@@ -380,7 +380,7 @@ nlohmann::json char_data::serializeBase() {
         if(bodyparts.test(i)) j["bodyparts"].push_back(i);
 
     if(title && strlen(title)) j["title"] = title;
-    if(race) j["race"] = race->getID();
+    j["race"] = race;
 
     if(chclass) j["chclass"] = chclass->getID();
     if(weight != 0.0) j["weight"] = weight;
@@ -448,9 +448,7 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     }
 
     if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
-    ::race::RaceID r = ::race::Human;
-    if(j.contains("race")) r = j["race"].get<::race::RaceID>();
-    race = ::race::race_map[r];
+    if(j.contains("race")) race = j["race"].get<RaceID>();
 
     ::sensei::sensei_id c = ::sensei::commoner;
     if(j.contains("chclass")) c = j["chclass"].get<::sensei::sensei_id>();
@@ -570,7 +568,8 @@ nlohmann::json char_data::serializeInstance() {
     if(moltlevel) j["moltlevel"] = moltlevel;
     if(majinize) j["majinize"] = majinize;
     if(majinizer) j["majinizer"] = majinizer;
-    if(mimic) j["mimic"] = mimic->getID();
+    if(mimic) j["mimic"] = mimic.value();
+    if(form != FormID::Base) j["form"] = form;
     if(olc_zone) j["olc_zone"] = olc_zone;
     if(starphase) j["starphase"] = starphase;
     if(accuracy) j["accuracy"] = accuracy;
@@ -734,10 +733,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("moltlevel")) moltlevel = j["moltlevel"];
     if(j.contains("majinize")) majinize = j["majinize"];
     if(j.contains("majinizer")) majinizer = j["majinizer"];
-    if(j.contains("mimic")) {
-        auto rid = j["mimic"].get<::race::RaceID>();
-        mimic = ::race::race_map[rid];
-    }
+    if(j.contains("mimic")) mimic = j["mimic"].get<RaceID>();
     if(j.contains("olc_zone")) olc_zone = j["olc_zone"];
     if(j.contains("starphase")) starphase = j["starphase"];
     if(j.contains("accuracy")) accuracy = j["accuracy"];
@@ -791,7 +787,8 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
     if(j.contains("load_room")) load_room = j["load_room"];
 
-    if(j.contains("transclass")) transclass = j["transclass"];
+    if(j.contains("transBonus")) transBonus = j["transBonus"];
+    if(j.contains("form")) form = j["form"].get<FormID>();
 
     if(j.contains("preference")) preference = j["preference"];
     if(j.contains("freeze_level")) freeze_level = j["freeze_level"];

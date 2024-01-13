@@ -1598,7 +1598,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     } else {
         snprintf(buf, sizeof(buf), "%s", k->chclass->getName().c_str());
     }
-    snprintf(buf2, sizeof(buf2), "%s", k->race->getName().c_str());
+    snprintf(buf2, sizeof(buf2), "%s", race::getName(k->race).c_str());
     send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n",
                  buf, buf2, GET_LEVEL(k), GET_EXP(k));
 
@@ -2762,7 +2762,7 @@ ACMD(do_last) {
 
     send_to_char(ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
                  GET_IDNUM(vict), (int) GET_LEVEL(vict),
-                 vict->race->getAbbr().c_str(), CLASS_ABBR(vict),
+                 race::getAbbr(vict->race).c_str(), CLASS_ABBR(vict),
                  GET_NAME(vict), "(FIXHOSTPLZ)",
                  ctime(&vict->time.logon));
 }
@@ -3203,7 +3203,7 @@ ACMD(do_show) {
             }
             send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
                          genders[(int) GET_SEX(vict)], GET_LEVEL(vict), CLASS_ABBR(vict),
-                         vict->race->getAbbr().c_str());
+                         race::getAbbr(vict->race).c_str());
             send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
                          GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                          GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));
@@ -3571,8 +3571,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     int64_t value = 0;
     room_rnum rnum;
     room_vnum rvnum;
-    race::RaceMap v_races;
-    race::Race *chosen_race;
     sensei::SenseiMap v_sensei;
     sensei::Sensei *chosen_sensei;
 
@@ -3918,18 +3916,23 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 GET_OLC_ZONE(vict) = atoi(val_arg);
             break;
 
-        case 52:
+        case 52: {
+            std::optional<RaceID> chosen_race;
+
             if (IS_NPC(vict)) {
-                chosen_race = race::find_race_map(val_arg, race::valid_for_sex(GET_SEX(ch)));
+                auto check = [ch](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch));};
+                chosen_race = race::findRace(val_arg, check);
             } else {
-                chosen_race = race::find_race_map(val_arg, race::valid_for_sex_pc(GET_SEX(ch)));
+                auto check = [ch](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isPlayable(id);};
+                chosen_race = chosen_race = race::findRace(val_arg, check);
             }
             if (!chosen_race) {
                 send_to_char(ch, "That is not a valid race for them. Try changing sex first.\r\n");
                 return (0);
             }
-            vict->race = chosen_race;
+            vict->race = chosen_race.value();
             racial_body_parts(vict);
+        }
             break;
 
         case 53:
@@ -4095,7 +4098,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 80:
-            GET_TRANSCLASS(vict) = RANGE(1, 3);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set transformation class for %s.",
                    GET_NAME(ch), GET_NAME(vict));
             log_imm_action("SET: %s has set transformation class for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4601,20 +4603,6 @@ ACMD (do_zcheck) {
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- has %d affects (limit %d).\r\n",
                                 affs, MAX_AFFECTS_ALLOWED);
-
-            /*check for out of range affections. */
-            for (j = 0; j < MAX_OBJ_AFFECT; j++)
-                if (zaffs[(int) obj->affected[j].location].max_aff != -99 && /* only care if a range is set */
-                    (obj->affected[j].modifier > zaffs[(int) obj->affected[j].location].max_aff ||
-                     obj->affected[j].modifier < zaffs[(int) obj->affected[j].location].min_aff ||
-                     zaffs[(int) obj->affected[j].location].min_aff ==
-                     zaffs[(int) obj->affected[j].location].max_aff) && (found = 1))
-                    len += snprintf(buf + len, sizeof(buf) - len,
-                                    "- apply to %s is %d (limit %d - %d).\r\n",
-                                    zaffs[(int) obj->affected[j].location].message,
-                                    obj->affected[j].modifier,
-                                    zaffs[(int) obj->affected[j].location].min_aff,
-                                    zaffs[(int) obj->affected[j].location].max_aff);
 
             /* special handling of +hit and +dam because of +hit_n_dam */
             for (todam = 0, tohit = 0, j = 0; j < MAX_OBJ_AFFECT; j++) {

@@ -885,7 +885,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define PERS(ch, vict) ((DISG(ch, vict) ? (CAN_SEE(vict, ch) ? (INTROD(vict, ch) ? (ISWIZ(ch, vict) ? GET_NAME(ch) :\
                         get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") :\
-                        (ch)->race->getName().c_str()))
+                        race::getName((ch)->race).c_str()))
 
 #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
     (obj)->short_description  : "something")

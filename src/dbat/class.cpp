@@ -637,7 +637,7 @@ void do_start(struct char_data *ch) {
         ch->set(attr, std::clamp<attribute_t>(val, 8, 20));
     }
 
-    GET_TRANSCLASS(ch) = rand_number(1, 3);
+    ch->transBonus = Random::get<double>(-0.3, 0.3);
 
     if (CONFIG_SITEOK_ALL)
         ch->playerFlags.set(PLR_SITEOK);

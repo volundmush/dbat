@@ -572,14 +572,6 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
     GET_EQ(ch, pos) = obj;
     obj->worn_by = ch;
     obj->worn_on = pos;
-
-    for (j = 0; j < MAX_OBJ_AFFECT; j++)
-        affect_modify_ar(ch, obj->affected[j].location,
-                         obj->affected[j].modifier,
-                         obj->affected[j].specific,
-                         GET_OBJ_PERM(obj), true);
-
-    affect_total(ch);
 }
 
 
@@ -597,14 +589,6 @@ struct obj_data *unequip_char(struct char_data *ch, int pos) {
     obj->worn_on = -1;
 
     GET_EQ(ch, pos) = nullptr;
-
-    for (j = 0; j < MAX_OBJ_AFFECT; j++)
-        affect_modify_ar(ch, obj->affected[j].location,
-                         obj->affected[j].modifier,
-                         obj->affected[j].specific,
-                         GET_OBJ_PERM(obj), false);
-
-    affect_total(ch);
 
     return (obj);
 }

@@ -474,7 +474,22 @@ int load_char(const char *name, struct char_data *ch) {
 
                 case 'T':
                     if (!strcmp(tag, "Tgro")) GET_TGROWTH(ch) = atoi(line);
-                    else if (!strcmp(tag, "Tcla")) GET_TRANSCLASS(ch) = atoi(line);
+                    else if (!strcmp(tag, "Tcla")) {
+                        switch(atoi(line)) {
+                            case 1: // great requirements... range is 0.2 to 0.3.
+                                ch->transBonus = Random::get<double>(0.2, 0.3);
+                            break;
+                            case 2:
+                                ch->transBonus = Random::get<double>(-0.1, 0.1);
+                            break;
+                            case 3:
+                                ch->transBonus = Random::get<double>(-0.3, -0.2);
+                            break;
+                            default:
+                                ch->transBonus = Random::get<double>(-0.3, 0.3);
+                        }
+
+                    }
                     else if (!strcmp(tag, "Tcos")) {
                         sscanf(line, "%d %d", &num2, &num3);
                         GET_TRANSCOST(ch, num2) = num3;

@@ -272,26 +272,6 @@ void racial_body_parts(struct char_data *ch) {
 
 namespace race {
 
-
-    bool Race::checkCanTransform(char_data *ch) const {
-        // No point checking for Saiyan/Halfbreed because it's just as expensive to check for
-        // the Oozaru flag.
-        if (PLR_FLAGGED(ch, PLR_OOZARU)) {
-            send_to_char(ch, "You are the great Oozaru right now and can't transform!\r\n");
-            return false;
-        }
-
-        if (GET_KAIOKEN(ch) > 0) {
-            send_to_char(ch, "You are in kaioken right now and can't transform!\r\n");
-            return false;
-        }
-
-        return true;
-    }
-
-    }
-
-
     static std::unordered_map<RaceID, int> race_sizes = {
         {RaceID::Tuffle, SIZE_SMALL},
         {RaceID::Animal, SIZE_FINE},
@@ -444,36 +424,6 @@ namespace race {
         }
     }
 
-    int getRPPCost(RaceID id) {
-        switch (id) {
-            case RaceID::Saiyan:
-                return 60;
-            case RaceID::BioAndroid:
-                return 35;
-            case RaceID::Majin:
-                return 55;
-            case RaceID::Hoshijin:
-                return 14;
-            default:
-                return 0;
-        }
-    }
-
-    int getRPPRefund(RaceID id) {
-        switch (id) {
-            case RaceID::Majin:
-                return 35;
-            case RaceID::Hoshijin:
-                return 15;
-            case RaceID::Saiyan:
-                return 40;
-            case RaceID::BioAndroid:
-                return 20;
-            default:
-                return 0;
-        }
-    }
-
     int64_t getSoftCap(RaceID id, int level) {
         switch(id) {
             case RaceID::Kanassan:
@@ -488,27 +438,6 @@ namespace race {
         return id != RaceID::Android;
     }
 
-    int getMaxTransformTier(RaceID id) {
-        switch (id) {
-            case RaceID::Saiyan:
-            case RaceID::Human:
-            case RaceID::Icer:
-            case RaceID::Namekian:
-            case RaceID::BioAndroid:
-                return 4;
-            case RaceID::Tuffle:
-            case RaceID::Mutant:
-            case RaceID::Halfbreed:
-            case RaceID::Majin:
-            case RaceID::Kai:
-            case RaceID::Konatsu:
-                return 3;
-            case RaceID::Android:
-                return 6;
-            default:
-                return 0;
-        }
-    }
 
     struct race_affect_type {
         int location{};

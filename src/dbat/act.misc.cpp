@@ -267,7 +267,6 @@ static void generate_multiform(struct char_data *ch, int count) {
         clone->time = ch->time;
 
         clone->tail_growth = ch->tail_growth;
-        ch->transclass = ch->transclass;
 
         // Copying these values, but it shouldn't matter because clones no longer work this way.
 
