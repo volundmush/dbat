@@ -72,16 +72,16 @@ const char *class_abbrevs[NUM_CLASSES + 1] = {
 const char *class_names[NUM_CLASSES + 1] = {
         "roshi",
         "piccolo",
-        "krane",
+        "Krane",
         "nail",
         "bardock",
         "ginyu",
         "frieza",
-        "tapion",
+        "Tapion",
         "android 16",
-        "dabura",
+        "Dabura",
         "kibito",
-        "jinto",
+        "Jinto",
         "tsuna",
         "kurzak",
         "assassin",
@@ -159,10 +159,10 @@ const char *class_display[NUM_CLASSES] = {
 const struct guild_info_type guild_info[6] = {
 
 /* Kortaal */
-        {CLASS_ROSHI,     3017, SCMD_EAST},
-        {CLASS_PICCOLO,   3004, SCMD_NORTH},
-        {CLASS_KRANE,     3027, SCMD_EAST},
-        {CLASS_NAIL,      3021, SCMD_EAST},
+        {(int)CLASS_ROSHI,     3017, SCMD_EAST},
+        {(int)CLASS_PICCOLO,   3004, SCMD_NORTH},
+        {(int)CLASS_KRANE,     3027, SCMD_EAST},
+        {(int)CLASS_NAIL,      3021, SCMD_EAST},
 
 /* Brass Dragon */
         {-999 /* all */ , 5065, SCMD_WEST},
@@ -366,7 +366,7 @@ void do_start(struct char_data *ch) {
     struct obj_data *obj;
 
     ch->set(CharNum::Level, 1);
-    GET_EXP(ch) = 1;
+    ch->setExperience(1);
 
     if (IS_ANDROID(ch)) {
         GET_COND(ch, HUNGER) = -1;
@@ -412,15 +412,8 @@ void do_start(struct char_data *ch) {
     if (GET_BONUS(ch, BONUS_BMEMORY))
         GET_SLOTS(ch) -= 5;
 
+    ch->gainTail(false);
 
-    if (GET_RACE(ch) == RACE_SAIYAN || GET_RACE(ch) == RACE_HALFBREED) {
-        if (GET_RACE(ch) != RACE_HALFBREED || (GET_RACE(ch) == RACE_HALFBREED && RACIAL_PREF(ch) != 1)) {
-            ch->playerFlags.set(PLR_STAIL);
-        }
-    }
-    if (GET_RACE(ch) == RACE_ICER || GET_RACE(ch) == RACE_BIO) {
-        ch->playerFlags.set(PLR_TAIL);
-    }
     if (GET_RACE(ch) == RACE_MAJIN) {
         GET_ABSORBS(ch) = 0;
         GET_INGESTLEARNED(ch) = 0;
@@ -526,10 +519,6 @@ void do_start(struct char_data *ch) {
         SET_SKILL(ch, SKILL_TAILWHIP, punch);
     }
 
-    if (GET_CLASS(ch) < 0 || GET_CLASS(ch) > NUM_CLASSES) {
-        basic_mud_log("Unknown character class %d in do_start, resetting.", GET_CLASS(ch));
-        //GET_CLASS(ch) = 0;
-    }
     if (GET_ALIGNMENT(ch) < 51 && GET_ALIGNMENT(ch) > -51) {
         set_title(ch, "the Warrior");
     }
@@ -616,7 +605,7 @@ void do_start(struct char_data *ch) {
     }
 
     send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch), GET_USER(ch));
-    advance_level(ch, GET_CLASS(ch));
+    advance_level(ch);
     /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
     for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
@@ -636,7 +625,7 @@ void do_start(struct char_data *ch) {
         ch->set(attr, std::clamp<attribute_t>(val, 8, 20));
     }
 
-    GET_TRANSCLASS(ch) = rand_number(1, 3);
+    ch->transBonus = Random::get<double>(-0.3, 0.3);
 
     if (CONFIG_SITEOK_ALL)
         ch->playerFlags.set(PLR_SITEOK);
@@ -783,85 +772,16 @@ static const int *free_start_feats[] = {
  * each class every time they gain a level.
  */
 /* Rillao: transloc, add new transes here */
-void advance_level(struct char_data *ch, int whichclass) {
+void advance_level(struct char_data *ch) {
     int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
     int add_prac = 1, add_train, i, j = 0, ranks;
     int add_gen_feats = 0, add_class_feats = 0;
     char buf[MAX_STRING_LENGTH];
 
-    if (whichclass < 0 || whichclass >= NUM_CLASSES) {
-        basic_mud_log("Invalid class %d passed to advance_level, resetting.", whichclass);
-        whichclass = 0;
-    }
-
-    if (!CONFIG_ALLOW_MULTICLASS && whichclass != GET_CLASS(ch)) {
-        basic_mud_log("Attempt to gain a second class without multiclass enabled for %s", GET_NAME(ch));
-        whichclass = GET_CLASS(ch);
-    }
-
-
-    /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-    if (ranks >= LVL_EPICSTART * 20) { /* Epic class */
-        j = ranks - 20;
-        switch (whichclass) {
-            case CLASS_ROSHI:
-            case CLASS_JINTO:
-            case CLASS_DRAGON_DISCIPLE:
-            case CLASS_ELDRITCH_KNIGHT:
-            case CLASS_HORIZON_WALKER:
-                if (!(j % 4))
-                    add_class_feats++;
-                break;
-            case CLASS_PICCOLO:
-                if (!(j % 2))
-                    add_class_feats++;
-                break;
-            case CLASS_KRANE:
-                if (!(j % 5))
-                    add_class_feats++;
-                break;
-            case CLASS_NPC_EXPERT:
-            case CLASS_NPC_ADEPT:
-            case CLASS_NPC_COMMONER:
-            case CLASS_NPC_ARISTOCRAT:
-            case CLASS_NPC_WARRIOR:
-                break;
-            case CLASS_DWARVEN_DEFENDER:
-            case CLASS_MYSTIC_THEURGE:
-                if (!(j % 6))
-                    add_class_feats++;
-                break;
-            default:
-                if (!(j % 3))
-                    add_class_feats++;
-                break;
-        }
-    } else {
-        switch (whichclass) {
-            case CLASS_ROSHI:
-                if (ranks == 1 || !(ranks % 2))
-                    add_class_feats++;
-                break;
-            case CLASS_PICCOLO:
-                if (ranks > 9 && !(ranks % 3))
-                    add_class_feats++;
-                break;
-            case CLASS_KRANE:
-                if (!(ranks % 5))
-                    add_class_feats++;
-                break;
-            default:
-                break;
-        }
-    }
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
     if (GET_LEVEL(ch) >= 1) {
-        double pl_percent = 10, ki_percent = 10, st_percent = 10, prac_reward = GET_WIS(ch);
-
-        if (prac_reward < 10) {
-            prac_reward = 10;
-        }
+        double pl_percent = 10, ki_percent = 10, st_percent = 10, prac_reward = std::max<int>(10, GET_WIS(ch));
 
         if (GET_LEVEL(ch) >= 91) {
             pl_percent -= 7.2;
@@ -1370,7 +1290,7 @@ int invalid_class(struct char_data *ch, struct obj_data *obj) {
  */
 
 /* Function to return the exp required for each class/level */
-int level_exp(struct char_data *ch, int level) {
+int64_t level_exp(struct char_data *ch, int level) {
     int req = 1;
 
     switch (level) {
@@ -1704,57 +1624,6 @@ int8_t dex_mod_capped(const struct char_data *ch) {
     return mod;
 }
 
-static int cabbr_ranktable[NUM_CLASSES];
-
-static int comp_rank(const void *a, const void *b) {
-    int first, second;
-    first = *(const int *) a;
-    second = *(const int *) b;
-    return cabbr_ranktable[second] - cabbr_ranktable[first];
-}
-
-/* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-char *class_desc_str(struct char_data *ch, int howlong, int wantthe) {
-    static char str[MAX_STRING_LENGTH];
-    char *ptr = str;
-    int i, rank, j;
-    int rankorder[NUM_CLASSES];
-    char *buf, *buf2, *buf3;
-
-    if (IS_NPC(ch)) {
-        snprintf(ptr, sizeof(str) - (ptr - str), "%s%d", CLASS_ABBR(ch), GET_LEVEL(ch));
-        return str;
-    }
-
-    if (wantthe)
-        ptr += sprintf(str, "the ");
-
-    if (howlong) {
-        buf2 = buf = buf3 = "";
-        if (howlong == 2) {
-            buf3 = " ";
-        }
-        rankorder[0] = GET_CLASS(ch); /* we always want primary class first */
-        rankorder[GET_CLASS(ch)] = 0;
-        qsort((void *) rankorder, NUM_CLASSES, sizeof(int), comp_rank);
-        for (const auto &sen: sensei::sensei_map) {
-            ptr += snprintf(ptr, sizeof(str) - (ptr - str), "%s%s%s%s%s%d", buf, buf2, buf,
-                            (howlong == 2 ? sen.second->getName().c_str() : sen.second->getAbbr().c_str()), buf3,
-                            cabbr_ranktable[rank]);
-            buf2 = "/";
-            if (howlong == 2)
-                buf = " ";
-        }
-        return str;
-    } else {
-        rank = 0;
-        snprintf(ptr, sizeof(str) - (ptr - str), "%s%d%s", ch->chclass->getNameLower().c_str(),
-                 rank, GET_LEVEL(ch) == rank ? "" : "+");
-        return str;
-    }
-}
-
-
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 int highest_skill_value(int level, int type) {
     if (level >= 60)
@@ -1770,31 +1639,7 @@ int highest_skill_value(int level, int type) {
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-/* Not anymore because for DBZ it was crap and unnecessary. */
-int calc_penalty_exp(struct char_data *ch, int gain) {
-    return gain;
-}
 
-static const int size_scaling_table[NUM_SIZES][4] = {
-/*                   str       dex     con  nat arm */
-/* Fine		*/ {-10, -2, -2, 0},
-/* Diminutive	*/
-                  {-10, -2, -2, 0},
-/* Tiny		*/
-                  {-8,  -2, -2, 0},
-/* Small	*/
-                  {-4,  -2, -2, 0},
-/* Medium	*/
-                  {0,   0,  0,  0},
-/* Large	*/
-                  {8,   -2, 4,  2},
-/* Huge		*/
-                  {16,  -4, 8,  5},
-/* Gargantuan	*/
-                  {24,  -4, 12, 9},
-/* Colossal	*/
-                  {32,  -4, 16, 14}
-};
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
 time_t birth_age(struct char_data *ch) {
@@ -1805,259 +1650,208 @@ time_t birth_age(struct char_data *ch) {
     return tmp;
 }
 
-time_t max_age(struct char_data *ch) {
-    struct aging_data *aging;
-    size_t tmp;
-
-    if (ch->time.maxage)
-        return ch->time.maxage - ch->time.birth;
-
-    aging = racial_aging_data + GET_RACE(ch);
-
-    tmp = 120;
-
-    return tmp;
-}
-
-static const int class_feats_wizard[] = {
-        FEAT_UNDEFINED
-};
-
-/*
- * Rogues follow opposite logic - they can take any feat in place of these,
- * all of these are abilities that are not normally able to be taken as
- * feats. Most classes can ONLY take from these lists for their class
- * feats.
- */
-static const int class_feats_rogue[] = {
-        FEAT_UNDEFINED
-};
-
-static const int class_feats_fighter[] = {
-        FEAT_UNDEFINED
-};
-
-static const int no_class_feats[] = {
-        FEAT_UNDEFINED
-};
-
-static const int *class_bonus_feats[NUM_CLASSES] = {
-/* WIZARD		*/ class_feats_wizard,
-/* CLERIC		*/ no_class_feats,
-/* ROGUE		*/ class_feats_rogue,
-/* FIGHTER		*/ class_feats_fighter,
-/* MONK			*/ no_class_feats,
-/* PALADIN		*/ no_class_feats,
-/* NPC_EXPERT		*/ no_class_feats,
-/* NPC_ADEPT		*/ no_class_feats,
-/* NPC_COMMONER		*/ no_class_feats,
-/* NPC_ARISTOCRAT	*/ no_class_feats,
-/* NPC_WARRIOR		*/ no_class_feats
-};
-
 
 namespace sensei {
 
-    Sensei::Sensei(sensei_id sid, const std::string &name, std::string abbr, std::string style) {
-        this->s_id = sid;
-        this->abbr = std::move(abbr);
-        this->name = name;
-        this->lower_name = name;
-        this->style = std::move(style);
-        std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
-    }
-
-    sensei_id Sensei::getID() const {
-        return s_id;
-    }
-
-    const std::string &Sensei::getAbbr() const {
-        return abbr;
-    }
-
-    const std::string &Sensei::getName() const {
-        return name;
-    }
-
-    const std::string &Sensei::getNameLower() const {
-        return lower_name;
-    }
-
-    const std::string &Sensei::getStyleName() const {
-        return style;
-    }
-
-    bool Sensei::senseiAvailableForRace(race::race_id r_id) const {
-        switch (s_id) {
-            case sixteen:
-                return r_id == race::android;
-            case dabura:
-                return r_id == race::demon;
-            case tsuna:
-                return r_id == race::kanassan;
-            case kurzak:
-                return r_id == race::arlian;
-            case jinto:
-                return r_id == race::hoshijin;
+    bool isValidSenseiForRace(SenseiID id, RaceID race) {
+        switch (id) {
+            case SenseiID::Sixteen:
+                return race == RaceID::Android;
+            case SenseiID::Dabura:
+                return race == RaceID::Demon;
+            case SenseiID::Tsuna:
+                return race == RaceID::Kanassan;
+            case SenseiID::Kurzak:
+                return race == RaceID::Arlian;
+            case SenseiID::Jinto:
+                return race == RaceID::Hoshijin;
             default:
-                return r_id != race::android;
+                return race != RaceID::Android;
         }
     }
 
-    IDXTYPE Sensei::senseiLocationID() const {
-        switch (s_id) {
-            case roshi:
-                return 1131;
-            case kibito:
-                return 12098;
-            case nail:
-                return 11683;
-            case bardock:
-                return 2267;
-            case krane:
-                return 13012;
-            case tapion:
-                return 8233;
-            case piccolo:
-                return 1662;
-            case sixteen:
-                return 1714;
-            case dabura:
-                return 6487;
-            case frieza:
-                return 4283;
-            case ginyu:
-                return 4290;
-            case jinto:
-                return 3499;
-            case kurzak:
-                return 16100;
-            case tsuna:
-                return 15009;
-            case commoner:
-                return 300;
-        }
+    static const std::vector<SenseiID> all_senseis = {
+            SenseiID::Roshi, SenseiID::Piccolo, SenseiID::Krane,
+            SenseiID::Nail, SenseiID::Bardock, SenseiID::Ginyu,
+            SenseiID::Frieza, SenseiID::Tapion, SenseiID::Sixteen,
+            SenseiID::Dabura, SenseiID::Kibito, SenseiID::Jinto,
+            SenseiID::Tsuna, SenseiID::Kurzak, SenseiID::Commoner
+    };
+
+    bool exists(SenseiID id) {
+        auto found = std::find(all_senseis.begin(), all_senseis.end(), id);
+        return found != all_senseis.end();
     }
 
-    IDXTYPE Sensei::senseiStartRoom() const {
-        switch (s_id) {
-            case roshi:
-                return 1130;
-            case kibito:
-                return 12098;
-            case nail:
-                return 11683;
-            case bardock:
-                return 2268;
-            case krane:
-                return 13009;
-            case tapion:
-                return 8231;
-            case piccolo:
-                return 1659;
-            case sixteen:
-                return 1713;
-            case dabura:
-                return 6486;
-            case frieza:
-                return 4282;
-            case ginyu:
-                return 4289;
-            case jinto:
-                return 3499;
-            case kurzak:
-                return 16100;
-            case tsuna:
-                return 15009;
-            case commoner:
-                return 300;
-        }
-    }
-
-    int Sensei::getGravTolerance() const {
-        switch (s_id) {
-            case bardock:
-                return 10;
-            default:
-                return 0;
-        }
-    }
-
-    bool Sensei::senseiIsPcOk() const {
-        switch (s_id) {
-            case commoner:
-                return false;
-            default:
-                return true;
-        }
-    }
-
-    int Sensei::getRPPCost(race::race_id rid) const {
-        switch (s_id) {
-            case kibito:
-                if (rid != race::kai) {
-                    return 10;
-                } else {
-                    return 0;
-                }
-            default:
-                return 0;
-        }
-    }
-
-    SenseiMap sensei_map;
-
-    void load_sensei() {
-        sensei_map[roshi] = new Sensei(roshi, "Roshi", "Ro", "Kame Arts");
-        sensei_map[piccolo] = new Sensei(piccolo, "Piccolo", "Pi", "Demon Taijutsu");
-        sensei_map[krane] = new Sensei(krane, "Krane", "Kr", "Crane Arts");
-        sensei_map[nail] = new Sensei(nail, "Nail", "Na", "Tranquil Palm");
-        sensei_map[bardock] = new Sensei(bardock, "Bardock", "Ba", "Brutal Beast");
-        sensei_map[ginyu] = new Sensei(ginyu, "Ginyu", "Gi", "Flaunted Style");
-        sensei_map[frieza] = new Sensei(frieza, "Frieza", "Fr", "Frozen Fist");
-        sensei_map[tapion] = new Sensei(tapion, "Tapion", "Ta", "Shadow Grappling");
-        sensei_map[sixteen] = new Sensei(sixteen, "Android 16", "16", "Iron Hand");
-        sensei_map[dabura] = new Sensei(dabura, "Dabura", "Da", "Devil Dance");
-        sensei_map[kibito] = new Sensei(kibito, "Kibito", "Ki", "Gentle Fist");
-        sensei_map[jinto] = new Sensei(jinto, "Jinto", "Ji", "Star's Radiance");
-        sensei_map[tsuna] = new Sensei(tsuna, "Tsuna", "Ts", "Sacred Tsunami");
-        sensei_map[kurzak] = new Sensei(kurzak, "Kurzak", "Ku", "Adaptive Taijutsu");
-
-        sensei_map[commoner] = new Sensei(commoner, "Commoner", "--", "Like a Bum");
-    }
-
-    Sensei *find_sensei(const std::string &arg) {
-        return find_sensei_map(arg, sensei_map);
-    }
-
-    Sensei *find_sensei_map(const std::string &arg, const SenseiMap &s_map) {
-        std::string lower(arg);
-        std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-
-        for (const auto &s: s_map) {
-            if (s.second->getNameLower() == lower) {
-                return s.second;
-            }
-        }
-        return nullptr;
-    }
-
-    Sensei *find_sensei_map_id(const int id, const SenseiMap &s_map) {
-        for (const auto &s: s_map) {
-            if (s.first == id) {
-                return s.second;
-            }
-        }
-        return nullptr;
-    }
-
-    SenseiMap valid_for_race_pc(char_data *ch) {
-        SenseiMap out;
-        for (const auto &s: sensei_map) {
-            if (s.second->senseiIsPcOk() && s.second->senseiAvailableForRace(ch->race->getID())) {
-                out[s.first] = s.second;
-            }
-        }
+    std::vector<SenseiID> filterSenseis(std::function<bool(SenseiID)> func) {
+        std::vector<SenseiID> out;
+        std::copy_if(all_senseis.begin(), all_senseis.end(), std::back_inserter(out), std::move(func));
         return out;
     }
+
+    std::optional<SenseiID> findSensei(const std::string& arg, const std::function<bool(SenseiID)>& func) {
+        for(auto s : all_senseis) {
+            if(!func(s)) continue;
+            if(boost::iequals(arg, getName(s))) return s;
+        }
+
+        return {};
+    }
+
+    static const std::unordered_map<SenseiID, room_vnum> sensei_start = {
+            {SenseiID::Roshi, 1130},
+            {SenseiID::Kibito, 12098},
+            {SenseiID::Nail, 11683},
+            {SenseiID::Bardock, 2268},
+            {SenseiID::Krane, 13009},
+            {SenseiID::Tapion, 8231},
+            {SenseiID::Piccolo, 1659},
+            {SenseiID::Sixteen, 1713},
+            {SenseiID::Dabura, 6486},
+            {SenseiID::Frieza, 4282},
+            {SenseiID::Ginyu, 4289},
+            {SenseiID::Jinto, 3499},
+            {SenseiID::Kurzak, 16100},
+            {SenseiID::Tsuna, 15009},
+            {SenseiID::Commoner, 300}
+    };
+
+    room_vnum getStartRoom(SenseiID id) {
+        if(auto found = sensei_start.find(id); found != sensei_start.end()) {
+            return found->second;
+        }
+        return 300;
+    }
+
+    static const std::unordered_map<SenseiID, room_vnum> sensei_location = {
+            {SenseiID::Roshi, 1131},
+            {SenseiID::Kibito, 12098},
+            {SenseiID::Nail, 11683},
+            {SenseiID::Bardock, 2267},
+            {SenseiID::Krane, 13012},
+            {SenseiID::Tapion, 8233},
+            {SenseiID::Piccolo, 1662},
+            {SenseiID::Sixteen, 1714},
+            {SenseiID::Dabura, 6487},
+            {SenseiID::Frieza, 4283},
+            {SenseiID::Ginyu, 4290},
+            {SenseiID::Jinto, 3499},
+            {SenseiID::Kurzak, 16100},
+            {SenseiID::Tsuna, 15009},
+            {SenseiID::Commoner, 300}
+    };
+
+    room_vnum getLocation(SenseiID id) {
+        if(auto found = sensei_location.find(id); found != sensei_location.end()) {
+            return found->second;
+        }
+        return 300;
+    }
+
+    static const std::unordered_map<SenseiID, std::string> sensei_name = {
+            {SenseiID::Roshi, "Roshi"},
+            {SenseiID::Piccolo, "Piccolo"},
+            {SenseiID::Krane, "Krane"},
+            {SenseiID::Nail, "Nail"},
+            {SenseiID::Bardock, "Bardock"},
+            {SenseiID::Ginyu, "Ginyu"},
+            {SenseiID::Frieza, "Frieza"},
+            {SenseiID::Tapion, "Tapion"},
+            {SenseiID::Sixteen, "Android 16"},
+            {SenseiID::Dabura, "Dabura"},
+            {SenseiID::Kibito, "Kibito"},
+            {SenseiID::Jinto, "Jinto"},
+            {SenseiID::Tsuna, "Tsuna"},
+            {SenseiID::Kurzak, "Kurzak"},
+            {SenseiID::Commoner, "Commoner"}
+    };
+
+    static const std::unordered_map<SenseiID, std::string> sensei_abbr = {
+            {SenseiID::Roshi, "Ro"},
+            {SenseiID::Piccolo, "Pi"},
+            {SenseiID::Krane, "Kr"},
+            {SenseiID::Nail, "Na"},
+            {SenseiID::Bardock, "Ba"},
+            {SenseiID::Ginyu, "Gi"},
+            {SenseiID::Frieza, "Fr"},
+            {SenseiID::Tapion, "Ta"},
+            {SenseiID::Sixteen, "16"},
+            {SenseiID::Dabura, "Da"},
+            {SenseiID::Kibito, "Ki"},
+            {SenseiID::Jinto, "Ji"},
+            {SenseiID::Tsuna, "Ts"},
+            {SenseiID::Kurzak, "Ku"},
+            {SenseiID::Commoner, "--"}
+    };
+
+    static const std::unordered_map<SenseiID, std::string> sensei_arts = {
+            {SenseiID::Roshi, "Kame Arts"},
+            {SenseiID::Piccolo, "Demon Taijutsu"},
+            {SenseiID::Krane, "Crane Arts"},
+            {SenseiID::Nail, "Tranquil Palm"},
+            {SenseiID::Bardock, "Brutal Beast"},
+            {SenseiID::Ginyu, "Flaunted Style"},
+            {SenseiID::Frieza, "Frozen Fist"},
+            {SenseiID::Tapion, "Shadow Grappling"},
+            {SenseiID::Sixteen, "Iron Hand"},
+            {SenseiID::Dabura, "Devil Dance"},
+            {SenseiID::Kibito, "Gentle Fist"},
+            {SenseiID::Jinto, "Star's Radiance"},
+            {SenseiID::Tsuna, "Sacred Tsunami"},
+            {SenseiID::Kurzak, "Adaptive Taijutsu"},
+            {SenseiID::Commoner, "Like a Bum"}
+    };
+
+    std::string getName(SenseiID id) {
+        if(auto found = sensei_name.find(id); found != sensei_name.end()) {
+            return found->second;
+        }
+        return "Unknown";
+    }
+
+    std::string getAbbr(SenseiID id) {
+        if(auto found = sensei_abbr.find(id); found != sensei_abbr.end()) {
+            return found->second;
+        }
+        return "Unknown";
+    }
+
+    std::string getStyle(SenseiID id) {
+        if(auto found = sensei_arts.find(id); found != sensei_arts.end()) {
+            return found->second;
+        }
+        return "Unknown";
+    }
+
+    bool isPlayable(SenseiID id) {
+        return id != SenseiID::Commoner;
+    }
+
+    struct sen_affect_type {
+        int location{};
+        double modifier{};
+        int specific{-1};
+        std::function<double(struct char_data *ch)> func{};
+    };
+
+    static std::unordered_map<SenseiID, std::vector<sen_affect_type>> sensei_affects = {};
+
+    double getModifier(char_data* ch, int location, int specific) {
+        double out = 0.0;
+        if(auto found = sensei_affects.find(ch->chclass); found != sensei_affects.end()) {
+
+            for(auto& affect : found->second) {
+                if(affect.location == location) {
+                    if(specific != -1 && specific != affect.specific) continue;
+                    out += affect.modifier;
+                    if(affect.func) {
+                        out += affect.func(ch);
+                    }
+                }
+            }
+        }
+
+        return out;
+    }
+
 }

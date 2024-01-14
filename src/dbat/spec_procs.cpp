@@ -59,8 +59,9 @@ SPECIAL(dump) {
         send_to_char(ch, "You are awarded for outstanding performance.\r\n");
         act("$n has been awarded for being a good citizen.", true, ch, nullptr, nullptr, TO_ROOM);
 
-        if (GET_LEVEL(ch) < 3)
-            gain_exp(ch, value);
+        if (GET_LEVEL(ch) < 3) {
+            ch->modExperience(value);
+        }
         else
             ch->mod(CharMoney::Carried, value);
     }
@@ -650,7 +651,7 @@ SPECIAL(guild_guard) {
             continue;
 
         /* Allow the people of the guild through. */
-        if (!IS_NPC(ch) && ch->chclass->getID() != i)
+        if (!IS_NPC(ch) && (int)ch->chclass != i)
             continue;
 
         send_to_char(ch, "%s", buf);
@@ -826,7 +827,6 @@ SPECIAL(pet_shops) {
         ch->mod(CharMoney::Carried, -PET_PRICE(pet));
 
         pet = read_mobile(GET_MOB_RNUM(pet), REAL);
-        GET_EXP(pet) = 0;
         pet->affected_by.set(AFF_CHARM);
 
         if (*pet_name) {

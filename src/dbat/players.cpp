@@ -216,9 +216,7 @@ int load_char(const char *name, struct char_data *ch) {
             SET_SKILL_PERF(ch, i, 0);
         }
 
-        ch->chclass = sensei::sensei_map[sensei::roshi];
         GET_LOG_USER(ch) = strdup("NOUSER");
-        ch->race = race::find_race_map_id(PFDEF_RACE, race::race_map);
         GET_SUPPRESS(ch) = PFDEF_SKIN;
         GET_FURY(ch) = PFDEF_HAIRL;
         GET_CLAN(ch) = strdup("None.");
@@ -237,7 +235,6 @@ int load_char(const char *name, struct char_data *ch) {
         GET_GAUNTLET(ch) = PFDEF_GAUNTLET;
         ch->energy = 1.0;
         ch->stamina = 1.0;
-        ch->mimic = nullptr;
 
 
         GET_LOADROOM(ch) = PFDEF_LOADROOM;
@@ -315,7 +312,7 @@ int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Clan")) GET_CLAN(ch) = strdup(line);
                     else if (!strcmp(tag, "Clar")) GET_CRANK(ch) = atoi(line);
                     else if (!strcmp(tag, "Clas"))
-                        ch->chclass = sensei::find_sensei_map_id(atoi(line), sensei::sensei_map);
+                        ch->chclass = static_cast<SenseiID>(std::min(14, atoi(line)));
                     else if (!strcmp(tag, "Colr")) {
                         sscanf(line, "%d %s", &num, buf2);
                         p.color_choices[num] = strdup(buf2);
@@ -335,7 +332,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'E':
-                    if (!strcmp(tag, "Exp ")) GET_EXP(ch) = atoi(line);
+                    if (!strcmp(tag, "Exp ")) ch->exp = atoi(line);
                     else if (!strcmp(tag, "Eali")) ch->set(CharAlign::LawChaos, atoi(line));
                     else if (!strcmp(tag, "Ecls")) {
 
@@ -405,7 +402,7 @@ int load_char(const char *name, struct char_data *ch) {
                     } else if (!strcmp(tag, "Maji")) MAJINIZED(ch) = atoi(line);
                     else if (!strcmp(tag, "Majm")) load_majin(ch, line);
                     else if (!strcmp(tag, "Mimi"))
-                        ch->mimic = race::find_race_map_id(atoi(line), race::race_map);
+                        ch->mimic = (RaceID)atoi(line);
                     else if (!strcmp(tag, "MxAg")) ch->time.maxage = atol(line);
                     break;
 
@@ -440,7 +437,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'R':
-                    if (!strcmp(tag, "Race")) ch->race = race::find_race_map_id(atoi(line), race::race_map);
+                    if (!strcmp(tag, "Race")) ch->race = (RaceID)atoi(line);
                     else if (!strcmp(tag, "Raci")) ch->set(CharNum::RacialPref, atoi(line));
                     else if (!strcmp(tag, "rDis")) GET_RDISPLAY(ch) = strdup(line);
                     else if (!strcmp(tag, "Rela")) GET_RELAXCOUNT(ch) = atoi(line);
@@ -474,10 +471,25 @@ int load_char(const char *name, struct char_data *ch) {
 
                 case 'T':
                     if (!strcmp(tag, "Tgro")) GET_TGROWTH(ch) = atoi(line);
-                    else if (!strcmp(tag, "Tcla")) GET_TRANSCLASS(ch) = atoi(line);
+                    else if (!strcmp(tag, "Tcla")) {
+                        switch(atoi(line)) {
+                            case 1: // great requirements... range is 0.2 to 0.3.
+                                ch->transBonus = Random::get<double>(0.2, 0.3);
+                            break;
+                            case 2:
+                                ch->transBonus = Random::get<double>(-0.1, 0.1);
+                            break;
+                            case 3:
+                                ch->transBonus = Random::get<double>(-0.3, -0.2);
+                            break;
+                            default:
+                                ch->transBonus = Random::get<double>(-0.3, 0.3);
+                        }
+
+                    }
                     else if (!strcmp(tag, "Tcos")) {
                         sscanf(line, "%d %d", &num2, &num3);
-                        GET_TRANSCOST(ch, num2) = num3;
+                        //GET_TRANSCOST(ch, num2) = num3;
                     } else if (!strcmp(tag, "Thir")) GET_COND(ch, THIRST) = atoi(line);
                     else if (!strcmp(tag, "Thr1")) GET_SAVE_MOD(ch, 0) = atoi(line);
                     else if (!strcmp(tag, "Thr2")) GET_SAVE_MOD(ch, 1) = atoi(line);
@@ -531,13 +543,6 @@ int load_char(const char *name, struct char_data *ch) {
         basic_mud_log("No birthday for user %s, using standard starting age determination", GET_NAME(ch));
         ch->time.birth = time(nullptr) - birth_age(ch);
     }
-
-    if (!ch->time.maxage) {
-        basic_mud_log("No max age for user %s, using standard max age determination", GET_NAME(ch));
-        ch->time.maxage = ch->time.birth + max_age(ch);
-    }
-
-    affect_total(ch);
 
     /* initialization for imms */
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {

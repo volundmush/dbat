@@ -18,7 +18,6 @@ extern const char *attack_names_comp[];
 extern const char *attack_names[];
 extern const int attack_skills[];
 
-extern const char *sensei_style[MAX_SENSEI];
 extern const char *dirs[NUM_OF_DIRS + 1];
 extern const char *abbr_dirs[NUM_OF_DIRS + 1];
 extern const char *room_bits[NUM_ROOM_FLAGS + 1];

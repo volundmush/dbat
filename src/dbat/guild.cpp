@@ -787,7 +787,7 @@ void handle_forget(struct char_data *keeper, int guild_nr, struct char_data *ch,
     if (GET_SKILL_BASE(ch, skill_num) > 30) {
         send_to_char(ch, "@MYou can not forget that skill, you know too much about it.@n\r\n");
         return;
-    } else if (skill_num == SKILL_MIMIC && GET_MIMIC(ch) > 0) {
+    } else if (skill_num == SKILL_MIMIC && ch->mimic) {
         send_to_char(ch, "@MYou can not forget mimic while you are using it!\r\n");
     } else if (skill_num == SKILL_FOCUS) {
         send_to_char(ch, "@MYou can not forget such a fundamental skill!@n\r\n");
@@ -887,7 +887,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
 
     skill_num = find_skill_num(argument, SKTYPE_SKILL);
 
-    if (strstr(sensei_style[GET_CLASS(ch)], argument)) {
+    if (strstr(sensei::getStyle(ch->chclass).c_str(), argument)) {
         skill_num = 539;
     }
 
@@ -984,7 +984,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         if (skill_num != 539)
                             send_to_char(ch, "You practice and master the basics!\r\n");
                         else
-                            send_to_char(ch, "You practice the basics of %s\r\n", sensei_style[GET_CLASS(ch)]);
+                            send_to_char(ch, "You practice the basics of %s\r\n", sensei::getStyle(ch->chclass));
                         SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + rand_number(10, 25));
                         ch->modPractices(-pointcost);
                         if (GET_FORGETING(ch) != 0 && GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
@@ -1010,7 +1010,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         send_to_char(ch, "You practice for a while and manage to advance your technique. +1 (%d/%d)\r\n",
                                      GET_SKILL_BASE(ch, skill_num) + 1, highest);
                     else
-                        send_to_char(ch, "You practice the basics of %s. +1 (%d/%d)\r\n", sensei_style[GET_CLASS(ch)],
+                        send_to_char(ch, "You practice the basics of %s. +1 (%d/%d)\r\n", sensei::getStyle(ch->chclass),
                                      GET_SKILL_BASE(ch, skill_num) + 1, highest);
                     SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
                     ch->modPractices(-pointcost);
@@ -1019,7 +1019,8 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         if (IS_KONATSU(ch) && skill_num == SKILL_PARRY) {
                             SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 5);
                         }
-                        gain_exp(ch, level_exp(ch, GET_LEVEL(ch) + 1) / 20);
+                        int64_t gain = level_exp(ch, GET_LEVEL(ch) + 1) / 20;
+                        ch->modExperience(gain);
                     }
                     if (GET_FORGETING(ch) != 0) {
                         GET_FORGET_COUNT(ch) += 1;
@@ -1051,8 +1052,6 @@ void handle_train(struct char_data *keeper, int guild_nr, struct char_data *ch, 
 
 
 void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument) {
-    int whichclass = GET_CLASS(ch);
-
     skip_spaces(&argument);
     auto rpp_cost = rpp_to_level(ch);
 
@@ -1062,9 +1061,9 @@ void handle_gain(struct char_data *keeper, int guild_nr, struct char_data *ch, c
         } else if (rpp_cost <= GET_RP(ch)) {
             ch->modRPP(-rpp_cost);
             send_to_char(ch, "@D(@cRPP@W: @w-%d@D)@n\n\n", rpp_cost);
-            gain_level(ch, whichclass);
+            gain_level(ch);
         } else {
-            gain_level(ch, whichclass);
+            gain_level(ch);
         }
     } else {
         send_to_char(ch, "You are not yet ready for further advancement.\r\n");
@@ -1076,7 +1075,7 @@ int rpp_to_level(struct char_data *ch) {
     switch (GET_LEVEL(ch)) {
         case 2:
             // charge the RPP races to level for the first time.
-            return ch->race->getRPPCost();
+            return 0;
         case 91:
         case 92:
         case 93:
@@ -1091,34 +1090,6 @@ int rpp_to_level(struct char_data *ch) {
             return 5;
         default:
             return 0;
-    }
-}
-
-void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument) {
-    if (GET_PRACTICES(ch) < 25) {
-        send_to_char(ch, "You need at least 25 practice sessions to learn.\r\n");
-        return;
-    }
-    if (GET_EXP(ch) > level_exp(ch, GET_LEVEL(ch) + 1) && GET_LEVEL(ch) != 100) {
-        send_to_char(ch, "You can't learn with negative TNL.\r\n");
-        return;
-    } else {
-        int64_t amt = level_exp(ch, GET_LEVEL(ch) + 1) / 100;
-        if (GET_LEVEL(ch) == 100) {
-            amt = 400000;
-        }
-        act("@c$n@W spends time training you in $s fighting style.@n", true, keeper, nullptr, ch, TO_VICT);
-        act("@c$n@W spends time training @C$N@W in $s fighting style.@n", true, keeper, nullptr, ch, TO_NOTVICT);
-        send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt).c_str());
-        ch->modPractices(-25);
-        if (IS_SAIYAN(ch) || IS_HALFBREED(ch)) {
-            amt = amt + (amt * .30);
-        }
-        if (IS_ICER(ch)) {
-            amt = amt - (amt * .10);
-        }
-        gain_exp(ch, amt);
-        return;
     }
 }
 
@@ -1171,7 +1142,7 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     if (fail == true)
         return;
 
-    GET_EXP(ch) -= expcost;
+    ch->modExperience(-expcost);
     ch->mod(CharMoney::Carried, -goldcost);
     ch->modPractices(25);
 

@@ -52,13 +52,8 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
 
 extern int sec_roll_check(struct char_data *ch);
 
-extern int get_measure(struct char_data *ch, int height, int weight);
 
 extern int64_t physical_cost(struct char_data *ch, int skill);
-
-extern int trans_cost(struct char_data *ch, int trans);
-
-extern int trans_req(struct char_data *ch, int trans);
 
 extern int axion_dice(int adjust);
 
@@ -197,13 +192,9 @@ extern int perform_move(struct char_data *ch, int dir, int following);
 extern int64_t max_carry_weight(struct char_data *ch);
 
 /* in limits.c */
-extern void advance_level(struct char_data *ch, int whichclass);
+extern void advance_level(struct char_data *ch);
 
 extern void set_title(struct char_data *ch, char *title);
-
-extern void gain_exp(struct char_data *ch, int64_t gain);
-
-extern void gain_exp_regardless(struct char_data *ch, int gain);
 
 extern void gain_condition(struct char_data *ch, int condition, int value);
 
@@ -212,8 +203,6 @@ extern void point_update(uint64_t heartPulse, double deltaTime);
 extern void update_pos(struct char_data *victim);
 
 /* in class.c */
-char *class_desc_str(struct char_data *ch, int howlong, int wantthe);
-
 extern int total_skill_levels(struct char_data *ch, int skill);
 
 extern int8_t ability_mod_value(int abil);
@@ -222,7 +211,6 @@ extern int8_t dex_mod_capped(const struct char_data *ch);
 
 extern int highest_skill_value(int level, int type);
 
-extern int calc_penalty_exp(struct char_data *ch, int gain);
 
 extern int raise_class_only(struct char_data *ch, int cl, int v);
 
@@ -496,9 +484,9 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define GET_ADMLEVEL(ch)    ((ch)->get(CharNum::AdmLevel))
 #define GET_LEVEL(ch)    ((ch)->get(CharNum::Level))
 
-#define GET_CLASS(ch)   ((ch)->chclass ? (ch)->chclass->getID() : 0)
+#define GET_CLASS(ch)   ((ch)->chclass)
 
-#define GET_RACE(ch)    ((ch)->race->getID())
+#define GET_RACE(ch)    ((ch)->race)
 #define GET_HAIRL(ch)   ((ch)->get(CharAppearance::HairLength))
 #define GET_HAIRC(ch)   ((ch)->get(CharAppearance::HairColor))
 #define GET_HAIRS(ch)   ((ch)->get(CharAppearance::HairStyle))
@@ -545,7 +533,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define IS_WEIGHTED(ch) ((ch)->getEffMaxPL() < GET_MAX_HIT(ch))
 
 
-#define GET_EXP(ch)      ((ch)->exp)
+#define GET_EXP(ch)      ((ch)->getExperience())
 /*
  * Changed GET_AC to GET_ARMOR so that code with GET_AC will need to be
  * looked at to see if it needs to change before being converted to use
@@ -885,7 +873,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define PERS(ch, vict) ((DISG(ch, vict) ? (CAN_SEE(vict, ch) ? (INTROD(vict, ch) ? (ISWIZ(ch, vict) ? GET_NAME(ch) :\
                         get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") :\
-                        (ch)->race->getName().c_str()))
+                        race::getName((ch)->race).c_str()))
 
 #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
     (obj)->short_description  : "something")
@@ -906,25 +894,25 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define RACE(ch)      ((ch)->juggleRaceName(true).c_str())
 #define LRACE(ch)     ((ch)->juggleRaceName(false).c_str())
-#define TRUE_RACE(ch) ((ch)->race->getName().c_str())
+#define TRUE_RACE(ch) (race::getName((ch)->race).c_str())
 
-#define CLASS_ABBR(ch) ((ch)->chclass->getAbbr().c_str())
+#define CLASS_ABBR(ch) (sensei::getAbbr((ch)->chclass).c_str())
 #define RACE_ABBR(ch) ((ch)->race->getAbbr().c_str())
 
-#define IS_ROSHI(ch)            (GET_CLASS(ch) == CLASS_ROSHI)
-#define IS_PICCOLO(ch)          (GET_CLASS(ch) == CLASS_PICCOLO)
-#define IS_KRANE(ch)            (GET_CLASS(ch) == CLASS_KRANE)
-#define IS_NAIL(ch)             (GET_CLASS(ch) == CLASS_NAIL)
-#define IS_BARDOCK(ch)          (GET_CLASS(ch) == CLASS_BARDOCK)
-#define IS_GINYU(ch)            (GET_CLASS(ch) == CLASS_GINYU)
-#define IS_FRIEZA(ch)           (GET_CLASS(ch) == CLASS_FRIEZA)
-#define IS_TAPION(ch)           (GET_CLASS(ch) == CLASS_TAPION)
-#define IS_ANDSIX(ch)           (GET_CLASS(ch) == CLASS_ANDSIX)
-#define IS_DABURA(ch)           (GET_CLASS(ch) == CLASS_DABURA)
-#define IS_KABITO(ch)           (GET_CLASS(ch) == CLASS_KABITO)
-#define IS_JINTO(ch)            (GET_CLASS(ch) == CLASS_JINTO)
-#define IS_TSUNA(ch)            (GET_CLASS(ch) == CLASS_TSUNA)
-#define IS_KURZAK(ch)           (GET_CLASS(ch) == CLASS_KURZAK)
+#define IS_ROSHI(ch)            (GET_CLASS(ch) == SenseiID::Roshi)
+#define IS_PICCOLO(ch)          (GET_CLASS(ch) == SenseiID::Piccolo)
+#define IS_KRANE(ch)            (GET_CLASS(ch) == SenseiID::Krane)
+#define IS_NAIL(ch)             (GET_CLASS(ch) == SenseiID::Nail)
+#define IS_BARDOCK(ch)          (GET_CLASS(ch) == SenseiID::Bardock)
+#define IS_GINYU(ch)            (GET_CLASS(ch) == SenseiID::Ginyu)
+#define IS_FRIEZA(ch)           (GET_CLASS(ch) == SenseiID::Frieza)
+#define IS_TAPION(ch)           (GET_CLASS(ch) == SenseiID::Tapion)
+#define IS_ANDSIX(ch)           (GET_CLASS(ch) == SenseiID::Sixteen)
+#define IS_DABURA(ch)           (GET_CLASS(ch) == SenseiID::Dabura)
+#define IS_KABITO(ch)           (GET_CLASS(ch) == SenseiID::Kibito)
+#define IS_JINTO(ch)            (GET_CLASS(ch) == SenseiID::Jinto)
+#define IS_TSUNA(ch)            (GET_CLASS(ch) == SenseiID::Tsuna)
+#define IS_KURZAK(ch)           (GET_CLASS(ch) == SenseiID::Kurzak)
 
 #define GOLD_CARRY(ch)        (GET_LEVEL(ch) < 100 ? (GET_LEVEL(ch) < 50 ? GET_LEVEL(ch) * 10000 : 500000) : 50000000)
 #define IS_SHADOW_DRAGON1(ch)   (IS_NPC(ch) && GET_MOB_VNUM(ch) == SHADOW_DRAGON1_VNUM)
@@ -941,23 +929,18 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define CHEAP_RACE(ch)          (IS_TRUFFLE(ch) || IS_MUTANT(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
 #define SPAR_TRAIN(ch)          (FIGHTING(ch) && !IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPAR) &&\
                                  !IS_NPC(FIGHTING(ch)) && PLR_FLAGGED(FIGHTING(ch), PLR_SPAR))
-#define IS_NONPTRANS(ch)        (IS_HUMAN(ch) || ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !IS_FULLPSSJ(ch) && !PLR_FLAGGED(ch, PLR_LSSJ) && !PLR_FLAGGED(ch, PLR_OOZARU)) ||\
-                                 IS_NAMEK(ch) || IS_MUTANT(ch) || IS_ICER(ch) ||\
-                                 IS_KAI(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
+#define IS_PTRANS(ch)           (IS_ANDROID(ch) || IS_TRUFFLE(ch) || IS_BIO(ch) || IS_MAJIN(ch))
+#define IS_NONPTRANS(ch)        (!IS_PTRANS(ch))
 #define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
-#define IS_FULLPSSJ(ch)         (OOZARU_RACE(ch) && PLR_FLAGGED(ch, PLR_FPSSJ) && PLR_FLAGGED(ch, PLR_TRANS1))
-#define IS_TRANSFORMED(ch)      (PLR_FLAGGED(ch, PLR_TRANS1) || PLR_FLAGGED(ch, PLR_TRANS2) ||\
-                                 PLR_FLAGGED(ch, PLR_TRANS3) || PLR_FLAGGED(ch, PLR_TRANS4) ||\
-                                 PLR_FLAGGED(ch, PLR_TRANS5) || PLR_FLAGGED(ch, PLR_TRANS6) ||\
-                                 PLR_FLAGGED(ch, PLR_OOZARU))
+#define IS_TRANSFORMED(ch)      ((ch)->form != FormID::Base)
 #define BIRTH_PHASE             (time_info.day <= 15)
 #define LIFE_PHASE              (!BIRTH_PHASE && time_info.day <= 22)
 #define DEATH_PHASE             (!BIRTH_PHASE && !LIFE_PHASE)
-#define MOON_OK(ch)             (HAS_MOON(ch) && MOON_DATE && MOON_TIME && OOZARU_OK(ch))
-#define OOZARU_OK(ch)           (OOZARU_RACE(ch) && PLR_FLAGGED(ch, PLR_STAIL) && !IS_TRANSFORMED(ch))
+
 #define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
 #define MOON_TIME               (time_info.hours >= 21 || time_info.hours <= 4)
-#define MOON_DATE               (time_info.day == 19 || time_info.day == 20 || time_info.day == 21)
+#define MOON_DATE               (time_info.day >= 20 && time_info.day <= 23)
+extern bool MOON_TIMECHECK();
 bool PLANET_FLAGGED(struct char_data *ch, int flag);
 bool ETHER_STREAM(struct char_data *ch);
 bool HAS_MOON(struct char_data *ch);
@@ -978,30 +961,30 @@ bool HAS_MOON(struct char_data *ch);
                                  (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || \
                                  (GRAPPLED(ch) && GRAPTYPE(ch) != 1)))
 
-#define IS_HUMAN(ch)            (GET_RACE(ch) == RACE_HUMAN)
-#define IS_SAIYAN(ch)           (GET_RACE(ch) == RACE_SAIYAN)
-#define IS_ICER(ch)             (GET_RACE(ch) == RACE_ICER)
-#define IS_KONATSU(ch)          (GET_RACE(ch) == RACE_KONATSU)
-#define IS_NAMEK(ch)            (GET_RACE(ch) == RACE_NAMEK)
-#define IS_MUTANT(ch)           (GET_RACE(ch) == RACE_MUTANT)
-#define IS_KANASSAN(ch)         (GET_RACE(ch) == RACE_KANASSAN)
-#define IS_HALFBREED(ch)        (GET_RACE(ch) == RACE_HALFBREED)
-#define IS_BIO(ch)              (GET_RACE(ch) == RACE_BIO)
-#define IS_ANDROID(ch)          (GET_RACE(ch) == RACE_ANDROID)
-#define IS_DEMON(ch)            (GET_RACE(ch) == RACE_DEMON)
-#define IS_MAJIN(ch)            (GET_RACE(ch) == RACE_MAJIN)
-#define IS_KAI(ch)              (GET_RACE(ch) == RACE_KAI)
-#define IS_TRUFFLE(ch)          (GET_RACE(ch) == RACE_TRUFFLE)
-#define IS_HOSHIJIN(ch)         (GET_RACE(ch) == RACE_GOBLIN)
-#define IS_ANIMAL(ch)           (GET_RACE(ch) == RACE_ANIMAL)
-#define IS_SAIBA(ch)              (GET_RACE(ch) == RACE_SAIBA)
-#define IS_SERPENT(ch)            (GET_RACE(ch) == RACE_SERPENT)
-#define IS_OGRE(ch)            (GET_RACE(ch) == RACE_OGRE)
-#define IS_YARDRATIAN(ch)         (GET_RACE(ch) == RACE_YARDRATIAN)
-#define IS_ARLIAN(ch)           (GET_RACE(ch) == RACE_ARLIAN)
-#define IS_DRAGON(ch)           (GET_RACE(ch) == RACE_DRAGON)
-#define IS_MECHANICAL(ch)          (GET_RACE(ch) == RACE_MECHANICAL)
-#define IS_FAERIE(ch)           (GET_RACE(ch) == RACE_FAERIE)
+#define IS_HUMAN(ch)            (GET_RACE(ch) == RaceID::Human)
+#define IS_SAIYAN(ch)           (GET_RACE(ch) == RaceID::Saiyan)
+#define IS_ICER(ch)             (GET_RACE(ch) == RaceID::Icer)
+#define IS_KONATSU(ch)          (GET_RACE(ch) == RaceID::Konatsu)
+#define IS_NAMEK(ch)            (GET_RACE(ch) == RaceID::Namekian)
+#define IS_MUTANT(ch)           (GET_RACE(ch) == RaceID::Mutant)
+#define IS_KANASSAN(ch)         (GET_RACE(ch) == RaceID::Kanassan)
+#define IS_HALFBREED(ch)        (GET_RACE(ch) == RaceID::Halfbreed)
+#define IS_BIO(ch)              (GET_RACE(ch) == RaceID::BioAndroid)
+#define IS_ANDROID(ch)          (GET_RACE(ch) == RaceID::Android)
+#define IS_DEMON(ch)            (GET_RACE(ch) == RaceID::Demon)
+#define IS_MAJIN(ch)            (GET_RACE(ch) == RaceID::Majin)
+#define IS_KAI(ch)              (GET_RACE(ch) == RaceID::Kai)
+#define IS_TRUFFLE(ch)          (GET_RACE(ch) == RaceID::Tuffle)
+#define IS_HOSHIJIN(ch)         (GET_RACE(ch) == RaceID::Hoshijin)
+#define IS_ANIMAL(ch)           (GET_RACE(ch) == RaceID::Animal)
+#define IS_SAIBA(ch)              (GET_RACE(ch) == RaceID::Saiba)
+#define IS_SERPENT(ch)            (GET_RACE(ch) == RaceID::Serpent)
+#define IS_OGRE(ch)            (GET_RACE(ch) == RaceID::Ogre)
+#define IS_YARDRATIAN(ch)         (GET_RACE(ch) == RaceID::Yardratian)
+#define IS_ARLIAN(ch)           (GET_RACE(ch) == RaceID::Arlian)
+#define IS_DRAGON(ch)           (GET_RACE(ch) == RaceID::Dragon)
+#define IS_MECHANICAL(ch)          (GET_RACE(ch) == RaceID::Mechanical)
+#define IS_FAERIE(ch)           (GET_RACE(ch) == RaceID::Spirit)
 #define IS_UNDEAD(ch)           (IS_AFFECTED(ch, AFF_UNDEAD))
 
 /* Define Gender More Easily */

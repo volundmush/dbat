@@ -16,36 +16,37 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/interpreter.h"
 #include "dbat/players.h"
+#include "dbat/transformation.h"
+#include "dbat/weather.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
 
-const std::string &char_data::juggleRaceName(bool capitalized) {
-    if (!race) return unknown;
+std::string char_data::juggleRaceName(bool capitalized) {
 
-    race::Race *apparent = race;
+    auto apparent = race;
 
-    switch (apparent->getID()) {
-        case race::hoshijin:
-            if (mimic) apparent = mimic;
+    switch (apparent) {
+        case RaceID::Hoshijin:
+            if (mimic) apparent = *mimic;
             break;
-        case race::halfbreed:
-            switch ((int)RACIAL_PREF(this)) {
+        case RaceID::Halfbreed:
+            switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = race::race_map[race::human];
+                    apparent = RaceID::Human;
                     break;
                 case 2:
-                    apparent = race::race_map[race::saiyan];
+                    apparent = RaceID::Saiyan;
                     break;
             }
             break;
-        case race::android:
-            switch ((int)RACIAL_PREF(this)) {
+        case RaceID::Android:
+            switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = race::race_map[race::android];
+                    apparent = RaceID::Android;
                     break;
                 case 2:
-                    apparent = race::race_map[race::human];
+                    apparent = RaceID::Human;
                     break;
                 case 3:
                     if (capitalized) {
@@ -55,17 +56,17 @@ const std::string &char_data::juggleRaceName(bool capitalized) {
                     }
             }
             break;
-        case race::saiyan:
+        case RaceID::Saiyan:
             if (PLR_FLAGGED(this, PLR_TAILHIDE)) {
-                apparent = race::race_map[race::human];
+                apparent = RaceID::Human;
             }
             break;
     }
 
     if (capitalized) {
-        return apparent->getName();
+        return race::getName(apparent);
     } else {
-        return apparent->getNameLower();
+        return boost::to_lower_copy(race::getName(apparent));
     }
 }
 
@@ -92,7 +93,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
         char_to_room(this, real_room(GET_DROOM(this)));
     } else {
-        char_to_room(this, real_room(this->chclass->senseiStartRoom()));
+        char_to_room(this, real_room(sensei::getStartRoom(chclass)));
     }
     look_at_room(in_room, this, 0);
 
@@ -206,32 +207,10 @@ static std::map<int, uint16_t> grav_threshold = {
         {10000, 200000000}
 };
 
-bool char_data::can_tolerate_gravity(int grav) {
-    if (IS_NPC(this)) return true;
-    int tolerance = 0;
-    tolerance = std::max(tolerance, this->chclass->getGravTolerance());
-    if (tolerance >= grav)
-        return true;
-    return GET_MAX_HIT(this) >= grav_threshold[grav];
-}
-
-
-int char_data::calcTier() {
-    auto level = get(CharNum::Level);
-    int tier = level / 10;
-    if ((level % 10) == 0)
-        tier--;
-    tier = std::max(tier, 0);
-    tier = std::min(tier, 9);
-    return tier;
-}
-
 int64_t char_data::calc_soft_cap() {
     auto level = get(CharNum::Level);
-    if(level >= 100) return 50e9;
-    auto tier = calcTier();
-    auto softmap = race->getSoftMap(this);
-    return level * softmap[tier];
+    if(level >= 100) return 50e12;
+    return race::getSoftCap(race, level);
 }
 
 bool char_data::is_soft_cap(int64_t type) {
@@ -375,13 +354,10 @@ void char_data::restoreHealth(bool announce) {
 }
 
 int64_t char_data::getMaxPLTrans() {
-    auto form = race->getCurForm(this);
-    int64_t total = 0;
-    if (form.flag) {
-        total = (form.bonus + getEffBasePL()) * form.mult;
-    } else {
-        total = getEffBasePL() * form.mult;
-    }
+    auto total = getEffBasePL();
+
+    total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_HIT));
+    total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_PL_MULT));
     return total;
 }
 
@@ -406,6 +382,7 @@ int64_t char_data::getCurPL() {
 
 int64_t char_data::getEffBasePL() {
     if (original) return original->getEffBasePL();
+
     if (!clones.empty()) {
         return getBasePL() / (clones.size() + 1);
     } else {
@@ -438,12 +415,10 @@ int64_t char_data::getCurKI() {
 }
 
 int64_t char_data::getMaxKI() {
-    auto form = race->getCurForm(this);
-    if (form.flag) {
-        return (form.bonus + getEffBaseKI()) * form.mult;
-    } else {
-        return getEffBaseKI();
-    }
+    auto total = getEffBaseKI();
+    total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_MANA));
+    total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_KI_MULT));
+    return total;
 }
 
 int64_t char_data::getEffBaseKI() {
@@ -528,12 +503,10 @@ int64_t char_data::getCurST() {
 }
 
 int64_t char_data::getMaxST() {
-    auto form = race->getCurForm(this);
-    if (form.flag) {
-        return (form.bonus + getEffBaseST()) * form.mult;
-    } else {
-        return getEffBaseST();
-    }
+    auto total = getEffBaseST();
+    total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_MOVE));
+    total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_ST_MULT));
+    return total;
 }
 
 int64_t char_data::getEffBaseST() {
@@ -770,8 +743,32 @@ void char_data::restoreLimbs(bool announce) {
     }
 
     // and lastly, tail.
-    this->race->gainTail(this, announce);
+    this->gainTail(announce);
 }
+
+
+void char_data::gainTail(bool announce) {
+    if (!race::hasTail(race)) return;
+    if(playerFlags.test(PLR_TAIL)) return;
+    playerFlags.set(PLR_TAIL);
+    if(announce) {
+        send_to_char(this, "@wYour tail grows back.@n\r\n");
+        act("$n@w's tail grows back.@n", true, this, nullptr, nullptr, TO_ROOM);
+    }
+}
+
+void char_data::loseTail() {
+    if (!playerFlags.test(PLR_TAIL)) return;
+    playerFlags.reset(PLR_TAIL);
+    remove_limb(this, 6);
+    GET_TGROWTH(this) = 0;
+    oozaru_revert(this);
+}
+
+bool char_data::hasTail() {
+    return playerFlags.test(PLR_TAIL);
+}
+
 
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
     return mod(CharStat::PowerLevel, amt);
@@ -1089,8 +1086,8 @@ void char_data::login() {
 
 }
 
-int char_data::getAffectModifier(int location, int specific) {
-    int total = 0;
+double char_data::getAffectModifier(int location, int specific) {
+    double total = 0;
     for(auto a = affected; a; a = a->next) {
         if(location != a->location) continue;
         if(specific != -1 && specific != a->specific) continue;
@@ -1100,6 +1097,10 @@ int char_data::getAffectModifier(int location, int specific) {
         if(auto obj = GET_EQ(this, i); obj)
         total += obj->getAffectModifier(location, specific);
     }
+
+    total += race::getModifier(this, location, specific);
+    total += trans::getModifier(this, location, specific);
+
     return total;
 }
 
@@ -1139,7 +1140,7 @@ int char_data::setSize(int val) {
 }
 
 int char_data::getSize() {
-    return get_size(this);
+    return size != SIZE_UNDEFINED ? size : race::getSize(race);
 }
 
 
@@ -1165,7 +1166,7 @@ attribute_t char_data::get(CharAttribute attr, bool base) {
         val = stat->second;
     }
     if(!base) {
-        val += getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_STATS);
+        val += getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_ATTRS);
         return std::clamp<attribute_t>(val, 5, 100);
     }
     return val;
@@ -1219,7 +1220,7 @@ stat_t char_data::mod(CharStat type, stat_t val) {
     return set(type, get(type) + val);
 }
 
-stat_t char_data::get(CharStat type) {
+stat_t char_data::get(CharStat type, bool base) {
     if(auto st = stats.find(type); st != stats.end()) {
         return st->second;
     }
@@ -1300,9 +1301,9 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
     else if (room >= 101 && room <= 139) {
         if (GET_LEVEL(this) == 1) {
             lroom = 100;
-            GET_EXP(this) = 0;
+            setExperience(0);
         } else {
-            lroom = chclass->senseiStartRoom();
+            lroom = sensei::getStartRoom(chclass);
         }
     }
     else {
@@ -1339,4 +1340,139 @@ int char_data::getArmor() {
             out += obj->getAffectModifier(APPLY_AC, -1);
     }
     return out;
+}
+
+int64_t char_data::getExperience() {
+    return exp;
+}
+
+int64_t char_data::setExperience(int64_t value) {
+    exp = value;
+    if(exp < 0) exp = 0;
+    return exp;
+}
+
+// This returns the exact amount that was modified by.
+int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
+
+    if(value < 0) {
+        // removing experience. We can do this easily.
+        auto cur = getExperience();
+        auto new_value = setExperience(cur + value);
+        // return the actual amount substracted as a negative.
+        return cur - new_value;
+    }
+
+    // Adding experience may involve bonuses.
+    auto gain = value;
+    auto cur = getExperience();
+
+    if(!applyBonuses) {
+        gain *= (1.0 + getAffectModifier(APPLY_EXP_GAIN_MULT));
+
+        if (AFF_FLAGGED(this, AFF_WUNJO)) {
+            gain *= 1.15;
+        }
+        if (PLR_FLAGGED(this, PLR_IMMORTAL)) {
+            gain *= 0.95;
+        }
+
+        int64_t diff = gain * 0.15;
+
+        if (gain > 0) {
+
+            // TODO: Modify the spar booster with APPLY_EXP_GAIN_MULT 0.25
+            if (auto obj = GET_EQ(this, WEAR_SH); obj && obj->vn == 1127) {
+                int64_t spar = gain;
+                gain += gain * 0.25;
+                spar = gain - spar;
+                send_to_char(this, "@D[@BBooster EXP@W: @G+%s@D]\r\n", add_commas(spar).c_str());
+            }
+
+            // Post-100 gains.
+            if (GET_LEVEL(this) == 100 && GET_ADMLEVEL(this) < 1) {
+                if (IS_KANASSAN(this) || IS_DEMON(this)) {
+                    diff = diff * 1.3;
+                }
+                if (IS_ANDROID(this)) {
+                    diff = diff * 1.2;
+                }
+
+                if (rand_number(1, 5) >= 2) {
+                    if (IS_HUMAN(this)) {
+                        this->gainBasePL(diff * 0.8);
+                    } else {
+                        this->gainBasePL(diff);
+                    }
+                    send_to_char(this, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
+                }
+                if (rand_number(1, 5) >= 2) {
+                    if (IS_HALFBREED(this)) {
+                        this->gainBaseST(diff * 0.85);
+                    } else {
+                        this->gainBaseST(diff);
+                    }
+                    send_to_char(this, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff).c_str());
+                }
+                if (rand_number(1, 5) >= 2) {
+                    this->gainBaseKI(diff);
+                    send_to_char(this, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff).c_str());
+                }
+            }
+        }
+    }
+
+    // Amount gained cannot be negative.
+    gain = std::max<int64_t>(gain, 0);
+
+    if (MINDLINK(this) && gain > 0 && LINKER(this) == 0) {
+        if (GET_LEVEL(this) + 20 < GET_LEVEL(MINDLINK(this)) || GET_LEVEL(this) - 20 > GET_LEVEL(MINDLINK(this))) {
+            send_to_char(MINDLINK(this),
+                         "The level difference between the two of you is too great to gain from mind read.\r\n");
+        } else {
+            act("@GYou've absorbed some new experiences from @W$n@G!@n", false, this, nullptr, MINDLINK(this),
+                TO_VICT);
+            int64_t read = gain * 0.12;
+            gain -= read;
+            if (read == 0)
+                read = 1;
+            MINDLINK(this)->modExperience(read, false);
+            act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, this,
+                nullptr, MINDLINK(this), TO_CHAR);
+        }
+    }
+
+    if(GET_LEVEL(this) < 100) {
+        int64_t tnl = level_exp(this, GET_LEVEL(this) + 1);
+
+        if(cur < tnl && (cur + gain) >= tnl) {
+            send_to_char(this, "@rYou have earned enough experience to gain a @ylevel@r.@n\r\n");
+        }
+
+        int64_t max_over_tnl = tnl * 5;
+        if((cur + gain) >= max_over_tnl) {
+            gain = max_over_tnl - getExperience();
+            send_to_char(this, "@WYou -@RNEED@W- to @ylevel@W. You can't hold any more experience!@n\r\n");
+        }
+
+    }
+
+    if(gain) setExperience(cur + gain);
+    return gain;
+
+}
+
+void char_data::gazeAtMoon() {
+    if(OOZARU_RACE(this) && playerFlags.test(PLR_TAIL)) {
+        if(form == FormID::Oozaru || form == FormID::GoldenOozaru) return;
+        FormID toForm = FormID::Oozaru;
+        if(transforms.contains(FormID::SuperSaiyan)
+        || transforms.contains(FormID::SuperSaiyan2)
+        || transforms.contains(FormID::SuperSaiyan3)
+        || transforms.contains(FormID::SuperSaiyan4))
+            toForm = FormID::GoldenOozaru;
+
+        trans::handleEchoTransform(this, toForm);
+        form = toForm;
+    }
 }

@@ -596,7 +596,7 @@ in the vault (vnum: 453) now and then. you can just use
                             strcpy(str, "0");
                     } else if (!strcasecmp(field, "class")) {
                         if (!IS_NPC(c))
-                            snprintf(str, slen, "%s", c->chclass->getName().c_str());
+                            snprintf(str, slen, "%s", sensei::getName(c->chclass).c_str());
                         else
                             snprintf(str, slen, "blank");
                     } else if (!strcasecmp(field, "con")) {
@@ -664,7 +664,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int64_t addition = std::max<int64_t>(0, atof(subfield));
 
-                            gain_exp(c, addition);
+                            c->modExperience(addition);
                         }
                         snprintf(str, slen, "%" I64T "", GET_EXP(c));
                     }
@@ -908,7 +908,7 @@ in the vault (vnum: 453) now and then. you can just use
                     }
 #ifdef GET_RACE
                     else if (!strcasecmp(field, "race")) {
-                        snprintf(str, slen, "%s", c->race->getName().c_str());
+                        snprintf(str, slen, "%s", race::getName(c->race).c_str());
                     }
 #endif
                     else if (!strcasecmp(field, "rpp")) {

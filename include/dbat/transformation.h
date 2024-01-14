@@ -2,44 +2,28 @@
 #include "structs.h"
 
 namespace trans {
+    extern std::string getName(struct char_data *ch, FormID form);
+    extern std::string getAbbr(struct char_data *ch, FormID form);
 
-    struct Transformation {
-        virtual int getID() = 0;
-        virtual std::string getName() = 0;
-        virtual int getSlot() = 0;
-        virtual double getBonus(struct char_data *ch, int location, int specific);
-        virtual std::optional<int> overrideAppearance(struct char_data *ch, int mode);
-        virtual std::string descriptionLine(struct char_data *ch);
-        virtual void onUpdate(double deltaTime);
-        virtual void onLoseBodyPart(struct char_data *ch, int limb);
-        virtual bool isSkill() {return false;}; // for Kaioken, DarkMeta, and maybe other things.
-        virtual bool isGodly() { return false;};
-        virtual bool isDemonic() { return false;};
-        virtual void onTransform(struct char_data *ch, bool voluntary);
-        virtual void onRevert(struct char_data *ch, bool voluntary);
-        virtual bool canTransform(struct char_data *ch);
-        virtual bool canRevert(struct char_data *ch);
-        virtual void announceTransform(struct char_data *ch, bool toRoom);
-        virtual void announceRevert(struct char_data *ch, bool toRoom);
-    };
+    extern bool unlock(struct char_data *ch, FormID form);
 
-    struct Base : public Transformation {
-        int getID() override { return 0;};
-        std::string getName() override {return "base";}
-        int getSlot() override { return -1;}; // Any slot
-    };
+    extern double getModifier(struct char_data *ch, int location, int specific = 0);
 
-    // SLOT 1 Transformations:
+    extern double getStaminaDrain(struct char_data *ch, FormID form, bool upkeep = false);
 
+    extern std::optional<int> getAppearanceMod(struct char_data *ch, FormID form, CharAppearance mode);
 
-    // SLOT 2 Transformations:
-    struct Oozaru : public Transformation {
-        int getID() override { return 1000;}
-        std::string getName() override { return "Oozaru";};
-    };
+    extern void handleEchoTransform(struct char_data *ch, FormID form);
+    extern void handleEchoRevert(struct char_data *ch, FormID form);
 
+    extern void displayForms(struct char_data *ch);
+    extern int64_t getRequiredPL(struct char_data* ch, FormID trans);
 
+    extern bool blockRevertDisallowed(struct char_data *ch, FormID form);
 
-    // SLOT 3 Transformations
+    extern std::optional<FormID> findForm(struct char_data *ch, const std::string& arg);
+
+    extern void gamesys_transform(uint64_t heartPulse, double deltaTime);
+    extern void gamesys_oozaru(uint64_t heartPulse, double deltaTime);
 
 }

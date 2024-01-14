@@ -26,6 +26,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/objsave.h"
 #include "dbat/act.informative.h"
+#include "dbat/transformation.h"
 
 /* Structures */
 struct char_data *combat_list = nullptr;    /* head of l-list of fighting chars */
@@ -232,7 +233,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
     if (power > 20)
         power = 20;
 
-    if (GET_CLASS(ch) == CLASS_NPC_COMMONER)
+    if (GET_CLASS(ch) == SenseiID::Commoner)
         special = 0;
 
     int dragonpass = true;
@@ -249,7 +250,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
 
     if (axion_dice(-10) > 90 && ch->getCurHealthPercent() <= .5 && !MOB_FLAGGED(ch, MOB_POWERUP) &&
         GET_MOB_VNUM(ch) != 25 &&
-        !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->chclass->getID() == sensei::commoner)) {
+        !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->chclass == SenseiID::Commoner)) {
         do_powerup(ch, nullptr, 0, 0);
         return;
     }
@@ -280,10 +281,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
             return;
         } else if (special < 100) { /* Normal physical attack */
-            if (GET_CLASS(ch) == CLASS_SHADOWDANCER && rand_number(1, 3) == 3) {
-                sprintf(buf2, "ass %s", buf);
-                do_throw(ch, buf2, 0, 0);
-            } else if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_REPAIR) && GET_HIT(ch) <= (ch->getEffMaxPL()) * 0.5 &&
+            if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_REPAIR) && GET_HIT(ch) <= (ch->getEffMaxPL()) * 0.5 &&
                        rand_number(1, 20) >= 16) {
                 do_srepair(ch, nullptr, 0, 0);
             } else if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_ABSORB) && rand_number(1, 20) >= 19) {
@@ -466,7 +464,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                     if (ch->mobcharge == 7) {
                         ch->mobcharge = 0;
                         switch (GET_CLASS(ch)) {
-                            case CLASS_ROSHI:
+                            case SenseiID::Roshi:
                                 if (special >= 100)
                                     do_kakusanha(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -478,7 +476,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case CLASS_FRIEZA:
+                            case SenseiID::Frieza:
                                 if (special >= 100)
                                     do_deathball(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -490,7 +488,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case CLASS_KRANE:
+                            case SenseiID::Krane:
                                 if (special >= 100)
                                     do_tribeam(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -502,7 +500,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case CLASS_PICCOLO:
+                            case SenseiID::Piccolo:
                                 if (special >= 100)
                                     do_scatter(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -516,7 +514,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case CLASS_BARDOCK:
+                            case SenseiID::Bardock:
                                 if (special >= 100)
                                     do_final(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -528,7 +526,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case CLASS_ANDSIX:
+                            case SenseiID::Sixteen:
                                 if (special >= 100)
                                     do_hellflash(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -540,7 +538,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case CLASS_NAIL:
+                            case SenseiID::Nail:
                                 if (special >= 100)
                                     do_regenerate(ch, "50", 0, 0);
                                 else if (special >= 80)
@@ -550,7 +548,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, nullptr, 0, 0);
                                 break;
-                            case CLASS_KURZAK:
+                            case SenseiID::Kurzak:
                                 if (special >= 100)
                                     do_ensnare(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -562,7 +560,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case CLASS_JINTO:
+                            case SenseiID::Jinto:
                                 if (special >= 100)
                                     do_nova(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -572,7 +570,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, "40", 0, 0);
                                 break;
-                            case CLASS_TSUNA:
+                            case SenseiID::Tsuna:
                                 if (special >= 100)
                                     do_koteiru(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -582,7 +580,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "20", 0, 0);
                                 break;
-                            case CLASS_TAPION:
+                            case SenseiID::Tapion:
                                 if (special >= 100)
                                     do_pslash(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -592,7 +590,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, "40", 0, 0);
                                 break;
-                            case CLASS_KABITO:
+                            case SenseiID::Kibito:
                                 if (special >= 100)
                                     do_pbarrage(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -602,7 +600,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, "40", 0, 0);
                                 break;
-                            case CLASS_DABURA:
+                            case SenseiID::Dabura:
                                 if (special >= 100)
                                     do_hellspear(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -612,7 +610,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, "40", 0, 0);
                                 break;
-                            case CLASS_GINYU:
+                            case SenseiID::Ginyu:
                                 if (special >= 100)
                                     do_spiral(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -702,34 +700,34 @@ void remove_limb(struct char_data *vict, int num) {
             snprintf(buf, sizeof(buf), "%s bloody head", GET_NAME(vict));
             break;
         case 1:
-            snprintf(part, sizeof(part), "@w%s right arm@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s right arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right arm");
         vict->pref.reset(PLR_CRARM);
             break;
         case 2:
-            snprintf(part, sizeof(part), "@w%s left arm@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s left arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left arm");
             vict->pref.reset(PLR_CLARM);
             break;
         case 3:
-            snprintf(part, sizeof(part), "@w%s right leg@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s right leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right leg");
             vict->pref.reset(PLR_CRLEG);
             break;
         case 4:
-            snprintf(part, sizeof(part), "@w%s left leg@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s left leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left leg");
             vict->pref.reset(PLR_CLLEG);
             break;
         case 5:
-            snprintf(part, sizeof(part), "@wA %s tail@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@wA %s tail@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "tail");
             break;
         case 6:
             snprintf(buf, sizeof(buf), "tail");
             break;
         default:
-            snprintf(part, sizeof(part), "@w%s body part@n", TRUE_RACE(vict));
+            snprintf(part, sizeof(part), "@w%s body part@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "body part");
             break;
     }
@@ -778,6 +776,7 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
         };
 
 #define IS_WEAPON(type) (((type) >= TYPE_HIT) && ((type) < TYPE_SUFFERING))
+
 
 /* The Fight related routines */
 void fight_stack(uint64_t heartPulse, double deltaTime) {
@@ -944,54 +943,6 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 ch->incCurSTPercent(.15);
                 send_to_char(ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
             }
-        }
-
-        if (!IS_NPC(ch) && IS_TRANSFORMED(ch) && !IS_ICER(ch) && IS_NONPTRANS(ch)) {
-            auto tier = ch->race->getCurrentTransTier(ch);
-
-            if (ch->getCurST() < GET_MAX_MOVE(ch) / 60) {
-                if (!(tier == 1 && PLR_FLAGGED(ch, PLR_FPSSJ))) {
-                    act("@mExhausted of stamina, your body forcibly reverts from its form.@n", true, ch, nullptr,
-                        nullptr, TO_CHAR);
-                    act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", true, ch, nullptr,
-                        nullptr, TO_ROOM);
-                    if (GET_KAIOKEN(ch) < 1)
-                        do_kaioken(ch, "0", 0, 0);
-                    do_transform(ch, "revert", 0, 0);
-                }
-            }
-
-            if (ch->getCurST() >= GET_MAX_MOVE(ch) / 800 && PLR_FLAGGED(ch, PLR_TRANS1)) {
-                if (!PLR_FLAGGED(ch, PLR_FPSSJ)) {
-                    if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-                        ch->decCurST(ch->getMaxST() / 900);
-                    } else
-                        ch->decCurST(ch->getMaxST() / 800);
-                }
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 600 && PLR_FLAGGED(ch, PLR_TRANS2) && !IS_KONATSU(ch) &&
-                       !IS_KAI(ch) && !IS_NAMEK(ch)) {
-                if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-                    ch->decCurST(ch->getMaxST() / 700);
-                } else
-                    ch->decCurST(ch->getMaxST() / 600);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 500 && PLR_FLAGGED(ch, PLR_TRANS2)) {
-                ch->decCurST(ch->getMaxST() / 500);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 400 && PLR_FLAGGED(ch, PLR_TRANS3) && !IS_SAIYAN(ch)) {
-                ch->decCurST(ch->getMaxST() / 400);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 250 && PLR_FLAGGED(ch, PLR_TRANS3)) {
-                if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-                    ch->decCurST(ch->getMaxST() / 300);
-                } else
-                    ch->decCurST(ch->getMaxST() / 250);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 200 && PLR_FLAGGED(ch, PLR_TRANS4) && !IS_SAIYAN(ch)) {
-                ch->decCurST(ch->getMaxST() / 200);
-            } else if (ch->getCurST() >= GET_MAX_MOVE(ch) / 170 && PLR_FLAGGED(ch, PLR_TRANS4)) {
-                if (IS_SAIYAN(ch) && (ch->getCurLF()) >= (ch->getMaxLF()) * 0.7) {
-                    ch->decCurST(ch->getMaxST() / 240);
-                } else
-                    ch->decCurST(ch->getMaxST() / 170);
-            }
-
         }
 
         if (!IS_NPC(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && FIGHTING(ch)) {
@@ -2164,7 +2115,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 break;
             case Newbie:
                 ch->restore(false);
-                ch->teleport_to(ch->chclass->senseiStartRoom());
+                ch->teleport_to(sensei::getStartRoom(ch->chclass));
                 send_to_char(ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
                                  "should learn to be more careful. Since when you die past that point and\r\n"
                                  "actually reach the afterlife you need to realise that being revived will\r\n"
@@ -2217,7 +2168,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                 stop_fighting(ch);
             }
             GET_POS(ch) = POS_SITTING;
-            ch->teleport_to(ch->chclass->senseiStartRoom());
+            ch->teleport_to(sensei::getStartRoom(ch->chclass));
             return;
         }
         for(auto f : {PLR_KILLER, PLR_THIEF}) ch->playerFlags.reset(f);
@@ -2418,7 +2369,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     else
         send_to_char(ch, "You receive your share of experience -- one measly little point!\r\n");
 
-    gain_exp(ch, share);
+    ch->modExperience(share);
     /*change_alignment(ch, victim);*/
 }
 
@@ -2563,14 +2514,14 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
         send_to_char(ch, "You receive one lousy experience point. That fight was hardly worth it...\r\n");
     }
     if (!IS_NPC(ch)) {
-        gain_exp(ch, exp);
+        ch->modExperience(exp);
     }
     if (IS_NPC(victim)) {
-        gain_exp(victim, -exp);
+        victim->modExperience(-exp);
     }
     if (!IS_NPC(victim)) {
         exp = exp / 5;
-        gain_exp(victim, -exp);
+        victim->modExperience(-exp);
     }
     /*change_alignment(ch, victim);*/
 }

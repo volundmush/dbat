@@ -30,6 +30,7 @@
 #include "dbat/players.h"
 #include "dbat/account.h"
 #include "dbat/improved-edit.h"
+#include "dbat/transformation.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -364,27 +365,22 @@ ACMD(do_mimic) {
     int count = 0, x = 0;
 
     // generate a list of mimic'able races.
-    race::RaceMap r_map;
-    for (const auto &r: race::race_map) {
-        if (r.second->raceCanBeMimiced() && r.second->isValidSex(GET_SEX(ch))) {
-            r_map[r.first] = r.second;
-        }
-    }
-
+    auto check = [&](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isValidMimic(id);};
+    auto races = race::filterRaces(check);
     if (!*arg) {
         send_to_char(ch, "@CMimic Menu\n@c--------------------@W\r\n");
-        for (const auto &r: r_map) {
+        for (const auto &r: races) {
             if (count == 2) {
-                send_to_char(ch, "%s\n", r.second->getName().c_str());
+                send_to_char(ch, "%s\n", race::getName(r).c_str());
                 count = 0;
             } else {
-                send_to_char(ch, "%s\n", r.second->getName().c_str());
+                send_to_char(ch, "%s\n", race::getName(r).c_str());
                 count++;
             }
         }
         send_to_char(ch, "Stop@n\r\n");
         if (ch->mimic) {
-            send_to_char(ch, "You currently Mimic a %s", ch->mimic->getName().c_str());
+            send_to_char(ch, "You currently Mimic a %s", race::getName(ch->mimic.value()).c_str());
         }
 
         return;
@@ -399,15 +395,16 @@ ACMD(do_mimic) {
             nullptr, nullptr, TO_CHAR);
         act("@M$n@m concentrates for a moment and SUDDENLY $s appearance changes some what!@n", true, ch, nullptr,
             nullptr, TO_ROOM);
-        ch->mimic = nullptr;
+        ch->mimic.reset();
     }
 
-    auto race = race::find_race_map(arg, r_map);
-    if (!race) {
+    auto chosen_race = race::findRace(arg, check);
+    if (!chosen_race) {
         send_to_char(ch,
                      "That is not a race you can change into. Enter mimic without arugments for the mimic menu.\r\n");
         return;
     }
+    auto race = chosen_race.value();
 
     int prob = GET_SKILL(ch, SKILL_MIMIC), perc = axion_dice(0);
     double mult = 1 / prob;
@@ -416,10 +413,10 @@ ACMD(do_mimic) {
     if (race == ch->mimic) {
         send_to_char(ch, "You are already mimicing that race. To stop enter 'mimic stop'\r\n");
         return;
-    } else if (race && (ch->getCurKI()) < cost) {
+    } else if (ch->getCurKI() < cost) {
         send_to_char(ch, "You do not have enough ki to perform the technique.\r\n");
         return;
-    } else if (race && prob < perc) {
+    } else if (prob < perc) {
         ch->decCurKI(cost);
         act("@mYou concentrate and attempt to create an illusion to obscure your racial features. However you frown as you realize you have failed.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
@@ -448,7 +445,7 @@ ACMD(do_kyodaika) {
         return;
     }
 
-    if (GET_GENOME(ch, 0) == 0) {
+    if (!AFF_FLAGGED(ch, AFF_KYODAIKA)) {
         act("@GYou growl as your body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@g$n@G growls as $s body grows to ten times its normal size!@n", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "@cStrength@D: @C+5\r\n@cSpeed@D: @c-2@n\r\n");
@@ -1074,7 +1071,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch) {
                     send_to_char(ch, "            @D[@cHair Color  @D: @WWhite.        @D]@n\r\n");
                 }
             } else if (IS_SAIYAN(tch) || IS_HALFBREED(tch)) {
-                if (PLR_FLAGGED(tch, PLR_TRANS1)) {
+                if (tch->form == FormID::SuperSaiyan) {
                     if (GET_HAIRL(tch) == HAIRL_LONG) {
                         send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
                     } else if (GET_HAIRL(tch) == HAIRL_BALD) {
@@ -1089,7 +1086,7 @@ static void bringdesc(struct char_data *ch, struct char_data *tch) {
                     send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
                     send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-                } else if (PLR_FLAGGED(tch, PLR_TRANS2)) {
+                } else if (tch->form == FormID::SuperSaiyan2) {
                     if (GET_HAIRL(tch) == HAIRL_LONG) {
                         send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
                     } else if (GET_HAIRL(tch) == HAIRL_BALD) {
@@ -1104,12 +1101,12 @@ static void bringdesc(struct char_data *ch, struct char_data *tch) {
                     send_to_char(ch, "            @D[@cHair Style  @D: @WSharp Spikes. @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
                     send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-                } else if (PLR_FLAGGED(tch, PLR_TRANS3)) {
+                } else if (tch->form == FormID::SuperSaiyan3) {
                     send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
                     send_to_char(ch, "            @D[@cEye Color   @D: @WAqua Green.   @D]@n\r\n");
-                } else if (PLR_FLAGGED(tch, PLR_TRANS4)) {
+                } else if (tch->form == FormID::SuperSaiyan4) {
                     send_to_char(ch, "            @D[@cHair Length @D: @WLong.        @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Style  @D: @WSoft Spikes. @D]@n\r\n");
                     send_to_char(ch, "            @D[@cHair Color  @D: @WBlack.       @D]@n\r\n");
@@ -2770,17 +2767,11 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         if (!PLR_FLAGGED(i, PLR_HEAD)) {
             send_to_char(ch, "            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
         }
-        if (((IS_SAIYAN(i) || IS_HALFBREED(i)) && PLR_FLAGGED(i, PLR_STAIL)) && !PLR_FLAGGED(i, PLR_TAILHIDE)) {
-            send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
-        }
-        if ((IS_SAIYAN(i) || IS_HALFBREED(i)) && (!PLR_FLAGGED(i, PLR_STAIL)) && (!PLR_FLAGGED(i, PLR_TAILHIDE))) {
-            send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
-        }
-        if ((IS_ICER(i) || IS_BIO(i)) && PLR_FLAGGED(i, PLR_TAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
-        }
-        if ((IS_ICER(i) || IS_BIO(i)) && !PLR_FLAGGED(i, PLR_TAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
+        if (race::hasTail(i->race) && !PLR_FLAGGED(i, PLR_TAILHIDE)) {
+            if(PLR_FLAGGED(i, PLR_TAIL))
+                send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
+            else
+                send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
         }
     }
     send_to_char(ch, "\r\n");
@@ -3101,16 +3092,6 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
                     } else {
                         height = strdup("short");
                     }
-                } else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-                    if (GET_PC_HEIGHT(i) * 10 > 2000) {
-                        height = strdup("very tall");
-                    } else if (GET_PC_HEIGHT(i) * 10 > 1800) {
-                        height = strdup("tall");
-                    } else if (GET_PC_HEIGHT(i) * 10 > 1500) {
-                        height = strdup("average height");
-                    } else {
-                        height = strdup("short");
-                    }
                 } else {
                     if (GET_PC_HEIGHT(i) > 200) {
                         height = strdup("very tall");
@@ -3138,18 +3119,6 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
                         height = strdup("heavy");
                     } else if (w > 15) {
                         height = strdup("average weight");
-                    } else {
-                        height = strdup("welterweight");
-                    }
-                } else if (PLR_FLAGGED(i, PLR_OOZARU) || GET_GENOME(i, 0) == 11) {
-                    if (w * 50 > 6000) {
-                        height = strdup("very heavy");
-                    } else if (w * 50 > 5000) {
-                        height = strdup("heavy");
-                    } else if (w * 50 > 4000) {
-                        height = strdup("average weight");
-                    } else if (w * 50 > 3000) {
-                        height = strdup("lightweight");
                     } else {
                         height = strdup("welterweight");
                     }
@@ -3337,6 +3306,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         sprintf(bloom, "...is surrounded by a bright %s aura.@n", aura_types[GET_AURA(i)]);
         act(bloom, true, i, nullptr, ch, TO_VICT);
     }
+
+    auto is_oozaru = (i->form == FormID::Oozaru || i->form == FormID::GoldenOozaru);
+
     if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
         act("@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_FIRESHIELD))
@@ -3362,22 +3334,22 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
         act(aura, true, i, nullptr, ch, TO_VICT);
     }
-    if (!PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (!is_oozaru && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
-    if (!PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
+    if (!is_oozaru && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
         char aura[MAX_INPUT_LENGTH];
         sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
         act(aura, true, i, nullptr, ch, TO_VICT);
     }
-    if (!PLR_FLAGGED(i, PLR_OOZARU) && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (i->form != FormID::Oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
-    if (PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (i->form == FormID::Oozaru && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e is in the form of a @rgreat ape@w!", true, i, nullptr, ch, TO_VICT);
-    if (GET_GENOME(i, 0) == 11)
+    if (AFF_FLAGGED(ch, AFF_KYODAIKA))
         act("@w...$e has expanded $s body size@w!", true, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_HAYASA))
         act("@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
-    if (PLR_FLAGGED(i, PLR_OOZARU) && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (i->form == FormID::Oozaru && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
     if (GET_FEATURE(i)) {
         char woo[MAX_STRING_LENGTH];
@@ -4738,7 +4710,21 @@ ACMD(do_look) {
                 //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
             }
         }
-    } else if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
+    } else if(is_abbrev(arg, "moon")) {
+        switch(room->checkMoon()) {
+            case MoonCheck::NoMoon:
+                send_to_char(ch, "It's kinda hard to see any moons from here.\r\n");
+                return;
+            case MoonCheck::NotFull:
+                send_to_char(ch, "You gaze skyward, but there's no full moon in sight.\r\n");
+                return;
+            case MoonCheck::Full:
+                send_to_char(ch, "You gaze upon a wondrous full moon... it's an amazing sight.\r\n");
+                ch->gazeAtMoon();
+                return;
+        }
+    }
+    else if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
         if (subcmd == SCMD_SEARCH)
             search_in_direction(ch, INDIR);
         else
@@ -4874,32 +4860,44 @@ ACMD(do_score) {
             } else if (PLR_FLAGGED(ch, PLR_SENSEM)) {
                 sprintf(model, "@RSensor Equiped");
             }
-            if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-                sprintf(version, "Beta 1.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-                sprintf(version, "ANS 2.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-                sprintf(version, "ANS 3.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-                sprintf(version, "ANS 4.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS5)) {
-                sprintf(version, "ANS 5.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS6)) {
-                sprintf(version, "ANS 6.0");
-            } else {
-                sprintf(version, "Alpha 0.5");
+
+            switch(ch->form) {
+                case FormID::Base:
+                    sprintf(version, "Alpha 0.5");
+                    break;
+                case FormID::Android10:
+                    sprintf(version, "Beta 1.0");
+                    break;
+                case FormID::Android20:
+                    sprintf(version, "ANS 2.0");
+                    break;
+                case FormID::Android30:
+                    sprintf(version, "ANS 3.0");
+                    break;
+                case FormID::Android40:
+                    sprintf(version, "ANS 4.0");
+                    break;
+                case FormID::Android50:
+                    sprintf(version, "ANS 5.0");
+                    break;
+                case FormID::Android60:
+                    sprintf(version, "ANS 6.0");
+                    break;
+                default:
+                    break;
             }
+
             send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model,
                          absorb > 0 ? "@RN/A" : add_commas(GET_UP(ch)).c_str(), version);
         }
         if (GET_CLAN(ch) != nullptr) {
             send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
         }
-        send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", TRUE_RACE(ch),
-                     ch->chclass->getName().c_str(), ch->chclass->getStyleName().c_str());
+        send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race),
+                     sensei::getName(ch->chclass).c_str(), sensei::getStyle(ch->chclass).c_str());
         char hei[300], wei[300];
-        sprintf(hei, "%dcm", get_measure(ch, GET_PC_HEIGHT(ch), 0));
-        sprintf(wei, "%dkg", get_measure(ch, 0, ch->getWeight()));
+        sprintf(hei, "%dcm", ch->getHeight());
+        sprintf(wei, "%dkg", (int)ch->getWeight());
         send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n",
                      add_commas(GET_AGE(ch)).c_str(), hei, wei);
         send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n",
@@ -4999,165 +4997,12 @@ ACMD(do_score) {
 
 static void trans_check(struct char_data *ch, struct char_data *vict) {
 /* Rillao: transloc, add new transes here */
-    if (IS_HUMAN(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Fourth@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_HOSHIJIN(vict)) {
-        if (GET_MIMIC(vict) == 0 || vict == ch) {
-            if (GET_PHASE(vict) == 1) {
-                send_to_char(ch, "         @cCurrent Transformation@D: @CBirth Phase@n\r\n");
-            } else if (GET_PHASE(vict) == 2) {
-                send_to_char(ch, "         @cCurrent Transformation@D: @CLife Phase@n\r\n");
-            } else {
-                send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-            }
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if ((IS_SAIYAN(vict) || IS_HALFBREED(vict)) && !PLR_FLAGGED(vict, PLR_LSSJ)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1) && !PLR_FLAGGED(vict, PLR_FPSSJ)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS1) && PLR_FLAGGED(vict, PLR_FPSSJ)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Fourth@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_OOZARU)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @COozaru@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_SAIYAN(vict) && PLR_FLAGGED(vict, PLR_LSSJ)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1) && !PLR_FLAGGED(vict, PLR_FPSSJ)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS1) && PLR_FLAGGED(vict, PLR_FPSSJ)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @YLegendary @CSuper Saiyan@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_OOZARU)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @COozaru@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_NAMEK(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Fourth@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_ICER(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTransform First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Fourth@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_KONATSU(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CShadow First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Fourth@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_MUTANT(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMutate First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMutate Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMutate Third@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_BIO(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMature@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSemi-perfect@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CPerfect@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Perfect@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_ANDROID(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 1.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 2.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 3.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 4.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS5)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 5.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS6)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 6.0@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_MAJIN(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CAffinity@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTrue@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_TRUFFLE(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CAscend First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CAscend Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CAscend Third@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_KAI(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMystic First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMystic Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMystic Third@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else {
+    if(vict->form == FormID::Base || (vict->mimic && vict != ch)) {
         send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
+        return;
     }
+
+    send_to_char(ch, "         @cCurrent Transformation@D: %s\r\n", trans::getName(vict, vict->form));
 
 } // End trans check
 
@@ -5238,18 +5083,13 @@ ACMD(do_status) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.         @D]@n\r\n");
         }
 
-        if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_STAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
+        if(race::hasTail(ch->race) && !PLR_FLAGGED(ch, PLR_TAILHIDE)) {
+            if(PLR_FLAGGED(ch, PLR_TAIL))
+                send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
+            else
+                send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
         }
-        if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !PLR_FLAGGED(ch, PLR_STAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
-        }
-        if ((IS_ICER(ch) || IS_BIO(ch)) && PLR_FLAGGED(ch, PLR_TAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
-        }
-        if ((IS_ICER(ch) || IS_BIO(ch)) && !PLR_FLAGGED(ch, PLR_TAIL)) {
-            send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
-        }
+
         send_to_char(ch, "\r\n");
 
         send_to_char(ch, "         @D-----------------@YHunger@D/@yThirst@D-----------------@n\r\n");
@@ -5454,7 +5294,7 @@ ACMD(do_status) {
             send_to_char(ch, "You are a bit at ease and your training suffers. Get out of the house more often.\r\n");
         }
 
-        if (GET_MIMIC(ch) > 0) {
+        if (ch->mimic) {
             send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(LRACE(ch)), LRACE(ch));
         }
         if (IS_MUTANT(ch)) {
@@ -6206,8 +6046,6 @@ ACMD(do_who) {
             }
             if (who_room && (IN_ROOM(tch) != IN_ROOM(ch)))
                 continue;
-            if (showclass && !(showclass & (1 << GET_CLASS(tch))))
-                continue;
             if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
                 continue;
             for (i = 0; i < num_ranks; i++)
@@ -6252,8 +6090,6 @@ ACMD(do_who) {
                 continue;
             if (PRF_FLAGGED(tch, PRF_HIDE) && tch != ch && GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
                 continue;
-            if (showclass && !(showclass & (1 << GET_CLASS(tch))))
-                continue;
             if (showgroup && (!tch->master || !AFF_FLAGGED(tch, AFF_GROUP)))
                 continue;
             if (showleader && (!tch->followers || !AFF_FLAGGED(tch, AFF_GROUP)))
@@ -6261,7 +6097,7 @@ ACMD(do_who) {
 
             if (short_list) {
                 send_to_char(ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-                             GET_LEVEL(tch), RACE_ABBR(tch), tch->chclass->getAbbr().c_str(), GET_NAME(tch),
+                             GET_LEVEL(tch), race::getAbbr(tch->race), sensei::getAbbr(tch->chclass).c_str(), GET_NAME(tch),
                              ((!(++num_can_see % 4)) ? "\r\n" : ""));
             } else {
                 num_can_see++;
@@ -6458,10 +6294,6 @@ ACMD(do_users) {
             }
             if (outlaws && !PLR_FLAGGED(tch, PLR_KILLER) &&
                 !PLR_FLAGGED(tch, PLR_THIEF))
-                continue;
-            if (showclass && !(showclass & (1 << GET_CLASS(tch))))
-                continue;
-            if (showrace && !(showrace & (1 << GET_RACE(tch))))
                 continue;
             if (GET_INVIS_LEV(tch) > GET_ADMLEVEL(ch))
                 continue;
@@ -7652,7 +7484,7 @@ ACMD(do_whois) {
     } else {
         send_to_char(ch,
                      "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n",
-                     GET_NAME(victim), victim->chclass->getName().c_str(), victim->race->getName().c_str(),
+                     GET_NAME(victim), sensei::getName(victim->chclass), race::getName(victim->race),
                      GET_TITLE(victim), clan ? buf : "None.");
         if (clan == true && !strstr(GET_CLAN(victim), "Applying")) {
             if (checkCLAN(victim) == true) {

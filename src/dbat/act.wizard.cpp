@@ -39,6 +39,7 @@
 #include "dbat/shop.h"
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
+#include "dbat/transformation.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -1593,12 +1594,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
         send_to_char(ch, "Title: %s\r\n", k->title ? k->title : "<None>");
 
     send_to_char(ch, "L-Des: %s@n", k->room_description ? k->room_description : "<None>\r\n");
-    if (CONFIG_ALLOW_MULTICLASS) {
-        strncpy(buf, class_desc_str(k, 1, 0), sizeof(buf));
-    } else {
-        snprintf(buf, sizeof(buf), "%s", k->chclass->getName().c_str());
-    }
-    snprintf(buf2, sizeof(buf2), "%s", k->race->getName().c_str());
+    snprintf(buf, sizeof(buf), "%s", sensei::getName(k->chclass).c_str());
+    snprintf(buf2, sizeof(buf2), "%s", race::getName(k->race).c_str());
     send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n",
                  buf, buf2, GET_LEVEL(k), GET_EXP(k));
 
@@ -1664,25 +1661,23 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     sprinttype(GET_POS(k), position_types, buf, sizeof(buf));
     send_to_char(ch, "Pos: %s, Fighting: %s", buf, FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
 
+
     if (k->desc) {
         sprinttype(STATE(k->desc), connected_types, buf, sizeof(buf));
         send_to_char(ch, ", Connected: %s", buf);
     }
 
-    if (IS_NPC(k)) {
-        sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
-        send_to_char(ch, ", Default position: %s\r\n", buf);
-        sprintbitarray(k->mobFlags, action_bits, PM_ARRAY_MAX, buf);
-        send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
-    } else {
-        send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
+    sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
+    send_to_char(ch, ", Default position: %s", buf);
+    send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
+    sprintbitarray(k->mobFlags, action_bits, PM_ARRAY_MAX, buf);
+    send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
+    sprintbitarray(k->playerFlags, player_bits, PM_ARRAY_MAX, buf);
+    send_to_char(ch, "PLR: @c%s@n\r\n", buf);
+    sprintbitarray(k->pref, preference_bits, PR_ARRAY_MAX, buf);
+    send_to_char(ch, "PRF: @g%s@n\r\n", buf);
 
-        sprintbitarray(k->playerFlags, player_bits, PM_ARRAY_MAX, buf);
-        send_to_char(ch, "PLR: @c%s@n\r\n", buf);
-
-        sprintbitarray(PRF_FLAGS(k), preference_bits, PR_ARRAY_MAX, buf);
-        send_to_char(ch, "PRF: @g%s@n\r\n", buf);
-    }
+    send_to_char(ch, "Form: %s\r\n", trans::getName(k, k->form));
 
     if (IS_MOB(k)) {
         send_to_char(ch, "Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n",
@@ -2480,8 +2475,8 @@ ACMD(do_advance) {
         basic_mud_log("(GC) %s has advanced %s to level %d (from %d)",
             GET_NAME(ch), GET_NAME(victim), newlevel, oldlevel);
 
-    gain_exp_regardless(victim,
-                        level_exp(victim, newlevel) - GET_EXP(victim));
+    int gain = level_exp(victim, newlevel) - GET_EXP(victim);
+    victim->modExperience(gain);
     victim->save();
 }
 
@@ -2762,7 +2757,7 @@ ACMD(do_last) {
 
     send_to_char(ch, "[%5d] [%2d %s %s] %-12s : %-18s : %-20s\r\n",
                  GET_IDNUM(vict), (int) GET_LEVEL(vict),
-                 vict->race->getAbbr().c_str(), CLASS_ABBR(vict),
+                 race::getAbbr(vict->race).c_str(), CLASS_ABBR(vict),
                  GET_NAME(vict), "(FIXHOSTPLZ)",
                  ctime(&vict->time.logon));
 }
@@ -3203,12 +3198,10 @@ ACMD(do_show) {
             }
             send_to_char(ch, "Player: %-12s (%s) [%2d %s %s]\r\n", GET_NAME(vict),
                          genders[(int) GET_SEX(vict)], GET_LEVEL(vict), CLASS_ABBR(vict),
-                         vict->race->getAbbr().c_str());
+                         race::getAbbr(vict->race).c_str());
             send_to_char(ch, "Au: %-8d  Bal: %-8d  Exp: %" I64T "  Align: %-5d  Ethic: %-5d\r\n",
                          GET_GOLD(vict), GET_BANK_GOLD(vict), GET_EXP(vict),
                          GET_ALIGNMENT(vict), GET_ETHIC_ALIGNMENT(vict));
-            if (CONFIG_ALLOW_MULTICLASS)
-                send_to_char(ch, "Class ranks: %s\r\n", class_desc_str(vict, 1, 0));
 
             /* ctime() uses static buffer: do not combine. */
             send_to_char(ch, "Started: %-20.16s  ", ctime(&vict->time.created));
@@ -3571,10 +3564,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
     int64_t value = 0;
     room_rnum rnum;
     room_vnum rvnum;
-    race::RaceMap v_races;
-    race::Race *chosen_race;
-    sensei::SenseiMap v_sensei;
-    sensei::Sensei *chosen_sensei;
 
     /* Check to make sure all the levels are correct */
     if (GET_ADMLEVEL(ch) != ADMLVL_IMPL) {
@@ -3825,12 +3814,15 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 38: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_DELETED);
             break;
-        case 39:
-            if (!(chosen_sensei = sensei::find_sensei(val_arg))) {
-                send_to_char(ch, "That is not a class.\r\n");
+        case 39: {
+            auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, vict->race);};
+            auto chosen_sensei = sensei::findSensei(val_arg, check);
+            if (!chosen_sensei) {
+                send_to_char(ch, "That is not a sensei. Or, it is invalid for the target's race.\r\n");
                 return (0);
             }
-            vict->chclass = chosen_sensei;
+            vict->chclass = chosen_sensei.value();
+        }
             break;
         case 40: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NOWIZLIST);
             break;
@@ -3918,18 +3910,23 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 GET_OLC_ZONE(vict) = atoi(val_arg);
             break;
 
-        case 52:
+        case 52: {
+            std::optional<RaceID> chosen_race;
+
             if (IS_NPC(vict)) {
-                chosen_race = race::find_race_map(val_arg, race::valid_for_sex(GET_SEX(ch)));
+                auto check = [ch](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch));};
+                chosen_race = race::findRace(val_arg, check);
             } else {
-                chosen_race = race::find_race_map(val_arg, race::valid_for_sex_pc(GET_SEX(ch)));
+                auto check = [ch](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isPlayable(id);};
+                chosen_race = chosen_race = race::findRace(val_arg, check);
             }
             if (!chosen_race) {
                 send_to_char(ch, "That is not a valid race for them. Try changing sex first.\r\n");
                 return (0);
             }
-            vict->race = chosen_race;
+            vict->race = chosen_race.value();
             racial_body_parts(vict);
+        }
             break;
 
         case 53:
@@ -4095,7 +4092,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 80:
-            GET_TRANSCLASS(vict) = RANGE(1, 3);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set transformation class for %s.",
                    GET_NAME(ch), GET_NAME(vict));
             log_imm_action("SET: %s has set transformation class for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4381,64 +4377,6 @@ static const struct zcheck_armor {
 #define MAX_APPLIES_LIMIT        1     /* toggle - is there a limit at all?  */
 #define CHECK_ITEM_RENT          0     /* do we check for rent cost == 0 ?   */
 #define CHECK_ITEM_COST          0     /* do we check for item cost == 0 ?   */
-/*
-  Applies limits
-  !! Very Important:  Keep these in the same order as in Structs.h
-  To ignore an apply, set max_aff to -99.
-  These will be ignored if MAX_APPLIES_LIMIT = 0
-*/
-static const struct zcheck_affs {
-    int aff_type;    /*from Structs.h*/
-    int min_aff;     /*min. allowed value*/
-    int max_aff;     /*max. allowed value*/
-    char *message;   /*phrase for error message*/
-} zaffs[] = {
-        {APPLY_NONE,        0,   -99, "unused0"},
-        {APPLY_STR,         -6,  6,   "strength"},
-        {APPLY_DEX,         -6,  6,   "dexterity"},
-        {APPLY_INT,         -6,  6,   "intelligence"},
-        {APPLY_WIS,         -6,  6,   "wisdom"},
-        {APPLY_CON,         -6,  6,   "constitution"},
-        {APPLY_CHA,         -6,  6,   "charisma"},
-        {APPLY_SPI,         0,   0,   "spirit"},
-        {APPLY_LEVEL,       0,   0,   "level"},
-        {APPLY_AGE,         -10, 10,  "age"},
-        {APPLY_CHAR_WEIGHT, -50, 50,  "character weight"},
-        {APPLY_CHAR_HEIGHT, -50, 50,  "character height"},
-        {APPLY_MANA,        -50, 50,  "mana"},
-        {APPLY_HIT,         -50, 50,  "hit points"},
-        {APPLY_MOVE,        -50, 50,  "movement"},
-        {APPLY_GOLD,        0,   0,   "gold"},
-        {APPLY_EXP,         0,   0,   "experience"},
-        {APPLY_AC,          -10, 10,  "magical AC"},
-        {APPLY_ACCURACY,    0,   -99, "accuracy"},
-        {APPLY_DAMAGE,      0,   -99, "damage"},
-        {APPLY_REGEN,       0,   0,   "regen"},
-        {APPLY_TRAIN,       0,   0,   "train"},
-        {APPLY_LIFEMAX,     0,   0,   "lifemax"},
-        {APPLY_UNUSED3,     0,   0,   "unused"},
-        {APPLY_UNUSED4,     0,   0,   "unused"},
-        {APPLY_RACE,        0,   0,   "race"},
-        {APPLY_TURN_LEVEL,  -6,  6,   "turn level"},
-        {APPLY_SPELL_LVL_0, 0,   0,   "spell level 0"},
-        {APPLY_SPELL_LVL_1, 0,   0,   "spell level 1"},
-        {APPLY_SPELL_LVL_2, 0,   0,   "spell level 2"},
-        {APPLY_SPELL_LVL_3, 0,   0,   "spell level 3"},
-        {APPLY_SPELL_LVL_4, 0,   0,   "spell level 4"},
-        {APPLY_SPELL_LVL_5, 0,   0,   "spell level 5"},
-        {APPLY_SPELL_LVL_6, 0,   0,   "spell level 6"},
-        {APPLY_SPELL_LVL_7, 0,   0,   "spell level 7"},
-        {APPLY_SPELL_LVL_8, 0,   0,   "spell level 8"},
-        {APPLY_SPELL_LVL_9, 0,   0,   "spell level 9"},
-        {APPLY_KI,          0,   0,   "ki"},
-        {APPLY_FORTITUDE,   -4,  4,   "fortitude"},
-        {APPLY_REFLEX,      -4,  4,   "reflex"},
-        {APPLY_WILL,        -4,  4,   "will"},
-        {APPLY_SKILL,       -10, 10,  "skill"},
-        {APPLY_FEAT,        -10, 10,  "feat"},
-        {APPLY_ALLSAVES,    -4,  4,   "all 3 save types"},
-        {APPLY_RESISTANCE,  -4,  4,   "resistance"}
-};
 
 /* These are ABS() values. */
 #define MAX_APPLY_ACCURCY_MOD_TOTAL    5
@@ -4659,20 +4597,6 @@ ACMD (do_zcheck) {
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- has %d affects (limit %d).\r\n",
                                 affs, MAX_AFFECTS_ALLOWED);
-
-            /*check for out of range affections. */
-            for (j = 0; j < MAX_OBJ_AFFECT; j++)
-                if (zaffs[(int) obj->affected[j].location].max_aff != -99 && /* only care if a range is set */
-                    (obj->affected[j].modifier > zaffs[(int) obj->affected[j].location].max_aff ||
-                     obj->affected[j].modifier < zaffs[(int) obj->affected[j].location].min_aff ||
-                     zaffs[(int) obj->affected[j].location].min_aff ==
-                     zaffs[(int) obj->affected[j].location].max_aff) && (found = 1))
-                    len += snprintf(buf + len, sizeof(buf) - len,
-                                    "- apply to %s is %d (limit %d - %d).\r\n",
-                                    zaffs[(int) obj->affected[j].location].message,
-                                    obj->affected[j].modifier,
-                                    zaffs[(int) obj->affected[j].location].min_aff,
-                                    zaffs[(int) obj->affected[j].location].max_aff);
 
             /* special handling of +hit and +dam because of +hit_n_dam */
             for (todam = 0, tohit = 0, j = 0; j < MAX_OBJ_AFFECT; j++) {

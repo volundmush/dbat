@@ -267,7 +267,6 @@ static void generate_multiform(struct char_data *ch, int count) {
         clone->time = ch->time;
 
         clone->tail_growth = ch->tail_growth;
-        ch->transclass = ch->transclass;
 
         // Copying these values, but it shouldn't matter because clones no longer work this way.
 
@@ -2255,7 +2254,7 @@ ACMD(do_scry) {
         if (GET_LEVEL(ch) < 100) {
             send_to_char(ch, "@D[@mPractice Sessions@D:@R -2000@D]@n\r\n");
             if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
-                GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch);
+                ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch));
                 send_to_char(ch, "The remaining experience needed for your next level up has been gained!@n\r\n");
             } else {
                 send_to_char(ch, "Due to already having enough experience to level up you gain no expereince.\r\n");

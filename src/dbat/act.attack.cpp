@@ -1342,11 +1342,11 @@ ACMD(do_zen) {
                     hurt(0, 0, ch, vict, nullptr, dmg, 1);
                     dam_eq_loc(vict, 4);
                     /* dam_eq_loc: 1 Arms, 2 legs, 3 head, and 4 body. */
-                    if (vict->race->hasTail(vict)) {
+                    if (vict->hasTail()) {
                         act("@rYou cut off $S tail!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@rYour tail is cut off!@n", true, ch, nullptr, vict, TO_VICT);
                         act("@R$N@r's tail is cut off!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                        vict->race->loseTail(vict);
+                        vict->loseTail();
                     }
                     break;
                 case 2: /* Critical */
@@ -4345,27 +4345,24 @@ ACMD(do_breaker) {
         } else {
             dmg = damtype(ch, 46, skill, attperc);
             int64_t theft = 0;
+            int64_t taken = 0;
             if (GET_LEVEL(ch) - 30 > GET_LEVEL(vict)) {
                 theft = 1;
-                GET_EXP(vict) -= theft;
             } else if (GET_LEVEL(ch) - 20 > GET_LEVEL(vict)) {
                 theft = GET_EXP(vict) / 1000;
-                GET_EXP(vict) -= theft;
             } else if (GET_LEVEL(ch) - 10 > GET_LEVEL(vict)) {
                 theft = GET_EXP(vict) / 100;
-                GET_EXP(vict) -= theft;
             } else if (GET_LEVEL(ch) >= GET_LEVEL(vict)) {
                 theft = GET_EXP(vict) / 50;
-                GET_EXP(vict) -= theft;
             } else if (GET_LEVEL(ch) + 10 >= GET_LEVEL(vict)) {
                 theft = GET_EXP(vict) / 500;
-                GET_EXP(vict) -= theft;
             } else if (GET_LEVEL(ch) + 20 >= GET_LEVEL(vict)) {
                 theft = GET_EXP(vict) / 1000;
-                GET_EXP(vict) -= theft;
             } else {
                 theft = GET_EXP(vict) / 2000;
-                GET_EXP(vict) -= theft;
+            }
+            if(theft > 0) {
+                taken = vict->modExperience(-theft);
             }
             int hitspot = 1;
             hitspot = roll_hitloc(ch, vict, skill);
@@ -4432,9 +4429,10 @@ ACMD(do_breaker) {
             }
 
             if (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) > 0 || GET_LEVEL(ch) >= 100) {
+                auto xp = ch->modExperience(theft * 2, false); // we will not apply bonuses to stolen exp.
                 send_to_char(ch, "The returning Eldritch energy blesses you with some experience. @D[@G%s@D]@n\r\n",
-                             add_commas(theft).c_str());
-                GET_EXP(ch) += theft * 2;
+                             add_commas(xp).c_str());
+
             }
 
             pcost(ch, attperc, 0);

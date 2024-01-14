@@ -673,7 +673,7 @@ static void update_flags(struct char_data *ch) {
         ch->affected_by.reset(AFF_ENSNARED);
     }
 
-    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_TRANS1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
+    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == FormID::SuperSaiyan) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
         GET_ABSORBS(ch) += 1;
         if (GET_ABSORBS(ch) >= 300) {
             send_to_char(ch,
@@ -683,29 +683,19 @@ static void update_flags(struct char_data *ch) {
         }
     }
 
-    if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_STAIL) && !PLR_FLAGGED(ch, PLR_NOGROW) &&
-        (IS_SAIYAN(ch) || IS_HALFBREED(ch))) {
-        if (RACIAL_PREF(ch) == 1 && rand_number(1, 50) >= 40) {
-            GET_TGROWTH(ch) += 1;
-        } else if (RACIAL_PREF(ch) != 1 || IS_SAIYAN(ch)) {
-            GET_TGROWTH(ch) += 1;
-        }
-        if (GET_TGROWTH(ch) >= 10) {
-            send_to_char(ch, "@wYour tail grows back.@n\r\n");
-            act("$n@w's tail grows back.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->race->gainTail(ch);
-            GET_TGROWTH(ch) = 0;
+    if(race::hasTail(ch->race) && !PLR_FLAGGED(ch, PLR_TAIL) && !PLR_FLAGGED(ch, PLR_NOGROW)) {
+        int growth = 0;
+        if(IS_HALFBREED(ch) && RACIAL_PREF(ch) == 1)
+            growth = 1 ? rand_number(1, 50) >= 40 : 0;
+        else
+            growth = 1;
+        ch->tail_growth += growth;
+        if(ch->tail_growth >= 10) {
+            ch->gainTail(true);
+            ch->tail_growth = 0;
         }
     }
-    if (!IS_NPC(ch) && !PLR_FLAGGED(ch, PLR_TAIL) && (IS_ICER(ch) || IS_BIO(ch))) {
-        GET_TGROWTH(ch) += 1;
-        if (GET_TGROWTH(ch) >= 10) {
-            send_to_char(ch, "@wYour tail grows back.@n\r\n");
-            act("$n@w's tail grows back.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->race->gainTail(ch);
-            GET_TGROWTH(ch) = 0;
-        }
-    }
+
     if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
         send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
         ch->affected_by.reset(AFF_MBREAK);
@@ -773,177 +763,19 @@ void set_title(struct char_data *ch, char *title) {
     */
 }
 
-void gain_level(struct char_data *ch, int whichclass) {
-    if (whichclass < 0)
-        whichclass = GET_CLASS(ch);
+void gain_level(struct char_data *ch) {
     if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
         ch->mod(CharNum::Level, 1);
-        //GET_CLASS(ch) = whichclass; /* Now tracks latest class instead of highest */
-        advance_level(ch, whichclass);
+        advance_level(ch);
         mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s advanced level to level %d.",
                GET_NAME(ch), GET_LEVEL(ch));
         send_to_char(ch, "You rise a level!\r\n");
-        GET_EXP(ch) -= level_exp(ch, GET_LEVEL(ch));
-        /*set_title(ch, nullptr);*/
-        ch->save();
+        ch->modExperience(-level_exp(ch, GET_LEVEL(ch)));
     }
 }
 
 void run_autowiz() {
 
-}
-
-void gain_exp(struct char_data *ch, int64_t gain) {
-
-    if (gain > 20000000) {
-        gain = 20000000;
-    }
-
-    if (IN_ARENA(ch)) {
-        send_to_char(ch, "EXP CANCEL: You can not gain experience from the arena.\r\n");
-        return;
-    }
-
-    if (AFF_FLAGGED(ch, AFF_WUNJO)) {
-        gain += gain * 0.15;
-    }
-    if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
-        gain = gain * 0.95;
-    }
-
-    int64_t diff = gain * 0.15;
-
-    if (!IS_NPC(ch) && GET_LEVEL(ch) < 1)
-        return;
-
-    if (IS_NPC(ch)) {
-        GET_EXP(ch) += gain;
-        return;
-    }
-
-    if (gain > 0) {
-        gain = MIN(CONFIG_MAX_EXP_GAIN, gain);    /* put a cap on the max gain per kill */
-        if (GET_EQ(ch, WEAR_SH)) {
-            struct obj_data *obj = GET_EQ(ch, WEAR_SH);
-            if (GET_OBJ_VNUM(obj) == 1127) {
-                int64_t spar = gain;
-                gain += gain * 0.25;
-                spar = gain - spar;
-                send_to_char(ch, "@D[@BBooster EXP@W: @G+%s@D]\r\n", add_commas(spar).c_str());
-            }
-        }
-        if (GET_LEVEL(ch) < 100) {
-            if (MINDLINK(ch) && gain > 0 && LINKER(ch) == 0) {
-                if (GET_LEVEL(ch) + 20 < GET_LEVEL(MINDLINK(ch)) || GET_LEVEL(ch) - 20 > GET_LEVEL(MINDLINK(ch))) {
-                    send_to_char(MINDLINK(ch),
-                                 "The level difference between the two of you is too great to gain from mind read.\r\n");
-                } else {
-                    act("@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, MINDLINK(ch),
-                        TO_VICT);
-                    int read = gain * 0.12;
-                    gain -= read;
-                    if (read == 0)
-                        read = 1;
-                    gain_exp(MINDLINK(ch), read);
-                    act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch,
-                        nullptr, MINDLINK(ch), TO_CHAR);
-                }
-            }
-            int64_t difff = level_exp(ch, GET_LEVEL(ch) + 1) * 5;
-            if (GET_LEVEL(ch) <= 90 && (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch) + gain) <=
-                                        (level_exp(ch, GET_LEVEL(ch) + 1) - difff))) {
-                send_to_char(ch, "@WYou -@RNEED@W- to @ylevel@W you can't hold any more experience.@n\r\n");
-            } else if (GET_LEVEL(ch) >= 91 && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) <= -1) {
-                send_to_char(ch, "@WYou -@RNEED@W- to @ylevel@W you can't hold any more experience.@n\r\n");
-            } else {
-                GET_EXP(ch) += gain;
-            }
-        }
-        if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1))
-            send_to_char(ch, "@rYou have earned enough experience to gain a @ylevel@r.@n\r\n");
-
-        if (GET_LEVEL(ch) == 100 && GET_ADMLEVEL(ch) < 1) {
-            if (IS_KANASSAN(ch) || IS_DEMON(ch)) {
-                diff = diff * 1.3;
-            }
-            if (IS_ANDROID(ch)) {
-                diff = diff * 1.2;
-            }
-            if (MINDLINK(ch) && gain > 0 && LINKER(ch) == 0) {
-                if (GET_LEVEL(ch) + 20 < GET_LEVEL(MINDLINK(ch)) || GET_LEVEL(ch) - 20 > GET_LEVEL(MINDLINK(ch))) {
-                    send_to_char(MINDLINK(ch),
-                                 "The level difference between the two of you is too great to gain from mind read.\r\n");
-                } else {
-                    act("@GYou've absorbed some new experiences from @W$n@G!@n", false, ch, nullptr, MINDLINK(ch),
-                        TO_VICT);
-                    int64_t read = gain * 0.12;
-                    diff -= (read * 0.15);
-                    gain -= read;
-                    if (read == 0)
-                        read = 1;
-                    gain_exp(MINDLINK(ch), read);
-                    act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, ch,
-                        nullptr, MINDLINK(ch), TO_CHAR);
-                }
-            }
-            if (rand_number(1, 5) >= 2) {
-                if (IS_HUMAN(ch)) {
-                    ch->gainBasePL(diff * 0.8);
-                } else {
-                    ch->gainBasePL(diff);
-                }
-                send_to_char(ch, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
-            }
-            if (rand_number(1, 5) >= 2) {
-                if (IS_HALFBREED(ch)) {
-                    ch->gainBaseST(diff * 0.85);
-                } else {
-                    ch->gainBaseST(diff);
-                }
-                send_to_char(ch, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff).c_str());
-            }
-            if (rand_number(1, 5) >= 2) {
-                ch->gainBaseKI(diff);
-                send_to_char(ch, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff).c_str());
-            }
-        }
-    } else if (gain < 0) {
-        gain = MAX(-CONFIG_MAX_EXP_LOSS, gain);    /* Cap max exp lost per death */
-        GET_EXP(ch) += gain;
-        if (GET_EXP(ch) < 0)
-            GET_EXP(ch) = 0;
-    }
-}
-
-void gain_exp_regardless(struct char_data *ch, int gain) {
-    int is_altered = false;
-    int num_levels = 0;
-
-    gain = (gain * CONFIG_EXP_MULTIPLIER);
-
-    GET_EXP(ch) += gain;
-    if (GET_EXP(ch) < 0)
-        GET_EXP(ch) = 0;
-
-    if (!IS_NPC(ch)) {
-        while (GET_LEVEL(ch) < CONFIG_LEVEL_CAP - 1 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
-            ch->mod(CharNum::Level, 1);
-            num_levels++;
-            advance_level(ch, GET_CLASS(ch));
-            is_altered = true;
-        }
-
-        if (is_altered) {
-            mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true,
-                   "%s advanced %d level%s to level %d.", GET_NAME(ch), num_levels,
-                   num_levels == 1 ? "" : "s", GET_LEVEL(ch));
-            if (num_levels == 1)
-                send_to_char(ch, "You rise a level!\r\n");
-            else
-                send_to_char(ch, "You rise %d levels!\r\n", num_levels);
-            /*set_title(ch, nullptr);*/
-        }
-    }
 }
 
 void gain_condition(struct char_data *ch, int condition, int value) {

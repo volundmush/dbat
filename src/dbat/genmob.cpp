@@ -380,9 +380,9 @@ nlohmann::json char_data::serializeBase() {
         if(bodyparts.test(i)) j["bodyparts"].push_back(i);
 
     if(title && strlen(title)) j["title"] = title;
-    if(race) j["race"] = race->getID();
+    j["race"] = race;
 
-    if(chclass) j["chclass"] = chclass->getID();
+    j["chclass"] = chclass;
     if(weight != 0.0) j["weight"] = weight;
 
     for(auto i = 0; i < affected_by.size(); i++)
@@ -448,13 +448,9 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     }
 
     if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
-    ::race::race_id r = ::race::human;
-    if(j.contains("race")) r = j["race"].get<::race::race_id>();
-    race = ::race::race_map[r];
+    if(j.contains("race")) race = j["race"].get<RaceID>();
 
-    ::sensei::sensei_id c = ::sensei::commoner;
-    if(j.contains("chclass")) c = j["chclass"].get<::sensei::sensei_id>();
-    chclass = ::sensei::sensei_map[c];
+    if(j.contains("chclass")) chclass = static_cast<SenseiID>(std::min(14, j["chclass"].get<int>()));
 
     if(j.contains("weight")) weight = j["weight"];
 
@@ -570,7 +566,8 @@ nlohmann::json char_data::serializeInstance() {
     if(moltlevel) j["moltlevel"] = moltlevel;
     if(majinize) j["majinize"] = majinize;
     if(majinizer) j["majinizer"] = majinizer;
-    if(mimic) j["mimic"] = mimic->getID();
+    if(mimic) j["mimic"] = mimic.value();
+    if(form != FormID::Base) j["form"] = form;
     if(olc_zone) j["olc_zone"] = olc_zone;
     if(starphase) j["starphase"] = starphase;
     if(accuracy) j["accuracy"] = accuracy;
@@ -589,9 +586,7 @@ nlohmann::json char_data::serializeInstance() {
     if(stupidkiss) j["stupidkiss"] = stupidkiss;
     if(suppression) j["suppression"] = suppression;
     if(tail_growth) j["tail_growth"] = tail_growth;
-    for(auto i = 0; i < 6; i++) {
-        if(transcost[i]) j["transcost"].push_back(std::make_pair(i, transcost[i]));
-    }
+
     for(auto i = 0; i < 3; i++) {
         if(saving_throw[i]) j["saving_throw"].push_back(std::make_pair(i, saving_throw[i]));
     }
@@ -612,7 +607,10 @@ nlohmann::json char_data::serializeInstance() {
     if (poofout && strlen(poofout)) j["poofout"] = poofout;
     if(players.contains(last_tell)) j["last_tell"] = last_tell;
 
-    if(transclass) j["transclass"] = transclass;
+    j["transBonus"] = transBonus;
+    for(auto &[frm, tra] : transforms) {
+        j["transforms"].push_back(std::make_pair(static_cast<int>(frm), tra.serialize()));
+    }
 
     return j;
 }
@@ -734,10 +732,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("moltlevel")) moltlevel = j["moltlevel"];
     if(j.contains("majinize")) majinize = j["majinize"];
     if(j.contains("majinizer")) majinizer = j["majinizer"];
-    if(j.contains("mimic")) {
-        auto rid = j["mimic"].get<::race::race_id>();
-        mimic = ::race::race_map[rid];
-    }
+    if(j.contains("mimic")) mimic = j["mimic"].get<RaceID>();
     if(j.contains("olc_zone")) olc_zone = j["olc_zone"];
     if(j.contains("starphase")) starphase = j["starphase"];
     if(j.contains("accuracy")) accuracy = j["accuracy"];
@@ -756,11 +751,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("stupidkiss")) stupidkiss = j["stupidkiss"];
     if(j.contains("suppression")) suppression = j["suppression"];
     if(j.contains("tail_growth")) tail_growth = j["tail_growth"];
-    if(j.contains("transcost")) {
-        for(auto t : j["transcost"]) {
-            transcost[t[0].get<int>()] = t[1];
-        }
-    }
+
     if(j.contains("saving_throw")) {
         for(auto t : j["saving_throw"]) {
             saving_throw[t[0].get<int>()] = t[1];
@@ -791,7 +782,14 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
     if(j.contains("load_room")) load_room = j["load_room"];
 
-    if(j.contains("transclass")) transclass = j["transclass"];
+    if(j.contains("transBonus")) transBonus = j["transBonus"];
+    if(j.contains("form")) form = j["form"].get<FormID>();
+    if(j.contains("transforms")) {
+        // it is a list of pairs that fills up the transforms map.
+        for(const auto &j2 : j["transforms"]) {
+            transforms.emplace(j2[0].get<FormID>(), j2[1]);
+        }
+    }
 
     if(j.contains("preference")) preference = j["preference"];
     if(j.contains("freeze_level")) freeze_level = j["freeze_level"];
@@ -1054,28 +1052,11 @@ affected_type::affected_type(const nlohmann::json &j) {
 }
 
 weight_t char_data::getWeight(bool base) {
-    weight_t total = 0;
-    if(!IS_NPC(this)) {
-        total += GET_PC_WEIGHT(this);
-
-    } else {
-        total += weight;
-    }
+    auto total = weight;
 
     if(!base) {
         total += getAffectModifier(APPLY_CHAR_WEIGHT);
-        if(!IS_NPC(this)) {
-            if(PLR_FLAGGED(this, PLR_OOZARU) || GET_GENOME(this, 0) == 1) total *= 50;
-            if(IS_ICER(this)) {
-                if(PLR_FLAGGED(this, PLR_TRANS1) || PLR_FLAGGED(this, PLR_TRANS2)) {
-                    total *= 4;
-                } else if(PLR_FLAGGED(this, PLR_TRANS3)) {
-                    total *= 2;
-                } else if(PLR_FLAGGED(this, PLR_TRANS4)) {
-                    total *= 3;
-                }
-            }
-        }
+        total *= (1.0 + getAffectModifier(APPLY_WEIGHT_MULT));
     }
 
     return total;
@@ -1086,18 +1067,7 @@ int char_data::getHeight(bool base) {
 
     if(!base) {
         total += getAffectModifier(APPLY_CHAR_HEIGHT);
-        if(!IS_NPC(this)) {
-            if(PLR_FLAGGED(this, PLR_OOZARU) || GET_GENOME(this, 0) == 1) total *= 10;
-            if(IS_ICER(this)) {
-                if(PLR_FLAGGED(this, PLR_TRANS1) || PLR_FLAGGED(this, PLR_TRANS2)) {
-                    total *= 3;
-                } else if(PLR_FLAGGED(this, PLR_TRANS3)) {
-                    total *= 1.5;
-                } else if(PLR_FLAGGED(this, PLR_TRANS4)) {
-                    total *= 2;
-                }
-            }
-        }
+        total *= (1.0 + getAffectModifier(APPLY_HEIGHT_MULT));
     }
 
     return total;

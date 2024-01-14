@@ -175,93 +175,7 @@ int isname(const char *str, const char *namelist) {
 }
 
 void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *msg) {
-    switch (loc) {
-        case APPLY_NONE:
-        case APPLY_STR:
-        case APPLY_DEX:
-        case APPLY_INT:
-        case APPLY_WIS:
-        case APPLY_CON:
-        case APPLY_CHA:
-        case APPLY_SPI:
-        case APPLY_LEVEL:
-        case APPLY_MANA:
-        case APPLY_HIT:
-        case APPLY_MOVE:
-        case APPLY_KI:
-        case APPLY_GOLD:
-        case APPLY_EXP:
-        case APPLY_UNUSED3:
-        case APPLY_UNUSED4:
-        case APPLY_RACE:
-        case APPLY_ALL_STATS:
-        case APPLY_RESISTANCE:
-        case APPLY_SKILL:
-            break;
 
-        case APPLY_AGE:
-            ch->ageBy((mod * SECS_PER_GAME_YEAR));
-            break;
-
-        case APPLY_CHAR_WEIGHT:
-            GET_WEIGHT(ch) += mod;
-            break;
-
-        case APPLY_CHAR_HEIGHT:
-            ch->modHeight(mod);
-            break;
-
-        case APPLY_AC:
-            break;
-
-        case APPLY_ACCURACY:
-            GET_POLE_BONUS(ch) += mod;
-            break;
-
-        case APPLY_DAMAGE:
-            GET_DAMAGE_MOD(ch) += mod;
-            break;
-
-        case APPLY_REGEN:
-            GET_REGEN(ch) += mod;
-            break;
-
-        case APPLY_TRAIN:
-            GET_ASB(ch) += mod;
-            break;
-
-        case APPLY_LIFEMAX:
-            ch->lifebonus += mod;
-            break;
-
-
-        case APPLY_FORTITUDE:
-            GET_SAVE_MOD(ch, SAVING_FORTITUDE) += mod;
-            break;
-
-        case APPLY_REFLEX:
-            GET_SAVE_MOD(ch, SAVING_REFLEX) += mod;
-            break;
-
-        case APPLY_WILL:
-            GET_SAVE_MOD(ch, SAVING_WILL) += mod;
-            break;
-
-        case APPLY_FEAT:
-            HAS_FEAT(ch, spec) += mod;
-            break;
-
-        case APPLY_ALLSAVES:
-            GET_SAVE_MOD(ch, SAVING_FORTITUDE) += mod;
-            GET_SAVE_MOD(ch, SAVING_REFLEX) += mod;
-            GET_SAVE_MOD(ch, SAVING_WILL) += mod;
-            break;
-
-        default:
-            basic_mud_log("SYSERR: Unknown apply adjust %d attempt (%s, affect_modify).", loc, __FILE__);
-            break;
-
-    } /* switch */
 }
 
 
@@ -658,14 +572,6 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
     GET_EQ(ch, pos) = obj;
     obj->worn_by = ch;
     obj->worn_on = pos;
-
-    for (j = 0; j < MAX_OBJ_AFFECT; j++)
-        affect_modify_ar(ch, obj->affected[j].location,
-                         obj->affected[j].modifier,
-                         obj->affected[j].specific,
-                         GET_OBJ_PERM(obj), true);
-
-    affect_total(ch);
 }
 
 
@@ -683,14 +589,6 @@ struct obj_data *unequip_char(struct char_data *ch, int pos) {
     obj->worn_on = -1;
 
     GET_EQ(ch, pos) = nullptr;
-
-    for (j = 0; j < MAX_OBJ_AFFECT; j++)
-        affect_modify_ar(ch, obj->affected[j].location,
-                         obj->affected[j].modifier,
-                         obj->affected[j].specific,
-                         GET_OBJ_PERM(obj), false);
-
-    affect_total(ch);
 
     return (obj);
 }

@@ -188,7 +188,7 @@ void medit_setup_new(struct descriptor_data *d) {
     GET_SDESC(mob) = strdup("the unfinished mob");
     GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
     GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
-    mob->race = race::race_map[race::human];
+    mob->race = RaceID::Human;
     SCRIPT(mob) = nullptr;
     mob->proto_script.clear();
     OLC_SCRIPT(d).clear();
@@ -234,7 +234,7 @@ void init_mobile(struct char_data *mob) {
     //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
     mob->set(CharAppearance::Sex, SEX_MALE);
-    mob->chclass = sensei::sensei_map[sensei::commoner];
+    mob->chclass = SenseiID::Commoner;
 
     GET_WEIGHT(mob) = rand_number(100, 200);
     mob->setHeight(rand_number(100, 200));
@@ -412,9 +412,10 @@ void medit_disp_class(struct descriptor_data *d) {
     int i;
     char buf[MAX_INPUT_LENGTH];
     clear_screen(d);
+    auto check = [](SenseiID id) {return true;};
 
-    for (const auto cl: sensei::sensei_map) {
-        sprintf(buf, "@g%2d@n) %s\r\n", cl.first, cl.second->getName().c_str());
+    for (const auto cl: sensei::filterSenseis(check)) {
+        sprintf(buf, "@g%2d@n) %s\r\n", cl, sensei::getName(cl).c_str());
         write_to_output(d, buf);
     }
     write_to_output(d, "Enter class number : ");
@@ -428,8 +429,9 @@ void medit_disp_race(struct descriptor_data *d) {
     char buf[MAX_INPUT_LENGTH];
 
     clear_screen(d);
-    for (const auto &r: race::race_map) {
-        sprintf(buf, "@g%2d@n) %-20.20s  %s", r.first, r.second->getName().c_str(),
+    auto check = [](RaceID id) {return true;};
+    for (const auto &r: race::filterRaces(check)) {
+        sprintf(buf, "@g%2d@n) %-20.20s  %s", r, race::getName(r).c_str(),
                 !(++columns % 2) ? "\r\n" : "");
         write_to_output(d, buf);
     }
@@ -502,8 +504,8 @@ void medit_disp_menu(struct descriptor_data *d) {
                     position_types[(int) GET_POS(mob)],
                     position_types[(int) GET_DEFAULT_POS(mob)],
                     npc_personality[GET_PERSONALITY(mob)],
-                    flags, flag2, mob->chclass->getName().c_str(),
-                    TRUE_RACE(mob),
+                    flags, flag2, sensei::getName(mob->chclass).c_str(),
+                    race::getName(mob->race).c_str(),
                     !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[get_size(mob)]
     );
 
@@ -517,7 +519,6 @@ void medit_disp_menu(struct descriptor_data *d) {
 void medit_parse(struct descriptor_data *d, char *arg) {
     int i = -1;
     char *oldtext = nullptr;
-    race::Race *chosen_race;
 
     if (OLC_MODE(d) > MEDIT_NUMERICAL_RESPONSE) {
         i = atoi(arg);
@@ -852,7 +853,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_EXP:
-            GET_EXP(OLC_MOB(d)) = LIMIT(i, 0, MAX_MOB_EXP);
+            OLC_MOB(d)->setExperience(LIMIT(i, 0, MAX_MOB_EXP));
             OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 
@@ -881,15 +882,17 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             OLC_MOB(d)->set(CharAlign::GoodEvil, LIMIT(i, -1000, 1000));
             break;
 
-        case MEDIT_CLASS:
+        case MEDIT_CLASS: {
+            auto sensei = static_cast<SenseiID>(i);
             //Check if the sensei requested exists
-            if (sensei::find_sensei_map_id(i, sensei::sensei_map) != nullptr) {
+            if (sensei::exists(sensei)) {
                 //Set the mob's Sensei to the chosen sensei
-                OLC_MOB(d)->chclass = sensei::find_sensei_map_id(i, sensei::sensei_map);
+                OLC_MOB(d)->chclass = sensei;
             }
             else {
                 write_to_output(d, "Couldn't find the requested Sensei!\r\n");
             }
+        }
             break;
 
         case MEDIT_COPY:
@@ -916,15 +919,16 @@ void medit_parse(struct descriptor_data *d, char *arg) {
                 write_to_output(d, "Please answer 'Y' or 'N': ");
             break;
 
-        case MEDIT_RACE:
-            chosen_race = race::find_race_map_id(i, race::race_map);
-            if (!chosen_race) {
+        case MEDIT_RACE: {
+            auto chosen_race = static_cast<RaceID>(i);
+            if (!race::exists(chosen_race)) {
                 write_to_output(d, "That's not a race!");
                 break;
             }
             OLC_MOB(d)->race = chosen_race;
             /*  Change racial size based on race choice. */
-            OLC_MOB(d)->setSize(OLC_MOB(d)->race->getSize());
+            OLC_MOB(d)->setSize(race::getSize(OLC_MOB(d)->race));
+        }
             break;
 
         case MEDIT_SIZE:

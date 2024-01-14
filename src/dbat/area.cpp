@@ -27,7 +27,6 @@ area_data::area_data(const nlohmann::json& j) {
     if(j.contains("type")) type = j["type"];
     if(j.contains("extraVn")) extraVn = j["extraVn"];
     if(j.contains("ether")) ether = j["ether"];
-    if(j.contains("moon")) moon = j["moon"];
 }
 
 nlohmann::json area_data::serialize() {
@@ -40,7 +39,6 @@ nlohmann::json area_data::serialize() {
     j["type"] = type;
     if(extraVn) j["extraVn"] = extraVn.value();
     if(ether) j["ether"] = ether;
-    if(moon) j["moon"] = moon;
 
     return j;
 }

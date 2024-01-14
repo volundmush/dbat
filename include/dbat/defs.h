@@ -41,8 +41,136 @@
  * NOTE: This will likely be unconditionally unsigned later.
  */
 
+enum class RaceID : uint8_t {
+ Human = 0,
+ Saiyan = 1,
+ Icer = 2,
+ Konatsu = 3,
+ Namekian = 4,
+ Mutant = 5,
+ Kanassan = 6,
+ Halfbreed = 7,
+ BioAndroid = 8,
+ Android = 9,
+ Demon = 10,
+ Majin = 11,
+ Kai = 12,
+ Tuffle = 13,
+ Hoshijin = 14,
+ Animal = 15,
+ Saiba = 16,
+ Serpent = 17,
+ Ogre = 18,
+ Yardratian = 19,
+ Arlian = 20,
+ Dragon = 21,
+ Mechanical = 22,
+ Spirit = 23
+};
+
+enum class SenseiID : uint8_t {
+    Roshi = 0,
+    Piccolo = 1,
+    Krane = 2,
+    Nail = 3,
+    Bardock = 4,
+    Ginyu = 5,
+    Frieza = 6,
+    Tapion = 7,
+    Sixteen = 8,
+    Dabura = 9,
+    Kibito = 10,
+    Jinto = 11,
+    Tsuna = 12,
+    Kurzak = 13,
+    Commoner = 14
+};
+
+enum class FormID : uint8_t {
+ // Universal,
+ Base = 0,
+ Custom1 = 1,
+ Custom2 = 2,
+ Custom3 = 3,
+ Custom4 = 4,
+ Custom5 = 5,
+ Custom6 = 6,
+ Custom7 = 7,
+ Custom8 = 8,
+ Custom9 = 9,
+
+ // Saiyan'y forms.
+ Oozaru = 10,
+ GoldenOozaru = 11,
+ SuperSaiyan = 12,
+ SuperSaiyan2 = 13,
+ SuperSaiyan3 = 14,
+ SuperSaiyan4 = 15,
+ SuperSaiyanGod = 16,
+ SuperSaiyanBlue = 17,
+
+ // Human'y Forms
+ SuperHuman = 18,
+ SuperHuman2 = 19,
+ SuperHuman3 = 20,
+ SuperHuman4 = 21,
 
 
+ // Icer'y Forms
+ IcerFirst = 22,
+ IcerSecond = 23,
+ IcerThird = 24,
+ IcerFourth = 25,
+ IcerMetal = 26,
+ IcerGolden = 27,
+ IcerBlack = 28,
+
+ // Konatsu
+ ShadowFirst = 29,
+ ShadowSecond = 30,
+ ShadowThird = 31,
+
+ // Namekian
+ SuperNamekian = 32,
+ SuperNamekian2 = 33,
+ SuperNamekian3 = 34,
+ SuperNamekian4 = 35,
+
+ // Mutant
+ MutateFirst = 36,
+ MutateSecond = 37,
+ MutateThird = 38,
+
+ // BioAndroid
+ BioMature = 39,
+ BioSemiPerfect = 40,
+ BioPerfect = 41,
+ BioSuperPerfect = 42,
+
+ // Android
+ Android10 = 43,
+ Android20 = 44,
+ Android30 = 45,
+ Android40 = 46,
+ Android50 = 47,
+ Android60 = 48,
+
+ // Majin
+ MajAffinity = 49,
+ MajSuper = 50,
+ MajTrue = 51,
+
+
+ // Kai
+ MysticFirst = 52,
+ MysticSecond = 53,
+ MysticThird = 54,
+
+ // Tuffle
+ AscendFirst = 55,
+ AscendSecond = 56,
+ AscendThird = 57
+};
 
 
 #define SG_MIN        2 /* Skill gain check must be less than this
@@ -255,8 +383,8 @@
 
 #define NUM_ROOM_FLAGS          68
 
-#define AREA_MOON              0 /* FOR CelestialBody (inherited): Planet has Moon for Oozaru. */
-#define AREA_ETHER             1 /* FOR CelestialBody (inherited): Planet has Ether Stream for Hoshijin. */
+#define AREA_MOON              0 /* FOR CelestialBody: Planet has Moon for Oozaru. */
+#define AREA_ETHER             1 /* FOR CelestialBody: Planet has Ether Stream for Hoshijin. */
 #define AREA_EARTH_DBALL       2 /* (Not Inherited): Earth DragonBalls may spawn here. */
 #define AREA_NAMEK_DBALL       3 /* (Not Inherited): Namek DragonBalls may spawn here. */
 #define AREA_SHADOW_DRAGON     4 */ (Not Inherited): The Shadow Dragons of Black Smoke Shenron may spawn here. */
@@ -303,21 +431,20 @@
 
 /* PC classes */
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-#define CLASS_UNDEFINED            (-1)
-#define CLASS_ROSHI             0
-#define CLASS_PICCOLO           1
-#define CLASS_KRANE             2
-#define CLASS_NAIL              3
-#define CLASS_BARDOCK           4
-#define CLASS_GINYU             5
-#define CLASS_FRIEZA            6
-#define CLASS_TAPION            7
-#define CLASS_ANDSIX            8
-#define CLASS_DABURA            9
-#define CLASS_KABITO            10
-#define CLASS_JINTO             11
-#define CLASS_TSUNA             12
-#define CLASS_KURZAK            13
+#define CLASS_ROSHI             SenseiID::Roshi
+#define CLASS_PICCOLO           SenseiID::Piccolo
+#define CLASS_KRANE             SenseiID::Krane
+#define CLASS_NAIL              SenseiID::Nail
+#define CLASS_BARDOCK           SenseiID::Bardock
+#define CLASS_GINYU             SenseiID::Ginyu
+#define CLASS_FRIEZA            SenseiID::Frieza
+#define CLASS_TAPION            SenseiID::Tapion
+#define CLASS_ANDSIX            SenseiID::Sixteen
+#define CLASS_DABURA            SenseiID::Dabura
+#define CLASS_KABITO            SenseiID::Kibito
+#define CLASS_JINTO             SenseiID::Jinto
+#define CLASS_TSUNA             SenseiID::Tsuna
+#define CLASS_KURZAK            SenseiID::Kurzak
 #define CLASS_ASSASSIN          14
 #define CLASS_BLACKGUARD        15
 #define CLASS_DRAGON_DISCIPLE   16
@@ -515,31 +642,30 @@
 #define PHASE_STRENGTH          6
 
 /* Races */
-#define RACE_UNDEFINED        (-1)
-#define RACE_HUMAN        0
-#define RACE_SAIYAN        1
-#define RACE_ICER        2
-#define RACE_KONATSU        3
-#define RACE_NAMEK        4
-#define RACE_MUTANT        5
-#define RACE_KANASSAN        6
-#define RACE_HALFBREED        7
-#define RACE_BIO        8
-#define RACE_ANDROID        9
-#define RACE_DEMON        10
-#define RACE_MAJIN        11
-#define RACE_KAI        12
-#define RACE_TRUFFLE        13
-#define RACE_GOBLIN        14
-#define RACE_ANIMAL        15
-#define RACE_SAIBA        16
-#define RACE_SERPENT        17
-#define RACE_OGRE        18
-#define RACE_YARDRATIAN        19
-#define RACE_ARLIAN        20
-#define RACE_DRAGON        21
-#define RACE_MECHANICAL        22
-#define RACE_FAERIE        23
+#define RACE_HUMAN        RaceID::Human
+#define RACE_SAIYAN        RaceID::Saiyan
+#define RACE_ICER        RaceID::Icer
+#define RACE_KONATSU        RaceID::Konatsu
+#define RACE_NAMEK        RaceID::Namekian
+#define RACE_MUTANT        RaceID::Mutant
+#define RACE_KANASSAN        RaceID::Kanassan
+#define RACE_HALFBREED        RaceID::Halfbreed
+#define RACE_BIO        RaceID::BioAndroid
+#define RACE_ANDROID        RaceID::Android
+#define RACE_DEMON        RaceID::Demon
+#define RACE_MAJIN        RaceID::Majin
+#define RACE_KAI        RaceID::Kai
+#define RACE_TRUFFLE        RaceID::Tuffle
+#define RACE_GOBLIN        RaceID::Hoshijin
+#define RACE_ANIMAL        RaceID::Animal
+#define RACE_SAIBA        RaceID::Saiba
+#define RACE_SERPENT        RaceID::Serpent
+#define RACE_OGRE        RaceID::Ogre
+#define RACE_YARDRATIAN        RaceID::Yardratian
+#define RACE_ARLIAN        RaceID::Arlian
+#define RACE_DRAGON        RaceID::Dragon
+#define RACE_MECHANICAL    RaceID::Mechanical
+#define RACE_FAERIE        RaceID::Spirit
 
 #define NUM_RACES        24
 
@@ -650,18 +776,18 @@
 #define PLR_RLEG        26  /* Player has a right leg           */
 #define PLR_LLEG        27  /* Player has a left leg            */
 #define PLR_HEAD        28  /* Player has a head                */
-#define PLR_STAIL       29  /* Player has a saiyan tail         */
-#define PLR_TAIL        30  /* Player has a non-saiyan tail     */
+#define PLR_STAIL       29  /* UNUSED         */
+#define PLR_TAIL        30  /* Player has a tail     */
 #define PLR_PILOTING    31  /* Player is sitting in the pilots chair */
 #define PLR_SKILLP      32  /* Player made a good choice in CC  */
 #define PLR_SPAR        33  /* Player is in a spar stance       */
 #define PLR_CHARGE      34  /* Player is charging               */
-#define PLR_TRANS1      35  /* Transformation 1                 */
-#define PLR_TRANS2      36  /* Transformation 2                 */
-#define PLR_TRANS3      37  /* Transformation 3                 */
-#define PLR_TRANS4      38  /* Transformation 4                 */
-#define PLR_TRANS5      39  /* Transformation 5                 */
-#define PLR_TRANS6      40  /* Transformation 6                 */
+#define PLR_TRANS1      35  /* UNUSED                 */
+#define PLR_TRANS2      36  /* UNUSED                 */
+#define PLR_TRANS3      37  /* UNUSED                 */
+#define PLR_TRANS4      38  /* UNUSED                 */
+#define PLR_TRANS5      39  /* UNUSED                 */
+#define PLR_TRANS6      40  /* UNUSED                 */
 #define PLR_ABSORB      41  /* Absorb model                     */
 #define PLR_REPAIR      42  /* Repair model                     */
 #define PLR_SENSEM      43  /* Sense-Powersense model           */
@@ -680,7 +806,7 @@
 #define PLR_HEALT       56  /* Is inside a healing tank         */
 #define PLR_FURY        57  /* Is in fury mode                  */
 #define PLR_POSE        58  /* Ginyu Pose Effect                */
-#define PLR_OOZARU      59
+#define PLR_OOZARU      59 // UNUSED
 #define PLR_ABSORBED    60
 #define PLR_MULTP       61
 #define PLR_PDEATH      62
@@ -1295,8 +1421,8 @@
 #define APPLY_INT               3    /* Apply to intelligence	*/
 #define APPLY_WIS               4    /* Apply to wisdom		*/
 #define APPLY_CON               5    /* Apply to constitution	*/
-#define APPLY_CHA        6    /* Apply to charisma		*/
-#define APPLY_SPI             7    /* Reserved			*/
+#define APPLY_CHA               6    /* Apply to charisma		*/
+#define APPLY_SPI               7    /* Reserved			*/
 #define APPLY_LEVEL             8    /* Reserved			*/
 #define APPLY_AGE               9    /* Apply to age			*/
 #define APPLY_CHAR_WEIGHT      10    /* Apply to weight		*/
@@ -1305,27 +1431,27 @@
 #define APPLY_HIT              13    /* Apply to max hit points	*/
 #define APPLY_MOVE             14    /* Apply to max move points	*/
 #define APPLY_GOLD             15    /* Reserved			*/
-#define APPLY_EXP              16    /* Reserved			*/
+#define APPLY_EXP_GAIN_MULT         16    /* Bonus/Penalty to XP gain. +/- % */
 #define APPLY_AC               17    /* Apply to Armor Class		*/
 #define APPLY_ACCURACY         18    /* Apply to accuracy		*/
 #define APPLY_DAMAGE           19    /* Apply to damage 		*/
-#define APPLY_REGEN           20    /* Regen Rate Buffed            */
-#define APPLY_TRAIN           21    /* Skill training rate buffed   */
-#define APPLY_LIFEMAX           22    /* Life Force max buffed        */
-#define APPLY_UNUSED3           23    /* Unused			*/
-#define APPLY_UNUSED4           24    /* Unused			*/
-#define APPLY_RACE             25       /* Apply to race                */
-#define APPLY_TURN_LEVEL       26       /* Apply to turn undead         */
-#define APPLY_SPELL_LVL_0      27       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_1      28       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_2      29       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_3      30       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_4      31       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_5      32       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_6      33       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_7      34       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_8      35       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_9      36       /* Apply to spell cast per day  */
+#define APPLY_REGEN            20    /* Regen Rate Buffed            */
+#define APPLY_TRAIN            21    /* Skill training rate buffed   */
+#define APPLY_LIFEMAX          22    /* Life Force max buffed        */
+#define APPLY_DAMAGE_PERC      23    /* Modify damage inflicted by -/+%			*/
+#define APPLY_DEFENSE_PERC     24    /* -/+% damage resistance.		*/
+#define APPLY_PL_MULT          25       /* Apply to race                */
+#define APPLY_KI_MULT          26       /* Apply to turn undead         */
+#define APPLY_ST_MULT          27       /* Apply to spell cast per day  */
+#define APPLY_LF_MULT          28       /* Apply to spell cast per day  */
+#define APPLY_VITALS_MULT      29       /* Apply to spell cast per day  */
+#define APPLY_WEIGHT_MULT      30       /* Apply to spell cast per day  */
+#define APPLY_HEIGHT_MULT      31       /* Apply to spell cast per day  */
+#define APPLY_PHYS_DAM_PERC    32       /* Bonus percentage to physical damage output.  */
+#define APPLY_KI_DAM_PERC      33       /* Bonus percentage to ki damage output.  */
+#define APPLY_PHYS_DAM_RES     34       /* Bonus resistance percentage to physical damage received.  */
+#define APPLY_KI_DAM_RES       35       /* Bonus resistance percentage to ki damage received. */
+#define APPLY_DAM_ATK_TIER     36       /* Bonus perc applied to damage output of a specific attack tier.  */
 #define APPLY_KI               37    /* Apply to max ki		*/
 #define APPLY_FORTITUDE        38    /* Apply to fortitue save	*/
 #define APPLY_REFLEX           39    /* Apply to reflex save		*/
@@ -1334,9 +1460,19 @@
 #define APPLY_FEAT             42       /* Apply to a specific feat     */
 #define APPLY_ALLSAVES         43       /* Apply to all 3 save types 	*/
 #define APPLY_RESISTANCE       44       /* Apply to resistance	 	*/
-#define APPLY_ALL_STATS        45       /* Apply to all attributes	*/
+#define APPLY_ALL_ATTRS        45       /* Apply to all attributes	*/
+#define APPLY_ALL_VITALS         46       // Apply to all CharStats base.
+#define APPLY_SKILL_SLOTS      47     // Add/Remove Skill Slots.
+#define APPLY_ATTR_TRAIN_COST  48     // Add/Reduce cost in train points to increase attribute by percent.
+#define APPLY_PS_GAIN_MULT          49     // Add/Reduce gained PS from things that grant PS.
+#define APPLY_TRANS_ST_UPKEEP  50    // Add/Reduce perc of stamina by % for transformation upkeep.
+#define APPLY_VITALS_GAIN_MULT 51     // improves gains to PL/KI/ST/LF by percent.
+#define APPLY_PL_GAIN_MULT     52
+#define APPLY_ST_GAIN_MULT     53
+#define APPLY_KI_GAIN_MULT     54
+#define APPLY_LF_GAIN_MULT     55
 
-#define NUM_APPLIES 46
+#define NUM_APPLIES 56
 
 /* Container flags - value[1] */
 #define CONT_CLOSEABLE      (1 << 0)    /* Container can be closed	*/

@@ -8,8 +8,8 @@ namespace net {
 
     class ChargenParser : public ConnectionParser {
     public:
-        ChargenParser(std::shared_ptr<Connection>& co);
-        ~ChargenParser();
+        explicit ChargenParser(std::shared_ptr<Connection>& co);
+        ~ChargenParser() override;
         void parse(const std::string &txt) override;
         void start() override;
 
@@ -22,10 +22,10 @@ namespace net {
         std::string maybeName;
         int roll_stats(int type, int bonus);
         void display_bonus_menu(int type);
-        race::RaceMap valid_races();
+        std::vector<RaceID> valid_races();
         void display_races();
         void display_races_sub();
-        sensei::SenseiMap valid_classes();
+        std::vector<SenseiID> valid_classes();
         void display_classes_sub();
         void display_classes();
         void display_races_help();

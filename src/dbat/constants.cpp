@@ -72,24 +72,6 @@ const char *npc_personality[MAX_PERSONALITIES + 1] = {
         "\n"
 };
 
-/* Sensei Fighting Style */
-const char *sensei_style[MAX_SENSEI] = {
-        "Kame Arts", /* Roshi */
-        "Demon Taijutsu", /* Piccolo */
-        "Crane Arts", /* Krane */
-        "Tranquil Palm", /* Nail */
-        "Brutal Beast", /* Bardock */
-        "Flaunted Style", /* Ginyu */
-        "Frozen Fist", /* Frieza */
-        "Shadow Grappling", /* Tapion */
-        "Iron Hand", /* Sixteen */
-        "Devil Dance", /* Dabura */
-        "Gentle Fist", /* Kibito */
-        "Star's Radiance", /* Jinto */
-        "Sacred Tsunami", /* Tsuna */
-        "Adaptive Taijutsu", /* Kurzak */
-        "\n"
-};
 
 /* Alignments */
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
@@ -1090,27 +1072,27 @@ const char *apply_types[NUM_APPLIES + 1] = {
         "MAXPL",
         "MAXST",
         "GOLD",
-        "EXP",
+        "EXP_GAIN_MULT",
         "ARMOR",
         "FISHBONUS",
         "DAMAGE",
         "REGEN RATE",
         "AUTO-TRAIN SKILL",
         "LIFEFORCE MAX",
-        "UNUSED3",
-        "UNUSED4",
-        "RACE",
-        "TURN_LEVEL",
-        "SPELL_LEVEL_0",
-        "SPELL_LEVEL_1",
-        "SPELL_LEVEL_2",
-        "SPELL_LEVEL_3",
-        "SPELL_LEVEL_4",
-        "SPELL_LEVEL_5",
-        "SPELL_LEVEL_6",
-        "SPELL_LEVEL_7",
-        "SPELL_LEVEL_8",
-        "SPELL_LEVEL_9",
+        "DAMAGE_PERC",
+        "DEFENSE_PERC",
+        "PL_MULT",
+        "KI_MULT",
+        "ST_MULT",
+        "LF_MULT",
+        "VITALS_MULT",
+        "HEIGHT_MULT",
+        "WEIGHT_MULT",
+        "PHYS_DAM_PERC",
+        "KI_DAM_PERC",
+        "PHYS_DAM_RES",
+        "KI_DAM_RES",
+        "DAM_ATK_TIER",
         "MAX_KI",
         "FORTITUDE",
         "REFLEX",
@@ -1119,7 +1101,18 @@ const char *apply_types[NUM_APPLIES + 1] = {
         "FEAT",
         "ALL_SAVES",
         "RESISTANCE",
-        "ALL_STATS",
+        "ALL_ATTRS",
+        "ALL_VITALS",
+        "SKILL_SLOTS",
+        "ATTR_TRAIN_COST",
+        "PS_GAIN_MULT",
+        "TRANS_ST_UPKEEP",
+        "VITALS_GAIN_MULT",
+        "PL_GAIN_MULT",
+        "ST_GAIN_MULT",
+        "KI_GAIN_MULT",
+        "LF_GAIN_MULT",
+
         "\n"
 };
 
