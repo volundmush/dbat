@@ -24,5 +24,6 @@ namespace trans {
     extern std::optional<FormID> findForm(struct char_data *ch, const std::string& arg);
 
     extern void gamesys_transform(uint64_t heartPulse, double deltaTime);
+    extern void gamesys_oozaru(uint64_t heartPulse, double deltaTime);
 
 }

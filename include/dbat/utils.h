@@ -936,11 +936,11 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define BIRTH_PHASE             (time_info.day <= 15)
 #define LIFE_PHASE              (!BIRTH_PHASE && time_info.day <= 22)
 #define DEATH_PHASE             (!BIRTH_PHASE && !LIFE_PHASE)
-#define MOON_OK(ch)             (HAS_MOON(ch) && MOON_DATE && MOON_TIME && OOZARU_OK(ch))
-#define OOZARU_OK(ch)           (OOZARU_RACE(ch) && PLR_FLAGGED(ch, PLR_STAIL) && !IS_TRANSFORMED(ch))
+
 #define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
 #define MOON_TIME               (time_info.hours >= 21 || time_info.hours <= 4)
-#define MOON_DATE               (time_info.day == 19 || time_info.day == 20 || time_info.day == 21)
+#define MOON_DATE               (time_info.day >= 20 && time_info.day <= 23)
+extern bool MOON_TIMECHECK();
 bool PLANET_FLAGGED(struct char_data *ch, int flag);
 bool ETHER_STREAM(struct char_data *ch);
 bool HAS_MOON(struct char_data *ch);

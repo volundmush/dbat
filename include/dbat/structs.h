@@ -85,7 +85,6 @@ struct area_data {
     AreaType type{AreaType::Dimension}; /* type of area				*/
     std::optional<vnum> extraVn; /* vehicle or house outer object vnum, orbit for CelBody */
     bool ether{false}; /* is this area etheric?			*/
-    bool moon{false}; /* does this planet have a moon? */
     std::bitset<NUM_AREA_FLAGS> flags; /* area flags				*/
     nlohmann::json serialize();
     static vnum getNextID();
@@ -307,6 +306,12 @@ struct room_direction_data {
     nlohmann::json serialize();
 };
 
+enum class MoonCheck : uint8_t {
+    NoMoon = 0,
+    NotFull = 1,
+    Full = 2
+};
+
 
 /* ================== Memory Structure for room ======================= */
 struct room_data : public unit_data {
@@ -346,6 +351,8 @@ struct room_data : public unit_data {
     std::optional<room_vnum> getLaunchDestination();
 
     std::list<struct char_data*> getPeople();
+
+    MoonCheck checkMoon();
 
 };
 /* ====================================================================== */
@@ -492,7 +499,8 @@ struct trans_data {
     explicit trans_data(const nlohmann::json& j);
 
     double timeSpentInForm{0.0};
-    std::map<int, int> overrideAppearance{};
+
+    double blutz{0.0}; // The number of seconds you can spend in Oozaru.
 
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
@@ -679,6 +687,10 @@ struct char_data : public unit_data {
 
     FormID form{FormID::Base};        /* Current form of the character		*/
     double transBonus{0.0};   // Varies from -0.3 to 0.3
+    void gazeAtMoon();
+
+    // Data stored about different forms.
+    std::unordered_map<FormID, trans_data> transforms;
 
     int16_t spellfail{};        /* Total spell failure %                 */
     int16_t armorcheck{};        /* Total armorcheck penalty with proficiency forgiveness */

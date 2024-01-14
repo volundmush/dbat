@@ -20,6 +20,7 @@ CPMAddPackage("gh:nlohmann/json#v3.11.2")
 CPMAddPackage("gh:gabime/spdlog#v1.12.0")
 CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 CPMAddPackage("gh:effolkronium/random#v1.5.0")
+CPMAddPackage("gh:skypjack/entt#v3.12.2")
 
 SET(LUABRIDGE_TESTING OFF)
 SET(LUAU_BUILD_CLI OFF)
@@ -29,31 +30,28 @@ SET(LUAU_BUILD_BENCHMARKS OFF)
 find_package(SQLite3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system program_options regex)
 
-set(CIRCLE_INCLUDE_DIRS
-        include
-        ${Boost_INCLUDE_DIRS}
-        ${fmt_SOURCE_DIR}/include
-        ${eff_random_SOURCE_DIR}/include
-        ${SQLiteCpp_SOURCE_DIR}/include
-        ${nlohmann_json_SOURCE_DIR}/single_include
-        ${spdlog_SOURCE_DIR}/include
-        ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
-        ${effolkronium_random_SOURCE_DIR}/include
-        )
-
-set(PORTAL_INCLUDE_DIRS
-        include
-        ${Boost_INCLUDE_DIRS}
-        ${fmt_SOURCE_DIR}/include
-        ${nlohmann_json_SOURCE_DIR}/single_include
-        ${spdlog_SOURCE_DIR}/include
-        )
-
 set(SHARED_INCLUDE_DIRS
         include
         ${nlohmann_json_SOURCE_DIR}/single_include
         ${Boost_INCLUDE_DIRS}
+        ${spdlog_SOURCE_DIR}/include
+        ${fmt_SOURCE_DIR}/include
 )
+
+set(CIRCLE_INCLUDE_DIRS
+        ${SHARED_INCLUDE_DIRS}
+        ${eff_random_SOURCE_DIR}/include
+        ${SQLiteCpp_SOURCE_DIR}/include
+        ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
+        ${effolkronium_random_SOURCE_DIR}/include
+        ${EnTT_SOURCE_DIR}/single_include
+        )
+
+set(PORTAL_INCLUDE_DIRS
+        ${SHARED_INCLUDE_DIRS}
+        )
+
+
 
 file(GLOB_RECURSE CIRCLE_INCLUDE include/dbat/*.h include/shared/*.h)
 file(GLOB_RECURSE CIRCLE_SRC src/dbat/*.cpp)

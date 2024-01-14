@@ -749,19 +749,16 @@ void char_data::restoreLimbs(bool announce) {
 
 void char_data::gainTail(bool announce) {
     if (!race::hasTail(race)) return;
+    if(playerFlags.test(PLR_TAIL)) return;
     playerFlags.set(PLR_TAIL);
     if(announce) {
         send_to_char(this, "@wYour tail grows back.@n\r\n");
         act("$n@w's tail grows back.@n", true, this, nullptr, nullptr, TO_ROOM);
     }
-
-    if (MOON_OK(this)) {
-        oozaru_transform(this);
-    }
 }
 
 void char_data::loseTail() {
-    if (!race::hasTail(race)) return;
+    if (!playerFlags.test(PLR_TAIL)) return;
     playerFlags.reset(PLR_TAIL);
     remove_limb(this, 6);
     GET_TGROWTH(this) = 0;
@@ -769,7 +766,6 @@ void char_data::loseTail() {
 }
 
 bool char_data::hasTail() {
-    if(!race::hasTail(race)) return false;
     return playerFlags.test(PLR_TAIL);
 }
 
@@ -1464,4 +1460,19 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
     if(gain) setExperience(cur + gain);
     return gain;
 
+}
+
+void char_data::gazeAtMoon() {
+    if(OOZARU_RACE(this) && playerFlags.test(PLR_TAIL)) {
+        if(form == FormID::Oozaru || form == FormID::GoldenOozaru) return;
+        FormID toForm = FormID::Oozaru;
+        if(transforms.contains(FormID::SuperSaiyan)
+        || transforms.contains(FormID::SuperSaiyan2)
+        || transforms.contains(FormID::SuperSaiyan3)
+        || transforms.contains(FormID::SuperSaiyan4))
+            toForm = FormID::GoldenOozaru;
+
+        trans::handleEchoTransform(this, toForm);
+        form = toForm;
+    }
 }

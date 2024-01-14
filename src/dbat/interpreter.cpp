@@ -1325,11 +1325,6 @@ void enter_player_game(struct descriptor_data *d) {
         }
     }
 
-    if (MOON_OK(d->character)) {
-        oozaru_transform(d->character);
-    } else {
-        oozaru_revert(d->character);
-    }
     if (IS_HOSHIJIN(d->character)) {
         if (time_info.day <= 14) {
             star_phase(d->character, 1);

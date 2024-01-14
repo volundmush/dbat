@@ -383,8 +383,8 @@ enum class FormID : uint8_t {
 
 #define NUM_ROOM_FLAGS          68
 
-#define AREA_MOON              0 /* FOR CelestialBody (inherited): Planet has Moon for Oozaru. */
-#define AREA_ETHER             1 /* FOR CelestialBody (inherited): Planet has Ether Stream for Hoshijin. */
+#define AREA_MOON              0 /* FOR CelestialBody: Planet has Moon for Oozaru. */
+#define AREA_ETHER             1 /* FOR CelestialBody: Planet has Ether Stream for Hoshijin. */
 #define AREA_EARTH_DBALL       2 /* (Not Inherited): Earth DragonBalls may spawn here. */
 #define AREA_NAMEK_DBALL       3 /* (Not Inherited): Namek DragonBalls may spawn here. */
 #define AREA_SHADOW_DRAGON     4 */ (Not Inherited): The Shadow Dragons of Black Smoke Shenron may spawn here. */
@@ -776,18 +776,18 @@ enum class FormID : uint8_t {
 #define PLR_RLEG        26  /* Player has a right leg           */
 #define PLR_LLEG        27  /* Player has a left leg            */
 #define PLR_HEAD        28  /* Player has a head                */
-#define PLR_STAIL       29  /* Player has a saiyan tail         */
-#define PLR_TAIL        30  /* Player has a non-saiyan tail     */
+#define PLR_STAIL       29  /* UNUSED         */
+#define PLR_TAIL        30  /* Player has a tail     */
 #define PLR_PILOTING    31  /* Player is sitting in the pilots chair */
 #define PLR_SKILLP      32  /* Player made a good choice in CC  */
 #define PLR_SPAR        33  /* Player is in a spar stance       */
 #define PLR_CHARGE      34  /* Player is charging               */
-#define PLR_TRANS1      35  /* Transformation 1                 */
-#define PLR_TRANS2      36  /* Transformation 2                 */
-#define PLR_TRANS3      37  /* Transformation 3                 */
-#define PLR_TRANS4      38  /* Transformation 4                 */
-#define PLR_TRANS5      39  /* Transformation 5                 */
-#define PLR_TRANS6      40  /* Transformation 6                 */
+#define PLR_TRANS1      35  /* UNUSED                 */
+#define PLR_TRANS2      36  /* UNUSED                 */
+#define PLR_TRANS3      37  /* UNUSED                 */
+#define PLR_TRANS4      38  /* UNUSED                 */
+#define PLR_TRANS5      39  /* UNUSED                 */
+#define PLR_TRANS6      40  /* UNUSED                 */
 #define PLR_ABSORB      41  /* Absorb model                     */
 #define PLR_REPAIR      42  /* Repair model                     */
 #define PLR_SENSEM      43  /* Sense-Powersense model           */
@@ -806,7 +806,7 @@ enum class FormID : uint8_t {
 #define PLR_HEALT       56  /* Is inside a healing tank         */
 #define PLR_FURY        57  /* Is in fury mode                  */
 #define PLR_POSE        58  /* Ginyu Pose Effect                */
-#define PLR_OOZARU      59
+#define PLR_OOZARU      59 // UNUSED
 #define PLR_ABSORBED    60
 #define PLR_MULTP       61
 #define PLR_PDEATH      62

@@ -608,6 +608,9 @@ nlohmann::json char_data::serializeInstance() {
     if(players.contains(last_tell)) j["last_tell"] = last_tell;
 
     j["transBonus"] = transBonus;
+    for(auto &[frm, tra] : transforms) {
+        j["transforms"].push_back(std::make_pair(static_cast<int>(frm), tra.serialize()));
+    }
 
     return j;
 }
@@ -781,6 +784,12 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
     if(j.contains("transBonus")) transBonus = j["transBonus"];
     if(j.contains("form")) form = j["form"].get<FormID>();
+    if(j.contains("transforms")) {
+        // it is a list of pairs that fills up the transforms map.
+        for(const auto &j2 : j["transforms"]) {
+            transforms.emplace(j2[0].get<FormID>(), j2[1]);
+        }
+    }
 
     if(j.contains("preference")) preference = j["preference"];
     if(j.contains("freeze_level")) freeze_level = j["freeze_level"];

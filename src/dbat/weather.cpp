@@ -17,6 +17,7 @@
 #include "dbat/config.h"
 #include "dbat/races.h"
 #include "dbat/dg_scripts.h"
+#include "dbat/transformation.h"
 
 static void phase_powerup(struct char_data *ch, int type, int phase);
 
@@ -199,50 +200,22 @@ static void weather_change() {
     }
 }
 
-
-void oozaru_transform(char_data *ch) {
-    if (ch->form == FormID::Oozaru)
-        return;
-
-    act("@rLooking up at the moon your heart begins to beat loudly. Sudden rage begins to fill your mind while your body begins to grow. Hair sprouts  all over your body and your teeth become sharp as your body takes on the Oozaru form!@n",
-        true, ch, nullptr, nullptr, TO_CHAR);
-    act("@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant ape!@n",
-        true, ch, nullptr, nullptr, TO_ROOM);
-    ch->form = FormID::Oozaru;
-}
-
-void oozaru_add() {
-    for (descriptor_data *d = descriptor_list; d; d = d->next) {
-        if (!IS_PLAYING(d)) {
-            continue;
-        }
-        if (MOON_OK(d->character)) {
-            oozaru_transform(d->character);
-        }
-
-    }
-}
-
 void oozaru_revert(char_data *ch) {
-    if (ch->form != FormID::Oozaru)
+    if (!(ch->form == FormID::Oozaru || ch->form == FormID::GoldenOozaru))
         return;
+
+    auto &data = ch->transforms[ch->form];
+    data.blutz = 0.0;
 
     act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n",
         true, ch, nullptr, nullptr, TO_CHAR);
-    act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal and asleep.@n",
+    act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal.@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-    GET_POS(ch) = POS_SLEEPING;
+
     ch->form = FormID::Base;
 
 }
 
-void oozaru_drop() {
-    for (descriptor_data *d = descriptor_list; d; d = d->next) {
-        if (!IS_PLAYING(d))
-            continue;
-        oozaru_revert(d->character);
-    }
-}
 
 /* This controls the powering up of Hoshi-jin from their Eldritch Star */
 void star_phase(struct char_data *ch, int type) {
@@ -416,12 +389,8 @@ static void hourChanged() {
         case 4:
             if (MOON_DATE) {
                 send_to_moon("The full moon disappears.\r\n");
-                MOON_UP = false;
-                oozaru_drop();
             } else if (time_info.day == 22) {
                 send_to_moon("The full moon disappears.\r\n");
-                MOON_UP = false;
-                oozaru_drop();
             }
             break;
         case 5:
@@ -450,8 +419,6 @@ static void hourChanged() {
         case 21:
             if (MOON_DATE) {
                 send_to_moon("The full moon has risen.\r\n");
-                MOON_UP = true;
-                oozaru_add();
             }
             break;
         default:

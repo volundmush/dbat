@@ -3473,20 +3473,28 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
                 break;
             case 49: /* Hell Spiral */
                 damtype_focus(ch, &dam, focus, 200);
-                if (!IS_NPC(ch)) {
-                    if (PLR_FLAGGED(ch, PLR_TRANS6)) {
-                        dam += dam;
-                    } else if (PLR_FLAGGED(ch, PLR_TRANS5)) {
-                        dam += (dam * 0.01) * 75;
-                    } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-                        dam += (dam * 0.01) * 50;
-                    } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-                        dam += (dam * 0.01) * 25;
-                    } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-                        dam += (dam * 0.01) * 15;
-                    } else if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+                switch(ch->form) {
+                    case FormID::Android10:
                         dam += (dam * 0.01) * 5;
-                    }
+                        break;
+                    case FormID::Android20:
+                        dam += (dam * 0.01) * 15;
+                        break;
+                    case FormID::Android30:
+                        dam += (dam * 0.01) * 25;
+                        break;
+                    case FormID::Android40:
+                        dam += (dam * 0.01) * 50;
+                        break;
+                    case FormID::Android50:
+                        dam += (dam * 0.01) * 75;
+                        break;
+                    case FormID::Android60:
+                        dam += dam;
+                        break;
+                    default:
+                        break;
+
                 }
                 break;
             case 50: /* Seishou Enko */
@@ -4043,7 +4051,7 @@ int check_skill(struct char_data *ch, int skill) {
 bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
 
     if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
-        st -= st * 0.5;
+        st *= 0.5;
     }
 
     int fail = false;
@@ -4086,17 +4094,42 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
         }
         fail = true;
     }
-    if (IS_NONPTRANS(ch)) {
-        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-            st -= st * 0.2;
-        } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-            st -= st * 0.4;
-        } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-            st -= st * 0.6;
-        } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-            st -= st * 0.8;
+
+    if (IS_ICER(ch)) {
+        switch(ch->form) {
+            case FormID::IcerFirst:
+                st *= 1.05;
+                break;
+            case FormID::IcerSecond:
+                st *= 1.1;
+                break;
+            case FormID::IcerThird:
+                st *= 1.15;
+                break;
+            case FormID::IcerFourth:
+                st *= 1.20;
+                break;
+            default:
+                break;
         }
     }
+
+    // Below section is commented out due to not using these flags anymore.
+    // TODO: Review and re-implement.
+
+    /*
+    if (IS_NONPTRANS(ch)) {
+        if (PLR_FLAGGED(ch, PLR_TRANS1)) {
+            st *= 0.8;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
+            st *= 0.6;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
+            st *= 0.4;
+        } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
+            st *= 0.2;
+        }
+    }
+     */
     auto ratio = ch->getBurdenRatio();
     // increase the stamina costs by ratio. Ratio can be 0.0 to 1.0 or more.
     // If ratio is 0, then no change. If ratio is 1.0, then double the cost.
@@ -4143,23 +4176,35 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
         } else if (!IS_NPC(ch) && GET_BONUS(ch, BONUS_SLACKER) > 0) {
             st += st * .25;
         }
-        if (IS_ICER(ch)) {
-            if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-                st = st * 1.05;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-                st = st * 1.1;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-                st = st * 1.15;
-            } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-                st = st * 1.20;
-            }
-        }
+
         if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
             st -= st * 0.5;
             GET_CHARGE(ch) -= st;
             if (GET_CHARGE(ch) < 0)
                 GET_CHARGE(ch) = 0;
         }
+
+        if (IS_ICER(ch)) {
+            switch(ch->form) {
+                case FormID::IcerFirst:
+                    st *= 1.05;
+                    break;
+                case FormID::IcerSecond:
+                    st *= 1.1;
+                    break;
+                case FormID::IcerThird:
+                    st *= 1.15;
+                    break;
+                case FormID::IcerFourth:
+                    st *= 1.20;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // TODO: reimplement
+        /*
         if (IS_NONPTRANS(ch)) {
             if (PLR_FLAGGED(ch, PLR_TRANS1)) {
                 st -= st * 0.2;
@@ -4171,6 +4216,9 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
                 st -= st * 0.8;
             }
         }
+         */
+
+
         auto ratio = ch->getBurdenRatio();
         st += st * ratio;
         ch->decCurST(st);
@@ -4487,49 +4535,46 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 perc = rand_number(1, 176);
             }
             if (nanite >= perc) {
-                if (PLR_FLAGGED(vict, PLR_TRANS6)) {
-                    act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_CHAR);
-                    act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block MOST of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_ROOM);
-                    dmg -= (dmg * 0.01) * 50;
-                } else if (PLR_FLAGGED(vict, PLR_TRANS5)) {
-                    act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_CHAR);
-                    act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_ROOM);
-                    dmg -= (dmg * 0.01) * 40;
-                } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-                    act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_CHAR);
-                    act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a lot of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_ROOM);
-                    dmg -= (dmg * 0.01) * 30;
-                } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-                    act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n",
-                        true, vict, nullptr, nullptr, TO_CHAR);
-                    act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a good deal of the damage!@n",
-                        true, vict, nullptr, nullptr, TO_ROOM);
-                    dmg -= (dmg * 0.01) * 25;
-                } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-                    act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_CHAR);
-                    act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block some of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_ROOM);
-                    dmg -= (dmg * 0.01) * 20;
-                } else if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-                    act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_CHAR);
-                    act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a bit of the damage!@n", true,
-                        vict, nullptr, nullptr, TO_ROOM);
-                    dmg -= (dmg * 0.01) * 10;
-                } else {
-                    act("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n",
-                        true, vict, nullptr, nullptr, TO_CHAR);
-                    act("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block a tiny bit of the damage!@n",
-                        true, vict, nullptr, nullptr, TO_ROOM);
-                    dmg -= (dmg * 0.01) * 5;
+                std::string amount = "none";
+                int mult = 0;
+                switch(vict->form) {
+                    case FormID::Base:
+                        mult = 5;
+                        amount = "a tiny bit";
+                        break;
+                    case FormID::Android10:
+                        mult = 10;
+                        amount = "a bit";
+                        break;
+                    case FormID::Android20:
+                        mult = 20;
+                        amount = "some";
+                        break;
+                    case FormID::Android30:
+                        mult = 25;
+                        amount = "a good deal";
+                        break;
+                    case FormID::Android40:
+                        mult = 30;
+                        amount = "a lot";
+                        break;
+                    case FormID::Android50:
+                        mult = 40;
+                        amount = "a great deal";
+                        break;
+                    case FormID::Android60:
+                        mult = 50;
+                        amount = "MOST";
+                        break;
                 }
+
+                auto victMsg = fmt::format("@WYour @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block {} of the damage!@n", amount);
+                auto roomMsg = fmt::format("@W$n's @gn@Ga@Wn@wite @Da@Wr@wm@Do@wr@W reacts in time to block {} of the damage!@n", amount);
+                act(victMsg.c_str(), true,
+                    vict, nullptr, nullptr, TO_CHAR);
+                act(roomMsg.c_str(), true,
+                    vict, nullptr, nullptr, TO_ROOM);
+                dmg -= (dmg * 0.01) * mult;
             }
         }
 

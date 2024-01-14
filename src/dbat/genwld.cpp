@@ -457,3 +457,17 @@ std::list<char_data *> room_data::getPeople() {
     }
     return out;
 }
+
+static const std::set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
+
+MoonCheck room_data::checkMoon() {
+    for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return MoonCheck::NoMoon;
+    if(inside_sectors.contains(sector_type)) return MoonCheck::NoMoon;
+    auto check_planet = getMatchingArea(area_data::isPlanet);
+    if(!check_planet) return MoonCheck::NoMoon;
+    auto &area = areas[*check_planet];
+    if(!area.flags.test(AREA_MOON)) return MoonCheck::NoMoon;
+
+    return MOON_TIMECHECK() ? MoonCheck::Full : MoonCheck::NotFull;
+
+}

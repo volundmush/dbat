@@ -7464,7 +7464,7 @@ ACMD(do_transform) {
     auto cur_form = ch->form;
 
     // If we are in kaioken or something weird like that, prevent transforming.
-    if (PLR_FLAGGED(ch, PLR_OOZARU)) {
+    if (ch->form == FormID::GoldenOozaru || ch->form == FormID::Oozaru) {
         send_to_char(ch, "You are the great Oozaru right now and can't transform!\r\n");
         return;
     }
@@ -8284,9 +8284,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             COMBO(d->character) = -1;
             COMBHITS(d->character) = 0;
         }
-        if (MOON_OK(d->character)) {
-            oozaru_transform(d->character);
-        }
+
         if (cash == true && GET_BANK_GOLD(d->character) > 0) {
             inc = (GET_BANK_GOLD(d->character) / 50) * 2;
             GET_LINTEREST(d->character) = LASTINTEREST;

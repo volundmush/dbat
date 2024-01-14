@@ -30,6 +30,7 @@
 #include "dbat/players.h"
 #include "dbat/account.h"
 #include "dbat/improved-edit.h"
+#include "dbat/transformation.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -3305,6 +3306,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         sprintf(bloom, "...is surrounded by a bright %s aura.@n", aura_types[GET_AURA(i)]);
         act(bloom, true, i, nullptr, ch, TO_VICT);
     }
+
+    auto is_oozaru = (i->form == FormID::Oozaru || i->form == FormID::GoldenOozaru);
+
     if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
         act("@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_FIRESHIELD))
@@ -3330,9 +3334,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
         act(aura, true, i, nullptr, ch, TO_VICT);
     }
-    if (!PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (!is_oozaru && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
-    if (!PLR_FLAGGED(i, PLR_OOZARU) && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
+    if (!is_oozaru && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
         char aura[MAX_INPUT_LENGTH];
         sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
         act(aura, true, i, nullptr, ch, TO_VICT);
@@ -4706,7 +4710,21 @@ ACMD(do_look) {
                 //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
             }
         }
-    } else if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
+    } else if(is_abbrev(arg, "moon")) {
+        switch(room->checkMoon()) {
+            case MoonCheck::NoMoon:
+                send_to_char(ch, "It's kinda hard to see any moons from here.\r\n");
+                return;
+            case MoonCheck::NotFull:
+                send_to_char(ch, "You gaze skyward, but there's no full moon in sight.\r\n");
+                return;
+            case MoonCheck::Full:
+                send_to_char(ch, "You gaze upon a wondrous full moon... it's an amazing sight.\r\n");
+                ch->gazeAtMoon();
+                return;
+        }
+    }
+    else if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
         if (subcmd == SCMD_SEARCH)
             search_in_direction(ch, INDIR);
         else
@@ -4842,21 +4860,33 @@ ACMD(do_score) {
             } else if (PLR_FLAGGED(ch, PLR_SENSEM)) {
                 sprintf(model, "@RSensor Equiped");
             }
-            if (PLR_FLAGGED(ch, PLR_TRANS1)) {
-                sprintf(version, "Beta 1.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS2)) {
-                sprintf(version, "ANS 2.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS3)) {
-                sprintf(version, "ANS 3.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS4)) {
-                sprintf(version, "ANS 4.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS5)) {
-                sprintf(version, "ANS 5.0");
-            } else if (PLR_FLAGGED(ch, PLR_TRANS6)) {
-                sprintf(version, "ANS 6.0");
-            } else {
-                sprintf(version, "Alpha 0.5");
+
+            switch(ch->form) {
+                case FormID::Base:
+                    sprintf(version, "Alpha 0.5");
+                    break;
+                case FormID::Android10:
+                    sprintf(version, "Beta 1.0");
+                    break;
+                case FormID::Android20:
+                    sprintf(version, "ANS 2.0");
+                    break;
+                case FormID::Android30:
+                    sprintf(version, "ANS 3.0");
+                    break;
+                case FormID::Android40:
+                    sprintf(version, "ANS 4.0");
+                    break;
+                case FormID::Android50:
+                    sprintf(version, "ANS 5.0");
+                    break;
+                case FormID::Android60:
+                    sprintf(version, "ANS 6.0");
+                    break;
+                default:
+                    break;
             }
+
             send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model,
                          absorb > 0 ? "@RN/A" : add_commas(GET_UP(ch)).c_str(), version);
         }
@@ -4967,165 +4997,12 @@ ACMD(do_score) {
 
 static void trans_check(struct char_data *ch, struct char_data *vict) {
 /* Rillao: transloc, add new transes here */
-    if (IS_HUMAN(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Human Fourth@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_HOSHIJIN(vict)) {
-        if (!vict->mimic || vict == ch) {
-            if (GET_PHASE(vict) == 1) {
-                send_to_char(ch, "         @cCurrent Transformation@D: @CBirth Phase@n\r\n");
-            } else if (GET_PHASE(vict) == 2) {
-                send_to_char(ch, "         @cCurrent Transformation@D: @CLife Phase@n\r\n");
-            } else {
-                send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-            }
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if ((IS_SAIYAN(vict) || IS_HALFBREED(vict)) && !PLR_FLAGGED(vict, PLR_LSSJ)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1) && !PLR_FLAGGED(vict, PLR_FPSSJ)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS1) && PLR_FLAGGED(vict, PLR_FPSSJ)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan Fourth@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_OOZARU)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @COozaru@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_SAIYAN(vict) && PLR_FLAGGED(vict, PLR_LSSJ)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1) && !PLR_FLAGGED(vict, PLR_FPSSJ)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Saiyan First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS1) && PLR_FLAGGED(vict, PLR_FPSSJ)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @YFull Powered @CSuper Saiyan@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @YLegendary @CSuper Saiyan@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_OOZARU)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @COozaru@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_NAMEK(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Namek Fourth@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_ICER(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTransform First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTransform Fourth@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_KONATSU(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CShadow First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Third@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CShadow Fourth@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_MUTANT(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMutate First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMutate Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMutate Third@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_BIO(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMature@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSemi-perfect@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CPerfect@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper Perfect@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_ANDROID(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 1.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 2.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 3.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS4)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 4.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS5)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 5.0@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS6)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSeries 6.0@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_MAJIN(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CAffinity@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CSuper@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CTrue@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_TRUFFLE(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CAscend First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CAscend Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CAscend Third@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else if (IS_KAI(vict)) {
-        if (PLR_FLAGGED(vict, PLR_TRANS1)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMystic First@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS2)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMystic Second@n\r\n");
-        } else if (PLR_FLAGGED(vict, PLR_TRANS3)) {
-            send_to_char(ch, "         @cCurrent Transformation@D: @CMystic Third@n\r\n");
-        } else {
-            send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
-        }
-    } else {
+    if(vict->form == FormID::Base || (vict->mimic && vict != ch)) {
         send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
+        return;
     }
+
+    send_to_char(ch, "         @cCurrent Transformation@D: %s\r\n", trans::getName(vict, vict->form));
 
 } // End trans check
 
