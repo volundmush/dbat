@@ -777,6 +777,7 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
 
 #define IS_WEAPON(type) (((type) >= TYPE_HIT) && ((type) < TYPE_SUFFERING))
 
+
 /* The Fight related routines */
 void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
@@ -941,19 +942,6 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 ch->incCurKIPercent(.15);
                 ch->incCurSTPercent(.15);
                 send_to_char(ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
-            }
-        }
-
-        if (auto drain = trans::getStaminaDrain(ch, ch->form, true); drain > 0) {
-            if(ch->decCurSTPercent(drain) == 0) {
-                if(!trans::blockRevertDisallowed(ch, FormID::Base)) {
-                    act("@mExhausted of stamina, your body forcibly reverts from its form.@n", true, ch, nullptr,
-                        nullptr, TO_CHAR);
-                    act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", true, ch, nullptr,
-                        nullptr, TO_ROOM);
-                    ch->form = FormID::Base;
-                    ch->remove_kaioken(true);
-                }
             }
         }
 

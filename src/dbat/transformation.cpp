@@ -29,9 +29,9 @@ namespace trans {
             case FormID::GoldenOozaru:
                 return "@YGolden Oozaru@n";
             case FormID::SuperSaiyan:
-                return "YSuper @CSaiyan @WFirst@n";
+                return "@YSuper @CSaiyan @WFirst@n";
             case FormID::SuperSaiyan2:
-                return "YSuper @CSaiyan @WSecond@n";
+                return "@YSuper @CSaiyan @WSecond@n";
             case FormID::SuperSaiyan3:
                 return "@YSuper @CSaiyan @WThird@n";
             case FormID::SuperSaiyan4:
@@ -87,11 +87,11 @@ namespace trans {
 
             // Mutant Forms.
             case FormID::MutateFirst:
-                return "YMutate @WFirst@n";
+                return "@YMutate @WFirst@n";
             case FormID::MutateSecond:
-                return "YMutate @WSecond@n";
+                return "@YMutate @WSecond@n";
             case FormID::MutateThird:
-                return "YMutate @WThird@n";
+                return "@YMutate @WThird@n";
 
             // BioAndroid
             case FormID::BioMature:
@@ -294,7 +294,8 @@ namespace trans {
     struct trans_affect_type {
         int location{};
         double modifier{};
-        int specific{};
+        int specific{-1};
+        std::function<double(struct char_data *ch)> func{};
     };
 
     static std::unordered_map<FormID, std::vector<trans_affect_type>> trans_affects = {
@@ -581,71 +582,67 @@ namespace trans {
 
     double getModifier(char_data* ch, int location, int specific) {
         if (ch->form == FormID::Base) return 0.0;
-
+        double out = 0.0;
         if (auto found = trans_affects.find(ch->form); found != trans_affects.end()) {
-            double out = 0.0;
             for (auto& affect: found->second) {
-                if (affect.location == location && affect.specific == specific) {
+                if (affect.location == location) {if(specific != -1 && specific != affect.specific) continue;
                     out += affect.modifier;
+                    if(affect.func) {
+                        out += affect.func(ch);
+                    }
                 }
             }
-            return out;
+
         }
 
-        return 0.0;
+        return out;
     }
 
     static std::unordered_map<FormID, double> trans_drain = {
         // Saiyan forms.
-        {FormID::SuperSaiyan, .1},
-        {FormID::SuperSaiyan2, .2},
-        {FormID::SuperSaiyan3, .2},
-        {FormID::SuperSaiyan4, .2},
+        {FormID::SuperSaiyan, .06},
+        {FormID::SuperSaiyan2, .08},
+        {FormID::SuperSaiyan3, .12},
+        {FormID::SuperSaiyan4, .14},
 
         // Human Forms
-        {FormID::SuperHuman, .1},
-        {FormID::SuperHuman2, .2},
-        {FormID::SuperHuman3, .2},
-        {FormID::SuperHuman4, .2},
+        {FormID::SuperHuman, .06},
+        {FormID::SuperHuman2, .08},
+        {FormID::SuperHuman3, .12},
+        {FormID::SuperHuman4, .14},
 
         // icer Forms
-        {FormID::IcerFirst, .1},
-        {FormID::IcerSecond, .2},
-        {FormID::IcerThird, .2},
-        {FormID::IcerFourth, .2},
+        {FormID::IcerFirst, .06},
+        {FormID::IcerSecond, .08},
+        {FormID::IcerThird, .12},
+        {FormID::IcerFourth, .14},
 
         // Konatsu Forms
-        {FormID::ShadowFirst, .1},
-        {FormID::ShadowSecond, .2},
-        {FormID::ShadowThird, .2},
+        {FormID::ShadowFirst, .06},
+        {FormID::ShadowSecond, .08},
+        {FormID::ShadowThird, .1},
 
         // Namekian Forms
-        {FormID::SuperNamekian, .1},
-        {FormID::SuperNamekian2, .2},
-        {FormID::SuperNamekian3, .2},
-        {FormID::SuperNamekian4, .2},
+        {FormID::SuperNamekian, .06},
+        {FormID::SuperNamekian2, .07},
+        {FormID::SuperNamekian3, .08},
+        {FormID::SuperNamekian4, .1},
 
         // Mutant Forms
-        {FormID::MutateFirst, .1},
-        {FormID::MutateSecond, .2},
-        {FormID::MutateThird, .2},
+        {FormID::MutateFirst, .05},
+        {FormID::MutateSecond, .07},
+        {FormID::MutateThird, .1},
 
         // Bio, Android, Majin, have no drain.
 
         // Kai
-        {FormID::MysticFirst, .1},
-        {FormID::MysticSecond, .2},
-        {FormID::MysticThird, .2},
-
-        // Tuffle
-        {FormID::AscendFirst, .1},
-        {FormID::AscendSecond, .2},
-        {FormID::AscendThird, .2}
-
+        {FormID::MysticFirst, .05},
+        {FormID::MysticSecond, .07},
+        {FormID::MysticThird, .1}
 
     };
 
-    double getStaminaDrain(char_data* ch, FormID form, bool fighting) {
+    double getStaminaDrain(char_data* ch, FormID form, bool upkeep) {
         if (ch->form == FormID::Base) return 0.0;
 
         double drain = 0.0;
@@ -656,11 +653,30 @@ namespace trans {
 
         if(form == FormID::SuperSaiyan && PLR_FLAGGED(ch, PLR_FPSSJ)) drain *= 0.5;
 
-        if(fighting) {
-            drain *= 0.2;
+        if(upkeep) {
+            drain *= 0.01;
             if(ch->race == RaceID::Icer) drain = 0.0;
         }
         return drain;
+    }
+
+    void gamesys_transform(uint64_t heartPulse, double deltaTime) {
+        for(auto ch = character_list; ch; ch = ch->next) {
+
+            // Check stamina drain.
+            if (auto drain = getStaminaDrain(ch, ch->form, true) * deltaTime; drain > 0) {
+                if(ch->decCurSTPercent(drain) == 0) {
+                    if(!blockRevertDisallowed(ch, FormID::Base)) {
+                        act("@mExhausted of stamina, your body forcibly reverts from its form.@n", true, ch, nullptr,
+                            nullptr, TO_CHAR);
+                        act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", true, ch, nullptr,
+                            nullptr, TO_ROOM);
+                        ch->form = FormID::Base;
+                        ch->remove_kaioken(true);
+                    }
+                }
+            }
+        }
     }
 
     struct trans_echo {
@@ -1260,4 +1276,6 @@ namespace trans {
     bool unlock(struct char_data *ch, FormID form) {
         return true;
     }
+
+
 }

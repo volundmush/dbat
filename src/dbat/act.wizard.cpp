@@ -39,6 +39,7 @@
 #include "dbat/shop.h"
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
+#include "dbat/transformation.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -1660,25 +1661,23 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     sprinttype(GET_POS(k), position_types, buf, sizeof(buf));
     send_to_char(ch, "Pos: %s, Fighting: %s", buf, FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
 
+
     if (k->desc) {
         sprinttype(STATE(k->desc), connected_types, buf, sizeof(buf));
         send_to_char(ch, ", Connected: %s", buf);
     }
 
-    if (IS_NPC(k)) {
-        sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
-        send_to_char(ch, ", Default position: %s\r\n", buf);
-        sprintbitarray(k->mobFlags, action_bits, PM_ARRAY_MAX, buf);
-        send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
-    } else {
-        send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
+    sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
+    send_to_char(ch, ", Default position: %s", buf);
+    send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
+    sprintbitarray(k->mobFlags, action_bits, PM_ARRAY_MAX, buf);
+    send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
+    sprintbitarray(k->playerFlags, player_bits, PM_ARRAY_MAX, buf);
+    send_to_char(ch, "PLR: @c%s@n\r\n", buf);
+    sprintbitarray(k->pref, preference_bits, PR_ARRAY_MAX, buf);
+    send_to_char(ch, "PRF: @g%s@n\r\n", buf);
 
-        sprintbitarray(k->playerFlags, player_bits, PM_ARRAY_MAX, buf);
-        send_to_char(ch, "PLR: @c%s@n\r\n", buf);
-
-        sprintbitarray(PRF_FLAGS(k), preference_bits, PR_ARRAY_MAX, buf);
-        send_to_char(ch, "PRF: @g%s@n\r\n", buf);
-    }
+    send_to_char(ch, "Form: %s\r\n", trans::getName(k, k->form));
 
     if (IS_MOB(k)) {
         send_to_char(ch, "Mob Spec-Proc: %s, NPC Bare Hand Dam: %dd%d\r\n",

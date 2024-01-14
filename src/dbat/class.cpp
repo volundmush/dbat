@@ -1827,6 +1827,31 @@ namespace sensei {
         return id != SenseiID::Commoner;
     }
 
+    struct sen_affect_type {
+        int location{};
+        double modifier{};
+        int specific{-1};
+        std::function<double(struct char_data *ch)> func{};
+    };
 
+    static std::unordered_map<SenseiID, std::vector<sen_affect_type>> sensei_affects = {};
+
+    double getModifier(char_data* ch, int location, int specific) {
+        double out = 0.0;
+        if(auto found = sensei_affects.find(ch->chclass); found != sensei_affects.end()) {
+
+            for(auto& affect : found->second) {
+                if(affect.location == location) {
+                    if(specific != -1 && specific != affect.specific) continue;
+                    out += affect.modifier;
+                    if(affect.func) {
+                        out += affect.func(ch);
+                    }
+                }
+            }
+        }
+
+        return out;
+    }
 
 }

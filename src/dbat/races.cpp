@@ -443,7 +443,7 @@ namespace race {
     struct race_affect_type {
         int location{};
         double modifier{};
-        int specific{};
+        int specific{-1};
         std::function<double(struct char_data *ch)> func{};
     };
 
@@ -478,22 +478,21 @@ namespace race {
     };
 
     double getModifier(char_data* ch, int location, int specific) {
-
+        double out = 0.0;
         if(auto found = race_affects.find(ch->race); found != race_affects.end()) {
-            double out = 0.0;
+
             for(auto& affect : found->second) {
-                if(affect.location == location && affect.specific == specific) {
+                if(affect.location == location) {
+                    if(specific != -1 && specific != affect.specific) continue;
                     out += affect.modifier;
                     if(affect.func) {
                         out += affect.func(ch);
                     }
                 }
             }
-            return out;
         }
 
-
-        return 0.0;
+        return out;
     }
 
     std::vector<RaceID> filterRaces(std::function<bool(RaceID)> func) {

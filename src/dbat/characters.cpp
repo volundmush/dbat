@@ -355,6 +355,7 @@ void char_data::restoreHealth(bool announce) {
 
 int64_t char_data::getMaxPLTrans() {
     auto total = getEffBasePL();
+
     total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_HIT));
     total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_PL_MULT));
     return total;

@@ -44,6 +44,7 @@
 #include "dbat/account.h"
 #include "dbat/charmenu.h"
 #include "dbat/puppet.h"
+#include "dbat/transformation.h"
 #include <mutex>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
@@ -295,6 +296,7 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("wishSYS", 1.0, wishSYS),
         GameSystem("mobile_activity", 10.0, mobile_activity),
         GameSystem("check_auction", 15.0, check_auction),
+        GameSystem("gamesys_transform", 0.0, trans::gamesys_transform),
         GameSystem("fight_stack", 4.0, fight_stack),
         GameSystem("homing_update", 2.0, homing_update),
         GameSystem("huge_update", 2.0, huge_update),

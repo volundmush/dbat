@@ -9,7 +9,7 @@ namespace trans {
 
     extern double getModifier(struct char_data *ch, int location, int specific = 0);
 
-    extern double getStaminaDrain(struct char_data *ch, FormID form, bool fighting = false);
+    extern double getStaminaDrain(struct char_data *ch, FormID form, bool upkeep = false);
 
     extern std::optional<int> getAppearanceMod(struct char_data *ch, FormID form, CharAppearance mode);
 
@@ -22,5 +22,7 @@ namespace trans {
     extern bool blockRevertDisallowed(struct char_data *ch, FormID form);
 
     extern std::optional<FormID> findForm(struct char_data *ch, const std::string& arg);
+
+    extern void gamesys_transform(uint64_t heartPulse, double deltaTime);
 
 }
