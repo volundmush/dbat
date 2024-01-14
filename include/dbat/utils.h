@@ -196,10 +196,6 @@ extern void advance_level(struct char_data *ch);
 
 extern void set_title(struct char_data *ch, char *title);
 
-extern void gain_exp(struct char_data *ch, int64_t gain);
-
-extern void gain_exp_regardless(struct char_data *ch, int gain);
-
 extern void gain_condition(struct char_data *ch, int condition, int value);
 
 extern void point_update(uint64_t heartPulse, double deltaTime);
@@ -537,7 +533,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define IS_WEIGHTED(ch) ((ch)->getEffMaxPL() < GET_MAX_HIT(ch))
 
 
-#define GET_EXP(ch)      ((ch)->exp)
+#define GET_EXP(ch)      ((ch)->getExperience())
 /*
  * Changed GET_AC to GET_ARMOR so that code with GET_AC will need to be
  * looked at to see if it needs to change before being converted to use

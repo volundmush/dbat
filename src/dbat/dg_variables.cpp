@@ -664,7 +664,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int64_t addition = std::max<int64_t>(0, atof(subfield));
 
-                            gain_exp(c, addition);
+                            c->modExperience(addition);
                         }
                         snprintf(str, slen, "%" I64T "", GET_EXP(c));
                     }

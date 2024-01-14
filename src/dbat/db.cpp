@@ -1976,15 +1976,7 @@ static void check_start_rooms() {
  */
 
 static void mob_autobalance(struct char_data *ch) {
-    /* Try to add some baseline defaults based on level choice. */
-    //GET_HIT(ch) = 0;
-    //GET_MANA(ch) = 0;
-    //GET_MOVE(ch) = 0;
-    GET_EXP(ch) = 0;
 
-    GET_NDD(ch) = 0;
-    GET_SDD(ch) = 0;
-    GET_DAMAGE_MOD(ch) = 0;
 }
 
 static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
@@ -2030,7 +2022,6 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     }
 
     ch->set(CharMoney::Carried, t[0]);
-    GET_EXP(ch) = 0;
     ch->race = static_cast<RaceID>(t[2]);
 
     ch->chclass = static_cast<SenseiID>(t[3]);
@@ -2568,7 +2559,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                     }
                 }
 
-                if (t[0] >= APPLY_DAMAGE_BONUS && t[0] <= APPLY_DEFENSE_BONUS) {
+                if (t[0] >= APPLY_DAMAGE_PERC && t[0] <= APPLY_DEFENSE_PERC) {
                     basic_mud_log("Warning: object #%d (%s) uses deprecated saving throw applies",
                         nr, GET_OBJ_SHORT(&o));
                 }
@@ -3454,46 +3445,47 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
     
     if (GET_EXP(mob) <= 0 && !MOB_FLAGGED(mob, MOB_DUMMY)) {
-        GET_EXP(mob) = GET_LEVEL(mob) * base;
-        GET_EXP(mob) = GET_EXP(mob) * .9;
-        GET_EXP(mob) += GET_LEVEL(mob) / 2;
-        GET_EXP(mob) += GET_LEVEL(mob) / 3;
+        int64_t mexp = GET_LEVEL(mob) * base;
+        mexp = mexp * .9;
+        mexp += GET_LEVEL(mob) / 2;
+        mexp += GET_LEVEL(mob) / 3;
         if (IS_DRAGON(mob)) {
-            GET_EXP(mob) *= 1.4;
+            mexp *= 1.4;
         } else if (IS_ANDROID(mob)) {
-            GET_EXP(mob) *= 1.25;
+            mexp *= 1.25;
         } else if (IS_SAIYAN(mob)) {
-            GET_EXP(mob) *= 1.1;
+            mexp *= 1.1;
         } else if (IS_BIO(mob)) {
-            GET_EXP(mob) *= 1.2;
+            mexp *= 1.2;
         } else if (IS_MAJIN(mob)) {
-            GET_EXP(mob) *= 1.25;
+            mexp *= 1.25;
         } else if (IS_DEMON(mob)) {
-            GET_EXP(mob) *= 1.1;
+            mexp *= 1.1;
         }
         if (GET_CLASS(mob) == SenseiID::Commoner && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
             if (!IS_ANDROID(mob) && !IS_SAIYAN(mob) && !IS_BIO(mob) && !IS_MAJIN(mob)) {
-                GET_EXP(mob) *= 0.75;
+                mexp *= 0.75;
             }
         }
 
         if (GET_LEVEL(mob) > 90) {
-            GET_EXP(mob) = GET_EXP(mob) * .7;
+            mexp = mexp * .7;
         } else if (GET_LEVEL(mob) > 80) {
-            GET_EXP(mob) = GET_EXP(mob) * .75;
+            mexp = mexp * .75;
         } else if (GET_LEVEL(mob) > 70) {
-            GET_EXP(mob) = GET_EXP(mob) * .8;
+            mexp = mexp * .8;
         } else if (GET_LEVEL(mob) > 60) {
-            GET_EXP(mob) = GET_EXP(mob) * .85;
+            mexp = mexp * .85;
         } else if (GET_LEVEL(mob) > 40) {
-            GET_EXP(mob) = GET_EXP(mob) * .9;
+            mexp = mexp * .9;
         } else if (GET_LEVEL(mob) > 30) {
-            GET_EXP(mob) = GET_EXP(mob) * .95;
+            mexp = mexp * .95;
         }
 
         if (GET_EXP(mob) > 20000000) {
-            GET_EXP(mob) = 20000000;
+            mexp = 20000000;
         }
+        mob->setExperience(mexp);
     }
 
     mob->setAge(birth_age(mob));

@@ -332,7 +332,7 @@ int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'E':
-                    if (!strcmp(tag, "Exp ")) GET_EXP(ch) = atoi(line);
+                    if (!strcmp(tag, "Exp ")) ch->exp = atoi(line);
                     else if (!strcmp(tag, "Eali")) ch->set(CharAlign::LawChaos, atoi(line));
                     else if (!strcmp(tag, "Ecls")) {
 

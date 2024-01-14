@@ -1019,7 +1019,8 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         if (IS_KONATSU(ch) && skill_num == SKILL_PARRY) {
                             SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 5);
                         }
-                        gain_exp(ch, level_exp(ch, GET_LEVEL(ch) + 1) / 20);
+                        int64_t gain = level_exp(ch, GET_LEVEL(ch) + 1) / 20;
+                        ch->modExperience(gain);
                     }
                     if (GET_FORGETING(ch) != 0) {
                         GET_FORGET_COUNT(ch) += 1;
@@ -1092,34 +1093,6 @@ int rpp_to_level(struct char_data *ch) {
     }
 }
 
-void handle_exp(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument) {
-    if (GET_PRACTICES(ch) < 25) {
-        send_to_char(ch, "You need at least 25 practice sessions to learn.\r\n");
-        return;
-    }
-    if (GET_EXP(ch) > level_exp(ch, GET_LEVEL(ch) + 1) && GET_LEVEL(ch) != 100) {
-        send_to_char(ch, "You can't learn with negative TNL.\r\n");
-        return;
-    } else {
-        int64_t amt = level_exp(ch, GET_LEVEL(ch) + 1) / 100;
-        if (GET_LEVEL(ch) == 100) {
-            amt = 400000;
-        }
-        act("@c$n@W spends time training you in $s fighting style.@n", true, keeper, nullptr, ch, TO_VICT);
-        act("@c$n@W spends time training @C$N@W in $s fighting style.@n", true, keeper, nullptr, ch, TO_NOTVICT);
-        send_to_char(ch, "@wExperience Gained: @C%s@n\r\n", add_commas(amt).c_str());
-        ch->modPractices(-25);
-        if (IS_SAIYAN(ch) || IS_HALFBREED(ch)) {
-            amt = amt + (amt * .30);
-        }
-        if (IS_ICER(ch)) {
-            amt = amt - (amt * .10);
-        }
-        gain_exp(ch, amt);
-        return;
-    }
-}
-
 void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, char *argument) {
 
     int expcost = 25000, goldcost = 750, fail = false, reward = 25, goldadjust = 0, expadjust = 0;
@@ -1169,7 +1142,7 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
     if (fail == true)
         return;
 
-    GET_EXP(ch) -= expcost;
+    ch->modExperience(-expcost);
     ch->mod(CharMoney::Carried, -goldcost);
     ch->modPractices(25);
 

@@ -13,7 +13,7 @@ extern void do_start(struct char_data *ch);
 
 extern int invalid_class(struct char_data *ch, struct obj_data *obj);
 
-extern int level_exp(struct char_data *ch, int level);
+extern int64_t level_exp(struct char_data *ch, int level);
 
 extern int load_levels();
 

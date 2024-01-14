@@ -444,18 +444,49 @@ namespace race {
         int location{};
         double modifier{};
         int specific{};
+        std::function<double(struct char_data *ch)> func{};
     };
 
-    static std::unordered_map<FormID, std::vector<race_affect_type>> race_affects = {};
+    static std::unordered_map<RaceID, std::vector<race_affect_type>> race_affects = {
+            {RaceID::Saiyan, {
+                    {APPLY_EXP_GAIN_MULT, 0.3},
+                    //{APPLY_PHYS_DAM_PERC, 0.0, 0, [](struct char_data *ch) {return PLR_FLAGGED(ch, PLR_TAIL) ? 0.15 : 0;}},
+                    //{APPLY_DAM_ATK_TIER, 0.2, 3},
+                    //{APPLY_SKILL_SLOTS, -1},
+                    //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](struct char_data *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
+
+            }},
+
+            {RaceID::Halfbreed, {
+                    {APPLY_EXP_GAIN_MULT, 0.2},
+                    //{APPLY_SKILL_SLOTS, 1},
+                    //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Intelligence},
+                    //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Strength},
+                    //{APPLY_PS_GAIN_MULT, -0.4}
+
+            }},
+
+            {RaceID::Icer, {
+                     {APPLY_EXP_GAIN_MULT, -0.1},
+
+            }},
+
+            {RaceID::Kai, {
+                                   {APPLY_EXP_GAIN_MULT, -0.1},
+
+                           }},
+    };
 
     double getModifier(char_data* ch, int location, int specific) {
-        if(ch->form == FormID::Base) return 0.0;
 
-        if(auto found = race_affects.find(ch->form); found != race_affects.end()) {
+        if(auto found = race_affects.find(ch->race); found != race_affects.end()) {
             double out = 0.0;
             for(auto& affect : found->second) {
                 if(affect.location == location && affect.specific == specific) {
                     out += affect.modifier;
+                    if(affect.func) {
+                        out += affect.func(ch);
+                    }
                 }
             }
             return out;

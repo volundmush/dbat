@@ -669,6 +669,9 @@ struct char_data : public unit_data {
     int armor{0};        /* Internally stored *10		*/
 
     int64_t exp{};            /* The experience of the player		*/
+    int64_t getExperience();
+    int64_t setExperience(int64_t value);
+    int64_t modExperience(int64_t value, bool applyBonuses = true);
 
     int accuracy{};            /* Base hit accuracy			*/
     int accuracy_mod{};        /* Any bonus or penalty to the accuracy	*/

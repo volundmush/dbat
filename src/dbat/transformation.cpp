@@ -305,8 +305,8 @@ namespace trans {
                 {APPLY_HEIGHT_MULT, 9.0},
                 {APPLY_WEIGHT_MULT, 49.0},
                 {APPLY_ALL_VITALS, 10000},
-                {APPLY_DEFENSE_BONUS, 0.3},
-                {APPLY_DAMAGE_BONUS, 0.3},
+                {APPLY_DEFENSE_PERC, 0.3},
+                {APPLY_DAMAGE_PERC, 0.3},
                 {APPLY_VITALS_MULT, 1.0}
             }
         },
@@ -315,8 +315,8 @@ namespace trans {
                 {APPLY_HEIGHT_MULT, 9.0},
                 {APPLY_WEIGHT_MULT, 49.0},
                 {APPLY_ALL_VITALS, 182000000},
-                {APPLY_DEFENSE_BONUS, 0.3},
-                {APPLY_DAMAGE_BONUS, 0.3},
+                {APPLY_DEFENSE_PERC, 0.3},
+                {APPLY_DAMAGE_PERC, 0.3},
                 {APPLY_VITALS_MULT, 4.5}
             }
         },

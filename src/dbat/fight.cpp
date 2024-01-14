@@ -2381,7 +2381,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     else
         send_to_char(ch, "You receive your share of experience -- one measly little point!\r\n");
 
-    gain_exp(ch, share);
+    ch->modExperience(share);
     /*change_alignment(ch, victim);*/
 }
 
@@ -2526,14 +2526,14 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
         send_to_char(ch, "You receive one lousy experience point. That fight was hardly worth it...\r\n");
     }
     if (!IS_NPC(ch)) {
-        gain_exp(ch, exp);
+        ch->modExperience(exp);
     }
     if (IS_NPC(victim)) {
-        gain_exp(victim, -exp);
+        victim->modExperience(-exp);
     }
     if (!IS_NPC(victim)) {
         exp = exp / 5;
-        gain_exp(victim, -exp);
+        victim->modExperience(-exp);
     }
     /*change_alignment(ch, victim);*/
 }

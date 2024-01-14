@@ -1421,8 +1421,8 @@ enum class FormID : uint8_t {
 #define APPLY_INT               3    /* Apply to intelligence	*/
 #define APPLY_WIS               4    /* Apply to wisdom		*/
 #define APPLY_CON               5    /* Apply to constitution	*/
-#define APPLY_CHA        6    /* Apply to charisma		*/
-#define APPLY_SPI             7    /* Reserved			*/
+#define APPLY_CHA               6    /* Apply to charisma		*/
+#define APPLY_SPI               7    /* Reserved			*/
 #define APPLY_LEVEL             8    /* Reserved			*/
 #define APPLY_AGE               9    /* Apply to age			*/
 #define APPLY_CHAR_WEIGHT      10    /* Apply to weight		*/
@@ -1431,27 +1431,27 @@ enum class FormID : uint8_t {
 #define APPLY_HIT              13    /* Apply to max hit points	*/
 #define APPLY_MOVE             14    /* Apply to max move points	*/
 #define APPLY_GOLD             15    /* Reserved			*/
-#define APPLY_EXP              16    /* Reserved			*/
+#define APPLY_EXP_GAIN_MULT         16    /* Bonus/Penalty to XP gain. +/- % */
 #define APPLY_AC               17    /* Apply to Armor Class		*/
 #define APPLY_ACCURACY         18    /* Apply to accuracy		*/
 #define APPLY_DAMAGE           19    /* Apply to damage 		*/
-#define APPLY_REGEN           20    /* Regen Rate Buffed            */
-#define APPLY_TRAIN           21    /* Skill training rate buffed   */
-#define APPLY_LIFEMAX           22    /* Life Force max buffed        */
-#define APPLY_DAMAGE_BONUS     23    /* Modify damage inflicted by -/+%			*/
-#define APPLY_DEFENSE_BONUS    24    /* -/+% damage resistance.		*/
-#define APPLY_PL_MULT             25       /* Apply to race                */
-#define APPLY_KI_MULT       26       /* Apply to turn undead         */
-#define APPLY_ST_MULT      27       /* Apply to spell cast per day  */
-#define APPLY_LF_MULT      28       /* Apply to spell cast per day  */
+#define APPLY_REGEN            20    /* Regen Rate Buffed            */
+#define APPLY_TRAIN            21    /* Skill training rate buffed   */
+#define APPLY_LIFEMAX          22    /* Life Force max buffed        */
+#define APPLY_DAMAGE_PERC      23    /* Modify damage inflicted by -/+%			*/
+#define APPLY_DEFENSE_PERC     24    /* -/+% damage resistance.		*/
+#define APPLY_PL_MULT          25       /* Apply to race                */
+#define APPLY_KI_MULT          26       /* Apply to turn undead         */
+#define APPLY_ST_MULT          27       /* Apply to spell cast per day  */
+#define APPLY_LF_MULT          28       /* Apply to spell cast per day  */
 #define APPLY_VITALS_MULT      29       /* Apply to spell cast per day  */
 #define APPLY_WEIGHT_MULT      30       /* Apply to spell cast per day  */
 #define APPLY_HEIGHT_MULT      31       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_5      32       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_6      33       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_7      34       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_8      35       /* Apply to spell cast per day  */
-#define APPLY_SPELL_LVL_9      36       /* Apply to spell cast per day  */
+#define APPLY_PHYS_DAM_PERC    32       /* Bonus percentage to physical damage output.  */
+#define APPLY_KI_DAM_PERC      33       /* Bonus percentage to ki damage output.  */
+#define APPLY_PHYS_DAM_RES     34       /* Bonus resistance percentage to physical damage received.  */
+#define APPLY_KI_DAM_RES       35       /* Bonus resistance percentage to ki damage received. */
+#define APPLY_DAM_ATK_TIER     36       /* Bonus perc applied to damage output of a specific attack tier.  */
 #define APPLY_KI               37    /* Apply to max ki		*/
 #define APPLY_FORTITUDE        38    /* Apply to fortitue save	*/
 #define APPLY_REFLEX           39    /* Apply to reflex save		*/
@@ -1460,10 +1460,19 @@ enum class FormID : uint8_t {
 #define APPLY_FEAT             42       /* Apply to a specific feat     */
 #define APPLY_ALLSAVES         43       /* Apply to all 3 save types 	*/
 #define APPLY_RESISTANCE       44       /* Apply to resistance	 	*/
-#define APPLY_ALL_STATS        45       /* Apply to all attributes	*/
+#define APPLY_ALL_ATTRS        45       /* Apply to all attributes	*/
 #define APPLY_ALL_VITALS         46       // Apply to all CharStats base.
+#define APPLY_SKILL_SLOTS      47     // Add/Remove Skill Slots.
+#define APPLY_ATTR_TRAIN_COST  48     // Add/Reduce cost in train points to increase attribute by percent.
+#define APPLY_PS_GAIN_MULT          49     // Add/Reduce gained PS from things that grant PS.
+#define APPLY_TRANS_ST_UPKEEP  50    // Add/Reduce perc of stamina by % for transformation upkeep.
+#define APPLY_VITALS_GAIN_MULT 51     // improves gains to PL/KI/ST/LF by percent.
+#define APPLY_PL_GAIN_MULT     52
+#define APPLY_ST_GAIN_MULT     53
+#define APPLY_KI_GAIN_MULT     54
+#define APPLY_LF_GAIN_MULT     55
 
-#define NUM_APPLIES 47
+#define NUM_APPLIES 56
 
 /* Container flags - value[1] */
 #define CONT_CLOSEABLE      (1 << 0)    /* Container can be closed	*/

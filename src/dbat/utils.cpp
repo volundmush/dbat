@@ -2327,9 +2327,9 @@ void improve_skill(struct char_data *ch, int skill, int num) {
                 SET_SKILL(ch, skill, GET_SKILL_BASE(ch, skill) + 5);
             }
             if (GET_LEVEL(ch) < 100) {
-                GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) / 20;
+                ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) / 20);
             } else {
-                gain_exp(ch, 5000000);
+                ch->modExperience(5000000);
             }
         }
     }

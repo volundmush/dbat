@@ -2476,8 +2476,8 @@ ACMD(do_advance) {
         basic_mud_log("(GC) %s has advanced %s to level %d (from %d)",
             GET_NAME(ch), GET_NAME(victim), newlevel, oldlevel);
 
-    gain_exp_regardless(victim,
-                        level_exp(victim, newlevel) - GET_EXP(victim));
+    int gain = level_exp(victim, newlevel) - GET_EXP(victim);
+    victim->modExperience(gain);
     victim->save();
 }
 

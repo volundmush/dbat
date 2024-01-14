@@ -853,7 +853,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_EXP:
-            GET_EXP(OLC_MOB(d)) = LIMIT(i, 0, MAX_MOB_EXP);
+            OLC_MOB(d)->setExperience(LIMIT(i, 0, MAX_MOB_EXP));
             OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
             break;
 

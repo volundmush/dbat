@@ -367,7 +367,7 @@ ACMD(do_rpp) {
                 send_to_char(ch, "You can not buy experience anymore UNTIL you level.\r\n");
                 return;
             } else {
-                GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * .52;
+                ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * .52);
                 send_to_char(ch, "You gained 50%s of the entire experience needed for your next level.\r\n", "%");
             } /* Can pay for it */
         } /* End Simple Exp Reward */
@@ -724,7 +724,7 @@ ACMD(do_willpower) {
         if (fail == true) {
             return;
         } else {
-            GET_EXP(ch) = 0;
+            ch->setExperience(0);
             ch->modPractices(-100);
             if (rand_number(10, 100) - GET_INT(ch) > 60) {
                 reveal_hiding(ch, 0);
@@ -734,7 +734,7 @@ ACMD(do_willpower) {
                     true, ch, nullptr, nullptr, TO_ROOM);
                 return;
             } else {
-                GET_EXP(ch) = 0;
+                ch->setExperience(0);
                 ch->modPractices(-100);
                 reveal_hiding(ch, 0);
                 act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n",
@@ -1584,7 +1584,7 @@ ACMD(do_train) {
         send_to_char(ch, "You feel your %s improve!@n\r\n", stat_name);
         ch->mod(attr, 1);
         if (IS_PICCOLO(ch) && IS_NAMEK(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
-            GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.25;
+            ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * 0.25);
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
         }
         ch->save();
@@ -5115,19 +5115,19 @@ ACMD(do_focus) {
                     ch->modPractices(-15);
                     if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
                         gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.15;
-                        GET_EXP(ch) += gain;
+                        auto gained = ch->modExperience(gain);
                         send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n",
-                                     add_commas(gain).c_str());
+                                     add_commas(gained).c_str());
                     } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 60) {
                         gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.10;
-                        GET_EXP(ch) += gain;
+                        auto gained = ch->modExperience(gain);
                         send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n",
-                                     add_commas(gain).c_str());
+                                     add_commas(gained).c_str());
                     } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 40) {
                         gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
-                        GET_EXP(ch) += gain;
+                        auto gained = ch->modExperience(gain);
                         send_to_char(ch, "@GYou gain @g%s@G experience due to your excellence with this skill.@n\r\n",
-                                     add_commas(gain).c_str());
+                                     add_commas(gained).c_str());
                     }
                 }
                 return;
@@ -5186,22 +5186,22 @@ ACMD(do_focus) {
                         ch->modPractices(-15);
                         if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 100) {
                             gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.15;
-                            GET_EXP(vict) += gain;
+                            auto gained = vict->modExperience(gain);
                             send_to_char(vict,
                                          "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n",
-                                         add_commas(gain).c_str());
+                                         add_commas(gained).c_str());
                         } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 60) {
                             gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.10;
-                            GET_EXP(vict) += gain;
+                            auto gained = vict->modExperience(gain);
                             send_to_char(vict,
                                          "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n",
-                                         add_commas(gain).c_str());
+                                         add_commas(gained).c_str());
                         } else if (GET_SKILL(ch, SKILL_ENLIGHTEN) >= 40) {
                             gain = level_exp(vict, GET_LEVEL(vict) + 1) * 0.05;
-                            GET_EXP(vict) += gain;
+                            auto gained = vict->modExperience(gain);
                             send_to_char(vict,
                                          "@GYou gain @g%s@G experience due to the level of enlightenment you have received!@n\r\n",
-                                         add_commas(gain).c_str());
+                                         add_commas(gained).c_str());
                         }
                     }
                     return;
@@ -5292,7 +5292,7 @@ ACMD(do_focus) {
                         AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
                         if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 &&
                             rand_number(1, 3) == 3) {
-                            GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
+                            ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * 0.05);
                         }
                     }
                     return;
@@ -5384,7 +5384,7 @@ ACMD(do_focus) {
                         AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
                         if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 &&
                             rand_number(1, 3) == 3) {
-                            GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
+                            ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * 0.05);
                         }
                     }
                     return;
@@ -5488,7 +5488,7 @@ ACMD(do_focus) {
                         AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
                         if (IS_KAI(ch) && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 &&
                             rand_number(1, 3) == 3) {
-                            GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.05;
+                            ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * 0.05);
                         }
                     }
                     if (AFF_FLAGGED(vict, AFF_CURSE)) {
@@ -6784,7 +6784,7 @@ ACMD(do_heal) {
                                                                                                      (vict->getEffMaxPL()) *
                                                                                                      0.85 &&
                 rand_number(1, 3) == 3) {
-                GET_EXP(ch) += level_exp(ch, GET_LEVEL(ch) + 1) * 0.005;
+                ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * 0.005);
             }
         }
 
@@ -10730,7 +10730,7 @@ ACMD(do_fix) {
             int64_t gain = (level_exp(ch, GET_LEVEL(ch) + 1) * 0.0003) * GET_SKILL(ch, SKILL_REPAIR);
             send_to_char(ch, "@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain).c_str());
             ch->playerFlags.set(PLR_REPLEARN);
-            gain_exp(ch, gain);
+            ch->modExperience(gain);
         } else if (rand_number(2, 12) >= 10 && PLR_FLAGGED(ch, PLR_REPLEARN)) {
             ch->playerFlags.reset(PLR_REPLEARN);
             send_to_char(ch, "@mYou think you might be on to something...@n\r\n");
@@ -10833,7 +10833,8 @@ ACMD(do_resurrect) {
     }
 
     send_to_char(ch, "You take an experience penalty and pray for charity resurrection.\r\n");
-    gain_exp(ch, -(level_exp(ch, GET_LEVEL(ch)) - level_exp(ch, GET_LEVEL(ch) - 1)));
+    int64_t gain = -(level_exp(ch, GET_LEVEL(ch)) - level_exp(ch, GET_LEVEL(ch) - 1));
+    ch->modExperience(gain);
 
     for (af = ch->affected; af; af = next_af) {
         next_af = af->next;

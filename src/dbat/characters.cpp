@@ -1169,7 +1169,7 @@ attribute_t char_data::get(CharAttribute attr, bool base) {
         val = stat->second;
     }
     if(!base) {
-        val += getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_STATS);
+        val += getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_ATTRS);
         return std::clamp<attribute_t>(val, 5, 100);
     }
     return val;
@@ -1304,7 +1304,7 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
     else if (room >= 101 && room <= 139) {
         if (GET_LEVEL(this) == 1) {
             lroom = 100;
-            GET_EXP(this) = 0;
+            setExperience(0);
         } else {
             lroom = sensei::getStartRoom(chclass);
         }
@@ -1343,4 +1343,124 @@ int char_data::getArmor() {
             out += obj->getAffectModifier(APPLY_AC, -1);
     }
     return out;
+}
+
+int64_t char_data::getExperience() {
+    return exp;
+}
+
+int64_t char_data::setExperience(int64_t value) {
+    exp = value;
+    if(exp < 0) exp = 0;
+    return exp;
+}
+
+// This returns the exact amount that was modified by.
+int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
+
+    if(value < 0) {
+        // removing experience. We can do this easily.
+        auto cur = getExperience();
+        auto new_value = setExperience(cur + value);
+        // return the actual amount substracted as a negative.
+        return cur - new_value;
+    }
+
+    // Adding experience may involve bonuses.
+    auto gain = value;
+    auto cur = getExperience();
+
+    if(!applyBonuses) {
+        gain *= (1.0 + getAffectModifier(APPLY_EXP_GAIN_MULT));
+
+        if (AFF_FLAGGED(this, AFF_WUNJO)) {
+            gain *= 1.15;
+        }
+        if (PLR_FLAGGED(this, PLR_IMMORTAL)) {
+            gain *= 0.95;
+        }
+
+        int64_t diff = gain * 0.15;
+
+        if (gain > 0) {
+
+            // TODO: Modify the spar booster with APPLY_EXP_GAIN_MULT 0.25
+            if (auto obj = GET_EQ(this, WEAR_SH); obj && obj->vn == 1127) {
+                int64_t spar = gain;
+                gain += gain * 0.25;
+                spar = gain - spar;
+                send_to_char(this, "@D[@BBooster EXP@W: @G+%s@D]\r\n", add_commas(spar).c_str());
+            }
+
+            // Post-100 gains.
+            if (GET_LEVEL(this) == 100 && GET_ADMLEVEL(this) < 1) {
+                if (IS_KANASSAN(this) || IS_DEMON(this)) {
+                    diff = diff * 1.3;
+                }
+                if (IS_ANDROID(this)) {
+                    diff = diff * 1.2;
+                }
+
+                if (rand_number(1, 5) >= 2) {
+                    if (IS_HUMAN(this)) {
+                        this->gainBasePL(diff * 0.8);
+                    } else {
+                        this->gainBasePL(diff);
+                    }
+                    send_to_char(this, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
+                }
+                if (rand_number(1, 5) >= 2) {
+                    if (IS_HALFBREED(this)) {
+                        this->gainBaseST(diff * 0.85);
+                    } else {
+                        this->gainBaseST(diff);
+                    }
+                    send_to_char(this, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff).c_str());
+                }
+                if (rand_number(1, 5) >= 2) {
+                    this->gainBaseKI(diff);
+                    send_to_char(this, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff).c_str());
+                }
+            }
+        }
+    }
+
+    // Amount gained cannot be negative.
+    gain = std::max<int64_t>(gain, 0);
+
+    if (MINDLINK(this) && gain > 0 && LINKER(this) == 0) {
+        if (GET_LEVEL(this) + 20 < GET_LEVEL(MINDLINK(this)) || GET_LEVEL(this) - 20 > GET_LEVEL(MINDLINK(this))) {
+            send_to_char(MINDLINK(this),
+                         "The level difference between the two of you is too great to gain from mind read.\r\n");
+        } else {
+            act("@GYou've absorbed some new experiences from @W$n@G!@n", false, this, nullptr, MINDLINK(this),
+                TO_VICT);
+            int64_t read = gain * 0.12;
+            gain -= read;
+            if (read == 0)
+                read = 1;
+            MINDLINK(this)->modExperience(read, false);
+            act("@RYou sense that @W$N@R has stolen some of your experiences with $S mind!@n", false, this,
+                nullptr, MINDLINK(this), TO_CHAR);
+        }
+    }
+
+    if(GET_LEVEL(this) < 100) {
+        int64_t tnl = level_exp(this, GET_LEVEL(this) + 1);
+
+        if(cur < tnl && (cur + gain) >= tnl) {
+            send_to_char(this, "@rYou have earned enough experience to gain a @ylevel@r.@n\r\n");
+        }
+
+        int64_t max_over_tnl = tnl * 5;
+        if((cur + gain) >= max_over_tnl) {
+            gain = max_over_tnl - getExperience();
+            send_to_char(this, "@WYou -@RNEED@W- to @ylevel@W. You can't hold any more experience!@n\r\n");
+        }
+
+    }
+
+    if(gain) setExperience(cur + gain);
+    return gain;
+
 }

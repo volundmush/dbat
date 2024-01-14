@@ -2216,9 +2216,9 @@ ACMD(do_assemble) {
         if (GET_LEVEL(ch) < 100 && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
             int64_t gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.011;
             send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(gain).c_str());
-            gain_exp(ch, gain);
+            ch->modExperience(gain);
         } else {
-            gain_exp(ch, 1375000);
+            ch->modExperience(1375000);
             send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(1375000).c_str());
         }
     }
@@ -3675,7 +3675,7 @@ ACMD(do_eat) {
                 pscapped = true;
             }
 
-            gain_exp(ch, expbonus);
+            ch->modExperience(expbonus);
             ch->modPractices(psbonus);
             send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n",
                          psbonus, add_commas(expbonus).c_str());
@@ -4495,12 +4495,12 @@ ACMD(do_sac) {
             case 2:
                 send_to_char(ch, "You sacrifice %s to the Gods.\r\nZizazat gives you %d experience points.\r\n",
                              GET_OBJ_SHORT(j), (2 * GET_OBJ_COST(j)));
-                GET_EXP(ch) += (2 * GET_OBJ_COST(j));
+                ch->modExperience(2 * GET_OBJ_COST(j));
                 break;
             case 3:
                 send_to_char(ch, "You sacrifice %s to the Gods.\r\nYou receive %d experience points.\r\n",
                              GET_OBJ_SHORT(j), GET_OBJ_COST(j));
-                GET_EXP(ch) += GET_OBJ_COST(j);
+                ch->modExperience(GET_OBJ_COST(j));
                 break;
             case 4:
                 send_to_char(ch, "Your sacrifice to the Gods is rewarded with %d zenni.\r\n", GET_OBJ_COST(j));

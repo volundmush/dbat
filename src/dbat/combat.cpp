@@ -1776,7 +1776,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                         } else if (count >= 10) {
                                             loss = 0.25;
                                         }
-                                        GET_EXP(vict) -= GET_EXP(vict) * loss;
+                                        vict->modExperience(-(GET_EXP(vict) * loss));
                                     }
                                 }
                                 act("@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -1956,7 +1956,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                         } else if (count >= 10) {
                                             loss = 0.25;
                                         }
-                                        GET_EXP(vict) -= GET_EXP(vict) * loss;
+                                        vict->modExperience(-(GET_EXP(vict) * loss));
                                     }
                                 }
                                 act("@R$N@r is caught by the explosion!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -3845,7 +3845,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         gain = gain * Random::get<double>(0.8, 1.2);
         gain = gain * bonus;
 		//Gain the xp
-        gain_exp(ch, gain);
+        ch->modExperience(gain);
         send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain).c_str());
 
 		//Handling for awarding vitals to the player
@@ -4229,6 +4229,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     }
 
     if (vict) {
+        int64_t gain = IS_NPC(ch) ? vict->getExperience() : 0;
 
         if (GET_ROOM_VNUM(IN_ROOM(vict)) == 17875) {
             return;
@@ -4253,16 +4254,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
 
-        if (!IS_NPC(ch)) {
-            if (PLR_FLAGGED(ch, PLR_OOZARU)) {
-                dmg += dmg * 0.30;
-            }
-        }
-        if (!IS_NPC(vict)) {
-            if (PLR_FLAGGED(vict, PLR_OOZARU)) {
-                dmg -= dmg * 0.30;
-            }
-        }
+        dmg *= (1.0 + ch->getAffectModifier(APPLY_DAMAGE_PERC));
+        dmg *= (1.0 + vict->getAffectModifier(APPLY_DEFENSE_PERC));
 
 
         if (type > -1) {
@@ -4288,8 +4281,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                             } else if (GET_SKILL(ch, SKILL_STYLE) >= 20) {
                                 gain += gain * 0.1;
                             }
-                            gain_exp(ch, gain);
-                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain).c_str());
+                            auto gained = ch->modExperience(gain);
+                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gained).c_str());
                         }
                     } else {
                         dmg += combo_damage(ch, dmg, 1);
@@ -4307,7 +4300,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                             } else if (GET_SKILL(ch, SKILL_STYLE) >= 20) {
                                 gain += gain * 0.1;
                             }
-                            gain_exp(ch, gain);
+                            ch->modExperience(gain);
                             send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain).c_str());
                         }
                         COMBO(ch) = -1;
@@ -4612,11 +4605,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (dmg >= 50 && chance > 0) {
             hurt_limb(ch, vict, chance, limb, dmg);
         }
+
         if (IS_NPC(vict) && dmg > vict->getMaxHealth() * .7 && GET_BONUS(ch, BONUS_SADISTIC) > 0) {
-            GET_EXP(vict) /= 2;
+            gain /= 2;
         } else if (IS_NPC(vict) && dmg > vict->getCurHealth() && vict->isFullHealth() * .5 &&
                    GET_BONUS(ch, BONUS_SADISTIC) > 0) {
-            GET_EXP(vict) /= 2;
+            gain /= 2;
         }
 
 
@@ -4802,13 +4796,13 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         if (type == 0 && rand_number(1, 100) >= 97) {
                             send_to_char(ch,
                                          "@YY@yo@Yu @yg@Ya@yi@Yn@y s@Yo@ym@Ye @yb@Yo@yn@Yu@ys @Ye@yx@Yp@ye@Yr@yi@Ye@yn@Yc@ye@Y!@n\r\n");
-                            int64_t gain = GET_EXP(vict) * 0.05;
+                            gain = gain * 0.05;
                             gain += 1;
-                            gain_exp(ch, gain);
+                            ch->modExperience(gain);
                         } else if (type != 0 && rand_number(1, 100) >= 93) {
-                            int64_t gain = GET_EXP(vict) * 0.05;
+                            gain = gain * 0.05;
                             gain += 1;
-                            gain_exp(ch, gain);
+                            ch->modExperience(gain);
                         }
                     }
                     if (AFF_FLAGGED(vict, AFF_ECHAINS)) {

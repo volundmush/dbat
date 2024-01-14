@@ -366,7 +366,7 @@ void do_start(struct char_data *ch) {
     struct obj_data *obj;
 
     ch->set(CharNum::Level, 1);
-    GET_EXP(ch) = 1;
+    ch->setExperience(1);
 
     if (IS_ANDROID(ch)) {
         GET_COND(ch, HUNGER) = -1;
@@ -1290,7 +1290,7 @@ int invalid_class(struct char_data *ch, struct obj_data *obj) {
  */
 
 /* Function to return the exp required for each class/level */
-int level_exp(struct char_data *ch, int level) {
+int64_t level_exp(struct char_data *ch, int level) {
     int req = 1;
 
     switch (level) {
