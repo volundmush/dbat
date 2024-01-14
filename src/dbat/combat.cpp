@@ -4466,7 +4466,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
         if (AFF_FLAGGED(vict, AFF_SHELL)) {
-            dmg = dmg * 0.25;
+            dmg -= dmg * 0.25;
         }
 
         if (AFF_FLAGGED(vict, AFF_WITHER)) {
