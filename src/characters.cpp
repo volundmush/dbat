@@ -771,6 +771,22 @@ bool char_data::hasTail() {
     return playerFlags.test(PLR_TAIL);
 }
 
+void char_data::addTransform(FormID form) {
+    unlockedForms.push_back(form);
+}
+
+bool char_data::removeTransform(FormID form) {
+    bool found = false;
+    for (int i = 0; i < unlockedForms.size() && !found; i++) {
+        if (unlockedForms[i] == form) {
+            found = true;
+            unlockedForms.erase(unlockedForms.begin() + i);
+        }
+    }
+    
+    //Return if successful
+    return found;
+}
 
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
     return mod(CharStat::PowerLevel, amt);

@@ -1127,6 +1127,19 @@ namespace trans {
     };
 
 
+    FormID find_form(char_data* ch, std::string form) {
+        for (auto formFound : forms) {
+            if (form == getAbbr(ch, formFound)) {
+                return formFound;
+                break;
+            }
+        }
+
+        //Failure state
+        return FormID::Base;
+    }
+
+
     static const std::unordered_map<RaceID, std::vector<FormID>> race_forms = {
         {RaceID::Human, {FormID::SuperHuman, FormID::SuperHuman2, FormID::SuperHuman3, FormID::SuperHuman4}},
         {RaceID::Saiyan, {FormID::SuperSaiyan, FormID::SuperSaiyan2, FormID::SuperSaiyan3, FormID::SuperSaiyan4}},
@@ -1153,7 +1166,7 @@ namespace trans {
 
     std::vector<FormID> get_forms(char_data* ch) {
         auto forms = race_forms.find(ch->race);
-        std::vector<FormID> pforms = ch->unlockedforms;
+        std::vector<FormID> pforms = ch->unlockedForms;
 
         for (auto form : forms->second) {
             pforms.push_back(form);

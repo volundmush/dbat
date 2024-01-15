@@ -765,7 +765,7 @@ struct char_data : public unit_data {
     int tail_growth{};
     int rage_meter{};
     char *feature{};
-    std::vector<FormID> unlockedforms{};
+    std::vector<FormID> unlockedForms{};
 
     int armor_last{};
     int forgeting{};
@@ -853,6 +853,9 @@ struct char_data : public unit_data {
     void gainTail(bool announce = true);
     void loseTail();
     bool hasTail();
+
+    void addTransform(FormID form);
+    bool removeTransform(FormID form);
 
     void resurrect(ResurrectionMode mode);
 
