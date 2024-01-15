@@ -28,7 +28,6 @@ namespace net {
 
         auto desc = new descriptor_data();
         STATE(desc) = CON_LOGIN;
-        desc->raw_input_queue = std::make_unique<Channel<std::string>>(*io, 200);
         desc->character = ch;
         desc->id = ch->id;
         ch->desc = desc;
@@ -43,6 +42,6 @@ namespace net {
     }
 
     void PuppetParser::parse(const std::string &txt) {
-        conn->desc->raw_input_queue->try_send(boost::system::error_code{}, txt);
+        conn->desc->raw_input_queue.push_back(txt);
     }
 }

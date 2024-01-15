@@ -67,6 +67,7 @@ std::set<int64_t> dirty_dgscripts;
 
 bool gameIsLoading = true;
 bool saveAll = false;
+bool isMigrating = false;
 
 struct config_data config_info; /* Game configuration list.    */
 

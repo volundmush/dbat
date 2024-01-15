@@ -10,7 +10,6 @@
 #pragma once
 
 #include "structs.h"
-#include <boost/asio.hpp>
 
 
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK
@@ -58,8 +57,6 @@ extern void close_socket(struct descriptor_data *d);
 /* I/O functions */
 extern void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 
-extern std::function<boost::asio::awaitable<void>()> gameFunc;
-
 extern void string_add(struct descriptor_data *d, char *str);
 
 extern void string_write(struct descriptor_data *d, char **txt, size_t len, long mailto, void *data);
@@ -98,6 +95,15 @@ extern void free_bufpool();
 
 void broadcast(const std::string& txt);
 
-boost::asio::awaitable<void> yield_for(std::chrono::milliseconds ms);
-
 void shutdown_game(int code);
+
+extern std::shared_ptr<spdlog::logger> setup_logging(const std::string &name, const std::string& path);
+
+namespace game {
+    void init_log();
+    void init_locale();
+    bool init_sodium();
+    void init_database();
+    void init_zones();
+    void run_loop_once(double deltaTime);
+}
