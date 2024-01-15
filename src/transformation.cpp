@@ -1151,9 +1151,20 @@ namespace trans {
         {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}}
     };
 
-    void displayForms(char_data* ch) {
+    std::vector<FormID> get_forms(char_data* ch) {
         auto forms = race_forms.find(ch->race);
-        if (forms == race_forms.end()) {
+        std::vector<FormID> pforms = ch->unlockedforms;
+
+        for (auto form : forms->second) {
+            pforms.push_back(form);
+        }
+
+        return pforms;
+    }
+
+    void displayForms(char_data* ch) {
+        auto forms = get_forms(ch);
+        if (forms.empty()) {
             send_to_char(ch, "You have no forms. Bummer.\r\n");
             return;
         }
@@ -1162,7 +1173,7 @@ namespace trans {
         send_to_char(ch, "@b------------------------------------------------@n\r\n");
         auto pl = ch->getBasePL();
         std::vector<std::string> form_names;
-        for (auto form: forms->second) {
+        for (auto form: forms) {
             auto name = getName(ch, form);
             auto req = getRequiredPL(ch, form);
             send_to_char(ch, "@W%s@n @R-@G %s BPL Req\r\n", name,
@@ -1303,7 +1314,7 @@ namespace trans {
     }
 
     std::optional<FormID> findForm(struct char_data* ch, const std::string& arg) {
-        auto forms = race_forms.find(ch->race);
+        auto forms = get_forms(ch);
         if (forms == race_forms.end()) {
             return {};
         }

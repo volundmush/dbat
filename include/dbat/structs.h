@@ -765,6 +765,7 @@ struct char_data : public unit_data {
     int tail_growth{};
     int rage_meter{};
     char *feature{};
+    std::vector<FormID> unlockedforms{};
 
     int armor_last{};
     int forgeting{};
