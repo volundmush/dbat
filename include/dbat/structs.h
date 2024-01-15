@@ -1137,8 +1137,7 @@ struct descriptor_data {
     int32_t mail_to{};        /* name for mail system			*/
     bool has_prompt{true};        /* is the user at a prompt?             */
     std::string last_input;        /* the last input			*/
-    std::unique_ptr<net::Channel<std::string>> raw_input_queue;        /* queue of raw unprocessed input		*/
-    std::list<std::string> input_queue;
+    std::list<std::string> raw_input_queue, input_queue;
     std::string output;        /* ptr to the current output buffer	*/
     std::list<std::string> history;        /* History of commands, for ! mostly.	*/
     struct char_data *character{};    /* linked to char			*/

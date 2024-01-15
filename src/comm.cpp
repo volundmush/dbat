@@ -45,9 +45,13 @@
 #include "dbat/charmenu.h"
 #include "dbat/puppet.h"
 #include "dbat/transformation.h"
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 #include <mutex>
 
 #include <locale>
+
+std::shared_ptr<spdlog::logger> logger;
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
@@ -81,89 +85,6 @@ void broadcast(const std::string& txt) {
     for(auto &[cid, c] : net::connections) {
         c->sendText(txt);
     }
-}
-
-boost::asio::awaitable<void> signal_watcher() {
-    while (!circle_shutdown) {
-        try {
-            // Wait for a signal to be received
-            int signal_number = co_await net::signals->async_wait(boost::asio::use_awaitable);
-
-            // Process the signal
-            switch(signal_number) {
-                case SIGUSR1:
-                    circle_shutdown = 1;
-                    circle_reboot = 1;
-                    break;
-                case SIGUSR2:
-                    circle_shutdown = 1;
-                    circle_reboot = 2;
-                    break;
-                default:
-                    basic_mud_log("Unexpected signal: %d", signal_number);
-            }
-
-        } catch(const std::exception& e) {
-            std::cerr << "Error in signal watcher: " << e.what() << '\n';
-        }
-    }
-}
-
-
-void copyover_recover_final() {
-    struct descriptor_data *next_d;
-    for(auto d = descriptor_list; d; d = next_d) {
-        next_d = d->next;
-        if(STATE(d) != CON_COPYOVER) continue;
-
-		auto accID = d->obj_editval;
-        auto playerID = d->id;
-        room_vnum room = d->obj_type;
-
-        d->obj_editflag = 0;
-        d->obj_type = 0;
-
-        auto accFind = accounts.find(accID);
-
-        if(accFind == accounts.end()) {
-            basic_mud_log("recoverConnection: user %d not found.", accID);
-            close_socket(d);
-            continue;
-        }
-        d->account = &accFind->second;
-        d->account->descriptors.insert(d);
-        for(auto &[cid, c] : d->conns) c->account = d->account;
-
-        auto playFind = players.find(playerID);
-        if(playFind == players.end()) {
-            basic_mud_log("recoverConnection: character %d not found.", playerID);
-            close_socket(d);
-            continue;
-        }
-        auto c = d->character = playFind->second.character;
-        c->desc = d;
-
-		GET_LOADROOM(c) = room;
-        for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->playerFlags.reset(f);
-        auto conns = d->conns;
-        for(auto &[cid, con] : conns) {
-            d->account->connections.insert(con.get());
-            con->setParser(new net::PuppetParser(con, c));
-        }
-
-        write_to_output(d, "@rThe world comes back into focus... has something changed?@n\r\n");
-
-        if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
-            GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
-        }
-    }
-}
-
-boost::asio::awaitable<void> yield_for(std::chrono::milliseconds ms) {
-    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, ms);
-    timer.expires_after(ms);
-    co_await timer.async_wait(boost::asio::use_awaitable);
-    co_return;
 }
 
 
@@ -226,7 +147,7 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("extract_pending_chars", 0.0, extract_pending_chars),
 };
 
-boost::asio::awaitable<void> heartbeat(uint64_t heart_pulse, double deltaTime) {
+void heartbeat(uint64_t heart_pulse, double deltaTime) {
     static int mins_since_crashsave = 0;
     timings.clear();
 
@@ -252,16 +173,15 @@ boost::asio::awaitable<void> heartbeat(uint64_t heart_pulse, double deltaTime) {
             s.countdown += s.interval;
         }
     }
-    co_return;
 }
 
-boost::asio::awaitable<void> processConnections(double deltaTime) {
+void processConnections(double deltaTime) {
     // First, handle any disconnected connections.
     for(auto &[id, reason] : net::deadConnections) {
         auto it = net::connections.find(id);
         // This shouldn't happen, but whatever.
         if(it == net::connections.end()) continue;
-        co_await it->second->cleanup(reason);
+        it->second->cleanup(reason);
     }
     for(auto &[id, reason] : net::deadConnections) {
         net::connections.erase(id);
@@ -282,16 +202,15 @@ boost::asio::awaitable<void> processConnections(double deltaTime) {
 
     // Next, we must handle the heartbeat routine for each connection.
     for(auto& [id, c] : net::connections) {
-        co_await c->onHeartbeat(deltaTime);
+        c->onHeartbeat(deltaTime);
     }
-    co_return;
 }
 
-boost::asio::awaitable<void> runOneLoop(double deltaTime) {
+void runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
 
-    co_await processConnections(deltaTime);
+    processConnections(deltaTime);
 
     if(sleeping && descriptor_list) {
         basic_mud_log("Waking up.");
@@ -303,7 +222,6 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
             basic_mud_log("No connections.  Going to sleep.");
             sleeping = true;
         }
-        co_return;
     }
 
     {
@@ -365,7 +283,7 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
 
     if(gameActive) {
         auto start = std::chrono::high_resolution_clock::now();
-        co_await heartbeat(++pulse, deltaTime);
+        heartbeat(++pulse, deltaTime);
         auto end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("heartbeat total", std::chrono::duration<double>(end - start).count());
     }
@@ -430,56 +348,112 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     }
 
     tics_passed++;
-    co_return;
 }
 
 
-/*
- * game_loop contains the main loop which drives the entire MUD.  It
- * cycles once every 0.10 seconds and is responsible for accepting new
- * new connections, polling existing connections for input, dequeueing
- * output and sending it out to players, and calling "heartbeat" functions
- * such as mobile_activity().
- */
-boost::asio::awaitable<void> game_loop() {
-    broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
-    for (auto &[vn, z] : zone_table) {
-        basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn,
-            z.name, z.bot, z.top);
-        reset_zone(vn);
-    }
 
-    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, config::heartbeatInterval);
-    double saveTimer = 60.0 * 5.0;
+void game_loop() {
+
+
     double deltaTimeInSeconds = 0.1;
     gameIsLoading = false;
 
     /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
     while (!circle_shutdown) {
 
-        auto loopStart = boost::asio::steady_timer::clock_type::now();
+
+    }
+
+    if(circle_reboot > 0) {
+        // circle_reboot at 1 is copyover, 2 is a full reboot.
+        performReboot(circle_reboot);
+    }
+}
+
+
+namespace game {
+    void init_log() {
+        logger = setup_logging("dbat", config::logFile);
+    }
+
+    void init_locale() {
+        std::locale::global(std::locale("en_US.UTF-8"));
+        circle_srandom(time(nullptr));
+    }
+
+    bool init_sodium() {
+        return sodium_init() == 0;
+    }
+
+    void init_database() {
+        // instantiate db with a shared_ptr, the filename is dbat.sqlite3
+        try {
+            assetDb = std::make_shared<SQLite::Database>(fmt::format("{}.sqlite3", config::assetDbName), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+        } catch (std::exception &e) {
+            basic_mud_log("Exception Opening Asset Database: %s", e.what());
+            shutdown_game(1);
+        }
+        create_schema();
+
+
+        try {
+            boot_db();
+        } catch(std::exception& e) {
+            basic_mud_log("Exception in boot_db(): %s", e.what());
+            exit(1);
+        }
+
+        {
+            broadcast("Loading Space Map. ");
+            FILE *mapfile = fopen("../lib/surface.map", "r");
+            int rowcounter, colcounter;
+            int vnum_read;
+            for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
+                for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
+                    fscanf(mapfile, "%d", &vnum_read);
+                    mapnums[rowcounter][colcounter] = real_room(vnum_read);
+                }
+            }
+            fclose(mapfile);
+        }
+
+        /* Load the toplist */
+        topLoad();
+    }
+
+    void init_zones() {
+        for (auto &[vn, z] : zone_table) {
+            basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn,
+                          z.name, z.bot, z.top);
+            reset_zone(vn);
+        }
+    }
+
+    void run_loop_once(double deltaTime) {
+        static double saveTimer = 60.0 * 5.0;
+
         try {
             SQLite::Transaction transaction(*assetDb);
-            co_await runOneLoop(deltaTimeInSeconds);
+            runOneLoop(deltaTime);
             if(circle_shutdown) saveAll = true;
             if(saveAll) {
                 dirty_all();
             }
             {
-                auto start = boost::asio::steady_timer::clock_type::now();
+                auto start = std::chrono::steady_clock::now();
                 process_dirty();
-                auto end = boost::asio::steady_timer::clock_type::now();
+                auto end = std::chrono::steady_clock::now();
                 timings.emplace_back("process_dirty", std::chrono::duration<double>(end - start).count());
             }
 
             {
-                auto start = boost::asio::steady_timer::clock_type::now();
+                auto start = std::chrono::steady_clock::now();
                 transaction.commit();
-                auto end = boost::asio::steady_timer::clock_type::now();
+                auto end = std::chrono::steady_clock::now();
                 timings.emplace_back("transaction.commit", std::chrono::duration<double>(end - start).count());
             }
 
-            saveTimer -= deltaTimeInSeconds;
+            saveTimer -= deltaTime;
             if(saveTimer <= 0 || saveAll) {
                 saveTimer = 60.0 * 5.0;
                 dump_state();
@@ -491,208 +465,13 @@ boost::asio::awaitable<void> game_loop() {
             printStackTrace();
             shutdown_game(1);
         } catch(...) {
-             basic_mud_log("Unknown exception in runOneLoop()");
+            basic_mud_log("Unknown exception in runOneLoop()");
             printStackTrace();
             shutdown_game(1);
         }
-        auto loopEnd = boost::asio::steady_timer::clock_type::now();
-
-        auto loopDuration = loopEnd - loopStart;
-        auto nextWait = config::heartbeatInterval - loopDuration;
-
-        // If heartbeat takes more than 100ms, default to a very short wait
-        if(nextWait.count() < 0) {
-            if(config::logEgregiousTimings) {
-                logger->warn("Heartbeat took {} too long, defaulting to short wait", abs(std::chrono::duration<double>(nextWait).count()));
-                for(auto &t : timings) {
-                    logger->warn("Timing {}: {}", t.first, std::chrono::duration<double>(t.second).count());
-                }
-            }
-            timings.clear();
-            nextWait = std::chrono::milliseconds(1);
-        }
-
-        timer.expires_from_now(nextWait);
-        co_await timer.async_wait(boost::asio::use_awaitable);
-        deltaTimeInSeconds = std::chrono::duration<double>(boost::asio::steady_timer::clock_type::now() - loopStart).count();
     }
 
-    if(circle_reboot > 0) {
-        // circle_reboot at 1 is copyover, 2 is a full reboot.
-        performReboot(circle_reboot);
-    }
-    co_return;
 }
-
-std::function<boost::asio::awaitable<void>()> gameFunc;
-
-static boost::asio::awaitable<void> runGame() {
-	// instantiate db with a shared_ptr, the filename is dbat.sqlite3
-    try {
-        assetDb = std::make_shared<SQLite::Database>(fmt::format("{}.sqlite3", config::assetDbName), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-    } catch (std::exception &e) {
-        basic_mud_log("Exception Opening Asset Database: %s", e.what());
-        shutdown_game(1);
-    }
-    create_schema();
-
-    circle_srandom(time(nullptr));
-
-    try {
-        boot_db();
-    } catch(std::exception& e) {
-        basic_mud_log("Exception in boot_db(): %s", e.what());
-        exit(1);
-    }
-
-
-    {
-        broadcast("Loading Space Map. ");
-        FILE *mapfile = fopen("../lib/surface.map", "r");
-        int rowcounter, colcounter;
-        int vnum_read;
-        for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
-            for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-                fscanf(mapfile, "%d", &vnum_read);
-                mapnums[rowcounter][colcounter] = real_room(vnum_read);
-            }
-        }
-        fclose(mapfile);
-    }
-
-    /* Load the toplist */
-    topLoad();
-
-    /* If we made it this far, we will be able to restart without problem. */
-    remove(KILLSCRIPT_FILE);
-
-    // bring anyone who's in the middle of a copyover back into the game.
-    if(fCopyOver) {
-        copyover_recover_final();
-        logger->info("Copyover recover complete.");
-    }
-
-    // Finally, let's get the game cracking.
-    try {
-        if(gameFunc) co_await gameFunc();
-        else co_await game_loop();
-    } catch(std::exception& e) {
-        logger->critical("Exception in game_loop(): %s", e.what());
-        printStackTrace();
-        shutdown_game(1);
-    } catch(...) {
-        logger->critical("Unknown exception in game_loop()");
-        printStackTrace();
-        shutdown_game(1);
-    }
-    co_return;
-}
-
-/* Init sockets, run game, and cleanup sockets */
-void init_game() {
-    /* We don't want to restart if we crash before we get up. */
-    touch(KILLSCRIPT_FILE);
-
-    std::locale::global(std::locale("en_US.UTF-8"));
-
-    if (sodium_init() != 0) {
-        basic_mud_log("Could not initialize libsodium!");
-        shutdown_game(EXIT_FAILURE);
-    }
-
-    logger->info("Setting up executor...");
-    if(!net::io) net::io = std::make_unique<boost::asio::io_context>();
-
-    if(!gameFunc) {
-        basic_mud_log("Signal trapping.");
-        net::signals = std::make_unique<boost::asio::signal_set>(*net::io, SIGUSR1, SIGUSR2);
-
-        boost::asio::co_spawn(boost::asio::make_strand(*net::io), signal_watcher(), boost::asio::detached);
-
-        boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runWebServer(), boost::asio::detached);
-    }
-
-    boost::asio::co_spawn(boost::asio::make_strand(*net::io), runGame(), boost::asio::detached);
-
-    // Run the io_context
-    logger->info("Entering main loop...");
-    // This part is a little tricky. if config::enableMultithreading is true, want to
-    // run the io_context on multiple threads. Otherwise, we want to run it on a single thread.
-    // Additionally, if it's true, we need to check config::threadsCount to see how many threads
-    // to run on. If it's <1, we want to run on the number of cores on the machine.
-    // The current thread should, of course, be considered one of those threads, so we subtract 1.
-    // The best way to do this is to simply create a vector of threads, decide how many it should contain,
-    // and start them. Then, we run the io_context on the current thread.
-
-    unsigned int threadCount = 0;
-    if(config::enableMultithreading) {
-        logger->info("Multithreading is enabled.");
-        if(config::threadsCount < 1) {
-            threadCount = std::thread::hardware_concurrency() - 1;
-            logger->info("Using {} threads. (Automatic detection)", threadCount+1);
-        } else {
-            threadCount = config::threadsCount - 1;
-            logger->info("Using {} threads. (Manual override)", threadCount+1);
-        }
-    } else {
-        threadCount = 0;
-    }
-
-    if(threadCount < 1) threadCount = 1;
-
-    std::vector<std::thread> threads;
-    if(threadCount) {
-        logger->info("Starting {} helper threads...", threadCount);
-        config::usingMultithreading = true;
-    }
-    for (int i = 0; i < threadCount; ++i) {
-        threads.emplace_back([&]() {
-            net::io->run();
-        });
-    }
-    logger->info("Main thread entering runGame()...");
-    net::io->run();
-
-    logger->info("Joining ASIO threads...");
-    for (auto &thread: threads) {
-        thread.join();
-    }
-    logger->info("Executor has shut down. Running cleanup.");
-    logger->info("All threads joined.");
-    threads.clear();
-
-    // Release the executor and acceptor.
-    // ASIO maintains its own socket polling fd and killing the executor is the
-    // only way to release it.
-
-    net::signals.reset();
-
-    net::io.reset();
-
-    basic_mud_log("Saving current MUD time.");
-    save_mud_time(&time_info);
-
-    if (circle_reboot) {
-        basic_mud_log("Rebooting.");
-        //shutdown_game(52);            /* what's so great about HHGTTG, anyhow? */
-        std::filesystem::current_path("..");
-        execl ("bin/circle", "circle", "-C%d", "1280", (char *) NULL);
-    }
-    basic_mud_log("Normal termination of game.");
-    shutdown_game(0);
-}
-
-/* ******************************************************************
-*  general utility stuff (for local use)                            *
-****************************************************************** */
-
-/*
- *  new code to calculate time differences, which works on systems
- *  for which tv_usec is unsigned (and thus comparisons for something
- *  being < 0 fail).  Based on code submitted by ss@sirocco.cup.hp.com.
- */
-
-
 
 void record_usage(uint64_t heartPulse, double deltaTime) {
 
@@ -2145,23 +1924,19 @@ void show_help(std::shared_ptr<net::Connection>& co, const char *entry) {
 void descriptor_data::handle_input() {
     // Now we need to process the raw_input_queue, watching for special characters and also aliases.
     // Commands are processed first-come-first served...
-    while(raw_input_queue->ready()) {
-        if(!raw_input_queue->try_receive([&](boost::system::error_code ec, const std::string &command) {
-            if(!ec) {
-                if (snoop_by)
-                    write_to_output(snoop_by, "%% %s\r\n", command.c_str());
+    for(auto command : raw_input_queue) {
+        if (snoop_by)
+            write_to_output(snoop_by, "%% %s\r\n", command.c_str());
 
-                if(command == "--") {
-                    // this is a special command that clears out the processed input_queue.
-                    input_queue.clear();
-                    write_to_output(this, "All queued commands cancelled.\r\n");
-                } else {
-                    perform_alias(this, (char*)command.c_str());
-                }
-            }
-        })) continue;
-
+        if(command == "--") {
+            // this is a special command that clears out the processed input_queue.
+            input_queue.clear();
+            write_to_output(this, "All queued commands cancelled.\r\n");
+        } else {
+            perform_alias(this, (char*)command.c_str());
+        }
     }
+    raw_input_queue.clear();
 
     if (character && GET_WAIT_STATE(character)) {
         character->mod(CharNum::Wait, -1);
@@ -2172,21 +1947,6 @@ void descriptor_data::handle_input() {
     if(input_queue.empty()) return;
     auto command = input_queue.front();
     input_queue.pop_front();
-
-    /* Reset the idle timer & pull char back from void if necessary
-
-    if (character) {
-        character->timer = 0;
-        if (STATE(this) == CON_PLAYING && GET_WAS_IN(character) != NOWHERE) {
-            if (IN_ROOM(character) != NOWHERE)
-                char_from_room(character);
-            char_to_room(character, GET_WAS_IN(character));
-            GET_WAS_IN(character) = NOWHERE;
-            act("$n has returned.", true, character, nullptr, nullptr, TO_ROOM);
-        }
-        character->set(CharNum::Wait, 1);
-    }
-    */
 
 
     has_prompt = false;
@@ -2245,4 +2005,20 @@ void descriptor_data::handleLostLastConnection(bool graceful) {
     if(character) {
         act("$n has lost $s link.", true, character, nullptr, nullptr, TO_ROOM);
     }
+}
+
+std::shared_ptr<spdlog::logger> setup_logging(const std::string &name, const std::string& path) {
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::info); // Set the console to output info level and above messages
+    console_sink->set_pattern("[%^%l%$] %v"); // Example pattern: [INFO] some message
+
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(path, 1024 * 1024 * 5, 3);
+    file_sink->set_level(spdlog::level::trace); // Set the file to output all levels of messages
+
+    std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
+
+    auto out = std::make_shared<spdlog::logger>(name, begin(sinks), end(sinks));
+    out->set_level(spdlog::level::trace); // Set the logger to trace level
+    spdlog::register_logger(out);
+    return out;
 }

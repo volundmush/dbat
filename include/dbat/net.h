@@ -2,28 +2,64 @@
 #include "sysdep.h"
 #include "nlohmann/json.hpp"
 #include "defs.h"
-#include "shared/net.h"
-#include <boost/asio.hpp>
-#include <boost/beast.hpp>
-#include <boost/asio/experimental/concurrent_channel.hpp>
-#include <boost/asio.hpp>
-#include <boost/beast/websocket.hpp>
-#include <boost/beast.hpp>
 #include <mutex>
 
 namespace net {
-    using namespace std::chrono_literals;
-    using namespace boost::asio;
-    using namespace boost::beast;
 
-    template<typename T>
-    using Channel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, T)>;
+    enum class GameMessageType : uint8_t {
+        Connect = 0,
+        Update = 1,
+        Command = 2,
+        GMCP = 3,
+        MSSP = 4,
+        Disconnect = 5,
+        Timeout = 6
+    };
 
-    using JsonChannel = Channel<nlohmann::json>;
+    struct GameMessage {
+        GameMessage() = default;
+        explicit GameMessage(const nlohmann::json& j);
+        GameMessageType type{GameMessageType::Connect};
+        nlohmann::json data;
+        [[nodiscard]] nlohmann::json serialize() const;
+    };
 
-    extern std::unique_ptr<io_context> io;
+    enum class Protocol : uint8_t {
+        Telnet = 0,
+        WebSocket = 1
+    };
 
-    extern std::unique_ptr<signal_set> signals;
+    enum class ColorType : uint8_t {
+        NoColor = 0,
+        Standard = 1,
+        Xterm256 = 2,
+        TrueColor = 3
+    };
+
+    struct ProtocolCapabilities {
+        Protocol protocol{Protocol::Telnet};
+
+        std::string clientName = "UNKNOWN", clientVersion = "UNKNOWN";
+        std::string hostAddress = "UNKNOWN";
+        std::string encoding;
+        std::vector<std::string> hostNames{};
+        ColorType colorType = ColorType::NoColor;
+        int16_t hostPort{0};
+
+        bool encryption = false;
+        bool utf8 = false;
+        int width = 80, height = 52;
+        bool gmcp = false, msdp = false, mssp = false, mxp = false;
+        bool mccp2 = false, mccp2_active = false, mccp3 = false, mccp3_active = false;
+        bool ttype = false, naws = false, sga = false, linemode = false;
+        bool force_endline = false, oob = false, tls = false;
+        bool screen_reader = false, mouse_tracking = false, vt100 = false;
+        bool osc_color_palette = false, proxy = false, mnes = false;
+
+        void deserialize(const nlohmann::json& j);
+        nlohmann::json serialize();
+        std::string protocolName();
+    };
 
     enum class DisconnectReason {
         // In these first two examples, the connection is dead on the portal and we have been informed of such.
@@ -40,8 +76,6 @@ namespace net {
 
     extern std::unordered_map<int64_t, DisconnectReason> deadConnections;
 
-    awaitable<void> runWebServer();
-
     class Connection;
 
     class ConnectionParser {
@@ -57,35 +91,21 @@ namespace net {
         std::shared_ptr<Connection> conn;
     };
 
-class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
-public:
-    explicit HttpConnection(boost::beast::tcp_stream socket);
-
-    boost::asio::awaitable<void> run();
-
-protected:
-    boost::beast::tcp_stream socket;
-    boost::beast::flat_buffer inBuf, outBuf;
-    http::request_parser<http::string_body> parser;
-    boost::asio::awaitable<void> runWebSocket(boost::beast::websocket::stream<boost::beast::tcp_stream> ws, std::string_view target);
-    boost::asio::awaitable<bool> runWeb();
-};
-
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
-        Connection(boost::beast::websocket::stream<boost::beast::tcp_stream> ws, const any_io_executor& ex, ProtocolCapabilities cap, int64_t connId);
+        Connection(int64_t connId);
         void sendGMCP(const std::string &cmd, const nlohmann::json &j);
         void sendText(const std::string &messg);
-        boost::asio::awaitable<void> onHeartbeat(double deltaTime);
+        void onHeartbeat(double deltaTime);
         void onNetworkDisconnected();
         void onWelcome();
         void close();
 
-        boost::asio::awaitable<void> cleanup(DisconnectReason reason);
+        void cleanup(DisconnectReason reason);
 
         void setParser(ConnectionParser *p);
 
-        boost::asio::awaitable<void> run();
+        void run();
 
         int64_t connId{};
         account_data *account{};
@@ -101,16 +121,9 @@ protected:
         // actually used anywhere else.
         ProtocolCapabilities capabilities{};
 
-        Channel<GameMessage> inChan, outChan;
-
         std::unique_ptr<ConnectionParser> parser;
     protected:
-        boost::beast::websocket::stream<boost::beast::tcp_stream> ws;
-        boost::asio::awaitable<void> runReader();
-        boost::asio::awaitable<void> runWriter();
-        boost::asio::awaitable<void> runPinger();
         void handleMessage(const GameMessage &msg);
-        boost::beast::flat_buffer inBuf;
     };
 
 

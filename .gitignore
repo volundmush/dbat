@@ -53,7 +53,7 @@ dkms.conf
 
 # CLion
 .idea/
-cmake-build-*
+cmake-*
 
 # DBAT
 libs
@@ -76,3 +76,4 @@ bin/split
 bin/wld2html
 build
 thermite/
+wrapper/*.cpp

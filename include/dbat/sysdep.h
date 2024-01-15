@@ -201,3 +201,7 @@ std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
 
 
 using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
+
+extern std::shared_ptr<spdlog::logger> logger;
+
+extern bool isMigrating;

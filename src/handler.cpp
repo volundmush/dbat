@@ -696,7 +696,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     }
 
     // This section is now only going to be called during migrations.
-    if(gameFunc) {
+    if(isMigrating) {
         if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
             if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
                 (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {

@@ -10,7 +10,6 @@
 #pragma once
 
 #include "structs.h"
-#include <boost/asio.hpp>
 #include "SQLiteCpp/SQLiteCpp.h"
 
 /* arbitrary constants used by index_boot() (must be unique) */

@@ -15,9 +15,8 @@ exit 1
 ;;
 esac
 
-OUTFOLDER=cmake-build-${MODE}
+OUTFOLDER=cmake-build
 
 mkdir -p $OUTFOLDER
 cmake -S . -B $OUTFOLDER -D CMAKE_BUILD_TYPE=$MODE
 cmake --build $OUTFOLDER -- -j $(nproc)
-
