@@ -3855,7 +3855,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                 gaincalc *= 1.25;
             }
         }
-        gain = gain * Random::get<double>(0.8, 1.2);
+        gain = gaincalc * Random::get<double>(0.8, 1.2);
         gain = gain * bonus;
 		//Gain the xp
         ch->modExperience(gain);
