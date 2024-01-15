@@ -3134,7 +3134,7 @@ void admin_set(struct char_data *ch, int value) {
     int i;
     int orig = GET_ADMLEVEL(ch);
 
-    value = std::clamp(value, 0, ADMLVL_IMPL);
+    value = std::clamp(value, 0, ADMLVL_IMPL-1);
 
     if (GET_ADMLEVEL(ch) == value)
         return;

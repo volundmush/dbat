@@ -395,13 +395,13 @@ namespace portal::telnet {
                 }
             }
             catch(const boost::system::error_code &ec) {
-                logger->error("runGameLink Exception: {}", ec.what());
+                if(!webShutdown) logger->error("runGameLink Exception: {}", ec.what());
             }
             catch (const std::exception& e) {
-                logger->error("runGameLink Exception: {}", e.what());
+                if(!webShutdown) logger->error("runGameLink Exception: {}", e.what());
             }
             catch(...) {
-                logger->error("runGameLink encountered an unknown exception");
+                if(!webShutdown) logger->error("runGameLink encountered an unknown exception");
             }
 
             if(webShutdown) break;
