@@ -3785,7 +3785,12 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 			float deadlyBonus = isLethal ? 1.2 : 1;
 
             //Average out the bonus to limit the exponential gain
-            gaincalc = (plGain + gear_exp(ch, 1)) / 2;
+            float gearGain = gear_exp(ch, 100) / 100;
+            if (gearGain <= 0) {
+                gearGain = 0.1;
+            }
+
+            gaincalc = (plGain + gearGain) / 2;
 
             gaincalc = num * gaincalc * deadlyBonus;
             type = 3;
@@ -4461,7 +4466,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
         if (AFF_FLAGGED(vict, AFF_SHELL)) {
-            dmg = dmg * 0.25;
+            dmg -= dmg * 0.25;
         }
 
         if (AFF_FLAGGED(vict, AFF_WITHER)) {
@@ -4666,7 +4671,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= ((vict->getEffMaxPL())) * .98) {
             do_stand(vict, nullptr, 0, 0);
         }
-        int suppresso = GET_SUPPRESS(vict) > 0;
+        bool suppresso = (GET_SUPPRESS(vict) > 0);
         if (is_sparring(ch) && is_sparring(vict) && (GET_SUPPRESS(vict) + vict->getCurHealth()) - dmg <= 0) {
             if (!IS_NPC(vict)) {
                 act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict,
