@@ -77,3 +77,4 @@ bin/wld2html
 build
 thermite/
 wrapper/*.cpp
+bin/
