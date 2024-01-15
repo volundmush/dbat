@@ -1,5 +1,11 @@
 #pragma once
 #include "nlohmann/json.hpp"
+#include <spdlog/spdlog.h>
+#include <memory>
+
+extern std::shared_ptr<spdlog::logger> logger;
+
+extern std::shared_ptr<spdlog::logger> setup_logging(const std::string &name, const std::string& path);
 
 namespace net {
 
@@ -19,15 +25,6 @@ namespace net {
         GameMessageType type{GameMessageType::Connect};
         nlohmann::json data;
         [[nodiscard]] nlohmann::json serialize() const;
-    };
-
-    struct Message {
-        Message();
-        explicit Message(const nlohmann::json& j);
-        std::string cmd;
-        nlohmann::json args;
-        nlohmann::json kwargs;
-        nlohmann::json serialize() const;
     };
 
     enum class Protocol : uint8_t {

@@ -16,22 +16,6 @@ namespace net {
     using namespace boost::asio;
     using namespace boost::beast;
 
-    class Link {
-    public:
-        explicit Link(boost::beast::websocket::stream<boost::beast::tcp_stream> ws);
-
-        awaitable<void> run();
-        void stop();
-
-    protected:
-        awaitable<void> runReader();
-        awaitable<void> runWriter();
-        awaitable<void> runPinger();
-        awaitable<void> createUpdateClient(const nlohmann::json &j);
-        boost::beast::websocket::stream<boost::beast::tcp_stream> conn;
-        bool is_stopped;
-    };
-
     template<typename T>
     using Channel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, T)>;
 
@@ -40,11 +24,6 @@ namespace net {
     extern std::unique_ptr<io_context> io;
 
     extern std::unique_ptr<signal_set> signals;
-
-    extern std::unique_ptr<Channel<nlohmann::json>> linkChannel;
-    extern boost::asio::ip::tcp::endpoint thermiteEndpoint;
-
-    extern std::unique_ptr<Link> link;
 
     enum class DisconnectReason {
         // In these first two examples, the connection is dead on the portal and we have been informed of such.
@@ -61,7 +40,7 @@ namespace net {
 
     extern std::unordered_map<int64_t, DisconnectReason> deadConnections;
 
-    awaitable<void> runLinkManager();
+    awaitable<void> runWebServer();
 
     class Connection;
 
@@ -69,8 +48,8 @@ namespace net {
     public:
         explicit ConnectionParser(const std::shared_ptr<Connection>& conn) : conn(conn) {}
         virtual ~ConnectionParser() = default;
-        virtual void handleMessage(const Message &m);
         virtual void parse(const std::string &txt) = 0;
+        virtual void handleGMCP(const std::string &txt, const nlohmann::json &j);
         virtual void start();
         virtual void close();
     protected:
@@ -78,20 +57,35 @@ namespace net {
         std::shared_ptr<Connection> conn;
     };
 
+class HttpConnection : public std::enable_shared_from_this<HttpConnection> {
+public:
+    explicit HttpConnection(boost::beast::tcp_stream socket);
+
+    boost::asio::awaitable<void> run();
+
+protected:
+    boost::beast::tcp_stream socket;
+    boost::beast::flat_buffer inBuf, outBuf;
+    http::request_parser<http::string_body> parser;
+    boost::asio::awaitable<void> runWebSocket(boost::beast::websocket::stream<boost::beast::tcp_stream> ws, std::string_view target);
+    boost::asio::awaitable<bool> runWeb();
+};
+
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
-        explicit Connection(int64_t connId);
-        void sendMessage(const Message &msg);
+        Connection(boost::beast::websocket::stream<boost::beast::tcp_stream> ws, const any_io_executor& ex, ProtocolCapabilities cap, int64_t connId);
+        void sendGMCP(const std::string &cmd, const nlohmann::json &j);
         void sendText(const std::string &messg);
-        void handleMessage(const Message &m);
-        void onHeartbeat(double deltaTime);
+        boost::asio::awaitable<void> onHeartbeat(double deltaTime);
         void onNetworkDisconnected();
         void onWelcome();
         void close();
 
-        void cleanup(DisconnectReason reason);
+        boost::asio::awaitable<void> cleanup(DisconnectReason reason);
 
         void setParser(ConnectionParser *p);
+
+        boost::asio::awaitable<void> run();
 
         int64_t connId{};
         account_data *account{};
@@ -107,9 +101,16 @@ namespace net {
         // actually used anywhere else.
         ProtocolCapabilities capabilities{};
 
-        JsonChannel fromLink;
-        std::unique_ptr<ConnectionParser> parser;
+        Channel<GameMessage> inChan, outChan;
 
+        std::unique_ptr<ConnectionParser> parser;
+    protected:
+        boost::beast::websocket::stream<boost::beast::tcp_stream> ws;
+        boost::asio::awaitable<void> runReader();
+        boost::asio::awaitable<void> runWriter();
+        boost::asio::awaitable<void> runPinger();
+        void handleMessage(const GameMessage &msg);
+        boost::beast::flat_buffer inBuf;
     };
 
 

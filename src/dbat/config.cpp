@@ -47,11 +47,11 @@ namespace config {
     using namespace std::chrono_literals;
 
     bool enableMultithreading{true};
-    int threadsCount{2};
+    int threadsCount{0};
     bool usingMultithreading{false};
     std::chrono::milliseconds heartbeatInterval{100ms};
-    std::string thermiteAddress{"127.0.0.1"};
-    uint16_t thermitePort{6999};
+    std::string serverAddress{"0.0.0.0"};
+    uint16_t serverPort{8000};
     std::string logFile = "logs/dbat.log";
 
     std::string assetDbName = "assets";

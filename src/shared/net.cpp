@@ -1,5 +1,25 @@
 #include "shared/net.h"
 #include <boost/algorithm/string.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+
+std::shared_ptr<spdlog::logger> logger;
+
+std::shared_ptr<spdlog::logger> setup_logging(const std::string &name, const std::string& path) {
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::info); // Set the console to output info level and above messages
+    console_sink->set_pattern("[%^%l%$] %v"); // Example pattern: [INFO] some message
+
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(path, 1024 * 1024 * 5, 3);
+    file_sink->set_level(spdlog::level::trace); // Set the file to output all levels of messages
+
+    std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
+
+    auto out = std::make_shared<spdlog::logger>(name, begin(sinks), end(sinks));
+    out->set_level(spdlog::level::trace); // Set the logger to trace level
+    spdlog::register_logger(out);
+    return out;
+}
 
 namespace net {
     void ProtocolCapabilities::deserialize(const nlohmann::json& j) {
@@ -19,7 +39,7 @@ namespace net {
         if(j.contains("encoding")) encoding = j["encoding"];
         if(j.contains("utf8")) utf8 = j["utf8"];
 
-        if(j.contains("colorType")) colorType = j["color"].get<ColorType>();
+        if(j.contains("colorType")) colorType = j["colorType"].get<ColorType>();
 
         if(j.contains("width")) width = j["width"];
         if(j.contains("height")) height = j["height"];
@@ -90,27 +110,6 @@ namespace net {
             default:
                 return "unknown";
         }
-    }
-
-    Message::Message() {
-        cmd = "";
-        args = nlohmann::json::array();
-        kwargs = nlohmann::json::object();
-    }
-
-    nlohmann::json Message::serialize() const {
-        nlohmann::json j;
-        if(!cmd.empty()) j["cmd"] = cmd;
-        if(!args.empty()) j["args"] = args;
-        if(!kwargs.empty()) j["kwargs"] = kwargs;
-
-        return j;
-    }
-
-    Message::Message(const nlohmann::json& j) : Message() {
-        if(j.contains("cmd")) cmd = j["cmd"].get<std::string>();
-        if(j.contains("args")) args = j["args"];
-        if(j.contains("kwargs")) kwargs = j["kwargs"];
     }
 
     nlohmann::json GameMessage::serialize() const {

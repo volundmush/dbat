@@ -1,4 +1,6 @@
 #include "portal/telnet.h"
+
+#include <memory>
 #include "portal/config.h"
 
 
@@ -95,8 +97,8 @@ namespace portal::telnet {
     // TelnetConnection
 
     TelnetConnection::TelnetConnection(ip::tcp::socket stream,
-        const any_io_executor &ex) : stream(std::move(stream)), outMessage(ex),
-        toGame(ex) {
+        const any_io_executor &ex) : stream(std::move(stream)), outMessage(ex, 200),
+        toGame(ex, 200) {
 
         capabilities.tls = tls;
 
@@ -110,28 +112,31 @@ namespace portal::telnet {
 
     }
 
-    awaitable<void> TelnetConnection::wsRunPinger(WsStream& ws) {
+    awaitable<void> TelnetConnection::wsRunPinger() {
         // Gimme a 100ms steady timer...
         auto ex = co_await this_coro::executor;
-        boost::asio::steady_timer timer(ex, std::chrono::milliseconds(100));
+        auto countdown = std::chrono::milliseconds(100);
+        boost::asio::steady_timer timer(ex, countdown);
 
         // Now, every 100ms, send an async_ping.
-        if(ws.index()) {
-            auto &wss = std::get<1>(ws);
+        if(ws->index()) {
+            auto &wss = std::get<1>(*ws);
             while(true) {
-                co_await timer.async_wait(use_awaitable);
                 if(wss.is_open()) {
                     co_await wss.async_ping({}, use_awaitable);
                 }
-                timer.expires_after(std::chrono::milliseconds(100));
+                timer.expires_after(countdown);
+                co_await timer.async_wait(use_awaitable);
             }
         } else {
-            auto &w = std::get<0>(ws);
-            co_await timer.async_wait(use_awaitable);
-            if(w.is_open()) {
-                co_await w.async_ping({}, use_awaitable);
+            auto &w = std::get<0>(*ws);
+            while(true) {
+                if(w.is_open()) {
+                    co_await w.async_ping({}, use_awaitable);
+                }
+                timer.expires_after(countdown);
+                co_await timer.async_wait(use_awaitable);
             }
-            timer.expires_after(std::chrono::milliseconds(100));
         }
 
         co_return;
@@ -212,15 +217,19 @@ namespace portal::telnet {
         switch(msg.type) {
             case ::net::GameMessageType::Command:
                 // on the portal-side, Command represents ANSI text that should be output to the client directly.
+                co_await wsHandleCommand(msg);
                     break;
             case ::net::GameMessageType::GMCP:
                 // special data that should be handled by the portal and/or sent to the client depending on what it is.
+                co_await wsHandleGMCP(msg);
                     break;
             case ::net::GameMessageType::MSSP:
                 // This is Mud Server Status Protocol data that should be sent out over IAC subnegotiation if the client supports it.
+                co_await wsHandleMSSP(msg);
                     break;
             case ::net::GameMessageType::Disconnect:
                 // the server has indicated that the client has been disconnected. kill the portal-side connection.
+                webShutdown = true;
                     break;
             default:
                 // Other types are not supported. Connect, Update, and Timeout have no meaning on the portal side.
@@ -231,11 +240,11 @@ namespace portal::telnet {
     }
 
 
-    awaitable<void> TelnetConnection::wsRunReader(WsStream& ws) {
+    awaitable<void> TelnetConnection::wsRunReader() {
         boost::beast::flat_buffer buf;
 
-        if(ws.index()) {
-            auto &wss = std::get<1>(ws);
+        if(ws->index()) {
+            auto &wss = std::get<1>(*ws);
             while(true) {
                 auto results = co_await wss.async_read(buf, use_awaitable);
                 if(wss.got_text()) {
@@ -245,10 +254,11 @@ namespace portal::telnet {
                     co_await wsHandleBinary(buf);
                 }
                 buf.clear();
+                if(webShutdown) break;
             }
 
         } else {
-            auto &w = std::get<0>(ws);
+            auto &w = std::get<0>(*ws);
             while(true) {
                 auto results = co_await w.async_read(buf, use_awaitable);
                 if(w.got_text()) {
@@ -258,50 +268,89 @@ namespace portal::telnet {
                     co_await wsHandleBinary(buf);
                 }
                 buf.clear();
+                if(webShutdown) break;
             }
         }
 
         co_return;
     }
 
-    awaitable<void> TelnetConnection::wsRunWriter(WsStream& ws) {
-        if(ws.index()) {
-            auto &wss = std::get<1>(ws);
-            while(true) {
-                auto message = co_await toGame.async_receive(use_awaitable);
-
-                auto serialized = message.serialize();
-                auto dumped = serialized.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
-                co_await wss.async_write(boost::asio::buffer(dumped), use_awaitable);
-            }
-
-        } else {
-            auto &w = std::get<0>(ws);
-
-            while(true) {
-                auto message = co_await toGame.async_receive(use_awaitable);
-                auto serialized = message.serialize();
-                auto dumped = serialized.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
-                co_await w.async_write(boost::asio::buffer(dumped), use_awaitable);
-            }
-        }
-        co_return;
-    }
-
-
-    awaitable<void> TelnetConnection::runWebSocket(WsStream ws) {
+    awaitable<void> TelnetConnection::wsRunWriter() {
+        bool error = false;
         try {
-            co_await (wsRunPinger(ws) || wsRunReader(ws) || wsRunWriter(ws));
+            if(ws->index()) {
+                auto &wss = std::get<1>(*ws);
+                while(true) {
+                    auto message = co_await toGame.async_receive(use_awaitable);
+
+                    auto serialized = message.serialize();
+                    auto dumped = serialized.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
+                    co_await wss.async_write(boost::asio::buffer(dumped), use_awaitable);
+                }
+
+            } else {
+                auto &w = std::get<0>(*ws);
+
+                while(true) {
+                    auto message = co_await toGame.async_receive(use_awaitable);
+                    auto serialized = message.serialize();
+                    auto dumped = serialized.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
+                    co_await w.async_write(boost::asio::buffer(dumped), use_awaitable);
+                }
+            }
+        }
+        catch(const boost::system::error_code &ec) {
+            if(!(webShutdown || telnetShutdown)) {
+                error = true;
+                logger->error("wsRunWriter Exception: {}", ec.what());
+            }
+
+        }
+        catch (const std::exception& e) {
+            if(!(webShutdown || telnetShutdown)) {
+                error = true;
+                logger->error("wsRunWriter Exception: {}", e.what());
+            }
+
         }
         catch(...) {
-            // handle this here...
+            if(!(webShutdown || telnetShutdown)) {
+                error = true;
+                logger->error("wsRunWriter encountered an unknown exception");
+            }
         }
+        co_return;
+    }
+
+
+    awaitable<void> TelnetConnection::runWebSocket() {
+        logger->info("Telnet->WebSocket session established.");
+        ::net::GameMessage msg;
+        msg.type = ::net::GameMessageType::Connect;
+        msg.data = capabilities.serialize();
+        try {
+            co_await toGame.async_send(boost::system::error_code{}, msg, use_awaitable);
+            co_await (wsRunPinger() || wsRunReader() || wsRunWriter());
+        }
+        catch(const boost::system::error_code &ec) {
+            if(!webShutdown) logger->error("runWebSocket Exception: {}", ec.what());
+        }
+        catch (const std::exception& e) {
+            if(!webShutdown) logger->error("runWebSocket Exception: {}", e.what());
+        }
+        catch(...) {
+            if(!webShutdown) logger->error("runWebSocket encountered an unknown exception");
+        }
+        logger->info("Telnet->WebSocket session closed.");
 
         co_return;
     }
 
 
     awaitable<void> TelnetConnection::runGameLink() {
+        using namespace std::chrono_literals;
+        auto ex = co_await boost::asio::this_coro::executor;
+        boost::asio::steady_timer standoff(ex, 5s);
 
         beast::error_code ec;
 
@@ -313,39 +362,53 @@ namespace portal::telnet {
         while(true) {
             try {
                 if(config::serverSecure) {
-                    websocket::stream<ssl_stream<tcp_stream>> ws(ioc, ssl_context);
+                    websocket::stream<ssl_stream<tcp_stream>> wss(ioc, ssl_context);
                     // Set a timeout on the operation
-                    beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
+                    //beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
                     // Make the connection on the IP address we get from a lookup
-                    auto ep = co_await beast::get_lowest_layer(ws).async_connect(results, use_awaitable);
+                    auto ep = co_await beast::get_lowest_layer(wss).async_connect(results, use_awaitable);
 
                     // Perform the SSL handshake
-                    co_await ws.next_layer().async_handshake(ssl::stream_base::client, use_awaitable);
+                    co_await wss.next_layer().async_handshake(ssl::stream_base::client, use_awaitable);
 
                     // Set a timeout on the operation
-                    ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
+                    wss.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
 
                     // Perform the WebSocket handshake
-                    co_await ws.async_handshake(config::serverAddress, "/ws", use_awaitable);
-                    co_await runWebSocket(std::move(ws));
+                    co_await wss.async_handshake(config::serverAddress, config::serverPath, use_awaitable);
+                    ws = std::make_unique<WsStream>(std::move(wss));
+                    co_await runWebSocket();
                 } else {
-                    websocket::stream<tcp_stream> ws(ioc);
+                    websocket::stream<tcp_stream> wss(ioc);
                     // Set a timeout on the operation
-                    beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
+                    //beast::get_lowest_layer(ws).expires_after(std::chrono::seconds(30));
                     // Make the connection on the IP address we get from a lookup
-                    auto ep = co_await beast::get_lowest_layer(ws).async_connect(results, use_awaitable);
+                    auto ep = co_await beast::get_lowest_layer(wss).async_connect(results, use_awaitable);
 
                     // Set a timeout on the operation
-                    ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
+                    wss.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
 
                     // Perform the WebSocket handshake
-                    co_await ws.async_handshake(config::serverAddress, "/ws", use_awaitable);
-                    co_await runWebSocket(std::move(ws));
+                    co_await wss.async_handshake(config::serverAddress, config::serverPath, use_awaitable);
+                    ws = std::make_unique<WsStream>(std::move(wss));
+                    co_await runWebSocket();
                 }
             }
-            catch(...) {
-
+            catch(const boost::system::error_code &ec) {
+                logger->error("runGameLink Exception: {}", ec.what());
             }
+            catch (const std::exception& e) {
+                logger->error("runGameLink Exception: {}", e.what());
+            }
+            catch(...) {
+                logger->error("runGameLink encountered an unknown exception");
+            }
+
+            if(webShutdown) break;
+
+            // Let's do a 5 second standoff. Gimme a steady timer.
+            standoff.expires_from_now(5s);
+            co_await standoff.async_wait(use_awaitable);
         }
 
         co_return;
@@ -361,6 +424,9 @@ namespace portal::telnet {
         co_await timer.async_wait(use_awaitable);
 
         co_await runGameLink();
+        if(webShutdown) {
+            // TODO: finish this...
+        }
         co_return;
     }
 
@@ -373,40 +439,68 @@ namespace portal::telnet {
     }
 
     awaitable<void> TelnetConnection::runWriter() {
-        while(true) {
-            auto message = co_await outMessage.async_receive(use_awaitable);
+        bool error = false;
+        try {
+            while(true) {
+                auto message = co_await outMessage.async_receive(use_awaitable);
 
-            switch(message.index()) {
-                case 0: // raw application data: a vector of uint8_t
-                    sendBytes(std::get<0>(message));
-                    break;
-                case 1: // a single byte, a telnet command. IAC <command>
-                    sendBytes({codes::IAC, std::get<1>(message)});
-                    break;
-                case 2: // a negotiation pair, IAC <first> <second>
-                {
-                    auto pair = std::get<2>(message);
-                    sendBytes({codes::IAC, std::get<0>(pair), std::get<1>(pair)});
+                switch(message.index()) {
+                    case 0: // raw application data: a vector of uint8_t
+                        sendBytes(std::get<0>(message));
+                        break;
+                    case 1: // a single byte, a telnet command. IAC <command>
+                        sendBytes({codes::IAC, std::get<1>(message)});
+                        break;
+                    case 2: // a negotiation pair, IAC <first> <second>
+                    {
+                        auto pair = std::get<2>(message);
+                        sendBytes({codes::IAC, std::get<0>(pair), std::get<1>(pair)});
+                    }
+                        break;
+                    case 3: // iac subnegotiation.
+                    {
+                        auto pair = std::get<3>(message);
+                        // The first element of the pair is the option, the second is a vector of bytes. we need to send...
+                        // IAC SB <option> <bytes> IAC SE
+                        std::vector<uint8_t> bytes = {codes::IAC, codes::SB, std::get<0>(pair)};
+                        bytes.insert(bytes.end(), std::get<1>(pair).begin(), std::get<1>(pair).end());
+                        bytes.push_back(codes::IAC);
+                        bytes.push_back(codes::SE);
+                        sendBytes(bytes);
+                    }
+                        break;
                 }
-                    break;
-                case 3: // iac subnegotiation.
-                {
-                    auto pair = std::get<3>(message);
-                    // The first element of the pair is the option, the second is a vector of bytes. we need to send...
-                    // IAC SB <option> <bytes> IAC SE
-                    std::vector<uint8_t> bytes = {codes::IAC, codes::SB, std::get<0>(pair)};
-                    bytes.insert(bytes.end(), std::get<1>(pair).begin(), std::get<1>(pair).end());
-                    bytes.push_back(codes::IAC);
-                    bytes.push_back(codes::SE);
-                    sendBytes(bytes);
+
+                // the sendBytes function put the bytes in writebuf. We need to flush it.
+                while(writebuf.size()) {
+                    const auto results = co_await stream.async_write_some(writebuf.data(), use_awaitable);
+                    writebuf.consume(results);
                 }
-                break;
+
+            }
+        }
+        catch(const boost::system::error_code &ec) {
+            if (ec == boost::asio::error::operation_aborted) {
+                // Operation cancelled, possibly due to timeout
+                if (!(telnetShutdown || webShutdown))
+                    logger->info("runWriter Operation aborted, possibly due to timeout");
+            } else {
+                // Other errors
+                error = true;
+                logger->error("runWriter Exception: {}", ec.message());
+            }
+        }
+        catch(const std::exception& e) {
+            if(!(telnetShutdown || webShutdown)) {
+                error = true;
+                logger->error("runWriter Exception: {}", e.what());
             }
 
-            // the sendBytes function put the bytes in writebuf. We need to flush it.
-            while(writebuf.size()) {
-                const auto results = co_await stream.async_write_some(writebuf.data(), use_awaitable);
-                writebuf.consume(results);
+        }
+        catch(...) {
+            if(!(telnetShutdown || webShutdown)) {
+                error = true;
+                logger->error("runWriter Unknown Exception");
             }
 
         }
@@ -423,15 +517,48 @@ namespace portal::telnet {
 
 
     awaitable<void> TelnetConnection::runReader() {
-        while(true) {
-            auto results = co_await stream.async_read_some(readbuf.prepare(1024), use_awaitable);
-            readbuf.commit(results);
+        bool error = false;
 
-            while(co_await parseTelnet()) {
+        try {
+            while(true) {
+                auto results = co_await stream.async_read_some(readbuf.prepare(1024), use_awaitable);
+                readbuf.commit(results);
 
+                while(co_await parseTelnet()) {
+
+                }
+
+            }
+        }
+        catch(const boost::system::error_code &ec) {
+            if(ec == boost::asio::error::eof) {
+                // End of file or connection closed by peer
+                telnetShutdown = true;
+            } else if(ec == boost::asio::error::operation_aborted) {
+                // Operation cancelled, possibly due to timeout
+                if(!(telnetShutdown || webShutdown)) logger->info("runReader Operation aborted, possibly due to timeout");
+            } else {
+                // Other errors
+                error = true;
+                logger->error("runReader Exception: {}", ec.message());
+            }
+        }
+        catch(const std::exception& e) {
+            if(!(telnetShutdown || webShutdown)) {
+                error = true;
+                logger->error("runReader Exception: {}", e.what());
             }
 
         }
+        catch(...) {
+            if(!(telnetShutdown || webShutdown)) {
+                error = true;
+                logger->error("runReader Unknown Exception");
+            }
+
+        }
+
+        if((telnetShutdown || webShutdown) && toGame.is_open()) toGame.close();
 
         co_return;
     }

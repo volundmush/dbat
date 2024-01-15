@@ -532,6 +532,8 @@ struct char_data : public unit_data {
     nlohmann::json serializeLocation();
     nlohmann::json serializeRelations();
 
+    void sendGMCP(const std::string &cmd, const nlohmann::json &j);
+
     void deserializeLocation(const nlohmann::json& j);
     void deserializeRelations(const nlohmann::json& j);
 
@@ -1164,6 +1166,7 @@ struct descriptor_data {
     void start();
     void handleLostLastConnection(bool graceful);
     void sendText(const std::string &txt);
+    void sendGMCP(const std::string &cmd, const nlohmann::json &j);
 };
 
 /* used in the socials */

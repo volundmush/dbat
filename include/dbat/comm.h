@@ -58,9 +58,7 @@ extern void close_socket(struct descriptor_data *d);
 /* I/O functions */
 extern void write_to_q(const char *txt, struct txt_q *queue, int aliased);
 
-extern std::function<void()> gameFunc;
-
-
+extern std::function<boost::asio::awaitable<void>()> gameFunc;
 
 extern void string_add(struct descriptor_data *d, char *str);
 
@@ -97,7 +95,6 @@ extern char *make_prompt(struct descriptor_data *point);
 
 extern void free_bufpool();
 
-extern void setup_log();
 
 void broadcast(const std::string& txt);
 

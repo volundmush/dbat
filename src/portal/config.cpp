@@ -8,4 +8,5 @@ namespace portal::config {
     std::string serverPort("8000");
     std::string serverPath{"/ws"};
     bool serverSecure{false};
-}boost::asio::ssl::context ssl_context(boost::asio::ssl::context::tlsv12_client);
+}
+boost::asio::ssl::context ssl_context(boost::asio::ssl::context::tlsv13_client);

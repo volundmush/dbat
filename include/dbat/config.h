@@ -15,10 +15,8 @@ namespace config {
     // the duration - in milliseconds - between calls to the heartbeat.
     extern std::chrono::milliseconds heartbeatInterval;
 
-    // the IP address of the thermite server used as the networking front-end.
-    extern std::string thermiteAddress;
-    // the port of the thermite server used as the networking front-end.
-    extern uint16_t thermitePort;
+    extern std::string serverAddress;
+    extern uint16_t serverPort;
 
     extern std::string logFile;
     // the filename for the game save database.

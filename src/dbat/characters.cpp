@@ -1476,3 +1476,7 @@ void char_data::gazeAtMoon() {
         form = toForm;
     }
 }
+
+void char_data::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
+    if(desc) desc->sendGMCP(cmd, j);
+}

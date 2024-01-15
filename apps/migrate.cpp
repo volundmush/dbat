@@ -4,6 +4,8 @@
 #include "dbat/constants.h"
 #include "dbat/genolc.h"
 #include "dbat/maputils.h"
+#include "dbat/config.h"
+#include "shared/net.h"
 #include <filesystem>
 #include <memory>
 #include <iostream>
@@ -1649,7 +1651,7 @@ void migrate_characters() {
     }
 }
 
-void migrate_db() {
+boost::asio::awaitable<void> migrate_db() {
 
     migrate_grid();
 
@@ -1687,6 +1689,7 @@ void migrate_db() {
         logger->error("Error dumping state: {}", e.what());
         shutdown_game(1);
     }
+    co_return;
 }
 
 int main(int argc, char **argv)
@@ -1822,7 +1825,7 @@ int main(int argc, char **argv)
 
     try {
         /* All arguments have been parsed, try to open log file. */
-        setup_log();
+        logger = setup_logging("migrate", "logs/migrate.log");
     }
     catch(std::exception& e) {
         std::cerr << "Cannot start logger: " << e.what() << std::endl;

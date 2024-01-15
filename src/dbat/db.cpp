@@ -65,7 +65,6 @@ std::set<int64_t> dirty_characters;
 std::set<int64_t> dirty_items;
 std::set<int64_t> dirty_dgscripts;
 
-std::shared_ptr<spdlog::logger> logger;
 bool gameIsLoading = true;
 bool saveAll = false;
 

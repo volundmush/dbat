@@ -2,6 +2,7 @@
 // Created by volund on 1/9/24.
 //
 #include "portal/config.h"
+#include "portal/portal.h"
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
@@ -52,16 +53,16 @@ int main(int argc, char* argv[]) {
         if(vm.count("secure")) {
             serverSecure = vm["secure"].as<bool>();
         }
-
+        logger = setup_logging("portal", "logs/portal.log");
 
         // Display the configuration for verification
-        std::cout << "Listening on: " << listenAddress << ":" << listenPort << std::endl;
-        std::cout << "Server: " << serverAddress << std::endl;
+        logger->info("Listening on: {}:{}", listenAddress, listenPort);
+        logger->info("Server: {}", serverAddress);
 
-        // ... Continue with the rest of your program ...
+        portal::run();
 
     } catch (std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        logger->error("Error: {}", e.what());
         return 1;
     }
 

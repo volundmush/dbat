@@ -12,6 +12,8 @@
 #include "dbat/constants.h"
 #include "dbat/ban.h"
 #include "dbat/genolc.h"
+#include "dbat/config.h"
+#include "shared/net.h"
 
 int main(int argc, char **argv)
 {
@@ -146,7 +148,7 @@ int main(int argc, char **argv)
 
     try {
         /* All arguments have been parsed, try to open log file. */
-        setup_log();
+        logger = setup_logging("dbat", config::logFile);
     }
     catch(std::exception& e) {
         std::cerr << "Cannot start logger: " << e.what() << std::endl;

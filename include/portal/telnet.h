@@ -80,10 +80,10 @@ namespace portal::telnet {
         awaitable<bool> parseTelnet();
 
         awaitable<void> runGameLink();
-        awaitable<void> runWebSocket(WsStream ws);
-        awaitable<void> wsRunReader(WsStream &ws);
-        awaitable<void> wsRunWriter(WsStream &ws);
-        awaitable<void> wsRunPinger(WsStream &ws);
+        awaitable<void> runWebSocket();
+        awaitable<void> wsRunReader();
+        awaitable<void> wsRunWriter();
+        awaitable<void> wsRunPinger();
         awaitable<void> wsHandleText(const std::string& msg);
         awaitable<void> wsHandleBinary(const beast::flat_buffer &buf);
         awaitable<void> wsHandleMessage(const ::net::GameMessage &msg);
@@ -100,11 +100,15 @@ namespace portal::telnet {
         awaitable<void> handleSubnegotiation(uint8_t option, const std::vector<uint8_t> &data);
 
         std::unordered_map<uint8_t, std::unique_ptr<TelnetOption>> options;
+        std::unique_ptr<WsStream> ws;
         boost::asio::ip::tcp::socket stream;
         bool tls;
         boost::asio::streambuf readbuf, writebuf, appbuf;
         Channel<TelnetMessage> outMessage;
         Channel<::net::GameMessage> toGame;
+
+        bool telnetShutdown{false};
+        bool webShutdown{false};
 
         bool started{false};
     };
