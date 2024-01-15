@@ -3768,7 +3768,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 		//Check if victim is NPC or Player, both have different logic here.
         if (vict != nullptr && IS_NPC(vict)) {
 			//Work out how challenging of an npc to fight this is, if the victim is stronger we want to give more xp. This doesn't affect attributes.
-			float plRatio = vict->getMaxPLTrans() / ch->getMaxPLTrans();
+			float plRatio = (float) vict->getMaxPLTrans() / (float) ch->getMaxPLTrans();
             float plGain = 1;
 
             //The lowest you can get from a fight is 0.5 times the xp, so long as they aren't 5x weaker than you
