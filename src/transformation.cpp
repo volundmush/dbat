@@ -142,8 +142,15 @@ namespace trans {
             case FormID::AscendThird:
                 return "@YAscend @WThird@n";
 
+
+            //Generic Forms
+            case FormID::PotentialUnleashed:
+                return "@YPotential @WUnleashed@n";
+            case FormID::EvilAura:
+                return "@YEvil @WAura@n";
+                
             // Whoops?
-            default:
+            default: 
                 return "Unknown";
         }
     }
@@ -285,6 +292,12 @@ namespace trans {
                 return "second";
             case FormID::AscendThird:
                 return "third";
+
+                //Generic Forms
+            case FormID::PotentialUnleashed:
+                return "potential";
+            case FormID::EvilAura:
+                return "evil";
 
             // Whoops?
             default:
@@ -585,9 +598,23 @@ namespace trans {
             }
         },
         {
-            FormID::AscendSecond, {
+            FormID::AscendThird, {
                 {APPLY_VITALS_MULT, 4.0},
                 {APPLY_ALL_VITALS, 300000000},
+            }
+        },
+        //Generic Forms
+        {
+            FormID::PotentialUnleashed, {
+                {APPLY_VITALS_MULT, 4.0},
+                {APPLY_ALL_VITALS, 300000000},
+            }
+        },
+        {
+            FormID::EvilAura, {
+                {APPLY_VITALS_MULT, 2.0},
+                {APPLY_ALL_VITALS, 1300000},
+                {APPLY_DAMAGE_PERC, 0.5},
             }
         },
 
@@ -655,7 +682,11 @@ namespace trans {
         // Kai
         {FormID::MysticFirst, .05},
         {FormID::MysticSecond, .07},
-        {FormID::MysticThird, .1}
+        {FormID::MysticThird, .1},
+
+        // Generic Forms
+        {FormID::PotentialUnleashed, .1},
+        {FormID::EvilAura, .08}
 
     };
 
@@ -1020,6 +1051,20 @@ namespace trans {
                                                      "@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Golden hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant golden ape!@n"
                                              }},
 
+            {
+                    FormID::PotentialUnleashed,     {
+                                                     "@WThere is a well of potential within you, beyond simple forms. Reaching deep you tug at it, pulling what was once simple potential and flaring it to life in a burst of simple power.@n",
+                                                     "@C$n takes a moment for themselves, focusing inwards. A moment later a white glow of pure aura explodes outwards, energy unbound.@n"
+                                             }
+            },
+
+            {
+                    FormID::EvilAura,     {
+                                                     "@WMorality is just a crutch for the weak. You know this better than anyone, for discarding it gleans a look at true power. You indulge. And outwards ruptures your Ki, tainted and drenched in evil beyond parallel.@n",
+                                                     "@C$n gives a sickeningly twisted smile as something behind their eyes relents. Forward from them rushes forwards a surge of black ki, their evil manifest, with nothing left to hold it back.@n"
+                                             }
+            },
+
 
     };
 
@@ -1123,7 +1168,11 @@ namespace trans {
         // Tuffle
         FormID::AscendFirst,
         FormID::AscendSecond,
-        FormID::AscendThird
+        FormID::AscendThird,
+
+        // Generic Forms
+        FormID::PotentialUnleashed,
+        FormID::EvilAura
     };
 
 
@@ -1315,7 +1364,11 @@ namespace trans {
         {FormID::BioMature, 1800000},
         {FormID::BioSemiPerfect, 25000000},
         {FormID::BioPerfect, 220000000},
-        {FormID::BioSuperPerfect, 1300000000}
+        {FormID::BioSuperPerfect, 1300000000},
+
+        // Generic Forms
+        {FormID::PotentialUnleashed, 0},
+        {FormID::EvilAura, 12500000}
 
     };
 

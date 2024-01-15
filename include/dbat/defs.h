@@ -87,89 +87,94 @@ enum class SenseiID : uint8_t {
 };
 
 enum class FormID : uint8_t {
- // Universal,
- Base = 0,
- Custom1 = 1,
- Custom2 = 2,
- Custom3 = 3,
- Custom4 = 4,
- Custom5 = 5,
- Custom6 = 6,
- Custom7 = 7,
- Custom8 = 8,
- Custom9 = 9,
+    // Universal,
+    Base = 0,
+    Custom1 = 1,
+    Custom2 = 2,
+    Custom3 = 3,
+    Custom4 = 4,
+    Custom5 = 5,
+    Custom6 = 6,
+    Custom7 = 7,
+    Custom8 = 8,
+    Custom9 = 9,
 
- // Saiyan'y forms.
- Oozaru = 10,
- GoldenOozaru = 11,
- SuperSaiyan = 12,
- SuperSaiyan2 = 13,
- SuperSaiyan3 = 14,
- SuperSaiyan4 = 15,
- SuperSaiyanGod = 16,
- SuperSaiyanBlue = 17,
+    // Saiyan'y forms.
+    Oozaru = 10,
+    GoldenOozaru = 11,
+    SuperSaiyan = 12,
+    SuperSaiyan2 = 13,
+    SuperSaiyan3 = 14,
+    SuperSaiyan4 = 15,
+    SuperSaiyanGod = 16,
+    SuperSaiyanBlue = 17,
 
- // Human'y Forms
- SuperHuman = 18,
- SuperHuman2 = 19,
- SuperHuman3 = 20,
- SuperHuman4 = 21,
-
-
- // Icer'y Forms
- IcerFirst = 22,
- IcerSecond = 23,
- IcerThird = 24,
- IcerFourth = 25,
- IcerMetal = 26,
- IcerGolden = 27,
- IcerBlack = 28,
-
- // Konatsu
- ShadowFirst = 29,
- ShadowSecond = 30,
- ShadowThird = 31,
-
- // Namekian
- SuperNamekian = 32,
- SuperNamekian2 = 33,
- SuperNamekian3 = 34,
- SuperNamekian4 = 35,
-
- // Mutant
- MutateFirst = 36,
- MutateSecond = 37,
- MutateThird = 38,
-
- // BioAndroid
- BioMature = 39,
- BioSemiPerfect = 40,
- BioPerfect = 41,
- BioSuperPerfect = 42,
-
- // Android
- Android10 = 43,
- Android20 = 44,
- Android30 = 45,
- Android40 = 46,
- Android50 = 47,
- Android60 = 48,
-
- // Majin
- MajAffinity = 49,
- MajSuper = 50,
- MajTrue = 51,
+    // Human'y Forms
+    SuperHuman = 18,
+    SuperHuman2 = 19,
+    SuperHuman3 = 20,
+    SuperHuman4 = 21,
 
 
- // Kai
- MysticFirst = 52,
- MysticSecond = 53,
- MysticThird = 54,
+    // Icer'y Forms
+    IcerFirst = 22,
+    IcerSecond = 23,
+    IcerThird = 24,
+    IcerFourth = 25,
+    IcerMetal = 26,
+    IcerGolden = 27,
+    IcerBlack = 28,
 
- // Tuffle
- AscendFirst = 55,
- AscendSecond = 56,
- AscendThird = 57
+    // Konatsu
+    ShadowFirst = 29,
+    ShadowSecond = 30,
+    ShadowThird = 31,
+
+    // Namekian
+    SuperNamekian = 32,
+    SuperNamekian2 = 33,
+    SuperNamekian3 = 34,
+    SuperNamekian4 = 35,
+
+    // Mutant
+    MutateFirst = 36,
+    MutateSecond = 37,
+    MutateThird = 38,
+
+    // BioAndroid
+    BioMature = 39,
+    BioSemiPerfect = 40,
+    BioPerfect = 41,
+    BioSuperPerfect = 42,
+
+    // Android
+    Android10 = 43,
+    Android20 = 44,
+    Android30 = 45,
+    Android40 = 46,
+    Android50 = 47,
+    Android60 = 48,
+
+    // Majin
+    MajAffinity = 49,
+    MajSuper = 50,
+    MajTrue = 51,
+
+
+    // Kai
+    MysticFirst = 52,
+    MysticSecond = 53,
+    MysticThird = 54,
+
+    // Tuffle
+    AscendFirst = 55,
+    AscendSecond = 56,
+    AscendThird = 57,
+
+    // Generic Forms
+    PotentialUnleashed = 58,
+    EvilAura = 59,
+
 };
 
 
