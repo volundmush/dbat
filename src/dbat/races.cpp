@@ -294,7 +294,7 @@ namespace race {
 
     static std::set<RaceID> playable = {RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian,
     RaceID::Mutant, RaceID::Kanassan, RaceID::Halfbreed, RaceID::BioAndroid, RaceID::Android, RaceID::Demon, RaceID::Majin,
-    RaceID::Kai, RaceID::Tuffle, RaceID::Animal};
+    RaceID::Kai, RaceID::Tuffle};
 
     bool isPlayable(RaceID id) {
         return playable.contains(id);
