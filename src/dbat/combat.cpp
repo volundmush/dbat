@@ -1175,7 +1175,7 @@ long double calc_critical(struct char_data *ch, int loc) {
 
     if (loc == 0) { /* Head */
         if (GET_BONUS(ch, BONUS_POWERHIT)) {
-            if (roll >= 15) {
+            if (roll <= 15) {
                 multi = 4;
             } else if (GET_BONUS(ch, BONUS_SOFT)) {
                 multi = 1;

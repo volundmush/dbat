@@ -7474,6 +7474,8 @@ ACMD(do_transform) {
         return;
     }
 
+    int64_t beforeKi = ch->getMaxKI();
+
     // check for revert.
     if (!strcasecmp("revert", arg)) {
         // Check if we can revert.
@@ -7495,8 +7497,19 @@ ACMD(do_transform) {
         trans::handleEchoRevert(ch, ch->form);
         ch->form = FormID::Base;
 
+        int64_t afterKi = ch->getMaxKI();
+
+        if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
+            int64_t barrier = GET_BARRIER(ch);
+            float ratio = afterKi / beforeKi;
+            GET_BARRIER(ch) = barrier * ratio;
+
+            send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.");
+        }
+
         return;
     }
+
 
     // Search for available transformations. Error out if we can't find one.
     auto trans_maybe = trans::findForm(ch, arg);
@@ -7528,10 +7541,24 @@ ACMD(do_transform) {
         }
     }
 
+    
+
     ch->form = trans;
     // No way is this a stealthy process...
     reveal_hiding(ch, 0);
     trans::handleEchoTransform(ch, trans);
+
+    int64_t afterKi = ch->getMaxKI();
+
+    if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
+        int64_t barrier = GET_BARRIER(ch);
+        float ratio = afterKi / beforeKi;
+        GET_BARRIER(ch) = barrier * ratio;
+
+        send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.");
+    }
+
+    //GET_BARRIER(ch)
 
     // Announce noisy transformations in the zone.
     int zone = 0;
