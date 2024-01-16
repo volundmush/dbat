@@ -7547,8 +7547,6 @@ ACMD(do_transform) {
         send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
     }
 
-    //GET_BARRIER(ch)
-
     // Announce noisy transformations in the zone.
     int zone = 0;
     if (race::isSenseable(ch->race)) {
