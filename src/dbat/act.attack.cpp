@@ -2659,7 +2659,7 @@ ACMD(do_throw) {
             int penalty = 0, chance = axion_dice(0) + axion_dice(0), wtype = 0, wlvl = 1, multithrow = true;
             handle_cooldown(ch, 5);
             improve_skill(ch, SKILL_THROW, 0);
-            damage = ((GET_OBJ_WEIGHT(obj) / 3) * (GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) * 0.01);
+            damage = (GET_STR(ch) * (GET_CHA(ch) * 2) * GET_DEX(ch)) / 4;
             damage += (damage * 0.01) * (gravity / 4);
 
             if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
@@ -2723,23 +2723,23 @@ ACMD(do_throw) {
             if (!OBJ_FLAGGED(obj, ITEM_THROW)) {
                 penalty = 15;
                 multithrow = false;
-                damage = damage * 0.45;
+                damage = damage * 0.3;
             } else {
                 odam = rand_number(0, 1);
-                damage += (GET_STR(ch)) * ((GET_HIT(ch) * 0.00012) + rand_number(1, 20));
+                damage += GET_STR(ch) * GET_DEX(ch) + rand_number(1, 20);
                 damage += wlvl * (damage * 0.1);
             }
 
             if (wlvl == 5) {
-                damage += 25000;
+                damage *= 250 * GET_LEVEL(ch);
             } else if (wlvl == 4) {
-                damage += 16000;
+                damage *= 160 * GET_LEVEL(ch);
             } else if (wlvl == 3) {
-                damage += 10000;
+                damage *= 100 * GET_LEVEL(ch);
             } else if (wlvl == 2) {
-                damage += 5000;
+                damage *= 50 * GET_LEVEL(ch);
             } else if (wlvl == 1) {
-                damage += 1000;
+                damage *= 10 * GET_LEVEL(ch);
             }
 
             int hot = false;
