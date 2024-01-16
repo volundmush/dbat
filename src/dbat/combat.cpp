@@ -1175,7 +1175,7 @@ long double calc_critical(struct char_data *ch, int loc) {
 
     if (loc == 0) { /* Head */
         if (GET_BONUS(ch, BONUS_POWERHIT)) {
-            if (roll >= 15) {
+            if (roll <= 15) {
                 multi = 4;
             } else if (GET_BONUS(ch, BONUS_SOFT)) {
                 multi = 1;
@@ -2079,6 +2079,12 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
             struct char_data *vict = TARGET(k);
 
             if (GET_OBJ_VNUM(k) == 80) { // Tsuihidan
+                if (KICHARGE(k) <= 0) {
+                    send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
+                        k->short_description);
+                    extract_obj(k);
+                    continue;
+                }
                 if (IN_ROOM(k) != IN_ROOM(vict)) {
                     act("@wThe $p@w pursues after you!@n", true, vict, k, nullptr, TO_CHAR);
                     act("@wThe $p@W pursues after @C$n@w!@n", true, vict, k, nullptr, TO_ROOM);
@@ -2104,7 +2110,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                             true, vict, k, nullptr, TO_CHAR);
                         act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n",
                             true, vict, k, nullptr, TO_ROOM);
-                        KICHARGE(k) -= KICHARGE(k) / 10;
+                        KICHARGE(k) -= KICHARGE(k) * 0.1;
                         if (KICHARGE(k) <= 0) {
                             send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
                                          k->short_description);
@@ -3773,7 +3779,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
             //The lowest you can get from a fight is 0.5 times the xp, so long as they aren't 5x weaker than you
             if (plRatio > 0.2) {
-                plGain = 0.5 + plRatio / 2;
+                plGain = 0.5 + (plRatio / 2);
                 if (plGain > 3) plGain = 3;
             }
             else {
@@ -4642,10 +4648,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     dmg = dmg * 0.16;
                 } else if (dmg - index <= 0) {
                     dmg = dmg * 0.2;
-                } else if (dmg - index > dmg * 0.25) {
-                    dmg -= index;
-                } else {
+                } else if (dmg - index <= dmg * 0.25) {
                     dmg = dmg * 0.25;
+                } else {
+                    dmg -= index;
                 }
             }
         }
@@ -4834,10 +4840,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     int64_t healhp = (long double) (GET_MAX_HIT(vict)) * 0.12;
-                    if (AFF_FLAGGED(ch, AFF_METAMORPH) && GET_HIT(ch) <= GET_MAX_HIT(ch)) {
+                    if (AFF_FLAGGED(ch, AFF_METAMORPH) ) {
                         act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@r$n@R's dark aura saps some of your life energy!@n", true, ch, nullptr, vict, TO_VICT);
-                        ch->incCurHealth(healhp);
+                        if (GET_HIT(ch) <= GET_MAX_HIT(ch)) {
+                            ch->incCurHealth(healhp);
+                        }
+                        GET_CHARGE(ch) = GET_CHARGE(ch) + (GET_MAX_MANA(vict) * 0.12);
+                        
                     }
                     if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
                         ch->incCurKI(dmg * .05);

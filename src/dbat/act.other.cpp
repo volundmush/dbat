@@ -1857,33 +1857,22 @@ ACMD(do_kura) {
     cost = (GET_MAX_MANA(ch) / 100) * num;
     bonus = cost;
 
-    if ((ch->getCurST()) < cost) {
-        send_to_char(ch, "You do not have enough stamina for that high a number.\r\n");
+    if ((ch->getCurLF()) < cost) {
+        send_to_char(ch, "You do not have enough life force for that high a number.\r\n");
         return;
     }
 
-    if (skill <= axion_dice(0)) {
-        ch->decCurST(cost);
-        reveal_hiding(ch, 0);
-        act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies but you fail!",
+    ch->decCurLF(cost);
+    ch->incCurKI(bonus);
+    reveal_hiding(ch, 0);
+    act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!",
             true, ch, nullptr, nullptr, TO_CHAR);
-        act("@c$n@w crouches down and screams as $s eyes turn red and $e attempts to tap into dark energies but fails!",
+    act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!",
             true, ch, nullptr, nullptr, TO_ROOM);
-        improve_skill(ch, SKILL_KURA, 0);
-        WAIT_STATE(ch, PULSE_2SEC);
-        return;
-    } else {
-        ch->decCurST(cost);
-        ch->incCurKI(bonus);
-        reveal_hiding(ch, 0);
-        act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        improve_skill(ch, SKILL_KURA, 0);
-        WAIT_STATE(ch, PULSE_2SEC);
-        return;
-    }
+    improve_skill(ch, SKILL_KURA, 0);
+    WAIT_STATE(ch, PULSE_1SEC);
+       
+    
 
 }
 
@@ -7474,6 +7463,8 @@ ACMD(do_transform) {
         return;
     }
 
+    int64_t beforeKi = ch->getMaxKI();
+
     // check for revert.
     if (!strcasecmp("revert", arg)) {
         // Check if we can revert.
@@ -7495,8 +7486,19 @@ ACMD(do_transform) {
         trans::handleEchoRevert(ch, ch->form);
         ch->form = FormID::Base;
 
+        int64_t afterKi = ch->getMaxKI();
+
+        if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
+            int64_t barrier = GET_BARRIER(ch);
+            float ratio = afterKi / beforeKi;
+            GET_BARRIER(ch) = barrier * ratio;
+
+            send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.");
+        }
+
         return;
     }
+
 
     // Search for available transformations. Error out if we can't find one.
     auto trans_maybe = trans::findForm(ch, arg);
@@ -7528,10 +7530,24 @@ ACMD(do_transform) {
         }
     }
 
+    
+
     ch->form = trans;
     // No way is this a stealthy process...
     reveal_hiding(ch, 0);
     trans::handleEchoTransform(ch, trans);
+
+    int64_t afterKi = ch->getMaxKI();
+
+    if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
+        int64_t barrier = GET_BARRIER(ch);
+        float ratio = afterKi / beforeKi;
+        GET_BARRIER(ch) = barrier * ratio;
+
+        send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.");
+    }
+
+    //GET_BARRIER(ch)
 
     // Announce noisy transformations in the zone.
     int zone = 0;
