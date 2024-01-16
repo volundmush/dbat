@@ -7216,11 +7216,11 @@ ACMD(do_deathbeam) {
                     break;
             }
             if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 100 && GET_HIT(vict) >= 2) {
-                ch->decCurLF(dmg * .4, -1);
+                vict->decCurLF(dmg * .4, -1);
             } else if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 60 && GET_HIT(vict) >= 2) {
-                ch->decCurLF(dmg * .2, -1);
+                vict->decCurLF(dmg * .2, -1);
             } else if (GET_SKILL(ch, SKILL_DEATHBEAM) >= 40 && GET_HIT(vict) >= 2) {
-                ch->decCurLF(dmg * .05, -1);
+                vict->decCurLF(dmg * .05, -1);
             }
             if (GET_SKILL_PERF(ch, SKILL_DEATHBEAM) == 3 && attperc > minimum) {
                 pcost(ch, attperc - 0.05, 0);
