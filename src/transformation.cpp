@@ -1215,13 +1215,27 @@ namespace trans {
 
     std::vector<FormID> get_forms(char_data* ch) {
         auto forms = race_forms.find(ch->race);
-        std::vector<FormID> pforms = ch->unlockedForms;
+        std::vector<FormID> pforms;
 
-        for (auto form : forms->second) {
-            pforms.push_back(form);
-        }
+        switch (ch->race) {
+            case RaceID::Majin:
+            case RaceID::Android:
+            case RaceID::BioAndroid:
+            case RaceID::Tuffle: 
+                for (auto form : forms->second) {
+                    pforms.push_back(form);
+                }
+                return pforms;
 
-        return pforms;
+            default:
+                pforms = ch->unlockedForms;
+
+                for (auto form : forms->second) {
+                    pforms.push_back(form);
+                }
+                return pforms;
+
+            }
     }
 
     void displayForms(char_data* ch) {
