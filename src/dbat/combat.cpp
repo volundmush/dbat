@@ -2079,6 +2079,12 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
             struct char_data *vict = TARGET(k);
 
             if (GET_OBJ_VNUM(k) == 80) { // Tsuihidan
+                if (KICHARGE(k) <= 0) {
+                    send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
+                        k->short_description);
+                    extract_obj(k);
+                    continue;
+                }
                 if (IN_ROOM(k) != IN_ROOM(vict)) {
                     act("@wThe $p@w pursues after you!@n", true, vict, k, nullptr, TO_CHAR);
                     act("@wThe $p@W pursues after @C$n@w!@n", true, vict, k, nullptr, TO_ROOM);
@@ -2104,7 +2110,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                             true, vict, k, nullptr, TO_CHAR);
                         act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n",
                             true, vict, k, nullptr, TO_ROOM);
-                        KICHARGE(k) -= KICHARGE(k) / 10;
+                        KICHARGE(k) -= KICHARGE(k) * 0.1;
                         if (KICHARGE(k) <= 0) {
                             send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
                                          k->short_description);
@@ -4642,10 +4648,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     dmg = dmg * 0.16;
                 } else if (dmg - index <= 0) {
                     dmg = dmg * 0.2;
-                } else if (dmg - index > dmg * 0.25) {
-                    dmg -= index;
-                } else {
+                } else if (dmg - index <= dmg * 0.25) {
                     dmg = dmg * 0.25;
+                } else {
+                    dmg -= index;
                 }
             }
         }
