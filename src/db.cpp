@@ -4771,9 +4771,9 @@ void load_config() {
 
     load_default_config();
 
-    snprintf(buf, sizeof(buf), "%s/%s", DFLT_DIR, CONFIG_CONFFILE);
-    if (!(fl = fopen(CONFIG_CONFFILE, "r")) && !(fl = fopen(buf, "r"))) {
-        snprintf(buf, sizeof(buf), "Game Config File: %s", CONFIG_CONFFILE);
+    snprintf(buf, sizeof(buf), "%s/%s", "lib", "etc/config");
+    if (!(fl = fopen(buf, "r"))) {
+        snprintf(buf, sizeof(buf), "Game Config File: %s", "etc/config");
         perror(buf);
         return;
     }

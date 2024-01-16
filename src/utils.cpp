@@ -3417,3 +3417,7 @@ bool MOON_TIMECHECK() {
     }
     return false;
 }
+
+std::string jdump(const nlohmann::json& j) {
+    return j.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
+}

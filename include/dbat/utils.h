@@ -1398,3 +1398,5 @@ size_t send_to_char(struct char_data *ch, fmt::string_view format, Args&&... arg
 }
 
 extern bool spar_friendly(struct char_data *ch, struct char_data *npc);
+
+extern std::string jdump(const nlohmann::json& j);

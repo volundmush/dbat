@@ -2,6 +2,7 @@
 #include "dbat/db.h"
 #include <boost/algorithm/string.hpp>
 #include "sodium.h"
+#include <stdexcept>
 
 std::map<vnum, account_data> accounts;
 
@@ -19,16 +20,24 @@ bool account_data::checkPassword(const std::string &password) {
     return result == 0;
 }
 
-bool account_data::setPassword(const std::string &password) {
+static std::optional<std::string> hashPassword(const std::string &password) {
     char hashed_password[crypto_pwhash_STRBYTES];
-    if(password.empty()) return false;
+    if(password.empty()) return {};
     if(crypto_pwhash_str(hashed_password, password.data(), password.size(),
                          crypto_pwhash_OPSLIMIT_INTERACTIVE, crypto_pwhash_MEMLIMIT_INTERACTIVE) != 0) {
-        return false;
+        return {};
     }
-    passHash = hashed_password;
-    dirty_accounts.insert(vn);
-    return true;
+    return hashed_password;
+}
+
+bool account_data::setPassword(const std::string &password) {
+    if(auto hashed = hashPassword(password); hashed) {
+        passHash = hashed.value();
+        dirty_accounts.insert(vn);
+        return true;
+    }
+    return false;
+
 }
 
 nlohmann::json account_data::serialize() {
@@ -83,4 +92,28 @@ int account_data::getNextID() {
     int id = 0;
     while(accounts.contains(id)) id++;
     return id;
+}
+
+account_data *createAccount(const std::string &name, const std::string &password) {
+    if(name.empty()) throw std::invalid_argument("Username cannot be blank.");
+    if(password.empty()) throw std::invalid_argument("Password cannot be blank.");
+
+    if(auto found = findAccount(name); found) {
+        throw std::invalid_argument("Username already exists.");
+    }
+
+    auto hash = hashPassword(password);
+    if(!hash) {
+        throw std::invalid_argument("Password rejected by hashing algorithm, try another.");
+    }
+
+    auto nextId = account_data::getNextID();
+    auto a = accounts[nextId];
+    a.name = name;
+    a.vn = nextId;
+    a.passHash = hash.value();
+    a.created = time(nullptr);
+    a.lastLogin = time(nullptr);
+
+    return nullptr;
 }
