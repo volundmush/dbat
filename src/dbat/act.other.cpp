@@ -7490,10 +7490,10 @@ ACMD(do_transform) {
 
         if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
             int64_t barrier = GET_BARRIER(ch);
-            float ratio = afterKi / beforeKi;
+            float ratio = (float) afterKi / (float) beforeKi;
             GET_BARRIER(ch) = barrier * ratio;
 
-            send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.");
+            send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
         }
 
         return;
@@ -7541,10 +7541,10 @@ ACMD(do_transform) {
 
     if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
         int64_t barrier = GET_BARRIER(ch);
-        float ratio = afterKi / beforeKi;
+        float ratio = (float) afterKi / (float) beforeKi;
         GET_BARRIER(ch) = barrier * ratio;
 
-        send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.");
+        send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
     }
 
     //GET_BARRIER(ch)
