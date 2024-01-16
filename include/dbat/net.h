@@ -6,75 +6,18 @@
 
 namespace net {
 
-    enum class GameMessageType : uint8_t {
-        Connect = 0,
-        Update = 1,
-        Command = 2,
-        GMCP = 3,
-        MSSP = 4,
-        Disconnect = 5,
-        Timeout = 6
-    };
-
-    struct GameMessage {
-        GameMessage() = default;
-        explicit GameMessage(const nlohmann::json& j);
-        GameMessageType type{GameMessageType::Connect};
-        nlohmann::json data;
-        [[nodiscard]] nlohmann::json serialize() const;
-    };
-
-    enum class Protocol : uint8_t {
-        Telnet = 0,
-        WebSocket = 1
-    };
-
-    enum class ColorType : uint8_t {
-        NoColor = 0,
-        Standard = 1,
-        Xterm256 = 2,
-        TrueColor = 3
-    };
-
     struct ProtocolCapabilities {
-        Protocol protocol{Protocol::Telnet};
-
+        std::string protocolName = "UNKNOWN";
         std::string clientName = "UNKNOWN", clientVersion = "UNKNOWN";
         std::string hostAddress = "UNKNOWN";
-        std::string encoding;
         std::vector<std::string> hostNames{};
-        ColorType colorType = ColorType::NoColor;
         int16_t hostPort{0};
-
-        bool encryption = false;
-        bool utf8 = false;
-        int width = 80, height = 52;
-        bool gmcp = false, msdp = false, mssp = false, mxp = false;
-        bool mccp2 = false, mccp2_active = false, mccp3 = false, mccp3_active = false;
-        bool ttype = false, naws = false, sga = false, linemode = false;
-        bool force_endline = false, oob = false, tls = false;
-        bool screen_reader = false, mouse_tracking = false, vt100 = false;
-        bool osc_color_palette = false, proxy = false, mnes = false;
-
-        void deserialize(const nlohmann::json& j);
-        nlohmann::json serialize();
-        std::string protocolName();
     };
 
-    enum class DisconnectReason {
-        // In these first two examples, the connection is dead on the portal and we have been informed of such.
-        ConnectionLost = 0,
-        ConnectionClosed = 1,
-        // In the remaining enums, the connection is still alive on the portal, but we are disconnecting for some reason.
-        // We must inform the portal.
-        GameLogoff = 2,
-    };
-
-    extern std::mutex connectionsMutex, pendingConnectionsMutex;
     extern std::map<int64_t, std::shared_ptr<Connection>> connections;
     extern std::set<int64_t> pendingConnections;
 
-    extern std::unordered_map<int64_t, DisconnectReason> deadConnections;
+    extern std::set<int64_t> deadConnections;
 
     class Connection;
 
@@ -91,21 +34,24 @@ namespace net {
         std::shared_ptr<Connection> conn;
     };
 
+
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
-        Connection(int64_t connId);
+        explicit Connection(int64_t connId);
         void sendGMCP(const std::string &cmd, const nlohmann::json &j);
         void sendText(const std::string &messg);
         void onHeartbeat(double deltaTime);
         void onNetworkDisconnected();
         void onWelcome();
         void close();
+        void handleGMCP(const std::string& cmd, const nlohmann::json& j);
+        void handleCommand(const std::string& cmd);
+        void handleMessage(const nlohmann::json &j);
 
-        void cleanup(DisconnectReason reason);
-
+        void cleanup();
         void setParser(ConnectionParser *p);
 
-        void run();
+        std::list<std::string> inQueue, outQueue;
 
         int64_t connId{};
         account_data *account{};
@@ -123,8 +69,9 @@ namespace net {
 
         std::unique_ptr<ConnectionParser> parser;
     protected:
-        void handleMessage(const GameMessage &msg);
+
     };
 
+    extern std::shared_ptr<Connection> newConnection();
 
 }

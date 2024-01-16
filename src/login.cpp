@@ -125,15 +125,19 @@ namespace net {
             return;
         }
         if(txt == password) {
-            auto id = account_data::getNextID();
-            auto &a = accounts[id];
-            a.vn = id;
-            a.name = name;
-            a.setPassword(password);
-            a.created = time(nullptr);
-            a.lastLogin = time(nullptr);
-            // Create a new user!
-            conn->account = &a;
+            account_data *a = nullptr;
+            try {
+                auto a = createAccount(name, password);
+            }
+            catch(const std::exception& err) {
+                auto error = fmt::format("Error: {}\r\n", err.what());
+                sendText(error);
+                name.clear();
+                password.clear();
+                state = LoginState::GetName;
+                return;
+            }
+            conn->account = a;
             conn->account->connections.insert(conn.get());
 
             conn->setParser(new AccountMenu(conn));

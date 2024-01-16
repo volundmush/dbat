@@ -81,10 +81,12 @@ char *last_act_message = nullptr;
 ***********************************************************************/
 
 void broadcast(const std::string& txt) {
+    /*
     basic_mud_log("Broadcasting: %s", txt.c_str());
     for(auto &[cid, c] : net::connections) {
         c->sendText(txt);
     }
+     */
 }
 
 
@@ -177,13 +179,13 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
 
 void processConnections(double deltaTime) {
     // First, handle any disconnected connections.
-    for(auto &[id, reason] : net::deadConnections) {
+    for(auto id : net::deadConnections) {
         auto it = net::connections.find(id);
         // This shouldn't happen, but whatever.
         if(it == net::connections.end()) continue;
-        it->second->cleanup(reason);
+        it->second->cleanup();
     }
-    for(auto &[id, reason] : net::deadConnections) {
+    for(auto id : net::deadConnections) {
         net::connections.erase(id);
     }
     net::deadConnections.clear();
@@ -349,27 +351,6 @@ void runOneLoop(double deltaTime) {
 
     tics_passed++;
 }
-
-
-
-void game_loop() {
-
-
-    double deltaTimeInSeconds = 0.1;
-    gameIsLoading = false;
-
-    /* The Main Loop.  The Big Cheese.  The Top Dog.  The Head Honcho.  The.. */
-    while (!circle_shutdown) {
-
-
-    }
-
-    if(circle_reboot > 0) {
-        // circle_reboot at 1 is copyover, 2 is a full reboot.
-        performReboot(circle_reboot);
-    }
-}
-
 
 namespace game {
     void init_log() {

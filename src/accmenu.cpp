@@ -22,7 +22,7 @@ namespace net {
         sendText("      @D[@y------@YActive Connections@y------@D]@n\n");
         for(const auto &c : a->connections) {
             auto &cap = c->capabilities;
-            std::string line = fmt::format("[{}] {} over ({}) {} version {}", c->connId, cap.hostAddress, cap.protocolName(), cap.clientName, cap.clientVersion);
+            std::string line = fmt::format("[{}] {} over ({}) {} version {}", c->connId, cap.hostAddress, cap.protocolName, cap.clientName, cap.clientVersion);
             if(c->desc) {
                 line += fmt::format(" as {}@n\r\n", c->desc->character->name);
             } else {
