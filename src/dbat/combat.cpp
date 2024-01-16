@@ -3773,7 +3773,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
             //The lowest you can get from a fight is 0.5 times the xp, so long as they aren't 5x weaker than you
             if (plRatio > 0.2) {
-                plGain = 0.5 + plRatio / 2;
+                plGain = 0.5 + (plRatio / 2);
                 if (plGain > 3) plGain = 3;
             }
             else {
@@ -3855,7 +3855,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                 gaincalc *= 1.25;
             }
         }
-        gain = gain * Random::get<double>(0.8, 1.2);
+        gain = gaincalc * Random::get<double>(0.8, 1.2);
         gain = gain * bonus;
 		//Gain the xp
         ch->modExperience(gain);
@@ -4834,10 +4834,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     int64_t healhp = (long double) (GET_MAX_HIT(vict)) * 0.12;
-                    if (AFF_FLAGGED(ch, AFF_METAMORPH) && GET_HIT(ch) <= GET_MAX_HIT(ch)) {
+                    if (AFF_FLAGGED(ch, AFF_METAMORPH) ) {
                         act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@r$n@R's dark aura saps some of your life energy!@n", true, ch, nullptr, vict, TO_VICT);
-                        ch->incCurHealth(healhp);
+                        if (GET_HIT(ch) <= GET_MAX_HIT(ch)) {
+                            ch->incCurHealth(healhp);
+                        }
+                        GET_CHARGE(ch) = GET_CHARGE(ch) + (GET_MAX_MANA(vict) * 0.12);
+                        
                     }
                     if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
                         ch->incCurKI(dmg * .05);

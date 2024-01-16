@@ -1857,33 +1857,22 @@ ACMD(do_kura) {
     cost = (GET_MAX_MANA(ch) / 100) * num;
     bonus = cost;
 
-    if ((ch->getCurST()) < cost) {
-        send_to_char(ch, "You do not have enough stamina for that high a number.\r\n");
+    if ((ch->getCurLF()) < cost) {
+        send_to_char(ch, "You do not have enough life force for that high a number.\r\n");
         return;
     }
 
-    if (skill <= axion_dice(0)) {
-        ch->decCurST(cost);
-        reveal_hiding(ch, 0);
-        act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies but you fail!",
+    ch->decCurLF(cost);
+    ch->incCurKI(bonus);
+    reveal_hiding(ch, 0);
+    act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!",
             true, ch, nullptr, nullptr, TO_CHAR);
-        act("@c$n@w crouches down and screams as $s eyes turn red and $e attempts to tap into dark energies but fails!",
+    act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!",
             true, ch, nullptr, nullptr, TO_ROOM);
-        improve_skill(ch, SKILL_KURA, 0);
-        WAIT_STATE(ch, PULSE_2SEC);
-        return;
-    } else {
-        ch->decCurST(cost);
-        ch->incCurKI(bonus);
-        reveal_hiding(ch, 0);
-        act("You crouch down and scream as your eyes turn red. You attempt to tap into your dark energies and succeed as a rush of energy explodes around you!",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@c$n@w crouches down and screams as $s eyes turn red. Suddenly $e manages to tap into dark energies and a rush of energy explodes around $m!",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        improve_skill(ch, SKILL_KURA, 0);
-        WAIT_STATE(ch, PULSE_2SEC);
-        return;
-    }
+    improve_skill(ch, SKILL_KURA, 0);
+    WAIT_STATE(ch, PULSE_1SEC);
+       
+    
 
 }
 
