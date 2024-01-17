@@ -286,17 +286,26 @@ std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<boo
     return governingAreaTypeFor(room, func);
 }
 
+static std::set<vnum> _areaRecurseGuard;
+
 std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data&)>& func) {
     std::size_t count = 0;
     for(auto r : start.rooms) {
-        auto room = world.find(r);
-        if(room == world.end()) continue;
-        if(func(room->second)) {
+        if(auto room = world.find(r); room != world.end() && func(room->second)) {
+            if(fill.contains(r)) {
+                auto message = fmt::format("ERROR: While recursing area: {}, asked to re-add room {}", start.vn, r);
+                throw std::runtime_error(message);
+            }
             fill.insert(r);
             count++;
         }
     }
     for(auto &child : start.children) {
+        if(_areaRecurseGuard.contains(child)) {
+            auto message = fmt::format("ERROR: While recursing area: {}, asked to re-scan area {}", start.vn, child);
+            throw std::runtime_error(message);
+        }
+        _areaRecurseGuard.insert(child);
         count += recurseScanRooms(areas[child], fill, func);
     }
     return count;
@@ -342,6 +351,7 @@ ACMD(do_land) {
     if(onPlanet) {
         auto &a = areas[onPlanet.value()];
         count = recurseScanRooms(a, rooms, scan);
+        _areaRecurseGuard.clear();
         above_planet = (a.extraVn && inroom == a.extraVn.value());
     } else {
         above_planet = false;
