@@ -1075,9 +1075,9 @@ ACMD(do_maddtransform) {
 
     std::string strForm(formName);
 
-    auto foundForm = trans::find_form(ch, strForm);
+    auto foundForm = trans::getForm(ch, strForm);
 
-    if(foundForm != FormID::Base)
+    if(foundForm.has_value())
         if(add)
             ch->addTransform(foundForm);
         else 

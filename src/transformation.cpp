@@ -1176,7 +1176,7 @@ namespace trans {
     };
 
 
-    FormID find_form(char_data* ch, std::string form) {
+    std::optional<FormID> find_form(char_data* ch, std::string form) {
         for (auto formFound : forms) {
             if (form == getAbbr(ch, formFound)) {
                 return formFound;
@@ -1185,7 +1185,7 @@ namespace trans {
         }
 
         //Failure state
-        return FormID::Base;
+        return {}
     }
 
 
