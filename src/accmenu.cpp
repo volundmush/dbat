@@ -5,7 +5,7 @@
 #include "dbat/players.h"
 #include "fmt/format.h"
 #include "dbat/chargen.h"
-#include <boost/algorithm/string.hpp>
+#include "dbat/utils.h"
 
 namespace net {
 
@@ -68,12 +68,12 @@ namespace net {
     }
 
     void AccountMenu::parse(const std::string &txt) {
-        if(boost::iequals(txt, "return") || boost::istarts_with(txt, "return ")) {
+        if(iequals(txt, "return") || istarts_with(txt, "return ")) {
             start();
             return;
         }
 
-        if(!txt.empty() && boost::all(txt, boost::is_digit())) {
+        if(!txt.empty() && is_numeric(txt)) {
             auto num = std::stoi(txt);
             auto slot = num - 1;
 
@@ -93,7 +93,7 @@ namespace net {
             return;
         }
 
-        if(boost::iequals(txt, "A") || boost::istarts_with(txt, "A ")) {
+        if(iequals(txt, "A") || istarts_with(txt, "A ")) {
             // Start chargen...
             if(conn->account->slots <= conn->account->characters.size()) {
                 sendText("Sorry, your slots are all full.\r\n");
@@ -103,7 +103,7 @@ namespace net {
             return;
         }
 
-        if (boost::iequals(txt, "B") || boost::istarts_with(txt, "B ")) {
+        if (iequals(txt, "B") || istarts_with(txt, "B ")) {
             // Buying a slot.
             if(conn->account->rpp < 15) {
                 sendText("You need at least 15 RPP to purchase a new character slot.\r\n");
@@ -120,11 +120,11 @@ namespace net {
             return;
         }
 
-        if(boost::iequals(txt, "D") || boost::istarts_with(txt, "D ")) {
+        if(iequals(txt, "D") || istarts_with(txt, "D ")) {
             // todo: implement...
         }
 
-        if(boost::iequals(txt, "Q") || boost::istarts_with(txt, "Q ")) {
+        if(iequals(txt, "Q") || istarts_with(txt, "Q ")) {
             sendText("Goodbye!\r\n");
             conn->close();
             return;

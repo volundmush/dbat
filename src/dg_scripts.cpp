@@ -8,7 +8,6 @@
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
 
-#include <boost/algorithm/string/predicate.hpp>
 #include "dbat/dg_scripts.h"
 #include "dbat/act.wizard.h"
 #include "dbat/dg_event.h"
@@ -18,7 +17,6 @@
 #include "dbat/constants.h"
 #include "dbat/comm.h"
 #include "dbat/players.h"
-#include <boost/regex.hpp>
 
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)
 

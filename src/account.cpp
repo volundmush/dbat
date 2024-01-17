@@ -1,6 +1,6 @@
 #include "dbat/account.h"
 #include "dbat/db.h"
-#include <boost/algorithm/string.hpp>
+#include "dbat/utils.h"
 #include "sodium.h"
 #include <stdexcept>
 
@@ -8,7 +8,7 @@ std::map<vnum, account_data> accounts;
 
 struct account_data *findAccount(const std::string &name) {
     for (auto &[aid, account] : accounts) {
-        if (boost::iequals(account.name, name)) {
+        if (iequals(account.name, name)) {
             return &account;
         }
     }

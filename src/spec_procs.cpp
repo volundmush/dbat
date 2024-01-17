@@ -1332,7 +1332,7 @@ SPECIAL(gravity) {
         // remove all commas from a.
         a.erase(std::remove(a.begin(), a.end(), ','), a.end());
         double grav = 0.0;
-        if(!boost::iequals(a, "N")) {
+        if(!iequals(a, "N")) {
             try {
                 grav = std::clamp<double>(std::stod(a), 0, 20000.0);
             } catch (std::exception &e) {

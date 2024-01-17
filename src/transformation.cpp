@@ -1172,7 +1172,7 @@ namespace trans {
 
         send_to_char(ch, "@b------------------------------------------------@n\r\n");
         if (!form_names.empty()) {
-            auto names = boost::join(form_names, ", ");
+            auto names = join(form_names, ", ");
             send_to_char(ch, "Available Forms: @W%s@n\r\n", names.c_str());
         }
 
@@ -1309,7 +1309,7 @@ namespace trans {
         }
 
         for (auto form: forms->second) {
-            if (boost::iequals(arg, getAbbr(ch, form))) return form;
+            if (iequals(arg, getAbbr(ch, form))) return form;
         }
 
         return {};

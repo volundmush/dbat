@@ -23,12 +23,10 @@ CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 CPMAddPackage("gh:effolkronium/random#v1.5.0")
 
 find_package(SQLite3 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system program_options regex)
 
 set(CIRCLE_INCLUDE_DIRS
         include
         ${nlohmann_json_SOURCE_DIR}/single_include
-        ${Boost_INCLUDE_DIRS}
         ${spdlog_SOURCE_DIR}/include
         ${fmt_SOURCE_DIR}/include
         ${eff_random_SOURCE_DIR}/include
@@ -50,7 +48,7 @@ set(CMAKE_CXX_FLAGS "-fpermissive -w")
 set(BUILD_TESTING OFF)
 
 set(CIRCLE_LINK_LIBRARIES
-        fmt::fmt ${SQLite3_LIBRARIES} ${Boost_LIBRARIES}
+        fmt::fmt ${SQLite3_LIBRARIES}
         SQLiteCpp sqlite3
         sodium
         effolkronium_random

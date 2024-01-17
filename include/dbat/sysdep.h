@@ -40,7 +40,6 @@
 #include <optional>
 #include <filesystem>
 #include <array>
-#include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <mutex>
 #include <bitset>
@@ -143,11 +142,11 @@ Iterator partialMatch(
 
     for (const auto& pair : sorted_map)
     {
-        if (boost::iequals(pair.first, match_text))
+        if (iequals(pair.first, match_text))
         {
             return std::find(begin, end, pair.second);
         }
-        else if (!exact && boost::istarts_with(pair.first, match_text))
+        else if (!exact && istarts_with(pair.first, match_text))
         {
             return std::find(begin, end, pair.second);
         }

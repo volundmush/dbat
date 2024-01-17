@@ -20,8 +20,8 @@ namespace atk {
 
     Attack::Attack(struct char_data *ch, char *arg) : user(ch) {
         if(arg && strlen(arg)) input = arg;
-        boost::trim(input);
-        args = boost::split(args, input, boost::is_space(), boost::token_compress_on);
+        trim(input);
+        args = split(input, ' ');
     }
 
     std::optional<int> Attack::limbsToCheck() {

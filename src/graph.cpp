@@ -163,7 +163,7 @@ ACMD(do_sradar) {
         return;
     }
     std::string argstr(arg);
-    boost::to_lower(argstr);
+    to_lower(argstr);
 
     struct room_data *startRoom;
     if (noship == false) {

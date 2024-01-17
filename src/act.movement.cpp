@@ -23,9 +23,7 @@
 #include "dbat/local_limits.h"
 #include "dbat/house.h"
 #include "dbat/constants.h"
-#include "dbat/class.h"
 #include "dbat/act.informative.h"
-#include <boost/algorithm/string.hpp>
 
 /* local functions */
 static void handle_fall(struct char_data *ch);
@@ -250,7 +248,7 @@ std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms) {
     });
 
     for(auto& name : names) {
-        if(boost::istarts_with(name.second, arg)) {
+        if(istarts_with(name.second, arg)) {
             return name.first;
         }
     }

@@ -7,8 +7,6 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-#include <boost/algorithm/string.hpp>
-
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
@@ -237,7 +235,7 @@ ACMD(do_alias) {
     /* is this an alias we've already defined? */
     auto &aliases = p.aliases;
     auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a) {
-        return boost::iequals(a.name, arg);
+        return iequals(a.name, arg);
     });
 
     /* if no replacement string is specified, assume we want to delete */
@@ -377,7 +375,7 @@ void perform_alias(struct descriptor_data *d, char *orig) {
     }
 
     auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a) {
-        return boost::iequals(a.name, first_arg);
+        return iequals(a.name, first_arg);
     });
 
     /* if the first arg is not an alias, return without doing anything */

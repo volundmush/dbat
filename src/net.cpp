@@ -5,8 +5,6 @@
 #include "dbat/players.h"
 #include "dbat/login.h"
 #include "dbat/config.h"
-#include <boost/asio/experimental/awaitable_operators.hpp>
-#include <boost/beast/core/buffers_to_string.hpp>
 
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
@@ -127,7 +125,7 @@ namespace net {
         }
 
         auto msgType = j["type"].get<std::string>();
-        if(boost::equals(msgType, "Game.Command")) {
+        if(msgType == "Game.Command") {
             if(!j.contains("data")) {
                 logger->error("Connection {} received malformed Game.Command JSON: {}",
                               connId, jdump(j));
@@ -135,7 +133,7 @@ namespace net {
             }
             auto cmd = j["data"].get<std::string>();
             handleCommand(cmd);
-        } else if(boost::equals(msgType, "Game.GMCP")) {
+        } else if(msgType == "Game.GMCP") {
             if(!(j.contains("cmd") && j.contains("data"))) {
                 logger->error("Connection {} received malformed Game.Command JSON: {}",
                               connId, jdump(j));
