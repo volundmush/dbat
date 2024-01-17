@@ -303,8 +303,9 @@ ACMD(do_rpp) {
                         {"agl", {CharAttribute::Agility, "agility", BONUS_CLUMSY}}
                 };
 
-                boost::to_lower(arg2);
-                if(auto stat_found = stat_map.find(arg2); stat_found != stat_map.end()) {
+                std::string entry(arg2);
+                to_lower(entry);
+                if(auto stat_found = stat_map.find(entry); stat_found != stat_map.end()) {
                     auto [attribute, name, flaw] = stat_found->second;
 
                     auto base = ch->get(attribute, true);

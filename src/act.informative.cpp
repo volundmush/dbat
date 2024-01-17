@@ -3826,7 +3826,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
             }
             // Reverse areas.
             std::reverse(ancestors.begin(), ancestors.end());
-            auto joined = boost::join(ancestors, " -> ");
+            auto joined = join(ancestors, " -> ");
             send_to_char(ch, "@wArea: @D[@n %s @D]@n\r\n", joined.c_str());
         }
         double grav = rm->getGravity();

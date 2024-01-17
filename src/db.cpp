@@ -43,7 +43,7 @@
 #include "dbat/genobj.h"
 #include "dbat/area.h"
 #include "dbat/account.h"
-#include <boost/regex.hpp>
+#include <regex>
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -707,11 +707,11 @@ static void db_load_globaldata() {
 
         try {
             auto j = nlohmann::json::parse(data);
-            if(boost::iequals(name, "time")) {
+            if(iequals(name, "time")) {
                 time_info.deserialize(j);
-            } else if(boost::iequals(name, "weather")) {
+            } else if(iequals(name, "weather")) {
                 weather_info.deserialize(j);
-            } else if(boost::iequals(name, "dgGlobals")) {
+            } else if(iequals(name, "dgGlobals")) {
                 auto room = world.find(0);
                 if(room != world.end()) {
                     if(!room->second.script) room->second.script = new script_data(&(room->second));
@@ -4284,7 +4284,7 @@ static int file_to_string(const char *name, char *buf) {
         std::string out;
         // read all of f to out.
         std::getline(f, out, '\0');
-        boost::trim_right(out);
+        trim_right(out);
         strcpy(buf, out.c_str());
         return 0;
     } catch (std::exception &e) {
@@ -5625,26 +5625,26 @@ int64_t nextCharID() {
     return id;
 }
 // ^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?
-static boost::regex uid_regex(R"(^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?(?<active>!)?)", boost::regex::icase);
+static std::regex uid_regex(R"(^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?(?<active>!)?)", std::regex::icase);
 
 bool isUID(const std::string& uid) {
-    return boost::regex_match(uid, uid_regex);
+    return std::regex_match(uid, uid_regex);
 }
 
 std::optional<UID> resolveUID(const std::string& uid) {
     // First we need to check if it matches or not.
-    boost::smatch match;
+    std::smatch match;
 
-    if(!boost::regex_search(uid, match, uid_regex)) {
+    if(!std::regex_search(uid, match, uid_regex)) {
         return std::nullopt;
     }
-    // extract the type as a char, id and generation as int64_t and time_t respectively.
-    char type = toupper(match["type"].str()[0]);
-    int64_t id = std::stoll(match["id"].str());
-    bool active = match["active"].matched;
+
+    char type = toupper(match[1].str()[0]); // First capture group
+    int64_t id = std::stoll(match[2].str()); // Second capture group
+    bool active = match[4].matched; // Fourth capture group
     time_t generation = 0;
-    if(match["generation"].matched) {
-        generation = std::stoll(match["generation"].str());
+    if(match[3].matched) { // Third capture group
+        generation = std::stoll(match[3].str());
     }
 
     if(type == 'R') {

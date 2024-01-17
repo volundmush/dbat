@@ -16,8 +16,6 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"
 #include "dbat/ban.h"
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 
 #define LOAD_HIT    0
 #define LOAD_MANA    1
@@ -766,7 +764,7 @@ void remove_player(int pfilepos) {
 
 struct char_data *findPlayer(const std::string& name) {
     for (auto& player : players) {
-        if (boost::iequals(player.second.name, name)) {
+        if (iequals(player.second.name, name)) {
             return player.second.character;
         }
     }
@@ -774,7 +772,8 @@ struct char_data *findPlayer(const std::string& name) {
 }
 
 OpResult<> validate_pc_name(const std::string& name) {
-    auto n = boost::trim_copy(name);
+    auto n = name;
+    trim(n);
     // Cannot be empty.
     if(n.empty()) return {false, "Player names cannot be empty."};
 
@@ -784,10 +783,10 @@ OpResult<> validate_pc_name(const std::string& name) {
     if(std::any_of(n.begin(), n.end(), [](auto c) { return std::isspace(c); }))
         return {false, "Whitespace is not allowed in player names."};
 
-    if(!boost::algorithm::all(n, boost::algorithm::is_alpha())) return {false, "No special symbols or numbers in names, please."};
+    if(!is_all_alpha(n)) return {false, "No special symbols or numbers in names, please."};
     // And nothing from our badnames list...
     for(auto &badname : invalid_list) {
-        if(boost::iequals(n, badname)) {
+        if(iequals(n, badname)) {
             return {false, "That name is disallowed. Nothing profane, lame, or conflicting with an official character please."};
         }
     }

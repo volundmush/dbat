@@ -585,7 +585,8 @@ namespace net {
                     sendText("\r\nPick a good name for this character.\r\nName: ");
                     return;
                 } else {
-                    maybeName = boost::trim_copy(arg);
+                    maybeName = arg;
+                    trim(maybeName);
                     if(findPlayer(maybeName)) {
                         sendText("\r\nUnfortunately that name's already taken.");
                         sendText("\r\nPick a good name for this character.\r\nName: ");
@@ -604,12 +605,12 @@ namespace net {
                     break;
                 }
             case CON_NAME_CNFRM:
-                if(boost::iequals(arg, "Y")) {
+                if(iequals(arg, "Y")) {
                     ch->name = strdup(maybeName.c_str());
                     state = CON_QRACE;
                     display_races();
                     break;
-                } else if(boost::iequals(arg, "N")) {
+                } else if(iequals(arg, "N")) {
                     maybeName.clear();
                     state = CON_GET_NAME;
                     sendText("\r\nOkay, let's try that again then.");

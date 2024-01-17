@@ -66,7 +66,9 @@ std::string char_data::juggleRaceName(bool capitalized) {
     if (capitalized) {
         return race::getName(apparent);
     } else {
-        return boost::to_lower_copy(race::getName(apparent));
+        auto out = race::getName(apparent);
+        to_lower(out);
+        return out;
     }
 }
 

@@ -8,7 +8,6 @@
 #include "dbat/account.h"
 #include "dbat/accmenu.h"
 #include "dbat/players.h"
-#include <boost/algorithm/string.hpp>
 
 namespace net {
     void LoginParser::start() {
@@ -79,11 +78,11 @@ namespace net {
             sendText("Yes or no: \r\n");
             return;
         }
-        if(boost::iequals(txt, "yes")) {
+        if(iequals(txt, "yes")) {
             state = LoginState::GetPassword;
             parse("");
             return;
-        } else if (boost::iequals(txt, "no")) {
+        } else if (iequals(txt, "no")) {
             state = LoginState::GetName;
             name.clear();
             parse("");

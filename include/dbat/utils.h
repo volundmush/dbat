@@ -1400,3 +1400,14 @@ size_t send_to_char(struct char_data *ch, fmt::string_view format, Args&&... arg
 extern bool spar_friendly(struct char_data *ch, struct char_data *npc);
 
 extern std::string jdump(const nlohmann::json& j);
+
+extern bool iequals(const std::string& a, const std::string& b);
+extern std::vector<std::string> split(const std::string& s, char delimiter);
+extern std::string join(const std::vector<std::string>& vec, const std::string& delimiter);
+extern bool istarts_with(const std::string& haystack, const std::string& needle);
+extern void trim(std::string& str);
+extern bool is_numeric(const std::string& str);
+extern void trim_right(std::string& str);
+extern void to_lower(std::string& str);
+extern bool is_all_alpha(const std::string& str);
+extern bool icontains(const std::string& haystack, const std::string& needle);
