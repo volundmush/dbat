@@ -7650,14 +7650,17 @@ ACMD(do_situp) {
         act("@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    double level_impact = (1.0 - (2 * fmax(0, GET_LEVEL(ch) - 60) / 100.0));
+    double level_impact = (1.0 - (2 * std::max<double>(0, (double)GET_LEVEL(ch) - 60.0) / 100.0));
 
     double base = (double)ch->getBaseST();
     double start_bonus = (base * 0.035 * level_impact) * Random::get<double>(0.8, 1.2);
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
     double diminishing_returns = (soft_cap - base) / soft_cap;
-    if(diminishing_returns > 0.0) diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    if (diminishing_returns > 0.0)
+        diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    else
+        diminishing_returns = 0;
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
@@ -7845,14 +7848,17 @@ ACMD(do_meditate) {
         act("@g$n meditates calmly, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    double level_impact = (1.0 - (2 * fmax(0, GET_LEVEL(ch) - 60) / 100.0));
+    double level_impact = (1.0 - (2 * std::max<double>(0, (double)GET_LEVEL(ch) - 60.0) / 100.0));
 
     double base = (double)ch->getBaseKI();
     double start_bonus = (base * 0.035 * level_impact) * Random::get<double>(0.8, 1.2);
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
     double diminishing_returns = (soft_cap - base) / soft_cap;
-    if(diminishing_returns > 0.0) diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    if(diminishing_returns > 0.0) 
+        diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    else
+        diminishing_returns = 0;
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
@@ -7992,14 +7998,17 @@ ACMD(do_pushup) {
         act("@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    double level_impact = (1.0 - (2 * fmax(0, GET_LEVEL(ch) - 60) / 100.0));
+    double level_impact = (1.0 - (2 * std::max<double>(0, (double) GET_LEVEL(ch) - 60.0) / 100.0));
 
     double base = (double)ch->getBasePL();
     double start_bonus = (base * 0.035 * level_impact) * Random::get<double>(0.8, 1.2);
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
     double diminishing_returns = (soft_cap - base) / soft_cap;
-    if(diminishing_returns > 0.0) diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    if (diminishing_returns > 0.0)
+        diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    else
+        diminishing_returns = 0;
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
