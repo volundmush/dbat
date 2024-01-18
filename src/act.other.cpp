@@ -10032,12 +10032,12 @@ ACMD(do_display) {
     skip_spaces(&argument);
 
     if (!*argument) {
-        send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | all/on | none/off }\r\n");
+        send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | O | all/on | none/off }\r\n");
         return;
     }
 
     auto allPrefs = {PRF_DISPHP, PRF_DISPKI, PRF_DISPMOVE, PRF_DISPTNL, PRF_FURY, PRF_DISTIME, PRF_DISGOLD, PRF_DISPRAC,
-        PRF_DISHUTH, PRF_DISPERC};
+        PRF_DISHUTH, PRF_DISPERC, PRF_FORM};
 
     if (!strcasecmp(argument, "on") || !strcasecmp(argument, "all")) {
         for(auto f : allPrefs) ch->pref.set(f);
@@ -10077,6 +10077,9 @@ ACMD(do_display) {
                     break;
                 case 'm':
                     ch->pref.flip(PRF_DISHUTH);
+                    break;
+                case 'o':
+                    ch->pref.flip(PRF_FORM);
                     break;
                 case 'f':
                     if (!IS_HALFBREED(ch)) {

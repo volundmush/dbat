@@ -47,6 +47,7 @@
 #include <mutex>
 #include "dbat/db.h"
 #include <locale>
+#include "dbat/transformation.h"
 
 std::shared_ptr<spdlog::logger> logger;
 
@@ -1038,6 +1039,14 @@ char *make_prompt(struct descriptor_data *d) {
             if (PRF_FLAGGED(d->character, PRF_DISPRAC) && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mPS@y: @W%s@D]@n",
                                  add_commas(GET_PRACTICES(d->character)).c_str());
+                if (count >= 0)
+                    len += count;
+            }
+            if (PRF_FLAGGED(d->character, PRF_FORM) && len < sizeof(prompt)) {
+                FormID form = d->character->form;
+
+                count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s@D]@n",
+                    trans::getName(d->character, form));
                 if (count >= 0)
                     len += count;
             }

@@ -651,6 +651,7 @@ const char *preference_bits[NUM_PRF_FLAGS + 1] = {
         "GHEALTH",
         "IHEALTH",
         "ENERGIZE",
+        "DISFORM",
         "\n"
 };
 
