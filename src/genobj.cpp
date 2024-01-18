@@ -393,7 +393,6 @@ rapidjson::Document obj_data::rserializeBase() {
 
 
 
-
 nlohmann::json obj_data::serializeInstance() {
     auto j = serializeBase();
     if(id == -1) {
@@ -412,6 +411,36 @@ nlohmann::json obj_data::serializeInstance() {
     if(world.contains(room_loaded)) j["room_loaded"] = room_loaded;
 
     return j;
+}
+
+rapidjson::Document obj_data::rserializeInstance() {
+    auto d = rserializeBase(); // Assuming this returns a RapidJSON Document with base data
+    auto& allocator = d.GetAllocator();
+
+    // Handling 'id' and 'generation'
+    if (id == -1) {
+        id = nextObjID(); // Assuming nextObjID() is accessible
+        generation = time(nullptr);
+        check_unique_id(this); // Assuming this function is accessible and modifies the object state
+        add_unique_id(this);   // Assuming this function is accessible and modifies the object state
+    }
+
+    if (generation) {
+        d.AddMember("generation", generation, allocator);
+    }
+
+    // Handling 'dgvariables'
+    if (script && script->global_vars) {
+        rapidjson::Document varsDoc = rserializeVars(script->global_vars); // Assuming serializeVars now returns a RapidJSON Document
+        d.AddMember("dgvariables", varsDoc, allocator);
+    }
+
+    // Handling 'room_loaded'
+    if (world.contains(room_loaded)) { // Assuming world is accessible and has contains method
+        d.AddMember("room_loaded", room_loaded, allocator);
+    }
+
+    return d;
 }
 
 nlohmann::json obj_data::serializeProto() {

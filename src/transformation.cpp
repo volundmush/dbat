@@ -1340,3 +1340,15 @@ nlohmann::json trans_data::serialize() {
     if(blutz != 0.0) j["blutz"] = blutz;
     return j;
 }
+
+rapidjson::Document trans_data::rserialize() {
+    rapidjson::Document d;
+    d.SetObject();
+    auto& allocator = d.GetAllocator();
+
+    // Adding 'timeSpentInForm' and 'blutz' fields
+    d.AddMember("timeSpentInForm", timeSpentInForm, allocator);
+    d.AddMember("blutz", blutz, allocator);
+
+    return d;
+}

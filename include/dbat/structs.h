@@ -37,6 +37,7 @@ struct account_data {
     std::set<net::Connection*> connections;
 
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     void deserialize(const nlohmann::json& j);
 
     void modRPP(int amt);
@@ -63,6 +64,7 @@ struct player_data {
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
 
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
 };
 
 enum class AreaType {
@@ -190,6 +192,7 @@ struct obj_data : public unit_data {
     nlohmann::json serializeBase();
     rapidjson::Document rserializeBase();
     nlohmann::json serializeInstance();
+    rapidjson::Document rserializeInstance();
     nlohmann::json serializeProto();
     rapidjson::Document rserializeProto();
 
@@ -403,6 +406,7 @@ struct time_data {
     double secondsAged{}; // The player's current IC age, in seconds.
     int currentAge();
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
 };
 
 
@@ -428,6 +432,7 @@ struct alias_data {
     std::string replacement;
     int type{};
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
 };
 
 /* this can be used for skills that can be used per-day */
@@ -448,12 +453,13 @@ struct mob_special_data {
     mob_special_data() = default;
     explicit mob_special_data(const nlohmann::json& j);
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     void deserialize(const nlohmann::json& j);
     memory_rec *memory{};        /* List of attackers to remember	       */
-    int8_t attack_type{};        /* The Attack Type Bitvector for NPC's     */
-    int8_t default_pos{POS_STANDING};        /* Default position for NPC                */
-    int8_t damnodice{};          /* The number of damage dice's	       */
-    int8_t damsizedice{};        /* The size of the damage dice's           */
+    int attack_type{};        /* The Attack Type Bitvector for NPC's     */
+    int default_pos{POS_STANDING};        /* Default position for NPC                */
+    int damnodice{};          /* The number of damage dice's	       */
+    int damsizedice{};        /* The size of the damage dice's           */
     bool newitem{};             /* Check if mob has new inv item       */
 };
 
@@ -468,6 +474,7 @@ struct affected_type {
     int specific{};         /* Some locations have parameters          */
     bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     struct affected_type *next{};
 };
 
@@ -496,6 +503,7 @@ struct skill_data {
     int16_t level{0};
     int16_t perfs{0};
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     void deserialize(const nlohmann::json& j);
 };
 
@@ -508,6 +516,7 @@ struct trans_data {
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
 
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     void deserialize(const nlohmann::json& j);
 };
 
@@ -518,17 +527,18 @@ struct char_data : public unit_data {
     // this constructor below is to be used only for the mob_proto map.
     explicit char_data(const nlohmann::json& j);
     nlohmann::json serializeBase();
+    rapidjson::Document rserializeBase();
     nlohmann::json serializeInstance();
+    rapidjson::Document rserializeInstance();
+
     nlohmann::json serializeProto();
-    nlohmann::json serializePlayer();
-    nlohmann::json serializeEquipment();
+    rapidjson::Document rserializeProto();
+
     void deserializeBase(const nlohmann::json& j);
     void deserializeProto(const nlohmann::json& j);
     void deserializeInstance(const nlohmann::json& j, bool isActive);
     void deserializeMobile(const nlohmann::json& j);
     void deserializePlayer(const nlohmann::json& j, bool isActive);
-    void deserializeContents(const nlohmann::json& j, bool isActive);
-    void deserializeEquipment(const nlohmann::json& j, bool isActive);
     void activate();
     void deactivate();
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
@@ -1233,6 +1243,7 @@ struct index_data {
     char *farg;         /* string argument for special function     */
     struct trig_data *proto;     /* for triggers... the trigger     */
     nlohmann::json serializeProto();
+    rapidjson::Document rserializeProto();
 };
 
 /* linked list for mob/object prototype trigger lists */
