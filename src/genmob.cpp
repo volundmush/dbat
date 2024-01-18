@@ -1252,10 +1252,10 @@ void addArray(rapidjson::Document& d, const char* key, std::set<T>& values, rapi
 void addDubNames(rapidjson::Document& d, const char* key, const std::map<int64_t, std::string>& dubNames, rapidjson::Document::AllocatorType& allocator) {
     rapidjson::Value dubNamesArray(rapidjson::kArrayType);
     for (const auto& pair : dubNames) {
-        rapidjson::Value dubNameObj(rapidjson::kObjectType);
-        dubNameObj.AddMember("key", pair.first, allocator);
-        dubNameObj.AddMember("value", rapidjson::Value(pair.second.c_str(), allocator).Move(), allocator);
-        dubNamesArray.PushBack(dubNameObj, allocator);
+        rapidjson::Value pairArray(rapidjson::kArrayType);
+        pairArray.PushBack(pair.first, allocator);  // Push the key
+        pairArray.PushBack(rapidjson::Value(pair.second.c_str(), allocator).Move(), allocator);  // Push the value
+        dubNamesArray.PushBack(pairArray, allocator);  // Add the pair array to the dubNames array
     }
     if (!dubNamesArray.Empty()) {
         d.AddMember(rapidjson::Value(key, allocator).Move(), dubNamesArray, allocator);

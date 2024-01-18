@@ -5216,7 +5216,7 @@ static void process_dirty_rooms() {
         else {
             // we'll be using q1...
             q1.bind(1, v);
-            q1.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+            q1.bind(2, rjdump(r->second.rserialize()));
             q1.exec();
             q1.reset();
         }
@@ -5239,7 +5239,7 @@ static void process_dirty_item_prototypes() {
             continue;
         }
         q.bind(1, v);
-        q.bind(2, r->second.serializeProto().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, rjdump(r->second.rserializeProto()));
         q.exec();
         q.reset();
     }
@@ -5260,7 +5260,7 @@ static void process_dirty_npc_prototypes() {
             continue;
         }
         q.bind(1, v);
-        q.bind(2, r->second.serializeProto().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, jdump(r->second.serializeProto()));
         q.exec();
         q.reset();
     }
@@ -5282,7 +5282,7 @@ static void process_dirty_shops() {
             continue;
         }
         q.bind(1, v);
-        q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, rjdump(r->second.rserialize()));
         q.exec();
         q.reset();
     }
@@ -5304,7 +5304,7 @@ static void process_dirty_guilds() {
             continue;
         }
         q.bind(1, v);
-        q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, rjdump(r->second.rserialize()));
         q.exec();
         q.reset();
     }
@@ -5326,7 +5326,7 @@ static void process_dirty_zones() {
             continue;
         }
         q.bind(1, v);
-        q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, rjdump(r->second.rserialize()));
         q.exec();
         q.reset();
     }
@@ -5347,7 +5347,7 @@ static void process_dirty_areas() {
             continue;
         }
         q.bind(1, v);
-        q.bind(2, r->second.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, rjdump(r->second.rserialize()));
         q.exec();
         q.reset();
     }
@@ -5369,7 +5369,7 @@ static void process_dirty_dgscript_prototypes() {
             continue;
         }
         q.bind(1, v);
-        q.bind(2, r->second.proto->serializeProto().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, rjdump(r->second.rserializeProto()));
         q.exec();
         q.reset();
     }
@@ -5383,7 +5383,7 @@ static void dump_state_accounts() {
 
     for(auto &[v, r] : accounts) {
         q.bind(1, v);
-        q.bind(2, r.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, rjdump(r.rserialize()));
         q.exec();
         q.reset();
     }
@@ -5395,7 +5395,7 @@ static void dump_state_players() {
 
     for(auto &[v, r] : players) {
         q.bind(1, v);
-        q.bind(2, r.serialize().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, rjdump(r.rserialize()));
         q.exec();
         q.reset();
     }
@@ -5413,9 +5413,9 @@ static void dump_state_characters() {
         q.bind(4, r.second->name);
         q.bind(5, r.second->short_description);
         q.bind(6, !IS_NPC(r.second));
-        q.bind(7, r.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-        q.bind(8, r.second->serializeLocation().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-        q.bind(9, r.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(7, jdump(r.second->serializeInstance()));
+        q.bind(8, jdump(r.second->serializeLocation()));
+        q.bind(9, jdump(r.second->serializeRelations()));
         q.exec();
         q.reset();
     }
@@ -5433,7 +5433,7 @@ static void dump_state_items() {
         q.bind(3, r.second->vn);
         q.bind(4, r.second->name);
         q.bind(5, r.second->short_description);
-        q.bind(6, r.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(6, rjdump(r.second->rserializeInstance()));
         q.bind(7, r.second->serializeLocation());
         q.bind(8, r.second->worn_on);
         q.bind(9, r.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
@@ -5452,7 +5452,7 @@ static void dump_state_dgscripts() {
         q.bind(2, r.first);
         q.bind(3, r.second->vn);
         q.bind(4, r.second->name);
-        q.bind(5, r.second->serializeInstance().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(5, rjdump(r.second->rserializeInstance()));
         q.bind(6, r.second->serializeLocation());
         q.bind(7, r.second->order);
         q.exec();
@@ -5528,7 +5528,7 @@ void dump_state_globalData() {
 
     for(auto &[v, r] : globalData) {
         q.bind(1, v);
-        q.bind(2, r.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
+        q.bind(2, jdump(r));
         q.exec();
         q.reset();
     }
