@@ -23,7 +23,7 @@
 #define LOAD_KI        3
 #define LOAD_LIFE       4
 
-DebugMap<int64_t, player_data> players;
+std::map<int64_t, player_data> players;
 
 /* local functions */
 

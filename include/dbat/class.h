@@ -23,7 +23,7 @@ extern void advance_level(struct char_data *ch);
 
 extern int8_t ability_mod_value(int abil);
 
-extern int8_t dex_mod_capped(const struct char_data *ch);
+extern int8_t dex_mod_capped(struct char_data *ch);
 
 extern int total_skill_levels(struct char_data *ch, int skill);
 

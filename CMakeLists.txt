@@ -21,6 +21,7 @@ CPMAddPackage("gh:nlohmann/json#v3.11.3")
 CPMAddPackage("gh:gabime/spdlog#v1.13.0")
 CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 CPMAddPackage("gh:effolkronium/random#v1.5.0")
+CPMAddPackage("gh:Tencent/rapidjson#v1.1.0")
 
 set(CIRCLE_INCLUDE_DIRS
         include
@@ -31,6 +32,7 @@ set(CIRCLE_INCLUDE_DIRS
         ${SQLiteCpp_SOURCE_DIR}/include
         ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         ${effolkronium_random_SOURCE_DIR}/include
+        ${RapidJSON_SOURCE_DIR}/include
         )
 
 

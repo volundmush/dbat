@@ -7,7 +7,7 @@ extern struct player_index_element *player_table;
 
 extern void remove_player(int pfilepos);
 
-extern DebugMap<int64_t, player_data> players;
+extern std::map<int64_t, player_data> players;
 
 struct char_data *findPlayer(const std::string& name);
 

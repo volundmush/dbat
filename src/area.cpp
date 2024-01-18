@@ -43,6 +43,52 @@ nlohmann::json area_data::serialize() {
     return j;
 }
 
+rapidjson::Document area_data::rserialize() {
+    rapidjson::Document d;
+    d.SetObject();
+    auto& allocator = d.GetAllocator();
+
+    // Adding basic fields
+    d.AddMember("vn", vn, allocator);
+
+    // Adding 'name' if it's not empty
+    if (!name.empty()) {
+        d.AddMember("name", rapidjson::Value(name.c_str(), allocator).Move(), allocator);
+    }
+
+    // Adding 'rooms' as an array
+    rapidjson::Value roomsArray(rapidjson::kArrayType);
+    for (const auto& r : rooms) {
+        roomsArray.PushBack(r, allocator);
+    }
+    d.AddMember("rooms", roomsArray, allocator);
+
+    // Adding optional fields
+    if (gravity) {
+        d.AddMember("gravity", gravity.value(), allocator);
+    }
+    if (parent) {
+        d.AddMember("parent", parent.value(), allocator);
+    }
+
+    // Adding 'type' (assuming you can convert AreaType enum to an int or string)
+    d.AddMember("type", static_cast<int>(type), allocator); // or convert it to a string if needed
+
+    // Adding 'extraVn' if it's set
+    if (extraVn) {
+        d.AddMember("extraVn", extraVn.value(), allocator);
+    }
+
+    // Adding 'ether' if it's true
+    if (ether) {
+        d.AddMember("ether", ether, allocator);
+    }
+
+    // TODO: Add 'children' and 'flags' if needed, similar to 'rooms'
+
+    return d;
+}
+
 static std::string areaTypeName(AreaType a) {
     switch(a) {
         case AreaType::Dimension:

@@ -269,6 +269,7 @@ struct reset_com {
     std::string sarg2;        /* string argument                      */
 
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
 
     /*
      *  Commands:              *
@@ -310,6 +311,7 @@ struct zone_data {
     bitvector_t zone_flags[ZF_ARRAY_MAX]{};          /* Flags for the zone.                */
 
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
 
     /*
      * Reset mode:

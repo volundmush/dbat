@@ -15,6 +15,7 @@ struct shop_buy_data {
     shop_buy_data() = default;
     explicit shop_buy_data(const nlohmann::json& j);
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     int type{};
     std::string keywords{};
 };
@@ -28,6 +29,7 @@ struct shop_data {
     shop_data() = default;
     explicit shop_data(const nlohmann::json& j);
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     ~shop_data();
     void add_product(obj_vnum v);
     void remove_product(obj_vnum v);

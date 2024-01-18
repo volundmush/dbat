@@ -3178,3 +3178,7 @@ void script_data::deactivate() {
         t->deactivate();
     }
 }
+
+nlohmann::json index_data::serializeProto() {
+    return proto->serializeProto();
+}

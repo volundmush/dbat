@@ -48,6 +48,10 @@
 #include <variant>
 
 // non-standard libraries
+#include "rapidjson/document.h"
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+
 #include "fmt/core.h"
 #include "fmt/printf.h"
 #include <spdlog/spdlog.h>

@@ -87,6 +87,7 @@ struct area_data {
     bool ether{false}; /* is this area etheric?			*/
     std::bitset<NUM_AREA_FLAGS> flags; /* area flags				*/
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     static vnum getNextID();
     static bool isPlanet(const area_data &area);
     std::optional<room_vnum> getLaunchDestination();
@@ -105,6 +106,7 @@ struct obj_affected_type {
     explicit obj_affected_type(const nlohmann::json& j);
     void deserialize(const nlohmann::json& j);
     nlohmann::json serialize();
+    rapidjson::Document rserialize();
     int location{};       /* Which ability to change (APPLY_XXX) */
     int specific{};       /* Some locations have parameters      */
     double modifier{};       /* How much it changes by              */
@@ -157,8 +159,8 @@ struct unit_data {
     int64_t id{NOTHING}; /* used by DG triggers	*/
     time_t generation{};             /* creation time for dupe check     */
 
+    rapidjson::Document rserializeUnit();
     nlohmann::json serializeUnit();
-    nlohmann::json serializeContents();
 
     void activateContents();
     void deactivateContents();
@@ -186,8 +188,10 @@ struct obj_data : public unit_data {
     explicit obj_data(const nlohmann::json& j);
 
     nlohmann::json serializeBase();
+    rapidjson::Document rserializeBase();
     nlohmann::json serializeInstance();
     nlohmann::json serializeProto();
+    rapidjson::Document rserializeProto();
 
     std::string serializeLocation();
     nlohmann::json serializeRelations();
@@ -302,7 +306,7 @@ struct room_direction_data {
 
     struct room_data* getDestination();
 
-
+    rapidjson::Document rserialize();
     nlohmann::json serialize();
 };
 
@@ -338,6 +342,7 @@ struct room_data : public unit_data {
 
     double getGravity();
 
+    rapidjson::Document rserialize();
     nlohmann::json serialize();
     void deserializeContents(const nlohmann::json& j, bool isActive);
 
@@ -1227,6 +1232,7 @@ struct index_data {
 
     char *farg;         /* string argument for special function     */
     struct trig_data *proto;     /* for triggers... the trigger     */
+    nlohmann::json serializeProto();
 };
 
 /* linked list for mob/object prototype trigger lists */

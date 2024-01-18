@@ -24,6 +24,7 @@
 #include "dbat/act.movement.h"
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
+#include "dbat/class.h"
 
 /* external variables */
 

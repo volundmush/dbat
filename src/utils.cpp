@@ -13,6 +13,9 @@
 #include <exception>
 #include <iostream>
 #include "dbat/utils.h"
+
+#include <rapidjson/prettywriter.h>
+
 #include "dbat/comm.h"
 #include "dbat/handler.h"
 #include "dbat/random.h"
@@ -3391,6 +3394,42 @@ std::string jdump_pretty(const nlohmann::json& j) {
 
 nlohmann::json jparse(const std::string& s) {
     return nlohmann::json::parse(s);
+}
+
+std::string rjdump(const rapidjson::Value& d) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    d.Accept(writer);
+    return buffer.GetString();
+}
+
+std::string rjdump_pretty(const rapidjson::Value& d) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    writer.SetIndent(' ', 4);
+    d.Accept(writer);
+    return buffer.GetString();
+}
+
+std::string rjdump(const rapidjson::Document& d) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    d.Accept(writer);
+    return buffer.GetString();
+}
+
+std::string rjdump_pretty(const rapidjson::Document& d) {
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    writer.SetIndent(' ', 4);
+    d.Accept(writer);
+    return buffer.GetString();
+}
+
+rapidjson::Document rjparse(const std::string& s) {
+    rapidjson::Document d;
+    d.Parse(s.c_str());
+    return d;
 }
 
 bool iequals(const std::string& a, const std::string& b) {

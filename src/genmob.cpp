@@ -844,37 +844,6 @@ skill_data::skill_data(const nlohmann::json &j) : skill_data() {
     deserialize(j);
 }
 
-void char_data::deserializeContents(const nlohmann::json &j, bool isActive) {
-    for(const auto& jo : j) {
-        auto obj = new obj_data();
-        obj->deserializeInstance(jo, isActive);
-        obj_to_char(obj, this);
-    }
-}
-
-void char_data::deserializeEquipment(const nlohmann::json &j, bool isActive) {
-    for(const auto& jo : j) {
-        // each jo is a two-element array. the first element is the id number of the equip
-        // location, and the second is the item dump data.
-        int id = jo[0];
-        auto data = jo[1];
-        auto obj = new obj_data();
-        obj->deserializeInstance(data, isActive);
-        // autoequip has a decrementer for some reason, so we'll increment.
-        auto_equip(this, obj, id+1);
-    }
-}
-
-nlohmann::json char_data::serializeEquipment() {
-    auto j = nlohmann::json::array();
-    for(auto i = 1; i < NUM_WEARS; i++) {
-        if(auto obj = GET_EQ(this, i); obj) {
-            j.push_back(std::make_pair(i, obj->serializeInstance()));
-        }
-    }
-
-    return j;
-}
 
 nlohmann::json alias_data::serialize() {
     auto j = nlohmann::json::object();

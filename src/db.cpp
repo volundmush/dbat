@@ -5619,7 +5619,7 @@ int64_t nextCharID() {
     return id;
 }
 // ^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?
-static std::regex uid_regex(R"(^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?(?<active>!)?)", std::regex::icase);
+static std::regex uid_regex(R"(^#([ROC])(\d+)(?::(\d+)?)?(!)?)", std::regex::icase);
 
 bool isUID(const std::string& uid) {
     return std::regex_match(uid, uid_regex);
