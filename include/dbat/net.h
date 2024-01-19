@@ -46,12 +46,14 @@ namespace net {
         void close();
         void handleGMCP(const std::string& cmd, const nlohmann::json& j);
         void handleCommand(const std::string& cmd);
-        void handleMessage(const nlohmann::json &j);
+        void handleMessage(const std::string& type, const nlohmann::json &j);
+
+        void queueMessage(const std::string& event, const std::string& data);
 
         void cleanup();
         void setParser(ConnectionParser *p);
 
-        std::list<std::string> inQueue, outQueue;
+        std::list<std::pair<std::string, std::string>> inQueue, outQueue;
 
         int64_t connId{};
         account_data *account{};

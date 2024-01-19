@@ -20,20 +20,14 @@ namespace net {
         nlohmann::json out;
         out["cmd"] = cmd;
         out["data"] = j;
-        out["type"] = "Game.GMCP";
-
-        outQueue.emplace_back(jdump(out));
+        outQueue.emplace_back("Legacy.GMCP", jdump(out));
     }
 
     void Connection::sendText(const std::string &text) {
         if(text.empty()) return;
-
         nlohmann::json out;
         out["data"] = text;
-        out["Type"] = "Game.LegacyText";
-
-        outQueue.emplace_back(jdump(out));
-
+        outQueue.emplace_back("Legacy.Text", jdump(out));
     }
 
 
@@ -90,22 +84,27 @@ namespace net {
         p->start();
     }
 
+    void Connection::queueMessage(const std::string& event, const std::string& data) {
+        inQueue.emplace_back(event, data);
+    }
+
+
     void Connection::onHeartbeat(double deltaTime) {
         if(inQueue.empty()) return;
 
-        std::string msg = inQueue.front();
+        std::pair<std::string, std::string> msg = inQueue.front();
         inQueue.pop_front();
 
         nlohmann::json j;
         try {
-            j = nlohmann::json::parse(msg);
+            j = nlohmann::json::parse(msg.second);
         }
         catch(std::exception &err) {
-            logger->error("Connection {} received un-parseable input: {}",
-                          connId, msg);
+            logger->error("Connection {} received un-parseable input: {} - {}",
+                          connId, msg.first, msg.second);
             return;
         }
-        handleMessage(j);
+        handleMessage(msg.first, j);
 
     }
 
@@ -117,15 +116,9 @@ namespace net {
         if(parser) parser->parse(cmd);
     }
 
-    void Connection::handleMessage(const nlohmann::json &j) {
-        if(!j.contains("type")) {
-            logger->error("Connection {} received malformed JSON: {}",
-                          connId, jdump(j));
-            return;
-        }
+    void Connection::handleMessage(const std::string& type, const nlohmann::json &j) {
 
-        auto msgType = j["type"].get<std::string>();
-        if(msgType == "Game.Command") {
+        if(type == "Legacy.Command") {
             if(!j.contains("data")) {
                 logger->error("Connection {} received malformed Game.Command JSON: {}",
                               connId, jdump(j));
@@ -133,7 +126,7 @@ namespace net {
             }
             auto cmd = j["data"].get<std::string>();
             handleCommand(cmd);
-        } else if(msgType == "Game.GMCP") {
+        } else if(type == "Legacy.GMCP") {
             if(!(j.contains("cmd") && j.contains("data"))) {
                 logger->error("Connection {} received malformed Game.Command JSON: {}",
                               connId, jdump(j));
