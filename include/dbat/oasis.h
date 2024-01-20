@@ -755,20 +755,6 @@ extern void free_help(struct help_index_element *help);
 
 extern ACMD(do_oasis_hedit);
 
-extern void hsedit_save_to_disk();
-
-extern void hsedit_setup_new(struct descriptor_data *d);
-
-extern void hsedit_setup_existing(struct descriptor_data *d, int real_num);
-
-extern void hsedit_parse(struct descriptor_data *d, char *arg);
-
-extern void hsedit_string_cleanup(struct descriptor_data *d, int terminator);
-
-extern void free_house(struct house_control_rec *house);
-
-extern ACMD(do_oasis_hsedit);
-
 extern int parse_stats(struct descriptor_data *d, char *arg);
 
 extern int stats_disp_menu(struct descriptor_data *d);

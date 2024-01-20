@@ -343,8 +343,6 @@ ACMD(do_group);
 
 ACMD(do_gsay);
 
-ACMD(do_hcontrol);
-
 ACMD(do_hell);
 
 ACMD(do_hspiral);
@@ -460,8 +458,6 @@ ACMD(do_potential);
 ACMD(do_map);
 
 ACMD(do_situp);
-
-ACMD(do_house);
 
 ACMD(do_iedit);
 
@@ -1003,7 +999,6 @@ const struct command_info cmd_info[] = {
         {"gsay",          "gsay",         POS_SLEEPING, do_gsay,            0,  ADMLVL_NONE,    0},
         {"gtell",         "gt",           POS_SLEEPING, do_gsay,            0,  ADMLVL_NONE,    0},
 
-        {"hcontrol", "hcon", POS_DEAD, do_hcontrol, 0, ADMLVL_BUILDER, 0},
         {"hand",          "han",          POS_SITTING,  do_hand,            0,  ADMLVL_NONE,    0},
         {"handout",       "hand",         POS_STANDING, do_handout,         0,  ADMLVL_GOD,     0},
         {"hasshuken",     "hasshuke",     POS_STANDING, do_hass,            0,  ADMLVL_NONE,    0},
@@ -1026,7 +1021,6 @@ const struct command_info cmd_info[] = {
         {"hold",          "hold",         POS_RESTING,  do_grab,            1,  ADMLVL_NONE,    0},
         {"holylight",     "holy",         POS_DEAD,     do_gen_tog,         0,  ADMLVL_IMMORT,  SCMD_HOLYLIGHT},
         {"honoo",         "hono",         POS_FIGHTING, do_honoo,           0,  ADMLVL_NONE,    0},
-        {"house",         "house",        POS_RESTING,  do_house,           0,  ADMLVL_NONE,    0},
         {"hsedit",        "hsedit",       POS_DEAD,     do_oasis,           0,  ADMLVL_BUILDER, SCMD_OASIS_HSEDIT},
         {"hspiral",       "hspira",       POS_FIGHTING, do_hspiral,         0,  ADMLVL_NONE,    0},
         {"htank",         "htan",         POS_STANDING, do_not_here,        1,  ADMLVL_NONE,    0},

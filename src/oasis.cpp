@@ -257,20 +257,6 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
         }
     }
 
-    if (OLC_HOUSE(d)) { /*. free_house performs no sanity checks, must be careful here .*/
-        switch (cleanup_type) {
-            case CLEANUP_ALL:
-                free_house(OLC_HOUSE(d));
-                break;
-            case CLEANUP_STRUCTS:
-                free(OLC_HOUSE(d));
-                break;
-            default:
-                /*. Caller has screwed up .*/
-                break;
-        }
-    }
-
     /*. Check for aedit stuff -- M. Scott */
     if (OLC_ACTION(d)) {
         switch (cleanup_type) {

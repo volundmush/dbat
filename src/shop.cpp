@@ -109,8 +109,6 @@ static int add_to_list(struct shop_buy_data *list, int type, int *len, int *val)
 
 static int end_read_list(struct shop_buy_data *list, int len, int error);
 
-static void read_line(FILE *shop_f, const char *string, void *data);
-
 
 /* config arrays */
 static const char *operator_str[] = {
@@ -1344,54 +1342,6 @@ int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim) {
 
     return (true);
 }
-
-/* val == obj_vnum and obj_rnum (?) */
-static int add_to_list(struct shop_buy_data *list, int type, int *len, int *val) {
-    if (*val != NOTHING && *val >= 0) { /* necessary after changing to unsigned v/rnums -- Welcor */
-        if (*len < MAX_SHOP_OBJ) {
-            if (type == LIST_PRODUCE)
-                *val = real_object(*val);
-            if (*val != NOTHING) {
-                BUY_TYPE(list[*len]) = *val;
-            } else
-                *val = NOTHING;
-            return (false);
-        } else
-            return (true);
-    }
-    return (false);
-}
-
-static int end_read_list(struct shop_buy_data *list, int len, int error) {
-    if (error)
-        basic_mud_log("SYSERR: Raise MAX_SHOP_OBJ constant in shop.h to %d", len + error);
-    return (len);
-}
-
-
-
-
-static int read_list(FILE *shop_f, struct shop_buy_data *list, int new_format,
-                     int max, int type) {
-    int count, temp, len = 0, error = 0;
-
-    if (new_format) {
-        for (;;) {
-            read_line(shop_f, "%d", &temp);
-            if (temp < 0)    /* Always "-1" the string. */
-                break;
-            error += add_to_list(list, type, &len, &temp);
-        }
-    } else
-        for (count = 0; count < max; count++) {
-            read_line(shop_f, "%d", &temp);
-            error += add_to_list(list, type, &len, &temp);
-        }
-    return (end_read_list(list, len, error));
-}
-
-
-
 
 
 void assign_the_shopkeepers() {
