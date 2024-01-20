@@ -10,7 +10,7 @@
 #pragma once
 
 #include "structs.h"
-#include "SQLiteCpp/SQLiteCpp.h"
+
 
 /* arbitrary constants used by index_boot() (must be unique) */
 #define DB_BOOT_WLD    0
@@ -121,8 +121,6 @@ extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct weather_data weather_info;    /* the infomation about the weather */
 extern std::set<zone_vnum> zone_reset_queue;
 
-extern std::shared_ptr<SQLite::Database> assetDb, stateDb, logDb;
-
 extern bool gameIsLoading;
 extern bool saveAll;
 
@@ -153,8 +151,29 @@ extern void boot_world();
 extern int is_empty(zone_rnum zone_nr);
 
 extern void index_boot(int mode);
+extern void check_start_rooms();
+extern void index_boot_help();
+extern void boot_db_textfiles();
+extern void boot_db_time();
+extern void boot_db_spellfeats();
+extern void boot_db_world();
+extern void boot_db_help();
+extern void boot_db_mail();
+extern void boot_db_socials();
+extern void boot_db_clans();
+extern void boot_db_commands();
+extern void boot_db_specials();
+extern void boot_db_assemblies();
+extern void boot_db_sort();
+extern void boot_db_boards();
+extern void boot_db_banned();
+extern void boot_db_rent();
+extern void boot_db_houses();
+extern void boot_db_shadow();
+extern void boot_db_spacemap();
 
-extern void boot_db();
+extern void boot_db_legacy();
+extern void boot_db_new();
 
 extern void destroy_db();
 
@@ -195,9 +214,6 @@ extern room_rnum real_room(room_vnum vnum);
 extern mob_rnum real_mobile(mob_vnum vnum);
 
 extern obj_rnum real_object(obj_vnum vnum);
-
-extern int load_char(const char *name, struct char_data *ch);
-
 
 extern void init_char(struct char_data *ch);
 
@@ -330,24 +346,6 @@ struct zone_data {
 };
 
 
-/* Added level, flags, and last, primarily for pfile autocleaning.  You
-   can also use them to keep online statistics, and can add race, class,
-   etc if you like.
-*/
-struct player_index_element {
-    char *name;
-    long id;
-    int level;
-    int admlevel;
-    int flags;
-    time_t last;
-    int ship;
-    int shiproom;
-    time_t played;
-    char *clan;
-};
-
-
 struct help_index_element {
     char *index;      /*Future Use */
     char *keywords;   /*Keyword Place holder and sorter */
@@ -381,25 +379,6 @@ extern time_t boot_time;
 extern struct config_data config_info;
 
 // dirty sets...
-void dirty_all();
-extern std::set<room_vnum> dirty_rooms;
-extern std::set<obj_vnum> dirty_item_prototypes;
-extern std::set<mob_vnum> dirty_npc_prototypes;
-extern std::set<zone_vnum> dirty_zones;
-extern std::set<vnum> dirty_areas;
-extern std::set<trig_vnum> dirty_dgscript_prototypes;
-extern std::set<guild_vnum> dirty_guilds;
-extern std::set<shop_vnum> dirty_shops;
-extern std::set<int64_t> dirty_players;
-extern std::set<vnum> dirty_accounts;
-
-extern std::set<int64_t> dirty_characters;
-extern std::set<int64_t> dirty_items;
-extern std::set<int64_t> dirty_dgscripts;
-
-void process_dirty();
-// TODO: not yet sure how to handle accounts... working on it...
-
 extern std::vector<obj_vnum> dbVnums;
 
 // world data...

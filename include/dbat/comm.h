@@ -90,6 +90,8 @@ extern char *make_prompt(struct descriptor_data *point);
 
 extern void free_bufpool();
 
+extern void migrate_db();
+
 
 void broadcast(const std::string& txt);
 

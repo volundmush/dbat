@@ -362,6 +362,8 @@ struct room_data : public unit_data {
 
     MoonCheck checkMoon();
 
+    nlohmann::json serializeDgVars();
+
 };
 /* ====================================================================== */
 

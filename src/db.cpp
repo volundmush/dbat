@@ -20,8 +20,6 @@
 #include "dbat/act.social.h"
 #include "dbat/random.h"
 #include "dbat/assemblies.h"
-#include "dbat/house.h"
-#include "dbat/dg_event.h"
 #include "dbat/reset.h"
 #include "dbat/class.h"
 #include "dbat/comm.h"
@@ -34,36 +32,18 @@
 #include "dbat/mail.h"
 #include "dbat/clan.h"
 #include "dbat/boards.h"
-#include "dbat/objsave.h"
 #include "dbat/constants.h"
-#include "dbat/genmob.h"
 #include "dbat/spells.h"
 #include "dbat/races.h"
-#include "dbat/spell_parser.h"
 #include "dbat/genobj.h"
-#include "dbat/area.h"
 #include "dbat/account.h"
 #include <regex>
+#include "SQLiteCpp/SQLiteCpp.h"
+#include "dbat/maputils.h"
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
-
-std::shared_ptr<SQLite::Database> assetDb, stateDb, logDb;
-std::set<room_vnum> dirty_rooms;
-std::set<obj_vnum> dirty_item_prototypes;
-std::set<mob_vnum> dirty_npc_prototypes;
-std::set<zone_vnum> dirty_zones;
-std::set<vnum> dirty_areas;
-std::set<trig_vnum> dirty_dgscript_prototypes;
-std::set<guild_vnum> dirty_guilds;
-std::set<shop_vnum> dirty_shops;
-std::set<int64_t> dirty_players;
-std::set<vnum> dirty_accounts;
-
-std::set<int64_t> dirty_characters;
-std::set<int64_t> dirty_items;
-std::set<int64_t> dirty_dgscripts;
 
 bool gameIsLoading = true;
 bool saveAll = false;
@@ -147,47 +127,13 @@ std::set<zone_vnum> zone_reset_queue;
 std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
 
 /* local functions */
-static void mob_stats(struct char_data *mob);
-
 static void dragon_level(struct char_data *ch);
-
-static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits);
-
-static int check_object_spell_number(struct obj_data *obj, int val);
-
-static int check_object_level(struct obj_data *obj, int val);
-
-static void setup_dir(FILE *fl, room_vnum room, int dir);
-
-static void discrete_load(FILE *fl, int mode, char *filename);
-
-static int check_object(struct obj_data *);
-
-static void parse_room(FILE *fl, room_vnum virtual_nr);
-
-static void parse_mobile(FILE *mob_f, mob_vnum nr);
-
-static char *parse_object(FILE *obj_f, obj_vnum nr);
-
-static void load_zones(FILE *fl, char *zonename);
 
 static int file_to_string(const char *name, char *buf);
 
 static int file_to_string_alloc(const char *name, char **buf);
 
 static int count_alias_records(FILE *fl);
-
-static int count_hash_records(FILE *fl);
-
-static bitvector_t asciiflag_conv_aff(char *flag);
-
-static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr);
-
-static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, mob_vnum nr);
-
-static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr);
-
-static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr);
 
 static void get_one_line(FILE *fl, char *buf);
 
@@ -197,10 +143,6 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
 
 static void reset_time();
 
-static void free_obj_unique_hash();
-
-static void mob_autobalance(struct char_data *ch);
-/* external functions */
 
 void mag_assign_spells();
 
@@ -234,8 +176,6 @@ void free_assemblies();
 
 /* external vars */
 
-
-
 static void dragon_level(struct char_data *ch) {
     struct descriptor_data *d;
     int level = 0, count = 0;
@@ -260,83 +200,7 @@ static void dragon_level(struct char_data *ch) {
     ch->set(CharNum::Level, level + rand_number(5, 20));
 }
 
-static void mob_stats(struct char_data *mob) {
-    int start = GET_LEVEL(mob) * 0.5, finish = GET_LEVEL(mob);
 
-    if (finish < 20)
-        finish = 20;
-
-    std::unordered_map<CharAttribute, int> setTo;
-
-    if (!IS_HUMANOID(mob)) {
-        setTo[CharAttribute::Strength] = rand_number(start, finish);
-        setTo[CharAttribute::Intelligence] = rand_number(start, finish) - 30;
-        setTo[CharAttribute::Wisdom] = rand_number(start, finish) - 30;
-        setTo[CharAttribute::Agility] = rand_number(start + 5, finish);
-        setTo[CharAttribute::Constitution] = rand_number(start + 5, finish);
-        setTo[CharAttribute::Speed] = rand_number(start, finish);
-    } else {
-        if (IS_SAIYAN(mob)) {
-            setTo[CharAttribute::Strength] = rand_number(start + 10, finish);
-            setTo[CharAttribute::Intelligence] = rand_number(start, finish - 10);
-            setTo[CharAttribute::Wisdom] = rand_number(start, finish - 5);
-            setTo[CharAttribute::Agility] = rand_number(start, finish);
-            setTo[CharAttribute::Constitution] = rand_number(start + 5, finish);
-            setTo[CharAttribute::Speed] = rand_number(start + 5, finish);
-        } else if (IS_KONATSU(mob)) {
-            setTo[CharAttribute::Strength] = rand_number(start, finish - 10);
-            setTo[CharAttribute::Intelligence] = rand_number(start, finish);
-            setTo[CharAttribute::Wisdom] = rand_number(start, finish);
-            setTo[CharAttribute::Agility] = rand_number(start + 10, finish);
-            setTo[CharAttribute::Constitution] = rand_number(start, finish);
-            setTo[CharAttribute::Speed] = rand_number(start, finish);
-        } else if (IS_ANDROID(mob)) {
-            setTo[CharAttribute::Strength] = rand_number(start, finish);
-            setTo[CharAttribute::Intelligence] = rand_number(start, finish);
-            setTo[CharAttribute::Wisdom] = rand_number(start, finish - 10);
-            setTo[CharAttribute::Agility] = rand_number(start, finish);
-            setTo[CharAttribute::Constitution] = rand_number(start, finish);
-            setTo[CharAttribute::Speed] = rand_number(start, finish);
-        } else if (IS_MAJIN(mob)) {
-            setTo[CharAttribute::Strength] = rand_number(start, finish);
-            setTo[CharAttribute::Intelligence] = rand_number(start, finish - 10);
-            setTo[CharAttribute::Wisdom] = rand_number(start, finish - 5);
-            setTo[CharAttribute::Agility] = rand_number(start, finish);
-            setTo[CharAttribute::Constitution] = rand_number(start + 15, finish);
-            setTo[CharAttribute::Speed] = rand_number(start, finish);
-        } else if (IS_TRUFFLE(mob)) {
-            setTo[CharAttribute::Strength] = rand_number(start, finish - 10);
-            setTo[CharAttribute::Intelligence] = rand_number(start + 15, finish);
-            setTo[CharAttribute::Wisdom] = rand_number(start, finish);
-            setTo[CharAttribute::Agility] = rand_number(start, finish);
-            setTo[CharAttribute::Constitution] = rand_number(start, finish);
-            setTo[CharAttribute::Speed] = rand_number(start, finish);
-        } else if (IS_ICER(mob)) {
-            setTo[CharAttribute::Strength] = rand_number(start + 5, finish);
-            setTo[CharAttribute::Intelligence] = rand_number(start, finish);
-            setTo[CharAttribute::Wisdom] = rand_number(start, finish);
-            setTo[CharAttribute::Agility] = rand_number(start, finish);
-            setTo[CharAttribute::Constitution] = rand_number(start, finish);
-            setTo[CharAttribute::Speed] = rand_number(start + 10, finish);
-        } else {
-            setTo[CharAttribute::Strength] = rand_number(start, finish);
-            setTo[CharAttribute::Intelligence] = rand_number(start, finish);
-            setTo[CharAttribute::Wisdom] = rand_number(start, finish);
-            setTo[CharAttribute::Agility] = rand_number(start, finish);
-            setTo[CharAttribute::Constitution] = rand_number(start, finish);
-            setTo[CharAttribute::Speed] = rand_number(start, finish);
-        }
-    }
-
-    for(auto &[attr, val] : setTo) {
-        if(val > 100) {
-            val = 100;
-        } else if(val < 5) {
-            val = rand_number(5, 8);
-        }
-        mob->set(attr, val);
-    }
-}
 
 
 /*************************************************************************
@@ -372,100 +236,11 @@ void free_text_files() {
  * To fix later, if desired. -gg 6/24/99
  */
 ACMD(do_reboot) {
-    char arg[MAX_INPUT_LENGTH];
-
-    one_argument(argument, arg);
-
-    if (!strcasecmp(arg, "all") || *arg == '*') {
-        if (file_to_string_alloc(GREETINGS_FILE, &GREETINGS) == 0)
-            prune_crlf(GREETINGS);
-        if (file_to_string_alloc(GREETANSI_FILE, &GREETANSI) == 0)
-            prune_crlf(GREETANSI);
-        if (file_to_string_alloc(WIZLIST_FILE, &wizlist) < 0)
-            send_to_char(ch, "Cannot read wizlist\r\n");
-        if (file_to_string_alloc(IMMLIST_FILE, &immlist) < 0)
-            send_to_char(ch, "Cannot read immlist\r\n");
-        if (file_to_string_alloc(NEWS_FILE, &news) < 0)
-            send_to_char(ch, "Cannot read news\r\n");
-        if (file_to_string_alloc(CREDITS_FILE, &credits) < 0)
-            send_to_char(ch, "Cannot read credits\r\n");
-        if (file_to_string_alloc(MOTD_FILE, &motd) < 0)
-            send_to_char(ch, "Cannot read motd\r\n");
-        if (file_to_string_alloc(IMOTD_FILE, &imotd) < 0)
-            send_to_char(ch, "Cannot read imotd\r\n");
-        if (file_to_string_alloc(HELP_PAGE_FILE, &help) < 0)
-            send_to_char(ch, "Cannot read help front page\r\n");
-        if (file_to_string_alloc(INFO_FILE, &info) < 0)
-            send_to_char(ch, "Cannot read info file\r\n");
-        if (file_to_string_alloc(POLICIES_FILE, &policies) < 0)
-            send_to_char(ch, "Cannot read policies\r\n");
-        if (file_to_string_alloc(HANDBOOK_FILE, &handbook) < 0)
-            send_to_char(ch, "Cannot read handbook\r\n");
-        if (file_to_string_alloc(BACKGROUND_FILE, &background) < 0)
-            send_to_char(ch, "Cannot read background\r\n");
-        if (help_table)
-            free_help_table();
-        index_boot(DB_BOOT_HLP);
-    } else if (!strcasecmp(arg, "wizlist")) {
-        if (file_to_string_alloc(WIZLIST_FILE, &wizlist) < 0)
-            send_to_char(ch, "Cannot read wizlist\r\n");
-    } else if (!strcasecmp(arg, "immlist")) {
-        if (file_to_string_alloc(IMMLIST_FILE, &immlist) < 0)
-            send_to_char(ch, "Cannot read immlist\r\n");
-    } else if (!strcasecmp(arg, "news")) {
-        if (file_to_string_alloc(NEWS_FILE, &news) < 0)
-            send_to_char(ch, "Cannot read news\r\n");
-    } else if (!strcasecmp(arg, "credits")) {
-        if (file_to_string_alloc(CREDITS_FILE, &credits) < 0)
-            send_to_char(ch, "Cannot read credits\r\n");
-    } else if (!strcasecmp(arg, "motd")) {
-        if (file_to_string_alloc(MOTD_FILE, &motd) < 0)
-            send_to_char(ch, "Cannot read motd\r\n");
-    } else if (!strcasecmp(arg, "imotd")) {
-        if (file_to_string_alloc(IMOTD_FILE, &imotd) < 0)
-            send_to_char(ch, "Cannot read imotd\r\n");
-    } else if (!strcasecmp(arg, "help")) {
-        if (file_to_string_alloc(HELP_PAGE_FILE, &help) < 0)
-            send_to_char(ch, "Cannot read help front page\r\n");
-    } else if (!strcasecmp(arg, "info")) {
-        if (file_to_string_alloc(INFO_FILE, &info) < 0)
-            send_to_char(ch, "Cannot read info\r\n");
-    } else if (!strcasecmp(arg, "policy")) {
-        if (file_to_string_alloc(POLICIES_FILE, &policies) < 0)
-            send_to_char(ch, "Cannot read policy\r\n");
-    } else if (!strcasecmp(arg, "handbook")) {
-        if (file_to_string_alloc(HANDBOOK_FILE, &handbook) < 0)
-            send_to_char(ch, "Cannot read handbook\r\n");
-    } else if (!strcasecmp(arg, "background")) {
-        if (file_to_string_alloc(BACKGROUND_FILE, &background) < 0)
-            send_to_char(ch, "Cannot read background\r\n");
-    } else if (!strcasecmp(arg, "greetings")) {
-        if (file_to_string_alloc(GREETINGS_FILE, &GREETINGS) == 0)
-            prune_crlf(GREETINGS);
-        else
-            send_to_char(ch, "Cannot read greetings.\r\n");
-    } else if (!strcasecmp(arg, "greetansi")) {
-        if (file_to_string_alloc(GREETANSI_FILE, &GREETANSI) == 0)
-            prune_crlf(GREETANSI);
-        else
-            send_to_char(ch, "Cannot read greetings.\r\n");
-    } else if (!strcasecmp(arg, "xhelp")) {
-        if (help_table)
-            free_help_table();
-        index_boot(DB_BOOT_HLP);
-    } else if (!strcasecmp(arg, "ihelp")) {
-        if (file_to_string_alloc(IHELP_PAGE_FILE, &ihelp) < 0)
-            send_to_char(ch, "Cannot read help front page\r\n");
-    } else {
-        send_to_char(ch, "Unknown reload option.\r\n");
-        return;
-    }
-
-    send_to_char(ch, "%s", CONFIG_OK);
+    send_to_char(ch, "Not a thing anymore.\r\n");
 }
 
-static void db_load_accounts() {
-    SQLite::Statement q(*stateDb, "SELECT id,data FROM accounts");
+static void db_load_accounts(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM accounts");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -478,11 +253,10 @@ static void db_load_accounts() {
         }
 
     }
-
 }
 
-static void db_load_players() {
-    SQLite::Statement q(*stateDb, "SELECT id,data FROM playerCharacters");
+static void db_load_players(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM playerCharacters");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -496,8 +270,8 @@ static void db_load_players() {
     }
 }
 
-static void db_load_characters_initial() {
-    SQLite::Statement q(*stateDb, "SELECT id,generation,isPlayer,data FROM characters");
+static void db_load_characters_initial(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,generation,isPlayer,data FROM characters");
 
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
@@ -525,8 +299,8 @@ static void db_load_characters_initial() {
 
 }
 
-static void db_load_characters_finish() {
-    SQLite::Statement q(*stateDb, "SELECT id,generation,isPlayer,location,relations FROM characters");
+static void db_load_characters_finish(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,generation,isPlayer,location,relations FROM characters");
 
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
@@ -560,8 +334,8 @@ static void db_load_characters_finish() {
     }
 }
 
-static void db_load_items_initial() {
-    SQLite::Statement q(*stateDb, "SELECT id,generation,data FROM items");
+static void db_load_items_initial(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,generation,data FROM items");
 
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
@@ -579,8 +353,8 @@ static void db_load_items_initial() {
     }
 }
 
-static void db_load_items_finish() {
-    SQLite::Statement q(*stateDb, "SELECT id,generation,location,slot,relations FROM items");
+static void db_load_items_finish(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,generation,location,slot,relations FROM items");
 
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
@@ -627,8 +401,8 @@ static void db_load_activate_entities() {
     }
 }
 
-static void db_load_dgscripts_initial() {
-    SQLite::Statement q(*stateDb, "SELECT id,generation,data FROM dgScripts");
+static void db_load_dgscripts_initial(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,generation,data FROM dgScripts");
 
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
@@ -646,8 +420,8 @@ static void db_load_dgscripts_initial() {
     }
 }
 
-static void db_load_dgscripts_finish() {
-    SQLite::Statement q(*stateDb, "SELECT id,generation,location FROM dgScripts ORDER BY num DESC");
+static void db_load_dgscripts_finish(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,generation,location FROM dgScripts ORDER BY num DESC");
 
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
@@ -698,8 +472,8 @@ static void db_load_dgscripts_finish() {
     }
 }
 
-static void db_load_globaldata() {
-    SQLite::Statement q(*stateDb, "SELECT name,data FROM globalData");
+static void db_load_globaldata(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT name,data FROM globalData");
 
     while(q.executeStep()) {
         auto name = q.getColumn(0).getString();
@@ -729,8 +503,8 @@ static void db_load_globaldata() {
 }
 
 
-static void db_load_zones() {
-    SQLite::Statement q(*assetDb, "SELECT id,data FROM zones");
+static void db_load_zones(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM zones");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -744,8 +518,8 @@ static void db_load_zones() {
     }
 }
 
-static void db_load_dgscript_prototypes() {
-    SQLite::Statement q(*assetDb, "SELECT id,data FROM dgScriptPrototypes");
+static void db_load_dgscript_prototypes(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM dgScriptPrototypes");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -761,8 +535,8 @@ static void db_load_dgscript_prototypes() {
     }
 }
 
-static void db_load_rooms() {
-    SQLite::Statement q(*assetDb, "SELECT id,data FROM rooms");
+static void db_load_rooms(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM rooms");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -777,8 +551,8 @@ static void db_load_rooms() {
     }
 }
 
-static void db_load_shops() {
-    SQLite::Statement q(*assetDb, "SELECT id,data FROM shops");
+static void db_load_shops(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM shops");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -792,8 +566,8 @@ static void db_load_shops() {
     }
 }
 
-static void db_load_guilds() {
-    SQLite::Statement q(*assetDb, "SELECT id,data FROM guilds");
+static void db_load_guilds(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM guilds");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -807,8 +581,8 @@ static void db_load_guilds() {
     }
 }
 
-static void db_load_item_prototypes() {
-    SQLite::Statement q(*assetDb, "SELECT id,data FROM itemPrototypes");
+static void db_load_item_prototypes(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM itemPrototypes");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -825,8 +599,8 @@ static void db_load_item_prototypes() {
     }
 }
 
-static void db_load_npc_prototypes() {
-    SQLite::Statement q(*assetDb, "SELECT id,data FROM npcPrototypes");
+static void db_load_npc_prototypes(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM npcPrototypes");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -843,8 +617,8 @@ static void db_load_npc_prototypes() {
     }
 }
 
-static void db_load_areas() {
-    SQLite::Statement q(*assetDb, "SELECT id,data FROM areas");
+static void db_load_areas(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,data FROM areas");
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto data = q.getColumn(1).getString();
@@ -874,8 +648,8 @@ static void db_load_areas() {
     }
 }
 
-static std::vector<std::filesystem::path> getStateFiles() {
-    std::filesystem::path dir = "state"; // Change to your directory
+static std::vector<std::filesystem::path> getDumpFiles() {
+    std::filesystem::path dir = "dump"; // Change to your directory
     std::vector<std::filesystem::path> files;
 
     auto pattern = fmt::format("{}-", config::stateDbName);
@@ -889,10 +663,9 @@ static std::vector<std::filesystem::path> getStateFiles() {
     return files;
 }
 
-static void load_new_database() {
+void boot_db_world() {
 
-    auto files = getStateFiles();
-
+    auto files = getDumpFiles();
     if (!files.empty()) {
         std::cout << "Newest state file: " << files.front() << '\n';
     } else {
@@ -900,121 +673,88 @@ static void load_new_database() {
         return;
     }
 
+    std::shared_ptr<SQLite::Database> latestDump;
+
     try {
-        stateDb = std::make_shared<SQLite::Database>(files.front().string(), SQLite::OPEN_READONLY);
+        latestDump = std::make_shared<SQLite::Database>(files.front().string(), SQLite::OPEN_READONLY);
     } catch(std::exception& e) {
         logger->critical("Error opening state database: {}", e.what());
         shutdown_game(1);
     }
 
+    basic_mud_log("Loading Zones...");
+    db_load_zones(latestDump);
+
+    basic_mud_log("Loading DgScripts and generating index.");
+    db_load_dgscript_prototypes(latestDump);
+
+    basic_mud_log("Loading mobs and generating index.");
+    db_load_npc_prototypes(latestDump);
+
+    basic_mud_log("Loading objs and generating index.");
+    db_load_item_prototypes(latestDump);
+
+    basic_mud_log("Loading rooms.");
+    db_load_rooms(latestDump);
+
+    basic_mud_log("Loading areas.");
+    db_load_areas(latestDump);
+
     basic_mud_log("Loading global data...");
-    db_load_globaldata();
+    db_load_globaldata(latestDump);
 
     basic_mud_log("Loading accounts.");
-    db_load_accounts();
+    db_load_accounts(latestDump);
 
     basic_mud_log("Loading players.");
-    db_load_players();
+    db_load_players(latestDump);
 
     basic_mud_log("Loading characters initial...");
-    db_load_characters_initial();
+    db_load_characters_initial(latestDump);
 
     basic_mud_log("Loading items initial...");
-    db_load_items_initial();
+    db_load_items_initial(latestDump);
 
     basic_mud_log("Loading dgscript initial...");
-    db_load_dgscripts_initial();
+    db_load_dgscripts_initial(latestDump);
 
     // Now that all of the game entities have been spawned, we can finish loading
     // relations between them.
 
     basic_mud_log("Loading characters finish...");
-    db_load_characters_finish();
+    db_load_characters_finish(latestDump);
 
     basic_mud_log("Loading items finish...");
-    db_load_items_finish();
+    db_load_items_finish(latestDump);
 
     basic_mud_log("Loading dgscript finish...");
-    db_load_dgscripts_finish();
+    db_load_dgscripts_finish(latestDump);
 
     basic_mud_log("Running activation of entities...");
     db_load_activate_entities();
-}
-
-static bool newStyle = false;
-
-void boot_world() {
-
-    basic_mud_log("Loading Zones...");
-    db_load_zones();
-
-    newStyle = !zone_table.empty();
-
-    if(newStyle) {
-        basic_mud_log("Loading DgScripts and generating index.");
-        db_load_dgscript_prototypes();
-
-        basic_mud_log("Loading mobs and generating index.");
-        db_load_npc_prototypes();
-
-        basic_mud_log("Loading objs and generating index.");
-        db_load_item_prototypes();
-
-        basic_mud_log("Loading rooms.");
-        db_load_rooms();
-
-        basic_mud_log("Loading areas.");
-        db_load_areas();
-
-        load_new_database();
-
-    } else {
-        basic_mud_log("Loading legacy world data...");
-        basic_mud_log("Loading zone table.");
-        index_boot(DB_BOOT_ZON);
-
-        basic_mud_log("Loading triggers and generating index.");
-        index_boot(DB_BOOT_TRG);
-
-        basic_mud_log("Loading rooms.");
-        index_boot(DB_BOOT_WLD);
-    }
 
     basic_mud_log("Checking start rooms.");
     check_start_rooms();
 
-    if(!newStyle) {
-        basic_mud_log("Loading mobs and generating index.");
-        index_boot(DB_BOOT_MOB);
-
-        basic_mud_log("Loading objs and generating index.");
-        index_boot(DB_BOOT_OBJ);
-    }
-
     basic_mud_log("Loading disabled commands list...");
     load_disabled();
 
-    if (!no_specials) {
-        if(newStyle) {
-            basic_mud_log("Loading shops.");
-            db_load_shops();
+    basic_mud_log("Loading shops.");
+    db_load_shops(latestDump);
 
-            basic_mud_log("Loading guild masters.");
-            db_load_guilds();
-        } else {
-            basic_mud_log("Loading shops.");
-            index_boot(DB_BOOT_SHP);
+    basic_mud_log("Loading guild masters.");
+    db_load_guilds(latestDump);
 
-            basic_mud_log("Loading guild masters.");
-            index_boot(DB_BOOT_GLD);
-        }
+    boot_db_shadow();
+}
 
-    }
+void boot_db_shadow() {
     if (SELFISHMETER >= 10) {
         basic_mud_log("Loading Shadow Dragons.");
         load_shadow_dragons();
     }
 }
+
 
 
 void free_extra_descriptions(struct extra_descr_data *edesc) {
@@ -1171,16 +911,7 @@ void destroy_db() {
      - Elie Rosenblum Dec. 12 2003 */
 #define NUM_OBJ_UNIQUE_POOLS 5000
 
-/* body of the booting system */
-void boot_db() {
-    zone_rnum i;
-
-    basic_mud_log("Boot db -- BEGIN.");
-
-    basic_mud_log("Resetting the game time:");
-    broadcast("Your sense of time accelerates and dilates paradoxically as the world unravels and reforms.\r\n");
-    reset_time();
-
+void boot_db_textfiles() {
     basic_mud_log("Reading news, credits, help, ihelp, bground, info & motds.");
     file_to_string_alloc(NEWS_FILE, &news);
     file_to_string_alloc(CREDITS_FILE, &credits);
@@ -1196,85 +927,122 @@ void boot_db() {
     file_to_string_alloc(IHELP_PAGE_FILE, &ihelp);
     file_to_string_alloc(GREETINGS_FILE, &GREETINGS);
     file_to_string_alloc(GREETANSI_FILE, &GREETANSI);
+}
 
+void boot_db_time() {
+    basic_mud_log("Resetting the game time:");
+    reset_time();
+}
+
+void boot_db_spellfeats() {
     basic_mud_log("Loading spell definitions.");
     mag_assign_spells();
 
     basic_mud_log("Loading feats.");
     assign_feats();
+}
 
-    boot_world();
-
+void boot_db_help() {
     basic_mud_log("Loading help entries.");
-    index_boot(DB_BOOT_HLP);
+    index_boot_help();
 
     basic_mud_log("Setting up context sensitive help system for OLC");
     boot_context_help();
+}
 
-    ERAPLAYERS = players.size();
-
-    //insure_directory(LIB_PLROBJS "CRASH", 0);
-
+void boot_db_mail() {
     basic_mud_log("Booting mail system.");
     if (!scan_file()) {
         basic_mud_log("    Mail boot failed -- Mail system disabled");
-        no_mail = 1;
     }
+}
 
+void boot_db_socials() {
     basic_mud_log("Loading social messages.");
     boot_social_messages();
+}
 
+void boot_db_clans() {
     basic_mud_log("Loading Clans.");
     clanBoot();
+}
 
+void boot_db_commands() {
     basic_mud_log("Building command list.");
     create_command_list(); /* aedit patch -- M. Scott */
+}
 
+void boot_db_specials() {
     basic_mud_log("Assigning function pointers:");
+    basic_mud_log("   Mobiles.");
+    assign_mobiles();
+    basic_mud_log("   Shopkeepers.");
+    assign_the_shopkeepers();
+    basic_mud_log("   Objects.");
+    assign_objects();
+    basic_mud_log("   Rooms.");
+    assign_rooms();
+    basic_mud_log("   Guildmasters.");
+    assign_the_guilds();
+}
 
-    if (!no_specials) {
-        basic_mud_log("   Mobiles.");
-        assign_mobiles();
-        basic_mud_log("   Shopkeepers.");
-        assign_the_shopkeepers();
-        basic_mud_log("   Objects.");
-        assign_objects();
-        basic_mud_log("   Rooms.");
-        assign_rooms();
-        basic_mud_log("   Guildmasters.");
-        assign_the_guilds();
-    }
-
+void boot_db_assemblies() {
     basic_mud_log("Booting assembled objects.");
     assemblyBootAssemblies();
+}
 
+void boot_db_sort() {
     basic_mud_log("Sorting command list and spells.");
     sort_commands();
     sort_spells();
     sort_feats();
+}
 
+void boot_db_boards() {
     basic_mud_log("Booting boards system.");
     init_boards();
+}
 
+void boot_db_banned() {
     basic_mud_log("Reading banned site and invalid-name list.");
     load_banned();
     Read_Invalid_List();
+}
 
-    if (!no_rent_check) {
-        basic_mud_log("Deleting timed-out crash and rent files:");
-        update_obj_file();
-        basic_mud_log("   Done.");
+
+void boot_db_spacemap() {
+    FILE *mapfile = fopen("../lib/surface.map", "r");
+    int rowcounter, colcounter;
+    int vnum_read;
+    for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
+        for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
+            fscanf(mapfile, "%d", &vnum_read);
+            mapnums[rowcounter][colcounter] = real_room(vnum_read);
+        }
     }
+    fclose(mapfile);
+}
 
-    /* Moved here so the object limit code works. -gg 6/24/98 */
-    if (!mini_mud) {
-        basic_mud_log("Booting houses.");
-        House_boot(!newStyle);
-    }
 
-    boot_time = time(nullptr);
+/* body of the booting system */
 
-    broadcast("Database load complete!\r\n");
+
+void boot_db_new() {
+    boot_db_time();
+    boot_db_textfiles();
+    boot_db_spellfeats();
+    boot_db_world();
+    boot_db_mail();
+    boot_db_socials();
+    boot_db_clans();
+    boot_db_commands();
+    boot_db_specials();
+    boot_db_assemblies();
+    boot_db_sort();
+    boot_db_boards();
+    boot_db_banned();
+    boot_db_spacemap();
+    topLoad();
 }
 
 
@@ -1457,49 +1225,16 @@ static int count_alias_records(FILE *fl) {
     exit(1);    /* Some day we hope to handle these things better... */
 }
 
-/* function to count how many hash-mark delimited records exist in a file */
-static int count_hash_records(FILE *fl) {
-    char buf[128];
-    int count = 0;
-
-    while (fgets(buf, 128, fl))
-        if (*buf == '#')
-            count++;
-
-    return (count);
-}
-
-
-void index_boot(int mode) {
+void index_boot_help() {
     const char *index_filename, *prefix = nullptr;    /* nullptr or egcs 1.1 complains */
     FILE *db_index, *db_file;
     int rec_count = 0, size[2];
     char buf2[PATH_MAX], buf1[MAX_STRING_LENGTH];
+    int mode = DB_BOOT_HLP;
 
     switch (mode) {
-        case DB_BOOT_WLD:
-            prefix = WLD_PREFIX;
-            break;
-        case DB_BOOT_MOB:
-            prefix = MOB_PREFIX;
-            break;
-        case DB_BOOT_OBJ:
-            prefix = OBJ_PREFIX;
-            break;
-        case DB_BOOT_ZON:
-            prefix = ZON_PREFIX;
-            break;
-        case DB_BOOT_SHP:
-            prefix = SHP_PREFIX;
-            break;
         case DB_BOOT_HLP:
             prefix = HLP_PREFIX;
-            break;
-        case DB_BOOT_TRG:
-            prefix = TRG_PREFIX;
-            break;
-        case DB_BOOT_GLD:
-            prefix = GLD_PREFIX;
             break;
         default:
             basic_mud_log("SYSERR: Unknown subcommand %d to index_boot!", mode);
@@ -1527,12 +1262,7 @@ void index_boot(int mode) {
             fscanf(db_index, "%s\n", buf1);
             continue;
         } else {
-            if (mode == DB_BOOT_ZON)
-                rec_count++;
-            else if (mode == DB_BOOT_HLP)
-                rec_count += count_alias_records(db_file);
-            else
-                rec_count += count_hash_records(db_file);
+            rec_count += count_alias_records(db_file);
         }
 
         fclose(db_file);
@@ -1541,37 +1271,13 @@ void index_boot(int mode) {
 
     /* Exit if 0 records, unless this is shops */
     if (!rec_count) {
-        if (mode == DB_BOOT_SHP || mode == DB_BOOT_GLD)
-            return;
-        basic_mud_log("SYSERR: boot error - 0 records counted in %s/%s.", prefix,
-            index_filename);
-        exit(1);
+        return;
     }
 
     /*
    * NOTE: "bytes" does _not_ include strings or other later malloc'd things.
    */
     switch (mode) {
-        case DB_BOOT_TRG:
-            break;
-        case DB_BOOT_WLD:
-            size[0] = sizeof(struct room_data) * rec_count;
-            basic_mud_log("   %d rooms, %d bytes.", rec_count, size[0]);
-            break;
-        case DB_BOOT_MOB:
-            size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(struct char_data) * rec_count;
-            basic_mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
-            break;
-        case DB_BOOT_OBJ:
-            size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(struct obj_data) * rec_count;
-            basic_mud_log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
-            break;
-        case DB_BOOT_ZON:
-            size[0] = sizeof(struct zone_data) * rec_count;
-            basic_mud_log("   %d zones, %d bytes.", rec_count, size[0]);
-            break;
         case DB_BOOT_HLP:
             CREATE(help_table, struct help_index_element, rec_count);
             size[0] = sizeof(struct help_index_element) * rec_count;
@@ -1588,23 +1294,8 @@ void index_boot(int mode) {
             exit(1);
         }
         switch (mode) {
-            case DB_BOOT_WLD:
-            case DB_BOOT_OBJ:
-            case DB_BOOT_MOB:
-            case DB_BOOT_TRG:
-                discrete_load(db_file, mode, buf2);
-                break;
-            case DB_BOOT_ZON:
-                load_zones(db_file, buf2);
-                break;
             case DB_BOOT_HLP:
                 load_help(db_file, buf2);
-                break;
-            case DB_BOOT_SHP:
-                boot_the_shops(db_file, buf2, rec_count);
-                break;
-            case DB_BOOT_GLD:
-                boot_the_guilds(db_file, buf2, rec_count);
                 break;
         }
 
@@ -1618,74 +1309,6 @@ void index_boot(int mode) {
         qsort(help_table, top_of_helpt, sizeof(struct help_index_element), hsort);
         top_of_helpt--;
     }
-}
-
-
-static void discrete_load(FILE *fl, int mode, char *filename) {
-    int nr = -1, last;
-    char line[READ_SIZE];
-
-    const char *modes[] = {"world", "mob", "obj", "ZON", "SHP", "HLP", "trg"};
-    /* modes positions correspond to DB_BOOT_xxx in db.h */
-
-    for (;;) {
-        /*
-     * we have to do special processing with the obj files because they have
-     * no end-of-record marker :(
-     */
-        if (mode != DB_BOOT_OBJ || nr < 0)
-            if (!get_line(fl, line)) {
-                if (nr == -1) {
-                    basic_mud_log("SYSERR: %s file %s is empty!", modes[mode], filename);
-                } else {
-                    basic_mud_log("SYSERR: Format error in %s after %s #%d\n"
-                        "...expecting a new %s, but file ended!\n"
-                        "(maybe the file is not terminated with '$'?)", filename,
-                        modes[mode], nr, modes[mode]);
-                }
-                exit(1);
-            }
-        if (*line == '$')
-            return;
-
-        if (*line == '#') {
-            last = nr;
-            if (sscanf(line, "#%d", &nr) != 1) {
-                basic_mud_log("SYSERR: Format error after %s #%d", modes[mode], last);
-                exit(1);
-            }
-            if (nr >= 99999)
-                return;
-            else
-                switch (mode) {
-                    case DB_BOOT_WLD:
-                        parse_room(fl, nr);
-                        break;
-                    case DB_BOOT_MOB:
-                        parse_mobile(fl, nr);
-                        break;
-                    case DB_BOOT_TRG:
-                        parse_trigger(fl, nr);
-                        break;
-                    case DB_BOOT_OBJ:
-                        strlcpy(line, parse_object(fl, nr), sizeof(line));
-                        break;
-                }
-        } else {
-            basic_mud_log("SYSERR: Format error in %s file %s near %s #%d", modes[mode],
-                filename, modes[mode], nr);
-            basic_mud_log("SYSERR: ... offending line: '%s'", line);
-            exit(1);
-        }
-    }
-}
-
-char fread_letter(FILE *fp) {
-    char c;
-    do {
-        c = getc(fp);
-    } while (isspace(c));
-    return c;
 }
 
 bitvector_t asciiflag_conv(char *flag) {
@@ -1709,233 +1332,6 @@ bitvector_t asciiflag_conv(char *flag) {
     return (flags);
 }
 
-static bitvector_t asciiflag_conv_aff(char *flag) {
-    bitvector_t flags = 0;
-    int is_num = true;
-    char *p;
-
-    for (p = flag; *p; p++) {
-        if (islower(*p))
-            flags |= 1 << (1 + (*p - 'a'));
-        else if (isupper(*p))
-            flags |= 1 << (26 + (*p - 'A'));
-
-        if (!(isdigit(*p) || (*p == '-')))
-            is_num = false;
-    }
-
-    if (is_num)
-        flags = atol(flag);
-
-    return (flags);
-}
-
-/* load the rooms */
-static void parse_room(FILE *fl, room_vnum virtual_nr) {
-    int t[10], i, retval;
-    char line[READ_SIZE], flags[128], flags2[128], flags3[128];
-    char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
-    bitvector_t roomFlagsHolder[4];
-    struct extra_descr_data *new_descr;
-    char letter;
-
-    /* This really had better fit or there are other problems. */
-    snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
-
-    auto zone = real_zone_by_thing(virtual_nr);
-    if (zone == NOWHERE) {
-        basic_mud_log("SYSERR: Room #%d is outside any zone.", virtual_nr);
-        exit(1);
-    }
-
-    if(world.count(virtual_nr)) {
-        basic_mud_log("SYSERR: Room #%d already exists, cannot parse!", virtual_nr);
-        exit(1);
-    }
-    auto &z = zone_table[zone];
-    auto &r = world[virtual_nr];
-    z.rooms.insert(virtual_nr);
-
-    r.zone = zone;
-    r.vn = virtual_nr;
-    r.name = fread_string(fl, buf2);
-    r.look_description = fread_string(fl, buf2);
-
-    if (!get_line(fl, line)) {
-        basic_mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
-            virtual_nr);
-        exit(1);
-    }
-
-    if ((retval = sscanf(line, " %d %s %s %s %s %d ", t, flags, flags2, flags3, flags4, t + 2)) == 6) {
-        int taeller;
-        roomFlagsHolder[0] = asciiflag_conv(flags);
-        roomFlagsHolder[1] = asciiflag_conv(flags2);
-        roomFlagsHolder[2] = asciiflag_conv(flags3);
-        roomFlagsHolder[3] = asciiflag_conv(flags4);
-
-        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r.room_flags.set(i);
-
-        r.sector_type = t[2];
-        sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
-        //check_bitvector_names(r.room_flags, room_bits_count, flags, "room");
-    } else {
-        basic_mud_log("SYSERR: Format error in roomflags/sector type of room #%d", virtual_nr);
-        exit(1);
-    }
-
-    r.func = nullptr;
-    r.contents = nullptr;
-    r.people = nullptr;
-    r.timed = -1;
-
-    for (i = 0; i < NUM_OF_DIRS; i++)
-        r.dir_option[i] = nullptr;
-
-    r.ex_description = nullptr;
-
-    snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
-
-    while(true) {
-        if (!get_line(fl, line)) {
-            basic_mud_log("%s", buf);
-            exit(1);
-        }
-        switch (*line) {
-            case 'D':
-                setup_dir(fl, virtual_nr, atoi(line + 1));
-                break;
-            case 'E':
-                CREATE(new_descr, struct extra_descr_data, 1);
-                new_descr->keyword = fread_string(fl, buf2);
-                new_descr->description = fread_string(fl, buf2);
-                /* fix for crashes in the editor when formatting
-       * - e-descs are assumed to end with a \r\n
-       * -- Welcor 09/03
-       */
-                {
-                    char *tmp = strchr(new_descr->description, '\0');
-                    if (tmp > new_descr->description && *(tmp - 1) != '\n') {
-                        CREATE(tmp, char, strlen(new_descr->description) + 3);
-                        sprintf(tmp, "%s\r\n", new_descr->description); /* sprintf ok : size checked above*/
-                        free(new_descr->description);
-                        new_descr->description = tmp;
-                    }
-                }
-                new_descr->next = r.ex_description;
-                r.ex_description = new_descr;
-                break;
-            case 'S':            /* end of room */
-                /* DG triggers -- script is defined after the end of the room */
-                letter = fread_letter(fl);
-                ungetc(letter, fl);
-                while (letter == 'T') {
-                    dg_read_trigger(fl, &world[virtual_nr], WLD_TRIGGER);
-                    letter = fread_letter(fl);
-                    ungetc(letter, fl);
-                }
-                return;
-            default:
-                basic_mud_log("%s", buf);
-                exit(1);
-        }
-    }
-}
-
-/* read direction data */
-static void setup_dir(FILE *fl, room_vnum room, int dir) {
-    int t[11], retval;
-    char line[READ_SIZE], buf2[128];
-
-    snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
-    
-    auto &r = world[room];
-
-    CREATE(r.dir_option[dir], struct room_direction_data, 1);
-    
-    auto d = r.dir_option[dir];
-    
-    d->general_description = fread_string(fl, buf2);
-    d->keyword = fread_string(fl, buf2);
-
-    if (!get_line(fl, line)) {
-        basic_mud_log("SYSERR: Format error, %s", buf2);
-        exit(1);
-    }
-    if (((retval = sscanf(line, " %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7,
-                          t + 8, t + 9, t + 10)) == 3) && (bitwarning == true)) {
-        basic_mud_log("SYSERR: Format error, %s", buf2);
-        exit(1);
-    } else if (bitwarning == false) {
-
-        if (t[0] == 1)
-            d->exit_info = EX_ISDOOR;
-        else if (t[0] == 2)
-            d->exit_info = EX_ISDOOR | EX_PICKPROOF;
-        else if (t[0] == 3)
-            d->exit_info = EX_ISDOOR | EX_SECRET;
-        else if (t[0] == 4)
-            d->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
-        else
-            d->exit_info = 0;
-
-        d->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
-        d->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
-
-        if (retval == 3) {
-            basic_mud_log("Converting world files to include DC add ons.");
-            d->dclock = 20;
-            d->dchide = 20;
-            d->dcskill = 0;
-            d->dcmove = 0;
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
-            if (bitsavetodisk) {
-                r.save();
-                converting = true;
-            }
-        } else if (retval == 5) {
-            d->dclock = t[3];
-            d->dchide = t[4];
-            d->dcskill = 0;
-            d->dcmove = 0;
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
-            if (bitsavetodisk) {
-                r.save();
-                converting = true;
-            }
-        } else if (retval == 7) {
-            d->dclock = t[3];
-            d->dchide = t[4];
-            d->dcskill = t[5];
-            d->dcmove = t[6];
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
-            if (bitsavetodisk) {
-                r.save();
-                converting = true;
-            }
-        } else if (retval == 11) {
-            d->dclock = t[3];
-            d->dchide = t[4];
-            d->dcskill = t[5];
-            d->dcmove = t[6];
-            d->failsavetype = t[7];
-            d->dcfailsave = t[8];
-            d->failroom = t[9];
-            d->totalfailroom = t[10];
-        }
-    }
-}
-
-
 /* make sure the start rooms exist & resolve their vnums to rnums */
 static void check_start_rooms() {
     if ((r_mortal_start_room = real_room(CONFIG_MORTAL_START)) == NOWHERE) {
@@ -1953,795 +1349,6 @@ static void check_start_rooms() {
         r_frozen_start_room = r_mortal_start_room;
     }
 }
-
-
-#define ZCMD2 zone_table[zone].cmd[cmd_no]
-
-/*
- * "resulve vnums into rnums in the zone reset tables"
- *
- * Or in English: Once all of the zone reset tables have been loaded, we
- * resolve the virtual numbers into real numbers all at once so we don't have
- * to do it repeatedly while the game is running.  This does make adding any
- * room, mobile, or object a little more difficult while the game is running.
- *
- * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
- * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
- */
-
-static void mob_autobalance(struct char_data *ch) {
-
-}
-
-static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
-    int j, t[10];
-    char line[READ_SIZE];
-
-    if (!get_line(mob_f, line)) {
-        basic_mud_log("SYSERR: Format error in mob #%d, file ended after S flag!", nr);
-        return 0;
-    }
-
-    if (sscanf(line, " %ld %ld %ld %ldd%ld+%ld %ldd%ld+%ld ",
-               t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8) != 9) {
-        basic_mud_log("SYSERR: Format error in mob #%d, first line after S flag\n"
-            "...expecting line of form '# # # #d#+# #d#+#'", nr);
-        return 0;
-    }
-
-    ch->set(CharNum::Level, t[0]);
-
-    /* max hit = 0 is a flag that H, M, V is xdy+z */
-    ch->set(CharStat::PowerLevel, t[3]);
-    ch->set(CharStat::Ki, t[4]);
-    ch->set(CharStat::Stamina, t[5]);
-    ch->health = 1.0;
-    ch->energy = 1.0;
-    ch->stamina = 1.0;
-
-    ch->mob_specials.damnodice = t[6];
-    ch->mob_specials.damsizedice = t[7];
-    GET_DAMAGE_MOD(ch) = t[8];
-
-    if (!get_line(mob_f, line)) {
-        basic_mud_log("SYSERR: Format error in mob #%d, second line after S flag\n"
-            "...expecting line of form '# #', but file ended!", nr);
-        return 0;
-    }
-
-    if (sscanf(line, " %ld %ld %ld %ld", t, t + 1, t + 2, t + 3) != 4) {
-        basic_mud_log("SYSERR: Format error in mob #%d, second line after S flag\n"
-            "...expecting line of form '# # # #'", nr);
-        return 0;
-    }
-
-    ch->set(CharMoney::Carried, t[0]);
-    ch->race = static_cast<RaceID>(t[2]);
-
-    ch->chclass = static_cast<SenseiID>(t[3]);
-    GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
-    GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
-    GET_SAVE_BASE(ch, SAVING_WILL) = 0;
-
-    /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
-
-    if (!IS_HUMAN(ch))
-        ch->affected_by.set(AFF_INFRAVISION);
-
-    SPEAKING(ch) = SKILL_LANG_COMMON;
-
-    if (!get_line(mob_f, line)) {
-        basic_mud_log("SYSERR: Format error in last line of mob #%d\n"
-            "...expecting line of form '# # #', but file ended!", nr);
-        return 0;
-    }
-
-    if (sscanf(line, " %ld %ld %ld ", t, t + 1, t + 2) != 3) {
-        basic_mud_log("SYSERR: Format error in last line of mob #%d\n"
-            "...expecting line of form '# # #'", nr);
-        return 0;
-    }
-
-    GET_POS(ch) = t[0];
-    GET_DEFAULT_POS(ch) = t[1];
-    ch->set(CharAppearance::Sex, t[2]);
-
-    SPEAKING(ch) = MIN_LANGUAGES;
-    set_height_and_weight_by_race(ch);
-
-    for (j = 0; j < 3; j++)
-        GET_SAVE_MOD(ch, j) = 0;
-
-    if (MOB_FLAGGED(ch, MOB_AUTOBALANCE)) {
-        mob_autobalance(ch);
-    }
-
-    return 1;
-}
-
-
-/*
- * interpret_espec is the function that takes espec keywords and values
- * and assigns the correct value to the mob as appropriate.  Adding new
- * e-specs is absurdly easy -- just add a new CASE statement to this
- * function!  No other changes need to be made anywhere in the code.
- *
- * CASE		: Requires a parameter through 'value'.
- * BOOL_CASE	: Being specified at all is its value.
- */
-
-#define CASE(test)    \
-    if (value && !matched && !strcasecmp(keyword, test) && (matched = false))
-
-#define BOOL_CASE(test)    \
-    if (!value && !matched && !strcasecmp(keyword, test) && (matched = true))
-
-#define RANGE(low, high)    \
-    (num_arg = MAX((low), MIN((high), (num_arg))))
-
-static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, mob_vnum nr) {
-    int num_arg = 0, matched = false;
-    int num, num2, num3, num4, num5, num6;
-    struct affected_type af;
-
-    /*
-   * If there isn't a colon, there is no value.  While Boolean options are
-   * possible, we don't actually have any.  Feel free to make some.
-  */
-    if (value)
-        num_arg = atoi(value);
-
-    CASE("BareHandAttack") {
-        RANGE(0, 99);
-        ch->mob_specials.attack_type = num_arg;
-    }
-
-    CASE("Size") {
-        RANGE(SIZE_UNDEFINED, NUM_SIZES - 1);
-        ch->setSize(num_arg);
-    }
-
-    CASE("Str") {
-        RANGE(0, 200);
-        ch->set(CharAttribute::Strength, num_arg);
-    }
-
-    CASE("StrAdd") {
-        basic_mud_log("mob #%d trying to set StrAdd, rebalance its strength.",
-            GET_MOB_VNUM(ch));
-    }
-
-    CASE("Int") {
-        RANGE(0, 200);
-        ch->set(CharAttribute::Intelligence, num_arg);
-    }
-
-    CASE("Wis") {
-        RANGE(0, 200);
-        ch->set(CharAttribute::Wisdom, num_arg);
-    }
-
-    CASE("Dex") {
-        RANGE(0, 200);
-        ch->set(CharAttribute::Agility, num_arg);
-    }
-
-    CASE("Con") {
-        RANGE(0, 200);
-        ch->set(CharAttribute::Constitution, num_arg);
-    }
-
-    CASE("Cha") {
-        RANGE(0, 200);
-        ch->set(CharAttribute::Speed, num_arg);
-    }
-
-    CASE("Hit") {
-        RANGE(0, 99999);
-        //GET_HIT(ch) = num_arg;
-    }
-
-    CASE("Mana") {
-        RANGE(0, 99999);
-        //GET_MANA(ch) = num_arg;
-    }
-
-    CASE("Moves") {
-        RANGE(0, 99999);
-        //GET_MOVE(ch) = num_arg;
-    }
-
-    CASE("Affect") {
-        num = num2 = num3 = num4 = num5 = num6 = 0;
-        sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
-        if (num > 0) {
-            af.type = num;
-            af.duration = num2;
-            af.modifier = num3;
-            af.location = num4;
-            af.bitvector = num5;
-            af.specific = num6;
-            affect_to_char(ch, &af);
-        }
-    }
-
-    CASE("AffectV") {
-        num = num2 = num3 = num4 = num5 = num6 = 0;
-        sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
-        if (num > 0) {
-            af.type = num;
-            af.duration = num2;
-            af.modifier = num3;
-            af.location = num4;
-            af.bitvector = num5;
-            af.specific = num6;
-            affectv_to_char(ch, &af);
-        }
-    }
-
-    CASE("Feat") {
-        sscanf(value, "%d %d", &num, &num2);
-        HAS_FEAT(ch, num) = num2;
-    }
-
-    CASE("Skill") {
-        sscanf(value, "%d %d", &num, &num2);
-        SET_SKILL(ch, num, num2);
-    }
-
-    CASE("SkillMod") {
-        sscanf(value, "%d %d", &num, &num2);
-        SET_SKILL_BONUS(ch, num, num2);
-    }
-
-    if (!matched) {
-        basic_mud_log("SYSERR: Warning: unrecognized espec keyword %s in mob #%d",
-            keyword, nr);
-    }
-}
-
-#undef CASE
-#undef BOOL_CASE
-#undef RANGE
-
-static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr) {
-    char *ptr;
-
-    if ((ptr = strchr(buf, ':')) != nullptr) {
-        *(ptr++) = '\0';
-        while (isspace(*ptr))
-            ptr++;
-    }
-    interpret_espec(buf, ptr, ch, nr);
-}
-
-static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
-    char line[READ_SIZE];
-
-    parse_simple_mob(mob_f, ch, nr);
-
-    while (get_line(mob_f, line)) {
-        if (!strcmp(line, "E"))    /* end of the enhanced section */
-            return 1;
-        else if (*line == '#') {    /* we've hit the next mob, maybe? */
-            basic_mud_log("SYSERR: Unterminated E section in mob #%d", nr);
-            return 0;
-        } else
-            parse_espec(line, ch, nr);
-    }
-
-    basic_mud_log("SYSERR: Unexpected end of file reached after mob #%d", nr);
-    return 0;
-}
-
-int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
-    int j, t[10], retval;
-    char line[READ_SIZE], *tmpptr, letter;
-    char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
-    char f7[128], f8[128], buf2[128];
-    mob_vnum nr = ch->vn;
-    auto &z = zone_table[real_zone_by_thing(nr)];
-    z.mobiles.insert(nr);
-
-    /*
-   * Mobiles should NEVER use anything in the 'player_specials' structure.
-   * The only reason we have every mob in the game share this copy of the
-   * structure is to save newbie coders from themselves. -gg 2/25/98
-   */
-
-    sprintf(buf2, "mob vnum %d", nr);   /* sprintf: OK (for 'buf2 >= 19') */
-
-    /***** String data *****/
-    ch->name = fread_string(mob_f, buf2);
-    tmpptr = ch->short_description = fread_string(mob_f, buf2);
-    if (tmpptr && *tmpptr)
-        if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
-            !strcasecmp(fname(tmpptr), "the"))
-            *tmpptr = LOWER(*tmpptr);
-    ch->room_description = fread_string(mob_f, buf2);
-    ch->look_description = fread_string(mob_f, buf2);
-
-    /* *** Numeric data *** */
-    if (!get_line(mob_f, line)) {
-        basic_mud_log("SYSERR: Format error after string section of mob #%d\n"
-            "...expecting line of form '# # # {S | E}', but file ended!", nr);
-        return 0;
-    }
-
-    if ((retval = sscanf(line, "%s %s %s %s %s %s %s %s %d %c", f1, f2, f3, f4, f5, f6, f7, f8, t + 2, &letter)) == 10) {
-        int taeller;
-
-        bitvector_t mf[4], aff[4];
-
-        mf[0] = asciiflag_conv(f1);
-        mf[1] = asciiflag_conv(f2);
-        mf[2] = asciiflag_conv(f3);
-        mf[3] = asciiflag_conv(f4);
-        for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-            check_bitvector_names(MOB_FLAGS(ch)[taeller], action_bits_count, buf2, "mobile");
-        for(auto i = 0; i < ch->mobFlags.size(); i++) ch->mobFlags.set(i, IS_SET_AR(mf, i));
-
-        aff[0] = asciiflag_conv(f5);
-        aff[1] = asciiflag_conv(f6);
-        aff[2] = asciiflag_conv(f7);
-        aff[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < ch->affected_by.size(); i++) ch->affected_by.set(i, IS_SET_AR(aff, i));
-
-        ch->set(CharAlign::GoodEvil, t[2]);
-
-        for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-            check_bitvector_names(AFF_FLAGS(ch)[taeller], affected_bits_count, buf2, "mobile affect");
-    } else {
-        basic_mud_log("SYSERR: Format error after string section of mob #%d\n"
-            "...expecting line of form '# # # {S | E}'", nr);
-        exit(1);
-    }
-
-    ch->mobFlags.set(MOB_ISNPC);
-    if (MOB_FLAGGED(ch, MOB_NOTDEADYET)) {
-        /* Rather bad to load mobiles with this bit already set. */
-        basic_mud_log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
-        ch->mobFlags.reset(MOB_NOTDEADYET);
-    }
-
-    /* AGGR_TO_ALIGN is ignored if the mob is AGGRESSIVE.
-  if (MOB_FLAGGED(mob_proto + i, MOB_AGGRESSIVE) && MOB_FLAGGED(mob_proto + i, MOB_AGGR_GOOD | MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL))
-    log("SYSERR: Mob #%d both Aggressive and Aggressive_to_Alignment.", nr); */
-
-    /* Convert mobs to use AUTOBALANCE. Uncomment and reboot to flag all mobs AUTOBALANCE.
-   * if (!MOB_FLAGGED(ch, MOB_AUTOBALANCE)) {
-   *   SET_BIT_AR(MOB_FLAGS(ch), MOB_AUTOBALANCE);
-   * } */
-
-    switch (UPPER(letter)) {
-        case 'S':    /* Simple monsters */
-            parse_simple_mob(mob_f, ch, nr);
-            break;
-        case 'E':    /* Circle3 Enhanced monsters */
-            parse_enhanced_mob(mob_f, ch, nr);
-            mob_stats(ch);
-            break;
-            /* add new mob types here.. */
-        default:
-            basic_mud_log("SYSERR: Unsupported mob type '%c' in mob #%d", letter, nr);
-            exit(1);
-    }
-
-    /* DG triggers -- script info follows mob S/E section */
-    letter = fread_letter(mob_f);
-    ungetc(letter, mob_f);
-    while (letter == 'T') {
-        dg_read_trigger(mob_f, ch, MOB_TRIGGER);
-        letter = fread_letter(mob_f);
-        ungetc(letter, mob_f);
-    }
-
-    for (j = 0; j < NUM_WEARS; j++)
-        ch->equipment[j] = nullptr;
-
-    /* Uncomment to force all mob files to be rewritten. Good for initial AUTOBALANCE setup.
-   * if (bitsavetodisk) {
-   *   add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
-   *   converting = TRUE;
-   * } */
-
-    return 1;
-}
-
-
-static void parse_mobile(FILE *mob_f, mob_vnum nr) {
-    auto &idx = mob_index[nr];
-    idx.vn = nr;
-    
-    auto &m = mob_proto[nr];
-
-    m.vn = nr;
-    m.desc = nullptr;
-
-    if (parse_mobile_from_file(mob_f, &m)) {
-
-    } else { /* We used to exit in the file reading code, but now we do it here */
-        exit(1);
-    }
-}
-
-
-/* read all objects from obj file; generate index and prototypes */
-static char *parse_object(FILE *obj_f, obj_vnum nr) {
-    static char line[READ_SIZE];
-    int64_t t[NUM_OBJ_VAL_POSITIONS + 2], j, retval;
-    char *tmpptr, buf2[128];
-    char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
-    char f5[READ_SIZE], f6[READ_SIZE], f7[READ_SIZE], f8[READ_SIZE];
-    char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
-    struct extra_descr_data *new_descr;
-    
-    auto &o = obj_proto[nr];
-    auto &idx = obj_index[nr];
-    
-    idx.vn = nr;
-    o.vn = nr;
-    
-    sprintf(buf2, "object #%d", nr);    /* sprintf: OK (for 'buf2 >= 19') */
-
-    /* *** string data *** */
-    if ((o.name = fread_string(obj_f, buf2)) == nullptr) {
-        basic_mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
-        exit(1);
-    }
-    auto &z = zone_table[real_zone_by_thing(nr)];
-    z.objects.insert(nr);
-    tmpptr = o.short_description = fread_string(obj_f, buf2);
-    if (tmpptr && *tmpptr)
-        if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
-            !strcasecmp(fname(tmpptr), "the"))
-            *tmpptr = LOWER(*tmpptr);
-
-    tmpptr = o.room_description = fread_string(obj_f, buf2);
-    if (tmpptr && *tmpptr)
-        CAP(tmpptr);
-    o.look_description = fread_string(obj_f, buf2);
-
-    /* *** numeric data *** */
-    if (!get_line(obj_f, line)) {
-        basic_mud_log("SYSERR: Expecting first numeric line of %s, but file ended!", buf2);
-        exit(1);
-    }
-    if ((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
-                                f11, f12)) == 13) {
-        bitvector_t extraFlags[4], wearFlags[4], permFlags[4];
-
-        extraFlags[0] = asciiflag_conv(f1);
-        extraFlags[1] = asciiflag_conv(f2);
-        extraFlags[2] = asciiflag_conv(f3);
-        extraFlags[3] = asciiflag_conv(f4);
-        for(auto i = 0; i < o.extra_flags.size(); i++) if(IS_SET_AR(extraFlags, i)) o.extra_flags.set(i);
-
-        wearFlags[0] = asciiflag_conv(f5);
-        wearFlags[1] = asciiflag_conv(f6);
-        wearFlags[2] = asciiflag_conv(f7);
-        wearFlags[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < o.wear_flags.size(); i++) if(IS_SET_AR(wearFlags, i)) o.wear_flags.set(i);
-
-        permFlags[0] = asciiflag_conv(f9);
-        permFlags[1] = asciiflag_conv(f10);
-        permFlags[2] = asciiflag_conv(f11);
-        permFlags[3] = asciiflag_conv(f12);
-        for(auto i = 0; i < o.bitvector.size(); i++) if(IS_SET_AR(permFlags, i)) o.bitvector.set(i);
-
-    } else {
-        basic_mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
-        exit(1);
-    }
-
-    /* Object flags checked in check_object(). */
-    GET_OBJ_TYPE(&o) = t[0];
-
-    if (!get_line(obj_f, line)) {
-        basic_mud_log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
-        exit(1);
-    }
-
-    for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-        t[j] = 0;
-
-    if ((retval = sscanf(line, "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5,
-                         t + 6, t + 7, t + 8, t + 9, t + 10, t + 11, t + 12, t + 13, t + 14, t + 15)) >
-        NUM_OBJ_VAL_POSITIONS) {
-        basic_mud_log("SYSERR: Format error in second numeric line (expecting <=%d args, got %d), %s", NUM_OBJ_VAL_POSITIONS,
-            retval, buf2);
-        exit(1);
-    }
-
-    for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-        GET_OBJ_VAL(&o, j) = t[j];
-
-    if ((GET_OBJ_TYPE(&o) == ITEM_PORTAL || \
-       GET_OBJ_TYPE(&o) == ITEM_HATCH) && \
-       (!GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) || \
-        !GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE))) {
-        GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) = 20;
-        GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE) = 20;
-        if (bitsavetodisk) {
-            dirty_item_prototypes.insert(nr);
-            converting = true;
-        }
-    }
-
-    /* Convert old CWG-SunTzu style armor values to CWG-Rasputin. Should no longer be needed I think.
-   * if (GET_OBJ_TYPE(obj_proto + i) == ITEM_ARMOR) {
-   *   if (suntzu_armor_convert(obj_proto + i)) {
-   *     if(bitsavetodisk) {
-   *       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-   *       converting = TRUE;
-   *     }
-   *   }
-   * }*/
-
-    if (!get_line(obj_f, line)) {
-        basic_mud_log("SYSERR: Expecting third numeric line of %s, but file ended!", buf2);
-        exit(1);
-    }
-    if ((retval = sscanf(line, "%ld %ld %ld %ld", t, t + 1, t + 2, t + 3)) != 4) {
-        if (retval == 3)
-            t[3] = 0;
-        else {
-            basic_mud_log("SYSERR: Format error in third numeric line (expecting 4 args, got %d), %s", retval, buf2);
-            exit(1);
-        }
-    }
-    GET_OBJ_WEIGHT(&o) = t[0];
-    GET_OBJ_COST(&o) = t[1];
-    GET_OBJ_RENT(&o) = t[2];
-    GET_OBJ_LEVEL(&o) = t[3];
-    GET_OBJ_SIZE(&o) = SIZE_MEDIUM;
-
-    /* check to make sure that weight of containers exceeds curr. quantity */
-    if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
-        GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN) {
-        if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, 1))
-            GET_OBJ_WEIGHT(&o) = GET_OBJ_VAL(&o, 1) + 5;
-    }
-    /* *** make sure portal objects have their timer set correctly *** */
-    if (GET_OBJ_TYPE(&o) == ITEM_PORTAL) {
-        GET_OBJ_TIMER(&o) = -1;
-    }
-
-    /* *** extra descriptions and affect fields *** */
-
-    for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-        o.affected[j].location = APPLY_NONE;
-        o.affected[j].modifier = 0;
-        o.affected[j].specific = 0;
-    }
-
-    strcat(buf2, ", after numeric constants\n"    /* strcat: OK (for 'buf2 >= 87') */
-                 "...expecting 'E', 'A', '$', or next object number");
-    j = 0;
-
-    for (;;) {
-        if (!get_line(obj_f, line)) {
-            basic_mud_log("SYSERR: Format error in %s", buf2);
-            exit(1);
-        }
-        switch (*line) {
-            case 'E':
-                CREATE(new_descr, struct extra_descr_data, 1);
-                new_descr->keyword = fread_string(obj_f, buf2);
-                new_descr->description = fread_string(obj_f, buf2);
-                new_descr->next = o.ex_description;
-                o.ex_description = new_descr;
-                break;
-            case 'A':
-                if (j >= MAX_OBJ_AFFECT) {
-                    basic_mud_log("SYSERR: Too many A fields (%d max), %s", MAX_OBJ_AFFECT, buf2);
-                    exit(1);
-                }
-                if (!get_line(obj_f, line)) {
-                    basic_mud_log("SYSERR: Format error in 'A' field, %s\n"
-                        "...expecting 2 numeric constants but file ended!", buf2);
-                    exit(1);
-                }
-
-                t[1] = 0;
-                if ((retval = sscanf(line, " %ld %ld %ld ", t, t + 1, t + 2)) != 3) {
-                    if (retval != 2) {
-                        basic_mud_log("SYSERR: Format error in 'A' field, %s\n"
-                            "...expecting 2 numeric arguments, got %d\n"
-                            "...offending line: '%s'", buf2, retval, line);
-                        exit(1);
-                    }
-                }
-
-                if (t[0] >= APPLY_DAMAGE_PERC && t[0] <= APPLY_DEFENSE_PERC) {
-                    basic_mud_log("Warning: object #%d (%s) uses deprecated saving throw applies",
-                        nr, GET_OBJ_SHORT(&o));
-                }
-                o.affected[j].location = t[0];
-                o.affected[j].modifier = t[1];
-                o.affected[j].specific = t[2];
-                j++;
-                break;
-            case 'S':  /* Spells for Spellbooks*/
-                if (j >= SPELLBOOK_SIZE) {
-                    basic_mud_log("SYSERR: Unknown spellbook slot in S field, %s", buf2);
-                    exit(1);
-                }
-                if (!get_line(obj_f, line)) {
-                    basic_mud_log("SYSERR: Format error in 'S' field, %s\n"
-                        "...expecting 2 numeric constants but file ended!", buf2);
-                    exit(1);
-                }
-
-                if ((retval = sscanf(line, " %d %d ", t, t + 1)) != 2) {
-                    basic_mud_log("SYSERR: Format error in 'S' field, %s\n"
-                        "...expecting 2 numeric arguments, got %d\n"
-                        "...offending line: '%s'", buf2, retval, line);
-                    exit(1);
-                }
-                if (!o.sbinfo) {
-                    CREATE(o.sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                }
-                o.sbinfo[j].spellname = t[0];
-                o.sbinfo[j].pages = t[1];
-                j++;
-                break;
-            case 'T':  /* DG triggers */
-                dg_obj_trigger(line, &o);
-                break;
-            case 'Z':
-                if (!get_line(obj_f, line)) {
-                    basic_mud_log("SYSERR: Format error in 'Z' field, %s\n"
-                        "...expecting numeric constant but file ended!", buf2);
-                    exit(1);
-                }
-                if (sscanf(line, "%d", t) != 1) {
-                    basic_mud_log("SYSERR: Format error in 'Z' field, %s\n"
-                        "...expecting numeric argument\n"
-                        "...offending line: '%s'", buf2, line);
-                    exit(1);
-                }
-                GET_OBJ_SIZE(&o) = t[0];
-                break;
-            case '$':
-            case '#':
-                /* Objects that set CHARM on players are bad. */
-                if (OBJAFF_FLAGGED(&o, AFF_CHARM)) {
-                    basic_mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-                    o.bitvector.reset(AFF_CHARM);
-                }
-                check_object(&o);
-                return (line);
-            default:
-                basic_mud_log("SYSERR: Format error in (%c): %s", *line, buf2);
-                exit(1);
-        }
-    }
-    return line;
-}
-
-/* load the zone table and command tables */
-static void load_zones(FILE *fl, char *zonename) {
-    int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
-    char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
-    int zone_fix = false;
-    char t1[80], t2[80], line[MAX_STRING_LENGTH];
-
-    strlcpy(zname, zonename, sizeof(zname));
-
-    line_num += get_line(fl, buf);
-
-    if (*buf == '@') {
-        if (sscanf(buf, "@Version: %d", &version) != 1) {
-            basic_mud_log("SYSERR: Format error in %s (version)", zname);
-            basic_mud_log("SYSERR: ...Line: %s", line);
-            exit(1);
-        }
-        line_num += get_line(fl, buf);
-    }
-    zone_vnum v;
-
-    if (sscanf(buf, "#%hd", &v) != 1) {
-        basic_mud_log("SYSERR: FFFFFF Format error in %s, line %d", zname, line_num);
-        exit(1);
-    }
-    snprintf(buf2, sizeof(buf2)-1, "beginning of zone #%d", v);
-
-    auto &z = zone_table[v];
-    z.number = v;
-
-    line_num += get_line(fl, buf);
-    if ((ptr = strchr(buf, '~')) != nullptr)    /* take off the '~' if it's there */
-        *ptr = '\0';
-    z.builders = strdup(buf);
-
-    line_num += get_line(fl, buf);
-    if ((ptr = strchr(buf, '~')) != nullptr)    /* take off the '~' if it's there */
-        *ptr = '\0';
-    z.name = strdup(buf);
-
-    line_num += get_line(fl, buf);
-    if (version >= 2) {
-
-        char zbuf1[MAX_STRING_LENGTH];
-        char zbuf2[MAX_STRING_LENGTH];
-        char zbuf3[MAX_STRING_LENGTH];
-        char zbuf4[MAX_STRING_LENGTH];
-
-        if (sscanf(buf, " %hd %hd %d %d %s %s %s %s %d %d", &z.bot, &z.top, &z.lifespan,
-                   &z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &z.min_level, &z.max_level) != 10) {
-            basic_mud_log("SYSERR: Format error in 10-constant line of %s", zname);
-            exit(1);
-        }
-
-        z.zone_flags[0] = asciiflag_conv(zbuf1);
-        z.zone_flags[1] = asciiflag_conv(zbuf2);
-        z.zone_flags[2] = asciiflag_conv(zbuf3);
-        z.zone_flags[3] = asciiflag_conv(zbuf4);
-
-    } else if (sscanf(buf, " %hd %hd %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
-        /*
-     * This may be due to the fact that the zone has no builder.  So, we just attempt
-     * to fix this by copying the previous 2 last reads into this variable and the
-     * last one.
-     */
-        basic_mud_log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
-        if (sscanf(z.name, " %hd %hd %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
-            basic_mud_log("SYSERR: Could not fix previous error, aborting game.");
-            exit(1);
-        } else {
-            free(z.name);
-            z.name = strdup(z.builders);
-            free(z.builders);
-            z.builders = strdup("None.");
-            zone_fix = true;
-        }
-    }
-    if (z.bot > z.top) {
-        basic_mud_log("SYSERR: Zone %d bottom (%d) > top (%d).", z.number, z.bot, z.top);
-        exit(1);
-    }
-
-    for (auto c = 0;true;c++) {
-        get_line(fl, buf);
-        if(buf[0] == '*') continue;
-
-        if(strchr("$S", buf[0])) {
-            break;
-        }
-
-        auto &zc = z.cmd.emplace_back();
-        zc.command = buf[0];
-
-        if(zc.command == 'V') { /* a string-arg command */
-            if (sscanf(&buf[1], " %d %d %d %d %d %d %79s %79[^\f\r\n\t\v]", &tmp,&zc.arg1, &zc.arg2, &zc.arg3,
-                       &zc.arg4, &zc.arg5, t1, t2) != 8)
-                error = 1;
-            else {
-                zc.sarg1 = t1;
-                zc.sarg2 = t2;
-            }
-        } else {
-            if ((arg_num = sscanf(&buf[1], " %d %d %d %d %d %d ", &tmp, &zc.arg1, &zc.arg2, &zc.arg3, &zc.arg4,
-                                  &zc.arg5)) != 6) {
-                if (arg_num != 5) {
-                    error = 1;
-                } else {
-                    zc.arg5 = 0;
-                }
-            }
-        }
-
-        zc.if_flag = tmp;
-
-        if (error) {
-            basic_mud_log("SYSERR: Format error in %s, line %d: '%s'", zname, c, buf);
-            exit(1);
-        }
-        zc.line = c;
-    }
-}
-
 
 
 static void get_one_line(FILE *fl, char *buf) {
@@ -3695,6 +2302,7 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
     }
 }
 
+#define ZCMD2 zone_table[zone].cmd[cmd_no]
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
     mudlog(NRM, ADMLVL_GOD, true, "SYSERR: zone file: %s", message);
     mudlog(NRM, ADMLVL_GOD, true, "SYSERR: ...offending cmd: '%c' cmd in zone #%d, line %d",
@@ -4394,138 +3002,10 @@ zone_rnum real_zone(zone_vnum vnum) {
  *
  * TODO: Add checks for unknown bitvectors.
  */
-static int check_object(struct obj_data *obj) {
-    char objname[MAX_INPUT_LENGTH + 32];
-    int error = false, y;
-
-    if (GET_OBJ_WEIGHT(obj) < 0 && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
-
-    if (GET_OBJ_RENT(obj) < 0 && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
-
-    snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->short_description);
-    for (y = 0; y < TW_ARRAY_MAX; y++) {
-        error |= check_bitvector_names(GET_OBJ_WEAR(obj)[y], wear_bits_count, objname, "object wear");
-        error |= check_bitvector_names(GET_OBJ_EXTRA(obj)[y], extra_bits_count, objname, "object extra");
-        error |= check_bitvector_names(GET_OBJ_PERM(obj)[y], affected_bits_count, objname, "object affect");
-    }
-
-    switch (GET_OBJ_TYPE(obj)) {
-        case ITEM_DRINKCON: {
-            char onealias[MAX_INPUT_LENGTH], *space = strrchr(obj->name, ' ');
-
-            strlcpy(onealias, space ? space + 1 : obj->name, sizeof(onealias));
-            if (search_block(onealias, drinknames, true) < 0 && (error = true)) {
-                //log("SYSERR: Object #%d (%s) doesn't have drink type as last alias. (%s)", GET_OBJ_VNUM(obj), obj->short_description, obj->name);
-            }
-        }
-            /* Fall through. */
-        case ITEM_FOUNTAIN:
-            if ((GET_OBJ_VAL(obj, 0) > 0) && (GET_OBJ_VAL(obj, 1) > GET_OBJ_VAL(obj, 0) && (error = true)))
-                basic_mud_log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
-                    GET_OBJ_VNUM(obj), obj->short_description,
-                    GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 0));
-            break;
-        case ITEM_SCROLL:
-        case ITEM_POTION:
-            error |= check_object_level(obj, 0);
-            error |= check_object_spell_number(obj, 1);
-            error |= check_object_spell_number(obj, 2);
-            error |= check_object_spell_number(obj, 3);
-            break;
-        case ITEM_WAND:
-        case ITEM_STAFF:
-            error |= check_object_level(obj, 0);
-            error |= check_object_spell_number(obj, 3);
-            if (GET_OBJ_VAL(obj, 2) > GET_OBJ_VAL(obj, 1) && (error = true))
-                basic_mud_log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
-                    GET_OBJ_VNUM(obj), obj->short_description,
-                    GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 1));
-            break;
-    }
-
-    return (error);
-}
 
 
-static int check_object_spell_number(struct obj_data *obj, int val) {
-    int error = false;
-    const char *spellname;
 
-    if (GET_OBJ_VAL(obj, val) == -1 ||
-        GET_OBJ_VAL(obj, val) == 0)    /* i.e.: no spell */
-        return (error);
 
-    /*
-   * Check for negative spells, spells beyond the top define, and any
-   * spell which is actually a skill.
-   */
-    if (GET_OBJ_VAL(obj, val) < 0)
-        error = true;
-    if (GET_OBJ_VAL(obj, val) >= SKILL_TABLE_SIZE)
-        error = true;
-    if (skill_type(GET_OBJ_VAL(obj, val)) != SKTYPE_SPELL)
-        error = true;
-    if (error)
-        basic_mud_log("SYSERR: Object #%d (%s) has out of range spell #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
-
-    /*
-   * This bug has been fixed, but if you don't like the special behavior...
-   */
-#if 0
-                                                                                                                            if (GET_OBJ_TYPE(obj) == ITEM_STAFF &&
-	HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, val), MAG_AREAS | MAG_MASSES))
-    log("... '%s' (#%d) uses %s spell '%s'.",
-	obj->short_description,	GET_OBJ_VNUM(obj),
-	HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, val), MAG_AREAS) ? "area" : "mass",
-	skill_name(GET_OBJ_VAL(obj, val)));
-#endif
-
-    if (scheck)        /* Spell names don't exist in syntax check mode. */
-        return (error);
-
-    /* Now check for unnamed spells. */
-    spellname = skill_name(GET_OBJ_VAL(obj, val));
-
-    if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, spellname,
-            GET_OBJ_VAL(obj, val));
-
-    return (error);
-}
-
-static int check_object_level(struct obj_data *obj, int val) {
-    int error = false;
-
-    if ((GET_OBJ_VAL(obj, val) < 0) && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) has out of range level #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
-
-    return (error);
-}
-
-static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits) {
-    unsigned int flagnum;
-    bool error = false;
-
-    /* See if any bits are set above the ones we know about. */
-    if (bits <= (~(bitvector_t) 0 >> (sizeof(bitvector_t) * 8 - namecount)))
-        return (false);
-
-    for (flagnum = namecount; flagnum < sizeof(bitvector_t) * 8; flagnum++)
-        if ((1 << flagnum) & bits) {
-            basic_mud_log("SYSERR: %s has unknown %s flag, bit %d (0 through %" SZT " known).", whatami, whatbits, flagnum,
-                namecount - 1);
-            error = true;
-        }
-
-    return (error);
-}
 
 int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
     int counter2, i;
@@ -5040,572 +3520,6 @@ void load_config() {
     fclose(fl);
 }
 
-static std::vector<std::string> assetSchema = {
-        "CREATE TABLE IF NOT EXISTS zones ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS areas ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS itemPrototypes ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS npcPrototypes ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS shops ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS guilds ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS rooms ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS dgScriptPrototypes ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");"
-};
-
-static std::vector<std::string> stateSchema = {
-        "CREATE TABLE IF NOT EXISTS accounts ("
-        "   id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS playerCharacters ("
-        "   id INTEGER NOT NULL PRIMARY KEY,"
-        "   data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS characters ("
-        "   id INTEGER PRIMARY KEY,"
-        "   generation INTEGER NOT NULL,"
-        "   vnum INTEGER NOT NULL DEFAULT -1,"
-        "   name TEXT,"
-        "   shortDesc TEXT,"
-        "   isPlayer INTEGER NOT NULL,"
-        "   data TEXT NOT NULL,"
-        "   location TEXT NOT NULL DEFAULT '{}',"
-        "   relations TEXT NOT NULL DEFAULT '{}'"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS items ("
-        "   id INTEGER PRIMARY KEY,"
-        "   generation INTEGER NOT NULL,"
-        "   vnum INTEGER NOT NULL DEFAULT -1,"
-        "   name TEXT,"
-        "   shortDesc TEXT,"
-        "   data TEXT NOT NULL,"
-        "   location TEXT NOT NULL DEFAULT '',"
-        "   slot INTEGER NOT NULL DEFAULT 0,"
-        "   relations TEXT NOT NULL DEFAULT '{}'"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS dgScripts ("
-        "	id INTEGER PRIMARY KEY,"
-        "   generation INTEGER NOT NULL,"
-        "   vnum INTEGER NOT NULL DEFAULT -1,"
-        "   name TEXT,"
-        "	data TEXT NOT NULL,"
-        "   location TEXT NOT NULL,"
-        "   num INTEGER NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS globalData ("
-        "   name TEXT PRIMARY KEY,"
-        "   data TEXT NOT NULL"
-        ");"
-};
-
-static void runQuery(std::string_view query, const std::shared_ptr<SQLite::Database>& db) {
-    try {
-        db->exec(query.data());
-    }
-    catch (const std::exception& e) {
-        basic_mud_log("Error executing query: %s", e.what());
-        basic_mud_log("For statement: %s", query.data());
-        exit(1);
-    }
-}
-
-void create_schema() {
-    SQLite::Transaction transaction(*assetDb);
-    for (const auto& query: assetSchema) {
-        runQuery(query, assetDb);
-    }
-    transaction.commit();
-}
-
-static void create_state_schema() {
-    for (const auto& query: stateSchema) {
-        runQuery(query, stateDb);
-    }
-}
-
-void dirty_all() {
-    for(auto &[vn, r] : world) {
-        r.save();
-    }
-
-    for(auto &[vn, obj] : obj_proto) {
-        dirty_item_prototypes.insert(vn);
-    }
-
-    for(auto &[vn, npc] : mob_proto) {
-        dirty_npc_prototypes.insert(vn);
-    }
-
-    for(auto &[vn, zone] : zone_table) {
-        dirty_zones.insert(vn);
-    }
-
-    for(auto &[vn, area] : areas) {
-        dirty_areas.insert(vn);
-    }
-
-    for(auto &[vn, dg] : trig_index) {
-        dirty_dgscript_prototypes.insert(vn);
-    }
-
-    for(auto &[vn, guild] : guild_index) {
-        dirty_guilds.insert(vn);
-    }
-
-    for(auto &[vn, shop] : shop_index) {
-        dirty_shops.insert(vn);
-    }
-
-    for(auto &[vn, player] : players) {
-        dirty_players.insert(vn);
-    }
-
-    for(auto &[vn, acc] : accounts) {
-        dirty_accounts.insert(vn);
-    }
-}
-
-static void process_dirty_rooms() {
-    SQLite::Statement q1(*assetDb, "INSERT OR REPLACE INTO rooms (id, data) VALUES (?, ?)");
-    SQLite::Statement q3(*assetDb, "DELETE FROM rooms WHERE id = ?");
-
-    for(auto v : dirty_rooms) {
-        auto r = world.find(v);
-        if(r == world.end()) {
-            // This room has been deleted.
-            q3.bind(1, v);
-            q3.exec();
-            q3.reset();
-            continue;
-        }
-        else {
-            // we'll be using q1...
-            q1.bind(1, v);
-            q1.bind(2, rjdump(r->second.rserialize()));
-            q1.exec();
-            q1.reset();
-        }
-    }
-
-    dirty_rooms.clear();
-}
-
-static void process_dirty_item_prototypes() {
-	SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO itemPrototypes (id, data) VALUES (?,?)");
-    SQLite::Statement q1(*assetDb, "DELETE FROM itemPrototypes WHERE id = ?");
-
-    for(auto v : dirty_item_prototypes) {
-        auto r = obj_proto.find(v);
-        if(r == obj_proto.end()) {
-            // This item prototype has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        }
-        q.bind(1, v);
-        q.bind(2, rjdump(r->second.rserializeProto()));
-        q.exec();
-        q.reset();
-    }
-    dirty_item_prototypes.clear();
-}
-
-static void process_dirty_npc_prototypes() {
-    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO npcPrototypes (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*assetDb, "DELETE FROM npcPrototypes WHERE id = ?");
-
-    for(auto v : dirty_npc_prototypes) {
-        auto r = mob_proto.find(v);
-        if(r == mob_proto.end()) {
-            // This npc prototype has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        }
-        q.bind(1, v);
-        q.bind(2, jdump(r->second.serializeProto()));
-        q.exec();
-        q.reset();
-    }
-    dirty_npc_prototypes.clear();
-
-}
-
-static void process_dirty_shops() {
-    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO shops (id, data) VALUES (?,?)");
-    SQLite::Statement q1(*assetDb, "DELETE FROM shops WHERE id = ?");
-
-    for(auto v : dirty_shops) {
-        auto r = shop_index.find(v);
-        if(r == shop_index.end()) {
-            // This shop has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        }
-        q.bind(1, v);
-        q.bind(2, rjdump(r->second.rserialize()));
-        q.exec();
-        q.reset();
-    }
-    dirty_shops.clear();
-
-}
-
-static void process_dirty_guilds() {
-    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO guilds (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*assetDb, "DELETE FROM guilds WHERE id = ?");
-
-    for(auto v : dirty_guilds) {
-        auto r = guild_index.find(v);
-        if(r == guild_index.end()) {
-            // This guild has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        }
-        q.bind(1, v);
-        q.bind(2, rjdump(r->second.rserialize()));
-        q.exec();
-        q.reset();
-    }
-    dirty_guilds.clear();
-
-}
-
-static void process_dirty_zones() {
-	SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO zones (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*assetDb, "DELETE FROM zones WHERE id = ?");
-
-    for(auto v : dirty_zones) {
-        auto r = zone_table.find(v);
-        if(r == zone_table.end()) {
-            // This zone has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        }
-        q.bind(1, v);
-        q.bind(2, rjdump(r->second.rserialize()));
-        q.exec();
-        q.reset();
-    }
-    dirty_zones.clear();
-}
-
-static void process_dirty_areas() {
-    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO areas (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*assetDb, "DELETE FROM areas WHERE id = ?");
-
-    for(auto v : dirty_areas) {
-        auto r = areas.find(v);
-        if(r == areas.end()) {
-            // This area has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        }
-        q.bind(1, v);
-        q.bind(2, rjdump(r->second.rserialize()));
-        q.exec();
-        q.reset();
-    }
-    dirty_areas.clear();
-
-}
-
-static void process_dirty_dgscript_prototypes() {
-    SQLite::Statement q(*assetDb, "INSERT OR REPLACE INTO dgScriptPrototypes (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*assetDb, "DELETE FROM dgScriptPrototypes WHERE id = ?");
-
-    for(auto v : dirty_dgscript_prototypes) {
-        auto r = trig_index.find(v);
-        if(r == trig_index.end()) {
-            // This dgscript has been deleted.
-            q1.bind(1, v);
-            q1.exec();
-            q1.reset();
-            continue;
-        }
-        q.bind(1, v);
-        q.bind(2, rjdump(r->second.rserializeProto()));
-        q.exec();
-        q.reset();
-    }
-    dirty_dgscript_prototypes.clear();
-
-}
-
-static void dump_state_accounts() {
-    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO accounts (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*stateDb, "DELETE FROM accounts WHERE id = ?");
-
-    for(auto &[v, r] : accounts) {
-        q.bind(1, v);
-        q.bind(2, rjdump(r.rserialize()));
-        q.exec();
-        q.reset();
-    }
-}
-
-static void dump_state_players() {
-    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO playerCharacters (id, data) VALUES (?, ?)");
-    SQLite::Statement q1(*stateDb, "DELETE FROM playerCharacters WHERE id = ?");
-
-    for(auto &[v, r] : players) {
-        q.bind(1, v);
-        q.bind(2, rjdump(r.rserialize()));
-        q.exec();
-        q.reset();
-    }
-}
-
-static void dump_state_characters() {
-    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO characters (id, generation, vnum, name, shortDesc, isPlayer, data, location, relations) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    SQLite::Statement q1(*stateDb, "DELETE FROM characters WHERE id = ?");
-
-    for(auto &[v, r] : uniqueCharacters) {
-        if(v != r.second->id) r.second->id = v;
-        q.bind(1, v);
-        q.bind(2, r.first);
-        q.bind(3, r.second->vn);
-        q.bind(4, r.second->name);
-        q.bind(5, r.second->short_description);
-        q.bind(6, !IS_NPC(r.second));
-        q.bind(7, jdump(r.second->serializeInstance()));
-        q.bind(8, jdump(r.second->serializeLocation()));
-        q.bind(9, jdump(r.second->serializeRelations()));
-        q.exec();
-        q.reset();
-    }
-
-}
-
-static void dump_state_items() {
-    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO items (id, generation, vnum, name, shortDesc, data, location, slot, relations) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    SQLite::Statement q1(*stateDb, "DELETE FROM items WHERE id = ?");
-
-    for(auto &[v, r] : uniqueObjects) {
-        if(v != r.second->id) r.second->id = v;
-        q.bind(1, v);
-        q.bind(2, r.first);
-        q.bind(3, r.second->vn);
-        q.bind(4, r.second->name);
-        q.bind(5, r.second->short_description);
-        q.bind(6, rjdump(r.second->rserializeInstance()));
-        q.bind(7, r.second->serializeLocation());
-        q.bind(8, r.second->worn_on);
-        q.bind(9, r.second->serializeRelations().dump(4, ' ', false, nlohmann::json::error_handler_t::ignore));
-        q.exec();
-        q.reset();
-    }
-}
-
-static void dump_state_dgscripts() {
-    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO dgscripts (id, generation, vnum, name, data, location, num) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    SQLite::Statement q1(*stateDb, "DELETE FROM dgscripts WHERE id = ?");
-
-    for(auto &[v, r] : uniqueScripts) {
-        if(v != r.second->id) r.second->id = v;
-        q.bind(1, v);
-        q.bind(2, r.first);
-        q.bind(3, r.second->vn);
-        q.bind(4, r.second->name);
-        q.bind(5, rjdump(r.second->rserializeInstance()));
-        q.bind(6, r.second->serializeLocation());
-        q.bind(7, r.second->order);
-        q.exec();
-        q.reset();
-    }
-    dirty_dgscripts.clear();
-}
-
-
-void process_dirty() {
-    if(saveAll) {
-        logger->info("Performing full save of all game assets.");
-        send_to_all("Saving all game assets, please wait...\r\n");
-    }
-    auto startTime = std::chrono::high_resolution_clock::now();
-
-    if(!dirty_rooms.empty()) {
-        process_dirty_rooms();
-    }
-
-    if(!dirty_item_prototypes.empty()) {
-        process_dirty_item_prototypes();
-    }
-
-    if(!dirty_npc_prototypes.empty()) {
-        process_dirty_npc_prototypes();
-    }
-
-    if(!dirty_shops.empty()) {
-        process_dirty_shops();
-    }
-
-    if(!dirty_guilds.empty()) {
-        process_dirty_guilds();
-    }
-
-    if(!dirty_zones.empty()) {
-        process_dirty_zones();
-    }
-
-    if(!dirty_areas.empty()) {
-        process_dirty_areas();
-    }
-
-    if(!dirty_dgscript_prototypes.empty()) {
-        process_dirty_dgscript_prototypes();
-    }
-
-    auto endTime = std::chrono::high_resolution_clock::now();
-    // time ins econds as a double...
-    auto duration = std::chrono::duration<double>(endTime - startTime).count();
-
-    if(saveAll) {
-        logger->info("Full save of all game assets completed in {} seconds.", duration);
-        send_to_all("Saving all game assets completed in %f seconds.\r\n", duration);
-    }
-}
-
-void dump_state_globalData() {
-    SQLite::Statement q(*stateDb, "INSERT OR REPLACE INTO globalData (name, data) VALUES (?, ?)");
-    SQLite::Statement q1(*stateDb, "DELETE FROM globalData WHERE name = ?");
-
-    std::map<std::string, nlohmann::json> globalData;
-
-    globalData["time"] = time_info.serialize();
-    globalData["weather"] = weather_info.serialize();
-    auto gRoom = world.find(0);
-    if(gRoom != world.end()) {
-        if(gRoom->second.script && gRoom->second.script->global_vars) {
-            globalData["dgGlobals"] = serializeVars(gRoom->second.script->global_vars);
-        }
-    }
-
-    for(auto &[v, r] : globalData) {
-        q.bind(1, v);
-        q.bind(2, jdump(r));
-        q.exec();
-        q.reset();
-    }
-}
-
-static void cleanup_state() {
-    auto vecFiles = getStateFiles();
-    std::list<std::filesystem::path> files(vecFiles.begin(), vecFiles.end());
-
-    // If we have more than 20 state files, we want to purge the oldest one(s) until we have just 20.
-    while(files.size() > 20) {
-        std::filesystem::remove(files.back());
-        files.pop_back();
-    }
-}
-
-void dump_state() {
-
-    //send_to_all("Saving game...\r\n");
-    logger->info("Beginning dump of state to disk.");
-
-    // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
-    auto path = std::filesystem::current_path() / "state";
-    std::filesystem::create_directories(path);
-    auto now = std::chrono::system_clock::now();
-    auto time_t_now = std::chrono::system_clock::to_time_t(now);
-    std::tm tm_now = *std::localtime(&time_t_now);
-
-    auto tempPath = path / fmt::format("{}.sqlite3", config::stateDbName);
-    auto journalPath = path / fmt::format("{}.sqlite3-journal", config::stateDbName);
-    std::filesystem::remove(tempPath);
-    std::filesystem::remove(journalPath);
-
-    auto newPath = path / fmt::format("{}-{:04}{:02}{:02}{:02}{:02}{:02}.sqlite3",
-                                      config::stateDbName,
-                                      tm_now.tm_year + 1900,
-                                      tm_now.tm_mon + 1,
-                                      tm_now.tm_mday,
-                                      tm_now.tm_hour,
-                                      tm_now.tm_min,
-                                      tm_now.tm_sec);
-
-    bool success = false;
-    double duration;
-
-    try {
-        stateDb = std::make_shared<SQLite::Database>(tempPath.string(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        auto startTime = std::chrono::high_resolution_clock::now();
-        SQLite::Transaction trans(*stateDb);
-        create_state_schema();
-        dump_state_accounts();
-        dump_state_characters();
-        dump_state_players();
-        dump_state_dgscripts();
-        dump_state_items();
-        dump_state_globalData();
-        trans.commit();
-        auto endTime = std::chrono::high_resolution_clock::now();
-        duration = std::chrono::duration<double>(endTime - startTime).count();
-        success = true;
-    } catch (std::exception &e) {
-        logger->critical("(GAME HAS NOT BEEN SAVED!) Exception in dump_state(): {}", e.what());
-        send_to_all("Warning, a critical error occurred during save! Please alert staff!\r\n");
-        return;
-    }
-
-    stateDb.reset();
-
-    if(success) {
-        std::filesystem::rename(tempPath, newPath);
-        logger->info("Finished dumping state to {} in {} seconds.", newPath.string(), duration);
-        //send_to_all("Game saved in %f seconds.\r\n", duration);
-    }
-
-    cleanup_state();
-
-}
 
 int64_t nextObjID() {
     int64_t id = 0;

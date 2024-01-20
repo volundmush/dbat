@@ -898,7 +898,6 @@ void introWrite(struct char_data *ch, struct char_data *vict, char *name) {
     std::string n(name);
     auto &p = players[ch->id];
     p.dubNames[vict->id] = n;
-    dirty_players.insert(ch->id);
 }
 
 ACMD(do_intro) {

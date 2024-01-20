@@ -33,7 +33,6 @@ static std::optional<std::string> hashPassword(const std::string &password) {
 bool account_data::setPassword(const std::string &password) {
     if(auto hashed = hashPassword(password); hashed) {
         passHash = hashed.value();
-        dirty_accounts.insert(vn);
         return true;
     }
     return false;

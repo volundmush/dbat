@@ -128,10 +128,6 @@ ACMD(do_oasis) {
             do_oasis_hedit(ch, argument, cmd, subcmd);
             break;
 
-        case SCMD_OASIS_HSEDIT:
-            do_oasis_hsedit(ch, argument, cmd, subcmd);
-            break;
-
         case SCMD_OASIS_RLIST:
         case SCMD_OASIS_MLIST:
         case SCMD_OASIS_OLIST:

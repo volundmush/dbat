@@ -245,7 +245,6 @@ ACMD(do_alias) {
         else {
 			aliases.erase(find);
             send_to_char(ch, "Alias deleted.\r\n");
-            dirty_players.insert(ch->id);
         }
         return;
     }
@@ -272,7 +271,6 @@ ACMD(do_alias) {
         a.type = type;
         send_to_char(ch, "Alias added.\r\n");
     }
-    dirty_players.insert(ch->id);
 }
 
 /*
@@ -1537,7 +1535,6 @@ static struct {
         {CON_GEDIT,    gedit_parse},
         {CON_LEVELUP,  levelup_parse},
         {CON_HEDIT,    hedit_parse},
-        {CON_HSEDIT,   hsedit_parse},
         {CON_POBJ,     pobj_edit_parse},
         {-1,           nullptr}
 };

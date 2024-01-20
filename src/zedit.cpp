@@ -399,7 +399,7 @@ void zedit_save_internally(struct descriptor_data *d) {
         z.min_level = zd->min_level;
         z.max_level = zd->max_level;
     }
-    dirty_zones.insert(z.number);
+
 }
 
 /*-------------------------------------------------------------------*/

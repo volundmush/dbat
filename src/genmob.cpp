@@ -17,7 +17,6 @@
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/spells.h"
-#include "dbat/objsave.h"
 #include "dbat/players.h"
 #include "dbat/account.h"
 
@@ -50,7 +49,6 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
             if (rnum == live_mob->vn)
                 update_mobile_strings(live_mob, &mob_proto[rnum]);
 
-        dirty_npc_prototypes.insert(rnum);
         basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
         return rnum;
     }
@@ -77,7 +75,6 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
     auto zvnum = real_zone_by_thing(vnum);
     auto &z = zone_table[zvnum];
     z.mobiles.insert(vnum);
-    dirty_npc_prototypes.insert(vnum);
     return found;
 }
 
@@ -142,7 +139,6 @@ int delete_mobile(mob_rnum refpt) {
         }
     }
 
-    dirty_npc_prototypes.insert(vnum);
     mob_proto.erase(vnum);
     mob_index.erase(vnum);
     save_mobiles(real_zone_by_thing(vnum));

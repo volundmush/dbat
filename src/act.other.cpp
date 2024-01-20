@@ -32,7 +32,6 @@
 #include "dbat/feats.h"
 #include "dbat/guild.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/objsave.h"
 #include "dbat/mail.h"
 #include "dbat/clan.h"
 #include "dbat/players.h"
@@ -9109,8 +9108,6 @@ ACMD(do_save) {
      */
         if (CONFIG_AUTO_SAVE && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "Saving.\r\n");
-            ch->save();
-            Crash_crashsave(ch);
             if (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899) {
                 if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 &&
                     GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {

@@ -648,12 +648,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (r->room_flags.test(ROOM_ATRIUM)) {
-        if (!House_can_enter(ch, GET_ROOM_VNUM(e->to_room))) {
-            send_to_char(ch, "That's private property -- no trespassing!\r\n");
-            return (0);
-        }
-    }
+
     if (dest->room_flags.test(ROOM_TUNNEL) && (num_pc_in_room(dest) >= CONFIG_TUNNEL_SIZE)) {
         if (CONFIG_TUNNEL_SIZE > 1)
             send_to_char(ch, "There isn't enough room for you to go there!\r\n");
@@ -1682,12 +1677,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
 
         return (0);
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ATRIUM)) {
-        if (!House_can_enter(ch, GET_ROOM_VNUM(dest_room))) {
-            send_to_char(ch, "That's private property -- no trespassing!\r\n");
-            return (0);
-        }
-    }
+
     if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
         num_pc_in_room(&(world[dest_room])) >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)
@@ -1925,12 +1915,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
 
         return (0);
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_ATRIUM)) {
-        if (!House_can_enter(ch, GET_ROOM_VNUM(dest_room))) {
-            send_to_char(ch, "That's private property -- no trespassing!\r\n");
-            return (0);
-        }
-    }
+
     if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
         num_pc_in_room(&(world[dest_room])) >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)

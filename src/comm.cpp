@@ -27,7 +27,6 @@
 #include "dbat/dg_event.h"
 #include "dbat/mobact.h"
 #include "dbat/magic.h"
-#include "dbat/objsave.h"
 #include "dbat/genolc.h"
 #include "dbat/class.h"
 #include "dbat/combat.h"
@@ -48,7 +47,7 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <mutex>
-
+#include "dbat/db.h"
 #include <locale>
 
 std::shared_ptr<spdlog::logger> logger;
@@ -140,8 +139,6 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("affect_update", 300.0, affect_update),
         GameSystem("point_update", 100.0, point_update),
         GameSystem("clan_update", 60.0, clan_update),
-        GameSystem("Crash_save_all", 60.0, Crash_save_all),
-        GameSystem("House_save_all", 60.0, House_save_all),
         GameSystem("record_usage", 5.0, record_usage),
         GameSystem("save_mud_time", 30.0, saveMudTimeWrapper),
         GameSystem("timed_dt", 30.0, deathTrapWrapper),
@@ -363,39 +360,7 @@ namespace game {
     }
 
     void init_database() {
-        // instantiate db with a shared_ptr, the filename is dbat.sqlite3
-        try {
-            assetDb = std::make_shared<SQLite::Database>(fmt::format("{}.sqlite3", config::assetDbName), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
-        } catch (std::exception &e) {
-            basic_mud_log("Exception Opening Asset Database: %s", e.what());
-            shutdown_game(1);
-        }
-        create_schema();
-
-
-        try {
-            boot_db();
-        } catch(std::exception& e) {
-            basic_mud_log("Exception in boot_db(): %s", e.what());
-            exit(1);
-        }
-
-        {
-            broadcast("Loading Space Map. ");
-            FILE *mapfile = fopen("../lib/surface.map", "r");
-            int rowcounter, colcounter;
-            int vnum_read;
-            for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
-                for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-                    fscanf(mapfile, "%d", &vnum_read);
-                    mapnums[rowcounter][colcounter] = real_room(vnum_read);
-                }
-            }
-            fclose(mapfile);
-        }
-
-        /* Load the toplist */
-        topLoad();
+        boot_db_new();
     }
 
     void init_zones() {
@@ -407,36 +372,8 @@ namespace game {
     }
 
     void run_loop_once(double deltaTime) {
-        static double saveTimer = 60.0 * 5.0;
-
         try {
-            SQLite::Transaction transaction(*assetDb);
             runOneLoop(deltaTime);
-            if(circle_shutdown) saveAll = true;
-            if(saveAll) {
-                dirty_all();
-            }
-            {
-                auto start = std::chrono::steady_clock::now();
-                process_dirty();
-                auto end = std::chrono::steady_clock::now();
-                timings.emplace_back("process_dirty", std::chrono::duration<double>(end - start).count());
-            }
-
-            {
-                auto start = std::chrono::steady_clock::now();
-                transaction.commit();
-                auto end = std::chrono::steady_clock::now();
-                timings.emplace_back("transaction.commit", std::chrono::duration<double>(end - start).count());
-            }
-
-            saveTimer -= deltaTime;
-            if(saveTimer <= 0 || saveAll) {
-                saveTimer = 60.0 * 5.0;
-                dump_state();
-            }
-            if(saveAll) saveAll = false;
-
         } catch(std::exception& e) {
             basic_mud_log("Exception in runOneLoop(): %s", e.what());
             shutdown_game(1);

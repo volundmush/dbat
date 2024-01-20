@@ -18,7 +18,7 @@
 #include "dbat/feats.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
-#include "dbat/objsave.h"
+
 #include "dbat/fight.h"
 #include "dbat/races.h"
 #include "dbat/act.informative.h"

@@ -1369,14 +1369,7 @@ static int end_read_list(struct shop_buy_data *list, int len, int error) {
 }
 
 
-static void read_line(FILE *shop_f, const char *string, void *data) {
-    char buf[READ_SIZE];
 
-    if (!get_line(shop_f, buf) || !sscanf(buf, string, data)) {
-        basic_mud_log("SYSERR: Error in shop #%d, near '%s' with '%s'", SHOP_NUM(top_shop), buf, string);
-        exit(1);
-    }
-}
 
 static int read_list(FILE *shop_f, struct shop_buy_data *list, int new_format,
                      int max, int type) {
@@ -1397,139 +1390,9 @@ static int read_list(FILE *shop_f, struct shop_buy_data *list, int new_format,
     return (end_read_list(list, len, error));
 }
 
-static char *read_shop_message(int mnum, room_vnum shr, FILE *shop_f, const char *why) {
-    int cht, ss = 0, ds = 0, err = 0;
-    char *tbuf;
-
-    if (!(tbuf = fread_string(shop_f, why)))
-        return (nullptr);
-
-    for (cht = 0; tbuf[cht]; cht++) {
-        if (tbuf[cht] != '%')
-            continue;
-
-        if (tbuf[cht + 1] == 's')
-            ss++;
-        else if (tbuf[cht + 1] == 'd' && (mnum == 5 || mnum == 6)) {
-            if (ss == 0) {
-                basic_mud_log("SYSERR: Shop #%d has %%d before %%s, message #%d.", shr, mnum);
-                err++;
-            }
-            ds++;
-        } else if (tbuf[cht + 1] != '%') {
-            basic_mud_log("SYSERR: Shop #%d has invalid format '%%%c' in message #%d.", shr, tbuf[cht + 1], mnum);
-            err++;
-        }
-    }
-
-    if (ss > 1 || ds > 1) {
-        basic_mud_log("SYSERR: Shop #%d has too many specifiers for message #%d. %%s=%d %%d=%d", shr, mnum, ss, ds);
-        err++;
-    }
-
-    if (err) {
-        free(tbuf);
-        return (nullptr);
-    }
-    return (tbuf);
-}
-
-void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
-    char *buf, buf2[256], *p;
-    shop_vnum temp, count, new_format = false;
-    int shop_temp;
-    struct shop_buy_data list[MAX_SHOP_OBJ + 1]{};
-    int done = false;
-
-    snprintf(buf2, sizeof(buf2), "beginning of shop file %s", filename);
-
-    while (!done) {
-        buf = fread_string(shop_f, buf2);
-        if (*buf == '#') {        /* New shop */
-            sscanf(buf, "#%ld\n", &temp);
-            snprintf(buf2, sizeof(buf2)-1, "shop #%ld in shop file %s", temp, filename);
-            auto &sh = shop_index[temp];
-            free(buf);        /* Plug memory leak! */
-            sh.vnum = temp;
-            auto &z = zone_table[real_zone_by_thing(sh.vnum)];
-            z.shops.insert(sh.vnum);
-            top_shop = temp;
-            while(true) {
-                read_line(shop_f, "%ld", &shop_temp);
-                if(shop_temp == -1) break;
-                temp = (shop_vnum)shop_temp;
-                if(obj_index.count(temp)) sh.producing.push_back(temp);
-            }
-
-            read_line(shop_f, "%f", &SHOP_BUYPROFIT(top_shop));
-            read_line(shop_f, "%f", &SHOP_SELLPROFIT(top_shop));
-
-            while(true) {
-                read_line(shop_f, "%ld", &shop_temp);
-                if(shop_temp == -1) break;
-                auto &t = sh.type.emplace_back();
-                t.type = shop_temp;
-            }
-
-            sh.no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.do_not_buy = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
-            read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
-            read_line(shop_f, "%ld", &SHOP_BITVECTOR(top_shop));
-            read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));
-
-            SHOP_KEEPER(top_shop) = real_mobile(SHOP_KEEPER(top_shop));
-            CREATE(buf, char, READ_SIZE);
-            get_line(shop_f, buf);
-            p = buf;
-            for (temp = 0; temp < SW_ARRAY_MAX; temp++) {
-                if (!p || !*p)
-                    break;
-                if (sscanf(p, "%d", &count) != 1) {
-                    basic_mud_log("SYSERR: Can't parse TRADE_WITH line in %s: '%s'", buf2, buf);
-                    break;
-                }
-                SHOP_TRADE_WITH(top_shop)[temp] = count;
-                while (isdigit(*p) || *p == '-') {
-                    p++;
-                }
-                while (*p && !(isdigit(*p) || *p == '-')) {
-                    p++;
-                }
-            }
-            free(buf);
-            while (temp < SW_ARRAY_MAX)
-                SHOP_TRADE_WITH(top_shop)[temp++] = 0;
-
-            while(true) {
-                read_line(shop_f, "%ld", &shop_temp);
-                if(shop_temp == -1) break;
-                if(world.contains(shop_temp)) sh.in_room.insert(shop_temp);
-
-            }
 
 
-            read_line(shop_f, "%d", &SHOP_OPEN1(top_shop));
-            read_line(shop_f, "%d", &SHOP_CLOSE1(top_shop));
-            read_line(shop_f, "%d", &SHOP_OPEN2(top_shop));
-            read_line(shop_f, "%d", &SHOP_CLOSE2(top_shop));
 
-            SHOP_BANK(top_shop) = 0;
-            SHOP_SORT(top_shop) = 0;
-            SHOP_FUNC(top_shop) = nullptr;
-        } else {
-            if (*buf == '$')        /* EOF */
-                done = true;
-            else if (strstr(buf, VERSION3_TAG))    /* New format marker */
-                new_format = true;
-            free(buf);        /* Plug memory leak! */
-        }
-    }
-}
 
 void assign_the_shopkeepers() {
     cmd_say = find_command("say");

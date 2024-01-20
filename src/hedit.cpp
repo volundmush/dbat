@@ -168,7 +168,7 @@ static void hedit_save_to_disk(struct descriptor_data *d) {
 
     /* Reboot the help files. */
     free_help_table();
-    index_boot(DB_BOOT_HLP);
+    index_boot_help();
 }
 
 /* The main menu. */

@@ -206,7 +206,6 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     auto &c = z.cmd.emplace_back();
     c.command = 'S';
 
-    dirty_zones.insert(zone->number);
     return rznum;
 }
 

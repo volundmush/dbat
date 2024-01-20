@@ -419,7 +419,6 @@ ACMD(do_rcopy) {
     /* Finally copy over room flags */
     world[rrnum].room_flags = world[trnum].room_flags;
     send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
-    dirty_rooms.insert(rrnum);
     send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
 }
 

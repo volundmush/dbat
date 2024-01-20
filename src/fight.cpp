@@ -24,7 +24,6 @@
 #include "dbat/combat.h"
 #include "dbat/class.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/objsave.h"
 #include "dbat/act.informative.h"
 #include "dbat/transformation.h"
 
@@ -2130,8 +2129,6 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 GET_UP(ch) -= loss;
                 send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
             }
-            Crash_delete_crashfile(ch);
-            ch->save();
         }
         WAIT_STATE(ch, PULSE_VIOLENCE);
     }

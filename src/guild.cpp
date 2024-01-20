@@ -1206,99 +1206,9 @@ SPECIAL(guild) {
 /****  This is ripped off of read_line from shop.c.  They could be
  *  combined. But why? ****/
 
-void read_guild_line(FILE *gm_f, char *string, void *data, char *type) {
-    char buf[MAX_STRING_LENGTH];
-
-    if (!get_line(gm_f, buf) || !sscanf(buf, string, data)) {
-        fprintf(stderr, "Error in guild #%d, Could not get %s\n", GM_NUM(top_guild), type);
-        exit(1);
-    }
-}
 
 
-void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
-    char *buf, buf2[256], *p, buf3[READ_SIZE];
-    int temp, val, t1, t2, rv;
-    int done = false;
 
-    snprintf(buf2, sizeof(buf2), "beginning of GM file %s", filename);
-
-    buf = fread_string(gm_f, buf2);
-    while (!done) {
-        if (*buf == '#') {        /* New Trainer */
-            sscanf(buf, "#%d\n", &temp);
-            snprintf(buf2, sizeof(buf2), "GM #%d in GM file %s", temp, filename);
-            free(buf);        /* Plug memory leak! */
-            top_guild = temp;
-            auto &g = guild_index[temp];
-            auto &z = zone_table[real_zone_by_thing(temp)];
-            z.guilds.insert(temp);
-
-            GM_NUM(top_guild) = temp;
-            
-            get_line(gm_f, buf3);
-            rv = sscanf(buf3, "%d %d", &t1, &t2);
-            while (t1 > -1) {
-                if (rv == 1) { /* old style guilds, only skills */
-                    g.skills.insert(t1);
-                } else if (rv == 2) { /* new style guilds, skills and feats */
-                    if (t2 == 1) {
-                        g.skills.insert(t1);
-                    } else if (t2 == 2) {
-                        g.feats.insert(t1);
-                    } else {
-                        basic_mud_log("SYSERR: Invalid 2nd arg in guild file!");
-                        exit(1);
-                    }
-                } else {
-                    basic_mud_log("SYSERR: Invalid format in guild file. Expecting 2 args but got %d!", rv);
-                    exit(1);
-                }
-                get_line(gm_f, buf3);
-                rv = sscanf(buf3, "%d %d", &t1, &t2);
-            }
-            read_guild_line(gm_f, "%f", &g.charge, "GM_CHARGE");
-            g.no_such_skill = fread_string(gm_f, buf2);
-            g.not_enough_gold = fread_string(gm_f, buf2);
-
-            read_guild_line(gm_f, "%d", &g.minlvl, "GM_MINLVL");
-            read_guild_line(gm_f, "%d", &g.gm, "GM_TRAINER");
-
-            g.gm = real_mobile(g.gm);
-            read_guild_line(gm_f, "%d", &g.with_who[0], "GM_WITH_WHO");
-
-            read_guild_line(gm_f, "%d", &g.open, "GM_OPEN");
-            read_guild_line(gm_f, "%d", &g.close, "GM_CLOSE");
-
-            CREATE(buf, char, READ_SIZE);
-            get_line(gm_f, buf);
-            if (buf && *buf != '#' && *buf != '$') {
-                p = buf;
-                for (temp = 1; temp < GW_ARRAY_MAX; temp++) {
-                    if (!p || !*p)
-                        break;
-                    if (sscanf(p, "%d", &val) != 1) {
-                        basic_mud_log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
-                        break;
-                    }
-                    g.with_who[temp] = val;
-                    while (isdigit(*p) || *p == '-') {
-                        p++;
-                    }
-                    while (*p && !(isdigit(*p) || *p == '-')) {
-                        p++;
-                    }
-                }
-                free(buf);
-                buf = fread_string(gm_f, buf2);
-            }
-        } else {
-            if (*buf == '$')        /* EOF */
-                done = true;
-            free(buf);        /* Plug memory leak! */
-        }
-    }
-}
 
 
 void assign_the_guilds() {

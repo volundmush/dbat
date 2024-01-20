@@ -939,7 +939,6 @@ void account_data::modRPP(int amt) {
     if(rpp < 0) {
         rpp = 0;
     }
-    dirty_accounts.insert(vn);
 }
 
 void char_data::modRPP(int amt) {

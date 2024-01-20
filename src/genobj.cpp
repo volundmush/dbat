@@ -6,13 +6,14 @@
  ************************************************************************/
 
 #include "dbat/genobj.h"
+
+#include "dbat/class.h"
 #include "dbat/genolc.h"
 #include "dbat/genzon.h"
 #include "dbat/utils.h"
 #include "dbat/handler.h"
 #include "dbat/dg_olc.h"
 #include "dbat/shop.h"
-#include "dbat/objsave.h"
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
@@ -27,13 +28,11 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
     if ((newobj->vn = real_object(ovnum)) != NOTHING) {
         copy_object(&obj_proto[newobj->vn], newobj);
         update_objects(&obj_proto[newobj->vn]);
-        dirty_item_prototypes.insert(ovnum);
         return newobj->vn;
     }
 
     found = insert_object(newobj, ovnum);
 
-    dirty_item_prototypes.insert(ovnum);
     auto &z = zone_table[rznum];
     z.objects.insert(ovnum);
     return found;
@@ -648,6 +647,117 @@ bool obj_data::isActive() {
     return active;
 }
 
+#define LOC_INVENTORY    0
+void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
+    int j;
+
+    /* Lots of checks... */
+    if (location > 0) {    /* Was wearing it. */
+        switch (j = (location - 1)) {
+            case WEAR_UNUSED0:
+                j = WEAR_WIELD2;
+                break;
+            case WEAR_FINGER_R:
+            case WEAR_FINGER_L:
+                if (!CAN_WEAR(obj, ITEM_WEAR_FINGER)) /* not fitting :( */
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_NECK_1:
+            case WEAR_NECK_2:
+                if (!CAN_WEAR(obj, ITEM_WEAR_NECK))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_BODY:
+                if (!CAN_WEAR(obj, ITEM_WEAR_BODY))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_HEAD:
+                if (!CAN_WEAR(obj, ITEM_WEAR_HEAD))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_LEGS:
+                if (!CAN_WEAR(obj, ITEM_WEAR_LEGS))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_FEET:
+                if (!CAN_WEAR(obj, ITEM_WEAR_FEET))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_HANDS:
+                if (!CAN_WEAR(obj, ITEM_WEAR_HANDS))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_ARMS:
+                if (!CAN_WEAR(obj, ITEM_WEAR_ARMS))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_UNUSED1:
+                if (!CAN_WEAR(obj, ITEM_WEAR_SHIELD))
+                    location = LOC_INVENTORY;
+                j = WEAR_WIELD2;
+                break;
+            case WEAR_ABOUT:
+                if (!CAN_WEAR(obj, ITEM_WEAR_ABOUT))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_WAIST:
+                if (!CAN_WEAR(obj, ITEM_WEAR_WAIST))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_WRIST_R:
+            case WEAR_WRIST_L:
+                if (!CAN_WEAR(obj, ITEM_WEAR_WRIST))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_WIELD1:
+                if (!CAN_WEAR(obj, ITEM_WEAR_WIELD))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_WIELD2:
+                break;
+            case WEAR_EYE:
+                if (!CAN_WEAR(obj, ITEM_WEAR_EYE))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_BACKPACK:
+                if (!CAN_WEAR(obj, ITEM_WEAR_PACK))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_SH:
+                if (!CAN_WEAR(obj, ITEM_WEAR_SH))
+                    location = LOC_INVENTORY;
+                break;
+            case WEAR_EAR_R:
+            case WEAR_EAR_L:
+                if (!CAN_WEAR(obj, ITEM_WEAR_EAR))
+                    location = LOC_INVENTORY;
+                break;
+            default:
+                location = LOC_INVENTORY;
+        }
+
+        if (location > 0) {        /* Wearable. */
+            if (!GET_EQ(ch, j)) {
+                /*
+                 * Check the characters's alignment to prevent them from being
+                 * zapped through the auto-equipping.
+                     */
+                if (invalid_align(ch, obj) || invalid_class(ch, obj))
+                    location = LOC_INVENTORY;
+                else
+                    equip_char(ch, obj, j);
+            } else {    /* Oops, saved a player with double equipment? */
+                mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: autoeq: '%s' already equipped in position %d.", GET_NAME(ch),
+                       location);
+                location = LOC_INVENTORY;
+            }
+        }
+    }
+
+    if (location <= 0)    /* Inventory */
+        obj_to_char(obj, ch);
+}
+
 std::string obj_data::serializeLocation() {
     if(in_obj) {
         return in_obj->getUID();
@@ -699,7 +809,6 @@ void obj_data::deserializeRelations(const nlohmann::json& j) {
 
 void obj_data::save() {
     if(id == NOTHING) return;
-    dirty_items.insert(id);
 }
 
 bool obj_data::isProvidingLight() {

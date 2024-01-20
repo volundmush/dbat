@@ -478,7 +478,6 @@ void trigedit_save(struct descriptor_data *d) {
         }
 
     }
-    dirty_dgscript_prototypes.insert(t.vn);
     write_to_output(d, "Trigger saved to disk.\r\n");
     create_world_index(zone, "trg");
 }

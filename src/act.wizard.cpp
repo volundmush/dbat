@@ -30,7 +30,6 @@
 #include "dbat/class.h"
 #include "dbat/spells.h"
 #include "dbat/improved-edit.h"
-#include "dbat/objsave.h"
 #include "dbat/feats.h"
 #include "dbat/fight.h"
 #include "dbat/genolc.h"
@@ -2285,8 +2284,6 @@ ACMD(do_purge) {
             if (!IS_NPC(vict))
                 continue;
 
-            delete_inv_backup(vict);
-
             /* Dump inventory. */
             while (vict->contents)
                 extract_obj(vict->contents);
@@ -3217,7 +3214,6 @@ ACMD(do_show) {
                 send_to_char(ch, "A name would help.\r\n");
                 return;
             }
-            Crash_listrent(ch, value);
             break;
 
             /* show stats */
@@ -3332,7 +3328,6 @@ ACMD(do_show) {
 
             /* show houses */
         case 9:
-            hcontrol_list_houses(ch);
             break;
 
             /* show snoop */

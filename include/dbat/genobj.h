@@ -7,6 +7,7 @@
 #pragma once
 
 #include "structs.h"
+extern void auto_equip(struct char_data *ch, struct obj_data *obj, int location);
 
 extern void copy_object_strings(struct obj_data *to, struct obj_data *from);
 

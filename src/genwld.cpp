@@ -324,6 +324,13 @@ room_direction_data::room_direction_data(const nlohmann::json &j) : room_directi
     if(j.contains("totalfailroom")) totalfailroom = j["totalfailroom"];
 }
 
+nlohmann::json room_data::serializeDgVars() {
+    if(script && script->global_vars)
+        return serializeVars(script->global_vars);
+    return nlohmann::json::array();
+}
+
+
 nlohmann::json room_data::serialize() {
     auto j = serializeUnit();
 
@@ -513,7 +520,7 @@ bool room_data::isActive() {
 
 
 void room_data::save() {
-    dirty_rooms.insert(vn);
+
 }
 
 int room_data::getDamage() {

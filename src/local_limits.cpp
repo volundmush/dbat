@@ -22,7 +22,7 @@
 #include "dbat/constants.h"
 #include "dbat/class.h"
 #include "dbat/fight.h"
-#include "dbat/objsave.h"
+
 #include "dbat/handler.h"
 #include "dbat/dg_scripts.h"
 

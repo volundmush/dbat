@@ -2670,7 +2670,6 @@ static int true_script_driver(void *go_adress, trig_data *trig, int type, int mo
 
 int script_driver(void *go_adress, trig_data *trig, int type, int mode) {
     auto result = true_script_driver(go_adress, trig, type, mode);
-    dirty_dgscripts.insert(trig->id);
     return result;
 }
 

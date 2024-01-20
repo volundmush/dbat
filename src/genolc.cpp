@@ -114,7 +114,6 @@ int add_to_save_list(zone_vnum zone, int type) {
     if(zone == HEDIT_PERMISSION || zone == NOWHERE || zone == AEDIT_PERMISSION) {
         return true;
     }
-    dirty_zones.insert(zone);
     return true;
 }
 
