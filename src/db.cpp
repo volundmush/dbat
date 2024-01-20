@@ -271,20 +271,19 @@ static void db_load_players(const std::shared_ptr<SQLite::Database>& db) {
 }
 
 static void db_load_characters_initial(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,generation,isPlayer,data FROM characters");
+    SQLite::Statement q(*db, "SELECT id,generation,vnum,data FROM characters");
 
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto generation = q.getColumn(1).getInt();
-        bool isPlayer = q.getColumn(2).getInt();
+        int vn = q.getColumn(2).getInt();
         auto data = q.getColumn(3).getString();
         try {
             auto j = nlohmann::json::parse(data);
             auto c = new char_data();
-            if(isPlayer) {
+            if(vn == -1) {
                 c->deserializePlayer(j, false);
-                auto p = players.find(id);
-                if(p != players.end()) {
+                if(auto p = players.find(id); p != players.end()) {
                     p->second.character = c;
                 }
             } else {
@@ -300,12 +299,12 @@ static void db_load_characters_initial(const std::shared_ptr<SQLite::Database>& 
 }
 
 static void db_load_characters_finish(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,generation,isPlayer,location,relations FROM characters");
+    SQLite::Statement q(*db, "SELECT id,generation,vnum,location,relations FROM characters");
 
     while(q.executeStep()) {
         auto id = q.getColumn(0).getInt64();
         auto generation = q.getColumn(1).getInt();
-        bool isPlayer = q.getColumn(2).getInt();
+        int vnum = q.getColumn(2).getInt();
         auto location = q.getColumn(3).getString();
         auto relations = q.getColumn(4).getString();
         try {
