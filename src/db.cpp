@@ -649,7 +649,7 @@ static void db_load_areas(const std::shared_ptr<SQLite::Database>& db) {
 }
 
 static std::vector<std::filesystem::path> getDumpFiles() {
-    std::filesystem::path dir = "dump"; // Change to your directory
+    std::filesystem::path dir = "dumps"; // Change to your directory
     std::vector<std::filesystem::path> files;
 
     auto pattern = fmt::format("{}-", config::stateDbName);

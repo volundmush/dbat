@@ -55,7 +55,7 @@ namespace config {
     std::string logFile = "logs/dbat.log";
 
     std::string assetDbName = "assets";
-    std::string stateDbName = "state";
+    std::string stateDbName = "dump";
     bool testMode{false};
     bool logEgregiousTimings{false};
 
