@@ -55,6 +55,7 @@ namespace net {
 
         std::list<std::pair<std::string, std::string>> inQueue, outQueue;
 
+        bool running{true};
         int64_t connId{};
         account_data *account{};
         int64_t adminLevel{0};

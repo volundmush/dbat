@@ -181,6 +181,7 @@ void processConnections(double deltaTime) {
         // This shouldn't happen, but whatever.
         if(it == net::connections.end()) continue;
         it->second->cleanup();
+        it->second->running = false;
     }
     for(auto id : net::deadConnections) {
         net::connections.erase(id);
