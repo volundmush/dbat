@@ -172,34 +172,36 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
 }
 
 void processConnections(double deltaTime) {
-    // First, handle any disconnected connections.
-    for(auto id : net::deadConnections) {
-        auto it = net::connections.find(id);
-        // This shouldn't happen, but whatever.
-        if(it == net::connections.end()) continue;
-        it->second->cleanup();
-        it->second->running = false;
-    }
-    for(auto id : net::deadConnections) {
-        net::connections.erase(id);
-    }
-    net::deadConnections.clear();
+    std::set<int64_t> deadConnections;
 
-    // Second, welcome any new connections!
-    auto pending = net::pendingConnections;
-    for(const auto& id : pending) {
-        auto it = net::connections.find(id);
-        if (it != net::connections.end()) {
-            auto conn = it->second;
-            // Need a proper welcoming later....
-            conn->onWelcome();
-            net::pendingConnections.erase(id);
+    if(!net::connections.empty()) {
+        std::lock_guard lock(net::connectionMutex);
+        for(auto &[id, conn] : net::connections) {
+            switch(conn->state) {
+                case net::ConnectionState::Negotiating:
+                    break;
+                case net::ConnectionState::Pending:
+                    conn->onWelcome();
+                    conn->state = net::ConnectionState::Connected;
+                break;
+                case net::ConnectionState::Connected:
+                    conn->onHeartbeat(deltaTime);
+                    break;
+                case net::ConnectionState::Dead:
+                    deadConnections.insert(id);
+                break;
+            }
         }
-    }
 
-    // Next, we must handle the heartbeat routine for each connection.
-    for(auto& [id, c] : net::connections) {
-        c->onHeartbeat(deltaTime);
+        if(!deadConnections.empty()) {
+
+            for(auto &did : deadConnections) {
+                auto it = net::connections.find(did);
+                if(it == net::connections.end()) continue;
+                it->second->cleanup();
+                net::connections.erase(did);
+            }
+        }
     }
 }
 

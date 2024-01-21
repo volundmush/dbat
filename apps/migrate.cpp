@@ -23,6 +23,8 @@
 #include "dbat/shop.h"
 #include "dbat/guild.h"
 #include "dbat/genobj.h"
+#include "asio.hpp"
+#include "dbat/saveload.h"
 
 #define RENT_FACTOR    1
 #define CRYO_FACTOR    4
@@ -4781,3 +4783,25 @@ void migrate_db() {
     }
 }
 
+int main(int argc, char* argv[]) {
+    game::init_locale();
+    game::init_log();
+    if(!game::init_sodium()) {
+        logger->error("Failed to initialize libsodium");
+        shutdown_game(EXIT_FAILURE);
+    }
+    load_config();
+    chdir("lib");
+    migrate_db();
+
+
+    // ASIO context setup
+    asio::io_context io_context;
+
+    // Run the coroutine and wait for it to finish
+    asio::co_spawn(io_context, runSave(), asio::detached);
+
+    // Run the ASIO context to execute the coroutine
+    io_context.run();
+
+}

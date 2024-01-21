@@ -14,10 +14,15 @@ namespace net {
         int16_t hostPort{0};
     };
 
-    extern std::map<int64_t, std::shared_ptr<Connection>> connections;
-    extern std::set<int64_t> pendingConnections;
+    enum class ConnectionState : uint8_t {
+        Negotiating = 0,
+        Pending = 1,
+        Connected = 2,
+        Dead = 3
+    };
 
-    extern std::set<int64_t> deadConnections;
+    extern std::mutex connectionMutex;
+    extern std::map<int64_t, std::shared_ptr<Connection>> connections;
 
     class Connection;
 
@@ -29,6 +34,8 @@ namespace net {
         virtual void handleGMCP(const std::string &txt, const nlohmann::json &j);
         virtual void start();
         virtual void close();
+
+
     protected:
         void sendText(const std::string &txt);
         std::shared_ptr<Connection> conn;
@@ -38,22 +45,18 @@ namespace net {
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
         explicit Connection(int64_t connId);
-        void sendGMCP(const std::string &cmd, const nlohmann::json &j);
-        void sendText(const std::string &messg);
-        void onHeartbeat(double deltaTime);
-        void onNetworkDisconnected();
+        virtual ~Connection() = default;
+        virtual void sendGMCP(const std::string &cmd, const nlohmann::json &j);
+        virtual void sendText(const std::string &messg);
+        virtual void onHeartbeat(double deltaTime);
+        virtual void onNetworkDisconnected();
         void onWelcome();
-        void close();
-        void handleGMCP(const std::string& cmd, const nlohmann::json& j);
-        void handleCommand(const std::string& cmd);
-        void handleMessage(const std::string& type, const nlohmann::json &j);
+        virtual void close();
+        void executeGMCP(const std::string& cmd, const nlohmann::json& j);
+        void executeCommand(const std::string& cmd);
 
-        void queueMessage(const std::string& event, const std::string& data);
-
-        void cleanup();
+        virtual void cleanup();
         void setParser(ConnectionParser *p);
-
-        std::list<std::pair<std::string, std::string>> inQueue, outQueue;
 
         bool running{true};
         int64_t connId{};
@@ -71,10 +74,10 @@ namespace net {
         ProtocolCapabilities capabilities{};
 
         std::unique_ptr<ConnectionParser> parser;
+
+        ConnectionState state{ConnectionState::Negotiating};
     protected:
 
     };
-
-    extern std::shared_ptr<Connection> newConnection();
 
 }

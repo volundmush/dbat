@@ -60,5 +60,12 @@ add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
 target_link_libraries(circlemud ${CIRCLE_LINK_LIBRARIES})
 target_include_directories(circlemud PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
+add_executable(migrate apps/migrate.cpp)
+target_link_libraries(migrate circlemud ${CIRCLE_LINK_LIBRARIES})
+target_include_directories(migrate PUBLIC ${CIRCLE_INCLUDE_DIRS})
+
+add_executable(circle apps/circle.cpp)
+target_link_libraries(circle circlemud ${CIRCLE_LINK_LIBRARIES})
+target_include_directories(circle PUBLIC ${CIRCLE_INCLUDE_DIRS})
 
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)

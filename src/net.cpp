@@ -10,24 +10,15 @@
 
 namespace net {
 
+    std::mutex connectionMutex;
     std::map<int64_t, std::shared_ptr<Connection>> connections;
-    std::set<int64_t> pendingConnections;
-
-    std::set<int64_t> deadConnections;
 
     void Connection::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-
-        nlohmann::json out;
-        out["cmd"] = cmd;
-        out["data"] = j;
-        outQueue.emplace_back("Legacy.GMCP", jdump(out));
+        // default implementation does nothing.
     }
 
     void Connection::sendText(const std::string &text) {
-        if(text.empty()) return;
-        nlohmann::json out;
-        out["data"] = text;
-        outQueue.emplace_back("Legacy.Text", jdump(out));
+        // default implementation does nothing.
     }
 
 
@@ -38,11 +29,11 @@ namespace net {
     }
 
     void Connection::close() {
-        deadConnections.insert(connId);
+        state = net::ConnectionState::Dead;
     }
 
     void Connection::onNetworkDisconnected() {
-        deadConnections.insert(connId);
+        state = net::ConnectionState::Dead;
     }
 
 
@@ -58,8 +49,6 @@ namespace net {
             account = nullptr;
         }
     }
-
-
 
 
     void ConnectionParser::close() {
@@ -84,67 +73,16 @@ namespace net {
         p->start();
     }
 
-    void Connection::queueMessage(const std::string& event, const std::string& data) {
-        inQueue.emplace_back(event, data);
-    }
-
-
     void Connection::onHeartbeat(double deltaTime) {
-        if(inQueue.empty()) return;
-
-        std::pair<std::string, std::string> msg = inQueue.front();
-        inQueue.pop_front();
-
-        nlohmann::json j;
-        try {
-            j = nlohmann::json::parse(msg.second);
-        }
-        catch(std::exception &err) {
-            logger->error("Connection {} received un-parseable input: {} - {}",
-                          connId, msg.first, msg.second);
-            return;
-        }
-        handleMessage(msg.first, j);
-
+        // default implementation does nothing.
     }
 
-    void Connection::handleGMCP(const std::string &cmd, const nlohmann::json &j) {
+    void Connection::executeGMCP(const std::string &cmd, const nlohmann::json &j) {
         if(parser) parser->handleGMCP(cmd, j);
     }
 
-    void Connection::handleCommand(const std::string &cmd) {
+    void Connection::executeCommand(const std::string &cmd) {
         if(parser) parser->parse(cmd);
-    }
-
-    void Connection::handleMessage(const std::string& type, const nlohmann::json &j) {
-
-        if(type == "Legacy.Command") {
-            if(!j.contains("data")) {
-                logger->error("Connection {} received malformed Game.Command JSON: {}",
-                              connId, jdump(j));
-                return;
-            }
-            auto cmd = j["data"].get<std::string>();
-            handleCommand(cmd);
-        } else if(type == "Legacy.GMCP") {
-            if(!(j.contains("cmd") && j.contains("data"))) {
-                logger->error("Connection {} received malformed Game.Command JSON: {}",
-                              connId, jdump(j));
-                return;
-            }
-            auto cmd = j["cmd"].get<std::string>();
-            auto j2 = j["data"];
-            handleGMCP(cmd, j2);
-        }
-    }
-
-    std::shared_ptr<Connection> newConnection() {
-        int64_t connId = 0;
-        while(connections.contains(connId)) connId++;
-        auto out = std::make_shared<Connection>(connId);
-        connections[connId] = out;
-        pendingConnections.insert(connId);
-        return out;
     }
 
 }
