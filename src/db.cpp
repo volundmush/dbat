@@ -9,6 +9,9 @@
 ************************************************************************ */
 
 #include <fstream>
+#include <regex>
+#include "SQLiteCpp/SQLiteCpp.h"
+
 #include "dbat/db.h"
 #include "dbat/utils.h"
 #include "dbat/feats.h"
@@ -18,7 +21,6 @@
 #include "dbat/act.informative.h"
 #include "dbat/act.other.h"
 #include "dbat/act.social.h"
-#include "dbat/random.h"
 #include "dbat/assemblies.h"
 #include "dbat/reset.h"
 #include "dbat/class.h"
@@ -37,8 +39,6 @@
 #include "dbat/races.h"
 #include "dbat/genobj.h"
 #include "dbat/account.h"
-#include <regex>
-#include "SQLiteCpp/SQLiteCpp.h"
 #include "dbat/maputils.h"
 
 /**************************************************************************
@@ -156,21 +156,9 @@ void Read_Invalid_List();
 
 int hsort(const void *a, const void *b);
 
-void prune_crlf(char *txt);
-
-void boot_the_guilds(FILE *gm_f, char *filename, int rec_count);
-
-void destroy_guilds();
-
-void assign_the_guilds();
-
 void memorize_add(struct char_data *ch, int spellnum, int timer);
 
-void assign_feats();
-
 void free_feats();
-
-void sort_feats();
 
 void free_assemblies();
 
@@ -295,7 +283,6 @@ static void db_load_characters_initial(const std::shared_ptr<SQLite::Database>& 
             continue;
         }
     }
-
 }
 
 static void db_load_characters_finish(const std::shared_ptr<SQLite::Database>& db) {
@@ -854,10 +841,10 @@ void destroy_db() {
     mob_proto.clear();
     mob_index.clear();
     /* Shops */
-    destroy_shops();
+    shop_index.clear();
 
     /* Guilds */
-    destroy_guilds();
+    guild_index.clear();
 
     /* Zones */
     /* zone table reset queue */

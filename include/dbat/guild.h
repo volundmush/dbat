@@ -145,5 +145,7 @@ extern void handle_ingest_learn(struct char_data *ch, struct char_data *vict);
 
 extern void list_skills(struct char_data *ch, char *arg);
 
+extern void assign_the_guilds();
+
 /*. External . */
 extern SPECIAL(guild);

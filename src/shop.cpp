@@ -1599,10 +1599,6 @@ void show_shops(struct char_data *ch, char *arg) {
     }
 }
 
-void destroy_shops() {
-    shop_index.clear();
-}
-
 
 shop_data::~shop_data() {
     free_shop_strings(this);

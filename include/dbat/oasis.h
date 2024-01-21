@@ -106,7 +106,6 @@ struct oasis_olc_data {
     struct obj_data *iobj;         /* used for 'iedit'         */
     struct zone_data *zone;        /* used for 'zedit'         */
     struct shop_data *shop;        /* used for 'sedit'         */
-    struct house_control_rec *house; /* used for 'hsedit'      */
     struct config_data *config;    /* used for 'cedit'         */
     struct extra_descr_data *desc; /* used in '[r|o|m]edit'    */
     struct social_messg *action;   /* Aedit uses this one      */

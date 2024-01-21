@@ -414,8 +414,10 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 for (auto &sh : shop_index) {
                     if (sh.second.keeper == ch->vn) {
                         shopnr = sh.first;
+                        break;
                     }
                 }
+
                 for (sobj = ch->contents; sobj; sobj = next_obj) {
                     next_obj = sobj->next_content;
                     if (sobj != nullptr && !shop_producing(sobj, shopnr)) {

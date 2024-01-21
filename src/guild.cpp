@@ -1208,9 +1208,6 @@ SPECIAL(guild) {
 
 
 
-
-
-
 void assign_the_guilds() {
     guild_vnum gdindex;
 
@@ -1392,10 +1389,6 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
 
     if (counter == 0)
         send_to_char(ch, "None found.\r\n");
-}
-
-void destroy_guilds() {
-    guild_index.clear();
 }
 
 
