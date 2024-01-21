@@ -728,7 +728,7 @@ int main(int argc, char* argv[]) {
 
     ioContext = std::make_unique<io_context>();
 
-    ip::tcp::acceptor acceptor(*ioContext, {ip::tcp::v4(), 7999});
+    ip::tcp::acceptor acceptor(*ioContext, {ip::tcp::v4(), 1280});
     co_spawn(*ioContext, listen(acceptor), asio::detached);
     co_spawn(*ioContext, run_game(), asio::detached);
 
