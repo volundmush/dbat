@@ -34,56 +34,6 @@ nlohmann::json unit_data::serializeUnit() {
     return j;
 }
 
-rapidjson::Document unit_data::rserializeUnit() {
-    rapidjson::Document d;
-    auto& allocator = d.GetAllocator();
-    d.SetObject();
-
-    if (vn != NOTHING) {
-        d.AddMember("vn", vn, allocator);
-    }
-
-    if (name && strlen(name)) {
-        d.AddMember("name", rapidjson::Value(name, allocator).Move(), allocator);
-    }
-
-    if (room_description && strlen(room_description)) {
-        d.AddMember("room_description", rapidjson::Value(room_description, allocator).Move(), allocator);
-    }
-
-    if (look_description && strlen(look_description)) {
-        d.AddMember("look_description", rapidjson::Value(look_description, allocator).Move(), allocator);
-    }
-
-    if (short_description && strlen(short_description)) {
-        d.AddMember("short_description", rapidjson::Value(short_description, allocator).Move(), allocator);
-    }
-
-    rapidjson::Value exDescArray(rapidjson::kArrayType);
-    for (auto ex = ex_description; ex; ex = ex->next) {
-        if (ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
-            rapidjson::Value p(rapidjson::kArrayType);
-            p.PushBack(rapidjson::Value(ex->keyword, allocator).Move(), allocator);
-            p.PushBack(rapidjson::Value(ex->description, allocator).Move(), allocator);
-
-            exDescArray.PushBack(p, allocator);
-        }
-    }
-    if (!exDescArray.Empty()) {
-        d.AddMember("ex_description", exDescArray, allocator);
-    }
-
-    if (id != NOTHING) {
-        d.AddMember("id", id, allocator);
-    }
-
-    if (zone != NOTHING) {
-        d.AddMember("zone", zone, allocator);
-    }
-
-    return d;
-}
-
 
 void unit_data::deserializeUnit(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"];

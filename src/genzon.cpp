@@ -408,45 +408,6 @@ nlohmann::json reset_com::serialize() {
     return j;
 }
 
-    rapidjson::Document reset_com::rserialize() {
-        rapidjson::Document d;
-        d.SetObject();
-        auto& allocator = d.GetAllocator();
-
-        // Adding 'command' as a string
-        std::string cmd(1, command);
-        if (!cmd.empty()) {
-            d.AddMember("command", rapidjson::Value(cmd.c_str(), allocator).Move(), allocator);
-        }
-
-        // Adding other members if they are set
-        if (if_flag) {
-            d.AddMember("if_flag", if_flag, allocator);
-        }
-        if (arg1) {
-            d.AddMember("arg1", arg1, allocator);
-        }
-        if (arg2) {
-            d.AddMember("arg2", arg2, allocator);
-        }
-        if (arg3) {
-            d.AddMember("arg3", arg3, allocator);
-        }
-        if (arg4) {
-            d.AddMember("arg4", arg4, allocator);
-        }
-        if (arg5) {
-            d.AddMember("arg5", arg5, allocator);
-        }
-        if (!sarg1.empty()) {
-            d.AddMember("sarg1", rapidjson::Value(sarg1.c_str(), allocator).Move(), allocator);
-        }
-        if (!sarg2.empty()) {
-            d.AddMember("sarg2", rapidjson::Value(sarg2.c_str(), allocator).Move(), allocator);
-        }
-
-        return d;
-    }
 
 zone_data::~zone_data() {
     if(name) free(name);
@@ -472,57 +433,6 @@ nlohmann::json zone_data::serialize() {
     return j;
 }
 
-    rapidjson::Document zone_data::rserialize() {
-        rapidjson::Document d;
-        d.SetObject();
-        auto& allocator = d.GetAllocator();
-
-        // Adding basic fields
-        d.AddMember("number", number, allocator);
-        if (name && strlen(name)) {
-            d.AddMember("name", rapidjson::Value(name, allocator).Move(), allocator);
-        }
-        if (builders && strlen(builders)) {
-            d.AddMember("builders", rapidjson::Value(builders, allocator).Move(), allocator);
-        }
-        if (lifespan) {
-            d.AddMember("lifespan", lifespan, allocator);
-        }
-        d.AddMember("bot", bot, allocator);
-        d.AddMember("top", top, allocator);
-        if (reset_mode) {
-            d.AddMember("reset_mode", reset_mode, allocator);
-        }
-        if (min_level) {
-            d.AddMember("min_level", min_level, allocator);
-        }
-        if (max_level) {
-            d.AddMember("max_level", max_level, allocator);
-        }
-
-        // Adding 'zone_flags' as an array
-        rapidjson::Value flagsArray(rapidjson::kArrayType);
-        for (int i = 0; i < NUM_ZONE_FLAGS; ++i) {
-            if (IS_SET_AR(zone_flags, i)) {
-                flagsArray.PushBack(i, allocator);
-            }
-        }
-        if (!flagsArray.Empty()) {
-            d.AddMember("zone_flags", flagsArray, allocator);
-        }
-
-        // Adding 'cmd' as an array of serialized reset_com objects
-        rapidjson::Value cmdArray(rapidjson::kArrayType);
-        for (auto& c : cmd) {
-            rapidjson::Document cmdDoc = c.rserialize(); // Assuming reset_com has a method rserialize
-            rapidjson::Value cmdValue(rapidjson::kObjectType);
-            cmdValue.CopyFrom(cmdDoc, allocator);
-            cmdArray.PushBack(cmdValue, allocator);
-        }
-        d.AddMember("cmd", cmdArray, allocator);
-
-        return d;
-    }
 
 zone_data::zone_data(const nlohmann::json &j) : zone_data() {
     if(j.contains("number")) number = j["number"];

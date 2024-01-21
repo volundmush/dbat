@@ -282,26 +282,6 @@ nlohmann::json mob_special_data::serialize() {
     return j;
 }
 
-rapidjson::Document mob_special_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    if (attack_type) {
-        d.AddMember("attack_type", attack_type, allocator);
-    }
-    if (default_pos != POS_STANDING) {
-        d.AddMember("default_pos", default_pos, allocator);
-    }
-    if (damnodice) {
-        d.AddMember("damnodice", damnodice, allocator);
-    }
-    if (damsizedice) {
-        d.AddMember("damsizedice", damsizedice, allocator);
-    }
-
-    return d;
-}
 
 void mob_special_data::deserialize(const nlohmann::json &j) {
     if(j.contains("attack_type")) attack_type = j["attack_type"];
@@ -328,34 +308,6 @@ nlohmann::json time_data::serialize() {
     if(secondsAged != 0.0) j["secondsAged"] = secondsAged;
 
     return j;
-}
-
-rapidjson::Document time_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding fields only if they have significant values
-    if (birth) {
-        d.AddMember("birth", birth, allocator);
-    }
-    if (created) {
-        d.AddMember("created", created, allocator);
-    }
-    if (maxage) {
-        d.AddMember("maxage", maxage, allocator);
-    }
-    if (logon) {
-        d.AddMember("logon", logon, allocator);
-    }
-    if (played != 0.0) {
-        d.AddMember("played", played, allocator);
-    }
-    if (secondsAged != 0.0) {
-        d.AddMember("secondsAged", secondsAged, allocator);
-    }
-
-    return d;
 }
 
 void time_data::deserialize(const nlohmann::json &j) {
@@ -429,64 +381,6 @@ nlohmann::json char_data::serializeBase() {
     if(damage_mod) j["damage_mod"] = damage_mod;
 
     return j;
-}
-
-// Helper function to add map fields
-template<typename K, typename V>
-void addMap(rapidjson::Document& d, const char* key, std::unordered_map<K, V>& mapData, rapidjson::Document::AllocatorType& allocator) {
-    rapidjson::Value array(rapidjson::kArrayType);
-    for (auto& [id, val] : mapData) {
-        if (val) {
-            rapidjson::Value pair(rapidjson::kArrayType);
-            pair.PushBack(static_cast<int>(id), allocator);
-            pair.PushBack(val, allocator);
-            array.PushBack(pair, allocator);
-        }
-    }
-    if (!array.Empty()) {
-        d.AddMember(rapidjson::Value(key, allocator).Move(), array, allocator);
-    }
-}
-
-rapidjson::Document char_data::rserializeBase() {
-    auto d = rserializeUnit(); // Assuming this returns a RapidJSON Document with base data
-    auto& allocator = d.GetAllocator();
-
-    // Serializing map fields as arrays of pairs
-    addMap(d, "trains", trains, allocator);
-    addMap(d, "attributes", attributes, allocator);
-    addMap(d, "moneys", moneys, allocator);
-    addMap(d, "aligns", aligns, allocator);
-    addMap(d, "appearances", appearances, allocator);
-    addMap(d, "stats", stats, allocator);
-    addMap(d, "nums", nums, allocator);
-
-    // Using addFlags for bitsets
-    addFlags(d, "mobFlags", mobFlags, allocator);
-    addFlags(d, "playerFlags", playerFlags, allocator);
-    addFlags(d, "pref", pref, allocator);
-    addFlags(d, "bodyparts", bodyparts, allocator);
-
-    // Adding other fields
-    if (title && strlen(title)) {
-        d.AddMember("title", rapidjson::Value(title, allocator).Move(), allocator);
-    }
-    d.AddMember("race", static_cast<int>(race), allocator);
-    d.AddMember("chclass", static_cast<int>(chclass), allocator);
-    if (weight != 0.0) {
-        d.AddMember("weight", weight, allocator);
-    }
-    if (armor) {
-        d.AddMember("armor", armor, allocator);
-    }
-    if (damage_mod) {
-        d.AddMember("damage_mod", damage_mod, allocator);
-    }
-
-    // Serializing affected_by
-    addFlags(d, "affected_by", affected_by, allocator);
-
-    return d;
 }
 
 
@@ -575,23 +469,6 @@ nlohmann::json char_data::serializeProto() {
     return j;
 }
 
-rapidjson::Document char_data::rserializeProto() {
-    auto d = rserializeBase(); // Assuming this returns a RapidJSON Document with base data
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'proto_script' as an array
-    rapidjson::Value protoScriptArray(rapidjson::kArrayType);
-    for (const auto& p : proto_script) {
-        if (trig_index.contains(p)) { // Assuming trig_index is accessible and has contains method
-            protoScriptArray.PushBack(p, allocator);
-        }
-    }
-    if (!protoScriptArray.Empty()) {
-        d.AddMember("proto_script", protoScriptArray, allocator);
-    }
-
-    return d;
-}
 
 nlohmann::json char_data::serializeInstance() {
     auto j = serializeBase();
@@ -726,202 +603,7 @@ nlohmann::json char_data::serializeInstance() {
     return j;
 }
 
-// Helper function for adding arrays of pairs
-template<typename T>
-void addArrayOfPairs(rapidjson::Document& d, const char* key, const T* array, int size, rapidjson::Document::AllocatorType& allocator) {
-    rapidjson::Value arrayVal(rapidjson::kArrayType);
-    for (int i = 0; i < size; ++i) {
-        if (array[i]) {
-            rapidjson::Value pair(rapidjson::kArrayType);
-            pair.PushBack(i, allocator);
-            pair.PushBack(array[i], allocator);
-            arrayVal.PushBack(pair, allocator);
-        }
-    }
-    if (!arrayVal.Empty()) {
-        d.AddMember(rapidjson::Value(key, allocator).Move(), arrayVal, allocator);
-    }
-}
 
-void serializeAffectedList(rapidjson::Document& d, const char* key, affected_type* affectedList, rapidjson::Document::AllocatorType& allocator) {
-    rapidjson::Value affectedArray(rapidjson::kArrayType);
-    for (auto a = affectedList; a; a = a->next) {
-        if (a->type) {
-            rapidjson::Document affectedDoc = a->rserialize(); // Assuming affected_type has a method rserialize
-            affectedArray.PushBack(affectedDoc, allocator);
-        }
-    }
-    if (!affectedArray.Empty()) {
-        d.AddMember(rapidjson::Value(key, allocator).Move(), affectedArray, allocator);
-    }
-}
-
-
-rapidjson::Document char_data::rserializeInstance() {
-    auto d = rserializeBase(); // Assuming this returns a RapidJSON Document with base data
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'generation'
-    if (generation) {
-        d.AddMember("generation", generation, allocator);
-    }
-
-    // Using addFlags for 'admflags'
-    addFlags(d, "admflags", admflags, allocator);
-
-    // Adding numerical fields
-    if (health < 1.0) d.AddMember("health", health, allocator);
-    if (energy < 1.0) d.AddMember("energy", energy, allocator);
-    if (stamina < 1.0) d.AddMember("stamina", stamina, allocator);
-    if (life < 1.0) d.AddMember("life", life, allocator);
-
-    // Adding 'exp'
-    if (exp) d.AddMember("exp", exp, allocator);
-
-    // Handling 'was_in_room' and 'hometown'
-    if (was_in_room != NOWHERE) d.AddMember("was_in_room", was_in_room, allocator);
-    if (world.contains(hometown)) d.AddMember("hometown", hometown, allocator); // Assuming 'world.contains' check is valid
-
-    // Handling 'time' data
-    auto timeDoc = time.rserialize(); // Assuming time_data has a method rserialize
-    if (!timeDoc.ObjectEmpty()) {
-        d.AddMember("time", timeDoc, allocator);
-    }
-
-    // Adding arrays of pairs for 'limb_condition' and 'conditions'
-    addArrayOfPairs(d, "limb_condition", limb_condition, 4, allocator);
-    addArrayOfPairs(d, "conditions", conditions, NUM_CONDITIONS, allocator);
-
-    // Adding other simple fields
-    if (freeze_level) d.AddMember("freeze_level", freeze_level, allocator);
-    if (invis_level) d.AddMember("invis_level", invis_level, allocator);
-    if (wimp_level) d.AddMember("wimp_level", wimp_level, allocator);
-
-    // Serializing 'skill' map
-    rapidjson::Value skillsArray(rapidjson::kArrayType);
-    for (auto& [skill_id, s] : skill) {
-        rapidjson::Document skillDoc = s.rserialize(); // Assuming skill_data has a method rserialize
-        if (!skillDoc.ObjectEmpty()) {
-            rapidjson::Value skillObj(rapidjson::kObjectType);
-            skillObj.AddMember("id", skill_id, allocator);
-            skillObj.AddMember("data", skillDoc, allocator);
-            skillsArray.PushBack(skillObj, allocator);
-        }
-    }
-    if (!skillsArray.Empty()) {
-        d.AddMember("skill", skillsArray, allocator);
-    }
-
-    // Adding 'speaking', 'preference', and 'practice_points'
-    if (speaking) d.AddMember("speaking", speaking, allocator);
-    if (preference) d.AddMember("preference", preference, allocator);
-    if (practice_points) d.AddMember("practice_points", practice_points, allocator);
-
-    // Serializing 'affected' and 'affectedv'
-    serializeAffectedList(d, "affected", affected, allocator);
-    serializeAffectedList(d, "affectedv", affectedv, allocator);
-
-    // Adding fields like 'absorbs', 'blesslvl', 'lboard', 'bonuses', 'boosts'
-    if (absorbs) d.AddMember("absorbs", absorbs, allocator);
-    if (blesslvl) d.AddMember("blesslvl", blesslvl, allocator);
-    addArrayOfPairs(d, "lboard", lboard, 5, allocator);
-    addFlags(d, "bonuses", bonuses,  allocator);
-    if (boosts) d.AddMember("boosts", boosts, allocator);
-
-    if (clan && strlen(clan)) d.AddMember("clan", rapidjson::Value(clan, allocator).Move(), allocator);
-    if (crank) d.AddMember("crank", crank, allocator);
-    if (con_cooldown) d.AddMember("con_cooldown", con_cooldown, allocator);
-
-    if (deathtime) d.AddMember("deathtime", deathtime, allocator);
-    if (dcount) d.AddMember("dcount", dcount, allocator);
-    if (death_type) d.AddMember("death_type", death_type, allocator);
-    if (damage_mod) d.AddMember("damage_mod", damage_mod, allocator);
-    if (droom) d.AddMember("droom", droom, allocator);
-    if (accuracy_mod) d.AddMember("accuracy_mod", accuracy_mod, allocator);
-    addArrayOfPairs(d, "genome", genome, 2, allocator);
-
-    if (gauntlet) d.AddMember("gauntlet", gauntlet, allocator);
-    if (ingestLearned) d.AddMember("ingestLearned", ingestLearned, allocator);
-    if (kaioken) d.AddMember("kaioken", kaioken, allocator);
-    if (lifeperc) d.AddMember("lifeperc", lifeperc, allocator);
-    if (lastint) d.AddMember("lastint", lastint, allocator);
-    if (lastpl) d.AddMember("lastpl", lastpl, allocator);
-    if (moltexp) d.AddMember("moltexp", moltexp, allocator);
-    if (moltlevel) d.AddMember("moltlevel", moltlevel, allocator);
-    if (majinize) d.AddMember("majinize", majinize, allocator);
-    if (majinizer) d.AddMember("majinizer", majinizer, allocator);
-
-    if (mimic) d.AddMember("mimic", static_cast<int>(mimic.value()), allocator);
-    if (form != FormID::Base) d.AddMember("form", static_cast<int>(form), allocator);
-    if (olc_zone) d.AddMember("olc_zone", olc_zone, allocator);
-    if (starphase) d.AddMember("starphase", starphase, allocator);
-    if (accuracy) d.AddMember("accuracy", accuracy, allocator);
-    if (position) d.AddMember("position", position, allocator);
-
-    if (rdisplay && strlen(rdisplay)) {
-        d.AddMember("rdisplay", rapidjson::Value(rdisplay, allocator).Move(), allocator);
-    }
-    if (relax_count) d.AddMember("relax_count", relax_count, allocator);
-    if (radar1) d.AddMember("radar1", radar1, allocator);
-    if (radar2) d.AddMember("radar2", radar2, allocator);
-    if (radar3) d.AddMember("radar3", radar3, allocator);
-    if (feature && strlen(feature)) {
-        d.AddMember("feature", rapidjson::Value(feature, allocator).Move(), allocator);
-    }
-    if (ship) d.AddMember("ship", ship, allocator);
-    if (con_sdcooldown) d.AddMember("con_sdcooldown", con_sdcooldown, allocator);
-    if (shipr) d.AddMember("shipr", shipr, allocator);
-    if (skill_slots) d.AddMember("skill_slots", skill_slots, allocator);
-    if (stupidkiss) d.AddMember("stupidkiss", stupidkiss, allocator);
-    if (suppression) d.AddMember("suppression", suppression, allocator);
-    if (tail_growth) d.AddMember("tail_growth", tail_growth, allocator);
-
-    addArrayOfPairs(d, "saving_throw", saving_throw, 3, allocator);
-    addArrayOfPairs(d, "apply_saving_throw", apply_saving_throw, 3, allocator);
-
-    if (upgrade) d.AddMember("upgrade", upgrade, allocator);
-    if (voice && strlen(voice)) {
-        d.AddMember("voice", rapidjson::Value(voice, allocator).Move(), allocator);
-    }
-
-    if (poofin && strlen(poofin)) {
-        d.AddMember("poofin", rapidjson::Value(poofin, allocator).Move(), allocator);
-    }
-    if (poofout && strlen(poofout)) {
-        d.AddMember("poofout", rapidjson::Value(poofout, allocator).Move(), allocator);
-    }
-
-    if (relax_count) d.AddMember("relax_count", relax_count, allocator);
-    if (ingestLearned) d.AddMember("ingestLearned", ingestLearned, allocator);
-    if (transBonus != 0.0) d.AddMember("transBonus", transBonus, allocator);
-
-
-    // Handling 'dgvariables' if script and global_vars are present
-    if (script && script->global_vars) {
-        rapidjson::Document varsDoc = rserializeVars(script->global_vars); // Assuming rserializeVars returns a RapidJSON Document
-        d.AddMember("dgvariables", varsDoc, allocator);
-    }
-
-    // Handling 'last_tell'
-    if (players.contains(last_tell)) { // Assuming 'players.contains' check is valid
-        d.AddMember("last_tell", last_tell, allocator);
-    }
-
-    // Serializing 'transforms'
-    rapidjson::Value transformsArray(rapidjson::kArrayType);
-    for (auto& [frm, tra] : transforms) {
-        rapidjson::Document traDoc = tra.rserialize(); // Assuming trans_data has a method rserialize
-        rapidjson::Value transformObj(rapidjson::kObjectType);
-        transformObj.AddMember("form", static_cast<int>(frm), allocator);
-        transformObj.AddMember("data", traDoc, allocator);
-        transformsArray.PushBack(transformObj, allocator);
-    }
-    if (!transformsArray.Empty()) {
-        d.AddMember("transforms", transformsArray, allocator);
-    }
-
-    return d;
-}
 
 void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     deserializeBase(j);
@@ -1143,17 +825,6 @@ nlohmann::json skill_data::serialize() {
     return j;
 }
 
-rapidjson::Document skill_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'level' and 'perfs' fields
-    d.AddMember("level", level, allocator);
-    d.AddMember("perfs", perfs, allocator);
-
-    return d;
-}
 
 void skill_data::deserialize(const nlohmann::json &j) {
     if(j.contains("level")) level = j["level"];
@@ -1175,28 +846,6 @@ nlohmann::json alias_data::serialize() {
     return j;
 }
 
-rapidjson::Document alias_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'name' if it's not empty
-    if (!name.empty()) {
-        d.AddMember("name", rapidjson::Value(name.c_str(), allocator).Move(), allocator);
-    }
-
-    // Adding 'replacement' if it's not empty
-    if (!replacement.empty()) {
-        d.AddMember("replacement", rapidjson::Value(replacement.c_str(), allocator).Move(), allocator);
-    }
-
-    // Adding 'type' if it's non-zero
-    if (type) {
-        d.AddMember("type", type, allocator);
-    }
-
-    return d;
-}
 
 alias_data::alias_data(const nlohmann::json &j) : alias_data() {
     if(j.contains("name")) name = j["name"].get<std::string>();
@@ -1233,78 +882,6 @@ nlohmann::json player_data::serialize() {
     return j;
 }
 
-// Helper function to add simple arrays
-template<typename T>
-void addArray(rapidjson::Document& d, const char* key, std::set<T>& values, rapidjson::Document::AllocatorType& allocator) {
-    rapidjson::Value array(rapidjson::kArrayType);
-    for (auto& v : values) {
-        array.PushBack(v, allocator);
-    }
-    if (!array.Empty()) {
-        d.AddMember(rapidjson::Value(key, allocator).Move(), array, allocator);
-    }
-}
-
-void addDubNames(rapidjson::Document& d, const char* key, const std::map<int64_t, std::string>& dubNames, rapidjson::Document::AllocatorType& allocator) {
-    rapidjson::Value dubNamesArray(rapidjson::kArrayType);
-    for (const auto& pair : dubNames) {
-        rapidjson::Value pairArray(rapidjson::kArrayType);
-        pairArray.PushBack(pair.first, allocator);  // Push the key
-        pairArray.PushBack(rapidjson::Value(pair.second.c_str(), allocator).Move(), allocator);  // Push the value
-        dubNamesArray.PushBack(pairArray, allocator);  // Add the pair array to the dubNames array
-    }
-    if (!dubNamesArray.Empty()) {
-        d.AddMember(rapidjson::Value(key, allocator).Move(), dubNamesArray, allocator);
-    }
-}
-
-rapidjson::Document player_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding basic fields
-    d.AddMember("id", id, allocator);
-    d.AddMember("name", rapidjson::Value(name.c_str(), allocator).Move(), allocator);
-
-    // Adding 'account' if it's set
-    if (account) {
-        d.AddMember("account", account->vn, allocator);
-    }
-
-    // Adding 'aliases' as an array of serialized objects
-    rapidjson::Value aliasesArray(rapidjson::kArrayType);
-    for (auto& a : aliases) {
-        rapidjson::Document aliasDoc = a.rserialize(); // Assuming alias_data has a method rserialize
-        rapidjson::Value aliasValue(rapidjson::kObjectType);
-        aliasValue.CopyFrom(aliasDoc, allocator);
-        aliasesArray.PushBack(aliasValue, allocator);
-    }
-    if (!aliasesArray.Empty()) {
-        d.AddMember("aliases", aliasesArray, allocator);
-    }
-
-    // Adding simple arrays ('sensePlayer', 'senseMemory', 'dubNames')
-    addArray(d, "sensePlayer", sensePlayer, allocator);
-    addArray(d, "senseMemory", senseMemory, allocator);
-    addDubNames(d, "dubNames", dubNames, allocator);
-
-    // Adding 'color_choices' as an array of pairs
-    rapidjson::Value colorChoicesArray(rapidjson::kArrayType);
-    for (int i = 0; i < NUM_COLOR; ++i) {
-        if (color_choices[i] && strlen(color_choices[i])) {
-            rapidjson::Value pair(rapidjson::kArrayType);
-            pair.PushBack(i, allocator);
-            pair.PushBack(rapidjson::Value(color_choices[i], allocator).Move(), allocator);
-            colorChoicesArray.PushBack(pair, allocator);
-        }
-    }
-    if (!colorChoicesArray.Empty()) {
-        d.AddMember("color_choices", colorChoicesArray, allocator);
-    }
-
-    return d;
-}
 
 player_data::player_data(const nlohmann::json &j) {
     id = j["id"];
@@ -1416,34 +993,6 @@ nlohmann::json affected_type::serialize() {
     if(bitvector) j["bitvector"] = bitvector;
 
     return j;
-}
-
-rapidjson::Document affected_type::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding fields only if they have significant values
-    if (type) {
-        d.AddMember("type", type, allocator);
-    }
-    if (duration) {
-        d.AddMember("duration", duration, allocator);
-    }
-    if (modifier != 0.0) { // Checking against 0.0 for double
-        d.AddMember("modifier", modifier, allocator);
-    }
-    if (location) {
-        d.AddMember("location", location, allocator);
-    }
-    if (specific) {
-        d.AddMember("specific", specific, allocator);
-    }
-    if (bitvector) {
-        d.AddMember("bitvector", bitvector, allocator);
-    }
-
-    return d;
 }
 
 affected_type::affected_type(const nlohmann::json &j) {

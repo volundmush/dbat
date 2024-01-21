@@ -1408,11 +1408,6 @@ extern bool spar_friendly(struct char_data *ch, struct char_data *npc);
 extern std::string jdump(const nlohmann::json& j);
 extern nlohmann::json jparse(const std::string& s);
 extern std::string jdump_pretty(const nlohmann::json& j);
-extern std::string rjdump(const rapidjson::Value& d);
-extern std::string rjdump_pretty(const rapidjson::Value& d);
-extern std::string rjdump(const rapidjson::Document& d);
-extern std::string rjdump_pretty(const rapidjson::Document& d);
-extern rapidjson::Document rjparse(const std::string& s);
 
 extern bool iequals(const std::string& a, const std::string& b);
 extern std::vector<std::string> split(const std::string& s, char delimiter);
@@ -1424,16 +1419,3 @@ extern void trim_right(std::string& str);
 extern void to_lower(std::string& str);
 extern bool is_all_alpha(const std::string& str);
 extern bool icontains(const std::string& haystack, const std::string& needle);
-
-template<size_t N>
-void addFlags(rapidjson::Document& d, const char* key, const std::bitset<N>& flags, rapidjson::Document::AllocatorType& allocator) {
-    rapidjson::Value flagsArray(rapidjson::kArrayType);
-    for (size_t i = 0; i < flags.size(); ++i) {
-        if (flags.test(i)) {
-            flagsArray.PushBack(static_cast<int>(i), allocator);
-        }
-    }
-    if (!flagsArray.Empty()) {
-        d.AddMember(rapidjson::Value(key, allocator).Move(), flagsArray, allocator);
-    }
-}

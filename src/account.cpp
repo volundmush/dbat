@@ -61,67 +61,6 @@ nlohmann::json account_data::serialize() {
     return j;
 }
 
-rapidjson::Document account_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding basic fields
-    if (vn != NOTHING) {
-        d.AddMember("vn", vn, allocator);
-    }
-    if (!name.empty()) {
-        d.AddMember("name", rapidjson::Value(name.c_str(), allocator).Move(), allocator);
-    }
-    if (!passHash.empty()) {
-        d.AddMember("passHash", rapidjson::Value(passHash.c_str(), allocator).Move(), allocator);
-    }
-    if (!email.empty()) {
-        d.AddMember("email", rapidjson::Value(email.c_str(), allocator).Move(), allocator);
-    }
-    if (created) {
-        d.AddMember("created", created, allocator);
-    }
-    if (lastLogin) {
-        d.AddMember("lastLogin", lastLogin, allocator);
-    }
-    if (lastLogout) {
-        d.AddMember("lastLogout", lastLogout, allocator);
-    }
-    if (lastPasswordChanged) {
-        d.AddMember("lastPasswordChanged", lastPasswordChanged, allocator);
-    }
-    if (totalPlayTime != 0.0) {
-        d.AddMember("totalPlayTime", totalPlayTime, allocator);
-    }
-    if (!disabledReason.empty()) {
-        d.AddMember("disabledReason", rapidjson::Value(disabledReason.c_str(), allocator).Move(), allocator);
-    }
-    if (disabledUntil) {
-        d.AddMember("disabledUntil", disabledUntil, allocator);
-    }
-    if (rpp) {
-        d.AddMember("rpp", rpp, allocator);
-    }
-    if (slots != 3) {
-        d.AddMember("slots", slots, allocator);
-    }
-    if (adminLevel) {
-        d.AddMember("adminLevel", adminLevel, allocator);
-    }
-
-    // Adding 'characters' as an array
-    rapidjson::Value charactersArray(rapidjson::kArrayType);
-    for (const auto& c : characters) {
-        charactersArray.PushBack(c, allocator);
-    }
-    if (!charactersArray.Empty()) {
-        d.AddMember("characters", charactersArray, allocator);
-    }
-
-    return d;
-}
-
 void account_data::deserialize(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"];
     if(j.contains("name")) name = j["name"];

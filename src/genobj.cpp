@@ -273,28 +273,6 @@ nlohmann::json obj_affected_type::serialize() {
     return j;
 }
 
-rapidjson::Document obj_affected_type::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'location' if it's non-zero
-    if (location) {
-        d.AddMember("location", location, allocator);
-    }
-
-    // Adding 'modifier' if it's non-zero
-    if (modifier != 0.0) {
-        d.AddMember("modifier", modifier, allocator);
-    }
-
-    // Adding 'specific' if it's non-zero
-    if (specific) {
-        d.AddMember("specific", specific, allocator);
-    }
-
-    return d;
-}
 
 nlohmann::json obj_data::serializeBase() {
     auto j = serializeUnit();
@@ -327,70 +305,6 @@ nlohmann::json obj_data::serializeBase() {
     return j;
 }
 
-// Helper function to add flag arrays
-
-
-rapidjson::Document obj_data::rserializeBase() {
-    auto d = rserializeUnit(); // Assuming this returns a RapidJSON Document with some base data
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'value' as an array of pairs
-    rapidjson::Value valueArray(rapidjson::kArrayType);
-    for (int i = 0; i < NUM_OBJ_VAL_POSITIONS; ++i) {
-        if (value[i]) {
-            rapidjson::Value pair(rapidjson::kArrayType);
-            pair.PushBack(i, allocator);
-            pair.PushBack(value[i], allocator);
-            valueArray.PushBack(pair, allocator);
-        }
-    }
-    if (!valueArray.Empty()) {
-        d.AddMember("value", valueArray, allocator);
-    }
-
-    // Adding other members if they are set
-    if (type_flag) {
-        d.AddMember("type_flag", type_flag, allocator);
-    }
-    if (level) {
-        d.AddMember("level", level, allocator);
-    }
-
-    // Adding 'wear_flags' and 'extra_flags' as arrays
-    addFlags(d, "wear_flags", wear_flags, allocator);
-    addFlags(d, "extra_flags", extra_flags, allocator);
-
-    // Adding 'weight', 'cost', and 'cost_per_day' if they are set
-    if (weight != 0.0) {
-        d.AddMember("weight", weight, allocator);
-    }
-    if (cost) {
-        d.AddMember("cost", cost, allocator);
-    }
-    if (cost_per_day) {
-        d.AddMember("cost_per_day", cost_per_day, allocator);
-    }
-
-    // Adding 'bitvector'
-    addFlags(d, "bitvector", bitvector, allocator);
-
-    // Adding 'affected' as an array of serialized affected_data objects
-    rapidjson::Value affectedArray(rapidjson::kArrayType);
-    for (auto& i : affected) {
-        if (i.location == APPLY_NONE) continue;
-        rapidjson::Document affectedDoc = i.rserialize(); // Assuming affected_data has a method rserialize
-        rapidjson::Value affectedValue(rapidjson::kObjectType);
-        affectedValue.CopyFrom(affectedDoc, allocator);
-        affectedArray.PushBack(affectedValue, allocator);
-    }
-    if (!affectedArray.Empty()) {
-        d.AddMember("affected", affectedArray, allocator);
-    }
-
-    return d;
-}
-
-
 
 nlohmann::json obj_data::serializeInstance() {
     auto j = serializeBase();
@@ -412,35 +326,6 @@ nlohmann::json obj_data::serializeInstance() {
     return j;
 }
 
-rapidjson::Document obj_data::rserializeInstance() {
-    auto d = rserializeBase(); // Assuming this returns a RapidJSON Document with base data
-    auto& allocator = d.GetAllocator();
-
-    // Handling 'id' and 'generation'
-    if (id == -1) {
-        id = nextObjID(); // Assuming nextObjID() is accessible
-        generation = time(nullptr);
-        check_unique_id(this); // Assuming this function is accessible and modifies the object state
-        add_unique_id(this);   // Assuming this function is accessible and modifies the object state
-    }
-
-    if (generation) {
-        d.AddMember("generation", generation, allocator);
-    }
-
-    // Handling 'dgvariables'
-    if (script && script->global_vars) {
-        rapidjson::Document varsDoc = rserializeVars(script->global_vars); // Assuming serializeVars now returns a RapidJSON Document
-        d.AddMember("dgvariables", varsDoc, allocator);
-    }
-
-    // Handling 'room_loaded'
-    if (world.contains(room_loaded)) { // Assuming world is accessible and has contains method
-        d.AddMember("room_loaded", room_loaded, allocator);
-    }
-
-    return d;
-}
 
 nlohmann::json obj_data::serializeProto() {
     auto j = serializeBase();
@@ -452,23 +337,6 @@ nlohmann::json obj_data::serializeProto() {
     return j;
 }
 
-rapidjson::Document obj_data::rserializeProto() {
-    auto d = rserializeBase(); // Assuming this returns a RapidJSON Document with base data
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'proto_script' as an array
-    rapidjson::Value protoScriptArray(rapidjson::kArrayType);
-    for (const auto& p : proto_script) {
-        if (trig_index.contains(p)) { // Assuming trig_index is accessible and has contains method
-            protoScriptArray.PushBack(p, allocator);
-        }
-    }
-    if (!protoScriptArray.Empty()) {
-        d.AddMember("proto_script", protoScriptArray, allocator);
-    }
-
-    return d;
-}
 
 
 void obj_data::deserializeBase(const nlohmann::json &j) {

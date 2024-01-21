@@ -248,66 +248,6 @@ nlohmann::json room_direction_data::serialize() {
     return j;
 }
 
-rapidjson::Document room_direction_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    if (general_description && strlen(general_description)) {
-        d.AddMember("general_description", rapidjson::Value(general_description, allocator).Move(), allocator);
-    }
-
-    if (keyword && strlen(keyword)) {
-        d.AddMember("keyword", rapidjson::Value(keyword, allocator).Move(), allocator);
-    }
-
-    if (exit_info) {
-        d.AddMember("exit_info", exit_info, allocator);
-    }
-
-    if (key > 0) {
-        d.AddMember("key", key, allocator);
-    }
-
-    if (to_room != NOWHERE) {
-        d.AddMember("to_room", to_room, allocator);
-    }
-
-    if (dclock) {
-        d.AddMember("dclock", dclock, allocator);
-    }
-
-    if (dchide) {
-        d.AddMember("dchide", dchide, allocator);
-    }
-
-    if (dcskill) {
-        d.AddMember("dcskill", dcskill, allocator);
-    }
-
-    if (dcmove) {
-        d.AddMember("dcmove", dcmove, allocator);
-    }
-
-    if (failsavetype) {
-        d.AddMember("failsavetype", failsavetype, allocator);
-    }
-
-    if (dcfailsave) {
-        d.AddMember("dcfailsave", dcfailsave, allocator);
-    }
-
-    if (failroom > 0) {
-        d.AddMember("failroom", failroom, allocator);
-    }
-
-    if (totalfailroom > 0) {
-        d.AddMember("totalfailroom", totalfailroom, allocator);
-    }
-
-    return d;
-}
-
 room_direction_data::room_direction_data(const nlohmann::json &j) : room_direction_data() {
     if(j.contains("general_description")) general_description = strdup(j["general_description"].get<std::string>().c_str());
     if(j.contains("keyword")) keyword = strdup(j["keyword"].get<std::string>().c_str());
@@ -352,64 +292,6 @@ nlohmann::json room_data::serialize() {
 
     return j;
 }
-
-rapidjson::Document room_data::rserialize() {
-    auto d = rserializeUnit();  // Assuming this returns a partially filled RapidJSON Document
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'sector_type' if it's non-zero
-    if (sector_type) {
-        d.AddMember("sector_type", sector_type, allocator);
-    }
-
-    // Adding 'dir_option' as an array of 2-element lists
-    rapidjson::Value dirArray(rapidjson::kArrayType);
-    for (int i = 0; i < NUM_OF_DIRS; ++i) {
-        if (dir_option[i]) {
-            rapidjson::Value pairArray(rapidjson::kArrayType);
-
-            // Adding the direction index
-            pairArray.PushBack(i, allocator);
-
-            // Serializing room_direction_data and adding it to the pairArray
-            rapidjson::Document dirDoc = dir_option[i]->rserialize();  // Assuming room_direction_data has a method rserialize
-            rapidjson::Value dirData(rapidjson::kObjectType);
-            dirData.CopyFrom(dirDoc, allocator);
-            pairArray.PushBack(dirData, allocator);
-
-            // Adding the pair to the dirArray
-            dirArray.PushBack(pairArray, allocator);
-        }
-    }
-    if (!dirArray.Empty()) {
-        d.AddMember("dir_option", dirArray, allocator);
-    }
-
-    // Adding 'room_flags'
-    rapidjson::Value flagsArray(rapidjson::kArrayType);
-    for (size_t i = 0; i < room_flags.size(); ++i) {
-        if (room_flags[i]) {
-            flagsArray.PushBack(static_cast<int>(i), allocator);
-        }
-    }
-    if (!flagsArray.Empty()) {
-        d.AddMember("room_flags", flagsArray, allocator);
-    }
-
-    // Adding 'proto_script'
-    rapidjson::Value protoArray(rapidjson::kArrayType);
-    for (auto p : proto_script) {
-        if (trig_index.contains(p)) {
-            protoArray.PushBack(p, allocator);
-        }
-    }
-    if (!protoArray.Empty()) {
-        d.AddMember("proto_script", protoArray, allocator);
-    }
-
-    return d;
-}
-
 
 room_data::room_data(const nlohmann::json &j) {
     deserializeUnit(j);

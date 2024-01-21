@@ -2961,24 +2961,6 @@ nlohmann::json trig_var_data::serialize() {
     return j;
 }
 
-rapidjson::Document trig_var_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    if (name && strlen(name)) {
-        d.AddMember("name", rapidjson::Value(name, allocator).Move(), allocator);
-    }
-    if (value && strlen(value)) {
-        d.AddMember("value", rapidjson::Value(value, allocator).Move(), allocator);
-    }
-    if (context) {
-        d.AddMember("context", context, allocator);
-    }
-
-    return d;
-}
-
 trig_var_data::trig_var_data(const nlohmann::json& j) : trig_var_data() {
     if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
     if(j.contains("value")) value = strdup(j["value"].get<std::string>().c_str());
@@ -3003,45 +2985,6 @@ nlohmann::json trig_data::serializeProto() {
     return j;
 }
 
-rapidjson::Document trig_data::rserializeProto() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding basic fields
-    if (vn != NOTHING) {
-        d.AddMember("vn", vn, allocator);
-    }
-    if (name && strlen(name)) {
-        d.AddMember("name", rapidjson::Value(name, allocator).Move(), allocator);
-    }
-    if (attach_type) {
-        d.AddMember("attach_type", attach_type, allocator);
-    }
-    if (data_type) {
-        d.AddMember("data_type", data_type, allocator);
-    }
-    if (trigger_type) {
-        d.AddMember("trigger_type", trigger_type, allocator);
-    }
-    if (narg) {
-        d.AddMember("narg", narg, allocator);
-    }
-    if (arglist && strlen(arglist)) {
-        d.AddMember("arglist", rapidjson::Value(arglist, allocator).Move(), allocator);
-    }
-
-    // Adding 'cmdlist' as an array
-    rapidjson::Value cmdlistArray(rapidjson::kArrayType);
-    for (auto c = cmdlist; c; c = c->next) {
-        cmdlistArray.PushBack(rapidjson::Value(c->cmd, allocator).Move(), allocator);
-    }
-    if (!cmdlistArray.Empty()) {
-        d.AddMember("cmdlist", cmdlistArray, allocator);
-    }
-
-    return d;
-}
 
 int trig_data::countLine(struct cmdlist_element *c) {
     int count = 0;
@@ -3076,44 +3019,6 @@ nlohmann::json trig_data::serializeInstance() {
     return j;
 }
 
-rapidjson::Document trig_data::rserializeInstance() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding basic fields
-    d.AddMember("vn", vn, allocator);
-    d.AddMember("id", id, allocator);
-    d.AddMember("generation", generation, allocator);
-    d.AddMember("order", order, allocator);
-
-    // Adding optional fields
-    if (depth) {
-        d.AddMember("depth", depth, allocator);
-    }
-    if (loops) {
-        d.AddMember("loops", loops, allocator);
-    }
-    if (waiting != 0.0) {
-        d.AddMember("waiting", waiting, allocator);
-    }
-
-    // Handling 'curr_state'
-    if (!(curr_state == cmdlist || !curr_state)) {
-        d.AddMember("curr_state", countLine(curr_state), allocator); // Assuming countLine() is accessible
-        if (curr_state->original) {
-            d.AddMember("curr_state_original", countLine(curr_state->original), allocator);
-        }
-    }
-
-    // Adding 'var_list'
-    if (var_list) {
-        rapidjson::Document varsDoc = rserializeVars(var_list); // Assuming rserializeVars now returns a RapidJSON Document
-        d.AddMember("var_list", varsDoc, allocator);
-    }
-
-    return d;
-}
 
 void trig_data::deserializeInstance(const nlohmann::json &j) {
     if(j.contains("vn")) vn = j["vn"].get<int>();
@@ -3255,20 +3160,6 @@ nlohmann::json serializeVars(struct trig_var_data *vd) {
     return j;
 }
 
-rapidjson::Document rserializeVars(struct trig_var_data *vd) {
-    rapidjson::Document j;
-    j.SetArray();
-    auto& allocator = j.GetAllocator();
-
-    for (auto v = vd; v; v = v->next) {
-        rapidjson::Document varDoc = v->rserialize(); // Assuming trig_var_data has rserialize method
-        rapidjson::Value varValue(rapidjson::kObjectType);
-        varValue.CopyFrom(varDoc, allocator);
-        j.PushBack(varValue, allocator);
-    }
-
-    return j;
-}
 
 void deserializeVars(struct trig_var_data **vd, const nlohmann::json &j) {
     for(auto it = j.rbegin(); it != j.rend(); ++it) {
@@ -3294,6 +3185,3 @@ nlohmann::json index_data::serializeProto() {
     return proto->serializeProto();
 }
 
-rapidjson::Document index_data::rserializeProto() {
-    return proto->rserializeProto();
-}

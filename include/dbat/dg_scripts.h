@@ -165,7 +165,6 @@ struct trig_var_data {
     trig_var_data() = default;
     explicit trig_var_data(const nlohmann::json& j);
     nlohmann::json serialize();
-    rapidjson::Document rserialize();
     char *name{};                /* name of variable  */
     char *value{};                /* value of variable */
     long context{};                /* 0: global context */
@@ -178,9 +177,7 @@ struct trig_data {
     trig_data() = default;
     explicit trig_data(const nlohmann::json& j);
     nlohmann::json serializeProto();
-    rapidjson::Document rserializeProto();
     nlohmann::json serializeInstance();
-    rapidjson::Document rserializeInstance();
     std::string serializeLocation();
     trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
     int8_t attach_type{};            /* mob/obj/wld intentions          */
@@ -546,4 +543,3 @@ extern void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thi
 extern nlohmann::json serializeVars(struct trig_var_data *vd);
 
 extern void deserializeVars(struct trig_var_data **vd, const nlohmann::json& j);
-extern rapidjson::Document rserializeVars(struct trig_var_data *vd);

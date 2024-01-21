@@ -1621,23 +1621,6 @@ nlohmann::json shop_buy_data::serialize() {
     return j;
 }
 
-rapidjson::Document shop_buy_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding 'type' if it's non-zero
-    if (type) {
-        d.AddMember("type", type, allocator);
-    }
-
-    // Adding 'keywords' if it's not empty
-    if (!keywords.empty()) {
-        d.AddMember("keywords", rapidjson::Value(keywords.c_str(), allocator).Move(), allocator);
-    }
-
-    return d;
-}
 
 shop_buy_data::shop_buy_data(const nlohmann::json &j) : shop_buy_data() {
     if(j.contains("type")) type = j["type"];
@@ -1673,95 +1656,6 @@ nlohmann::json shop_data::serialize() {
 
     return j;
 }
-
-// Helper function to add string members
-static void addStringMember(rapidjson::Document& d, const char* key, const char* value, rapidjson::Document::AllocatorType& allocator) {
-    if (value && strlen(value)) {
-        d.AddMember(rapidjson::Value(key, allocator).Move(), rapidjson::Value(value, allocator).Move(), allocator);
-    }
-}
-
-// Helper function to add integer members
-static void addIntMember(rapidjson::Document& d, const char* key, int value, rapidjson::Document::AllocatorType& allocator) {
-    if (value) {
-        d.AddMember(rapidjson::Value(key, allocator).Move(), value, allocator);
-    }
-}
-
-rapidjson::Document shop_data::rserialize() {
-    rapidjson::Document d;
-    d.SetObject();
-    auto& allocator = d.GetAllocator();
-
-    // Adding basic fields
-    d.AddMember("vnum", vnum, allocator);
-
-    // Adding 'producing' as an array
-    rapidjson::Value producingArray(rapidjson::kArrayType);
-    for (const auto& i : producing) {
-        producingArray.PushBack(i, allocator);
-    }
-    d.AddMember("producing", producingArray, allocator);
-
-    // Adding 'type' as an array of serialized shop_buy_data objects
-    rapidjson::Value typeArray(rapidjson::kArrayType);
-    for (auto& t : type) {
-        rapidjson::Document typeDoc = t.rserialize(); // Assuming shop_buy_data has a method rserialize
-        rapidjson::Value typeValue(rapidjson::kObjectType);
-        typeValue.CopyFrom(typeDoc, allocator);
-        typeArray.PushBack(typeValue, allocator);
-    }
-    d.AddMember("type", typeArray, allocator);
-
-    // Adding other members if they are set
-    if (profit_buy != 0.0) {
-        d.AddMember("profit_buy", profit_buy, allocator);
-    }
-    if (profit_sell != 0.0) {
-        d.AddMember("profit_sell", profit_sell, allocator);
-    }
-
-    // Adding char* fields
-    addStringMember(d, "no_such_item1", no_such_item1, allocator);
-    addStringMember(d, "no_such_item2", no_such_item2, allocator);
-    addStringMember(d, "missing_cash1", missing_cash1, allocator);
-    addStringMember(d, "missing_cash2", missing_cash2, allocator);
-    addStringMember(d, "do_not_buy", do_not_buy, allocator);
-    addStringMember(d, "message_buy", message_buy, allocator);
-    addStringMember(d, "message_sell", message_sell, allocator);
-
-    // Adding integer fields
-    addIntMember(d, "temper1", temper1, allocator);
-    addIntMember(d, "bitvector", bitvector, allocator);
-    addIntMember(d, "keeper", keeper, allocator);
-    addIntMember(d, "open1", open1, allocator);
-    addIntMember(d, "close1", close1, allocator);
-    addIntMember(d, "open2", open2, allocator);
-    addIntMember(d, "close2", close2, allocator);
-    addIntMember(d, "bankAccount", bankAccount, allocator);
-    addIntMember(d, "lastsort", lastsort, allocator);
-
-    // Adding 'with_who' as an array
-    rapidjson::Value withWhoArray(rapidjson::kArrayType);
-    for (int i = 0; i < 79; ++i) { // Assuming 79 is the correct size for with_who array
-        if (IS_SET_AR(with_who, i)) {
-            withWhoArray.PushBack(i, allocator);
-        }
-    }
-    if (!withWhoArray.Empty()) {
-        d.AddMember("with_who", withWhoArray, allocator);
-    }
-
-    // Adding 'in_room' as an array
-    rapidjson::Value inRoomArray(rapidjson::kArrayType);
-    for (const auto& r : in_room) {
-        inRoomArray.PushBack(r, allocator);
-    }
-    d.AddMember("in_room", inRoomArray, allocator);
-
-    return d;
-}
-
 
 
 shop_data::shop_data(const nlohmann::json &j) : shop_data() {
