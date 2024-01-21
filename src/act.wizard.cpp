@@ -22,7 +22,6 @@
 #include "dbat/players.h"
 #include "dbat/weather.h"
 #include "dbat/assemblies.h"
-#include "dbat/house.h"
 #include "dbat/comm.h"
 #include "dbat/constants.h"
 #include "dbat/dg_scripts.h"

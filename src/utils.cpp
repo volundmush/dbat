@@ -18,7 +18,6 @@
 
 #include "dbat/comm.h"
 #include "dbat/handler.h"
-#include "dbat/random.h"
 #include "dbat/spells.h"
 #include "dbat/db.h"
 #include "dbat/fight.h"

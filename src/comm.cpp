@@ -15,14 +15,12 @@
 #include "dbat/weather.h"
 #include "dbat/act.wizard.h"
 #include "dbat/act.misc.h"
-#include "dbat/house.h"
 #include "dbat/act.other.h"
 #include "dbat/dg_comm.h"
 #include "dbat/handler.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/act.item.h"
 #include "dbat/interpreter.h"
-#include "dbat/random.h"
 #include "dbat/act.informative.h"
 #include "dbat/dg_event.h"
 #include "dbat/mobact.h"
@@ -354,7 +352,6 @@ namespace game {
 
     void init_locale() {
         std::locale::global(std::locale("en_US.UTF-8"));
-        circle_srandom(time(nullptr));
     }
 
     bool init_sodium() {

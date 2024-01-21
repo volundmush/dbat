@@ -274,13 +274,9 @@ extern int shop_producing(struct obj_data *item, vnum shop_nr);
 
 extern int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim);
 
-extern void boot_the_shops(FILE *shop_f, char *filename, int rec_count);
-
 extern void assign_the_shopkeepers();
 
 extern int ok_shop_room(vnum shop_nr, room_vnum room);
-
-extern void destroy_shops();
 
 extern void show_shops(struct char_data *ch, char *arg);
 

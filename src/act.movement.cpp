@@ -21,7 +21,6 @@
 #include "dbat/guild.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/local_limits.h"
-#include "dbat/house.h"
 #include "dbat/constants.h"
 #include "dbat/act.informative.h"
 
