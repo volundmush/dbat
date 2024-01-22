@@ -31,7 +31,6 @@ set(CIRCLE_INCLUDE_DIRS
         ${SQLiteCpp_SOURCE_DIR}/include
         ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         ${effolkronium_random_SOURCE_DIR}/include
-        ${RapidJSON_SOURCE_DIR}/include
         )
 
 
