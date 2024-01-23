@@ -164,4 +164,40 @@ namespace skill {
         }
         return "NOTFOUND";
     }
+
+    struct skill_affect_type {
+        int location{};
+        double modifier{0.0};
+        int specific{-1};
+        std::function<double(struct char_data *ch)> func{};
+    };
+
+    std::unordered_map<SkillID, std::vector<skill_affect_type>> skillAffects = {};
+
+    double getModifier(char_data* ch, SkillID skill, int location, int specific) {
+        double out = 0.0;
+        if (auto found = skillAffects.find(skill); found != skillAffects.end()) {
+            for (auto& affect: found->second) {
+                if (affect.location == location) {if(specific != -1 && specific != affect.specific) continue;
+                    out += affect.modifier;
+                    if(affect.func) {
+                        out += affect.func(ch);
+                    }
+                }
+            }
+
+        }
+
+        return out;
+    }
+
+    double getModifiers(char_data* ch, int location, int specific) {
+        double out = 0.0;
+        for(auto &[id, data] : ch->skill) {
+            if(data.level > 0)
+                out += getModifier(ch, id, location, specific);
+        }
+        return out;
+    }
+
 }
