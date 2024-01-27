@@ -1091,8 +1091,9 @@ enum class SkillID : uint16_t {
 #define PRF_GHEALTH     57
 #define PRF_IHEALTH     58
 #define PRF_ENERGIZE    59
+#define PRF_FORM        60
 
-#define NUM_PRF_FLAGS   60
+#define NUM_PRF_FLAGS   61
 
 /* Player autoexit levels: used as an index to exitlevels           */
 #define EXIT_OFF        0       /* Autoexit off                     */
