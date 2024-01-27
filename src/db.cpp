@@ -537,6 +537,23 @@ static void db_load_rooms(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
+static void db_load_exits(const std::shared_ptr<SQLite::Database>& db) {
+    SQLite::Statement q(*db, "SELECT id,direction,data FROM exits");
+    while(q.executeStep()) {
+        auto id = q.getColumn(0).getInt64();
+        auto dir = q.getColumn(1).getInt64();
+        auto data = q.getColumn(2).getString();
+        try {
+            auto j = nlohmann::json::parse(data);
+            auto &r = world[id];
+            r.dir_option[dir] = new room_direction_data(j);
+        } catch(std::exception& e) {
+            basic_mud_log("Error parsing exit %ld-%ld: %s", id, dir, e.what());
+            continue;
+        }
+    }
+}
+
 static void db_load_shops(const std::shared_ptr<SQLite::Database>& db) {
     SQLite::Statement q(*db, "SELECT id,data FROM shops");
     while(q.executeStep()) {
@@ -682,6 +699,8 @@ void boot_db_world() {
 
     basic_mud_log("Loading rooms.");
     db_load_rooms(latestDump);
+    basic_mud_log("Loading exits.");
+    db_load_exits(latestDump);
 
     basic_mud_log("Loading areas.");
     db_load_areas(latestDump);

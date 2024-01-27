@@ -276,10 +276,6 @@ nlohmann::json room_data::serialize() {
 
     if(sector_type) j["sector_type"] = sector_type;
 
-    for(auto i = 0; i < NUM_OF_DIRS; i++) {
-        if(dir_option[i]) j["dir_option"].push_back(std::make_pair(i, dir_option[i]->serialize()));
-    }
-
     for (size_t i = 0; i < room_flags.size(); ++i) {
         if (room_flags[i]) {
             j["room_flags"].push_back(i);

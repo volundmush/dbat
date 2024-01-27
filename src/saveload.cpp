@@ -49,10 +49,18 @@ static std::vector<std::string> schema = {
         "	data TEXT NOT NULL"
         ");",
 
+        "CREATE TABLE IF NOT EXISTS exits ("
+        "	id INTEGER NOT NULL,"
+        "   direction INTEGER NOT NULL,"
+        "   destination INTEGER NOT NULL,"
+        "	data TEXT NOT NULL,"
+        "   PRIMARY KEY(id, direction)"
+        ");",
+
         "CREATE TABLE IF NOT EXISTS dgScriptPrototypes ("
         "	id INTEGER PRIMARY KEY,"
         "	data TEXT NOT NULL"
-        ");"
+        ");",
 
         "CREATE TABLE IF NOT EXISTS accounts ("
         "   id INTEGER PRIMARY KEY,"
@@ -221,12 +229,25 @@ void dump_state_globalData(const std::shared_ptr<SQLite::Database>& db) {
 
 static void process_dirty_rooms(const std::shared_ptr<SQLite::Database>& db) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO rooms (id, data) VALUES (?, ?)");
+    SQLite::Statement q2(*db, "INSERT OR REPLACE INTO exits (id, direction, destination, data) VALUES (?,?,?,?)");
 
     for(auto &[v, r] : world) {
         q.bind(1, v);
         q.bind(2, jdump(r.serialize()));
         q.exec();
         q.reset();
+
+        for(auto i = 0; i < NUM_OF_DIRS; i++) {
+            if(auto ex = r.dir_option[i]; ex) {
+                q2.bind(1, v);
+                q2.bind(2, i);
+                q2.bind(3, ex->to_room);
+                q2.bind(4, jdump(ex->serialize()));
+                q2.exec();
+                q2.reset();
+            }
+        }
+
     }
 }
 
