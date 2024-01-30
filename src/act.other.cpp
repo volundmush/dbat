@@ -7501,7 +7501,7 @@ ACMD(do_transform) {
 
 
     // Search for available transformations. Error out if we can't find one.
-    auto trans_maybe = trans::findForm(ch, arg);
+    auto trans_maybe = trans::findFormFor(ch, arg);
     if (!trans_maybe) {
         send_to_char(ch, "You don't have that form.\r\n");
         return;

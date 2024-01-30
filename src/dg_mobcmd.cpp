@@ -1075,13 +1075,13 @@ ACMD(do_maddtransform) {
 
     std::string strForm(formName);
 
-    auto foundForm = trans::getForm(ch, strForm);
+    auto foundForm = trans::findForm(ch, strForm);
 
     if(foundForm.has_value())
         if(add)
-            ch->addTransform(foundForm);
+            ch->addTransform(*foundForm);
         else 
-            ch->removeTransform(foundForm);
+            ch->removeTransform(*foundForm);
 }
 
 

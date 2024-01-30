@@ -1176,7 +1176,7 @@ namespace trans {
     };
 
 
-    std::optional<FormID> find_form(char_data* ch, std::string form) {
+    std::optional<FormID> findForm(char_data* ch, const std::string& form) {
         for (auto formFound : forms) {
             if (form == getAbbr(ch, formFound)) {
                 return formFound;
@@ -1185,7 +1185,7 @@ namespace trans {
         }
 
         //Failure state
-        return {}
+        return {};
     }
 
 
@@ -1213,7 +1213,7 @@ namespace trans {
         {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}}
     };
 
-    std::vector<FormID> get_forms(char_data* ch) {
+    std::vector<FormID> getFormsFor(char_data* ch) {
         auto forms = race_forms.find(ch->race);
         std::vector<FormID> pforms;
 
@@ -1239,7 +1239,7 @@ namespace trans {
     }
 
     void displayForms(char_data* ch) {
-        auto forms = get_forms(ch);
+        auto forms = getFormsFor(ch);
         if (forms.empty()) {
             send_to_char(ch, "You have no forms. Bummer.\r\n");
             return;
@@ -1393,13 +1393,8 @@ namespace trans {
         return 0;
     }
 
-    std::optional<FormID> findForm(struct char_data* ch, const std::string& arg) {
-        auto forms = get_forms(ch);
-        if (forms == race_forms.end()) {
-            return {};
-        }
-
-        for (auto form: forms->second) {
+    std::optional<FormID> findFormFor(struct char_data* ch, const std::string& arg) {
+        for (auto form: getFormsFor(ch)) {
             if (iequals(arg, getAbbr(ch, form))) return form;
         }
 

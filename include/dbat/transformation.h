@@ -18,7 +18,8 @@ namespace trans {
 
     extern void displayForms(struct char_data *ch);
     extern int64_t getRequiredPL(struct char_data* ch, FormID trans);
-    extern std::optional<FormID> getForm(char_data* ch, std::string form);
+    extern std::optional<FormID> findFormFor(char_data* ch, const std::string& form);
+    extern std::vector<FormID> getFormsFor(char_data* ch);
 
     extern bool blockRevertDisallowed(struct char_data *ch, FormID form);
 
