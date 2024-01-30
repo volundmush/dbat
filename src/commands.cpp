@@ -809,6 +809,8 @@ ACMD(do_dig);
 
 ACMD(do_rdisplay);
 
+ACMD(do_maddtransform);
+
 struct command_info *complete_cmd_info;
 
 const struct command_info cmd_info[] = {
@@ -1380,5 +1382,6 @@ const struct command_info cmd_info[] = {
         {"mzoneecho",     "mzoneecho",    POS_DEAD,     do_mzoneecho,       -1, ADMLVL_NONE,    0},
         {"vdelete",       "vdelete",      POS_DEAD,     do_vdelete,         0,  ADMLVL_BUILDER, 0},
         {"mfollow",       "mfollow",      POS_DEAD,     do_mfollow,         -1, ADMLVL_NONE,    0},
+        {"maddtransform", "maddtransform",POS_DEAD,     do_maddtransform,   -1, ADMLVL_NONE,    0},
 
         {"\n",            "zzzzzzz", 0,                 nullptr,            0,  ADMLVL_NONE,    0}};    /* this must be last */

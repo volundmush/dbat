@@ -45,6 +45,7 @@
 #include "dbat/constants.h"
 #include "dbat/act.wizard.h"
 #include "dbat/fight.h"
+#include "dbat/transformation.h"
 
 /*
  * Local functions.
@@ -1032,6 +1033,55 @@ ACMD(do_mtransform) {
         ch->vn = this_rnum;
         extract_char(m);
     }
+}
+
+
+ACMD(do_maddtransform) {
+    char name[MAX_INPUT_LENGTH], operation[MAX_INPUT_LENGTH], formName[MAX_INPUT_LENGTH];
+    int dam = 0;
+    char_data* vict;
+
+    if (!MOB_OR_IMPL(ch)) {
+        send_to_char(ch, "Huh?!?\r\n");
+        return;
+    }
+
+    if (AFF_FLAGGED(ch, AFF_CHARM))
+        return;
+
+    three_arguments(argument, name, operation, formName);
+
+    /* who cares if it's a number ? if not it'll just be 0 */
+    if (!*name || !*operation || !*formName) {
+        mob_log(ch, "maddtransform: bad syntax (<name> <add/remove> <TFabbr>)");
+        return;
+    }
+
+    if (!(vict = get_char(name))) {
+        mob_log(ch, "maddtransform: victim (%s) does not exist", name);
+        return;
+    }
+
+    bool add = true;
+    if (operation == "add") {
+        add = true;
+    }
+    else if (operation == "remove") {
+        add = false;
+    }
+    else {
+        mob_log(ch, "maddtransform: please specify whether to remove or add.", name);
+    }
+
+    std::string strForm(formName);
+
+    auto foundForm = trans::getForm(ch, strForm);
+
+    if(foundForm.has_value())
+        if(add)
+            ch->addTransform(foundForm);
+        else 
+            ch->removeTransform(foundForm);
 }
 
 

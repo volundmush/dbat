@@ -142,8 +142,15 @@ namespace trans {
             case FormID::AscendThird:
                 return "@YAscend @WThird@n";
 
+
+            //Generic Forms
+            case FormID::PotentialUnleashed:
+                return "@YPotential @WUnleashed@n";
+            case FormID::EvilAura:
+                return "@YEvil @WAura@n";
+                
             // Whoops?
-            default:
+            default: 
                 return "Unknown";
         }
     }
@@ -285,6 +292,12 @@ namespace trans {
                 return "second";
             case FormID::AscendThird:
                 return "third";
+
+                //Generic Forms
+            case FormID::PotentialUnleashed:
+                return "potential";
+            case FormID::EvilAura:
+                return "evil";
 
             // Whoops?
             default:
@@ -585,9 +598,23 @@ namespace trans {
             }
         },
         {
-            FormID::AscendSecond, {
+            FormID::AscendThird, {
                 {APPLY_VITALS_MULT, 4.0},
                 {APPLY_ALL_VITALS, 300000000},
+            }
+        },
+        //Generic Forms
+        {
+            FormID::PotentialUnleashed, {
+                {APPLY_VITALS_MULT, 4.0},
+                {APPLY_ALL_VITALS, 300000000},
+            }
+        },
+        {
+            FormID::EvilAura, {
+                {APPLY_VITALS_MULT, 2.0},
+                {APPLY_ALL_VITALS, 1300000},
+                {APPLY_DAMAGE_PERC, 0.5},
             }
         },
 
@@ -655,7 +682,11 @@ namespace trans {
         // Kai
         {FormID::MysticFirst, .05},
         {FormID::MysticSecond, .07},
-        {FormID::MysticThird, .1}
+        {FormID::MysticThird, .1},
+
+        // Generic Forms
+        {FormID::PotentialUnleashed, .1},
+        {FormID::EvilAura, .08}
 
     };
 
@@ -1020,6 +1051,20 @@ namespace trans {
                                                      "@R$n@r looks up at the moon as $s eyes turn red and $s heart starts to beat loudly. Golden hair starts to grow all over $s body as $e starts screaming. The scream turns into a roar as $s body begins to grow into a giant golden ape!@n"
                                              }},
 
+            {
+                    FormID::PotentialUnleashed,     {
+                                                     "@WThere is a well of potential within you, beyond simple forms. Reaching deep you tug at it, pulling what was once simple potential and flaring it to life in a burst of simple power.@n",
+                                                     "@C$n takes a moment for themselves, focusing inwards. A moment later a white glow of pure aura explodes outwards, energy unbound.@n"
+                                             }
+            },
+
+            {
+                    FormID::EvilAura,     {
+                                                     "@WMorality is just a crutch for the weak. You know this better than anyone, for discarding it gleans a look at true power. You indulge. And outwards ruptures your Ki, tainted and drenched in evil beyond parallel.@n",
+                                                     "@C$n gives a sickeningly twisted smile as something behind their eyes relents. Forward from them rushes forwards a surge of black ki, their evil manifest, with nothing left to hold it back.@n"
+                                             }
+            },
+
 
     };
 
@@ -1123,8 +1168,25 @@ namespace trans {
         // Tuffle
         FormID::AscendFirst,
         FormID::AscendSecond,
-        FormID::AscendThird
+        FormID::AscendThird,
+
+        // Generic Forms
+        FormID::PotentialUnleashed,
+        FormID::EvilAura
     };
+
+
+    std::optional<FormID> find_form(char_data* ch, std::string form) {
+        for (auto formFound : forms) {
+            if (form == getAbbr(ch, formFound)) {
+                return formFound;
+                break;
+            }
+        }
+
+        //Failure state
+        return {}
+    }
 
 
     static const std::unordered_map<RaceID, std::vector<FormID>> race_forms = {
@@ -1151,9 +1213,34 @@ namespace trans {
         {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}}
     };
 
-    void displayForms(char_data* ch) {
+    std::vector<FormID> get_forms(char_data* ch) {
         auto forms = race_forms.find(ch->race);
-        if (forms == race_forms.end()) {
+        std::vector<FormID> pforms;
+
+        switch (ch->race) {
+            case RaceID::Majin:
+            case RaceID::Android:
+            case RaceID::BioAndroid:
+            case RaceID::Tuffle: 
+                for (auto form : forms->second) {
+                    pforms.push_back(form);
+                }
+                return pforms;
+
+            default:
+                pforms = ch->unlockedForms;
+
+                for (auto form : forms->second) {
+                    pforms.push_back(form);
+                }
+                return pforms;
+
+            }
+    }
+
+    void displayForms(char_data* ch) {
+        auto forms = get_forms(ch);
+        if (forms.empty()) {
             send_to_char(ch, "You have no forms. Bummer.\r\n");
             return;
         }
@@ -1162,7 +1249,7 @@ namespace trans {
         send_to_char(ch, "@b------------------------------------------------@n\r\n");
         auto pl = ch->getBasePL();
         std::vector<std::string> form_names;
-        for (auto form: forms->second) {
+        for (auto form: forms) {
             auto name = getName(ch, form);
             auto req = getRequiredPL(ch, form);
             send_to_char(ch, "@W%s@n @R-@G %s BPL Req\r\n", name,
@@ -1291,7 +1378,11 @@ namespace trans {
         {FormID::BioMature, 1800000},
         {FormID::BioSemiPerfect, 25000000},
         {FormID::BioPerfect, 220000000},
-        {FormID::BioSuperPerfect, 1300000000}
+        {FormID::BioSuperPerfect, 1300000000},
+
+        // Generic Forms
+        {FormID::PotentialUnleashed, 0},
+        {FormID::EvilAura, 12500000}
 
     };
 
@@ -1303,7 +1394,7 @@ namespace trans {
     }
 
     std::optional<FormID> findForm(struct char_data* ch, const std::string& arg) {
-        auto forms = race_forms.find(ch->race);
+        auto forms = get_forms(ch);
         if (forms == race_forms.end()) {
             return {};
         }
