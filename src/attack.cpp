@@ -5,6 +5,7 @@
 #include "dbat/techniques.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
+#include "dbat/random.h"
 
 namespace atk {
     std::map<int, std::vector<std::pair<int, int>>> minimumSkillRequired;

@@ -16,9 +16,10 @@
 #include <cstddef>
 
 #ifndef _WIN32
-#include <strings.h>
-#include <bsd/string.h>
+// #include <strings.h>
+// #include <bsd/string.h>
 #endif
+#include "dbat/stringutils.h"
 
 #ifndef SIGUSR1
 #define SIGUSR1 10
@@ -50,8 +51,6 @@
 #include "fmt/core.h"
 #include "fmt/printf.h"
 #include <spdlog/spdlog.h>
-#include "effolkronium/random.hpp"
-using Random = effolkronium::random_static;
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)

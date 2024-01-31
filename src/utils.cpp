@@ -25,6 +25,7 @@
 #include "dbat/act.informative.h"
 #include "dbat/screen.h"
 #include "dbat/players.h"
+#include "dbat/random.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];

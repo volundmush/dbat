@@ -35,6 +35,7 @@
 #include "dbat/mail.h"
 #include "dbat/clan.h"
 #include "dbat/players.h"
+#include "dbat/random.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);

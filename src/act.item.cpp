@@ -28,6 +28,8 @@
 #include "dbat/genzon.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/boards.h"
+#include "dbat/random.h"
+#include <algorithm>
 
 /* global variables */
 struct obj_data *obj_selling = nullptr;    /* current object for sale */
@@ -3757,7 +3759,7 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
     pl *= 0.05;
 
     std::vector<int> toAdd = {0, 1, 2};
-    Random::shuffle(toAdd);
+    std::shuffle(toAdd.begin(), toAdd.end(), Random::gen);
 
     // 0: pl, 1: ki, 2: stamina.
 

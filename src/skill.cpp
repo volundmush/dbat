@@ -195,7 +195,7 @@ namespace skill {
         double out = 0.0;
         for(auto &[id, data] : ch->skill) {
             if(data.level > 0)
-                out += getModifier(ch, id, location, specific);
+                out += getModifier(ch, static_cast<SkillID>(id), location, specific);
         }
         return out;
     }
