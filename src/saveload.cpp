@@ -156,7 +156,7 @@ static void dump_state_characters(const std::shared_ptr<SQLite::Database>& db) {
     for(auto &[v, r] : uniqueCharacters) {
         if(v != r.second->id) r.second->id = v;
         q.bind(1, v);
-        q.bind(2, r.first);
+        q.bind(2, static_cast<int32_t>(r.first));
         q.bind(3, r.second->vn);
         q.bind(4, r.second->name);
         q.bind(5, r.second->short_description);
@@ -175,7 +175,7 @@ static void dump_state_items(const std::shared_ptr<SQLite::Database>& db) {
     for(auto &[v, r] : uniqueObjects) {
         if(v != r.second->id) r.second->id = v;
         q.bind(1, v);
-        q.bind(2, r.first);
+        q.bind(2, static_cast<int32_t>(r.first));
         q.bind(3, r.second->vn);
         q.bind(4, r.second->name);
         q.bind(5, r.second->short_description);
@@ -194,7 +194,7 @@ static void dump_state_dgscripts(const std::shared_ptr<SQLite::Database>& db) {
     for(auto &[v, r] : uniqueScripts) {
         if(v != r.second->id) r.second->id = v;
         q.bind(1, v);
-        q.bind(2, r.first);
+        q.bind(2, static_cast<int32_t>(r.first));
         q.bind(3, r.second->vn);
         q.bind(4, r.second->name);
         q.bind(5, jdump(r.second->serializeInstance()));
@@ -378,7 +378,7 @@ asio::awaitable<void> runSave() {
                                       tm_now.tm_sec);
 
     double duration{};
-
+    bool failed = false;
     try {
         auto db = std::make_shared<SQLite::Database>(tempPath.string(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
         auto startTime = std::chrono::high_resolution_clock::now();
@@ -405,8 +405,9 @@ asio::awaitable<void> runSave() {
     } catch (std::exception &e) {
         logger->critical("(GAME HAS NOT BEEN SAVED!) Exception in dump_state(): {}", e.what());
         send_to_all("Warning, a critical error occurred during save! Please alert staff!\r\n");
-        co_return;
+        failed = true;
     }
+    if(failed) co_return;
 
     std::filesystem::rename(tempPath, newPath);
     logger->info("Finished dumping state to {} in {} seconds.", newPath.string(), duration);
