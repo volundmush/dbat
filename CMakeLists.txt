@@ -48,7 +48,7 @@ set(CIRCLE_LINK_LIBRARIES
         )
 
 if(WIN32)
-set(CIRCLE_LINK_LIBRARIES ${CIRCLE_LINK_LIBRARIES} Ws2_32.lib)
+set(CIRCLE_LINK_LIBRARIES ${CIRCLE_LINK_LIBRARIES} Ws2_32 wsock32)
 endif()
 
 # this is the core library we're making.
