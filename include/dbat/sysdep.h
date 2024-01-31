@@ -48,6 +48,7 @@
 #include <bitset>
 #include <variant>
 
+#define FMT_HEADER_ONLY
 #include "fmt/core.h"
 #include "fmt/printf.h"
 #include <spdlog/spdlog.h>

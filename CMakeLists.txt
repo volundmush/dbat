@@ -26,7 +26,6 @@ set(CIRCLE_INCLUDE_DIRS
         ${nlohmann_json_SOURCE_DIR}/single_include
         ${spdlog_SOURCE_DIR}/include
         ${fmt_SOURCE_DIR}/include
-        ${eff_random_SOURCE_DIR}/include
         ${SQLiteCpp_SOURCE_DIR}/include
         ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         )
@@ -44,7 +43,6 @@ set(CMAKE_CXX_FLAGS "-fpermissive -w")
 set(BUILD_TESTING OFF)
 
 set(CIRCLE_LINK_LIBRARIES
-        fmt::fmt ${SQLite3_LIBRARIES}
         SQLiteCpp sqlite3
         sodium
         )
