@@ -20,7 +20,6 @@
 constexpr size_t PATH_MAX = 4096;
 #endif
 #ifdef _WIN32
-#include "StringsTemp.h"
 using ssize_t = ptrdiff_t;
 #endif
 

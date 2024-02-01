@@ -24,6 +24,7 @@
 #include "dbat/genobj.h"
 #include "asio.hpp"
 #include "dbat/saveload.h"
+#include "dbat/random.h"
 
 #define RENT_FACTOR    1
 #define CRYO_FACTOR    4
