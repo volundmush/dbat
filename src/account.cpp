@@ -1,7 +1,6 @@
 #include "dbat/account.h"
 #include "dbat/db.h"
 #include "dbat/utils.h"
-#include "sodium.h"
 #include <stdexcept>
 
 std::map<vnum, account_data> accounts;
@@ -16,26 +15,16 @@ struct account_data *findAccount(const std::string &name) {
 }
 
 bool account_data::checkPassword(const std::string &password) {
-    auto result = crypto_pwhash_str_verify(passHash.data(), password.data(), password.size());
-    return result == 0;
+    return password == passHash;
 }
 
 static std::optional<std::string> hashPassword(const std::string &password) {
-    char hashed_password[crypto_pwhash_STRBYTES];
-    if(password.empty()) return {};
-    if(crypto_pwhash_str(hashed_password, password.data(), password.size(),
-                         crypto_pwhash_OPSLIMIT_INTERACTIVE, crypto_pwhash_MEMLIMIT_INTERACTIVE) != 0) {
-        return {};
-    }
-    return hashed_password;
+
+    return password;
 }
 
 bool account_data::setPassword(const std::string &password) {
-    if(auto hashed = hashPassword(password); hashed) {
-        passHash = hashed.value();
-        return true;
-    }
-    return false;
+    return true;
 
 }
 

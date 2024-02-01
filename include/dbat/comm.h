@@ -97,12 +97,8 @@ void broadcast(const std::string& txt);
 
 void shutdown_game(int code);
 
-extern std::shared_ptr<spdlog::logger> setup_logging(const std::string &name, const std::string& path);
-
 namespace game {
-    void init_log();
     void init_locale();
-    bool init_sodium();
     void init_database();
     void init_zones();
     void run_loop_once(double deltaTime);

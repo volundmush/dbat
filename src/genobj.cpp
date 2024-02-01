@@ -428,7 +428,7 @@ std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const are
 
 void obj_data::activate() {
     if(active) {
-        logger->warn("Attempted to activate an already active item.");
+        basic_mud_log("Attempted to activate an already active item.");
         return;
     }
     active = true;

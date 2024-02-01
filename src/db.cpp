@@ -681,7 +681,7 @@ void boot_db_world() {
     try {
         latestDump = std::make_shared<SQLite::Database>(files.front().string(), SQLite::OPEN_READONLY);
     } catch(std::exception& e) {
-        logger->critical("Error opening state database: {}", e.what());
+        basic_mud_log("Error opening state database: %s", e.what());
         shutdown_game(1);
     }
 
@@ -2119,7 +2119,7 @@ void add_unique_id(struct obj_data *obj) {
     if(obj->id == -1) {
         obj->id = nextObjID();
         obj->generation = time(nullptr);
-        logger->warn("Object Found with ID -1. Automatically fixed to ID {}", obj->id);
+        basic_mud_log("Object Found with ID -1. Automatically fixed to ID {}", obj->id);
     }
 
     auto &o = uniqueObjects[obj->id];
@@ -2159,7 +2159,7 @@ void check_unique_id(struct obj_data *obj) {
     if(obj->id == -1) {
         obj->id = nextObjID();
         obj->generation = time(nullptr);
-        logger->warn("Object Found with ID -1. Automatically fixed to ID {}", obj->id);
+        basic_mud_log("Object Found with ID -1. Automatically fixed to ID %d", obj->id);
     }
     auto find = uniqueObjects.find(obj->id);
 
@@ -2182,7 +2182,7 @@ void check_unique_id(struct char_data *ch) {
     if(ch->id == -1) {
         ch->id = nextCharID();
         ch->generation = time(nullptr);
-        logger->warn("Character Found with ID -1. Automatically fixed to ID {}", ch->id);
+        basic_mud_log("Character Found with ID -1. Automatically fixed to ID %d", ch->id);
     }
     auto find = uniqueCharacters.find(ch->id);
 
@@ -2195,7 +2195,7 @@ void add_unique_id(struct char_data *ch) {
     if(ch->id == -1) {
         ch->id = nextCharID();
         ch->generation = time(nullptr);
-        logger->warn("Character Found with ID -1. Automatically fixed to ID {}", ch->id);
+        basic_mud_log("Character Found with ID -1. Automatically fixed to ID %d", ch->id);
     }
     auto &o = uniqueCharacters[ch->id];
     o.first = ch->generation;
@@ -2621,7 +2621,7 @@ void reset_zone(zone_rnum zone) {
                     break;
             }
             } catch (const std::exception &e) {
-                logger->critical("Exception thrown in reset_zone '{}' line {}", zone, c.line);
+                basic_mud_log("Exception thrown in reset_zone '%d' line %d", zone, c.line);
                 shutdown_game(1);
             }
         }

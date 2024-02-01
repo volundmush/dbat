@@ -240,7 +240,7 @@ void Read_Invalid_List() {
     // Check if the file exists
     if (!std::filesystem::exists(path))
     {
-        logger->error("SYSERR: Unable to open '" XNAME_FILE "' for reading");
+        basic_mud_log("SYSERR: Unable to open '" XNAME_FILE "' for reading");
         return;
     }
 
@@ -249,7 +249,7 @@ void Read_Invalid_List() {
     // Check if the file was opened successfully
     if (!file)
     {
-        logger->error("SYSERR: Unable to open '" XNAME_FILE "' for reading");
+        basic_mud_log("SYSERR: Unable to open '" XNAME_FILE "' for reading");
         return;
     }
 

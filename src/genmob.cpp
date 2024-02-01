@@ -926,7 +926,7 @@ player_data::player_data(const nlohmann::json &j) {
 
 void char_data::activate() {
     if(active) {
-        logger->warn("Attempted to activate an already active character.");
+        basic_mud_log("Attempted to activate an already active character.");
         return;
     }
     active = true;

@@ -51,7 +51,6 @@
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
 #include "fmt/printf.h"
-#include <spdlog/spdlog.h>
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)
@@ -123,7 +122,6 @@ public:
 template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
 
-extern std::shared_ptr<spdlog::logger> logger;
 using weight_t = double;
 
 template <typename Iterator, typename Key = std::function<std::string(typename std::iterator_traits<Iterator>::value_type)>>
@@ -201,7 +199,5 @@ std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
 
 
 using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
-
-extern std::shared_ptr<spdlog::logger> logger;
 
 extern bool isMigrating;

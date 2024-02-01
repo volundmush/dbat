@@ -4,8 +4,6 @@
 #include "dbat/net.h"
 #include "dbat/utils.h"
 #include "SQLiteCpp/SQLiteCpp.h"
-#include "asio/experimental/awaitable_operators.hpp"
-#include "asio/experimental/concurrent_channel.hpp"
 #include "dbat/players.h"
 #include "dbat/db.h"
 #include "dbat/account.h"
@@ -13,163 +11,55 @@
 #include "dbat/guild.h"
 #include "dbat/shop.h"
 
-static std::vector<std::string> schema = {
-        "CREATE TABLE IF NOT EXISTS zones ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
+#include <fstream>
 
-        "CREATE TABLE IF NOT EXISTS areas ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS itemPrototypes ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS npcPrototypes ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS shops ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS guilds ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS rooms ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS exits ("
-        "	id INTEGER NOT NULL,"
-        "   direction INTEGER NOT NULL,"
-        "   destination INTEGER NOT NULL,"
-        "	data TEXT NOT NULL,"
-        "   PRIMARY KEY(id, direction)"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS dgScriptPrototypes ("
-        "	id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS accounts ("
-        "   id INTEGER PRIMARY KEY,"
-        "	data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS playerCharacters ("
-        "   id INTEGER NOT NULL PRIMARY KEY,"
-        "   data TEXT NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS characters ("
-        "   id INTEGER PRIMARY KEY,"
-        "   generation INTEGER NOT NULL,"
-        "   vnum INTEGER NOT NULL DEFAULT -1,"
-        "   name TEXT,"
-        "   shortDesc TEXT,"
-        "   data TEXT NOT NULL,"
-        "   location TEXT NOT NULL DEFAULT '{}',"
-        "   relations TEXT NOT NULL DEFAULT '{}'"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS items ("
-        "   id INTEGER PRIMARY KEY,"
-        "   generation INTEGER NOT NULL,"
-        "   vnum INTEGER NOT NULL DEFAULT -1,"
-        "   name TEXT,"
-        "   shortDesc TEXT,"
-        "   data TEXT NOT NULL,"
-        "   location TEXT NOT NULL DEFAULT '',"
-        "   slot INTEGER NOT NULL DEFAULT 0,"
-        "   relations TEXT NOT NULL DEFAULT '{}'"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS dgScripts ("
-        "	id INTEGER PRIMARY KEY,"
-        "   generation INTEGER NOT NULL,"
-        "   vnum INTEGER NOT NULL DEFAULT -1,"
-        "   name TEXT,"
-        "	data TEXT NOT NULL,"
-        "   location TEXT NOT NULL,"
-        "   num INTEGER NOT NULL"
-        ");",
-
-        "CREATE TABLE IF NOT EXISTS globalData ("
-        "   name TEXT PRIMARY KEY,"
-        "   data TEXT NOT NULL"
-        ");"
-};
-
-static void runQuery(std::string_view query, const std::shared_ptr<SQLite::Database>& db) {
-    try {
-        db->exec(query.data());
-    }
-    catch (const std::exception& e) {
-        basic_mud_log("Error executing query: %s", e.what());
-        basic_mud_log("For statement: %s", query.data());
-        exit(1);
-    }
+static void dump_to_file(const std::filesystem::path &loc, const std::string &name, const nlohmann::json &data) {
+    std::ofstream out(loc / name);
+    out << jdump_pretty(data);
+    out.close();
 }
 
-void create_schema(const std::shared_ptr<SQLite::Database>& db) {
-    for (const auto& query: schema) {
-        runQuery(query, db);
-    }
-}
-
-static void dump_state_accounts(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO accounts (id, data) VALUES (?, ?)");
+static void dump_state_accounts(const std::filesystem::path &loc) {
+    nlohmann::json j;
 
     for(auto &[v, r] : accounts) {
-        q.bind(1, v);
-        q.bind(2, jdump(r.serialize()));
-        q.exec();
-        q.reset();
+        j.push_back(std::make_pair(v, r.serialize()));
     }
+
+    dump_to_file(loc, "accounts.json", j);
+
 }
 
-static void dump_state_players(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO playerCharacters (id, data) VALUES (?, ?)");
+static void dump_state_players(const std::filesystem::path &loc) {
+    nlohmann::json j;
 
     for(auto &[v, r] : players) {
-        q.bind(1, v);
-        q.bind(2, jdump(r.serialize()));
-        q.exec();
-        q.reset();
+        j.push_back(std::make_pair(v, r.serialize()));
     }
+    dump_to_file(loc, "players.json", j);
 }
 
-static void dump_state_characters(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO characters (id, generation, vnum, name, shortDesc, data, location, relations) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+static void dump_state_characters(const std::filesystem::path &loc) {
+    nlohmann::json j;
 
     for(auto &[v, r] : uniqueCharacters) {
         if(v != r.second->id) r.second->id = v;
-        q.bind(1, v);
-        q.bind(2, static_cast<int32_t>(r.first));
-        q.bind(3, r.second->vn);
-        q.bind(4, r.second->name);
-        q.bind(5, r.second->short_description);
-        q.bind(6, jdump(r.second->serializeInstance()));
-        q.bind(7, jdump(r.second->serializeLocation()));
-        q.bind(8, jdump(r.second->serializeRelations()));
-        q.exec();
-        q.reset();
+        nlohmann::json j2;
+        j2["id"] = v;
+        j2["generation"] = static_cast<int32_t>(r.first);
+        j2["vnum"] = r.second->vn;
+        j2["name"] = r.second->name;
+        j2["shortDesc"] = r.second->short_description;
+        j2["data"] = r.second->serializeInstance();
+        j2["location"] = r.second->serializeLocation();
+        j2["relations"] = r.second->serializeRelations();
+        j.push_back(std::make_pair(v, j2));
     }
+    dump_to_file(loc, "characters.json", j);
 
 }
 
-static void dump_state_items(const std::shared_ptr<SQLite::Database>& db) {
+static void dump_state_items(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO items (id, generation, vnum, name, shortDesc, data, location, slot, relations) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     for(auto &[v, r] : uniqueObjects) {
@@ -188,7 +78,7 @@ static void dump_state_items(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
-static void dump_state_dgscripts(const std::shared_ptr<SQLite::Database>& db) {
+static void dump_state_dgscripts(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgscripts (id, generation, vnum, name, data, location, num) VALUES (?, ?, ?, ?, ?, ?, ?)");
 
     for(auto &[v, r] : uniqueScripts) {
@@ -205,7 +95,7 @@ static void dump_state_dgscripts(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
-void dump_state_globalData(const std::shared_ptr<SQLite::Database>& db) {
+void dump_state_globalData(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO globalData (name, data) VALUES (?, ?)");
 
     std::map<std::string, nlohmann::json> globalData;
@@ -227,7 +117,7 @@ void dump_state_globalData(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
-static void process_dirty_rooms(const std::shared_ptr<SQLite::Database>& db) {
+static void process_dirty_rooms(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO rooms (id, data) VALUES (?, ?)");
     SQLite::Statement q2(*db, "INSERT OR REPLACE INTO exits (id, direction, destination, data) VALUES (?,?,?,?)");
 
@@ -251,7 +141,7 @@ static void process_dirty_rooms(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
-static void process_dirty_item_prototypes(const std::shared_ptr<SQLite::Database>& db) {
+static void process_dirty_item_prototypes(const std::filesystem::path &loc) {
 	SQLite::Statement q(*db, "INSERT OR REPLACE INTO itemPrototypes (id, data) VALUES (?,?)");
 
     for(auto &[v, o] : obj_proto) {
@@ -262,7 +152,7 @@ static void process_dirty_item_prototypes(const std::shared_ptr<SQLite::Database
     }
 }
 
-static void process_dirty_npc_prototypes(const std::shared_ptr<SQLite::Database>& db) {
+static void process_dirty_npc_prototypes(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO npcPrototypes (id, data) VALUES (?, ?)");
 
     for(auto &[v, n] : mob_proto) {
@@ -273,7 +163,7 @@ static void process_dirty_npc_prototypes(const std::shared_ptr<SQLite::Database>
     }
 }
 
-static void process_dirty_shops(const std::shared_ptr<SQLite::Database>& db) {
+static void process_dirty_shops(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO shops (id, data) VALUES (?,?)");
 
     for(auto &[v, s] : shop_index) {
@@ -284,7 +174,7 @@ static void process_dirty_shops(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
-static void process_dirty_guilds(const std::shared_ptr<SQLite::Database>& db) {
+static void process_dirty_guilds(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO guilds (id, data) VALUES (?, ?)");
 
     for(auto &[v, g] : guild_index) {
@@ -295,7 +185,7 @@ static void process_dirty_guilds(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
-static void process_dirty_zones(const std::shared_ptr<SQLite::Database>& db) {
+static void process_dirty_zones(const std::filesystem::path &loc) {
 	SQLite::Statement q(*db, "INSERT OR REPLACE INTO zones (id, data) VALUES (?, ?)");
 
     for(auto &[v, z] : zone_table) {
@@ -306,7 +196,7 @@ static void process_dirty_zones(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
-static void process_dirty_areas(const std::shared_ptr<SQLite::Database>& db) {
+static void process_dirty_areas(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO areas (id, data) VALUES (?, ?)");
 
     for(auto &[v, a] : areas) {
@@ -317,7 +207,7 @@ static void process_dirty_areas(const std::shared_ptr<SQLite::Database>& db) {
     }
 }
 
-static void process_dirty_dgscript_prototypes(const std::shared_ptr<SQLite::Database>& db) {
+static void process_dirty_dgscript_prototypes(const std::filesystem::path &loc) {
     SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgScriptPrototypes (id, data) VALUES (?, ?)");
 
     for(auto &[v, t] : trig_index) {
@@ -354,8 +244,8 @@ static void cleanup_state() {
     }
 }
 
-asio::awaitable<void> runSave() {
-    logger->info("Beginning dump of state to disk.");
+void runSave() {
+    basic_mud_log("Beginning dump of state to disk.");
     // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
     auto path = std::filesystem::current_path() / "dumps";
     std::filesystem::create_directories(path);
@@ -363,13 +253,10 @@ asio::awaitable<void> runSave() {
     auto time_t_now = std::chrono::system_clock::to_time_t(now);
     std::tm tm_now = *std::localtime(&time_t_now);
 
-    auto tempPath = path / fmt::format("{}.sqlite3", config::stateDbName);
-    auto journalPath = path / fmt::format("{}.sqlite3-journal", config::stateDbName);
+    auto tempPath = path / "temp";
     std::filesystem::remove(tempPath);
-    std::filesystem::remove(journalPath);
 
-    auto newPath = path / fmt::format("{}-{:04}{:02}{:02}{:02}{:02}{:02}.sqlite3",
-                                      config::stateDbName,
+    auto newPath = path / fmt::format("dump-{:04}{:02}{:02}{:02}{:02}{:02}",
                                       tm_now.tm_year + 1900,
                                       tm_now.tm_mon + 1,
                                       tm_now.tm_mday,
@@ -380,37 +267,34 @@ asio::awaitable<void> runSave() {
     double duration{};
     bool failed = false;
     try {
-        auto db = std::make_shared<SQLite::Database>(tempPath.string(), SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
         auto startTime = std::chrono::high_resolution_clock::now();
-        SQLite::Transaction trans(*db);
-        create_schema(db);
-        dump_state_accounts(db);
-        dump_state_characters(db);
-        dump_state_players(db);
-        dump_state_dgscripts(db);
-        dump_state_items(db);
-        dump_state_globalData(db);
-        process_dirty_rooms(db);
-        process_dirty_item_prototypes(db);
-        process_dirty_npc_prototypes(db);
-        process_dirty_shops(db);
-        process_dirty_guilds(db);
-        process_dirty_zones(db);
-        process_dirty_areas(db);
-        process_dirty_dgscript_prototypes(db);
-        trans.commit();
+        dump_state_accounts(tempPath);
+        dump_state_characters(tempPath);
+        dump_state_players(tempPath);
+        dump_state_dgscripts(tempPath);
+        dump_state_items(tempPath);
+        dump_state_globalData(tempPath);
+        process_dirty_rooms(tempPath);
+        process_dirty_item_prototypes(tempPath);
+        process_dirty_npc_prototypes(tempPath);
+        process_dirty_shops(tempPath);
+        process_dirty_guilds(tempPath);
+        process_dirty_zones(tempPath);
+        process_dirty_areas(tempPath);
+        process_dirty_dgscript_prototypes(tempPath);
+
         auto endTime = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration<double>(endTime - startTime).count();
 
     } catch (std::exception &e) {
-        logger->critical("(GAME HAS NOT BEEN SAVED!) Exception in dump_state(): {}", e.what());
+        basic_mud_log("(GAME HAS NOT BEEN SAVED!) Exception in dump_state(): %s", e.what());
         send_to_all("Warning, a critical error occurred during save! Please alert staff!\r\n");
         failed = true;
     }
-    if(failed) co_return;
+    if(failed) return;
 
     std::filesystem::rename(tempPath, newPath);
-    logger->info("Finished dumping state to {} in {} seconds.", newPath.string(), duration);
+    basic_mud_log("Finished dumping state to %s in %f seconds.", newPath.string(), duration);
     cleanup_state();
-    co_return;
+    return;
 }

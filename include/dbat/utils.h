@@ -108,7 +108,19 @@ extern void trim(char *s);
 
 extern char *introd_calc(struct char_data *ch);
 
-extern void basic_mud_log(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
+template<typename... Args>
+void basic_mud_log(fmt::string_view format, Args&&... args) {
+    try {
+        std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
+        if(formatted_string.empty()) return;
+
+        std::cout << formatted_string << std::endl;
+    }
+    catch(const std::exception &e) {
+        std::cout << "SYSERR: Format error in basic_mud_log: " << e.what() << std::endl;
+        std::cout << "Template was: " << format.data() << std::endl;
+    }
+}
 
 extern void basic_mud_vlog(const char *format, va_list args);
 

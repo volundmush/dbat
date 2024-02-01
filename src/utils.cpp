@@ -2454,11 +2454,6 @@ void basic_mud_vlog(const char *format, va_list args) {
     time_t ct = time(nullptr);
     char *time_s = asctime(localtime(&ct));
 
-    if (!logger) {
-        puts("SYSERR: Using log() before stream was initialized!");
-        return;
-    }
-
     // do a copy of the args to find out their total formatted byte size...
     va_list args_copy;
     va_copy(args_copy, args);
@@ -2470,19 +2465,8 @@ void basic_mud_vlog(const char *format, va_list args) {
 
     char *buf = new char[size + 1];
     vsnprintf(buf, size + 1, format, args);
-    const std::string out(buf);
-    logger->info(out);
+    std::cout << buf << std::endl;
     delete[] buf;
-}
-
-
-/* So mudlog() can use the same function. */
-void basic_mud_log(const char *format, ...) {
-    va_list args;
-
-    va_start(args, format);
-    basic_mud_vlog(format, args);
-    va_end(args);
 }
 
 

@@ -1159,7 +1159,7 @@ void extract_char_final(struct char_data *ch) {
  */
 void extract_char(struct char_data *ch) {
     if(!ch->active) {
-        logger->warn("Attempt to extract an inactive character.");
+        basic_mud_log("Attempt to extract an inactive character.");
         return;
     }
 

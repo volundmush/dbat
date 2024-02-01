@@ -35,21 +35,16 @@
 #include "dbat/constants.h"
 #include "dbat/screen.h"
 #include <fstream>
-#include "sodium.h"
 #include <thread>
 #include "dbat/players.h"
 #include "dbat/account.h"
 #include "dbat/charmenu.h"
 #include "dbat/puppet.h"
 #include "dbat/transformation.h"
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
 #include <mutex>
 #include "dbat/db.h"
 #include <locale>
 #include "dbat/transformation.h"
-
-std::shared_ptr<spdlog::logger> logger;
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
@@ -347,16 +342,10 @@ void runOneLoop(double deltaTime) {
 }
 
 namespace game {
-    void init_log() {
-        logger = setup_logging("dbat", config::logFile);
-    }
+
 
     void init_locale() {
         std::locale::global(std::locale("en_US.UTF-8"));
-    }
-
-    bool init_sodium() {
-        return sodium_init() == 0;
     }
 
     void init_database() {
@@ -1896,11 +1885,7 @@ void descriptor_data::handle_input() {
 }
 
 void shutdown_game(int exitCode) {
-    if(logger) {
-        logger->info("Process exiting with exit code {}", exitCode);
-    } else {
-        std::cout << "Process exiting with exit code " << exitCode << std::endl;
-    }
+    basic_mud_log("Process exiting with exit code %d", exitCode);
     std::exit(exitCode);
 }
 
@@ -1925,20 +1910,4 @@ void descriptor_data::handleLostLastConnection(bool graceful) {
     if(character) {
         act("$n has lost $s link.", true, character, nullptr, nullptr, TO_ROOM);
     }
-}
-
-std::shared_ptr<spdlog::logger> setup_logging(const std::string &name, const std::string& path) {
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::info); // Set the console to output info level and above messages
-    console_sink->set_pattern("[%^%l%$] %v"); // Example pattern: [INFO] some message
-
-    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(path, 1024 * 1024 * 5, 3);
-    file_sink->set_level(spdlog::level::trace); // Set the file to output all levels of messages
-
-    std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
-
-    auto out = std::make_shared<spdlog::logger>(name, begin(sinks), end(sinks));
-    out->set_level(spdlog::level::trace); // Set the logger to trace level
-    spdlog::register_logger(out);
-    return out;
 }

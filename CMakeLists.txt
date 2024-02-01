@@ -18,16 +18,12 @@ project(circle)
 CPMAddPackage("gh:fmtlib/fmt#10.2.1")
 CPMAddPackage("gh:SRombauts/SQLiteCpp#3.3.1")
 CPMAddPackage("gh:nlohmann/json#v3.11.3")
-CPMAddPackage("gh:gabime/spdlog#v1.13.0")
-CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 
 set(CIRCLE_INCLUDE_DIRS
         include
         ${nlohmann_json_SOURCE_DIR}/single_include
-        ${spdlog_SOURCE_DIR}/include
         ${fmt_SOURCE_DIR}/include
         ${SQLiteCpp_SOURCE_DIR}/include
-        ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         )
 
 
