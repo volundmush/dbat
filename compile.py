@@ -39,6 +39,7 @@ def main(build_mode):
         'cmake',
         '-S', '.',
         '-B', out_folder,
+        "-G", "Ninja",
         f'-D', f'CMAKE_BUILD_TYPE={build_mode.capitalize()}'
     ]
     build_args = [

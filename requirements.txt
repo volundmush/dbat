@@ -8,3 +8,4 @@ aioquic
 sanic[http3]
 sanic-jwt
 python-socketio[asyncio_client]
+setuptools
