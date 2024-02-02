@@ -61,6 +61,9 @@ class Core:
     def _setup_logging(self):
         from rich.logging import RichHandler
 
+        if not os.path.exists(self.settings.LOG_DIR):
+            os.makedirs(self.settings.LOG_DIR)
+
         # aiomisc handles logging but we'll help it along with some better settings.
         log_handler = TimedRotatingFileHandler(
             filename=os.path.join(self.settings.LOG_DIR, f"{self.app}.log"),

@@ -113,6 +113,7 @@ namespace net {
 
             handleEvent(name, j);
         }
+        inQueue.clear();
     }
 
     void Connection::executeGMCP(const std::string &cmd, const nlohmann::json &j) {

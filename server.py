@@ -2,6 +2,7 @@ from sanic import Sanic, response
 from sanic_jwt import Initialize
 import socketio
 import os
+import asyncio
 
 import circlemud
 from circlemud import account_manager
@@ -9,11 +10,14 @@ from circlemud import account_manager
 from dbat import settings
 from dbat import api
 
-# Get the absolute path to the 'lib/webroot/' directory
-webroot_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'lib', 'webroot'))
+# Get the absolute path to the 'webroot/' directory
+webroot_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'webroot'))
 
 sio = socketio.AsyncServer(async_mode="sanic", namespaces='*')
 app = Sanic(settings.NAME)
+
+app.config["USE_UVLOOP"] = False
+
 Initialize(app, claim_aud=settings.HOSTNAME, authenticate=account_manager.authenticate, retrieve_user=account_manager.retrieve_user)
 sio.attach(app)
 app.blueprint(api.api)

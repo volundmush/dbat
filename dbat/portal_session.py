@@ -89,10 +89,10 @@ class PortalSession:
 
     async def on_event(self, event: str, message):
         match event:
-            case "Legacy.Text":
+            case "Game.Text":
                 if (txt := message.get("data", None)) is not None:
                     await self.send_game_text(txt)
-            case "Legacy.GMCP":
+            case "Game.GMCP":
                 cmd = message.get("cmd", None)
                 data = message.get("data", dict())
                 await self.send_gmcp(cmd, data)
