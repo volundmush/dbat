@@ -1,6 +1,5 @@
 #include "dbat/saveload.h"
 #include "dbat/config.h"
-
 #include "dbat/net.h"
 #include "dbat/utils.h"
 #include "dbat/players.h"
@@ -11,12 +10,17 @@
 #include "dbat/shop.h"
 
 #include <fstream>
+#include <thread>
 
 static void dump_to_file(const std::filesystem::path &loc, const std::string &name, const nlohmann::json &data) {
     if(data.empty()) return;
+    //auto startTime = std::chrono::high_resolution_clock::now();
     std::ofstream out(loc / name);
-    out << jdump_pretty(data);
+    out << jdump(data);
     out.close();
+    //auto endTime = std::chrono::high_resolution_clock::now();
+    //auto duration = std::chrono::duration<double>(endTime - startTime).count();
+    //basic_mud_log("Dumping %s to disk took %f seconds.", name, duration);
 }
 
 static void dump_state_accounts(const std::filesystem::path &loc) {
@@ -104,10 +108,18 @@ void dump_state_globalData(const std::filesystem::path &loc) {
 }
 
 static void process_dirty_rooms(const std::filesystem::path &loc) {
-    nlohmann::json rooms, exits;
+    nlohmann::json rooms;
 
     for(auto &[v, r] : world) {
         rooms.push_back(r.serialize());
+    }
+    dump_to_file(loc, "rooms.json", rooms);
+}
+
+static void process_dirty_exits(const std::filesystem::path &loc) {
+    nlohmann::json exits;
+
+    for(auto &[v, r] : world) {
 
         for(auto i = 0; i < NUM_OF_DIRS; i++) {
             if(auto ex = r.dir_option[i]; ex) {
@@ -120,7 +132,6 @@ static void process_dirty_rooms(const std::filesystem::path &loc) {
         }
 
     }
-    dump_to_file(loc, "rooms.json", rooms);
     dump_to_file(loc, "exits.json", exits);
 }
 
@@ -233,20 +244,23 @@ void runSave() {
     bool failed = false;
     try {
         auto startTime = std::chrono::high_resolution_clock::now();
-        dump_state_accounts(tempPath);
-        dump_state_characters(tempPath);
-        dump_state_players(tempPath);
-        dump_state_dgscripts(tempPath);
-        dump_state_items(tempPath);
-        dump_state_globalData(tempPath);
-        process_dirty_rooms(tempPath);
-        process_dirty_item_prototypes(tempPath);
-        process_dirty_npc_prototypes(tempPath);
-        process_dirty_shops(tempPath);
-        process_dirty_guilds(tempPath);
-        process_dirty_zones(tempPath);
-        process_dirty_areas(tempPath);
-        process_dirty_dgscript_prototypes(tempPath);
+        std::vector<std::thread> threads;
+        for(const auto func : {dump_state_accounts, dump_state_characters,
+              dump_state_players, dump_state_dgscripts,
+                          dump_state_items, dump_state_globalData,
+                          process_dirty_rooms, process_dirty_exits, process_dirty_item_prototypes,
+                          process_dirty_npc_prototypes, process_dirty_shops,
+                          process_dirty_guilds, process_dirty_zones,
+                          process_dirty_areas, process_dirty_dgscript_prototypes}) {
+            threads.emplace_back([func, &tempPath]() {
+                func(tempPath);
+            });
+        }
+
+        for (auto& thread : threads) {
+            thread.join();
+        }
+        threads.clear();
 
         auto endTime = std::chrono::high_resolution_clock::now();
         duration = std::chrono::duration<double>(endTime - startTime).count();
