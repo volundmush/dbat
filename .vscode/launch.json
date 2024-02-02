@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "DBAT: Portal",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/portal.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "DBAT: Server",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/server.py",
+            "console": "integratedTerminal"
+        }
+    ]
+}

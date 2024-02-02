@@ -51,6 +51,19 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# VS Code
+.venv/
+__pycache__
+dependency_links.txt
+not-zip-safe
+PKG-INFO
+requires.txt
+SOURCES.txt
+top_level.txt
+dist/
+
+*.pid
+
 # CLion
 .idea/
 cmake-*
