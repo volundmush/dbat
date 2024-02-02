@@ -13,22 +13,29 @@ The recommended IDE is VS Code due to the multi-language nature of the project. 
 
 ## Ubuntu Setup
 The following apt packages are needed:
+
 `sudo apt-get install cmake build-essential python3.11 python3.11-dev python3-git python3-virtualenv git`
 
 Clone the directory.
+
 `git clone https://github.com/volundmush/dbat`
 
 (NOTE: if using VS Code, you can skip creating the venv here as VS Code will be able to create one instead.)
+
 Create a virtualenv for the Python packages.
+
 `python3.11 -m virtualenv venv`
 
 Activate the venv.
+
 `source venv/bin/activate`
 
 Switch to folder.
+
 `cd dbat`
 
 Install requirements.
+
 `pip install -r requirements.txt`
 
 ## Windows
@@ -41,22 +48,32 @@ Installing WSL2 varies slightly depending on your Windows version. There are num
 Open up a Command Prompt as admin (right click the shortcut/icon to access "run as admin"):
 
 `wsl --install`
+
 and
+
 `wsl --update`
+
 `wsl --set-default-version 2`
+
 just to be sure everything is in order.
 
 To install your Ubuntu distro,
+
 `wsl --install -d Ubuntu`
+
 Once it's installed, you can make it your default for any `wsl` commands.
+
 `wsl --set-default Ubuntu`
 
 Inside your WSL2 instance, you can now follow the Ubuntu instructions. Skip the venv stuff; it's better to let VS Code handle that.
 
 ### VS Code
 Install the following Extensions:
+
 `Remote Development`
+
 `C/C++ Extension Pack`
+
 `Python Extensionn Pack`
 
 Restart VS Code if needed.
@@ -73,8 +90,11 @@ Finally, after that, use the Command Palette (F5) and tell it to Python: Create 
 The project relies on several major components to work properly.
 
 The first is `libcirclemud.a` which is compiled from the .h and .cpp files in `include/` and `src/`.
+
 The second is the `circlemud` Python Extension module compiled by Cython, which links to `libcirclemud.a`.
+
 The third is `server.py`, which runs a specially configured Sanic server instance that operates the game and a SocketIO server.
+
 Fourth is `portal.py`, which runs a Telnet listener and maps these to SocketIO sessions that then talk to the SocketIO server.
 
 Although the provided `CMakeLists.txt` can compile `libcirclemud.a`, there is a `compile.py` which will automate building it and the Cython extension. So, use `./compile.py debug` (or `./compile.py release` if appropriate) or `python compile.py <arg>` to handle compiling.
