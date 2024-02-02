@@ -23,7 +23,6 @@
 #include "dbat/shop.h"
 #include "dbat/guild.h"
 #include "dbat/genobj.h"
-#include "asio.hpp"
 #include "dbat/saveload.h"
 #include "dbat/random.h"
 

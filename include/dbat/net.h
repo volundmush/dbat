@@ -22,9 +22,11 @@ namespace net {
     };
 
     extern std::mutex connectionMutex;
-    extern std::map<int64_t, std::shared_ptr<Connection>> connections;
+    extern std::unordered_map<std::string, std::shared_ptr<Connection>> connections;
 
     class Connection;
+
+    std::shared_ptr<Connection> newConnection(const std::string& connID);
 
     class ConnectionParser {
     public:
@@ -41,28 +43,33 @@ namespace net {
         std::shared_ptr<Connection> conn;
     };
 
-
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
-        explicit Connection(int64_t connId);
-        virtual ~Connection() = default;
-        virtual void sendGMCP(const std::string &cmd, const nlohmann::json &j);
-        virtual void sendText(const std::string &messg);
-        virtual void onHeartbeat(double deltaTime);
-        virtual void onNetworkDisconnected();
+        explicit Connection(const std::string& connId);
+        void sendGMCP(const std::string &cmd, const nlohmann::json &j);
+        void sendText(const std::string &messg);
+        void sendEvent(const std::string &name, const nlohmann::json &data);
+        void onHeartbeat(double deltaTime);
+        void onNetworkDisconnected();
         void onWelcome();
-        virtual void close();
+        void close();
         void executeGMCP(const std::string& cmd, const nlohmann::json& j);
         void executeCommand(const std::string& cmd);
 
-        virtual void cleanup();
+        void cleanup();
         void setParser(ConnectionParser *p);
 
         bool running{true};
-        int64_t connId{};
+        std::string connId{};
         account_data *account{};
         int64_t adminLevel{0};
         struct descriptor_data *desc{};
+
+        void queueMessage(const std::string& event, const std::string& data);
+
+        void handleEvent(const std::string& event, const nlohmann::json& data);
+
+        std::list<std::pair<std::string, std::string>> outQueue, inQueue;
 
         // Some time structs to handle when we received connections.
         // These probably need some updating on this and Thermite side...

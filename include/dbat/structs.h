@@ -1125,9 +1125,9 @@ struct txt_q {
 
 struct descriptor_data {
     int64_t id{NOTHING};
-    std::map<int64_t, std::shared_ptr<net::Connection>> conns;
-    void onConnectionLost(int64_t);
-    void onConnectionClosed(int64_t);
+    std::unordered_map<std::string, std::shared_ptr<net::Connection>> conns;
+    void onConnectionLost(const std::string& connId);
+    void onConnectionClosed(const std::string& connId);
 
     char host[HOST_LENGTH + 1];    /* hostname				*/
     int connected{CON_PLAYING};        /* mode of 'connectedness'		*/

@@ -11,14 +11,45 @@
 namespace net {
 
     std::mutex connectionMutex;
-    std::map<int64_t, std::shared_ptr<Connection>> connections;
+    std::unordered_map<std::string, std::shared_ptr<Connection>> connections;
+
+    void ConnectionParser::close() {
+
+    }
+
+    void ConnectionParser::sendText(const std::string &txt) {
+        conn->sendText(txt);
+    }
+
+    void ConnectionParser::start() {
+
+    }
+
+    void ConnectionParser::handleGMCP(const std::string &txt, const nlohmann::json &j) {
+
+    }
 
     void Connection::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-        // default implementation does nothing.
+        if(cmd.empty()) return;
+        nlohmann::json j2;
+        j2["cmd"] = cmd;
+        j2["data"] = j;
+        sendEvent("Game.GMCP", j2);
     }
 
     void Connection::sendText(const std::string &text) {
-        // default implementation does nothing.
+        if(text.empty()) return;
+        nlohmann::json j;
+        j["data"] = text;
+        sendEvent("Game.Text", j);
+    }
+
+    void Connection::sendEvent(const std::string &name, const nlohmann::json &data) {
+        outQueue.emplace_back(name, jdump(data));
+    }
+
+    void Connection::queueMessage(const std::string& event, const std::string& data) {
+        inQueue.emplace_back(event, data);
     }
 
 
@@ -37,7 +68,7 @@ namespace net {
     }
 
 
-    Connection::Connection(int64_t connId)
+    Connection::Connection(const std::string& connId)
     : connId(connId) {
 
     }
@@ -51,30 +82,37 @@ namespace net {
     }
 
 
-    void ConnectionParser::close() {
-
-    }
-
-	void ConnectionParser::sendText(const std::string &txt) {
-        conn->sendText(txt);
-    }
-
-    void ConnectionParser::start() {
-
-    }
-
-    void ConnectionParser::handleGMCP(const std::string &txt, const nlohmann::json &j) {
-
-    }
-
     void Connection::setParser(ConnectionParser *p) {
         if(parser) parser->close();
         parser.reset(p);
         p->start();
     }
 
+    void Connection::handleEvent(const std::string& event, const nlohmann::json& data) {
+        if(event == "Game.Command") {
+            executeCommand(data["data"].get<std::string>());
+        } else if(event == "Game.GMCP") {
+            executeGMCP(data["cmd"].get<std::string>(), data["data"]);
+        }
+    }
+
+
     void Connection::onHeartbeat(double deltaTime) {
-        // default implementation does nothing.
+        if(!inQueue.empty())
+            lastActivity = std::chrono::steady_clock::now();
+
+        for(auto &[name, jdata] : inQueue) {
+            nlohmann::json j;
+            try {
+                j = jparse(jdata);
+            }
+            catch (const nlohmann::json::parse_error &e) {
+                basic_mud_log("Error parsing JSON for event %s: %s", name, e.what());
+                continue;
+            }
+
+            handleEvent(name, j);
+        }
     }
 
     void Connection::executeGMCP(const std::string &cmd, const nlohmann::json &j) {
@@ -84,5 +122,13 @@ namespace net {
     void Connection::executeCommand(const std::string &cmd) {
         if(parser) parser->parse(cmd);
     }
+
+    std::shared_ptr<Connection> newConnection(const std::string& connID) {
+        auto conn = std::make_shared<Connection>(connID);
+        conn->state = ConnectionState::Pending;
+        connections[connID] = conn;
+        return conn;
+    }
+
 
 }

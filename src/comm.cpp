@@ -166,7 +166,7 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
 }
 
 void processConnections(double deltaTime) {
-    std::set<int64_t> deadConnections;
+    std::set<std::string> deadConnections;
 
     if(!net::connections.empty()) {
         std::lock_guard lock(net::connectionMutex);
@@ -1889,14 +1889,14 @@ void shutdown_game(int exitCode) {
     std::exit(exitCode);
 }
 
-void descriptor_data::onConnectionClosed(int64_t connId) {
+void descriptor_data::onConnectionClosed(const std::string& connId) {
     conns.erase(connId);
     if(conns.empty()) {
         handleLostLastConnection(true);
     }
 }
 
-void descriptor_data::onConnectionLost(int64_t connId) {
+void descriptor_data::onConnectionLost(const std::string& connId) {
     conns.erase(connId);
     if(conns.empty()) {
         handleLostLastConnection(false);
