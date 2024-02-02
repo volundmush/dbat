@@ -197,7 +197,7 @@ static std::vector<std::filesystem::path> getDumpFiles() {
     std::filesystem::path dir = "dumps"; // Change to your directory
     std::vector<std::filesystem::path> directories;
 
-    auto pattern = "dumps-";
+    auto pattern = "dump-";
     for (const auto& entry : std::filesystem::directory_iterator(dir)) {
         if (entry.is_directory() && entry.path().filename().string().starts_with(pattern)) {
             directories.push_back(entry.path());
