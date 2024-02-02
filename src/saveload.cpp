@@ -214,7 +214,7 @@ static void cleanup_state() {
 
     // If we have more than 20 state files, we want to purge the oldest one(s) until we have just 20.
     while(files.size() > 20) {
-        std::filesystem::remove(files.back());
+        std::filesystem::remove_all(files.back());
         files.pop_back();
     }
 }
