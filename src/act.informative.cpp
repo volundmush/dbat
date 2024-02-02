@@ -2026,7 +2026,7 @@ static void display_scroll(struct char_data *ch, struct obj_data *obj) {
 
 static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode) {
     if (!obj || !ch) {
-        basic_mud_log("SYSERR: nullptr pointer in show_obj_to_char(): obj=%p ch=%p", obj, ch);
+        basic_mud_log("SYSERR: nullptr pointer in show_obj_to_char()");
         /*  SYSERR_DESC:
      *  Somehow a nullptr pointer was sent to show_obj_to_char() in either the
      *  'obj' or the 'ch' variable.  The error will indicate which was nullptr

@@ -687,7 +687,7 @@ awaitable<void> manage_loop() {
         saveTimer -= deltaTime;
         if(saveTimer <= 0.0) {
             // TODO : Run save operation.
-            co_await runSave();
+            runSave();
             saveTimer = 60.0 * 5.0;
         }
 
@@ -709,11 +709,6 @@ awaitable<void> manage_loop() {
 
 awaitable<void> run_game() {
     game::init_locale();
-    game::init_log();
-    if(!game::init_sodium()) {
-        logger->error("Failed to initialize libsodium");
-        shutdown_game(EXIT_FAILURE);
-    }
     load_config();
     chdir("lib");
     game::init_database();

@@ -14,6 +14,7 @@
 #include <cerrno>
 #include <ctime>
 #include <cstddef>
+#include <sys/stat.h>
 
 #ifndef _WIN32
 // #include <strings.h>
@@ -47,6 +48,7 @@
 #include <mutex>
 #include <bitset>
 #include <variant>
+#include <functional>
 
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"

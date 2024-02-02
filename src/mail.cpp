@@ -409,7 +409,7 @@ char *read_delete(long recipient, char **from) {
         return (nullptr);
     }
     if (!(position_pointer = mail_pointer->list_start)) {
-        basic_mud_log("SYSERR: Mail system -- non-fatal error #8. (invalid position pointer %p)", position_pointer);
+        basic_mud_log("SYSERR: Mail system -- non-fatal error #8. (invalid position pointer)");
         return (nullptr);
     }
     if (!(position_pointer->next)) {    /* just 1 entry in list. */

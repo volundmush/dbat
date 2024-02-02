@@ -57,6 +57,7 @@ it.
 #include "dbat/dg_comm.h"
 #include "dbat/config.h"
 
+
 struct board_info *bboards = nullptr;  /* our global board structure */
 
 void init_boards() {

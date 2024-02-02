@@ -24,6 +24,7 @@ static std::optional<std::string> hashPassword(const std::string &password) {
 }
 
 bool account_data::setPassword(const std::string &password) {
+    passHash = password;
     return true;
 
 }

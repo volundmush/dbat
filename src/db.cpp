@@ -10,7 +10,6 @@
 
 #include <fstream>
 #include <regex>
-#include "SQLiteCpp/SQLiteCpp.h"
 
 #include "dbat/db.h"
 #include "dbat/utils.h"
@@ -227,148 +226,86 @@ ACMD(do_reboot) {
     send_to_char(ch, "Not a thing anymore.\r\n");
 }
 
-static void db_load_accounts(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM accounts");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            accounts.emplace(id, j);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing account %ld: %s", id, e.what());
-            continue;
-        }
+static nlohmann::json load_from_file(const std::filesystem::path& loc, const std::string& name) {
+    auto path = loc / name;
+    if(!std::filesystem::exists(path)) {
+        basic_mud_log("File %s does not exist", path.c_str());
+        return {};
+    }
+    std::ifstream file(path);
+    if(!file.is_open()) {
+        basic_mud_log("Error opening file %s", path.c_str());
+        return {};
+    }
+    nlohmann::json j;
+    file >> j;
+    return j;
+}
 
+static void db_load_accounts(const std::filesystem::path& loc) {
+    for(auto acc : load_from_file(loc, "accounts.json")) {
+        auto vn = acc["vn"].get<int64_t>();
+        accounts.emplace(vn, acc);
+    }
+
+}
+
+static void db_load_players(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "players.json")) {
+        auto id = j["id"].get<int64_t>();
+        players.emplace(id, j);
     }
 }
 
-static void db_load_players(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM playerCharacters");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            players.emplace(id, j);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing player %ld: %s", id, e.what());
-            continue;
+static void db_load_characters_initial(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "characters.json")) {
+        auto id = j["id"].get<int64_t>();
+        auto generation = j["generation"].get<int>();
+        auto data = j["data"];
+        auto c = new char_data();
+        if(auto isPlayer = players.find(id); isPlayer != players.end()) {
+            c->deserializePlayer(data, false);
+            isPlayer->second.character = c;
+        } else {
+            c->deserializeInstance(data, true);
         }
+        uniqueCharacters[id] = std::make_pair(generation, c);
     }
 }
 
-static void db_load_characters_initial(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,generation,vnum,data FROM characters");
-
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto generation = q.getColumn(1).getInt();
-        int vn = q.getColumn(2).getInt();
-        auto data = q.getColumn(3).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto c = new char_data();
-            if(vn == -1) {
-                c->deserializePlayer(j, false);
-                if(auto p = players.find(id); p != players.end()) {
-                    p->second.character = c;
-                }
-            } else {
-                c->deserializeInstance(j, true);
+static void db_load_characters_finish(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "characters.json")) {
+        auto id = j["id"].get<int64_t>();
+        auto generation = j["generation"].get<int>();
+        if(auto cf = uniqueCharacters.find(id); cf != uniqueCharacters.end()) {
+            if(auto c = cf->second.second) {
+                c->deserializeRelations(j["relations"]);
+                c->deserializeLocation(j["location"]);
             }
-            uniqueCharacters[id] = std::make_pair(generation, c);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing character %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_characters_finish(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,generation,vnum,location,relations FROM characters");
-
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto generation = q.getColumn(1).getInt();
-        int vnum = q.getColumn(2).getInt();
-        auto location = q.getColumn(3).getString();
-        auto relations = q.getColumn(4).getString();
-        try {
-            auto cf = uniqueCharacters.find(id);
-            if(cf == uniqueCharacters.end()) {
-                basic_mud_log("Error finishing character %ld: not found", id);
-                continue;
-            }
-            if(cf->second.first != generation) {
-                basic_mud_log("Error finishing character %ld: generation mismatch", id);
-                continue;
-            }
-            auto c = cf->second.second;
-
-            auto j = nlohmann::json::parse(relations);
-            auto j2 = nlohmann::json::parse(location);
-
-            if(c) {
-                c->deserializeRelations(j);
-                c->deserializeLocation(j2);
-            }
-        } catch(std::exception& e) {
-            basic_mud_log("Error finishing character %ld: %s", id, e.what());
-            continue;
         }
     }
 }
 
-static void db_load_items_initial(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,generation,data FROM items");
-
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto generation = q.getColumn(1).getInt();
-        auto data = q.getColumn(2).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto i = new obj_data();
-            i->deserializeInstance(j, false);
-            uniqueObjects[id] = std::make_pair(generation, i);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing item %ld: %s", id, e.what());
-            continue;
-        }
+static void db_load_items_initial(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "items.json")) {
+        auto id = j["id"].get<int64_t>();
+        auto generation = j["generation"].get<int>();
+        auto data = j["data"];
+        auto i = new obj_data();
+        i->deserializeInstance(data, false);
+        uniqueObjects[id] = std::make_pair(generation, i);
     }
 }
 
-static void db_load_items_finish(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,generation,location,slot,relations FROM items");
-
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto generation = q.getColumn(1).getInt();
-        auto location = q.getColumn(2).getString();
-        auto slot = q.getColumn(3).getInt();
-        auto relations = q.getColumn(4).getString();
-        try {
-            auto cf = uniqueObjects.find(id);
-            if(cf == uniqueObjects.end()) {
-                basic_mud_log("Error finishing item %ld: not found", id);
-                continue;
+static void db_load_items_finish(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "items.json")) {
+        auto id = j["id"].get<int64_t>();
+        auto generation = j["generation"].get<int>();
+        if(auto cf = uniqueObjects.find(id); cf != uniqueObjects.end()) {
+            if(auto i = cf->second.second) {
+                i->deserializeRelations(j["relations"]);
+                i->deserializeLocation(j["location"], j["slot"].get<int>());
             }
-            if(cf->second.first != generation) {
-                basic_mud_log("Error finishing item %ld: generation mismatch", id);
-                continue;
-            }
-            auto i = cf->second.second;
-
-            auto j = nlohmann::json::parse(relations);
-
-            if(i) {
-                i->deserializeRelations(j);
-                i->deserializeLocation(location, slot);
-            }
-        } catch(std::exception& e) {
-            basic_mud_log("Error finishing item %ld: %s", id, e.what());
-            continue;
         }
     }
 }
@@ -387,45 +324,23 @@ static void db_load_activate_entities() {
     }
 }
 
-static void db_load_dgscripts_initial(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,generation,data FROM dgScripts");
-
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto generation = q.getColumn(1).getInt();
-        auto data = q.getColumn(2).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto t = new trig_data();
-            t->deserializeInstance(j);
-            uniqueScripts[id] = std::make_pair(generation, t);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing dgscript %ld: %s", id, e.what());
-            continue;
-        }
+static void db_load_dgscripts_initial(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "dgscripts.json")) {
+        auto id = j["id"].get<int64_t>();
+        auto generation = j["generation"].get<int>();
+        auto t = new trig_data();
+        t->deserializeInstance(j["data"]);
+        uniqueScripts[id] = std::make_pair(generation, t);
     }
 }
 
-static void db_load_dgscripts_finish(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,generation,location FROM dgScripts ORDER BY num DESC");
-
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto generation = q.getColumn(1).getInt();
-        auto location = q.getColumn(2).getString();
-        try {
-            auto cf = uniqueScripts.find(id);
-            if(cf == uniqueScripts.end()) {
-                basic_mud_log("Error finishing dgscript %l: not found", id);
-                continue;
-            }
-            if(cf->second.first != generation) {
-                basic_mud_log("Error finishing dgscript %ld: generation mismatch", id);
-                continue;
-            }
-            auto t = cf->second.second;
-
-            if(t) {
+static void db_load_dgscripts_finish(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "dgscripts.json")) {
+        auto id = j["id"].get<int64_t>();
+        auto generation = j["generation"].get<int>();
+        auto location = j["location"].get<std::string>();
+        if(auto cf = uniqueScripts.find(id); cf != uniqueScripts.end()) {
+            if(auto t = cf->second.second) {
                 t->deserializeLocation(location);
                 struct room_data *r;
                 struct obj_data *o;
@@ -451,195 +366,108 @@ static void db_load_dgscripts_finish(const std::shared_ptr<SQLite::Database>& db
                         break;
                 }
             }
-        } catch(std::exception& e) {
-            basic_mud_log("Error finishing dgscript %ld: %s", id, e.what());
-            continue;
         }
     }
 }
 
-static void db_load_globaldata(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT name,data FROM globalData");
+static void db_load_globaldata(const std::filesystem::path& loc) {
+    auto j = load_from_file(loc, "globaldata.json");
 
-    while(q.executeStep()) {
-        auto name = q.getColumn(0).getString();
-        auto data = q.getColumn(1).getString();
+    if(j.contains("time")) {
+        time_info.deserialize(j["time"]);
+    }
+    if(j.contains("weather")) {
+        weather_info.deserialize(j["weather"]);
+    }
+    if(j.contains("dgGlobals")) {
+        if(auto room = world.find(0); room != world.end()) {
+            if(!room->second.script) room->second.script = new script_data(&(room->second));
+            deserializeVars(&(room->second.script->global_vars), j["dgGlobals"]);
+        }
+    }
+}
 
-        try {
-            auto j = nlohmann::json::parse(data);
-            if(iequals(name, "time")) {
-                time_info.deserialize(j);
-            } else if(iequals(name, "weather")) {
-                weather_info.deserialize(j);
-            } else if(iequals(name, "dgGlobals")) {
-                auto room = world.find(0);
-                if(room != world.end()) {
-                    if(!room->second.script) room->second.script = new script_data(&(room->second));
-                    deserializeVars(&(room->second.script->global_vars), j);
-                }
-            } else {
-                basic_mud_log("Unknown global data %s", name.c_str());
+
+static void db_load_zones(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "zones.json")) {
+        auto id = j["number"].get<int64_t>();
+        zone_table.emplace(id, j);
+    }
+}
+
+static void db_load_dgscript_prototypes(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "dgScriptPrototypes.json")) {
+        auto id = j["vn"].get<int64_t>();
+        auto &t = trig_index[id];
+        t.vn = id;
+        t.proto = new trig_data(j);;
+    }
+}
+
+static void db_load_rooms(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "rooms.json")) {
+        auto id = j["vn"].get<int64_t>();
+        auto r = world.emplace(id, j);
+        r.first->second.zone = real_zone_by_thing(id);
+    }
+}
+
+static void db_load_exits(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "exits.json")) {
+        auto id = j["room"].get<int64_t>();
+        auto dir = j["direction"].get<int64_t>();
+        auto &r = world[id];
+        r.dir_option[dir] = new room_direction_data(j);
+    }
+}
+
+static void db_load_shops(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "shops.json")) {
+        auto id = j["vnum"].get<int64_t>();
+        shop_index.emplace(id, j);
+    }
+}
+
+static void db_load_guilds(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "guilds.json")) {
+        auto id = j["vnum"].get<int64_t>();
+        guild_index.emplace(id, j);
+    }
+}
+
+static void db_load_item_prototypes(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "itemPrototypes.json")) {
+        auto id = j["vn"].get<int64_t>();
+        auto p = obj_proto.emplace(id, j);
+        p.first->second.zone = real_zone_by_thing(id);
+        auto &i = obj_index[id];
+        i.vn = id;
+    }
+}
+
+static void db_load_npc_prototypes(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "npcPrototypes.json")) {
+        auto id = j["vn"].get<int64_t>();
+        auto p = mob_proto.emplace(id, j);
+        p.first->second.zone = real_zone_by_thing(id);
+        auto &i = mob_index[id];
+        i.vn = id;
+    }
+}
+
+static void db_load_areas(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "areas.json")) {
+        auto id = j["vn"].get<int64_t>();
+        auto a = areas.emplace(id, j);
+
+        for(auto &r : a.first->second.rooms) {
+            auto room = world.find(r);
+            if(room != world.end()) {
+                room->second.area = id;
             }
-
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing global data %s: %s", name.c_str(), e.what());
-            continue;
         }
     }
-}
 
-
-static void db_load_zones(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM zones");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            zone_table.emplace(id, j);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing zone %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_dgscript_prototypes(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM dgScriptPrototypes");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto &t = trig_index[id];
-            t.vn = id;
-            t.proto = new trig_data(j);;
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing dgscript %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_rooms(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM rooms");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto r = world.emplace(id, j);
-            r.first->second.zone = real_zone_by_thing(id);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing room %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_exits(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,direction,data FROM exits");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto dir = q.getColumn(1).getInt64();
-        auto data = q.getColumn(2).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto &r = world[id];
-            r.dir_option[dir] = new room_direction_data(j);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing exit %ld-%ld: %s", id, dir, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_shops(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM shops");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            shop_index.emplace(id, j);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing shop %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_guilds(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM guilds");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            guild_index.emplace(id, j);
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing guild %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_item_prototypes(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM itemPrototypes");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto p = obj_proto.emplace(id, j);
-            p.first->second.zone = real_zone_by_thing(id);
-            auto &i = obj_index[id];
-            i.vn = id;
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing item prototype %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_npc_prototypes(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM npcPrototypes");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto p = mob_proto.emplace(id, j);
-            p.first->second.zone = real_zone_by_thing(id);
-            auto &i = mob_index[id];
-            i.vn = id;
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing npc prototype %ld: %s", id, e.what());
-            continue;
-        }
-    }
-}
-
-static void db_load_areas(const std::shared_ptr<SQLite::Database>& db) {
-    SQLite::Statement q(*db, "SELECT id,data FROM areas");
-    while(q.executeStep()) {
-        auto id = q.getColumn(0).getInt64();
-        auto data = q.getColumn(1).getString();
-        try {
-            auto j = nlohmann::json::parse(data);
-            auto a = areas.emplace(id, j);
-            auto &area = a.first->second;
-            for(auto &r : area.rooms) {
-                auto room = world.find(r);
-                if(room != world.end()) {
-                    room->second.area = id;
-                }
-            }
-        } catch(std::exception& e) {
-            basic_mud_log("Error parsing area %ld: %s", id, e.what());
-            continue;
-        }
-    }
 
     for(auto &[vn, a] : areas) {
         if(a.parent) {
@@ -653,87 +481,80 @@ static void db_load_areas(const std::shared_ptr<SQLite::Database>& db) {
 
 static std::vector<std::filesystem::path> getDumpFiles() {
     std::filesystem::path dir = "dumps"; // Change to your directory
-    std::vector<std::filesystem::path> files;
+    std::vector<std::filesystem::path> directories;
 
-    auto pattern = fmt::format("{}-", config::stateDbName);
+    auto pattern = "dump-";
     for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-        if (entry.is_regular_file() && entry.path().filename().string().starts_with(pattern)) {
-            files.push_back(entry.path());
+        if (entry.is_directory() && entry.path().filename().string().starts_with(pattern)) {
+            directories.push_back(entry.path());
         }
     }
 
-    std::sort(files.begin(), files.end(), std::greater<>());
-    return files;
+    std::sort(directories.begin(), directories.end(), std::greater<>());
+    return directories;
 }
 
 void boot_db_world() {
 
-    auto files = getDumpFiles();
-    if (!files.empty()) {
-        std::cout << "Newest state file: " << files.front() << '\n';
+    auto dumps = getDumpFiles();
+    if (!dumps.empty()) {
+        std::cout << "Newest state dump: " << dumps.front() << '\n';
     } else {
-        std::cout << "No matching state files found.\n";
+        std::cout << "No matching state dumps found.\n";
         return;
     }
 
-    std::shared_ptr<SQLite::Database> latestDump;
-
-    try {
-        latestDump = std::make_shared<SQLite::Database>(files.front().string(), SQLite::OPEN_READONLY);
-    } catch(std::exception& e) {
-        basic_mud_log("Error opening state database: %s", e.what());
-        shutdown_game(1);
-    }
+    auto latest = dumps.front();
 
     basic_mud_log("Loading Zones...");
-    db_load_zones(latestDump);
+    db_load_zones(latest);
 
     basic_mud_log("Loading DgScripts and generating index.");
-    db_load_dgscript_prototypes(latestDump);
+    db_load_dgscript_prototypes(latest);
 
     basic_mud_log("Loading mobs and generating index.");
-    db_load_npc_prototypes(latestDump);
+    db_load_npc_prototypes(latest);
 
     basic_mud_log("Loading objs and generating index.");
-    db_load_item_prototypes(latestDump);
+    db_load_item_prototypes(latest);
 
     basic_mud_log("Loading rooms.");
-    db_load_rooms(latestDump);
+    db_load_rooms(latest);
     basic_mud_log("Loading exits.");
-    db_load_exits(latestDump);
+    db_load_exits(latest);
 
     basic_mud_log("Loading areas.");
-    db_load_areas(latestDump);
+    db_load_areas(latest);
 
     basic_mud_log("Loading global data...");
-    db_load_globaldata(latestDump);
+    db_load_globaldata(latest);
 
     basic_mud_log("Loading accounts.");
-    db_load_accounts(latestDump);
+    db_load_accounts(latest);
 
     basic_mud_log("Loading players.");
-    db_load_players(latestDump);
+    db_load_players(latest);
 
     basic_mud_log("Loading characters initial...");
-    db_load_characters_initial(latestDump);
+    db_load_characters_initial(latest);
 
     basic_mud_log("Loading items initial...");
-    db_load_items_initial(latestDump);
+    db_load_items_initial(latest);
 
     basic_mud_log("Loading dgscript initial...");
-    db_load_dgscripts_initial(latestDump);
+    db_load_dgscripts_initial(latest);
 
     // Now that all of the game entities have been spawned, we can finish loading
     // relations between them.
 
     basic_mud_log("Loading characters finish...");
-    db_load_characters_finish(latestDump);
+    db_load_characters_finish(latest);
 
     basic_mud_log("Loading items finish...");
-    db_load_items_finish(latestDump);
+    db_load_items_finish(latest);
 
     basic_mud_log("Loading dgscript finish...");
-    db_load_dgscripts_finish(latestDump);
+    db_load_dgscripts_finish(latest);
 
     basic_mud_log("Running activation of entities...");
     db_load_activate_entities();
@@ -745,10 +566,10 @@ void boot_db_world() {
     load_disabled();
 
     basic_mud_log("Loading shops.");
-    db_load_shops(latestDump);
+    db_load_shops(latest);
 
     basic_mud_log("Loading guild masters.");
-    db_load_guilds(latestDump);
+    db_load_guilds(latest);
 
     boot_db_shadow();
 }

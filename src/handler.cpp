@@ -465,7 +465,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
         if (!IS_NPC(ch))
             ch->playerFlags.set(PLR_CRASH);
     } else
-        basic_mud_log("SYSERR: nullptr obj (%p) or char (%p) passed to obj_to_char.", object, ch);
+        basic_mud_log("SYSERR: nullptr obj or char passed to obj_to_char.");
 }
 
 
@@ -782,8 +782,8 @@ void obj_from_room(struct obj_data *object) {
     struct obj_data *temp;
 
     if (!object || IN_ROOM(object) == NOWHERE) {
-        basic_mud_log("SYSERR: nullptr object (%p) or obj not in a room (%d) passed to obj_from_room",
-            object, IN_ROOM(object));
+        basic_mud_log("SYSERR: nullptr object or obj not in a room (%d) passed to obj_from_room",
+            IN_ROOM(object));
         return;
     }
 
@@ -817,8 +817,6 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
     struct obj_data *tmp_obj;
 
     if (!obj || !obj_to || obj == obj_to) {
-        basic_mud_log("SYSERR: nullptr object (%p) or same source (%p) and target (%p VNUM: %d) obj passed to obj_to_obj.",
-            obj, obj, obj_to, obj_to ? GET_OBJ_VNUM(obj_to) : -1);
         return;
     }
 

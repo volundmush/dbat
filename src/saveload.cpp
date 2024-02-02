@@ -3,7 +3,6 @@
 
 #include "dbat/net.h"
 #include "dbat/utils.h"
-#include "SQLiteCpp/SQLiteCpp.h"
 #include "dbat/players.h"
 #include "dbat/db.h"
 #include "dbat/account.h"
@@ -14,6 +13,7 @@
 #include <fstream>
 
 static void dump_to_file(const std::filesystem::path &loc, const std::string &name, const nlohmann::json &data) {
+    if(data.empty()) return;
     std::ofstream out(loc / name);
     out << jdump_pretty(data);
     out.close();
@@ -23,7 +23,7 @@ static void dump_state_accounts(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, r] : accounts) {
-        j.push_back(std::make_pair(v, r.serialize()));
+        j.push_back(r.serialize());
     }
 
     dump_to_file(loc, "accounts.json", j);
@@ -34,7 +34,7 @@ static void dump_state_players(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, r] : players) {
-        j.push_back(std::make_pair(v, r.serialize()));
+        j.push_back(r.serialize());
     }
     dump_to_file(loc, "players.json", j);
 }
@@ -47,190 +47,154 @@ static void dump_state_characters(const std::filesystem::path &loc) {
         nlohmann::json j2;
         j2["id"] = v;
         j2["generation"] = static_cast<int32_t>(r.first);
-        j2["vnum"] = r.second->vn;
-        j2["name"] = r.second->name;
-        j2["shortDesc"] = r.second->short_description;
         j2["data"] = r.second->serializeInstance();
         j2["location"] = r.second->serializeLocation();
         j2["relations"] = r.second->serializeRelations();
-        j.push_back(std::make_pair(v, j2));
+        j.push_back(j2);
     }
     dump_to_file(loc, "characters.json", j);
 
 }
 
 static void dump_state_items(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO items (id, generation, vnum, name, shortDesc, data, location, slot, relations) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    nlohmann::json j;
 
     for(auto &[v, r] : uniqueObjects) {
         if(v != r.second->id) r.second->id = v;
-        q.bind(1, v);
-        q.bind(2, static_cast<int32_t>(r.first));
-        q.bind(3, r.second->vn);
-        q.bind(4, r.second->name);
-        q.bind(5, r.second->short_description);
-        q.bind(6, jdump(r.second->serializeInstance()));
-        q.bind(7, r.second->serializeLocation());
-        q.bind(8, r.second->worn_on);
-        q.bind(9, jdump(r.second->serializeRelations()));
-        q.exec();
-        q.reset();
+        nlohmann::json j2;
+        j2["id"] = v;
+        j2["generation"] = static_cast<int32_t>(r.first);
+        j2["data"] = r.second->serializeInstance();
+        j2["location"] = r.second->serializeLocation();
+        j2["slot"] = r.second->worn_on;
+        j2["relations"] = r.second->serializeRelations();
+        j.push_back(j2);
     }
+    dump_to_file(loc, "items.json", j);
 }
 
 static void dump_state_dgscripts(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgscripts (id, generation, vnum, name, data, location, num) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    nlohmann::json j;
 
     for(auto &[v, r] : uniqueScripts) {
         if(v != r.second->id) r.second->id = v;
-        q.bind(1, v);
-        q.bind(2, static_cast<int32_t>(r.first));
-        q.bind(3, r.second->vn);
-        q.bind(4, r.second->name);
-        q.bind(5, jdump(r.second->serializeInstance()));
-        q.bind(6, r.second->serializeLocation());
-        q.bind(7, r.second->order);
-        q.exec();
-        q.reset();
+        nlohmann::json j2;
+        j2["id"] = v;
+        j2["generation"] = static_cast<int32_t>(r.first);
+        j2["data"] = r.second->serializeInstance();
+        j2["location"] = r.second->serializeLocation();
+        j2["order"] = r.second->order;
+        j.push_back(j2);
     }
+    dump_to_file(loc, "dgscripts.json", j);
 }
 
 void dump_state_globalData(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO globalData (name, data) VALUES (?, ?)");
+    nlohmann::json j;
 
-    std::map<std::string, nlohmann::json> globalData;
-
-    globalData["time"] = time_info.serialize();
-    globalData["weather"] = weather_info.serialize();
-    auto gRoom = world.find(0);
-    if(gRoom != world.end()) {
+    j["time"] = time_info.serialize();
+    j["weather"] = weather_info.serialize();
+    if(auto gRoom = world.find(0); gRoom != world.end()) {
         if(gRoom->second.script && gRoom->second.script->global_vars) {
-            globalData["dgGlobals"] = serializeVars(gRoom->second.script->global_vars);
+            j["dgGlobals"] = serializeVars(gRoom->second.script->global_vars);
         }
     }
 
-    for(auto &[v, r] : globalData) {
-        q.bind(1, v);
-        q.bind(2, jdump(r));
-        q.exec();
-        q.reset();
-    }
+    dump_to_file(loc, "globaldata.json", j);
 }
 
 static void process_dirty_rooms(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO rooms (id, data) VALUES (?, ?)");
-    SQLite::Statement q2(*db, "INSERT OR REPLACE INTO exits (id, direction, destination, data) VALUES (?,?,?,?)");
+    nlohmann::json rooms, exits;
 
     for(auto &[v, r] : world) {
-        q.bind(1, v);
-        q.bind(2, jdump(r.serialize()));
-        q.exec();
-        q.reset();
+        rooms.push_back(r.serialize());
 
         for(auto i = 0; i < NUM_OF_DIRS; i++) {
             if(auto ex = r.dir_option[i]; ex) {
-                q2.bind(1, v);
-                q2.bind(2, i);
-                q2.bind(3, ex->to_room);
-                q2.bind(4, jdump(ex->serialize()));
-                q2.exec();
-                q2.reset();
+                nlohmann::json j2;
+                j2["room"] = v;
+                j2["direction"] = i;
+                j2["data"] = ex->serialize();
+                exits.push_back(j2);
             }
         }
 
     }
+    dump_to_file(loc, "rooms.json", rooms);
+    dump_to_file(loc, "exits.json", exits);
 }
 
 static void process_dirty_item_prototypes(const std::filesystem::path &loc) {
-	SQLite::Statement q(*db, "INSERT OR REPLACE INTO itemPrototypes (id, data) VALUES (?,?)");
-
+    nlohmann::json j;
     for(auto &[v, o] : obj_proto) {
-        q.bind(1, v);
-        q.bind(2, jdump(o.serializeProto()));
-        q.exec();
-        q.reset();
+        j.push_back(o.serializeProto());
     }
+    dump_to_file(loc, "itemPrototypes.json", j);
 }
 
 static void process_dirty_npc_prototypes(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO npcPrototypes (id, data) VALUES (?, ?)");
+    nlohmann::json j;
 
     for(auto &[v, n] : mob_proto) {
-        q.bind(1, v);
-        q.bind(2, jdump(n.serializeProto()));
-        q.exec();
-        q.reset();
+        j.push_back(n.serializeProto());
     }
+    dump_to_file(loc, "npcPrototypes.json", j);
 }
 
 static void process_dirty_shops(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO shops (id, data) VALUES (?,?)");
-
+    nlohmann::json j;
     for(auto &[v, s] : shop_index) {
-        q.bind(1, v);
-        q.bind(2, jdump(s.serialize()));
-        q.exec();
-        q.reset();
+        j.push_back(s.serialize());
     }
+    dump_to_file(loc, "shops.json", j);
 }
 
 static void process_dirty_guilds(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO guilds (id, data) VALUES (?, ?)");
-
+    nlohmann::json j;
     for(auto &[v, g] : guild_index) {
-        q.bind(1, v);
-        q.bind(2, jdump(g.serialize()));
-        q.exec();
-        q.reset();
+        j.push_back(g.serialize());
     }
+    dump_to_file(loc, "guilds.json", j);
 }
 
 static void process_dirty_zones(const std::filesystem::path &loc) {
-	SQLite::Statement q(*db, "INSERT OR REPLACE INTO zones (id, data) VALUES (?, ?)");
+    nlohmann::json j;
 
     for(auto &[v, z] : zone_table) {
-        q.bind(1, v);
-        q.bind(2, jdump(z.serialize()));
-        q.exec();
-        q.reset();
+        j.push_back(z.serialize());
     }
+    dump_to_file(loc, "zones.json", j);
 }
 
 static void process_dirty_areas(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO areas (id, data) VALUES (?, ?)");
-
+    nlohmann::json j;
     for(auto &[v, a] : areas) {
-        q.bind(1, v);
-        q.bind(2, jdump(a.serialize()));
-        q.exec();
-        q.reset();
+        j.push_back(a.serialize());
     }
+    dump_to_file(loc, "areas.json", j);
 }
 
 static void process_dirty_dgscript_prototypes(const std::filesystem::path &loc) {
-    SQLite::Statement q(*db, "INSERT OR REPLACE INTO dgScriptPrototypes (id, data) VALUES (?, ?)");
-
+    nlohmann::json j;
     for(auto &[v, t] : trig_index) {
-        q.bind(1, v);
-        q.bind(2, jdump(t.serializeProto()));
-        q.exec();
-        q.reset();
+        j.push_back(t.serializeProto());
     }
+    dump_to_file(loc, "dgScriptPrototypes.json", j);
 }
 
 static std::vector<std::filesystem::path> getDumpFiles() {
     std::filesystem::path dir = "dumps"; // Change to your directory
-    std::vector<std::filesystem::path> files;
+    std::vector<std::filesystem::path> directories;
 
-    auto pattern = fmt::format("{}-", config::stateDbName);
+    auto pattern = "dumps-";
     for (const auto& entry : std::filesystem::directory_iterator(dir)) {
-        if (entry.is_regular_file() && entry.path().filename().string().starts_with(pattern)) {
-            files.push_back(entry.path());
+        if (entry.is_directory() && entry.path().filename().string().starts_with(pattern)) {
+            directories.push_back(entry.path());
         }
     }
 
-    std::sort(files.begin(), files.end(), std::greater<>());
-    return files;
+    std::sort(directories.begin(), directories.end(), std::greater<>());
+    return directories;
 }
 
 static void cleanup_state() {
@@ -255,6 +219,7 @@ void runSave() {
 
     auto tempPath = path / "temp";
     std::filesystem::remove(tempPath);
+    std::filesystem::create_directories(tempPath);
 
     auto newPath = path / fmt::format("dump-{:04}{:02}{:02}{:02}{:02}{:02}",
                                       tm_now.tm_year + 1900,
@@ -296,5 +261,4 @@ void runSave() {
     std::filesystem::rename(tempPath, newPath);
     basic_mud_log("Finished dumping state to %s in %f seconds.", newPath.string(), duration);
     cleanup_state();
-    return;
 }

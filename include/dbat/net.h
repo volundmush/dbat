@@ -1,6 +1,6 @@
 #pragma once
 #include "sysdep.h"
-#include "nlohmann/json.hpp"
+#include "json.hpp"
 #include "defs.h"
 #include <mutex>
 
