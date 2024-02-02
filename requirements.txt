@@ -1,0 +1,10 @@
+websockets
+aiodns
+aiohttp
+orjson
+cython
+rich
+aioquic
+sanic[http3]
+sanic-jwt
+python-socketio[asyncio_client]

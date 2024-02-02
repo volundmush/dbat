@@ -10,6 +10,7 @@
 
 #include <fstream>
 #include <regex>
+#include <thread>
 
 #include "dbat/db.h"
 #include "dbat/utils.h"
@@ -506,43 +507,95 @@ void boot_db_world() {
 
     auto latest = dumps.front();
 
+    std::vector<std::thread> threads;
+
     basic_mud_log("Loading Zones...");
-    db_load_zones(latest);
+    threads.emplace_back([&latest] {
+        db_load_zones(latest);
+    });
 
     basic_mud_log("Loading DgScripts and generating index.");
-    db_load_dgscript_prototypes(latest);
+    threads.emplace_back([&latest] {
+        db_load_dgscript_prototypes(latest);
+    });
 
     basic_mud_log("Loading mobs and generating index.");
-    db_load_npc_prototypes(latest);
+    threads.emplace_back([&latest] {
+        db_load_npc_prototypes(latest);
+    });
 
     basic_mud_log("Loading objs and generating index.");
-    db_load_item_prototypes(latest);
+    threads.emplace_back([&latest] {
+        db_load_item_prototypes(latest);
+    });
 
     basic_mud_log("Loading rooms.");
-    db_load_rooms(latest);
+    threads.emplace_back([&latest] {
+        db_load_rooms(latest);
+    });
+
+    basic_mud_log("Loading shops.");
+    threads.emplace_back([&latest] {
+        db_load_shops(latest);
+    });
+
+    basic_mud_log("Loading guild masters.");
+    threads.emplace_back([&latest] {
+        db_load_guilds(latest);
+    });
+
+    for(auto &t : threads) {
+        t.join();
+    }
+    threads.clear();
+
     basic_mud_log("Loading exits.");
-    db_load_exits(latest);
+    threads.emplace_back([&latest] {
+        db_load_exits(latest);
+    });
 
     basic_mud_log("Loading areas.");
-    db_load_areas(latest);
+    threads.emplace_back([&latest] {
+        db_load_areas(latest);
+    });
 
     basic_mud_log("Loading global data...");
-    db_load_globaldata(latest);
+    threads.emplace_back([&latest] {
+        db_load_globaldata(latest);
+    });
 
     basic_mud_log("Loading accounts.");
-    db_load_accounts(latest);
+    threads.emplace_back([&latest] {
+        db_load_accounts(latest);
+    });
+
+    for(auto &t : threads) {
+        t.join();
+    }
+    threads.clear();
 
     basic_mud_log("Loading players.");
     db_load_players(latest);
 
     basic_mud_log("Loading characters initial...");
-    db_load_characters_initial(latest);
+    threads.emplace_back([&latest] {
+        db_load_characters_initial(latest);
+    });
 
     basic_mud_log("Loading items initial...");
-    db_load_items_initial(latest);
+    threads.emplace_back([&latest] {
+        db_load_items_initial(latest);
+    });
 
     basic_mud_log("Loading dgscript initial...");
-    db_load_dgscripts_initial(latest);
+    threads.emplace_back([&latest] {
+        db_load_dgscripts_initial(latest);
+    });
+
+    for(auto &t : threads) {
+        t.join();
+    }
+    threads.clear();
 
     // Now that all of the game entities have been spawned, we can finish loading
     // relations between them.
@@ -564,12 +617,6 @@ void boot_db_world() {
 
     basic_mud_log("Loading disabled commands list...");
     load_disabled();
-
-    basic_mud_log("Loading shops.");
-    db_load_shops(latest);
-
-    basic_mud_log("Loading guild masters.");
-    db_load_guilds(latest);
 
     boot_db_shadow();
 }

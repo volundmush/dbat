@@ -19,7 +19,7 @@ start_thermite() {
 }
 
 start_server() {
-  nohup ./dbat &
+  nohup ./rundbat &
 }
 
 start_game() {
