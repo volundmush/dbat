@@ -417,7 +417,7 @@ static void db_load_exits(const std::filesystem::path& loc) {
         auto id = j["room"].get<int64_t>();
         auto dir = j["direction"].get<int64_t>();
         auto &r = world[id];
-        r.dir_option[dir] = new room_direction_data(j);
+        r.dir_option[dir] = new room_direction_data(j["data"]);
     }
 }
 

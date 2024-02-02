@@ -407,7 +407,7 @@ OCMD(do_ogoto) {
     target = find_obj_target_room(obj, arg1);
 
     if (target == NOWHERE) {
-        obj_log(obj, "ogoto target is an invalid room");
+        obj_log(obj, "ogoto target '%s' is an invalid room", arg1);
     } else if (IN_ROOM(obj) == NOWHERE) {
         obj_log(obj, "ogoto tried to leave nowhere");
     } else {
