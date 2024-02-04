@@ -1,5 +1,4 @@
 # What is this?
-
 This is the codebase for Dragon Ball Advent Truth, a MUD written atop of CircleMUD (with Goodies) 3.5 "Rasputin". Originally written in C, refactored with some C++, and now running in a horrific mishmash of Python and C++ in an attempt to modernize it.
 
 # Can I run it?
@@ -14,7 +13,7 @@ The recommended IDE is VS Code due to the multi-language nature of the project. 
 ## Ubuntu Setup
 The following apt packages are needed:
 
-`sudo apt-get install cmake build-essential python3.11 python3.11-dev python3-git python3-virtualenv git`
+`sudo apt-get install cmake build-essential python3.11 python3.11-dev python3-git python3-virtualenv git ninja-build`
 
 Clone the directory.
 

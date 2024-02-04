@@ -13,7 +13,7 @@ from dbat import api
 # Get the absolute path to the 'webroot/' directory
 webroot_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'webroot'))
 
-sio = socketio.AsyncServer(async_mode="sanic", namespaces='*')
+sio = socketio.AsyncServer(async_mode="sanic", namespaces='*', cors_allowed_origins='*')
 app = Sanic(settings.NAME)
 
 app.config["USE_UVLOOP"] = False
