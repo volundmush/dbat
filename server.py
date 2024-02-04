@@ -3,7 +3,7 @@ from sanic_jwt import Initialize
 import socketio
 import os
 import asyncio
-
+import pathlib
 import circlemud
 from circlemud import account_manager
 
@@ -11,7 +11,7 @@ from dbat import settings
 from dbat import api
 
 # Get the absolute path to the 'webroot/' directory
-webroot_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'webroot'))
+webroot_path = pathlib.Path(os.path.abspath(os.path.join(os.path.dirname(__file__), 'webclient'))) / "dist"
 
 sio = socketio.AsyncServer(async_mode="sanic", namespaces='*', cors_allowed_origins='*')
 app = Sanic(settings.NAME)
@@ -23,7 +23,7 @@ sio.attach(app)
 app.blueprint(api.api)
 
 # Static file serving
-app.static('/static', os.path.join(webroot_path, 'static'))
+app.static('/assets', os.path.join(webroot_path, 'assets'))
 
 # Route to serve index.html
 @app.route('/')

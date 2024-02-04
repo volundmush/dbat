@@ -1,48 +1,35 @@
-html, body, #root {
+html, body, #root, #gamedisplay {
   height: 100%;
   width: 100%;
 }
 
 body {
-  background-color: black;
+
+  font-family: 'Courier New', Courier, monospace !important; /* or any monospace font of your choice */
 }
 
 #root {
-  display: flex;
 }
 
 #gamedisplay {
-  display: flex;
-  flex-direction: row;
-  flex-grow: 1;
+
 }
 
 #gametextdisplay {
-  display: flex;
-  flex-direction: column;
-  width: 35%;
+  white-space: pre-wrap; /* preserves whitespace and wraps text */
+  background-color: black;
+  color: #cccccc; /* text color, assuming a dark background */
 }
 
 #gametextholder {
-  height: 90%;
-  font-size: 1em; /* or any other size you prefer */
-  font-family: 'Courier New', Courier, monospace; /* or any monospace font of your choice */
-  white-space: pre-wrap; /* preserves whitespace and wraps text */
-  line-height: 1.5; /* adjust line height for better readability */
-  color: #cccccc; /* text color, assuming a dark background */
-  background-color: #000000; /* background color, can be set to match your theme */
   overflow-y: auto; /* adds a scrollbar if content overflows vertically */
-  display: flex;
-  flex-direction: column;
 }
 
 #gameinput {
-  height: 10%;
-  display: flex;
-  flex-grow: 4;
   resize: none;
+  color: #cccccc; /* text color, assuming a dark background */
 }
 
 #gamedatadisplay {
-  width: 65%;
+
 }

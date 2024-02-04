@@ -6,13 +6,13 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import io from 'https://cdn.socket.io/4.7.4/socket.io.esm.min.js';
+import io from 'socket.io-client';
 import Stack from 'react-bootstrap/Stack';
+import { SplitView } from '@swc-react/split-view';
 
 const protocol = window.location.protocol.includes('https') ? 'https' : 'http';
 const host = window.location.hostname;
-//const port = window.location.port || (protocol === 'https' ? 443 : 80);
-const port = 8000;
+const port = (import.meta.env.MODE === "production") ? (window.location.port || (protocol === 'https' ? 443 : 80)) : 8000;
 const socketUrl = `${protocol}://${host}:${port}`;
 const socket = io(socketUrl, { autoConnect: false });
 
@@ -69,9 +69,9 @@ export const GameWindow = () => {
 
     useEffect(() => {
         if (gameTextEndRef.current) {
-          gameTextEndRef.current.scrollIntoView({ behavior: 'smooth'});
+            (gameTextEndRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth'});
         }
-      }, [textChunks]);
+    }, [textChunks]);
 
     // Create a single HTML string from all events
     const createMarkup = () => {
@@ -79,9 +79,15 @@ export const GameWindow = () => {
     };
 
     return (
-        <>
-            <div id="gamedisplay">
-            <div id="gametextdisplay">
+            <SplitView id="gamedisplay"
+             resizable
+             primarySize="40%"
+             >
+            <SplitView id="gametextdisplay"
+            resizable 
+            vertical
+            primarySize="80%"
+            >
                 <div id="gametextholder">
                     <div id="gametext" dangerouslySetInnerHTML={createMarkup()}/>
                     <div id="bottomref" ref={gameTextEndRef}/>
@@ -94,13 +100,11 @@ export const GameWindow = () => {
                 onKeyDown={handleKeyDown}
                 autoFocus={true}
                 />
-        </div>
+        </SplitView>
 
             <div id="gamedatadisplay">
             Blargh.
             </div>
-        </div>
-          
-        </>
+        </SplitView>
       );
 };
