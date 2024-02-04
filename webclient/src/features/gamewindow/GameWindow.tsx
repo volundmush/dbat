@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { useState } from "react"
+import React, { useEffect, useState, useRef, ChangeEventHandler, KeyboardEventHandler} from 'react';
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
 import { chunks, addChunk} from './gameWindow';
 import Container from 'react-bootstrap/Container';
@@ -8,17 +7,21 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import io from 'https://cdn.socket.io/4.7.4/socket.io.esm.min.js';
+import Stack from 'react-bootstrap/Stack';
+
+const protocol = window.location.protocol.includes('https') ? 'https' : 'http';
+const host = window.location.hostname;
+//const port = window.location.port || (protocol === 'https' ? 443 : 80);
+const port = 8000;
+const socketUrl = `${protocol}://${host}:${port}`;
+const socket = io(socketUrl, { autoConnect: false });
 
 export const GameWindow = () => {
     const dispatch = useAppDispatch();
+    const [command, setCommand] = useState('');
     const textChunks = useAppSelector(chunks);
-    const protocol = window.location.protocol.includes('https') ? 'https' : 'http';
-    const host = window.location.hostname;
-    //const port = window.location.port || (protocol === 'https' ? 443 : 80);
-    const port = 8000;
-    const socketUrl = `${protocol}://${host}:${port}`;
-    const socket = io(socketUrl, { autoConnect: false });
-
+    const gameTextEndRef = useRef(null);
+    
     useEffect(() => {
         console.log(`Attempting to connect SocketIO to ${socketUrl}`);
 
@@ -40,9 +43,35 @@ export const GameWindow = () => {
         socket.connect();
 
         return () => {
-            socket.disconnect();
+            console.log('Disconnecting from Socket.IO server.');
+            //socket.disconnect();
         };
     }, []);
+
+    const handleInputChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
+        setCommand(e.target.value);
+    };
+    
+    const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {  // Prevents submission if Shift+Enter is pressed
+            e.preventDefault();  // Prevents the default action of Enter key in a textarea (new line)
+            handleSubmit(e);
+        }
+    };
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
+        e.preventDefault();
+        if (command.trim()) {
+            socket.emit("Game.Command", { data: command.trim() });
+            setCommand(''); // Clear the input after sending the command
+        }
+    };
+
+    useEffect(() => {
+        if (gameTextEndRef.current) {
+          gameTextEndRef.current.scrollIntoView({ behavior: 'smooth'});
+        }
+      }, [textChunks]);
 
     // Create a single HTML string from all events
     const createMarkup = () => {
@@ -50,25 +79,28 @@ export const GameWindow = () => {
     };
 
     return (
-        <Container fluid id="mainapp">
-            <Row id="gametext" dangerouslySetInnerHTML={createMarkup()} />
-            <Row id="gamecontrols">
-                <Form>
-                    <Row className="align-items-center">
-                        <Col xs={9} md={10}> {/* Adjust the size props as necessary for responsiveness */}
-                            <Form.Group controlId="gameSubmit">
-                                <Form.Control type="text" placeholder="Enter command" />
-                            </Form.Group>
-                        </Col>
-                        <Col xs={2} md={2}> {/* Adjust the size props as necessary for responsiveness */}
-                            <Button variant="primary">
-                                Send
-                            </Button>
-                        </Col>
-                    </Row>
-                </Form>
-            </Row>
-        </Container>
+        <>
+            <div id="gamedisplay">
+            <div id="gametextdisplay">
+                <div id="gametextholder">
+                    <div id="gametext" dangerouslySetInnerHTML={createMarkup()}/>
+                    <div id="bottomref" ref={gameTextEndRef}/>
+                </div>
+            <textarea id="gameinput" 
+                autoComplete="off" 
+                placeholder="Enter command"
+                value={command}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                autoFocus={true}
+                />
+        </div>
 
-    );
+            <div id="gamedatadisplay">
+            Blargh.
+            </div>
+        </div>
+          
+        </>
+      );
 };
