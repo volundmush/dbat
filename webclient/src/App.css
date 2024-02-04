@@ -3,8 +3,7 @@ html, body, #root, #mainapp {
   width: 100%;
 }
 
-#gamewindowholder {
-  height: 80%;
+#mainapp {
   background-color: black;
 }
 
@@ -17,5 +16,5 @@ html, body, #root, #mainapp {
   background-color: #000000; /* background color, can be set to match your theme */
   padding: 10px; /* space inside the div */
   overflow-y: auto; /* adds a scrollbar if content overflows vertically */
-  height: 100%; /* or any other value depending on your layout needs */
+  height: 80%; /* or any other value depending on your layout needs */
 }
