@@ -1,9 +1,9 @@
 import "./App.css"
-import { Counter } from "./features/counter/Counter"
-import { Quotes } from "./features/quotes/Quotes"
 import { GameWindow } from "./features/gamewindow/GameWindow"
-import logo from "./logo.svg"
-import { Theme } from "@swc-react/theme";
+import 'react-mosaic-component/react-mosaic-component.css';
+import '@blueprintjs/core/lib/css/blueprint.css';
+import '@blueprintjs/icons/lib/css/blueprint-icons.css';
+
 
 const App = () => {
   return (

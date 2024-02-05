@@ -1,14 +1,9 @@
-import React, { useEffect, useState, useRef, ChangeEventHandler, KeyboardEventHandler} from 'react';
+import React, { useEffect, useState, useRef, ChangeEventHandler, KeyboardEventHandler } from 'react';
 import { useAppDispatch, useAppSelector } from "../../app/hooks"
-import { chunks, addChunk} from './gameWindow';
-import Container from 'react-bootstrap/Container';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import { chunks, addChunk } from './gameWindow';
 import io from 'socket.io-client';
-import Stack from 'react-bootstrap/Stack';
-import { SplitView } from '@swc-react/split-view';
+import { Mosaic, MosaicWindow } from 'react-mosaic-component';
+
 
 const protocol = window.location.protocol.includes('https') ? 'https' : 'http';
 const host = window.location.hostname;
@@ -21,7 +16,7 @@ export const GameWindow = () => {
     const [command, setCommand] = useState('');
     const textChunks = useAppSelector(chunks);
     const gameTextEndRef = useRef(null);
-    
+
     useEffect(() => {
         console.log(`Attempting to connect SocketIO to ${socketUrl}`);
 
@@ -35,7 +30,7 @@ export const GameWindow = () => {
 
         socket.onAny((eventName: string, message: any) => {
             console.log(`Received event: ${eventName}`, message);
-            if(eventName === "Game.Text") {
+            if (eventName === "Game.Text") {
                 dispatch(addChunk(message.data));
             }
 
@@ -51,7 +46,7 @@ export const GameWindow = () => {
     const handleInputChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
         setCommand(e.target.value);
     };
-    
+
     const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {  // Prevents submission if Shift+Enter is pressed
             e.preventDefault();  // Prevents the default action of Enter key in a textarea (new line)
@@ -69,7 +64,7 @@ export const GameWindow = () => {
 
     useEffect(() => {
         if (gameTextEndRef.current) {
-            (gameTextEndRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth'});
+            (gameTextEndRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
         }
     }, [textChunks]);
 
@@ -78,33 +73,44 @@ export const GameWindow = () => {
         return { __html: textChunks.join('') };
     };
 
-    return (
-            <SplitView id="gamedisplay"
-             resizable
-             primarySize="40%"
-             >
-            <SplitView id="gametextdisplay"
-            resizable 
-            vertical
-            primarySize="80%"
-            >
-                <div id="gametextholder">
-                    <div id="gametext" dangerouslySetInnerHTML={createMarkup()}/>
-                    <div id="bottomref" ref={gameTextEndRef}/>
-                </div>
-            <textarea id="gameinput" 
-                autoComplete="off" 
-                placeholder="Enter command"
-                value={command}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                autoFocus={true}
-                />
-        </SplitView>
-
-            <div id="gamedatadisplay">
-            Blargh.
+    const ELEMENT_MAP: { [viewId: string]: JSX.Element } = {
+        a: <div id="gametextdisplay">
+            <div id="gametextholder">
+                <div id="gametext" dangerouslySetInnerHTML={createMarkup()} />
+                <div id="bottomref" ref={gameTextEndRef} />
             </div>
-        </SplitView>
-      );
+
+        </div>,
+        b: <textarea id="gameinput"
+            autoComplete="off"
+            placeholder="Enter command"
+            value={command}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            autoFocus={true}
+        />,
+        c: <div>Blargh</div>,
+        new: <span>New window</span>,
+    };
+
+    return (
+        <Mosaic<string>
+            renderTile={(id, path) => (
+                <MosaicWindow<string> path={path} createNode={() => 'new'} title="booya">
+                    {ELEMENT_MAP[id]}
+                </MosaicWindow>
+            )}
+            initialValue={{
+                direction: 'row',
+                first: {
+                    direction: 'column',
+                    first: 'a',
+                    second: 'b',
+                    splitPercentage: 80
+                },
+                second: 'c',
+                splitPercentage: 50,
+            }}
+        />
+    );
 };
