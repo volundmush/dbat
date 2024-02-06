@@ -8,20 +8,18 @@ body {
   font-family: 'Courier New', Courier, monospace !important; /* or any monospace font of your choice */
 }
 
+.mosaic-window-body {
+  overflow-y: scroll !important;
+}
 
-#gametextdisplay {
+.gametextholder {
   white-space: pre-wrap; /* preserves whitespace and wraps text */
   background-color: black;
   color: #cccccc; /* text color, assuming a dark background */
-  overflow-y: scroll; /* adds a scrollbar if content overflows vertically */
 }
 
-#gametextholder {
-  overflow-y: scroll; /* adds a scrollbar if content overflows vertically */
-  background-color: black;
-}
 
-#gameinput {
+.gameinput {
   resize: none;
   color: #cccccc; /* text color, assuming a dark background */
 }

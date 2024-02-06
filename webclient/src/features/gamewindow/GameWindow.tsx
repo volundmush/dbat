@@ -1,115 +1,64 @@
-import React, { useEffect, useState, useRef, ChangeEventHandler, KeyboardEventHandler } from 'react';
-import { useAppDispatch, useAppSelector } from "../../app/hooks"
-import { chunks, addChunk } from './gameWindow';
-import io from 'socket.io-client';
-import { Mosaic, MosaicWindow } from 'react-mosaic-component';
+import React, { useEffect } from 'react';
+import { useAppDispatch } from "../../app/hooks";
+import { addChunk } from './gameWindow';
+import { Mosaic, MosaicWindow, MosaicNode } from 'react-mosaic-component';
+import {socket} from "./SocketIO";
+import {GameText} from "./GameText";
+import {GameInput} from "./GameInput";
+import { Classes, HTMLSelect } from '@blueprintjs/core';
+import classNames from 'classnames';
 
+const THEMES = {
+    ['Blueprint']: 'mosaic-blueprint-theme',
+    ['Blueprint Dark']: classNames('mosaic-blueprint-theme', Classes.DARK),
+    ['None']: '',
+  };
 
-const protocol = window.location.protocol.includes('https') ? 'https' : 'http';
-const host = window.location.hostname;
-const port = (import.meta.env.MODE === "production") ? (window.location.port || (protocol === 'https' ? 443 : 80)) : 8000;
-const socketUrl = `${protocol}://${host}:${port}`;
-const socket = io(socketUrl, { autoConnect: false });
+type Theme = keyof typeof THEMES;
 
-export const GameWindow = () => {
+const ELEMENT_MAP: { [viewId: string]: JSX.Element } = {
+    gametext: <GameText/>,
+    gameinput: <GameInput/>,
+};
+
+export interface ExampleAppState {
+    currentNode: MosaicNode<string> | null;
+    currentTheme: Theme;
+  }
+
+export class GameWindow extends React.PureComponent<{}, > {
     const dispatch = useAppDispatch();
-    const [command, setCommand] = useState('');
-    const textChunks = useAppSelector(chunks);
-    const gameTextEndRef = useRef(null);
-
+    
     useEffect(() => {
-        console.log(`Attempting to connect SocketIO to ${socketUrl}`);
+        console.log(`Attempting to connect SocketIO`);
 
-        socket.on('connect', () => {
-            console.log('Connected to Socket.IO server at', socketUrl);
-        });
-
-        socket.on('disconnect', () => {
-            console.log('Remote Server disconnected.');
-        });
-
-        socket.onAny((eventName: string, message: any) => {
-            console.log(`Received event: ${eventName}`, message);
-            if (eventName === "Game.Text") {
+        socket.on("Game.Text", (message) => {
+            console.log(`Received Game.Text:`, message);
+            if(message.data)
                 dispatch(addChunk(message.data));
-            }
 
         });
+
         socket.connect();
 
         return () => {
             console.log('Disconnecting from Socket.IO server.');
-            //socket.disconnect();
+            socket.disconnect();
         };
     }, []);
-
-    const handleInputChange: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
-        setCommand(e.target.value);
-    };
-
-    const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {  // Prevents submission if Shift+Enter is pressed
-            e.preventDefault();  // Prevents the default action of Enter key in a textarea (new line)
-            handleSubmit(e);
-        }
-    };
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
-        e.preventDefault();
-        if (command.trim()) {
-            socket.emit("Game.Command", { data: command.trim() });
-            setCommand(''); // Clear the input after sending the command
-        }
-    };
-
-    useEffect(() => {
-        if (gameTextEndRef.current) {
-            (gameTextEndRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [textChunks]);
-
-    // Create a single HTML string from all events
-    const createMarkup = () => {
-        return { __html: textChunks.join('') };
-    };
-
-    const ELEMENT_MAP: { [viewId: string]: JSX.Element } = {
-        a: <div id="gametextdisplay">
-            <div id="gametextholder">
-                <div id="gametext" dangerouslySetInnerHTML={createMarkup()} />
-                <div id="bottomref" ref={gameTextEndRef} />
-            </div>
-
-        </div>,
-        b: <textarea id="gameinput"
-            autoComplete="off"
-            placeholder="Enter command"
-            value={command}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            autoFocus={true}
-        />,
-        c: <div>Blargh</div>,
-        new: <span>New window</span>,
-    };
 
     return (
         <Mosaic<string>
             renderTile={(id, path) => (
-                <MosaicWindow<string> path={path} createNode={() => 'new'} title="booya">
+                <MosaicWindow<string> path={path} createNode={() => 'new'} title={id}>
                     {ELEMENT_MAP[id]}
                 </MosaicWindow>
             )}
             initialValue={{
-                direction: 'row',
-                first: {
-                    direction: 'column',
-                    first: 'a',
-                    second: 'b',
-                    splitPercentage: 80
-                },
-                second: 'c',
-                splitPercentage: 50,
+                direction: 'column',
+                first: "gametext",
+                second: 'gameinput',
+                splitPercentage: 80,
             }}
         />
     );
