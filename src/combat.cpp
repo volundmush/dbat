@@ -4679,7 +4679,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             do_stand(vict, nullptr, 0, 0);
         }
         bool suppresso = (GET_SUPPRESS(vict) > 0);
-        send_to_char(vict,"Suppresso: %s\nSuppress Level: %s\nDamage: %s\nUnsuppressed PL: %s\n", (suppresso) ? "True" : "False", std::to_string(GET_SUPPRESS(vict)), std::to_string(dmg), std::to_string(vict->getUnsuppressedPL()));
         if (is_sparring(ch) && is_sparring(vict) && (GET_SUPPRESS(vict) + vict->getCurHealth()) - dmg <= 0) {
             if (!IS_NPC(vict)) {
                 act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict,
@@ -4965,7 +4964,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 } else if (dmg > 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     double percentageDamage = (double) dmg / (double) vict->getMaxPL();
                     int64_t calcdamage = GET_HIT(vict) * percentageDamage;
-                    send_to_char(vict,"Health Before: %s\nPercentage Damage: %s\n", std::to_string(vict->health), std::to_string(percentageDamage));
 
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
                     send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(calcdamage).c_str());
@@ -4973,7 +4971,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     //Translate the damage into a percentage of max LF, remove that from the player instead
                     
                     vict->decCurHealth(calcdamage);
-                    send_to_char(vict,"Health After: %s\n", std::to_string(vict->health));
 
                     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         if (IS_ANDROID(vict)) {
