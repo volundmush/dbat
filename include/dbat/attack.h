@@ -18,6 +18,8 @@ namespace atk {
     };
 
     enum class DefenseResult {
+        Missed,
+        Perfect_Dodged,
         Blocked,
         Dodged,
         Parried,
@@ -35,6 +37,7 @@ namespace atk {
         virtual int autoTrainSkillID() { return 0;};
 
         virtual Result doAttack();
+        virtual DefenseResult attackOutcome(char_data*, char_data*, int, bool);
         virtual Result attackCharacter();
         virtual Result attackObject();
 

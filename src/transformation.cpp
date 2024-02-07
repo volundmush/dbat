@@ -149,7 +149,7 @@ namespace trans {
             case FormID::EvilAura:
                 return "@YEvil @WAura@n";
             case FormID::UltraInstinct:
-                return "@OUltra @RInstinct@n";
+                return "@BUltra @RInstinct@n";
                 
             // Whoops?
             default: 

@@ -160,6 +160,81 @@ namespace atk {
         return 0;
     }
 
+    DefenseResult Attack::attackOutcome(char_data* user, char_data* victim, int skillID, bool kiAttack) {
+        initStats();
+
+        currentHitProbability = roll_accuracy(user, skillID, kiAttack);
+        currentChanceToHit = chance_to_hit(user);
+
+        if(isPhysical() && !usesWeapon()) {
+            if (IS_KABITO(user) && !IS_NPC(user)) {
+                if (GET_SKILL_BASE(user, SKILL_STYLE) >= 75)
+                    currentChanceToHit -= currentChanceToHit * 0.2;
+            }
+        }
+
+        currentSpeedIndexCheck = handle_speed(user, victim);
+
+        currentHitProbability += currentSpeedIndexCheck;
+
+        handle_defense(victim, &currentParryCheck, &currentBlockCheck, &currentDodgeCheck);
+
+        tech_handle_posmodifier(victim, currentParryCheck, currentBlockCheck, currentDodgeCheck, currentHitProbability);
+
+        if(canZanzoken()) {
+            if (!tech_handle_zanzoken(user, victim, getName().c_str())) {
+                COMBO(user) = -1;
+                COMBHITS(user) = 0;
+                currentStaminaCost /= 2;
+                pcost(victim, 0, GET_MAX_HIT(victim) / 200);
+                return DefenseResult::Missed;
+            }
+        }
+
+        calcDamage = damtype(user, getAtkID(), initSkill, attPerc);
+        if(currentHitProbability < currentChanceToHit - 20) {
+            // So you just missed...
+            return DefenseResult::Missed;
+        } else {
+            // it was a clean hit! Or should be...
+
+            if(victim->getAffectModifier(APPLY_PERFECT_DODGE) != 0) {
+                actVictim("@C$n@W moves so slowly that you dodge their attack with ease.@n");
+                actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
+                actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
+
+                if(victim->getCurKI() > 0) {
+                    victim->decCurKI(calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+                } else {
+                    victim->decCurST(2 * calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+                }
+                return DefenseResult::Perfect_Dodged;
+
+            }
+
+
+            if(victim->getCurST() > 0) {
+                double parryChance = ((double) currentParryCheck / 6.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_PARRY_PERC));
+                double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_DODGE_PERC));
+                double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_BLOCK_PERC));
+
+                double overcomeParry = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+                double overcomeDodge = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+                double overcomeBlock = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+                
+
+                if(canParry() && (!IS_NPC(victim) || !MOB_FLAGGED(victim, MOB_DUMMY)) && parryChance > overcomeParry) return DefenseResult::Parried;
+                if(canDodge() && dodgeChance > overcomeDodge) return DefenseResult::Dodged;
+                if(canBlock() && blockChance > overcomeBlock) return DefenseResult::Blocked;
+            }
+
+            //Victim failed to defend, we have a clean hit!
+            return DefenseResult::Failed;
+        }
+        //Default to fail
+        return DefenseResult::Failed;
+    }
+
     Result Attack::attackCharacter() {
         if(!can_kill(user, victim, nullptr, canKillType())) return Result::Canceled;
         if (handle_defender(victim, user)) {
@@ -167,7 +242,15 @@ namespace atk {
             // should I do can_kill again here???
         }
 
-        initStats();
+        DefenseResult result = attackOutcome(user, victim, getSkillID(), isKiAttack());
+        if(result == DefenseResult::Blocked) return handleBlock();
+        if(result == DefenseResult::Parried) return handleParry();
+        if(result == DefenseResult::Dodged) return handleDodge();
+        if(result == DefenseResult::Perfect_Dodged) return Result::Missed;
+        if(result == DefenseResult::Failed) return handleCleanHit();
+        if(result == DefenseResult::Missed) return Result::Missed;
+
+        /*initStats();
 
         currentHitProbability = roll_accuracy(user, getSkillID(), isKiAttack());
         currentChanceToHit = chance_to_hit(user);
@@ -237,7 +320,7 @@ namespace atk {
             //Victim failed to defend, we have a clean hit!
             defenseResult = DefenseResult::Failed;
             return handleCleanHit();
-        }
+        }*/
 
     }
 
