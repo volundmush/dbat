@@ -935,7 +935,7 @@ void oedit_disp_menu(struct descriptor_data *d) {
 
     write_to_output(d,
                     "@g7@n) Wear flags  : @c%s@n\r\n"
-                    "@g8@n) Weight      : @c%-4" I64T "@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
+                    "@g8@n) Weight      : @c%s@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
                     "@gA@n) Cost/Day    : @c%-4d@n, 	@gB@n) Timer       : @c%-4d@n\r\n"
                     "@gC@n) Values      : @c%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d@n\r\n"
                     "@gD@n) Applies menu@n\r\n"
@@ -951,7 +951,7 @@ void oedit_disp_menu(struct descriptor_data *d) {
                     "@gQ@n) Quit\r\n"
                     "Enter choice : ",
 
-                    tbitbuf, GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj),
+                    tbitbuf, add_commas(GET_OBJ_WEIGHT(obj)).c_str(), GET_OBJ_COST(obj), GET_OBJ_RENT(obj),
                     GET_OBJ_TIMER(obj), GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
                     GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4),
                     GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),
