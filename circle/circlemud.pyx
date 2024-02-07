@@ -149,12 +149,18 @@ cdef accountToJSON(accounts.account_data* account):
 
 cdef class _AccountManager:
 
+    def get(self, vn: int):
+        account = accounts.accounts.find(vn)
+        if account == accounts.accounts.end():
+            return None
+        return accountToJSON(deref(account).second)
+
     def create(self, data: dict[str, "Any"]):
         vn = accounts.account_data.getNextID()
         data["vn"] = vn
         j = orjson.dumps(data)
-        acc = accounts.account_data(utils.jparse(j))
-        accounts.accounts[vn] = acc
+        cdef accounts.account_data* acc = &accounts.accounts[vn]
+        acc.deserialize(utils.jparse(j))
     
     def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
         account = accounts.accounts.find(target)
@@ -263,3 +269,31 @@ cdef class _SkillManager:
 
 
 skill_manager = _SkillManager()
+
+cdef playerToJSON(structs.player_data* player):
+    serialized = player.serialize()
+    dumped = utils.jdump(serialized)
+    return orjson.loads(dumped)
+
+cdef class _PlayerManager:
+    def get(self, vn: int):
+        player = db.players.find(vn)
+        if player == db.players.end():
+            return None
+        return playerToJSON(deref(player).second)
+
+    def create(self, data: dict[str, "Any"]):
+        vn = accounts.account_data.getNextID()
+        data["vn"] = vn
+        j = orjson.dumps(data)
+        cdef accounts.account_data* acc = &accounts.accounts[vn]
+        acc.deserialize(utils.jparse(j))
+    
+    def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
+        account = accounts.accounts.find(target)
+        if account == accounts.accounts.end():
+            return "Account not found."
+        j = orjson.dumps(data)
+        deref(account).second.deserialize(utils.jparse(j))
+
+player_manager = _PlayerManager()

@@ -49,7 +49,7 @@ new_account_data_schema = {
     "additionalProperties": False  # Disallow properties not listed above
 }
 
-from circlemud import account_manager, CRYPT_CONTEXT
+from circlemud import account_manager, player_manager
 
 accounts = Blueprint("accounts", url_prefix="/accounts")
 
@@ -143,4 +143,16 @@ async def update_account(request, user, account_id):
     if password:
         PASSWORD_CHANGE_TRACKER[ip] = time.time()
     return response.json({"success": True}, status=200)
-    
+
+@accounts.get("/<account_id:int>/characters")
+@protected()
+@inject_user()
+async def get_characters(request, user, account_id):
+    if not (account := account_manager.get(account_id)):
+        return response.json({"error": "Account not found"}, status=404)
+    if ((user["adminLevel"] < 1) and (user["id"] != account_id)):
+        return response.json({"error": "Unauthorized"}, status=401)
+    if not (characters := account.get("characters", [])):
+        return response.json({"error": "No characters found"}, status=404)
+    out = [{"id": found['id'], "name": found['name']} for x in characters if (found := player_manager.get(x))]
+    return response.json(out)
