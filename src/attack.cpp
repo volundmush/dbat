@@ -198,15 +198,12 @@ namespace atk {
         }
 
         calcDamage = damtype(user, getAtkID(), initSkill, attPerc);
-        send_to_char(victim, "Checking Hit Chance!\r\n");
         if(currentHitProbability < currentChanceToHit - 20) {
             // So you just missed...
             return handleMiss();
         } else {
             // it was a clean hit! Or should be...
 
-            send_to_char(victim, "Checking Dodge Chance!\r\n");
-            send_to_char(victim, "Current Mod: %s\r\n", std::to_string(victim->getAffectModifier(APPLY_PERFECT_DODGE)));
             if(victim->getAffectModifier(APPLY_PERFECT_DODGE) != 0) {
                 actVictim("@C$n@W moves so slowly that you dodge their attack with ease.@n");
                 actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
