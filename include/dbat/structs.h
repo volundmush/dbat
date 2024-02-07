@@ -921,6 +921,8 @@ struct char_data : public unit_data {
 
     int64_t getCurPL();
 
+    int64_t getUnsuppressedPL();
+
     int64_t getBasePL();
 
     int64_t getEffBasePL();
