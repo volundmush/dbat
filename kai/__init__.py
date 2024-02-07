@@ -29,3 +29,7 @@ VALIDATORS = dict()
 TILES = dict()
 
 COMMAND_SETS = dict()
+
+from passlib.context import CryptContext
+
+CRYPT_CONTEXT = CryptContext(schemes=["argon2"])

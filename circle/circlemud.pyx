@@ -19,9 +19,7 @@ import pickle
 import orjson
 import pathlib
 from datetime import datetime
-from passlib.context import CryptContext
-
-CRYPT_CONTEXT = CryptContext(schemes=["argon2"], deprecated="auto")
+from kai import CRYPT_CONTEXT
 
 
 cdef class GameSession:
@@ -89,11 +87,27 @@ def initialize():
     comm.init_database()
     comm.init_zones()
 
+# Keeping this here as an example of how to iterate through stuff.
+def _hash_passwords():
+    it = accounts.accounts.begin()
+    end = accounts.accounts.end()
+
+    while it != end:
+        if not deref(it).second.passHash.empty():
+            try:
+                password = deref(it).second.passHash.decode("UTF-8", errors='ignore')
+                hashed = CRYPT_CONTEXT.hash(password)
+                deref(it).second.passHash = hashed.encode()
+            except (TypeError, ValueError):
+                print(f"Failed to hash password for {deref(it).second.name.decode('UTF-8', errors='ignore')}")
+        inc(it)
+
 def migrate():
     comm.init_locale()
     db.load_config()
     os.chdir("lib")
     comm.migrate_db()
+    _hash_passwords()
     comm.runSave()
 
 def run_loop_once(deltaTime: float):
@@ -138,9 +152,9 @@ cdef class _AccountManager:
     def create(self, data: dict[str, "Any"]):
         vn = accounts.account_data.getNextID()
         data["vn"] = vn
-        acc = accounts.accounts[vn]
         j = orjson.dumps(data)
-        acc.deserialize(utils.jparse(j))
+        acc = accounts.account_data(utils.jparse(j))
+        accounts.accounts[vn] = acc
     
     def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
         account = accounts.accounts.find(target)
@@ -205,14 +219,7 @@ cdef class _AccountManager:
 
 account_manager = _AccountManager()
 
-# Keeping this here as an example of how to iterate through stuff.
-def print_account_names():
-    it = accounts.accounts.begin()
-    end = accounts.accounts.end()
 
-    while it != end:
-        print(deref(it).second.name)
-        inc(it)
 
 
 cdef class _SkillManager:

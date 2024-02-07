@@ -8,6 +8,7 @@ from jsonschema import validate, ValidationError
 
 import time
 import kai
+from kai import CRYPT_CONTEXT
 from kai.utils.utils import get_true_ip
 
 account_data_schema = {
@@ -86,14 +87,17 @@ async def create_account(request):
         validate(request.json, new_account_data_schema)
     except ValidationError as e:
         return response.json({"error": "Invalid account data", "details": e.message}, status=400)
+    
+    if account_manager.exists(request.json["name"]):
+        return response.json({"error": "Name already in use"}, status=400)
+
     try:
         request.json["passHash"] = CRYPT_CONTEXT.hash(request.json["password"])
     except (TypeError, KeyError):
         return response.json({"error": "Invalid account data", "details": "Password not hashable"}, status=400)
     account = account_manager.create(request.json)
-    account.pop("passHash", None)
     CREATION_TRACKER[ip] = time.time()
-    return response.json(account)
+    return response.json({"success": True}, status=200)
 
 PASSWORD_CHANGE_TRACKER: dict[str, float] = dict()
 

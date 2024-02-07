@@ -40,8 +40,8 @@ class ServerCore:
 
     def setup_routes(self):
         # Static file serving
-        self.app.static('/assets', os.path.join(webroot_path, 'assets'))
-        self.app.route('/')(self.index)
+        #self.app.static('/assets', os.path.join(webroot_path, 'assets'))
+        #self.app.route('/')(self.index)
         self.app.blueprint(v1)
     
     async def init_game(self, *args, **kwargs):
