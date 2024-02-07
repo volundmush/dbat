@@ -133,13 +133,14 @@ cdef accountToJSON(accounts.account_data* account):
     dumped = utils.jdump(serialized)
     return orjson.loads(dumped)
 
-
 cdef class _AccountManager:
 
     def create(self, data: dict[str, "Any"]):
-        data["vn"] = accounts.account_data.getNextID()
+        vn = accounts.account_data.getNextID()
+        data["vn"] = vn
+        acc = accounts.accounts[vn]
         j = orjson.dumps(data)
-        
+        acc.deserialize(utils.jparse(j))
     
     def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
         account = accounts.accounts.find(target)
