@@ -211,7 +211,7 @@ static std::map<int, uint16_t> grav_threshold = {
 
 int64_t char_data::calc_soft_cap() {
     auto level = get(CharNum::Level);
-    if(level >= 100) return 50e12;
+    if(level >= 100) return 5e9;
     return race::getSoftCap(race, level);
 }
 

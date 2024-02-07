@@ -7651,10 +7651,10 @@ ACMD(do_situp) {
         act("@g$n does a situp, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    double level_impact = (1.0 - (2 * std::max<double>(0, (double)GET_LEVEL(ch) - 60.0) / 100.0));
+    double level_impact = (1.0 - (2 * std::max<double>(0, (double) GET_LEVEL(ch) - 51.0) / 100.0));
 
     double base = (double)ch->getBaseST();
-    double start_bonus = (base * 0.035 * level_impact) * Random::get<double>(0.8, 1.2);
+    double start_bonus = (base * 0.01 * level_impact) * Random::get<double>(0.8, 1.2);
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
     double diminishing_returns = (soft_cap - base) / soft_cap;
@@ -7667,20 +7667,20 @@ ACMD(do_situp) {
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
-        bonus *= 10;
-        if(bonus <= 15) bonus = 15;
+        bonus *= 8;
+        if(bonus <= 10) bonus = 10;
     } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-            bonus *= 10;
-            if(bonus <= 12) bonus = 12;
-        } else {
             bonus *= 5;
             if(bonus <= 6) bonus = 6;
+        } else {
+            bonus *= 2;
+            if(bonus <= 4) bonus = 4;
         }
     } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
         send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
-        bonus *= 20;
-        if(bonus <= 15) bonus = 15;
+        bonus *= 10;
+        if(bonus <= 12) bonus = 12;
     }
     /* Rillao: transloc, add new transes here */
 
@@ -7849,10 +7849,10 @@ ACMD(do_meditate) {
         act("@g$n meditates calmly, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    double level_impact = (1.0 - (2 * std::max<double>(0, (double)GET_LEVEL(ch) - 60.0) / 100.0));
+    double level_impact = (1.0 - (2 * std::max<double>(0, (double) GET_LEVEL(ch) - 51.0) / 100.0));
 
     double base = (double)ch->getBaseKI();
-    double start_bonus = (base * 0.035 * level_impact) * Random::get<double>(0.8, 1.2);
+    double start_bonus = (base * 0.01 * level_impact) * Random::get<double>(0.8, 1.2);
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
     double diminishing_returns = (soft_cap - base) / soft_cap;
@@ -7865,20 +7865,20 @@ ACMD(do_meditate) {
 
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
-        if(bonus <= 0) bonus = 15;
+        if(bonus <= 0) bonus = 10;
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
-        bonus *= 10;
+        bonus *= 5;
     } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-            if(bonus <= 0) bonus = 12;
-            bonus *= 10;
-        } else {
             if(bonus <= 0) bonus = 6;
             bonus *= 5;
+        } else {
+            if(bonus <= 0) bonus = 3;
+            bonus *= 2;
         }
     } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
         send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
-        bonus *= 20;
+        bonus *= 10;
     } else {
         if(bonus <= 0) bonus = 1;
     }
@@ -7887,9 +7887,9 @@ ACMD(do_meditate) {
     }
     if (bonus <= 1 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-            bonus = 12;
-        } else {
             bonus = 6;
+        } else {
+            bonus = 3;
         }
     }
     if (bonus > 0 && IS_DEMON(ch) && rand_number(1, 100) >= 80) {
@@ -7999,10 +7999,10 @@ ACMD(do_pushup) {
         act("@g$n does a pushup, while sweating profusely.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
 
-    double level_impact = (1.0 - (2 * std::max<double>(0, (double) GET_LEVEL(ch) - 60.0) / 100.0));
+    double level_impact = (1.0 - (2 * std::max<double>(0, (double) GET_LEVEL(ch) - 51.0) / 100.0));
 
     double base = (double)ch->getBasePL();
-    double start_bonus = (base * 0.035 * level_impact) * Random::get<double>(0.8, 1.2);
+    double start_bonus = (base * 0.01 * level_impact) * Random::get<double>(0.8, 1.2);
     double ratio_bonus = 1.0 + (3.0 * ratio);
     double soft_cap = (double)ch->calc_soft_cap();
     double diminishing_returns = (soft_cap - base) / soft_cap;
@@ -8015,20 +8015,20 @@ ACMD(do_pushup) {
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
-        bonus *= 10;
-        if(bonus <= 15) bonus = 15;
+        bonus *= 5;
+        if(bonus <= 6) bonus = 6;
     } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
-            bonus *= 10;
-            if(bonus <= 12) bonus = 12;
-        } else {
             bonus *= 5;
             if(bonus <= 6) bonus = 6;
+        } else {
+            bonus *= 2;
+            if(bonus <= 4) bonus = 4;
         }
     } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
         send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
-        bonus *= 20;
-        if(bonus <= 15) bonus = 15;
+        bonus *= 10;
+        if(bonus <= 12) bonus = 12;
     }
 
     bonus += GET_LEVEL(ch) / 20;
