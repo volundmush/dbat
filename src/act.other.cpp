@@ -8744,10 +8744,18 @@ ACMD(do_snet) {
             if (GET_ADMLEVEL(i->character) > 0 && call <= -1) {
                 send_to_char(i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice,
                              GET_NAME(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
+                *hist = '\0';
+                sprintf(hist, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice,
+                             GET_NAME(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
+                add_history(i->character, hist, HIST_SNET);
                 continue;
             } else if (GET_ADMLEVEL(i->character) > 0) {
                 send_to_char(i->character, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice,
                              GET_NAME(ch), call, !*arg2 ? "" : CAP(arg2));
+                *hist = '\0';
+                sprintf(hist, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice,
+                             GET_NAME(ch), call, !*arg2 ? "" : CAP(arg2));
+                add_history(i->character, hist, HIST_SNET);
                 continue;
             }
         } /* End switch */
