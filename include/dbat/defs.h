@@ -174,6 +174,7 @@ enum class FormID : uint8_t {
     // Generic Forms
     PotentialUnleashed = 58,
     EvilAura = 59,
+    UltraInstinct = 60,
 
 };
 
@@ -1635,8 +1636,12 @@ enum class SkillID : uint16_t {
 #define APPLY_ST_GAIN_MULT     53
 #define APPLY_KI_GAIN_MULT     54
 #define APPLY_LF_GAIN_MULT     55
+#define APPLY_PERFECT_DODGE    56
+#define APPLY_PARRY_PERC       57
+#define APPLY_DODGE_PERC       58
+#define APPLY_BLOCK_PERC       59
 
-#define NUM_APPLIES 56
+#define NUM_APPLIES 60
 
 /* Container flags - value[1] */
 #define CONT_CLOSEABLE      (1 << 0)    /* Container can be closed	*/

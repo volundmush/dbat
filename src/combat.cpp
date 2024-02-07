@@ -1147,26 +1147,30 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg) {
 } /* End of advanced_energy function */
 
 int roll_accuracy(struct char_data *ch, int skill, bool kiatt) {
+    int value = GET_SKILL(ch, skill);
 
     if (!IS_NPC(ch)) {
         if (GET_BONUS(ch, BONUS_ACCURATE)) {
             if (kiatt == true)
-                skill += skill * 0.10;
+                value += value * 0.10;
             else
-                skill += skill * 0.20;
+                value += value * 0.20;
         } else if (GET_BONUS(ch, BONUS_POORDEPTH)) {
             if (kiatt == true)
-                skill -= skill * 0.10;
+                value -= value * 0.10;
             else
-                skill -= skill * 0.20;
+                value -= value * 0.20;
         }
+    } else {
+        value += GET_LEVEL(ch);
+        if(value > 115) value = 115;
     }
 
-    if (skill < 40) {
-        skill += rand_number(3, 10);
+    if (value < 40) {
+        value += rand_number(3, 10);
     }
 
-    return (skill);
+    return (value);
 }
 
 long double calc_critical(struct char_data *ch, int loc) {

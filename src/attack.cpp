@@ -169,7 +169,6 @@ namespace atk {
 
         initStats();
 
-        currentSpeedIndexCheck = check_def(victim);
         currentHitProbability = roll_accuracy(user, getSkillID(), isKiAttack());
         currentChanceToHit = chance_to_hit(user);
 
@@ -182,11 +181,9 @@ namespace atk {
 
         currentSpeedIndexCheck = handle_speed(user, victim);
 
-        auto avo = currentSpeedIndexCheck / 4;
+        currentHitProbability += currentSpeedIndexCheck;
 
         handle_defense(victim, &currentParryCheck, &currentBlockCheck, &currentDodgeCheck);
-
-        currentHitProbability -= avo;
 
         tech_handle_posmodifier(victim, currentParryCheck, currentBlockCheck, currentDodgeCheck, currentHitProbability);
 
@@ -201,12 +198,46 @@ namespace atk {
         }
 
         calcDamage = damtype(user, getAtkID(), initSkill, attPerc);
-
+        send_to_char(victim, "Checking Hit Chance!\r\n");
         if(currentHitProbability < currentChanceToHit - 20) {
-            // a counter or miss of some kind...
-            return handleOtherHit();
+            // So you just missed...
+            return handleMiss();
         } else {
-            // it was a clean hit!
+            // it was a clean hit! Or should be...
+
+            send_to_char(victim, "Checking Dodge Chance!\r\n");
+            send_to_char(victim, "Current Mod: %s\r\n", std::to_string(victim->getAffectModifier(APPLY_PERFECT_DODGE)));
+            if(victim->getAffectModifier(APPLY_PERFECT_DODGE) != 0) {
+                actVictim("@C$n@W moves so slowly that you dodge their attack with ease.@n");
+                actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
+                actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
+
+                if(victim->getCurKI() > 0) {
+                    victim->decCurKI(calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+                } else {
+                    victim->decCurST(2 * calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+                }
+                return Result::Missed;
+
+            }
+
+
+            if(victim->getCurST() > 0) {
+                double parryChance = ((double) currentParryCheck / 6.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_PARRY_PERC));
+                double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_DODGE_PERC));
+                double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_BLOCK_PERC));
+
+                double overcomeParry = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+                double overcomeDodge = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+                double overcomeBlock = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+                
+
+                if(canParry() && (!IS_NPC(victim) || !MOB_FLAGGED(victim, MOB_DUMMY)) && parryChance > overcomeParry) return handleParry();
+                if(canDodge() && dodgeChance > overcomeDodge) return handleDodge();
+                if(canBlock() && blockChance > overcomeBlock) return handleBlock();
+            }
+
+            //Victim failed to defend, we have a clean hit!
             defenseResult = DefenseResult::Failed;
             return handleCleanHit();
         }
@@ -269,7 +300,7 @@ namespace atk {
     }
 
     bool Attack::calculateDeflect() {
-        return currentParryCheck > rand_number(1, 140) && (!IS_NPC(victim) || !MOB_FLAGGED(victim, MOB_DUMMY));
+        return (currentParryCheck * axion_dice(0)) / 120 > currentChanceToHit && (!IS_NPC(victim) || !MOB_FLAGGED(victim, MOB_DUMMY));
     }
 
     Result Attack::attackObject() {

@@ -148,6 +148,8 @@ namespace trans {
                 return "@YPotential @WUnleashed@n";
             case FormID::EvilAura:
                 return "@YEvil @WAura@n";
+            case FormID::UltraInstinct:
+                return "@OUltra @RInstinct@n";
                 
             // Whoops?
             default: 
@@ -293,11 +295,13 @@ namespace trans {
             case FormID::AscendThird:
                 return "third";
 
-                //Generic Forms
+                //Unbound Forms
             case FormID::PotentialUnleashed:
                 return "potential";
             case FormID::EvilAura:
                 return "evil";
+            case FormID::UltraInstinct:
+                return "ui";
 
             // Whoops?
             default:
@@ -324,7 +328,7 @@ namespace trans {
                 {APPLY_ALL_VITALS, 10000},
                 {APPLY_DEFENSE_PERC, -0.3},
                 {APPLY_DAMAGE_PERC, 0.3},
-                {APPLY_VITALS_MULT, 1.0}
+                {APPLY_VITALS_MULT, 1.0},
             }
         },
         {
@@ -517,31 +521,43 @@ namespace trans {
         {
             FormID::Android10, {
                 {APPLY_ALL_VITALS, 12500000},
+                {APPLY_PL_GAIN_MULT, 0.2},
+                {APPLY_ST_GAIN_MULT, 0.2},
             }
         },
         {
             FormID::Android20, {
                 {APPLY_ALL_VITALS, 50000000},
+                {APPLY_PL_GAIN_MULT, 0.4},
+                {APPLY_ST_GAIN_MULT, 0.4},
             }
         },
         {
             FormID::Android30, {
                 {APPLY_ALL_VITALS, 312000000},
+                {APPLY_PL_GAIN_MULT, 0.6},
+                {APPLY_ST_GAIN_MULT, 0.6},
             }
         },
         {
             FormID::Android40, {
                 {APPLY_ALL_VITALS, 2500000000},
+                {APPLY_PL_GAIN_MULT, 0.8},
+                {APPLY_ST_GAIN_MULT, 0.8},
             }
         },
         {
             FormID::Android50, {
                 {APPLY_ALL_VITALS, 5000000000},
+                {APPLY_PL_GAIN_MULT, 1},
+                {APPLY_ST_GAIN_MULT, 1},
             }
         },
         {
             FormID::Android60, {
                 {APPLY_ALL_VITALS, 10000000000},
+                {APPLY_PL_GAIN_MULT, 2},
+                {APPLY_ST_GAIN_MULT, 2},
             }
         },
 
@@ -603,18 +619,44 @@ namespace trans {
                 {APPLY_ALL_VITALS, 300000000},
             }
         },
-        //Generic Forms
+        //Unbound Forms
         {
             FormID::PotentialUnleashed, {
-                {APPLY_VITALS_MULT, 4.0},
-                {APPLY_ALL_VITALS, 300000000},
+                {APPLY_VITALS_MULT,  0.0, -1, [](struct char_data *ch) {
+                    if(ch->get(CharNum::Level) < 20) return 1.0;
+                    if(ch->get(CharNum::Level) < 40) return 2.0;
+                    if(ch->get(CharNum::Level) < 60) return 3.0;
+                    if(ch->get(CharNum::Level) < 80) return 4.5;
+                    if(ch->get(CharNum::Level) < 100) return 6.0;
+                    if(ch->get(CharNum::Level) == 100) return 7.0;
+                    return 1.0;
+                }},
             }
         },
         {
             FormID::EvilAura, {
                 {APPLY_VITALS_MULT, 2.0},
+                {APPLY_PL_MULT,  0.0, -1, [](struct char_data *ch) {
+	                double healthBoost = (1 - ch->health) * 5;
+	                return healthBoost;
+                }},
                 {APPLY_ALL_VITALS, 1300000},
-                {APPLY_DAMAGE_PERC, 0.5},
+                {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {
+                    double healthBoost = 0.1;
+                    if(ch->health < 0.75) {
+                        healthBoost = (1 - ch->health) * 4;
+                        send_to_char(ch, "@RYou feel your own pain infuse the attack.\r\n@n");
+                    }
+	                return healthBoost;
+                }},
+            }
+        },
+        {
+            FormID::UltraInstinct, {
+                {APPLY_ACCURACY, 1},
+                {APPLY_KI_MULT, 2},
+                {APPLY_DAMAGE_PERC, -0.5},
+                {APPLY_PERFECT_DODGE, -0.6},
             }
         },
 
@@ -684,9 +726,10 @@ namespace trans {
         {FormID::MysticSecond, .07},
         {FormID::MysticThird, .1},
 
-        // Generic Forms
+        // Unbound Forms
         {FormID::PotentialUnleashed, .1},
-        {FormID::EvilAura, .08}
+        {FormID::EvilAura, .08},
+        {FormID::UltraInstinct, .08}
 
     };
 
@@ -1059,9 +1102,15 @@ namespace trans {
             },
 
             {
-                    FormID::EvilAura,     {
+                    FormID::EvilAura,       {
                                                      "@WMorality is just a crutch for the weak. You know this better than anyone, for discarding it gleans a look at true power. You indulge. And outwards ruptures your Ki, tainted and drenched in evil beyond parallel.@n",
                                                      "@C$n gives a sickeningly twisted smile as something behind their eyes relents. Forward from them rushes forwards a surge of black ki, their evil manifest, with nothing left to hold it back.@n"
+                                             }
+            },
+            {
+                    FormID::UltraInstinct,   {
+                                                     "@WThe tempo of the fight soon gives way to a single rhythm, every blow falling in perfect harmony, you can see it all as your emotions drain away into a perfect and sharp focus.@n",
+                                                     "@C$n starts to slow their movements as emotion fades away from them, each move growing precise, calculated with perfect accuracy.@n"
                                              }
             },
 
@@ -1170,9 +1219,10 @@ namespace trans {
         FormID::AscendSecond,
         FormID::AscendThird,
 
-        // Generic Forms
+        // Unbound Forms
         FormID::PotentialUnleashed,
-        FormID::EvilAura
+        FormID::EvilAura,
+        FormID::UltraInstinct
     };
 
 
@@ -1213,9 +1263,9 @@ namespace trans {
         {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}}
     };
 
-    std::vector<FormID> getFormsFor(char_data* ch) {
+    std::set<FormID> getFormsFor(char_data* ch) {
         auto forms = race_forms.find(ch->race);
-        std::vector<FormID> pforms;
+        std::set<FormID> pforms;
 
         switch (ch->race) {
             case RaceID::Majin:
@@ -1223,7 +1273,7 @@ namespace trans {
             case RaceID::BioAndroid:
             case RaceID::Tuffle: 
                 for (auto form : forms->second) {
-                    pforms.push_back(form);
+                    pforms.insert(form);
                 }
                 return pforms;
 
@@ -1231,7 +1281,7 @@ namespace trans {
                 pforms = ch->unlockedForms;
 
                 for (auto form : forms->second) {
-                    pforms.push_back(form);
+                    pforms.insert(form);
                 }
                 return pforms;
 
@@ -1380,9 +1430,10 @@ namespace trans {
         {FormID::BioPerfect, 220000000},
         {FormID::BioSuperPerfect, 1300000000},
 
-        // Generic Forms
+        // Unbound Forms
         {FormID::PotentialUnleashed, 0},
-        {FormID::EvilAura, 12500000}
+        {FormID::EvilAura, 12500000},
+        {FormID::UltraInstinct, 220000000}
 
     };
 
