@@ -8,8 +8,8 @@ import traceback
 import aiodns
 from logging.handlers import TimedRotatingFileHandler
 
-import dbat
-from dbat.utils import import_from_module, callables_from_module
+import kai
+from kai.utils.utils import import_from_module, callables_from_module
 
 
 # Install Rich as the traceback handler.
@@ -34,7 +34,7 @@ class Core:
 
     def __init__(self, settings):
         self.settings = settings
-        dbat.GAME = self
+        kai.GAME = self
         self._log_handler = None
         self.services = dict()
         self.copyover_data = None
@@ -44,10 +44,10 @@ class Core:
 
     def copyover(self):
         data_dict = dict()
-        for k, v in dbat.SERVICES.items():
+        for k, v in kai.SERVICES.items():
             v.do_copyover(data_dict)
 
-        for func in dbat.HOOKS["copyover"]:
+        for func in kai.HOOKS["copyover"]:
             func(data_dict)
 
         data_dict["pid"] = os.getpid()
@@ -60,9 +60,6 @@ class Core:
 
     def _setup_logging(self):
         from rich.logging import RichHandler
-
-        if not os.path.exists(self.settings.LOG_DIR):
-            os.makedirs(self.settings.LOG_DIR)
 
         # aiomisc handles logging but we'll help it along with some better settings.
         log_handler = TimedRotatingFileHandler(
@@ -172,7 +169,7 @@ class Core:
         try:
             # Import and initialize classes and services from settings.
             for k, v in self.get_setting("CLASSES", dict()).items():
-                dbat.CLASSES[k] = import_from_module(v)
+                kai.CLASSES[k] = import_from_module(v)
         except Exception as e:
             logging.error(f"{e}")
             logging.error(traceback.format_exc())
@@ -187,11 +184,23 @@ class Core:
                         continue
                 service = service_class(self)
                 self.services[k] = service
-                dbat.SERVICES[k] = service
+                kai.SERVICES[k] = service
         except Exception as e:
             logging.error(f"{e}")
             logging.error(traceback.format_exc())
             return
+
+        for module in kai.SETTINGS.VALIDATOR_FUNC_MODULES:
+            for k, v in callables_from_module(module).items():
+                kai.VALIDATORS[k] = v
+
+        for module in kai.SETTINGS.OPTION_CLASS_MODULES:
+            for k, v in callables_from_module(module).items():
+                kai.OPTION_CLASSES[k] = v
+
+        for module in kai.SETTINGS.PORTAL_EVENT_HANDLER_MODULES:
+            for k, v in callables_from_module(module).items():
+                kai.PORTAL_EVENTS[k] = v
 
         await self._pre_start()
 

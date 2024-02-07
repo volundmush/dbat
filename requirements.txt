@@ -9,3 +9,8 @@ sanic[http3]
 sanic-jwt
 python-socketio[asyncio_client]
 setuptools
+argon2-cffi
+passlib
+aioconsole
+httpx[http2]
+jsonschema

@@ -12,7 +12,7 @@ cdef extern from "dbat/structs.h":
         int vn
         string name
         string email
-        # string passHash - NOT including passHash here.
+        string passHash
         time_t created
         time_t lastLogin
         time_t lastLogout
@@ -25,12 +25,12 @@ cdef extern from "dbat/structs.h":
         int slots
         vector[int] characters
 
-        bool checkPassword(const string& password)
-        bool setPassword(const string& password)
         void modRPP(int amt)
 
         utils.json serialize()
         void deserialize(const utils.json& j)
+        @staticmethod
+        int getNextID()
 
 cdef extern from "dbat/account.h":
     account_data* createAccount(const string& name, const string& password) except+

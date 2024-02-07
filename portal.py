@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 
+
 def run(name: str):
     import os
-    import dbat
-    from dbat.utils import import_from_module
+    import kai
+    from kai.utils.utils import class_from_module
 
-    from dbat import settings
+    from .game import settings
 
-    core_class = import_from_module(settings.CORES[name])
+    kai.SETTINGS = settings
+
+    for k, v in settings.PORTAL_CLASSES.items():
+        kai.CLASSES[k] = class_from_module(v)
+
+    core_class = kai.CLASSES["core"]
 
     pidfile = f"{name}.pid"
 
@@ -17,7 +23,7 @@ def run(name: str):
 
         try:
             app = core_class(settings)
-            dbat.GAME = app
+            kai.GAME = app
             app.run()
         except Exception as err:
             print(str(err))

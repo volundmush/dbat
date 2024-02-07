@@ -5,17 +5,19 @@ from rich.color import ColorType, ColorSystem
 from typing import Optional
 import logging
 import enum
-import pickle
+
 import re
 import traceback
-
+from rich.console import Console
+from rich.table import Table
+from rich.box import ASCII2
 import socketio
 
-from websockets import client as websocket_client
-import dbat
-from dbat import settings
-from dbat.ansi import circle_to_rich
-from dbat.utils import lazy_property
+import kai
+
+from .ansi import circle_to_rich
+from kai.utils.utils import lazy_property
+from kai.utils.optionhandler import OptionHandler
 
 
 @dataclass
@@ -27,7 +29,7 @@ class Capabilities:
     client_version: str = "UNKNOWN"
     host_address: str = "UNKNOWN"
     host_port: int = -1
-    host_names: list[str, ...] = None
+    host_names: list[str] = None
     encoding: str = "ascii"
     color: ColorType = ColorType.DEFAULT
     width: int = 78
@@ -61,7 +63,6 @@ class SessionState(enum.IntEnum):
 
 
 class PortalSession:
-
     def __init__(self):
         self.capabilities = Capabilities()
         self.task_group = asyncio.TaskGroup()
@@ -88,19 +89,19 @@ class PortalSession:
         pass
 
     async def on_event(self, event: str, message):
-        match event:
-            case "Game.Text":
-                if (txt := message.get("data", None)) is not None:
-                    await self.send_game_text(txt)
-            case "Game.GMCP":
-                cmd = message.get("cmd", None)
-                data = message.get("data", dict())
-                await self.send_gmcp(cmd, data)
+        if found := kai.PORTAL_EVENTS.get(event, None):
+            try:
+                await found(self, event, message)
+            except Exception as e:
+                logging.error(
+                    f"Got an Exception while processing Event {event} for {self.sio.sid}: {e} (message: {message})"
+                )
+                logging.exception(e)
+        else:
+            logging.warning(f"Event {event} not found in {kai.PORTAL_EVENTS}")
 
     @lazy_property
     def console(self):
-        from rich.console import Console
-
         return Console(
             color_system=self.rich_color_system(),
             width=self.capabilities.width,
@@ -139,12 +140,38 @@ class PortalSession:
         self.console.print(*args, **new_kwargs)
         return self.console.export_text(clear=True, styles=True)
 
+    @lazy_property
+    def options(self):
+        return OptionHandler(
+            self,
+            options_dict=kai.SETTINGS.OPTIONS_ACCOUNT_DEFAULT,
+        )
+
+    async def uses_screenreader(self) -> bool:
+        return await self.options.get("screenreader")
+
+    async def rich_table(self, *args, **kwargs) -> Table:
+        options = self.options
+        real_kwargs = {
+            "box": ASCII2,
+            "border_style": await options.get("border_style"),
+            "header_style": await options.get("header_style"),
+            "title_style": await options.get("header_style"),
+            "expand": True,
+        }
+        real_kwargs.update(kwargs)
+        if await self.uses_screenreader():
+            real_kwargs["box"] = None
+        return Table(*args, **real_kwargs)
+
     async def run(self):
         pass
 
     async def start(self):
         headers = {"X-FORWARDED-FOR": self.capabilities.host_address}
-        await self.sio.connect(settings.PORTAL_URL_TO_WS, wait=True, headers=headers)
+        await self.sio.connect(
+            kai.SETTINGS.PORTAL_URL_TO_GAME, wait=True, headers=headers
+        )
         await asyncio.gather(*[self.run_messaging(), self.run_idler()])
 
     async def run_idler(self):
@@ -153,7 +180,7 @@ class PortalSession:
             await self.sio.emit("idle", data=dict())
 
     async def run_messaging(self):
-        while (msg := await self.outgoing_queue.get()):
+        while msg := await self.outgoing_queue.get():
             event = msg[0]
             data = msg[1]
             await self.sio.emit(event, data=data)

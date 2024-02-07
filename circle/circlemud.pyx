@@ -19,6 +19,9 @@ import pickle
 import orjson
 import pathlib
 from datetime import datetime
+from passlib.context import CryptContext
+
+CRYPT_CONTEXT = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 cdef class GameSession:
@@ -124,7 +127,27 @@ async def run_game_loop():
         deltaTimeInSeconds = time.perf_counter() - start
 
 
+
+cdef accountToJSON(accounts.account_data* account):
+    serialized = account.serialize()
+    dumped = utils.jdump(serialized)
+    return orjson.loads(dumped)
+
+
 cdef class _AccountManager:
+
+    def create(self, data: dict[str, "Any"]):
+        data["vn"] = accounts.account_data.getNextID()
+        j = orjson.dumps(data)
+        
+    
+    def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
+        account = accounts.accounts.find(target)
+        if account == accounts.accounts.end():
+            return "Account not found."
+        j = orjson.dumps(data)
+        deref(account).second.deserialize(utils.jparse(j))
+
     async def retrieve_user(self, request, payload, *args, **kwargs):
         if payload:
             if not (user_id := payload.get("user_id", None)):
@@ -155,16 +178,29 @@ cdef class _AccountManager:
         if user is NULL:
             raise exceptions.AuthenticationFailed("Incorrect credentials.")
 
-        if not user.checkPassword(password.encode()):
+        passhash = user.passHash.decode("UTF-8", errors='ignore')
+        if not passhash:
+            raise exceptions.AuthenticationFailed("Incorrect credentials.")
+        
+        if not CRYPT_CONTEXT.verify(password, passhash):
             raise exceptions.AuthenticationFailed("Incorrect credentials.")
 
-        out = {"user_id": user.vn, "username": user.name.decode("UTF-8", errors='ignore'), "adminLevel": user.adminLevel}
+        out = {"user_id": user.vn, "name": user.name.decode("UTF-8", errors='ignore'), "adminLevel": user.adminLevel}
         if not user.email.empty():
             out["email"] = user.email.decode("UTF-8", errors='ignore')
         if not user.characters.empty():
             out["characters"] = [x for x in user.characters]
 
         return out
+    
+    def exists(self, name: str, exclude: int = None) -> bool:
+        found = accounts.findAccount(name.encode())
+        if found is NULL:
+            return False
+        if exclude is not None:
+            if found.vn == exclude:
+                return False
+        return True
 
 account_manager = _AccountManager()
 
