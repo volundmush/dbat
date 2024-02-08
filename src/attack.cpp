@@ -163,7 +163,7 @@ namespace atk {
     DefenseResult Attack::attackOutcome(char_data* user, char_data* victim, int skillID, bool kiAttack) {
         initStats();
 
-        currentHitProbability = roll_accuracy(user, skillID, kiAttack);
+        currentHitProbability = roll_accuracy(user, init_skill(user, skillID), kiAttack);
         currentChanceToHit = chance_to_hit(user);
 
         if(isPhysical() && !usesWeapon()) {
