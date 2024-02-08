@@ -331,7 +331,10 @@ int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getEffMaxPL();
-    health = std::max(fl, health - (double) std::abs(amt) / (double) getEffMaxPL());
+    if (suppression > 0)
+        health = std::max(fl, health - (double) std::abs(amt) / ((double) getEffMaxPL() * ((double) suppression / 100.0)));
+    else
+        health = std::max(fl, health - (double) std::abs(amt) / (double) getEffMaxPL());
     return getCurHealth();
 }
 
@@ -376,10 +379,14 @@ int64_t char_data::getMaxPL() {
 
 int64_t char_data::getCurPL() {
     if (suppression > 0) {
-        return getEffMaxPL() * std::min(health, (double) suppression / 100);
+        return getEffMaxPL() * std::min(health, health * ((double) suppression / 100));
     } else {
         return getEffMaxPL() * health;
     }
+}
+
+int64_t char_data::getUnsuppressedPL() {
+        return getEffMaxPL() * health;
 }
 
 int64_t char_data::getEffBasePL() {
