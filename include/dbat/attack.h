@@ -88,6 +88,7 @@ namespace atk {
         virtual Result handleParry() = 0;
         virtual Result handleBlock() = 0;
         virtual Result handleDodge() = 0;
+        virtual Result handlePerfectDodge() = 0;
 
         virtual int64_t calculateObjectDamage();
 

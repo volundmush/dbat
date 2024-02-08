@@ -161,7 +161,19 @@ namespace trans {
         return "N/A";
     }
 
-
+    int getMasteryTier(char_data* ch, FormID form) {
+        if(ch->transforms.contains(form)) {
+            double timeSpent = ch->transforms[form].timeSpentInForm;
+            if (timeSpent > 100000)
+                return 3;
+            if (timeSpent > 5000)
+                return 2;
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    
     std::string getAbbr(struct char_data* ch, FormID form) {
         switch (form) {
             case FormID::Base:
@@ -653,10 +665,10 @@ namespace trans {
         },
         {
             FormID::UltraInstinct, {
-                {APPLY_ACCURACY, 1},
-                {APPLY_KI_MULT, 2},
-                {APPLY_DAMAGE_PERC, -0.5},
-                {APPLY_PERFECT_DODGE, -0.6},
+                {APPLY_ACCURACY, 0.0, -1, [](struct char_data *ch) {return 1 + (0.1 * getMasteryTier(ch, FormID::UltraInstinct));}},
+                {APPLY_KI_MULT, 0.0, -1, [](struct char_data *ch) {return 2 + (0.4 * getMasteryTier(ch, FormID::UltraInstinct));}},
+                {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {return -0.7 + (0.2 * getMasteryTier(ch, FormID::UltraInstinct));}},
+                {APPLY_PERFECT_DODGE, 0.0, -1, [](struct char_data *ch) {return -0.4 - (0.2 * getMasteryTier(ch, FormID::UltraInstinct));}},
             }
         },
 
@@ -1263,25 +1275,41 @@ namespace trans {
         {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}}
     };
 
+    void initTransforms(char_data* ch) {
+        for (auto form : race_forms.find(ch->race)->second) {
+            if(!ch->transforms.contains(form)) {
+                ch->addTransform(form);
+            }
+        }
+    }
+
     std::set<FormID> getFormsFor(char_data* ch) {
-        auto forms = race_forms.find(ch->race);
+        initTransforms(ch);
+        auto forms = ch->transforms;
         std::set<FormID> pforms;
+        
 
         switch (ch->race) {
             case RaceID::Majin:
             case RaceID::Android:
             case RaceID::BioAndroid:
             case RaceID::Tuffle: 
-                for (auto form : forms->second) {
-                    pforms.insert(form);
+                for (auto form : forms) {
+                    if(form.first == FormID::Base)
+                        form.second.visible = false;
+                    if(form.second.visible)
+                        pforms.insert(form.first);
                 }
                 return pforms;
 
             default:
-                pforms = ch->unlockedForms;
+                //pforms = ch->unlockedForms;
 
-                for (auto form : forms->second) {
-                    pforms.insert(form);
+                for (auto form : forms) {
+                    if(form.first == FormID::Base || form.first == FormID::Oozaru || form.first == FormID::GoldenOozaru)
+                        form.second.visible = false;
+                    if(form.second.visible)
+                        pforms.insert(form.first);
                 }
                 return pforms;
 
@@ -1301,6 +1329,10 @@ namespace trans {
         std::vector<std::string> form_names;
         for (auto form: forms) {
             auto name = getName(ch, form);
+            if(getMasteryTier(ch, form) > 2)
+                name = "@RLIMIT@n " + name;
+            else if (getMasteryTier(ch, form) > 1)
+                name = "@BMASTERED@n " + name;
             auto req = getRequiredPL(ch, form);
             send_to_char(ch, "@W%s@n @R-@G %s BPL Req\r\n", name,
                          (pl >= (req * 0.75)) ? add_commas(req) : "??????????");
@@ -1468,12 +1500,14 @@ trans_data::trans_data(const nlohmann::json &j) : trans_data() {
 
 void trans_data::deserialize(const nlohmann::json &j) {
     if(j.contains("timeSpentInForm")) timeSpentInForm = j["timeSpentInForm"];
+    if(j.contains("visible")) timeSpentInForm = j["visible"];
     if(j.contains("blutz")) blutz = j["blutz"];
 }
 
 nlohmann::json trans_data::serialize() {
     nlohmann::json j;
     if(timeSpentInForm != 0.0) j["timeSpentInForm"] = timeSpentInForm;
+    if(!visible) j["visible"] = visible;
     if(blutz != 0.0) j["blutz"] = blutz;
     return j;
 }

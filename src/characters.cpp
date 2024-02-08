@@ -772,13 +772,18 @@ bool char_data::hasTail() {
 }
 
 void char_data::addTransform(FormID form) {
-    unlockedForms.insert(form);
+    transforms.insert({form, trans_data()});
+}
+
+void char_data::hideTransform(FormID form, bool hide) {
+    auto foundForm = transforms.find(form);
+    foundForm->second.visible = !hide;
 }
 
 bool char_data::removeTransform(FormID form) {
-    if (unlockedForms.contains(form))
+    if (transforms.contains(form))
     {
-        unlockedForms.erase(form);
+        transforms.erase(form);
         return true;
     }
     //Return if failure

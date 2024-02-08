@@ -2262,9 +2262,17 @@ ACMD(do_pgrant) {
         send_to_char(ch, "Form %s added!\r\n", strForm);
         log_imm_action("Form Added: %s added %s to %s!", ch, strForm, vict);
     } else {
-        vict->removeTransform(*foundForm);
-        send_to_char(ch, "Form %s removed!\r\n", strForm);
-        log_imm_action("Form Removed: %s removed %s from %s!", ch, strForm, vict);
+        if(vict->transforms.find(*foundForm)->second.visible) {
+            vict->hideTransform(*foundForm, true);
+            send_to_char(ch, "Form %s hidden!\r\n", strForm);
+            log_imm_action("Form Hidden: %s hidden %s from %s!", ch, strForm, vict);
+        } else {
+            vict->hideTransform(*foundForm, false);
+            send_to_char(ch, "Form %s unhidden!\r\n", strForm);
+            log_imm_action("Form Unhidden: %s unhidden %s from %s!", ch, strForm, vict);
+        }
+
+        
     }
 
 }
