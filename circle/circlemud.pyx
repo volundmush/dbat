@@ -27,12 +27,16 @@ cdef class GameSession:
     cdef object sid
     cdef object sio
     cdef object running
+    cdef object ip
+    cdef object user_id
 
-    def __init__(self, sid, sio):
+    def __init__(self, sid, sio, ip, user_id):
         self.sid = sid
         self.sio = sio
         self.running = True
-        self.conn = net.newConnection(sid.encode())
+        self.ip = ip
+        self.user_id = user_id
+        self.conn = net.newConnection(sid.encode(), ip.encode(), user_id)
 
     async def run(self):
         c = self.conn.get()

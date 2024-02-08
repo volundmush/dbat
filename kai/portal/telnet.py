@@ -654,7 +654,7 @@ class TelnetProtocol(PortalSession):
         self.remote_disconnect = True
         self.task_group._abort()
 
-    async def run(self):
+    async def run_protocol(self):
         async with self.task_group as tg:
             tg.create_task(self.run_reader())
             tg.create_task(self.run_writer())
@@ -809,7 +809,7 @@ class TelnetProtocol(PortalSession):
                 )
                 pass
 
-            await self.start()
+            await self.set_parser(kai.CLASSES["login_parser"](self))
         except asyncio.CancelledError:
             return
         except Exception as err:

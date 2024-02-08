@@ -5,6 +5,8 @@
 #include "dbat/players.h"
 #include "dbat/login.h"
 #include "dbat/config.h"
+#include "dbat/account.h"
+#include "dbat/accmenu.h"
 
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
@@ -54,9 +56,8 @@ namespace net {
 
 
     void Connection::onWelcome() {
-        account = nullptr;
-        desc = nullptr;
-        setParser(new LoginParser(shared_from_this()));
+        account->connections.insert(this);
+        setParser(new AccountMenu(shared_from_this()));
     }
 
     void Connection::close() {
@@ -68,8 +69,8 @@ namespace net {
     }
 
 
-    Connection::Connection(const std::string& connId)
-    : connId(connId) {
+    Connection::Connection(const std::string& connId, const std::string& host)
+    : connId(connId), host(host) {
 
     }
 
@@ -124,8 +125,9 @@ namespace net {
         if(parser) parser->parse(cmd);
     }
 
-    std::shared_ptr<Connection> newConnection(const std::string& connID) {
+    std::shared_ptr<Connection> newConnection(const std::string& connID, const std::string& host, int64_t account_id) {
         auto conn = std::make_shared<Connection>(connID);
+        conn->account = &(accounts.find(account_id)->second);
         conn->state = ConnectionState::Pending;
         connections[connID] = conn;
         return conn;

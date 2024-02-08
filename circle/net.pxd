@@ -37,4 +37,4 @@ cdef extern from "dbat/net.h" namespace "net":
     cdef map[string, shared_ptr[Connection]] connections
 
 
-    cdef shared_ptr[Connection] newConnection(const string& connID)
+    cdef shared_ptr[Connection] newConnection(const string& connID, const string& ip, int64_t account)

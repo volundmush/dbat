@@ -27,6 +27,9 @@ PARSERS = {
 
 PORTAL_CLASSES = dict()
 PORTAL_CLASSES["core"] = "kai.portal.portal.Core"
+PORTAL_CLASSES["login_parser"] = "kai.portal.login.LoginParser"
+PORTAL_CLASSES["game_parser"] = "kai.portal.game.GameParser"
+PORTAL_CLASSES["admin_parser"] = "kai.portal.admin.AdminParser"
 
 PORTAL_SERVICES = {"telnet": "kai.portal.telnet.TelnetService"}
 
@@ -34,3 +37,15 @@ PORTAL_EVENT_HANDLER_MODULES = ["kai.portal.events"]
 SERVER_EVENT_HANDLER_MODULES = ["kai.db.events"]
 
 DEBUG = True
+
+LOG_DIR = "logs"
+
+# Modules holding Option classes, responsible for serializing the option and
+# calling validator functions on it. Same-named functions in modules added
+# later in this list will override those added earlier.
+OPTION_CLASS_MODULES = ["kai.utils.optionclasses"]
+# Module holding validator functions. These are used as a resource for
+# validating options, but can also be used as input validators in general.
+# Same-named functions in modules added later in this list will override those
+# added earlier.
+VALIDATOR_FUNC_MODULES = ["kai.utils.validatorfuncs"]

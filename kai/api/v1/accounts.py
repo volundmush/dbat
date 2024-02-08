@@ -97,7 +97,7 @@ async def create_account(request):
         return response.json({"error": "Invalid account data", "details": "Password not hashable"}, status=400)
     account = account_manager.create(request.json)
     CREATION_TRACKER[ip] = time.time()
-    return response.json({"success": True}, status=200)
+    return response.json({"success": True}, status=201)
 
 PASSWORD_CHANGE_TRACKER: dict[str, float] = dict()
 

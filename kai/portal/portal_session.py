@@ -71,6 +71,8 @@ class PortalSession:
         # This contains arbitrary data sent by the server which will be sent on a reconnect.
         self.userdata = None
         self.outgoing_queue = asyncio.Queue()
+        self.parser_queue = asyncio.Queue()
+        self.parser = None
         self.core = None
         self.linked = False
         self.jwt = None
@@ -81,6 +83,11 @@ class PortalSession:
         self.sio.on("*", self.on_event)
         self.sio.on("connect", self.on_connect)
         self.sio.on("disconnect", self.on_disconnect)
+
+    @property
+    def http(self):
+        return self.core.http
+
 
     async def on_connect(self):
         pass
@@ -165,25 +172,20 @@ class PortalSession:
         return Table(*args, **real_kwargs)
 
     async def run(self):
+        await asyncio.gather(*[self.run_protocol(), self.run_parser()])
+    
+    async def run_protocol(self):
         pass
-
-    async def start(self):
-        headers = {"X-FORWARDED-FOR": self.capabilities.host_address}
-        await self.sio.connect(
-            kai.SETTINGS.PORTAL_URL_TO_GAME, wait=True, headers=headers
-        )
-        await asyncio.gather(*[self.run_messaging(), self.run_idler()])
-
-    async def run_idler(self):
-        while True:
-            await asyncio.sleep(5.0)
-            await self.sio.emit("idle", data=dict())
-
-    async def run_messaging(self):
-        while msg := await self.outgoing_queue.get():
-            event = msg[0]
-            data = msg[1]
-            await self.sio.emit(event, data=data)
+    
+    async def set_parser(self, parser):
+        await self.parser_queue.put(parser)
+        if self.parser:
+            await self.parser.close()
+    
+    async def run_parser(self):
+        while(msg := await self.parser_queue.get()):
+            self.parser = msg
+            await self.parser.run()
 
     async def send_text(self, text: str, force_endline=True):
         if not text:

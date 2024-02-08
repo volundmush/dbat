@@ -6,7 +6,7 @@ def run(name: str):
     import kai
     from kai.utils.utils import class_from_module
 
-    from .game import settings
+    from game import settings
 
     kai.SETTINGS = settings
 

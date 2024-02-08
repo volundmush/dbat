@@ -7,6 +7,7 @@ import sys
 import traceback
 import aiodns
 from logging.handlers import TimedRotatingFileHandler
+import httpx
 
 import kai
 from kai.utils.utils import import_from_module, callables_from_module
@@ -41,6 +42,7 @@ class Core:
         self.cold_start = True
         self.ep = None
         self.game_sessions: dict[str, "GameSession"] = dict()
+        self.http = httpx.AsyncClient(base_url=settings.PORTAL_URL_TO_GAME, http2=True)
 
     def copyover(self):
         data_dict = dict()

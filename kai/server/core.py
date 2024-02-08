@@ -4,7 +4,7 @@ import asyncio
 import queue
 import time
 import pathlib
-from sanic import Sanic, response
+from sanic import Sanic, response, exceptions
 
 from sanic_jwt import Initialize
 import circlemud
@@ -25,7 +25,7 @@ class ServerCore:
         sio.attach(app)
         app.ctx.socketio = sio
         self.settings = app.ctx.settings
-        Initialize(app, claim_aud=self.settings.SERVER_INTERFACE, authenticate=account_manager.authenticate, retrieve_user=account_manager.retrieve_user)
+        self.auth = Initialize(app, claim_aud=self.settings.SERVER_INTERFACE, authenticate=account_manager.authenticate, retrieve_user=account_manager.retrieve_user)
         self.tasks = list()
         self.connections: dict[str, circlemud.GameSession] = dict()
 
@@ -53,8 +53,36 @@ class ServerCore:
     async def index(self, request):
         return await response.file(os.path.join(webroot_path, 'index.html'))
 
+    def get_real_ip(self, environ):
+        best_choice = environ.get("REMOTE_ADDR")
+        if (forwarded := environ.get("HTT_X_FORWARDED_FOR", None)):
+            best_choice = forwarded.split(",")[0]
+        return best_choice
+
+    async def get_payload(self, environ):
+        if (token := environ.get("HTTP_AUTHORIZATION", None)):
+            return None
+        if not token.startswith("Bearer "):
+            return None
+        token = token.split(" ")[1]
+        try:
+            # Assuming `token` is the JWT extracted from the SocketIO connection
+            # Use Sanic-JWT's internal method to validate and decode the token
+            payload = await self.auth.authentication._decode(token, verify=True)
+            return payload
+        except exceptions.SanicJWTException as e:
+            # Handle invalid token cases (e.g., expired, invalid signature)
+            print("Invalid JWT:", str(e))
+            return False
+
     async def connect_handler(self, sid, environ):
-        new_conn = circlemud.GameSession(sid, self.sio)
+        ip = self.get_real_ip(environ)
+        if not (payload := await self.get_payload(environ)):
+            print(f"connect_handler: Invalid JWT from {ip}")
+            await self.sio.disconnect(sid)
+            return
+        user_id = payload.get("user_id")
+        new_conn = circlemud.GameSession(sid, self.sio, ip, user_id)
         self.connections[sid] = new_conn
         self.app.add_task(new_conn.run(), name=f"Connection {sid}")
 

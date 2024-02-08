@@ -26,7 +26,7 @@ namespace net {
 
     class Connection;
 
-    std::shared_ptr<Connection> newConnection(const std::string& connID);
+    std::shared_ptr<Connection> newConnection(const std::string& connID, const std::string& host);
 
     class ConnectionParser {
     public:
@@ -45,7 +45,7 @@ namespace net {
 
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
-        explicit Connection(const std::string& connId);
+        explicit Connection(const std::string& connId, const std::string& host);
         void sendGMCP(const std::string &cmd, const nlohmann::json &j);
         void sendText(const std::string &messg);
         void sendEvent(const std::string &name, const nlohmann::json &data);
@@ -60,7 +60,7 @@ namespace net {
         void setParser(ConnectionParser *p);
 
         bool running{true};
-        std::string connId{};
+        std::string connId{}, host{};
         account_data *account{};
         int64_t adminLevel{0};
         struct descriptor_data *desc{};

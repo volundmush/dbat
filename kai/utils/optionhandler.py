@@ -1,5 +1,3 @@
-from django.utils.translation import gettext as _
-
 from kai.utils.utils import partial_match
 
 import kai
@@ -137,7 +135,7 @@ class OptionHandler:
         """
         if key not in self.options_dict:
             if raise_error:
-                raise KeyError(_("Option not found!"))
+                raise KeyError("Option not found!")
             return default
         # get the options or load/recache it
         op_found = self.options.get(key) or await self._load_option(key)
@@ -159,15 +157,15 @@ class OptionHandler:
 
         """
         if not key:
-            raise ValueError(_("Option field blank!"))
+            raise ValueError("Option field blank!")
         match = partial_match(key, list(self.options_dict.keys()))
         if not match:
-            raise ValueError(_("Option not found!"))
+            raise ValueError("Option not found!")
         if len(match) > 1:
             raise ValueError(
-                _("Multiple matches:")
+                "Multiple matches:"
                 + f"{', '.join(match)}. "
-                + _("Please be more specific.")
+                + "Please be more specific."
             )
         match = match[0]
         op = await self.get(match, return_obj=True)
