@@ -133,6 +133,7 @@ namespace atk {
         bool canCombo() override {return true;};
         Result handleParry() override;
         Result handleDodge() override;
+        Result handlePerfectDodge() override;
         Result handleBlock() override;
         void handleHitspot() override;
     };

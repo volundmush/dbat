@@ -476,7 +476,7 @@ namespace atk {
 
     }
 
-    Result Attack::handlePerfectDodge() {
+    Result MeleeAttack::handlePerfectDodge() {
         actVictim("@C$n@W moves so slowly that you dodge their attack with ease.@n");
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
