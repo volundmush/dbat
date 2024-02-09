@@ -618,3 +618,18 @@ def get_true_ip(request: request.Request) -> str:
         return request.headers.get("X-Forwarded-For").split()[-1]
     else:
         return request.ip
+
+
+def validate_email_address(emailaddress):
+    """
+    Checks if an email address is syntactically correct.
+
+    Args:
+        emailaddress (str): Email address to validate.
+
+    Returns:
+        bool: If this is a valid email or not.
+
+    """
+    # TODO: Finish this.
+    return True

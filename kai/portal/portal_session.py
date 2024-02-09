@@ -6,8 +6,10 @@ from typing import Optional
 import logging
 import enum
 
+import jwt
 import re
 import traceback
+import time
 from rich.console import Console
 from rich.table import Table
 from rich.box import ASCII2
@@ -54,6 +56,35 @@ class Capabilities:
     proxy: bool = False
     mnes: bool = False
 
+class ParserMixin:
+    
+    @property
+    def http(self):
+        return self.session.http
+    
+    @property
+    def get(self):
+        return self.session.get
+    
+    @property
+    def post(self):
+        return self.session.post
+    
+    @property
+    def put(self):
+        return self.session.put
+    
+    @property
+    def patch(self):
+        return self.session.patch
+    
+    @property
+    def delete(self):
+        return self.session.delete
+    
+    @property
+    def headers(self):
+        return self.session.headers
 
 
 class PortalSession:
@@ -68,7 +99,7 @@ class PortalSession:
         self.core = None
         self.linked = False
         self.jwt = None
-        self.jwt_claims = dict()
+        self.jwt_decoded = dict()
         self.parser = None
         self.parser_queue = asyncio.Queue()
         self.parser = None
@@ -76,6 +107,32 @@ class PortalSession:
     @property
     def http(self):
         return self.core.http
+
+    def set_jwt(self, token):
+        self.jwt = token
+        self.jwt_decoded = jwt.decode(token, options={"verify_signature": False})
+
+    def headers(self):
+        headers = {
+            "Authorization": f"Bearer {self.jwt}",
+            "X-Forwarded-For": self.capabilities.host_address
+        }
+        return headers
+    
+    async def get(self, url: str, **kwargs):
+        return await self.http.get(url, headers=self.headers(), **kwargs)
+    
+    async def post(self, url: str, **kwargs):
+        return await self.http.post(url, headers=self.headers(), **kwargs)
+        
+    async def patch(self, url: str, **kwargs):
+        return await self.http.patch(url, headers=self.headers(), **kwargs)
+        
+    async def put(self, url: str, **kwargs):
+        return await self.http.put(url, headers=self.headers(), **kwargs)
+    
+    async def delete(self, url: str, **kwargs):
+        return await self.http.delete(url, headers=self.headers(), **kwargs)
 
     @lazy_property
     def console(self):
@@ -147,6 +204,27 @@ class PortalSession:
     async def run_protocol(self):
         pass
     
+    async def run_refresh(self):
+        while True:
+            if not self.jwt_decoded:
+                await asyncio.sleep(10)
+                continue
+            exp = self.jwt_decoded.get("exp")
+            current = time.time()
+            remaining = exp - current - 120
+
+            if remaining > 0:
+                await asyncio.sleep(remaining)
+            await self.refresh()
+    
+    
+    async def refresh(self):
+        headers = self.headers()
+        result = await self.http.post("/auth/refresh", headers=headers, json={})
+        if result.status == 200:
+            token = result.json().get("access_token")
+            self.set_jwt(token)
+    
     async def set_parser(self, parser):
         await self.parser_queue.put(parser)
         if self.parser:
@@ -165,6 +243,10 @@ class PortalSession:
         if force_endline and not text.endswith("\r\n"):
             text += "\r\n"
         await self.handle_send_text(text)
+    
+    async def send_rich(self, renderable):
+        rendered = self.print(renderable)
+        await self.send_text(rendered)
 
     async def handle_send_text(self, text: str):
         pass

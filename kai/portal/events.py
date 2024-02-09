@@ -7,16 +7,13 @@ async def CircleText(session, event: str, data):
     if (text := data.pop("data", "")):
         replaced = text.replace("\r", "")
         replaced = replaced.replace("\n", "\r\n")
-        out = circle_to_rich(replaced)
-        rendered = session.print(out)
-        await session.send_text(rendered)
+        await session.send_rich(circle_to_rich(replaced))
 
 
 async def RichText(session, event: str, data):
     if (txt := data.pop("text", None)) is not None:
         text = RealRichText(txt, **data)
-        rendered = session.print(text)
-        await session.send_text(rendered)
+        await session.send_rich(text)
 
 
 async def Text(session, event: str, data):
@@ -45,9 +42,8 @@ async def RichTable(session, event: str, data):
 
     for row in rows:
         table.add_row(*row)
-
-    rendered = session.print(table)
-    await session.send_game_text(rendered)
+        
+    await session.send_rich(table)
 
 
 async def ReprEcho(session, event: str, data):

@@ -19,6 +19,7 @@ from kai.api import v1
 
 class ServerCore:
     def __init__(self, app: Sanic):
+        kai.GAME = self
         self.app = app
         sio = socketio.AsyncServer(async_mode="sanic", namespaces="*")
         kai.SOCKETIO = sio

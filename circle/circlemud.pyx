@@ -29,6 +29,8 @@ cdef class GameSession:
     cdef object running
     cdef object ip
     cdef object user_id
+    cdef object created
+    cdef object last_activity
 
     def __init__(self, sid, sio, ip, user_id):
         self.sid = sid
@@ -36,7 +38,28 @@ cdef class GameSession:
         self.running = True
         self.ip = ip
         self.user_id = user_id
+        self.created = time.time()
+        self.last_activity = time.time()
         self.conn = net.newConnection(sid.encode(), ip.encode(), user_id)
+    
+    def idle_time(self):
+        return time.time() - self.last_activity
+    
+    def connected_time(self):
+        return time.time() - self.created
+
+    def serialize(self) -> dict:
+        c = self.conn.get()
+        out = {
+            "ip": self.ip,
+            "user_id": self.user_id,
+            "username": c.account.name.decode("UTF-8", errors='ignore'),
+            "connected_time": self.connected_time(),
+            "idle_time": self.idle_time()
+        }
+        if c.desc is not NULL:
+            out["character"] = c.desc.character.name.decode("UTF-8", errors='ignore')
+        return out
 
     async def run(self):
         c = self.conn.get()
@@ -67,6 +90,7 @@ cdef class GameSession:
         self.conn.get().state = net.ConnectionState.Dead
 
     async def handle_event(self, event: str, message):
+        self.last_activity = time.time()
         self.conn.get().queueMessage(event.encode(), orjson.dumps(message))
 
     async def start_resume(self):

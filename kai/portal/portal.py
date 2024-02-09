@@ -192,15 +192,15 @@ class Core:
             logging.error(traceback.format_exc())
             return
 
-        for module in kai.SETTINGS.VALIDATOR_FUNC_MODULES:
+        for module in self.settings.VALIDATOR_FUNC_MODULES:
             for k, v in callables_from_module(module).items():
                 kai.VALIDATORS[k] = v
 
-        for module in kai.SETTINGS.OPTION_CLASS_MODULES:
+        for module in self.settings.OPTION_CLASS_MODULES:
             for k, v in callables_from_module(module).items():
                 kai.OPTION_CLASSES[k] = v
 
-        for module in kai.SETTINGS.PORTAL_EVENT_HANDLER_MODULES:
+        for module in self.settings.PORTAL_EVENT_HANDLER_MODULES:
             for k, v in callables_from_module(module).items():
                 kai.PORTAL_EVENTS[k] = v
 

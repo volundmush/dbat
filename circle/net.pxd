@@ -8,6 +8,7 @@ from libcpp.vector cimport vector
 from libcpp.memory cimport shared_ptr
 from libcpp.pair cimport pair
 cimport accounts
+cimport structs
 
 cdef extern from "dbat/net.h" namespace "net":
 
@@ -35,6 +36,7 @@ cdef extern from "dbat/net.h" namespace "net":
         ConnectionState state
         void onHeartbeat(double deltaTime)
         accounts.account_data* account
+        structs.descriptor_data* desc;
 
     cdef map[string, shared_ptr[Connection]] connections
 

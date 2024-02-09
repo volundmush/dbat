@@ -10,6 +10,6 @@ admin = Blueprint("admin", url_prefix="/admin")
 @inject_user()
 async def get_admin(request, user):
     if user["adminLevel"] > 0:
-        return response.json({"error": False}, status=200)
+        return response.json({"error": False, "adminLevel": user['adminLevel']}, status=200)
     else:
-        return response.json({"error": "Unauthorized."}, status=401)
+        return response.json({"error": "Unauthorized", "adminLevel": user['adminLevel']}, status=401)

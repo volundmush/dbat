@@ -660,9 +660,6 @@ class TelnetProtocol(PortalSession):
             tg.create_task(self.run_writer())
             tg.create_task(self.run_negotiation())
 
-        if self.sio.connected:
-            await self.sio.disconnect()
-
         if self.remote_disconnect:
             self.writer.close()
 

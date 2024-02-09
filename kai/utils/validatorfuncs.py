@@ -12,13 +12,16 @@ import datetime as _dt
 import re as _re
 
 import pytz as _pytz
-from django.utils.translation import gettext as _
 
 from kai.utils.ansi import strip_ansi
 from kai.utils.utils import validate_email_address, partial_match, utcnow
 
 _TZ_DICT = {str(tz): _pytz.timezone(tz) for tz in _pytz.common_timezones}
 
+def whoops(line: str): 
+    return line
+
+_ = whoops
 
 def text(entry, option_key="Text", **kwargs):
     try:

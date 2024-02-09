@@ -24,7 +24,9 @@ Note: Usernames are alphanumeric, no spaces allowed.
 @rO@b---------------------------------------------------------------------@rO@n
 """
 
-class LoginParser:
+from kai.portal.portal_session import ParserMixin
+
+class LoginParser(ParserMixin):
     
     def __init__(self, session):
         self.session = session
@@ -48,14 +50,14 @@ class LoginParser:
         if not username or not password:
             await self.session.send_text("Invalid username or password. Please try again.")
             return
-        result = await self.session.http.post("/auth", json={"username": username, "password": password})
+        result = await self.http.post("/auth", json={"username": username, "password": password})
         if result.status_code  != 200:
             await self.session.send_text(f"Login failed. Error: {result.json().get('reasons', 'N/A')}.")
             return
         if not (token := result.json().get("access_token", None)):
             await self.session.send_text("Login failed. No token received. Contact staff.")
             return
-        self.session.jwt = token
+        self.session.set_jwt(token)
         return token
     
     async def handle_connect(self, username, password):
@@ -68,15 +70,13 @@ class LoginParser:
     async def handle_admin(self, username, password):
         if not (await self.handle_login(username, password)):
             return
-        headers = {
-            "Authorization": f"Bearer {self.session.jwt}"
-        }
-        result = await self.session.http.get("/v1/admin", headers=headers)
+        result = await self.session.get("/v1/admin")
         if result.status_code  != 200:
             await self.session.send_text(f"Admin login failed. Error: {result.json().get('error', 'N/A')}.")
             return
         self.running = False
-        await self.session.set_parser(kai.CLASSES["admin_parser"](self.session))
+        adminLevel = result.json().get("adminLevel")
+        await self.session.set_parser(kai.CLASSES["admin_parser"](self.session, adminLevel))
     
     async def run(self):
         circle = kai.PORTAL_EVENTS["CircleText"]

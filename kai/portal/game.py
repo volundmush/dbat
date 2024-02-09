@@ -23,16 +23,11 @@ class GameParser:
     def http(self):
         return self.session.http
     
-    def headers(self):
-        headers = {
-            "Authorization": f"Bearer {self.session.jwt}",
-            "X-Forwarded-For": self.session.capabilities.host_address
-        }
-        return headers
+    
     
     async def run(self):
         await self.sio.connect(
-            kai.SETTINGS.PORTAL_URL_TO_GAME, wait=True, headers=self.headers
+            kai.SETTINGS.PORTAL_URL_TO_GAME, wait=True, headers=self.session.headers()
         )
         self.task = asyncio.create_task(self.run_game())
         await self.task
@@ -69,26 +64,7 @@ class GameParser:
             data = msg[1]
             await self.sio.emit(event, data=data)
     
-    async def run_refresh(self):
-        while True:
-            if not self.jwt_decoded:
-                await asyncio.sleep(10)
-                continue
-            exp = self.jwt_decoded.get("exp")
-            current = time.time()
-            remaining = exp - current - 120
-
-            if remaining > 0:
-                await asyncio.sleep(remaining)
-            await self.refresh()
     
-    async def refresh(self):
-        headers = self.headers()
-        result = await self.http.post("/auth/refresh", headers=headers, json={})
-        if result.status == 200:
-            jwt = result.json().get("access_token")
-            self.session.jwt = jwt
-            self.jwt_decoded = jwt.decode(jwt, options={"verify_signature": False})
     
     async def close(self):
         if self.task:

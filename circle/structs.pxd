@@ -96,6 +96,12 @@ cdef extern from "dbat/structs.h":
         trig_data *proto
         utils.json serializeProto()
 
+    cdef cppclass descriptor_data:
+        int64_t id
+        int connected
+        char_data *character
+        char_data *original
+
 
 cdef extern from "dbat/guild.h":
     cdef cppclass guild_data:
