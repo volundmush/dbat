@@ -779,20 +779,22 @@ bool char_data::hasTail() {
 }
 
 void char_data::addTransform(FormID form) {
-    unlockedForms.push_back(form);
+    transforms.insert({form, trans_data()});
+}
+
+void char_data::hideTransform(FormID form, bool hide) {
+    auto foundForm = transforms.find(form);
+    foundForm->second.visible = !hide;
 }
 
 bool char_data::removeTransform(FormID form) {
-    bool found = false;
-    for (int i = 0; i < unlockedForms.size() && !found; i++) {
-        if (unlockedForms[i] == form) {
-            found = true;
-            unlockedForms.erase(unlockedForms.begin() + i);
-        }
+    if (transforms.contains(form))
+    {
+        transforms.erase(form);
+        return true;
     }
-    
-    //Return if successful
-    return found;
+    //Return if failure
+    return false;
 }
 
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {

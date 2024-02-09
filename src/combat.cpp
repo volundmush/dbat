@@ -1147,7 +1147,6 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg) {
 } /* End of advanced_energy function */
 
 int roll_accuracy(struct char_data *ch, int skill, bool kiatt) {
-
     if (!IS_NPC(ch)) {
         if (GET_BONUS(ch, BONUS_ACCURATE)) {
             if (kiatt == true)

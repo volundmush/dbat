@@ -499,6 +499,7 @@ struct trans_data {
     explicit trans_data(const nlohmann::json& j);
 
     double timeSpentInForm{0.0};
+    bool visible = true;
 
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
 
@@ -765,7 +766,6 @@ struct char_data : public unit_data {
     int tail_growth{};
     int rage_meter{};
     char *feature{};
-    std::vector<FormID> unlockedForms{};
 
     int armor_last{};
     int forgeting{};
@@ -854,6 +854,7 @@ struct char_data : public unit_data {
     void loseTail();
     bool hasTail();
 
+    void hideTransform(FormID form, bool hide);
     void addTransform(FormID form);
     bool removeTransform(FormID form);
 

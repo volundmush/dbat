@@ -2231,6 +2231,52 @@ ACMD(do_vstat) {
         send_to_char(ch, "That'll have to be either 'obj' or 'mob'.\r\n");
 }
 
+ACMD(do_pgrant) {
+    char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+    struct char_data *vict;
+
+    two_arguments(argument, arg1, arg2);
+
+    std::string strForm;
+    if(!*arg2) {
+        vict = ch;
+        strForm = arg1;
+    } else {
+        if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD))) {
+            send_to_char(ch, "No such character.\r\nUsage: pgrant <char> <target>\r\n");
+            return;
+        }
+        strForm = arg2;
+    }
+
+
+    auto foundForm = trans::findForm(vict, strForm);
+
+    if (!foundForm.has_value()) {
+        send_to_char(ch, "Form %s not found.\r\n", strForm);
+        return;
+    }
+
+    if(!trans::getFormsFor(vict).contains(*foundForm)) {
+        vict->addTransform(*foundForm);
+        send_to_char(ch, "Form %s added!\r\n", strForm);
+        log_imm_action("Form Added: %s added %s to %s!", ch, strForm, vict);
+    } else {
+        if(vict->transforms.find(*foundForm)->second.visible) {
+            vict->hideTransform(*foundForm, true);
+            send_to_char(ch, "Form %s hidden!\r\n", strForm);
+            log_imm_action("Form Hidden: %s hidden %s from %s!", ch, strForm, vict);
+        } else {
+            vict->hideTransform(*foundForm, false);
+            send_to_char(ch, "Form %s unhidden!\r\n", strForm);
+            log_imm_action("Form Unhidden: %s unhidden %s from %s!", ch, strForm, vict);
+        }
+
+        
+    }
+
+}
+
 /* clean a room of all mobiles and objects */
 ACMD(do_purge) {
     char buf[MAX_INPUT_LENGTH];

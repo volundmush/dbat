@@ -18,6 +18,8 @@ namespace atk {
     };
 
     enum class DefenseResult {
+        Missed,
+        Perfect_Dodged,
         Blocked,
         Dodged,
         Parried,
@@ -35,6 +37,7 @@ namespace atk {
         virtual int autoTrainSkillID() { return 0;};
 
         virtual Result doAttack();
+        virtual DefenseResult attackOutcome(char_data*, char_data*, int, bool);
         virtual Result attackCharacter();
         virtual Result attackObject();
 
@@ -85,6 +88,7 @@ namespace atk {
         virtual Result handleParry() = 0;
         virtual Result handleBlock() = 0;
         virtual Result handleDodge() = 0;
+        virtual Result handlePerfectDodge() = 0;
 
         virtual int64_t calculateObjectDamage();
 
@@ -129,6 +133,7 @@ namespace atk {
         bool canCombo() override {return true;};
         Result handleParry() override;
         Result handleDodge() override;
+        Result handlePerfectDodge() override;
         Result handleBlock() override;
         void handleHitspot() override;
     };
