@@ -1,5 +1,15 @@
 from rich.highlighter import ReprHighlighter
 from rich.text import Text as RealRichText
+from .ansi import circle_to_rich
+
+
+async def CircleText(session, event: str, data):
+    if (text := data.pop("data", "")):
+        replaced = text.replace("\r", "")
+        replaced = replaced.replace("\n", "\r\n")
+        out = circle_to_rich(replaced)
+        rendered = session.print(out)
+        await session.send_text(rendered)
 
 
 async def RichText(session, event: str, data):

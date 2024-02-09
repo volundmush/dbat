@@ -3,7 +3,26 @@ import logging
 import kai
 import asyncio
 from kai.utils.utils import partial_match
+import pathlib
 
+GREET = ""
+
+def get_greet():
+    global GREET
+    if not GREET:
+        path = pathlib.Path() / "lib" / "text" / "greetansi"
+        GREET = open(path, mode="r").read()
+    return GREET
+
+INSTRUCTIONS = """
+@rO@b---------------------------------------------------------------------@rO@n
+This game has an account system. Characters are created/selected after login.
+Note: Usernames are alphanumeric, no spaces allowed.
+@Wconnect <username> <password>@n to login
+ @Wcreate <username> <password>@n to register.
+  @Wadmin <username> <password>@n to engage admin panel.
+@rO@b---------------------------------------------------------------------@rO@n
+"""
 
 class LoginParser:
     
@@ -60,6 +79,10 @@ class LoginParser:
         await self.session.set_parser(kai.CLASSES["admin_parser"](self.session))
     
     async def run(self):
+        circle = kai.PORTAL_EVENTS["CircleText"]
+        for text in (get_greet(), INSTRUCTIONS):
+            await circle(self.session, "CircleText", {"data": text})
+        
         while self.running:
             event, data = await self.session.outgoing_queue.get()
             if event != "Command":

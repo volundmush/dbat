@@ -3,7 +3,6 @@
 #include <regex>
 #include "dbat/screen.h"
 #include "dbat/players.h"
-#include "dbat/login.h"
 #include "dbat/config.h"
 #include "dbat/account.h"
 #include "dbat/accmenu.h"
@@ -36,14 +35,14 @@ namespace net {
         nlohmann::json j2;
         j2["cmd"] = cmd;
         j2["data"] = j;
-        sendEvent("Game.GMCP", j2);
+        sendEvent("GMCP", j2);
     }
 
     void Connection::sendText(const std::string &text) {
         if(text.empty()) return;
         nlohmann::json j;
         j["data"] = text;
-        sendEvent("Game.Text", j);
+        sendEvent("CircleText", j);
     }
 
     void Connection::sendEvent(const std::string &name, const nlohmann::json &data) {
@@ -90,9 +89,9 @@ namespace net {
     }
 
     void Connection::handleEvent(const std::string& event, const nlohmann::json& data) {
-        if(event == "Game.Command") {
+        if(event == "Command") {
             executeCommand(data["data"].get<std::string>());
-        } else if(event == "Game.GMCP") {
+        } else if(event == "GMCP") {
             executeGMCP(data["cmd"].get<std::string>(), data["data"]);
         }
     }
@@ -126,7 +125,7 @@ namespace net {
     }
 
     std::shared_ptr<Connection> newConnection(const std::string& connID, const std::string& host, int64_t account_id) {
-        auto conn = std::make_shared<Connection>(connID);
+        auto conn = std::make_shared<Connection>(connID, host);
         conn->account = &(accounts.find(account_id)->second);
         conn->state = ConnectionState::Pending;
         connections[connID] = conn;

@@ -11,11 +11,11 @@ import traceback
 from rich.console import Console
 from rich.table import Table
 from rich.box import ASCII2
-import socketio
+
 
 import kai
 
-from .ansi import circle_to_rich
+
 from kai.utils.utils import lazy_property
 from kai.utils.optionhandler import OptionHandler
 
@@ -55,12 +55,6 @@ class Capabilities:
     mnes: bool = False
 
 
-class SessionState(enum.IntEnum):
-    Login = 0
-    CharSelect = 1
-    CharMenu = 2
-    Playing = 3
-
 
 class PortalSession:
     def __init__(self):
@@ -71,41 +65,17 @@ class PortalSession:
         # This contains arbitrary data sent by the server which will be sent on a reconnect.
         self.userdata = None
         self.outgoing_queue = asyncio.Queue()
-        self.parser_queue = asyncio.Queue()
-        self.parser = None
         self.core = None
         self.linked = False
         self.jwt = None
         self.jwt_claims = dict()
-        self.state = SessionState.Login
-        self.sio = socketio.AsyncClient()
-
-        self.sio.on("*", self.on_event)
-        self.sio.on("connect", self.on_connect)
-        self.sio.on("disconnect", self.on_disconnect)
-
+        self.parser = None
+        self.parser_queue = asyncio.Queue()
+        self.parser = None
+        
     @property
     def http(self):
         return self.core.http
-
-
-    async def on_connect(self):
-        pass
-
-    async def on_disconnect(self):
-        pass
-
-    async def on_event(self, event: str, message):
-        if found := kai.PORTAL_EVENTS.get(event, None):
-            try:
-                await found(self, event, message)
-            except Exception as e:
-                logging.error(
-                    f"Got an Exception while processing Event {event} for {self.sio.sid}: {e} (message: {message})"
-                )
-                logging.exception(e)
-        else:
-            logging.warning(f"Event {event} not found in {kai.PORTAL_EVENTS}")
 
     @lazy_property
     def console(self):
@@ -186,7 +156,7 @@ class PortalSession:
         while(msg := await self.parser_queue.get()):
             self.parser = msg
             await self.parser.run()
-
+        
     async def send_text(self, text: str, force_endline=True):
         if not text:
             return
@@ -195,14 +165,6 @@ class PortalSession:
         if force_endline and not text.endswith("\r\n"):
             text += "\r\n"
         await self.handle_send_text(text)
-
-    async def send_game_text(self, text: str):
-        # sanitize the text...
-        replaced = text.replace("\r", "")
-        replaced = replaced.replace("\n", "\r\n")
-        out = circle_to_rich(replaced)
-        rendered = self.print(out)
-        await self.handle_send_text(rendered)
 
     async def handle_send_text(self, text: str):
         pass

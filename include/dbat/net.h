@@ -26,7 +26,7 @@ namespace net {
 
     class Connection;
 
-    std::shared_ptr<Connection> newConnection(const std::string& connID, const std::string& host);
+    std::shared_ptr<Connection> newConnection(const std::string& connID, const std::string& host, int64_t account_id);
 
     class ConnectionParser {
     public:

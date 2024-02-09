@@ -5,6 +5,7 @@ import queue
 import time
 import pathlib
 from sanic import Sanic, response, exceptions
+import jwt
 
 from sanic_jwt import Initialize
 import circlemud
@@ -25,7 +26,11 @@ class ServerCore:
         sio.attach(app)
         app.ctx.socketio = sio
         self.settings = app.ctx.settings
-        self.auth = Initialize(app, claim_aud=self.settings.SERVER_INTERFACE, authenticate=account_manager.authenticate, retrieve_user=account_manager.retrieve_user)
+        self.auth = Initialize(app,
+                               secret=self.settings.JWT_SECRET, 
+                               claim_aud=self.settings.SERVER_INTERFACE, 
+                               authenticate=account_manager.authenticate, 
+                               retrieve_user=account_manager.retrieve_user)
         self.tasks = list()
         self.connections: dict[str, circlemud.GameSession] = dict()
 
@@ -59,8 +64,8 @@ class ServerCore:
             best_choice = forwarded.split(",")[0]
         return best_choice
 
-    async def get_payload(self, environ):
-        if (token := environ.get("HTTP_AUTHORIZATION", None)):
+    def get_payload(self, environ):
+        if not (token := environ.get("HTTP_AUTHORIZATION", None)):
             return None
         if not token.startswith("Bearer "):
             return None
@@ -68,16 +73,16 @@ class ServerCore:
         try:
             # Assuming `token` is the JWT extracted from the SocketIO connection
             # Use Sanic-JWT's internal method to validate and decode the token
-            payload = await self.auth.authentication._decode(token, verify=True)
+            payload = jwt.decode(token, self.settings.JWT_SECRET, algorithms=["HS256"], audience="0.0.0.0")
             return payload
-        except exceptions.SanicJWTException as e:
+        except Exception as e:
             # Handle invalid token cases (e.g., expired, invalid signature)
             print("Invalid JWT:", str(e))
             return False
 
     async def connect_handler(self, sid, environ):
         ip = self.get_real_ip(environ)
-        if not (payload := await self.get_payload(environ)):
+        if not (payload := self.get_payload(environ)):
             print(f"connect_handler: Invalid JWT from {ip}")
             await self.sio.disconnect(sid)
             return

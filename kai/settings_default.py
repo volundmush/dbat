@@ -49,3 +49,6 @@ OPTION_CLASS_MODULES = ["kai.utils.optionclasses"]
 # Same-named functions in modules added later in this list will override those
 # added earlier.
 VALIDATOR_FUNC_MODULES = ["kai.utils.validatorfuncs"]
+
+# This should absolutely be overridden in secret_settings.py!
+JWT_SECRET = "adventkai"

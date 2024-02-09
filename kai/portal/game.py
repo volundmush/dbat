@@ -64,7 +64,7 @@ class GameParser:
             await self.sio.emit("idle", data=dict())
 
     async def run_messaging(self):
-        while msg := await self.outgoing_queue.get():
+        while msg := await self.session.outgoing_queue.get():
             event = msg[0]
             data = msg[1]
             await self.sio.emit(event, data=data)

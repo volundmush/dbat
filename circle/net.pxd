@@ -7,6 +7,7 @@ from libcpp.map cimport map
 from libcpp.vector cimport vector
 from libcpp.memory cimport shared_ptr
 from libcpp.pair cimport pair
+cimport accounts
 
 cdef extern from "dbat/net.h" namespace "net":
 
@@ -25,7 +26,7 @@ cdef extern from "dbat/net.h" namespace "net":
         int16_t hostPort
 
     cdef cppclass Connection:
-        Connection(int64_t connId)
+        Connection(const string& connID, const string& host)
         int64_t connId
         void queueMessage(const string& event, const string& data)
         list[pair[string, string]] outQueue
@@ -33,6 +34,7 @@ cdef extern from "dbat/net.h" namespace "net":
         bool running
         ConnectionState state
         void onHeartbeat(double deltaTime)
+        accounts.account_data* account
 
     cdef map[string, shared_ptr[Connection]] connections
 

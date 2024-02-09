@@ -12,10 +12,13 @@ import traceback
 from inspect import getmembers, getmodule, getmro, ismodule, trace
 import kai
 from sanic import request
-
+from pathlib import Path
 
 def setup_logging(app_name, log_dir):
     log_file_path = os.path.join(log_dir, f"{app_name}.log")
+    
+    # ensure log_dir exists...
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
 
     LOGGING_CONFIG = {
         "version": 1,
