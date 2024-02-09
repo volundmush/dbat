@@ -80,3 +80,4 @@ bin/
 build
 thermite/
 circle/*.cpp
+game/secret_settings.py

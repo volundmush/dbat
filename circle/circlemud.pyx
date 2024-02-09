@@ -19,6 +19,7 @@ import pickle
 import orjson
 import pathlib
 from datetime import datetime
+from kai import CRYPT_CONTEXT
 
 
 cdef class GameSession:
@@ -26,12 +27,16 @@ cdef class GameSession:
     cdef object sid
     cdef object sio
     cdef object running
+    cdef object ip
+    cdef object user_id
 
-    def __init__(self, sid, sio):
+    def __init__(self, sid, sio, ip, user_id):
         self.sid = sid
         self.sio = sio
         self.running = True
-        self.conn = net.newConnection(sid.encode())
+        self.ip = ip
+        self.user_id = user_id
+        self.conn = net.newConnection(sid.encode(), ip.encode(), user_id)
 
     async def run(self):
         c = self.conn.get()
@@ -86,11 +91,27 @@ def initialize():
     comm.init_database()
     comm.init_zones()
 
+# Keeping this here as an example of how to iterate through stuff.
+def _hash_passwords():
+    it = accounts.accounts.begin()
+    end = accounts.accounts.end()
+
+    while it != end:
+        if not deref(it).second.passHash.empty():
+            try:
+                password = deref(it).second.passHash.decode("UTF-8", errors='ignore')
+                hashed = CRYPT_CONTEXT.hash(password)
+                deref(it).second.passHash = hashed.encode()
+            except (TypeError, ValueError):
+                print(f"Failed to hash password for {deref(it).second.name.decode('UTF-8', errors='ignore')}")
+        inc(it)
+
 def migrate():
     comm.init_locale()
     db.load_config()
     os.chdir("lib")
     comm.migrate_db()
+    _hash_passwords()
     comm.runSave()
 
 def run_loop_once(deltaTime: float):
@@ -125,6 +146,27 @@ async def run_game_loop():
 
 
 cdef class _AccountManager:
+
+    def get(self, vn: int):
+        account = accounts.accounts.find(vn)
+        if account == accounts.accounts.end():
+            return None
+        return orjson.loads(utils.jdump(deref(account).second.serialize()))
+
+    def create(self, data: dict[str, "Any"]):
+        vn = accounts.account_data.getNextID()
+        data["vn"] = vn
+        j = orjson.dumps(data)
+        cdef accounts.account_data* acc = &accounts.accounts[vn]
+        acc.deserialize(utils.jparse(j))
+    
+    def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
+        account = accounts.accounts.find(target)
+        if account == accounts.accounts.end():
+            return "Account not found."
+        j = orjson.dumps(data)
+        deref(account).second.deserialize(utils.jparse(j))
+
     async def retrieve_user(self, request, payload, *args, **kwargs):
         if payload:
             if not (user_id := payload.get("user_id", None)):
@@ -155,27 +197,33 @@ cdef class _AccountManager:
         if user is NULL:
             raise exceptions.AuthenticationFailed("Incorrect credentials.")
 
-        if not user.checkPassword(password.encode()):
+        passhash = user.passHash.decode("UTF-8", errors='ignore')
+        if not passhash:
+            raise exceptions.AuthenticationFailed("Incorrect credentials.")
+        
+        if not CRYPT_CONTEXT.verify(password, passhash):
             raise exceptions.AuthenticationFailed("Incorrect credentials.")
 
-        out = {"user_id": user.vn, "username": user.name.decode("UTF-8", errors='ignore'), "adminLevel": user.adminLevel}
+        out = {"user_id": user.vn, "name": user.name.decode("UTF-8", errors='ignore'), "adminLevel": user.adminLevel}
         if not user.email.empty():
             out["email"] = user.email.decode("UTF-8", errors='ignore')
         if not user.characters.empty():
             out["characters"] = [x for x in user.characters]
 
         return out
+    
+    def exists(self, name: str, exclude: int = None) -> bool:
+        found = accounts.findAccount(name.encode())
+        if found is NULL:
+            return False
+        if exclude is not None:
+            if found.vn == exclude:
+                return False
+        return True
 
 account_manager = _AccountManager()
 
-# Keeping this here as an example of how to iterate through stuff.
-def print_account_names():
-    it = accounts.accounts.begin()
-    end = accounts.accounts.end()
 
-    while it != end:
-        print(deref(it).second.name)
-        inc(it)
 
 
 cdef class _SkillManager:
@@ -219,3 +267,19 @@ cdef class _SkillManager:
 
 
 skill_manager = _SkillManager()
+
+
+cdef class _PlayerManager:
+    def get(self, vn: int):
+        player = db.players.find(vn)
+        if player == db.players.end():
+            return None
+        return orjson.loads(utils.jdump(deref(player).second.serialize()))
+
+    def create(self, data: dict[str, "Any"]):
+        pass
+    
+    def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
+        pass
+
+player_manager = _PlayerManager()

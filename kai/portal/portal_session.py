@@ -5,17 +5,19 @@ from rich.color import ColorType, ColorSystem
 from typing import Optional
 import logging
 import enum
-import pickle
+
 import re
 import traceback
+from rich.console import Console
+from rich.table import Table
+from rich.box import ASCII2
 
-import socketio
 
-from websockets import client as websocket_client
-import dbat
-from dbat import settings
-from dbat.ansi import circle_to_rich
-from dbat.utils import lazy_property
+import kai
+
+
+from kai.utils.utils import lazy_property
+from kai.utils.optionhandler import OptionHandler
 
 
 @dataclass
@@ -27,7 +29,7 @@ class Capabilities:
     client_version: str = "UNKNOWN"
     host_address: str = "UNKNOWN"
     host_port: int = -1
-    host_names: list[str, ...] = None
+    host_names: list[str] = None
     encoding: str = "ascii"
     color: ColorType = ColorType.DEFAULT
     width: int = 78
@@ -53,15 +55,8 @@ class Capabilities:
     mnes: bool = False
 
 
-class SessionState(enum.IntEnum):
-    Login = 0
-    CharSelect = 1
-    CharMenu = 2
-    Playing = 3
-
 
 class PortalSession:
-
     def __init__(self):
         self.capabilities = Capabilities()
         self.task_group = asyncio.TaskGroup()
@@ -74,33 +69,16 @@ class PortalSession:
         self.linked = False
         self.jwt = None
         self.jwt_claims = dict()
-        self.state = SessionState.Login
-        self.sio = socketio.AsyncClient()
-
-        self.sio.on("*", self.on_event)
-        self.sio.on("connect", self.on_connect)
-        self.sio.on("disconnect", self.on_disconnect)
-
-    async def on_connect(self):
-        pass
-
-    async def on_disconnect(self):
-        pass
-
-    async def on_event(self, event: str, message):
-        match event:
-            case "Game.Text":
-                if (txt := message.get("data", None)) is not None:
-                    await self.send_game_text(txt)
-            case "Game.GMCP":
-                cmd = message.get("cmd", None)
-                data = message.get("data", dict())
-                await self.send_gmcp(cmd, data)
+        self.parser = None
+        self.parser_queue = asyncio.Queue()
+        self.parser = None
+        
+    @property
+    def http(self):
+        return self.core.http
 
     @lazy_property
     def console(self):
-        from rich.console import Console
-
         return Console(
             color_system=self.rich_color_system(),
             width=self.capabilities.width,
@@ -139,25 +117,46 @@ class PortalSession:
         self.console.print(*args, **new_kwargs)
         return self.console.export_text(clear=True, styles=True)
 
+    @lazy_property
+    def options(self):
+        return OptionHandler(
+            self,
+            options_dict=kai.SETTINGS.OPTIONS_ACCOUNT_DEFAULT,
+        )
+
+    async def uses_screenreader(self) -> bool:
+        return await self.options.get("screenreader")
+
+    async def rich_table(self, *args, **kwargs) -> Table:
+        options = self.options
+        real_kwargs = {
+            "box": ASCII2,
+            "border_style": await options.get("border_style"),
+            "header_style": await options.get("header_style"),
+            "title_style": await options.get("header_style"),
+            "expand": True,
+        }
+        real_kwargs.update(kwargs)
+        if await self.uses_screenreader():
+            real_kwargs["box"] = None
+        return Table(*args, **real_kwargs)
+
     async def run(self):
+        await asyncio.gather(*[self.run_protocol(), self.run_parser()])
+    
+    async def run_protocol(self):
         pass
-
-    async def start(self):
-        headers = {"X-FORWARDED-FOR": self.capabilities.host_address}
-        await self.sio.connect(settings.PORTAL_URL_TO_WS, wait=True, headers=headers)
-        await asyncio.gather(*[self.run_messaging(), self.run_idler()])
-
-    async def run_idler(self):
-        while True:
-            await asyncio.sleep(5.0)
-            await self.sio.emit("idle", data=dict())
-
-    async def run_messaging(self):
-        while (msg := await self.outgoing_queue.get()):
-            event = msg[0]
-            data = msg[1]
-            await self.sio.emit(event, data=data)
-
+    
+    async def set_parser(self, parser):
+        await self.parser_queue.put(parser)
+        if self.parser:
+            await self.parser.close()
+    
+    async def run_parser(self):
+        while(msg := await self.parser_queue.get()):
+            self.parser = msg
+            await self.parser.run()
+        
     async def send_text(self, text: str, force_endline=True):
         if not text:
             return
@@ -166,14 +165,6 @@ class PortalSession:
         if force_endline and not text.endswith("\r\n"):
             text += "\r\n"
         await self.handle_send_text(text)
-
-    async def send_game_text(self, text: str):
-        # sanitize the text...
-        replaced = text.replace("\r", "")
-        replaced = replaced.replace("\n", "\r\n")
-        out = circle_to_rich(replaced)
-        rendered = self.print(out)
-        await self.handle_send_text(rendered)
 
     async def handle_send_text(self, text: str):
         pass

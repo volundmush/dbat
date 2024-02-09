@@ -13,7 +13,7 @@ The recommended IDE is VS Code due to the multi-language nature of the project. 
 ## Ubuntu Setup
 The following apt packages are needed:
 
-`sudo apt-get install cmake build-essential python3.11 python3.11-dev python3-git python3-virtualenv git ninja-build`
+`sudo apt-get install cmake build-essential gdb python3.11 python3.11-dev python3-git python3-virtualenv git ninja-build`
 
 Clone the directory.
 

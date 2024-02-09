@@ -5,7 +5,9 @@ from sanic import Blueprint
 from sanic_jwt import Initialize
 from sanic_jwt import exceptions, protected, inject_user
 
-from dbat import settings
-from .skills import skills as skills_bp
+from .skills import skills
+from .accounts import accounts
+from .admin import admin
 
-gamedata = Blueprint.group(skills_bp, url_prefix="/gamedata")
+v1 = Blueprint.group(skills, accounts, admin, version=1)
+

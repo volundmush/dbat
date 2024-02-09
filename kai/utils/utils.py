@@ -10,34 +10,40 @@ import os
 import types
 import traceback
 from inspect import getmembers, getmodule, getmro, ismodule, trace
+import kai
+from sanic import request
+from pathlib import Path
 
 def setup_logging(app_name, log_dir):
     log_file_path = os.path.join(log_dir, f"{app_name}.log")
+    
+    # ensure log_dir exists...
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
 
     LOGGING_CONFIG = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'standard': {
-                'format': '[%(asctime)s] %(message)s',
-                'datefmt': '%x %X',
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {
+                "format": "[%(asctime)s] %(message)s",
+                "datefmt": "%x %X",
             },
         },
-        'handlers': {
-            'file': {
-                'class': 'logging.handlers.TimedRotatingFileHandler',
-                'filename': log_file_path,
-                'encoding': 'utf-8',
-                'utc': True,
-                'when': 'midnight',
-                'interval': 1,
-                'backupCount': 14,
-                'formatter': 'standard',
+        "handlers": {
+            "file": {
+                "class": "logging.handlers.TimedRotatingFileHandler",
+                "filename": log_file_path,
+                "encoding": "utf-8",
+                "utc": True,
+                "when": "midnight",
+                "interval": 1,
+                "backupCount": 14,
+                "formatter": "standard",
             },
         },
-        'root': {
-            'handlers': ['file', 'rich'],
-            'level': 'INFO',
+        "root": {
+            "handlers": ["file", "rich"],
+            "level": "INFO",
         },
     }
 
@@ -370,7 +376,7 @@ def generate_name(prefix: str, existing, gen_length: int = 20) -> str:
 
 def get_server_pid() -> typing.Optional[int]:
     try:
-        f = open("game_code.pid", mode="r")
+        f = open("server.pid", mode="r")
         pid = int(f.read())
         return pid
     except:
@@ -470,13 +476,13 @@ def class_from_module(path, defaultpaths=None, fallback=None):
             )
 
         try:
-            if not importlib.util.find_spec(testpath, package="evennia"):
+            if not importlib.util.find_spec(testpath, package="kai"):
                 continue
         except ModuleNotFoundError:
             continue
 
         try:
-            mod = importlib.import_module(testpath, package="evennia")
+            mod = importlib.import_module(testpath, package="kai")
         except ModuleNotFoundError:
             err = traceback.format_exc(30)
             break
@@ -509,3 +515,106 @@ def class_from_module(path, defaultpaths=None, fallback=None):
 
 # alias
 object_from_module = class_from_module
+
+
+def dbref(inp, reqhash=True):
+    """
+    Converts/checks if input is a valid dbref.
+
+    Args:
+        inp (int, str): A database ref on the form N or #N.
+        reqhash (bool, optional): Require the #N form to accept
+            input as a valid dbref.
+
+    Returns:
+        dbref (int or None): The integer part of the dbref or `None`
+            if input was not a valid dbref.
+
+    """
+    if reqhash:
+        num = (
+            int(inp.lstrip("#"))
+            if (
+                isinstance(inp, str)
+                and inp.startswith("#")
+                and inp.lstrip("#").isdigit()
+            )
+            else None
+        )
+        return num if isinstance(num, int) and num > 0 else None
+    elif isinstance(inp, str):
+        inp = inp.lstrip("#")
+        return int(inp) if inp.isdigit() and int(inp) > 0 else None
+    else:
+        return inp if isinstance(inp, int) else None
+
+
+def crop(text, width=None, suffix="[...]"):
+    """
+    Crop text to a certain width, throwing away text from too-long
+    lines.
+
+    Args:
+        text (str): Text to crop.
+        width (int, optional): Width of line to crop, in characters.
+        suffix (str, optional): This is appended to the end of cropped
+            lines to show that the line actually continues. Cropping
+            will be done so that the suffix will also fit within the
+            given width. If width is too small to fit both crop and
+            suffix, the suffix will be dropped.
+
+    Returns:
+        text (str): The cropped text.
+
+    """
+    width = width if width else kai.GAME.settings.CLIENT_DEFAULT_WIDTH
+    ltext = len(text)
+    if ltext <= width:
+        return text
+    else:
+        lsuffix = len(suffix)
+        text = (
+            text[:width]
+            if lsuffix >= width
+            else "%s%s" % (text[: width - lsuffix], suffix)
+        )
+        return to_str(text)
+
+
+class SessionHandler:
+    def __init__(self, obj):
+        self.obj = obj
+        self.sessions = set()
+
+    def add(self, sess):
+        self.sessions.add(sess)
+
+    def remove(self, sess):
+        self.sessions.remove(sess)
+
+    def all(self):
+        return set(self.sessions)
+
+    def count(self):
+        return len(self.sessions)
+
+def get_true_ip(request: request.Request) -> str:
+    """
+    Given a Sanic request, return the true IP address of the client.
+
+    There are three sources: X-Real-IP, X-Forwarded-For, and request.ip.
+    The first two are set by the reverse proxy, and the last is set by Sanic.
+
+    Args:
+        request (sanic.Request): The request object.
+
+    Returns:
+        ip (str): The IP address of the client.
+
+    """
+    if request.headers.get("X-Real-IP"):
+        return request.headers.get("X-Real-IP")
+    elif request.headers.get("X-Forwarded-For"):
+        return request.headers.get("X-Forwarded-For").split()[-1]
+    else:
+        return request.ip

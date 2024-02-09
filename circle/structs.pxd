@@ -20,7 +20,7 @@ cdef extern from "dbat/structs.h":
         player_data(const utils.json& j)
         int64_t id
         string name
-        accounts.account_data * account
+        accounts.account_data* account
 
         utils.json serialize()
 

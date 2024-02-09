@@ -3,7 +3,7 @@ import typing
 import zlib
 import orjson
 import ssl
-import dbat
+import kai
 import logging
 import traceback
 
@@ -13,9 +13,9 @@ from enum import IntEnum
 from rich.color import ColorType
 from rich.console import Group
 
-from dbat.utils import generate_name
-from dbat.portal_session import PortalSession
-from dbat.portal import Service
+from kai.utils.utils import generate_name
+from .portal_session import PortalSession
+from .portal import Service
 
 
 class TelnetCode(IntEnum):
@@ -642,19 +642,19 @@ class TelnetProtocol(PortalSession):
         self._telnet_out_queue = asyncio.Queue()
         self._app_data = bytearray()
 
-        self.options: dict[int, TelnetOption] = {}
+        self.telnet_options: dict[int, TelnetOption] = {}
         self.compress_out = None
         self.decompress_in = None
         self.remote_disconnect: bool = False
 
         for op in self.supported_options:
-            self.options[op.code] = op(self)
+            self.telnet_options[op.code] = op(self)
 
     async def on_disconnect(self):
         self.remote_disconnect = True
         self.task_group._abort()
 
-    async def run(self):
+    async def run_protocol(self):
         async with self.task_group as tg:
             tg.create_task(self.run_reader())
             tg.create_task(self.run_writer())
@@ -688,11 +688,11 @@ class TelnetProtocol(PortalSession):
             try:
                 data = self.decompress_in.decompress(data)
                 if self.decompress_in.unused_data != b"":
-                    op: MCCP3Option = self.options[TelnetCode.MCCP3]
+                    op: MCCP3Option = self.telnet_options[TelnetCode.MCCP3]
                     await op.at_decompress_end()
                 self._telnet_read_buffer.extend(data)
             except zlib.error as e:
-                op: MCCP3Option = self.options[TelnetCode.MCCP3]
+                op: MCCP3Option = self.telnet_options[TelnetCode.MCCP3]
                 await op.at_decompress_end()
         else:
             self._telnet_read_buffer.extend(data)
@@ -739,13 +739,13 @@ class TelnetProtocol(PortalSession):
             # Process the line
             if line != "IDLE":
                 out_message = {"data": line}
-                await self.outgoing_queue.put(("Game.Command", out_message))
+                await self.outgoing_queue.put(("Command", out_message))
 
             # Remove the processed line from _app_data
             self._app_data = self._app_data[newline_pos + 1 :]
 
     async def handle_negotiate(self, message: TelnetNegotiate):
-        if op := self.options.get(message.option, None):
+        if op := self.telnet_options.get(message.option, None):
             await op.at_receive_negotiate(message)
             return
 
@@ -759,7 +759,7 @@ class TelnetProtocol(PortalSession):
                 await self._telnet_out_queue.put(msg)
 
     async def handle_subnegotiate(self, message: TelnetSubNegotiate):
-        if op := self.options.get(message.option, None):
+        if op := self.telnet_options.get(message.option, None):
             await op.at_receive_subnegotiate(message)
 
     async def handle_command(self, message: TelnetCommand):
@@ -781,10 +781,10 @@ class TelnetProtocol(PortalSession):
                 self.writer.write(encoded)
                 match data:
                     case TelnetNegotiate():
-                        if op := self.options.get(data.option, None):
+                        if op := self.telnet_options.get(data.option, None):
                             await op.at_send_negotiate(data)
                     case TelnetSubNegotiate():
-                        if op := self.options.get(data.option, None):
+                        if op := self.telnet_options.get(data.option, None):
                             await op.at_send_subnegotiate(data)
                 await self.writer.drain()
         except asyncio.CancelledError:
@@ -795,19 +795,21 @@ class TelnetProtocol(PortalSession):
 
     async def run_negotiation(self):
         try:
-            for code, op in self.options.items():
+            for code, op in self.telnet_options.items():
                 await op.start()
 
-            ops = [op.negotiation.wait() for op in self.options.values()]
+            ops = [op.negotiation.wait() for op in self.telnet_options.values()]
 
             try:
                 await asyncio.wait_for(asyncio.gather(*ops), 0.5)
                 await self.send_text("Successfully negotiated MUD features..")
             except asyncio.TimeoutError as err:
-                await self.send_text("Timed out waiting for telnet negotiation. Assuming defaults.")
+                await self.send_text(
+                    "Timed out waiting for telnet negotiation. Assuming defaults."
+                )
                 pass
 
-            await self.start()
+            await self.set_parser(kai.CLASSES["login_parser"](self))
         except asyncio.CancelledError:
             return
         except Exception as err:
@@ -824,12 +826,12 @@ class TelnetProtocol(PortalSession):
 
     async def send_gmcp(self, command: str, data=None):
         if self.capabilities.gmcp:
-            op: GMCPOption = self.options.get(TelnetCode.GMCP)
+            op: GMCPOption = self.telnet_options.get(TelnetCode.GMCP)
             await op.send_gmcp(command, data)
 
     async def send_mssp(self, data: dict[str, str]):
         if self.capabilities.mssp:
-            op: MSSPOption = self.options.get(TelnetCode.MSSP)
+            op: MSSPOption = self.telnet_options.get(TelnetCode.MSSP)
             await op.send_mssp(data)
 
 
@@ -838,20 +840,20 @@ class TelnetService(Service):
 
     @classmethod
     def is_valid(cls, settings):
-        if not (external := settings.LISTEN_INTERFACE):
+        if not (external := settings.PORTAL_INTERFACE):
             return False
-        if not (port := settings.TELNET.get("plain", None)):
+        if not (port := settings.PORTAL_TELNET):
             return False
         return True
 
     def __init__(self, core):
         super().__init__(core)
         self.connections = set()
-        self.protocol_class = dbat.CLASSES["telnet_protocol"]
+        self.protocol_class = TelnetProtocol
         settings = core.settings
 
-        self.external = settings.LISTEN_INTERFACE
-        self.port = settings.TELNET.get("plain")
+        self.external = settings.PORTAL_INTERFACE
+        self.port = settings.PORTAL_TELNET
 
     async def start(self):
         # Create the server and start listening on the specified address and port
@@ -876,66 +878,6 @@ class TelnetService(Service):
         )
         protocol.capabilities.host_address = address
         protocol.capabilities.host_port = port
-        #reverse = await self.core.resolver.gethostbyaddr(address)
-        #protocol.capabilities.host_names = reverse.aliases
-        await self.core.handle_new_protocol(protocol)
-
-
-class TLSTelnetService(Service):
-    tls = True
-
-    @classmethod
-    def is_valid(cls, settings):
-        if not (external := settings.LISTEN_INTERFACE):
-            return False
-        if not (port := settings.TELNET.get("tls", None)):
-            return False
-
-        if not (cert := settings.TLS.get("cert", None)):
-            return False
-
-        if not (key := settings.TLS.get("key", None)):
-            return False
-
-        return True
-
-    def __init__(self, core):
-        super().__init__(core)
-        self.protocol_class = dbat.CLASSES["telnet_protocol"]
-        settings = core.settings
-
-        self.external = settings.LISTEN_INTERFACE
-        self.port = settings.TELNET.get("tls")
-
-        self.cert = settings.TLS.get("cert")
-        self.key = settings.TLS.get("key")
-
-    async def start(self):
-        # Create an SSL context
-        ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-        ssl_context.load_cert_chain(certfile=self.cert, keyfile=self.key)
-
-        # Create the server with SSL context and start listening
-        self.server = await asyncio.start_server(
-            self.handle_client, self.external, self.port, ssl=ssl_context
-        )
-
-        logging.info(f"TLS Telnet server started on {self.external}:{self.port}")
-
-        # Run the server until the service is stopped
-        async with self.server:
-            await self.server.serve_forever()
-
-    async def handle_client(
-        self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
-    ):
-        address, port = writer.get_extra_info("peername")
-        protocol = self.protocol_class(reader, writer, self)
-        protocol.capabilities.session_name = generate_name(
-            "telnets", self.core.game_sessions.keys()
-        )
-        protocol.capabilities.host_address = address
-        protocol.capabilities.host_port = port
-        #reverse = await self.core.resolver.gethostbyaddr(address)
-        #protocol.capabilities.host_names = reverse.aliases
+        # reverse = await self.core.resolver.gethostbyaddr(address)
+        # protocol.capabilities.host_names = reverse.aliases
         await self.core.handle_new_protocol(protocol)
