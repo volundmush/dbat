@@ -38,9 +38,12 @@ namespace atk {
 
         virtual Result doAttack();
         virtual DefenseResult attackOutcome(char_data*, char_data*, int, bool);
+        virtual DefenseResult calculateDefense();
         virtual Result attackCharacter();
         virtual Result attackObject();
 
+        virtual void attackPreprocess();
+        virtual void attackPostprocess();
         virtual void onLanded();
         virtual void onMissed();
         virtual void onCanceled();
@@ -69,6 +72,9 @@ namespace atk {
         virtual std::optional<int> hasCooldown();
         virtual int canKillType();
         virtual int limbhurtChance() {return 0;};
+        virtual int getHoming() {return 0;};
+        virtual double getKiEfficiency() {return 1;};
+        virtual int getTier() {return 0;};
 
         virtual void doTrain(const std::vector<std::pair<int, int>>& skills);
 
@@ -141,7 +147,7 @@ namespace atk {
         void announceBlock() override;
         void announceDodge() override;
         void announceMiss() override;
-        void announceHitspot() override;
+        //void announceHitspot() override;
     };
 
     struct RangedAttack : Attack {
@@ -151,8 +157,23 @@ namespace atk {
 
     struct RangedKiAttack : RangedAttack {
         using RangedAttack::RangedAttack;
+
         bool isKiAttack() override {return true;};
         bool isPhysical() override {return false;};
+        int64_t calculateKiCost() override;
+        double getKiEfficiency();
+        int getTier() {return 1;};
+        int getHoming() {return 0;};
+        Result handleParry() override;
+        Result handleDodge() override;
+        Result handlePerfectDodge() override;
+        Result handleBlock() override;
+
+        void announceObject() override;
+        void announceParry() override;
+        void announceBlock() override;
+        void announceDodge() override;
+        void announceMiss() override;
     };
 
     // atkID -1 is used for parry.
@@ -289,16 +310,81 @@ namespace atk {
         void announceHitspot() override;
     };
 
+    struct KiBall : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+        int getSkillID() override { return SKILL_KIBALL; }
+        int getAtkID() override {return 7;};
+        std::string getName() override { return "kiball"; }
+
+        void execute() override;
+        void announceHitspot() override;
+    };
+
+    struct KiBlast : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+        int64_t record = 0;
+
+        int getSkillID() override { return SKILL_KIBLAST; }
+        int getAtkID() override {return 9;};
+        std::string getName() override { return "kiblast"; }
+        void attackPreprocess() override;
+        void attackPostprocess() override;
+
+        void announceHitspot() override;
+    };
+
+    struct Beam : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_BEAM; }
+        int getAtkID() override {return 10;};
+        std::string getName() override { return "beam"; }
+        void attackPostprocess() override;
+
+        void announceHitspot() override;
+    };
+
     struct Tsuihidan : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
         int getSkillID() override { return SKILL_TSUIHIDAN; }
         int getAtkID() override {return 11;};
+        int getHoming() override {return 2;}
+        int getTier() {return 2;};
         std::string getName() override { return "tsuihidan"; }
+        void attackPostprocess() override;
+
+        void announceHitspot() override;
     };
 
     struct Renzo : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int count = 0;
         int getSkillID() override { return SKILL_RENZO; }
         int getAtkID() override {return 12;};
         std::string getName() override { return "renzo"; }
+        int getTier() {return 2;};
+        DefenseResult calculateDefense() override;
+        double getKiEfficiency() override;
+        void attackPreprocess() override;
+        void handleHitspot() override;
+
+        void announceHitspot() override;
+    };
+
+    struct Shogekiha : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+        
+        int getSkillID() override { return SKILL_SHOGEKIHA; }
+        int getAtkID() override {return 10;};
+        std::string getName() override { return "shogekiha"; }
+        int getTier() {return 2;};
+        void attackPostprocess() override;
+        Result attackObject() override;
+
+        void announceHitspot() override;
+        void announceObject() override;
     };
 
     struct Kamehameha : RangedKiAttack {
@@ -409,6 +495,7 @@ namespace atk {
         int getSkillID() override { return SKILL_TAILWHIP; }
         int getAtkID() override {return 56;};
         std::string getName() override { return "tailwhip"; }
+        std::string getBodyPart() override {return "tail";};
     };
 
 }

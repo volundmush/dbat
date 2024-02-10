@@ -378,7 +378,7 @@ int64_t char_data::getMaxPL() {
 }
 
 int64_t char_data::getCurPL() {
-    if (suppression > 0) {
+    if (!IS_NPC(this) && suppression > 0) {
         return getEffMaxPL() * std::min(health, health * ((double) suppression / 100));
     } else {
         return getEffMaxPL() * health;

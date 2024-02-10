@@ -98,7 +98,7 @@ namespace atk {
             return false;
         }
         currentKiCost = calculateKiCost();
-        if(user->getCurKI() < currentKiCost) {
+        if(GET_CHARGE(user) < currentKiCost || GET_CHARGE(user) <= 0) {
             send_to_char(user, "You don't have enough ki to do that!\r\n");
             return false;
         }
@@ -183,13 +183,25 @@ namespace atk {
         tech_handle_posmodifier(victim, currentParryCheck, currentBlockCheck, currentDodgeCheck, currentHitProbability);
 
         if(canZanzoken()) {
-            if (!tech_handle_zanzoken(user, victim, getName().c_str())) {
-                COMBO(user) = -1;
-                COMBHITS(user) = 0;
-                currentStaminaCost /= 2;
-                pcost(victim, 0, GET_MAX_HIT(victim) / 200);
-                return DefenseResult::Missed;
+            if(isKiAttack() && !isPhysical()) {
+                if (!tech_handle_zanzoken(user, victim, getName().c_str())) {
+                    dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, SKILL_TSUIHIDAN); /* Effects on the room from dodging a ki attack
+                               Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
+                               Num 2: [ Number of attack for damtype ]*/
+                    pcost(victim, 0, GET_MAX_HIT(victim) / 200);
+                    pcost(user, currentKiCost, 0);
+                    return DefenseResult::Missed;
+                }
+            } else {
+                if (!tech_handle_zanzoken(user, victim, getName().c_str())) {
+                    COMBO(user) = -1;
+                    COMBHITS(user) = 0;
+                    currentStaminaCost /= 2;
+                    pcost(victim, 0, GET_MAX_HIT(victim) / 200);
+                    return DefenseResult::Missed;
+                }
             }
+
         }
 
         calcDamage = damtype(user, getAtkID(), initSkill, attPerc);
@@ -205,24 +217,28 @@ namespace atk {
 
 
             if(victim->getCurST() > 0) {
-                double parryChance = ((double) currentParryCheck / 6.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_PARRY_PERC));
-                double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_DODGE_PERC));
-                double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_BLOCK_PERC));
-
-                double overcomeParry = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
-                double overcomeDodge = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
-                double overcomeBlock = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
-                
-
-                if(canParry() && calculateDeflect()) return DefenseResult::Parried;
-                if(canDodge() && dodgeChance > overcomeDodge) return DefenseResult::Dodged;
-                if(canBlock() && blockChance > overcomeBlock) return DefenseResult::Blocked;
+                return calculateDefense();
             }
 
             //Victim failed to defend, we have a clean hit!
             return DefenseResult::Failed;
         }
         //Default to fail
+        return DefenseResult::Failed;
+    }
+
+    DefenseResult Attack::calculateDefense() {
+        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_DODGE_PERC));
+        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_BLOCK_PERC));
+
+        double overcomeDodge = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+        double overcomeBlock = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+        
+
+        if(canParry() && calculateDeflect()) return DefenseResult::Parried;
+        if(canDodge() && dodgeChance > overcomeDodge) return DefenseResult::Dodged;
+        if(canBlock() && blockChance > overcomeBlock) return DefenseResult::Blocked;
+
         return DefenseResult::Failed;
     }
 
@@ -312,7 +328,16 @@ namespace atk {
         return Result::Landed;
     }
 
+    void Attack::attackPreprocess() {
+
+    }
+
+    void Attack::attackPostprocess() {
+
+    }
+
     void Attack::onLanded() {
+        attackPreprocess();
         switch(defenseResult) {
             case DefenseResult::Blocked:
                 calcDamage /= 4;
@@ -324,6 +349,7 @@ namespace atk {
             if(isPhysical()) tech_handle_fireshield(user, victim, getBodyPart().c_str());
             if(canCombo()) handle_multihit(user, victim);
         }
+        attackPostprocess();
     }
 
     void Attack::onMissed() {
@@ -508,13 +534,15 @@ namespace atk {
     void MeleeAttack::handleHitspot() {
         switch(hitspot) {
             case 1:
-            case 2:
-                if (GET_BONUS(user, BONUS_SOFT)) {
+                if (GET_BONUS(user, BONUS_SOFT)) 
                     calcDamage *= calc_critical(user, 2);
-                }
+                break;
+            case 2:
+                calcDamage *= calc_critical(user, 0);
                 break;
             case 3:
-                calcDamage *= calc_critical(user, 0);
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
                 break;
             case 4:
             case 5:
@@ -1267,6 +1295,7 @@ namespace atk {
             }
         }
 
+        int multiplier = 0;
         switch (hitspot) {
             case 1:
                 if (GET_BONUS(user, BONUS_SOFT)) 
@@ -1281,12 +1310,12 @@ namespace atk {
                     act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_NOTVICT);
                     victim->setStatusKnockedOut();
                 }
-                int mult = 1;
+                
                 if (IS_KURZAK(user) && !IS_NPC(user)) {
                     if (GET_SKILL_BASE(user, SKILL_STYLE) >= 75)
-                        mult += 1;
+                        multiplier += 1;
                 }
-                calcDamage *= (calc_critical(user, 0) + mult);
+                calcDamage *= (calc_critical(user, 0) + multiplier);
                 break;
             case 3:
                 if (GET_BONUS(user, BONUS_SOFT)) 
@@ -1327,6 +1356,595 @@ namespace atk {
                 actVictim("@C$n@W grabs YOU and barely manages to slam $s head into YOUR arm!@n");
                 actOthers("@C$n@W grabs @c$N@W and barely manages to slam $s head into @c$N's@W arm!@n");
                 break;
+        }
+    }
+
+
+
+    // KI
+
+    int64_t RangedKiAttack::calculateKiCost() {
+        if (getTier() == 1)
+            attPerc = 0.05;
+        if (getTier() == 2)
+            attPerc = 0.10;
+        if (getTier() == 3)
+            attPerc = 0.15;
+        if (getTier() == 4)
+            attPerc = 0.25;
+        if (getTier() == 5)
+            attPerc = 0.50;
+
+        return attPerc * getKiEfficiency();
+    }
+
+    double RangedKiAttack::getKiEfficiency() {
+        return 1;
+    }
+
+    Result RangedKiAttack::handleParry() {
+        announceParry();
+        defenseResult = DefenseResult::Parried;
+        pcost(victim, 0, GET_MAX_HIT(victim) / 500);
+        improve_skill(victim, SKILL_PARRY, 0);
+        parry_ki(attPerc, user, victim, (char*)getName().c_str(), 0, 0, getSkillID(), getAtkID());
+        user->getRoom()->modDamage(5);
+        return Result::Missed;
+
+    }
+
+    Result RangedKiAttack::handleDodge() {
+        announceDodge();
+        defenseResult = DefenseResult::Dodged;
+        improve_skill(victim, SKILL_DODGE, 0);
+        pcost(victim, 0, GET_MAX_HIT(victim) / 500);
+
+        dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, getSkillID());
+        user->getRoom()->modDamage(5);
+        return Result::Missed;
+
+    }
+
+    Result RangedKiAttack::handlePerfectDodge() {
+        actVictim("@C$n@W moves so slowly that you dodge their attack with ease.@n");
+        actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
+        actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
+
+        if(victim->getCurKI() > 0) {
+            victim->decCurKI(calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+        } else {
+            victim->decCurST(2 * calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+            actVictim("@WContinuing to dodge without Ki takes a heavy toll.@n");
+        }
+
+        return Result::Missed;
+    }
+
+    Result RangedKiAttack::handleBlock() {
+        announceBlock();
+        defenseResult = DefenseResult::Blocked;
+        improve_skill(victim, SKILL_BLOCK, 0);
+        pcost(victim, 0, GET_MAX_HIT(victim) / 500);
+        return Result::Landed;
+
+    }
+
+    
+
+    void RangedKiAttack::announceObject() {
+        actUser("@WYou fire a " + getName() + " at $p@W!@n");
+        actRoom("@C$n@W fires a " + getName() + " at $p@W!@n");
+    }
+
+    void RangedKiAttack::announceParry() {
+        actUser("@C$N@W deflects your " + getName() + ", sending it flying away!@n");
+        actVictim("@WYou deflect @C$n's@W " + getName() + " sending it flying away!@n");
+        actOthers("@C$N@W deflects @c$n's@W " + getName() + " sending it flying away!@n");
+    }
+
+    void RangedKiAttack::announceBlock() {
+        actUser("@C$N@W moves quickly and blocks " + getName() + "!@n");
+        actVictim("@WYou move quickly and block @C$n's@W " + getName() + "!@n");
+        actOthers("@C$N@W moves quickly and blocks @c$n's@W " + getName() + "!@n");
+    }
+
+    void RangedKiAttack::announceDodge() {
+        actUser("@C$N@W manages to dodge your " + getName() + ", letting it slam into the surroundings!@n");
+        actVictim("@WYou dodge @C$n's@W " + getName() + ", letting it slam into the surroundings!@n");
+        actOthers("@C$N@W manages to dodge @c$n's@W " + getName() + ", letting it slam into the surroundings!@n");
+    }
+
+    void RangedKiAttack::announceMiss() {
+        actUser("@WYou can't believe it but your " + getName() + " misses, flying through the air harmlessly!@n");
+        actVictim("@C$n@W fires a " + getName() + " at you, but misses!@n");
+        actOthers("@c$n@W fires a " + getName() + " at @C$N@W, but somehow misses!@n");
+    }
+
+    
+
+
+    // Kiball
+    void KiBall::execute() {
+
+        if(!can_grav(user)) return;
+        if(!checkSkills()) return;
+        if(!checkLimbs()) return;
+        if(!checkEmptyHands()) return;
+
+        if (args.empty() && !FIGHTING(user)) {
+            send_to_char(user, "Direct it at who?\r\n");
+            return;
+        }
+
+        if(!checkCosts()) return;
+
+        initSkill = init_skill(user, getSkillID());
+
+        int mult_roll = rand_number(1, 100), mult_count = 1, mult_chance = 0;
+
+        if(args.empty()) {
+            victim = FIGHTING(user);
+        } else {
+            if(!tech_handle_targeting(user, (char*)args[0].c_str(), &victim, &obj)) return;
+        }
+
+        if (initSkill >= 100) {
+            mult_chance = 30;
+        } else if (initSkill >= 75) {
+            mult_chance = 15;
+        } else if (initSkill >= 50) {
+            mult_chance = 10;
+        }
+
+        if (mult_roll <= mult_chance)
+            mult_count = rand_number(2, 3);
+
+        while (mult_count > 0) {
+            mult_count -= 1;
+            switch(doAttack()) {
+                case Result::Landed:
+                    onLanded();
+                    onLandedOrMissed();
+                    break;
+                case Result::Missed:
+                    onMissed();
+                    onLandedOrMissed();
+                    break;
+                case Result::Canceled:
+                    onCanceled();
+                    break;
+            }
+        }
+    }
+
+    void KiBall::announceHitspot() {
+        switch(hitspot) {
+            case 1:
+                actUser("@WYou hold out your hand towards @C$N@W, and fire a bright yellow kiball! The kiball slams into $M quickly and explodes with roaring light!@n");
+                actVictim("@c$n@W holds out $s hand towards you, and fires a bright yellow kiball! The kiball slams into you quickly and explodes with roaring light!@n");
+                actOthers("@c$n@W holds out $s hand towards @C$N@W, and fires a bright yellow kiball! The kiball slams into $M quickly and explodes with roaring light!@n");
+                break;
+            case 2:
+                actUser("@WYou hold out your hand towards @C$N@W, and fire a bright yellow kiball! The kiball slams into $S face and explodes, shrouding $S head with smoke!@n");
+                actVictim("@c$n@W holds out $s hand towards you, and fires a bright yellow kiball! The kiball slams into your face and explodes, leaving you choking on smoke!@n");
+                actOthers("@c$n@W holds out $s hand towards @C$N@W, and fires a bright yellow kiball! The kiball slams into $S face and explodes, shrouding $S head with smoke!@n");
+                break;
+            case 3:
+                actUser("@WYou hold out your hand towards @C$N@W, and fire a bright yellow kiball! The kiball slams into $S body and explodes with a loud roar!@n");
+                actVictim("@c$n@W holds out $s hand towards you, and fires a bright yellow kiball! The kiball slams into your body and explodes with a loud roar!@n");
+                actOthers("@c$n@W holds out $s hand towards @C$N@W, and fires a bright yellow kiball! The kiball slams into $S body and explodes with a loud roar!@n");
+                break;
+            case 4:
+                actUser("@WYou hold out your hand towards @C$N@W, and fire a bright yellow kiball! The kiball grazes $S arm and explodes shortly after!@n");
+                actVictim("@c$n@W holds out $s hand towards you, and fires a bright yellow kiball! The kiball grazes your arm and explodes shortly after!@n");
+                actOthers("@c$n@W holds out $s hand towards @C$N@W, and fires a bright yellow kiball! The kiball grazes $S arm and explodes shortly after!@n");
+                break;
+            case 5:
+                actUser("@WYou hold out your hand towards @C$N@W, and fire a bright yellow kiball! The kiball grazes $S leg and explodes shortly after!@n");
+                actVictim("@c$n@W holds out $s hand towards you, and fires a bright yellow kiball! The kiball grazes your leg and explodes shortly after!@n");
+                actOthers("@c$n@W holds out $s hand towards @C$N@W, and fires a bright yellow kiball! The kiball grazes $S leg and explodes shortly after!@n");
+                break;
+        }
+    }
+
+    //KiBlast
+    void KiBlast::attackPreprocess() {
+        record = GET_HIT(victim);
+        if (IS_ANDROID(user)) {
+                if (GET_SKILL(user, SKILL_KIBLAST) >= 100) {
+                    calcDamage += calcDamage * 0.15;
+                } else if (GET_SKILL(user, SKILL_KIBLAST) >= 60) {
+                    calcDamage += calcDamage * 0.10;
+                } else if (GET_SKILL(user, SKILL_KIBLAST) >= 40) {
+                    calcDamage += calcDamage * 0.05;
+                }
+        }
+    }
+
+    void KiBlast::attackPostprocess() {
+        int mastery = rand_number(1, 100), master_pass = false, chance = 0;
+
+        if (initSkill >= 100)
+            chance = 30;
+        else if (initSkill >= 75)
+            chance = 20;
+        else if (initSkill >= 50)
+            chance = 15;
+
+        if (mastery <= chance)
+            master_pass = true;
+
+        if (master_pass == true && record > GET_HIT(victim) &&
+            (record - GET_HIT(victim) > (victim->getEffMaxPL()) * 0.025)) {
+            if (!AFF_FLAGGED(victim, AFF_KNOCKED) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
+                act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
+                act("@WYou are knocked out!@n", true, user, nullptr, victim, TO_VICT);
+                act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_NOTVICT);
+                 victim->setStatusKnockedOut();
+            }
+        }
+    }
+
+    void KiBlast::announceHitspot() {
+        switch(hitspot) {
+            case 1:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large kiblast that slams into $S chest!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into your chest!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into $N@W's chest!@n");
+                break;
+            case 2:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large kiblast that slams into $S face!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into your face!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into $N@W's face!@n");
+                break;
+            case 3:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large kiblast that slams into $S gut!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into your gut!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into $N@W's gut!@n");
+                break;
+            case 4:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large kiblast that slams into $S arm!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into your arm!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into $N@W's arm!@n");
+                break;
+            case 5:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large kiblast that slams into $S leg!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into your leg!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large kiblast that slams into $N@W's leg!@n");
+                break;
+        }
+    }
+
+
+    // Beam
+    void Beam::announceHitspot() {
+        switch(hitspot) {
+            case 1:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S chest!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your chest!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's chest!@n");
+                break;
+            case 2:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S face!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your face!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's face!@n");
+                break;
+            case 3:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S gut!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your gut!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's gut!@n");
+                break;
+            case 4:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S arm!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your arm!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's arm!@n");
+                break;
+            case 5:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large beam that slams into $S leg!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into your leg!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large beam that slams into $N@W's leg!@n");
+                break;
+        }
+    }
+
+    void Beam::attackPostprocess() {
+        int master_roll = rand_number(1, 100), master_chance = 0, master_pass = false;
+
+        if (initSkill >= 100)
+            master_chance = 20;
+        else if (initSkill >= 75)
+            master_chance = 10;
+        else if (initSkill >= 50)
+            master_chance = 5;
+
+        if (master_chance >= master_roll)
+            master_pass = true;
+
+        if (GET_HIT(victim) > 0 && calcDamage > GET_MAX_HIT(victim) / 4 && master_pass == true) {
+            int attempt = rand_number(0, NUM_OF_DIRS);  /* Select a random direction */
+            int count = 0;
+            while (count < 12) {
+                attempt = count;
+                if (CAN_GO(victim, attempt)) {
+                    count = 12;
+                } else {
+                    count++;
+                }
+            }
+            if (CAN_GO(victim, attempt)) {
+                act("$N@W is pushed away by the blast!@n", true, user, nullptr, victim, TO_CHAR);
+                act("@WYou are pushed away by the blast!@n", true, user, nullptr, victim, TO_VICT);
+                act("$N@W is pushed away by the blast!@n", true, user, nullptr, victim, TO_NOTVICT);
+                do_simple_move(victim, attempt, true);
+            } else {
+                act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, user, nullptr,
+                    victim,
+                    TO_CHAR);
+                act("@WYou are pushed away by the blast, but are slammed into an obstruction!@n", true, user, nullptr,
+                    victim,
+                    TO_VICT);
+                act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, user, nullptr,
+                    victim,
+                    TO_NOTVICT);
+                calcDamage *= 2;
+                hurt(1, 195, user, victim, nullptr, calcDamage, 1);
+            }
+        }
+    }
+
+
+    // Tsuihidan
+    void Tsuihidan::announceHitspot() {
+        switch(hitspot) {
+            case 1:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large tsuihidan that slams into $s chest!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into your chest!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into $N@W's chest!@n");
+                break;
+            case 2:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large tsuihidan that slams into $S face!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into your face!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into $N@W's face!@n");
+                break;
+            case 3:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large tsuihidan that slams into $S gut!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into your gut!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into $N@W's gut!@n");
+                break;
+            case 4:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large tsuihidan that slams into $S arm!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into your arm!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into $N@W's arm!@n");
+                break;
+            case 5:
+                actUser("@WYou aim your hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly you unleash a large tsuihidan that slams into $S leg!@n");
+                actVictim("@W$n@W aims $s hand at you, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into your leg!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and bright @Yyellow@W energy begins to pool there. Suddenly $e unleashes a large tsuihidan that slams into $N@W's leg!@n");
+                break;
+        }
+    }
+
+    void Tsuihidan::attackPostprocess() {
+        int master_roll = rand_number(1, 100), master_chance = 0, master_pass = false;
+
+        if (initSkill >= 100)
+            master_chance = 20;
+        else if (initSkill >= 75)
+            master_chance = 10;
+        else if (initSkill >= 50)
+            master_chance = 5;
+
+        if (master_chance >= master_roll)
+            master_pass = true;
+
+        if (master_pass == true) {
+            victim->decCurST(calcDamage);
+            act("@CYour tsuihidan hits a vital spot and seems to sap some of @c$N's@C stamina!@n", true, user,
+                nullptr, victim, TO_CHAR);
+            act("@C$n's@C tsuihidan hits a vital spot and saps some of your stamina!@n", true, user, nullptr, victim,
+                TO_VICT);
+            act("@C$n's@C tsuihidan hits a vital spot and saps some of @c$N's@C stamina!", true, user, nullptr, victim,
+                TO_NOTVICT);
+        }
+    }
+
+    // Renzo
+
+    DefenseResult Renzo::calculateDefense() {
+        count = 100;
+
+        if (IS_NAIL(user)) {
+            if (initSkill >= 100) {
+                count += 200;
+            } else if (initSkill >= 60) {
+                count += 100;
+            } else if (initSkill >= 40) {
+                count += 40;
+            }
+        }
+        if (rand_number(1, 5) >= 5) { /* Random boost or neg for everyone */
+            count += rand_number(-15, 25);
+        }
+
+
+
+        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_DODGE_PERC));
+        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_BLOCK_PERC));
+
+        double overcomeDodge = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+        double overcomeBlock = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
+        
+
+        if(canParry() && calculateDeflect()) count -= axion_dice(0);
+        if(count <= 0) return DefenseResult::Parried;
+        if(canDodge() && dodgeChance > overcomeDodge) count -= axion_dice(0);
+        if(count <= 0) return DefenseResult::Dodged;
+        if(canBlock() && blockChance > overcomeBlock) return DefenseResult::Blocked;
+
+        return DefenseResult::Failed;
+    }
+
+    double Renzo::getKiEfficiency() {
+        int master_roll = rand_number(1, 100), master_chance = 0, half_chance = 0, master_pass = 0;
+
+        if (initSkill >= 100) {
+            master_chance = 10;
+            half_chance = 20;
+        } else if (initSkill >= 75) {
+            master_chance = 5;
+            half_chance = 10;
+        } else if (initSkill >= 50) {
+            master_chance = 5;
+            half_chance = 5;
+        }
+
+        if (master_chance >= master_roll)
+            master_pass = 1;
+        else if (half_chance >= master_roll)
+            master_pass = 2;
+
+        if (master_pass == 1) {
+            send_to_char(user, "@GYour mastery of the technique has made your use of energy more efficient!@n\r\n");
+            return 0.25;
+        }
+        else if (master_pass == 2) {
+            send_to_char(user,
+                "@GYour mastery of the technique has made your use of energy as efficient as possible!@n\r\n");
+            return 0.5;
+        }
+
+        return 1.0;
+    }
+
+    void Renzo::attackPreprocess() {
+        calcDamage = calcDamage * 0.01;
+        calcDamage *= count;
+        
+    }
+
+    void Renzo::handleHitspot() {
+        hitspot = 1;
+    }
+
+    void Renzo::announceHitspot() {
+        if (count >= 100) {
+            actUser("@WYou gather your charged energy into your hands as a golden glow appears around each. You slam your hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! All of the shots hit!");
+            actVictim("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at you! All of the shots hit!");
+            actOthers("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! All of the shots hit!");
+        }
+        if (count >= 75 && count < 100) {
+            actUser("@WYou gather your charged energy into your hands as a golden glow appears around each. You slam your hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! Most of the shots hit, but some of them are avoided by $M!");
+            actVictim("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at you! Most of the shots hit, but some of them you manage to avoid!");
+            actOthers("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! Most of the shots hit, but some of them are avoided by $M!");
+        }
+        if (count >= 50 && count < 75) {
+            actUser("@WYou gather your charged energy into your hands as a golden glow appears around each. You slam your hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! About half of the shots hit, the rest are avoided by $M!");
+            actVictim("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at you! About half of the shots hit, the rest you manage to avoid!");
+            actOthers("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! About half of the shots hit, the rest are avoided by $M!");
+        }
+        if (count >= 25 && count < 50) {
+            actUser("@WYou gather your charged energy into your hands as a golden glow appears around each. You slam your hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! Few of the shots hit, the rest are avoided by $M!");
+            actVictim("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at you! Few of the shots hit, the rest you manage to avoid!");
+            actOthers("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! Few of the shots hit, the rest are avoided by $M!");
+        }
+        if (count < 25) {
+            actUser("@WYou gather your charged energy into your hands as a golden glow appears around each. You slam your hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! Very few of the shots hit, the rest are avoided by $M!");
+            actVictim("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at you! Very few of the shots hit, the rest you manage to avoid!");
+            actOthers("@w$n gathers charged energy into $s hands as a golden glow appears around each. $e slams $s hands forward rapidly firing hundreds of Renzokou Energy Dan shots at $N@W! Very few of the shots hit, the rest are avoided by $M!");
+        }
+        
+    }
+
+
+    // Shogekiha
+    void Shogekiha::attackPostprocess() {
+        int master_roll = rand_number(1, 100), master_chance = 0, master_pass = false;
+
+        if (initSkill >= 100)
+            master_chance = 20;
+        else if (initSkill >= 75)
+            master_chance = 10;
+        else if (initSkill >= 50)
+            master_chance = 5;
+
+        if (master_chance >= master_roll)
+            master_pass = true;
+
+        if (master_pass == true) {
+            act("@CYour skillful shogekiha dissipated some of @c$N's@C charged ki!@n", true, user, nullptr, victim,
+                TO_CHAR);
+            act("@C$n@C's skillful shogekiha dissipated some of YOUR charged ki!@n", true, user, nullptr, victim,
+                TO_VICT);
+            act("@C$n@C's skillful shogekiha dissipated some of @c$N's@C charged ki!", true, user, nullptr, victim,
+                TO_NOTVICT);
+            GET_CHARGE(victim) -= GET_CHARGE(victim) * 0.25;
+        }
+    }
+
+
+    void Shogekiha::announceHitspot() {
+        switch(hitspot) {
+            case 1:
+                actUser("@WYou aim your hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly you unleash a large shogekiha that slams into $S chest!@n");
+                actVictim("@W$n@W aims $s hand at you, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into your chest!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into $N@W's chest!@n");
+                break;
+            case 2:
+                actUser("@WYou aim your hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly you unleash a large shogekiha that slams into $S face!@n");
+                actVictim("@W$n@W aims $s hand at you, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into your face!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into $N@W's face!@n");
+                break;
+            case 3:
+                actUser("@WYou aim your hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly you unleash a large shogekiha that slams into $S gut!@n");
+                actVictim("@W$n@W aims $s hand at you, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into your gut!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into $N@W's gut!@n");
+                break;
+            case 4:
+                actUser("@WYou aim your hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly you unleash a large shogekiha that slams into $S arm!@n");
+                actVictim("@W$n@W aims $s hand at you, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into your arm!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into $N@W's arm!@n");
+                break;
+            case 5:
+                actUser("@WYou aim your hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly you unleash a large shogekiha that slams into $S leg!@n");
+                actVictim("@W$n@W aims $s hand at you, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into your leg!@n");
+                actOthers("@W$n@W aims $s hand at $N@W, and nearby loose objects begin to be pushed out by an invisible force. Suddenly $e unleashes a large shogekiha that slams into $N@W's leg!@n");
+                break;
+        }
+    }
+
+    Result Shogekiha::attackObject() {
+        if(!can_kill(user, nullptr, obj, canKillType())) return Result::Canceled;
+        bool extracted = false;
+        calcDamage = calculateObjectDamage();
+
+        if (KICHARGE(obj) > 0 && GET_CHARGE(user) > KICHARGE(obj)) {
+            KICHARGE(obj) -= GET_CHARGE(user);
+            extract_obj(obj);
+            extracted = true;
+        } else if (KICHARGE(obj) > 0 && GET_CHARGE(user) < KICHARGE(obj)) {
+            KICHARGE(obj) -= GET_CHARGE(user);
+            GET_CHARGE(user) = 0;
+            calcDamage = KICHARGE(obj);
+            hurt(0, 0, USER(obj), user, nullptr, calcDamage, 0);
+            extract_obj(obj);
+            extracted = true;
+        }
+
+        announceObject();
+        if(extracted) return Result::Canceled;
+        return Result::Landed;
+    }
+
+    void Shogekiha::announceObject() {
+        if (KICHARGE(obj) > 0 && GET_CHARGE(user) > KICHARGE(obj)) {
+            actUser("@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and shatter the attack with your ki!@n");
+            actRoom("@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and shatters the attack with $s ki!@n");
+        } else if (KICHARGE(obj) > 0 && GET_CHARGE(user) < KICHARGE(obj)) {
+            actUser("@WYou leap at $p@W with your arms spread out to your sides. As you are about to make contact with $p@W you scream and weaken the attack with your ki before taking the rest of the attack in the chest!@n");
+            actRoom("@C$n@W leaps out at $p@W with $s arms spead out to $s sides. As $e is about to make contact with $p@W $e screams and weakens the attack with $s ki before taking the rest of the attack in the chest!@n");
+        } else {
+            actUser("@WYou fire a shogekiha at $p@W!@n");
+            actRoom("@C$n@W fires a shogekiha at $p@W!@n");
         }
     }
 
