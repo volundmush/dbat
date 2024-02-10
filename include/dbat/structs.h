@@ -354,6 +354,8 @@ struct room_data : public unit_data {
 
     nlohmann::json serializeDgVars();
 
+    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
+
 };
 /* ====================================================================== */
 
@@ -544,6 +546,8 @@ struct char_data : public unit_data {
 
     void ageBy(double addedTime);
     void setAge(double newAge);
+
+    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
     struct room_data* getRoom();
 

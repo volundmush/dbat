@@ -12,6 +12,7 @@
 #include "dbat/genolc.h"
 #include "dbat/shop.h"
 #include "dbat/dg_olc.h"
+#include "dbat/constants.h"
 
 
 /*
@@ -454,4 +455,56 @@ MoonCheck room_data::checkMoon() {
 
     return MOON_TIMECHECK() ? MoonCheck::Full : MoonCheck::NotFull;
 
+}
+
+static const std::map<std::string, int> _dirNames = {
+    {"north", NORTH},
+    {"east", EAST},
+    {"south", SOUTH},
+    {"west", WEST},
+    {"up", UP},
+    {"down", DOWN},
+    {"northwest", NORTHWEST},
+    {"northeast", NORTHEAST},
+    {"southwest", SOUTHWEST},
+    {"southeast", SOUTHEAST},
+    {"inside", INDIR},
+    {"outside", OUTDIR}
+
+};
+
+std::optional<std::string> room_data::dgCallMember(const std::string& member, const std::string& arg) {
+    std::string lmember = member;
+    to_lower(lmember);
+    trim(lmember);
+    char bitholder[MAX_STRING_LENGTH];
+
+    if(auto d = _dirNames.find(lmember); d != _dirNames.end()) {
+        auto ex = dir_option[d->second];
+        if(!ex) {
+            return "";
+        }
+        if (!arg.empty()) {
+            if (!strcasecmp(arg.c_str(), "vnum"))
+                return fmt::format("{}", ex->to_room);
+            else if (!strcasecmp(arg.c_str(), "key"))
+                return fmt::format("{}", ex->key);
+            else if (!strcasecmp(arg.c_str(), "bits")) {
+                sprintbit(ex->exit_info, exit_bits, bitholder, MAX_STRING_LENGTH);
+                return bitholder;
+            }
+            else if (!strcasecmp(arg.c_str(), "room")) {
+                if (auto roomFound = world.find(ex->to_room); roomFound != world.end())
+                    return fmt::format("{}", roomFound->second.getUID(false));
+                else
+                    return "";
+            }
+        } else /* no subfield - default to bits */
+            {
+                sprintbit(ex->exit_info, exit_bits, bitholder, MAX_STRING_LENGTH);
+                return bitholder;
+            }
+    }
+
+    return {};
 }

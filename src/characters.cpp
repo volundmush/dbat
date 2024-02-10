@@ -1506,3 +1506,97 @@ void char_data::gazeAtMoon() {
 void char_data::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
     if(desc) desc->sendGMCP(cmd, j);
 }
+
+static const std::map<std::string, CharAttribute> _attr_names = {
+    {"str", CharAttribute::Strength},
+    {"wis", CharAttribute::Wisdom},
+    {"con", CharAttribute::Constitution},
+    {"cha", CharAttribute::Speed},
+    {"spd", CharAttribute::Speed},
+    {"dex", CharAttribute::Agility},
+    {"agi", CharAttribute::Agility},
+    {"int", CharAttribute::Intelligence}
+};
+
+static const std::map<std::string, CharMoney> _money_names = {
+    {"bank", CharMoney::Bank},
+    {"gold", CharMoney::Carried},
+    {"zenni", CharMoney::Carried}
+};
+
+static const std::map<std::string, int> _cond_names = {
+    {"hunger", HUNGER},
+    {"thirst", THIRST},
+    {"drunk", DRUNK}
+};
+
+static const std::map<std::string, int> _save_names = {
+    {"saving_fortitude", SAVING_FORTITUDE},
+    {"saving_reflex", SAVING_REFLEX},
+    {"saving_will", SAVING_WILL}
+};
+
+static const std::map<std::string, int> _pflags = {
+    {"is_killer", PLR_KILLER},
+    {"is_thief", PLR_THIEF}
+};
+
+static const std::map<std::string, int> _aflags = {
+    {"dead", AFF_SPIRIT},
+    {"flying", AFF_FLYING}
+};
+
+
+std::optional<std::string> char_data::dgCallMember(const std::string& member, const std::string& arg) {
+    std::string lmember = member;
+    to_lower(lmember);
+    trim(lmember);
+
+    if(auto attr = _attr_names.find(lmember); attr != _attr_names.end()) {
+        if (!arg.empty()) {
+            attribute_t addition = atof(arg.c_str());
+            mod(attr->second, addition);
+        }
+        return fmt::format("{}", get(attr->second));
+    }
+
+    if(auto mon = _money_names.find(lmember); mon != _money_names.end()) {
+        if (!arg.empty()) {
+            money_t addition = atoll(arg.c_str());
+            mod(mon->second, addition);
+        }
+        return fmt::format("{}", get(mon->second));
+    }
+
+    if(auto con = _cond_names.find(lmember); con != _cond_names.end()) {
+        if (!arg.empty()) {
+            int addition = atof(arg.c_str());
+            GET_COND(this, con->second) = std::clamp<int>(addition, -1, 24);
+        }
+        return fmt::format("{}", GET_COND(this, con->second));
+    }
+
+    if(auto save = _save_names.find(lmember); save != _save_names.end()) {
+        if (!arg.empty()) {
+            int addition = atof(arg.c_str());
+            GET_SAVE_MOD(this, save->second) += addition;
+        }
+        return fmt::format("{}", GET_SAVE_MOD(this, save->second));
+    }
+
+    if(auto pf = _pflags.find(lmember); pf != _pflags.end()) {
+        if (!arg.empty()) {
+            if (!strcasecmp("on", arg.c_str()))
+                playerFlags.set(pf->second);
+            else if (!strcasecmp("off", arg.c_str()))
+                playerFlags.reset(pf->second);
+        }
+        return playerFlags.test(pf->second) ? "1" : "0";
+    }
+
+    if(auto af = _aflags.find(lmember); af != _aflags.end()) {
+        return AFF_FLAGGED(this, af->second) ? "1" : "0";
+    }
+
+    return {};
+}

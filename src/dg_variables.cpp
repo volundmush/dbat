@@ -22,6 +22,7 @@
 #include "dbat/oasis.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
+#include "dbat/random.h"
 
 /* Utility functions */
 
@@ -218,6 +219,23 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
     return false;
 }
 
+static char *send_cmd[] = {"msend ", "osend ", "wsend "};
+static char *echo_cmd[] = {"mecho ", "oecho ", "wecho "};
+static char *echoaround_cmd[] = {"mechoaround ", "oechoaround ", "wechoaround "};
+static char *door[] = {"mdoor ", "odoor ", "wdoor "};
+static char *force[] = {"mforce ", "oforce ", "wforce "};
+static char *load[] = {"mload ", "oload ", "wload "};
+static char *purge[] = {"mpurge ", "opurge ", "wpurge "};
+static char *teleport[] = {"mteleport ", "oteleport ", "wteleport "};
+/* the x kills a 'shadow' warning in gcc. */
+static char *xdamage[] = {"mdamage ", "odamage ", "wdamage "};
+static char *zoneecho[] = {"mzoneecho ", "ozoneecho ", "wzoneecho "};
+static char *asound[] = {"masound ", "oasound ", "wasound "};
+static char *at[] = {"mat ", "oat ", "wat "};
+/* there is no such thing as wtransform, thus the wecho below  */
+static char *transform[] = {"mtransform ", "otransform ", "wecho "};
+static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
+
 
 /* sets str to be the value of var.field */
 void
@@ -229,23 +247,6 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
     struct room_data *room, *r = nullptr;
     char *name;
     int num, count, i, j, doors;
-
-    char *send_cmd[] = {"msend ", "osend ", "wsend "};
-    char *echo_cmd[] = {"mecho ", "oecho ", "wecho "};
-    char *echoaround_cmd[] = {"mechoaround ", "oechoaround ", "wechoaround "};
-    char *door[] = {"mdoor ", "odoor ", "wdoor "};
-    char *force[] = {"mforce ", "oforce ", "wforce "};
-    char *load[] = {"mload ", "oload ", "wload "};
-    char *purge[] = {"mpurge ", "opurge ", "wpurge "};
-    char *teleport[] = {"mteleport ", "oteleport ", "wteleport "};
-    /* the x kills a 'shadow' warning in gcc. */
-    char *xdamage[] = {"mdamage ", "odamage ", "wdamage "};
-    char *zoneecho[] = {"mzoneecho ", "ozoneecho ", "wzoneecho "};
-    char *asound[] = {"masound ", "oasound ", "wasound "};
-    char *at[] = {"mat ", "oat ", "wat "};
-    /* there is no such thing as wtransform, thus the wecho below  */
-    char *transform[] = {"mtransform ", "otransform ", "wecho "};
-    char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
     auto unit = (unit_data*)go;
 
@@ -346,21 +347,18 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
             }
         } else {
             if (!strcasecmp(var, "self")) {
+                c = nullptr;
+                r = nullptr;
+                o = nullptr;
                 switch (type) {
                     case MOB_TRIGGER:
                         c = (char_data *) go;
-                        r = nullptr;
-                        o = nullptr;  /* nullptr assignments added to avoid self to always be    */
                         break;     /* the room.  - Welcor        */
                     case OBJ_TRIGGER:
                         o = (obj_data *) go;
-                        c = nullptr;
-                        r = nullptr;
                         break;
                     case WLD_TRIGGER:
                         r = (struct room_data *) go;
-                        c = nullptr;
-                        o = nullptr;
                         break;
                 }
             } else if (!strcasecmp(var, "global")) {
@@ -509,21 +507,17 @@ in the vault (vnum: 453) now and then. you can just use
                     if (in_room == NOWHERE) {
                         *str = '\0';
                     } else {
-                        doors = 0;
+                        std::vector<int> available;
                         room = &world[in_room];
                         for (i = 0; i < NUM_OF_DIRS; i++)
                             if (R_EXIT(room, i))
-                                doors++;
+                                available.push_back(i);
 
-                        if (!doors) {
+                        if (available.empty()) {
                             *str = '\0';
                         } else {
-                            for (;;) {
-                                doors = rand_number(0, NUM_OF_DIRS - 1);
-                                if (R_EXIT(room, doors))
-                                    break;
-                            }
-                            snprintf(str, slen, "%s", dirs[doors]);
+                            auto dir = Random::get(available);
+                            snprintf(str, slen, "%s", dirs[*dir]);
                         }
                     }
                 } else
@@ -533,10 +527,11 @@ in the vault (vnum: 453) now and then. you can just use
             }
         }
 
-        if (c) {
-            if (text_processed(field, subfield, vd, str, slen)) return;
+        if (text_processed(field, subfield, vd, str, slen)) return;
 
-            else if (!strcasecmp(field, "global")) { /* get global of something else */
+        if (c) {
+            
+            if (!strcasecmp(field, "global")) { /* get global of something else */
                 if (IS_NPC(c) && c->script) {
                     find_replacement(go, c->script, nullptr, MOB_TRIGGER,
                                      subfield, nullptr, nullptr, str, slen);
@@ -544,6 +539,11 @@ in the vault (vnum: 453) now and then. you can just use
             }
             /* set str to some 'non-text' first */
             *str = '\x1';
+
+            if(auto result = c->dgCallMember(field, subfield ? subfield : ""); result) {
+                snprintf(str, slen, "%s", result.value().c_str());
+                return;
+            }
 
             switch (LOWER(*field)) {
                 case 'a':
@@ -569,15 +569,6 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%d", GET_ALIGNMENT(c));
                     }
                     break;
-                case 'b':
-                    if (!strcasecmp(field, "bank")) {
-                        if (subfield && *subfield) {
-                            int addition = atoll(subfield);
-                            c->mod(CharMoney::Bank, addition);
-                        }
-                        snprintf(str, slen, "%lld", GET_BANK_GOLD(c));
-                    }
-                    break;
                 case 'c':
                     if (!strcasecmp(field, "canbeseen")) {
                         if ((type == MOB_TRIGGER) && !CAN_SEE(((char_data *) go), c))
@@ -599,45 +590,16 @@ in the vault (vnum: 453) now and then. you can just use
                             snprintf(str, slen, "%s", sensei::getName(c->chclass).c_str());
                         else
                             snprintf(str, slen, "blank");
-                    } else if (!strcasecmp(field, "con")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->mod(CharAttribute::Constitution, addition);
-                        }
-                        snprintf(str, slen, "%d", GET_CON(c));
-                    } else if (!strcasecmp(field, "cha")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->mod(CharAttribute::Speed, addition);
-                        }
-                        snprintf(str, slen, "%d", GET_CHA(c));
                     }
                     break;
                 case 'd':
-                    if (!strcasecmp(field, "dead")) {
-                        if (AFF_FLAGGED(c, AFF_SPIRIT))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    } else if (!strcasecmp(field, "death")) {
+                    if (!strcasecmp(field, "death")) {
                         snprintf(str, slen, "%ld", GET_DTIME(c));
-                    } else if (!strcasecmp(field, "dex")) {
-                        if (subfield && *subfield) {
-                            int addition = atoi(subfield);
-                            ch->mod(CharAttribute::Agility, addition);
-                        }
-                        snprintf(str, slen, "%d", GET_DEX(c));
                     } else if (!strcasecmp(field, "drag")) {
                         if (!IS_NPC(c) && DRAGGING(c))
                             strcpy(str, "1");
                         else
                             strcpy(str, "0");
-                    } else if (!strcasecmp(field, "drunk")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_COND(c, DRUNK) = std::clamp<int>(addition, -1, 24);
-                        }
-                        snprintf(str, slen, "%d", GET_COND(c, DRUNK));
                     }
                     break;
                 case 'e':
@@ -675,25 +637,11 @@ in the vault (vnum: 453) now and then. you can just use
                             snprintf(str, slen, "%s", ((((c)->fighting))->getUID(false).c_str()));
                         else
                             *str = '\0';
-                    } else if (!strcasecmp(field, "flying")) {
-                        if (AFF_FLAGGED(c, AFF_FLYING))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
                     } else if (!strcasecmp(field, "follower")) {
                         if (!c->followers || !c->followers->follower)
                             *str = '\0';
                         else
                             snprintf(str, slen, "%s", ((c->followers->follower)->getUID(false).c_str()));
-                    }
-                    break;
-                case 'g':
-                    if (!strcasecmp(field, "gold")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = atof(subfield);
-                            c->mod(CharMoney::Carried, addition);
-                        }
-                        snprintf(str, slen, "%ld", GET_GOLD(c));
                     }
                     break;
                 case 'h':
@@ -723,12 +671,6 @@ in the vault (vnum: 453) now and then. you can just use
                             update_pos(c);
                         }
                         snprintf(str, slen, "%" I64T "", GET_HIT(c));
-                    } else if (!strcasecmp(field, "hunger")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_COND(c, HUNGER) = std::clamp<int>(addition, -1, 24);
-                        }
-                        snprintf(str, slen, "%d", GET_COND(c, HUNGER));
                     }
                     break;
                 case 'i':
@@ -737,10 +679,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                         /* new check for pc/npc status */
                     else if (!strcasecmp(field, "is_pc")) {
-                        if (IS_NPC(c))
-                            strcpy(str, "0");
-                        else
-                            strcpy(str, "1");
+                        strcpy(str, IS_NPC(c) ? "1" : "0");
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
                             for (obj = c->contents; obj; obj = obj->next_content) {
@@ -758,34 +697,6 @@ in the vault (vnum: 453) now and then. you can just use
                                 *str = '\0';
                             }
                         }
-                    } else if (!strcasecmp(field, "is_killer")) {
-                        if (subfield && *subfield) {
-                            if (!strcasecmp("on", subfield))
-                                c->playerFlags.set(PLR_KILLER);
-                            else if (!strcasecmp("off", subfield))
-                                c->playerFlags.reset(PLR_KILLER);
-                        }
-                        if (PLR_FLAGGED(c, PLR_KILLER))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    } else if (!strcasecmp(field, "is_thief")) {
-                        if (subfield && *subfield) {
-                            if (!strcasecmp("on", subfield))
-                                c->playerFlags.set(PLR_THIEF);
-                            else if (!strcasecmp("off", subfield))
-                                c->playerFlags.reset(PLR_THIEF);
-                        }
-                        if (PLR_FLAGGED(c, PLR_THIEF))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    } else if (!strcasecmp(field, "int")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->mod(CharAttribute::Intelligence, addition);
-                        }
-                        snprintf(str, slen, "%d", GET_INT(c));
                     }
                     break;
                 case 'l':
@@ -925,13 +836,7 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "sex"))
                         snprintf(str, slen, "%s", genders[(int) GET_SEX(c)]);
 
-                    else if (!strcasecmp(field, "str")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->mod(CharAttribute::Strength, addition);
-                        }
-                        snprintf(str, slen, "%d", GET_STR(c));
-                    } else if (!strcasecmp(field, "size")) {
+                    else if (!strcasecmp(field, "size")) {
                         if (subfield && *subfield) {
                             int ns;
                             if ((ns = search_block(subfield, size_names, false)) > -1) {
@@ -956,35 +861,10 @@ in the vault (vnum: 453) now and then. you can just use
                             }
                         }
                         *str = '\0'; /* so the parser know we recognize 'skillset' as a field */
-                    } else if (!strcasecmp(field, "saving_fortitude")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_SAVE_MOD(c, SAVING_FORTITUDE) += addition;
-                        }
-                        snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_FORTITUDE));
-                    } else if (!strcasecmp(field, "saving_reflex")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_SAVE_MOD(c, SAVING_REFLEX) += addition;
-                        }
-                        snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_REFLEX));
-                    } else if (!strcasecmp(field, "saving_will")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_SAVE_MOD(c, SAVING_WILL) += addition;
-                        }
-                        snprintf(str, slen, "%d", GET_SAVE_MOD(c, SAVING_WILL));
                     }
-
                     break;
                 case 't':
-                    if (!strcasecmp(field, "thirst")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_COND(c, THIRST) = MAX(-1, MIN(addition, 24));
-                        }
-                        snprintf(str, slen, "%d", GET_COND(c, THIRST));
-                    } else if (!strcasecmp(field, "tnl")) {
+                    if (!strcasecmp(field, "tnl")) {
                         snprintf(str, slen, "%d", level_exp(c, GET_LEVEL(c) + 1));
                     }
                     break;
@@ -1021,22 +901,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'w':
                     if (!strcasecmp(field, "weight"))
                         snprintf(str, slen, "%s", fmt::format("{}", GET_WEIGHT(c)).c_str());
-                    else if (!strcasecmp(field, "wis")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->mod(CharAttribute::Wisdom, addition);
-                        }
-                        snprintf(str, slen, "%d", GET_WIS(c));
-                    }
-                    break;
-                case 'z':
-                    if (!strcasecmp(field, "zenni")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = atoll(subfield);
-                            c->mod(CharMoney::Carried, addition);
-                        }
-                        snprintf(str, slen, "%lld", GET_GOLD(c));
-                    }
+            
                     break;
             } /* switch *field */
 
@@ -1058,10 +923,10 @@ in the vault (vnum: 453) now and then. you can just use
                                GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
                 }
             }
+
         } /* if (c) ...*/
 
         else if (o) {
-            if (text_processed(field, subfield, vd, str, slen)) return;
 
             *str = '\x1';
             switch (LOWER(*field)) {
@@ -1311,7 +1176,11 @@ in the vault (vnum: 453) now and then. you can just use
         } /* if (o) ... */
 
         else if (r) {
-            if (text_processed(field, subfield, vd, str, slen)) return;
+
+            if(auto result = r->dgCallMember(field, subfield ? subfield : ""); result) {
+                snprintf(str, slen, "%s", result->c_str());
+                return;
+            }
 
             /* special handling of the void, as it stores all 'full global' variables */
             if (r->vn == 0) {
@@ -1385,8 +1254,7 @@ in the vault (vnum: 453) now and then. you can just use
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "fishing")) {
-                room_rnum thisroom = real_room(r->vn);
-                if (ROOM_FLAGGED(thisroom, ROOM_FISHING))
+                if (ROOM_FLAGGED(r, ROOM_FISHING))
                     snprintf(str, slen, "1");
                 else
                     snprintf(str, slen, "0");
@@ -1396,243 +1264,12 @@ in the vault (vnum: 453) now and then. you can just use
                 snprintf(str, slen, "%s", zone_table[r->zone].name);
             else if (!strcasecmp(field, "roomflag")) {
                 if (subfield && *subfield) {
-                    room_rnum thisroom = real_room(r->vn);
                     if (check_flags_by_name_ar(r->room_flags, NUM_ROOM_FLAGS, subfield, room_bits) > 0)
                         snprintf(str, slen, "1");
                     else
                         snprintf(str, slen, "0");
                 } else
                     snprintf(str, slen, "0");
-            } else if (!strcasecmp(field, "north")) {
-                if (R_EXIT(r, NORTH)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTH)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, NORTH)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, NORTH)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, NORTH)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s",
-                                         roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, NORTH)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "east")) {
-                if (R_EXIT(r, EAST)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, EAST)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, EAST)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, EAST)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, EAST)->to_room) ; roomFound != world.end())
-                                snprintf(str, slen, "s",
-                                         roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, EAST)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "south")) {
-                if (R_EXIT(r, SOUTH)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTH)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, SOUTH)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, SOUTH)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, SOUTH)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, SOUTH)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "west")) {
-                if (R_EXIT(r, WEST)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, WEST)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, WEST)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, WEST)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, WEST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, WEST)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "up")) {
-                if (R_EXIT(r, UP)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, UP)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, UP)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, UP)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, UP)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, UP)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "down")) {
-                if (R_EXIT(r, DOWN)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, DOWN)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, DOWN)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, DOWN)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, DOWN)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, DOWN)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "northwest")) {
-                if (R_EXIT(r, NORTHWEST)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTHWEST)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, NORTHWEST)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, NORTHWEST)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, NORTHWEST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, NORTHWEST)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "northeast")) {
-                if (R_EXIT(r, NORTHEAST)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, NORTHEAST)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, NORTHEAST)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, NORTHEAST)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, NORTHEAST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, NORTHEAST)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "southwest")) {
-                if (R_EXIT(r, SOUTHWEST)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTHWEST)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, SOUTHWEST)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, SOUTHWEST)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, SOUTHWEST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, SOUTHWEST)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "southeast")) {
-                if (R_EXIT(r, SOUTHEAST)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, SOUTHEAST)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, SOUTHEAST)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, SOUTHEAST)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, SOUTHEAST)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, SOUTHEAST)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "inside")) {
-                if (R_EXIT(r, INDIR)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, INDIR)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, INDIR)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, INDIR)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, INDIR)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, INDIR)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "outside")) {
-                if (R_EXIT(r, OUTDIR)) {
-                    if (subfield && *subfield) {
-                        if (!strcasecmp(subfield, "vnum"))
-                            snprintf(str, slen, "%d", GET_ROOM_VNUM(R_EXIT(r, OUTDIR)->to_room));
-                        else if (!strcasecmp(subfield, "key"))
-                            snprintf(str, slen, "%d", R_EXIT(r, OUTDIR)->key);
-                        else if (!strcasecmp(subfield, "bits"))
-                            sprintbit(R_EXIT(r, OUTDIR)->exit_info, exit_bits, str, slen);
-                        else if (!strcasecmp(subfield, "room")) {
-                            if (auto roomFound = world.find(R_EXIT(r, OUTDIR)->to_room); roomFound != world.end())
-                                snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                            else
-                                *str = '\0';
-                        }
-                    } else /* no subfield - default to bits */
-                        sprintbit(R_EXIT(r, OUTDIR)->exit_info, exit_bits, str, slen);
-                } else
-                    *str = '\0';
             } else {
                 if (SCRIPT(r)) { /* check for global var */
                     for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
