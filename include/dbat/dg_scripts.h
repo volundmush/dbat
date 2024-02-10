@@ -154,6 +154,21 @@ std::string toDgUID(const DgUID& uid);
 
 #define SCRIPT_ERROR_CODE     (-9999999)   /* this shouldn't happen too often */
 
+struct trig_proto {
+    trig_proto() = default;
+    explicit trig_proto(const nlohmann::json& j);
+    trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
+    int8_t attach_type{};            /* mob/obj/wld intentions          */
+    int8_t data_type{};                /* type of game_data for trig      */
+    std::string name;
+    long trigger_type{};            /* type of trigger (for bitvector) */
+    int narg{};                /* numerical argument              */
+    std::string arglist{};            /* argument list                   */
+    std::vector<std::string> lines;
+    std::set<std::shared_ptr<trig_data>> instances;
+    nlohmann::json serialize();
+};
+
 /* one line of the trigger */
 struct cmdlist_element {
     char *cmd{};                /* one line of a trigger */
@@ -172,61 +187,130 @@ struct trig_var_data {
     struct trig_var_data *next{};
 };
 
-/* structure for triggers */
-struct trig_data {
-    trig_data() = default;
-    explicit trig_data(const nlohmann::json& j);
-    nlohmann::json serializeProto();
-    nlohmann::json serializeInstance();
-    std::string serializeLocation();
-    trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
-    int8_t attach_type{};            /* mob/obj/wld intentions          */
-    int8_t data_type{};                /* type of game_data for trig      */
-    char *name{};                    /* name of trigger                 */
-    long trigger_type{};            /* type of trigger (for bitvector) */
-    struct cmdlist_element *cmdlist{};    /* top of command list             */
-    struct cmdlist_element *curr_state{};    /* ptr to current line of trigger  */
-    int narg{};                /* numerical argument              */
-    char *arglist{};            /* argument list                   */
-    int depth{};                /* depth into nest ifs/whiles/etc  */
-    int loops{};                /* loop iteration counter          */
-    double waiting{0.0};    /* event to pause the trigger      */
-    bool purged{};            /* trigger is set to be purged     */
-    struct trig_var_data *var_list{};    /* list of local vars for trigger  */
-    DgUID owner{};
-    int order{0};
-    int countLine(struct cmdlist_element *c);
+enum class NestType : uint8_t {
+    IF = 0,
+    WHILE = 1,
+    SWITCH = 2
+};
 
-    bool active{false};
-    void activate();
-    void deactivate();
+enum class DgScriptState : uint8_t {
+    DORMANT = 0,
+    RUNNING = 1,
+    WAITING = 2,
+    ERROR = 3,
+    DONE = 4,
+    PURGED = 5
+};
+
+class DgScriptException : public std::exception {
+private:
+    std::string message;
+
+public:
+    // Constructor taking a std::string parameter
+    explicit DgScriptException(const std::string& msg) : message(msg) {}
+
+    // Override the what() method to return the error message
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
+
+struct HasVars {
+    std::unordered_map<std::string, std::string> vars;
+    void addVar(const std::string &name, const std::string &value);
+    std::string getVar(const std::string& name);
+};
+
+/* structure for triggers */
+struct trig_data : public HasVars {
+    trig_data(struct script_data *sc, std::shared_ptr<trig_proto> parent);
+
+    nlohmann::json serialize();
+    std::string serializeLocation();
 
     int64_t id{};
     time_t generation{};
 
+    std::shared_ptr<trig_proto> parent;
+    struct script_data *sc;
+
+    std::vector<std::pair<NestType, std::size_t>> depth; /* depth into nest ifs/whiles/etc  */
+    std::size_t lineNumber{0};
+    int loops{};                /* loop iteration counter          */
+    int totalLoops{};
+    double waiting{0.0};    /* event to pause the trigger      */
+    bool purged{};            /* trigger is set to be purged     */
+    int order{0};
+    bool active{false};
+    DgScriptState state{DgScriptState::DORMANT};
+    void activate();
+    void deactivate();
+
     struct trig_data *next{};
     struct trig_data *next_in_world{};    /* next in the global trigger list */
-    void deserializeInstance(const nlohmann::json& j);
+    void deserialize(const nlohmann::json& j);
     void deserializeLocation(const std::string& txt);
+
+    
+
+    void reset();
+    void setState(DgScriptState st);
+
+    int execute();
+    int executeBlock(std::size_t start, std::size_t end);
+    std::string getLine(std::size_t num);
+
+    bool processIf(const std::string &cond);
+
+    std::string evalExpr(const std::string& expr);
+    std::string varSubst(const std::string& expr);
+    std::string handleSubst(const std::string& expr);
+
+    std::optional<std::string> evalLhsOpRhs(const std::string& expr);
+
+    std::string evalOp(const std::string& op, const std::string& lhr, const std::string& rhr);
+
+    std::string evalNumericOp(const std::string& op, const std::string &lhs, const std::string &rhs);
+
+    bool truthy(const std::string& expr);
+
+    std::size_t findElseEnd(bool matchElseIf = true, bool matchElse = true);
+    std::size_t findEnd();
+    std::size_t findDone();
+    std::size_t findCase(const std::string& cond);
+
+    void processEval(const std::string& expr);
+    void extractValue(const std::string& expr);
+    void processContext(const std::string& expr);
+    void processGlobal(const std::string& cmd);
+    void processRemote(const std::string& cmd);
+    void processRdelete(const std::string& cmd);
+    void processSet(const std::string& cmd);
+    void processUnset(const std::string& cmd);
+    void processWait(const std::string& cmd);
+    void processAttach(const std::string& cmd);
+    void processDetach(const std::string& cmd);
+
 };
 
 
 /* a complete script (composed of several triggers) */
-struct script_data {
+struct script_data : public HasVars {
     script_data() = default;
-    explicit script_data(DgUID uid) : script_data() {
-        owner = uid;
+    explicit script_data(struct unit_data *u) : script_data() {
+        owner = u;
     };
     long types{};                /* bitvector of trigger types */
     struct trig_data *trig_list{};            /* list of triggers           */
-    struct trig_var_data *global_vars{};    /* list of global variables   */
     bool purged{};                /* script is set to be purged */
-    long context{};                /* current context for statics */
-    DgUID owner{};
-
+    struct unit_data* owner{};
     struct script_data *next{};        /* used for purged_scripts    */
     void activate();
     void deactivate();
+
+    std::unordered_map<std::string, std::string> vars;
+    trig_var_data *getVar(const std::string& name);
 };
 
 /* The event data for the wait command */
@@ -448,12 +532,9 @@ extern int char_has_item(char *item, struct char_data *ch);
 extern void var_subst(void *go, struct script_data *sc, trig_data *trig,
                       int type, char *line, char *buf);
 
-extern int text_processed(char *field, char *subfield, struct trig_var_data *vd,
-                          char *str, size_t slen);
+extern std::optional<std::string> text_processed(char *field, char *subfield, struct trig_var_data *vd);
 
-extern void find_replacement(void *go, struct script_data *sc, trig_data *trig,
-                             int type, char *var, char *field, char *subfield, char *str, size_t slen);
-
+extern std::string find_replacement(trig_data *trig, char *var, char *field, char *subfield);
 
 /* From dg_handler.c */
 extern void free_var_el(struct trig_var_data *var);
@@ -505,13 +586,13 @@ extern room_rnum obj_room(obj_data *obj);
 /* Macros for scripts */
 
 #define UID_CHAR   '#'
-#define GET_TRIG_NAME(t)          ((t)->name)
-#define GET_TRIG_RNUM(t)          ((t)->vn)
-#define GET_TRIG_VNUM(t)      (trig_index[(t)->vn].vn)
-#define GET_TRIG_TYPE(t)          ((t)->trigger_type)
-#define GET_TRIG_NARG(t)          ((t)->narg)
-#define GET_TRIG_ARG(t)           ((t)->arglist)
-#define GET_TRIG_VARS(t)      ((t)->var_list)
+#define GET_TRIG_NAME(t)          ((t)->parent->name)
+#define GET_TRIG_RNUM(t)          ((t)->parent->vn)
+#define GET_TRIG_VNUM(t)          ((t)->parent->vn)
+#define GET_TRIG_TYPE(t)          ((t)->parent->trigger_type)
+#define GET_TRIG_NARG(t)          ((t)->parent->narg)
+#define GET_TRIG_ARG(t)           ((t)->parent->arglist)
+#define GET_TRIG_VARS(t)          ((t)->var_list)
 
 #define GET_TRIG_DEPTH(t)         ((t)->depth)
 #define GET_TRIG_LOOPS(t)         ((t)->loops)

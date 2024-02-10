@@ -13,6 +13,7 @@
 #include "dbat/shop.h"
 #include "dbat/dg_olc.h"
 #include "dbat/constants.h"
+#include "dbat/dg_scripts.h"
 
 
 /*
@@ -473,7 +474,14 @@ static const std::map<std::string, int> _dirNames = {
 
 };
 
-std::optional<std::string> room_data::dgCallMember(const std::string& member, const std::string& arg) {
+const std::vector<std::string> sky_look = {
+                        "sunny",
+                        "cloudy",
+                        "rainy",
+                        "lightning"
+                };
+
+std::optional<std::string> room_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     std::string lmember = member;
     to_lower(lmember);
     trim(lmember);
@@ -504,6 +512,52 @@ std::optional<std::string> room_data::dgCallMember(const std::string& member, co
                 sprintbit(ex->exit_info, exit_bits, bitholder, MAX_STRING_LENGTH);
                 return bitholder;
             }
+    }
+
+    if(lmember == "name") return name;
+    if(lmember == "sector") return sector_types[sector_type];
+    if(lmember == "gravity") return fmt::format("{}", (int64_t)getGravity());
+
+    if(lmember == "vnum") {
+        if(!arg.empty()) {
+            auto v = atoll(arg.c_str());
+            return vn == v ? "1":"0";
+        }
+        return fmt::format("{}", vn);
+    }
+
+    if(lmember == "contents") {
+        if(arg.empty()) return contents ? contents->getUID(false) : "";
+        obj_vnum v = atoll(arg.c_str());
+        auto found = findObjectVnum(v);
+        return found ? found->getUID(false) : "";
+    }
+
+    if(lmember == "people") return people ? people->getUID(false) : "";
+
+    if(lmember == "id") return getUID(false);
+
+    if(lmember == "weather") return !room_flags.test(ROOM_INDOORS) ? sky_look[weather_info.sky] : "";
+
+    if(lmember == "fishing") return room_flags.test(ROOM_FISHING) ? "1" : "0";
+
+    if(lmember == "roomflag") {
+        if(arg.empty()) return "0";
+        int flag = get_flag_by_name(room_bits, (char*)arg.c_str());
+        if(flag == -1) return "0";
+        return room_flags.test(flag) ? "1" : "0";
+    }
+
+    if(lmember == "varexists") return script->getVar(arg) ? "1" : "0";
+
+    if(lmember == "zonenumber") return fmt::format("{}", zone);
+    if(lmember == "zonename") return zone_table[zone].name;
+
+    if(auto found = script->getVar(lmember); found) {
+        return found->value;
+    } else {
+        script_log("Trigger: %s, VNum %d. unknown room field: '%s'",
+                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), lmember.c_str());
     }
 
     return {};

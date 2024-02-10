@@ -18,6 +18,8 @@
 #include "dbat/players.h"
 #include "dbat/transformation.h"
 #include "dbat/weather.h"
+#include "dbat/constants.h"
+#include "dbat/dg_scripts.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
@@ -1546,8 +1548,10 @@ static const std::map<std::string, int> _aflags = {
     {"flying", AFF_FLYING}
 };
 
+static const std::set<std::string> _senseiCheck = {"sensei", "class"};
 
-std::optional<std::string> char_data::dgCallMember(const std::string& member, const std::string& arg) {
+
+std::optional<std::string> char_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     std::string lmember = member;
     to_lower(lmember);
     trim(lmember);
@@ -1596,6 +1600,270 @@ std::optional<std::string> char_data::dgCallMember(const std::string& member, co
 
     if(auto af = _aflags.find(lmember); af != _aflags.end()) {
         return AFF_FLAGGED(this, af->second) ? "1" : "0";
+    }
+
+    if(lmember == "aaaaa") {
+        // Is this even used?
+        return "0";
+    }
+
+    if(lmember == "affect") {
+        if(arg.empty()) return "0";
+        int affect = get_flag_by_name(affected_bits, (char*)arg.c_str());
+        return (affect != NOFLAG && AFF_FLAGGED(this, affect)) ? "1" : "0";
+    }
+
+    if(lmember == "alias") {
+        return GET_PC_NAME(this);
+    }
+
+    if(lmember == "align") {
+        if (!arg.empty()) {
+            int addition = atof(arg.c_str());
+            set(CharAlign::GoodEvil, std::clamp<int>(addition, -1000, 1000));
+        }
+        return fmt::format("{}", GET_ALIGNMENT(this));
+    }
+
+    if(lmember == "canbeseen") {
+        if(trig->owner.index() != 2) return "0";
+        auto owner = std::get<2>(trig->owner);
+        return CAN_SEE(owner, this) ? "1" : "0";
+    }
+
+    if(lmember == "carry") {
+        return CARRYING(this) ? "1" : "0";
+    }
+
+    if(lmember == "clan") {
+        return clan && strstr(clan, arg.c_str()) ? "1": "0";
+    }
+
+    if(_senseiCheck.contains(lmember)) {
+        return sensei::getName(chclass);
+    }
+
+    if(lmember == "death") {
+        return fmt::format("{}", GET_DTIME(this));
+    }
+
+    if(lmember == "drag") {
+        return DRAGGING(this) ? "1" : "0";
+    }
+
+    if(lmember == "eq") {
+        if(arg.empty()) return "";
+        else if(arg == "*") {
+            for(auto i = 0; i < NUM_WEARS;i++) if(equipment[i]) return "1";
+            return "0";
+        }
+        else {
+            auto pos = find_eq_pos_script((char*)arg.c_str());
+            if(pos == -1) return "";
+            if(equipment[pos]) return equipment[pos]->getUID(false);
+            return "";
+        }
+    }
+
+    if(lmember == "exp") {
+        if (!arg.empty()) {
+            int64_t addition = std::max<int64_t>(0, atof(arg.c_str()));
+            modExperience(addition);
+        }
+        return fmt::format("{}", GET_EXP(this));
+    }
+
+    if(lmember == "fighting") {
+        return fighting ? fighting->getUID(false) : "";
+    }
+
+    if(lmember == "followers") {
+        return followers && followers->follower ? followers->follower->getUID(false) : "";
+    }
+
+    if(lmember == "has_item") {
+        if(arg.empty()) return "";
+        return fmt::format("{}", char_has_item((char*)arg.c_str(), this));
+    }
+
+    if(lmember == "hisher") return HSHR(this);
+    if(lmember == "heshe") return HSSH(this);
+    if(lmember == "himher") return HMHR(this);
+
+    if(lmember == "hitp") {
+        if (!arg.empty()) {
+            int64_t addition = atof(arg.c_str());
+            if (addition > 0) {
+                incCurHealth(addition);
+            } else {
+                decCurHealth(addition);
+            }
+            update_pos(this);
+        }
+        return fmt::format("{}", GET_HIT(this));
+    }
+
+    if(lmember == "id") return getUID(false);
+
+    if(lmember == "is_pc") return IS_NPC(this) ? "1":"0";
+
+    if(lmember == "inventory") {
+        if(arg.empty()) return contents ? contents->getUID(false) : "";
+        obj_vnum v = atoll(arg.c_str());
+        auto found = findObjectVnum(v);
+        return found ? found->getUID(false) : "";
+    }
+
+    if(lmember == "level") return fmt::format("{}", GET_LEVEL(this));
+
+    if(lmember == "maxhitp") {
+        if(!arg.empty()) {
+            int64_t addition = atof(arg.c_str());
+        }
+        return fmt::format("{}", GET_MAX_HIT(this));
+    }
+
+    if(lmember == "mana") {
+        if (!arg.empty()) {
+            int64_t addition = atof(arg.c_str());
+            if (addition > 0) {
+                incCurKI(addition);
+            } else {
+                decCurKI(addition);
+            }
+        }
+        return fmt::format("{}", getCurKI());
+    }
+
+    if(lmember == "maxmana") {
+        if(!arg.empty()) {
+            int64_t addition = atof(arg.c_str());
+        }
+        return fmt::format("{}", GET_MAX_MANA(this));
+    }
+
+    if(lmember == "move") {
+        if (!arg.empty()) {
+            int64_t addition = atof(arg.c_str());
+            if (addition > 0) {
+                incCurST(addition);
+            } else {
+                decCurST(addition);
+            }
+        }
+        return fmt::format("{}", getCurST());
+    }
+
+    if(lmember == "maxmove") {
+        if(!arg.empty()) {
+            int64_t addition = atof(arg.c_str());
+        }
+        return fmt::format("{}", GET_MAX_MOVE(this));
+    }
+
+    if(lmember == "master") return master ? master->getUID(false) : "";
+
+    if(lmember == "name") return GET_NAME(this);
+
+    if(lmember == "next_in_room") return next_in_room ? next_in_room->getUID(false) : "";
+
+    if(lmember == "pos") {
+        if(!arg.empty()) {
+            // This is stupid. It's the dumbest way of doing it. But I guess it works.
+            for (auto i = POS_SLEEPING; i <= POS_STANDING; i++) {
+                /* allows : Sleeping, Resting, Sitting, Fighting, Standing */
+                if (iequals(arg, position_types[i])) {
+                    position = i;
+                    break;
+                }
+            }
+        }
+        return position_types[position];
+    }
+
+    if(lmember == "prac") {
+        if(!arg.empty()) {
+            int addition = atof(arg.c_str());
+            modPractices(addition);
+        }
+        return fmt::format("{}", GET_PRACTICES(this));
+    }
+
+    if(lmember == "plr") {
+        if(arg.empty()) return "0";
+        int flag = get_flag_by_name(player_bits, (char*)arg.c_str());
+        if(flag == -1) return "0";
+        return playerFlags.test(flag) ? "1" : "0";
+    }
+
+    if(lmember == "pref") {
+        if(arg.empty()) return "0";
+        int flag = get_flag_by_name(preference_bits, (char*)arg.c_str());
+        if(flag == -1) return "0";
+        return pref.test(flag) ? "1" : "0";
+    }
+
+    if(lmember == "room") {
+        auto r = getRoom();
+        return r ? r->getUID(false) : "";
+    }
+
+    if(lmember == "race") return race::getName(race);
+
+    if(lmember == "rpp") {
+        if(!arg.empty()) {
+            int addition = atof(arg.c_str());
+            modRPP(addition);
+        }
+        return fmt::format("{}", getRPP());
+    }
+
+    if(lmember == "sex") return genders[(int)GET_SEX(this)];
+
+    if(lmember == "size") {
+        if(!arg.empty()) {
+            auto ns = search_block((char*)arg.c_str(), size_names, false);
+            if(ns > -1) setSize(ns);
+        }
+        return size_names[getSize()];
+    }
+
+    if(lmember == "skill") return skill_percent(this, (char*)arg.c_str());
+
+    if(lmember == "skillset") {
+        if(!arg.empty()) {
+            char skillname[MAX_INPUT_LENGTH], *amount;
+            amount = one_word((char*)arg.c_str(), skillname);
+            skip_spaces(&amount);
+            if (amount && *amount && is_number(amount)) {
+                int skillnum = find_skill_num(skillname, SKTYPE_SKILL);
+                if (skillnum > 0) {
+                    int new_value = std::clamp<double>(atof(amount), 0, 100);
+                    SET_SKILL(this, skillnum, new_value);
+                }
+            }
+        }
+        return "";
+    }
+
+    if(lmember == "tnl") return fmt::format("{}", level_exp(this, GET_LEVEL(this)+1));
+
+    if(lmember == "vnum") {
+        if(!arg.empty()) {
+            auto v = atoll(arg.c_str());
+            return vn == v ? "1":"0";
+        }
+        return fmt::format("{}", vn);
+    }
+
+    if(lmember == "varexists") return script->getVar(arg) ? "1" : "0";
+
+    // nothing left to do but try global variables...
+    if(auto found = script->getVar(lmember); found) {
+        return found->value;
+    } else {
+        script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
+                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), lmember.c_str());
     }
 
     return {};

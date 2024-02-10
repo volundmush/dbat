@@ -146,17 +146,14 @@ int char_has_item(char *item, struct char_data *ch) {
         return 1;
 }
 
-int text_processed(char *field, char *subfield, struct trig_var_data *vd,
-                   char *str, size_t slen) {
+std::optional<std::string> text_processed(char *field, char *subfield, struct trig_var_data *vd) {
     char *p, *p2;
     char tmpvar[MAX_STRING_LENGTH];
 
-    if (!strcasecmp(field, "strlen")) {                     /* strlen    */
+    if (iequals(field, "strlen")) {                     /* strlen    */
         char limit[200];
-        sprintf(limit, "%" SZT, strlen(vd->value));
-        snprintf(str, slen, "%d", atoi(limit));
-        return true;
-    } else if (!strcasecmp(field, "trim")) {                /* trim      */
+        return fmt::format("{}", strlen(vd->value));
+    } else if (iequals(field, "trim")) {                /* trim      */
         /* trim whitespace from ends */
         snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", vd->value); /* -1 to use later*/
         p = tmpvar;
@@ -164,40 +161,28 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
         while (*p && isspace(*p)) p++;
         while ((p <= p2) && isspace(*p2)) p2--;
         if (p > p2) { /* nothing left */
-            *str = '\0';
-            return true;
+            return "";
         }
         *(++p2) = '\0';                                         /* +1 ok (see above) */
-        snprintf(str, slen, "%s", p);
-        return true;
-    } else if (!strcasecmp(field, "contains")) {            /* contains  */
-        if (str_str(vd->value, subfield))
-            strcpy(str, "1");
-        else
-            strcpy(str, "0");
-        return true;
-    } else if (!strcasecmp(field, "car")) {                 /* car       */
-        char *car = vd->value;
-        while (*car && !isspace(*car))
-            *str++ = *car++;
-        *str = '\0';
-        return true;
-
-    } else if (!strcasecmp(field, "cdr")) {                 /* cdr       */
+        return p;
+    } else if (iequals(field, "contains")) {            /* contains  */
+        return str_str(vd->value, subfield) ? "1" : "0";
+    } else if (iequals(field, "car")) {
+        auto sp = split(vd->value, ' ');
+        if(!sp.empty()) return sp[0];
+        return "";
+    } else if (iequals(field, "cdr")) {                 /* cdr       */
         char *cdr = vd->value;
         while (*cdr && !isspace(*cdr)) cdr++; /* skip 1st field */
         while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
-
-        snprintf(str, slen, "%s", cdr);
-        return true;
-    } else if (!strcasecmp(field, "charat")) {              /* CharAt    */
+        return cdr;
+    } else if (iequals(field, "charat")) {              /* CharAt    */
         size_t len = strlen(vd->value), dgindex = atoi(subfield);
         if (dgindex > len || dgindex < 1)
-            strcpy(str, "");
+            return "";
         else
-            snprintf(str, slen, "%c", vd->value[dgindex - 1]);
-        return true;
-    } else if (!strcasecmp(field, "mudcommand")) {
+            return fmt::format("{}", vd->value[dgindex - 1]);
+    } else if (iequals(field, "mudcommand")) {
         /* find the mud command returned from this text */
 /* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
 /* depending on what patches you've got applied.                      */
@@ -210,13 +195,12 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd,
                 break;
 
         if (*cmd_info[cmd].command == '\n')
-            *str = '\0';
+            return "";
         else
-            snprintf(str, slen, "%s", cmd_info[cmd].command);
-        return true;
+            return fmt::format("{}", cmd_info[cmd].command);
     }
 
-    return false;
+    return {};
 }
 
 static char *send_cmd[] = {"msend ", "osend ", "wsend "};
@@ -238,9 +222,8 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 
 /* sets str to be the value of var.field */
-void
-find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield,
-                 char *str, size_t slen) {
+std::string find_replacement(trig_data *trig, char *var, char *field, char *subfield) {
+    int type = trig->data_type;
     struct trig_var_data *vd = nullptr;
     char_data *ch, *c = nullptr, *rndm;
     obj_data *obj, *o = nullptr;
@@ -248,68 +231,69 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
     char *name;
     int num, count, i, j, doors;
 
-    auto unit = (unit_data*)go;
+    for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
+        if (iequals(vd->name, var))
+            break;
 
-    *str = '\0';
+    unit_data *u = nullptr;
+    switch(trig->owner.index()) {
+        case 0:
+            u = std::get<0>(trig->owner);
+            break;
+        case 1:
+            u = std::get<1>(trig->owner);
+            break;
+        case 2:
+            u = std::get<2>(trig->owner);
+            break;
+    }
 
-    /* X.global() will have a nullptr trig */
-    if (trig)
-        for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
-            if (!strcasecmp(vd->name, var))
-                break;
-
-    /* some evil waitstates could crash the mud if sent here with sc==nullptr*/
-    if (!vd && sc)
-        for (vd = sc->global_vars; vd; vd = vd->next)
-            if (!strcasecmp(vd->name, var) &&
-                (vd->context == 0 || vd->context == sc->context))
+    if (!vd)
+        for (vd = u->script->global_vars; vd; vd = vd->next)
+            if (iequals(vd->name, var) && (vd->context == 0 || vd->context == u->script->context))
                 break;
 
     if (!*field) {
-        if (vd)
-            snprintf(str, slen, "%s", vd->value);
+        if (vd) return vd->value;
         else {
-            if (!strcasecmp(var, "self")) {
-                auto uid = unit->getUID(false);
-                snprintf(str, slen, "%s", uid.c_str());
-            } else if (!strcasecmp(var, "global")) {
+            if (iequals(var, "self")) {
+                return u->getUID(false);
+            } else if (iequals(var, "global")) {
                 /* so "remote varname %global%" will work */
-                snprintf(str, slen, "%d", world[0].getUID(false).c_str());
-                return;
-            } else if (!strcasecmp(var, "ctime"))
-                snprintf(str, slen, "%ld", time(nullptr));
-            else if (!strcasecmp(var, "door"))
-                snprintf(str, slen, "%s", door[type]);
-            else if (!strcasecmp(var, "force"))
-                snprintf(str, slen, "%s", force[type]);
-            else if (!strcasecmp(var, "load"))
-                snprintf(str, slen, "%s", load[type]);
-            else if (!strcasecmp(var, "purge"))
-                snprintf(str, slen, "%s", purge[type]);
-            else if (!strcasecmp(var, "teleport"))
-                snprintf(str, slen, "%s", teleport[type]);
-            else if (!strcasecmp(var, "damage"))
-                snprintf(str, slen, "%s", xdamage[type]);
-            else if (!strcasecmp(var, "send"))
-                snprintf(str, slen, "%s", send_cmd[type]);
-            else if (!strcasecmp(var, "echo"))
-                snprintf(str, slen, "%s", echo_cmd[type]);
-            else if (!strcasecmp(var, "echoaround"))
-                snprintf(str, slen, "%s", echoaround_cmd[type]);
-            else if (!strcasecmp(var, "zoneecho"))
-                snprintf(str, slen, "%s", zoneecho[type]);
-            else if (!strcasecmp(var, "asound"))
-                snprintf(str, slen, "%s", asound[type]);
-            else if (!strcasecmp(var, "at"))
-                snprintf(str, slen, "%s", at[type]);
-            else if (!strcasecmp(var, "transform"))
-                snprintf(str, slen, "%s", transform[type]);
-            else if (!strcasecmp(var, "recho"))
-                snprintf(str, slen, "%s", recho[type]);
+                return world[0].getUID(false);
+            } else if (iequals(var, "ctime"))
+                return fmt::format("{}", time(nullptr));
+            else if (iequals(var, "door"))
+                return door[type];
+            else if (iequals(var, "force"))
+                return force[type];
+            else if (iequals(var, "load"))
+                return load[type];
+            else if (iequals(var, "purge"))
+                return purge[type];
+            else if (iequals(var, "teleport"))
+                return teleport[type];
+            else if (iequals(var, "damage"))
+                return xdamage[type];
+            else if (iequals(var, "send"))
+                return send_cmd[type];
+            else if (iequals(var, "echo"))
+                return echo_cmd[type];
+            else if (iequals(var, "echoaround"))
+                return echoaround_cmd[type];
+            else if (iequals(var, "zoneecho"))
+                return zoneecho[type];
+            else if (iequals(var, "asound"))
+                return asound[type];
+            else if (iequals(var, "at"))
+                return at[type];
+            else if (iequals(var, "transform"))
+                return transform[type];
+            else if (iequals(var, "recho"))
+                return recho[type];
             else
-                *str = '\0';
+                return "";
         }
-
         return;
     } else {
         if (vd) {
@@ -317,7 +301,7 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
 
             switch (type) {
                 case MOB_TRIGGER:
-                    ch = (char_data *) go;
+                    ch = (char_data *)u;
 
                     if ((o = get_object_in_equip(ch, name)));
                     else if ((o = get_obj_in_list(name, ch->contents)));
@@ -329,7 +313,7 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
 
                     break;
                 case OBJ_TRIGGER:
-                    obj = (obj_data *) go;
+                    obj = (obj_data *)u;
 
                     if ((c = get_char_by_obj(obj, name)));
                     else if ((o = get_obj_by_obj(obj, name)));
@@ -337,7 +321,7 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
 
                     break;
                 case WLD_TRIGGER:
-                    room = (struct room_data *) go;
+                    room = (room_data *)u;
 
                     if ((c = get_char_by_room(room, name)));
                     else if ((o = get_obj_by_room(room, name)));
@@ -346,54 +330,51 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
                     break;
             }
         } else {
-            if (!strcasecmp(var, "self")) {
+            if (iequals(var, "self")) {
                 c = nullptr;
                 r = nullptr;
                 o = nullptr;
                 switch (type) {
                     case MOB_TRIGGER:
-                        c = (char_data *) go;
+                        c = (char_data *)u;
                         break;     /* the room.  - Welcor        */
                     case OBJ_TRIGGER:
-                        o = (obj_data *) go;
+                        o = (obj_data *)u;
                         break;
                     case WLD_TRIGGER:
-                        r = (struct room_data *) go;
+                        r = (struct room_data *)u;
                         break;
                 }
-            } else if (!strcasecmp(var, "global")) {
-                struct script_data *thescript = SCRIPT(&world[0]);
-                *str = '\0';
+            } else if (iequals(var, "global")) {
+                auto thescript = SCRIPT(&world[0]);
                 if (!thescript) {
                     script_log("Attempt to find global var. Apparently the void has no script.");
                     return;
                 }
                 for (vd = thescript->global_vars; vd; vd = vd->next)
-                    if (!strcasecmp(vd->name, field))
+                    if (iequals(vd->name, field))
                         break;
 
-                if (vd)
-                    snprintf(str, slen, "%s", vd->value);
+                if (vd) return vd->value;
 
                 return;
-            } else if (!strcasecmp(var, "people")) {
-                snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? trgvar_in_room(num) : 0);
+            } else if (iequals(var, "people")) {
+                return fmt::format("{}", ((num = atoi(field)) > 0) ? trgvar_in_room(num) : 0);
                 return;
-            } else if (!strcasecmp(var, "time")) {
-                if (!strcasecmp(field, "hour"))
-                    snprintf(str, slen, "%d", time_info.hours);
-                else if(!strcasecmp(field, "minute"))
-                    snprintf(str, slen, "%d", time_info.minutes);
-                else if(!strcasecmp(field, "second"))
-                    snprintf(str, slen, "%d", time_info.seconds);
-                else if (!strcasecmp(field, "day"))
-                    snprintf(str, slen, "%d", time_info.day + 1);
-                else if (!strcasecmp(field, "month"))
-                    snprintf(str, slen, "%d", time_info.month + 1);
-                else if (!strcasecmp(field, "year"))
-                    snprintf(str, slen, "%d", time_info.year);
-                else *str = '\0';
-                return;
+            } else if (iequals(var, "time")) {
+                if (iequals(field, "hour"))
+                    return fmt::format("{}", time_info.hours);
+                else if(iequals(field, "minute"))
+                    return fmt::format("{}", time_info.minutes);
+                else if(iequals(field, "second"))
+                    return fmt::format("{}", time_info.seconds);
+                else if (iequals(field, "day"))
+                    return fmt::format("{}", time_info.day + 1);
+                else if (iequals(field, "month"))
+                    return fmt::format("{}", time_info.month + 1);
+                else if (iequals(field, "year"))
+                    return fmt::format("{}", time_info.year);
+                else return "";
             }
 /*
 
@@ -417,49 +398,48 @@ in the vault (vnum: 453) now and then. you can just use
 **/
 
                 /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-            else if (!strcasecmp(var, "findmob")) {
+            else if (iequals(var, "findmob")) {
                 if (!field || !*field || !subfield || !*subfield) {
                     script_log("findmob.vnum(mvnum) - illegal syntax");
-                    strcpy(str, "0");
+                    return "0";
                 } else {
                     room_rnum rrnum = real_room(atof(field));
                     mob_vnum mvnum = atof(subfield);
 
                     if (rrnum == NOWHERE) {
                         script_log("findmob.vnum(ovnum): No room with vnum %d", atof(field));
-                        strcpy(str, "0");
+                        return "0";
                     } else {
                         for (i = 0, ch = world[rrnum].people; ch; ch = ch->next_in_room)
                             if (GET_MOB_VNUM(ch) == mvnum)
                                 i++;
-
-                        snprintf(str, slen, "%d", i);
+                        return fmt::format("{}", i);
                     }
                 }
             }
                 /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-            else if (!strcasecmp(var, "findobj")) {
+            else if (iequals(var, "findobj")) {
                 if (!field || !*field || !subfield || !*subfield) {
                     script_log("findobj.vnum(ovnum) - illegal syntax");
-                    strcpy(str, "0");
+                    return "0";
                 } else {
                     room_rnum rrnum = real_room(atof(field));
 
                     if (rrnum == NOWHERE) {
                         script_log("findobj.vnum(ovnum): No room with vnum %d", atof(field));
-                        strcpy(str, "0");
+                        return "0";
                     } else {
                         /* item_in_list looks within containers as well. */
-                        snprintf(str, slen, "%d", item_in_list(subfield, world[rrnum].contents));
+                        return fmt::format("{}", item_in_list(subfield, world[rrnum].contents));
                     }
                 }
-            } else if (!strcasecmp(var, "random")) {
-                if (!strcasecmp(field, "char")) {
+            } else if (iequals(var, "random")) {
+                if (iequals(field, "char")) {
                     rndm = nullptr;
                     count = 0;
 
                     if (type == MOB_TRIGGER) {
-                        ch = (char_data *) go;
+                        ch = (char_data *)u;
                         for (c = ch->getRoom()->people; c; c = c->next_in_room)
                             if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
                                 CAN_SEE(ch, c)) {
@@ -468,7 +448,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 count++;
                             }
                     } else if (type == OBJ_TRIGGER) {
-                        for (c = world[obj_room((obj_data *) go)].people; c;
+                        for (c = world[obj_room((obj_data *)u)].people; c;
                              c = c->next_in_room)
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
                                 if (!rand_number(0, count))
@@ -476,7 +456,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 count++;
                             }
                     } else if (type == WLD_TRIGGER) {
-                        for (c = ((struct room_data *) go)->people; c;
+                        for (c = ((struct room_data *)u)->people; c;
                              c = c->next_in_room)
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
 
@@ -485,27 +465,23 @@ in the vault (vnum: 453) now and then. you can just use
                                 count++;
                             }
                     }
-
-                    if (rndm)
-                        snprintf(str, slen, "%s", ((rndm)->getUID(false).c_str()));
-                    else
-                        *str = '\0';
-                } else if (!strcasecmp(field, "dir")) {
+                    return rndm ? fmt::format("{}", ((rndm)->getUID(false).c_str())) : "0";
+                } else if (iequals(field, "dir")) {
                     room_rnum in_room = NOWHERE;
 
                     switch (type) {
                         case WLD_TRIGGER:
-                            in_room = real_room(((struct room_data *) go)->vn);
+                            in_room = real_room(((struct room_data *)u)->vn);
                             break;
                         case OBJ_TRIGGER:
-                            in_room = obj_room((struct obj_data *) go);
+                            in_room = obj_room((struct obj_data *)u);
                             break;
                         case MOB_TRIGGER:
-                            in_room = IN_ROOM((struct char_data *) go);
+                            in_room = IN_ROOM((struct char_data *)u);
                             break;
                     }
                     if (in_room == NOWHERE) {
-                        *str = '\0';
+                        return "";
                     } else {
                         std::vector<int> available;
                         room = &world[in_room];
@@ -514,898 +490,83 @@ in the vault (vnum: 453) now and then. you can just use
                                 available.push_back(i);
 
                         if (available.empty()) {
-                            *str = '\0';
+                            return "";
                         } else {
                             auto dir = Random::get(available);
-                            snprintf(str, slen, "%s", dirs[*dir]);
+                            return dirs[*dir];
                         }
                     }
                 } else
-                    snprintf(str, slen, "%d", ((num = atoi(field)) > 0) ? rand_number(1, num) : 0);
+                    return fmt::format("{}", ((num = atoi(field)) > 0) ? rand_number(1, num) : 0);
 
                 return;
             }
         }
 
-        if (text_processed(field, subfield, vd, str, slen)) return;
+        if (auto res = text_processed(field, subfield, vd); res) {
+            return res.value();
+        }
 
-        if (c) {
-            
-            if (!strcasecmp(field, "global")) { /* get global of something else */
-                if (IS_NPC(c) && c->script) {
-                    find_replacement(go, c->script, nullptr, MOB_TRIGGER,
-                                     subfield, nullptr, nullptr, str, slen);
-                }
+        /* set str to some 'non-text' first */
+        if(u) {
+            if(auto result = u->dgCallMember(trig, field, subfield ? subfield : ""); result) {
+                return result.value();
             }
-            /* set str to some 'non-text' first */
-            *str = '\x1';
-
-            if(auto result = c->dgCallMember(field, subfield ? subfield : ""); result) {
-                snprintf(str, slen, "%s", result.value().c_str());
-                return;
-            }
-
-            switch (LOWER(*field)) {
-                case 'a':
-                    if (!strcasecmp(field, "aaaaa")) {
-                        strcpy(str, "0");
-                    } else if (!strcasecmp(field, "affect")) {
-                        if (subfield && *subfield) {
-                            int affect = get_flag_by_name(affected_bits, subfield);
-                            if (affect != NOFLAG && AFF_FLAGGED(c, affect))
-                                strcpy(str, "1");
-                            else
-                                strcpy(str, "0");
-                        } else
-                            strcpy(str, "0");
-                    } else if (!strcasecmp(field, "alias"))
-                        snprintf(str, slen, "%s", GET_PC_NAME(c));
-
-                    else if (!strcasecmp(field, "align")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->set(CharAlign::GoodEvil, std::clamp<int>(addition, -1000, 1000));
-                        }
-                        snprintf(str, slen, "%d", GET_ALIGNMENT(c));
-                    }
-                    break;
-                case 'c':
-                    if (!strcasecmp(field, "canbeseen")) {
-                        if ((type == MOB_TRIGGER) && !CAN_SEE(((char_data *) go), c))
-                            strcpy(str, "0");
-                        else
-                            strcpy(str, "1");
-                    } else if (!strcasecmp(field, "carry")) {
-                        if (!IS_NPC(c) && CARRYING(c))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    } else if (!strcasecmp(field, "clan")) {
-                        if (GET_CLAN(c) != nullptr && strstr(GET_CLAN(c), subfield))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    } else if (!strcasecmp(field, "class")) {
-                        if (!IS_NPC(c))
-                            snprintf(str, slen, "%s", sensei::getName(c->chclass).c_str());
-                        else
-                            snprintf(str, slen, "blank");
-                    }
-                    break;
-                case 'd':
-                    if (!strcasecmp(field, "death")) {
-                        snprintf(str, slen, "%ld", GET_DTIME(c));
-                    } else if (!strcasecmp(field, "drag")) {
-                        if (!IS_NPC(c) && DRAGGING(c))
-                            strcpy(str, "1");
-                        else
-                            strcpy(str, "0");
-                    }
-                    break;
-                case 'e':
-                    if (!strcasecmp(field, "eq")) {
-                        int pos;
-                        if (!subfield || !*subfield)
-                            *str = '\0';
-                        else if (*subfield == '*') {
-                            for (i = 0, j = 0; i < NUM_WEARS; i++)
-                                if (GET_EQ(c, i)) {
-                                    j++;
-                                    break;
-                                }
-                            if (j > 0)
-                                strcpy(str, "1");
-                            else
-                                *str = '\0';
-                        } else if ((pos = find_eq_pos_script(subfield)) < 0 || !GET_EQ(c, pos))
-                            *str = '\0';
-                        else
-                            snprintf(str, slen, "%s", ((((c)->equipment[pos]))->getUID(false).c_str()));
-                    }
-                    if (!strcasecmp(field, "exp")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = std::max<int64_t>(0, atof(subfield));
-
-                            c->modExperience(addition);
-                        }
-                        snprintf(str, slen, "%" I64T "", GET_EXP(c));
-                    }
-                    break;
-                case 'f':
-                    if (!strcasecmp(field, "fighting")) {
-                        if (FIGHTING(c))
-                            snprintf(str, slen, "%s", ((((c)->fighting))->getUID(false).c_str()));
-                        else
-                            *str = '\0';
-                    } else if (!strcasecmp(field, "follower")) {
-                        if (!c->followers || !c->followers->follower)
-                            *str = '\0';
-                        else
-                            snprintf(str, slen, "%s", ((c->followers->follower)->getUID(false).c_str()));
-                    }
-                    break;
-                case 'h':
-                    if (!strcasecmp(field, "has_item")) {
-                        if (!(subfield && *subfield))
-                            *str = '\0';
-                        else
-                            snprintf(str, slen, "%d", char_has_item(subfield, c));
-                    } else if (!strcasecmp(field, "hisher"))
-                        snprintf(str, slen, "%s", HSHR(c));
-
-                    else if (!strcasecmp(field, "heshe"))
-                        snprintf(str, slen, "%s", HSSH(c));
-
-                    else if (!strcasecmp(field, "himher"))
-                        snprintf(str, slen, "%s", HMHR(c));
-
-                    else if (!strcasecmp(field, "hitp")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = atof(subfield);
-                            if (addition > 0) {
-                                c->incCurHealth(addition);
-                            } else {
-                                c->decCurHealth(addition);
-                            }
-
-                            update_pos(c);
-                        }
-                        snprintf(str, slen, "%" I64T "", GET_HIT(c));
-                    }
-                    break;
-                case 'i':
-                    if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%s", c->getUID(false).c_str());
-
-                        /* new check for pc/npc status */
-                    else if (!strcasecmp(field, "is_pc")) {
-                        strcpy(str, IS_NPC(c) ? "1" : "0");
-                    } else if (!strcasecmp(field, "inventory")) {
-                        if (subfield && *subfield) {
-                            for (obj = c->contents; obj; obj = obj->next_content) {
-                                if (GET_OBJ_VNUM(obj) == atof(subfield)) {
-                                    snprintf(str, slen, "%s", ((obj)->getUID(false).c_str())); /* arg given, found */
-                                    return;
-                                }
-                            }
-                            if (!obj)
-                                *str = '\0'; /* arg given, not found */
-                        } else { /* no arg given */
-                            if (c->contents) {
-                                snprintf(str, slen, "%s", ((c->contents)->getUID(false).c_str()));
-                            } else {
-                                *str = '\0';
-                            }
-                        }
-                    }
-                    break;
-                case 'l':
-                    if (!strcasecmp(field, "level"))
-                        snprintf(str, slen, "%d", GET_LEVEL(c));
-                    break;
-                case 'm':
-                    if (!strcasecmp(field, "maxhitp")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = atof(subfield);
-                            //GET_MAX_HIT(c) = MAX(GET_MAX_HIT(c) + addition, 1);
-                        }
-                        snprintf(str, slen, "%" I64T "", GET_MAX_HIT(c));
-                    } else if (!strcasecmp(field, "mana")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = atof(subfield);
-                            if (addition > 0) {
-                                c->incCurKI(addition);
-                            } else {
-                                c->decCurKI(addition);
-                            }
-                        }
-                        snprintf(str, slen, "%" I64T "", (c->getCurKI()));
-                    } else if (!strcasecmp(field, "maxmana")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = atof(subfield);
-                            //GET_MAX_MANA(c) = MAX(GET_MAX_MANA(c) + addition, 1);
-                        }
-                        snprintf(str, slen, "%" I64T "", GET_MAX_MANA(c));
-                    } else if (!strcasecmp(field, "move")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = atof(subfield);
-                            if (addition > 0) {
-                                c->incCurST(addition);
-                            } else {
-                                c->decCurST(addition);
-                            }
-
-                        }
-                        snprintf(str, slen, "%" I64T "", (c->getCurST()));
-                    } else if (!strcasecmp(field, "maxmove")) {
-                        if (subfield && *subfield) {
-                            int64_t addition = atof(subfield);
-                            //GET_MAX_MOVE(c) = MAX(GET_MAX_MOVE(c) + addition, 1);
-                        }
-                        snprintf(str, slen, "%" I64T "", GET_MAX_MOVE(c));
-                    } else if (!strcasecmp(field, "master")) {
-                        if (!c->master)
-                            *str = '\0';
-                        else
-                            snprintf(str, slen, "%s", ((c->master)->getUID(false).c_str()));
-                    }
-                    break;
-                case 'n':
-                    if (!strcasecmp(field, "name")) {
-                        snprintf(str, slen, "%s", GET_NAME(c));
-                    } else if (!strcasecmp(field, "next_in_room")) {
-                        if (c->next_in_room)
-                            snprintf(str, slen, "%s", ((c->next_in_room)->getUID(false).c_str()));
-                        else
-                            *str = '\0';
-                    }
-                    break;
-                case 'p':
-                    /* Thanks to Christian Ejlertsen for this idea
-                       And to Ken Ray for speeding the implementation up :)*/
-                    if (!strcasecmp(field, "pos")) {
-                        if (subfield && *subfield) {
-                            for (i = POS_SLEEPING; i <= POS_STANDING; i++) {
-                                /* allows : Sleeping, Resting, Sitting, Fighting, Standing */
-                                if (!strncasecmp(subfield, position_types[i], strlen(subfield))) {
-                                    GET_POS(c) = i;
-                                    break;
-                                }
-                            }
-                        }
-                        snprintf(str, slen, "%s", position_types[GET_POS(c)]);
-                    } else if (!strcasecmp(field, "prac")) {
-                        if (IS_NPC(c)) {
-                            if (IN_ROOM(c) != NOWHERE) {
-                                send_to_room(IN_ROOM(c),
-                                             "Error!: Report this trigger error to the coding authorities!\r\n");
-                            }
-                        }
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->modPractices(addition);
-                        }
-                        snprintf(str, slen, "%d", GET_PRACTICES(c));
-                    } else if (!strcasecmp(field, "plr")) {
-                        if (subfield && *subfield) {
-                            int plr = get_flag_by_name(player_bits, subfield);
-                            if (plr != NOFLAG && PLR_FLAGGED(c, plr))
-                                strcpy(str, "1");
-                            else
-                                strcpy(str, "0");
-                        } else
-                            strcpy(str, "0");
-                    } else if (!strcasecmp(field, "pref")) {
-                        if (subfield && *subfield) {
-                            int pref = get_flag_by_name(preference_bits, subfield);
-                            if (pref != NOFLAG && PRF_FLAGGED(c, pref))
-                                strcpy(str, "1");
-                            else
-                                strcpy(str, "0");
-                        } else
-                            strcpy(str, "0");
-                    }
-                    break;
-                case 'r':
-                    if (!strcasecmp(field, "room")) {  /* in NOWHERE, return the void */
-/* see note in dg_scripts.h */
-#ifdef ACTOR_ROOM_IS_UID
-						if(auto roomFound = world.find(IN_ROOM(c)); roomFound != world.end()) {
-                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                        }
-#else
-                        snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? c->getRoom()->number : 0);
-#endif
-                    }
-#ifdef GET_RACE
-                    else if (!strcasecmp(field, "race")) {
-                        snprintf(str, slen, "%s", race::getName(c->race).c_str());
-                    }
-#endif
-                    else if (!strcasecmp(field, "rpp")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            c->modRPP(addition);
-                        }
-
-                        snprintf(str, slen, "%d", c->getRPP());
-                    }
-
-                    break;
-                case 's':
-                    if (!strcasecmp(field, "sex"))
-                        snprintf(str, slen, "%s", genders[(int) GET_SEX(c)]);
-
-                    else if (!strcasecmp(field, "size")) {
-                        if (subfield && *subfield) {
-                            int ns;
-                            if ((ns = search_block(subfield, size_names, false)) > -1) {
-                                (c)->setSize(ns);
-                            }
-                        }
-                        sprinttype(get_size(c), size_names, str, slen);
-                    } else if (!strcasecmp(field, "skill"))
-                        snprintf(str, slen, "%s", skill_percent(c, subfield));
-
-                    else if (!strcasecmp(field, "skillset")) {
-                        if (!IS_NPC(c) && subfield && *subfield) {
-                            char skillname[MAX_INPUT_LENGTH], *amount;
-                            amount = one_word(subfield, skillname);
-                            skip_spaces(&amount);
-                            if (amount && *amount && is_number(amount)) {
-                                int skillnum = find_skill_num(skillname, SKTYPE_SKILL);
-                                if (skillnum > 0) {
-                                    int new_value = std::clamp<double>(atof(amount), 0, 100);
-                                    SET_SKILL(c, skillnum, new_value);
-                                }
-                            }
-                        }
-                        *str = '\0'; /* so the parser know we recognize 'skillset' as a field */
-                    }
-                    break;
-                case 't':
-                    if (!strcasecmp(field, "tnl")) {
-                        snprintf(str, slen, "%d", level_exp(c, GET_LEVEL(c) + 1));
-                    }
-                    break;
-                case 'v':
-                    if (!strcasecmp(field, "vnum")) {
-                        if (subfield && *subfield) {
-                            snprintf(str, slen, "%d", IS_NPC(c) ? (int) (GET_MOB_VNUM(c) == atof(subfield)) : -1);
-                        } else {
-                            if (IS_NPC(c))
-                                snprintf(str, slen, "%d", GET_MOB_VNUM(c));
-                            else
-                                /*
-                                 * for compatibility with unsigned indexes
-                                 * - this is deprecated - use %actor.is_pc% to check
-                                 * instead of %actor.vnum% == -1  --Welcor 09/03
-                                 */
-                                strcpy(str, "-1");
-                        }
-                    } else if (!strcasecmp(field, "varexists")) {
-                        struct trig_var_data *remote_vd;
-                        int found = 0;
-                        if (SCRIPT(c)) {
-                            for (remote_vd = SCRIPT(c)->global_vars; remote_vd; remote_vd = remote_vd->next) {
-                                if (!strcasecmp(remote_vd->name, subfield)) {
-                                    found = 1;
-                                    break;
-                                }
-                            }
-                        }
-                        snprintf(str, slen, "%d", found);
-                    }
-
-                    break;
-                case 'w':
-                    if (!strcasecmp(field, "weight"))
-                        snprintf(str, slen, "%s", fmt::format("{}", GET_WEIGHT(c)).c_str());
-            
-                    break;
-            } /* switch *field */
-
-            if (*str == '\x1') { /* no match found in switch */
-                if (SCRIPT(c)) {
-                    for (vd = (SCRIPT(c))->global_vars; vd; vd = vd->next)
-                        if (!strcasecmp(vd->name, field))
-                            break;
-                    if (vd)
-                        snprintf(str, slen, "%s", vd->value);
-                    else {
-                        *str = '\0';
-                        script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
-                    }
-                } else {
-                    *str = '\0';
-                    script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
-                }
-            }
-
-        } /* if (c) ...*/
-
-        else if (o) {
-
-            *str = '\x1';
-            switch (LOWER(*field)) {
-                case 'a':
-                    if (!strcasecmp(field, "affects")) {
-                        if (subfield && *subfield) {
-                            if (check_flags_by_name_ar(GET_OBJ_PERM(o), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
-                                snprintf(str, slen, "1");
-                            else
-                                snprintf(str, slen, "0");
-                        } else
-                            snprintf(str, slen, "0");
-                    }
-                    break;
-                case 'c':
-                    if (!strcasecmp(field, "cost")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_OBJ_COST(o) = std::max<int>(0, addition + GET_OBJ_COST(o));
-                        }
-                        snprintf(str, slen, "%d", GET_OBJ_COST(o));
-                    } else if (!strcasecmp(field, "cost_per_day")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_OBJ_RENT(o) = std::max<int>(0, addition + GET_OBJ_RENT(o));
-                        }
-                        snprintf(str, slen, "%d", GET_OBJ_RENT(o));
-                    } else if (!strcasecmp(field, "carried_by")) {
-                        if (o->carried_by)
-                            snprintf(str, slen, "%s", ((o->carried_by)->getUID(false).c_str()));
-                        else
-                            *str = '\0';
-                    } else if (!strcasecmp(field, "contents")) {
-                        if (o->contents)
-                            snprintf(str, slen, "%s", ((o->contents)->getUID(false).c_str()));
-                        else
-                            *str = '\0';
-                    }
-                        /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-                    else if (!strcasecmp(field, "count")) {
-                        if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                            snprintf(str, slen, "%d", item_in_list(subfield, o->contents));
-                        else
-                            strcpy(str, "0");
-                    }
-                    break;
-                case 'e':
-                    if (!strcasecmp(field, "extra")) {
-                        if (subfield && *subfield) {
-                            if (check_flags_by_name_ar(GET_OBJ_EXTRA(o), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
-                                snprintf(str, slen, "1");
-                            else
-                                snprintf(str, slen, "0");
-                        } else
-                            snprintf(str, slen, "0");
-                    } else {
-                        sprintbitarray(GET_OBJ_EXTRA(o), extra_bits, EF_ARRAY_MAX, str);
-                    }
-                    break;
-                case 'h':
-                    /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
-                    if (!strcasecmp(field, "has_in")) {
-                        if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                            snprintf(str, slen, "%s", (item_in_list(subfield, o->contents) ? "1" : "0"));
-                        else
-                            strcpy(str, "0");
-                    }
-                    if (!strcasecmp(field, "health")) {
-                        if (subfield && *subfield) {
-                            int addition = atof(subfield);
-                            GET_OBJ_VAL(o, VAL_ALL_HEALTH) = std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH));
-                            if (OBJ_FLAGGED(o, ITEM_BROKEN) && GET_OBJ_VAL(o, VAL_ALL_HEALTH) >= 100)
-                                o->extra_flags.reset(ITEM_BROKEN);
-                        }
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, VAL_ALL_HEALTH));
-                    }
-                    break;
-                case 'i':
-                    if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%s", o->getUID(false).c_str());
-
-                    else if (!strcasecmp(field, "is_inroom")) {
-                        if (auto roomFound = world.find(IN_ROOM(o)); roomFound != world.end())
-                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                        else
-                            *str = '\0';
-                    } else if (!strcasecmp(field, "is_pc")) {
-                        strcpy(str, "-1");
-                    } else if (!strcasecmp(field, "itemflag")) {
-                        if (subfield && *subfield) {
-                            int item = get_flag_by_name(extra_bits, subfield);
-                            if (item != NOFLAG && OBJ_FLAGGED(o, item))
-                                strcpy(str, "1");
-                            else
-                                strcpy(str, "0");
-                        } else
-                            strcpy(str, "0");
-                    }
-                    break;
-                case 'l':
-                    if (!strcasecmp(field, "level"))
-                        snprintf(str, slen, "%d", GET_OBJ_LEVEL(o));
-                    break;
-
-                case 'n':
-                    if (!strcasecmp(field, "name")) {
-                        if (!subfield || !*subfield)
-                            snprintf(str, slen, "%s", o->name);
-                        else {
-                            char blah[500];
-                            sprintf(blah, "%s %s", o->name, subfield);
-                            o->name = strdup(blah);
-                        }
-                    } else if (!strcasecmp(field, "next_in_list")) {
-                        if (o->next_content)
-                            snprintf(str, slen, "%s", ((o->next_content)->getUID(false).c_str()));
-                        else
-                            *str = '\0';
-                    }
-                    break;
-                case 'r':
-                    if (!strcasecmp(field, "room")) {
-                        if (auto roomFound = world.find(obj_room(o)); roomFound != world.end())
-                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
-                        else
-                            *str = '\0';
-                    }
-                    break;
-                case 's':
-                    if (!strcasecmp(field, "shortdesc")) {
-                        if (!subfield || !*subfield)
-                            snprintf(str, slen, "%s", o->short_description);
-                        else {
-                            char blah[500];
-                            sprintf(blah, "%s @wnicknamed @D(@C%s@D)@n", o->short_description, subfield);
-                            o->short_description = strdup(blah);
-                        }
-                    } else if (!strcasecmp(field, "setaffects")) {
-                        if (subfield && *subfield) {
-                            int ns;
-                            if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o), NUM_AFF_FLAGS, subfield, affected_bits)) >
-                                0) {
-                                o->bitvector.flip(ns);
-                                snprintf(str, slen, "1");
-                            }
-                        }
-                    } else if (!strcasecmp(field, "setextra")) {
-                        if (subfield && *subfield) {
-                            int ns;
-                            if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o), NUM_ITEM_FLAGS, subfield, extra_bits)) >
-                                0) {
-                                o->extra_flags.flip(ns);
-                                snprintf(str, slen, "1");
-                            }
-                        }
-                    } else if (!strcasecmp(field, "size")) {
-                        if (subfield && *subfield) {
-                            int ns;
-                            if ((ns = search_block(subfield, size_names, false)) > -1) {
-                                (o)->size = ns;
-                            }
-                        }
-                        sprinttype(GET_OBJ_SIZE(o), size_names, str, slen);
-                    }
-                    break;
-                case 't':
-                    if (!strcasecmp(field, "type"))
-                        sprinttype(GET_OBJ_TYPE(o), item_types, str, slen);
-
-                    else if (!strcasecmp(field, "timer"))
-                        snprintf(str, slen, "%d", GET_OBJ_TIMER(o));
-                    break;
-                case 'v':
-                    if (!strcasecmp(field, "vnum"))
-                        if (subfield && *subfield) {
-                            snprintf(str, slen, "%d", (int) (GET_OBJ_VNUM(o) == atof(subfield)));
-                        } else {
-                            snprintf(str, slen, "%d", GET_OBJ_VNUM(o));
-                        }
-                    else if (!strcasecmp(field, "val0"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 0));
-
-                    else if (!strcasecmp(field, "val1"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 1));
-
-                    else if (!strcasecmp(field, "val2"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 2));
-
-                    else if (!strcasecmp(field, "val3"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 3));
-
-                    else if (!strcasecmp(field, "val4"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 4));
-
-                    else if (!strcasecmp(field, "val5"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 5));
-
-                    else if (!strcasecmp(field, "val6"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 6));
-
-                    else if (!strcasecmp(field, "val7"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 7));
-                    break;
-                case 'w':
-                    if (!strcasecmp(field, "weight")) {
-                        if (subfield && *subfield) {
-                            auto addition = atof(subfield);
-                            if (addition < 0 || addition > 0) {
-                                GET_OBJ_WEIGHT(o) = std::max<double>(0, addition + GET_OBJ_WEIGHT(o));
-                            } else {
-                                GET_OBJ_WEIGHT(o) = 0;
-                            }
-                        }
-                        snprintf(str, slen, "%s", fmt::format("{}", GET_OBJ_WEIGHT(o)).c_str());
-                    } else if (!strcasecmp(field, "worn_by")) {
-                        if (o->worn_by)
-                            snprintf(str, slen, "%s", ((o->worn_by)->getUID(false).c_str()));
-                        else
-                            *str = '\0';
-                    }
-                    break;
-            } /* switch *field */
-
-
-            if (*str == '\x1') { /* no match in switch */
-                if (SCRIPT(o)) { /* check for global var */
-                    for (vd = (SCRIPT(o))->global_vars; vd; vd = vd->next)
-                        if (!strcasecmp(vd->name, field))
-                            break;
-                    if (vd)
-                        snprintf(str, slen, "%s", vd->value);
-                    else {
-                        *str = '\0';
-                        if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
-                            script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                                       GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
-                        }
-                    }
-                } else {
-                    *str = '\0';
-                    if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
-                        script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
-                    }
-                }
-            }
-        } /* if (o) ... */
-
-        else if (r) {
-
-            if(auto result = r->dgCallMember(field, subfield ? subfield : ""); result) {
-                snprintf(str, slen, "%s", result->c_str());
-                return;
-            }
-
-            /* special handling of the void, as it stores all 'full global' variables */
-            if (r->vn == 0) {
-                if (!SCRIPT(r)) {
-                    *str = '\0';
-                    script_log(
-                            "Trigger: %s, Vnum %d, type %d. Trying to access Global var list of void. Apparently this has not been set up!",
-                            GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type);
-                } else {
-                    for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
-                        if (!strcasecmp(vd->name, field))
-                            break;
-                    if (vd)
-                        snprintf(str, slen, "%s", vd->value);
-                    else
-                        *str = '\0';
-                }
-            } else if (!strcasecmp(field, "name"))
-                snprintf(str, slen, "%s", r->name);
-
-            else if (!strcasecmp(field, "sector"))
-                sprinttype(r->sector_type, sector_types, str, slen);
-
-            else if (!strcasecmp(field, "gravity"))
-                snprintf(str, slen, "%d", (int)r->getGravity());
-
-            else if (!strcasecmp(field, "vnum")) {
-                if (subfield && *subfield) {
-                    snprintf(str, slen, "%d", (int) (r->vn == atof(subfield)));
-                } else {
-                    snprintf(str, slen, "%d", r->vn);
-                }
-            } else if (!strcasecmp(field, "contents")) {
-                if (subfield && *subfield) {
-                    for (obj = r->contents; obj; obj = obj->next_content) {
-                        if (GET_OBJ_VNUM(obj) == atof(subfield)) {
-                            /* arg given, found */
-                            snprintf(str, slen, "%s", ((obj)->getUID(false).c_str()));
-                            return;
-                        }
-                    }
-                    if (!obj)
-                        *str = '\0'; /* arg given, not found */
-                } else { /* no arg given */
-                    if (r->contents) {
-                        snprintf(str, slen, "%s", ((r->contents)->getUID(false).c_str()));
-                    } else {
-                        *str = '\0';
-                    }
-                }
-            } else if (!strcasecmp(field, "people")) {
-                if (r->people)
-                    snprintf(str, slen, "%s", ((r->people)->getUID(false).c_str()));
-                else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "id")) {
-                if (r->vn != NOWHERE)
-                    snprintf(str, slen, "%s", r->getUID(false).c_str());
-                else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "weather")) {
-                const char *sky_look[] = {
-                        "sunny",
-                        "cloudy",
-                        "rainy",
-                        "lightning"
-                };
-
-                if (!r->room_flags.test(ROOM_INDOORS))
-                    snprintf(str, slen, "%s", sky_look[weather_info.sky]);
-                else
-                    *str = '\0';
-            } else if (!strcasecmp(field, "fishing")) {
-                if (ROOM_FLAGGED(r, ROOM_FISHING))
-                    snprintf(str, slen, "1");
-                else
-                    snprintf(str, slen, "0");
-            } else if (!strcasecmp(field, "zonenumber"))
-                snprintf(str, slen, "%d", zone_table[r->zone].number);
-            else if (!strcasecmp(field, "zonename"))
-                snprintf(str, slen, "%s", zone_table[r->zone].name);
-            else if (!strcasecmp(field, "roomflag")) {
-                if (subfield && *subfield) {
-                    if (check_flags_by_name_ar(r->room_flags, NUM_ROOM_FLAGS, subfield, room_bits) > 0)
-                        snprintf(str, slen, "1");
-                    else
-                        snprintf(str, slen, "0");
-                } else
-                    snprintf(str, slen, "0");
-            } else {
-                if (SCRIPT(r)) { /* check for global var */
-                    for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
-                        if (!strcasecmp(vd->name, field))
-                            break;
-                    if (vd)
-                        snprintf(str, slen, "%s", vd->value);
-                    else {
-                        *str = '\0';
-                        script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
-                    }
-                } else {
-                    *str = '\0';
-                    script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
-                }
-            }
-        } /* if (r).. */
+        }
+        return "";
     }
 }
 
-/*
- * Now automatically checks if the variable has more then one field
- * in it. And if the field returns a name or a script UID or the like
- * it can recurse.
- * If you supply a value like, %actor.int.str% it wont blow up on you
- * either.
- * - Jamie Nelson 31st Oct 2003 01:03
- *
- * Now also lets subfields have variables parsed inside of them
- * so that:
- * %echo% %actor.gold(%actor.gold%)%
- * will double the actors gold every time its called.  etc...
- * - Jamie Nelson 31st Oct 2003 01:24
- */
+std::size_t matching_percent(const std::string& line, std::size_t start) {
+    int depth;
 
-/* substitutes any variables into line and returns it as buf */
-void var_subst(void *go, struct script_data *sc, trig_data *trig,
-               int type, char *line, char *buf) {
-    char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
-    char *var = nullptr, *field = nullptr, *p = nullptr;
-    char tmp2[MAX_INPUT_LENGTH];
-    char *subfield_p, subfield[MAX_INPUT_LENGTH];
-    int left, len;
-    int paren_count = 0;
-    int dots = 0;
-
-    if(istarts_with(line, "eval loss 500 + %500000.random%")) {
-        script_log("barf!");
+    for (auto i = start+1; i < line.size(); i++) {
+        auto p = line[i];
+        if (p == '(')
+            depth++;
+        else if (p == ')')
+            depth--;
+        else if (p == '%' && depth == 0)
+            return i;
     }
 
-    /* skip out if no %'s */
-    if (!strchr(line, '%')) {
-        strcpy(buf, line);
-        return;
-    }
-    /*lets just empty these to start with*/
-    *repl_str = *tmp = *tmp2 = '\0';
-
-    p = strcpy(tmp, line);
-    subfield_p = subfield;
-
-    left = MAX_INPUT_LENGTH - 1;
-
-    while (*p && (left > 0)) {
-
-
-        /* copy until we find the first % */
-        while (*p && (*p != '%') && (left > 0)) {
-            *(buf++) = *(p++);
-            left--;
-        }
-
-        *buf = '\0';
-
-        /* double % */
-        if (*p && (*(++p) == '%') && (left > 0)) {
-            *(buf++) = *(p++);
-            *buf = '\0';
-            left--;
-            continue;
-        }
-
-            /* so it wasn't double %'s */
-        else if (*p && (left > 0)) {
-
-            /* search until end of var or beginning of field */
-            for (var = p; *p && (*p != '%') && (*p != '.'); p++);
-
-            field = p;
-            if (*p == '.') {
-                *(p++) = '\0';
-                dots = 0;
-                for (field = p; *p && ((*p != '%') || (paren_count > 0) || (dots)); p++) {
-                    if (dots > 0) {
-                        *subfield_p = '\0';
-                        find_replacement(go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str));
-                        if (*repl_str) {
-                            snprintf(tmp2, sizeof(tmp2), "eval tmpvr %s", repl_str); //temp var
-                            process_eval(go, sc, trig, type, tmp2);
-                            strcpy(var, "tmpvr");
-                            field = p;
-                            dots = 0;
-                            continue;
-                        }
-                        dots = 0;
-                    } else if (*p == '(') {
-                        *p = '\0';
-                        paren_count++;
-                    } else if (*p == ')') {
-                        *p = '\0';
-                        paren_count--;
-                    } else if (paren_count > 0) {
-                        *subfield_p++ = *p;
-                    } else if (*p == '.') {
-                        *p = '\0';
-                        dots++;
-                    }
-                } /* for (field.. */
-            } /* if *p == '.' */
-
-            *(p++) = '\0';
-            *subfield_p = '\0';
-
-            if (*subfield) {
-                var_subst(go, sc, trig, type, subfield, tmp2);
-                strcpy(subfield, tmp2);
-            }
-
-            find_replacement(go, sc, trig, type, var, field, subfield, repl_str, sizeof(repl_str) - 1);
-
-            strncat(buf, repl_str, left);
-            len = strlen(repl_str);
-            buf += len;
-            left -= len;
-        } /* else if *p .. */
-    } /* while *p .. */
+    return line.size();
 }
+
+
+std::string handleSubst(const std::string& expr) {
+    std::string l = expr;
+    trim(l);
+
+    std::string current = "";
+
+    while(true) {
+        
+    }
+
+
+    return current;
+}
+
+
+std::string trig_data::varSubst(const std::string& line) {
+    std::string out;
+    std::string l = line;
+
+    std::size_t start = l.find('%');
+
+    while(start != std::string::npos) {
+        auto end = matching_percent(l, start);
+
+        auto sub = l.substr(start+1, line.size()-end);
+        out += handleSubst(sub);
+        l = l.substr(end+1);
+
+        start = l.find('%');
+    }
+
+    out += l;
+
+    return out;
+}
+

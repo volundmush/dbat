@@ -11,6 +11,8 @@
 
 #include "net.h"
 
+struct trig_data;
+
 /**********************************************************************
 * Structures                                                          *
 **********************************************************************/
@@ -165,9 +167,9 @@ struct unit_data {
     void deserializeUnit(const nlohmann::json& j);
     std::string scriptString();
 
-    virtual std::string getUID(bool active = true) = 0;
-    virtual bool isActive() = 0;
-    virtual void save() = 0;
+    virtual std::string getUID(bool active = true);
+    virtual bool isActive();
+    virtual void save();
 
     nlohmann::json serializeScripts();
     void deserializeScripts();
@@ -175,7 +177,7 @@ struct unit_data {
     struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
     virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
     virtual std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
-
+    virtual std::optional<std::string> dgCallMember(trig_data *trig, const std::string& member, const std::string& arg);
 };
 
 
@@ -204,6 +206,8 @@ struct obj_data : public unit_data {
     void deactivate();
 
     int getAffectModifier(int location, int specific = -1);
+    std::optional<std::string> dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
+
 
     std::string getUID(bool active = true) override;
     bool active{false};
@@ -216,7 +220,7 @@ struct obj_data : public unit_data {
     void clearLocation();
 
     obj_ref ref() { return obj_ref{id, generation}; }
-
+    
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
@@ -354,7 +358,7 @@ struct room_data : public unit_data {
 
     nlohmann::json serializeDgVars();
 
-    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
+    std::optional<std::string> dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
 };
 /* ====================================================================== */
@@ -547,7 +551,7 @@ struct char_data : public unit_data {
     void ageBy(double addedTime);
     void setAge(double newAge);
 
-    std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
+    std::optional<std::string> dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
     struct room_data* getRoom();
 

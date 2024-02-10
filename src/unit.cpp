@@ -133,3 +133,19 @@ std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(str
     }
     return out;
 }
+
+std::string unit_data::getUID(bool active) {
+    return "";
+}
+
+std::optional<std::string> unit_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+    return {};
+}
+
+bool unit_data::isActive() {
+    return false;
+}
+
+void unit_data::save() {
+    
+}
