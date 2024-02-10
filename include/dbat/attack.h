@@ -770,6 +770,166 @@ namespace atk {
 
     };
 
+    struct LightGrenade : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_LIGHTGRENADE; }
+        int getAtkID() override {return -1;};
+        std::string getName() override { return "light grenade"; }
+
+    };
+
+    struct Breath : RangedKiAttack {
+
+    };
+
+    struct Ram : MeleeAttack {
+
+    };
+
+    struct Strike : MeleeAttack {
+
+    };
+
+    struct Sunder : MeleeAttack {
+
+    };
+
+    struct ZenBlade : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_ZEN; }
+        int getAtkID() override {return 54;};
+        std::string getName() override { return "zen blade"; }
+        int getTier() override {return 3;};
+        bool canParry() override {return false;};
+        bool checkOtherConditions() override;
+        void handleHitspot() override;
+
+        void announceHitspot() override;
+
+    };
+
+    struct MaliceBreaker : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_MALICE; }
+        int getAtkID() override {return 36;};
+        std::string getName() override { return "malice breaker"; }
+        int getTier() override {return 3;};
+        bool canParry() override {return false;};
+        void attackPreprocess() override;
+        void handleHitspot() override;
+
+        void announceHitspot() override;
+    };
+
+    struct Nova : RangedKiAttack {
+
+    };
+
+    struct Bash : MeleeAttack {
+
+    };
+
+    struct SeishouEnko : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_SEISHOU; }
+        int getAtkID() override {return 50;};
+        std::string getName() override { return "seishou enko"; }
+        int getTier() override {return 3;};
+        void attackPreprocess() override;
+        void handleHitspot() override;
+
+        void announceHitspot() override;
+    };
+
+    struct SelfDestruct : RangedKiAttack {
+
+    };
+
+    struct WaterRazor : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_WRAZOR; }
+        int getAtkID() override {return 47;};
+        std::string getName() override { return "water razor"; }
+        int64_t reduction;
+        int getTier() override {return 2;};
+        bool canParry() override {return false;};
+        bool canBlock() override {return false;};
+        bool checkOtherConditions() override;
+        void attackPreprocess() override;
+        void attackPostprocess() override;
+        void handleHitspot() override;
+
+        void announceHitspot() override;
+
+    };
+
+    struct WaterSpike : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_WSPIKE; }
+        int getAtkID() override {return 43;};
+        std::string getName() override { return "water spike"; }
+        int getTier() override {return 2;};
+        bool canParry() override {return false;};
+        void attackPreprocess() override;
+        void postProcess() override;
+        void handleHitspot() override;
+
+        void announceHitspot() override;
+
+    };
+    struct KoteiruBakuha : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_KOTEIRU; }
+        int getAtkID() override {return 48;};
+        std::string getName() override { return "koteiru bakuha"; }
+        int getTier() override {return 3;};
+        bool canParry() override {return false;};
+        bool canBlock() override {return false;};
+        int limbhurtChance() override;
+        void attackPreprocess() override;
+        void attackPostprocess() override;
+
+        void announceHitspot() override;
+    };
+    struct HellSpiral : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        int getSkillID() override { return SKILL_HSPIRAL; }
+        int getAtkID() override {return 49;};
+        std::string getName() override { return "hell spiral"; }
+        int getTier() override {return 3;};
+        bool canParry() override {return false;};
+        bool canBlock() override {return false;};
+        int limbhurtChance() override;
+
+        void announceHitspot() override;
+    };
+    struct Spiral : RangedKiAttack {
+
+    };
+    struct StarBreaker : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+        int64_t theft = 0;
+        int64_t taken = 0;
+
+        int getSkillID() override { return SKILL_BREAKER; }
+        int getAtkID() override {return 46;};
+        std::string getName() override { return "star breaker"; }
+        int getTier() override {return 2;};
+        int limbhurtChance() override;
+        void attackPreprocess() override;
+        void attackPostprocess() override;
+
+        void announceHitspot() override;
+    };
+
     struct Bite : MeleeAttack {
 
     };

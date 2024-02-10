@@ -2335,7 +2335,9 @@ namespace atk {
                 break;
             case 2:
                 loc = "face";
+                break;
             case 3:
+                loc = "guts";
                 break;
             case 4:
                 loc = "arm";
@@ -3159,6 +3161,15 @@ namespace atk {
 
 
     // FinalFlash
+    int DarknessDragonSlash::limbhurtChance() {
+        switch(hitspot) {
+            case 4:
+            case 5:
+                return 180;
+        }
+        return 0;
+    }
+
     void FinalFlash::announceHitspot() {
         std::string loc = "body";
         switch(hitspot) {
@@ -3186,15 +3197,24 @@ namespace atk {
 
 
     // Kousengan
-    void CrusherBall::attackPostprocess() {
+    int Kousengan::limbhurtChance() {
+        switch(hitspot) {
+            case 4:
+            case 5:
+                return 190;
+        }
+        return 0;
+    }
+
+    void Kousengan::attackPostprocess() {
         if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim)) {
             send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-            vict->affected_by.set(AFF_BURNED);
+            victim->affected_by.set(AFF_BURNED);
         }
     }
 
-    void FinalFlash::announceHitspot() {
+    void Kousengan::announceHitspot() {
         std::string loc = "body";
         switch(hitspot) {
             case 1:
@@ -3214,10 +3234,546 @@ namespace atk {
                 break;
         }
 
-        actUser("@WYou grin as you bring either hand to the sides of your body. Your charged ki begins to pool there as @bblue@W orbs of energy form in your palms. You quickly bring both hands forward slamming your wrists together with the palms flat out facing @c$N@W! You shout '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's " + loc + "!@n");
-        actVictim("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing YOU! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over YOUR " + loc + "!@n");
-        actOthers("@C$n@W grins as $e brings either hand to the sides of $s body. @C$n@W's charged ki begins to pool there as @bblue@W orbs of energy form in $s palms. @C$n@W quickly brings both hands forward slamming $s wrists together with the palms flat out facing @c$N@W! @C$n@W shouts '@DF@ci@Cn@Da@cl @CF@Dl@ca@Cs@Dh@W!' as a massive wave of energy erupts all over @c$N@W's " + loc + "!@n");   
+        actUser("@WYou look at @c$N@W and grin. Then bright @Mpink@W lasers shoot from your eyes and slam into $S " + loc + "!@n");
+        actVictim("@C$n@W looks at YOU and grins. Then bright @Mpink@W lasers shoot from $s eyes and slam into YOUR " + loc + "!@n");
+        actOthers("@C$n@W looks at @c$N@W and grins. Then bright @Mpink@W lasers shoot from $s eyes and slam into @c$N@W's " + loc + "!@n");   
     }
 
+    // ZenBlade
+    bool ZenBlade::checkOtherConditions() {
+        if (!GET_EQ(user, WEAR_WIELD1)) {
+            send_to_char(user, "You need to wield a sword to use this.\r\n");
+            return false;
+        }
+        if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
+            send_to_char(user, "You are not wielding a sword, you need one to use this technique.\r\n");
+            return false;
+        }
+        return true;
+    }
+
+    void ZenBlade::handleHitspot() {
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                if (victim->hasTail()) {
+                    act("@rYou cut off $S tail!@n", true, user, nullptr, victim, TO_CHAR);
+                    act("@rYour tail is cut off!@n", true, user, nullptr, victim, TO_VICT);
+                    act("@R$N@r's tail is cut off!@n", true, user, nullptr, victim, TO_NOTVICT);
+                    victim->loseTail();
+                }
+                break;
+            case 2:
+                calcDamage *= (calc_critical(user, 0) + 2);
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                
+                break;
+            case 4:
+                calcDamage *= calc_critical(user, 1);
+                if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
+                    if (GET_LIMBCOND(victim, 1) > 0 && !is_sparring(user) && rand_number(1, 1) == 2) {
+                        act("@RYour attack severs $N's left arm!@n", true, user, nullptr, victim, TO_CHAR);
+                        act("@R$n's attack severs your left arm!@n", true, user, nullptr, victim, TO_VICT);
+                        act("@R$N's left arm is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
+                        GET_LIMBCOND(victim, 1) = 0;
+                        remove_limb(victim, 2);
+                    } else if (GET_LIMBCOND(victim, 0) > 0 && !is_sparring(user)) {
+                        act("@RYour attack severs $N's right arm!@n", true, user, nullptr, victim, TO_CHAR);
+                        act("@R$n's attack severs your right arm!@n", true, user, nullptr, victim, TO_VICT);
+                        act("@R$N's right arm is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
+                        GET_LIMBCOND(victim, 0) = 0;
+                        remove_limb(victim, 1);
+                    }
+                }
+                break;
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                if (rand_number(1, 100) >= 70 && !IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
+                    if (GET_LIMBCOND(victim, 3) > 0 && !is_sparring(user) && rand_number(1, 1) == 2) {
+                        act("@RYour attack severs $N's left leg!@n", true, user, nullptr, victim, TO_CHAR);
+                        act("@R$n's attack severs your left leg!@n", true, user, nullptr, victim, TO_VICT);
+                        act("@R$N's left leg is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
+                        GET_LIMBCOND(victim, 3) = 0;
+                        remove_limb(victim, 4);
+                    } else if (GET_LIMBCOND(victim, 2) > 0 && !is_sparring(user)) {
+                        act("@RYour attack severs $N's right leg!@n", true, user, nullptr, victim, TO_CHAR);
+                        act("@R$n's attack severs your right leg!@n", true, user, nullptr, victim, TO_VICT);
+                        act("@R$N's right leg is severered in the attack!@n", true, user, nullptr, victim, TO_VICT);
+                        GET_LIMBCOND(victim, 2) = 0;
+                        remove_limb(victim, 3);
+                    }
+                }
+                break;
+        }
+    }
+
+    void ZenBlade::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "body";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "guts";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@CRaising your blade above your head, and closing your eyes, you focus ki into its edge. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as you open your eyes and instantly move past @g$N's@C body while slashing with the pure energy of your resolve! A large explosion of energy erupts across $S " + loc + "!@n");
+        actVictim("@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past YOUR body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across YOUR " + loc + "!@n");
+        actOthers("@G$n @Craises $s blade above $s head, and closes $s eyes. The edge of the blade begins to glow a soft blue as the blade begins to throb with excess energy. Peels of lighting begin to arc from the blade in all directions as $e opens $s eyes and instantly moves past @g$N's@C body while slashing with the pure energy of $s resolve! A large explosion of energy erupts across @g$N's@C " + loc + "!@n");   
+    }
+
+
+    // MaliceBreaker
+    void MaliceBreaker::attackPreprocess() {
+        if (time_info.hours <= 15) {
+            calcDamage *= 1.25;
+        } else if (time_info.hours <= 22) {
+            calcDamage *= 1.4;
+        }
+    }
+
+    void MaliceBreaker::handleHitspot() {
+        if (hitspot == 1) hitspot = 2;
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                calcDamage *= (calc_critical(user, 0));
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+                calcDamage *= calc_critical(user, 1);
+                break;
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+    void MaliceBreaker::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "body";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou rush forward at @c$N@W, building ki into your arm. As you slam an open palm into $S chest, you send the charged energy into $S body. A few small explosions seem to hit across $S entire body, forcing $M to stumble back. Finally, you launch $M into the air, pointing a forefinger at $m like a pistol, and shout '@MM@ma@Dl@wi@Wce Br@we@Dak@me@Mr@W!' as a dark, violet explosion erupts at the epicenter of your first strike on @c$N@W's " + loc + "!@n");
+        actVictim("@C$n @Wrushes forward at you, building ki into $s arm. As $e slams an open palm into your chest, $e sends the charged energy into your body. A few small explosions seem to hit across your entire body, forcing you to stumble back. Finally, @C$n@W launches you into the air, pointing a forefinger at your body like a pistol, and shouts '@MM@ma@Dl@wi@Wce Br@we@Dak@me@Mr@W!' as a dark, violet explosion erupts at the epicenter of $s first strike on your " + loc + "!@n");
+        actOthers("@C$n@W rushes forward at $N@W, building ki into $s arm. As $e slam an open palm into @c$N's@W chest, $e sends the charged energy into $S body. A few small explosions seem to hit across @c$N's@W entire body, forcing $M to stumble back. Finally, @C$n@W launches $M into the air, pointing a forefinger at $m like a pistol, and shouts '@MM@ma@Dl@wi@Wce Br@we@Dak@me@Mr@W!' as a dark, violet explosion erupts at the epicenter of $s first strike on @c$N@W's " + loc + "!@n");   
+    }
+
+
+    // SeishouEnko
+    void SeishouEnko::attackPreprocess() {
+        if (GET_MOLT_LEVEL(user) >= 150) {
+            calcDamage *= 2;
+        }
+    }
+
+    void SeishouEnko::handleHitspot() {
+        if (rand_number(1,3) == 3) hitspot = 2;
+        if (hitspot == 1) hitspot = 2;
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                calcDamage *= (calc_critical(user, 0));
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+                calcDamage *= calc_critical(user, 1);
+                break;
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+    void SeishouEnko::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "body";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou aim your mouth at @C$N@W and focus your charged ki. In an instant you fire a large @Rr@re@Rd@W @rS@Re@Wi@ws@rh@Ro@Wu @wE@rn@Rk@Wo at $M! Almost instantly it blasts into $S " + loc + " with searing heat!@n");
+        actVictim("@C$n @Waims $s mouth at YOU and seems to focus $s ki. In an instant $e fires a large @Rr@re@Rd@W @rS@Re@Wi@ws@rh@Ro@Wu @wE@rn@Rk@Wo at YOU! Almost instantly it blasts into YOUR " + loc + " with searing heat!@n");
+        actOthers("@C$n @Waims $s mouth at @c$N@W and seems to focus $s ki. In an instant $e fires a large @Rr@re@Rd@W @rS@Re@Wi@ws@rh@Ro@Wu @wE@rn@Rk@Wo at $M! Almost instantly it blasts into $S " + loc + " with searing heat!@n");   
+    }
+
+
+    // WaterSpike
+    bool WaterRazor::checkOtherConditions() {
+        if (IS_ANDROID(victim)) {
+            send_to_char(user, "There is not a necessary amount of water in cybernetic creatures.\r\n");
+            return false;
+        }
+        return true;
+    }
+
+    void WaterRazor::attackPreprocess() {
+        reduction = GET_HIT(victim);
+        if (AFF_FLAGGED(user, AFF_SANCTUARY)) {
+            if (initSkill >= 100) {
+                GET_BARRIER(user) += calcDamage * 0.1;
+            } else if (initSkill >= 60) {
+                GET_BARRIER(user) += calcDamage * 0.05;
+            } else if (initSkill >= 40) {
+                GET_BARRIER(user) += calcDamage * 0.02;
+            }
+            if (GET_BARRIER(user) > GET_MAX_MANA(user)) {
+                GET_BARRIER(user) = GET_MAX_MANA(user);
+            }
+        }
+    }
+
+    void WaterRazor::attackPostprocess() {
+        if (victim) {
+            reduction = reduction - GET_HIT(victim);
+
+            if ((!IS_NPC(victim) && !AFF_FLAGGED(victim, AFF_SPIRIT)) || (IS_NPC(victim) && GET_HIT(victim) > 0)) {
+                victim->decCurKI(reduction);
+                victim->decCurST(reduction);
+            }
+        }
+    }
+
+    void WaterRazor::handleHitspot() {
+        if (rand_number(1,3) == 3) hitspot = 2;
+        if (hitspot == 1) hitspot = 2;
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                calcDamage *= (calc_critical(user, 0));
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+    void WaterRazor::announceHitspot() {
+        switch(hitspot) {
+            case 2:
+            case 3:
+                actUser("@WYou raise your hand toward @c$N@W with the palm open as if you are ready to grab the air between the two of you. You then focus your ki into $S body and close your hand in an instant! The @Bwater@W in $S body instantly takes the shape of millions of microscopic @Dblades@W that cut up $S insides! Blood sprays out in a mist from every pore of $S body!@n");
+                actVictim("@C$n@W raises $s hand toward YOU with the palm open as if $e is ready to grab the air between the two of you. $e then focus $s ki into YOUR body and close $s hand in an instant! The @Bwater@W in your body instantly takes the shape of millions of microscopic @Dblades@W that cut up YOUR insides! Blood sprays out of your pores into a fine mist!@n");
+                actOthers("@C$n@W raises $s hand toward @c$N@W with the palm open as if $e is ready to grab the air between the two of them. $e then focus $s ki into @c$N's@W body and close $s hand in an instant! The @Bwater@W in @c$N's@W body instantly takes the shape of millions of microscopic @Dblades@W that cut up $S insides! Blood sprays out of $S pores into a fine mist!@n");  
+                break;
+            case 1:
+            case 4:
+            case 5:
+                actUser("@WYou raise your hand toward @c$N@W with the palm open as if you are ready to grab the air between the two of you. You then focus your ki into $S body and close your hand in an instant! The @Bwater@W in $S body instantly takes the shape of millions of microscopic @Dblades@W that cut up $S insides!@n");
+                actVictim("@C$n@W raises $s hand toward YOU with the palm open as if $e is ready to grab the air between the two of you. $e then focus $s ki into YOUR body and close $s hand in an instant! The @Bwater@W in your body instantly takes the shape of millions of microscopic @Dblades@W that cut up YOUR insides!@n");
+                actOthers("@C$n@W raises $s hand toward @c$N@W with the palm open as if $e is ready to grab the air between the two of them. $e then focus $s ki into @c$N's@W body and close $s hand in an instant! The @Bwater@W in @c$N's@W body instantly takes the shape of millions of microscopic @Dblades@W that cut up $S insides!@n");  
+        }
+    }
+
+
+    // WaterSpike
+    void WaterSpike::attackPreprocess() {
+        if (AFF_FLAGGED(user, AFF_SANCTUARY)) {
+            if (initSkill >= 100) {
+                GET_BARRIER(user) += calcDamage * 0.1;
+            } else if (initSkill >= 60) {
+                GET_BARRIER(user) += calcDamage * 0.05;
+            } else if (initSkill >= 40) {
+                GET_BARRIER(user) += calcDamage * 0.02;
+            }
+            if (GET_BARRIER(user) > GET_MAX_MANA(user)) {
+                GET_BARRIER(user) = GET_MAX_MANA(user);
+            }
+        }
+    }
+
+    void WaterSpike::postProcess() {
+        if (initSkill >= 100) {
+            user->incCurKI((user->getMaxKI() * attPerc) * .3);
+        } else if (initSkill >= 60) {
+            user->incCurKI((user->getMaxKI() * attPerc) * .1);
+        } else if (initSkill >= 40) {
+            user->incCurKI((user->getMaxKI() * attPerc) * .05);
+        }
+    }
+
+    void WaterSpike::handleHitspot() {
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                calcDamage *= (calc_critical(user, 0));
+                if (!AFF_FLAGGED(victim, AFF_KNOCKED) &&
+                    (rand_number(1, 3) >= 2 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
+                        !AFF_FLAGGED(victim, AFF_SANCTUARY))) {
+                    act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
+                    act("@WYou are knocked out!@n", true, user, nullptr, victim, TO_VICT);
+                    act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_NOTVICT);
+                    victim->setStatusKnockedOut();
+                }
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+                calcDamage *= calc_critical(user, 1);
+                break;
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+    void WaterSpike::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "body";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@CYou slam both your hands together in front of you, palms flat. As you pull them apart ki flows from your palms and forms into a giant ball of water. You raise your hand above your head with the ball of water. You command the water to form several sharp spikes which freeze upon forming. The spikes then launch at @R$N@C and slam into $S " + loc + "!@n");
+        actVictim("@c$n@C slams both $s hands together in front of $mself, palms flat. As $e pulls them apart ki flows from the palms and forms into a giant ball of water. Then $e raises $s hand above $s head with the ball of water. The water forms several sharp spikes which freeze instantly as they take shape. The spikes then launch at @RYOU@C and slam into YOUR " + loc + "!@n");
+        actOthers("@c$n@C slams both $s hands together in front of $mself, palms flat. As $e pulls them apart ki flows from the palms and forms into a giant ball of water. Then $e raises $s hand above $s head with the ball of water. The water forms several sharp spikes which freeze instantly as they take shape. The spikes then launch at @R$N@C and slam into $s " + loc + "!@n");   
+    }
+
+
+    // KoteiruBakuha
+    void KoteiruBakuha::attackPreprocess() {
+        if (AFF_FLAGGED(user, AFF_SANCTUARY)) {
+            if (initSkill >= 100) {
+                GET_BARRIER(user) += calcDamage * 0.1;
+            } else if (initSkill >= 60) {
+                GET_BARRIER(user) += calcDamage * 0.05;
+            } else if (initSkill >= 40) {
+                GET_BARRIER(user) += calcDamage * 0.02;
+            }
+            if (GET_BARRIER(user) > GET_MAX_MANA(user)) {
+                GET_BARRIER(user) = GET_MAX_MANA(user);
+            }
+        }
+    }
+
+    void KoteiruBakuha::attackPostprocess() {
+        if (victim) {
+            if (GET_HIT(victim) > 1) {
+                if (rand_number(1, 4) == 1 && !AFF_FLAGGED(victim, AFF_FROZEN) && !IS_DEMON(victim)) {
+                    act("@CYour body completely freezes!@n", true, victim, nullptr, nullptr, TO_CHAR);
+                    act("@c$n's@C body completely freezes!@n", true, victim, nullptr, nullptr, TO_ROOM);
+                    victim->affected_by.set(AFF_FROZEN);
+                }
+            }
+        }
+    }
+
+    int KoteiruBakuha::limbhurtChance() {
+        switch(hitspot) {
+            case 4:
+            case 5:
+                return 190;
+        }
+        return 0;
+    }
+
+    void KoteiruBakuha::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "body";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@CYou hold your hands outstretched in front of your body and with your ki begin to create turbulant waters that hover around your body. You begin a sort of dance as you control the water more and more until you have created a huge floating wave. In an instant you swing the wave at @W$N@C! As the wave slams into $S " + loc + " it freezes solid around $M!@n");
+        actVictim("@c$n@C holds $s hands outstretched in front of $s body and with $s ki begins to create turbulant waters that hover around $s body. @c$n@C begins a sort of dance as $e controls the water more and more until $e has created a huge floating wave. In an instant $e swings the wave at YOU! As the wave slams into YOUR " + loc + " it freezes solid around YOU!@n");
+        actOthers("@c$n@C holds $s hands outstretched in front of $s body and with $s ki begins to create turbulant waters that hover around $s body. @c$n@C begins a sort of dance as $e controls the water more and more until $e has created a huge floating wave. In an instant $e swings the wave at @W$N@C! As the wave slams into $S " + loc + " it freezes solid around @W$N@C!@n");   
+    }
+
+
+    // HellSpiral
+    int HellSpiral::limbhurtChance() {
+        switch(hitspot) {
+            case 4:
+            case 5:
+                return 120;
+        }
+        return 0;
+    }
+
+    void HellSpiral::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou hold out your hand, palm upward, while looking toward @C$N@W and grinning as @Rred@W energy begins to pool in the center of your palm. As the large orb of energy swells to about three feet in diameter you move your hand away! You quickly punch the ball of energy and send it flying into @C$N's@W " + loc + " where it @re@Rx@Dp@rl@Ro@Dd@re@Rs@W in a flash of light!@n");
+        actVictim("@C$n @Wholds out $s hand, palm upward, while looking toward YOU and grinning as @Rred@W energy begins to pool in the center of $s palm. As the large orb of energy swells to about three feet in diameter $e moves $s hand away! Then $e quickly punches the ball of energy and sends it flying into YOUR " + loc + " where it @re@Rx@Dp@rl@Ro@Dd@re@Rs@W in a flash of light!@n");
+        actOthers("@C$n @Wholds out $s hand, palm upward, while looking toward @c$N@W and grinning as @Rred@W energy begins to pool in the center of $s palm. As the large orb of energy swells to about three feet in diameter $e moves $s hand away! Then $e quickly punches the ball of energy and sends it flying into @c$N's@W " + loc + " where it @re@Rx@Dp@rl@Ro@Dd@re@Rs@W in a flash of light!@n");   
+    }
+
+
+    // StarBreaker
+    void StarBreaker::attackPreprocess() {
+        theft = 0;
+        taken = 0;
+        if (GET_LEVEL(user) - 30 > GET_LEVEL(user)) {
+            theft = 1;
+        } else if (GET_LEVEL(user) - 20 > GET_LEVEL(victim)) {
+            theft = GET_EXP(victim) / 1000;
+        } else if (GET_LEVEL(user) - 10 > GET_LEVEL(victim)) {
+            theft = GET_EXP(victim) / 100;
+        } else if (GET_LEVEL(user) >= GET_LEVEL(victim)) {
+            theft = GET_EXP(victim) / 50;
+        } else if (GET_LEVEL(user) + 10 >= GET_LEVEL(victim)) {
+            theft = GET_EXP(victim) / 500;
+        } else if (GET_LEVEL(user) + 20 >= GET_LEVEL(victim)) {
+            theft = GET_EXP(victim) / 1000;
+        } else {
+            theft = GET_EXP(victim) / 2000;
+        }
+        if(theft > 0) {
+            taken = victim->modExperience(-theft);
+        }
+    }
+
+    void StarBreaker::attackPostprocess() {
+        if (level_exp(user, GET_LEVEL(user) + 1) - (GET_EXP(user)) > 0 || GET_LEVEL(user) >= 100) {
+            auto xp = user->modExperience(theft * 2, false); // we will not apply bonuses to stolen exp.
+            send_to_char(user, "The returning Eldritch energy blesses you with some experience. @D[@G%s@D]@n\r\n",
+                            add_commas(xp).c_str());
+
+        }
+    }
+
+    int StarBreaker::limbhurtChance() {
+        switch(hitspot) {
+            case 4:
+            case 5:
+                return 180;
+        }
+        return 0;
+    }
+
+    void StarBreaker::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou raise your right hand above your head with it slightly cupped. Dark @rred@W energy from the Eldritch Star begins to pool there and form a growing orb of energy. At the same time @mpurple@W arcs of electricity formed by your ki flows up your left arm as you raise it. You slam both of your hands together, combining the energy, and then toss your @YS@yta@Yr @rB@Rr@De@ra@Rk@De@rr@W at @c$N@W! It engulfs $S " + loc + "!@n");
+        actVictim("@C$n@W raises $s right hand above $s head with it slightly cupped. Dark @rred@W energy begins to pool there and form a growing orb of energy. At the same time @mpurple@W arcs of electricity formed by $s ki flows up $s left arm as $e raises it. Suddenly $e slams both of $s hands together, combining the energy, and then toss a @YS@yta@Yr @rB@Rr@De@ra@Rk@De@rr@W at YOU! It engulfs your " + loc + "!@n");
+        actOthers("@C$n@W raises $s right hand above $s head with it slightly cupped. Dark @rred@W energy begins to pool there and form a growing orb of energy. At the same time @mpurple@W arcs of electricity formed by $s ki flows up $s left arm as $e raises it. Suddenly $e slams both of $s hands together, combining the energy, and then tosses a @YS@yta@Yr @rB@Rr@De@ra@Rk@De@rr@W at @c$N@W! It engulfs $S " + loc + "!@n");   
+    }
 
 }
