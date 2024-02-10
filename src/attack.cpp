@@ -6,6 +6,7 @@
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/random.h"
+#include "dbat/fight.h"
 
 namespace atk {
     std::map<int, std::vector<std::pair<int, int>>> minimumSkillRequired;
@@ -507,12 +508,12 @@ namespace atk {
     void MeleeAttack::handleHitspot() {
         switch(hitspot) {
             case 1:
-            case 3:
+            case 2:
                 if (GET_BONUS(user, BONUS_SOFT)) {
                     calcDamage *= calc_critical(user, 2);
                 }
                 break;
-            case 2:
+            case 3:
                 calcDamage *= calc_critical(user, 0);
                 break;
             case 4:
@@ -527,6 +528,29 @@ namespace atk {
         return 1;
     }
 
+    void MeleeAttack::announceParry() {
+        actUser("@C$N@W parries your " + getName() + " with a punch of $S own!@n");
+        actVictim("@WYou parry @C$n's@W " + getName() + " with a punch of your own!@n");
+        actOthers("@C$N@W parries @c$n's@W " + getName() + " with a punch of $S own!@n");
+    }
+
+    void MeleeAttack::announceBlock() {
+        actUser("@C$N@W moves quickly and blocks your " + getName() + "!@n");
+        actVictim("@WYou move quickly and block @C$n's@W " + getName() + "!@n");
+        actOthers("@C$N@W moves quickly and blocks @c$n's@W " + getName() + "!@n");
+    }
+
+    void MeleeAttack::announceDodge() {
+        actUser("@C$N@W manages to dodge your " + getName() + "!@n");
+        actVictim("@WYou dodge @C$n's@W " + getName() + "!@n");
+        actOthers("@C$N@W manages to dodge @c$n's@W " + getName() + "!@n");
+    }
+
+    void MeleeAttack::announceMiss() {
+        actUser("@WYou can't believe it but your " + getName() + " misses!@n");
+        actVictim("@C$n@W throws a " + getName() + " at you but somehow misses!@n");
+        actOthers("@c$n@W throws a " + getName() + " at @C$N@W but somehow misses!@n");
+    }
 
     // PUNCH
     void Punch::announceParry() {
@@ -848,6 +872,462 @@ namespace atk {
                 return 195;
         }
         return 0;
+    }
+
+
+    // Uppercut
+    std::optional<int> Uppercut::hasCooldown() {
+        if (IS_FRIEZA(user) && GET_SKILL_BASE(user, SKILL_STYLE) >= 75) 
+            handle_cooldown(user, 5);
+        else
+            handle_cooldown(user, 7);
+    }
+
+    void Uppercut::announceObject() {
+        actUser("@WYou uppercut $p@W as hard as you can!@n");
+        actRoom("@C$n@W uppercuts $p@W extremely hard!@n");
+    }
+
+    void Uppercut::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou leap up and launch an uppercut into @C$N's@W body!@n");
+                actVictim("@C$n@W leaps up and launches an uppercut into your body!@n");
+                actOthers("@c$n@W leaps up and launches an uppercut into @C$N's@W body!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou smash an uppercut into @C$N's@W chin!@n");
+                actVictim("@C$n@W smashes an uppercut into your chin!@n");
+                actOthers("@c$n@W smashes an uppercut into @C$N's@W chin!@n");
+                break;
+            case 3:
+                actUser("@WYou uppercut @C$N@W, hitting $M directly in chest!@n");
+                actVictim("@C$n@W uppercuts you, hitting you directly in the chest!@n");
+                actOthers("@c$n@W uppercuts @C$N@W, hitting $M directly in the chest!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYour poorly aimed uppercut hits @C$N@W in the arm!@n");
+                actVictim("@C$n@W poorly aims an uppercut and hits you in the arm!@n");
+                actOthers("@c$n@W poorly aims an uppercut and hits @C$N@W in the arm!@n");
+                break;
+            case 5: /* Weak 2 */
+                actUser("@WYou slam an uppercut into @C$N's@W leg!@n");
+                actVictim("@C$n@W slams an uppercut into your leg!@n");
+                actOthers("@c$n@W slams an uppercut into @C$N's@W leg!@n");
+                break;
+        }
+    }
+
+    void Uppercut::handleHitspot() {
+        switch(hitspot) {
+            case 1:
+            case 2:
+                if (GET_BONUS(user, BONUS_SOFT)) {
+                    calcDamage *= calc_critical(user, 2);
+                }
+                if (!AFF_FLAGGED(victim, AFF_KNOCKED) &&
+                        (rand_number(1, 8) >= 7 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
+                         !AFF_FLAGGED(victim, AFF_SANCTUARY))) {
+                        act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
+                        act("@WYou are knocked out!@n", true, user, nullptr, victim, TO_VICT);
+                        act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_NOTVICT);
+                        victim->setStatusKnockedOut();
+                }
+                break;
+            case 3:
+                calcDamage *= calc_critical(user, 0);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+
+    //Slam
+    std::optional<int> Slam::hasCooldown() {
+        if (IS_BARDOCK(user) && GET_SKILL_BASE(user, SKILL_STYLE) >= 75) 
+            handle_cooldown(user, 7);
+        else
+            handle_cooldown(user, 9);
+    }
+
+    void Slam::announceObject() {
+        actUser("@WYou slam $p@W as hard as you can!@n");
+        actRoom("@C$n@W slams $p@W extremely hard!@n");
+    }
+
+    void Slam::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou disappear, appearing above @C$N@W and slam a double fisted blow into $M!@n");
+                actVictim("@C$n@W disappears, only to appear above you, slamming a double fisted blow into you!@n");
+                actOthers("@c$n@W disappears, only to appear above @C$N@W, slamming a double fisted blow into $M!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou disappear, reappearing in front of @C$N@W, you grab $M! Spinning you send $M flying into the ground!@n");
+                actVictim("@C$n@W disappears, reappearing in front of you, and $e grabs you! Spinning quickly $e sends you flying into the ground!@n");
+                actOthers("@c$n@W disappears, reappearing in front of @C$N@W, and grabs $M! Spinning quickly $e sends $M flying into the ground!@n");
+
+                if (ROOM_DAMAGE(IN_ROOM(victim)) <= 95 && !ROOM_FLAGGED(IN_ROOM(victim), ROOM_SPACE)) {
+                        act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, user, nullptr,
+                            victim,
+                            TO_CHAR);
+                        act("@WYou slam into the ground forming a large crater with your body!@n", true, user, nullptr,
+                            victim,
+                            TO_VICT);
+                        act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, user, nullptr,
+                            victim,
+                            TO_NOTVICT);
+                        if (SECT(IN_ROOM(victim)) != SECT_INSIDE && SECT(IN_ROOM(victim)) != SECT_UNDERWATER &&
+                            SECT(IN_ROOM(victim)) != SECT_WATER_SWIM && SECT(IN_ROOM(victim)) != SECT_WATER_NOSWIM) {
+                            impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
+                            switch (rand_number(1, 8)) {
+                                case 1:
+                                    act("Debris is thrown into the air and showers down thunderously!", true, user,
+                                        nullptr,
+                                        victim, TO_CHAR);
+                                    act("Debris is thrown into the air and showers down thunderously!", true, user,
+                                        nullptr,
+                                        victim, TO_ROOM);
+                                    break;
+                                case 2:
+                                    if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(victim)) == 0) {
+                                        ROOM_EFFECT(IN_ROOM(victim)) = 1;
+                                        act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
+                                            TO_CHAR);
+                                        act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
+                                            TO_ROOM);
+                                    }
+                                    break;
+                                case 3:
+                                    act("A cloud of dust envelopes the entire area!", true, user, nullptr, victim, TO_CHAR);
+                                    act("A cloud of dust envelopes the entire area!", true, user, nullptr, victim, TO_ROOM);
+                                    break;
+                                case 4:
+                                    act("The surrounding area roars and shudders from the impact!", true, user, nullptr,
+                                        victim,
+                                        TO_CHAR);
+                                    act("The surrounding area roars and shudders from the impact!", true, user, nullptr,
+                                        victim,
+                                        TO_ROOM);
+                                    break;
+                                case 5:
+                                    act("The ground shatters apart from the stress of the impact!", true, user, nullptr,
+                                        victim,
+                                        TO_CHAR);
+                                    act("The ground shatters apart from the stress of the impact!", true, user, nullptr,
+                                        victim,
+                                        TO_ROOM);
+                                    break;
+                                case 6:
+                                    /* One less message */
+                                    break;
+                                default:
+                                    /* we want no message for the default */
+                                    break;
+                            }
+                        }
+                        if (SECT(IN_ROOM(victim)) == SECT_UNDERWATER) {
+                            switch (rand_number(1, 3)) {
+                                case 1:
+                                    act("The water churns violently!", true, user, nullptr, victim, TO_CHAR);
+                                    act("The water churns violently!", true, user, nullptr, victim, TO_ROOM);
+                                    break;
+                                case 2:
+                                    act("Large bubbles rise from the movement!", true, user, nullptr, victim, TO_CHAR);
+                                    act("Large bubbles rise from the movement!", true, user, nullptr, victim, TO_ROOM);
+                                    break;
+                                case 3:
+                                    act("The water collapses in on the hole created!", true, user, nullptr, victim,
+                                        TO_CHAR);
+                                    act("The water collapses in on the hole create!", true, user, nullptr, victim, TO_ROOM);
+                                    break;
+                            }
+                        }
+                        if (SECT(IN_ROOM(victim)) == SECT_WATER_SWIM || SECT(IN_ROOM(victim)) == SECT_WATER_NOSWIM) {
+                            switch (rand_number(1, 3)) {
+                                case 1:
+                                    act("A huge column of water erupts from the impact!", true, user, nullptr, victim,
+                                        TO_CHAR);
+                                    act("A huge column of water erupts from the impact!", true, user, nullptr, victim,
+                                        TO_ROOM);
+                                    break;
+                                case 2:
+                                    act("The impact briefly causes a swirling vortex of water!", true, user, nullptr,
+                                        victim,
+                                        TO_CHAR);
+                                    act("The impact briefly causes a swirling vortex of water!", true, user, nullptr,
+                                        victim,
+                                        TO_ROOM);
+                                    break;
+                                case 3:
+                                    act("A huge depression forms in the water and erupts into a wave from the impact!",
+                                        true, user, nullptr, victim, TO_CHAR);
+                                    act("A huge depression forms in the water and erupts into a wave from the impact!",
+                                        true, user, nullptr, victim, TO_ROOM);
+                                    break;
+                            }
+                        }
+                        if (SECT(IN_ROOM(victim)) == SECT_INSIDE) {
+                            impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
+                            switch (rand_number(1, 8)) {
+                                case 1:
+                                    act("Debris is thrown into the air and showers down thunderously!", true, user,
+                                        nullptr,
+                                        victim, TO_CHAR);
+                                    act("Debris is thrown into the air and showers down thunderously!", true, user,
+                                        nullptr,
+                                        victim, TO_ROOM);
+                                    break;
+                                case 2:
+                                    act("The structure of the surrounding room cracks and quakes from the impact!",
+                                        true, user, nullptr, victim, TO_CHAR);
+                                    act("The structure of the surrounding room cracks and quakes from the impact!",
+                                        true, user, nullptr, victim, TO_ROOM);
+                                    break;
+                                case 3:
+                                    act("Parts of the ceiling collapse, crushing into the floor!", true, user, nullptr,
+                                        victim,
+                                        TO_CHAR);
+                                    act("Parts of the ceiling collapse, crushing into the floor!", true, user, nullptr,
+                                        victim,
+                                        TO_ROOM);
+                                    break;
+                                case 4:
+                                    act("The surrounding area roars and shudders from the impact!", true, user, nullptr,
+                                        victim,
+                                        TO_CHAR);
+                                    act("The surrounding area roars and shudders from the impact!", true, user, nullptr,
+                                        victim,
+                                        TO_ROOM);
+                                    break;
+                                case 5:
+                                    act("The ground shatters apart from the stress of the impact!", true, user, nullptr,
+                                        victim,
+                                        TO_CHAR);
+                                    act("The ground shatters apart from the stress of the impact!", true, user, nullptr,
+                                        victim,
+                                        TO_ROOM);
+                                    break;
+                                case 6:
+                                    act("The walls of the surrounding room crack in the same instant!", true, user,
+                                        nullptr,
+                                        victim, TO_CHAR);
+                                    act("The walls of the surrounding room crack in the same instant!", true, user,
+                                        nullptr,
+                                        victim, TO_ROOM);
+                                    break;
+                                default:
+                                    /* we want no message for the default */
+                                    break;
+                        }
+                    }
+                }
+        
+                break;
+            case 3:
+                actUser("@WYou fly at @C$N@W, slamming both your fists into $S gut as you fly!@n");
+                actVictim("@C$n@W flies at you, slamming both $s fists into your gut as $e flies!@n");
+                actOthers("@c$n@W flies at @C$N@W, slamming both $s fists into $S gut as $e flies!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYou slam both your fists into @C$N@W, hitting $M in the arm!@n");
+                actVictim("@C$n@W slams both $s fists into you, hitting you in the arm!@n");
+                actOthers("@c$n@W slams both $s fists into @C$N@W, hitting $M in the arm!@n");
+                break;
+            case 5: /* Weak 2 */
+                actUser("@WYou slam both your fists into @C$N's@W leg!@n");
+                actVictim("@C$n@W slams both $s fists into your leg!@n");
+                actOthers("@c$n@W slams both $s fists into @C$N's@W leg!@n");
+                break;
+        }
+    }
+
+    void Slam::handleHitspot() {
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                calcDamage *= calc_critical(user, 0);
+                if (!AFF_FLAGGED(victim, AFF_KNOCKED) &&
+                        (rand_number(1, 8) >= 7 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
+                         !AFF_FLAGGED(victim, AFF_SANCTUARY))) {
+                    act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
+                    act("@WYou are knocked out!@n", true, user, nullptr, victim, TO_VICT);
+                    act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_NOTVICT);
+                    victim->setStatusKnockedOut();
+                } else if ((GET_POS(victim) == POS_STANDING || GET_POS(victim) == POS_FIGHTING) &&
+                               !AFF_FLAGGED(victim, AFF_KNOCKED)) {
+                    GET_POS(victim) = POS_SITTING;
+                }
+                victim->getRoom()->modDamage(5);
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+
+    // Heeldrop
+    std::optional<int> Heeldrop::hasCooldown() {
+        if(IS_PICCOLO(user) && GET_SKILL_BASE(user, SKILL_STYLE) >= 75) 
+            return 5;
+        else
+            return 7;
+    }
+
+    void Heeldrop::announceObject() {
+        actUser("@WYou heeldrop $p@W as hard as you can!@n");
+        actRoom("@C$n@W heeldrops $p@W extremely hard!@n");
+    }
+
+    void Heeldrop::handleHitspot() {
+        switch (hitspot) {
+            case 1:
+                tech_handle_crashdown(user, victim);
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                tech_handle_crashdown(user, victim);
+                calcDamage *= calc_critical(user, 0);
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+        
+    }
+
+    void Heeldrop::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou disappear, appearing above @C$N@W you spin and heeldrop $M in the face!@n");
+                actVictim("@C$n@W disappears, only to appear above you, spinning quickly and heeldropping you in the face!@n");
+                actOthers("@c$n@W disappears, only to appear above @C$N@W, spinning quickly and heeldropping $M in the face!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou disappear, reappearing in front of @C$N@W, you flip upside down and slam your heel into the top of $S head!@n");
+                actVictim("@C$n@W disappears, reappearing in front of you, $e flips upside down and slams $s heel into the top of your head!@n");
+                actOthers("@c$n@W disappears, reappearing in front of @C$N@W, $e flips upside down and slams $s heel into the top of @C$N@W's head!@n");
+                break;
+            case 3:
+                actUser("@WYou fly at @C$N@W, heeldropping $S gut as you fly!@n");
+                actVictim("@C$n@W flies at you, heeldropping your gut as $e flies!@n");
+                actOthers("@c$n@W flies at @C$N@W, heeldropping $S gut as $e flies!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYou heeldrop @C$N@W, hitting $M in the arm!@n");
+                actVictim("@C$n@W heeldrops you, hitting you in the arm!@n");
+                actOthers("@c$n@W heeldrops @C$N@W, hitting $M in the arm!@n");
+                break;
+            case 5: /* Weak 2 */
+                actUser("@WYou heeldrop @C$N's@W leg!@n");
+                actVictim("@C$n@W heeldrops your leg!@n");
+                actOthers("@c$n@W heeldrops @C$N's@W leg!@n");
+                break;
+        }
+    }
+
+
+    // Headbutt
+    std::optional<int> Headbutt::hasCooldown() {
+        if(IS_KURZAK(user) && GET_SKILL_BASE(user, SKILL_STYLE) >= 100) 
+            return 5;
+        else
+            return 6;
+    }
+
+    void Headbutt::announceObject() {
+        actUser("@WYou headbutt $p@W as hard as you can!@n");
+        actRoom("@C$n@W headbutt $p@W extremely hard!@n");
+    }
+
+    void Headbutt::handleHitspot() {
+        if (IS_KURZAK(user)) {
+            if (GET_SKILL(user, SKILL_HEADBUTT) >= 60) {
+                calcDamage += calcDamage * 0.1;
+            } else if (GET_SKILL(user, SKILL_HEADBUTT) >= 40) {
+                calcDamage += calcDamage * 0.05;
+            }
+        }
+
+        switch (hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                if (!AFF_FLAGGED(victim, AFF_KNOCKED) &&
+                        (rand_number(1, 7) >= 4 && (GET_HIT(victim) > GET_HIT(user) / 5) &&
+                         !AFF_FLAGGED(victim, AFF_SANCTUARY))) {
+                    act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
+                    act("@WYou are knocked out!@n", true, user, nullptr, victim, TO_VICT);
+                    act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_NOTVICT);
+                    victim->setStatusKnockedOut();
+                }
+                int mult = 1;
+                if (IS_KURZAK(user) && !IS_NPC(user)) {
+                    if (GET_SKILL_BASE(user, SKILL_STYLE) >= 75)
+                        mult += 1;
+                }
+                calcDamage *= (calc_critical(user, 0) + mult);
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+        
+    }
+
+    void Headbutt::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou grab @c$N@W by the shoulders and slam your head into $S chest!@n");
+                actVictim("@C$n@W grabs YOU by the shoulders and slams $s head into YOUR chest!@n");
+                actOthers("@C$n@W grabs @c$N@W by the shoulders and slams $s head into @c$N's@W chest!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou grab @c$N@W by the shoulders and slam your head into $S face!@n");
+                actVictim("@C$n@W grabs YOU by the shoulders and slams $s head into YOUR face!@n");
+                actOthers("@C$n@W grabs @c$N@W by the shoulders and slams $s head into @c$N's@W face!@n");
+                break;
+            case 3:
+                actUser("@WYou grab @c$N@W by the shoulders and slam your head into $S chest!@n");
+                actVictim("@C$n@W grabs YOU by the shoulders and slams $s head into YOUR chest!@n");
+                actOthers("@C$n@W grabs @c$N@W by the shoulders and slams $s head into @c$N's@W chest!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYou grab @c$N@W and barely manage to slam your head into $S leg!@n");
+                actVictim("@C$n@W grabs YOU and barely manages to slam $s head into YOUR leg!@n");
+                actOthers("@C$n@W grabs @c$N@W and barely manages to slam $s head into @c$N's@W leg!@n");
+                break;
+            case 5: /* Weak 2 */
+                actUser("@WYou grab @c$N@W and barely manage to slam your head into $S arm!@n");
+                actVictim("@C$n@W grabs YOU and barely manages to slam $s head into YOUR arm!@n");
+                actOthers("@C$n@W grabs @c$N@W and barely manages to slam $s head into @c$N's@W arm!@n");
+                break;
+        }
     }
 
 }

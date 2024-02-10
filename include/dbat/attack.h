@@ -136,6 +136,12 @@ namespace atk {
         Result handlePerfectDodge() override;
         Result handleBlock() override;
         void handleHitspot() override;
+
+        void announceParry() override;
+        void announceBlock() override;
+        void announceDodge() override;
+        void announceMiss() override;
+        void announceHitspot() override;
     };
 
     struct RangedAttack : Attack {
@@ -250,18 +256,37 @@ namespace atk {
         int getAtkID() override {return 5;};
         std::string getName() override { return "uppercut"; }
         std::string getBodyPart() override {return "hand";};
+        std::optional<int> hasCooldown() override;
+        void handleHitspot() override;
+
+        void announceObject() override;
+        void announceHitspot() override;
     };
 
-    struct Slam : MeleeAttack {
+    struct Slam : HandAttack {
+        using HandAttack::HandAttack;
         int getSkillID() override { return SKILL_SLAM; }
         int getAtkID() override {return 6;};
         std::string getName() override { return "slam"; }
+        std::string getBodyPart() override {return "hand";};
+        std::optional<int> hasCooldown() override;
+        void handleHitspot() override;
+
+        void announceObject() override;
+        void announceHitspot() override;
     };
 
-    struct Heeldrop : MeleeAttack {
+    struct Heeldrop : LegAttack {
+        using LegAttack::LegAttack;
         int getSkillID() override { return SKILL_HEELDROP; }
         int getAtkID() override {return 8;};
         std::string getName() override { return "heeldrop"; }
+        std::string getBodyPart() override {return "foot";};
+        std::optional<int> hasCooldown() override;
+        void handleHitspot() override;
+
+        void announceObject() override;
+        void announceHitspot() override;
     };
 
     struct Tsuihidan : RangedKiAttack {
@@ -367,12 +392,20 @@ namespace atk {
     };
 
     struct Headbutt : MeleeAttack {
+        using MeleeAttack::MeleeAttack;
         int getSkillID() override { return SKILL_HEADBUTT; }
         int getAtkID() override {return 52;};
         std::string getName() override { return "headbutt"; }
+        std::string getBodyPart() override {return "head";};
+        std::optional<int> hasCooldown() override;
+        void handleHitspot() override;
+
+        void announceObject() override;
+        void announceHitspot() override;
     };
 
     struct Tailwhip : MeleeAttack {
+        using MeleeAttack::MeleeAttack;
         int getSkillID() override { return SKILL_TAILWHIP; }
         int getAtkID() override {return 56;};
         std::string getName() override { return "tailwhip"; }
