@@ -1683,3 +1683,35 @@ shop_data::shop_data(const nlohmann::json &j) : shop_data() {
     if(j.contains("bankAccount")) bankAccount = j["bankAccount"];
     if(j.contains("lastsort")) lastsort = j["lastsort"];
 }
+
+std::list<char_data*> shop_data::getKeepers() {
+    return get_vnum_list(characterVnumIndex, keeper);
+}
+
+bool shop_data::isProducing(obj_vnum vn) {
+    if(auto found = std::find(producing.begin(), producing.end(), vn); found != producing.end()) {
+        return true; 
+    }
+    return false;
+}
+
+void shop_data::runPurge() {
+    struct obj_data *next_obj;
+    for(auto keeper : getKeepers()) {
+        for (auto sobj = keeper->contents; sobj; sobj = next_obj) {
+            next_obj = sobj->next_content;
+            if(!sobj) continue;
+            if(isProducing(sobj->vn)) {
+                keeper->mod(CharMoney::Carried, GET_OBJ_COST(sobj));
+                extract_obj(sobj);
+            }
+        }
+    }
+}
+
+
+void shop_purge(uint64_t heartPulse, double deltaTime) {
+    for(auto &[vn, shop] : shop_index) {
+        shop.runPurge();
+    }
+}

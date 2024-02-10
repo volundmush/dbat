@@ -45,6 +45,7 @@
 #include "dbat/db.h"
 #include <locale>
 #include "dbat/transformation.h"
+#include "dbat/shop.h"
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
@@ -120,6 +121,7 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("handle_songs", 15.0, handle_songs),
         GameSystem("wishSYS", 1.0, wishSYS),
         GameSystem("mobile_activity", 10.0, mobile_activity),
+        GameSystem("shop_purge", 86400.0 * 7.0, shop_purge),
         GameSystem("check_auction", 15.0, check_auction),
         GameSystem("gamesys_oozaru", 0.0, trans::gamesys_oozaru),
         GameSystem("gamesys_transform", 0.0, trans::gamesys_transform),

@@ -25,6 +25,7 @@
 #include "dbat/act.misc.h"
 #include "dbat/act.movement.h"
 #include "dbat/players.h"
+#include "dbat/mobact.h"
 
 /* local vars */
 static std::set<struct char_data*> extractions_pending;
@@ -41,8 +42,6 @@ static void update_object(struct obj_data *obj, int use);
 struct obj_data *find_vehicle_by_vnum(int vnum);
 
 void remove_follower(struct char_data *ch);
-
-void clearMemory(struct char_data *ch);
 
 ACMD(do_return);
 

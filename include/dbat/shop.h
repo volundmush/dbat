@@ -11,6 +11,8 @@
 
 #include "structs.h"
 
+extern void shop_purge(uint64_t heartPulse, double deltaTime);
+
 struct shop_buy_data {
     shop_buy_data() = default;
     explicit shop_buy_data(const nlohmann::json& j);
@@ -53,6 +55,10 @@ struct shop_data {
     int bankAccount{};        /* Store all gold over 15000 (disabled)	*/
     int lastsort{};        /* How many items are sorted in inven?	*/
     SpecialFunc func{};        /* Secondary spec_proc for shopkeeper	*/
+    
+    std::list<char_data*> getKeepers();
+    bool isProducing(obj_vnum vn);
+    void runPurge();
 };
 
 
