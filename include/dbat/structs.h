@@ -177,7 +177,7 @@ struct unit_data {
     struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
     virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
     virtual std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
-    virtual std::optional<std::string> dgCallMember(trig_data *trig, const std::string& member, const std::string& arg);
+    virtual DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg);
 };
 
 
@@ -206,7 +206,7 @@ struct obj_data : public unit_data {
     void deactivate();
 
     int getAffectModifier(int location, int specific = -1);
-    std::optional<std::string> dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
+    DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
 
     std::string getUID(bool active = true) override;
@@ -358,7 +358,7 @@ struct room_data : public unit_data {
 
     nlohmann::json serializeDgVars();
 
-    std::optional<std::string> dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
+    DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
 };
 /* ====================================================================== */
@@ -551,7 +551,7 @@ struct char_data : public unit_data {
     void ageBy(double addedTime);
     void setAge(double newAge);
 
-    std::optional<std::string> dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
+    DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
     struct room_data* getRoom();
 

@@ -481,7 +481,7 @@ const std::vector<std::string> sky_look = {
                         "lightning"
                 };
 
-std::optional<std::string> room_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+DgResults room_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     std::string lmember = member;
     to_lower(lmember);
     trim(lmember);
@@ -527,15 +527,21 @@ std::optional<std::string> room_data::dgCallMember(trig_data *trig, const std::s
     }
 
     if(lmember == "contents") {
-        if(arg.empty()) return contents ? contents->getUID(false) : "";
+        if(arg.empty()) {
+            if(contents) return contents;
+            return "";
+        }
         obj_vnum v = atoll(arg.c_str());
-        auto found = findObjectVnum(v);
-        return found ? found->getUID(false) : "";
+        if(auto found = findObjectVnum(v); found) return found;
+        return "";
     }
 
-    if(lmember == "people") return people ? people->getUID(false) : "";
+    if(lmember == "people") {
+        if(people) return people;
+        return "";
+    }
 
-    if(lmember == "id") return getUID(false);
+    if(lmember == "id") return this;
 
     if(lmember == "weather") return !room_flags.test(ROOM_INDOORS) ? sky_look[weather_info.sky] : "";
 
@@ -548,17 +554,17 @@ std::optional<std::string> room_data::dgCallMember(trig_data *trig, const std::s
         return room_flags.test(flag) ? "1" : "0";
     }
 
-    if(lmember == "varexists") return script->getVar(arg) ? "1" : "0";
+    if(lmember == "varexists") return script->hasVar(arg) ? "1" : "0";
 
     if(lmember == "zonenumber") return fmt::format("{}", zone);
     if(lmember == "zonename") return zone_table[zone].name;
 
-    if(auto found = script->getVar(lmember); found) {
-        return found->value;
+    if(script->hasVar(lmember)) {
+        return script->getVar(lmember);
     } else {
         script_log("Trigger: %s, VNum %d. unknown room field: '%s'",
                                GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), lmember.c_str());
     }
 
-    return {};
+    return "";
 }

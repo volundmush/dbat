@@ -2961,15 +2961,34 @@ nlohmann::json index_data::serializeProto() {
     return proto->serializeProto();
 }
 
-std::string HasVars::getVar(const std::string& name) {
-    if(name.empty()) return {};
-    std::string n = name;
-    to_lower(n);
-    trim(n);
-    if(auto found = vars.find(n); found != vars.end()) {
-        return found->second;
+DgResults HasVars::getVar(const std::string& name) {
+    if(name.empty()) return "";
+    for(auto &[n, val] : vars) {
+        if(iequals(name, n)) {
+            auto uidResult = resolveUID(val);
+            if(uidResult) {
+                auto u = *uidResult;
+                switch(u.index()) {
+                    case 0:
+                        return std::get<0>(u);
+                    case 1:
+                        return std::get<1>(u);
+                    case 2:
+                        return std::get<2>(u);
+                }
+            }
+            return val;
+        }
     }
-    return {};
+    return "";
+}
+
+std::string HasVars::getRaw(const std::string& name) {
+    if(name.empty()) return "";
+    for(auto &[n, val] : vars) {
+        if(iequals(name, n)) return val;
+    }
+    return "";
 }
 
 void HasVars::addVar(const std::string& name, const std::string& val) {
@@ -2978,4 +2997,12 @@ void HasVars::addVar(const std::string& name, const std::string& val) {
     trim(n);
     if(val.empty()) vars.erase(n);
     else vars[n] = val;
+}
+
+bool HasVars::hasVar(const std::string& name) {
+    if(name.empty()) return false;
+    for(auto &[n, val] : vars) {
+        if(iequals(name, n)) return true;
+    }
+    return false;
 }

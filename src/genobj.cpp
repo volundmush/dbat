@@ -730,7 +730,7 @@ static const std::map<std::string, int> _values = {
     {"val7", 7}
 };
 
-std::optional<std::string> obj_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     std::string lmember = member;
     to_lower(lmember);
     trim(lmember);
@@ -763,13 +763,14 @@ std::optional<std::string> obj_data::dgCallMember(trig_data *trig, const std::st
         return "0";
     }
 
-    if(lmember == "carried_by") return carried_by ? carried_by->getUID(false) : "";
+    if(lmember == "carried_by") return carried_by;
 
     if(lmember == "contents") {
-        if(arg.empty()) return contents ? contents->getUID(false) : "";
+        if(arg.empty()) return contents;
         obj_vnum v = atoll(arg.c_str());
         auto found = findObjectVnum(v);
-        return found ? found->getUID(false) : "";
+        if(found) return found;
+        return "";
     }
 
     if(lmember == "extra" || lmember == "itemflag") {
@@ -794,11 +795,11 @@ std::optional<std::string> obj_data::dgCallMember(trig_data *trig, const std::st
         return fmt::format("{}", value[VAL_ALL_HEALTH]);
     }
 
-    if(lmember == "id") return getUID(false);
+    if(lmember == "id") return this;
 
     if(lmember == "in_room") {
         if (auto roomFound = world.find(in_room); roomFound != world.end())
-            return roomFound->second.getUID(false);
+            return &roomFound->second;
         return "";
     }
 
@@ -813,11 +814,15 @@ std::optional<std::string> obj_data::dgCallMember(trig_data *trig, const std::st
         return name;
     }
 
-    if(lmember == "next_in_list") return next_content ? next_content->getUID(false) : "";
+    if(lmember == "next_in_list") {
+        if(next_content) return next_content;
+        return "";
+    }
 
     if(lmember == "room") {
         auto r = getRoom();
-        return r ? r->getUID(false) : "";
+        if(r) return r;
+        return "";
     }
 
     if(lmember == "setaffects") {
@@ -867,7 +872,10 @@ std::optional<std::string> obj_data::dgCallMember(trig_data *trig, const std::st
         return fmt::format("{}", GET_OBJ_WEIGHT(this));
     }
 
-    if(lmember == "worn_by") return worn_by ? worn_by->getUID(false) : "";
+    if(lmember == "worn_by") {
+        if(worn_by) return worn_by;
+        return "";
+    }
 
     if(lmember == "vnum") {
         if(!arg.empty()) {
@@ -877,11 +885,12 @@ std::optional<std::string> obj_data::dgCallMember(trig_data *trig, const std::st
         return fmt::format("{}", vn);
     }
 
-    if(auto found = script->getVar(lmember); found) {
-        return found->value;
+    if(script->hasVar(lmember)) {
+        return script->getVar(lmember);
     } else {
         script_log("Trigger: %s, VNum %d. unknown object field: '%s'",
                                GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), lmember.c_str());
     }
+    return "";
 
 }

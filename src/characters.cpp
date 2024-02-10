@@ -1551,7 +1551,7 @@ static const std::map<std::string, int> _aflags = {
 static const std::set<std::string> _senseiCheck = {"sensei", "class"};
 
 
-std::optional<std::string> char_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     std::string lmember = member;
     to_lower(lmember);
     trim(lmember);
@@ -1626,8 +1626,8 @@ std::optional<std::string> char_data::dgCallMember(trig_data *trig, const std::s
     }
 
     if(lmember == "canbeseen") {
-        if(trig->owner.index() != 2) return "0";
-        auto owner = std::get<2>(trig->owner);
+        if(trig->parent->data_type != 2) return "0";
+        auto owner = (char_data*)trig->sc->owner;
         return CAN_SEE(owner, this) ? "1" : "0";
     }
 
@@ -1674,11 +1674,13 @@ std::optional<std::string> char_data::dgCallMember(trig_data *trig, const std::s
     }
 
     if(lmember == "fighting") {
-        return fighting ? fighting->getUID(false) : "";
+        if(fighting) return fighting;
+        return "";
     }
 
     if(lmember == "followers") {
-        return followers && followers->follower ? followers->follower->getUID(false) : "";
+        if(followers && followers->follower) return followers->follower;
+        return "";
     }
 
     if(lmember == "has_item") {
@@ -1703,15 +1705,18 @@ std::optional<std::string> char_data::dgCallMember(trig_data *trig, const std::s
         return fmt::format("{}", GET_HIT(this));
     }
 
-    if(lmember == "id") return getUID(false);
+    if(lmember == "id") return this;
 
     if(lmember == "is_pc") return IS_NPC(this) ? "1":"0";
 
     if(lmember == "inventory") {
-        if(arg.empty()) return contents ? contents->getUID(false) : "";
+        if(arg.empty()) {
+            if(contents) return contents;
+            return "";
+        }
         obj_vnum v = atoll(arg.c_str());
-        auto found = findObjectVnum(v);
-        return found ? found->getUID(false) : "";
+        if(auto found = findObjectVnum(v); found) return found;
+        return "";
     }
 
     if(lmember == "level") return fmt::format("{}", GET_LEVEL(this));
@@ -1761,11 +1766,17 @@ std::optional<std::string> char_data::dgCallMember(trig_data *trig, const std::s
         return fmt::format("{}", GET_MAX_MOVE(this));
     }
 
-    if(lmember == "master") return master ? master->getUID(false) : "";
+    if(lmember == "master") {
+        if(master) return master;
+        return "";
+    }
 
     if(lmember == "name") return GET_NAME(this);
 
-    if(lmember == "next_in_room") return next_in_room ? next_in_room->getUID(false) : "";
+    if(lmember == "next_in_room") {
+        if(next_in_room) return next_in_room;
+        return "";
+    }
 
     if(lmember == "pos") {
         if(!arg.empty()) {
@@ -1804,8 +1815,8 @@ std::optional<std::string> char_data::dgCallMember(trig_data *trig, const std::s
     }
 
     if(lmember == "room") {
-        auto r = getRoom();
-        return r ? r->getUID(false) : "";
+        if(auto r = getRoom(); r) return r;
+        return "";
     }
 
     if(lmember == "race") return race::getName(race);
@@ -1856,15 +1867,15 @@ std::optional<std::string> char_data::dgCallMember(trig_data *trig, const std::s
         return fmt::format("{}", vn);
     }
 
-    if(lmember == "varexists") return script->getVar(arg) ? "1" : "0";
+    if(lmember == "varexists") return !script->hasVar(arg) ? "1" : "0";
 
     // nothing left to do but try global variables...
-    if(auto found = script->getVar(lmember); found) {
-        return found->value;
+    if(script->hasVar(lmember)) {
+        return script->getVar(lmember);
     } else {
         script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
                                GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), lmember.c_str());
     }
 
-    return {};
+    return "";
 }

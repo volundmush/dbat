@@ -176,17 +176,6 @@ struct cmdlist_element {
     struct cmdlist_element *next{};
 };
 
-struct trig_var_data {
-    trig_var_data() = default;
-    explicit trig_var_data(const nlohmann::json& j);
-    nlohmann::json serialize();
-    char *name{};                /* name of variable  */
-    char *value{};                /* value of variable */
-    long context{};                /* 0: global context */
-
-    struct trig_var_data *next{};
-};
-
 enum class NestType : uint8_t {
     IF = 0,
     WHILE = 1,
@@ -219,7 +208,9 @@ public:
 struct HasVars {
     std::unordered_map<std::string, std::string> vars;
     void addVar(const std::string &name, const std::string &value);
-    std::string getVar(const std::string& name);
+    DgResults getVar(const std::string& name);
+    std::string getRaw(const std::string& name);
+    bool hasVar(const std::string& name);
 };
 
 /* structure for triggers */
@@ -308,9 +299,6 @@ struct script_data : public HasVars {
     struct script_data *next{};        /* used for purged_scripts    */
     void activate();
     void deactivate();
-
-    std::unordered_map<std::string, std::string> vars;
-    trig_var_data *getVar(const std::string& name);
 };
 
 /* The event data for the wait command */

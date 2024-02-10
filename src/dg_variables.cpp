@@ -24,6 +24,23 @@
 #include "dbat/races.h"
 #include "dbat/random.h"
 
+static char *send_cmd[] = {"msend ", "osend ", "wsend "};
+static char *echo_cmd[] = {"mecho ", "oecho ", "wecho "};
+static char *echoaround_cmd[] = {"mechoaround ", "oechoaround ", "wechoaround "};
+static char *door[] = {"mdoor ", "odoor ", "wdoor "};
+static char *force[] = {"mforce ", "oforce ", "wforce "};
+static char *load[] = {"mload ", "oload ", "wload "};
+static char *purge[] = {"mpurge ", "opurge ", "wpurge "};
+static char *teleport[] = {"mteleport ", "oteleport ", "wteleport "};
+/* the x kills a 'shadow' warning in gcc. */
+static char *xdamage[] = {"mdamage ", "odamage ", "wdamage "};
+static char *zoneecho[] = {"mzoneecho ", "ozoneecho ", "wzoneecho "};
+static char *asound[] = {"masound ", "oasound ", "wasound "};
+static char *at[] = {"mat ", "oat ", "wat "};
+/* there is no such thing as wtransform, thus the wecho below  */
+static char *transform[] = {"mtransform ", "otransform ", "wecho "};
+static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
+
 /* Utility functions */
 
 /*
@@ -203,23 +220,6 @@ std::optional<std::string> text_processed(char *field, char *subfield, struct tr
     return {};
 }
 
-static char *send_cmd[] = {"msend ", "osend ", "wsend "};
-static char *echo_cmd[] = {"mecho ", "oecho ", "wecho "};
-static char *echoaround_cmd[] = {"mechoaround ", "oechoaround ", "wechoaround "};
-static char *door[] = {"mdoor ", "odoor ", "wdoor "};
-static char *force[] = {"mforce ", "oforce ", "wforce "};
-static char *load[] = {"mload ", "oload ", "wload "};
-static char *purge[] = {"mpurge ", "opurge ", "wpurge "};
-static char *teleport[] = {"mteleport ", "oteleport ", "wteleport "};
-/* the x kills a 'shadow' warning in gcc. */
-static char *xdamage[] = {"mdamage ", "odamage ", "wdamage "};
-static char *zoneecho[] = {"mzoneecho ", "ozoneecho ", "wzoneecho "};
-static char *asound[] = {"masound ", "oasound ", "wasound "};
-static char *at[] = {"mat ", "oat ", "wat "};
-/* there is no such thing as wtransform, thus the wecho below  */
-static char *transform[] = {"mtransform ", "otransform ", "wecho "};
-static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
-
 
 /* sets str to be the value of var.field */
 std::string find_replacement(trig_data *trig, char *var, char *field, char *subfield) {
@@ -360,7 +360,6 @@ std::string find_replacement(trig_data *trig, char *var, char *field, char *subf
                 return;
             } else if (iequals(var, "people")) {
                 return fmt::format("{}", ((num = atoi(field)) > 0) ? trgvar_in_room(num) : 0);
-                return;
             } else if (iequals(var, "time")) {
                 if (iequals(field, "hour"))
                     return fmt::format("{}", time_info.hours);
@@ -534,18 +533,261 @@ std::size_t matching_percent(const std::string& line, std::size_t start) {
 }
 
 
-std::string handleSubst(const std::string& expr) {
-    std::string l = expr;
+std::string scriptTimeHolder(trig_data *trig, const std::string& field, const std::string& args) {
+    if(iequals(field, "hour")) {
+        return fmt::format("{}", time_info.hours);
+    } else if(iequals(field, "minute")) {
+        return fmt::format("{}", time_info.minutes);
+    } else if(iequals(field, "second")) {
+        return fmt::format("{}", time_info.seconds);
+    } else if(iequals(field, "day")) {
+        return fmt::format("{}", time_info.day + 1);
+    } else if(iequals(field, "month")) {
+        return fmt::format("{}", time_info.month + 1);
+    } else if(iequals(field, "year")) {
+        return fmt::format("{}", time_info.year);
+    }
+    return "";
+}
+
+DgResults scriptStartHolder(trig_data* trig, const std::string& field, const std::string& args) {
+    auto type = trig->parent->data_type;
+
+    if(iequals(field, "self")) {
+        return trig->sc->owner;
+    }
+    else if(iequals(field, "time")) {
+        return std::function(scriptTimeHolder);
+    }
+    else if (iequals(field, "global")) {
+        /* so "remote varname %global%" will work */
+        return world[0].getUID(false);
+    } 
+    else if (iequals(field, "ctime"))
+        return fmt::format("{}", time(nullptr));
+    else if (iequals(field, "door"))
+        return door[type];
+    else if (iequals(field, "force"))
+        return force[type];
+    else if (iequals(field, "load"))
+        return load[type];
+    else if (iequals(field, "purge"))
+        return purge[type];
+    else if (iequals(field, "teleport"))
+        return teleport[type];
+    else if (iequals(field, "damage"))
+        return xdamage[type];
+    else if (iequals(field, "send"))
+        return send_cmd[type];
+    else if (iequals(field, "echo"))
+        return echo_cmd[type];
+    else if (iequals(field, "echoaround"))
+        return echoaround_cmd[type];
+    else if (iequals(field, "zoneecho"))
+        return zoneecho[type];
+    else if (iequals(field, "asound"))
+        return asound[type];
+    else if (iequals(field, "at"))
+        return at[type];
+    else if (iequals(field, "transform"))
+        return transform[type];
+    else if (iequals(field, "recho"))
+        return recho[type];
+
+
+    return "";
+}
+
+std::optional<std::size_t> findDot(const std::string& line) {
+    int depth = 0;
+    bool escaped = false;
+    for(std::size_t i = 0; i < line.size(); i++) {
+        if(escaped) {
+            escaped = false;
+            continue;
+        }
+        switch(line[i]) {
+            case '(':
+                depth++;
+                break;
+            case ')':
+                depth--;
+                break;
+            case '\\':
+                escaped = true;
+                break;
+            case '.':
+                if(depth == 0) return i;
+                break;
+        }
+    }
+    return {};
+}
+
+std::optional<std::size_t> findEndParen(const std::string& line, std::size_t start) {
+    int depth = 0;
+    bool escaped = false;
+    for(std::size_t i = start; i < line.size(); i++) {
+        if(escaped) {
+            escaped = false;
+            continue;
+        }
+        switch(line[i]) {
+            case '(':
+                depth++;
+                break;
+            case ')':
+                depth--;
+                if(depth == 0) return i;
+                break;
+            case '\\':
+                escaped = true;
+                break;
+        }
+    }
+    return {};
+}
+
+std::vector<std::pair<std::string, std::string>> splitFields(const std::string& line) {
+    std::vector<std::pair<std::string, std::string>> out;
+    std::string l = line;
     trim(l);
 
-    std::string current = "";
-
+    std::vector<std::string> dotSeparators;
+    // First, we'll chop up l and fill dotSeparators with the chunks, separated by dots.
     while(true) {
-        
+        auto dot = findDot(l);
+        if(!dot) {
+            dotSeparators.emplace_back(l);
+            break;
+        }
+        dotSeparators.emplace_back(l.substr(0, dot.value()));
+        l = l.substr(dot.value()+1);
+        trim(l);
     }
 
+    // Now we'll go through dotSeparators and split each chunk into a field and an argument.
+    // Not every chunk will have an argument, so we'll have to handle that.
+    // Arguments follow the field, enclosed by parentheses. Which might be nested.
+    for(auto& chunk : dotSeparators) {
+        std::string field;
+        std::string args;
+        auto paren = chunk.find('(');
+        if(paren == std::string::npos) {
+            field = chunk;
+        } else {
+            field = chunk.substr(0, paren);
+            auto endParen = findEndParen(chunk, paren);
+            if(endParen) {
+                args = chunk.substr(paren+1, endParen.value()-paren-1);
+                trim(args);
+                // TODO: probably need to do some recursive shit here on args.
+            }
+        }
+        out.emplace_back(field, args);
+    }
+    
 
-    return current;
+    return out;
+}
+
+
+std::string trig_data::handleSubst(const std::string& expr) {
+    auto type = parent->data_type;
+    DgHolder current = "";
+    int i = 0;
+
+    for(const auto &[field, args] : splitFields(expr)) {
+        if(i++ == 0) {
+            // it's the first run.
+            if(iequals(field, "self")) {
+                current = sc->owner;
+            }
+            else if(iequals(field, "time")) {
+                current = std::function(scriptTimeHolder);
+            }
+            else if (iequals(field, "global")) {
+                /* so "remote varname %global%" will work */
+                current = &world[0];
+            } 
+            else if (iequals(field, "ctime"))
+                current = fmt::format("{}", time(nullptr));
+            else if (iequals(field, "door"))
+                current = door[type];
+            else if (iequals(field, "force"))
+                current = force[type];
+            else if (iequals(field, "load"))
+                current = load[type];
+            else if (iequals(field, "purge"))
+                current = purge[type];
+            else if (iequals(field, "teleport"))
+                current = teleport[type];
+            else if (iequals(field, "damage"))
+                current = xdamage[type];
+            else if (iequals(field, "send"))
+                current = send_cmd[type];
+            else if (iequals(field, "echo"))
+                current = echo_cmd[type];
+            else if (iequals(field, "echoaround"))
+                current = echoaround_cmd[type];
+            else if (iequals(field, "zoneecho"))
+                current = zoneecho[type];
+            else if (iequals(field, "asound"))
+                current = asound[type];
+            else if (iequals(field, "at"))
+                current = at[type];
+            else if (iequals(field, "transform"))
+                current = transform[type];
+            else if (iequals(field, "recho"))
+                current = recho[type];
+
+            continue;
+        }
+        switch(current.index()) {
+            case 0: {
+                // Strings. strings will invoke the string manipulation funcs.
+                auto s = std::get<0>(current);
+                }
+                break;
+            case 1: {
+                // a unit_data*.
+                auto u = std::get<1>(current);
+                // here we'll call the dgCallMember method and set the result into current...
+                auto res = u->dgCallMember(this, field, args);
+                if(res.index() == 0) {
+                        current = std::get<0>(res);
+                    } else {
+                        current = std::get<1>(res);
+                    }
+                }
+                break;
+            case 2: {
+                    // a function.
+                    auto f = std::get<2>(current);
+                    // here we'll call the function and set the result into current...
+                    auto res = f(this, field, args);
+                    if(res.index() == 0) {
+                        current = std::get<0>(res);
+                    } else {
+                        current = std::get<1>(res);
+                    }
+                }
+                break;
+        }
+    }
+
+    switch(current.index()) {
+        case 0: {
+            return std::get<0>(current);
+        }
+        case 1: {
+            return std::get<1>(current)->getUID(false);
+        }
+        case 2: {
+            return "";
+        }
+    
+    }
 }
 
 

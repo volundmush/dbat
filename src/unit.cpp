@@ -138,8 +138,8 @@ std::string unit_data::getUID(bool active) {
     return "";
 }
 
-std::optional<std::string> unit_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
-    return {};
+DgResults unit_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+    return "";
 }
 
 bool unit_data::isActive() {
