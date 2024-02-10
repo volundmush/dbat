@@ -2370,6 +2370,8 @@ int rand_number(int from, int to) {
         from = to;
         to = tmp;
     }
+    //To make it inclusive of the last number.
+    to = to + 1;
     return Random::get<int>(from, to);
 }
 

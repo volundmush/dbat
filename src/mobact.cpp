@@ -193,16 +193,24 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
         /* Mob Movement */
         if (!MOB_FLAGGED(ch, MOB_SENTINEL) && (GET_POS(ch) == POS_STANDING) && !FIGHTING(ch) &&
-            (!AFF_FLAGGED(ch, AFF_TAMED)) && !ABSORBBY(ch) &&
-            ((door = rand_number(0, 18)) < NUM_OF_DIRS) && CAN_GO(ch, door) &&
-            !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_NOMOB) &&
-            !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_DEATH) &&
-            (!MOB_FLAGGED(ch, MOB_STAY_ZONE) ||
-             (world[EXIT(ch, door)->to_room].zone == ch->getRoom()->zone))) {
-            if (rand_number(1, 2) == 2 && !IS_AFFECTED(ch, AFF_PARALYZE) && block_calc(ch)) {
-                perform_move(ch, door, 1);
+            (!AFF_FLAGGED(ch, AFF_TAMED)) && !ABSORBBY(ch)) {
+            door = rand_number(0, 18);
+            //Check if door is a viable movement
+            if (door < NUM_OF_DIRS && CAN_GO(ch, door) &&
+                !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_NOMOB) &&
+                !ROOM_FLAGGED(EXIT(ch, door)->to_room, ROOM_DEATH)) {
+                    //Check if door is outside of mob's zone
+                    if (!MOB_FLAGGED(ch, MOB_STAY_ZONE) ||
+                        (world[EXIT(ch, door)->to_room].zone == ch->getRoom()->zone)) {
+
+                        //Check if the mob isn't paralysed, blocked or just not feeling it today
+                        if (rand_number(1, 2) == 2 && !IS_AFFECTED(ch, AFF_PARALYZE) && block_calc(ch)) {
+                            perform_move(ch, door, 1);
+                        }
+                    }
+                }
             }
-        }
+        
 
         /* RESPOND TO A HUGE ATTACK */
         struct obj_data *hugeatk = nullptr, *next_huge = nullptr;
