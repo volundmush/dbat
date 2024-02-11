@@ -1577,6 +1577,13 @@ namespace atk {
     }
 
     //KiBlast
+    std::optional<int> KiBlast::hasCooldown() {
+        if (!IS_ANDROID(user) || initSkill < 100)
+            handle_cooldown(user, 5);
+
+        return 1;
+    }
+
     void KiBlast::attackPreprocess() {
         record = GET_HIT(victim);
         if (IS_ANDROID(user)) {
@@ -1886,6 +1893,13 @@ namespace atk {
 
 
     // Shogekiha
+    std::optional<int> Shogekiha::hasCooldown() {
+         if (!IS_KABITO(user) || initSkill < 100) 
+            return 5;
+        
+        return 1;    
+    }
+
     void Shogekiha::attackPostprocess() {
         int master_roll = rand_number(1, 100), master_chance = 0, master_pass = false;
 
@@ -2441,7 +2455,7 @@ namespace atk {
             victim->affected_by.reset(AFF_ASHED);
     }
 
-    void Honoo::attackPostprocess() {
+    void Honoo::postProcess() {
         if (ROOM_EFFECT(IN_ROOM(user)) < -1) {
             send_to_room(IN_ROOM(user), "The water surrounding the area evaporates some!\r\n");
             ROOM_EFFECT(IN_ROOM(user)) += 1;
@@ -3003,6 +3017,24 @@ namespace atk {
 
 
     // Balefire
+    std::optional<int> Balefire::hasCooldown() {
+         int cool = 8;
+
+    if (IS_PICCOLO(user)) {
+        if (initSkill >= 100)
+            cool -= 3;
+        else if (initSkill >= 75)
+            cool -= 2;
+        else if (initSkill >= 40)
+            cool -= 1;
+    }
+
+    if (cool < 1)
+        cool = 1;
+
+        return cool;    
+    }
+
     void Balefire::announceHitspot() {
         std::string loc = "body";
         switch(hitspot) {
@@ -3166,7 +3198,7 @@ namespace atk {
 
 
     // FinalFlash
-    int DarknessDragonSlash::limbhurtChance() {
+    int FinalFlash::limbhurtChance() {
         switch(hitspot) {
             case 4:
             case 5:
@@ -4039,6 +4071,51 @@ namespace atk {
         actUser("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's " + loc + "!@n");
         actVictim("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR " + loc + "!@n");
         actOthers("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's " + loc + "!@n");   
+    }
+
+
+    // Tailwhip
+    bool Tailwhip::checkOtherConditions() {
+        if (!PLR_FLAGGED(user, PLR_TAIL) && !IS_NPC(user)) {
+            send_to_char(user, "You have no tail!\r\n");
+            return false;
+        }
+        return true;
+    }
+
+    int Tailwhip::limbhurtChance() {
+        switch(hitspot){
+            case 4:
+            case 5:
+                return 195;
+        }
+ 
+        return 0;
+    }
+
+    void Tailwhip::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "head";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou swing your tail and manage to slam it into @c$N@W's " + loc + "!@n");
+        actVictim("@C$n@W swings $s tail and manages to slam it into YOUR " + loc + "!@n");
+        actOthers("@C$n@W swings $s tail and manages to slam it into @c$N@W's " + loc + "!@n");   
     }
 
 }

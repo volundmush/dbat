@@ -2738,8 +2738,8 @@ ACMD(do_punch) {
 }
 
 ACMD(do_tailwhip) {
-    //atk::Tailwhip a(ch, argument);
-    //a.execute();
+    atk::Tailwhip a(ch, argument);
+    a.execute();
 }
 
 /* This handles charging for energy attacks */

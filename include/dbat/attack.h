@@ -319,6 +319,7 @@ namespace atk {
         int getSkillID() override { return SKILL_KIBALL; }
         int getAtkID() override {return 7;};
         std::string getName() override { return "kiball"; }
+        std::optional<int> hasCooldown() override {return 5;};
 
         void execute() override;
         void announceHitspot() override;
@@ -331,6 +332,7 @@ namespace atk {
         int getSkillID() override { return SKILL_KIBLAST; }
         int getAtkID() override {return 9;};
         std::string getName() override { return "kiblast"; }
+        std::optional<int> hasCooldown() override;
         void attackPreprocess() override;
         void attackPostprocess() override;
 
@@ -343,6 +345,7 @@ namespace atk {
         int getSkillID() override { return SKILL_BEAM; }
         int getAtkID() override {return 10;};
         std::string getName() override { return "beam"; }
+        std::optional<int> hasCooldown() override {return 5;};
         void attackPostprocess() override;
 
         void announceHitspot() override;
@@ -356,6 +359,7 @@ namespace atk {
         int getHoming() override {return 2;}
         int getTier() override {return 2;};
         std::string getName() override { return "tsuihidan"; }
+        std::optional<int> hasCooldown() override {return 5;};
         void attackPostprocess() override;
 
         void announceHitspot() override;
@@ -368,6 +372,7 @@ namespace atk {
         int getSkillID() override { return SKILL_RENZO; }
         int getAtkID() override {return 12;};
         std::string getName() override { return "renzo"; }
+        std::optional<int> hasCooldown() override {return 5;};
         int getTier() override {return 2;};
         DefenseResult calculateDefense() override;
         double getKiEfficiency() override;
@@ -384,6 +389,7 @@ namespace atk {
         int getAtkID() override {return 10;};
         std::string getName() override { return "shogekiha"; }
         int getTier() override {return 2;};
+        std::optional<int> hasCooldown() override;
         void attackPostprocess() override;
         Result attackObject() override;
 
@@ -411,6 +417,7 @@ namespace atk {
         int getAtkID() override {return 14;};
         std::string getName() override { return "masenko"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         void attackPreprocess() override;
 
         void announceHitspot() override;
@@ -423,6 +430,7 @@ namespace atk {
         int getAtkID() override {return 15;};
         std::string getName() override { return "dodonpa"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         void attackPostprocess() override;
 
         void announceHitspot() override;
@@ -435,6 +443,7 @@ namespace atk {
         int getAtkID() override {return 16;};
         std::string getName() override { return "galik gun"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
 
         void announceHitspot() override;
     };
@@ -459,6 +468,7 @@ namespace atk {
         int getAtkID() override {return 18;};
         std::string getName() override { return "eraser cannon"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         void attackPostprocess() override;
         void handleHitspot() override;
         void postProcess() override;
@@ -473,6 +483,7 @@ namespace atk {
         int getAtkID() override {return 19;};
         std::string getName() override { return "twin slash"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         bool usesWeapon() override { return true; }
         bool checkOtherConditions() override;
         void handleHitspot() override;
@@ -488,6 +499,7 @@ namespace atk {
         int getAtkID() override {return 20;};
         std::string getName() override { return "psychic blast"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         void attackPostprocess() override;
 
         void announceHitspot() override;
@@ -500,6 +512,7 @@ namespace atk {
         int getAtkID() override {return 21;};
         std::string getName() override { return "honoo"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         void attackPreprocess() override;
         void attackPostprocess() override;
         void postProcess() override;
@@ -515,6 +528,7 @@ namespace atk {
         int getAtkID() override {return 22;};
         std::string getName() override { return "dual beam"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         void handleHitspot() override;
         void execute() override;
 
@@ -550,6 +564,7 @@ namespace atk {
         int getAtkID() override {return 25;};
         std::string getName() override { return "kienzan"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 7;};
         int getHoming() override {return 2;}
         bool canBlock() override {return false;};
         bool canParry() override {return false;};
@@ -567,6 +582,7 @@ namespace atk {
         int getAtkID() override {return 26;};
         std::string getName() override { return "tribeam"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 7;};
         bool canBlock() override {return false;};
         bool canParry() override {return false;};
         void attackPreprocess() override;
@@ -581,6 +597,7 @@ namespace atk {
         int getAtkID() override {return 27;};
         std::string getName() override { return "special beam cannon"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 7;};
         bool canBlock() override {return false;};
         bool canParry() override {return false;};
 
@@ -595,6 +612,7 @@ namespace atk {
         int getAtkID() override {return 31;};
         std::string getName() override { return "psychic barrage"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 7;};
         bool canBlock() override {return false;};
         void attackPostprocess() override;
 
@@ -616,6 +634,7 @@ namespace atk {
         int getAtkID() override {return 39;};
         std::string getName() override { return "spiritball"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 8;};
         int getHoming() override {return 2;}
 
         void announceHitspot() override;
@@ -629,6 +648,7 @@ namespace atk {
         int getAtkID() override {return 38;};
         std::string getName() override { return "deathball"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 8;};
         bool canBlock() override {return false;};
         bool canParry() override {return false;};
 
@@ -642,6 +662,7 @@ namespace atk {
         int getAtkID() override {return 37;};
         std::string getName() override { return "phoenix slash"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 8;};
         bool usesWeapon() override { return true; }
         bool canParry() override {return false;};
         bool checkOtherConditions() override;
@@ -660,6 +681,7 @@ namespace atk {
         int getAtkID() override {return 36;};
         std::string getName() override { return "big bang"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 8;};
         bool canParry() override {return false;};
         void handleHitspot() override;
 
@@ -688,6 +710,7 @@ namespace atk {
         int getAtkID() override {return 35;};
         std::string getName() override { return "balefire"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override;
         bool canParry() override {return false;};
 
         void announceHitspot() override;
@@ -716,6 +739,7 @@ namespace atk {
         int getAtkID() override {return 32;};
         std::string getName() override { return "hellflash"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 7;};
         bool canParry() override {return false;};
         void attackPreprocess() override;
 
@@ -730,6 +754,7 @@ namespace atk {
         int getAtkID() override {return 30;};
         std::string getName() override { return "darkness dragon slash"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 7;};
         bool checkOtherConditions() override;
         bool canParry() override {return false;};
         int limbhurtChance() override;
@@ -747,6 +772,7 @@ namespace atk {
         int getAtkID() override {return 29;};
         std::string getName() override { return "crusher ball"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 7;};
         bool canParry() override {return false;};
         void attackPostprocess() override;
 
@@ -759,8 +785,9 @@ namespace atk {
 
         int getSkillID() override { return SKILL_FINALFLASH; }
         int getAtkID() override {return 28;};
-        std::string getName() override { return "crusher ball"; }
+        std::string getName() override { return "final flash"; }
         int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 7;};
         bool canParry() override {return false;};
         int limbhurtChance() override;
 
@@ -773,7 +800,8 @@ namespace atk {
         int getSkillID() override { return SKILL_KOUSENGAN; }
         int getAtkID() override {return 42;};
         std::string getName() override { return "kousengan"; }
-        int getTier() override {return 4;};
+        int getTier() override {return 2;};
+        std::optional<int> hasCooldown() override {return 5;};
         bool canParry() override {return false;};
         int limbhurtChance() override;
         void attackPostprocess() override;
@@ -849,6 +877,7 @@ namespace atk {
         int getAtkID() override {return 54;};
         std::string getName() override { return "zen blade"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         bool canParry() override {return false;};
         bool checkOtherConditions() override;
         void handleHitspot() override;
@@ -864,6 +893,7 @@ namespace atk {
         int getAtkID() override {return 36;};
         std::string getName() override { return "malice breaker"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 8;};
         bool canParry() override {return false;};
         void attackPreprocess() override;
         void handleHitspot() override;
@@ -894,6 +924,7 @@ namespace atk {
         int getAtkID() override {return 50;};
         std::string getName() override { return "seishou enko"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 4;};
         void attackPreprocess() override;
         void handleHitspot() override;
 
@@ -912,6 +943,7 @@ namespace atk {
         std::string getName() override { return "water razor"; }
         int64_t reduction;
         int getTier() override {return 2;};
+        std::optional<int> hasCooldown() override {return 6;};
         bool canParry() override {return false;};
         bool canBlock() override {return false;};
         bool checkOtherConditions() override;
@@ -930,6 +962,7 @@ namespace atk {
         int getAtkID() override {return 43;};
         std::string getName() override { return "water spike"; }
         int getTier() override {return 2;};
+        std::optional<int> hasCooldown() override {return 6;};
         bool canParry() override {return false;};
         void attackPreprocess() override;
         void postProcess() override;
@@ -945,6 +978,7 @@ namespace atk {
         int getAtkID() override {return 48;};
         std::string getName() override { return "koteiru bakuha"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 7;};
         bool canParry() override {return false;};
         bool canBlock() override {return false;};
         int limbhurtChance() override;
@@ -960,6 +994,7 @@ namespace atk {
         int getAtkID() override {return 49;};
         std::string getName() override { return "hell spiral"; }
         int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
         bool canParry() override {return false;};
         bool canBlock() override {return false;};
         int limbhurtChance() override;
@@ -978,6 +1013,7 @@ namespace atk {
         int getAtkID() override {return 46;};
         std::string getName() override { return "star breaker"; }
         int getTier() override {return 2;};
+        std::optional<int> hasCooldown() override {return 6;};
         int limbhurtChance() override;
         void attackPreprocess() override;
         void attackPostprocess() override;
@@ -1012,10 +1048,17 @@ namespace atk {
 
     struct Tailwhip : MeleeAttack {
         using MeleeAttack::MeleeAttack;
+
         int getSkillID() override { return SKILL_TAILWHIP; }
         int getAtkID() override {return 56;};
         std::string getName() override { return "tailwhip"; }
+        std::optional<int> hasCooldown() override {return 7;};
         std::string getBodyPart() override {return "tail";};
+        bool checkOtherConditions() override;
+        int limbhurtChance() override;
+
+        void announceHitspot() override;
+
     };
 
 }
