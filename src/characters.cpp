@@ -1626,7 +1626,7 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
     }
 
     if(lmember == "canbeseen") {
-        if(trig->parent->data_type != 2) return "0";
+        if(trig->parent->attach_type != 2) return "0";
         auto owner = (char_data*)trig->sc->owner;
         return CAN_SEE(owner, this) ? "1" : "0";
     }

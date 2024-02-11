@@ -178,15 +178,6 @@ public:
     }
 };
 
-/* structure for triggers */
-
-
-/* The event data for the wait command */
-struct wait_event_data {
-    struct trig_data *trigger{};
-    void *go{};
-    int type{};
-};
 
 /* typedefs that the dg functions rely on */
 typedef struct index_data index_data;
@@ -347,8 +338,6 @@ extern void find_uid_name(char *uid, char *name, size_t nlen);
 
 extern void do_sstat(struct char_data *ch, struct unit_data *ud);
 
-extern void add_trigger(struct script_data *sc, const std::shared_ptr<trig_data> t, int loc);
-
 extern void script_vlog(const char *format, va_list args);
 
 extern void script_log(const char *format, ...) __attribute__ ((format (printf, 1, 2)));
@@ -388,13 +377,7 @@ extern char *skill_percent(struct char_data *ch, char *skill);
 
 extern int char_has_item(char *item, struct char_data *ch);
 
-extern void var_subst(void *go, struct script_data *sc, trig_data *trig,
-                      int type, char *line, char *buf);
-
 /* From dg_handler.c */
-
-
-extern void free_trigger(trig_data *trig);
 
 extern void extract_script(void *thing, int type);
 

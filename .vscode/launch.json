@@ -37,6 +37,27 @@
             "preLaunchTask": "setPythonPath" // This is optional, see below
         },
         {
+            "name": "DBAT: (GDB) Migrate",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${command:python.interpreterPath}",
+            "args": ["migrate.py"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb",
+            "preLaunchTask": "setPythonPath" // This is optional, see below
+        },
+        {
             "name": "(GDB) Attach to Python",
             "type": "cppdbg",
             "request": "attach",

@@ -68,15 +68,15 @@ struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
 
-std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
+DebugMap<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
 /* hash tree for fast obj lookup */
-std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
+DebugMap<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, std::shared_ptr<trig_proto>> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
-std::map<int64_t, std::pair<time_t, std::shared_ptr<trig_data>>> uniqueScripts;
+DebugMap<int64_t, std::pair<time_t, std::shared_ptr<trig_data>>> uniqueScripts;
 
 
 int dg_owner_purged;            /* For control of scripts */
@@ -261,6 +261,7 @@ static void db_load_characters_initial(const std::filesystem::path& loc) {
         auto generation = j["generation"].get<int>();
         auto data = j["data"];
         auto c = new char_data();
+        c->script = std::make_shared<script_data>(c);
         if(auto isPlayer = players.find(id); isPlayer != players.end()) {
             c->deserializePlayer(data, false);
             isPlayer->second.character = c;
@@ -290,6 +291,7 @@ static void db_load_items_initial(const std::filesystem::path& loc) {
         auto generation = j["generation"].get<int>();
         auto data = j["data"];
         auto i = new obj_data();
+        i->script = std::make_shared<script_data>(i);
         i->deserializeInstance(data, false);
         uniqueObjects[id] = std::make_pair(generation, i);
     }
@@ -393,6 +395,7 @@ static void db_load_rooms(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "rooms.json")) {
         auto id = j["vn"].get<int64_t>();
         auto r = world.emplace(id, j);
+        r.first->second.script = std::make_shared<script_data>(&r.first->second);
         r.first->second.zone = real_zone_by_thing(id);
     }
 }
@@ -452,7 +455,6 @@ static void db_load_areas(const std::filesystem::path& loc) {
             }
         }
     }
-
 
     for(auto &[vn, a] : areas) {
         if(a.parent) {
@@ -571,7 +573,7 @@ void boot_db_world() {
         db_load_items_initial(latest);
     });
 
-    basic_mud_log("Loading dgscrip instances...");
+    basic_mud_log("Loading dgscript instances...");
     threads.emplace_back([&latest] {
         db_load_dgscripts_initial(latest);
     });
@@ -1326,6 +1328,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
 /* create a character, and add it to the char list */
 struct char_data *create_char(bool activate) {
     auto ch = new char_data();
+    ch->script = std::make_shared<script_data>(ch);
 
     if(activate) {
         ch->id = nextCharID();
@@ -1335,7 +1338,6 @@ struct char_data *create_char(bool activate) {
         ch->activate();
     }
 
-
     return ch;
 }
 
@@ -1343,8 +1345,6 @@ struct char_data *create_char(bool activate) {
 /* create a new mobile from a prototype */
 struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
-    struct char_data *mob;
-
     auto proto = mob_proto.find(nr);
 
     if(proto == mob_proto.end()) {
@@ -1352,9 +1352,12 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         return (nullptr);
     }
 
-    mob = new char_data();
+    // Weird hack to ensure script_data is not overwritten by prototype...
+    auto mob = new char_data();
 
     *mob = proto->second;
+    mob->script = std::make_shared<script_data>(mob);
+
     mob->id = nextCharID();
     mob->generation = time(nullptr);
     check_unique_id(mob);
@@ -1998,16 +2001,14 @@ char *sprintuniques(int low, int high) {
 /* create an object, and add it to the object list */
 struct obj_data *create_obj(bool activate) {
     auto obj = new obj_data();
-
+    
     if(activate) {
         obj->id = nextObjID();
         obj->generation = time(nullptr);
-        obj->activate();
         check_unique_id(obj);
         add_unique_id(obj);
+        obj->activate();
     }
-
-    assign_triggers(obj, OBJ_TRIGGER);
 
     return (obj);
 }
@@ -2026,17 +2027,14 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
         return (nullptr);
     }
     
+    // Weird hack to ensure that script_data is not overritten by prototype.
     auto obj = new obj_data();
     *obj = proto->second;
-    OBJ_LOADROOM(obj) = NOWHERE;
-    if(activate) {
-        obj->id = nextObjID();
-        obj->generation = time(nullptr);
-        check_unique_id(obj);
-        add_unique_id(obj);
-        obj->activate();
-    }
+    obj->script = std::make_shared<script_data>(obj);
 
+    OBJ_LOADROOM(obj) = NOWHERE;
+    
+    
     if (proto->second.sbinfo) {
         CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
         for (j = 0; j < SPELLBOOK_SIZE; j++) {
@@ -2044,8 +2042,7 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
             obj->sbinfo[j].pages = proto->second.sbinfo[j].pages;
         }
     }
-    copy_proto_script(&proto->second, obj, OBJ_TRIGGER);
-    assign_triggers(obj, OBJ_TRIGGER);
+
     if (GET_OBJ_VNUM(obj) == 65) {
         HCHARGE(obj) = 20;
     }
@@ -2054,6 +2051,13 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
             GET_OBJ_VAL(obj, 1) = GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL);
         }
         FOOB(obj) = GET_OBJ_VAL(obj, 1);
+    }
+    if(activate) {
+        obj->id = nextObjID();
+        obj->generation = time(nullptr);
+        check_unique_id(obj);
+        add_unique_id(obj);
+        obj->activate();
     }
     return (obj);
 }

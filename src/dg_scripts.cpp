@@ -45,7 +45,6 @@ void trig_data::reset() {
 }
 
 int trig_data::execute() {
-    dg_owner_purged = false;
     try {
         switch(state) {
             case DgScriptState::RUNNING:
@@ -166,7 +165,7 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
         }
 
         else if(l.starts_with("done ") || l == "done") {
-            if(depth.empty() || (depth.back().first == NestType::SWITCH || depth.back().first == NestType::WHILE))
+            if(depth.empty() || !(depth.back().first == NestType::SWITCH || depth.back().first == NestType::WHILE))
                 throw DgScriptException("done outside of switch-case or while block!");
             switch(depth.back().first) {
                 case NestType::WHILE:
@@ -232,7 +231,7 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
                 mudlog(NRM, ADMLVL_GOD, true, "%s", DG_SCRIPT_VERSION);
 
             else {
-                switch (parent->data_type) {
+                switch (parent->attach_type) {
                     case MOB_TRIGGER:
                         command_interpreter((char_data *) sc->owner, cmd);
                         break;
@@ -250,6 +249,7 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
                 }
             }
         }
+        lineNumber++;
     }
     return ret_val;
 
@@ -314,7 +314,7 @@ std::size_t trig_data::findEnd() {
 }
 
 std::size_t trig_data::findDone() {
-    if(depth.empty() || (depth.back().first == NestType::SWITCH || depth.back().first == NestType::WHILE))
+    if(depth.empty() || !(depth.back().first == NestType::SWITCH || depth.back().first == NestType::WHILE))
         throw DgScriptException("findDone called outside of switch-case or while block!");
     
     auto t = depth.back().first;
@@ -1549,6 +1549,18 @@ std::string trig_data::evalOp(const std::string& op, const std::string& lhs, con
     return "0";
 }
 
+char *matching_quote(char *p)
+{
+  for (p++; *p && (*p != '"'); p++) {
+    if (*p == '\\')
+      p++;
+  }
+
+  if (!*p)
+    p--;
+
+  return p;
+}
 
 /*
  * p points to the first quote, returns the matching
@@ -1568,7 +1580,7 @@ std::size_t matching_quote(const std::string& line, std::size_t start) {
  * matching closing paren, or the last non-null char in p.
  */
 std::size_t matching_paren(const std::string& line, std::size_t start) {
-    int depth;
+    int depth = 0;
 
     for (auto i = start; i < line.size(); i++) {
         auto p = line[i];
@@ -1593,7 +1605,7 @@ std::string trig_data::evalExpr(const std::string& expr) {
 
     if (l.starts_with('(')) {
         auto p = matching_paren(l, 0);
-        return evalExpr(l.substr(0, p));
+        return evalExpr(l.substr(1, p-1));
     } else if (auto result = evalLhsOpRhs(l); result) {
         return result.value();
     } else
@@ -1628,7 +1640,13 @@ std::optional<std::string> trig_data::evalLhsOpRhs(const std::string& expr)
         if(idx == std::string::npos) continue;
 
         auto left = expr.substr(0, idx-1);
-        auto right = expr.substr((idx-1 + op.size()));
+        auto right = expr.substr((idx + op.size()));
+
+        // handle ! in a special way to avoid double-evaluation.
+        if(op == "!") {
+            auto r = evalExpr(right);
+            return fmt::format("{}", !truthy(r));
+        }
 
         auto lhr = evalExpr(left);
         auto rhr = evalExpr(right);
@@ -1680,7 +1698,6 @@ std::optional<std::size_t> find_end(trig_data *trig, std::size_t line) {
 /* processes any 'wait' commands in a trigger */
 void trig_data::processWait(const std::string& cmd) {
     char buf[MAX_INPUT_LENGTH], *arg;
-    struct wait_event_data *wait_event_obj;
     long when, hr, min, ntime;
     char c;
 
@@ -2281,6 +2298,10 @@ nlohmann::json trig_proto::serialize() {
     return j;
 }
 
+trig_proto::trig_proto(const nlohmann::json& j) {
+    deserialize(j);
+}
+
 void trig_proto::deserialize(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"].get<trig_vnum>();
     if(j.contains("name")) name = j["name"].get<std::string>();
@@ -2297,7 +2318,6 @@ nlohmann::json trig_data::serialize() {
     auto j = nlohmann::json::object();
 
     j["vn"] = parent->vn;
-
     j["id"] = id;
     j["generation"] = generation;
     j["order"] = order;
@@ -2332,7 +2352,7 @@ void trig_data::deserialize(const nlohmann::json &j) {
 }
 
 std::string trig_data::serializeLocation() {
-    return sc->owner->getUID();
+    return sc->owner->getUID(false);
 }
 
 // Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
@@ -2449,4 +2469,8 @@ trig_data::~trig_data() {
 
 void script_data::removeAll() {
     dgScripts.clear();
+}
+
+void script_data::removeScript(const std::string &name) {
+    
 }

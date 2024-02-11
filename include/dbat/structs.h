@@ -269,7 +269,7 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
 };
 
 struct unit_data {
-    unit_data();
+    unit_data() = default;
     virtual ~unit_data() = default;
     vnum vn{NOTHING}; /* Where in database */
     zone_vnum zone{NOTHING};
@@ -1370,8 +1370,6 @@ struct index_data {
     SpecialFunc func;
 
     char *farg;         /* string argument for special function     */
-    struct trig_data *proto;     /* for triggers... the trigger     */
-    nlohmann::json serializeProto();
 };
 
 /* linked list for mob/object prototype trigger lists */

@@ -131,7 +131,7 @@ int char_has_item(char *item, struct char_data *ch) {
 
 
 std::size_t matching_percent(const std::string& line, std::size_t start) {
-    int depth;
+    int depth = 0;
 
     for (auto i = start+1; i < line.size(); i++) {
         auto p = line[i];
@@ -292,7 +292,7 @@ DgResults scriptGlobal(trig_data *trig, const std::string& field, const std::str
 }
 
 DgResults scriptRandom(trig_data *trig, const std::string& field, const std::string& args) {
-    auto type = trig->parent->data_type;
+    auto type = trig->parent->attach_type;
     struct char_data *enactor;
     room_data *r;
     switch(type) {
@@ -410,7 +410,7 @@ DgResults checkForID(const std::string& text) {
 
 
 std::string trig_data::handleSubst(const std::string& expr) {
-    auto type = parent->data_type;
+    auto type = parent->attach_type;
     DgHolder current = "";
     int i = 0;
     int num = 0;
@@ -530,7 +530,7 @@ std::string trig_data::varSubst(const std::string& line) {
     while(start != std::string::npos) {
         auto end = matching_percent(l, start);
 
-        auto sub = l.substr(start+1, line.size()-end);
+        auto sub = l.substr(start+1, end-(start+1));
         out += handleSubst(sub);
         l = l.substr(end+1);
         start = l.find('%');

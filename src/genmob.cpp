@@ -752,11 +752,11 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     }
 
     if(j.contains("dgvariables")) {
-        // dgvariables is a sequence of string pairs that fills the script->vars map.
-        auto j2 = j["dgvariables"];
-        for(auto j3 : j2) {
-            script->vars[j3[0].get<std::string>()] = j3[1].get<std::string>();
+        // dgvariables is a json object of string keys and string values which must fill up script->vars the likewise map.
+        for(auto &i : j["dgvariables"].items()) {
+            script->vars[i.key()] = i.value();
         }
+        
     }
 
     auto proto = mob_proto.find(vn);

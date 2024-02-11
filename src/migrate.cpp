@@ -81,8 +81,8 @@ static void parse_trigger(FILE *trig_f, trig_vnum nr) {
     trig->attach_type = (int8_t) attach_type;
     trig->trigger_type = (long) asciiflag_conv(flags);
     trig->narg = (k == 3) ? t[0] : 0;
-
-    trig->arglist = fread_string(trig_f, errors);
+    auto args = fread_string(trig_f, errors);
+    if(args) trig->arglist = args;
 
     cmds = s = fread_string(trig_f, errors);
 
@@ -831,6 +831,7 @@ static int Crash_load(struct char_data *ch) {
             }   /* exit our xap loop */
             if (temp != nullptr) {
                 num_objs++;
+                temp->script = std::make_shared<script_data>(temp);
                 check_unique_id(temp);
                 add_unique_id(temp);
                 temp->activate();
@@ -1092,7 +1093,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     auto &z = zone_table[zone];
     auto &r = world[virtual_nr];
     z.rooms.insert(virtual_nr);
-
+    r.script = std::make_shared<script_data>(&r);
     r.zone = zone;
     r.vn = virtual_nr;
     r.name = fread_string(fl, buf2);
@@ -3058,6 +3059,7 @@ int House_load(room_vnum rvnum) {
             if (temp != nullptr) {
                 check_unique_id(temp);
                 add_unique_id(temp);
+                temp->script = std::make_shared<script_data>(temp);
                 temp->activate();
                 num_objs++;
                 obj_to_room(temp, rrnum);
@@ -4652,6 +4654,7 @@ void migrate_characters() {
 
     for(auto &[cname, accID] : characterToAccount) {
         auto ch = new char_data();
+        ch->script = std::make_shared<script_data>(ch);
         if(load_char(cname.c_str(), ch) < 0) {
             basic_mud_log("Error loading %s for account migration.", cname.c_str());
             delete ch;

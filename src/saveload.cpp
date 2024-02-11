@@ -84,6 +84,7 @@ static void dump_state_dgscripts(const std::filesystem::path &loc) {
         if(v != r.second->id) r.second->id = v;
         nlohmann::json j2;
         j2["id"] = v;
+        j2["vn"] = r.second->parent->vn;
         j2["generation"] = static_cast<int32_t>(r.first);
         j2["data"] = r.second->serialize();
         j2["location"] = r.second->serializeLocation();
@@ -228,7 +229,7 @@ void runSave() {
     std::tm tm_now = *std::localtime(&time_t_now);
 
     auto tempPath = path / "temp";
-    std::filesystem::remove(tempPath);
+    std::filesystem::remove_all(tempPath);
     std::filesystem::create_directories(tempPath);
 
     auto newPath = path / fmt::format("dump-{:04}{:02}{:02}{:02}{:02}{:02}",

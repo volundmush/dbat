@@ -93,8 +93,6 @@ cdef extern from "dbat/structs.h":
 
     cdef cppclass index_data:
         int vn
-        trig_data *proto
-        utils.json serializeProto()
 
     cdef cppclass descriptor_data:
         int64_t id

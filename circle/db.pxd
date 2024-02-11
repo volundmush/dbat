@@ -14,7 +14,6 @@ cimport utils
 
 ctypedef structs.char_data* char_data_ptr
 ctypedef structs.obj_data* obj_data_ptr
-ctypedef structs.trig_data* trig_data_ptr
 
 cdef extern from "dbat/db.h":
     structs.time_info_data time_info
@@ -37,8 +36,8 @@ cdef extern from "dbat/db.h":
 
     unordered_map[int64_t, pair[time_t, obj_data_ptr]] uniqueObjects
 
-    map[int, structs.index_data] trig_index
-    map[int64_t, pair[time_t, trig_data_ptr]] uniqueScripts
+    map[int, shared_ptr[structs.trig_data]] trig_index
+    map[int64_t, pair[time_t, shared_ptr[structs.trig_data]]] uniqueScripts
 
 cdef extern from "dbat/guild.h":
     map[int, structs.guild_data] guild_index

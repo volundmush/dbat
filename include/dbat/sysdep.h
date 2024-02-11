@@ -111,13 +111,13 @@ typedef int(*SpecialFunc)(struct char_data *ch, void *me, int cmd, char *argumen
 #define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
 
 template <typename Key, typename T>
-class DebugMap : public std::map<Key, T> {
+class DebugMap : public std::unordered_map<Key, T> {
 public:
     T& operator[](const Key& key) {
         if (key < 0) {
             throw std::runtime_error("Invalid key");
         }
-        return std::map<Key, T>::operator[](key);
+        return std::unordered_map<Key, T>::operator[](key);
     }
 };
 
