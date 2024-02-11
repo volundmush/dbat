@@ -42,9 +42,12 @@ namespace atk {
         virtual Result attackCharacter();
         virtual Result attackObject();
 
+        virtual void processAttack();
+        virtual void calculateDamage();
         virtual void attackPreprocess();
         virtual void attackPostprocess();
         virtual void postProcess();
+        virtual void doUserCost();
         virtual void onLanded();
         virtual void onMissed();
         virtual void onCanceled();
@@ -53,6 +56,7 @@ namespace atk {
         virtual std::optional<int> limbsToCheck();
         virtual std::optional<int> hurtInjuredLimbs();
         virtual void hurtLimb(int limb);
+        virtual bool getOpponent();
         virtual bool checkLimbs();
         virtual bool checkSkills();
         virtual bool checkOtherConditions();
@@ -70,7 +74,7 @@ namespace atk {
 
         virtual int64_t calculateHealthCost();
         virtual int64_t calculateStaminaCost();
-        virtual int64_t calculateKiCost();
+        virtual double calculateKiCost();
         virtual std::optional<int> hasCooldown();
         virtual int canKillType();
         virtual int limbhurtChance() {return 0;};
@@ -92,6 +96,7 @@ namespace atk {
         virtual void announceHitspot();
 
         virtual bool calculateDeflect();
+        virtual void handleAccuracyModifiers();
         virtual Result handleMiss();
         virtual Result handleParry() = 0;
         virtual Result handleBlock() = 0;
@@ -124,7 +129,7 @@ namespace atk {
         int cooldownOverride{-1};
         int64_t currentHealthCost{0};
         int64_t currentStaminaCost{0};
-        int64_t currentKiCost{0};
+        double currentKiCost{0};
         double attPerc{0.0};
         int64_t calcDamage{0};
         DefenseResult defenseResult{DefenseResult::Failed};
@@ -164,7 +169,8 @@ namespace atk {
 
         bool isKiAttack() override {return true;};
         bool isPhysical() override {return false;};
-        int64_t calculateKiCost() override;
+        bool checkOtherConditions() override;
+        double calculateKiCost() override;
         double getKiEfficiency();
         int getTier() {return 1;};
         int getHoming() {return 0;};
@@ -321,7 +327,7 @@ namespace atk {
         std::string getName() override { return "kiball"; }
         std::optional<int> hasCooldown() override {return 5;};
 
-        void execute() override;
+        void processAttack() override;
         void announceHitspot() override;
     };
 
@@ -469,9 +475,8 @@ namespace atk {
         std::string getName() override { return "eraser cannon"; }
         int getTier() override {return 3;};
         std::optional<int> hasCooldown() override {return 6;};
-        void attackPostprocess() override;
-        void handleHitspot() override;
         void postProcess() override;
+        void handleHitspot() override;
 
         void announceHitspot() override;
     };
@@ -530,7 +535,7 @@ namespace atk {
         int getTier() override {return 3;};
         std::optional<int> hasCooldown() override {return 6;};
         void handleHitspot() override;
-        void execute() override;
+        void processAttack() override;
 
         void announceHitspot() override;
     };
@@ -549,13 +554,6 @@ namespace atk {
         void announceHitspot() override;
     };
 
-    struct Bakuhatsuha : RangedKiAttack {
-        using RangedKiAttack::RangedKiAttack;
-
-        int getSkillID() override { return SKILL_BAKUHATSUHA; }
-        int getAtkID() override {return 24;};
-        std::string getName() override { return "bakuhatsuha"; }
-    };
 
     struct Kienzan : RangedKiAttack {
         using RangedKiAttack::RangedKiAttack;
@@ -716,21 +714,7 @@ namespace atk {
         void announceHitspot() override;
     };
 
-    struct Kakusanha : RangedKiAttack {
-        using RangedKiAttack::RangedKiAttack;
-
-        int getSkillID() override { return SKILL_KAKUSANHA; }
-        int getAtkID() override {return 34;};
-
-    };
-
-    struct Hellspear : RangedKiAttack {
-        using RangedKiAttack::RangedKiAttack;
-
-        int getSkillID() override { return SKILL_HELLSPEAR; }
-        int getAtkID() override {return 33;};
-
-    };
+    
 
     struct Hellflash : RangedKiAttack {
         using RangedKiAttack::RangedKiAttack;
@@ -807,15 +791,6 @@ namespace atk {
         void attackPostprocess() override;
 
         void announceHitspot() override;
-
-    };
-
-    struct LightGrenade : RangedKiAttack {
-        using RangedKiAttack::RangedKiAttack;
-
-        int getSkillID() override { return SKILL_LIGHTGRENADE; }
-        int getAtkID() override {return -1;};
-        std::string getName() override { return "light grenade"; }
 
     };
 
@@ -899,10 +874,6 @@ namespace atk {
         void handleHitspot() override;
 
         void announceHitspot() override;
-    };
-
-    struct Nova : RangedKiAttack {
-
     };
 
     struct Bash : HandAttack {
@@ -1060,5 +1031,217 @@ namespace atk {
         void announceHitspot() override;
 
     };
+
+    struct KiAreaAttack : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
+        std::vector<char_data> targets;
+        bool paidCost = false;
+        bool canParry() override {return false;};
+        bool canBlock() override {return false;};
+        void doUserCost() override;
+        bool getOpponent() override;
+        void processAttack() override;
+        virtual void announceAttack();
+
+    };
+
+    
+    struct Bakuhatsuha : KiAreaAttack {
+        using KiAreaAttack::KiAreaAttack;
+
+        int getSkillID() override { return SKILL_BAKUHATSUHA; }
+        int getAtkID() override {return 24;};
+        std::string getName() override { return "bakuhatsuha"; }
+        int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
+        void attackPreprocess() override;
+
+        void announceAttack() override;
+        void announceHitspot() override;
+    };
+
+    struct Kakusanha : KiAreaAttack {
+        using KiAreaAttack::KiAreaAttack;
+
+        int getSkillID() override { return SKILL_KAKUSANHA; }
+        int getAtkID() override {return 34;};
+        std::string getName() override { return "kakusanha"; }
+        int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 5;};
+        void attackPreprocess() override;
+        void postProcess() override;
+
+        void announceAttack() override;
+        void announceHitspot() override;
+    };
+
+    struct Hellspear : KiAreaAttack {
+        using KiAreaAttack::KiAreaAttack;
+
+        int getSkillID() override { return SKILL_HELLSPEAR; }
+        int getAtkID() override {return 33;};
+        std::string getName() override { return "hellspear"; }
+        int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 5;};
+
+        void announceAttack() override;
+        void announceHitspot() override;
+
+    };
+
+    struct LightGrenade : KiAreaAttack {
+        using KiAreaAttack::KiAreaAttack;
+
+        int getSkillID() override { return SKILL_LIGHTGRENADE; }
+        int getAtkID() override {return 57;};
+        std::string getName() override { return "light grenade"; }
+        int getTier() override {return 4;};
+        std::optional<int> hasCooldown() override {return 9;};
+        void attackPostprocess() override;
+
+        void announceAttack() override;
+        void announceHitspot() override;
+
+    };
+
+    struct StarNova : KiAreaAttack {
+        using KiAreaAttack::KiAreaAttack;
+
+        int getSkillID() override { return SKILL_STARNOVA; }
+        int getAtkID() override {return 53;};
+        std::string getName() override { return "star nova"; }
+        int getTier() override {return 3;};
+        std::optional<int> hasCooldown() override {return 6;};
+        void attackPreprocess() override;
+
+        void announceAttack() override;
+        void announceHitspot() override;
+
+    };
+
+
+    struct WeaponAttack : MeleeAttack {
+        using MeleeAttack::MeleeAttack;
+
+        struct obj_data *weap = nullptr;
+        bool secondAttack = false;
+        int wielded = 0;
+        int dualWield = 0;
+        int wtype = 0;
+        int wlvl = 0;
+
+        bool usesWeapon() override { return true; }
+        virtual int getWeaponType() {return (TYPE_PIERCE - TYPE_HIT);};
+        std::string getName() override { return "dagger"; }
+        int getAtkID() override {return -1;};
+        std::optional<int> hasCooldown() override {return 8;};
+        bool checkOtherConditions() override;
+        int64_t calculateStaminaCost() override;
+        void executeSecond();
+        void chooseSecondAttack();
+        void calculateDamage() override;
+        void postProcess() override;
+        void handleAccuracyModifiers() override;
+
+
+    };
+
+    //Dagger
+    struct Stab : WeaponAttack {
+        using WeaponAttack::WeaponAttack;
+
+        int wtype = 1;
+        int getSkillID() override { return SKILL_DAGGER; }
+
+        int getWeaponType() {return (TYPE_PIERCE - TYPE_HIT);};
+        std::string getName() override { return "dagger"; }
+        void attackPreprocess() override;
+
+        void announceHitspot() override;
+
+    };
+
+    //Sword
+    struct Slash : WeaponAttack {
+        using WeaponAttack::WeaponAttack;
+
+        int wtype = 0;
+        int64_t beforepl = 0;
+        int getSkillID() override { return SKILL_SWORD; }
+
+        int getWeaponType() {return (TYPE_SLASH - TYPE_HIT);};
+        std::string getName() override { return "sword"; }
+        void attackPreprocess() override;
+        void attackPostprocess() override;
+        void handleHitspot() override;
+
+        void announceHitspot() override;
+
+    };
+
+    //Crush
+    struct Crush : WeaponAttack {
+        using WeaponAttack::WeaponAttack;
+
+        int wtype = 2;
+        
+        int getSkillID() override { return SKILL_CLUB; }
+
+        int getWeaponType() {return (TYPE_CRUSH - TYPE_HIT);};
+        std::string getName() override { return "club"; }
+        void attackPostprocess() override;
+
+        void announceHitspot() override;
+
+    };
+
+    //Spear
+    struct Impale : WeaponAttack {
+        using WeaponAttack::WeaponAttack;
+
+        int wtype = 3;
+        int getSkillID() override { return SKILL_SPEAR; }
+
+        int getWeaponType() {return (TYPE_STAB - TYPE_HIT);};
+        std::string getName() override { return "spear"; }
+
+        void announceHitspot() override;
+
+    };
+
+    //Gun
+    struct Shoot : WeaponAttack {
+        using WeaponAttack::WeaponAttack;
+
+        int wtype = 4;
+        int getSkillID() override { return SKILL_GUN; }
+
+        int getWeaponType() {return (TYPE_BLAST - TYPE_HIT);};
+        std::string getName() override { return "gun"; }
+        void handleHitspot() override;
+        bool checkOtherConditions() override;
+
+        void announceHitspot() override;
+
+        int canKillType() override {return 1;};
+
+    };
+
+    //Other
+    struct Smash : WeaponAttack {
+        using WeaponAttack::WeaponAttack;
+
+        int wtype = 5;
+        int getSkillID() override { return SKILL_BRAWL; }
+
+        int getWeaponType() {return (TYPE_PUNCH - TYPE_HIT);};
+        std::string getName() override { return "weapon"; }
+        void handleHitspot() override;
+
+        void announceHitspot() override;
+
+    };
+
 
 }

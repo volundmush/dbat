@@ -7,6 +7,7 @@
 #include "dbat/races.h"
 #include "dbat/random.h"
 #include "dbat/fight.h"
+#include "dbat/guild.h"
 
 namespace atk {
     std::map<int, std::vector<std::pair<int, int>>> minimumSkillRequired;
@@ -86,8 +87,8 @@ namespace atk {
         return 0;
     }
 
-    int64_t Attack::calculateKiCost() {
-        return 0;
+    double Attack::calculateKiCost() {
+        return 0.0;
     }
 
     bool Attack::checkCosts() {
@@ -102,7 +103,7 @@ namespace atk {
             return false;
         }
         currentKiCost = calculateKiCost();
-        if(GET_CHARGE(user) < currentKiCost || GET_CHARGE(user) <= 0) {
+        if(GET_CHARGE(user) < (currentKiCost * GET_MAX_MANA(user)) || GET_CHARGE(user) <= 0) {
             send_to_char(user, "You don't have enough ki to do that!\r\n");
             return false;
         }
@@ -113,6 +114,20 @@ namespace atk {
         return std::nullopt;
     }
 
+    bool Attack::getOpponent() {
+        if (args.empty() && !FIGHTING(user)) {
+            send_to_char(user, "Direct it at who?\r\n");
+            return false;
+        }
+
+        if(args.empty()) {
+            victim = FIGHTING(user);
+        } else {
+            if(!tech_handle_targeting(user, (char*)args[0].c_str(), &victim, &obj)) return;
+        }
+        return true;
+    }
+
     void Attack::execute() {
 
         if(!can_grav(user)) return;
@@ -121,21 +136,16 @@ namespace atk {
         if(!checkEmptyHands()) return;
         if(!checkOtherConditions()) return;
 
-        if (args.empty() && !FIGHTING(user)) {
-            send_to_char(user, "Direct it at who?\r\n");
-            return;
-        }
+        if(!getOpponent()) return;
 
         if(!checkCosts()) return;
 
         initSkill = init_skill(user, getSkillID());
 
-        if(args.empty()) {
-            victim = FIGHTING(user);
-        } else {
-            if(!tech_handle_targeting(user, (char*)args[0].c_str(), &victim, &obj)) return;
-        }
+        processAttack();
+    }
 
+    void Attack::processAttack() {
         switch(doAttack()) {
             case Result::Landed:
                 onLanded();
@@ -187,27 +197,22 @@ namespace atk {
 
         tech_handle_posmodifier(victim, currentParryCheck, currentBlockCheck, currentDodgeCheck, currentHitProbability);
 
-        if(canZanzoken()) {
-            if(isKiAttack() && !isPhysical()) {
-                if (!tech_handle_zanzoken(user, victim, getName().c_str())) {
-                    dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, SKILL_TSUIHIDAN); /* Effects on the room from dodging a ki attack
-                               Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
-                               Num 2: [ Number of attack for damtype ]*/
-                    pcost(victim, 0, GET_MAX_HIT(victim) / 200);
-                    pcost(user, currentKiCost, 0);
-                    return DefenseResult::Missed;
-                }
-            } else {
-                if (!tech_handle_zanzoken(user, victim, getName().c_str())) {
-                    COMBO(user) = -1;
-                    COMBHITS(user) = 0;
-                    currentStaminaCost /= 2;
-                    pcost(victim, 0, GET_MAX_HIT(victim) / 200);
-                    return DefenseResult::Missed;
-                }
+        if(isKiAttack() && !isPhysical()) {
+            if (IS_ICER(user) && rand_number(1, 30) >= 28) {
+                actUser("@C$N@c disappears, avoiding the attack before reappearing elsewhere!@n");
+                actVictim("@cYou disappear, avoiding the attack before reappearing elsewhere!@n");
+                actRoom("@C$N@c disappears, avoiding the attack before reappearing elsewhere!@n");
+                dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, skillID); /* Effects on the room from dodging a ki attack
+                            Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
+                            Num 2: [ Number of attack for damtype ]*/
+                pcost(victim, 0, GET_MAX_HIT(victim) / 150);
+                pcost(user, currentKiCost, 0);
+                return DefenseResult::Missed;
             }
-
         }
+
+        handleAccuracyModifiers();
+
 
         if (GET_SKILL_PERF(user, getSkillID()) == 1) {
             attPerc += 0.05;
@@ -219,7 +224,8 @@ namespace atk {
             currentKiCost -= currentKiCost * 0.05;
         }
 
-        calcDamage = damtype(user, getAtkID(), initSkill, attPerc);
+        calculateDamage();
+        
         if(currentHitProbability < currentChanceToHit - 20) {
             // So you just missed...
             return DefenseResult::Missed;
@@ -242,9 +248,20 @@ namespace atk {
         return DefenseResult::Failed;
     }
 
+    void Attack::handleAccuracyModifiers() {
+
+    }
+
+    void Attack::calculateDamage() {
+        calcDamage = damtype(user, getAtkID(), initSkill, attPerc);
+    }
+
     DefenseResult Attack::calculateDefense() {
         double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_DODGE_PERC));
         double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_BLOCK_PERC));
+
+        if(canZanzoken() && AFF_FLAGGED(user, AFF_ZANZOKEN) && canZanzoken())
+            dodgeChance *= (2.0 * GET_SKILL(user, SKILL_ZANZOKEN)); 
 
         double overcomeDodge = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
         double overcomeBlock = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
@@ -394,6 +411,10 @@ namespace atk {
         }
     }
 
+    void Attack::doUserCost() {
+        pcost(user, currentKiCost, currentStaminaCost);
+    }
+
     void Attack::onLandedOrMissed() {
         auto atrain = autoTrainSkillID();
         if(atrain != -1) {
@@ -407,7 +428,7 @@ namespace atk {
         if(currentStaminaCost < 0) currentStaminaCost = 0;
         if(currentKiCost < 0) currentKiCost = 0;
         if(currentStaminaCost > 0 || currentKiCost > 0) {
-            pcost(user, currentKiCost, currentStaminaCost);
+            doUserCost();
         }
         
         if(auto hlimb = hurtInjuredLimbs(); hlimb) {
@@ -518,6 +539,8 @@ namespace atk {
         announceDodge();
         defenseResult = DefenseResult::Dodged;
         improve_skill(victim, SKILL_DODGE, 0);
+        if(canZanzoken() && AFF_FLAGGED(user, AFF_ZANZOKEN))
+            pcost(victim, GET_MAX_MANA(victim) * 0.05, 0);
         pcost(victim, 0, GET_MAX_HIT(victim) / 500);
         return Result::Missed;
 
@@ -1387,18 +1410,47 @@ namespace atk {
 
 
     // KI
+    bool RangedKiAttack::checkOtherConditions() {
+        char *arg = (char*)args[1].c_str();
+        if (*arg) {
+            double adjust = (double)(atoi(arg)) * 0.01;
+            if (adjust < 0.01 || adjust > 1.00) {
+                send_to_char(user, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
+                return false;
+            }
+        return true;
+        }
+    }
 
-    int64_t RangedKiAttack::calculateKiCost() {
-        if (getTier() == 1)
+    double RangedKiAttack::calculateKiCost() {
+        double minimum = 0.01; 
+        attPerc = 0.05;
+
+        if (getTier() == 1) {
+            minimum = 0.01;
             attPerc = 0.05;
-        if (getTier() == 2)
+        }
+        if (getTier() == 2) {
+            minimum = 0.05;
             attPerc = 0.10;
-        if (getTier() == 3)
-            attPerc = 0.15;
-        if (getTier() == 4)
-            attPerc = 0.25;
-        if (getTier() == 5)
+        }
+        if (getTier() == 3) {
+            minimum = 0.1;
+            attPerc = 0.2;
+        }
+        if (getTier() == 4) {
+            minimum = 0.2;
+            attPerc = 0.35;
+        }
+        if (getTier() == 5) {
+            minimum = 0.35;
             attPerc = 0.50;
+        }
+
+
+
+        bool success = tech_handle_charge(user, (char*)args[1].c_str(), minimum, &attPerc);
+
 
         return attPerc * getKiEfficiency();
     }
@@ -1423,9 +1475,11 @@ namespace atk {
         defenseResult = DefenseResult::Dodged;
         improve_skill(victim, SKILL_DODGE, 0);
         pcost(victim, 0, GET_MAX_HIT(victim) / 500);
+        if(AFF_FLAGGED(user, AFF_ZANZOKEN))
+            pcost(victim, GET_MAX_MANA(victim) * 0.05, 0);
 
         dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, getSkillID());
-        user->getRoom()->modDamage(5);
+        user->getRoom()->modDamage(5 * getTier());
         return Result::Missed;
 
     }
@@ -1493,29 +1547,8 @@ namespace atk {
 
 
     // Kiball
-    void KiBall::execute() {
-
-        if(!can_grav(user)) return;
-        if(!checkSkills()) return;
-        if(!checkLimbs()) return;
-        if(!checkEmptyHands()) return;
-
-        if (args.empty() && !FIGHTING(user)) {
-            send_to_char(user, "Direct it at who?\r\n");
-            return;
-        }
-
-        if(!checkCosts()) return;
-
-        initSkill = init_skill(user, getSkillID());
-
+    void KiBall::processAttack() {
         int mult_roll = rand_number(1, 100), mult_count = 1, mult_chance = 0;
-
-        if(args.empty()) {
-            victim = FIGHTING(user);
-        } else {
-            if(!tech_handle_targeting(user, (char*)args[0].c_str(), &victim, &obj)) return;
-        }
 
         if (initSkill >= 100) {
             mult_chance = 30;
@@ -2490,22 +2523,7 @@ namespace atk {
 
 
     //DualBeam
-    void DualBeam::execute() {
-
-        if(!can_grav(user)) return;
-        if(!checkSkills()) return;
-        if(!checkLimbs()) return;
-        if(!checkEmptyHands()) return;
-
-        if (args.empty() && !FIGHTING(user)) {
-            send_to_char(user, "Direct it at who?\r\n");
-            return;
-        }
-
-        if(!checkCosts()) return;
-
-        initSkill = init_skill(user, getSkillID());
-
+    void DualBeam::processAttack() {
         int mult_count = 3;
 
         while (mult_count > 0) {
@@ -4117,5 +4135,840 @@ namespace atk {
         actVictim("@C$n@W swings $s tail and manages to slam it into YOUR " + loc + "!@n");
         actOthers("@C$n@W swings $s tail and manages to slam it into @c$N@W's " + loc + "!@n");   
     }
+
+
+    // KiAreaAttack
+    // Gather Targets, check list > 0 after not including some
+    // Announce the attack
+    // Reduce damage by number of targets?
+    // Do attack
+
+    bool KiAreaAttack::getOpponent() {
+        char_data *vict, *next_v;
+        for (vict = user->getRoom()->people; vict; vict = next_v) {
+            next_v = vict->next_in_room;
+            if (vict == user) {
+                continue;
+            }
+            if (AFF_FLAGGED(vict, AFF_SPIRIT) && !IS_NPC(vict)) {
+                continue;
+            }
+            if (AFF_FLAGGED(vict, AFF_GROUP) && (vict->master == user || user->master == vict)) {
+                continue;
+            }
+            if (GET_LEVEL(vict) <= 8 && !IS_NPC(vict)) {
+                continue;
+            }
+            if (MOB_FLAGGED(vict, MOB_NOKILL)) {
+                continue;
+            } else {
+                targets.push_back(*vict);
+            }
+        }
+        if (targets.empty()) {
+            send_to_char(user, "There is no one worth targeting around.\r\n");
+            return false;
+        }
+        return true;
+    }
+
+    void KiAreaAttack::doUserCost() {
+        if(!paidCost) {
+            pcost(user, currentKiCost, currentStaminaCost);
+            paidCost = true;
+        }
+    }
+
+
+    void KiAreaAttack::processAttack() {
+        announceAttack();
+
+        for(char_data vic : targets) {
+            victim = &vic;
+            switch(doAttack()) {
+                case Result::Landed:
+                    onLanded();
+                    onLandedOrMissed();
+                    break;
+                case Result::Missed:
+                    onMissed();
+                    onLandedOrMissed();
+                    break;
+                case Result::Canceled:
+                    onCanceled();
+                    break;
+            }
+        }
+        
+    }
+
+    void KiAreaAttack::announceAttack() {
+        actUser("@WYou raise your hand with index and middle fingers extended upwards. You try releasing your charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but mess up and waste the ki!@n");
+        actOthers("@C$n@W raises $s hand with index and middle fingers extended upwards. @C$n@W tries releasing $s charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but messes up and wastes the ki!@n");
+    }
+
+
+    // Bakuhatsuha
+    void Bakuhatsuha::attackPreprocess() {
+        if(targets.size() >= 4) {
+            calcDamage = (calcDamage / 100) * 25;
+        } else if(targets.size() == 3) {
+            calcDamage = (calcDamage / 100) * 50;
+        } else if(targets.size() == 2) {
+            calcDamage = (calcDamage / 100) * 75;
+        } else if(targets.size() == 1) {
+            calcDamage = (calcDamage / 100);
+        }
+    }
+
+    void Bakuhatsuha::announceAttack() {
+        actUser("@WYou raise your hand with index and middle fingers extended upwards. You try releasing your charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but mess up and waste the ki!@n");
+        actOthers("@C$n@W raises $s hand with index and middle fingers extended upwards. @C$n@W tries releasing $s charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but messes up and wastes the ki!@n");
+    }
+
+    void Bakuhatsuha::announceHitspot() {
+        actUser("@R$N@r is caught by the explosion!@n");
+        actVictim("@RYou are caught by the explosion!@n");
+        actOthers("@R$N@r is caught by the explosion!@n");   
+    }
+
+    // Kakusanha
+    void Kakusanha::attackPreprocess() {
+        if(targets.size() >= 3) {
+            calcDamage = (calcDamage / 100) * 40;
+        } else if(targets.size() >= 1) {
+            calcDamage = (calcDamage / 100) * 60;
+        }
+    }
+
+    void Kakusanha::announceAttack() {
+        actUser("@WYou pour your charged ki into your hands and bring them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of your palms. You fire one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before you swing your arms upward and the beam follows suit. Above your targets the beam breaks apart into five seperate pieces that follow their victims!@n");
+        actOthers("@C$n@W pours $s charged ki into $s hands and brings them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of $s palms. @C$n@W fires one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before $e swings $s arms upward and the beam follows suit. Above you the beam breaks apart into five seperate pieces that follow their victims!@n");
+    }
+
+    void Kakusanha::announceHitspot() {
+        actUser("@R$N@r is slammed by one of the beams!@n");
+        actVictim("@RYou are slammed by one of the beams!@n");
+        actOthers("@R$N@r is slammed by one of the beams!@n");   
+    }
+
+    void Kakusanha::postProcess() {
+        int count = targets.size();
+        if (count < 5 && !ROOM_FLAGGED(IN_ROOM(user), ROOM_SPACE)) {
+            send_to_room(IN_ROOM(user), "The rest of the beams slam into the ground!@n\r\n");
+            send_to_room(IN_ROOM(user), "@wBright explosions erupt from the impacts!\r\n");
+
+            if (SECT(IN_ROOM(user)) != SECT_INSIDE) {
+                impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
+                switch (rand_number(1, 8)) {
+                    case 1:
+                        act("Debris is thrown into the air and showers down thunderously!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("Debris is thrown into the air and showers down thunderously!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 2:
+                        if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(user)) == 0) {
+                            ROOM_EFFECT(IN_ROOM(user)) = 5;
+                            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
+                                true, user, nullptr, nullptr, TO_CHAR);
+                            act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
+                                true, user, nullptr, nullptr, TO_ROOM);
+                        }
+                        break;
+                    case 3:
+                        act("A cloud of dust envelopes the entire area!", true, user, nullptr, nullptr, TO_CHAR);
+                        act("A cloud of dust envelopes the entire area!", true, user, nullptr, nullptr, TO_ROOM);
+                        break;
+                    case 4:
+                        act("The surrounding area roars and shudders from the impact!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The surrounding area roars and shudders from the impact!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 5:
+                        act("The ground shatters apart from the stress of the impact!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The ground shatters apart from the stress of the impact!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 6:
+                        act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.",
+                            true, user, nullptr, nullptr, TO_CHAR);
+                        act("The explosion continues to burn spreading out and devouring some more of the ground before dying out.",
+                            true, user, nullptr, nullptr, TO_ROOM);
+                        break;
+                    default:
+                        /* we want no message for the default */
+                        break;
+                }
+            }
+            if (SECT(IN_ROOM(user)) == SECT_UNDERWATER) {
+                switch (rand_number(1, 3)) {
+                    case 1:
+                        act("The water churns violently!", true, user, nullptr, nullptr, TO_CHAR);
+                        act("The water churns violently!", true, user, nullptr, nullptr, TO_ROOM);
+                        break;
+                    case 2:
+                        act("Large bubbles rise from the movement!", true, user, nullptr, nullptr, TO_CHAR);
+                        act("Large bubbles rise from the movement!", true, user, nullptr, nullptr, TO_ROOM);
+                        break;
+                    case 3:
+                        act("The water collapses in on the hole created!", true, user, nullptr, nullptr, TO_CHAR);
+                        act("The water collapses in on the hole create!", true, user, nullptr, nullptr, TO_ROOM);
+                        break;
+                }
+            }
+            if (SECT(IN_ROOM(user)) == SECT_WATER_SWIM || SECT(IN_ROOM(user)) == SECT_WATER_NOSWIM) {
+                switch (rand_number(1, 3)) {
+                    case 1:
+                        act("A huge column of water erupts from the impact!", true, user, nullptr, nullptr, TO_CHAR);
+                        act("A huge column of water erupts from the impact!", true, user, nullptr, nullptr, TO_ROOM);
+                        break;
+                    case 2:
+                        act("The impact briefly causes a swirling vortex of water!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The impact briefly causes a swirling vortex of water!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 3:
+                        act("A huge depression forms in the water and erupts into a wave from the impact!", true, user,
+                            nullptr,
+                            nullptr, TO_CHAR);
+                        act("A huge depression forms in the water and erupts into a wave from the impact!", true, user,
+                            nullptr,
+                            nullptr, TO_ROOM);
+                        break;
+                }
+            }
+            if (SECT(IN_ROOM(user)) == SECT_INSIDE) {
+                impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
+                switch (rand_number(1, 8)) {
+                    case 1:
+                        act("Debris is thrown into the air and showers down thunderously!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("Debris is thrown into the air and showers down thunderously!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 2:
+                        act("The structure of the surrounding room cracks and quakes from the blast!", true, user,
+                            nullptr, nullptr,
+                            TO_CHAR);
+                        act("The structure of the surrounding room cracks and quakes from the blast!", true, user,
+                            nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 3:
+                        act("Parts of the ceiling collapse, crushing into the floor!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("Parts of the ceiling collapse, crushing into the floor!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 4:
+                        act("The surrounding area roars and shudders from the impact!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The surrounding area roars and shudders from the impact!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 5:
+                        act("The ground shatters apart from the stress of the impact!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The ground shatters apart from the stress of the impact!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    case 6:
+                        act("The walls of the surrounding room crack in the same instant!", true, user, nullptr, nullptr,
+                            TO_CHAR);
+                        act("The walls of the surrounding room crack in the same instant!", true, user, nullptr, nullptr,
+                            TO_ROOM);
+                        break;
+                    default:
+                        /* we want no message for the default */
+                        break;
+                }
+            }
+
+            user->getRoom()->modDamage((5 - count) * 5);
+        }
+    }
+
+
+    // Hellspear
+    void Hellspear::announceAttack() {
+        actUser("@WYou fly up higher in the air while holding your hand above your head. Your charged ki is condensed and materialized in the grasp of your raised hand forming a spear of energy. Grinning evily you aim the spear at the ground below and throw it. As the red spear of energy slams into the ground your laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n");
+        actOthers("@C$n@W flies up higher in the air while holding $s hand above $s head. @C$n@W's charged ki is condensed and materialized in the grasp of $s raised hand forming a spear of energy. Grinning evily $e aims the spear at the ground below and throws it. As the red spear of energy slams into the ground $s laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n");
+    }
+
+    void Hellspear::announceHitspot() {
+        actUser("@R$N@r is caught by the explosion!@n");
+        actVictim("@RYou are caught by the explosion!@n");
+        actOthers("@R$N@r is caught by the explosion!@n");   
+    }
+
+
+    // LightGrenade
+    void LightGrenade::announceAttack() {
+        actUser("@WYou quickly bring your hands in front of your body and cup them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as your ki is condensed between your hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. You shout @r'@YLIGHT GRENADE@r'@W as the orb launches from your hands at @C$N@W!@n");
+        actOthers("@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. @C$n shouts @r'@YLIGHT GRENADE@r'@W as the orb launches from $s hands at @c$N@W!@n");
+    }
+
+    void LightGrenade::announceHitspot() {
+        actUser("@R$N@r is hit by the light grenade which explodes all around $m!@n");
+        actVictim("@RYou are hit by the light grenade which explodes all around you!@n");
+        actOthers("@R$N@r is hit by the light grenade which explodes all around $m!@n");   
+    }
+
+    void LightGrenade::attackPostprocess() {
+        if (!AFF_FLAGGED(victim, AFF_FLYING) && GET_POS(victim) == POS_STANDING && rand_number(1, 4) == 4) {
+            handle_knockdown(victim);
+        }
+    }
+
+
+    // StarNova
+    void StarNova::attackPreprocess() {
+        if (time_info.hours <= 15) {
+            calcDamage *= 1.25;
+        } else if (time_info.hours <= 22) {
+            calcDamage *= 1.4;
+        }
+    }
+
+    void StarNova::announceAttack() {
+        actUser("@WYou gather your charged energy and clench your upheld fists at either side of your body while crouching down. A hot glow of energy begins to form around your body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as your glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n");
+        actOthers("@C$n@W gathers $s charged energy and clenches $s upheld fists at either side of $s body while crouching down. A hot glow of energy begins to form around $s body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as @C$n's@W glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n");
+    }
+
+    void StarNova::announceHitspot() {
+        actUser("@R$N@r is caught by the explosion!@n");
+        actVictim("@RYou are caught by the explosion!@n");
+        actOthers("@R$N@r is caught by the explosion!@n");   
+    }
+
+
+    // WeaponAttack
+    // Check weapon exists
+    // Modify Stamina costs
+    // Pre-proccess any advantages
+    // Post-process on hit affects
+    // Final-process dual wield recursion
+    // Change damagetype
+    bool WeaponAttack::checkOtherConditions() {
+        if (!secondAttack) {
+            weap = GET_EQ(user, WEAR_WIELD1);
+        } else {
+            weap = GET_EQ(user, WEAR_WIELD2);
+        }
+
+        if (!weap) {
+            send_to_char(user, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+            return false;
+        }
+
+        if (GET_OBJ_VAL(weap, VAL_WEAPON_DAMTYPE) != getWeaponType() && wtype != 5) {
+            send_to_char(user, "You need to wield a " + getName() + " to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+            return false;
+        }
+
+        
+
+        return true;
+    }
+
+    void WeaponAttack::executeSecond() {
+        secondAttack = true;
+
+        if(!can_grav(user)) return;
+        if(!checkSkills()) return;
+        if(!checkLimbs()) return;
+        if(!checkEmptyHands()) return;
+        if(!checkOtherConditions()) return;
+
+        if(!getOpponent()) return;
+
+        if(!checkCosts()) return;
+
+        initSkill = init_skill(user, getSkillID());
+
+        processAttack();
+    }
+
+    void WeaponAttack::chooseSecondAttack() {
+        if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
+            atk::Stab a(user, (char*)args[0].c_str());
+            a.executeSecond();
+        } else if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
+            atk::Slash a(user, (char*)args[0].c_str());
+            a.executeSecond();
+        } else if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
+            atk::Crush a(user, (char*)args[0].c_str());
+            a.executeSecond();
+        } else if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
+            atk::Impale a(user, (char*)args[0].c_str());
+            a.executeSecond();
+        } else if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+            atk::Shoot a(user, (char*)args[0].c_str());
+            a.executeSecond();
+        } else {
+            atk::Smash a(user, (char*)args[0].c_str());
+            a.executeSecond();
+        }
+    }
+
+    int64_t WeaponAttack::calculateStaminaCost() {
+        int64_t stamCost = 0;
+        if (weap) {
+            if (!IS_ANDROID(user)) {
+                stamCost += GET_OBJ_WEIGHT(weap);
+            } else {
+                stamCost += GET_OBJ_WEIGHT(weap) * 0.25;
+            }
+            wielded = 1;
+        }
+
+        if (!secondAttack && wielded == 1 && GET_EQ(user, WEAR_WIELD2) && !(GET_OBJ_VAL(weap, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)) {
+            wielded = 2;
+            if (GET_SKILL_BASE(user, SKILL_DUALWIELD) >= 100) {
+                dualWield = 3;
+                stamCost -= stamCost * 0.30;
+            } else if (GET_SKILL_BASE(user, SKILL_DUALWIELD) >= 75) {
+                dualWield = 2;
+                stamCost -= stamCost * 0.25;
+            }
+        }
+
+        return stamCost;
+    }
+
+    void WeaponAttack::handleAccuracyModifiers() {
+        if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+            if (dualWield >= 2) {
+                currentHitProbability += currentHitProbability * 0.1;
+            }
+        }
+
+        if (PLR_FLAGGED(user, PLR_THANDW)) {
+            currentChanceToHit += 15;
+        }
+    }
+
+    void WeaponAttack::calculateDamage() {
+        calcDamage = 0;
+
+        calcDamage = damtype(user, -1, initSkill, attPerc);
+        if (OBJ_FLAGGED(weap, ITEM_WEAPLVL1)) {
+            calcDamage += calcDamage * 0.05;
+            wlvl = 1;
+        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL2)) {
+            calcDamage += calcDamage * 0.1;
+            wlvl = 2;
+        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL3)) {
+            calcDamage += calcDamage * 0.2;
+            wlvl = 3;
+        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL4)) {
+            calcDamage += calcDamage * 0.3;
+            wlvl = 4;
+        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL5)) {
+            calcDamage += calcDamage * 0.5;
+            wlvl = 5;
+        }
+        if (wtype == 5) {
+            if (GET_SKILL(user, SKILL_BRAWL) >= 100) {
+                calcDamage += calcDamage * 0.5;
+                wlvl = 5;
+            } else if (GET_SKILL(user, SKILL_BRAWL) >= 50) {
+                calcDamage += calcDamage * 0.2;
+                wlvl = 3;
+            }
+        }
+
+        if (wtype == 0 && IS_KONATSU(user)) {
+            calcDamage += calcDamage * .25;
+        }
+        if (PLR_FLAGGED(user, PLR_THANDW)) {
+            calcDamage += calcDamage * 1.2;
+        }
+        if (!IS_NPC(user)) {
+            if (PLR_FLAGGED(user, PLR_THANDW) && !(GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) && !(GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)) {
+                if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 100) {
+                    calcDamage += calcDamage * 0.5;
+                } else if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 75) {
+                    calcDamage += calcDamage * 0.25;
+                } else if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 50) {
+                    calcDamage += calcDamage * 0.1;
+                }
+                if (wtype == 3) {
+                    switch (wlvl) {
+                        case 1:
+                            calcDamage += calcDamage * 0.04;
+                            break;
+                        case 2:
+                            calcDamage += calcDamage * 0.08;
+                            break;
+                        case 3:
+                            calcDamage += calcDamage * 0.12;
+                            break;
+                        case 4:
+                            calcDamage += calcDamage * 0.2;
+                            break;
+                        case 5:
+                            calcDamage += calcDamage * 0.25;
+                            break;
+                    }
+                }
+            }
+        }
+        if (wtype == 3) {
+            if (initSkill >= 100)
+                calcDamage += calcDamage * 0.04;
+            else if (initSkill >= 50)
+                calcDamage += calcDamage * 0.1;
+        }
+
+        if (GET_OBJ_VAL(weap, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)
+                calcDamage = gun_dam(user, wlvl);
+
+
+    }
+
+    void WeaponAttack::postProcess() {
+
+        if ((GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) && (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)) {
+            damage_weapon(user, weap, victim);
+        }
+        if (!IS_NPC(user)) {
+            if (PLR_FLAGGED(user, PLR_THANDW)) {
+                if (!GET_SKILL(user, SKILL_TWOHAND) && slot_count(user) + 1 <= GET_SLOTS(user)) {
+                    int numb = rand_number(10, 15);
+                    SET_SKILL(user, SKILL_TWOHAND, numb);
+                    send_to_char(user, "@GYou learn the very basics of two-handing your weapon!@n\r\n");
+                } else {
+                    improve_skill(user, SKILL_TWOHAND, 0);
+                }
+            }
+        }
+        if (!secondAttack && GET_EQ(user, WEAR_WIELD2)) {
+            if (!GET_SKILL(user, SKILL_DUALWIELD) && slot_count(user) + 1 <= GET_SLOTS(user) &&
+                (GET_OBJ_TYPE(GET_EQ(user, WEAR_WIELD2)) != ITEM_LIGHT)) {
+                int numb = rand_number(10, 15);
+                SET_SKILL(user, SKILL_DUALWIELD, numb);
+                send_to_char(user, "@GYou learn the very basics of dual-wielding!@n\r\n");
+            } else {
+                improve_skill(user, SKILL_DUALWIELD, 0);
+            }
+            if (victim != nullptr && GET_HIT(victim) > 1 && axion_dice(0) < (GET_SKILL(user, SKILL_DUALWIELD)) &&
+                GET_EQ(user, WEAR_WIELD1)) {
+                chooseSecondAttack();
+            }
+        }
+    }
+
+
+    // Stab
+    void Stab::attackPreprocess() {
+        if (!FIGHTING(user) && backstab(user, victim, wlvl, calcDamage)) {
+            if (!secondAttack && victim != nullptr && GET_HIT(victim) > 1 && axion_dice(0) < (GET_SKILL(user, SKILL_DUALWIELD)) &&
+                GET_EQ(user, WEAR_WIELD1) && GET_EQ(user, WEAR_WIELD2)) {
+                chooseSecondAttack();
+            }
+            return;
+        }
+        calcDamage += (calcDamage * 0.01) * (GET_DEX(user) * 0.5);
+    }
+
+    void Stab::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "stomach";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou pierce @C$N's@W " + loc + "!@n");
+        actVictim("@c$n@W pierces your " + loc + "!@n");
+        actOthers("@c$n@W pierces @C$N's@W " + loc + "!@n");   
+    }
+
+
+    // Slash
+    void Slash::attackPreprocess() {
+        beforepl = GET_HIT(victim);
+    }
+
+    void Slash::attackPostprocess() {
+        if (beforepl - GET_HIT(victim) >= (victim->getEffMaxPL()) * 0.025) {
+            cut_limb(user, victim, wlvl, hitspot);
+        }
+    }
+
+    void Slash::handleHitspot() {
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                if (!IS_NPC(user) && PLR_FLAGGED(user, PLR_THANDW) && GET_SKILL_BASE(user, SKILL_TWOHAND) >= 100) {
+                    double mult = calc_critical(user, 0);
+                    mult += 1.0;
+                    calcDamage *= mult;
+                } else {
+                    calcDamage *= calc_critical(user, 0);
+                }
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+    void Slash::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou slash @C$N@W across the " + loc + "!@n");
+        actVictim("@c$n@W slashes you across the " + loc + "!@n");
+        actOthers("@c$n@W slashes @C$N@W across the " + loc + "!@n");   
+    }
+
+
+    // Club
+    void Crush::attackPostprocess() {
+        club_stamina(user, victim, wlvl, calcDamage);
+    }
+
+    void Crush::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou crush @C$N's@W " + loc + "!@n");
+        actVictim("@c$n@W crushes your " + loc + "!@n");
+        actOthers("@c$n@W crushes @C$N's@W " + loc + "@n");   
+    }
+
+
+    // Impale
+    void Impale::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou stab @C$N's@W " + loc + "!@n");
+        actVictim("@c$n@W stabs your " + loc + "!@n");
+        actOthers("@c$n@W stabs @C$N's@W " + loc + "!@n");   
+    }
+
+
+    // Shoot
+    bool Shoot::checkOtherConditions() {
+        if (!GET_EQ(user, WEAR_WIELD1) && !GET_EQ(user, WEAR_WIELD2)) {
+            send_to_char(user, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+            return false;
+        }
+
+        if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != getWeaponType()) {
+            send_to_char(user, "You need to wield a " + getName() + " to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+            return false;
+        }
+        
+
+        int guncost = 1;
+        struct obj_data *weap = nullptr;
+        if (GET_EQ(user, WEAR_WIELD1)) {
+            weap = GET_EQ(user, WEAR_WIELD1);
+        } else {
+            weap = GET_EQ(user, WEAR_WIELD2);
+        }
+
+
+        if (OBJ_FLAGGED(weap, ITEM_WEAPLVL5)) {
+            guncost = 12;
+        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL4)) {
+            guncost = 6;
+        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL3)) {
+            guncost = 4;
+        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL2)) {
+            guncost = 2;
+        }
+        if (GET_GOLD(user) < guncost) {
+            send_to_char(user, "You do not have enough zenni. You need %d zenni per shot for that level of gun.\r\n",
+                         guncost);
+            return false;
+        } else {
+            user->mod(CharMoney::Carried, -guncost);
+        }
+        return true;
+
+    }
+
+    void Shoot::handleHitspot() {
+        if (PLR_FLAGGED(user, PLR_THANDW)) {
+            if (hitspot != 2 && boom_headshot(user)) {
+                hitspot = 2;
+                send_to_char(user, "@GBoom headshot!@n\r\n");
+            }
+        }
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                calcDamage *= calc_critical(user, 0);
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+    void Shoot::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "head";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou blast @C$N's@W " + loc + "!@n");
+        actVictim("@c$n@W blasts your " + loc + "!@n");
+        actOthers("@c$n@W blasts @C$N's@W " + loc + "!@n");   
+    }
+
+
+    // Smash
+    void Smash::handleHitspot() {
+        switch(hitspot) {
+            case 1:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 2:
+                if (initSkill >= 100) {
+                    double mult = calc_critical(user, 0);
+                    mult += 1.0;
+                    calcDamage *= mult;
+                } else {
+                    calcDamage *= calc_critical(user, 0);
+                }
+                break;
+            case 3:
+                if (GET_BONUS(user, BONUS_SOFT)) 
+                    calcDamage *= calc_critical(user, 2);
+                break;
+            case 4:
+            case 5:
+                calcDamage *= calc_critical(user, 1);
+                break;
+        }
+    }
+
+    void Smash::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou whack @C$N@W in the " + loc + "!@n");
+        actVictim("@c$n@W whacks you in the " + loc + "!@n");
+        actOthers("@c$n@W whacks @C$N@W in the " + loc + "!@n");   
+    }
+
+
 
 }
