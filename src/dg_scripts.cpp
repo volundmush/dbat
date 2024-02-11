@@ -27,10 +27,10 @@ void trig_data::setState(DgScriptState st) {
     state = st;
     switch(state) {
         case DgScriptState::WAITING:
-            triggers_waiting.insert(this);
+            triggers_waiting.insert(shared_from_this());
             break;
         default:
-            triggers_waiting.erase(this);
+            triggers_waiting.erase(shared_from_this());
             break;
     }
 }
@@ -184,7 +184,7 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
         else {
             auto cmdres = varSubst(line);
             trim(cmdres);
-            auto cmd = cmdres.c_str();
+            auto cmd = (char*)cmdres.c_str();
 
             if (!strncasecmp(cmd, "eval ", 5))
                 processEval(cmdres);
@@ -210,7 +210,7 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
                 processRdelete(cmdres);
 
             else if (!strncasecmp(cmd, "return ", 7))
-                ret_val = atoi(cmd.c_str());
+                ret_val = atoi(cmdres.c_str());
 
             else if (!strncasecmp(cmd, "set ", 4))
                 processSet(cmdres);
@@ -243,10 +243,9 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
                         wld_command_interpreter((struct room_data *)sc->owner, cmd);
                         break;
                 }
-                if (dg_owner_purged) {
+                if (sc->purged) {
                     loops--;
-                    if (parent->data_type == OBJ_TRIGGER)
-                        *(obj_data **) sc->owner = nullptr;
+                    setState(DgScriptState::PURGED);
                     return ret_val;
                 }
             }
@@ -426,65 +425,15 @@ std::size_t trig_data::findCase(const std::string& cond) {
 
 
 /* Local functions not used elsewhere */
-void do_stat_trigger(struct char_data *ch, trig_data *trig);
+void do_stat_trigger(struct char_data *ch, const std::shared_ptr<trig_data> &trig);
 
-void script_stat(char_data *ch, struct script_data *sc);
+void script_stat(char_data *ch, const std::shared_ptr<script_data>& sc);
 
 int remove_trigger(struct script_data *sc, char *name);
 
 bool is_num(const std::string &arg);
 
-void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
-             struct script_data *sc, trig_data *trig);
-
 char *matching_paren(char *p);
-
-std::string eval_expr(trig_data *trig, const std::string& line);
-
-int eval_lhs_op_rhs(char *expr, char *result, void *go, struct script_data *sc,
-                    trig_data *trig, int type);
-
-int process_if(char *cond, void *go, struct script_data *sc,
-               trig_data *trig, int type);
-
-struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl);
-
-struct cmdlist_element *find_else_end(trig_data *trig,
-                                      struct cmdlist_element *cl, void *go,
-                                      struct script_data *sc, int type);
-
-void process_wait(void *go, trig_data *trig, int type, char *cmd,
-                  struct cmdlist_element *cl);
-
-void process_set(struct script_data *sc, trig_data *trig, char *cmd);
-
-void process_attach(void *go, struct script_data *sc, trig_data *trig,
-                    int type, char *cmd);
-
-void process_detach(void *go, struct script_data *sc, trig_data *trig,
-                    int type, char *cmd);
-
-int process_return(trig_data *trig, char *cmd);
-
-void process_unset(struct script_data *sc, trig_data *trig, char *cmd);
-
-void process_remote(struct script_data *sc, trig_data *trig, char *cmd);
-
-void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd);
-
-void process_global(struct script_data *sc, trig_data *trig, char *cmd, long id);
-
-void process_context(struct script_data *sc, trig_data *trig, char *cmd);
-
-void extract_value(struct script_data *sc, trig_data *trig, char *cmd);
-
-void dg_letter_value(struct script_data *sc, trig_data *trig, char *cmd);
-
-struct cmdlist_element *
-find_case(struct trig_data *trig, struct cmdlist_element *cl,
-          void *go, struct script_data *sc, int type, char *cond);
-
-struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
 int fgetline(FILE *file, char *p);
 
@@ -1033,38 +982,27 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     obj_data *obj;
     struct room_data *room = nullptr;
     int nr;
-    struct script_data *sc;
 
     for (ch = character_list; ch; ch = ch->next) {
-        if (SCRIPT(ch)) {
-            sc = SCRIPT(ch);
-
-            if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
-                (!is_empty(ch->getRoom()->zone) ||
-                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                random_mtrigger(ch);
-        }
+        auto sc = SCRIPT(ch);
+        if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
+            (!is_empty(ch->getRoom()->zone) ||
+                IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
+            random_mtrigger(ch);
     }
 
     for (obj = object_list; obj; obj = obj->next) {
-        if (SCRIPT(obj)) {
-            sc = SCRIPT(obj);
-
-            if (IS_SET(SCRIPT_TYPES(sc), OTRIG_RANDOM))
+        auto sc = SCRIPT(obj);
+        if (IS_SET(SCRIPT_TYPES(sc), OTRIG_RANDOM))
                 random_otrigger(obj);
-        }
     }
 
-    for (auto &r : world) {
-        if (SCRIPT(&r.second)) {
-            room = &r.second;
-            sc = SCRIPT(room);
-
-            if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
-                (!is_empty(room->zone) ||
-                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                random_wtrigger(room);
-        }
+    for (auto &[vn, r] : world) {
+        auto sc = SCRIPT(&r); 
+        if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
+            (!is_empty(r.zone) ||
+                IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
+            random_wtrigger(&r);
     }
 }
 
@@ -1073,78 +1011,56 @@ void check_time_triggers() {
     obj_data *obj;
     struct room_data *room = nullptr;
     int nr;
-    struct script_data *sc;
 
     for (ch = character_list; ch; ch = ch->next) {
-        if (SCRIPT(ch)) {
-            sc = SCRIPT(ch);
+        auto sc = SCRIPT(ch);
 
-            if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) &&
-                (!is_empty(ch->getRoom()->zone) ||
-                 IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
-                time_mtrigger(ch);
-        }
+        if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) && (!is_empty(ch->getRoom()->zone) || IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
+            time_mtrigger(ch);
     }
 
     for (obj = object_list; obj; obj = obj->next) {
-        if (SCRIPT(obj)) {
-            sc = SCRIPT(obj);
-
-            if (IS_SET(SCRIPT_TYPES(sc), OTRIG_TIME))
+        auto sc = SCRIPT(obj);
+        if (IS_SET(SCRIPT_TYPES(sc), OTRIG_TIME))
                 time_otrigger(obj);
-        }
     }
 
-    for (auto &r : world) {
-        if (SCRIPT(&r.second)) {
-            room = &r.second;
-            sc = SCRIPT(room);
-
-            if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
-                (!is_empty(room->zone) ||
+    for (auto &[vn, r] : world) {
+        auto sc = SCRIPT(&r);
+        if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
+                (!is_empty(r.zone) ||
                  IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                time_wtrigger(room);
-        }
+                time_wtrigger(&r);
     }
 }
 
 void check_interval_triggers(int trigFlag) {
 
     for (auto ch = character_list; ch; ch = ch->next) {
-        if (SCRIPT(ch)) {
-            auto sc = SCRIPT(ch);
-
-            if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
+        auto sc = SCRIPT(ch);
+        if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
                 (!is_empty(ch->getRoom()->zone) ||
                  IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
                 interval_mtrigger(ch, trigFlag);
-        }
     }
 
     for (auto obj = object_list; obj; obj = obj->next) {
-        if (SCRIPT(obj)) {
-            auto sc = SCRIPT(obj);
-
-            if (IS_SET(SCRIPT_TYPES(sc), trigFlag))
+        auto sc = SCRIPT(obj);
+        if (IS_SET(SCRIPT_TYPES(sc), trigFlag))
                 interval_otrigger(obj, trigFlag);
-        }
     }
 
     for (auto &[vn, r] : world) {
-        if (SCRIPT(&r)) {
-            auto sc = SCRIPT(&r);
-
-            if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
-                (!is_empty(r.zone) ||
-                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                interval_wtrigger(&r, trigFlag);
-        }
+        auto sc = SCRIPT(&r);
+        if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
+            (!is_empty(r.zone) ||
+                IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
+            interval_wtrigger(&r, trigFlag);
     }
 }
 
 
-void do_stat_trigger(struct char_data *ch, trig_data *trig) {
-    struct cmdlist_element *cmd_list;
+void do_stat_trigger(struct char_data *ch, const std::shared_ptr<trig_data>& trig) {
     char sb[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
     int len = 0;
 
@@ -1202,7 +1118,7 @@ void find_uid_name(char *uid, char *name, size_t nlen) {
 
 
 /* general function to display stats on script sc */
-void script_stat(char_data *ch, struct script_data *sc) {
+void script_stat(char_data *ch, const std::shared_ptr<script_data>& sc) {
     send_to_char(ch, "Global Variables: %d\r\n", sc->vars.size());
     char buf1[MAX_STRING_LENGTH];
 
@@ -1235,7 +1151,7 @@ void script_stat(char_data *ch, struct script_data *sc) {
             send_to_char(ch, "    %15s:  %s\r\n", name, value);
     }
 
-    for (auto t = TRIGGERS(sc); t; t = t->next) {
+    for (auto t : sc->dgScripts) {
         send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
                      GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
 
@@ -1315,34 +1231,21 @@ int64_t nextTrigID() {
  * adds the trigger t to script sc in in location loc.  loc = -1 means
  * add to the end, loc = 0 means add before all other triggers.
  */
-void add_trigger(struct script_data *sc, trig_data *t, int loc) {
-
-    // Gather up all existing triggers from the manual linked list...
-    std::list<trig_data*> triggers;
-    for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
-        triggers.push_back(t2);
-    }
+void script_data::addTrigger(const std::shared_ptr<trig_data> t, int loc) {
+    t->sc = this;
 
     // Now insert t in the right spot...
     if(loc == -1) {
-        triggers.push_back(t);
+        dgScripts.push_back(t);
     } else if(loc == 0) {
-        triggers.push_front(t);
+        dgScripts.push_front(t);
     } else {
-        auto it = triggers.begin();
+        auto it = dgScripts.begin();
         std::advance(it, loc);
-        triggers.insert(it, t);
+        dgScripts.insert(it, t);
     }
 
-    sc->trig_list = nullptr;
-    // Reverse iterate through triggers to rebuild sc->trig_list...
-    for(auto it = triggers.rbegin(); it != triggers.rend(); it++) {
-        auto t2 = *it;
-        t2->next = sc->trig_list;
-        sc->trig_list = t2;
-    }
-
-    SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
+    SCRIPT_TYPES(this) |= GET_TRIG_TYPE(t);
     t->activate();
     t->id = nextTrigID();
     t->generation = time(nullptr);
@@ -1350,7 +1253,7 @@ void add_trigger(struct script_data *sc, trig_data *t, int loc) {
     uniqueScripts[t->id] = std::make_pair(t->generation, t);
 
     int order = 0;
-    for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
+    for(auto t2 : dgScripts) {
         t2->order = order++;
     }
 
@@ -1400,14 +1303,12 @@ ACMD(do_attach) {
             return;
         }
         /* have a valid mob, now get trigger */
-        rn = real_trigger(tn);
-        if ((rn == NOTHING) || !(trig = read_trigger(rn))) {
+        auto trig = read_trigger(tn);
+        if (!trig) {
             send_to_char(ch, "That trigger does not exist.\r\n");
             return;
         }
-
-        if (!SCRIPT(victim)) victim->script = new script_data(victim);
-        add_trigger(SCRIPT(victim), trig, loc);
+        victim->script->addTrigger(trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
                      tn, GET_TRIG_NAME(trig), GET_SHORT(victim), GET_MOB_VNUM(victim));
@@ -1435,14 +1336,13 @@ ACMD(do_attach) {
             return;
         }
         /* have a valid obj, now get trigger */
-        rn = real_trigger(tn);
-        if ((rn == NOTHING) || !(trig = read_trigger(rn))) {
+        auto trig = read_trigger(tn);
+        if (!trig) {
             send_to_char(ch, "That trigger does not exist.\r\n");
             return;
         }
 
-        if (!SCRIPT(object)) object->script = new script_data(object);
-        add_trigger(SCRIPT(object), trig, loc);
+        object->script->addTrigger(trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
                      tn, GET_TRIG_NAME(trig),
@@ -1467,16 +1367,14 @@ ACMD(do_attach) {
             return;
         }
         /* have a valid room, now get trigger */
-        rn = real_trigger(tn);
-        if ((rn == NOTHING) || !(trig = read_trigger(rn))) {
+        auto trig = read_trigger(tn);
+        if (!trig) {
             send_to_char(ch, "That trigger does not exist.\r\n");
             return;
         }
 
         room = &world[rnum];
-
-        if (!SCRIPT(room)) room->script = new script_data(room);
-        add_trigger(SCRIPT(room), trig, loc);
+        room->script->addTrigger(trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
                      tn, GET_TRIG_NAME(trig), world[rnum].vn);
@@ -1494,195 +1392,11 @@ ACMD(do_attach) {
  *  this function returns, in order to remove the script.
  */
 int remove_trigger(struct script_data *sc, char *name) {
-    trig_data *i, *j;
-    int num = 0, string = false, n;
-    char *cname;
-
-
-    if (!sc)
-        return 0;
-
-    if ((cname = strstr(name, ".")) || (!isdigit(*name))) {
-        string = true;
-        if (cname) {
-            *cname = '\0';
-            num = atoi(name);
-            name = ++cname;
-        }
-    } else
-        num = atoi(name);
-
-    for (n = 0, j = nullptr, i = TRIGGERS(sc); i; j = i, i = i->next) {
-        if (string) {
-            if (isname(name, GET_TRIG_NAME(i).c_str()))
-                if (++n >= num)
-                    break;
-        }
-
-            /* this isn't clean... */
-            /* a numeric value will match if it's position OR vnum */
-            /* is found. originally the number was position-only */
-        else if (++n >= num)
-            break;
-        else if (trig_index[i->parent->vn].vn == num)
-            break;
-    }
-
-    if (i) {
-        if (j) {
-            j->next = i->next;
-            extract_trigger(i);
-        }
-
-            /* this was the first trigger */
-        else {
-            TRIGGERS(sc) = i->next;
-            extract_trigger(i);
-        }
-
-        /* update the script type bitvector */
-        SCRIPT_TYPES(sc) = 0;
-        for (i = TRIGGERS(sc); i; i = i->next)
-            SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(i);
-
-        return 1;
-    } else
-        return 0;
+    return;
 }
 
 ACMD(do_detach) {
-    char_data *victim = nullptr;
-    obj_data *object = nullptr;
-    struct room_data *room;
-    char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
-    char *trigger = nullptr;
-    int num_arg;
-
-    argument = two_arguments(argument, arg1, arg2);
-    one_argument(argument, arg3);
-
-    if (!*arg1 || !*arg2) {
-        send_to_char(ch, "Usage: detach [ mob | object | room ] { target } { trigger |"
-                         " 'all' }\r\n");
-        return;
-    }
-
-    /* vnum of mob/obj, if given */
-    num_arg = atoi(arg2);
-
-    if (!strcasecmp(arg1, "room") || !strcasecmp(arg1, "wtr")) {
-        room = ch->getRoom();
-        if (!can_edit_zone(ch, room->zone)) {
-            send_to_char(ch, "You can only detach triggers in your own zone\r\n");
-            return;
-        }
-        if (!SCRIPT(room))
-            send_to_char(ch, "This room does not have any triggers.\r\n");
-        else if (!strcasecmp(arg2, "all")) {
-            extract_script(room, WLD_TRIGGER);
-            send_to_char(ch, "All triggers removed from room.\r\n");
-        } else if (remove_trigger(SCRIPT(room), arg2)) {
-            send_to_char(ch, "Trigger removed.\r\n");
-            if (!TRIGGERS(SCRIPT(room))) {
-                extract_script(room, WLD_TRIGGER);
-            }
-        } else
-            send_to_char(ch, "That trigger was not found.\r\n");
-    } else {
-        if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
-            victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
-            if (!victim) { /* search room for one with this vnum */
-                for (victim = ch->getRoom()->people; victim; victim = victim->next_in_room)
-                    if (GET_MOB_VNUM(victim) == num_arg)
-                        break;
-
-                if (!victim) {
-                    send_to_char(ch, "No such mobile around.\r\n");
-                    return;
-                }
-            }
-
-            if (arg3 == nullptr || !*arg3)
-                send_to_char(ch, "You must specify a trigger to remove.\r\n");
-            else
-                trigger = arg3;
-        } else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
-            object = get_obj_vis(ch, arg2, nullptr);
-            if (!object) { /* search room for one with this vnum */
-                for (object = ch->getRoom()->contents; object; object = object->next_content)
-                    if (GET_OBJ_VNUM(object) == num_arg)
-                        break;
-
-                if (!object) { /* search inventory for one with this vnum */
-                    for (object = ch->contents; object; object = object->next_content)
-                        if (GET_OBJ_VNUM(object) == num_arg)
-                            break;
-
-                    if (!object) { /* give up */
-                        send_to_char(ch, "No such object around.\r\n");
-                        return;
-                    }
-                }
-            }
-
-            if (arg3 == nullptr || !*arg3)
-                send_to_char(ch, "You must specify a trigger to remove.\r\n");
-            else
-                trigger = arg3;
-        } else {
-            /* Thanks to Carlos Myers for fixing the line below */
-            if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->equipment)));
-            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->contents)));
-            else if ((victim = get_char_room_vis(ch, arg1, nullptr)));
-            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getRoom()->contents)));
-            else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)));
-            else if ((object = get_obj_vis(ch, arg1, nullptr)));
-            else
-                send_to_char(ch, "Nothing around by that name.\r\n");
-
-            trigger = arg2;
-        }
-
-        if (victim) {
-            if (!IS_NPC(victim))
-                send_to_char(ch, "Players don't have triggers.\r\n");
-
-            else if (!SCRIPT(victim))
-                send_to_char(ch, "That mob doesn't have any triggers.\r\n");
-            else if (!can_edit_zone(ch, real_zone_by_thing(GET_MOB_VNUM(victim)))) {
-                send_to_char(ch, "You can only detach triggers in your own zone\r\n");
-                return;
-            } else if (trigger && !strcasecmp(trigger, "all")) {
-                extract_script(victim, MOB_TRIGGER);
-                send_to_char(ch, "All triggers removed from %s.\r\n", GET_SHORT(victim));
-            } else if (trigger && remove_trigger(SCRIPT(victim), trigger)) {
-                send_to_char(ch, "Trigger removed.\r\n");
-                if (!TRIGGERS(SCRIPT(victim))) {
-                    extract_script(victim, MOB_TRIGGER);
-                }
-            } else
-                send_to_char(ch, "That trigger was not found.\r\n");
-        } else if (object) {
-            if (!SCRIPT(object))
-                send_to_char(ch, "That object doesn't have any triggers.\r\n");
-
-            else if (!can_edit_zone(ch, real_zone_by_thing(GET_OBJ_VNUM(object)))) {
-                send_to_char(ch, "You can only detach triggers in your own zone\r\n");
-                return;
-            } else if (trigger && !strcasecmp(trigger, "all")) {
-                extract_script(object, OBJ_TRIGGER);
-                send_to_char(ch, "All triggers removed from %s.\r\n",
-                             object->short_description ? object->short_description :
-                             object->name);
-            } else if (remove_trigger(SCRIPT(object), trigger)) {
-                send_to_char(ch, "Trigger removed.\r\n");
-                if (!TRIGGERS(SCRIPT(object))) {
-                    extract_script(object, OBJ_TRIGGER);
-                }
-            } else
-                send_to_char(ch, "That trigger was not found.\r\n");
-        }
-    }
+    return;
 }
 
 /*
@@ -1883,7 +1597,7 @@ std::string trig_data::evalExpr(const std::string& expr) {
     } else if (auto result = evalLhsOpRhs(l); result) {
         return result.value();
     } else
-        var_subst(go, sc, trig, type, line, result);
+        return varSubst(l);
 }
 
 static std::vector<std::string> ops = {
@@ -1962,45 +1676,6 @@ std::optional<std::size_t> find_end(trig_data *trig, std::size_t line) {
 }
 
 
-/*
- * searches for valid elseif, else, or end to continue execution at.
- * returns line of elseif, else, or end if found, or last line of trigger.
- */
-std::optional<std::size_t> find_else_end(trig_data *trig, std::size_t line) {
-
-    if(line >= trig->parent.lines.size()-1)
-
-    for (c = cl->next; c->next; c = c->next) {
-        for (p = c->cmd; *p && isspace(*p); p++); /* skip spaces */
-
-        if (!strncasecmp("if ", p, 3))
-            c = find_end(trig, c);
-
-        else if (!strncasecmp("elseif ", p, 7)) {
-            if (process_if(p + 7, go, sc, trig, type)) {
-                GET_TRIG_DEPTH(trig)++;
-                return c;
-            }
-        } else if (!strncasecmp("else", p, 4)) {
-            GET_TRIG_DEPTH(trig)++;
-            return c;
-        } else if (!strncasecmp("end", p, 3))
-            return c;
-
-        /* thanks to Russell Ryan for this fix */
-        if (!c->next) { /* rryan: this is the last line, return. */
-            script_log("Trigger VNum %lld has 'if' without 'end'. (error 4)", GET_TRIG_VNUM(trig));
-            return c;
-        }
-    }
-
-    /* rryan: if we got here, it's the last line, if its not an end, script_log it. */
-    for (p = c->cmd; *p && isspace(*p); p++); /* skip spaces */
-    if (strncasecmp("end", p, 3))
-        script_log("Trigger VNum %lld has 'if' without 'end'. (error 5)", GET_TRIG_VNUM(trig));
-    return c;
-}
-
 
 /* processes any 'wait' commands in a trigger */
 void trig_data::processWait(const std::string& cmd) {
@@ -2073,7 +1748,7 @@ void trig_data::processSet(const std::string& cmd) {
     
     if (!*name) {
         script_log("Trigger: %s, VNum %d. set w/o an arg: '%s'",
-                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
+                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd);
         return;
     }
     addVar(name, value);
@@ -2140,49 +1815,31 @@ void trig_data::processAttach(const std::string &cmd) {
         return;
     }
 
+    struct unit_data *u;
+
     switch(uidResult->index()) {
         case 0:
-            r = std::get<0>(*uidResult);
+            u = std::get<0>(*uidResult);
             break;
         case 1:
-            o = std::get<1>(*uidResult);
+            u = std::get<1>(*uidResult);
             break;
         case 2:
-            c = std::get<2>(*uidResult);
+            u = std::get<2>(*uidResult);
             break;
     }
 
     /* locate and load the trigger specified */
     trignum = real_trigger(atoi(trignum_s));
-    if (trignum == NOTHING || !(newtrig = read_trigger(trignum))) {
+    auto trig = read_trigger(atoi(trignum_s));
+    
+    if (!trig) {
         script_log("Trigger: %s, VNum %d. attach invalid trigger: '%s'",
                    GET_TRIG_NAME(this), GET_TRIG_VNUM(this), trignum_s);
         return;
     }
 
-    if (c) {
-        if (!IS_NPC(c)) {
-            script_log("Trigger: %s, VNum %d. attach invalid target: '%s'",
-                       GET_TRIG_NAME(this), GET_TRIG_VNUM(this), GET_NAME(c));
-            return;
-        }
-        if (!SCRIPT(c)) c->script = new script_data(c);
-        add_trigger(SCRIPT(c), newtrig, -1);
-        return;
-    }
-
-    if (o) {
-        if (!SCRIPT(o)) o->script = new script_data(o);
-        add_trigger(SCRIPT(o), newtrig, -1);
-        return;
-    }
-
-    if (r) {
-        if (!SCRIPT(r)) r->script = new script_data(r);
-        add_trigger(SCRIPT(r), newtrig, -1);
-        return;
-    }
-
+    u->script->addTrigger(trig, -1);
 }
 
 
@@ -2222,64 +1879,30 @@ void trig_data::processDetach(const std::string& cmd) {
         return;
     }
 
+    struct unit_data *u;
+
     switch(uidResult->index()) {
         case 0:
-            r = std::get<0>(*uidResult);
+            u = std::get<0>(*uidResult);
             break;
         case 1:
-            o = std::get<1>(*uidResult);
+            u = std::get<1>(*uidResult);
             break;
         case 2:
-            c = std::get<2>(*uidResult);
+            u = std::get<2>(*uidResult);
             break;
     }
 
-    if (c && SCRIPT(c)) {
-        if (!strcmp(trignum_s, "all")) {
-            extract_script(c, MOB_TRIGGER);
-            return;
-        }
-        if (remove_trigger(SCRIPT(c), trignum_s)) {
-            if (!TRIGGERS(SCRIPT(c))) {
-                extract_script(c, MOB_TRIGGER);
-            }
-        }
-        return;
+    if(iequals(trignum_s, "all")) {
+        u->script->removeAll();
+    } else {
+        u->script->removeScript(trignum_s);
     }
-
-    if (o && SCRIPT(o)) {
-        if (!strcmp(trignum_s, "all")) {
-            extract_script(o, OBJ_TRIGGER);
-            return;
-        }
-        if (remove_trigger(SCRIPT(o), trignum_s)) {
-            if (!TRIGGERS(SCRIPT(o))) {
-                extract_script(o, OBJ_TRIGGER);
-            }
-        }
-        return;
-    }
-
-    if (r && SCRIPT(r)) {
-        if (!strcmp(trignum_s, "all")) {
-            extract_script(r, WLD_TRIGGER);
-            return;
-        }
-        if (remove_trigger(SCRIPT(r), trignum_s)) {
-            if (!TRIGGERS(SCRIPT(r))) {
-                extract_script(r, WLD_TRIGGER);
-            }
-        }
-        return;
-    }
-
 }
 
 struct room_data *dg_room_of_obj(struct obj_data *obj) {
     return obj->getAbsoluteRoom();
 }
-
-
 
 
 /*
@@ -2299,10 +1922,10 @@ void trig_data::processUnset(const std::string& cmd) {
         return;
     }
 
-    if(auto v = getVar(var); v.size()) {
-        sc->addVar(var, "");
+    if(sc->hasVar(var)) {
+        sc->delVar(var);
     } else {
-        addVar(var, "");
+        delVar(var);
     }
 }
 
@@ -2312,7 +1935,7 @@ void trig_data::processUnset(const std::string& cmd) {
  *     'remote <variable_name> <uid>'
  */
 void trig_data::processRemote(const std::string& cmd) {
-    auto args = split(cmd);
+    auto args = split(cmd, ' ');
 
     if (args.size() != 2) {
         script_log("Trigger: %s, VNum %d. remote: invalid arguments '%s'",
@@ -2320,12 +1943,13 @@ void trig_data::processRemote(const std::string& cmd) {
         return;
     }
 
-    auto loc = getVar(args[0]);
-    if(loc.empty()) {
+    if(!hasVar(args[0])) {
         script_log("Trigger: %s, VNum %d. local var '%s' not found in remote call",
                    GET_TRIG_NAME(this), GET_TRIG_VNUM(this), args[0].c_str());
         return;
     }
+
+    auto loc = getRaw(args[0]);
     /* find the target script from the uid number */
     std::optional<DgUID> result;
     result = resolveUID(args[1]);
@@ -2336,21 +1960,20 @@ void trig_data::processRemote(const std::string& cmd) {
         return;
     }
 
-    struct script_data *sc_remote;
+    struct unit_data *u;
     switch(uidResult->index()) {
         case 0:
-            sc_remote = SCRIPT(std::get<0>(*uidResult));
+            u = std::get<0>(*uidResult);
             break;
         case 1:
-            sc_remote = SCRIPT(std::get<1>(*uidResult));
+            u = std::get<1>(*uidResult);
             break;
         case 2:
-            sc_remote = SCRIPT(std::get<2>(*uidResult));
+            u = std::get<2>(*uidResult);
             break;
     }
 
-    if (sc_remote == nullptr) return; /* no script to assign */
-    sc_remote->addVar(args[0], loc);
+    u->script->addVar(args[0], loc);
 }
 
 
@@ -2360,7 +1983,6 @@ void trig_data::processRemote(const std::string& cmd) {
  */
 ACMD(do_vdelete) {
     struct trig_var_data *vd, *vd_prev = nullptr;
-    struct script_data *sc_remote = nullptr;
     char *var, *uid_p;
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
     long uid, context;
@@ -2387,80 +2009,44 @@ ACMD(do_vdelete) {
         send_to_char(ch, "vdelete: illegal id specified.\r\n");
         return;
     }
+    struct unit_data *u;
     switch(uidResult->index()) {
         case 0:
-            sc_remote = SCRIPT(std::get<0>(*uidResult));
+            u = std::get<0>(*uidResult);
             break;
         case 1:
-            sc_remote = SCRIPT(std::get<1>(*uidResult));
+            u = std::get<1>(*uidResult);
             break;
         case 2:
-            sc_remote = SCRIPT(std::get<2>(*uidResult));
+            u = std::get<2>(*uidResult);
             break;
     }
+
+    auto sc_remote = u->script;
 
     if(!sc_remote) {
         send_to_char(ch, "vdelete: cannot resolve specified id.\r\n");
         return;
     }
 
-    if (sc_remote->global_vars == nullptr) {
+    if (sc_remote->vars.empty()) {
         send_to_char(ch, "That id represents no global variables.(2)\r\n");
         return;
     }
 
     if (*var == '*' || is_abbrev(var, "all")) {
-        struct trig_var_data *vd_next;
-        for (vd = sc_remote->global_vars; vd; vd = vd_next) {
-            vd_next = vd->next;
-            free(vd->value);
-            free(vd->name);
-            free(vd);
-        }
-        sc_remote->global_vars = nullptr;
+        sc_remote->vars.clear();
         send_to_char(ch, "All variables deleted from that id.\r\n");
         return;
     }
 
     /* find the global */
-    for (vd = sc_remote->global_vars; vd; vd_prev = vd, vd = vd->next)
-        if (!strcasecmp(vd->name, var))
-            break;
-
-    if (!vd) {
+    if (sc_remote->delVar(var)) {
         send_to_char(ch, "That variable cannot be located.\r\n");
         return;
     }
 
-    /* ok, delete the variable */
-    if (vd_prev) vd_prev->next = vd->next;
-    else sc_remote->global_vars = vd->next;
-
-    /* and free up the space */
-    free(vd->value);
-    free(vd->name);
-    free(vd);
-
     send_to_char(ch, "Deleted.\r\n");
-}
-
-/*
- * Called from do_set - return 0 for failure, 1 for success.
- * ch and vict are verified
- */
-int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_arg) {
-    char var_name[MAX_INPUT_LENGTH], *var_value;
-
-    var_value = any_one_arg(val_arg, var_name);
-
-    if (var_name == nullptr || !*var_name || var_value == nullptr || !*var_value) {
-        send_to_char(ch, "Usage: set <char> <varname> <value>\r\n");
-        return 0;
-    }
-    if (!SCRIPT(vict)) vict->script = new script_data(vict);
-
-    add_var(&(SCRIPT(vict)->global_vars), var_name, var_value, 0);
-    return 1;
 }
 
 /*
@@ -2468,7 +2054,7 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
  *     'rdelete <variable_name> <uid>'
  */
 void trig_data::processRdelete(const std::string &cmd) {
-    auto args = split(cmd);
+    auto args = split(cmd, ' ');
 
     struct script_data *sc_remote = nullptr;
 
@@ -2487,26 +2073,28 @@ void trig_data::processRdelete(const std::string &cmd) {
         return;
     }
 
+    struct unit_data *u;
     switch(uidResult->index()) {
         case 0:
-            sc_remote = SCRIPT(std::get<0>(*uidResult));
+            u = std::get<0>(*uidResult);
             break;
         case 1:
-            sc_remote = SCRIPT(std::get<1>(*uidResult));
+            u = std::get<1>(*uidResult);
             break;
         case 2:
-            sc_remote = SCRIPT(std::get<2>(*uidResult));
+            u = std::get<2>(*uidResult);
             break;
     }
 
-    if (sc_remote == nullptr) return; /* no script to delete a trigger from */
-    sc_remote->addVar(args[0], "");
+    u->script->addVar(args[0], "");
 }
 
 
 void trig_data::processGlobal(const std::string& name) {
-    sc->addVar(name, getVar(name));
-    addVar(name, "");
+    if(hasVar(name)) {
+        sc->addVar(name, getRaw(name));
+        delVar(name);
+    }
 }
 
 
@@ -2542,32 +2130,6 @@ void trig_data::extractValue(const std::string& cmd) {
 
 }
 
-
-/*  This is the core driver for scripts. */
-/*  Arguments:
-    void *go_adress
-      A pointer to a pointer to the entity running the script.
-      The reason for this approcah is that we want to be able to see
-      from the calling function, if the entity has been free'd.
-
-    trig_data *trig
-      A pointer to the current running trigger.
-
-    int type
-      MOB_TRIGGER, OBJ_TRIGGER or WLD_TRIGGER, respectively.
-
-    int mode
-      TRIG_NEW     just started from dg_triggers.c
-      TRIG_RESTART restarted after a 'wait'
-*/
-
-
-
-
-int script_driver(void *go_adress, trig_data *trig, int type, int mode) {
-    return trig->execute();
-}
-
 /* returns the real number of the trigger with given virtual number */
 trig_rnum real_trigger(trig_vnum vnum) {
     return trig_index.count(vnum) ? vnum : NOTHING;
@@ -2584,8 +2146,6 @@ ACMD(do_tstat) {
             send_to_char(ch, "That vnum does not exist.\r\n");
             return;
         }
-
-        do_stat_trigger(ch, trig_index[rnum].proto);
     } else
         send_to_char(ch, "Usage: tstat <vnum>\r\n");
 }
@@ -2627,7 +2187,6 @@ void read_saved_vars(struct char_data *ch) {
     /* create the space for the script structure which holds the vars */
     /* We need to do this first, because later calls to 'remote' will need */
     /* a script already assigned. */
-    ch->script = new script_data(ch);
 
     /* find the file that holds the saved variables and open it*/
     get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
@@ -2646,51 +2205,12 @@ void read_saved_vars(struct char_data *ch) {
             temp = any_one_arg(temp, context_str);
             skip_spaces(&temp); /* temp now points to the rest of the line */
 
-            context = atol(context_str);
-            add_var(&(SCRIPT(ch)->global_vars), varname, temp, context);
+            ch->script->addVar(varname, temp);
             free(p); /* plug memory hole */
         }
     } while (!feof(file));
 
     /* close the file and return */
-    fclose(file);
-}
-
-/* save a characters variables out to disk */
-void save_char_vars(struct char_data *ch) {
-    FILE *file;
-    char fn[127];
-    struct trig_var_data *vars;
-
-    /* immediate return if no script (and therefore no variables) structure */
-    /* has been created. this will happen when the player is logging in */
-    if (SCRIPT(ch) == nullptr) return;
-
-    /* we should never be called for an NPC, but just in case... */
-    if (IS_NPC(ch)) return;
-
-    get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
-    std::filesystem::remove(fn);
-
-    /* make sure this char has global variables to save */
-    if (ch->script->global_vars == nullptr) return;
-    vars = ch->script->global_vars;
-
-    file = fopen(fn, "wt");
-    if (!file) {
-        mudlog(NRM, ADMLVL_GOD, true,
-               "SYSERR: Could not open player variable file %s for writing.:%s",
-               fn, strerror(errno));
-        return;
-    }
-    /* note that currently, context will always be zero. this may change */
-    /* in the future */
-    while (vars) {
-        if (*vars->name != '-') /* don't save if it begins with - */
-            fprintf(file, "%s %ld %s\n", vars->name, vars->context, vars->value);
-        vars = vars->next;
-    }
-
     fclose(file);
 }
 
@@ -2709,11 +2229,6 @@ void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count) {
     if (SCRIPT(ch))
         return;
 
-    /* create the space for the script structure which holds the vars */
-    /* We need to do this first, because later calls to 'remote' will need */
-    /* a script already assigned. */
-    ch->script = new script_data(ch);
-
     /* walk through each line in the file parsing variables */
     for (i = 0; i < count; i++) {
         if (get_line(file, input_line) > 0) {
@@ -2723,38 +2238,9 @@ void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count) {
             skip_spaces(&temp); /* temp now points to the rest of the line */
 
             context = atol(context_str);
-            add_var(&(SCRIPT(ch)->global_vars), varname, temp, context);
+            ch->script->addVar(varname, temp);
             free(p); /* plug memory hole */
         }
-    }
-}
-
-/* save a characters variables out to an ASCII pfile */
-void save_char_vars_ascii(FILE *file, struct char_data *ch) {
-    struct trig_var_data *vars;
-    int count = 0;
-    /* immediate return if no script (and therefore no variables) structure */
-    /* has been created. this will happen when the player is logging in */
-    if (SCRIPT(ch) == nullptr) return;
-
-    /* we should never be called for an NPC, but just in case... */
-    if (IS_NPC(ch)) return;
-
-    /* make sure this char has global variables to save */
-    if (ch->script->global_vars == nullptr) return;
-
-    /* note that currently, context will always be zero. this may change */
-    /* in the future */
-    for (vars = ch->script->global_vars; vars; vars = vars->next)
-        if (*vars->name != '-')
-            count++;
-
-    if (count != 0) {
-        fprintf(file, "Vars: %d\n", count);
-
-        for (vars = ch->script->global_vars; vars; vars = vars->next)
-            if (*vars->name != '-') /* don't save if it begins with - */
-                fprintf(file, "%s %ld %s\n", vars->name, vars->context, vars->value);
     }
 }
 
@@ -2782,22 +2268,6 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
     return false;
 }
 
-nlohmann::json trig_var_data::serialize() {
-    nlohmann::json j;
-
-    if(name && strlen(name)) j["name"] = name;
-    if(value && strlen(value)) j["value"] = value;
-    if(context) j["context"] = context;
-
-    return j;
-}
-
-trig_var_data::trig_var_data(const nlohmann::json& j) : trig_var_data() {
-    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
-    if(j.contains("value")) value = strdup(j["value"].get<std::string>().c_str());
-    if(j.contains("context")) context = j["context"].get<long>();
-}
-
 nlohmann::json trig_proto::serialize() {
     auto j = nlohmann::json::object();
     if(vn != NOTHING) j["vn"] = vn;
@@ -2811,15 +2281,16 @@ nlohmann::json trig_proto::serialize() {
     return j;
 }
 
+void trig_proto::deserialize(const nlohmann::json& j) {
+    if(j.contains("vn")) vn = j["vn"].get<trig_vnum>();
+    if(j.contains("name")) name = j["name"].get<std::string>();
+    if(j.contains("attach_type")) attach_type = j["attach_type"].get<int>();
+    if(j.contains("data_type")) data_type = j["data_type"].get<int>();
+    if(j.contains("trigger_type")) trigger_type = j["trigger_type"].get<int>();
+    if(j.contains("narg")) narg = j["narg"].get<int>();
+    if(j.contains("arglist")) arglist = j["arglist"].get<std::string>();
+    if(j.contains("lines")) lines = j["lines"].get<std::vector<std::string>>();
 
-int trig_data::countLine(struct cmdlist_element *c) {
-    int count = 0;
-    for(auto cl = cmdlist; cl; cl = cl->next) {
-        if(cl == c) return count;
-        count++;
-    }
-    // This should never, EVER happen...
-    return -1;
 }
 
 nlohmann::json trig_data::serialize() {
@@ -2831,8 +2302,11 @@ nlohmann::json trig_data::serialize() {
     j["generation"] = generation;
     j["order"] = order;
 
-    if(depth) j["depth"] = depth;
+    for(auto &[nt, line] : depth) {
+        j["depth"].push_back(std::make_pair(nt, line));
+    }
     if(loops) j["loops"] = loops;
+    if(totalLoops) j["totalLoops"] = totalLoops;
     if(waiting != 0.0) j["waiting"] = waiting;
     if(!vars.empty()) j["vars"] = vars;
 
@@ -2846,62 +2320,19 @@ void trig_data::deserialize(const nlohmann::json &j) {
     if(j.contains("order")) order = j["order"].get<long>();
 
     if(j.contains("waiting")) waiting = j["waiting"].get<double>();
-    if(j.contains("depth")) depth = j["depth"].get<int>();
+    if(j.contains("depth")) {
+        for(auto &d : j["depth"]) {
+            depth.emplace_back(d[0].get<NestType>(), d[1].get<int>());
+        }
+    }
     if(j.contains("loops")) loops = j["loops"].get<int>();
+    if(j.contains("totalLoops")) totalLoops = j["totalLoops"].get<int>();
 
     if(j.contains("vars")) vars = j["vars"];
 }
 
 std::string trig_data::serializeLocation() {
-    return owner->getUID();
-}
-
-void trig_data::deserializeLocation(const std::string &txt) {
-    auto uid = resolveUID(txt);
-    if(!uid) return;
-    owner = *uid;
-    struct room_data *r;
-    struct obj_data *o;
-    struct char_data *c;
-    switch(owner.index()) {
-        case 0:
-            r = std::get<0>(owner);
-            if(!SCRIPT(r)) r->script = new script_data(r);
-            break;
-        case 1:
-            o = std::get<1>(owner);
-            if(!SCRIPT(o)) o->script = new script_data(o);
-            break;
-        case 2:
-            c = std::get<2>(owner);
-            if(!SCRIPT(c)) c->script = new script_data(c);
-            break;
-    }
-}
-
-trig_data::trig_data(const nlohmann::json &j) : trig_data() {
-    if(j.contains("vn")) vn = j["vn"].get<int>();
-    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
-    if(j.contains("attach_type")) attach_type = j["attach_type"].get<int>();
-    if(j.contains("data_type")) data_type = j["data_type"].get<int>();
-    if(j.contains("trigger_type")) trigger_type = j["trigger_type"].get<int>();
-    if(j.contains("narg")) narg = j["narg"].get<int>();
-    if(j.contains("arglist")) arglist = strdup(j["arglist"].get<std::string>().c_str());
-
-    if(j.contains("cmdlist")) {
-        auto &cl = j["cmdlist"];
-        for(auto c = cl.rbegin(); c != cl.rend(); c++) {
-            auto cle = new cmdlist_element();
-            cle->cmd = strdup(c->get<std::string>().c_str());
-            cle->next = cmdlist;
-            cmdlist = cle;
-        }
-    }
-}
-
-void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context) {
-	auto uid = thing->getUID(false);
-    add_var(&GET_TRIG_VARS(trig), name, (char*)uid.c_str(), context);
+    return sc->owner->getUID();
 }
 
 // Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
@@ -2912,9 +2343,8 @@ void trig_data::activate() {
         return;
     }
     active = true;
-    next_in_world = trigger_list;
-    trigger_list = this;
-    if(waiting != 0.0) triggers_waiting.insert(this);
+    if(waiting != 0.0) triggers_waiting.insert(shared_from_this());
+    parent->instances.insert(shared_from_this());
 }
 
 void trig_data::deactivate() {
@@ -2923,42 +2353,21 @@ void trig_data::deactivate() {
         return;
     }
     active = false;
-    struct trig_data *temp;
-    triggers_waiting.erase(this);
-    REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);
+    triggers_waiting.erase(shared_from_this());
+    parent->instances.erase(shared_from_this());
 }
 
-nlohmann::json serializeVars(struct trig_var_data *vd) {
-    auto j = nlohmann::json::array();;
-    for(auto v = vd; v; v = v->next) {
-        j.push_back(v->serialize());
-    }
-    return j;
-}
-
-
-void deserializeVars(struct trig_var_data **vd, const nlohmann::json &j) {
-    for(auto it = j.rbegin(); it != j.rend(); ++it) {
-        auto v = new trig_var_data(*it);
-        v->next = *vd;
-        *vd = v;
-    }
-}
 
 void script_data::activate() {
-    for(auto t = trig_list; t; t = t->next) {
+    for(auto t : dgScripts) {
         t->activate();
     }
 }
 
 void script_data::deactivate() {
-    for(auto t = trig_list; t; t = t->next) {
+    for(auto t : dgScripts) {
         t->deactivate();
     }
-}
-
-nlohmann::json index_data::serializeProto() {
-    return proto->serializeProto();
 }
 
 DgResults HasVars::getVar(const std::string& name) {
@@ -2999,10 +2408,45 @@ void HasVars::addVar(const std::string& name, const std::string& val) {
     else vars[n] = val;
 }
 
+void HasVars::addVar(const std::string& name, struct unit_data *u) {
+    addVar(name, u->getUID(false));
+}
+
 bool HasVars::hasVar(const std::string& name) {
     if(name.empty()) return false;
     for(auto &[n, val] : vars) {
         if(iequals(name, n)) return true;
     }
     return false;
+}
+
+bool HasVars::delVar(const std::string& name) {
+    if(name.empty()) return false;
+    for(auto &[n, val] : vars) {
+        if(iequals(name, n)) {
+            vars.erase(n);
+            return true;
+        }
+    }
+    return false;
+}
+
+trig_data::trig_data(std::shared_ptr<trig_proto> parent) : parent(parent) {
+    
+}
+
+void script_data::loadScript(std::shared_ptr<trig_data> t) {
+    t->order = dgScripts.size();
+    dgScripts.push_back(t);
+    types |= GET_TRIG_TYPE(t);
+    t->activate();
+}
+
+trig_data::~trig_data() {
+    if(active) deactivate();
+    uniqueScripts.erase(id);
+}
+
+void script_data::removeAll() {
+    dgScripts.clear();
 }

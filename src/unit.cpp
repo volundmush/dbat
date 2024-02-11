@@ -147,5 +147,9 @@ bool unit_data::isActive() {
 }
 
 void unit_data::save() {
-    
+
+}
+
+unit_data::unit_data() : script(std::make_shared<script_data>(this)) {
+
 }

@@ -584,8 +584,8 @@ nlohmann::json char_data::serializeInstance() {
     if(upgrade) j["upgrade"] = upgrade;
     if(voice && strlen(voice)) j["voice"] = voice;
 
-    if(script && script->global_vars) {
-        j["dgvariables"] = serializeVars(script->global_vars);
+    if(!script->vars.empty()) {
+        j["dgvariables"] = script->vars;
     }
 
     if(relax_count) j["relax_count"] = relax_count;
@@ -752,8 +752,11 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     }
 
     if(j.contains("dgvariables")) {
-        if(!script) script = new script_data(this);
-        deserializeVars(&script->global_vars, j["dgvariables"]);
+        // dgvariables is a sequence of string pairs that fills the script->vars map.
+        auto j2 = j["dgvariables"];
+        for(auto j3 : j2) {
+            script->vars[j3[0].get<std::string>()] = j3[1].get<std::string>();
+        }
     }
 
     auto proto = mob_proto.find(vn);

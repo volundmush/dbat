@@ -62,6 +62,38 @@ world[room].dir_option[dir]->to_room : NOWHERE)
 
 static bool converting = false;
 
+static void parse_trigger(FILE *trig_f, trig_vnum nr) {
+    int t[2], k, attach_type;
+    char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
+    auto trig = std::make_shared<trig_proto>();
+    trig_index[nr] = trig;
+    trig->vn = nr;
+
+    auto &z = zone_table[real_zone_by_thing(nr)];
+    z.triggers.insert(nr);
+
+    snprintf(errors, sizeof(errors), "trig vnum %d", nr);
+
+    trig->name = fread_string(trig_f, errors);
+
+    get_line(trig_f, line);
+    k = sscanf(line, "%d %s %d", &attach_type, flags, t);
+    trig->attach_type = (int8_t) attach_type;
+    trig->trigger_type = (long) asciiflag_conv(flags);
+    trig->narg = (k == 3) ? t[0] : 0;
+
+    trig->arglist = fread_string(trig_f, errors);
+
+    cmds = s = fread_string(trig_f, errors);
+
+    trig->lines.emplace_back(strtok(s, "\r\n"));
+
+    while ((s = strtok(nullptr, "\r\n"))) {
+        trig->lines.emplace_back(s);
+    }
+
+    free(cmds);
+}
 
 static void read_line(FILE *shop_f, const char *string, void *data) {
     char buf[READ_SIZE];
@@ -4743,13 +4775,9 @@ void migrate_characters() {
             if(pos2 == std::string::npos) continue;
             auto context = line.substr(pos + 1, pos2 - pos - 1);
             auto data = line.substr(pos2 + 1);
-            if(!ch->script) {
-                ch->script = new script_data(ch);
-            }
 
             try {
-                auto ctx = std::stoi(context);
-                add_var(&ch->script->global_vars, (char*)varname.c_str(), data.c_str(), ctx);
+                ch->script->addVar(varname, data);
             } catch(...) {
                 basic_mud_log("Error parsing %s for variable migration.", line.c_str());
             }

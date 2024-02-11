@@ -411,10 +411,10 @@ int64_t nextObjID();
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
-extern std::map<trig_vnum, struct index_data> trig_index;
+extern std::map<trig_vnum, std::shared_ptr<trig_proto>> trig_index;
 
 extern struct trig_data *trigger_list;
-extern std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueScripts;
+extern std::map<int64_t, std::pair<time_t, std::shared_ptr<trig_data>>> uniqueScripts;
 
 extern int dg_owner_purged;
 

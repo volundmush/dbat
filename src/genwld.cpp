@@ -266,13 +266,6 @@ room_direction_data::room_direction_data(const nlohmann::json &j) : room_directi
     if(j.contains("totalfailroom")) totalfailroom = j["totalfailroom"];
 }
 
-nlohmann::json room_data::serializeDgVars() {
-    if(script && script->global_vars)
-        return serializeVars(script->global_vars);
-    return nlohmann::json::array();
-}
-
-
 nlohmann::json room_data::serialize() {
     auto j = serializeUnit();
 
@@ -313,11 +306,6 @@ room_data::room_data(const nlohmann::json &j) {
     if(j.contains("proto_script")) {
         for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
     }
-
-    if(!proto_script.empty() || vn == 0) {
-        if(!script) script = new script_data(this);
-    }
-
 
 }
 

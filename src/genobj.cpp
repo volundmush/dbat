@@ -319,8 +319,8 @@ nlohmann::json obj_data::serializeInstance() {
 
     if(generation) j["generation"] = generation;
 
-    if(script && script->global_vars) {
-        j["dgvariables"] = serializeVars(script->global_vars);
+    if(!script->vars.empty()) {
+        j["dgvariables"] = script->vars;
     }
 
     if(world.contains(room_loaded)) j["room_loaded"] = room_loaded;
@@ -437,7 +437,7 @@ void obj_data::activate() {
     next = object_list;
     object_list = this;
 
-    if(script) script->activate();
+    script->activate();
 
     if(obj_proto.contains(vn)) {
         insert_vnum(objectVnumIndex, this);
@@ -456,14 +456,8 @@ void obj_data::deactivate() {
         erase_vnum(objectVnumIndex, this);
     }
 
-    if(script && script->trig_list) {
-        struct trig_data *next_trig;
-        for (auto trig = TRIGGERS(script); trig; trig = next_trig) {
-            next_trig = trig->next;
-            extract_trigger(trig);
-        }
-        TRIGGERS(script) = nullptr;
-    }
+    script->deactivate();
+
     if(contents) deactivateContents();
 }
 
@@ -475,8 +469,7 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     add_unique_id(this);
 
     if(j.contains("dgvariables")) {
-        if(!script) script = new script_data(this);
-        deserializeVars(&script->global_vars, j["dgvariables"]);
+        script->vars = j["dgvariables"].get<std::unordered_map<std::string, std::string>>();
     }
 
     if(j.contains("room_loaded")) room_loaded = j["room_loaded"];

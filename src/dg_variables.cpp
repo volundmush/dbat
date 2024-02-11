@@ -43,40 +43,6 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 /* Utility functions */
 
-/*
- * Thanks to James Long for his assistance in plugging the memory leak
- * that used to be here.   -- Welcor
- */
-/* adds a variable with given name and value to trigger */
-void add_var(struct trig_var_data **var_list, char *name, const char *value, long id) {
-    struct trig_var_data *vd;
-
-    if (strchr(name, '.')) {
-        basic_mud_log("add_var() : Attempt to add illegal var: %s", name);
-        return;
-    }
-
-    for (vd = *var_list; vd && strcasecmp(vd->name, name); vd = vd->next);
-
-    if (vd && (!vd->context || vd->context == id)) {
-        free(vd->value);
-        CREATE(vd->value, char, strlen(value) + 1);
-    } else {
-        CREATE(vd, struct trig_var_data, 1);
-
-        CREATE(vd->name, char, strlen(name) + 1);
-        strcpy(vd->name, name);                            /* strcpy: ok*/
-
-        CREATE(vd->value, char, strlen(value) + 1);
-
-        vd->next = *var_list;
-        vd->context = id;
-        *var_list = vd;
-    }
-    if(vd->value) free(vd->value);
-    vd->value = strdup(value);
-}
-
 
 /* perhaps not the best place for this, but I didn't want a new file */
 char *skill_percent(struct char_data *ch, char *skill) {
@@ -163,358 +129,6 @@ int char_has_item(char *item, struct char_data *ch) {
         return 1;
 }
 
-std::optional<std::string> text_processed(char *field, char *subfield, struct trig_var_data *vd) {
-    char *p, *p2;
-    char tmpvar[MAX_STRING_LENGTH];
-
-    if (iequals(field, "strlen")) {                     /* strlen    */
-        char limit[200];
-        return fmt::format("{}", strlen(vd->value));
-    } else if (iequals(field, "trim")) {                /* trim      */
-        /* trim whitespace from ends */
-        snprintf(tmpvar, sizeof(tmpvar) - 1, "%s", vd->value); /* -1 to use later*/
-        p = tmpvar;
-        p2 = tmpvar + strlen(tmpvar) - 1;
-        while (*p && isspace(*p)) p++;
-        while ((p <= p2) && isspace(*p2)) p2--;
-        if (p > p2) { /* nothing left */
-            return "";
-        }
-        *(++p2) = '\0';                                         /* +1 ok (see above) */
-        return p;
-    } else if (iequals(field, "contains")) {            /* contains  */
-        return str_str(vd->value, subfield) ? "1" : "0";
-    } else if (iequals(field, "car")) {
-        auto sp = split(vd->value, ' ');
-        if(!sp.empty()) return sp[0];
-        return "";
-    } else if (iequals(field, "cdr")) {                 /* cdr       */
-        char *cdr = vd->value;
-        while (*cdr && !isspace(*cdr)) cdr++; /* skip 1st field */
-        while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
-        return cdr;
-    } else if (iequals(field, "charat")) {              /* CharAt    */
-        size_t len = strlen(vd->value), dgindex = atoi(subfield);
-        if (dgindex > len || dgindex < 1)
-            return "";
-        else
-            return fmt::format("{}", vd->value[dgindex - 1]);
-    } else if (iequals(field, "mudcommand")) {
-        /* find the mud command returned from this text */
-/* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
-/* depending on what patches you've got applied.                      */
-
-/* on older source bases:    extern struct command_info *cmd_info; */
-        int length, cmd;
-        for (length = strlen(vd->value), cmd = 0;
-             *cmd_info[cmd].command != '\n'; cmd++)
-            if (!strncmp(cmd_info[cmd].command, vd->value, length))
-                break;
-
-        if (*cmd_info[cmd].command == '\n')
-            return "";
-        else
-            return fmt::format("{}", cmd_info[cmd].command);
-    }
-
-    return {};
-}
-
-
-/* sets str to be the value of var.field */
-std::string find_replacement(trig_data *trig, char *var, char *field, char *subfield) {
-    int type = trig->data_type;
-    struct trig_var_data *vd = nullptr;
-    char_data *ch, *c = nullptr, *rndm;
-    obj_data *obj, *o = nullptr;
-    struct room_data *room, *r = nullptr;
-    char *name;
-    int num, count, i, j, doors;
-
-    for (vd = GET_TRIG_VARS(trig); vd; vd = vd->next)
-        if (iequals(vd->name, var))
-            break;
-
-    unit_data *u = nullptr;
-    switch(trig->owner.index()) {
-        case 0:
-            u = std::get<0>(trig->owner);
-            break;
-        case 1:
-            u = std::get<1>(trig->owner);
-            break;
-        case 2:
-            u = std::get<2>(trig->owner);
-            break;
-    }
-
-    if (!vd)
-        for (vd = u->script->global_vars; vd; vd = vd->next)
-            if (iequals(vd->name, var) && (vd->context == 0 || vd->context == u->script->context))
-                break;
-
-    if (!*field) {
-        if (vd) return vd->value;
-        else {
-            if (iequals(var, "self")) {
-                return u->getUID(false);
-            } else if (iequals(var, "global")) {
-                /* so "remote varname %global%" will work */
-                return world[0].getUID(false);
-            } else if (iequals(var, "ctime"))
-                return fmt::format("{}", time(nullptr));
-            else if (iequals(var, "door"))
-                return door[type];
-            else if (iequals(var, "force"))
-                return force[type];
-            else if (iequals(var, "load"))
-                return load[type];
-            else if (iequals(var, "purge"))
-                return purge[type];
-            else if (iequals(var, "teleport"))
-                return teleport[type];
-            else if (iequals(var, "damage"))
-                return xdamage[type];
-            else if (iequals(var, "send"))
-                return send_cmd[type];
-            else if (iequals(var, "echo"))
-                return echo_cmd[type];
-            else if (iequals(var, "echoaround"))
-                return echoaround_cmd[type];
-            else if (iequals(var, "zoneecho"))
-                return zoneecho[type];
-            else if (iequals(var, "asound"))
-                return asound[type];
-            else if (iequals(var, "at"))
-                return at[type];
-            else if (iequals(var, "transform"))
-                return transform[type];
-            else if (iequals(var, "recho"))
-                return recho[type];
-            else
-                return "";
-        }
-        return;
-    } else {
-        if (vd) {
-            name = vd->value;
-
-            switch (type) {
-                case MOB_TRIGGER:
-                    ch = (char_data *)u;
-
-                    if ((o = get_object_in_equip(ch, name)));
-                    else if ((o = get_obj_in_list(name, ch->contents)));
-                    else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(ch->getRoom(), name)));
-                    else if ((o = get_obj_in_list(name, ch->getRoom()->contents)));
-                    else if ((c = get_char(name)));
-                    else if ((o = get_obj(name)));
-                    else if ((r = get_room(name))) {}
-
-                    break;
-                case OBJ_TRIGGER:
-                    obj = (obj_data *)u;
-
-                    if ((c = get_char_by_obj(obj, name)));
-                    else if ((o = get_obj_by_obj(obj, name)));
-                    else if ((r = get_room(name))) {}
-
-                    break;
-                case WLD_TRIGGER:
-                    room = (room_data *)u;
-
-                    if ((c = get_char_by_room(room, name)));
-                    else if ((o = get_obj_by_room(room, name)));
-                    else if ((r = get_room(name))) {}
-
-                    break;
-            }
-        } else {
-            if (iequals(var, "self")) {
-                c = nullptr;
-                r = nullptr;
-                o = nullptr;
-                switch (type) {
-                    case MOB_TRIGGER:
-                        c = (char_data *)u;
-                        break;     /* the room.  - Welcor        */
-                    case OBJ_TRIGGER:
-                        o = (obj_data *)u;
-                        break;
-                    case WLD_TRIGGER:
-                        r = (struct room_data *)u;
-                        break;
-                }
-            } else if (iequals(var, "global")) {
-                auto thescript = SCRIPT(&world[0]);
-                if (!thescript) {
-                    script_log("Attempt to find global var. Apparently the void has no script.");
-                    return;
-                }
-                for (vd = thescript->global_vars; vd; vd = vd->next)
-                    if (iequals(vd->name, field))
-                        break;
-
-                if (vd) return vd->value;
-
-                return;
-            } else if (iequals(var, "people")) {
-                return fmt::format("{}", ((num = atoi(field)) > 0) ? trgvar_in_room(num) : 0);
-            } else if (iequals(var, "time")) {
-                if (iequals(field, "hour"))
-                    return fmt::format("{}", time_info.hours);
-                else if(iequals(field, "minute"))
-                    return fmt::format("{}", time_info.minutes);
-                else if(iequals(field, "second"))
-                    return fmt::format("{}", time_info.seconds);
-                else if (iequals(field, "day"))
-                    return fmt::format("{}", time_info.day + 1);
-                else if (iequals(field, "month"))
-                    return fmt::format("{}", time_info.month + 1);
-                else if (iequals(field, "year"))
-                    return fmt::format("{}", time_info.year);
-                else return "";
-            }
-/*
-
-      %findobj.<room vnum X>(<object vnum/id/name>)%
-        - count number of objects in room X with this name/id/vnum
-      %findmob.<room vnum X>(<mob vnum Y>)%
-        - count number of mobs in room X with vnum Y
-
-for example you want to check how many PC's are in room with vnum 1204.
-as PC's have the vnum -1...
-you would type:
-in any script:
-%echo% players in room 1204: %findmob.1204(-1)%
-
-Or say you had a bank, and you want a script to check the number of
-bags
-of gold (vnum: 1234)
-in the vault (vnum: 453) now and then. you can just use
-%findobj.453(1234)% and it will return the number of bags of gold.
-
-**/
-
-                /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-            else if (iequals(var, "findmob")) {
-                if (!field || !*field || !subfield || !*subfield) {
-                    script_log("findmob.vnum(mvnum) - illegal syntax");
-                    return "0";
-                } else {
-                    room_rnum rrnum = real_room(atof(field));
-                    mob_vnum mvnum = atof(subfield);
-
-                    if (rrnum == NOWHERE) {
-                        script_log("findmob.vnum(ovnum): No room with vnum %d", atof(field));
-                        return "0";
-                    } else {
-                        for (i = 0, ch = world[rrnum].people; ch; ch = ch->next_in_room)
-                            if (GET_MOB_VNUM(ch) == mvnum)
-                                i++;
-                        return fmt::format("{}", i);
-                    }
-                }
-            }
-                /* addition inspired by Jamie Nelson - mordecai@xtra.co.nz */
-            else if (iequals(var, "findobj")) {
-                if (!field || !*field || !subfield || !*subfield) {
-                    script_log("findobj.vnum(ovnum) - illegal syntax");
-                    return "0";
-                } else {
-                    room_rnum rrnum = real_room(atof(field));
-
-                    if (rrnum == NOWHERE) {
-                        script_log("findobj.vnum(ovnum): No room with vnum %d", atof(field));
-                        return "0";
-                    } else {
-                        /* item_in_list looks within containers as well. */
-                        return fmt::format("{}", item_in_list(subfield, world[rrnum].contents));
-                    }
-                }
-            } else if (iequals(var, "random")) {
-                if (iequals(field, "char")) {
-                    rndm = nullptr;
-                    count = 0;
-
-                    if (type == MOB_TRIGGER) {
-                        ch = (char_data *)u;
-                        for (c = ch->getRoom()->people; c; c = c->next_in_room)
-                            if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
-                                CAN_SEE(ch, c)) {
-                                if (!rand_number(0, count))
-                                    rndm = c;
-                                count++;
-                            }
-                    } else if (type == OBJ_TRIGGER) {
-                        for (c = world[obj_room((obj_data *)u)].people; c;
-                             c = c->next_in_room)
-                            if (valid_dg_target(c, DG_ALLOW_GODS)) {
-                                if (!rand_number(0, count))
-                                    rndm = c;
-                                count++;
-                            }
-                    } else if (type == WLD_TRIGGER) {
-                        for (c = ((struct room_data *)u)->people; c;
-                             c = c->next_in_room)
-                            if (valid_dg_target(c, DG_ALLOW_GODS)) {
-
-                                if (!rand_number(0, count))
-                                    rndm = c;
-                                count++;
-                            }
-                    }
-                    return rndm ? fmt::format("{}", ((rndm)->getUID(false).c_str())) : "0";
-                } else if (iequals(field, "dir")) {
-                    room_rnum in_room = NOWHERE;
-
-                    switch (type) {
-                        case WLD_TRIGGER:
-                            in_room = real_room(((struct room_data *)u)->vn);
-                            break;
-                        case OBJ_TRIGGER:
-                            in_room = obj_room((struct obj_data *)u);
-                            break;
-                        case MOB_TRIGGER:
-                            in_room = IN_ROOM((struct char_data *)u);
-                            break;
-                    }
-                    if (in_room == NOWHERE) {
-                        return "";
-                    } else {
-                        std::vector<int> available;
-                        room = &world[in_room];
-                        for (i = 0; i < NUM_OF_DIRS; i++)
-                            if (R_EXIT(room, i))
-                                available.push_back(i);
-
-                        if (available.empty()) {
-                            return "";
-                        } else {
-                            auto dir = Random::get(available);
-                            return dirs[*dir];
-                        }
-                    }
-                } else
-                    return fmt::format("{}", ((num = atoi(field)) > 0) ? rand_number(1, num) : 0);
-
-                return;
-            }
-        }
-
-        if (auto res = text_processed(field, subfield, vd); res) {
-            return res.value();
-        }
-
-        /* set str to some 'non-text' first */
-        if(u) {
-            if(auto result = u->dgCallMember(trig, field, subfield ? subfield : ""); result) {
-                return result.value();
-            }
-        }
-        return "";
-    }
-}
 
 std::size_t matching_percent(const std::string& line, std::size_t start) {
     int depth;
@@ -547,54 +161,6 @@ std::string scriptTimeHolder(trig_data *trig, const std::string& field, const st
     } else if(iequals(field, "year")) {
         return fmt::format("{}", time_info.year);
     }
-    return "";
-}
-
-DgResults scriptStartHolder(trig_data* trig, const std::string& field, const std::string& args) {
-    auto type = trig->parent->data_type;
-
-    if(iequals(field, "self")) {
-        return trig->sc->owner;
-    }
-    else if(iequals(field, "time")) {
-        return std::function(scriptTimeHolder);
-    }
-    else if (iequals(field, "global")) {
-        /* so "remote varname %global%" will work */
-        return world[0].getUID(false);
-    } 
-    else if (iequals(field, "ctime"))
-        return fmt::format("{}", time(nullptr));
-    else if (iequals(field, "door"))
-        return door[type];
-    else if (iequals(field, "force"))
-        return force[type];
-    else if (iequals(field, "load"))
-        return load[type];
-    else if (iequals(field, "purge"))
-        return purge[type];
-    else if (iequals(field, "teleport"))
-        return teleport[type];
-    else if (iequals(field, "damage"))
-        return xdamage[type];
-    else if (iequals(field, "send"))
-        return send_cmd[type];
-    else if (iequals(field, "echo"))
-        return echo_cmd[type];
-    else if (iequals(field, "echoaround"))
-        return echoaround_cmd[type];
-    else if (iequals(field, "zoneecho"))
-        return zoneecho[type];
-    else if (iequals(field, "asound"))
-        return asound[type];
-    else if (iequals(field, "at"))
-        return at[type];
-    else if (iequals(field, "transform"))
-        return transform[type];
-    else if (iequals(field, "recho"))
-        return recho[type];
-
-
     return "";
 }
 
@@ -648,7 +214,7 @@ std::optional<std::size_t> findEndParen(const std::string& line, std::size_t sta
     return {};
 }
 
-std::vector<std::pair<std::string, std::string>> splitFields(const std::string& line) {
+std::vector<std::pair<std::string, std::string>> trig_data::splitFields(const std::string& line) {
     std::vector<std::pair<std::string, std::string>> out;
     std::string l = line;
     trim(l);
@@ -681,7 +247,8 @@ std::vector<std::pair<std::string, std::string>> splitFields(const std::string& 
             if(endParen) {
                 args = chunk.substr(paren+1, endParen.value()-paren-1);
                 trim(args);
-                // TODO: probably need to do some recursive shit here on args.
+                // Recurse the arguments in case there's anything in there that needs to be split.
+                args = evalExpr(args);
             }
         }
         out.emplace_back(field, args);
@@ -691,12 +258,163 @@ std::vector<std::pair<std::string, std::string>> splitFields(const std::string& 
     return out;
 }
 
+DgResults scriptFindMob(trig_data *trig, const std::string& field, const std::string& args) {
+    if(args.empty() || field.empty()) return "0";
+    room_rnum rrnum = real_room(atof(field.c_str()));
+    mob_vnum mvnum = atof(args.c_str());
+    if (rrnum == NOWHERE) {
+        script_log("findmob.vnum(ovnum): No room with vnum %d", atof(field.c_str()));
+        return "0";
+    }
+    auto i = 0;
+    for (auto ch = world[rrnum].people; ch; ch = ch->next_in_room)
+        if (GET_MOB_VNUM(ch) == mvnum)
+            i++;
+    return fmt::format("{}", i);
+
+}
+
+DgResults scriptFindObj(trig_data *trig, const std::string& field, const std::string& args) {
+    if(args.empty() || field.empty()) return "0";
+    room_rnum rrnum = real_room(atof(field.c_str()));
+
+    if (rrnum == NOWHERE) {
+        script_log("findobj.vnum(ovnum): No room with vnum %d", atof(field.c_str()));
+        return "0";
+    }
+     /* item_in_list looks within containers as well. */
+    return fmt::format("{}", item_in_list((char*)args.c_str(), world[rrnum].contents));
+}
+
+DgResults scriptGlobal(trig_data *trig, const std::string& field, const std::string& args) {
+    // TODO: not implemented yet!
+    return "";
+}
+
+DgResults scriptRandom(trig_data *trig, const std::string& field, const std::string& args) {
+    auto type = trig->parent->data_type;
+    struct char_data *enactor;
+    room_data *r;
+    switch(type) {
+            case MOB_TRIGGER:
+                enactor = (struct char_data*)trig->sc->owner;
+                r = enactor->getRoom();
+                break;
+            case OBJ_TRIGGER:
+                r = ((struct obj_data*)trig->sc->owner)->getRoom();
+                break;
+            case WLD_TRIGGER:
+                r = (struct room_data*)trig->sc->owner;
+                break;
+        }
+
+    if(iequals(field, "char")) {
+        if(!r) return "";
+        std::vector<struct char_data*> candidates;
+        for(auto c = r->people; c; c = c->next_in_room) {
+            if(type == MOB_TRIGGER && !CAN_SEE(enactor, c)) continue;
+            if(!valid_dg_target(c, DG_ALLOW_GODS)) continue;
+            candidates.push_back(c);
+        }
+        if(candidates.empty()) return "0";
+        auto can = Random::get(candidates);
+        return (*can);
+    } else if(iequals(field, "dir")) {
+        if(!r) return "";
+        std::vector<int> available;
+        for (auto i = 0; i < NUM_OF_DIRS; i++)
+            if (R_EXIT(r, i))
+                available.push_back(i);
+
+        if (available.empty()) {
+            return "";
+        } else {
+            auto dir = Random::get(available);
+            return dirs[*dir];
+        }
+    } else {
+        if(auto num = atoi(field.c_str()); num >= 1) {
+            return fmt::format("{}", Random::get(1, num));
+        }
+    }
+
+    return "";
+}
+
+std::string scriptTextProcess(trig_data *trig, const std::string& text, const std::string& field, const std::string& args) {
+        char *p, *p2;
+    char tmpvar[MAX_STRING_LENGTH];
+
+    if (iequals(field, "strlen")) {                     /* strlen    */
+        return fmt::format("{}", text.size());
+    } else if (iequals(field, "trim")) {                /* trim      */
+        std::string clone(text);
+        trim(clone);
+        return clone;
+    } else if (iequals(field, "contains")) {            /* contains  */
+        return str_str((char*)text.c_str(), (char*)args.c_str()) ? "1" : "0";
+    } else if (iequals(field, "car")) {
+        auto sp = split(text, ' ');
+        if(!sp.empty()) return sp[0];
+        return "";
+    } else if (iequals(field, "cdr")) {                 /* cdr       */
+        auto cdr = text.c_str();
+        while (*cdr && !isspace(*cdr)) cdr++; /* skip 1st field */
+        while (*cdr && isspace(*cdr)) cdr++;  /* skip to next */
+        return cdr;
+    } else if (iequals(field, "charat")) {              /* CharAt    */
+        size_t len = text.size(), dgindex = atoi(args.c_str());
+        if (dgindex > len || dgindex < 1)
+            return "";
+        else
+            return fmt::format("{}", text[dgindex - 1]);
+    } else if (iequals(field, "mudcommand")) {
+        /* find the mud command returned from this text */
+/* NOTE: you may need to replace "cmd_info" with "complete_cmd_info", */
+/* depending on what patches you've got applied.                      */
+
+/* on older source bases:    extern struct command_info *cmd_info; */
+        int length, cmd;
+        for (length = text.size(), cmd = 0;
+             *cmd_info[cmd].command != '\n'; cmd++)
+            if (!strncmp(cmd_info[cmd].command, text.c_str(), length))
+                break;
+
+        if (*cmd_info[cmd].command == '\n')
+            return "";
+        else
+            return fmt::format("{}", cmd_info[cmd].command);
+    }
+
+    return {};
+}
+
+DgResults checkForID(const std::string& text) {
+    auto uidCheck = resolveUID(text);
+    if(uidCheck) {
+        auto uid = *uidCheck;
+        switch(uid.index()) {
+            case 0: {
+                return std::get<0>(uid);
+            }
+            case 1: {
+                return std::get<1>(uid);
+            }
+            case 2: {
+                return std::get<2>(uid);
+            }
+        }
+    }
+    return text;
+}
+
 
 std::string trig_data::handleSubst(const std::string& expr) {
     auto type = parent->data_type;
     DgHolder current = "";
     int i = 0;
-
+    int num = 0;
+    
     for(const auto &[field, args] : splitFields(expr)) {
         if(i++ == 0) {
             // it's the first run.
@@ -707,9 +425,20 @@ std::string trig_data::handleSubst(const std::string& expr) {
                 current = std::function(scriptTimeHolder);
             }
             else if (iequals(field, "global")) {
-                /* so "remote varname %global%" will work */
-                current = &world[0];
-            } 
+                current = std::function(scriptGlobal);
+            }
+            else if(iequals(field, "people")) {
+                current = fmt::format("{}", ((num = atoi(args.c_str())) > 0) ? trgvar_in_room(num) : 0);
+            }
+            else if(iequals(field, "findmob")) {
+                current = std::function(scriptFindMob);
+            }
+            else if(iequals(field, "findobj")) {
+                current = std::function(scriptFindObj);
+            }
+            else if(iequals(field, "random")) {
+                current = std::function(scriptRandom);
+            }
             else if (iequals(field, "ctime"))
                 current = fmt::format("{}", time(nullptr));
             else if (iequals(field, "door"))
@@ -747,6 +476,7 @@ std::string trig_data::handleSubst(const std::string& expr) {
             case 0: {
                 // Strings. strings will invoke the string manipulation funcs.
                 auto s = std::get<0>(current);
+                current = scriptTextProcess(this, s, field, args);
                 }
                 break;
             case 1: {
@@ -803,7 +533,6 @@ std::string trig_data::varSubst(const std::string& line) {
         auto sub = l.substr(start+1, line.size()-end);
         out += handleSubst(sub);
         l = l.substr(end+1);
-
         start = l.find('%');
     }
 
@@ -811,4 +540,3 @@ std::string trig_data::varSubst(const std::string& line) {
 
     return out;
 }
-
