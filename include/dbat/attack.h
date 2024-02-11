@@ -120,6 +120,7 @@ namespace atk {
         int currentChanceToHit{0};
         int initSkill{0};
         int hitspot{1};
+        int targetLimb{1};
         int cooldownOverride{-1};
         int64_t currentHealthCost{0};
         int64_t currentStaminaCost{0};
@@ -149,6 +150,7 @@ namespace atk {
         void announceBlock() override;
         void announceDodge() override;
         void announceMiss() override;
+        void announceObject() override;
         //void announceHitspot() override;
     };
 
@@ -519,13 +521,23 @@ namespace atk {
         void announceHitspot() override;
     };
 
-    struct Rogafufuken : MeleeAttack {
+    struct Rogafufuken : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+        int canKillType() override {return 0;};
+
         int getSkillID() override { return SKILL_ROGAFUFUKEN; }
         int getAtkID() override {return 23;};
         std::string getName() override { return "rogafufuken"; }
+        int getTier() override {return 2;};
+        int limbhurtChance() override;
+        std::optional<int> hasCooldown() override {return 7;};
+
+        void announceHitspot() override;
     };
 
-    struct Bakuhatsuha : MeleeAttack {
+    struct Bakuhatsuha : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
+
         int getSkillID() override { return SKILL_BAKUHATSUHA; }
         int getAtkID() override {return 24;};
         std::string getName() override { return "bakuhatsuha"; }
@@ -779,20 +791,55 @@ namespace atk {
 
     };
 
-    struct Breath : RangedKiAttack {
+    struct FireBreath : MeleeAttack {
+        using MeleeAttack::MeleeAttack;
 
+        int getSkillID() override { return SKILL_KNEE; }
+        int getAtkID() override {return 8;};
+        std::string getName() override { return "fire breath"; }
+        std::optional<int> hasCooldown() {return 10;};
+        void attackPostprocess() override;
+
+        void announceHitspot() override;
     };
 
     struct Ram : MeleeAttack {
+        using MeleeAttack::MeleeAttack;
+
+        int getSkillID() override { return SKILL_KNEE; }
+        int getAtkID() override {return 8;};
+        std::string getName() override { return "ram"; }
+        std::optional<int> hasCooldown() {return 4;};
+
+        void announceHitspot() override;
+    };
+
+    struct FangStrike : MeleeAttack {
+        using MeleeAttack::MeleeAttack;
+
+        int getSkillID() override { return SKILL_KNEE; }
+        int getAtkID() override {return 8;};
+        std::string getName() override { return "fang strike"; }
+        std::optional<int> hasCooldown() {return 4;};
+        void attackPreprocess() override;
+
+        void announceHitspot() override;
 
     };
 
-    struct Strike : MeleeAttack {
+    struct SunderingForce : RangedKiAttack {
+        using RangedKiAttack::RangedKiAttack;
 
-    };
+        int getSkillID() override { return SKILL_ZEN; }
+        int getAtkID() override {return 55;};
+        std::string getName() override { return "sundering force"; }
+        int getTier() override {return 3;};
+        std::optional<int> hasCooldown() {return 6;};
+        bool canParry() override {return false;};
+        bool canBlock() override {return false;};
+        int limbhurtChance() override;
 
-    struct Sunder : MeleeAttack {
-
+        void announceHitspot() override;
     };
 
     struct ZenBlade : RangedKiAttack {
@@ -828,8 +875,16 @@ namespace atk {
 
     };
 
-    struct Bash : MeleeAttack {
+    struct Bash : HandAttack {
+        using HandAttack::HandAttack;
 
+        int getSkillID() override { return SKILL_BASH; }
+        int getAtkID() override {return 51;};
+        std::string getName() override { return "bash"; }
+        std::optional<int> hasCooldown() {return 6;};
+        void attackPostprocess() override;
+
+        void announceHitspot() override;
     };
 
     struct SeishouEnko : RangedKiAttack {
@@ -931,7 +986,15 @@ namespace atk {
     };
 
     struct Bite : MeleeAttack {
+        using MeleeAttack::MeleeAttack;
+        int getSkillID() override { return SKILL_PUNCH; }
+        int getAtkID() override {return 8;};
+        std::string getName() override { return "bite"; }
+        std::optional<int> hasCooldown() {return 4;};
+        void attackPostprocess() override;
+        void attackPreprocess() override;
 
+        void announceHitspot() override;
     };
 
     struct Headbutt : MeleeAttack {

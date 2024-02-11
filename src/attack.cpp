@@ -359,7 +359,7 @@ namespace atk {
                 break;
         }
         if(calcDamage < 1) calcDamage = 1;
-        hurt(0, limbhurtChance(), user, victim, obj, calcDamage, isKiAttack());
+        hurt(targetLimb, limbhurtChance(), user, victim, obj, calcDamage, isKiAttack());
         if(victim) {
             if(isPhysical()) tech_handle_fireshield(user, victim, getBodyPart().c_str());
             if(canCombo()) handle_multihit(user, victim);
@@ -598,6 +598,11 @@ namespace atk {
         actUser("@WYou can't believe it but your " + getName() + " misses!@n");
         actVictim("@C$n@W throws a " + getName() + " at you but somehow misses!@n");
         actOthers("@c$n@W throws a " + getName() + " at @C$N@W but somehow misses!@n");
+    }
+
+    void MeleeAttack::announceObject() {
+        actUser("@WYou " + getName() + " $p@W as hard as you can!@n");
+        actRoom("@C$n@W " + getName() + "s $p@W!@n");
     }
 
     // PUNCH
@@ -3774,6 +3779,266 @@ namespace atk {
         actUser("@WYou raise your right hand above your head with it slightly cupped. Dark @rred@W energy from the Eldritch Star begins to pool there and form a growing orb of energy. At the same time @mpurple@W arcs of electricity formed by your ki flows up your left arm as you raise it. You slam both of your hands together, combining the energy, and then toss your @YS@yta@Yr @rB@Rr@De@ra@Rk@De@rr@W at @c$N@W! It engulfs $S " + loc + "!@n");
         actVictim("@C$n@W raises $s right hand above $s head with it slightly cupped. Dark @rred@W energy begins to pool there and form a growing orb of energy. At the same time @mpurple@W arcs of electricity formed by $s ki flows up $s left arm as $e raises it. Suddenly $e slams both of $s hands together, combining the energy, and then toss a @YS@yta@Yr @rB@Rr@De@ra@Rk@De@rr@W at YOU! It engulfs your " + loc + "!@n");
         actOthers("@C$n@W raises $s right hand above $s head with it slightly cupped. Dark @rred@W energy begins to pool there and form a growing orb of energy. At the same time @mpurple@W arcs of electricity formed by $s ki flows up $s left arm as $e raises it. Suddenly $e slams both of $s hands together, combining the energy, and then tosses a @YS@yta@Yr @rB@Rr@De@ra@Rk@De@rr@W at @c$N@W! It engulfs $S " + loc + "!@n");   
+    }
+
+
+    // FireBreath
+    void FireBreath::attackPostprocess() {
+        if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim) &&
+                !GET_BONUS(victim, BONUS_FIREPROOF)) {
+            send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
+            send_to_char(user, "@RThey are burned by the attack!@n\r\n");
+            victim->affected_by.set(AFF_BURNED);
+        } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
+            send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
+        } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
+            send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
+            send_to_char(user, "@RThey are easily burned!@n\r\n");
+            victim->affected_by.set(AFF_BURNED);
+        }
+    } 
+
+    void FireBreath::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@CYou@W aim your mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard buzzes in your mouth, the burning warmth felt easily against your tongue. Suddenly you breathe a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$n's@W " + loc + "!@n");
+        actVictim("@C$n@W aims $s mouth at you and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto YOUR " + loc + "!@n");
+        actOthers("@C$n@W aims $s mouth at @c$N@W and opens it wide slowly. A high pitched sound can be heard as the mouth opens, and as the throat is exposed a bright white flame can be seen burning there. Suddenly @C$n@W breathes a jet of @rf@Ri@Ye@Rr@ry@W flames onto @c$N's@W " + loc + "!@n");   
+    }
+
+
+    // Ram
+    void Ram::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@cYou@W aim your head at @C$N@W and ram into $S's " + loc + "!@n");
+        actVictim("@C$n@W aims $s head at YOU and rams into YOUR " + loc + "!@n");
+        actOthers("@c$n@W aims $s head at @C$N@W and rams into $S " + loc + "!@n");   
+    }
+
+    // FangStrike
+    void FangStrike::attackPreprocess() {
+        calcDamage += calcDamage * 0.5;
+    } 
+
+    void FangStrike::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "face";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@cYou@W launch your body at @C$N@W and sink your fang strike into $S's " + loc + "!@n");
+        actVictim("@C$n@W launches $s body at YOU and sinks $s fang strike into YOUR " + loc + "!@n");
+        actOthers("@c$n@W launches $s body at @C$N@W and sinks $s fang strike into $S " + loc + "!@n");   
+    }
+
+
+    // SunderingForce
+    int SunderingForce::limbhurtChance() {
+        int chance = rand_number(2, 12);
+
+        if (chance >= 10) 
+            return 160;
+        else if (chance >= 8) {
+            targetLimb = 1;
+            return 160;
+        }
+ 
+        return 0;
+    }
+
+    void SunderingForce::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "head";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou raise both hands and aim the flats of your palms toward @c$N@W. As you concentrate your charged ki long arcing beams of blue energy shoot out and form a field around $M. With a quick motion you move your hands in opposite directions and wrench @c$N's@W " + loc + " with the force of your energy!@n");
+        actVictim("@C$n@W raises both hands and aims the flats of $s palms toward YOU. As $e concentrates $s charged ki long arcing beams of blue energy shoot out and form a field around YOU. With a quick motion $e moves $s hands in opposite directions and wrenches YOUR " + loc + " with the force of $s energy!@n");
+        actOthers("@C$n@W raises both hands and aims the flats of $s palms toward @c$N@W. As $e concentrates $s charged ki long arcing beams of blue energy shoot out and form a field around @c$N@W. With a quick motion @C$n@W moves $s hands in opposite directions and wrenches @c$N's@W " + loc + " with the force of $s energy!@n");   
+    }
+
+
+    // Bash
+    void Bash::attackPostprocess() {
+        if (victim && rand_number(1, 5) >= 4)
+            tech_handle_crashdown(victim, user);
+
+        if (rand_number(1, 5) >= 5)
+            tech_handle_crashdown(user, victim);
+    }
+
+    void Bash::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "head";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WBending over slightly you aim your body at @c$N@W and instantly launch yourself toward $M at full speed! You slam into $S " + loc + " with a crashing impact!@n");
+        actVictim("@C$n@W bends over slightly aiming $s body at YOU and then instantly launches $mself toward YOU at full speed! @C$n@W slams into YOUR " + loc + " with a crashing impact!@n");
+        actOthers("@C$n@W bends over slightly aiming $s body at @c$N@W and then instantly launches $mself toward $M at full speed! @C$n@W slams into $S " + loc + " with a crashing impact!@n");   
+    }
+
+
+    // Bite
+    void Bite::attackPreprocess() {
+        calcDamage += calcDamage * 0.25;
+    }
+
+    void Bite::attackPostprocess() {
+        if (!IS_NPC(user)) {
+            if (axion_dice(0) > GET_CON(victim) && rand_number(1, 5) == 5) {
+                act("@R$N@r was poisoned by your bite!@n", true, user, nullptr, victim, TO_CHAR);
+                act("@rYou were poisoned by the bite!@n", true, user, nullptr, victim, TO_VICT);
+                victim->poisonby = user;
+                user->poisoned.insert(victim);
+                int duration = (GET_INT(user) / 50) + 1;
+                assign_affect(victim, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
+            }
+        }
+    }
+
+    void Bite::announceHitspot() {
+        switch (hitspot) {
+            case 1:
+                actUser("@WYou bite @C$N's@W face!@n");
+                actVictim("@C$n@W bites your face!@n");
+                actOthers("@c$n@W bites into $N's face!@n");
+                break;
+            case 2: /* Critical */
+                actUser("@WYou bite @C$N@W!@n");
+                actVictim("@C$n@W bites you!@n");
+                actOthers("@C$n@W bites @c$N@W!@n");
+                break;
+            case 3:
+                actUser("@WYou bite @C$N's@W body!@n");
+                actVictim("@C$n@W bites you on the body, sending blood flying!@n");
+                actOthers("@C$n@W bites @c$N@W on the body, sending blood flying!@n");
+                break;
+            case 4: /* Weak */
+                actUser("@WYou bite @C$N's@W arm!@n");
+                actVictim("@C$n@W bites you on the arm!@n");
+                actOthers("@C$n@W bites @c$N@W on the arm!@n");
+                break;
+            case 5: /* Weak */
+                actUser("@WYou bite @C$N's@W leg!@n");
+                actVictim("@C$n@W bites into your leg!@n");
+                actOthers("@c$n@W bites into @c$N's@W leg!@n");
+                break;
+        }
+    }
+
+
+    // Rogafufuken
+    int SunderingForce::limbhurtChance() {
+        switch(hitspot){
+            case 4:
+            case 5:
+                return 170
+        }
+ 
+        return 0;
+    }
+
+    void Bash::announceHitspot() {
+        std::string loc = "body";
+        switch(hitspot) {
+            case 1:
+                loc = "chest";
+                break;
+            case 2:
+                loc = "head";
+                break;
+            case 3:
+                loc = "gut";
+                break;
+            case 4:
+                loc = "arm";
+                break;
+            case 5:
+                loc = "leg";
+                break;
+        }
+
+        actUser("@WYou pour your charged energy into your hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as you leap towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. You unleash a flurry of hand strikes on @c$N@W's " + loc + "!@n");
+        actVictim("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards YOU while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on YOUR " + loc + "!@n");
+        actOthers("@C$n@W pours $s charged energy into $s hands and feet. A @rr@Re@wd@W glow trails behind the movements of either as $e leaps towards @c$N@W while yelling '@cW@Co@Wl@wf @DFang @rFist@W!'. $e unleashes a flurry of hand strikes on @c$N@W's " + loc + "!@n");   
     }
 
 }
