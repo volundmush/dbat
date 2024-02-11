@@ -4006,17 +4006,17 @@ namespace atk {
 
 
     // Rogafufuken
-    int SunderingForce::limbhurtChance() {
+    int Rogafufuken::limbhurtChance() {
         switch(hitspot){
             case 4:
             case 5:
-                return 170
+                return 170;
         }
  
         return 0;
     }
 
-    void Bash::announceHitspot() {
+    void Rogafufuken::announceHitspot() {
         std::string loc = "body";
         switch(hitspot) {
             case 1:
