@@ -103,7 +103,7 @@ namespace atk {
             return false;
         }
         currentKiCost = calculateKiCost();
-        if(GET_CHARGE(user) < (currentKiCost * GET_MAX_MANA(user)) || GET_CHARGE(user) <= 0) {
+        if(GET_CHARGE(user) < (currentKiCost * GET_MAX_MANA(user))) {
             send_to_char(user, "You don't have enough ki to do that!\r\n");
             return false;
         }

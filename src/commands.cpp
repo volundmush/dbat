@@ -233,6 +233,8 @@ ACMD(do_compare);
 
 ACMD(do_copyover);
 
+ACMD(do_combo);
+
 ACMD(do_commands);
 
 ACMD(do_consider);
@@ -904,6 +906,7 @@ const struct command_info cmd_info[] = {
         {"clsolc",        "clsolc",       POS_DEAD,     do_gen_tog,         0,  ADMLVL_BUILDER, SCMD_CLS},
         {"consider",      "con",          POS_RESTING,  do_consider,        0,  ADMLVL_NONE,    0},
         {"color",         "col",          POS_DEAD,     do_color,           0,  ADMLVL_NONE,    0},
+        {"combo",         "combo",        POS_RESTING,  do_combo,           0,  ADMLVL_NONE,    0},
         {"combine",       "comb",         POS_RESTING,  do_combine,         0,  ADMLVL_NONE,    0},
         {"compare",       "comp",         POS_RESTING,  do_compare,         0,  ADMLVL_NONE,    0},
         {"commands",      "com",          POS_DEAD,     do_commands,        0,  ADMLVL_NONE,    SCMD_COMMANDS},

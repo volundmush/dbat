@@ -9,6 +9,7 @@
 ************************************************************************ */
 
 #include "dbat/act.offensive.h"
+#include "dbat/act.attack.h"
 #include "dbat/interpreter.h"
 #include "dbat/combat.h"
 #include "dbat/comm.h"
@@ -52,6 +53,49 @@ ACMD(do_eraser) {
 ACMD(do_pbarrage) {
     atk::PsychicBarrage a(ch, argument);
     a.execute();
+}
+
+ACMD(do_combo) {
+    switch (COMBO(ch)) {
+        case 0:
+            do_punch(ch, argument, 0, 0);
+            break;
+        case 1:
+            do_kick(ch, argument, 0, 0);
+            break;
+        case 2:
+            do_elbow(ch, argument, 0, 0);
+            break;
+        case 3:
+            do_knee(ch, argument, 0, 0);
+            break;
+        case 4:
+            do_roundhouse(ch, argument, 0, 0);
+            break;
+        case 5:
+            do_uppercut(ch, argument, 0, 0);
+            break;
+        case 6:
+            do_slam(ch, argument, 0, 0);
+            break;
+        case 8:
+            do_heeldrop(ch, argument, 0, 0);
+            break;
+        case 51:
+            do_bash(ch, argument, 0, 0);
+            break;
+        case 52:
+            do_head(ch, argument, 0, 0);
+            break;
+        case 56:
+            do_tailwhip(ch, argument, 0, 0);
+            break;
+        default:
+            do_punch(ch, argument, 0, 0);
+            break;
+
+    }
+    
 }
 
 ACMD(do_geno) {
