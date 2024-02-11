@@ -369,19 +369,24 @@ namespace atk {
     }
 
     void Attack::onLanded() {
-        attackPreprocess();
-        switch(defenseResult) {
-            case DefenseResult::Blocked:
-                calcDamage /= 4;
-                break;
-        }
-        if(calcDamage < 1) calcDamage = 1;
-        hurt(targetLimb, limbhurtChance(), user, victim, obj, calcDamage, isKiAttack());
         if(victim) {
-            if(isPhysical()) tech_handle_fireshield(user, victim, getBodyPart().c_str());
-            if(canCombo()) handle_multihit(user, victim);
+            attackPreprocess();
+            switch(defenseResult) {
+                case DefenseResult::Blocked:
+                    calcDamage /= 4;
+                    break;
+            }
+            if(calcDamage < 1) calcDamage = 1;
+            hurt(targetLimb, limbhurtChance(), user, victim, obj, calcDamage, isKiAttack());
+            if(victim) {
+                if(isPhysical()) tech_handle_fireshield(user, victim, getBodyPart().c_str());
+                if(canCombo()) handle_multihit(user, victim);
+            }
+            attackPostprocess();
+        } else if (obj) {
+            if(calcDamage < 1) calcDamage = 1;
+            hurt(0, 0, user, nullptr, obj, calcDamage, isKiAttack());
         }
-        attackPostprocess();
     }
 
     void Attack::onMissed() {
@@ -1411,15 +1416,17 @@ namespace atk {
 
     // KI
     bool RangedKiAttack::checkOtherConditions() {
-        char *arg = (char*)args[1].c_str();
-        if (*arg) {
-            double adjust = (double)(atoi(arg)) * 0.01;
-            if (adjust < 0.01 || adjust > 1.00) {
-                send_to_char(user, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
-                return false;
+        if(!args.empty() && args.size() >= 2) {
+            if ((char*)args[1].c_str()) {
+                double adjust = (double)(atoi((char*)args[1].c_str())) * 0.01;
+                if (adjust < 0.01 || adjust > 1.00) {
+                    send_to_char(user, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
+                    return false;
+                }
+            
             }
-        return true;
         }
+        return true;
     }
 
     double RangedKiAttack::calculateKiCost() {
@@ -1448,8 +1455,9 @@ namespace atk {
         }
 
 
-
-        bool success = tech_handle_charge(user, (char*)args[1].c_str(), minimum, &attPerc);
+        if(!args.empty() && args.size() >= 2) {
+            bool success = tech_handle_charge(user, (char*)args[1].c_str(), minimum, &attPerc);
+        }
 
 
         return attPerc * getKiEfficiency();
@@ -4144,25 +4152,26 @@ namespace atk {
     // Do attack
 
     bool KiAreaAttack::getOpponent() {
-        char_data *vict, *next_v;
-        for (vict = user->getRoom()->people; vict; vict = next_v) {
-            next_v = vict->next_in_room;
-            if (vict == user) {
+
+        std::list<struct char_data*> people = user->getRoom()->getPeople();
+
+        for (auto person : people) {
+            if (person == user) {
                 continue;
             }
-            if (AFF_FLAGGED(vict, AFF_SPIRIT) && !IS_NPC(vict)) {
+            if (AFF_FLAGGED(person, AFF_SPIRIT) && !IS_NPC(person)) {
                 continue;
             }
-            if (AFF_FLAGGED(vict, AFF_GROUP) && (vict->master == user || user->master == vict)) {
+            if (AFF_FLAGGED(person, AFF_GROUP) && (person->master == user || user->master == person)) {
                 continue;
             }
-            if (GET_LEVEL(vict) <= 8 && !IS_NPC(vict)) {
+            if (GET_LEVEL(person) <= 8 && !IS_NPC(person)) {
                 continue;
             }
-            if (MOB_FLAGGED(vict, MOB_NOKILL)) {
+            if (MOB_FLAGGED(person, MOB_NOKILL)) {
                 continue;
             } else {
-                targets.push_back(*vict);
+                targets.push_back(person);
             }
         }
         if (targets.empty()) {
@@ -4183,8 +4192,8 @@ namespace atk {
     void KiAreaAttack::processAttack() {
         announceAttack();
 
-        for(char_data vic : targets) {
-            victim = &vic;
+        for(char_data *value : targets) {
+            victim = value;
             switch(doAttack()) {
                 case Result::Landed:
                     onLanded();
@@ -4204,7 +4213,7 @@ namespace atk {
 
     void KiAreaAttack::announceAttack() {
         actUser("@WYou raise your hand with index and middle fingers extended upwards. You try releasing your charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but mess up and waste the ki!@n");
-        actOthers("@C$n@W raises $s hand with index and middle fingers extended upwards. @C$n@W tries releasing $s charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but messes up and wastes the ki!@n");
+        actRoom("@C$n@W raises $s hand with index and middle fingers extended upwards. @C$n@W tries releasing $s charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but messes up and wastes the ki!@n");
     }
 
 
@@ -4223,7 +4232,7 @@ namespace atk {
 
     void Bakuhatsuha::announceAttack() {
         actUser("@WYou raise your hand with index and middle fingers extended upwards. You try releasing your charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but mess up and waste the ki!@n");
-        actOthers("@C$n@W raises $s hand with index and middle fingers extended upwards. @C$n@W tries releasing $s charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but messes up and wastes the ki!@n");
+        actRoom("@C$n@W raises $s hand with index and middle fingers extended upwards. @C$n@W tries releasing $s charged ki in a @yB@Ya@Wk@wuh@ya@Yt@Ws@wuh@ya@W but messes up and wastes the ki!@n");
     }
 
     void Bakuhatsuha::announceHitspot() {
@@ -4243,7 +4252,7 @@ namespace atk {
 
     void Kakusanha::announceAttack() {
         actUser("@WYou pour your charged ki into your hands and bring them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of your palms. You fire one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before you swing your arms upward and the beam follows suit. Above your targets the beam breaks apart into five seperate pieces that follow their victims!@n");
-        actOthers("@C$n@W pours $s charged ki into $s hands and brings them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of $s palms. @C$n@W fires one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before $e swings $s arms upward and the beam follows suit. Above you the beam breaks apart into five seperate pieces that follow their victims!@n");
+        actRoom("@C$n@W pours $s charged ki into $s hands and brings them both forward quickly. @yG@Yo@Wl@wden@W orbs of energy form at the extent of $s palms. @C$n@W fires one massive beam of @yg@Yo@Wl@wden @Wenergy from combining both orbs. The beam flies forward a short distance before $e swings $s arms upward and the beam follows suit. Above you the beam breaks apart into five seperate pieces that follow their victims!@n");
     }
 
     void Kakusanha::announceHitspot() {
@@ -4396,7 +4405,7 @@ namespace atk {
     // Hellspear
     void Hellspear::announceAttack() {
         actUser("@WYou fly up higher in the air while holding your hand above your head. Your charged ki is condensed and materialized in the grasp of your raised hand forming a spear of energy. Grinning evily you aim the spear at the ground below and throw it. As the red spear of energy slams into the ground your laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n");
-        actOthers("@C$n@W flies up higher in the air while holding $s hand above $s head. @C$n@W's charged ki is condensed and materialized in the grasp of $s raised hand forming a spear of energy. Grinning evily $e aims the spear at the ground below and throws it. As the red spear of energy slams into the ground $s laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n");
+        actRoom("@C$n@W flies up higher in the air while holding $s hand above $s head. @C$n@W's charged ki is condensed and materialized in the grasp of $s raised hand forming a spear of energy. Grinning evily $e aims the spear at the ground below and throws it. As the red spear of energy slams into the ground $s laughter rings throughout the area, and the @rH@Re@Dl@Wl @rS@Rp@De@Wa@wr B@rl@Ra@Ds@wt@W erupts with a roar!@n");
     }
 
     void Hellspear::announceHitspot() {
@@ -4409,7 +4418,7 @@ namespace atk {
     // LightGrenade
     void LightGrenade::announceAttack() {
         actUser("@WYou quickly bring your hands in front of your body and cup them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as your ki is condensed between your hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. You shout @r'@YLIGHT GRENADE@r'@W as the orb launches from your hands at @C$N@W!@n");
-        actOthers("@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. @C$n shouts @r'@YLIGHT GRENADE@r'@W as the orb launches from $s hands at @c$N@W!@n");
+        actRoom("@C$n@W quickly brings $s hands in front of $s body and cups them a short distance from each other. A flash of @Ggreen @Ylight@W can be seen as ki is condensed between $s hands before a @Yg@yo@Yl@yd@Ye@yn@W orb of ki replaces the green light. @C$n shouts @r'@YLIGHT GRENADE@r'@W as the orb launches from $s hands at @c$N@W!@n");
     }
 
     void LightGrenade::announceHitspot() {
@@ -4436,7 +4445,7 @@ namespace atk {
 
     void StarNova::announceAttack() {
         actUser("@WYou gather your charged energy and clench your upheld fists at either side of your body while crouching down. A hot glow of energy begins to form around your body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as your glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n");
-        actOthers("@C$n@W gathers $s charged energy and clenches $s upheld fists at either side of $s body while crouching down. A hot glow of energy begins to form around $s body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as @C$n's@W glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n");
+        actRoom("@C$n@W gathers $s charged energy and clenches $s upheld fists at either side of $s body while crouching down. A hot glow of energy begins to form around $s body in the shape of a sphere! Suddenly a shockwave of heat and energy erupts out into the surrounding area as @C$n's@W glorious @yS@Yt@Wa@wr @cN@Co@Wv@wa@W is born!@n");
     }
 
     void StarNova::announceHitspot() {
@@ -4494,23 +4503,28 @@ namespace atk {
     }
 
     void WeaponAttack::chooseSecondAttack() {
+        char *victim = "";
+        if(!args.empty()) {
+            victim = (char*)args[0].c_str();
+        }
+
         if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
-            atk::Stab a(user, (char*)args[0].c_str());
+            atk::Stab a(user, victim);
             a.executeSecond();
         } else if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
-            atk::Slash a(user, (char*)args[0].c_str());
+            atk::Slash a(user, victim);
             a.executeSecond();
         } else if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
-            atk::Crush a(user, (char*)args[0].c_str());
+            atk::Crush a(user, victim);
             a.executeSecond();
         } else if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
-            atk::Impale a(user, (char*)args[0].c_str());
+            atk::Impale a(user, victim);
             a.executeSecond();
         } else if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
-            atk::Shoot a(user, (char*)args[0].c_str());
+            atk::Shoot a(user, victim);
             a.executeSecond();
         } else {
-            atk::Smash a(user, (char*)args[0].c_str());
+            atk::Smash a(user, victim);
             a.executeSecond();
         }
     }
@@ -4541,20 +4555,12 @@ namespace atk {
     }
 
     void WeaponAttack::handleAccuracyModifiers() {
-        if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
-            if (dualWield >= 2) {
-                currentHitProbability += currentHitProbability * 0.1;
-            }
-        }
-
         if (PLR_FLAGGED(user, PLR_THANDW)) {
             currentChanceToHit += 15;
         }
     }
 
     void WeaponAttack::calculateDamage() {
-        calcDamage = 0;
-
         calcDamage = damtype(user, -1, initSkill, attPerc);
         if (OBJ_FLAGGED(weap, ITEM_WEAPLVL1)) {
             calcDamage += calcDamage * 0.05;
@@ -4572,62 +4578,20 @@ namespace atk {
             calcDamage += calcDamage * 0.5;
             wlvl = 5;
         }
-        if (wtype == 5) {
-            if (GET_SKILL(user, SKILL_BRAWL) >= 100) {
-                calcDamage += calcDamage * 0.5;
-                wlvl = 5;
-            } else if (GET_SKILL(user, SKILL_BRAWL) >= 50) {
-                calcDamage += calcDamage * 0.2;
-                wlvl = 3;
-            }
-        }
 
-        if (wtype == 0 && IS_KONATSU(user)) {
-            calcDamage += calcDamage * .25;
-        }
         if (PLR_FLAGGED(user, PLR_THANDW)) {
             calcDamage += calcDamage * 1.2;
         }
-        if (!IS_NPC(user)) {
-            if (PLR_FLAGGED(user, PLR_THANDW) && !(GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) && !(GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)) {
-                if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 100) {
-                    calcDamage += calcDamage * 0.5;
-                } else if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 75) {
-                    calcDamage += calcDamage * 0.25;
-                } else if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 50) {
-                    calcDamage += calcDamage * 0.1;
-                }
-                if (wtype == 3) {
-                    switch (wlvl) {
-                        case 1:
-                            calcDamage += calcDamage * 0.04;
-                            break;
-                        case 2:
-                            calcDamage += calcDamage * 0.08;
-                            break;
-                        case 3:
-                            calcDamage += calcDamage * 0.12;
-                            break;
-                        case 4:
-                            calcDamage += calcDamage * 0.2;
-                            break;
-                        case 5:
-                            calcDamage += calcDamage * 0.25;
-                            break;
-                    }
-                }
+        
+        if (PLR_FLAGGED(user, PLR_THANDW) && !(GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) && !(GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)) {
+            if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 100) {
+                calcDamage += calcDamage * 0.5;
+            } else if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 75) {
+                calcDamage += calcDamage * 0.25;
+            } else if (GET_SKILL_BASE(user, SKILL_TWOHAND) >= 50) {
+                calcDamage += calcDamage * 0.1;
             }
         }
-        if (wtype == 3) {
-            if (initSkill >= 100)
-                calcDamage += calcDamage * 0.04;
-            else if (initSkill >= 50)
-                calcDamage += calcDamage * 0.1;
-        }
-
-        if (GET_OBJ_VAL(weap, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)
-                calcDamage = gun_dam(user, wlvl);
-
 
     }
 
@@ -4705,6 +4669,9 @@ namespace atk {
     // Slash
     void Slash::attackPreprocess() {
         beforepl = GET_HIT(victim);
+        if (IS_KONATSU(user)) {
+            calcDamage += calcDamage * .25;
+        }
     }
 
     void Slash::attackPostprocess() {
@@ -4765,7 +4732,38 @@ namespace atk {
     }
 
 
-    // Club
+    // Crush
+    void Crush::attackPreprocess() {
+
+        if (PLR_FLAGGED(user, PLR_THANDW) && !(GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) && !(GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT)) {
+            switch (wlvl) {
+                case 1:
+                    calcDamage += calcDamage * 0.04;
+                    break;
+                case 2:
+                    calcDamage += calcDamage * 0.08;
+                    break;
+                case 3:
+                    calcDamage += calcDamage * 0.12;
+                    break;
+                case 4:
+                    calcDamage += calcDamage * 0.2;
+                    break;
+                case 5:
+                    calcDamage += calcDamage * 0.25;
+                    break;
+            }
+        
+            
+        }
+        
+        if (initSkill >= 100)
+            calcDamage += calcDamage * 0.04;
+        else if (initSkill >= 50)
+            calcDamage += calcDamage * 0.1;
+        
+    }
+
     void Crush::attackPostprocess() {
         club_stamina(user, victim, wlvl, calcDamage);
     }
@@ -4865,6 +4863,16 @@ namespace atk {
 
     }
 
+    void Shoot::handleAccuracyModifiers() {
+        if (PLR_FLAGGED(user, PLR_THANDW)) {
+            currentChanceToHit += 15;
+        }
+
+        if (dualWield >= 2) {
+            currentHitProbability += currentHitProbability * 0.1;
+        }
+    }
+
     void Shoot::handleHitspot() {
         if (PLR_FLAGGED(user, PLR_THANDW)) {
             if (hitspot != 2 && boom_headshot(user)) {
@@ -4889,6 +4897,10 @@ namespace atk {
                 calcDamage *= calc_critical(user, 1);
                 break;
         }
+    }
+
+    void Shoot::calculateDamage() {
+        calcDamage = gun_dam(user, wlvl);
     }
 
     void Shoot::announceHitspot() {
@@ -4918,6 +4930,18 @@ namespace atk {
 
 
     // Smash
+    void Smash::attackPreprocess() {
+        
+        if (initSkill >= 100) {
+            calcDamage += calcDamage * 0.5;
+            wlvl = 5;
+        } else if (initSkill >= 50) {
+            calcDamage += calcDamage * 0.2;
+            wlvl = 3;
+        }
+        
+    }
+
     void Smash::handleHitspot() {
         switch(hitspot) {
             case 1:

@@ -1035,7 +1035,7 @@ namespace atk {
     struct KiAreaAttack : RangedKiAttack {
         using RangedKiAttack::RangedKiAttack;
 
-        std::vector<char_data> targets;
+        std::vector<char_data*> targets;
         bool paidCost = false;
         bool canParry() override {return false;};
         bool canBlock() override {return false;};
@@ -1144,7 +1144,6 @@ namespace atk {
         void postProcess() override;
         void handleAccuracyModifiers() override;
 
-
     };
 
     //Dagger
@@ -1190,6 +1189,7 @@ namespace atk {
 
         int getWeaponType() {return (TYPE_CRUSH - TYPE_HIT);};
         std::string getName() override { return "club"; }
+        void attackPreprocess() override;
         void attackPostprocess() override;
 
         void announceHitspot() override;
@@ -1221,6 +1221,9 @@ namespace atk {
         std::string getName() override { return "gun"; }
         void handleHitspot() override;
         bool checkOtherConditions() override;
+        void calculateDamage() override;
+        void handleAccuracyModifiers() override;
+        
 
         void announceHitspot() override;
 
@@ -1237,6 +1240,7 @@ namespace atk {
 
         int getWeaponType() {return (TYPE_PUNCH - TYPE_HIT);};
         std::string getName() override { return "weapon"; }
+        void attackPreprocess() override;
         void handleHitspot() override;
 
         void announceHitspot() override;

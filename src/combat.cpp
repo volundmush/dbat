@@ -4242,7 +4242,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     int64_t maindmg = dmg, beforered = dmg;
     int dead = false;
 
-    if(vict->getCurHealth() <= 0) {
+    if(vict && vict->getCurHealth() <= 0) {
         send_to_char(ch, "They are already dead!");
         return;
     }
