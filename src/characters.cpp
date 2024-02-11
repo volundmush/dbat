@@ -1867,7 +1867,7 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
         return fmt::format("{}", vn);
     }
 
-    if(lmember == "varexists") return !script->hasVar(arg) ? "1" : "0";
+    if(lmember == "varexists") return script->hasVar(arg) ? "1" : "0";
 
     // nothing left to do but try global variables...
     if(script->hasVar(lmember)) {

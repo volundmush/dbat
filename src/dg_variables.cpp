@@ -469,7 +469,14 @@ std::string trig_data::handleSubst(const std::string& expr) {
                 current = transform[type];
             else if (iequals(field, "recho"))
                 current = recho[type];
-
+            else if(hasVar(field)) {
+                auto res = getVar(field);
+                if(res.index() == 0) {
+                    current = std::get<0>(res);
+                } else {
+                    current = std::get<1>(res);
+                }
+            }
             continue;
         }
         switch(current.index()) {
@@ -521,22 +528,37 @@ std::string trig_data::handleSubst(const std::string& expr) {
 }
 
 
-std::string trig_data::varSubst(const std::string& line) {
+std::string trig_data::varSubst(const std::string& expr) {
     std::string out;
-    std::string l = line;
+    std::string l = expr;
+    std::size_t start = 0;
 
-    std::size_t start = l.find('%');
-
-    while(start != std::string::npos) {
-        auto end = matching_percent(l, start);
-
-        auto sub = l.substr(start+1, end-(start+1));
-        out += handleSubst(sub);
-        l = l.substr(end+1);
-        start = l.find('%');
+    while(start < l.length()) {
+        std::size_t open = l.find('%', start);
+        
+        if (open == std::string::npos) {
+            // No more opening % found, append the rest of the string to out.
+            out += l.substr(start);
+            break;
+        } else {
+            // Append the text before the opening % to out.
+            out += l.substr(start, open - start);
+        }
+        
+        std::size_t close = matching_percent(l, open);
+        
+        // If there's no matching closing %, we have a malformed input. Handle as needed.
+        if (close == std::string::npos) {
+            throw DgScriptException("No matching closing '%' found for the opening at position " + std::to_string(open));
+        }
+        
+        // Extract the placeholder text and perform substitution.
+        std::string placeholder = l.substr(open + 1, close - open - 1);
+        out += handleSubst(placeholder);
+        
+        // Update the start position to the character after the closing %.
+        start = close + 1;
     }
-
-    out += l;
 
     return out;
 }

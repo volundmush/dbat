@@ -9,7 +9,7 @@
 ************************************************************************ */
 
 #include <unordered_set>
-
+#include <algorithm> 
 #include <exception>
 #include <iostream>
 #include "dbat/utils.h"
@@ -3417,19 +3417,24 @@ bool istarts_with(const std::string& haystack, const std::string& needle) {
     ).first == needle.end();
 }
 
-void trim(std::string& str) {
-    auto start = str.begin();
-    while (start != str.end() && std::isspace(*start)) {
-        start++;
-    }
-
-    auto end = str.end();
-    do {
-        end--;
-    } while (std::distance(start, end) > 0 && std::isspace(*end));
-
-    str = std::string(start, end + 1);
+inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
 }
+
+
+inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+void trim(std::string& str) {
+    rtrim(str);
+    ltrim(str);
+}
+
 
 bool is_numeric(const std::string& str) {
     return std::all_of(str.begin(), str.end(), [](unsigned char c) {

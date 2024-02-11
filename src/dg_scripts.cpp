@@ -71,6 +71,9 @@ int trig_data::execute() {
     }
     catch(const DgScriptException& err) {
         // TODO: script exception handling!
+        script_log("Trigger: %s, VNum %d. Exception: %s", 
+            GET_TRIG_NAME(this), GET_TRIG_VNUM(this), err.what());
+        reset();
         return 0;
     }
 }
@@ -83,6 +86,10 @@ std::string trig_data::getLine(std::size_t num) {
 
 int trig_data::executeBlock(std::size_t start, std::size_t end) {
     int ret_val = 1;
+
+    if(parent->vn == 2018) {
+        int x = 0;
+    }
 
     lineNumber = start;
 
@@ -114,23 +121,23 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
                 lineNumber = findElseEnd();
                 continue;
             }
-            else if(l.starts_with("elseif ")) {
-                if(depth.empty() || depth.back().first != NestType::IF)
-                    throw DgScriptException("'elseif' outside of an if!");
-                lineNumber = findEnd();
-                continue;
-            }
-            else if(l.starts_with("else ") || l == "else") {
-                if(depth.empty() || depth.back().first != NestType::IF)
-                    throw DgScriptException("'else' outside of an if!");
-                lineNumber = findEnd();
-                continue;
-            }
-            else if(l.starts_with("end ") || l == "end") {
-                if(depth.empty() || depth.back().first != NestType::IF)
-                    throw DgScriptException("'end' outside of an if!");
-                depth.pop_back();
-            }
+        }
+        else if(l.starts_with("elseif ")) {
+            if(depth.empty() || depth.back().first != NestType::IF)
+                throw DgScriptException("'elseif' outside of an if!");
+            lineNumber = findEnd();
+            continue;
+        }
+        else if(l.starts_with("else ") || l == "else") {
+            if(depth.empty() || depth.back().first != NestType::IF)
+                throw DgScriptException("'else' outside of an if!");
+            lineNumber = findEnd();
+            continue;
+        }
+        else if(l.starts_with("end ") || l == "end") {
+            if(depth.empty() || depth.back().first != NestType::IF)
+                throw DgScriptException("'end' outside of an if!");
+            depth.pop_back();
         }
 
         // Handle the while control flow.
@@ -167,9 +174,10 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
         else if(l.starts_with("done ") || l == "done") {
             if(depth.empty() || !(depth.back().first == NestType::SWITCH || depth.back().first == NestType::WHILE))
                 throw DgScriptException("done outside of switch-case or while block!");
-            switch(depth.back().first) {
+            auto back = depth.back();
+            switch(back.first) {
                 case NestType::WHILE:
-                    lineNumber == depth.back().second;
+                    lineNumber = back.second;
                     depth.pop_back();
                     continue;
                     break;
@@ -1633,25 +1641,34 @@ static std::vector<std::string> ops = {
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-std::optional<std::string> trig_data::evalLhsOpRhs(const std::string& expr)
-{
+std::optional<std::string> trig_data::evalLhsOpRhs(const std::string& expr) {
     for (const auto& op : ops) {
         auto idx = expr.find(op);
-        if(idx == std::string::npos) continue;
+        if (idx == std::string::npos) continue;
 
-        auto left = expr.substr(0, idx-1);
-        auto right = expr.substr((idx + op.size()));
-
-        // handle ! in a special way to avoid double-evaluation.
-        if(op == "!") {
-            auto r = evalExpr(right);
-            return fmt::format("{}", !truthy(r));
+        // Special case for unary operators
+        if (idx == 0) {
+            // For unary operators like "!" and potentially unary "+", handle them here
+            if (op == "!" || op == "+") {
+                auto right = expr.substr(op.size());
+                auto rhr = evalExpr(right);
+                if (op == "!") {
+                    return fmt::format("{}", !truthy(rhr));
+                } else if (op == "+") {
+                    // Unary plus, simply return the evaluated right-hand side
+                    return rhr;
+                }
+            }
+            continue; // If other unary operators are added, handle them before this line
         }
+
+        // Binary operator cases
+        auto left = expr.substr(0, idx);
+        auto right = expr.substr(idx + op.size());
 
         auto lhr = evalExpr(left);
         auto rhr = evalExpr(right);
         return evalOp(op, lhr, rhr);
-
     }
 
     return {};
@@ -1954,26 +1971,26 @@ void trig_data::processUnset(const std::string& cmd) {
 void trig_data::processRemote(const std::string& cmd) {
     auto args = split(cmd, ' ');
 
-    if (args.size() != 2) {
+    if (args.size() != 3) {
         script_log("Trigger: %s, VNum %d. remote: invalid arguments '%s'",
                    GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd);
         return;
     }
 
-    if(!hasVar(args[0])) {
+    if(!hasVar(args[1])) {
         script_log("Trigger: %s, VNum %d. local var '%s' not found in remote call",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), args[0].c_str());
+                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), args[1].c_str());
         return;
     }
 
-    auto loc = getRaw(args[0]);
+    auto loc = getRaw(args[1]);
     /* find the target script from the uid number */
     std::optional<DgUID> result;
-    result = resolveUID(args[1]);
+    result = resolveUID(args[2]);
     auto uidResult = result;
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. remote: illegal uid '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), args[1]);
+                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), args[2]);
         return;
     }
 

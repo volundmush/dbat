@@ -179,6 +179,7 @@ public:
 };
 
 
+
 /* typedefs that the dg functions rely on */
 typedef struct index_data index_data;
 typedef struct room_data room_data;
@@ -418,7 +419,7 @@ extern room_rnum obj_room(obj_data *obj);
 /* Macros for scripts */
 
 #define UID_CHAR   '#'
-#define GET_TRIG_NAME(t)          ((t)->parent->name)
+#define GET_TRIG_NAME(t)          ((t)->parent->name.c_str())
 #define GET_TRIG_RNUM(t)          ((t)->parent->vn)
 #define GET_TRIG_VNUM(t)          ((t)->parent->vn)
 #define GET_TRIG_TYPE(t)          ((t)->parent->trigger_type)
