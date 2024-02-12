@@ -727,7 +727,7 @@ namespace trans {
 
                         ch->decCurLFPercent(0.05);
                     } else {
-                        send_to_char(ch, "@MYou feel far too exhauseted to strengthen yourself!@n");
+                        send_to_char(ch, "@MYou feel far too exhausted to strengthen yourself!@n");
                     }
                     
                     return -base - ((base/10) * getMasteryTier(ch, FormID::DarkKing));
