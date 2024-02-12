@@ -571,10 +571,6 @@ std::string trig_data::varSubst(const std::string& expr) {
     std::string out;
 
     std::string chopped = expr;
-
-    if(chopped.contains("zone")) {
-        int x = 0;
-    }
     
     while(chopped.contains('%')) {
         std::vector<DgHolder> current;

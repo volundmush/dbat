@@ -1517,17 +1517,17 @@ std::string trig_data::evalOp(const std::string& op, const std::string& lhs, con
     } else if ("&&" == op) {
         return (lhs == "0" || rhs == "0") ? "0" : "1";
     } else if ("==" == op) {
-        return fmt::format("{}", !strcasecmp(lhs.c_str(), rhs.c_str()));
+        return !strcasecmp(lhs.c_str(), rhs.c_str()) ? "1" : "0";
     } else if ("!=" == op) {
-        return fmt::format("{}", strcasecmp(lhs.c_str(), rhs.c_str()));
+        return strcasecmp(lhs.c_str(), rhs.c_str()) ? "1" : "0";
     } else if ("<=" == op) {
-        return fmt::format("{}", strcasecmp(lhs.c_str(), rhs.c_str()) <= 0);
+        return (strcasecmp(lhs.c_str(), rhs.c_str()) <= 0) ? "1" : "0";
     } else if (">=" == op) {
-        return fmt::format("{}", strcasecmp(lhs.c_str(), rhs.c_str()) <= 0);
+        return (strcasecmp(lhs.c_str(), rhs.c_str()) <= 0) ? "1" : "0";
     } else if ("<" == op) {
-        return fmt::format("{}", strcasecmp(lhs.c_str(), rhs.c_str()) < 0);
+        return (strcasecmp(lhs.c_str(), rhs.c_str()) < 0) ? "1" : "0";
     } else if (">" == op) {
-        return fmt::format("{}", strcasecmp(lhs.c_str(), rhs.c_str()) > 0);
+        return (strcasecmp(lhs.c_str(), rhs.c_str()) > 0) ? "1" : "0";
     } else if ("/=" == op)
         return str_str((char*)lhs.c_str(), (char*)rhs.c_str()) ? "1" : "0";
     else if ("!" == op) {
@@ -1646,8 +1646,8 @@ std::optional<std::string> trig_data::evalLhsOpRhs(const std::string& expr) {
         }
 
         // Binary operator cases
-        auto left = expr.substr(0, idx);
-        auto right = expr.substr(idx + op.size());
+        auto left = expr.substr(0, idx-1);
+        auto right = expr.substr(idx+1 + op.size());
 
         auto lhr = evalExpr(left);
         auto rhr = evalExpr(right);
