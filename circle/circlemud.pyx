@@ -1,5 +1,5 @@
 from cython.operator cimport dereference as deref, preincrement as inc
-from libcpp.memory cimport shared_ptr
+from libcpp.memory cimport shared_ptr, make_shared
 from libcpp.string cimport string
 
 cimport comm
@@ -53,7 +53,7 @@ cdef class GameSession:
         out = {
             "ip": self.ip,
             "user_id": self.user_id,
-            "username": c.account.name.decode("UTF-8", errors='ignore'),
+            "username": c.account.get().name.decode("UTF-8", errors='ignore'),
             "connected_time": self.connected_time(),
             "idle_time": self.idle_time()
         }
@@ -117,18 +117,18 @@ def initialize():
 
 # Keeping this here as an example of how to iterate through stuff.
 def _hash_passwords():
-    it = accounts.accounts.begin()
-    end = accounts.accounts.end()
-
-    while it != end:
-        if not deref(it).second.passHash.empty():
+    for pair in accounts.accounts:
+        key = pair.first
+        accPtr = pair.second
+        acc = accPtr.get()
+        if not acc.passHash.empty():
             try:
-                password = deref(it).second.passHash.decode("UTF-8", errors='ignore')
+                password = acc.passHash.decode("UTF-8", errors='ignore')
                 hashed = CRYPT_CONTEXT.hash(password)
-                deref(it).second.passHash = hashed.encode()
+                acc.passHash = hashed.encode()
             except (TypeError, ValueError):
-                print(f"Failed to hash password for {deref(it).second.name.decode('UTF-8', errors='ignore')}")
-        inc(it)
+                print(f"Failed to hash password for {acc.name.decode('UTF-8', errors='ignore')}")
+    
 
 def migrate():
     comm.init_locale()
@@ -175,21 +175,25 @@ cdef class _AccountManager:
         account = accounts.accounts.find(vn)
         if account == accounts.accounts.end():
             return None
-        return orjson.loads(utils.jdump(deref(account).second.serialize()))
+        return orjson.loads(utils.jdump(deref(account).second.get().serialize()))
 
     def create(self, data: dict[str, "Any"]):
+        cdef shared_ptr[accounts.account_data] acc
+        cdef utils.json jd
         vn = accounts.account_data.getNextID()
         data["vn"] = vn
         j = orjson.dumps(data)
-        cdef accounts.account_data* acc = &accounts.accounts[vn]
-        acc.deserialize(utils.jparse(j))
+        jd = utils.jparse(j)
+        acc = make_shared[accounts.account_data](jd)
+        accounts.accounts[vn] = acc
     
     def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
         account = accounts.accounts.find(target)
         if account == accounts.accounts.end():
             return "Account not found."
         j = orjson.dumps(data)
-        deref(account).second.deserialize(utils.jparse(j))
+        cdef utils.json jd = utils.jparse(j)
+        deref(account).second.get().deserialize(jd)
 
     async def retrieve_user(self, request, payload, *args, **kwargs):
         if payload:
@@ -198,7 +202,7 @@ cdef class _AccountManager:
             found = accounts.accounts.find(user_id)
             if found == accounts.accounts.end():
                 return None
-            user = deref(found).second
+            user = deref(found).second.get()
 
             out = {"user_id": user.vn, "username": user.name.decode("UTF-8", errors='ignore'), "adminLevel": user.adminLevel}
             if not user.email.empty():
@@ -216,7 +220,7 @@ cdef class _AccountManager:
         if not username or not password:
             raise exceptions.AuthenticationFailed("Missing username or password.")
 
-        user = accounts.findAccount(username.encode())
+        user = accounts.findAccount(username.encode()).get()
 
         if user is NULL:
             raise exceptions.AuthenticationFailed("Incorrect credentials.")
@@ -237,7 +241,7 @@ cdef class _AccountManager:
         return out
     
     def exists(self, name: str, exclude: int = None) -> bool:
-        found = accounts.findAccount(name.encode())
+        found = accounts.findAccount(name.encode()).get()
         if found is NULL:
             return False
         if exclude is not None:
@@ -298,7 +302,7 @@ cdef class _PlayerManager:
         player = db.players.find(vn)
         if player == db.players.end():
             return None
-        return orjson.loads(utils.jdump(deref(player).second.serialize()))
+        return orjson.loads(utils.jdump(deref(player).second.get().serialize()))
 
     def create(self, data: dict[str, "Any"]):
         pass

@@ -2,7 +2,8 @@ from libc.time cimport time_t
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.map cimport map
+from libcpp.unordered_map cimport unordered_map
+from libcpp.memory cimport shared_ptr
 cimport utils
 
 cdef extern from "dbat/structs.h":
@@ -33,7 +34,7 @@ cdef extern from "dbat/structs.h":
         int getNextID()
 
 cdef extern from "dbat/account.h":
-    account_data* createAccount(const string& name, const string& password) except+
-    account_data* findAccount(const string& name)
+    shared_ptr[account_data] createAccount(const string& name, const string& password) except+
+    shared_ptr[account_data] findAccount(const string& name)
 
-    map[int, account_data] accounts
+    unordered_map[int, shared_ptr[account_data]] accounts

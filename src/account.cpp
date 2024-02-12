@@ -3,15 +3,15 @@
 #include "dbat/utils.h"
 #include <stdexcept>
 
-std::map<vnum, account_data> accounts;
+std::unordered_map<vnum, std::shared_ptr<account_data>> accounts;
 
-struct account_data *findAccount(const std::string &name) {
+std::shared_ptr<account_data> findAccount(const std::string &name) {
     for (auto &[aid, account] : accounts) {
-        if (iequals(account.name, name)) {
-            return &account;
+        if (iequals(account->name, name)) {
+            return account;
         }
     }
-    return nullptr;
+    return {};
 }
 
 bool account_data::checkPassword(const std::string &password) {
@@ -83,7 +83,7 @@ int account_data::getNextID() {
     return id;
 }
 
-account_data *createAccount(const std::string &name, const std::string &password) {
+std::shared_ptr<account_data> createAccount(const std::string &name, const std::string &password) {
     if(name.empty()) throw std::invalid_argument("Username cannot be blank.");
     if(password.empty()) throw std::invalid_argument("Password cannot be blank.");
 
@@ -97,12 +97,13 @@ account_data *createAccount(const std::string &name, const std::string &password
     }
 
     auto nextId = account_data::getNextID();
-    auto a = accounts[nextId];
-    a.name = name;
-    a.vn = nextId;
-    a.passHash = hash.value();
-    a.created = time(nullptr);
-    a.lastLogin = time(nullptr);
+    auto a = std::shared_ptr<account_data>();
+    accounts[nextId] = a;
+    a->name = name;
+    a->vn = nextId;
+    a->passHash = hash.value();
+    a->created = time(nullptr);
+    a->lastLogin = time(nullptr);
 
-    return nullptr;
+    return a;
 }

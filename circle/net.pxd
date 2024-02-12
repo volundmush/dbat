@@ -3,7 +3,7 @@ from libc.stdint cimport int64_t, int16_t, uint8_t
 from libcpp.string cimport string
 from libcpp.list cimport list
 from libcpp.set cimport set
-from libcpp.map cimport map
+from libcpp.unordered_map cimport unordered_map
 from libcpp.vector cimport vector
 from libcpp.memory cimport shared_ptr
 from libcpp.pair cimport pair
@@ -35,10 +35,10 @@ cdef extern from "dbat/net.h" namespace "net":
         bool running
         ConnectionState state
         void onHeartbeat(double deltaTime)
-        accounts.account_data* account
+        shared_ptr[accounts.account_data] account
         structs.descriptor_data* desc;
 
-    cdef map[string, shared_ptr[Connection]] connections
+    cdef unordered_map[string, shared_ptr[Connection]] connections
 
 
     cdef shared_ptr[Connection] newConnection(const string& connID, const string& ip, int64_t account)

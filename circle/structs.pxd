@@ -5,12 +5,18 @@ from libcpp.string cimport string
 from libcpp.list cimport list
 from libcpp.set cimport set
 from libcpp.map cimport map
+from libcpp.unordered_map cimport unordered_map
 from libcpp.vector cimport vector
 from libcpp.memory cimport shared_ptr
 cimport accounts
 cimport utils
 
 cdef extern from "dbat/structs.h":
+    cdef cppclass reset_com:
+        pass
+
+    cdef cppclass zone_data:
+        pass
 
     cdef cppclass area_data:
         area_data(const utils.json& j)
@@ -99,7 +105,39 @@ cdef extern from "dbat/structs.h":
         int connected
         char_data *character
         char_data *original
+    
+    cdef cppclass HasVars:
+        unordered_map[string, string] vars
+        utils.json serializeVars()
 
+    cdef cppclass trig_proto:
+        int64_t vn
+        int8_t attach_type
+        int8_t data_type
+        string name
+        int trigger_type
+        int narg
+        string arglist
+        vector[string] lines
+        utils.json serialize()
+    
+    cdef cppclass trig_data(HasVars):
+        shared_ptr[trig_proto] parent
+
+        int loops
+        int totalLoops
+        double waiting
+        bool purged
+        bool active
+
+        utils.json serializeProto()
+        utils.json serializeInstance()
+        string serializeLocation()
+
+        void deserializeInstance(const utils.json& j)
+        void deserializeLocation(const string& txt)
+
+        int order
 
 cdef extern from "dbat/guild.h":
     cdef cppclass guild_data:
@@ -112,21 +150,6 @@ cdef extern from "dbat/shop.h":
         shop_data(const utils.json& j)
         utils.json serialize()
 
-
-cdef extern from "dbat/dg_scripts.h":
-    cdef cppclass trig_data:
-        trig_data()
-        trig_data(const utils.json& j)
-        int vn
-        char* name
-        utils.json serializeProto()
-        utils.json serializeInstance()
-        string serializeLocation()
-
-        void deserializeInstance(const utils.json& j)
-        void deserializeLocation(const string& txt)
-
-        int order
 
 
 cdef extern from "dbat/db.h":

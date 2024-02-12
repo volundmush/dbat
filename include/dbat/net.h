@@ -61,7 +61,7 @@ namespace net {
 
         bool running{true};
         std::string connId{}, host{};
-        account_data *account{};
+        std::shared_ptr<account_data> account{};
         int64_t adminLevel{0};
         struct descriptor_data *desc{};
 

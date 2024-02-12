@@ -22,29 +22,28 @@ cdef extern from "dbat/db.h":
     void load_config()
     void migrate_db()
 
-    map[int, structs.room_data] world
-    map[int, structs.zone_data] zone_table
-    map[int, structs.area_data] areas
+    unordered_map[int, structs.room_data] world
+    unordered_map[int, structs.zone_data] zone_table
+    unordered_map[int, structs.area_data] areas
 
-    map[int, structs.index_data] mob_index
-    map[int, structs.char_data] mob_proto
+    unordered_map[int, structs.index_data] mob_index
+    unordered_map[int, structs.char_data] mob_proto
 
     unordered_map[int64_t, pair[time_t, char_data_ptr]] uniqueCharacters
 
-    map[int, structs.index_data] obj_index
-    map[int, structs.obj_data] obj_proto
+    unordered_map[int, structs.index_data] obj_index
+    unordered_map[int, structs.obj_data] obj_proto
 
     unordered_map[int64_t, pair[time_t, obj_data_ptr]] uniqueObjects
 
-    map[int, shared_ptr[structs.trig_data]] trig_index
-    map[int64_t, pair[time_t, shared_ptr[structs.trig_data]]] uniqueScripts
+    unordered_map[int, shared_ptr[structs.trig_proto]] trig_index
 
 cdef extern from "dbat/guild.h":
-    map[int, structs.guild_data] guild_index
+    unordered_map[int, structs.guild_data] guild_index
 
 
 cdef extern from "dbat/shop.h":
-    map[int, structs.shop_data] shop_index
+    unordered_map[int, structs.shop_data] shop_index
 
 cdef extern from "dbat/players.h":
-    map[int64_t, structs.player_data] players
+    unordered_map[int64_t, shared_ptr[structs.player_data]] players

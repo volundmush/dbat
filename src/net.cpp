@@ -126,7 +126,7 @@ namespace net {
 
     std::shared_ptr<Connection> newConnection(const std::string& connID, const std::string& host, int64_t account_id) {
         auto conn = std::make_shared<Connection>(connID, host);
-        conn->account = &(accounts.find(account_id)->second);
+        conn->account = (accounts.find(account_id)->second);
         conn->state = ConnectionState::Pending;
         connections[connID] = conn;
         return conn;
