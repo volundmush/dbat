@@ -62,6 +62,38 @@ world[room].dir_option[dir]->to_room : NOWHERE)
 
 static bool converting = false;
 
+static void parse_trigger(FILE *trig_f, trig_vnum nr) {
+    int t[2], k, attach_type;
+    char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
+    auto trig = std::make_shared<trig_proto>();
+    trig_index[nr] = trig;
+    trig->vn = nr;
+
+    auto &z = zone_table[real_zone_by_thing(nr)];
+    z.triggers.insert(nr);
+
+    snprintf(errors, sizeof(errors), "trig vnum %d", nr);
+
+    trig->name = fread_string(trig_f, errors);
+
+    get_line(trig_f, line);
+    k = sscanf(line, "%d %s %d", &attach_type, flags, t);
+    trig->attach_type = (int8_t) attach_type;
+    trig->trigger_type = (long) asciiflag_conv(flags);
+    trig->narg = (k == 3) ? t[0] : 0;
+    auto args = fread_string(trig_f, errors);
+    if(args) trig->arglist = args;
+
+    cmds = s = fread_string(trig_f, errors);
+
+    trig->lines.emplace_back(strtok(s, "\r\n"));
+
+    while ((s = strtok(nullptr, "\r\n"))) {
+        trig->lines.emplace_back(s);
+    }
+
+    free(cmds);
+}
 
 static void read_line(FILE *shop_f, const char *string, void *data) {
     char buf[READ_SIZE];
@@ -799,6 +831,7 @@ static int Crash_load(struct char_data *ch) {
             }   /* exit our xap loop */
             if (temp != nullptr) {
                 num_objs++;
+                temp->script = std::make_shared<script_data>(temp);
                 check_unique_id(temp);
                 add_unique_id(temp);
                 temp->activate();
@@ -1060,7 +1093,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     auto &z = zone_table[zone];
     auto &r = world[virtual_nr];
     z.rooms.insert(virtual_nr);
-
+    r.script = std::make_shared<script_data>(&r);
     r.zone = zone;
     r.vn = virtual_nr;
     r.name = fread_string(fl, buf2);
@@ -3026,6 +3059,7 @@ int House_load(room_vnum rvnum) {
             if (temp != nullptr) {
                 check_unique_id(temp);
                 add_unique_id(temp);
+                temp->script = std::make_shared<script_data>(temp);
                 temp->activate();
                 num_objs++;
                 obj_to_room(temp, rrnum);
@@ -4620,6 +4654,7 @@ void migrate_characters() {
 
     for(auto &[cname, accID] : characterToAccount) {
         auto ch = new char_data();
+        ch->script = std::make_shared<script_data>(ch);
         if(load_char(cname.c_str(), ch) < 0) {
             basic_mud_log("Error loading %s for account migration.", cname.c_str());
             delete ch;
@@ -4743,13 +4778,9 @@ void migrate_characters() {
             if(pos2 == std::string::npos) continue;
             auto context = line.substr(pos + 1, pos2 - pos - 1);
             auto data = line.substr(pos2 + 1);
-            if(!ch->script) {
-                ch->script = new script_data(ch);
-            }
 
             try {
-                auto ctx = std::stoi(context);
-                add_var(&ch->script->global_vars, (char*)varname.c_str(), data.c_str(), ctx);
+                ch->script->addVar(varname, data);
             } catch(...) {
                 basic_mud_log("Error parsing %s for variable migration.", line.c_str());
             }
