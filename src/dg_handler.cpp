@@ -31,14 +31,17 @@ void extract_script(void *thing, int type) {
     switch (type) {
         case MOB_TRIGGER:
             mob = (struct char_data *) thing;
+            mob->script->purged = true;
             mob->script->removeAll();
             break;
         case OBJ_TRIGGER:
             obj = (struct obj_data *) thing;
+            obj->script->purged = true;
             obj->script->removeAll();
             break;
         case WLD_TRIGGER:
             room = (struct room_data *) thing;
+            room->script->purged = true;
             room->script->removeAll();
             break;
     }

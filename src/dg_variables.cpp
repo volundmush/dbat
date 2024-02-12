@@ -214,50 +214,6 @@ std::optional<std::size_t> findEndParen(const std::string& line, std::size_t sta
     return {};
 }
 
-std::vector<std::pair<std::string, std::string>> trig_data::splitFields(const std::string& line) {
-    std::vector<std::pair<std::string, std::string>> out;
-    std::string l = line;
-    trim(l);
-
-    std::vector<std::string> dotSeparators;
-    // First, we'll chop up l and fill dotSeparators with the chunks, separated by dots.
-    while(true) {
-        auto dot = findDot(l);
-        if(!dot) {
-            dotSeparators.emplace_back(l);
-            break;
-        }
-        dotSeparators.emplace_back(l.substr(0, dot.value()));
-        l = l.substr(dot.value()+1);
-        trim(l);
-    }
-
-    // Now we'll go through dotSeparators and split each chunk into a field and an argument.
-    // Not every chunk will have an argument, so we'll have to handle that.
-    // Arguments follow the field, enclosed by parentheses. Which might be nested.
-    for(auto& chunk : dotSeparators) {
-        std::string field;
-        std::string args;
-        auto paren = chunk.find('(');
-        if(paren == std::string::npos) {
-            field = chunk;
-        } else {
-            field = chunk.substr(0, paren);
-            auto endParen = findEndParen(chunk, paren);
-            if(endParen) {
-                args = chunk.substr(paren+1, endParen.value()-paren-1);
-                trim(args);
-                // Recurse the arguments in case there's anything in there that needs to be split.
-                args = evalExpr(args);
-            }
-        }
-        out.emplace_back(field, args);
-    }
-    
-
-    return out;
-}
-
 DgResults scriptFindMob(trig_data *trig, const std::string& field, const std::string& args) {
     if(args.empty() || field.empty()) return "0";
     room_rnum rrnum = real_room(atof(field.c_str()));
@@ -409,156 +365,246 @@ DgResults checkForID(const std::string& text) {
 }
 
 
-std::string trig_data::handleSubst(const std::string& expr) {
+void trig_data::handleSubst(std::vector<DgHolder> &current, const std::string& field, const std::string& args) {
     auto type = parent->attach_type;
-    DgHolder current = "";
-    int i = 0;
-    int num = 0;
     
-    for(const auto &[field, args] : splitFields(expr)) {
-        if(i++ == 0) {
-            // it's the first run.
-            if(iequals(field, "self")) {
-                current = sc->owner;
-            }
-            else if(iequals(field, "time")) {
-                current = std::function(scriptTimeHolder);
-            }
-            else if (iequals(field, "global")) {
-                current = std::function(scriptGlobal);
-            }
-            else if(iequals(field, "people")) {
-                current = fmt::format("{}", ((num = atoi(args.c_str())) > 0) ? trgvar_in_room(num) : 0);
-            }
-            else if(iequals(field, "findmob")) {
-                current = std::function(scriptFindMob);
-            }
-            else if(iequals(field, "findobj")) {
-                current = std::function(scriptFindObj);
-            }
-            else if(iequals(field, "random")) {
-                current = std::function(scriptRandom);
-            }
-            else if (iequals(field, "ctime"))
-                current = fmt::format("{}", time(nullptr));
-            else if (iequals(field, "door"))
-                current = door[type];
-            else if (iequals(field, "force"))
-                current = force[type];
-            else if (iequals(field, "load"))
-                current = load[type];
-            else if (iequals(field, "purge"))
-                current = purge[type];
-            else if (iequals(field, "teleport"))
-                current = teleport[type];
-            else if (iequals(field, "damage"))
-                current = xdamage[type];
-            else if (iequals(field, "send"))
-                current = send_cmd[type];
-            else if (iequals(field, "echo"))
-                current = echo_cmd[type];
-            else if (iequals(field, "echoaround"))
-                current = echoaround_cmd[type];
-            else if (iequals(field, "zoneecho"))
-                current = zoneecho[type];
-            else if (iequals(field, "asound"))
-                current = asound[type];
-            else if (iequals(field, "at"))
-                current = at[type];
-            else if (iequals(field, "transform"))
-                current = transform[type];
-            else if (iequals(field, "recho"))
-                current = recho[type];
-            else if(hasVar(field)) {
-                auto res = getVar(field);
-                if(res.index() == 0) {
-                    current = std::get<0>(res);
-                } else {
-                    current = std::get<1>(res);
-                }
-            }
-            continue;
+    if(current.empty()) {
+        // it's the first run.
+        if(iequals(field, "self")) {
+            current.emplace_back(sc->owner);
         }
-        switch(current.index()) {
-            case 0: {
-                // Strings. strings will invoke the string manipulation funcs.
-                auto s = std::get<0>(current);
-                current = scriptTextProcess(this, s, field, args);
-                }
-                break;
-            case 1: {
-                // a unit_data*.
-                auto u = std::get<1>(current);
-                // here we'll call the dgCallMember method and set the result into current...
-                auto res = u->dgCallMember(this, field, args);
-                if(res.index() == 0) {
-                        current = std::get<0>(res);
-                    } else {
-                        current = std::get<1>(res);
-                    }
-                }
-                break;
-            case 2: {
-                    // a function.
-                    auto f = std::get<2>(current);
-                    // here we'll call the function and set the result into current...
-                    auto res = f(this, field, args);
-                    if(res.index() == 0) {
-                        current = std::get<0>(res);
-                    } else {
-                        current = std::get<1>(res);
-                    }
-                }
-                break;
+        else if(iequals(field, "time")) {
+            current.emplace_back(std::function(scriptTimeHolder));
         }
+        else if (iequals(field, "global")) {
+            current.emplace_back(std::function(scriptGlobal));
+        }
+        else if(iequals(field, "people")) {
+            int num = 0;
+            auto f = fmt::format("{}", ((num = atoi(args.c_str())) > 0) ? trgvar_in_room(num) : 0);
+            current.emplace_back(f);
+        }
+        else if(iequals(field, "findmob")) {
+            current.emplace_back(std::function(scriptFindMob));
+        }
+        else if(iequals(field, "findobj")) {
+            current.emplace_back(std::function(scriptFindObj));
+        }
+        else if(iequals(field, "random")) {
+            current.emplace_back(std::function(scriptRandom));
+        }
+        else if (iequals(field, "ctime"))
+            current.emplace_back(fmt::format("{}", time(nullptr)));
+        else if (iequals(field, "door"))
+            current.emplace_back(door[type]);
+        else if (iequals(field, "force"))
+            current.emplace_back(force[type]);
+        else if (iequals(field, "load"))
+            current.emplace_back(load[type]);
+        else if (iequals(field, "purge"))
+            current.emplace_back(purge[type]);
+        else if (iequals(field, "teleport"))
+            current.emplace_back(teleport[type]);
+        else if (iequals(field, "damage"))
+            current.emplace_back(xdamage[type]);
+        else if (iequals(field, "send"))
+            current.emplace_back(send_cmd[type]);
+        else if (iequals(field, "echo"))
+            current.emplace_back(echo_cmd[type]);
+        else if (iequals(field, "echoaround"))
+            current.emplace_back(echoaround_cmd[type]);
+        else if (iequals(field, "zoneecho"))
+            current.emplace_back(zoneecho[type]);
+        else if (iequals(field, "asound"))
+            current.emplace_back(asound[type]);
+        else if (iequals(field, "at"))
+            current.emplace_back(at[type]);
+        else if (iequals(field, "transform"))
+            current.emplace_back(transform[type]);
+        else if (iequals(field, "recho"))
+            current.emplace_back(recho[type]);
+        else if(hasVar(field)) {
+            auto res = getVar(field);
+            if(res.index() == 0) {
+                current.emplace_back(std::get<0>(res));
+            } else {
+                current.emplace_back(std::get<1>(res));
+            }
+        } else {
+            current.emplace_back("");
+        }
+        return;
     }
 
-    switch(current.index()) {
+    auto back = current.back();
+    switch(back.index()) {
         case 0: {
-            return std::get<0>(current);
-        }
+            // Strings. strings will invoke the string manipulation funcs.
+            auto s = std::get<0>(back);
+            current.emplace_back(scriptTextProcess(this, s, field, args));
+            }
+            break;
         case 1: {
-            return std::get<1>(current)->getUID(false);
-        }
+            // a unit_data*.
+            auto u = std::get<1>(back);
+            // here we'll call the dgCallMember method and set the result into current...
+            auto res = u->dgCallMember(this, field, args);
+            if(res.index() == 0) {
+                    current.emplace_back(std::get<0>(res));
+                } else {
+                    current.emplace_back(std::get<1>(res));
+                }
+            }
+            break;
         case 2: {
-            return "";
-        }
-    
+                // a function.
+                auto f = std::get<2>(back);
+                // here we'll call the function and set the result into current...
+                auto res = f(this, field, args);
+                if(res.index() == 0) {
+                    current.emplace_back(std::get<0>(res));
+                } else {
+                    current.emplace_back(std::get<1>(res));
+                }
+            }
+            break;
     }
 }
 
+std::string trig_data::innerSubst(std::vector<DgHolder>& current, const std::string& expr) {
+    // This function will only be called on a string where the first character is right past a %  
+    std::string chopped = expr;
+
+    std::string field, args;
+    bool finished = false;
+
+    while(!chopped.empty()) {
+        // if the first character is a %, we must recurse.
+        if(chopped[0] == '%') {
+            chopped = evalExpr(chopped);
+            continue;
+        }
+        // After this SHOULD BE a field (no spaces allowed), which ends in a either a dot, open paren, or %.
+        // First, let's find the end of the field.
+        std::size_t end = 0;
+        char found = -1;
+        for(std::size_t i = 0; i < chopped.size(); i++) {
+            if(chopped[i] == '.' || chopped[i] == '(' || chopped[i] == '%') {
+                end = i;
+                found = chopped[i];
+                break;
+            }
+        }
+        field = chopped.substr(0, end);
+        switch(found) {
+            case -1:
+                // we reached the very end and found no %.
+                throw DgScriptException("Unexpected end of string in innerSubst. No % found.");
+                break;
+            case '.': {
+                // we found a dot. Capture the word up to but not including end.
+                // be careful to not go past the end of the string. the . might be the end.
+                if(end+1 < chopped.size()) {
+                    chopped = chopped.substr(end+1);
+                } else {
+                    throw DgScriptException("Unexpected end of string in innerSubst. Dot with no following field.");
+                }
+            }
+                break;
+            case '(': {
+                // An opening parentheses. We need to find the matching closing parentheses.
+                if(auto endParen = findEndParen(chopped, end); endParen) {
+                    args = chopped.substr(end+1, endParen.value()-end-1);
+                    args = evalExpr(args);
+                    // Be careful to not go past the end of the string. The closing paren might be the end.
+                    if(endParen.value()+1 < chopped.size()) {
+                        chopped = chopped.substr(endParen.value()+1);
+                    } else {
+                        chopped = "";
+                    }
+                } else {
+                    // we didn't find the closing parentheses. We're done here.
+                    throw DgScriptException("Unexpected end of string in innerSubst. Open paren with no matching close paren.");
+                }
+                // should it exist, if the following character is not a . or %, we should throw an error.
+                if(!chopped.empty()) {
+                    switch(chopped[0]) {
+                        case '.':
+                            // advance the string past the dot.
+                            chopped = chopped.substr(1);
+                            break;
+                        case '%':
+                            chopped = chopped.substr(1);
+                            finished = true;
+                            break;
+                        default:
+                            throw DgScriptException(fmt::format("Unexpected {} after closing paren in innerSubst.", chopped[0]));
+                    }
+                }
+            }
+            break;
+            case '%': {
+                finished = true;
+                // A % character. We're done here.
+                // If there is anything after the %, we must return it.
+                if(end+1 < chopped.size()) {
+                    chopped = chopped.substr(end+1);
+                } else {
+                    chopped = "";
+                }
+            }
+        }
+
+        // At the tail end of every while loop, we should have a field and args.
+        if(!field.empty()) {
+            handleSubst(current, field, args);
+            field.clear();
+            args.clear();
+        }
+        if(finished) return chopped;
+        
+    }
+    return "";
+}
 
 std::string trig_data::varSubst(const std::string& expr) {
     std::string out;
-    std::string l = expr;
-    std::size_t start = 0;
 
-    while(start < l.length()) {
-        std::size_t open = l.find('%', start);
-        
-        if (open == std::string::npos) {
-            // No more opening % found, append the rest of the string to out.
-            out += l.substr(start);
-            break;
+    std::string chopped = expr;
+
+    if(chopped.contains("zone")) {
+        int x = 0;
+    }
+    
+    while(chopped.contains('%')) {
+        std::vector<DgHolder> current;
+        // Copy the string up to the first % into out.
+        auto find = chopped.find('%');
+        out += chopped.substr(0, find);
+        // gotta be careful to make sure we don't go past the end of the string.
+        if(find+1 < chopped.size()) {
+            chopped = chopped.substr(find+1);
         } else {
-            // Append the text before the opening % to out.
-            out += l.substr(start, open - start);
+            break;
         }
-        
-        std::size_t close = matching_percent(l, open);
-        
-        // If there's no matching closing %, we have a malformed input. Handle as needed.
-        if (close == std::string::npos) {
-            throw DgScriptException("No matching closing '%' found for the opening at position " + std::to_string(open));
+        // We get the remainder back...
+        chopped = innerSubst(current, chopped);
+        // Extract from current and append to out.
+        if(current.empty()) continue;
+        auto back = current.back();
+        switch(back.index()) {
+            case 0: {
+                out += std::get<0>(back);
+            }
+                break;
+            case 1: {
+                out += std::get<1>(back)->getUID();
+            }
+                break;
+            default:
+                break;
         }
-        
-        // Extract the placeholder text and perform substitution.
-        std::string placeholder = l.substr(open + 1, close - open - 1);
-        out += handleSubst(placeholder);
-        
-        // Update the start position to the character after the closing %.
-        start = close + 1;
     }
 
-    return out;
+    return out + chopped;
 }

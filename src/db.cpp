@@ -62,7 +62,6 @@ std::map<mob_vnum, struct char_data> mob_proto;    /* prototypes for mobs		 */
 
 VnumIndex<obj_data> objectVnumIndex;
 VnumIndex<char_data> characterVnumIndex;
-VnumIndex<trig_data> scriptVnumIndex;
 
 struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
@@ -75,11 +74,6 @@ DebugMap<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, std::shared_ptr<trig_proto>> trig_index; /* index table for triggers      */
-struct trig_data *trigger_list = nullptr;  /* all attached triggers */
-DebugMap<int64_t, std::pair<time_t, std::shared_ptr<trig_data>>> uniqueScripts;
-
-
-int dg_owner_purged;            /* For control of scripts */
 
 int no_mail = 0;        /* mail disabled?		 */
 int mini_mud = 0;        /* mini-mud mode?		 */
@@ -324,40 +318,6 @@ static void db_load_activate_entities() {
     }
 }
 
-static void db_load_dgscripts_initial(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "dgscripts.json")) {
-        auto vn = j["vn"].get<int64_t>();
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        auto location = j["location"].get<std::string>();
-
-        auto uidResult = resolveUID(location);
-        if(!uidResult) {
-            basic_mud_log("Failed to resolve UID %s", location.c_str());
-            continue;
-        }
-        struct unit_data *u;
-        switch(uidResult.value().index()) {
-            case 0:
-                u = std::get<0>(uidResult.value());
-                break;
-            case 1:
-                u = std::get<1>(uidResult.value());
-                break;
-            case 2:
-                u = std::get<2>(uidResult.value());
-                break;
-        }
-
-        auto &proto = trig_index[vn];
-
-        auto t = std::make_shared<trig_data>(proto);
-        t->deserialize(j["data"]);
-        uniqueScripts[id] = std::make_pair(generation, t);
-        u->script->loadScript(t);
-    }
-}
-
 static void db_load_globaldata(const std::filesystem::path& loc) {
     auto j = load_from_file(loc, "globaldata.json");
 
@@ -366,12 +326,6 @@ static void db_load_globaldata(const std::filesystem::path& loc) {
     }
     if(j.contains("weather")) {
         weather_info.deserialize(j["weather"]);
-    }
-    if(j.contains("dgGlobals")) {
-        if(auto room = world.find(0); room != world.end()) {
-            auto j2 = j["dgGlobals"];
-            room->second.script->vars = j2.get<std::unordered_map<std::string, std::string>>();
-        }
     }
 }
 
@@ -573,11 +527,6 @@ void boot_db_world() {
         db_load_items_initial(latest);
     });
 
-    basic_mud_log("Loading dgscript instances...");
-    threads.emplace_back([&latest] {
-        db_load_dgscripts_initial(latest);
-    });
-
     for(auto &t : threads) {
         t.join();
     }
@@ -591,7 +540,6 @@ void boot_db_world() {
 
     basic_mud_log("Loading items finish...");
     db_load_items_finish(latest);
-
 
     basic_mud_log("Running activation of entities...");
     db_load_activate_entities();

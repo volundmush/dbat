@@ -277,6 +277,10 @@ nlohmann::json room_data::serialize() {
         }
     }
 
+    if(timed) j["timed"] = timed;
+    if(dmg) j["dmg"] = dmg;
+    if(geffect) j["geffect"] = geffect;
+
     for(auto p :proto_script) {
         if(trig_index.contains(p)) j["proto_script"].push_back(p);
     }
@@ -306,6 +310,10 @@ room_data::room_data(const nlohmann::json &j) {
     if(j.contains("proto_script")) {
         for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
     }
+
+    if(j.contains("timed")) timed = j["timed"];
+    if(j.contains("dmg")) dmg = j["dmg"];
+    if(j.contains("geffect")) geffect = j["geffect"];
 
 }
 

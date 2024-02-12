@@ -143,6 +143,9 @@ struct HasVars {
     std::string getRaw(const std::string& name);
     bool hasVar(const std::string& name);
     bool delVar(const std::string& name);
+
+    nlohmann::json serializeVars();
+
 };
 
 struct trig_proto {
@@ -156,7 +159,6 @@ struct trig_proto {
     int narg{};                /* numerical argument              */
     std::string arglist{};            /* argument list                   */
     std::vector<std::string> lines;
-    std::set<std::shared_ptr<trig_data>> instances;
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
 };
@@ -179,6 +181,9 @@ struct script_data : public HasVars {
     void removeScript(const std::string &name);
 
     void loadScript(const std::shared_ptr<trig_data> t);
+
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json &j);
 
 };
 
@@ -205,9 +210,6 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
     nlohmann::json serialize();
     std::string serializeLocation();
 
-    int64_t id{};
-    time_t generation{};
-
     std::shared_ptr<trig_proto> parent;
     struct script_data *sc;
 
@@ -217,7 +219,7 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
     int totalLoops{};
     double waiting{0.0};    /* event to pause the trigger      */
     bool purged{};            /* trigger is set to be purged     */
-    int order{0};
+
     bool active{false};
     DgScriptState state{DgScriptState::DORMANT};
     void activate();
@@ -237,7 +239,8 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
 
     std::string evalExpr(const std::string& expr);
     std::string varSubst(const std::string& expr);
-    std::string handleSubst(const std::string& expr);
+    std::string innerSubst(std::vector<DgHolder> &current, const std::string& expr);
+    void handleSubst(std::vector<DgHolder> &current, const std::string& field, const std::string& args);
 
     std::optional<std::string> evalLhsOpRhs(const std::string& expr);
 
@@ -263,8 +266,6 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
     void processWait(const std::string& cmd);
     void processAttach(const std::string& cmd);
     void processDetach(const std::string& cmd);
-
-    std::vector<std::pair<std::string, std::string>> splitFields(const std::string& expr);
 
 };
 
@@ -303,9 +304,6 @@ struct unit_data {
     virtual std::string getUID(bool active = true);
     virtual bool isActive();
     virtual void save();
-
-    nlohmann::json serializeScripts();
-    void deserializeScripts();
 
     struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
     virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);

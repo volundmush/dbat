@@ -584,10 +584,6 @@ nlohmann::json char_data::serializeInstance() {
     if(upgrade) j["upgrade"] = upgrade;
     if(voice && strlen(voice)) j["voice"] = voice;
 
-    if(!script->vars.empty()) {
-        j["dgvariables"] = script->vars;
-    }
-
     if(relax_count) j["relax_count"] = relax_count;
     if(ingestLearned) j["ingestLearned"] = ingestLearned;
 

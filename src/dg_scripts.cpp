@@ -25,12 +25,15 @@ void wld_command_interpreter(room_data *room, char *argument);
 
 void trig_data::setState(DgScriptState st) {
     state = st;
+    auto sh = shared_from_this();
     switch(state) {
         case DgScriptState::WAITING:
-            triggers_waiting.insert(shared_from_this());
+            triggers_waiting.push_back(sh);
             break;
         default:
-            triggers_waiting.erase(shared_from_this());
+            triggers_waiting.remove_if([sh](const std::weak_ptr<trig_data>& t) {
+                return t.expired() || t.lock() == sh;
+            });
             break;
     }
 }
@@ -61,18 +64,12 @@ int trig_data::execute() {
         }
         setState(DgScriptState::RUNNING);
         auto results = executeBlock(lineNumber, parent->lines.size());
-        switch(state) {
-            case DgScriptState::DONE:
-            case DgScriptState::ERROR:
-                reset();
-                break;
-        }
+        if(state != DgScriptState::WAITING) reset();
         return results;
     }
     catch(const DgScriptException& err) {
-        // TODO: script exception handling!
-        script_log("Trigger: %s, VNum %d. Exception: %s", 
-            GET_TRIG_NAME(this), GET_TRIG_VNUM(this), err.what());
+        script_log("DgScript Error on %s: '%s' - DgScript ID %d, Name: %s. Exception: %s", 
+            sc->owner->getUID(false).c_str(), sc->owner->name, GET_TRIG_VNUM(this), GET_TRIG_NAME(this), err.what());
         reset();
         return 0;
     }
@@ -86,10 +83,6 @@ std::string trig_data::getLine(std::size_t num) {
 
 int trig_data::executeBlock(std::size_t start, std::size_t end) {
     int ret_val = 1;
-
-    if(parent->vn == 2018) {
-        int x = 0;
-    }
 
     lineNumber = start;
 
@@ -144,7 +137,8 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
         else if(l.starts_with("while ")) {
             depth.emplace_back(NestType::WHILE, lineNumber);
             if(!processIf(line.substr(6))) {
-                lineNumber = findDone();
+                lineNumber = findDone() + 1;
+                depth.pop_back();
                 continue;
             }
         }
@@ -228,6 +222,7 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
             else if (!strncasecmp(cmd, "wait ", 5)) {
                 processWait(cmdres);
                 loops--;
+                lineNumber++;
                 return ret_val;
             } else if (!strncasecmp(cmd, "attach ", 7))
                 processAttach(cmdres);
@@ -1229,12 +1224,6 @@ void do_sstat(struct char_data *ch, struct unit_data *ud) {
     script_stat(ch, SCRIPT(ud));
 }
 
-int64_t nextTrigID() {
-    int64_t id = 0;
-    while(uniqueScripts.contains(id)) id++;
-    return id;
-}
-
 /*
  * adds the trigger t to script sc in in location loc.  loc = -1 means
  * add to the end, loc = 0 means add before all other triggers.
@@ -1255,16 +1244,6 @@ void script_data::addTrigger(const std::shared_ptr<trig_data> t, int loc) {
 
     SCRIPT_TYPES(this) |= GET_TRIG_TYPE(t);
     t->activate();
-    t->id = nextTrigID();
-    t->generation = time(nullptr);
-
-    uniqueScripts[t->id] = std::make_pair(t->generation, t);
-
-    int order = 0;
-    for(auto t2 : dgScripts) {
-        t2->order = order++;
-    }
-
 }
 
 
@@ -1552,7 +1531,7 @@ std::string trig_data::evalOp(const std::string& op, const std::string& lhs, con
     } else if ("/=" == op)
         return str_str((char*)lhs.c_str(), (char*)rhs.c_str()) ? "1" : "0";
     else if ("!" == op) {
-        return fmt::format("{}", !truthy(rhs));
+        return !truthy(rhs) ? "1" : "0";
     }
     return "0";
 }
@@ -1649,14 +1628,18 @@ std::optional<std::string> trig_data::evalLhsOpRhs(const std::string& expr) {
         // Special case for unary operators
         if (idx == 0) {
             // For unary operators like "!" and potentially unary "+", handle them here
-            if (op == "!" || op == "+") {
+            if (op == "!" || op == "+" || op == "-") {
                 auto right = expr.substr(op.size());
                 auto rhr = evalExpr(right);
                 if (op == "!") {
-                    return fmt::format("{}", !truthy(rhr));
+                    return !truthy(rhr) ? "1" : "0";
                 } else if (op == "+") {
                     // Unary plus, simply return the evaluated right-hand side
                     return rhr;
+                } else {
+                    // Unary minus, negate the evaluated right-hand side
+                    auto r = atof(rhr.c_str());
+                    return fmt::format("{}", -r);
                 }
             }
             continue; // If other unary operators are added, handle them before this line
@@ -1680,36 +1663,6 @@ bool trig_data::processIf(const std::string& cond) {
     auto result = evalExpr(cond);
     return truthy(result);
 }
-
-
-/*
- * scans for end of if-block.
- * returns the line containg 'end', or the last
- * line of the trigger if not found.
- */
-std::optional<std::size_t> find_end(trig_data *trig, std::size_t line) {
-
-    if(line > trig->parent->lines.size()-1) { /* rryan: if this is the last line, theres no end. */
-        script_log("Trigger VNum %lld has 'if' without 'end'. (error 1)", GET_TRIG_VNUM(trig));
-        return {};
-    }
-
-    for (auto i = line; i < trig->parent->lines.size(); i++) {
-        auto l = trig->parent->lines[i];
-        trim(l);
-        to_lower(l);
-
-        if(l.starts_with("if "))
-            return find_end(trig, i);
-        if(l.starts_with("end"))
-            return i;
-    }
-
-    /* rryan: we didn't find an end. */
-    script_log("Trigger VNum %lld has 'if' without 'end'. (error 3)", GET_TRIG_VNUM(trig));
-    return {};
-}
-
 
 
 /* processes any 'wait' commands in a trigger */
@@ -1781,9 +1734,7 @@ void trig_data::processSet(const std::string& cmd) {
     skip_spaces(&value);
     
     if (!*name) {
-        script_log("Trigger: %s, VNum %d. set w/o an arg: '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd);
-        return;
+        throw DgScriptException(fmt::format("set w/o an arg: '{}'",cmd));
     }
     addVar(name, value);
 }
@@ -1799,9 +1750,7 @@ void trig_data::processEval(const std::string &cmd) {
     skip_spaces(&expr);
 
     if (!*name) {
-        script_log("Trigger: %s, VNum %d. eval w/o an arg: '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd);
-        return;
+        throw DgScriptException(fmt::format("eval w/o an arg: '{}'",cmd));
     }
 
     if(isUID(expr)) {
@@ -1827,9 +1776,7 @@ void trig_data::processAttach(const std::string &cmd) {
     skip_spaces(&id_p);
 
     if (!*trignum_s) {
-        script_log("Trigger: %s, VNum %d. attach w/o an arg: '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd.c_str());
-        return;
+        throw DgScriptException(fmt::format("attach w/o an arg: '{}'",cmd));
     }
 
     if(isUID(id_p)) {
@@ -1844,9 +1791,7 @@ void trig_data::processAttach(const std::string &cmd) {
     std::optional<DgUID> result1 = resolveUID(result);
     auto uidResult = result1;
     if(!uidResult) {
-        script_log("Trigger: %s, VNum %d. attach invalid id arg: '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd.c_str());
-        return;
+        throw DgScriptException(fmt::format("attach invalid id arg: '{}'",cmd));
     }
 
     struct unit_data *u;
@@ -1868,9 +1813,7 @@ void trig_data::processAttach(const std::string &cmd) {
     auto trig = read_trigger(atoi(trignum_s));
     
     if (!trig) {
-        script_log("Trigger: %s, VNum %d. attach invalid trigger: '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), trignum_s);
-        return;
+        throw DgScriptException(fmt::format("attach invalid trigger: '{}'",trignum_s));
     }
 
     u->script->addTrigger(trig, -1);
@@ -1890,9 +1833,7 @@ void trig_data::processDetach(const std::string& cmd) {
     skip_spaces(&id_p);
 
     if (!*trignum_s) {
-        script_log("Trigger: %s, VNum %d. detach w/o an arg: '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd.c_str());
-        return;
+        throw DgScriptException(fmt::format("detach w/o an arg: '{}'",cmd));
     }
 
     if(isUID(id_p)) {
@@ -1908,8 +1849,7 @@ void trig_data::processDetach(const std::string& cmd) {
 
     auto uidResult = result1;
     if(!uidResult) {
-        script_log("Trigger: %s, VNum %d. detach invalid id arg: '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd.c_str());
+        throw DgScriptException(fmt::format("detach invalid id arg: '{}'",cmd));
         return;
     }
 
@@ -1951,9 +1891,7 @@ void trig_data::processUnset(const std::string& cmd) {
     skip_spaces(&var);
 
     if (!*var) {
-        script_log("Trigger: %s, VNum %d. unset w/o an arg: '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd);
-        return;
+        throw DgScriptException(fmt::format("unset w/o an arg: '{}'",cmd));
     }
 
     if(sc->hasVar(var)) {
@@ -1972,15 +1910,11 @@ void trig_data::processRemote(const std::string& cmd) {
     auto args = split(cmd, ' ');
 
     if (args.size() != 3) {
-        script_log("Trigger: %s, VNum %d. remote: invalid arguments '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd);
-        return;
+        throw DgScriptException(fmt::format("remote: invalid arguments '{}'",cmd));
     }
 
     if(!hasVar(args[1])) {
-        script_log("Trigger: %s, VNum %d. local var '%s' not found in remote call",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), args[1].c_str());
-        return;
+        throw DgScriptException(fmt::format("remote: local var '{}' not found in remote call",args[1]));
     }
 
     auto loc = getRaw(args[1]);
@@ -1989,9 +1923,7 @@ void trig_data::processRemote(const std::string& cmd) {
     result = resolveUID(args[2]);
     auto uidResult = result;
     if(!uidResult) {
-        script_log("Trigger: %s, VNum %d. remote: illegal uid '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), args[2]);
-        return;
+        throw DgScriptException(fmt::format("remote: illegal uid '{}'",args[2]));
     }
 
     struct unit_data *u;
@@ -2093,18 +2025,14 @@ void trig_data::processRdelete(const std::string &cmd) {
     struct script_data *sc_remote = nullptr;
 
     if (args.size() != 2) {
-        script_log("Trigger: %s, VNum %d. rdelete: invalid arguments '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), cmd);
-        return;
+        throw DgScriptException(fmt::format("rdelete: invalid arguments '{}'",cmd));
     }
 
     std::optional<DgUID> result;
     result = resolveUID(args[1]);
     auto uidResult = result;
     if(!uidResult) {
-        script_log("Trigger: %s, VNum %d. rdelete: illegal uid '%s'",
-                   GET_TRIG_NAME(this), GET_TRIG_VNUM(this), args[1]);
-        return;
+        throw DgScriptException(fmt::format("rdelete: illegal uid '{}'",args[1]));
     }
 
     struct unit_data *u;
@@ -2333,12 +2261,6 @@ void trig_proto::deserialize(const nlohmann::json& j) {
 
 nlohmann::json trig_data::serialize() {
     auto j = nlohmann::json::object();
-
-    j["vn"] = parent->vn;
-    j["id"] = id;
-    j["generation"] = generation;
-    j["order"] = order;
-
     for(auto &[nt, line] : depth) {
         j["depth"].push_back(std::make_pair(nt, line));
     }
@@ -2350,12 +2272,38 @@ nlohmann::json trig_data::serialize() {
     return j;
 }
 
+nlohmann::json HasVars::serializeVars() {
+    nlohmann::json j = nlohmann::json::object();
+    for(auto &[n, val] : vars) {
+        j[n] = val;
+    }
+    return j;
+}
+
+nlohmann::json script_data::serialize() {
+    nlohmann::json j = nlohmann::json::object();
+    if(!vars.empty()) j["vars"] = serializeVars();
+    for(auto t : dgScripts) {
+        j["dgScripts"].push_back(std::make_pair(t->parent->vn, t->serialize()));
+    }
+    return j;
+}
+
+void script_data::deserialize(const nlohmann::json& j) {
+    if(j.contains("vars")) vars = j["vars"];
+    if(j.contains("dgScripts")) {
+        for(auto &t : j["dgScripts"]) {
+            auto proto = t[0].get<trig_vnum>();
+            auto data = t[1];
+            auto trig = read_trigger(proto);
+            trig->deserialize(data);
+            loadScript(trig);
+        }
+    }
+}
+
 
 void trig_data::deserialize(const nlohmann::json &j) {
-    if(j.contains("id")) id = j["id"].get<long>();
-    if(j.contains("generation")) generation = j["generation"].get<long>();
-    if(j.contains("order")) order = j["order"].get<long>();
-
     if(j.contains("waiting")) waiting = j["waiting"].get<double>();
     if(j.contains("depth")) {
         for(auto &d : j["depth"]) {
@@ -2376,22 +2324,19 @@ std::string trig_data::serializeLocation() {
 // not individually.
 void trig_data::activate() {
     if(active) {
-        basic_mud_log("SYSERR: Attempt to activate already-active trigger %ld", id);
+        basic_mud_log("SYSERR: Attempt to activate already-active trigger %s/%ld", sc->owner->getUID(), parent->vn);
         return;
     }
     active = true;
-    if(waiting != 0.0) triggers_waiting.insert(shared_from_this());
-    parent->instances.insert(shared_from_this());
+    if(waiting != 0.0) triggers_waiting.push_back(shared_from_this());
 }
 
 void trig_data::deactivate() {
     if(!active) {
-        basic_mud_log("SYSERR: Attempt to deactivate already-inactive trigger %ld", id);
+        basic_mud_log("SYSERR: Attempt to deactivate already-inactive trigger %s/%ld", sc->owner->getUID(), parent->vn);
         return;
     }
     active = false;
-    triggers_waiting.erase(shared_from_this());
-    parent->instances.erase(shared_from_this());
 }
 
 
@@ -2441,8 +2386,7 @@ void HasVars::addVar(const std::string& name, const std::string& val) {
     std::string n = name;
     to_lower(n);
     trim(n);
-    if(val.empty()) vars.erase(n);
-    else vars[n] = val;
+    vars[n] = val;
 }
 
 void HasVars::addVar(const std::string& name, struct unit_data *u) {
@@ -2473,7 +2417,6 @@ trig_data::trig_data(std::shared_ptr<trig_proto> parent) : parent(parent) {
 }
 
 void script_data::loadScript(std::shared_ptr<trig_data> t) {
-    t->order = dgScripts.size();
     dgScripts.push_back(t);
     types |= GET_TRIG_TYPE(t);
     t->activate();
@@ -2481,7 +2424,6 @@ void script_data::loadScript(std::shared_ptr<trig_data> t) {
 
 trig_data::~trig_data() {
     if(active) deactivate();
-    uniqueScripts.erase(id);
 }
 
 void script_data::removeAll() {
