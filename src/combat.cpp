@@ -3891,10 +3891,10 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                         CharAttribute val;
                         if(rand == 1) {
                             val = CharAttribute::Agility;
-                            send_to_char(ch, "@mYour body feels like it's light as a feather!@n");
+                            send_to_char(ch, "@mYour body feels like it's light as a feather!@n\r\n");
                         } else {
                             val = CharAttribute::Speed;
-                            send_to_char(ch, "@mThe world feels just a little slower.@n");
+                            send_to_char(ch, "@mThe world feels just a little slower.@n\r\n");
                         }
 
                         ch->mod(val, 1);
@@ -3908,10 +3908,10 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                         CharAttribute val;
                         if(rand == 1) {
                             val = CharAttribute::Intelligence;
-                            send_to_char(ch, "@mYou begin to notice new ways to put together your attacks.@n");
+                            send_to_char(ch, "@mYou begin to notice new ways to put together your attacks.@n\r\n");
                         } else {
                             val = CharAttribute::Wisdom;
-                            send_to_char(ch, "@mYou notice a couple of flaws in your opponents technique.@n");
+                            send_to_char(ch, "@mYou notice a couple of flaws in your opponents technique.@n\r\n");
                         }
 
                         ch->mod(val, 1);
@@ -3925,10 +3925,10 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                         CharAttribute val;
                         if(rand == 1) {
                             val = CharAttribute::Constitution;
-                            send_to_char(ch, "@mThe pain of your wounds feel just a little bit less important.@n");
+                            send_to_char(ch, "@mThe pain of your wounds feel just a little bit less important.@n\r\n");
                         } else {
                             val = CharAttribute::Strength;
-                            send_to_char(ch, "@mYour hits seem to be landing just a bit harder.@n");
+                            send_to_char(ch, "@mYour hits seem to be landing just a bit harder.@n\r\n");
                         }
 
                         ch->mod(val, 1);

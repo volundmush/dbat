@@ -5106,8 +5106,9 @@ ACMD(do_cook) {
 
             GET_OBJ_VAL(meal, 1) = psbonus;
             GET_OBJ_VAL(meal, 2) = expbonus;
-            GET_OBJ_VAL(meal, 3) = attr;
-            GET_OBJ_VAL(meal, 4) = attrChance * masterBonus;
+            // 3 is Poison!
+            GET_OBJ_VAL(meal, 4) = attr;
+            GET_OBJ_VAL(meal, 5) = attrChance * masterBonus;
 
             WAIT_STATE(ch, PULSE_2SEC);
         } /* End has ingredients */
