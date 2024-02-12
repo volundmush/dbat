@@ -500,6 +500,7 @@ struct trans_data {
 
     double timeSpentInForm{0.0};
     bool visible = true;
+    bool limitBroken = false;
 
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
 
@@ -857,6 +858,7 @@ struct char_data : public unit_data {
     void hideTransform(FormID form, bool hide);
     void addTransform(FormID form);
     bool removeTransform(FormID form);
+    void attemptLimitBreak();
 
     void resurrect(ResurrectionMode mode);
 

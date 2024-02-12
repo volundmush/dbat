@@ -797,6 +797,16 @@ bool char_data::removeTransform(FormID form) {
     return false;
 }
 
+void char_data::attemptLimitBreak() {
+    if(form == FormID::Base)
+        return;
+    if(transforms[form].timeSpentInForm > 50000 && rand_number(0, 1000) == 1000) {
+        transforms[form].limitBroken = true;
+        if(race != RaceID::Android && race != RaceID::Tuffle && race != RaceID::BioAndroid && race != RaceID::Majin )
+        affected_by.set(AFF_LIMIT_BREAKING);         
+    }
+}
+
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
     return mod(CharStat::PowerLevel, amt);
 }

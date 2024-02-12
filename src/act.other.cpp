@@ -7486,6 +7486,8 @@ ACMD(do_transform) {
 
         trans::handleEchoRevert(ch, ch->form);
         ch->form = FormID::Base;
+        if (AFF_FLAGGED(ch, AFF_LIMIT_BREAKING)) 
+            ch->affected_by.set(AFF_LIMIT_BREAKING, false);
 
         int64_t afterKi = ch->getMaxKI();
 
