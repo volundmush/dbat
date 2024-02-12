@@ -2081,7 +2081,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
             if (GET_OBJ_VNUM(k) == 80) { // Tsuihidan
                 if (KICHARGE(k) <= 0) {
                     send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
-                        k->short_description);
+                        k->getShortDesc());
                     extract_obj(k);
                     continue;
                 }
@@ -2113,7 +2113,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         KICHARGE(k) -= KICHARGE(k) * 0.1;
                         if (KICHARGE(k) <= 0) {
                             send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
-                                         k->short_description);
+                                         k->getShortDesc());
                             extract_obj(k);
                         }
                         continue;
@@ -2227,7 +2227,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         KICHARGE(k) -= KICHARGE(k) / 10;
                         if (KICHARGE(k) <= 0) {
                             send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
-                                         k->short_description);
+                                         k->getShortDesc());
                             extract_obj(k);
                         }
                         continue;
