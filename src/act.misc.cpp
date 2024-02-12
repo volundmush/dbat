@@ -874,7 +874,9 @@ ACMD(do_preference) {
     if (IS_NPC(ch))
         return;
 
-    char arg[MAX_INPUT_LENGTH];
+    send_to_char(ch, "Undergoing rework/removal, sorry! Not this era!");
+
+    /*char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
 
@@ -911,7 +913,7 @@ ACMD(do_preference) {
     } else {
         send_to_char(ch, "Syntax: preference (throw | weapon | hand | ki)\r\n");
         return;
-    }
+    }*/
 }
 
 ACMD(do_moondust) {
@@ -4954,7 +4956,7 @@ ACMD(do_cook) {
                 return;
             } /* End failed to cook it right */
 
-            int psbonus = 0, expbonus = 0;
+            int psbonus = 0, expbonus = 0, attr = 0;
 
             switch (num) {
                 case 1:
@@ -4962,102 +4964,119 @@ ACMD(do_cook) {
                     obj_to_char(meal, ch);
                     psbonus = 1;
                     expbonus = 5;
+                    attr = 1;
                     break;
                 case 2:
                     meal = read_object(MEAL_TOMATO_SOUP, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 2;
                     expbonus = 15;
+                    attr = 2;
                     break;
                 case 3:
                     meal = read_object(MEAL_POTATO_SOUP, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 1;
                     expbonus = 20;
+                    attr = 3;
                     break;
                 case 4:
                     meal = read_object(MEAL_VEGETABLE_SOUP, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 3;
                     expbonus = 45;
+                    attr = 4;
                     break;
                 case 5:
                     meal = read_object(MEAL_MEAT_STEW, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 2;
                     expbonus = 50;
+                    attr = 5;
                     break;
                 case 6:
                     meal = read_object(MEAL_CHILI_SOUP, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 0;
                     expbonus = 100;
+                    attr = 6;
                     break;
                 case 7:
                     meal = read_object(MEAL_NORM_FISH, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 2;
                     expbonus = 12;
+                    attr = 1;
                     break;
                 case 8:
                     meal = read_object(MEAL_GOOD_FISH, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 3;
                     expbonus = 40;
+                    attr = 2;
                     break;
                 case 9:
                     meal = read_object(MEAL_GREAT_FISH, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 5;
                     expbonus = 80;
+                    attr = 3;
                     break;
                 case 10:
                     meal = read_object(MEAL_BEST_FISH, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 7;
                     expbonus = 125;
+                    attr = 4;
                     break;
                 case 11:
                     meal = read_object(MEAL_COOKED_RICE, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 1;
                     expbonus = 8;
+                    attr = 5;
                     break;
                 case 12:
                     meal = read_object(MEAL_SUSHI, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 2;
                     expbonus = 20;
+                    attr = 6;
                     break;
                 case 13:
                     meal = read_object(MEAL_BREAD, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 1;
                     expbonus = 8;
+                    attr = 1;
                     break;
                 case 14:
                     meal = read_object(MEAL_SALAD, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 5;
                     expbonus = 8;
+                    attr = 2;
                     break;
                 case 15:
                     meal = read_object(MEAL_APPLEPLUM, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 1;
                     expbonus = 9;
+                    attr = 3;
                     break;
                 case 16:
                     meal = read_object(MEAL_FBERRY_MUFFIN, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 3;
                     expbonus = 12;
+                    attr = 4;
                     break;
                 case 17:
                     meal = read_object(MEAL_CARAMBOLA_BREAD, VIRTUAL);
                     obj_to_char(meal, ch);
                     psbonus = 1;
                     expbonus = 9;
+                    attr = 5;
                     break;
                 default:
                     send_to_char(ch, "That is not a valid dish!\r\n");
@@ -5067,6 +5086,9 @@ ACMD(do_cook) {
                 psbonus += 1;
                 expbonus += 3;
             }
+
+            int attrChance = (psbonus + expbonus) / 4;
+
             act("@wYou carefully prepare the ingredients and then start cooking them. After a while of patience  and skillful care you successfully make @D'@C$p@D'@w!@n",
                 true, ch, meal, nullptr, TO_CHAR);
             act("@C$n@w carefully prepares some ingredients and starts cooking them. After a while of patience and skillful care $e succeeds in making @D'@C$p@D'@w!@n",
@@ -5084,6 +5106,8 @@ ACMD(do_cook) {
 
             GET_OBJ_VAL(meal, 1) = psbonus;
             GET_OBJ_VAL(meal, 2) = expbonus;
+            GET_OBJ_VAL(meal, 3) = attr;
+            GET_OBJ_VAL(meal, 4) = attrChance * masterBonus;
 
             WAIT_STATE(ch, PULSE_2SEC);
         } /* End has ingredients */

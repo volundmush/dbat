@@ -4965,7 +4965,7 @@ ACMD(do_focus) {
                 ch->decCurKI(ch->getMaxKI() / 20);
                 int duration = roll_aff_duration(GET_INT(ch), 2);
                 /* Str , Con, Int, Agl, Wis, Spd */
-                assign_affect(ch, AFF_MIGHT, SKILL_MIGHT, duration, 10, 2, 0, 0, 0, 0);
+                assign_affect(ch, AFF_MIGHT, SKILL_MIGHT, duration, ch->get(CharTrain::Strength) / 5, 2, 0, 0, 0, 0);
                 reveal_hiding(ch, 0);
                 act("You focus ki into your muscles, making them mighty!", true, ch, nullptr, nullptr, TO_CHAR);
                 act("$n focuses ki into $s muscles, making them mighty!", true, ch, nullptr, nullptr, TO_ROOM);
@@ -5014,7 +5014,7 @@ ACMD(do_focus) {
                     ch->decCurKI(ch->getMaxKI() / 20);
                     int duration = roll_aff_duration(GET_INT(ch), 2);
                     /* Str , Con, Int, Agl, Wis, Spd */
-                    assign_affect(vict, AFF_MIGHT, SKILL_MIGHT, duration, 10, 2, 0, 0, 0, 0);
+                    assign_affect(vict, AFF_MIGHT, SKILL_MIGHT, duration, vict->get(CharTrain::Strength) / 5, 2, 0, 0, 0, 0);
                     reveal_hiding(ch, 0);
                     act("You focus ki into $N's muscles, making them mighty!", true, ch, nullptr, vict, TO_CHAR);
                     act("$n focuses ki into your muscles, making them mighty!", true, ch, nullptr, vict, TO_VICT);
@@ -5094,7 +5094,7 @@ ACMD(do_focus) {
             } else {
                 int duration = roll_aff_duration(GET_INT(ch), 2);
                 /* Str , Con, Int, Agl, Wis, Spd */
-                assign_affect(ch, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, 10, 0);
+                assign_affect(ch, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, ch->get(CharTrain::Intelligence) / 5, 0);
                 ch->decCurKI(ch->getMaxKI() / 20);
                 reveal_hiding(ch, 0);
                 act("You focus ki into your mind, awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_CHAR);
@@ -5161,7 +5161,7 @@ ACMD(do_focus) {
                 } else {
                     int duration = roll_aff_duration(GET_INT(ch), 2);
                     /* Str , Con, Int, Agl, Wis, Spd */
-                    assign_affect(vict, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, 10, 0);
+                    assign_affect(vict, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, vict->get(CharTrain::Intelligence) / 5, 0);
                     ch->decCurKI(ch->getMaxKI() / 20);
                     reveal_hiding(ch, 0);
                     act("You focus ki into $N's mind, awakening it to cosmic wisdom!", true, ch, nullptr, vict,
@@ -5226,7 +5226,7 @@ ACMD(do_focus) {
             } else {
                 int duration = roll_aff_duration(GET_INT(ch), 2);
                 /* Str , Con, Int, Agl, Wis, Spd */
-                assign_affect(ch, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, 10, 0, 0, 0);
+                assign_affect(ch, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, ch->get(CharTrain::Intelligence) / 5, 0, 0, 0);
                 ch->decCurKI(ch->getMaxKI() / 20);
                 reveal_hiding(ch, 0);
                 act("You focus ki into your mind, making it work faster!", true, ch, nullptr, nullptr, TO_CHAR);
@@ -5272,7 +5272,7 @@ ACMD(do_focus) {
                 } else {
                     int duration = roll_aff_duration(GET_INT(ch), 2);;
                     /* Str , Con, Int, Agl, Wis, Spd */
-                    assign_affect(vict, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, 10, 0, 0, 0);
+                    assign_affect(vict, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, vict->get(CharTrain::Intelligence) / 5, 0, 0, 0);
                     ch->decCurKI(ch->getMaxKI() / 20);
                     reveal_hiding(ch, 0);
                     act("You focus ki into $N's mind, making it work faster!", true, ch, nullptr, vict, TO_CHAR);
@@ -5318,7 +5318,7 @@ ACMD(do_focus) {
                 ch->decCurKI(ch->getMaxKI() / 20);
                 int duration = roll_aff_duration(GET_INT(ch), 2);;
                 /* Str , Con, Int, Agl, Wis, Spd */
-                assign_affect(ch, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, 10, 0, 0);
+                assign_affect(ch, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, ch->get(CharTrain::Agility) / 5, 0, 0);
                 reveal_hiding(ch, 0);
                 act("You focus ki into your limbs, making them more flexible!", true, ch, nullptr, nullptr, TO_CHAR);
                 act("$n focuses ki into $s limbs, making them more flexible!", true, ch, nullptr, nullptr, TO_ROOM);
@@ -5364,7 +5364,7 @@ ACMD(do_focus) {
                     ch->decCurKI(ch->getMaxKI() / 20);
                     int duration = roll_aff_duration(GET_INT(ch), 2);;
                     /* Str , Con, Int, Agl, Wis, Spd */
-                    assign_affect(vict, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, 10, 0, 0);
+                    assign_affect(vict, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, vict->get(CharTrain::Agility) / 5, 0, 0);
                     reveal_hiding(ch, 0);
                     act("You focus ki into $N's limbs, making them more flexible!", true, ch, nullptr, vict, TO_CHAR);
                     act("$n focuses ki into your limbs, making them more flexible!", true, ch, nullptr, vict, TO_VICT);

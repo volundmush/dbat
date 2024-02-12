@@ -2069,13 +2069,10 @@ ACMD(do_assemble) {
             return;
         }
 
-        if (GET_SKILL(ch, SKILL_SURVIVAL) >= 90) {
-            roll += axion_dice(0);
-        } else if (GET_SKILL(ch, SKILL_SURVIVAL) < 90) {
-            roll += axion_dice(0);
-        }
-        improve_skill(ch, SKILL_BUILD, 1);
-        if (GET_SKILL(ch, SKILL_BUILD) <= roll) {
+        roll += axion_dice(0);
+
+        improve_skill(ch, SKILL_SURVIVAL, 1);
+        if (70 + (GET_SKILL(ch, SKILL_SURVIVAL) / 2) >= roll) {
             if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
                 send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
                 return;
@@ -3664,10 +3661,11 @@ ACMD(do_eat) {
         if (subcmd != SCMD_TASTE) {
             int psbonus = GET_OBJ_VAL(food, 1);
             int expbonus = GET_OBJ_VAL(food, 2) * ((GET_LEVEL(ch) * 0.4) + 1);
-            int capped = false, pscapped = false;
+            int attr = GET_OBJ_VAL(food, 3);
+            int attrChance = GET_OBJ_VAL(food, 4);
+            int pscapped = false;
             if (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) <= 0 && GET_LEVEL(ch) < 100) {
                 expbonus = 1;
-                capped = true;
             } else {
                 expbonus = GET_LEVEL(ch) * 1000;
             }
@@ -3679,10 +3677,38 @@ ACMD(do_eat) {
 
             ch->modExperience(expbonus);
             ch->modPractices(psbonus);
+
+            if(axion_dice(0) < attrChance) {
+                switch(attr) {
+                    case 1:
+                        ch->mod(CharAttribute::Strength, 1);
+                        send_to_char(ch, "@mThat was a hearty meal!@n");
+                        break;
+                    case 2:
+                        ch->mod(CharAttribute::Agility, 1);
+                        send_to_char(ch, "@mDiced to perfection.@n");
+                        break;
+                    case 3:
+                        ch->mod(CharAttribute::Constitution, 1);
+                        send_to_char(ch, "@mWhat a fortifying meal!@n");
+                        break;
+                    case 4:
+                        ch->mod(CharAttribute::Intelligence, 1);
+                        send_to_char(ch, "@mA splendid dish!@n");
+                        break;
+                    case 5:
+                        ch->mod(CharAttribute::Speed, 1);
+                        send_to_char(ch, "@mWhere did it all go?@n");
+                        break;
+                    case 6:
+                        ch->mod(CharAttribute::Wisdom, 1);
+                        send_to_char(ch, "@mYou feel sated. Content.@n");
+                        break;
+                }
+            }
+
             send_to_char(ch, "That was exceptionally delicious! @D[@mPS@D: @C+%d@D] [@gEXP@D: @G+%s@D]@n\r\n",
                          psbonus, add_commas(expbonus).c_str());
-            if (capped == true)
-                send_to_char(ch, "Experience capped due to negative TNL.\r\n");
             if (pscapped == true)
                 send_to_char(ch, "Practice Sessions capped for food at 1000 PS.\r\n");
         }
