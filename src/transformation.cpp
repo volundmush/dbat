@@ -144,8 +144,12 @@ namespace trans {
 
             // Demon
             case FormID::DarkKing:
-                if(ch->getBasePL() > 1225000000)
+                if(ch->getBasePL() >= 1225000000)
                     return "@bDark @rKing@n";
+                else if (ch->getBasePL() >= 85000000)
+                    return "@bDark @yLord@n";
+                else if (ch->getBasePL() >= 2000000)
+                    return "@bDark @yCourtier@n";
                 else
                     return "@bDark @ySeed@n";
 
@@ -902,21 +906,21 @@ namespace trans {
 
             // Notify at thresholds
             if(timeBefore < MASTERY_THRESHOLD && timeAfter >= MASTERY_THRESHOLD)
-                send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, form));
+                send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n\r\n" + getName(ch, form));
 
             if(timeBefore < LIMIT_THRESHOLD && timeAfter >= LIMIT_THRESHOLD)
-                send_to_char(ch, "@mYou feel power overwhelming eminate from your core, you instinctively know you've hit the limit of @n" + getName(ch, form));
+                send_to_char(ch, "@mYou feel power overwhelming eminate from your core, you instinctively know you've hit the limit of @n\r\n" + getName(ch, form));
 
             if(timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limitBroken == true)
-                send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n");
+                send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n\r\n");
 
             // Check stamina drain.
             if (auto drain = getStaminaDrain(ch, ch->form, true) * deltaTime; drain > 0) {
                 if(ch->decCurSTPercent(drain) == 0) {
                     if(!blockRevertDisallowed(ch, FormID::Base)) {
-                        act("@mExhausted of stamina, your body forcibly reverts from its form.@n", true, ch, nullptr,
+                        act("@mExhausted of stamina, your body forcibly reverts from its form.@n\r\n", true, ch, nullptr,
                             nullptr, TO_CHAR);
-                        act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n", true, ch, nullptr,
+                        act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n\r\n", true, ch, nullptr,
                             nullptr, TO_ROOM);
                         ch->form = FormID::Base;
                         ch->remove_kaioken(true);
