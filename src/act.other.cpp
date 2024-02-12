@@ -6405,11 +6405,6 @@ ACMD(do_eavesdrop) {
 }
 
 ACMD(do_zanzoken) {
-
-    int prob = 0, perc = 0;
-    int64_t cost = 0;
-
-
     if (!know_skill(ch, SKILL_ZANZOKEN) && !IS_NPC(ch)) {
         return;
     }
@@ -6425,39 +6420,7 @@ ACMD(do_zanzoken) {
         return;
     }
 
-    if (!IS_NPC(ch)) {
-        prob = GET_SKILL(ch, SKILL_ZANZOKEN);
-    } else {
-        prob = rand_number(80, 90);
-    }
-    perc = axion_dice(0);
-    cost = GET_MAX_MANA(ch) / 50;
-
-    if (prob > 75) {
-        cost *= 2;
-    } else if (prob > 50) {
-        cost *= 4;
-    } else if (prob >= 25) {
-        cost *= 8;
-    } else if (prob < 25) {
-        cost *= 10;
-    }
-
-    if ((ch->getCurKI()) < cost) {
-        send_to_char(ch, "You do not have enough ki.\r\n");
-        return;
-    }
-
-    if (prob < perc) {
-        send_to_char(ch, "You focus your ki in preparation of a zanzoken but mess up and waste your ki!\r\n");
-        improve_skill(ch, SKILL_ZANZOKEN, 2);
-        ch->decCurKI(cost);
-        WAIT_STATE(ch, PULSE_2SEC);
-        return;
-    }
-
     act("@wYou focus your ki, preparing to move at super speeds if necessary.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    ch->decCurKI(cost);
     ch->affected_by.set(AFF_ZANZOKEN);
     improve_skill(ch, SKILL_ZANZOKEN, 2);
     WAIT_STATE(ch, PULSE_2SEC);
