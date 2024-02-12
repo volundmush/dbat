@@ -142,6 +142,12 @@ namespace trans {
             case FormID::AscendThird:
                 return "@YAscend @WThird@n";
 
+            // Demon
+            case FormID::DarkKing:
+                if(ch->getBasePL() > 1225000000)
+                    return "@bDark @rKing@n";
+                else
+                    return "@bDark @ySeed@n";
 
             //Generic Forms
             case FormID::PotentialUnleashed:
@@ -173,7 +179,7 @@ namespace trans {
                 mastery = 2;
             else mastery = 1;
 
-            if(IS_AFFECTED(ch, AFF_LIMIT_BREAKING))
+            if(IS_AFFECTED(ch, AFF_LIMIT_BREAKING) && ch->transforms[form].limitBroken)
                 mastery += 2;
 
             return mastery;
@@ -315,7 +321,11 @@ namespace trans {
             case FormID::AscendThird:
                 return "third";
 
-                //Unbound Forms
+            // Demon
+            case FormID::DarkKing:
+                return "dark";
+
+            // Unbound Forms
             case FormID::PotentialUnleashed:
                 return "potential";
             case FormID::EvilAura:
@@ -643,16 +653,100 @@ namespace trans {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 250000000 * 1.0 + (0.2 * getMasteryTier(ch, FormID::AscendThird));}},
             }
         },
-        //Unbound Forms
+        // Demon Form
+        {
+            FormID::DarkKing, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {
+                    double base;
+                    auto bpl = ch->getBasePL();
+                    if(bpl < 2000000)
+                        base = 1.0;
+                    else if(bpl < 85000000)
+                        base = 1.5;
+                    else if(bpl < 1225000000)
+                        base = 2.0;
+                    else
+                        base = 3.0;
+
+                    return base + ((base/10.0) * getMasteryTier(ch, FormID::DarkKing));
+                    }},
+                {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {
+                    double base;
+                    if(ch->getCurLF() > 0) {
+                        auto bpl = ch->getBasePL();
+
+                        if(bpl < 2000000) {
+                            base = 0.4;
+                        }
+                        else if(bpl < 85000000) {
+                            base = 0.6;
+                        }
+                        else if(bpl < 1225000000) {
+                            base = 0.8;
+                        }
+                        else {
+                            base = 1.0;
+                        }
+
+                        send_to_char(ch, "@MYour tainted lifeforce infuses your attack with a sickly purple hue!@n");
+
+                        base = base * ch->decCurLFPercent(0.05);
+                    }
+                    
+                    return base + ((base/10) * getMasteryTier(ch, FormID::DarkKing));
+                }},
+                {APPLY_DEFENSE_PERC, 0.0, -1, [](struct char_data *ch) {
+                    double base = 0.0;
+                    if(ch->getCurLF() > 0) {
+                        int chance = 30;
+                        auto bpl = ch->getBasePL();
+
+                        if(bpl < 2000000) {
+                            chance = 30;
+                            base = 0.2;
+                        }
+                        else if(bpl < 85000000) {
+                            chance = 50;
+                            base = 0.3;
+                        }
+                        else if(bpl < 1225000000) {
+                            chance = 60;
+                            base = 0.5;
+                        }
+                        else {
+                            chance = 80;
+                            base = 0.6;
+                        }
+
+                        if(axion_dice(0) <= chance && GET_BARRIER(ch) <= 0) {
+                            ch->barrier = ch->getCurLF() / 5;
+                            send_to_char(ch, "@MThe mantle of your tainted life flares out, creating a barrier.@n");
+                        }
+                        else
+                            send_to_char(ch, "@MYour tainted lifeforce saps the strength of your opponents attack!@n");
+
+                        ch->decCurLFPercent(0.05);
+                    } else {
+                        send_to_char(ch, "@MYou feel far too exhauseted to strengthen yourself!@n");
+                    }
+                    
+                    return -base - ((base/10) * getMasteryTier(ch, FormID::DarkKing));
+                    }},
+
+            }
+        },
+
+        // Unbound Forms
         {
             FormID::PotentialUnleashed, {
                 {APPLY_VITALS_MULT,  0.0, -1, [](struct char_data *ch) {
-                    if(ch->get(CharNum::Level) < 20) return 1.0 + (0.1 * getMasteryTier(ch, FormID::PotentialUnleashed));
-                    if(ch->get(CharNum::Level) < 40) return 2.0 + (0.1 * getMasteryTier(ch, FormID::PotentialUnleashed));
-                    if(ch->get(CharNum::Level) < 60) return 3.0 + (0.15 * getMasteryTier(ch, FormID::PotentialUnleashed));
-                    if(ch->get(CharNum::Level) < 80) return 4.5 + (0.15 * getMasteryTier(ch, FormID::PotentialUnleashed));
-                    if(ch->get(CharNum::Level) < 100) return 6.0 + (0.2 * getMasteryTier(ch, FormID::PotentialUnleashed));
-                    if(ch->get(CharNum::Level) == 100) return 7.0 + (0.2 * getMasteryTier(ch, FormID::PotentialUnleashed));
+                    auto cl = ch->get(CharNum::Level);
+                    if(cl < 20) return 1.0 + (0.1 * getMasteryTier(ch, FormID::PotentialUnleashed));
+                    if(cl < 40) return 2.0 + (0.1 * getMasteryTier(ch, FormID::PotentialUnleashed));
+                    if(cl < 60) return 3.0 + (0.15 * getMasteryTier(ch, FormID::PotentialUnleashed));
+                    if(cl < 80) return 4.0 + (0.15 * getMasteryTier(ch, FormID::PotentialUnleashed));
+                    if(cl < 100) return 4.5 + (0.2 * getMasteryTier(ch, FormID::PotentialUnleashed));
+                    if(cl == 100) return 5.0 + (0.2 * getMasteryTier(ch, FormID::PotentialUnleashed));
                     return 1.0 + (0.1 * getMasteryTier(ch, FormID::PotentialUnleashed));
                 }},
             }
@@ -667,9 +761,16 @@ namespace trans {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) { return 1300000 * 1.0 + (0.2 * getMasteryTier(ch, FormID::EvilAura));}},
                 {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {
                     double healthBoost = 0.1;
-                    if(ch->health < 0.75) {
-                        healthBoost = (1 - ch->health) * (4 + (0.2 * getMasteryTier(ch, FormID::EvilAura)));
-                        send_to_char(ch, "@RYou feel your own pain infuse the attack.\r\n@n");
+                    auto chealth = ch->health;
+                    if(chealth < 0.75) {
+                        healthBoost = (1 - chealth) * (4 + (0.2 * getMasteryTier(ch, FormID::EvilAura)));
+                        
+                        if(chealth < 0.25)
+                            send_to_char(ch, "@RYou feel your agony infuse the attack.\r\n@n");
+                        else if(chealth < 0.50)
+                            send_to_char(ch, "@RYou feel your rage infuse the attack.\r\n@n");
+                        else 
+                            send_to_char(ch, "@RYou feel your anger infuse the attack.\r\n@n");
                     }
 	                return healthBoost;
                 }},
@@ -750,6 +851,9 @@ namespace trans {
         {FormID::MysticSecond, .07},
         {FormID::MysticThird, .1},
 
+        // Demon
+        {FormID::DarkKing, .1},
+
         // Unbound Forms
         {FormID::PotentialUnleashed, .1},
         {FormID::EvilAura, .08},
@@ -816,8 +920,7 @@ namespace trans {
                             nullptr, TO_ROOM);
                         ch->form = FormID::Base;
                         ch->remove_kaioken(true);
-                        if (AFF_FLAGGED(ch, AFF_LIMIT_BREAKING)) 
-                            ch->affected_by.set(AFF_LIMIT_BREAKING, false);
+                        ch->removeLimitBreak();
             
                     }
                 }
@@ -1134,6 +1237,13 @@ namespace trans {
                                              }},
 
             {
+                    FormID::DarkKing,     {
+                                                     "@WYou kindle the dark seed within you, rooted through your body, and in a mere moment its roots pulse with power untold. Wrapping them within yourself, bound eternal, your body begins to shift as your combined strength becomes manifest.@n",
+                                                     "@C$n strains for a second as their eyes shine a fierce red, soon their body contorts, unleashing an ominous aura from within themself.@n"
+                                             }
+            },
+
+            {
                     FormID::PotentialUnleashed,     {
                                                      "@WThere is a well of potential within you, beyond simple forms. Reaching deep you tug at it, pulling what was once simple potential and flaring it to life in a burst of simple power.@n",
                                                      "@C$n takes a moment for themselves, focusing inwards. A moment later a white glow of pure aura explodes outwards, energy unbound.@n"
@@ -1258,6 +1368,9 @@ namespace trans {
         FormID::AscendSecond,
         FormID::AscendThird,
 
+        // Demon
+        FormID::DarkKing,
+
         // Unbound Forms
         FormID::PotentialUnleashed,
         FormID::EvilAura,
@@ -1299,7 +1412,8 @@ namespace trans {
         },
         {RaceID::Majin, {FormID::MajAffinity, FormID::MajSuper, FormID::MajTrue}},
         {RaceID::Kai, {FormID::MysticFirst, FormID::MysticSecond, FormID::MysticThird}},
-        {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}}
+        {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}},
+        {RaceID::Demon, {FormID::DarkKing}}
     };
 
     void initTransforms(char_data* ch) {
@@ -1330,8 +1444,6 @@ namespace trans {
                 return pforms;
 
             default:
-                //pforms = ch->unlockedForms;
-
                 for (auto form : forms) {
                     if(form.first == FormID::Base || form.first == FormID::Oozaru || form.first == FormID::GoldenOozaru)
                         form.second.visible = false;
@@ -1490,6 +1602,9 @@ namespace trans {
         {FormID::BioSemiPerfect, 25000000},
         {FormID::BioPerfect, 220000000},
         {FormID::BioSuperPerfect, 1300000000},
+
+        // Demon Forms
+        {FormID::DarkKing, 800000},
 
         // Unbound Forms
         {FormID::PotentialUnleashed, 0},

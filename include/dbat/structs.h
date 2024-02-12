@@ -859,6 +859,7 @@ struct char_data : public unit_data {
     void addTransform(FormID form);
     bool removeTransform(FormID form);
     void attemptLimitBreak();
+    void removeLimitBreak();
 
     void resurrect(ResurrectionMode mode);
 

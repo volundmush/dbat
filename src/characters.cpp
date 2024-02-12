@@ -802,8 +802,19 @@ void char_data::attemptLimitBreak() {
         return;
     if(transforms[form].timeSpentInForm > 50000 && rand_number(0, 1000) == 1000) {
         transforms[form].limitBroken = true;
+        incCurHealthPercent(0.35);
+        incCurKIPercent(0.35);
+        incCurSTPercent(0.35);
+        send_to_char(this, "@mA rush of energy bursts through your system as you defy your limits.@n");
         if(race != RaceID::Android && race != RaceID::Tuffle && race != RaceID::BioAndroid && race != RaceID::Majin )
-        affected_by.set(AFF_LIMIT_BREAKING);         
+            affected_by.set(AFF_LIMIT_BREAKING);         
+    }
+}
+
+void char_data::removeLimitBreak() {
+    if (AFF_FLAGGED(this, AFF_LIMIT_BREAKING)) {
+        this->affected_by.set(AFF_LIMIT_BREAKING, false);
+        send_to_char(this, "@mYou feel your body finally calm down.@n");
     }
 }
 

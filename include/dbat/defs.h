@@ -171,10 +171,13 @@ enum class FormID : uint8_t {
     AscendSecond = 56,
     AscendThird = 57,
 
-    // Generic Forms
-    PotentialUnleashed = 58,
-    EvilAura = 59,
-    UltraInstinct = 60,
+    // Demon
+    DarkKing = 58,
+
+    // Unbound Forms
+    PotentialUnleashed = 59,
+    EvilAura = 60,
+    UltraInstinct = 61,
 
 };
 

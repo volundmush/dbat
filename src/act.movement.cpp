@@ -2574,8 +2574,7 @@ ACMD(do_rest) {
                 SITS(ch) = chair;
                 SITTING(chair) = ch;
                 GET_POS(ch) = POS_RESTING;
-                if (AFF_FLAGGED(ch, AFF_LIMIT_BREAKING)) 
-                    ch->affected_by.set(AFF_LIMIT_BREAKING, false);
+                ch->removeLimitBreak();
                 break;
             case POS_SITTING:
                 send_to_char(ch, "You should get up first.\r\n");
@@ -2593,8 +2592,7 @@ ACMD(do_rest) {
                 send_to_char(ch, "You stop floating around, and stop to rest your tired bones.\r\n");
                 act("$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
                 GET_POS(ch) = POS_RESTING;
-                if (AFF_FLAGGED(ch, AFF_LIMIT_BREAKING)) 
-                    ch->affected_by.set(AFF_LIMIT_BREAKING, false);
+                ch->removeLimitBreak();
                 break;
         }
     }
@@ -2687,8 +2685,7 @@ ACMD(do_sleep) {
                 send_to_char(ch, "You go to sleep.\r\n");
                 act("$n lies down and falls asleep.", true, ch, nullptr, nullptr, TO_ROOM);
                 GET_POS(ch) = POS_SLEEPING;
-                if (AFF_FLAGGED(ch, AFF_LIMIT_BREAKING)) 
-                    ch->affected_by.set(AFF_LIMIT_BREAKING, false);
+                ch->removeLimitBreak();
                 /* Fury Mode Loss for halfbreeds */
 
                 if (PLR_FLAGGED(ch, PLR_FURY)) {
@@ -2714,8 +2711,7 @@ ACMD(do_sleep) {
                 send_to_char(ch, "You stop floating around, and lie down to sleep.\r\n");
                 act("$n stops floating around, and lie down to sleep.",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                if (AFF_FLAGGED(ch, AFF_LIMIT_BREAKING)) 
-                    ch->affected_by.set(AFF_LIMIT_BREAKING, false);
+                ch->removeLimitBreak();
                 GET_POS(ch) = POS_SLEEPING;
                 break;
         }
@@ -2753,8 +2749,7 @@ ACMD(do_sleep) {
                 reveal_hiding(ch, 0);
                 act("You lay down on $p and sleep.", false, ch, chair, nullptr, TO_CHAR);
                 act("$n lays down on $p and sleeps.", false, ch, chair, nullptr, TO_ROOM);
-                if (AFF_FLAGGED(ch, AFF_LIMIT_BREAKING)) 
-                    ch->affected_by.set(AFF_LIMIT_BREAKING, false);
+                ch->removeLimitBreak();
                 /* Fury Mode Loss for halfbreeds */
 
                 if (PLR_FLAGGED(ch, PLR_FURY)) {
@@ -2784,8 +2779,7 @@ ACMD(do_sleep) {
                 act("$n stops floating around, and lie down to sleep.",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 GET_POS(ch) = POS_SLEEPING;
-                if (AFF_FLAGGED(ch, AFF_LIMIT_BREAKING)) 
-                    ch->affected_by.set(AFF_LIMIT_BREAKING, false);
+                ch->removeLimitBreak();
                 break;
         }
     }
