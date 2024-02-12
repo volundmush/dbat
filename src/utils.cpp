@@ -2899,7 +2899,7 @@ void core_dump_real(const char *who, int line) {
 /* Is there a campfire in the room? */
 int cook_element(room_rnum room) {
     int found = 0;
-    for(auto obj = world[room].contents; obj; obj = obj->next_content) {
+    for(auto obj = world[room]->contents; obj; obj = obj->next_content) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
         } else if(obj->vn == 19093) return 2;
@@ -3023,7 +3023,7 @@ int room_is_dark(room_rnum room) {
         return (false);
     }
 
-    for(auto c = world[room].people; c; c = c->next_in_room) {
+    for(auto c = world[room]->people; c; c = c->next_in_room) {
         if(c->isProvidingLight()) return false;
     }
 
@@ -3301,7 +3301,7 @@ bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
     auto room = world.find(loc);
     if (room != world.end()) {
-        return room->second.room_flags.test(flag);
+        return room->second->room_flags.test(flag);
     }
     return false;
 }

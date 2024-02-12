@@ -51,7 +51,7 @@ bool isMigrating = false;
 
 struct config_data config_info; /* Game configuration list.    */
 
-std::unordered_map<room_vnum, room_data> world;    /* array of rooms		 */
+std::unordered_map<room_vnum, room_data*> world;    /* array of rooms		 */
 std::unordered_map<vnum, area_data> areas;    /* area information		 */
 
 struct char_data *character_list = nullptr; /* global linked list of chars	 */
@@ -317,10 +317,10 @@ static void db_load_items_finish(const std::filesystem::path& loc) {
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
     for(auto &[id, r] : world) {
-        if(r.script) r.script->activate();
-        assign_triggers(&r, WLD_TRIGGER);
-        r.activateContents();
-        for(auto c = r.people; c; c = c->next_in_room) {
+        if(r->script) r->script->activate();
+        assign_triggers(r, WLD_TRIGGER);
+        r->activateContents();
+        for(auto c = r->people; c; c = c->next_in_room) {
             if(IS_NPC(c)) {
                 c->activate();
             }
@@ -364,9 +364,10 @@ static void db_load_rooms(const std::filesystem::path& loc) {
     world.reserve(data.size());
     for(auto j : data) {
         auto id = j["vn"].get<int64_t>();
-        auto r = world.emplace(id, j);
-        r.first->second.script = std::make_shared<script_data>(&r.first->second);
-        r.first->second.zone = real_zone_by_thing(id);
+        auto r = new room_data(j);
+        world[id] = r;
+        r->script = std::make_shared<script_data>(r);
+        r->zone = real_zone_by_thing(id);
     }
 }
 
@@ -374,8 +375,8 @@ static void db_load_exits(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "exits.json")) {
         auto id = j["room"].get<int64_t>();
         auto dir = j["direction"].get<int64_t>();
-        auto &r = world[id];
-        r.dir_option[dir] = new room_direction_data(j["data"]);
+        auto r = world[id];
+        r->dir_option[dir] = new room_direction_data(j["data"]);
     }
 }
 
@@ -431,7 +432,7 @@ static void db_load_areas(const std::filesystem::path& loc) {
         for(auto &r : a.first->second.rooms) {
             auto room = world.find(r);
             if(room != world.end()) {
-                room->second.area = id;
+                room->second->area = id;
             }
         }
     }
@@ -809,7 +810,7 @@ void auc_save() {
     else {
         struct obj_data *obj, *next_obj;
 
-        for (obj = world[real_room(80)].contents; obj; obj = next_obj) {
+        for (obj = world[real_room(80)]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
@@ -2276,7 +2277,7 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'R': /* rem obj from room */
-                    if ((obj = get_obj_in_list_num(c.arg2, world[c.arg1].contents)) != nullptr)
+                    if ((obj = get_obj_in_list_num(c.arg2, world[c.arg1]->contents)) != nullptr)
                         extract_obj(obj);
                     last_cmd = 1;
                     tmob = nullptr;
@@ -2287,27 +2288,27 @@ void reset_zone(zone_rnum zone) {
                 case 'D':            /* set state of door */
                     room = world.find(c.arg1);
                     if (room == world.end() || c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
-                        (room->second.dir_option[c.arg2] == nullptr)) {
+                        (room->second->dir_option[c.arg2] == nullptr)) {
                         ZONE_ERROR("room or door does not exist, command disabled");
                         c.command = '*';
                     } else
                         switch (c.arg3) {
                             case 0:
-                                REMOVE_BIT(room->second.dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(room->second->dir_option[c.arg2]->exit_info,
                                            EX_LOCKED);
-                                REMOVE_BIT(room->second.dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(room->second->dir_option[c.arg2]->exit_info,
                                            EX_CLOSED);
                                 break;
                             case 1:
-                                SET_BIT(room->second.dir_option[c.arg2]->exit_info,
+                                SET_BIT(room->second->dir_option[c.arg2]->exit_info,
                                         EX_CLOSED);
-                                REMOVE_BIT(room->second.dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(room->second->dir_option[c.arg2]->exit_info,
                                            EX_LOCKED);
                                 break;
                             case 2:
-                                SET_BIT(room->second.dir_option[c.arg2]->exit_info,
+                                SET_BIT(room->second->dir_option[c.arg2]->exit_info,
                                         EX_LOCKED);
-                                SET_BIT(room->second.dir_option[c.arg2]->exit_info,
+                                SET_BIT(room->second->dir_option[c.arg2]->exit_info,
                                         EX_CLOSED);
                                 break;
                         }
@@ -2328,7 +2329,7 @@ void reset_zone(zone_rnum zone) {
                         if (room == world.end()) {
                             ZONE_ERROR("Invalid room number in trigger assignment");
                         }
-                        room->second.script->addTrigger(read_trigger(c.arg2), -1);
+                        room->second->script->addTrigger(read_trigger(c.arg2), -1);
                         last_cmd = 1;
                     }
 
@@ -2352,10 +2353,10 @@ void reset_zone(zone_rnum zone) {
                         if (!world.count(c.arg3)) {
                             ZONE_ERROR("Invalid room number in variable assignment");
                         } else {
-                            if (!(world[c.arg3].script)) {
+                            if (!(world[c.arg3]->script)) {
                                 ZONE_ERROR("Attempt to give variable to scriptless object");
                             } else
-                                world[c.arg3].script->addVar(c.sarg1, c.sarg2);
+                                world[c.arg3]->script->addVar(c.sarg1, c.sarg2);
                             last_cmd = 1;
                         }
                     }
@@ -2380,40 +2381,40 @@ void reset_zone(zone_rnum zone) {
             if(room == world.end()) continue;
             rrnum = rvnum;
 
-            reset_wtrigger(&room->second);
-            if (room->second.room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
+            reset_wtrigger(room->second);
+            if (room->second->room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
                 send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-                room->second.room_flags.reset(ROOM_AURA);
+                room->second->room_flags.reset(ROOM_AURA);
             }
-            if (room->second.sector_type == SECT_LAVA) {
-                room->second.geffect = 5;
+            if (room->second->sector_type == SECT_LAVA) {
+                room->second->geffect = 5;
             }
-            if (room->second.geffect < -1) {
+            if (room->second->geffect < -1) {
                 send_to_room(rrnum, "The area loses some of the water flooding it.\r\n");
-                room->second.geffect += 1;
-            } else if (room->second.geffect == -1) {
+                room->second->geffect += 1;
+            } else if (room->second->geffect == -1) {
                 send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
-                room->second.geffect = 0;
+                room->second->geffect = 0;
             }
 
-            if(auto dmg = room->second.getDamage(); dmg > 0) {
+            if(auto dmg = room->second->getDamage(); dmg > 0) {
                 int toRepair = 0;
                 if(dmg >= 100) toRepair = rand_number(5, 10);
                 else if(dmg >= 10) toRepair = rand_number(1, 10);
                 else if(dmg > 1) toRepair = rand_number(1, dmg);
                 else toRepair = 1;
-                room->second.modDamage(-toRepair);
+                room->second->modDamage(-toRepair);
                 send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
             }
 
 
-            if (room->second.geffect >= 1 && rand_number(1, 4) == 4 && !room->second.isSunken() && room->second.sector_type != SECT_LAVA) {
+            if (room->second->geffect >= 1 && rand_number(1, 4) == 4 && !room->second->isSunken() && room->second->sector_type != SECT_LAVA) {
                 send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
-                room->second.geffect = 0;
-            } else if (room->second.geffect >= 1 && rand_number(1, 2) == 2 && room->second.isSunken() &&
-                    room->second.sector_type != SECT_LAVA) {
+                room->second->geffect = 0;
+            } else if (room->second->geffect >= 1 && rand_number(1, 2) == 2 && room->second->isSunken() &&
+                    room->second->sector_type != SECT_LAVA) {
                 send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
-                room->second.geffect = 0;
+                room->second->geffect = 0;
             }
         }
     } else {
@@ -3202,7 +3203,7 @@ std::optional<UID> resolveUID(const std::string& uid) {
     }
 
     if(type == 'R') {
-        if(world.contains(id)) return &world[id];
+        if(world.contains(id)) return world[id];
     } else if(type == 'O') {
         auto find = uniqueObjects.find(id);
         if(find != uniqueObjects.end()) {

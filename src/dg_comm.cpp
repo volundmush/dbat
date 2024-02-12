@@ -214,8 +214,8 @@ void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
 
     vnum areaVnum = NOWHERE;
     {
-        auto &r = world[roomVnum];
-        if(auto found = r.getMatchingArea(area_data::isPlanet); found) {
+        auto r = world[roomVnum];
+        if(auto found = r->getMatchingArea(area_data::isPlanet); found) {
             areaVnum = *found;
         }
     }

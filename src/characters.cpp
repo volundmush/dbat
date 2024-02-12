@@ -268,7 +268,7 @@ int64_t char_data::calcGravCost(int64_t num) {
     double gravity = 1.0;
     auto room = world.find(in_room);
     if (room != world.end()) {
-        gravity = room->second.getGravity();
+        gravity = room->second->getGravity();
     }
     int64_t cost = (gravity * gravity);
 
@@ -1260,7 +1260,7 @@ bool char_data::canCarryWeight(weight_t val) {
     double gravity = 1.0;
     auto room = world.find(in_room);
     if(room != world.end()) {
-        gravity = room->second.getGravity();
+        gravity = room->second->getGravity();
     }
     return getAvailableCarryWeight() >= (val * gravity);
 }
@@ -1277,7 +1277,7 @@ weight_t char_data::getCurrentBurden() {
     auto total = getTotalWeight();
     auto room = world.find(in_room);
     if(room != world.end()) {
-        total *= room->second.getGravity();
+        total *= room->second->getGravity();
     }
     return total;
 }
