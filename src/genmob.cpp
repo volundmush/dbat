@@ -921,21 +921,7 @@ bool char_data::isActive() {
     return active;
 }
 
-nlohmann::json char_data::serializeLocation() {
-    auto j = nlohmann::json::object();
 
-    if(IS_NPC(this)) {
-        j["in_room"] = in_room;
-    } else {
-        auto room = in_room != NOWHERE ? in_room : was_in_room;
-        if(!desc) {
-            room = load_room;
-        }
-        j["load_room"] = normalizeLoadRoom(room);
-    }
-
-    return j;
-}
 
 nlohmann::json char_data::serializeRelations() {
     auto j = nlohmann::json::object();
@@ -966,11 +952,6 @@ bool char_data::isProvidingLight() {
     return false;
 }
 
-struct room_data* char_data::getRoom() {
-    auto roomFound = world.find(in_room);
-    if(roomFound != world.end()) return dynamic_cast<room_data*>(roomFound->second);
-    return nullptr;
-}
 
 double char_data::currentGravity() {
     if(auto room = getRoom(); room) {

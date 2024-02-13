@@ -1786,7 +1786,7 @@ ACMD(do_taisha) {
 
     auto room = ch->getRoom();
 
-    if (room->room_flags.test(ROOM_AURA)) {
+    if (room->checkFlag(FlagType::Room, ROOM_AURA)) {
         send_to_char(ch, "This area already has an aura of regeneration around it.\r\n");
         return;
     }
@@ -1819,7 +1819,7 @@ ACMD(do_taisha) {
         act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_TAISHA, 1);
-        room->room_flags.set(ROOM_AURA);
+        room->setFlag(FlagType::Room, ROOM_AURA);
         return;
     }
 }
@@ -3141,23 +3141,23 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type) {
         case 1: /* This object is a weapon. */
             switch (boost) {
                 case 30:
-                    obj->extra_flags.set(ITEM_WEAPLVL2);
+                    obj->setFlag(FlagType::Item, ITEM_WEAPLVL2);
                     break;
                 case 40:
                 case 50:
-                    obj->extra_flags.set(ITEM_WEAPLVL3);
+                    obj->setFlag(FlagType::Item, ITEM_WEAPLVL3);
                     break;
                 case 60:
                 case 70:
                 case 80:
                 case 90:
-                    obj->extra_flags.set(ITEM_WEAPLVL4);
+                    obj->setFlag(FlagType::Item, ITEM_WEAPLVL4);
                     break;
                 case 100:
-                    obj->extra_flags.set(ITEM_WEAPLVL5);
+                    obj->setFlag(FlagType::Item, ITEM_WEAPLVL5);
                     break;
                 default:
-                    obj->extra_flags.set(ITEM_WEAPLVL1);
+                    obj->setFlag(FlagType::Item, ITEM_WEAPLVL1);
                     break;
             }
             if (boost != 0) {
@@ -3591,7 +3591,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(19053, VIRTUAL);
             obj_to_char(obj, ch);
-            for(auto f : {ITEM_NORENT, ITEM_NOSELL}) obj->extra_flags.set(f);
+            for(auto f : {ITEM_NORENT, ITEM_NOSELL}) obj->setFlag(FlagType::Item, f);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3872,7 +3872,7 @@ ACMD(do_srepair) {
                             if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) > 100) {
                                 GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) = 100;
                             }
-                            GET_EQ(ch, i)->extra_flags.reset(ITEM_BROKEN);
+                            GET_EQ(ch, i)->clearFlag(FlagType::Item, ITEM_BROKEN);
                             repaired = true;
                         }
                     }
@@ -6193,7 +6193,7 @@ ACMD(do_forgery) {
     obj_to_char(obj3, ch);
 
     /* Set Object Variables */
-    obj3->extra_flags.set(ITEM_FORGED);
+    obj3->setFlag(FlagType::Item, ITEM_FORGED);
     GET_OBJ_WEIGHT(obj3) = rand_number(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3));
 
     obj_from_char(obj4);
@@ -7344,12 +7344,12 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
 ACMD(do_summon) {
     auto room = ch->getRoom();
 
-    if (!room->room_flags.test(ROOM_EARTH)) {
+    if (!room->checkFlag(FlagType::Room, ROOM_EARTH)) {
         send_to_char(ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
         return;
     }
 
-    if (room->room_flags.test(ROOM_NOINSTANT) || room->room_flags.test(ROOM_PEACEFUL)) {
+    if (room->checkFlag(FlagType::Room, ROOM_NOINSTANT) || room->checkFlag(FlagType::Room, ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not summon shenron in this protected area!\r\n");
         return;
     }
@@ -10624,7 +10624,7 @@ ACMD(do_break) {
     send_to_char(ch, "You ruin %s.\r\n", obj->getShortDesc());
     act("$n ruins $p.", false, ch, obj, nullptr, TO_ROOM);
     GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 0;
-    obj->extra_flags.set(ITEM_BROKEN);
+    obj->setFlag(FlagType::Item, ITEM_BROKEN);
 
     return;
 }
@@ -10713,12 +10713,12 @@ ACMD(do_fix) {
             send_to_char(ch, "You repair %s a bit.\r\n", obj->getShortDesc());
             act("$n repairs $p a bit.", false, ch, obj, nullptr, TO_ROOM);
             GET_OBJ_VAL(obj, VAL_ALL_HEALTH) += GET_SKILL(ch, SKILL_REPAIR);
-            obj->extra_flags.reset(ITEM_BROKEN);
+            obj->clearFlag(FlagType::Item, ITEM_BROKEN);
         } else {
             send_to_char(ch, "You repair %s completely.\r\n", obj->getShortDesc());
             act("$n repairs $p completely.", false, ch, obj, nullptr, TO_ROOM);
             GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
-            obj->extra_flags.reset(ITEM_BROKEN);
+            obj->clearFlag(FlagType::Item, ITEM_BROKEN);
         }
         if (obj->carried_by == nullptr && !PLR_FLAGGED(ch, PLR_REPLEARN) &&
             (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {

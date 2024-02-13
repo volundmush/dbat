@@ -2206,9 +2206,9 @@ void reset_zone(zone_rnum zone) {
             rrnum = rvnum;
 
             reset_wtrigger(room);
-            if (room->room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
+            if (room->checkFlag(FlagType::Room, ROOM_AURA) && rand_number(1, 5) >= 4) {
                 send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-                room->room_flags.reset(ROOM_AURA);
+                room->clearFlag(FlagType::Room, ROOM_AURA);
             }
             if (room->sector_type == SECT_LAVA) {
                 room->geffect = 5;

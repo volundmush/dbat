@@ -2801,7 +2801,7 @@ ACMD(do_channel) {
             act("@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             r->geffect = 0;
-            ruby->extra_flags.set(ITEM_HOT);
+            ruby->setFlag(FlagType::Item, ITEM_HOT);
         }
         ch->decCurKI(cost);
         WAIT_STATE(ch, PULSE_1SEC);
@@ -3211,11 +3211,11 @@ ACMD(do_instill) {
         extract_obj(token);
 
         if (OBJ_FLAGGED(obj, ITEM_SLOT1))
-            obj->extra_flags.set(ITEM_SLOTS_FILLED);
+            obj->setFlag(FlagType::Item, ITEM_SLOTS_FILLED);
         else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && !OBJ_FLAGGED(obj, ITEM_SLOT_ONE))
-            obj->extra_flags.set(ITEM_SLOT_ONE);
+            obj->setFlag(FlagType::Item, ITEM_SLOT_ONE);
         else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && OBJ_FLAGGED(obj, ITEM_SLOT_ONE))
-            obj->extra_flags.set(ITEM_SLOTS_FILLED);
+            obj->setFlag(FlagType::Item, ITEM_SLOTS_FILLED);
 
         /* Check it's slots for the appropriate stat and add to it if possible */
         if (obj->affected[0].location == stat) {
@@ -3380,7 +3380,7 @@ ACMD(do_bury) {
             }
             obj_from_char(obj);
             obj_to_room(obj, IN_ROOM(ch));
-            obj->extra_flags.set(ITEM_BURIED);
+            obj->setFlag(FlagType::Item, ITEM_BURIED);
         }
     } else if (!strcasecmp(arg, "uncover")) {
         if (fobj == nullptr) {
@@ -3398,7 +3398,7 @@ ACMD(do_bury) {
                 act("@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n",
                     true, ch, fobj, nullptr, TO_ROOM);
             }
-            fobj->extra_flags.reset(ITEM_BURIED);
+            fobj->clearFlag(FlagType::Item, ITEM_BURIED);
         }
     } else {
         send_to_char(ch, "Syntax: dig [bury (item) | uncover]\r\n");
@@ -4208,7 +4208,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 break;
             case 8: {
                 auto &o = obj_proto[1126];
-                if (!ch->canCarryWeight(o.weight)) {
+                if (!ch->canCarryWeight(o->weight)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -5283,12 +5283,12 @@ ACMD(do_obstruct) {
 
     auto r = ch->getRoom();
 
-    if (r->room_flags.test(ROOM_PEACEFUL)) {
+    if (r->checkFlag(FlagType::Room, ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not use this in such a peaceful area.\r\n");
         return;
     }
 
-    if (r->sector_type == SECT_SPACE || r->room_flags.test(ROOM_SPACE)) {
+    if (r->sector_type == SECT_SPACE || r->checkFlag(FlagType::Room, ROOM_SPACE)) {
         send_to_char(ch, "You can not wall off the vastness of space.\r\n");
         return;
     }
@@ -5642,8 +5642,8 @@ ACMD(do_spoil) {
     body_part->setShortDesc(buf3);
 
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;
-    body_part->wear_flags.set(ITEM_WEAR_TAKE);
-    body_part->extra_flags.set(ITEM_UNIQUE_SAVE);
+    body_part->setFlag(FlagType::Wear, ITEM_WEAR_TAKE);
+    body_part->setFlag(FlagType::Item, ITEM_UNIQUE_SAVE);
     GET_OBJ_VAL(body_part, 0) = 0;
     GET_OBJ_VAL(body_part, 1) = 0;
     GET_OBJ_VAL(body_part, 2) = 0;

@@ -66,9 +66,9 @@ const char *get_i_name(struct char_data *ch, struct char_data *vict) {
         return (RACE(vict));
     }
 
-    auto p = players[ch->id];
+    auto p = players[ch->uid];
 
-    auto found = p->dubNames.find(vict->id);
+    auto found = p->dubNames.find(vict->uid);
     if(found == p->dubNames.end()) return RACE(vict);
 
     // print *found to name and return buf pointer.
@@ -691,7 +691,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
-        object->extra_flags.set(ITEM_UNBREAKABLE);
+        object->setFlag(FlagType::Item, ITEM_UNBREAKABLE);
     }
 
     // This section is now only going to be called during migrations.
@@ -898,7 +898,7 @@ void extract_obj(struct obj_data *obj) {
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
 
-    auto found = uniqueObjects.find(obj->id);
+    auto found = uniqueObjects.find(obj->uid);
     if (found != uniqueObjects.end()) {
         uniqueObjects.erase(found);
     }
@@ -1134,7 +1134,7 @@ void extract_char_final(struct char_data *ch) {
 
     ch->deactivate();
     if (IS_NPC(ch)) {
-        auto found = uniqueCharacters.find(ch->id);
+        auto found = uniqueCharacters.find(ch->uid);
         if (found != uniqueCharacters.end()) {
             uniqueCharacters.erase(found);
         }
@@ -1564,8 +1564,8 @@ struct obj_data *create_money(int amount) {
     GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH) = 100;
     GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
     for (y = 0; y < TW_ARRAY_MAX; y++)
-        obj->wear_flags[y] = 0;
-    obj->wear_flags.set(ITEM_WEAR_TAKE);
+        obj->clearFlag(FlagType::Wear, y);
+    obj->setFlag(FlagType::Wear, ITEM_WEAR_TAKE);
     GET_OBJ_VAL(obj, VAL_MONEY_SIZE) = amount;
     GET_OBJ_COST(obj) = amount;
     obj->vn = NOTHING;

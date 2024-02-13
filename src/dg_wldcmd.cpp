@@ -139,7 +139,7 @@ WCMD(do_weffect) {
             wld_log(room, "weffect target is NOWHERE.");
             return;
         } else {
-            room->room_flags.flip(ROOM_INDOORS);
+            room->flipFlag(FlagType::Room, ROOM_INDOORS);
         }
     } else if (!strcasecmp(arg, "lava")) {
         if (target == NOWHERE) {
@@ -169,11 +169,13 @@ WCMD(do_wasound) {
     }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
-        struct room_direction_data *newexit;
+        auto dir = room->dir_option[door];
+        if(!dir) continue;
+        auto dest = dir->getDestination();
+        if(!dest) continue;
 
-        if ((newexit = room->dir_option[door]) && (newexit->to_room != NOWHERE) &&
-            room != world[newexit->to_room])
-            act_to_room(argument, world[newexit->to_room]);
+        act_to_room(argument, dest);
+            
     }
 }
 

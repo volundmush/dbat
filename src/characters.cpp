@@ -99,7 +99,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     } else {
         char_to_room(this, real_room(sensei::getStartRoom(chclass)));
     }
-    look_at_room(in_room, this, 0);
+    look_at_room(location, this, 0);
 
     // If Costless, there's not going to be any penalties.
     int dur = 100;

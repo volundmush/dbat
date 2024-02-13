@@ -742,7 +742,7 @@ void remove_limb(struct char_data *vict, int num) {
 
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;
     body_part->wear_flags.set(ITEM_WEAR_TAKE);
-    body_part->extra_flags.set(ITEM_UNIQUE_SAVE);
+    body_part->setFlag(FlagType::Item, ITEM_UNIQUE_SAVE);
     GET_OBJ_VAL(body_part, 0) = 0;
     GET_OBJ_VAL(body_part, 1) = 0;
     GET_OBJ_VAL(body_part, 2) = 0;
@@ -1484,14 +1484,14 @@ static void make_pcorpse(struct char_data *ch) {
         if (x < EF_ARRAY_MAX)
             GET_OBJ_EXTRA_AR(corpse, x) = 0;
         if (y < TW_ARRAY_MAX)
-            corpse->wear_flags[y] = 0;
+            corpse->clearFlag(FlagType::Wear, y);
     }
 
-    corpse->wear_flags.set(ITEM_WEAR_TAKE);
-    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->extra_flags.set(f);
+    corpse->setFlag(FlagType::Wear, ITEM_WEAR_TAKE);
+    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->setFlag(FlagType::Item, f);
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;      /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;        /* corpse identifier */
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = ch->id;  /* corpse identifier */
+    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = ch->uid;  /* corpse identifier */
     GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
     GET_OBJ_RENT(corpse) = 100000;
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
@@ -1701,11 +1701,11 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         if (x < EF_ARRAY_MAX)
             GET_OBJ_EXTRA_AR(corpse, x) = 0;
         if (y < TW_ARRAY_MAX)
-            corpse->wear_flags[y] = 0;
+            corpse->clearFlag(FlagType::Wear, y);
     }
 
-    corpse->wear_flags.set(ITEM_WEAR_TAKE);
-    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->extra_flags.set(f);
+    corpse->setFlag(FlagType::Wear, ITEM_WEAR_TAKE);
+    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->setFlag(FlagType::Item, f);
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;    /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;    /* corpse identifier */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = -1;    /* corpse identifier */

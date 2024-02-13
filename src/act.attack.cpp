@@ -531,7 +531,7 @@ ACMD(do_throw) {
                 act("You smile as $p breaks on $N's@n face!", true, ch, obj, vict, TO_CHAR);
                 act("$n@n smiles as $p breaks on $N's@n face!", true, ch, obj, vict, TO_NOTVICT);
                 act("$n@n smiles as $p breaks on your face!", true, ch, obj, vict, TO_VICT);
-                obj->extra_flags.flip(ITEM_BROKEN);
+                obj->setFlag(FlagType::Item, ITEM_BROKEN);
             } else if (GET_DEX(ch) >= axion_dice(0)) {
                 if (IS_ANDROID(vict) || IS_MECHANICAL(vict)) {
                     act("@RSome pieces of metal are sent flying!@n", true, ch, nullptr, vict, TO_CHAR);

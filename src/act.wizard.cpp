@@ -1280,7 +1280,6 @@ static void do_stat_room(struct char_data *ch) {
                  zone_table[rm->zone].number, rm->vn, IN_ROOM(ch),
                  (long) rm->vn, buf2);
 
-    sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
     send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->geffect);
     send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
@@ -1407,13 +1406,13 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         send_to_char(ch, "\r\n");
     }
 
-    sprintbitarray(GET_OBJ_WEAR(j), wear_bits, TW_ARRAY_MAX, buf);
+    // TODO: sprintbitarray(GET_OBJ_WEAR(j), wear_bits, TW_ARRAY_MAX, buf);
     send_to_char(ch, "Can be worn on: %s\r\n", buf);
 
-    sprintbitarray(GET_OBJ_PERM(j), affected_bits, AF_ARRAY_MAX, buf);
+    // TODO: sprintbitarray(GET_OBJ_PERM(j), affected_bits, AF_ARRAY_MAX, buf);
     send_to_char(ch, "Set char bits : %s\r\n", buf);
 
-    sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf);
+    // TODO: sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf);
     send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
     auto wString = fmt::format("{}", GET_OBJ_WEIGHT(j));
@@ -2951,7 +2950,7 @@ ACMD(do_zreset) {
             return;
         }
     } else if (*arg == '.' || !*arg)
-        i = real_zone_by_thing(ch->in_room);
+        i = real_zone_by_thing(ch->location);
     else {
         i = atol(arg);
     }

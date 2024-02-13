@@ -336,6 +336,18 @@ enum class SkillID : uint16_t {
     BlessedHammer = 557
 };
 
+enum class FlagType : uint8_t {
+    Admin = 0,
+    PC = 1,
+    NPC = 2,
+    Wear = 3,
+    Item = 4,
+    Affect = 5,
+    Area = 6,
+    Pref = 7,
+    Room = 8
+};
+
 
 #define SG_MIN        2 /* Skill gain check must be less than this
 			     number in order to be successful.

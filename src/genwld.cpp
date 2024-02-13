@@ -266,15 +266,10 @@ room_direction_data::room_direction_data(const nlohmann::json &j) : room_directi
 }
 
 nlohmann::json room_data::serialize() {
-    auto j = serializeUnit();
+    auto j = unit_data::serialize();
 
     if(sector_type) j["sector_type"] = sector_type;
 
-    for (size_t i = 0; i < room_flags.size(); ++i) {
-        if (room_flags[i]) {
-            j["room_flags"].push_back(i);
-        }
-    }
 
     if(timed) j["timed"] = timed;
     if(dmg) j["dmg"] = dmg;
@@ -288,7 +283,7 @@ nlohmann::json room_data::serialize() {
 }
 
 room_data::room_data(const nlohmann::json &j) {
-    deserializeUnit(j);
+    deserialize(j);
 
     if(j.contains("sector_type")) sector_type = j["sector_type"];
 
@@ -302,7 +297,7 @@ room_data::room_data(const nlohmann::json &j) {
 
     if(j.contains("room_flags")) {
         for(auto &f : j["room_flags"]) {
-            room_flags.set(f.get<int>());
+            setFlag(FlagType::Room, f.get<int>());
         }
     }
 
@@ -332,9 +327,7 @@ std::optional<vnum> room_data::getMatchingArea(std::function<bool(const area_dat
         if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.extraVn) {
             // we need to find the a.objectVnum in the world by scanning object_list...
             if (auto obj = get_obj_num(a.extraVn.value()); obj) {
-                if(world.contains(obj->in_room)) {
-                    auto u = world[obj->in_room];
-                    auto r = dynamic_cast<room_data*>(u);
+                if(auto r = obj->getRoom(); r) {
                     return r->getMatchingArea(f);
                 }
             }
@@ -439,7 +432,7 @@ std::list<char_data *> room_data::getPeople() {
 static const std::set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
 
 MoonCheck room_data::checkMoon() {
-    for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return MoonCheck::NoMoon;
+    for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(checkFlag(FlagType::Room, f)) return MoonCheck::NoMoon;
     if(inside_sectors.contains(sector_type)) return MoonCheck::NoMoon;
     auto check_planet = getMatchingArea(area_data::isPlanet);
     if(!check_planet) return MoonCheck::NoMoon;
@@ -535,15 +528,15 @@ DgResults room_data::dgCallMember(trig_data *trig, const std::string& member, co
 
     if(lmember == "id") return this;
 
-    if(lmember == "weather") return !room_flags.test(ROOM_INDOORS) ? sky_look[weather_info.sky] : "";
+    if(lmember == "weather") return !checkFlag(FlagType::Room, ROOM_INDOORS) ? sky_look[weather_info.sky] : "";
 
-    if(lmember == "fishing") return room_flags.test(ROOM_FISHING) ? "1" : "0";
+    if(lmember == "fishing") return checkFlag(FlagType::Room, ROOM_FISHING) ? "1" : "0";
 
     if(lmember == "roomflag") {
         if(arg.empty()) return "0";
         int flag = get_flag_by_name(room_bits, (char*)arg.c_str());
         if(flag == -1) return "0";
-        return room_flags.test(flag) ? "1" : "0";
+        return checkFlag(FlagType::Room, flag) ? "1" : "0";
     }
 
     if(lmember == "varexists") return script->hasVar(arg) ? "1" : "0";

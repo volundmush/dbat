@@ -426,12 +426,31 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
     struct obj_data *contents{};     /* Contains objects  */
 
+    std::unordered_map<FlagType, std::unordered_set<int>> flags;
+    virtual bool checkFlag(FlagType type, int flag);
+    virtual void setFlag(FlagType type, int flag, bool value = true);
+    virtual void clearFlag(FlagType type, int flag);
+    virtual bool flipFlag(FlagType type, int flag);
+
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
-    std::list<struct obj_data*> getContents();
+    std::vector<struct obj_data*> getInventory();
+    std::unordered_map<int, obj_data*> getEquipment();
+    room_data* getAbsoluteRoom();
+    room_data* getRoom();
+    unit_data* getLocation();
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
+
+    // the unit_data you are located in. This could be NOWHERE (-1) but that's
+    // mostly only used for very special cases...
+    int64_t location{NOWHERE};
+    // LocationType is extra information about how you are inside <location>.
+    // For instance, if you are a character, then the locationType of units
+    // you contain should represent inventory/equipment slots. 0 is inventory,
+    // positive number is equipment slot.
+    int16_t locationType{0}; 
 
     void activateContents();
     void deactivateContents();
@@ -441,7 +460,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void deserializeLocation(const nlohmann::json& j);
     virtual nlohmann::json serialize();
     virtual nlohmann::json serializeRelations();
-    virtual std::string serializeLocation();
+    virtual nlohmann::json serializeLocation();
     
     virtual std::string scriptString();
 
@@ -517,8 +536,6 @@ struct obj_data : public unit_data {
     bool isActive() override;
     void save() override;
 
-    struct room_data* getAbsoluteRoom();
-    struct room_data* getRoom();
     bool isWorking();
     void clearLocation();
   
@@ -527,15 +544,13 @@ struct obj_data : public unit_data {
     std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value{};   /* Values of the item (see list)    */
     int8_t type_flag{};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
-    std::bitset<NUM_ITEM_WEARS> wear_flags{}; /* Where you can wear it     */
-    std::bitset<NUM_ITEM_FLAGS> extra_flags{}; /* If it hums, glows, etc.  */
+
     weight_t weight{};         /* Weight what else                     */
     weight_t getWeight();
     weight_t getTotalWeight();
     int cost{};           /* Value when sold (gp.)               */
     int cost_per_day{};   /* Cost to keep pr. real day           */
     int timer{};          /* Timer for object                    */
-    std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
     int size{SIZE_MEDIUM};           /* Size class of object                */
 
     std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
@@ -635,7 +650,6 @@ struct room_data : public unit_data {
     explicit room_data(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
-    std::bitset<NUM_ROOM_FLAGS> room_flags{};   /* DEATH,DARK ... etc */
     SpecialFunc func{};
     struct char_data *people{};    /* List of NPC / PC in room */
     int timed{};                   /* For timed Dt's                     */

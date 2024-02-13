@@ -219,7 +219,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     d->obj_editflag = EDIT_NONE;
                     d->obj_editval = EDIT_NONE;
                     d->character->mod(CharMoney::Carried,  -5000);
-                    obj->extra_flags.set(ITEM_RESTRING);
+                    obj->setFlag(FlagType::Item, ITEM_RESTRING);
                     write_to_output(d, "Purchase complete.");
                     send_to_imm("Restring Eq: %s has bought: %s, which was %s.", GET_NAME(d->character),
                                 obj->getShortDesc(), d->obj_was);
@@ -432,49 +432,49 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         obj_to_char(obj, d->character);
                         switch (d->obj_type) {
                             case 1:
-                                obj->wear_flags.set(ITEM_WEAR_BODY);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_BODY);
                                 break;
                             case 2:
-                                obj->wear_flags.set(ITEM_WEAR_ABOUT);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_ABOUT);
                                 break;
                             case 3:
-                                obj->wear_flags.set(ITEM_WEAR_WRIST);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_WRIST);
                                 break;
                             case 4:
-                                obj->wear_flags.set(ITEM_WEAR_EAR);
+                                obj->setFlag(FlagType::Wear, (ITEM_WEAR_EAR);
                                 break;
                             case 5:
-                                obj->wear_flags.set(ITEM_WEAR_FINGER);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_FINGER);
                                 break;
                             case 6:
-                                obj->wear_flags.set(ITEM_WEAR_EYE);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_EYE);
                                 break;
                             case 7:
-                                obj->wear_flags.set(ITEM_WEAR_HANDS);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_HANDS);
                                 break;
                             case 8:
-                                obj->wear_flags.set(ITEM_WEAR_FEET);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_FEET);
                                 break;
                             case 9:
-                                obj->wear_flags.set(ITEM_WEAR_WAIST);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_WAIST);
                                 break;
                             case 10:
-                                obj->wear_flags.set(ITEM_WEAR_LEGS);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_LEGS);
                                 break;
                             case 11:
-                                obj->wear_flags.set(ITEM_WEAR_ARMS);
+                                obj->setFlag(FlagType::Wear, (ITEM_WEAR_ARMS);
                                 break;
                             case 12:
-                                obj->wear_flags.set(ITEM_WEAR_HEAD);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_HEAD);
                                 break;
                             case 13:
-                                obj->wear_flags.set(ITEM_WEAR_NECK);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_NECK);
                                 break;
                             case 14:
-                                obj->wear_flags.set(ITEM_WEAR_PACK);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_PACK);
                                 break;
                             case 15:
-                                obj->wear_flags.set(ITEM_WEAR_SH);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_SH);
                                 break;
                         }
                         *buf = '\0';
@@ -520,7 +520,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         }
                         GET_OBJ_LEVEL(obj) = 20;
                     }
-                    for(auto f : {ITEM_SLOT2, ITEM_CUSTOM}) obj->extra_flags.set(f);
+                    for(auto f : {ITEM_SLOT2, ITEM_CUSTOM}) obj->setFlag(FlagType::Item, f);
                     d->obj_editflag = EDIT_NONE;
                     d->obj_editval = EDIT_NONE;
                     d->character->modRPP(-20);

@@ -97,14 +97,13 @@ int num_players_in_room(room_vnum room) {
 }
 
 bool check_mob_in_room(mob_vnum mob, room_vnum room) {
-    struct char_data *i;
-    bool found = false;
-
-    for (i = character_list; i; i = i->next)
-        if (GET_MOB_VNUM(i) == mob)
-            if (world[i->in_room]->vn == room) found = true;
-
-    return found;
+    if(auto u = world.find(room); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        for(auto i = r->people; i; i = i->next_in_room) {
+            if(i->vn == mob) return true;
+        }
+    }
+    return false;
 }
 
 bool check_obj_in_room(obj_vnum obj, room_vnum room) {
@@ -505,7 +504,7 @@ SPECIAL(auction) {
 
         for (obj = world[auct_room]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            if (obj && GET_AUCTER(obj) == ((ch)->id)) {
+            if (obj && GET_AUCTER(obj) == ((ch)->uid)) {
                 obj2 = obj;
                 found = true;
 
@@ -554,7 +553,7 @@ SPECIAL(auction) {
 
         for (obj = world[auct_room]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            if (obj && GET_CURBID(obj) == ((ch)->id)) {
+            if (obj && GET_CURBID(obj) == ((ch)->uid)) {
                 obj2 = obj;
                 found = true;
 
@@ -662,7 +661,7 @@ SPECIAL(auction) {
 
         GET_BID(obj2) = value;
         GET_STARTBID(obj2) = GET_BID(obj2);
-        GET_AUCTER(obj2) = ((ch)->id);
+        GET_AUCTER(obj2) = ((ch)->uid);
         GET_AUCTERN(obj2) = strdup(GET_NAME(ch));
         GET_AUCTIME(obj2) = time(nullptr);
         GET_CURBID(obj2) = -1;
@@ -1004,8 +1003,8 @@ SPECIAL(gravity) {
                 send_to_char(ch, msg.c_str());
                 obj->gravity = grav;
                 auto room = ch->getRoom();
-                if (room->room_flags.test(ROOM_AURA)) {
-                    room->room_flags.reset(ROOM_AURA);
+                if (room->checkFlag(FlagType::Room, ROOM_AURA)) {
+                    room->clearFlag(FlagType::Room, ROOM_AURA);
                     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
                 }
             } else {
@@ -1086,7 +1085,7 @@ SPECIAL(bank) {
                 send_to_char(ch, "There is an error. Report to staff.");
                 return (true);
             }
-            auto id = vict->id;
+            auto id = vict->uid;
             auto p = players[id];
             auto &c = p->account->characters;
             auto found = std::find_if(c.begin(), c.end(), [&](auto i) {return i == id;});

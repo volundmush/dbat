@@ -394,7 +394,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 
     is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, 0));
     auto going = dynamic_cast<room_data*>(world[is_going_to]);
-    if (!going->room_flags.test(ROOM_VEHICLE)) {
+    if (!going->checkFlag(FlagType::Room, ROOM_VEHICLE)) {
         send_to_char(ch, "@wThat ship can't carry other ships.");
         return;
     }
@@ -487,7 +487,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         return;
     }
 
-    if (!dest->room_flags.test(ROOM_VEHICLE) && !dest->room_flags.test(ROOM_SPACE)) {
+    if (!dest->checkFlag(FlagType::Room, ROOM_VEHICLE) && !dest->checkFlag(FlagType::Room, ROOM_SPACE)) {
         /* But the vehicle can't go that way*/
         send_to_char(ch, "@wThe ship can't fit there!\r\n");
         return;

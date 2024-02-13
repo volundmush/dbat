@@ -326,7 +326,7 @@ static void search_room(struct char_data *ch) {
         if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
             act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
             act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
-            obj->extra_flags.reset(ITEM_BURIED);
+            obj->clearFlag(FlagType::Item, ITEM_BURIED);
             found++;
         }
     }
@@ -890,15 +890,15 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
         return 1;
     }
 
-    auto p = players[ch->id];
+    auto p = players[ch->uid];
 
-    return p->dubNames.contains(vict->id);
+    return p->dubNames.contains(vict->uid);
 }
 
 void introWrite(struct char_data *ch, struct char_data *vict, char *name) {
     std::string n(name);
-    auto p = players[ch->id];
-    p->dubNames[vict->id] = n;
+    auto p = players[ch->uid];
+    p->dubNames[vict->uid] = n;
 }
 
 ACMD(do_intro) {
@@ -1817,7 +1817,7 @@ static void gen_map(struct char_data *ch, int num) {
     auto room = ch->getRoom();
     
     /* print out exits */
-    map_draw_room(map, 4, 4, ch->in_room, ch);
+    map_draw_room(map, 4, 4, ch->location, ch);
     for (door = 0; door < NUM_OF_DIRS; door++) {
         auto d = room->dir_option[door];
         if(!d) continue;
@@ -2107,12 +2107,10 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
                     if (GET_OBJ_POSTED(obj) == nullptr) {
                         send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
-                        if (!obj->proto_script.empty())
                             send_to_char(ch, "%s ", obj->scriptString().c_str());
                     } else {
                         if (GET_OBJ_POSTTYPE(obj) <= 0) {
                             send_to_char(ch, "@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
-                            if (!obj->proto_script.empty())
                                 send_to_char(ch, "%s ", obj->scriptString().c_str());
                         }
                     }
@@ -2163,7 +2161,6 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
         case SHOW_OBJ_SHORT:
             if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
                 send_to_char(ch, "[%d] ", GET_OBJ_VNUM(obj));
-                if (!obj->proto_script.empty())
                     send_to_char(ch, "%s ", obj->scriptString().c_str());
             }
 
@@ -2931,8 +2928,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     };
 
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i)) {
-        auto sString = !i->proto_script.empty() ? fmt::format("{} ", i->scriptString()) : "";
-        send_to_char(ch, "@D[@G%d@D]@w %s", GET_MOB_VNUM(i), sString.c_str());
+        send_to_char(ch, "@D[@G%d@D]@w %s", GET_MOB_VNUM(i), i->scriptString().c_str());
     }
 
     if (IS_NPC(i) && i->room_description && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
@@ -3649,16 +3645,16 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
         }
         
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
-        if (room->room_flags.test(ROOM_HOUSE) && !room->room_flags.test(ROOM_GARDEN1) &&
-            !room->room_flags.test(ROOM_GARDEN2)) {
+        if (room->checkFlag(FlagType::Room, ROOM_HOUSE) && !room->checkFlag(FlagType::Room, ROOM_GARDEN1) &&
+            !room->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
             send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
         }
-        if (room->room_flags.test(ROOM_HOUSE) && room->room_flags.test(ROOM_GARDEN1) &&
-            !room->room_flags.test(ROOM_GARDEN2)) {
+        if (room->checkFlag(FlagType::Room, ROOM_HOUSE) && room->checkFlag(FlagType::Room, ROOM_GARDEN1) &&
+            !room->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
             send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
         }
-        if (room->room_flags.test(ROOM_HOUSE) && !room->room_flags.test(ROOM_GARDEN1) &&
-                room->room_flags.test(ROOM_GARDEN2)) {
+        if (room->checkFlag(FlagType::Room, ROOM_HOUSE) && !room->checkFlag(FlagType::Room, ROOM_GARDEN1) &&
+                room->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
             send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n",
                          check_saveroom_count(ch, nullptr));
         }
@@ -3779,7 +3775,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
         char buf2[MAX_STRING_LENGTH];
         char buf3[MAX_STRING_LENGTH];
 
-        sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf);
+        // TODO: sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf);
         sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
         if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
             send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
@@ -3822,13 +3818,13 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
             auto &a = areas[planet.value()];
             send_to_char(ch, "@wPlanet: @G%s@n\r\n", a.name.c_str());
         } else {
-            if (rm->room_flags.test(ROOM_NEO)) {
+            if (rm->checkFlag(FlagType::Room, ROOM_NEO)) {
                 send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
-            } else if (rm->room_flags.test(ROOM_AL)) {
+            } else if (rm->checkFlag(FlagType::Room, ROOM_AL)) {
                 send_to_char(ch, "@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
-            } else if (rm->room_flags.test(ROOM_HELL)) {
+            } else if (rm->checkFlag(FlagType::Room, ROOM_HELL)) {
                 send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
-            } else if (rm->room_flags.test(ROOM_RHELL)) {
+            } else if (rm->checkFlag(FlagType::Room, ROOM_RHELL)) {
                 send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
             }
         }
@@ -3840,13 +3836,13 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
             auto g = fmt::format("{}", grav);
             send_to_char(ch, "@wGravity: @W%sx@n\r\n", g.c_str());
         }
-        if (rm->room_flags.test(ROOM_REGEN)) {
+        if (rm->checkFlag(FlagType::Room, ROOM_REGEN)) {
             send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
         }
-        if (rm->room_flags.test(ROOM_AURA)) {
+        if (rm->checkFlag(FlagType::Room, ROOM_AURA)) {
             send_to_char(ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
         }
-        if (rm->room_flags.test(ROOM_HBTC)) {
+        if (rm->checkFlag(FlagType::Room, ROOM_HBTC)) {
             send_to_char(ch, "@rThis room feels like it opperates in a different time frame.@n\r\n");
         }
         if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
@@ -3856,7 +3852,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
     
     auto dmg = rm->getDamage();
 
-    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->room_flags.test(ROOM_DEATH)) {
+    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->checkFlag(FlagType::Room, ROOM_DEATH)) {
         if (dmg <= 99) {
             send_to_char(ch, "@w%s@n", rm->getLookDesc());
         }
@@ -4002,12 +3998,12 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
         do_auto_exits(rm, ch, EXIT_LEV(ch));
 
     /* now list characters & objects */
-    if (rm->room_flags.test(ROOM_GARDEN1)) {
+    if (rm->checkFlag(FlagType::Room, ROOM_GARDEN1)) {
         send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
     } else {
-        if (rm->room_flags.test(ROOM_GARDEN2)) {
+        if (rm->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
             send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
-        } else if (rm->room_flags.test(ROOM_HOUSE)) {
+        } else if (rm->checkFlag(FlagType::Room, ROOM_HOUSE)) {
             send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
         }
     }
@@ -4414,7 +4410,7 @@ static void look_out_window(struct char_data *ch, char *arg) {
                     if(!e) continue;
                     auto dest = e->getDestination();
                     if(!dest) continue;
-                    if(!dest->room_flags.test(ROOM_INDOORS)) {
+                    if(!dest->checkFlag(FlagType::Room, ROOM_INDOORS)) {
                         target_room = dest->vn;
                         break;
                     }
@@ -6411,8 +6407,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
     else
         send_to_char(ch, "%33s", " - ");
 
-    if (!obj->proto_script.empty())
-        send_to_char(ch, "%s", obj->scriptString().c_str());
+    send_to_char(ch, "%s", obj->scriptString().c_str());
 
     if (IN_ROOM(obj) != NOWHERE)
         send_to_char(ch, "[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), obj->getRoom()->name);
@@ -7080,7 +7075,7 @@ ACMD(do_history) {
     one_argument(argument, arg);
     if(IS_NPC(ch)) return;
 
-    auto p = players[ch->id];
+    auto p = players[ch->uid];
 
     type = search_block(arg, history_types, false);
     if (!*arg || type < 0) {
@@ -7123,7 +7118,7 @@ void add_history(struct char_data *ch, char *str, int type) {
     if (IS_NPC(ch))
         return;
 
-    auto p = players[ch->id];
+    auto p = players[ch->uid];
 
     tmp = p->comm_hist[type];
     ct = time(nullptr);
@@ -7184,7 +7179,7 @@ ACMD(do_scan) {
         return;
     }
 
-    auto darkHere = IS_DARK(ch->in_room);
+    auto darkHere = IS_DARK(ch->location);
 
     for (i = 0; i < 10; i++) {
         auto d = room->dir_option[i];
@@ -7530,14 +7525,14 @@ ACMD(do_oaffects) {
     int counter = 0;
     for(auto &[vn, o] : obj_proto) {
         bool found = false;
-        for(auto &aff : o.affected) {
+        for(auto &aff : o->affected) {
             if(aff.location == location) {
                 found = true;
                 break;
             }
         }
         if(!found) continue;
-        send_to_char(ch, "[%d] %s\r\n", vn, o.getShortDesc());
+        send_to_char(ch, "[%d] %s\r\n", vn, o->short_description);
         counter++;
 
     }

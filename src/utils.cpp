@@ -667,12 +667,12 @@ int read_sense_memory(struct char_data *ch, struct char_data *vict) {
 
     if(IS_NPC(ch)) return 0;
 
-    auto p = players[ch->id];
+    auto p = players[ch->uid];
 
     if(IS_NPC(vict)) {
         return p->senseMemory.contains(vict->vn);
     } else {
-        return p->sensePlayer.contains(vict->id);
+        return p->sensePlayer.contains(vict->uid);
     }
 }
 
@@ -683,12 +683,12 @@ void sense_memory_write(struct char_data *ch, struct char_data *vict) {
     }
 
     if(IS_NPC(ch)) return;
-    auto p = players[ch->id];
+    auto p = players[ch->uid];
 
     if(IS_NPC(vict)) {
         p->senseMemory.insert(vict->vn);
     } else {
-        p->sensePlayer.insert(vict->id);
+        p->sensePlayer.insert(vict->uid);
     }
 }
 
@@ -1078,9 +1078,9 @@ void randomize_eq(struct obj_data *obj) {
         }
         int dice = rand_number(2, 12);
         if (dice >= 10) {
-            obj->extra_flags.set(ITEM_SLOT2);
+            obj->setFlag(FlagType::Item, ITEM_SLOT2);
         } else if (dice >= 7) {
-            obj->extra_flags.set(ITEM_SLOT1);
+            obj->setFlag(FlagType::Item, ITEM_SLOT1);
         }
     }
 }
@@ -3032,7 +3032,7 @@ int room_is_dark(room_rnum room) {
     if (cook_element(room))
         return (false);
 
-    if (r->room_flags.test(ROOM_NOINSTANT) && ROOM_FLAGGED(room, ROOM_DARK)) {
+    if (r->checkFlag(FlagType::Room, ROOM_NOINSTANT) && ROOM_FLAGGED(room, ROOM_DARK)) {
         return (true);
     }
     if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && !ROOM_FLAGGED(room, ROOM_DARK)) {
@@ -3289,15 +3289,15 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
 }
 
 bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag) {
-    return obj->wear_flags.test(flag);
+    return obj->checkFlag(FlagType::Wear, flag);
 }
 
-bool OBJ_FLAGGED(const obj_data *obj, int flag) {
-    return obj->extra_flags.test(flag);
+bool OBJ_FLAGGED(obj_data *obj, int flag) {
+    return obj->checkFlag(FlagType::Item, flag);
 }
 
 bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
-    return obj->bitvector.test(flag);
+    return obj->checkFlag(FlagType::Affect, flag);
 }
 
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
@@ -3305,37 +3305,37 @@ bool ROOM_FLAGGED(room_vnum loc, int flag) {
     if (auto u = world.find(loc); u != world.end()) {
         auto r = dynamic_cast<room_data*>(u->second);
         if(!r) return false;
-        return r->room_flags.test(flag);
+        return r->checkFlag(FlagType::Room, flag);
     }
     return false;
 }
 
 bool ROOM_FLAGGED(struct room_data *loc, int flag) {
     if(!loc) return false;
-    return loc->room_flags.test(flag);
+    return loc->checkFlag(FlagType::Room, flag);
 }
 
 bool ADM_FLAGGED(struct char_data *ch, int flag) {
-    return ch->admflags.test(flag);
+    return ch->checkFlag(FlagType::Admin, flag);
 }
 
 bool PRF_FLAGGED(struct char_data *ch, int flag) {
-    return ch->pref.test(flag);
+    return ch->checkFlag(FlagType::Pref, flag);
 }
 
-bool MOB_FLAGGED(const struct char_data *ch, int flag) {
-    return ch->mobFlags.test(flag);
+bool MOB_FLAGGED(struct char_data *ch, int flag) {
+    return ch->checkFlag(FlagType::NPC, flag);
 }
 
 bool PLR_FLAGGED(struct char_data *ch, int flag) {
-    return ch->playerFlags.test(flag);
+    return ch->checkFlag(FlagType::PC, flag);
 }
 
 bool AFF_FLAGGED(struct char_data *ch, int flag) {
-    if(ch->affected_by.test(flag)) return true;
+    if(ch->checkFlag(FlagType::Affect, flag)) return true;
     for(auto i = 0; i < NUM_WEARS; i++)
         if(auto eq = GET_EQ(ch, i); eq)
-            if(eq->bitvector.test(flag)) return true;
+            if(eq->checkFlag(FlagType::Affect, flag)) return true;
     return false;
 }
 

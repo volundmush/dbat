@@ -676,7 +676,7 @@ static int Crash_load(struct char_data *ch) {
             ex[1] = asciiflag_conv(f2);
             ex[2] = asciiflag_conv(f3);
             ex[3] = asciiflag_conv(f4);
-            for(auto i = 0; i < temp->extra_flags.size(); i++) temp->extra_flags.set(i, IS_SET_AR(ex, i));
+            for(auto i = 0; i < temp->extra_flags.size(); i++) temp->setFlag(FlagType::Item, i, IS_SET_AR(ex, i));
             GET_OBJ_VAL(temp, 8) = t[13];
             GET_OBJ_VAL(temp, 9) = t[14];
             GET_OBJ_VAL(temp, 10) = t[15];
@@ -819,7 +819,7 @@ static int Crash_load(struct char_data *ch) {
                 }
                 if (GET_OBJ_VNUM(temp) == 20099 || GET_OBJ_VNUM(temp) == 20098)
                     if (OBJ_FLAGGED(temp, ITEM_UNBREAKABLE))
-                        temp->extra_flags.reset(ITEM_UNBREAKABLE);
+                        temp->clearFlag(FlagType::Item, ITEM_UNBREAKABLE);
                 auto_equip(ch, temp, locate);
             } else {
                 continue;
@@ -1085,7 +1085,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         roomFlagsHolder[2] = asciiflag_conv(flags3);
         roomFlagsHolder[3] = asciiflag_conv(flags4);
 
-        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->room_flags.set(i);
+        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->setFlag(FlagType::Room, i);
 
         r->sector_type = t[2];
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
@@ -1654,7 +1654,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         extraFlags[1] = asciiflag_conv(f2);
         extraFlags[2] = asciiflag_conv(f3);
         extraFlags[3] = asciiflag_conv(f4);
-        for(auto i = 0; i < o->extra_flags.size(); i++) if(IS_SET_AR(extraFlags, i)) o->extra_flags.set(i);
+        for(auto i = 0; i < o->extra_flags.size(); i++) if(IS_SET_AR(extraFlags, i)) o->setFlag(FlagType::Item, i);
 
         wearFlags[0] = asciiflag_conv(f5);
         wearFlags[1] = asciiflag_conv(f6);
@@ -2861,7 +2861,7 @@ int House_load(room_vnum rvnum) {
             ex[1] = asciiflag_conv(f2);
             ex[2] = asciiflag_conv(f3);
             ex[3] = asciiflag_conv(f4);
-            for(auto i = 0; i < temp->extra_flags.size(); i++) temp->extra_flags.set(i, IS_SET_AR(ex, i));
+            for(auto i = 0; i < temp->extra_flags.size(); i++) temp->setFlag(FlagType::Item, i, IS_SET_AR(ex, i));
             GET_OBJ_VAL(temp, 8) = t[13];
             GET_OBJ_VAL(temp, 9) = t[14];
             GET_OBJ_VAL(temp, 10) = t[15];
@@ -3251,7 +3251,7 @@ vnum assembleArea(const AreaDef &def) {
         for(auto &[vn, u] : world) {
             if(auto room = dynamic_cast<room_data*>(u); room) {
                 for(auto &f : def.roomFlags) {
-                    if(room->room_flags.test(f)) {
+                    if(room->checkFlag(FlagType::Room, f)) {
                         rooms.insert(vn);
                         break;
                     }
@@ -3693,7 +3693,7 @@ void migrate_grid() {
             if(auto u = world.find(r); u != world.end()) {
                 auto room = dynamic_cast<room_data*>(u->second);
                 if(room) {
-                    room->room_flags.reset(ROOM_EARTH);
+                    room->clearFlag(FlagType::Room, ROOM_EARTH);
                 }
             }
         }
@@ -3821,7 +3821,7 @@ void migrate_grid() {
 
         for(auto &p : planetMap) {
             if(!room->area) continue;
-            if(room->room_flags.test(p.first)) {
+            if(room->checkFlag(FlagType::Room, p.first)) {
                 auto avn = room->area.value();
                 auto &a = areas[avn];
                 auto &pl = areas[p.second];
@@ -4484,7 +4484,7 @@ void migrate_grid() {
     }) {
         if(auto u = world.find(r); u != world.end()) {
             auto room = dynamic_cast<room_data*>(u->second);
-            room->room_flags.set(ROOM_LANDING);
+            room->setFlag(FlagType::Room, ROOM_LANDING);
         }
     }
 }
@@ -4613,7 +4613,7 @@ void migrate_characters() {
         p->account = a;
         a->adminLevel = std::max(a->adminLevel, GET_ADMLEVEL(ch));
         a->characters.emplace_back(id);
-        ch->in_room = ch->load_room;
+        ch->location = ch->load_room;
         ch->was_in_room = ch->load_room;
         world[id] = ch;
     }

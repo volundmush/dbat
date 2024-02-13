@@ -133,12 +133,40 @@ item_proto& item_proto::operator=(const item_proto& other) {
     return *this;
 }
 
-std::list<obj_data *> unit_data::getContents() {
-    std::list<obj_data*> out;
-    for(auto o = contents; o; o = o->next_content) out.push_back(o);
+std::vector<obj_data *> unit_data::getInventory() {
+    std::vector<obj_data*> out;
+    for(auto u = contents; u; u = u->next_content) {
+        auto o = dynamic_cast<obj_data*>(u);
+        if(o && o->locationType == 0) out.push_back(o);
+    }
     return out;
 }
 
+std::unordered_map<int, obj_data*> unit_data::getEquipment() {
+    std::unordered_map<int, obj_data*> out;
+    for(auto u = contents; u; u = u->next_content) {
+        auto o = dynamic_cast<obj_data*>(u);
+        if(o && o->locationType > 0) out[o->locationType] = o;
+    }
+    return out;
+}
+
+unit_data* unit_data::getLocation() {
+    if(auto found = world.find(location); found != world.end()) return found->second;
+    return nullptr;
+}
+
+room_data* unit_data::getRoom() {
+    return dynamic_cast<room_data*>(getLocation());
+}
+
+room_data* unit_data::getAbsoluteRoom() {
+    if(auto room = getRoom(); room) {
+        return room;
+    }
+    if(auto loc = getLocation(); loc) return loc->getAbsoluteRoom();
+    return nullptr;
+}
 
 nlohmann::json base_proto::serialize() {
     nlohmann::json j;
@@ -342,7 +370,7 @@ void item_proto::deserialize(const nlohmann::json& j) {
     }
 }
 
-nlohmann::json unit_data::serializeUnit() {
+nlohmann::json unit_data::serialize() {
     nlohmann::json j;
 
     if(vn != NOTHING) j["vn"] = vn;
@@ -369,7 +397,7 @@ nlohmann::json unit_data::serializeUnit() {
 }
 
 
-void unit_data::deserializeUnit(const nlohmann::json& j) {
+void unit_data::deserialize(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"];
     if(j.contains("name")) {
         if(name) free(name);
@@ -569,4 +597,54 @@ unit_data::~unit_data() {
 
 void unit_data::assignTriggers() {
     // does nothing.
+}
+
+bool unit_data::checkFlag(FlagType type, int flag) {
+    if(auto foundType = flags.find(type); foundType != flags.end()) {
+        return foundType->second.contains(flag);
+    }
+    return false;
+}
+
+void unit_data::setFlag(FlagType type, int flag, bool value) {
+    auto &f = flags[type];
+    if(value) {
+        f.insert(flag);
+    } else {
+        f.erase(flag);
+    }
+}
+
+void unit_data::clearFlag(FlagType type, int flag) {
+    setFlag(type, flag, false);
+}
+
+bool unit_data::flipFlag(FlagType type, int flag) {
+    auto &f = flags[type];
+    if(f.contains(flag)) {
+        f.erase(flag);
+        return false;
+    } else {
+        f.insert(flag);
+        return true;
+    }
+}
+
+
+nlohmann::json unit_data::serializeLocation() {
+    nlohmann::json j = nlohmann::json::object();
+
+    if(location != NOWHERE) {
+        j["location"] = location;
+        if(locationType) j["locationType"] = locationType;
+    }
+
+    return j;
+}
+
+nlohmann::json unit_data::serializeRelations() {
+    nlohmann::json j = nlohmann::json::object();
+
+
+    return j;
 }

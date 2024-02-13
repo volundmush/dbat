@@ -344,7 +344,7 @@ ACMD(do_land) {
 
     std::set<room_vnum> rooms;
     std::function<bool(room_data&)> scan = [&](room_data &r) {
-        return r.room_flags.test(ROOM_LANDING);
+        return r.checkFlag(FlagType::Room, ROOM_LANDING);
     };
     std::size_t count = 0;
 
@@ -543,7 +543,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (r->room_flags.test(ROOM_SPACE)) {
+    if (r->checkFlag(FlagType::Room, ROOM_SPACE)) {
         if (!IS_ANDROID(ch)) {
             if (!check_swim(ch)) {
                 return (0);
@@ -555,7 +555,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         return (0);
     }
 
-    if (IS_NPC(ch) && dest->room_flags.test(ROOM_NOMOB) && !ch->master) {
+    if (IS_NPC(ch) && dest->checkFlag(FlagType::Room, ROOM_NOMOB) && !ch->master) {
         return (0);
     }
 
@@ -651,7 +651,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     }
 
 
-    if (dest->room_flags.test(ROOM_TUNNEL) && (num_pc_in_room(dest) >= CONFIG_TUNNEL_SIZE)) {
+    if (dest->checkFlag(FlagType::Room, ROOM_TUNNEL) && (num_pc_in_room(dest) >= CONFIG_TUNNEL_SIZE)) {
         if (CONFIG_TUNNEL_SIZE > 1)
             send_to_char(ch, "There isn't enough room for you to go there!\r\n");
         else
@@ -659,7 +659,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         return (0);
     }
     /* Mortals and low level gods cannot enter greater god rooms. */
-    if (dest->room_flags.test(ROOM_GODROOM) &&
+    if (dest->checkFlag(FlagType::Room, ROOM_GODROOM) &&
         GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
         send_to_char(ch, "You aren't godly enough to use that room!\r\n");
         return (0);
@@ -2063,7 +2063,7 @@ ACMD(do_leave) {
         if(!e) continue;
         auto dest = e->getDestination();
         if(!dest) continue;
-        if (!EXIT_FLAGGED(e, EX_CLOSED) && !dest->room_flags.test(ROOM_INDOORS)) {
+        if (!EXIT_FLAGGED(e, EX_CLOSED) && !dest->checkFlag(FlagType::Room, ROOM_INDOORS)) {
             perform_move(ch, door, 1);
             return;
         }

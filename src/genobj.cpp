@@ -49,8 +49,8 @@ nlohmann::json obj_affected_type::serialize() {
 }
 
 
-nlohmann::json obj_data::serializeBase() {
-    auto j = serializeUnit();
+nlohmann::json obj_data::serialize() {
+    auto j = unit_data::serialize();
 
     for(auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++) {
         if(value[i]) j["value"].push_back(std::make_pair(i, value[i]));
@@ -59,18 +59,9 @@ nlohmann::json obj_data::serializeBase() {
     if(type_flag) j["type_flag"] = type_flag;
     if(level) j["level"] = level;
 
-    for(auto i = 0; i < wear_flags.size(); i++)
-        if(wear_flags.test(i)) j["wear_flags"].push_back(i);
-
-    for(auto i = 0; i < extra_flags.size(); i++)
-        if(extra_flags.test(i)) j["extra_flags"].push_back(i);
-
     if(weight != 0.0) j["weight"] = weight;
     if(cost) j["cost"] = cost;
     if(cost_per_day) j["cost_per_day"] = cost_per_day;
-
-    for(auto i = 0; i < bitvector.size(); i++)
-        if(bitvector.test(i)) j["bitvector"].push_back(i);
 
     for(auto & i : affected) {
         if(i.location == APPLY_NONE) continue;
@@ -114,27 +105,9 @@ void obj_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("type_flag")) type_flag = j["type_flag"];
     if(j.contains("level")) level = j["level"];
 
-    if(j.contains("wear_flags")) {
-        for(auto & i : j["wear_flags"]) {
-            wear_flags.set(i.get<int>());
-        }
-    }
-
-    if(j.contains("extra_flags")) {
-        for(auto & i : j["extra_flags"]) {
-            extra_flags.set(i.get<int>());
-        }
-    }
-
     if(j.contains("weight")) weight = j["weight"];
     if(j.contains("cost")) cost = j["cost"];
     if(j.contains("cost_per_day")) cost_per_day = j["cost_per_day"];
-
-    if(j.contains("bitvector")) {
-        for(auto & i : j["bitvector"]) {
-            bitvector.set(i.get<int>());
-        }
-    }
 
     if(j.contains("affected")) {
         int counter = 0;
@@ -366,19 +339,6 @@ void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
         obj_to_char(obj, ch);
 }
 
-std::string obj_data::serializeLocation() {
-    if(in_obj) {
-        return in_obj->getUID();
-    } else if(carried_by) {
-        return carried_by->getUID();
-    } else if(worn_by) {
-        return worn_by->getUID();
-    } else if(world.contains(in_room)) {
-        return world[in_room]->getUID();
-    } else {
-        return ""; // this should NEVER happen!
-    }
-}
 
 nlohmann::json obj_data::serializeRelations() {
     auto j = nlohmann::json::object();
@@ -418,21 +378,6 @@ bool obj_data::isProvidingLight() {
     return GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS);
 }
 
-struct room_data* obj_data::getRoom() {
-    auto roomFound = world.find(in_room);
-    if(roomFound != world.end()) return dynamic_cast<room_data*>(roomFound->second);
-    return nullptr;
-}
-
-struct room_data* obj_data::getAbsoluteRoom() {
-    if(auto room = getRoom(); room) {
-        return room;
-    }
-    if(in_obj) return in_obj->getAbsoluteRoom();
-    else if(carried_by) return carried_by->getRoom();
-    else if(worn_by) return worn_by->getRoom();
-    return nullptr;
-}
 
 double obj_data::currentGravity() {
     if(auto room = getAbsoluteRoom(); room) {
@@ -443,13 +388,6 @@ double obj_data::currentGravity() {
 
 bool obj_data::isWorking() {
     return !(OBJ_FLAGGED(this, ITEM_BROKEN) || OBJ_FLAGGED(this, ITEM_FORGED));
-}
-
-void obj_data::clearLocation() {
-    if(in_obj) obj_from_obj(this);
-    else if(carried_by) obj_from_char(this);
-    else if(worn_by) unequip_char(worn_by, worn_on);
-    else if(world.contains(in_room)) obj_from_room(this);
 }
 
 static const std::map<std::string, int> _values = {
@@ -472,7 +410,7 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
         if(arg.empty()) return "0";
         int flag = get_flag_by_name(affected_bits, (char*)arg.c_str());
         if(flag == -1) return "0";
-        return bitvector.test(flag) ? "1" : "0";
+        return checkFlag(FlagType::Affect, flag) ? "1" : "0";
     }
 
     if(lmember == "cost") {
@@ -510,7 +448,7 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
         if(arg.empty()) return "0";
         int flag = get_flag_by_name(extra_bits, (char*)arg.c_str());
         if(flag == -1) return "0";
-        return extra_flags.test(flag) ? "1" : "0";
+        return checkFlag(FlagType::Item, flag) ? "1" : "0";
     }
 
     if(lmember == "has_in") {
@@ -523,7 +461,7 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
             int addition = atof(arg.c_str());
             value[VAL_ALL_HEALTH] = std::max<int>(1, addition + value[VAL_ALL_HEALTH]);
             if (OBJ_FLAGGED(this, ITEM_BROKEN) && value[VAL_ALL_HEALTH] >= 100)
-                extra_flags.reset(ITEM_BROKEN);
+                clearFlag(FlagType::Item, ITEM_BROKEN);
         }
         return fmt::format("{}", value[VAL_ALL_HEALTH]);
     }
@@ -531,8 +469,8 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
     if(lmember == "id") return this;
 
     if(lmember == "in_room") {
-        if (auto roomFound = world.find(in_room); roomFound != world.end())
-            return roomFound->second;
+        if (auto roomFound = world.find(location); roomFound != world.end())
+            return dynamic_cast<room_data*>(roomFound->second);
         return "";
     }
 
@@ -562,7 +500,7 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
         if(arg.empty()) return "0";
         int flag = get_flag_by_name(affected_bits, (char*)arg.c_str());
         if(flag == -1) return "0";
-        bitvector.flip(flag);
+        flipFlag(FlagType::Affect, flag);
         return "1";
     }
 
@@ -570,7 +508,7 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
         if(arg.empty()) return "0";
         int flag = get_flag_by_name(extra_bits, (char*)arg.c_str());
         if(flag == -1) return "0";
-        extra_flags.flip(flag);
+        flipFlag(FlagType::Item, flag);
         return "1";
     }
 
@@ -636,12 +574,9 @@ void obj_data::setProto(std::shared_ptr<item_proto> pro) {
     value = proto->value;
     type_flag = proto->type_flag;
     level = proto->level;
-    wear_flags = proto->wear_flags;
-    extra_flags = proto->extra_flags;
     weight = proto->weight;
     cost = proto->cost;
     cost_per_day = proto->cost_per_day;
-    bitvector = proto->bitvector;
     affected = proto->affected;
     timer = proto->timer;
 }
