@@ -264,64 +264,43 @@ static void db_load_players(const std::filesystem::path& loc) {
     }
 }
 
-static void db_load_characters_initial(const std::filesystem::path& loc) {
-    auto data = load_from_file(loc, "characters.json");
-    uniqueCharacters.reserve(data.size());
+static void db_load_instances_initial(const std::filesystem::path& loc) {
+    auto data = load_from_file(loc, "instances.json");
+    world.reserve(data.size());
     for(auto j : data) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
+        auto uid = j["uid"].get<int64_t>();
+        auto unitClass = j["unitClass"].get<std::string>();
         auto data = j["data"];
-        auto c = new char_data();
-        c->script = std::make_shared<script_data>(c);
-        if(auto isPlayer = players.find(id); isPlayer != players.end()) {
-            c->deserializePlayer(data, false);
-            isPlayer->second->character = c;
-        } else {
-            c->deserializeInstance(data, true);
+        unit_data *u = nullptr;
+        if(unitClass == "pc_data") {
+            auto pc = new pc_data(data);
+            u = pc;
+            if(auto isPlayer = players.find(uid); isPlayer != players.end()) {
+                isPlayer->second->character = pc;
+            }
+        } else if(unitClass == "npc_data") {
+            u = new npc_data(data);
+        } else if(unitClass == "obj_data") {
+            u = new obj_data(data);
+        } else if(unitClass == "room_data") {
+            u = new room_data(data);
         }
-        uniqueCharacters[id] = std::make_pair(generation, c);
+        world[uid] = u;
     }
 }
 
-static void db_load_characters_finish(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "characters.json")) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        if(auto cf = uniqueCharacters.find(id); cf != uniqueCharacters.end()) {
-            if(auto c = cf->second.second) {
-                c->deserializeRelations(j["relations"]);
-                c->deserializeLocation(j["location"]);
+static void db_load_instances_finish(const std::filesystem::path& loc) {
+    for(auto j : load_from_file(loc, "instances.json")) {
+        auto uid = j["uid"].get<int64_t>();
+        if(auto uf = world.find(uid); uf != world.end()) {
+            if(auto u = uf->second) {
+                u->deserializeRelations(j["relations"]);
+                u->deserializeLocation(j["location"]);
             }
         }
     }
 }
 
-static void db_load_items_initial(const std::filesystem::path& loc) {
-    auto data = load_from_file(loc, "items.json");
-    uniqueObjects.reserve(data.size());
-    for(auto j : data) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        auto data = j["data"];
-        auto i = new obj_data();
-        i->script = std::make_shared<script_data>(i);
-        i->deserializeInstance(data, false);
-        uniqueObjects[id] = std::make_pair(generation, i);
-    }
-}
-
-static void db_load_items_finish(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "items.json")) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        if(auto cf = uniqueObjects.find(id); cf != uniqueObjects.end()) {
-            if(auto i = cf->second.second) {
-                i->deserializeRelations(j["relations"]);
-                i->deserializeLocation(j["location"], j["slot"].get<int>());
-            }
-        }
-    }
-}
 
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
@@ -367,27 +346,6 @@ static void db_load_dgscript_prototypes(const std::filesystem::path& loc) {
         auto id = j["vn"].get<int64_t>();
         auto proto = std::make_shared<trig_proto>(j);
         trig_index[id] = proto;
-    }
-}
-
-static void db_load_rooms(const std::filesystem::path& loc) {
-    auto data = load_from_file(loc, "rooms.json");
-    world.reserve(data.size());
-    for(auto j : data) {
-        auto id = j["vn"].get<int64_t>();
-        auto r = new room_data(j);
-        world[id] = r;
-        r->script = std::make_shared<script_data>(r);
-        r->zone = real_zone_by_thing(id);
-    }
-}
-
-static void db_load_exits(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "exits.json")) {
-        auto id = j["room"].get<int64_t>();
-        auto dir = j["direction"].get<int64_t>();
-        auto r = dynamic_cast<room_data*>(world[id]);
-        r->dir_option[dir] = new room_direction_data(j["data"]);
     }
 }
 
@@ -487,6 +445,21 @@ void boot_db_world() {
 
     std::vector<std::thread> threads;
 
+    basic_mud_log("Loading global data...");
+    threads.emplace_back([&latest] {
+        db_load_globaldata(latest);
+    });
+
+    basic_mud_log("Loading accounts.");
+    threads.emplace_back([&latest] {
+        db_load_accounts(latest);
+    });
+
+    basic_mud_log("Loading player index...");
+    threads.emplace_back([&latest] {
+        db_load_players(latest);
+    });
+
     basic_mud_log("Loading Zones...");
     threads.emplace_back([&latest] {
         db_load_zones(latest);
@@ -507,11 +480,6 @@ void boot_db_world() {
         db_load_item_prototypes(latest);
     });
 
-    basic_mud_log("Loading rooms.");
-    threads.emplace_back([&latest] {
-        db_load_rooms(latest);
-    });
-
     basic_mud_log("Loading shops.");
     threads.emplace_back([&latest] {
         db_load_shops(latest);
@@ -527,57 +495,17 @@ void boot_db_world() {
     }
     threads.clear();
 
-    basic_mud_log("Loading exits.");
-    threads.emplace_back([&latest] {
-        db_load_exits(latest);
-    });
+    basic_mud_log("Initializing instances...");
+    db_load_instances_initial(latest);
 
     basic_mud_log("Loading areas.");
-    threads.emplace_back([&latest] {
-        db_load_areas(latest);
-    });
-
-    basic_mud_log("Loading global data...");
-    threads.emplace_back([&latest] {
-        db_load_globaldata(latest);
-    });
-
-    basic_mud_log("Loading accounts.");
-    threads.emplace_back([&latest] {
-        db_load_accounts(latest);
-    });
-
-    for(auto &t : threads) {
-        t.join();
-    }
-    threads.clear();
-
-    basic_mud_log("Loading players.");
-    db_load_players(latest);
-
-    basic_mud_log("Loading characters initial...");
-    threads.emplace_back([&latest] {
-        db_load_characters_initial(latest);
-    });
-
-    basic_mud_log("Loading items initial...");
-    threads.emplace_back([&latest] {
-        db_load_items_initial(latest);
-    });
-
-    for(auto &t : threads) {
-        t.join();
-    }
-    threads.clear();
+    db_load_areas(latest);
 
     // Now that all of the game entities have been spawned, we can finish loading
     // relations between them.
 
-    basic_mud_log("Loading characters finish...");
-    db_load_characters_finish(latest);
-
-    basic_mud_log("Loading items finish...");
-    db_load_items_finish(latest);
+    basic_mud_log("Finish loading instances.");
+    db_load_instances_finish(latest);
 
     basic_mud_log("Running activation of entities...");
     db_load_activate_entities();

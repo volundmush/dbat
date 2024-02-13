@@ -18,42 +18,6 @@
 #include "dbat/dg_scripts.h"
 
 
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
-/*
- * Fix all existing objects to have these values.
- * We need to run through each and every object currently in the
- * game to see which ones are pointing to this prototype.
- * if object is pointing to this prototype, then we need to replace it
- * with the new one.
- */
-int update_objects(struct obj_data *refobj) {
-    struct obj_data *obj, swap;
-    int count = 0;
-
-    for (obj = object_list; obj; obj = obj->next) {
-        if (obj->vn != refobj->vn)
-            continue;
-
-        count++;
-
-        /* Update the existing object but save a copy for private information. */
-        swap = *obj;
-        *obj = *refobj;
-
-        /* Copy game-time dependent variables over. */
-        IN_ROOM(obj) = swap.in_room;
-        obj->carried_by = swap.carried_by;
-        obj->worn_by = swap.worn_by;
-        obj->worn_on = swap.worn_on;
-        obj->in_obj = swap.in_obj;
-        obj->contents = swap.contents;
-        obj->next_content = swap.next_content;
-        obj->next = swap.next;
-    }
-
-    return count;
-}
 
 
 
@@ -63,62 +27,6 @@ int save_objects(zone_rnum zone_num) {
     return true;
 }
 
-
-
-
-
-int delete_object(obj_rnum rnum) {
-    obj_rnum i;
-    zone_rnum zrnum;
-    struct obj_data *obj, *tmp;
-    int shop, j, zone, cmd_no;
-
-    if (!obj_proto.count(rnum))
-        return NOTHING;
-
-    obj = &obj_proto[rnum];
-
-    zrnum = real_zone_by_thing(rnum);
-
-    /* This is something you might want to read about in the logs. */
-    basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->getShortDesc());
-
-    for (tmp = object_list; tmp; tmp = tmp->next) {
-        if (tmp->vn != obj->vn)
-            continue;
-
-        /* extract_obj() will just axe contents. */
-        if (tmp->contents) {
-            struct obj_data *this_content, *next_content;
-            for (this_content = tmp->contents; this_content; this_content = next_content) {
-                next_content = this_content->next_content;
-                if (IN_ROOM(tmp)) {
-                    /* Transfer stuff from object to room. */
-                    obj_from_obj(this_content);
-                    obj_to_room(this_content, IN_ROOM(tmp));
-                } else if (tmp->worn_by || tmp->carried_by) {
-                    /* Transfer stuff from object to person inventory. */
-                    obj_from_char(this_content);
-                    obj_to_char(this_content, tmp->carried_by);
-                } else if (tmp->in_obj) {
-                    /* Transfer stuff from object to containing object. */
-                    obj_from_obj(this_content);
-                    obj_to_obj(this_content, tmp->in_obj);
-                }
-            }
-        }
-        /* Remove from object_list, etc. - handles weight changes, and similar. */
-        extract_obj(tmp);
-    }
-
-    /* Make sure all are removed. */
-
-    assert(get_vnum_count(objectVnumIndex, rnum) == 0);
-    obj_proto.erase(rnum);
-    obj_index.erase(rnum);
-
-    return rnum;
-}
 
 void obj_affected_type::deserialize(const nlohmann::json &j) {
     if(j.count("location")) location = j["location"];

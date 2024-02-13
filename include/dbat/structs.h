@@ -124,7 +124,7 @@ struct player_data {
     int64_t id{NOTHING};
     std::string name;
     std::shared_ptr<account_data> account{};
-    struct char_data* character{};
+    pc_data* character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
     std::set<int64_t> sensePlayer;
     std::set<mob_vnum> senseMemory;
@@ -411,7 +411,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // Many NPCs, items, and rooms have a VN.
     // the Room's VN should be the same as its UID.
     vnum vn{NOTHING};
-    // Zones. Many things are in a Zone. It's legacy though. :()
+    // Zones. Many things are in a Zone. It's legacy though. :(
     zone_vnum zone{NOTHING};
 
     char *name{};
@@ -433,12 +433,16 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
 
-    nlohmann::json serializeUnit();
-
     void activateContents();
     void deactivateContents();
 
-    void deserializeUnit(const nlohmann::json& j);
+    virtual void deserialize(const nlohmann::json& j);
+    virtual void deserializeRelations(const nlohmann::json& j);
+    virtual void deserializeLocation(const nlohmann::json& j);
+    virtual nlohmann::json serialize();
+    virtual nlohmann::json serializeRelations();
+    virtual std::string serializeLocation();
+    
     virtual std::string scriptString();
 
     std::string getUID(bool active = true);

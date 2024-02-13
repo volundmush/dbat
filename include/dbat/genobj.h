@@ -11,6 +11,4 @@ extern void auto_equip(struct char_data *ch, struct obj_data *obj, int location)
 
 extern int save_objects(zone_rnum vznum);
 
-extern int update_objects(struct obj_data *refobj);
 
-extern int delete_object(obj_rnum);
