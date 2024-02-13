@@ -3472,7 +3472,7 @@ bool icontains(const std::string& haystack, const std::string& needle) {
     return (it != haystack.end());
 }
 
-std::string withPlaceholder(const std::string& str, const std::string& placeholder, const std::string& replacement) {
+std::string withPlaceholder(const std::string& str, const std::string& placeholder) {
     return str.empty() ? placeholder : str;
 }
 
