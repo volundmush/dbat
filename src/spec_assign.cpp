@@ -46,7 +46,7 @@ void ASSIGNROOM(room_vnum room, SPECIAL(fname)) {
     room_rnum rnum;
 
     if ((rnum = real_room(room)) != NOWHERE)
-        world[rnum]->func = fname;
+        dynamic_cast<room_data*>(world[rnum])->func = fname;
     else if (!mini_mud)
         basic_mud_log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }
@@ -89,7 +89,10 @@ void assign_rooms() {
     /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
 
     if (CONFIG_DTS_ARE_DUMPS)
-        for (auto &r : world)
-            if (ROOM_FLAGGED(r.first, ROOM_DEATH))
-                r.second->func = dump;
+        for (auto &[vn, u] : world) {
+            auto r = dynamic_cast<room_data *>(u);
+            if (!r) continue;
+            if (ROOM_FLAGGED(r, ROOM_DEATH))
+                r->func = dump;
+        }
 }

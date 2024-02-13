@@ -202,8 +202,9 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
      * Build a copy of the room for editing.
      */
     auto room = new room_data();
+    auto exist = dynamic_cast<room_data*>(world[real_num]);
 
-    *room = *world[real_num];
+    *room = *exist;
     /*
      * Allocate space for all strings.
      */
@@ -214,21 +215,21 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
      * Exits - We allocate only if necessary.
      */
     for (counter = 0; counter < NUM_OF_DIRS; counter++) {
-        if (world[real_num]->dir_option[counter]) {
+        if (exist->dir_option[counter]) {
             CREATE(room->dir_option[counter], struct room_direction_data, 1);
 
             /*
              * Copy the numbers over.
              */
-            *room->dir_option[counter] = *world[real_num]->dir_option[counter];
+            *room->dir_option[counter] = *exist->dir_option[counter];
             /*
              * Allocate the strings.
              */
-            if (world[real_num]->dir_option[counter]->general_description)
+            if (exist->dir_option[counter]->general_description)
                 room->dir_option[counter]->general_description = strdup(
-                        world[real_num]->dir_option[counter]->general_description);
-            if (world[real_num]->dir_option[counter]->keyword)
-                room->dir_option[counter]->keyword = strdup(world[real_num]->dir_option[counter]->keyword);
+                        exist->dir_option[counter]->general_description);
+            if (exist->dir_option[counter]->keyword)
+                room->dir_option[counter]->keyword = strdup(exist->dir_option[counter]->keyword);
         }
     }
 

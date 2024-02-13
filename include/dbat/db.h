@@ -311,7 +311,7 @@ extern struct config_data config_info;
 extern std::vector<obj_vnum> dbVnums;
 
 // world data...
-extern std::unordered_map<room_vnum, room_data*> world;
+extern std::unordered_map<room_vnum, unit_data*> world;
 extern std::unordered_map<zone_vnum, struct zone_data> zone_table;
 
 extern std::unordered_map<vnum, area_data> areas;

@@ -287,13 +287,16 @@ static std::set<vnum> _areaRecurseGuard;
 
 std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data*)>& func) {
     std::size_t count = 0;
-    for(auto r : start.rooms) {
-        if(auto room = world.find(r); room != world.end() && func(room->second)) {
-            if(fill.contains(r)) {
-                auto message = fmt::format("ERROR: While recursing area: {}, asked to re-add room {}", start.vn, r);
+    for(auto v : start.rooms) {
+        if(auto u = world.find(v); u != world.end()) {
+            auto r = dynamic_cast<room_data*>(u->second);
+            if(!r) continue;
+            if(!func(r)) continue;
+            if(fill.contains(r->vn)) {
+                auto message = fmt::format("ERROR: While recursing area: {}, asked to re-add room {}", start.vn, r->vn);
                 throw std::runtime_error(message);
             }
-            fill.insert(r);
+            fill.insert(r->vn);
             count++;
         }
     }
@@ -374,7 +377,7 @@ ACMD(do_land) {
 
     if (landing != NOWHERE) {
         auto was_in = GET_ROOM_VNUM(IN_ROOM(ch));
-        auto r = world[landing];
+        auto r = dynamic_cast<room_data*>(world[landing]);
         send_to_char(ch,
                      "You descend through the upper atmosphere, and coming down through the clouds you land quickly on the ground below.\r\n");
         std::string landName = "UNKNOWN";
@@ -735,9 +738,10 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
     }
     ch->affected_by.set(AFF_PURSUIT);
+    r = ch->getRoom();
     char_from_room(ch);
     char_to_room(ch, dest->vn);
-    if ((ch->getRoom()->zone != world[was_in]->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
+    if ((ch->getRoom()->zone != r->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
         send_to_sense(0, "You sense someone", ch);
         sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.",
                 add_commas(GET_HIT(ch)).c_str());
@@ -758,9 +762,9 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
               (dir == DOWN) ? "above" : dirs[rev_dir[dir]]));
     act("$n arrives from $T.", true, ch, nullptr, buf2, TO_ROOM | TO_SNEAKRESIST);
     if (FIGHTING(ch)) {
-        if (SECT(world[was_in]->dir_option[dir]->to_room) != SECT_FLYING &&
-            SECT(world[was_in]->dir_option[dir]->to_room) != SECT_WATER_NOSWIM &&
-            ROOM_EFFECT(world[was_in]->dir_option[dir]->to_room) == 0) {
+        if (SECT(r->dir_option[dir]->to_room) != SECT_FLYING &&
+            SECT(r->dir_option[dir]->to_room) != SECT_WATER_NOSWIM &&
+            ROOM_EFFECT(r->dir_option[dir]->to_room) == 0) {
             roll_pursue(FIGHTING(ch), ch);
         }
         ch->affected_by.reset(AFF_PURSUIT);
@@ -1267,7 +1271,7 @@ static const int flags_door[] =
         };
 
 
-#define EXITN(room, door)        (world[room]->dir_option[door])
+#define EXITN(room, door)        (dynamic_cast<room_data*>(world[room])->dir_option[door])
 #define OPEN_DOOR(room, obj, door)    ((obj) ?\
         (REMOVE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_CLOSED)) :\
         (REMOVE_BIT(EXITN(room, door)->exit_info, EX_CLOSED)))
@@ -1317,7 +1321,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
 
     len = snprintf(buf, sizeof(buf), "$n %ss ", cmd_door[scmd]);
     if (!obj && ((other_room = EXIT(ch, door)->to_room) != NOWHERE)) {
-        if ((back = world[other_room]->dir_option[rev_dir[door]]) != nullptr)
+        if ((back = dynamic_cast<room_data*>(world[other_room])->dir_option[rev_dir[door]]) != nullptr)
             if (back->to_room != IN_ROOM(ch))
                 back = nullptr;
     }
@@ -1678,7 +1682,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     }
 
     if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
-        num_pc_in_room((world[dest_room])) >= CONFIG_TUNNEL_SIZE) {
+        num_pc_in_room((dynamic_cast<room_data*>(world[dest_room]))) >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)
             send_to_char(ch, "There isn't enough room for you to go there!\r\n");
         else
@@ -1783,7 +1787,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
             if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099) {
                 struct char_data *tch, *next_v;
                 int filled = false;
-                for (tch = world[real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))]->people; tch; tch = next_v) {
+                for (tch = dynamic_cast<room_data*>(world[real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))])->people; tch; tch = next_v) {
                     next_v = tch->next_in_room;
                     if (tch) {
                         filled = true;
@@ -1916,7 +1920,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     }
 
     if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
-        num_pc_in_room((world[dest_room])) >= CONFIG_TUNNEL_SIZE) {
+        num_pc_in_room((dynamic_cast<room_data*>(world[dest_room]))) >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)
             send_to_char(ch, "There isn't enough room for you to go there!\r\n");
         else

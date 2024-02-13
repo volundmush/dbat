@@ -393,7 +393,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
     }
 
     is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, 0));
-    auto going = world[is_going_to];
+    auto going = dynamic_cast<room_data*>(world[is_going_to]);
     if (!going->room_flags.test(ROOM_VEHICLE)) {
         send_to_char(ch, "@wThat ship can't carry other ships.");
         return;

@@ -326,14 +326,14 @@ ACMD(do_dig) {
     /*
      * check if we can dig from there to here.
      */
-    auto r2 = world[rrnum];
+    auto r2 = dynamic_cast<room_data*>(world[rrnum]);
     auto e2 = r2->dir_option[rev_dir[dir]];
 
     if (e2)
         send_to_char(ch, "You cannot dig from %d to here. The target room already has an exit to the %s.\r\n",
                      rvnum, dirs[rev_dir[dir]]);
     else {
-        world[rrnum]->dir_option[rev_dir[dir]] = new room_direction_data();
+        r2->dir_option[rev_dir[dir]] = new room_direction_data();
         e2 = r2->dir_option[rev_dir[dir]];
         e2->general_description = nullptr;
         e2->keyword = nullptr;
@@ -389,7 +389,10 @@ ACMD(do_rcopy) {
         return;
     }
 
-    zone = world[rrnum]->zone;
+    auto r = dynamic_cast<room_data*>(world[rrnum]);
+    auto t = dynamic_cast<room_data*>(world[trnum]);
+
+    zone = r->zone;
     if ((zone == NOWHERE) || !can_edit_zone(ch, zone)) {
         send_to_char(ch, "\r\n");
         send_cannot_edit(ch, zone);
@@ -397,26 +400,26 @@ ACMD(do_rcopy) {
     }
 
     /* Free descriptions. */
-    if (world[rrnum]->name)
-        free(world[rrnum]->name);
-    if (world[rrnum]->look_description)
-        free(world[rrnum]->look_description);
-    if (world[rrnum]->ex_description)
-        free_ex_descriptions(world[rrnum]->ex_description);
-    world[rrnum]->sector_type = world[trnum]->sector_type;
+    if (r->name)
+        free(r->name);
+    if (r->look_description)
+        free(r->look_description);
+    if (r->ex_description)
+        free_ex_descriptions(r->ex_description);
+    r->sector_type = t->sector_type;
 
     /* Copy over description name and extra descriptions */
-    world[rrnum]->look_description = str_udup(world[trnum]->look_description);
-    world[rrnum]->name = str_udup(world[trnum]->name);
+    r->look_description = str_udup(t->look_description);
+    r->name = str_udup(t->name);
 
     /* Copy over any existings extra descriptions */
-    if (world[trnum]->ex_description)
-        copy_ex_descriptions(&world[rrnum]->ex_description, world[trnum]->ex_description);
+    if (t->ex_description)
+        copy_ex_descriptions(&r->ex_description, t->ex_description);
     else
-        world[rrnum]->ex_description = nullptr;
+        r->ex_description = nullptr;
 
     /* Finally copy over room flags */
-    world[rrnum]->room_flags = world[trnum]->room_flags;
+    r->room_flags = t->room_flags;
     send_to_imm("Log: %s has copied room [%d] to room [%d].", GET_NAME(ch), tvnum, rvnum);
     send_to_char(ch, "Room [%d] copied to room [%d].\r\n", tvnum, rvnum);
 }
@@ -479,8 +482,10 @@ int buildwalk(struct char_data *ch, int dir) {
             rnum = real_room(vnum);
             ch->getRoom()->dir_option[dir] = new room_direction_data();
             EXIT(ch, dir)->to_room = rnum;
-            world[rnum]->dir_option[rev_dir[dir]] = new room_direction_data();
-            world[rnum]->dir_option[rev_dir[dir]]->to_room = IN_ROOM(ch);
+            auto r = dynamic_cast<room_data*>(world[rnum]);
+
+            r->dir_option[rev_dir[dir]] = new room_direction_data();
+            r->dir_option[rev_dir[dir]]->to_room = IN_ROOM(ch);
 
             /* Report room creation to user */
             send_to_char(ch, "@yRoom #%d created by BuildWalk.@n\r\n", vnum);

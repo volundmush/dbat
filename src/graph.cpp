@@ -61,8 +61,9 @@ int find_first_step(struct room_data *src, struct room_data *target) {
         return (BFS_ALREADY_THERE);
 
     /* clear marks first, some OLC systems will save the mark. */
-    for (auto &[vn, r] : world) {
-        r->room_flags.reset(ROOM_BFS_MARK);
+    for (auto &[vn, u] : world) {
+        auto r = dynamic_cast<room_data*>(u);
+        if(r) r->room_flags.reset(ROOM_BFS_MARK);
     }
     src->room_flags.set(ROOM_BFS_MARK);
 
@@ -174,13 +175,13 @@ ACMD(do_sradar) {
 
     auto find = planetLocations.find(argstr);
     if(find != planetLocations.end()) {
-        dir = find_first_step(startRoom, world[find->second]);
+        dir = find_first_step(startRoom, dynamic_cast<room_data*>(world[find->second]));
         sprintf(planet, "%s", argstr.c_str());
     } else {
         if(!strcasecmp(arg, "buoy1")) {
             auto room = world.find(GET_RADAR1(ch));
             if(room != world.end()) {
-                dir = find_first_step(startRoom, room->second);
+                dir = find_first_step(startRoom, dynamic_cast<room_data*>(room->second));
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;
@@ -188,7 +189,7 @@ ACMD(do_sradar) {
         } else if(!strcasecmp(arg, "buoy2")) {
             auto room = world.find(GET_RADAR2(ch));
             if(room != world.end()) {
-                dir = find_first_step(startRoom, room->second);
+                dir = find_first_step(startRoom, dynamic_cast<room_data*>(room->second));
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;
@@ -196,7 +197,7 @@ ACMD(do_sradar) {
         } else if(!strcasecmp(arg, "buoy3")) {
             auto room = world.find(GET_RADAR3(ch));
             if(room != world.end()) {
-                dir = find_first_step(startRoom, room->second);
+                dir = find_first_step(startRoom, dynamic_cast<room_data*>(room->second));
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;
@@ -440,7 +441,7 @@ ACMD(do_track) {
         auto chPlanet = ch->getMatchingArea(area_data::isPlanet);
         auto vPlanet = vict->getMatchingArea(area_data::isPlanet);
         if(chPlanet && chPlanet == vPlanet) {
-            auto &a = areas[world[vict->in_room]->area.value()];
+            auto &a = areas[vict->getRoom()->area.value()];
             send_to_char(ch, "@WSense@D: %s@n\r\n", a.name.c_str());
         }
     } else {
@@ -484,7 +485,7 @@ ACMD(do_track) {
                 break;
             default:    /* Success! */
                 if ((GET_SKILL_BASE(ch, SKILL_SENSE) >= 75)) {
-                    auto &a = areas[world[vict->in_room]->area.value()];
+                    auto &a = areas[vict->getRoom()->area.value()];
                     send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
                     send_to_char(ch, "@WSense@D: @Y%s@n\r\n", a.name.c_str());
                 } else {

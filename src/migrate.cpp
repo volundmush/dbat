@@ -971,7 +971,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
 
-    auto r = world[room];
+    auto r = dynamic_cast<room_data*>(world[room]);
     
     auto d = r->dir_option[dir] = new room_direction_data();
 
@@ -3294,11 +3294,13 @@ vnum assembleArea(const AreaDef &def) {
     }
 
     if(!def.roomFlags.empty()) {
-        for(auto &[vn, room] : world) {
-            for(auto &f : def.roomFlags) {
-                if(room->room_flags.test(f)) {
-                    rooms.insert(vn);
-                    break;
+        for(auto &[vn, u] : world) {
+            if(auto room = dynamic_cast<room_data*>(u); room) {
+                for(auto &f : def.roomFlags) {
+                    if(room->room_flags.test(f)) {
+                        rooms.insert(vn);
+                        break;
+                    }
                 }
             }
         }
@@ -3311,7 +3313,8 @@ vnum assembleArea(const AreaDef &def) {
     for(auto r : rooms) {
         auto found = world.find(r);
         if(found == world.end()) continue;
-        auto &room = found->second;
+        auto room = dynamic_cast<room_data*>(found->second);
+        if(!room) continue;
         if(room->area) continue;
         room->area = vn;
         a.rooms.insert(r);
@@ -3460,7 +3463,9 @@ void migrate_grid() {
         a.roomIDs.insert(177);
     }
 
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, u] : world) {
+        auto room = dynamic_cast<room_data*>(u);
+        if(!room) continue;
         if(room->area) continue;
         auto sense = sense_location_name(rv);
         if(sense != "Unknown.") {
@@ -3731,8 +3736,11 @@ void migrate_grid() {
     for(auto child : areas[moon].children) {
         auto &a = areas[child];
         for(auto r : a.rooms) {
-            if(auto room = world.find(r); room != world.end()) {
-                room->second->room_flags.reset(ROOM_EARTH);
+            if(auto u = world.find(r); u != world.end()) {
+                auto room = dynamic_cast<room_data*>(u->second);
+                if(room) {
+                    room->room_flags.reset(ROOM_EARTH);
+                }
             }
         }
     }
@@ -3852,8 +3860,10 @@ void migrate_grid() {
     };
 
     basic_mud_log("Attempting to deduce Areas to Planets...");
-    for(auto &[vnum, room] : world) {
+    for(auto &[vnum, u] : world) {
         // check for planetMap flags and, if found, bind the area this room belongs to, to the respective planet.
+        auto room = dynamic_cast<room_data*>(u);
+        if(!room) continue;
 
         for(auto &p : planetMap) {
             if(!room->area) continue;
@@ -4498,8 +4508,10 @@ void migrate_grid() {
 
     AreaDef misc;
     misc.name = "Miscellaneous";
-    for(auto &[rv, room] : world) {
-        if(!room->area) misc.roomIDs.insert(rv);
+    for(auto &[rv, u] : world) {
+        if(auto room = dynamic_cast<room_data*>(u); room && !room->area) {
+            misc.roomIDs.insert(rv);
+        }
     }
     auto misc_area = assembleArea(misc);
 
@@ -4516,7 +4528,10 @@ void migrate_grid() {
         14904, 15655, // kanassa
         16009, 16544, 16600 // Arlia
     }) {
-        if(auto room = world.find(r); room != world.end()) room->second->room_flags.set(ROOM_LANDING);
+        if(auto u = world.find(r); u != world.end()) {
+            auto room = dynamic_cast<room_data*>(u->second);
+            room->room_flags.set(ROOM_LANDING);
+        }
     }
 }
 

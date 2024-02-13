@@ -136,10 +136,11 @@ ACMD(do_masound) {
     skip_spaces(&argument);
 
     was_in_room = IN_ROOM(ch);
+    auto old = ch->getRoom();
     for (door = 0; door < NUM_OF_DIRS; door++) {
         struct room_direction_data *newexit;
 
-        if (((newexit = world[was_in_room]->dir_option[door]) != nullptr) &&
+        if (((newexit = old->dir_option[door]) != nullptr) &&
             newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
             IN_ROOM(ch) = newexit->to_room;
             sub_write(argument, ch, true, TO_ROOM);

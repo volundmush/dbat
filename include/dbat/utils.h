@@ -1321,7 +1321,8 @@ void send_to_room(struct room_data *room, fmt::string_view format, Args&&... arg
 template<typename... Args>
 void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
     if(!world.contains(room)) return;
-    auto r = world[room];
+    auto r = dynamic_cast<room_data*>(world[room]);
+    if(!r) return;
     send_to_room(r, format, std::forward<Args>(args)...);
 }
 

@@ -238,10 +238,11 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
       }
     } */
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[ch->in_room]->vn == gauntlet_info[i][1]) {
+        auto r = ch->getRoom();
+        if (r->vn == gauntlet_info[i][1]) {
             if (cmd == gauntlet_info[i][2]) {
                 //don't let him proceed if mob is still alive
-                for (tch = world[ch->in_room]->people; tch; tch = tch->next_in_room) {
+                for (tch = r->people; tch; tch = tch->next_in_room) {
                     if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */
                     {
                         proceed = 0;
@@ -254,7 +255,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
                     nomob = true;
 
                     /* Check the next room for players and ensure mob is waiting */
-                    for (tch = world[real_room(gauntlet_info[i + 1][1])]->people; tch; tch = tch->next_in_room) {
+                    for (tch = dynamic_cast<room_data*>(world[real_room(gauntlet_info[i + 1][1])])->people; tch; tch = tch->next_in_room) {
                         if (!IS_NPC(tch)) {
                             proceed = 0;  /* There is a player there */
                             sprintf(buf, "%s is in the next room.  You must wait for them to finish.\r\n",
@@ -376,7 +377,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
-                for (tch = world[real_room(gauntlet_info[i][1])]->people; tch; tch = tch->next_in_room) {
+                for (tch = dynamic_cast<room_data*>(world[real_room(gauntlet_info[i][1])])->people; tch; tch = tch->next_in_room) {
                     if (!IS_NPC(tch)) {
                         proceed = 0;  /* There is a player there */
                         sprintf(buf, "%s has moved into the next room.  You must wait for them to finish.\r\n",
@@ -444,7 +445,7 @@ SPECIAL(pet_shops) {
 
     if (CMD_IS("list")) {
         send_to_char(ch, "Available pets are:\r\n");
-        for (pet = world[pet_room]->people; pet; pet = pet->next_in_room) {
+        for (pet = dynamic_cast<room_data*>(world[pet_room])->people; pet; pet = pet->next_in_room) {
             /* No, you can't have the Implementor as a pet if he's in there. */
             if (!IS_NPC(pet))
                 continue;

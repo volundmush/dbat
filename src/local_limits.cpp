@@ -1561,8 +1561,11 @@ void timed_dt(struct char_data *ch) {
           value decreased if its not -1.
           */
 
-        for (auto &r : world)
-            r.second->timed -= (r.second->timed != -1);
+        for (auto &[vn, u] : world) {
+            auto r = dynamic_cast<room_data*>(u);
+            if(!r) continue;
+            r->timed -= (r->timed != -1);
+        }
 
         for (vict = character_list; vict; vict = vict->next) {
             if (IS_NPC(vict))
@@ -1585,16 +1588,18 @@ void timed_dt(struct char_data *ch) {
       and return again.
     */
 
-    if (ch->getRoom()->timed < 0) {
-        ch->getRoom()->timed = rand_number(2, 5);
+    auto r = ch->getRoom();
+
+    if (r->timed < 0) {
+        r->timed = rand_number(2, 5);
         return;
     }
 
     /* We know ch is in a dt room with timed >= 0 - see if its the end.
     *
     */
-    if (ch->getRoom()->timed == 0) {
-        for (vict = ch->getRoom()->people; vict; vict = vict->next_in_room) {
+    if (r->timed == 0) {
+        for (vict = r->people; vict; vict = vict->next_in_room) {
             if (IS_NPC(vict))
                 continue;
             if (GET_ADMLEVEL(vict) >= ADMLVL_IMMORT)

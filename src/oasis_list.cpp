@@ -135,14 +135,19 @@ ACMD(do_oasis_links) {
 
     send_to_char(ch, "Zone %d is linked to the following zones:\r\n", z->second.number);
     for (auto nr : z->second.rooms) {
-        auto r = world.find(nr);
-        if (r == world.end()) {
+        auto u = world.find(nr);
+        if (u == world.end()) {
+            send_to_char(ch, "Room %d is not in the world.\r\n", nr);
+            continue;
+        }
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(!r) {
             send_to_char(ch, "Room %d is not in the world.\r\n", nr);
             continue;
         }
 
         for (j = 0; j < NUM_OF_DIRS; j++) {
-            auto d = r->second->dir_option[j];
+            auto d = r->dir_option[j];
             if(!d) continue;
             if(d->to_room == NOWHERE) continue;
             auto dest = d->getDestination();
@@ -187,7 +192,9 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
                  "@nVNum    Room Name                                Exits\r\n"
                  "------- ---------------------------------------- -----@n\r\n");
 
-    for (auto &[vn, r] : world) {
+    for (auto &[vn, u] : world) {
+        auto r = dynamic_cast<room_data*>(u);
+        if(!r) continue;
 
         /** Check to see if this room is one of the ones needed to be listed.    **/
         if ((vn >= bottom) && (vn <= top)) {

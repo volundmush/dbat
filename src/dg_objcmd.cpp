@@ -151,17 +151,15 @@ room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr) {
 /* Object commands */
 
 OCMD(do_oecho) {
-    int room;
-
     skip_spaces(&argument);
 
     if (!*argument)
         obj_log(obj, "oecho called with no args");
 
-    else if ((room = obj_room(obj)) != NOWHERE) {
-        if (world[room]->people) {
-            sub_write(argument, world[room]->people, true, TO_ROOM);
-            sub_write(argument, world[room]->people, true, TO_CHAR);
+    else if (auto room = obj->getRoom(); room) {
+        if (room->people) {
+            sub_write(argument, room->people, true, TO_ROOM);
+            sub_write(argument, room->people, true, TO_CHAR);
         }
     } else
         obj_log(obj, "oecho called by object in NOWHERE");
@@ -170,7 +168,6 @@ OCMD(do_oecho) {
 
 OCMD(do_oforce) {
     char_data *ch, *next_ch;
-    int room;
     char arg1[MAX_INPUT_LENGTH], *line;
 
     line = one_argument(argument, arg1);
@@ -181,10 +178,10 @@ OCMD(do_oforce) {
     }
 
     if (!strcasecmp(arg1, "all")) {
-        if ((room = obj_room(obj)) == NOWHERE)
+        if (auto room = obj->getRoom(); room)
             obj_log(obj, "oforce called by object in NOWHERE");
         else {
-            for (ch = world[room]->people; ch; ch = next_ch) {
+            for (ch = room->people; ch; ch = next_ch) {
                 next_ch = ch->next_in_room;
                 if (valid_dg_target(ch, 0)) {
                     command_interpreter(ch, line);
@@ -346,20 +343,19 @@ OCMD(do_opurge) {
     char arg[MAX_INPUT_LENGTH];
     char_data *ch, *next_ch;
     obj_data *o, *next_obj;
-    int rm;
 
     one_argument(argument, arg);
 
     if (!*arg) {
         /* purge all */
-        if ((rm = obj_room(obj)) != NOWHERE) {
-            for (ch = world[rm]->people; ch; ch = next_ch) {
+        if (auto rm = obj->getRoom(); rm) {
+            for (ch = rm->people; ch; ch = next_ch) {
                 next_ch = ch->next_in_room;
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
 
-            for (o = world[rm]->contents; o; o = next_obj) {
+            for (o = rm->contents; o; o = next_obj) {
                 next_obj = o->next_content;
                 if (o != obj)
                     extract_obj(o);
@@ -416,7 +412,7 @@ OCMD(do_ogoto) {
 
 OCMD(do_oteleport) {
     char_data *ch, *next_ch;
-    room_rnum target, rm;
+    room_rnum target;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
@@ -432,11 +428,11 @@ OCMD(do_oteleport) {
         obj_log(obj, "oteleport target is an invalid room");
 
     else if (!strcasecmp(arg1, "all")) {
-        rm = obj_room(obj);
-        if (target == rm)
+        auto rm = obj->getRoom();
+        if (target == rm->vn)
             obj_log(obj, "oteleport target is itself");
 
-        for (ch = world[rm]->people; ch; ch = next_ch) {
+        for (ch = rm->people; ch; ch = next_ch) {
             next_ch = ch->next_in_room;
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
@@ -583,19 +579,20 @@ OCMD(do_oasound) {
         return;
     }
 
-    if ((room = obj_room(obj)) == NOWHERE) {
+    auto r = obj->getRoom();
+
+    if (!r) {
         obj_log(obj, "oecho called by object in NOWHERE");
         return;
     }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
-        if (world[room]->dir_option[door] != nullptr &&
-            (world[room]->dir_option[door])->to_room != NOWHERE &&
-            (world[room]->dir_option[door])->to_room != room &&
-            world[(world[room]->dir_option[door])->to_room]->people) {
-            sub_write(argument, world[(world[room]->dir_option[door])->to_room]->people, true, TO_ROOM);
-            sub_write(argument, world[(world[room]->dir_option[door])->to_room]->people, true, TO_CHAR);
-        }
+        auto e = r->dir_option[door];
+        if(!e) continue;
+        auto dest = e->getDestination();
+        if(!dest) continue;
+        sub_write(argument, dest->people, true, TO_ROOM);
+        sub_write(argument, dest->people, true, TO_CHAR);
     }
 }
 

@@ -560,10 +560,10 @@ ACMD(do_shuffle) {
     for (obj2 = obj->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         obj_from_obj(obj2);
-        obj_to_room(obj2, real_room(48));
+        obj_to_room(obj2, 48);
     }
     while (count > 0) {
-        for (obj2 = world[real_room(48)]->contents; obj2; obj2 = next_obj) {
+        for (obj2 = world[48]->contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
                 continue;
@@ -1264,7 +1264,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                           struct char_data *ch) {
     int door;
 
-    auto room = world[rnum];
+    auto room = dynamic_cast<room_data*>(world[rnum]);
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
         auto d = room->dir_option[door];
@@ -3750,7 +3750,8 @@ ACMD(do_autoexit) {
 }
 
 void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief) {
-    struct room_data *rm = world[target_room];
+    auto rm = dynamic_cast<room_data*>(world[target_room]);
+    if(!rm) return;
     look_at_room(rm, ch, ignore_brief);
 }
 
@@ -4922,9 +4923,9 @@ ACMD(do_score) {
                      add_commas(GET_GOLD(ch)).c_str(), add_commas(
                         (ch->getCarriedWeight())).c_str());
         double gravity = 1.0;
-        auto room = world.find(ch->in_room);
-        if(room != world.end()) {
-            gravity = room->second->getGravity();
+        auto room = ch->getRoom();
+        if(room) {
+            gravity = room->getGravity();
         }
         std::string grav = gravity > 1.0 ? fmt::format("(Gravity:", gravity) : "";
         send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n %s\n",

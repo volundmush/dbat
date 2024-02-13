@@ -30,7 +30,7 @@ room_rnum add_room(struct room_data *room) {
         return NOWHERE;
 
     if (world.contains(room->vn)) {
-        auto ro = world[room->vn];
+        auto ro = static_cast<room_data*>(world[room->vn]);
         if (SCRIPT(ro))
             extract_script(&ro, WLD_TRIGGER);
         tch = ro->people;
@@ -64,7 +64,7 @@ int delete_room(room_rnum rnum) {
     if (!world.count(rnum))    /* Can't delete void yet. */
         return false;
 
-    room = world[rnum];
+    room = dynamic_cast<room_data*>(world[rnum]);
 
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
@@ -91,7 +91,7 @@ int delete_room(room_rnum rnum) {
         obj_from_room(obj);
         obj_to_room(obj, 0);
     }
-    for (ppl = world[rnum]->people; ppl; ppl = next_ppl) {
+    for (ppl = dynamic_cast<room_data*>(world[rnum])->people; ppl; ppl = next_ppl) {
         next_ppl = ppl->next_in_room;
         char_from_room(ppl);
         char_to_room(ppl, 0);
@@ -106,7 +106,9 @@ int delete_room(room_rnum rnum) {
      * Also fix all the exits pointing to rooms above this.
      */
 
-    for(auto &[vn, r] : world) {
+    for(auto &[vn, u] : world) {
+        auto r = dynamic_cast<room_data*>(u);
+        if(!r) continue;
         for (j = 0; j < NUM_OF_DIRS; j++) {
             auto e = r->dir_option[j];
             if (!e || e->to_room != rnum)
@@ -331,7 +333,8 @@ std::optional<vnum> room_data::getMatchingArea(std::function<bool(const area_dat
             // we need to find the a.objectVnum in the world by scanning object_list...
             if (auto obj = get_obj_num(a.extraVn.value()); obj) {
                 if(world.contains(obj->in_room)) {
-                    auto r = world[obj->in_room];
+                    auto u = world[obj->in_room];
+                    auto r = dynamic_cast<room_data*>(u);
                     return r->getMatchingArea(f);
                 }
             }
@@ -413,7 +416,7 @@ int room_data::modDamage(int amount) {
 
 struct room_data* room_direction_data::getDestination() {
     auto found = world.find(to_room);
-    if(found != world.end()) return found->second;
+    if(found != world.end()) return dynamic_cast<room_data*>(found->second);
     return nullptr;
 }
 

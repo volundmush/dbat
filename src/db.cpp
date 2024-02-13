@@ -51,7 +51,7 @@ bool isMigrating = false;
 
 struct config_data config_info; /* Game configuration list.    */
 
-std::unordered_map<room_vnum, room_data*> world;    /* array of rooms		 */
+std::unordered_map<room_vnum, unit_data*> world;    /* array of rooms		 */
 std::unordered_map<vnum, area_data> areas;    /* area information		 */
 
 struct char_data *character_list = nullptr; /* global linked list of chars	 */
@@ -316,7 +316,9 @@ static void db_load_items_finish(const std::filesystem::path& loc) {
 
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
-    for(auto &[id, r] : world) {
+    for(auto &[id, u] : world) {
+        auto r = dynamic_cast<room_data*>(u);
+        if(!r) continue;
         if(r->script) r->script->activate();
         assign_triggers(r, WLD_TRIGGER);
         r->activateContents();
@@ -375,7 +377,7 @@ static void db_load_exits(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "exits.json")) {
         auto id = j["room"].get<int64_t>();
         auto dir = j["direction"].get<int64_t>();
-        auto r = world[id];
+        auto r = dynamic_cast<room_data*>(world[id]);
         r->dir_option[dir] = new room_direction_data(j["data"]);
     }
 }
@@ -429,10 +431,11 @@ static void db_load_areas(const std::filesystem::path& loc) {
         auto id = j["vn"].get<int64_t>();
         auto a = areas.emplace(id, j);
 
-        for(auto &r : a.first->second.rooms) {
-            auto room = world.find(r);
-            if(room != world.end()) {
-                room->second->area = id;
+        for(auto &rid : a.first->second.rooms) {
+            if(auto room = world.find(rid); room != world.end()) {
+                if(auto r = dynamic_cast<room_data*>(room->second); r) {
+                    r->area = id;
+                }
             }
         }
     }
@@ -2286,35 +2289,44 @@ void reset_zone(zone_rnum zone) {
 
 
                 case 'D':            /* set state of door */
-                    room = world.find(c.arg1);
-                    if (room == world.end() || c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
-                        (room->second->dir_option[c.arg2] == nullptr)) {
+                    {
+                    auto u = world.find(c.arg1);
+                    if(u == world.end()) {
+                        ZONE_ERROR("room does not exist, command disabled");
+                        c.command = '*';
+                        break;
+                    }
+            
+                    auto room = dynamic_cast<room_data*>(u->second);
+                    if (c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
+                        (room->dir_option[c.arg2] == nullptr)) {
                         ZONE_ERROR("room or door does not exist, command disabled");
                         c.command = '*';
                     } else
                         switch (c.arg3) {
                             case 0:
-                                REMOVE_BIT(room->second->dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
                                            EX_LOCKED);
-                                REMOVE_BIT(room->second->dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
                                            EX_CLOSED);
                                 break;
                             case 1:
-                                SET_BIT(room->second->dir_option[c.arg2]->exit_info,
+                                SET_BIT(room->dir_option[c.arg2]->exit_info,
                                         EX_CLOSED);
-                                REMOVE_BIT(room->second->dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
                                            EX_LOCKED);
                                 break;
                             case 2:
-                                SET_BIT(room->second->dir_option[c.arg2]->exit_info,
+                                SET_BIT(room->dir_option[c.arg2]->exit_info,
                                         EX_LOCKED);
-                                SET_BIT(room->second->dir_option[c.arg2]->exit_info,
+                                SET_BIT(room->dir_option[c.arg2]->exit_info,
                                         EX_CLOSED);
                                 break;
                         }
                     last_cmd = 1;
                     tmob = nullptr;
                     tobj = nullptr;
+                    }
                     break;
 
                 case 'T': /* trigger command */
@@ -2377,44 +2389,46 @@ void reset_zone(zone_rnum zone) {
         /* handle reset_wtrigger's */
 
         for(auto &rvnum : z.rooms) {
-            room = world.find(rvnum);
-            if(room == world.end()) continue;
+            auto u = world.find(rvnum);
+            if(u == world.end()) continue;
+            auto room = dynamic_cast<room_data*>(u->second);
+            if(!room) continue;
             rrnum = rvnum;
 
-            reset_wtrigger(room->second);
-            if (room->second->room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
+            reset_wtrigger(room);
+            if (room->room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
                 send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-                room->second->room_flags.reset(ROOM_AURA);
+                room->room_flags.reset(ROOM_AURA);
             }
-            if (room->second->sector_type == SECT_LAVA) {
-                room->second->geffect = 5;
+            if (room->sector_type == SECT_LAVA) {
+                room->geffect = 5;
             }
-            if (room->second->geffect < -1) {
+            if (room->geffect < -1) {
                 send_to_room(rrnum, "The area loses some of the water flooding it.\r\n");
-                room->second->geffect += 1;
-            } else if (room->second->geffect == -1) {
+                room->geffect += 1;
+            } else if (room->geffect == -1) {
                 send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
-                room->second->geffect = 0;
+                room->geffect = 0;
             }
 
-            if(auto dmg = room->second->getDamage(); dmg > 0) {
+            if(auto dmg = room->getDamage(); dmg > 0) {
                 int toRepair = 0;
                 if(dmg >= 100) toRepair = rand_number(5, 10);
                 else if(dmg >= 10) toRepair = rand_number(1, 10);
                 else if(dmg > 1) toRepair = rand_number(1, dmg);
                 else toRepair = 1;
-                room->second->modDamage(-toRepair);
+                room->modDamage(-toRepair);
                 send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
             }
 
 
-            if (room->second->geffect >= 1 && rand_number(1, 4) == 4 && !room->second->isSunken() && room->second->sector_type != SECT_LAVA) {
+            if (room->geffect >= 1 && rand_number(1, 4) == 4 && !room->isSunken() && room->sector_type != SECT_LAVA) {
                 send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
-                room->second->geffect = 0;
-            } else if (room->second->geffect >= 1 && rand_number(1, 2) == 2 && room->second->isSunken() &&
-                    room->second->sector_type != SECT_LAVA) {
+                room->geffect = 0;
+            } else if (room->geffect >= 1 && rand_number(1, 2) == 2 && room->isSunken() &&
+                    room->sector_type != SECT_LAVA) {
                 send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
-                room->second->geffect = 0;
+                room->geffect = 0;
             }
         }
     } else {
@@ -3203,7 +3217,7 @@ std::optional<UID> resolveUID(const std::string& uid) {
     }
 
     if(type == 'R') {
-        if(world.contains(id)) return world[id];
+        if(world.contains(id)) return dynamic_cast<room_data*>(world[id]);
     } else if(type == 'O') {
         auto find = uniqueObjects.find(id);
         if(find != uniqueObjects.end()) {

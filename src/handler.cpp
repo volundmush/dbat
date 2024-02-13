@@ -434,7 +434,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
 void char_to_room(struct char_data *ch, room_rnum room) {
     if(!ch) return;
     if(!world.count(room)) return;
-    char_to_room(ch, &world[room]);
+    char_to_room(ch, dynamic_cast<room_data*>(world[room]));
 }
 
 
@@ -646,7 +646,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
     if (*number == 0)
         return (nullptr);
 
-    for (i = world[room]->people; i && *number; i = i->next_in_room)
+    for (i = dynamic_cast<room_data*>(world[room])->people; i && *number; i = i->next_in_room)
         if (isname(name, i->name))
             if (--(*number) == 0)
                 return (i);
@@ -770,7 +770,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
 void obj_to_room(struct obj_data *object, room_rnum room) {
     if(!object) return;
     if(!world.count(room)) return;
-    obj_to_room(object, &world[room]);
+    obj_to_room(object, dynamic_cast<room_data*>(world[room]));
 }
 
 

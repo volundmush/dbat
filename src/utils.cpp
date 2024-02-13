@@ -3018,19 +3018,21 @@ size_t countColors(const std::string &txt) {
  * Inside and City rooms are always lit.
  * Outside rooms are dark at sunset and night.  */
 int room_is_dark(room_rnum room) {
-    if (!world.contains(room)) {
+    auto found = world.find(room);
+    if (found == world.end()) {
         basic_mud_log("room_is_dark: Invalid room rnum %d.", room);
-        return (false);
+        return (true);
     }
+    auto r = dynamic_cast<room_data*>(found->second);
 
-    for(auto c = world[room]->people; c; c = c->next_in_room) {
+    for(auto c = r->people; c; c = c->next_in_room) {
         if(c->isProvidingLight()) return false;
     }
 
     if (cook_element(room))
         return (false);
 
-    if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && ROOM_FLAGGED(room, ROOM_DARK)) {
+    if (r->room_flags.test(ROOM_NOINSTANT) && ROOM_FLAGGED(room, ROOM_DARK)) {
         return (true);
     }
     if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && !ROOM_FLAGGED(room, ROOM_DARK)) {
@@ -3299,9 +3301,11 @@ bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
 }
 
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
-    auto room = world.find(loc);
-    if (room != world.end()) {
-        return room->second->room_flags.test(flag);
+    
+    if (auto u = world.find(loc); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(!r) return false;
+        return r->room_flags.test(flag);
     }
     return false;
 }
@@ -3477,36 +3481,43 @@ std::string withPlaceholder(const std::string& str, const std::string& placehold
 }
 
 int SECT(room_vnum room) {
-    if(auto r = world.find(room); r != world.end()) {
-        return r->second->sector_type;
+    if(auto u = world.find(room); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(r) return r->sector_type;
     }
     return SECT_INSIDE;
 }
 
 int ROOM_DAMAGE(room_vnum room) {
-    if(auto r = world.find(room); r != world.end()) {
-        return r->second->dmg;
+    if(auto u = world.find(room); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(r) return r->dmg;
     }
     return 0;
 }
 
 int ROOM_EFFECT(room_vnum room) {
-    if(auto r = world.find(room); r != world.end()) {
-        return r->second->geffect;
+    if(auto u = world.find(room); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(!r) return 0;
+        return r->geffect;
     }
     return 0;
 }
 
 double ROOM_GRAVITY(room_vnum room) {
-    if(auto r = world.find(room); r != world.end()) {
-        return r->second->getGravity();
+    if(auto u = world.find(room); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+         if(!r) return 1.0;
+        return r->getGravity();
     }
     return 1.0;
 }
 
 SpecialFunc GET_ROOM_SPEC(room_vnum room) {
-    if(auto r = world.find(room); r != world.end()) {
-        return r->second->func;
+    if(auto u = world.find(room); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(r) return r->func;
     }
     return nullptr;
 }
@@ -3519,17 +3530,22 @@ zone_vnum IN_ZONE(struct unit_data *ch) {
 }
 
 room_direction_data* EXIT(struct unit_data *ch, int door) {
-    if(auto r = world.find(IN_ROOM(ch)); r != world.end()) {
-        return r->second->dir_option[door];
+    if(auto u = world.find(IN_ROOM(ch)); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(r) return r->dir_option[door];
     }
     return nullptr;
 }
 
 room_direction_data* SECOND_EXIT(struct unit_data *ch, int door) {
-    if(auto r = world.find(IN_ROOM(ch)); r != world.end()) {
-        if(auto e = r->second->dir_option[door]; e) {
-            if(auto r2 = world.find(e->to_room); r2 != world.end()) {
-                return r2->second->dir_option[rev_dir[door]];
+    if(auto u = world.find(IN_ROOM(ch)); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(r) {
+            if(auto e = r->dir_option[door]; e) {
+                if(auto u2 = world.find(e->to_room); u2 != world.end()) {
+                    auto r2 = dynamic_cast<room_data*>(u2->second);
+                    if(r2) return r2->dir_option[rev_dir[door]];
+                }
             }
         }
     }
@@ -3537,12 +3553,19 @@ room_direction_data* SECOND_EXIT(struct unit_data *ch, int door) {
 }
 
 room_direction_data* THIRD_EXIT(struct unit_data *ch, int door) {
-    if(auto r = world.find(IN_ROOM(ch)); r != world.end()) {
-        if(auto e = r->second->dir_option[door]; e) {
-            if(auto r2 = world.find(e->to_room); r2 != world.end()) {
-                if(auto e2 = r2->second->dir_option[rev_dir[door]]; e2) {
-                    if(auto r3 = world.find(e2->to_room); r3 != world.end()) {
-                        return r3->second->dir_option[rev_dir[door]];
+    if(auto u = world.find(IN_ROOM(ch)); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(r) {
+            if(auto e = r->dir_option[door]; e) {
+                if(auto u2 = world.find(e->to_room); u2 != world.end()) {
+                    auto r2 = dynamic_cast<room_data*>(u2->second);
+                    if(r2) {
+                        if(auto e2 = r2->dir_option[rev_dir[door]]; e2) {
+                            if(auto u3 = world.find(e2->to_room); u3 != world.end()) {
+                                auto r3 = dynamic_cast<room_data*>(u3->second);
+                                if(r3) return r3->dir_option[rev_dir[door]];
+                            }
+                        }
                     }
                 }
             }
@@ -3552,8 +3575,10 @@ room_direction_data* THIRD_EXIT(struct unit_data *ch, int door) {
 }
 
 room_direction_data* W_EXIT(room_rnum room, int door) {
-    if(auto r = world.find(room); r != world.end()) {
-        return r->second->dir_option[door];
+    if(auto u = world.find(room); u != world.end()) {
+        auto r = dynamic_cast<room_data*>(u->second);
+        if(!r) return nullptr;
+        return r->dir_option[door];
     }
     return nullptr;
 }

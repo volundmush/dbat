@@ -266,9 +266,8 @@ int char_data::wearing_android_canister() {
 
 int64_t char_data::calcGravCost(int64_t num) {
     double gravity = 1.0;
-    auto room = world.find(in_room);
-    if (room != world.end()) {
-        gravity = room->second->getGravity();
+    if (auto room = getRoom(); room) {
+        gravity = room->getGravity();
     }
     int64_t cost = (gravity * gravity);
 
@@ -1258,9 +1257,8 @@ stat_t char_data::get(CharStat type, bool base) {
 
 bool char_data::canCarryWeight(weight_t val) {
     double gravity = 1.0;
-    auto room = world.find(in_room);
-    if(room != world.end()) {
-        gravity = room->second->getGravity();
+    if(auto room = getRoom(); room) {
+        gravity = room->getGravity();
     }
     return getAvailableCarryWeight() >= (val * gravity);
 }
@@ -1275,9 +1273,8 @@ bool char_data::canCarryWeight(struct char_data *obj) {
 
 weight_t char_data::getCurrentBurden() {
     auto total = getTotalWeight();
-    auto room = world.find(in_room);
-    if(room != world.end()) {
-        total *= room->second->getGravity();
+    if(auto room = getRoom(); room) {
+        total *= room->getGravity();
     }
     return total;
 }

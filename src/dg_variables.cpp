@@ -223,7 +223,7 @@ DgResults scriptFindMob(trig_data *trig, const std::string& field, const std::st
         return "0";
     }
     auto i = 0;
-    for (auto ch = world[rrnum]->people; ch; ch = ch->next_in_room)
+    for (auto ch = dynamic_cast<room_data*>(world[rrnum])->people; ch; ch = ch->next_in_room)
         if (GET_MOB_VNUM(ch) == mvnum)
             i++;
     return fmt::format("{}", i);

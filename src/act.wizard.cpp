@@ -703,7 +703,10 @@ ACMD(do_finddoor) {
     if (vnum != NOTHING) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, GET_OBJ_SHORT(obj));
-        for (auto &[vn, r] : world) {
+        for (auto &[vn, u] : world) {
+            auto r = dynamic_cast<room_data*>(u);
+            if (!r)
+                continue;
             for (d = 0; d < NUM_OF_DIRS; d++) {
                 auto e = r->dir_option[d];
                 if (e && e->key &&
@@ -945,7 +948,7 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_VICE)
         return (location);
 
-    rm = world[location];
+    rm = dynamic_cast<room_data*>(world[location]);
 
     if ((!can_edit_zone(ch, rm->zone) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
         && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
@@ -3304,7 +3307,9 @@ ACMD(do_show) {
             /* show errors */
         case 5:
             len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
-            for (auto &[vn, r] : world) {
+            for (auto &[vn, u] : world) {
+                auto r = dynamic_cast<room_data*>(u);
+                if(!r) continue;
                 for (j = 0; j < NUM_OF_DIRS; j++) {
                     auto &e = r->dir_option[j];
                     if (!e)
@@ -4342,16 +4347,21 @@ ACMD(do_zpurge) {
 
     auto &z = zone_table[zone];
 
-    for (auto room = z.bot; room <= z.top; room++) {
-        if ((i = real_room(room)) != NOWHERE) {
-            for (mob = world[i]->people; mob; mob = next_mob) {
+    for (auto rvn : z.rooms) {
+        auto found = world.find(rvn);
+        if (found == world.end()) {
+            continue;
+        }
+        auto r = dynamic_cast<room_data*>(found->second);
+        if (r) {
+            for (mob = r->people; mob; mob = next_mob) {
                 next_mob = mob->next_in_room;
                 if (IS_NPC(mob)) {
                     extract_char(mob);
                 }
             }
 
-            for (obj = world[i]->contents; obj; obj = next_obj) {
+            for (obj = r->contents; obj; obj = next_obj) {
                 next_obj = obj->next_content;
                 extract_obj(obj);
             }
@@ -4669,8 +4679,11 @@ ACMD (do_zcheck) {
     send_to_char(ch, "\r\nChecking Rooms for limits...\r\n");
 
     for (auto &i : z.rooms) {
-        if (world.count(i)) {
-            auto r = world[i];
+        if (auto u = world.find(i); u != world.end()) {
+            auto r = dynamic_cast<room_data*>(u->second);
+            if (!r) {
+                continue;
+            }
             for (j = 0; j < NUM_OF_DIRS; j++) {
                 /*check for exit, but ignore off limits if you're in an offlimit zone*/
                 if (!r->dir_option[j])
@@ -4736,10 +4749,12 @@ ACMD (do_zcheck) {
     } /*checking rooms*/
 
     for (auto &i : z.rooms) {
-        if (world.count(i)) {
+        if (auto found = world.find(i); found != world.end()) {
+            auto r = dynamic_cast<room_data*>(found->second);
+            if(!r) continue;
             m++;
             for (j = 0, k = 0; j < NUM_OF_DIRS; j++)
-                if (!world[i]->dir_option[j])
+                if (!r->dir_option[j])
                     k++;
 
             if (k == NUM_OF_DIRS)

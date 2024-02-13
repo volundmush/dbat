@@ -745,8 +745,8 @@ ACMD(do_pack) {
                     }
                     money = 65000;
                     while (count < 4) {
-                        while (world[real_room(rnum)]->contents)
-                            extract_obj(world[real_room(rnum)]->contents);
+                        while (world[rnum]->contents)
+                            extract_obj(world[rnum]->contents);
                         count++;
                         rnum++;
                     }
@@ -754,8 +754,8 @@ ACMD(do_pack) {
                     rnum = rnum - 1;
                     money = 150000;
                     while (count < 4) {
-                        while (world[real_room(rnum)]->contents)
-                            extract_obj(world[real_room(rnum)]->contents);
+                        while (world[rnum]->contents)
+                            extract_obj(world[rnum]->contents);
                         count++;
                         rnum++;
                     }
@@ -763,8 +763,8 @@ ACMD(do_pack) {
                     rnum = rnum - 1;
                     money = 1000000;
                     while (count < 4) {
-                        while (world[real_room(rnum)]->contents)
-                            extract_obj(world[real_room(rnum)]->contents);
+                        while (world[rnum]->contents)
+                            extract_obj(world[rnum]->contents);
                         count++;
                         rnum++;
                     }

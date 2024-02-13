@@ -478,16 +478,13 @@ char *str_str(char *cs, char *ct) {
 
 
 int trgvar_in_room(room_vnum vnum) {
-    room_rnum rnum = real_room(vnum);
+    auto u = world.find(vnum);
+    if(u == world.end()) return 0;
+    auto r = dynamic_cast<room_data*>(u->second);
+    if(!r) return 0;
     int i = 0;
-    char_data *ch;
 
-    if (rnum == NOWHERE) {
-        script_log("people.vnum: world[rnum] does not exist");
-        return (-1);
-    }
-
-    for (ch = world[rnum]->people; ch != nullptr; ch = ch->next_in_room)
+    for (auto ch = r->people; ch != nullptr; ch = ch->next_in_room)
         i++;
 
     return i;
@@ -692,8 +689,8 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
             return ch;
     } else {
         room_rnum num;
-        if ((num = obj_room(obj)) != NOWHERE)
-            for (ch = world[num]->people; ch; ch = ch->next_in_room)
+        if (auto room = obj->getRoom(); room)
+            for (ch = room->people; ch; ch = ch->next_in_room)
                 if (isname(name, ch->name) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
@@ -765,13 +762,13 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
     else if (obj->carried_by &&
              (i = get_obj_in_list(name, obj->carried_by->contents)))
         return i;
-    else if ((rm = obj_room(obj)) != NOWHERE) {
+    else if (auto rm = obj->getRoom(); rm) {
         /* check the floor */
-        if ((i = get_obj_in_list(name, world[rm]->contents)))
+        if ((i = get_obj_in_list(name, rm->contents)))
             return i;
 
         /* check peoples' inventory */
-        for (ch = world[rm]->people; ch; ch = ch->next_in_room)
+        for (ch = rm->people; ch; ch = ch->next_in_room)
             if ((i = get_object_in_equip(ch, name)))
                 return i;
     }
@@ -816,7 +813,7 @@ room_data *get_room(char *name) {
     else if ((nr = real_room(atoi(name))) == NOWHERE)
         return nullptr;
     else
-        return world[nr];
+        return dynamic_cast<room_data*>(world[nr]);
 }
 
 
@@ -1000,7 +997,9 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
                 random_otrigger(obj);
     }
 
-    for (auto &[vn, r] : world) {
+    for (auto &[vn, u] : world) {
+        auto r = dynamic_cast<room_data*>(u);
+        if(!r) continue;
         auto sc = SCRIPT(r); 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
             (!is_empty(r->zone) ||
@@ -1028,7 +1027,9 @@ void check_time_triggers() {
                 time_otrigger(obj);
     }
 
-    for (auto &[vn, r] : world) {
+    for (auto &[vn, u] : world) {
+        auto r = dynamic_cast<room_data*>(u);
+        if(!r) continue;
         auto sc = SCRIPT(r);
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
                 (!is_empty(r->zone) ||
@@ -1053,7 +1054,9 @@ void check_interval_triggers(int trigFlag) {
                 interval_otrigger(obj, trigFlag);
     }
 
-    for (auto &[vn, r] : world) {
+    for (auto &[vn, u] : world) {
+        auto r = dynamic_cast<room_data*>(u);
+        if(!r) continue;
         auto sc = SCRIPT(r);
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
             (!is_empty(r->zone) ||
@@ -1359,7 +1362,7 @@ ACMD(do_attach) {
             return;
         }
 
-        room = world[rnum];
+        room = dynamic_cast<room_data*>(world[rnum]);
         room->script->addTrigger(trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
