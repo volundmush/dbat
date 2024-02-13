@@ -29,44 +29,23 @@ void check_mobile_string(mob_vnum i, char **string, const char *dscr);
 
 int copy_mobile_strings(struct char_data *t, struct char_data *f);
 
-#if CONFIG_GENOLC_MOBPROG
-int write_mobile_mobprog(mob_vnum mvnum, struct char_data *mob, FILE *fd);
-#endif
-
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);
 
-int add_mobile(struct char_data *mob, mob_vnum vnum) {
-    mob_vnum rnum, found = false;
-    struct char_data *live_mob;
-
-    if ((rnum = real_mobile(vnum)) != NOBODY) {
-        /* Copy over the mobile and free() the old strings. */
-        copy_mobile(&mob_proto[rnum], mob);
-
-        /* Now re-point all existing mobile strings to here. */
-        for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-            if (rnum == live_mob->vn)
-                update_mobile_strings(live_mob, &mob_proto[rnum]);
-
+int add_mobile(const std::shared_ptr<npc_proto>& mob, mob_vnum vnum) {
+    if(auto found = mob_proto.find(vnum); found != mob_proto.end()) {
+        *(found->second) = *mob;
         basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
-        return rnum;
+        return vnum;
     }
-
-    auto &m = mob_proto[vnum];
-    m = *mob;
-
-    m.vn = 0;
-    copy_mobile_strings(&m, mob);
+    mob_proto[vnum] = mob;
     auto &ix = mob_index[vnum];
     ix.vn = vnum;
-
-    basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
-
     auto zvnum = real_zone_by_thing(vnum);
     auto &z = zone_table[zvnum];
     z.mobiles.insert(vnum);
-    return found;
+    basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
+    return vnum;
 }
 
 int copy_mobile(struct char_data *to, struct char_data *from) {
@@ -167,41 +146,6 @@ int free_mobile_strings(struct char_data *mob) {
         free(mob->room_description);
     if (mob->look_description)
         free(mob->look_description);
-    return true;
-}
-
-
-/* Free a mobile structure that has been edited. Take care of existing mobiles 
- * and their mob_proto!  */
-int free_mobile(struct char_data *mob) {
-    mob_rnum i;
-
-    if (mob == nullptr)
-        return false;
-
-    /* Non-prototyped mobile.  Also known as new mobiles.  */
-    if ((i = GET_MOB_RNUM(mob)) == NOBODY) {
-        free_mobile_strings(mob);
-        /* free script proto list */
-        free_proto_script(mob, MOB_TRIGGER);
-    } else {    /* Prototyped mobile. */
-        if (mob->name && mob->name != mob_proto[i].name)
-            free(mob->name);
-        if (mob->title && mob->title != mob_proto[i].title)
-            free(mob->title);
-        if (mob->room_description && mob->room_description != mob_proto[i].room_description)
-            free(mob->room_description);
-        if (mob->look_description && mob->look_description != mob_proto[i].look_description)
-            free(mob->look_description);
-    }
-    while (mob->affected)
-        affect_remove(mob, mob->affected);
-
-    /* free any assigned scripts */
-    if (SCRIPT(mob))
-        extract_script(mob, MOB_TRIGGER);
-
-    delete mob;
     return true;
 }
 
@@ -418,10 +362,6 @@ nlohmann::json char_data::serializeProto() {
 
     auto ms = mob_specials.serialize();
     if(!ms.empty()) j["mob_specials"] = ms;
-
-    for(auto p : proto_script) {
-        if(trig_index.contains(p)) j["proto_script"].push_back(p);
-    }
 
     return j;
 }
@@ -725,10 +665,6 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
 void char_data::deserializeProto(const nlohmann::json &j) {
     deserializeBase(j);
-
-    if(j.contains("proto_script")) {
-        for(const auto& p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
-    }
 
 }
 

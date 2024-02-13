@@ -120,7 +120,7 @@ static void process_dirty_exits(const std::filesystem::path &loc) {
 static void process_dirty_item_prototypes(const std::filesystem::path &loc) {
     nlohmann::json j;
     for(auto &[v, o] : obj_proto) {
-        j.push_back(o.serializeProto());
+        j.push_back(o->serialize());
     }
     dump_to_file(loc, "itemPrototypes.json", j);
 }
@@ -129,7 +129,7 @@ static void process_dirty_npc_prototypes(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, n] : mob_proto) {
-        j.push_back(n.serializeProto());
+        j.push_back(n->serialize());
     }
     dump_to_file(loc, "npcPrototypes.json", j);
 }

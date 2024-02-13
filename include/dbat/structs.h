@@ -165,6 +165,7 @@ struct area_data {
 /* Extra description: used in objects, mobiles, and rooms */
 struct extra_descr_data {
     extra_descr_data() = default;
+    extra_descr_data(const extra_descr_data& other);
     ~extra_descr_data();
     char *keyword;                 /* Keyword in look/examine          */
     char *description;             /* What to see                      */
@@ -325,24 +326,29 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
 struct base_proto : public std::enable_shared_from_this<base_proto> {
     base_proto() = default;
     virtual ~base_proto() = default;
+    // Copy constructor.
+    base_proto(const base_proto& other);
+    // Copy assignment.
+    base_proto& operator=(const base_proto& other);
     vnum vn{NOTHING}; /* virtual number of this thing		*/
     char *name{}; /* name of this thing			*/
     char *short_description{}; /* for listings			*/
     char *look_description{}; /* for examine/look		*/
     char *room_description{};      /* When thing is listed in room */
-    char *description{}; /* extra descriptions		*/
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
     std::vector<trig_vnum> proto_script; /* list of default triggers  */
     std::string scriptString();
 
-    nlohmann::json serializeBase();
-    void deserialize(const nlohmann::json& j);
+    virtual nlohmann::json serialize();
+    virtual void deserialize(const nlohmann::json& j);
 };
 
 struct npc_proto : public base_proto {
     npc_proto() = default;
     explicit npc_proto(const nlohmann::json& j);
+    npc_proto(const npc_proto& other);
+    npc_proto& operator=(const npc_proto& other);
     RaceID race{RaceID::Spirit};
     SenseiID chclass{SenseiID::Commoner};
     weight_t weight{0};
@@ -363,11 +369,16 @@ struct npc_proto : public base_proto {
 
     // Data stored about different forms.
     std::unordered_map<FormID, trans_data> transforms;
+
+    nlohmann::json serialize() override;
+    void deserialize(const nlohmann::json& j) override;
 };
 
 struct item_proto : public base_proto {
     item_proto() = default;
     explicit item_proto(const nlohmann::json& j);
+    item_proto(const item_proto& other);
+    item_proto& operator=(const item_proto& other);
     std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value{};   /* Values of the item (see list)    */
     int8_t type_flag{};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
@@ -381,7 +392,8 @@ struct item_proto : public base_proto {
     std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
     int timer{};          /* Timer for object                    */
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
-    nlohmann::json serialize();
+    nlohmann::json serialize() override;
+    void deserialize(const nlohmann::json& j) override;
 };
 
 

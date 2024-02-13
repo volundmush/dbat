@@ -17,28 +17,6 @@
 #include "dbat/constants.h"
 #include "dbat/dg_scripts.h"
 
-static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
-
-
-obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
-    int found = NOTHING;
-    zone_rnum rznum = real_zone_by_thing(ovnum);
-
-    /*
-     * Write object to internal tables.
-     */
-    if ((newobj->vn = real_object(ovnum)) != NOTHING) {
-        copy_object(&obj_proto[newobj->vn], newobj);
-        update_objects(&obj_proto[newobj->vn]);
-        return newobj->vn;
-    }
-
-    found = insert_object(newobj, ovnum);
-
-    auto &z = zone_table[rznum];
-    z.objects.insert(ovnum);
-    return found;
-}
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
 
@@ -77,23 +55,6 @@ int update_objects(struct obj_data *refobj) {
     return count;
 }
 
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
-/*
- * Function handle the insertion of an object within the prototype framework.  Note that this does not adjust internal values
- * of other objects, use add_object() for that.
- */
-obj_rnum insert_object(struct obj_data *obj, obj_vnum ovnum) {
-
-    auto exists = obj_proto.count(ovnum);
-    auto &o = obj_proto[ovnum];
-    o = *obj;
-
-    /* Not found, place at 0. */
-    return false;
-}
 
 
 /* ------------------------------------------------------------------------------------------------------------------------------ */
@@ -102,49 +63,9 @@ int save_objects(zone_rnum zone_num) {
     return true;
 }
 
-/*
- * Free all, unconditionally.
- */
-void free_object_strings(struct obj_data *obj) {
-    if (obj->name)
-        free(obj->name);
-    if (obj->room_description)
-        free(obj->room_description);
-    if (obj->look_description)
-        free(obj->look_description);
-    if (obj->ex_description)
-        free_ex_descriptions(obj->ex_description);
-}
 
-/*
- * For object instances that are not the prototype.
- */
 
-void copy_object_strings(struct obj_data *to, struct obj_data *from) {
-    to->name = from->name ? strdup(from->name) : nullptr;
-    to->room_description = from->room_description ? strdup(from->room_description) : nullptr;
-    to->look_description = from->look_description ? strdup(from->look_description) : nullptr;
 
-    if (from->ex_description)
-        copy_ex_descriptions(&to->ex_description, from->ex_description);
-    else
-        to->ex_description = nullptr;
-}
-
-int copy_object(struct obj_data *to, struct obj_data *from) {
-    free_object_strings(to);
-    return copy_object_main(to, from, true);
-}
-
-int copy_object_preserve(struct obj_data *to, struct obj_data *from) {
-    return copy_object_main(to, from, false);
-}
-
-static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object) {
-    *to = *from;
-    copy_object_strings(to, from);
-    return true;
-}
 
 int delete_object(obj_rnum rnum) {
     obj_rnum i;
@@ -195,7 +116,6 @@ int delete_object(obj_rnum rnum) {
     assert(get_vnum_count(objectVnumIndex, rnum) == 0);
     obj_proto.erase(rnum);
     obj_index.erase(rnum);
-    save_objects(zrnum);
 
     return rnum;
 }

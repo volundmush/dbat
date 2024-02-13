@@ -202,17 +202,7 @@ void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type) {
      * aren't part of the prototype any longer.  They get added
      * with strdup().
      */
-    if (OLC_OBJ(d)) {
-        free_object_strings(OLC_OBJ(d));
-        free(OLC_OBJ(d));
-    }
 
-    /*
-     * Check for a mob.  free_mobile() makes sure strings are not in
-     * the prototype.
-     */
-    if (OLC_MOB(d))
-        free_mobile(OLC_MOB(d));
 
     /*
      * Check for a zone.  cleanup_type is irrelevant here, free() everything.
