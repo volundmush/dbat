@@ -487,7 +487,7 @@ int trgvar_in_room(room_vnum vnum) {
         return (-1);
     }
 
-    for (ch = world[rnum].people; ch != nullptr; ch = ch->next_in_room)
+    for (ch = world[rnum]->people; ch != nullptr; ch = ch->next_in_room)
         i++;
 
     return i;
@@ -693,7 +693,7 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
     } else {
         room_rnum num;
         if ((num = obj_room(obj)) != NOWHERE)
-            for (ch = world[num].people; ch; ch = ch->next_in_room)
+            for (ch = world[num]->people; ch; ch = ch->next_in_room)
                 if (isname(name, ch->name) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
@@ -767,11 +767,11 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return i;
     else if ((rm = obj_room(obj)) != NOWHERE) {
         /* check the floor */
-        if ((i = get_obj_in_list(name, world[rm].contents)))
+        if ((i = get_obj_in_list(name, world[rm]->contents)))
             return i;
 
         /* check peoples' inventory */
-        for (ch = world[rm].people; ch; ch = ch->next_in_room)
+        for (ch = world[rm]->people; ch; ch = ch->next_in_room)
             if ((i = get_object_in_equip(ch, name)))
                 return i;
     }
@@ -816,7 +816,7 @@ room_data *get_room(char *name) {
     else if ((nr = real_room(atoi(name))) == NOWHERE)
         return nullptr;
     else
-        return &world[nr];
+        return world[nr];
 }
 
 
@@ -925,7 +925,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
-        (i = get_obj_in_list(name, world[rm].contents)))
+        (i = get_obj_in_list(name, world[rm]->contents)))
         return i;
 
     return get_obj(name);
@@ -1001,11 +1001,11 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     }
 
     for (auto &[vn, r] : world) {
-        auto sc = SCRIPT(&r); 
+        auto sc = SCRIPT(r); 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
-            (!is_empty(r.zone) ||
+            (!is_empty(r->zone) ||
                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-            random_wtrigger(&r);
+            random_wtrigger(r);
     }
 }
 
@@ -1029,11 +1029,11 @@ void check_time_triggers() {
     }
 
     for (auto &[vn, r] : world) {
-        auto sc = SCRIPT(&r);
+        auto sc = SCRIPT(r);
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
-                (!is_empty(r.zone) ||
+                (!is_empty(r->zone) ||
                  IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                time_wtrigger(&r);
+                time_wtrigger(r);
     }
 }
 
@@ -1054,11 +1054,11 @@ void check_interval_triggers(int trigFlag) {
     }
 
     for (auto &[vn, r] : world) {
-        auto sc = SCRIPT(&r);
+        auto sc = SCRIPT(r);
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
-            (!is_empty(r.zone) ||
+            (!is_empty(r->zone) ||
                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-            interval_wtrigger(&r, trigFlag);
+            interval_wtrigger(r, trigFlag);
     }
 }
 
@@ -1348,7 +1348,7 @@ ACMD(do_attach) {
             return;
         }
 
-        if (!can_edit_zone(ch, world[rnum].zone)) {
+        if (!can_edit_zone(ch, world[rnum]->zone)) {
             send_to_char(ch, "You can only attach triggers in your own zone\r\n");
             return;
         }
@@ -1359,11 +1359,11 @@ ACMD(do_attach) {
             return;
         }
 
-        room = &world[rnum];
+        room = world[rnum];
         room->script->addTrigger(trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
-                     tn, GET_TRIG_NAME(trig), world[rnum].vn);
+                     tn, GET_TRIG_NAME(trig), world[rnum]->vn);
     } else
         send_to_char(ch, "Please specify 'mob', 'obj', or 'room'.\r\n");
 }

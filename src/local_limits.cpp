@@ -1499,7 +1499,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 if (ROOM_EFFECT(IN_ROOM(j)) >= 1 && ROOM_EFFECT(IN_ROOM(j)) <= 5) {
                     send_to_room(IN_ROOM(j),
                                  "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
-                    ROOM_EFFECT(IN_ROOM(j)) -= 1;
+                    j->getRoom()->geffect -= 1;
                     if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0) {
                         GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
                     } else {
@@ -1562,7 +1562,7 @@ void timed_dt(struct char_data *ch) {
           */
 
         for (auto &r : world)
-            r.second.timed -= (r.second.timed != -1);
+            r.second->timed -= (r.second->timed != -1);
 
         for (vict = character_list; vict; vict = vict->next) {
             if (IS_NPC(vict))

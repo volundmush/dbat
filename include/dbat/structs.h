@@ -343,6 +343,8 @@ struct unit_data {
     int64_t id{NOTHING}; /* used by DG triggers	*/
     time_t generation{};             /* creation time for dupe check     */
 
+    room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
+
     nlohmann::json serializeUnit();
 
     void activateContents();
@@ -411,7 +413,7 @@ struct obj_data : public unit_data {
     void clearLocation();
   
 
-    room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
+    
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
     int64_t value[NUM_OBJ_VAL_POSITIONS]{};   /* Values of the item (see list)    */
@@ -799,7 +801,6 @@ struct char_data : public unit_data {
     stat_t mod(CharStat type, stat_t val);
 
     // Instance-relevant fields below...
-    room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
 
     std::bitset<NUM_ADMFLAGS> admflags{};    /* Bitvector for admin privs		*/

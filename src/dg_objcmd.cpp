@@ -159,9 +159,9 @@ OCMD(do_oecho) {
         obj_log(obj, "oecho called with no args");
 
     else if ((room = obj_room(obj)) != NOWHERE) {
-        if (world[room].people) {
-            sub_write(argument, world[room].people, true, TO_ROOM);
-            sub_write(argument, world[room].people, true, TO_CHAR);
+        if (world[room]->people) {
+            sub_write(argument, world[room]->people, true, TO_ROOM);
+            sub_write(argument, world[room]->people, true, TO_CHAR);
         }
     } else
         obj_log(obj, "oecho called by object in NOWHERE");
@@ -184,7 +184,7 @@ OCMD(do_oforce) {
         if ((room = obj_room(obj)) == NOWHERE)
             obj_log(obj, "oforce called by object in NOWHERE");
         else {
-            for (ch = world[room].people; ch; ch = next_ch) {
+            for (ch = world[room]->people; ch; ch = next_ch) {
                 next_ch = ch->next_in_room;
                 if (valid_dg_target(ch, 0)) {
                     command_interpreter(ch, line);
@@ -353,13 +353,13 @@ OCMD(do_opurge) {
     if (!*arg) {
         /* purge all */
         if ((rm = obj_room(obj)) != NOWHERE) {
-            for (ch = world[rm].people; ch; ch = next_ch) {
+            for (ch = world[rm]->people; ch; ch = next_ch) {
                 next_ch = ch->next_in_room;
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
 
-            for (o = world[rm].contents; o; o = next_obj) {
+            for (o = world[rm]->contents; o; o = next_obj) {
                 next_obj = o->next_content;
                 if (o != obj)
                     extract_obj(o);
@@ -436,7 +436,7 @@ OCMD(do_oteleport) {
         if (target == rm)
             obj_log(obj, "oteleport target is itself");
 
-        for (ch = world[rm].people; ch; ch = next_ch) {
+        for (ch = world[rm]->people; ch; ch = next_ch) {
             next_ch = ch->next_in_room;
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
@@ -589,12 +589,12 @@ OCMD(do_oasound) {
     }
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
-        if (world[room].dir_option[door] != nullptr &&
-            (world[room].dir_option[door])->to_room != NOWHERE &&
-            (world[room].dir_option[door])->to_room != room &&
-            world[(world[room].dir_option[door])->to_room].people) {
-            sub_write(argument, world[(world[room].dir_option[door])->to_room].people, true, TO_ROOM);
-            sub_write(argument, world[(world[room].dir_option[door])->to_room].people, true, TO_CHAR);
+        if (world[room]->dir_option[door] != nullptr &&
+            (world[room]->dir_option[door])->to_room != NOWHERE &&
+            (world[room]->dir_option[door])->to_room != room &&
+            world[(world[room]->dir_option[door])->to_room]->people) {
+            sub_write(argument, world[(world[room]->dir_option[door])->to_room]->people, true, TO_ROOM);
+            sub_write(argument, world[(world[room]->dir_option[door])->to_room]->people, true, TO_CHAR);
         }
     }
 }

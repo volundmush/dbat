@@ -8284,8 +8284,9 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         if (!IS_NPC(d->character)) {
             check_eq(d->character);
         }
-        if (!IS_NPC(d->character) && ROOM_EFFECT(IN_ROOM(d->character)) >= 1 && rand_number(1, 100) >= 96) {
-            if (ROOM_EFFECT(IN_ROOM(d->character)) <= 4) {
+        auto r = d->character->getRoom();
+        if (!IS_NPC(d->character) && r->geffect >= 1 && rand_number(1, 100) >= 96) {
+            if (r->geffect <= 4) {
                 switch (rand_number(1, 4)) {
                     case 1:
                         act("@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr,
@@ -8312,11 +8313,11 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                             nullptr, nullptr, TO_CHAR);
                         break;
                 }
-                ROOM_EFFECT(IN_ROOM(d->character)) += 1;
+                r->geffect += 1;
             } else if (ROOM_EFFECT(IN_ROOM(d->character)) == 5) {
                 act("@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_ROOM);
                 act("@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_CHAR);
-                ROOM_EFFECT(IN_ROOM(d->character)) += 1;
+                r->geffect += 1;
             }
         }
         if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {

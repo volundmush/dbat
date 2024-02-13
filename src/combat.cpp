@@ -1786,7 +1786,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 continue;
                             }
                         }
-                        ROOM_DAMAGE(IN_ROOM(k)) = 100;
+                        k->getRoom()->dmg = 100;
                         int zone = 0;
                         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -1861,7 +1861,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             continue;
                         }
                     }
-                    ROOM_DAMAGE(IN_ROOM(k)) = 100;
+                    k->getRoom()->dmg = 100;
                     int zone = 0;
                     if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -1966,7 +1966,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 continue;
                             }
                         }
-                        ROOM_DAMAGE(IN_ROOM(k)) = 100;
+                        k->getRoom()->dmg = 100;
                         int zone = 0;
                         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -2039,7 +2039,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             continue;
                         }
                     }
-                    ROOM_DAMAGE(IN_ROOM(k)) = 100;
+                    k->getRoom()->dmg = 100;
                     int zone = 0;
                     if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -2122,8 +2122,9 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                             true, vict, k, nullptr, TO_CHAR);
                         act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
                             true, vict, k, nullptr, TO_ROOM);
-                        if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
-                            ROOM_DAMAGE(IN_ROOM(vict)) += 5;
+                        auto r = vict->getRoom();
+                        if (r->dmg <= 95) {
+                            r->dmg += 5;
                         }
                         extract_obj(k);
                         continue;
@@ -2236,8 +2237,9 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                             true, vict, k, nullptr, TO_CHAR);
                         act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
                             true, vict, k, nullptr, TO_ROOM);
-                        if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
-                            ROOM_DAMAGE(IN_ROOM(vict)) += 5;
+                        auto r = vict->getRoom();
+                        if (r->dmg <= 95) {
+                            r->dmg += 5;
                         }
                         extract_obj(k);
                         continue;
@@ -2642,7 +2644,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
                     break;
                 case 2:
                     if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(vict)) == 0) {
-                        ROOM_EFFECT(IN_ROOM(vict)) = 1;
+                        vict->getRoom()->geffect = 1;
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
                             true, ch, nullptr, vict, TO_CHAR);
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
@@ -2744,8 +2746,9 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
                     break;
             }
         }
-        if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-            ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+        auto r = ch->getRoom();
+        if (r->dmg <= 95) {
+            r->dmg += 5;
         }
         int zone = 0;
         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
@@ -2756,6 +2759,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
 }
 
 void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2) {
+    auto r = vict->getRoom();
     if (type == 0 && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE)) {
         if (SECT(IN_ROOM(ch)) != SECT_INSIDE) {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
@@ -2768,7 +2772,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
                     break;
                 case 2:
                     if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(vict)) == 0) {
-                        ROOM_EFFECT(IN_ROOM(vict)) = 1;
+                        r->geffect = 1;
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
                             true, ch, nullptr, vict, TO_CHAR);
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
@@ -2870,8 +2874,9 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
                     break;
             }
         }
-        if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-            ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+        auto r = ch->getRoom();
+        if (r->dmg <= 95) {
+            r->dmg += 5;
         }
         int zone = 0;
         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {

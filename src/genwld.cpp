@@ -30,23 +30,21 @@ room_rnum add_room(struct room_data *room) {
         return NOWHERE;
 
     if (world.contains(room->vn)) {
-        auto &ro = world[room->vn];
-        if (SCRIPT(&ro))
+        auto ro = world[room->vn];
+        if (SCRIPT(ro))
             extract_script(&ro, WLD_TRIGGER);
-        tch = ro.people;
-        tobj = ro.contents;
-        copy_room(&ro, room);
-        ro.people = tch;
-        ro.contents = tobj;
-        ro.save();
+        tch = ro->people;
+        tobj = ro->contents;
+        copy_room(ro, room);
+        ro->people = tch;
+        ro->contents = tobj;
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
 
-    auto &r = world[room->vn];
-    r = *room;
+    auto r = world[room->vn];
+    *r = *room;
     basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
-    r.save();
 
     /*
      * Return what array entry we placed the new room in.
@@ -66,8 +64,7 @@ int delete_room(room_rnum rnum) {
     if (!world.count(rnum))    /* Can't delete void yet. */
         return false;
 
-    room = &world[rnum];
-    room->save();
+    room = world[rnum];
 
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
@@ -89,12 +86,12 @@ int delete_room(room_rnum rnum) {
      * Dump the contents of this room into the Void.  We could also just
      * extract the people, mobs, and objects here.
      */
-    for (obj = world[rnum].contents; obj; obj = next_obj) {
+    for (obj = world[rnum]->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         obj_from_room(obj);
         obj_to_room(obj, 0);
     }
-    for (ppl = world[rnum].people; ppl; ppl = next_ppl) {
+    for (ppl = world[rnum]->people; ppl; ppl = next_ppl) {
         next_ppl = ppl->next_in_room;
         char_from_room(ppl);
         char_to_room(ppl, 0);
@@ -109,9 +106,9 @@ int delete_room(room_rnum rnum) {
      * Also fix all the exits pointing to rooms above this.
      */
 
-    for(auto &r : world) {
+    for(auto &[vn, r] : world) {
         for (j = 0; j < NUM_OF_DIRS; j++) {
-            auto &e = r.second.dir_option[j];
+            auto e = r->dir_option[j];
             if (!e || e->to_room != rnum)
                 continue;
             if ((!e->keyword || !*e->keyword) &&
@@ -183,8 +180,8 @@ int copy_room_strings(struct room_data *dest, struct room_data *source) {
         if (!R_EXIT(source, i))
             continue;
 
-        CREATE(R_EXIT(dest, i), struct room_direction_data, 1);
-        *R_EXIT(dest, i) = *R_EXIT(source, i);
+        dest->dir_option[i] = new room_direction_data();
+                *R_EXIT(dest, i) = *R_EXIT(source, i);
         if (R_EXIT(source, i)->general_description)
             R_EXIT(dest, i)->general_description = strdup(R_EXIT(source, i)->general_description);
         if (R_EXIT(source, i)->keyword)
@@ -334,8 +331,8 @@ std::optional<vnum> room_data::getMatchingArea(std::function<bool(const area_dat
             // we need to find the a.objectVnum in the world by scanning object_list...
             if (auto obj = get_obj_num(a.extraVn.value()); obj) {
                 if(world.contains(obj->in_room)) {
-                    auto &r = world[obj->in_room];
-                    return r.getMatchingArea(f);
+                    auto r = world[obj->in_room];
+                    return r->getMatchingArea(f);
                 }
             }
         }
@@ -416,7 +413,7 @@ int room_data::modDamage(int amount) {
 
 struct room_data* room_direction_data::getDestination() {
     auto found = world.find(to_room);
-    if(found != world.end()) return &found->second;
+    if(found != world.end()) return found->second;
     return nullptr;
 }
 
@@ -499,7 +496,7 @@ DgResults room_data::dgCallMember(trig_data *trig, const std::string& member, co
             }
             else if (!strcasecmp(arg.c_str(), "room")) {
                 if (auto roomFound = world.find(ex->to_room); roomFound != world.end())
-                    return fmt::format("{}", roomFound->second.getUID(false));
+                    return fmt::format("{}", roomFound->second->getUID(false));
                 else
                     return "";
             }

@@ -971,11 +971,9 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
 
-    auto &r = world[room];
-
-    CREATE(r.dir_option[dir], struct room_direction_data, 1);
-
-    auto d = r.dir_option[dir];
+    auto r = world[room];
+    
+    auto d = r->dir_option[dir] = new room_direction_data();
 
     d->general_description = fread_string(fl, buf2);
     d->keyword = fread_string(fl, buf2);
@@ -1015,7 +1013,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->failroom = NOWHERE;
             d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                r.save();
                 converting = true;
             }
         } else if (retval == 5) {
@@ -1028,7 +1025,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->failroom = NOWHERE;
             d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                r.save();
                 converting = true;
             }
         } else if (retval == 7) {
@@ -1041,7 +1037,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->failroom = NOWHERE;
             d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                r.save();
                 converting = true;
             }
         } else if (retval == 11) {
@@ -1081,13 +1076,14 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
     auto &z = zone_table[zone];
-    auto &r = world[virtual_nr];
+    auto r = new room_data();
+    world[virtual_nr] = r;
     z.rooms.insert(virtual_nr);
-    r.script = std::make_shared<script_data>(&r);
-    r.zone = zone;
-    r.vn = virtual_nr;
-    r.name = fread_string(fl, buf2);
-    r.look_description = fread_string(fl, buf2);
+    r->script = std::make_shared<script_data>(r);
+    r->zone = zone;
+    r->vn = virtual_nr;
+    r->name = fread_string(fl, buf2);
+    r->look_description = fread_string(fl, buf2);
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1102,9 +1098,9 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         roomFlagsHolder[2] = asciiflag_conv(flags3);
         roomFlagsHolder[3] = asciiflag_conv(flags4);
 
-        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r.room_flags.set(i);
+        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->room_flags.set(i);
 
-        r.sector_type = t[2];
+        r->sector_type = t[2];
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
         //check_bitvector_names(r.room_flags, room_bits_count, flags, "room");
     } else {
@@ -1112,15 +1108,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
 
-    r.func = nullptr;
-    r.contents = nullptr;
-    r.people = nullptr;
-    r.timed = -1;
-
-    for (i = 0; i < NUM_OF_DIRS; i++)
-        r.dir_option[i] = nullptr;
-
-    r.ex_description = nullptr;
+    r->timed = -1;
 
     snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
 
@@ -1150,15 +1138,15 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
                         new_descr->description = tmp;
                     }
                 }
-                new_descr->next = r.ex_description;
-                r.ex_description = new_descr;
+                new_descr->next = r->ex_description;
+                r->ex_description = new_descr;
                 break;
             case 'S':            /* end of room */
                 /* DG triggers -- script is defined after the end of the room */
                 letter = fread_letter(fl);
                 ungetc(letter, fl);
                 while (letter == 'T') {
-                    dg_read_trigger(fl, &world[virtual_nr], WLD_TRIGGER);
+                    dg_read_trigger(fl, world[virtual_nr], WLD_TRIGGER);
                     letter = fread_letter(fl);
                     ungetc(letter, fl);
                 }
@@ -3308,7 +3296,7 @@ vnum assembleArea(const AreaDef &def) {
     if(!def.roomFlags.empty()) {
         for(auto &[vn, room] : world) {
             for(auto &f : def.roomFlags) {
-                if(room.room_flags.test(f)) {
+                if(room->room_flags.test(f)) {
                     rooms.insert(vn);
                     break;
                 }
@@ -3324,8 +3312,8 @@ vnum assembleArea(const AreaDef &def) {
         auto found = world.find(r);
         if(found == world.end()) continue;
         auto &room = found->second;
-        if(room.area) continue;
-        room.area = vn;
+        if(room->area) continue;
+        room->area = vn;
         a.rooms.insert(r);
     }
 
@@ -3473,7 +3461,7 @@ void migrate_grid() {
     }
 
     for(auto &[rv, room] : world) {
-        if(room.area) continue;
+        if(room->area) continue;
         auto sense = sense_location_name(rv);
         if(sense != "Unknown.") {
             auto &area = areaDefs[sense];
@@ -3611,7 +3599,7 @@ void migrate_grid() {
     bodef.roomIDs.insert(19053);
     bodef.roomIDs.insert(19039);
     for(auto &[r, room] : world) {
-        if(icontains(stripAnsi(room.name), "Black Omen")) bodef.roomIDs.insert(r);
+        if(icontains(stripAnsi(room->name), "Black Omen")) bodef.roomIDs.insert(r);
     }
     bodef.roomIDs.insert(19050);
     bodef.type = AreaType::Vehicle;
@@ -3743,7 +3731,9 @@ void migrate_grid() {
     for(auto child : areas[moon].children) {
         auto &a = areas[child];
         for(auto r : a.rooms) {
-            ROOM_FLAGS(r).reset(ROOM_EARTH);
+            if(auto room = world.find(r); room != world.end()) {
+                room->second->room_flags.reset(ROOM_EARTH);
+            }
         }
     }
 
@@ -3866,9 +3856,9 @@ void migrate_grid() {
         // check for planetMap flags and, if found, bind the area this room belongs to, to the respective planet.
 
         for(auto &p : planetMap) {
-            if(!room.area) continue;
-            if(room.room_flags.test(p.first)) {
-                auto avn = room.area.value();
+            if(!room->area) continue;
+            if(room->room_flags.test(p.first)) {
+                auto avn = room->area.value();
                 auto &a = areas[avn];
                 auto &pl = areas[p.second];
                 pl.children.insert(avn);
@@ -3893,7 +3883,7 @@ void migrate_grid() {
     celdef.type = AreaType::Structure;
     celdef.roomRanges.emplace_back(16305, 16399);
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Celestial Corp")) celdef.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->name), "Celestial Corp")) celdef.roomIDs.insert(rv);
     }
     auto celestial_corp = assembleArea(celdef);
 
@@ -3910,7 +3900,7 @@ void migrate_grid() {
     cooler.parent = space;
     cooler.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Cooler's Ship")) {
+        if(icontains(stripAnsi(room->name), "Cooler's Ship")) {
             cooler.roomIDs.insert(rv);
         }
     }
@@ -3921,7 +3911,7 @@ void migrate_grid() {
     alph.type = AreaType::Structure;
     alph.parent = space;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Alpharis")) alph.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->name), "Alpharis")) alph.roomIDs.insert(rv);
     }
     auto alpharis = assembleArea(alph);
 
@@ -3930,7 +3920,7 @@ void migrate_grid() {
     dzone.parent = universe7;
     dzone.type = AreaType::Dimension;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Dead Zone")) dzone.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->name), "Dead Zone")) dzone.roomIDs.insert(rv);
     }
     auto dead_zone = assembleArea(dzone);
 
@@ -3939,7 +3929,7 @@ void migrate_grid() {
     bast.parent = space;
     bast.type = AreaType::CelestialBody;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Blasted Asteroid")) bast.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->name), "Blasted Asteroid")) bast.roomIDs.insert(rv);
     }
     auto blasted_asteroid = assembleArea(bast);
 
@@ -3949,7 +3939,7 @@ void migrate_grid() {
     listres.parent = xenoverse;
     listres.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Lister's Restaurant")) listres.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->name), "Lister's Restaurant")) listres.roomIDs.insert(rv);
     }
     listres.roomIDs = {18640};
     auto listers_restaurant = assembleArea(listres);
@@ -3959,7 +3949,7 @@ void migrate_grid() {
     scasino.type = AreaType::Structure;
     scasino.parent = xenoverse;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->name), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
     }
     auto shooting_star_casino = assembleArea(scasino);
 
@@ -3968,7 +3958,7 @@ void migrate_grid() {
     outdef.parent = celestial_plane;
 	outdef.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "The Outpost")) outdef.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->name), "The Outpost")) outdef.roomIDs.insert(rv);
     }
     auto outpost = assembleArea(outdef);
 
@@ -4509,7 +4499,7 @@ void migrate_grid() {
     AreaDef misc;
     misc.name = "Miscellaneous";
     for(auto &[rv, room] : world) {
-        if(!room.area) misc.roomIDs.insert(rv);
+        if(!room->area) misc.roomIDs.insert(rv);
     }
     auto misc_area = assembleArea(misc);
 
@@ -4526,7 +4516,7 @@ void migrate_grid() {
         14904, 15655, // kanassa
         16009, 16544, 16600 // Arlia
     }) {
-        ROOM_FLAGS(r).set(ROOM_LANDING);
+        if(auto room = world.find(r); room != world.end()) room->second->room_flags.set(ROOM_LANDING);
     }
 }
 

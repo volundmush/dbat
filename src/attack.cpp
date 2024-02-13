@@ -1040,6 +1040,7 @@ namespace atk {
     }
 
     void Slam::announceHitspot() {
+        auto r = victim->getRoom();
         switch (hitspot) {
             case 1:
                 actUser("@WYou disappear, appearing above @C$N@W and slam a double fisted blow into $M!@n");
@@ -1075,7 +1076,7 @@ namespace atk {
                                     break;
                                 case 2:
                                     if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(victim)) == 0) {
-                                        ROOM_EFFECT(IN_ROOM(victim)) = 1;
+                                        r->geffect = 1;
                                         act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
                                             TO_CHAR);
                                         act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
@@ -2469,6 +2470,7 @@ namespace atk {
     }
 
     void Honoo::attackPostprocess() {
+        auto r = user->getRoom();
         if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim) &&
                 !GET_BONUS(victim, BONUS_FIREPROOF)) {
                 send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
@@ -2488,21 +2490,22 @@ namespace atk {
             }
             if (ROOM_EFFECT(IN_ROOM(user)) < -1) {
                 send_to_room(IN_ROOM(user), "The water surrounding the area evaporates some!\r\n");
-                ROOM_EFFECT(IN_ROOM(user)) += 1;
+                r->geffect += 1;
             } else if (ROOM_EFFECT(IN_ROOM(user)) == -1) {
                 send_to_room(IN_ROOM(user), "The water surrounding the area evaporates completely away!\r\n");
-                ROOM_EFFECT(IN_ROOM(user)) = 0;
+                r->geffect = 0;
             }
             victim->affected_by.reset(AFF_ASHED);
     }
 
     void Honoo::postProcess() {
+        auto r = user->getRoom();
         if (ROOM_EFFECT(IN_ROOM(user)) < -1) {
             send_to_room(IN_ROOM(user), "The water surrounding the area evaporates some!\r\n");
-            ROOM_EFFECT(IN_ROOM(user)) += 1;
+            r->geffect += 1;
         } else if (ROOM_EFFECT(IN_ROOM(user)) == -1) {
             send_to_room(IN_ROOM(user), "The water surrounding the area evaporates completely away!\r\n");
-            ROOM_EFFECT(IN_ROOM(user)) = 0;
+            r->geffect = 0;
         }
     }   
 
@@ -4262,6 +4265,7 @@ namespace atk {
     }
 
     void Kakusanha::postProcess() {
+        auto r = user->getRoom();
         int count = targets.size();
         if (count < 5 && !ROOM_FLAGGED(IN_ROOM(user), ROOM_SPACE)) {
             send_to_room(IN_ROOM(user), "The rest of the beams slam into the ground!@n\r\n");
@@ -4277,8 +4281,8 @@ namespace atk {
                             TO_ROOM);
                         break;
                     case 2:
-                        if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(user)) == 0) {
-                            ROOM_EFFECT(IN_ROOM(user)) = 5;
+                        if (rand_number(1, 4) == 4 && r->geffect == 0) {
+                            r->geffect = 5;
                             act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
                                 true, user, nullptr, nullptr, TO_CHAR);
                             act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",

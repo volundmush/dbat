@@ -563,7 +563,7 @@ ACMD(do_shuffle) {
         obj_to_room(obj2, real_room(48));
     }
     while (count > 0) {
-        for (obj2 = world[real_room(48)].contents; obj2; obj2 = next_obj) {
+        for (obj2 = world[real_room(48)]->contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
                 continue;
@@ -1264,10 +1264,10 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                           struct char_data *ch) {
     int door;
 
-    auto &room = world[rnum];
+    auto room = world[rnum];
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = room.dir_option[door];
+        auto d = room->dir_option[door];
         if(!d) continue;
         auto dest = d->getDestination();
         if(!dest) continue;
@@ -3750,7 +3750,7 @@ ACMD(do_autoexit) {
 }
 
 void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief) {
-    struct room_data *rm = &world[target_room];
+    struct room_data *rm = world[target_room];
     look_at_room(rm, ch, ignore_brief);
 }
 
@@ -4076,7 +4076,7 @@ static void look_in_obj(struct char_data *ch, char *arg) {
                 send_to_char(ch, "You see nothing but infinite darkness...\r\n");
             } else {
                 send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n",
-                             world[portal_dest].name);
+                             world[portal_dest]->name);
             }
         } else if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
             /* display the appropriate description from the list of descriptions
@@ -4924,7 +4924,7 @@ ACMD(do_score) {
         double gravity = 1.0;
         auto room = world.find(ch->in_room);
         if(room != world.end()) {
-            gravity = room->second.getGravity();
+            gravity = room->second->getGravity();
         }
         std::string grav = gravity > 1.0 ? fmt::format("(Gravity:", gravity) : "";
         send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n %s\n",

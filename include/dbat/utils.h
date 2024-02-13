@@ -410,7 +410,6 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define PRF_FLAGS(ch)    ((ch)->pref)
 #define AFF_FLAGS(ch)    ((ch)->affected_by)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
-#define ROOM_FLAGS(loc)    (world[(loc)].room_flags)
 #define SPELL_ROUTINES(spl)    (spell_info[spl].routines)
 #define ZONE_FLAGS(rnum)       (zone_table[(rnum)].zone_flags)
 #define ZONE_MINLVL(rnum)      (zone_table[(rnum)].min_level)
@@ -456,30 +455,28 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 /* room utils ************************************************************/
 
 
-#define SECT(room)    (VALID_ROOM_RNUM(room) ? \
-                world[(room)]->sector_type : SECT_INSIDE)
-#define ROOM_DAMAGE(room)   (world[(room)]->dmg)
-#define ROOM_EFFECT(room)   (world[(room)]->geffect)
-#define ROOM_GRAVITY(room)  (world[(room)]->getGravity())
+extern int SECT(room_vnum room);
+extern int ROOM_DAMAGE(room_vnum room);
+extern int ROOM_EFFECT(room_vnum room);
+extern double ROOM_GRAVITY(room_vnum room);
+
 #define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
 
 #define IS_DARK(room)    room_is_dark((room))
 #define IS_LIGHT(room)  (!IS_DARK(room))
 
-#define VALID_ROOM_RNUM(rnum)    (world.count(rnum) > 0 && rnum != NOWHERE)
-#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? world[(rnum)]->vn : NOWHERE)
-#define GET_ROOM_SPEC(room) \
-    (VALID_ROOM_RNUM(room) ? world[(room)].func : nullptr)
+#define GET_ROOM_VNUM(rnum) (rnum)
+extern SpecialFunc GET_ROOM_SPEC(room_rnum rnum);
 
 /* Minor Planet Defines */
-#define PLANET_ZENITH(room) ((GET_ROOM_VNUM(room) >= 3400 && GET_ROOM_VNUM(room) <= 3599) || (GET_ROOM_VNUM(room) >= 62900 && GET_ROOM_VNUM(room) <= 62999) || \
-                (GET_ROOM_VNUM(room) == 19600))
+#define PLANET_ZENITH(room) ((room) >= 3400 && (room) <= 3599) || ((room) >= 62900 && (room) <= 62999) || \
+                ((room) == 19600))
 
 /* char utils ************************************************************/
 
 
 #define IN_ROOM(ch)    ((ch)->in_room)
-#define IN_ZONE(ch)   (zone_table[(world[(IN_ROOM(ch))].zone)].number)
+extern zone_vnum IN_ZONE(struct unit_data *ch);
 #define GET_WAS_IN(ch)    ((ch)->was_in_room)
 #define GET_AGE(ch)     ((ch)->time.currentAge())
 
@@ -897,12 +894,12 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
     fname((obj)->name) : "something")
 
-
-#define EXIT(ch, door)  (world[IN_ROOM(ch)].dir_option[door])
-#define SECOND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door])
-#define THIRD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
-#define W_EXIT(room, num)     (world[(room)].dir_option[(num)])
-#define R_EXIT(room, num)     ((room)->dir_option[(num)])
+extern room_direction_data *EXIT(struct unit_data *ch, int door);
+extern room_direction_data* SECOND_EXIT(struct unit_data *ch, int door);
+extern room_direction_data* THIRD_EXIT(struct unit_data *ch, int door);
+extern room_direction_data* W_EXIT(room_rnum room, int door);
+extern room_direction_data* R_EXIT(room_data *room, int door);
+extern room_direction_data* R_EXIT(room_data* room, int door);
 
 #define CAN_GO(ch, door) (EXIT(ch,door) && \
              (EXIT(ch,door)->to_room != NOWHERE) && \
@@ -1324,7 +1321,7 @@ void send_to_room(struct room_data *room, fmt::string_view format, Args&&... arg
 template<typename... Args>
 void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
     if(!world.contains(room)) return;
-    auto r = &world[room];
+    auto r = world[room];
     send_to_room(r, format, std::forward<Args>(args)...);
 }
 

@@ -172,8 +172,8 @@ WCMD(do_wasound) {
         struct room_direction_data *newexit;
 
         if ((newexit = room->dir_option[door]) && (newexit->to_room != NOWHERE) &&
-            room != &world[newexit->to_room])
-            act_to_room(argument, &world[newexit->to_room]);
+            room != world[newexit->to_room])
+            act_to_room(argument, world[newexit->to_room]);
     }
 }
 
@@ -609,7 +609,7 @@ WCMD(do_wat) {
         return;
     }
 
-    wld_command_interpreter(&world[loc], command);
+    wld_command_interpreter(world[loc], command);
 }
 
 const struct wld_command_info wld_cmd_info[] = {

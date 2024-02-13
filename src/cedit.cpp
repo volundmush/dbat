@@ -2240,7 +2240,7 @@ void reassign_rooms() {
 
     /* remove old funcs */
     for (auto &r : world)
-        r.second.func = nullptr;
+        r.second->func = nullptr;
 
     /* reassign spec_procs */
     assign_rooms();

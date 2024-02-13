@@ -3018,7 +3018,7 @@ size_t countColors(const std::string &txt) {
  * Inside and City rooms are always lit.
  * Outside rooms are dark at sunset and night.  */
 int room_is_dark(room_rnum room) {
-    if (!VALID_ROOM_RNUM(room)) {
+    if (!world.contains(room)) {
         basic_mud_log("room_is_dark: Invalid room rnum %d.", room);
         return (false);
     }
@@ -3476,3 +3476,88 @@ std::string withPlaceholder(const std::string& str, const std::string& placehold
     return str.empty() ? placeholder : str;
 }
 
+int SECT(room_vnum room) {
+    if(auto r = world.find(room); r != world.end()) {
+        return r->second->sector_type;
+    }
+    return SECT_INSIDE;
+}
+
+int ROOM_DAMAGE(room_vnum room) {
+    if(auto r = world.find(room); r != world.end()) {
+        return r->second->dmg;
+    }
+    return 0;
+}
+
+int ROOM_EFFECT(room_vnum room) {
+    if(auto r = world.find(room); r != world.end()) {
+        return r->second->geffect;
+    }
+    return 0;
+}
+
+double ROOM_GRAVITY(room_vnum room) {
+    if(auto r = world.find(room); r != world.end()) {
+        return r->second->getGravity();
+    }
+    return 1.0;
+}
+
+SpecialFunc GET_ROOM_SPEC(room_vnum room) {
+    if(auto r = world.find(room); r != world.end()) {
+        return r->second->func;
+    }
+    return nullptr;
+}
+
+zone_vnum IN_ZONE(struct unit_data *ch) {
+    if(auto r = world.find(IN_ROOM(ch)); r != world.end()) {
+        return r->second->zone;
+    }
+    return NOWHERE;
+}
+
+room_direction_data* EXIT(struct unit_data *ch, int door) {
+    if(auto r = world.find(IN_ROOM(ch)); r != world.end()) {
+        return r->second->dir_option[door];
+    }
+    return nullptr;
+}
+
+room_direction_data* SECOND_EXIT(struct unit_data *ch, int door) {
+    if(auto r = world.find(IN_ROOM(ch)); r != world.end()) {
+        if(auto e = r->second->dir_option[door]; e) {
+            if(auto r2 = world.find(e->to_room); r2 != world.end()) {
+                return r2->second->dir_option[rev_dir[door]];
+            }
+        }
+    }
+    return nullptr;
+}
+
+room_direction_data* THIRD_EXIT(struct unit_data *ch, int door) {
+    if(auto r = world.find(IN_ROOM(ch)); r != world.end()) {
+        if(auto e = r->second->dir_option[door]; e) {
+            if(auto r2 = world.find(e->to_room); r2 != world.end()) {
+                if(auto e2 = r2->second->dir_option[rev_dir[door]]; e2) {
+                    if(auto r3 = world.find(e2->to_room); r3 != world.end()) {
+                        return r3->second->dir_option[rev_dir[door]];
+                    }
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+room_direction_data* W_EXIT(room_rnum room, int door) {
+    if(auto r = world.find(room); r != world.end()) {
+        return r->second->dir_option[door];
+    }
+    return nullptr;
+}
+
+room_direction_data* R_EXIT(room_data* room, int door) {
+    return room->dir_option[door];
+}

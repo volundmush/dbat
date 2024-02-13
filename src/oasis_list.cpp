@@ -142,7 +142,7 @@ ACMD(do_oasis_links) {
         }
 
         for (j = 0; j < NUM_OF_DIRS; j++) {
-            auto d = r->second.dir_option[j];
+            auto d = r->second->dir_option[j];
             if(!d) continue;
             if(d->to_room == NOWHERE) continue;
             auto dest = d->getDestination();
@@ -193,18 +193,18 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
         if ((vn >= bottom) && (vn <= top)) {
             counter++;
 
-            auto sString = !r.proto_script.empty() ? fmt::format(" {}", r.scriptString()) : "";
+            auto sString = !r->proto_script.empty() ? fmt::format(" {}", r->scriptString()) : "";
 
             send_to_char(ch, "[@g%-5d@n] @[1]%-*s@n %s",
-                         vn, count_color_chars(r.name) + 44,
-                         r.name, sString.c_str());
+                         vn, count_color_chars(r->name) + 44,
+                         r->name, sString.c_str());
             for (j = 0; j < NUM_OF_DIRS; j++) {
-                auto d = r.dir_option[j];
+                auto d = r->dir_option[j];
                 if(!d) continue;
                 auto dest = d->getDestination();
                 if(!dest) continue;
 
-                if (dest->zone != r.zone)
+                if (dest->zone != r->zone)
                     send_to_char(ch, "(@y%d@n)", dest->vn);
 
             }

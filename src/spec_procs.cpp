@@ -102,7 +102,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room) {
 
     for (i = character_list; i; i = i->next)
         if (GET_MOB_VNUM(i) == mob)
-            if (world[i->in_room].vn == room) found = true;
+            if (world[i->in_room]->vn == room) found = true;
 
     return found;
 }
@@ -114,7 +114,7 @@ bool check_obj_in_room(obj_vnum obj, room_vnum room) {
     room_rnum r_room;
 
     r_room = real_room(room);
-    list = world[r_room].contents;
+    list = world[r_room]->contents;
 
     for (i = list; i; i = i->next_content) {
         if (GET_OBJ_VNUM(i) == obj) found = true;
@@ -238,10 +238,10 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
       }
     } */
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[ch->in_room].vn == gauntlet_info[i][1]) {
+        if (world[ch->in_room]->vn == gauntlet_info[i][1]) {
             if (cmd == gauntlet_info[i][2]) {
                 //don't let him proceed if mob is still alive
-                for (tch = world[ch->in_room].people; tch; tch = tch->next_in_room) {
+                for (tch = world[ch->in_room]->people; tch; tch = tch->next_in_room) {
                     if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */
                     {
                         proceed = 0;
@@ -254,7 +254,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
                     nomob = true;
 
                     /* Check the next room for players and ensure mob is waiting */
-                    for (tch = world[real_room(gauntlet_info[i + 1][1])].people; tch; tch = tch->next_in_room) {
+                    for (tch = world[real_room(gauntlet_info[i + 1][1])]->people; tch; tch = tch->next_in_room) {
                         if (!IS_NPC(tch)) {
                             proceed = 0;  /* There is a player there */
                             sprintf(buf, "%s is in the next room.  You must wait for them to finish.\r\n",
@@ -324,7 +324,7 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[EXIT(ch, (cmd - 1))->to_room].vn == gauntlet_info[i][1]) {
+        if (world[EXIT(ch, (cmd - 1))->to_room]->vn == gauntlet_info[i][1]) {
             send_to_char(ch, "You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
@@ -372,11 +372,11 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
             if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
                 continue;
 
-            if ((world[EXIT(ch, door)->to_room].vn == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if ((world[EXIT(ch, door)->to_room]->vn == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
-                for (tch = world[real_room(gauntlet_info[i][1])].people; tch; tch = tch->next_in_room) {
+                for (tch = world[real_room(gauntlet_info[i][1])]->people; tch; tch = tch->next_in_room) {
                     if (!IS_NPC(tch)) {
                         proceed = 0;  /* There is a player there */
                         sprintf(buf, "%s has moved into the next room.  You must wait for them to finish.\r\n",
@@ -444,7 +444,7 @@ SPECIAL(pet_shops) {
 
     if (CMD_IS("list")) {
         send_to_char(ch, "Available pets are:\r\n");
-        for (pet = world[pet_room].people; pet; pet = pet->next_in_room) {
+        for (pet = world[pet_room]->people; pet; pet = pet->next_in_room) {
             /* No, you can't have the Implementor as a pet if he's in there. */
             if (!IS_NPC(pet))
                 continue;
@@ -502,7 +502,7 @@ SPECIAL(auction) {
 
     if (CMD_IS("cancel")) {
 
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = world[auct_room]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj && GET_AUCTER(obj) == ((ch)->id)) {
                 obj2 = obj;
@@ -551,7 +551,7 @@ SPECIAL(auction) {
         struct descriptor_data *d;
         int founded = false;
 
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = world[auct_room]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj && GET_CURBID(obj) == ((ch)->id)) {
                 obj2 = obj;

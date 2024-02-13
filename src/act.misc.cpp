@@ -2781,7 +2781,9 @@ ACMD(do_channel) {
         return;
     }
 
-    if (ROOM_EFFECT(IN_ROOM(ch)) <= 0) {
+    auto r = ch->getRoom();
+
+    if (r->geffect <= 0) {
         send_to_char(ch, "There is no lava here!\r\n");
         return;
     }
@@ -2798,7 +2800,7 @@ ACMD(do_channel) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ROOM_EFFECT(IN_ROOM(ch)) = 0;
+            r->geffect = 0;
             ruby->extra_flags.set(ITEM_HOT);
         }
         ch->decCurKI(cost);
@@ -5422,12 +5424,14 @@ ACMD(do_dimizu) {
     int skill = GET_SKILL(ch, SKILL_DIMIZU);
     int prob = axion_dice(0);
 
-    if (ROOM_EFFECT(IN_ROOM(ch)) < 0) {
+    auto r = ch->getRoom();
+
+    if (r->geffect < 0) {
         act("@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C concentrates and the water filling the area seems to shudder. Suddenly the water begins to evaporate as the hydrogen and oxygen are separated.",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ROOM_EFFECT(IN_ROOM(ch)) = 0;
+        r->geffect = 0;
         WAIT_STATE(ch, PULSE_1SEC);
         return;
     } else if (SECT(IN_ROOM(ch)) == SECT_UNDERWATER) {
@@ -5453,7 +5457,7 @@ ACMD(do_dimizu) {
         act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->decCurKI(ch->getMaxKI() / 12);
-        ROOM_EFFECT(IN_ROOM(ch)) = -3;
+        r->geffect = -3;
         improve_skill(ch, SKILL_DIMIZU, 0);
         return;
     }

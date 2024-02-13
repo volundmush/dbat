@@ -745,8 +745,8 @@ ACMD(do_pack) {
                     }
                     money = 65000;
                     while (count < 4) {
-                        while (world[real_room(rnum)].contents)
-                            extract_obj(world[real_room(rnum)].contents);
+                        while (world[real_room(rnum)]->contents)
+                            extract_obj(world[real_room(rnum)]->contents);
                         count++;
                         rnum++;
                     }
@@ -754,8 +754,8 @@ ACMD(do_pack) {
                     rnum = rnum - 1;
                     money = 150000;
                     while (count < 4) {
-                        while (world[real_room(rnum)].contents)
-                            extract_obj(world[real_room(rnum)].contents);
+                        while (world[real_room(rnum)]->contents)
+                            extract_obj(world[real_room(rnum)]->contents);
                         count++;
                         rnum++;
                     }
@@ -763,8 +763,8 @@ ACMD(do_pack) {
                     rnum = rnum - 1;
                     money = 1000000;
                     while (count < 4) {
-                        while (world[real_room(rnum)].contents)
-                            extract_obj(world[real_room(rnum)].contents);
+                        while (world[real_room(rnum)]->contents)
+                            extract_obj(world[real_room(rnum)]->contents);
                         count++;
                         rnum++;
                     }
@@ -941,7 +941,7 @@ ACMD(do_deploy) {
     int final = rnum + 99;
 
     while (giveup == false && cont == false) {
-        for (obj3 = world[real_room(rnum)].contents; obj3; obj3 = next_obj) {
+        for (obj3 = world[real_room(rnum)]->contents; obj3; obj3 = next_obj) {
             next_obj = obj3->next_content;
             if (GET_OBJ_VNUM(obj3) == 18801) {
                 found = true;
@@ -1670,7 +1670,7 @@ ACMD(do_bid) {
         send_to_char(ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
         return;
     }
-    for (obj = world[auct_room].contents; obj; obj = next_obj) {
+    for (obj = world[auct_room]->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (obj) {
             list++;
@@ -1682,7 +1682,7 @@ ACMD(do_bid) {
     if (!strcasecmp(arg, "list")) {
         send_to_char(ch, "@Y                                   Auction@n\r\n");
         send_to_char(ch, "@c------------------------------------------------------------------------------@n\r\n");
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = world[auct_room]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {
@@ -1736,7 +1736,7 @@ ACMD(do_bid) {
             return;
         }
 
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = world[auct_room]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {
@@ -1841,7 +1841,7 @@ ACMD(do_bid) {
             return;
         }
 
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = world[auct_room]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {

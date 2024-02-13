@@ -393,7 +393,8 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
     }
 
     is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, 0));
-    if (!ROOM_FLAGS(is_going_to).test(ROOM_VEHICLE)) {
+    auto going = world[is_going_to];
+    if (!going->room_flags.test(ROOM_VEHICLE)) {
         send_to_char(ch, "@wThat ship can't carry other ships.");
         return;
     }
@@ -514,7 +515,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
     struct obj_data *hatch = nullptr;
 
-    for (hatch = world[real_room(GET_OBJ_VAL(vehicle, 0))].contents; hatch; hatch = hatch->next_content) {
+    for (hatch = world[real_room(GET_OBJ_VAL(vehicle, 0))]->contents; hatch; hatch = hatch->next_content) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             GET_OBJ_VAL(hatch, 3) = GET_ROOM_VNUM(IN_ROOM(vehicle));
         }
@@ -1300,9 +1301,10 @@ ACMD(do_drive) {
                 } else {
                     sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n",
                             vehicle->getShortDesc().c_str());
-                    ROOM_DAMAGE(IN_ROOM(vehicle)) += 1;
-                    if (ROOM_DAMAGE(IN_ROOM(vehicle)) >= 10) {
-                        ROOM_DAMAGE(IN_ROOM(vehicle)) = 10;
+                    auto room = vehicle->getRoom();
+                    room->dmg += 1;
+                    if (room->dmg >= 10) {
+                        room->dmg = 10;
                     }
                     look_at_room(IN_ROOM(vehicle), ch, 0);
                     send_to_room(IN_ROOM(vehicle), buf3);

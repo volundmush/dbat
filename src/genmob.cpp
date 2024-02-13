@@ -1059,7 +1059,7 @@ bool char_data::isProvidingLight() {
 
 struct room_data* char_data::getRoom() {
     auto roomFound = world.find(in_room);
-    if(roomFound != world.end()) return &roomFound->second;
+    if(roomFound != world.end()) return roomFound->second;
     return nullptr;
 }
 

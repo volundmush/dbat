@@ -605,7 +605,7 @@ std::string obj_data::serializeLocation() {
     } else if(worn_by) {
         return worn_by->getUID();
     } else if(world.contains(in_room)) {
-        return world[in_room].getUID();
+        return world[in_room]->getUID();
     } else {
         return ""; // this should NEVER happen!
     }
@@ -656,7 +656,7 @@ bool obj_data::isProvidingLight() {
 
 struct room_data* obj_data::getRoom() {
     auto roomFound = world.find(in_room);
-    if(roomFound != world.end()) return &roomFound->second;
+    if(roomFound != world.end()) return roomFound->second;
     return nullptr;
 }
 
@@ -768,7 +768,7 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
 
     if(lmember == "in_room") {
         if (auto roomFound = world.find(in_room); roomFound != world.end())
-            return &roomFound->second;
+            return roomFound->second;
         return "";
     }
 

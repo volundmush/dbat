@@ -49,7 +49,7 @@ int checkship(int rnum, int vnum) {
     struct obj_data *i = nullptr;
     int there = false;
 
-    for (i = world[rnum].contents; i; i = i->next_content) {
+    for (i = world[rnum]->contents; i; i = i->next_content) {
         if (!ROOM_FLAGGED(rnum, ROOM_NEBULA)) {
             if (GET_OBJ_TYPE(i) == ITEM_VEHICLE && there != true) {
                 there = true;

@@ -1458,7 +1458,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             column += 2;
         }
         if(world.contains(r)) {
-            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[r].name, r);
+            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[r]->name, r);
         } else {
             linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", r);
         }

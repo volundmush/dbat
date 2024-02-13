@@ -703,14 +703,14 @@ ACMD(do_finddoor) {
     if (vnum != NOTHING) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, GET_OBJ_SHORT(obj));
-        for (auto &r : world) {
+        for (auto &[vn, r] : world) {
             for (d = 0; d < NUM_OF_DIRS; d++) {
-                auto &e = r.second.dir_option[d];
+                auto e = r->dir_option[d];
                 if (e && e->key &&
                     e->key == vnum) {
                     nlen = snprintf(buf + len, sizeof(buf) - len,
                                     "[%3d] Room %d, %s (%s)\r\n",
-                                    ++num, r.first,
+                                    ++num, vn,
                                     dirs[d], e->keyword);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
@@ -945,7 +945,7 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_VICE)
         return (location);
 
-    rm = &world[location];
+    rm = world[location];
 
     if ((!can_edit_zone(ch, rm->zone) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
         && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
@@ -3304,14 +3304,14 @@ ACMD(do_show) {
             /* show errors */
         case 5:
             len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
-            for (auto &r : world) {
+            for (auto &[vn, r] : world) {
                 for (j = 0; j < NUM_OF_DIRS; j++) {
-                    auto &e = r.second.dir_option[j];
+                    auto &e = r->dir_option[j];
                     if (!e)
                         continue;
                     if (e->to_room == 0) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
-                                        r.first, count_color_chars(r.second.name) + 40, r.second.name, QNRM,
+                                        vn, count_color_chars(r->name) + 40, r->name, QNRM,
                                         dirs[j]);
                         if (len + nlen >= sizeof(buf) || nlen < 0)
                             break;
@@ -3319,7 +3319,7 @@ ACMD(do_show) {
                     }
                     if (e->to_room == NOWHERE && !e->general_description) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k,
-                                        r.first, count_color_chars(r.second.name) + 40, r.second.name, QNRM,
+                                        vn, count_color_chars(r->name) + 40, r->name, QNRM,
                                         dirs[j]);
                         if (len + nlen >= sizeof(buf) || nlen < 0)
                             break;
@@ -3335,10 +3335,10 @@ ACMD(do_show) {
         case 6:
             j = 0;
             len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
-            for (auto &r : world)
-                if (ROOM_FLAGGED(r.first, ROOM_DEATH)) {
-                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r.first,
-                                    r.second.name);
+            for (auto &[vn, r] : world)
+                if (ROOM_FLAGGED(vn, ROOM_DEATH)) {
+                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
+                                    r->name);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -3350,10 +3350,10 @@ ACMD(do_show) {
         case 7:
             j = 0;
             len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
-            for (auto &r : world)
-                if (ROOM_FLAGGED(r.first, ROOM_GODROOM)) {
-                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, r.first,
-                                    r.second.name);
+            for (auto &[vn, r] : world)
+                if (ROOM_FLAGGED(vn, ROOM_GODROOM)) {
+                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
+                                    r->name);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -4344,14 +4344,14 @@ ACMD(do_zpurge) {
 
     for (auto room = z.bot; room <= z.top; room++) {
         if ((i = real_room(room)) != NOWHERE) {
-            for (mob = world[i].people; mob; mob = next_mob) {
+            for (mob = world[i]->people; mob; mob = next_mob) {
                 next_mob = mob->next_in_room;
                 if (IS_NPC(mob)) {
                     extract_char(mob);
                 }
             }
 
-            for (obj = world[i].contents; obj; obj = next_obj) {
+            for (obj = world[i]->contents; obj; obj = next_obj) {
                 next_obj = obj->next_content;
                 extract_obj(obj);
             }
@@ -4670,24 +4670,24 @@ ACMD (do_zcheck) {
 
     for (auto &i : z.rooms) {
         if (world.count(i)) {
-            auto &r = world[i];
+            auto r = world[i];
             for (j = 0; j < NUM_OF_DIRS; j++) {
                 /*check for exit, but ignore off limits if you're in an offlimit zone*/
-                if (!r.dir_option[j])
+                if (!r->dir_option[j])
                     continue;
-                auto &e = r.dir_option[j];
+                auto e = r->dir_option[j];
                 exroom = e->to_room;
                 if (exroom == NOWHERE || !world.count(exroom))
                     continue;
-                auto &ex = world[exroom];
-                if (ex.zone == r.zone)
+                auto ex = world[exroom];
+                if (ex->zone == r->zone)
                     continue;
 
                 for (k = 0; offlimit_zones[k] != -1; k++) {
-                    if (ex.zone == real_zone(offlimit_zones[k]) && (found = 1))
+                    if (ex->zone == real_zone(offlimit_zones[k]) && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
                                         "- Exit %s cannot connect to %d (zone off limits).\r\n",
-                                        dirs[j], ex.vn);
+                                        dirs[j], ex->vn);
                 } /* for (k.. */
             } /* cycle directions */
 
@@ -4700,12 +4700,12 @@ ACMD (do_zcheck) {
                                 ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "",
                                 ROOM_FLAGGED(i, ROOM_BFS_MARK) ? "*" : "");
 
-            auto ld = r.getLookDesc();
+            auto ld = r->getLookDesc();
 
             if ((MIN_ROOM_DESC_LENGTH) && ld.size() < MIN_ROOM_DESC_LENGTH && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Room description is too short. (%4.4" SZT" of min. %d characters).\r\n",
-                                world[i].getLookDesc().size(), MIN_ROOM_DESC_LENGTH);
+                                world[i]->getLookDesc().size(), MIN_ROOM_DESC_LENGTH);
 
             if (strncmp(ld.c_str(), "   ", 3) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
@@ -4717,7 +4717,7 @@ ACMD (do_zcheck) {
                                 "- Room description not wrapped at %d chars (/fi in the editor).\r\n",
                                 MAX_COLOUMN_WIDTH);
 
-            for (ext2 = nullptr, ext = r.ex_description; ext; ext = ext->next)
+            for (ext2 = nullptr, ext = r->ex_description; ext; ext = ext->next)
                 if (strncmp(ext->description, "   ", 3))
                     ext2 = ext;
 
@@ -4727,7 +4727,7 @@ ACMD (do_zcheck) {
 
             if (found) {
                 send_to_char(ch, "[%5d] %-30s: \r\n%s",
-                             i, r.name ? r.name : "An unnamed room", buf);
+                             i, r->name ? r->name : "An unnamed room", buf);
                 strcpy(buf, "");
                 len = 0;
                 found = 0;
@@ -4739,7 +4739,7 @@ ACMD (do_zcheck) {
         if (world.count(i)) {
             m++;
             for (j = 0, k = 0; j < NUM_OF_DIRS; j++)
-                if (!world[i].dir_option[j])
+                if (!world[i]->dir_option[j])
                     k++;
 
             if (k == NUM_OF_DIRS)
@@ -4778,8 +4778,8 @@ static void mob_checkload(struct char_data *ch, mob_vnum mvnum) {
                              "ERROR");
             } else {
                 send_to_char(ch, "  [%5d] %s (%d MaxW, %d MaxW)\r\n",
-                             room->second.vn,
-                             room->second.name,
+                             room->second->vn,
+                             room->second->name,
                              c.arg2, c.arg4);
             }
             count += 1;
@@ -4828,7 +4828,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastroom != world.end()) {
                             send_to_char(ch, "  [%5d] %s (%d MaxR, %d MaxW)\r\n",
                                          lastroom->first,
-                                         lastroom->second.name,
+                                         lastroom->second->name,
                                          c.arg2, c.arg4);
                         } else {
                             send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
@@ -4844,7 +4844,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastroom != world.end() && lastobj != obj_proto.end()) {
                             send_to_char(ch, "  [%5d] %s (Put in another object [%d Max])\r\n",
                                          lastroom->first,
-                                         lastroom->second.name,
+                                         lastroom->second->name,
                                          c.arg2);
                         } else {
                             if(lastroom == world.end() && lastobj == obj_proto.end()) {
@@ -4870,7 +4870,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastroom != world.end() && lastmob != mob_proto.end()) {
                             send_to_char(ch, "  [%5d] %s (Given to %s [%d][%d Max])\r\n",
                                          lastroom_v,
-                                         lastroom->second.name,
+                                         lastroom->second->name,
                                          lastmob->second.getShortDesc(),
                                          lastmob->first,
                                          c.arg2);
@@ -4893,7 +4893,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastmob != mob_proto.end()) {
                             send_to_char(ch, "  [%5d] %s (Equipped to %s [%d] at %s [%d Max])\r\n",
                                          lastroom_v,
-                                         lastroom->second.name,
+                                         lastroom->second->name,
                                          lastmob->second.getShortDesc(),
                                          lastmob->first,
                                          equipment_types[c.arg3],
@@ -4901,7 +4901,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         } else {
                             send_to_char(ch, "  [%5d] %s (Equipped to ??? [%d] at %s [%d Max])\r\n",
                                          lastroom_v,
-                                         lastroom->second.name,
+                                         lastroom->second->name,
                                          c.arg1,
                                          equipment_types[c.arg3],
                                          c.arg2);
@@ -4917,7 +4917,7 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum) {
                         if(lastroom != world.end()) {
                             send_to_char(ch, "  [%5d] %s (Removed from room)\r\n",
                                          lastroom_v,
-                                         lastroom->second.name);
+                                         lastroom->second->name);
                         } else {
                             send_to_char(ch, "  [%5d] %s (room does not exist)\r\n",
                                          c.arg1,
@@ -5020,7 +5020,7 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
                         if(lastroom != world.end()) {
                             send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",
                                          lastroom_v,
-                                         lastroom->second.name);
+                                         lastroom->second->name);
                         } else {
                             send_to_char(ch, "room [%5d] %-60s (zedit)\r\n",
                                          lastroom_v,
@@ -5050,10 +5050,10 @@ static void trg_checkload(struct char_data *ch, trig_vnum tvnum) {
     }
 
     for (auto &[vn, r] : world) {
-        auto find = std::find(r.proto_script.begin(), r.proto_script.end(), tvnum);
-        if (find == r.proto_script.end())
+        auto find = std::find(r->proto_script.begin(), r->proto_script.end(), tvnum);
+        if (find == r->proto_script.end())
             continue;
-        send_to_char(ch, "room[%5d] %s\r\n", vn, r.name);
+        send_to_char(ch, "room[%5d] %s\r\n", vn, r->name);
         found = 1;
     }
 

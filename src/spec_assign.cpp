@@ -46,7 +46,7 @@ void ASSIGNROOM(room_vnum room, SPECIAL(fname)) {
     room_rnum rnum;
 
     if ((rnum = real_room(room)) != NOWHERE)
-        world[rnum].func = fname;
+        world[rnum]->func = fname;
     else if (!mini_mud)
         basic_mud_log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }
@@ -91,5 +91,5 @@ void assign_rooms() {
     if (CONFIG_DTS_ARE_DUMPS)
         for (auto &r : world)
             if (ROOM_FLAGGED(r.first, ROOM_DEATH))
-                r.second.func = dump;
+                r.second->func = dump;
 }

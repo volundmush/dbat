@@ -646,7 +646,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
     if (*number == 0)
         return (nullptr);
 
-    for (i = world[room].people; i && *number; i = i->next_in_room)
+    for (i = world[room]->people; i && *number; i = i->next_in_room)
         if (isname(name, i->name))
             if (--(*number) == 0)
                 return (i);

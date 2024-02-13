@@ -90,7 +90,7 @@ static void process_dirty_rooms(const std::filesystem::path &loc) {
     nlohmann::json rooms;
 
     for(auto &[v, r] : world) {
-        rooms.push_back(r.serialize());
+        rooms.push_back(r->serialize());
     }
     dump_to_file(loc, "rooms.json", rooms);
 }
@@ -101,7 +101,7 @@ static void process_dirty_exits(const std::filesystem::path &loc) {
     for(auto &[v, r] : world) {
 
         for(auto i = 0; i < NUM_OF_DIRS; i++) {
-            if(auto ex = r.dir_option[i]; ex) {
+            if(auto ex = r->dir_option[i]; ex) {
                 nlohmann::json j2;
                 j2["room"] = v;
                 j2["direction"] = i;

@@ -203,44 +203,44 @@ void redit_setup_existing(struct descriptor_data *d, int real_num) {
      */
     auto room = new room_data();
 
-    *room = world[real_num];
+    *room = *world[real_num];
     /*
      * Allocate space for all strings.
      */
-    room->name = str_udup(world[real_num].name);
-    room->look_description = str_udup(world[real_num].look_description);
+    room->name = str_udup(world[real_num]->name);
+    room->look_description = str_udup(world[real_num]->look_description);
 
     /*
      * Exits - We allocate only if necessary.
      */
     for (counter = 0; counter < NUM_OF_DIRS; counter++) {
-        if (world[real_num].dir_option[counter]) {
+        if (world[real_num]->dir_option[counter]) {
             CREATE(room->dir_option[counter], struct room_direction_data, 1);
 
             /*
              * Copy the numbers over.
              */
-            *room->dir_option[counter] = *world[real_num].dir_option[counter];
+            *room->dir_option[counter] = *world[real_num]->dir_option[counter];
             /*
              * Allocate the strings.
              */
-            if (world[real_num].dir_option[counter]->general_description)
+            if (world[real_num]->dir_option[counter]->general_description)
                 room->dir_option[counter]->general_description = strdup(
-                        world[real_num].dir_option[counter]->general_description);
-            if (world[real_num].dir_option[counter]->keyword)
-                room->dir_option[counter]->keyword = strdup(world[real_num].dir_option[counter]->keyword);
+                        world[real_num]->dir_option[counter]->general_description);
+            if (world[real_num]->dir_option[counter]->keyword)
+                room->dir_option[counter]->keyword = strdup(world[real_num]->dir_option[counter]->keyword);
         }
     }
 
     /*
      * Extra descriptions, if necessary.
      */
-    if (world[real_num].ex_description) {
+    if (world[real_num]->ex_description) {
         struct extra_descr_data *tdesc, *temp, *temp2;
         CREATE(temp, struct extra_descr_data, 1);
 
         room->ex_description = temp;
-        for (tdesc = world[real_num].ex_description; tdesc; tdesc = tdesc->next) {
+        for (tdesc = world[real_num]->ex_description; tdesc; tdesc = tdesc->next) {
             temp->keyword = strdup(tdesc->keyword);
             temp->description = strdup(tdesc->description);
             if (tdesc->next) {
@@ -284,11 +284,11 @@ void redit_save_internally(struct descriptor_data *d) {
 
     /* Update triggers */
     /* Free old proto list */
-    if (world[room_num].proto_script != OLC_SCRIPT(d))
-        free_proto_script(&world[room_num], WLD_TRIGGER);
+    if (world[room_num]->proto_script != OLC_SCRIPT(d))
+        free_proto_script(world[room_num], WLD_TRIGGER);
 
-    world[room_num].proto_script = OLC_SCRIPT(d);
-    assign_triggers(&world[room_num], WLD_TRIGGER);
+    world[room_num]->proto_script = OLC_SCRIPT(d);
+    assign_triggers(world[room_num], WLD_TRIGGER);
     /* end trigger update */
 
     /* Don't adjust numbers on a room update. */
@@ -402,7 +402,7 @@ void redit_disp_exit_menu(struct descriptor_data *d) {
                     "@gE@n) Major Fail Dest. Room	: @c%d@n\r\n"
                     "Enter choice, 0 to quit : ",
 
-                    OLC_EXIT(d)->to_room != NOWHERE ? world[OLC_EXIT(d)->to_room].vn : -1,
+                    OLC_EXIT(d)->to_room != NOWHERE ? world[OLC_EXIT(d)->to_room]->vn : -1,
                     OLC_EXIT(d)->general_description ? OLC_EXIT(d)->general_description : "<NONE>",
                     OLC_EXIT(d)->keyword ? OLC_EXIT(d)->keyword : "<NONE>",
                     OLC_EXIT(d)->key != NOTHING ? OLC_EXIT(d)->key : -1,
@@ -507,29 +507,29 @@ void redit_disp_menu(struct descriptor_data *d) {
                         OLC_NUM(d), zone_table[OLC_ZNUM(d)].number, room->name,
                         room->look_description, buf1, buf2,
                         room->dir_option[NORTH] && room->dir_option[NORTH]->to_room != NOWHERE ?
-                        world[room->dir_option[NORTH]->to_room].vn : -1,
+                        world[room->dir_option[NORTH]->to_room]->vn : -1,
                         room->dir_option[NORTHWEST] && room->dir_option[NORTHWEST]->to_room != NOWHERE ?
-                        world[room->dir_option[NORTHWEST]->to_room].vn : -1,
+                        world[room->dir_option[NORTHWEST]->to_room]->vn : -1,
                         room->dir_option[EAST] && room->dir_option[EAST]->to_room != NOWHERE ?
-                        world[room->dir_option[EAST]->to_room].vn : -1,
+                        world[room->dir_option[EAST]->to_room]->vn : -1,
                         room->dir_option[NORTHEAST] && room->dir_option[NORTHEAST]->to_room != NOWHERE ?
-                        world[room->dir_option[NORTHEAST]->to_room].vn : -1,
+                        world[room->dir_option[NORTHEAST]->to_room]->vn : -1,
                         room->dir_option[SOUTH] && room->dir_option[SOUTH]->to_room != NOWHERE ?
-                        world[room->dir_option[SOUTH]->to_room].vn : -1,
+                        world[room->dir_option[SOUTH]->to_room]->vn : -1,
                         room->dir_option[SOUTHEAST] && room->dir_option[SOUTHEAST]->to_room != NOWHERE ?
-                        world[room->dir_option[SOUTHEAST]->to_room].vn : -1,
+                        world[room->dir_option[SOUTHEAST]->to_room]->vn : -1,
                         room->dir_option[WEST] && room->dir_option[WEST]->to_room != NOWHERE ?
-                        world[room->dir_option[WEST]->to_room].vn : -1,
+                        world[room->dir_option[WEST]->to_room]->vn : -1,
                         room->dir_option[SOUTHWEST] && room->dir_option[SOUTHWEST]->to_room != NOWHERE ?
-                        world[room->dir_option[SOUTHWEST]->to_room].vn : -1,
+                        world[room->dir_option[SOUTHWEST]->to_room]->vn : -1,
                         room->dir_option[UP] && room->dir_option[UP]->to_room != NOWHERE ?
-                        world[room->dir_option[UP]->to_room].vn : -1,
+                        world[room->dir_option[UP]->to_room]->vn : -1,
                         room->dir_option[INDIR] && room->dir_option[INDIR]->to_room != NOWHERE ?
-                        world[room->dir_option[INDIR]->to_room].vn : -1,
+                        world[room->dir_option[INDIR]->to_room]->vn : -1,
                         room->dir_option[DOWN] && room->dir_option[DOWN]->to_room != NOWHERE ?
-                        world[room->dir_option[DOWN]->to_room].vn : -1,
+                        world[room->dir_option[DOWN]->to_room]->vn : -1,
                         room->dir_option[OUTDIR] && room->dir_option[OUTDIR]->to_room != NOWHERE ?
-                        world[room->dir_option[OUTDIR]->to_room].vn : -1,
+                        world[room->dir_option[OUTDIR]->to_room]->vn : -1,
                         !OLC_SCRIPT(d).empty() ? "Set." : "Not Set."
         );
     } else {
