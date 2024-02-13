@@ -1219,7 +1219,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
         if (!PLR_FLAGGED(ch, PLR_CHARGE) && rand_number(1, 40) >= 38 && !FIGHTING(ch) &&
             (GET_PREFERENCE(ch) != PREFERENCE_KI || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
-            if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100) {
+            if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100 && axion_dice(-10) > ch->get(CharAttribute::Intelligence, false)) {
                 int64_t loss = 0;
                 send_to_char(ch, "You lose some of your energy slowly.\r\n");
                 switch (rand_number(1, 3)) {
