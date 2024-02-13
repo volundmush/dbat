@@ -51,49 +51,8 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg) {
 
 }
 
-/* for mobs and rooms: */
-void dg_read_trigger(FILE *fp, struct unit_data *proto, int type) {
-    char line[READ_SIZE];
-    char junk[8];
-    int vnum, rnum, count;
-    char_data *mob;
-    room_data *room;
-    struct trig_proto_list *trg_proto, *new_trg;
 
-    get_line(fp, line);
-    count = sscanf(line, "%7s %d", junk, &vnum);
-
-    if (count != 2) {
-        mudlog(BRF, ADMLVL_BUILDER, true,
-               "SYSERR: Error assigning trigger! - Line was\n  %s", line);
-        return;
-    }
-
-    rnum = real_trigger(vnum);
-    if (rnum == NOTHING) {
-        switch (type) {
-            case MOB_TRIGGER:
-                mudlog(BRF, ADMLVL_BUILDER, true,
-                       "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (mob: %s - %d)",
-                       vnum, GET_NAME((char_data *) proto), GET_MOB_VNUM((char_data *) proto));
-                break;
-            case WLD_TRIGGER:
-                mudlog(BRF, ADMLVL_BUILDER, true,
-                       "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (room:%d)",
-                       vnum, GET_ROOM_VNUM(((room_data *) proto)->vn));
-                break;
-            default:
-                mudlog(BRF, ADMLVL_BUILDER, true,
-                       "SYSERR: dg_read_trigger: Trigger vnum #%d asked for but non-existant! (?)", vnum);
-                break;
-        }
-        return;
-    }
-
-    proto->proto_script.push_back(rnum);
-}
-
-void dg_obj_trigger(char *line, struct obj_data *obj) {
+void dg_obj_trigger(char *line, const std::shared_ptr<item_proto>& obj) {
     char junk[8];
     int vnum, rnum, count;
     struct trig_proto_list *trg_proto, *new_trg;
@@ -110,56 +69,10 @@ void dg_obj_trigger(char *line, struct obj_data *obj) {
     if (rnum == NOTHING) {
         mudlog(BRF, ADMLVL_BUILDER, true,
                "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
-               vnum, obj->getShortDesc().c_str(), GET_OBJ_VNUM(obj));
+               vnum, obj->short_description, GET_OBJ_VNUM(obj));
         return;
     }
 
     obj->proto_script.push_back(rnum);
 }
 
-void assign_triggers(struct unit_data *i, int type) {
-
-    // remove all duplicates from i->proto_script but do not change its order otherwise.
-    std::set<trig_vnum> existVnums;
-    std::set<trig_vnum> valid;
-    for(auto t : i->proto_script) valid.insert(t);
-    
-    for(auto t : i->script->dgScripts) existVnums.insert(t->parent->vn);
-    bool added = false;
-    bool removed = false;
-
-    // remove any dgScript instances in i->script->dgScripts that aren't in i->proto_script
-    std::list<std::shared_ptr<trig_data>> validScripts;
-    for(auto t : i->script->dgScripts) {
-        if(valid.contains(t->parent->vn)) {
-            validScripts.push_back(t);
-        }
-        else {
-            removed = true;
-        }
-    }
-    if(removed) i->script->dgScripts = validScripts;
-
-    for(auto p : i->proto_script) {
-        // only add if they don't already have one...
-        if(!existVnums.contains(p)) {
-            i->script->addTrigger(read_trigger(p), -1);
-            added = true;
-            existVnums.insert(p);
-        }
-    }
-
-    if(added || removed) {
-        // we need to sort i->script->dgScripts by the order of i->proto_script
-        std::list<std::shared_ptr<trig_data>> sorted;
-        for(auto p : i->proto_script) {
-            for(auto t : i->script->dgScripts) {
-                if(t->parent->vn == p) {
-                    sorted.push_back(t);
-                    break;
-                }
-            }
-        }
-        i->script->dgScripts = sorted;
-    }
-}

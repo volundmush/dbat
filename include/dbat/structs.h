@@ -164,6 +164,8 @@ struct area_data {
 
 /* Extra description: used in objects, mobiles, and rooms */
 struct extra_descr_data {
+    extra_descr_data() = default;
+    ~extra_descr_data();
     char *keyword;                 /* Keyword in look/examine          */
     char *description;             /* What to see                      */
     struct extra_descr_data *next; /* Next in list                     */
@@ -319,29 +321,103 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
 
 };
 
-struct unit_data {
+// abstract class used for the base of both npc_proto and item_proto.
+struct base_proto : public std::enable_shared_from_this<base_proto> {
+    base_proto() = default;
+    virtual ~base_proto() = default;
+    vnum vn{NOTHING}; /* virtual number of this thing		*/
+    char *name{}; /* name of this thing			*/
+    char *short_description{}; /* for listings			*/
+    char *look_description{}; /* for examine/look		*/
+    char *room_description{};      /* When thing is listed in room */
+    char *description{}; /* extra descriptions		*/
+    struct extra_descr_data *ex_description{}; /* extra descriptions     */
+
+    std::vector<trig_vnum> proto_script; /* list of default triggers  */
+    std::string scriptString();
+
+    nlohmann::json serializeBase();
+    void deserialize(const nlohmann::json& j);
+};
+
+struct npc_proto : public base_proto {
+    npc_proto() = default;
+    explicit npc_proto(const nlohmann::json& j);
+    RaceID race{RaceID::Spirit};
+    SenseiID chclass{SenseiID::Commoner};
+    weight_t weight{0};
+    std::unordered_map<CharNum, num_t> nums{};
+    struct mob_special_data mob_specials{};
+    int size{SIZE_UNDEFINED};
+    std::unordered_map<CharAttribute, attribute_t> attributes;
+    std::unordered_map<CharAppearance, appearance_t> appearances;
+    std::unordered_map<CharMoney, money_t> moneys;
+    std::unordered_map<CharAlign, align_t> aligns;
+    std::bitset<NUM_AFF_FLAGS> affected_by{}; /* Bitvector for current affects	*/
+    std::unordered_map<CharStat, stat_t> stats;
+    std::bitset<NUM_PLR_FLAGS> playerFlags{}; /* act flag for NPC's; player flag for PC's */
+    std::bitset<NUM_MOB_FLAGS> mobFlags{};
+    int armor{0};        /* Internally stored *10		*/
+    int damage_mod{};        /* Any bonus or penalty to the damage	*/
+    int speaking{};            /* Language currently speaking		*/
+
+    // Data stored about different forms.
+    std::unordered_map<FormID, trans_data> transforms;
+};
+
+struct item_proto : public base_proto {
+    item_proto() = default;
+    explicit item_proto(const nlohmann::json& j);
+    std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value{};   /* Values of the item (see list)    */
+    int8_t type_flag{};      /* Type of item                        */
+    int level{}; /* Minimum level of object.            */
+    std::bitset<NUM_ITEM_WEARS> wear_flags{}; /* Where you can wear it     */
+    std::bitset<NUM_ITEM_FLAGS> extra_flags{}; /* If it hums, glows, etc.  */
+    weight_t weight{};         /* Weight what else                     */
+    int cost{};           /* Value when sold (gp.)               */
+    int cost_per_day{};   /* Cost to keep pr. real day           */
+    std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
+    int size{SIZE_MEDIUM};           /* Size class of object                */
+    std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
+    int timer{};          /* Timer for object                    */
+    struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
+    nlohmann::json serialize();
+};
+
+
+enum class UnitFamily : uint8_t {
+    Character = 0,
+    Item = 1,
+    Room = 2
+};
+
+
+struct unit_data : public std::enable_shared_from_this<unit_data> {
     unit_data() = default;
-    virtual ~unit_data() = default;
-    vnum vn{NOTHING}; /* Where in database */
+    virtual ~unit_data();
+    int64_t uid{NOTHING}; /* unique id for this unit */
+    // Many NPCs, items, and rooms have a VN.
+    // the Room's VN should be the same as its UID.
+    vnum vn{NOTHING};
+    // Zones. Many things are in a Zone. It's legacy though. :()
     zone_vnum zone{NOTHING};
+
     char *name{};
     char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */
     char *short_description{};     /* when displayed in list or action message. */
-    bool exists{true}; // used for deleted objects. invalid ones are !exists
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
-    std::vector<trig_vnum> proto_script; /* list of default triggers  */
+    bool exists{true}; // used for deleted objects. invalid ones are !exists
+
     std::shared_ptr<script_data> script{};  /* script info for the object */
 
     struct obj_data *contents{};     /* Contains objects  */
+
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
     std::list<struct obj_data*> getContents();
-
-    int64_t id{NOTHING}; /* used by DG triggers	*/
-    time_t generation{};             /* creation time for dupe check     */
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
 
@@ -351,9 +427,9 @@ struct unit_data {
     void deactivateContents();
 
     void deserializeUnit(const nlohmann::json& j);
-    std::string scriptString();
+    virtual std::string scriptString();
 
-    virtual std::string getUID(bool active = true);
+    std::string getUID(bool active = true);
     virtual bool isActive();
     virtual void save();
 
@@ -366,10 +442,22 @@ struct unit_data {
     virtual std::string getShortDesc();
     virtual std::string getRoomDesc();
     virtual std::string getLookDesc();
+
     virtual void setName(const std::string& desc);
     virtual void setShortDesc(const std::string& desc);
     virtual void setRoomDesc(const std::string& desc);
     virtual void setLookDesc(const std::string& desc);
+
+    virtual std::string getDisplayName(struct char_data* ch);
+    virtual std::vector<std::string> getKeywords(struct char_data* ch);
+    virtual std::string renderAppearance(struct char_data* ch);
+
+    virtual UnitFamily getFamily() = 0;
+    virtual std::string getUnitClass() = 0;
+    
+    void checkMyID();
+
+    virtual void assignTriggers();
 
 };
 
@@ -377,7 +465,15 @@ struct unit_data {
 /* ================== Memory Structure for Objects ================== */
 struct obj_data : public unit_data {
     obj_data() = default;
+    virtual ~obj_data();
     explicit obj_data(const nlohmann::json& j);
+
+    // Many - but not all - objects are spawned from a prototype.
+    std::shared_ptr<item_proto> proto;
+    void setProto(std::shared_ptr<item_proto> p);
+
+    UnitFamily getFamily() override;
+    std::string getUnitClass() override;
 
     nlohmann::json serializeBase();
     nlohmann::json serializeInstance();
@@ -401,8 +497,6 @@ struct obj_data : public unit_data {
     int getAffectModifier(int location, int specific = -1);
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
-
-    std::string getUID(bool active = true) override;
     bool active{false};
     bool isActive() override;
     void save() override;
@@ -412,11 +506,9 @@ struct obj_data : public unit_data {
     bool isWorking();
     void clearLocation();
   
-
-    
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
-    int64_t value[NUM_OBJ_VAL_POSITIONS]{};   /* Values of the item (see list)    */
+    std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value{};   /* Values of the item (see list)    */
     int8_t type_flag{};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
     std::bitset<NUM_ITEM_WEARS> wear_flags{}; /* Where you can wear it     */
@@ -430,7 +522,7 @@ struct obj_data : public unit_data {
     std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
     int size{SIZE_MEDIUM};           /* Size class of object                */
 
-    struct obj_affected_type affected[MAX_OBJ_AFFECT]{};  /* affects */
+    std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
 
     struct obj_data *in_obj{};       /* In what object nullptr when none    */
     struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
@@ -467,6 +559,15 @@ struct obj_data : public unit_data {
 
     bool isProvidingLight();
     double currentGravity();
+
+    std::string getName() override;
+    std::string getShortDesc() override;
+    std::string getRoomDesc() override;
+    std::string getLookDesc() override;
+
+    void assignTriggers() override;
+    std::string scriptString() override;
+
 };
 /* ======================================================================= */
 
@@ -510,6 +611,11 @@ enum class MoonCheck : uint8_t {
 struct room_data : public unit_data {
     room_data() = default;
     ~room_data() override;
+
+    UnitFamily getFamily() override;
+    std::string getUnitClass() override;
+    std::vector<trig_vnum> proto_script;
+
     explicit room_data(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
@@ -535,7 +641,6 @@ struct room_data : public unit_data {
     void deserializeContents(const nlohmann::json& j, bool isActive);
 
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
-    std::string getUID(bool active = true) override;
     bool isActive() override;
     void save() override;
 
@@ -547,6 +652,8 @@ struct room_data : public unit_data {
 
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
+    void assignTriggers() override;
+    std::string scriptString() override;
 };
 /* ====================================================================== */
 
@@ -701,9 +808,10 @@ struct trans_data {
 };
 
 
-/* ================== Structure for player/non-player ===================== */
+/* ================== Structure for player/non-player base class ===================== */
 struct char_data : public unit_data {
     char_data() = default;
+    virtual ~char_data();
     // this constructor below is to be used only for the mob_proto map.
     explicit char_data(const nlohmann::json& j);
     nlohmann::json serializeBase();
@@ -728,8 +836,6 @@ struct char_data : public unit_data {
 
     void deserializeLocation(const nlohmann::json& j);
     void deserializeRelations(const nlohmann::json& j);
-
-    std::string getUID(bool active = true) override;
 
     bool active{false};
     bool isActive() override;
@@ -1213,7 +1319,6 @@ struct char_data : public unit_data {
 
     void restoreLF(bool announce = true);
 
-
     bool isFullVitals();
 
     void restoreVitals(bool announce = true);
@@ -1295,6 +1400,20 @@ struct char_data : public unit_data {
     bool isProvidingLight();
     double currentGravity();
 
+    UnitFamily getFamily() override;
+
+};
+
+struct npc_data : public char_data {
+    std::shared_ptr<npc_proto> proto;
+    void setProto(std::shared_ptr<npc_proto> p);
+    std::string getUnitClass() override;
+    void assignTriggers() override;
+    std::string scriptString() override;
+};
+
+struct pc_data : public char_data {
+    std::string getUnitClass() override;
 };
 
 

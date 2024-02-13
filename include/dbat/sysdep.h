@@ -189,9 +189,6 @@ std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
     return {};
 }
 
-
-using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
-
 extern bool isMigrating;
 
 using DgResults = std::variant<std::string, unit_data*>;

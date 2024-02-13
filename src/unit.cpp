@@ -2,11 +2,36 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
 
+base_proto::~base_proto() {
+    if(name) free(name);
+    if(short_description) free(short_description);
+    if(description) free(description);
+    while(ex_description) {
+        auto next = ex_description->next;
+        delete ex_description;
+        ex_description = next;
+    }
+}
+
 std::list<obj_data *> unit_data::getContents() {
     std::list<obj_data*> out;
     for(auto o = contents; o; o = o->next_content) out.push_back(o);
     return out;
 }
+
+
+nlohmann::json base_proto::serializeBase() {
+    nlohmann::json j;
+    if(vn != NOTHING) j["vn"] = vn;
+
+    if(name && strlen(name)) j["name"] = name;
+    if(short_description && strlen(short_description)) j["short_description"] = short_description;
+    if(description && strlen(description)) j["description"] = description;
+    for(auto t : proto_script) j["proto_script"].push_back(t);
+    return j;
+}
+
+
 
 
 nlohmann::json unit_data::serializeUnit() {
@@ -28,7 +53,7 @@ nlohmann::json unit_data::serializeUnit() {
         }
     }
 
-    if(id != NOTHING) j["id"] = id;
+    if(uid != NOTHING) j["uid"] = uid;
     if(zone != NOTHING) j["zone"] = zone;
 
     if(script && (!script->dgScripts.empty() || !script->vars.empty())) {
@@ -69,7 +94,7 @@ void unit_data::deserializeUnit(const nlohmann::json& j) {
         }
     }
 
-    if(j.contains("id")) id = j["id"];
+    if(j.contains("uid")) uid = j["uid"];
     if(j.contains("zone")) zone = j["zone"];
 
     if(j.contains("dgScripts")) {
@@ -92,7 +117,10 @@ void unit_data::deactivateContents() {
 }
 
 std::string unit_data::scriptString() {
-    if(!script) return "";
+    return "";
+}
+
+std::string base_proto::scriptString() {
     std::vector<std::string> vnums;
     for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
 
@@ -144,7 +172,7 @@ std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(str
 }
 
 std::string unit_data::getUID(bool active) {
-    return "";
+    return fmt::format("#{}{}", uid, active ? "" : "!");
 }
 
 DgResults unit_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
@@ -193,4 +221,47 @@ std::string unit_data::getLookDesc() {
 void unit_data::setLookDesc(const std::string& n) {
     if(look_description) free(look_description);
     look_description = strdup(n.c_str());
+}
+
+
+void unit_data::checkMyID() {
+    if(uid == -1) {
+        uid = getNextUID();
+        basic_mud_log("Unit Found with ID -1. Automatically fixed to ID %d", uid);
+    }
+}
+
+std::string unit_data::getDisplayName(struct char_data* ch) {
+    return "Nameless";
+}
+
+std::string unit_data::renderAppearance(struct char_data* ch) {
+    return "You see nothing special.";
+}
+
+std::vector<std::string> unit_data::getKeywords(struct char_data* ch) {
+    return {};
+}
+
+extra_descr_data::~extra_descr_data() {
+    if(keyword) free(keyword);
+    if(description) free(description);
+}
+
+unit_data::~unit_data() {
+    if(name) free(name);
+    if(short_description) free(short_description);
+    if(room_description) free(room_description);
+    if(look_description) free(look_description);
+    while(ex_description) {
+        auto next = ex_description->next;
+        delete ex_description;
+        ex_description = next;
+    }
+    if(script) script.reset();
+}
+
+
+void unit_data::assignTriggers() {
+    // does nothing.
 }

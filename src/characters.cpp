@@ -954,7 +954,7 @@ int char_data::getRPP() {
         return 0;
     }
 
-    auto p = players[id];
+    auto p = players[uid];
 
     return p->account->rpp;
 
@@ -972,7 +972,7 @@ void char_data::modRPP(int amt) {
         return;
     }
 
-    auto p = players[id];
+    auto p = players[uid];
 
     p->account->modRPP(amt);
 }
@@ -1875,4 +1875,57 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
     }
 
     return "";
+}
+
+std::string npc_data::getUnitClass() {
+    return "npc_data";
+}
+
+std::string pc_data::getUnitClass() {
+    return "pc_data";
+}
+
+UnitFamily char_data::getFamily() {
+    return UnitFamily::Character;
+}
+
+char_data::~char_data() {
+    if (title)
+        free(title);
+    if(clan)
+        free(clan);
+    if(voice)
+        free(voice);
+}
+
+void npc_data::setProto(std::shared_ptr<npc_proto> p) {
+    proto = p;
+    vn = proto->vn;
+    zone = real_zone_by_thing(vn);
+    race = proto->race;
+    chclass = proto->chclass;
+    weight = proto->weight;
+    nums = proto->nums;
+    mob_specials = proto->mob_specials;
+    size = proto->size;
+    attributes = proto->attributes;
+    appearances = proto->appearances;
+    moneys = proto->moneys;
+    aligns = proto->aligns;
+    affected_by = proto->affected_by;
+    stats = proto->stats;
+    playerFlags = proto->playerFlags;
+    mobFlags = proto->mobFlags;
+    armor = proto->armor;
+    damage_mod = proto->damage_mod;
+    speaking = proto->speaking;
+    transforms = proto->transforms;
+}
+
+std::string npc_data::scriptString() {
+    if(!proto) return "";
+    std::vector<std::string> vnums;
+    for(auto p : proto->proto_script) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }

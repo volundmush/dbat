@@ -252,27 +252,6 @@ void oedit_save_internally(struct descriptor_data *d) {
         return;
     }
 
-    /* Update triggers : */
-    /* Free old proto list  */
-    if (obj_proto[robj_num].proto_script != OLC_SCRIPT(d))
-        free_proto_script(&obj_proto[robj_num], OBJ_TRIGGER);
-    /* this will handle new instances of the object: */
-    obj_proto[robj_num].proto_script = OLC_SCRIPT(d);
-
-    /* this takes care of the objects currently in-game */
-    for (obj = object_list; obj; obj = obj->next) {
-        if (obj->vn != robj_num)
-            continue;
-        /* remove any old scripts */
-        if (SCRIPT(obj))
-            extract_script(obj, OBJ_TRIGGER);
-
-        free_proto_script(obj, OBJ_TRIGGER);
-        copy_proto_script(&obj_proto[robj_num], obj, OBJ_TRIGGER);
-        assign_triggers(obj, OBJ_TRIGGER);
-    }
-    /* end trigger update */
-
     if (!i)    /* If it's not a new object, don't renumber. */
         return;
 
@@ -1057,7 +1036,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                         send_to_char(d->character, "\r\nCommitting iedit changes.\r\n");
                         obj = OLC_IOBJ(d);
                         *obj = *(OLC_OBJ(d));
-                        ((obj)->id) = nextObjID();
+                        ((obj)->uid) = getNextUID();
                         /* find_obj helper */
                         if (GET_OBJ_VNUM(obj) != NOTHING) {
                             /* remove any old scripts */
@@ -1069,7 +1048,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                             free_proto_script(obj, OBJ_TRIGGER);
                             robj = real_object(GET_OBJ_VNUM(obj));
                             copy_proto_script(&obj_proto[robj], obj, OBJ_TRIGGER);
-                            assign_triggers(obj, OBJ_TRIGGER);
+                            obj->assignTriggers();
                         }
                         obj->extra_flags.set(ITEM_UNIQUE_SAVE);
                         /* Xap - ought to save the old pointer, free after assignment I suppose */

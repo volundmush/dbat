@@ -119,37 +119,6 @@ void free_object_strings(struct obj_data *obj) {
 /*
  * For object instances that are not the prototype.
  */
-void free_object_strings_proto(struct obj_data *obj) {
-    int robj_num = GET_OBJ_RNUM(obj);
-
-    if (obj->name && obj->name != obj_proto[robj_num].name)
-        free(obj->name);
-    if (obj->room_description && obj->room_description != obj_proto[robj_num].room_description)
-        free(obj->room_description);
-    if (obj->look_description && obj->look_description != obj_proto[robj_num].look_description)
-        free(obj->look_description);
-    if (obj->ex_description) {
-        struct extra_descr_data *thised, *plist, *next_one; /* O(horrible) */
-        int ok_key, ok_desc, ok_item;
-        for (thised = obj->ex_description; thised; thised = next_one) {
-            next_one = thised->next;
-            for (ok_item = ok_key = ok_desc = 1, plist = obj_proto[robj_num].ex_description; plist; plist = plist->next) {
-                if (plist->keyword == thised->keyword)
-                    ok_key = 0;
-                if (plist->description == thised->description)
-                    ok_desc = 0;
-                if (plist == thised)
-                    ok_item = 0;
-            }
-            if (thised->keyword && ok_key)
-                free(thised->keyword);
-            if (thised->description && ok_desc)
-                free(thised->description);
-            if (ok_item)
-                free(thised);
-        }
-    }
-}
 
 void copy_object_strings(struct obj_data *to, struct obj_data *from) {
     to->name = from->name ? strdup(from->name) : nullptr;
@@ -286,14 +255,6 @@ nlohmann::json obj_data::serializeBase() {
 
 nlohmann::json obj_data::serializeInstance() {
     auto j = serializeBase();
-    if(id == -1) {
-        id = nextObjID();
-        generation = time(nullptr);
-        check_unique_id(this);
-        add_unique_id(this);
-    }
-
-    if(generation) j["generation"] = generation;
 
     if(!script->vars.empty()) {
         j["dgvariables"] = script->vars;
@@ -307,10 +268,6 @@ nlohmann::json obj_data::serializeInstance() {
 
 nlohmann::json obj_data::serializeProto() {
     auto j = serializeBase();
-
-    for(auto p : proto_script) {
-        if(trig_index.contains(p)) j["proto_script"].push_back(p);
-    }
 
     return j;
 }
@@ -365,9 +322,6 @@ void obj_data::deserializeBase(const nlohmann::json &j) {
 void obj_data::deserializeProto(const nlohmann::json& j) {
     deserializeBase(j);
 
-    if(j.contains("proto_script")) {
-        for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
-    }
 }
 
 
@@ -440,20 +394,11 @@ void obj_data::deactivate() {
 void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     deserializeBase(j);
 
-    if(j.contains("generation")) generation = j["generation"];
-    check_unique_id(this);
-    add_unique_id(this);
-
     if(j.contains("dgvariables")) {
         script->vars = j["dgvariables"].get<std::unordered_map<std::string, std::string>>();
     }
 
     if(j.contains("room_loaded")) room_loaded = j["room_loaded"];
-
-    auto proto = obj_proto.find(vn);
-    if(proto != obj_proto.end()) {
-        proto_script = proto->second.proto_script;
-    }
 
     if(isActive) activate();
 
@@ -476,10 +421,6 @@ weight_t obj_data::getWeight() {
 
 weight_t obj_data::getTotalWeight() {
     return getWeight() + getInventoryWeight() + (sitting ? sitting->getTotalWeight() : 0);
-}
-
-std::string obj_data::getUID(bool active) {
-    return fmt::format("#O{}:{}{}", id, generation, active ? "" : "!");
 }
 
 bool obj_data::isActive() {
@@ -623,32 +564,27 @@ nlohmann::json obj_data::serializeRelations() {
 void obj_data::deserializeLocation(const std::string& txt, int16_t slot) {
     auto check = resolveUID(txt);
     if(!check) return;
-    auto idx = check->index();
-    if(idx == 0) {
-        auto &r = std::get<0>(*check);
-        obj_to_room(this, r->vn);
-    } else if(idx == 1) {
-        obj_to_obj(this, std::get<1>(*check));
-    } else if(idx == 2) {
-        auto &c = std::get<2>(*check);
-        auto_equip(c, this, slot+1);
+    auto idx = check->getFamily();
+    if(idx == UnitFamily::Room) {
+        obj_to_room(this, dynamic_cast<room_data*>(check));
+    } else if(idx == UnitFamily::Item) {
+        obj_to_obj(this, dynamic_cast<obj_data*>(check));
+    } else {
+        auto_equip(dynamic_cast<char_data*>(check), this, slot+1);
     }
 }
 
 void obj_data::deserializeRelations(const nlohmann::json& j) {
     if(j.contains("posted_to")) {
         auto check = resolveUID(j["posted_to"]);
-        if(check) posted_to = std::get<1>(*check);
+        if(check) posted_to = dynamic_cast<obj_data*>(check);
     }
     if(j.contains("fellow_wall")) {
         auto check = resolveUID(j["fellow_wall"]);
-        if(check) fellow_wall = std::get<1>(*check);
+        if(check) fellow_wall = dynamic_cast<obj_data*>(check);
     }
 }
 
-void obj_data::save() {
-    if(id == NOTHING) return;
-}
 
 bool obj_data::isProvidingLight() {
     return GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS);
@@ -656,7 +592,7 @@ bool obj_data::isProvidingLight() {
 
 struct room_data* obj_data::getRoom() {
     auto roomFound = world.find(in_room);
-    if(roomFound != world.end()) return roomFound->second;
+    if(roomFound != world.end()) return dynamic_cast<room_data*>(roomFound->second);
     return nullptr;
 }
 
@@ -862,4 +798,117 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
     }
     return "";
 
+}
+
+
+void obj_data::setProto(std::shared_ptr<item_proto> pro) {
+    proto = pro;
+    vn = proto->vn;
+    zone = real_zone_by_thing(vn);
+    value = proto->value;
+    type_flag = proto->type_flag;
+    level = proto->level;
+    wear_flags = proto->wear_flags;
+    extra_flags = proto->extra_flags;
+    weight = proto->weight;
+    cost = proto->cost;
+    cost_per_day = proto->cost_per_day;
+    bitvector = proto->bitvector;
+    affected = proto->affected;
+    timer = proto->timer;
+}
+
+std::string obj_data::getName() {
+    if(name) return name;
+    if(proto->name) return proto->name;
+    return "nameless object";
+}
+
+std::string obj_data::getShortDesc() {
+    if(short_description) return short_description;
+    if(proto->short_description) return proto->short_description;
+    return "a nameless object";
+}
+
+std::string obj_data::getLookDesc() {
+    if(look_description) return look_description;
+    if(proto->look_description) return proto->look_description;
+    return "A nameless object is here.";
+}
+
+std::string obj_data::getRoomDesc() {
+    if(room_description) return room_description;
+    if(proto->room_description) return proto->room_description;
+    return "A nameless object is here.";
+}
+
+std::string obj_data::getUnitClass() {
+    return "obj_data";
+}
+
+UnitFamily obj_data::getFamily() {
+    return UnitFamily::Item;
+}
+
+obj_data::~obj_data() {
+    if(auctname) free(auctname);
+    if(sbinfo) free(sbinfo);
+}
+
+
+void obj_data::assignTriggers() {
+    // Nothing to do without a prototype...
+    if(!proto) return;
+
+    // remove all duplicates from i->proto_script but do not change its order otherwise.
+    std::set<trig_vnum> existVnums;
+    std::set<trig_vnum> valid;
+    for(auto t : proto->proto_script) valid.insert(t);
+    
+    for(auto t : script->dgScripts) existVnums.insert(t->parent->vn);
+    bool added = false;
+    bool removed = false;
+
+    // remove any dgScript instances in i->script->dgScripts that aren't in i->proto_script
+    std::list<std::shared_ptr<trig_data>> validScripts;
+    for(auto t : script->dgScripts) {
+        if(valid.contains(t->parent->vn)) {
+            validScripts.push_back(t);
+        }
+        else {
+            removed = true;
+        }
+    }
+    if(removed) script->dgScripts = validScripts;
+
+    for(auto p : proto->proto_script) {
+        // only add if they don't already have one...
+        if(!existVnums.contains(p)) {
+            script->addTrigger(read_trigger(p), -1);
+            added = true;
+            existVnums.insert(p);
+        }
+    }
+
+    if(added || removed) {
+        // we need to sort i->script->dgScripts by the order of i->proto_script
+        std::list<std::shared_ptr<trig_data>> sorted;
+        for(auto p : proto->proto_script) {
+            for(auto t : script->dgScripts) {
+                if(t->parent->vn == p) {
+                    sorted.push_back(t);
+                    break;
+                }
+            }
+        }
+        script->dgScripts = sorted;
+    }
+}
+
+std::string obj_data::scriptString() {
+    if(!proto) return "";
+    std::vector<std::string> vnums;
+    for(auto p : proto->proto_script) vnums.emplace_back(std::move(std::to_string(p)));
+
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }

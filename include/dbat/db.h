@@ -114,7 +114,7 @@
 // global variables
 
 bool isUID(const std::string& uid);
-std::optional<UID> resolveUID(const std::string& uid);
+unit_data* resolveUID(const std::string& uid);
 
 extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infomation about the time    */
 extern struct time_info_data time_info;/* the infomation about the time    */
@@ -217,8 +217,6 @@ extern obj_rnum real_object(obj_vnum vnum);
 
 extern void init_char(struct char_data *ch);
 
-struct char_data *create_char(bool activate = true);
-
 struct char_data *read_mobile(mob_vnum nr, int type);
 
 extern int vnum_mobile(char *searchname, struct char_data *ch);
@@ -244,14 +242,6 @@ extern void free_obj(struct obj_data *obj);
 struct obj_data *read_object(obj_vnum nr, int type, bool activate = true);
 
 extern int vnum_object(char *searchname, struct char_data *ch);
-
-extern void add_unique_id(struct obj_data *obj);
-
-extern void check_unique_id(struct obj_data *obj);
-
-extern void add_unique_id(struct char_data *ch);
-
-extern void check_unique_id(struct char_data *ch);
 
 extern char *sprintuniques(int low, int high);
 
@@ -311,6 +301,8 @@ extern struct config_data config_info;
 extern std::vector<obj_vnum> dbVnums;
 
 // world data...
+extern int64_t nextUID;
+extern int64_t getNextUID();
 extern std::unordered_map<room_vnum, unit_data*> world;
 extern std::unordered_map<zone_vnum, struct zone_data> zone_table;
 
@@ -323,22 +315,20 @@ extern struct char_data *affect_list;
 extern struct char_data *affectv_list;
 
 extern std::unordered_map<mob_vnum, struct index_data> mob_index;
-extern std::unordered_map<mob_vnum, struct char_data> mob_proto;
+extern std::unordered_map<mob_vnum, std::shared_ptr<npc_proto>> mob_proto;
 
 extern struct char_data *character_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
-int64_t nextCharID();
 
 extern VnumIndex<obj_data> objectVnumIndex;
 extern VnumIndex<char_data> characterVnumIndex;
 
 
 extern std::unordered_map<obj_vnum, struct index_data> obj_index;
-extern std::unordered_map<obj_vnum, struct obj_data> obj_proto;
+extern std::unordered_map<obj_vnum, std::shared_ptr<item_proto>> obj_proto;
 
 extern struct obj_data *object_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
-int64_t nextObjID();
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;

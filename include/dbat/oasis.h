@@ -100,9 +100,9 @@ struct oasis_olc_data {
     room_vnum number;              /* vnum of subject          */
     int value;                     /* mostly 'has changed' flag*/
     char *storage;                 /* used for 'tedit'         */
-    struct char_data *mob;         /* used for 'medit'         */
+    std::shared_ptr<npc_proto> mob;         /* used for 'medit'         */
     struct room_data *room;        /* used for 'redit'         */
-    struct obj_data *obj;          /* used for 'oedit'         */
+    std::shared_ptr<item_proto> obj;          /* used for 'oedit'         */
     struct obj_data *iobj;         /* used for 'iedit'         */
     struct zone_data *zone;        /* used for 'zedit'         */
     struct shop_data *shop;        /* used for 'sedit'         */

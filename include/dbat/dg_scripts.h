@@ -20,10 +20,6 @@
 #define __attribute__(a)
 #endif
 
-using DgUID = UID;
-
-std::string toDgUID(const DgUID& uid);
-
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 
 #define    MOB_TRIGGER   0
@@ -363,13 +359,7 @@ extern void parse_trigger(FILE *trig_f, trig_vnum nr);
 extern std::shared_ptr<trig_data> read_trigger(int nr);
 
 extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
-
-extern void dg_read_trigger(FILE *fp, struct unit_data *proto, int type);
-
-extern void dg_obj_trigger(char *line, struct obj_data *obj);
-
-extern void assign_triggers(struct unit_data *i, int type);
-
+extern void dg_obj_trigger(char *line, const std::shared_ptr<item_proto>& obj);
 
 /* From dg_variables.c */
 extern int item_in_list(char *item, obj_data *list);

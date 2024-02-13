@@ -85,20 +85,16 @@ void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data 
 }
 
 void free_ex_descriptions(struct extra_descr_data *head) {
-    struct extra_descr_data *thised, *next_one;
+    struct extra_descr_data *next_one;
 
     if (!head) {
         basic_mud_log("free_ex_descriptions: nullptr pointer or nullptr data.");
         return;
     }
 
-    for (thised = head; thised; thised = next_one) {
+    for (auto thised = head; thised; thised = next_one) {
         next_one = thised->next;
-        if (thised->keyword)
-            free(thised->keyword);
-        if (thised->description)
-            free(thised->description);
-        free(thised);
+        delete thised;
     }
 }
 

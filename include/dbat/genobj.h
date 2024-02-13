@@ -13,8 +13,6 @@ extern void copy_object_strings(struct obj_data *to, struct obj_data *from);
 
 extern void free_object_strings(struct obj_data *obj);
 
-extern void free_object_strings_proto(struct obj_data *obj);
-
 extern int copy_object(struct obj_data *to, struct obj_data *from);
 
 extern int copy_object_preserve(struct obj_data *to, struct obj_data *from);

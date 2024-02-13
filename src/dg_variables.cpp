@@ -74,12 +74,10 @@ int item_in_list(char *item, obj_data *list) {
         return 0;
 
     if (*item == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(item);
-        auto uidResult = result;
-        if(!uidResult) return 0;
-        if(uidResult->index() != 1) return 0;
-        auto obj = std::get<1>(*uidResult);
+        auto result = resolveUID(item);
+        if(!result) return 0;
+        auto obj = dynamic_cast<obj_data*>(result);
+        if(!obj) return 0;
 
         for (i = list; i; i = i->next_content) {
             if (i == obj)
@@ -346,20 +344,8 @@ std::string scriptTextProcess(trig_data *trig, const std::string& text, const st
 }
 
 DgResults checkForID(const std::string& text) {
-    auto uidCheck = resolveUID(text);
-    if(uidCheck) {
-        auto uid = *uidCheck;
-        switch(uid.index()) {
-            case 0: {
-                return std::get<0>(uid);
-            }
-            case 1: {
-                return std::get<1>(uid);
-            }
-            case 2: {
-                return std::get<2>(uid);
-            }
-        }
+    if(auto check = resolveUID(text); check) {
+        return check;
     }
     return text;
 }

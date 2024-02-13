@@ -11,6 +11,8 @@ struct descriptor_data;
 struct account_data;
 struct player_data;
 struct trig_data;
+struct trans_data;
+struct mob_special_data;
 
 namespace race {
     class Race;

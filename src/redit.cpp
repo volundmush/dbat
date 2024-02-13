@@ -285,11 +285,9 @@ void redit_save_internally(struct descriptor_data *d) {
 
     /* Update triggers */
     /* Free old proto list */
-    if (world[room_num]->proto_script != OLC_SCRIPT(d))
-        free_proto_script(world[room_num], WLD_TRIGGER);
 
-    world[room_num]->proto_script = OLC_SCRIPT(d);
-    assign_triggers(world[room_num], WLD_TRIGGER);
+    dynamic_cast<room_data*>(world[room_num])->proto_script = OLC_SCRIPT(d);
+    dynamic_cast<room_data*>(world[room_num])->assignTriggers();
     /* end trigger update */
 
     /* Don't adjust numbers on a room update. */

@@ -289,8 +289,7 @@ void medit_save_internally(struct descriptor_data *d) {
             extract_script(mob, MOB_TRIGGER);
 
         free_proto_script(mob, MOB_TRIGGER);
-        copy_proto_script(&mob_proto[new_rnum], mob, MOB_TRIGGER);
-        assign_triggers(mob, MOB_TRIGGER);
+        mob->assignTriggers();
     }
     /* end trigger update */
 

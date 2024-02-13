@@ -634,7 +634,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_SDCOOLDOWN(ch) ((ch)->con_sdcooldown)
 #define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
 #define GET_POS(ch)        ((ch)->position)
-#define GET_IDNUM(ch)        ((ch)->id)
+#define GET_IDNUM(ch)        ((ch)->uid)
 #define IS_CARRYING_W(ch)    ((ch)->getCarriedWeight())
 #define IS_CARRYING_N(ch)    ((ch)->getInventoryCount())
 #define FIGHTING(ch)        ((ch)->fighting)

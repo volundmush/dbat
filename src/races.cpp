@@ -147,6 +147,23 @@ void set_height_and_weight_by_race(struct char_data *ch) {
     GET_WEIGHT(ch) = hw_info[race].weight[sex] + mod;
 }
 
+void set_height_and_weight_by_race(const std::shared_ptr<npc_proto>& ch) {
+    int race, sex, mod;
+
+    race = (int)GET_RACE(ch);
+    sex = ch->appearances[CharAppearance::Sex];
+    if (sex < SEX_NEUTRAL || sex >= NUM_SEX) {
+        basic_mud_log("Invalid gender in set_height_and_weight_by_race: %d", sex);
+        sex = SEX_NEUTRAL;
+    }
+
+    mod = dice(2, hw_info[race].heightdie);
+    ch->nums[CharNum::Height] = hw_info[race].height[sex] + mod;
+    mod *= hw_info[race].weightfac;
+    mod /= 100;
+    GET_WEIGHT(ch) = hw_info[race].weight[sex] + mod;
+}
+
 
 struct race_flags {
     int anti;

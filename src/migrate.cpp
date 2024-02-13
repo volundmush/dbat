@@ -331,7 +331,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     }
 }
 
-static int check_object_spell_number(struct obj_data *obj, int val) {
+static int check_object_spell_number(const std::shared_ptr<item_proto>& obj, int val) {
     int error = false;
     const char *spellname;
 
@@ -351,19 +351,7 @@ static int check_object_spell_number(struct obj_data *obj, int val) {
         error = true;
     if (error)
         basic_mud_log("SYSERR: Object #%d (%s) has out of range spell #%d.",
-            GET_OBJ_VNUM(obj), obj->getShortDesc(), GET_OBJ_VAL(obj, val));
-
-    /*
-   * This bug has been fixed, but if you don't like the special behavior...
-   */
-#if 0
-                                                                                                                            if (GET_OBJ_TYPE(obj) == ITEM_STAFF &&
-	HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, val), MAG_AREAS | MAG_MASSES))
-    log("... '%s' (#%d) uses %s spell '%s'.",
-	obj->getShortDesc(),	GET_OBJ_VNUM(obj),
-	HAS_SPELL_ROUTINE(GET_OBJ_VAL(obj, val), MAG_AREAS) ? "area" : "mass",
-	skill_name(GET_OBJ_VAL(obj, val)));
-#endif
+            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
 
     if (scheck)        /* Spell names don't exist in syntax check mode. */
         return (error);
@@ -373,18 +361,18 @@ static int check_object_spell_number(struct obj_data *obj, int val) {
 
     if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = true))
         basic_mud_log("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
-            GET_OBJ_VNUM(obj), obj->getShortDesc(), spellname,
+            GET_OBJ_VNUM(obj), obj->short_description, spellname,
             GET_OBJ_VAL(obj, val));
 
     return (error);
 }
 
-static int check_object_level(struct obj_data *obj, int val) {
+static int check_object_level(const std::shared_ptr<item_proto>& obj, int val) {
     int error = false;
 
     if ((GET_OBJ_VAL(obj, val) < 0) && (error = true))
         basic_mud_log("SYSERR: Object #%d (%s) has out of range level #%d.",
-            GET_OBJ_VNUM(obj), obj->getShortDesc(), GET_OBJ_VAL(obj, val));
+            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
 
     return (error);
 }
@@ -407,19 +395,19 @@ static int check_bitvector_names(bitvector_t bits, size_t namecount, const char 
     return (error);
 }
 
-static int check_object(struct obj_data *obj) {
+static int check_object(const std::shared_ptr<item_proto>& obj) {
     char objname[MAX_INPUT_LENGTH + 32];
     int error = false, y;
 
     if (GET_OBJ_WEIGHT(obj) < 0 && (error = true))
         basic_mud_log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
-            GET_OBJ_VNUM(obj), obj->getShortDesc(), GET_OBJ_WEIGHT(obj));
+            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
 
     if (GET_OBJ_RENT(obj) < 0 && (error = true))
         basic_mud_log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
-            GET_OBJ_VNUM(obj), obj->getShortDesc(), GET_OBJ_RENT(obj));
+            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
 
-    snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->getShortDesc());
+    snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->short_description);
     for (y = 0; y < TW_ARRAY_MAX; y++) {
         error |= check_bitvector_names(GET_OBJ_WEAR(obj)[y], wear_bits_count, objname, "object wear");
         error |= check_bitvector_names(GET_OBJ_EXTRA(obj)[y], extra_bits_count, objname, "object extra");
@@ -439,7 +427,7 @@ static int check_object(struct obj_data *obj) {
         case ITEM_FOUNTAIN:
             if ((GET_OBJ_VAL(obj, 0) > 0) && (GET_OBJ_VAL(obj, 1) > GET_OBJ_VAL(obj, 0) && (error = true)))
                 basic_mud_log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
-                    GET_OBJ_VNUM(obj), obj->getShortDesc(),
+                    GET_OBJ_VNUM(obj), obj->short_description,
                     GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 0));
             break;
         case ITEM_SCROLL:
@@ -455,7 +443,7 @@ static int check_object(struct obj_data *obj) {
             error |= check_object_spell_number(obj, 3);
             if (GET_OBJ_VAL(obj, 2) > GET_OBJ_VAL(obj, 1) && (error = true))
                 basic_mud_log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
-                    GET_OBJ_VNUM(obj), obj->getShortDesc(),
+                    GET_OBJ_VNUM(obj), obj->short_description,
                     GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 1));
             break;
     }
@@ -779,12 +767,11 @@ static int Crash_load(struct char_data *ch) {
                             break;
                         case 'G':
                             get_line(fl, line);
-                            sscanf(line, "%" TMT, &temp->generation);
                             get_line(fl, line);
                             break;
                         case 'U':
                             get_line(fl, line);
-                            sscanf(line, "%" I64T, &temp->id);
+                            sscanf(line, "%" I64T, &temp->uid);
                             get_line(fl, line);
                             break;
                         case 'S':
@@ -822,8 +809,7 @@ static int Crash_load(struct char_data *ch) {
             if (temp != nullptr) {
                 num_objs++;
                 temp->script = std::make_shared<script_data>(temp);
-                check_unique_id(temp);
-                add_unique_id(temp);
+                temp->checkMyID();
                 temp->activate();
 
                 if (GET_OBJ_TYPE(temp) == ITEM_DRINKCON) {
@@ -1082,6 +1068,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     r->script = std::make_shared<script_data>(r);
     r->zone = zone;
     r->vn = virtual_nr;
+    r->uid = virtual_nr;
     r->name = fread_string(fl, buf2);
     r->look_description = fread_string(fl, buf2);
 
@@ -1146,7 +1133,12 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
                 letter = fread_letter(fl);
                 ungetc(letter, fl);
                 while (letter == 'T') {
-                    dg_read_trigger(fl, world[virtual_nr], WLD_TRIGGER);
+                    char junk[248];
+                    char tline[248];
+                    trig_vnum tvn;
+                    get_line(fl, tline);
+                    auto count = sscanf(line, "%7s %d", junk, &tvn);
+                    if(trig_index.contains(tvn)) r->proto_script.push_back(tvn);
                     letter = fread_letter(fl);
                     ungetc(letter, fl);
                 }
@@ -1170,11 +1162,11 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
  * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
  */
 
-static void mob_autobalance(struct char_data *ch) {
+static void mob_autobalance(const std::shared_ptr<npc_proto>& ch) {
 
 }
 
-static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
+static int parse_simple_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch, mob_vnum nr) {
     int j, t[10];
     char line[READ_SIZE];
 
@@ -1190,15 +1182,12 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    ch->set(CharNum::Level, t[0]);
+    ch->nums[CharNum::Level] = t[0];
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
-    ch->set(CharStat::PowerLevel, t[3]);
-    ch->set(CharStat::Ki, t[4]);
-    ch->set(CharStat::Stamina, t[5]);
-    ch->health = 1.0;
-    ch->energy = 1.0;
-    ch->stamina = 1.0;
+    ch->stats[CharStat::PowerLevel] = t[3];
+    ch->stats[CharStat::Ki] = t[4];
+    ch->stats[CharStat::Stamina] = t[5];
 
     ch->mob_specials.damnodice = t[6];
     ch->mob_specials.damsizedice = t[7];
@@ -1216,20 +1205,15 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    ch->set(CharMoney::Carried, t[0]);
+    ch->moneys[CharMoney::Carried] = t[0];
     ch->race = static_cast<RaceID>(t[2]);
 
     ch->chclass = static_cast<SenseiID>(t[3]);
-    GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
-    GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
-    GET_SAVE_BASE(ch, SAVING_WILL) = 0;
 
     /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
 
     if (!IS_HUMAN(ch))
         ch->affected_by.set(AFF_INFRAVISION);
-
-    SPEAKING(ch) = SKILL_LANG_COMMON;
 
     if (!get_line(mob_f, line)) {
         basic_mud_log("SYSERR: Format error in last line of mob #%d\n"
@@ -1243,17 +1227,14 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    GET_POS(ch) = t[0];
     GET_DEFAULT_POS(ch) = t[1];
-    ch->set(CharAppearance::Sex, t[2]);
+    ch->appearances[CharAppearance::Sex] = t[2];
 
     SPEAKING(ch) = MIN_LANGUAGES;
     set_height_and_weight_by_race(ch);
 
-    for (j = 0; j < 3; j++)
-        GET_SAVE_MOD(ch, j) = 0;
 
-    if (MOB_FLAGGED(ch, MOB_AUTOBALANCE)) {
+    if (ch->mobFlags.test(MOB_AUTOBALANCE)) {
         mob_autobalance(ch);
     }
 
@@ -1280,7 +1261,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
 #define RANGE(low, high)    \
     (num_arg = MAX((low), MIN((high), (num_arg))))
 
-static void interpret_espec(const char *keyword, const char *value, struct char_data *ch, mob_vnum nr) {
+static void interpret_espec(const char *keyword, const char *value, const std::shared_ptr<npc_proto>& ch, mob_vnum nr) {
     int num_arg = 0, matched = false;
     int num, num2, num3, num4, num5, num6;
     struct affected_type af;
@@ -1299,42 +1280,42 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Size") {
         RANGE(SIZE_UNDEFINED, NUM_SIZES - 1);
-        ch->setSize(num_arg);
+        ch->size = num_arg;
     }
 
     CASE("Str") {
         RANGE(0, 200);
-        ch->set(CharAttribute::Strength, num_arg);
+        ch->attributes[CharAttribute::Strength] = num_arg;
     }
 
     CASE("StrAdd") {
         basic_mud_log("mob #%d trying to set StrAdd, rebalance its strength.",
-            GET_MOB_VNUM(ch));
+            ch->vn);
     }
 
     CASE("Int") {
         RANGE(0, 200);
-        ch->set(CharAttribute::Intelligence, num_arg);
+        ch->attributes[CharAttribute::Intelligence] = num_arg;
     }
 
     CASE("Wis") {
         RANGE(0, 200);
-        ch->set(CharAttribute::Wisdom, num_arg);
+        ch->attributes[CharAttribute::Wisdom] = num_arg;
     }
 
     CASE("Dex") {
         RANGE(0, 200);
-        ch->set(CharAttribute::Agility, num_arg);
+        ch->attributes[CharAttribute::Agility] = num_arg;
     }
 
     CASE("Con") {
         RANGE(0, 200);
-        ch->set(CharAttribute::Constitution, num_arg);
+        ch->attributes[CharAttribute::Constitution] = num_arg;
     }
 
     CASE("Cha") {
         RANGE(0, 200);
-        ch->set(CharAttribute::Speed, num_arg);
+        ch->attributes[CharAttribute::Speed] = num_arg;
     }
 
     CASE("Hit") {
@@ -1353,46 +1334,23 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
     }
 
     CASE("Affect") {
-        num = num2 = num3 = num4 = num5 = num6 = 0;
-        sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
-        if (num > 0) {
-            af.type = num;
-            af.duration = num2;
-            af.modifier = num3;
-            af.location = num4;
-            af.bitvector = num5;
-            af.specific = num6;
-            affect_to_char(ch, &af);
-        }
+
     }
 
     CASE("AffectV") {
-        num = num2 = num3 = num4 = num5 = num6 = 0;
-        sscanf(value, "%d %d %d %d %d %d", &num, &num2, &num3, &num4, &num5, &num6);
-        if (num > 0) {
-            af.type = num;
-            af.duration = num2;
-            af.modifier = num3;
-            af.location = num4;
-            af.bitvector = num5;
-            af.specific = num6;
-            affectv_to_char(ch, &af);
-        }
+
     }
 
     CASE("Feat") {
         sscanf(value, "%d %d", &num, &num2);
-        HAS_FEAT(ch, num) = num2;
     }
 
     CASE("Skill") {
         sscanf(value, "%d %d", &num, &num2);
-        SET_SKILL(ch, num, num2);
     }
 
     CASE("SkillMod") {
         sscanf(value, "%d %d", &num, &num2);
-        SET_SKILL_BONUS(ch, num, num2);
     }
 
     if (!matched) {
@@ -1405,7 +1363,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 #undef BOOL_CASE
 #undef RANGE
 
-static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr) {
+static void parse_espec(char *buf, const std::shared_ptr<npc_proto>& ch, mob_vnum nr) {
     char *ptr;
 
     if ((ptr = strchr(buf, ':')) != nullptr) {
@@ -1416,8 +1374,8 @@ static void parse_espec(char *buf, struct char_data *ch, mob_vnum nr) {
     interpret_espec(buf, ptr, ch, nr);
 }
 
-static void mob_stats(struct char_data *mob) {
-    int start = GET_LEVEL(mob) * 0.5, finish = GET_LEVEL(mob);
+static void mob_stats(const std::shared_ptr<npc_proto>& mob) {
+    int start = mob->nums[CharNum::Level] * 0.5, finish = mob->nums[CharNum::Level];
 
     if (finish < 20)
         finish = 20;
@@ -1490,11 +1448,11 @@ static void mob_stats(struct char_data *mob) {
         } else if(val < 5) {
             val = rand_number(5, 8);
         }
-        mob->set(attr, val);
+        mob->attributes[attr] = val;
     }
 }
 
-static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
+static int parse_enhanced_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch, mob_vnum nr) {
     char line[READ_SIZE];
 
     parse_simple_mob(mob_f, ch, nr);
@@ -1513,7 +1471,7 @@ static int parse_enhanced_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     return 0;
 }
 
-static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
+static int parse_mobile_from_file(FILE *mob_f, const std::shared_ptr<npc_proto>& ch) {
     int j, t[10], retval;
     char line[READ_SIZE], *tmpptr, letter;
     char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
@@ -1531,15 +1489,14 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
     sprintf(buf2, "mob vnum %d", nr);   /* sprintf: OK (for 'buf2 >= 19') */
 
     /***** String data *****/
-    ch->setName(fread_string(mob_f, buf2));
-    ch->setShortDesc(fread_string(mob_f, buf2));
-    tmpptr = (char*)ch->getShortDesc().c_str();
+    ch->name = fread_string(mob_f, buf2);
+    tmpptr = ch->short_description = fread_string(mob_f, buf2);
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
-    ch->setRoomDesc(fread_string(mob_f, buf2));
-    ch->setRoomDesc(fread_string(mob_f, buf2));
+    ch->room_description = fread_string(mob_f, buf2);
+    ch->look_description =fread_string(mob_f, buf2);
 
     /* *** Numeric data *** */
     if (!get_line(mob_f, line)) {
@@ -1567,7 +1524,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         aff[3] = asciiflag_conv(f8);
         for(auto i = 0; i < ch->affected_by.size(); i++) ch->affected_by.set(i, IS_SET_AR(aff, i));
 
-        ch->set(CharAlign::GoodEvil, t[2]);
+        ch->aligns[CharAlign::GoodEvil] = t[2];
 
         for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
             check_bitvector_names(AFF_FLAGS(ch)[taeller], affected_bits_count, buf2, "mobile affect");
@@ -1578,7 +1535,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
     }
 
     ch->mobFlags.set(MOB_ISNPC);
-    if (MOB_FLAGGED(ch, MOB_NOTDEADYET)) {
+    if (ch->mobFlags.test(MOB_NOTDEADYET)) {
         /* Rather bad to load mobiles with this bit already set. */
         basic_mud_log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
         ch->mobFlags.reset(MOB_NOTDEADYET);
@@ -1611,13 +1568,15 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
     letter = fread_letter(mob_f);
     ungetc(letter, mob_f);
     while (letter == 'T') {
-        dg_read_trigger(mob_f, ch, MOB_TRIGGER);
+        char junk[248];
+        char tline[248];
+        trig_vnum tvn;
+        get_line(mob_f, tline);
+        auto count = sscanf(line, "%7s %d", junk, &tvn);
+        if(trig_index.contains(tvn)) ch->proto_script.push_back(tvn);
         letter = fread_letter(mob_f);
         ungetc(letter, mob_f);
     }
-
-    for (j = 0; j < NUM_WEARS; j++)
-        ch->equipment[j] = nullptr;
 
     /* Uncomment to force all mob files to be rewritten. Good for initial AUTOBALANCE setup.
    * if (bitsavetodisk) {
@@ -1633,12 +1592,11 @@ static void parse_mobile(FILE *mob_f, mob_vnum nr) {
     auto &idx = mob_index[nr];
     idx.vn = nr;
 
-    auto &m = mob_proto[nr];
+    auto m = std::make_shared<npc_proto>();
+    mob_proto[nr] = m;
+    m->vn = nr;
 
-    m.vn = nr;
-    m.desc = nullptr;
-
-    if (parse_mobile_from_file(mob_f, &m)) {
+    if (parse_mobile_from_file(mob_f, m)) {
 
     } else { /* We used to exit in the file reading code, but now we do it here */
         exit(1);
@@ -1656,32 +1614,32 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
     struct extra_descr_data *new_descr;
 
-    auto &o = obj_proto[nr];
+    auto o = std::make_shared<item_proto>();
+    obj_proto[nr] = o;
+
     auto &idx = obj_index[nr];
 
     idx.vn = nr;
-    o.vn = nr;
+    o->vn = nr;
 
     sprintf(buf2, "object #%d", nr);    /* sprintf: OK (for 'buf2 >= 19') */
 
     /* *** string data *** */
-    if ((o.name = fread_string(obj_f, buf2)) == nullptr) {
+    if ((o->name = fread_string(obj_f, buf2)) == nullptr) {
         basic_mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
         exit(1);
     }
     auto &z = zone_table[real_zone_by_thing(nr)];
     z.objects.insert(nr);
-    o.setShortDesc(fread_string(obj_f, buf2));
-    tmpptr = (char*)o.getShortDesc().c_str();
+    tmpptr = o->short_description = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
-    o.setRoomDesc(fread_string(obj_f, buf2));
-    tmpptr = (char*)o.getRoomDesc().c_str();
+    tmpptr = o->room_description = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr)
         CAP(tmpptr);
-    o.look_description = fread_string(obj_f, buf2);
+    o->look_description = fread_string(obj_f, buf2);
 
     /* *** numeric data *** */
     if (!get_line(obj_f, line)) {
@@ -1696,19 +1654,19 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         extraFlags[1] = asciiflag_conv(f2);
         extraFlags[2] = asciiflag_conv(f3);
         extraFlags[3] = asciiflag_conv(f4);
-        for(auto i = 0; i < o.extra_flags.size(); i++) if(IS_SET_AR(extraFlags, i)) o.extra_flags.set(i);
+        for(auto i = 0; i < o->extra_flags.size(); i++) if(IS_SET_AR(extraFlags, i)) o->extra_flags.set(i);
 
         wearFlags[0] = asciiflag_conv(f5);
         wearFlags[1] = asciiflag_conv(f6);
         wearFlags[2] = asciiflag_conv(f7);
         wearFlags[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < o.wear_flags.size(); i++) if(IS_SET_AR(wearFlags, i)) o.wear_flags.set(i);
+        for(auto i = 0; i < o->wear_flags.size(); i++) if(IS_SET_AR(wearFlags, i)) o->wear_flags.set(i);
 
         permFlags[0] = asciiflag_conv(f9);
         permFlags[1] = asciiflag_conv(f10);
         permFlags[2] = asciiflag_conv(f11);
         permFlags[3] = asciiflag_conv(f12);
-        for(auto i = 0; i < o.bitvector.size(); i++) if(IS_SET_AR(permFlags, i)) o.bitvector.set(i);
+        for(auto i = 0; i < o->bitvector.size(); i++) if(IS_SET_AR(permFlags, i)) o->bitvector.set(i);
 
     } else {
         basic_mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -1716,7 +1674,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     }
 
     /* Object flags checked in check_object(). */
-    GET_OBJ_TYPE(&o) = t[0];
+    GET_OBJ_TYPE(o) = t[0];
 
     if (!get_line(obj_f, line)) {
         basic_mud_log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
@@ -1735,14 +1693,14 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     }
 
     for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-        GET_OBJ_VAL(&o, j) = t[j];
+        GET_OBJ_VAL(o, j) = t[j];
 
-    if ((GET_OBJ_TYPE(&o) == ITEM_PORTAL || \
-       GET_OBJ_TYPE(&o) == ITEM_HATCH) && \
-       (!GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) || \
-        !GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE))) {
-        GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) = 20;
-        GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE) = 20;
+    if ((GET_OBJ_TYPE(o) == ITEM_PORTAL || \
+       GET_OBJ_TYPE(o) == ITEM_HATCH) && \
+       (!GET_OBJ_VAL(o, VAL_DOOR_DCLOCK) || \
+        !GET_OBJ_VAL(o, VAL_DOOR_DCHIDE))) {
+        GET_OBJ_VAL(o, VAL_DOOR_DCLOCK) = 20;
+        GET_OBJ_VAL(o, VAL_DOOR_DCHIDE) = 20;
         if (bitsavetodisk) {
             converting = true;
         }
@@ -1770,29 +1728,29 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             exit(1);
         }
     }
-    GET_OBJ_WEIGHT(&o) = t[0];
-    GET_OBJ_COST(&o) = t[1];
-    GET_OBJ_RENT(&o) = t[2];
-    GET_OBJ_LEVEL(&o) = t[3];
-    GET_OBJ_SIZE(&o) = SIZE_MEDIUM;
+    GET_OBJ_WEIGHT(o) = t[0];
+    GET_OBJ_COST(o) = t[1];
+    GET_OBJ_RENT(o) = t[2];
+    GET_OBJ_LEVEL(o) = t[3];
+    GET_OBJ_SIZE(o) = SIZE_MEDIUM;
 
     /* check to make sure that weight of containers exceeds curr. quantity */
-    if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
-        GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN) {
-        if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, 1))
-            GET_OBJ_WEIGHT(&o) = GET_OBJ_VAL(&o, 1) + 5;
+    if (GET_OBJ_TYPE(o) == ITEM_DRINKCON ||
+        GET_OBJ_TYPE(o) == ITEM_FOUNTAIN) {
+        if (GET_OBJ_WEIGHT(o) < GET_OBJ_VAL(o, 1))
+            GET_OBJ_WEIGHT(o) = GET_OBJ_VAL(o, 1) + 5;
     }
     /* *** make sure portal objects have their timer set correctly *** */
-    if (GET_OBJ_TYPE(&o) == ITEM_PORTAL) {
-        GET_OBJ_TIMER(&o) = -1;
+    if (GET_OBJ_TYPE(o) == ITEM_PORTAL) {
+        GET_OBJ_TIMER(o) = -1;
     }
 
     /* *** extra descriptions and affect fields *** */
 
     for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-        o.affected[j].location = APPLY_NONE;
-        o.affected[j].modifier = 0;
-        o.affected[j].specific = 0;
+        o->affected[j].location = APPLY_NONE;
+        o->affected[j].modifier = 0;
+        o->affected[j].specific = 0;
     }
 
     strcat(buf2, ", after numeric constants\n"    /* strcat: OK (for 'buf2 >= 87') */
@@ -1806,11 +1764,11 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         }
         switch (*line) {
             case 'E':
-                CREATE(new_descr, struct extra_descr_data, 1);
+                new_descr = new extra_descr_data();
                 new_descr->keyword = fread_string(obj_f, buf2);
                 new_descr->description = fread_string(obj_f, buf2);
-                new_descr->next = o.ex_description;
-                o.ex_description = new_descr;
+                new_descr->next = o->ex_description;
+                o->ex_description = new_descr;
                 break;
             case 'A':
                 if (j >= MAX_OBJ_AFFECT) {
@@ -1835,11 +1793,11 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
 
                 if (t[0] >= APPLY_DAMAGE_PERC && t[0] <= APPLY_DEFENSE_PERC) {
                     basic_mud_log("Warning: object #%d (%s) uses deprecated saving throw applies",
-                        nr, GET_OBJ_SHORT(&o));
+                        nr, o->short_description);
                 }
-                o.affected[j].location = t[0];
-                o.affected[j].modifier = t[1];
-                o.affected[j].specific = t[2];
+                o->affected[j].location = t[0];
+                o->affected[j].modifier = t[1];
+                o->affected[j].specific = t[2];
                 j++;
                 break;
             case 'S':  /* Spells for Spellbooks*/
@@ -1859,15 +1817,15 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...offending line: '%s'", buf2, retval, line);
                     exit(1);
                 }
-                if (!o.sbinfo) {
-                    CREATE(o.sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
+                if (!o->sbinfo) {
+                    CREATE(o->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
                 }
-                o.sbinfo[j].spellname = t[0];
-                o.sbinfo[j].pages = t[1];
+                o->sbinfo[j].spellname = t[0];
+                o->sbinfo[j].pages = t[1];
                 j++;
                 break;
             case 'T':  /* DG triggers */
-                dg_obj_trigger(line, &o);
+                dg_obj_trigger(line, o);
                 break;
             case 'Z':
                 if (!get_line(obj_f, line)) {
@@ -1881,16 +1839,16 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...offending line: '%s'", buf2, line);
                     exit(1);
                 }
-                GET_OBJ_SIZE(&o) = t[0];
+                GET_OBJ_SIZE(o) = t[0];
                 break;
             case '$':
             case '#':
                 /* Objects that set CHARM on players are bad. */
-                if (OBJAFF_FLAGGED(&o, AFF_CHARM)) {
+                if (o->bitvector.test(AFF_CHARM)) {
                     basic_mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-                    o.bitvector.reset(AFF_CHARM);
+                    o->bitvector.reset(AFF_CHARM);
                 }
-                check_object(&o);
+                check_object(o);
                 return (line);
             default:
                 basic_mud_log("SYSERR: Format error in (%c): %s", *line, buf2);
@@ -2795,8 +2753,6 @@ static int load_char(const char *name, struct char_data *ch) {
         ch->time.created = time(nullptr);
     }
 
-    ch->generation = ch->time.created;
-
     if (!ch->time.birth) {
         basic_mud_log("No birthday for user %s, using standard starting age determination", GET_NAME(ch));
         ch->time.birth = time(nullptr) - birth_age(ch);
@@ -2985,12 +2941,11 @@ int House_load(room_vnum rvnum) {
 
                         case 'G':
                             get_line(fl, line);
-                            sscanf(line, "%" TMT, &temp->generation);
                             get_line(fl, line);
                             break;
                         case 'U':
                             get_line(fl, line);
-                            sscanf(line, "%" I64T, &temp->id);
+                            sscanf(line, "%" I64T, &temp->uid);
                             get_line(fl, line);
                             break;
                         case 'S':
@@ -3026,8 +2981,7 @@ int House_load(room_vnum rvnum) {
                 }      /* exit our for loop */
             }   /* exit our xap loop */
             if (temp != nullptr) {
-                check_unique_id(temp);
-                add_unique_id(temp);
+                temp->checkMyID();
                 temp->script = std::make_shared<script_data>(temp);
                 temp->activate();
                 num_objs++;
@@ -4442,7 +4396,7 @@ void migrate_grid() {
         auto o = obj_proto.find(ovn);
         if(o == obj_proto.end()) continue;
         old_ship_data shipData;
-        shipData.name = o->second.name;
+        shipData.name = o->second->name;
         shipData.ship_obj = ovn;
         shipData.vnums.insert(vn);
         shipData.hatch_room = vn;
@@ -4640,19 +4594,18 @@ void migrate_characters() {
     // if we can load them, we'll convert them and bind them to the appropriate account.
 
     for(auto &[cname, accID] : characterToAccount) {
-        auto ch = new char_data();
+        auto ch = new pc_data();
         ch->script = std::make_shared<script_data>(ch);
         if(load_char(cname.c_str(), ch) < 0) {
             basic_mud_log("Error loading %s for account migration.", cname.c_str());
             delete ch;
             continue;
         }
-        auto id = ch->id;
+        auto id = ch->uid;
         auto p = std::make_shared<player_data>();
         p->id = id;
         players[id] = p;
         p->id = id;
-        if(!ch->generation) ch->generation = time(nullptr);
         p->character = ch;
         p->name = ch->name;
         auto a = accounts[accID];
@@ -4662,7 +4615,7 @@ void migrate_characters() {
         a->characters.emplace_back(id);
         ch->in_room = ch->load_room;
         ch->was_in_room = ch->load_room;
-        uniqueCharacters[id] = std::make_pair(ch->generation, ch);
+        world[id] = ch;
     }
 
     // migrate sense files...
@@ -4682,7 +4635,7 @@ void migrate_characters() {
             basic_mud_log("Error loading %s for sense migration.", name.c_str());
             continue;
         }
-        auto pa = players[ch->id];
+        auto pa = players[ch->uid];
         // The file contains a sequence of lines, with each line containing a number.
 		// The number is the vnum of a mobile the player's sensed.
         // We will read each line and insert the vnum into the player's sensed list.
@@ -4716,7 +4669,7 @@ void migrate_characters() {
             continue;
         }
 
-        auto pa = players[ch->id];
+        auto pa = players[ch->uid];
 
 		// The file contains a series of lines.
         // Each line looks like: <name> <dub>
@@ -4733,7 +4686,7 @@ void migrate_characters() {
             if(name == "Gibbles") continue;
             auto pc = findPlayer(name);
             if(!pc) continue;
-            pa->dubNames[pc->id] = dub;
+            pa->dubNames[pc->uid] = dub;
         }
     }
 
@@ -4793,7 +4746,7 @@ void migrate_characters() {
             basic_mud_log("Error loading %s for alias migration.", name.c_str());
             continue;
         }
-        auto pa = players.find(ch->id);
+        auto pa = players.find(ch->uid);
         if(pa == players.end()) {
             basic_mud_log("Error loading %s for alias migration.", name.c_str());
             continue;

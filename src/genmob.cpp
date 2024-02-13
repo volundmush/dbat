@@ -63,15 +63,6 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
 
     basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
 
-#if CONFIG_GENOLC_MOBPROG
-    GET_MPROG(OLC_MOB(d)) = OLC_MPROGL(d);
-    GET_MPROG_TYPE(OLC_MOB(d)) = (OLC_MPROGL(d) ? OLC_MPROGL(d)->type : 0);
-    while (OLC_MPROGL(d)) {
-      GET_MPROG_TYPE(OLC_MOB(d)) |= OLC_MPROGL(d)->type;
-      OLC_MPROGL(d) = OLC_MPROGL(d)->next;
-    }
-#endif
-
     auto zvnum = real_zone_by_thing(vnum);
     auto &z = zone_table[zvnum];
     z.mobiles.insert(vnum);
@@ -438,7 +429,6 @@ nlohmann::json char_data::serializeProto() {
 
 nlohmann::json char_data::serializeInstance() {
     auto j = serializeBase();
-    if(generation) j["generation"] = generation;
 
     for(auto i = 0; i < NUM_ADMFLAGS; i++)
         if(admflags.test(i)) j["admflags"].push_back(i);
@@ -569,10 +559,6 @@ nlohmann::json char_data::serializeInstance() {
 
 void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     deserializeBase(j);
-
-    if(j.contains("generation")) generation = j["generation"];
-    check_unique_id(this);
-    add_unique_id(this);
 
     if(j.contains("admflags"))
         for(auto &i : j["admflags"])
@@ -708,11 +694,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("upgrade")) upgrade = j["upgrade"];
     if(j.contains("voice")) voice = strdup(j["voice"].get<std::string>().c_str());
     if(j.contains("wimp_level")) wimp_level = j["wimp_level"];
-
-    if(!proto_script.empty()) {
-        assign_triggers(this, OBJ_TRIGGER);
-    }
-
+    
     if(j.contains("dgvariables")) {
         // dgvariables is a json object of string keys and string values which must fill up script->vars the likewise map.
         for(auto &i : j["dgvariables"].items()) {
@@ -721,10 +703,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         
     }
 
-    auto proto = mob_proto.find(vn);
-    if(proto != mob_proto.end()) {
-        proto_script = proto->second.proto_script;
-    }
+    assignTriggers();
 
     if(j.contains("load_room")) load_room = j["load_room"];
 
@@ -998,14 +977,8 @@ int char_data::modHeight(int val) {
     return setHeight(getHeight(true) + val);
 }
 
-
-
 double char_data::getTotalWeight() {
     return getWeight() + getCarriedWeight();
-}
-
-std::string char_data::getUID(bool active) {
-    return fmt::format("#C{}:{}{}", id, generation, active ? "" : "!");
 }
 
 bool char_data::isActive() {
@@ -1059,7 +1032,7 @@ bool char_data::isProvidingLight() {
 
 struct room_data* char_data::getRoom() {
     auto roomFound = world.find(in_room);
-    if(roomFound != world.end()) return roomFound->second;
+    if(roomFound != world.end()) return dynamic_cast<room_data*>(roomFound->second);
     return nullptr;
 }
 
@@ -1106,4 +1079,53 @@ void char_data::ageBy(double addedTime) {
 
 void char_data::setAge(double newAge) {
     this->time.secondsAged = newAge * SECS_PER_GAME_YEAR;
+}
+
+void npc_data::assignTriggers() {
+    // Nothing to do without a prototype...
+    if(!proto) return;
+
+    // remove all duplicates from i->proto_script but do not change its order otherwise.
+    std::set<trig_vnum> existVnums;
+    std::set<trig_vnum> valid;
+    for(auto t : proto->proto_script) valid.insert(t);
+    
+    for(auto t : script->dgScripts) existVnums.insert(t->parent->vn);
+    bool added = false;
+    bool removed = false;
+
+    // remove any dgScript instances in i->script->dgScripts that aren't in i->proto_script
+    std::list<std::shared_ptr<trig_data>> validScripts;
+    for(auto t : script->dgScripts) {
+        if(valid.contains(t->parent->vn)) {
+            validScripts.push_back(t);
+        }
+        else {
+            removed = true;
+        }
+    }
+    if(removed) script->dgScripts = validScripts;
+
+    for(auto p : proto->proto_script) {
+        // only add if they don't already have one...
+        if(!existVnums.contains(p)) {
+            script->addTrigger(read_trigger(p), -1);
+            added = true;
+            existVnums.insert(p);
+        }
+    }
+
+    if(added || removed) {
+        // we need to sort i->script->dgScripts by the order of i->proto_script
+        std::list<std::shared_ptr<trig_data>> sorted;
+        for(auto p : proto->proto_script) {
+            for(auto t : script->dgScripts) {
+                if(t->parent->vn == p) {
+                    sorted.push_back(t);
+                    break;
+                }
+            }
+        }
+        script->dgScripts = sorted;
+    }
 }

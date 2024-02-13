@@ -51,6 +51,15 @@ bool isMigrating = false;
 
 struct config_data config_info; /* Game configuration list.    */
 
+int64_t nextUID = 0;
+
+int64_t getNextUID() {
+    while(world.contains(nextUID)) {
+        nextUID++;
+    }
+    return nextUID++;
+}
+
 std::unordered_map<room_vnum, unit_data*> world;    /* array of rooms		 */
 std::unordered_map<vnum, area_data> areas;    /* area information		 */
 
@@ -58,14 +67,14 @@ struct char_data *character_list = nullptr; /* global linked list of chars	 */
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::unordered_map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
-std::unordered_map<mob_vnum, struct char_data> mob_proto;    /* prototypes for mobs		 */
+std::unordered_map<mob_vnum, std::shared_ptr<npc_proto>> mob_proto;    /* prototypes for mobs		 */
 
 VnumIndex<obj_data> objectVnumIndex;
 VnumIndex<char_data> characterVnumIndex;
 
 struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
 std::unordered_map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
-std::unordered_map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
+std::unordered_map<obj_vnum, std::shared_ptr<item_proto>> obj_proto;    /* prototypes for objs		 */
 
 std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
 /* hash tree for fast obj lookup */
@@ -320,7 +329,7 @@ static void db_load_activate_entities() {
         auto r = dynamic_cast<room_data*>(u);
         if(!r) continue;
         if(r->script) r->script->activate();
-        assign_triggers(r, WLD_TRIGGER);
+        r->assignTriggers();
         r->activateContents();
         for(auto c = r->people; c; c = c->next_in_room) {
             if(IS_NPC(c)) {
@@ -406,8 +415,8 @@ static void db_load_item_prototypes(const std::filesystem::path& loc) {
     obj_index.reserve(data.size());
     for(auto j : data) {
         auto id = j["vn"].get<int64_t>();
-        auto p = obj_proto.emplace(id, j);
-        p.first->second.zone = real_zone_by_thing(id);
+        auto p = std::make_shared<item_proto>(j);
+        obj_proto[id] = p;
         auto &i = obj_index[id];
         i.vn = id;
     }
@@ -420,7 +429,6 @@ static void db_load_npc_prototypes(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "npcPrototypes.json")) {
         auto id = j["vn"].get<int64_t>();
         auto p = mob_proto.emplace(id, j);
-        p.first->second.zone = real_zone_by_thing(id);
         auto &i = mob_index[id];
         i.vn = id;
     }
@@ -816,7 +824,7 @@ void auc_save() {
         for (obj = world[real_room(80)]->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
-                fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
+                fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->uid, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
             }
         }
@@ -839,7 +847,7 @@ void auc_load(struct obj_data *obj) {
         while (!feof(fl)) {
             get_line(fl, line);
             sscanf(line, "%" I64T " %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
-            if (obj->id == oID) {
+            if (obj->uid == oID) {
                 GET_AUCTERN(obj) = strdup(filler);
                 GET_AUCTER(obj) = aID;
                 GET_CURBID(obj) = bID;
@@ -1221,10 +1229,10 @@ int vnum_mobile(char *searchname, struct char_data *ch) {
     int found = 0;
 
     for (auto &m : mob_proto)
-        if (isname(searchname, m.second.name))
+        if (isname(searchname, m.second->name))
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, m.first, m.second.getShortDesc(),
-                         !m.second.proto_script.empty() ? m.second.scriptString().c_str() : "");
+                         ++found, m.first, m.second->short_description,
+                         !m.second->proto_script.empty() ? m.second->scriptString().c_str() : "");
 
     return (found);
 }
@@ -1234,10 +1242,10 @@ int vnum_object(char *searchname, struct char_data *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (isname(searchname, o.second.name))
+        if (isname(searchname, o.second->name))
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, o.first, o.second.getShortDesc(),
-                         !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+                         ++found, o.first, o.second->short_description,
+                         !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
 
     return (found);
 }
@@ -1247,10 +1255,10 @@ int vnum_material(char *searchname, struct char_data *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (isname(searchname, material_names[o.second.value[VAL_ALL_MATERIAL]])) {
+        if (isname(searchname, material_names[o.second->value[VAL_ALL_MATERIAL]])) {
             send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, o.first, o.second.getShortDesc(),
-                         !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+                         ++found, o.first, o.second->short_description,
+                         !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
         }
 
     return (found);
@@ -1261,11 +1269,11 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (o.second.type_flag == ITEM_WEAPON) {
-            if (isname(searchname, weapon_type[o.second.value[VAL_WEAPON_SKILL]])) {
+        if (o.second->type_flag == ITEM_WEAPON) {
+            if (isname(searchname, weapon_type[o.second->value[VAL_WEAPON_SKILL]])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                             ++found, o.first, o.second.getShortDesc(),
-                             !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+                             ++found, o.first, o.second->short_description,
+                             !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
             }
         }
 
@@ -1277,31 +1285,15 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (o.second.type_flag == ITEM_ARMOR) {
-            if (isname(searchname, armor_type[o.second.value[VAL_ARMOR_SKILL]])) {
+        if (o.second->type_flag == ITEM_ARMOR) {
+            if (isname(searchname, armor_type[o.second->value[VAL_ARMOR_SKILL]])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                             ++found, o.first, o.second.getShortDesc(),
-                             !o.second.proto_script.empty() ? o.second.scriptString().c_str() : "");
+                             ++found, o.first, o.second->short_description,
+                             !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
             }
         }
 
     return (found);
-}
-
-/* create a character, and add it to the char list */
-struct char_data *create_char(bool activate) {
-    auto ch = new char_data();
-    ch->script = std::make_shared<script_data>(ch);
-
-    if(activate) {
-        ch->id = nextCharID();
-        ch->generation = time(nullptr);
-        check_unique_id(ch);
-        add_unique_id(ch);
-        ch->activate();
-    }
-
-    return ch;
 }
 
 
@@ -1316,15 +1308,12 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     // Weird hack to ensure script_data is not overwritten by prototype...
-    auto mob = new char_data();
-
-    *mob = proto->second;
+    auto mob = new npc_data();
+    mob->setProto(proto->second);
     mob->script = std::make_shared<script_data>(mob);
 
-    mob->id = nextCharID();
-    mob->generation = time(nullptr);
-    check_unique_id(mob);
-    add_unique_id(mob);
+    mob->uid = getNextUID();
+    world[mob->uid] = mob;
     mob->activate();
 
     std::map<CharAppearance, int> setNumsTo;
@@ -1336,13 +1325,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     setNumsTo[CharAppearance::EyeColor] = rand_number(0, 11);
-
-    GET_ABSORBS(mob) = 0;
-    ABSORBING(mob) = nullptr;
-    ABSORBBY(mob) = nullptr;
-    SITS(mob) = nullptr;
-    BLOCKED(mob) = nullptr;
-    BLOCKS(mob) = nullptr;
 
     if (!IS_HUMAN(mob) && !IS_SAIYAN(mob) && !IS_HALFBREED(mob) && !IS_NAMEK(mob)) {
         setNumsTo[CharAppearance::SkinColor] = rand_number(0, 11);
@@ -1858,8 +1840,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         for(auto f : {MOB_RARM, MOB_LARM, MOB_RLEG, MOB_LLEG}) mob->mobFlags.set(f);
     }
 
-    copy_proto_script(&proto->second, mob, MOB_TRIGGER);
-    assign_triggers(mob, MOB_TRIGGER);
+    mob->assignTriggers();
     racial_body_parts(mob);
 
     if (GET_MOB_VNUM(mob) >= 800 && GET_MOB_VNUM(mob) <= 805) {
@@ -1867,93 +1848,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     return mob;
-}
-
-void add_unique_id(struct obj_data *obj) {
-    if(obj->id == -1) {
-        obj->id = nextObjID();
-        obj->generation = time(nullptr);
-        basic_mud_log("Object Found with ID -1. Automatically fixed to ID {}", obj->id);
-    }
-
-    auto &o = uniqueObjects[obj->id];
-    o.first = obj->generation;
-    o.second = obj;
-}
-
-void remove_unique_id(struct obj_data *obj) {
-    uniqueObjects.erase(obj->id);
-}
-
-void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
-    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
-           withPlaceholder(obj1->getShortDesc(), "<No name>").c_str(),
-           GET_OBJ_VNUM(obj1), obj1->generation, obj1->id);
-    mudlog(BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
-                                  "In object: %s, Carried by: %s, Worn by: %s",
-           GET_ROOM_VNUM(IN_ROOM(obj1)),
-           IN_ROOM(obj1) == NOWHERE ? "Nowhere" : obj1->getRoom()->name,
-           obj1->in_obj ? obj1->in_obj->getShortDesc().c_str() : "None",
-           obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
-           obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
-    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
-                                  "In object: %s, Carried by: %s, Worn by: %s",
-           GET_ROOM_VNUM(IN_ROOM(obj2)),
-           IN_ROOM(obj2) == NOWHERE ? "Nowhere" : obj2->getRoom()->name,
-           obj2->in_obj ? obj2->in_obj->getShortDesc().c_str() : "None",
-           obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
-           obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
-
-    // assign a new unique ID to obj2.
-    obj2->id = nextObjID();
-    mudlog(BRF, ADMLVL_GOD, true, "Conflicting object assigned new id: %d", obj2->id);
-}
-
-void check_unique_id(struct obj_data *obj) {
-    if(obj->id == -1) {
-        obj->id = nextObjID();
-        obj->generation = time(nullptr);
-        basic_mud_log("Object Found with ID -1. Automatically fixed to ID %d", obj->id);
-    }
-    auto find = uniqueObjects.find(obj->id);
-
-    if(find != uniqueObjects.end() && find->second.first == obj->generation) {
-        log_dupe_objects(find->second.second, obj);
-    }
-}
-
-static void log_dupe_characters(struct char_data *ch1, struct char_data *ch2) {
-    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Dupe character found: %s [%d] [%" TMT ":%" I64T "]",
-           withPlaceholder(ch1->getShortDesc(), "<No name>").c_str(),
-           ch1->vn, ch1->generation, ch1->id);
-
-    // assign a new unique ID to obj2.
-    ch2->id = nextCharID();
-    mudlog(BRF, ADMLVL_GOD, true, "Conflicting character assigned new id: %d", ch2->id);
-}
-
-void check_unique_id(struct char_data *ch) {
-    if(ch->id == -1) {
-        ch->id = nextCharID();
-        ch->generation = time(nullptr);
-        basic_mud_log("Character Found with ID -1. Automatically fixed to ID %d", ch->id);
-    }
-    auto find = uniqueCharacters.find(ch->id);
-
-    if(find != uniqueCharacters.end() && find->second.first == ch->generation) {
-        log_dupe_characters(find->second.second, ch);
-    }
-}
-
-void add_unique_id(struct char_data *ch) {
-    if(ch->id == -1) {
-        ch->id = nextCharID();
-        ch->generation = time(nullptr);
-        basic_mud_log("Character Found with ID -1. Automatically fixed to ID %d", ch->id);
-    }
-    auto &o = uniqueCharacters[ch->id];
-    o.first = ch->generation;
-    o.second = ch;
 }
 
 char *sprintuniques(int low, int high) {
@@ -1966,10 +1860,9 @@ struct obj_data *create_obj(bool activate) {
     auto obj = new obj_data();
     obj->script = std::make_shared<script_data>(obj);
     if(activate) {
-        obj->id = nextObjID();
-        obj->generation = time(nullptr);
-        check_unique_id(obj);
-        add_unique_id(obj);
+        obj->uid = getNextUID();
+        obj->checkMyID();
+        world[obj->uid] = obj;
         obj->activate();
     }
 
@@ -1992,19 +1885,10 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
     
     // Weird hack to ensure that script_data is not overritten by prototype.
     auto obj = new obj_data();
-    *obj = proto->second;
     obj->script = std::make_shared<script_data>(obj);
-
+    obj->setProto(proto->second);
+    
     OBJ_LOADROOM(obj) = NOWHERE;
-    
-    
-    if (proto->second.sbinfo) {
-        CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-        for (j = 0; j < SPELLBOOK_SIZE; j++) {
-            obj->sbinfo[j].spellname = proto->second.sbinfo[j].spellname;
-            obj->sbinfo[j].pages = proto->second.sbinfo[j].pages;
-        }
-    }
 
     if (GET_OBJ_VNUM(obj) == 65) {
         HCHARGE(obj) = 20;
@@ -2016,10 +1900,8 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
         FOOB(obj) = GET_OBJ_VAL(obj, 1);
     }
     if(activate) {
-        obj->id = nextObjID();
-        obj->generation = time(nullptr);
-        check_unique_id(obj);
-        add_unique_id(obj);
+        obj->uid = getNextUID();
+        world[obj->uid] = obj;
         obj->activate();
     }
     return (obj);
@@ -2161,8 +2043,8 @@ void reset_zone(zone_rnum zone) {
                     room = world.find(c.arg3);
                     oproto = obj_proto.find(c.arg1);
                     if(oproto != obj_proto.end()) {
-                        if(oproto->second.type_flag == ITEM_HATCH || oproto->second.type_flag == ITEM_CONTROL
-                        || oproto->second.type_flag == ITEM_WINDOW || oproto->second.type_flag == ITEM_VEHICLE) {
+                        if(oproto->second->type_flag == ITEM_HATCH || oproto->second->type_flag == ITEM_CONTROL
+                        || oproto->second->type_flag == ITEM_WINDOW || oproto->second->type_flag == ITEM_VEHICLE) {
                             c.arg2 = 1;
                             c.arg4 = 1;
                         }
@@ -2530,38 +2412,8 @@ void free_followers(struct follow_type *k) {
 /* release memory allocated for a char struct */
 void free_char(struct char_data *ch) {
     int i;
-    uniqueCharacters.erase(ch->id);
-
-    if(ch->vn == NOBODY) {
-        if (GET_NAME(ch))
-            free(GET_NAME(ch));
-        if (GET_VOICE(ch))
-            free(GET_VOICE(ch));
-        if (GET_CLAN(ch))
-            free(GET_CLAN(ch));
-        if (ch->title)
-            free(ch->title);
-        if (ch->room_description)
-            free(ch->room_description);
-        if (ch->look_description)
-            free(ch->look_description);
-        if(ch->short_description)
-            free(ch->short_description);
-
-    } else {
-        auto &m = mob_proto[ch->vn];
-        if (ch->name && ch->name != m.name)
-            free(ch->name);
-        if (ch->title && ch->title != m.title)
-            free(ch->title);
-        if (ch->room_description && ch->room_description != m.room_description)
-            free(ch->room_description);
-        if (ch->look_description && ch->look_description != m.look_description)
-            free(ch->look_description);
-        if (ch->short_description && ch->short_description != m.short_description)
-            free(ch->short_description);
-    }
-
+    world.erase(ch->uid);
+    
     while (ch->affected)
         affect_remove(ch, ch->affected);
 
@@ -2587,25 +2439,11 @@ void free_char(struct char_data *ch) {
 
 /* release memory allocated for an obj struct */
 void free_obj(struct obj_data *obj) {
-    remove_unique_id(obj);
-    if (GET_OBJ_RNUM(obj) == NOWHERE) {
-        free_object_strings(obj);
-    } else {
-        free_object_strings_proto(obj);
-
-    }
-
-    /* Let's make sure that we free up this memory */
-    if (obj->auctname) {
-        free(obj->auctname);
-    }
+    world.erase(obj->uid);
 
     /* free any assigned scripts */
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
-
-    if (obj->sbinfo)
-        free(obj->sbinfo);
 
     delete obj;
 }
@@ -3182,60 +3020,30 @@ void load_config() {
 }
 
 
-int64_t nextObjID() {
-    int64_t id = 0;
-    while(uniqueObjects.contains(id)) id++;
-    return id;
-}
 
-int64_t nextCharID() {
-    int64_t id = 0;
-    while(uniqueCharacters.contains(id)) id++;
-    return id;
-}
+
 // ^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?
-static std::regex uid_regex(R"(^#([ROC])(\d+)(?::(\d+)?)?(!)?)", std::regex::icase);
+static std::regex uid_regex(R"(^#(\d+)(!)?)", std::regex::icase);
 
 bool isUID(const std::string& uid) {
     return std::regex_match(uid, uid_regex);
 }
 
-std::optional<UID> resolveUID(const std::string& uid) {
+unit_data* resolveUID(const std::string& uid) {
     // First we need to check if it matches or not.
     std::smatch match;
 
     if(!std::regex_search(uid, match, uid_regex)) {
-        return std::nullopt;
+        return nullptr;
     }
 
-    char type = toupper(match[1].str()[0]); // First capture group
-    int64_t id = std::stoll(match[2].str()); // Second capture group
-    bool active = match[4].matched; // Fourth capture group
-    time_t generation = 0;
-    if(match[3].matched) { // Third capture group
-        generation = std::stoll(match[3].str());
-    }
+    int64_t id = std::stoll(match[1].str()); // Second capture group
+    bool active = match[2].matched; // Fourth capture group
 
-    if(type == 'R') {
-        if(world.contains(id)) return dynamic_cast<room_data*>(world[id]);
-    } else if(type == 'O') {
-        auto find = uniqueObjects.find(id);
-        if(find != uniqueObjects.end()) {
-            if(!generation || (find->second.first == generation)) {
-                if(active && !find->second.second->isActive())
-                    return std::nullopt;
-                return find->second.second;
-            }
-        }
-    } else if(type == 'C') {
-        auto find = uniqueCharacters.find(id);
-        if(find != uniqueCharacters.end()) {
-            if(!generation || (find->second.first == generation)) {
-                if(active && !find->second.second->isActive())
-                    return std::nullopt;
-                return find->second.second;
-            }
-        }
+    if(auto found = world.find(id); found != world.end()) {
+        auto u = found->second;
+        if(!active) return u;
+        if(u->isActive()) return u;
     }
-    return std::nullopt;
+    return nullptr;
 }
