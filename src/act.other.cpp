@@ -7449,6 +7449,7 @@ ACMD(do_transform) {
 
         trans::handleEchoRevert(ch, ch->form);
         ch->form = FormID::Base;
+        ch->removeLimitBreak();
 
         int64_t afterKi = ch->getMaxKI();
 
@@ -7495,7 +7496,7 @@ ACMD(do_transform) {
     }
 
     
-
+    ch->removeLimitBreak();
     ch->form = trans;
     // No way is this a stealthy process...
     reveal_hiding(ch, 0);

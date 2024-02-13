@@ -4872,6 +4872,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     } else {
                         vict->incCurHealth(GET_LEVEL(vict) * 100);
                     }
+
+                    vict->attemptLimitBreak();
+
                     return;
                 }
                 if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
