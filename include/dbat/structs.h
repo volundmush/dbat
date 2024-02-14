@@ -495,6 +495,18 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
     virtual bool canSee(unit_data *target);
 
+    // NOTE: all functions beginning with check return an empty optional if it's OK.
+    // the optional string contains the reason why it's NOT OK, otherwise.
+
+    // Whether u can access this unit's inventory.
+    virtual std::optional<std::string> checkAllowInventoryAcesss(unit_data *u);
+
+    // whether this unit will allow u to take it.
+    virtual std::optional<std::string> checkAllowGet(unit_data *u);
+
+    // whether this unit is capable of picking up u. This is related to the above, but is more about the unit's own state.
+    virtual std::optional<std::string> checkCanPickup(unit_data *u);
+
     // Look at location.
     void lookAtLocation();
     // The business part of the above.
@@ -541,6 +553,26 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     void checkMyID();
 
     virtual void assignTriggers();
+
+    virtual void sendText(const std::string& text);
+    virtual void sendLine(const std::string& text);
+    
+    template<typename... Args>
+    void sendText(const std::string& text, Args&&... args) {
+        sendText(fmt::format(text, args...));
+    }
+
+    template<typename... Args>
+    void sendLine(const std::string& text, Args&&... args) {
+        sendLine(fmt::format(text, args...));
+    }
+
+    template<typename... Args>
+    void sendf(const std::string& text, Args&&... args) {
+        sendText(fmt::sprintf(text, args...));
+    }
+
+
 
 };
 

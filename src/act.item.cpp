@@ -2634,10 +2634,6 @@ ACMD(do_get) {
     char arg2[MAX_INPUT_LENGTH];
     char arg3[MAX_INPUT_LENGTH];
 
-    int cont_dotmode, found = 0, mode;
-    struct obj_data *cont;
-    struct char_data *tmp_char;
-
     one_argument(two_arguments(argument, arg1, arg2), arg3);    /* three_arguments */
 
     if (!HAS_ARMS(ch)) {
@@ -2668,79 +2664,34 @@ ACMD(do_get) {
     Searcher searcher(ch, arg1);
     for(auto loc : locations) {
         // TODO: validate that loc is something player can access...
+        if(auto check = loc->checkAllowInventoryAcesss(ch); check) {
+            ch->sendLine("{}: {}\r\n", loc->getDisplayName(ch), check.value());
+            continue;
+        }
 
         searcher.addInventory(loc);
     }
+
     auto results = searcher.search();
     if(results.empty()) {
-        send_to_char(ch, "You don't see %s %s here.\r\n", AN(arg1), arg1);
+        ch->sendLine("You don't see %s %s here.\r\n", AN(arg1), arg1);
         return;
     }
 
     for(auto o : results) {
         // TODO: Filter whether thing can be gotten...
-
+        if(auto check = o->checkAllowGet(ch); check) {
+            ch->sendLine("{}: {}", o->getDisplayName(ch), check.value());
+            continue;
+        }
+        if(auto check = ch->checkCanPickup(ch); check) {
+            ch->sendLine("{}: {}", o->getDisplayName(ch), check.value());
+            continue;
+        }
+        // TODO: Print output of the get operation.
+        // use new Messager class.
         o->removeFromLocation();
         o->addToLocation(ch);
-    }
-
-    else if (!*arg2)
-        get_from_room(ch, arg1, 1);
-    else if (is_number(arg1) && !*arg3)
-        get_from_room(ch, arg2, atoi(arg1));
-    else {
-        int amount = 1;
-        if (is_number(arg1)) {
-            amount = atoi(arg1);
-            strcpy(arg1, arg2);    /* strcpy: OK (sizeof: arg1 == arg2) */
-            strcpy(arg2, arg3);    /* strcpy: OK (sizeof: arg2 == arg3) */
-        }
-        cont_dotmode = find_all_dots(arg2);
-        if (cont_dotmode == FIND_INDIV) {
-            mode = generic_find(arg2, FIND_OBJ_INV | FIND_OBJ_EQUIP | FIND_OBJ_ROOM, ch, &tmp_char, &cont);
-            if (!cont)
-                send_to_char(ch, "You don't have %s %s.\r\n", AN(arg2), arg2);
-            else if (GET_OBJ_TYPE(cont) == ITEM_VEHICLE)
-                send_to_char(ch, "You will need to enter it first.\r\n");
-            else if ((GET_OBJ_TYPE(cont) != ITEM_CONTAINER) &&
-                     !((GET_OBJ_TYPE(cont) == ITEM_PORTAL) && (OBJVAL_FLAGGED(cont, CONT_CLOSEABLE))))
-                act("$p is not a container.", false, ch, cont, nullptr, TO_CHAR);
-            else
-                get_from_container(ch, cont, arg1, mode, amount);
-        } else {
-            if (cont_dotmode == FIND_ALLDOT && !*arg2) {
-                send_to_char(ch, "Get from all of what?\r\n");
-                return;
-            }
-            for (cont = ch->contents; cont; cont = cont->next_content)
-                if (CAN_SEE_OBJ(ch, cont) &&
-                    (cont_dotmode == FIND_ALL || isname(arg2, cont->name))) {
-                    if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER) {
-                        found = 1;
-                        get_from_container(ch, cont, arg1, FIND_OBJ_INV, amount);
-                    } else if (cont_dotmode == FIND_ALLDOT) {
-                        found = 1;
-                        act("$p is not a container.", false, ch, cont, nullptr, TO_CHAR);
-                    }
-                }
-            for (cont = ch->getRoom()->contents; cont; cont = cont->next_content)
-                if (CAN_SEE_OBJ(ch, cont) &&
-                    (cont_dotmode == FIND_ALL || isname(arg2, cont->name))) {
-                    if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER) {
-                        get_from_container(ch, cont, arg1, FIND_OBJ_ROOM, amount);
-                        found = 1;
-                    } else if (cont_dotmode == FIND_ALLDOT) {
-                        act("$p is not a container.", false, ch, cont, nullptr, TO_CHAR);
-                        found = 1;
-                    }
-                }
-            if (!found) {
-                if (cont_dotmode == FIND_ALL)
-                    send_to_char(ch, "You can't seem to find any containers.\r\n");
-                else
-                    send_to_char(ch, "You can't seem to find any %ss here.\r\n", arg2);
-            }
-        }
     }
 }
 
@@ -2934,6 +2885,29 @@ ACMD(do_drop) {
         send_to_char(ch, "You have no arms!\r\n");
         return;
     }
+
+    auto loc = ch->getLocation();
+    if(auto check = loc->allowDrop(ch); check) {
+        ch->sendLine("You can't drop anything here: {}", check.value());
+        return;
+    }
+
+    argument = one_argument(argument, arg);
+
+    if (!*arg) {
+        send_to_char(ch, "What do you want to %s?\r\n", sname);
+        return;
+    }
+
+    Searcher search(ch, arg);
+    search.setAllowAll().setAllowAsterisk().addInventory(ch);
+
+    auto results = search.search();
+    if(results.empty()) {
+        ch->sendLine("You don't have {} {}.\r\n", AN(arg), arg);
+        return;
+    }
+
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
         send_to_char(ch, "You can not do that in a garden.\r\n");
