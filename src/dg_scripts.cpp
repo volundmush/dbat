@@ -490,7 +490,7 @@ int trgvar_in_room(room_vnum vnum) {
     return i;
 }
 
-obj_data *get_obj_in_list(char *name, obj_data *list) {
+obj_data *get_obj_in_list(char *name, std::vector<obj_data*> list) {
     obj_data *i;
     int32_t id;
 
@@ -718,7 +718,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return obj;
 
     /* is it inside ? */
-    if (obj->contents && (i = get_obj_in_list(name, obj->contents)))
+    if (auto con = obj->getInventory(); !con.empty() && (i = get_obj_in_list(name, con)))
         return i;
 
     /* or outside ? */
@@ -735,11 +735,11 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return i;
         /* or carried ? */
     else if (obj->carried_by &&
-             (i = get_obj_in_list(name, obj->carried_by->contents)))
+             (i = get_obj_in_list(name, obj->carried_by->getInventory())))
         return i;
     else if (auto rm = obj->getRoom(); rm) {
         /* check the floor */
-        if ((i = get_obj_in_list(name, rm->contents)))
+        if ((i = get_obj_in_list(name, rm->getInventory())))
             return i;
 
         /* check peoples' inventory */
@@ -859,7 +859,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
         return obj;
 
-    if (obj->contents && (i = get_obj_in_list(name, obj->contents)))
+    if (auto con = obj->getInventory(); !con.empty() && (i = get_obj_in_list(name, con)))
         return i;
 
     if (obj->in_obj && isname(name, obj->in_obj->name))
@@ -869,11 +869,11 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
         return i;
 
     if (obj->carried_by &&
-        (i = get_obj_in_list(name, obj->carried_by->contents)))
+        (i = get_obj_in_list(name, obj->carried_by->getInventory())))
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
-        (i = get_obj_in_list(name, world[rm]->contents)))
+        (i = get_obj_in_list(name, world[rm]->getInventory())))
         return i;
 
     return get_obj(name);
@@ -881,17 +881,16 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
 
 /* only searches the room */
 obj_data *get_obj_in_room(room_data *room, char *name) {
-    obj_data *obj;
     int32_t id;
 
     if (*name == UID_CHAR) {
         auto o = dynamic_cast<obj_data*>(resolveUID(name));
         if(!o) return nullptr;
-        for (obj = room->contents; obj; obj = obj->next_content)
+        for (auto obj : room->getInventory())
             if (o == obj)
                 return obj;
     } else {
-        for (obj = room->contents; obj; obj = obj->next_content)
+        for (auto obj : room->getInventory())
             if (isname(name, obj->name))
                 return obj;
     }
@@ -901,17 +900,16 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
 
 /* returns obj with name - searches room, then world */
 obj_data *get_obj_by_room(room_data *room, char *name) {
-    obj_data *obj;
 
     if (*name == UID_CHAR) {
         return dynamic_cast<obj_data*>(resolveUID(name));
     }
 
-    for (obj = room->contents; obj; obj = obj->next_content)
+    for (auto obj : room->getInventory())
         if (isname(name, obj->name))
             return obj;
 
-    for (obj = object_list; obj; obj = obj->next)
+    for (auto obj = object_list; obj; obj = obj->next)
         if (isname(name, obj->name))
             return obj;
 
@@ -1210,14 +1208,10 @@ ACMD(do_attach) {
     } else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
         object = get_obj_vis(ch, targ_name, nullptr);
         if (!object) { /* search room for one with this vnum */
-            for (object = ch->getRoom()->contents; object; object = object->next_content)
-                if (GET_OBJ_VNUM(object) == num_arg)
-                    break;
+            object = ch->getRoom()->findObjectVnum(num_arg);
 
             if (!object) { /* search inventory for one with this vnum */
-                for (object = ch->contents; object; object = object->next_content)
-                    if (GET_OBJ_VNUM(object) == num_arg)
-                        break;
+                object = ch->findObjectVnum(num_arg);
 
                 if (!object) {
                     send_to_char(ch, "That object does not exist.\r\n");

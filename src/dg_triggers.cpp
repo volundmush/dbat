@@ -809,7 +809,6 @@ int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
 
 int command_otrigger(char_data *actor, char *cmd, char *argument)
 {
-    obj_data *obj;
     int i;
 
     /* prevent people we like from becoming trapped :P */
@@ -822,11 +821,11 @@ int command_otrigger(char_data *actor, char *cmd, char *argument)
                 !OBJ_FLAGGED(GET_EQ(actor, i), ITEM_FORGED))
                 return 1;
 
-    for (obj = actor->contents; obj; obj = obj->next_content)
+    for (auto obj : actor->getInventory())
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
 
-    for (obj = actor->getRoom()->contents; obj; obj = obj->next_content)
+    for (auto obj : actor->getRoom()->getInventory())
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
 
@@ -965,15 +964,6 @@ void load_otrigger(obj_data *obj)
             break;
         }
     }
-    if (result == SCRIPT_ERROR_CODE)
-    {
-        /* we have recursed beyond reasonable depth */
-        /* make sure this mob is the last one in the load chain */
-        if (GET_OBJ_RNUM(obj) != NOTHING)
-        {
-            free_proto_script(&obj_proto[GET_OBJ_RNUM(obj)], OBJ_TRIGGER);
-        }
-    }
 }
 
 int cast_otrigger(char_data *actor, obj_data *obj, int spellnum)
@@ -1008,14 +998,12 @@ int leave_otrigger(room_data *room, char_data *actor, int dir)
     trig_data *t;
     char buf[MAX_INPUT_LENGTH];
     int temp, final = 1;
-    obj_data *obj, *obj_next;
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
 
-    for (obj = room->contents; obj; obj = obj_next)
+    for (auto obj : room->getInventory())
     {
-        obj_next = obj->next_content;
         if (!SCRIPT_CHECK(obj, OTRIG_LEAVE))
             continue;
 

@@ -817,8 +817,6 @@ void char_data::activate() {
     if(mob_proto.contains(vn)) {
         insert_vnum(characterVnumIndex, this);
     }
-
-    if(contents) activateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(GET_EQ(this, i)) {
             auto obj = GET_EQ(this, i);
@@ -852,7 +850,7 @@ void char_data::deactivate() {
     if(affectedv) {
         REMOVE_FROM_LIST(this, affectv_list, next_affectv, temp);
     }
-    if(contents) deactivateContents();
+
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(GET_EQ(this, i)) {
             auto obj = GET_EQ(this, i);

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "net.h"
+#include <type_traits> // For std::is_base_of
 
 struct trig_data;
 
@@ -460,7 +461,9 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     int64_t getInventoryCount();
 
     /* Equipment array			*/
+    std::vector<unit_data*> getContents();
     std::vector<struct obj_data*> getInventory();
+    std::vector<char_data*> getPeople();
     std::unordered_map<int, obj_data*> getEquipment();
 
     room_data* getAbsoluteRoom();
@@ -483,6 +486,19 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // positive number is equipment slot.
     int16_t locationType{0};
     coordinates coords{};
+
+    // Returns a collection of 'units within reach' for commands like look or get.
+    std::vector<unit_data*> getNeighbors(bool visible = true);
+
+    // The business part of the above.
+    virtual std::vector<unit_data*> getNeighborsFor(unit_data* u, bool visible = true);
+
+    virtual bool canSee(unit_data *target);
+
+    // Look at location.
+    void lookAtLocation();
+    // The business part of the above.
+    virtual std::string renderLocationFor(unit_data* u);
 
     void activateContents();
     void deactivateContents();
@@ -516,7 +532,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void setLookDesc(const std::string& desc);
 
     virtual std::string getDisplayName(struct char_data* ch);
-    virtual std::vector<std::string> getKeywords(struct char_data* ch);
+    virtual std::vector<std::string> getKeywordsFor(struct char_data* ch);
     virtual std::string renderAppearance(struct char_data* ch);
 
     virtual UnitFamily getFamily() = 0;
@@ -1752,6 +1768,54 @@ struct aging_data {
     int maxdice[2];    /* For roll to determine natural death beyond venerable */
 };
 
-#ifdef MEMORY_DEBUG
-#include "zmalloc.h"
-#endif
+
+enum class SearchType : uint8_t {
+    Inventory = 0,
+    Equipment = 1,
+    Location = 2,
+    World = 3
+};
+
+class Searcher {
+    public:
+        Searcher(char_data* viewer, const std::string& args);
+        Searcher& addInventory(unit_data* target);
+        Searcher& addEquipment(unit_data* target);
+        Searcher& addLocation(unit_data* target);
+        Searcher& addWorld();
+        Searcher& setAllowAll(bool val = true);
+        Searcher& setAllowAsterisk(bool val = true);
+        Searcher& setAllowSelf(bool val = true);
+        Searcher& setAllowHere(bool val = true);
+        Searcher& setAllowRecurse(bool val = true);
+        Searcher& setFilter(const std::function<bool(unit_data*)> &f);
+        Searcher& setCheckVisible(bool val = true);
+        std::vector<unit_data*> search();
+        unit_data* getOne();
+
+        template<typename T>
+        std::vector<T*> types() {
+            static_assert(std::is_base_of<unit_data, T>::value, "T must be derived from unit_data");
+            std::vector<T*> filtered;
+            for (auto* unit : search()) {
+                if (T* casted = dynamic_cast<T*>(unit); casted != nullptr) {
+                    filtered.push_back(casted);
+                }
+            }
+            return filtered;
+        }
+
+    protected:
+        char_data* viewer;
+        std::string args;
+        bool checkVisible{true};
+        bool allowAll{false};
+        bool allowAsterisk{false};
+        bool allowSelf{false};
+        bool allowHere{false};
+        bool allowRecurse{false};
+        std::function<bool(unit_data*)> filter;
+        std::vector<std::pair<SearchType, unit_data*>> targets;
+
+        std::vector<unit_data*> searchHelper(SearchType type, unit_data* target);
+};

@@ -21,35 +21,8 @@
  * copies of the description, title, and such.
  */
 room_rnum add_room(struct room_data *room) {
-    struct char_data *tch;
-    struct obj_data *tobj;
-    vnum j, found = false;
-    room_rnum i;
 
-    if (!room)
-        return NOWHERE;
-
-    if (world.contains(room->vn)) {
-        auto ro = static_cast<room_data*>(world[room->vn]);
-        if (SCRIPT(ro))
-            extract_script(&ro, WLD_TRIGGER);
-        tch = ro->people;
-        tobj = ro->contents;
-        copy_room(ro, room);
-        ro->people = tch;
-        ro->contents = tobj;
-        basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
-        return i;
-    }
-
-    auto r = world[room->vn];
-    *r = *room;
-    basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
-
-    /*
-     * Return what array entry we placed the new room in.
-     */
-    return found;
+    return 0;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -65,14 +38,7 @@ int save_rooms(zone_rnum zone_num) {
 }
 
 int copy_room(struct room_data *to, struct room_data *from) {
-    free_room_strings(to);
-    *to = *from;
-    copy_room_strings(to, from);
 
-    /* Don't put people and objects in two locations.
-       Am thinking this shouldn't be done here... */
-    from->people = nullptr;
-    from->contents = nullptr;
 
     return true;
 }
@@ -86,58 +52,12 @@ int copy_room(struct room_data *to, struct room_data *from) {
  * is used elsewhere, be sure to free_room_strings() the 'dest' room first.
  */
 int copy_room_strings(struct room_data *dest, struct room_data *source) {
-    int i;
-
-    if (dest == nullptr || source == nullptr) {
-        basic_mud_log("SYSERR: GenOLC: copy_room_strings: nullptr values passed.");
-        return false;
-    }
-
-    dest->look_description = str_udup(source->look_description);
-    dest->name = str_udup(source->name);
-
-    for (i = 0; i < NUM_OF_DIRS; i++) {
-        if (!R_EXIT(source, i))
-            continue;
-
-        dest->dir_option[i] = new room_direction_data();
-                *R_EXIT(dest, i) = *R_EXIT(source, i);
-        if (R_EXIT(source, i)->general_description)
-            R_EXIT(dest, i)->general_description = strdup(R_EXIT(source, i)->general_description);
-        if (R_EXIT(source, i)->keyword)
-            R_EXIT(dest, i)->keyword = strdup(R_EXIT(source, i)->keyword);
-    }
-
-    if (source->ex_description)
-        copy_ex_descriptions(&dest->ex_description, source->ex_description);
 
     return true;
 }
 
 int free_room_strings(struct room_data *room) {
-    int i;
 
-    /* Free descriptions. */
-    if (room->name)
-        free(room->name);
-    if (room->look_description)
-        free(room->look_description);
-    if (room->ex_description)
-        free_ex_descriptions(room->ex_description);
-
-    /* Free exits. */
-    for (i = 0; i < NUM_OF_DIRS; i++) {
-        if (room->dir_option[i]) {
-            if (room->dir_option[i]->general_description)
-                free(room->dir_option[i]->general_description);
-            if (room->dir_option[i]->keyword)
-                free(room->dir_option[i]->keyword);
-            free(room->dir_option[i]);
-            room->dir_option[i] = nullptr;
-        }
-    }
-
-    return true;
 }
 
 room_direction_data::~room_direction_data() {
@@ -261,7 +181,7 @@ static bool checkGravity(const area_data &a) {
 
 double room_data::getGravity() {
     // check for a gravity generator...
-    for(auto c = contents; c; c = c->next_content) {
+    for(auto c : getInventory()) {
         if(c->gravity) return c->gravity.value();
     }
 
@@ -339,13 +259,7 @@ std::optional<room_vnum> room_data::getLaunchDestination() {
     return a.getLaunchDestination();
 }
 
-std::list<char_data *> room_data::getPeople() {
-    std::list<struct char_data*> out;
-    for(auto c = people; c; c = c->next_in_room) {
-        out.push_back(c);
-    }
-    return out;
-}
+
 
 static const std::set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
 
@@ -431,7 +345,7 @@ DgResults room_data::dgCallMember(trig_data *trig, const std::string& member, co
 
     if(lmember == "contents") {
         if(arg.empty()) {
-            if(contents) return contents;
+            if(auto inv = getInventory(); !inv.empty()) return inv.front();
             return "";
         }
         obj_vnum v = atoll(arg.c_str());

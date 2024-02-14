@@ -311,15 +311,12 @@ OCMD(do_otransform) {
         }
 
         /* move new obj info over to old object and delete new obj */
-        memcpy(&tmpobj, o, sizeof(*o));
-        IN_ROOM(&tmpobj) = IN_ROOM(obj);
+
         tmpobj.carried_by = obj->carried_by;
         tmpobj.worn_by = obj->worn_by;
         tmpobj.worn_on = obj->worn_on;
         tmpobj.in_obj = obj->in_obj;
-        tmpobj.contents = obj->contents;
-        tmpobj.id = obj->id;
-        tmpobj.proto_script = obj->proto_script;
+
         tmpobj.script = obj->script;
         tmpobj.next_content = obj->next_content;
         tmpobj.next = obj->next;
@@ -342,7 +339,6 @@ OCMD(do_dupe) {
 OCMD(do_opurge) {
     char arg[MAX_INPUT_LENGTH];
     char_data *ch, *next_ch;
-    obj_data *o, *next_obj;
 
     one_argument(argument, arg);
 
@@ -355,8 +351,7 @@ OCMD(do_opurge) {
                     extract_char(ch);
             }
 
-            for (o = rm->contents; o; o = next_obj) {
-                next_obj = o->next_content;
+            for (auto o : rm->getInventory()) {
                 if (o != obj)
                     extract_obj(o);
             }
@@ -367,7 +362,7 @@ OCMD(do_opurge) {
 
     ch = get_char_by_obj(obj, arg);
     if (!ch) {
-        o = get_obj_by_obj(obj, arg);
+        auto o = get_obj_by_obj(obj, arg);
         if (o) {
             extract_obj(o);
         } else

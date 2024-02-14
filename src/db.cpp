@@ -747,10 +747,8 @@ void auc_save() {
     if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
         basic_mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
     else {
-        struct obj_data *obj, *next_obj;
 
-        for (obj = world[real_room(80)]->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+        for (auto obj : world[real_room(80)]->getInventory()) {
             if (obj) {
                 fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->uid, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
@@ -2090,7 +2088,7 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'R': /* rem obj from room */
-                    if ((obj = get_obj_in_list_num(c.arg2, world[c.arg1]->contents)) != nullptr)
+                    if ((obj = world[c.arg1]->findObjectVnum(c.arg2)) != nullptr)
                         extract_obj(obj);
                     last_cmd = 1;
                     tmob = nullptr;

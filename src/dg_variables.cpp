@@ -66,8 +66,7 @@ char *skill_percent(struct char_data *ch, char *skill) {
    Now returns the number of matching objects -- Welcor 02/04
 */
 
-int item_in_list(char *item, obj_data *list) {
-    obj_data *i;
+int item_in_list(char *item, std::vector<obj_data*> list) {
     int count = 0;
 
     if (!item || !*item)
@@ -79,27 +78,27 @@ int item_in_list(char *item, obj_data *list) {
         auto obj = dynamic_cast<obj_data*>(result);
         if(!obj) return 0;
 
-        for (i = list; i; i = i->next_content) {
+        for (auto i : list) {
             if (i == obj)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->contents);
+                count += item_in_list(item, i->getInventory());
         }
     } else if (is_number(item) > -1) { /* check for vnum */
         obj_vnum ovnum = atof(item);
 
-        for (i = list; i; i = i->next_content) {
+        for (auto i : list) {
             if (GET_OBJ_VNUM(i) == ovnum)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->contents);
+                count += item_in_list(item, i->getInventory());
         }
     } else {
-        for (i = list; i; i = i->next_content) {
+        for (auto i : list) {
             if (isname(item, i->name))
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->contents);
+                count += item_in_list(item, i->getInventory());
         }
     }
     return count;
@@ -121,7 +120,7 @@ int char_has_item(char *item, struct char_data *ch) {
     if (get_object_in_equip(ch, item) != nullptr)
         return 1;
 
-    if (item_in_list(item, ch->contents) == 0)
+    if (item_in_list(item, ch->getInventory()) == 0)
         return 0;
     else
         return 1;
@@ -237,7 +236,7 @@ DgResults scriptFindObj(trig_data *trig, const std::string& field, const std::st
         return "0";
     }
      /* item_in_list looks within containers as well. */
-    return fmt::format("{}", item_in_list((char*)args.c_str(), world[rrnum]->contents));
+    return fmt::format("{}", item_in_list((char*)args.c_str(), world[rrnum]->getInventory()));
 }
 
 DgResults scriptGlobal(trig_data *trig, const std::string& field, const std::string& args) {

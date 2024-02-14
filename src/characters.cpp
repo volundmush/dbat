@@ -1705,7 +1705,7 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
 
     if(lmember == "inventory") {
         if(arg.empty()) {
-            if(contents) return contents;
+            if(auto con = getInventory(); !con.empty()) return con.front();
             return "";
         }
         obj_vnum v = atoll(arg.c_str());

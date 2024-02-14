@@ -465,7 +465,7 @@ ACMD(do_rpp) {
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You need at least 1 RPP to initiate an equipment restring.\r\n");
                 return;
-            } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
+            } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getInventory()))) {
                 send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
                 send_to_char(ch, "Syntax: rpp 14 (obj name)\r\n");
                 return;
@@ -3936,7 +3936,7 @@ ACMD(do_upgrade) {
             send_to_char(ch, "You need to be at least level 80 to use these kits.\r\n");
             return;
         }
-        if (!(obj = get_obj_in_list_vis(ch, "Augmentation", nullptr, ch->contents))) {
+        if (!(obj = get_obj_in_list_vis(ch, "Augmentation", nullptr, ch->getInventory()))) {
             send_to_char(ch, "You don't have a Circuit Augmentation Kit.\r\n");
             return;
         } else {
@@ -6052,7 +6052,7 @@ ACMD(do_plant) {
         roll = -10;         /* Failure */
 
 
-    if (!(obj = get_obj_in_list_vis(ch, obj_name, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, obj_name, nullptr, ch->getInventory()))) {
         send_to_char(ch, "You don't have that to plant on them.\r\n");
         return;
     }
@@ -6115,7 +6115,7 @@ ACMD(do_forgery) {
         return;
     }
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
         send_to_char(ch, "You want to make a fake copy of what?\r\n");
         return;
     }
@@ -6224,7 +6224,7 @@ ACMD(do_appraise) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
         send_to_char(ch, "You want to appraise what?\r\n");
         return;
     }
@@ -9260,7 +9260,7 @@ ACMD(do_steal) {
                 return;
             }
         } else { /* It's an object... */
-            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, vict->contents))) {
+            if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, vict->getInventory()))) {
                 for (eq_pos = 0; eq_pos < NUM_WEARS; eq_pos++)
                     if (GET_EQ(vict, eq_pos) && (isname(arg, GET_EQ(vict, eq_pos)->name)) &&
                         CAN_SEE_OBJ(ch, GET_EQ(vict, eq_pos))) {
@@ -9815,13 +9815,13 @@ ACMD(do_use) {
         switch (subcmd) {
             case SCMD_RECITE:
             case SCMD_QUAFF:
-                if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+                if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
                     send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
                     return;
                 }
                 break;
             case SCMD_USE:
-                if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+                if (!(mag_item = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
                     send_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
                     return;
                 }

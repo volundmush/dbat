@@ -133,9 +133,17 @@ item_proto& item_proto::operator=(const item_proto& other) {
     return *this;
 }
 
-std::vector<obj_data *> unit_data::getInventory() {
+std::vector<char_data*> unit_data::getPeople() {
+    std::vector<struct char_data*> out;
+    for(auto u : contents) {
+        if(auto c = dynamic_cast<char_data*>(u); c) out.push_back(c);
+    }
+    return out;
+}
+
+std::vector<obj_data*> unit_data::getInventory() {
     std::vector<obj_data*> out;
-    for(auto u = contents; u; u = u->next_content) {
+    for(auto u : contents) {
         auto o = dynamic_cast<obj_data*>(u);
         if(o && o->locationType == 0) out.push_back(o);
     }
@@ -144,7 +152,7 @@ std::vector<obj_data *> unit_data::getInventory() {
 
 std::unordered_map<int, obj_data*> unit_data::getEquipment() {
     std::unordered_map<int, obj_data*> out;
-    for(auto u = contents; u; u = u->next_content) {
+    for(auto u : contents) {
         auto o = dynamic_cast<obj_data*>(u);
         if(o && o->locationType > 0) out[o->locationType] = o;
     }
@@ -437,15 +445,11 @@ void unit_data::deserialize(const nlohmann::json& j) {
 }
 
 void unit_data::activateContents() {
-    for(auto obj = contents; obj; obj = obj->next_content) {
-        obj->activate();
-    }
+
 }
 
 void unit_data::deactivateContents() {
-    for(auto obj = contents; obj; obj = obj->next_content) {
-        obj->deactivate();
-    }
+
 }
 
 std::string unit_data::scriptString() {
@@ -461,7 +465,7 @@ std::string base_proto::scriptString() {
 
 double unit_data::getInventoryWeight() {
     double weight = 0;
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : getInventory()) {
         weight += obj->getTotalWeight();
     }
     return weight;
@@ -469,14 +473,14 @@ double unit_data::getInventoryWeight() {
 
 int64_t unit_data::getInventoryCount() {
     int64_t total = 0;
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : getInventory()) {
         total++;
     }
     return total;
 }
 
 struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : getInventory()) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
             return obj;
@@ -492,7 +496,7 @@ struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
 
 std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     std::set<struct obj_data*> out;
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : getInventory()) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
             out.insert(obj);
@@ -671,4 +675,171 @@ void unit_data::handleRemove(unit_data *u) {
 
     // remove uid from loc->contents
     std::erase_if(contents, [&](auto ud) {return ud == u;});
+}
+
+std::vector<unit_data*> unit_data::getNeighbors(bool visible) {
+    auto loc = getLocation();
+    if(!loc) return {};
+    return loc->getNeighbors(visible);
+}
+
+bool unit_data::canSee(unit_data *u) {
+    return true;
+}
+
+std::vector<unit_data*> unit_data::getNeighborsFor(unit_data *u, bool visible) {
+    std::vector<unit_data*> out;
+    for(auto n : contents) {
+        if(u == n) continue;
+        if(visible && !u->canSee(n)) continue;
+        out.push_back(n);
+    }
+
+    return out;
+}
+
+
+Searcher::Searcher(char_data* viewer, const std::string& args) : viewer(viewer), args(args) {};
+
+Searcher& Searcher::addInventory(unit_data* target) {
+    targets.emplace_back(SearchType::Inventory, target);
+    return *this;
+}
+
+Searcher& Searcher::addEquipment(unit_data* target) {
+    targets.emplace_back(SearchType::Equipment, target);
+    return *this;
+}
+
+Searcher& Searcher::addLocation(unit_data* target) {
+    targets.emplace_back(SearchType::Location, target);
+    return *this;
+}
+
+Searcher& Searcher::addWorld() {
+    targets.emplace_back(SearchType::World, nullptr);
+    return *this;
+}
+
+Searcher& Searcher::setAllowAll(bool allow) {
+    allowAll = allow;
+    return *this;
+}
+
+Searcher& Searcher::setAllowSelf(bool allow) {
+    allowSelf = allow;
+    return *this;
+}
+
+Searcher& Searcher::setAllowHere(bool allow) {
+    allowHere = allow;
+    return *this;
+} 
+
+Searcher& Searcher::setAllowRecurse(bool allow) {
+    allowRecurse = allow;
+    return *this;
+}
+
+Searcher& Searcher::setCheckVisible(bool check) {
+    checkVisible = check;
+    return *this;
+}
+
+Searcher& Searcher::setFilter(const std::function<bool(unit_data*)> &filter) {
+    this->filter = filter;
+    return *this;
+}
+
+
+std::vector<unit_data*> Searcher::searchHelper(SearchType type, unit_data* target) {
+    switch(type) {
+        case SearchType::Inventory:
+            return target->getContents();
+        case SearchType::Equipment: {
+            std::vector<unit_data*> out;
+            for(auto [id, obj] : target->getEquipment()) {
+                out.push_back(obj);
+            }
+            return out;
+        }
+        case SearchType::Location:
+            return target->getNeighbors(checkVisible);
+        case SearchType::World: {
+            std::vector<unit_data*> out;
+            for(auto [id, obj] : world) {
+                out.push_back(obj);
+            }
+            return out;
+        }
+    }
+}
+
+std::vector<unit_data*> Searcher::search() {
+    trim(args);
+    if(args.empty()) return {};
+    if(allowSelf && iequals(args, "self")) return {viewer};
+    if(allowHere && iequals(args, "here")) return {viewer->getLocation()};
+
+    std::vector<unit_data*> candidates;
+    for(auto [type, target] : targets) {
+        auto results = searchHelper(type, target);
+        // if filter is set, apply it.
+        if(filter) {
+            std::copy_if(results.begin(), results.end(), std::back_inserter(candidates), filter);
+        } else {
+            candidates.insert(candidates.end(), results.begin(), results.end());
+        }
+    }
+    int counter = 0;
+    int prefix = 1;
+    bool allMode = false;
+    std::string targetName;
+    
+    // args might be formatted like "blah" or like "5.blah" or "all.blah".
+    // We need to split by the first . if it exists.
+    // Then we check if it's a number or all.
+
+    if(auto dot = args.find('.'); dot != std::string::npos) {
+        auto prefixStr = args.substr(0, dot);
+        if(iequals(prefixStr, "all")) {
+            allMode = allowAll;
+            if(!allMode) {
+                viewer->sendLine("You are not allowed to use 'all' in this context.");
+                return {};
+            }
+        } else {
+            prefix = std::stoi(prefixStr);
+        }
+        targetName = args.substr(dot+1);
+    } else {
+        targetName = args;
+    }
+
+    if(allowAsterisk && iequals(targetName, "*")) {
+        return candidates;
+    }
+
+    for(auto c : candidates) {
+        auto keywords = c->getKeywordsFor(viewer);
+
+        for(auto k : keywords) {
+            if(iequals(k, targetName)) {
+                if(counter == prefix) {
+                    return {c};
+                }
+                counter++;
+                break;
+            }
+        }
+
+    }
+
+    return {};
+}
+
+unit_data* Searcher::getOne() {
+    auto results = search();
+    if(results.size() == 1) return results.front();
+    return nullptr;
 }

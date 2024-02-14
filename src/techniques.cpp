@@ -78,7 +78,7 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
         if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
             *vict = FIGHTING(ch);
             return true;
-        } else if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+        } else if (!(*obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->getInventory()))) {
             send_to_char(ch, "Nothing around here by that name.\r\n");
             return false;
         }

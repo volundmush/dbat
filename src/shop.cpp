@@ -925,7 +925,7 @@ get_selling_obj(struct char_data *ch, char *name, struct char_data *keeper, vnum
     struct obj_data *obj;
     int result;
 
-    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->getInventory()))) {
         if (msg) {
             char tbuf[MAX_INPUT_LENGTH];
 
@@ -1012,8 +1012,7 @@ static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr) {
     while (list) {
         temp = list;
         list = list->next_content;
-        if (shop_producing(temp, shop_nr) &&
-            !get_obj_in_list_num(GET_OBJ_RNUM(temp), keeper->contents)) {
+        if (shop_producing(temp, shop_nr) && !keeper->findObjectVnum(temp->vn)) {
                 temp->addToLocation(keeper);
             SHOP_SORT(shop_nr)++;
         } else
@@ -1201,8 +1200,7 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
 
     len = strlcpy(buf, " ##   Available   Item                             Min. Lvl       Cost\r\n"
                        "----------------------------------------------------------------------\r\n", sizeof(buf));
-    if (keeper->contents)
-        for (obj = keeper->contents; obj; obj = obj->next_content)
+    for (auto obj : keeper->getInventory())
             if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_COST(obj) > 0) {
                 if (!last_obj) {
                     last_obj = obj;
@@ -1698,9 +1696,7 @@ bool shop_data::isProducing(obj_vnum vn) {
 void shop_data::runPurge() {
     struct obj_data *next_obj;
     for(auto keeper : getKeepers()) {
-        for (auto sobj = keeper->contents; sobj; sobj = next_obj) {
-            next_obj = sobj->next_content;
-            if(!sobj) continue;
+        for (auto sobj : keeper->getInventory()) {
             if(isProducing(sobj->vn)) {
                 keeper->mod(CharMoney::Carried, GET_OBJ_COST(sobj));
                 extract_obj(sobj);

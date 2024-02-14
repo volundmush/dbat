@@ -2899,8 +2899,13 @@ void core_dump_real(const char *who, int line) {
 
 /* Is there a campfire in the room? */
 int cook_element(room_rnum room) {
+    auto u = world.find(room);
+    if (u == world.end()) {
+        basic_mud_log("cook_element: Invalid room rnum %d.", room);
+        return 0;
+    }
     int found = 0;
-    for(auto obj = world[room]->contents; obj; obj = obj->next_content) {
+    for(auto obj : u->second->getInventory()) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
         } else if(obj->vn == 19093) return 2;

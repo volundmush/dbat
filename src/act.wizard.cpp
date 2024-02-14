@@ -594,7 +594,7 @@ ACMD(do_transobj) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
         send_to_char(ch, "You want to send what?\r\n");
         return;
     } else if (!strcasecmp("all", arg2)) {
@@ -1313,46 +1313,39 @@ static void do_stat_room(struct char_data *ch) {
         }
     }
 
-    if (rm->contents) {
-        send_to_char(ch, "Contents:@g");
-        column = 9;    /* ^^^ strlen ^^^ */
-
-        for (found = 0, j = rm->contents; j; j = j->next_content) {
-            if (!CAN_SEE_OBJ(ch, j))
-                continue;
-
-            column += send_to_char(ch, "%s %s", found++ ? "," : "", j->getShortDesc());
-            if (column >= 62) {
-                send_to_char(ch, "%s\r\n", j->next_content ? "," : "");
-                found = false;
-                column = 0;
+    if (auto inv = rm->getInventory(); !inv.empty()) {
+        std::vector<std::string> names;
+        for (auto obj : inv) {
+            if (CAN_SEE_OBJ(ch, obj)) {
+                names.push_back(obj->getShortDesc());
             }
         }
-        send_to_char(ch, "@n");
+        send_to_char(ch, "Contents:@g %s@n\r\n", join(names, ", "));
     }
 
     for (i = 0; i < NUM_OF_DIRS; i++) {
         char buf1[128];
+        auto e = rm->dir_option[i];
 
-        if (!rm->dir_option[i])
+        if (!e)
             continue;
 
-        if (rm->dir_option[i]->to_room == NOWHERE)
+        if (e->to_room == NOWHERE)
             snprintf(buf1, sizeof(buf1), " @cNONE@n");
         else
-            snprintf(buf1, sizeof(buf1), "@c%5d@n", GET_ROOM_VNUM(rm->dir_option[i]->to_room));
+            snprintf(buf1, sizeof(buf1), "@c%5d@n", GET_ROOM_VNUM(e->to_room));
 
-        sprintbit(rm->dir_option[i]->exit_info, exit_bits, buf2, sizeof(buf2));
+        sprintbit(e->exit_info, exit_bits, buf2, sizeof(buf2));
 
         send_to_char(ch,
                      "Exit @c%-5s@n:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n  DC Lock: [%2d], DC Hide: [%2d], DC Skill: [%4s], DC Move: [%2d]\r\n%s",
                      dirs[i], buf1,
-                     rm->dir_option[i]->key == NOTHING ? -1 : rm->dir_option[i]->key,
-                     rm->dir_option[i]->keyword ? rm->dir_option[i]->keyword : "None", buf2,
-                     rm->dir_option[i]->dclock, rm->dir_option[i]->dchide,
-                     rm->dir_option[i]->dcskill == 0 ? "None" : spell_info[rm->dir_option[i]->dcskill].name,
-                     rm->dir_option[i]->dcmove,
-                     rm->dir_option[i]->general_description ? rm->dir_option[i]->general_description
+                     e->key == NOTHING ? -1 : e->key,
+                     e->keyword ? e->keyword : "None", buf2,
+                     e->dclock, e->dchide,
+                     e->dcskill == 0 ? "None" : spell_info[e->dcskill].name,
+                     e->dcmove,
+                     e->general_description ? e->general_description
                                                             : "  No exit description.\r\n");
     }
 
@@ -1523,21 +1516,13 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
    * more or less useless and just takes up valuable screen space.
    */
 
-    if (j->contents) {
-        int column;
-
-        send_to_char(ch, "\r\nContents:@g");
-        column = 9;    /* ^^^ strlen ^^^ */
-
-        for (found = 0, j2 = j->contents; j2; j2 = j2->next_content) {
-            column += send_to_char(ch, "%s %s", found++ ? "," : "", j2->getShortDesc());
-            if (column >= 62) {
-                send_to_char(ch, "%s\r\n", j2->next_content ? "," : "");
-                found = false;
-                column = 0;
-            }
+    if (auto inv = j->getInventory(); !inv.empty()) {
+        std::vector<std::string> names;
+        for (auto j2 : inv) {
+            names.emplace_back(j2->getShortDesc());
         }
-        send_to_char(ch, "@n");
+
+        send_to_char(ch, "\r\nContents:@g %s@n", join(names, ", "));
     }
 
     found = false;
@@ -1697,16 +1682,19 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     }
 
     int counts = 0, total = 0;
-    for (i = 0, j = k->contents; j; j = j->next_content, i++) {
+    i = 0;
+    for (auto j : k->getInventory()) {
         counts += check_insidebag(j, 0.5);
         counts++;
+        i++;
     }
     total = counts;
     total += i;
-    for (i = 0, i2 = 0; i < NUM_WEARS; i++)
-        if (GET_EQ(k, i)) {
+    i = 0;
+    for (auto &[pos, o] : k->getEquipment())
+        {
             i2++;
-            total += check_insidebag(GET_EQ(k, i), 0.5) + 1;
+            total += check_insidebag(o, 0.5) + 1;
         }
     send_to_char(ch, "Carried: weight: %d, Total Items (includes bagged items): %d, EQ: %d\r\n", (int64_t)IS_CARRYING_W(k),
                  total, i2);
@@ -1924,11 +1912,11 @@ ACMD(do_stat) {
 
         if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != nullptr)
             do_stat_object(ch, object);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->contents)) != nullptr)
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getInventory())) != nullptr)
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
             do_stat_character(ch, victim);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getRoom()->contents)) != nullptr)
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getRoom()->getInventory())) != nullptr)
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)) != nullptr)
             do_stat_character(ch, victim);
@@ -2295,7 +2283,7 @@ ACMD(do_purge) {
                 }
             }
             extract_char(vict);
-        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getRoom()->contents)) != nullptr) {
+        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getRoom()->getInventory())) != nullptr) {
             act("$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
             extract_obj(obj);
         } else {
@@ -2316,21 +2304,20 @@ ACMD(do_purge) {
                 continue;
 
             /* Dump inventory. */
-            while (vict->contents)
-                extract_obj(vict->contents);
+            for (auto o : vict->getInventory())
+                extract_obj(o);
 
             /* Dump equipment. */
-            for (i = 0; i < NUM_WEARS; i++)
-                if (GET_EQ(vict, i))
-                    extract_obj(GET_EQ(vict, i));
+            for (auto &[pos, o] : vict->getEquipment())
+                    extract_obj(o);
 
             /* Dump character. */
             extract_char(vict);
         }
 
         /* Clear the ground. */
-        while (ch->getRoom()->contents)
-            extract_obj(ch->getRoom()->contents);
+        for (auto o : ch->getRoom()->getInventory())
+            extract_obj(o);
     }
 }
 
@@ -4300,8 +4287,8 @@ ACMD(do_chown) {
             }
         }
 
-        if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->contents))) {
-            if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->contents))) {
+        if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->getInventory()))) {
+            if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->getInventory()))) {
                 send_to_char(ch, "%s does not appear to have the %s.\r\n", GET_NAME(victim), buf2);
                 return;
             }
@@ -4319,7 +4306,6 @@ ACMD(do_chown) {
 }
 
 ACMD(do_zpurge) {
-    struct obj_data *obj, *next_obj;
     struct char_data *mob, *next_mob;
     vnum i, stored = -1, zone;
     char arg[MAX_INPUT_LENGTH];
@@ -4349,8 +4335,7 @@ ACMD(do_zpurge) {
                 }
             }
 
-            for (obj = r->contents; obj; obj = next_obj) {
-                next_obj = obj->next_content;
+            for (auto obj : r->getInventory()) {
                 extract_obj(obj);
             }
         }

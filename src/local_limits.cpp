@@ -1450,8 +1450,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                         }
                     }
                 }
-                for (jj = j->contents; jj; jj = next_thing2) {
-                    next_thing2 = jj->next_content;    /* Next in inventory */
+                for (auto jj : j->getInventory()) {
                     jj->removeFromLocation();
                     jj->addToLocation(j->getLocation());
                 }

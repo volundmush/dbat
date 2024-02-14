@@ -75,7 +75,6 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     GET_NAME(ch), GET_MOB_VNUM(ch));
                 ch->mobFlags.reset(MOB_SPEC);
                 auto &mp = mob_proto[ch->vn];
-                mp.mobFlags.reset(MOB_SPEC);
             } else {
                 char actbuf[MAX_INPUT_LENGTH] = "";
                 if ((mob_index[GET_MOB_RNUM(ch)].func)(ch, ch, 0, actbuf))
@@ -90,10 +89,10 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         /* Scavenger (picking up objects) */
         if (IS_HUMANOID(ch) && !FIGHTING(ch) && AWAKE(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) &&
             !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118))
-            if (ch->getRoom()->contents && rand_number(1, 100) >= 95) {
+            if (auto contents = ch->getRoom()->getInventory(); !contents.empty() && rand_number(1, 100) >= 95) {
                 max = 1;
                 best_obj = nullptr;
-                for (obj = ch->getRoom()->contents; obj; obj = obj->next_content)
+                for (auto obj : contents)
                     if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {
                         best_obj = obj;
                         max = GET_OBJ_COST(obj);
@@ -128,9 +127,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         }
         
         /* RESPOND TO A HUGE ATTACK */
-        struct obj_data *hugeatk = nullptr, *next_huge = nullptr;
-        for (hugeatk = ch->getRoom()->contents; hugeatk; hugeatk = next_huge) {
-            next_huge = hugeatk->next_content;
+        for (auto hugeatk : ch->getRoom()->getInventory()) {
             if (FIGHTING(ch)) {
                 continue;
             }

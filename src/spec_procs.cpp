@@ -35,10 +35,9 @@
 ******************************************************************** */
 
 SPECIAL(dump) {
-    struct obj_data *k;
     int value = 0;
 
-    for (k = ch->getRoom()->contents; k; k = ch->getRoom()->contents) {
+    for (auto k : ch->getRoom()->getInventory()) {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         extract_obj(k);
     }
@@ -48,7 +47,7 @@ SPECIAL(dump) {
 
     do_drop(ch, argument, cmd, SCMD_DROP);
 
-    for (k = ch->getRoom()->contents; k; k = ch->getRoom()->contents) {
+    for (auto k : ch->getRoom()->getInventory()) {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         value += MAX(1, MIN(50, GET_OBJ_COST(k) / 10));
         extract_obj(k);
@@ -108,17 +107,12 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room) {
 
 bool check_obj_in_room(obj_vnum obj, room_vnum room) {
 
-    struct obj_data *i, *list;
     bool found = false;
     room_rnum r_room;
 
     r_room = real_room(room);
-    list = world[r_room]->contents;
-
-    for (i = list; i; i = i->next_content) {
-        if (GET_OBJ_VNUM(i) == obj) found = true;
-    }
-    return found;
+    if(r_room == NOWHERE) return false;
+    return world.at(r_room)->findObjectVnum(obj) != nullptr;
 }
 
 static const int gauntlet_info[][3] = {  /* --mystic 26 Oct 2005 */
@@ -502,8 +496,7 @@ SPECIAL(auction) {
 
     if (CMD_IS("cancel")) {
 
-        for (obj = world[auct_room]->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+        for (auto obj : world[auct_room]->getInventory()) {
             if (obj && GET_AUCTER(obj) == ((ch)->uid)) {
                 obj2 = obj;
                 found = true;
@@ -551,8 +544,7 @@ SPECIAL(auction) {
         struct descriptor_data *d;
         int founded = false;
 
-        for (obj = world[auct_room]->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+        for (auto obj : world[auct_room]->getInventory()) {
             if (obj && GET_CURBID(obj) == ((ch)->uid)) {
                 obj2 = obj;
                 found = true;
@@ -633,7 +625,7 @@ SPECIAL(auction) {
 
         value = atoi(arg2);
 
-        if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+        if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
             send_to_char(ch, "You don't have that item to auction.\r\n");
             return (true);
         }
@@ -700,13 +692,7 @@ SPECIAL(healtank) {
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
-    for (i = ch->getRoom()->contents; i; i = i->next_content) {
-        if (GET_OBJ_VNUM(i) == 65) {
-            htank = i;
-        } else {
-            continue;
-        }
-    }
+    htank = ch->getRoom()->findObjectVnum(65);
 
     if (CMD_IS("htank")) {
         if (!htank) {
@@ -942,18 +928,12 @@ static std::map<std::string, double> gravMap = {
 
 /* This controls gravity generator functions */
 SPECIAL(gravity) {
-    struct obj_data *i, *obj = nullptr;
+    struct obj_data *obj = nullptr;
     char arg[MAX_INPUT_LENGTH];
     int match = false;
 
     one_argument(argument, arg);
-    for (i = ch->getRoom()->contents; i; i = i->next_content) {
-        if (GET_OBJ_VNUM(i) == 11) {
-            obj = i;
-        } else {
-            continue;
-        }
-    }
+    obj = ch->getRoom()->findObjectVnum(11);
     if (CMD_IS("gravity") || CMD_IS("generator")) {
 
         if (!*arg) {
@@ -1025,15 +1005,8 @@ SPECIAL(gravity) {
 SPECIAL(bank) {
     int amount, num = 0;
 
-    struct obj_data *i, *obj = nullptr;
-
-    for (i = ch->getRoom()->contents; i; i = i->next_content) {
-        if (GET_OBJ_VNUM(i) == 3034) {
-            obj = i;
-        } else {
-            continue;
-        }
-    }
+    struct obj_data *obj = nullptr;
+    obj = ch->getRoom()->findObjectVnum(3034);
 
     if (CMD_IS("balance")) {
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {

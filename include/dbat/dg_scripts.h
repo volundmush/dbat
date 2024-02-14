@@ -321,7 +321,7 @@ extern obj_data *get_obj_by_room(room_data *room, char *name);
 
 extern int trgvar_in_room(room_vnum vnum);
 
-extern obj_data *get_obj_in_list(char *name, obj_data *list);
+extern obj_data *get_obj_in_list(char *name, std::vector<obj_data*> list);
 
 extern obj_data *get_object_in_equip(char_data *ch, char *name);
 
@@ -362,7 +362,7 @@ extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
 extern void dg_obj_trigger(char *line, const std::shared_ptr<item_proto>& obj);
 
 /* From dg_variables.c */
-extern int item_in_list(char *item, obj_data *list);
+extern int item_in_list(char *item, std::vector<obj_data*> list);
 
 extern char *skill_percent(struct char_data *ch, char *skill);
 

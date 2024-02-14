@@ -65,8 +65,6 @@ struct obj_data *unequip_char(struct char_data *ch, int pos);
 
 extern int invalid_align(struct char_data *ch, struct obj_data *obj);
 
-extern void object_list_new_owner(struct obj_data *list, struct char_data *ch);
-
 extern void extract_obj(struct obj_data *obj);
 
 /* ******* characters ********* */
@@ -90,11 +88,9 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
 
 struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *number);
 
-struct obj_data *get_obj_in_list_num(int num, struct obj_data *list);
-
 struct obj_data *get_obj_num(obj_rnum nr);
 
-struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, struct obj_data *list);
+struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, std::vector<obj_data*> list);
 
 struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *num);
 

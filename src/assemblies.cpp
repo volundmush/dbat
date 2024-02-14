@@ -227,15 +227,13 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
             bOk = false;
         else {
             if (pAssembly->pComponents[i].bInRoom) {
-                if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
-                                                                 pCharacter->getRoom()->contents)) == nullptr)
+                if ((ppComponentObjects[i] = pCharacter->getRoom()->findObjectVnum(lRnum)) == nullptr)
                     bOk = false;
                 else {
                     ppComponentObjects[i]->removeFromLocation();
                 }
             } else {
-                if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
-                                                                 pCharacter->contents)) == nullptr)
+                if ((ppComponentObjects[i] = pCharacter->getRoom()->findObjectVnum(lRnum)) == nullptr)
                     bOk = false;
                 else {
                     ppComponentObjects[i]->removeFromLocation();

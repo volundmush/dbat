@@ -174,7 +174,6 @@ void obj_data::activate() {
         insert_vnum(objectVnumIndex, this);
     }
 
-    if(contents) activateContents();
 }
 
 void obj_data::deactivate() {
@@ -189,7 +188,6 @@ void obj_data::deactivate() {
 
     script->deactivate();
 
-    if(contents) deactivateContents();
 }
 
 void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
@@ -430,14 +428,17 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
     }
 
     if(lmember == "count") {
-        if(GET_OBJ_TYPE(this) == ITEM_CONTAINER) return fmt::format("{}", item_in_list((char*)arg.c_str(), contents));
+        if(GET_OBJ_TYPE(this) == ITEM_CONTAINER) return fmt::format("{}", item_in_list((char*)arg.c_str(), getInventory()));
         return "0";
     }
 
     if(lmember == "carried_by") return carried_by;
 
     if(lmember == "contents") {
-        if(arg.empty()) return contents;
+        if(arg.empty()) {
+            if(auto con = getInventory(); !con.empty()) return con.front();
+            return "";
+        }
         obj_vnum v = atoll(arg.c_str());
         auto found = findObjectVnum(v);
         if(found) return found;
@@ -452,7 +453,7 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
     }
 
     if(lmember == "has_in") {
-        if(GET_OBJ_TYPE(this) == ITEM_CONTAINER) return item_in_list((char*)arg.c_str(), contents) ? "1" : "0";
+        if(GET_OBJ_TYPE(this) == ITEM_CONTAINER) return item_in_list((char*)arg.c_str(), getInventory()) ? "1" : "0";
         return "0";
     }
 

@@ -196,7 +196,6 @@ void mutant_limb_regen(struct char_data *ch) {
 }
 
 static int pick_n_throw(struct char_data *ch, char *buf) {
-    struct obj_data *cont;
     char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];;
 
     if (rand_number(1, 20) < 18) {
@@ -204,7 +203,7 @@ static int pick_n_throw(struct char_data *ch, char *buf) {
     }
 
 
-    for (cont = ch->getRoom()->contents; cont; cont = cont->next_content) {
+    for (auto cont : ch->getRoom()->getInventory()) {
         if (ch->canCarryWeight(cont)) {
             sprintf(buf2, "%s", cont->name);
             do_get(ch, buf2, 0, 0);
@@ -1003,8 +1002,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 GET_POS(ch) > POS_RESTING) {
                 if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
                     act("$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
-                    while (ch->contents)
-                        extract_obj(ch->contents);
+                    for(auto o : ch->getInventory())
+                        extract_obj(o);
 
                     extract_char(ch);
                     continue;
@@ -1013,8 +1012,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             if (AFF_FLAGGED(FIGHTING(ch), AFF_FLYING) && IS_HUMANOID(ch) && GET_LEVEL(ch) <= 10) {
                 if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
                     act("$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
-                    while (ch->contents)
-                        extract_obj(ch->contents);
+                    for(auto o : ch->getInventory())
+                        extract_obj(o);
                     extract_char(ch);
                     continue;
                 }
@@ -1489,8 +1488,7 @@ static void make_pcorpse(struct char_data *ch) {
 
     struct obj_data *obj, *next_obj;
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
+    for (auto obj : ch->getInventory()) {
 
         if (obj && GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998) {
             if ((GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) ||
@@ -1697,8 +1695,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         GET_OBJ_TIMER(corpse) = rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME);
 
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
-        for (obj = ch->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+        for (auto o : ch->getInventory()) {
             obj->removeFromLocation();
             extract_obj(obj);
         }
@@ -1706,11 +1703,10 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
     if (!MOB_FLAGGED(ch, MOB_HUSK)) {
         /* transfer character's inventory to the corpse */
-        corpse->contents = ch->contents;
-        for (o = corpse->contents; o != nullptr; o = o->next_content) {
-            o->in_obj = corpse;
+        for(auto o : ch->contents) {
+            o->removeFromLocation();
+            o->addToLocation(corpse);
         }
-        object_list_new_owner(corpse, nullptr);
 
         /* transfer character's equipment to the corpse */
         int eqdrop = false;
@@ -1736,9 +1732,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         }
         ch->set(CharMoney::Carried, 0);
     }
-    if (!MOB_FLAGGED(ch, MOB_HUSK)) {
-        ch->contents = nullptr;
-    }
+
     corpse->addToLocation(ch->getRoom());
 
 }

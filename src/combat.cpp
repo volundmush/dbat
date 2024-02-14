@@ -2605,8 +2605,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
         }
     }
 
-    for (tob = ch->getRoom()->contents; tob; tob = next_obj) {
-        next_obj = tob->next_content;
+    for (auto tob : ch->getRoom()->getInventory()) {
         if (OBJ_FLAGGED(tob, ITEM_UNBREAKABLE))
             continue;
         if (foundo == true)
@@ -3962,14 +3961,14 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         } else if (MOB_FLAGGED(vict, MOB_NOKILL)) {
             send_to_char(ch, "But they are not to be killed!\r\n");
             return 0;
-        } else if (MAJINIZED(ch) == ((vict)->id)) {
+        } else if (MAJINIZED(ch) == ((vict)->uid)) {
             send_to_char(ch, "You can not harm your master!\r\n");
             return 0;
         } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && GET_MAX_HIT(vict) > GET_MAX_HIT(ch) + (GET_MAX_HIT(ch) * .5) &&
                    !FIGHTING(ch)) {
             send_to_char(ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
             return 0;
-        } else if (MAJINIZED(vict) == ((ch)->id)) {
+        } else if (MAJINIZED(vict) == ((ch)->uid)) {
             send_to_char(ch, "You can not harm your servant.\r\n");
             return 0;
         } else if ((GRAPPLING(ch) && GRAPTYPE(ch) != 3) || (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4))) {
@@ -4718,10 +4717,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", true, ch, nullptr, vict,
                     TO_NOTVICT);
                 solo_gain(ch, vict);
-                struct obj_data *rew, *next_rew;
                 int founded = 0;
-                for (rew = vict->contents; rew; rew = next_rew) {
-                    next_rew = rew->next_content;
+                for (auto rew : vict->getInventory()) {
                     if (rew) {
                         rew->removeFromLocation();
                         rew->addToLocation(vict->getRoom());

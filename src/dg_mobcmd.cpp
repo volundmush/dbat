@@ -288,12 +288,11 @@ ACMD(do_mjunk) {
             extract_obj(unequip_char(ch, pos));
             return;
         }
-        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents)) != nullptr)
+        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())) != nullptr)
             extract_obj(obj);
         return;
     } else {
-        for (obj = ch->contents; obj != nullptr; obj = obj_next) {
-            obj_next = obj->next_content;
+        for (auto obj : ch->getInventory()) {
             if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
                 extract_obj(obj);
             }
@@ -552,7 +551,6 @@ ACMD(do_mpurge) {
     if (!*arg) {
         /* 'purge' */
         char_data *vnext;
-        obj_data *obj_next;
 
         for (victim = ch->getRoom()->people; victim; victim = vnext) {
             vnext = victim->next_in_room;
@@ -560,8 +558,7 @@ ACMD(do_mpurge) {
                 extract_char(victim);
         }
 
-        for (obj = ch->getRoom()->contents; obj; obj = obj_next) {
-            obj_next = obj->next_content;
+        for (auto obj : ch->getRoom()->getInventory()) {
             extract_obj(obj);
         }
 
@@ -1006,10 +1003,7 @@ ACMD(do_mtransform) {
         if (auto ld = m->getLookDesc(); !ld.empty()) tmpmob.setLookDesc(ld);
         if (auto d = m->getRoomDesc(); !d.empty()) tmpmob.setRoomDesc(d);
 
-        tmpmob.id = ch->id;
         tmpmob.affected = ch->affected;
-        tmpmob.contents = ch->contents;
-        tmpmob.proto_script = ch->proto_script;
         tmpmob.script = ch->script;
         tmpmob.memory = ch->memory;
         tmpmob.next_in_room = ch->next_in_room;

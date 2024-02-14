@@ -58,8 +58,8 @@ ACMD(do_action) {
     vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM);
     if (!vict) {
         if (action->char_obj_found) {
-            targ = get_obj_in_list_vis(ch, arg, nullptr, ch->contents);
-            if (!targ) targ = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents);
+            targ = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory());
+            if (!targ) targ = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->getInventory());
             if (targ) {
                 act(action->char_obj_found, action->hide, ch, targ, nullptr, TO_CHAR);
                 act(action->others_obj_found, action->hide, ch, targ, nullptr, TO_ROOM);

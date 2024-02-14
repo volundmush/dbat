@@ -860,7 +860,6 @@ static int Crash_load(struct char_data *ch) {
                     if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
                         /* rem item ; fill ; equip again */
                         temp = unequip_char(ch, locate - 1);
-                        temp->contents = nullptr; /* should be empty - but who knows */
                         for (; cont_row[0]; cont_row[0] = obj1) {
                             obj1 = cont_row[0]->next_content;
                             cont_row[0]->addToLocation(temp);
