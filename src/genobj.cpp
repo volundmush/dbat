@@ -336,7 +336,7 @@ void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
     }
 
     if (location <= 0)    /* Inventory */
-        obj_to_char(obj, ch);
+        obj->addToLocation(ch);
 }
 
 
@@ -354,9 +354,9 @@ void obj_data::deserializeLocation(const std::string& txt, int16_t slot) {
     if(!check) return;
     auto idx = check->getFamily();
     if(idx == UnitFamily::Room) {
-        obj_to_room(this, dynamic_cast<room_data*>(check));
+        addToLocation(check);
     } else if(idx == UnitFamily::Item) {
-        obj_to_obj(this, dynamic_cast<obj_data*>(check));
+        addToLocation(check);
     } else {
         auto_equip(dynamic_cast<char_data*>(check), this, slot+1);
     }

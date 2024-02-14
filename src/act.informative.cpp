@@ -508,8 +508,8 @@ ACMD(do_draw) {
     for (obj2 = obj->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         if (drawn == false) {
-            obj_from_obj(obj2);
-            obj_to_char(obj2, ch);
+            obj2->removeFromLocation();
+            obj2->addToLocation(ch);
             obj3 = obj2;
             drawn = true;
         }
@@ -557,25 +557,23 @@ ACMD(do_shuffle) {
         return;
     }
     int total = count;
-    for (obj2 = obj->contents; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
-        obj_from_obj(obj2);
-        obj_to_room(obj2, 48);
+    for (auto obj2 : obj->getInventory()) {
+        obj2->removeFromLocation();
+        obj2->addToLocation(world.at(48));
     }
     while (count > 0) {
-        for (obj2 = world[48]->contents; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
+        for (auto obj2 : world[48]->getInventory()) {
             if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
                 continue;
             }
             if (obj2 && count > 1 && rand_number(1, 4) == 3) {
                 count -= 1;
-                obj_from_room(obj2);
-                obj_to_obj(obj2, obj);
+                obj2->removeFromLocation();
+                obj2->addToLocation(obj);
             } else if (obj2 && count == 1) {
                 count -= 1;
-                obj_from_room(obj2);
-                obj_to_obj(obj2, obj);
+                obj2->removeFromLocation();
+                obj2->addToLocation(obj);
             }
         }
     }
@@ -683,8 +681,8 @@ ACMD(do_post) {
         }
         act("@WYou post $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_CHAR);
         act("@C$n@W posts $p@W on a nearby structure.@n", true, ch, obj, nullptr, TO_ROOM);
-        obj_from_char(obj);
-        obj_to_room(obj, IN_ROOM(ch));
+        obj->removeFromLocation();
+        obj->addToLocation(ch->getRoom());
         GET_OBJ_POSTTYPE(obj) = 1;
         return;
     } else {
@@ -702,8 +700,8 @@ ACMD(do_post) {
             sprintf(buf, "@C$n@W posts %s@W on %s@W.@n", obj->getShortDesc(), obj2->getShortDesc());
             send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->getShortDesc(), obj2->getShortDesc());
             act(buf, true, ch, nullptr, nullptr, TO_ROOM);
-            obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->removeFromLocation();
+            obj->addToLocation(ch->getRoom());
             GET_OBJ_POSTTYPE(obj) = 2;
             GET_OBJ_POSTED(obj) = obj2;
             GET_OBJ_POSTED(obj2) = obj;
@@ -758,8 +756,8 @@ ACMD(do_play) {
 
     act("You play $p on your table.", true, ch, obj, nullptr, TO_CHAR);
     act("$n plays $p on $s table.", true, ch, obj, nullptr, TO_ROOM);
-    obj_from_char(obj);
-    obj_to_obj(obj, obj2);
+    obj->removeFromLocation();
+    obj->addToLocation(obj2);
 }
 
 /* Nickname an object */
@@ -809,8 +807,8 @@ ACMD(do_nickname) {
                     if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(ship2) + 1000) {
                         extract_obj(k);
                         int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
-                        obj_from_room(ship2);
-                        obj_to_room(ship2, real_room(was_in));
+                        ship2->removeFromLocation();
+                        ship2->addToLocation(world.at(was_in));
                     }
                 }
             }

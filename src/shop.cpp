@@ -861,10 +861,10 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         if (shop_producing(obj, shop_nr)) {
             obj = read_object(GET_OBJ_RNUM(obj), REAL);
         } else {
-            obj_from_char(obj);
+            obj->removeFromLocation();
             SHOP_SORT(shop_nr)--;
         }
-        obj_to_char(obj, ch);
+        obj->addToLocation(ch);
         if (OBJ_FLAGGED(obj, ITEM_MATURE)) {
             GET_OBJ_VAL(obj, VAL_MAXMATURE) = 6;
         }
@@ -985,7 +985,7 @@ static struct obj_data *slide_obj(struct obj_data *obj, struct char_data *keeper
     }
     SHOP_SORT(shop_nr)++;
     loop = keeper->contents;
-    obj_to_char(obj, keeper);
+    obj->addToLocation(keeper);
     keeper->contents = loop;
     while (loop) {
         if (same_obj(obj, loop)) {
@@ -1004,7 +1004,7 @@ static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr) {
 
     while (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper)) {
         temp = keeper->contents;
-        obj_from_char(temp);
+        temp->removeFromLocation();
         temp->next_content = list;
         list = temp;
     }
@@ -1014,7 +1014,7 @@ static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr) {
         list = list->next_content;
         if (shop_producing(temp, shop_nr) &&
             !get_obj_in_list_num(GET_OBJ_RNUM(temp), keeper->contents)) {
-            obj_to_char(temp, keeper);
+                temp->addToLocation(keeper);
             SHOP_SORT(shop_nr)++;
         } else
             slide_obj(temp, keeper, shop_nr);
@@ -1071,7 +1071,7 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
         keeper->mod(CharMoney::Carried, -charged);
 
         sold++;
-        obj_from_char(obj);
+        obj->removeFromLocation();
         slide_obj(obj, keeper, shop_nr);    /* Seems we don't use return value. */
         obj = get_selling_obj(ch, name, keeper, shop_nr, false);
     }

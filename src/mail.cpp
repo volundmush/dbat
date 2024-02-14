@@ -627,7 +627,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         obj->setFlag(FlagType::Item, ITEM_UNIQUE_SAVE);
 
         if (IS_PLAYING(ch->desc) && mailman != nullptr) {
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             act("$n gives you a piece of mail.", false, mailman, nullptr, ch, TO_VICT);
             act("$N gives $n a piece of mail.", false, ch, nullptr, mailman, TO_ROOM);
         } else {

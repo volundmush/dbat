@@ -497,11 +497,11 @@ ACMD(do_say) {
                                         GET_DROOM(wch) = 300;
                                     }
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
-                                        char_from_room(wch);
+                                        wch->removeFromLocation();
                                         if (GET_DROOM(wch) > 0) {
-                                            char_to_room(wch, real_room(GET_DROOM(wch)));
+                                            wch->addToLocation(world.at(GET_DROOM(wch)));
                                         } else {
-                                            char_to_room(wch, real_room(300));
+                                            wch->addToLocation(world.at(300));
                                         }
                                         look_at_room(IN_ROOM(wch), wch, 0);
                                         send_to_char(wch,
@@ -534,8 +534,8 @@ ACMD(do_say) {
                                         GET_DROOM(wch) = 300;
                                     }
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
-                                        char_from_room(wch);
-                                        char_to_room(wch, real_room(GET_DROOM(wch)));
+                                        wch->removeFromLocation();
+                                        wch->addToLocation(world.at(GET_DROOM(wch)));
                                         look_at_room(IN_ROOM(wch), wch, 0);
                                         send_to_char(wch,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -545,8 +545,8 @@ ACMD(do_say) {
                                         GET_DROOM(wch2) = 300;
                                     }
                                     if (real_room(GET_DROOM(wch2)) != NOWHERE) {
-                                        char_from_room(wch2);
-                                        char_to_room(wch2, real_room(GET_DROOM(wch2)));
+                                        wch2->removeFromLocation();
+                                        wch2->addToLocation(world.at(GET_DROOM(wch2)));
                                         look_at_room(IN_ROOM(wch2), wch2, 0);
                                         send_to_char(wch2,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -584,8 +584,8 @@ ACMD(do_say) {
                                         GET_DROOM(wch) = 300;
                                     }
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
-                                        char_from_room(wch);
-                                        char_to_room(wch, real_room(GET_DROOM(wch)));
+                                        wch->removeFromLocation();
+                                        wch->addToLocation(world.at(GET_DROOM(wch)));
                                         look_at_room(IN_ROOM(wch), wch, 0);
                                         send_to_char(wch,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -595,8 +595,8 @@ ACMD(do_say) {
                                         GET_DROOM(wch2) = 300;
                                     }
                                     if (real_room(GET_DROOM(wch2)) != NOWHERE) {
-                                        char_from_room(wch2);
-                                        char_to_room(wch2, real_room(GET_DROOM(wch2)));
+                                        wch2->removeFromLocation();
+                                        wch2->addToLocation(world.at(GET_DROOM(wch2)));
                                         look_at_room(IN_ROOM(wch2), wch2, 0);
                                         send_to_char(wch2,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -606,8 +606,8 @@ ACMD(do_say) {
                                         GET_DROOM(wch3) = 300;
                                     }
                                     if (real_room(GET_DROOM(wch3)) != NOWHERE) {
-                                        char_from_room(wch3);
-                                        char_to_room(wch3, real_room(GET_DROOM(wch3)));
+                                        wch3->removeFromLocation();
+                                        wch3->addToLocation(world.at(GET_DROOM(wch3)));
                                         look_at_room(IN_ROOM(wch3), wch3, 0);
                                         send_to_char(wch3,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -662,25 +662,25 @@ ACMD(do_say) {
                         if (granted == false && strstr(argument, "senzu")) {
                             if (wch != nullptr) {
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 obj = read_object(1, VIRTUAL);
-                                obj_to_char(obj, ch);
+                                obj->addToLocation(ch);
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s now possesses 10 senzus!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");

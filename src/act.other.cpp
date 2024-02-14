@@ -578,7 +578,7 @@ ACMD(do_rpp) {
             } else {
                 send_to_char(ch, "You now have an Excel House Capsule!\r\n");
                 struct obj_data *hobj = read_object(6, VIRTUAL);
-                obj_to_char(hobj, ch);
+                hobj->addToLocation(ch);
                 ch->modRPP(-pay);
                 ch->save();
                 send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
@@ -1953,7 +1953,7 @@ ACMD(do_candy) {
     char newsh[MAX_STRING_LENGTH];
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", obj->getShortDesc(), vict->getShortDesc());
     obj->setShortDesc(newsh);
-    obj_to_char(obj, ch);
+    obj->addToLocation(ch);
     obj->value[VAL_FOOD_CANDY_PL] = vict->get(CharStat::PowerLevel);
     obj->value[VAL_FOOD_CANDY_KI] = vict->get(CharStat::Ki);
     obj->value[VAL_FOOD_CANDY_ST] = vict->get(CharStat::Stamina);
@@ -2301,7 +2301,7 @@ ACMD(do_implant) {
                     true, ch, limb, nullptr, TO_ROOM);
             }
             vict->playerFlags.set(PLR_CRARM);
-            obj_from_char(limb);
+            limb->removeFromLocation();
             extract_obj(limb);
             return;
         }
@@ -2332,7 +2332,7 @@ ACMD(do_implant) {
                     true, ch, limb, nullptr, TO_ROOM);
             }
             vict->playerFlags.set(PLR_CLARM);
-            obj_from_char(limb);
+            limb->removeFromLocation();
             extract_obj(limb);
             return;
         }
@@ -2363,7 +2363,7 @@ ACMD(do_implant) {
                     true, ch, limb, nullptr, TO_ROOM);
             }
             vict->playerFlags.set(PLR_CRLEG);
-            obj_from_char(limb);
+            limb->removeFromLocation();
             extract_obj(limb);
             return;
         }
@@ -2394,7 +2394,7 @@ ACMD(do_implant) {
                     true, ch, limb, nullptr, TO_ROOM);
             }
             vict->playerFlags.set(PLR_CLLEG);
-            obj_from_char(limb);
+            limb->removeFromLocation();
             extract_obj(limb);
             return;
         }
@@ -3300,7 +3300,7 @@ ACMD(do_form) {
             } else {
                 obj = read_object(70, VIRTUAL);
             }
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3341,7 +3341,7 @@ ACMD(do_form) {
             } else {
                 obj = read_object(71, VIRTUAL);
             }
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3362,7 +3362,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(319, VIRTUAL);
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3383,7 +3383,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(16, VIRTUAL);
-            obj_to_char(obj, ch);  // cooldown removed on 10/24/2021
+            obj->addToLocation(ch);  // cooldown removed on 10/24/2021
             reveal_hiding(ch, 0);  //GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
@@ -3490,7 +3490,7 @@ ACMD(do_form) {
                              "What type of weapon?\r\nSyntax: create weapon (sword | club | spear | dagger | gun)\r\n");
                 return;
             }
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3529,23 +3529,23 @@ ACMD(do_form) {
         } else {
             obj = read_object(92, VIRTUAL); /* gi */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(vict);
             obj = read_object(91, VIRTUAL); /* pants */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(vict);
             obj = read_object(1528, VIRTUAL); /* wrist */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(vict);
             obj = read_object(1528, VIRTUAL); /* wrist */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(vict);
             obj = read_object(1532, VIRTUAL); /* boots */
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, vict);
+            vict->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(vict);
             do_wear(vict, "all", 0, 0);
             reveal_hiding(ch, 0);
@@ -3568,7 +3568,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(92, VIRTUAL);
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3590,7 +3590,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(19053, VIRTUAL);
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             for(auto f : {ITEM_NORENT, ITEM_NOSELL}) obj->setFlag(FlagType::Item, f);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
@@ -3614,7 +3614,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(91, VIRTUAL);
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3637,7 +3637,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(1528, VIRTUAL);
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3660,7 +3660,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(1532, VIRTUAL);
             boost_obj(obj, ch, 0);
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3682,7 +3682,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(72, VIRTUAL);
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3704,7 +3704,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(87, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(ch->getRoom());
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3733,7 +3733,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(86, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(ch->getRoom());
             GET_OBJ_SIZE(obj) = get_size(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3766,7 +3766,7 @@ ACMD(do_form) {
             return;
         } else {
             obj = read_object(1, VIRTUAL);
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3975,7 +3975,7 @@ ACMD(do_upgrade) {
                     break;
             }
             if (!strcasecmp("powerlevel", arg2)) {
-                obj_from_char(obj);
+                obj->removeFromLocation();
                 extract_obj(obj);
                 act("@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, nullptr, nullptr,
                     TO_CHAR);
@@ -3984,7 +3984,7 @@ ACMD(do_upgrade) {
                 send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             } else if (!strcasecmp("ki", arg2)) {
-                obj_from_char(obj);
+                obj->removeFromLocation();
                 extract_obj(obj);
                 act("@WYou install the circuits and upgrade your maximum ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -3992,7 +3992,7 @@ ACMD(do_upgrade) {
                 send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             } else if (!strcasecmp("stamina", arg2)) {
-                obj_from_char(obj);
+                obj->removeFromLocation();
                 extract_obj(obj);
                 act("@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, nullptr, nullptr,
                     TO_CHAR);
@@ -6080,14 +6080,14 @@ ACMD(do_plant) {
         act("@c$N@w looks around after feeling $S pockets.@n", true, ch, obj, vict, TO_NOTVICT);
         act("@wYou plant $p@w on @c$N@w! @c$N @wseems to notice the change in weight in their inventory.@n", true, ch,
             obj, vict, TO_CHAR);
-        obj_from_char(obj);
-        obj_to_char(obj, vict);
+        obj->removeFromLocation();
+        vict->addToLocation(ch);
         WAIT_STATE(ch, PULSE_2SEC);
         return;
     } else {
         act("@wYou plant $p@w on @c$N@w! No one noticed, whew....@n", true, ch, obj, vict, TO_CHAR);
-        obj_from_char(obj);
-        obj_to_char(obj, vict);
+        obj->removeFromLocation();
+        vict->addToLocation(ch);
         WAIT_STATE(ch, PULSE_2SEC);
         return;
     }
@@ -6181,7 +6181,7 @@ ACMD(do_forgery) {
         send_to_char(ch, "You start to make a forgery of %s but screw up and waste your forgery kit..\r\n",
                      obj2->getShortDesc());
         act("@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, nullptr, TO_ROOM);
-        obj_from_char(obj4);
+        obj4->removeFromLocation();
         extract_obj(obj4);
         WAIT_STATE(ch, PULSE_2SEC);
         return;
@@ -6190,13 +6190,13 @@ ACMD(do_forgery) {
     int loadn = GET_OBJ_VNUM(obj2);
 
     obj3 = read_object(loadn, VIRTUAL);
-    obj_to_char(obj3, ch);
+    obj3->addToLocation(ch);
 
     /* Set Object Variables */
     obj3->setFlag(FlagType::Item, ITEM_FORGED);
     GET_OBJ_WEIGHT(obj3) = rand_number(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3));
 
-    obj_from_char(obj4);
+    obj4->removeFromLocation();
     extract_obj(obj4);
     send_to_char(ch, "You make an excellent forgery of %s@n!\r\n", obj2->getShortDesc());
     act("@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, nullptr, TO_ROOM);
@@ -7038,49 +7038,49 @@ void load_shadow_dragons() {
     if (SHADOW_DRAGON1 > 0) {
         r_num = real_mobile(SHADOW_DRAGON1_VNUM);
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, real_room(SHADOW_DRAGON1));
+        mob->addToLocation(world.at(SHADOW_DRAGON1));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON2 > 0) {
         r_num = real_mobile(SHADOW_DRAGON2_VNUM);
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, real_room(SHADOW_DRAGON2));
+        mob->addToLocation(world.at(SHADOW_DRAGON2));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON3 > 0) {
         r_num = real_mobile(SHADOW_DRAGON3_VNUM);
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, real_room(SHADOW_DRAGON3));
+        mob->addToLocation(world.at(SHADOW_DRAGON3));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON4 > 0) {
         r_num = real_mobile(SHADOW_DRAGON4_VNUM);
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, real_room(SHADOW_DRAGON4));
+        mob->addToLocation(world.at(SHADOW_DRAGON4));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON5 > 0) {
         r_num = real_mobile(SHADOW_DRAGON5_VNUM);
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, real_room(SHADOW_DRAGON5));
+        mob->addToLocation(world.at(SHADOW_DRAGON5));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON6 > 0) {
         r_num = real_mobile(SHADOW_DRAGON6_VNUM);
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, real_room(SHADOW_DRAGON6));
+        mob->addToLocation(world.at(SHADOW_DRAGON6));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON7 > 0) {
         r_num = real_mobile(SHADOW_DRAGON7_VNUM);
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, real_room(SHADOW_DRAGON7));
+        mob->addToLocation(world.at(SHADOW_DRAGON7));
     }
 
     save_mud_time(&time_info);
@@ -7105,8 +7105,8 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
                 case 290:
                     send_to_room(real_room(DRAGONR),
                                  "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
-                    char_from_room(EDRAGON);
-                    char_to_room(EDRAGON, real_room(DRAGONR));
+                    EDRAGON->removeFromLocation();
+                    EDRAGON->addToLocation(world.at(DRAGONR));
                     DRAGONC -= 1;
                     break;
                 case 285:
@@ -7301,37 +7301,37 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
 
             r_num = real_mobile(SHADOW_DRAGON1_VNUM);
             mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON1));
+            mob->addToLocation(world.at(SHADOW_DRAGON1));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON2_VNUM);
             mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON2));
+            mob->addToLocation(world.at(SHADOW_DRAGON2));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON3_VNUM);
             mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON3));
+            mob->addToLocation(world.at(SHADOW_DRAGON3));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON4_VNUM);
             mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON4));
+            mob->addToLocation(world.at(SHADOW_DRAGON4));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON5_VNUM);
             mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON5));
+            mob->addToLocation(world.at(SHADOW_DRAGON5));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON6_VNUM);
             mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON6));
+            mob->addToLocation(world.at(SHADOW_DRAGON6));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON7_VNUM);
             mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON7));
+            mob->addToLocation(world.at(SHADOW_DRAGON7));
             mob = nullptr;
 
             extract_char(EDRAGON);
@@ -7370,7 +7370,7 @@ ACMD(do_summon) {
         send_to_imm("Shenron doesn't exist!");
         return;
     }
-    char_to_room(dragon, 0);
+    dragon->addToLocation(world.at(0));;
 
     reveal_hiding(ch, 0);
     act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n",
@@ -9307,7 +9307,7 @@ ACMD(do_steal) {
                         send_to_char(vict, "You feel your body being disturbed.\r\n");
                         improve_skill(vict, SKILL_SPOT, 1);
                     }
-                    obj_to_char(unequip_char(vict, eq_pos), ch);
+                    unequip_char(vict, eq_pos)->addToLocation(ch);
                     improve_skill(ch, SKILL_SLEIGHT_OF_HAND, 1);
                     return;
                 } else { /* Failure! */
@@ -9348,8 +9348,8 @@ ACMD(do_steal) {
                     return;
                 } else if (prob > perc) { /* Right out of their pockets */
                     act("You steal $p from $N.", false, ch, obj, vict, TO_CHAR);
-                    obj_from_char(obj);
-                    obj_to_char(obj, ch);
+                    obj->removeFromLocation();
+                    obj->addToLocation(ch);
                     if (!IS_NPC(vict)) {
                         vict->playerFlags.set(PLR_STOLEN);
                         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "THEFT: %s has stolen %s@n from %s",
@@ -9942,7 +9942,7 @@ ACMD(do_use) {
             break;
     }
 
-    mag_objectmagic(ch, mag_item, buf);
+    // TODO: sanity check. mag_objectmagic(ch, mag_item, buf);
 }
 
 ACMD(do_value) {
@@ -10842,9 +10842,10 @@ ACMD(do_resurrect) {
         rm = real_room(CONFIG_MORTAL_START);
 
     if (rm != NOWHERE) {
-        char_from_room(ch);
-        char_to_room(ch, rm);
-        look_at_room(IN_ROOM(ch), ch, 0);
+        auto r = dynamic_cast<room_data*>(world.at(rm));
+        ch->removeFromLocation();
+        ch->addToLocation(r);
+        look_at_room(r, ch, 0);
     }
 
     act("$n's body forms in a pool of @Bblue light@n.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -11523,7 +11524,7 @@ ACMD(do_aid) {
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Adrenex Adreneline Injector!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                obj_to_char(aid_prod, ch);
+                aid_prod->addToLocation(ch);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
@@ -11545,7 +11546,7 @@ ACMD(do_aid) {
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a jar of burn salve!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                obj_to_char(aid_prod, ch);
+                aid_prod->addToLocation(ch);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
@@ -11567,7 +11568,7 @@ ACMD(do_aid) {
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Antitoxin Injector!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                obj_to_char(aid_prod, ch);
+                aid_prod->addToLocation(ch);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
@@ -11589,7 +11590,7 @@ ACMD(do_aid) {
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A moment later $e holds up a completed Vial of Formula 82!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
-                obj_to_char(aid_prod, ch);
+                aid_prod->addToLocation(ch);
                 extract_obj(aid_obj);
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }

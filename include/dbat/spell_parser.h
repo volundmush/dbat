@@ -9,4 +9,3 @@
 extern const char *unused_spellname;
 
 // Commands
-extern ACMD(do_cast);

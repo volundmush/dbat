@@ -613,7 +613,7 @@ ACMD(do_transobj) {
             else {
                 act("$N sends $p across the universe to you.", true, d->character, obj, ch, TO_CHAR);
                 obj2 = read_object(num, VIRTUAL);
-                obj_to_char(obj2, d->character);
+                obj2->addToLocation(d->character);
             }
         }
     } else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
@@ -622,8 +622,8 @@ ACMD(do_transobj) {
     } else {
         act("You send $p to $N.", true, ch, obj, vict, TO_CHAR);
         act("$n sends $p across the universe to you.", true, ch, obj, vict, TO_VICT);
-        obj_from_char(obj);
-        obj_to_char(obj, vict);
+        obj->removeFromLocation();
+        obj->addToLocation(vict);
         return;
     }
 }
@@ -737,8 +737,8 @@ ACMD(do_recall) {
         send_to_char(ch, "You disappear in a burst of light!\r\n");
         act("$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
         if (real_room(2) != NOWHERE) {
-            char_from_room(ch);
-            char_to_room(ch, real_room(2));
+            ch->removeFromLocation();
+            ch->addToLocation(world.at(2));
             look_at_room(IN_ROOM(ch), ch, 0);
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
@@ -971,7 +971,7 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
 
 ACMD(do_at) {
     char command[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
-    room_rnum location, original_loc;
+    room_rnum location;
 
     half_chop(argument, buf, command);
     if (!*buf) {
@@ -986,17 +986,18 @@ ACMD(do_at) {
 
     if ((location = find_target_room(ch, buf)) == NOWHERE)
         return;
+    auto r = world.at(location);
 
     /* a location has been found. */
-    original_loc = IN_ROOM(ch);
-    char_from_room(ch);
-    char_to_room(ch, location);
+    auto original = ch->getRoom();
+    ch->removeFromLocation();
+    ch->addToLocation(r);
     command_interpreter(ch, command);
 
     /* check if the char is still there */
-    if (IN_ROOM(ch) == location) {
-        char_from_room(ch);
-        char_to_room(ch, original_loc);
+    if (ch->getRoom()->uid == location) {
+        ch->removeFromLocation();
+        ch->addToLocation(original);
     }
 }
 
@@ -1011,17 +1012,19 @@ ACMD(do_goto) {
         return;
     }
 
+    auto r = dynamic_cast<room_data*>(world.at(location));
+
     snprintf(buf, sizeof(buf), "$n %s", POOFOUT(ch) ? POOFOUT(ch) : "disappears in a puff of smoke.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
-    char_from_room(ch);
-    char_to_room(ch, location);
+    ch->removeFromLocation();
+    ch->addToLocation(r);
 
     snprintf(buf, sizeof(buf), "$n %s", POOFIN(ch) ? POOFIN(ch) : "appears with an ear-splitting bang.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
-    look_at_room(IN_ROOM(ch), ch, 0);
-    enter_wtrigger(ch->getRoom(), ch, -1);
+    look_at_room(r, ch, 0);
+    enter_wtrigger(r, ch, -1);
 }
 
 ACMD(do_trans) {
@@ -1047,18 +1050,20 @@ ACMD(do_trans) {
                 return;
             }
             act("$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
-            char_from_room(victim);
-            char_to_room(victim, IN_ROOM(ch));
+            auto r = ch->getRoom();
+            victim->removeFromLocation();
+            victim->addToLocation(r);
             act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
             act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
-            look_at_room(IN_ROOM(victim), victim, 0);
-            enter_wtrigger(victim->getRoom(), victim, -1);
+            look_at_room(r, victim, 0);
+            enter_wtrigger(r, victim, -1);
         }
     } else {            /* Trans All */
         if (!ADM_FLAGGED(ch, ADM_TRANSALL)) {
             send_to_char(ch, "I think not.\r\n");
             return;
         }
+        auto r = ch->getRoom();
 
         for (i = descriptor_list; i; i = i->next)
             if (STATE(i) == CON_PLAYING && i->character && i->character != ch) {
@@ -1066,12 +1071,12 @@ ACMD(do_trans) {
                 if (GET_ADMLEVEL(victim) >= GET_ADMLEVEL(ch))
                     continue;
                 act("$n disappears in a mushroom cloud.", false, victim, nullptr, nullptr, TO_ROOM);
-                char_from_room(victim);
-                char_to_room(victim, IN_ROOM(ch));
+                victim->removeFromLocation();
+                victim->addToLocation(r);
                 act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
                 act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
-                look_at_room(IN_ROOM(victim), victim, 0);
-                enter_wtrigger(victim->getRoom(), victim, -1);
+                look_at_room(r, victim, 0);
+                enter_wtrigger(r, victim, -1);
             }
         send_to_char(ch, "%s", CONFIG_OK);
     }
@@ -1099,14 +1104,15 @@ ACMD(do_teleport) {
             send_to_char(ch, "They are inside a healing tank!\r\n");
             return;
         }
+        auto r = dynamic_cast<room_data*>(world.at(target));
         send_to_char(ch, "%s", CONFIG_OK);
         act("$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
-        char_from_room(victim);
-        char_to_room(victim, target);
+        victim->removeFromLocation();
+        victim->addToLocation(r);
         act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         act("$n has teleported you!", false, ch, nullptr, (char *) victim, TO_VICT);
-        look_at_room(IN_ROOM(victim), victim, 0);
-        enter_wtrigger(victim->getRoom(), victim, -1);
+        look_at_room(r, victim, 0);
+        enter_wtrigger(r, victim, -1);
     }
 }
 
@@ -2136,7 +2142,7 @@ ACMD(do_load) {
         }
         for (i = 0; i < n; i++) {
             mob = read_mobile(r_num, REAL);
-            char_to_room(mob, IN_ROOM(ch));
+            mob->addToLocation(ch->getRoom());
 
             act("$n makes a quaint, magical gesture with one hand.", true, ch, nullptr, nullptr, TO_ROOM);
             act("$n has created $N!", false, ch, nullptr, mob, TO_ROOM);
@@ -2158,9 +2164,9 @@ ACMD(do_load) {
                 log_imm_action("LOAD: %s has loaded a %s", GET_NAME(ch), obj->getShortDesc());
             }
             if (CONFIG_LOAD_INVENTORY)
-                obj_to_char(obj, ch);
+                obj->addToLocation(ch);
             else
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
             act("$n makes a strange magical gesture.", true, ch, nullptr, nullptr, TO_ROOM);
             act("$n has created $p!", false, ch, obj, nullptr, TO_ROOM);
             act("You create $p.", false, ch, obj, nullptr, TO_CHAR);
@@ -2193,7 +2199,7 @@ ACMD(do_vstat) {
             return;
         }
         mob = read_mobile(r_num, REAL);
-        char_to_room(mob, 0);
+        mob->addToLocation(world.at(0));
         do_stat_character(ch, mob);
         extract_char(mob);
     } else if (is_abbrev(buf, "obj")) {
@@ -3827,8 +3833,8 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             if (IN_ROOM(vict) != NOWHERE)    /* Another Eric Green special. */
-                char_from_room(vict);
-            char_to_room(vict, rnum);
+                vict->removeFromLocation();
+            vict->addToLocation(world.at(rnum));
             break;
         case 36: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_ROOMFLAGS);
             break;
@@ -4289,7 +4295,7 @@ ACMD(do_chown) {
         for (i = 0; i < NUM_WEARS; i++) {
             if (GET_EQ(victim, i) && CAN_SEE_OBJ(ch, GET_EQ(victim, i)) &&
                 isname(buf2, GET_EQ(victim, i)->name)) {
-                obj_to_char(unequip_char(victim, i), victim);
+                    unequip_char(victim, i)->addToLocation(victim);
                 k = 1;
             }
         }
@@ -4305,8 +4311,8 @@ ACMD(do_chown) {
         act("@n$n makes a magical gesture and $p@n flies away from you to $m.", false, ch, obj, victim, TO_VICT);
         act("@nYou make a magical gesture and $p@n flies away from $N to you.", false, ch, obj, victim, TO_CHAR);
 
-        obj_from_char(obj);
-        obj_to_char(obj, ch);
+        obj->removeFromLocation();
+        obj->addToLocation(ch);
         ch->save();
         victim->save();
     }

@@ -363,10 +363,13 @@ WCMD(do_wteleport) {
     nr = atoi(arg2);
     target = real_room(nr);
 
-    if (target == NOWHERE)
+    if (target == NOWHERE) {
         wld_log(room, "wteleport target is an invalid room");
+        return;
+    }
+    auto r = dynamic_cast<room_data*>(world.at(target));
 
-    else if (!strcasecmp(arg1, "all")) {
+    if (!strcasecmp(arg1, "all")) {
         if (nr == room->vn) {
             wld_log(room, "wteleport all target is itself");
             return;
@@ -376,16 +379,16 @@ WCMD(do_wteleport) {
             next_ch = ch->next_in_room;
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
-            char_from_room(ch);
-            char_to_room(ch, target);
-            enter_wtrigger(ch->getRoom(), ch, -1);
+            ch->removeFromLocation();
+            ch->addToLocation(r);
+            enter_wtrigger(r, ch, -1);
         }
     } else {
         if ((ch = get_char_by_room(room, arg1))) {
             if (valid_dg_target(ch, DG_ALLOW_GODS)) {
-                char_from_room(ch);
-                char_to_room(ch, target);
-                enter_wtrigger(ch->getRoom(), ch, -1);
+                ch->removeFromLocation();
+                ch->addToLocation(r);
+                enter_wtrigger(r, ch, -1);
             }
         } else
             wld_log(room, "wteleport: no target found");
@@ -508,7 +511,7 @@ WCMD(do_wload) {
             wld_log(room, "mload: bad mob vnum");
             return;
         }
-        char_to_room(mob, rnum);
+        mob->addToLocation(world.at(rnum));
         if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
             room->script->addVar("lastloaded", mob);
         }
@@ -520,7 +523,7 @@ WCMD(do_wload) {
         }
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            obj_to_room(object, real_room(room->vn));
+            object->addToLocation(room);
             if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
                 room->script->addVar("lastloaded", object);
             }
@@ -539,18 +542,18 @@ WCMD(do_wload) {
                 load_otrigger(object);
                 return;
             }
-            obj_to_char(object, tch);
+            object->addToLocation(tch);
             load_otrigger(object);
             return;
         }
         cnt = get_obj_in_room(room, arg1);
         if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
-            obj_to_obj(object, cnt);
+            object->addToLocation(cnt);
             load_otrigger(object);
             return;
         }
         /* neither char nor container found - just dump it in room */
-        obj_to_room(object, real_room(room->vn));
+        object->addToLocation(room);
         load_otrigger(object);
         return;
     } else

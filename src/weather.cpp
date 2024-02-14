@@ -21,24 +21,19 @@
 
 static void phase_powerup(struct char_data *ch, int type, int phase);
 
-static void grow_plants();
-
-
 static void grow_plants() {
-    struct obj_data *k;
 
-    for (k = object_list; k; k = k->next) {
-        if (IN_ROOM(k) == NOWHERE) {
-            continue;
-        } else if (k->carried_by || k->in_obj) {
-            continue;
-        } else if (ROOM_FLAGGED(IN_ROOM(k), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(k), ROOM_GARDEN2)) {
-            if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
+    for (auto k = object_list; k; k = k->next) {
+        auto r = k->getRoom();
+        if(!r) continue;
+        if(!(r->checkFlag(FlagType::Room, ROOM_GARDEN1) || r->checkFlag(FlagType::Room, ROOM_GARDEN2))) continue;
+
+        if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
                 GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
                 if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
-                    send_to_room(IN_ROOM(k), "%s@y withers a bit.\r\n", k->getShortDesc());
+                    send_to_room(r, "%s@y withers a bit.\r\n", k->getShortDesc());
                 } else {
-                    send_to_room(IN_ROOM(k), "%s@y has withered to a dried up dead husk.\r\n", k->getShortDesc());
+                    send_to_room(r, "%s@y has withered to a dried up dead husk.\r\n", k->getShortDesc());
                 }
             } else if (GET_OBJ_VAL(k, VAL_WATERLEVEL) >= 0) {
                 GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
@@ -50,11 +45,11 @@ static void grow_plants() {
                         GET_OBJ_VAL(k, VAL_MATURITY) += 1;
                     }
                     if (GET_OBJ_VAL(k, VAL_MATURITY) >= GET_OBJ_VAL(k, VAL_MAXMATURE)) {
-                        send_to_room(IN_ROOM(k), "%s@G is now fully grown!@n\r\n", k->getShortDesc());
+                        send_to_room(r, "%s@G is now fully grown!@n\r\n", k->getShortDesc());
                     }
                 }
             }
-        }
+        
     }
 
 }

@@ -207,8 +207,8 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
     if (CMD_IS("surrender")) {
         if (FIGHTING(ch)) {
             /* OK, player has had enough - position is already stored, so throw them back to the start */
-            char_from_room(ch);
-            char_to_room(ch, real_room(gauntlet_info[0][1]));
+            ch->removeFromLocation();
+            ch->addToLocation(world[real_room(gauntlet_info[0][1])]);
             act("$n suddenly appears looking relieved after $s trial in the Gauntlet", false, ch, nullptr, ch,
                 TO_NOTVICT);
             act("You are returned to the start of the Gauntlet", false, ch, nullptr, ch, TO_VICT);
@@ -478,7 +478,7 @@ SPECIAL(pet_shops) {
             /* free(pet->description); don't free the prototype! */
             pet->look_description = strdup(buf);
         }
-        char_to_room(pet, IN_ROOM(ch));
+        pet->addToLocation(ch->getRoom());
         add_follower(pet, ch);
         pet->master_id = GET_IDNUM(ch);
 
@@ -536,8 +536,8 @@ SPECIAL(auction) {
                     }
                 }
 
-                obj_from_room(obj2);
-                obj_to_char(obj2, ch);
+                obj2->removeFromLocation();
+                obj2->addToLocation(ch);
                 auc_save();
             }
         }
@@ -578,8 +578,8 @@ SPECIAL(auction) {
                 }
 
                 ch->mod(CharMoney::Carried, -GET_BID(obj2));
-                obj_from_room(obj2);
-                obj_to_char(obj2, ch);
+                obj2->removeFromLocation();
+                obj2->addToLocation(ch);
                 send_to_char(ch, "You pay %s zenni and receive the item.\r\n", add_commas(GET_BID(obj2)).c_str());
                 auc_save();
 
@@ -665,8 +665,8 @@ SPECIAL(auction) {
         GET_AUCTERN(obj2) = strdup(GET_NAME(ch));
         GET_AUCTIME(obj2) = time(nullptr);
         GET_CURBID(obj2) = -1;
-        obj_from_char(obj2);
-        obj_to_room(obj2, auct_room);
+        obj2->removeFromLocation();
+        obj2->addToLocation(world.at(auct_room));
         auc_save();
         send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->getShortDesc(),
                      add_commas(GET_BID(obj2)).c_str());

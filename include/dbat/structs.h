@@ -344,6 +344,20 @@ struct base_proto : public std::enable_shared_from_this<base_proto> {
     virtual void deserialize(const nlohmann::json& j);
 };
 
+/* Specials used by NPCs, not PCs */
+struct mob_special_data {
+    mob_special_data() = default;
+    explicit mob_special_data(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+    memory_rec *memory{};        /* List of attackers to remember	       */
+    int attack_type{};        /* The Attack Type Bitvector for NPC's     */
+    int default_pos{POS_STANDING};        /* Default position for NPC                */
+    int damnodice{};          /* The number of damage dice's	       */
+    int damsizedice{};        /* The size of the damage dice's           */
+    bool newitem{};             /* Check if mob has new inv item       */
+};
+
 struct npc_proto : public base_proto {
     npc_proto() = default;
     explicit npc_proto(const nlohmann::json& j);
@@ -403,6 +417,16 @@ enum class UnitFamily : uint8_t {
     Room = 2
 };
 
+struct coordinates {
+    coordinates() = default;
+    explicit coordinates(const nlohmann::json& j);
+    double x{0};
+    double y{0};
+    double z{0};
+    void clear();
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+};
 
 struct unit_data : public std::enable_shared_from_this<unit_data> {
     unit_data() = default;
@@ -424,7 +448,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
     std::shared_ptr<script_data> script{};  /* script info for the object */
 
-    struct obj_data *contents{};     /* Contains objects  */
+    std::vector<unit_data*> contents{};     /* Contains objects  */
 
     std::unordered_map<FlagType, std::unordered_set<int>> flags;
     virtual bool checkFlag(FlagType type, int flag);
@@ -435,22 +459,30 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
+    /* Equipment array			*/
     std::vector<struct obj_data*> getInventory();
     std::unordered_map<int, obj_data*> getEquipment();
+
     room_data* getAbsoluteRoom();
     room_data* getRoom();
     unit_data* getLocation();
 
-    room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
+    // removeFromLocation is called first, and handleRemove is called BY removeFromLocation on its location.
+    virtual void removeFromLocation();
+    virtual void handleRemove(unit_data *u);
 
-    // the unit_data you are located in. This could be NOWHERE (-1) but that's
-    // mostly only used for very special cases...
-    int64_t location{NOWHERE};
+    // As above, the process is to call addToLocation which will then call handleAdd ON the location.
+    virtual void addToLocation(unit_data *u, int locationType = 0, std::optional<coordinates> coords = std::nullopt);
+    virtual void handleAdd(unit_data *u);
+
+    // the unit_data you are located in. Which might be null.
+    unit_data *location{nullptr};
     // LocationType is extra information about how you are inside <location>.
     // For instance, if you are a character, then the locationType of units
     // you contain should represent inventory/equipment slots. 0 is inventory,
     // positive number is equipment slot.
-    int16_t locationType{0}; 
+    int16_t locationType{0};
+    coordinates coords{};
 
     void activateContents();
     void deactivateContents();
@@ -510,11 +542,8 @@ struct obj_data : public unit_data {
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
 
-    nlohmann::json serializeBase();
-    nlohmann::json serializeInstance();
-    nlohmann::json serializeProto();
+    nlohmann::json serialize() override;
 
-    std::string serializeLocation();
     nlohmann::json serializeRelations();
 
     void deserializeLocation(const std::string& txt, int16_t slot);
@@ -768,19 +797,7 @@ struct innate_node {
     struct innate_node *next;
 };
 
-/* Specials used by NPCs, not PCs */
-struct mob_special_data {
-    mob_special_data() = default;
-    explicit mob_special_data(const nlohmann::json& j);
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json& j);
-    memory_rec *memory{};        /* List of attackers to remember	       */
-    int attack_type{};        /* The Attack Type Bitvector for NPC's     */
-    int default_pos{POS_STANDING};        /* Default position for NPC                */
-    int damnodice{};          /* The number of damage dice's	       */
-    int damsizedice{};        /* The size of the damage dice's           */
-    bool newitem{};             /* Check if mob has new inv item       */
-};
+
 
 /* An affect structure. */
 struct affected_type {
@@ -947,12 +964,6 @@ struct char_data : public unit_data {
     struct affected_type *affectedv{};
     /* affected by what combat spells	*/
     struct queued_act *actq{};    /* queued spells / other actions	*/
-
-    /* Equipment array			*/
-    struct obj_data *equipment[NUM_WEARS]{};
-
-    std::map<int, struct obj_data*> getEquipment();
-    struct obj_data* getEquipSlot(int slot);
 
     struct descriptor_data *desc{};    /* nullptr for mobiles			*/
 

@@ -405,8 +405,8 @@ OCMD(do_ogoto) {
     } else if (IN_ROOM(obj) == NOWHERE) {
         obj_log(obj, "ogoto tried to leave nowhere");
     } else {
-        obj_from_room(obj);
-        obj_to_room(obj, target);
+        obj->removeFromLocation();
+        obj->addToLocation(world.at(target));
     }
 }
 
@@ -424,10 +424,13 @@ OCMD(do_oteleport) {
 
     target = find_obj_target_room(obj, arg2);
 
-    if (target == NOWHERE)
+    if (target == NOWHERE) {
         obj_log(obj, "oteleport target is an invalid room");
+        return;
+    }
+    auto r = dynamic_cast<room_data*>(world.at(target));
 
-    else if (!strcasecmp(arg1, "all")) {
+    if (!strcasecmp(arg1, "all")) {
         auto rm = obj->getRoom();
         if (target == rm->vn)
             obj_log(obj, "oteleport target is itself");
@@ -436,16 +439,16 @@ OCMD(do_oteleport) {
             next_ch = ch->next_in_room;
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
-            char_from_room(ch);
-            char_to_room(ch, target);
-            enter_wtrigger(ch->getRoom(), ch, -1);
+            ch->removeFromLocation();
+            ch->addToLocation(r);
+            enter_wtrigger(r, ch, -1);
         }
     } else {
         if ((ch = get_char_by_obj(obj, arg1))) {
             if (valid_dg_target(ch, DG_ALLOW_GODS)) {
-                char_from_room(ch);
-                char_to_room(ch, target);
-                enter_wtrigger(ch->getRoom(), ch, -1);
+                ch->removeFromLocation();
+                ch->addToLocation(r);
+                enter_wtrigger(r, ch, -1);
             }
         } else
             obj_log(obj, "oteleport: no target found");
@@ -491,7 +494,7 @@ OCMD(do_dgoload) {
             obj_log(obj, "oload: bad mob vnum");
             return;
         }
-        char_to_room(mob, rnum);
+        mob->addToLocation(world.at(rnum));
 
         if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
             obj->script->addVar("lastloaded", mob);
@@ -510,7 +513,7 @@ OCMD(do_dgoload) {
 
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            obj_to_room(object, room);
+            object->addToLocation(world.at(room));
             load_otrigger(object);
             return;
         }
@@ -525,18 +528,18 @@ OCMD(do_dgoload) {
                 load_otrigger(object);
                 return;
             }
-            obj_to_char(object, tch);
+            object->addToLocation(tch);
             load_otrigger(object);
             return;
         }
         cnt = get_obj_near_obj(obj, arg1);
         if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
-            obj_to_obj(object, cnt);
+            object->addToLocation(cnt);
             load_otrigger(object);
             return;
         }
         /* neither char nor container found - just dump it in room */
-        obj_to_room(object, room);
+        object->addToLocation(world.at(room));
         load_otrigger(object);
         return;
     } else
@@ -740,8 +743,7 @@ OCMD(do_oat) {
 
     if (!(object = read_object(GET_OBJ_VNUM(obj), VIRTUAL)))
         return;
-
-    obj_to_room(object, loc);
+    object->addToLocation(world.at(loc));
     obj_command_interpreter(object, command);
 
     if (IN_ROOM(object) == loc)

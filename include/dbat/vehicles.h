@@ -19,8 +19,6 @@ struct obj_data *get_obj_in_list_type(int type, struct obj_data *list);
 
 
 // commands
-extern ACMD(do_warp);
-
 extern ACMD(do_drive);
 
 extern ACMD(do_ship_fire);

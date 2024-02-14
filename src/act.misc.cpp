@@ -276,7 +276,7 @@ static void generate_multiform(struct char_data *ch, int count) {
         ch->clones.insert(clone);
 
         GET_ORIGINAL(clone) = ch;
-        char_to_room(clone, IN_ROOM(ch));
+        clone->addToLocation(ch->getRoom());
         add_follower(clone, ch);
     }
 }
@@ -309,6 +309,17 @@ void handle_songs(uint64_t heartPulse, double deltaTime) {
     }
 
 }
+
+static const std::unordered_map<int, std::pair<room_vnum, std::string>> song_destinations = {
+    {SONG_TELEPORT_EARTH, {300, "Earth"}},
+    {SONG_TELEPORT_VEGETA, {2234, "Vegeta"}},
+    {SONG_TELEPORT_FRIGID, {4047, "Frigid"}},
+    {SONG_TELEPORT_NAMEK, {10182, "Namek"}},
+    {SONG_TELEPORT_KANASSA, {14910, "Kanassa"}},
+    {SONG_TELEPORT_AETHER, {12025, "Aether"}},
+    {SONG_TELEPORT_ARLIA, {16087, "Arlia"}},
+    {SONG_TELEPORT_KONACK, {8003, "Konack"}}
+};
 
 static void resolve_song(struct char_data *ch) {
 
@@ -464,148 +475,33 @@ static void resolve_song(struct char_data *ch) {
 
                 break;
             case SONG_TELEPORT_EARTH:
-                if (vict == ch)
-                    continue;
-                if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-                    if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-                        if (skill > diceroll) {
-                            act("@CYour Teleportation Melody has transported @c$N@C to Earth in a flash!@n", true, ch,
-                                nullptr, vict, TO_CHAR);
-                            act("@c$n's@C Teleportation Melody has transported you to Earth in a flash!@n", true, ch,
-                                nullptr, vict, TO_VICT);
-                            act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
-                                nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
-                            char_to_room(vict, real_room(300));
-                        }
-                    }
-                }
-                break;
             case SONG_TELEPORT_VEGETA:
-                if (vict == ch)
-                    continue;
-                if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-                    if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-                        if (skill > diceroll) {
-                            act("@CYour Teleportation Melody has transported @c$N@C to Vegeta in a flash!@n", true, ch,
-                                nullptr, vict, TO_CHAR);
-                            act("@c$n's@C Teleportation Melody has transported you to Vegeta in a flash!@n", true, ch,
-                                nullptr, vict, TO_VICT);
-                            act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
-                                nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
-                            char_to_room(vict, real_room(2234));
-                        }
-                    }
-                }
-                break;
             case SONG_TELEPORT_FRIGID:
-                if (vict == ch)
-                    continue;
-                if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-                    if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-                        if (skill > diceroll) {
-                            act("@CYour Teleportation Melody has transported @c$N@C to Frigid in a flash!@n", true, ch,
-                                nullptr, vict, TO_CHAR);
-                            act("@c$n's@C Teleportation Melody has transported you to Frigid in a flash!@n", true, ch,
-                                nullptr, vict, TO_VICT);
-                            act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
-                                nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
-                            char_to_room(vict, real_room(4047));
-                        }
-                    }
-                }
-                break;
             case SONG_TELEPORT_KONACK:
-                if (vict == ch)
-                    continue;
-                if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-                    if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-                        if (skill > diceroll) {
-                            act("@CYour Teleportation Melody has transported @c$N@C to Konack in a flash!@n", true, ch,
-                                nullptr, vict, TO_CHAR);
-                            act("@c$n's@C Teleportation Melody has transported you to Konack in a flash!@n", true, ch,
-                                nullptr, vict, TO_VICT);
-                            act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
-                                nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
-                            char_to_room(vict, real_room(8003));
-                        }
-                    }
-                }
-                break;
             case SONG_TELEPORT_NAMEK:
-                if (vict == ch)
-                    continue;
-                if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-                    if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-                        if (skill > diceroll) {
-                            act("@CYour Teleportation Melody has transported @c$N@C to Namek in a flash!@n", true, ch,
-                                nullptr, vict, TO_CHAR);
-                            act("@c$n's@C Teleportation Melody has transported you to Namek in a flash!@n", true, ch,
-                                nullptr, vict, TO_VICT);
-                            act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
-                                nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
-                            char_to_room(vict, real_room(10182));
-                        }
-                    }
-                }
-                break;
             case SONG_TELEPORT_ARLIA:
-                if (vict == ch)
-                    continue;
-                if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-                    if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-                        if (skill > diceroll) {
-                            act("@CYour Teleportation Melody has transported @c$N@C to Arlia in a flash!@n", true, ch,
-                                nullptr, vict, TO_CHAR);
-                            act("@c$n's@C Teleportation Melody has transported you to Arlia in a flash!@n", true, ch,
-                                nullptr, vict, TO_VICT);
-                            act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
-                                nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
-                            char_to_room(vict, real_room(16087));
-                        }
-                    }
-                }
-                break;
             case SONG_TELEPORT_AETHER:
+            case SONG_TELEPORT_KANASSA: {
                 if (vict == ch)
                     continue;
+                auto &dest = song_destinations.at((int)GET_SONG(ch));
+                auto r = world.at(dest.first);
                 if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
                     if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
                         if (skill > diceroll) {
-                            act("@CYour Teleportation Melody has transported @c$N@C to Aether in a flash!@n", true, ch,
+                            act(fmt::format("@CYour Teleportation Melody has transported @c$N@C to {} in a flash!@n", dest.second).c_str(), true, ch,
                                 nullptr, vict, TO_CHAR);
-                            act("@c$n's@C Teleportation Melody has transported you to Aether in a flash!@n", true, ch,
+                            act(fmt::format("@c$n's@C Teleportation Melody has transported you to {} in a flash!@n", dest.second).c_str(), true, ch,
                                 nullptr, vict, TO_VICT);
-                            act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
+                            act(fmt::format("@c$n's@C Teleportation Melody has transported @c$N@C away to {} in a flash!@n", dest.second).c_str(), true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
-                            char_to_room(vict, real_room(12025));
+                            vict->removeFromLocation();
+                            vict->addToLocation(r);
                         }
                     }
                 }
-                break;
-            case SONG_TELEPORT_KANASSA:
-                if (vict == ch)
-                    continue;
-                if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
-                    if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
-                        if (skill > diceroll) {
-                            act("@CYour Teleportation Melody has transported @c$N@C to Kanassa in a flash!@n", true, ch,
-                                nullptr, vict, TO_CHAR);
-                            act("@c$n's@C Teleportation Melody has transported you to Kanassa in a flash!@n", true, ch,
-                                nullptr, vict, TO_VICT);
-                            act("@c$n's@C Teleportation Melody has transported @c$N@C away in a flash!@n", true, ch,
-                                nullptr, vict, TO_NOTVICT);
-                            char_from_room(vict);
-                            char_to_room(vict, real_room(14910));
-                        }
-                    }
-                }
+            }
+                
                 break;
             case SONG_SHIELDING:
                 if (vict == ch || (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP))) {
@@ -641,24 +537,15 @@ static void resolve_song(struct char_data *ch) {
         }
     }
 
-    static const std::unordered_map<int, std::pair<room_vnum, std::string>> song_destinations = {
-        {SONG_TELEPORT_EARTH, {300, "Earth"}},
-        {SONG_TELEPORT_VEGETA, {2234, "Vegeta"}},
-        {SONG_TELEPORT_FRIGID, {4047, "Frigid"}},
-        {SONG_TELEPORT_NAMEK, {10182, "Namek"}},
-        {SONG_TELEPORT_KANASSA, {14910, "Kanassa"}},
-        {SONG_TELEPORT_AETHER, {12025, "Aether"}},
-        {SONG_TELEPORT_ARLIA, {16087, "Arlia"}},
-        {SONG_TELEPORT_KONACK, {8003, "Konack"}}
-    };
+    
 
     if (GET_SONG(ch) >= 4 && skill > diceroll) {
         if(auto foundsong = song_destinations.find((int)GET_SONG(ch)); foundsong != song_destinations.end()) {
             auto [room, name] = foundsong->second;
             act(fmt::format("@CYour Teleportation Melody has transported you to @c{}@C!@n", name).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
             act(fmt::format("@c$n's@C Teleportation Melody has transported $m to @c{}@C!@n",name).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
-            char_from_room(ch);
-            char_to_room(ch, real_room(room));
+            ch->removeFromLocation();
+            ch->addToLocation(world.at(room));
             ch->set(CharNum::MysticMelody, 0);
         }
     }
@@ -1578,7 +1465,7 @@ static void catch_fish(struct char_data *ch, int quality) {
     GET_OBJ_WEIGHT(fish) += weight;
 
     GET_OBJ_VAL(pole, 0) = 0;
-    obj_to_room(fish, IN_ROOM(ch));
+    fish->addToLocation(ch->getRoom());
     do_get(ch, "fish", 0, 0);
     send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
     ch->playerFlags.reset(PLR_FISHING);
@@ -1711,7 +1598,7 @@ ACMD(do_extract) {
                     struct obj_data *filled = read_object(3424, VIRTUAL);
                     extract_obj(bottle);
                     GET_OBJ_VAL(filled, 6) = 24;
-                    obj_to_char(filled, ch);
+                    filled->addToLocation(ch);
                     ch->decCurKI(0);
                     act("@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n",
                         true, ch, filled, nullptr, TO_CHAR);
@@ -1842,7 +1729,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         } else {
             ch->decCurKI(cost);
@@ -1862,7 +1749,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         }
         improve_skill(ch, SKILL_RUNIC, 1);
@@ -1889,7 +1776,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         } else {
             ch->decCurKI(cost);
@@ -1909,7 +1796,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         }
         improve_skill(ch, SKILL_RUNIC, 1);
@@ -1936,7 +1823,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         }
     } else if (!strcasecmp(arg2, "laguz") || !strcasecmp(arg2, "Laguz")) {
@@ -1960,7 +1847,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         } else {
             ch->decCurKI(cost);
@@ -1980,7 +1867,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         }
         improve_skill(ch, SKILL_RUNIC, 1);
@@ -2009,7 +1896,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         } else {
             ch->decCurKI(cost);
@@ -2031,7 +1918,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         }
         improve_skill(ch, SKILL_RUNIC, 1);
@@ -2059,7 +1946,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         } else {
             ch->decCurKI(cost);
@@ -2080,7 +1967,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         }
         improve_skill(ch, SKILL_RUNIC, 1);
@@ -2105,7 +1992,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         } else {
             ch->decCurKI(cost);
@@ -2123,7 +2010,7 @@ ACMD(do_runic) {
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
-                obj_to_char(empty, ch);
+                empty->addToLocation(ch);
             }
         }
         improve_skill(ch, SKILL_RUNIC, 1);
@@ -2347,7 +2234,7 @@ ACMD(do_ashcloud) {
     act("@r$n@R takes a handful of ashes and $e breathes ki infused flames at the pile of ashes! The flames and ashes mix and fill the surrounding area with a hot burning ash!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
     ashcloud = read_object(1306, VIRTUAL);
-    obj_to_room(ashcloud, IN_ROOM(ch));
+    ashcloud->addToLocation(ch->getRoom());
     extract_obj(ash);
     GET_OBJ_TIMER(ashcloud) = otimer;
     GET_OBJ_COST(ashcloud) = ocost;
@@ -2893,11 +2780,11 @@ ACMD(do_hydromancy) {
         act("@c$n@C presses $s palms together in front of $s body and water begins to flow up $s body and pools between $s palms. Slowly pulling them apart reveals a @c$p@C as it forms between them!@n",
             true, ch, obj, nullptr, TO_VICT);
         if (GET_OBJ_WEIGHT(obj) + (ch->getCarriedWeight()) <= CAN_CARRY_W(ch))
-            obj_to_char(obj, ch);
+            obj->addToLocation(ch);
         else {
             send_to_char(ch, "You are unable to hold it and so let it go at your feet.\r\n");
             act("@C$n@w drops an ice spike.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(ch->getRoom());
         }
         improve_skill(ch, SKILL_STYLE, 1);
         GET_COOLDOWN(ch) = 10;
@@ -3378,8 +3265,8 @@ ACMD(do_bury) {
                 act("@C$n@Y starts digging in a spot of soft sand. Once $e has an appropriately sized hole $e drops @G$p@Y in and then covers it.@n",
                     true, ch, obj, nullptr, TO_ROOM);
             }
-            obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->removeFromLocation();
+            obj->addToLocation(ch->getRoom());
             obj->setFlag(FlagType::Item, ITEM_BURIED);
         }
     } else if (!strcasecmp(arg, "uncover")) {
@@ -3690,7 +3577,7 @@ ACMD(do_silk) {
                     return;
                 } else {
                     weaved = read_object(16705, VIRTUAL);
-                    obj_to_room(weaved, IN_ROOM(ch));
+                    weaved->addToLocation(ch->getRoom());
                     if (GET_OBJ_VNUM(obj) == 16708) {
                         armor *= 20;
                         str = 4;
@@ -3754,7 +3641,7 @@ ACMD(do_silk) {
                     return;
                 } else {
                     weaved = read_object(16706, VIRTUAL);
-                    obj_to_room(weaved, IN_ROOM(ch));
+                    weaved->addToLocation(ch->getRoom());
                     if (GET_OBJ_VNUM(obj) == 16708) {
                         armor *= 20;
                         str = 4;
@@ -3818,7 +3705,7 @@ ACMD(do_silk) {
                     return;
                 } else {
                     weaved = read_object(16707, VIRTUAL);
-                    obj_to_room(weaved, IN_ROOM(ch));
+                    weaved->addToLocation(ch->getRoom());
                     if (GET_OBJ_VNUM(obj) == 16708) {
                         armor *= 20;
                         str = 4;
@@ -3904,7 +3791,7 @@ ACMD(do_silk) {
             }
             if (super == true) {
                 obj = read_object(16708, VIRTUAL);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 act("@YYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@Y piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 send_to_char(ch, "@YIt's SUPER grand!@n\r\n");
@@ -3913,7 +3800,7 @@ ACMD(do_silk) {
                 ch->decCurKI(cost);
             } else if (prob > perc && prob >= 100) { /* Second Best Quality */
                 obj = read_object(16700, VIRTUAL);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -3921,7 +3808,7 @@ ACMD(do_silk) {
                 ch->decCurKI(cost);
             } else if (prob > perc && prob >= 90) { /* Great Quality */
                 obj = read_object(16701, VIRTUAL);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -3929,7 +3816,7 @@ ACMD(do_silk) {
                 ch->decCurKI(cost);
             } else if (prob > perc && prob >= 80) { /* Good Quality */
                 obj = read_object(16702, VIRTUAL);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -3937,7 +3824,7 @@ ACMD(do_silk) {
                 ch->decCurKI(cost);
             } else if (prob > perc && prob >= 50) { /* Decent Quality */
                 obj = read_object(16703, VIRTUAL);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -3945,7 +3832,7 @@ ACMD(do_silk) {
                 ch->decCurKI(cost);
             } else if (prob > perc) { /* Bad Quality */
                 obj = read_object(16704, VIRTUAL);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 act("@WYou concentrate your ki into your silk sacs and begin to spit silk out of your mouth. You gently weave the silk and in no time at all you have a $p@W piled at your feet!@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W seems to concentrate for a moment before spitting out a golden colored silk from $s mouth. Gently $e weaves the silk and in no time at all $e has a $p@W piled at $s feet!@n",
@@ -4085,16 +3972,16 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     for (objnum = 1110; objnum < 1120; objnum++) {
                         if (objnum <= 1116) {
                             obj = read_object(objnum, VIRTUAL);
-                            obj_to_char(obj, ch);
+                            obj->addToLocation(ch);
                             GET_OBJ_SIZE(obj) = get_size(ch);
                             obj = nullptr;
                         } else {
                             obj = read_object(objnum, VIRTUAL);
-                            obj_to_char(obj, ch);
+                            obj->addToLocation(ch);
                             GET_OBJ_SIZE(obj) = get_size(ch);
                             obj = nullptr;
                             obj = read_object(objnum, VIRTUAL);
-                            obj_to_char(obj, ch);
+                            obj->addToLocation(ch);
                             GET_OBJ_SIZE(obj) = get_size(ch);
                         }
                     }
@@ -4113,7 +4000,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1120, VIRTUAL);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
                     ch->save();
@@ -4130,7 +4017,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1121, VIRTUAL);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
                     ch->save();
@@ -4147,7 +4034,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1122, VIRTUAL);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
                     ch->save();
@@ -4164,7 +4051,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1123, VIRTUAL);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
                     ch->save();
@@ -4181,7 +4068,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1124, VIRTUAL);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
                     ch->save();
@@ -4198,7 +4085,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "You are below the minimum level to equip it.\r\n");
                 } else {
                     obj = read_object(1125, VIRTUAL);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
                     ch->save();
@@ -4214,7 +4101,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
                 } else {
                     obj = read_object(1126, VIRTUAL);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
                     ch->save();
@@ -4230,7 +4117,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
                 } else {
                     obj = read_object(1127, VIRTUAL);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
                     ch->save();
@@ -4906,103 +4793,103 @@ ACMD(do_cook) {
             switch (num) {
                 case 1:
                     meal = read_object(MEAL_STEAK, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 1;
                     expbonus = 5;
                     break;
                 case 2:
                     meal = read_object(MEAL_TOMATO_SOUP, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 2;
                     expbonus = 15;
                     break;
                 case 3:
                     meal = read_object(MEAL_POTATO_SOUP, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 1;
                     expbonus = 20;
                     break;
                 case 4:
                     meal = read_object(MEAL_VEGETABLE_SOUP, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 3;
                     expbonus = 45;
                     break;
                 case 5:
                     meal = read_object(MEAL_MEAT_STEW, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 2;
                     expbonus = 50;
                     break;
                 case 6:
                     meal = read_object(MEAL_CHILI_SOUP, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 0;
                     expbonus = 100;
                     break;
                 case 7:
                     meal = read_object(MEAL_NORM_FISH, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 2;
                     expbonus = 12;
                     break;
                 case 8:
                     meal = read_object(MEAL_GOOD_FISH, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 3;
                     expbonus = 40;
                     break;
                 case 9:
                     meal = read_object(MEAL_GREAT_FISH, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 5;
                     expbonus = 80;
                     break;
                 case 10:
                     meal = read_object(MEAL_BEST_FISH, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 7;
                     expbonus = 125;
                     break;
                 case 11:
                     meal = read_object(MEAL_COOKED_RICE, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 1;
                     expbonus = 8;
                     break;
                 case 12:
                     meal = read_object(MEAL_SUSHI, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 2;
                     expbonus = 20;
                     break;
                 case 13:
                     meal = read_object(MEAL_BREAD, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 1;
                     expbonus = 8;
                     break;
                 case 14:
                     meal = read_object(MEAL_SALAD, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 5;
                     expbonus = 8;
                     break;
                 case 15:
                     meal = read_object(MEAL_APPLEPLUM, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 1;
                     expbonus = 9;
                     break;
                 case 16:
                     meal = read_object(MEAL_FBERRY_MUFFIN, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 3;
                     expbonus = 12;
                     break;
                 case 17:
                     meal = read_object(MEAL_CARAMBOLA_BREAD, VIRTUAL);
-                    obj_to_char(meal, ch);
+                    meal->addToLocation(ch);
                     psbonus = 1;
                     expbonus = 9;
                     break;
@@ -5089,6 +4976,16 @@ ACMD(do_fireshield) {
 
 }
 
+
+const std::unordered_map<std::string, std::pair<int, room_vnum>> warp_map = {
+    {"earth", {ROOM_EARTH, 850}},
+    {"frigid", {ROOM_FRIGID, 4609}},
+    {"kanassa", {ROOM_KANASSA, 15100}},
+    {"namek", {ROOM_NAMEK, 10904}},
+    {"aether", {ROOM_AETHER, 12252}},
+};
+
+
 /* This allows a player to warp from one ocean/sea to another. */
 ACMD(do_warppool) {
 
@@ -5149,126 +5046,40 @@ ACMD(do_warppool) {
         return;
     }
 
-    if (!strcasecmp("earth", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
-        send_to_char(ch, "You are already on Earth!\r\n");
-        return;
-    } else if (!strcasecmp("frigid", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
-        send_to_char(ch, "You are already on Frigid!\r\n");
-        return;
-    } else if (!strcasecmp("kanassa", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
-        send_to_char(ch, "You are already on Kanasssa!\r\n");
-        return;
-    } else if (!strcasecmp("namek", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
-        send_to_char(ch, "You are already on Namek!\r\n");
-        return;
-    } else if (!strcasecmp("aether", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
-        send_to_char(ch, "You are already on Aether!\r\n");
-        return;
-    } else if (!strcasecmp("earth", arg)) {
-        if (prob > perc) {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-            improve_skill(ch, SKILL_WARP, 1);
-        } else {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
-            char_to_room(ch, real_room(850));
-            act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-        }
-    } else if (!strcasecmp("frigid", arg)) {
-        if (prob > perc) {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-            improve_skill(ch, SKILL_WARP, 1);
-        } else {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
-            char_to_room(ch, real_room(4609));
-            act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-        }
-    } else if (!strcasecmp("namek", arg)) {
-        if (prob > perc) {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-            improve_skill(ch, SKILL_WARP, 1);
-        } else {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
-            char_to_room(ch, real_room(10904));
-            act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-        }
-    } else if (!strcasecmp("kanassa", arg)) {
-        if (prob > perc) {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-            improve_skill(ch, SKILL_WARP, 1);
-        } else {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
-            char_to_room(ch, real_room(15100));
-            act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-        }
-    } else if (!strcasecmp("aether", arg)) {
-        if (prob > perc) {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-            improve_skill(ch, SKILL_WARP, 1);
-        } else {
-            act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            improve_skill(ch, SKILL_WARP, 1);
-            char_from_room(ch);
-            char_to_room(ch, real_room(12252));
-            act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI(cost);
-        }
-    } else {
-        send_to_char(ch,
-                     "That is not an acceptable choice. It must be a planet with a large body of water.\n[ earth | frigid | kanassa | namek | aether ]\r\n");
+    std::string a(arg);
+    to_lower(a);
+
+    auto wfind = warp_map.find(a);
+    if(wfind == warp_map.end()) {
+        send_to_char(ch, "That is not a valid planet to warp to.\n[ earth | frigid | kanassa | namek | aether ]\r\n");
         return;
     }
+
+    if (ROOM_FLAGGED(IN_ROOM(ch), wfind->second.first)) {
+        send_to_char(ch, "You are already on that planet!\r\n");
+        return;
+    }
+
+    if (prob > perc) {
+        act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. You lose your concentration and the ritual fails!@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly a puzzled look comes across @c$n's @Cface and the water returns to normal.@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        ch->decCurKI(cost);
+        improve_skill(ch, SKILL_WARP, 1);
+    } else {
+        act("@CYou reach your hand out and begin to swirl nearby water with it. At the same time you release ki into the water and focus your mind on sensing out the distant body of water you wish to travel to. As you complete the ritual you connect the water you disturbed with the water you envisioned and warp between the two points!@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@c$n@C reaches $s hand out and begins to swirl nearby water with it. The water that is being swirled begins to glow @wbright@B blue@C and has a distinct separation from the rest of the waters. Suddenly @c$n@C vanishes into this water! A moment later the waters return to normal.@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        improve_skill(ch, SKILL_WARP, 1);
+        ch->removeFromLocation();
+        ch->addToLocation(world.at(wfind->second.second));
+        act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        ch->decCurKI(cost);
+    }
+
 }
 
 /* This allows a player to block off the exit of a room */
@@ -5376,9 +5187,9 @@ ACMD(do_obstruct) {
     struct obj_data *obj2, *obj3;
 
     obj2 = read_object(79, VIRTUAL);
-    obj_to_room(obj2, newroom);
+    obj2->addToLocation(world.at(newroom));
     obj3 = read_object(79, VIRTUAL);
-    obj_to_room(obj3, IN_ROOM(ch));
+    obj3->addToLocation(ch->getRoom());
 
     int64_t strength = (((GET_INT(ch) * skill) * GET_WIS(ch)) * 20) + (GET_MAX_MANA(ch) * 0.001);
 
@@ -5549,7 +5360,7 @@ ACMD(do_feed) {
     act("@WYou take $p@W and pop it into @C$N@W's mouth!@n", true, ch, obj, vict, TO_CHAR);
     act("@C$n@W takes $p@W and pops it into YOUR mouth!@n", true, ch, obj, vict, TO_VICT);
     act("@C$n@W takes $p@W and pops it into @c$N@W's mouth!@n", true, ch, obj, vict, TO_NOTVICT);
-    mag_objectmagic(vict, obj, "");
+    // TODO: SENZU DAMMIT.
 }
 
 /* This allows players to decapitate a corpse for a sick trophy. */
@@ -5623,7 +5434,6 @@ ACMD(do_spoil) {
 
     body_part = create_obj();
     body_part->vn = NOTHING;
-    IN_ROOM(body_part) = NOWHERE;
     snprintf(part, sizeof(part), "%s", obj->name);
     search_replace(part, "headless", "");
     search_replace(part, "corpse", "");
@@ -5652,8 +5462,8 @@ ACMD(do_spoil) {
     GET_OBJ_VAL(body_part, 5) = 1;
     GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
     GET_OBJ_RENT(body_part) = 0;
-    obj_to_room(body_part, IN_ROOM(ch));
-    obj_from_room(body_part);
-    obj_to_char(body_part, ch);
+    body_part->addToLocation(ch->getRoom());
+    body_part->removeFromLocation();
+    body_part->addToLocation(ch);
 
 }

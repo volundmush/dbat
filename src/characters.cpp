@@ -93,13 +93,13 @@ void char_data::resurrect(ResurrectionMode mode) {
     for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) affected_by.reset(f);
     playerFlags.reset(PLR_PDEATH);
     // Send them to their starting room and have them 'look'.
-    char_from_room(this);
+    removeFromLocation();
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
-        char_to_room(this, real_room(GET_DROOM(this)));
+        addToLocation(world.at(GET_DROOM(this)));
     } else {
-        char_to_room(this, real_room(sensei::getStartRoom(chclass)));
+        addToLocation(world.at(sensei::getStartRoom(chclass)));
     }
-    look_at_room(location, this, 0);
+    look_at_room(getRoom(), this, 0);
 
     // If Costless, there's not going to be any penalties.
     int dur = 100;
@@ -173,9 +173,10 @@ void char_data::ghostify() {
 }
 
 void char_data::teleport_to(IDXTYPE rnum) {
-    char_from_room(this);
-    char_to_room(this, real_room(rnum));
-    look_at_room(IN_ROOM(this), this, 0);
+    removeFromLocation();
+    auto r = dynamic_cast<room_data*>(world.at(rnum));
+    addToLocation(r);
+    look_at_room(r, this, 0);
     update_pos(this);
 }
 
@@ -1037,11 +1038,11 @@ void char_data::login() {
         send_to_char(this, "%s", CONFIG_START_MESSG);
     }
     if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1 && GET_LOADROOM(this) != NOWHERE) {
-        char_from_room(this);
-        char_to_room(this, real_room(real_room(GET_LOADROOM(this))));
+        removeFromLocation();
+        addToLocation(world.at(GET_LOADROOM(this)));
     } else if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1) {
-        char_from_room(this);
-        char_to_room(this, real_room(real_room(300)));
+        removeFromLocation();
+        addToLocation(world.at(300));
     } else {
         look_at_room(IN_ROOM(this), this, 0);
     }
@@ -1352,10 +1353,6 @@ std::map<int, obj_data *> char_data::getEquipment() {
     return out;
 }
 
-obj_data* char_data::getEquipSlot(int slot) {
-    if(slot < 0 || slot > NUM_WEARS-1) return nullptr;
-    return GET_EQ(this, slot);
-}
 
 
 int char_data::getArmor() {

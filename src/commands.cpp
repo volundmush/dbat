@@ -706,8 +706,6 @@ ACMD(do_vstat);
 
 ACMD(do_wake);
 
-ACMD(do_warp);
-
 ACMD(do_warppool);
 
 ACMD(do_razor);
@@ -1049,7 +1047,7 @@ const struct command_info cmd_info[] = {
         {"interest",      "inter",        POS_DEAD,     do_interest,        0,  ADMLVL_IMPL,    0},
         {"iedit",         "ie",           POS_DEAD,     do_iedit,           0,  ADMLVL_IMPL,    0},
         {"invis",         "invi",         POS_DEAD,     do_invis,           0,  ADMLVL_IMMORT,  0},
-        {"iwarp",         "iwarp",        POS_RESTING,  do_warp,            0,  ADMLVL_NONE,    0},
+        //{"iwarp",         "iwarp",        POS_RESTING,  do_warp,            0,  ADMLVL_NONE,    0},
 
         {"junk",          "junk",         POS_RESTING,  do_drop,            0,  ADMLVL_NONE,    SCMD_JUNK},
 

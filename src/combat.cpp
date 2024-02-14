@@ -335,6 +335,7 @@ void handle_disarm(struct char_data *ch, struct char_data *vict) {
 
     if (roll1 < roll2) {
         struct obj_data *obj;
+        auto r = ch->getRoom();
         if (GET_EQ(ch, WEAR_WIELD1) && handled == false) {
             obj = GET_EQ(ch, WEAR_WIELD1);
             act("@y$N@Y manages to disarm you! The @w$p@Y falls from your grasp!@n", true, ch, obj, vict, TO_CHAR);
@@ -342,8 +343,8 @@ void handle_disarm(struct char_data *ch, struct char_data *vict) {
             act("@YYou manage to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", true, ch, obj, vict, TO_VICT);
             perform_remove(ch, 16);
             if (GET_OBJ_VNUM(obj) != 20098) {
-                obj_from_char(obj);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->removeFromLocation();
+                obj->addToLocation(r);
             }
         } else if (GET_EQ(ch, WEAR_WIELD1) && handled == true) {
             obj = GET_EQ(ch, WEAR_WIELD1);
@@ -368,8 +369,8 @@ void handle_disarm(struct char_data *ch, struct char_data *vict) {
             act("@YYou manage to disarm @R$n@Y! The @w$p@Y falls from $s grasp!@n", true, ch, obj, vict, TO_VICT);
             perform_remove(ch, 17);
             if (GET_OBJ_VNUM(obj) != 20098) {
-                obj_from_char(obj);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->removeFromLocation();
+                obj->addToLocation(r);
             }
         }
     }
@@ -2077,6 +2078,8 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
         } else if (TARGET(k) && USER(k)) {
             struct char_data *ch = USER(k);
             struct char_data *vict = TARGET(k);
+            auto r = ch->getRoom();
+            auto kr = vict->getRoom();
 
             if (GET_OBJ_VNUM(k) == 80) { // Tsuihidan
                 if (KICHARGE(k) <= 0) {
@@ -2085,11 +2088,11 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                     extract_obj(k);
                     continue;
                 }
-                if (IN_ROOM(k) != IN_ROOM(vict)) {
+                if (r != kr) {
                     act("@wThe $p@w pursues after you!@n", true, vict, k, nullptr, TO_CHAR);
                     act("@wThe $p@W pursues after @C$n@w!@n", true, vict, k, nullptr, TO_ROOM);
-                    obj_from_room(k);
-                    obj_to_room(k, IN_ROOM(vict));
+                    k->removeFromLocation();
+                    k->addToLocation(kr);
                     continue;
                 } else {
                     act("@RThe $p@R makes a tight turn and rockets straight for you!@n", true, vict, k, nullptr,
@@ -2903,7 +2906,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
             }
 
             obj = read_object(num, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(ch->getRoom());
 
             TARGET(obj) = vict;
             KICHARGE(obj) = damtype(ch, type2, skill, .2);
@@ -2948,7 +2951,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
         }
 
         obj = read_object(num, VIRTUAL);
-        obj_to_room(obj, IN_ROOM(ch));
+        obj->addToLocation(ch->getRoom());
 
         TARGET(obj) = vict;
         KICHARGE(obj) = damtype(ch, type2, skill, .3);
@@ -4720,8 +4723,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 for (rew = vict->contents; rew; rew = next_rew) {
                     next_rew = rew->next_content;
                     if (rew) {
-                        obj_from_char(rew);
-                        obj_to_room(rew, IN_ROOM(vict));
+                        rew->removeFromLocation();
+                        rew->addToLocation(vict->getRoom());
                         founded = 1;
                     }
                 }
@@ -4758,19 +4761,16 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && vict->getCurHealth() - dmg <= 0) {
             if (IN_ARENA(vict)) {
                 send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
-                char_from_room(ch);
-                char_to_room(ch, real_room(17875));
-                look_at_room(IN_ROOM(ch), ch, 0);
-                char_from_room(vict);
-                char_to_room(vict, real_room(17875));
+                auto r = dynamic_cast<room_data*>(world.at(17875));
+                for(auto x : {ch, vict}) {
+                    x->removeFromLocation();
+                    x->addToLocation(r);
+                    look_at_room(r, x, 0);
+                    if (FIGHTING(x)) {
+                        stop_fighting(x);
+                    }
+                }
                 vict->setCurHealth(1);
-                look_at_room(IN_ROOM(vict), vict, 0);
-                if (FIGHTING(vict)) {
-                    stop_fighting(vict);
-                }
-                if (FIGHTING(ch)) {
-                    stop_fighting(ch);
-                }
                 return;
             } else {
                 act("@c$N@w disappears right before dying. $N appears to be immortal.@n", true, ch, nullptr, vict,
@@ -4790,8 +4790,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     stop_fighting(ch);
                 }
                 GET_POS(vict) = POS_SITTING;
-                char_from_room(vict);
-                char_to_room(vict, real_room(sensei::getStartRoom(vict->chclass)));
+                vict->removeFromLocation();
+                vict->addToLocation(world.at((sensei::getStartRoom(vict->chclass))));
+
             }
             return;
         }

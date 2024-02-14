@@ -385,115 +385,6 @@ void affect_join(struct char_data *ch, struct affected_type *af,
 }
 
 
-/* move a player out of a room */
-void char_from_room(struct char_data *ch) {
-    struct char_data *temp;
-    int i;
-    struct room_data *r;
-
-    if (ch == nullptr || !(r = ch->getRoom())) {
-        basic_mud_log("SYSERR: nullptr character or NOWHERE in %s, char_from_room", __FILE__);
-        return;
-    }
-
-    if (FIGHTING(ch) != nullptr && !AFF_FLAGGED(ch, AFF_PURSUIT))
-        stop_fighting(ch);
-    if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
-        ch->affected_by.reset(AFF_PURSUIT);
-
-    REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
-    IN_ROOM(ch) = NOWHERE;
-    ch->next_in_room = nullptr;
-    
-    if(!gameIsLoading) ch->save();
-}
-
-/* place a character in a room */
-void char_to_room(struct char_data *ch, struct room_data* room) {
-    int i;
-
-    ch->next_in_room = room->people;
-    room->people = ch;
-    IN_ROOM(ch) = room->vn;
-
-    /* Stop fighting now, if we left. */
-    if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
-        stop_fighting(FIGHTING(ch));
-        stop_fighting(ch);
-    }
-    if (!IS_NPC(ch)) {
-        if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref.reset(PRF_ARENAWATCH);
-            ARENA_IDNUM(ch) = -1;
-        }
-    }
-
-}
-
-/* place a character in a room */
-void char_to_room(struct char_data *ch, room_rnum room) {
-    if(!ch) return;
-    if(!world.count(room)) return;
-    char_to_room(ch, dynamic_cast<room_data*>(world[room]));
-}
-
-
-/* give an object to a char   */
-void obj_to_char(struct obj_data *object, struct char_data *ch) {
-    if (object && ch) {
-        object->next_content = ch->contents;
-        ch->contents = object;
-        object->carried_by = ch;
-        IN_ROOM(object) = NOWHERE;
-        if ((GET_KAIOKEN(ch) <= 0 && !AFF_FLAGGED(ch, AFF_METAMORPH)) && !OBJ_FLAGGED(object, ITEM_THROW)) {
-
-        } else if (GET_HIT(ch) > (ch->getEffMaxPL())) {
-            if (GET_KAIOKEN(ch) > 0) {
-                send_to_char(ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
-            } else if (AFF_FLAGGED(ch, AFF_METAMORPH)) {
-                send_to_char(ch, "@RYour metamorphosis strains under the additional weight!@n\n");
-            }
-        }
-
-        /* set flag for crash-save system, but not on mobs! */
-        if (GET_OBJ_VAL(object, 0) != 0) {
-            if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {
-                object->level = GET_OBJ_VAL(object, 0);
-            }
-        }
-        if (!IS_NPC(ch))
-            ch->playerFlags.set(PLR_CRASH);
-    } else
-        basic_mud_log("SYSERR: nullptr obj or char passed to obj_to_char.");
-}
-
-
-/* take an object from a char */
-void obj_from_char(struct obj_data *object) {
-    struct obj_data *temp;
-
-    if (object == nullptr) {
-        basic_mud_log("SYSERR: nullptr object passed to obj_from_char.");
-        return;
-    }
-    REMOVE_FROM_LIST(object, object->carried_by->contents, next_content, temp);
-
-    /* set flag for crash-save system, but not on mobs! */
-    if (!IS_NPC(object->carried_by))
-        object->carried_by->playerFlags.set(PLR_CRASH);
-
-    int64_t previous = (object->carried_by->getEffMaxPL());
-
-    if (GET_OBJ_VAL(object, 0) != 0) {
-        if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {
-            object->level = GET_OBJ_VAL(object, 0);
-        }
-    }
-
-    object->carried_by = nullptr;
-    object->next_content = nullptr;
-}
-
 
 /* Return the effect of a piece of armor in position eq_pos */
 static int apply_ac(struct char_data *ch, int eq_pos) {
@@ -564,32 +455,26 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
         act("You stop wearing $p as something prevents you.", false, ch, obj, nullptr, TO_CHAR);
         act("$n stops wearing $p as something prevents $m.", false, ch, obj, nullptr, TO_ROOM);
         /* Changed to drop in inventory instead of the ground. */
-        obj_to_char(obj, ch);
+        obj->addToLocation(ch);
         return;
     }
 
-    GET_EQ(ch, pos) = obj;
-    obj->worn_by = ch;
-    obj->worn_on = pos;
+    obj->removeFromLocation();
+    obj->addToLocation(ch, pos);
 }
 
 
 struct obj_data *unequip_char(struct char_data *ch, int pos) {
     int j;
-    struct obj_data *obj;
+    auto obj = GET_EQ(ch, pos);
 
-    if ((pos < 0 || pos >= NUM_WEARS) || GET_EQ(ch, pos) == nullptr) {
+    if ((pos < 0 || pos >= NUM_WEARS) || !obj) {
         core_dump();
         return (nullptr);
     }
 
-    obj = GET_EQ(ch, pos);
-    obj->worn_by = nullptr;
-    obj->worn_on = -1;
-
-    GET_EQ(ch, pos) = nullptr;
-
-    return (obj);
+    obj->removeFromLocation();
+    return obj;
 }
 
 
@@ -667,7 +552,8 @@ struct char_data *get_char_num(mob_rnum nr) {
 }
 
 
-void obj_to_room(struct obj_data *object, struct room_data *room) {
+// old code, don't delete just yet though...
+static void _obj_to_room(struct obj_data *object, struct room_data *room) {
     struct obj_data *vehicle = nullptr;
 
     if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
@@ -683,11 +569,6 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
         auc_load(object);
     }
 
-    object->next_content = room->contents;
-    room->contents = object;
-    IN_ROOM(object) = room->vn;
-    object->carried_by = nullptr;
-    GET_LAST_LOAD(object) = time(nullptr);
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
@@ -700,8 +581,8 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
             if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
                 (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
                 int hnum = GET_OBJ_VAL(object, 0);
-                struct obj_data *house = read_object(hnum, VIRTUAL);
-                obj_to_room(house, real_room(GET_OBJ_VAL(object, 6)));
+                auto house = read_object(hnum, VIRTUAL);
+                house->addToLocation(world.at(GET_OBJ_VAL(object, 6)));
                 SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
                 SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
             }
@@ -714,7 +595,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                     if(!vehicle) {
                         basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
                     }
-                    obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
+                    vehicle->addToLocation(world.at(GET_OBJ_VAL(object, 3)));
                     if (auto ld = object->getLookDesc(); !ld.empty()) {
                         char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                             if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
@@ -745,15 +626,15 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
         (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
         act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
         int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
-        obj_from_room(object);
-        obj_to_room(object, real_room(numb));
+        object->removeFromLocation();
+        object->addToLocation(world.at(numb));
     }
     if (EXIT(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING &&
         (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
         act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
         int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
-        obj_from_room(object);
-        obj_to_room(object, real_room(numb));
+        object->removeFromLocation();
+        object->addToLocation(world.at(numb));
         if (SECT(IN_ROOM(object)) != SECT_FLYING) {
             act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
         }
@@ -763,85 +644,6 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
             object->level = GET_OBJ_VAL(object, 0);
         }
     }
-}
-
-
-/* put an object in a room */
-void obj_to_room(struct obj_data *object, room_rnum room) {
-    if(!object) return;
-    if(!world.count(room)) return;
-    obj_to_room(object, dynamic_cast<room_data*>(world[room]));
-}
-
-
-/* Take an object from a room */
-void obj_from_room(struct obj_data *object) {
-    struct obj_data *temp;
-
-    if (!object || IN_ROOM(object) == NOWHERE) {
-        basic_mud_log("SYSERR: nullptr object or obj not in a room (%d) passed to obj_from_room",
-            IN_ROOM(object));
-        return;
-    }
-
-    if (GET_OBJ_POSTED(object) && object->in_obj == nullptr) {
-        struct obj_data *obj = GET_OBJ_POSTED(object);
-        if (GET_OBJ_POSTTYPE(object) <= 0) {
-            send_to_room(IN_ROOM(obj), "%s@W shakes loose from %s@W.@n\r\n", obj->getShortDesc(),
-                         object->getShortDesc());
-        } else {
-            send_to_room(IN_ROOM(obj), "%s@W comes loose from %s@W.@n\r\n", object->getShortDesc(),
-                         obj->getShortDesc());
-        }
-        GET_OBJ_POSTED(obj) = nullptr;
-        GET_OBJ_POSTTYPE(obj) = 0;
-        GET_OBJ_POSTED(object) = nullptr;
-        GET_OBJ_POSTTYPE(object) = 0;
-    }
-
-    REMOVE_FROM_LIST(object, object->getRoom()->contents, next_content, temp);
-
-    IN_ROOM(object) = NOWHERE;
-    object->next_content = nullptr;
-
-    if(!gameIsLoading) object->save();
-
-}
-
-
-/* put an object in an object (quaint)  */
-void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
-    struct obj_data *tmp_obj;
-
-    if (!obj || !obj_to || obj == obj_to) {
-        return;
-    }
-
-    obj->next_content = obj_to->contents;
-    obj_to->contents = obj;
-    obj->in_obj = obj_to;
-    tmp_obj = obj->in_obj;
-
-    if(!gameIsLoading) obj->save();
-}
-
-
-/* remove an object from an object */
-void obj_from_obj(struct obj_data *obj) {
-    struct obj_data *temp, *obj_from;
-
-    if (obj->in_obj == nullptr) {
-        basic_mud_log("SYSERR: (%s): trying to illegally extract obj from obj.", __FILE__);
-        return;
-    }
-    obj_from = obj->in_obj;
-    temp = obj->in_obj;
-    REMOVE_FROM_LIST(obj, obj_from->contents, next_content, temp);
-    
-    if(!gameIsLoading) obj->save();
-
-    obj->in_obj = nullptr;
-    obj->next_content = nullptr;
 }
 
 
@@ -1092,10 +894,10 @@ void extract_char_final(struct char_data *ch) {
 
     /* transfer objects to room, if any */
     if(IS_NPC(ch)) {
-        while (ch->contents) {
-            obj = ch->contents;
-            obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+        auto r = ch->getRoom();
+        for(auto obj : ch->getInventory()) {
+            obj->removeFromLocation();
+            obj->addToLocation(r);
         }
 
         /* transfer equipment to room, if any */
@@ -1113,7 +915,7 @@ void extract_char_final(struct char_data *ch) {
             stop_fighting(k);
     }
 
-    char_from_room(ch);
+    ch->removeFromLocation();
 
     if (IS_NPC(ch)) {
         if (GET_MOB_RNUM(ch) != NOTHING)    /* prototyped */
@@ -1170,15 +972,15 @@ void extract_char(struct char_data *ch) {
             /* transfer objects to char, if any */
             while (foll->follower->contents) {
                 auto obj = foll->follower->contents;
-                obj_from_char(obj);
-                obj_to_char(obj, ch);
+                obj->removeFromLocation();
+                obj->addToLocation(ch);
             }
 
             /* transfer equipment to char, if any */
             for (auto i = 0; i < NUM_WEARS; i++)
                 if (GET_EQ(foll->follower, i)) {
                     auto obj = unequip_char(foll->follower, i);
-                    obj_to_char(obj, ch);
+                    obj->addToLocation(ch);
                 }
 
             extract_char(foll->follower);

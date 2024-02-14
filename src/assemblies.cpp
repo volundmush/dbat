@@ -231,14 +231,14 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
                                                                  pCharacter->getRoom()->contents)) == nullptr)
                     bOk = false;
                 else {
-                    obj_from_room(ppComponentObjects[i]);
+                    ppComponentObjects[i]->removeFromLocation();
                 }
             } else {
                 if ((ppComponentObjects[i] = get_obj_in_list_num(lRnum,
                                                                  pCharacter->contents)) == nullptr)
                     bOk = false;
                 else {
-                    obj_from_char(ppComponentObjects[i]);
+                    ppComponentObjects[i]->removeFromLocation();
                 }
             }
         }
@@ -251,9 +251,9 @@ bool assemblyCheckComponents(long lVnum, struct char_data *pCharacter, int extra
         if (pAssembly->pComponents[i].bExtract && bOk && extract_yes == true)
             extract_obj(ppComponentObjects[i]);
         else if (pAssembly->pComponents[i].bInRoom)
-            obj_to_room(ppComponentObjects[i], IN_ROOM(pCharacter));
+            ppComponentObjects[i]->addToLocation(pCharacter->getRoom());
         else
-            obj_to_char(ppComponentObjects[i], pCharacter);
+            ppComponentObjects[i]->addToLocation(pCharacter);
     }
 
     free(ppComponentObjects);

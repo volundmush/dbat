@@ -719,11 +719,12 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
     if (skill > perc) {
         int inroom = GET_ROOM_VNUM(IN_ROOM(ch));
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        char_from_room(ch);
-        char_to_room(ch, IN_ROOM(vict));
+        ch->removeFromLocation();
+        ch->addToLocation(vict->getLocation());
         act("@GYou pursue right after @c$N@G!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@C$n@R pursues after you!@n", true, ch, nullptr, vict, TO_VICT);
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
+        auto newloc = ch->getRoom();
 
         struct follow_type *k, *next;
 
@@ -736,8 +737,8 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
                     act("You follow $N.", true, k->follower, nullptr, ch, TO_CHAR);
                     act("$n follows after $N.", true, k->follower, nullptr, ch, TO_NOTVICT);
                     act("$n follows after you.", true, k->follower, nullptr, ch, TO_VICT);
-                    char_from_room(k->follower);
-                    char_to_room(k->follower, IN_ROOM(ch));
+                    k->follower->removeFromLocation();
+                    k->follower->addToLocation(newloc);
                 }
             }
         }
@@ -802,7 +803,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
                 send_to_room(IN_ROOM(k),
                              "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
                 money = create_money(rand_number(1, 30));
-                obj_to_room(money, IN_ROOM(k));
+                money->addToLocation(k->getRoom());
             } else if (health <= 99 && dice < 4) {
                 send_to_room(IN_ROOM(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
             }
@@ -3585,4 +3586,12 @@ room_direction_data* W_EXIT(room_rnum room, int door) {
 
 room_direction_data* R_EXIT(room_data* room, int door) {
     return room->dir_option[door];
+}
+
+obj_data *GET_EQ(unit_data *u, int i) {
+    auto eq = u->getEquipment();
+    if(auto found = eq.find(i); found != eq.end()) {
+        return found->second;
+    }
+    return nullptr;
 }

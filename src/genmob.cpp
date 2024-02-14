@@ -930,12 +930,7 @@ nlohmann::json char_data::serializeRelations() {
 }
 
 void char_data::deserializeLocation(const nlohmann::json &j) {
-    if(j.contains("in_room")) {
-        auto vn = j["in_room"].get<room_vnum>();
-        char_to_room(this, vn);
-    } else if(j.contains("load_room")) {
-        load_room = j["load_room"].get<room_vnum>();
-    }
+
 }
 
 void char_data::deserializeRelations(const nlohmann::json &j) {

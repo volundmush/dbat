@@ -425,8 +425,8 @@ ACMD(do_throw) {
                 vict->affected_by.reset(AFF_ZANZOKEN);
                 pcost(ch, 0, stcost / 2);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
-                obj_from_char(obj);
-                obj_to_room(obj, IN_ROOM(vict));
+                obj->removeFromLocation();
+                obj->addToLocation(vict->getRoom());
                 return;
             }
 
@@ -454,8 +454,8 @@ ACMD(do_throw) {
                 }
                 LASTATK(ch) = -50;
                 hurt(0, 0, ch, vict, nullptr, 0, 0);
-                obj_from_char(obj);
-                obj_to_room(obj, IN_ROOM(vict));
+                obj->removeFromLocation();
+                obj->addToLocation(vict->getRoom());
                 ch->decCurST(((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
                 if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
                     perc += 20;
@@ -572,8 +572,8 @@ ACMD(do_throw) {
                 damage *= 0.35;
             }
             hurt(0, 0, ch, vict, nullptr, damage, 0);
-            obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(vict));
+            obj->removeFromLocation();
+            obj->addToLocation(vict->getRoom());
 
             ch->decCurST(((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
             if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))

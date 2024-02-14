@@ -472,7 +472,7 @@ ACMD(do_mload) {
             mob_log(ch, "mload: bad mob vnum");
             return;
         }
-        char_to_room(mob, rnum);
+        mob->addToLocation(world.at(rnum));
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
             ch->script->addVar("lastloaded", mob);
         }
@@ -489,9 +489,9 @@ ACMD(do_mload) {
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
             if (CAN_WEAR(object, ITEM_WEAR_TAKE)) {
-                obj_to_char(object, ch);
+                object->addToLocation(ch);
             } else {
-                obj_to_room(object, IN_ROOM(ch));
+                object->addToLocation(ch->getRoom());
             }
             load_otrigger(object);
             return;
@@ -507,18 +507,18 @@ ACMD(do_mload) {
                 load_otrigger(object);
                 return;
             }
-            obj_to_char(object, tch);
+            object->addToLocation(tch);
             load_otrigger(object);
             return;
         }
         cnt = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
         if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
-            obj_to_obj(object, cnt);
+            object->addToLocation(cnt);
             load_otrigger(object);
             return;
         }
         /* neither char nor container found - just dump it in room */
-        obj_to_room(object, IN_ROOM(ch));
+        object->addToLocation(ch->getRoom());
         load_otrigger(object);
         return;
     } else
@@ -623,19 +623,21 @@ ACMD(do_mgoto) {
         return;
     }
 
+    auto r = dynamic_cast<room_data*>(world.at(location));
+
     if (FIGHTING(ch))
         stop_fighting(ch);
 
-    char_from_room(ch);
-    char_to_room(ch, location);
-    enter_wtrigger(ch->getRoom(), ch, -1);
+    ch->removeFromLocation();
+    ch->addToLocation(r);
+    enter_wtrigger(r, ch, -1);
 }
 
 
 /* lets the mobile do a command at another location. Very useful */
 ACMD(do_mat) {
     char arg[MAX_INPUT_LENGTH];
-    room_rnum location, original;
+    room_rnum location;
 
     if (!MOB_OR_IMPL(ch)) {
         send_to_char(ch, "Huh?!?\r\n");
@@ -657,15 +659,15 @@ ACMD(do_mat) {
         return;
     }
 
-    original = IN_ROOM(ch);
-    char_from_room(ch);
-    char_to_room(ch, location);
+    auto original = ch->getRoom();
+    ch->removeFromLocation();
+    ch->addToLocation(world.at(location));
     command_interpreter(ch, argument);
 
     /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
     if (IN_ROOM(ch) == location) {
-        char_from_room(ch);
-        char_to_room(ch, original);
+        ch->removeFromLocation();
+        ch->addToLocation(original);
     }
 }
 
@@ -701,8 +703,10 @@ ACMD(do_mteleport) {
         return;
     }
 
+    auto r = dynamic_cast<room_data*>(world.at(target));
+
     if (!strcasecmp(arg1, "all")) {
-        if (target == IN_ROOM(ch)) {
+        if (r == ch->getRoom()) {
             mob_log(ch, "mteleport all target is itself");
             return;
         }
@@ -711,9 +715,9 @@ ACMD(do_mteleport) {
             next_ch = vict->next_in_room;
 
             if (valid_dg_target(vict, DG_ALLOW_GODS)) {
-                char_from_room(vict);
-                char_to_room(vict, target);
-                enter_wtrigger(ch->getRoom(), ch, -1);
+                vict->removeFromLocation();
+                vict->addToLocation(r);
+                enter_wtrigger(r, ch, -1);
             }
         }
     } else {
@@ -728,9 +732,9 @@ ACMD(do_mteleport) {
         }
 
         if (valid_dg_target(ch, DG_ALLOW_GODS)) {
-            char_from_room(vict);
-            char_to_room(vict, target);
-            enter_wtrigger(ch->getRoom(), ch, -1);
+            vict->removeFromLocation();
+            vict->addToLocation(r);
+            enter_wtrigger(r, ch, -1);
         }
     }
 }
@@ -988,7 +992,7 @@ ACMD(do_mtransform) {
         }
 
         /* put the mob in the same room as ch so extract will work */
-        char_to_room(m, IN_ROOM(ch));
+        m->addToLocation(ch->getRoom());
 
         memcpy(&tmpmob, m, sizeof(*m));
 

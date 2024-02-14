@@ -852,7 +852,7 @@ static int Crash_load(struct char_data *ch) {
                     if (cont_row[j]) { /* no container -> back to ch's inventory */
                         for (; cont_row[j]; cont_row[j] = obj1) {
                             obj1 = cont_row[j]->next_content;
-                            obj_to_char(cont_row[j], ch);
+                            cont_row[j]->addToLocation(ch);
                         }
                         cont_row[j] = nullptr;
                     }
@@ -863,13 +863,13 @@ static int Crash_load(struct char_data *ch) {
                         temp->contents = nullptr; /* should be empty - but who knows */
                         for (; cont_row[0]; cont_row[0] = obj1) {
                             obj1 = cont_row[0]->next_content;
-                            obj_to_obj(cont_row[0], temp);
+                            cont_row[0]->addToLocation(temp);
                         }
                         equip_char(ch, temp, locate - 1);
                     } else { /* object isn't container -> empty content list */
                         for (; cont_row[0]; cont_row[0] = obj1) {
                             obj1 = cont_row[0]->next_content;
-                            obj_to_char(cont_row[0], ch);
+                            cont_row[0]->addToLocation(ch);
                         }
                         cont_row[0] = nullptr;
                     }
@@ -879,7 +879,7 @@ static int Crash_load(struct char_data *ch) {
                     if (cont_row[j]) { /* no container -> back to ch's inventory */
                         for (; cont_row[j]; cont_row[j] = obj1) {
                             obj1 = cont_row[j]->next_content;
-                            obj_to_char(cont_row[j], ch);
+                            cont_row[j]->addToLocation(ch);
                         }
                         cont_row[j] = nullptr;
                     }
@@ -887,17 +887,16 @@ static int Crash_load(struct char_data *ch) {
                 if (j == -locate && cont_row[j]) { /* content list existing */
                     if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
                         /* take item ; fill ; give to char again */
-                        obj_from_char(temp);
-                        temp->contents = nullptr;
+                        temp->removeFromLocation();
                         for (; cont_row[j]; cont_row[j] = obj1) {
                             obj1 = cont_row[j]->next_content;
-                            obj_to_obj(cont_row[j], temp);
+                            cont_row[j]->addToLocation(temp);
                         }
-                        obj_to_char(temp, ch); /* add to inv first ... */
+                        temp->addToLocation(ch); /* add to inv first ... */
                     } else { /* object isn't container -> empty content list */
                         for (; cont_row[j]; cont_row[j] = obj1) {
                             obj1 = cont_row[j]->next_content;
-                            obj_to_char(cont_row[j], ch);
+                            cont_row[j]->addToLocation(ch);
                         }
                         cont_row[j] = nullptr;
                     }
@@ -907,7 +906,7 @@ static int Crash_load(struct char_data *ch) {
                     /* let obj be part of content list
                        but put it at the list's end thus having the items
                        in the same order as before renting */
-                    obj_from_char(temp);
+                    temp->removeFromLocation();
                     if ((obj1 = cont_row[-locate - 1])) {
                         while (obj1->next_content)
                             obj1 = obj1->next_content;
@@ -2985,7 +2984,7 @@ int House_load(room_vnum rvnum) {
                 temp->script = std::make_shared<script_data>(temp);
                 temp->activate();
                 num_objs++;
-                obj_to_room(temp, rrnum);
+                temp->addToLocation(world.at(rrnum));
             }
 
 /*No need to check if its equipped since rooms can't equip things --firebird_223*/
@@ -2993,7 +2992,7 @@ int House_load(room_vnum rvnum) {
                 if (cont_row[j]) { /* no container -> back to ch's inventory */
                     for (; cont_row[j]; cont_row[j] = obj1) {
                         obj1 = cont_row[j]->next_content;
-                        obj_to_room(cont_row[j], rrnum);
+                        cont_row[j]->addToLocation(world.at(rrnum));
                     }
                     cont_row[j] = nullptr;
                 }
@@ -3001,17 +3000,16 @@ int House_load(room_vnum rvnum) {
             if (j == -locate && cont_row[j]) { /* content list existing */
                 if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
                     /* take item ; fill ; give to char again */
-                    obj_from_room(temp);
-                    temp->contents = nullptr;
+                    temp->removeFromLocation();
                     for (; cont_row[j]; cont_row[j] = obj1) {
                         obj1 = cont_row[j]->next_content;
-                        obj_to_obj(cont_row[j], temp);
+                        cont_row[j]->addToLocation(temp);
                     }
-                    obj_to_room(temp, rrnum); /* add to inv first ... */
+                    temp->addToLocation(world.at(rrnum)); /* add to inv first ... */
                 } else { /* object isn't container -> empty content list */
                     for (; cont_row[j]; cont_row[j] = obj1) {
                         obj1 = cont_row[j]->next_content;
-                        obj_to_room(cont_row[j], rrnum);
+                        cont_row[j]->addToLocation(world.at(rrnum));
                     }
                     cont_row[j] = nullptr;
                 }
@@ -3021,7 +3019,7 @@ int House_load(room_vnum rvnum) {
                 /* let obj be part of content list
                    but put it at the list's end thus having the items
                    in the same order as before renting */
-                obj_from_room(temp);
+                temp->removeFromLocation();
                 if ((obj1 = cont_row[-locate - 1])) {
                     while (obj1->next_content)
                         obj1 = obj1->next_content;
@@ -4613,7 +4611,7 @@ void migrate_characters() {
         p->account = a;
         a->adminLevel = std::max(a->adminLevel, GET_ADMLEVEL(ch));
         a->characters.emplace_back(id);
-        ch->location = ch->load_room;
+        ch->location = world[ch->load_room];
         ch->was_in_room = ch->load_room;
         world[id] = ch;
     }

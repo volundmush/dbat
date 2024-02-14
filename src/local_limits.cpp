@@ -1452,16 +1452,8 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 }
                 for (jj = j->contents; jj; jj = next_thing2) {
                     next_thing2 = jj->next_content;    /* Next in inventory */
-                    obj_from_obj(jj);
-
-                    if (j->in_obj)
-                        obj_to_obj(jj, j->in_obj);
-                    else if (j->carried_by)
-                        obj_to_room(jj, IN_ROOM(j->carried_by));
-                    else if (IN_ROOM(j) != NOWHERE)
-                        obj_to_room(jj, IN_ROOM(j));
-                    else
-                        core_dump();
+                    jj->removeFromLocation();
+                    jj->addToLocation(j->getLocation());
                 }
                 extract_obj(j);
             }

@@ -1956,7 +1956,7 @@ void reset_zone(zone_rnum zone) {
                         mob = read_mobile(c.arg1, REAL);
                         /*  Set the mobs loadroom for room_max checks. */
                         MOB_LOADROOM(mob) = c.arg3;
-                        char_to_room(mob, c.arg3);
+                        mob->addToLocation(world.at(c.arg3));
 
                         load_mtrigger(mob);
                         tmob = mob;
@@ -2009,7 +2009,7 @@ void reset_zone(zone_rnum zone) {
                         }
 
                         obj = read_object(c.arg1, REAL);
-                        obj_to_room(obj, c.arg3);
+                        obj->addToLocation(world.at(c.arg3));
                         /* Set the loadroom for room_max checks */
                         OBJ_LOADROOM(obj) = c.arg3;
 
@@ -2032,7 +2032,7 @@ void reset_zone(zone_rnum zone) {
                             break;
                         }
                         obj = read_object(c.arg1, REAL);
-                        obj_to_obj(obj, obj_to);
+                        obj->addToLocation(obj_to);
                         last_cmd = 1;
                         load_otrigger(obj);
                         tobj = obj;
@@ -2050,7 +2050,7 @@ void reset_zone(zone_rnum zone) {
                     if (obj_proto.contains(c.arg1) && (get_vnum_count(objectVnumIndex, c.arg1) < c.arg2) &&
                         mob_load && (rand_number(1, 100) >= c.arg5)) {
                         obj = read_object(c.arg1, REAL);
-                        obj_to_char(obj, mob);
+                        obj->addToLocation(mob);
                         if (GET_MOB_SPEC(mob) != shop_keeper) {
                             randomize_eq(obj);
                         }
@@ -2080,7 +2080,7 @@ void reset_zone(zone_rnum zone) {
                                 IN_ROOM(obj) = NOWHERE;
                                 equip_char(mob, obj, c.arg3);
                             } else
-                                obj_to_char(obj, mob);
+                                obj->addToLocation(mob);
                             tobj = obj;
                             last_cmd = 1;
                         }

@@ -475,7 +475,7 @@ extern SpecialFunc GET_ROOM_SPEC(room_rnum rnum);
 /* char utils ************************************************************/
 
 
-#define IN_ROOM(ch)    ((ch)->in_room)
+#define IN_ROOM(ch)    ((ch)->getRoom() ? (ch)->getRoom()->uid : NOWHERE)
 extern zone_vnum IN_ZONE(struct unit_data *ch);
 #define GET_WAS_IN(ch)    ((ch)->was_in_room)
 #define GET_AGE(ch)     ((ch)->time.currentAge())
@@ -695,7 +695,7 @@ void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val);
 void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val);
 void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
-#define GET_EQ(ch, i)        ((ch)->equipment[i])
+extern obj_data* GET_EQ(unit_data* u, int i);
 
 #define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->vn].func : 0)
 #define GET_MOB_RNUM(mob)    ((mob)->vn)

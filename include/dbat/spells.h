@@ -473,81 +473,13 @@ extern void spellname(int level, struct char_data *ch, \
 
 #define MANUAL_SPELL(spellname)    spellname(level, caster, cvict, ovict, arg);
 
-ASPELL(spell_create_water);
-
-ASPELL(spell_recall);
-
-ASPELL(spell_teleport);
-
-ASPELL(spell_summon);
-
-ASPELL(spell_locate_object);
-
-ASPELL(spell_charm);
-
-ASPELL(spell_information);
-
-ASPELL(spell_identify);
-
-ASPELL(spell_enchant_weapon);
-
-ASPELL(spell_detect_poison);
-
-ASPELL(spell_portal);
-
-ASPELL(art_abundant_step);
 
 /* basic magic calling functions */
 
 extern int find_skill_num(char *name, int sktype);
 
-extern int mag_damage(int level, struct char_data *ch, struct char_data *victim,
-                      int spellnum);
-
-extern void mag_affects(int level, struct char_data *ch, struct char_data *victim,
-                        int spellnum);
-
-extern void mag_groups(int level, struct char_data *ch, int spellnum);
-
-extern void mag_masses(int level, struct char_data *ch, int spellnum);
-
-extern void mag_areas(int level, struct char_data *ch, int spellnum);
-
-extern void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg);
-
-extern void mag_points(int level, struct char_data *ch, struct char_data *victim,
-                       int spellnum);
-
-extern void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
-                          int spellnum);
-
-extern void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
-                           int spellnum);
-
-extern void mag_creations(int level, struct char_data *ch, int spellnum);
-
-extern void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
-                         int spellnum);
-
-extern int call_magic(struct char_data *caster, struct char_data *cvict,
-                      struct obj_data *ovict, int spellnum, int level, int casttype, char *arg);
-
-extern void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
-                            char *argument);
-
-extern int cast_spell(struct char_data *ch, struct char_data *tch,
-                      struct obj_data *tobj, int spellnum, char *arg);
-
-extern int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum,
-                        int level, int cast_stat);
-
-
 /* other prototypes */
 extern void skill_level(int spell, int chclass, int level);
-
-extern void skill_race_class(int spell, int race, int learntype);
-
-extern void skill_class(int skill, int chclass, int learntype);
 
 const char *skill_name(int num);
 

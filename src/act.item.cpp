@@ -226,7 +226,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             }
             while (count > 0) {
                 fruit = read_object(1, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -235,7 +235,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
         case 1129:
             while (count > 0) {
                 fruit = read_object(1131, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -246,7 +246,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count += 2;
             while (count > 0) {
                 fruit = read_object(17212, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -257,7 +257,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count += 2;
             while (count > 0) {
                 fruit = read_object(17213, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -268,7 +268,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count += 1;
             while (count > 0) {
                 fruit = read_object(17215, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -277,7 +277,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
         case 17216:
             while (count > 0) {
                 fruit = read_object(17217, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -288,7 +288,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count += 14;
             while (count > 0) {
                 fruit = read_object(17219, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -299,7 +299,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count = reward;
             while (count > 0) {
                 fruit = read_object(17221, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -310,7 +310,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count = reward;
             while (count > 0) {
                 fruit = read_object(17223, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -321,7 +321,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count = reward;
             while (count > 0) {
                 fruit = read_object(17225, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -334,7 +334,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count = reward;
             while (count > 0) {
                 fruit = read_object(17227, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -345,7 +345,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
             count = reward;
             while (count > 0) {
                 fruit = read_object(3703, VIRTUAL);
-                obj_to_char(fruit, ch);
+                fruit->addToLocation(ch);
                 count -= 1;
             }
             send_to_char(ch, "@YYou harvest @D[@G%d@D]@Y @g%s@Y!@n\r\n", reward, fruit->getShortDesc());
@@ -399,7 +399,7 @@ ACMD(do_garden) {
             }
             if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FERTILE1)) {
                 struct obj_data *soil = read_object(255, VIRTUAL);
-                obj_to_char(soil, ch);
+                soil->addToLocation(ch);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of fertile soil!@n", true,
                     ch, nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of fertile soil!@n", true,
@@ -409,7 +409,7 @@ ACMD(do_garden) {
                 return;
             } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FERTILE2)) {
                 struct obj_data *soil = read_object(255, VIRTUAL);
-                obj_to_char(soil, ch);
+                soil->addToLocation(ch);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of good soil!@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", true,
@@ -419,7 +419,7 @@ ACMD(do_garden) {
                 return;
             } else {
                 struct obj_data *soil = read_object(255, VIRTUAL);
-                obj_to_char(soil, ch);
+                soil->addToLocation(ch);
                 act("@yYou sink your shovel into the soft ground and manage to dig up a pile of soil!@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", true, ch,
@@ -561,8 +561,8 @@ ACMD(do_garden) {
                 act("@GYou calmly dig up @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
                 act("@g$n@G calmly digs up @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
                 ch->decCurST(cost);
-                obj_from_room(obj);
-                obj_to_char(obj, ch);
+                obj->removeFromLocation();
+                obj->addToLocation(ch);
                 GET_OBJ_VAL(obj, VAL_SOILQ) = 0;
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
@@ -602,8 +602,8 @@ ACMD(do_garden) {
                 act("@GYou dig a proper sized hole and plant @g$p@G in it.@n", true, ch, obj, nullptr, TO_CHAR);
                 act("@g$n@G digs a proper sized hole in a planter and plants @g$p@G in it.@n", true, ch, obj, nullptr,
                     TO_ROOM);
-                obj_from_char(obj);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->removeFromLocation();
+                obj->addToLocation(ch->getRoom());
                 ch->decCurST(cost);
                 GET_OBJ_VAL(obj, VAL_MAXMATURE) = 6;
                 GET_OBJ_VAL(obj, VAL_MATGOAL) = 200;
@@ -656,8 +656,8 @@ ACMD(do_garden) {
                     TO_CHAR);
                 act("@g$n@G grabs a hold of @g$p@G and carefully picks it out of the soil.@n", true, ch, obj, nullptr,
                     TO_ROOM);
-                obj_from_room(obj);
-                obj_to_char(obj, ch);
+                obj->removeFromLocation();
+                obj->addToLocation(ch);
                 ch->decCurST(cost);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
@@ -710,12 +710,12 @@ ACMD(do_pack) {
             if (GET_OBJ_VNUM(obj) == 11) {
                 extract_obj(obj);
                 packed = read_object(19085, VIRTUAL);
-                obj_to_room(packed, IN_ROOM(ch));
+                packed->addToLocation(ch->getRoom());
             } else {
                 int fnum = GET_OBJ_VNUM(obj) - 10;
                 packed = read_object(fnum, VIRTUAL);
                 extract_obj(obj);
-                obj_to_room(packed, IN_ROOM(ch));
+                packed->addToLocation(ch->getRoom());
             }
             return;
         } else if (GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 19199 && GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
@@ -783,7 +783,7 @@ ACMD(do_pack) {
                     }
                 }
                 struct obj_data *money_obj = create_money(money);
-                obj_to_room(money_obj, IN_ROOM(ch));
+                money_obj->addToLocation(ch->getRoom());
                 extract_obj(obj);
                 return;
             }
@@ -917,7 +917,7 @@ ACMD(do_deploy) {
                 true, ch, furn, nullptr, TO_CHAR);
             act("@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n",
                 true, ch, furn, nullptr, TO_ROOM);
-            obj_to_room(furn, IN_ROOM(ch));
+            furn->addToLocation(ch->getRoom());
             extract_obj(obj);
             return;
         } else {
@@ -971,15 +971,15 @@ ACMD(do_deploy) {
         else
             GET_OBJ_VAL(door, 0) = 18802;
         GET_OBJ_VAL(door, 2) = rnum;
-        obj_to_room(door, real_room(rnum));
+        door->addToLocation(world.at(rnum));
         struct obj_data *key = read_object(rnum, VIRTUAL);
-        obj_to_char(key, ch);
+        key->addToLocation(ch);
         act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         struct obj_data *foun = read_object(18803, VIRTUAL);
-        obj_to_room(foun, real_room(rnum + 1));
+        foun->addToLocation(world.at(rnum+1));
         extract_obj(obj);
     } else {
         send_to_char(ch,
@@ -1026,7 +1026,7 @@ ACMD(do_twohand) {
 static void start_auction(struct char_data *ch, struct obj_data *obj, int bid) {
     /* Take object from character and set variables */
 
-    obj_from_char(obj);
+    obj->removeFromLocation();
     obj_selling = obj;
     ch_selling = ch;
     ch_buying = nullptr;
@@ -1119,10 +1119,10 @@ void check_auction(uint64_t heartPulse, double deltaTime) {
                 CAP(buf);
                 auc_send_to_all(buf, false);
 
-                sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDesc());
+                sprintf(buf, "%s flies out of the sky and into your hands.\r\n", obj_selling->getShortDesc());
                 CAP(buf);
                 send_to_char(ch_selling, buf);
-                obj_to_char(obj_selling, ch_selling);
+                obj_selling->addToLocation(ch_selling);
 
                 /* Reset auctioning values */
                 obj_selling = nullptr;
@@ -1137,7 +1137,7 @@ void check_auction(uint64_t heartPulse, double deltaTime) {
                 auc_send_to_all(buf, true);
 
                 /* Give the object to the buyer */
-                obj_to_char(obj_selling, ch_buying);
+                obj_selling->addToLocation(ch_buying);
                 sprintf(buf, "%s flies out the sky and into your hands, what a steal!\r\n",
                         obj_selling->getShortDesc());
                 CAP(buf);
@@ -1238,28 +1238,28 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(20, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else if (hunter2 == false) {
                     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(20, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else {
                     k = read_object(20, VIRTUAL);
-                    obj_to_room(k, real_room(room));
+                    k->addToLocation(world.at(room));
                 }
             } else {
                 k = read_object(20, VIRTUAL);
-                obj_to_room(k, real_room(room));
+                k->addToLocation(world.at(room));
             }
             loaded = true;
         }
@@ -1287,28 +1287,28 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(21, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else if (hunter2 == false) {
                     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(21, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else {
                     k = read_object(21, VIRTUAL);
-                    obj_to_room(k, real_room(room));
+                    k->addToLocation(world.at(room));
                 }
             } else {
                 k = read_object(21, VIRTUAL);
-                obj_to_room(k, real_room(room));
+                k->addToLocation(world.at(room));
             }
             loaded = true;
         }
@@ -1336,28 +1336,28 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(22, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else if (hunter2 == false) {
                     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(22, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else {
                     k = read_object(22, VIRTUAL);
-                    obj_to_room(k, real_room(room));
+                    k->addToLocation(world.at(room));
                 }
             } else {
                 k = read_object(22, VIRTUAL);
-                obj_to_room(k, real_room(room));
+                k->addToLocation(world.at(room));
             }
             loaded = true;
         }
@@ -1385,28 +1385,28 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(23, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else if (hunter2 == false) {
                     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(23, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else {
                     k = read_object(23, VIRTUAL);
-                    obj_to_room(k, real_room(room));
+                    k->addToLocation(world.at(room));
                 }
             } else {
                 k = read_object(23, VIRTUAL);
-                obj_to_room(k, real_room(room));
+                k->addToLocation(world.at(room));
             }
             loaded = true;
         }
@@ -1434,28 +1434,28 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(24, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else if (hunter2 == false) {
                     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(24, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else {
                     k = read_object(24, VIRTUAL);
-                    obj_to_room(k, real_room(room));
+                    k->addToLocation(world.at(room));
                 }
             } else {
                 k = read_object(24, VIRTUAL);
-                obj_to_room(k, real_room(room));
+                k->addToLocation(world.at(room));
             }
             loaded = true;
         }
@@ -1483,28 +1483,28 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(25, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else if (hunter2 == false) {
                     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(25, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else {
                     k = read_object(25, VIRTUAL);
-                    obj_to_room(k, real_room(room));
+                    k->addToLocation(world.at(room));
                 }
             } else {
                 k = read_object(25, VIRTUAL);
-                obj_to_room(k, real_room(room));
+                k->addToLocation(world.at(room));
             }
             loaded = true;
         }
@@ -1532,28 +1532,28 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(26, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else if (hunter2 == false) {
                     if ((r_num = real_mobile(DBALL_HUNTER2_VNUM)) == NOBODY) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    char_to_room(hunter, real_room(room));
+                    hunter->addToLocation(world.at(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(26, VIRTUAL);
-                    obj_to_char(k, hunter);
+                    k->addToLocation(hunter);
                 } else {
                     k = read_object(26, VIRTUAL);
-                    obj_to_room(k, real_room(room));
+                    k->addToLocation(world.at(room));
                 }
             } else {
                 k = read_object(26, VIRTUAL);
-                obj_to_room(k, real_room(room));
+                k->addToLocation(world.at(room));
             }
             loaded = true;
         }
@@ -1947,12 +1947,12 @@ void stop_auction(int type, struct char_data *ch) {
         sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDesc());
         CAP(buf);
         send_to_char(ch_selling, buf);
-        obj_to_char(obj_selling, ch_selling);
+        obj_selling->addToLocation(ch_selling);
     } else {
         sprintf(buf, "%s flies out the sky and into your hands.\r\n", obj_selling->getShortDesc());
         CAP(buf);
         send_to_char(ch, buf);
-        obj_to_char(obj_selling, ch);
+        obj_selling->addToLocation(ch);
     }
 
 
@@ -2152,7 +2152,7 @@ ACMD(do_assemble) {
 
     /* Now give the object to the character. */
     if (GET_OBJ_VNUM(pObject) != 1611) {
-        obj_to_char(pObject, ch);
+        pObject->addToLocation(ch);
         if (IS_TRUFFLE(ch)) {
             int count = 0, plused = false, hasstat = 0, failsafe = 0;
 
@@ -2183,7 +2183,7 @@ ACMD(do_assemble) {
             }
         }
     } else {
-        obj_to_room(pObject, IN_ROOM(ch));
+        pObject->addToLocation(ch->getRoom());
         GET_OBJ_TIMER(pObject) = (GET_SKILL(ch, SKILL_SURVIVAL) * 0.12);
     }
 
@@ -2280,8 +2280,8 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     else if (OBJ_FLAGGED(obj, ITEM_NORENT))
         send_to_char(ch, "That isn't worth bagging. Better keep that close if you wanna keep it at all.\r\n");
     else {
-        obj_from_char(obj);
-        obj_to_obj(obj, cont);
+        obj->removeFromLocation();
+        obj->addToLocation(cont);
 
         if (!OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
             act("$n puts $p in $P.", true, ch, obj, cont, TO_ROOM);
@@ -2299,8 +2299,8 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
         /* If object placed in portal or vehicle, move it to the portal destination */
         if ((GET_OBJ_TYPE(cont) == ITEM_PORTAL) ||
             (GET_OBJ_TYPE(cont) == ITEM_VEHICLE)) {
-            obj_from_obj(obj);
-            obj_to_room(obj, real_room(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)));
+            obj->removeFromLocation();
+            obj->addToLocation(world.at(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)));
             if (GET_OBJ_TYPE(cont) == ITEM_PORTAL) {
                 act("What? $U$p disappears from $P in a puff of smoke!",
                     true, ch, obj, cont, TO_ROOM);
@@ -2429,7 +2429,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
         int diff = 0;
         diff = (GET_GOLD(ch) + value) - GOLD_CARRY(ch);
         obj = create_money(diff);
-        obj_to_room(obj, IN_ROOM(ch));
+        obj->addToLocation(ch->getRoom());
         ch->set(CharMoney::Carried, GOLD_CARRY(ch));
         return;
     }
@@ -2462,8 +2462,8 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
             send_to_char(ch, "You aren't playing at that table!\r\n");
             return;
         } else if (get_otrigger(obj, ch)) {
-            obj_from_obj(obj);
-            obj_to_char(obj, ch);
+            obj->removeFromLocation();
+            obj->addToLocation(ch);
             if (OBJ_FLAGGED(cont, ITEM_SHEATH)) {
                 act("You draw $p from $P.", false, ch, obj, cont, TO_CHAR);
                 act("$n draws $p from $P.", true, ch, obj, cont, TO_ROOM);
@@ -2559,8 +2559,8 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj) {
     }
 
     if (can_take_obj(ch, obj) && get_otrigger(obj, ch)) {
-        obj_from_room(obj);
-        obj_to_char(obj, ch);
+        obj->removeFromLocation();
+        obj->addToLocation(ch);
         act("You get $p.", false, ch, obj, nullptr, TO_CHAR);
         act("$n gets $p.", true, ch, obj, nullptr, TO_ROOM);
 
@@ -2735,7 +2735,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
                 send_to_char(ch, "You throw some zenni into the air where it disappears in a puff of smoke!\r\n");
                 act("$n throws some gold into the air where it disappears in a puff of smoke!",
                     false, ch, nullptr, nullptr, TO_ROOM);
-                obj_to_room(obj, RDR);
+                obj->addToLocation(world.at(RDR));
                 act("$p suddenly appears in a puff of orange smoke!", 0, nullptr, obj, nullptr, TO_ROOM);
             } else {
                 char buf[MAX_STRING_LENGTH];
@@ -2754,7 +2754,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
                 act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
                 send_to_char(ch, "You drop some zenni.\r\n");
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 if (GET_ADMLEVEL(ch) > 0) {
                     send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDesc(),
                                 GET_ROOM_VNUM(IN_ROOM(obj)));
@@ -2812,7 +2812,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
         if ((mode == SCMD_DROP) && OBJ_FLAGGED(obj, ITEM_NORENT)) {
             snprintf(buf, sizeof(buf), "You drop $p but it gets lost on the ground!");
             act(buf, false, ch, obj, nullptr, TO_CHAR);
-            obj_from_char(obj);
+            obj->removeFromLocation();
             extract_obj(obj);
             return (0);
         }
@@ -2849,7 +2849,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     snprintf(buf, sizeof(buf), "$n %ss $p.", sname);
     act(buf, true, ch, obj, nullptr, TO_ROOM);
 
-    obj_from_char(obj);
+    obj->removeFromLocation();
 
     switch (mode) {
         case SCMD_DROP:
@@ -2860,7 +2860,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             } else if (ROOM_EFFECT(IN_ROOM(ch)) == 6) {
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_CHAR);
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_ROOM);
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 if (GET_ADMLEVEL(ch) > 0) {
                     send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDesc(),
                                 GET_ROOM_VNUM(IN_ROOM(obj)));
@@ -2868,7 +2868,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
                                    GET_ROOM_VNUM(IN_ROOM(obj)));
                 }
             } else {
-                obj_to_room(obj, IN_ROOM(ch));
+                obj->addToLocation(ch->getRoom());
                 if (GET_ADMLEVEL(ch) > 0) {
                     send_to_imm("IMM DROP: %s dropped %s in room [%d]", GET_NAME(ch), obj->getShortDesc(),
                                 GET_ROOM_VNUM(IN_ROOM(obj)));
@@ -2878,7 +2878,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             }
             return (0);
         case SCMD_DONATE:
-            obj_to_room(obj, RDR);
+            obj->addToLocation(world.at(RDR));
             act("$p suddenly appears in a puff a smoke!", false, nullptr, obj, nullptr, TO_ROOM);
             return (0);
         case SCMD_JUNK:
@@ -3039,8 +3039,8 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
         if (IS_NPC(ch)) {
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
-            obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->removeFromLocation();
+            obj->addToLocation(ch->getRoom());
         }
         return;
     }
@@ -3054,8 +3054,8 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
         if (IS_NPC(ch)) {
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
-            obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->removeFromLocation();
+            obj->addToLocation(ch->getRoom());
         }
         return;
     }
@@ -3064,8 +3064,8 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
         if (IS_NPC(ch)) {
             act("$n@n drops $p because you can't carry anymore.", true, ch, obj, vict, TO_VICT);
             act("$n@n drops $p on the ground since $N's unable to carry it.", true, ch, obj, vict, TO_NOTVICT);
-            obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->removeFromLocation();
+            obj->addToLocation(ch->getRoom());
         }
         return;
     }
@@ -3078,8 +3078,8 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
             return;
         }
     }
-    obj_from_char(obj);
-    obj_to_char(obj, vict);
+    obj->removeFromLocation();
+    obj->addToLocation(vict);
     act("You give $p to $N.", false, ch, obj, vict, TO_CHAR);
     act("$n gives you $p.", false, ch, obj, vict, TO_VICT);
     act("$n gives $p to $N.", true, ch, obj, vict, TO_NOTVICT);
@@ -3253,13 +3253,13 @@ void weight_change_object(struct obj_data *obj, int weight) {
     if (IN_ROOM(obj) != NOWHERE) {
         GET_OBJ_WEIGHT(obj) += weight;
     } else if ((tmp_ch = obj->carried_by)) {
-        obj_from_char(obj);
+        obj->removeFromLocation();
         GET_OBJ_WEIGHT(obj) += weight;
-        obj_to_char(obj, tmp_ch);
+        obj->addToLocation(tmp_ch);
     } else if ((tmp_obj = obj->in_obj)) {
-        obj_from_obj(obj);
+        obj->removeFromLocation();
         GET_OBJ_WEIGHT(obj) += weight;
-        obj_to_obj(obj, tmp_obj);
+        obj->addToLocation(tmp_obj);
     } else {
         basic_mud_log("SYSERR: Unknown attempt to subtract weight from an object.");
         /*  SYSERR_DESC:
@@ -3411,7 +3411,7 @@ ACMD(do_drink) {
                 true, ch, temp, nullptr, TO_CHAR);
             act("@C$n@w uncorks the $p and tips it to $s lips. Drinking it down and then smiling.@n", true, ch, temp,
                 nullptr, TO_ROOM);
-            obj_from_char(temp);
+            temp->removeFromLocation();
             extract_obj(temp);
             ch->restoreKI();
             GET_COND(ch, THIRST) += 8;
@@ -3438,7 +3438,7 @@ ACMD(do_drink) {
     }
     if (IS_NPC(ch)) {     /* Cannot use GET_COND() on mobs. */
         act("$n@w drinks from $p.", true, ch, temp, nullptr, TO_ROOM);
-        obj_from_char(temp);
+        temp->removeFromLocation();
         extract_obj(temp);
         return;
     }
@@ -4125,7 +4125,7 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where) {
     }
 
     wear_message(ch, obj, where);
-    obj_from_char(obj);
+    obj->removeFromLocation();
     equip_char(ch, obj, where);
 }
 
@@ -4347,7 +4347,7 @@ void perform_remove(struct char_data *ch, int pos) {
         if (pos == WEAR_WIELD1 && PLR_FLAGGED(ch, PLR_THANDW)) {
             ch->playerFlags.reset(PLR_THANDW);
         }
-        obj_to_char(unequip_char(ch, pos), ch);
+        unequip_char(ch, pos)->addToLocation(ch);
         act("You stop using $p.", false, ch, obj, nullptr, TO_CHAR);
         act("$n stops using $p.", true, ch, obj, nullptr, TO_ROOM);
         if (previous > GET_HIT(ch)) {

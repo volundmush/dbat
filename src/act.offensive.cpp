@@ -181,7 +181,7 @@ ACMD(do_geno) {
     }
 
     obj = read_object(83, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(vict));
+    obj->addToLocation(vict->getRoom());
 
     GET_CHARGE(ch) += GET_MAX_HIT(ch) / 10;
     TARGET(obj) = vict;
@@ -296,7 +296,7 @@ ACMD(do_genki) {
     struct obj_data *obj;
 
     obj = read_object(82, VIRTUAL);
-    obj_to_room(obj, IN_ROOM(vict));
+    obj->addToLocation(vict->getRoom());
 
     TARGET(obj) = vict;
     KICHARGE(obj) = damtype(ch, 40, prob, attperc);

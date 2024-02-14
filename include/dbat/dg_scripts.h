@@ -386,9 +386,6 @@ extern void sub_write(char *arg, char_data *ch, int8_t find_invis, int targets);
 extern void send_to_zone(char *messg, zone_rnum zone);
 
 /* from dg_misc.c */
-extern void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
-                       int type, char *cmd);
-
 extern void do_dg_affect(void *go, struct script_data *sc, trig_data *trig,
                          int type, char *cmd);
 

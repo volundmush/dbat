@@ -152,8 +152,7 @@ std::unordered_map<int, obj_data*> unit_data::getEquipment() {
 }
 
 unit_data* unit_data::getLocation() {
-    if(auto found = world.find(location); found != world.end()) return found->second;
-    return nullptr;
+    return location;
 }
 
 room_data* unit_data::getRoom() {
@@ -634,9 +633,10 @@ bool unit_data::flipFlag(FlagType type, int flag) {
 nlohmann::json unit_data::serializeLocation() {
     nlohmann::json j = nlohmann::json::object();
 
-    if(location != NOWHERE) {
-        j["location"] = location;
+    if(location) {
+        j["location"] = location->getUID();
         if(locationType) j["locationType"] = locationType;
+        if(auto co = coords.serialize(); !co.empty()) j["coords"] = co;
     }
 
     return j;
@@ -647,4 +647,28 @@ nlohmann::json unit_data::serializeRelations() {
 
 
     return j;
+}
+
+
+void unit_data::removeFromLocation() {
+    if(location) {
+        basic_mud_log("Attempted to remove unit '%d: %s' from location, but location was not found.", uid, getName().c_str());
+        locationType = -1;
+        coords.clear();
+        return;
+    }
+    
+    location->handleRemove(this);
+
+    location = nullptr;
+    locationType = -1;
+    coords.clear();
+    
+}
+
+
+void unit_data::handleRemove(unit_data *u) {
+
+    // remove uid from loc->contents
+    std::erase_if(contents, [&](auto ud) {return ud == u;});
 }

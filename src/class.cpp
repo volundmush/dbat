@@ -572,37 +572,37 @@ void do_start(struct char_data *ch) {
 
     /* assign starting items etc...*/
     obj = read_object(17, VIRTUAL);
-    obj_to_char(obj, ch);
+    obj->addToLocation(ch);
     if (IS_HOSHIJIN(ch)) {
         obj = read_object(3428, VIRTUAL);
-        obj_to_char(obj, ch);
+        obj->addToLocation(ch);
     }
     struct obj_data *obj2;
     obj2 = read_object(17998, VIRTUAL);
-    obj_to_char(obj2, ch);
+    obj2->addToLocation(ch);
 
     if (IS_TAPION(ch) || IS_GINYU(ch)) {
         struct obj_data *throw_obj;
         throw_obj = read_object(19050, VIRTUAL);
-        obj_to_char(throw_obj, ch);
+        throw_obj->addToLocation(ch);
         if (rand_number(1, 2) == 2) {
             throw_obj = nullptr;
             throw_obj = read_object(19050, VIRTUAL);
-            obj_to_char(throw_obj, ch);
+            throw_obj->addToLocation(ch);
         }
         if (rand_number(1, 2) == 2) {
             throw_obj = nullptr;
             throw_obj = read_object(19050, VIRTUAL);
-            obj_to_char(throw_obj, ch);
+            throw_obj->addToLocation(ch);
         }
 
     } else if (IS_DABURA(ch)) {
         struct obj_data *throw_obj;
         throw_obj = read_object(19055, VIRTUAL);
-        obj_to_char(throw_obj, ch);
+        throw_obj->addToLocation(ch);
         throw_obj = nullptr;
         throw_obj = read_object(19055, VIRTUAL);
-        obj_to_char(throw_obj, ch);
+        throw_obj->addToLocation(ch);
     }
 
     send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch), GET_USER(ch));

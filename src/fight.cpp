@@ -691,7 +691,6 @@ void remove_limb(struct char_data *vict, int num) {
 
     body_part = create_obj();
     body_part->vn = NOTHING;
-    IN_ROOM(body_part) = NOWHERE;
 
     switch (num) {
         case 0:
@@ -741,7 +740,7 @@ void remove_limb(struct char_data *vict, int num) {
     body_part->setShortDesc(part);
 
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;
-    body_part->wear_flags.set(ITEM_WEAR_TAKE);
+    body_part->setFlag(FlagType::Wear, ITEM_WEAR_TAKE);
     body_part->setFlag(FlagType::Item, ITEM_UNIQUE_SAVE);
     GET_OBJ_VAL(body_part, 0) = 0;
     GET_OBJ_VAL(body_part, 1) = 0;
@@ -751,7 +750,7 @@ void remove_limb(struct char_data *vict, int num) {
     GET_OBJ_VAL(body_part, 5) = 1;
     GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
     GET_OBJ_RENT(body_part) = 0;
-    obj_to_room(body_part, IN_ROOM(vict));
+    body_part->addToLocation(vict->getRoom());
 }
 
 /* Weapon attack texts */
@@ -1460,21 +1459,12 @@ static void make_pcorpse(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_ASHED)) {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
         struct obj_data *ashes;
-        if (rand_number(1, 3) == 2) {
+        auto r = ch->getRoom();
+        auto ashcount = rand_number(1,3);
+        while(ashcount) {
             ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-        } else if (rand_number(1, 2) == 2) {
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-        } else {
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+            ashes->addToLocation(r);
+            ashcount--;
         }
     }
 
@@ -1507,8 +1497,8 @@ static void make_pcorpse(struct char_data *ch) {
                 (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199)) {
                 continue;
             } else {
-                obj_from_char(obj);
-                obj_to_obj(obj, corpse);
+                obj->removeFromLocation();
+                obj->addToLocation(corpse);
                 continue;
             }
         } else {
@@ -1527,12 +1517,12 @@ static void make_pcorpse(struct char_data *ch) {
          */
         if (IS_NPC(ch) || ch->desc) {
             money = create_money(GET_GOLD(ch));
-            obj_to_obj(money, corpse);
+            money->addToLocation(corpse);
         }
         ch->set(CharMoney::Carried, 0);
     }
 
-    obj_to_room(corpse, IN_ROOM(ch));
+    corpse->addToLocation(ch->getRoom());
 }
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
@@ -1627,22 +1617,12 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
     if (AFF_FLAGGED(ch, AFF_ASHED)) {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        struct obj_data *ashes;
-        if (rand_number(1, 3) == 2) {
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-        } else if (rand_number(1, 2) == 2) {
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-        } else {
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+        auto ashcount = rand_number(1,3);
+        auto r = ch->getRoom();
+        while(ashcount) {
+            auto ashes = read_object(1305, VIRTUAL);
+            ashes->addToLocation(r);
+            ashcount--;
         }
     }
 
@@ -1680,7 +1660,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
                     struct obj_data *meat;
                     send_to_char(tch, "The choice edible meat is preserved because of your skill.\r\n");
                     meat = read_object(1612, VIRTUAL);
-                    obj_to_char(meat, ch);
+                    meat->addToLocation(ch);
                     char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                     sprintf(nick, "@RRaw %s@R Steak@n", GET_NAME(ch));
                     sprintf(nick2, "Raw %s Steak", ch->name);
@@ -1719,7 +1699,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
         for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            obj_from_char(obj);
+            obj->removeFromLocation();
             extract_obj(obj);
         }
     }
@@ -1737,7 +1717,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         for (i = 0; i < NUM_WEARS; i++)
             if (GET_EQ(ch, i)) {
                 remove_otrigger(GET_EQ(ch, i), ch);
-                obj_to_obj(unequip_char(ch, i), corpse);
+                unequip_char(ch, i)->addToLocation(corpse);
                 eqdrop = true;
             }
     }
@@ -1752,14 +1732,14 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
          */
         if (IS_NPC(ch) || ch->desc) {
             money = create_money(GET_GOLD(ch));
-            obj_to_obj(money, corpse);
+            money->addToLocation(corpse);
         }
         ch->set(CharMoney::Carried, 0);
     }
     if (!MOB_FLAGGED(ch, MOB_HUSK)) {
         ch->contents = nullptr;
     }
-    obj_to_room(corpse, IN_ROOM(ch));
+    corpse->addToLocation(ch->getRoom());
 
 }
 
@@ -1955,7 +1935,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         death_cry(ch);
 
     update_pos(ch);
-
+    auto r = ch->getRoom();
     if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_DUMMY)) {
         int shadowed = false;
         ch->decCurHealthPercent(1);
@@ -1965,7 +1945,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             send_to_room(IN_ROOM(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(20, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON2(ch)) {
             struct obj_data *obj = nullptr;
@@ -1973,7 +1953,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             send_to_room(IN_ROOM(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(21, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON3(ch)) {
             struct obj_data *obj = nullptr;
@@ -1981,7 +1961,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             send_to_room(IN_ROOM(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(22, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON4(ch)) {
             struct obj_data *obj = nullptr;
@@ -1989,7 +1969,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             send_to_room(IN_ROOM(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(23, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON5(ch)) {
             struct obj_data *obj = nullptr;
@@ -1997,7 +1977,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             send_to_room(IN_ROOM(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(24, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON6(ch)) {
             struct obj_data *obj = nullptr;
@@ -2005,7 +1985,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             send_to_room(IN_ROOM(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(25, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON7(ch)) {
             struct obj_data *obj = nullptr;
@@ -2013,7 +1993,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             send_to_room(IN_ROOM(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
 
             obj = read_object(26, VIRTUAL);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj->addToLocation(r);
             shadowed = true;
         }
         make_corpse(ch, killer);
@@ -2154,8 +2134,9 @@ void die(struct char_data *ch, struct char_data *killer) {
                 } else {
                     send_to_all("@R%s@r dies in the water of the Arena and is disqualified!@n\r\n", GET_NAME(ch));
                 }
-                char_from_room(ch);
-                char_to_room(ch, real_room(17875));
+                ch->removeFromLocation();
+                // God damned VNUMS.
+                ch->addToLocation(world.at(17875));
                 ch->decCurHealthPercent(1, 1);
                 look_at_room(IN_ROOM(ch), ch, 0);
                 final_combat_resolve(ch);
