@@ -2645,8 +2645,45 @@ ACMD(do_get) {
         return;
     }
 
-    if (!*arg1)
+    if (!*arg1) {
         send_to_char(ch, "Get what?\r\n");
+        return;
+    }
+
+    std::vector<unit_data*> locations;
+
+    if(arg2 && strlen(arg2)) {
+        Searcher searcher(ch, arg2);
+        searcher.setAllowAll().setAllowAsterisk().addLocation(ch).addInventory(ch).addEquipment(ch);
+        auto results = searcher.search();
+        if(results.empty()) {
+            send_to_char(ch, "You don't have %s %s.\r\n", AN(arg2), arg2);
+            return;
+        }
+        locations.insert(locations.end(), results.begin(), results.end());
+    } else {
+        locations.push_back(ch->getLocation());
+    }
+
+    Searcher searcher(ch, arg1);
+    for(auto loc : locations) {
+        // TODO: validate that loc is something player can access...
+
+        searcher.addInventory(loc);
+    }
+    auto results = searcher.search();
+    if(results.empty()) {
+        send_to_char(ch, "You don't see %s %s here.\r\n", AN(arg1), arg1);
+        return;
+    }
+
+    for(auto o : results) {
+        // TODO: Filter whether thing can be gotten...
+
+        o->removeFromLocation();
+        o->addToLocation(ch);
+    }
+
     else if (!*arg2)
         get_from_room(ch, arg1, 1);
     else if (is_number(arg1) && !*arg3)

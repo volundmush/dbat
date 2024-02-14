@@ -1798,7 +1798,7 @@ class Searcher {
             static_assert(std::is_base_of<unit_data, T>::value, "T must be derived from unit_data");
             std::vector<T*> filtered;
             for (auto* unit : search()) {
-                if (T* casted = dynamic_cast<T*>(unit); casted != nullptr) {
+                if (T* casted = dynamic_cast<T*>(unit); casted) {
                     filtered.push_back(casted);
                 }
             }
