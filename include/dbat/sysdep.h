@@ -193,3 +193,5 @@ extern bool isMigrating;
 
 using DgResults = std::variant<std::string, unit_data*>;
 using DgHolder = std::variant<std::string, unit_data*, std::function<DgResults(struct trig_data*, const std::string& field, const std::string& args)>>;
+
+using Event = std::pair<std::string, nlohmann::json>;

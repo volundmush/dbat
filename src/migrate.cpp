@@ -1,5 +1,4 @@
 #include "dbat/migrate.h"
-
 #include "dbat/comm.h"
 #include "dbat/utils.h"
 #include "dbat/dg_scripts.h"
@@ -676,7 +675,7 @@ static int Crash_load(struct char_data *ch) {
             ex[1] = asciiflag_conv(f2);
             ex[2] = asciiflag_conv(f3);
             ex[3] = asciiflag_conv(f4);
-            for(auto i = 0; i < temp->extra_flags.size(); i++) temp->setFlag(FlagType::Item, i, IS_SET_AR(ex, i));
+            for(auto i = 0; i < NUM_ITEM_FLAGS; i++) temp->setFlag(FlagType::Item, i, IS_SET_AR(ex, i));
             GET_OBJ_VAL(temp, 8) = t[13];
             GET_OBJ_VAL(temp, 9) = t[14];
             GET_OBJ_VAL(temp, 10) = t[15];
@@ -708,7 +707,7 @@ static int Crash_load(struct char_data *ch) {
                 wear[1] = t[2];
                 wear[2] = t[3];
                 wear[3] = t[4];
-                for(auto i = 0; i < temp->wear_flags.size(); i++) temp->wear_flags.set(i, IS_SET_AR(wear, i));
+                for(auto i = 0; i < NUM_ITEM_WEARS; i++) temp->setFlag(FlagType::Wear, IS_SET_AR(wear, i));
 
                 temp->weight = t[5];
                 temp->cost = t[6];
@@ -1164,7 +1163,7 @@ static void mob_autobalance(const std::shared_ptr<npc_proto>& ch) {
 
 }
 
-static int parse_simple_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch, mob_vnum nr) {
+static int parse_simple_mob(FILE *mob_f, nlohmann::json& ch, mob_vnum nr) {
     int j, t[10];
     char line[READ_SIZE];
 
@@ -1180,16 +1179,14 @@ static int parse_simple_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch, m
         return 0;
     }
 
-    ch->nums[CharNum::Level] = t[0];
+    ch["nums"].push_back(std::make_pair(CharNum::Level, t[0]));
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
-    ch->stats[CharStat::PowerLevel] = t[3];
-    ch->stats[CharStat::Ki] = t[4];
-    ch->stats[CharStat::Stamina] = t[5];
+    ch["stats"].push_back(std::make_pair(CharStat::PowerLevel, t[3]));
+    ch["stats"].push_back(std::make_pair(CharStat::Ki, t[4]));
+    ch["stats"].push_back(std::make_pair(CharStat::Stamina, t[5]));
 
-    ch->mob_specials.damnodice = t[6];
-    ch->mob_specials.damsizedice = t[7];
-    GET_DAMAGE_MOD(ch) = t[8];
+    ch["damage_mod"] = t[8];
 
     if (!get_line(mob_f, line)) {
         basic_mud_log("SYSERR: Format error in mob #%d, second line after S flag\n"
@@ -1202,17 +1199,12 @@ static int parse_simple_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch, m
             "...expecting line of form '# # # #'", nr);
         return 0;
     }
+    ch["moneys"].push_back(std::make_pair(CharMoney::Carried, t[0]));
+    ch["race"] = t[2];
+    ch["chclass"] = t[3];
 
-    ch->moneys[CharMoney::Carried] = t[0];
-    ch->race = static_cast<RaceID>(t[2]);
-
-    ch->chclass = static_cast<SenseiID>(t[3]);
 
     /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
-
-    if (!IS_HUMAN(ch))
-        ch->affected_by.set(AFF_INFRAVISION);
-
     if (!get_line(mob_f, line)) {
         basic_mud_log("SYSERR: Format error in last line of mob #%d\n"
             "...expecting line of form '# # #', but file ended!", nr);
@@ -1225,16 +1217,10 @@ static int parse_simple_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch, m
         return 0;
     }
 
-    GET_DEFAULT_POS(ch) = t[1];
-    ch->appearances[CharAppearance::Sex] = t[2];
+    auto sex = t[2];
+    ch["appearances"].push_back(std::make_pair(CharAppearance::Sex, t[2]));
 
-    SPEAKING(ch) = MIN_LANGUAGES;
-    set_height_and_weight_by_race(ch);
-
-
-    if (ch->mobFlags.test(MOB_AUTOBALANCE)) {
-        mob_autobalance(ch);
-    }
+    set_height_and_weight_by_race(ch, sex);
 
     return 1;
 }
@@ -1259,109 +1245,15 @@ static int parse_simple_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch, m
 #define RANGE(low, high)    \
     (num_arg = MAX((low), MIN((high), (num_arg))))
 
-static void interpret_espec(const char *keyword, const char *value, const std::shared_ptr<npc_proto>& ch, mob_vnum nr) {
-    int num_arg = 0, matched = false;
-    int num, num2, num3, num4, num5, num6;
-    struct affected_type af;
+static void interpret_espec(const char *keyword, const char *value, nlohmann::json& ch, mob_vnum nr) {
 
-    /*
-   * If there isn't a colon, there is no value.  While Boolean options are
-   * possible, we don't actually have any.  Feel free to make some.
-  */
-    if (value)
-        num_arg = atoi(value);
-
-    CASE("BareHandAttack") {
-        RANGE(0, 99);
-        ch->mob_specials.attack_type = num_arg;
-    }
-
-    CASE("Size") {
-        RANGE(SIZE_UNDEFINED, NUM_SIZES - 1);
-        ch->size = num_arg;
-    }
-
-    CASE("Str") {
-        RANGE(0, 200);
-        ch->attributes[CharAttribute::Strength] = num_arg;
-    }
-
-    CASE("StrAdd") {
-        basic_mud_log("mob #%d trying to set StrAdd, rebalance its strength.",
-            ch->vn);
-    }
-
-    CASE("Int") {
-        RANGE(0, 200);
-        ch->attributes[CharAttribute::Intelligence] = num_arg;
-    }
-
-    CASE("Wis") {
-        RANGE(0, 200);
-        ch->attributes[CharAttribute::Wisdom] = num_arg;
-    }
-
-    CASE("Dex") {
-        RANGE(0, 200);
-        ch->attributes[CharAttribute::Agility] = num_arg;
-    }
-
-    CASE("Con") {
-        RANGE(0, 200);
-        ch->attributes[CharAttribute::Constitution] = num_arg;
-    }
-
-    CASE("Cha") {
-        RANGE(0, 200);
-        ch->attributes[CharAttribute::Speed] = num_arg;
-    }
-
-    CASE("Hit") {
-        RANGE(0, 99999);
-        //GET_HIT(ch) = num_arg;
-    }
-
-    CASE("Mana") {
-        RANGE(0, 99999);
-        //GET_MANA(ch) = num_arg;
-    }
-
-    CASE("Moves") {
-        RANGE(0, 99999);
-        //GET_MOVE(ch) = num_arg;
-    }
-
-    CASE("Affect") {
-
-    }
-
-    CASE("AffectV") {
-
-    }
-
-    CASE("Feat") {
-        sscanf(value, "%d %d", &num, &num2);
-    }
-
-    CASE("Skill") {
-        sscanf(value, "%d %d", &num, &num2);
-    }
-
-    CASE("SkillMod") {
-        sscanf(value, "%d %d", &num, &num2);
-    }
-
-    if (!matched) {
-        basic_mud_log("SYSERR: Warning: unrecognized espec keyword %s in mob #%d",
-            keyword, nr);
-    }
 }
 
 #undef CASE
 #undef BOOL_CASE
 #undef RANGE
 
-static void parse_espec(char *buf, const std::shared_ptr<npc_proto>& ch, mob_vnum nr) {
+static void parse_espec(char *buf, nlohmann::json& ch, mob_vnum nr) {
     char *ptr;
 
     if ((ptr = strchr(buf, ':')) != nullptr) {
@@ -1372,15 +1264,18 @@ static void parse_espec(char *buf, const std::shared_ptr<npc_proto>& ch, mob_vnu
     interpret_espec(buf, ptr, ch, nr);
 }
 
-static void mob_stats(const std::shared_ptr<npc_proto>& mob) {
-    int start = mob->nums[CharNum::Level] * 0.5, finish = mob->nums[CharNum::Level];
+static void mob_stats(nlohmann::json& mob) {
+    auto level = mob["level"].get<int>();
+    int start = level * 0.5, finish = level;
 
     if (finish < 20)
         finish = 20;
 
     std::unordered_map<CharAttribute, int> setTo;
 
-    if (!IS_HUMANOID(mob)) {
+    auto race = mob["race"].get<RaceID>();
+
+    if ((race == RaceID::Serpent || race == RaceID::Animal)) {
         setTo[CharAttribute::Strength] = rand_number(start, finish);
         setTo[CharAttribute::Intelligence] = rand_number(start, finish) - 30;
         setTo[CharAttribute::Wisdom] = rand_number(start, finish) - 30;
@@ -1388,42 +1283,42 @@ static void mob_stats(const std::shared_ptr<npc_proto>& mob) {
         setTo[CharAttribute::Constitution] = rand_number(start + 5, finish);
         setTo[CharAttribute::Speed] = rand_number(start, finish);
     } else {
-        if (IS_SAIYAN(mob)) {
+        if (race == RaceID::Saiyan) {
             setTo[CharAttribute::Strength] = rand_number(start + 10, finish);
             setTo[CharAttribute::Intelligence] = rand_number(start, finish - 10);
             setTo[CharAttribute::Wisdom] = rand_number(start, finish - 5);
             setTo[CharAttribute::Agility] = rand_number(start, finish);
             setTo[CharAttribute::Constitution] = rand_number(start + 5, finish);
             setTo[CharAttribute::Speed] = rand_number(start + 5, finish);
-        } else if (IS_KONATSU(mob)) {
+        } else if (race == RaceID::Konatsu) {
             setTo[CharAttribute::Strength] = rand_number(start, finish - 10);
             setTo[CharAttribute::Intelligence] = rand_number(start, finish);
             setTo[CharAttribute::Wisdom] = rand_number(start, finish);
             setTo[CharAttribute::Agility] = rand_number(start + 10, finish);
             setTo[CharAttribute::Constitution] = rand_number(start, finish);
             setTo[CharAttribute::Speed] = rand_number(start, finish);
-        } else if (IS_ANDROID(mob)) {
+        } else if (race == RaceID::Android) {
             setTo[CharAttribute::Strength] = rand_number(start, finish);
             setTo[CharAttribute::Intelligence] = rand_number(start, finish);
             setTo[CharAttribute::Wisdom] = rand_number(start, finish - 10);
             setTo[CharAttribute::Agility] = rand_number(start, finish);
             setTo[CharAttribute::Constitution] = rand_number(start, finish);
             setTo[CharAttribute::Speed] = rand_number(start, finish);
-        } else if (IS_MAJIN(mob)) {
+        } else if (race == RaceID::Majin) {
             setTo[CharAttribute::Strength] = rand_number(start, finish);
             setTo[CharAttribute::Intelligence] = rand_number(start, finish - 10);
             setTo[CharAttribute::Wisdom] = rand_number(start, finish - 5);
             setTo[CharAttribute::Agility] = rand_number(start, finish);
             setTo[CharAttribute::Constitution] = rand_number(start + 15, finish);
             setTo[CharAttribute::Speed] = rand_number(start, finish);
-        } else if (IS_TRUFFLE(mob)) {
+        } else if (race == RaceID::Tuffle) {
             setTo[CharAttribute::Strength] = rand_number(start, finish - 10);
             setTo[CharAttribute::Intelligence] = rand_number(start + 15, finish);
             setTo[CharAttribute::Wisdom] = rand_number(start, finish);
             setTo[CharAttribute::Agility] = rand_number(start, finish);
             setTo[CharAttribute::Constitution] = rand_number(start, finish);
             setTo[CharAttribute::Speed] = rand_number(start, finish);
-        } else if (IS_ICER(mob)) {
+        } else if (race == RaceID::Icer) {
             setTo[CharAttribute::Strength] = rand_number(start + 5, finish);
             setTo[CharAttribute::Intelligence] = rand_number(start, finish);
             setTo[CharAttribute::Wisdom] = rand_number(start, finish);
@@ -1446,11 +1341,11 @@ static void mob_stats(const std::shared_ptr<npc_proto>& mob) {
         } else if(val < 5) {
             val = rand_number(5, 8);
         }
-        mob->attributes[attr] = val;
+        mob["attributes"].push_back(std::make_pair(attr, val));
     }
 }
 
-static int parse_enhanced_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch, mob_vnum nr) {
+static int parse_enhanced_mob(FILE *mob_f, nlohmann::json& ch, mob_vnum nr) {
     char line[READ_SIZE];
 
     parse_simple_mob(mob_f, ch, nr);
@@ -1469,12 +1364,12 @@ static int parse_enhanced_mob(FILE *mob_f, const std::shared_ptr<npc_proto>& ch,
     return 0;
 }
 
-static int parse_mobile_from_file(FILE *mob_f, const std::shared_ptr<npc_proto>& ch) {
+static int parse_mobile_from_file(FILE *mob_f, nlohmann::json& ch) {
     int j, t[10], retval;
     char line[READ_SIZE], *tmpptr, letter;
     char f1[128], f2[128], f3[128], f4[128], f5[128], f6[128];
     char f7[128], f8[128], buf2[128];
-    mob_vnum nr = ch->vn;
+    mob_vnum nr = ch["vn"];
     auto &z = zone_table[real_zone_by_thing(nr)];
     z.mobiles.insert(nr);
 
@@ -1487,14 +1382,17 @@ static int parse_mobile_from_file(FILE *mob_f, const std::shared_ptr<npc_proto>&
     sprintf(buf2, "mob vnum %d", nr);   /* sprintf: OK (for 'buf2 >= 19') */
 
     /***** String data *****/
-    ch->name = fread_string(mob_f, buf2);
-    tmpptr = ch->short_description = fread_string(mob_f, buf2);
-    if (tmpptr && *tmpptr)
+    ch["name"] = fread_string(mob_f, buf2);
+    tmpptr = fread_string(mob_f, buf2);
+    if (tmpptr && *tmpptr) {
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
-    ch->room_description = fread_string(mob_f, buf2);
-    ch->look_description =fread_string(mob_f, buf2);
+            ch["short_description"] = tmpptr;
+            free(tmpptr);
+    }
+    ch["room_description"] = fread_string(mob_f, buf2);
+    ch["look_description"] = fread_string(mob_f, buf2);
 
     /* *** Numeric data *** */
     if (!get_line(mob_f, line)) {
@@ -1508,36 +1406,38 @@ static int parse_mobile_from_file(FILE *mob_f, const std::shared_ptr<npc_proto>&
 
         bitvector_t mf[4], aff[4];
 
+        std::set<int> flags;
+
         mf[0] = asciiflag_conv(f1);
         mf[1] = asciiflag_conv(f2);
         mf[2] = asciiflag_conv(f3);
         mf[3] = asciiflag_conv(f4);
-        for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-            check_bitvector_names(MOB_FLAGS(ch)[taeller], action_bits_count, buf2, "mobile");
-        for(auto i = 0; i < ch->mobFlags.size(); i++) ch->mobFlags.set(i, IS_SET_AR(mf, i));
+
+        for(auto i = 0; i < NUM_MOB_FLAGS; i++) if(IS_SET_AR(mf, i)) flags.insert(i);
+        flags.insert(MOB_ISNPC);
+        flags.erase(MOB_NOTDEADYET);
+        if(!flags.empty()) {
+            ch["flags"].push_back(std::make_pair(FlagType::NPC, std::vector<int>(flags.begin(), flags.end())));
+            flags.clear();
+        }
 
         aff[0] = asciiflag_conv(f5);
         aff[1] = asciiflag_conv(f6);
         aff[2] = asciiflag_conv(f7);
         aff[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < ch->affected_by.size(); i++) ch->affected_by.set(i, IS_SET_AR(aff, i));
+        for(auto i = 0; i < NUM_AFF_FLAGS; i++) if(IS_SET_AR(aff, i)) flags.insert(i);
+        if(!flags.empty()) {
+            ch["flags"].push_back(std::make_pair(FlagType::Affect, std::vector<int>(flags.begin(), flags.end())));
+            flags.clear();
+        }
+        ch["aligns"].push_back(std::make_pair(CharAlign::GoodEvil, t[2]));
 
-        ch->aligns[CharAlign::GoodEvil] = t[2];
-
-        for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-            check_bitvector_names(AFF_FLAGS(ch)[taeller], affected_bits_count, buf2, "mobile affect");
     } else {
         basic_mud_log("SYSERR: Format error after string section of mob #%d\n"
             "...expecting line of form '# # # {S | E}'", nr);
         exit(1);
     }
 
-    ch->mobFlags.set(MOB_ISNPC);
-    if (ch->mobFlags.test(MOB_NOTDEADYET)) {
-        /* Rather bad to load mobiles with this bit already set. */
-        basic_mud_log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
-        ch->mobFlags.reset(MOB_NOTDEADYET);
-    }
 
     /* AGGR_TO_ALIGN is ignored if the mob is AGGRESSIVE.
   if (MOB_FLAGGED(mob_proto + i, MOB_AGGRESSIVE) && MOB_FLAGGED(mob_proto + i, MOB_AGGR_GOOD | MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL))
@@ -1571,7 +1471,7 @@ static int parse_mobile_from_file(FILE *mob_f, const std::shared_ptr<npc_proto>&
         trig_vnum tvn;
         get_line(mob_f, tline);
         auto count = sscanf(line, "%7s %d", junk, &tvn);
-        if(trig_index.contains(tvn)) ch->proto_script.push_back(tvn);
+        if(trig_index.contains(tvn)) ch["proto_script"].push_back(tvn);
         letter = fread_letter(mob_f);
         ungetc(letter, mob_f);
     }
@@ -1590,11 +1490,11 @@ static void parse_mobile(FILE *mob_f, mob_vnum nr) {
     auto &idx = mob_index[nr];
     idx.vn = nr;
 
-    auto m = std::make_shared<npc_proto>();
-    mob_proto[nr] = m;
-    m->vn = nr;
+    auto mj = mob_proto.emplace(nr, nlohmann::json::object());
+    auto &j = mj.first->second;
+    j["vn"] = nr;
 
-    if (parse_mobile_from_file(mob_f, m)) {
+    if (parse_mobile_from_file(mob_f, j)) {
 
     } else { /* We used to exit in the file reading code, but now we do it here */
         exit(1);
@@ -1605,39 +1505,48 @@ static void parse_mobile(FILE *mob_f, mob_vnum nr) {
 /* read all objects from obj file; generate index and prototypes */
 static char *parse_object(FILE *obj_f, obj_vnum nr) {
     static char line[READ_SIZE];
-    int64_t t[NUM_OBJ_VAL_POSITIONS + 2], j, retval;
+    int64_t t[NUM_OBJ_VAL_POSITIONS + 2], retval;
     char *tmpptr, buf2[128];
     char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
     char f5[READ_SIZE], f6[READ_SIZE], f7[READ_SIZE], f8[READ_SIZE];
     char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
     struct extra_descr_data *new_descr;
 
-    auto o = std::make_shared<item_proto>();
-    obj_proto[nr] = o;
-
     auto &idx = obj_index[nr];
-
+    auto oi = obj_proto.emplace(nr, nlohmann::json::object());
+    auto &j = oi.first->second;
+    
     idx.vn = nr;
-    o->vn = nr;
+    j["vn"] = nr;
 
     sprintf(buf2, "object #%d", nr);    /* sprintf: OK (for 'buf2 >= 19') */
-
-    /* *** string data *** */
-    if ((o->name = fread_string(obj_f, buf2)) == nullptr) {
-        basic_mud_log("SYSERR: Null obj name or format error at or near %s", buf2);
-        exit(1);
+    char* tempStr = fread_string(obj_f, buf2);
+    if(tempStr != nullptr) {
+        j["name"] = std::string(tempStr);
     }
+
     auto &z = zone_table[real_zone_by_thing(nr)];
     z.objects.insert(nr);
-    tmpptr = o->short_description = fread_string(obj_f, buf2);
-    if (tmpptr && *tmpptr)
+
+    tmpptr = fread_string(obj_f, buf2);
+    if (tmpptr && *tmpptr) {
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
-    tmpptr = o->room_description = fread_string(obj_f, buf2);
-    if (tmpptr && *tmpptr)
+            j["short_description"] = tmpptr;
+            free(tmpptr);
+    }
+    tmpptr = fread_string(obj_f, buf2);
+    if (tmpptr && *tmpptr) {
         CAP(tmpptr);
-    o->look_description = fread_string(obj_f, buf2);
+        j["room_description"] = tmpptr;
+        free(tmpptr);
+    }
+    tmpptr = fread_string(obj_f, buf2);
+    if(tmpptr && *tmpptr) {
+        j["look_description"] = tmpptr;
+        free(tmpptr);
+    }
 
     /* *** numeric data *** */
     if (!get_line(obj_f, line)) {
@@ -1648,23 +1557,40 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                                 f11, f12)) == 13) {
         bitvector_t extraFlags[4], wearFlags[4], permFlags[4];
 
+        std::set<int> flags;
+
         extraFlags[0] = asciiflag_conv(f1);
         extraFlags[1] = asciiflag_conv(f2);
         extraFlags[2] = asciiflag_conv(f3);
         extraFlags[3] = asciiflag_conv(f4);
-        for(auto i = 0; i < o->extra_flags.size(); i++) if(IS_SET_AR(extraFlags, i)) o->setFlag(FlagType::Item, i);
+        
+        for(auto i = 0; i < NUM_ITEM_FLAGS; i++) {
+            if(IS_SET_AR(extraFlags, i)) flags.insert(i);
+        };
+        if(!flags.empty()) {
+            j["flags"].push_back(std::make_pair(FlagType::Item, std::vector<int>(flags.begin(), flags.end())));
+            flags.clear();
+        }
 
         wearFlags[0] = asciiflag_conv(f5);
         wearFlags[1] = asciiflag_conv(f6);
         wearFlags[2] = asciiflag_conv(f7);
         wearFlags[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < o->wear_flags.size(); i++) if(IS_SET_AR(wearFlags, i)) o->wear_flags.set(i);
+        for(auto i = 0; i < NUM_ITEM_WEARS; i++) if(IS_SET_AR(wearFlags, i)) flags.insert(i);
+        if(!flags.empty()) {
+            j["flags"].push_back(std::make_pair(FlagType::Wear, std::vector<int>(flags.begin(), flags.end())));
+            flags.clear();
+        }
 
         permFlags[0] = asciiflag_conv(f9);
         permFlags[1] = asciiflag_conv(f10);
         permFlags[2] = asciiflag_conv(f11);
         permFlags[3] = asciiflag_conv(f12);
-        for(auto i = 0; i < o->bitvector.size(); i++) if(IS_SET_AR(permFlags, i)) o->bitvector.set(i);
+        for(auto i = 0; i < NUM_AFF_FLAGS; i++) if(IS_SET_AR(permFlags, i)) flags.insert(i);
+        if(!flags.empty()) {
+            j["flags"].push_back(std::make_pair(FlagType::Affect, std::vector<int>(flags.begin(), flags.end())));
+            flags.clear();
+        }
 
     } else {
         basic_mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -1672,15 +1598,16 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     }
 
     /* Object flags checked in check_object(). */
-    GET_OBJ_TYPE(o) = t[0];
+    auto obj_type = t[0];
+    j["type_flag"] = obj_type;
 
     if (!get_line(obj_f, line)) {
         basic_mud_log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
         exit(1);
     }
 
-    for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-        t[j] = 0;
+    for (auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++)
+        t[i] = 0;
 
     if ((retval = sscanf(line, "%ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5,
                          t + 6, t + 7, t + 8, t + 9, t + 10, t + 11, t + 12, t + 13, t + 14, t + 15)) >
@@ -1690,29 +1617,19 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         exit(1);
     }
 
-    for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-        GET_OBJ_VAL(o, j) = t[j];
+    std::array<int64_t, NUM_OBJ_VAL_POSITIONS> values{};
 
-    if ((GET_OBJ_TYPE(o) == ITEM_PORTAL || \
-       GET_OBJ_TYPE(o) == ITEM_HATCH) && \
-       (!GET_OBJ_VAL(o, VAL_DOOR_DCLOCK) || \
-        !GET_OBJ_VAL(o, VAL_DOOR_DCHIDE))) {
-        GET_OBJ_VAL(o, VAL_DOOR_DCLOCK) = 20;
-        GET_OBJ_VAL(o, VAL_DOOR_DCHIDE) = 20;
-        if (bitsavetodisk) {
-            converting = true;
-        }
+    for (auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++) if(t[i] != 0) 
+        values[i] = t[i];
+
+    if ((obj_type == ITEM_PORTAL || \
+       obj_type == ITEM_HATCH) && \
+       (!values[VAL_DOOR_DCLOCK] || \
+        !values[VAL_DOOR_DCHIDE])) {
+        values[VAL_DOOR_DCLOCK] = 20;
+        values[VAL_DOOR_DCHIDE] = 20;
+
     }
-
-    /* Convert old CWG-SunTzu style armor values to CWG-Rasputin. Should no longer be needed I think.
-   * if (GET_OBJ_TYPE(obj_proto + i) == ITEM_ARMOR) {
-   *   if (suntzu_armor_convert(obj_proto + i)) {
-   *     if(bitsavetodisk) {
-   *       add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 1);
-   *       converting = TRUE;
-   *     }
-   *   }
-   * }*/
 
     if (!get_line(obj_f, line)) {
         basic_mud_log("SYSERR: Expecting third numeric line of %s, but file ended!", buf2);
@@ -1726,34 +1643,33 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             exit(1);
         }
     }
-    GET_OBJ_WEIGHT(o) = t[0];
-    GET_OBJ_COST(o) = t[1];
-    GET_OBJ_RENT(o) = t[2];
-    GET_OBJ_LEVEL(o) = t[3];
-    GET_OBJ_SIZE(o) = SIZE_MEDIUM;
+    auto weight = t[0];
+    j["weight"] = weight;
+    j["cost"] = t[1];
+    j["cost_per_day"] = t[2];
+    j["level"] = t[3];
+    j["size"] = SIZE_MEDIUM;
 
     /* check to make sure that weight of containers exceeds curr. quantity */
-    if (GET_OBJ_TYPE(o) == ITEM_DRINKCON ||
-        GET_OBJ_TYPE(o) == ITEM_FOUNTAIN) {
-        if (GET_OBJ_WEIGHT(o) < GET_OBJ_VAL(o, 1))
-            GET_OBJ_WEIGHT(o) = GET_OBJ_VAL(o, 1) + 5;
+    if (obj_type == ITEM_DRINKCON ||
+        obj_type == ITEM_FOUNTAIN) {
+        if (weight < values[1])
+            j["weight"] = values[1] + 5;
     }
     /* *** make sure portal objects have their timer set correctly *** */
-    if (GET_OBJ_TYPE(o) == ITEM_PORTAL) {
-        GET_OBJ_TIMER(o) = -1;
+    if (obj_type == ITEM_PORTAL) {
+        j["timer"] = -1;
     }
 
     /* *** extra descriptions and affect fields *** */
-
-    for (j = 0; j < MAX_OBJ_AFFECT; j++) {
-        o->affected[j].location = APPLY_NONE;
-        o->affected[j].modifier = 0;
-        o->affected[j].specific = 0;
+    for(auto i = 0; i < values.size(); i++) {
+        if(values[i] != 0) {
+            j["values"].push_back(std::make_pair(i, values[i]));
+        }
     }
 
     strcat(buf2, ", after numeric constants\n"    /* strcat: OK (for 'buf2 >= 87') */
                  "...expecting 'E', 'A', '$', or next object number");
-    j = 0;
 
     for (;;) {
         if (!get_line(obj_f, line)) {
@@ -1761,14 +1677,13 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             exit(1);
         }
         switch (*line) {
-            case 'E':
-                new_descr = new extra_descr_data();
-                new_descr->keyword = fread_string(obj_f, buf2);
-                new_descr->description = fread_string(obj_f, buf2);
-                new_descr->next = o->ex_description;
-                o->ex_description = new_descr;
+            case 'E': {
+                auto keyword = fread_string(obj_f, buf2);
+                auto description = fread_string(obj_f, buf2);
+                j["ex_description"].push_back(std::make_pair(keyword, description));
+            }
                 break;
-            case 'A':
+            case 'A': {
                 if (j >= MAX_OBJ_AFFECT) {
                     basic_mud_log("SYSERR: Too many A fields (%d max), %s", MAX_OBJ_AFFECT, buf2);
                     exit(1);
@@ -1789,14 +1704,13 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                     }
                 }
 
-                if (t[0] >= APPLY_DAMAGE_PERC && t[0] <= APPLY_DEFENSE_PERC) {
-                    basic_mud_log("Warning: object #%d (%s) uses deprecated saving throw applies",
-                        nr, o->short_description);
-                }
-                o->affected[j].location = t[0];
-                o->affected[j].modifier = t[1];
-                o->affected[j].specific = t[2];
-                j++;
+                obj_affected_type af;
+                
+                af.location = t[0];
+                af.modifier = t[1];
+                af.specific = t[2];
+                j["affected"].push_back(af.serialize());
+            }
                 break;
             case 'S':  /* Spells for Spellbooks*/
                 if (j >= SPELLBOOK_SIZE) {
@@ -1815,15 +1729,14 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...offending line: '%s'", buf2, retval, line);
                     exit(1);
                 }
-                if (!o->sbinfo) {
-                    CREATE(o->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                }
-                o->sbinfo[j].spellname = t[0];
-                o->sbinfo[j].pages = t[1];
-                j++;
                 break;
             case 'T':  /* DG triggers */
-                dg_obj_trigger(line, o);
+                {
+                    char junk[8];
+                    int vnum, count;
+                    count = sscanf(line, "%s %d", junk, &vnum);
+                    j["proto_script"].push_back(vnum);
+                }
                 break;
             case 'Z':
                 if (!get_line(obj_f, line)) {
@@ -1837,16 +1750,10 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...offending line: '%s'", buf2, line);
                     exit(1);
                 }
-                GET_OBJ_SIZE(o) = t[0];
+                j["size"] = t[0];
                 break;
             case '$':
             case '#':
-                /* Objects that set CHARM on players are bad. */
-                if (o->bitvector.test(AFF_CHARM)) {
-                    basic_mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-                    o->bitvector.reset(AFF_CHARM);
-                }
-                check_object(o);
                 return (line);
             default:
                 basic_mud_log("SYSERR: Format error in (%c): %s", *line, buf2);
@@ -2859,7 +2766,7 @@ int House_load(room_vnum rvnum) {
             ex[1] = asciiflag_conv(f2);
             ex[2] = asciiflag_conv(f3);
             ex[3] = asciiflag_conv(f4);
-            for(auto i = 0; i < temp->extra_flags.size(); i++) temp->setFlag(FlagType::Item, i, IS_SET_AR(ex, i));
+            for(auto i = 0; i < NUM_ITEM_FLAGS; i++) temp->setFlag(FlagType::Item, i, IS_SET_AR(ex, i));
             GET_OBJ_VAL(temp, 8) = t[13];
             GET_OBJ_VAL(temp, 9) = t[14];
             GET_OBJ_VAL(temp, 10) = t[15];
@@ -2893,7 +2800,7 @@ int House_load(room_vnum rvnum) {
                 wear[1] = t[2];
                 wear[2] = t[3];
                 wear[3] = t[4];
-                for(auto i = 0; i < temp->wear_flags.size(); i++) temp->wear_flags.set(i, IS_SET_AR(wear, i));
+                for(auto i = 0; i < NUM_ITEM_WEARS; i++) temp->setFlag(FlagType::Wear, IS_SET_AR(wear, i));
                 temp->weight = t[5];
                 temp->cost = t[6];
                 temp->cost_per_day = t[7];
@@ -3204,37 +3111,34 @@ static struct old_ship_data customs[] = {
 struct AreaDef {
     std::string name;
     AreaType type{AreaType::Region};
-    std::optional<vnum> parent, orbit;
+    unit_data *location;
+    std::optional<vnum> parent;
     std::optional<double> gravity;
     std::set<std::size_t> roomFlags{};
     std::vector<std::pair<std::size_t, std::size_t>> roomRanges;
     std::set<vnum> roomIDs{}, roomSkips{};
-    std::bitset<NUM_AREA_FLAGS> flags;
+    std::unordered_set<int> flags;
 };
 
-vnum assembleArea(const AreaDef &def) {
-    auto vn = area_data::getNextID();
-    auto &a = areas[vn];
-    a.vn = vn;
-    a.name = def.name;
-    a.type = def.type;
-    a.flags = def.flags;
+static area_data* assembleArea(const AreaDef &def) {
+    auto vn = getNextUID();
+    auto a = new area_data();
+    a->script = std::make_shared<script_data>(a);
+    a->uid = vn;
+    world[vn] = a;
+    a->setName(def.name);
+    a->type = def.type;
+    a->flags[FlagType::Area] = def.flags;
 
     if(def.gravity) {
-        a.gravity = def.gravity.value();
+        a->gravity = def.gravity.value();
     }
 
-    if(def.parent) {
-        auto &p = areas[def.parent.value()];
-        p.children.insert(vn);
-        a.parent = p.vn;
+    if(def.location) {
+        a->addToLocation(def.location);
     }
 
     std::set<vnum> rooms = def.roomIDs;
-    a.extraVn = def.orbit;
-    if(a.type == AreaType::CelestialBody && a.extraVn) {
-        rooms.insert(a.extraVn.value());
-    }
 
     for(auto &[start, end] : def.roomRanges) {
         for(auto i = start; i <= end; i++) {
@@ -3266,12 +3170,10 @@ vnum assembleArea(const AreaDef &def) {
         if(found == world.end()) continue;
         auto room = dynamic_cast<room_data*>(found->second);
         if(!room) continue;
-        if(room->area) continue;
-        room->area = vn;
-        a.rooms.insert(r);
+        room->addToLocation(a);
     }
 
-    return vn;
+    return a;
 
 }
 
@@ -3303,25 +3205,25 @@ void migrate_grid() {
     AreaDef u7def;
     u7def.name = "Universe 7";
     u7def.type = AreaType::Dimension;
-    u7def.parent = multiverse;
+    u7def.location = multiverse;
     auto universe7 = assembleArea(u7def);
 
     AreaDef mplane;
     mplane.name = "Mortal Plane";
     mplane.type = AreaType::Dimension;
-    mplane.parent = universe7;
+    mplane.location = universe7;
     auto mortal_plane = assembleArea(mplane);
 
     AreaDef cplane;
     cplane.name = "Celestial Plane";
     cplane.type = AreaType::Dimension;
-    cplane.parent = universe7;
+    cplane.location = universe7;
     auto celestial_plane = assembleArea(cplane);
 
     AreaDef spacedef;
     spacedef.name = "Depths of Space";
     spacedef.type = AreaType::Region;
-    spacedef.parent = mortal_plane;
+    spacedef.location = mortal_plane;
     // Insert every room id from mapnums (the 2d array) into spacedef.roomIDs...
     for(auto &row : mapnums) {
         for(auto &col : row) {
@@ -3425,7 +3327,7 @@ void migrate_grid() {
         }
     }
 
-    std::unordered_map<std::string, vnum> areaObjects;
+    std::unordered_map<std::string, area_data*> areaObjects;
 
     for(auto &[name, def] : areaDefs) {
         def.name = name;
@@ -3437,121 +3339,105 @@ void migrate_grid() {
     AreaDef pearth;
     pearth.name = "@GEarth@n";
     pearth.type = AreaType::CelestialBody;
-    pearth.parent = space;
-    pearth.orbit = 50;
+    pearth.location = world.at(50);
     auto planet_earth = assembleArea(pearth);
 
     AreaDef pvegeta;
     pvegeta.name = "@YVegeta@n";
     pvegeta.type = AreaType::CelestialBody;
-    pvegeta.parent = space;
+    pvegeta.location = world.at(53);
     pvegeta.gravity = 10.0;
-    pvegeta.orbit = 53;
     auto planet_vegeta = assembleArea(pvegeta);
 
     AreaDef pfrigid;
     pfrigid.name = "@CFrigid@n";
     pfrigid.type = AreaType::CelestialBody;
-    pfrigid.parent = space;
-    pfrigid.orbit = 51;
+    pfrigid.location = world.at(51);
     auto planet_frigid = assembleArea(pfrigid);
 
     AreaDef pnamek;
     pnamek.name = "@gNamek@n";
     pnamek.type = AreaType::CelestialBody;
-    pnamek.parent = space;
-    pnamek.orbit = 54;
+    pnamek.location = world.at(54);
     auto planet_namek = assembleArea(pnamek);
 
     AreaDef pkonack;
     pkonack.name = "@MKonack@n";
     pkonack.type = AreaType::CelestialBody;
-    pkonack.parent = space;
-    pkonack.orbit = 52;
+    pkonack.location = world.at(52);
     auto planet_konack = assembleArea(pkonack);
 
     AreaDef paether;
     paether.name = "@MAether@n";
     paether.type = AreaType::CelestialBody;
-    paether.parent = space;
-    paether.orbit = 55;
+    paether.location = world.at(55);
     auto planet_aether = assembleArea(paether);
 
     AreaDef pyardrat;
     pyardrat.name = "@mYardrat@n";
     pyardrat.type = AreaType::CelestialBody;
-    pyardrat.parent = space;
-    pyardrat.orbit = 56;
+    pyardrat.location = world.at(56);
     auto planet_yardrat = assembleArea(pyardrat);
 
     AreaDef pkanassa;
     pkanassa.name = "@BKanassa@n";
     pkanassa.type = AreaType::CelestialBody;
-    pkanassa.parent = space;
-    pkanassa.orbit = 58;
+    pkanassa.location = world.at(58);
     auto planet_kanassa = assembleArea(pkanassa);
 
     AreaDef pcerria;
     pcerria.name = "@RCerria@n";
     pcerria.type = AreaType::CelestialBody;
-    pcerria.parent = space;
-    pcerria.orbit = 198;
+    pcerria.location = world.at(198);
     auto planet_cerria = assembleArea(pcerria);
 
     AreaDef parlia;
     parlia.name = "@GArlia@n";
     parlia.type = AreaType::CelestialBody;
-    parlia.parent = space;
-    parlia.orbit = 59;
+    parlia.location = world.at(59);
     auto planet_arlia = assembleArea(parlia);
 
     AreaDef pzenith;
     pzenith.name = "@BZenith@n";
     pzenith.type = AreaType::CelestialBody;
-    pzenith.parent = space;
-    pzenith.orbit = 57;
+    pzenith.location = world.at(57);
     auto moon_zenith = assembleArea(pzenith);
     for(const auto& name : {"Ancient Castle", "Utatlan City", "Zenith Jungle"}) {
-        auto vn = areaObjects[name];
-        auto &a = areas[vn];
-        a.parent = moon_zenith;
-        auto &m = areas[moon_zenith];
-        m.children.insert(vn);
+        auto a = areaObjects[name];
+        a->addToLocation(moon_zenith);
     }
 
 
     AreaDef ucdef;
     ucdef.name = "Underground Cavern";
-    ucdef.parent = moon_zenith;
+    ucdef.location = moon_zenith;
     ucdef.roomRanges.emplace_back(62900, 63000);
     auto underground_cavern = assembleArea(ucdef);
 
     for(auto &p : {planet_earth, planet_aether, planet_namek, moon_zenith}) {
-		auto &planet = areas[p];
-        planet.flags.set(AREA_ETHER);
+        // planet.flags.set(AREA_ETHER);
     }
 
     for(auto &p : {planet_earth, planet_aether, planet_vegeta, planet_frigid}) {
-        auto &planet = areas[p];
-        planet.flags.set(AREA_MOON);
+        //planet.flags.set(AREA_MOON);
     }
 
     AreaDef zelakinfarm;
     zelakinfarm.name = "Zelakin's Farm";
-    zelakinfarm.parent = xenoverse;
+    zelakinfarm.location = xenoverse;
     zelakinfarm.roomRanges.emplace_back(5896, 5899);
     auto zelakin_farm = assembleArea(zelakinfarm);
 
     AreaDef hbtcdef;
     hbtcdef.name = "Hyperbolic Time Chamber";
-    hbtcdef.parent = universe7;
+    hbtcdef.location = universe7;
     hbtcdef.roomRanges.emplace_back(64000, 64097);
     hbtcdef.type = AreaType::Dimension;
     auto hbtc = assembleArea(hbtcdef);
 
     AreaDef bodef;
     bodef.name = "The Black Omen";
-    bodef.parent = space;
+    bodef.location = space;
     bodef.roomIDs.insert(19053);
     bodef.roomIDs.insert(19039);
     for(auto &[r, room] : world) {
@@ -3563,13 +3449,13 @@ void migrate_grid() {
 
     AreaDef earthduel;
     earthduel.name = "Duel Dome";
-    earthduel.parent = planet_earth;
+    earthduel.location = planet_earth;
     earthduel.roomRanges.emplace_back(160, 176);
     auto earth_duel_dome = assembleArea(earthduel);
 
     AreaDef earthwmat;
     earthwmat.name = "World Martial Arts Building";
-    earthwmat.parent = planet_earth;
+    earthwmat.location = planet_earth;
     earthwmat.roomRanges.emplace_back(3800, 3834);
     earthwmat.roomRanges.emplace_back(19578, 19598);
     earthwmat.roomRanges.emplace_back(19570, 19573);
@@ -3578,226 +3464,220 @@ void migrate_grid() {
 
     AreaDef capsulecorp;
     capsulecorp.name = "Capsule Corporation";
-    capsulecorp.parent = areaObjects["West City"];
+    capsulecorp.location = areaObjects["West City"];
     capsulecorp.roomRanges.emplace_back(19559, 19569);
     auto capsule_corp = assembleArea(capsulecorp);
 
     AreaDef threestarelem;
     threestarelem.name = "Three Star Elementary";
-    threestarelem.parent = planet_earth;
+    threestarelem.location = planet_earth;
     threestarelem.roomRanges.emplace_back(5800, 5823);
     threestarelem.roomIDs.insert(5826);
     auto three_star_elem = assembleArea(threestarelem);
 
     AreaDef gerol;
     gerol.name = "Gero's Lab";
-    gerol.parent = planet_earth;
+    gerol.location = planet_earth;
     gerol.roomRanges.emplace_back(7701, 7753);
     auto gero_lab = assembleArea(gerol);
 
     AreaDef shadowrain;
     shadowrain.name = "Shadowrain City";
-    shadowrain.parent = planet_earth;
+    shadowrain.location = planet_earth;
     shadowrain.roomRanges.emplace_back(9111, 9199);
     auto shadowrain_city = assembleArea(shadowrain);
 
     AreaDef kingcastle;
     kingcastle.name = "King Castle";
-    kingcastle.parent = planet_earth;
+    kingcastle.location = planet_earth;
     kingcastle.roomRanges.emplace_back(12600, 12627);
     auto king_castle = assembleArea(kingcastle);
 
     AreaDef orangestar;
     orangestar.name = "Orange Star Highschool";
-    orangestar.parent = planet_earth;
+    orangestar.location = planet_earth;
     orangestar.roomRanges.emplace_back(16400, 16499);
     auto orange_star = assembleArea(orangestar);
 
     AreaDef ath;
     ath.name = "Athletic Field";
-    ath.parent = orange_star;
+    ath.location = orange_star;
     ath.roomRanges.emplace_back(15900, 15937);
     auto athletic_field = assembleArea(ath);
 
     AreaDef oak;
     oak.name = "Inside an Oak Tree";
-    oak.parent = areaObjects["Northern Plains"];
+    oak.location = areaObjects["Northern Plains"];
     oak.roomRanges.emplace_back(16200, 16210);
     oak.roomIDs = {19199};
     auto oak_tree = assembleArea(oak);
 
     AreaDef edfhq;
     edfhq.name = "EDF Headquarters";
-    edfhq.parent = planet_earth;
+    edfhq.location = planet_earth;
     edfhq.type = AreaType::Structure;
     edfhq.roomRanges.emplace_back(9101, 9110);
     auto edf_hq = assembleArea(edfhq);
 
     AreaDef bar;
     bar.name = "Bar";
-    bar.parent = planet_earth;
+    bar.location = planet_earth;
     bar.type = AreaType::Structure;
     bar.roomRanges.emplace_back(18100, 18114);
     auto bar_ = assembleArea(bar);
 
     AreaDef themoon;
     themoon.name = "The Moon";
-    themoon.parent = space;
+    themoon.location = space;
     themoon.type = AreaType::CelestialBody;
     themoon.gravity = 10.0;
     auto moon = assembleArea(themoon);
 
     AreaDef luncrat;
     luncrat.name = "Lunar Crater";
-    luncrat.parent = moon;
+    luncrat.location = moon;
     luncrat.roomRanges.emplace_back(63300, 63311);
     auto lunar_crater = assembleArea(luncrat);
 
     AreaDef cratpass;
     cratpass.name = "Crater Passage";
-    cratpass.parent = moon;
+    cratpass.location = moon;
     cratpass.roomRanges.emplace_back(63312, 63336);
     auto crater_passage = assembleArea(cratpass);
 
     AreaDef darkside;
     darkside.name = "Darkside Crater";
-    darkside.parent = moon;
+    darkside.location = moon;
     darkside.roomRanges.emplace_back(63337, 63362);
     auto darkside_crater = assembleArea(darkside);
 
     AreaDef moonstone;
     moonstone.name = "Moonstone Quarry";
-    moonstone.parent = moon;
+    moonstone.location = moon;
     moonstone.roomRanges.emplace_back(63381, 63392);
     auto moonstone_quarry = assembleArea(moonstone);
 
     AreaDef intrepidbase;
     intrepidbase.name = "Intrepid Base";
-    intrepidbase.parent = moon;
+    intrepidbase.location = moon;
     intrepidbase.roomRanges.emplace_back(63363, 63380);
     intrepidbase.roomRanges.emplace_back(63393, 63457);
     auto intrepid_base = assembleArea(intrepidbase);
 
     AreaDef fortemple;
     fortemple.name = "Forgotten Temple";
-    fortemple.parent = moon;
+    fortemple.location = moon;
     fortemple.roomRanges.emplace_back(63458, 63499);
     auto forgotten_temple = assembleArea(fortemple);
 
-    for(auto child : areas[moon].children) {
-        auto &a = areas[child];
-        for(auto r : a.rooms) {
-            if(auto u = world.find(r); u != world.end()) {
-                auto room = dynamic_cast<room_data*>(u->second);
-                if(room) {
-                    room->clearFlag(FlagType::Room, ROOM_EARTH);
-                }
-            }
+    for(auto child : moon->getContents()) {
+        for(auto r : child->getRooms()) {
+            r->clearFlag(FlagType::Room, ROOM_EARTH);
         }
     }
 
     AreaDef prideplains;
     prideplains.name = "Pride Plains";
-    prideplains.parent = planet_vegeta;
+    prideplains.location = planet_vegeta;
     prideplains.roomRanges.emplace_back(19700, 19711);
     auto pride_plains = assembleArea(prideplains);
 
     AreaDef pridesomething;
     pridesomething.name = "Pride Something";
-    pridesomething.parent = planet_vegeta;
+    pridesomething.location = planet_vegeta;
     pridesomething.roomRanges.emplace_back(19740, 19752);
     auto pride_something = assembleArea(pridesomething);
 
     AreaDef pridejungle;
     pridejungle.name = "Pride Jungle";
-    pridejungle.parent = planet_vegeta;
+    pridejungle.location = planet_vegeta;
     pridejungle.roomRanges.emplace_back(19712, 19718);
     pridejungle.roomRanges.emplace_back(19753, 19789);
     auto pride_jungle = assembleArea(pridejungle);
 
     AreaDef pridecave;
     pridecave.name = "Pride Cave";
-    pridecave.parent = planet_vegeta;
+    pridecave.location = planet_vegeta;
     pridecave.roomRanges.emplace_back(9400, 9499);
     auto pride_cave = assembleArea(pridecave);
 
     AreaDef pridedesert;
     pridedesert.name = "Pride Desert";
-    pridedesert.parent = planet_vegeta;
+    pridedesert.location = planet_vegeta;
     pridedesert.roomRanges.emplace_back(19719, 19739);
     pridedesert.roomIDs.insert(19790);
     auto pride_desert = assembleArea(pridedesert);
 
     AreaDef rocktail;
     rocktail.name = "Rocktail Camp";
-    rocktail.parent = planet_vegeta;
+    rocktail.location = planet_vegeta;
     rocktail.roomRanges.emplace_back(61030, 61044);
     rocktail.roomIDs.insert(19198);
     auto rocktail_camp = assembleArea(rocktail);
 
     AreaDef lavaarena;
     lavaarena.name = "Lava Arena";
-    lavaarena.parent = planet_frigid;
+    lavaarena.location = planet_frigid;
     lavaarena.roomRanges.emplace_back(12900, 12918);
     auto lava_arena = assembleArea(lavaarena);
 
     AreaDef strangecliff;
     strangecliff.name = "Strange Cliff";
-    strangecliff.parent = planet_namek;
+    strangecliff.location = planet_namek;
     strangecliff.roomRanges.emplace_back(12800, 12813);
     auto strange_cliff = assembleArea(strangecliff);
 
     AreaDef stonehallway;
     stonehallway.name = "Stone Hallway";
-    stonehallway.parent = planet_namek;
+    stonehallway.location = planet_namek;
     stonehallway.roomRanges.emplace_back(12814, 12831);
     stonehallway.roomSkips.insert(12825);
     auto stone_hallway = assembleArea(stonehallway);
 
     AreaDef tranquilpalm;
     tranquilpalm.name = "Tranquil Palm Dojo";
-    tranquilpalm.parent = planet_namek;
+    tranquilpalm.location = planet_namek;
     tranquilpalm.roomRanges.emplace_back(12832, 12868);
     auto tranquil_palm_dojo = assembleArea(tranquilpalm);
 
     AreaDef namekunder;
     namekunder.name = "Namekian Underground";
-    namekunder.parent = planet_namek;
+    namekunder.location = planet_namek;
     namekunder.roomRanges.emplace_back(64700, 65009);
     auto namek_underground = assembleArea(namekunder);
 
     AreaDef advkindojo;
     advkindojo.name = "Advanced Kinetic Dojo";
-    advkindojo.parent = planet_aether;
+    advkindojo.location = planet_aether;
     advkindojo.roomRanges.emplace_back(17743, 17751);
     auto advanced_kinetic_dojo = assembleArea(advkindojo);
 
     AreaDef lostcity;
     lostcity.name = "Lost City";
-    lostcity.parent = planet_kanassa;
+    lostcity.location = planet_kanassa;
     lostcity.roomRanges.emplace_back(7600, 7686);
     auto lost_city = assembleArea(lostcity);
 
     AreaDef aqtower;
     aqtower.name = "Aquis Tower";
-    aqtower.parent = areaObjects["Aquis City"];
+    aqtower.location = areaObjects["Aquis City"];
     aqtower.roomRanges.emplace_back(12628, 12666);
     auto aquis_tower = assembleArea(aqtower);
 
     AreaDef moaipalace;
     moaipalace.name = "Moai's Palace";
-    moaipalace.parent = planet_arlia;
+    moaipalace.location = planet_arlia;
     moaipalace.roomRanges.emplace_back(12667, 12699);
     auto moai_palace = assembleArea(moaipalace);
 
     AreaDef darkthorne;
     darkthorne.name = "DarkThorne Compound";
-    darkthorne.parent = planet_arlia;
+    darkthorne.location = planet_arlia;
     darkthorne.roomRanges.emplace_back(18150, 18169);
     auto darkthorne_compound = assembleArea(darkthorne);
 
 
-    std::unordered_map<int, vnum> planetMap = {
+    std::unordered_map<int, area_data*> planetMap = {
             {ROOM_EARTH, planet_earth},
             {ROOM_VEGETA, planet_vegeta},
             {ROOM_FRIGID, planet_frigid},
@@ -3816,14 +3696,11 @@ void migrate_grid() {
         auto room = dynamic_cast<room_data*>(u);
         if(!room) continue;
 
-        for(auto &p : planetMap) {
+        for(auto &[rflag, a] : planetMap) {
             if(!room->area) continue;
-            if(room->checkFlag(FlagType::Room, p.first)) {
-                auto avn = room->area.value();
-                auto &a = areas[avn];
-                auto &pl = areas[p.second];
-                pl.children.insert(avn);
-                a.parent = p.second;
+            if(room->checkFlag(FlagType::Room, rflag)) {
+                auto avn = room->getLocation();
+                avn->addToLocation(a);
                 break;
             }
         }
@@ -3833,14 +3710,14 @@ void migrate_grid() {
 
     AreaDef nodef;
     nodef.name = "Northran";
-    nodef.parent = xenoverse;
+    nodef.location = xenoverse;
     nodef.type = AreaType::Dimension;
     nodef.roomRanges.emplace_back(17900, 17999);
     auto northran = assembleArea(nodef);
 
     AreaDef celdef;
     celdef.name = "Celestial Corp";
-    celdef.parent = space;
+    celdef.location = space;
     celdef.type = AreaType::Structure;
     celdef.roomRanges.emplace_back(16305, 16399);
     for(auto &[rv, room] : world) {
@@ -3850,7 +3727,7 @@ void migrate_grid() {
 
     AreaDef gneb;
     gneb.name = "Green Nebula Mall";
-    gneb.parent = space;
+    gneb.location = space;
     gneb.type = AreaType::Structure;
     gneb.roomRanges.emplace_back(17200, 17276);
     gneb.roomIDs.insert(184);
@@ -3858,7 +3735,7 @@ void migrate_grid() {
 
     AreaDef cooler;
     cooler.name = "Cooler's Ship";
-    cooler.parent = space;
+    cooler.location = space;
     cooler.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->name), "Cooler's Ship")) {
@@ -3870,7 +3747,7 @@ void migrate_grid() {
     AreaDef alph;
     alph.name = "Alpharis";
     alph.type = AreaType::Structure;
-    alph.parent = space;
+    alph.location = space;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->name), "Alpharis")) alph.roomIDs.insert(rv);
     }
@@ -3878,7 +3755,7 @@ void migrate_grid() {
 
     AreaDef dzone;
     dzone.name = "Dead Zone";
-    dzone.parent = universe7;
+    dzone.location = universe7;
     dzone.type = AreaType::Dimension;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->name), "Dead Zone")) dzone.roomIDs.insert(rv);
@@ -3887,7 +3764,7 @@ void migrate_grid() {
 
     AreaDef bast;
     bast.name = "Blasted Asteroid";
-    bast.parent = space;
+    bast.location = space;
     bast.type = AreaType::CelestialBody;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->name), "Blasted Asteroid")) bast.roomIDs.insert(rv);
@@ -3897,7 +3774,7 @@ void migrate_grid() {
 
     AreaDef listres;
     listres.name = "Lister's Restaurant";
-    listres.parent = xenoverse;
+    listres.location = xenoverse;
     listres.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->name), "Lister's Restaurant")) listres.roomIDs.insert(rv);
@@ -3908,7 +3785,7 @@ void migrate_grid() {
     AreaDef scasino;
     scasino.name = "Shooting Star Casino";
     scasino.type = AreaType::Structure;
-    scasino.parent = xenoverse;
+    scasino.location = xenoverse;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->name), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
     }
@@ -3916,7 +3793,7 @@ void migrate_grid() {
 
     AreaDef outdef;
     outdef.name = "The Outpost";
-    outdef.parent = celestial_plane;
+    outdef.location = celestial_plane;
 	outdef.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->name), "The Outpost")) outdef.roomIDs.insert(rv);
@@ -3925,7 +3802,7 @@ void migrate_grid() {
 
     AreaDef kyem;
     kyem.name = "King Yemma's Domain";
-    kyem.parent = celestial_plane;
+    kyem.location = celestial_plane;
     kyem.roomRanges.emplace_back(6000, 6030);
     kyem.roomSkips.insert(6017);
     kyem.roomIDs.insert(6295);
@@ -3933,14 +3810,14 @@ void migrate_grid() {
 
     AreaDef snway;
     snway.name = "Snake Way";
-    snway.parent = celestial_plane;
+    snway.location = celestial_plane;
     snway.roomRanges.emplace_back(6031, 6099);
     snway.roomIDs.insert(6017);
     auto snake_way = assembleArea(snway);
 
     AreaDef nkai;
     nkai.name = "North Kai's Planet";
-    nkai.parent = celestial_plane;
+    nkai.location = celestial_plane;
     nkai.gravity = 10.0;
     nkai.type = AreaType::CelestialBody;
     nkai.roomRanges.emplace_back(6100, 6138);
@@ -3948,83 +3825,83 @@ void migrate_grid() {
 
     AreaDef serp;
     serp.name = "Serpent's Castle";
-    serp.parent = snake_way;
+    serp.location = snake_way;
     serp.type = AreaType::Structure;
     serp.roomRanges.emplace_back(6139, 6166);
     auto serpents_castle = assembleArea(serp);
 
     AreaDef gkai;
     gkai.name = "Grand Kai's Planet";
-    gkai.parent = celestial_plane;
+    gkai.location = celestial_plane;
     gkai.type = AreaType::CelestialBody;
     gkai.roomRanges.emplace_back(6800, 6960);
     auto grand_kai = assembleArea(gkai);
 
     AreaDef gkaipalace;
     gkaipalace.name = "Grand Kai's Palace";
-    gkaipalace.parent = grand_kai;
+    gkaipalace.location = grand_kai;
     gkaipalace.type = AreaType::Structure;
     gkaipalace.roomRanges.emplace_back(6961, 7076);
     auto grand_kais_palace = assembleArea(gkaipalace);
 
     AreaDef maze;
     maze.name = "Maze of Echoes";
-    maze.parent = celestial_plane;
+    maze.location = celestial_plane;
     maze.roomRanges.emplace_back(7100, 7199);
     auto maze_of_echoes = assembleArea(maze);
 
     AreaDef cat;
     cat.name = "Dark Catacomb";
-    cat.parent = maze_of_echoes;
+    cat.location = maze_of_echoes;
     cat.roomRanges.emplace_back(7200, 7245);
     auto dark_catacomb = assembleArea(cat);
 
     AreaDef twi;
     twi.name = "Twilight Cavern";
-    twi.parent = celestial_plane;
+    twi.location = celestial_plane;
     twi.roomRanges.emplace_back(7300, 7499);
     auto twilight_cavern = assembleArea(twi);
 
     AreaDef helldef;
     helldef.name = "Hell";
-    helldef.parent = celestial_plane;
+    helldef.location = celestial_plane;
     helldef.roomRanges.emplace_back(6200, 6298);
     helldef.roomSkips.insert(6295);
     auto hell = assembleArea(helldef);
 
     AreaDef hellhouse;
     hellhouse.name = "Hell - Old House";
-    hellhouse.parent = hell;
+    hellhouse.location = hell;
     hellhouse.roomRanges.emplace_back(61000, 61007);
     auto hell_old_house = assembleArea(hellhouse);
 
     AreaDef gyukihouse;
     gyukihouse.name = "Gyuki's House";
-    gyukihouse.parent = planet_earth;
+    gyukihouse.location = planet_earth;
     gyukihouse.roomRanges.emplace_back(61015, 61026);
     auto gyukis_house = assembleArea(gyukihouse);
 
     AreaDef hfields;
     hfields.name = "Hell Fields";
-    hfields.parent = hell;
+    hfields.location = hell;
     hfields.roomRanges.emplace_back(6200, 6300);
     auto hell_fields = assembleArea(hfields);
 
     AreaDef hsands;
     hsands.name = "Sands of Time";
-    hsands.parent = hell;
+    hsands.location = hell;
     hsands.roomRanges.emplace_back(6300, 6348);
     auto sands_of_time = assembleArea(hsands);
 
     AreaDef hchaotic;
     hchaotic.name = "Chaotic Spiral";
-    hchaotic.parent = hell;
+    hchaotic.location = hell;
     hchaotic.roomRanges.emplace_back(6349, 6399);
     auto chaotic_spiral = assembleArea(hchaotic);
 
     AreaDef hfirecity;
     hfirecity.name = "Hellfire City";
-    hfirecity.parent = hell;
+    hfirecity.location = hell;
     hfirecity.roomRanges.emplace_back(6400, 6529);
     hfirecity.roomIDs = {6568, 6569, 6600, 6699};
     auto hellfire_city = assembleArea(hfirecity);
@@ -4032,46 +3909,46 @@ void migrate_grid() {
     AreaDef fbagdojo;
     fbagdojo.name = "Flaming Bag Dojo";
     fbagdojo.type = AreaType::Structure;
-    fbagdojo.parent = hellfire_city;
+    fbagdojo.location = hellfire_city;
     fbagdojo.roomRanges.emplace_back(6530, 6568);
     auto flaming_bag_dojo = assembleArea(fbagdojo);
 
     AreaDef etrailgrave;
     etrailgrave.name = "Entrail Graveyard";
-    etrailgrave.parent = hellfire_city;
+    etrailgrave.location = hellfire_city;
     etrailgrave.roomRanges.emplace_back(6601, 6689);
     auto entrail_graveyard = assembleArea(etrailgrave);
 
     AreaDef psihnon;
     psihnon.name = "Sihnon";
-    psihnon.parent = space;
+    psihnon.location = space;
     psihnon.type = AreaType::CelestialBody;
     psihnon.roomRanges.emplace_back(3600, 3699);
     auto planet_sihnon = assembleArea(psihnon);
 
     AreaDef majdef;
     majdef.name = "Majinton";
-    majdef.parent = planet_sihnon;
+    majdef.location = planet_sihnon;
     majdef.type = AreaType::Dimension;
     majdef.roomRanges.emplace_back(3700, 3797);
     auto majinton = assembleArea(majdef);
 
     AreaDef wistower;
     wistower.name = "Wisdom Tower";
-    wistower.parent = planet_namek;
+    wistower.location = planet_namek;
     wistower.type = AreaType::Structure;
     wistower.roomRanges.emplace_back(9600, 9666);
     auto wisdom_tower = assembleArea(wistower);
 
     AreaDef veld;
     veld.name = "Veldryth Mountains";
-    veld.parent = planet_konack;
+    veld.location = planet_konack;
     veld.roomRanges.emplace_back(9300, 9355);
     auto veldryth_mountains = assembleArea(veld);
 
     AreaDef machia;
     machia.name = "Machiavilla";
-    machia.parent = planet_konack;
+    machia.location = planet_konack;
     machia.type = AreaType::Structure;
     machia.roomRanges.emplace_back(12743, 12798);
     machia.roomRanges.emplace_back(12700, 12761);
@@ -4080,13 +3957,13 @@ void migrate_grid() {
 
     AreaDef laron;
     laron.name = "Laron Forest";
-    laron.parent = planet_konack;
+    laron.location = planet_konack;
     laron.roomRanges.emplace_back(19200, 19299);
     auto laron_forest = assembleArea(laron);
 
     AreaDef nazr;
     nazr.name = "Nazrin Village";
-    nazr.parent = planet_konack;
+    nazr.location = planet_konack;
     nazr.roomRanges.emplace_back(19300, 19347);
     nazr.roomIDs = {19398};
     auto nazrin_village = assembleArea(nazr);
@@ -4094,21 +3971,21 @@ void migrate_grid() {
     AreaDef nazchief;
     nazchief.name = "Chieftain's House";
     nazchief.type = AreaType::Structure;
-    nazchief.parent = nazrin_village;
+    nazchief.location = nazrin_village;
     nazchief.roomRanges.emplace_back(19348, 19397);
     auto chieftains_house = assembleArea(nazchief);
 
     AreaDef shmaze;
     shmaze.name = "Shadow Maze";
     shmaze.type = AreaType::Structure;
-    shmaze.parent = chieftains_house;
+    shmaze.location = chieftains_house;
     shmaze.roomRanges.emplace_back(19400, 19499);
     auto shadow_maze = assembleArea(shmaze);
 
     AreaDef monbal;
     monbal.name = "Monastery of Balance";
     monbal.type = AreaType::Structure;
-    monbal.parent = planet_konack;
+    monbal.location = planet_konack;
     monbal.roomRanges.emplace_back(9500, 9599);
     monbal.roomRanges.emplace_back(9357, 9364);
     monbal.roomIDs.insert(9365);
@@ -4116,35 +3993,35 @@ void migrate_grid() {
 
     AreaDef futschool;
     futschool.name = "Future School";
-    futschool.parent = xenoverse;
+    futschool.location = xenoverse;
     futschool.type = AreaType::Dimension;
     futschool.roomRanges.emplace_back(15938, 15999);
     auto future_school = assembleArea(futschool);
 
     AreaDef udfhq;
     udfhq.name = "UDF Headquarters";
-    udfhq.parent = space;
+    udfhq.location = space;
     udfhq.type = AreaType::Structure;
     udfhq.roomRanges.emplace_back(18000, 18059);
     auto udf_headquarters = assembleArea(udfhq);
 
     AreaDef hspire;
     hspire.name = "The Haven Spire";
-    hspire.parent = space;
+    hspire.location = space;
     hspire.type = AreaType::Structure;
     hspire.roomRanges.emplace_back(18300, 18341);
     auto haven_spire = assembleArea(hspire);
 
     AreaDef knoit;
     knoit.name = "Kame no Itto";
-    knoit.parent = space;
+    knoit.location = space;
     knoit.type = AreaType::Structure;
     knoit.roomRanges.emplace_back(18400, 18460);
     auto kame_no_itto = assembleArea(knoit);
 
     AreaDef neonirvana;
     neonirvana.name = "Neo Nirvana";
-    neonirvana.parent = space;
+    neonirvana.location = space;
     neonirvana.type = AreaType::Structure;
     neonirvana.roomRanges.emplace_back(13500, 13552);
     neonirvana.roomRanges.emplace_back(14782, 14790);
@@ -4152,192 +4029,192 @@ void migrate_grid() {
 
     AreaDef neohologram;
     neohologram.name = "Hologram Combat";
-    neohologram.parent = neo_nirvana;
+    neohologram.location = neo_nirvana;
     neohologram.roomRanges.emplace_back(13553, 13567);
     auto neo_hologram_combat = assembleArea(neohologram);
 
     AreaDef neonexusfield;
     neonexusfield.name = "Nexus Field";
-    neonexusfield.parent = neo_hologram_combat;
+    neonexusfield.location = neo_hologram_combat;
     neonexusfield.roomRanges.emplace_back(13568, 13612);
     auto neo_nexus_field = assembleArea(neonexusfield);
 
     AreaDef neonamekgrassyisland;
     neonamekgrassyisland.name = "Namek: Grassy Island";
-    neonamekgrassyisland.parent = neo_hologram_combat;
+    neonamekgrassyisland.location = neo_hologram_combat;
     neonamekgrassyisland.roomRanges.emplace_back(13613, 13657);
     auto neo_namek_grassy_island = assembleArea(neonamekgrassyisland);
 
     AreaDef neoslavemarket;
     neoslavemarket.name = "Slave Market";
-    neoslavemarket.parent = neo_hologram_combat;
+    neoslavemarket.location = neo_hologram_combat;
     neoslavemarket.roomRanges.emplace_back(13658, 13702);
     auto neo_slave_market = assembleArea(neoslavemarket);
 
     AreaDef neokanassa;
     neokanassa.name = "Kanassa: Blasted Battlefield";
-    neokanassa.parent = neo_hologram_combat;
+    neokanassa.location = neo_hologram_combat;
     neokanassa.roomRanges.emplace_back(13703, 13747);
     auto neo_kanassa_blasted_battlefield = assembleArea(neokanassa);
 
     AreaDef neosilentglade;
     neosilentglade.name = "Silent Glade";
-    neosilentglade.parent = neo_hologram_combat;
+    neosilentglade.location = neo_hologram_combat;
     neosilentglade.roomRanges.emplace_back(13748, 13792);
     auto neo_silent_glade = assembleArea(neosilentglade);
 
     AreaDef neohell;
     neohell.name = "Hell - Flat Plains";
-    neohell.parent = neo_hologram_combat;
+    neohell.location = neo_hologram_combat;
     neohell.roomRanges.emplace_back(13793, 13837);
     auto neo_hell_flat_plains = assembleArea(neohell);
 
     AreaDef neosandydesert;
     neosandydesert.name = "Sandy Desert";
-    neosandydesert.parent = neo_hologram_combat;
+    neosandydesert.location = neo_hologram_combat;
     neosandydesert.roomRanges.emplace_back(13838, 13882);
     auto neo_sandy_desert = assembleArea(neosandydesert);
 
     AreaDef neotopicasnowfield;
     neotopicasnowfield.name = "Topica Snowfield";
-    neotopicasnowfield.parent = neo_hologram_combat;
+    neotopicasnowfield.location = neo_hologram_combat;
     neotopicasnowfield.roomRanges.emplace_back(13883, 13927);
     auto neo_topica_snow_field = assembleArea(neotopicasnowfield);
 
     AreaDef neogerolab;
     neogerolab.name = "Gero's Lab";
-    neogerolab.parent = neo_hologram_combat;
+    neogerolab.location = neo_hologram_combat;
     neogerolab.roomRanges.emplace_back(13928, 14517);
     auto neo_geros_lab = assembleArea(neogerolab);
 
     AreaDef neocandyland;
     neocandyland.name = "Candy Land";
-    neocandyland.parent = neo_hologram_combat;
+    neocandyland.location = neo_hologram_combat;
     neocandyland.roomRanges.emplace_back(14518, 14562);
     auto neo_candy_land = assembleArea(neocandyland);
 
     AreaDef neoancestralmountains;
     neoancestralmountains.name = "Ancestral Mountains";
-    neoancestralmountains.parent = neo_hologram_combat;
+    neoancestralmountains.location = neo_hologram_combat;
     neoancestralmountains.roomRanges.emplace_back(14563, 14607);
     auto neo_ancestral_mountains = assembleArea(neoancestralmountains);
 
     AreaDef neoelzthuanforest;
     neoelzthuanforest.name = "Elzthuan Forest";
-    neoelzthuanforest.parent = neo_hologram_combat;
+    neoelzthuanforest.location = neo_hologram_combat;
     neoelzthuanforest.roomRanges.emplace_back(14608, 14652);
     auto neo_elzthuan_forest = assembleArea(neoelzthuanforest);
 
     AreaDef neoyardracity;
     neoyardracity.name = "Yardra City";
-    neoyardracity.parent = neo_hologram_combat;
+    neoyardracity.location = neo_hologram_combat;
     neoyardracity.roomRanges.emplace_back(14653, 14697);
     auto neo_yardra_city = assembleArea(neoyardracity);
 
     AreaDef neoancientcoliseum;
     neoancientcoliseum.name = "Ancient Coliseum";
-    neoancientcoliseum.parent = neo_hologram_combat;
+    neoancientcoliseum.location = neo_hologram_combat;
     neoancientcoliseum.roomRanges.emplace_back(14698, 14742);
     auto neo_ancient_coliseum = assembleArea(neoancientcoliseum);
 
     AreaDef fortrancomplex;
     fortrancomplex.name = "Fortran Complex";
-    fortrancomplex.parent = neo_nirvana;
+    fortrancomplex.location = neo_nirvana;
     fortrancomplex.roomRanges.emplace_back(14743, 14772);
     auto fortran_complex = assembleArea(fortrancomplex);
 
     AreaDef revolutionpark;
     revolutionpark.name = "Revolution Park";
-    revolutionpark.parent = neo_nirvana;
+    revolutionpark.location = neo_nirvana;
     revolutionpark.roomRanges.emplace_back(14773, 14802);
     auto revolution_park = assembleArea(revolutionpark);
 
     AreaDef akatsukilabs;
     akatsukilabs.name = "Akatsuki Labs";
-    akatsukilabs.parent = neo_nirvana;
+    akatsukilabs.location = neo_nirvana;
     akatsukilabs.roomRanges.emplace_back(14800, 14893);
     auto akatsuki_labs = assembleArea(akatsukilabs);
 
     AreaDef southgal;
     southgal.name = "South Galaxy";
-    southgal.parent = mortal_plane;
+    southgal.location = mortal_plane;
     southgal.roomIDs = {64300, 64399};
     auto south_galaxy = assembleArea(southgal);
 
     AreaDef undergroundpassage;
     undergroundpassage.name = "Underground Passage";
-    undergroundpassage.parent = planet_namek;
+    undergroundpassage.location = planet_namek;
     undergroundpassage.roomRanges.emplace_back(12869, 12899);
     auto underground_passage = assembleArea(undergroundpassage);
 
     AreaDef shatplan;
     shatplan.name = "Shattered Planet";
-    shatplan.parent = south_galaxy;
+    shatplan.location = south_galaxy;
     shatplan.type = AreaType::CelestialBody;
     shatplan.roomRanges.emplace_back(64301, 64399);
     auto shattered_planet = assembleArea(shatplan);
 
     AreaDef wzdef;
     wzdef.name = "War Zone";
-    wzdef.parent = xenoverse;
+    wzdef.location = xenoverse;
     wzdef.type = AreaType::Structure;
     wzdef.roomRanges.emplace_back(17700, 17702);
     auto war_zone = assembleArea(wzdef);
 
     AreaDef corlight;
     corlight.name = "Corridor of Light";
-    corlight.parent = war_zone;
+    corlight.location = war_zone;
     corlight.roomRanges.emplace_back(17703, 17722);
     auto corridor_of_light = assembleArea(corlight);
 
     AreaDef cordark;
     cordark.name = "Corridor of Darkness";
-    cordark.parent = war_zone;
+    cordark.location = war_zone;
     cordark.roomRanges.emplace_back(17723, 17743);
     auto corridor_of_darkness = assembleArea(cordark);
 
     AreaDef soisland;
     soisland.name = "South Ocean Island";
-    soisland.parent = planet_earth;
+    soisland.location = planet_earth;
     soisland.roomRanges.emplace_back(6700, 6758);
     auto south_ocean_island = assembleArea(soisland);
 
     AreaDef hhouse;
     hhouse.name = "Haunted House";
-    hhouse.parent = xenoverse;
+    hhouse.location = xenoverse;
     hhouse.type = AreaType::Dimension;
     hhouse.roomRanges.emplace_back(18600, 18693);
     auto haunted_house = assembleArea(hhouse);
 
     AreaDef roc;
     roc.name = "Random Occurences, WTF?";
-    roc.parent = xenoverse;
+    roc.location = xenoverse;
     roc.type = AreaType::Dimension;
     roc.roomRanges.emplace_back(18700, 18776);
     auto random_occurences = assembleArea(roc);
 
     AreaDef galstrong;
     galstrong.name = "Galaxy's Strongest Tournament";
-    galstrong.parent = space;
+    galstrong.location = space;
     galstrong.type = AreaType::Structure;
     galstrong.roomRanges.emplace_back(17875, 17894);
     auto galaxy_strongest_tournament = assembleArea(galstrong);
 
     AreaDef arwater;
     arwater.name = "Arena - Water";
-    arwater.parent = galaxy_strongest_tournament;
+    arwater.location = galaxy_strongest_tournament;
     arwater.roomRanges.emplace_back(17800, 17824);
     auto arena_water = assembleArea(arwater);
 
     AreaDef arring;
     arring.name = "Arena - The Ring";
-    arring.parent = galaxy_strongest_tournament;
+    arring.location = galaxy_strongest_tournament;
     arring.roomRanges.emplace_back(17825, 17849);
     auto arena_ring = assembleArea(arring);
 
     AreaDef arsky;
     arsky.name = "Arena - In the Sky";
-    arsky.parent = galaxy_strongest_tournament;
+    arsky.location = galaxy_strongest_tournament;
     arsky.roomRanges.emplace_back(17850, 17875);
     auto arena_sky = assembleArea(arsky);
 
@@ -4355,12 +4232,8 @@ void migrate_grid() {
         sdata.name = data.name;
         sdata.roomIDs = data.vnums;
         sdata.type = AreaType::Vehicle;
-        sdata.parent = spaceships;
-        auto ship = assembleArea(sdata);
-        auto &s = areas[ship];
-        if(data.ship_obj) s.extraVn = data.ship_obj.value();
-
-        return ship;
+        sdata.location = world.at(data.location ? data.location.value() : 16694);
+        return assembleArea(sdata);
     };
 
     for(auto &sd : gships) {
@@ -4374,7 +4247,7 @@ void migrate_grid() {
     // A very luxurious player custom home
     AreaDef dunnoHouse;
     dunnoHouse.name = "Dunno's House";
-    dunnoHouse.parent = xenoverse;
+    dunnoHouse.location = xenoverse;
     dunnoHouse.roomIDs = {19009, 19010, 19011, 19012, 19013, 19014, 19015, 19016, 19017, 19018,
                           19019, 19020, 19021, 19022, 19023};
     auto dunno_house = assembleArea(dunnoHouse);
@@ -4382,7 +4255,7 @@ void migrate_grid() {
     // This looks like an unused old player home, seems like it's attached to Cherry Blossom Mountain?
     AreaDef mountainFortress;
     mountainFortress.name = "Mountaintop Fortress";
-    mountainFortress.parent = xenoverse;
+    mountainFortress.location = xenoverse;
     mountainFortress.roomIDs = {19025, 19026, 19027, 19028, 19029, 19030, 19031, 19032,
                                 19033, 19034, 19035, 19036, 19037, 19038, 19024};
     auto mountain_fortress = assembleArea(mountainFortress);
@@ -4393,7 +4266,7 @@ void migrate_grid() {
         auto o = obj_proto.find(ovn);
         if(o == obj_proto.end()) continue;
         old_ship_data shipData;
-        shipData.name = o->second->name;
+        shipData.name = o->second["name"];
         shipData.ship_obj = ovn;
         shipData.vnums.insert(vn);
         shipData.hatch_room = vn;
@@ -4402,7 +4275,7 @@ void migrate_grid() {
 
     AreaDef sphouses;
     sphouses.name = "Small Player Houses";
-    sphouses.parent = structures;
+    sphouses.location = structures;
     auto small_player_houses = assembleArea(sphouses);
 
     int count = 1;
@@ -4410,13 +4283,13 @@ void migrate_grid() {
         AreaDef house;
         house.name = fmt::format("Small Player House {}", count++);
         house.roomRanges.emplace_back(i, i+3);
-        house.parent = small_player_houses;
+        house.location = small_player_houses;
         assembleArea(house);
     }
 
     AreaDef mdhouses;
     mdhouses.name = "Deluxe Player Houses";
-    mdhouses.parent = structures;
+    mdhouses.location = structures;
     auto medium_player_houses = assembleArea(mdhouses);
 
     count = 1;
@@ -4424,13 +4297,13 @@ void migrate_grid() {
         AreaDef house;
         house.name = fmt::format("Deluxe Player House {}", count++);
         house.roomRanges.emplace_back(i, i+4);
-        house.parent = medium_player_houses;
+        house.location = medium_player_houses;
         assembleArea(house);
     }
 
     AreaDef lphouses;
     lphouses.name = "Excellent Player Houses";
-    lphouses.parent = structures;
+    lphouses.location = structures;
     auto large_player_houses = assembleArea(lphouses);
 
     count = 1;
@@ -4438,7 +4311,7 @@ void migrate_grid() {
         AreaDef house;
         house.name = fmt::format("Excellent Player House {}", count++);
         house.roomRanges.emplace_back(i, i+4);
-        house.parent = large_player_houses;
+        house.location = large_player_houses;
         assembleArea(house);
     }
 
@@ -4450,7 +4323,7 @@ void migrate_grid() {
     for(auto vn = 19800; vn <= 19899; vn++) {
         AreaDef pdim;
         pdim.name = "Personal Pocket Dimension " + std::to_string(counter++);
-        pdim.parent = personal_dimensions;
+        pdim.location = personal_dimensions;
         pdim.roomIDs.insert(vn);
         pdim.type = AreaType::Dimension;
         pdim.gravity = 1000.0;

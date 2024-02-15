@@ -99,7 +99,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     } else {
         addToLocation(world.at(sensei::getStartRoom(chclass)));
     }
-    look_at_room(getRoom(), this, 0);
+    lookAtLocation();
 
     // If Costless, there's not going to be any penalties.
     int dur = 100;
@@ -176,7 +176,7 @@ void char_data::teleport_to(IDXTYPE rnum) {
     removeFromLocation();
     auto r = dynamic_cast<room_data*>(world.at(rnum));
     addToLocation(r);
-    look_at_room(r, this, 0);
+    lookAtLocation();
     update_pos(this);
 }
 
@@ -1044,7 +1044,7 @@ void char_data::login() {
         removeFromLocation();
         addToLocation(world.at(300));
     } else {
-        look_at_room(IN_ROOM(this), this, 0);
+        lookAtLocation();
     }
     if (has_mail(GET_IDNUM(this)))
         send_to_char(this, "\r\nYou have mail waiting.\r\n");

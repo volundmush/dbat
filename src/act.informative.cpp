@@ -3737,270 +3737,205 @@ ACMD(do_autoexit) {
     send_to_char(ch, "Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
 }
 
-void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief) {
-    auto rm = dynamic_cast<room_data*>(world[target_room]);
-    if(!rm) return;
-    look_at_room(rm, ch, ignore_brief);
-}
 
-void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) {
-    trig_data *t;
-
-    if (!ch->desc)
-        return;
+Event room_data::renderLocationFor(unit_data *viewer) {
     
-    auto sect = rm->sector_type;
-    auto sunk = SUNKEN(rm->vn);
+    auto sunk = isSunken();
 
-    if (IS_DARK(rm->vn) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-        send_to_char(ch, "It is pitch black...\r\n");
-        return;
-    } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
-        send_to_char(ch, "You see nothing but infinite darkness...\r\n");
-        return;
-    } else if (PLR_FLAGGED(ch, PLR_EYEC)) {
-        send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
-        return;
+    /*
+    if (viewer->checkFlag(FlagType::Affect, AFF_BLIND)) {
+        out += "You see nothing but infinite darkness...\r\n";
+        return out;
     }
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
-        char buf[MAX_STRING_LENGTH];
-        char buf2[MAX_STRING_LENGTH];
-        char buf3[MAX_STRING_LENGTH];
+    if (viewer->checkFlag(FlagType::PC, PLR_EYEC)) {
+        out += "You can't see a damned thing, your eyes are closed!\r\n";
+        return out;
+    }
+    if (isInsideDark() && !viewer->canSeeInDark()) {
+        out += "It is pitch black...\r\n";
+        return out;
+    }
+    */
 
-        // TODO: sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf);
-        sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
-        }
+    Event ev("DBATLegacyRoom", nlohmann::json::object());
+    auto &j = ev.second;
+    auto nodec = viewer->checkFlag(FlagType::Pref, PRF_NODEC);
+    if(nodec) j["nodec"] = true;
+    j["gravity"] = getGravity();
+    j["sector_type"] = sector_type;
+    j["sector"] = sector_types[sector_type];
+    j["dmg"] = dmg;
+    j["geffect"] = geffect;
+    j["name"] = getDisplayName(viewer);
 
-        send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rm->name);
-        if (!rm->script->dgScripts.empty()) {
-            send_to_char(ch, "@D[@GTriggers");
-            for (auto t : rm->script->dgScripts)
-                send_to_char(ch, " %d", GET_TRIG_VNUM(t));
-            send_to_char(ch, "@D] ");
-        }
-        if(rm->area) {
-            std::vector<std::string> ancestors;
-            auto parent = rm->area;
-            while(parent) {
-                auto &a = areas[parent.value()];
-                ancestors.emplace_back(fmt::format("[{}] {}@n", a.vn, a.name));
-                parent = a.parent;
+    
+    double grav = getGravity();
+    if (viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) {
+        j["room_flags"] = getFlagNames(FlagType::Room);
+
+        if (!script->dgScripts.empty()) {
+            std::vector<trig_vnum> triggers;
+            for (auto t : script->dgScripts) {
+                triggers.push_back(GET_TRIG_VNUM(t));
             }
-            // Reverse areas.
-            std::reverse(ancestors.begin(), ancestors.end());
-            auto joined = join(ancestors, " -> ");
-            send_to_char(ch, "@wArea: @D[@n %s @D]@n\r\n", joined.c_str());
+            j["triggers"] = triggers;
         }
-        double grav = rm->getGravity();
-        auto g = fmt::format("{}", grav);
-        sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2,
-                rm->vn, g.c_str());
-        send_to_char(ch, "@wFlags: %-70s@w\r\n", buf3);
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
-        }
+
+        j["vn"] = vn;
     } else {
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
-        }
-        send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->name);
-        if(auto planet = ch->getMatchingArea(area_data::isPlanet); planet) {
+
+        if(auto planet = viewer->getMatchingArea(area_data::isPlanet); planet) {
             auto &a = areas[planet.value()];
-            send_to_char(ch, "@wPlanet: @G%s@n\r\n", a.name.c_str());
+            j["planet"] = a.name;
         } else {
-            if (rm->checkFlag(FlagType::Room, ROOM_NEO)) {
-                send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
-            } else if (rm->checkFlag(FlagType::Room, ROOM_AL)) {
-                send_to_char(ch, "@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
-            } else if (rm->checkFlag(FlagType::Room, ROOM_HELL)) {
-                send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
-            } else if (rm->checkFlag(FlagType::Room, ROOM_RHELL)) {
-                send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
+            if (checkFlag(FlagType::Room, ROOM_NEO)) {
+                j["planet"] = "Neo Nirvana";
+            } else if (checkFlag(FlagType::Room, ROOM_AL)) {
+                j["dimension"] = "Afterlife";
+            } else if (checkFlag(FlagType::Room, ROOM_HELL)) {
+                j["dimension"] = "Punishment Hell";
+            } else if (checkFlag(FlagType::Room, ROOM_RHELL)) {
+                j["dimension"] = "Hell";
             }
         }
 
-        double grav = rm->getGravity();
-        if(grav <= 1.0) {
-            send_to_char(ch, "@wGravity: @WNormal@n\r\n");
-        } else {
-            auto g = fmt::format("{}", grav);
-            send_to_char(ch, "@wGravity: @W%sx@n\r\n", g.c_str());
+        
+        if (checkFlag(FlagType::Room, ROOM_REGEN)) {
+            j["auras"].push_back("@CA feeling of calm and relaxation fills this room.@n");
         }
-        if (rm->checkFlag(FlagType::Room, ROOM_REGEN)) {
-            send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
+        if (checkFlag(FlagType::Room, ROOM_AURA)) {
+            j["auras"].push_back("@GAn aura of @gregeneration@G surrounds this area.@n");
         }
-        if (rm->checkFlag(FlagType::Room, ROOM_AURA)) {
-            send_to_char(ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
-        }
-        if (rm->checkFlag(FlagType::Room, ROOM_HBTC)) {
-            send_to_char(ch, "@rThis room feels like it opperates in a different time frame.@n\r\n");
-        }
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
+        if (checkFlag(FlagType::Room, ROOM_HBTC)) {
+            j["auras"].push_back("@GThe @YHyperbolic Time Chamber@G surrounds this area.@n");
         }
     }
     
-    auto dmg = rm->getDamage();
-
-    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->checkFlag(FlagType::Room, ROOM_DEATH)) {
-        if (dmg <= 99) {
-            send_to_char(ch, "@w%s@n", rm->getLookDesc());
-        }
-        if (dmg == 100 &&
-            (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING ||
-             sect == SECT_SHOP || sect == SECT_IMPORTANT)) {
-            send_to_char(ch, "@w%s@n", rm->getLookDesc());
-        }
-        if (sect == SECT_INSIDE && dmg > 0) {
-            send_to_char(ch, "\r\n");
+    j["description"] = getLookDesc();
+    auto dmg = getDamage();
+    std::string dmsg;
+    if ((!viewer->checkFlag(FlagType::PC, PRF_BRIEF)) || checkFlag(FlagType::Room, ROOM_DEATH)) {
+        if (sector_type == SECT_INSIDE && dmg > 0) {
             if (dmg <= 2) {
-                send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the floor.@n");
+                dmsg = "@wA small hole with chunks of debris that can be seen scarring the floor.@n";
             } else if (dmg <= 4) {
-                send_to_char(ch, "@wA couple small holes with chunks of debris that can be seen scarring the floor.@n");
+                dmsg = "@wA couple small holes with chunks of debris that can be seen scarring the floor.@n";
             } else if (dmg <= 6) {
-                send_to_char(ch, "@wA few small holes with chunks of debris that can be seen scarring the floor.@n");
+                dmsg = "@wA few small holes with chunks of debris that can be seen scarring the floor.@n";
             } else if (dmg <= 10) {
-                send_to_char(ch,
-                             "@wThere are several small holes with chunks of debris that can be seen scarring the floor.@n");
+                dmsg = "@wThere are several small holes with chunks of debris that can be seen scarring the floor.@n";
             } else if (dmg <= 20) {
-                send_to_char(ch, "@wMany holes fill the floor of this area, many of which have burn marks.@n");
+                dmsg = "@wMany holes fill the floor of this area, many of which have burn marks.@n";
             } else if (dmg <= 30) {
-                send_to_char(ch, "@wThe floor is severely damaged with many large holes.@n");
+                dmsg = "@wThe floor is severely damaged with many large holes.@n";
             } else if (dmg <= 50) {
-                send_to_char(ch,
-                             "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
+                dmsg = "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n";
             } else if (dmg <= 75) {
-                send_to_char(ch, "@wThis entire area is falling apart, it has been damaged so badly.@n");
+                dmsg = "@wThis entire area is falling apart, it has been damaged so badly.@n";
             } else if (dmg <= 99) {
-                send_to_char(ch,
-                             "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
+                dmsg = "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n";
             } else if (dmg >= 100) {
-                send_to_char(ch,
-                             "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
+                dmsg = "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n";
             }
-            send_to_char(ch, "\r\n");
         } else if (
-                (sect == SECT_CITY || sect == SECT_FIELD || sect == SECT_HILLS ||
-                 sect == SECT_IMPORTANT) && dmg > 0) {
-            send_to_char(ch, "\r\n");
+                (sector_type == SECT_CITY || sector_type == SECT_FIELD || sector_type == SECT_HILLS ||
+                 sector_type == SECT_IMPORTANT) && dmg > 0) {
             if (dmg <= 2) {
-                send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the ground.@n");
+                dmsg = "@wA small hole with chunks of debris that can be seen scarring the ground.@n";
             } else if (dmg <= 4) {
-                send_to_char(ch,
-                             "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n");
+                dmsg = "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n";
             } else if (dmg <= 6) {
-                send_to_char(ch, "@wA few small craters with chunks of debris that can be seen scarring the ground.@n");
+                dmsg = "@wA few small craters with chunks of debris that can be seen scarring the ground.@n";
             } else if (dmg <= 10) {
-                send_to_char(ch,
-                             "@wThere are several small craters with chunks of debris that can be seen scarring the ground.@n");
+                dmsg = "@wThere are several small craters with chunks of debris that can be seen scarring the ground.@n";
             } else if (dmg <= 20) {
-                send_to_char(ch, "@wMany craters fill the ground of this area, many of which have burn marks.@n");
+                dmsg = "@wMany craters fill the ground of this area, many of which have burn marks.@n";
             } else if (dmg <= 30) {
-                send_to_char(ch, "@wThe ground is severely damaged with many large craters.@n");
+                dmsg = "@wThe ground is severely damaged with many large craters.@n";
             } else if (dmg <= 50) {
-                send_to_char(ch,
-                             "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
+                dmsg = "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n";
             } else if (dmg <= 75) {
-                send_to_char(ch, "@wThis entire area is falling apart, it has been damaged so badly.@n");
+                dmsg = "@wThis entire area is falling apart, it has been damaged so badly.@n";
             } else if (dmg <= 99) {
-                send_to_char(ch,
-                             "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
+                dmsg = "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n";
             } else if (dmg >= 100) {
-                send_to_char(ch,
-                             "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
+                dmsg =  "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n";
             }
-            send_to_char(ch, "\r\n");
-        } else if (sect == SECT_FOREST && dmg > 0) {
-            send_to_char(ch, "\r\n");
+        } else if (sector_type == SECT_FOREST && dmg > 0) {
             if (dmg <= 2) {
-                send_to_char(ch, "@wA small tree sits in a little crater here.@n");
+                dmsg = "@wA small tree sits in a little crater here.@n";
             } else if (dmg <= 4) {
-                send_to_char(ch, "@wTrees have been uprooted by craters in the ground.@n");
+                dmsg = "@wTrees have been uprooted by craters in the ground.@n";
             } else if (dmg <= 6) {
-                send_to_char(ch,
-                             "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n");
+                dmsg = "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n";
             } else if (dmg <= 10) {
-                send_to_char(ch, "@wA large patch of trees have been destroyed and are laying in craters here.@n");
+                dmsg = "@wA large patch of trees have been destroyed and are laying in craters here.@n";
             } else if (dmg <= 20) {
-                send_to_char(ch, "@wSeveral craters have merged into one large crater in one part of this forest.@n");
+                dmsg = "@wSeveral craters have merged into one large crater in one part of this forest.@n";
             } else if (dmg <= 30) {
-                send_to_char(ch,
-                             "@wThe open sky can easily be seen through a hole of trees destroyed\r\nand resting at the bottom of several craters here.@n");
+                dmsg = "@wThe open sky can easily be seen through a hole of trees destroyed\r\nand resting at the bottom of several craters here.@n";
             } else if (dmg <= 50) {
-                send_to_char(ch,
-                             "@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n");
+                dmsg =  "@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n";
             } else if (dmg <= 75) {
-                send_to_char(ch,
-                             "@wVery few trees are left standing in this area, replaced instead by large craters.@n");
+                dmsg =  "@wVery few trees are left standing in this area, replaced instead by large craters.@n";
             } else if (dmg <= 99) {
-                send_to_char(ch,
-                             "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n");
+                dmsg = "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n";
             } else if (dmg >= 100) {
-                send_to_char(ch,
-                             "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n");
+                dmsg = "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n";
             }
-            send_to_char(ch, "\r\n");
-        } else if (sect == SECT_MOUNTAIN && dmg > 0) {
-            send_to_char(ch, "\r\n");
+
+        } else if (sector_type == SECT_MOUNTAIN && dmg > 0) {
+
             
             if (dmg <= 2) {
-                send_to_char(ch, "@wA small crater has been burned into the side of this mountain.@n");
+                dmsg = "@wA small crater has been burned into the side of this mountain.@n";
             } else if (dmg <= 4) {
-                send_to_char(ch, "@wA couple craters have been burned into the side of this mountain.@n");
+                dmsg = "@wA couple craters have been burned into the side of this mountain.@n";
             } else if (dmg <= 6) {
-                send_to_char(ch,
-                             "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n");
+                dmsg = "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n";
             } else if (dmg <= 10) {
-                send_to_char(ch, "@wSeveral bad craters can be seen in the side of the mountain here.@n");
+                dmsg = "@wSeveral bad craters can be seen in the side of the mountain here.@n";
             } else if (dmg <= 20) {
-                send_to_char(ch,
-                             "@wLarge boulders have rolled down the mountain side and collected in many nearby craters.@n");
+                dmsg = "@wLarge boulders have rolled down the mountain side and collected in many nearby craters.@n";
             } else if (dmg <= 30) {
-                send_to_char(ch, "@wMany craters are covering the mountainside here.@n");
+                dmsg = "@wMany craters are covering the mountainside here.@n";
             } else if (dmg <= 50) {
-                send_to_char(ch,
-                             "@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n");
+                dmsg =  "@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n";
             } else if (dmg <= 75) {
-                send_to_char(ch, "@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n");
+                dmsg = "@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n";
             } else if (dmg <= 99) {
-                send_to_char(ch,
-                             "@wThe mountain side here has completely collapsed, shedding dangerous rubble down to its base.@n");
+                dmsg = "@wThe mountain side here has completely collapsed, shedding dangerous rubble down to its base.@n";
             } else if (dmg >= 100) {
-                send_to_char(ch,
-                             "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n");
+                dmsg =  "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n";
             }
-            send_to_char(ch, "\r\n");
         }
-        if (rm->geffect >= 1 && rm->geffect <= 5) {
-            send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
+        if(!dmsg.empty()) j["dmsg"] = dmsg;
+        if (geffect >= 1 && geffect <= 5) {
+            j["geffect_string"] = "@rLava@w is pooling in someplaces here...@n";
         }
-        if (rm->geffect >= 6) {
-            send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
+        if (geffect >= 6) {
+            j["geffect_string"] = "@RLava@r covers pretty much the entire area!@n";
         }
-        if (rm->geffect < 0) {
-            send_to_char(ch, "@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n\r\n");
+        if (geffect < 0) {
+            j["geffect_string"] = "@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n";
         }
     }
-    /* autoexits */
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NODEC))
-        do_auto_exits2(rm, ch);
-    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
-        do_auto_exits(rm, ch, EXIT_LEV(ch));
 
-    /* now list characters & objects */
-    if (rm->checkFlag(FlagType::Room, ROOM_GARDEN1)) {
-        send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
-    } else {
-        if (rm->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
-            send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
-        } else if (rm->checkFlag(FlagType::Room, ROOM_HOUSE)) {
-            send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
+    // TODO: Exits stuff...
+    for(auto i = 0; i < NUM_OF_DIRS; i++) {
+        auto e = dir_option[i];
+        if(!e) continue;
+        
+    }
+
+    if(auto con = getContents(); !con.empty()) {
+        std::vector<std::string> lines;
+        for(auto obj : con) {
+            j["contents"].push_back(obj->renderRoomListFor(viewer));
         }
     }
-    list_obj_to_char(rm->contents, ch, SHOW_OBJ_LONG, false);
-    list_char_to_char(rm->people, ch);
+
+    return ev;
 }
 
 static void look_in_direction(struct char_data *ch, int dir) {
@@ -4039,7 +3974,7 @@ static void look_in_direction(struct char_data *ch, int dir) {
 
     if(canSeeRoom) {
         send_to_char(ch, "You peek over and see:\r\n");
-        look_at_room(dest, ch, 0);
+        ch->lookAtLocation();
     }
 }
 
@@ -4088,7 +4023,7 @@ static void look_in_obj(struct char_data *ch, char *arg) {
                 send_to_char(ch, "It is pitch black...\r\n");
             } else {
                 send_to_char(ch, "You look inside and see:\r\n");
-                look_at_room(vehicle_inside, ch, 0);
+                ch->sendEvent(world.at(vehicle_inside)->renderLocationFor(ch));
             }
         } else {
             send_to_char(ch, "You cannot see inside that.\r\n");
@@ -4423,7 +4358,7 @@ static void look_out_window(struct char_data *ch, char *arg) {
             else
                 act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
             send_to_char(ch, "You look outside and see:\r\n");
-            look_at_room(target_room, ch, 0);
+            ch->sendEvent(world.at(target_room)->renderLocationFor(ch));
         }
     }
 }
@@ -4669,7 +4604,7 @@ ACMD(do_look) {
         if (subcmd == SCMD_SEARCH) {
             search_room(ch);
         } else {
-            look_at_room(room, ch, 1);
+            ch->lookAtLocation();
             if (GET_ADMLEVEL(ch) < 1 && !AFF_FLAGGED(ch, AFF_HIDE)) {
                 //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
             }

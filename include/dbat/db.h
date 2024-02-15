@@ -315,7 +315,7 @@ extern struct char_data *affect_list;
 extern struct char_data *affectv_list;
 
 extern std::unordered_map<mob_vnum, struct index_data> mob_index;
-extern std::unordered_map<mob_vnum, std::shared_ptr<npc_proto>> mob_proto;
+extern std::unordered_map<mob_vnum, nlohmann::json> mob_proto;
 
 extern struct char_data *character_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
@@ -325,7 +325,7 @@ extern VnumIndex<char_data> characterVnumIndex;
 
 
 extern std::unordered_map<obj_vnum, struct index_data> obj_index;
-extern std::unordered_map<obj_vnum, std::shared_ptr<item_proto>> obj_proto;
+extern std::unordered_map<obj_vnum, nlohmann::json> obj_proto;
 
 extern struct obj_data *object_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
@@ -333,8 +333,6 @@ extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueOb
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
 extern std::unordered_map<trig_vnum, std::shared_ptr<trig_proto>> trig_index;
-
-extern int dg_owner_purged;
 
 extern void strip_string(char *buffer);
 

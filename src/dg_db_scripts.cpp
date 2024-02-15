@@ -52,27 +52,3 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg) {
 }
 
 
-void dg_obj_trigger(char *line, const std::shared_ptr<item_proto>& obj) {
-    char junk[8];
-    int vnum, rnum, count;
-    struct trig_proto_list *trg_proto, *new_trg;
-
-    count = sscanf(line, "%s %d", junk, &vnum);
-
-    if (count != 2) {
-        mudlog(BRF, ADMLVL_BUILDER, true,
-               "SYSERR: dg_obj_trigger() : Error assigning trigger! - Line was:\n  %s", line);
-        return;
-    }
-
-    rnum = real_trigger(vnum);
-    if (rnum == NOTHING) {
-        mudlog(BRF, ADMLVL_BUILDER, true,
-               "SYSERR: Trigger vnum #%d asked for but non-existant! (Object: %s - %d)",
-               vnum, obj->short_description, GET_OBJ_VNUM(obj));
-        return;
-    }
-
-    obj->proto_script.push_back(rnum);
-}
-

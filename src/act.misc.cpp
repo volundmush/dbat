@@ -3315,7 +3315,7 @@ ACMD(do_arena) {
             send_to_char(ch, "You are not even watching anyone in the arena.\r\n");
             return;
         } else if (arena_watch(ch) != NOWHERE) {
-            look_at_room(real_room(arena_watch(ch)), ch, 0);
+            ch->sendEvent(world.at(arena_watch(ch))->renderLocationFor(ch));
         }
     } else if (!strcasecmp(arg, "scan")) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) == 17875) {

@@ -2667,7 +2667,7 @@ ACMD(do_telepathy) {
             send_to_char(ch, "Their eyes are closed!\r\n");
             return;
         } else {
-            look_at_room(IN_ROOM(vict), ch, 0);
+            ch->sendEvent(vict->getRoom()->renderLocationFor(ch));
             send_to_char(ch, "You see all this through their eyes!\r\n");
             if (GET_INT(vict) > GET_INT(ch)) {
                 send_to_char(ch, "You feel like someone was using your mind for something...\r\n");
@@ -9014,8 +9014,8 @@ ACMD(do_quit) {
     }
     if (MINDLINK(ch) && LINKER(ch) == 0) {
         send_to_char(ch, "@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
-        if (IN_ROOM(MINDLINK(ch)) != NOWHERE) {
-            look_at_room(IN_ROOM(MINDLINK(ch)), ch, 0);
+        if (auto mindroom = MINDLINK(ch)->getRoom(); mindroom) {
+            ch->sendEvent(mindroom->renderLocationFor(ch));
             send_to_char(ch, "You get an impression of where this interference is originating from.\r\n");
         }
         return;
@@ -10845,7 +10845,7 @@ ACMD(do_resurrect) {
         auto r = dynamic_cast<room_data*>(world.at(rm));
         ch->removeFromLocation();
         ch->addToLocation(r);
-        look_at_room(r, ch, 0);
+        ch->lookAtLocation();
     }
 
     act("$n's body forms in a pool of @Bblue light@n.", true, ch, nullptr, nullptr, TO_ROOM);

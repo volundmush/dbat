@@ -739,7 +739,7 @@ ACMD(do_recall) {
         if (real_room(2) != NOWHERE) {
             ch->removeFromLocation();
             ch->addToLocation(world.at(2));
-            look_at_room(IN_ROOM(ch), ch, 0);
+            ch->lookAtLocation();
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
     }
@@ -1023,7 +1023,7 @@ ACMD(do_goto) {
     snprintf(buf, sizeof(buf), "$n %s", POOFIN(ch) ? POOFIN(ch) : "appears with an ear-splitting bang.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
-    look_at_room(r, ch, 0);
+    ch->lookAtLocation();
     enter_wtrigger(r, ch, -1);
 }
 
@@ -1055,7 +1055,7 @@ ACMD(do_trans) {
             victim->addToLocation(r);
             act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
             act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
-            look_at_room(r, victim, 0);
+            victim->lookAtLocation();
             enter_wtrigger(r, victim, -1);
         }
     } else {            /* Trans All */
@@ -1075,7 +1075,7 @@ ACMD(do_trans) {
                 victim->addToLocation(r);
                 act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
                 act("$n has transferred you!", false, ch, nullptr, victim, TO_VICT);
-                look_at_room(r, victim, 0);
+                victim->lookAtLocation();
                 enter_wtrigger(r, victim, -1);
             }
         send_to_char(ch, "%s", CONFIG_OK);
@@ -1111,7 +1111,7 @@ ACMD(do_teleport) {
         victim->addToLocation(r);
         act("$n arrives from a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         act("$n has teleported you!", false, ch, nullptr, (char *) victim, TO_VICT);
-        look_at_room(r, victim, 0);
+        victim->lookAtLocation();
         enter_wtrigger(r, victim, -1);
     }
 }

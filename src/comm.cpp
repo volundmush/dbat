@@ -237,7 +237,7 @@ void runOneLoop(double deltaTime) {
                     break;
             }
         }
-        for(auto d : toLook) look_at_room(IN_ROOM(d->character), d->character, 0);
+        for(auto d : toLook) d->character->lookAtLocation();
         auto end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("handle logins", std::chrono::duration<double>(end - start).count());
     }

@@ -209,8 +209,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 
             /* Hit point penalty for surrendering */
             ch->decCurHealth(2000);
-
-            look_at_room(IN_ROOM(ch), ch, 0);
+            ch->lookAtLocation();
             return true;
         } else {
             send_to_char(ch, "You can only surrender while fighting, so at least TRY to make an effort");

@@ -359,7 +359,6 @@ extern void parse_trigger(FILE *trig_f, trig_vnum nr);
 extern std::shared_ptr<trig_data> read_trigger(int nr);
 
 extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
-extern void dg_obj_trigger(char *line, const std::shared_ptr<item_proto>& obj);
 
 /* From dg_variables.c */
 extern int item_in_list(char *item, std::vector<obj_data*> list);

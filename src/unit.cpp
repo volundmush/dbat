@@ -400,6 +400,13 @@ nlohmann::json unit_data::serialize() {
         j["dgScripts"] = script->serialize();
     }
 
+    if(!flags.empty()) {
+        for(auto &[type, f] : flags) {
+            if(f.empty()) continue;
+            j["flags"].push_back(std::make_pair(type, std::vector<int>(f.begin(), f.end())));
+        }
+    }
+
     return j;
 }
 
@@ -699,27 +706,6 @@ std::vector<unit_data*> unit_data::getNeighborsFor(unit_data *u, bool visible) {
 }
 
 
-Searcher::Searcher(char_data* viewer, const std::string& args) : viewer(viewer), args(args) {};
-
-Searcher& Searcher::addInventory(unit_data* target) {
-    targets.emplace_back(SearchType::Inventory, target);
-    return *this;
-}
-
-Searcher& Searcher::addEquipment(unit_data* target) {
-    targets.emplace_back(SearchType::Equipment, target);
-    return *this;
-}
-
-Searcher& Searcher::addLocation(unit_data* target) {
-    targets.emplace_back(SearchType::Location, target);
-    return *this;
-}
-
-Searcher& Searcher::addWorld() {
-    targets.emplace_back(SearchType::World, nullptr);
-    return *this;
-}
 
 Searcher& Searcher::setAllowAll(bool allow) {
     allowAll = allow;
@@ -746,51 +732,15 @@ Searcher& Searcher::setCheckVisible(bool check) {
     return *this;
 }
 
-Searcher& Searcher::setFilter(const std::function<bool(unit_data*)> &filter) {
-    this->filter = filter;
-    return *this;
-}
-
-
-std::vector<unit_data*> Searcher::searchHelper(SearchType type, unit_data* target) {
-    switch(type) {
-        case SearchType::Inventory:
-            return target->getContents();
-        case SearchType::Equipment: {
-            std::vector<unit_data*> out;
-            for(auto [id, obj] : target->getEquipment()) {
-                out.push_back(obj);
-            }
-            return out;
-        }
-        case SearchType::Location:
-            return target->getNeighbors(checkVisible);
-        case SearchType::World: {
-            std::vector<unit_data*> out;
-            for(auto [id, obj] : world) {
-                out.push_back(obj);
-            }
-            return out;
-        }
-    }
-}
 
 std::vector<unit_data*> Searcher::search() {
     trim(args);
     if(args.empty()) return {};
-    if(allowSelf && iequals(args, "self")) return {viewer};
-    if(allowHere && iequals(args, "here")) return {viewer->getLocation()};
+    if(allowSelf && iequals(args, "self")) return {caller};
+    if(allowHere && iequals(args, "here")) return {caller->getLocation()};
 
-    std::vector<unit_data*> candidates;
-    for(auto [type, target] : targets) {
-        auto results = searchHelper(type, target);
-        // if filter is set, apply it.
-        if(filter) {
-            std::copy_if(results.begin(), results.end(), std::back_inserter(candidates), filter);
-        } else {
-            candidates.insert(candidates.end(), results.begin(), results.end());
-        }
-    }
+    auto candidates = doSearch();
+    
     int counter = 0;
     int prefix = 1;
     bool allMode = false;
@@ -805,7 +755,7 @@ std::vector<unit_data*> Searcher::search() {
         if(iequals(prefixStr, "all")) {
             allMode = allowAll;
             if(!allMode) {
-                viewer->sendLine("You are not allowed to use 'all' in this context.");
+                caller->sendLine("You are not allowed to use 'all' in this context.");
                 return {};
             }
         } else {
@@ -821,7 +771,7 @@ std::vector<unit_data*> Searcher::search() {
     }
 
     for(auto c : candidates) {
-        auto keywords = c->getKeywordsFor(viewer);
+        auto keywords = c->getKeywordsFor(caller);
 
         for(auto k : keywords) {
             if(iequals(k, targetName)) {

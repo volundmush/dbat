@@ -67,14 +67,14 @@ struct char_data *character_list = nullptr; /* global linked list of chars	 */
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::unordered_map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
-std::unordered_map<mob_vnum, std::shared_ptr<npc_proto>> mob_proto;    /* prototypes for mobs		 */
+std::unordered_map<mob_vnum, nlohmann::json> mob_proto;    /* prototypes for mobs		 */
 
 VnumIndex<obj_data> objectVnumIndex;
 VnumIndex<char_data> characterVnumIndex;
 
 struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
 std::unordered_map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
-std::unordered_map<obj_vnum, std::shared_ptr<item_proto>> obj_proto;    /* prototypes for objs		 */
+std::unordered_map<obj_vnum, nlohmann::json> obj_proto;    /* prototypes for objs		 */
 
 std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
 /* hash tree for fast obj lookup */

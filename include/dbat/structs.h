@@ -136,32 +136,7 @@ struct player_data {
     nlohmann::json serialize();
 };
 
-enum class AreaType {
-    Dimension = 0,
-    CelestialBody = 1,
-    Region = 2,
-    Structure = 3,
-    Vehicle = 4
-};
 
-struct area_data {
-    area_data() = default;
-    explicit area_data(const nlohmann::json &j);
-    vnum vn{NOTHING}; /* virtual number of this area		*/
-    std::string name; /* name of this area			*/
-    std::set<room_vnum> rooms; /* rooms in this area			*/
-    std::set<vnum> children; /* child areas				*/
-    std::optional<double> gravity; /* gravity in this area			*/
-    std::optional<vnum> parent; /* parent area				*/
-    AreaType type{AreaType::Dimension}; /* type of area				*/
-    std::optional<vnum> extraVn; /* vehicle or house outer object vnum, orbit for CelBody */
-    bool ether{false}; /* is this area etheric?			*/
-    std::bitset<NUM_AREA_FLAGS> flags; /* area flags				*/
-    nlohmann::json serialize();
-    static vnum getNextID();
-    static bool isPlanet(const area_data &area);
-    std::optional<room_vnum> getLaunchDestination();
-};
 
 /* Extra description: used in objects, mobiles, and rooms */
 struct extra_descr_data {
@@ -456,6 +431,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void setFlag(FlagType type, int flag, bool value = true);
     virtual void clearFlag(FlagType type, int flag);
     virtual bool flipFlag(FlagType type, int flag);
+    std::vector<std::string> getFlagNames(FlagType type);
 
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
@@ -465,6 +441,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     std::vector<struct obj_data*> getInventory();
     std::vector<char_data*> getPeople();
     std::unordered_map<int, obj_data*> getEquipment();
+    std::vector<room_data*> getRooms();
 
     room_data* getAbsoluteRoom();
     room_data* getRoom();
@@ -495,6 +472,9 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
     virtual bool canSee(unit_data *target);
 
+    // whether this has some form of nightvision.
+    virtual bool canSeeInDark();
+
     // NOTE: all functions beginning with check return an empty optional if it's OK.
     // the optional string contains the reason why it's NOT OK, otherwise.
 
@@ -507,10 +487,16 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // whether this unit is capable of picking up u. This is related to the above, but is more about the unit's own state.
     virtual std::optional<std::string> checkCanPickup(unit_data *u);
 
+    virtual bool isInsideDark();
+    virtual bool isProvidingLight();
+
     // Look at location.
     void lookAtLocation();
     // The business part of the above.
-    virtual std::string renderLocationFor(unit_data* u);
+    virtual Event renderLocationFor(unit_data* u);
+
+    virtual std::string renderRoomListFor(unit_data* u, bool statuses = false);
+    virtual std::string renderContentsListFor(unit_data* u);
 
     void activateContents();
     void deactivateContents();
@@ -543,16 +529,20 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void setRoomDesc(const std::string& desc);
     virtual void setLookDesc(const std::string& desc);
 
-    virtual std::string getDisplayName(struct char_data* ch);
-    virtual std::vector<std::string> getKeywordsFor(struct char_data* ch);
-    virtual std::string renderAppearance(struct char_data* ch);
+    virtual std::string getDisplayName(unit_data* ch);
+    virtual std::vector<std::string> getKeywordsFor(unit_data* ch);
+    virtual std::string renderAppearance(unit_data* ch);
 
     virtual UnitFamily getFamily() = 0;
     virtual std::string getUnitClass() = 0;
     
     void checkMyID();
 
+    virtual std::optional<vnum> getMatchingArea(const std::function<bool(const area_data&)>& f);
+
     virtual void assignTriggers();
+
+    virtual void sendEvent(const Event& event);
 
     virtual void sendText(const std::string& text);
     virtual void sendLine(const std::string& text);
@@ -572,8 +562,27 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
         sendText(fmt::sprintf(text, args...));
     }
 
+};
 
+enum class AreaType {
+    Dimension = 0,
+    CelestialBody = 1,
+    Region = 2,
+    Structure = 3,
+    Vehicle = 4
+};
 
+struct area_data : public unit_data {
+    area_data() = default;
+    explicit area_data(const nlohmann::json &j);
+
+    std::optional<double> gravity; /* gravity in this area			*/
+    AreaType type{AreaType::Dimension}; /* type of area				*/
+
+    nlohmann::json serialize() override;
+
+    UnitFamily getFamily() override;
+    std::string getUnitClass() override;
 };
 
 
@@ -663,8 +672,6 @@ struct obj_data : public unit_data {
 
     std::optional<double> gravity;
 
-    std::optional<vnum> getMatchingArea(const std::function<bool(const area_data&)>& f);
-
     bool isProvidingLight();
     double currentGravity();
 
@@ -681,8 +688,6 @@ struct obj_data : public unit_data {
 
 
 /* room-related structures ************************************************/
-
-
 
 struct room_direction_data {
     room_direction_data() = default;
@@ -761,6 +766,10 @@ struct room_data : public unit_data {
 
     void assignTriggers() override;
     std::string scriptString() override;
+
+    Event renderLocationFor(unit_data* u) override;
+
+    bool isInsideDark() override;
 };
 /* ====================================================================== */
 
@@ -1802,52 +1811,137 @@ struct aging_data {
 
 
 enum class SearchType : uint8_t {
-    Inventory = 0,
-    Equipment = 1,
-    Location = 2,
-    World = 3
+    Contents = 0,
+    Inventory = 1,
+    Equipment = 2,
+    Location = 3,
+    People = 4,
+    World = 5
 };
 
-class Searcher {
+
+template<typename Derived>
+class Dispatcher {
     public:
-        Searcher(char_data* viewer, const std::string& args);
-        Searcher& addInventory(unit_data* target);
-        Searcher& addEquipment(unit_data* target);
-        Searcher& addLocation(unit_data* target);
-        Searcher& addWorld();
-        Searcher& setAllowAll(bool val = true);
-        Searcher& setAllowAsterisk(bool val = true);
-        Searcher& setAllowSelf(bool val = true);
-        Searcher& setAllowHere(bool val = true);
-        Searcher& setAllowRecurse(bool val = true);
-        Searcher& setFilter(const std::function<bool(unit_data*)> &f);
-        Searcher& setCheckVisible(bool val = true);
-        std::vector<unit_data*> search();
-        unit_data* getOne();
-
-        template<typename T>
-        std::vector<T*> types() {
-            static_assert(std::is_base_of<unit_data, T>::value, "T must be derived from unit_data");
-            std::vector<T*> filtered;
-            for (auto* unit : search()) {
-                if (T* casted = dynamic_cast<T*>(unit); casted) {
-                    filtered.push_back(casted);
-                }
-            }
-            return filtered;
-        }
-
+    Dispatcher(char_data* caller, const std::string& args) : caller(caller), args(args) {};
+    Dispatcher& setFilter(const std::function<bool(unit_data*)> &f) {
+        filter = f;
+        return static_cast<Derived&>(*this);
+    }
+    Dispatcher& setCheckVisible(bool val = true) {
+        checkVisible = val;
+        return static_cast<Derived&>(*this);
+    }
+    Dispatcher& addPeople(unit_data* target) {
+        targets.push_back({SearchType::People, target});
+        return static_cast<Derived&>(*this);
+    }
+    Dispatcher& addInventory(unit_data* target) {
+        targets.push_back({SearchType::Inventory, target});
+        return static_cast<Derived&>(*this);
+    }
+    Dispatcher& addEquipment(unit_data* target) {
+        targets.push_back({SearchType::Equipment, target});
+        return static_cast<Derived&>(*this);
+    }
+    Dispatcher& addLocation(unit_data* target) {
+        targets.push_back({SearchType::Location, target});
+        return static_cast<Derived&>(*this);
+    }
+    Dispatcher& addWorld() {
+        targets.push_back({SearchType::World, nullptr});
+        return static_cast<Derived&>(*this);
+    }
     protected:
-        char_data* viewer;
-        std::string args;
-        bool checkVisible{true};
-        bool allowAll{false};
-        bool allowAsterisk{false};
-        bool allowSelf{false};
-        bool allowHere{false};
-        bool allowRecurse{false};
-        std::function<bool(unit_data*)> filter;
-        std::vector<std::pair<SearchType, unit_data*>> targets;
+    char_data* caller;
+    std::string args;
+    bool checkVisible{true};
+    std::function<bool(unit_data*)> filter;
+    std::vector<std::pair<SearchType, unit_data*>> targets;
+    std::vector<unit_data*> searchHelper(SearchType type, unit_data* target) {
+        switch(type) {
+            case SearchType::Inventory:
+                return target->getContents();
+                break;
+            case SearchType::Equipment: {
+                std::vector<unit_data*> out;
+                for(auto [id, obj] : target->getEquipment()) {
+                    out.push_back(obj);
+                }
+                return out;
+            }
+            break;
+            case SearchType::Location:
+                return target->getNeighbors(checkVisible);
+                break;
+            case SearchType::World: {
+                std::vector<unit_data*> out;
+                for(auto [id, obj] : world) {
+                    out.push_back(obj);
+                }
+                return out;
+            }
+            break;
+            case SearchType::People:
+                return target->getPeople();
+                break;
+        }
+    }
 
-        std::vector<unit_data*> searchHelper(SearchType type, unit_data* target);
+    std::vector<unit_data*> doSearch() {
+        std::vector<unit_data*> out;
+        for(auto [type, target] : targets) {
+            auto results = searchHelper(type, target);
+            // if filter is set, apply it.
+            if(filter) {
+                std::copy_if(results.begin(), results.end(), std::back_inserter(candidates), filter);
+            } else {
+                candidates.insert(candidates.end(), results.begin(), results.end());
+            }
+        }
+        std::erase_if(out, [this](auto c) {return c == caller;});
+        return out;
+    }
+};
+
+
+class Searcher : public Dispatcher<Searcher> {
+public:
+    Searcher& setAllowAll(bool val = true);
+    Searcher& setAllowAsterisk(bool val = true);
+    Searcher& setAllowSelf(bool val = true);
+    Searcher& setAllowHere(bool val = true);
+    Searcher& setAllowRecurse(bool val = true);
+    std::vector<unit_data*> search();
+    unit_data* getOne();
+
+    template<typename T>
+    std::vector<T*> types() {
+        static_assert(std::is_base_of<unit_data, T>::value, "T must be derived from unit_data");
+        std::vector<T*> filtered;
+        for (auto* unit : search()) {
+            if (T* casted = dynamic_cast<T*>(unit); casted) {
+                filtered.push_back(casted);
+            }
+        }
+        return filtered;
+    }
+
+protected:
+    bool checkVisible{true};
+    bool allowAll{false};
+    bool allowAsterisk{false};
+    bool allowSelf{false};
+    bool allowHere{false};
+    bool allowRecurse{false};
+};
+
+using MsgVar = std::variant<unit_data*, std::string>;
+
+class Messager : public Dispatcher<Messager> {
+public:
+    void deliver();
+    void addVar(const std::string& key, MsgVar value);
+protected:
+    std::unordered_map<std::string, MsgVar> variables;
 };

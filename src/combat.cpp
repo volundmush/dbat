@@ -4762,7 +4762,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 for(auto x : {ch, vict}) {
                     x->removeFromLocation();
                     x->addToLocation(r);
-                    look_at_room(r, x, 0);
+                    x->lookAtLocation();
                     if (FIGHTING(x)) {
                         stop_fighting(x);
                     }

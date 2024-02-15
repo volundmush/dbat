@@ -9,7 +9,7 @@ extern const struct guild_info_type guild_info[6];
 extern void racial_body_parts(struct char_data *ch);
 
 extern void set_height_and_weight_by_race(struct char_data *ch);
-extern void set_height_and_weight_by_race(const std::shared_ptr<npc_proto>& ch);
+extern void set_height_and_weight_by_race(nlohmann::json& ch, int sex);
 
 extern int invalid_race(struct char_data *ch, struct obj_data *obj);
 

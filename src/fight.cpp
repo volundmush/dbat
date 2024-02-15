@@ -2132,7 +2132,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                 // God damned VNUMS.
                 ch->addToLocation(world.at(17875));
                 ch->decCurHealthPercent(1, 1);
-                look_at_room(IN_ROOM(ch), ch, 0);
+                ch->lookAtLocation();
                 final_combat_resolve(ch);
                 return;
             } else {

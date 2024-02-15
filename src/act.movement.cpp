@@ -799,7 +799,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     }
 
     if (ch->desc != nullptr) {
-        look_at_room(r, ch, 0);
+        ch->lookAtLocation();
         if (AFF_FLAGGED(ch, AFF_SNEAK) && !IS_NPC(ch) && GET_SKILL(ch, SKILL_MOVE_SILENTLY) &&
             GET_SKILL(ch, SKILL_MOVE_SILENTLY) < rand_number(1, 101)) {
             send_to_char(ch, "@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
@@ -849,7 +849,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     if (!greet_mtrigger(ch, dir)) {
         ch->removeFromLocation();
         ch->addToLocation(world.at(was_in));
-        look_at_room(ch->getRoom(), ch, 0);
+        ch->lookAtLocation();
     } else greet_memory_mtrigger(ch);
     if (willfall == true) {
         handle_fall(ch);
@@ -1755,7 +1755,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     }
 
     if (ch->desc != nullptr)
-        look_at_room(IN_ROOM(ch), ch, 0);
+        ch->lookAtLocation();
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
         log_death_trap(ch);
@@ -1996,7 +1996,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
 
     if (ch->desc != nullptr) {
         act(obj->getLookDesc().c_str(), true, ch, obj, nullptr, TO_CHAR);
-        look_at_room(IN_ROOM(ch), ch, 0);
+        ch->lookAtLocation();
     }
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
@@ -2089,7 +2089,7 @@ static void handle_fall(struct char_data *ch) {
             ch->decCurHealth(ch->getEffMaxPL() / 20, 1);
 
             act("@rYou slam into the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            look_at_room(IN_ROOM(ch), ch, 0);
+            ch->lookAtLocation();
         } else {
             act("@r$n pummets down toward the ground below!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }

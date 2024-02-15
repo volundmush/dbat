@@ -3023,39 +3023,30 @@ size_t countColors(const std::string &txt) {
  *
  * Inside and City rooms are always lit.
  * Outside rooms are dark at sunset and night.  */
-int room_is_dark(room_rnum room) {
-    auto found = world.find(room);
-    if (found == world.end()) {
-        basic_mud_log("room_is_dark: Invalid room rnum %d.", room);
+static const std::set<int> lit_sectors = {SECT_INSIDE, SECT_CITY, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
+
+bool room_data::isInsideDark() {
+
+    for(auto u : getContents()) {
+        if(u->isProvidingLight()) return false;
+    }
+
+    auto rfd = checkFlag(FlagType::Room, ROOM_DARK);
+
+    if (checkFlag(FlagType::Room, ROOM_NOINSTANT) && rfd) {
         return (true);
     }
-    auto r = dynamic_cast<room_data*>(found->second);
-
-    for(auto c = r->people; c; c = c->next_in_room) {
-        if(c->isProvidingLight()) return false;
-    }
-
-    if (cook_element(room))
-        return (false);
-
-    if (r->checkFlag(FlagType::Room, ROOM_NOINSTANT) && ROOM_FLAGGED(room, ROOM_DARK)) {
-        return (true);
-    }
-    if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && !ROOM_FLAGGED(room, ROOM_DARK)) {
+    if (checkFlag(FlagType::Room, ROOM_NOINSTANT) && !rfd) {
         return (false);
     }
 
-    if (ROOM_FLAGGED(room, ROOM_DARK))
+    if (rfd)
         return (true);
 
-    if (ROOM_FLAGGED(room, ROOM_INDOORS))
+    if (checkFlag(FlagType::Room, ROOM_INDOORS))
         return (false);
 
-    if (SECT(room) == SECT_INSIDE || SECT(room) == SECT_CITY || SECT(room) == SECT_IMPORTANT || SECT(room) == SECT_SHOP)
-        return (false);
-
-    if (SECT(room) == SECT_SPACE)
-        return (false);
+    if(lit_sectors.contains(sector_type)) return false;
 
     if (weather_info.sunlight == SUN_SET)
         return (true);
