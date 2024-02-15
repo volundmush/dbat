@@ -171,10 +171,8 @@ WCMD(do_wasound) {
         return;
     }
 
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto dir = room->dir_option[door];
-        if(!dir) continue;
-        auto dest = dir->getDestination();
+    for (auto &[dir, ex] : room->getExits()) {
+        auto dest = ex->getDestination();
         if(!dest) continue;
 
         act_to_room(argument, dest);
@@ -260,7 +258,7 @@ WCMD(do_wdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
-    struct room_direction_data *newexit;
+    struct exit_data *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -302,31 +300,25 @@ WCMD(do_wdoor) {
         return;
     }
 
-    newexit = rm->dir_option[dir];
+    auto exists = rm->getExits();
 
+    exit_data *ex = exists[dir];
     /* purge exit */
     if (fd == 0) {
-        if (newexit) {
-            if (newexit->general_description)
-                free(newexit->general_description);
-            if (newexit->keyword)
-                free(newexit->keyword);
-            free(newexit);
-            rm->dir_option[dir] = nullptr;
+        if (ex) {
+            ex->extractFromWorld();
         }
     } else {
-        if (!newexit) {
-            CREATE(newexit, struct room_direction_data, 1);
-            rm->dir_option[dir] = newexit;
+        if (!exists[dir]) {
+            ex = new exit_data();
+            ex->uid = getNextUID();
+            ex->script = std::make_shared<script_data>(ex);
+            ex->addToLocation(rm, dir);
         }
 
         switch (fd) {
             case 1:  /* description */
-                if (newexit->general_description)
-                    free(newexit->general_description);
-                CREATE(newexit->general_description, char, strlen(value) + 3);
-                strcpy(newexit->general_description, value);
-                strcat(newexit->general_description, "\r\n");
+                ex->setLookDesc(value);
                 break;
             case 2:  /* flags       */
                 newexit->exit_info = (int16_t) asciiflag_conv(value);
@@ -335,14 +327,11 @@ WCMD(do_wdoor) {
                 newexit->key = atoi(value);
                 break;
             case 4:  /* name        */
-                if (newexit->keyword)
-                    free(newexit->keyword);
-                CREATE(newexit->keyword, char, strlen(value) + 1);
-                strcpy(newexit->keyword, value);
+                ex->setKeyword(value);
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->to_room = to_room;
+                    newexit->to = world.at(to_room);
                 else
                     wld_log(room, "wdoor: invalid door target");
                 break;

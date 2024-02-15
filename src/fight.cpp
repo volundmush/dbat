@@ -673,10 +673,10 @@ static void shadow_dragons_live() {
 
 /* For announcing the sounds of battle to nearby rooms */
 void impact_sound(struct char_data *ch, char *mssg) {
-    int door;
-    for (door = 0; door < NUM_OF_DIRS; door++)
-        if (CAN_GO(ch, door))
-            send_to_room(ch->getRoom()->dir_option[door]->to_room, "%s", mssg);
+    for (auto &[dir, ex] : ch->getRoom()->getExits()) {
+        if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
+        if(auto dest = ex->getDestination(); dest) dest->sendfContents("%s", mssg);
+    }
 }
 
 /* For removing body parts */

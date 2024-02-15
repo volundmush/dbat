@@ -1252,13 +1252,10 @@ static void bringdesc(struct char_data *ch, struct char_data *tch) {
 
 static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                           struct char_data *ch) {
-    int door;
 
     auto room = dynamic_cast<room_data*>(world[rnum]);
 
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = room->dir_option[door];
-        if(!d) continue;
+    for (auto &[door, ex] : room->getExits()) {
         auto dest = d->getDestination();
         if(!dest) continue;
         bool isClosed = IS_SET(d->exit_info, EX_CLOSED);
@@ -1808,9 +1805,8 @@ static void gen_map(struct char_data *ch, int num) {
     
     /* print out exits */
     map_draw_room(map, 4, 4, ch->getRoom()->vn, ch);
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = room->dir_option[door];
-        if(!d) continue;
+    auto exits = room->getExits();
+    for (auto &[door, ex] : exits) {
         if(EXIT_FLAGGED(d, EX_CLOSED)) continue;
         auto dest = d->getDestination();
         if(!dest) continue;
@@ -1858,78 +1854,78 @@ static void gen_map(struct char_data *ch, int num) {
         } else {
             if (i == 2) {
                 sprintf(buf2, "@w       @w|%s@w|           %s",
-                        (room->dir_option[0] && !EXIT_FLAGGED(room->dir_option[0], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[0],
+                        (exits[0] && !EXIT_FLAGGED(exits[0], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[0],
                                                                                                      EX_CLOSED)
                                                                                              ? " @rN " : " @CN ")
                                                                                           : "   ", map[i]);
             }
             if (i == 3) {
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        (room->dir_option[6] && !EXIT_FLAGGED(room->dir_option[6], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[6],
+                        (exits[6] && !EXIT_FLAGGED(exits[6], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[6],
                                                                                                      EX_CLOSED)
                                                                                              ? " @rNW" : " @CNW")
                                                                                           : "   ",
-                        (room->dir_option[4] && !EXIT_FLAGGED(room->dir_option[4], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[4],
+                        (exits[4] && !EXIT_FLAGGED(exits[4], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[4],
                                                                                                      EX_CLOSED)
                                                                                              ? " @yU " : " @YU ")
                                                                                           : "   ",
-                        (room->dir_option[7] && !EXIT_FLAGGED(room->dir_option[7], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[7],
+                        (exits[7] && !EXIT_FLAGGED(exits[7], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[7],
                                                                                                      EX_SECRET)
                                                                                              ? "@rNE " : "@CNE ")
                                                                                           : "   ", map[i]);
             }
             if (i == 4) {
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        (room->dir_option[3] && !EXIT_FLAGGED(room->dir_option[3], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[3],
+                        (exits[3] && !EXIT_FLAGGED(exits[3], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[3],
                                                                                                      EX_CLOSED)
                                                                                              ? "  @rW" : "  @CW")
                                                                                           : "   ",
-                        (room->dir_option[10] && !EXIT_FLAGGED(room->dir_option[10], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                            room->dir_option[10],
+                        (exits[10] && !EXIT_FLAGGED(exits[10], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                            exits[10],
                                                                                                        EX_CLOSED)
                                                                                                ? " @rI " : " @mI ")
-                                                                                            : ((room->dir_option[11] &&
+                                                                                            : ((exits[11] &&
                                                                                                 !EXIT_FLAGGED(
-                                                                                                        room->dir_option[11],
+                                                                                                        exits[11],
                                                                                                         EX_SECRET))
                                                                                                ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[11],
+                                                                                                          exits[11],
                                                                                                           EX_CLOSED)
                                                                                                   ? "@rOUT" : "@mOUT")
                                                                                                : "@r{ }"),
-                        (room->dir_option[1] && !EXIT_FLAGGED(room->dir_option[1], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[1],
+                        (exits[1] && !EXIT_FLAGGED(exits[1], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[1],
                                                                                                      EX_CLOSED)
                                                                                              ? "@rE  " : "@CE  ")
                                                                                           : "   ", map[i]);
             }
             if (i == 5) {
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        (room->dir_option[9] && !EXIT_FLAGGED(room->dir_option[9], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[9],
+                        (exits[9] && !EXIT_FLAGGED(exits[9], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[9],
                                                                                                      EX_CLOSED)
                                                                                              ? " @rSW" : " @CSW")
                                                                                           : "   ",
-                        (room->dir_option[5] && !EXIT_FLAGGED(room->dir_option[5], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[5],
+                        (exits[5] && !EXIT_FLAGGED(exits[5], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[5],
                                                                                                      EX_CLOSED)
                                                                                              ? " @yD " : " @YD ")
                                                                                           : "   ",
-                        (room->dir_option[8] && !EXIT_FLAGGED(room->dir_option[8], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[8],
+                        (exits[8] && !EXIT_FLAGGED(exits[8], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[8],
                                                                                                      EX_SECRET)
                                                                                              ? "@rSE " : "@CSE ")
                                                                                           : "   ", map[i]);
             }
             if (i == 6) {
                 sprintf(buf2, "@w       @w|%s@w|           %s",
-                        (room->dir_option[2] && !EXIT_FLAGGED(room->dir_option[2], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[2],
+                        (exits[2] && !EXIT_FLAGGED(exits[2], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[2],
                                                                                                      EX_CLOSED)
                                                                                              ? " @rS " : " @CS ")
                                                                                           : "   ", map[i]);
@@ -3422,7 +3418,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
         };
 
         for (door = 0; door < NUM_OF_DIRS; door++) {
-            auto d = room->dir_option[door];
+            auto d = exits[door];
             if(!d) continue;
             auto dest = d->getDestination();
             if(!dest) continue;
@@ -3587,7 +3583,7 @@ static void do_auto_exits2(struct room_data *room, struct char_data *ch) {
     ch->sendf("\nExits: ");
 
     for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = room->dir_option[door];
+        auto d = exits[door];
         if(!d) continue;
         auto dest = d->getDestination();
         if(!dest) continue;
@@ -4532,7 +4528,7 @@ ACMD(do_look) {
                 return;
         }
     }
-    else if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
+    else if (is_abbrev(arg, "inside") && exits[INDIR] && !*arg2) {
         if (subcmd == SCMD_SEARCH)
             search_in_direction(ch, INDIR);
         else
@@ -4548,7 +4544,7 @@ ACMD(do_look) {
                (subcmd == SCMD_LOOK) && *arg2) {
         look_out_window(ch, arg2);
     } else if (is_abbrev(arg, "outside") &&
-               (subcmd == SCMD_LOOK) && !room->dir_option[OUTDIR]) {
+               (subcmd == SCMD_LOOK) && !exits[OUTDIR]) {
         look_out_window(ch, arg2);
     } else if ((look_type = search_block(arg, dirs, false)) >= 0 ||
                (look_type = search_block(arg, abbr_dirs, false)) >= 0) {
@@ -7018,7 +7014,7 @@ ACMD(do_scan) {
     auto darkHere = room->isInsideDark();
 
     for (i = 0; i < 10; i++) {
-        auto d = room->dir_option[i];
+        auto d = exits[i];
         if(!d) continue;
 
         if (darkHere && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&

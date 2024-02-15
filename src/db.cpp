@@ -51,7 +51,8 @@ bool isMigrating = false;
 
 struct config_data config_info; /* Game configuration list.    */
 
-int64_t nextUID = 0;
+// the legacy vnums from rooms top off at 65,000, so we'll start at 80,000.
+int64_t nextUID = 80000;
 
 int64_t getNextUID() {
     while(world.contains(nextUID)) {
@@ -281,7 +282,7 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
             u = new room_data(data);
         }
 
-        if(auto pc = dynamic_cast<pc_data>(u); pc) {
+        if(auto pc = dynamic_cast<pc_data*>(u); pc) {
             if(auto isPlayer = players.find(uid); isPlayer != players.end()) {
                 isPlayer->second->character = pc;
             }
@@ -2047,30 +2048,33 @@ void reset_zone(zone_rnum zone) {
                         c.command = '*';
                         break;
                     }
+
+                    auto exits = room->getExits();
+                    auto ex = exits[c.arg2];
             
                     auto room = dynamic_cast<room_data*>(u->second);
                     if (c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
-                        (room->dir_option[c.arg2] == nullptr)) {
+                        (ex == nullptr)) {
                         ZONE_ERROR("room or door does not exist, command disabled");
                         c.command = '*';
                     } else
                         switch (c.arg3) {
                             case 0:
-                                REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(ex->exit_info,
                                            EX_LOCKED);
-                                REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(ex->exit_info,
                                            EX_CLOSED);
                                 break;
                             case 1:
-                                SET_BIT(room->dir_option[c.arg2]->exit_info,
+                                SET_BIT(ex->exit_info,
                                         EX_CLOSED);
-                                REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
+                                REMOVE_BIT(ex->exit_info,
                                            EX_LOCKED);
                                 break;
                             case 2:
-                                SET_BIT(room->dir_option[c.arg2]->exit_info,
+                                SET_BIT(ex->exit_info,
                                         EX_LOCKED);
-                                SET_BIT(room->dir_option[c.arg2]->exit_info,
+                                SET_BIT(ex->exit_info,
                                         EX_CLOSED);
                                 break;
                         }

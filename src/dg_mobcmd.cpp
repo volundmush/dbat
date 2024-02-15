@@ -136,12 +136,10 @@ ACMD(do_masound) {
     skip_spaces(&argument);
 
     auto r = ch->getRoom();
-    for (auto door = 0; door < NUM_OF_DIRS; door++) {
-        auto e = r->dir_option[door];
-        if(!e) continue;
-        auto dest = e->getDestination();
+    for (auto &[door, ex] : r->getExits()) {
+        auto dest = ex->getDestination();
         if(!dest) continue;
-        dest->broadcast(argument);
+        dest->sendTextContents(argument);
     }
 
 }
@@ -1076,7 +1074,7 @@ ACMD(do_mdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
     room_data *rm;
-    struct room_direction_data *newexit;
+    struct exit_data *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -1136,7 +1134,7 @@ ACMD(do_mdoor) {
         }
     } else {
         if (!newexit) {
-            CREATE(newexit, struct room_direction_data, 1);
+            CREATE(newexit, struct exit_data, 1);
             rm->dir_option[dir] = newexit;
         }
 

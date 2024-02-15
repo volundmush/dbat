@@ -3526,22 +3526,37 @@ zone_vnum IN_ZONE(struct unit_data *ch) {
     return NOWHERE;
 }
 
-room_direction_data* EXIT(struct unit_data *ch, int door) {
+exit_data* EXIT(struct unit_data *ch, int door) {
     if(auto u = world.find(IN_ROOM(ch)); u != world.end()) {
-        auto r = dynamic_cast<room_data*>(u->second);
-        if(r) return r->dir_option[door];
+        if(auto ex = u->second->getExits(); !ex.empty()) {
+            if(auto e = ex.find(door); e != ex.end()) {
+                return e->second;
+            }
+        }
     }
     return nullptr;
 }
 
-room_direction_data* SECOND_EXIT(struct unit_data *ch, int door) {
-    if(auto u = world.find(IN_ROOM(ch)); u != world.end()) {
-        auto r = dynamic_cast<room_data*>(u->second);
-        if(r) {
-            if(auto e = r->dir_option[door]; e) {
-                if(auto u2 = world.find(e->to_room); u2 != world.end()) {
-                    auto r2 = dynamic_cast<room_data*>(u2->second);
-                    if(r2) return r2->dir_option[rev_dir[door]];
+exit_data* SECOND_EXIT(struct unit_data *ch, int door) {
+    if(auto ex = EXIT(ch, door); ex) {
+        if(auto r = ex->getDestination(); r) {
+            if(auto ex2 = r->getExits(); !ex2.empty()) {
+                if(auto e2 = ex2.find(door); e2 != ex2.end()) {
+                    return e2->second;
+                }
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+exit_data* THIRD_EXIT(struct unit_data *ch, int door) {
+    if(auto ex = SECOND_EXIT(ch, door); ex) {
+        if(auto r = ex->getDestination(); r) {
+            if(auto ex2 = r->getExits(); !ex2.empty()) {
+                if(auto e2 = ex2.find(door); e2 != ex2.end()) {
+                    return e2->second;
                 }
             }
         }
@@ -3549,39 +3564,24 @@ room_direction_data* SECOND_EXIT(struct unit_data *ch, int door) {
     return nullptr;
 }
 
-room_direction_data* THIRD_EXIT(struct unit_data *ch, int door) {
-    if(auto u = world.find(IN_ROOM(ch)); u != world.end()) {
-        auto r = dynamic_cast<room_data*>(u->second);
-        if(r) {
-            if(auto e = r->dir_option[door]; e) {
-                if(auto u2 = world.find(e->to_room); u2 != world.end()) {
-                    auto r2 = dynamic_cast<room_data*>(u2->second);
-                    if(r2) {
-                        if(auto e2 = r2->dir_option[rev_dir[door]]; e2) {
-                            if(auto u3 = world.find(e2->to_room); u3 != world.end()) {
-                                auto r3 = dynamic_cast<room_data*>(u3->second);
-                                if(r3) return r3->dir_option[rev_dir[door]];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return nullptr;
-}
-
-room_direction_data* W_EXIT(room_rnum room, int door) {
+exit_data* W_EXIT(room_rnum room, int door) {
     if(auto u = world.find(room); u != world.end()) {
         auto r = dynamic_cast<room_data*>(u->second);
         if(!r) return nullptr;
-        return r->dir_option[door];
+        auto ex = r->getExits();
+        if(auto found = ex.find(door); found != ex.end()) {
+            return found->second;
+        }
     }
     return nullptr;
 }
 
-room_direction_data* R_EXIT(room_data* room, int door) {
-    return room->dir_option[door];
+exit_data* R_EXIT(room_data* room, int door) {
+    auto ex = room->getExits();
+    if(auto found = ex.find(door); found != ex.end()) {
+        return found->second;
+    }
+    return nullptr;
 }
 
 obj_data *GET_EQ(unit_data *u, int i) {

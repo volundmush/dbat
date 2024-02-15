@@ -14,7 +14,7 @@ namespace net {
         void start() override;
 
     protected:
-        char_data *ch{};
+        pc_data *ch{};
         int state{CON_GET_NAME};
         int total{};
         int ccpoints{};

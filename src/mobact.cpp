@@ -110,10 +110,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             std::vector<int> availableDirections;
             //Check if door is a viable movement
             auto r = ch->getRoom();
-            for(auto i = 0; i < NUM_OF_DIRS; i++) {
-                auto ex = r->dir_option[i];
-                if(!ex) continue;
-                if(IS_SET(ex->exit_info, EX_CLOSED)) continue;
+            for(auto &[i, ex] : r->getExits()) {
+                if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
                 auto dest = ex->getDestination();
                 if(!dest) continue;
                 if(dest->checkFlag(FlagType::Room, ROOM_NOMOB) || dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;

@@ -60,14 +60,14 @@ int free_room_strings(struct room_data *room) {
 
 }
 
-room_direction_data::~room_direction_data() {
+exit_data::~exit_data() {
     if (general_description)
         free(general_description);
     if (keyword)
         free(keyword);
 }
 
-nlohmann::json room_direction_data::serialize() {
+nlohmann::json exit_data::serialize() {
     nlohmann::json j;
 
     if(general_description && strlen(general_description)) j["general_description"] = general_description;
@@ -87,7 +87,7 @@ nlohmann::json room_direction_data::serialize() {
     return j;
 }
 
-room_direction_data::room_direction_data(const nlohmann::json &j) : room_direction_data() {
+exit_data::exit_data(const nlohmann::json &j) : exit_data() {
     if(j.contains("general_description")) general_description = strdup(j["general_description"].get<std::string>().c_str());
     if(j.contains("keyword")) keyword = strdup(j["keyword"].get<std::string>().c_str());
     if(j.contains("exit_info")) exit_info = j["exit_info"].get<int16_t>();
@@ -124,37 +124,10 @@ room_data::room_data(const nlohmann::json &j) {
     deserialize(j);
 
     if(j.contains("sector_type")) sector_type = j["sector_type"];
-
-    if(j.contains("dir_option")) {
-        // this is an array of (<number>, <json>) pairs, with number matching the dir_option array index.
-        // Thankfully we can pass the json straight into the room_direction_data constructor...
-        for(auto &d : j["dir_option"]) {
-            dir_option[d[0]] = new room_direction_data(d[1]);
-        }
-    }
-
-    if(j.contains("room_flags")) {
-        for(auto &f : j["room_flags"]) {
-            setFlag(FlagType::Room, f.get<int>());
-        }
-    }
-
-    if(j.contains("proto_script")) {
-        for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
-    }
-
     if(j.contains("timed")) timed = j["timed"];
     if(j.contains("dmg")) dmg = j["dmg"];
     if(j.contains("geffect")) geffect = j["geffect"];
 
-}
-
-room_data::~room_data() {
-    // fields like name are handled by the base destructor...
-    // we just need to clean up exits.
-    for(auto d : dir_option) {
-        delete d;
-    }
 }
 
 
@@ -225,7 +198,7 @@ int room_data::modDamage(int amount) {
     return setDamage(dmg + amount);
 }
 
-struct room_data* room_direction_data::getDestination() {
+struct room_data* exit_data::getDestination() {
     auto found = world.find(to_room);
     if(found != world.end()) return dynamic_cast<room_data*>(found->second);
     return nullptr;

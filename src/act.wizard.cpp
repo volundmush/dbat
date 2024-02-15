@@ -707,14 +707,13 @@ ACMD(do_finddoor) {
             auto r = dynamic_cast<room_data*>(u);
             if (!r)
                 continue;
-            for (d = 0; d < NUM_OF_DIRS; d++) {
-                auto e = r->dir_option[d];
+            for (auto &[d, e] : r->getExits()) {
                 if (e && e->key &&
                     e->key == vnum) {
                     nlen = snprintf(buf + len, sizeof(buf) - len,
                                     "[%3d] Room %d, %s (%s)\r\n",
                                     ++num, vn,
-                                    dirs[d], e->keyword);
+                                    dirs[d], e->getName().c_str());
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -1304,7 +1303,7 @@ static void do_stat_room(struct char_data *ch) {
         if (!CAN_SEE(ch, k))
             continue;
 
-        column += ch->sendf("%s @y%s@n(%s)", found++ ? "," : "", GET_NAME(k),
+        ch->sendf("%s @y%s@n(%s)", found++ ? "," : "", GET_NAME(k),
                                !IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB"));
     }
 
@@ -1318,17 +1317,17 @@ static void do_stat_room(struct char_data *ch) {
         ch->sendf("Contents:@g %s@n\r\n", join(names, ", "));
     }
 
-    for (i = 0; i < NUM_OF_DIRS; i++) {
+    for (auto &[i, e] : rm->getExits()) {
         char buf1[128];
-        auto e = rm->dir_option[i];
+
 
         if (!e)
             continue;
 
-        if (e->to_room == NOWHERE)
+        if (!e->to)
             snprintf(buf1, sizeof(buf1), " @cNONE@n");
         else
-            snprintf(buf1, sizeof(buf1), "@c%5d@n", GET_ROOM_VNUM(e->to_room));
+            snprintf(buf1, sizeof(buf1), "@c%5d@n", e->to->uid);
 
         sprintbit(e->exit_info, exit_bits, buf2, sizeof(buf2));
 
@@ -1699,12 +1698,12 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
         ch->sendf("Hunger: %d, Thirst: %d, Drunk: %d\r\n", GET_COND(k, HUNGER), GET_COND(k, THIRST),
                      GET_COND(k, DRUNK));
 
-    column = ch->sendf("Master is: %s, Followers are:", k->master ? GET_NAME(k->master) : "<none>");
+    ch->sendf("Master is: %s, Followers are:", k->master ? GET_NAME(k->master) : "<none>");
     if (!k->followers)
         ch->sendf(" <none>\r\n");
     else {
         for (fol = k->followers; fol; fol = fol->next) {
-            column += ch->sendf("%s %s", found++ ? "," : "", PERS(fol->follower, ch));
+            ch->sendf("%s %s", found++ ? "," : "", PERS(fol->follower, ch));
             if (column >= 62) {
                 ch->sendf("%s\r\n", fol->next ? "," : "");
                 found = false;

@@ -894,12 +894,12 @@ extern obj_data* GET_EQ(unit_data* u, int i);
 #define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
     fname((obj)->name) : "something")
 
-extern room_direction_data *EXIT(struct unit_data *ch, int door);
-extern room_direction_data* SECOND_EXIT(struct unit_data *ch, int door);
-extern room_direction_data* THIRD_EXIT(struct unit_data *ch, int door);
-extern room_direction_data* W_EXIT(room_rnum room, int door);
-extern room_direction_data* R_EXIT(room_data *room, int door);
-extern room_direction_data* R_EXIT(room_data* room, int door);
+extern exit_data *EXIT(struct unit_data *ch, int door);
+extern exit_data* SECOND_EXIT(struct unit_data *ch, int door);
+extern exit_data* THIRD_EXIT(struct unit_data *ch, int door);
+extern exit_data* W_EXIT(room_rnum room, int door);
+extern exit_data* R_EXIT(room_data *room, int door);
+extern exit_data* R_EXIT(room_data* room, int door);
 
 #define CAN_GO(ch, door) (EXIT(ch,door) && \
              (EXIT(ch,door)->to_room != NOWHERE) && \

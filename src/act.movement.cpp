@@ -509,7 +509,8 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     }
 
     auto r = ch->getRoom();
-    auto e = r->dir_option[dir];
+    auto exits = r->getExits();
+    auto e = exits[dir];
     auto dest = e->getDestination();
 
     int willfall = false;
@@ -1293,7 +1294,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
     size_t len;
     int num = 0;
     room_rnum other_room = NOWHERE;
-    struct room_direction_data *back = nullptr;
+    struct exit_data *back = nullptr;
     struct obj_data *hatch = nullptr, *obj2 = nullptr, *next_obj, *vehicle = nullptr;
 
     if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH) {
@@ -1832,7 +1833,7 @@ ACMD(do_enter) {
             obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getInventory());
         /* Is the character carrying the object? */
         if (!obj)
-            obj = get_obj_in_equip_vis(ch, buf, nullptr, ch->equipment);
+            obj = get_obj_in_equip_vis(ch, buf, nullptr, ch->getEquipment());
         /* We have an object to enter */
         if (obj)
             perform_enter_obj(ch, obj, 0);

@@ -24,11 +24,12 @@
 static std::list<std::pair<struct room_data*, int>> bfs_queue;
 
 static int VALID_EDGE(struct room_data *x, int y) {
-    auto d = x->dir_option[y];
+    
+    auto d = x->getExits()[y];
     if(!d) return false;
     auto dest = d->getDestination();
     if(!dest) return false;
-    if(CONFIG_TRACK_T_DOORS == false && IS_SET(d->exit_info, EX_CLOSED)) return false;
+    if(CONFIG_TRACK_T_DOORS == false && d->checkFlag(FlagType::Exit, EX_CLOSED)) return false;
     if(dest->checkFlag(FlagType::Room, ROOM_NOTRACK) || dest->checkFlag(FlagType::Room, ROOM_BFS_MARK)) return false;
     return true;
 }
@@ -70,7 +71,7 @@ int find_first_step(struct room_data *src, struct room_data *target) {
     /* first, enqueue the first steps, saving which direction we're going. */
     for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {
         if (VALID_EDGE(src, curr_dir)) {
-            auto dest = src->dir_option[curr_dir]->getDestination();
+            auto dest = src->getExits()[curr_dir]->getDestination();
             dest->setFlag(FlagType::Room, ROOM_BFS_MARK);
             bfs_enqueue(dest, curr_dir);
         }
@@ -85,7 +86,7 @@ int find_first_step(struct room_data *src, struct room_data *target) {
         } else {
             for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++)
                 if (VALID_EDGE(f.first, curr_dir)) {
-                    auto dest = f.first->dir_option[curr_dir]->getDestination();
+                    auto dest = f.first->getExits()[curr_dir]->getDestination();
                     dest->setFlag(FlagType::Room, ROOM_BFS_MARK);
                     bfs_enqueue(dest, f.second);
                 }

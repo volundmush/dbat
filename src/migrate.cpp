@@ -567,12 +567,16 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
 
-    auto r = dynamic_cast<room_data*>(world[room]);
+    auto r = world.at(room);
     
-    auto d = r->dir_option[dir] = new room_direction_data();
+    auto d = new exit_data();
+    d->script = std::make_shared<script_data>(d);
+    d->uid = getNextUID();
 
-    d->general_description = fread_string(fl, buf2);
-    d->keyword = fread_string(fl, buf2);
+    d->setLookDesc(fread_string(fl, buf2));
+    d->setKeywords(fread_string(fl, buf2));
+
+    d->addtoLocation(r, dir);
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Format error, %s", buf2);
@@ -595,8 +599,8 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
         else
             d->exit_info = 0;
 
-        d->key = ((t[1] == -1 || t[1] == 65535) ? NOTHING : t[1]);
-        d->to_room = ((t[2] == -1 || t[2] == 65535) ? NOWHERE : t[2]);
+        d->key = world.contains(t[1]) ? t[1] : NOTHING;
+        d->to = world.contains(t[2]) ? world.at(t[2]) : nullptr;
 
         if (retval == 3) {
             basic_mud_log("Converting world files to include DC add ons.");
@@ -606,8 +610,8 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = 0;
             d->failsavetype = 0;
             d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
+            d->failroom = nullptr;
+            d->totalfailroom = nullptr;
             if (bitsavetodisk) {
                 converting = true;
             }
@@ -618,8 +622,8 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = 0;
             d->failsavetype = 0;
             d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
+            d->failroom = nullptr;
+            d->totalfailroom = nullptr;
             if (bitsavetodisk) {
                 converting = true;
             }
@@ -642,8 +646,8 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = t[6];
             d->failsavetype = t[7];
             d->dcfailsave = t[8];
-            d->failroom = t[9];
-            d->totalfailroom = t[10];
+            d->failroom = world.contains(t[9]) ? world.at(t[9]) : nullptr;
+            d->totalfailroom = world.contains(t[10]) ? world.at(t[10]) : nullptr;
         }
     }
 }
@@ -771,10 +775,6 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
  * NOTE 1: Assumes NOWHERE == NOBODY == NOTHING.
  * NOTE 2: Assumes sizeof(room_rnum) >= (sizeof(mob_rnum) and sizeof(obj_rnum))
  */
-
-static void mob_autobalance(const std::shared_ptr<npc_proto>& ch) {
-
-}
 
 static int parse_simple_mob(FILE *mob_f, nlohmann::json& ch, mob_vnum nr) {
     int j, t[10];

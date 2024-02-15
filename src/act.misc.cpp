@@ -2789,7 +2789,8 @@ ACMD(do_hydromancy) {
         }
 
         attempt = search_block(arg2, dirs, false);
-        auto e = r->dir_option[attempt];
+        auto exits = r->getExits();
+        auto e = exits[attempt];
         if(!e) {
             ch->sendf("You can not flood the water that direction!\r\n");
             return;
@@ -5119,7 +5120,9 @@ ACMD(do_obstruct) {
     }
     int dir2 = rev_dir[dir];
 
-    auto e = r->dir_option[dir];
+    auto exits = r->getExits();
+
+    auto e = exits[dir];
     if(!e) {
         ch->sendf("That direction does not exist here.\r\n");
         return;

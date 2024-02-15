@@ -345,7 +345,8 @@ enum class FlagType : uint8_t {
     Affect = 5,
     Area = 6,
     Pref = 7,
-    Room = 8
+    Room = 8,
+    Exit = 9
 };
 
 

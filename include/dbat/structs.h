@@ -316,7 +316,9 @@ struct mob_special_data {
 enum class UnitFamily : uint8_t {
     Character = 0,
     Item = 1,
-    Room = 2
+    Room = 2,
+    Exit = 3,
+    Area = 4
 };
 
 struct coordinates {
@@ -367,8 +369,9 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     std::vector<unit_data*> getContents();
     std::vector<struct obj_data*> getInventory();
     std::vector<char_data*> getPeople();
-    std::unordered_map<int, obj_data*> getEquipment();
+    std::map<int, obj_data*> getEquipment();
     std::vector<room_data*> getRooms();
+    std::map<int, exit_data*> getExits();
 
     room_data* getAbsoluteRoom();
     room_data* getRoom();
@@ -632,26 +635,25 @@ struct obj_data : public unit_data {
 
 /* room-related structures ************************************************/
 
-struct room_direction_data {
-    room_direction_data() = default;
-    explicit room_direction_data(const nlohmann::json &j);
-    ~room_direction_data();
-    char *general_description{};       /* When look DIR.			*/
-    char *keyword{};        /* for open/close			*/
+struct exit_data : public unit_data {
+    exit_data() = default;
+    explicit exit_data(const nlohmann::json &j);
 
-    int16_t exit_info{};        /* Exit info			*/
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
-    room_rnum to_room{NOWHERE};        /* Where direction leads (NOWHERE)	*/
+    room_data *to{nullptr};        /* Where direction leads (NOWHERE)	*/
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
     int dcskill{};            /* Skill req. to move through exit	*/
     int dcmove{};            /* DC for skill to move through exit	*/
     int failsavetype{};        /* Saving Throw type on skill fail	*/
     int dcfailsave{};        /* DC to save against on fail		*/
-    room_vnum failroom{NOWHERE};        /* Room # to put char in when fail > 5  */
-    room_vnum totalfailroom{NOWHERE};        /* Room # if char fails save < 5	*/
+    room_data *failroom{nullptr};        /* Room # to put char in when fail > 5  */
+    room_data *totalfailroom{nullptr};        /* Room # if char fails save < 5	*/
 
     struct room_data* getDestination();
+
+    UnitFamily getFamily() override;
+    std::string getUnitClass() override;
 
     nlohmann::json serialize();
 };
@@ -673,7 +675,7 @@ struct room_data : public unit_data {
 
     explicit room_data(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
-    std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
+    std::array<exit_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     SpecialFunc func{};
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
