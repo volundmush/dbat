@@ -805,8 +805,7 @@ ACMD(do_echo) {
             sprintf(argument, "%s\n@D(@gMessage truncated to 7000 characters@D)@n\n", argument);
         }
 
-        for (vict = ch->getRoom()->people; vict; vict = next_v) {
-            next_v = vict->next_in_room;
+        for (auto vict : ch->getRoom()->getPeople()) {
             if (vict == ch)
                 continue;
             if (found == false) {
@@ -1184,7 +1183,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'M':
                     send_to_char(ch, "%sLoad %s@y [@c%d@y], MaxMud : %d, MaxR : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 mob_proto[ZOCMD.arg1]->short_description,
+                                 mob_proto[ZOCMD.arg1]["short_description"],
                                  mob_index[ZOCMD.arg1].vn, ZOCMD.arg2,
                                  ZOCMD.arg4, ZOCMD.arg5
                     );
@@ -1192,7 +1191,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'G':
                     send_to_char(ch, "%sGive it %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1]->short_description,
+                                 obj_proto[ZOCMD.arg1]["short_description"],
                                  obj_index[ZOCMD.arg1].vn,
                                  ZOCMD.arg2, ZOCMD.arg5
                     );
@@ -1200,7 +1199,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'O':
                     send_to_char(ch, "%sLoad %s@y [@c%d@y], Max : %d, MaxR : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1]->short_description,
+                                 obj_proto[ZOCMD.arg1]["short_description"],
                                  obj_index[ZOCMD.arg1].vn,
                                  ZOCMD.arg2, ZOCMD.arg4, ZOCMD.arg5
                     );
@@ -1208,7 +1207,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'E':
                     send_to_char(ch, "%sEquip with %s@y [@c%d@y], %s, Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1]->short_description,
+                                 obj_proto[ZOCMD.arg1]["short_description"],
                                  obj_index[ZOCMD.arg1].vn,
                                  equipment_types[ZOCMD.arg3],
                                  ZOCMD.arg2, ZOCMD.arg5
@@ -1217,9 +1216,9 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'P':
                     send_to_char(ch, "%sPut %s@y [@c%d@y] in %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1]->short_description,
+                                 obj_proto[ZOCMD.arg1]["short_description"],
                                  obj_index[ZOCMD.arg1].vn,
-                                 obj_proto[ZOCMD.arg3]->short_description,
+                                 obj_proto[ZOCMD.arg3]["short_description"],
                                  obj_index[ZOCMD.arg3].vn,
                                  ZOCMD.arg2, ZOCMD.arg5
                     );
@@ -1227,7 +1226,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'R':
                     send_to_char(ch, "%sRemove %s@y [@c%d@y] from room.\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg2]->short_description,
+                                 obj_proto[ZOCMD.arg2]["short_description"],
                                  obj_index[ZOCMD.arg2].vn
                     );
                     break;
@@ -1300,17 +1299,13 @@ static void do_stat_room(struct char_data *ch) {
 
     send_to_char(ch, "Chars present:");
     column = 14;    /* ^^^ strlen ^^^ */
-    for (found = false, k = rm->people; k; k = k->next_in_room) {
+    found = false;
+    for (auto k : rm->getPeople()) {
         if (!CAN_SEE(ch, k))
             continue;
 
         column += send_to_char(ch, "%s @y%s@n(%s)", found++ ? "," : "", GET_NAME(k),
                                !IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB"));
-        if (column >= 62) {
-            send_to_char(ch, "%s\r\n", k->next_in_room ? "," : "");
-            found = false;
-            column = 0;
-        }
     }
 
     if (auto inv = rm->getInventory(); !inv.empty()) {
@@ -1726,7 +1721,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     }
 
     /* Showing the bitvector */
-    sprintbitarray(AFF_FLAGS(k), affected_bits, AF_ARRAY_MAX, buf);
+    snprintf(buf, sizeof(buf), "%s", join(k->getFlagNames(FlagType::Affect), ", ").c_str());
     send_to_char(ch, "AFF: @y%s@n\r\n", buf);
 
     /* Routine to show what spells a char is affected by */
@@ -1910,7 +1905,7 @@ ACMD(do_stat) {
         char *name = buf1;
         int number = get_number(&name);
 
-        if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != nullptr)
+        if ((object = get_obj_in_equip_vis(ch, name, &number, ch->getEquipment())) != nullptr)
             do_stat_object(ch, object);
         else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getInventory())) != nullptr)
             do_stat_object(ch, object);
@@ -2299,7 +2294,7 @@ ACMD(do_purge) {
             false, ch, nullptr, nullptr, TO_ROOM);
         send_to_room(IN_ROOM(ch), "The world seems a little cleaner.\r\n");
 
-        for (vict = ch->getRoom()->people; vict; vict = vict->next_in_room) {
+        for (auto vict : ch->getRoom()->getPeople()) {
             if (!IS_NPC(vict))
                 continue;
 
@@ -2555,7 +2550,7 @@ void perform_immort_vis(struct char_data *ch) {
 static void perform_immort_invis(struct char_data *ch, int level) {
     struct char_data *tch;
 
-    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
+    for (auto tch : ch->getRoom()->getPeople()) {
         if (tch == ch)
             continue;
         if (GET_ADMLEVEL(tch) >= GET_INVIS_LEV(ch) && GET_ADMLEVEL(tch) < level)
@@ -2805,8 +2800,7 @@ ACMD(do_force) {
         mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
                GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), to_force);
 
-        for (vict = ch->getRoom()->people; vict; vict = next_force) {
-            next_force = vict->next_in_room;
+        for (auto vict : ch->getRoom()->getPeople()) {
             if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
                 continue;
             act(buf1, true, ch, nullptr, vict, TO_VICT);
@@ -4200,11 +4194,9 @@ ACMD(do_plist) {
 }
 
 ACMD(do_peace) {
-    struct char_data *vict, *next_v;
     send_to_room(IN_ROOM(ch), "Everything is quite peaceful now.\r\n");
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto vict : ch->getRoom()->getPeople()) {
         if (GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch))
             continue;
         stop_fighting(vict);
@@ -4328,8 +4320,7 @@ ACMD(do_zpurge) {
         }
         auto r = dynamic_cast<room_data*>(found->second);
         if (r) {
-            for (mob = r->people; mob; mob = next_mob) {
-                next_mob = mob->next_in_room;
+            for (auto mob : r->getPeople()) {
                 if (IS_NPC(mob)) {
                     extract_char(mob);
                 }

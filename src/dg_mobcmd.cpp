@@ -100,7 +100,7 @@ void mob_log(char_data *mob, const char *format, ...) {
     char output[MAX_STRING_LENGTH];
 
     snprintf(output, sizeof(output), "Mob (%s [%d], VNum %d):: %s",
-             GET_SHORT(mob), mob->id, GET_MOB_VNUM(mob), format);
+             GET_SHORT(mob), mob->uid, GET_MOB_VNUM(mob), format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -135,19 +135,15 @@ ACMD(do_masound) {
 
     skip_spaces(&argument);
 
-    was_in_room = IN_ROOM(ch);
-    auto old = ch->getRoom();
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        struct room_direction_data *newexit;
-
-        if (((newexit = old->dir_option[door]) != nullptr) &&
-            newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
-            IN_ROOM(ch) = newexit->to_room;
-            sub_write(argument, ch, true, TO_ROOM);
-        }
+    auto r = ch->getRoom();
+    for (auto door = 0; door < NUM_OF_DIRS; door++) {
+        auto e = r->dir_option[door];
+        if(!e) continue;
+        auto dest = e->getDestination();
+        if(!dest) continue;
+        dest->broadcast(argument);
     }
 
-    IN_ROOM(ch) = was_in_room;
 }
 
 /* Heals a stat of the mob */
@@ -284,7 +280,7 @@ ACMD(do_mjunk) {
 
     if ((find_all_dots(arg) != FIND_INDIV) && !junk_all) {
         /* Thanks to Carlos Myers for fixing the line below */
-        if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0) {
+        if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->getEquipment())) >= 0) {
             extract_obj(unequip_char(ch, pos));
             return;
         }
@@ -298,7 +294,7 @@ ACMD(do_mjunk) {
             }
         }
         /* Thanks to Carlos Myers for fixing the line below */
-        while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->equipment)) >= 0)
+        while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->getEquipment())) >= 0)
             extract_obj(unequip_char(ch, pos));
     }
     return;
@@ -876,7 +872,7 @@ ACMD(do_mremember) {
     }
 
     /* fill in the structure */
-    mem->id = ((victim)->id);
+    mem->id = ((victim)->uid);
     if (argument && *argument) {
         mem->cmd = strdup(argument);
     }
@@ -920,7 +916,7 @@ ACMD(do_mforget) {
     mem = SCRIPT_MEM(ch);
     prev = nullptr;
     while (mem) {
-        if (mem->id == ((victim)->id)) {
+        if (mem->id == ((victim)->uid)) {
             if (mem->cmd) free(mem->cmd);
             if (prev == nullptr) {
                 SCRIPT_MEM(ch) = mem->next;
@@ -942,7 +938,8 @@ ACMD(do_mforget) {
 /* transform into a different mobile */
 ACMD(do_mtransform) {
     char arg[MAX_INPUT_LENGTH];
-    char_data *m, tmpmob;
+    char_data *m;
+    npc_data tmpmob;
     obj_data *obj[NUM_WEARS];
     mob_rnum this_rnum = GET_MOB_RNUM(ch);
     int pos;
@@ -1004,7 +1001,6 @@ ACMD(do_mtransform) {
         tmpmob.affected = ch->affected;
         tmpmob.script = ch->script;
         tmpmob.memory = ch->memory;
-        tmpmob.next_in_room = ch->next_in_room;
         tmpmob.next = ch->next;
         tmpmob.next_fighting = ch->next_fighting;
         tmpmob.followers = ch->followers;

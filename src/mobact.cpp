@@ -73,7 +73,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             if (mob_index[GET_MOB_RNUM(ch)].func == nullptr) {
                 basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
                     GET_NAME(ch), GET_MOB_VNUM(ch));
-                ch->mobFlags.reset(MOB_SPEC);
+                ch->clearFlag(FlagType::NPC, MOB_SPEC);
                 auto &mp = mob_proto[ch->vn];
             } else {
                 char actbuf[MAX_INPUT_LENGTH] = "";
@@ -329,7 +329,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             !AFF_FLAGGED(ch, AFF_BLIND) &&
             !AFF_FLAGGED(ch, AFF_CHARM)) {
             found = false;
-            for (vict = ch->getRoom()->people; vict && !found; vict = vict->next_in_room) {
+            for (auto vict : ch->getRoom()->getPeople()) {
                 if (ch == vict || !IS_NPC(vict) || !FIGHTING(vict))
                     continue;
                 if (IS_NPC(FIGHTING(vict)) || ch == FIGHTING(vict))
@@ -342,6 +342,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
                     do_punch(ch, tar, 0, 0);
                     found = true;
+                    break;
                 }
             }
         }

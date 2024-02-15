@@ -21,40 +21,13 @@
 #include "dbat/account.h"
 
 /* From db.c */
-int update_mobile_strings(struct char_data *t, struct char_data *f);
-
 void check_mobile_strings(struct char_data *mob);
 
 void check_mobile_string(mob_vnum i, char **string, const char *dscr);
 
-int copy_mobile_strings(struct char_data *t, struct char_data *f);
-
 /* local functions */
 void extract_mobile_all(mob_vnum vnum);
 
-int add_mobile(const std::shared_ptr<npc_proto>& mob, mob_vnum vnum) {
-    if(auto found = mob_proto.find(vnum); found != mob_proto.end()) {
-        *(found->second) = *mob;
-        basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
-        return vnum;
-    }
-    mob_proto[vnum] = mob;
-    auto &ix = mob_index[vnum];
-    ix.vn = vnum;
-    auto zvnum = real_zone_by_thing(vnum);
-    auto &z = zone_table[zvnum];
-    z.mobiles.insert(vnum);
-    basic_mud_log("GenOLC: add_mobile: Added mobile %d.", vnum);
-    return vnum;
-}
-
-int copy_mobile(struct char_data *to, struct char_data *from) {
-    free_mobile_strings(to);
-    *to = *from;
-    check_mobile_strings(from);
-    copy_mobile_strings(to, from);
-    return true;
-}
 
 void extract_mobile_all(mob_vnum vnum) {
     struct char_data *next, *ch;
@@ -66,88 +39,6 @@ void extract_mobile_all(mob_vnum vnum) {
     }
 }
 
-int delete_mobile(mob_rnum refpt) {
-    struct char_data *live_mob;
-    int counter, cmd_no;
-    mob_vnum vnum;
-    zone_rnum zone;
-
-    if (!mob_proto.count(refpt)) {
-        basic_mud_log("SYSERR: GenOLC: delete_mobile: Invalid rnum %d.", refpt);
-        return NOBODY;
-    }
-
-    vnum = mob_index[refpt].vn;
-    extract_mobile_all(vnum);
-    auto &z = zone_table[real_zone_by_thing(refpt)];
-    z.mobiles.erase(refpt);
-
-    /* Update live mobile rnums.  */
-    for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-        GET_MOB_RNUM(live_mob) -= (GET_MOB_RNUM(live_mob) >= refpt);
-
-    /* Update zone table.  */
-    for (auto &[zone, z] : zone_table) {
-        z.cmd.erase(std::remove_if(z.cmd.begin(), z.cmd.end(), [refpt](auto &cmd) { return cmd.command == 'M' && cmd.arg1 == refpt; }));
-    }
-
-    /* Update shop keepers.  */
-    for (auto &sh : shop_index) {
-        /* Find the shop for this keeper and reset it's keeper to
-         * -1 to keep the shop so it could be assigned to someone else */
-        if (sh.second.keeper == refpt) {
-            sh.second.keeper = NOBODY;
-        }
-    }
-
-    /* Update guild masters */
-    for (auto &g : guild_index) {
-        /* Find the guild for this trainer and reset it's trainer to
-         * -1 to keep the guild so it could be assigned to someone else */
-        if (g.second.gm == refpt) {
-            g.second.gm = NOBODY;
-        }
-    }
-
-    mob_proto.erase(vnum);
-    mob_index.erase(vnum);
-    save_mobiles(real_zone_by_thing(vnum));
-
-    return refpt;
-}
-
-int copy_mobile_strings(struct char_data *t, struct char_data *f) {
-    if(auto n = f->getName(); !n.empty()) t->setName(n);
-    if (f->title)
-        t->title = strdup(f->title);
-    if(auto r = f->getRoomDesc(); !r.empty()) t->setRoomDesc(r);
-    if(auto l = f->getLookDesc(); !l.empty()) t->setLookDesc(l);
-    return true;
-}
-
-int update_mobile_strings(struct char_data *t, struct char_data *f) {
-    if (f->name)
-        t->name = f->name;
-    if (f->title)
-        t->title = f->title;
-    if (f->room_description)
-        t->room_description = f->room_description;
-    if (f->look_description)
-        t->look_description = f->look_description;
-    return true;
-}
-
-int free_mobile_strings(struct char_data *mob) {
-    if (mob->name)
-        free(mob->name);
-    if (mob->title)
-        free(mob->title);
-    if (mob->room_description)
-        free(mob->room_description);
-    if (mob->look_description)
-        free(mob->look_description);
-    return true;
-}
 
 int save_mobiles(zone_rnum zone_num) {
     return true;
@@ -257,7 +148,7 @@ nlohmann::json char_data::serializeBase() {
     }
 
     for(auto i = 0; i < mobFlags.size(); i++)
-        if(mobFlags.test(i)) j["mobFlags"].push_back(i);
+        if(checkFlag(FlagType::NPC, i)) j["mobFlags"].push_back(i);
 
     for(auto i = 0; i < playerFlags.size(); i++)
         if(playerFlags.test(i)) j["playerFlags"].push_back(i);
@@ -273,9 +164,6 @@ nlohmann::json char_data::serializeBase() {
 
     j["chclass"] = chclass;
     if(weight != 0.0) j["weight"] = weight;
-
-    for(auto i = 0; i < affected_by.size(); i++)
-        if(affected_by.test(i)) j["affected_by"].push_back(i);
 
 
     if(armor) j["armor"] = armor;
@@ -346,12 +234,12 @@ void char_data::deserializeBase(const nlohmann::json &j) {
 
     if(j.contains("affected_by"))
         for(auto &i : j["affected_by"])
-            affected_by.set(i.get<int>());
+            setFlag(FlagType::Affect, i.get<int>());
 
     if(j.contains("armor")) armor = j["armor"];
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
-    if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) mobFlags.set(i.get<int>());
+    if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) setFlag(FlagType::NPC, i.get<int>());
     if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
     if(j.contains("pref")) for(auto &i : j["pref"]) pref.set(i.get<int>());
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) bodyparts.set(i.get<int>());
@@ -369,9 +257,6 @@ nlohmann::json char_data::serializeProto() {
 
 nlohmann::json char_data::serializeInstance() {
     auto j = serializeBase();
-
-    for(auto i = 0; i < NUM_ADMFLAGS; i++)
-        if(admflags.test(i)) j["admflags"].push_back(i);
 
     if(health < 1.0) j["health"] = health;
     if(energy < 1.0) j["energy"] = energy;
@@ -499,10 +384,6 @@ nlohmann::json char_data::serializeInstance() {
 
 void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     deserializeBase(j);
-
-    if(j.contains("admflags"))
-        for(auto &i : j["admflags"])
-            admflags.set(i.get<int>());
 
     if(j.contains("hometown")) hometown = j["hometown"];
 
@@ -684,13 +565,13 @@ char_data::char_data(const nlohmann::json &j) : char_data() {
     deserializeProto(j);
 
     if (!IS_HUMAN(this))
-        affected_by.set(AFF_INFRAVISION);
+        setFlag(FlagType::Affect, AFF_INFRAVISION);
 
     SPEAKING(this) = SKILL_LANG_COMMON;
     set_height_and_weight_by_race(this);
 
-    mobFlags.set(MOB_ISNPC);
-    mobFlags.reset(MOB_NOTDEADYET);
+    setFlag(FlagType::NPC, MOB_ISNPC);
+    clearFlag(FlagType::NPC, MOB_NOTDEADYET);
 
     playerFlags.reset(PLR_NOTDEADYET);
 
@@ -957,9 +838,7 @@ struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*
     auto o = unit_data::findObject(func, working);
     if(o) return o;
 
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        auto obj = equipment[i];
-        if(!obj) continue;
+    for(auto [pos, obj] : getEquipment()) {
         if(working && !obj->isWorking()) continue;
         if(func(obj)) return obj;
         auto p = obj->findObject(func, working);
@@ -972,9 +851,7 @@ struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*
 std::set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     auto out = unit_data::gatherObjects(func, working);
 
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        auto obj = equipment[i];
-        if(!obj) continue;
+    for(auto [pos, obj] : getEquipment()) {
         if(working && !obj->isWorking()) continue;
         if(func(obj)) out.insert(obj);
         auto contents = obj->gatherObjects(func, working);

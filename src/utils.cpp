@@ -742,7 +742,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
                 }
             }
         }
-        vict->affected_by.reset(AFF_PURSUIT);
+        vict->clearFlag(FlagType::Affect,AFF_PURSUIT);
         return (true);
     } else {
         send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
@@ -1496,13 +1496,13 @@ void reveal_hiding(struct char_data *ch, int type) {
         act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("@M$n moves a little and you notice them!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->affected_by.reset(AFF_HIDE);
+        ch->clearFlag(FlagType::Affect,AFF_HIDE);
     } else if (type == 1) { /* Their skill at hiding failed, reveal */
         if (GET_SKILL(ch, SKILL_HIDE) + bonus < axion_dice(0)) {
             act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, nullptr,
                 nullptr, TO_CHAR);
             act("@M$n moves a little and you notice them!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_HIDE);
+            ch->clearFlag(FlagType::Affect,AFF_HIDE);
         }
     } else if (type == 2) { /* They were spotted */
         struct descriptor_data *d;
@@ -1519,7 +1519,7 @@ void reveal_hiding(struct char_data *ch, int type) {
                 continue;
 
             if (GET_SKILL(tch, SKILL_SPOT) + rand1 >= GET_SKILL(ch, SKILL_HIDE) + rand2) {
-                ch->affected_by.reset(AFF_HIDE);
+                ch->clearFlag(FlagType::Affect,AFF_HIDE);
                 act("@M$N seems to notice you!@n", true, ch, nullptr, tch, TO_CHAR);
                 act("@MYou notice $n's movements reveal $s hiding spot!@n", true, ch, nullptr, tch, TO_VICT);
                 act("@MYou notice $N look keenly somewhere nearby. At that spot you see $n hiding!@n", true, ch,
@@ -1558,7 +1558,7 @@ void reveal_hiding(struct char_data *ch, int type) {
             }
         }
     } else if (type == 4) { /* You were found from search! */
-        ch->affected_by.reset(AFF_HIDE);
+        ch->clearFlag(FlagType::Affect,AFF_HIDE);
     }
 }
 
@@ -1586,11 +1586,11 @@ int block_calc(struct char_data *ch) {
                 if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 1) {
                     send_to_char(blocker, "You're now floating in the air.\r\n");
 
-                    blocker->affected_by.set(AFF_FLYING);
+                    blocker->setFlag(FlagType::Affect, AFF_FLYING);
                     GET_ALT(blocker) = GET_ALT(ch);
                 } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 2) {
                     send_to_char(blocker, "You're now floating high in the sky.\r\n");
-                    blocker->affected_by.set(AFF_FLYING);
+                    blocker->setFlag(FlagType::Affect, AFF_FLYING);
                     GET_ALT(blocker) = GET_ALT(ch);
                 }
                 return (0);
@@ -1808,7 +1808,7 @@ bool spar_friendly(struct char_data *ch, struct char_data *npc) {
             return false;
     }
 
-    for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->mobFlags.test(f)) return false;
+    for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->checkFlag(FlagType::NPC, f)) return false;
 
     return true;
 
@@ -3130,7 +3130,7 @@ void admin_set(struct char_data *ch, int value) {
         while (GET_ADMLEVEL(ch) < value) {
             ch->mod(CharNum::AdmLevel, 1);
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                ch->admflags.set(default_admin_flags[GET_ADMLEVEL(ch)][i]);
+                ch->setFlag(FlagType::Admin, default_admin_flags[GET_ADMLEVEL(ch)][i]);
         }
         run_autowiz();
         if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
@@ -3150,7 +3150,7 @@ void admin_set(struct char_data *ch, int value) {
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) > value) {
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                ch->admflags.reset(default_admin_flags[GET_ADMLEVEL(ch)][i]);
+                ch->clearFlag(FlagType::Admin, default_admin_flags[GET_ADMLEVEL(ch)][i]);
             ch->mod(CharNum::AdmLevel, -1);
         }
         run_autowiz();
@@ -3340,7 +3340,7 @@ bool PLANET_FLAGGED(struct char_data *ch, int flag) {
     auto planet = ch->getMatchingArea(area_data::isPlanet);
     if(!planet) return false;
     auto &a = areas[*planet];
-    return a.flags.test(flag);
+    return a.checkFlags.test(flag);
 }
 
 bool ETHER_STREAM(struct char_data *ch) {

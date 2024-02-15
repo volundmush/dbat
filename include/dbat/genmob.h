@@ -7,15 +7,6 @@
 
 #include "structs.h"
 
-
-extern int delete_mobile(mob_rnum);
-
-extern int copy_mobile(struct char_data *to, struct char_data *from);
-
-extern int add_mobile(const std::shared_ptr<npc_proto>&, mob_vnum);
-
-extern int copy_mob_strings(struct char_data *to, struct char_data *from);
-
 extern int free_mobile_strings(struct char_data *mob);
 
 extern int save_mobiles(zone_rnum rznum);

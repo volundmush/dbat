@@ -160,7 +160,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
 
                 if (find_invis) obj = get_obj_in_room(ch->getRoom(), name);
                 else if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->getRoom()->getInventory())));
-                else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, ch->equipment)));
+                else if (!(obj = get_obj_in_equip_vis(ch, name, &tmp, ch->getEquipment())));
                 else obj = get_obj_in_list_vis(ch, name, nullptr, ch->getInventory());
 
                 otokens[i] = (void *) obj;

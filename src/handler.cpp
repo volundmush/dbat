@@ -181,11 +181,11 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
 void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add) {
     if (add) {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-            ch->affected_by.set(bitv);
+            ch->setFlag(FlagType::Affect, bitv);
         }
     } else {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-            ch->affected_by.reset(bitv);
+            ch->clearFlag(FlagType::Affect,bitv);
             mod = -mod;
         }
     }
@@ -197,9 +197,9 @@ void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, 
 void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS>& bitv, bool add) {
     int i, j;
 
-    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affected_by.set(i);
+    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->setFlag(FlagType::Affect, i);
     else {
-        for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affected_by.reset(i);
+        for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->clearFlag(FlagType::Affect,i);
         mod = -mod;
     }
 
@@ -210,49 +210,6 @@ void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const st
 /* This updates a character by subtracting everything he is affected by */
 /* restoring original abilities, and then affecting all again           */
 void affect_total(struct char_data *ch) {
-    struct affected_type *af;
-    int i, j;
-
-    GET_SPELLFAIL(ch) = GET_ARMORCHECK(ch) = GET_ARMORCHECKALL(ch) = 0;
-
-    for (i = 0; i < NUM_WEARS; i++) {
-        if (GET_EQ(ch, i))
-            for (j = 0; j < MAX_OBJ_AFFECT; j++)
-                affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
-                                 GET_EQ(ch, i)->affected[j].modifier,
-                                 GET_EQ(ch, i)->affected[j].specific,
-                                 GET_OBJ_PERM(GET_EQ(ch, i)), false);
-    }
-
-
-    for (af = ch->affected; af; af = af->next)
-        affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
-
-
-    GET_SAVE_MOD(ch, SAVING_FORTITUDE) = HAS_FEAT(ch, FEAT_GREAT_FORTITUDE) * 3;
-    GET_SAVE_MOD(ch, SAVING_REFLEX) = HAS_FEAT(ch, FEAT_LIGHTNING_REFLEXES) * 3;
-    GET_SAVE_MOD(ch, SAVING_WILL) = HAS_FEAT(ch, FEAT_IRON_WILL) * 3;
-
-    for (i = 0; i < NUM_WEARS; i++) {
-        if (GET_EQ(ch, i)) {
-            if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_ARMOR) {
-                GET_SPELLFAIL(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SPELLFAIL);
-                GET_ARMORCHECKALL(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK);
-                if (!is_proficient_with_armor(ch, GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SKILL)))
-                    GET_ARMORCHECK(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK);
-            }
-            for (j = 0; j < MAX_OBJ_AFFECT; j++)
-                affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
-                                 GET_EQ(ch, i)->affected[j].modifier,
-                                 GET_EQ(ch, i)->affected[j].specific,
-                                 GET_OBJ_PERM(GET_EQ(ch, i)), true);
-        }
-    }
-
-
-    for (af = ch->affected; af; af = af->next)
-        affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
-
 
 }
 
@@ -273,7 +230,6 @@ void affect_to_char(struct char_data *ch, struct affected_type *af) {
     ch->affected = affected_alloc;
 
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, true);
-    affect_total(ch);
 }
 
 
@@ -293,7 +249,6 @@ void affect_remove(struct char_data *ch, struct affected_type *af) {
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
     REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
     free(af);
-    affect_total(ch);
     if (!ch->affected) {
         struct char_data *temp;
         REMOVE_FROM_LIST(ch, affect_list, next_affect, temp);
@@ -1217,7 +1172,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
 }
 
 
-struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, struct obj_data *equipment[]) {
+struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, std::unordered_map<int, obj_data*> equipment) {
     int j, num;
 
     if (!number) {
@@ -1237,7 +1192,7 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
 }
 
 
-int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, struct obj_data *equipment[]) {
+int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, std::unordered_map<int, obj_data*> equipment) {
     int j, num;
 
     if (!number) {

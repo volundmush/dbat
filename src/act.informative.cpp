@@ -69,7 +69,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch);
 
 static void list_one_char(struct char_data *i, struct char_data *ch);
 
-static void list_char_to_char(std::vector<char_data*> list, struct char_data *ch);
+static void list_char_to_char(std::vector<char_data*> people, struct char_data *ch);
 
 static void look_in_direction(struct char_data *ch, int dir);
 
@@ -291,8 +291,7 @@ static void search_room(struct char_data *ch) {
     act("@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, TO_ROOM);
     WAIT_STATE(ch, PULSE_1SEC);
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto vict : ch->getRoom()->getPeople()) {
         if (AFF_FLAGGED(vict, AFF_HIDE) && vict != ch) {
             if (GET_SUPPRESS(vict) >= 1) {
                 perc *= (GET_SUPPRESS(vict) * 0.01);
@@ -1809,7 +1808,7 @@ static void gen_map(struct char_data *ch, int num) {
     auto room = ch->getRoom();
     
     /* print out exits */
-    map_draw_room(map, 4, 4, ch->location, ch);
+    map_draw_room(map, 4, 4, ch->getRoom()->vn, ch);
     for (door = 0; door < NUM_OF_DIRS; door++) {
         auto d = room->dir_option[door];
         if(!d) continue;
@@ -3282,7 +3281,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
 
 }
 
-static void list_char_to_char(std::vector<char_data*> list, struct char_data *ch) {
+static void list_char_to_char(std::vector<char_data*> people, struct char_data *ch) {
     struct char_data *i, *j;
     struct hide_node {
         struct hide_node *next;
@@ -3292,7 +3291,7 @@ static void list_char_to_char(std::vector<char_data*> list, struct char_data *ch
 
     hideinfo = lasthide = nullptr;
 
-    for (auto i : list) {
+    for (auto i : people) {
         if (AFF_FLAGGED(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
             if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
                 improve_skill(i, SKILL_HIDE, 1);
@@ -4495,7 +4494,7 @@ ACMD(do_look) {
 
     if(IS_DARK(room->vn) && !CAN_SEE_IN_DARK(ch)) {
         send_to_char(ch, "It is pitch black...\r\n");
-        list_char_to_char(room->people, ch);    /* glowing red eyes */
+        list_char_to_char(room->getPeople(), ch);    /* glowing red eyes */
         return;
     }
 
@@ -7017,7 +7016,7 @@ ACMD(do_scan) {
         return;
     }
 
-    auto darkHere = IS_DARK(ch->location);
+    auto darkHere = room->isInsideDark();
 
     for (i = 0; i < 10; i++) {
         auto d = room->dir_option[i];
@@ -7040,7 +7039,8 @@ ACMD(do_scan) {
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
         list_obj_to_char(dest->getInventory(), ch, SHOW_OBJ_LONG, false);
-        list_char_to_char(dest->people, ch);
+        auto people = dest->getPeople();
+        list_char_to_char(people, ch);
         if (dest->geffect >= 1 && dest->geffect <= 5) {
             send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
         }
@@ -7339,45 +7339,7 @@ ACMD(do_oaffects) {
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
-    if(!*arg) {
-        send_to_char(ch, "You must specify a target location.\r\n");
-        return;
-    }
-
-    int location = -1;
-    int i = 0;
-    while(strcasecmp(apply_types[i], "\n")) {
-        if(!strcasecmp(apply_types[i], arg)) {
-            location = i;
-            break;
-        }
-        i++;
-    }
-
-    if(location == -1) {
-        send_to_char(ch, "That is not a valid apply location.\r\n");
-        return;
-    }
-
-    send_to_char(ch, "Affects for %s:\r\n", apply_types[location]);
-    int counter = 0;
-    for(auto &[vn, o] : obj_proto) {
-        bool found = false;
-        for(auto &aff : o->affected) {
-            if(aff.location == location) {
-                found = true;
-                break;
-            }
-        }
-        if(!found) continue;
-        send_to_char(ch, "[%d] %s\r\n", vn, o->short_description);
-        counter++;
-
-    }
-    if(!counter) {
-        send_to_char(ch, "None.\r\n");
-    }
-
+    send_to_char(ch, "Temporarily disabled.\r\n");
 }
 
 ACMD(do_desc) {

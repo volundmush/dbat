@@ -61,7 +61,6 @@ int64_t getNextUID() {
 }
 
 std::unordered_map<room_vnum, unit_data*> world;    /* array of rooms		 */
-std::unordered_map<vnum, area_data> areas;    /* area information		 */
 
 struct char_data *character_list = nullptr; /* global linked list of chars	 */
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
@@ -273,11 +272,7 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
         auto data = j["data"];
         unit_data *u = nullptr;
         if(unitClass == "pc_data") {
-            auto pc = new pc_data(data);
-            u = pc;
-            if(auto isPlayer = players.find(uid); isPlayer != players.end()) {
-                isPlayer->second->character = pc;
-            }
+            u = new pc_data(data);
         } else if(unitClass == "npc_data") {
             u = new npc_data(data);
         } else if(unitClass == "obj_data") {
@@ -285,6 +280,13 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
         } else if(unitClass == "room_data") {
             u = new room_data(data);
         }
+
+        if(auto pc = dynamic_cast<pc_data>(u); pc) {
+            if(auto isPlayer = players.find(uid); isPlayer != players.end()) {
+                isPlayer->second->character = pc;
+            }
+        }
+
         world[uid] = u;
     }
 }
@@ -373,8 +375,7 @@ static void db_load_item_prototypes(const std::filesystem::path& loc) {
     obj_index.reserve(data.size());
     for(auto j : data) {
         auto id = j["vn"].get<int64_t>();
-        auto p = std::make_shared<item_proto>(j);
-        obj_proto[id] = p;
+        obj_proto[id] = j;
         auto &i = obj_index[id];
         i.vn = id;
     }
@@ -386,33 +387,9 @@ static void db_load_npc_prototypes(const std::filesystem::path& loc) {
     mob_index.reserve(data.size());
     for(auto j : load_from_file(loc, "npcPrototypes.json")) {
         auto id = j["vn"].get<int64_t>();
-        auto p = mob_proto.emplace(id, j);
+        mob_proto[id] = j;
         auto &i = mob_index[id];
         i.vn = id;
-    }
-}
-
-static void db_load_areas(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "areas.json")) {
-        auto id = j["vn"].get<int64_t>();
-        auto a = areas.emplace(id, j);
-
-        for(auto &rid : a.first->second.rooms) {
-            if(auto room = world.find(rid); room != world.end()) {
-                if(auto r = dynamic_cast<room_data*>(room->second); r) {
-                    r->area = id;
-                }
-            }
-        }
-    }
-
-    for(auto &[vn, a] : areas) {
-        if(a.parent) {
-            auto parent = areas.find(a.parent.value());
-            if(parent != areas.end()) {
-                parent->second.children.insert(vn);
-            }
-        }
     }
 }
 
@@ -497,9 +474,6 @@ void boot_db_world() {
 
     basic_mud_log("Initializing instances...");
     db_load_instances_initial(latest);
-
-    basic_mud_log("Loading areas.");
-    db_load_areas(latest);
 
     // Now that all of the game entities have been spawned, we can finish loading
     // relations between them.
@@ -1154,12 +1128,6 @@ int hsort(const void *a, const void *b) {
 int vnum_mobile(char *searchname, struct char_data *ch) {
     int found = 0;
 
-    for (auto &m : mob_proto)
-        if (isname(searchname, m.second->name))
-            send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, m.first, m.second->short_description,
-                         !m.second->proto_script.empty() ? m.second->scriptString().c_str() : "");
-
     return (found);
 }
 
@@ -1167,11 +1135,6 @@ int vnum_mobile(char *searchname, struct char_data *ch) {
 int vnum_object(char *searchname, struct char_data *ch) {
     int found = 0;
 
-    for (auto &o : obj_proto)
-        if (isname(searchname, o.second->name))
-            send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, o.first, o.second->short_description,
-                         !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
 
     return (found);
 }
@@ -1180,12 +1143,6 @@ int vnum_object(char *searchname, struct char_data *ch) {
 int vnum_material(char *searchname, struct char_data *ch) {
     int found = 0;
 
-    for (auto &o : obj_proto)
-        if (isname(searchname, material_names[o.second->value[VAL_ALL_MATERIAL]])) {
-            send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                         ++found, o.first, o.second->short_description,
-                         !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
-        }
 
     return (found);
 }
@@ -1194,14 +1151,6 @@ int vnum_material(char *searchname, struct char_data *ch) {
 int vnum_weapontype(char *searchname, struct char_data *ch) {
     int found = 0;
 
-    for (auto &o : obj_proto)
-        if (o.second->type_flag == ITEM_WEAPON) {
-            if (isname(searchname, weapon_type[o.second->value[VAL_WEAPON_SKILL]])) {
-                send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                             ++found, o.first, o.second->short_description,
-                             !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
-            }
-        }
 
     return (found);
 }
@@ -1210,14 +1159,6 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
 int vnum_armortype(char *searchname, struct char_data *ch) {
     int found = 0;
 
-    for (auto &o : obj_proto)
-        if (o.second->type_flag == ITEM_ARMOR) {
-            if (isname(searchname, armor_type[o.second->value[VAL_ARMOR_SKILL]])) {
-                send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
-                             ++found, o.first, o.second->short_description,
-                             !o.second->proto_script.empty() ? o.second->scriptString().c_str() : "");
-            }
-        }
 
     return (found);
 }
@@ -1235,9 +1176,9 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
     // Weird hack to ensure script_data is not overwritten by prototype...
     auto mob = new npc_data();
-    mob->setProto(proto->second);
     mob->script = std::make_shared<script_data>(mob);
-
+    mob->deserialize(proto->second);
+    
     mob->uid = getNextUID();
     world[mob->uid] = mob;
     mob->activate();
@@ -1763,7 +1704,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     MOB_LOADROOM(mob) = NOWHERE;
 
     if (IS_HUMANOID(mob)) {
-        for(auto f : {MOB_RARM, MOB_LARM, MOB_RLEG, MOB_LLEG}) mob->mobFlags.set(f);
+        for(auto f : {MOB_RARM, MOB_LARM, MOB_RLEG, MOB_LLEG}) mob->setFlag(FlagType::NPC, f);
     }
 
     mob->assignTriggers();
@@ -1812,7 +1753,7 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
     // Weird hack to ensure that script_data is not overritten by prototype.
     auto obj = new obj_data();
     obj->script = std::make_shared<script_data>(obj);
-    obj->setProto(proto->second);
+    obj->deserialize(proto->second);
     
     OBJ_LOADROOM(obj) = NOWHERE;
 
@@ -1969,8 +1910,9 @@ void reset_zone(zone_rnum zone) {
                     room = world.find(c.arg3);
                     oproto = obj_proto.find(c.arg1);
                     if(oproto != obj_proto.end()) {
-                        if(oproto->second->type_flag == ITEM_HATCH || oproto->second->type_flag == ITEM_CONTROL
-                        || oproto->second->type_flag == ITEM_WINDOW || oproto->second->type_flag == ITEM_VEHICLE) {
+                        auto tf = oproto->second["type_flag"];
+                        if(tf == ITEM_HATCH || tf == ITEM_CONTROL
+                        || tf == ITEM_WINDOW || tf == ITEM_VEHICLE) {
                             c.arg2 = 1;
                             c.arg4 = 1;
                         }
@@ -2072,10 +2014,11 @@ void reset_zone(zone_rnum zone) {
                             ZONE_ERROR("invalid equipment pos number");
                         } else {
                             obj = read_object(c.arg1, REAL);
-                            IN_ROOM(obj) = IN_ROOM(mob);
+                            obj->addToLocation(mob->getLocation());
                             load_otrigger(obj);
                             if (wear_otrigger(obj, mob, c.arg3)) {
-                                IN_ROOM(obj) = NOWHERE;
+                                obj->removeFromLocation();
+                                obj->addToLocation(mob);
                                 equip_char(mob, obj, c.arg3);
                             } else
                                 obj->addToLocation(mob);
@@ -2430,10 +2373,8 @@ void reset_char(struct char_data *ch) {
 
     ch->followers = nullptr;
     ch->master = nullptr;
-    IN_ROOM(ch) = NOWHERE;
     ch->next = nullptr;
     ch->next_fighting = nullptr;
-    ch->next_in_room = nullptr;
     FIGHTING(ch) = nullptr;
     ch->position = POS_STANDING;
     ch->mob_specials.default_pos = POS_STANDING;
@@ -2485,12 +2426,6 @@ void init_char(struct char_data *ch) {
         SET_SKILL_BONUS(ch, i, 0);
     }
 
-    for (i = 0; i < AF_ARRAY_MAX; i++)
-        AFF_FLAGS(ch)[i] = 0;
-
-    for (i = 0; i < 3; i++)
-        GET_SAVE_MOD(ch, i) = 0;
-
     for (i = 0; i < 3; i++)
         GET_COND(ch, i) = (GET_ADMLEVEL(ch) == ADMLVL_IMPL ? -1 : 24);
 
@@ -2500,24 +2435,24 @@ void init_char(struct char_data *ch) {
 
 /* returns the real number of the room with given virtual number */
 room_rnum real_room(room_vnum vnum) {
-    return world.count(vnum) ? vnum : NOWHERE;
+    return world.contains(vnum) ? vnum : NOWHERE;
 }
 
 
 /* returns the real number of the monster with given virtual number */
 mob_rnum real_mobile(mob_vnum vnum) {
-    return mob_proto.count(vnum) ? vnum : NOBODY;
+    return mob_proto.contains(vnum) ? vnum : NOBODY;
 }
 
 
 /* returns the real number of the object with given virtual number */
 obj_rnum real_object(obj_vnum vnum) {
-    return obj_proto.count(vnum) ? vnum : NOTHING;
+    return obj_proto.contains(vnum) ? vnum : NOTHING;
 }
 
 /* returns the real number of the room with given virtual number */
 zone_rnum real_zone(zone_vnum vnum) {
-    return zone_table.count(vnum) ? vnum : NOWHERE;
+    return zone_table.contains(vnum) ? vnum : NOWHERE;
 }
 
 

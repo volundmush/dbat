@@ -805,7 +805,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@g$n@ finishes powering up as $s aura flashes brightly filling the entire area briefly with its light!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 ch->restoreHealth(false);
-                ch->mobFlags.set(MOB_POWERUP);
+                ch->setFlag(FlagType::NPC, MOB_POWERUP);
             } else if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 2) {
                 act("@g$n@G continues powering up as torrents of energy crackle within $s aura.@n", true, ch, nullptr,
                     nullptr, TO_ROOM);
@@ -881,7 +881,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                             TO_CHAR);
                         act("@y$n@Y manages to move into an advantageous position!@n", true, ch, nullptr, nullptr,
                             TO_ROOM);
-                        ch->affected_by.set(AFF_POSITION);
+                        ch->setFlag(FlagType::Affect, AFF_POSITION);
                     } else {
                         struct char_data *vict = FIGHTING(ch);
                         if (roll_balance(ch) > roll_balance(vict)) {
@@ -891,8 +891,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                                 nullptr, vict, TO_VICT);
                             act("@y$n@Y struggles to gain a better position than @y$N@Y and succeeds!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            vict->affected_by.reset(AFF_POSITION);
-                            ch->affected_by.set(AFF_POSITION);
+                            vict->clearFlag(FlagType::Affect,AFF_POSITION);
+                            ch->setFlag(FlagType::Affect, AFF_POSITION);
                         }
                     }
                 }
@@ -901,7 +901,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             if (roll_balance(ch) < axion_dice(-30) || GET_POS(ch) < POS_STANDING) {
                 act("@YYou are moved out of your position!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@y$n@Y is moved out of $s position!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->affected_by.reset(AFF_POSITION);
+                ch->clearFlag(FlagType::Affect,AFF_POSITION);
             }
         }
         if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8) {
@@ -914,7 +914,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
-                ch->affected_by.set(AFF_KNOCKED);
+                ch->setFlag(FlagType::Affect, AFF_KNOCKED);
                 GET_POS(GRAPPLING(ch)) = POS_SLEEPING;
                 GRAPTYPE(GRAPPLING(ch)) = -1;
                 GRAPPLED(GRAPPLING(ch)) = nullptr;
@@ -962,7 +962,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
         if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
             act("@W$n@W is no longer blind.@n", false, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_BLIND);
+            ch->clearFlag(FlagType::Affect,AFF_BLIND);
         }
 
         if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
@@ -1359,7 +1359,7 @@ void appear(struct char_data *ch) {
     if (affected_by_spell(ch, SPELL_INVISIBLE))
         affect_from_char(ch, SPELL_INVISIBLE);
 
-    for(auto f : {AFF_INVISIBLE, AFF_HIDE}) ch->affected_by.reset(f);
+    for(auto f : {AFF_INVISIBLE, AFF_HIDE}) ch->clearFlag(FlagType::Affect,f);
 
     act("$n slowly fades into existence.", false, ch, nullptr, nullptr, TO_ROOM);
 }
@@ -1436,7 +1436,7 @@ void stop_fighting(struct char_data *ch) {
     REMOVE_FROM_LIST(ch, combat_list, next_fighting, temp);
     ch->next_fighting = nullptr;
     FIGHTING(ch) = nullptr;
-    ch->affected_by.reset(AFF_POSITION);
+    ch->clearFlag(FlagType::Affect,AFF_POSITION);
     update_pos(ch);
 }
 
@@ -2111,7 +2111,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             return;
         }
         for(auto f : {PLR_KILLER, PLR_THIEF}) ch->playerFlags.reset(f);
-        for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affected_by.reset(f);
+        for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->clearFlag(FlagType::Affect,f);
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && GET_LEVEL(ch) > 8) {
             if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
                 GET_DTIME(ch) = time(nullptr);

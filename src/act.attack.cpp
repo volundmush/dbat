@@ -422,7 +422,7 @@ ACMD(do_throw) {
                 COMBO(ch) = -1;
                 COMBHITS(ch) = 0;
                 int stcost = ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj));
-                vict->affected_by.reset(AFF_ZANZOKEN);
+                vict->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
                 pcost(ch, 0, stcost / 2);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                 obj->removeFromLocation();
@@ -561,7 +561,7 @@ ACMD(do_throw) {
                     act("@R$N@R is burned by it!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@RYou are burned by it!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@R is burned by it!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    vict->affected_by.set(AFF_BURNED);
+                    vict->setFlag(FlagType::Affect, AFF_BURNED);
                     damage += damage * 0.4;
                 }
             }
@@ -814,8 +814,7 @@ ACMD(do_selfd) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        for (tch = ch->getRoom()->people; tch; tch = next_v) {
-            next_v = tch->next_in_room;
+        for (auto tch : ch->getRoom()->getPeople()) {
             if (tch == ch) {
                 continue;
             }

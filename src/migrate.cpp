@@ -1989,8 +1989,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->playerFlags.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->playerFlags.set(f);
+                        for(auto f = 0; f < NUM_PLR_FLAGS; f++) {
+                            if(IS_SET_AR(flags, f)) ch->setFlag(FlagType::PC, f);
                         }
                     } else if (!strcmp(tag, "Aff ")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
@@ -1998,8 +1998,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->affected_by.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->affected_by.set(f);
+                        for(auto f = 0; f < NUM_AFF_FLAGS; f++) {
+                            if(IS_SET_AR(flags, f)) ch->setFlag(FlagType::Affect, f);
                         }
                     } else if (!strcmp(tag, "Affs")) load_affects(fl, ch, 0);
                     else if (!strcmp(tag, "Affv")) load_affects(fl, ch, 1);
@@ -2011,8 +2011,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->admflags.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->admflags.set(f);
+                        for(auto f = 0; f < NUM_ADMFLAGS; f++) {
+                            if(IS_SET_AR(flags, f)) ch->setFlag(FlagType::Admin, f);
                         }
                     } else if (!strcmp(tag, "Alin")) ch->set(CharAlign::GoodEvil, atoi(line));
                     else if (!strcmp(tag, "Aura")) ch->set(CharAppearance::Aura, atoi(line));

@@ -87,16 +87,19 @@ void wld_log(room_data *room, const char *format, ...) {
 /* sends str to room */
 void act_to_room(char *str, room_data *room) {
     /* no one is in the room */
-    if (!room->people)
+    auto people = room->getPeople();
+    if (people.empty()) {
+        wld_log(room, "No one is in the room.");
         return;
+    }
 
     /*
      * since you can't use act(..., TO_ROOM) for an room, send it
      * TO_ROOM and TO_CHAR for some char in the room.
      * (just dont use $n or you might get strange results)
      */
-    act(str, false, room->people, nullptr, nullptr, TO_ROOM);
-    act(str, false, room->people, nullptr, nullptr, TO_CHAR);
+    act(str, false, people.front(), nullptr, nullptr, TO_ROOM);
+    act(str, false, people.front(), nullptr, nullptr, TO_CHAR);
 }
 
 
@@ -375,8 +378,7 @@ WCMD(do_wteleport) {
             return;
         }
 
-        for (ch = room->people; ch; ch = next_ch) {
-            next_ch = ch->next_in_room;
+        for (auto ch : room->getPeople()) {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
             ch->removeFromLocation();
@@ -408,8 +410,7 @@ WCMD(do_wforce) {
     }
 
     if (!strcasecmp(arg1, "all")) {
-        for (ch = room->people; ch; ch = next_ch) {
-            next_ch = ch->next_in_room;
+        for (auto ch : room->getPeople()) {
 
             if (valid_dg_target(ch, 0)) {
                 command_interpreter(ch, line);
@@ -436,8 +437,7 @@ WCMD(do_wpurge) {
 
     if (!*arg) {
         /* purge all */
-        for (ch = room->people; ch; ch = next_ch) {
-            next_ch = ch->next_in_room;
+        for (auto ch : room->getPeople()) {
             if (IS_NPC(ch))
                 extract_char(ch);
         }

@@ -2,135 +2,10 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
 
-base_proto::~base_proto() {
-    if(name) free(name);
-    if(short_description) free(short_description);
-    if(room_description) free(room_description);
-    while(ex_description) {
-        auto next = ex_description->next;
-        delete ex_description;
-        ex_description = next;
-    }
-}
-
 extra_descr_data::extra_descr_data(const extra_descr_data& other) {
     if(other.keyword) keyword = strdup(other.keyword);
     if(other.description) description = strdup(other.description);
     if(other.next) next = new extra_descr_data(*other.next);
-}
-
-base_proto::base_proto(const base_proto& other) {
-    vn = other.vn;
-    if(other.name) name = strdup(other.name);
-    if(other.short_description) short_description = strdup(other.short_description);
-    if(other.look_description) look_description = strdup(other.look_description);
-    if(other.room_description) room_description = strdup(other.room_description);
-    proto_script = other.proto_script;
-    if(other.ex_description) ex_description = new extra_descr_data(*other.ex_description);
-}
-
-base_proto& base_proto::operator=(const base_proto& other) {
-    if(this == &other) return *this;
-
-    if(name) free(name);
-    if(short_description) free(short_description);
-    if(look_description) free(look_description);
-    if(room_description) free(room_description);
-    while(ex_description) {
-        auto next = ex_description->next;
-        delete ex_description;
-        ex_description = next;
-    }
-
-    vn = other.vn;
-    if(other.name) name = strdup(other.name);
-    if(other.short_description) short_description = strdup(other.short_description);
-    if(other.look_description) look_description = strdup(other.look_description);
-    if(other.room_description) room_description = strdup(other.room_description);
-    proto_script = other.proto_script;
-    if(other.ex_description) ex_description = new extra_descr_data(*other.ex_description);
-
-    return *this;
-}
-
-npc_proto::npc_proto(const npc_proto& other) : base_proto(other) {
-    race = other.race;
-    chclass = other.chclass;
-    weight = other.weight;
-    nums = other.nums;
-    mob_specials = other.mob_specials;
-    size = other.size;
-    attributes = other.attributes;
-    appearances = other.appearances;
-    moneys = other.moneys;
-    aligns = other.aligns;
-    affected_by = other.affected_by;
-    stats = other.stats;
-    playerFlags = other.playerFlags;
-    mobFlags = other.mobFlags;
-    armor = other.armor;
-    damage_mod = other.damage_mod;
-    speaking = other.speaking;
-    transforms = other.transforms;
-}
-
-npc_proto& npc_proto::operator=(const npc_proto& other) {
-    if(this == &other) return *this;
-
-    base_proto::operator=(other);
-
-    race = other.race;
-    chclass = other.chclass;
-    weight = other.weight;
-    nums = other.nums;
-    mob_specials = other.mob_specials;
-    size = other.size;
-    attributes = other.attributes;
-    appearances = other.appearances;
-    moneys = other.moneys;
-    aligns = other.aligns;
-    affected_by = other.affected_by;
-    stats = other.stats;
-    playerFlags = other.playerFlags;
-    mobFlags = other.mobFlags;
-    armor = other.armor;
-    damage_mod = other.damage_mod;
-    speaking = other.speaking;
-    transforms = other.transforms;
-}
-
-item_proto::item_proto(const item_proto& other) : base_proto(other) {
-    type_flag = other.type_flag;
-    level = other.level;
-    wear_flags = other.wear_flags;
-    extra_flags = other.extra_flags;
-    weight = other.weight;
-    cost = other.cost;
-    cost_per_day = other.cost_per_day;
-    bitvector = other.bitvector;
-    size = other.size;
-    affected = other.affected;
-    timer = other.timer;
-}
-
-item_proto& item_proto::operator=(const item_proto& other) {
-    if(this == &other) return *this;
-
-    base_proto::operator=(other);
-
-    type_flag = other.type_flag;
-    level = other.level;
-    wear_flags = other.wear_flags;
-    extra_flags = other.extra_flags;
-    weight = other.weight;
-    cost = other.cost;
-    cost_per_day = other.cost_per_day;
-    bitvector = other.bitvector;
-    size = other.size;
-    affected = other.affected;
-    timer = other.timer;
-
-    return *this;
 }
 
 std::vector<room_data*> unit_data::getRooms() {
@@ -181,208 +56,6 @@ room_data* unit_data::getAbsoluteRoom() {
     }
     if(auto loc = getLocation(); loc) return loc->getAbsoluteRoom();
     return nullptr;
-}
-
-nlohmann::json base_proto::serialize() {
-    nlohmann::json j;
-    if(vn != NOTHING) j["vn"] = vn;
-    if(name && strlen(name)) j["name"] = name;
-    if(short_description && strlen(short_description)) j["short_description"] = short_description;
-    if(look_description && strlen(look_description)) j["look_description"] = look_description;
-    if(room_description && strlen(room_description)) j["room_description"] = room_description;
-    for(auto ex = ex_description; ex; ex = ex->next) {
-        if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
-            j["ex_description"].push_back(std::make_pair(ex->keyword, ex->description));
-        }
-    }
-    for(auto t : proto_script) j["proto_script"].push_back(t);
-    return j;
-}
-
-void base_proto::deserialize(const nlohmann::json& j) {
-    if(j.contains("vn")) vn = j["vn"];
-    if(j.contains("name")) {
-        if(name) free(name);
-        name = strdup(j["name"].get<std::string>().c_str());
-    }
-    if(j.contains("short_description")) {
-        if(short_description) free(short_description);
-        short_description = strdup(j["short_description"].get<std::string>().c_str());
-    }
-    if(j.contains("look_description")) {
-        if(look_description) free(look_description);
-        look_description = strdup(j["look_description"].get<std::string>().c_str());
-    }
-    if(j.contains("room_description")) {
-        if(room_description) free(room_description);
-        room_description = strdup(j["room_description"].get<std::string>().c_str());
-    }
-    if(j.contains("ex_description")) {
-        // free existing ones.
-        while(ex_description) {
-            auto next = ex_description->next;
-            delete ex_description;
-            ex_description = next;
-        }
-        auto &e = j["ex_description"];
-        for(auto ex = e.rbegin(); ex != e.rend(); ex++) {
-            auto new_ex = new extra_descr_data();
-            new_ex->keyword = strdup((*ex)[0].get<std::string>().c_str());
-            new_ex->description = strdup((*ex)[1].get<std::string>().c_str());
-            new_ex->next = ex_description;
-            ex_description = new_ex;
-        }
-    }
-    if(j.contains("proto_script")) {
-        for(auto t : j["proto_script"]) proto_script.push_back(t);
-    }
-}
-
-nlohmann::json npc_proto::serialize() {
-    nlohmann::json j = base_proto::serialize();
-    j["race"] = race;
-    j["chclass"] = chclass;
-    if(weight != 0.0) j["weight"] = weight;
-    for(auto &[id, attr] : attributes) if(attr) j["attributes"].push_back(std::make_pair(id, attr));
-    for(auto &[id, mon] : moneys) if(mon) j["moneys"].push_back(std::make_pair(id, mon));
-
-    for(auto &[id, align] : aligns) if(align) j["aligns"].push_back(std::make_pair(id, align));
-
-    for(auto &[id, app] : appearances) if(app) j["appearances"].push_back(std::make_pair(id, app));
-
-    for(auto &[id, app] : stats) if(app) j["stats"].push_back(std::make_pair(id, app));
-
-    for(auto &[id, app] : nums) if(app) j["nums"].push_back(std::make_pair(id, app));
-
-    for(auto i = 0; i < mobFlags.size(); i++) if(mobFlags.test(i)) j["mobFlags"].push_back(i);
-
-    for(auto i = 0; i < playerFlags.size(); i++) if(playerFlags.test(i)) j["playerFlags"].push_back(i);
-
-    for(auto i = 0; i < affected_by.size(); i++) if(affected_by.test(i)) j["affected_by"].push_back(i);
-    
-    if(armor) j["armor"] = armor;
-    if(damage_mod) j["damage_mod"] = damage_mod;
-    if(speaking) j["speaking"] = speaking;
-
-    return j;
-}
-
-void npc_proto::deserialize(const nlohmann::json& j) {
-    base_proto::deserialize(j);
-    if(j.contains("attributes")) {
-        for(auto j2 : j["attributes"]) {
-            auto id = j2[0].get<CharAttribute>();
-            attributes[id] = j2[1].get<attribute_t>();
-        }
-    }
-
-    if(j.contains("moneys")) {
-        for(auto j2 : j["moneys"]) {
-            auto id = j2[0].get<CharMoney>();
-            moneys[id] = j2[1].get<money_t>();
-        }
-    }
-
-    if(j.contains("aligns")) {
-        for(auto j2 : j["aligns"]) {
-            auto id = j2[0].get<CharAlign>();
-            aligns[id] = j2[1].get<align_t>();
-        }
-    }
-
-    if(j.contains("appearances")) {
-        for(auto j2 : j["appearances"]) {
-            auto id = j2[0].get<CharAppearance>();
-            appearances[id] = j2[1].get<appearance_t>();
-        }
-    }
-
-    if(j.contains("stats")) {
-        for(auto j2 : j["stats"]) {
-            auto id = j2[0].get<CharStat>();
-            stats[id] = j2[1].get<stat_t>();
-        }
-    }
-
-    if(j.contains("nums")) {
-        for(auto j2 : j["nums"]) {
-            auto id = j2[0].get<CharNum>();
-            nums[id] = j2[1].get<num_t>();
-        }
-    }
-
-    if(j.contains("race")) race = j["race"].get<RaceID>();
-
-    if(j.contains("chclass")) chclass = static_cast<SenseiID>(std::min(14, j["chclass"].get<int>()));
-
-    if(j.contains("weight")) weight = j["weight"];
-    if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) mobFlags.set(i.get<int>());
-    if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
-    
-    if(j.contains("affected_by"))
-        for(auto &i : j["affected_by"])
-            affected_by.set(i.get<int>());
-    if(j.contains("armor")) armor = j["armor"];
-    if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
-    if(j.contains("speaking")) speaking = j["speaking"];
-}
-
-npc_proto::npc_proto(const nlohmann::json& j) {
-    deserialize(j);
-}
-
-nlohmann::json item_proto::serialize() {
-    nlohmann::json j = base_proto::serialize();
-    for(auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++) {
-        if(value[i]) j["value"].push_back(std::make_pair(i, value[i]));
-    }
-    j["type_flag"] = type_flag;
-    j["level"] = level;
-    for(auto i = 0; i < wear_flags.size(); i++)
-        if(wear_flags.test(i)) j["wear_flags"].push_back(i);
-
-    for(auto i = 0; i < extra_flags.size(); i++)
-        if(extra_flags.test(i)) j["extra_flags"].push_back(i);
-
-    if(weight != 0.0) j["weight"] = weight;
-    if(cost != 0) j["cost"] = cost;
-    if(cost_per_day != 0) j["cost_per_day"] = cost_per_day;
-    for(auto i = 0; i < bitvector.size(); i++)
-        if(bitvector.test(i)) j["bitvector"].push_back(i);
-    if(size) j["size"] = size;
-    if(timer) j["timer"] = timer;
-    for(auto & i : affected) {
-        if(i.location == APPLY_NONE) continue;
-        j["affected"].push_back(i.serialize());
-    }
-    return j;
-}
-
-void item_proto::deserialize(const nlohmann::json& j) {
-    base_proto::deserialize(j);
-    if(j.contains("value")) {
-        for(auto j2 : j["value"]) {
-            auto id = j2[0].get<int>();
-            value[id] = j2[1].get<int>();
-        }
-    }
-    if(j.contains("type_flag")) type_flag = j["type_flag"];
-    if(j.contains("level")) level = j["level"];
-    if(j.contains("wear_flags")) for(auto &i : j["wear_flags"]) wear_flags.set(i.get<int>());
-    if(j.contains("extra_flags")) for(auto &i : j["extra_flags"]) extra_flags.set(i.get<int>());
-    if(j.contains("weight")) weight = j["weight"];
-    if(j.contains("cost")) cost = j["cost"];
-    if(j.contains("cost_per_day")) cost_per_day = j["cost_per_day"];
-    if(j.contains("bitvector")) for(auto &i : j["bitvector"]) bitvector.set(i.get<int>());
-    if(j.contains("size")) size = j["size"];
-    if(j.contains("timer")) timer = j["timer"];
-    if(j.contains("affected")) {
-        int counter = 0;
-        for(auto & i : j["affected"]) {
-            affected[counter].deserialize(i);
-            counter++;
-        }
-    }
 }
 
 nlohmann::json unit_data::serialize() {
@@ -469,13 +142,6 @@ void unit_data::deactivateContents() {
 
 std::string unit_data::scriptString() {
     return "";
-}
-
-std::string base_proto::scriptString() {
-    std::vector<std::string> vnums;
-    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
-
-    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }
 
 double unit_data::getInventoryWeight() {
@@ -582,15 +248,15 @@ void unit_data::checkMyID() {
     }
 }
 
-std::string unit_data::getDisplayName(struct char_data* ch) {
+std::string unit_data::getDisplayName(struct unit_data* ch) {
     return "Nameless";
 }
 
-std::string unit_data::renderAppearance(struct char_data* ch) {
+std::string unit_data::renderAppearance(struct unit_data* ch) {
     return "You see nothing special.";
 }
 
-std::vector<std::string> unit_data::getKeywords(struct char_data* ch) {
+std::vector<std::string> unit_data::getKeywords(struct unit_data* ch) {
     return {};
 }
 
@@ -735,11 +401,6 @@ Searcher& Searcher::setAllowRecurse(bool allow) {
     return *this;
 }
 
-Searcher& Searcher::setCheckVisible(bool check) {
-    checkVisible = check;
-    return *this;
-}
-
 
 std::vector<unit_data*> Searcher::search() {
     trim(args);
@@ -779,7 +440,7 @@ std::vector<unit_data*> Searcher::search() {
     }
 
     for(auto c : candidates) {
-        auto keywords = c->getKeywordsFor(caller);
+        auto keywords = c->getKeywords(caller);
 
         for(auto k : keywords) {
             if(iequals(k, targetName)) {

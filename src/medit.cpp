@@ -76,7 +76,7 @@ void init_mobile(struct char_data *mob) {
         mob->set(attr, base2);
     }
 
-    mob->mobFlags.set(MOB_ISNPC);
+    mob->setFlag(FlagType::NPC, MOB_ISNPC);
 }
 
 /*-------------------------------------------------------------------*/
@@ -128,17 +128,7 @@ void medit_disp_sex(struct descriptor_data *d) {
  * Display mob-flags menu.
  */
 void medit_disp_mob_flags(struct descriptor_data *d) {
-    int i, columns = 0;
-    char flags[MAX_STRING_LENGTH];
 
-    clear_screen(d);
-    for (i = 0; i < NUM_MOB_FLAGS; i++) {
-        write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
-                        !(++columns % 2) ? "\r\n" : "");
-    }
-    sprintbitarray(OLC_MOB(d)->mobFlags, action_bits, AF_ARRAY_MAX, flags);
-    write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
-                    flags);
 }
 
 /*-------------------------------------------------------------------*/

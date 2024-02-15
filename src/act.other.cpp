@@ -861,7 +861,7 @@ ACMD(do_grapple) {
                     vict, TO_VICT);
                 act("@C$N@c disappears, avoiding @C$n's@c grapple attempt before reappearing!@n", false, ch, nullptr,
                     vict, TO_NOTVICT);
-                for(auto c : {ch, vict}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {ch, vict}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
                 ch->decCurST(cost);
                 WAIT_STATE(ch, PULSE_4SEC);
                 return;
@@ -873,7 +873,7 @@ ACMD(do_grapple) {
                     nullptr, vict, TO_VICT);
                 act("@C$N@c disappears, trying to avoid @C$n's@c grapple attempt but @C$n's@c zanzoken is faster!@n",
                     false, ch, nullptr, vict, TO_NOTVICT);
-                for(auto c : {ch, vict}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {ch, vict}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
             }
         }
 
@@ -1088,7 +1088,7 @@ ACMD(do_trip) {
                 act("@cYou disappear, avoiding @C$n's@c trip before reappearing!@n", false, ch, nullptr, vict, TO_VICT);
                 act("@C$N@c disappears, avoiding @C$n's@c trip before reappearing!@n", false, ch, nullptr, vict,
                     TO_NOTVICT);
-                for(auto c : {ch, vict}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {ch, vict}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
                 ch->decCurST(cost);
                 WAIT_STATE(ch, PULSE_4SEC);
                 return;
@@ -1100,7 +1100,7 @@ ACMD(do_trip) {
                     TO_VICT);
                 act("@C$N@c disappears, trying to avoid @C$n's@c trip but @C$n's@c zanzoken is faster!@n", false, ch,
                     nullptr, vict, TO_NOTVICT);
-                for(auto c : {ch, vict}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {ch, vict}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
             }
         }
 
@@ -1681,7 +1681,7 @@ ACMD(do_infuse) {
     if (AFF_FLAGGED(ch, AFF_INFUSE)) {
         act("You stop infusing ki into your attacks.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n stops infusing ki into $s attacks.", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->affected_by.reset(AFF_INFUSE);
+        ch->clearFlag(FlagType::Affect,AFF_INFUSE);
         return;
     }
 
@@ -1692,7 +1692,7 @@ ACMD(do_infuse) {
     reveal_hiding(ch, 0);
     act("You start infusing ki into your attacks.", true, ch, nullptr, nullptr, TO_CHAR);
     act("$n starts infusing ki into $s attacks.", true, ch, nullptr, nullptr, TO_ROOM);
-    ch->affected_by.set(AFF_INFUSE);
+    ch->setFlag(FlagType::Affect, AFF_INFUSE);
     ch->decCurKI(ch->getMaxKI() / 100);
 }
 
@@ -1958,7 +1958,7 @@ ACMD(do_candy) {
     obj->value[VAL_FOOD_CANDY_KI] = vict->get(CharStat::Ki);
     obj->value[VAL_FOOD_CANDY_ST] = vict->get(CharStat::Stamina);
 
-    vict->mobFlags.reset(MOB_HUSK);
+    vict->clearFlag(FlagType::NPC, MOB_HUSK);
     die(vict, ch);
 
 }
@@ -2738,7 +2738,7 @@ ACMD(do_telepathy) {
                     TO_CHAR);
                 if (rand_number(1, 15) >= 14 && !AFF_FLAGGED(ch, AFF_SHOCKED)) {
                     act("@MYour mind has been shocked!@n", true, ch, nullptr, nullptr, TO_CHAR);
-                    ch->affected_by.set(AFF_SHOCKED);
+                    ch->setFlag(FlagType::Affect, AFF_SHOCKED);
                 } else {
                     improve_skill(ch, SKILL_TELEPATHY, 0);
                 }
@@ -2886,7 +2886,7 @@ ACMD(do_potential) {
     else {
         boost = GET_SKILL(ch, SKILL_POTENTIAL) / 2;
 
-        vict->affected_by.set(PLR_PR);
+        vict->setFlag(FlagType::Affect, PLR_PR);
 
         vict->gainBasePL((vict->getBasePL() / 100) * boost);
         if (IS_HALFBREED(vict)) {
@@ -2944,7 +2944,7 @@ ACMD(do_majinize) {
         return;
     }
     int alignmentTotal = GET_ALIGNMENT(ch) - GET_ALIGNMENT(vict);
-    if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != ((ch)->id)) {
+    if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != ((ch)->uid)) {
         send_to_char(ch, "They are already majinized before by someone else.\r\n");
         return;
     } else if ((vict->master != ch)) {
@@ -2959,7 +2959,7 @@ ACMD(do_majinize) {
         return;
     }
         /* Rillao: transloc, add new transes here */
-    else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == ((ch)->id)) {
+    else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == ((ch)->uid)) {
         reveal_hiding(ch, 0);
         act("You remove $N's majinization, freeing them from your influence, but also weakening them.", true, ch,
             nullptr, vict, TO_CHAR);
@@ -2995,7 +2995,7 @@ ACMD(do_majinize) {
             true, ch, nullptr, vict, TO_VICT);
         act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.",
             true, ch, nullptr, vict, TO_NOTVICT);
-        MAJINIZED(vict) = ((ch)->id);
+        MAJINIZED(vict) = ((ch)->uid);
         GET_BOOSTS(ch) -= 1;
 
         GET_MAJINIZED(vict) = (vict->getBasePL()) * .4;
@@ -3069,7 +3069,7 @@ ACMD(do_spit) {
             TO_VICT);
         act("@C$N@c disappears, avoiding @C$n's@c @rstone spit@c before reappearing!@n", false, ch, nullptr, vict,
             TO_NOTVICT);
-        vict->affected_by.reset(AFF_ZANZOKEN);
+        vict->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
         WAIT_STATE(ch, PULSE_2SEC);
         improve_skill(ch, SKILL_SPIT, 1);
         return;
@@ -4205,7 +4205,7 @@ ACMD(do_ingest) {
                 vict, TO_VICT);
             act("@C$N@c disappears, avoiding @C$n's@c attempted @ringestion@c before reappearing!@n", false, ch,
                 nullptr, vict, TO_NOTVICT);
-            vict->affected_by.reset(AFF_ZANZOKEN);
+            vict->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
             WAIT_STATE(ch, PULSE_3SEC);
             return;
         }
@@ -4546,7 +4546,7 @@ ACMD(do_absorb) {
                          add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
             improve_skill(ch, SKILL_ABSORB, 0);
             WAIT_STATE(ch, PULSE_4SEC);
-            vict->mobFlags.set(MOB_HUSK);
+            vict->setFlag(FlagType::NPC, MOB_HUSK);
             die(vict, ch);
         }
     } else {
@@ -4961,7 +4961,7 @@ ACMD(do_focus) {
                     TO_ROOM);
                 return;
             } else {
-                ch->affected_by.set(AFF_MIGHT);
+                ch->setFlag(FlagType::Affect, AFF_MIGHT);
                 ch->decCurKI(ch->getMaxKI() / 20);
                 int duration = roll_aff_duration(GET_INT(ch), 2);
                 /* Str , Con, Int, Agl, Wis, Spd */
@@ -5646,7 +5646,7 @@ ACMD(do_focus) {
                 act("$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", true, ch, nullptr,
                     vict, TO_NOTVICT);
                 GET_POS(vict) = POS_SLEEPING;
-                vict->affected_by.reset(AFF_FLYING);
+                vict->clearFlag(FlagType::Affect,AFF_FLYING);
                 GET_ALT(vict) = 0;
                 return;
             }
@@ -6314,7 +6314,7 @@ ACMD(do_appraise) {
     if (!found)
         send_to_char(ch, " None");
     char buf2[MAX_STRING_LENGTH];
-    sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, buf2);
+    sprintf(buf2, "%s", join(obj->getFlagNames(FlagType::Affect), ", ").c_str());
     send_to_char(ch, "\nSpecial: %s\r\n", buf2);
 
     WAIT_STATE(ch, PULSE_2SEC);
@@ -6410,7 +6410,7 @@ ACMD(do_zanzoken) {
     }
 
     if (AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
-        ch->affected_by.set(AFF_ZANZOKEN);
+        ch->setFlag(FlagType::Affect, AFF_ZANZOKEN);
         send_to_char(ch, "You release the ki you had prepared for a zanzoken.\r\n");
         return;
     }
@@ -6421,7 +6421,7 @@ ACMD(do_zanzoken) {
     }
 
     act("@wYou focus your ki, preparing to move at super speeds if necessary.@n", true, ch, nullptr, nullptr, TO_CHAR);
-    ch->affected_by.set(AFF_ZANZOKEN);
+    ch->setFlag(FlagType::Affect, AFF_ZANZOKEN);
     improve_skill(ch, SKILL_ZANZOKEN, 2);
     WAIT_STATE(ch, PULSE_2SEC);
 }
@@ -6564,8 +6564,7 @@ ACMD(do_solar) {
     act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto vict : ch->getRoom()->getPeople()) {
 
         if (vict == ch)
             continue;
@@ -6716,7 +6715,7 @@ ACMD(do_heal) {
         if (AFF_FLAGGED(vict, AFF_BURNED)) {
             send_to_char(vict, "Your burns are healed now.\r\n");
             act("$n@w's burns are now healed.@n", true, vict, nullptr, nullptr, TO_ROOM);
-            vict->affected_by.reset(AFF_BURNED);
+            vict->clearFlag(FlagType::Affect,AFF_BURNED);
         }
         if (AFF_FLAGGED(vict, AFF_HYDROZAP)) {
             send_to_char(vict, "You no longer feel a great thirst.\r\n");
@@ -6767,7 +6766,7 @@ ACMD(do_heal) {
             }
         }
 
-        vict->affected_by.reset(AFF_BLIND);
+        vict->clearFlag(FlagType::Affect,AFF_BLIND);
         GET_LIMBCOND(vict, 0) = 100;
         GET_LIMBCOND(vict, 1) = 100;
         GET_LIMBCOND(vict, 2) = 100;
@@ -6799,7 +6798,7 @@ ACMD(do_barrier) {
         act("@BYou dispel your barrier, releasing its energy.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@B$n@B dispels $s barrier, releasing its energy.@n", true, ch, nullptr, nullptr, TO_ROOM);
         GET_BARRIER(ch) = 0;
-        ch->affected_by.reset(AFF_SANCTUARY);
+        ch->clearFlag(FlagType::Affect,AFF_SANCTUARY);
         return;
     } else if (!strcasecmp("release", arg)) {
         send_to_char(ch, "You don't have a barrier.\r\n");
@@ -6871,7 +6870,7 @@ ACMD(do_barrier) {
         } else {
             improve_skill(ch, SKILL_AQUA_BARRIER, 2);
         }
-        ch->affected_by.set(AFF_SANCTUARY);
+        ch->setFlag(FlagType::Affect, AFF_SANCTUARY);
         GET_COOLDOWN(ch) = 20;
         return;
     }
@@ -7750,7 +7749,7 @@ ACMD(do_meditate) {
             if (GET_INT(MINDLINK(ch)) < axion_dice(-10) && !AFF_FLAGGED(MINDLINK(ch), AFF_SHOCKED)) {
                 send_to_char(MINDLINK(ch),
                              "Your mind is shocked by the flood of mental energy that pushed it out!@n\r\n");
-                MINDLINK(ch)->affected_by.reset(AFF_SHOCKED);
+                MINDLINK(ch)->clearFlag(FlagType::Affect,AFF_SHOCKED);
             }
 
             LINKER(MINDLINK(ch)) = 0;
@@ -8242,7 +8241,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         d->character->playerFlags.reset(PLR_TRANSMISSION);
 
         if (!FIGHTING(d->character) && AFF_FLAGGED(d->character, AFF_POSITION)) {
-            d->character->affected_by.reset(AFF_POSITION);
+            d->character->clearFlag(FlagType::Affect,AFF_POSITION);
         }
         if (SITS(d->character)) {
             if (IN_ROOM(d->character) != IN_ROOM(SITS(d->character))) {
@@ -8594,7 +8593,7 @@ ACMD(do_snet) {
     }
 
     if (!strcasecmp(arg, "check")) {
-        send_to_char(ch, "Your personal scouter number is: %d\r\n", ((ch)->id));
+        send_to_char(ch, "Your personal scouter number is: %d\r\n", ((ch)->uid));
         return;
     }
 
@@ -8690,13 +8689,13 @@ ACMD(do_snet) {
                         send_to_char(i->character, "@WScanner@D: @Y%s@n\r\n", sense_location(ch));
                     }
                     continue;
-                } else if (call > -1 && ((i->character)->id) == call) {
+                } else if (call > -1 && ((i->character)->uid) == call) {
                     send_to_char(i->character, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n",
                                  voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown",
-                                 ((ch)->id), !*arg2 ? "" : CAP(arg2));
+                                 ((ch)->uid), !*arg2 ? "" : CAP(arg2));
                     *hist = '\0';
                     sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice,
-                            readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", ((ch)->id),
+                            readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", ((ch)->uid),
                             !*arg2 ? "" : CAP(arg2));
                     add_history(i->character, hist, HIST_SNET);
                     if (has_scanner(i->character)) {
@@ -9492,7 +9491,7 @@ perform_group(struct char_data *ch, struct char_data *vict, int highlvl, int low
   }
   */
 
-    vict->affected_by.set(AFF_GROUP);
+    vict->setFlag(FlagType::Affect, AFF_GROUP);
     if (ch != vict)
         act("$N is now a member of your group.", false, ch, nullptr, vict, TO_CHAR);
     act("You are now a member of $n's group.", false, ch, nullptr, vict, TO_VICT);
@@ -9623,7 +9622,7 @@ ACMD(do_group) {
         if (!AFF_FLAGGED(vict, AFF_GROUP)) {
             if (!AFF_FLAGGED(ch, AFF_GROUP)) {
                 send_to_char(ch, "You form a group, with you as leader.\r\n");
-                ch->affected_by.set(AFF_GROUP);
+                ch->setFlag(FlagType::Affect, AFF_GROUP);
             }
             perform_group(ch, vict, highlvl, lowlvl, highpl, lowpl);
         } else {
@@ -9631,7 +9630,7 @@ ACMD(do_group) {
                 act("$N is no longer a member of your group.", false, ch, nullptr, vict, TO_CHAR);
             act("You have been kicked out of $n's group!", false, ch, nullptr, vict, TO_VICT);
             act("$N has been kicked out of $n's group!", false, ch, nullptr, vict, TO_NOTVICT);
-            vict->affected_by.reset(AFF_GROUP);
+            vict->clearFlag(FlagType::Affect,AFF_GROUP);
         }
     }
 }
@@ -9652,7 +9651,7 @@ ACMD(do_ungroup) {
         for (f = ch->followers; f; f = next_fol) {
             next_fol = f->next;
             if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
-                f->follower->affected_by.reset(AFF_GROUP);
+                f->follower->clearFlag(FlagType::Affect,AFF_GROUP);
                 act("$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
                 f->follower->set(CharNum::GroupKills, 0);
                 if (!AFF_FLAGGED(f->follower, AFF_CHARM))
@@ -9660,7 +9659,7 @@ ACMD(do_ungroup) {
             }
         }
 
-        ch->affected_by.reset(AFF_GROUP);
+        ch->clearFlag(FlagType::Affect,AFF_GROUP);
         ch->set(CharNum::GroupKills, 0);
         send_to_char(ch, "You disband the group.\r\n");
         return;
@@ -9679,7 +9678,7 @@ ACMD(do_ungroup) {
         return;
     }
 
-    tch->affected_by.reset(AFF_GROUP);
+    tch->clearFlag(FlagType::Affect,AFF_GROUP);
     tch->set(CharNum::GroupKills, 0);
 
     act("$N is no longer a member of your group.", false, ch, nullptr, tch, TO_CHAR);
@@ -9890,7 +9889,7 @@ ACMD(do_use) {
                             act("@WYou gently apply the salve to your burns.@n", true, ch, mag_item, nullptr, TO_CHAR);
                             act("@C$n@W gently applies a burn salve to $s burns.@n", true, ch, mag_item, nullptr,
                                 TO_ROOM);
-                            ch->affected_by.reset(AFF_BURNED);
+                            ch->clearFlag(FlagType::Affect,AFF_BURNED);
                             extract_obj(mag_item);
                         } else {
                             send_to_char(ch, "You are not burned.\r\n");
@@ -10332,7 +10331,7 @@ ACMD(do_gen_tog) {
             result = PRF_TOG_CHK(ch, PRF_AUTOSAC);
             break;
         case SCMD_SNEAK:
-            result = AFF_TOG_CHK(ch, AFF_SNEAK);
+            result = ch->flipFlag(FlagType::Affect, AFF_SNEAK);
             break;
         case SCMD_HIDE:
             if ((GET_CHARGE(ch) > 0 && GET_PREFERENCE(ch) != PREFERENCE_KI) ||
@@ -10351,7 +10350,7 @@ ACMD(do_gen_tog) {
                 send_to_char(ch, "@RYou need more skill slots in order to learn this skill.@n\r\n");
                 return;
             }
-            result = AFF_TOG_CHK(ch, AFF_HIDE);
+            result = ch->flipFlag(FlagType::Affect, AFF_HIDE);
             break;
         case SCMD_AUTOMEM:
             result = PRF_TOG_CHK(ch, PRF_AUTOMEM);

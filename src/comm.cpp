@@ -1635,7 +1635,6 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
 
 char *act(const char *str, int hide_invisible, struct char_data *ch,
           struct obj_data *obj, const void *vict_obj, int type) {
-    struct char_data *to;
     int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
 
     if (!str || !*str)
@@ -1688,8 +1687,8 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     }
 
     if (type == TO_VICT) {
-        if ((to = (struct char_data *) vict_obj) != nullptr && SENDOK(to) &&
-            (!resskill || (roll_skill(to, resskill) >= dcval))) {
+        auto to = (struct char_data *) vict_obj;
+        if (to && SENDOK(to) && (!resskill || (roll_skill(to, resskill) >= dcval))) {
             perform_act(str, ch, obj, vict_obj, to);
             return last_act_message;
         }
@@ -1697,9 +1696,8 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     }
 
     if (type == TO_GMOTE) {
-        struct descriptor_data *i;
         char buf[MAX_STRING_LENGTH];
-        for (i = descriptor_list; i; i = i->next) {
+        for (auto i = descriptor_list; i; i = i->next) {
             if (!i->connected && i->character &&
                 !PRF_FLAGGED(i->character, PRF_NOGOSS) &&
                 !PLR_FLAGGED(i->character, PLR_WRITING) &&
@@ -1717,18 +1715,17 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
 
     /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
+    std::vector<char_data*> to;
     if (ch && IN_ROOM(ch) != NOWHERE)
-        to = ch->getRoom()->people;
+        to = ch->getRoom()->getPeople();
     else if (obj && IN_ROOM(obj) != NOWHERE)
-        to = obj->getRoom()->people;
+        to = obj->getRoom()->getPeople();
     else {
         return nullptr;
     }
 
     if ((type & TO_ROOM)) {
-        struct descriptor_data *d;
-
-        for (d = descriptor_list; d; d = d->next) {
+        for (auto d = descriptor_list; d; d = d->next) {
             if (STATE(d) != CON_PLAYING)
                 continue;
 
@@ -1765,16 +1762,16 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
         }
     }
 
-    for (; to; to = to->next_in_room) {
-        if (!SENDOK(to) || (to == ch))
+    for (auto t : to) {
+        if (!SENDOK(t) || (t == ch))
             continue;
-        if (hide_invisible && ch && !CAN_SEE(to, ch))
+        if (hide_invisible && ch && !CAN_SEE(t, ch))
             continue;
-        if (type != TO_ROOM && to == vict_obj)
+        if (type != TO_ROOM && t == vict_obj)
             continue;
-        if (resskill && roll_skill(to, resskill) < dcval)
+        if (resskill && roll_skill(t, resskill) < dcval)
             continue;
-        perform_act(str, ch, obj, vict_obj, to);
+        perform_act(str, ch, obj, vict_obj, t);
     }
     return last_act_message;
 }

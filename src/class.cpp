@@ -558,7 +558,7 @@ void do_start(struct char_data *ch) {
             SET_SKILL(ch, SKILL_LANG_COMMON, 1);
             break;
         case RACE_ANDROID:
-            ch->affected_by.set(AFF_INFRAVISION);
+            ch->setFlag(FlagType::Affect, AFF_INFRAVISION);
             SET_SKILL(ch, SKILL_LANG_COMMON, 1);
             break;
         default:

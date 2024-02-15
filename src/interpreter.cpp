@@ -1062,11 +1062,11 @@ void enter_player_game(struct descriptor_data *d) {
         GET_ALT(d->character) = 0;
     }
 
-    for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->affected_by.reset(f);
+    for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->clearFlag(FlagType::Affect,f);
     d->character->playerFlags.reset(PLR_KNOCKED);
 
     if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION)) {
-        d->character->affected_by.set(AFF_INFRAVISION);
+        d->character->setFlag(FlagType::Affect, AFF_INFRAVISION);
     }
 
     ABSORBING(d->character) = nullptr;
@@ -1078,7 +1078,7 @@ void enter_player_game(struct descriptor_data *d) {
     GET_SPAM(d->character) = 0;
     GET_RMETER(d->character) = 0;
     if (!d->character->affected) {
-        d->character->affected_by.reset(AFF_HEALGLOW);
+        d->character->clearFlag(FlagType::Affect,AFF_HEALGLOW);
     }
     if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
         GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;

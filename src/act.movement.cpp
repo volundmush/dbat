@@ -440,7 +440,7 @@ static int has_flight(struct char_data *ch) {
         !IS_ANDROID(ch) && !IS_NPC(ch)) {
         act("@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->affected_by.reset(AFF_FLYING);
+        ch->clearFlag(FlagType::Affect,AFF_FLYING);
         handle_fall(ch);
         return (0);
     }
@@ -622,7 +622,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         ch->decCurKI(flight_cost);
         act("@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->affected_by.reset(AFF_FLYING);
+        ch->clearFlag(FlagType::Affect,AFF_FLYING);
     } else if (AFF_FLAGGED(ch, AFF_FLYING) && !IS_ANDROID(ch)) {
         ch->decCurKI(flight_cost);
     }
@@ -711,7 +711,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             improve_skill(ch, SKILL_MOVE_SILENTLY, 0);
         } else if (slot_count(ch) + 1 > GET_SLOTS(ch)) {
             send_to_char(ch, "@RYour skill slots are full. You can not learn Move Silently.\r\n");
-            ch->affected_by.reset(AFF_SNEAK);
+            ch->clearFlag(FlagType::Affect,AFF_SNEAK);
         } else {
             send_to_char(ch, "@GYou learn the very basics of moving silently.@n\r\n");
             SET_SKILL(ch, SKILL_MOVE_SILENTLY, rand_number(5, 10));
@@ -739,7 +739,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     if (CARRYING(ch)) {
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
     }
-    ch->affected_by.set(AFF_PURSUIT);
+    ch->setFlag(FlagType::Affect, AFF_PURSUIT);
     ch->removeFromLocation();
     ch->addToLocation(dest);
     if ((dest->zone != r->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
@@ -753,7 +753,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     if (!entry_mtrigger(ch) || !enter_wtrigger(ch->getRoom(), ch, dir)) {
         ch->removeFromLocation();
         ch->addToLocation(r);
-        ch->affected_by.reset(AFF_PURSUIT);
+        ch->clearFlag(FlagType::Affect,AFF_PURSUIT);
         return 0;
     }
 
@@ -770,7 +770,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             r->geffect == 0) {
             roll_pursue(fight, ch);
         }
-        ch->affected_by.reset(AFF_PURSUIT);
+        ch->clearFlag(FlagType::Affect,AFF_PURSUIT);
     }
     if (auto drag = DRAGGING(ch); drag) {
         act("@wYou drag @C$N@w with you.@n", true, ch, nullptr, drag, TO_CHAR);
@@ -805,7 +805,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             send_to_char(ch, "@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
             act("@c$n@w makes a noise revealing $s sneaking!@n", true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
             reveal_hiding(ch, 0);
-            ch->affected_by.reset(AFF_SNEAK);
+            ch->clearFlag(FlagType::Affect,AFF_SNEAK);
         }
     }
 
@@ -927,7 +927,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
                     ch, TO_NOTVICT);
                 act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr,
                     ch, TO_VICT);
-                for(auto c : {ch, k->follower}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {ch, k->follower}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
                 perform_move(k->follower, dir, 1);
             } else if ((IN_ROOM(k->follower) == was_in) &&
                        (GET_POS(k->follower) >= POS_STANDING) &&
@@ -938,7 +938,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
                     ch, TO_NOTVICT);
                 act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, ch,
                     TO_VICT);
-                ch->affected_by.reset(AFF_ZANZOKEN);
+                ch->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
             }
         }
         return (1);
@@ -1789,8 +1789,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
             if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099) {
                 struct char_data *tch, *next_v;
                 int filled = false;
-                for (tch = dynamic_cast<room_data*>(world[real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))])->people; tch; tch = next_v) {
-                    next_v = tch->next_in_room;
+                for (auto tch : dynamic_cast<room_data*>(world[real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))])->getPeople()) {
                     if (tch) {
                         filled = true;
                     }
@@ -2173,7 +2172,7 @@ ACMD(do_fly) {
         if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) != SECT_FLYING && SECT(IN_ROOM(ch)) != SECT_SPACE) {
             act("@WYou slowly settle down to the ground.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n slowly settles down to the ground.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_FLYING);
+            ch->clearFlag(FlagType::Affect,AFF_FLYING);
             GET_ALT(ch) = 0;
             return;
         }
@@ -2181,7 +2180,7 @@ ACMD(do_fly) {
         if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
             act("@WYou begin to plummet to the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n starts to pummet to the ground below!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_FLYING);
+            ch->clearFlag(FlagType::Affect,AFF_FLYING);
             GET_ALT(ch) = 0;
             handle_fall(ch);
             return;
@@ -2189,7 +2188,7 @@ ACMD(do_fly) {
         if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) == SECT_SPACE) {
             act("@WYou let yourself drift aimlessly through space.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n starts to drift slowly.!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_FLYING);
+            ch->clearFlag(FlagType::Affect,AFF_FLYING);
             GET_ALT(ch) = 0;
             return;
         }
@@ -2207,7 +2206,7 @@ ACMD(do_fly) {
             if (GET_POS(ch) < POS_STANDING) {
                 GET_POS(ch) = POS_STANDING;
             }
-            ch->affected_by.set(AFF_FLYING);
+            ch->setFlag(FlagType::Affect, AFF_FLYING);
             GET_ALT(ch) = 1;
             ch->decCurKI(ch->getMaxKI() / 100);
         }
@@ -2227,7 +2226,7 @@ ACMD(do_fly) {
             if (GET_POS(ch) < POS_STANDING) {
                 GET_POS(ch) = POS_STANDING;
             }
-            ch->affected_by.set(AFF_FLYING);
+            ch->setFlag(FlagType::Affect, AFF_FLYING);
             GET_ALT(ch) = 2;
             ch->decCurKI(ch->getMaxKI() / 100);
         }
@@ -2257,12 +2256,12 @@ ACMD(do_fly) {
 
         reveal_hiding(ch, 0);
         GET_ALT(ch) = 2;
-        ch->affected_by.set(AFF_FLYING);
+        ch->setFlag(FlagType::Affect, AFF_FLYING);
         if (!block_calc(ch)) {
             return;
         }
         GET_ALT(ch) = 0;
-        ch->affected_by.reset(AFF_FLYING);
+        ch->clearFlag(FlagType::Affect,AFF_FLYING);
 
         if(planet) {
             fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
@@ -2484,7 +2483,7 @@ ACMD(do_rest) {
             return;
         } else {
             GET_BARRIER(ch) = 0;
-            ch->affected_by.reset(AFF_SANCTUARY);
+            ch->clearFlag(FlagType::Affect,AFF_SANCTUARY);
         }
     }
     if (FIGHTING(ch)) {
@@ -2647,7 +2646,7 @@ ACMD(do_sleep) {
             return;
         } else {
             GET_BARRIER(ch) = 0;
-            ch->affected_by.reset(AFF_SANCTUARY);
+            ch->clearFlag(FlagType::Affect,AFF_SANCTUARY);
         }
     }
     if (GET_KAIOKEN(ch) > 0) {
@@ -2906,7 +2905,7 @@ ACMD(do_follow) {
             }
             if (ch->master)
                 stop_follower(ch);
-            ch->affected_by.reset(AFF_GROUP);
+            ch->clearFlag(FlagType::Affect,AFF_GROUP);
             reveal_hiding(ch, 0);
             add_follower(ch, leader);
         }

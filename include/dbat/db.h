@@ -306,8 +306,6 @@ extern int64_t getNextUID();
 extern std::unordered_map<room_vnum, unit_data*> world;
 extern std::unordered_map<zone_vnum, struct zone_data> zone_table;
 
-extern std::unordered_map<vnum, area_data> areas;
-
 extern struct descriptor_data *descriptor_list;
 extern std::unordered_map<int64_t, struct descriptor_data*> sessions;
 

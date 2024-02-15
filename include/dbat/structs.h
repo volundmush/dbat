@@ -298,28 +298,6 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
 
 };
 
-// abstract class used for the base of both npc_proto and item_proto.
-struct base_proto : public std::enable_shared_from_this<base_proto> {
-    base_proto() = default;
-    virtual ~base_proto() = default;
-    // Copy constructor.
-    base_proto(const base_proto& other);
-    // Copy assignment.
-    base_proto& operator=(const base_proto& other);
-    vnum vn{NOTHING}; /* virtual number of this thing		*/
-    char *name{}; /* name of this thing			*/
-    char *short_description{}; /* for listings			*/
-    char *look_description{}; /* for examine/look		*/
-    char *room_description{};      /* When thing is listed in room */
-    struct extra_descr_data *ex_description{}; /* extra descriptions     */
-
-    std::vector<trig_vnum> proto_script; /* list of default triggers  */
-    std::string scriptString();
-
-    virtual nlohmann::json serialize();
-    virtual void deserialize(const nlohmann::json& j);
-};
-
 /* Specials used by NPCs, not PCs */
 struct mob_special_data {
     mob_special_data() = default;
@@ -332,58 +310,6 @@ struct mob_special_data {
     int damnodice{};          /* The number of damage dice's	       */
     int damsizedice{};        /* The size of the damage dice's           */
     bool newitem{};             /* Check if mob has new inv item       */
-};
-
-struct npc_proto : public base_proto {
-    npc_proto() = default;
-    explicit npc_proto(const nlohmann::json& j);
-    npc_proto(const npc_proto& other);
-    npc_proto& operator=(const npc_proto& other);
-    RaceID race{RaceID::Spirit};
-    SenseiID chclass{SenseiID::Commoner};
-    weight_t weight{0};
-    std::unordered_map<CharNum, num_t> nums{};
-    struct mob_special_data mob_specials{};
-    int size{SIZE_UNDEFINED};
-    std::unordered_map<CharAttribute, attribute_t> attributes;
-    std::unordered_map<CharAppearance, appearance_t> appearances;
-    std::unordered_map<CharMoney, money_t> moneys;
-    std::unordered_map<CharAlign, align_t> aligns;
-    std::bitset<NUM_AFF_FLAGS> affected_by{}; /* Bitvector for current affects	*/
-    std::unordered_map<CharStat, stat_t> stats;
-    std::bitset<NUM_PLR_FLAGS> playerFlags{}; /* act flag for NPC's; player flag for PC's */
-    std::bitset<NUM_MOB_FLAGS> mobFlags{};
-    int armor{0};        /* Internally stored *10		*/
-    int damage_mod{};        /* Any bonus or penalty to the damage	*/
-    int speaking{};            /* Language currently speaking		*/
-
-    // Data stored about different forms.
-    std::unordered_map<FormID, trans_data> transforms;
-
-    nlohmann::json serialize() override;
-    void deserialize(const nlohmann::json& j) override;
-};
-
-struct item_proto : public base_proto {
-    item_proto() = default;
-    explicit item_proto(const nlohmann::json& j);
-    item_proto(const item_proto& other);
-    item_proto& operator=(const item_proto& other);
-    std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value{};   /* Values of the item (see list)    */
-    int8_t type_flag{};      /* Type of item                        */
-    int level{}; /* Minimum level of object.            */
-    std::bitset<NUM_ITEM_WEARS> wear_flags{}; /* Where you can wear it     */
-    std::bitset<NUM_ITEM_FLAGS> extra_flags{}; /* If it hums, glows, etc.  */
-    weight_t weight{};         /* Weight what else                     */
-    int cost{};           /* Value when sold (gp.)               */
-    int cost_per_day{};   /* Cost to keep pr. real day           */
-    std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
-    int size{SIZE_MEDIUM};           /* Size class of object                */
-    std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
-    int timer{};          /* Timer for object                    */
-    struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
-    nlohmann::json serialize() override;
-    void deserialize(const nlohmann::json& j) override;
 };
 
 
@@ -487,6 +413,9 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // whether this unit is capable of picking up u. This is related to the above, but is more about the unit's own state.
     virtual std::optional<std::string> checkCanPickup(unit_data *u);
 
+    // if u is allowed to drop items into this. Doesn't matter what kinda item. Anything.
+    virtual std::optional<std::string> checkAllowDrop(unit_data *u);
+
     virtual bool isInsideDark();
     virtual bool isProvidingLight();
 
@@ -530,7 +459,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void setLookDesc(const std::string& desc);
 
     virtual std::string getDisplayName(unit_data* ch);
-    virtual std::vector<std::string> getKeywordsFor(unit_data* ch);
+    virtual std::vector<std::string> getKeywords(unit_data* ch);
     virtual std::string renderAppearance(unit_data* ch);
 
     virtual UnitFamily getFamily() = 0;
@@ -591,10 +520,6 @@ struct obj_data : public unit_data {
     obj_data() = default;
     virtual ~obj_data();
     explicit obj_data(const nlohmann::json& j);
-
-    // Many - but not all - objects are spawned from a prototype.
-    std::shared_ptr<item_proto> proto;
-    void setProto(std::shared_ptr<item_proto> p);
 
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
@@ -732,7 +657,6 @@ struct room_data : public unit_data {
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     SpecialFunc func{};
-    struct char_data *people{};    /* List of NPC / PC in room */
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
     int geffect{};            /* Effect of ground destruction       */
@@ -1002,8 +926,6 @@ struct char_data : public unit_data {
     appearance_t set(CharAppearance type, appearance_t val);
     appearance_t mod(CharAppearance type, appearance_t val);
 
-    std::bitset<NUM_AFF_FLAGS> affected_by{};/* Bitvector for current affects	*/
-
     std::unordered_map<CharStat, stat_t> stats;
     stat_t get(CharStat type, bool base = true);
     stat_t set(CharStat type, stat_t val);
@@ -1012,7 +934,6 @@ struct char_data : public unit_data {
     // Instance-relevant fields below...
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
 
-    std::bitset<NUM_ADMFLAGS> admflags{};    /* Bitvector for admin privs		*/
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
     struct affected_type *affected{};
@@ -1025,7 +946,6 @@ struct char_data : public unit_data {
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
-    struct char_data *next_in_room{};
     /* For room->people - list		*/
     struct char_data *next{};    /* For either monster or ppl-list	*/
     struct char_data *next_fighting{};
@@ -1502,8 +1422,6 @@ struct char_data : public unit_data {
 };
 
 struct npc_data : public char_data {
-    std::shared_ptr<npc_proto> proto;
-    void setProto(std::shared_ptr<npc_proto> p);
     std::string getUnitClass() override;
     void assignTriggers() override;
     std::string scriptString() override;

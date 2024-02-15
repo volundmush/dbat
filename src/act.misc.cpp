@@ -153,8 +153,7 @@ ACMD(do_multiform) {
     std::vector<char_data *> multis;
     struct char_data *tch = nullptr, *next_v = nullptr;
 
-    for (tch = ch->getRoom()->people; tch; tch = next_v) {
-        next_v = tch->next_in_room;
+    for (auto tch : ch->getRoom()->getPeople()) {
         if (tch == ch || !IS_NPC(tch)) {
             continue;
         }
@@ -364,8 +363,7 @@ static void resolve_song(struct char_data *ch) {
         return;
     }
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto vict : ch->getRoom()->getPeople()) {
         switch ((int)GET_SONG(ch)) {
             case SONG_SAFETY:
                 if ((ch->master == vict->master || ch == vict->master || vict == ch->master) || vict == ch) {
@@ -521,7 +519,7 @@ static void resolve_song(struct char_data *ch) {
                             if (GET_BARRIER(vict) >= GET_MAX_MANA(vict) * 0.75) {
                                 GET_BARRIER(vict) = GET_MAX_MANA(vict) * 0.75;
                             }
-                            vict->affected_by.set(AFF_SANCTUARY);
+                            vict->setFlag(FlagType::Affect, AFF_SANCTUARY);
                             ch->incCurKI(ch->getPercentOfMaxKI(.02) + skill);
                         }
                     }
@@ -794,8 +792,8 @@ ACMD(do_moondust) {
 
     struct char_data *vict = nullptr, *next_v = nullptr;
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto vict : ch->getRoom()->getPeople()) {
+
         if (vict == ch) {
             continue;
         }
@@ -827,7 +825,7 @@ ACMD(do_shell) {
         act("@mYou quickly absorb the armor carapace covering your body back inside.@n", true, ch, nullptr, nullptr,
             TO_CHAR);
         act("@M$n's@m armored carapce retreats back to its original size.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->affected_by.reset(AFF_SHELL);
+        ch->clearFlag(FlagType::Affect,AFF_SHELL);
         return;
     }
 
@@ -846,7 +844,7 @@ ACMD(do_shell) {
         act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->decCurSTPercent(.2);
-        ch->affected_by.set(AFF_SHELL);
+        ch->setFlag(FlagType::Affect, AFF_SHELL);
         return;
     }
 }
@@ -864,7 +862,7 @@ ACMD(do_liquefy) {
             true, ch, nullptr, nullptr, TO_ROOM);
         act("@MYou begin to pull the liquid chunks of your body together. Those chunks hover upward and merge into each other until a large ball of goo is formed. Slowly your body emerges as the pieces of your body take on their old form!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
-        ch->affected_by.reset(AFF_LIQUEFIED);
+        ch->clearFlag(FlagType::Affect,AFF_LIQUEFIED);
         WAIT_STATE(ch, PULSE_3SEC);
         WAIT_STATE(ch, PULSE_3SEC);
         WAIT_STATE(ch, PULSE_3SEC);
@@ -914,7 +912,7 @@ ACMD(do_liquefy) {
             act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
-            ch->affected_by.set(AFF_LIQUEFIED);
+            ch->setFlag(FlagType::Affect, AFF_LIQUEFIED);
             return;
         }
     } else if (!strcasecmp(arg, "explode")) {
@@ -994,7 +992,7 @@ ACMD(do_liquefy) {
                 solo_gain(ch, vict);
             }
             die(vict, ch);
-            ch->affected_by.set(AFF_LIQUEFIED);
+            ch->setFlag(FlagType::Affect, AFF_LIQUEFIED);
             WAIT_STATE(ch, PULSE_3SEC);
             handle_cooldown(ch, 9);
             return;
@@ -2354,7 +2352,7 @@ ACMD(do_healglow) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C places $s hands on $s body. Slowly a strong blue glow glistens and shines across $s skin!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            vict->affected_by.set(AFF_HEALGLOW);
+            vict->setFlag(FlagType::Affect, AFF_HEALGLOW);
             int duration = (GET_SKILL(ch, SKILL_HEALGLOW) * 0.1);
             if (duration <= 0)
                 duration = 1;
@@ -2828,8 +2826,7 @@ ACMD(do_hydromancy) {
             act(bun, true, ch, nullptr, nullptr, TO_CHAR);
             act(bunn, true, ch, nullptr, nullptr, TO_ROOM);
 
-            for (vict = r->people; vict; vict = next_v) {
-                next_v = vict->next_in_room;
+            for (auto vict : r->getPeople()) {
                 if (vict == ch)
                     continue;
                 if (!can_kill(ch, vict, nullptr, 1)) {
@@ -3438,7 +3435,7 @@ ACMD(do_ensnare) {
             extract_obj(obj);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
-            vict->affected_by.reset(AFF_ZANZOKEN);
+            vict->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
         } else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
             if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100)) {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! You both zanzoken! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
@@ -3450,7 +3447,7 @@ ACMD(do_ensnare) {
                 extract_obj(obj);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
-                for(auto c : {vict, ch}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {vict, ch}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
             } else {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! You both zanzoken! Quickly you spin around $M and ensnare $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_CHAR);
@@ -3459,10 +3456,10 @@ ACMD(do_ensnare) {
                 act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! They both zanzoken! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_NOTVICT);
                 extract_obj(obj);
-                vict->affected_by.set(AFF_ENSNARED);
+                vict->setFlag(FlagType::Affect, AFF_ENSNARED);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
-                for(auto c : {vict, ch}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {vict, ch}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
             }
         } else if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you zanzoken and spin around $M and ensnare $S arms with the silk!@n",
@@ -3472,10 +3469,10 @@ ACMD(do_ensnare) {
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e zanzokens and spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             extract_obj(obj);
-            vict->affected_by.set(AFF_ENSNARED);
+            vict->setFlag(FlagType::Affect, AFF_ENSNARED);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
-            ch->affected_by.reset(AFF_ZANZOKEN);
+            ch->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
         } else if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100)) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
                 true, ch, nullptr, vict, TO_CHAR);
@@ -3494,7 +3491,7 @@ ACMD(do_ensnare) {
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             extract_obj(obj);
-            vict->affected_by.set(AFF_ENSNARED);
+            vict->setFlag(FlagType::Affect, AFF_ENSNARED);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
         }
@@ -4086,7 +4083,8 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 break;
             case 8: {
                 auto &o = obj_proto[1126];
-                if (!ch->canCarryWeight(o->weight)) {
+                auto weight = o.contains("weight") ? o["weight"].get<int>() : 0;
+                if (!ch->canCarryWeight(weight)) {
                     send_to_char(ch, "You can not carry that much weight at this moment.\r\n");
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
                     send_to_char(ch, "You have too many items on you to carry anymore at this moment.\r\n");
@@ -4957,7 +4955,7 @@ ACMD(do_fireshield) {
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_FIRESHIELD, 0);
         ch->decCurKI(cost);
-        ch->affected_by.set(AFF_FIRESHIELD);
+        ch->setFlag(FlagType::Affect, AFF_FIRESHIELD);
         return;
     }
 

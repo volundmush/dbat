@@ -1773,7 +1773,7 @@ ACMD(do_bid) {
                 }
                 send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj2)).c_str());
                 char bits[MAX_STRING_LENGTH];
-                sprintbitarray(GET_OBJ_WEAR(obj2), wear_bits, TW_ARRAY_MAX, bits);
+                sprintf(bits, "%s", join(obj2->getFlagNames(FlagType::Wear), ", "));
                 search_replace(bits, "TAKE", "");
                 send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
                 if (GET_OBJ_TYPE(obj2) == ITEM_WEAPON) {
@@ -1811,7 +1811,7 @@ ACMD(do_bid) {
                 else
                     send_to_char(ch, "@n");
                 char buf2[MAX_STRING_LENGTH];
-                sprintbitarray(GET_OBJ_PERM(obj2), affected_bits, AF_ARRAY_MAX, buf2);
+                sprintf(buf2, "%s", join(obj2->getFlagNames(FlagType::Affect), ", "));
                 send_to_char(ch, "\n@GSpecial     @W:@w %s\n", buf2);
                 send_to_char(ch, "@c------------------------------------------------------------------------\n");
                 return;
@@ -1843,10 +1843,10 @@ ACMD(do_bid) {
         if (!obj2) {
             send_to_char(ch, "That item number is not found.\r\n");
             return;
-        } else if (GET_CURBID(obj2) == ((ch)->id)) {
+        } else if (GET_CURBID(obj2) == ((ch)->uid)) {
             send_to_char(ch, "You already have the highest bid.\r\n");
             return;
-        } else if (GET_AUCTER(obj2) == ((ch)->id)) {
+        } else if (GET_AUCTER(obj2) == ((ch)->uid)) {
             send_to_char(ch, "You auctioned the item, go to the auction house and cancel if you can.\r\n");
             return;
         } else if (GET_CURBID(obj2) > 0 && atoi(arg2) <= (GET_BID(obj2) + (GET_BID(obj2) * .1)) &&
@@ -1865,7 +1865,7 @@ ACMD(do_bid) {
             return;
         } else {
             GET_BID(obj2) = atoi(arg2);
-            GET_CURBID(obj2) = ((ch)->id);
+            GET_CURBID(obj2) = ((ch)->uid);
             auc_save();
             struct descriptor_data *d;
             int bid = atoi(arg2);
@@ -2464,7 +2464,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
                     if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
                         ch->decCurHealthPercent(1, 1);
 
-                    ch->affected_by.set(AFF_BURNED);
+                    ch->setFlag(FlagType::Affect, AFF_BURNED);
                     act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@R$n@R is burned by it!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
@@ -2507,7 +2507,7 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj) {
                 if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
                     ch->decCurHealthPercent(1, 1);
 
-                ch->affected_by.set(AFF_BURNED);
+                ch->setFlag(FlagType::Affect, AFF_BURNED);
                 act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@R is burned by it!@n", true, ch, nullptr, nullptr, TO_ROOM);
             }
@@ -2789,7 +2789,7 @@ ACMD(do_drop) {
     }
 
     auto loc = ch->getLocation();
-    if(auto check = loc->allowDrop(ch); check) {
+    if(auto check = loc->checkAllowDrop(ch); check) {
         ch->sendLine("You can't drop anything here: {}", check.value());
         return;
     }
@@ -2880,7 +2880,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
                 ch->decCurHealthPercent(1, 1);
 
 
-            vict->affected_by.set(AFF_BURNED);
+            vict->setFlag(FlagType::Affect, AFF_BURNED);
             act("@RYou are burned by it!@n", true, vict, nullptr, nullptr, TO_CHAR);
             act("@R$n@R is burned by it!@n", true, vict, nullptr, nullptr, TO_ROOM);
         }
@@ -3098,7 +3098,7 @@ void name_from_drinkcon(struct obj_data *obj) {
         strncat(new_name, cur_name, cpylen);    /* strncat: OK (size precalculated) */
     }
 
-    if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto[GET_OBJ_RNUM(obj)].name)
+    if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto[GET_OBJ_RNUM(obj)]["name"])
         free(obj->name);
     obj->name = new_name;
 }
@@ -3112,7 +3112,7 @@ void name_to_drinkcon(struct obj_data *obj, int type) {
     CREATE(new_name, char, strlen(obj->name) + strlen(drinknames[type]) + 2);
     sprintf(new_name, "%s %s", obj->name, drinknames[type]);    /* sprintf: OK */
 
-    if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto[GET_OBJ_RNUM(obj)].name)
+    if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto[GET_OBJ_RNUM(obj)]["name"])
         free(obj->name);
 
     obj->name = new_name;
@@ -4165,10 +4165,11 @@ ACMD(do_remove) {
         return;
     }
 
+    /*
+
     auto isBoard = [&](const auto &o) {return GET_OBJ_TYPE(o) == ITEM_BOARD;};
 
     obj = ch->findObject(isBoard);
-    /* lemme check for a board FIRST */
     if (!obj) ch->getRoom()->findObject(isBoard);
 
     if (obj) {
@@ -4216,6 +4217,7 @@ ACMD(do_remove) {
             perform_remove(ch, i);
         }
     }
+    */
 }
 
 ACMD(do_sac) {

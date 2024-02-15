@@ -90,7 +90,7 @@ void char_data::restore(bool announce) {
 void char_data::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
     restore(true);
-    for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) affected_by.reset(f);
+    for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) clearFlag(FlagType::Affect,f);
     playerFlags.reset(PLR_PDEATH);
     // Send them to their starting room and have them 'look'.
     removeFromLocation();
@@ -162,7 +162,7 @@ void char_data::resurrect(ResurrectionMode mode) {
 
 void char_data::ghostify() {
     restore(true);
-    for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) affected_by.reset(f);
+    for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) clearFlag(FlagType::Affect,f);
 
     // upon death, ghost-bodies gain new natural limbs... unless they're a
     // cyborg and want to keep their implants.
@@ -690,8 +690,8 @@ void char_data::restoreStatus(bool announce) {
 }
 
 void char_data::setStatusKnockedOut() {
-    affected_by.set(AFF_KNOCKED);
-    affected_by.reset(AFF_FLYING);
+    setFlag(FlagType::Affect, AFF_KNOCKED);
+    clearFlag(FlagType::Affect,AFF_FLYING);
     altitude = 0;
     GET_POS(this) = POS_SLEEPING;
 }
@@ -711,7 +711,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
             }
         }
 
-        affected_by.reset(AFF_KNOCKED);
+        clearFlag(FlagType::Affect,AFF_KNOCKED);
         GET_POS(this) = POS_SITTING;
     }
 }
@@ -722,7 +722,7 @@ void char_data::cureStatusBurn(bool announce) {
             send_to_char(this, "Your burns are healed now.\r\n");
             ::act("$n@w's burns are now healed.@n", true, this, nullptr, nullptr, TO_ROOM);
         }
-        affected_by.reset(AFF_BURNED);
+        clearFlag(FlagType::Affect,AFF_BURNED);
     }
 }
 
@@ -1343,17 +1343,6 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
 
 }
 
-std::map<int, obj_data *> char_data::getEquipment() {
-    std::map<int, obj_data*> out;
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        if(auto eq = GET_EQ(this, i); eq) {
-            out[i] = eq;
-        }
-    }
-    return out;
-}
-
-
 
 int char_data::getArmor() {
     int out = get(CharNum::ArmorWishes) * 5000;
@@ -1648,13 +1637,14 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
     if(lmember == "eq") {
         if(arg.empty()) return "";
         else if(arg == "*") {
-            for(auto i = 0; i < NUM_WEARS;i++) if(equipment[i]) return "1";
+            if(auto eq = getEquipment(); !eq.empty()) return "1";
             return "0";
         }
         else {
             auto pos = find_eq_pos_script((char*)arg.c_str());
             if(pos == -1) return "";
-            if(equipment[pos]) return equipment[pos]->getUID(false);
+            auto eq = getEquipment();
+            if(eq[pos]) return eq[pos];
             return "";
         }
     }
@@ -1768,7 +1758,11 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
     if(lmember == "name") return GET_NAME(this);
 
     if(lmember == "next_in_room") {
-        if(next_in_room) return next_in_room;
+        auto loc = getRoom();
+        if(!loc) return "";
+        auto people = loc->getPeople();
+        auto found = std::find(people.begin(), people.end(), this);
+        if(found != people.end() && ++found != people.end()) return *found;
         return "";
     }
 
@@ -1895,29 +1889,6 @@ char_data::~char_data() {
         free(voice);
 }
 
-void npc_data::setProto(std::shared_ptr<npc_proto> p) {
-    proto = p;
-    vn = proto->vn;
-    zone = real_zone_by_thing(vn);
-    race = proto->race;
-    chclass = proto->chclass;
-    weight = proto->weight;
-    nums = proto->nums;
-    mob_specials = proto->mob_specials;
-    size = proto->size;
-    attributes = proto->attributes;
-    appearances = proto->appearances;
-    moneys = proto->moneys;
-    aligns = proto->aligns;
-    affected_by = proto->affected_by;
-    stats = proto->stats;
-    playerFlags = proto->playerFlags;
-    mobFlags = proto->mobFlags;
-    armor = proto->armor;
-    damage_mod = proto->damage_mod;
-    speaking = proto->speaking;
-    transforms = proto->transforms;
-}
 
 std::string npc_data::scriptString() {
     if(!proto) return "";

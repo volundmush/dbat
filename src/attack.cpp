@@ -2427,7 +2427,7 @@ namespace atk {
         if (!AFF_FLAGGED(victim, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
             act("@MYour mind has been shocked!@n", true, victim, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, victim, nullptr, nullptr, TO_ROOM);
-            victim->affected_by.set(AFF_SHOCKED);
+            victim->setFlag(FlagType::Affect, AFF_SHOCKED);
         }
     }
 
@@ -2466,7 +2466,7 @@ namespace atk {
                 calcDamage += calcDamage * 0.4;
             }
 
-            victim->affected_by.set(AFF_ASHED);
+            victim->setFlag(FlagType::Affect, AFF_ASHED);
     }
 
     void Honoo::attackPostprocess() {
@@ -2475,13 +2475,13 @@ namespace atk {
                 !GET_BONUS(victim, BONUS_FIREPROOF)) {
                 send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-                victim->affected_by.set(AFF_BURNED);
+                victim->setFlag(FlagType::Affect, AFF_BURNED);
             } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
                 send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
             } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
                 send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
                 send_to_char(user, "@RThey are easily burned!@n\r\n");
-                victim->affected_by.set(AFF_BURNED);
+                victim->setFlag(FlagType::Affect, AFF_BURNED);
             }
             if (GET_SKILL_PERF(user, SKILL_HONOO) == 3 && attPerc > 0.1) {
                 pcost(user, attPerc - 0.05, 0);
@@ -2495,7 +2495,7 @@ namespace atk {
                 send_to_room(IN_ROOM(user), "The water surrounding the area evaporates completely away!\r\n");
                 r->geffect = 0;
             }
-            victim->affected_by.reset(AFF_ASHED);
+            victim->clearFlag(FlagType::Affect,AFF_ASHED);
     }
 
     void Honoo::postProcess() {
@@ -2795,11 +2795,11 @@ namespace atk {
                 nullptr, nullptr,
                 TO_CHAR);
             act("@M$n@m's mind has been damaged by the attack!@n", true, victim, nullptr, nullptr, TO_ROOM);
-            victim->affected_by.set(AFF_MBREAK);
+            victim->setFlag(FlagType::Affect, AFF_MBREAK);
         } else if (!AFF_FLAGGED(victim, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
             act("@MYour mind has been shocked!@n", true, victim, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, victim, nullptr, nullptr, TO_ROOM);
-            victim->affected_by.set(AFF_SHOCKED);
+            victim->setFlag(FlagType::Affect, AFF_SHOCKED);
         }
     }
 
@@ -2905,7 +2905,7 @@ namespace atk {
         } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
             calcDamage += calcDamage * 0.4;
         }
-        victim->affected_by.set(AFF_ASHED);
+        victim->setFlag(FlagType::Affect, AFF_ASHED);
     }
 
     void PhoenixSlash::attackPostprocess() {
@@ -2913,15 +2913,15 @@ namespace atk {
             !GET_BONUS(victim, BONUS_FIREPROOF)) {
             send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setFlag(FlagType::Affect, AFF_BURNED);
         } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
             send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
             send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are easily burned!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setFlag(FlagType::Affect, AFF_BURNED);
         }
-        victim->affected_by.reset(AFF_ASHED);
+        victim->clearFlag(FlagType::Affect,AFF_ASHED);
     }
 
     int PhoenixSlash::limbhurtChance() {
@@ -3276,7 +3276,7 @@ namespace atk {
         if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim)) {
             send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setFlag(FlagType::Affect, AFF_BURNED);
         }
     }
 
@@ -3698,7 +3698,7 @@ namespace atk {
                 if (rand_number(1, 4) == 1 && !AFF_FLAGGED(victim, AFF_FROZEN) && !IS_DEMON(victim)) {
                     act("@CYour body completely freezes!@n", true, victim, nullptr, nullptr, TO_CHAR);
                     act("@c$n's@C body completely freezes!@n", true, victim, nullptr, nullptr, TO_ROOM);
-                    victim->affected_by.set(AFF_FROZEN);
+                    victim->setFlag(FlagType::Affect, AFF_FROZEN);
                 }
             }
         }
@@ -3849,13 +3849,13 @@ namespace atk {
                 !GET_BONUS(victim, BONUS_FIREPROOF)) {
             send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setFlag(FlagType::Affect, AFF_BURNED);
         } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
             send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
             send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are easily burned!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setFlag(FlagType::Affect, AFF_BURNED);
         }
     } 
 
@@ -4156,7 +4156,7 @@ namespace atk {
 
     bool KiAreaAttack::getOpponent() {
 
-        std::list<struct char_data*> people = user->getRoom()->getPeople();
+        auto people = user->getRoom()->getPeople();
 
         for (auto person : people) {
             if (person == user) {

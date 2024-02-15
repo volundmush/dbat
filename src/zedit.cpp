@@ -277,7 +277,7 @@ void zedit_disp_flag_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
                         zone_bits[counter], !(++columns % 2) ? "\r\n" : "");
     }
-
+    
     sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX, bits);
     write_to_output(d, "\r\nZone flags: @c%s@n\r\n"
                        "Enter Zone flags, 0 to quit : ", bits);

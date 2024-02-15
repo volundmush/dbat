@@ -751,7 +751,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
             send_to_char(ch, "GToken Slots  @W: @m2/2@n\n");
         }
         char bits[MAX_STRING_LENGTH];
-        sprintbitarray(GET_OBJ_WEAR(obj), wear_bits, TW_ARRAY_MAX, bits);
+        sprintf(bits, "%s", join(obj->getFlagNames(FlagType::Wear), ", ").c_str());
         search_replace(bits, "TAKE", "");
         send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
@@ -787,7 +787,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
         else
             send_to_char(ch, "@n");
         char buf2[MAX_STRING_LENGTH];
-        sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, buf2);
+        sprintf(buf2, "%s", join(obj->getFlagNames(FlagType::Affect), ", ").c_str());
         send_to_char(ch, "\n@GSpecial     @W:@w %s", buf2);
         send_to_char(ch, "\n@c---------------------------------------------------------------@n\n");
     }

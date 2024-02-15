@@ -271,8 +271,7 @@ ACMD(do_genki) {
         return;
     }
 
-    for (friend_char = ch->getRoom()->people; friend_char; friend_char = next_v) {
-        next_v = friend_char->next_in_room;
+    for (auto friend_char : ch->getRoom()->getPeople()) {
         if (friend_char == ch) {
             continue;
         }
@@ -624,7 +623,7 @@ ACMD(do_blessedhammer) {
             if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict)) {
                 send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                vict->affected_by.set(AFF_BURNED);
+                vict->setFlag(FlagType::Affect, AFF_BURNED);
             }
             pcost(ch, attperc, 0);
 
@@ -933,7 +932,7 @@ ACMD(do_charge) {
 
 ACMD(do_powerup) {
     if (IS_NPC(ch)) {
-        ch->mobFlags.set(MOB_POWERUP);
+        ch->setFlag(FlagType::NPC, MOB_POWERUP);
         if (GET_MAX_HIT(ch) < 50000) {
             act("@RYou begin to powerup, and air billows outward around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@R$n begins to powerup, and air billows outward around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1103,9 +1102,12 @@ ACMD(do_assist) {
         if (FIGHTING(helpee))
             opponent = FIGHTING(helpee);
         else
-            for (opponent = ch->getRoom()->people;
-                 opponent && (FIGHTING(opponent) != helpee);
-                 opponent = opponent->next_in_room);
+            for (auto op : ch->getRoom()->getPeople()) {
+                if (FIGHTING(op) && !IS_NPC(op)) {
+                    opponent = FIGHTING(op);
+                    break;
+                }
+            }
 
         if (!opponent)
             act("But nobody is fighting $M!", true, ch, nullptr, helpee, TO_CHAR);
