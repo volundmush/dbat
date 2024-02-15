@@ -3309,7 +3309,7 @@ static void list_char_to_char(std::vector<char_data*> people, struct char_data *
         }
     }
 
-    for (auto i : list) {
+    for (auto i : people) {
         /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
         if ((ch == i) || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i)

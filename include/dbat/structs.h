@@ -681,8 +681,6 @@ struct room_data : public unit_data {
 
     std::optional<room_vnum> getLaunchDestination();
 
-    std::list<struct char_data*> getPeople();
-
     MoonCheck checkMoon();
 
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
