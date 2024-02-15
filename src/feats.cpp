@@ -427,7 +427,7 @@ ACMD(do_feats) {
     one_argument(argument, arg);
 
     if (is_abbrev(arg, "known") || !*arg) {
-        send_to_char(ch, "Syntax is \"feats <available | complete | known>\".\r\n");
+        ch->sendf("Syntax is \"feats <available | complete | known>\".\r\n");
         list_feats_known(ch);
     } else if (is_abbrev(arg, "available")) {
         list_feats_available(ch);

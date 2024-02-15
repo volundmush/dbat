@@ -27,25 +27,25 @@ ACMD(do_oasis_aedit) {
     int i;
 
     if (CONFIG_NEW_SOCIALS == 0) {
-        send_to_char(ch, "Socials cannot be edited at the moment.\r\n");
+        ch->sendf("Socials cannot be edited at the moment.\r\n");
         return;
     }
 
     if (GET_OLC_ZONE(ch) != AEDIT_PERMISSION && GET_ADMLEVEL(ch) < ADMLVL_BUILDER) {
-        send_to_char(ch, "You don't have access to editing socials.\r\n");
+        ch->sendf("You don't have access to editing socials.\r\n");
         return;
     }
 
     for (d = descriptor_list; d; d = d->next)
         if (STATE(d) == CON_AEDIT) {
-            send_to_char(ch, "Sorry, only one can edit socials at a time.\r\n");
+            ch->sendf("Sorry, only one can edit socials at a time.\r\n");
             return;
         }
 
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Please specify a social to edit.\r\n");
+        ch->sendf("Please specify a social to edit.\r\n");
         return;
     }
 
@@ -53,9 +53,9 @@ ACMD(do_oasis_aedit) {
 
     if (!strcasecmp("save", arg)) {
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves socials.", GET_NAME(ch));
-        send_to_char(ch, "Writing social file..\r\n");
+        ch->sendf("Writing social file..\r\n");
         aedit_save_to_disk(d);
-        send_to_char(ch, "Done.\r\n");
+        ch->sendf("Done.\r\n");
         return;
     }
 
@@ -77,14 +77,14 @@ ACMD(do_oasis_aedit) {
 
     if (OLC_ZNUM(d) > top_of_socialt) {
         if ((i = aedit_find_command(OLC_STORAGE(d))) != -1) {
-            send_to_char(ch, "The '%s' command already exists (%s).\r\n", OLC_STORAGE(d), complete_cmd_info[i].command);
+            ch->sendf("The '%s' command already exists (%s).\r\n", OLC_STORAGE(d), complete_cmd_info[i].command);
             cleanup_olc(d, CLEANUP_ALL);
             return;
         }
-        send_to_char(ch, "Do you wish to add the '%s' action? ", OLC_STORAGE(d));
+        ch->sendf("Do you wish to add the '%s' action? ", OLC_STORAGE(d));
         OLC_MODE(d) = AEDIT_CONFIRM_ADD;
     } else {
-        send_to_char(ch, "Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
+        ch->sendf("Do you wish to edit the '%s' action? ", soc_mess_list[OLC_ZNUM(d)].command);
         OLC_MODE(d) = AEDIT_CONFIRM_EDIT;
     }
     STATE(d) = CON_AEDIT;
@@ -745,7 +745,7 @@ ACMD(do_astat) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Astat which social?\r\n");
+        ch->sendf("Astat which social?\r\n");
         return;
     }
 
@@ -757,11 +757,11 @@ ACMD(do_astat) {
     }
 
     if (!real) {
-        send_to_char(ch, "No such social.\r\n");
+        ch->sendf("No such social.\r\n");
         return;
     }
 
-    send_to_char(ch,
+    ch->sendf(
                  "n) Command         : @y%-15.15s@n 1) Sort as Command : @y%-15.15s@n\r\n"
                  "2) Min Position[CH]: @c%-8.8s@n        3) Min Position[VT]: @c%-8.8s@n\r\n"
                  "4) Min Level   [CH]: @c%-3d@n             5) Show if Invis   : @c%s@n\r\n"

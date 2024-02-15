@@ -121,7 +121,7 @@ ACMD(do_masound) {
     int door;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -151,7 +151,7 @@ ACMD(do_mheal) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -187,7 +187,7 @@ ACMD(do_mkill) {
     char buf[MAX_INPUT_LENGTH];
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -262,7 +262,7 @@ ACMD(do_mjunk) {
     obj_data *obj_next;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -308,7 +308,7 @@ ACMD(do_mechoaround) {
     char *p;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -349,7 +349,7 @@ ACMD(do_msend) {
     char *p;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -383,7 +383,7 @@ ACMD(do_mecho) {
     char *p;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -434,7 +434,7 @@ ACMD(do_mload) {
     int pos;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -532,7 +532,7 @@ ACMD(do_mpurge) {
     obj_data *obj;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -594,7 +594,7 @@ ACMD(do_mgoto) {
     room_rnum location;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -632,7 +632,7 @@ ACMD(do_mat) {
     room_rnum location;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -674,7 +674,7 @@ ACMD(do_mteleport) {
     char_data *vict, *next_ch;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -737,7 +737,7 @@ ACMD(do_mdamage) {
     char_data *vict;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -773,7 +773,7 @@ ACMD(do_mforce) {
     char arg[MAX_INPUT_LENGTH];
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -835,7 +835,7 @@ ACMD(do_mremember) {
     char arg[MAX_INPUT_LENGTH];
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -886,7 +886,7 @@ ACMD(do_mforget) {
     char arg[MAX_INPUT_LENGTH];
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -945,7 +945,7 @@ ACMD(do_mtransform) {
     int pos;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -953,7 +953,7 @@ ACMD(do_mtransform) {
         return;
 
     if (ch->desc) {
-        send_to_char(ch, "You've got no VNUM to return to, dummy! try 'switch'\r\n");
+        ch->sendf("You've got no VNUM to return to, dummy! try 'switch'\r\n");
         return;
     }
 
@@ -1029,7 +1029,7 @@ ACMD(do_maddtransform) {
     char_data* vict;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -1091,7 +1091,7 @@ ACMD(do_mdoor) {
 
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -1176,7 +1176,7 @@ ACMD(do_mfollow) {
     struct follow_type *j, *k;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
 
@@ -1246,7 +1246,7 @@ ACMD(do_mrecho) {
     char start[MAX_INPUT_LENGTH], finish[MAX_INPUT_LENGTH], *msg;
 
     if (!MOB_OR_IMPL(ch)) {
-        send_to_char(ch, "Huh?!?\r\n");
+        ch->sendf("Huh?!?\r\n");
         return;
     }
     msg = two_arguments(argument, start, finish);

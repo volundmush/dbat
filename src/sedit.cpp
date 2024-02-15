@@ -45,11 +45,11 @@ ACMD(do_oasis_sedit) {
     two_arguments(argument, buf1, buf2);
 
     if (!*buf1) {
-        send_to_char(ch, "Specify a shop VNUM to edit.\r\n");
+        ch->sendf("Specify a shop VNUM to edit.\r\n");
         return;
     } else if (!isdigit(*buf1)) {
         if (strcasecmp("save", buf1) != 0) {
-            send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+            ch->sendf("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
         }
 
@@ -67,7 +67,7 @@ ACMD(do_oasis_sedit) {
         }
 
         if (number == NOWHERE) {
-            send_to_char(ch, "Save which zone?\r\n");
+            ch->sendf("Save which zone?\r\n");
             return;
         }
     }
@@ -84,7 +84,7 @@ ACMD(do_oasis_sedit) {
     for (d = descriptor_list; d; d = d->next) {
         if (STATE(d) == CON_SEDIT) {
             if (d->olc && OLC_NUM(d) == number) {
-                send_to_char(ch, "That shop is currently being edited by %s.\r\n",
+                ch->sendf("That shop is currently being edited by %s.\r\n",
                              PERS(d->character, ch));
                 return;
             }
@@ -112,7 +112,7 @@ ACMD(do_oasis_sedit) {
     /****************************************************************************/
     OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
     if (OLC_ZNUM(d) == NOWHERE) {
-        send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
+        ch->sendf("Sorry, there is no zone for that number!\r\n");
         free(d->olc);
         d->olc = nullptr;
         return;
@@ -133,7 +133,7 @@ ACMD(do_oasis_sedit) {
     }
 
     if (save) {
-        send_to_char(ch, "Saving all shops in zone %d.\r\n",
+        ch->sendf("Saving all shops in zone %d.\r\n",
                      zone_table[OLC_ZNUM(d)].number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves shop info for zone %d.",

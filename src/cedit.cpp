@@ -54,7 +54,7 @@ ACMD(do_oasis_cedit) {
     one_argument(argument, buf1);
 
     if (GET_ADMLEVEL(ch) < 5) {
-        send_to_char(ch, "You can't modify the game configuration.\r\n");
+        ch->sendf("You can't modify the game configuration.\r\n");
         return;
     }
 
@@ -72,11 +72,11 @@ ACMD(do_oasis_cedit) {
                "OLC: %s starts editing the game configuration.", GET_NAME(ch));
         return;
     } else if (strcasecmp("save", buf1) != 0) {
-        send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+        ch->sendf("Yikes!  Stop that, someone will get hurt!\r\n");
         return;
     }
 
-    send_to_char(ch, "Saving the game configuration.\r\n");
+    ch->sendf("Saving the game configuration.\r\n");
     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
            "OLC: %s saves the game configuration.", GET_NAME(ch));
 
@@ -1444,7 +1444,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
                 case 'j':
                 case 'J':
                     TOGGLE_VAR(OLC_CONFIG(d)->operation.use_new_socials);
-                    send_to_char(d->character,
+                    d->character->sendf(
                                  "Please note that using the stock social file will disable AEDIT.\r\n");
                     break;
 

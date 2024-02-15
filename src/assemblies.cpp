@@ -121,35 +121,35 @@ void assemblyListToChar(struct char_data *pCharacter) {
         basic_mud_log("SYSERR: assemblyListAssembliesToChar(): nullptr 'pCharacter'.");
         return;
     } else if (g_pAssemblyTable == nullptr) {
-        send_to_char(pCharacter, "No assemblies exist.\r\n");
+        pCharacter->sendf("No assemblies exist.\r\n");
         return;
     }
 
     /* Send out a "header" of sorts. */
-    send_to_char(pCharacter, "The following assemblies exists:\r\n");
+    pCharacter->sendf("The following assemblies exists:\r\n");
 
     for (i = 0; i < g_lNumAssemblies; i++) {
         if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0) {
-            send_to_char(pCharacter, "[-----] ***RESERVED***\r\n");
+            pCharacter->sendf("[-----] ***RESERVED***\r\n");
             basic_mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
         } else {
             sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
             sprintf(szBuffer, "[%5ld] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
-                    obj_proto[lRnum].getShortDesc().c_str(), szAssmType);
-            send_to_char(pCharacter, szBuffer);
+                    obj_proto[lRnum]["short_description"].get<std::string>().c_str(), szAssmType);
+            pCharacter->sendf(szBuffer);
 
             for (j = 0; j < g_pAssemblyTable[i].lNumComponents; j++) {
                 if ((lRnum = real_object(g_pAssemblyTable[i].pComponents[j].lVnum)) < 0) {
-                    send_to_char(pCharacter, " -----: ***RESERVED***\r\n");
+                    pCharacter->sendf(" -----: ***RESERVED***\r\n");
                     basic_mud_log("SYSERR: assemblyListToChar(): Invalid component vnum #%ld in assembly for vnum #%ld.",
                         g_pAssemblyTable[i].pComponents[j].lVnum, g_pAssemblyTable[i].lVnum);
                 } else {
                     sprintf(szBuffer, " %5ld: %-20.20s Extract=%-3.3s InRoom=%-3.3s\r\n",
                             +g_pAssemblyTable[i].pComponents[j].lVnum,
-                            obj_proto[lRnum].getShortDesc().c_str(),
+                            obj_proto[lRnum]["short_description"].get<std::string>().c_str(),
                             (g_pAssemblyTable[i].pComponents[j].bExtract ? "Yes" : "No"),
                             (g_pAssemblyTable[i].pComponents[j].bInRoom ? "Yes" : "No"));
-                    send_to_char(pCharacter, szBuffer);
+                    pCharacter->sendf(szBuffer);
                 }
             }
         }
@@ -433,7 +433,7 @@ long assemblyFindAssembly(const char *pszAssemblyName) {
     for (i = 0; i < g_lNumAssemblies; i++) {
         if ((lRnum = real_object(g_pAssemblyTable[i].lVnum)) < 0)
             basic_mud_log("SYSERR: assemblyFindAssembly(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
-        else if (isname(pszAssemblyName, obj_proto[lRnum].name))
+        else if (isname(pszAssemblyName, obj_proto[lRnum]["name"].get<std::string>().c_str()))
             return (g_pAssemblyTable[i].lVnum);
     }
 

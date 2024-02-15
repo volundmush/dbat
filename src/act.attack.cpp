@@ -38,7 +38,7 @@ ACMD(do_energize) {
         return;
 
     if (GET_PREFERENCE(ch) != PREFERENCE_THROWING) {
-        send_to_char(ch, "You aren't dedicated to throwing!\r\n");
+        ch->sendf("You aren't dedicated to throwing!\r\n");
         return;
     }
 
@@ -46,19 +46,19 @@ ACMD(do_energize) {
         if (GET_SKILL(ch, SKILL_FOCUS) >= 30) {
             int result = rand_number(10, 14);
             SET_SKILL(ch, SKILL_ENERGIZE, result);
-            send_to_char(ch,
+            ch->sendf(
                          "You learn the basics for energizing thrown weapons! Now use the energize command again.\r\n");
             return;
         } else {
-            send_to_char(ch, "You need a Focus skill level of 30 to figure out the basics of this technique.\r\n");
+            ch->sendf("You need a Focus skill level of 30 to figure out the basics of this technique.\r\n");
             return;
         }
     } else {
         ch->pref.flip(PRF_ENERGIZE);
         if (ch->pref.test(PRF_ENERGIZE)) {
-            send_to_char(ch, "You start focusing your latent ki into your fingertips.\r\n");
+            ch->sendf("You start focusing your latent ki into your fingertips.\r\n");
         } else {
-            send_to_char(ch, "You stop focusing ki into your fingertips.\r\n");
+            ch->sendf("You stop focusing ki into your fingertips.\r\n");
         }
     }
 }
@@ -90,25 +90,25 @@ ACMD(do_combine) {
     two_arguments(argument, arg, arg2);
 
     if (!has_group(ch)) {
-        send_to_char(ch, "You need to be in a group!\r\n");
+        ch->sendf("You need to be in a group!\r\n");
         return;
     } else {
         if (!*arg || (!ch->master && !*arg2)) {
-            send_to_char(ch, "Follower Syntax: combine (attack)\r\n");
-            send_to_char(ch, "Leader Syntax: combine (attack) (target)\r\n");
-            send_to_char(ch, "Cancel Syntax: combine stop\r\n");
+            ch->sendf("Follower Syntax: combine (attack)\r\n");
+            ch->sendf("Leader Syntax: combine (attack) (target)\r\n");
+            ch->sendf("Cancel Syntax: combine stop\r\n");
         } else {
             if (!strcasecmp(arg, "stop") && ch->master) {
                 if (GET_COMBINE(ch) == -1) {
-                    send_to_char(ch, "You are not trying to combine any attacks...\r\n");
+                    ch->sendf("You are not trying to combine any attacks...\r\n");
                     return;
                 } else {
-                    send_to_char(ch, "You stop your preparations to combine your attack with a group attack.\r\n");
-                    send_to_char(ch->master, "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n",
+                    ch->sendf("You stop your preparations to combine your attack with a group attack.\r\n");
+                    ch->master->sendf("@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n",
                                  get_i_name(ch->master, ch));
                     for (f = ch->master->followers; f; f = f->next) {
                         if (ch != f->follower)
-                            send_to_char(f->follower,
+                            f->follower->sendf(
                                          "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n",
                                          get_i_name(f->follower, ch));
                     }
@@ -116,7 +116,7 @@ ACMD(do_combine) {
                     return;
                 }
             } else if (!strcasecmp(arg, "stop") && !ch->master) {
-                send_to_char(ch, "You do not need to stop as you haven't prepared anything.\r\n");
+                ch->sendf("You do not need to stop as you haven't prepared anything.\r\n");
                 return;
             }
             int i = 0;
@@ -124,11 +124,11 @@ ACMD(do_combine) {
                 if (strstr(arg, attack_names[i])) {
                     if (i == 5) {
                         if (!GET_EQ(ch, WEAR_WIELD1)) {
-                            send_to_char(ch, "You need to wield a sword to use this technique.\r\n");
+                            ch->sendf("You need to wield a sword to use this technique.\r\n");
                             return;
                         }
                         if (GET_OBJ_VAL(GET_EQ(ch, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-                            send_to_char(ch, "You are not wielding a sword, you need one to use this technique.\r\n");
+                            ch->sendf("You are not wielding a sword, you need one to use this technique.\r\n");
                             return;
                         } else {
                             temp = i;
@@ -140,25 +140,25 @@ ACMD(do_combine) {
                 }
             }
             if (temp == -1) {
-                send_to_char(ch, "Follower Syntax: combine (attack)\r\n");
-                send_to_char(ch, "Leader Syntax: combine (attack) (target)\r\n");
-                send_to_char(ch, "Follower Cancel Syntax: combine stop\r\n");
+                ch->sendf("Follower Syntax: combine (attack)\r\n");
+                ch->sendf("Leader Syntax: combine (attack) (target)\r\n");
+                ch->sendf("Follower Cancel Syntax: combine stop\r\n");
                 return;
             } else if (!GET_SKILL(ch, attack_skills[temp])) {
-                send_to_char(ch, "You do not know that skill.\r\n");
+                ch->sendf("You do not know that skill.\r\n");
                 return;
             } else if (attack_skills[temp] == 440 && !IS_NAIL(ch)) {
-                send_to_char(ch, "Only students of Nail know how to combine that attack effectively.\r\n");
+                ch->sendf("Only students of Nail know how to combine that attack effectively.\r\n");
                 return;
             } else if (GET_CHARGE(ch) < GET_MAX_MANA(ch) * 0.05) {
-                send_to_char(ch, "You need to have the minimum of 5%s ki charged to combine.\r\n", "%");
+                ch->sendf("You need to have the minimum of 5%s ki charged to combine.\r\n", "%");
             }
             if (!ch->master) {
                 if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
-                    send_to_char(ch, "Who will your combined attack be targeting?\r\n");
+                    ch->sendf("Who will your combined attack be targeting?\r\n");
                     return;
                 } else if (vict == ch) {
-                    send_to_char(ch, "No targeting yourself...\r\n");
+                    ch->sendf("No targeting yourself...\r\n");
                     return;
                 }
                 GET_COMBINE(ch) = temp;
@@ -174,7 +174,7 @@ ACMD(do_combine) {
                     combine_attacks(ch, vict);
                     return;
                 } else {
-                    send_to_char(ch,
+                    ch->sendf(
                                  "You do not have any followers who have readied an attack to combine or they do not have enough ki anymore to combine said attack.\r\n");
                     return;
                 }
@@ -182,18 +182,18 @@ ACMD(do_combine) {
                 if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.05) {
                     act("@C$n@c appears to be concentrating hard and focusing $s energy!@n\r\n", true, ch, nullptr,
                         nullptr, TO_ROOM);
-                    send_to_char(ch->master,
+                    ch->master->sendf(
                                  "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n",
                                  get_i_name(ch->master, ch), attack_names[temp]);
                     for (f = ch->master->followers; f; f = f->next) {
                         if (ch != f->follower)
-                            send_to_char(f->follower,
+                            f->follower->sendf(
                                          "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n",
                                          get_i_name(f->follower, ch), attack_names[temp]);
                     }
                     GET_COMBINE(ch) = temp;
                 } else {
-                    send_to_char(ch, "You do not have the minimum 5%s ki charged.\r\n", "%");
+                    ch->sendf("You do not have the minimum 5%s ki charged.\r\n", "%");
                     return;
                 }
             }
@@ -247,12 +247,12 @@ ACMD(do_throw) {
     half_chop(argument, arg, chunk);
 
     if (!*arg) {
-        send_to_char(ch, "Throw what?\r\n");
+        ch->sendf("Throw what?\r\n");
         return;
     }
 
     if (is_sparring(ch)) {
-        send_to_char(ch, "You can not spar with throw.\r\n");
+        ch->sendf("You can not spar with throw.\r\n");
         return;
     }
 
@@ -262,7 +262,7 @@ ACMD(do_throw) {
 
     if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
         if (!(tch = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-            send_to_char(ch, "You do not have that object or character to throw!\r\n");
+            ch->sendf("You do not have that object or character to throw!\r\n");
             return;
         }
     }
@@ -271,7 +271,7 @@ ACMD(do_throw) {
         if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
             vict = FIGHTING(ch);
         } else {
-            send_to_char(ch, "Who do you want to target?\r\n");
+            ch->sendf("Who do you want to target?\r\n");
             return;
         }
     }
@@ -299,15 +299,15 @@ ACMD(do_throw) {
         }
 
         if ((ch->getCurST()) < ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj))) {
-            send_to_char(ch, "You do not have enough stamina to do it...\r\n");
+            ch->sendf("You do not have enough stamina to do it...\r\n");
             return;
         }
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-            send_to_char(ch, "That is broken and useless to throw!\r\n");
+            ch->sendf("That is broken and useless to throw!\r\n");
             return;
         }
         if (!ch->canCarryWeight(obj)) {
-            send_to_char(ch, "The gravity has made that too heavy for you to throw!\r\n");
+            ch->sendf("The gravity has made that too heavy for you to throw!\r\n");
             return;
         } else {
             int penalty = 0, chance = axion_dice(0) + axion_dice(0), wtype = 0, wlvl = 1, multithrow = true;
@@ -412,7 +412,7 @@ ACMD(do_throw) {
                 if (!strcasecmp(arg3, "1") || !strcasecmp(arg3, "single")) {
                     multithrow = false;
                 } else {
-                    send_to_char(ch,
+                    ch->sendf(
                                  "Syntax: throw (obj | character) (target) <-- This will multithrow if able\nSyntax: throw (obj) (target) (1 | single) <-- This will not multi throw)\r\n");
                     return;
                 }
@@ -596,12 +596,12 @@ ACMD(do_throw) {
     /* We are throwing a character at someone else. */
     if (tch) {
         if (tch == vict) {
-            send_to_char(ch, "You can't throw someone at theirself.\r\n");
+            ch->sendf("You can't throw someone at theirself.\r\n");
             return;
         }
 
         if (!can_kill(ch, tch, nullptr, 0)) {
-            send_to_char(ch, "The one you are throwing can't be harmed.\r\n");
+            ch->sendf("The one you are throwing can't be harmed.\r\n");
             return;
         }
 
@@ -610,11 +610,11 @@ ACMD(do_throw) {
         }
 
         if ((ch->getCurST()) < ((GET_MAX_HIT(ch) / 100) + tch->getTotalWeight())) {
-            send_to_char(ch, "You do not have enough stamina to do it...\r\n");
+            ch->sendf("You do not have enough stamina to do it...\r\n");
             return;
         }
         if (!ch->canCarryWeight(tch)) {
-            send_to_char(ch, "The gravity has made them too heavy for you to throw!\r\n");
+            ch->sendf("The gravity has made them too heavy for you to throw!\r\n");
             return;
         }
         if (grab == false) {
@@ -720,23 +720,23 @@ ACMD(do_selfd) {
         return;
 
     if (IN_ARENA(ch)) {
-        send_to_char(ch, "You can not use self destruct in the arena.\r\n");
+        ch->sendf("You can not use self destruct in the arena.\r\n");
         return;
     }
 
     if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
-        send_to_char(ch, "You are already dead!\r\n");
+        ch->sendf("You are already dead!\r\n");
         return;
     }
 
     if (GET_LEVEL(ch) < 9) {
-        send_to_char(ch, "You can't self destruct while protected by the newbie shield!\r\n");
+        ch->sendf("You can't self destruct while protected by the newbie shield!\r\n");
         return;
     }
 
     /*Andros Start*/
     if (!GET_SDCOOLDOWN(ch) <= 0) {
-        send_to_char(ch, "Your body is still recovering from the last self destruct!\r\n");
+        ch->sendf("Your body is still recovering from the last self destruct!\r\n");
         return;
     } /*Andros End*/
 
@@ -765,7 +765,7 @@ ACMD(do_selfd) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        send_to_char(ch, "You can't kill them, the immortals won't allow it!\r\n");
+        ch->sendf("You can't kill them, the immortals won't allow it!\r\n");
         ch->playerFlags.reset(PLR_SELFD);
         return;
     } else if (GRAPPLING(ch) != nullptr) {
@@ -888,7 +888,7 @@ ACMD(do_spiral) {
     }
 
     if (!*arg && !FIGHTING(ch)) {
-        send_to_char(ch, "Direct it at who?\r\n");
+        ch->sendf("Direct it at who?\r\n");
         return;
     }
 
@@ -904,7 +904,7 @@ ACMD(do_spiral) {
         if (FIGHTING(ch)) {
             vict = FIGHTING(ch);
         } else {
-            send_to_char(ch, "Nothing around here by that name.");
+            ch->sendf("Nothing around here by that name.");
             return;
         }
     }

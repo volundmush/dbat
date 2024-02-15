@@ -66,7 +66,7 @@ ACMD(do_oasis_list) {
         rzone = real_zone(atoi(smin));
 
         if (rzone == NOWHERE) {
-            send_to_char(ch, "Sorry, there's no zone with that number\r\n");
+            ch->sendf("Sorry, there's no zone with that number\r\n");
             return;
         }
     } else {
@@ -75,11 +75,11 @@ ACMD(do_oasis_list) {
         vmax = atoi(smax);
 
         if (vmin + 1500 < vmax) {
-            send_to_char(ch, "Really? Over 1500?! You need to view that many at once? Come on...\r\n");
+            ch->sendf("Really? Over 1500?! You need to view that many at once? Come on...\r\n");
             return;
         }
         if (vmin > vmax) {
-            send_to_char(ch, "List from %d to %d - Aren't we funny today!\r\n", vmin, vmax);
+            ch->sendf("List from %d to %d - Aren't we funny today!\r\n", vmin, vmax);
             return;
         }
     }
@@ -104,7 +104,7 @@ ACMD(do_oasis_list) {
             list_guilds(ch, rzone, vmin, vmax);
             break;
         default:
-            send_to_char(ch, "You can't list that!\r\n");
+            ch->sendf("You can't list that!\r\n");
             mudlog(BRF, ADMLVL_IMMORT, true,
                    "SYSERR: do_oasis_list: Unknown list option: %d", subcmd);
     }
@@ -128,21 +128,21 @@ ACMD(do_oasis_links) {
 
     auto z = zone_table.find(zvnum);
     if (z == zone_table.end()) {
-        send_to_char(ch, "No zone was found with that number.\r\n");
+        ch->sendf("No zone was found with that number.\r\n");
         return;
     }
 
 
-    send_to_char(ch, "Zone %d is linked to the following zones:\r\n", z->second.number);
+    ch->sendf("Zone %d is linked to the following zones:\r\n", z->second.number);
     for (auto nr : z->second.rooms) {
         auto u = world.find(nr);
         if (u == world.end()) {
-            send_to_char(ch, "Room %d is not in the world.\r\n", nr);
+            ch->sendf("Room %d is not in the world.\r\n", nr);
             continue;
         }
         auto r = dynamic_cast<room_data*>(u->second);
         if(!r) {
-            send_to_char(ch, "Room %d is not in the world.\r\n", nr);
+            ch->sendf("Room %d is not in the world.\r\n", nr);
             continue;
         }
 
@@ -156,11 +156,11 @@ ACMD(do_oasis_links) {
 
             auto z2 = zone_table.find(dest->zone);
             if (z2 == zone_table.end()) {
-                send_to_char(ch, "Room %d has an invalid zone.\r\n", nr);
+                ch->sendf("Room %d has an invalid zone.\r\n", nr);
                 continue;
             }
 
-            send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
+            ch->sendf("%3d %-30s at %5d (%-5s) ---> %5d\r\n",
                          z2->first,z2->second.name,GET_ROOM_VNUM(nr), dirs[j], dest->vn);
         }
     }
@@ -188,7 +188,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
         top = vmax;
     }
 
-    send_to_char(ch,
+    ch->sendf(
                  "@nVNum    Room Name                                Exits\r\n"
                  "------- ---------------------------------------- -----@n\r\n");
 
@@ -202,7 +202,7 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
 
             auto sString = !r->proto_script.empty() ? fmt::format(" {}", r->scriptString()) : "";
 
-            send_to_char(ch, "[@g%-5d@n] @[1]%-*s@n %s",
+            ch->sendf("[@g%-5d@n] @[1]%-*s@n %s",
                          vn, count_color_chars(r->name) + 44,
                          r->name, sString.c_str());
             for (j = 0; j < NUM_OF_DIRS; j++) {
@@ -212,16 +212,16 @@ void list_rooms(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnum 
                 if(!dest) continue;
 
                 if (dest->zone != r->zone)
-                    send_to_char(ch, "(@y%d@n)", dest->vn);
+                    ch->sendf("(@y%d@n)", dest->vn);
 
             }
 
-            send_to_char(ch, "\r\n");
+            ch->sendf("\r\n");
         }
     }
 
     if (counter == 0) {
-        send_to_char(ch, "No rooms found for zone/range specified.\r\n");
+        ch->sendf("No rooms found for zone/range specified.\r\n");
     }
 }
 
@@ -239,7 +239,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
         top = vmax;
     }
 
-    send_to_char(ch,
+    ch->sendf(
                  "@nVnum    Cnt    Mobile Name                    Race      Class     Level\r\n"
                    "------- ----- -------------------------      --------- --------- -----\r\n");
 
@@ -247,7 +247,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
         if (vn >= bottom && vn <= top) {
             counter++;
             auto sString = !m.proto_script.empty() ? fmt::format(" {}", m.scriptString()) : "";
-            send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
+            ch->sendf("@g%4d@n) [@g%-5d@n] @[3]%-*s @C%-9s @c%-9s @y[%4d]@n %s\r\n",
                          vn, get_vnum_count(characterVnumIndex, vn), count_color_chars((char*)m.getShortDesc().c_str()) + 30,
                          m.getShortDesc(), TRUE_RACE(&m), sensei::getName(m.chclass).c_str(),
                          m.get(CharNum::Level),
@@ -256,7 +256,7 @@ void list_mobiles(struct char_data *ch, zone_rnum rnum, zone_vnum vmin, zone_vnu
     }
 
     if (counter == 0) {
-        send_to_char(ch, "None found.\r\n");
+        ch->sendf("None found.\r\n");
     }
 }
 
@@ -274,7 +274,7 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
         top = vmax;
     }
 
-    send_to_char(ch,
+    ch->sendf(
                  "@VNum   Cnt   Object Name                                  Object Type\r\n"
                  "------- ----- -------------------------------------------- ----------------\r\n");
 
@@ -282,7 +282,7 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
         if (vn >= bottom && vn <= top) {
             counter++;
             auto sString = !o.proto_script.empty() ? fmt::format(" {}", o.scriptString()) : "";
-            send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
+            ch->sendf("@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
                          vn, get_vnum_count(objectVnumIndex, vn), count_color_chars((char*)o.getShortDesc().c_str()) + 44,
                          o.getShortDesc(), item_types[o.type_flag],
                          sString.c_str());
@@ -290,7 +290,7 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
     }
 
     if (counter == 0) {
-        send_to_char(ch, "None found.\r\n");
+        ch->sendf("None found.\r\n");
     }
 }
 
@@ -312,7 +312,7 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
     /****************************************************************************/
     /** Store the header for the shop listing.                                 **/
     /****************************************************************************/
-    send_to_char(ch,
+    ch->sendf(
                  "Index VNum    Shop Room(s)\r\n"
                  "----- ------- ---------------------------------------------\r\n");
 
@@ -321,25 +321,25 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
         if (i >= bottom && i <= top) {
             counter++;
 
-            send_to_char(ch, "@g%4d@n) [@g%-5d@n]", counter, i);
+            ch->sendf("@g%4d@n) [@g%-5d@n]", counter, i);
 
             /************************************************************************/
             /** Retrieve the list of rooms for this shop.                          **/
             /************************************************************************/
 			j = 0;
             for (auto r : sh.in_room)
-                send_to_char(ch, "%s@c[@y%d@c]@n",
+                ch->sendf("%s@c[@y%d@c]@n",
                              ((j > 0) && (j++ % 8 == 0)) ? "\r\n              " : " ", r);
 
             if (j == 0)
-                send_to_char(ch, "@cNone.@n");
+                ch->sendf("@cNone.@n");
 
-            send_to_char(ch, "\r\n");
+            ch->sendf("\r\n");
         }
     }
 
     if (counter == 0)
-        send_to_char(ch, "None found.\r\n");
+        ch->sendf("None found.\r\n");
 }
 
 /*
@@ -347,12 +347,12 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
  */
 void list_zones(struct char_data *ch) {
 
-    send_to_char(ch,
+    ch->sendf(
                  "VNum  Zone Name                      Builder(s)\r\n"
                  "----- ------------------------------ --------------------------------------\r\n");
 
     for (auto &z : zone_table)
-        send_to_char(ch, "[@g%3d@n] @c%-*s @y%-1s@n\r\n",
+        ch->sendf("[@g%3d@n] @c%-*s @y%-1s@n\r\n",
                      z.first, count_color_chars(z.second.name) + 30, z.second.name,
                      z.second.builders ? z.second.builders : "None.");
 }
@@ -368,7 +368,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum) {
     char bits[MAX_STRING_LENGTH];
 
     if (!zone_table.count(vnum)) {
-        send_to_char(ch, "Zone #%d does not exist in the database.\r\n", vnum);
+        ch->sendf("Zone #%d does not exist in the database.\r\n", vnum);
         return;
     }
     auto &z = zone_table[vnum];
@@ -384,7 +384,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum) {
     /****************************************************************************/
     /** Display all of the zone information at once.                           **/
     /****************************************************************************/
-    send_to_char(ch,
+    ch->sendf(
                  "@gVirtual Number = @c%d\r\n"
                  "@gName of zone   = @c%s\r\n"
                  "@gBuilders       = @c%s\r\n"
@@ -428,7 +428,7 @@ void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vn
 
 
     /** Store the header for the room listing. **/
-    send_to_char(ch,
+    ch->sendf(
                  "Index VNum    Trigger Name                        Type\r\n"
                  "----- ------- -------------------------------------------------------\r\n");
 
@@ -439,24 +439,24 @@ void list_triggers(struct char_data *ch, zone_rnum rnum, trig_vnum vmin, trig_vn
         if ((vn >= bottom) && (vn <= top)) {
             counter++;
 
-            send_to_char(ch, "%4d) [@g%5d@n] @[1]%-45.45s ",
+            ch->sendf("%4d) [@g%5d@n] @[1]%-45.45s ",
                          counter, vn, t->name);
 
             if (t->attach_type == OBJ_TRIGGER) {
                 sprintbit(t->trigger_type, otrig_types, trgtypes, sizeof(trgtypes));
-                send_to_char(ch, "obj @y%s@n\r\n", trgtypes);
+                ch->sendf("obj @y%s@n\r\n", trgtypes);
             } else if (t->attach_type == WLD_TRIGGER) {
                 sprintbit(t->trigger_type, wtrig_types, trgtypes, sizeof(trgtypes));
-                send_to_char(ch, "wld @y%s@n\r\n", trgtypes);
+                ch->sendf("wld @y%s@n\r\n", trgtypes);
             } else {
                 sprintbit(t->trigger_type, trig_types, trgtypes, sizeof(trgtypes));
-                send_to_char(ch, "mob @y%s@n\r\n", trgtypes);
+                ch->sendf("mob @y%s@n\r\n", trgtypes);
             }
 
         }
     }
 
     if (counter == 0) {
-        send_to_char(ch, "No triggers found from %d to %d.\r\n", vmin, vmax);
+        ch->sendf("No triggers found from %d to %d.\r\n", vmin, vmax);
     }
 }

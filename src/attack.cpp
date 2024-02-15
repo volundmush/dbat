@@ -51,7 +51,7 @@ namespace atk {
             auto skillID = s.first;
             auto required = s.second;
             if(GET_SKILL(user, skillID) < required) {
-                send_to_char(user, "You need %d in %s to use this attack.\r\n", required, spell_info[skillID].name);
+                user->sendf("You need %d in %s to use this attack.\r\n", required, spell_info[skillID].name);
                 return false;
             }
         }
@@ -68,7 +68,7 @@ namespace atk {
     bool Attack::checkEmptyHands() {
         if(needEmptyHands()) {
             if (GET_EQ(user, WEAR_WIELD1) && GET_EQ(user, WEAR_WIELD2)) {
-                send_to_char(user, "Your hands are full!\r\n");
+                user->sendf("Your hands are full!\r\n");
                 return false;
             }
         }
@@ -94,17 +94,17 @@ namespace atk {
     bool Attack::checkCosts() {
         currentHealthCost = calculateHealthCost();
         if(GET_HIT(user) < currentHealthCost) {
-            send_to_char(user, "You don't have enough health to do that!\r\n");
+            user->sendf("You don't have enough health to do that!\r\n");
             return false;
         }
         currentStaminaCost = calculateStaminaCost();
         if(user->getCurST() < currentStaminaCost) {
-            send_to_char(user, "You don't have enough stamina to do that!\r\n");
+            user->sendf("You don't have enough stamina to do that!\r\n");
             return false;
         }
         currentKiCost = calculateKiCost();
         if(GET_CHARGE(user) < (currentKiCost * GET_MAX_MANA(user))) {
-            send_to_char(user, "You don't have enough ki to do that!\r\n");
+            user->sendf("You don't have enough ki to do that!\r\n");
             return false;
         }
         return true;
@@ -116,7 +116,7 @@ namespace atk {
 
     bool Attack::getOpponent() {
         if (args.empty() && !FIGHTING(user)) {
-            send_to_char(user, "Direct it at who?\r\n");
+            user->sendf("Direct it at who?\r\n");
             return false;
         }
 
@@ -166,7 +166,7 @@ namespace atk {
         if(victim) return attackCharacter();
         else if(obj) return attackObject();
         else {
-            send_to_char(user, "You can't find that target.\r\n");
+            user->sendf("You can't find that target.\r\n");
             return Result::Canceled;
         }
 
@@ -408,7 +408,7 @@ namespace atk {
 
     void Attack::hurtLimb(int limb) {
         auto name = bodyParts[limb];
-        send_to_char(user, fmt::format("Using your broken {} has damaged it more!@n\r\n", name).c_str());
+        user->sendf(fmt::format("Using your broken {} has damaged it more!@n\r\n", name).c_str());
         GET_LIMBCOND(user, limb) -= rand_number(3, 5);
         if (GET_LIMBCOND(user, limb) < 0) {
             act(fmt::format("@RYour {} has fallen apart!@n", name).c_str(), true, user, nullptr, nullptr, TO_CHAR);
@@ -1421,7 +1421,7 @@ namespace atk {
             if ((char*)args[1].c_str()) {
                 double adjust = (double)(atoi((char*)args[1].c_str())) * 0.01;
                 if (adjust < 0.01 || adjust > 1.00) {
-                    send_to_char(user, "If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
+                    user->sendf("If you are going to supply a percentage of your charge to use then use an acceptable number (1-100)\r\n");
                     return false;
                 }
             
@@ -1882,11 +1882,11 @@ namespace atk {
             master_pass = 2;
 
         if (master_pass == 1) {
-            send_to_char(user, "@GYour mastery of the technique has made your use of energy more efficient!@n\r\n");
+            user->sendf("@GYour mastery of the technique has made your use of energy more efficient!@n\r\n");
             return 0.25;
         }
         else if (master_pass == 2) {
-            send_to_char(user,
+            user->sendf(
                 "@GYour mastery of the technique has made your use of energy as efficient as possible!@n\r\n");
             return 0.5;
         }
@@ -2135,7 +2135,7 @@ namespace atk {
     void Dodonpa::attackPostprocess() {
         if (rand_number(1, 3) == 2) {
             victim->decCurKI(calcDamage / 4);
-            send_to_char(victim, "@RYou feel some of your ki drained away by the attack!@n\r\n");
+            victim->sendf("@RYou feel some of your ki drained away by the attack!@n\r\n");
         }
     }
 
@@ -2294,11 +2294,11 @@ namespace atk {
     // TwinSlash
     bool TwinSlash::checkOtherConditions() {
         if (!GET_EQ(user, WEAR_WIELD1)) {
-            send_to_char(user, "You need to wield a sword to use this.\r\n");
+            user->sendf("You need to wield a sword to use this.\r\n");
             return false;
         }
         if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-            send_to_char(user, "You are not wielding a sword, you need one to use this technique.\r\n");
+            user->sendf("You are not wielding a sword, you need one to use this technique.\r\n");
             return false;
         }
         return true;
@@ -2421,7 +2421,7 @@ namespace atk {
             if (GET_CHARGE(victim) < 0) {
                 GET_CHARGE(victim) = 0;
             }
-            send_to_char(victim, "@RYou lose some of your charged ki!@n\r\n");
+            victim->sendf("@RYou lose some of your charged ki!@n\r\n");
         }
 
         if (!AFF_FLAGGED(victim, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
@@ -2473,14 +2473,14 @@ namespace atk {
         auto r = user->getRoom();
         if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim) &&
                 !GET_BONUS(victim, BONUS_FIREPROOF)) {
-                send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
-                send_to_char(user, "@RThey are burned by the attack!@n\r\n");
+                victim->sendf("@RYou are burned by the attack!@n\r\n");
+                user->sendf("@RThey are burned by the attack!@n\r\n");
                 victim->setFlag(FlagType::Affect, AFF_BURNED);
             } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
-                send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
+                user->sendf("@RThey appear to be fireproof!@n\r\n");
             } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
-                send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-                send_to_char(user, "@RThey are easily burned!@n\r\n");
+                victim->sendf("@RYou are extremely flammable and are burned by the attack!@n\r\n");
+                user->sendf("@RThey are easily burned!@n\r\n");
                 victim->setFlag(FlagType::Affect, AFF_BURNED);
             }
             if (GET_SKILL_PERF(user, SKILL_HONOO) == 3 && attPerc > 0.1) {
@@ -2886,11 +2886,11 @@ namespace atk {
     // PhoenixSlash
     bool PhoenixSlash::checkOtherConditions() {
         if (!GET_EQ(user, WEAR_WIELD1)) {
-            send_to_char(user, "You need to wield a sword to use this.\r\n");
+            user->sendf("You need to wield a sword to use this.\r\n");
             return false;
         }
         if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-            send_to_char(user, "You are not wielding a sword, you need one to use this technique.\r\n");
+            user->sendf("You are not wielding a sword, you need one to use this technique.\r\n");
             return false;
         }
         return true;
@@ -2911,14 +2911,14 @@ namespace atk {
     void PhoenixSlash::attackPostprocess() {
         if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 4 && !IS_DEMON(victim) &&
             !GET_BONUS(victim, BONUS_FIREPROOF)) {
-            send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
-            send_to_char(user, "@RThey are burned by the attack!@n\r\n");
+            victim->sendf("@RYou are burned by the attack!@n\r\n");
+            user->sendf("@RThey are burned by the attack!@n\r\n");
             victim->setFlag(FlagType::Affect, AFF_BURNED);
         } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
-            send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
+            user->sendf("@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
-            send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-            send_to_char(user, "@RThey are easily burned!@n\r\n");
+            victim->sendf("@RYou are extremely flammable and are burned by the attack!@n\r\n");
+            user->sendf("@RThey are easily burned!@n\r\n");
             victim->setFlag(FlagType::Affect, AFF_BURNED);
         }
         victim->clearFlag(FlagType::Affect,AFF_ASHED);
@@ -3129,11 +3129,11 @@ namespace atk {
     // DarknessDragonSlash
     bool DarknessDragonSlash::checkOtherConditions() {
         if (!GET_EQ(user, WEAR_WIELD1)) {
-            send_to_char(user, "You need to wield a sword to use this.\r\n");
+            user->sendf("You need to wield a sword to use this.\r\n");
             return false;
         }
         if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-            send_to_char(user, "You are not wielding a sword, you need one to use this technique.\r\n");
+            user->sendf("You are not wielding a sword, you need one to use this technique.\r\n");
             return false;
         }
         return true;
@@ -3274,8 +3274,8 @@ namespace atk {
 
     void Kousengan::attackPostprocess() {
         if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim)) {
-            send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
-            send_to_char(user, "@RThey are burned by the attack!@n\r\n");
+            victim->sendf("@RYou are burned by the attack!@n\r\n");
+            user->sendf("@RThey are burned by the attack!@n\r\n");
             victim->setFlag(FlagType::Affect, AFF_BURNED);
         }
     }
@@ -3308,11 +3308,11 @@ namespace atk {
     // ZenBlade
     bool ZenBlade::checkOtherConditions() {
         if (!GET_EQ(user, WEAR_WIELD1)) {
-            send_to_char(user, "You need to wield a sword to use this.\r\n");
+            user->sendf("You need to wield a sword to use this.\r\n");
             return false;
         }
         if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != TYPE_SLASH - TYPE_HIT) {
-            send_to_char(user, "You are not wielding a sword, you need one to use this technique.\r\n");
+            user->sendf("You are not wielding a sword, you need one to use this technique.\r\n");
             return false;
         }
         return true;
@@ -3521,7 +3521,7 @@ namespace atk {
     // WaterSpike
     bool WaterRazor::checkOtherConditions() {
         if (IS_ANDROID(victim)) {
-            send_to_char(user, "There is not a necessary amount of water in cybernetic creatures.\r\n");
+            user->sendf("There is not a necessary amount of water in cybernetic creatures.\r\n");
             return false;
         }
         return true;
@@ -3802,7 +3802,7 @@ namespace atk {
     void StarBreaker::attackPostprocess() {
         if (level_exp(user, GET_LEVEL(user) + 1) - (GET_EXP(user)) > 0 || GET_LEVEL(user) >= 100) {
             auto xp = user->modExperience(theft * 2, false); // we will not apply bonuses to stolen exp.
-            send_to_char(user, "The returning Eldritch energy blesses you with some experience. @D[@G%s@D]@n\r\n",
+            user->sendf("The returning Eldritch energy blesses you with some experience. @D[@G%s@D]@n\r\n",
                             add_commas(xp).c_str());
 
         }
@@ -3847,14 +3847,14 @@ namespace atk {
     void FireBreath::attackPostprocess() {
         if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim) &&
                 !GET_BONUS(victim, BONUS_FIREPROOF)) {
-            send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
-            send_to_char(user, "@RThey are burned by the attack!@n\r\n");
+            victim->sendf("@RYou are burned by the attack!@n\r\n");
+            user->sendf("@RThey are burned by the attack!@n\r\n");
             victim->setFlag(FlagType::Affect, AFF_BURNED);
         } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
-            send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
+            user->sendf("@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
-            send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-            send_to_char(user, "@RThey are easily burned!@n\r\n");
+            victim->sendf("@RYou are extremely flammable and are burned by the attack!@n\r\n");
+            user->sendf("@RThey are easily burned!@n\r\n");
             victim->setFlag(FlagType::Affect, AFF_BURNED);
         }
     } 
@@ -4106,7 +4106,7 @@ namespace atk {
     // Tailwhip
     bool Tailwhip::checkOtherConditions() {
         if (!PLR_FLAGGED(user, PLR_TAIL) && !IS_NPC(user)) {
-            send_to_char(user, "You have no tail!\r\n");
+            user->sendf("You have no tail!\r\n");
             return false;
         }
         return true;
@@ -4178,7 +4178,7 @@ namespace atk {
             }
         }
         if (targets.empty()) {
-            send_to_char(user, "There is no one worth targeting around.\r\n");
+            user->sendf("There is no one worth targeting around.\r\n");
             return false;
         }
         return true;
@@ -4474,12 +4474,12 @@ namespace atk {
         }
 
         if (!weap) {
-            send_to_char(user, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+            user->sendf("You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
             return false;
         }
 
         if (GET_OBJ_VAL(weap, VAL_WEAPON_DAMTYPE) != getWeaponType() && wtype != 5) {
-            send_to_char(user, "You need to wield a " + getName() + " to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+            user->sendf("You need to wield a " + getName() + " to use this, without one try punch, kick, or other no weapon attacks.\r\n");
             return false;
         }
 
@@ -4609,7 +4609,7 @@ namespace atk {
                 if (!GET_SKILL(user, SKILL_TWOHAND) && slot_count(user) + 1 <= GET_SLOTS(user)) {
                     int numb = rand_number(10, 15);
                     SET_SKILL(user, SKILL_TWOHAND, numb);
-                    send_to_char(user, "@GYou learn the very basics of two-handing your weapon!@n\r\n");
+                    user->sendf("@GYou learn the very basics of two-handing your weapon!@n\r\n");
                 } else {
                     improve_skill(user, SKILL_TWOHAND, 0);
                 }
@@ -4620,7 +4620,7 @@ namespace atk {
                 (GET_OBJ_TYPE(GET_EQ(user, WEAR_WIELD2)) != ITEM_LIGHT)) {
                 int numb = rand_number(10, 15);
                 SET_SKILL(user, SKILL_DUALWIELD, numb);
-                send_to_char(user, "@GYou learn the very basics of dual-wielding!@n\r\n");
+                user->sendf("@GYou learn the very basics of dual-wielding!@n\r\n");
             } else {
                 improve_skill(user, SKILL_DUALWIELD, 0);
             }
@@ -4828,12 +4828,12 @@ namespace atk {
     // Shoot
     bool Shoot::checkOtherConditions() {
         if (!GET_EQ(user, WEAR_WIELD1) && !GET_EQ(user, WEAR_WIELD2)) {
-            send_to_char(user, "You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+            user->sendf("You need to wield a weapon to use this, without one try punch, kick, or other no weapon attacks.\r\n");
             return false;
         }
 
         if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD1), VAL_WEAPON_DAMTYPE) != getWeaponType()) {
-            send_to_char(user, "You need to wield a " + getName() + " to use this, without one try punch, kick, or other no weapon attacks.\r\n");
+            user->sendf("You need to wield a " + getName() + " to use this, without one try punch, kick, or other no weapon attacks.\r\n");
             return false;
         }
         
@@ -4857,7 +4857,7 @@ namespace atk {
             guncost = 2;
         }
         if (GET_GOLD(user) < guncost) {
-            send_to_char(user, "You do not have enough zenni. You need %d zenni per shot for that level of gun.\r\n",
+            user->sendf("You do not have enough zenni. You need %d zenni per shot for that level of gun.\r\n",
                          guncost);
             return false;
         } else {
@@ -4881,7 +4881,7 @@ namespace atk {
         if (PLR_FLAGGED(user, PLR_THANDW)) {
             if (hitspot != 2 && boom_headshot(user)) {
                 hitspot = 2;
-                send_to_char(user, "@GBoom headshot!@n\r\n");
+                user->sendf("@GBoom headshot!@n\r\n");
             }
         }
         switch(hitspot) {

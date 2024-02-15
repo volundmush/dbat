@@ -54,7 +54,7 @@ SPECIAL(dump) {
     }
 
     if (value) {
-        send_to_char(ch, "You are awarded for outstanding performance.\r\n");
+        ch->sendf("You are awarded for outstanding performance.\r\n");
         act("$n has been awarded for being a good citizen.", true, ch, nullptr, nullptr, TO_ROOM);
 
         if (GET_LEVEL(ch) < 3) {
@@ -187,7 +187,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
         return false;
 
     if (CMD_IS("flee")) {
-        send_to_char(ch,
+        ch->sendf(
                      "Fleeing is not allowed!  If you want to get out of here, type @Ysurrender@n while fighting to be returned to the start.");
         return true;
     }
@@ -212,7 +212,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
             ch->lookAtLocation();
             return true;
         } else {
-            send_to_char(ch, "You can only surrender while fighting, so at least TRY to make an effort");
+            ch->sendf("You can only surrender while fighting, so at least TRY to make an effort");
             return true;
         }
     }
@@ -220,15 +220,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) /* Imms can walk through the gauntlet unhindered */
         return false;
 
-    /* Only Avatars may pass the 11th room
-    if ((world[ch->in_room].number == gauntlet_info[GAUNTLET_AV][1] ) && (cmd == gauntlet_info[GAUNTLET_AV][2]))
-    {
-      if (GET_CLASS(ch) != CLASS_AVATAR)
-      {
-        send_to_char (ch, "Only Avatars may proceed further!\r\n");
-        return TRUE;
-      }
-    } */
+
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
         auto r = ch->getRoom();
         if (r->vn == gauntlet_info[i][1]) {
@@ -263,7 +255,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
                 }
 
                 if (proceed == 0) {
-                    send_to_char(ch, buf);
+                    ch->sendf(buf);
                     act(buf2, false, ch, nullptr, ch, TO_ROOM);
                     return true;
                 }
@@ -291,17 +283,17 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
 
     if (CMD_IS("flee")) {
         if ((FIGHTING(ch)) && (GET_POS(ch) == POS_FIGHTING)) {
-            send_to_char(ch,
+            ch->sendf(
                          "You can't flee from this fight./r/nIt's your own fault for summoning creatures into the gauntlet!\r\n");
             return true;
         } else {
-            send_to_char(ch, "There is nothing here to flee from\r\n");
+            ch->sendf("There is nothing here to flee from\r\n");
             return true;
         }
     }
 
     if (CMD_IS("surrender")) {
-        send_to_char(ch, "You have completed the gauntlet, why would you need to surrender?\r\n");
+        ch->sendf("You have completed the gauntlet, why would you need to surrender?\r\n");
         return true;
     }
 
@@ -318,7 +310,7 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
         if (world[EXIT(ch, (cmd - 1))->to_room]->vn == gauntlet_info[i][1]) {
-            send_to_char(ch, "You have completed the gauntlet, you cannot go backwards!\r\n");
+            ch->sendf("You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
     }
@@ -338,13 +330,13 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
         return false;
 
     if (CMD_IS("flee")) {
-        send_to_char(ch,
+        ch->sendf(
                      "Fleeing is not allowed!  If you want to get out of here, type @Ysurrender@n while fighting to be returned to the start.");
         return true;
     }
 
     if (CMD_IS("surrender")) {
-        send_to_char(ch,
+        ch->sendf(
                      "You are in a rest-room.  Surrender is not an option.\r\nIf you want to leave the Gauntlet, you can surrender while fighting.\r\n");
         return true;
     }
@@ -386,7 +378,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
         } 
 */
                 if (proceed == 0) {
-                    send_to_char(ch, buf);
+                    ch->sendf(buf);
                     act(buf2, false, ch, nullptr, ch, TO_ROOM);
                     return true;
                 }
@@ -436,12 +428,12 @@ SPECIAL(pet_shops) {
     pet_room = IN_ROOM(ch) + 1;
 
     if (CMD_IS("list")) {
-        send_to_char(ch, "Available pets are:\r\n");
+        ch->sendf("Available pets are:\r\n");
         for (auto pet : dynamic_cast<room_data*>(world[pet_room])->getPeople()) {
             /* No, you can't have the Implementor as a pet if he's in there. */
             if (!IS_NPC(pet))
                 continue;
-            send_to_char(ch, "%8d - %s\r\n", PET_PRICE(pet), GET_NAME(pet));
+            ch->sendf("%8d - %s\r\n", PET_PRICE(pet), GET_NAME(pet));
         }
         return (true);
     } else if (CMD_IS("buy")) {
@@ -449,11 +441,11 @@ SPECIAL(pet_shops) {
         two_arguments(argument, buf, pet_name);
 
         if (!(pet = get_char_room(buf, nullptr, pet_room)) || !IS_NPC(pet)) {
-            send_to_char(ch, "There is no such pet!\r\n");
+            ch->sendf("There is no such pet!\r\n");
             return (true);
         }
         if (GET_GOLD(ch) < PET_PRICE(pet)) {
-            send_to_char(ch, "You don't have enough zenni!\r\n");
+            ch->sendf("You don't have enough zenni!\r\n");
             return (true);
         }
         ch->mod(CharMoney::Carried, -PET_PRICE(pet));
@@ -475,7 +467,7 @@ SPECIAL(pet_shops) {
         add_follower(pet, ch);
         pet->master_id = GET_IDNUM(ch);
 
-        send_to_char(ch, "May you enjoy your pet.\r\n");
+        ch->sendf("May you enjoy your pet.\r\n");
         act("$n buys $N as a pet.", false, ch, nullptr, pet, TO_ROOM);
 
         return (true);
@@ -501,18 +493,18 @@ SPECIAL(auction) {
                 found = true;
 
                 if (GET_CURBID(obj2) != -1 && GET_AUCTIME(obj2) + 518400 > time(nullptr)) {
-                    send_to_char(ch,
+                    ch->sendf(
                                  "Unable to cancel. Someone has already bid on it and their bid license hasn't expired.\r\n");
                     time_t remain = (GET_AUCTIME(obj2) + 518400) - time(nullptr);
                     int day = (int) ((remain % 604800) / 86400);
                     int hour = (int) ((remain % 86400) / 3600);
                     int minu = (int) ((remain % 3600) / 60);
-                    send_to_char(ch, "Time Till License Expiration: %d day%s, %d hour%s, %d minute%s.\r\n", day,
+                    ch->sendf("Time Till License Expiration: %d day%s, %d hour%s, %d minute%s.\r\n", day,
                                  day > 1 ? "s" : "", hour, hour > 1 ? "s" : "", minu, minu > 1 ? "s" : "");
                     continue;
                 }
 
-                send_to_char(ch, "@wYou cancel the auction of %s@w and it is returned to you.@n\r\n",
+                ch->sendf("@wYou cancel the auction of %s@w and it is returned to you.@n\r\n",
                              obj2->getShortDesc());
                 struct descriptor_data *d;
 
@@ -522,7 +514,7 @@ SPECIAL(auction) {
                     if (d->character == ch)
                         continue;
                     if (GET_EQ(d->character, WEAR_EYE)) {
-                        send_to_char(d->character,
+                        d->character->sendf(
                                      "@RScouter Auction News@D: @GThe auction of @w%s@G has been canceled.\r\n",
                                      obj2->getShortDesc());
                     }
@@ -535,7 +527,7 @@ SPECIAL(auction) {
         }
 
         if (found == false) {
-            send_to_char(ch, "There are no items being auctioned by you.\r\n");
+            ch->sendf("There are no items being auctioned by you.\r\n");
         }
 
         return (true);
@@ -553,7 +545,7 @@ SPECIAL(auction) {
                 }
 
                 if (GET_BID(obj2) > GET_GOLD(ch)) {
-                    send_to_char(ch, "Unable to purchase %s, you don't have enough money on hand.\r\n",
+                    ch->sendf("Unable to purchase %s, you don't have enough money on hand.\r\n",
                                  obj2->getShortDesc());
                     continue;
                 }
@@ -562,7 +554,7 @@ SPECIAL(auction) {
                     time_t remain = (GET_AUCTIME(obj2) + 86400) - time(nullptr);
                     int hour = (int) ((remain % 86400) / 3600);
                     int minu = (int) ((remain % 3600) / 60);
-                    send_to_char(ch,
+                    ch->sendf(
                                  "Unable to purchase %s, minimum time to bid is 24 hours. %d hour%s and %d minute%s remain.\r\n",
                                  obj2->getShortDesc(), hour, hour > 1 ? "s" : "", minu, minu > 1 ? "s" : "");
                     continue;
@@ -571,7 +563,7 @@ SPECIAL(auction) {
                 ch->mod(CharMoney::Carried, -GET_BID(obj2));
                 obj2->removeFromLocation();
                 obj2->addToLocation(ch);
-                send_to_char(ch, "You pay %s zenni and receive the item.\r\n", add_commas(GET_BID(obj2)).c_str());
+                ch->sendf("You pay %s zenni and receive the item.\r\n", add_commas(GET_BID(obj2)).c_str());
                 auc_save();
 
                 for (d = descriptor_list; d; d = d->next) {
@@ -583,12 +575,12 @@ SPECIAL(auction) {
                         founded = true;
                         d->character->mod(CharMoney::Carried, GET_BID(obj2));
                         if (GET_EQ(d->character, WEAR_EYE)) {
-                            send_to_char(d->character,
+                            d->character->sendf(
                                          "@RScouter Auction News@D: @GSomeone has purchased your @w%s@G and you had the money put in your bank account.\r\n",
                                          obj2->getShortDesc());
                         }
                     } else if (GET_EQ(d->character, WEAR_EYE)) {
-                        send_to_char(d->character,
+                        d->character->sendf(
                                      "@RScouter Auction News@D: @GSomeone has purchased the @w%s@G that was on auction.\r\n",
                                      obj2->getShortDesc());
                     }
@@ -607,7 +599,7 @@ SPECIAL(auction) {
         }
 
         if (found == false) {
-            send_to_char(ch, "There are no items that you have bid on.\r\n");
+            ch->sendf("There are no items that you have bid on.\r\n");
         }
         return (true);
     } else if (CMD_IS("auction")) {
@@ -618,18 +610,18 @@ SPECIAL(auction) {
         two_arguments(argument, arg, arg2);
 
         if (!*arg || !*arg2) {
-            send_to_char(ch, "Auction what item and for how much?\r\n");
+            ch->sendf("Auction what item and for how much?\r\n");
             return (true);
         }
 
         value = atoi(arg2);
 
         if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory()))) {
-            send_to_char(ch, "You don't have that item to auction.\r\n");
+            ch->sendf("You don't have that item to auction.\r\n");
             return (true);
         }
         if (value <= 999) {
-            send_to_char(ch, "Do not auction anything for less than 1,000 zenni.\r\n");
+            ch->sendf("Do not auction anything for less than 1,000 zenni.\r\n");
             return (true);
         }
 
@@ -659,7 +651,7 @@ SPECIAL(auction) {
         obj2->removeFromLocation();
         obj2->addToLocation(world.at(auct_room));
         auc_save();
-        send_to_char(ch, "You place %s on auction for %s zenni.\r\n", obj2->getShortDesc(),
+        ch->sendf("You place %s on auction for %s zenni.\r\n", obj2->getShortDesc(),
                      add_commas(GET_BID(obj2)).c_str());
         basic_mud_log("AUCTION: %s places %s on auction for %s", GET_NAME(ch), obj2->getShortDesc(),
             add_commas(GET_BID(obj2)).c_str());
@@ -670,7 +662,7 @@ SPECIAL(auction) {
             if (d->character == ch)
                 continue;
             if (GET_EQ(d->character, WEAR_EYE)) {
-                send_to_char(d->character,
+                d->character->sendf(
                              "@RScouter Auction News@D: @GThe item, @w%s@G, has been placed on auction for @Y%s@G zenni.@n\r\n",
                              obj2->getShortDesc(), add_commas(GET_BID(obj2)).c_str());
             }
@@ -699,34 +691,34 @@ SPECIAL(healtank) {
         }
 
         if (!*arg) {
-            send_to_char(ch, "@WHealing Tank Commands:\r\n"
+            ch->sendf("@WHealing Tank Commands:\r\n"
                              "htank [ enter | exit | check ]@n");
             return (true);
         }
 
         if (!strcasecmp("enter", arg)) {
             if (PLR_FLAGGED(ch, PLR_HEALT)) {
-                send_to_char(ch, "You are already inside a healing tank!\r\n");
+                ch->sendf("You are already inside a healing tank!\r\n");
                 return (true);
             }
             if (ch->master && ch->master != ch) {
-                send_to_char(ch, "You can't enter it while following someone!\r\n");
+                ch->sendf("You can't enter it while following someone!\r\n");
                 return (true);
             } else if (IS_ANDROID(ch)) {
-                send_to_char(ch, "A healing tank will have no effect on you.\r\n");
+                ch->sendf("A healing tank will have no effect on you.\r\n");
                 return (true);
             } else if (HCHARGE(htank) <= 0) {
-                send_to_char(ch, "That healing tank needs to recharge, wait a while.\r\n");
+                ch->sendf("That healing tank needs to recharge, wait a while.\r\n");
                 return (true);
             } else if (OBJ_FLAGGED(htank, ITEM_BROKEN)) {
-                send_to_char(ch,
+                ch->sendf(
                              "It is broken! You will need to fix it yourself or wait for someone else to fix it.\r\n");
                 return (true);
             } else if (SITS(ch)) {
-                send_to_char(ch, "You are already on something.\r\n");
+                ch->sendf("You are already on something.\r\n");
                 return (true);
             } else if (SITTING(htank)) {
-                send_to_char(ch, "Someone else is already inside that healing tank!\r\n");
+                ch->sendf("Someone else is already inside that healing tank!\r\n");
                 return (true);
             } else {
                 GET_CHARGE(ch) = 0;
@@ -747,7 +739,7 @@ SPECIAL(healtank) {
 
         else if (!strcasecmp("exit", arg)) {
             if (!PLR_FLAGGED(ch, PLR_HEALT)) {
-                send_to_char(ch, "You are not inside a healing tank.\r\n");
+                ch->sendf("You are not inside a healing tank.\r\n");
                 return (true);
             } else {
                 act("@wThe healing tank drains and you exit it shortly after.", true, ch, nullptr, nullptr, TO_CHAR);
@@ -761,15 +753,15 @@ SPECIAL(healtank) {
 
         else if (!strcasecmp("check", arg)) {
             if (HCHARGE(htank) < 20 && HCHARGE(htank) > 0) {
-                send_to_char(ch, "The healing tank has %d bars of energy displayed on its meter.\r\n", HCHARGE(htank));
+                ch->sendf("The healing tank has %d bars of energy displayed on its meter.\r\n", HCHARGE(htank));
             } else if (HCHARGE(htank) <= 0) {
-                send_to_char(ch, "The healing tank has no energy displayed on its meter.\r\n");
+                ch->sendf("The healing tank has no energy displayed on its meter.\r\n");
             } else {
-                send_to_char(ch, "The healing tank has full energy shown on its meter.\r\n");
+                ch->sendf("The healing tank has full energy shown on its meter.\r\n");
             }
             return (true);
         } else {
-            send_to_char(ch, "@WHealing Tank Commands:\r\n"
+            ch->sendf("@WHealing Tank Commands:\r\n"
                              "htank [ enter | exit | check ]@n");
             return (true);
         }
@@ -802,26 +794,26 @@ SPECIAL(augmenter) {
         int specost = speed * 1200;
 
         if (!*arg) {
-            send_to_char(ch, "@D                        -----@WBody Augmentations@D-----@n\r\n");
-            send_to_char(ch, "@RStrength    @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n",
+            ch->sendf("@D                        -----@WBody Augmentations@D-----@n\r\n");
+            ch->sendf("@RStrength    @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n",
                          strength, add_commas(strcost).c_str());
-            send_to_char(ch, "@BIntelligence@y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", intel,
+            ch->sendf("@BIntelligence@y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", intel,
                          add_commas(intcost).c_str());
-            send_to_char(ch, "@CWisdom      @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", wisdom,
+            ch->sendf("@CWisdom      @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", wisdom,
                          add_commas(wiscost).c_str());
-            send_to_char(ch, "@GConstitution@y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", consti,
+            ch->sendf("@GConstitution@y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", consti,
                          add_commas(concost).c_str());
-            send_to_char(ch, "@mAgility     @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", agility,
+            ch->sendf("@mAgility     @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", agility,
                          add_commas(agicost).c_str());
-            send_to_char(ch, "@YSpeed       @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", speed,
+            ch->sendf("@YSpeed       @y: @WCurrently measured at @w%d@W, cost to augment @Y%s@W.@n\r\n", speed,
                          add_commas(specost).c_str());
-            send_to_char(ch, "\r\n");
+            ch->sendf("\r\n");
             return (true);
         } else if (!strcasecmp("strength", arg) || !strcasecmp("str", arg)) {
             if (strength >= 100)
-                send_to_char(ch, "Your strength is already as high as it can possibly go.\r\n");
+                ch->sendf("Your strength is already as high as it can possibly go.\r\n");
             else if (GET_GOLD(ch) < strcost)
-                send_to_char(ch, "You can not afford the price!\r\n");
+                ch->sendf("You can not afford the price!\r\n");
             else { /* They can augment it! */
                 act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -832,9 +824,9 @@ SPECIAL(augmenter) {
             }
         } else if (!strcasecmp("intelligence", arg) || !strcasecmp("int", arg)) {
             if (intel >= 100)
-                send_to_char(ch, "Your intelligence is already as high as it can possibly go.\r\n");
+                ch->sendf("Your intelligence is already as high as it can possibly go.\r\n");
             else if (GET_GOLD(ch) < intcost)
-                send_to_char(ch, "You can not afford the price!\r\n");
+                ch->sendf("You can not afford the price!\r\n");
             else { /* They can augment it! */
                 act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -845,9 +837,9 @@ SPECIAL(augmenter) {
             }
         } else if (!strcasecmp("constitution", arg) || !strcasecmp("con", arg)) {
             if (consti >= 100)
-                send_to_char(ch, "Your constitution is already as high as it can possibly go.\r\n");
+                ch->sendf("Your constitution is already as high as it can possibly go.\r\n");
             else if (GET_GOLD(ch) < concost)
-                send_to_char(ch, "You can not afford the price!\r\n");
+                ch->sendf("You can not afford the price!\r\n");
             else { /* They can augment it! */
                 act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -858,9 +850,9 @@ SPECIAL(augmenter) {
             }
         } else if (!strcasecmp("speed", arg) || !strcasecmp("spe", arg)) {
             if (speed >= 100)
-                send_to_char(ch, "Your speed is already as high as it can possibly go.\r\n");
+                ch->sendf("Your speed is already as high as it can possibly go.\r\n");
             else if (GET_GOLD(ch) < specost)
-                send_to_char(ch, "You can not afford the price!\r\n");
+                ch->sendf("You can not afford the price!\r\n");
             else { /* They can augment it! */
                 act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -871,9 +863,9 @@ SPECIAL(augmenter) {
             }
         } else if (!strcasecmp("agility", arg) || !strcasecmp("agi", arg)) {
             if (agility >= 100)
-                send_to_char(ch, "Your agility is already as high as it can possibly go.\r\n");
+                ch->sendf("Your agility is already as high as it can possibly go.\r\n");
             else if (GET_GOLD(ch) < agicost)
-                send_to_char(ch, "You can not afford the price!\r\n");
+                ch->sendf("You can not afford the price!\r\n");
             else { /* They can augment it! */
                 act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -884,9 +876,9 @@ SPECIAL(augmenter) {
             }
         } else if (!strcasecmp("wisdom", arg) || !strcasecmp("wis", arg)) {
             if (wisdom >= 100)
-                send_to_char(ch, "Your wisdom how somehow been measured is already as high as it can possibly go.\r\n");
+                ch->sendf("Your wisdom how somehow been measured is already as high as it can possibly go.\r\n");
             else if (GET_GOLD(ch) < wiscost)
-                send_to_char(ch, "You can not afford the price!\r\n");
+                ch->sendf("You can not afford the price!\r\n");
             else { /* They can augment it! */
                 act("@WThe machine's arm moves out and quickly augments your body with microscopic attachments.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -896,7 +888,7 @@ SPECIAL(augmenter) {
                 ch->mod(CharMoney::Carried, -wiscost);
             }
         } else {
-            send_to_char(ch, "Syntax: augment [str | con | int | wis | agi | spe]\r\n");
+            ch->sendf("Syntax: augment [str | con | int | wis | agi | spe]\r\n");
         }
         ch->save();
         return (true);
@@ -936,13 +928,13 @@ SPECIAL(gravity) {
     if (CMD_IS("gravity") || CMD_IS("generator")) {
 
         if (!*arg) {
-            send_to_char(ch, "@WGravity Commands:@n\r\n");
-            send_to_char(ch, "@Wgravity [ N | <num> ]\r\n");
+            ch->sendf("@WGravity Commands:@n\r\n");
+            ch->sendf("@Wgravity [ N | <num> ]\r\n");
             return (true);
         }
 
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-            send_to_char(ch, "It's broken!\r\n");
+            ch->sendf("It's broken!\r\n");
             return (true);
         }
 
@@ -954,7 +946,7 @@ SPECIAL(gravity) {
             try {
                 grav = std::clamp<double>(std::stod(a), 0, 20000.0);
             } catch (std::exception &e) {
-                send_to_char(ch, "That is not an acceptable gravity setting.\r\n");
+                ch->sendf("That is not an acceptable gravity setting.\r\n");
                 return (true);
             }
         }
@@ -963,7 +955,7 @@ SPECIAL(gravity) {
 
         if(obj->gravity) {
             if(obj->gravity.value() == grav) {
-                send_to_char(ch, "The gravity generator is already set to that.\r\n");
+                ch->sendf("The gravity generator is already set to that.\r\n");
                 return (true);
             }
             doChange = true;
@@ -971,7 +963,7 @@ SPECIAL(gravity) {
             if(grav > 0.0) {
                 doChange = true;
             } else {
-                send_to_char(ch, "The gravity generator is already set to that.\r\n");
+                ch->sendf("The gravity generator is already set to that.\r\n");
                 return (true);
             }
         }
@@ -979,7 +971,7 @@ SPECIAL(gravity) {
         if(doChange) {
             if(grav > 0.0) {
                 auto msg = fmt::format("You punch in {} times gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n", grav);
-                send_to_char(ch, msg.c_str());
+                ch->sendf(msg.c_str());
                 obj->gravity = grav;
                 auto room = ch->getRoom();
                 if (room->checkFlag(FlagType::Room, ROOM_AURA)) {
@@ -987,7 +979,7 @@ SPECIAL(gravity) {
                     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
                 }
             } else {
-                send_to_char(ch,
+                ch->sendf(
                              "You punch in normal gravity on the generator. It hums for a moment\r\nbefore you feel the pressure on your body change.\r\n");
                 obj->gravity = std::nullopt;
             }
@@ -1009,14 +1001,14 @@ SPECIAL(bank) {
 
     if (CMD_IS("balance")) {
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-            send_to_char(ch, "The ATM is broken!\r\n");
+            ch->sendf("The ATM is broken!\r\n");
             return (true);
         }
 
         if (GET_BANK_GOLD(ch) > 0)
-            send_to_char(ch, "Your current balance is %d zenni.\r\n", GET_BANK_GOLD(ch));
+            ch->sendf("Your current balance is %d zenni.\r\n", GET_BANK_GOLD(ch));
         else
-            send_to_char(ch, "You currently have no money deposited.\r\n");
+            ch->sendf("You currently have no money deposited.\r\n");
         return (true);
     } else if (CMD_IS("wire")) {
         char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -1025,20 +1017,20 @@ SPECIAL(bank) {
         two_arguments(argument, arg, arg2);
 
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-            send_to_char(ch, "The ATM is broken!\r\n");
+            ch->sendf("The ATM is broken!\r\n");
             return (true);
         }
 
         if ((amount = atoi(arg)) <= 0) {
-            send_to_char(ch, "How much do you want to transfer?\r\n");
+            ch->sendf("How much do you want to transfer?\r\n");
             return (true);
         }
         if (GET_BANK_GOLD(ch) < amount + (amount / 100)) {
-            send_to_char(ch, "You don't have that much zenni in the bank (plus 1%s charge)!\r\n", "%");
+            ch->sendf("You don't have that much zenni in the bank (plus 1%s charge)!\r\n", "%");
             return (true);
         }
         if (!*arg2) {
-            send_to_char(ch, "You want to transfer it to who?!\r\n");
+            ch->sendf("You want to transfer it to who?!\r\n");
             return (true);
         }
         if (!(vict = get_player_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
@@ -1049,12 +1041,12 @@ SPECIAL(bank) {
             vict = findPlayer(name);
 
             if(!vict) {
-                send_to_char(ch, "That person doesn't exist.\r\n");
+                ch->sendf("That person doesn't exist.\r\n");
                 return (true);
             }
 
             if (ch->desc->account == nullptr) {
-                send_to_char(ch, "There is an error. Report to staff.");
+                ch->sendf("There is an error. Report to staff.");
                 return (true);
             }
             auto id = vict->uid;
@@ -1062,7 +1054,7 @@ SPECIAL(bank) {
             auto &c = p->account->characters;
             auto found = std::find_if(c.begin(), c.end(), [&](auto i) {return i == id;});
             if(found != c.end()) {
-                send_to_char(ch, "You can not transfer money to your own offline characters...");
+                ch->sendf("You can not transfer money to your own offline characters...");
                 return (true);
             }
             vict->mod(CharMoney::Bank, amount);
@@ -1073,45 +1065,45 @@ SPECIAL(bank) {
         } else {
             vict->mod(CharMoney::Bank, amount);
             ch->mod(CharMoney::Bank, -(amount + (amount / 100)));
-            send_to_char(vict, "@WYou have just had @Y%s@W zenni wired into your bank account.@n\r\n",
+            vict->sendf("@WYou have just had @Y%s@W zenni wired into your bank account.@n\r\n",
                          add_commas(amount).c_str());
         }
-        send_to_char(ch, "You transfer %s zenni to them.\r\n", add_commas(amount).c_str());
+        ch->sendf("You transfer %s zenni to them.\r\n", add_commas(amount).c_str());
         act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
         return (true);
     } else if (CMD_IS("deposit")) {
 
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-            send_to_char(ch, "The ATM is broken!\r\n");
+            ch->sendf("The ATM is broken!\r\n");
             return (true);
         }
 
         if ((amount = atoi(argument)) <= 0) {
-            send_to_char(ch, "How much do you want to deposit?\r\n");
+            ch->sendf("How much do you want to deposit?\r\n");
             return (true);
         }
         if (GET_GOLD(ch) < amount) {
-            send_to_char(ch, "You don't have that much zenni!\r\n");
+            ch->sendf("You don't have that much zenni!\r\n");
             return (true);
         }
         ch->mod(CharMoney::Carried, -amount);
         ch->mod(CharMoney::Bank, amount);
-        send_to_char(ch, "You deposit %d zenni.\r\n", amount);
+        ch->sendf("You deposit %d zenni.\r\n", amount);
         act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
         return (true);
     } else if (CMD_IS("withdraw")) {
 
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-            send_to_char(ch, "The ATM is broken!\r\n");
+            ch->sendf("The ATM is broken!\r\n");
             return (true);
         }
 
         if ((amount = atoi(argument)) <= 0) {
-            send_to_char(ch, "How much do you want to withdraw?\r\n");
+            ch->sendf("How much do you want to withdraw?\r\n");
             return (true);
         }
         if (GET_BANK_GOLD(ch) < amount) {
-            send_to_char(ch, "You don't have that much zenni!\r\n");
+            ch->sendf("You don't have that much zenni!\r\n");
             return (true);
         }
         if (GET_BANK_GOLD(ch) - (amount + (1 + amount / 100)) < 0) {
@@ -1120,12 +1112,12 @@ SPECIAL(bank) {
             } else if (amount < 100) {
                 amount = amount + 1;
             }
-            send_to_char(ch, "You need at least %s in the bank with the 1 percent withdraw fee.\r\n",
+            ch->sendf("You need at least %s in the bank with the 1 percent withdraw fee.\r\n",
                          add_commas(amount).c_str());
             return (true);
         }
         if (GET_GOLD(ch) + amount > GOLD_CARRY(ch)) {
-            send_to_char(ch, "You can only carry %s zenni, you left the rest.\r\n", add_commas(GOLD_CARRY(ch)).c_str());
+            ch->sendf("You can only carry %s zenni, you left the rest.\r\n", add_commas(GOLD_CARRY(ch)).c_str());
             int diff = (GET_GOLD(ch) + amount) - GOLD_CARRY(ch);
             ch->set(CharMoney::Carried, GOLD_CARRY(ch));
             amount -= diff;
@@ -1135,7 +1127,7 @@ SPECIAL(bank) {
             } else if (amount < 100) {
                 ch->mod(CharMoney::Bank, -(amount + 1));
             }
-            send_to_char(ch, "You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount).c_str(),
+            ch->sendf("You withdraw %s zenni,  and pay %s in withdraw fees.\r\n.\r\n", add_commas(amount).c_str(),
                          add_commas(num).c_str());
             act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
             return (true);
@@ -1147,7 +1139,7 @@ SPECIAL(bank) {
         } else if (amount < 100) {
             ch->mod(CharMoney::Bank, -(amount + 1));
         }
-        send_to_char(ch, "You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount).c_str(),
+        ch->sendf("You withdraw %s zenni, and pay %s in withdraw fees.\r\n", add_commas(amount).c_str(),
                      add_commas(num).c_str());
         act("$n makes a bank transaction.", true, ch, nullptr, nullptr, TO_ROOM);
         return (true);

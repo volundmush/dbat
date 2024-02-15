@@ -535,7 +535,7 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
             break;
         default:
             send_to_imm("ERROR: Combine attacks failure for: %s", GET_NAME(ch));
-            send_to_char(ch, "An error has been logged. Be patient while waiting for Iovan's response.\r\n");
+            ch->sendf("An error has been logged. Be patient while waiting for Iovan's response.\r\n");
             return;
     }
 
@@ -601,14 +601,14 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
     if (burn == true) {
         if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict) &&
             !GET_BONUS(vict, BONUS_FIREPROOF)) {
-            send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
-            send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
+            vict->sendf("@RYou are burned by the attack!@n\r\n");
+            ch->sendf("@RThey are burned by the attack!@n\r\n");
             vict->setFlag(FlagType::Affect, AFF_BURNED);
         } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
-            send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
+            ch->sendf("@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
-            send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
-            send_to_char(ch, "@RThey are easily burned!@n\r\n");
+            vict->sendf("@RYou are extremely flammable and are burned by the attack!@n\r\n");
+            ch->sendf("@RThey are easily burned!@n\r\n");
             vict->setFlag(FlagType::Affect, AFF_BURNED);
         }
     }
@@ -622,9 +622,9 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
     hurt(0, 0, ch, vict, nullptr, totki, 1);
     if (same == true) {
         for (f = ch->followers; f; f = f->next) {
-            send_to_char(f->follower, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
+            f->follower->sendf("@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
         }
-        send_to_char(ch, "@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
+        ch->sendf("@YS@yy@Yn@ye@Yr@yg@Yi@ys@Yt@yi@Yc @yB@Yo@yn@Yu@ys@Y!@n\r\n");
     }
 }
 
@@ -818,8 +818,8 @@ void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_
     drained = dmg * drain;
     vict->decCurST(drained);
 
-    send_to_char(ch, "@D[@YVictim's @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained).c_str());
-    send_to_char(vict, "@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained).c_str());
+    ch->sendf("@D[@YVictim's @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained).c_str());
+    vict->sendf("@D[@rYour @GStamina @cLoss@W: @g%s@D]@n\r\n", add_commas(drained).c_str());
 
 }
 
@@ -1116,7 +1116,7 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg) {
                     act("@MYou leech some of the energy away!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@m$n@M leeches some of the energy away!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 } else {
-                    send_to_char(ch,
+                    ch->sendf(
                                  "@MYou can't leech because there is too much charged energy for you to handle!@n\r\n");
                 }
             } else {
@@ -1645,11 +1645,11 @@ void damage_eq(struct char_data *vict, int location) {
             act("@WYour $p@W rips a little!@n", false, nullptr, eq, vict, TO_VICT);
             act("@C$N's@W $p@W rips a little!@n", false, nullptr, eq, vict, TO_NOTVICT);
             if (AFF_FLAGGED(vict, AFF_BLESS)) {
-                send_to_char(vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
+                vict->sendf("@c...But your blessing seems to have partly mended this damage.@n\r\n");
                 act("@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, nullptr,
                     nullptr, vict, TO_NOTVICT);
             } else if (AFF_FLAGGED(vict, AFF_CURSE)) {
-                send_to_char(vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
+                vict->sendf("@r...and your curse seems to have made the damage three times worse!@n\r\n");
                 act("@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true,
                     nullptr, nullptr, vict, TO_NOTVICT);
             }
@@ -1657,11 +1657,11 @@ void damage_eq(struct char_data *vict, int location) {
             act("@WYour $p@W cracks a little!@n", false, nullptr, eq, vict, TO_VICT);
             act("@C$N's@W $p@W cracks a little!@n", false, nullptr, eq, vict, TO_NOTVICT);
             if (AFF_FLAGGED(vict, AFF_BLESS)) {
-                send_to_char(vict, "@c...But your blessing seems to have partly mended this damage.@n\r\n");
+                vict->sendf("@c...But your blessing seems to have partly mended this damage.@n\r\n");
                 act("@c...but @C$N's@c body glows blue for a moment and the damage mends a little.@n", true, nullptr,
                     nullptr, vict, TO_NOTVICT);
             } else if (AFF_FLAGGED(vict, AFF_CURSE)) {
-                send_to_char(vict, "@r...and your curse seems to have made the damage three times worse!@n\r\n");
+                vict->sendf("@r...and your curse seems to have made the damage three times worse!@n\r\n");
                 act("@c...but @C$N's@c body glows red for a moment and the damage grow three times worse!@n", true,
                     nullptr, nullptr, vict, TO_NOTVICT);
             }
@@ -2259,26 +2259,26 @@ int limb_ok(struct char_data *ch, int type) {
         return true;
     }
     if (GRAPPLING(ch) && GRAPTYPE(ch) != 3) {
-        send_to_char(ch, "You are too busy grappling!\r\n");
+        ch->sendf("You are too busy grappling!\r\n");
         return false;
     }
     if (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4)) {
-        send_to_char(ch, "You are unable to move while in this hold! Try using 'escape' to get out of it!\r\n");
+        ch->sendf("You are unable to move while in this hold! Try using 'escape' to get out of it!\r\n");
         return false;
     }
     if (GET_SONG(ch) > 0) {
-        send_to_char(ch, "You are currently playing a song! Enter the song command in order to stop!\r\n");
+        ch->sendf("You are currently playing a song! Enter the song command in order to stop!\r\n");
         return false;
     }
 
     // Arms
     if (type == 0 || type == 2) {
         if (!HAS_ARMS(ch)) {
-            send_to_char(ch, "You have no available arms!\r\n");
+            ch->sendf("You have no available arms!\r\n");
             return false;
         }
         if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 100) <= 90) {
-            send_to_char(ch, "You are unable to move your arms while bound by this strong silk!\r\n");
+            ch->sendf("You are unable to move your arms while bound by this strong silk!\r\n");
             WAIT_STATE(ch, PULSE_1SEC);
             return false;
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
@@ -2287,7 +2287,7 @@ int limb_ok(struct char_data *ch, int type) {
             ch->clearFlag(FlagType::Affect,AFF_ENSNARED);
         }
         if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
-            send_to_char(ch, "Your hands are full!\r\n");
+            ch->sendf("Your hands are full!\r\n");
             return false;
         }
     }
@@ -2295,7 +2295,7 @@ int limb_ok(struct char_data *ch, int type) {
     // Legs
     if (type == 1 || type == 2) {
         if (!HAS_LEGS(ch)) {
-            send_to_char(ch, "You have no working legs!\r\n");
+            ch->sendf("You have no working legs!\r\n");
             return false;
         }
     }
@@ -2303,7 +2303,7 @@ int limb_ok(struct char_data *ch, int type) {
     // tail
     if(type == 3) {
         if(!ch->hasTail()) {
-            send_to_char(ch, "You have no tail!\r\n");
+            ch->sendf("You have no tail!\r\n");
             return false;
         }
     }
@@ -3582,7 +3582,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
         act("Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, nullptr, nullptr,
             TO_ROOM);
         if (rand_number(1, 10) >= 7) {
-            send_to_char(ch, "You feel less angry.\r\n");
+            ch->sendf("You feel less angry.\r\n");
             ch->clearFlag(FlagType::Affect,PLR_FURY);
         }
     } else if (PLR_FLAGGED(ch, PLR_FURY)) {
@@ -3647,7 +3647,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
         return;
     }
     if (weak) {
-        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
+        ch->sendf("@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
         return;
     }
 
@@ -3658,7 +3658,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
     }
 
     if (stats.empty()) {
-        send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
+        ch->sendf("@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
         return;
     }
 
@@ -3667,17 +3667,17 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
     switch (*itr) {
         case 0:
             ch->gainBasePL(gain);
-            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
+            ch->sendf("@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
                          add_commas(gain).c_str());
             break;
         case 1:
             ch->gainBaseKI(gain);
-            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n",
+            ch->sendf("@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n",
                          add_commas(gain).c_str());
             break;
         case 2:
             ch->gainBaseST(gain);
-            send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n",
+            ch->sendf("@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n",
                          add_commas(gain).c_str());
             break;
     }
@@ -3785,7 +3785,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                 if (plGain > 3) plGain = 3;
             }
             else {
-                send_to_char(ch, "This foe is not strong enough for you to learn anything.\r\n");
+                ch->sendf("This foe is not strong enough for you to learn anything.\r\n");
                 plGain = 0;
             }
 
@@ -3820,7 +3820,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         if (vict != nullptr) {
 			//You are penalized for level difference in sparring? Remove this perhaps as it disincentivises oldbies teaching newbies. And it's against the lore, that happens a lot.
             if (difference >= 51) {
-                send_to_char(ch, "The difference in your levels is too great for you to gain anything.\r\n");
+                ch->sendf("The difference in your levels is too great for you to gain anything.\r\n");
                 return;
             } else if (difference >= 40) {
                 gaincalc = gaincalc * 0.05;
@@ -3835,7 +3835,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 				//Logic for instructing and giving a bonus to your sparring partner, it costs practices to the 'victim'
                 if (!IS_NPC(ch) && PRF_FLAGGED(vict, PRF_INSTRUCT)) {
                     if (GET_PRACTICES(vict) > 10) {
-                        send_to_char(vict, "You instruct them in proper fighting techniques and strategies.\r\n");
+                        vict->sendf("You instruct them in proper fighting techniques and strategies.\r\n");
                         act("You take $N's instruction to heart and gain more experience.\r\n", false, ch, nullptr,
                             vict, TO_CHAR);
                         vict->modPractices(-10);
@@ -3867,7 +3867,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         gain = gain * bonus;
 		//Gain the xp
         ch->modExperience(gain);
-        send_to_char(ch, "@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain).c_str());
+        ch->sendf("@D[@Y+ @G%s @mExp@D]@n ", add_commas(gain).c_str());
 
 		//Handling for awarding vitals to the player
         std::vector<int64_t> stats;
@@ -3882,20 +3882,20 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
             switch(*itr) {
                 case 0:
-                    send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
+                    ch->sendf("@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
                     ch->gainBasePL(pl);
                     break;
                 case 1:
-                    send_to_char(ch, "@D[@Y+ @C%s @cKI@D]@n\r\n", add_commas(ki).c_str());
+                    ch->sendf("@D[@Y+ @C%s @cKI@D]@n\r\n", add_commas(ki).c_str());
                     ch->gainBaseKI(ki);
                     break;
                 case 2:
-                    send_to_char(ch, "@D[@Y+ @C%s @cST@D]@n\r\n", add_commas(st).c_str());
+                    ch->sendf("@D[@Y+ @C%s @cST@D]@n\r\n", add_commas(st).c_str());
                     ch->gainBaseST(st);
                     break;
             }
         } else {
-            send_to_char(ch, "\r\n");
+            ch->sendf("\r\n");
         }
     }
 }
@@ -3915,7 +3915,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
 bool can_grav(struct char_data *ch) {
     auto result = ch->getBurdenRatio() <= 1.0;
     if(!result) {
-        send_to_char(ch, "You are too burdened to even think about it!\r\n");
+        ch->sendf("You are too burdened to even think about it!\r\n");
     }
     return result;
 }
@@ -3924,11 +3924,11 @@ bool can_grav(struct char_data *ch) {
 int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num) {
     /* Target Related */
     if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_HEALT)) {
-        send_to_char(ch, "You are inside a healing tank!\r\n");
+        ch->sendf("You are inside a healing tank!\r\n");
         return 0;
     }
     if (IS_CARRYING_W(ch) > CAN_CARRY_W(ch)) {
-        send_to_char(ch, "You are weighted down too much!\r\n");
+        ch->sendf("You are weighted down too much!\r\n");
         return 0;
     }
     if (vict) {
@@ -3936,64 +3936,64 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
             return 0;
         }
         if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
-            send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
+            ch->sendf("This room just has such a peaceful, easy feeling...\r\n");
             return 0;
         } else if (vict == ch) {
-            send_to_char(ch, "That's insane, don't hurt yourself. Hurt others! That's the key to life ^_^\r\n");
+            ch->sendf("That's insane, don't hurt yourself. Hurt others! That's the key to life ^_^\r\n");
             return 0;
         } else if (vict->gooptime > 0) {
-            send_to_char(ch, "It seems like it'll be hard to kill them right now...\r\n");
+            ch->sendf("It seems like it'll be hard to kill them right now...\r\n");
             return 0;
         } else if (CARRYING(ch)) {
-            send_to_char(ch, "You are too busy protecting the person on your shoulder!\r\n");
+            ch->sendf("You are too busy protecting the person on your shoulder!\r\n");
             return 0;
         } else if (CARRIED_BY(vict)) {
-            send_to_char(ch, "They are being protected by someone else!\r\n");
+            ch->sendf("They are being protected by someone else!\r\n");
             return 0;
         } else if (AFF_FLAGGED(vict, AFF_PARALYZE)) {
-            send_to_char(ch, "They are a statue, just leave them alone...\r\n");
+            ch->sendf("They are a statue, just leave them alone...\r\n");
             return 0;
         } else if (MOB_FLAGGED(vict, MOB_NOKILL)) {
-            send_to_char(ch, "But they are not to be killed!\r\n");
+            ch->sendf("But they are not to be killed!\r\n");
             return 0;
         } else if (MAJINIZED(ch) == ((vict)->uid)) {
-            send_to_char(ch, "You can not harm your master!\r\n");
+            ch->sendf("You can not harm your master!\r\n");
             return 0;
         } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && GET_MAX_HIT(vict) > GET_MAX_HIT(ch) + (GET_MAX_HIT(ch) * .5) &&
                    !FIGHTING(ch)) {
-            send_to_char(ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
+            ch->sendf("You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
             return 0;
         } else if (MAJINIZED(vict) == ((ch)->uid)) {
-            send_to_char(ch, "You can not harm your servant.\r\n");
+            ch->sendf("You can not harm your servant.\r\n");
             return 0;
         } else if ((GRAPPLING(ch) && GRAPTYPE(ch) != 3) || (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4))) {
-            send_to_char(ch, "You are too busy grappling!%s\r\n", GRAPPLED(ch) != nullptr ? " Try 'escape'!" : "");
+            ch->sendf("You are too busy grappling!%s\r\n", GRAPPLED(ch) != nullptr ? " Try 'escape'!" : "");
             return 0;
         } else if (GRAPPLING(ch) && GRAPPLING(ch) != vict) {
-            send_to_char(ch, "You can't reach that far in your current position!\r\n");
+            ch->sendf("You can't reach that far in your current position!\r\n");
             return 0;
         } else if (GRAPPLED(ch) && GRAPPLED(ch) != vict) {
-            send_to_char(ch, "You can't reach that far in your current position!\r\n");
+            ch->sendf("You can't reach that far in your current position!\r\n");
             return 0;
         } else if (!IS_NPC(ch) && !IS_NPC(vict) && AFF_FLAGGED(ch, AFF_SPIRIT) &&
                    (!is_sparring(ch) || !is_sparring(vict)) && num != 2) {
-            send_to_char(ch, "You can not fight other players in AL/Hell.\r\n");
+            ch->sendf("You can not fight other players in AL/Hell.\r\n");
             return 0;
         } else if (GET_LEVEL(vict) <= 8 && !IS_NPC(ch) && !IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
-            send_to_char(ch, "Newbie Shield Protects them!\r\n");
+            ch->sendf("Newbie Shield Protects them!\r\n");
             return 0;
         } else if (GET_LEVEL(ch) <= 8 && !IS_NPC(ch) && !IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
-            send_to_char(ch, "Newbie Shield Protects you until level 8.\r\n");
+            ch->sendf("Newbie Shield Protects you until level 8.\r\n");
             return 0;
         } else if (PLR_FLAGGED(vict, PLR_SPIRAL) && num != 3) {
-            send_to_char(ch,
+            ch->sendf(
                          "Due to the nature of their current technique anything less than a Tier 4 or AOE attack will not work on them.\r\n");
             return 0;
         } else if (ABSORBING(ch)) {
-            send_to_char(ch, "You are too busy absorbing %s!\r\n", GET_NAME(ABSORBING(ch)));
+            ch->sendf("You are too busy absorbing %s!\r\n", GET_NAME(ABSORBING(ch)));
             return 0;
         } else if (ABSORBBY(ch)) {
-            send_to_char(ch, "You are too busy being absorbed by %s!\r\n", GET_NAME(ABSORBBY(ch)));
+            ch->sendf("You are too busy being absorbed by %s!\r\n", GET_NAME(ABSORBBY(ch)));
             return 0;
         } else if ((std::abs(GET_ALT(vict) - GET_ALT(ch)) == 1) && (IS_NAMEK(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3)))) {
             act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -4003,17 +4003,17 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
                 TO_NOTVICT);
             return 1;
         } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(vict, AFF_FLYING) && num == 0) {
-            send_to_char(ch, "You are too far above them.\r\n");
+            ch->sendf("You are too far above them.\r\n");
             return 0;
         } else if (!AFF_FLAGGED(ch, AFF_FLYING) && AFF_FLAGGED(vict, AFF_FLYING) && num == 0) {
-            send_to_char(ch, "They are too far above you.\r\n");
+            ch->sendf("They are too far above you.\r\n");
             return 0;
         } else if (!IS_NPC(ch) && GET_ALT(ch) > GET_ALT(vict) && !IS_NPC(vict) && num == 0) {
             if (GET_ALT(vict) < 0) {
                 GET_ALT(vict) = GET_ALT(ch);
                 return 1;
             } else {
-                send_to_char(ch, "You are too far above them.\r\n");
+                ch->sendf("You are too far above them.\r\n");
                 return 0;
             }
         } else if (!IS_NPC(ch) && GET_ALT(ch) < GET_ALT(vict) && !IS_NPC(vict) && num == 0) {
@@ -4021,7 +4021,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
                 GET_ALT(vict) = GET_ALT(ch);
                 return 1;
             } else {
-                send_to_char(ch, "They are too far above you.\r\n");
+                ch->sendf("They are too far above you.\r\n");
                 return 0;
             }
         } else {
@@ -4030,23 +4030,23 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
     }
     if (obj) {
         if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
-            send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
+            ch->sendf("This room just has such a peaceful, easy feeling...\r\n");
             return 0;
         } else if (OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && GET_OBJ_VNUM(obj) != 87 && GET_OBJ_VNUM(obj) != 80 &&
                    GET_OBJ_VNUM(obj) != 81 && GET_OBJ_VNUM(obj) != 82 && GET_OBJ_VNUM(obj) != 83) {
-            send_to_char(ch, "You can't hit that, it is protected by the immortals!\r\n");
+            ch->sendf("You can't hit that, it is protected by the immortals!\r\n");
             return 0;
         } else if (AFF_FLAGGED(ch, AFF_FLYING)) {
-            send_to_char(ch, "You are too far above it.\r\n");
+            ch->sendf("You are too far above it.\r\n");
             return 0;
         } else if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-            send_to_char(ch, "It is already broken!\r\n");
+            ch->sendf("It is already broken!\r\n");
             return 0;
         } else {
             return 1;
         }
     } else {
-        send_to_char(ch, "Error: Report to imm.");
+        ch->sendf("Error: Report to imm.");
         return 0;
     }
 }
@@ -4070,40 +4070,40 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
     int fail = false;
     if (IS_NPC(ch)) {
         if ((ch->getCurKI()) < ki) {
-            send_to_char(ch, "You do not have enough ki!\r\n");
+            ch->sendf("You do not have enough ki!\r\n");
             return false;
         }
         if ((ch->getCurST()) < st) {
-            send_to_char(ch, "You do not have enough stamina!\r\n");
+            ch->sendf("You do not have enough stamina!\r\n");
             return false;
         }
     }
 
     if (GET_CHARGE(ch) < ki) {
-        send_to_char(ch, "You do not have enough ki charged.\r\n");
+        ch->sendf("You do not have enough ki charged.\r\n");
         int64_t perc = GET_MAX_MANA(ch) * 0.01;
         if (ki >= perc * 49) {
-            send_to_char(ch, "You need at least 50 percent charged.\r\n");
+            ch->sendf("You need at least 50 percent charged.\r\n");
         } else if (ki >= perc * 44) {
-            send_to_char(ch, "You need at least 45 percent charged.\r\n");
+            ch->sendf("You need at least 45 percent charged.\r\n");
         } else if (ki >= perc * 39) {
-            send_to_char(ch, "You need at least 40 percent charged.\r\n");
+            ch->sendf("You need at least 40 percent charged.\r\n");
         } else if (ki >= perc * 34) {
-            send_to_char(ch, "You need at least 35 percent charged.\r\n");
+            ch->sendf("You need at least 35 percent charged.\r\n");
         } else if (ki >= perc * 29) {
-            send_to_char(ch, "You need at least 30 percent charged.\r\n");
+            ch->sendf("You need at least 30 percent charged.\r\n");
         } else if (ki >= perc * 24) {
-            send_to_char(ch, "You need at least 25 percent charged.\r\n");
+            ch->sendf("You need at least 25 percent charged.\r\n");
         } else if (ki >= perc * 19) {
-            send_to_char(ch, "You need at least 20 percent charged.\r\n");
+            ch->sendf("You need at least 20 percent charged.\r\n");
         } else if (ki >= perc * 14) {
-            send_to_char(ch, "You need at least 15 percent charged.\r\n");
+            ch->sendf("You need at least 15 percent charged.\r\n");
         } else if (ki >= perc * 9) {
-            send_to_char(ch, "You need at least 10 percent charged.\r\n");
+            ch->sendf("You need at least 10 percent charged.\r\n");
         } else if (ki >= perc * 4) {
-            send_to_char(ch, "You need at least 5 percent charged.\r\n");
+            ch->sendf("You need at least 5 percent charged.\r\n");
         } else if (ki >= 1) {
-            send_to_char(ch, "You need at least 1 percent charged.\r\n");
+            ch->sendf("You need at least 1 percent charged.\r\n");
         }
         fail = true;
     }
@@ -4149,7 +4149,7 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
     st += st * ratio;
 
     if ((ch->getCurST()) < st) {
-        send_to_char(ch, "You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st).c_str());
+        ch->sendf("You do not have enough stamina.\r\n@C%s@n needed.\r\n", add_commas(st).c_str());
         fail = true;
     }
 
@@ -4245,7 +4245,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     int dead = false;
 
     if(vict && vict->getCurHealth() <= 0) {
-        send_to_char(ch, "They are already dead!");
+        ch->sendf("They are already dead!");
         return;
     }
 
@@ -4303,7 +4303,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
         reveal_hiding(vict, 0);
         if (AFF_FLAGGED(vict, AFF_PARALYZE)) {
-            send_to_char(ch, "They are a statue and can't be harmed\r\n");
+            ch->sendf("They are a statue and can't be harmed\r\n");
             return;
         }
 
@@ -4330,7 +4330,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     if (beforered <= 1) {
                         COMBO(ch) = -1;
                         COMBHITS(ch) = 0;
-                        send_to_char(ch, "@RYou have cut your combo short because you missed your last hit!@n\r\n");
+                        ch->sendf("@RYou have cut your combo short because you missed your last hit!@n\r\n");
                     } else if (COMBHITS(ch) < physical_mastery(ch)) {
                         dmg += combo_damage(ch, dmg, 0);
                         if ((COMBHITS(ch) == 10 || COMBHITS(ch) == 20 || COMBHITS(ch) == 30) &&
@@ -4348,7 +4348,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                                 gain += gain * 0.1;
                             }
                             auto gained = ch->modExperience(gain);
-                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gained).c_str());
+                            ch->sendf("@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gained).c_str());
                         }
                     } else {
                         dmg += combo_damage(ch, dmg, 1);
@@ -4367,14 +4367,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                                 gain += gain * 0.1;
                             }
                             ch->modExperience(gain);
-                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain).c_str());
+                            ch->sendf("@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain).c_str());
                         }
                         COMBO(ch) = -1;
                         COMBHITS(ch) = 0;
                     }
                 }
             } else if (COMBHITS(ch) > 0 && LASTATK(ch) < 1000) {
-                send_to_char(ch, "@RYou have cut your combo short because you used the wrong attack!@n\r\n");
+                ch->sendf("@RYou have cut your combo short because you used the wrong attack!@n\r\n");
                 COMBO(ch) = -1;
                 COMBHITS(ch) = 0;
             }
@@ -4819,9 +4819,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     act("@CYou barely cling to life!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@c$N@w barely clings to life!@n.", true, ch, nullptr, vict, TO_NOTVICT);
                     vict->decCurLF(lifeloss);
-                    send_to_char(vict, "@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss).c_str());
+                    vict->sendf("@D[@CLifeforce@D: @R-%s@D]\n", add_commas(lifeloss).c_str());
                     if ((vict->getCurLF()) >= (vict->getMaxLF()) * 0.05) {
-                        send_to_char(vict, "@YYou recover a bit thanks to your strong life force.@n\r\n");
+                        vict->sendf("@YYou recover a bit thanks to your strong life force.@n\r\n");
                         vict->incCurHealth((vict->getMaxLF()) * .05);
                         vict->decCurLFPercent(.05);
                     } else {
@@ -4845,8 +4845,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
                         ch->incCurKI(raise);
                     }
-                    send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
-                    send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
+                    ch->sendf("@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
+                    vict->sendf("@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     int64_t healhp = (long double) (GET_MAX_HIT(vict)) * 0.12;
                     if (AFF_FLAGGED(ch, AFF_METAMORPH) ) {
                         act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -4862,7 +4862,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     }
                     if (!is_sparring(ch) && IS_NPC(vict)) {
                         if (type == 0 && rand_number(1, 100) >= 97) {
-                            send_to_char(ch,
+                            ch->sendf(
                                          "@YY@yo@Yu @yg@Ya@yi@Yn@y s@Yo@ym@Ye @yb@Yo@yn@Yu@ys @Ye@yx@Yp@ye@Yr@yi@Ye@yn@Yc@ye@Y!@n\r\n");
                             gain = gain * 0.05;
                             gain += 1;
@@ -4887,8 +4887,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         }
                     }
                 } else if (dmg <= 1) {
-                    send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n\r\n");
-                    send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
+                    ch->sendf("@D[@GDamage@W: @BPitiful...@D]@n\r\n");
+                    vict->sendf("@D[@rDamage@W: @BPitiful...@D]@n\r\n");
                 }
 
                 vict->decCurHealthPercent(1, 0);
@@ -4926,49 +4926,49 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
                     ch->incCurKI(dmg * .05);
                 }
-                send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
-                send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
+                ch->sendf("@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
+                vict->sendf("@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                 //int64_t healhp = GET_HIT(vict) * 0.12;
                 if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     if (IS_ANDROID(vict)) {
-                        send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                        ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
-                        send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                        ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
-                        send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                        ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
-                        send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                        ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else {
-                        send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
+                        ch->sendf(" @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
                     }
                 } else {
-                    send_to_char(ch, "\r\n");
+                    ch->sendf("\r\n");
                 }
             } else {//if (!IS_NPC(ch)) {
                 if (dmg <= 1 && suppresso == false && !PRF_FLAGGED(ch, PRF_NODEC)) {
-                    send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
-                    send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
+                    ch->sendf("@D[@GDamage@W: @BPitiful...@D]@n");
+                    vict->sendf("@D[@rDamage@W: @BPitiful...@D]@n\r\n");
                     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         if (IS_ANDROID(vict)) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
+                            ch->sendf(" @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
                         }
                     } else {
-                        send_to_char(ch, "\r\n");
+                        ch->sendf("\r\n");
                     }
                 } else if (dmg > 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     double percentageDamage = (double) dmg / (double) vict->getMaxPL();
                     int64_t calcdamage = GET_HIT(vict) * percentageDamage;
 
-                    send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
-                    send_to_char(vict, "@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(calcdamage).c_str());
+                    ch->sendf("@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
+                    vict->sendf("@D[@rDamage@W: @R%s @c-Suppression-@D]@n\r\n", add_commas(calcdamage).c_str());
                     //int64_t healhp = GET_HIT(vict) * 0.12;
                     //Translate the damage into a percentage of max LF, remove that from the player instead
                     
@@ -4976,35 +4976,35 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
                     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         if (IS_ANDROID(vict)) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
+                            ch->sendf(" @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
                         }
                     } else {
-                        send_to_char(ch, "\r\n");
+                        ch->sendf("\r\n");
                     }
                 } else if (dmg <= 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
-                    send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
+                    ch->sendf("@D[@GDamage@W: @BPitiful...@D]@n");
                     if (GET_EQ(ch, WEAR_EYE) && vict) {
                         if (IS_ANDROID(vict) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
+                            ch->sendf(" @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
+                            ch->sendf(" @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
                         }
                     } else {
-                        send_to_char(ch, "\r\n");
+                        ch->sendf("\r\n");
                     }
                 }
             }
@@ -5016,7 +5016,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         /* Increases GET_FURY for halfbreeds who get damaged. */
 
         if (!is_sparring(ch) && IS_HALFBREED(vict) && GET_FURY(vict) < 100 && !PLR_FLAGGED(vict, PLR_FURY)) {
-            send_to_char(vict, "@RYour fury increases a little bit!@n\r\n");
+            vict->sendf("@RYour fury increases a little bit!@n\r\n");
             GET_FURY(vict) += 1;
         }
 
@@ -5340,7 +5340,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
             break;
         default:
             if (COMBO(ch) != -1) {
-                send_to_char(ch, "@RYou have cut your combo short with the wrong attack!@n\r\n");
+                ch->sendf("@RYou have cut your combo short with the wrong attack!@n\r\n");
             }
             COMBO(ch) = -1;
             COMBHITS(ch) = 0;
@@ -5384,7 +5384,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 4:
                 case 5:
                     if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R punch @Gnext!@n\r\n");
+                        ch->sendf("@GYou have a chance for a COMBO! Try a@R punch @Gnext!@n\r\n");
                         COMBO(ch) = 0;
                         success = true;
                     }
@@ -5395,7 +5395,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 9:
                 case 10:
                     if (GET_SKILL(ch, SKILL_KICK) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R kick @Gnext!@n\r\n");
+                        ch->sendf("@GYou have a chance for a COMBO! Try a@R kick @Gnext!@n\r\n");
                         COMBO(ch) = 1;
                         success = true;
                     }
@@ -5405,7 +5405,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 13:
                 case 14:
                     if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try an@R elbow @Gnext!@n\r\n");
+                        ch->sendf("@GYou have a chance for a COMBO! Try an@R elbow @Gnext!@n\r\n");
                         COMBO(ch) = 2;
                         success = true;
                     }
@@ -5414,7 +5414,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 16:
                 case 17:
                     if (GET_SKILL(ch, SKILL_KNEE) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R knee @Gnext!@n\r\n");
+                        ch->sendf("@GYou have a chance for a COMBO! Try a@R knee @Gnext!@n\r\n");
                         COMBO(ch) = 3;
                         success = true;
                     }
@@ -5422,7 +5422,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 18:
                 case 19:
                     if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R roundhouse @Gnext!@n\r\n");
+                        ch->sendf("@GYou have a chance for a COMBO! Try a@R roundhouse @Gnext!@n\r\n");
                         COMBO(ch) = 4;
                         success = true;
                     }
@@ -5430,21 +5430,21 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 20:
                 case 21:
                     if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try an@R uppercut @Gnext!@n\r\n");
+                        ch->sendf("@GYou have a chance for a COMBO! Try an@R uppercut @Gnext!@n\r\n");
                         COMBO(ch) = 5;
                         success = true;
                     }
                     break;
                 case 22:
                     if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R heeldrop @Gnext!@n\r\n");
+                        ch->sendf("@GYou have a chance for a COMBO! Try a@R heeldrop @Gnext!@n\r\n");
                         COMBO(ch) = 8;
                         success = true;
                     }
                     break;
                 case 24:
                     if (GET_SKILL(ch, SKILL_SLAM) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R slam @Gnext!@n\r\n");
+                        ch->sendf("@GYou have a chance for a COMBO! Try a@R slam @Gnext!@n\r\n");
                         COMBO(ch) = 6;
                         success = true;
                     }
@@ -5466,7 +5466,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 7:
                     case 8:
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 2;
                             success = true;
@@ -5481,7 +5481,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 15:
                     case 16:
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 3;
                             success = true;
@@ -5493,7 +5493,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 20:
                     case 21:
                         if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 5;
                             success = true;
@@ -5505,7 +5505,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 25:
                     case 26:
                         if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 4;
                             success = true;
@@ -5515,21 +5515,21 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 28:
                     case 29:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                             COMBO(ch) = 51;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 56;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 52;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 6;
                             success = true;
@@ -5541,21 +5541,21 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 33:
                     case 34:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                             COMBO(ch) = 51;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 56;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 52;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 8;
                             success = true;
@@ -5575,7 +5575,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 9:
                     case 10:
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 2;
                             success = true;
@@ -5592,7 +5592,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 19:
                     case 20:
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 3;
                             success = true;
@@ -5602,7 +5602,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 22:
                     case 23:
                         if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 0;
                             success = true;
@@ -5612,7 +5612,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 26:
                     case 27:
                         if (GET_SKILL(ch, SKILL_KICK) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 1;
                             success = true;
@@ -5621,7 +5621,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 29:
                     case 30:
                         if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 5;
                             success = true;
@@ -5632,7 +5632,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 33:
                     case 34:
                         if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 4;
                             success = true;
@@ -5640,21 +5640,21 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         break;
                     case 35:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                             COMBO(ch) = 51;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 56;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 52;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 6;
                             success = true;
@@ -5662,21 +5662,21 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         break;
                     case 36:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                             COMBO(ch) = 51;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 56;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 52;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 8;
                             success = true;
@@ -5691,7 +5691,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 4:
                     case 5:
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 2;
                             success = true;
@@ -5703,7 +5703,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 9:
                     case 10:
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 3;
                             success = true;
@@ -5718,7 +5718,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 17:
                     case 18:
                         if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 0;
                             success = true;
@@ -5733,7 +5733,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 25:
                     case 26:
                         if (GET_SKILL(ch, SKILL_KICK) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 1;
                             success = true;
@@ -5743,7 +5743,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 28:
                     case 29:
                         if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 5;
                             success = true;
@@ -5752,7 +5752,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 30:
                     case 31:
                         if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 4;
                             success = true;
@@ -5761,21 +5761,21 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 32:
                     case 33:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                             COMBO(ch) = 51;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 56;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 52;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 6;
                             success = true;
@@ -5783,21 +5783,21 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         break;
                     case 34:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
                             COMBO(ch) = 51;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 56;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 52;
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 8;
                             success = true;
@@ -5811,7 +5811,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 3:
                     case 4:
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 2;
                             success = true;
@@ -5822,7 +5822,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 7:
                     case 8:
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 3;
                             success = true;
@@ -5839,7 +5839,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 17:
                     case 18:
                         if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 0;
                             success = true;
@@ -5856,7 +5856,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 27:
                     case 28:
                         if (GET_SKILL(ch, SKILL_KICK) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 1;
                             success = true;
@@ -5864,7 +5864,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         break;
                     case 29:
                         if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 5;
                             success = true;
@@ -5872,7 +5872,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         break;
                     case 30:
                         if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 4;
                             success = true;
@@ -5885,7 +5885,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 2:
                     case 3:
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 2;
                             success = true;
@@ -5895,7 +5895,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 5:
                     case 6:
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 3;
                             success = true;
@@ -5914,7 +5914,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 17:
                     case 18:
                         if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 0;
                             success = true;
@@ -5933,7 +5933,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 29:
                     case 30:
                         if (GET_SKILL(ch, SKILL_KICK) > 0) {
-                            send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
+                            ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
                                          COMBHITS(ch));
                             COMBO(ch) = 1;
                             success = true;
@@ -5945,9 +5945,9 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
         return COMBHITS(ch);
     } else if (LASTATK(ch) == COMBO(ch) && COMBHITS(ch) >= physical_mastery(ch)) {
         COMBHITS(ch) += 1;
-        send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Combo FINISHED for massive damage@G!@n\r\n", COMBHITS(ch));
+        ch->sendf("@D(@GC-c-combo Bonus @gx%d@G!@D)@C Combo FINISHED for massive damage@G!@n\r\n", COMBHITS(ch));
     } else if (COMBO(ch) != LASTATK(ch) && COMBO(ch) > -1) {
-        send_to_char(ch, "@GCombo failed!@n\r\n");
+        ch->sendf("@GCombo failed!@n\r\n");
         COMBO(ch) = -1;
         COMBHITS(ch) = 0;
         return 0;

@@ -445,12 +445,12 @@ int know_skill(struct char_data *ch, int skill) {
         know = 2;
 
     if (know == 0) {
-        send_to_char(ch, "You do not know how to perform %s.\r\n", spell_info[skill].name);
+        ch->sendf("You do not know how to perform %s.\r\n", spell_info[skill].name);
         know = 0;
     } else if (know == 2) {
-        send_to_char(ch, "@WYou try to use @M%s@W but lingering thoughts of a certain kiss distracts you!@n\r\n",
+        ch->sendf("@WYou try to use @M%s@W but lingering thoughts of a certain kiss distracts you!@n\r\n",
                      spell_info[skill].name);
-        send_to_char(ch, "You must sleep in order to cure this.\r\n");
+        ch->sendf("You must sleep in order to cure this.\r\n");
         know = 0;
     }
 
@@ -745,7 +745,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
         vict->clearFlag(FlagType::Affect,AFF_PURSUIT);
         return (true);
     } else {
-        send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
+        ch->sendf("@RYou fail to pursue after them!@n\r\n");
         if (FIGHTING(ch)) {
             stop_fighting(ch);
         }
@@ -1584,12 +1584,12 @@ int block_calc(struct char_data *ch) {
                 act("$n tries to leave, but can't outrun you!", true, ch, nullptr, blocker, TO_VICT);
                 act("You try to leave, but can't outrun $N!", true, ch, nullptr, blocker, TO_CHAR);
                 if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 1) {
-                    send_to_char(blocker, "You're now floating in the air.\r\n");
+                    blocker->sendf("You're now floating in the air.\r\n");
 
                     blocker->setFlag(FlagType::Affect, AFF_FLYING);
                     GET_ALT(blocker) = GET_ALT(ch);
                 } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 2) {
-                    send_to_char(blocker, "You're now floating high in the sky.\r\n");
+                    blocker->sendf("You're now floating high in the sky.\r\n");
                     blocker->setFlag(FlagType::Affect, AFF_FLYING);
                     GET_ALT(blocker) = GET_ALT(ch);
                 }
@@ -1712,7 +1712,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
     GET_MOLT_EXP(ch) += moltgain;
 
     if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
-        send_to_char(ch,
+        ch->sendf(
                      "You are dead and all evolution experience is reduced. Gains are divided by 100 or reduced to a minimum of 1.\r\n");
         moltgain /= 100;
     }
@@ -1740,11 +1740,11 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@G$n's@g @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. Suddenly $e sheds the damaged @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn and reveals a stronger version that had been growing underneath!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@RPL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n",
+            ch->sendf("@D[@RPL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n",
                          add_commas(plgain).c_str(), add_commas(stamgain).c_str(),
                          GET_ARMOR(ch) >= 50000 ? "50k CAP" : add_commas(armorgain).c_str());
         } else {
-            send_to_char(ch,
+            ch->sendf(
                          "@gYou are unable to evolve while your evolution level is higher than twice your character level.@n\r\n");
         }
     }
@@ -2317,11 +2317,11 @@ void improve_skill(struct char_data *ch, int skill, int num) {
     SET_SKILL(ch, skill, percent);
     if (newpercent >= 1) {
         sprintf(skillbuf, "@WYou feel you have learned something new about @G%s@W.@n\r\n", spell_info[skill].name);
-        send_to_char(ch, skillbuf);
+        ch->sendf(skillbuf);
         if (GET_SKILL_BASE(ch, skill) >= 100) {
-            send_to_char(ch, "You learned a lot by mastering that skill.\r\n");
+            ch->sendf("You learned a lot by mastering that skill.\r\n");
             if (perf_skill(skill)) {
-                send_to_char(ch, "You can now choose a perfection for this skill (help perfection).\r\n");
+                ch->sendf("You can now choose a perfection for this skill (help perfection).\r\n");
             }
             if (IS_KONATSU(ch) && skill == SKILL_PARRY) {
                 SET_SKILL(ch, skill, GET_SKILL_BASE(ch, skill) + 5);
@@ -2522,7 +2522,7 @@ void mudlog(int type, int level, int file, const char *str, ...) {
         if (type > (PRF_FLAGGED(i->character, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(i->character, PRF_LOG2) ? 2 : 0))
             continue;
 
-        send_to_char(i->character, "@g%s@n", buf);
+        i->character->sendf("@g%s@n", buf);
     }
 }
 

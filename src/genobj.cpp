@@ -72,77 +72,6 @@ nlohmann::json obj_data::serialize() {
 }
 
 
-nlohmann::json obj_data::serializeInstance() {
-    auto j = serializeBase();
-
-    if(!script->vars.empty()) {
-        j["dgvariables"] = script->vars;
-    }
-
-    if(world.contains(room_loaded)) j["room_loaded"] = room_loaded;
-
-    return j;
-}
-
-
-void obj_data::deserializeBase(const nlohmann::json &j) {
-    deserializeUnit(j);
-
-    if(j.contains("value")) {
-        for(auto & i : j["value"]) {
-            value[i[0].get<int>()] = i[1];
-        }
-    }
-
-    if(j.contains("type_flag")) type_flag = j["type_flag"];
-    if(j.contains("level")) level = j["level"];
-
-    if(j.contains("weight")) weight = j["weight"];
-    if(j.contains("cost")) cost = j["cost"];
-    if(j.contains("cost_per_day")) cost_per_day = j["cost_per_day"];
-
-    if(j.contains("affected")) {
-        int counter = 0;
-        for(auto & i : j["affected"]) {
-            affected[counter].deserialize(i);
-            counter++;
-        }
-    }
-
-}
-
-
-void obj_data::deserializeProto(const nlohmann::json& j) {
-    deserializeBase(j);
-
-}
-
-
-obj_data::obj_data(const nlohmann::json &j) : obj_data() {
-    deserializeProto(j);
-
-    if ((GET_OBJ_TYPE(this) == ITEM_PORTAL || \
-       GET_OBJ_TYPE(this) == ITEM_HATCH) && \
-       (!GET_OBJ_VAL(this, VAL_DOOR_DCLOCK) || \
-        !GET_OBJ_VAL(this, VAL_DOOR_DCHIDE))) {
-        GET_OBJ_VAL(this, VAL_DOOR_DCLOCK) = 20;
-        GET_OBJ_VAL(this, VAL_DOOR_DCHIDE) = 20;
-    }
-
-    GET_OBJ_SIZE(this) = SIZE_MEDIUM;
-
-/* check to make sure that weight of containers exceeds curr. quantity */
-    if (GET_OBJ_TYPE(this) == ITEM_DRINKCON ||
-        GET_OBJ_TYPE(this) == ITEM_FOUNTAIN) {
-        if (GET_OBJ_WEIGHT(this) < GET_OBJ_VAL(this, 1))
-            GET_OBJ_WEIGHT(this) = GET_OBJ_VAL(this, 1) + 5;
-    }
-    /* *** make sure portal objects have their timer set correctly *** */
-    if (GET_OBJ_TYPE(this) == ITEM_PORTAL) {
-        GET_OBJ_TIMER(this) = -1;
-    }
-    
-}
 
 
 void obj_data::activate() {
@@ -561,44 +490,6 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
 }
 
 
-void obj_data::setProto(std::shared_ptr<item_proto> pro) {
-    proto = pro;
-    vn = proto->vn;
-    zone = real_zone_by_thing(vn);
-    value = proto->value;
-    type_flag = proto->type_flag;
-    level = proto->level;
-    weight = proto->weight;
-    cost = proto->cost;
-    cost_per_day = proto->cost_per_day;
-    affected = proto->affected;
-    timer = proto->timer;
-}
-
-std::string obj_data::getName() {
-    if(name) return name;
-    if(proto->name) return proto->name;
-    return "nameless object";
-}
-
-std::string obj_data::getShortDesc() {
-    if(short_description) return short_description;
-    if(proto->short_description) return proto->short_description;
-    return "a nameless object";
-}
-
-std::string obj_data::getLookDesc() {
-    if(look_description) return look_description;
-    if(proto->look_description) return proto->look_description;
-    return "A nameless object is here.";
-}
-
-std::string obj_data::getRoomDesc() {
-    if(room_description) return room_description;
-    if(proto->room_description) return proto->room_description;
-    return "A nameless object is here.";
-}
-
 std::string obj_data::getUnitClass() {
     return "obj_data";
 }
@@ -615,12 +506,11 @@ obj_data::~obj_data() {
 
 void obj_data::assignTriggers() {
     // Nothing to do without a prototype...
-    if(!proto) return;
 
     // remove all duplicates from i->proto_script but do not change its order otherwise.
     std::set<trig_vnum> existVnums;
     std::set<trig_vnum> valid;
-    for(auto t : proto->proto_script) valid.insert(t);
+    for(auto t : proto_script) valid.insert(t);
     
     for(auto t : script->dgScripts) existVnums.insert(t->parent->vn);
     bool added = false;
@@ -638,7 +528,7 @@ void obj_data::assignTriggers() {
     }
     if(removed) script->dgScripts = validScripts;
 
-    for(auto p : proto->proto_script) {
+    for(auto p : proto_script) {
         // only add if they don't already have one...
         if(!existVnums.contains(p)) {
             script->addTrigger(read_trigger(p), -1);
@@ -650,7 +540,7 @@ void obj_data::assignTriggers() {
     if(added || removed) {
         // we need to sort i->script->dgScripts by the order of i->proto_script
         std::list<std::shared_ptr<trig_data>> sorted;
-        for(auto p : proto->proto_script) {
+        for(auto p : proto_script) {
             for(auto t : script->dgScripts) {
                 if(t->parent->vn == p) {
                     sorted.push_back(t);
@@ -660,12 +550,4 @@ void obj_data::assignTriggers() {
         }
         script->dgScripts = sorted;
     }
-}
-
-std::string obj_data::scriptString() {
-    if(!proto) return "";
-    std::vector<std::string> vnums;
-    for(auto p : proto->proto_script) vnums.emplace_back(std::move(std::to_string(p)));
-
-    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }

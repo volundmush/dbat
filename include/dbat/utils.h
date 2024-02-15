@@ -1280,50 +1280,12 @@ void send_to_planet(int type, int planet, fmt::string_view format, Args&&... arg
 }
 
 template<typename... Args>
-void send_to_room(struct room_data *room, fmt::string_view format, Args&&... args) {
-    if(!room) return;
-
-    try {
-        std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
-        if(formatted_string.empty()) return;
-
-        for(auto i : room->getPeople()) {
-            if(!i->desc) continue;
-            i->desc->output += formatted_string;
-        }
-
-        for(auto d = descriptor_list; d; d = d->next) {
-            if (STATE(d) != CON_PLAYING)
-                continue;
-
-            if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-                if (arena_watch(d->character) == room->vn) {
-                    d->output += "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n";
-                    d->output += formatted_string;
-                }
-            }
-            if (GET_EAVESDROP(d->character) > 0) {
-                int roll = rand_number(1, 101);
-                if (GET_EAVESDROP(d->character) == room->vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
-                    d->output += "@c-----Eavesdrop-----@n\r\n%s\r\n@c-----Eavesdrop-----@n\r\n";
-                    d->output += formatted_string;
-                }
-            }
-
-        }
-    }
-    catch(const std::exception &e) {
-        basic_mud_log("SYSERR: Format error in send_to_room: %s", e.what());
-        basic_mud_log("Template was: %s", format.data());
-    }
-}
-
-template<typename... Args>
 void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
     if(!world.contains(room)) return;
     auto r = dynamic_cast<room_data*>(world[room]);
     if(!r) return;
-    send_to_room(r, format, std::forward<Args>(args)...);
+    auto out = fmt::sprintf(format, std::forward<Args>(args)...);
+    r->sendText(out);
 }
 
 template<typename... Args>
@@ -1333,8 +1295,15 @@ void send_to_range(room_vnum start, room_vnum finish, fmt::string_view format, A
         return;
     }
 
+    auto out = fmt::sprintf(format, std::forward<Args>(args)...);
+
     for(auto r = start; r <= finish; r++) {
-        send_to_room(r, format, std::forward<Args>(args)...);
+        if(world.contains(r)) {
+            auto ru = dynamic_cast<room_data*>(world[r]);
+            if(ru) {
+                ru->sendText(out);
+            }
+        }
     }
 
 }
@@ -1401,13 +1370,6 @@ size_t write_to_output(struct descriptor_data *t, fmt::string_view format, Args&
     }
 }
 
-template<typename... Args>
-size_t send_to_char(struct char_data *ch, fmt::string_view format, Args&&... args) {
-    if(ch->desc) {
-        return write_to_output(ch->desc, format, std::forward<Args>(args)...);
-    }
-    return 0;
-}
 
 extern bool spar_friendly(struct char_data *ch, struct char_data *npc);
 

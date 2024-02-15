@@ -37,7 +37,7 @@ void affect_update(uint64_t heartPulse, double deltaTime) {
                 if (af->type > 0)
                     if (!af->next || (af->next->type != af->type) || (af->next->duration > 0)) {
                         if (spell_info[af->type].wear_off_msg)
-                            send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
+                            i->sendf("%s\r\n", spell_info[af->type].wear_off_msg);
                         if (GET_SPEEDBOOST(i) > 0 && af->type == SPELL_HAYASA) {
                             GET_SPEEDBOOST(i) = 0;
                         }
@@ -80,7 +80,7 @@ void affect_update_violence(uint64_t heartPulse, double deltaTime) {
                     if (!af->next || (af->next->type != af->type) ||
                         (af->next->duration > 0))
                         if (spell_info[af->type].wear_off_msg)
-                            send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
+                            i->sendf("%s\r\n", spell_info[af->type].wear_off_msg);
                 if (af->bitvector == AFF_SUMMONED) {
                     stop_follower(i);
                     if (!DEAD(i))

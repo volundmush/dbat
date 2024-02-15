@@ -39,19 +39,19 @@ ACMD(do_oasis_hedit) {
         return;
 
     if (HEDITS == true) {
-        send_to_char(ch, "Sorry, only one person can edit help files at a time.\r\n");
+        ch->sendf("Sorry, only one person can edit help files at a time.\r\n");
         return;
     }
 
     if (GET_ADMLEVEL(ch) < 4 && (!strcasecmp("Tepsih", GET_NAME(ch)) && !strcasecmp("Rogoshen", GET_NAME(ch)))) {
-        send_to_char(ch, "Sorry you are incapable of editing help files at this time.\r\n");
+        ch->sendf("Sorry you are incapable of editing help files at this time.\r\n");
         return;
     }
 
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Please specify a help entry to edit.\r\n");
+        ch->sendf("Please specify a help entry to edit.\r\n");
         return;
     }
 
@@ -61,7 +61,7 @@ ACMD(do_oasis_hedit) {
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true, "OLC: %s saves help files.",
                GET_NAME(ch));
         hedit_save_to_disk(d);
-        send_to_char(ch, "Saving help files.\r\n");
+        ch->sendf("Saving help files.\r\n");
         return;
     }
 
@@ -77,10 +77,10 @@ ACMD(do_oasis_hedit) {
     OLC_ZNUM(d) = search_help((const char *) OLC_STORAGE(d), ADMLVL_IMPL);
 
     if (OLC_ZNUM(d) == NOWHERE) {
-        send_to_char(ch, "Do you wish to add the '%s' help file? ", OLC_STORAGE(d));
+        ch->sendf("Do you wish to add the '%s' help file? ", OLC_STORAGE(d));
         OLC_MODE(d) = HEDIT_CONFIRM_ADD;
     } else {
-        send_to_char(ch, "Do you wish to edit the '%s' help file? ", help_table[OLC_ZNUM(d)].keywords);
+        ch->sendf("Do you wish to edit the '%s' help file? ", help_table[OLC_ZNUM(d)].keywords);
         OLC_MODE(d) = HEDIT_CONFIRM_EDIT;
     }
 
@@ -405,7 +405,7 @@ ACMD(do_helpcheck) {
     int i, count = 0;
     size_t len = 0, nlen;
 
-    send_to_char(ch, "Commands without help entries:\r\n");
+    ch->sendf("Commands without help entries:\r\n");
 
     for (i = 1; *(complete_cmd_info[i].command) != '\n'; i++) {
         if (complete_cmd_info[i].command_pointer != do_action && complete_cmd_info[i].minimum_level >= 0) {
@@ -438,12 +438,12 @@ ACMD(do_hindex) {
     skip_spaces(&argument);
 
     if (!*argument) {
-        send_to_char(ch, "Usage: hindex <string>\r\n");
+        ch->sendf("Usage: hindex <string>\r\n");
         for (i = 0; i < top_of_helpt; i++) {
             num++;
         }
         if (num > 0 && GET_ADMLEVEL(ch) > 0) {
-            send_to_char(ch, "\r\n@D[@Y%d@y Help files in index.@D]@n\r\n", num);
+            ch->sendf("\r\n@D[@Y%d@y Help files in index.@D]@n\r\n", num);
         }
         return;
     }

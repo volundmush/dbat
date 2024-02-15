@@ -1065,54 +1065,54 @@ void find_uid_name(char *uid, char *name, size_t nlen) {
 
 /* general function to display stats on script sc */
 void script_stat(char_data *ch, const std::shared_ptr<script_data>& sc) {
-    send_to_char(ch, "Global Variables: %d\r\n", sc->vars.size());
+    ch->sendf("Global Variables: %d\r\n", sc->vars.size());
     char buf1[MAX_STRING_LENGTH];
 
     for (auto &[name, value] : sc->vars) {
         if (!value.empty() && value[0] == UID_CHAR) {
             if(auto u = resolveUID(value); u) {
-                send_to_char(ch, "    %15s:  %s\r\n", name, u->getName());
+                ch->sendf("    %15s:  %s\r\n", name, u->getName());
             } else {
-                send_to_char(ch, "   -BAD UID: %s", value);
+                ch->sendf("   -BAD UID: %s", value);
             }
         } else
-            send_to_char(ch, "    %15s:  %s\r\n", name, value);
+            ch->sendf("    %15s:  %s\r\n", name, value);
     }
 
     for (auto t : sc->dgScripts) {
-        send_to_char(ch, "\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
+        ch->sendf("\r\n  Trigger: @y%s@n, VNum: [@y%5d@n], RNum: [%5d]\r\n",
                      GET_TRIG_NAME(t), GET_TRIG_VNUM(t), GET_TRIG_RNUM(t));
 
         if (t->parent->attach_type == OBJ_TRIGGER) {
-            send_to_char(ch, "  Trigger Intended Assignment: Objects\r\n");
+            ch->sendf("  Trigger Intended Assignment: Objects\r\n");
             sprintbit(GET_TRIG_TYPE(t), otrig_types, buf1, sizeof(buf1));
         } else if (t->parent->attach_type == WLD_TRIGGER) {
-            send_to_char(ch, "  Trigger Intended Assignment: Rooms\r\n");
+            ch->sendf("  Trigger Intended Assignment: Rooms\r\n");
             sprintbit(GET_TRIG_TYPE(t), wtrig_types, buf1, sizeof(buf1));
         } else {
-            send_to_char(ch, "  Trigger Intended Assignment: Mobiles\r\n");
+            ch->sendf("  Trigger Intended Assignment: Mobiles\r\n");
             sprintbit(GET_TRIG_TYPE(t), trig_types, buf1, sizeof(buf1));
         }
 
-        send_to_char(ch, "  Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
+        ch->sendf("  Trigger Type: %s, Numeric Arg: %d, Arg list: %s\r\n",
                      buf1, GET_TRIG_NARG(t),
                      GET_TRIG_ARG(t));
 
         if (t->waiting != 0.0) {
-            send_to_char(ch, "    Wait: %f seconds, Current line: %s\r\n",
+            ch->sendf("    Wait: %f seconds, Current line: %s\r\n",
                          t->waiting,
                          t->parent->lines[t->lineNumber]);
-            send_to_char(ch, "  Variables: %d\r\n", t->vars.size());
+            ch->sendf("  Variables: %d\r\n", t->vars.size());
 
             for (auto &[name, value] : t->vars) {
                 if (!value.empty() && value[0] == UID_CHAR) {
                     if(auto u = resolveUID(value); u) {
-                        send_to_char(ch, "    %15s:  %s\r\n", name, u->getName().c_str());
+                        ch->sendf("    %15s:  %s\r\n", name, u->getName().c_str());
                     } else {
-                        send_to_char(ch, "   -BAD UID: %s", value);
+                        ch->sendf("   -BAD UID: %s", value);
                     }
                 } else {
-                    send_to_char(ch, "    %15s:  %s\r\n", name, value);
+                    ch->sendf("    %15s:  %s\r\n", name, value);
                 }
             }
         }
@@ -1121,9 +1121,9 @@ void script_stat(char_data *ch, const std::shared_ptr<script_data>& sc) {
 
 
 void do_sstat(struct char_data *ch, struct unit_data *ud) {
-    send_to_char(ch, "Triggers:\r\n");
+    ch->sendf("Triggers:\r\n");
     if (!SCRIPT(ud)) {
-        send_to_char(ch, "  None.\r\n");
+        ch->sendf("  None.\r\n");
         return;
     }
 
@@ -1167,7 +1167,7 @@ ACMD(do_attach) {
     two_arguments(argument, targ_name, loc_name);
 
     if (!*arg || !*targ_name || !*trig_name) {
-        send_to_char(ch, "Usage: attach { mob | obj | room } { trigger } { name } [ location ]\r\n");
+        ch->sendf("Usage: attach { mob | obj | room } { trigger } { name } [ location ]\r\n");
         return;
     }
 
@@ -1185,27 +1185,27 @@ ACMD(do_attach) {
                 }
 
             if (!victim) {
-                send_to_char(ch, "That mob does not exist.\r\n");
+                ch->sendf("That mob does not exist.\r\n");
                 return;
             }
         }
         if (!IS_NPC(victim)) {
-            send_to_char(ch, "Players can't have scripts.\r\n");
+            ch->sendf("Players can't have scripts.\r\n");
             return;
         }
         if (!can_edit_zone(ch, ch->getRoom()->zone)) {
-            send_to_char(ch, "You can only attach triggers in your own zone\r\n");
+            ch->sendf("You can only attach triggers in your own zone\r\n");
             return;
         }
         /* have a valid mob, now get trigger */
         auto trig = read_trigger(tn);
         if (!trig) {
-            send_to_char(ch, "That trigger does not exist.\r\n");
+            ch->sendf("That trigger does not exist.\r\n");
             return;
         }
         victim->script->addTrigger(trig, loc);
 
-        send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
+        ch->sendf("Trigger %d (%s) attached to %s [%d].\r\n",
                      tn, GET_TRIG_NAME(trig), GET_SHORT(victim), GET_MOB_VNUM(victim));
     } else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
         object = get_obj_vis(ch, targ_name, nullptr);
@@ -1216,26 +1216,26 @@ ACMD(do_attach) {
                 object = ch->findObjectVnum(num_arg);
 
                 if (!object) {
-                    send_to_char(ch, "That object does not exist.\r\n");
+                    ch->sendf("That object does not exist.\r\n");
                     return;
                 }
             }
         }
 
         if (!can_edit_zone(ch, ch->getRoom()->zone)) {
-            send_to_char(ch, "You can only attach triggers in your own zone\r\n");
+            ch->sendf("You can only attach triggers in your own zone\r\n");
             return;
         }
         /* have a valid obj, now get trigger */
         auto trig = read_trigger(tn);
         if (!trig) {
-            send_to_char(ch, "That trigger does not exist.\r\n");
+            ch->sendf("That trigger does not exist.\r\n");
             return;
         }
 
         object->script->addTrigger(trig, loc);
 
-        send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
+        ch->sendf("Trigger %d (%s) attached to %s [%d].\r\n",
                      tn, GET_TRIG_NAME(trig),
                      (withPlaceholder(object->getShortDesc(), object->name),
                      GET_OBJ_VNUM(object)));
@@ -1248,28 +1248,28 @@ ACMD(do_attach) {
             rnum = NOWHERE;
 
         if (rnum == NOWHERE) {
-            send_to_char(ch, "You need to supply a room number or . for current room.\r\n");
+            ch->sendf("You need to supply a room number or . for current room.\r\n");
             return;
         }
 
         if (!can_edit_zone(ch, world[rnum]->zone)) {
-            send_to_char(ch, "You can only attach triggers in your own zone\r\n");
+            ch->sendf("You can only attach triggers in your own zone\r\n");
             return;
         }
         /* have a valid room, now get trigger */
         auto trig = read_trigger(tn);
         if (!trig) {
-            send_to_char(ch, "That trigger does not exist.\r\n");
+            ch->sendf("That trigger does not exist.\r\n");
             return;
         }
 
         room = dynamic_cast<room_data*>(world[rnum]);
         room->script->addTrigger(trig, loc);
 
-        send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
+        ch->sendf("Trigger %d (%s) attached to room %d.\r\n",
                      tn, GET_TRIG_NAME(trig), world[rnum]->vn);
     } else
-        send_to_char(ch, "Please specify 'mob', 'obj', or 'room'.\r\n");
+        ch->sendf("Please specify 'mob', 'obj', or 'room'.\r\n");
 }
 
 
@@ -1320,7 +1320,7 @@ void script_vlog(const char *format, va_list args) {
         if (NRM > (PRF_FLAGGED(i->character, PRF_LOG1) ? 1 : 0) + (PRF_FLAGGED(i->character, PRF_LOG2) ? 2 : 0))
             continue;
 
-        send_to_char(i->character, "@g%s@n", output);
+        i->character->sendf("@g%s@n", output);
     }
 }
 
@@ -1814,41 +1814,41 @@ ACMD(do_vdelete) {
 
 
     if (!*buf || !*buf2) {
-        send_to_char(ch, "Usage: vdelete { <variablename> | * | all } <id>\r\n");
+        ch->sendf("Usage: vdelete { <variablename> | * | all } <id>\r\n");
         return;
     }
 
     auto u = resolveUID(buf2);
     if(!u) {
-        send_to_char(ch, "vdelete: illegal id specified.\r\n");
+        ch->sendf("vdelete: illegal id specified.\r\n");
         return;
     }
 
     auto sc_remote = u->script;
 
     if(!sc_remote) {
-        send_to_char(ch, "vdelete: cannot resolve specified id.\r\n");
+        ch->sendf("vdelete: cannot resolve specified id.\r\n");
         return;
     }
 
     if (sc_remote->vars.empty()) {
-        send_to_char(ch, "That id represents no global variables.(2)\r\n");
+        ch->sendf("That id represents no global variables.(2)\r\n");
         return;
     }
 
     if (*var == '*' || is_abbrev(var, "all")) {
         sc_remote->vars.clear();
-        send_to_char(ch, "All variables deleted from that id.\r\n");
+        ch->sendf("All variables deleted from that id.\r\n");
         return;
     }
 
     /* find the global */
     if (sc_remote->delVar(var)) {
-        send_to_char(ch, "That variable cannot be located.\r\n");
+        ch->sendf("That variable cannot be located.\r\n");
         return;
     }
 
-    send_to_char(ch, "Deleted.\r\n");
+    ch->sendf("Deleted.\r\n");
 }
 
 /*
@@ -1926,11 +1926,11 @@ ACMD(do_tstat) {
     if (*str) {
         rnum = real_trigger(atoi(str));
         if (rnum == NOTHING) {
-            send_to_char(ch, "That vnum does not exist.\r\n");
+            ch->sendf("That vnum does not exist.\r\n");
             return;
         }
     } else
-        send_to_char(ch, "Usage: tstat <vnum>\r\n");
+        ch->sendf("Usage: tstat <vnum>\r\n");
 }
 
 /* read a line in from a file, return the number of chars read */

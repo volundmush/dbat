@@ -157,23 +157,7 @@ room_data::~room_data() {
     }
 }
 
-std::optional<vnum> room_data::getMatchingArea(std::function<bool(const area_data &)> f) {
-    std::optional<vnum> parent = area;
-    while(parent) {
-        auto &a = areas[parent.value()];
-        if(f(a)) return parent;
-        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.extraVn) {
-            // we need to find the a.objectVnum in the world by scanning object_list...
-            if (auto obj = get_obj_num(a.extraVn.value()); obj) {
-                if(auto r = obj->getRoom(); r) {
-                    return r->getMatchingArea(f);
-                }
-            }
-        }
-        parent = a.parent;
-    }
-    return std::nullopt;
-}
+
 
 static bool checkGravity(const area_data &a) {
     return a.gravity.has_value();
@@ -440,11 +424,4 @@ void room_data::assignTriggers() {
         script->dgScripts = sorted;
     }
 
-}
-
-std::string room_data::scriptString() {
-    std::vector<std::string> vnums;
-    for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
-
-    return fmt::format("@D[@wT{}@D]@n", fmt::join(vnums, ","));
 }

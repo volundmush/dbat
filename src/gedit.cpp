@@ -51,11 +51,11 @@ ACMD(do_oasis_gedit) {
     buf3 = two_arguments(argument, buf1, buf2);
 
     if (!*buf1) {
-        send_to_char(ch, "Specify a guild VNUM to edit.\r\n");
+        ch->sendf("Specify a guild VNUM to edit.\r\n");
         return;
     } else if (!isdigit(*buf1)) {
         if (strcasecmp("save", buf1) != 0) {
-            send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+            ch->sendf("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
         }
 
@@ -73,7 +73,7 @@ ACMD(do_oasis_gedit) {
         }
 
         if (number == NOWHERE) {
-            send_to_char(ch, "Save which zone?\r\n");
+            ch->sendf("Save which zone?\r\n");
             return;
         }
     }
@@ -90,7 +90,7 @@ ACMD(do_oasis_gedit) {
     for (d = descriptor_list; d; d = d->next) {
         if (STATE(d) == CON_GEDIT) {
             if (d->olc && OLC_NUM(d) == number) {
-                send_to_char(ch, "That guild is currently being edited by %s.\r\n",
+                ch->sendf("That guild is currently being edited by %s.\r\n",
                              PERS(d->character, ch));
                 return;
             }
@@ -117,7 +117,7 @@ ACMD(do_oasis_gedit) {
     /** Find the zone.                                                         **/
     /****************************************************************************/
     if ((OLC_ZNUM(d) = real_zone_by_thing(number)) == NOWHERE) {
-        send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
+        ch->sendf("Sorry, there is no zone for that number!\r\n");
         free(d->olc);
         d->olc = nullptr;
         return;
@@ -138,7 +138,7 @@ ACMD(do_oasis_gedit) {
     }
 
     if (save) {
-        send_to_char(ch, "Saving all guilds in zone %d.\r\n",
+        ch->sendf("Saving all guilds in zone %d.\r\n",
                      zone_table[OLC_ZNUM(d)].number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves guild info for zone %d.",
@@ -418,7 +418,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             switch (*arg) {
                 case 'y':
                 case 'Y':
-                    send_to_char(d->character, "Saving Guild to memory.\r\n");
+                    d->character->sendf("Saving Guild to memory.\r\n");
                     gedit_save_internally(d);
                     mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                            "OLC: %s edits guild %d", GET_NAME(d->character), OLC_NUM(d));

@@ -28,14 +28,14 @@ ACMD(do_action) {
     struct obj_data *targ;
 
     if ((act_nr = find_action(cmd)) < 0) {
-        send_to_char(ch, "That action is not supported.\r\n");
+        ch->sendf("That action is not supported.\r\n");
         return;
     }
 
     action = &soc_mess_list[act_nr];
 
     if (!argument || !*argument) {
-        send_to_char(ch, "%s\r\n", action->char_no_arg);
+        ch->sendf("%s\r\n", action->char_no_arg);
         act(action->others_no_arg, action->hide, ch, nullptr, nullptr, TO_ROOM);
         return;
     }
@@ -43,7 +43,7 @@ ACMD(do_action) {
     two_arguments(argument, arg, part);
 
     if ((!action->char_body_found) && (*part)) {
-        send_to_char(ch, "Sorry, this social does not support body parts.\r\n");
+        ch->sendf("Sorry, this social does not support body parts.\r\n");
         return;
     }
 
@@ -67,17 +67,17 @@ ACMD(do_action) {
             }
         }
         if (action->not_found)
-            send_to_char(ch, "%s\r\n", action->not_found);
+            ch->sendf("%s\r\n", action->not_found);
         else
-            send_to_char(ch, "I don't see anything by that name here.\r\n");
+            ch->sendf("I don't see anything by that name here.\r\n");
         return;
     }
 
     if (vict == ch) {
         if (action->char_auto)
-            send_to_char(ch, "%s\r\n", action->char_auto);
+            ch->sendf("%s\r\n", action->char_auto);
         else
-            send_to_char(ch, "Erm, no.\r\n");
+            ch->sendf("Erm, no.\r\n");
         act(action->others_auto, action->hide, ch, nullptr, nullptr, TO_ROOM);
         return;
     }
@@ -105,10 +105,10 @@ ACMD(do_insult) {
 
     if (*arg) {
         if (!(victim = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
-            send_to_char(ch, "Can't hear you!\r\n");
+            ch->sendf("Can't hear you!\r\n");
         else {
             if (victim != ch) {
-                send_to_char(ch, "You insult %s.\r\n", GET_NAME(victim));
+                ch->sendf("You insult %s.\r\n", GET_NAME(victim));
 
                 switch (rand_number(0, 2)) {
                     case 0:
@@ -136,11 +136,11 @@ ACMD(do_insult) {
 
                 act("$n insults $N.", true, ch, nullptr, victim, TO_NOTVICT);
             } else {            /* ch == victim */
-                send_to_char(ch, "You feel insulted.\r\n");
+                ch->sendf("You feel insulted.\r\n");
             }
         }
     } else
-        send_to_char(ch, "I'm sure you don't want to insult *everybody*...\r\n");
+        ch->sendf("I'm sure you don't want to insult *everybody*...\r\n");
 }
 
 void boot_social_messages() {
@@ -437,7 +437,7 @@ ACMD(do_gmote) {
     }
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SOUNDPROOF)) {
-        send_to_char(ch, "The walls seem to absorb your actions.\r\n");
+        ch->sendf("The walls seem to absorb your actions.\r\n");
         return;
     }
 
@@ -448,16 +448,16 @@ ACMD(do_gmote) {
 
     if (!*arg) {
         if (!action->others_no_arg || !*action->others_no_arg) {
-            send_to_char(ch, "Who are you going to do that to?\r\n");
+            ch->sendf("Who are you going to do that to?\r\n");
             return;
         }
         snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_no_arg);
     } else if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
-        send_to_char(ch, "%s\r\n", action->not_found);
+        ch->sendf("%s\r\n", action->not_found);
         return;
     } else if (vict == ch) {
         if (!action->others_auto || !*action->others_auto) {
-            send_to_char(ch, "%s\r\n", action->char_auto);
+            ch->sendf("%s\r\n", action->char_auto);
             return;
         }
         snprintf(buf, sizeof(buf), "@D[@BOOC@D: @g%s@D]@n", action->others_auto);

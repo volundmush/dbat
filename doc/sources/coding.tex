@@ -500,7 +500,7 @@ Our changes give us:
       act("Hello, $n.", FALSE, ch, NULL, NULL, TO_CHAR);
       return;                   /* We're done for this case. */
     } else if (!(targ = get_char_vis(ch, arg, FIND_CHAR_ROOM))) {
-      send_to_char(ch, NOPERSON);
+      ch->sendf(NOPERSON);
       return;                   /* Done for this case. */
     }
 
@@ -629,7 +629,7 @@ After you have a good idea of what you want to do, why you want to do it, and wh
 Now your skill can be gained and practiced by players of an appropriate level and class, but it doesn't actually do anything. Most skills, like "\texttt{bash}" and "\texttt{kick}", are simply commands that perform skill checks.  The setup and everything else is the same as in Section 3.1, Adding Commands.  The body needs to account for (1) whether the command's user can access the skill and (2) whether they were successful in using the skill.  For (1), CircleMUD uses the idiom
 \begin{verbatim}
   if (IS_NPC(ch) || !GET_SKILL(ch, SKILL_xxx)) {
-    send_to_char(ch, "You have no idea how.\r\n");
+    ch->sendf("You have no idea how.\r\n");
     return;
   }
 \end{verbatim}

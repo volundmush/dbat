@@ -223,7 +223,7 @@ void free_text_files() {
  * To fix later, if desired. -gg 6/24/99
  */
 ACMD(do_reboot) {
-    send_to_char(ch, "Not a thing anymore.\r\n");
+    ch->sendf("Not a thing anymore.\r\n");
 }
 
 static nlohmann::json load_from_file(const std::filesystem::path& loc, const std::string& name) {

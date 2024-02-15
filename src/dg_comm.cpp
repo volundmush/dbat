@@ -116,7 +116,7 @@ void sub_write_to_char(struct char_data *ch, char *tokens[],
     strcat(sb, tokens[i]);
     strcat(sb, "\r\n");
     sb[0] = toupper(sb[0]);
-    send_to_char(ch, "%s", sb);
+    ch->sendf("%s", sb);
 }
 
 
@@ -490,6 +490,6 @@ void send_to_worlds(struct char_data *ch) {
         auto op = i->character->getMatchingArea(area_data::isPlanet);
         if(!op) continue;
         if(op.value() != p.value()) continue;
-        send_to_char(i->character, "%s", message);
+        i->character->sendf("%s", message);
     }
 }

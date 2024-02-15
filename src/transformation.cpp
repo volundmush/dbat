@@ -657,7 +657,7 @@ namespace trans {
                     double healthBoost = 0.1;
                     if(ch->health < 0.75) {
                         healthBoost = (1 - ch->health) * 4;
-                        send_to_char(ch, "@RYou feel your own pain infuse the attack.\r\n@n");
+                        ch->sendf("@RYou feel your own pain infuse the attack.\r\n@n");
                     }
 	                return healthBoost;
                 }},
@@ -1319,12 +1319,12 @@ namespace trans {
     void displayForms(char_data* ch) {
         auto forms = getFormsFor(ch);
         if (forms.empty()) {
-            send_to_char(ch, "You have no forms. Bummer.\r\n");
+            ch->sendf("You have no forms. Bummer.\r\n");
             return;
         }
 
-        send_to_char(ch, "              @YForms@n\r\n");
-        send_to_char(ch, "@b------------------------------------------------@n\r\n");
+        ch->sendf("              @YForms@n\r\n");
+        ch->sendf("@b------------------------------------------------@n\r\n");
         auto pl = ch->getBasePL();
         std::vector<std::string> form_names;
         for (auto form: forms) {
@@ -1334,33 +1334,33 @@ namespace trans {
             else if (getMasteryTier(ch, form) > 1)
                 name = "@BMASTERED@n " + name;
             auto req = getRequiredPL(ch, form);
-            send_to_char(ch, "@W%s@n @R-@G %s BPL Req\r\n", name,
+            ch->sendf("@W%s@n @R-@G %s BPL Req\r\n", name,
                          (pl >= (req * 0.75)) ? add_commas(req) : "??????????");
             if (pl >= req) form_names.push_back(getAbbr(ch, form));
         }
 
-        send_to_char(ch, "@b------------------------------------------------@n\r\n");
+        ch->sendf("@b------------------------------------------------@n\r\n");
         if (!form_names.empty()) {
             auto names = join(form_names, ", ");
-            send_to_char(ch, "Available Forms: @W%s@n\r\n", names.c_str());
+            ch->sendf("Available Forms: @W%s@n\r\n", names.c_str());
         }
 
         const double epsilon = 0.05;  // A small tolerance value for floating point comparison
 
         if (ch->transBonus <= -0.3 + epsilon) {
-            send_to_char(ch, "\r\n@WYou have @wGREAT@W transformation BPL Requirements.@n\r\n");
+            ch->sendf("\r\n@WYou have @wGREAT@W transformation BPL Requirements.@n\r\n");
         } else if (ch->transBonus <= -0.2 + epsilon) {
-            send_to_char(ch, "\r\n@MYou have @mabove average@M transformation BPL Requirements.@n\r\n");
+            ch->sendf("\r\n@MYou have @mabove average@M transformation BPL Requirements.@n\r\n");
         } else if (ch->transBonus <= -0.1 + epsilon) {
-            send_to_char(ch, "\r\n@BYou have @bslightly above average@B transformation BPL Requirements.@n\r\n");
+            ch->sendf("\r\n@BYou have @bslightly above average@B transformation BPL Requirements.@n\r\n");
         } else if (ch->transBonus < 0.1 - epsilon) {
-            send_to_char(ch, "\r\n@GYou have @gaverage@G transformation BPL Requirements.@n\r\n");
+            ch->sendf("\r\n@GYou have @gaverage@G transformation BPL Requirements.@n\r\n");
         } else if (ch->transBonus < 0.2 - epsilon) {
-            send_to_char(ch, "\r\n@YYou have @yslightly below average@Y transformation BPL Requirements.@n\r\n");
+            ch->sendf("\r\n@YYou have @yslightly below average@Y transformation BPL Requirements.@n\r\n");
         } else if (ch->transBonus < 0.3 - epsilon) {
-            send_to_char(ch, "\r\n@CYou have @cbelow average@C transformation BPL Requirements.@n\r\n");
+            ch->sendf("\r\n@CYou have @cbelow average@C transformation BPL Requirements.@n\r\n");
         } else {
-            send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
+            ch->sendf("\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
         }
     }
 

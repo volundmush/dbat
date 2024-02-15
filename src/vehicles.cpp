@@ -31,65 +31,65 @@ static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle);
 static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle) {
     auto r = vehicle->getRoom();
     if (r->uid == 50) { // Above Earth
-        send_to_char(ch, "@D------------------[ @GEarth@D ]------------------@c\n");
-        send_to_char(ch, "Nexus City, South Ocean, Nexus field, Cherry Blossom Mountain,\n");
-        send_to_char(ch, "Sandy Desert, Northern Plains, Korin's Tower, Kami's Lookout,\n");
-        send_to_char(ch, "Shadow Forest, Decrepit Area, West City, Hercule Beach, Satan City.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @GEarth@D ]------------------@c\n");
+        ch->sendf("Nexus City, South Ocean, Nexus field, Cherry Blossom Mountain,\n");
+        ch->sendf("Sandy Desert, Northern Plains, Korin's Tower, Kami's Lookout,\n");
+        ch->sendf("Shadow Forest, Decrepit Area, West City, Hercule Beach, Satan City.\n");
+        ch->sendf("@D---------------------------------------------@n\n");
     } else if (r->uid == 51) { // Above Frigid
-        send_to_char(ch, "@D------------------[ @CFrigid@D ]------------------@c\n");
-        send_to_char(ch, "Ice Crown City, Ice Highway, Topica Snowfield, Glug's Volcano,\n");
-        send_to_char(ch, "Platonic Sea, Slave City, Acturian Woods, Desolate Demesne,\n");
-        send_to_char(ch, "Chateau Ishran, Wyrm Spine Mountain, Cloud Ruler Temple, Koltoan mine.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @CFrigid@D ]------------------@c\n");
+        ch->sendf("Ice Crown City, Ice Highway, Topica Snowfield, Glug's Volcano,\n");
+        ch->sendf("Platonic Sea, Slave City, Acturian Woods, Desolate Demesne,\n");
+        ch->sendf("Chateau Ishran, Wyrm Spine Mountain, Cloud Ruler Temple, Koltoan mine.\n");
+        ch->sendf("@D---------------------------------------------@n\n");
     } else if (r->uid == 52) { // Above Konack
-        send_to_char(ch, "@D------------------[ @MKonack@D ]------------------@c\n");
-        send_to_char(ch, "Great Oroist Temple, Elzthuan Forest, Mazori Farm, Dres,\n");
-        send_to_char(ch, "Colvian Farm, St Alucia, Meridius Memorial, Desert of Illusion,\n");
-        send_to_char(ch, "Plains of Confusion, Turlon Fair, Wetlands, Kerberos,\n");
-        send_to_char(ch, "Shaeras Mansion, Slavinus Ravine, Furian Citadel.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @MKonack@D ]------------------@c\n");
+        ch->sendf("Great Oroist Temple, Elzthuan Forest, Mazori Farm, Dres,\n");
+        ch->sendf("Colvian Farm, St Alucia, Meridius Memorial, Desert of Illusion,\n");
+        ch->sendf("Plains of Confusion, Turlon Fair, Wetlands, Kerberos,\n");
+        ch->sendf("Shaeras Mansion, Slavinus Ravine, Furian Citadel.\n");
+        ch->sendf("@D---------------------------------------------@n\n");
     } else if (r->uid == 53) { // Above Vegeta
-        send_to_char(ch, "@D------------------[ @YVegeta@D ]------------------@c\n");
-        send_to_char(ch, "Vegetos City, Blood Dunes, Ancestral Mountains, Destopa Swamp,\n");
-        send_to_char(ch, "Pride Forest, Pride tower, Ruby Cave.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @YVegeta@D ]------------------@c\n");
+        ch->sendf("Vegetos City, Blood Dunes, Ancestral Mountains, Destopa Swamp,\n");
+        ch->sendf("Pride Forest, Pride tower, Ruby Cave.\n");
+        ch->sendf("@D---------------------------------------------@n\n");
     } else if (r->uid == 198) { // Above Cerria
-        send_to_char(ch, "@D------------------[ @MCerria@D ]------------------@c\n");
-        send_to_char(ch, "Cerria Colony, Fistarl Volcano, Crystalline Forest.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @MCerria@D ]------------------@c\n");
+        ch->sendf("Cerria Colony, Fistarl Volcano, Crystalline Forest.\n");
+        ch->sendf("@D---------------------------------------------@n\n");
     } else if (r->uid == 54) { // Above Namek
-        send_to_char(ch, "@D------------------[ @gNamek@D ]------------------@c\n");
-        send_to_char(ch, "Senzu Village, Guru's House, Crystalline Cave, Elder Village,\n");
-        send_to_char(ch, "Frieza's Ship, Kakureta Village.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @gNamek@D ]------------------@c\n");
+        ch->sendf("Senzu Village, Guru's House, Crystalline Cave, Elder Village,\n");
+        ch->sendf("Frieza's Ship, Kakureta Village.\n");
+        ch->sendf("@D---------------------------------------------@n\n");
     } else if (r->uid == 55) { // Above Aether
-        send_to_char(ch, "@D------------------[ @BAether@D ]-----------------@c\n");
-        send_to_char(ch, "Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
-        send_to_char(ch, "Silent Glade.\n");
-        send_to_char(ch, "@D--------------------------------------------@n\n");
-        send_to_char(ch, "@D------------------[ @BAether@D ]-----------------@c\n");
-        send_to_char(ch, "Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
-        send_to_char(ch, "Silent Glade.\n");
-        send_to_char(ch, "@D--------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @BAether@D ]-----------------@c\n");
+        ch->sendf("Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
+        ch->sendf("Silent Glade.\n");
+        ch->sendf("@D--------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @BAether@D ]-----------------@c\n");
+        ch->sendf("Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
+        ch->sendf("Silent Glade.\n");
+        ch->sendf("@D--------------------------------------------@n\n");
     } else if (r->uid == 56) { // Above Yardrat
-        send_to_char(ch, "@D-----------------[ @mYardrat@D ]-----------------@c\n");
-        send_to_char(ch, "Yardra City, Jade Forest, Jade Cliffs, Mount Valaria.\n");
-        send_to_char(ch, "@D-------------------------------------------@n\n");
+        ch->sendf("@D-----------------[ @mYardrat@D ]-----------------@c\n");
+        ch->sendf("Yardra City, Jade Forest, Jade Cliffs, Mount Valaria.\n");
+        ch->sendf("@D-------------------------------------------@n\n");
     } else if (r->uid == 57) { // Above Zennith
-        send_to_char(ch, "@D-----------------[ @CZennith@D ]-----------------@c\n");
-        send_to_char(ch, "Utatlan City, Zenith Jungle, Ancient Castle.\n");
-        send_to_char(ch, "@D-------------------------------------------@n\n");
+        ch->sendf("@D-----------------[ @CZennith@D ]-----------------@c\n");
+        ch->sendf("Utatlan City, Zenith Jungle, Ancient Castle.\n");
+        ch->sendf("@D-------------------------------------------@n\n");
     } else if (r->uid == 58) { // Above Kanassa
-        send_to_char(ch, "@D-----------------[ @CKanassa@D ]-----------------@c\n");
-        send_to_char(ch, "Aquis City, Yunkai Pirate Base.\n");
-        send_to_char(ch, "@D-------------------------------------------@n\n");
+        ch->sendf("@D-----------------[ @CKanassa@D ]-----------------@c\n");
+        ch->sendf("Aquis City, Yunkai Pirate Base.\n");
+        ch->sendf("@D-------------------------------------------@n\n");
     } else if (r->uid == 59) { // Above Arlia
-        send_to_char(ch, "@D------------------[ @MArlia@D ]------------------@c\n");
-        send_to_char(ch, "Janacre, Arlian Wasteland, Arlia Mine, Kemabra Wastes.\n");
-        send_to_char(ch, "@D---------------------------------------------@n\n");
+        ch->sendf("@D------------------[ @MArlia@D ]------------------@c\n");
+        ch->sendf("Janacre, Arlian Wasteland, Arlia Mine, Kemabra Wastes.\n");
+        ch->sendf("@D---------------------------------------------@n\n");
     } else {
-        send_to_char(ch, "You are not above a planet!\r\n");
+        ch->sendf("You are not above a planet!\r\n");
     }
 }
 
@@ -145,7 +145,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
             return (landspot);
             return (13020);
         } else {
-            send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("You don't know where that made up place is, but decided to land anyway.");
             return (300);
         }
     } else if (r->uid == 51) { // Above Frigid
@@ -174,7 +174,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Koltoan Mine")) {
             return (4944);
         } else {
-            send_to_char(ch, "You don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("You don't know where that made up place is, but decided to land anyway.");
             return (4264);
         }
     } else if (r->uid == 52) { // Above Konack
@@ -211,7 +211,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Furian Citadel")) {
             return (9949);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (8006);
         }
     } else if (r->uid == 53) { // Above Vegeta
@@ -230,7 +230,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Ruby Cave")) {
             return (2615);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (2226);
         }
     } else if (r->uid == 54) { // Above Namek
@@ -247,7 +247,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Kakureta Village")) {
             return (10922);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (11600);
         }
     } else if (r->uid == 55) { // Above Aether
@@ -262,7 +262,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Silent Glade")) {
             return (12480);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (12010);
         }
     } else if (r->uid == 56) { // Above Yardrat
@@ -275,7 +275,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Mount Valaria")) {
             return (14300);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (14008);
         }
     } else if (r->uid == 198) { // Above Cerria
@@ -286,7 +286,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Fistarl Volcano")) {
             return (17420);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (17531);
         }
     } else if (r->uid == 57) { // Above Zennith
@@ -297,7 +297,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Ancient Castle")) {
             return (19600);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (3412);
         }
     } else if (r->uid == 58) { // Above Kanassa
@@ -306,7 +306,7 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Yunkai Pirate Base")) {
             return (15655);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (14904);
         }
     } else if (r->uid == 59) { // Above Arlia
@@ -319,11 +319,11 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
         } else if (!strcasecmp(arg, "Kemabra Wastes")) {
             return (16816);
         } else {
-            send_to_char(ch, "you don't know where that made up place is, but decided to land anyway.");
+            ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (16009);
         }
     } else {
-        send_to_char(ch, "You are not above a planet!\r\n");
+        ch->sendf("You are not above a planet!\r\n");
         return (-1);
     }
 }
@@ -364,26 +364,26 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
     auto d = room->dir_option[dir];
     if(!d) {
-        send_to_char(ch, "@wApparently %s doesn't exist there.\r\n", dirs[dir]);
+        ch->sendf("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
     }
     auto dest = d->getDestination();
     if(!dest) {
-        send_to_char(ch, "@wApparently %s doesn't exist there.\r\n", dirs[dir]);
+        ch->sendf("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
     }
 
     if(IS_SET(d->exit_info, EX_CLOSED)) {
         if (d->keyword)
-            send_to_char(ch, "@wThe %s seems to be closed.\r\n", fname(d->keyword));
+            ch->sendf("@wThe %s seems to be closed.\r\n", fname(d->keyword));
         else
-            send_to_char(ch, "@wIt seems to be closed.\r\n");
+            ch->sendf("@wIt seems to be closed.\r\n");
         return;
     }
 
     if (!dest->checkFlag(FlagType::Room, ROOM_VEHICLE) && !dest->checkFlag(FlagType::Room, ROOM_SPACE)) {
         /* But the vehicle can't go that way*/
-        send_to_char(ch, "@wThe ship can't fit there!\r\n");
+        ch->sendf("@wThe ship can't fit there!\r\n");
         return;
     }
 
@@ -420,10 +420,10 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     if (ch->desc != nullptr)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
-    send_to_char(ch, "@wThe ship flies onward:\r\n");
+    ch->sendf("@wThe ship flies onward:\r\n");
     ch->sendEvent(vehicle->getLocation()->renderLocationFor(ch));
     if (controls) {
-        send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
+        ch->sendf("@RFUEL@D: %s%s@n\r\n",
                      GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
                      add_commas(GET_FUEL(controls)).c_str());
     }
@@ -436,7 +436,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         if(!dest) continue;
         if(!IS_SET(e->exit_info, EX_CLOSED)) continue;
 
-        send_to_room(dest->vn, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+        dest->sendfContents("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
     sprintf(buf, "%s @wflies in from the %s.\r\n",
             vehicle->getShortDesc().c_str(), dirs[rev_dir[dir]]);
@@ -454,17 +454,17 @@ ACMD(do_drive) {
     one_argument(argument, arg3);
 
     if (!HAS_ARMS(ch)) {
-        send_to_char(ch, "You have no arms!\r\n");
+        ch->sendf("You have no arms!\r\n");
         return;
     }
 
     if (!strcasecmp(arg3, "unready") && !IS_NPC(ch)) {
         if (!PLR_FLAGGED(ch, PLR_PILOTING)) {
-            send_to_char(ch, "You are already not flying the ship!\r\n");
+            ch->sendf("You are already not flying the ship!\r\n");
             return;
         } else if (PLR_FLAGGED(ch, PLR_PILOTING)) {
             act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@wYou stand up from the pilot's seat.\r\n");
+            ch->sendf("@wYou stand up from the pilot's seat.\r\n");
             GET_POS(ch) = POS_STANDING;
             ch->playerFlags.reset(PLR_PILOTING);
             return;
@@ -472,20 +472,20 @@ ACMD(do_drive) {
     }
     if (!strcasecmp(arg3, "ready") && !IS_NPC(ch)) {
         if (!(controls = find_control(ch))) {
-            send_to_char(ch, "@wYou have nothing to control here!\r\n");
+            ch->sendf("@wYou have nothing to control here!\r\n");
             return;
         }
         struct descriptor_data *d;
         if (PLR_FLAGGED(ch, PLR_PILOTING)) {
-            send_to_char(ch, "@wYou are already piloting the ship, try [pilot unready].\r\n");
+            ch->sendf("@wYou are already piloting the ship, try [pilot unready].\r\n");
             return;
         }
         if (CARRYING(ch)) {
-            send_to_char(ch, "@wYou are busy carrying someone.\r\n");
+            ch->sendf("@wYou are busy carrying someone.\r\n");
             return;
         }
         if (DRAGGING(ch)) {
-            send_to_char(ch, "@wYou are busy dragging someone.\r\n");
+            ch->sendf("@wYou are busy dragging someone.\r\n");
             return;
         }
         for (d = descriptor_list; d; d = d->next) {
@@ -496,7 +496,7 @@ ACMD(do_drive) {
                 continue;
             }
             if (PLR_FLAGGED(d->character, PLR_PILOTING) && IN_ROOM(d->character) == IN_ROOM(ch)) {
-                send_to_char(ch, "@w%s is already piloting the ship!\r\n", GET_NAME(d->character));
+                ch->sendf("@w%s is already piloting the ship!\r\n", GET_NAME(d->character));
                 count = 1;
                 return;
             }
@@ -509,25 +509,25 @@ ACMD(do_drive) {
         ch->playerFlags.set(PLR_PILOTING);
         act("@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_POS(ch) = POS_SITTING;
-        send_to_char(ch, "@wYou take a seat in the pilot's chair.\r\n");
+        ch->sendf("@wYou take a seat in the pilot's chair.\r\n");
         return;
     } else if (!PLR_FLAGGED(ch, PLR_PILOTING)) {
-        send_to_char(ch, "@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
+        ch->sendf("@wYou need to be seated in the pilot's seat.\r\n[Enter: Pilot ready/unready]\r\n");
     } else if (GET_POS(ch) < POS_SLEEPING) {
-        send_to_char(ch, "@wYou can't see anything but stars!\r\n");
+        ch->sendf("@wYou can't see anything but stars!\r\n");
     } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
-        send_to_char(ch, "@wYou can't see a damned thing, you're blind!\r\n");
+        ch->sendf("@wYou can't see a damned thing, you're blind!\r\n");
     } else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch)) {
-        send_to_char(ch, "@wIt is pitch black...\r\n");
+        ch->sendf("@wIt is pitch black...\r\n");
     } else if (!(controls = find_control(ch))) {
-        send_to_char(ch, "@wYou have nothing to control here!\r\n");
+        ch->sendf("@wYou have nothing to control here!\r\n");
     } else if (invalid_align(ch, controls) ||
                invalid_class(ch, controls) ||
                invalid_race(ch, controls)) {
         act("@wYou are zapped by $p@w and instantly step away from it.", false, ch, controls, nullptr, TO_CHAR);
         act("@w$n@w is zapped by $p@w and instantly steps away from it.", false, ch, controls, nullptr, TO_ROOM);
     } else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0)))) {
-        send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
+        ch->sendf("@wYou can't find anything to pilot.\r\n");
     } else {
 
         char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -536,12 +536,12 @@ ACMD(do_drive) {
         half_chop(argument, arg, arg2);
 
         if (GET_FUEL(controls) <= 0) {
-            send_to_char(ch, "Your ship doesn't have enough fuel to move.\r\n");
+            ch->sendf("Your ship doesn't have enough fuel to move.\r\n");
             return;
         }
 
         if (!*arg) {
-            send_to_char(ch, "@wPilot, yes, but where?\r\n");
+            ch->sendf("@wPilot, yes, but where?\r\n");
         } else if (is_abbrev(arg, "into") ||
                    is_abbrev(arg, "onto")) {
             /* Driving into another vehicle */
@@ -550,7 +550,7 @@ ACMD(do_drive) {
             drive_outof_vehicle(ch, vehicle);
         } else {
             if (!OBJVAL_FLAGGED(vehicle, CONT_CLOSED)) {
-                send_to_char(ch, "@wThe hatch is open, are you insane!?\r\n");
+                ch->sendf("@wThe hatch is open, are you insane!?\r\n");
                 return;
             }
 
@@ -730,12 +730,12 @@ ACMD(do_drive) {
 
                 if (!*arg2) {
                     if (GET_OBJ_VNUM(vehicle) >= 46000 && GET_OBJ_VNUM(vehicle) <= 46099) {
-                        send_to_char(ch, "@wLand on which pad? 1, 2, 3 or 4?\r\n");
-                        send_to_char(ch,
+                        ch->sendf("@wLand on which pad? 1, 2, 3 or 4?\r\n");
+                        ch->sendf(
                                      "@CSpecial Ship Ability@D: @wpilot land (area name)\n@GExample@D: @wpilot land Nexus City\r\n");
                         disp_ship_locations(ch, vehicle);
                     } else {
-                        send_to_char(ch, "@wLand on which pad? 1, 2, 3 or 4?\r\n");
+                        ch->sendf("@wLand on which pad? 1, 2, 3 or 4?\r\n");
                     }
                     return;
                 }
@@ -744,7 +744,7 @@ ACMD(do_drive) {
                 if (GET_OBJ_VNUM(vehicle) > 46099) {
                     if (strcasecmp(arg2, "1") && strcasecmp(arg2, "2") && strcasecmp(arg2, "3") &&
                         strcasecmp(arg2, "4")) {
-                        send_to_char(ch, "@wLand on which pad? 1, 2, 3 or 4?\r\n");
+                        ch->sendf("@wLand on which pad? 1, 2, 3 or 4?\r\n");
                         return;
                     }
                 } else if (strcasecmp(arg2, "1") && strcasecmp(arg2, "2") && strcasecmp(arg2, "3") &&
@@ -974,7 +974,7 @@ ACMD(do_drive) {
                             TO_ROOM);
                     }
                 } else {
-                    send_to_char(ch, "@wYou are not where you can land, you need to be in a planet's low orbit.@n\r\n");
+                    ch->sendf("@wYou are not where you can land, you need to be in a planet's low orbit.@n\r\n");
                 }
                 auto room = vehicle->getRoom();
                 if (land_location <= 50) {
@@ -999,7 +999,7 @@ ACMD(do_drive) {
                 auto room = vehicle->getRoom();
                 auto dest = room->getLaunchDestination();
                 if(!dest) {
-                    send_to_char(ch, "@wYou are not on a planet.@n\r\n");
+                    ch->sendf("@wYou are not on a planet.@n\r\n");
                     return;
                 }
                 rnum = dest.value();
@@ -1009,7 +1009,7 @@ ACMD(do_drive) {
                 act("@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, TO_ROOM);
                 act("@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_CHAR);
                 act("@wThe ship has reached low orbit.@n", false, ch, nullptr, nullptr, TO_ROOM);
-                send_to_room(vehicle->getRoom(), "@R%s @Rshudders before blasting off into the sky!@n",
+                vehicle->getRoom()->sendfContents("@R%s @Rshudders before blasting off into the sky!@n",
                              vehicle->getShortDesc().c_str());
                 if (GET_FUELCOUNT(controls) < 5) {
                     GET_FUELCOUNT(controls) += 1;
@@ -1023,29 +1023,29 @@ ACMD(do_drive) {
                 vehicle->removeFromLocation();
                 vehicle->lookAtLocation();
                 ch->sendEvent(vehicle->getLocation()->renderLocationFor(ch));
-                send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
+                ch->sendf("@RFUEL@D: %s%s@n\r\n",
                              GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
                              add_commas(GET_FUEL(controls)).c_str());
             } else if (!strcasecmp(arg, "mark")) {
                 int rnum = 0;
                 if (!*arg2) {
-                    send_to_char(ch, "@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
+                    ch->sendf("@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
                     return;
                 }
                 if (!!strcasecmp(arg2, "1") && !!strcasecmp(arg2, "2") && !!strcasecmp(arg2, "3")) {
-                    send_to_char(ch, "@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
+                    ch->sendf("@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
                     return;
                 }
 
                 if (!ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_SPACE)) {
-                    send_to_char(ch, "@wYou need to be in space to launch a marker buoy.\r\n");
+                    ch->sendf("@wYou need to be in space to launch a marker buoy.\r\n");
                     return;
                 }
 
                 rnum = IN_ROOM(vehicle);
 
                 if (GET_RADAR1(ch) > 0 && !strcasecmp(arg2, "1")) {
-                    send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
+                    ch->sendf("@wYou need to 'deactivate' that marker.\r\n");
                     return;
                 } else if (GET_RADAR1(ch) <= 0 && !strcasecmp(arg2, "1")) {
                     act("@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr,
@@ -1054,7 +1054,7 @@ ACMD(do_drive) {
                     GET_RADAR1(ch) = GET_ROOM_VNUM(IN_ROOM(vehicle));
                 }
                 if (GET_RADAR2(ch) > 0 && !strcasecmp(arg2, "2")) {
-                    send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
+                    ch->sendf("@wYou need to 'deactivate' that marker.\r\n");
                     return;
                 } else if (GET_RADAR2(ch) <= 0 && !strcasecmp(arg2, "2")) {
                     act("@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr,
@@ -1063,7 +1063,7 @@ ACMD(do_drive) {
                     GET_RADAR2(ch) = GET_ROOM_VNUM(IN_ROOM(vehicle));
                 }
                 if (GET_RADAR3(ch) > 0 && !strcasecmp(arg2, "3")) {
-                    send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
+                    ch->sendf("@wYou need to 'deactivate' that marker.\r\n");
                     return;
                 } else if (GET_RADAR3(ch) <= 0 && !strcasecmp(arg2, "3")) {
                     act("@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr,
@@ -1073,16 +1073,16 @@ ACMD(do_drive) {
                 }
             } else if (!strcasecmp(arg, "deactivate")) {
                 if (!*arg2) {
-                    send_to_char(ch, "@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
+                    ch->sendf("@wWhich marker are you wanting to launch? 1, 2, or 3?\r\n");
                     return;
                 }
                 if (!!strcasecmp(arg2, "1") && !!strcasecmp(arg2, "2") && !!strcasecmp(arg2, "3")) {
-                    send_to_char(ch, "@wWhich marker are you wanting to deactivate? 1, 2, or 3?\r\n");
+                    ch->sendf("@wWhich marker are you wanting to deactivate? 1, 2, or 3?\r\n");
                     return;
                 }
 
                 if (GET_RADAR1(ch) <= 0 && !strcasecmp(arg2, "1")) {
-                    send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
+                    ch->sendf("@wYou haven't launched that buoy yet.\r\n");
                     return;
                 } else if (GET_RADAR1(ch) > 0 && !strcasecmp(arg2, "1")) {
                     act("@wYou enter buoy one's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr,
@@ -1091,7 +1091,7 @@ ACMD(do_drive) {
                     GET_RADAR1(ch) = 0;
                 }
                 if (GET_RADAR2(ch) <= 0 && !strcasecmp(arg2, "2")) {
-                    send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
+                    ch->sendf("@wYou haven't launched that buoy yet.\r\n");
                     return;
                 } else if (GET_RADAR2(ch) > 0 && !strcasecmp(arg2, "2")) {
                     act("@wYou enter buoy two's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr,
@@ -1100,7 +1100,7 @@ ACMD(do_drive) {
                     GET_RADAR2(ch) = 0;
                 }
                 if (GET_RADAR3(ch) <= 0 && !strcasecmp(arg2, "3")) {
-                    send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
+                    ch->sendf("@wYou haven't launched that buoy yet.\r\n");
                     return;
                 } else if (GET_RADAR3(ch) > 0 && !strcasecmp(arg2, "3")) {
                     act("@wYou enter buoy three's code and command it to deactivate.@n\r\n", false, ch, nullptr,
@@ -1109,13 +1109,13 @@ ACMD(do_drive) {
                     GET_RADAR3(ch) = 0;
                 }
             } else {
-                send_to_char(ch, "@wThats not a valid direction.\r\n");
-                send_to_char(ch, "Try one of these.\r\n");
-                send_to_char(ch, "[ north/n  | south/s  | east/e  |  west/w  ]\r\n");
-                send_to_char(ch, "[ up/u | down/d | northeast/ne/northe | northwest/nw/northw]\r\n");
-                send_to_char(ch, "[  southeast/se/southe  |  southwest/sw/southw]\r\n");
-                send_to_char(ch, "[  into  |  onto  |  inside  |  outside  ]@n\r\n");
-                send_to_char(ch, "[ land | launch ]@n\r\n");
+                ch->sendf("@wThats not a valid direction.\r\n");
+                ch->sendf("Try one of these.\r\n");
+                ch->sendf("[ north/n  | south/s  | east/e  |  west/w  ]\r\n");
+                ch->sendf("[ up/u | down/d | northeast/ne/northe | northwest/nw/northw]\r\n");
+                ch->sendf("[  southeast/se/southe  |  southwest/sw/southw]\r\n");
+                ch->sendf("[  into  |  onto  |  inside  |  outside  ]@n\r\n");
+                ch->sendf("[ land | launch ]@n\r\n");
             }
         }
     }
@@ -1128,12 +1128,12 @@ ACMD(do_ship_fire) {
     two_arguments(argument, arg1, arg2);
 
     if (!(controls = find_control(ch))) {
-        send_to_char(ch, "@wYou must be near the comm station in the cockpit.\r\n");
+        ch->sendf("@wYou must be near the comm station in the cockpit.\r\n");
         return;
     }
 
     if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0)))) {
-        send_to_char(ch, "@wSomething cosmic is jamming your signal! Quick call Iovan to repair it!\r\n");
+        ch->sendf("@wSomething cosmic is jamming your signal! Quick call Iovan to repair it!\r\n");
         return;
     }
 

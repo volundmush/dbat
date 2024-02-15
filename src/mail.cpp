@@ -508,7 +508,7 @@ SPECIAL(postmaster) {
         return (0);
 
     if (no_mail) {
-        send_to_char(ch, "Sorry, the mail system is having technical difficulties.\r\n");
+        ch->sendf("Sorry, the mail system is having technical difficulties.\r\n");
         return (0);
     }
 
@@ -641,7 +641,7 @@ void notify_if_playing(struct char_data *from, int recipient_id) {
 
     for (d = descriptor_list; d; d = d->next) {
         if ((IS_PLAYING(d)) && (GET_IDNUM(d->character) == recipient_id) && (has_mail(GET_IDNUM(d->character)))) {
-            send_to_char(d->character, "\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", GET_NAME(from));
+            d->character->sendf("\r\n\007\007\007@G@lYou have new mudmail from %s.@n\r\n", GET_NAME(from));
         }
     }
 } 

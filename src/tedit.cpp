@@ -54,7 +54,7 @@ void news_string_cleanup(struct descriptor_data *d, int terminator) {
                     if (PLR_FLAGGED(i->character, PLR_WRITING))
                         continue;
                     if (NEWSUPDATE > GET_LPLAY(i->character))
-                        send_to_char(i->character,
+                        i->character->sendf(
                                      "\r\n@GA news entry has been made by %s, type 'news %d' to see it.@n\r\n",
                                      GET_NAME(d->character), TOP_OF_NEWS);
                 }
@@ -115,7 +115,7 @@ void tedit_string_cleanup(struct descriptor_data *d, int terminator) {
                         if (PLR_FLAGGED(i->character, PLR_WRITING))
                             continue;
                         if (NEWSUPDATE > GET_LPLAY(i->character))
-                            send_to_char(i->character,
+                            i->character->sendf(
                                          "\r\n@GThe NEWS file has been updated, type 'news' to see it.@n\r\n");
                     }
                     do_reboot(d->character, "all", 0, 0);
@@ -168,18 +168,18 @@ ACMD(do_tedit) {
     one_argument(argument, field);
 
     if (!*field) {
-        send_to_char(ch, "Files available to be edited:\r\n");
+        ch->sendf("Files available to be edited:\r\n");
         for (l = 0; *fields[l].cmd != '\n'; l++) {
             if (GET_ADMLEVEL(ch) >= fields[l].level) {
-                send_to_char(ch, "%-11.11s ", fields[l].cmd);
+                ch->sendf("%-11.11s ", fields[l].cmd);
                 if (!(++i % 7))
-                    send_to_char(ch, "\r\n");
+                    ch->sendf("\r\n");
             }
         }
         if (i % 7)
-            send_to_char(ch, "\r\n");
+            ch->sendf("\r\n");
         if (i == 0)
-            send_to_char(ch, "None.\r\n");
+            ch->sendf("None.\r\n");
         return;
     }
     for (l = 0; *(fields[l].cmd) != '\n'; l++)
@@ -187,19 +187,19 @@ ACMD(do_tedit) {
             break;
 
     if (*fields[l].cmd == '\n') {
-        send_to_char(ch, "Invalid text editor option.\r\n");
+        ch->sendf("Invalid text editor option.\r\n");
         return;
     }
 
     if (GET_ADMLEVEL(ch) < fields[l].level) {
-        send_to_char(ch, "You are not godly enough for that!\r\n");
+        ch->sendf("You are not godly enough for that!\r\n");
         return;
     }
 
     /* set up editor stats */
     clear_screen(ch->desc);
     send_editor_help(ch->desc);
-    send_to_char(ch, "Edit file below:\r\n\r\n");
+    ch->sendf("Edit file below:\r\n\r\n");
 
     if (ch->desc->olc) {
         mudlog(BRF, ADMLVL_IMMORT, true, "SYSERR: do_tedit: Player already had olc structure.");
@@ -208,7 +208,7 @@ ACMD(do_tedit) {
     CREATE(ch->desc->olc, struct oasis_olc_data, 1);
 
     if (*fields[l].buffer) {
-        send_to_char(ch, "%s", *fields[l].buffer);
+        ch->sendf("%s", *fields[l].buffer);
         backstr = strdup(*fields[l].buffer);
     }
 

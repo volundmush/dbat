@@ -141,7 +141,7 @@ void unit_data::deactivateContents() {
 }
 
 std::string unit_data::scriptString() {
-    return "";
+    return fmt::format("@D[@wT{}@D]@n", fmt::join(proto_script, ","));
 }
 
 double unit_data::getInventoryWeight() {
@@ -463,9 +463,6 @@ unit_data* Searcher::getOne() {
     return nullptr;
 }
 
-std::optional<vnum> unit_data::getMatchingArea(const std::function<bool(const area_data &)>& f) {
-    if(auto room = getAbsoluteRoom(); room) {
-        return room->getMatchingArea(f);
-    }
-    return std::nullopt;
+area_data* unit_data::getMatchingArea(const std::function<bool(area_data*)>& f) {
+    return nullptr;
 }

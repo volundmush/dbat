@@ -127,7 +127,7 @@ void mag_nextstrike(int level, struct char_data *caster, int spellnum) {
     if (!caster)
         return;
     if (caster->actq) {
-        send_to_char(caster, "You can't perform more than one special attack at a time!");
+        caster->sendf("You can't perform more than one special attack at a time!");
         return;
     }
     CREATE(caster->actq, struct queued_act, 1);

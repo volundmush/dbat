@@ -502,8 +502,7 @@ static void _obj_to_room(struct obj_data *object, struct room_data *room) {
 
     if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
         if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
-            send_to_room(room,
-                         "%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
+            room->sendfContents("%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
                          object->getShortDesc());
             extract_obj(object);
             return;
@@ -665,10 +664,10 @@ void update_char_objects(struct char_data *ch) {
                 j = --GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS);
                 GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) = 3;
                 if (j == 1) {
-                    send_to_char(ch, "Your light begins to flicker and fade.\r\n");
+                    ch->sendf("Your light begins to flicker and fade.\r\n");
                     act("$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
                 } else if (j == 0) {
-                    send_to_char(ch, "Your light sputters out and dies.\r\n");
+                    ch->sendf("Your light sputters out and dies.\r\n");
                     act("$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
                 }
             } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
@@ -836,7 +835,7 @@ void extract_char_final(struct char_data *ch) {
         /* transfer equipment to room, if any */
         for (i = 0; i < NUM_WEARS; i++)
             if (GET_EQ(ch, i))
-                obj_to_room(unequip_char(ch, i), IN_ROOM(ch));
+                unequip_char(ch, i)->addToLocation(r);
     }
 
     if (FIGHTING(ch))
@@ -1359,12 +1358,12 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
     }
 
     if (IS_SET(bitvector, FIND_OBJ_INV)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->->getInventory())) != nullptr)
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getInventory())) != nullptr)
             return (FIND_OBJ_INV);
     }
 
     if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getRoom()->->getInventory())) != nullptr)
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getRoom()->getInventory())) != nullptr)
             return (FIND_OBJ_ROOM);
     }
 

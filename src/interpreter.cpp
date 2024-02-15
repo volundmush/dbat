@@ -150,47 +150,47 @@ void command_interpreter(struct char_data *ch, char *argument) {
 
 
     if (*complete_cmd_info[cmd].command == '\n') {
-        send_to_char(ch, "Huh!?!\r\n");
+        ch->sendf("Huh!?!\r\n");
         return;
     }
 
     if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1)
-        send_to_char(ch, "It's unfortunate...\r\n");
+        ch->sendf("It's unfortunate...\r\n");
     else if (check_disabled(&complete_cmd_info[cmd]))    /* is it disabled? */
-        send_to_char(ch, "This command has been temporarily disabled.\r\n");
+        ch->sendf("This command has been temporarily disabled.\r\n");
     else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_GOOP) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
-        send_to_char(ch, "You only have your internal thoughts until your body has finished regenerating!\r\n");
+        ch->sendf("You only have your internal thoughts until your body has finished regenerating!\r\n");
     else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_FROZEN) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
-        send_to_char(ch, "You try, but the mind-numbing cold prevents you...\r\n");
+        ch->sendf("You try, but the mind-numbing cold prevents you...\r\n");
     else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPIRAL))
-        send_to_char(ch, "You are occupied with your Spiral Comet attack!\r\n");
+        ch->sendf("You are occupied with your Spiral Comet attack!\r\n");
     else if (complete_cmd_info[cmd].command_pointer == nullptr)
-        send_to_char(ch, "Sorry, that command hasn't been implemented yet.\r\n");
+        ch->sendf("Sorry, that command hasn't been implemented yet.\r\n");
     else if (IS_NPC(ch) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
-        send_to_char(ch, "You can't use immortal commands while switched.\r\n");
+        ch->sendf("You can't use immortal commands while switched.\r\n");
     else if (GET_POS(ch) < complete_cmd_info[cmd].minimum_position && GET_POS(ch) != POS_FIGHTING) {
         switch (GET_POS(ch)) {
             case POS_DEAD:
-                send_to_char(ch, "Lie still; you are DEAD!!! :-(\r\n");
+                ch->sendf("Lie still; you are DEAD!!! :-(\r\n");
                 break;
             case POS_INCAP:
             case POS_MORTALLYW:
-                send_to_char(ch, "You are in a pretty bad shape, unable to do anything!\r\n");
+                ch->sendf("You are in a pretty bad shape, unable to do anything!\r\n");
                 break;
             case POS_STUNNED:
-                send_to_char(ch, "All you can do right now is think about the stars!\r\n");
+                ch->sendf("All you can do right now is think about the stars!\r\n");
                 break;
             case POS_SLEEPING:
-                send_to_char(ch, "In your dreams, or what?\r\n");
+                ch->sendf("In your dreams, or what?\r\n");
                 break;
             case POS_RESTING:
-                send_to_char(ch, "Nah... You feel too relaxed to do that..\r\n");
+                ch->sendf("Nah... You feel too relaxed to do that..\r\n");
                 break;
             case POS_SITTING:
-                send_to_char(ch, "Maybe you should get on your feet first?\r\n");
+                ch->sendf("Maybe you should get on your feet first?\r\n");
                 break;
             case POS_FIGHTING:
-                send_to_char(ch, "No way!  You're fighting for your life!\r\n");
+                ch->sendf("No way!  You're fighting for your life!\r\n");
                 break;
         }
     } else if (no_specials || !special(ch, cmd, line)) {
@@ -213,19 +213,19 @@ ACMD(do_alias) {
     if (IS_NPC(ch))
         return;
 
-    auto p = players[ch->id];
+    auto p = players[ch->uid];
 
     repl = any_one_arg(argument, arg);
 
     if (!*arg) {            /* no argument specified -- list currently defined aliases */
-        send_to_char(ch, "Currently defined aliases:\r\n");
+        ch->sendf("Currently defined aliases:\r\n");
         int count = 0;
         for(auto &a : p->aliases) {
             count++;
-            send_to_char(ch, "%-15s %s\r\n", a.name.c_str(), a.replacement.c_str());
+            ch->sendf("%-15s %s\r\n", a.name.c_str(), a.replacement.c_str());
         }
         if(!count) {
-            send_to_char(ch, " None.\r\n");
+            ch->sendf(" None.\r\n");
         }
         return;
     }
@@ -239,17 +239,17 @@ ACMD(do_alias) {
     /* if no replacement string is specified, assume we want to delete */
     if (!*repl) {
         if(find == aliases.end())
-            send_to_char(ch, "No such alias.\r\n");
+            ch->sendf("No such alias.\r\n");
         else {
 			aliases.erase(find);
-            send_to_char(ch, "Alias deleted.\r\n");
+            ch->sendf("Alias deleted.\r\n");
         }
         return;
     }
 
     /* otherwise, either add or redefine an alias */
     if (!strcasecmp(arg, "alias")) {
-        send_to_char(ch, "You can't alias 'alias'.\r\n");
+        ch->sendf("You can't alias 'alias'.\r\n");
         return;
     }
 
@@ -260,14 +260,14 @@ ACMD(do_alias) {
         find->name = arg;
         find->replacement = repl;
         find->type = type;
-        send_to_char(ch, "Alias redefined.\r\n");
+        ch->sendf("Alias redefined.\r\n");
     } else {
         auto &a = aliases.emplace_back();
         a.name = arg;
         a.replacement = repl;
         // type is ALIAS_SIMPLE if repl contains no ; otherwiise it's ALIAS_COMPLEX
         a.type = type;
-        send_to_char(ch, "Alias added.\r\n");
+        ch->sendf("Alias added.\r\n");
     }
 }
 
@@ -352,7 +352,7 @@ void perform_alias(struct descriptor_data *d, char *orig) {
         d->input_queue.emplace_back(orig);
         return;
     }
-    auto p = players[d->character->id];
+    auto p = players[d->character->uid];
     auto &aliases = p->aliases;
 
     /* bail out immediately if the guy doesn't have any aliases */
@@ -1165,15 +1165,15 @@ void payout(int num) {
         if (GET_ADMLEVEL(k->character) <= 0 && IS_PLAYING(k) && GET_RTIME(k->character) < LASTPAYOUT) {
             if (num == 0) {
                 k->account->modRPP(1);
-                send_to_char(k->character,
+                k->character->sendf(
                              "@D[@G+ 1 RPP@D] @cA total logon count within 4 of the highest has been achieved.@n\r\n");
             } else if (num == 1) {
                 k->account->modRPP(2);
-                send_to_char(k->character,
+                k->character->sendf(
                              "@D[@G+ 2 RPP@D] @cThe total logon count has tied with the highest ever.@n\r\n");
             } else {
                 k->account->modRPP(3);
-                send_to_char(k->character, "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
+                k->character->sendf("@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
             }
             GET_RTIME(k->character) = LASTPAYOUT;
         }
@@ -1186,19 +1186,19 @@ int command_pass(char *cmd, struct char_data *ch) {
         if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") &&
             strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") && strcasecmp(cmd, "emote") &&
             strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-            send_to_char(ch, "You are not capable of performing that action while liquefied!\r\n");
+            ch->sendf("You are not capable of performing that action while liquefied!\r\n");
             return (false);
         }
     } else if (IS_AFFECTED(ch, AFF_PARALYZE)) {
         if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") &&
             strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-            send_to_char(ch, "You are not capable of performing that action while petrified!\r\n");
+            ch->sendf("You are not capable of performing that action while petrified!\r\n");
             return (false);
         }
     } else if (IS_AFFECTED(ch, AFF_FROZEN)) {
         if (strcasecmp(cmd, "look") && strcasecmp(cmd, "score") && strcasecmp(cmd, "ooc") && strcasecmp(cmd, "osay") &&
             strcasecmp(cmd, "emote") && strcasecmp(cmd, "smote") && strcasecmp(cmd, "status")) {
-            send_to_char(ch, "You are not capable of performing that action while a frozen block of ice!\r\n");
+            ch->sendf("You are not capable of performing that action while a frozen block of ice!\r\n");
             return (false);
         }
     } else if (IS_AFFECTED(ch, AFF_PARA) && GET_INT(ch) < rand_number(1, 60)) {
@@ -1276,19 +1276,19 @@ char *rIntro(struct char_data *ch, char *arg) {
 }
 
 void fingerUser(struct char_data *ch, std::shared_ptr<account_data> account) {
-    send_to_char(ch, "@D[@gUsername   @D: @w%-30s@D]@n\r\n", account->name.c_str());
-    send_to_char(ch, "@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
-    send_to_char(ch, "@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account->slots);
-    send_to_char(ch, "@D[@gRP Points  @D: @w%-30d@D]@n\r\n", account->rpp);
+    ch->sendf("@D[@gUsername   @D: @w%-30s@D]@n\r\n", account->name.c_str());
+    ch->sendf("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
+    ch->sendf("@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account->slots);
+    ch->sendf("@D[@gRP Points  @D: @w%-30d@D]@n\r\n", account->rpp);
 
     if (GET_ADMLEVEL(ch) > 0) {
         int counter = 0;
         for(auto c : account->characters) {
             auto p = players.find(c);
             if(p == players.end()) continue;
-            send_to_char(ch, "@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second->character->name);
+            ch->sendf("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second->character->name);
         }
-        send_to_char(ch, "\n");
+        ch->sendf("\n");
     }
 }
 
@@ -1384,7 +1384,7 @@ ACMD(do_disable) {
     DISABLED_DATA *p, *temp;
 
     if (IS_NPC(ch)) {
-        send_to_char(ch, "Monsters can't disable commands, silly.\r\n");
+        ch->sendf("Monsters can't disable commands, silly.\r\n");
         return;
     }
 
@@ -1392,14 +1392,14 @@ ACMD(do_disable) {
 
     if (!*argument) { /* Nothing specified. Show disabled commands. */
         if (!disabled_first) /* Any disabled at all ? */
-            send_to_char(ch, "There are no disabled commands.\r\n");
+            ch->sendf("There are no disabled commands.\r\n");
         else {
-            send_to_char(ch,
+            ch->sendf(
                          "Commands that are currently disabled:\r\n\r\n"
                          " Command       Disabled by     Level\r\n"
                          "-----------   --------------  -------\r\n");
             for (p = disabled_first; p; p = p->next)
-                send_to_char(ch, " %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
+                ch->sendf(" %-12s   %-12s    %3d\r\n", p->command->command, p->disabled_by, p->level);
         }
         return;
     }
@@ -1413,12 +1413,12 @@ ACMD(do_disable) {
 
         /* Was it disabled by a higher level imm? */
         if (GET_ADMLEVEL(ch) < p->level) {
-            send_to_char(ch, "This command was disabled by a higher power.\r\n");
+            ch->sendf("This command was disabled by a higher power.\r\n");
             return;
         }
 
         REMOVE_FROM_LIST(p, disabled_first, next, temp);
-        send_to_char(ch, "Command '%s' enabled.\r\n", p->command->command);
+        ch->sendf("Command '%s' enabled.\r\n", p->command->command);
         mudlog(BRF, ADMLVL_IMMORT, true, "(GC) %s has enabled the command '%s'.",
                GET_NAME(ch), p->command->command);
         free(p->disabled_by);
@@ -1435,12 +1435,12 @@ ACMD(do_disable) {
 
         /*  Found?     */
         if (*cmd_info[i].command == '\n') {
-            send_to_char(ch, "You don't know of any such command.\r\n");
+            ch->sendf("You don't know of any such command.\r\n");
             return;
         }
 
         if (!strcmp(cmd_info[i].command, "disable")) {
-            send_to_char(ch, "You cannot disable the disable command.\r\n");
+            ch->sendf("You cannot disable the disable command.\r\n");
             return;
         }
 
@@ -1452,7 +1452,7 @@ ACMD(do_disable) {
         p->subcmd = cmd_info[i].subcmd;       /* the subcommand if any  */
         p->next = disabled_first;
         disabled_first = p; /* add before the current first element */
-        send_to_char(ch, "Command '%s' disabled.\r\n", p->command->command);
+        ch->sendf("Command '%s' disabled.\r\n", p->command->command);
         mudlog(BRF, ADMLVL_IMMORT, true, "(GC) %s has disabled the command '%s'.",
                GET_NAME(ch), p->command->command);
         save_disabled(); /* save to disk */

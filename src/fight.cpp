@@ -69,11 +69,11 @@ int group_bonus(struct char_data *ch, int type) {
             } else {
                 if (type == 0) {
                     k->follower->incCurLFPercent(.25);
-                    send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
+                    k->follower->sendf("@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
                 } else if (type == 1) {
                     k->follower->incCurLFPercent(.4);
-                    send_to_char(k->follower, "@CIncensed by the death of your comrade your life force swells!@n");
+                    k->follower->sendf("@CIncensed by the death of your comrade your life force swells!@n");
                     return (true);
                 } else if (type == 2) {
                     if (IS_ROSHI(ch)) {
@@ -869,7 +869,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     ch->decCurLFPercent(2, -1);
                 }
 
-                send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
+                ch->sendf("@YYour life force has kept you strong@n!\r\n");
             }
         }
 
@@ -929,7 +929,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             hurt(0, 0, ch, GRAPPLING(ch), nullptr, damg, 0);
         }
         if (GRAPPLED(ch) && rand_number(1, 2) == 2) {
-            send_to_char(ch, "@CTry 'escape' to break free from the hold!@n\r\n");
+            ch->sendf("@CTry 'escape' to break free from the hold!@n\r\n");
         }
         if (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FURY)) {
             GET_RMETER(ch) += 1;
@@ -938,12 +938,12 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 ch->incCurHealthPercent(.15);
                 ch->incCurKIPercent(.15);
                 ch->incCurSTPercent(.15);
-                send_to_char(ch, "Your fury has called forth more of your hidden power and you feel better!\r\n");
+                ch->sendf("Your fury has called forth more of your hidden power and you feel better!\r\n");
             }
         }
 
         if (!IS_NPC(ch) && GET_WIMP_LEV(ch) && GET_HIT(ch) < GET_WIMP_LEV(ch) && GET_HIT(ch) > 0 && FIGHTING(ch)) {
-            send_to_char(ch, "You wimp out, and attempt to flee!\r\n");
+            ch->sendf("You wimp out, and attempt to flee!\r\n");
             do_flee(ch, nullptr, 0, 0);
         }
         if (IS_NPC(ch) && GET_HIT(ch) < GET_MAX_HIT(ch) / 10 && GET_HIT(ch) > 0 && FIGHTING(ch) &&
@@ -956,7 +956,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             mutant_limb_regen(ch);
         }
         if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
-            send_to_char(ch, "Your disguise comes off because of your swift movements!\r\n");
+            ch->sendf("Your disguise comes off because of your swift movements!\r\n");
             ch->playerFlags.reset(PLR_DISGUISED);
             act("@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
         }
@@ -1171,7 +1171,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
         if ((GET_POS(ch) == POS_SLEEPING || GET_POS(ch) == POS_RESTING) &&
             (PLR_FLAGGED(ch, PLR_CHARGE) || GET_CHARGE(ch) >= 1)) {
-            send_to_char(ch, "You stop charging and release all your pent up energy!\r\n");
+            ch->sendf("You stop charging and release all your pent up energy!\r\n");
             switch (rand_number(1, 3)) {
                 case 1:
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1192,7 +1192,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             GET_CHARGETO(ch) = 0;
         }
         if (PLR_FLAGGED(ch, PLR_CHARGE) && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70) {
-            send_to_char(ch, "You lose concentration due to your unfocused mind and release your charged energy!\r\n");
+            ch->sendf("You lose concentration due to your unfocused mind and release your charged energy!\r\n");
             switch (rand_number(1, 3)) {
                 case 1:
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1219,7 +1219,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             (GET_PREFERENCE(ch) != PREFERENCE_KI || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
             if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100) {
                 int64_t loss = 0;
-                send_to_char(ch, "You lose some of your energy slowly.\r\n");
+                ch->sendf("You lose some of your energy slowly.\r\n");
                 switch (rand_number(1, 3)) {
                     case 1:
                         act("$n@w's aura flickers weakly.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1238,7 +1238,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 loss = GET_CHARGE(ch) / 20;
                 GET_CHARGE(ch) -= loss;
             } else if (GET_CHARGE(ch) < GET_MAX_MANA(ch) / 100 && GET_CHARGE(ch) != 0) {
-                send_to_char(ch, "Your charged energy is completely gone as your aura fades.\r\n");
+                ch->sendf("Your charged energy is completely gone as your aura fades.\r\n");
                 act("$n@w's aura fades away dimmly.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 GET_CHARGE(ch) = 0;
             }
@@ -1292,11 +1292,11 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 perc = perc * 0.5;
             }
             if ((ch->getCurKI()) <= 0) {
-                send_to_char(ch, "You can not charge anymore, you have charged all your energy!\r\n");
+                ch->sendf("You can not charge anymore, you have charged all your energy!\r\n");
                 act("$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->playerFlags.reset(PLR_CHARGE);
             } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >= (ch->getCurKI())) {
-                send_to_char(ch, "You have charged the last that you can.\r\n");
+                ch->sendf("You have charged the last that you can.\r\n");
                 act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
                     TO_ROOM);
                 GET_CHARGE(ch) += (ch->getCurKI());
@@ -1305,14 +1305,14 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 ch->playerFlags.reset(PLR_CHARGE);
             } else {
                 if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
-                    send_to_char(ch, "You have already reached the maximum that you wished to charge.\r\n");
+                    ch->sendf("You have already reached the maximum that you wished to charge.\r\n");
                     act("$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     GET_CHARGETO(ch) = 0;
                     ch->playerFlags.reset(PLR_CHARGE);
                 } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
                     ch->decCurKI(GET_CHARGETO(ch) - GET_CHARGE(ch));
                     GET_CHARGE(ch) = GET_CHARGETO(ch);
-                    send_to_char(ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
+                    ch->sendf("You stop charging as you reach the maximum that you wished to charge.\r\n");
                     act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
                         TO_ROOM);
                     GET_CHARGETO(ch) = 0;
@@ -1324,16 +1324,16 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                         case 1:
                             act("$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr,
                                 nullptr, TO_ROOM);
-                            send_to_char(ch, "Your aura grows bright as you charge more ki.\r\n");
+                            ch->sendf("Your aura grows bright as you charge more ki.\r\n");
                             break;
                         case 2:
                             act("$n@w's aura ripples with power as it grows larger!@n", true, ch, nullptr, nullptr,
                                 TO_ROOM);
-                            send_to_char(ch, "Your aura ripples with power as you charge more ki.\r\n");
+                            ch->sendf("Your aura ripples with power as you charge more ki.\r\n");
                             break;
                         case 3:
                             act("$n@w's aura throws sparks off violently!.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                            send_to_char(ch, "Your aura throws sparks off violently as you charge more ki.\r\n");
+                            ch->sendf("Your aura throws sparks off violently as you charge more ki.\r\n");
                             break;
                         default:
                             break;
@@ -1341,7 +1341,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
                         GET_CHARGE(ch) = GET_CHARGETO(ch);
                         GET_CHARGE(ch) += GET_LEVEL(ch);
-                        send_to_char(ch, "You have finished charging!\r\n");
+                        ch->sendf("You have finished charging!\r\n");
                         act("$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         ch->playerFlags.reset(PLR_CHARGE);
                         GET_CHARGETO(ch) = 0;
@@ -1656,7 +1656,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
                 for (int ind = 0; ind < repeats; ind++) {
                     struct obj_data *meat;
-                    send_to_char(tch, "The choice edible meat is preserved because of your skill.\r\n");
+                    tch->sendf("The choice edible meat is preserved because of your skill.\r\n");
                     meat = read_object(1612, VIRTUAL);
                     meat->addToLocation(ch);
                     char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
@@ -1875,51 +1875,51 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_HUSK) && GET_PRACTICES(killer) > 50 &&
                     IS_BIO(ch)) {
                     psreward = 0;
-                    send_to_char(killer, "@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
+                    killer->sendf("@D[@G+0 @BPS @cCapped at 50 for Absorb@D]@n\r\n");
                 } else {
                     killer->modPractices(psreward);
-                    send_to_char(killer, "@D[@G+%d @BPS@D]@n\r\n", psreward);
+                    killer->sendf("@D[@G+%d @BPS@D]@n\r\n", psreward);
                 }
             }
         }
         if (IS_ANDROID(killer) && !IS_NPC(killer) && !PLR_FLAGGED(killer, PLR_ABSORB)) {
             if (PLR_FLAGGED(killer, PLR_REPAIR)) {
                 if (GET_LEVEL(killer) > GET_LEVEL(ch) + 15) {
-                    send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
+                    killer->sendf("@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 10) {
                     GET_UP(killer) += 3;
-                    send_to_char(killer, "@D[@G+3 @mUpgrade Point@D]@n\r\n");
+                    killer->sendf("@D[@G+3 @mUpgrade Point@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 8) {
                     GET_UP(killer) += 6;
-                    send_to_char(killer, "@D[@G+6 @mUpgrade Points@D]@n\r\n");
+                    killer->sendf("@D[@G+6 @mUpgrade Points@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 4) {
                     GET_UP(killer) += 12;
-                    send_to_char(killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
+                    killer->sendf("@D[@G+12 @mUpgrade Points@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 2) {
                     GET_UP(killer) += 16;
-                    send_to_char(killer, "@D[@G+16 @mUpgrade Points@D]@n\r\n");
+                    killer->sendf("@D[@G+16 @mUpgrade Points@D]@n\r\n");
                 } else {
                     GET_UP(killer) += 28;
-                    send_to_char(killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
+                    killer->sendf("@D[@G+28 @mUpgrade Points@D]@n\r\n");
                 }
             } else {
                 if (GET_LEVEL(killer) > GET_LEVEL(ch) + 15) {
-                    send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
+                    killer->sendf("@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 10) {
                     GET_UP(killer) += 5;
-                    send_to_char(killer, "@D[@G+5 @mUpgrade Point@D]@n\r\n");
+                    killer->sendf("@D[@G+5 @mUpgrade Point@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 6) {
                     GET_UP(killer) += 12;
-                    send_to_char(killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
+                    killer->sendf("@D[@G+12 @mUpgrade Points@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 4) {
                     GET_UP(killer) += 18;
-                    send_to_char(killer, "@D[@G+18 @mUpgrade Points@D]@n\r\n");
+                    killer->sendf("@D[@G+18 @mUpgrade Points@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 2) {
                     GET_UP(killer) += 28;
-                    send_to_char(killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
+                    killer->sendf("@D[@G+28 @mUpgrade Points@D]@n\r\n");
                 } else {
                     GET_UP(killer) += 36;
-                    send_to_char(killer, "@D[@G+36 @mUpgrade Points@D]@n\r\n");
+                    killer->sendf("@D[@G+36 @mUpgrade Points@D]@n\r\n");
                 }
             }
         }
@@ -2046,18 +2046,18 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 ch->restore(false);
                 ch->teleport_to(17900);
                 android_lose = false;
-                send_to_char(ch, "You wake up and realise that you didn't die, how or why are a mystery.\r\n");
+                ch->sendf("You wake up and realise that you didn't die, how or why are a mystery.\r\n");
                 break;
             case Past:
                 ch->restore(false);
                 ch->teleport_to(1561);
                 android_lose = false;
-                send_to_char(ch, "You wake up and realise that you died, but only in your mind.\r\n");
+                ch->sendf("You wake up and realise that you died, but only in your mind.\r\n");
                 break;
             case Newbie:
                 ch->restore(false);
                 ch->teleport_to(sensei::getStartRoom(ch->chclass));
-                send_to_char(ch, "\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
+                ch->sendf("\r\n@RYou should beware, when you reach level 9, you will actually die. So you\r\n"
                                  "should learn to be more careful. Since when you die past that point and\r\n"
                                  "actually reach the afterlife you need to realise that being revived will\r\n"
                                  "not be very easy. So treat your character's dying with as much care as\r\n"
@@ -2069,7 +2069,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             if (IS_ANDROID(ch) && !PLR_FLAGGED(ch, PLR_ABSORB) && android_lose && GET_UP(ch) > 5) {
                 int loss = GET_UP(ch) / 5;
                 GET_UP(ch) -= loss;
-                send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
+                ch->sendf("@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
             }
         }
         WAIT_STATE(ch, PULSE_VIOLENCE);
@@ -2116,7 +2116,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
                 GET_DTIME(ch) = time(nullptr);
             } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
-                send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
+                ch->sendf("Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
             } else if (IN_ARENA(ch)) {
                 cleanup_arena_watch(ch);
                 if (killer != nullptr) {
@@ -2224,7 +2224,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
             }
         }
         if (checkit == false) {
-            send_to_char(ch, "@RYou didn't do most of the work for this kill.@n\r\n");
+            ch->sendf("@RYou didn't do most of the work for this kill.@n\r\n");
             share = 1;
         }
     }
@@ -2259,32 +2259,32 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
         share += (share * 0.02) * ((GET_GROUPKILLS(ch) + 1) / 20);
     }
     if (group_bonus(ch, 2) == 2) {
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
+        ch->sendf("You receive a bonus from your group's leader! @D[@G+2 PS!@D]@n\r\n");
         ch->modPractices(2);
     } else if (group_bonus(ch, 2) == 3) {
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
+        ch->sendf("You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
         share += share * 0.05;
     } else if (group_bonus(ch, 2) == 5) {
         ch->incCurKIPercent(.04);
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
+        ch->sendf("You receive a bonus from your group's leader! @D[@G4%s Ki Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 6) {
         ch->incCurKIPercent(.02);
         ch->incCurSTPercent(.02);
         ch->incCurHealthPercent(.02);
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
+        ch->sendf("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 7) {
         if (IS_ANDROID(ch)) {
             if (PLR_FLAGGED(leader, PLR_ABSORB)) {
                 ch->incCurKIPercent(.02);
                 ch->incCurSTPercent(.02);
-                send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n",
+                ch->sendf("You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n",
                              "%");
             } else if (PLR_FLAGGED(leader, PLR_REPAIR)) {
                 ch->incCurHealthPercent(.02);
-                send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
+                ch->sendf("You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
             } else if (PLR_FLAGGED(leader, PLR_SENSEM) && !PLR_FLAGGED(ch, PLR_ABSORB)) {
                 GET_UP(ch) += 5;
-                send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
+                ch->sendf("You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
             }
         } else {
             ch->incCurHealthPercent(.01);
@@ -2293,21 +2293,21 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
         }
     } else if (group_bonus(ch, 2) == 11) {
         ch->incCurSTPercent(.04);
-        send_to_char(ch, "You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
+        ch->sendf("You receive a bonus from your group's leader! @D[@G4%s ST Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 13) {
         if (GET_PHASE(leader) == 1) {
             share += share * 0.05;
-            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
+            ch->sendf("You receive a bonus from your group's leader! @D[@G+5%s Exp!@D]@n\r\n", "%");
         } else if (GET_PHASE(leader) == 2) {
             share += share * 0.1;
-            send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
+            ch->sendf("You receive a bonus from your group's leader! @D[@G+10%s Exp!@D]@n\r\n", "%");
         }
     }
     share = gear_exp(ch, share);
     if (share > 1)
-        send_to_char(ch, "You receive your share of experience -- %s points.\r\n", add_commas(share).c_str());
+        ch->sendf("You receive your share of experience -- %s points.\r\n", add_commas(share).c_str());
     else
-        send_to_char(ch, "You receive your share of experience -- one measly little point!\r\n");
+        ch->sendf("You receive your share of experience -- one measly little point!\r\n");
 
     ch->modExperience(share);
     /*change_alignment(ch, victim);*/
@@ -2374,9 +2374,9 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
       perform_group_gain(k, base, victim);
      } else {
       if (k == ch) {
-       send_to_char(ch, "You can not group gain while your powerlevel is weighted down more than half of your max.\r\n");
+       ch->sendf("You can not group gain while your powerlevel is weighted down more than half of your max.\r\n");
       } else {
-       send_to_char(ch, "You can not group gain while your powerlevel is weighted down more than half of the leader's adjusted powerlevel.\r\n");
+       ch->sendf("You can not group gain while your powerlevel is weighted down more than half of the leader's adjusted powerlevel.\r\n");
       }
      }
     }
@@ -2424,7 +2424,7 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
         }
     }
     if (LASTHIT(victim) != 0 && LASTHIT(victim) != GET_IDNUM(ch)) {
-        send_to_char(ch, "@RYou didn't do most of the work for this victory.@n\r\n");
+        ch->sendf("@RYou didn't do most of the work for this victory.@n\r\n");
         exp = 1;
     }
     if (IS_NPC(victim) && MOB_FLAGGED(victim, MOB_HUSK)) {
@@ -2449,9 +2449,9 @@ void solo_gain(struct char_data *ch, struct char_data *victim) {
     exp = MAX(exp, 1);
 
     if (exp > 1)
-        send_to_char(ch, "You receive %s experience points.\r\n", add_commas(exp).c_str());
+        ch->sendf("You receive %s experience points.\r\n", add_commas(exp).c_str());
     else {
-        send_to_char(ch, "You receive one lousy experience point. That fight was hardly worth it...\r\n");
+        ch->sendf("You receive one lousy experience point. That fight was hardly worth it...\r\n");
     }
     if (!IS_NPC(ch)) {
         ch->modExperience(exp);

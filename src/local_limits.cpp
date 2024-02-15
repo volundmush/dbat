@@ -96,14 +96,14 @@ static void barrier_shed(struct char_data *ch) {
         act("@c$n@c's barrier disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else {
         act("@cYour barrier loses some energy.@n", true, ch, nullptr, nullptr, TO_CHAR);
-        send_to_char(ch, "@D[@C%s@D]@n\r\n", add_commas(loss).c_str());
+        ch->sendf("@D[@C%s@D]@n\r\n", add_commas(loss).c_str());
         act("@c$n@c's barrier sends some sparks into the air as it seems to get a bit weaker.@n", true, ch, nullptr,
             nullptr, TO_ROOM);
     }
 
     if (recharge > 0 && (ch->getCurKI()) < GET_MAX_MANA(ch)) {
         ch->incCurKI(recharge);
-        send_to_char(ch, "@CYou reabsorb some of the energy lost into your body!@n\r\n");
+        ch->sendf("@CYou reabsorb some of the energy lost into your body!@n\r\n");
     }
 }
 
@@ -158,7 +158,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (change == true) {
-        send_to_char(ch, "@CYou feel your body recover from all its ailments!@n\r\n");
+        ch->sendf("@CYou feel your body recover from all its ailments!@n\r\n");
     }
     return;
 }
@@ -320,7 +320,7 @@ static int64_t mana_gain(struct char_data *ch) {
     }
     if (AFF_FLAGGED(ch, AFF_POSE) && axion_dice(0) > GET_SKILL(ch, SKILL_POSE)) {
         null_affect(ch, AFF_POSE);
-        send_to_char(ch, "You feel slightly less confident now.\r\n");
+        ch->sendf("You feel slightly less confident now.\r\n");
     }
     if (AFF_FLAGGED(ch, AFF_HYDROZAP) && rand_number(1, 4) >= 4) {
         null_affect(ch, AFF_HYDROZAP);
@@ -487,7 +487,7 @@ int64_t hit_gain(struct char_data *ch) {
     /* Fury Mode Loss for halfbreeds */
 
     if (PLR_FLAGGED(ch, PLR_FURY)) {
-        send_to_char(ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
+        ch->sendf("Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
         ch->playerFlags.reset(PLR_FURY);
     }
 
@@ -646,7 +646,7 @@ static void update_flags(struct char_data *ch) {
     if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
         if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurST()) >= GET_MAX_MOVE(ch) &&
             (ch->getCurKI()) >= GET_MAX_MANA(ch)) {
-            send_to_char(ch, "You FINALLY wake up.\r\n");
+            ch->sendf("You FINALLY wake up.\r\n");
             act("$n wakes up.", true, ch, nullptr, nullptr, TO_ROOM);
             GET_POS(ch) = POS_SITTING;
         }
@@ -659,22 +659,22 @@ static void update_flags(struct char_data *ch) {
     barrier_shed(ch);
 
     if (AFF_FLAGGED(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && rand_number(1, 101) > GET_SKILL(ch, SKILL_FIRESHIELD)) {
-        send_to_char(ch, "Your fireshield disappears.\r\n");
+        ch->sendf("Your fireshield disappears.\r\n");
         ch->clearFlag(FlagType::Affect,AFF_FIRESHIELD);
     }
     if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && rand_number(1, 3) == 2) {
-        send_to_char(ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
+        ch->sendf("You lose concentration and no longer are ready to zanzoken.\r\n");
         ch->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
     }
     if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 3) == 2) {
-        send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
+        ch->sendf("The silk ensnaring your arms disolves enough for you to break it!\r\n");
         ch->clearFlag(FlagType::Affect,AFF_ENSNARED);
     }
 
     if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == FormID::SuperSaiyan) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
         GET_ABSORBS(ch) += 1;
         if (GET_ABSORBS(ch) >= 300) {
-            send_to_char(ch,
+            ch->sendf(
                          "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
             ch->playerFlags.set(PLR_FPSSJ);
             GET_ABSORBS(ch) = 0;
@@ -695,19 +695,19 @@ static void update_flags(struct char_data *ch) {
     }
 
     if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
-        send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
+        ch->sendf("@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
         ch->clearFlag(FlagType::Affect,AFF_MBREAK);
         if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0) {
             bool condition1 = rand_number(1, 2) == 2;
             bool condition2 = rand_number(1, 20) == 1;
             if (condition1 || condition2) {
-                send_to_char(ch, "@RYour senses are still a little addled... (-2 Int and Wis for 6 game hours.)@n\r\n");
+                ch->sendf("@RYour senses are still a little addled... (-2 Int and Wis for 6 game hours.)@n\r\n");
                 assign_affect(ch, AFF_MBREAK_DEBUFF, 0, 6, 0, 0, -2, 0, -2, 0);
             }
         }
     }
     if (AFF_FLAGGED(ch, AFF_SHOCKED) && rand_number(1, 4) == 4) {
-        send_to_char(ch, "@wYour mind is no longer shocked.@n\r\n");
+        ch->sendf("@wYour mind is no longer shocked.@n\r\n");
         if (GET_SKILL(ch, SKILL_TELEPATHY) > 0) {
             int skill = GET_SKILL(ch, SKILL_TELEPATHY), stop = false;
             improve_skill(ch, SKILL_TELEPATHY, 0);
@@ -718,23 +718,23 @@ static void update_flags(struct char_data *ch) {
                     improve_skill(ch, SKILL_TELEPATHY, 0);
             }
             if (skill < GET_SKILL(ch, SKILL_TELEPATHY))
-                send_to_char(ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
+                ch->sendf("Your mental damage and recovery has taught you things about your own mind.\r\n");
         }
         ch->clearFlag(FlagType::Affect,AFF_SHOCKED);
     }
     if (AFF_FLAGGED(ch, AFF_FROZEN) && rand_number(1, 2) == 2) {
-        send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
+        ch->sendf("@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
         act("$n@W breaks out of the ice holding $m prisoner!", true, ch, nullptr, nullptr, TO_ROOM);
         ch->clearFlag(FlagType::Affect,AFF_FROZEN);
     }
     if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2) {
-        send_to_char(ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
+        ch->sendf("@wYour body returns to normal and you beat the withering that plagued you.\r\n");
         act("$n@W's looks more fit now.", true, ch, nullptr, nullptr, TO_ROOM);
         null_affect(ch, AFF_WITHER);
     }
     if (wearing_stardust(ch) == 1) {
         ch->setFlag(FlagType::Affect, AFF_ZANZOKEN);
-        send_to_char(ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
+        ch->sendf("The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
     }
 
 }
@@ -742,7 +742,7 @@ static void update_flags(struct char_data *ch) {
 
 void set_title(struct char_data *ch, char *title) {
     if (ch) {
-        send_to_char(ch,
+        ch->sendf(
                      "Title is disabled for the time being while Iovan works on a brand new and fancier title system.\r\n");
         return;
     }
@@ -767,7 +767,7 @@ void gain_level(struct char_data *ch) {
         advance_level(ch);
         mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s advanced level to level %d.",
                GET_NAME(ch), GET_LEVEL(ch));
-        send_to_char(ch, "You rise a level!\r\n");
+        ch->sendf("You rise a level!\r\n");
         ch->modExperience(-level_exp(ch, GET_LEVEL(ch)));
     }
 }
@@ -829,37 +829,37 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                         switch (GET_COND(ch, condition)) {
                             case 0:
                                 if ((ch->getCurST()) >= GET_MAX_MOVE(ch) / 3) {
-                                    send_to_char(ch, "@RYou are starving to death!@n\r\n");
+                                    ch->sendf("@RYou are starving to death!@n\r\n");
                                     ch->decCurSTPercent(.33);
                                 }
                                 else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 3) {
-                                    send_to_char(ch, "@RYou are starving to death!@n\r\n");
+                                    ch->sendf("@RYou are starving to death!@n\r\n");
                                     ch->decCurSTPercent(1, 0);
                                     ch->decCurHealthPercent(.34);
                                 }
                                 break;
                             case 1:
-                                send_to_char(ch, "You are extremely hungry!\r\n");
+                                ch->sendf("You are extremely hungry!\r\n");
                                 break;
                             case 2:
-                                send_to_char(ch, "You are very hungry!\r\n");
+                                ch->sendf("You are very hungry!\r\n");
                                 break;
                             case 3:
-                                send_to_char(ch, "You are pretty hungry!\r\n");
+                                ch->sendf("You are pretty hungry!\r\n");
                                 break;
                             case 4:
-                                send_to_char(ch, "You are hungry!\r\n");
+                                ch->sendf("You are hungry!\r\n");
                                 break;
                             case 5:
                             case 6:
                             case 7:
                             case 8:
-                                send_to_char(ch, "Your stomach is growling!\r\n");
+                                ch->sendf("Your stomach is growling!\r\n");
                                 break;
                             case 9:
                             case 10:
                             case 11:
-                                send_to_char(ch, "You could use something to eat.\r\n");
+                                ch->sendf("You could use something to eat.\r\n");
                                 break;
                             case 12:
                             case 13:
@@ -867,12 +867,12 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                             case 15:
                             case 16:
                             case 17:
-                                send_to_char(ch, "You could use a bite to eat.\r\n");
+                                ch->sendf("You could use a bite to eat.\r\n");
                                 break;
                             case 18:
                             case 19:
                             case 20:
-                                send_to_char(ch, "You could use a snack.\r\n");
+                                ch->sendf("You could use a snack.\r\n");
                                 break;
                             default:
                                 break;
@@ -883,36 +883,36 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                     switch (GET_COND(ch, condition)) {
                         case 0:
                             if ((ch->getCurST()) >= GET_MAX_MOVE(ch) / 3) {
-                                send_to_char(ch, "@RYou are dehydrated!@n\r\n");
+                                ch->sendf("@RYou are dehydrated!@n\r\n");
                                 ch->decCurSTPercent(.33);
                             } else if ((ch->getCurST()) < GET_MAX_MOVE(ch) / 3) {
-                                send_to_char(ch, "@RYou are dehydrated!@n\r\n");
+                                ch->sendf("@RYou are dehydrated!@n\r\n");
                                 ch->decCurSTPercent(1, 0);
                                 ch->decCurHealthPercent(.34);
                             }
                             break;
                         case 1:
-                            send_to_char(ch, "You are extremely thirsty!\r\n");
+                            ch->sendf("You are extremely thirsty!\r\n");
                             break;
                         case 2:
-                            send_to_char(ch, "You are very thirsty!\r\n");
+                            ch->sendf("You are very thirsty!\r\n");
                             break;
                         case 3:
-                            send_to_char(ch, "You are pretty thirsty!\r\n");
+                            ch->sendf("You are pretty thirsty!\r\n");
                             break;
                         case 4:
-                            send_to_char(ch, "You are thirsty!\r\n");
+                            ch->sendf("You are thirsty!\r\n");
                             break;
                         case 5:
                         case 6:
                         case 7:
                         case 8:
-                            send_to_char(ch, "Your throat is pretty dry!\r\n");
+                            ch->sendf("Your throat is pretty dry!\r\n");
                             break;
                         case 9:
                         case 10:
                         case 11:
-                            send_to_char(ch, "You could use something to drink.\r\n");
+                            ch->sendf("You could use something to drink.\r\n");
                             break;
                         case 12:
                         case 13:
@@ -920,12 +920,12 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                         case 15:
                         case 16:
                         case 17:
-                            send_to_char(ch, "Your mouth feels pretty dry.\r\n");
+                            ch->sendf("Your mouth feels pretty dry.\r\n");
                             break;
                         case 18:
                         case 19:
                         case 20:
-                            send_to_char(ch, "You could use a sip of water.\r\n");
+                            ch->sendf("You could use a sip of water.\r\n");
                             break;
                         default:
                             break;
@@ -934,7 +934,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                 case DRUNK:
                     if (intoxicated) {
                         if (GET_COND(ch, DRUNK) <= 0) {
-                            send_to_char(ch, "You are now sober.\r\n");
+                            ch->sendf("You are now sober.\r\n");
                         }
                     }
                     break;
@@ -943,7 +943,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
             }
             //If you starve or dehydrate, die and reset your conditions
             if (GET_HIT(ch) <= 0 && GET_COND(ch, HUNGER) == 0) {
-                send_to_char(ch, "You have starved to death!\r\n");
+                ch->sendf("You have starved to death!\r\n");
                 ch->decCurSTPercent(1, 0);
                 act("@W$n@W falls down dead before you...@n", false, ch, nullptr, nullptr, TO_ROOM);
                 die(ch, nullptr);
@@ -955,7 +955,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
                 }
             }
             if (GET_HIT(ch) <= 0 && GET_COND(ch, THIRST) == 0) {
-                send_to_char(ch, "You have died of dehydration!\r\n");
+                ch->sendf("You have died of dehydration!\r\n");
                 ch->decCurSTPercent(1, 0);
                 act("@W$n@W falls down dead before you...@n", false, ch, nullptr, nullptr, TO_ROOM);
                 die(ch, nullptr);
@@ -984,11 +984,11 @@ static void check_idling(struct char_data *ch) {
             }
 
             act("$n disappears into the void.", true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "You have been idle, and are pulled into a void.\r\n");
+            ch->sendf("You have been idle, and are pulled into a void.\r\n");
             char_from_room(ch);
             char_to_room(ch, 1);
         } else if (ch->timer > CONFIG_IDLE_RENT_TIME && IN_ROOM(ch) == 1) {
-            send_to_char(ch, "You are idle and are extracted safely from the game.\r\n");
+            ch->sendf("You are idle and are extracted safely from the game.\r\n");
             mudlog(CMP, ADMLVL_GOD, true, "%s force-rented and extracted (idle).", GET_NAME(ch));
             extract_char(ch);
         }
@@ -1021,16 +1021,16 @@ static void heal_limb(struct char_data *ch) {
                 recovered = true;
             } else {
                 GET_LIMBCOND(ch, 0) += healrate;
-                send_to_char(ch, "Your right arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n",
+                ch->sendf("Your right arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n",
                              GET_LIMBCOND(ch, 0), "%", "%");
             }
         } else if (GET_LIMBCOND(ch, 0) + healrate < 100) {
             GET_LIMBCOND(ch, 0) += healrate;
-            send_to_char(ch, "Your right arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 0),
+            ch->sendf("Your right arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 0),
                          "%", "%");
         } else if (GET_LIMBCOND(ch, 0) < 100 && GET_LIMBCOND(ch, 0) + healrate >= 100) {
             GET_LIMBCOND(ch, 0) = 100;
-            send_to_char(ch, "Your right arm has fully recovered.\r\n");
+            ch->sendf("Your right arm has fully recovered.\r\n");
         }
 
         if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
@@ -1041,16 +1041,16 @@ static void heal_limb(struct char_data *ch) {
                 recovered = true;
             } else {
                 GET_LIMBCOND(ch, 1) += healrate;
-                send_to_char(ch, "Your left arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n",
+                ch->sendf("Your left arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n",
                              GET_LIMBCOND(ch, 0), "%", "%");
             }
         } else if (GET_LIMBCOND(ch, 1) + healrate < 100) {
             GET_LIMBCOND(ch, 1) += healrate;
-            send_to_char(ch, "Your left arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 1),
+            ch->sendf("Your left arm feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 1),
                          "%", "%");
         } else if (GET_LIMBCOND(ch, 1) < 100 && GET_LIMBCOND(ch, 1) + healrate >= 100) {
             GET_LIMBCOND(ch, 1) = 100;
-            send_to_char(ch, "Your left arm has fully recovered.\r\n");
+            ch->sendf("Your left arm has fully recovered.\r\n");
         }
 
         if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
@@ -1061,16 +1061,16 @@ static void heal_limb(struct char_data *ch) {
                 recovered = true;
             } else {
                 GET_LIMBCOND(ch, 2) += healrate;
-                send_to_char(ch, "Your right leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n",
+                ch->sendf("Your right leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n",
                              GET_LIMBCOND(ch, 0), "%", "%");
             }
         } else if (GET_LIMBCOND(ch, 2) + healrate < 100) {
             GET_LIMBCOND(ch, 2) += healrate;
-            send_to_char(ch, "Your right leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 2),
+            ch->sendf("Your right leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 2),
                          "%", "%");
         } else if (GET_LIMBCOND(ch, 2) < 100 && GET_LIMBCOND(ch, 2) + healrate >= 100) {
             GET_LIMBCOND(ch, 2) = 100;
-            send_to_char(ch, "Your right leg has fully recovered.\r\n");
+            ch->sendf("Your right leg has fully recovered.\r\n");
         }
 
         if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
@@ -1081,16 +1081,16 @@ static void heal_limb(struct char_data *ch) {
                 recovered = true;
             } else {
                 GET_LIMBCOND(ch, 3) += healrate;
-                send_to_char(ch, "Your left leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n",
+                ch->sendf("Your left leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n",
                              GET_LIMBCOND(ch, 0), "%", "%");
             }
         } else if (GET_LIMBCOND(ch, 3) + healrate < 100) {
             GET_LIMBCOND(ch, 3) += healrate;
-            send_to_char(ch, "Your left leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 3),
+            ch->sendf("Your left leg feels a little better @D[@G%d%s@D/@g100%s@D]@n.\r\n", GET_LIMBCOND(ch, 3),
                          "%", "%");
         } else if (GET_LIMBCOND(ch, 3) < 100 && GET_LIMBCOND(ch, 3) + healrate >= 100) {
             GET_LIMBCOND(ch, 3) = 100;
-            send_to_char(ch, "Your left leg as fully recovered.\r\n");
+            ch->sendf("Your left leg as fully recovered.\r\n");
         }
 
         if (!PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
@@ -1098,7 +1098,7 @@ static void heal_limb(struct char_data *ch) {
                 ch->mod(CharAttribute::Strength, -1);
                 ch->mod(CharAttribute::Speed, -1);
                 ch->mod(CharAttribute::Agility, -1);
-                send_to_char(ch, "@RYou lose 1 Strength, Agility, and Speed!\r\n");
+                ch->sendf("@RYou lose 1 Strength, Agility, and Speed!\r\n");
                 ch->save();
             }
         }
@@ -1106,7 +1106,7 @@ static void heal_limb(struct char_data *ch) {
 
     if (PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
         ch->playerFlags.reset(PLR_BANDAGED);
-        send_to_char(ch, "You remove your bandages.\r\n");
+        ch->sendf("You remove your bandages.\r\n");
         return;
     }
 }
@@ -1165,10 +1165,10 @@ void point_update(uint64_t heartPulse, double deltaTime) {
 
             if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
                 if ((i->getCurKI()) > (mana_gain(i) + i->getPercentOfMaxKI(.05))) {
-                    send_to_char(i, "You send more energy into your aura to keep the light active.\r\n");
+                    i->sendf("You send more energy into your aura to keep the light active.\r\n");
                     i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.05));
                 } else {
-                    send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
+                    i->sendf("You don't have enough energy to keep the aura active.\r\n");
                     act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
                     i->playerFlags.reset(PLR_AURALIGHT);
                 }
@@ -1197,7 +1197,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
 
             if (AFF_FLAGGED(i, AFF_BURNED)) {
                 if (rand_number(1, 5) >= 4) {
-                    send_to_char(i, "Your burns are healed now.\r\n");
+                    i->sendf("Your burns are healed now.\r\n");
                     act("$n@w's burns are now healed.@n", true, i, nullptr, nullptr, TO_ROOM);
                     i->clearFlag(FlagType::Affect,AFF_BURNED);
                 }
@@ -1231,14 +1231,14 @@ void point_update(uint64_t heartPulse, double deltaTime) {
             }
             if (!has_o2(i) && SUNKEN(IN_ROOM(i)) && !ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE)) {
                 if (((i->getCurKI()) - mana_gain(i)) > GET_MAX_MANA(i) / 200) {
-                    send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
+                    i->sendf("Your ki holds an atmosphere around you.\r\n");
                     i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.005));
                 } else {
                     if ((GET_HIT(i) - hit_gain(i)) > (i->getEffMaxPL()) * 0.05) {
-                        send_to_char(i, "You struggle trying to hold your breath!\r\n");
+                        i->sendf("You struggle trying to hold your breath!\r\n");
                         i->decCurHealth(hit_gain(i) + i->getPercentOfMaxHealth(.05));
                     } else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
-                        send_to_char(i, "You have drowned!\r\n");
+                        i->sendf("You have drowned!\r\n");
                         act("@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
                         die(i, nullptr);
                     }
@@ -1246,14 +1246,14 @@ void point_update(uint64_t heartPulse, double deltaTime) {
             }
             if (!has_o2(i) && ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE)) {
                 if (((i->getCurKI()) - mana_gain(i)) > GET_MAX_MANA(i) * 0.005) {
-                    send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
+                    i->sendf("Your ki holds an atmosphere around you.\r\n");
                     i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.005));
                 } else {
                     if ((GET_HIT(i) - hit_gain(i)) > (i->getEffMaxPL()) * 0.05) {
-                        send_to_char(i, "You struggle trying to hold your breath!\r\n");
+                        i->sendf("You struggle trying to hold your breath!\r\n");
                         i->decCurHealth(hit_gain(i) + i->getPercentOfMaxHealth(.05));
                     } else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
-                        send_to_char(i, "You have drowned!\r\n");
+                        i->sendf("You have drowned!\r\n");
                         i->decCurHealthPercent(1, 1);
                         act("@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
                         die(i, nullptr);
@@ -1276,17 +1276,17 @@ void point_update(uint64_t heartPulse, double deltaTime) {
             }
             if (change && !AFF_FLAGGED(i, AFF_POISON)) {
                 if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) != nullptr) {
-                    send_to_char(i, "@wThe healing tank works wonders on your injuries.@n\r\n");
+                    i->sendf("@wThe healing tank works wonders on your injuries.@n\r\n");
                     HCHARGE(SITS(i)) -= rand_number(1, 2);
                     if (HCHARGE(SITS(i)) == 0) {
-                        send_to_char(i, "@wThe healing tank is now too low on energy to heal you.\r\n");
+                        i->sendf("@wThe healing tank is now too low on energy to heal you.\r\n");
                         act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
                         act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
                         i->playerFlags.reset(PLR_HEALT);
                         SITTING(SITS(i)) = nullptr;
                         SITS(i) = nullptr;
                     } else if (i->isFullVitals()) {
-                        send_to_char(i, "@wYou are fully recovered now.\r\n");
+                        i->sendf("@wYou are fully recovered now.\r\n");
                         act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
                         act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
                         i->playerFlags.reset(PLR_HEALT);
@@ -1296,22 +1296,22 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 } else if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) == nullptr) {
                     i->playerFlags.reset(PLR_HEALT);
                 } else if (GET_POS(i) == POS_SLEEPING) {
-                    send_to_char(i, "@wYour sleep does you some good.@n\r\n");
+                    i->sendf("@wYour sleep does you some good.@n\r\n");
                     if (!IS_ANDROID(i) && !FIGHTING(i))
                         i->restoreLF(false);
                 } else if (GET_POS(i) == POS_RESTING) {
-                    send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
+                    i->sendf("@wYou feel relaxed and better.@n\r\n");
                     if (!i->isFullLF()) {
                         if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 &&
                             GET_HIT(i) != (i->getEffMaxPL())) {
                             i->incCurLFPercent(.15);
-                            send_to_char(i, "@CYou feel more lively.@n\r\n");
+                            i->sendf("@CYou feel more lively.@n\r\n");
                         }
                     }
                 } else if (GET_POS(i) == POS_SITTING)
-                    send_to_char(i, "@wYou feel rested and better.@n\r\n");
+                    i->sendf("@wYou feel rested and better.@n\r\n");
                 else
-                    send_to_char(i, "You feel slightly better.\r\n");
+                    i->sendf("You feel slightly better.\r\n");
             }
             if (AFF_FLAGGED(i, AFF_POISON)) {
                 double cost = 0.0;
@@ -1329,11 +1329,11 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     cost = 0.06;
                 }
                 if (GET_HIT(i) - GET_MAX_HIT(i) * cost > 0) {
-                    send_to_char(i, "You puke as the poison burns through your blood.\r\n");
+                    i->sendf("You puke as the poison burns through your blood.\r\n");
                     act("$n shivers and then pukes.", true, i, nullptr, nullptr, TO_ROOM);
                     i->decCurHealth(i->getEffMaxPL() * cost);
                 } else {
-                    send_to_char(i, "The poison claims your life!\r\n");
+                    i->sendf("The poison claims your life!\r\n");
                     act("$n pukes up blood and falls down dead!", true, i, nullptr, nullptr, TO_ROOM);
                     if (i->poisonby) {
                         if (AFF_FLAGGED(i->poisonby, AFF_GROUP)) {
@@ -1488,9 +1488,9 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
                     if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0) {
                         GET_OBJ_WEIGHT(j) -= melt;
-                        send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->getShortDesc());
+                        j->carried_by->sendf("%s @wmelts a little.\r\n", j->getShortDesc());
                     } else {
-                        send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->getShortDesc());
+                        j->carried_by->sendf("%s @wmelts completely away.\r\n", j->getShortDesc());
                         int remainder = melt - GET_OBJ_WEIGHT(j);
                         extract_obj(j);
                     }

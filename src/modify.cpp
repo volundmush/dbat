@@ -146,7 +146,7 @@ void string_add(struct descriptor_data *d, char *str) {
         /* Do nothing. */ ;
     else if (!(*d->str)) {
         if (strlen(str) + 3 > d->max_str) { /* \r\n\0 */
-            send_to_char(d->character, "String too long - Truncated.\r\n");
+            d->character->sendf("String too long - Truncated.\r\n");
             strcpy(str + (d->max_str - 3), "\r\n");
             CREATE(*d->str, char, d->max_str);
             strcpy(*d->str, str);    /* strcpy: OK (size checked) */
@@ -158,7 +158,7 @@ void string_add(struct descriptor_data *d, char *str) {
         }
     } else {
         if (strlen(str) + strlen(*d->str) + 3 > d->max_str) { /* \r\n\0 */
-            send_to_char(d->character, "String too long.  Last line skipped.\r\n");
+            d->character->sendf("String too long.  Last line skipped.\r\n");
             if (!using_improved_editor)
                 action = STRINGADD_SAVE;
             else if (action == STRINGADD_OK)
@@ -329,22 +329,22 @@ ACMD(do_skillset) {
     argument = one_argument(argument, name);
 
     if (!*name) {            /* no arguments. print an informative text */
-        send_to_char(ch, "Syntax: skillset <name> '<skill>' <value>\r\n"
+        ch->sendf("Syntax: skillset <name> '<skill>' <value>\r\n"
                          "Skill being one of the following:\r\n");
         for (qend = 0, i = 0; i < SKILL_TABLE_SIZE; i++) {
             if (spell_info[i].name == unused_spellname)    /* This is valid. */
                 continue;
-            send_to_char(ch, "%18s", spell_info[i].name);
+            ch->sendf("%18s", spell_info[i].name);
             if (qend++ % 4 == 3)
-                send_to_char(ch, "\r\n");
+                ch->sendf("\r\n");
         }
         if (qend % 4 != 0)
-            send_to_char(ch, "\r\n");
+            ch->sendf("\r\n");
         return;
     }
 
     if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
-        send_to_char(ch, "%s", CONFIG_NOPERSON);
+        ch->sendf("%s", CONFIG_NOPERSON);
         return;
     }
     skip_spaces(&argument);
@@ -366,7 +366,7 @@ ACMD(do_skillset) {
     }
 
     if (*argument != '\'') {
-        send_to_char(ch, "Skill must be enclosed in: ''\r\n");
+        ch->sendf("Skill must be enclosed in: ''\r\n");
         return;
     }
     /* Locate the last quote and lowercase the magic words (if any) */
@@ -375,25 +375,25 @@ ACMD(do_skillset) {
         argument[qend] = LOWER(argument[qend]);
 
     if (argument[qend] != '\'') {
-        send_to_char(ch, "Skill must be enclosed in: ''\r\n");
+        ch->sendf("Skill must be enclosed in: ''\r\n");
         return;
     }
     strcpy(help, (argument + 1));    /* strcpy: OK (MAX_INPUT_LENGTH <= MAX_STRING_LENGTH) */
     help[qend - 1] = '\0';
     if ((skill = find_skill_num(help, SKTYPE_SKILL)) <= 0) {
-        send_to_char(ch, "Unrecognized skill.\r\n");
+        ch->sendf("Unrecognized skill.\r\n");
         return;
     }
     argument += qend + 1;        /* skip to next parameter */
     argument = one_argument(argument, buf);
 
     if (!*buf) {
-        send_to_char(ch, "Learned value expected.\r\n");
+        ch->sendf("Learned value expected.\r\n");
         return;
     }
     value = atoi(buf);
     if (value < 0) {
-        send_to_char(ch, "Minimum value for learned is 0.\r\n");
+        ch->sendf("Minimum value for learned is 0.\r\n");
         return;
     }
 
@@ -404,5 +404,5 @@ ACMD(do_skillset) {
     SET_SKILL(vict, skill, value);
     mudlog(BRF, ADMLVL_IMMORT, true, "skillset: %s changed %s's '%s' to %d.", GET_NAME(ch), GET_NAME(vict),
            spell_info[skill].name, value);
-    send_to_char(ch, "You change %s's %s to %d.\r\n", GET_NAME(vict), spell_info[skill].name, value);
+    ch->sendf("You change %s's %s to %d.\r\n", GET_NAME(vict), spell_info[skill].name, value);
 }

@@ -63,12 +63,12 @@ ACMD(do_oasis_zedit) {
             }
 
             if (number == NOWHERE) {
-                send_to_char(ch, "Save which zone?\r\n");
+                ch->sendf("Save which zone?\r\n");
                 return;
             }
         } else if (GET_ADMLEVEL(ch) >= ADMLVL_IMPL) {
             if (strcasecmp("new", buf1) || !buf3 || !*buf3)
-                send_to_char(ch, "Format: zedit new <zone number> <bottom-room> "
+                ch->sendf("Format: zedit new <zone number> <bottom-room> "
                                  "<upper-room>\r\n");
             else {
                 char sbot[MAX_INPUT_LENGTH], stop[MAX_INPUT_LENGTH];
@@ -95,7 +95,7 @@ ACMD(do_oasis_zedit) {
             return;
 
         } else {
-            send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");
+            ch->sendf("Yikes!  Stop that, someone will get hurt!\r\n");
             return;
         }
     }
@@ -112,7 +112,7 @@ ACMD(do_oasis_zedit) {
     for (d = descriptor_list; d; d = d->next) {
         if (STATE(d) == CON_ZEDIT) {
             if (d->olc && OLC_NUM(d) == number) {
-                send_to_char(ch, "That zone is currently being edited by %s.\r\n",
+                ch->sendf("That zone is currently being edited by %s.\r\n",
                              PERS(d->character, ch));
                 return;
             }
@@ -140,7 +140,7 @@ ACMD(do_oasis_zedit) {
     /****************************************************************************/
     OLC_ZNUM(d) = save ? real_zone(number) : real_zone_by_thing(number);
     if (OLC_ZNUM(d) == NOWHERE) {
-        send_to_char(ch, "Sorry, there is no zone for that number!\r\n");
+        ch->sendf("Sorry, there is no zone for that number!\r\n");
 
         /**************************************************************************/
         /** Free the descriptor's OLC structure.                                 **/
@@ -164,7 +164,7 @@ ACMD(do_oasis_zedit) {
     /** If we need to save, then save the zone.                                **/
     /****************************************************************************/
     if (save) {
-        send_to_char(ch, "Saving all zone information for zone %d.\r\n",
+        ch->sendf("Saving all zone information for zone %d.\r\n",
                      zone_table[OLC_ZNUM(d)].number);
         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(ch)), true,
                "OLC: %s saves zone information for zone %d.", GET_NAME(ch),
@@ -442,7 +442,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
     /*
      * Menu header
      */
-    send_to_char(d->character,
+    d->character->sendf(
                  "Room number: [@c%d@n]		Room zone: @c%d\r\n"
                  "@g1@n) Builders       : @y%s\r\n"
                  "@gA@n) Zone name      : @y%s\r\n"

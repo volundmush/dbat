@@ -339,6 +339,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     vnum vn{NOTHING};
     // Zones. Many things are in a Zone. It's legacy though. :(
     zone_vnum zone{NOTHING};
+    std::vector<trig_vnum> proto_script;
 
     char *name{};
     char *room_description{};      /* When thing is listed in room */
@@ -467,18 +468,31 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     
     void checkMyID();
 
-    virtual std::optional<vnum> getMatchingArea(const std::function<bool(const area_data&)>& f);
+    virtual area_data* getMatchingArea(const std::function<bool(area_data*)>& f);
 
     virtual void assignTriggers();
 
     virtual void sendEvent(const Event& event);
+    virtual void sendEventContents(const Event& event);
 
     virtual void sendText(const std::string& text);
     virtual void sendLine(const std::string& text);
+    virtual void sendTextContents(const std::string& text);
+    virtual void sendLineContents(const std::string& text);
     
     template<typename... Args>
     void sendText(const std::string& text, Args&&... args) {
         sendText(fmt::format(text, args...));
+    }
+
+    template<typename... Args>
+    void sendLineContents(const std::string& text, Args&&... args) {
+        sendLineContents(fmt::format(text, args...));
+    }
+
+    template<typename... Args>
+    void sendTextContents(const std::string& text, Args&&... args) {
+        sendTextContents(fmt::format(text, args...));
     }
 
     template<typename... Args>
@@ -489,6 +503,11 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     template<typename... Args>
     void sendf(const std::string& text, Args&&... args) {
         sendText(fmt::sprintf(text, args...));
+    }
+
+    template<typename... Args>
+    void sendfContents(const std::string& text, Args&&... args) {
+        sendTextContents(fmt::sprintf(text, args...));
     }
 
 };
@@ -651,7 +670,6 @@ struct room_data : public unit_data {
 
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
-    std::vector<trig_vnum> proto_script;
 
     explicit room_data(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
@@ -675,7 +693,6 @@ struct room_data : public unit_data {
     nlohmann::json serialize();
     void deserializeContents(const nlohmann::json& j, bool isActive);
 
-    std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
     bool isActive() override;
     void save() override;
 
@@ -851,7 +868,6 @@ struct char_data : public unit_data {
     void deserializePlayer(const nlohmann::json& j, bool isActive);
     void activate();
     void deactivate();
-    std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
     void login();
 
     nlohmann::json serializeLocation();

@@ -121,7 +121,7 @@ ACMD(do_geno) {
     }
 
     if (!*arg && !FIGHTING(ch)) {
-        send_to_char(ch, "Direct it at who?\r\n");
+        ch->sendf("Direct it at who?\r\n");
         return;
     }
 
@@ -140,7 +140,7 @@ ACMD(do_geno) {
         if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
             vict = FIGHTING(ch);
         } else {
-            send_to_char(ch, "No one around here by that name.\r\n");
+            ch->sendf("No one around here by that name.\r\n");
             return;
         }
     }
@@ -223,7 +223,7 @@ ACMD(do_genki) {
     }
 
     if (!*arg && !FIGHTING(ch)) {
-        send_to_char(ch, "Direct it at who?\r\n");
+        ch->sendf("Direct it at who?\r\n");
         return;
     }
 
@@ -242,7 +242,7 @@ ACMD(do_genki) {
         if (FIGHTING(ch) && IN_ROOM(FIGHTING(ch)) == IN_ROOM(ch)) {
             vict = FIGHTING(ch);
         } else {
-            send_to_char(ch, "No one around here by that name.\r\n");
+            ch->sendf("No one around here by that name.\r\n");
             return;
         }
     }
@@ -427,7 +427,7 @@ ACMD(do_blessedhammer) {
     }
 
     if (!*arg && !FIGHTING(ch)) {
-        send_to_char(ch, "Direct it at who?\r\n");
+        ch->sendf("Direct it at who?\r\n");
         return;
     }
 
@@ -621,8 +621,8 @@ ACMD(do_blessedhammer) {
                     break;
             }
             if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict)) {
-                send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
-                send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
+                vict->sendf("@RYou are burned by the attack!@n\r\n");
+                ch->sendf("@RThey are burned by the attack!@n\r\n");
                 vict->setFlag(FlagType::Affect, AFF_BURNED);
             }
             pcost(ch, attperc, 0);
@@ -634,7 +634,7 @@ ACMD(do_blessedhammer) {
             return;
         }
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-            send_to_char(ch, "It is broken already!\r\n");
+            ch->sendf("It is broken already!\r\n");
             return;
         }
         dmg = damtype(ch, 42, skill, attperc);
@@ -645,7 +645,7 @@ ACMD(do_blessedhammer) {
         pcost(ch, attperc, 0);
 
     } else {
-        send_to_char(ch, "Error! Please report.\r\n");
+        ch->sendf("Error! Please report.\r\n");
         return;
     }
 }
@@ -786,30 +786,30 @@ ACMD(do_charge) {
     one_argument(argument, arg);
 
     if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-        send_to_char(ch, "@WYou are concentrating too much on your aura to be able to charge.");
+        ch->sendf("@WYou are concentrating too much on your aura to be able to charge.");
         return;
     }
     if (PLR_FLAGGED(ch, PLR_HEALT)) {
-        send_to_char(ch, "You are inside a healing tank!\r\n");
+        ch->sendf("You are inside a healing tank!\r\n");
         return;
     }
     if (AFF_FLAGGED(ch, AFF_MBREAK)) {
-        send_to_char(ch, "Your mind is still strained from psychic attacks...\r\n");
+        ch->sendf("Your mind is still strained from psychic attacks...\r\n");
         return;
     }
     if (AFF_FLAGGED(ch, AFF_POISON)) {
-        send_to_char(ch, "You feel too sick from the poison to concentrate.\r\n");
+        ch->sendf("You feel too sick from the poison to concentrate.\r\n");
         return;
     }
     if (!*arg) {
-        send_to_char(ch, "Charge, yes. How much percent though?\r\n");
-        send_to_char(ch, "[ 1 - 100 | cancel | release]\r\n");
+        ch->sendf("Charge, yes. How much percent though?\r\n");
+        ch->sendf("[ 1 - 100 | cancel | release]\r\n");
         return;
     } else if (!strcasecmp("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) <= 0)) {
-        send_to_char(ch, "Try cancel instead, you have nothing charged up yet!\r\n");
+        ch->sendf("Try cancel instead, you have nothing charged up yet!\r\n");
         return;
     } else if (!strcasecmp("release", arg) && (PLR_FLAGGED(ch, PLR_CHARGE) && GET_CHARGE(ch) > 0)) {
-        send_to_char(ch, "You stop charging and release your pent up energy.\r\n");
+        ch->sendf("You stop charging and release your pent up energy.\r\n");
         switch (rand_number(1, 3)) {
             case 1:
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -830,7 +830,7 @@ ACMD(do_charge) {
         ch->playerFlags.reset(PLR_CHARGE);
         return;
     } else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0) {
-        send_to_char(ch, "You release your pent up energy.\r\n");
+        ch->sendf("You release your pent up energy.\r\n");
         switch (rand_number(1, 3)) {
             case 1:
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -850,7 +850,7 @@ ACMD(do_charge) {
         GET_CHARGETO(ch) = 0;
         return;
     } else if (!strcasecmp("cancel", arg) && PLR_FLAGGED(ch, PLR_CHARGE)) {
-        send_to_char(ch, "You stop charging.\r\n");
+        ch->sendf("You stop charging.\r\n");
         switch (rand_number(1, 3)) {
             case 1:
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -869,14 +869,14 @@ ACMD(do_charge) {
         GET_CHARGETO(ch) = 0;
         return;
     } else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
-        send_to_char(ch, "You are not even charging!\r\n");
+        ch->sendf("You are not even charging!\r\n");
         return;
     } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 100) {
-        send_to_char(ch, "You don't even have enough ki!\r\n");
+        ch->sendf("You don't even have enough ki!\r\n");
         return;
     } else if ((amt = atoi(arg)) > 0) {
         if (amt >= 101) {
-            send_to_char(ch, "You have set it too high!\r\n");
+            ch->sendf("You have set it too high!\r\n");
             return;
         } else if (AFF_FLAGGED(ch, AFF_SPIRITCONTROL)) {
             int64_t diff = 0;
@@ -891,7 +891,7 @@ ACMD(do_charge) {
                 chance = 15;
 
             if (chance > rand_number(1, 100)) {
-                send_to_char(ch,
+                ch->sendf(
                              "The rush of ki that you try to pool temporarily overwhelms you and you lose control!\r\n");
                 null_affect(ch, AFF_SPIRITCONTROL);
                 return;
@@ -901,10 +901,10 @@ ACMD(do_charge) {
                     spiritcost = GET_MAX_MANA(ch) * 0.01;
                 }
                 reveal_hiding(ch, 0);
-                send_to_char(ch,
+                ch->sendf(
                              "Your %s colored aura flashes up around you as you instantly take control of the ki you needed!\r\n",
                              aura_types[GET_AURA(ch)]);
-                send_to_char(ch, "@D[@RCost@D: @r%s@D]@n\r\n", add_commas(spiritcost));
+                ch->sendf("@D[@RCost@D: @r%s@D]@n\r\n", add_commas(spiritcost));
                 char bloom[MAX_INPUT_LENGTH];
                 sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
                 act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
@@ -913,7 +913,7 @@ ACMD(do_charge) {
             }
         } else {
             reveal_hiding(ch, 0);
-            send_to_char(ch, "You begin to charge some energy, as a %s aura begins to burn around you!\r\n",
+            ch->sendf("You begin to charge some energy, as a %s aura begins to burn around you!\r\n",
                          aura_types[GET_AURA(ch)]);
             char bloom[MAX_INPUT_LENGTH];
             sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
@@ -923,10 +923,10 @@ ACMD(do_charge) {
             ch->playerFlags.set(PLR_CHARGE);
         }
     } else if (amt < 1 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1562) {
-        send_to_char(ch, "You have set it too low!\r\n");
+        ch->sendf("You have set it too low!\r\n");
         return;
     } else {
-        send_to_char(ch, "That is an invalid argument.\r\n");
+        ch->sendf("That is an invalid argument.\r\n");
     }
 }
 
@@ -971,28 +971,28 @@ ACMD(do_powerup) {
         return;
     }
     if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-        send_to_char(ch, "@WYou are concentrating too much on your aura to be able to power up.");
+        ch->sendf("@WYou are concentrating too much on your aura to be able to power up.");
         return;
     }
     if (IS_ANDROID(ch)) {
-        send_to_char(ch, "@WYou are an android, you do not powerup.@n");
+        ch->sendf("@WYou are an android, you do not powerup.@n");
         return;
     }
     if (GET_SUPPRESS(ch) > 0) {
-        send_to_char(ch, "@WYou currently have your powerlevel suppressed to %" I64T " percent.@n", GET_SUPPRESS(ch));
+        ch->sendf("@WYou currently have your powerlevel suppressed to %" I64T " percent.@n", GET_SUPPRESS(ch));
         return;
     }
     if (PLR_FLAGGED(ch, PLR_POWERUP)) {
-        send_to_char(ch, "@WYou stop powering up.@n");
+        ch->sendf("@WYou stop powering up.@n");
         ch->playerFlags.reset(PLR_POWERUP);
         return;
     }
     if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
-        send_to_char(ch, "@WYou are already at max!@n");
+        ch->sendf("@WYou are already at max!@n");
         return;
     }
     if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
-        send_to_char(ch, "@WYou do not have enough ki to powerup!@n");
+        ch->sendf("@WYou do not have enough ki to powerup!@n");
         return;
     } else {
         reveal_hiding(ch, 0);
@@ -1044,15 +1044,15 @@ ACMD(do_rescue) {
     one_argument(argument, arg);
 
     if (!*arg)
-        send_to_char(ch, "Whom do you wish to rescue?\r\n");
+        ch->sendf("Whom do you wish to rescue?\r\n");
     else if (!(helpee = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
-        send_to_char(ch, "%s", CONFIG_NOPERSON);
+        ch->sendf("%s", CONFIG_NOPERSON);
     else if (helpee == ch)
-        send_to_char(ch, "You can't help yourself any more than this!\r\n");
+        ch->sendf("You can't help yourself any more than this!\r\n");
     else if (!FIGHTING(helpee))
-        send_to_char(ch, "They are not fighting anyone!\r\n");
+        ch->sendf("They are not fighting anyone!\r\n");
     else if (FIGHTING(ch) && !IS_NPC(ch))
-        send_to_char(ch, "You are a little too busy fighting for yourself!\r\n");
+        ch->sendf("You are a little too busy fighting for yourself!\r\n");
     else {
         opponent = FIGHTING(helpee);
         int mobbonus = 0;
@@ -1084,17 +1084,17 @@ ACMD(do_assist) {
     struct char_data *helpee, *opponent;
 
     if (FIGHTING(ch)) {
-        send_to_char(ch, "You're already fighting!  How can you assist someone else?\r\n");
+        ch->sendf("You're already fighting!  How can you assist someone else?\r\n");
         return;
     }
     one_argument(argument, arg);
 
     if (!*arg)
-        send_to_char(ch, "Whom do you wish to assist?\r\n");
+        ch->sendf("Whom do you wish to assist?\r\n");
     else if (!(helpee = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
-        send_to_char(ch, "%s", CONFIG_NOPERSON);
+        ch->sendf("%s", CONFIG_NOPERSON);
     else if (helpee == ch)
-        send_to_char(ch, "You can't help yourself any more than this!\r\n");
+        ch->sendf("You can't help yourself any more than this!\r\n");
     else {
         /*
      * Hit the same enemy the person you're helping is.
@@ -1116,7 +1116,7 @@ ACMD(do_assist) {
             /* prevent accidental pkill */
         else {
             reveal_hiding(ch, 0);
-            send_to_char(ch, "You join the fight!\r\n");
+            ch->sendf("You join the fight!\r\n");
             act("$N assists you!", 0, helpee, nullptr, ch, TO_CHAR);
             act("$n assists $N.", true, ch, nullptr, helpee, TO_NOTVICT);
             if (!FIGHTING(ch)) {
@@ -1139,12 +1139,12 @@ ACMD(do_kill) {
     one_argument(argument, arg);
 
     if (!*arg) {
-        send_to_char(ch, "Kill who?\r\n");
+        ch->sendf("Kill who?\r\n");
     } else {
         if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM)))
-            send_to_char(ch, "They aren't here.\r\n");
+            ch->sendf("They aren't here.\r\n");
         else if (ch == vict)
-            send_to_char(ch, "Your mother would be so sad.. :(\r\n");
+            ch->sendf("Your mother would be so sad.. :(\r\n");
         else {
             act("You chop $M to pieces!  Ah!  The blood!", true, ch, nullptr, vict, TO_CHAR);
             act("$N chops you to pieces!", true, vict, nullptr, ch, TO_CHAR);
@@ -1162,27 +1162,27 @@ ACMD(do_flee) {
     one_argument(argument, arg);
 
     if (GET_POS(ch) < POS_RESTING) {
-        send_to_char(ch, "You are in pretty bad shape, unable to flee!\r\n");
+        ch->sendf("You are in pretty bad shape, unable to flee!\r\n");
         return;
     }
 
     if (GRAPPLING(ch)) {
-        send_to_char(ch, "You are grappling with someone!\r\n");
+        ch->sendf("You are grappling with someone!\r\n");
         return;
     }
 
     if (GRAPPLED(ch)) {
-        send_to_char(ch, "You are grappling with someone!\r\n");
+        ch->sendf("You are grappling with someone!\r\n");
         return;
     }
 
     if (ABSORBING(ch)) {
-        send_to_char(ch, "You are absorbing from someone!\r\n");
+        ch->sendf("You are absorbing from someone!\r\n");
         return;
     }
 
     if (ABSORBBY(ch)) {
-        send_to_char(ch, "You are being absorbed from by someone!\r\n");
+        ch->sendf("You are being absorbed from by someone!\r\n");
         return;
     }
 
@@ -1190,7 +1190,7 @@ ACMD(do_flee) {
         int fail = false;
         auto isMyAttack = [&](const auto&o) {return KICHARGE(o) > 0 && USER(o) == ch;};
         if (auto obj = ch->getRoom()->findObject(isMyAttack); obj) {
-            send_to_char(ch, "You are too busy controlling your attack!\r\n");
+            ch->sendf("You are too busy controlling your attack!\r\n");
             return;
         }
     }
@@ -1218,7 +1218,7 @@ ACMD(do_flee) {
 
             auto isWall = [&](const auto&o) {return o->vn == 79 && GET_OBJ_COST(o) == attempt;};
             if(auto wall = ch->getRoom()->findObject(isWall); wall) {
-                send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
+                ch->sendf("That direction has a glacial wall blocking it.\r\n");
                 return;
             }
 
@@ -1227,26 +1227,26 @@ ACMD(do_flee) {
             }
 
             if (ABSORBING(ch)) {
-                send_to_char(ch, "You are busy absorbing from %s!\r\n", GET_NAME(ABSORBING(ch)));
+                ch->sendf("You are busy absorbing from %s!\r\n", GET_NAME(ABSORBING(ch)));
                 return;
             }
-            if (ABSORBBY(ch)) {
-                if (axion_dice(0) < GET_SKILL(ABSORBING(ch), SKILL_ABSORB)) {
-                    send_to_char(ch, "You are being held by %s, they are absorbing you!\r\n", GET_NAME(ABSORBBY(ch)));
-                    send_to_char(ABSORBBY(ch), "%s struggles in your grasp!\r\n", GET_NAME(ch));
+            if (auto ab = ABSORBBY(ch); ab) {
+                if (axion_dice(0) < GET_SKILL(ab, SKILL_ABSORB)) {
+                    ch->sendf("You are being held by %s, they are absorbing you!\r\n", GET_NAME(ab));
+                    ab->sendf("%s struggles in your grasp!\r\n", GET_NAME(ch));
                     WAIT_STATE(ch, PULSE_2SEC);
                     return;
                 } else {
-                    act("@c$N@W manages to break loose of @C$n's@W hold!@n", true, ABSORBBY(ch), nullptr, ch,
+                    act("@c$N@W manages to break loose of @C$n's@W hold!@n", true, ab, nullptr, ch,
                         TO_NOTVICT);
-                    act("@WYou manage to break loose of @C$n's@W hold!@n", true, ABSORBBY(ch), nullptr, ch, TO_VICT);
-                    act("@c$N@W manages to break loose of your hold!@n", true, ABSORBBY(ch), nullptr, ch, TO_CHAR);
-                    ABSORBING(ABSORBBY(ch)) = nullptr;
+                    act("@WYou manage to break loose of @C$n's@W hold!@n", true, ab, nullptr, ch, TO_VICT);
+                    act("@c$N@W manages to break loose of your hold!@n", true, ab, nullptr, ch, TO_CHAR);
+                    ABSORBING(ab) = nullptr;
                     ABSORBBY(ch) = nullptr;
                 }
             }
             if (do_simple_move(ch, attempt, true)) {
-                send_to_char(ch, "You flee head over heels.\r\n");
+                ch->sendf("You flee head over heels.\r\n");
                 WAIT_STATE(ch, PULSE_2SEC);
             } else {
                 act("$n tries to flee, but can't!", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1255,6 +1255,6 @@ ACMD(do_flee) {
             return;
         }
     }
-    send_to_char(ch, "PANIC!  You couldn't escape!\r\n");
+    ch->sendf("PANIC!  You couldn't escape!\r\n");
 
 }

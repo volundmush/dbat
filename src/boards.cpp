@@ -123,10 +123,7 @@ struct board_info *create_new_board(obj_vnum board_vnum) {
         WRITE_LVL(temp) = CONFIG_LEVEL_CAP;
         REMOVE_LVL(temp) = CONFIG_LEVEL_CAP;
     } else {
-        obj = &(obj_proto[real_object(board_vnum)]);
-        READ_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_READ);
-        WRITE_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
-        REMOVE_LVL(temp) = GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
+
     }
     BOARD_VNUM(temp) = board_vnum;
     BOARD_MNUM(temp) = 0;
@@ -253,14 +250,7 @@ struct board_info *load_board(obj_vnum board_vnum) {
         BOARD_VERSION(temp_board) = t[4];
         basic_mud_log("Board vnum %d, Version %d", BOARD_VNUM(temp_board), BOARD_VERSION(temp_board));
     } else {
-        obj = &(obj_proto[real_object(board_vnum)]);
-        /* double check one or two things */
-        if (t[0] != GET_OBJ_VAL(obj, VAL_BOARD_READ) ||
-            t[1] != GET_OBJ_VAL(obj, VAL_BOARD_WRITE) ||
-            t[2] != GET_OBJ_VAL(obj, VAL_BOARD_ERASE)) {
-            basic_mud_log("Mismatch in board <-> object read/write/remove settings for board [vnum: %d]. Correcting.",
-                board_vnum);
-        }
+
         READ_LVL(temp_board) = GET_OBJ_VAL(obj, VAL_BOARD_READ);
         WRITE_LVL(temp_board) = GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
         REMOVE_LVL(temp_board) = GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
@@ -458,7 +448,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
 
     /* board locate */
     if (IS_NPC(ch)) {
-        send_to_char(ch, "Gosh.. now .. if only mobs could read.. you'd be doing good.\r\n");
+        ch->sendf("Gosh.. now .. if only mobs could read.. you'd be doing good.\r\n");
         return;
     }
     thisboard = locate_board(board_vnum);
@@ -469,7 +459,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
         bboards = thisboard;
     }
     if (GET_ADMLEVEL(ch) < READ_LVL(thisboard)) {
-        send_to_char(ch, "You try but fail to understand the holy words.\r\n");
+        ch->sendf("You try but fail to understand the holy words.\r\n");
         return;
     }
 
@@ -478,9 +468,9 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
     int num = board_vnum;
     if ((board_vnum = real_object(num)) == NOTHING) {
         basic_mud_log("SYSERR: DEFUNCT BOARD VNUM.\r\n");
-        send_to_char(ch, "@W                  This is a bulletin board.\r\n");
-        send_to_char(ch, "@rO@b============================================================================@rO@n\n");
-        send_to_char(ch, "     @D[@GX@D] means you have read the message, @D[@RX@D] means you have not.\r\n"
+        ch->sendf("@W                  This is a bulletin board.\r\n");
+        ch->sendf("@rO@b============================================================================@rO@n\n");
+        ch->sendf("     @D[@GX@D] means you have read the message, @D[@RX@D] means you have not.\r\n"
                          "     @WUsage@D:@CREAD@D/@cREMOVE @D<@Wmessg #@D>@W, @CRESPOND @D<@Wmessg #@D>@W, @CWRITE @D<@Wheader@D>@W.@n\r\n"
                          "     @CVieworder@W, this changes the order in which posts are listed to you.@n\r\n");
     } else {
@@ -492,12 +482,12 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
             if (!strstr(obj->getLookDesc().c_str(), clan)) {
-                send_to_char(ch, "You are incapable of reading this board!\r\n");
+                ch->sendf("You are incapable of reading this board!\r\n");
                 return;
             }
         }
-        send_to_char(ch, "@W                  This is the %20s\r\n", obj->getShortDesc());
-        send_to_char(ch, "@rO@b============================================================================@rO@n\n"
+        ch->sendf("@W                  This is the %20s\r\n", obj->getShortDesc());
+        ch->sendf("@rO@b============================================================================@rO@n\n"
                          "     @D[@GX@D] means you have read the message, @D[@RX@D] means you have not.\r\n"
                          "     @WUsage@D:@CREAD@D/@cREMOVE @D<@Wmessg #@D>@W, @CRESPOND @D<@Wmessg #@D>@W, @CWRITE @D<@Wheader@D>@W.@n\r\n"
                          "     @CVieworder@W, this changes the order in which posts are listed to you.@n\r\n"
@@ -507,10 +497,10 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
 
     if (!BOARD_MNUM(thisboard) || !BOARD_MESSAGES(thisboard)) {
         sprintf(buf, "                  @WThe board is empty.@n\r\n");
-        send_to_char(ch, buf);
+        ch->sendf(buf);
         return;
     } else {
-        send_to_char(ch, "                  @WThere %s %d %s on the board.@n\r\n",
+        ch->sendf("                  @WThere %s %d %s on the board.@n\r\n",
                      (BOARD_MNUM(thisboard) == 1) ? "is" : "are", BOARD_MNUM(thisboard),
                      (BOARD_MNUM(thisboard) == 1) ? "message" : "messages");
 
@@ -579,7 +569,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     char buf[MAX_STRING_LENGTH + 1];
 
     if (IS_NPC(ch)) {
-        send_to_char(ch, "Silly mob - reading is for pcs!\r\n");
+        ch->sendf("Silly mob - reading is for pcs!\r\n");
         return;
     }
     /* guess we'll have to locate the board now in the list */
@@ -590,12 +580,12 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     }
 
     if (GET_ADMLEVEL(ch) < READ_LVL(thisboard)) {
-        send_to_char(ch, "You try but fail to understand the holy words.\r\n");
+        ch->sendf("You try but fail to understand the holy words.\r\n");
         return;
 
     }
     if (!BOARD_MESSAGES(thisboard)) {
-        send_to_char(ch, "The board is empty!\r\n");
+        ch->sendf("The board is empty!\r\n");
         return;
     }
 
@@ -613,7 +603,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
             if (!strstr(obj->getLookDesc().c_str(), clan)) {
-                send_to_char(ch, "You are incapable of reading this board!\r\n");
+                ch->sendf("You are incapable of reading this board!\r\n");
                 return;
             }
         }
@@ -623,7 +613,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     /* now we locate the message.*/
     message = BOARD_MESSAGES(thisboard);
     if (arg < 1) {
-        send_to_char(ch, "You must specify the (positive) number of the message to be read!\r\n");
+        ch->sendf("You must specify the (positive) number of the message to be read!\r\n");
         return;
     }
 
@@ -642,7 +632,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     }
 
     if (!message) {
-        send_to_char(ch, "That message exists only in your imagination.\r\n");
+        ch->sendf("That message exists only in your imagination.\r\n");
         return;
     }          /* Have message, let's add the fact that this player read the mesg */
 
@@ -773,19 +763,19 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg) {
     struct board_msg *message;
 
     if (IS_NPC(ch)) {
-        send_to_char(ch, "Orwellian police thwart your attempt at free speech.\r\n");
+        ch->sendf("Orwellian police thwart your attempt at free speech.\r\n");
         return;
     }
     thisboard = locate_board(board_vnum);
 
     if (!thisboard) {
-        send_to_char(ch, "Error: Your board could not be found. Please report.\n");
+        ch->sendf("Error: Your board could not be found. Please report.\n");
         basic_mud_log("Error in write_board_msg - board #%d", board_vnum);
         return;
     }
 
     if (GET_ADMLEVEL(ch) < WRITE_LVL(thisboard)) {
-        send_to_char(ch, "You are not holy enough to write on this board.\r\n");
+        ch->sendf("You are not holy enough to write on this board.\r\n");
 
         return;
     }
@@ -793,7 +783,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg) {
         sprintf(arg, "No Subject");
     }
     if (strlen(arg) > 46) {
-        send_to_char(ch, "Your subject can only be 45 characters long(including colorcode).\r\n");
+        ch->sendf("Your subject can only be 45 characters long(including colorcode).\r\n");
         return;
     }
     act("@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -818,7 +808,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg) {
     }
 
     BOARD_MESSAGES(thisboard) = message;
-    send_to_char(ch, "Write your message.  (/s saves /h for help)\r\n");
+    ch->sendf("Write your message.  (/s saves /h for help)\r\n");
 
     ch->playerFlags.set(PLR_WRITING);
     string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, nullptr);
@@ -843,13 +833,13 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg) {
         if (PLR_FLAGGED(d->character, PLR_WRITING))
             continue;
         if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWIMM > GET_BOARD(d->character, 1) && board_vnum == 3098)
-            send_to_char(d->character, "\r\n@GThere is a new Immortal Board Post.@n\r\n");
+            d->character->sendf("\r\n@GThere is a new Immortal Board Post.@n\r\n");
         if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWBUI > GET_BOARD(d->character, 4) && board_vnum == 3090)
-            send_to_char(d->character, "\r\n@GThere is a new Builder Board Post.@n\r\n");
+            d->character->sendf("\r\n@GThere is a new Builder Board Post.@n\r\n");
         if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWDUO > GET_BOARD(d->character, 3) && board_vnum == 3099)
-            send_to_char(d->character, "\r\n@GThere is a new Punishment Board Post.@n\r\n");
+            d->character->sendf("\r\n@GThere is a new Punishment Board Post.@n\r\n");
         if (BOARDNEWMORT > GET_BOARD(d->character, 0) && board_vnum == 3092)
-            send_to_char(d->character, "\r\n@GThere is a new Mortal Board Post.@n\r\n");
+            d->character->sendf("\r\n@GThere is a new Mortal Board Post.@n\r\n");
     }
 
 
@@ -865,24 +855,24 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum) {
     thisboard = locate_board(board_vnum);
 
     if (!thisboard) {
-        send_to_char(ch, "Error: Your board could not be found. Please report.\n");
+        ch->sendf("Error: Your board could not be found. Please report.\n");
         basic_mud_log("Error in board_respond - board #%ld", board_vnum);
         return;
     }
     if (GET_ADMLEVEL(ch) < WRITE_LVL(thisboard)) {
-        send_to_char(ch, "You are not holy enough to write on this board.\r\n");
+        ch->sendf("You are not holy enough to write on this board.\r\n");
         return;
     }
 
     if (GET_ADMLEVEL(ch) < READ_LVL(thisboard)) {
-        send_to_char(ch, "You are not holy enough to respond to this board.\r\n");
+        ch->sendf("You are not holy enough to respond to this board.\r\n");
         return;
     }
     if (PRF_FLAGGED(ch, PRF_VIEWORDER)) {
         mnum = (BOARD_MNUM(thisboard) - mnum) + 1;
     }
     if (mnum < 0 || mnum > BOARD_MNUM(thisboard)) {
-        send_to_char(ch, "You can only respond to an actual message.\r\n");
+        ch->sendf("You can only respond to an actual message.\r\n");
 
         return;
     }
@@ -907,7 +897,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum) {
     }
     BOARD_MESSAGES(thisboard) = message;
 
-    send_to_char(ch, "Write your message.  (/s saves /h for help)\r\n\r\n");
+    ch->sendf("Write your message.  (/s saves /h for help)\r\n\r\n");
     act("@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
 
     if (!IS_NPC(ch)) {
@@ -943,13 +933,13 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum) {
         if (PLR_FLAGGED(d->character, PLR_WRITING))
             continue;
         if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWIMM > GET_BOARD(d->character, 1) && board_vnum == 3098)
-            send_to_char(d->character, "\r\n@GThere is a new Immortal Board Post.@n\r\n");
+            d->character->sendf("\r\n@GThere is a new Immortal Board Post.@n\r\n");
         if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWBUI > GET_BOARD(d->character, 4) && board_vnum == 3090)
-            send_to_char(d->character, "\r\n@GThere is a new Builder Board Post.@n\r\n");
+            d->character->sendf("\r\n@GThere is a new Builder Board Post.@n\r\n");
         if (GET_ADMLEVEL(d->character) >= 1 && BOARDNEWDUO > GET_BOARD(d->character, 3) && board_vnum == 3099)
-            send_to_char(d->character, "\r\n@GThere is a new Punishment Board Post.@n\r\n");
+            d->character->sendf("\r\n@GThere is a new Punishment Board Post.@n\r\n");
         if (BOARDNEWMORT > GET_BOARD(d->character, 0) && board_vnum == 3092)
-            send_to_char(d->character, "\r\n@GThere is a new Mortal Board Post.@n\r\n");
+            d->character->sendf("\r\n@GThere is a new Mortal Board Post.@n\r\n");
     }
 
     return;
@@ -978,13 +968,13 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     char buf[MAX_STRING_LENGTH + 1];
 
     if (IS_NPC(ch)) {
-        send_to_char(ch, "Nuts.. looks like you forgot your eraser back in mobland...\r\n");
+        ch->sendf("Nuts.. looks like you forgot your eraser back in mobland...\r\n");
         return;
     }
     thisboard = locate_board(board_vnum);
 
     if (!thisboard) {
-        send_to_char(ch, "Error: Your board could not be found. Please report.\n");
+        ch->sendf("Error: Your board could not be found. Please report.\n");
         basic_mud_log("Error in Board_remove_msg - board #%d", board_vnum);
         return;
     }
@@ -992,7 +982,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     cur = BOARD_MESSAGES(thisboard);
 
     if (arg < 1) {
-        send_to_char(ch, "You must specify the (positive) number of the message to be read!\r\n");
+        ch->sendf("You must specify the (positive) number of the message to be read!\r\n");
         return;
     }
 
@@ -1004,7 +994,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
 
     }
     if (!cur) {
-        send_to_char(ch, "That message exists only in your imagination.\r\n");
+        ch->sendf("That message exists only in your imagination.\r\n");
         return;
     }
     /* perform check for mesg in creation */
@@ -1020,15 +1010,15 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
             if (clanIsModerator(clan, ch) && strstr(obj->getLookDesc().c_str(), clan)) {
-                send_to_char(ch, "Exercising your clan leader powers....\r\n");
+                ch->sendf("Exercising your clan leader powers....\r\n");
             } else if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
-                send_to_char(ch, "You can't remove other people's messages.\r\n");
+                ch->sendf("You can't remove other people's messages.\r\n");
                 extract_obj(obj);
                 return;
             }
         } else if (!OBJ_FLAGGED(obj, ITEM_CBOARD)) {
             if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
-                send_to_char(ch, "You can't remove other people's messages.\r\n");
+                ch->sendf("You can't remove other people's messages.\r\n");
                 extract_obj(obj);
                 return;
             }
@@ -1038,7 +1028,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
 
     for (d = descriptor_list; d; d = d->next) {
         if (!d->connected && d->str == &(MESG_DATA(cur))) {
-            send_to_char(ch, "At least wait until the author is finished before removing it!\r\n");
+            ch->sendf("At least wait until the author is finished before removing it!\r\n");
             return;
         }
     }
@@ -1049,7 +1039,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
     free(cur);
     cur = nullptr;
     BOARD_MNUM (thisboard) = BOARD_MNUM (thisboard) - 1;
-    send_to_char(ch, "Message removed.\r\n");
+    ch->sendf("Message removed.\r\n");
     sprintf(buf, "$n just removed message %d.", arg);
     act(buf, false, ch, nullptr, nullptr, TO_ROOM);
     save_board(thisboard);
