@@ -520,7 +520,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
     if (*number == 0)
         return (nullptr);
 
-    for (i = dynamic_cast<room_data*>(world[room])->people; i && *number; i = i->next_in_room)
+    for (auto i : dynamic_cast<room_data*>(world[room])->getPeople())
         if (isname(name, i->name))
             if (--(*number) == 0)
                 return (i);
@@ -1057,7 +1057,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
     if (*number == 0)
         return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
 
-    for (i = ch->getRoom()->people; i && *number; i = i->next_in_room) {
+    for (auto i : ch->getRoom()->getPeople()) {
         if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)

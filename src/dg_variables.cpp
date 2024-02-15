@@ -220,7 +220,7 @@ DgResults scriptFindMob(trig_data *trig, const std::string& field, const std::st
         return "0";
     }
     auto i = 0;
-    for (auto ch = dynamic_cast<room_data*>(world[rrnum])->people; ch; ch = ch->next_in_room)
+    for (auto ch : dynamic_cast<room_data*>(world[rrnum])->getPeople())
         if (GET_MOB_VNUM(ch) == mvnum)
             i++;
     return fmt::format("{}", i);
@@ -264,7 +264,7 @@ DgResults scriptRandom(trig_data *trig, const std::string& field, const std::str
     if(iequals(field, "char")) {
         if(!r) return "";
         std::vector<struct char_data*> candidates;
-        for(auto c = r->people; c; c = c->next_in_room) {
+        for(auto c : r->getPeople()) {
             if(type == MOB_TRIGGER && !CAN_SEE(enactor, c)) continue;
             if(!valid_dg_target(c, DG_ALLOW_GODS)) continue;
             candidates.push_back(c);

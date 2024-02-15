@@ -15,8 +15,6 @@ struct obj_data *find_vehicle_by_vnum(int vnum);
 
 struct obj_data *find_hatch_by_vnum(int vnum);
 
-struct obj_data *get_obj_in_list_type(int type, struct obj_data *list);
-
 
 // commands
 extern ACMD(do_drive);

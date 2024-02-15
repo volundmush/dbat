@@ -1754,7 +1754,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
 void demon_refill_lf(struct char_data *ch, int64_t num) {
     struct char_data *tch = nullptr;
 
-    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
+    for (auto tch : ch->getRoom()->getPeople()) {
         if (!IS_DEMON(tch))
             continue;
         if ((tch->getCurLF()) >= (tch->getMaxLF()))
@@ -1777,7 +1777,7 @@ void mob_talk(struct char_data *ch, const char *speech) {
         return;
     }
 
-    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
+    for (auto tch : ch->getRoom()->getPeople()) {
         if (!IS_NPC(tch))
             continue;
         if (!IS_HUMANOID(tch))
@@ -2872,7 +2872,7 @@ int num_pc_in_room(struct room_data *room) {
     int i = 0;
     struct char_data *ch;
 
-    for (ch = room->people; ch != nullptr; ch = ch->next_in_room)
+    for (auto ch : ch->getRoom()->getPeople())
         if (!IS_NPC(ch))
             i++;
 

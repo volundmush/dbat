@@ -354,7 +354,7 @@ DgResults room_data::dgCallMember(trig_data *trig, const std::string& member, co
     }
 
     if(lmember == "people") {
-        if(people) return people;
+        if(auto p = getPeople(); !p.empty()) return p.front();
         return "";
     }
 

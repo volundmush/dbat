@@ -184,8 +184,7 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
         sub_write_to_char(ch, tokens, otokens, type);
 
     if (IS_SET(targets, TO_ROOM))
-        for (to = ch->getRoom()->people;
-             to; to = to->next_in_room)
+        for (auto to : ch->getRoom()->getPeople())
             if (to != ch && SENDOK(to))
                 sub_write_to_char(to, tokens, otokens, type);
 }

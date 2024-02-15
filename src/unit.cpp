@@ -133,6 +133,14 @@ item_proto& item_proto::operator=(const item_proto& other) {
     return *this;
 }
 
+std::vector<room_data*> unit_data::getRooms() {
+    std::vector<struct room_data*> out;
+    for(auto u : contents) {
+        if(auto r = dynamic_cast<room_data*>(u); r) out.push_back(r);
+    }
+    return out;
+}
+
 std::vector<char_data*> unit_data::getPeople() {
     std::vector<struct char_data*> out;
     for(auto u : contents) {
@@ -792,4 +800,11 @@ unit_data* Searcher::getOne() {
     auto results = search();
     if(results.size() == 1) return results.front();
     return nullptr;
+}
+
+std::optional<vnum> unit_data::getMatchingArea(const std::function<bool(const area_data &)>& f) {
+    if(auto room = getAbsoluteRoom(); room) {
+        return room->getMatchingArea(f);
+    }
+    return std::nullopt;
 }

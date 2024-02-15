@@ -176,7 +176,7 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
     snprintf(buf1, sizeof(buf1), format, skill_name(spellnum));
     snprintf(buf2, sizeof(buf2), format, buf);
 
-    for (i = ch->getRoom()->people; i; i = i->next_in_room) {
+    for (auto i : ch->getRoom()->getPeople()) {
         if (i == ch || i == tch || !i->desc || !AWAKE(i))
             continue;
         /* This should really check spell type vs. target ranks */

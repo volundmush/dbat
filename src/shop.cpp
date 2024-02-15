@@ -556,8 +556,7 @@ static struct obj_data *get_hash_obj_vis(struct char_data *ch, char *name,
     return (nullptr);
 }
 
-static struct obj_data *get_purchase_obj(struct char_data *ch, char *arg,
-                                         struct char_data *keeper, vnum shop_nr, int msg) {
+static struct obj_data *get_purchase_obj(struct char_data *ch, char *arg, struct char_data *keeper, vnum shop_nr, int msg) {
     char name[MAX_INPUT_LENGTH];
     struct obj_data *obj;
 

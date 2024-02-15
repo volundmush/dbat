@@ -310,7 +310,7 @@ static void db_load_activate_entities() {
         if(r->script) r->script->activate();
         r->assignTriggers();
         r->activateContents();
-        for(auto c = r->people; c; c = c->next_in_room) {
+        for(auto c : r->getPeople()) {
             if(IS_NPC(c)) {
                 c->activate();
             }

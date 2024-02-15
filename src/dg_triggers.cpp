@@ -165,7 +165,7 @@ void greet_memory_mtrigger(char_data *actor)
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return;
 
-    for (ch = actor->getRoom()->people; ch; ch = ch->next_in_room)
+    for (auto ch : actor->getRoom()->getPeople())
     {
         if (!SCRIPT_MEM(ch) || !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
@@ -228,7 +228,7 @@ int greet_mtrigger(char_data *actor, int dir)
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return true;
 
-    for (ch = actor->getRoom()->people; ch; ch = ch->next_in_room)
+    for (auto ch : actor->getRoom()->getPeople())
     {
         if (!SCRIPT_CHECK(ch, MTRIG_GREET | MTRIG_GREET_ALL) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
@@ -267,15 +267,10 @@ void entry_memory_mtrigger(char_data *ch)
     if (!SCRIPT_MEM(ch) || AFF_FLAGGED(ch, AFF_CHARM))
         return;
 
-    for (actor = ch->getRoom()->people; actor && SCRIPT_MEM(ch);
-         actor = actor->next_in_room)
-    {
-        if (actor != ch && SCRIPT_MEM(ch))
-        {
-            for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next)
+    for (auto actor : ch->getRoom()->getPeople()) {
+        for (auto mem = SCRIPT_MEM(ch); mem; mem = mem->next)
             {
-                if (((actor)->id) == mem->id)
-                {
+                if (((actor)->uid) == mem->id) {
                     struct script_memory *prev;
                     if (mem->cmd)
                         command_interpreter(ch, mem->cmd);
@@ -309,7 +304,6 @@ void entry_memory_mtrigger(char_data *ch)
                     free(mem);
                 }
             } /* for (mem =..... */
-        }
     }
 }
 
@@ -339,9 +333,8 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument)
     if (!valid_dg_target(actor, 0))
         return 0;
 
-    for (ch = actor->getRoom()->people; ch; ch = ch_next)
+    for (auto ch : actor->getRoom()->getPeople())
     {
-        ch_next = ch->next_in_room;
 
         if (SCRIPT_CHECK(ch, MTRIG_COMMAND) && !AFF_FLAGGED(ch, AFF_CHARM) &&
             (actor != ch))
@@ -381,9 +374,8 @@ void speech_mtrigger(char_data *actor, char *str)
     char_data *ch, *ch_next;
     char buf[MAX_INPUT_LENGTH];
 
-    for (ch = actor->getRoom()->people; ch; ch = ch_next)
+    for (auto ch : actor->getRoom()->getPeople())
     {
-        ch_next = ch->next_in_room;
 
         if (SCRIPT_CHECK(ch, MTRIG_SPEECH) && AWAKE(ch) &&
             !AFF_FLAGGED(ch, AFF_CHARM) && (actor != ch))
@@ -611,7 +603,7 @@ int leave_mtrigger(char_data *actor, int dir)
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
 
-    for (ch = actor->getRoom()->people; ch; ch = ch->next_in_room)
+    for (auto ch : actor->getRoom()->getPeople())
     {
         if (!SCRIPT_CHECK(ch, MTRIG_LEAVE) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
@@ -640,7 +632,7 @@ int door_mtrigger(char_data *actor, int subcmd, int dir)
     char_data *ch;
     char buf[MAX_INPUT_LENGTH];
 
-    for (ch = actor->getRoom()->people; ch; ch = ch->next_in_room)
+    for(auto ch : actor->getRoom()->getPeople())
     {
         if (!SCRIPT_CHECK(ch, MTRIG_DOOR) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||

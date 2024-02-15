@@ -37,10 +37,10 @@ static int player_present(struct char_data *ch) {
     if (IN_ROOM(ch) == NOWHERE)
         return 0;
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto vict : ch->getRoom()->getPeople()) {
         if (!IS_NPC(vict)) {
             found = true;
+            break;
         }
     }
 
@@ -155,7 +155,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
             int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
             found = false;
-            for (vict = ch->getRoom()->people; vict && !found; vict = vict->next_in_room) {
+            for (auto vict : ch->getRoom()->getPeople()) {
                 if (vict == ch)
                     continue;
                 else if (FIGHTING(ch))
@@ -255,8 +255,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
             struct char_data *vict, *next_v;
             int done = false;
-            for (vict = ch->getRoom()->people; vict; vict = next_v) {
-                next_v = vict->next_in_room;
+            for (auto vict : ch->getRoom()->getPeople()) {
                 if (vict == ch)
                     continue;
                 if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
@@ -292,8 +291,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
             struct char_data *vict, *next_v;
             int done = false;
-            for (vict = ch->getRoom()->people; vict; vict = next_v) {
-                next_v = vict->next_in_room;
+            for (auto vict : ch->getRoom()->getPeople()) {
                 if (vict == ch)
                     continue;
                 if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
@@ -320,32 +318,6 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         }
         if (GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
             do_wake(ch, nullptr, 0, 0);
-        }
-
-        /* Mob Memory */
-        if (IS_HUMANOID(ch) && MEMORY(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
-            found = false;
-            for (vict = ch->getRoom()->people; vict && !found; vict = vict->next_in_room) {
-                if (IS_NPC(vict) || !CAN_SEE(ch, vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
-                    continue;
-                if (FIGHTING(ch))
-                    continue;
-                if (GET_HIT(ch) <= GET_MAX_HIT(ch) / 100)
-                    continue;
-
-                for (names = MEMORY(ch); names && !found; names = names->next) {
-                    if (names->id != GET_IDNUM(vict))
-                        continue;
-
-                    found = true;
-                    act("'Hey!  You're the fiend that attacked me!!!', exclaims $n.", false, ch, nullptr, nullptr,
-                        TO_ROOM);
-                    char tar[MAX_INPUT_LENGTH];
-
-                    sprintf(tar, "%s", GET_NAME(vict));
-                    do_punch(ch, tar, 0, 0);
-                }
-            }
         }
 
         if (FIGHTING(ch) && rand_number(1, 30) >= 25) {

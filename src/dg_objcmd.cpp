@@ -157,10 +157,7 @@ OCMD(do_oecho) {
         obj_log(obj, "oecho called with no args");
 
     else if (auto room = obj->getRoom(); room) {
-        if (room->people) {
-            sub_write(argument, room->people, true, TO_ROOM);
-            sub_write(argument, room->people, true, TO_CHAR);
-        }
+        room->broadcast(argument);
     } else
         obj_log(obj, "oecho called by object in NOWHERE");
 }
@@ -181,8 +178,7 @@ OCMD(do_oforce) {
         if (auto room = obj->getRoom(); room)
             obj_log(obj, "oforce called by object in NOWHERE");
         else {
-            for (ch = room->people; ch; ch = next_ch) {
-                next_ch = ch->next_in_room;
+            for (auto ch : room->getPeople()) {
                 if (valid_dg_target(ch, 0)) {
                     command_interpreter(ch, line);
                 }
@@ -318,7 +314,6 @@ OCMD(do_otransform) {
         tmpobj.in_obj = obj->in_obj;
 
         tmpobj.script = obj->script;
-        tmpobj.next_content = obj->next_content;
         tmpobj.next = obj->next;
         memcpy(obj, &tmpobj, sizeof(*obj));
 
@@ -345,8 +340,7 @@ OCMD(do_opurge) {
     if (!*arg) {
         /* purge all */
         if (auto rm = obj->getRoom(); rm) {
-            for (ch = rm->people; ch; ch = next_ch) {
-                next_ch = ch->next_in_room;
+            for (auto ch : rm->getPeople()) {
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
@@ -430,8 +424,7 @@ OCMD(do_oteleport) {
         if (target == rm->vn)
             obj_log(obj, "oteleport target is itself");
 
-        for (ch = rm->people; ch; ch = next_ch) {
-            next_ch = ch->next_in_room;
+        for (auto ch : rm->getPeople()) {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
             ch->removeFromLocation();
@@ -589,8 +582,7 @@ OCMD(do_oasound) {
         if(!e) continue;
         auto dest = e->getDestination();
         if(!dest) continue;
-        sub_write(argument, dest->people, true, TO_ROOM);
-        sub_write(argument, dest->people, true, TO_CHAR);
+        dest->broadcast(argument);
     }
 }
 

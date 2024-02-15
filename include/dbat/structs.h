@@ -646,7 +646,6 @@ struct obj_data : public unit_data {
     struct char_data *worn_by{};      /* Worn by? */
     int16_t worn_on{-1};          /* Worn where?		      */
 
-    struct obj_data *next_content{}; /* For 'contains' lists             */
     struct obj_data *next{};         /* For the object list              */
 
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
@@ -1823,7 +1822,7 @@ enum class SearchType : uint8_t {
 template<typename Derived>
 class Dispatcher {
     public:
-    Dispatcher(char_data* caller, const std::string& args) : caller(caller), args(args) {};
+    Dispatcher(unit_data* caller, const std::string& args) : caller(caller), args(args) {};
     Dispatcher& setFilter(const std::function<bool(unit_data*)> &f) {
         filter = f;
         return static_cast<Derived&>(*this);
@@ -1853,7 +1852,7 @@ class Dispatcher {
         return static_cast<Derived&>(*this);
     }
     protected:
-    char_data* caller;
+    unit_data* caller;
     std::string args;
     bool checkVisible{true};
     std::function<bool(unit_data*)> filter;
@@ -1907,6 +1906,8 @@ class Dispatcher {
 
 class Searcher : public Dispatcher<Searcher> {
 public:
+    Searcher(unit_data* caller, const std::string& args) : Dispatcher<Searcher>(caller, args) {}
+
     Searcher& setAllowAll(bool val = true);
     Searcher& setAllowAsterisk(bool val = true);
     Searcher& setAllowSelf(bool val = true);
@@ -1940,6 +1941,7 @@ using MsgVar = std::variant<unit_data*, std::string>;
 
 class Messager : public Dispatcher<Messager> {
 public:
+    Messager(unit_data* caller, const std::string& args) : Dispatcher<Messager>(caller, args) {}
     void deliver();
     void addVar(const std::string& key, MsgVar value);
 protected:

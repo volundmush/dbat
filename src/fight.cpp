@@ -1703,7 +1703,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
     if (!MOB_FLAGGED(ch, MOB_HUSK)) {
         /* transfer character's inventory to the corpse */
-        for(auto o : ch->contents) {
+        for(auto o : ch->getContents()) {
             o->removeFromLocation();
             o->addToLocation(corpse);
         }

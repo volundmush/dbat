@@ -85,14 +85,6 @@ nlohmann::json obj_data::serializeInstance() {
 }
 
 
-nlohmann::json obj_data::serializeProto() {
-    auto j = serializeBase();
-
-    return j;
-}
-
-
-
 void obj_data::deserializeBase(const nlohmann::json &j) {
     deserializeUnit(j);
 
@@ -152,12 +144,6 @@ obj_data::obj_data(const nlohmann::json &j) : obj_data() {
     
 }
 
-std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const area_data &)>& f) {
-    if(auto room = getAbsoluteRoom(); room) {
-        return room->getMatchingArea(f);
-    }
-    return std::nullopt;
-}
 
 void obj_data::activate() {
     if(active) {
@@ -470,8 +456,7 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
     if(lmember == "id") return this;
 
     if(lmember == "in_room") {
-        if (auto roomFound = world.find(location); roomFound != world.end())
-            return dynamic_cast<room_data*>(roomFound->second);
+        if(auto r = getRoom(); r) return r;
         return "";
     }
 
@@ -487,8 +472,16 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
     }
 
     if(lmember == "next_in_list") {
-        if(next_content) return next_content;
-        return "";
+        // Okay this one's stupid. We're not a manual linked list anymore, so for this to work we'll have to fake it.
+        auto loc = getLocation();
+        if(!loc) return "";
+        if(locationType != 0) return "";
+        auto inv = loc->getInventory();
+        // so we should be in here somewhere, and if so we want to return a pointer to the next available item, if any.
+        auto found = std::find(inv.begin(), inv.end(), this);
+        if(found == inv.end()) return "";
+        if(found+1 == inv.end()) return "";
+        return *(found+1);
     }
 
     if(lmember == "room") {

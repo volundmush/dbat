@@ -51,7 +51,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
 
 static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode);
 
-static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show);
+static void list_obj_to_char(std::vector<obj_data*> list, struct char_data *ch, int mode, int show);
 
 static void trans_check(struct char_data *ch, struct char_data *vict);
 
@@ -69,7 +69,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch);
 
 static void list_one_char(struct char_data *i, struct char_data *ch);
 
-static void list_char_to_char(struct char_data *list, struct char_data *ch);
+static void list_char_to_char(std::vector<char_data*> list, struct char_data *ch);
 
 static void look_in_direction(struct char_data *ch, int dir);
 
@@ -2522,67 +2522,19 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch) {
     return (found);
 }
 
-static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show) {
+static void list_obj_to_char(std::vector<obj_data*> list, struct char_data *ch, int mode, int show) {
     struct obj_data *i, *j, *d;
     bool found = false;
     int num;
 
     /* Loop through all objects in the list */
-    for (i = list; i; i = i->next_content) {
+    for (auto i : list) {
         if (i->room_description == nullptr)
             continue;
         if (strcasecmp(i->room_description, "undefined") == 0)
             continue;
         num = 0;
         d = i;
-        if (CONFIG_STACK_OBJS) {
-            for (j = list; j != i; j = j->next_content)
-                if ((!strcasecmp(j->getShortDesc().c_str(), i->getShortDesc().c_str()) &&
-                     !strcasecmp(j->room_description, i->room_description)) &&
-                    (j->vn == i->vn) &&
-                    ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) ||
-                     (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
-                    if ((!SITTING(j) && !SITTING(i)))
-                        if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
-                            if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) ||
-                                (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT &&
-                                 GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) &&
-                                 GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
-                                if ((!OBJ_FLAGGED(j, ITEM_DUPLICATE) && !OBJ_FLAGGED(i, ITEM_DUPLICATE)) ||
-                                    (OBJ_FLAGGED(j, ITEM_DUPLICATE) && OBJ_FLAGGED(i, ITEM_DUPLICATE)))
-                                    if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
-                                        if (!GET_FELLOW_WALL(j) && !GET_FELLOW_WALL(i))
-                                            if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && GET_OBJ_VNUM(j) == 255 &&
-                                                 GET_OBJ_VNUM(i) == 255) ||
-                                                (GET_OBJ_VNUM(j) != 255 && GET_OBJ_VNUM(i) != 255))
-                                                break;
-            if (j != i)
-                continue;
-            for (d = j = i; j; j = j->next_content)
-                if ((!strcasecmp(j->getShortDesc().c_str(), i->getShortDesc().c_str()) &&
-                     !strcasecmp(j->room_description, i->room_description)) &&
-                    (j->vn == i->vn) &&
-                    ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) ||
-                     (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
-                    if ((!SITTING(j) && !SITTING(i)))
-                        if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
-                            if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
-                                if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) ||
-                                    (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT &&
-                                     GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) &&
-                                     GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
-                                    if ((!OBJ_FLAGGED(j, ITEM_DUPLICATE) && !OBJ_FLAGGED(i, ITEM_DUPLICATE)) ||
-                                        (OBJ_FLAGGED(j, ITEM_DUPLICATE) && OBJ_FLAGGED(i, ITEM_DUPLICATE)))
-                                        if (!GET_FELLOW_WALL(j) && !GET_FELLOW_WALL(i))
-                                            if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && GET_OBJ_VNUM(i) == 255 &&
-                                                 GET_OBJ_VNUM(j) == 255) ||
-                                                (GET_OBJ_VNUM(j) != 255 && GET_OBJ_VNUM(i) != 255))
-                                                if (CAN_SEE_OBJ(ch, j)) {
-                                                    num++;
-                                                    if (d == i && !CAN_SEE_OBJ(ch, d))
-                                                        d = j;
-                                                }
-        }
         if ((CAN_SEE_OBJ(ch, d) &&
              ((*d->room_description != '.' && *d->getShortDesc().c_str() != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
             (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
@@ -3330,7 +3282,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
 
 }
 
-static void list_char_to_char(struct char_data *list, struct char_data *ch) {
+static void list_char_to_char(std::vector<char_data*> list, struct char_data *ch) {
     struct char_data *i, *j;
     struct hide_node {
         struct hide_node *next;
@@ -3340,7 +3292,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
 
     hideinfo = lasthide = nullptr;
 
-    for (i = list; i; i = i->next_in_room) {
+    for (auto i : list) {
         if (AFF_FLAGGED(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
             if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
                 improve_skill(i, SKILL_HIDE, 1);
@@ -3358,7 +3310,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
         }
     }
 
-    for (i = list; i; i = i->next_in_room) {
+    for (auto i : list) {
         /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
         if ((ch == i) || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i)
@@ -3373,47 +3325,6 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
 
         if (CAN_SEE(ch, i)) {
             num = 0;
-            if (CONFIG_STACK_MOBS) {
-                /* How many other occurences of this mob are there? */
-                for (j = list; j != i; j = j->next_in_room)
-                    if ((i->vn == j->vn) &&
-                        (GET_POS(i) == GET_POS(j)) &&
-                        (AFF_FLAGS(i)[0] == AFF_FLAGS(j)[0]) &&
-                        (AFF_FLAGS(i)[1] == AFF_FLAGS(j)[1]) &&
-                        (AFF_FLAGS(i)[2] == AFF_FLAGS(j)[2]) &&
-                        (AFF_FLAGS(i)[3] == AFF_FLAGS(j)[3]) &&
-                        (!FIGHTING(i) && !FIGHTING(j)) &&
-                        (GET_HIT(i) == (i->getEffMaxPL()) && GET_HIT(j) == (j->getEffMaxPL())) &&
-                        !strcmp(GET_NAME(i), GET_NAME(j))) {
-                        for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-                            if (tmphide->hidden == j)
-                                break;
-                        if (!tmphide)
-                            break;
-                    }
-                if (j != i)
-                    /* This will be true where we have already found this
-	   * mob for an earlier "i".  The continue pops us out of
-	   * the main "i" for loop.
-	   */
-                    continue;
-                for (j = i; j; j = j->next_in_room)
-                    if ((i->vn == j->vn) &&
-                        (GET_POS(i) == GET_POS(j)) &&
-                        (AFF_FLAGS(i)[0] == AFF_FLAGS(j)[0]) &&
-                        (AFF_FLAGS(i)[1] == AFF_FLAGS(j)[1]) &&
-                        (AFF_FLAGS(i)[2] == AFF_FLAGS(j)[2]) &&
-                        (AFF_FLAGS(i)[3] == AFF_FLAGS(j)[3]) &&
-                        (!FIGHTING(i) && !FIGHTING(j)) &&
-                        (GET_HIT(i) == GET_MAX_HIT(i) && GET_HIT(j) == GET_MAX_HIT(j)) &&
-                        !strcmp(GET_NAME(i), GET_NAME(j))) {
-                        for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-                            if (tmphide->hidden == j)
-                                break;
-                        if (!tmphide)
-                            num++;
-                    }
-            }
             /* Now show this mob's name and other stuff */
             send_to_char(ch, "@w");
             if (num > 1)
@@ -4058,7 +3969,7 @@ static void look_in_obj(struct char_data *ch, char *arg) {
                     break;
             }
 
-            list_obj_to_char(obj->contents, ch, SHOW_OBJ_SHORT, true);
+            list_obj_to_char(obj->getInventory(), ch, SHOW_OBJ_SHORT, true);
         }
     } else {        /* item must be a fountain or drink container */
         if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) == 1))
@@ -4211,7 +4122,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
                 }
 
         /* Does the argument match an extra desc in the char's inventory? */
-        for (obj = ch->contents; obj && !found; obj = obj->next_content) {
+        for (auto obj : ch->getInventory()) {
             if (CAN_SEE_OBJ(ch, obj))
                 if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
                     if (isBoard(obj)) {
@@ -4240,7 +4151,7 @@ static void look_at_target(struct char_data *ch, char *arg, int cmread) {
         }
 
         /* Does the argument match an extra desc of an object in the room? */
-        for (obj = ch->getRoom()->contents; obj && !found; obj = obj->next_content)
+        for (auto obj : ch->getRoom()->getInventory())
             if (CAN_SEE_OBJ(ch, obj))
                 if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
                     if (isBoard(obj)) {
@@ -5657,7 +5568,7 @@ ACMD(do_inventory) {
             return;
         }
     }
-    list_obj_to_char(ch->contents, ch, SHOW_OBJ_SHORT, true);
+    list_obj_to_char(ch->getInventory(), ch, SHOW_OBJ_SHORT, true);
     send_to_char(ch, "\n");
 }
 
@@ -7128,7 +7039,7 @@ ACMD(do_scan) {
                      CCNRM(ch, C_NRM));
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
-        list_obj_to_char(dest->contents, ch, SHOW_OBJ_LONG, false);
+        list_obj_to_char(dest->getInventory(), ch, SHOW_OBJ_LONG, false);
         list_char_to_char(dest->people, ch);
         if (dest->geffect >= 1 && dest->geffect <= 5) {
             send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
@@ -7152,8 +7063,8 @@ ACMD(do_scan) {
                          CCNRM(ch, C_NRM));
             send_to_char(ch, "@W          -----------------          @n\r\n");
 
-            list_obj_to_char(dest2->contents, ch, SHOW_OBJ_LONG, false);
-            list_char_to_char(dest2->people, ch);
+            list_obj_to_char(dest2->getInventory(), ch, SHOW_OBJ_LONG, false);
+            list_char_to_char(dest2->getPeople(), ch);
             if (dest2->geffect >= 1 && dest2->geffect <= 5) {
                 send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
             }

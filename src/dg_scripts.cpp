@@ -484,7 +484,7 @@ int trgvar_in_room(room_vnum vnum) {
     if(!r) return 0;
     int i = 0;
 
-    for (auto ch = r->people; ch != nullptr; ch = ch->next_in_room)
+    for (auto ch : r->getPeople())
         i++;
 
     return i;
@@ -498,10 +498,10 @@ obj_data *get_obj_in_list(char *name, std::vector<obj_data*> list) {
         auto obj = dynamic_cast<obj_data*>(resolveUID(name));
         if(!obj) return nullptr;
 
-        for (i = list; i; i = i->next_content)
+        for (auto i : list)
             if(i == obj) return obj;
     } else {
-        for (i = list; i; i = i->next_content)
+        for (auto i : list)
             if (isname(name, i->name))
                 return i;
     }
@@ -673,7 +673,7 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
     } else {
         room_rnum num;
         if (auto room = obj->getRoom(); room)
-            for (ch = room->people; ch; ch = ch->next_in_room)
+            for (auto ch : room->getPeople())
                 if (isname(name, ch->name) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
@@ -697,7 +697,7 @@ char_data *get_char_in_room(room_data *room, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        for (ch = room->people; ch; ch = ch->next_in_room)
+        for (auto ch : room->getPeople())
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
@@ -743,7 +743,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
             return i;
 
         /* check peoples' inventory */
-        for (ch = rm->people; ch; ch = ch->next_in_room)
+        for (auto ch : rm->getPeople())
             if ((i = get_object_in_equip(ch, name)))
                 return i;
     }
@@ -829,7 +829,7 @@ char_data *get_char_by_room(room_data *room, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        for (ch = room->people; ch; ch = ch->next_in_room)
+        for (auto ch : room->getPeople())
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
@@ -1178,9 +1178,11 @@ ACMD(do_attach) {
     if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
         victim = get_char_vis(ch, targ_name, nullptr, FIND_CHAR_WORLD);
         if (!victim) { /* search room for one with this vnum */
-            for (victim = ch->getRoom()->people; victim; victim = victim->next_in_room)
-                if (GET_MOB_VNUM(victim) == num_arg)
+            for (auto v : ch->getRoom()->getPeople())
+                if (GET_MOB_VNUM(victim) == num_arg) {
+                    victim = v;
                     break;
+                }
 
             if (!victim) {
                 send_to_char(ch, "That mob does not exist.\r\n");

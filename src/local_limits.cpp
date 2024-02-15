@@ -1396,59 +1396,37 @@ void point_update(uint64_t heartPulse, double deltaTime) {
             if (GET_OBJ_TIMER(j) > 0)
                 GET_OBJ_TIMER(j)--;
             if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
-                if (GET_OBJ_TIMER(j) == 5) {
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                            TO_CHAR);
-                        act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                            TO_ROOM);
-                    }
-                }
-                if (GET_OBJ_TIMER(j) == 3) {
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                            TO_CHAR);
-                        act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                            TO_ROOM);
-                    }
-                }
-                if (GET_OBJ_TIMER(j) == 2) {
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
-                            nullptr, TO_CHAR);
-                        act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
-                            nullptr, TO_ROOM);
-                    }
-                }
-                if (GET_OBJ_TIMER(j) == 1) {
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
-                            j, nullptr, TO_CHAR);
-                        act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
-                            j, nullptr, TO_ROOM);
-                    }
-                }
+                std::string corpseName = j->getShortDesc();
+                std::string decayMessage;
+                switch(GET_OBJ_TIMER(j)) {
+                    case 5:
+                        decayMessage = "@DFlies start to gather around $you()@D.@n.";
+                        break;
+                    case 3:
+                        decayMessage = "@DA cloud of flies has formed over $you()@D.@n";
+                        break;
+                    case 2:
+                        decayMessage = "@DMaggots can be seen crawling all over $you()@D.@n";
+                        break;
+                    case 1:
+                        decayMessage = "@DMaggots have nearly stripped $you() of all its flesh@D.@n";
+                        break;
+                };
+                if(!decayMessage.empty()) {
+                    Messager msg(j, decayMessage);
+                    msg.addLocation(j);
+                    msg.deliver();
+                };
             }
             if (!GET_OBJ_TIMER(j)) {
 
                 if (j->carried_by) {
-                    if (!strstr(j->name, "android")) {
-                        act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
-                        if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                            act("A quivering horde of maggots consumes $p.",
-                                true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                            act("A quivering horde of maggots consumes $p.",
-                                true, j->getRoom()->people, j, nullptr, TO_CHAR);
-                        }
-                    } else {
-                        act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
-                        if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                            act("$p breaks down completely into a pile of junk.",
-                                true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                            act("$p breaks down completely into a pile of junk.",
-                                true, j->getRoom()->people, j, nullptr, TO_CHAR);
-                        }
-                    }
+                    act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
+                }
+                else {
+                    Messager msg(j, strstr(j->name, "android") ? "$you() breaks down completely into a pile of junk." : "A quivering horde of maggots consumes $you().");
+                    msg.addLocation(j->carried_by);
+                    msg.deliver();
                 }
                 for (auto jj : j->getInventory()) {
                     jj->removeFromLocation();
@@ -1468,10 +1446,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 GET_OBJ_TIMER(j)--;
 
             if (GET_OBJ_TIMER(j) == 0) {
-                act("A glowing portal fades from existence.",
-                    true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                act("A glowing portal fades from existence.",
-                    true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                j->getRoom()->broadcast("A glowing portal fades from existence.");
                 extract_obj(j);
             }
         } else if (GET_OBJ_VNUM(j) == 1306) {
@@ -1479,10 +1454,9 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 GET_OBJ_TIMER(j)--;
 
             if (GET_OBJ_TIMER(j) == 0) {
-                act("The $p@n settles to the ground and goes out.",
-                    true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                act("A $p@n settles to the ground and goes out.",
-                    true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                Messager msg(j, "The $you() settles to the ground and goes out.");
+                msg.addLocation(j->getRoom());
+                msg.deliver();
                 extract_obj(j);
             }
         } else if (OBJ_FLAGGED(j, ITEM_ICE)) {
@@ -1590,7 +1564,7 @@ void timed_dt(struct char_data *ch) {
     *
     */
     if (r->timed == 0) {
-        for (vict = r->people; vict; vict = vict->next_in_room) {
+        for (auto vict : r->getPeople()) {
             if (IS_NPC(vict))
                 continue;
             if (GET_ADMLEVEL(vict) >= ADMLVL_IMMORT)

@@ -552,8 +552,7 @@ ACMD(do_mpurge) {
         /* 'purge' */
         char_data *vnext;
 
-        for (victim = ch->getRoom()->people; victim; victim = vnext) {
-            vnext = victim->next_in_room;
+        for (auto victim : ch->getRoom()->getPeople()) {
             if (IS_NPC(victim) && victim != ch)
                 extract_char(victim);
         }
@@ -708,8 +707,7 @@ ACMD(do_mteleport) {
             return;
         }
 
-        for (vict = ch->getRoom()->people; vict; vict = next_ch) {
-            next_ch = vict->next_in_room;
+        for (auto victim : ch->getRoom()->getPeople()) {
 
             if (valid_dg_target(vict, DG_ALLOW_GODS)) {
                 vict->removeFromLocation();
