@@ -2701,8 +2701,12 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
     if (!ch->desc) {
         return;
     }
-    if (auto ld = i->getLookDesc(); !ld.empty()) {
-        send_to_char(ch, "%s", ld);
+    if(i->form == FormID::Base || i->transforms[i->form].description == nullptr || i->transforms[i->form].description == "") {
+        if (i->look_description) {
+            send_to_char(ch, "%s", i->look_description);
+        }
+    } else {
+        send_to_char(ch, "%s", i->transforms[i->form].description);
     }
     if (!MOB_FLAGGED(i, MOB_JUSTDESC)) {
         bringdesc(ch, i);
@@ -4658,11 +4662,11 @@ ACMD(do_look) {
 
     auto room = ch->getRoom();
 
-    if(IS_DARK(room->vn) && !CAN_SEE_IN_DARK(ch)) {
+    /*if(IS_DARK(room->vn) && !CAN_SEE_IN_DARK(ch)) {
         send_to_char(ch, "It is pitch black...\r\n");
-        list_char_to_char(room->people, ch);    /* glowing red eyes */
+        list_char_to_char(room->people, ch);     //glowing red eyes 
         return;
-    }
+    }*/
 
     char arg[MAX_INPUT_LENGTH], arg2[200];
 
@@ -7551,8 +7555,19 @@ ACMD(do_desc) {
     if(!d) {
         return;
     }
-    write_to_output(d, "Current description:\r\n%s", ch->getLookDesc());
-    write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
-    string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
-    STATE(d) = CON_EXDESC;
+
+    if(ch->form == FormID::Base) {
+        write_to_output(d, "Current description:\r\n%s", ch->look_description);
+        write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
+        string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
+        STATE(d) = CON_EXDESC;
+    } else {
+        auto form = ch->form;
+
+        write_to_output(d, "Current description for %s:\r\n%s", trans::getName(ch, form), ch->transforms[form].description);
+        write_to_output(d, "Enter the new text you'd like others to see when they look at you in this form.\r\n");
+
+        string_write(d, &ch->transforms[form].description, EXDSCR_LENGTH, 0, nullptr);
+        STATE(d) = CON_EXDESC;
+    }
 }

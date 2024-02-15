@@ -689,6 +689,7 @@ struct trans_data {
     trans_data() = default;
     explicit trans_data(const nlohmann::json& j);
 
+    char *description{};
     double timeSpentInForm{0.0};
     bool visible = true;
     bool limitBroken = false;
