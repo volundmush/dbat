@@ -3114,13 +3114,13 @@ void admin_set(struct char_data *ch, int value) {
         }
         run_autowiz();
         if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
-            for(auto f : {PRF_LOG2, PRF_HOLYLIGHT, PRF_ROOMFLAGS, PRF_AUTOEXIT}) ch->pref.set(f);
+            for(auto f : {PRF_LOG2, PRF_HOLYLIGHT, PRF_ROOMFLAGS, PRF_AUTOEXIT}) ch->setFlag(FlagType::Pref, f);
 
         }
         if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
             for (i = 0; i < 3; i++)
                 GET_COND(ch, i) = (char) -1;
-            ch->pref.set(PRF_HOLYLIGHT);
+            ch->setFlag(FlagType::Pref, PRF_HOLYLIGHT);
         }
         return;
     }
@@ -3135,7 +3135,7 @@ void admin_set(struct char_data *ch, int value) {
         }
         run_autowiz();
         if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {
-            for(auto f : {PRF_LOG1, PRF_LOG2, PRF_NOHASSLE, PRF_HOLYLIGHT, PRF_ROOMFLAGS}) ch->pref.reset(f);
+            for(auto f : {PRF_LOG1, PRF_LOG2, PRF_NOHASSLE, PRF_HOLYLIGHT, PRF_ROOMFLAGS}) ch->clearFlag(FlagType::Pref, f);
         }
         return;
     }

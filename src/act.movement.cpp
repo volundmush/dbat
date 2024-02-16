@@ -1040,7 +1040,7 @@ ACMD(do_move) {
     }
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref.reset(PRF_ARENAWATCH);
+            ch->clearFlag(FlagType::Pref, PRF_ARENAWATCH);
             ARENA_IDNUM(ch) = -1;
         }
         if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 &&
@@ -2201,7 +2201,7 @@ ACMD(do_sleep) {
 
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref.reset(PRF_ARENAWATCH);
+            ch->clearFlag(FlagType::Pref, PRF_ARENAWATCH);
             ARENA_IDNUM(ch) = -1;
             ch->sendf("You stop watching the arena action.\r\n");
         }

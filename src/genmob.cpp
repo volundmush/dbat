@@ -147,15 +147,6 @@ nlohmann::json char_data::serialize() {
         if(app) j["nums"].push_back(std::make_pair(id, app));
     }
 
-    for(auto i = 0; i < mobFlags.size(); i++)
-        if(checkFlag(FlagType::NPC, i)) j["mobFlags"].push_back(i);
-
-    for(auto i = 0; i < playerFlags.size(); i++)
-        if(playerFlags.test(i)) j["playerFlags"].push_back(i);
-
-    for(auto i = 0; i < pref.size(); i++)
-        if(pref.test(i)) j["pref"].push_back(i);
-
     for(auto i = 0; i < bodyparts.size(); i++)
         if(bodyparts.test(i)) j["bodyparts"].push_back(i);
 
@@ -360,7 +351,7 @@ void char_data::deserialize(const nlohmann::json &j) {
     if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
     if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) setFlag(FlagType::NPC, i.get<int>());
     if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
-    if(j.contains("pref")) for(auto &i : j["pref"]) pref.set(i.get<int>());
+    if(j.contains("pref")) for(auto &i : j["pref"]) setFlag(FlagType::Pref, i.get<int>());
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) bodyparts.set(i.get<int>());
 
     if(j.contains("hometown")) hometown = j["hometown"];

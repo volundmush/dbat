@@ -6887,7 +6887,7 @@ ACMD(do_instant) {
 
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref.reset(PRF_ARENAWATCH);
+            ch->clearFlag(FlagType::Pref, PRF_ARENAWATCH);
             ARENA_IDNUM(ch) = -1;
             ch->sendf("You stop watching the arena action.\r\n");
         }
@@ -10010,52 +10010,48 @@ ACMD(do_display) {
         PRF_DISHUTH, PRF_DISPERC, PRF_FORM};
 
     if (!strcasecmp(argument, "on") || !strcasecmp(argument, "all")) {
-        for(auto f : allPrefs) ch->pref.set(f);
+        for(auto f : allPrefs) ch->setFlag(FlagType::Pref, f);
     } else if (!strcasecmp(argument, "off") || !strcasecmp(argument, "none")) {
-        for(auto f : allPrefs) ch->pref.reset(f);
+        for(auto f : allPrefs) ch->clearFlag(FlagType::Pref, f);
     } else {
-        /*REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPHP);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPMOVE);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPTNL);
-    REMOVE_BIT_AR(PRF_FLAGS(ch), PRF_DISPKI);*/
 
         for (i = 0; i < strlen(argument); i++) {
             switch (LOWER(argument[i])) {
                 case 'p':
-                    ch->pref.flip(PRF_DISPHP);
+                    ch->flipFlag(FlagType::Pref, PRF_DISPHP);
                     break;
                 case 's':
-                    ch->pref.flip(PRF_DISPMOVE);
+                    ch->flipFlag(FlagType::Pref, PRF_DISPMOVE);
                     break;
                 case 'k':
-                    ch->pref.flip(PRF_DISPKI);
+                    ch->flipFlag(FlagType::Pref, PRF_DISPKI);
                     break;
                 case 't':
-                    ch->pref.flip(PRF_DISPTNL);
+                    ch->flipFlag(FlagType::Pref, PRF_DISPTNL);
                     break;
                 case 'h':
-                    ch->pref.flip(PRF_DISTIME);
+                    ch->flipFlag(FlagType::Pref, PRF_DISTIME);
                     break;
                 case 'g':
-                    ch->pref.flip(PRF_DISGOLD);
+                    ch->flipFlag(FlagType::Pref, PRF_DISGOLD);
                     break;
                 case 'l':
-                    ch->pref.flip(PRF_DISPRAC);
+                    ch->flipFlag(FlagType::Pref, PRF_DISPRAC);
                     break;
                 case 'c':
-                    ch->pref.flip(PRF_DISPERC);
+                    ch->flipFlag(FlagType::Pref, PRF_DISPERC);
                     break;
                 case 'm':
-                    ch->pref.flip(PRF_DISHUTH);
+                    ch->flipFlag(FlagType::Pref, PRF_DISHUTH);
                     break;
                 case 'o':
-                    ch->pref.flip(PRF_FORM);
+                    ch->flipFlag(FlagType::Pref, PRF_FORM);
                     break;
                 case 'f':
                     if (!IS_HALFBREED(ch)) {
                         ch->sendf("Only halfbreeds use fury.\r\n");
                     }
-                    ch->pref.flip(PRF_FURY);
+                    ch->flipFlag(FlagType::Pref, PRF_FURY);
                     break;
                 default:
                     ch->sendf("Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
@@ -10358,7 +10354,7 @@ ACMD(do_gen_tog) {
             break;
         case SCMD_TEST:
             if (GET_ADMLEVEL(ch) >= 1) {
-                ch->pref.flip(PRF_TEST);
+                ch->flipFlag(FlagType::Pref, PRF_TEST);
                 ch->sendf("Okay. Testing is now: %s\r\n", PRF_FLAGGED(ch, PRF_TEST) ? "On" : "Off");
                 if (PRF_FLAGGED(ch, PRF_TEST)) {
                     ch->sendf("Make sure to remove nohassle as well.\r\n");

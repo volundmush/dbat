@@ -651,7 +651,7 @@ static void cleanup_arena_watch(struct char_data *ch) {
 
         if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
             if (ARENA_IDNUM(d->character) == GET_IDNUM(ch)) {
-                d->character->pref.reset(PRF_ARENAWATCH);
+                d->character->clearFlag(FlagType::Pref, PRF_ARENAWATCH);
                 ARENA_IDNUM(d->character) = -1;
             }
         }
@@ -699,22 +699,22 @@ void remove_limb(struct char_data *vict, int num) {
         case 1:
             snprintf(part, sizeof(part), "@w%s right arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right arm");
-        vict->pref.reset(PLR_CRARM);
+        vict->clearFlag(FlagType::Pref, PLR_CRARM);
             break;
         case 2:
             snprintf(part, sizeof(part), "@w%s left arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left arm");
-            vict->pref.reset(PLR_CLARM);
+            vict->clearFlag(FlagType::Pref, PLR_CLARM);
             break;
         case 3:
             snprintf(part, sizeof(part), "@w%s right leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right leg");
-            vict->pref.reset(PLR_CRLEG);
+            vict->clearFlag(FlagType::Pref, PLR_CRLEG);
             break;
         case 4:
             snprintf(part, sizeof(part), "@w%s left leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left leg");
-            vict->pref.reset(PLR_CLLEG);
+            vict->clearFlag(FlagType::Pref, PLR_CLLEG);
             break;
         case 5:
             snprintf(part, sizeof(part), "@wA %s tail@n", race::getName(vict->race).c_str());

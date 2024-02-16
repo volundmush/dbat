@@ -54,8 +54,8 @@ ACMD(do_energize) {
             return;
         }
     } else {
-        ch->pref.flip(PRF_ENERGIZE);
-        if (ch->pref.test(PRF_ENERGIZE)) {
+        ch->flipFlag(FlagType::Pref, PRF_ENERGIZE);
+        if (ch->checkFlag(FlagType::Pref, PRF_ENERGIZE)) {
             ch->sendf("You start focusing your latent ki into your fingertips.\r\n");
         } else {
             ch->sendf("You stop focusing ki into your fingertips.\r\n");

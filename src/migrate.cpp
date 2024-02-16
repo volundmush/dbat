@@ -2018,8 +2018,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->pref.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->pref.set(f);
+                        for(auto f = 0; f < NUM_PRF_FLAGS; f++) {
+                            if(IS_SET_AR(flags, f)) ch->setFlag(FlagType::Pref, f);
                         }
                     } else if (!strcmp(tag, "Prff")) GET_PREFERENCE(ch) = atoi(line);
                     break;

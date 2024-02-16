@@ -1492,7 +1492,7 @@ int arena_watch(struct char_data *ch) {
     }
 
     if (found == false) {
-        ch->pref.reset(PRF_ARENAWATCH);
+        ch->clearFlag(FlagType::Pref, PRF_ARENAWATCH);
         ARENA_IDNUM(ch) = -1;
         return (NOWHERE);
     } else {

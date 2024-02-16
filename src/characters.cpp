@@ -1098,7 +1098,7 @@ void char_data::login() {
 
     desc->has_prompt = 0;
     /* We've updated to 3.1 - some bits might be set wrongly: */
-    pref.reset(PRF_BUILDWALK);
+    clearFlag(FlagType::Pref, PRF_BUILDWALK);
     if (!GET_EQ(this, WEAR_WIELD1) && PLR_FLAGGED(this, PLR_THANDW)) {
         playerFlags.reset(PLR_THANDW);
     }
@@ -1784,7 +1784,7 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
         if(arg.empty()) return "0";
         int flag = get_flag_by_name(preference_bits, (char*)arg.c_str());
         if(flag == -1) return "0";
-        return pref.test(flag) ? "1" : "0";
+        return checkFlag(FlagType::Pref, flag) ? "1" : "0";
     }
 
     if(lmember == "room") {

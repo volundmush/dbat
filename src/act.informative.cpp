@@ -3621,14 +3621,14 @@ ACMD(do_autoexit) {
     }
     switch (tp) {
         case EXIT_OFF:
-            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->pref.reset(f);
+            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->clearFlag(FlagType::Pref, f);
             break;
         case EXIT_NORMAL:
-            ch->pref.set(PRF_AUTOEXIT);
-            ch->pref.reset(PRF_FULL_EXIT);
+            ch->setFlag(FlagType::Pref, PRF_AUTOEXIT);
+            ch->clearFlag(FlagType::Pref, PRF_FULL_EXIT);
             break;
         case EXIT_COMPLETE:
-            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->pref.set(f);
+            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->setFlag(FlagType::Pref, f);
             break;
     }
     ch->sendf("Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
@@ -6485,10 +6485,10 @@ ACMD(do_color) {
     }
     switch (tp) {
         case C_OFF:
-            ch->pref.reset(PRF_COLOR);
+            ch->clearFlag(FlagType::Pref, PRF_COLOR);
             break;
         case C_ON:
-            ch->pref.set(PRF_COLOR);
+            ch->setFlag(FlagType::Pref, PRF_COLOR);
             break;
     }
     ch->sendf("Your color is now @o%s@n.\r\n", ctypes[tp]);

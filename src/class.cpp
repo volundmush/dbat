@@ -380,7 +380,7 @@ void do_start(struct char_data *ch) {
     }
 
     for(auto f : {PRF_VIEWORDER, PRF_DISPMOVE, PRF_AUTOEXIT, PRF_HINTS, PRF_NOMUSIC, PRF_DISPHP,
-    PRF_DISPKI, PRF_DISPEXP, PRF_DISPTNL}) ch->pref.set(f);
+    PRF_DISPKI, PRF_DISPEXP, PRF_DISPTNL}) ch->setFlag(FlagType::Pref, f);
 
     GET_LIMBCOND(ch, 0) = 100;
     GET_LIMBCOND(ch, 1) = 100;
@@ -1054,7 +1054,7 @@ void advance_level(struct char_data *ch) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
         for (i = 0; i < 3; i++)
             GET_COND(ch, i) = (char) -1;
-        ch->pref.set(PRF_HOLYLIGHT);
+        ch->setFlag(FlagType::Pref, PRF_HOLYLIGHT);
     }
 
     sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp).c_str(),

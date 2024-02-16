@@ -407,7 +407,6 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 
 #define MOB_FLAGS(ch)    ((ch)->mobFlags)
 #define PLR_FLAGS(ch)    ((ch)->playerFlags)
-#define PRF_FLAGS(ch)    ((ch)->pref)
 #define AFF_FLAGS(ch)    ((ch)->affected_by)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
 #define SPELL_ROUTINES(spl)    (spell_info[spl].routines)
@@ -444,10 +443,10 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 /* IS_AFFECTED for backwards compatibility */
 #define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))
 
-#define PLR_TOG_CHK(ch, flag) ((ch)->playerFlags.flip(flag).test(flag))
-#define PRF_TOG_CHK(ch, flag) ((ch)->pref.flip(flag).test(flag))
-#define ADM_TOG_CHK(ch, flag) ((ch)->admflags.flip(flag).test(flag))
-#define AFF_TOG_CHK(ch, flag) ((ch)->affected_by.flip(flag).test(flag))
+#define PLR_TOG_CHK(ch, flag) ((ch)->flipFlag(FlagType::PC, flag))
+#define PRF_TOG_CHK(ch, flag) ((ch)->flipFlag(FlagType::Pref, flag))
+#define ADM_TOG_CHK(ch, flag) ((ch)->flipFlag(FlagType::Admin, flag))
+#define AFF_TOG_CHK(ch, flag) ((ch)->flipFlag(FlagType::Affect, flag))
 
 /* new define for quick check */
 #define DEAD(ch) (PLR_FLAGGED((ch), PLR_NOTDEADYET) || MOB_FLAGGED((ch), MOB_NOTDEADYET))

@@ -2501,7 +2501,7 @@ ACMD(do_shimmer) {
 
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref.set(PRF_ARENAWATCH);
+            ch->setFlag(FlagType::Pref, PRF_ARENAWATCH);
             ARENA_IDNUM(ch) = -1;
             ch->sendf("You stop watching the arena action.\r\n");
         }
@@ -3302,7 +3302,7 @@ ACMD(do_arena) {
         return;
     } else if (!strcasecmp(arg, "stop")) {
         ch->sendf("You stop viewing what's going on in the arena.\r\n");
-        ch->pref.reset(PRF_ARENAWATCH);
+        ch->clearFlag(FlagType::Pref, PRF_ARENAWATCH);
         ARENA_IDNUM(ch) = -1;
         return;
     } else if (GET_ROOM_VNUM(IN_ROOM(ch)) != 17875) {
@@ -3366,7 +3366,7 @@ ACMD(do_arena) {
                 act("@wYou start watching the action surrounding that particular fighter in the arena.@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
                 act("@C$n@w starts watching the action in the arena.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->pref.set(PRF_ARENAWATCH);
+                ch->setFlag(FlagType::Pref, PRF_ARENAWATCH);
                 ARENA_IDNUM(ch) = num;
             } else {
                 ch->sendf("A fighter with such a number was not found in the arena.\r\n");

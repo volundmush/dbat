@@ -1654,12 +1654,12 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
     ch->sendf(", Default position: %s", buf);
     ch->sendf(", Idle Timer (in tics) [%d]\r\n", k->timer);
-    sprintbitarray(k->mobFlags, action_bits, PM_ARRAY_MAX, buf);
+    sprintf(buf, "%s", join(k->getFlagNames(FlagType::NPC), ", ").c_str());
     ch->sendf("NPC flags: @c%s@n\r\n", buf);
-    sprintbitarray(k->playerFlags, player_bits, PM_ARRAY_MAX, buf);
-    ch->sendf("PLR: @c%s@n\r\n", buf);
-    sprintbitarray(k->pref, preference_bits, PR_ARRAY_MAX, buf);
-    ch->sendf("PRF: @g%s@n\r\n", buf);
+    sprintf(buf, "%s", join(k->getFlagNames(FlagType::PC), ", ").c_str());
+    ch->sendf("PLR flags: @c%s@n\r\n", buf);
+    sprintf(buf, "%s", join(k->getFlagNames(FlagType::Pref), ", ").c_str());
+    ch->sendf("PRF flags: @g%s@n\r\n", buf);
 
     ch->sendf("Form: %s\r\n", trans::getName(k, k->form));
 
@@ -2332,9 +2332,9 @@ ACMD(do_syslog) {
         ch->sendf("Usage: syslog { Off | Brief | Normal | Complete }\r\n");
         return;
     }
-    for(auto f : {PRF_LOG1, PRF_LOG2}) ch->pref.reset(f);
-    if (tp & 1) ch->pref.set(PRF_LOG1);
-    if (tp & 2) ch->pref.set(PRF_LOG2);
+    for(auto f : {PRF_LOG1, PRF_LOG2}) ch->clearFlag(FlagType::Pref, f);
+    if (tp & 1) ch->setFlag(FlagType::Pref, PRF_LOG1);
+    if (tp & 2) ch->setFlag(FlagType::Pref, PRF_LOG2);
 
     ch->sendf("Your syslog is now %s.\r\n", logtypes[tp]);
 }
@@ -3463,17 +3463,13 @@ ACMD(do_show) {
 
 /***************** The do_set function ***********************************/
 
-#define PC   1
-#define NPC  2
-#define BOTH 3
+constexpr int PC = 1;
+constexpr int NPC = 2;
+constexpr int BOTH = 3;
 
 #define MISC    0
 #define BINARY    1
 #define NUMBER    2
-
-#define SET_OR_REMOVE(flagset, flags) { \
-    if (on) flagset.set(flags); \
-    else if (off) flagset.reset(flags); }
 
 #define RANGE(low, high) (value = MAX((low), MIN((high), (value))))
 
@@ -3620,15 +3616,15 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         ch->sendf("%s", CONFIG_OK);
 
     switch (mode) {
-        case 0: SET_OR_REMOVE(vict->pref, PRF_BRIEF);
+        case 0: vict->flipFlag(FlagType::Pref, PRF_BRIEF);
             break;
-        case 1: SET_OR_REMOVE(vict->playerFlags, PLR_INVSTART);
+        case 1: vict->flipFlag(FlagType::PC, PLR_INVSTART);
             break;
         case 2:
             set_title(vict, val_arg);
             ch->sendf("%s's title is now: %s\r\n", GET_NAME(vict), GET_TITLE(vict));
             break;
-        case 3: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_SUMMONABLE);
+        case 3: vict->flipFlag(FlagType::Pref, PRF_SUMMONABLE);
             ch->sendf("Nosummon %s for %s.\r\n", ONOFF(!on), GET_NAME(vict));
             break;
         case 4:
@@ -3768,14 +3764,14 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 ch->sendf("You aren't godly enough for that!\r\n");
                 return (0);
             }
-            SET_OR_REMOVE(PRF_FLAGS(vict), PRF_NOHASSLE);
+            vict->flipFlag(FlagType::Pref, PRF_NOHASSLE);
             break;
         case 26:
             if (ch == vict && on) {
                 ch->sendf("Better not -- could be a long winter!\r\n");
                 return (0);
             }
-            SET_OR_REMOVE(PLR_FLAGS(vict), PLR_FROZEN);
+            vict->flipFlag(FlagType::PC,  PLR_FROZEN);
             break;
         case 27:
         case 28:
@@ -3800,9 +3796,9 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 32: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_KILLER);
+        case 32: vict->flipFlag(FlagType::PC,  PLR_KILLER);
             break;
-        case 33: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_THIEF);
+        case 33: vict->flipFlag(FlagType::PC,  PLR_THIEF);
             break;
         case 34:
             if (!IS_NPC(vict) && value > 100) {
@@ -3821,11 +3817,11 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 vict->removeFromLocation();
             vict->addToLocation(world.at(rnum));
             break;
-        case 36: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_ROOMFLAGS);
+        case 36: vict->flipFlag(FlagType::Pref, PRF_ROOMFLAGS);
             break;
-        case 37: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_SITEOK);
+        case 37: vict->flipFlag(FlagType::PC,  PLR_SITEOK);
             break;
-        case 38: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_DELETED);
+        case 38: vict->flipFlag(FlagType::PC,  PLR_DELETED);
             break;
         case 39: {
             auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, vict->race);};
@@ -3837,9 +3833,9 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             vict->chclass = chosen_sensei.value();
         }
             break;
-        case 40: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NOWIZLIST);
+        case 40: vict->flipFlag(FlagType::PC,  PLR_NOWIZLIST);
             break;
-        case 41: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_QUEST);
+        case 41: vict->flipFlag(FlagType::Pref, PRF_QUEST);
             break;
         case 42:
             if (!strcasecmp(val_arg, "off")) {
@@ -3860,7 +3856,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 43: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_COLOR);
+        case 43: vict->flipFlag(FlagType::Pref, PRF_COLOR);
             break;
         case 44:
             if (GET_IDNUM(ch) == 0 || IS_NPC(vict))
@@ -3877,7 +3873,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 46: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NODELETE);
+        case 46: vict->flipFlag(FlagType::PC,  PLR_NODELETE);
             break;
         case 47:
             if ((i = search_block(val_arg, genders, false)) < 0) {
@@ -4071,7 +4067,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         case 72:
             GET_BOOSTS(vict) = RANGE(-1000, 1000);
             break;
-        case 73: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_MULTP);
+        case 73: vict->flipFlag(FlagType::PC,  PLR_MULTP);
             break;
         case 74:
             GET_DCOUNT(vict) = RANGE(-1000, 1000);

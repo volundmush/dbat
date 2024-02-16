@@ -1218,7 +1218,6 @@ struct char_data : public unit_data {
     int8_t freeze_level{};        /* Level of god who froze char, if any	*/
     int16_t invis_level{};        /* level of invisibility		*/
     room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
-    std::bitset<NUM_PRF_FLAGS> pref{};    /* preference flags for PC's.		*/
 
     room_vnum normalizeLoadRoom(room_vnum in);
 

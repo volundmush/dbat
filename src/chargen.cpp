@@ -2266,7 +2266,7 @@ namespace net {
     void ChargenParser::finish() {
         // CREATE PLAYER ENTRY
         ch->uid = getNextUID();
-        ch->pref.set(PRF_COLOR);
+        ch->setFlag(FlagType::Pref, PRF_COLOR);
         world[ch->uid] = ch;
         auto p = std::make_shared<player_data>();
         p->id = ch->uid;
