@@ -503,17 +503,6 @@ void boot_db_shadow() {
 
 
 
-void free_extra_descriptions(struct extra_descr_data *edesc) {
-    struct extra_descr_data *enext;
-
-    for (; edesc; edesc = enext) {
-        enext = edesc->next;
-
-        free(edesc->keyword);
-        free(edesc->description);
-        free(edesc);
-    }
-}
 
 
 /* Free the world, in a memory allocation sense. */

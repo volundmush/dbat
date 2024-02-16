@@ -187,8 +187,6 @@ extern char *get_name_by_id(long id);
 
 extern void save_mud_time(struct time_info_data *when);
 
-extern void free_extra_descriptions(struct extra_descr_data *edesc);
-
 extern void free_text_files();
 
 extern void free_player_index();

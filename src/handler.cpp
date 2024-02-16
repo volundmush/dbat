@@ -1232,21 +1232,21 @@ struct obj_data *create_money(int amount) {
         return (nullptr);
     }
     obj = create_obj();
-    CREATE(new_descr, struct extra_descr_data, 1);
+    auto &e = obj->ex_description.emplace_back();
 
     if (amount == 1) {
         obj->setName("zenni money");
         obj->setShortDesc("a single zenni");
         obj->setRoomDesc("One miserable zenni is lying here");
-        new_descr->keyword = strdup("zenni money");
-        new_descr->description = strdup("It's just one miserable little zenni.");
+        e.keyword = "zenni money";
+        e.description = "It's just one miserable little zenni.";
     } else {
         obj->setName("zenni money");
         obj->setShortDesc(money_desc(amount));
         snprintf(buf, sizeof(buf), "%s is lying here", money_desc(amount));
         obj->setRoomDesc(CAP(buf));
 
-        new_descr->keyword = strdup("zenni money");
+        e.keyword = "zenni money";
         if (amount < 10)
             snprintf(buf, sizeof(buf), "There is %d zenni.", amount);
         else if (amount < 100)
@@ -1258,11 +1258,9 @@ struct obj_data *create_money(int amount) {
                      1000 * ((amount / 1000) + rand_number(0, (amount / 1000))));
         else
             strcpy(buf, "There are is LOT of zenni.");    /* strcpy: OK (is < 200) */
-        new_descr->description = strdup(buf);
+        e.description = buf;
     }
 
-    new_descr->next = nullptr;
-    obj->ex_description = new_descr;
 
     GET_OBJ_TYPE(obj) = ITEM_MONEY;
     GET_OBJ_MATERIAL(obj) = MATERIAL_GOLD;

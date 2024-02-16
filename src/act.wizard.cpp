@@ -1289,10 +1289,10 @@ static void do_stat_room(struct char_data *ch) {
 
     ch->sendf("Description:\r\n%s", withPlaceholder(rm->getLookDesc(), "  None.\r\n"));
 
-    if (rm->ex_description) {
+    if (!rm->ex_description.empty()) {
         ch->sendf("Extra descs:");
-        for (desc = rm->ex_description; desc; desc = desc->next)
-            ch->sendf(" [@c%s@n]", desc->keyword);
+        for (auto desc : rm->ex_description)
+            ch->sendf(" [@c%s@n]", desc.keyword);
         ch->sendf("\r\n");
     }
 
@@ -1391,10 +1391,10 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         ch->sendf("HOLDING: %s\r\n", GET_NAME(sitter));
     }
 
-    if (j->ex_description) {
+    if (!j->ex_description.empty()) {
         ch->sendf("Extra descs:");
-        for (desc = j->ex_description; desc; desc = desc->next)
-            ch->sendf(" [@g%s@n]", desc->keyword);
+        for (auto desc : j->ex_description)
+            ch->sendf(" [@c%s@n]", desc.keyword);
         ch->sendf("\r\n");
     }
 

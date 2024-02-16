@@ -3802,7 +3802,7 @@ char *find_exdesc(char *word, const std::vector<extra_descr_data>& list) {
         if (i.keyword.starts_with(".") ? isname(word, i.keyword.substr(1).c_str()) : isname(word, i.keyword.c_str()))
             return (char*)i.description.c_str();
 
-    return (nullptr);
+    return nullptr;
 }
 
 

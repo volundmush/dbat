@@ -93,8 +93,6 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant);
 
 static int can_harvest(struct obj_data *plant);
 
-static char *find_exdesc_keywords(char *word, struct extra_descr_data *list);
-
 /* local variables */
 static char buf[MAX_STRING_LENGTH];
 
@@ -2520,15 +2518,6 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj) {
     return (0);
 }
 
-static char *find_exdesc_keywords(char *word, struct extra_descr_data *list) {
-    struct extra_descr_data *i;
-
-    for (i = list; i; i = i->next)
-        if (isname(word, i->keyword))
-            return (i->keyword);
-
-    return (nullptr);
-}
 
 
 ACMD(do_get) {

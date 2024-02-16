@@ -22,7 +22,7 @@ extern int check_disabled(const struct command_info *command);
 
 extern void sort_commands();
 
-extern char *find_exdesc(char *word, struct extra_descr_data *list);
+extern char *find_exdesc(char *word, const std::vector<extra_descr_data>& list);
 
 extern void add_history(struct char_data *ch, char *str, int type);
 
