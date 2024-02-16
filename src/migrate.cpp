@@ -617,24 +617,11 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
                 setup_dir(fl, virtual_nr, atoi(line + 1));
                 break;
             case 'E':
-                CREATE(new_descr, struct extra_descr_data, 1);
-                new_descr->keyword = fread_string(fl, buf2);
-                new_descr->description = fread_string(fl, buf2);
-                /* fix for crashes in the editor when formatting
-       * - e-descs are assumed to end with a \r\n
-       * -- Welcor 09/03
-       */
                 {
-                    char *tmp = strchr(new_descr->description, '\0');
-                    if (tmp > new_descr->description && *(tmp - 1) != '\n') {
-                        CREATE(tmp, char, strlen(new_descr->description) + 3);
-                        sprintf(tmp, "%s\r\n", new_descr->description); /* sprintf ok : size checked above*/
-                        free(new_descr->description);
-                        new_descr->description = tmp;
-                    }
+                    auto &e = r->ex_description.emplace_back();
+                    e.keyword = fread_string(fl, buf2);
+                    e.description = fread_string(fl, buf2);
                 }
-                new_descr->next = r->ex_description;
-                r->ex_description = new_descr;
                 break;
             case 'S':            /* end of room */
                 /* DG triggers -- script is defined after the end of the room */
@@ -1011,15 +998,15 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
 
     auto &idx = obj_index[nr];
     auto oi = obj_proto.emplace(nr, nlohmann::json::object());
-    auto &j = oi.first->second;
+    auto &obj = oi.first->second;
     
     idx.vn = nr;
-    j["vn"] = nr;
+    obj["vn"] = nr;
 
     sprintf(buf2, "object #%d", nr);    /* sprintf: OK (for 'buf2 >= 19') */
     char* tempStr = fread_string(obj_f, buf2);
     if(tempStr != nullptr) {
-        j["name"] = std::string(tempStr);
+        obj["name"] = std::string(tempStr);
     }
 
     auto &z = zone_table[real_zone_by_thing(nr)];
@@ -1030,18 +1017,18 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
-            j["short_description"] = tmpptr;
+            obj["short_description"] = tmpptr;
             free(tmpptr);
     }
     tmpptr = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr) {
         CAP(tmpptr);
-        j["room_description"] = tmpptr;
+        obj["room_description"] = tmpptr;
         free(tmpptr);
     }
     tmpptr = fread_string(obj_f, buf2);
     if(tmpptr && *tmpptr) {
-        j["look_description"] = tmpptr;
+        obj["look_description"] = tmpptr;
         free(tmpptr);
     }
 
@@ -1065,7 +1052,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             if(IS_SET_AR(extraFlags, i)) flags.insert(i);
         };
         if(!flags.empty()) {
-            j["flags"].push_back(std::make_pair(FlagType::Item, std::vector<int>(flags.begin(), flags.end())));
+            obj["flags"].push_back(std::make_pair(FlagType::Item, std::vector<int>(flags.begin(), flags.end())));
             flags.clear();
         }
 
@@ -1075,7 +1062,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         wearFlags[3] = asciiflag_conv(f8);
         for(auto i = 0; i < NUM_ITEM_WEARS; i++) if(IS_SET_AR(wearFlags, i)) flags.insert(i);
         if(!flags.empty()) {
-            j["flags"].push_back(std::make_pair(FlagType::Wear, std::vector<int>(flags.begin(), flags.end())));
+            obj["flags"].push_back(std::make_pair(FlagType::Wear, std::vector<int>(flags.begin(), flags.end())));
             flags.clear();
         }
 
@@ -1085,7 +1072,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         permFlags[3] = asciiflag_conv(f12);
         for(auto i = 0; i < NUM_AFF_FLAGS; i++) if(IS_SET_AR(permFlags, i)) flags.insert(i);
         if(!flags.empty()) {
-            j["flags"].push_back(std::make_pair(FlagType::Affect, std::vector<int>(flags.begin(), flags.end())));
+            obj["flags"].push_back(std::make_pair(FlagType::Affect, std::vector<int>(flags.begin(), flags.end())));
             flags.clear();
         }
 
@@ -1096,7 +1083,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
 
     /* Object flags checked in check_object(). */
     auto obj_type = t[0];
-    j["type_flag"] = obj_type;
+    obj["type_flag"] = obj_type;
 
     if (!get_line(obj_f, line)) {
         basic_mud_log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
@@ -1141,27 +1128,27 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         }
     }
     auto weight = t[0];
-    j["weight"] = weight;
-    j["cost"] = t[1];
-    j["cost_per_day"] = t[2];
-    j["level"] = t[3];
-    j["size"] = SIZE_MEDIUM;
+    obj["weight"] = weight;
+    obj["cost"] = t[1];
+    obj["cost_per_day"] = t[2];
+    obj["level"] = t[3];
+    obj["size"] = SIZE_MEDIUM;
 
     /* check to make sure that weight of containers exceeds curr. quantity */
     if (obj_type == ITEM_DRINKCON ||
         obj_type == ITEM_FOUNTAIN) {
         if (weight < values[1])
-            j["weight"] = values[1] + 5;
+            obj["weight"] = values[1] + 5;
     }
     /* *** make sure portal objects have their timer set correctly *** */
     if (obj_type == ITEM_PORTAL) {
-        j["timer"] = -1;
+        obj["timer"] = -1;
     }
 
     /* *** extra descriptions and affect fields *** */
     for(auto i = 0; i < values.size(); i++) {
         if(values[i] != 0) {
-            j["values"].push_back(std::make_pair(i, values[i]));
+            obj["values"].push_back(std::make_pair(i, values[i]));
         }
     }
 
@@ -1175,22 +1162,13 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         }
         switch (*line) {
             case 'E': {
-                auto keyword = fread_string(obj_f, buf2);
-                auto description = fread_string(obj_f, buf2);
-                j["ex_description"].push_back(std::make_pair(keyword, description));
+                nlohmann::json ex;
+                ex["keyword"] = fread_string(obj_f, buf2);
+                ex["description"] = fread_string(obj_f, buf2);
+                obj["ex_description"].push_back(ex);
             }
                 break;
             case 'A': {
-                if (j >= MAX_OBJ_AFFECT) {
-                    basic_mud_log("SYSERR: Too many A fields (%d max), %s", MAX_OBJ_AFFECT, buf2);
-                    exit(1);
-                }
-                if (!get_line(obj_f, line)) {
-                    basic_mud_log("SYSERR: Format error in 'A' field, %s\n"
-                        "...expecting 2 numeric constants but file ended!", buf2);
-                    exit(1);
-                }
-
                 t[1] = 0;
                 if ((retval = sscanf(line, " %ld %ld %ld ", t, t + 1, t + 2)) != 3) {
                     if (retval != 2) {
@@ -1206,20 +1184,10 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                 af.location = t[0];
                 af.modifier = t[1];
                 af.specific = t[2];
-                j["affected"].push_back(af.serialize());
+                obj["affected"].push_back(af.serialize());
             }
                 break;
             case 'S':  /* Spells for Spellbooks*/
-                if (j >= SPELLBOOK_SIZE) {
-                    basic_mud_log("SYSERR: Unknown spellbook slot in S field, %s", buf2);
-                    exit(1);
-                }
-                if (!get_line(obj_f, line)) {
-                    basic_mud_log("SYSERR: Format error in 'S' field, %s\n"
-                        "...expecting 2 numeric constants but file ended!", buf2);
-                    exit(1);
-                }
-
                 if ((retval = sscanf(line, " %d %d ", t, t + 1)) != 2) {
                     basic_mud_log("SYSERR: Format error in 'S' field, %s\n"
                         "...expecting 2 numeric arguments, got %d\n"
@@ -1232,7 +1200,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                     char junk[8];
                     int vnum, count;
                     count = sscanf(line, "%s %d", junk, &vnum);
-                    j["proto_script"].push_back(vnum);
+                    obj["proto_script"].push_back(vnum);
                 }
                 break;
             case 'Z':
@@ -1247,7 +1215,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...offending line: '%s'", buf2, line);
                     exit(1);
                 }
-                j["size"] = t[0];
+                obj["size"] = t[0];
                 break;
             case '$':
             case '#':

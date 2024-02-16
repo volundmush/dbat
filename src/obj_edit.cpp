@@ -441,7 +441,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                                 obj->setFlag(FlagType::Wear, ITEM_WEAR_WRIST);
                                 break;
                             case 4:
-                                obj->setFlag(FlagType::Wear, (ITEM_WEAR_EAR);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_EAR);
                                 break;
                             case 5:
                                 obj->setFlag(FlagType::Wear, ITEM_WEAR_FINGER);
@@ -462,7 +462,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                                 obj->setFlag(FlagType::Wear, ITEM_WEAR_LEGS);
                                 break;
                             case 11:
-                                obj->setFlag(FlagType::Wear, (ITEM_WEAR_ARMS);
+                                obj->setFlag(FlagType::Wear, ITEM_WEAR_ARMS);
                                 break;
                             case 12:
                                 obj->setFlag(FlagType::Wear, ITEM_WEAR_HEAD);

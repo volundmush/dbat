@@ -149,17 +149,7 @@ void medit_disp_personality(struct descriptor_data *d) {
  * Display affection flags menu.
  */
 void medit_disp_aff_flags(struct descriptor_data *d) {
-    int i, columns = 0;
-    char flags[MAX_STRING_LENGTH];
 
-    clear_screen(d);
-    for (i = 0; i < NUM_AFF_FLAGS; i++) {
-        write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, affected_bits[i + 1],
-                        !(++columns % 2) ? "\r\n" : "");
-    }
-    sprintbitarray(AFF_FLAGS(OLC_MOB(d)), affected_bits, AF_ARRAY_MAX, flags);
-    write_to_output(d, "\r\nCurrent flags   : @c%s@n\r\nEnter aff flags (0 to quit) : ",
-                    flags);
 }
 
 /*-------------------------------------------------------------------*/

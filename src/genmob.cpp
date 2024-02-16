@@ -116,8 +116,8 @@ time_data::time_data(const nlohmann::json &j) : time_data() {
 }
 
 
-nlohmann::json char_data::serializeBase() {
-    auto j = serializeUnit();
+nlohmann::json char_data::serialize() {
+    auto j = unit_data::serialize();
 
     for(auto &[id, train] : trains) {
         if(train) j["trains"].push_back(std::make_pair(id, train));
@@ -169,96 +169,7 @@ nlohmann::json char_data::serializeBase() {
     if(armor) j["armor"] = armor;
     if(damage_mod) j["damage_mod"] = damage_mod;
 
-    return j;
-}
-
-
-void char_data::deserializeBase(const nlohmann::json &j) {
-    deserializeUnit(j);
-
-    if(j.contains("trains")) {
-        for(auto j2 : j["trains"]) {
-            auto id = j2[0].get<CharTrain>();
-            trains[id] = j2[1].get<attribute_train_t>();
-        }
-    }
-
-    if(j.contains("attributes")) {
-        for(auto j2 : j["attributes"]) {
-            auto id = j2[0].get<CharAttribute>();
-            attributes[id] = j2[1].get<attribute_t>();
-        }
-    }
-
-    if(j.contains("moneys")) {
-        for(auto j2 : j["moneys"]) {
-            auto id = j2[0].get<CharMoney>();
-            moneys[id] = j2[1].get<money_t>();
-        }
-    }
-
-    if(j.contains("aligns")) {
-        for(auto j2 : j["aligns"]) {
-            auto id = j2[0].get<CharAlign>();
-            aligns[id] = j2[1].get<align_t>();
-        }
-    }
-
-    if(j.contains("appearances")) {
-        for(auto j2 : j["appearances"]) {
-            auto id = j2[0].get<CharAppearance>();
-            appearances[id] = j2[1].get<appearance_t>();
-        }
-    }
-
-    if(j.contains("stats")) {
-        for(auto j2 : j["stats"]) {
-            auto id = j2[0].get<CharStat>();
-            stats[id] = j2[1].get<stat_t>();
-        }
-    }
-
-    if(j.contains("nums")) {
-        for(auto j2 : j["nums"]) {
-            auto id = j2[0].get<CharNum>();
-            nums[id] = j2[1].get<num_t>();
-        }
-    }
-
-    if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
-    if(j.contains("race")) race = j["race"].get<RaceID>();
-
-    if(j.contains("chclass")) chclass = static_cast<SenseiID>(std::min(14, j["chclass"].get<int>()));
-
-    if(j.contains("weight")) weight = j["weight"];
-
-    if(j.contains("affected_by"))
-        for(auto &i : j["affected_by"])
-            setFlag(FlagType::Affect, i.get<int>());
-
-    if(j.contains("armor")) armor = j["armor"];
-    if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
-    if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
-    if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) setFlag(FlagType::NPC, i.get<int>());
-    if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
-    if(j.contains("pref")) for(auto &i : j["pref"]) pref.set(i.get<int>());
-    if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) bodyparts.set(i.get<int>());
-}
-
-nlohmann::json char_data::serializeProto() {
-    auto j = serializeBase();
-
-    auto ms = mob_specials.serialize();
-    if(!ms.empty()) j["mob_specials"] = ms;
-
-    return j;
-}
-
-
-nlohmann::json char_data::serializeInstance() {
-    auto j = serializeBase();
-
-    if(health < 1.0) j["health"] = health;
+        if(health < 1.0) j["health"] = health;
     if(energy < 1.0) j["energy"] = energy;
     if(stamina < 1.0) j["stamina"] = stamina;
     if(life < 1.0) j["life"] = life;
@@ -381,9 +292,76 @@ nlohmann::json char_data::serializeInstance() {
 }
 
 
+void char_data::deserialize(const nlohmann::json &j) {
+    unit_data::deserialize(j);
 
-void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
-    deserializeBase(j);
+    if(j.contains("trains")) {
+        for(auto j2 : j["trains"]) {
+            auto id = j2[0].get<CharTrain>();
+            trains[id] = j2[1].get<attribute_train_t>();
+        }
+    }
+
+    if(j.contains("attributes")) {
+        for(auto j2 : j["attributes"]) {
+            auto id = j2[0].get<CharAttribute>();
+            attributes[id] = j2[1].get<attribute_t>();
+        }
+    }
+
+    if(j.contains("moneys")) {
+        for(auto j2 : j["moneys"]) {
+            auto id = j2[0].get<CharMoney>();
+            moneys[id] = j2[1].get<money_t>();
+        }
+    }
+
+    if(j.contains("aligns")) {
+        for(auto j2 : j["aligns"]) {
+            auto id = j2[0].get<CharAlign>();
+            aligns[id] = j2[1].get<align_t>();
+        }
+    }
+
+    if(j.contains("appearances")) {
+        for(auto j2 : j["appearances"]) {
+            auto id = j2[0].get<CharAppearance>();
+            appearances[id] = j2[1].get<appearance_t>();
+        }
+    }
+
+    if(j.contains("stats")) {
+        for(auto j2 : j["stats"]) {
+            auto id = j2[0].get<CharStat>();
+            stats[id] = j2[1].get<stat_t>();
+        }
+    }
+
+    if(j.contains("nums")) {
+        for(auto j2 : j["nums"]) {
+            auto id = j2[0].get<CharNum>();
+            nums[id] = j2[1].get<num_t>();
+        }
+    }
+
+    if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
+    if(j.contains("race")) race = j["race"].get<RaceID>();
+
+    if(j.contains("chclass")) chclass = static_cast<SenseiID>(std::min(14, j["chclass"].get<int>()));
+
+    if(j.contains("weight")) weight = j["weight"];
+
+    if(j.contains("affected_by"))
+        for(auto &i : j["affected_by"])
+            setFlag(FlagType::Affect, i.get<int>());
+
+    if(j.contains("armor")) armor = j["armor"];
+    if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
+    if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
+    if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) setFlag(FlagType::NPC, i.get<int>());
+    if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
+    if(j.contains("pref")) for(auto &i : j["pref"]) pref.set(i.get<int>());
+    if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) bodyparts.set(i.get<int>());
 
     if(j.contains("hometown")) hometown = j["hometown"];
 
@@ -524,8 +502,6 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         
     }
 
-    assignTriggers();
-
     if(j.contains("load_room")) load_room = j["load_room"];
 
     if(j.contains("transBonus")) transBonus = j["transBonus"];
@@ -544,25 +520,9 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 
 }
 
-void char_data::deserializeProto(const nlohmann::json &j) {
-    deserializeBase(j);
-
-}
-
-void char_data::deserializePlayer(const nlohmann::json &j, bool isActive) {
-    deserializeInstance(j, isActive);
-
-
-}
-
-void char_data::deserializeMobile(const nlohmann::json &j) {
-    deserializeInstance(j, true);
-
-
-}
 
 char_data::char_data(const nlohmann::json &j) : char_data() {
-    deserializeProto(j);
+    deserialize(j);
 
     if (!IS_HUMAN(this))
         setFlag(FlagType::Affect, AFF_INFRAVISION);
@@ -801,20 +761,12 @@ bool char_data::isActive() {
 }
 
 
-
 nlohmann::json char_data::serializeRelations() {
     auto j = nlohmann::json::object();
 
     return j;
 }
 
-void char_data::deserializeLocation(const nlohmann::json &j) {
-
-}
-
-void char_data::deserializeRelations(const nlohmann::json &j) {
-
-}
 
 void char_data::save() {
 

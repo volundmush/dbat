@@ -211,17 +211,8 @@ void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
-    vnum areaVnum = NOWHERE;
-    {
-        auto r = dynamic_cast<room_data*>(world[roomVnum]);
-        if(auto found = r->getRegion(); found && found->checkFlag(FlagType::Area, REGION_PLANET)) {
-            areaVnum = *found;
-        }
-    }
-
-    if(areaVnum == NOWHERE) {
-        return;
-    }
+    auto planet = ch->getPlanet();
+    if(!planet) return;
 
     for(auto i = descriptor_list; i; i = i->next) {
         if(!i->connected) continue;
@@ -230,9 +221,9 @@ void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
         if(IN_ROOM(i->character) == NOWHERE) continue;
         if(!OUTSIDE(i->character)) continue;
 
-        auto found = i->character->getMatchingArea(area_data::isPlanet);
+        auto found = i->character->getPlanet();
         if(!found) continue;
-        if(*found != areaVnum) continue;
+        if(found != planet) continue;
         if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
             write_to_output(i, "A disguised figure %s", messg);
         } else {
@@ -265,7 +256,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
-    auto planet = ch->getMatchingArea(area_data::isPlanet);
+    auto planet = ch->getPlanet();
     if(!planet && type == 0) {
         return;
     }
@@ -284,11 +275,11 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
         if (!GET_SKILL(tch, SKILL_SENSE)) {
             continue;
         }
-        if(auto p = tch->getMatchingArea(area_data::isPlanet); type == 0) {
+        if(auto p = tch->getPlanet(); type == 0) {
             if (!p) {
                 continue;
             }
-            if (*p != *planet) {
+            if (p != planet) {
                 continue;
             }
         }
@@ -320,9 +311,9 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
         } else if (planet_check(ch, tch)) {
             std::string blah = "UNKNOWN";
             {
-                auto av = tch->getMatchingArea([&](auto &a) {return true;});
+                auto av = tch->getRegion();
                 if(av) {
-                    blah = areas[av.value()].name;
+                    blah = av->getDisplayName(ch);
                 }
             }
             char power[MAX_INPUT_LENGTH];
@@ -377,7 +368,7 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
     if (!messg || !*messg)
         return;
 
-    auto planet = ch->getMatchingArea(area_data::isPlanet);
+    auto planet = ch->getPlanet();
     if(!planet && type == 0) {
         return;
     }
@@ -391,11 +382,11 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
         if (tch == ch) continue;
         if(!AWAKE(tch)) continue;
 
-        if(auto p = tch->getMatchingArea(area_data::isPlanet); type == 0) {
+        if(auto p = tch->getPlanet(); type == 0) {
             if (!p) {
                 continue;
             }
-            if (*p != *planet) {
+            if (p != planet) {
                 continue;
             }
         }
@@ -444,9 +435,9 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
         } else if (type == 2 && GET_SKILL(tch, SKILL_SENSE) < 20) {
             std::string blah = "UNKNOWN";
             {
-                auto av = tch->getMatchingArea([&](auto &a) {return true;});
+                auto av = tch->getPlanet();
                 if(av) {
-                    blah = areas[av.value()].name;
+                    blah = av->getDisplayName(i->character);
                 }
             }
             if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
@@ -480,16 +471,16 @@ void send_to_worlds(struct char_data *ch) {
         return;
     }
 
-    auto p = ch->getMatchingArea(area_data::isPlanet);
+    auto p = ch->getPlanet();
     if(!p) return;
 
     for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
         }
-        auto op = i->character->getMatchingArea(area_data::isPlanet);
+        auto op = i->character->getPlanet();
         if(!op) continue;
-        if(op.value() != p.value()) continue;
+        if(op != p) continue;
         i->character->sendf("%s", message);
     }
 }

@@ -2567,7 +2567,7 @@ ACMD(do_get) {
     for(auto loc : locations) {
         // TODO: validate that loc is something player can access...
         if(auto check = loc->checkAllowInventoryAcesss(ch); check) {
-            ch->sendLine("{}: {}\r\n", loc->getDisplayName(ch), check.value());
+            ch->sendLine("{}: {}", loc->getDisplayName(ch), check.value());
             continue;
         }
 
@@ -2790,7 +2790,8 @@ ACMD(do_drop) {
 
     auto loc = ch->getLocation();
     if(auto check = loc->checkAllowDrop(ch); check) {
-        ch->sendLine("You can't drop anything here: {}", check.value());
+        std::string msg(check.value());
+        ch->sendLine("You can't drop anything here: {}", msg);
         return;
     }
 

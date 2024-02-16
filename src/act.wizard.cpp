@@ -1182,7 +1182,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'M':
                     ch->sendf("%sLoad %s@y [@c%d@y], MaxMud : %d, MaxR : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 mob_proto[ZOCMD.arg1]["short_description"],
+                                 mob_proto[ZOCMD.arg1]["short_description"].get<std::string>().c_str(),
                                  mob_index[ZOCMD.arg1].vn, ZOCMD.arg2,
                                  ZOCMD.arg4, ZOCMD.arg5
                     );
@@ -1190,7 +1190,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'G':
                     ch->sendf("%sGive it %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1]["short_description"],
+                                 obj_proto[ZOCMD.arg1]["short_description"].get<std::string>().c_str(),
                                  obj_index[ZOCMD.arg1].vn,
                                  ZOCMD.arg2, ZOCMD.arg5
                     );
@@ -1198,7 +1198,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'O':
                     ch->sendf("%sLoad %s@y [@c%d@y], Max : %d, MaxR : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1]["short_description"],
+                                 obj_proto[ZOCMD.arg1]["short_description"].get<std::string>().c_str(),
                                  obj_index[ZOCMD.arg1].vn,
                                  ZOCMD.arg2, ZOCMD.arg4, ZOCMD.arg5
                     );
@@ -1206,7 +1206,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'E':
                     ch->sendf("%sEquip with %s@y [@c%d@y], %s, Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1]["short_description"],
+                                 obj_proto[ZOCMD.arg1]["short_description"].get<std::string>().c_str(),
                                  obj_index[ZOCMD.arg1].vn,
                                  equipment_types[ZOCMD.arg3],
                                  ZOCMD.arg2, ZOCMD.arg5
@@ -1215,9 +1215,9 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'P':
                     ch->sendf("%sPut %s@y [@c%d@y] in %s@y [@c%d@y], Max : %d, Chance : %d\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg1]["short_description"],
+                                 obj_proto[ZOCMD.arg1]["short_description"].get<std::string>().c_str(),
                                  obj_index[ZOCMD.arg1].vn,
-                                 obj_proto[ZOCMD.arg3]["short_description"],
+                                 obj_proto[ZOCMD.arg3]["short_description"].get<std::string>().c_str(),
                                  obj_index[ZOCMD.arg3].vn,
                                  ZOCMD.arg2, ZOCMD.arg5
                     );
@@ -1225,7 +1225,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
                 case 'R':
                     ch->sendf("%sRemove %s@y [@c%d@y] from room.\r\n",
                                  ZOCMD.if_flag ? " then " : "",
-                                 obj_proto[ZOCMD.arg2]["short_description"],
+                                 obj_proto[ZOCMD.arg2]["short_description"].get<std::string>().c_str(),
                                  obj_index[ZOCMD.arg2].vn
                     );
                     break;

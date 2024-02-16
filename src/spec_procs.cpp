@@ -303,13 +303,13 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
     if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */
         return false;                  /* This also allows following pets!              */
 
-    if (!EXIT(ch, cmd - 1) || EXIT(ch, cmd - 1)->to_room == NOWHERE)
+    if (!EXIT(ch, cmd - 1) || EXIT(ch, cmd - 1)->destination == nullptr)
         return false;
     if (EXIT_FLAGGED(EXIT(ch, cmd - 1), EX_CLOSED))
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[EXIT(ch, (cmd - 1))->to_room]->vn == gauntlet_info[i][1]) {
+        if (world[EXIT(ch, (cmd - 1))->destination->uid]->vn == gauntlet_info[i][1]) {
             ch->sendf("You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
@@ -352,12 +352,12 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
         for (door = 0; door < NUM_OF_DIRS; door++) {
-            if (!EXIT(ch, door) || EXIT(ch, door)->to_room == NOWHERE)
+            if (!EXIT(ch, door) || EXIT(ch, door)->destination == nullptr)
                 continue;
             if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
                 continue;
 
-            if ((world[EXIT(ch, door)->to_room]->vn == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if ((world[EXIT(ch, door)->destination->uid]->vn == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */

@@ -142,11 +142,11 @@ struct player_data {
 /* Extra description: used in objects, mobiles, and rooms */
 struct extra_descr_data {
     extra_descr_data() = default;
-    extra_descr_data(const extra_descr_data& other);
-    ~extra_descr_data();
-    char *keyword;                 /* Keyword in look/examine          */
-    char *description;             /* What to see                      */
-    struct extra_descr_data *next; /* Next in list                     */
+    explicit extra_descr_data(const nlohmann::json& j);
+    std::string keyword;                 /* Keyword in look/examine          */
+    std::string description;             /* What to see                      */
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
 };
 
 
@@ -360,7 +360,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     char *look_description{};      /* what to show when looked at */
     char *short_description{};     /* when displayed in list or action message. */
 
-    struct extra_descr_data *ex_description{}; /* extra descriptions     */
+    std::vector<extra_descr_data> ex_description{}; /* extra descriptions     */
 
     bool exists{true}; // used for deleted objects. invalid ones are !exists
 
@@ -505,6 +505,8 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
     virtual bool isStructure();
 
+    unit_data* getPlanet();
+
     // Returns viable landing locations within this, for u.
     virtual std::vector<unit_data*> getLandingLocations(unit_data *u);
 
@@ -522,33 +524,70 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual double getEnvVar(EnvVar v);
     
     template<typename... Args>
-    void sendText(const std::string& text, Args&&... args) {
-        sendText(fmt::format(text, args...));
+    void sendText(fmt::string_view format, Args&&... args) {
+        try {
+            std::string msg = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            sendText(msg);
+        }
+        catch(const std::exception &e) {
+            basic_mud_log("Error in sendText: %s", e.what());
+        }
+        
     }
 
     template<typename... Args>
-    void sendLineContents(const std::string& text, Args&&... args) {
-        sendLineContents(fmt::format(text, args...));
+    void sendLineContents(fmt::string_view format, Args&&... args) {
+        try {
+            std::string msg = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            sendLineContents(msg);
+        }
+        catch(const std::exception &e) {
+            basic_mud_log("Error in sendLineContents: %s", e.what());
+        }
     }
 
     template<typename... Args>
-    void sendTextContents(const std::string& text, Args&&... args) {
-        sendTextContents(fmt::format(text, args...));
+    void sendTextContents(fmt::string_view format, Args&&... args) {
+        try {
+            std::string msg = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            sendTextContents(msg);
+        }
+        catch(const std::exception &e) {
+            basic_mud_log("Error in sendTextContents: %s", e.what());
+        }
     }
 
     template<typename... Args>
-    void sendLine(const std::string& text, Args&&... args) {
-        sendLine(fmt::format(text, args...));
+    void sendLine(fmt::string_view format, Args&&... args) {
+        try {
+            std::string msg = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+            sendLine(msg);
+        }
+        catch(const std::exception &e) {
+            basic_mud_log("Error in sendLine: %s", e.what());
+        }
     }
 
     template<typename... Args>
-    void sendf(const std::string& text, Args&&... args) {
-        sendText(fmt::sprintf(text, args...));
+    void sendf(fmt::string_view format, Args&&... args) {
+        try {
+            std::string msg = fmt::sprintf(format, std::forward<Args>(args)...);
+            sendText(msg);
+        }
+        catch(const std::exception &e) {
+            basic_mud_log("Error in sendf: %s", e.what());
+        }
     }
 
     template<typename... Args>
-    void sendfContents(const std::string& text, Args&&... args) {
-        sendTextContents(fmt::sprintf(text, args...));
+    void sendfContents(fmt::string_view format, Args&&... args) {
+        try {
+            std::string msg = fmt::sprintf(format, std::forward<Args>(args)...);
+            sendTextContents(msg);
+        }
+        catch(const std::exception &e) {
+            basic_mud_log("Error in sendfContents: %s", e.what());
+        }
     }
 
 };
@@ -587,16 +626,10 @@ struct obj_data : public unit_data {
     std::string getUnitClass() override;
 
     nlohmann::json serialize() override;
+    nlohmann::json serializeRelations() override;
+    void deserializeRelations(const nlohmann::json& j) override;
+    void deserialize(const nlohmann::json& j) override;
 
-    nlohmann::json serializeRelations();
-
-    void deserializeLocation(const std::string& txt, int16_t slot);
-    void deserializeRelations(const nlohmann::json& j);
-
-    void deserializeBase(const nlohmann::json& j);
-    void deserializeProto(const nlohmann::json& j);
-    void deserializeInstance(const nlohmann::json& j, bool isActive);
-    void deserializeContents(const nlohmann::json& j, bool isActive);
 
     void activate();
 
@@ -894,30 +927,21 @@ struct trans_data {
 /* ================== Structure for player/non-player base class ===================== */
 struct char_data : public unit_data {
     char_data() = default;
-    virtual ~char_data();
+    ~char_data() override;
     // this constructor below is to be used only for the mob_proto map.
     explicit char_data(const nlohmann::json& j);
-    nlohmann::json serializeBase();
-    nlohmann::json serializeInstance();
 
-    nlohmann::json serializeProto();
+    nlohmann::json serialize() override;
+    void deserialize(const nlohmann::json& j) override;
 
-    void deserializeBase(const nlohmann::json& j);
-    void deserializeProto(const nlohmann::json& j);
-    void deserializeInstance(const nlohmann::json& j, bool isActive);
-    void deserializeMobile(const nlohmann::json& j);
-    void deserializePlayer(const nlohmann::json& j, bool isActive);
     void activate();
     void deactivate();
     void login();
 
-    nlohmann::json serializeLocation();
-    nlohmann::json serializeRelations();
+    nlohmann::json serializeRelations() override;
+    void deserializeRelations(const nlohmann::json& j) override;
 
     void sendGMCP(const std::string &cmd, const nlohmann::json &j);
-
-    void deserializeLocation(const nlohmann::json& j);
-    void deserializeRelations(const nlohmann::json& j);
 
     bool active{false};
     bool isActive() override;
@@ -1477,13 +1501,28 @@ struct char_data : public unit_data {
 };
 
 struct npc_data : public char_data {
-    std::string getUnitClass() override;
+    npc_data() = default;
+    explicit npc_data(const nlohmann::json &j);
+
     void assignTriggers() override;
     std::string scriptString() override;
+
+    UnitFamily getFamily() override;
+    std::string getUnitClass() override;
+
+    void deserialize(const nlohmann::json& j) override;
+    nlohmann::json serialize() override;
 };
 
 struct pc_data : public char_data {
+    pc_data() = default;
+    explicit pc_data(const nlohmann::json &j);
+
+    UnitFamily getFamily() override;
     std::string getUnitClass() override;
+
+    void deserialize(const nlohmann::json& j) override;
+    nlohmann::json serialize() override;
 };
 
 

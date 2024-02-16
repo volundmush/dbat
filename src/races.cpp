@@ -148,7 +148,7 @@ void set_height_and_weight_by_race(struct char_data *ch) {
 }
 
 void set_height_and_weight_by_race(nlohmann::json& ch, int sex) {
-    int race, sex, mod;
+    int race, mod;
 
     race = ch["race"];
     if (sex < SEX_NEUTRAL || sex >= NUM_SEX) {

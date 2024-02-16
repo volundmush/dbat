@@ -428,35 +428,7 @@ static int trade_with(struct obj_data *item, vnum shop_nr) {
 }
 
 static int same_obj(struct obj_data *obj1, struct obj_data *obj2) {
-    int aindex, i;
-    int ef1, ef2;
-
-    if (!obj1 || !obj2)
-        return (obj1 == obj2);
-
-    if (GET_OBJ_RNUM(obj1) != GET_OBJ_RNUM(obj2))
-        return (false);
-
-    if (GET_OBJ_COST(obj1) != GET_OBJ_COST(obj2))
-        return (false);
-
-    for (i = 0; i < EF_ARRAY_MAX; i++) {
-        ef1 = GET_OBJ_EXTRA_AR(obj1, i);
-        ef2 = GET_OBJ_EXTRA_AR(obj2, i);
-        if (i == Q_FIELD(ITEM_UNIQUE_SAVE)) {
-            ef1 &= ~Q_BIT(ITEM_UNIQUE_SAVE);
-            ef2 &= ~Q_BIT(ITEM_UNIQUE_SAVE);
-        }
-        if (ef1 != ef2)
-            return (false);
-    }
-
-    for (aindex = 0; aindex < MAX_OBJ_AFFECT; aindex++)
-        if ((obj1->affected[aindex].location != obj2->affected[aindex].location) ||
-            (obj1->affected[aindex].modifier != obj2->affected[aindex].modifier))
-            return (false);
-
-    return (true);
+    return false;
 }
 
 int shop_producing(struct obj_data *item, vnum shop_nr) {
@@ -513,74 +485,16 @@ static char *times_message(struct obj_data *obj, char *name, int num) {
 
 static struct obj_data *get_slide_obj_vis(struct char_data *ch, char *name,
                                           struct obj_data *list) {
-    struct obj_data *i, *last_match = nullptr;
-    int j, number;
-    char tmpname[MAX_INPUT_LENGTH];
-    char *tmp;
-
-    strlcpy(tmpname, name, sizeof(tmpname));
-    tmp = tmpname;
-    if (!(number = get_number(&tmp)))
-        return (nullptr);
-
-    for (i = list, j = 1; i && (j <= number); i = i->next_content)
-        if (isname(tmp, i->name))
-            if (CAN_SEE_OBJ(ch, i) && !same_obj(last_match, i)) {
-                if (j == number)
-                    return (i);
-                last_match = i;
-                j++;
-            }
-    return (nullptr);
+    return nullptr;
 }
 
 static struct obj_data *get_hash_obj_vis(struct char_data *ch, char *name,
                                          struct obj_data *list) {
-    struct obj_data *loop, *last_obj = nullptr;
-    int qindex;
-
-    if (is_number(name))
-        qindex = atoi(name);
-    else if (is_number(name + 1))
-        qindex = atoi(name + 1);
-    else
-        return (nullptr);
-
-    for (loop = list; loop; loop = loop->next_content)
-        if (CAN_SEE_OBJ(ch, loop) && GET_OBJ_COST(loop) > 0)
-            if (!same_obj(last_obj, loop)) {
-                if (--qindex == 0)
-                    return (loop);
-                last_obj = loop;
-            }
-    return (nullptr);
+    return nullptr;
 }
 
 static struct obj_data *get_purchase_obj(struct char_data *ch, char *arg, struct char_data *keeper, vnum shop_nr, int msg) {
-    char name[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
-
-    one_argument(arg, name);
-    do {
-        if (*name == '#' || is_number(name))
-            obj = get_hash_obj_vis(ch, name, keeper->contents);
-        else
-            obj = get_slide_obj_vis(ch, name, keeper->contents);
-        if (!obj) {
-            if (msg) {
-                char buf[MAX_INPUT_LENGTH];
-
-                snprintf(buf, sizeof(buf), shop_index[shop_nr].no_such_item1, GET_NAME(ch));
-                do_tell(keeper, buf, cmd_tell, 0);
-            }
-            return (nullptr);
-        }
-        if (GET_OBJ_COST(obj) <= 0) {
-            obj->extractFromWorld();
-            obj = nullptr;
-        }
-    } while (!obj);
-    return (obj);
+    return nullptr;
 }
 
 /*
@@ -794,128 +708,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
 }
 
 static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keeper, vnum shop_nr) {
-    char tempstr[MAX_INPUT_LENGTH], tempbuf[MAX_INPUT_LENGTH];
-    struct obj_data *obj, *last_obj = nullptr;
-    int goldamt = 0, buynum, bought = 0;
-
-    if (!is_ok(keeper, ch, shop_nr))
-        return;
-
-    if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
-        sort_keeper_objs(keeper, shop_nr);
-
-    if ((buynum = transaction_amt(arg)) < 0) {
-        char buf[MAX_INPUT_LENGTH];
-
-        snprintf(buf, sizeof(buf), "%s A negative amount?  Try selling me something.",
-                 GET_NAME(ch));
-        do_tell(keeper, buf, cmd_tell, 0);
-        return;
-    }
-    if (!*arg || !buynum) {
-        char buf[MAX_INPUT_LENGTH];
-
-        snprintf(buf, sizeof(buf), "%s What do you want to buy?", GET_NAME(ch));
-        do_tell(keeper, buf, cmd_tell, 0);
-        return;
-    }
-    if (!(obj = get_purchase_obj(ch, arg, keeper, shop_nr, true)))
-        return;
-
-    if (buy_price(obj, shop_nr, keeper, ch) > GET_GOLD(ch) && !ADM_FLAGGED(ch, ADM_MONEY)) {
-        char actbuf[MAX_INPUT_LENGTH];
-
-        auto &sh = shop_index[shop_nr];
-
-        snprintf(actbuf, sizeof(actbuf), sh.missing_cash2 ? sh.missing_cash2 : "You can't afford that!", GET_NAME(ch));
-        do_tell(keeper, actbuf, cmd_tell, 0);
-
-        switch (SHOP_BROKE_TEMPER(shop_nr)) {
-            case 0:
-                do_action(keeper, strcpy(actbuf, GET_NAME(ch)), cmd_puke,
-                          0);    /* strcpy: OK (MAX_NAME_LENGTH < MAX_INPUT_LENGTH) */
-                return;
-            case 1:
-                do_echo(keeper, strcpy(actbuf, "smokes on his joint."), cmd_emote, SCMD_EMOTE);    /* strcpy: OK */
-                return;
-            default:
-                return;
-        }
-    }
-    if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
-        ch->sendf("%s: You can't carry any more items.\r\n", fname(obj->name));
-        return;
-    }
-    if (!ch->canCarryWeight(obj)) {
-        ch->sendf("%s: You can't carry that much weight.\r\n", fname(obj->name));
-        return;
-    }
-    while (obj && (GET_GOLD(ch) >= buy_price(obj, shop_nr, keeper, ch) || ADM_FLAGGED(ch, ADM_MONEY))
-           && IS_CARRYING_N(ch) < CAN_CARRY_N(ch) && bought < buynum
-           && ch->canCarryWeight(obj)) {
-        int charged;
-
-        bought++;
-        /* Test if producing shop ! */
-        if (shop_producing(obj, shop_nr)) {
-            obj = read_object(GET_OBJ_RNUM(obj), REAL);
-        } else {
-            obj->removeFromLocation();
-            SHOP_SORT(shop_nr)--;
-        }
-        obj->addToLocation(ch);
-        if (OBJ_FLAGGED(obj, ITEM_MATURE)) {
-            GET_OBJ_VAL(obj, VAL_MAXMATURE) = 6;
-        }
-
-        charged = buy_price(obj, shop_nr, keeper, ch);
-        goldamt += charged;
-        if (!ADM_FLAGGED(ch, ADM_MONEY))
-            ch->mod(CharMoney::Carried, -charged);
-        else {
-            send_to_imm("IMM PURCHASE: %s has purchased %s for free.", GET_NAME(ch), obj->getShortDesc());
-            log_imm_action("IMM PURCHASE: %s has purchased %s for free.", GET_NAME(ch), obj->getShortDesc());
-        }
-
-        last_obj = obj;
-        obj = get_purchase_obj(ch, arg, keeper, shop_nr, false);
-        if (!same_obj(obj, last_obj))
-            break;
-    }
-
-    if (bought < buynum) {
-        char buf[MAX_INPUT_LENGTH];
-
-        if (!obj || !same_obj(last_obj, obj))
-            snprintf(buf, sizeof(buf), "%s I only have %d to sell you.", GET_NAME(ch), bought);
-        else if (GET_GOLD(ch) < buy_price(obj, shop_nr, keeper, ch))
-            snprintf(buf, sizeof(buf), "%s You can only afford %d.", GET_NAME(ch), bought);
-        else if (IS_CARRYING_N(ch) >= CAN_CARRY_N(ch))
-            snprintf(buf, sizeof(buf), "%s You can only hold %d.", GET_NAME(ch), bought);
-        else if (!ch->canCarryWeight(obj))
-            snprintf(buf, sizeof(buf), "%s You can only carry %d.", GET_NAME(ch), bought);
-        else
-            snprintf(buf, sizeof(buf), "%s Something screwy only gave you %d.", GET_NAME(ch), bought);
-        do_tell(keeper, buf, cmd_tell, 0);
-    }
-    if (!ADM_FLAGGED(ch, ADM_MONEY))
-        keeper->mod(CharMoney::Carried, goldamt);
-
-    strlcpy(tempstr, times_message(ch->contents, nullptr, bought), sizeof(tempstr));
-
-    snprintf(tempbuf, sizeof(tempbuf), "$n buys %s.", tempstr);
-    act(tempbuf, false, ch, obj, nullptr, TO_ROOM);
-
-    snprintf(tempbuf, sizeof(tempbuf), shop_index[shop_nr].message_buy, GET_NAME(ch), goldamt);
-    do_tell(keeper, tempbuf, cmd_tell, 0);
-
-    ch->sendf("You now have %s.\r\n", tempstr);
-
-    if (SHOP_USES_BANK(shop_nr))
-        if (GET_GOLD(keeper) > MAX_OUTSIDE_BANK) {
-            SHOP_BANK(shop_nr) += (GET_GOLD(keeper) - MAX_OUTSIDE_BANK);
-            keeper->set(CharMoney::Carried, MAX_OUTSIDE_BANK);
-        }
+    return;
 }
 
 static struct obj_data *
@@ -961,62 +754,13 @@ get_selling_obj(struct char_data *ch, char *name, struct char_data *keeper, vnum
 
 static struct obj_data *slide_obj(struct obj_data *obj, struct char_data *keeper,
                                   vnum shop_nr)
-/*
-   This function is a slight hack!  To make sure that duplicate items are
-   only listed once on the "list", this function groups "identical"
-   objects together on the shopkeeper's inventory list.  The hack involves
-   knowing how the list is put together, and manipulating the order of
-   the objects on the list.  (But since most of DIKU is not encapsulated,
-   and information hiding is almost never used, it isn't that big a deal) -JF
-*/
+
 {
-    struct obj_data *loop;
-    int temp;
-
-    if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
-        sort_keeper_objs(keeper, shop_nr);
-
-    /* Extract the object if it is identical to one produced */
-    if (shop_producing(obj, shop_nr)) {
-        temp = GET_OBJ_RNUM(obj);
-        obj->extractFromWorld();
-        return (&obj_proto[temp]);
-    }
-    SHOP_SORT(shop_nr)++;
-    loop = keeper->contents;
-    obj->addToLocation(keeper);
-    keeper->contents = loop;
-    while (loop) {
-        if (same_obj(obj, loop)) {
-            obj->next_content = loop->next_content;
-            loop->next_content = obj;
-            return (obj);
-        }
-        loop = loop->next_content;
-    }
-    keeper->contents = obj;
-    return (obj);
+    return nullptr;
 }
 
 static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr) {
-    struct obj_data *list = nullptr, *temp;
-
-    while (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper)) {
-        temp = keeper->contents;
-        temp->removeFromLocation();
-        temp->next_content = list;
-        list = temp;
-    }
-
-    while (list) {
-        temp = list;
-        list = list->next_content;
-        if (shop_producing(temp, shop_nr) && !keeper->findObjectVnum(temp->vn)) {
-                temp->addToLocation(keeper);
-            SHOP_SORT(shop_nr)++;
-        } else
-            slide_obj(temp, keeper, shop_nr);
-    }
+    
 }
 
 static void shopping_sell(char *arg, struct char_data *ch, struct char_data *keeper, vnum shop_nr) {
@@ -1466,8 +1210,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             column = 12;
         }
 
-        if (!ch->sendf("%s", buf1))
-            return;
+        ch->sendf("%s", buf1);
         column += linelen;
     }
     if (sh.in_room.empty())
@@ -1476,7 +1219,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
     ch->sendf("\r\nShopkeeper: ");
     if (sh.keeper != NOBODY) {
         ch->sendf("%s (#%d), Special Function: %s\r\n",
-                     GET_NAME(&mob_proto[SHOP_KEEPER(shop_nr)]),
+                     mob_proto[SHOP_KEEPER(shop_nr)]["name"].get<std::string>(),
                      sh.keeper,
                      YESNO(SHOP_FUNC(shop_nr)));
 
@@ -1503,7 +1246,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             column += 2;
         }
         linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
-                           obj_proto[p].getShortDesc().c_str(),
+                           obj_proto[p]["short_description"].get<std::string>(),
                            p);
 
         /* Implementing word-wrapping: assumes screen-size == 80 */
@@ -1513,8 +1256,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             column = 12;
         }
 
-        if (!ch->sendf("%s", buf1))
-            return;
+        ch->sendf("%s", buf1);
         column += linelen;
     }
     if (!sindex)
@@ -1544,8 +1286,8 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             column = 12;
         }
 
-        if (!ch->sendf("%s", buf1))
-            return;
+        ch->sendf("%s", buf1);
+
         column += linelen;
         sindex++;
     }

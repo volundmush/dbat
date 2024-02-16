@@ -2,10 +2,17 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
 
-extra_descr_data::extra_descr_data(const extra_descr_data& other) {
-    if(other.keyword) keyword = strdup(other.keyword);
-    if(other.description) description = strdup(other.description);
-    if(other.next) next = new extra_descr_data(*other.next);
+
+
+extra_descr_data::extra_descr_data(const nlohmann::json& j) {
+    deserialize(j);
+}
+
+nlohmann::json extra_descr_data::serialize() {
+    nlohmann::json j;
+    if(!keyword.empty()) j["keyword"] = keyword;
+    if(!description.empty()) j["description"] = description;
+    return j;
 }
 
 std::vector<room_data*> unit_data::getRooms() {
@@ -92,10 +99,8 @@ nlohmann::json unit_data::serialize() {
     if(look_description && strlen(look_description)) j["look_description"] = look_description;
     if(short_description && strlen(short_description)) j["short_description"] = short_description;
 
-    for(auto ex = ex_description; ex; ex = ex->next) {
-        if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
-            j["ex_description"].push_back(std::make_pair(ex->keyword, ex->description));
-        }
+    for(auto &ex : ex_description) {
+        j["ex_description"].push_back(ex.serialize());
     }
 
     if(uid != NOTHING) j["uid"] = uid;
@@ -137,13 +142,7 @@ void unit_data::deserialize(const nlohmann::json& j) {
 
     if(j.contains("ex_description")) {
         auto &e = j["ex_description"];
-        for(auto ex = e.rbegin(); ex != e.rend(); ex++) {
-            auto new_ex = new extra_descr_data();
-            new_ex->keyword = strdup((*ex)[0].get<std::string>().c_str());
-            new_ex->description = strdup((*ex)[1].get<std::string>().c_str());
-            new_ex->next = ex_description;
-            ex_description = new_ex;
-        }
+        for(auto ej : e) ex_description.emplace_back(ej);
     }
 
     if(j.contains("uid")) uid = j["uid"];
@@ -284,21 +283,13 @@ std::vector<std::string> unit_data::getKeywords(struct unit_data* ch) {
     return {};
 }
 
-extra_descr_data::~extra_descr_data() {
-    if(keyword) free(keyword);
-    if(description) free(description);
-}
+
 
 unit_data::~unit_data() {
     if(name) free(name);
     if(short_description) free(short_description);
     if(room_description) free(room_description);
     if(look_description) free(look_description);
-    while(ex_description) {
-        auto next = ex_description->next;
-        delete ex_description;
-        ex_description = next;
-    }
     if(script) script.reset();
 }
 
@@ -484,10 +475,6 @@ std::vector<unit_data*> Searcher::search() {
 unit_data* Searcher::getOne() {
     auto results = search();
     if(results.size() == 1) return results.front();
-    return nullptr;
-}
-
-area_data* unit_data::getMatchingArea(const std::function<bool(area_data*)>& f) {
     return nullptr;
 }
 

@@ -105,16 +105,10 @@ void obj_data::deactivate() {
 
 }
 
-void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
-    deserializeBase(j);
-
-    if(j.contains("dgvariables")) {
-        script->vars = j["dgvariables"].get<std::unordered_map<std::string, std::string>>();
-    }
+void obj_data::deserialize(const nlohmann::json &j) {
+    unit_data::deserialize(j);
 
     if(j.contains("room_loaded")) room_loaded = j["room_loaded"];
-
-    if(isActive) activate();
 
 }
 
@@ -262,20 +256,10 @@ nlohmann::json obj_data::serializeRelations() {
     return j;
 }
 
-void obj_data::deserializeLocation(const std::string& txt, int16_t slot) {
-    auto check = resolveUID(txt);
-    if(!check) return;
-    auto idx = check->getFamily();
-    if(idx == UnitFamily::Room) {
-        addToLocation(check);
-    } else if(idx == UnitFamily::Item) {
-        addToLocation(check);
-    } else {
-        auto_equip(dynamic_cast<char_data*>(check), this, slot+1);
-    }
-}
 
 void obj_data::deserializeRelations(const nlohmann::json& j) {
+    unit_data::deserializeRelations(j);
+    
     if(j.contains("posted_to")) {
         auto check = resolveUID(j["posted_to"]);
         if(check) posted_to = dynamic_cast<obj_data*>(check);
