@@ -2701,8 +2701,12 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
     if (!ch->desc) {
         return;
     }
-    if (auto ld = i->getLookDesc(); !ld.empty()) {
-        send_to_char(ch, "%s", ld);
+    if(i->form == FormID::Base || i->transforms[i->form].description == nullptr || i->transforms[i->form].description == "") {
+        if (i->look_description) {
+            send_to_char(ch, "%s", i->look_description);
+        }
+    } else {
+        send_to_char(ch, "%s", i->transforms[i->form].description);
     }
     if (!MOB_FLAGGED(i, MOB_JUSTDESC)) {
         bringdesc(ch, i);
@@ -3499,10 +3503,10 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
             send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
             return;
         }
-        if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+        /*if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
             send_to_char(ch, "It is pitch black...\r\n");
             return;
-        }
+        }*/
 
         /* Is the character using a working light source? */
         has_light = ch->isProvidingLight();
@@ -3764,8 +3768,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
     auto sunk = SUNKEN(rm->vn);
 
     if (IS_DARK(rm->vn) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-        send_to_char(ch, "It is pitch black...\r\n");
-        return;
+        send_to_char(ch, "It's too dark to make out much detail...\r\n");
     } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
         send_to_char(ch, "You see nothing but infinite darkness...\r\n");
         return;
@@ -4657,12 +4660,6 @@ ACMD(do_look) {
     }
 
     auto room = ch->getRoom();
-
-    if(IS_DARK(room->vn) && !CAN_SEE_IN_DARK(ch)) {
-        send_to_char(ch, "It is pitch black...\r\n");
-        list_char_to_char(room->people, ch);    /* glowing red eyes */
-        return;
-    }
 
     char arg[MAX_INPUT_LENGTH], arg2[200];
 
@@ -7551,8 +7548,19 @@ ACMD(do_desc) {
     if(!d) {
         return;
     }
-    write_to_output(d, "Current description:\r\n%s", ch->getLookDesc());
-    write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
-    string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
-    STATE(d) = CON_EXDESC;
+
+    if(ch->form == FormID::Base) {
+        write_to_output(d, "Current description:\r\n%s\r\n", ch->look_description);
+        write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
+        string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
+        STATE(d) = CON_EXDESC;
+    } else {
+        auto form = ch->form;
+
+        write_to_output(d, "Current description for %s:\r\n%s\r\n", trans::getName(ch, form), ch->transforms[form].description);
+        write_to_output(d, "Enter the new text you'd like others to see when they look at you in this form.\r\n");
+
+        string_write(d, &ch->transforms[form].description, EXDSCR_LENGTH, 0, nullptr);
+        STATE(d) = CON_EXDESC;
+    }
 }

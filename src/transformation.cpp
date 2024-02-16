@@ -905,13 +905,13 @@ namespace trans {
             }
 
             // Notify at thresholds
-            if(timeBefore < MASTERY_THRESHOLD && timeAfter >= MASTERY_THRESHOLD)
-                send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n\r\n" + getName(ch, form));
+            if(form != FormID::Base && timeBefore < MASTERY_THRESHOLD && timeAfter >= MASTERY_THRESHOLD)
+                send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, form) + "\r\n");
 
-            if(timeBefore < LIMIT_THRESHOLD && timeAfter >= LIMIT_THRESHOLD)
-                send_to_char(ch, "@mYou feel power overwhelming eminate from your core, you instinctively know you've hit the limit of @n\r\n" + getName(ch, form));
+            if(form != FormID::Base && timeBefore < LIMIT_THRESHOLD && timeAfter >= LIMIT_THRESHOLD)
+                send_to_char(ch, "@mYou feel power overwhelming eminate from your core, you instinctively know you've hit the limit of @n" + getName(ch, form) + "\r\n");
 
-            if(timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limitBroken == true)
+            if(form != FormID::Base && timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limitBroken == true)
                 send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n\r\n");
 
             // Check stamina drain.
@@ -1651,6 +1651,11 @@ void trans_data::deserialize(const nlohmann::json &j) {
     if(j.contains("visible")) visible = j["visible"];
     if(j.contains("limitBroken")) limitBroken = j["limitBroken"];
     if(j.contains("blutz")) blutz = j["blutz"];
+
+    if(j.contains("description")) {
+        if(description) free(description);
+        description = strdup(j["description"].get<std::string>().c_str());
+    }
 }
 
 nlohmann::json trans_data::serialize() {
@@ -1659,5 +1664,8 @@ nlohmann::json trans_data::serialize() {
     j["visible"] = visible;
     j["limitBroken"] = limitBroken;
     if(blutz != 0.0) j["blutz"] = blutz;
+
+    if(description && strlen(description)) j["description"] = description;
+
     return j;
 }
