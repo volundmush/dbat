@@ -70,33 +70,6 @@ void strip_cr(char *buffer) {
     buffer[wpos] = '\0';
 }
 
-void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from) {
-    struct extra_descr_data *wpos;
-
-    CREATE(*to, struct extra_descr_data, 1);
-    wpos = *to;
-
-    for (; from; from = from->next, wpos = wpos->next) {
-        wpos->keyword = str_udup(from->keyword);
-        wpos->description = str_udup(from->description);
-        if (from->next)
-            CREATE(wpos->next, struct extra_descr_data, 1);
-    }
-}
-
-void free_ex_descriptions(struct extra_descr_data *head) {
-    struct extra_descr_data *next_one;
-
-    if (!head) {
-        basic_mud_log("free_ex_descriptions: nullptr pointer or nullptr data.");
-        return;
-    }
-
-    for (auto thised = head; thised; thised = next_one) {
-        next_one = thised->next;
-        delete thised;
-    }
-}
 
 int remove_from_save_list(zone_vnum zone, int type) {
     int counter = 0;

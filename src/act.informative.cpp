@@ -3795,13 +3795,12 @@ static void look_in_obj(struct char_data *ch, char *arg) {
     }
 }
 
-char *find_exdesc(char *word, struct extra_descr_data *list) {
-    struct extra_descr_data *i;
+char *find_exdesc(char *word, const std::vector<extra_descr_data>& list) {
 
-    for (i = list; i; i = i->next)
+    for (auto i : list)
         /*if (isname(word, i->keyword))*/
-        if (*i->keyword == '.' ? isname(word, i->keyword + 1) : isname(word, i->keyword))
-            return (i->description);
+        if (i.keyword.starts_with(".") ? isname(word, i.keyword.substr(1).c_str()) : isname(word, i.keyword.c_str()))
+            return (char*)i.description.c_str();
 
     return (nullptr);
 }
@@ -4366,10 +4365,10 @@ ACMD(do_look) {
         struct extra_descr_data *i;
         int found = 0;
 
-        for (i = ch->getRoom()->ex_description; i; i = i->next) {
-            if (*i->keyword != '.') {
+        for (auto i : ch->getRoom()->ex_description) {
+            if (!i.keyword.starts_with(".")) {
                 ch->sendf("%s%s:\r\n%s",
-                             (found ? "\r\n" : ""), i->keyword, i->description);
+                             (found ? "\r\n" : ""), i.keyword, i.description);
                 found = 1;
             }
         }

@@ -27,10 +27,6 @@ extern void save_all();
 
 extern char *str_udup(const char *);
 
-extern void copy_ex_descriptions(struct extra_descr_data **to, struct extra_descr_data *from);
-
-extern void free_ex_descriptions(struct extra_descr_data *head);
-
 extern int sprintascii(char *out, bitvector_t bits);
 
 struct save_list_data {
