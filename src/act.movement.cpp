@@ -33,11 +33,7 @@ static void disp_locations(struct char_data *ch, vnum areaVnum, std::set<room_vn
 
 static int has_boat(struct char_data *ch);
 
-static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname);
-
 static int has_key(struct char_data *ch, obj_vnum key);
-
-static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd);
 
 static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *obj);
 
@@ -256,65 +252,17 @@ std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms) {
 
 }
 
-std::optional<vnum> governingAreaTypeFor(struct room_data *rd, std::function<bool(area_data&)>& func) {
-    if(!rd->area) return std::nullopt;
-    auto &a = areas[rd->area.value()];
-    while(true) {
-        if (func(a)) return a.vn;
-        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.extraVn) {
-            // we need to find the a.objectVnum in the world by scanning object_list...
-            if (auto obj = get_obj_num(a.extraVn.value()); obj) {
-                return governingAreaTypeFor(obj, func);
-            }
-        }
-        if (!a.parent) return std::nullopt;
-        a = areas[a.parent.value()];
-    }
-}
-
-std::optional<vnum> governingAreaTypeFor(struct char_data *ch, std::function<bool(area_data&)>& func) {
-    auto room = ch->getRoom();
-    if(!room) return std::nullopt;
-    return governingAreaTypeFor(room, func);
-}
-
-std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<bool(area_data&)>& func) {
-	auto room = obj->getAbsoluteRoom();
-    if(!room) return std::nullopt;
-    return governingAreaTypeFor(room, func);
-}
-
 static std::set<vnum> _areaRecurseGuard;
 
 std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data*)>& func) {
     std::size_t count = 0;
-    for(auto v : start.rooms) {
-        if(auto u = world.find(v); u != world.end()) {
-            auto r = dynamic_cast<room_data*>(u->second);
-            if(!r) continue;
-            if(!func(r)) continue;
-            if(fill.contains(r->vn)) {
-                auto message = fmt::format("ERROR: While recursing area: {}, asked to re-add room {}", start.vn, r->vn);
-                throw std::runtime_error(message);
-            }
-            fill.insert(r->vn);
-            count++;
-        }
-    }
-    for(auto &child : start.children) {
-        if(_areaRecurseGuard.contains(child)) {
-            auto message = fmt::format("ERROR: While recursing area: {}, asked to re-scan area {}", start.vn, child);
-            throw std::runtime_error(message);
-        }
-        _areaRecurseGuard.insert(child);
-        count += recurseScanRooms(areas[child], fill, func);
-    }
     return count;
 }
 
 /* This shows the player what locations the planet has to land at. */
 static void disp_locations(struct char_data *ch, vnum areaVnum, std::set<room_vnum>& rooms) {
-	auto &a = areas[areaVnum];
+	/*
+    auto &a = areas[areaVnum];
     if(rooms.empty()) {
         ch->sendf("There are no landing locations on this planet.\r\n");
         return;
@@ -332,10 +280,12 @@ static void disp_locations(struct char_data *ch, vnum areaVnum, std::set<room_vn
     for(auto &name : names) {
         ch->sendf("%s\n", name.c_str());
     }
+    */
 }
 
 ACMD(do_land) {
 
+    /*
     int above_planet = true, inroom = GET_ROOM_VNUM(IN_ROOM(ch));
     skip_spaces(&argument);
     std::function<bool(area_data&)> governingCelestial = [&](area_data& area) {
@@ -398,6 +348,7 @@ ACMD(do_land) {
             TO_ROOM);
         return;
     }
+    */
 }
 
 
@@ -590,7 +541,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
 
     /* move points needed is avg. move loss for src and destination sect type */
     if(!IS_NPC(ch)) {
-        auto gravity = r->getGravity();
+        auto gravity = ch->myEnvVar(EnvVar::Gravity);
         need_movement = (gravity * gravity) * ch->getBurdenRatio();
     }
 
@@ -864,6 +815,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
 int perform_move(struct char_data *ch, int dir, int need_specials_check) {
     room_rnum was_in;
     struct follow_type *k, *next;
+    /*
 
     if (GRAPPLING(ch) || GRAPPLED(ch)) {
         ch->sendf("You are grappling with someone!\r\n");
@@ -944,7 +896,9 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
         }
         return (1);
     }
+    */
     return (0);
+    
 }
 
 ACMD(do_move) {
@@ -1204,45 +1158,6 @@ ACMD(do_move) {
     }
 }
 
-static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname) {
-    int door;
-
-    if (*dir) {            /* a direction was specified */
-        if ((door = search_block(dir, dirs, false)) < 0 &&
-            (door = search_block(dir, abbr_dirs, false)) < 0) {    /* Partial Match */
-            ch->sendf("That's not a direction.\r\n");
-            return (-1);
-        }
-        if (EXIT(ch, door)) {    /* Braces added according to indent. -gg */
-            if (EXIT(ch, door)->keyword) {
-                if (is_name(type, EXIT(ch, door)->keyword))
-                    return (door);
-                else {
-                    ch->sendf("I see no %s there.\r\n", type);
-                    return (-1);
-                }
-            } else
-                return (door);
-        } else {
-            ch->sendf("I really don't see how you can %s anything there.\r\n", cmdname);
-            return (-1);
-        }
-    } else {            /* try to locate the keyword */
-        if (!*type) {
-            ch->sendf("What is it you want to %s?\r\n", cmdname);
-            return (-1);
-        }
-        for (door = 0; door < NUM_OF_DIRS; door++)
-            if (EXIT(ch, door))
-                if (EXIT(ch, door)->keyword)
-                    if (is_name(type, EXIT(ch, door)->keyword))
-                        return (door);
-
-        ch->sendf("There doesn't seem to be %s %s that could be manipulated in that way here.\r\n", AN(type),
-                     type);
-        return (-1);
-    }
-}
 
 static int has_key(struct char_data *ch, obj_vnum key) {
     return ch->findObjectVnum(key) != nullptr;
@@ -1271,246 +1186,6 @@ static const int flags_door[] =
                 NEED_CLOSED | NEED_LOCKED
         };
 
-
-#define EXITN(room, door)        (dynamic_cast<room_data*>(world[room])->dir_option[door])
-#define OPEN_DOOR(room, obj, door)    ((obj) ?\
-        (REMOVE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_CLOSED)) :\
-        (REMOVE_BIT(EXITN(room, door)->exit_info, EX_CLOSED)))
-#define CLOSE_DOOR(room, obj, door)    ((obj) ?\
-        (SET_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_CLOSED)) :\
-        (SET_BIT(EXITN(room, door)->exit_info, EX_CLOSED)))
-#define LOCK_DOOR(room, obj, door)    ((obj) ?\
-        (SET_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_LOCKED)) :\
-        (SET_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
-#define UNLOCK_DOOR(room, obj, door)    ((obj) ?\
-        (REMOVE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_LOCKED)) :\
-        (REMOVE_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
-#define TOGGLE_LOCK(room, obj, door)    ((obj) ?\
-        (TOGGLE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_LOCKED)) :\
-        (TOGGLE_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
-
-static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd) {
-    char buf[MAX_STRING_LENGTH];
-    size_t len;
-    int num = 0;
-    room_rnum other_room = NOWHERE;
-    struct exit_data *back = nullptr;
-    struct obj_data *hatch = nullptr, *obj2 = nullptr, *next_obj, *vehicle = nullptr;
-
-    if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH) {
-        vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(obj, VAL_HATCH_DEST));
-    } else if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
-        if (real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)) != NOWHERE) {
-            num = IN_ROOM(ch);
-            ch->removeFromLocation();
-            ch->addToLocation(world.at(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)));
-        }
-        for (auto obj2 : ch->getRoom()->getInventory()) {
-            if (GET_OBJ_TYPE(obj2) == ITEM_HATCH) {
-                hatch = obj2;
-            }
-        }
-        obj2 = nullptr;
-    }
-
-    if (!door_mtrigger(ch, scmd, door))
-        return;
-
-    if (!door_wtrigger(ch, scmd, door))
-        return;
-
-    len = snprintf(buf, sizeof(buf), "$n %ss ", cmd_door[scmd]);
-    if (!obj && ((other_room = EXIT(ch, door)->to_room) != NOWHERE)) {
-        if ((back = dynamic_cast<room_data*>(world[other_room])->dir_option[rev_dir[door]]) != nullptr)
-            if (back->to_room != IN_ROOM(ch))
-                back = nullptr;
-    }
-    switch (scmd) {
-        case SCMD_OPEN:
-            if (obj) {
-                if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
-                    OPEN_DOOR(IN_ROOM(ch), vehicle, door);
-                    if (GET_OBJ_VNUM(obj) > 19199) {
-                        send_to_room(IN_ROOM(ch),
-                                     "@wThe ship hatch opens slowly and settles onto the ground outside.\r\n");
-                        send_to_room(IN_ROOM(vehicle),
-                                     "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
-                        if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_SPACE)) {
-                            send_to_room(IN_ROOM(ch),
-                                         "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
-                        }
-                    } else {
-                        act("@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
-                        act("@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
-                        send_to_room(IN_ROOM(vehicle), "@wThe door to %s@w is opened from the other side.\r\n",
-                                     vehicle->getShortDesc());
-                    }
-                    vehicle = nullptr;
-                }
-                if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
-                    OPEN_DOOR(IN_ROOM(ch), hatch, door);
-                    ch->removeFromLocation();
-                    ch->addToLocation(world.at(num));
-                    if (GET_OBJ_VNUM(obj) > 19199) {
-                        send_to_room(num, "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
-                        send_to_room(IN_ROOM(hatch), "@wThe ship hatch opens slowly.\r\n");
-                        if (ROOM_FLAGGED(IN_ROOM(obj), ROOM_SPACE)) {
-                            send_to_room(num, "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
-                        }
-                    } else {
-                        act("@wYou open @c$p@w.", true, ch, obj, 0, TO_CHAR);
-                        act("@C$n@w opens @c$p@w.", true, ch, obj, 0, TO_ROOM);
-                        send_to_room(IN_ROOM(hatch), "@wThe door is opened from the other side.\r\n");
-                    }
-                    hatch = nullptr;
-                }
-            }
-            OPEN_DOOR(IN_ROOM(ch), obj, door);
-            if (back) {
-                OPEN_DOOR(other_room, obj, rev_dir[door]);
-            }
-            if (!obj) {
-                ch->sendf("You open the %s that leads %s.\r\n",
-                             EXIT(ch, door)->keyword ? EXIT(ch, door)->keyword : "door", dirs[door]);
-            } else if (GET_OBJ_TYPE(obj) != ITEM_VEHICLE && GET_OBJ_TYPE(obj) != ITEM_HATCH) {
-                ch->sendf("You open %s.\r\n", obj->getShortDesc());
-            }
-            break;
-
-        case SCMD_CLOSE:
-            if (obj) {
-                if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
-                    CLOSE_DOOR(IN_ROOM(ch), vehicle, door);
-                    if (GET_OBJ_VNUM(obj) > 19199) {
-                        send_to_room(IN_ROOM(ch),
-                                     "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
-                        send_to_room(IN_ROOM(vehicle), "@wThe ship hatch slowly closes, sealing the ship.\r\n");
-                        if (ROOM_FLAGGED(IN_ROOM(vehicle), ROOM_SPACE)) {
-                            send_to_room(IN_ROOM(ch),
-                                         "@wThe air stops getting sucked out into space as the hatch seals!\r\n");
-                        }
-                    } else {
-                        act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
-                        act("@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
-                        send_to_room(IN_ROOM(vehicle), "@wThe door to %s@w is closed from the other side.\r\n",
-                                     vehicle->getShortDesc());
-                    }
-                    vehicle = NULL;
-                }
-                if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
-                    CLOSE_DOOR(IN_ROOM(ch), hatch, door);
-                    ch->removeFromLocation();
-                    ch->addToLocation(world.at(num));
-                    if (GET_OBJ_VNUM(obj) > 19199) {
-                        send_to_room(num, "@wThe ship hatch slowly closes, sealing the ship.\r\n");
-                        send_to_room(IN_ROOM(hatch),
-                                     "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
-                        if (ROOM_FLAGGED(IN_ROOM(obj), ROOM_SPACE)) {
-                            send_to_room(num, "@wAir stops getting sucked out into space as the hatch seals!\r\n");
-                        }
-                    } else {
-                        act("@wYou close @c$p@w.", true, ch, obj, 0, TO_CHAR);
-                        act("@C$n@w closes @c$p@w.", true, ch, obj, 0, TO_ROOM);
-                        send_to_room(IN_ROOM(hatch), "@wThe door to %s@w is closed from the other side.\r\n",
-                                     hatch->getShortDesc());
-                    }
-                    hatch = NULL;
-                }
-            }
-            CLOSE_DOOR(IN_ROOM(ch), obj, door);
-            if (back) {
-                CLOSE_DOOR(other_room, obj, rev_dir[door]);
-            }
-            if (!obj) {
-                ch->sendf("You close the %s that leads %s.\r\n",
-                             EXIT(ch, door)->keyword ? EXIT(ch, door)->keyword : "door", dirs[door]);
-            } else if (GET_OBJ_TYPE(obj) != ITEM_VEHICLE && GET_OBJ_TYPE(obj) != ITEM_HATCH) {
-                ch->sendf("You close %s.\r\n", obj->getShortDesc());
-            }
-            break;
-
-        case SCMD_LOCK:
-            if (obj) {
-                if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
-                    LOCK_DOOR(IN_ROOM(ch), vehicle, door);
-                    vehicle = NULL;
-                }
-                if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
-                    LOCK_DOOR(IN_ROOM(ch), hatch, door);
-                    ch->removeFromLocation();
-                    ch->addToLocation(world.at(num));
-                    hatch = NULL;
-                }
-            }
-            LOCK_DOOR(IN_ROOM(ch), obj, door);
-            if (back) {
-                LOCK_DOOR(other_room, obj, rev_dir[door]);
-            }
-            if (!obj) {
-                ch->sendf("You lock the %s that leads %s.\r\n",
-                             EXIT(ch, door)->keyword ? EXIT(ch, door)->keyword : "door", dirs[door]);
-            } else {
-                ch->sendf("You lock %s.\r\n", obj->getShortDesc());
-            }
-            break;
-
-        case SCMD_UNLOCK:
-            if (obj) {
-                if ((obj) && GET_OBJ_TYPE(obj) == ITEM_HATCH && (vehicle)) {
-                    UNLOCK_DOOR(IN_ROOM(ch), vehicle, door);
-                    vehicle = NULL;
-                }
-                if ((obj) && GET_OBJ_TYPE(obj) == ITEM_VEHICLE && (hatch)) {
-                    UNLOCK_DOOR(IN_ROOM(ch), hatch, door);
-                    ch->removeFromLocation();
-                    ch->addToLocation(world.at(num));
-                    hatch = NULL;
-                }
-            }
-            UNLOCK_DOOR(IN_ROOM(ch), obj, door);
-            if (back) {
-                UNLOCK_DOOR(other_room, obj, rev_dir[door]);
-            }
-            if (!obj) {
-                ch->sendf("You unlock the %s that leads %s.\r\n",
-                             EXIT(ch, door)->keyword ? EXIT(ch, door)->keyword : "door", dirs[door]);
-            } else {
-                ch->sendf("You unlock %s.\r\n", obj->getShortDesc());
-            }
-            break;
-
-        case SCMD_PICK:
-            TOGGLE_LOCK(IN_ROOM(ch), obj, door);
-            if (back)
-                TOGGLE_LOCK(other_room, obj, rev_dir[door]);
-            ch->sendf("The lock quickly yields to your skills.\r\n");
-            len = strlcpy(buf, "$n skillfully picks the lock on ", sizeof(buf));
-            break;
-    }
-
-    /* Notify the room. */
-    char dbuf[100];
-    if (!obj) {
-        sprintf(dbuf, "%s", dirs[door]);
-    }
-    if (len < sizeof(buf))
-        snprintf(buf + len, sizeof(buf) - len, "%s%s%s%s.",
-                 obj ? "" : "the ", obj ? "$p" : EXIT(ch, door)->keyword ? "$F" : "door", obj ? "" : " that leads ",
-                 obj ? "" : dbuf);
-    if (!obj || IN_ROOM(obj) != NOWHERE)
-        act(buf, false, ch, obj, obj ? 0 : EXIT(ch, door)->keyword, TO_ROOM);
-
-    /* Notify the other room */
-    if (back && (scmd == SCMD_OPEN || scmd == SCMD_CLOSE)) {
-        send_to_room(EXIT(ch, door)->to_room, "The %s that leads %s is %s%s from the other side.\r\n",
-                     back->keyword ? fname(back->keyword) : "door", dbuf, cmd_door[scmd],
-                     scmd == SCMD_CLOSE ? "d" : "ed");
-    } else if (back && (scmd == SCMD_LOCK || scmd == SCMD_UNLOCK)) {
-        send_to_room(EXIT(ch, door)->to_room, "The %s that leads %s is %sed from the other side.\r\n",
-                     back->keyword ? fname(back->keyword) : "door", dbuf, cmd_door[scmd]);
-    }
-    *dbuf = '\0';
-}
 
 static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, struct obj_data *hatch) {
     int skill_lvl, found = false;
@@ -1564,93 +1239,8 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
 }
 
 
-#define DOOR_IS_OPENABLE(ch, obj, door)    ((obj) ? \
-            ((GET_OBJ_TYPE(obj) == ITEM_CONTAINER) && \
-            OBJVAL_FLAGGED(obj, CONT_CLOSEABLE))   || \
-                        ((GET_OBJ_TYPE(obj) == ITEM_VEHICLE)   && \
-                        OBJVAL_FLAGGED(obj, CONT_CLOSEABLE))   || \
-                        ((GET_OBJ_TYPE(obj) == ITEM_HATCH)     && \
-                        OBJVAL_FLAGGED(obj, CONT_CLOSEABLE))   || \
-                        ((GET_OBJ_TYPE(obj) == ITEM_WINDOW)    && \
-                        OBJVAL_FLAGGED(obj, CONT_CLOSEABLE))   || \
-                        ((GET_OBJ_TYPE(obj) == ITEM_PORTAL)    && \
-            OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) :\
-            (EXIT_FLAGGED(EXIT(ch, door), EX_ISDOOR)))
-#define DOOR_IS_OPEN(ch, obj, door)    ((obj) ? \
-            (!OBJVAL_FLAGGED(obj, CONT_CLOSED)) :\
-            (!EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED)))
-#define DOOR_IS_UNLOCKED(ch, obj, door)    ((obj) ? \
-            (!OBJVAL_FLAGGED(obj, CONT_LOCKED)) :\
-            (!EXIT_FLAGGED(EXIT(ch, door), EX_LOCKED)))
-#define DOOR_IS_PICKPROOF(ch, obj, door) ((obj) ? \
-            (OBJVAL_FLAGGED(obj, CONT_PICKPROOF)) : \
-            (EXIT_FLAGGED(EXIT(ch, door), EX_PICKPROOF)))
-#define DOOR_IS_SECRET(ch, obj, door) ((obj) ? \
-                        (OBJVAL_FLAGGED(obj, CONT_SECRET)) : \
-                        (EXIT_FLAGGED(EXIT(ch, door), EX_SECRET)))
-
-#define DOOR_IS_CLOSED(ch, obj, door)    (!(DOOR_IS_OPEN(ch, obj, door)))
-#define DOOR_IS_LOCKED(ch, obj, door)    (!(DOOR_IS_UNLOCKED(ch, obj, door)))
-#define DOOR_KEY(ch, obj, door)        ((obj) ? (GET_OBJ_VAL(obj, VAL_KEY_KEYCODE)) : \
-                    (EXIT(ch, door)->key))
-#define DOOR_DCLOCK(ch, obj, door)    ((obj) ? (GET_OBJ_VAL(obj, VAL_DOOR_DCLOCK)) : EXIT(ch, door)->dclock)
-
 ACMD(do_gen_door) {
-    int door = -1;
-    obj_vnum keynum;
-    char type[MAX_INPUT_LENGTH], dir[MAX_INPUT_LENGTH];
-    struct obj_data *obj = nullptr;
-    struct char_data *victim = nullptr;
 
-    skip_spaces(&argument);
-    if (!*argument) {
-        ch->sendf("%c%s what?\r\n", UPPER(*cmd_door[subcmd]), cmd_door[subcmd] + 1);
-        return;
-    }
-    two_arguments(argument, type, dir);
-    if (!generic_find(type, FIND_OBJ_INV | FIND_OBJ_ROOM, ch, &victim, &obj))
-        door = find_door(ch, type, dir, cmd_door[subcmd]);
-
-    auto r = ch->getRoom();
-
-    if ((obj) &&
-        (GET_OBJ_TYPE(obj) != ITEM_CONTAINER && GET_OBJ_TYPE(obj) != ITEM_VEHICLE && GET_OBJ_TYPE(obj) != ITEM_HATCH)) {
-        obj = nullptr;
-        door = find_door(ch, type, dir, cmd_door[subcmd]);
-    }
-
-    if ((obj) || (door >= 0)) {
-        keynum = DOOR_KEY(ch, obj, door);
-        if (!DOOR_DCLOCK(ch, obj, door)) {
-            if (obj) {
-                GET_OBJ_VAL(obj, VAL_DOOR_DCLOCK) = 20;
-            } else {
-                r->dir_option[door]->dclock = 20;
-            }
-        }
-        if (!(DOOR_IS_OPENABLE(ch, obj, door)))
-            act("You can't $F that!", false, ch, nullptr, cmd_door[subcmd], TO_CHAR);
-        else if (!DOOR_IS_OPEN(ch, obj, door) &&
-                 IS_SET(flags_door[subcmd], NEED_OPEN))
-            ch->sendf("But it's already closed!\r\n");
-        else if (!DOOR_IS_CLOSED(ch, obj, door) &&
-                 IS_SET(flags_door[subcmd], NEED_CLOSED))
-            ch->sendf("But it's currently open!\r\n");
-        else if (!(DOOR_IS_LOCKED(ch, obj, door)) &&
-                 IS_SET(flags_door[subcmd], NEED_LOCKED))
-            ch->sendf("Oh.. it wasn't locked, after all..\r\n");
-        else if (!(DOOR_IS_UNLOCKED(ch, obj, door)) &&
-                 IS_SET(flags_door[subcmd], NEED_UNLOCKED))
-            ch->sendf("It seems to be locked.\r\n");
-        else if (!has_key(ch, keynum) && !ADM_FLAGGED(ch, ADM_NOKEYS) &&
-                 ((subcmd == SCMD_LOCK) || (subcmd == SCMD_UNLOCK)))
-            ch->sendf("You don't seem to have the proper key.\r\n");
-        else if (!obj &&
-                 ok_pick(ch, keynum, DOOR_IS_PICKPROOF(ch, obj, door), DOOR_DCLOCK(ch, obj, door), subcmd, nullptr))
-            do_doorcmd(ch, obj, door, subcmd);
-        else if (ok_pick(ch, keynum, DOOR_IS_PICKPROOF(ch, obj, door), DOOR_DCLOCK(ch, obj, door), subcmd, obj) && obj)
-            do_doorcmd(ch, obj, door, subcmd);
-    }
 }
 
 static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_specials_check) {
@@ -1818,6 +1408,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
 }
 
 ACMD(do_enter) {
+    /*
     struct obj_data *obj = nullptr;
     char buf[MAX_INPUT_LENGTH];
     int door, move_dir = -1;
@@ -1825,26 +1416,25 @@ ACMD(do_enter) {
     one_argument(argument, buf);
     auto r = ch->getRoom();
 
-    if (*buf) { /* an argument was supplied, search for door keyword */
-        /* Is the object in the room? */
+    if (*buf) {
+
         obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getRoom()->getInventory());
-        /* Is the object in the character's inventory? */
+
         if (!obj)
             obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getInventory());
-        /* Is the character carrying the object? */
+
         if (!obj)
             obj = get_obj_in_equip_vis(ch, buf, nullptr, ch->getEquipment());
-        /* We have an object to enter */
+
         if (obj)
             perform_enter_obj(ch, obj, 0);
-            /* Is there a door to enter? */
+
         else {
-            for (door = 0; door < NUM_OF_DIRS; door++)
-                if (r->dir_option[door])
-                    if (r->dir_option[door]->keyword)
-                        if (isname(buf, r->dir_option[door]->keyword))
-                            move_dir = door;
-            /* Did we find what they wanted to enter. */
+            for (auto &[door, e] : r->getExits())
+                if (auto kw = e->getKeywords(ch);r->dir_option[door]->keyword)
+                    if (isname(buf, r->dir_option[door]->keyword))
+                        move_dir = door;
+
             if (move_dir > -1)
                 perform_move(ch, move_dir, 1);
             else
@@ -1853,7 +1443,7 @@ ACMD(do_enter) {
     } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_INDOORS)) {
         ch->sendf("You are already indoors.\r\n");
     } else {
-        /* try to locate an entrance */
+
         for (door = 0; door < NUM_OF_DIRS; door++)
             if (r->dir_option[door])
                 if (r->dir_option[door]->to_room != NOWHERE)
@@ -1865,6 +1455,7 @@ ACMD(do_enter) {
         else
             ch->sendf("You can't seem to find anything to enter.\r\n");
     }
+    */
 }
 
 static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_specials_check) {
@@ -2060,12 +1651,10 @@ ACMD(do_leave) {
         return;
     }
 
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto e = r->dir_option[door];
-        if(!e) continue;
+    for (auto &[door, e] : r->getExits()) {
         auto dest = e->getDestination();
         if(!dest) continue;
-        if (!EXIT_FLAGGED(e, EX_CLOSED) && !dest->checkFlag(FlagType::Room, ROOM_INDOORS)) {
+        if (!e->checkFlag(FlagType::Exit, EX_CLOSED) && !dest->checkFlag(FlagType::Room, ROOM_INDOORS)) {
             perform_move(ch, door, 1);
             return;
         }
@@ -2077,7 +1666,7 @@ ACMD(do_leave) {
 static void handle_fall(struct char_data *ch) {
     int room = -1;
     while (EXIT(ch, 5) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
-        room = GET_ROOM_VNUM(EXIT(ch, 5)->to_room);
+        room = EXIT(ch, 5)->getDestination()->uid;
         ch->removeFromLocation();
         ch->addToLocation(world.at(room));
         if (auto carry = CARRYING(ch); carry) {
@@ -2233,6 +1822,7 @@ ACMD(do_fly) {
         }
     }
     if (!strcasecmp("space", arg)) {
+        /*
         if (!OUTSIDE(ch)) {
             ch->sendf("You are not outside!");
             return;
@@ -2288,6 +1878,8 @@ ACMD(do_fly) {
         }
         WAIT_STATE(ch, PULSE_3SEC);
         return;
+        */
+
     }
 }
 

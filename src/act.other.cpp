@@ -33,7 +33,6 @@
 #include "dbat/guild.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/mail.h"
-#include "dbat/clan.h"
 #include "dbat/players.h"
 #include "dbat/random.h"
 
@@ -2302,7 +2301,7 @@ ACMD(do_implant) {
             }
             vict->playerFlags.set(PLR_CRARM);
             limb->removeFromLocation();
-            extract_obj(limb);
+            limb->extractFromWorld();
             return;
         }
     } else if (!(strcmp(arg, "larm"))) {
@@ -2333,7 +2332,7 @@ ACMD(do_implant) {
             }
             vict->playerFlags.set(PLR_CLARM);
             limb->removeFromLocation();
-            extract_obj(limb);
+            limb->extractFromWorld();
             return;
         }
     } else if (!(strcmp(arg, "rleg"))) {
@@ -2364,7 +2363,7 @@ ACMD(do_implant) {
             }
             vict->playerFlags.set(PLR_CRLEG);
             limb->removeFromLocation();
-            extract_obj(limb);
+            limb->extractFromWorld();
             return;
         }
     } else if (!(strcmp(arg, "lleg"))) {
@@ -2395,7 +2394,7 @@ ACMD(do_implant) {
             }
             vict->playerFlags.set(PLR_CLLEG);
             limb->removeFromLocation();
-            extract_obj(limb);
+            limb->extractFromWorld();
             return;
         }
     } else {
@@ -3976,7 +3975,7 @@ ACMD(do_upgrade) {
             }
             if (!strcasecmp("powerlevel", arg2)) {
                 obj->removeFromLocation();
-                extract_obj(obj);
+                obj->extractFromWorld();
                 act("@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, nullptr, nullptr,
                     TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -3985,7 +3984,7 @@ ACMD(do_upgrade) {
                 return;
             } else if (!strcasecmp("ki", arg2)) {
                 obj->removeFromLocation();
-                extract_obj(obj);
+                obj->extractFromWorld();
                 act("@WYou install the circuits and upgrade your maximum ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->gainBaseKI(gain, true);
@@ -3993,7 +3992,7 @@ ACMD(do_upgrade) {
                 return;
             } else if (!strcasecmp("stamina", arg2)) {
                 obj->removeFromLocation();
-                extract_obj(obj);
+                obj->extractFromWorld();
                 act("@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, nullptr, nullptr,
                     TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -6174,15 +6173,15 @@ ACMD(do_forgery) {
             ch->sendf(
                          "In the middle of creating a forgery of %s you screw up. The fabrication unit built into the forgery kit melts and bonds with the original. You clumsy mistake with the Estex Titanium drill has broken both.\r\n",
                          obj2->getShortDesc());
-            extract_obj(obj4);
-            extract_obj(obj2);
+            obj4->extractFromWorld();
+            obj2->extractFromWorld();
             return;
         }
         ch->sendf("You start to make a forgery of %s but screw up and waste your forgery kit..\r\n",
                      obj2->getShortDesc());
         act("@c$n@w tried to duplicate $p but screws up somehow.@n", true, ch, obj2, nullptr, TO_ROOM);
         obj4->removeFromLocation();
-        extract_obj(obj4);
+        obj4->extractFromWorld();
         WAIT_STATE(ch, PULSE_2SEC);
         return;
     }
@@ -6197,7 +6196,7 @@ ACMD(do_forgery) {
     GET_OBJ_WEIGHT(obj3) = rand_number(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3));
 
     obj4->removeFromLocation();
-    extract_obj(obj4);
+    obj4->extractFromWorld();
     ch->sendf("You make an excellent forgery of %s@n!\r\n", obj2->getShortDesc());
     act("@c$n@w makes a perfect forgery of $p.@n", true, ch, obj2, nullptr, TO_ROOM);
     WAIT_STATE(ch, PULSE_2SEC);
@@ -6392,11 +6391,11 @@ ACMD(do_eavesdrop) {
         return;
     }
     if (EXIT(ch, dir)) {
-        if (IS_SET(EXIT(ch, dir)->exit_info, EX_CLOSED) && EXIT(ch, dir)->keyword) {
-            sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
+        if (EXIT(ch, dir)->checkFlag(FlagType::Exit, EX_CLOSED) && !EXIT(ch, dir)->getAlias().empty()) {
+            sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->getAlias().c_str()));
             ch->sendf(buf);
         } else {
-            GET_EAVESDROP(ch) = GET_ROOM_VNUM(EXIT(ch, dir)->to_room);
+            GET_EAVESDROP(ch) = EXIT(ch, dir)->getDestination()->uid;
             GET_EAVESDIR(ch) = dir;
             ch->sendf("Okay.\r\n");
         }
@@ -7383,7 +7382,7 @@ ACMD(do_summon) {
     send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
 
     for(auto dball : dragonBalls) {
-        extract_obj(dball);
+        dball->extractFromWorld();
     }
 
     EDRAGON = dragon;
@@ -8873,7 +8872,7 @@ ACMD(do_scouter) {
                 perform_remove(ch, WEAR_EYE);
                 ch->sendf("Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 ch->save();
                 return;
             } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
@@ -8882,7 +8881,7 @@ ACMD(do_scouter) {
                 perform_remove(ch, WEAR_EYE);
                 ch->sendf("Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 ch->save();
                 return;
             } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
@@ -8891,7 +8890,7 @@ ACMD(do_scouter) {
                 perform_remove(ch, WEAR_EYE);
                 ch->sendf("Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 ch->save();
                 return;
             } else {
@@ -9881,7 +9880,7 @@ ACMD(do_use) {
                         } else {
                             ch->incCurST(ch->getMaxST() * .1);
                         }
-                        extract_obj(mag_item);
+                        mag_item->extractFromWorld();
                         return;
                     case 382:
                         if (AFF_FLAGGED(ch, AFF_BURNED)) {
@@ -9889,7 +9888,7 @@ ACMD(do_use) {
                             act("@C$n@W gently applies a burn salve to $s burns.@n", true, ch, mag_item, nullptr,
                                 TO_ROOM);
                             ch->clearFlag(FlagType::Affect,AFF_BURNED);
-                            extract_obj(mag_item);
+                            mag_item->extractFromWorld();
                         } else {
                             ch->sendf("You are not burned.\r\n");
                         }
@@ -9901,7 +9900,7 @@ ACMD(do_use) {
                             act("@C$n@W places an $p@W against $s neck and a loud click is heard.@n", true, ch,
                                 mag_item, nullptr, TO_ROOM);
                             null_affect(ch, AFF_POISON);
-                            extract_obj(mag_item);
+                            mag_item->extractFromWorld();
                         } else {
                             ch->sendf("You are not poisoned.\r\n");
                         }
@@ -9930,7 +9929,7 @@ ACMD(do_use) {
                         if (refreshed == true) {
                             ch->sendf("@CYou feel refreshed!\r\n");
                         }
-                        extract_obj(mag_item);
+                        mag_item->extractFromWorld();
                         return;
                     default:
                         ch->sendf("That is not something you can apparently use.\r\n");
@@ -10700,7 +10699,7 @@ ACMD(do_fix) {
         if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
             act("You try to repair $p but screw up..", true, ch, obj, nullptr, TO_CHAR);
             act("$n tries to repair $p but screws up..", true, ch, obj, nullptr, TO_ROOM);
-            extract_obj(obj4);
+            obj4->extractFromWorld();
             improve_skill(ch, SKILL_REPAIR, 1);
             WAIT_STATE(ch, PULSE_2SEC);
             return;
@@ -10729,7 +10728,7 @@ ACMD(do_fix) {
             ch->sendf("@mYou think you might be on to something...@n\r\n");
         }
         improve_skill(ch, SKILL_REPAIR, 1);
-        extract_obj(obj4);
+        obj4->extractFromWorld();
         WAIT_STATE(ch, PULSE_2SEC);
         return;
     } else { /* For androids repairing themselves */
@@ -10740,7 +10739,7 @@ ACMD(do_fix) {
         } else if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
             act("You try to repair your body but screw up..", true, ch, nullptr, nullptr, TO_CHAR);
             act("$n tries to repair $s body but screws up..", true, ch, nullptr, nullptr, TO_ROOM);
-            extract_obj(obj4);
+            obj4->extractFromWorld();
             improve_skill(ch, SKILL_REPAIR, 1);
             WAIT_STATE(ch, PULSE_5SEC);
             return;
@@ -10750,7 +10749,7 @@ ACMD(do_fix) {
             int64_t mult = GET_SKILL(ch, SKILL_REPAIR);
             int64_t add = (((ch->getEffMaxPL()) * 0.005) + 10) * mult;
 
-            extract_obj(obj4);
+            obj4->extractFromWorld();
             if (ch->incCurHealth(add) == ch->getEffMaxPL()) {
                 ch->sendf("Your body has been totally repaired.\r\n");
                 WAIT_STATE(ch, PULSE_5SEC);
@@ -10888,519 +10887,6 @@ static void show_clan_info(struct char_data *ch) {
 
 }
 
-ACMD(do_clan) {
-
-    char arg1[100];
-    char arg2[MAX_INPUT_LENGTH];
-
-    if (ch == nullptr || IS_NPC(ch))
-        return;
-
-    half_chop(argument, arg1, arg2);
-
-    if (!*arg1) {
-        show_clan_info(ch);
-        return;
-    }
-
-
-    // immortal-only commands
-    if (GET_ADMLEVEL(ch) >= ADMLVL_IMPL) {
-
-        if (!(strcmp(arg1, "create"))) {
-            if (!*arg2)
-                show_clan_info(ch);
-            else if (isClan(arg2))
-                ch->sendf("There is already a clan with the name, %s.\r\n", arg2);
-            else {
-                ch->sendf("You create a clan with the name, %s.\r\n", arg2);
-                clanCreate(arg2);
-                mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s has created a clan named %s.",
-                       GET_NAME(ch), arg2);
-            }
-            return;
-        } else if (!(strcmp(arg1, "destroy"))) {
-            if (!*arg2)
-                show_clan_info(ch);
-            else if (!isClan(arg2))
-                ch->sendf("No clan with the name %s exists.\r\n", arg2);
-            else {
-                ch->sendf("You destroy %s.\r\n", arg2);
-                clanDestroy(arg2);
-            }
-            return;
-        } else if (!(strcmp(arg1, "bset"))) {
-            if (!*arg2)
-                show_clan_info(ch);
-            else if (!isClan(arg2))
-                ch->sendf("No clan with the name %s exists.\r\n", arg2);
-            else if (GET_ADMLEVEL(ch) < 5)
-                show_clan_info(ch);
-            else {
-                clanBSET(arg2, ch);
-            }
-            return;
-        } else if (!(strcmp(arg1, "reload"))) {
-            if (!*arg2)
-                show_clan_info(ch);
-            else if (!isClan(arg2))
-                ch->sendf("No clan with the name %s exists.\r\n", arg2);
-            else if (clanReload(arg2))
-                ch->sendf("Data for %s has been reloaded.\r\n", arg2);
-            else
-                ch->sendf("Failed to reload the data for %s.\r\n", arg2);
-            return;
-        }
-    }
-
-    // commands available to everybody
-    if (!(strcmp(arg1, "apply"))) {
-        if (!*arg2)
-            show_clan_info(ch);
-        else if (!isClan(arg2))
-            ch->sendf("%s is not a valid clan.\r\n", arg2);
-        else if (GET_CLAN(ch) != nullptr && clanIsMember(GET_CLAN(ch), ch))
-            ch->sendf("You are already a member of %s.\r\n", GET_CLAN(ch));
-        else if (clanOpenJoin(arg2)) {
-            ch->sendf("You can just join %s, it is open.\r\n", arg2);
-            return;
-        } else {
-            if (GET_CLAN(ch) != nullptr && checkCLAN(ch) == true) {
-                checkAPP(ch);
-                ch->sendf("You stop applying to %s\r\n", GET_CLAN(ch));
-                clanDecline(GET_CLAN(ch), ch);
-                if (GET_CLAN(ch)) {
-                    free(GET_CLAN(ch));
-                }
-                GET_CLAN(ch) = strdup("None.");
-            }
-            ch->sendf("You apply to become a member of %s.\r\n", arg2);
-            clanApply(arg2, ch);
-            return;
-        }
-        return;
-    }
-    if (!(strcmp(arg1, "join"))) {
-        if (!*arg2)
-            show_clan_info(ch);
-        else if (!isClan(arg2))
-            ch->sendf("%s is not a valid clan.\r\n", arg2);
-        else if (clanIsMember(arg2, ch))
-            ch->sendf("You are already a member of %s.\r\n", arg2);
-        else if (GET_CLAN(ch) != nullptr && checkCLAN(ch) == true && strstr(GET_CLAN(ch), "Applying") == false)
-            ch->sendf("You are already a member of %s, you need to leave it first.\r\n", GET_CLAN(ch));
-        else if (clanOpenJoin(arg2)) {
-            if (GET_CLAN(ch) != nullptr && checkCLAN(ch) == true) {
-                checkAPP(ch);
-                ch->sendf("You stop applying to %s\r\n", GET_CLAN(ch));
-                clanDecline(GET_CLAN(ch), ch);
-                if (GET_CLAN(ch)) {
-                    free(GET_CLAN(ch));
-                }
-                GET_CLAN(ch) = strdup("None.");
-            }
-            ch->sendf("You are now a member of %s.\r\n", arg2);
-            clanInduct(arg2, ch);
-            return;
-        } else {
-            ch->sendf("%s isn't open, you must apply instead.\r\n", arg2);
-            return;
-        }
-        return;
-    } else if (!(strcmp(arg1, "leave"))) {
-        if (!*arg2)
-            show_clan_info(ch);
-        else if (!isClan(arg2))
-            ch->sendf("%s is not a valid clan.\r\n", arg2);
-        else if (!clanIsMember(arg2, ch))
-            ch->sendf("You aren't even a member of %s.\r\n", arg2);
-        else if (!(clanOpenLeave(arg2) || clanIsModerator(arg2, ch)))
-            ch->sendf("You must be expelled from %s in order to leave it.\r\n", arg2);
-        else {
-            ch->sendf("You are no longer a member of %s.\r\n", arg2);
-            clanExpel(arg2, ch);
-            return;
-        }
-        return;
-    } else if (!(strcmp(arg1, "infow"))) {
-        if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
-            ch->sendf("You are not in a clan.\r\n");
-            return;
-        } else {
-            if (clanIsModerator(GET_CLAN(ch), ch) == false)
-                ch->sendf("You must be a moderator to edit the clan's information.\r\n");
-            else {
-                clanINFOW(GET_CLAN(ch), ch);
-                ch->playerFlags.set(PLR_WRITING);
-            }
-            return;
-        }
-    } else if (!(strcmp(arg1, "deposit"))) {
-        long bank = 0;
-
-        if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
-            ch->sendf("You are not in a clan.\r\n");
-            return;
-        } else {
-            if (!clanIsMember(GET_CLAN(ch), ch) && !clanIsModerator(GET_CLAN(ch), ch)) {
-                ch->sendf("You are not in a clan.\r\n");
-                return;
-            } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_CBANK) && clanBANY(GET_CLAN(ch), ch) == false) {
-                ch->sendf("You are not in your clan bank and your clan doesn't have bank anywhere.\r\n");
-                return;
-            } else if (!*arg2) {
-                ch->sendf("How much do you want to deposit?\r\n");
-                return;
-            } else if (atoi(arg2) <= 0) {
-                ch->sendf("It needs to be a value higher than 0...\r\n");
-                return;
-            } else if (GET_GOLD(ch) < atoi(arg2)) {
-                ch->sendf("You do not have that much to deposit!\r\n");
-                return;
-            } else {
-                bank = atoi(arg2);
-                ch->mod(CharMoney::Carried, -bank);
-                clanBANKADD(GET_CLAN(ch), ch, bank);
-                ch->sendf("You have deposited %s into the clan bank.\r\n", add_commas(bank).c_str());
-            }
-        }
-        return;
-    } else if (!(strcmp(arg1, "highrank"))) {
-
-        if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
-            ch->sendf("You are not in a clan.\r\n");
-            return;
-        } else {
-            if (!clanIsModerator(GET_CLAN(ch), ch)) {
-                ch->sendf("You are not leading a clan.\r\n");
-                return;
-            } else if (!*arg2) {
-                ch->sendf("What name are you going to make the rank?\r\n");
-                return;
-            } else if (strlen(arg2) > 20) {
-                ch->sendf("The name length can't be longer than 20 characters.\r\n");
-                return;
-            } else if (strstr(arg2, "@")) {
-                ch->sendf("No colorcode allowed in the ranks.\r\n");
-                return;
-            } else {
-                clanHIGHRANK(GET_CLAN(ch), ch, arg2);
-                ch->sendf("High rank set.\r\n");
-            }
-            return;
-        }
-    } else if (!(strcmp(arg1, "midrank"))) {
-
-        if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
-            ch->sendf("You are not in a clan.\r\n");
-            return;
-        } else {
-            if (!clanIsModerator(GET_CLAN(ch), ch)) {
-                ch->sendf("You are not leading a clan.\r\n");
-                return;
-            } else if (!*arg2) {
-                ch->sendf("What name are you going to make the rank?\r\n");
-                return;
-            } else if (strlen(arg2) > 20) {
-                ch->sendf("The name length can't be longer than 20 characters.\r\n");
-                return;
-            } else if (strstr(arg2, "@")) {
-                ch->sendf("No colorcode allowed in the ranks.\r\n");
-                return;
-            } else {
-                clanMIDRANK(GET_CLAN(ch), ch, arg2);
-                ch->sendf("Mid rank set.\r\n");
-            }
-            return;
-        }
-    } else if (!(strcmp(arg1, "rank"))) {
-        struct char_data *vict = nullptr;
-        char arg3[100];
-        char name[100];
-        half_chop(arg2, name, arg3);
-
-        if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
-            ch->sendf("You are not in a clan.\r\n");
-            return;
-        } else {
-            if (!clanIsModerator(GET_CLAN(ch), ch)) {
-                ch->sendf("You are not leading a clan.\r\n");
-                return;
-            } else if (!*arg2) {
-                ch->sendf("Who's rank do you want to change?\r\n");
-                return;
-            } else if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD))) {
-                ch->sendf("That person is no where to be found in the entire universe.\r\n");
-                return;
-            } else if (GET_CLAN(vict) == nullptr || !(strcmp(GET_CLAN(vict), "None."))) {
-                ch->sendf("That person is not even in a clan, let alone your's.\r\n");
-                return;
-            } else if (!clanIsMember(GET_CLAN(ch), vict)) {
-                ch->sendf("You can only rank those in your clan and only if below leader.\r\n");
-                return;
-            } else if (clanIsModerator(GET_CLAN(ch), vict)) {
-                ch->sendf("You can't rank a fellow leader, you require imm assistance.\r\n");
-                return;
-            } else if (!*arg3) {
-                ch->sendf(
-                             "What rank do you want to set them to?\r\n[ 0 = Member, 1 = Midrank, 2 = Highrank]\r\n");
-                return;
-            }
-            int num = atoi(arg3);
-            if (num < 0 || num > 2) {
-                ch->sendf("It must be above zero and lower than three...\r\n");
-                return;
-            } else if (GET_CRANK(vict) == num) {
-                ch->sendf("They are already that rank!\r\n");
-                return;
-            } else if (GET_CRANK(vict) > num) {
-                clanRANK(GET_CLAN(ch), ch, vict, num);
-                switch (num) {
-                    case 0:
-                        ch->sendf("You demote %s.\r\n", GET_NAME(vict));
-                        vict->sendf("%s has demoted your clan rank to member!\r\n", GET_NAME(ch));
-                        break;
-                    case 1:
-                        ch->sendf("You demote %s.\r\n", GET_NAME(vict));
-                        vict->sendf("%s has demoted your clan rank to midrank!\r\n", GET_NAME(ch));
-                        break;
-                }
-                return;
-            } else if (GET_CRANK(vict) < num) {
-                clanRANK(GET_CLAN(ch), ch, vict, num);
-                switch (num) {
-                    case 1:
-                        ch->sendf("You promote %s.\r\n", GET_NAME(vict));
-                        vict->sendf("%s has promoted your clan rank to midrank!\r\n", GET_NAME(ch));
-                        break;
-                    case 2:
-                        ch->sendf("You promote %s.\r\n", GET_NAME(vict));
-                        vict->sendf("%s has promoted your clan rank to highrank!\r\n", GET_NAME(ch));
-                        break;
-                }
-                return;
-            }
-        }
-    } else if (!(strcmp(arg1, "withdraw"))) {
-        long bank = 0;
-
-        if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
-            ch->sendf("You are not in a clan.\r\n");
-            return;
-        } else {
-            if (!clanIsMember(GET_CLAN(ch), ch) && !clanIsModerator(GET_CLAN(ch), ch)) {
-                ch->sendf("You are not in a clan.\r\n");
-                return;
-            } else if (!*arg2) {
-                ch->sendf("How much do you want to withdraw?\r\n");
-                return;
-            } else if (!(clanIsModerator(GET_CLAN(ch), ch) || GET_ADMLEVEL(ch) >= ADMLVL_IMPL)) {
-                ch->sendf("You do not have the power to withdraw from the clan bank.\r\n");
-                return;
-            } else if (atoi(arg2) <= 0) {
-                ch->sendf("It needs to be a value higher than 0...\r\n");
-                return;
-            } else if (GET_GOLD(ch) + atoi(arg2) > GOLD_CARRY(ch)) {
-                ch->sendf("You can not hold that much zenni!\r\n");
-                return;
-            } else {
-                bank = atoi(arg2);
-                if (clanBANKSUB(GET_CLAN(ch), ch, bank)) {
-                    ch->sendf("You have withdrawn %s from the clan bank.\r\n", add_commas(bank).c_str());
-                    ch->mod(CharMoney::Carried, bank);
-                } else {
-                    ch->sendf("There isn't that much in the clan's bank!\r\n");
-                }
-            }
-        }
-        return;
-    } else if (!(strcmp(arg1, "bank"))) {
-        long bank = 0;
-        if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
-            ch->sendf("You are not in a clan.\r\n");
-            return;
-        } else {
-            if (!clanIsMember(GET_CLAN(ch), ch) && !clanIsModerator(GET_CLAN(ch), ch)) {
-                ch->sendf("You are not in a clan.\r\n");
-                return;
-            }
-            bank = clanBANK(GET_CLAN(ch), ch);
-            ch->sendf("@W[ @C%-20s @W]@w has @D(@Y%s@D)@w zenni in its clan bank.\r\n", GET_CLAN(ch),
-                         add_commas(bank).c_str());
-        }
-        return;
-    } else if (!(strcmp(arg1, "members"))) {
-        if (GET_CLAN(ch) == nullptr || !(strcmp(GET_CLAN(ch), "None."))) {
-            ch->sendf("You are not even in a clan.\r\n");
-            return;
-        } else {
-            handle_clan_member_list(ch);
-        }
-    } else if (!(strcmp(arg1, "expel"))) {
-        struct char_data *vict;
-        char arg3[100];
-        char name[MAX_INPUT_LENGTH];
-        char name1[100];
-        half_chop(arg2, name1, arg3);
-
-        if (!*arg3 || !*name1) {
-            show_clan_info(ch);
-        } else if (!isClan(arg3)) {
-            ch->sendf("%s is not a valid clan.\r\n", arg3);
-        } else if (!(clanIsModerator(arg3, ch) || GET_ADMLEVEL(ch) >= ADMLVL_IMPL)) {
-            ch->sendf("Only leaders can expel people from a clan.\r\n");
-        } else if (clanOpenJoin(arg3)) {
-            ch->sendf("You can't kick someone out of an open-join clan.\r\n");
-        } else if (!(vict = get_char_vis(ch, name1, nullptr, FIND_CHAR_WORLD))) {
-            vict = findPlayer(name);
-            sprintf(name, "%s", rIntro(ch, name1));
-            if(!vict) vict = findPlayer(name1);
-
-            if (vict) {
-                if (!clanIsMember(arg3, vict)) {
-                    ch->sendf("%s isn't even a member of %s.\r\n", GET_NAME(vict), arg3);
-                } else if (clanIsModerator(arg3, vict) && GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
-                    ch->sendf("You do not have the power to kick a leader out of %s.\r\n", arg3);
-                } else {
-                    ch->sendf("You expel %s from %s.\r\n", GET_NAME(vict), arg3);
-                    clanExpel(arg3, vict);
-                }
-            }
-            else {
-                ch->sendf("%s does not seem to exist.\r\n", name1);
-                return;
-            }
-            return;
-        } else if (!clanIsMember(arg3, vict)) {
-            ch->sendf("%s isn't even a member of %s.\r\n", GET_NAME(vict), arg3);
-        } else if (clanIsModerator(arg3, vict) && GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
-            ch->sendf("You do not have the power to kick a leader out of %s.\r\n", arg3);
-        } else {
-            ch->sendf("You expel %s from %s.\r\n", GET_NAME(vict), arg3);
-            vict->sendf("You have been expelled from %s.\r\n", arg3);
-            clanExpel(arg3, vict);
-            return;
-        }
-        return;
-    } else if (!(strcmp(arg1, "decline"))) {
-        struct char_data *vict;
-        char arg3[100];
-        char name[100];
-        half_chop(arg2, name, arg3);
-
-        if (!*arg3 || !*name)
-            show_clan_info(ch);
-        else if (!isClan(arg3))
-            ch->sendf("%s is not a valid clan.\r\n", arg3);
-        else if ((clanIsModerator(arg3, ch) == false && clanIsMember(arg3, ch) == false &&
-                  GET_ADMLEVEL(ch) < ADMLVL_IMPL) || (GET_CRANK(ch) < 2 && GET_ADMLEVEL(ch) < ADMLVL_IMPL))
-            ch->sendf("Only leaders or highrank can decline people from entering a clan.\r\n");
-        else if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD)))
-            ch->sendf("%s is not around at the moment.\r\n", name);
-        else if (!clanIsApplicant(arg3, vict))
-            ch->sendf("%s isn't applying to join %s.\r\n", GET_NAME(vict), arg3);
-        else {
-            ch->sendf("You decline %s enterance to %s.\r\n", GET_NAME(vict), arg3);
-            vict->sendf("You have been declined enterance to %s.\r\n", arg3);
-            clanDecline(arg3, vict);
-        }
-        return;
-    } else if (!(strcmp(arg1, "enroll"))) {
-        struct char_data *vict;
-        char arg3[100];
-        char name[100];
-        half_chop(arg2, name, arg3);
-
-        if (!*arg3 || !*name)
-            show_clan_info(ch);
-        else if (!isClan(arg3))
-            ch->sendf("%s is not a valid clan.\r\n", arg3);
-        else if (!clanIsMember(arg3, ch) && GET_ADMLEVEL(ch) < 1)
-            ch->sendf("You are not in that clan.\r\n");
-        else if (!(clanIsModerator(arg3, ch) || GET_ADMLEVEL(ch) >= ADMLVL_IMPL) && GET_CRANK(ch) < 2)
-            ch->sendf("Only leaders or captains can enroll people into their clan.\r\n");
-        else if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD)))
-            ch->sendf("%s is not around at the moment.\r\n", name);
-        else if (!clanIsApplicant(arg3, vict))
-            ch->sendf("%s isn't applying to join %s.\r\n", GET_NAME(vict), arg3);
-        else {
-            ch->sendf("You enroll %s into %s.\r\n", GET_NAME(vict), arg3);
-            vict->sendf("You have been enrolled into %s.\r\n", arg3);
-            clanInduct(arg3, vict);
-        }
-        return;
-    } else if (!(strcmp(arg1, "makemod"))) {
-        struct char_data *vict;
-        char arg3[100];
-        char name[100];
-        half_chop(arg2, name, arg3);
-
-        if (!*arg3 || !*name)
-            show_clan_info(ch);
-        else if (!isClan(arg3))
-            ch->sendf("%s is not a valid clan.\r\n", arg3);
-        else if (!(clanIsModerator(arg3, ch) || GET_ADMLEVEL(ch) >= ADMLVL_IMPL))
-            ch->sendf("Only leaders can make other people in a clan a leader.\r\n");
-        else if (!(vict = get_char_vis(ch, name, nullptr, FIND_CHAR_WORLD)))
-            ch->sendf("%s is not around at the moment.\r\n", name);
-        else {
-            ch->sendf("You make %s a leader of %s.\r\n", GET_NAME(vict), arg3);
-            vict->sendf("You have been made a leader of %s.\r\n", arg3);
-            clanMakeModerator(arg3, vict);
-        }
-        return;
-    } else if (!(strcmp(arg1, "setleave"))) {
-        char name[100];
-        char setting[100];
-        half_chop(arg2, setting, name);
-
-        if (!*name || !*setting)
-            show_clan_info(ch);
-        else if (!isClan(name))
-            ch->sendf("%s is not a valid clan.\r\n", name);
-        else if (!(clanIsModerator(name, ch) || GET_ADMLEVEL(ch) >= ADMLVL_IMPL))
-            ch->sendf("Only leaders can change that.\r\n");
-        else if (!strcmp(setting, "free")) {
-            ch->sendf("Members of %s are free to leave as they please.\r\n", name);
-            clanSetOpenLeave(name, true);
-        } else if (!strcmp(setting, "restricted")) {
-            ch->sendf("Members of %s can no longer leave as they please.\r\n", name);
-            clanSetOpenLeave(name, false);
-        } else
-            ch->sendf("Leave access may only be set to free or restricted.\r\n");
-        return;
-    } else if (!(strcmp(arg1, "setjoin"))) {
-        char name[100];
-        char setting[100];
-        half_chop(arg2, setting, name);
-
-        if (!*name || !*setting)
-            show_clan_info(ch);
-        else if (!isClan(name))
-            ch->sendf("%s is not a valid clan.\r\n", name);
-        else if (!(clanIsModerator(name, ch) || GET_ADMLEVEL(ch) >= ADMLVL_IMPL))
-            ch->sendf("Only leaders can change that.\r\n");
-        else if (!strcmp(setting, "free")) {
-            ch->sendf("People may now freely join %s.\r\n", name);
-            clanSetOpenJoin(name, true);
-        } else if (!strcmp(setting, "restricted")) {
-            ch->sendf("People must be enrolled into %s to join.\r\n", name);
-            clanSetOpenJoin(name, false);
-        } else
-            ch->sendf("Leave access my only be set to free or restricted.\r\n");
-        return;
-    } else if (!(strcmp(arg1, "list")))
-        listClans(ch);
-    else if (!(strcmp(arg1, "info"))) {
-        if (!*arg2)
-            show_clan_info(ch);
-        else
-            listClanInfo(arg2, ch);
-    } else {
-        show_clan_info(ch);
-        ch->sendf("These are viable options.\r\n");
-    }
-}
 
 ACMD(do_aid) {
     struct char_data *vict;
@@ -11481,7 +10967,7 @@ ACMD(do_aid) {
                 vict->sendf("Your wounds are bandaged by %s!\r\n", GET_NAME(ch));
                 act("$n's wounds are stablized by $N!", true, vict, nullptr, ch, TO_NOTVICT);
                 vict->playerFlags.set(PLR_BANDAGED);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
             } else {
                 if (vict != ch) {
                     ch->sendf("You fail to bandage their wounds properly, wasting the set of bandages...\r\n");
@@ -11495,7 +10981,7 @@ ACMD(do_aid) {
                     act("You fail to bandage your wounds properly, wasting an entire set of bandages...", true, vict,
                         nullptr, ch, TO_VICT);
                 }
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
             }
             improve_skill(ch, SKILL_FIRST_AID, 1);
         } else if (PLR_FLAGGED(vict, PLR_BANDAGED)) {
@@ -11515,7 +11001,7 @@ ACMD(do_aid) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
             } else {
                 act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully construct an Adrenex Adreneline Injector@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -11523,7 +11009,7 @@ ACMD(do_aid) {
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
                 aid_prod->addToLocation(ch);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
         }
@@ -11537,7 +11023,7 @@ ACMD(do_aid) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
             } else {
                 act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully boil a burn salve to perfection and it is automatically placed in a jar.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -11545,7 +11031,7 @@ ACMD(do_aid) {
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
                 aid_prod->addToLocation(ch);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
         }
@@ -11559,7 +11045,7 @@ ACMD(do_aid) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
             } else {
                 act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble the Antitoxin Injector.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -11567,7 +11053,7 @@ ACMD(do_aid) {
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
                 aid_prod->addToLocation(ch);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
         }
@@ -11581,7 +11067,7 @@ ACMD(do_aid) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@W holds a steel case up and opens it. The case hisses as its lid opens. @C$n@W wastes no time as $e reaches into the case and begins constructing something. A frown forms on $s face as it appears that $e has failed.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
             } else {
                 act("@WYou unlock and open the TCX-M.E.C.K. case. The case hisses as its lid opens. Your knowledge in basic medical devices and treatments helps you as you successfully assemble a vial of Formula 82.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -11589,7 +11075,7 @@ ACMD(do_aid) {
                     true, ch, nullptr, nullptr, TO_ROOM);
                 aid_prod = read_object(num2, VIRTUAL);
                 aid_prod->addToLocation(ch);
-                extract_obj(aid_obj);
+                aid_obj->extractFromWorld();
                 improve_skill(ch, SKILL_FIRST_AID, 1);
             }
         }

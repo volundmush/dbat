@@ -2285,3 +2285,8 @@ enum class CharNum : uint8_t {
 };
 
 using effect_t = uint16_t;
+
+// For starters we only have gravity, but we can add more later.
+enum class EnvVar : uint8_t {
+    Gravity = 0
+};

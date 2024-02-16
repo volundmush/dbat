@@ -23,7 +23,7 @@ std::unordered_map<int64_t, std::shared_ptr<player_data>> players;
 long get_id_by_name(const char *name) {
     auto find = findPlayer(name);
     if(!find) return -1;
-    return find->id;
+    return find->uid;
 }
 
 

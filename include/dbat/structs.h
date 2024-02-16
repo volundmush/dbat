@@ -11,6 +11,7 @@
 
 #include "net.h"
 #include <type_traits> // For std::is_base_of
+extern std::unordered_map<room_vnum, unit_data*> world;
 
 struct trig_data;
 
@@ -335,18 +336,30 @@ struct coordinates {
 struct unit_data : public std::enable_shared_from_this<unit_data> {
     unit_data() = default;
     virtual ~unit_data();
-    int64_t uid{NOTHING}; /* unique id for this unit */
+
+    /* unique id for this unit */
+    int64_t uid{NOTHING}; 
+
     // Many NPCs, items, and rooms have a VN.
     // the Room's VN should be the same as its UID.
     vnum vn{NOTHING};
+
     // Zones. Many things are in a Zone. It's legacy though. :(
     zone_vnum zone{NOTHING};
+
+    // Stores the scripts? Not sure if I need this, given prototypes...
     std::vector<trig_vnum> proto_script;
+
+    // Used to remove the unit from the world.
+    virtual void extractFromWorld();
+    // Oh no, the thing you're inside is being extracted. What now?
+    virtual void onHolderExtraction();
 
     char *name{};
     char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */
     char *short_description{};     /* when displayed in list or action message. */
+
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
     bool exists{true}; // used for deleted objects. invalid ones are !exists
@@ -372,6 +385,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     std::map<int, obj_data*> getEquipment();
     std::vector<room_data*> getRooms();
     std::map<int, exit_data*> getExits();
+    std::map<int, exit_data*> getUsableExits();
 
     room_data* getAbsoluteRoom();
     room_data* getRoom();
@@ -453,11 +467,13 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg);
 
     virtual std::string getName();
+    virtual std::string getAlias();
     virtual std::string getShortDesc();
     virtual std::string getRoomDesc();
     virtual std::string getLookDesc();
 
     virtual void setName(const std::string& desc);
+    virtual void setAlias(const std::string& alias);
     virtual void setShortDesc(const std::string& desc);
     virtual void setRoomDesc(const std::string& desc);
     virtual void setLookDesc(const std::string& desc);
@@ -471,7 +487,26 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     
     void checkMyID();
 
-    virtual area_data* getMatchingArea(const std::function<bool(area_data*)>& f);
+    // The object which provides environmental data for this unit.
+    // An example would be current gravity.
+    unit_data* getEnvironment();
+
+    virtual bool isEnvironment();
+
+    // The object which is 'roughly where the unit is.' This is likely a planet, dimension,
+    // or similar major boundary.
+    unit_data* getRegion();
+
+    virtual bool isRegion();
+
+    // The object which represents a point of entry/exit. This is likely a vehicle, structure, planet, etc.
+    // You can generally board/land/enter these things and similarly leave/fly out of them.
+    unit_data* getStructure();
+
+    virtual bool isStructure();
+
+    // Returns viable landing locations within this, for u.
+    virtual std::vector<unit_data*> getLandingLocations(unit_data *u);
 
     virtual void assignTriggers();
 
@@ -482,6 +517,9 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void sendLine(const std::string& text);
     virtual void sendTextContents(const std::string& text);
     virtual void sendLineContents(const std::string& text);
+
+    virtual double myEnvVar(EnvVar v);
+    virtual double getEnvVar(EnvVar v);
     
     template<typename... Args>
     void sendText(const std::string& text, Args&&... args) {
@@ -542,6 +580,8 @@ struct obj_data : public unit_data {
     obj_data() = default;
     virtual ~obj_data();
     explicit obj_data(const nlohmann::json& j);
+
+    void extractFromWorld() override;
 
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
@@ -640,7 +680,7 @@ struct exit_data : public unit_data {
     explicit exit_data(const nlohmann::json &j);
 
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
-    room_data *to{nullptr};        /* Where direction leads (NOWHERE)	*/
+    room_data *destination{nullptr};        /* Where direction leads (NOWHERE)	*/
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
     int dcskill{};            /* Skill req. to move through exit	*/
@@ -654,8 +694,8 @@ struct exit_data : public unit_data {
 
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
-
-    nlohmann::json serialize();
+    nlohmann::json serializeRelations() override;
+    nlohmann::json serialize() override;
 };
 
 enum class MoonCheck : uint8_t {
@@ -690,8 +730,6 @@ struct room_data : public unit_data {
     int setDamage(int amount);
     int modDamage(int amount);
 
-    double getGravity();
-
     nlohmann::json serialize();
     void deserializeContents(const nlohmann::json& j, bool isActive);
 
@@ -710,6 +748,12 @@ struct room_data : public unit_data {
     Event renderLocationFor(unit_data* u) override;
 
     bool isInsideDark() override;
+
+    bool isEnvironment() override;
+
+    double getEnvVar(EnvVar v) override;
+
+
 };
 /* ====================================================================== */
 
@@ -718,12 +762,7 @@ struct room_data : public unit_data {
 
 
 /* memory structure for characters */
-struct memory_rec_struct {
-    int32_t id;
-    struct memory_rec_struct *next;
-};
 
-typedef struct memory_rec_struct memory_rec;
 
 
 /* This structure is purely intended to be an easy way to transfer */
@@ -1752,6 +1791,16 @@ enum class SearchType : uint8_t {
     World = 5
 };
 
+template<typename T>
+std::vector<unit_data*> unitVector(const std::vector<T*>& vec) {
+    std::vector<unit_data*> out;
+    for(auto* unit : vec) {
+        if(auto o = dynamic_cast<unit_data*>(unit); o) {
+            out.push_back(o);
+        }
+    }
+    return out;
+}
 
 template<typename Derived>
 class Dispatcher {
@@ -1794,7 +1843,7 @@ class Dispatcher {
     std::vector<unit_data*> searchHelper(SearchType type, unit_data* target) {
         switch(type) {
             case SearchType::Inventory:
-                return target->getContents();
+                return unitVector(target->getContents());
                 break;
             case SearchType::Equipment: {
                 std::vector<unit_data*> out;
@@ -1805,7 +1854,7 @@ class Dispatcher {
             }
             break;
             case SearchType::Location:
-                return target->getNeighbors(checkVisible);
+                return unitVector(target->getNeighbors(checkVisible));
                 break;
             case SearchType::World: {
                 std::vector<unit_data*> out;
@@ -1816,7 +1865,7 @@ class Dispatcher {
             }
             break;
             case SearchType::People:
-                return target->getPeople();
+                return unitVector(target->getPeople());
                 break;
         }
     }
@@ -1827,9 +1876,9 @@ class Dispatcher {
             auto results = searchHelper(type, target);
             // if filter is set, apply it.
             if(filter) {
-                std::copy_if(results.begin(), results.end(), std::back_inserter(candidates), filter);
+                std::copy_if(results.begin(), results.end(), std::back_inserter(out), filter);
             } else {
-                candidates.insert(candidates.end(), results.begin(), results.end());
+                out.insert(out.end(), results.begin(), results.end());
             }
         }
         std::erase_if(out, [this](auto c) {return c == caller;});

@@ -153,7 +153,7 @@ void assedit_disp_menu(struct descriptor_data *d) {
                  "Assembly Type  : @y%s@n\r\n"
                  "Components:\r\n",
                  OLC_ASSEDIT(d)->lVnum,
-                 obj_proto[real_object(OLC_ASSEDIT(d)->lVnum)]["short_description"],
+                 obj_proto[real_object(OLC_ASSEDIT(d)->lVnum)]["short_description"].get<std::string>().c_str(),
                  szAssmType
     );
 

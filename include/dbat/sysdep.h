@@ -54,6 +54,7 @@
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
 #include "fmt/printf.h"
+#include "json.hpp"
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)

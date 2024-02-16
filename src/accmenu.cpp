@@ -24,7 +24,7 @@ namespace net {
             auto &cap = c->capabilities;
             std::string line = fmt::format("[{}] {} over ({}) {} version {}", c->connId, cap.hostAddress, cap.protocolName, cap.clientName, cap.clientVersion);
             if(c->desc) {
-                line += fmt::format(" as {}@n\r\n", c->desc->character->name);
+                line += fmt::format(" as {}@n\r\n", c->desc->character->getName());
             } else {
                 line += "@n\r\n";
             }
@@ -38,7 +38,7 @@ namespace net {
             auto p = players.find(cid);
             if(p == players.end()) continue;
             auto c = p->second->character;
-            std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, c->name);
+            std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, c->getName());
             if(c->desc) {
                 line += fmt::format(" @D[@y{} Connections@D]@n\r\n", c->desc->conns.size());
             } else {

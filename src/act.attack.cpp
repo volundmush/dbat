@@ -436,7 +436,7 @@ ACMD(do_throw) {
                     act("$n@n throws $p at $N@n, but it melts before touching $M!", true, ch, obj, vict, TO_NOTVICT);
                     act("$n@n throws $p at you, but it melts before touching you!", true, ch, obj, vict, TO_VICT);
                     ch->decCurST(((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)));
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     return;
                 }
                 if (perc2 > 0) {

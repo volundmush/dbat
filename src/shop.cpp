@@ -576,7 +576,7 @@ static struct obj_data *get_purchase_obj(struct char_data *ch, char *arg, struct
             return (nullptr);
         }
         if (GET_OBJ_COST(obj) <= 0) {
-            extract_obj(obj);
+            obj->extractFromWorld();
             obj = nullptr;
         }
     } while (!obj);
@@ -979,7 +979,7 @@ static struct obj_data *slide_obj(struct obj_data *obj, struct char_data *keeper
     /* Extract the object if it is identical to one produced */
     if (shop_producing(obj, shop_nr)) {
         temp = GET_OBJ_RNUM(obj);
-        extract_obj(obj);
+        obj->extractFromWorld();
         return (&obj_proto[temp]);
     }
     SHOP_SORT(shop_nr)++;
@@ -1698,7 +1698,7 @@ void shop_data::runPurge() {
         for (auto sobj : keeper->getInventory()) {
             if(isProducing(sobj->vn)) {
                 keeper->mod(CharMoney::Carried, GET_OBJ_COST(sobj));
-                extract_obj(sobj);
+                sobj->extractFromWorld();
             }
         }
     }

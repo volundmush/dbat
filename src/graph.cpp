@@ -19,6 +19,7 @@
 #include "dbat/maputils.h"
 #include "dbat/vehicles.h"
 #include "dbat/act.informative.h"
+#include "dbat/random.h"
 
 /* local functions */
 static std::list<std::pair<struct room_data*, int>> bfs_queue;
@@ -145,7 +146,7 @@ ACMD(do_sradar) {
 
     if (!*arg) {
         if (GET_ADMLEVEL(ch) >= 1 && noship == true) {
-            printmap(ch->location, ch, 0, -1);
+            printmap(ch->getRoom()->uid, ch, 0, -1);
         } else {
             printmap(IN_ROOM(vehicle), ch, 0, GET_OBJ_VNUM(vehicle));
         }
@@ -439,25 +440,27 @@ ACMD(do_track) {
     }
 
     if(GET_SKILL_BASE(ch, SKILL_SENSE) == 100) {
-        auto chPlanet = ch->getMatchingArea(area_data::isPlanet);
-        auto vPlanet = vict->getMatchingArea(area_data::isPlanet);
-        if(chPlanet && chPlanet == vPlanet) {
-            auto &a = areas[vict->getRoom()->area.value()];
-            ch->sendf("@WSense@D: %s@n\r\n", a.name.c_str());
+        auto chRegion = ch->getRegion();
+        auto vRegion = vict->getRegion();
+        if(chRegion && chRegion == vRegion) {
+            ch->sendf("@WSense@D: %s@n\r\n", vRegion->getDisplayName(ch));
         }
     } else {
 
         if (GET_SKILL(ch, SKILL_SENSE) < rand_number(1, 101)) {
-            int tries = 10;
-            /* Find a random direction. :) */
-            do {
-                dir = rand_number(0, NUM_OF_DIRS - 1);
-            } while (!CAN_GO(ch, dir) && --tries);
-            ch->sendf("You sense them %s faintly from here, but are unsure....\r\n", dirs[dir]);
+            auto candidates = ch->getRoom()->getUsableExits();
+
+            if(candidates.empty()) {
+                ch->sendf("You can't sense them from here.\r\n");
+            } else {
+                auto dir = Random::get(candidates);
+                ch->sendf("You sense them %s faintly from here, but are unsure....\r\n", dirs[dir->first]);
+            }
+            
             improve_skill(ch, SKILL_SENSE, 1);
             improve_skill(ch, SKILL_SENSE, 1);
             improve_skill(ch, SKILL_SENSE, 1);
-            return;
+            return;           
         }
 
         /* They passed the skill check. */
@@ -486,9 +489,9 @@ ACMD(do_track) {
                 break;
             default:    /* Success! */
                 if ((GET_SKILL_BASE(ch, SKILL_SENSE) >= 75)) {
-                    auto &a = areas[vict->getRoom()->area.value()];
+                    
                     ch->sendf("You sense them %s from here!\r\n", dirs[dir]);
-                    ch->sendf("@WSense@D: @Y%s@n\r\n", a.name.c_str());
+                    if(auto reg = vict->getRegion(); reg) ch->sendf("@WSense@D: @Y%s@n\r\n", reg->getDisplayName(ch));
                 } else {
                     ch->sendf("You sense them %s from here!\r\n", dirs[dir]);
                     break;

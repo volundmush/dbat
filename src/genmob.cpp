@@ -828,10 +828,7 @@ bool char_data::isProvidingLight() {
 
 
 double char_data::currentGravity() {
-    if(auto room = getRoom(); room) {
-        return room->getGravity();
-    }
-    return 1.0;
+    return myEnvVar(EnvVar::Gravity);
 }
 
 struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
@@ -870,12 +867,11 @@ void char_data::setAge(double newAge) {
 
 void npc_data::assignTriggers() {
     // Nothing to do without a prototype...
-    if(!proto) return;
 
     // remove all duplicates from i->proto_script but do not change its order otherwise.
     std::set<trig_vnum> existVnums;
     std::set<trig_vnum> valid;
-    for(auto t : proto->proto_script) valid.insert(t);
+    for(auto t : proto_script) valid.insert(t);
     
     for(auto t : script->dgScripts) existVnums.insert(t->parent->vn);
     bool added = false;
@@ -893,7 +889,7 @@ void npc_data::assignTriggers() {
     }
     if(removed) script->dgScripts = validScripts;
 
-    for(auto p : proto->proto_script) {
+    for(auto p : proto_script) {
         // only add if they don't already have one...
         if(!existVnums.contains(p)) {
             script->addTrigger(read_trigger(p), -1);
@@ -905,7 +901,7 @@ void npc_data::assignTriggers() {
     if(added || removed) {
         // we need to sort i->script->dgScripts by the order of i->proto_script
         std::list<std::shared_ptr<trig_data>> sorted;
-        for(auto p : proto->proto_script) {
+        for(auto p : proto_script) {
             for(auto t : script->dgScripts) {
                 if(t->parent->vn == p) {
                     sorted.push_back(t);

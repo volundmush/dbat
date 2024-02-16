@@ -138,7 +138,7 @@ ACMD(do_refuel) {
             GET_FUEL(controls) += (GET_OBJ_WEIGHT(fuel) * 4);
         }
 
-        extract_obj(fuel);
+        fuel->extractFromWorld();
 
         ch->sendf(
                      "You place the fuel canister into the ship. Within seconds the fuel has been extracted from the canister into the ships' internal tanks.\r\n");
@@ -355,7 +355,7 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
     if (extract == true) {
         ch->sendf(
                      "@wThe harvesting process has killed the plant. Do not worry, this is normal for that type.@n\r\n");
-        extract_obj(plant);
+        plant->extractFromWorld();
     } else {
         GET_OBJ_VAL(plant, VAL_MATURITY) = 3;
         GET_OBJ_VAL(plant, VAL_GROWTH) = 0;
@@ -488,7 +488,7 @@ ACMD(do_garden) {
                     GET_OBJ_VAL(obj, VAL_WATERLEVEL) = 500;
                     ch->sendf("@YThe plant is now at full water level.@n\r\n");
                 }
-                extract_obj(water);
+                water->extractFromWorld();
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
                 return;
@@ -501,7 +501,7 @@ ACMD(do_garden) {
                     GET_OBJ_VAL(obj, VAL_WATERLEVEL) = 500;
                     ch->sendf("@YThe plant is now at full water level.@n\r\n");
                 }
-                extract_obj(water);
+                water->extractFromWorld();
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
                 return;
@@ -528,7 +528,7 @@ ACMD(do_garden) {
                 act("@g$n@G attempts to harvest @g$p@G with $s clippers, but accidently cuts the plant in half!@n",
                     true, ch, obj, nullptr, TO_ROOM);
                 ch->decCurST(cost);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
                 return;
@@ -630,7 +630,7 @@ ACMD(do_garden) {
                         GET_OBJ_VAL(obj, VAL_MATGOAL) -= 80;
                         break;
                 }
-                extract_obj(soil);
+                soil->extractFromWorld();
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
             }
@@ -704,13 +704,13 @@ ACMD(do_pack) {
             act("@c$n@C pushes a hidden button on $p@C and a cloud of smokes erupts and covers it. As the smoke clears a small capsule can be seen on the ground.@n",
                 true, ch, obj, nullptr, TO_ROOM);
             if (GET_OBJ_VNUM(obj) == 11) {
-                extract_obj(obj);
+                obj->extractFromWorld();
                 packed = read_object(19085, VIRTUAL);
                 packed->addToLocation(ch->getRoom());
             } else {
                 int fnum = GET_OBJ_VNUM(obj) - 10;
                 packed = read_object(fnum, VIRTUAL);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 packed->addToLocation(ch->getRoom());
             }
             return;
@@ -742,7 +742,7 @@ ACMD(do_pack) {
                     money = 65000;
                     while (count < 4) {
                         for (auto o : world[rnum]->getInventory())
-                            extract_obj(o);
+                            o->extractFromWorld();
                         count++;
                         rnum++;
                     }
@@ -751,7 +751,7 @@ ACMD(do_pack) {
                     money = 150000;
                     while (count < 4) {
                         for (auto o : world[rnum]->getInventory())
-                            extract_obj(o);
+                            o->extractFromWorld();
                         count++;
                         rnum++;
                     }
@@ -760,7 +760,7 @@ ACMD(do_pack) {
                     money = 1000000;
                     while (count < 4) {
                         for (auto o : world[rnum]->getInventory())
-                            extract_obj(o);
+                            o->extractFromWorld();
                         count++;
                         rnum++;
                     }
@@ -768,17 +768,17 @@ ACMD(do_pack) {
                 for (auto obj2 : ch->getInventory()) {
                     if (GET_OBJ_VNUM(obj) == 18802) {
                         if (GET_OBJ_VNUM(obj2) == 18800) {
-                            extract_obj(obj2);
+                            obj2->extractFromWorld();
                         }
                     } else {
                         if (GET_OBJ_VNUM(obj2) == GET_OBJ_VNUM(obj) - 1) {
-                            extract_obj(obj2);
+                            obj2->extractFromWorld();
                         }
                     }
                 }
                 struct obj_data *money_obj = create_money(money);
                 money_obj->addToLocation(ch->getRoom());
-                extract_obj(obj);
+                obj->extractFromWorld();
                 return;
             }
         } else {
@@ -909,7 +909,7 @@ ACMD(do_deploy) {
             act("@c$n@C clicks a capsule's button and tosses it to the floor. A puff of smoke erupts immediately and quickly dissipates to reveal, $p@C.@n",
                 true, ch, furn, nullptr, TO_ROOM);
             furn->addToLocation(ch->getRoom());
-            extract_obj(obj);
+            obj->extractFromWorld();
             return;
         } else {
             send_to_imm("ERROR: Furniture failed to deploy at %d.", GET_ROOM_VNUM(IN_ROOM(ch)));
@@ -970,7 +970,7 @@ ACMD(do_deploy) {
             true, ch, nullptr, nullptr, TO_ROOM);
         struct obj_data *foun = read_object(18803, VIRTUAL);
         foun->addToLocation(world.at(rnum+1));
-        extract_obj(obj);
+        obj->extractFromWorld();
     } else {
         ch->sendf(
                      "@ROOC@D: @wSorry for the inconvenience, but it appears there are no houses available. Please contact Iovan.@n\r\n");
@@ -1197,7 +1197,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                 found7 = true;
             } else if (IN_ROOM(k) != NOWHERE && ROOM_EFFECT(IN_ROOM(k)) == 6 && !OBJ_FLAGGED(k, ITEM_UNBREAKABLE)) {
                 send_to_room(IN_ROOM(k), "@R%s@r melts in the lava!@n\r\n", k->getShortDesc());
-                extract_obj(k);
+                k->extractFromWorld();
             } else {
                 continue;
             }
@@ -2067,7 +2067,7 @@ ACMD(do_assemble) {
                 return;
             }
 
-            extract_obj(pObject);
+            pObject->extractFromWorld();
             ch->sendf("You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(argument), argument);
 
             if (assemblyCheckComponents(lVnum, ch, true)) {
@@ -2088,7 +2088,7 @@ ACMD(do_assemble) {
                 return;
             }
 
-            extract_obj(pObject);
+            pObject->extractFromWorld();
             ch->sendf("You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(argument), argument);
 
             if (tool && rand_number(1, 3) == 3 && GET_OBJ_VAL(tool, VAL_ALL_HEALTH) > 0) {
@@ -2111,7 +2111,7 @@ ACMD(do_assemble) {
             return;
         }
 
-        extract_obj(pObject);
+        pObject->extractFromWorld();
         ch->sendf("You start to %s %s %s, but forget a couple of steps. You take it apart and give up.\r\n",
                      CMD_NAME, AN(argument), argument);
         WAIT_STATE(ch, PULSE_6SEC);
@@ -2122,7 +2122,7 @@ ACMD(do_assemble) {
             return;
         }
 
-        extract_obj(pObject);
+        pObject->extractFromWorld();
         ch->sendf(
                      "You start to %s %s %s, but put it together wrong and have to stop. You take it apart and give up.\r\n",
                      CMD_NAME, AN(argument), argument);
@@ -2412,7 +2412,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
         ch->sendf("You can only carry %s zenni at your current level, and leave the rest.\r\n",
                      add_commas(GOLD_CARRY(ch)).c_str());
         act("@w$n @wdrops some onto the ground.@n", false, ch, nullptr, nullptr, TO_ROOM);
-        extract_obj(obj);
+        obj->extractFromWorld();
         int diff = 0;
         diff = (GET_GOLD(ch) + value) - GOLD_CARRY(ch);
         obj = create_money(diff);
@@ -2423,7 +2423,7 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
 
 
     ch->mod(CharMoney::Carried, value);
-    extract_obj(obj);
+    obj->extractFromWorld();
 
     if (value == 1) {
         ch->sendf("There was 1 zenni.\r\n");
@@ -2619,12 +2619,12 @@ static void perform_drop_gold(struct char_data *ch, int amount,
                 char buf[MAX_STRING_LENGTH];
 
                 if (!drop_wtrigger(obj, ch)) {
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     return;
                 }
 
                 if (!drop_wtrigger(obj, ch) && (obj)) { /* obj may be purged */
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     return;
                 }
 
@@ -2691,7 +2691,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             snprintf(buf, sizeof(buf), "You drop $p but it gets lost on the ground!");
             act(buf, false, ch, obj, nullptr, TO_CHAR);
             obj->removeFromLocation();
-            extract_obj(obj);
+            obj->extractFromWorld();
             return (0);
         }
         if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NOINSTANT)) {
@@ -2734,7 +2734,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && ROOM_EFFECT(IN_ROOM(ch)) == 6) {
                 act("$p melts in the lava!", false, ch, obj, nullptr, TO_CHAR);
                 act("$p melts in the lava!", false, ch, obj, nullptr, TO_ROOM);
-                extract_obj(obj);
+                obj->extractFromWorld();
             } else if (ROOM_EFFECT(IN_ROOM(ch)) == 6) {
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_CHAR);
                 act("$p plops down on some cooled lava!", false, ch, obj, nullptr, TO_ROOM);
@@ -2761,7 +2761,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
             return (0);
         case SCMD_JUNK:
             value = MAX(1, MIN(200, GET_OBJ_COST(obj) / 16));
-            extract_obj(obj);
+            obj->extractFromWorld();
             return (value);
         default:
             basic_mud_log("SYSERR: Incorrect argument %d passed to perform_drop.", mode);
@@ -3202,7 +3202,7 @@ ACMD(do_drink) {
             act("@C$n@w uncorks the $p and tips it to $s lips. Drinking it down and then smiling.@n", true, ch, temp,
                 nullptr, TO_ROOM);
             temp->removeFromLocation();
-            extract_obj(temp);
+            temp->extractFromWorld();
             ch->restoreKI();
             GET_COND(ch, THIRST) += 8;
             return;
@@ -3229,7 +3229,7 @@ ACMD(do_drink) {
     if (IS_NPC(ch)) {     /* Cannot use GET_COND() on mobs. */
         act("$n@w drinks from $p.", true, ch, temp, nullptr, TO_ROOM);
         temp->removeFromLocation();
-        extract_obj(temp);
+        temp->extractFromWorld();
         return;
     }
     if ((GET_COND(ch, DRUNK) > 10) && (GET_COND(ch, THIRST) > 0)) {
@@ -3490,14 +3490,14 @@ ACMD(do_eat) {
     if (subcmd == SCMD_EAT) {
         if (foob >= GET_OBJ_VAL(food, VAL_FOOD_FOODVAL)) {
             ch->sendf("You finish the last bite.\r\n");
-            extract_obj(food);
+            food->extractFromWorld();
         } else {
             GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= foob;
         }
     } else {
         if (!(--GET_OBJ_VAL(food, VAL_FOOD_FOODVAL))) {
             ch->sendf("There's nothing left now.\r\n");
-            extract_obj(food);
+            food->extractFromWorld();
         }
     }
 }
@@ -4288,6 +4288,6 @@ ACMD(do_sac) {
         /* No longer transfer corpse contents to room. Sac it, sac it all. */
         ch->sendf("You send the corpse on to the next life!\r\n");
     }
-    extract_obj(j);
+    j->extractFromWorld();
 }
 

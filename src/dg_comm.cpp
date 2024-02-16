@@ -214,7 +214,7 @@ void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
     vnum areaVnum = NOWHERE;
     {
         auto r = dynamic_cast<room_data*>(world[roomVnum]);
-        if(auto found = r->getMatchingArea(area_data::isPlanet); found) {
+        if(auto found = r->getRegion(); found && found->checkFlag(FlagType::Area, REGION_PLANET)) {
             areaVnum = *found;
         }
     }

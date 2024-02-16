@@ -330,52 +330,6 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     }
 }
 
-static int check_object_spell_number(const std::shared_ptr<item_proto>& obj, int val) {
-    int error = false;
-    const char *spellname;
-
-    if (GET_OBJ_VAL(obj, val) == -1 ||
-        GET_OBJ_VAL(obj, val) == 0)    /* i.e.: no spell */
-        return (error);
-
-    /*
-   * Check for negative spells, spells beyond the top define, and any
-   * spell which is actually a skill.
-   */
-    if (GET_OBJ_VAL(obj, val) < 0)
-        error = true;
-    if (GET_OBJ_VAL(obj, val) >= SKILL_TABLE_SIZE)
-        error = true;
-    if (skill_type(GET_OBJ_VAL(obj, val)) != SKTYPE_SPELL)
-        error = true;
-    if (error)
-        basic_mud_log("SYSERR: Object #%d (%s) has out of range spell #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
-
-    if (scheck)        /* Spell names don't exist in syntax check mode. */
-        return (error);
-
-    /* Now check for unnamed spells. */
-    spellname = skill_name(GET_OBJ_VAL(obj, val));
-
-    if ((spellname == unused_spellname || !strcasecmp("UNDEFINED", spellname)) && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) uses '%s' spell #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, spellname,
-            GET_OBJ_VAL(obj, val));
-
-    return (error);
-}
-
-static int check_object_level(const std::shared_ptr<item_proto>& obj, int val) {
-    int error = false;
-
-    if ((GET_OBJ_VAL(obj, val) < 0) && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) has out of range level #%d.",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_VAL(obj, val));
-
-    return (error);
-}
-
 static int check_bitvector_names(bitvector_t bits, size_t namecount, const char *whatami, const char *whatbits) {
     unsigned int flagnum;
     bool error = false;
@@ -390,62 +344,6 @@ static int check_bitvector_names(bitvector_t bits, size_t namecount, const char 
                 namecount - 1);
             error = true;
         }
-
-    return (error);
-}
-
-static int check_object(const std::shared_ptr<item_proto>& obj) {
-    char objname[MAX_INPUT_LENGTH + 32];
-    int error = false, y;
-
-    if (GET_OBJ_WEIGHT(obj) < 0 && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
-
-    if (GET_OBJ_RENT(obj) < 0 && (error = true))
-        basic_mud_log("SYSERR: Object #%d (%s) has negative cost/day (%d).",
-            GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
-
-    snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->short_description);
-    for (y = 0; y < TW_ARRAY_MAX; y++) {
-        error |= check_bitvector_names(GET_OBJ_WEAR(obj)[y], wear_bits_count, objname, "object wear");
-        error |= check_bitvector_names(GET_OBJ_EXTRA(obj)[y], extra_bits_count, objname, "object extra");
-        error |= check_bitvector_names(GET_OBJ_PERM(obj)[y], affected_bits_count, objname, "object affect");
-    }
-
-    switch (GET_OBJ_TYPE(obj)) {
-        case ITEM_DRINKCON: {
-            char onealias[MAX_INPUT_LENGTH], *space = strrchr(obj->name, ' ');
-
-            strlcpy(onealias, space ? space + 1 : obj->name, sizeof(onealias));
-            if (search_block(onealias, drinknames, true) < 0 && (error = true)) {
-                //log("SYSERR: Object #%d (%s) doesn't have drink type as last alias. (%s)", GET_OBJ_VNUM(obj), obj->getShortDesc(), obj->name);
-            }
-        }
-            /* Fall through. */
-        case ITEM_FOUNTAIN:
-            if ((GET_OBJ_VAL(obj, 0) > 0) && (GET_OBJ_VAL(obj, 1) > GET_OBJ_VAL(obj, 0) && (error = true)))
-                basic_mud_log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
-                    GET_OBJ_VNUM(obj), obj->short_description,
-                    GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 0));
-            break;
-        case ITEM_SCROLL:
-        case ITEM_POTION:
-            error |= check_object_level(obj, 0);
-            error |= check_object_spell_number(obj, 1);
-            error |= check_object_spell_number(obj, 2);
-            error |= check_object_spell_number(obj, 3);
-            break;
-        case ITEM_WAND:
-        case ITEM_STAFF:
-            error |= check_object_level(obj, 0);
-            error |= check_object_spell_number(obj, 3);
-            if (GET_OBJ_VAL(obj, 2) > GET_OBJ_VAL(obj, 1) && (error = true))
-                basic_mud_log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
-                    GET_OBJ_VNUM(obj), obj->short_description,
-                    GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 1));
-            break;
-    }
 
     return (error);
 }
@@ -574,9 +472,9 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
     d->uid = getNextUID();
 
     d->setLookDesc(fread_string(fl, buf2));
-    d->setKeywords(fread_string(fl, buf2));
+    d->setAlias(fread_string(fl, buf2));
 
-    d->addtoLocation(r, dir);
+    d->addToLocation(r, dir);
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Format error, %s", buf2);
@@ -588,19 +486,19 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
         exit(1);
     } else if (bitwarning == false) {
 
+        bitvector_t flags = 0;
         if (t[0] == 1)
-            d->exit_info = EX_ISDOOR;
+            flags = EX_ISDOOR;
         else if (t[0] == 2)
-            d->exit_info = EX_ISDOOR | EX_PICKPROOF;
+            flags = EX_ISDOOR | EX_PICKPROOF;
         else if (t[0] == 3)
-            d->exit_info = EX_ISDOOR | EX_SECRET;
+            flags = EX_ISDOOR | EX_SECRET;
         else if (t[0] == 4)
-            d->exit_info = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
-        else
-            d->exit_info = 0;
+            flags = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
 
+        for(auto i = 0; i < NUM_EXIT_FLAGS; i++) if(IS_SET(flags, i)) d->setFlag(FlagType::Exit, i);
         d->key = world.contains(t[1]) ? t[1] : NOTHING;
-        d->to = world.contains(t[2]) ? world.at(t[2]) : nullptr;
+        d->destination = dynamic_cast<room_data*>(world.contains(t[2]) ? world.at(t[2]) : nullptr);
 
         if (retval == 3) {
             basic_mud_log("Converting world files to include DC add ons.");
@@ -622,8 +520,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = 0;
             d->failsavetype = 0;
             d->dcfailsave = 0;
-            d->failroom = nullptr;
-            d->totalfailroom = nullptr;
             if (bitsavetodisk) {
                 converting = true;
             }
@@ -634,8 +530,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = t[6];
             d->failsavetype = 0;
             d->dcfailsave = 0;
-            d->failroom = NOWHERE;
-            d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
                 converting = true;
             }
@@ -646,8 +540,8 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = t[6];
             d->failsavetype = t[7];
             d->dcfailsave = t[8];
-            d->failroom = world.contains(t[9]) ? world.at(t[9]) : nullptr;
-            d->totalfailroom = world.contains(t[10]) ? world.at(t[10]) : nullptr;
+            d->failroom = dynamic_cast<room_data*>(world.contains(t[9]) ? world.at(t[9]) : nullptr);
+            d->totalfailroom = dynamic_cast<room_data*>(world.contains(t[10]) ? world.at(t[10]) : nullptr);
         }
     }
 }

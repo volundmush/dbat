@@ -1380,7 +1380,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
             diff = time(nullptr) - GET_LAST_LOAD(j);
             if (diff > 240 && GET_LAST_LOAD(j) > 0) {
                 basic_mud_log("No rent object (%s) extracted from room (%d)", j->getShortDesc().c_str(), GET_ROOM_VNUM(IN_ROOM(j)));
-                extract_obj(j);
+                j->extractFromWorld();
             }
         }
 
@@ -1432,7 +1432,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     jj->removeFromLocation();
                     jj->addToLocation(j->getLocation());
                 }
-                extract_obj(j);
+                j->extractFromWorld();
             }
         }
 
@@ -1446,8 +1446,8 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 GET_OBJ_TIMER(j)--;
 
             if (GET_OBJ_TIMER(j) == 0) {
-                j->getRoom()->broadcast("A glowing portal fades from existence.");
-                extract_obj(j);
+                j->getRoom()->sendLineContents("A glowing portal fades from existence.");
+                j->extractFromWorld();
             }
         } else if (GET_OBJ_VNUM(j) == 1306) {
             if (GET_OBJ_TIMER(j) > 0)
@@ -1457,7 +1457,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 Messager msg(j, "The $you() settles to the ground and goes out.");
                 msg.addLocation(j->getRoom());
                 msg.deliver();
-                extract_obj(j);
+                j->extractFromWorld();
             }
         } else if (OBJ_FLAGGED(j, ITEM_ICE)) {
             if (GET_OBJ_VNUM(j) == 79 && rand_number(1, 2) == 2) {
@@ -1471,7 +1471,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                         send_to_room(IN_ROOM(j),
                                      "The glacial wall blocking off the %s direction melts completely away.\r\n",
                                      dirs[GET_OBJ_COST(j)]);
-                        extract_obj(j);
+                        j->extractFromWorld();
                     }
                 } else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0) {
                     GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
@@ -1481,7 +1481,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     send_to_room(IN_ROOM(j),
                                  "The glacial wall blocking off the %s direction melts completely away.\r\n",
                                  dirs[GET_OBJ_COST(j)]);
-                    extract_obj(j);
+                    j->extractFromWorld();
                 }
             } else if (GET_OBJ_VNUM(j) != 79) {
                 if (j->carried_by && !j->in_obj) {
@@ -1492,7 +1492,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     } else {
                         j->carried_by->sendf("%s @wmelts completely away.\r\n", j->getShortDesc());
                         int remainder = melt - GET_OBJ_WEIGHT(j);
-                        extract_obj(j);
+                        j->extractFromWorld();
                     }
                 } else if (IN_ROOM(j) != NOWHERE) {
                     if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0) {
@@ -1500,7 +1500,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                         send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->getShortDesc());
                     } else {
                         send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->getShortDesc());
-                        extract_obj(j);
+                        j->extractFromWorld();
                     }
                 }
             }

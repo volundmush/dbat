@@ -39,7 +39,7 @@ SPECIAL(dump) {
 
     for (auto k : ch->getRoom()->getInventory()) {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
-        extract_obj(k);
+        k->extractFromWorld();
     }
 
     if (!CMD_IS("drop"))
@@ -50,7 +50,7 @@ SPECIAL(dump) {
     for (auto k : ch->getRoom()->getInventory()) {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         value += MAX(1, MIN(50, GET_OBJ_COST(k) / 10));
-        extract_obj(k);
+        k->extractFromWorld();
     }
 
     if (value) {

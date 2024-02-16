@@ -1196,7 +1196,7 @@ ACMD(do_fish) {
                     act("@CYou carefully apply the $p@C to your hook.@n", true, ch, bait, nullptr, TO_CHAR);
                     act("@c$n@C carefully applies $p@C to $s fishing pole's hook.@n", true, ch, bait, nullptr, TO_ROOM);
                     GET_OBJ_VAL(pole, 0) = GET_OBJ_COST(bait);
-                    extract_obj(bait);
+                    bait->extractFromWorld();
                     return;
                 } /* End we applied bait */
             } /* End Applying bait */
@@ -1519,7 +1519,7 @@ ACMD(do_extract) {
                     }
                     ch->sendf(
                                  "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
-                    extract_obj(obj2);
+                    obj2->extractFromWorld();
                 } else if (GET_OBJ_VAL(obj2, 6) > GET_OBJ_VAL(obj, 6)) {
                     GET_OBJ_VAL(obj2, 6) += GET_OBJ_VAL(obj, 6);
                     if (GET_OBJ_VAL(obj2, 6) > 24) {
@@ -1527,7 +1527,7 @@ ACMD(do_extract) {
                     }
                     ch->sendf(
                                  "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                 }
                 return;
             }
@@ -1578,7 +1578,7 @@ ACMD(do_extract) {
                 act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze. A nasty explosion of a mess is all that follows!@n",
                     true, ch, obj, nullptr, TO_ROOM);
                 improve_skill(ch, SKILL_EXTRACT, 0);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 WAIT_STATE(ch, PULSE_3SEC);
                 return;
             } else {
@@ -1587,11 +1587,11 @@ ACMD(do_extract) {
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n",
                     true, ch, obj, nullptr, TO_ROOM);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 GET_OBJ_VAL(bottle, 6) += rand_number(4, 6);
                 if (GET_OBJ_VAL(bottle, 6) >= 24) {
                     struct obj_data *filled = read_object(3424, VIRTUAL);
-                    extract_obj(bottle);
+                    bottle->extractFromWorld();
                     GET_OBJ_VAL(filled, 6) = 24;
                     filled->addToLocation(ch);
                     ch->decCurKI(0);
@@ -1687,7 +1687,7 @@ ACMD(do_runic) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before a look of panic dons $s face. Just at that moment the bottle of ink explodes! Strange...@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        extract_obj(bottle);
+        bottle->extractFromWorld();
         improve_skill(ch, SKILL_RUNIC, 1);
         ch->decCurKI(cost);
         WAIT_STATE(ch, PULSE_3SEC);
@@ -1720,7 +1720,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_INFRAVISION, SKILL_RUNIC, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1740,7 +1740,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_INFRAVISION, SKILL_RUNIC, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1767,7 +1767,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_EARMOR, SKILL_PUNCH, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1787,7 +1787,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_EARMOR, SKILL_PUNCH, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1814,7 +1814,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_ECHAINS, SKILL_KNEE, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1838,7 +1838,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_WATERBREATH, SKILL_SBC, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1858,7 +1858,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_ECHAINS, SKILL_KNEE, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1887,7 +1887,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_WUNJO, SKILL_SLAM, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1909,7 +1909,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_WUNJO, SKILL_SLAM, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1937,7 +1937,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_POTENT, SKILL_HEELDROP, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1958,7 +1958,7 @@ ACMD(do_runic) {
             assign_affect(vict, AFF_POTENT, SKILL_HEELDROP, duration, 0, 0, 0, 0, 0, 0);
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -1983,7 +1983,7 @@ ACMD(do_runic) {
                          "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -2001,7 +2001,7 @@ ACMD(do_runic) {
                          "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
-                extract_obj(bottle);
+                bottle->extractFromWorld();
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
@@ -2213,7 +2213,7 @@ ACMD(do_ashcloud) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@r$n@R takes a handful of ashes from $s belongings and blows it out of $s hands with a strong gust of air. @YStrange.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        extract_obj(ash);
+        ash->extractFromWorld();
         ch->decCurKI(cost);
         return;
     }
@@ -2228,7 +2228,7 @@ ACMD(do_ashcloud) {
         true, ch, nullptr, nullptr, TO_ROOM);
     ashcloud = read_object(1306, VIRTUAL);
     ashcloud->addToLocation(ch->getRoom());
-    extract_obj(ash);
+    ash->extractFromWorld();
     GET_OBJ_TIMER(ashcloud) = otimer;
     GET_OBJ_COST(ashcloud) = ocost;
 
@@ -2673,7 +2673,7 @@ ACMD(do_channel) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. However $e screws up the rate of heating and causes the ruby to crumble to dust!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            extract_obj(ruby);
+            ruby->extractFromWorld();
         } else {
             act("@RAs you move your ki through the lava you begin to draw heat away from it into the ruby. You do so at an even rate and end up with a glowing red hot blood ruby!@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
@@ -3087,7 +3087,7 @@ ACMD(do_instill) {
         act("@g$n@G instills a token into @g$p@G. It glows @ggreen@G for a moment before returning to normal. The token disappears with the glow.@n",
             true, ch, obj, nullptr, TO_ROOM);
         raise = token->affected[0].modifier;
-        extract_obj(token);
+        token->extractFromWorld();
 
         if (OBJ_FLAGGED(obj, ITEM_SLOT1))
             obj->setFlag(FlagType::Item, ITEM_SLOTS_FILLED);
@@ -3423,7 +3423,7 @@ ACMD(do_ensnare) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately $e misses and loses the bundle...@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            extract_obj(obj);
+            obj->extractFromWorld();
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
         } else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && !AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
@@ -3433,7 +3433,7 @@ ACMD(do_ensnare) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately @c$N@W zanzokens away avoiding it and @C$n@W loses the bundle...@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            extract_obj(obj);
+            obj->extractFromWorld();
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
             vict->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
@@ -3445,7 +3445,7 @@ ACMD(do_ensnare) {
                     true, ch, nullptr, vict, TO_VICT);
                 act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! They both zanzoken! Fortunately @c$N@W manages to avoid it and @C$n@W loses the bundle...@n",
                     true, ch, nullptr, vict, TO_NOTVICT);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
                 for(auto c : {vict, ch}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
@@ -3456,7 +3456,7 @@ ACMD(do_ensnare) {
                     true, ch, nullptr, vict, TO_VICT);
                 act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! They both zanzoken! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_NOTVICT);
-                extract_obj(obj);
+                obj->extractFromWorld();
                 vict->setFlag(FlagType::Affect, AFF_ENSNARED);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
@@ -3469,7 +3469,7 @@ ACMD(do_ensnare) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e zanzokens and spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            extract_obj(obj);
+            obj->extractFromWorld();
             vict->setFlag(FlagType::Affect, AFF_ENSNARED);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
@@ -3481,7 +3481,7 @@ ACMD(do_ensnare) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Fortunately @c$N@W manages to avoid it and @C$n@W loses the bundle...@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            extract_obj(obj);
+            obj->extractFromWorld();
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
         } else {
@@ -3491,7 +3491,7 @@ ACMD(do_ensnare) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            extract_obj(obj);
+            obj->extractFromWorld();
             vict->setFlag(FlagType::Affect, AFF_ENSNARED);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
@@ -3561,7 +3561,7 @@ ACMD(do_silk) {
                         true, ch, obj, nullptr, TO_CHAR);
                     act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n",
                         true, ch, obj, nullptr, TO_ROOM);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     WAIT_STATE(ch, PULSE_4SEC);
                     return;
                 } else {
@@ -3616,7 +3616,7 @@ ACMD(do_silk) {
                     act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch,
                         weaved, nullptr, TO_ROOM);
                     do_get(ch, "headsash", 0, 0);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     WAIT_STATE(ch, PULSE_4SEC);
                 }
             } else if (!strcasecmp(arg2, "wrist")) {
@@ -3625,7 +3625,7 @@ ACMD(do_silk) {
                         true, ch, obj, nullptr, TO_CHAR);
                     act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n",
                         true, ch, obj, nullptr, TO_ROOM);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     WAIT_STATE(ch, PULSE_4SEC);
                     return;
                 } else {
@@ -3680,7 +3680,7 @@ ACMD(do_silk) {
                     act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch,
                         weaved, nullptr, TO_ROOM);
                     do_get(ch, "wristband", 0, 0);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     WAIT_STATE(ch, PULSE_4SEC);
                 }
             } else if (!strcasecmp(arg2, "belt")) {
@@ -3689,7 +3689,7 @@ ACMD(do_silk) {
                         true, ch, obj, nullptr, TO_CHAR);
                     act("@C$n@W attempts to weave $p@W into some type of clothing but ends up ruining the entire bundle instead.@n",
                         true, ch, obj, nullptr, TO_ROOM);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     WAIT_STATE(ch, PULSE_4SEC);
                     return;
                 } else {
@@ -3744,7 +3744,7 @@ ACMD(do_silk) {
                     act("@C$n@W attempts to weave a bundle into something and manages to create $p@W!@n", true, ch,
                         weaved, nullptr, TO_ROOM);
                     do_get(ch, "belt", 0, 0);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                     WAIT_STATE(ch, PULSE_4SEC);
                 }
             } else {
@@ -4331,49 +4331,49 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
                 case RCP_TOMATO:
                     if (tomato > 0) {
                         tomato -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_NORMAL_MEAT:
                     if (normmeat > 0) {
                         normmeat -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_POTATO:
                     if (potato > 0) {
                         potato -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_ONION:
                     if (onion > 0) {
                         onion -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_CUCUMBER:
                     if (cucumber > 0) {
                         cucumber -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_CHILIPEPPER:
                     if (redpep > 0) {
                         redpep -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_CARROT:
                     if (carrot > 0) {
                         carrot -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_GREENBEAN:
                     if (greenbean > 0) {
                         greenbean -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_BLACKBASS:
@@ -4382,7 +4382,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
                 case RCP_GRAVELREBOI:
                     if (normfish > 0) {
                         normfish -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_SILVERTROUT:
@@ -4391,7 +4391,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
                 case RCP_VOOSPIKE:
                     if (goodfish > 0) {
                         goodfish -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_STRIPEDBASS:
@@ -4400,7 +4400,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
                 case RCP_SHADOWFISH:
                     if (greatfish > 0) {
                         greatfish -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_BLUECATFISH:
@@ -4409,55 +4409,55 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
                 case RCP_SHADEEEL:
                     if (bestfish > 0) {
                         bestfish -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_BROWNMUSH:
                     if (brownmush > 0) {
                         brownmush -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_GARLIC:
                     if (garlic > 0) {
                         garlic -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_RICE:
                     if (rice > 0) {
                         rice -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_FLOUR:
                     if (flour > 0) {
                         flour -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_LETTUCE:
                     if (lettuce > 0) {
                         lettuce -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_APPLEPLUM:
                     if (appleplum > 0) {
                         appleplum -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_FROZENBERRY:
                     if (fberry > 0) {
                         fberry -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
                 case RCP_CARAMBOLA:
                     if (carambola > 0) {
                         carambola -= 1;
-                        extract_obj(obj2);
+                        obj2->extractFromWorld();
                     }
                     break;
             }
@@ -5164,7 +5164,7 @@ ACMD(do_obstruct) {
                     act("@c$n@C places $s hands on the glacial wall and concentrates. Suddenly the wall melts and then evaporates!@n",
                         true, ch, nullptr, nullptr, TO_ROOM);
                     ch->decCurKI(cost / 2);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                 }
                 return;
             }

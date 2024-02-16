@@ -60,47 +60,38 @@ int free_room_strings(struct room_data *room) {
 
 }
 
-exit_data::~exit_data() {
-    if (general_description)
-        free(general_description);
-    if (keyword)
-        free(keyword);
-}
-
 nlohmann::json exit_data::serialize() {
     nlohmann::json j;
 
-    if(general_description && strlen(general_description)) j["general_description"] = general_description;
-    if(keyword && strlen(keyword)) j["keyword"] = keyword;
-    if(exit_info) j["exit_info"] = exit_info;
     if(key > 0) j["key"] = key;
-	if(to_room != NOWHERE) j["to_room"] = to_room;
+
     if(dclock) j["dclock"] = dclock;
     if(dchide) j["dchide"] = dchide;
     if(dcskill) j["dcskill"] = dcskill;
     if(dcmove) j["dcmove"] = dcmove;
     if(failsavetype) j["failsavetype"] = failsavetype;
     if(dcfailsave) j["dcfailsave"] = dcfailsave;
-    if(failroom > 0) j["failroom"] = failroom;
-    if(totalfailroom > 0) j["totalfailroom"] = totalfailroom;
 
     return j;
 }
 
+nlohmann::json exit_data::serializeRelations() {
+    nlohmann::json j;
+    if(destination) j["destination"] = destination->getUID();
+    if(failroom) j["failroom"] = failroom->getUID();
+    if(totalfailroom) j["totalfailroom"] = totalfailroom->getUID();
+    return j;
+
+}
+
 exit_data::exit_data(const nlohmann::json &j) : exit_data() {
-    if(j.contains("general_description")) general_description = strdup(j["general_description"].get<std::string>().c_str());
-    if(j.contains("keyword")) keyword = strdup(j["keyword"].get<std::string>().c_str());
-    if(j.contains("exit_info")) exit_info = j["exit_info"].get<int16_t>();
     if(j.contains("key")) key = j["key"];
-    if(j.contains("to_room")) to_room = j["to_room"];
     if(j.contains("dclock")) dclock = j["dclock"];
     if(j.contains("dchide")) dchide = j["dchide"];
     if(j.contains("dcskill")) dcskill = j["dcskill"];
     if(j.contains("dcmove")) dcmove = j["dcmove"];
     if(j.contains("failsavetype")) failsavetype = j["failsavetype"];
     if(j.contains("dcfailsave")) dcfailsave = j["dcfailsave"];
-    if(j.contains("failroom")) failroom = j["failroom"];
-    if(j.contains("totalfailroom")) totalfailroom = j["totalfailroom"];
 }
 
 nlohmann::json room_data::serialize() {
@@ -130,48 +121,54 @@ room_data::room_data(const nlohmann::json &j) {
 
 }
 
-
-
 static bool checkGravity(const area_data &a) {
     return a.gravity.has_value();
 }
 
-double room_data::getGravity() {
-    // check for a gravity generator...
-    for(auto c : getInventory()) {
-        if(c->gravity) return c->gravity.value();
-    }
+bool room_data::isEnvironment() {
+    return true;
+}
 
-    // what about area rules?
-    if(std::optional<vnum> gravArea = getMatchingArea(checkGravity); gravArea) {
-        auto &a = areas[gravArea.value()];
-        return a.gravity.value();
-    }
+double room_data::getEnvVar(EnvVar v) {
+    switch(v) {
+        case EnvVar::Gravity: {
+            // Check for a gravity generator.
+            for(auto c : getInventory()) if(c->gravity) return c->gravity.value();
 
-    // special cases here..
-    if (vn >= 64000 && vn <= 64006) {
-        return 100.0;
-    }
-    if (vn >= 64007 && vn <= 64016) {
-        return 300.0;
-    }
-    if (vn >= 64017 && vn <= 64030) {
-        return 500.0;
-    }
-    if (vn >= 64031 && vn <= 64048) {
-        return 1000.0;
-    }
-    if (vn >= 64049 && vn <= 64070) {
-        return 5000.0;
-    }
-    if (vn >= 64071 && vn <= 64096) {
-        return 10000.0;
-    }
-    if (vn == 64097) {
-        return 1000.0;
-    }
+            // what about area rules? For legacy rooms, this should be a planet or dimension etc.
+            if(auto env = getEnvironment(); env) {
+                return env->getEnvVar(v);
+            }
 
-    return 1.0;
+            // special cases here..
+            if (vn >= 64000 && vn <= 64006) {
+                return 100.0;
+            }
+            if (vn >= 64007 && vn <= 64016) {
+                return 300.0;
+            }
+            if (vn >= 64017 && vn <= 64030) {
+                return 500.0;
+            }
+            if (vn >= 64031 && vn <= 64048) {
+                return 1000.0;
+            }
+            if (vn >= 64049 && vn <= 64070) {
+                return 5000.0;
+            }
+            if (vn >= 64071 && vn <= 64096) {
+                return 10000.0;
+            }
+            if (vn == 64097) {
+                return 1000.0;
+            }
+
+            // safe default.
+            return 1.0;
+        }
+        default:
+            return 0.0;
+    }
 }
 
 bool room_data::isActive() {
@@ -199,9 +196,7 @@ int room_data::modDamage(int amount) {
 }
 
 struct room_data* exit_data::getDestination() {
-    auto found = world.find(to_room);
-    if(found != world.end()) return dynamic_cast<room_data*>(found->second);
-    return nullptr;
+    return destination;
 }
 
 
@@ -209,24 +204,15 @@ bool room_data::isSunken() {
     return sector_type == SECT_UNDERWATER || geffect < 0;
 }
 
-std::optional<room_vnum> room_data::getLaunchDestination() {
-    if(!area) return NOWHERE;
-    if(!areas.contains(area.value())) return NOWHERE;
-    auto &a = areas[area.value()];
-    return a.getLaunchDestination();
-}
-
-
 
 static const std::set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
 
 MoonCheck room_data::checkMoon() {
     for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(checkFlag(FlagType::Room, f)) return MoonCheck::NoMoon;
     if(inside_sectors.contains(sector_type)) return MoonCheck::NoMoon;
-    auto check_planet = getMatchingArea(area_data::isPlanet);
-    if(!check_planet) return MoonCheck::NoMoon;
-    auto &area = areas[*check_planet];
-    if(!area.flags.test(AREA_MOON)) return MoonCheck::NoMoon;
+    auto reg = getRegion();
+    if(!reg) return MoonCheck::NoMoon;
+    if(!reg->checkFlag(FlagType::Area, AREA_MOON)) return MoonCheck::NoMoon;
 
     return MOON_TIMECHECK() ? MoonCheck::Full : MoonCheck::NotFull;
 
@@ -262,35 +248,38 @@ DgResults room_data::dgCallMember(trig_data *trig, const std::string& member, co
     char bitholder[MAX_STRING_LENGTH];
 
     if(auto d = _dirNames.find(lmember); d != _dirNames.end()) {
-        auto ex = dir_option[d->second];
+        auto exits = getExits();
+        auto ex = exits[d->second];
         if(!ex) {
             return "";
         }
         if (!arg.empty()) {
-            if (!strcasecmp(arg.c_str(), "vnum"))
-                return fmt::format("{}", ex->to_room);
+            auto dest = ex->getDestination();
+            if (!strcasecmp(arg.c_str(), "vnum")) {
+                
+                if(ex) return std::to_string(dest->uid);
+                return "";
+            }
             else if (!strcasecmp(arg.c_str(), "key"))
                 return fmt::format("{}", ex->key);
             else if (!strcasecmp(arg.c_str(), "bits")) {
-                sprintbit(ex->exit_info, exit_bits, bitholder, MAX_STRING_LENGTH);
+                snprintf(bitholder, sizeof(bitholder), "%s", ex->getFlagNames(FlagType::Exit));
                 return bitholder;
             }
             else if (!strcasecmp(arg.c_str(), "room")) {
-                if (auto roomFound = world.find(ex->to_room); roomFound != world.end())
-                    return fmt::format("{}", roomFound->second->getUID(false));
-                else
-                    return "";
+                if(dest) return dest;
+                return "";
             }
         } else /* no subfield - default to bits */
             {
-                sprintbit(ex->exit_info, exit_bits, bitholder, MAX_STRING_LENGTH);
+                snprintf(bitholder, sizeof(bitholder), "%s", ex->getFlagNames(FlagType::Exit));
                 return bitholder;
             }
     }
 
     if(lmember == "name") return name;
     if(lmember == "sector") return sector_types[sector_type];
-    if(lmember == "gravity") return fmt::format("{}", (int64_t)getGravity());
+    if(lmember == "gravity") return fmt::format("{}", (int64_t)getEnvVar(EnvVar::Gravity));
 
     if(lmember == "vnum") {
         if(!arg.empty()) {

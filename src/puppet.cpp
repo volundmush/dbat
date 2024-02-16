@@ -29,13 +29,13 @@ namespace net {
         auto desc = new descriptor_data();
         STATE(desc) = CON_LOGIN;
         desc->character = ch;
-        desc->id = ch->id;
+        desc->id = ch->uid;
         ch->desc = desc;
         conn->desc = desc;
         desc->account = conn->account;
         conn->account->descriptors.insert(desc);
         desc->conns[conn->connId] = conn;
-        sessions[ch->id] = desc;
+        sessions[ch->uid] = desc;
 
         desc->next = descriptor_list;
         descriptor_list = desc;

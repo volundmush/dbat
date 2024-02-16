@@ -53,7 +53,6 @@ it.
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/improved-edit.h"
-#include "dbat/clan.h"
 #include "dbat/dg_comm.h"
 #include "dbat/config.h"
 
@@ -492,7 +491,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
                          "     @WUsage@D:@CREAD@D/@cREMOVE @D<@Wmessg #@D>@W, @CRESPOND @D<@Wmessg #@D>@W, @CWRITE @D<@Wheader@D>@W.@n\r\n"
                          "     @CVieworder@W, this changes the order in which posts are listed to you.@n\r\n"
                          "     @D----------------------------------------------------------------\n");
-        extract_obj(obj);
+        obj->extractFromWorld();
     }
 
     if (!BOARD_MNUM(thisboard) || !BOARD_MESSAGES(thisboard)) {
@@ -607,7 +606,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
                 return;
             }
         }
-        extract_obj(obj);
+        obj->extractFromWorld();
     }
 
     /* now we locate the message.*/
@@ -1009,21 +1008,19 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
             if (GET_CLAN(ch) != nullptr) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
-            if (clanIsModerator(clan, ch) && strstr(obj->getLookDesc().c_str(), clan)) {
-                ch->sendf("Exercising your clan leader powers....\r\n");
-            } else if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
+            if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
                 ch->sendf("You can't remove other people's messages.\r\n");
-                extract_obj(obj);
+                obj->extractFromWorld();
                 return;
             }
         } else if (!OBJ_FLAGGED(obj, ITEM_CBOARD)) {
             if (GET_ADMLEVEL(ch) < REMOVE_LVL(thisboard) && strcmp(GET_NAME(ch), MESG_POSTER_NAME(cur))) {
                 ch->sendf("You can't remove other people's messages.\r\n");
-                extract_obj(obj);
+                obj->extractFromWorld();
                 return;
             }
         }
-        extract_obj(obj);
+        obj->extractFromWorld();
     }
 
     for (d = descriptor_list; d; d = d->next) {

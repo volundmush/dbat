@@ -173,7 +173,7 @@ void greet_memory_mtrigger(char_data *actor)
         /* find memory line with command only */
         for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next)
         {
-            if (((actor)->id) != mem->id)
+            if (((actor)->uid) != mem->id)
                 continue;
             if (mem->cmd)
             {
@@ -557,15 +557,6 @@ void load_mtrigger(char_data *ch)
         {
             result = t->execute();
             break;
-        }
-    }
-    if (result == SCRIPT_ERROR_CODE)
-    {
-        /* we have recursed beyond reasonable depth */
-        /* make sure this mob is the last one in the load chain */
-        if (GET_MOB_RNUM(ch) != NOBODY)
-        {
-            free_proto_script(&mob_proto[GET_MOB_RNUM(ch)], MOB_TRIGGER);
         }
     }
 }

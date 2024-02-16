@@ -26,12 +26,6 @@
 struct spell_info_type spell_info[SKILL_TABLE_SIZE];
 
 /* local functions */
-void say_spell(struct char_data *ch, int spellnum, struct char_data *tch, struct obj_data *tobj);
-
-int mag_manacost(struct char_data *ch, int spellnum);
-
-void mag_nextstrike(int level, struct char_data *caster, int spellnum);
-
 void unused_spell(int spl);
 
 void mag_assign_spells();
@@ -109,10 +103,6 @@ struct syllable syls[] = {
 
 const char *unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */
 
-int mag_manacost(struct char_data *ch, int spellnum) {
-    return 0;
-}
-
 
 int mag_kicost(struct char_data *ch, int spellnum) {
     int i, min, tval;
@@ -123,72 +113,6 @@ int mag_kicost(struct char_data *ch, int spellnum) {
 }
 
 
-void mag_nextstrike(int level, struct char_data *caster, int spellnum) {
-    if (!caster)
-        return;
-    if (caster->actq) {
-        caster->sendf("You can't perform more than one special attack at a time!");
-        return;
-    }
-    CREATE(caster->actq, struct queued_act, 1);
-    caster->actq->level = level;
-    caster->actq->spellnum = spellnum;
-}
-
-
-void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
-               struct obj_data *tobj) {
-    char lbuf[256], buf[256], buf1[256], buf2[256];    /* FIXME */
-    const char *format;
-
-    struct char_data *i;
-    int j, ofs = 0;
-
-    *buf = '\0';
-    strlcpy(lbuf, skill_name(spellnum), sizeof(lbuf));
-
-    while (lbuf[ofs]) {
-        for (j = 0; *(syls[j].org); j++) {
-            if (!strncmp(syls[j].org, lbuf + ofs, strlen(syls[j].org))) {
-                strcat(buf, syls[j].news);    /* strcat: BAD */
-                ofs += strlen(syls[j].org);
-                break;
-            }
-        }
-        /* i.e., we didn't find a match in syls[] */
-        if (!*syls[j].org) {
-            basic_mud_log("No entry in syllable table for substring of '%s'", lbuf);
-            ofs++;
-        }
-    }
-
-    if (tch != nullptr && IN_ROOM(tch) == IN_ROOM(ch)) {
-        if (tch == ch)
-            format = "$n closes $s eyes and utters the words, '%s'.";
-        else
-            format = "$n stares at $N and utters the words, '%s'.";
-    } else if (tobj != nullptr &&
-               ((IN_ROOM(tobj) == IN_ROOM(ch)) || (tobj->carried_by == ch)))
-        format = "$n stares at $p and utters the words, '%s'.";
-    else
-        format = "$n utters the words, '%s'.";
-
-    snprintf(buf1, sizeof(buf1), format, skill_name(spellnum));
-    snprintf(buf2, sizeof(buf2), format, buf);
-
-    for (auto i : ch->getRoom()->getPeople()) {
-        if (i == ch || i == tch || !i->desc || !AWAKE(i))
-            continue;
-        /* This should really check spell type vs. target ranks */
-        perform_act(buf1, ch, tobj, tch, i);
-    }
-
-    if (tch != nullptr && tch != ch && IN_ROOM(tch) == IN_ROOM(ch)) {
-        snprintf(buf1, sizeof(buf1), "$n stares at you and utters the words, '%s'.",
-                 GET_LEVEL(ch) ? skill_name(spellnum) : buf);
-        act(buf1, false, ch, nullptr, tch, TO_VICT);
-    }
-}
 
 /*
  * This function should be used anytime you are not 100% sure that you have

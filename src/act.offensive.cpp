@@ -22,6 +22,7 @@
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 #include "dbat/attack.h"
+#include "dbat/random.h"
 
 /* Combat commands below this line */
 
@@ -1155,7 +1156,7 @@ ACMD(do_kill) {
 }
 
 ACMD(do_flee) {
-    int i, attempt;
+    int i, attempt = -1;
     struct char_data *was_fighting;
     char arg[MAX_INPUT_LENGTH];
 
@@ -1195,66 +1196,64 @@ ACMD(do_flee) {
         }
     }
 
-    for (i = 0; i < 12; i++) {
-        if (*arg) {
-            if ((attempt = search_block(arg, dirs, false) > -1)) {
-                attempt = search_block(arg, dirs, false);
-            } else if ((attempt = search_block(arg, abbr_dirs, false) > -1)) {
-                attempt = search_block(arg, abbr_dirs, false);
-            } else {
-                attempt = rand_number(0, NUM_OF_DIRS - 1);  /* Select a random direction */
-            }
-        }
-        if (!*arg) {
-            attempt = rand_number(0, NUM_OF_DIRS - 1);    /* Select a random direction */
-        }
-        if (CAN_GO(ch, attempt) &&
-            !ROOM_FLAGGED(EXIT(ch, attempt)->to_room, ROOM_DEATH)) {
-            act("$n panics, and attempts to flee!", true, ch, nullptr, nullptr, TO_ROOM);
-            if (IS_NPC(ch) && ROOM_FLAGGED(EXIT(ch, attempt)->to_room, ROOM_NOMOB)) {
-                return;
-            }
-            was_fighting = FIGHTING(ch);
+    std::map<int, exit_data*> candidates;
+    for(auto &[door, ex] : ch->getRoom()->getExits()) {
+        if (EXIT_FLAGGED(ex, EX_CLOSED)) continue;
+        auto dest = ex->getDestination();
+        if(!dest) continue;
+        if(dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
+        if(IS_NPC(ch) && dest->checkFlag(FlagType::Room, ROOM_NOMOB)) continue;
+        candidates[door] = ex;
+    }
 
-            auto isWall = [&](const auto&o) {return o->vn == 79 && GET_OBJ_COST(o) == attempt;};
-            if(auto wall = ch->getRoom()->findObject(isWall); wall) {
-                ch->sendf("That direction has a glacial wall blocking it.\r\n");
-                return;
-            }
+    if(candidates.empty()) {
+        ch->sendf("PANIC!  You couldn't escape!\r\n");
+        return;
+    }
+    
+    if (*arg) {
+        attempt = search_block(arg, dirs, false);
+    }
 
-            if (!block_calc(ch)) {
-                return;
-            }
+    auto dest = candidates.contains(attempt) ? attempt : Random::get(candidates)->first;
 
-            if (ABSORBING(ch)) {
-                ch->sendf("You are busy absorbing from %s!\r\n", GET_NAME(ABSORBING(ch)));
-                return;
-            }
-            if (auto ab = ABSORBBY(ch); ab) {
-                if (axion_dice(0) < GET_SKILL(ab, SKILL_ABSORB)) {
-                    ch->sendf("You are being held by %s, they are absorbing you!\r\n", GET_NAME(ab));
-                    ab->sendf("%s struggles in your grasp!\r\n", GET_NAME(ch));
-                    WAIT_STATE(ch, PULSE_2SEC);
-                    return;
-                } else {
-                    act("@c$N@W manages to break loose of @C$n's@W hold!@n", true, ab, nullptr, ch,
-                        TO_NOTVICT);
-                    act("@WYou manage to break loose of @C$n's@W hold!@n", true, ab, nullptr, ch, TO_VICT);
-                    act("@c$N@W manages to break loose of your hold!@n", true, ab, nullptr, ch, TO_CHAR);
-                    ABSORBING(ab) = nullptr;
-                    ABSORBBY(ch) = nullptr;
-                }
-            }
-            if (do_simple_move(ch, attempt, true)) {
-                ch->sendf("You flee head over heels.\r\n");
-                WAIT_STATE(ch, PULSE_2SEC);
-            } else {
-                act("$n tries to flee, but can't!", true, ch, nullptr, nullptr, TO_ROOM);
-                WAIT_STATE(ch, PULSE_2SEC);
-            }
+    act("$n panics, and attempts to flee!", true, ch, nullptr, nullptr, TO_ROOM);
+    was_fighting = FIGHTING(ch);
+
+    auto isWall = [&](const auto&o) {return o->vn == 79 && GET_OBJ_COST(o) == attempt;};
+    if(auto wall = ch->getRoom()->findObject(isWall); wall) {
+        ch->sendf("That direction has a glacial wall blocking it.\r\n");
+        return;
+    }
+
+    if (!block_calc(ch)) {
+        return;
+    }
+
+    if (ABSORBING(ch)) {
+        ch->sendf("You are busy absorbing from %s!\r\n", GET_NAME(ABSORBING(ch)));
+        return;
+    }
+    if (auto ab = ABSORBBY(ch); ab) {
+        if (axion_dice(0) < GET_SKILL(ab, SKILL_ABSORB)) {
+            ch->sendf("You are being held by %s, they are absorbing you!\r\n", GET_NAME(ab));
+            ab->sendf("%s struggles in your grasp!\r\n", GET_NAME(ch));
+            WAIT_STATE(ch, PULSE_2SEC);
             return;
+        } else {
+            act("@c$N@W manages to break loose of @C$n's@W hold!@n", true, ab, nullptr, ch,
+                TO_NOTVICT);
+            act("@WYou manage to break loose of @C$n's@W hold!@n", true, ab, nullptr, ch, TO_VICT);
+            act("@c$N@W manages to break loose of your hold!@n", true, ab, nullptr, ch, TO_CHAR);
+            ABSORBING(ab) = nullptr;
+            ABSORBBY(ch) = nullptr;
         }
     }
-    ch->sendf("PANIC!  You couldn't escape!\r\n");
-
+    if (do_simple_move(ch, attempt, true)) {
+        ch->sendf("You flee head over heels.\r\n");
+        WAIT_STATE(ch, PULSE_2SEC);
+    } else {
+        act("$n tries to flee, but can't!", true, ch, nullptr, nullptr, TO_ROOM);
+        WAIT_STATE(ch, PULSE_2SEC);
+    }
 }

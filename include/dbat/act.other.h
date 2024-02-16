@@ -189,6 +189,4 @@ extern ACMD(do_fix);
 
 extern ACMD(do_resurrect);
 
-extern ACMD(do_clan);
-
 extern ACMD(do_aid);

@@ -32,7 +32,6 @@
 #include "dbat/guild.h"
 #include "dbat/handler.h"
 #include "dbat/mail.h"
-#include "dbat/clan.h"
 #include "dbat/boards.h"
 #include "dbat/constants.h"
 #include "dbat/spells.h"
@@ -62,6 +61,7 @@ int64_t getNextUID() {
 }
 
 std::unordered_map<room_vnum, unit_data*> world;    /* array of rooms		 */
+std::unordered_set<unit_data*> pendingDeletions;
 
 struct char_data *character_list = nullptr; /* global linked list of chars	 */
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
@@ -535,7 +535,6 @@ void destroy_db() {
     while (object_list) {
         objtmp = object_list;
         object_list = object_list->next;
-        free_obj(objtmp);
     }
 
     uniqueObjects.clear();
@@ -629,11 +628,6 @@ void boot_db_mail() {
 void boot_db_socials() {
     basic_mud_log("Loading social messages.");
     boot_social_messages();
-}
-
-void boot_db_clans() {
-    basic_mud_log("Loading Clans.");
-    clanBoot();
 }
 
 void boot_db_commands() {
@@ -2033,7 +2027,7 @@ void reset_zone(zone_rnum zone) {
 
                 case 'R': /* rem obj from room */
                     if ((obj = world[c.arg1]->findObjectVnum(c.arg2)) != nullptr)
-                        extract_obj(obj);
+                        obj->extractFromWorld();
                     last_cmd = 1;
                     tmob = nullptr;
                     tobj = nullptr;
@@ -2049,7 +2043,7 @@ void reset_zone(zone_rnum zone) {
                         break;
                     }
 
-                    auto exits = room->getExits();
+                    auto exits = room->second->getExits();
                     auto ex = exits[c.arg2];
             
                     auto room = dynamic_cast<room_data*>(u->second);
@@ -2060,21 +2054,21 @@ void reset_zone(zone_rnum zone) {
                     } else
                         switch (c.arg3) {
                             case 0:
-                                REMOVE_BIT(ex->exit_info,
+                                ex->clearFlag(FlagType::Exit,
                                            EX_LOCKED);
-                                REMOVE_BIT(ex->exit_info,
+                                ex->clearFlag(FlagType::Exit,
                                            EX_CLOSED);
                                 break;
                             case 1:
-                                SET_BIT(ex->exit_info,
+                                ex->setFlag(FlagType::Exit,
                                         EX_CLOSED);
-                                REMOVE_BIT(ex->exit_info,
+                                ex->clearFlag(FlagType::Exit,
                                            EX_LOCKED);
                                 break;
                             case 2:
-                                SET_BIT(ex->exit_info,
+                                ex->setFlag(FlagType::Exit,
                                         EX_LOCKED);
-                                SET_BIT(ex->exit_info,
+                                ex->setFlag(FlagType::Exit,
                                         EX_CLOSED);
                                 break;
                         }
@@ -2310,16 +2304,6 @@ void free_char(struct char_data *ch) {
 }
 
 
-/* release memory allocated for an obj struct */
-void free_obj(struct obj_data *obj) {
-    world.erase(obj->uid);
-
-    /* free any assigned scripts */
-    if (SCRIPT(obj))
-        extract_script(obj, OBJ_TRIGGER);
-
-    delete obj;
-}
 
 /*
  * Steps:

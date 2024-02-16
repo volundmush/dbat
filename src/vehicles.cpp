@@ -373,9 +373,9 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         return;
     }
 
-    if(IS_SET(d->exit_info, EX_CLOSED)) {
-        if (d->keyword)
-            ch->sendf("@wThe %s seems to be closed.\r\n", fname(d->keyword));
+    if(d->checkFlag(FlagType::Exit, EX_CLOSED)) {
+        if (!d->getAlias().empty())
+            ch->sendf("@wThe %s seems to be closed.\r\n", fname(d->getAlias().c_str()));
         else
             ch->sendf("@wIt seems to be closed.\r\n");
         return;
@@ -434,7 +434,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         if(!e) continue;
         dest = e->getDestination();
         if(!dest) continue;
-        if(!IS_SET(e->exit_info, EX_CLOSED)) continue;
+        if(!e->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
 
         dest->sendfContents("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }

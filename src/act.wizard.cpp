@@ -1324,23 +1324,22 @@ static void do_stat_room(struct char_data *ch) {
         if (!e)
             continue;
 
-        if (!e->to)
+        if (auto dest = e->getDestination(); dest)
             snprintf(buf1, sizeof(buf1), " @cNONE@n");
         else
-            snprintf(buf1, sizeof(buf1), "@c%5d@n", e->to->uid);
-
-        sprintbit(e->exit_info, exit_bits, buf2, sizeof(buf2));
+            snprintf(buf1, sizeof(buf1), "@c%5d@n", dest->uid);
+        
+        snprintf(buf2, sizeof(buf2), "%s", join(e->getFlagNames(FlagType::Exit), ", ").c_str());
 
         ch->sendf(
-                     "Exit @c%-5s@n:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n  DC Lock: [%2d], DC Hide: [%2d], DC Skill: [%4s], DC Move: [%2d]\r\n%s",
+                     "Exit @c%-5s@n:  To: [%s], Key: [%5d], Keywrd: %s, Type: %s\r\n  DC Lock: [%2d], DC Hide: [%2d], DC Skill: [%4s], DC Move: [%2d]\r\n%s\r\n",
                      dirs[i], buf1,
                      e->key == NOTHING ? -1 : e->key,
-                     e->keyword ? e->keyword : "None", buf2,
+                     withPlaceholder(e->getAlias(), "None").c_str(),
                      e->dclock, e->dchide,
                      e->dcskill == 0 ? "None" : spell_info[e->dcskill].name,
                      e->dcmove,
-                     e->general_description ? e->general_description
-                                                            : "  No exit description.\r\n");
+                     withPlaceholder(e->getLookDesc(), "None").c_str());
     }
 
     /* check the room for a script */
@@ -2194,7 +2193,7 @@ ACMD(do_vstat) {
         }
         obj = read_object(r_num, REAL);
         do_stat_object(ch, obj);
-        extract_obj(obj);
+        obj->extractFromWorld();
     } else
         ch->sendf("That'll have to be either 'obj' or 'mob'.\r\n");
 }
@@ -2279,7 +2278,7 @@ ACMD(do_purge) {
             extract_char(vict);
         } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getRoom()->getInventory())) != nullptr) {
             act("$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
-            extract_obj(obj);
+            obj->extractFromWorld();
         } else {
             ch->sendf("Nothing here by that name.\r\n");
             return;
@@ -2299,11 +2298,11 @@ ACMD(do_purge) {
 
             /* Dump inventory. */
             for (auto o : vict->getInventory())
-                extract_obj(o);
+                o->extractFromWorld();
 
             /* Dump equipment. */
             for (auto &[pos, o] : vict->getEquipment())
-                    extract_obj(o);
+                    o->extractFromWorld();
 
             /* Dump character. */
             extract_char(vict);
@@ -2311,7 +2310,7 @@ ACMD(do_purge) {
 
         /* Clear the ground. */
         for (auto o : ch->getRoom()->getInventory())
-            extract_obj(o);
+            o->extractFromWorld();
     }
 }
 
@@ -3278,20 +3277,26 @@ ACMD(do_show) {
             for (auto &[vn, u] : world) {
                 auto r = dynamic_cast<room_data*>(u);
                 if(!r) continue;
-                for (j = 0; j < NUM_OF_DIRS; j++) {
-                    auto &e = r->dir_option[j];
-                    if (!e)
-                        continue;
-                    if (e->to_room == 0) {
-                        nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
-                                        vn, count_color_chars(r->name) + 40, r->name, QNRM,
-                                        dirs[j]);
-                        if (len + nlen >= sizeof(buf) || nlen < 0)
-                            break;
-                        len += nlen;
+                for (auto &[j, e] : r->getExits()) {
+                    auto dest = e->getDestination();
+                    if(!dest) {
+                        if(auto gen = e->getLookDesc(); !gen.empty()) {
+                            nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->name, gen.c_str());
+                            if (len + nlen >= sizeof(buf) || nlen < 0)
+                                break;
+                            len += nlen;
+                        }
                     }
-                    if (e->to_room == NOWHERE && !e->general_description) {
-                        nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (Nowhere) [%5d] %-*s%s (%s)\r\n", ++k,
+                    else {
+                        if(dest->uid == 0) {
+                            nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->name, e->getLookDesc().c_str());
+                            if (len + nlen >= sizeof(buf) || nlen < 0)
+                                break;
+                            len += nlen;
+                        }
+                    }
+                    if (dest && dest->uid == 0) {
+                        nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
                                         vn, count_color_chars(r->name) + 40, r->name, QNRM,
                                         dirs[j]);
                         if (len + nlen >= sizeof(buf) || nlen < 0)
@@ -4326,7 +4331,7 @@ ACMD(do_zpurge) {
             }
 
             for (auto obj : r->getInventory()) {
-                extract_obj(obj);
+                obj->extractFromWorld();
             }
         }
     }

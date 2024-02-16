@@ -67,10 +67,7 @@ static void dump_state_items(const std::filesystem::path &loc) {
         if(v != r.second->uid) r.second->uid = v;
         nlohmann::json j2;
         j2["id"] = v;
-        j2["generation"] = static_cast<int32_t>(r.first);
-        j2["data"] = r.second->serializeInstance();
-        j2["location"] = r.second->serializeLocation();
-        j2["slot"] = r.second->worn_on;
+        j2["data"] = r.second->serialize();
         j2["relations"] = r.second->serializeRelations();
         j.push_back(j2);
     }
@@ -101,7 +98,7 @@ static void process_dirty_rooms(const std::filesystem::path &loc) {
 static void process_dirty_item_prototypes(const std::filesystem::path &loc) {
     nlohmann::json j;
     for(auto &[v, o] : obj_proto) {
-        j.push_back(o->serialize());
+        j.push_back(o);
     }
     dump_to_file(loc, "itemPrototypes.json", j);
 }
@@ -110,7 +107,7 @@ static void process_dirty_npc_prototypes(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, n] : mob_proto) {
-        j.push_back(n->serialize());
+        j.push_back(n);
     }
     dump_to_file(loc, "npcPrototypes.json", j);
 }
@@ -138,14 +135,6 @@ static void process_dirty_zones(const std::filesystem::path &loc) {
         j.push_back(z.serialize());
     }
     dump_to_file(loc, "zones.json", j);
-}
-
-static void process_dirty_areas(const std::filesystem::path &loc) {
-    nlohmann::json j;
-    for(auto &[v, a] : areas) {
-        j.push_back(a.serialize());
-    }
-    dump_to_file(loc, "areas.json", j);
 }
 
 static void process_dirty_dgscript_prototypes(const std::filesystem::path &loc) {
@@ -211,10 +200,10 @@ void runSave() {
         for(const auto func : {dump_state_accounts, dump_state_characters,
               dump_state_players,
                           dump_state_items, dump_state_globalData,
-                          process_dirty_rooms, process_dirty_exits, process_dirty_item_prototypes,
+                          process_dirty_rooms, process_dirty_item_prototypes,
                           process_dirty_npc_prototypes, process_dirty_shops,
                           process_dirty_guilds, process_dirty_zones,
-                          process_dirty_areas, process_dirty_dgscript_prototypes}) {
+                          process_dirty_dgscript_prototypes}) {
             threads.emplace_back([func, &tempPath]() {
                 func(tempPath);
             });

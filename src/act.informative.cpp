@@ -26,7 +26,6 @@
 #include "dbat/screen.h"
 #include "dbat/mail.h"
 #include "dbat/guild.h"
-#include "dbat/clan.h"
 #include "dbat/players.h"
 #include "dbat/account.h"
 #include "dbat/improved-edit.h"
@@ -797,7 +796,7 @@ ACMD(do_nickname) {
                 struct obj_data *k;
                 for (k = object_list; k; k = k->next) {
                     if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(ship2) + 1000) {
-                        extract_obj(k);
+                        k->extractFromWorld();
                         int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
                         ship2->removeFromLocation();
                         ship2->addToLocation(world.at(was_in));
@@ -811,16 +810,16 @@ ACMD(do_nickname) {
     if (strstr(obj->getShortDesc().c_str(), "nicknamed")) {
         ch->sendf("%s@w has already been nicknamed.@n\r\n", obj->getShortDesc());
         return;
-    } else if (strstr(obj->name, "corpse")) {
+    } else if (strstr(obj->getName().c_str(), "corpse")) {
         ch->sendf("%s@w is a corpse!@n\r\n", obj->getShortDesc());
         return;
     } else {
         ch->sendf("@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj->getShortDesc(), arg2);
         char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
         sprintf(nick, "%s @wnicknamed @D(@C%s@D)@n", obj->getShortDesc(), CAP(arg2));
-        sprintf(nick2, "%s %s", obj->name, arg2);
-        obj->getShortDesc() = strdup(nick);
-        obj->name = strdup(nick2);
+        sprintf(nick2, "%s %s", obj->getName().c_str(), arg2);
+        obj->setShortDesc(nick);
+        obj->setName(nick2);
         return;
     }
 }
@@ -1255,11 +1254,11 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
 
     auto room = dynamic_cast<room_data*>(world[rnum]);
 
-    for (auto &[door, ex] : room->getExits()) {
+    for (auto &[door, d] : room->getExits()) {
         auto dest = d->getDestination();
         if(!dest) continue;
-        bool isClosed = IS_SET(d->exit_info, EX_CLOSED);
-        bool isSecret = IS_SET(d->exit_info, EX_SECRET);
+        bool isClosed = d->checkFlag(FlagType::Exit, EX_CLOSED);
+        bool isSecret = d->checkFlag(FlagType::Exit, EX_SECRET);
 
         if(isClosed && !isSecret)  {
             switch (door) {
@@ -1806,35 +1805,35 @@ static void gen_map(struct char_data *ch, int num) {
     /* print out exits */
     map_draw_room(map, 4, 4, ch->getRoom()->vn, ch);
     auto exits = room->getExits();
-    for (auto &[door, ex] : exits) {
-        if(EXIT_FLAGGED(d, EX_CLOSED)) continue;
+    for (auto &[door, d] : exits) {
+        if(d->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
         auto dest = d->getDestination();
         if(!dest) continue;
 
         switch (door) {
             case NORTH:
-                map_draw_room(map, 4, 3, d->to_room, ch);
+                map_draw_room(map, 4, 3, dest->uid, ch);
                 break;
             case EAST:
-                map_draw_room(map, 5, 4, d->to_room, ch);
+                map_draw_room(map, 5, 4, dest->uid, ch);
                 break;
             case SOUTH:
-                map_draw_room(map, 4, 5, d->to_room, ch);
+                map_draw_room(map, 4, 5, dest->uid, ch);
                 break;
             case WEST:
-                map_draw_room(map, 3, 4, d->to_room, ch);
+                map_draw_room(map, 3, 4, dest->uid, ch);
                 break;
             case NORTHEAST:
-                map_draw_room(map, 5, 3, d->to_room, ch);
+                map_draw_room(map, 5, 3, dest->uid, ch);
                 break;
             case NORTHWEST:
-                map_draw_room(map, 3, 3, d->to_room, ch);
+                map_draw_room(map, 3, 3, dest->uid, ch);
                 break;
             case SOUTHEAST:
-                map_draw_room(map, 5, 5, d->to_room, ch);
+                map_draw_room(map, 5, 5, dest->uid, ch);
                 break;
             case SOUTHWEST:
-                map_draw_room(map, 3, 5, d->to_room, ch);
+                map_draw_room(map, 3, 5, dest->uid, ch);
                 break;
         }
     }
@@ -3417,12 +3416,12 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
                 {11, dlist12}
         };
 
-        for (door = 0; door < NUM_OF_DIRS; door++) {
-            auto d = exits[door];
-            if(!d) continue;
+        for (auto &[door, d] : room->getExits()) {
             auto dest = d->getDestination();
             if(!dest) continue;
             auto dl = dlists[door];
+
+            auto al = d->getAlias();
 
             if (admVision) {
                 /* Immortals see everything */
@@ -3436,34 +3435,28 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
 
 
                 sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->vn, dest->name);
-                if (IS_SET(d->exit_info, EX_ISDOOR) || IS_SET(d->exit_info, EX_SECRET)) {
+                if (d->checkFlag(FlagType::Exit, EX_ISDOOR) || d->checkFlag(FlagType::Exit, EX_SECRET)) {
                     /* This exit has a door - tell all about it */
                     char argh[100];
-                    if (fname(d->keyword) == nullptr) {
-                        ch->sendf("@RREPORT THIS ERROR IMMEADIATELY FOR DIRECTION %s@n\r\n", dirname);
-                        basic_mud_log("ERROR: %s found error direction %s at room %d", dirname, GET_NAME(ch),
-                                      GET_ROOM_VNUM(IN_ROOM(ch)));
-                        return;
-                    }
                     sprintf(argh, "%s ",
-                            strcasecmp(fname(d->keyword), "undefined") ? fname(
-                                    d->keyword) : "opening");
+                            strcasecmp(fname(al.c_str()), "undefined") ? fname(
+                                    al.c_str()) : "opening");
                     sprintf(dl + strlen(dl), "                    The %s%s %s %s %s%s.\r\n",
-                            IS_SET(d->exit_info, EX_SECRET) ?
+                            d->checkFlag(FlagType::Exit, EX_SECRET) ?
                             "@rsecret@w " : "",
-                            (d->keyword && strcasecmp(fname(d->keyword), "undefined")) ?
-                            fname(d->keyword) : "opening",
+                            (al.c_str() && strcasecmp(fname(al.c_str()), "undefined")) ?
+                            fname(al.c_str()) : "opening",
                             strstr(argh, "s ") != nullptr ? "are" : "is",
-                            IS_SET(d->exit_info, EX_CLOSED) ?
+                            d->checkFlag(FlagType::Exit, EX_CLOSED) ?
                             "closed" : "open",
-                            IS_SET(d->exit_info, EX_LOCKED) ?
+                            d->checkFlag(FlagType::Exit, EX_LOCKED) ?
                             "and locked" : "and unlocked",
-                            IS_SET(d->exit_info, EX_PICKPROOF) ?
+                            d->checkFlag(FlagType::Exit, EX_PICKPROOF) ?
                             " (pickproof)" : "");
                 }
             }
             else { /* This is what mortal characters see */
-                if (!IS_SET(d->exit_info, EX_CLOSED)) {
+                if (!d->checkFlag(FlagType::Exit, EX_CLOSED)) {
                     /* And the door is open */
                     door_found++;
                     char blam[9];
@@ -3474,7 +3467,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
                             IS_DARK(dest->vn) && !CAN_SEE_IN_DARK(ch) && !has_light
                             ? "@bToo dark to tell.@w" : dest->name);
 
-                } else if (CONFIG_DISP_CLOSED_DOORS && !d->exit_info, EX_SECRET) {
+                } else if (CONFIG_DISP_CLOSED_DOORS && !d->checkFlag(FlagType::Exit, EX_SECRET)) {
                     /* But we tell them the door is closed */
                     door_found++;
                     char blam[9];
@@ -3484,7 +3477,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
 
                     }
                     sprintf(dl, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam,
-                            (d->keyword) ? fname(d->keyword)
+                            (al.c_str()) ? fname(al.c_str())
                                          : "opening");
                 }
             }
@@ -3582,12 +3575,11 @@ static void do_auto_exits2(struct room_data *room, struct char_data *ch) {
 
     ch->sendf("\nExits: ");
 
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = exits[door];
-        if(!d) continue;
+    for (auto &[door, d] : room->getExits()) {
+
         auto dest = d->getDestination();
         if(!dest) continue;
-        if (EXIT_FLAGGED(d, EX_CLOSED))
+        if (d->checkFlag(FlagType::Exit, EX_CLOSED))
             continue;
 
         ch->sendf("%s ", abbr_dirs[door]);
@@ -3643,213 +3635,14 @@ ACMD(do_autoexit) {
 }
 
 
-Event room_data::renderLocationFor(unit_data *viewer) {
-    
-    auto sunk = isSunken();
-
-    /*
-    if (viewer->checkFlag(FlagType::Affect, AFF_BLIND)) {
-        out += "You see nothing but infinite darkness...\r\n";
-        return out;
-    }
-    if (viewer->checkFlag(FlagType::PC, PLR_EYEC)) {
-        out += "You can't see a damned thing, your eyes are closed!\r\n";
-        return out;
-    }
-    if (isInsideDark() && !viewer->canSeeInDark()) {
-        out += "It is pitch black...\r\n";
-        return out;
-    }
-    */
-
-    Event ev("DBATLegacyRoom", nlohmann::json::object());
-    auto &j = ev.second;
-    auto nodec = viewer->checkFlag(FlagType::Pref, PRF_NODEC);
-    if(nodec) j["nodec"] = true;
-    j["gravity"] = getGravity();
-    j["sector_type"] = sector_type;
-    j["sector"] = sector_types[sector_type];
-    j["dmg"] = dmg;
-    j["geffect"] = geffect;
-    j["name"] = getDisplayName(viewer);
-
-    
-    double grav = getGravity();
-    if (viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) {
-        j["room_flags"] = getFlagNames(FlagType::Room);
-
-        if (!script->dgScripts.empty()) {
-            std::vector<trig_vnum> triggers;
-            for (auto t : script->dgScripts) {
-                triggers.push_back(GET_TRIG_VNUM(t));
-            }
-            j["triggers"] = triggers;
-        }
-
-        j["vn"] = vn;
-    } else {
-
-        if(auto planet = viewer->getMatchingArea(area_data::isPlanet); planet) {
-            auto &a = areas[planet.value()];
-            j["planet"] = a.name;
-        } else {
-            if (checkFlag(FlagType::Room, ROOM_NEO)) {
-                j["planet"] = "Neo Nirvana";
-            } else if (checkFlag(FlagType::Room, ROOM_AL)) {
-                j["dimension"] = "Afterlife";
-            } else if (checkFlag(FlagType::Room, ROOM_HELL)) {
-                j["dimension"] = "Punishment Hell";
-            } else if (checkFlag(FlagType::Room, ROOM_RHELL)) {
-                j["dimension"] = "Hell";
-            }
-        }
-
-        
-        if (checkFlag(FlagType::Room, ROOM_REGEN)) {
-            j["auras"].push_back("@CA feeling of calm and relaxation fills this room.@n");
-        }
-        if (checkFlag(FlagType::Room, ROOM_AURA)) {
-            j["auras"].push_back("@GAn aura of @gregeneration@G surrounds this area.@n");
-        }
-        if (checkFlag(FlagType::Room, ROOM_HBTC)) {
-            j["auras"].push_back("@GThe @YHyperbolic Time Chamber@G surrounds this area.@n");
-        }
-    }
-    
-    j["description"] = getLookDesc();
-    auto dmg = getDamage();
-    std::string dmsg;
-    if ((!viewer->checkFlag(FlagType::PC, PRF_BRIEF)) || checkFlag(FlagType::Room, ROOM_DEATH)) {
-        if (sector_type == SECT_INSIDE && dmg > 0) {
-            if (dmg <= 2) {
-                dmsg = "@wA small hole with chunks of debris that can be seen scarring the floor.@n";
-            } else if (dmg <= 4) {
-                dmsg = "@wA couple small holes with chunks of debris that can be seen scarring the floor.@n";
-            } else if (dmg <= 6) {
-                dmsg = "@wA few small holes with chunks of debris that can be seen scarring the floor.@n";
-            } else if (dmg <= 10) {
-                dmsg = "@wThere are several small holes with chunks of debris that can be seen scarring the floor.@n";
-            } else if (dmg <= 20) {
-                dmsg = "@wMany holes fill the floor of this area, many of which have burn marks.@n";
-            } else if (dmg <= 30) {
-                dmsg = "@wThe floor is severely damaged with many large holes.@n";
-            } else if (dmg <= 50) {
-                dmsg = "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n";
-            } else if (dmg <= 75) {
-                dmsg = "@wThis entire area is falling apart, it has been damaged so badly.@n";
-            } else if (dmg <= 99) {
-                dmsg = "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n";
-            } else if (dmg >= 100) {
-                dmsg = "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n";
-            }
-        } else if (
-                (sector_type == SECT_CITY || sector_type == SECT_FIELD || sector_type == SECT_HILLS ||
-                 sector_type == SECT_IMPORTANT) && dmg > 0) {
-            if (dmg <= 2) {
-                dmsg = "@wA small hole with chunks of debris that can be seen scarring the ground.@n";
-            } else if (dmg <= 4) {
-                dmsg = "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n";
-            } else if (dmg <= 6) {
-                dmsg = "@wA few small craters with chunks of debris that can be seen scarring the ground.@n";
-            } else if (dmg <= 10) {
-                dmsg = "@wThere are several small craters with chunks of debris that can be seen scarring the ground.@n";
-            } else if (dmg <= 20) {
-                dmsg = "@wMany craters fill the ground of this area, many of which have burn marks.@n";
-            } else if (dmg <= 30) {
-                dmsg = "@wThe ground is severely damaged with many large craters.@n";
-            } else if (dmg <= 50) {
-                dmsg = "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n";
-            } else if (dmg <= 75) {
-                dmsg = "@wThis entire area is falling apart, it has been damaged so badly.@n";
-            } else if (dmg <= 99) {
-                dmsg = "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n";
-            } else if (dmg >= 100) {
-                dmsg =  "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n";
-            }
-        } else if (sector_type == SECT_FOREST && dmg > 0) {
-            if (dmg <= 2) {
-                dmsg = "@wA small tree sits in a little crater here.@n";
-            } else if (dmg <= 4) {
-                dmsg = "@wTrees have been uprooted by craters in the ground.@n";
-            } else if (dmg <= 6) {
-                dmsg = "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n";
-            } else if (dmg <= 10) {
-                dmsg = "@wA large patch of trees have been destroyed and are laying in craters here.@n";
-            } else if (dmg <= 20) {
-                dmsg = "@wSeveral craters have merged into one large crater in one part of this forest.@n";
-            } else if (dmg <= 30) {
-                dmsg = "@wThe open sky can easily be seen through a hole of trees destroyed\r\nand resting at the bottom of several craters here.@n";
-            } else if (dmg <= 50) {
-                dmsg =  "@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n";
-            } else if (dmg <= 75) {
-                dmsg =  "@wVery few trees are left standing in this area, replaced instead by large craters.@n";
-            } else if (dmg <= 99) {
-                dmsg = "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n";
-            } else if (dmg >= 100) {
-                dmsg = "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n";
-            }
-
-        } else if (sector_type == SECT_MOUNTAIN && dmg > 0) {
-
-            
-            if (dmg <= 2) {
-                dmsg = "@wA small crater has been burned into the side of this mountain.@n";
-            } else if (dmg <= 4) {
-                dmsg = "@wA couple craters have been burned into the side of this mountain.@n";
-            } else if (dmg <= 6) {
-                dmsg = "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n";
-            } else if (dmg <= 10) {
-                dmsg = "@wSeveral bad craters can be seen in the side of the mountain here.@n";
-            } else if (dmg <= 20) {
-                dmsg = "@wLarge boulders have rolled down the mountain side and collected in many nearby craters.@n";
-            } else if (dmg <= 30) {
-                dmsg = "@wMany craters are covering the mountainside here.@n";
-            } else if (dmg <= 50) {
-                dmsg =  "@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n";
-            } else if (dmg <= 75) {
-                dmsg = "@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n";
-            } else if (dmg <= 99) {
-                dmsg = "@wThe mountain side here has completely collapsed, shedding dangerous rubble down to its base.@n";
-            } else if (dmg >= 100) {
-                dmsg =  "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n";
-            }
-        }
-        if(!dmsg.empty()) j["dmsg"] = dmsg;
-        if (geffect >= 1 && geffect <= 5) {
-            j["geffect_string"] = "@rLava@w is pooling in someplaces here...@n";
-        }
-        if (geffect >= 6) {
-            j["geffect_string"] = "@RLava@r covers pretty much the entire area!@n";
-        }
-        if (geffect < 0) {
-            j["geffect_string"] = "@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n";
-        }
-    }
-
-    // TODO: Exits stuff...
-    for(auto i = 0; i < NUM_OF_DIRS; i++) {
-        auto e = dir_option[i];
-        if(!e) continue;
-        
-    }
-
-    if(auto con = getContents(); !con.empty()) {
-        std::vector<std::string> lines;
-        for(auto obj : con) {
-            j["contents"].push_back(obj->renderRoomListFor(viewer));
-        }
-    }
-
-    return ev;
-}
-
 static void look_in_direction(struct char_data *ch, int dir) {
     auto r = ch->getRoom();
     if(!r) {
         ch->sendf("Nothing special there...\r\n");
         return;
     }
-    auto d = r->dir_option[dir];
+    auto exits = r->getExits();
+    auto d = exits[dir];
     if(!d) {
         ch->sendf("Nothing special there...\r\n");
         return;
@@ -3860,27 +3653,31 @@ static void look_in_direction(struct char_data *ch, int dir) {
         return;
     }
 
-    if (d->general_description)
-        ch->sendf("%s", d->general_description);
+    if (auto desc = d->getLookDesc(); !desc.empty()) {
+        ch->sendText(desc);
 
-    bool canSeeRoom = false;
+        bool canSeeRoom = false;
 
-    if (EXIT_FLAGGED(d, EX_ISDOOR) && d->keyword) {
-        if (!EXIT_FLAGGED(d, EX_SECRET) &&
-            EXIT_FLAGGED(d, EX_CLOSED))
-            ch->sendf("The %s is closed.\r\n", fname(d->keyword));
-        else if (!EXIT_FLAGGED(d, EX_CLOSED)) {
-            ch->sendf("The %s is open.\r\n", fname(d->keyword));
+        auto alias = d->getAlias();
+
+        if (d->checkFlag(FlagType::Exit, EX_ISDOOR) && !alias.empty()) {
+            if (!d->checkFlag(FlagType::Exit, EX_SECRET) &&
+                d->checkFlag(FlagType::Exit, EX_CLOSED))
+                ch->sendf("The %s is closed.\r\n", fname(alias.c_str()));
+            else if (!d->checkFlag(FlagType::Exit, EX_CLOSED)) {
+                ch->sendf("The %s is open.\r\n", fname(alias.c_str()));
+                canSeeRoom = true;
+            }
+        } else {
             canSeeRoom = true;
         }
-    } else {
-        canSeeRoom = true;
+
+        if(canSeeRoom) {
+            ch->sendf("You peek over and see:\r\n");
+            ch->lookAtLocation();
+        }
     }
 
-    if(canSeeRoom) {
-        ch->sendf("You peek over and see:\r\n");
-        ch->lookAtLocation();
-    }
 }
 
 static void look_in_obj(struct char_data *ch, char *arg) {
@@ -4486,6 +4283,7 @@ ACMD(do_look) {
     }
 
     auto room = ch->getRoom();
+    auto exits = room->getExits();
 
     if(IS_DARK(room->vn) && !CAN_SEE_IN_DARK(ch)) {
         ch->sendf("It is pitch black...\r\n");
@@ -4750,11 +4548,7 @@ ACMD(do_score) {
         ch->sendf("      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n",
                      add_commas(GET_GOLD(ch)).c_str(), add_commas(
                         (ch->getCarriedWeight())).c_str());
-        double gravity = 1.0;
-        auto room = ch->getRoom();
-        if(room) {
-            gravity = room->getGravity();
-        }
+        double gravity = ch->myEnvVar(EnvVar::Gravity);
         std::string grav = gravity > 1.0 ? fmt::format("(Gravity:", gravity) : "";
         ch->sendf("      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n %s\n",
                      add_commas(GET_BANK_GOLD(ch)).c_str(), add_commas(CAN_CARRY_W(ch)).c_str(), grav.c_str());
@@ -6259,40 +6053,24 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
 static void perform_immort_where(struct char_data *ch, char *arg) {
     struct char_data *i;
     struct obj_data *k;
-    struct descriptor_data *d;
     int num = 0, num2 = 0, found = 0;
-    std::optional<vnum> planet;
 
     if (!*arg) {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
                "GODCMD: %s has checked where to check player locations", GET_NAME(ch));
         ch->sendf(
                      "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
-        for (d = descriptor_list; d; d = d->next)
-            if (IS_PLAYING(d)) {
-                if (IN_ROOM(d->character) != NOWHERE) {
-                    planet = d->character->getMatchingArea(area_data::isPlanet);
-                } else {
-                    planet.reset();
-                }
-                i = (d->original ? d->original : d->character);
-                if (i && CAN_SEE(ch, i) && (IN_ROOM(i) != NOWHERE)) {
-                    if (d->original)
-                        ch->sendf("%-20s - [%5d]   %s (in %s)\r\n",
-                                     GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(d->character)),
-                                     d->character->getRoom()->name, GET_NAME(d->character));
-                    else {
-                        std::string locName = "UNKNOWN";
-                        if(planet) {
-                            auto &a = areas[planet.value()];
-                            locName = a.name;
-                        }
-                        ch->sendf("%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)),
-                                     locName.c_str(), i->getRoom()->name);
-                    }
+        for (auto d = descriptor_list; d; d = d->next) {
+            if(!IS_PLAYING(d)) continue;
+            auto loc = d->character->getLocation();
+            if(!loc) continue;
+            if(!CAN_SEE(ch, d->character)) continue;
+            auto reg = loc->getRegion();
 
-                }
-            }
+            ch->sendf("%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)),
+                            reg ? reg->getDisplayName(ch) : "Unknown", loc->getDisplayName(ch));
+            
+        }
     } else {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
@@ -7013,9 +6791,8 @@ ACMD(do_scan) {
 
     auto darkHere = room->isInsideDark();
 
-    for (i = 0; i < 10; i++) {
-        auto d = exits[i];
-        if(!d) continue;
+    for (auto &[i, d] : room->getExits()) {
+        if(i > 10) break;
 
         if (darkHere && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
             (!AFF_FLAGGED(ch, AFF_INFRAVISION))) {
@@ -7025,7 +6802,7 @@ ACMD(do_scan) {
 
         auto dest = d->getDestination();
         if(!dest) continue;
-        if(IS_SET(d->exit_info, EX_CLOSED)) continue;
+        if(d->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
 
         ch->sendf("@w-----------------------------------------@n\r\n");
         ch->sendf("          %s%s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
@@ -7048,7 +6825,7 @@ ACMD(do_scan) {
         if(!d2) continue;
         auto dest2 = d2->getDestination();
         if(!dest2) continue;
-        if(IS_SET(d2->exit_info, EX_CLOSED)) continue;
+        if(d2->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
 
         if (!IS_DARK(dest2->vn)) {
             ch->sendf("@w-----------------------------------------@n\r\n");
@@ -7274,11 +7051,7 @@ ACMD(do_whois) {
                      "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n",
                      GET_NAME(victim), sensei::getName(victim->chclass), race::getName(victim->race),
                      GET_TITLE(victim), clan ? buf : "None.");
-        if (clan == true && !strstr(GET_CLAN(victim), "Applying")) {
-            if (checkCLAN(victim) == true) {
-                clanRANKD(GET_CLAN(victim), ch, victim);
-            }
-        }
+
     }
     ch->sendf("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
 }
@@ -7314,17 +7087,16 @@ static void search_in_direction(struct char_data *ch, int dir) {
     if (skill_lvl > dchide)
         check = true;
 
-    if (e->general_description &&
-        !EXIT_FLAGGED(e, EX_SECRET))
-        ch->sendf(e->general_description);
-    else if (!EXIT_FLAGGED(e, EX_SECRET))
+    if (auto gen = e->getLookDesc(); !gen.empty() && !e->checkFlag(FlagType::Exit, EX_SECRET))
+        ch->sendf(gen);
+    else if (!e->checkFlag(FlagType::Exit, EX_SECRET))
         ch->sendf("There is a normal exit there.\r\n");
-    else if (EXIT_FLAGGED(e, EX_ISDOOR) &&
-             EXIT_FLAGGED(e, EX_SECRET) &&
-             e->keyword && (check == true))
+    else if (e->checkFlag(FlagType::Exit, EX_ISDOOR) &&
+             e->checkFlag(FlagType::Exit, EX_SECRET) &&
+             !e->getAlias().empty() && (check == true))
         ch->sendf("There is a hidden door keyword: '%s' %sthere.\r\n",
-                     fname(e->keyword),
-                     (EXIT_FLAGGED(e, EX_CLOSED)) ? "" : "open ");
+                     fname(e->getAlias().c_str()),
+                     (e->checkFlag(FlagType::Exit, EX_CLOSED)) ? "" : "open ");
     else
         ch->sendf("There is no exit there.\r\n");
 

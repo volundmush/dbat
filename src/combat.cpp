@@ -637,7 +637,7 @@ int check_ruby(struct char_data *ch) {
         act("@RYour $p@R flares up and disappears. Your fire attack has been aided!@n", true, ch, ruby, nullptr,
             TO_CHAR);
         act("@R$n's@R $p@R flares up and disappears!@n", true, ch, ruby, nullptr, TO_ROOM);
-        extract_obj(ruby);
+        ruby->extractFromWorld();
         return (1);
     } else {
         return (0);
@@ -1681,7 +1681,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
             if (IN_ROOM(k) && GET_ROOM_VNUM(IN_ROOM(k)) == 80) {
                 room_vnum inroom = IN_ROOM(k);
-                extract_obj(k);
+                k->extractFromWorld();
                 continue;
             }
         }
@@ -1792,7 +1792,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
                         }
 
-                        extract_obj(k);
+                        k->extractFromWorld();
                         continue;
                     } /* It isn't stopped! */
                     else {
@@ -1802,7 +1802,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             true, TARGET(k), nullptr, nullptr, TO_ROOM);
                         hurt(0, 0, ch, TARGET(k), nullptr, 0, 1);
                         TARGET(k)->decCurST(KICHARGE(k) / 4);
-                        extract_obj(k);
+                        k->extractFromWorld();
                         continue;
                     }
                 } else if (IN_ROOM(TARGET(k)) != IN_ROOM(k)) {
@@ -1865,7 +1865,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
                     }
-                    extract_obj(k);
+                    k->extractFromWorld();
                     continue;
                 }/* End Genki */
                 continue;
@@ -1969,7 +1969,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
                         }
-                        extract_obj(k);
+                        k->extractFromWorld();
                         continue;
                     } /* It isn't stopped! */
                     else {
@@ -1979,7 +1979,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             true, TARGET(k), nullptr, nullptr, TO_ROOM);
                         hurt(0, 0, ch, TARGET(k), nullptr, 0, 1);
                         TARGET(k)->decCurST(KICHARGE(k) / 4);
-                        extract_obj(k);
+                        k->extractFromWorld();
                         continue;
                     }
                 } else if (IN_ROOM(TARGET(k)) != IN_ROOM(k)) {
@@ -2041,12 +2041,12 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
                     }
-                    extract_obj(k);
+                    k->extractFromWorld();
                     continue;
                 }/* End Genocide */
                 continue;
             } else {
-                extract_obj(k);
+                k->extractFromWorld();
                 continue;
             }
         }
@@ -2081,7 +2081,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                 if (KICHARGE(k) <= 0) {
                     send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
                         k->getShortDesc());
-                    extract_obj(k);
+                    k->extractFromWorld();
                     continue;
                 }
                 if (r != kr) {
@@ -2101,7 +2101,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict,
                             k, nullptr, TO_ROOM);
                         int64_t dmg = KICHARGE(k);
-                        extract_obj(k);
+                        k->extractFromWorld();
                         hurt(0, 0, ch, vict, nullptr, dmg, 1);
                         continue;
                     } else if (rand_number(1, 3) > 1) {
@@ -2113,7 +2113,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         if (KICHARGE(k) <= 0) {
                             send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
                                          k->getShortDesc());
-                            extract_obj(k);
+                            k->extractFromWorld();
                         }
                         continue;
                     } else {
@@ -2125,7 +2125,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         if (r->dmg <= 95) {
                             r->dmg += 5;
                         }
-                        extract_obj(k);
+                        k->extractFromWorld();
                         continue;
                     }
                 }
@@ -2135,7 +2135,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                     act("@wYou lose sight of @C$N@W and let $p@W fly away!@n", true, ch, k, vict, TO_CHAR);
                     act("@wYou manage to escape @C$n's@W $p@W!@n", true, ch, k, vict, TO_VICT);
                     act("@C$n@W loses sight of @c$N@W and lets $s $p@W fly away!@n", true, ch, k, vict, TO_NOTVICT);
-                    extract_obj(k);
+                    k->extractFromWorld();
                     continue;
                 } else {
                     act("@RYou move your hand and direct $p@R after @r$N@R!@n", true, ch, k, vict, TO_CHAR);
@@ -2148,7 +2148,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                             act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true,
                                 vict, k, nullptr, TO_ROOM);
                             int64_t dmg = KICHARGE(k);
-                            extract_obj(k);
+                            k->extractFromWorld();
                             hurt(0, 0, ch, vict, nullptr, dmg, 1);
                         } else if (GET_OBJ_VNUM(k) == 84) {
                             int64_t dmg = KICHARGE(k);
@@ -2216,7 +2216,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                                     true, vict, k, nullptr, TO_ROOM);
                                 hurt(0, 0, ch, vict, nullptr, dmg, 1);
                             }
-                            extract_obj(k);
+                            k->extractFromWorld();
                         }
                         continue;
                     } else if (rand_number(1, 3) > 1) {
@@ -2228,7 +2228,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         if (KICHARGE(k) <= 0) {
                             send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
                                          k->getShortDesc());
-                            extract_obj(k);
+                            k->extractFromWorld();
                         }
                         continue;
                     } else {
@@ -2240,7 +2240,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         if (r->dmg <= 95) {
                             r->dmg += 5;
                         }
-                        extract_obj(k);
+                        k->extractFromWorld();
                         continue;
                     }
                 }
@@ -5107,11 +5107,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (type <= 0) {
                     act("$p@w breaks completely apart and then melts away.@n", true, ch, obj, nullptr, TO_CHAR);
                     act("$p@w breaks completely apart and then melts away.@n", true, ch, obj, nullptr, TO_ROOM);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                 } else {
                     act("$p@w is blown away into snow and water!@n", true, ch, obj, nullptr, TO_CHAR);
                     act("$p@w is blown away into snow and water!@n", true, ch, obj, nullptr, TO_ROOM);
-                    extract_obj(obj);
+                    obj->extractFromWorld();
                 }
             }
         } else if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) - dmg > 0) {
@@ -5130,7 +5130,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             } else if (type != 0) {
                 act("$p@w is disintegrated!@n", true, ch, obj, nullptr, TO_CHAR);
                 act("$p@w is disintegrated!@n", true, ch, obj, nullptr, TO_ROOM);
-                extract_obj(obj);
+                obj->extractFromWorld();
             }
         }
     } else {

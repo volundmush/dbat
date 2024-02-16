@@ -17,7 +17,6 @@
 #include "dbat/oasis.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/guild.h"
-#include "dbat/clan.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/config.h"
@@ -1090,17 +1089,6 @@ void enter_player_game(struct descriptor_data *d) {
 
     if (GET_ADMLEVEL(d->character) > 0) {
         d->level = 1;
-    }
-
-    if (GET_CLAN(d->character) != nullptr && !strstr(GET_CLAN(d->character), "None")) {
-        if (!clanIsMember(GET_CLAN(d->character), d->character)) {
-            if (!clanIsModerator(GET_CLAN(d->character), d->character)) {
-                if (!checkCLAN(d->character)) {
-                    write_to_output(d, "Your clan no longer exists.\r\n");
-                    GET_CLAN(d->character) = strdup("None.");
-                }
-            }
-        }
     }
 
     if (IS_HOSHIJIN(d->character)) {

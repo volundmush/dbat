@@ -496,7 +496,7 @@ struct char_data *get_char_num(mob_rnum nr) {
 }
 
 
-// old code, don't delete just yet though...
+/*
 static void _obj_to_room(struct obj_data *object, struct room_data *room) {
     struct obj_data *vehicle = nullptr;
 
@@ -504,7 +504,7 @@ static void _obj_to_room(struct obj_data *object, struct room_data *room) {
         if (GET_OBJ_TYPE(object) != ITEM_PLANT) {
             room->sendfContents("%s @wDisappears in a puff of smoke! It seems the room was designed to vaporize anything not plant related. Strange...@n\r\n",
                          object->getShortDesc());
-            extract_obj(object);
+            object->extractFromWorld();
             return;
         }
     }
@@ -518,7 +518,6 @@ static void _obj_to_room(struct obj_data *object, struct room_data *room) {
         object->setFlag(FlagType::Item, ITEM_UNBREAKABLE);
     }
 
-    // This section is now only going to be called during migrations.
     if(isMigrating) {
         if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
             if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
@@ -588,58 +587,33 @@ static void _obj_to_room(struct obj_data *object, struct room_data *room) {
         }
     }
 }
-
+*/
 
 
 /* Extract an object from the world */
-void extract_obj(struct obj_data *obj) {
-    struct obj_data *temp;
-    struct char_data *ch;
-    obj->clearLocation();
+void obj_data::extractFromWorld() {
+    unit_data::extractFromWorld();
+    
+    clearLocation();
 
     /* Get rid of the contents of the object, as well. */
-    if (GET_FELLOW_WALL(obj) && GET_OBJ_VNUM(obj) == 79) {
-        struct obj_data *trash;
-        trash = GET_FELLOW_WALL(obj);
-        GET_FELLOW_WALL(obj) = nullptr;
+    if (GET_FELLOW_WALL(this) && vn == 79) {
+        auto trash = GET_FELLOW_WALL(this);
+        GET_FELLOW_WALL(this) = nullptr;
         GET_FELLOW_WALL(trash) = nullptr;
-        extract_obj(trash);
+        trash->extractFromWorld();
     }
-    if (SITTING(obj)) {
-        ch = SITTING(obj);
-        SITTING(obj) = nullptr;
+
+    if (auto ch = SITTING(this); ch) {
+        SITTING(this) = nullptr;
         SITS(ch) = nullptr;
     }
-    if (GET_OBJ_POSTED(obj) && obj->in_obj == nullptr) {
-        struct obj_data *obj2 = GET_OBJ_POSTED(obj);
-        GET_OBJ_POSTED(obj2) = nullptr;
-        GET_OBJ_POSTTYPE(obj2) = 0;
-        GET_OBJ_POSTED(obj) = nullptr;
-    }
-    if (TARGET(obj)) {
-        TARGET(obj) = nullptr;
-    }
-    if (USER(obj)) {
-        USER(obj) = nullptr;
+
+    if (USER(this)) {
+        USER(this) = nullptr;
     }
 
-    for(auto o : obj->getInventory())
-        extract_obj(o);
-
-    obj->deactivate();
-
-    if (GET_OBJ_RNUM(obj) != NOTHING)
-        (obj_index[GET_OBJ_RNUM(obj)].vn)--;
-
-    if (SCRIPT(obj))
-        extract_script(obj, OBJ_TRIGGER);
-
-    auto found = uniqueObjects.find(obj->uid);
-    if (found != uniqueObjects.end()) {
-        uniqueObjects.erase(found);
-    }
-
-    free_obj(obj);
+    erase_vnum(objectVnumIndex, this);
 }
 
 
@@ -1171,7 +1145,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
 }
 
 
-struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, std::unordered_map<int, obj_data*> equipment) {
+struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, std::map<int, obj_data*> equipment) {
     int j, num;
 
     if (!number) {
@@ -1191,7 +1165,7 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
 }
 
 
-int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, std::unordered_map<int, obj_data*> equipment) {
+int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, std::map<int, obj_data*> equipment) {
     int j, num;
 
     if (!number) {

@@ -432,7 +432,7 @@ extern bool ADM_FLAGGED(struct char_data *ch, int flag);
 bool ROOM_FLAGGED(room_vnum loc, int flag);
 bool ROOM_FLAGGED(struct room_data *loc, int flag);
 
-#define EXIT_FLAGGED(exit, flag) (IS_SET((exit)->exit_info, (flag)))
+#define EXIT_FLAGGED(exit, flag) (exit->checkFlag(FlagType::Exit, (flag)))
 extern bool OBJAFF_FLAGGED(struct obj_data *obj, int flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
 extern bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag);

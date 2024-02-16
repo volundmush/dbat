@@ -316,22 +316,25 @@ WCMD(do_wdoor) {
             ex->addToLocation(rm, dir);
         }
 
+        bitvector_t flags = 0;
+
         switch (fd) {
             case 1:  /* description */
                 ex->setLookDesc(value);
                 break;
             case 2:  /* flags       */
-                newexit->exit_info = (int16_t) asciiflag_conv(value);
+                flags = asciiflag_conv(value);
+                for(auto i = 0; i < NUM_EXIT_FLAGS; i++) ex->setFlag(FlagType::Exit, i, IS_SET(flags, 1 << i));
                 break;
             case 3:  /* key         */
                 newexit->key = atoi(value);
                 break;
             case 4:  /* name        */
-                ex->setKeyword(value);
+                ex->setAlias(value);
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->to = world.at(to_room);
+                    newexit->destination = dynamic_cast<room_data*>(world.at(to_room));
                 else
                     wld_log(room, "wdoor: invalid door target");
                 break;
@@ -432,7 +435,7 @@ WCMD(do_wpurge) {
         }
 
         for (auto o : room->getInventory()) {
-            extract_obj(obj);
+            obj->extractFromWorld();
         }
 
         return;
@@ -450,7 +453,7 @@ WCMD(do_wpurge) {
             obj = get_obj_in_room(room, arg);
 
         if (obj) {
-            extract_obj(obj);
+            obj->extractFromWorld();
         } else
             wld_log(room, "wpurge: bad argument");
 
@@ -602,7 +605,7 @@ WCMD(do_wat) {
         return;
     }
 
-    wld_command_interpreter(world[loc], command);
+    wld_command_interpreter(dynamic_cast<room_data*>(world[loc]), command);
 }
 
 const struct wld_command_info wld_cmd_info[] = {

@@ -46,7 +46,7 @@ void dispel_ash(struct char_data *ch) {
     if(!success) return;
     act("@GYou clear the air with the shockwaves of your power!@n", true, ch, ash, nullptr, TO_CHAR);
     act("@C$n@G clears the air with the shockwaves of $s power!@n", true, ch, ash, nullptr, TO_ROOM);
-    extract_obj(ash);
+    ash->extractFromWorld();
 
 }
 
@@ -2137,27 +2137,7 @@ int64_t gear_exp(struct char_data *ch, int64_t exp) {
 
 int planet_check(struct char_data *ch, struct char_data *vict) {
 
-    if (ch == nullptr) {
-        basic_mud_log("ERROR: planet_check called without ch!");
-        return false;
-    } else if (vict == nullptr) {
-        basic_mud_log("ERROR: planet_check called without vict!");
-        return false;
-    } else {
-        if (GET_ADMLEVEL(vict) <= 0) {
-            auto chPlanet = ch->getMatchingArea(area_data::isPlanet);
-            auto victPlanet = vict->getMatchingArea(area_data::isPlanet);
-            if(chPlanet && chPlanet == victPlanet) return true;
-            else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_AL)) {
-                return true;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_HELL)) {
-                return true;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NEO) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_NEO)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    return false;
 }
 
 void purge_homing(struct char_data *ch) {
@@ -2166,7 +2146,7 @@ void purge_homing(struct char_data *ch) {
     auto gather = ch->getRoom()->gatherObjects(isHoming);
     for(auto obj : gather) {
         act("$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
-        extract_obj(obj);
+        obj->extractFromWorld();
     }
 }
 
@@ -3337,10 +3317,7 @@ bool AFF_FLAGGED(struct char_data *ch, int flag) {
 }
 
 bool PLANET_FLAGGED(struct char_data *ch, int flag) {
-    auto planet = ch->getMatchingArea(area_data::isPlanet);
-    if(!planet) return false;
-    auto &a = areas[*planet];
-    return a.checkFlags.test(flag);
+    return false;
 }
 
 bool ETHER_STREAM(struct char_data *ch) {
@@ -3506,7 +3483,7 @@ double ROOM_GRAVITY(room_vnum room) {
     if(auto u = world.find(room); u != world.end()) {
         auto r = dynamic_cast<room_data*>(u->second);
          if(!r) return 1.0;
-        return r->getGravity();
+        return r->getEnvVar(EnvVar::Gravity);
     }
     return 1.0;
 }

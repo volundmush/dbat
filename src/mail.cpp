@@ -631,7 +631,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
             act("$n gives you a piece of mail.", false, mailman, nullptr, ch, TO_VICT);
             act("$N gives $n a piece of mail.", false, ch, nullptr, mailman, TO_ROOM);
         } else {
-            extract_obj(obj);
+            obj->extractFromWorld();
         }
     }
 }

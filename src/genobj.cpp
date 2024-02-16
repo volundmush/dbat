@@ -293,10 +293,7 @@ bool obj_data::isProvidingLight() {
 
 
 double obj_data::currentGravity() {
-    if(auto room = getAbsoluteRoom(); room) {
-        return room->getGravity();
-    }
-    return 1.0;
+    return myEnvVar(EnvVar::Gravity);
 }
 
 bool obj_data::isWorking() {

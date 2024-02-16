@@ -1739,21 +1739,19 @@ namespace atk {
             master_pass = true;
 
         if (GET_HIT(victim) > 0 && calcDamage > GET_MAX_HIT(victim) / 4 && master_pass == true) {
-            int attempt = rand_number(0, NUM_OF_DIRS);  /* Select a random direction */
-            int count = 0;
-            while (count < 12) {
-                attempt = count;
-                if (CAN_GO(victim, attempt)) {
-                    count = 12;
-                } else {
-                    count++;
-                }
+            auto r = victim->getRoom();
+            std::vector<exit_data*> candidates;
+            for(auto &[door, ex] : r->getExits()) {
+                if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
+                if(auto dest = ex->getDestination(); dest) candidates.push_back(ex);
             }
-            if (CAN_GO(victim, attempt)) {
+            
+            if (!candidates.empty()) {
+                auto dir = Random::get(candidates);
                 act("$N@W is pushed away by the blast!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@WYou are pushed away by the blast!@n", true, user, nullptr, victim, TO_VICT);
                 act("$N@W is pushed away by the blast!@n", true, user, nullptr, victim, TO_NOTVICT);
-                do_simple_move(victim, attempt, true);
+                do_simple_move(victim, (*dir)->locationType, true);
             } else {
                 act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, user, nullptr,
                     victim,
@@ -2004,14 +2002,14 @@ namespace atk {
 
         if (KICHARGE(obj) > 0 && GET_CHARGE(user) > KICHARGE(obj)) {
             KICHARGE(obj) -= GET_CHARGE(user);
-            extract_obj(obj);
+            obj->extractFromWorld();
             extracted = true;
         } else if (KICHARGE(obj) > 0 && GET_CHARGE(user) < KICHARGE(obj)) {
             KICHARGE(obj) -= GET_CHARGE(user);
             GET_CHARGE(user) = 0;
             calcDamage = KICHARGE(obj);
             hurt(0, 0, USER(obj), user, nullptr, calcDamage, 0);
-            extract_obj(obj);
+            obj->extractFromWorld();
             extracted = true;
         }
 

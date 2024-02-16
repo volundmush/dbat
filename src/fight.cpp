@@ -1003,7 +1003,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
                     act("$n@G flees in terror and you lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
                     for(auto o : ch->getInventory())
-                        extract_obj(o);
+                        o->extractFromWorld();
 
                     extract_char(ch);
                     continue;
@@ -1013,7 +1013,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 if (rand_number(1, 30) >= 22 && !block_calc(ch)) {
                     act("$n@G turns and runs away. You lose sight of $m!", true, ch, nullptr, nullptr, TO_ROOM);
                     for(auto o : ch->getInventory())
-                        extract_obj(o);
+                        o->extractFromWorld();
                     extract_char(ch);
                     continue;
                 }
@@ -1450,7 +1450,6 @@ static void make_pcorpse(struct char_data *ch) {
     corpse = create_obj();
 
     corpse->vn = NOTHING;
-    IN_ROOM(corpse) = NOWHERE;
 
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
@@ -1470,8 +1469,6 @@ static void make_pcorpse(struct char_data *ch) {
     GET_OBJ_TYPE(corpse) = ITEM_CONTAINER;
     GET_OBJ_SIZE(corpse) = get_size(ch);
     for (x = y = 0; x < EF_ARRAY_MAX || y < TW_ARRAY_MAX; x++, y++) {
-        if (x < EF_ARRAY_MAX)
-            GET_OBJ_EXTRA_AR(corpse, x) = 0;
         if (y < TW_ARRAY_MAX)
             corpse->clearFlag(FlagType::Wear, y);
     }
@@ -1608,7 +1605,6 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     corpse = create_obj();
 
     corpse->vn = NOTHING;
-    IN_ROOM(corpse) = NOWHERE;
 
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
@@ -1676,8 +1672,6 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     GET_OBJ_TYPE(corpse) = ITEM_CONTAINER;
     GET_OBJ_SIZE(corpse) = get_size(ch);
     for (x = y = 0; x < EF_ARRAY_MAX || y < TW_ARRAY_MAX; x++, y++) {
-        if (x < EF_ARRAY_MAX)
-            GET_OBJ_EXTRA_AR(corpse, x) = 0;
         if (y < TW_ARRAY_MAX)
             corpse->clearFlag(FlagType::Wear, y);
     }
@@ -1697,7 +1691,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
         for (auto o : ch->getInventory()) {
             obj->removeFromLocation();
-            extract_obj(obj);
+            obj->extractFromWorld();
         }
     }
 
@@ -1761,11 +1755,14 @@ static void change_alignment(struct char_data *ch, struct char_data *victim) {
 
 
 void death_cry(struct char_data *ch) {
-    int door;
-    for (door = 0; door < NUM_OF_DIRS; door++)
-        if (CAN_GO(ch, door))
-            send_to_room(ch->getRoom()->dir_option[door]->to_room,
-                         "Your blood freezes as you hear someone's death cry.\r\n");
+    auto r = ch->getRoom();
+    for (auto &[door, ex] : r->getExits()) {
+        if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
+        if(auto dest = ex->getDestination(); dest) {
+            dest->sendText("Your blood freezes as you hear someone's death cry.\r\n");
+        }
+        
+    }
 }
 
 /* Let's clean up necessary things after "death" */

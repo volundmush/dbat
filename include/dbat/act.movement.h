@@ -18,15 +18,6 @@ extern int do_simple_move(struct char_data *ch, int dir, int need_specials_check
 
 extern int perform_move(struct char_data *ch, int dir, int need_specials_check);
 
-extern std::optional<vnum> governingAreaTypeFor(struct room_data *rd, std::function<bool(area_data&)>& func);
-
-extern std::optional<vnum> governingAreaTypeFor(struct char_data *ch, std::function<bool(area_data&)>& func);
-
-extern std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<bool(area_data&)>& func);
-
-extern std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data&)>& func);
-
-
 // commands
 extern ACMD(do_gen_door);
 

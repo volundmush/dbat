@@ -279,21 +279,21 @@ ACMD(do_mjunk) {
     if ((find_all_dots(arg) != FIND_INDIV) && !junk_all) {
         /* Thanks to Carlos Myers for fixing the line below */
         if ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->getEquipment())) >= 0) {
-            extract_obj(unequip_char(ch, pos));
+            unequip_char(ch, pos)->extractFromWorld();
             return;
         }
         if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getInventory())) != nullptr)
-            extract_obj(obj);
+            obj->extractFromWorld();
         return;
     } else {
         for (auto obj : ch->getInventory()) {
             if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
-                extract_obj(obj);
+                obj->extractFromWorld();
             }
         }
         /* Thanks to Carlos Myers for fixing the line below */
         while ((pos = get_obj_pos_in_equip_vis(ch, arg, nullptr, ch->getEquipment())) >= 0)
-            extract_obj(unequip_char(ch, pos));
+            unequip_char(ch, pos)->extractFromWorld();
     }
     return;
 }
@@ -552,7 +552,7 @@ ACMD(do_mpurge) {
         }
 
         for (auto obj : ch->getRoom()->getInventory()) {
-            extract_obj(obj);
+            obj->extractFromWorld();
         }
 
         return;
@@ -569,7 +569,7 @@ ACMD(do_mpurge) {
             obj = get_obj_vis(ch, arg, nullptr);
 
         if (obj) {
-            extract_obj(obj);
+            obj->extractFromWorld();
             obj = nullptr;
         } else
             mob_log(ch, "mpurge: bad argument");
@@ -1120,47 +1120,40 @@ ACMD(do_mdoor) {
         return;
     }
 
-    newexit = rm->dir_option[dir];
+    auto exits = rm->getExits();
+    auto ex = exits[dir];
 
     /* purge exit */
     if (fd == 0) {
-        if (newexit) {
-            if (newexit->general_description)
-                free(newexit->general_description);
-            if (newexit->keyword)
-                free(newexit->keyword);
-            free(newexit);
-            rm->dir_option[dir] = nullptr;
+        if (ex) {
+            ex->extractFromWorld();
         }
     } else {
-        if (!newexit) {
-            CREATE(newexit, struct exit_data, 1);
-            rm->dir_option[dir] = newexit;
+        if (!ex) {
+            ex = new exit_data();
+            ex->uid = getNextUID();
+            world[ex->uid] = ex;
+            ex->script = std::make_shared<script_data>(ex);
         }
 
+        bitvector_t flags = 0;
         switch (fd) {
             case 1:  /* description */
-                if (newexit->general_description)
-                    free(newexit->general_description);
-                CREATE(newexit->general_description, char, strlen(value) + 3);
-                strcpy(newexit->general_description, value);
-                strcat(newexit->general_description, "\r\n");
+                ex->setLookDesc(value);
                 break;
             case 2:  /* flags       */
-                newexit->exit_info = (int16_t) asciiflag_conv(value);
+                flags = asciiflag_conv(value);
+                for(auto i = 0; i < NUM_EXIT_FLAGS; i++) ex->setFlag(FlagType::Exit, i, IS_SET(flags, 1 << i));
                 break;
             case 3:  /* key         */
-                newexit->key = atoi(value);
+                ex->key = atoi(value);
                 break;
             case 4:  /* name        */
-                if (newexit->keyword)
-                    free(newexit->keyword);
-                CREATE(newexit->keyword, char, strlen(value) + 1);
-                strcpy(newexit->keyword, value);
+                ex->setAlias(value);
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->to_room = to_room;
+                    ex->destination = dynamic_cast<room_data*>(world.at(to_room));
                 else
                     mob_log(ch, "mdoor: invalid door target");
                 break;

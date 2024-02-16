@@ -33,11 +33,35 @@ std::vector<obj_data*> unit_data::getInventory() {
     return out;
 }
 
-std::unordered_map<int, obj_data*> unit_data::getEquipment() {
-    std::unordered_map<int, obj_data*> out;
+std::map<int, obj_data*> unit_data::getEquipment() {
+    std::map<int, obj_data*> out;
     for(auto u : contents) {
         auto o = dynamic_cast<obj_data*>(u);
         if(o && o->locationType > 0) out[o->locationType] = o;
+    }
+    return out;
+}
+
+std::map<int, exit_data*> unit_data::getExits() {
+    std::map<int, exit_data*> out;
+    for(auto u : contents) {
+        auto o = dynamic_cast<exit_data*>(u);
+        if(!o) continue;
+        out[o->locationType] = o;
+    }
+    return out;
+}
+
+std::map<int, exit_data*> unit_data::getUsableExits() {
+    std::map<int, exit_data*> out;
+    for(auto u : contents) {
+        auto o = dynamic_cast<exit_data*>(u);
+        if(!o) continue;
+        if(o->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
+        auto dest = o->getDestination();
+        if(!dest) continue;
+        if(dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
+        out[o->locationType] = o;
     }
     return out;
 }
@@ -465,4 +489,68 @@ unit_data* Searcher::getOne() {
 
 area_data* unit_data::getMatchingArea(const std::function<bool(area_data*)>& f) {
     return nullptr;
+}
+
+
+bool unit_data::isEnvironment() {
+    return false;
+}
+
+
+bool unit_data::isRegion() {
+    return false;
+}
+
+bool unit_data::isStructure() {
+    return false;
+}
+
+unit_data* unit_data::getEnvironment() {
+    auto loc = getLocation();
+    while(loc) {
+        if(loc->isEnvironment()) return loc;
+        loc = loc->getLocation();
+        if(loc == this) return nullptr;
+    }
+    return nullptr;
+}
+
+unit_data* unit_data::getRegion() {
+    auto loc = getLocation();
+    while(loc) {
+        if(loc->isRegion()) return loc;
+        loc = loc->getLocation();
+        if(loc == this) return nullptr;
+    }
+    return nullptr;
+}
+
+unit_data* unit_data::getStructure() {
+    auto loc = getLocation();
+    while(loc) {
+        if(loc->isStructure()) return loc;
+        loc = loc->getLocation();
+        if(loc == this) return nullptr;
+    }
+    return nullptr;
+}
+
+double unit_data::myEnvVar(EnvVar v) {
+    if(auto env = getEnvironment(); env) return env->getEnvVar(v);
+    return 0.0;
+}
+
+double unit_data::getEnvVar(EnvVar v) {
+    return 0.0;
+}
+
+void unit_data::extractFromWorld() {
+    exists = false;
+    pendingDeletions.insert(this);
+    if(script) script->deactivate();
+
+    for(auto c : contents) {
+        c->onHolderExtraction();
+    }
+
 }
