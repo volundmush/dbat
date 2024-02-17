@@ -333,7 +333,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual ~GameEntity();
 
     int64_t getUID();
-    vnum getVNUM();
+    vnum getVN();
     zone_vnum getZone();
 
     /* unique id for this unit */

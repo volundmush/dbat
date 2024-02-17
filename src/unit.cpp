@@ -203,7 +203,7 @@ Object* GameEntity::findObject(const std::function<bool(Object*)> &func, bool wo
 }
 
 Object* GameEntity::findObjectVnum(obj_vnum objVnum, bool working) {
-    return findObject([objVnum](auto o) {return o->vn == objVnum;}, working);
+    return findObject([objVnum](auto o) {return o->getVN() == objVnum;}, working);
 }
 
 std::set<Object*> GameEntity::gatherObjects(const std::function<bool(Object*)> &func, bool working) {
@@ -639,6 +639,7 @@ bool GameEntity::canSeeAdminInvisible() {
 }
 
 bool GameEntity::canSee(GameEntity *u) {
+    if(u == this) return true;
     if(canSeeAdminInvisible()) return true;
     if(u->isInvisible() && !canSeeInvisible()) return false;
     if(u->isHidden() && !canSeeHidden()) return false;
@@ -706,4 +707,16 @@ std::optional<std::string> GameEntity::checkAllowEquip(GameEntity *u, int locati
 
 std::optional<std::string> GameEntity::checkAllowRemove(GameEntity *u) {
     return "you can't remove it!";
+}
+
+int64_t GameEntity::getUID() {
+    return uid;
+}
+
+vnum GameEntity::getVN() {
+    return vn;
+}
+
+zone_vnum GameEntity::getZone() {
+    return zone;
 }

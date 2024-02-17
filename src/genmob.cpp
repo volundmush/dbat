@@ -46,7 +46,7 @@ int save_mobiles(zone_rnum zone_num) {
 
 
 void check_mobile_strings(BaseCharacter *mob) {
-    mob_vnum mvnum = mob_index[mob->vn].vn;
+    mob_vnum mvnum = mob_index[mob->getVN()].vn;
     check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
     check_mobile_string(mvnum, &GET_DDESC(mob), "detailed description");
     check_mobile_string(mvnum, &GET_ALIAS(mob), "alias list");

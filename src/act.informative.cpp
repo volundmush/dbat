@@ -879,15 +879,15 @@ int readIntro(BaseCharacter *ch, BaseCharacter *vict) {
         return 1;
     }
 
-    auto p = players[ch->uid];
+    auto p = players[ch->getUID()];
 
-    return p->dubNames.contains(vict->uid);
+    return p->dubNames.contains(vict->getUID());
 }
 
 void introWrite(BaseCharacter *ch, BaseCharacter *vict, char *name) {
     std::string n(name);
-    auto p = players[ch->uid];
-    p->dubNames[vict->uid] = n;
+    auto p = players[ch->getUID()];
+    p->dubNames[vict->getUID()] = n;
 }
 
 ACMD(do_intro) {
@@ -1803,7 +1803,7 @@ static void gen_map(BaseCharacter *ch, int num) {
     auto room = ch->getRoom();
     
     /* print out exits */
-    map_draw_room(map, 4, 4, ch->getRoom()->vn, ch);
+    map_draw_room(map, 4, 4, ch->getRoom()->getUID(), ch);
     auto exits = room->getExits();
     for (auto &[door, d] : exits) {
         if(d->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
@@ -1812,28 +1812,28 @@ static void gen_map(BaseCharacter *ch, int num) {
 
         switch (door) {
             case NORTH:
-                map_draw_room(map, 4, 3, dest->uid, ch);
+                map_draw_room(map, 4, 3, dest->getUID(), ch);
                 break;
             case EAST:
-                map_draw_room(map, 5, 4, dest->uid, ch);
+                map_draw_room(map, 5, 4, dest->getUID(), ch);
                 break;
             case SOUTH:
-                map_draw_room(map, 4, 5, dest->uid, ch);
+                map_draw_room(map, 4, 5, dest->getUID(), ch);
                 break;
             case WEST:
-                map_draw_room(map, 3, 4, dest->uid, ch);
+                map_draw_room(map, 3, 4, dest->getUID(), ch);
                 break;
             case NORTHEAST:
-                map_draw_room(map, 5, 3, dest->uid, ch);
+                map_draw_room(map, 5, 3, dest->getUID(), ch);
                 break;
             case NORTHWEST:
-                map_draw_room(map, 3, 3, dest->uid, ch);
+                map_draw_room(map, 3, 3, dest->getUID(), ch);
                 break;
             case SOUTHEAST:
-                map_draw_room(map, 5, 5, dest->uid, ch);
+                map_draw_room(map, 5, 5, dest->getUID(), ch);
                 break;
             case SOUTHWEST:
-                map_draw_room(map, 3, 5, dest->uid, ch);
+                map_draw_room(map, 3, 5, dest->getUID(), ch);
                 break;
         }
     }
@@ -3363,10 +3363,10 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
         ch->sendf("@D------------------------------------------------------------------------@n\r\n");
     }
     int space = false;
-    if (room->sector_type == SECT_SPACE && room->vn >= 20000) {
+    if (room->sector_type == SECT_SPACE && room->getUID() >= 20000) {
         space = true;
     }
-    if (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) == room->vn) {
+    if (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) == room->getUID()) {
         /* Compass and Auto-map - Iovan 9-11-10 */
         ch->sendf("@D------------------------------------------------------------------------@n\r\n");
         ch->sendf("@w      Compass           Auto-Map            Map Key\r\n");
@@ -3377,11 +3377,11 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
     if (exit_mode == EXIT_NORMAL && space == true) {
         /* printmap */
         ch->sendf("@D------------------------------[@CRadar@D]---------------------------------@n\r\n");
-        printmap(room->vn, ch, 1, -1);
+        printmap(room->getUID(), ch, 1, -1);
         ch->sendf("     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
         ch->sendf("@D------------------------------------------------------------------------@n\r\n");
     }
-    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) != room->vn)) {
+    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) != room->getUID())) {
         ch->sendf("@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
         if (IS_AFFECTED(ch, AFF_BLIND)) {
             ch->sendf("You can't see a damned thing, you're blind!\r\n");
@@ -3434,7 +3434,7 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
                 auto rdirname = dirs[rev_dir[door]];
 
 
-                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->vn, dest->name);
+                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->getUID(), dest->name);
                 if (d->checkFlag(FlagType::Exit, EX_ISDOOR) || d->checkFlag(FlagType::Exit, EX_SECRET)) {
                     /* This exit has a door - tell all about it */
                     char argh[100];
@@ -3464,7 +3464,7 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
                     *blam = toupper(*blam);
 
                     sprintf(dl, "@c%-9s @D-@w %s\r\n", blam,
-                            IS_DARK(dest->vn) && !CAN_SEE_IN_DARK(ch) && !has_light
+                            IS_DARK(dest->getUID()) && !CAN_SEE_IN_DARK(ch) && !has_light
                             ? "@bToo dark to tell.@w" : dest->name);
 
                 } else if (CONFIG_DISP_CLOSED_DOORS && !d->checkFlag(FlagType::Exit, EX_SECRET)) {
@@ -3548,23 +3548,23 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
             ch->sendf("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n",
                          check_saveroom_count(ch, nullptr));
         }
-        if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) == room->vn &&
-            GET_RADAR3(ch) != room->vn) {
+        if (GET_RADAR1(ch) == room->getUID() && GET_RADAR2(ch) == room->getUID() &&
+            GET_RADAR3(ch) != room->getUID()) {
             ch->sendf("@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) != room->vn &&
-                   GET_RADAR3(ch) == room->vn) {
+        } else if (GET_RADAR1(ch) == room->getUID() && GET_RADAR2(ch) != room->getUID() &&
+                   GET_RADAR3(ch) == room->getUID()) {
             ch->sendf("@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) != room->vn && GET_RADAR2(ch) == room->vn &&
-                   GET_RADAR3(ch) == room->vn) {
+        } else if (GET_RADAR1(ch) != room->getUID() && GET_RADAR2(ch) == room->getUID() &&
+                   GET_RADAR3(ch) == room->getUID()) {
             ch->sendf("@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) == room->vn &&
-                   GET_RADAR3(ch) == room->vn) {
+        } else if (GET_RADAR1(ch) == room->getUID() && GET_RADAR2(ch) == room->getUID() &&
+                   GET_RADAR3(ch) == room->getUID()) {
             ch->sendf("@CAll three of your buoys are floating here. Why?@n\r\n");
-        } else if (GET_RADAR1(ch) == room->vn) {
+        } else if (GET_RADAR1(ch) == room->getUID()) {
             ch->sendf("@CYour @cBuoy #1@C is floating here.@n\r\n");
-        } else if (GET_RADAR2(ch) == room->vn) {
+        } else if (GET_RADAR2(ch) == room->getUID()) {
             ch->sendf("@CYour @cBuoy #2@C is floating here.@n\r\n");
-        } else if (GET_RADAR3(ch) == room->vn) {
+        } else if (GET_RADAR3(ch) == room->getUID()) {
             ch->sendf("@CYour @cBuoy #3@C is floating here.@n\r\n");
         }
     }
@@ -3646,9 +3646,9 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
         return;
     
     auto sect = rm->sector_type;
-    auto sunk = SUNKEN(rm->vn);
+    auto sunk = rm->isSunken();
 
-    if (IS_DARK(rm->vn) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+    if (IS_DARK(rm->getUID()) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         ch->sendf("It's too dark to make out much detail...\r\n");
     } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
         ch->sendf("You see nothing but infinite darkness...\r\n");
@@ -3679,7 +3679,7 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
             std::vector<std::string> ancestors;
             auto parent = rm->getLocation();
             while(parent) {
-                ancestors.emplace_back(fmt::format("[{}] {}@n", parent->uid, parent->getDisplayName(ch)));
+                ancestors.emplace_back(fmt::format("[{}] {}@n", parent->getUID(), parent->getDisplayName(ch)));
                 parent = parent->getLocation();
             }
             // Reverse areas.
@@ -3690,7 +3690,7 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
         double grav = rm->getEnvVar(EnvVar::Gravity);
         auto g = fmt::format("{}", grav);
         sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2,
-                rm->vn, g.c_str());
+                rm->getUID(), g.c_str());
         ch->sendf("@wFlags: %-70s@w\r\n", buf3);
         if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
             ch->sendf("@wO----------------------------------------------------------------------O@n\r\n");
@@ -4301,7 +4301,7 @@ static void look_out_window(BaseCharacter *ch, char *arg) {
                     auto dest = e->getDestination();
                     if(!dest) continue;
                     if(!dest->checkFlag(FlagType::Room, ROOM_INDOORS)) {
-                        target_room = dest->vn;
+                        target_room = dest->getUID();
                         break;
                     }
                 }
@@ -4547,7 +4547,7 @@ ACMD(do_look) {
     auto room = ch->getRoom();
     auto exits = room->getExits();
 
-    if(IS_DARK(room->vn) && !CAN_SEE_IN_DARK(ch)) {
+    if(IS_DARK(room->getUID()) && !CAN_SEE_IN_DARK(ch)) {
         ch->sendf("It is pitch black...\r\n");
         list_char_to_char(room->getPeople(), ch);    /* glowing red eyes */
         return;
@@ -6947,7 +6947,7 @@ ACMD(do_history) {
     one_argument(argument, arg);
     if(IS_NPC(ch)) return;
 
-    auto p = players[ch->uid];
+    auto p = players[ch->getUID()];
 
     type = search_block(arg, history_types, false);
     if (!*arg || type < 0) {
@@ -6990,7 +6990,7 @@ void add_history(BaseCharacter *ch, char *str, int type) {
     if (IS_NPC(ch))
         return;
 
-    auto p = players[ch->uid];
+    auto p = players[ch->getUID()];
 
     tmp = p->comm_hist[type];
     ct = time(nullptr);
@@ -7090,7 +7090,7 @@ ACMD(do_scan) {
         if(!dest2) continue;
         if(d2->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
 
-        if (!IS_DARK(dest2->vn)) {
+        if (!IS_DARK(dest2->getUID())) {
             ch->sendf("@w-----------------------------------------@n\r\n");
             ch->sendf("          %sFar %s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
                          dest2->name ? dest2->name

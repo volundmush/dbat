@@ -2267,9 +2267,9 @@ namespace net {
         // CREATE PLAYER ENTRY
         ch->uid = getNextUID();
         ch->setFlag(FlagType::Pref, PRF_COLOR);
-        world[ch->uid] = ch;
+        world[ch->getUID()] = ch;
         auto p = std::make_shared<player_data>();
-        p->id = ch->uid;
+        p->id = ch->getUID();
         players[p->id] = p;
         p->name = ch->name;
         p->account = conn->account;

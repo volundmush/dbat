@@ -77,7 +77,7 @@ void wld_log(Room *room, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
-    snprintf(output, sizeof(output), "Room %d :: %s", room->vn, format);
+    snprintf(output, sizeof(output), "Room %d :: %s", room->getVN(), format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -365,7 +365,7 @@ WCMD(do_wteleport) {
     auto r = dynamic_cast<Room*>(world.at(target));
 
     if (!strcasecmp(arg1, "all")) {
-        if (nr == room->vn) {
+        if (nr == room->getUID()) {
             wld_log(room, "wteleport all target is itself");
             return;
         }
@@ -491,7 +491,7 @@ WCMD(do_wload) {
     if (is_abbrev(arg1, "mob")) {
         room_rnum rnum;
         if (!target || !*target) {
-            rnum = real_room(room->vn);
+            rnum = real_room(room->getUID());
         } else {
             if (!isdigit(*target) || (rnum = real_room(atoi(target))) == NOWHERE) {
                 wld_log(room, "wload: room target vnum doesn't exist (loading mob vnum %d to room %s)", number, target);

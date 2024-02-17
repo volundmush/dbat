@@ -707,7 +707,7 @@ void auc_save() {
 
         for (auto obj : world[real_room(80)]->getInventory()) {
             if (obj) {
-                fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->uid, GET_AUCTERN(obj), GET_AUCTER(obj),
+                fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->getUID(), GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
             }
         }
@@ -730,7 +730,7 @@ void auc_load(Object *obj) {
         while (!feof(fl)) {
             get_line(fl, line);
             sscanf(line, "%" I64T " %s %d %d %d %d %ld\n", &oID, filler, &aID, &bID, &startc, &cost, &timer);
-            if (obj->uid == oID) {
+            if (obj->getUID() == oID) {
                 GET_AUCTERN(obj) = strdup(filler);
                 GET_AUCTER(obj) = aID;
                 GET_CURBID(obj) = bID;
@@ -1163,7 +1163,7 @@ BaseCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->deserialize(proto->second);
     
     mob->uid = getNextUID();
-    world[mob->uid] = mob;
+    world[mob->getUID()] = mob;
     mob->activate();
 
     std::map<CharAppearance, int> setNumsTo;
@@ -1712,7 +1712,7 @@ Object *create_obj(bool activate) {
     if(activate) {
         obj->uid = getNextUID();
         obj->checkMyID();
-        world[obj->uid] = obj;
+        world[obj->getUID()] = obj;
         obj->activate();
     }
 
@@ -1751,7 +1751,7 @@ Object *read_object(obj_vnum nr, int type, bool activate) /* and obj_rnum */
     }
     if(activate) {
         obj->uid = getNextUID();
-        world[obj->uid] = obj;
+        world[obj->getUID()] = obj;
         obj->activate();
     }
     return (obj);
@@ -2267,7 +2267,7 @@ void free_followers(struct follow_type *k) {
 /* release memory allocated for a char struct */
 void free_char(BaseCharacter *ch) {
     int i;
-    world.erase(ch->uid);
+    world.erase(ch->getUID());
     
     while (ch->affected)
         affect_remove(ch, ch->affected);

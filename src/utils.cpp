@@ -663,12 +663,12 @@ int read_sense_memory(BaseCharacter *ch, BaseCharacter *vict) {
 
     if(IS_NPC(ch)) return 0;
 
-    auto p = players[ch->uid];
+    auto p = players[ch->getUID()];
 
     if(IS_NPC(vict)) {
-        return p->senseMemory.contains(vict->vn);
+        return p->senseMemory.contains(vict->getVN());
     } else {
-        return p->sensePlayer.contains(vict->uid);
+        return p->sensePlayer.contains(vict->getUID());
     }
 }
 
@@ -679,12 +679,12 @@ void sense_memory_write(BaseCharacter *ch, BaseCharacter *vict) {
     }
 
     if(IS_NPC(ch)) return;
-    auto p = players[ch->uid];
+    auto p = players[ch->getUID()];
 
     if(IS_NPC(vict)) {
-        p->senseMemory.insert(vict->vn);
+        p->senseMemory.insert(vict->getVN());
     } else {
-        p->sensePlayer.insert(vict->uid);
+        p->sensePlayer.insert(vict->getUID());
     }
 }
 
@@ -2138,7 +2138,7 @@ int planet_check(BaseCharacter *ch, BaseCharacter *vict) {
 
 void purge_homing(BaseCharacter *ch) {
 
-    auto isHoming = [&](const auto& o) {return (o->vn == 80 || o->vn == 81) && (TARGET(o) == ch || USER(o) == ch);};
+    auto isHoming = [&](const auto& o) {return (o->getVN() == 80 || o->getVN() == 81) && (TARGET(o) == ch || USER(o) == ch);};
     auto gather = ch->getRoom()->gatherObjects(isHoming);
     for(auto obj : gather) {
         act("$p @wloses its target and flies off into the distance.@n", true, nullptr, obj, nullptr, TO_ROOM);
@@ -2884,10 +2884,19 @@ int cook_element(room_rnum room) {
     for(auto obj : u->second->getInventory()) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
-        } else if(obj->vn == 19093) return 2;
+        } else if(obj->getVN() == 19093) return 2;
     }
 
     return found;
+}
+
+bool room_is_dark(room_vnum room) {
+    if(auto u = world.find(room); u != world.end()) {
+        if(auto r = dynamic_cast<Room*>(u->second); r) {
+            return r->isInsideDark();
+        }
+    }
+    return false;
 }
 
 // A C++ version of proc_color from comm.c. it returns the colored string.

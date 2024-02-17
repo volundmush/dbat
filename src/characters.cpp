@@ -1379,7 +1379,7 @@ int64_t BaseCharacter::modExperience(int64_t value, bool applyBonuses) {
         if (gain > 0) {
 
             // TODO: Modify the spar booster with APPLY_EXP_GAIN_MULT 0.25
-            if (auto obj = GET_EQ(this, WEAR_SH); obj && obj->vn == 1127) {
+            if (auto obj = GET_EQ(this, WEAR_SH); obj && obj->getVN() == 1127) {
                 int64_t spar = gain;
                 gain += gain * 0.25;
                 spar = gain - spar;

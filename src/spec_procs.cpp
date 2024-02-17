@@ -83,7 +83,7 @@ int num_players_in_room(room_vnum room) {
             continue;
         if (!world.count(IN_ROOM(i->character)))
             continue;
-        if (i->character->getRoom()->vn != room)
+        if (i->character->getRoom()->getVN() != room)
             continue;
         if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) &&
             (PRF_FLAGGED(i->character, PRF_NOHASSLE))) /* Ignore Imms */
@@ -99,7 +99,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room) {
     if(auto u = world.find(room); u != world.end()) {
         auto r = dynamic_cast<Room*>(u->second);
         for(auto i : r->getPeople()) {
-            if(i->vn == mob) return true;
+            if(i->getVN() == mob) return true;
         }
     }
     return false;
@@ -174,7 +174,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 
     /* give player credit for making it this far */
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if ((!IS_NPC(ch)) && (ch->getRoom()->vn == gauntlet_info[i][1])) {
+        if ((!IS_NPC(ch)) && (ch->getRoom()->getVN() == gauntlet_info[i][1])) {
             /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */
             if (GET_GAUNTLET(ch) < (gauntlet_info[i][0])) {
                 //set player's gauntlet rank
@@ -223,7 +223,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
         auto r = ch->getRoom();
-        if (r->vn == gauntlet_info[i][1]) {
+        if (r->getVN() == gauntlet_info[i][1]) {
             if (cmd == gauntlet_info[i][2]) {
                 //don't let him proceed if mob is still alive
                 for (auto tch : r->getPeople()) {
@@ -309,7 +309,7 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[EXIT(ch, (cmd - 1))->destination->uid]->vn == gauntlet_info[i][1]) {
+        if (world[EXIT(ch, (cmd - 1))->destination->getUID()]->getVN() == gauntlet_info[i][1]) {
             ch->sendf("You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
@@ -357,7 +357,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
             if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
                 continue;
 
-            if ((world[EXIT(ch, door)->destination->uid]->vn == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if ((world[EXIT(ch, door)->destination->getUID()]->getVN() == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
@@ -488,7 +488,7 @@ SPECIAL(auction) {
     if (CMD_IS("cancel")) {
 
         for (auto obj : world[auct_room]->getInventory()) {
-            if (obj && GET_AUCTER(obj) == ((ch)->uid)) {
+            if (obj && GET_AUCTER(obj) == ((ch)->getUID())) {
                 obj2 = obj;
                 found = true;
 
@@ -536,7 +536,7 @@ SPECIAL(auction) {
         int founded = false;
 
         for (auto obj : world[auct_room]->getInventory()) {
-            if (obj && GET_CURBID(obj) == ((ch)->uid)) {
+            if (obj && GET_CURBID(obj) == ((ch)->getUID())) {
                 obj2 = obj;
                 found = true;
 
@@ -644,7 +644,7 @@ SPECIAL(auction) {
 
         GET_BID(obj2) = value;
         GET_STARTBID(obj2) = GET_BID(obj2);
-        GET_AUCTER(obj2) = ((ch)->uid);
+        GET_AUCTER(obj2) = ((ch)->getUID());
         GET_AUCTERN(obj2) = strdup(GET_NAME(ch));
         GET_AUCTIME(obj2) = time(nullptr);
         GET_CURBID(obj2) = -1;
@@ -1048,7 +1048,7 @@ SPECIAL(bank) {
                 ch->sendf("There is an error. Report to staff.");
                 return (true);
             }
-            auto id = vict->uid;
+            auto id = vict->getUID();
             auto p = players[id];
             auto &c = p->account->characters;
             auto found = std::find_if(c.begin(), c.end(), [&](auto i) {return i == id;});

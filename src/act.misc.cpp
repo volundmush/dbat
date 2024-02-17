@@ -5135,7 +5135,7 @@ ACMD(do_obstruct) {
         improve_skill(ch, SKILL_HYOGA_KABE, 0);
         return;
     }
-    int newroom = dest->vn;
+    int newroom = dest->getVN();
 
     if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
         ch->sendf("You can not block off a peaceful area.\r\n");

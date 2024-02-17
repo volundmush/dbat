@@ -1662,7 +1662,7 @@ ACMD(do_leave) {
 static void handle_fall(BaseCharacter *ch) {
     int room = -1;
     while (EXIT(ch, 5) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
-        room = EXIT(ch, 5)->getDestination()->uid;
+        room = EXIT(ch, 5)->getDestination()->getUID();
         ch->removeFromLocation();
         ch->addToLocation(world.at(room));
         if (auto carry = CARRYING(ch); carry) {

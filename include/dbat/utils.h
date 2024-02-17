@@ -152,7 +152,7 @@ extern int num_pc_in_room(Room *room);
 
 extern void core_dump_real(const char *who, int line);
 
-extern int room_is_dark(room_rnum room);
+extern bool room_is_dark(room_rnum room);
 
 extern int count_color_chars(char *string);
 
@@ -694,9 +694,9 @@ void SET_SKILL_PERF(BaseCharacter *ch, uint16_t skill, int16_t val);
 
 extern Object* GET_EQ(GameEntity* u, int i);
 
-#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->vn].func : 0)
-#define GET_MOB_RNUM(mob)    ((mob)->vn)
-#define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? (mob_index.count((mob)->vn) ? (mob)->vn : NOBODY) : NOBODY)
+#define GET_MOB_SPEC(ch)    (IS_MOB(ch) ? mob_index[(ch)->getVN()].func : 0)
+#define GET_MOB_RNUM(mob)    ((mob)->getVN())
+#define GET_MOB_VNUM(mob)    (IS_MOB(mob) ? (mob_index.count((mob)->getVN()) ? (mob)->getVN() : NOBODY) : NOBODY)
 
 #define GET_DEFAULT_POS(ch)    ((ch)->mob_specials.default_pos)
 #define MEMORY(ch)        ((ch)->mob_specials.memory)
@@ -714,8 +714,7 @@ extern Object* GET_EQ(GameEntity* u, int i);
 #define CAN_CARRY_W(ch) ((ch)->getMaxCarryWeight())
 #define CAN_CARRY_N(ch) (50)
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
-#define CAN_SEE_IN_DARK(ch) \
-   (AFF_FLAGGED(ch, AFF_INFRAVISION) || (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HOLYLIGHT)) || (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) || PLR_FLAGGED(ch, PLR_AURALIGHT))
+#define CAN_SEE_IN_DARK(ch) ((ch)->canSeeInDark())
 
 #define IS_GOOD(ch)    (GET_ALIGNMENT(ch) >= 50)
 #define IS_EVIL(ch)    (GET_ALIGNMENT(ch) <= -50)
@@ -797,7 +796,7 @@ extern Object* GET_EQ(GameEntity* u, int i);
 #define HCHARGE(obj)            ((obj)->healcharge)
 #define GET_LAST_LOAD(obj)      ((obj)->lload)
 #define GET_OBJ_SIZE(obj)    ((obj)->size)
-#define GET_OBJ_RNUM(obj)    ((obj)->vn)
+#define GET_OBJ_RNUM(obj)    ((obj)->getVN())
 #define GET_OBJ_VNUM(obj)    (VALID_OBJ_RNUM(obj) ? \
                 GET_OBJ_RNUM(obj) : NOTHING)
 #define GET_OBJ_SPEC(obj)    (VALID_OBJ_RNUM(obj) ? \
@@ -846,9 +845,7 @@ extern Object* GET_EQ(GameEntity* u, int i);
 #define SELF(sub, obj)  ((sub) == (obj))
 
 /* Can subject see character "obj"? */
-#define CAN_SEE(sub, obj) (SELF(sub, obj) || \
-   ((GET_ADMLEVEL(sub) >= (IS_NPC(obj) ? 0 : GET_INVIS_LEV(obj))) && \
-   IMM_CAN_SEE(sub, obj) && (NOT_HIDDEN(obj) || GET_ADMLEVEL(sub) > 0)))
+#define CAN_SEE(sub, obj) ((sub)->canSee(obj))
 
 #define NOT_HIDDEN(ch) (!AFF_FLAGGED(ch, AFF_HIDE))
 /* End of CAN_SEE */
@@ -858,15 +855,12 @@ extern Object* GET_EQ(GameEntity* u, int i);
   (!OBJ_FLAGGED((obj), ITEM_INVISIBLE) || AFF_FLAGGED((sub), AFF_DETECT_INVIS))
 
 /* Is anyone carrying this object and if so, are they visible? */
-#define CAN_SEE_OBJ_CARRIER(sub, obj) \
-  ((!(obj)->carried_by || CAN_SEE((sub), (obj)->carried_by)) &&    \
-   (!(obj)->worn_by || CAN_SEE((sub), (obj)->worn_by)))
+#define CAN_SEE_OBJ_CARRIER(sub, obj) ((obj)->getLocation() ? CAN_SEE((sub), (obj)->getLocation()) : TRUE)
 
 #define MORT_CAN_SEE_OBJ(sub, obj) \
   ((LIGHT_OK(sub) || (obj)->carried_by == (sub) || (obj)->worn_by) && INVIS_OK_OBJ((sub), (obj)) && CAN_SEE_OBJ_CARRIER((sub), (obj)))
 
-#define CAN_SEE_OBJ(sub, obj) \
-   (MORT_CAN_SEE_OBJ(sub, obj) || (!IS_NPC(sub) && PRF_FLAGGED((sub), PRF_HOLYLIGHT)))
+#define CAN_SEE_OBJ(sub, obj) ((sub)->canSee(obj))
 
 #define CAN_CARRY_OBJ(ch, obj) ((ch)->canCarryWeight((obj)) && ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
 

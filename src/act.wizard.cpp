@@ -993,7 +993,7 @@ ACMD(do_at) {
     command_interpreter(ch, command);
 
     /* check if the char is still there */
-    if (ch->getRoom()->uid == location) {
+    if (ch->getRoom()->getUID() == location) {
         ch->removeFromLocation();
         ch->addToLocation(original);
     }
@@ -1281,8 +1281,8 @@ static void do_stat_room(BaseCharacter *ch) {
 
     sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
     ch->sendf("Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
-                 zone_table[rm->zone].number, rm->vn, IN_ROOM(ch),
-                 (long) rm->vn, buf2);
+                 zone_table[rm->zone].number, rm->getVN(), IN_ROOM(ch),
+                 (long) rm->getVN(), buf2);
 
     ch->sendf("Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->geffect);
     ch->sendf("SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
@@ -1327,7 +1327,7 @@ static void do_stat_room(BaseCharacter *ch) {
         if (auto dest = e->getDestination(); dest)
             snprintf(buf1, sizeof(buf1), " @cNONE@n");
         else
-            snprintf(buf1, sizeof(buf1), "@c%5d@n", dest->uid);
+            snprintf(buf1, sizeof(buf1), "@c%5d@n", dest->getUID());
         
         snprintf(buf2, sizeof(buf2), "%s", join(e->getFlagNames(FlagType::Exit), ", ").c_str());
 
@@ -1345,7 +1345,7 @@ static void do_stat_room(BaseCharacter *ch) {
     /* check the room for a script */
     do_sstat(ch, rm);
 
-    list_zone_commands_room(ch, rm->vn);
+    list_zone_commands_room(ch, rm->getVN());
 }
 
 static void do_stat_object(BaseCharacter *ch, Object *j) {
@@ -1373,9 +1373,9 @@ static void do_stat_object(BaseCharacter *ch, Object *j) {
 
     sprinttype(GET_OBJ_TYPE(j), item_types, buf, sizeof(buf));
     ch->sendf("VNum: [@g%5d@n], RNum: [%5d], Idnum: [%5d], Type: %s, SpecProc: %s\r\n",
-                 vnum, GET_OBJ_RNUM(j), ((j)->uid), buf, GET_OBJ_SPEC(j) ? "Exists" : "None");
+                 vnum, GET_OBJ_RNUM(j), ((j)->getUID()), buf, GET_OBJ_SPEC(j) ? "Exists" : "None");
 
-    ch->sendf("@nUnique ID: @g%" I64T "@n\r\n", j->uid);
+    ch->sendf("@nUnique ID: @g%" I64T "@n\r\n", j->getUID());
 
     ch->sendf("Object Hit Points: [ @g%3d@n/@g%3d@n]\r\n",
                  GET_OBJ_VAL(j, VAL_ALL_HEALTH), GET_OBJ_VAL(j, VAL_ALL_MAXHEALTH));
@@ -1562,7 +1562,7 @@ static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
     sprinttype(GET_SEX(k), genders, buf, sizeof(buf));
     ch->sendf("%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n",
                  buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")),
-                 GET_NAME(k), IS_NPC(k) ? ((k)->uid) : GET_IDNUM(k), GET_ROOM_VNUM(IN_ROOM(k)),
+                 GET_NAME(k), IS_NPC(k) ? ((k)->getUID()) : GET_IDNUM(k), GET_ROOM_VNUM(IN_ROOM(k)),
                  IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
 
     ch->sendf("DROOM: [%5d]\r\n", GET_DROOM(k));
@@ -3286,14 +3286,14 @@ ACMD(do_show) {
                         }
                     }
                     else {
-                        if(dest->uid == 0) {
+                        if(dest->getUID() == 0) {
                             nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->name, e->getLookDesc().c_str());
                             if (len + nlen >= sizeof(buf) || nlen < 0)
                                 break;
                             len += nlen;
                         }
                     }
-                    if (dest && dest->uid == 0) {
+                    if (dest && dest->getUID() == 0) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
                                         vn, count_color_chars(r->name) + 40, r->name, QNRM,
                                         dirs[j]);

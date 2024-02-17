@@ -47,7 +47,7 @@ static void dump_state_characters(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, r] : uniqueCharacters) {
-        if(v != r.second->uid) r.second->uid = v;
+        if(v != r.second->getUID()) r.second->uid = v;
         nlohmann::json j2;
         j2["id"] = v;
         j2["data"] = r.second->serialize();
@@ -62,7 +62,7 @@ static void dump_state_items(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, r] : uniqueObjects) {
-        if(v != r.second->uid) r.second->uid = v;
+        if(v != r.second->getUID()) r.second->uid = v;
         nlohmann::json j2;
         j2["id"] = v;
         j2["data"] = r.second->serialize();

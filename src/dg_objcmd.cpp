@@ -86,7 +86,7 @@ void obj_log(Object *obj, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
-    snprintf(output, sizeof(output), "Obj (%s [%d], VNum %d):: %s", obj->getShortDesc().c_str(), obj->uid, GET_OBJ_VNUM(obj), format);
+    snprintf(output, sizeof(output), "Obj (%s [%d], VNum %d):: %s", obj->getShortDesc().c_str(), obj->getUID(), GET_OBJ_VNUM(obj), format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -421,7 +421,7 @@ OCMD(do_oteleport) {
 
     if (!strcasecmp(arg1, "all")) {
         auto rm = obj->getRoom();
-        if (target == rm->vn)
+        if (target == rm->getVN())
             obj_log(obj, "oteleport target is itself");
 
         for (auto ch : rm->getPeople()) {

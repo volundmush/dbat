@@ -2939,7 +2939,7 @@ ACMD(do_majinize) {
         return;
     }
     int alignmentTotal = GET_ALIGNMENT(ch) - GET_ALIGNMENT(vict);
-    if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != ((ch)->uid)) {
+    if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != ((ch)->getUID())) {
         ch->sendf("They are already majinized before by someone else.\r\n");
         return;
     } else if ((vict->master != ch)) {
@@ -2954,7 +2954,7 @@ ACMD(do_majinize) {
         return;
     }
         /* Rillao: transloc, add new transes here */
-    else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == ((ch)->uid)) {
+    else if (MAJINIZED(vict) > 0 && MAJINIZED(vict) == ((ch)->getUID())) {
         reveal_hiding(ch, 0);
         act("You remove $N's majinization, freeing them from your influence, but also weakening them.", true, ch,
             nullptr, vict, TO_CHAR);
@@ -2990,7 +2990,7 @@ ACMD(do_majinize) {
             true, ch, nullptr, vict, TO_VICT);
         act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.",
             true, ch, nullptr, vict, TO_NOTVICT);
-        MAJINIZED(vict) = ((ch)->uid);
+        MAJINIZED(vict) = ((ch)->getUID());
         GET_BOOSTS(ch) -= 1;
 
         GET_MAJINIZED(vict) = (vict->getBasePL()) * .4;
@@ -6391,7 +6391,7 @@ ACMD(do_eavesdrop) {
             sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->getAlias().c_str()));
             ch->sendf(buf);
         } else {
-            GET_EAVESDROP(ch) = EXIT(ch, dir)->getDestination()->uid;
+            GET_EAVESDROP(ch) = EXIT(ch, dir)->getDestination()->getUID();
             GET_EAVESDIR(ch) = dir;
             ch->sendf("Okay.\r\n");
         }
@@ -7373,7 +7373,7 @@ ACMD(do_summon) {
         true, ch, nullptr, nullptr, TO_ROOM);
     SHENRON = true;
     DRAGONC = 300;
-    DRAGONR = room->vn;
+    DRAGONR = room->getVN();
     DRAGONZ = room->zone;
     send_to_imm("Shenron summoned to room: %d\r\n", DRAGONR);
 
@@ -8587,7 +8587,7 @@ ACMD(do_snet) {
     }
 
     if (!strcasecmp(arg, "check")) {
-        ch->sendf("Your personal scouter number is: %d\r\n", ((ch)->uid));
+        ch->sendf("Your personal scouter number is: %d\r\n", ((ch)->getUID()));
         return;
     }
 
@@ -8683,13 +8683,13 @@ ACMD(do_snet) {
                         i->character->sendf("@WScanner@D: @Y%s@n\r\n", sense_location(ch));
                     }
                     continue;
-                } else if (call > -1 && ((i->character)->uid) == call) {
+                } else if (call > -1 && ((i->character)->getUID()) == call) {
                     i->character->sendf("@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n",
                                  voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown",
-                                 ((ch)->uid), !*arg2 ? "" : CAP(arg2));
+                                 ((ch)->getUID()), !*arg2 ? "" : CAP(arg2));
                     *hist = '\0';
                     sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@R#@W%d @Ycalling YOU@D] @G%s@n\r\n", voice,
-                            readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", ((ch)->uid),
+                            readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", ((ch)->getUID()),
                             !*arg2 ? "" : CAP(arg2));
                     add_history(i->character, hist, HIST_SNET);
                     if (has_scanner(i->character)) {

@@ -66,9 +66,9 @@ const char *get_i_name(BaseCharacter *ch, BaseCharacter *vict) {
         return (RACE(vict));
     }
 
-    auto p = players[ch->uid];
+    auto p = players[ch->getUID()];
 
-    auto found = p->dubNames.find(vict->uid);
+    auto found = p->dubNames.find(vict->getUID());
     if(found == p->dubNames.end()) return RACE(vict);
 
     // print *found to name and return buf pointer.
@@ -840,7 +840,7 @@ void extract_char_final(BaseCharacter *ch) {
 
     ch->deactivate();
     if (IS_NPC(ch)) {
-        auto found = uniqueCharacters.find(ch->uid);
+        auto found = uniqueCharacters.find(ch->getUID());
         if (found != uniqueCharacters.end()) {
             uniqueCharacters.erase(found);
         }

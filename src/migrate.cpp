@@ -3653,7 +3653,7 @@ void migrate_characters() {
             delete ch;
             continue;
         }
-        auto id = ch->uid;
+        auto id = ch->getUID();
         auto p = std::make_shared<player_data>();
         p->id = id;
         players[id] = p;
@@ -3687,7 +3687,7 @@ void migrate_characters() {
             basic_mud_log("Error loading %s for sense migration.", name.c_str());
             continue;
         }
-        auto pa = players[ch->uid];
+        auto pa = players[ch->getUID()];
         // The file contains a sequence of lines, with each line containing a number.
 		// The number is the vnum of a mobile the player's sensed.
         // We will read each line and insert the vnum into the player's sensed list.
@@ -3721,7 +3721,7 @@ void migrate_characters() {
             continue;
         }
 
-        auto pa = players[ch->uid];
+        auto pa = players[ch->getUID()];
 
 		// The file contains a series of lines.
         // Each line looks like: <name> <dub>
@@ -3738,7 +3738,7 @@ void migrate_characters() {
             if(name == "Gibbles") continue;
             auto pc = findPlayer(name);
             if(!pc) continue;
-            pa->dubNames[pc->uid] = dub;
+            pa->dubNames[pc->getUID()] = dub;
         }
     }
 
@@ -3798,7 +3798,7 @@ void migrate_characters() {
             basic_mud_log("Error loading %s for alias migration.", name.c_str());
             continue;
         }
-        auto pa = players.find(ch->uid);
+        auto pa = players.find(ch->getUID());
         if(pa == players.end()) {
             basic_mud_log("Error loading %s for alias migration.", name.c_str());
             continue;

@@ -30,40 +30,40 @@ static void disp_ship_locations(BaseCharacter *ch, Object *vehicle);
 /* This shows the player what locations the planet has to land at. */
 static void disp_ship_locations(BaseCharacter *ch, Object *vehicle) {
     auto r = vehicle->getRoom();
-    if (r->uid == 50) { // Above Earth
+    if (r->getUID() == 50) { // Above Earth
         ch->sendf("@D------------------[ @GEarth@D ]------------------@c\n");
         ch->sendf("Nexus City, South Ocean, Nexus field, Cherry Blossom Mountain,\n");
         ch->sendf("Sandy Desert, Northern Plains, Korin's Tower, Kami's Lookout,\n");
         ch->sendf("Shadow Forest, Decrepit Area, West City, Hercule Beach, Satan City.\n");
         ch->sendf("@D---------------------------------------------@n\n");
-    } else if (r->uid == 51) { // Above Frigid
+    } else if (r->getUID() == 51) { // Above Frigid
         ch->sendf("@D------------------[ @CFrigid@D ]------------------@c\n");
         ch->sendf("Ice Crown City, Ice Highway, Topica Snowfield, Glug's Volcano,\n");
         ch->sendf("Platonic Sea, Slave City, Acturian Woods, Desolate Demesne,\n");
         ch->sendf("Chateau Ishran, Wyrm Spine Mountain, Cloud Ruler Temple, Koltoan mine.\n");
         ch->sendf("@D---------------------------------------------@n\n");
-    } else if (r->uid == 52) { // Above Konack
+    } else if (r->getUID() == 52) { // Above Konack
         ch->sendf("@D------------------[ @MKonack@D ]------------------@c\n");
         ch->sendf("Great Oroist Temple, Elzthuan Forest, Mazori Farm, Dres,\n");
         ch->sendf("Colvian Farm, St Alucia, Meridius Memorial, Desert of Illusion,\n");
         ch->sendf("Plains of Confusion, Turlon Fair, Wetlands, Kerberos,\n");
         ch->sendf("Shaeras Mansion, Slavinus Ravine, Furian Citadel.\n");
         ch->sendf("@D---------------------------------------------@n\n");
-    } else if (r->uid == 53) { // Above Vegeta
+    } else if (r->getUID() == 53) { // Above Vegeta
         ch->sendf("@D------------------[ @YVegeta@D ]------------------@c\n");
         ch->sendf("Vegetos City, Blood Dunes, Ancestral Mountains, Destopa Swamp,\n");
         ch->sendf("Pride Forest, Pride tower, Ruby Cave.\n");
         ch->sendf("@D---------------------------------------------@n\n");
-    } else if (r->uid == 198) { // Above Cerria
+    } else if (r->getUID() == 198) { // Above Cerria
         ch->sendf("@D------------------[ @MCerria@D ]------------------@c\n");
         ch->sendf("Cerria Colony, Fistarl Volcano, Crystalline Forest.\n");
         ch->sendf("@D---------------------------------------------@n\n");
-    } else if (r->uid == 54) { // Above Namek
+    } else if (r->getUID() == 54) { // Above Namek
         ch->sendf("@D------------------[ @gNamek@D ]------------------@c\n");
         ch->sendf("Senzu Village, Guru's House, Crystalline Cave, Elder Village,\n");
         ch->sendf("Frieza's Ship, Kakureta Village.\n");
         ch->sendf("@D---------------------------------------------@n\n");
-    } else if (r->uid == 55) { // Above Aether
+    } else if (r->getUID() == 55) { // Above Aether
         ch->sendf("@D------------------[ @BAether@D ]-----------------@c\n");
         ch->sendf("Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
         ch->sendf("Silent Glade.\n");
@@ -72,19 +72,19 @@ static void disp_ship_locations(BaseCharacter *ch, Object *vehicle) {
         ch->sendf("Haven City, Serenity Lake, Kaiju Forest, Ortusian Temple,\n");
         ch->sendf("Silent Glade.\n");
         ch->sendf("@D--------------------------------------------@n\n");
-    } else if (r->uid == 56) { // Above Yardrat
+    } else if (r->getUID() == 56) { // Above Yardrat
         ch->sendf("@D-----------------[ @mYardrat@D ]-----------------@c\n");
         ch->sendf("Yardra City, Jade Forest, Jade Cliffs, Mount Valaria.\n");
         ch->sendf("@D-------------------------------------------@n\n");
-    } else if (r->uid == 57) { // Above Zennith
+    } else if (r->getUID() == 57) { // Above Zennith
         ch->sendf("@D-----------------[ @CZennith@D ]-----------------@c\n");
         ch->sendf("Utatlan City, Zenith Jungle, Ancient Castle.\n");
         ch->sendf("@D-------------------------------------------@n\n");
-    } else if (r->uid == 58) { // Above Kanassa
+    } else if (r->getUID() == 58) { // Above Kanassa
         ch->sendf("@D-----------------[ @CKanassa@D ]-----------------@c\n");
         ch->sendf("Aquis City, Yunkai Pirate Base.\n");
         ch->sendf("@D-------------------------------------------@n\n");
-    } else if (r->uid == 59) { // Above Arlia
+    } else if (r->getUID() == 59) { // Above Arlia
         ch->sendf("@D------------------[ @MArlia@D ]------------------@c\n");
         ch->sendf("Janacre, Arlian Wasteland, Arlia Mine, Kemabra Wastes.\n");
         ch->sendf("@D---------------------------------------------@n\n");
@@ -96,7 +96,7 @@ static void disp_ship_locations(BaseCharacter *ch, Object *vehicle) {
 static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
     int landspot = 50;
     auto r = vehicle->getRoom();
-    if (r->uid == 50) { // Above Earth
+    if (r->getUID() == 50) { // Above Earth
         if (!strcasecmp(arg, "Nexus City")) {
             landspot = 300;
             landspot += rand_number(0, 63);
@@ -148,7 +148,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("You don't know where that made up place is, but decided to land anyway.");
             return (300);
         }
-    } else if (r->uid == 51) { // Above Frigid
+    } else if (r->getUID() == 51) { // Above Frigid
         if (!strcasecmp(arg, "Ice Crown City")) {
             return (4264);
         } else if (!strcasecmp(arg, "Ice Highway")) {
@@ -177,7 +177,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("You don't know where that made up place is, but decided to land anyway.");
             return (4264);
         }
-    } else if (r->uid == 52) { // Above Konack
+    } else if (r->getUID() == 52) { // Above Konack
         if (!strcasecmp(arg, "Tiranoc City")) {
             return (8006);
         } else if (!strcasecmp(arg, "Great Oroist Temple")) {
@@ -214,7 +214,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (8006);
         }
-    } else if (r->uid == 53) { // Above Vegeta
+    } else if (r->getUID() == 53) { // Above Vegeta
         if (!strcasecmp(arg, "Vegetos City")) {
             return (2226);
         } else if (!strcasecmp(arg, "Blood Dunes")) {
@@ -233,7 +233,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (2226);
         }
-    } else if (r->uid == 54) { // Above Namek
+    } else if (r->getUID() == 54) { // Above Namek
         if (!strcasecmp(arg, "Senzu Village")) {
             return (11600);
         } else if (!strcasecmp(arg, "Guru's House")) {
@@ -250,7 +250,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (11600);
         }
-    } else if (r->uid == 55) { // Above Aether
+    } else if (r->getUID() == 55) { // Above Aether
         if (!strcasecmp(arg, "Haven City")) {
             return (12010);
         } else if (!strcasecmp(arg, "Serenity Lake")) {
@@ -265,7 +265,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (12010);
         }
-    } else if (r->uid == 56) { // Above Yardrat
+    } else if (r->getUID() == 56) { // Above Yardrat
         if (!strcasecmp(arg, "Yardra City")) {
             return (14008);
         } else if (!strcasecmp(arg, "Jade Forest")) {
@@ -278,7 +278,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (14008);
         }
-    } else if (r->uid == 198) { // Above Cerria
+    } else if (r->getUID() == 198) { // Above Cerria
         if (!strcasecmp(arg, "Cerria Colony")) {
             return (17531);
         } else if (!strcasecmp(arg, "Crystalline Forest")) {
@@ -289,7 +289,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (17531);
         }
-    } else if (r->uid == 57) { // Above Zennith
+    } else if (r->getUID() == 57) { // Above Zennith
         if (!strcasecmp(arg, "Utatlan City")) {
             return (3412);
         } else if (!strcasecmp(arg, "Zenith Jungle")) {
@@ -300,7 +300,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (3412);
         }
-    } else if (r->uid == 58) { // Above Kanassa
+    } else if (r->getUID() == 58) { // Above Kanassa
         if (!strcasecmp(arg, "Aquis City")) {
             return (14904);
         } else if (!strcasecmp(arg, "Yunkai Pirate Base")) {
@@ -309,7 +309,7 @@ static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
             ch->sendf("you don't know where that made up place is, but decided to land anyway.");
             return (14904);
         }
-    } else if (r->uid == 59) { // Above Arlia
+    } else if (r->getUID() == 59) { // Above Arlia
         if (!strcasecmp(arg, "Janacre")) {
             return (16009);
         } else if (!strcasecmp(arg, "Arlian Wasteland")) {

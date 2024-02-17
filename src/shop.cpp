@@ -439,7 +439,7 @@ int shop_producing(Object *item, vnum shop_nr) {
     auto &shop = shop_index[shop_nr];
 
     auto find = std::ranges::find_if(shop.producing, [&](const auto &product) {
-        return (product == item->vn);
+        return (product == item->getVN());
     });
     return (find != shop.producing.end());
 }
@@ -996,7 +996,7 @@ SPECIAL(shop_keeper) {
     vnum shop_nr = NOTHING;
 
     for (auto &[nr, sh] : shop_index) {
-        if (sh.keeper == keeper->vn) {
+        if (sh.keeper == keeper->getVN()) {
             shop_nr = nr;
             break;
         }
@@ -1438,7 +1438,7 @@ void shop_data::runPurge() {
     Object *next_obj;
     for(auto keeper : getKeepers()) {
         for (auto sobj : keeper->getInventory()) {
-            if(isProducing(sobj->vn)) {
+            if(isProducing(sobj->getVN())) {
                 keeper->mod(CharMoney::Carried, GET_OBJ_COST(sobj));
                 sobj->extractFromWorld();
             }

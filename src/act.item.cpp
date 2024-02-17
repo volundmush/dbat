@@ -670,8 +670,8 @@ static bool has_housekey(BaseCharacter *ch, Object *obj) {
     if(OBJ_FLAGGED(obj, ITEM_DUPLICATE)) return false;
 
     auto isHouseKey = [&](Object *obj2) -> bool {
-        if(obj2->vn == 18800 && obj->vn == 18802) return true;
-        if(obj2->vn == obj->vn -1) return true;
+        if(obj2->getVN() == 18800 && obj->getVN() == 18802) return true;
+        if(obj2->getVN() == obj->getVN() -1) return true;
         return false;
     };
 
@@ -1841,10 +1841,10 @@ ACMD(do_bid) {
         if (!obj2) {
             ch->sendf("That item number is not found.\r\n");
             return;
-        } else if (GET_CURBID(obj2) == ((ch)->uid)) {
+        } else if (GET_CURBID(obj2) == ((ch)->getUID())) {
             ch->sendf("You already have the highest bid.\r\n");
             return;
-        } else if (GET_AUCTER(obj2) == ((ch)->uid)) {
+        } else if (GET_AUCTER(obj2) == ((ch)->getUID())) {
             ch->sendf("You auctioned the item, go to the auction house and cancel if you can.\r\n");
             return;
         } else if (GET_CURBID(obj2) > 0 && atoi(arg2) <= (GET_BID(obj2) + (GET_BID(obj2) * .1)) &&
@@ -1863,7 +1863,7 @@ ACMD(do_bid) {
             return;
         } else {
             GET_BID(obj2) = atoi(arg2);
-            GET_CURBID(obj2) = ((ch)->uid);
+            GET_CURBID(obj2) = ((ch)->getUID());
             auc_save();
             struct descriptor_data *d;
             int bid = atoi(arg2);
@@ -3472,7 +3472,7 @@ ACMD(do_eat) {
 
     std::set<obj_vnum> candies = {53, 93, 94, 95};
 
-    if(candies.contains(food->vn)) {
+    if(candies.contains(food->getVN())) {
         if(IS_MAJIN(ch)) foob = GET_OBJ_VAL(food, VAL_FOOD_FOODVAL);
         majin_gain(ch, food, foob);
     }

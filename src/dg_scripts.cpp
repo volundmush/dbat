@@ -1267,7 +1267,7 @@ ACMD(do_attach) {
         room->script->addTrigger(trig, loc);
 
         ch->sendf("Trigger %d (%s) attached to room %d.\r\n",
-                     tn, GET_TRIG_NAME(trig), world[rnum]->vn);
+                     tn, GET_TRIG_NAME(trig), world[rnum]->getVN());
     } else
         ch->sendf("Please specify 'mob', 'obj', or 'room'.\r\n");
 }

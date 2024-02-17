@@ -248,7 +248,7 @@ DgResults Room::dgCallMember(trig_data *trig, const std::string& member, const s
             auto dest = ex->getDestination();
             if (!strcasecmp(arg.c_str(), "vnum")) {
                 
-                if(ex) return std::to_string(dest->uid);
+                if(ex) return std::to_string(dest->getUID());
                 return "";
             }
             else if (!strcasecmp(arg.c_str(), "key"))

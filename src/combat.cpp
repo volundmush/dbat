@@ -630,7 +630,7 @@ void combine_attacks(BaseCharacter *ch, BaseCharacter *vict) {
 
 int check_ruby(BaseCharacter *ch) {
 
-    auto isHotRuby = [](const auto&o) {return o->vn == 6600 && OBJ_FLAGGED(o, ITEM_HOT);};
+    auto isHotRuby = [](const auto&o) {return o->getVN() == 6600 && OBJ_FLAGGED(o, ITEM_HOT);};
     auto ruby = ch->findObject(isHotRuby);
 
     if (ruby) {
@@ -3953,14 +3953,14 @@ int can_kill(BaseCharacter *ch, BaseCharacter *vict, Object *obj, int num) {
         } else if (MOB_FLAGGED(vict, MOB_NOKILL)) {
             ch->sendf("But they are not to be killed!\r\n");
             return 0;
-        } else if (MAJINIZED(ch) == ((vict)->uid)) {
+        } else if (MAJINIZED(ch) == ((vict)->getUID())) {
             ch->sendf("You can not harm your master!\r\n");
             return 0;
         } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && GET_MAX_HIT(vict) > GET_MAX_HIT(ch) + (GET_MAX_HIT(ch) * .5) &&
                    !FIGHTING(ch)) {
             ch->sendf("You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
             return 0;
-        } else if (MAJINIZED(vict) == ((ch)->uid)) {
+        } else if (MAJINIZED(vict) == ((ch)->getUID())) {
             ch->sendf("You can not harm your servant.\r\n");
             return 0;
         } else if ((GRAPPLING(ch) && GRAPTYPE(ch) != 3) || (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4))) {

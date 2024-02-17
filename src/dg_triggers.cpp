@@ -173,7 +173,7 @@ void greet_memory_mtrigger(BaseCharacter *actor)
         /* find memory line with command only */
         for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next)
         {
-            if (((actor)->uid) != mem->id)
+            if (((actor)->getUID()) != mem->id)
                 continue;
             if (mem->cmd)
             {
@@ -270,7 +270,7 @@ void entry_memory_mtrigger(BaseCharacter *ch)
     for (auto actor : ch->getRoom()->getPeople()) {
         for (auto mem = SCRIPT_MEM(ch); mem; mem = mem->next)
             {
-                if (((actor)->uid) == mem->id) {
+                if (((actor)->getUID()) == mem->id) {
                     struct script_memory *prev;
                     if (mem->cmd)
                         command_interpreter(ch, mem->cmd);

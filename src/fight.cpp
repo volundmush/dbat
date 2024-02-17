@@ -1477,7 +1477,7 @@ static void make_pcorpse(BaseCharacter *ch) {
     for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->setFlag(FlagType::Item, f);
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;      /* You can't store stuff in a corpse */
     GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;        /* corpse identifier */
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = ch->uid;  /* corpse identifier */
+    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = ch->getUID();  /* corpse identifier */
     GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
     GET_OBJ_RENT(corpse) = 100000;
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;

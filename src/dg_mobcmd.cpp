@@ -100,7 +100,7 @@ void mob_log(BaseCharacter *mob, const char *format, ...) {
     char output[MAX_STRING_LENGTH];
 
     snprintf(output, sizeof(output), "Mob (%s [%d], VNum %d):: %s",
-             GET_SHORT(mob), mob->uid, GET_MOB_VNUM(mob), format);
+             GET_SHORT(mob), mob->getUID(), GET_MOB_VNUM(mob), format);
 
     va_start(args, format);
     script_vlog(output, args);
@@ -870,7 +870,7 @@ ACMD(do_mremember) {
     }
 
     /* fill in the structure */
-    mem->id = ((victim)->uid);
+    mem->id = ((victim)->getUID());
     if (argument && *argument) {
         mem->cmd = strdup(argument);
     }
@@ -914,7 +914,7 @@ ACMD(do_mforget) {
     mem = SCRIPT_MEM(ch);
     prev = nullptr;
     while (mem) {
-        if (mem->id == ((victim)->uid)) {
+        if (mem->id == ((victim)->getUID())) {
             if (mem->cmd) free(mem->cmd);
             if (prev == nullptr) {
                 SCRIPT_MEM(ch) = mem->next;
@@ -1132,7 +1132,7 @@ ACMD(do_mdoor) {
         if (!ex) {
             ex = new Exit();
             ex->uid = getNextUID();
-            world[ex->uid] = ex;
+            world[ex->getUID()] = ex;
             ex->script = std::make_shared<script_data>(ex);
         }
 
