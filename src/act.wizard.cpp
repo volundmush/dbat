@@ -1277,7 +1277,7 @@ static void do_stat_room(BaseCharacter *ch) {
     Object *j;
     BaseCharacter *k;
 
-    ch->sendf("Room name: @c%s@n\r\n", rm->name);
+    ch->sendf("Room name: @c%s@n\r\n", rm->getDisplayName(ch));
 
     sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
     ch->sendf("Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
@@ -1368,7 +1368,7 @@ static void do_stat_object(BaseCharacter *ch, Object *j) {
     }
 
     ch->sendf("Name: '%s', Keywords: %s, Size: %s\r\n",
-                 withPlaceholder(j->getShortDesc(), "<None>"), j->name,
+                 withPlaceholder(j->getShortDesc(), "<None>"), j->getDisplayName(ch),
                  size_names[GET_OBJ_SIZE(j)]);
 
     sprinttype(GET_OBJ_TYPE(j), item_types, buf, sizeof(buf));
@@ -1412,7 +1412,7 @@ static void do_stat_object(BaseCharacter *ch, Object *j) {
                  wString.c_str(), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
     ch->sendf("In room: %d (%s), ", GET_ROOM_VNUM(IN_ROOM(j)),
-                 IN_ROOM(j) == NOWHERE ? "Nowhere" : j->getRoom()->name);
+                 IN_ROOM(j) == NOWHERE ? "Nowhere" : j->getRoom()->getDisplayName(ch));
 
     /*
    * NOTE: In order to make it this far, we must already be able to see the
@@ -1571,7 +1571,7 @@ static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
             sprintf(buf, ", Master: %s", get_name_by_id(k->master_id));
         else
             buf[0] = 0;
-        ch->sendf("Keyword: %s, VNum: [%5d], RNum: [%5d]%s\r\n", k->name,
+        ch->sendf("Keyword: %s, VNum: [%5d], RNum: [%5d]%s\r\n", k->getName(),
                      GET_MOB_VNUM(k), GET_MOB_RNUM(k), buf);
     } else
 
@@ -3279,7 +3279,7 @@ ACMD(do_show) {
                     auto dest = e->getDestination();
                     if(!dest) {
                         if(auto gen = e->getLookDesc(); !gen.empty()) {
-                            nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->name, gen.c_str());
+                            nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->getDisplayName(ch), gen.c_str());
                             if (len + nlen >= sizeof(buf) || nlen < 0)
                                 break;
                             len += nlen;
@@ -3287,7 +3287,7 @@ ACMD(do_show) {
                     }
                     else {
                         if(dest->getUID() == 0) {
-                            nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->name, e->getLookDesc().c_str());
+                            nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->getDisplayName(ch), e->getLookDesc().c_str());
                             if (len + nlen >= sizeof(buf) || nlen < 0)
                                 break;
                             len += nlen;
@@ -3295,7 +3295,7 @@ ACMD(do_show) {
                     }
                     if (dest && dest->getUID() == 0) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
-                                        vn, count_color_chars(r->name) + 40, r->name, QNRM,
+                                        vn, count_color_chars((char*)r->getDisplayName(ch).c_str()) + 40, r->getDisplayName(ch).c_str(), QNRM,
                                         dirs[j]);
                         if (len + nlen >= sizeof(buf) || nlen < 0)
                             break;
@@ -3314,7 +3314,7 @@ ACMD(do_show) {
             for (auto &[vn, r] : world)
                 if (ROOM_FLAGGED(vn, ROOM_DEATH)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
-                                    r->name);
+                                    r->getDisplayName(ch).c_str());
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -3329,7 +3329,7 @@ ACMD(do_show) {
             for (auto &[vn, r] : world)
                 if (ROOM_FLAGGED(vn, ROOM_GODROOM)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
-                                    r->name);
+                                    r->getDisplayName(ch).c_str());
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
@@ -4267,7 +4267,7 @@ ACMD(do_chown) {
     else {
         for (i = 0; i < NUM_WEARS; i++) {
             if (GET_EQ(victim, i) && CAN_SEE_OBJ(ch, GET_EQ(victim, i)) &&
-                isname(buf2, GET_EQ(victim, i)->name)) {
+                isname(buf2, GET_EQ(victim, i)->getDisplayName(ch).c_str())) {
                     unequip_char(victim, i)->addToLocation(victim);
                 k = 1;
             }

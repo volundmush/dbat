@@ -2479,7 +2479,7 @@ static int show_obj_modifiers(Object *obj, BaseCharacter *ch) {
         ch->sendf(" @D(@YCUSTOM@D)@n");
     }
     if (OBJ_FLAGGED(obj, ITEM_RESTRING)) {
-        ch->sendf(" @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? obj->name : "*");
+        ch->sendf(" @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? !obj->getName().empty() : "*");
     }
     if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
         if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL ||
@@ -2965,9 +2965,9 @@ static void list_one_char(BaseCharacter *i, BaseCharacter *ch) {
             return;
         }
         if ((GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(i) > 0) || IS_NPC(ch)) {
-            ch->sendf("@w%s", i->name);
+            ch->sendf("@w%s", i->getDisplayName(ch));
         } else if ((!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
-            ch->sendf("@w%s", get_i_name(ch, i));
+            ch->sendf("@w%s", i->getDisplayName(ch));
         } else if (!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
             if (GET_DISTFEA(i) == DISTFEA_EYE) {
                 ch->sendf("@wA %s eyed %s %s", eye_types[(int) GET_EYE(i)], MAFE(i), LRACE(i));
@@ -3424,7 +3424,7 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
                 auto rdirname = dirs[rev_dir[door]];
 
 
-                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->getUID(), dest->name);
+                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->getUID(), dest->getDisplayName(ch).c_str());
                 if (d->checkFlag(FlagType::Exit, EX_ISDOOR) || d->checkFlag(FlagType::Exit, EX_SECRET)) {
                     /* This exit has a door - tell all about it */
                     char argh[100];
@@ -3455,7 +3455,7 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
 
                     sprintf(dl, "@c%-9s @D-@w %s\r\n", blam,
                             IS_DARK(dest->getUID()) && !CAN_SEE_IN_DARK(ch) && !has_light
-                            ? "@bToo dark to tell.@w" : dest->name);
+                            ? "@bToo dark to tell.@w" : dest->getDisplayName(ch).c_str());
 
                 } else if (CONFIG_DISP_CLOSED_DOORS && !d->checkFlag(FlagType::Exit, EX_SECRET)) {
                     /* But we tell them the door is closed */
@@ -3658,7 +3658,7 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
             ch->sendf("\r\n@wO----------------------------------------------------------------------O@n\r\n");
         }
 
-        ch->sendf("@wLocation: @G%-70s@w\r\n", rm->name);
+        ch->sendf("@wLocation: @G%-70s@w\r\n", rm->getDisplayName(ch));
         if (!rm->script->dgScripts.empty()) {
             ch->sendf("@D[@GTriggers");
             for (auto t : rm->script->dgScripts)
@@ -3689,7 +3689,7 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
         if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
             ch->sendf("@wO----------------------------------------------------------------------O@n\r\n");
         }
-        ch->sendf("@wLocation: %-70s@n\r\n", rm->name);
+        ch->sendf("@wLocation: %-70s@n\r\n", rm->getDisplayName(ch));
         if(auto planet = ch->getPlanet(); planet) {
             ch->sendf("@wPlanet: @G%s@n\r\n", planet->getDisplayName(ch));
         } else {
@@ -3955,7 +3955,7 @@ static void look_in_obj(BaseCharacter *ch, char *arg) {
                 ch->sendf("You see nothing but infinite darkness...\r\n");
             } else {
                 ch->sendf("After seconds of concentration you see the image of %s.\r\n",
-                             world[portal_dest]->name);
+                             world[portal_dest]->getDisplayName(ch));
             }
         } else if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
             /* display the appropriate description from the list of descriptions
@@ -4103,7 +4103,7 @@ static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
 	 difference between the two?  Well, there's a period in the second,
 	 so, we'll just stick with that basic difference */
 
-            if (isname(number, obj->name)) {
+            if (isname(number, obj->getDisplayName(ch).c_str())) {
                 show_board(GET_OBJ_VNUM(obj), ch);
             } else if ((!isdigit(*number) || (!(msg = atoi(number)))) ||
                        (strchr(number, '.'))) {
@@ -4146,7 +4146,7 @@ static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
             if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)))
                 if ((desc = find_exdesc(arg, GET_EQ(ch, j)->ex_description)) != nullptr && ++i == fnum) {
                     ch->sendf("%s", desc);
-                    if (isname(arg, GET_EQ(ch, j)->name)) {
+                    if (isname(arg, GET_EQ(ch, j)->getDisplayName(ch).c_str())) {
                         if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_WEAPON) {
                             ch->sendf("The weapon type of %s is a %s.\r\n",
                                          GET_OBJ_SHORT(GET_EQ(ch, j)),
@@ -4173,7 +4173,7 @@ static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
                         show_board(GET_OBJ_VNUM(obj), ch);
                     } else {
                         ch->sendf("%s", desc);
-                        if (isname(arg, obj->name)) {
+                        if (isname(arg, obj->getDisplayName(ch).c_str())) {
                             if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
                                 ch->sendf("The weapon type of %s is a %s.\r\n",
                                              GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj,
@@ -4215,7 +4215,7 @@ static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
                             ch->sendf("@YSyntax@D: @CUnlock hatch\r\n");
                             ch->sendf("@YSyntax@D: @CLeave@n\r\n");
                         } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
-                            look_out_window(ch, obj->name);
+                            look_out_window(ch, obj->getDisplayName(ch).c_str());
                         }
 
                         if (GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
@@ -4273,7 +4273,7 @@ static void look_out_window(BaseCharacter *ch, char *arg) {
         return;
     } else {
         /* Look for any old window in the room */
-        viewport = ch->getRoom()->findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->name);});
+        viewport = ch->getRoom()->findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->getDisplayName(ch).c_str());});
     }
     if (!viewport) {
         /* Nothing suitable to look through */
@@ -6149,8 +6149,8 @@ ACMD(do_users) {
             strcpy(idletime, "");
 
         sprintf(line, "%3d %-20s %-20s %-14s %-3s %-8s %1s ", -1,
-                d->original && d->original->name ? d->original->name :
-                d->character && d->character->name ? d->character->name :
+                d->original && !d->original->getName().empty() ? d->original->getName().c_str() :
+                d->character && !d->character->getName().empty() ? d->character->getName().c_str() :
                 "UNDEFINED", d->account ? d->account->name.c_str() : "UNKNOWN", state, idletime, timeptr,
                 "N");
 
@@ -6261,7 +6261,7 @@ static void perform_mortal_where(BaseCharacter *ch, char *arg) {
                 continue;
             if (ch->getRoom()->zone != i->getRoom()->zone)
                 continue;
-            ch->sendf("%-20s - %s\r\n", GET_NAME(i), i->getRoom()->name);
+            ch->sendf("%-20s - %s\r\n", GET_NAME(i), i->getRoom()->getDisplayName(ch));
         }
     } else {            /* print only FIRST char, not all. */
         for (i = character_list; i; i = i->next) {
@@ -6269,9 +6269,9 @@ static void perform_mortal_where(BaseCharacter *ch, char *arg) {
                 continue;
             if (!CAN_SEE(ch, i) || i->getRoom()->zone != ch->getRoom()->zone)
                 continue;
-            if (!isname(arg, i->name))
+            if (!isname(arg, i->getDisplayName(ch).c_str()))
                 continue;
-            ch->sendf("%-25s - %s\r\n", GET_NAME(i), i->getRoom()->name);
+            ch->sendf("%-25s - %s\r\n", GET_NAME(i), i->getRoom()->getDisplayName(ch));
             return;
         }
         ch->sendf("Nobody around by that name.\r\n");
@@ -6288,7 +6288,7 @@ static void print_object_location(int num, Object *obj, BaseCharacter *ch,
     ch->sendf("%s", obj->scriptString().c_str());
 
     if (IN_ROOM(obj) != NOWHERE)
-        ch->sendf("[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), obj->getRoom()->name);
+        ch->sendf("[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), obj->getRoom()->getDisplayName(ch));
     else if (obj->carried_by)
         ch->sendf("carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch),
                      GET_ROOM_VNUM(IN_ROOM(obj->carried_by)));
@@ -6327,10 +6327,10 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
         for (i = character_list; i; i = i->next) {
-            if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
+            if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->getDisplayName(ch).c_str())) {
                 found = 1;
                 ch->sendf("M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
-                             GET_ROOM_VNUM(IN_ROOM(i)), i->getRoom()->name);
+                             GET_ROOM_VNUM(IN_ROOM(i)), i->getRoom()->getDisplayName(ch));
                 if (IS_NPC(i) && !i->script->dgScripts.empty()) {
                     auto t = i->scriptString();
                     ch->sendf("%s ", t.c_str());
@@ -6339,7 +6339,7 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
             }
         }
         for (k = object_list; k; k = k->next)
-            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
+            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->getDisplayName(ch).c_str())) {
                 found = 1;
                 print_object_location(++num, k, ch, true);
             }
@@ -7058,7 +7058,7 @@ ACMD(do_scan) {
 
         ch->sendf("@w-----------------------------------------@n\r\n");
         ch->sendf("          %s%s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
-                     dest->name ? dest->name : "You don't think you saw what you just saw.",
+                     withPlaceholder(dest->getDisplayName(ch), "You don't think you saw what you just saw."),
                      CCNRM(ch, C_NRM));
         ch->sendf("@W          -----------------          @n\r\n");
 
@@ -7083,8 +7083,7 @@ ACMD(do_scan) {
         if (!IS_DARK(dest2->getUID())) {
             ch->sendf("@w-----------------------------------------@n\r\n");
             ch->sendf("          %sFar %s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
-                         dest2->name ? dest2->name
-                                             : "You don't think you saw what you just saw.",
+                         withPlaceholder(dest2->getDisplayName(ch), "You don't think you saw what you just saw."),
                          CCNRM(ch, C_NRM));
             ch->sendf("@W          -----------------          @n\r\n");
 
@@ -7370,6 +7369,6 @@ ACMD(do_desc) {
     }
     write_to_output(d, "Current description:\r\n%s", ch->getLookDesc());
     write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
-    string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
+    // TODO: string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);
     STATE(d) = CON_EXDESC;
 }

@@ -396,7 +396,7 @@ DgResults Object::dgCallMember(trig_data *trig, const std::string& member, const
 
     if(lmember == "name") {
         if(!arg.empty()) {
-            name = strdup(arg.c_str());
+            setName(arg);
         }
         return name;
     }

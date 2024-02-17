@@ -69,7 +69,7 @@ int trig_data::execute() {
     }
     catch(const DgScriptException& err) {
         script_log("DgScript Error on %s: '%s' - DgScript ID %d, Name: %s. Exception: %s", 
-            sc->owner->getUIDString(false).c_str(), sc->owner->name, GET_TRIG_VNUM(this), GET_TRIG_NAME(this), err.what());
+            sc->owner->getUIDString(false).c_str(), sc->owner->getName(), GET_TRIG_VNUM(this), GET_TRIG_NAME(this), err.what());
         reset();
         return 0;
     }
@@ -502,7 +502,7 @@ Object *get_obj_in_list(char *name, std::vector<Object*> list) {
             if(i == obj) return obj;
     } else {
         for (auto i : list)
-            if (isname(name, i->name))
+            if (isname(name, i->getName().c_str())
                 return i;
     }
 
@@ -536,7 +536,7 @@ Object *get_object_in_equip(BaseCharacter *ch, char *name) {
 
         for (j = 0; (j < NUM_WEARS) && (n <= number); j++)
             if ((obj = GET_EQ(ch, j)))
-                if (isname(tmp, obj->name))
+                if (isname(tmp, obj->getName().c_str()))
                     if (++n == number)
                         return (obj);
     }
@@ -650,7 +650,7 @@ BaseCharacter *get_char(char *name) {
             return ch;
     } else {
         for (auto i = character_list; i; i = i->next)
-            if (isname(name, i->name) &&
+            if (isname(name, i->getName().c_str()) &&
                 valid_dg_target(i, DG_ALLOW_GODS))
                 return i;
     }
@@ -674,7 +674,7 @@ BaseCharacter *get_char_near_obj(Object *obj, char *name) {
         room_rnum num;
         if (auto room = obj->getRoom(); room)
             for (auto ch : room->getPeople())
-                if (isname(name, ch->name) &&
+                if (isname(name, ch->getName().c_str()) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
     }
@@ -698,7 +698,7 @@ BaseCharacter *get_char_in_room(Room *room, char *name) {
             return ch;
     } else {
         for (auto ch : room->getPeople())
-            if (isname(name, ch->name) &&
+            if (isname(name, ch->getName().c_str()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
     }
@@ -727,7 +727,7 @@ Object *get_obj_near_obj(Object *obj, char *name) {
             auto o = dynamic_cast<Object*>(resolveUID(name));
             if(!o) return nullptr;
             if(o == obj->in_obj) return o;
-        } else if (isname(name, obj->in_obj->name))
+        } else if (isname(name, obj->in_obj->getName().c_str()))
             return obj->in_obj;
     }
         /* or worn ?*/
@@ -759,7 +759,7 @@ Object *get_obj(char *name) {
     }
     else {
         for (obj = object_list; obj; obj = obj->next)
-            if (isname(name, obj->name))
+            if (isname(name, obj->getName().c_str()))
                 return obj;
     }
 
@@ -796,17 +796,17 @@ BaseCharacter *get_char_by_obj(Object *obj, char *name) {
             return ch;
     } else {
         if (obj->carried_by &&
-            isname(name, obj->carried_by->name) &&
+            isname(name, obj->carried_by->getName().c_str()) &&
             valid_dg_target(obj->carried_by, DG_ALLOW_GODS))
             return obj->carried_by;
 
         if (obj->worn_by &&
-            isname(name, obj->worn_by->name) &&
+            isname(name, obj->worn_by->getName().c_str()) &&
             valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
             return obj->worn_by;
 
         for (ch = character_list; ch; ch = ch->next)
-            if (isname(name, ch->name) &&
+            if (isname(name, ch->getName().c_str()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
     }
@@ -830,12 +830,12 @@ BaseCharacter *get_char_by_room(Room *room, char *name) {
             return ch;
     } else {
         for (auto ch : room->getPeople())
-            if (isname(name, ch->name) &&
+            if (isname(name, ch->getName().c_str()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
 
         for (ch = character_list; ch; ch = ch->next)
-            if (isname(name, ch->name) &&
+            if (isname(name, ch->getName().c_str()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
     }
@@ -862,7 +862,7 @@ Object *get_obj_by_obj(Object *obj, char *name) {
     if (auto con = obj->getInventory(); !con.empty() && (i = get_obj_in_list(name, con)))
         return i;
 
-    if (obj->in_obj && isname(name, obj->in_obj->name))
+    if (obj->in_obj && isname(name, obj->in_obj->getName().c_str()))
         return obj->in_obj;
 
     if (obj->worn_by && (i = get_object_in_equip(obj->worn_by, name)))
@@ -891,7 +891,7 @@ Object *get_obj_in_room(Room *room, char *name) {
                 return obj;
     } else {
         for (auto obj : room->getInventory())
-            if (isname(name, obj->name))
+            if (isname(name, obj->getName().c_str()))
                 return obj;
     }
 
@@ -906,11 +906,11 @@ Object *get_obj_by_room(Room *room, char *name) {
     }
 
     for (auto obj : room->getInventory())
-        if (isname(name, obj->name))
+        if (isname(name, obj->getName().c_str()))
             return obj;
 
     for (auto obj = object_list; obj; obj = obj->next)
-        if (isname(name, obj->name))
+        if (isname(name, obj->getName().c_str()))
             return obj;
 
     return nullptr;
@@ -1055,9 +1055,9 @@ void find_uid_name(char *uid, char *name, size_t nlen) {
     Object *obj;
 
     if ((ch = get_char(uid)))
-        snprintf(name, nlen, "%s", ch->name);
+        snprintf(name, nlen, "%s", ch->getName());
     else if ((obj = get_obj(uid)))
-        snprintf(name, nlen, "%s", obj->name);
+        snprintf(name, nlen, "%s", obj->getName());
     else
         snprintf(name, nlen, "uid = %s, (not found)", uid + 1);
 }
@@ -1237,7 +1237,7 @@ ACMD(do_attach) {
 
         ch->sendf("Trigger %d (%s) attached to %s [%d].\r\n",
                      tn, GET_TRIG_NAME(trig),
-                     (withPlaceholder(object->getShortDesc(), object->name),
+                     (withPlaceholder(object->getShortDesc(), object->getName()),
                      GET_OBJ_VNUM(object)));
     } else if (is_abbrev(arg, "room") || is_abbrev(arg, "wtr")) {
         if (strchr(targ_name, '.'))

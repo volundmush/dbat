@@ -236,7 +236,7 @@ std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms) {
     for(auto r : rooms) {
         auto room = world.find(r);
         if(room == world.end()) continue;
-        names.emplace_back(r, processColors(room->second->name, false, nullptr));
+        names.emplace_back(r, processColors(room->second->getDisplayName(nullptr), false, nullptr));
     }
 
     std::sort(names.begin(), names.end(), [](const std::pair<room_vnum, std::string>& a, const std::pair<room_vnum, std::string>& b) {

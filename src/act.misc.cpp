@@ -231,9 +231,9 @@ static void generate_multiform(BaseCharacter *ch, int count) {
         return;
     }
 
-    auto clone_name = fmt::format("{}'s Clone", ch->name);
-    auto clone_sdesc = fmt::format("{}'s @CClone@n", ch->name);
-    auto clone_ldesc = fmt::format("{}'s @CClone@w is standing here.@n\n", ch->name);
+    auto clone_name = fmt::format("{}'s Clone", ch->getName());
+    auto clone_sdesc = fmt::format("{}'s @CClone@n", ch->getName());
+    auto clone_ldesc = fmt::format("{}'s @CClone@w is standing here.@n\n", ch->getName());
 
     for (int i = 0; i < count; i++) {
         auto clone = read_mobile(r_num, REAL);
@@ -5412,7 +5412,7 @@ ACMD(do_spoil) {
 
     body_part = create_obj();
     body_part->vn = NOTHING;
-    snprintf(part, sizeof(part), "%s", obj->name);
+    snprintf(part, sizeof(part), "%s", obj->getName().c_str());
     search_replace(part, "headless", "");
     search_replace(part, "corpse", "");
     search_replace(part, "half", "");

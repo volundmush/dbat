@@ -1394,7 +1394,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
             /* timer count down */
             if (GET_OBJ_TIMER(j) > 0)
                 GET_OBJ_TIMER(j)--;
-            if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
+            if (!strstr(j->getName().c_str(), "android") && !strstr(j->getName().c_str(), "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
                 std::string corpseName = j->getShortDesc();
                 std::string decayMessage;
                 switch(GET_OBJ_TIMER(j)) {

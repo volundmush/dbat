@@ -491,9 +491,6 @@ int64_t BaseCharacter::incCurKIPercent(double amt, bool limit_max) {
 }
 
 int64_t BaseCharacter::decCurKIPercent(double amt, int64_t floor) {
-    if (!strcasecmp(this->name, "Wayland")) {
-        this->sendf("decCurKIPercent called with: %f\r\n", amt);
-    }
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getMaxKI();

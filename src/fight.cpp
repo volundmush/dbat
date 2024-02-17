@@ -205,7 +205,7 @@ static int pick_n_throw(BaseCharacter *ch, char *buf) {
 
     for (auto cont : ch->getRoom()->getInventory()) {
         if (ch->canCarryWeight(cont)) {
-            sprintf(buf2, "%s", cont->name);
+            sprintf(buf2, "%s", cont->getDisplayName(ch).c_str());
             do_get(ch, buf2, 0, 0);
             sprintf(buf3, "%s %s", buf2, buf);
             do_throw(ch, buf3, 0, 0);
@@ -729,7 +729,7 @@ void remove_limb(BaseCharacter *vict, int num) {
             break;
     }
 
-    body_part->name = strdup(buf);
+    body_part->setName(buf);
     if (num > 0) {
         snprintf(buf2, sizeof(buf2), "@wA %s is lying here@n", part);
     } else {
@@ -1651,18 +1651,17 @@ static void make_corpse(BaseCharacter *ch, BaseCharacter *tch) {
                 }
 
                 for (int ind = 0; ind < repeats; ind++) {
-                    Object *meat;
                     tch->sendf("The choice edible meat is preserved because of your skill.\r\n");
-                    meat = read_object(1612, VIRTUAL);
-                    meat->addToLocation(ch);
+                    auto meat = read_object(1612, VIRTUAL);
                     char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                     sprintf(nick, "@RRaw %s@R Steak@n", GET_NAME(ch));
-                    sprintf(nick2, "Raw %s Steak", ch->name);
+                    sprintf(nick2, "Raw %s Steak", ch->getName().c_str());
                     sprintf(nick3, "@wA @Rraw %s@R steak@w is lying here@n", GET_NAME(ch));
                     meat->setShortDesc(nick);
                     meat->setName(nick2);
                     meat->setRoomDesc(nick3);
                     GET_OBJ_MATERIAL(meat) = 14;
+                    meat->addToLocation(ch);
                 }
 
             }

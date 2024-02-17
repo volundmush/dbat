@@ -95,7 +95,7 @@ int item_in_list(char *item, std::vector<Object*> list) {
         }
     } else {
         for (auto i : list) {
-            if (isname(item, i->name))
+            if (isname(item, i->getName().c_str()))
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
                 count += item_in_list(item, i->getInventory());

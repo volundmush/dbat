@@ -211,7 +211,7 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
                         char buf[MAX_INPUT_LENGTH];
                         *buf = '\0';
                         sprintf(buf, "%s", OLC_HELP(d)->keywords);
-                        send_to_imm("@gHedit@D: @w%s@G has just edited and saved, @Y%s@G.@n", d->character->name, buf);
+                        send_to_imm("@gHedit@D: @w%s@G has just edited and saved, @Y%s@G.@n", d->character->getName().c_str(), buf);
                         hedit_save_internally(d);
                         /* Do not free strings, just the help structure. */
                         cleanup_olc(d, CLEANUP_STRUCTS);

@@ -606,7 +606,7 @@ namespace net {
                 }
             case CON_NAME_CNFRM:
                 if(iequals(arg, "Y")) {
-                    ch->name = strdup(maybeName.c_str());
+                    ch->setName(maybeName);
                     state = CON_QRACE;
                     display_races();
                     break;
@@ -2271,14 +2271,14 @@ namespace net {
         auto p = std::make_shared<player_data>();
         p->id = ch->getUID();
         players[p->id] = p;
-        p->name = ch->name;
+        p->name = ch->getName();
         p->account = conn->account;
         conn->account->characters.push_back(p->id);
         p->character = ch;
         init_char(ch);
         // set state to -1 to prevent accidental freeing of ch...
         state = -1;
-        send_to_imm("New Character '%s' created by Account: %s", ch->name, p->account->name.c_str());
+        send_to_imm("New Character '%s' created by Account: %s", ch->getName(), p->account->name.c_str());
         conn->setParser(new CharacterMenu(conn, ch));
     }
 }

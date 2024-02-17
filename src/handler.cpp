@@ -461,7 +461,7 @@ BaseCharacter *get_char_room(char *name, int *number, room_rnum room) {
         return (nullptr);
 
     for (auto i : dynamic_cast<Room*>(world[room])->getPeople())
-        if (isname(name, i->name))
+        if (isname(name, i->getName().c_str()))
             if (--(*number) == 0)
                 return (i);
 
@@ -928,7 +928,7 @@ BaseCharacter *get_player_vis(BaseCharacter *ch, char *name, int *number, int in
             }
         }
         if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
-            if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
+            if (strcasecmp(i->getName().c_str(), name) && !strstr(i->getName().c_str(), name)) {
                 if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
                     if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
                         if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
@@ -973,12 +973,12 @@ BaseCharacter *get_char_room_vis(BaseCharacter *ch, char *name, int *number) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (isname(name, i->name) && (IS_NPC(i) || IS_NPC(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) &&
+        } else if (isname(name, i->getName().c_str()) && (IS_NPC(i) || IS_NPC(ch) || GET_ADMLEVEL(i) > 0 || GET_ADMLEVEL(ch) > 0) &&
                    i != ch) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
-        } else if (isname(name, i->name) && i == ch) {
+        } else if (isname(name, i->getName().c_str()) && i == ch) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)
                     return (i);
@@ -1042,7 +1042,7 @@ BaseCharacter *get_char_world_vis(BaseCharacter *ch, char *name, int *number) {
             }
         }
         if ((GET_ADMLEVEL(ch) >= 1 || GET_ADMLEVEL(i) >= 1 || IS_NPC(ch) || IS_NPC(i))) {
-            if (strcasecmp(i->name, name) && !strstr(i->name, name)) {
+            if (strcasecmp(i->getName().c_str(), name) && !strstr(i->getName().c_str(), name)) {
                 if (strcasecmp(RACE(i), name) && !strstr(RACE(i), name)) {
                     if (!IS_NPC(ch) && !IS_NPC(i) && readIntro(ch, i) == 1) {
                         if (strcasecmp(get_i_name(ch, i), name) && !strstr(get_i_name(ch, i), name)) {
@@ -1140,7 +1140,7 @@ Object *get_obj_in_equip_vis(BaseCharacter *ch, char *arg, int *number, std::map
         return (nullptr);
 
     for (j = 0; j < NUM_WEARS; j++)
-        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->name))
+        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->getName().c_str()))
             if (--(*number) == 0)
                 return (equipment[j]);
 
@@ -1160,7 +1160,7 @@ int get_obj_pos_in_equip_vis(BaseCharacter *ch, char *arg, int *number, std::map
         return (-1);
 
     for (j = 0; j < NUM_WEARS; j++)
-        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->name))
+        if (equipment[j] && CAN_SEE_OBJ(ch, equipment[j]) && isname(arg, equipment[j]->getName().c_str()))
             if (--(*number) == 0)
                 return (j);
 
@@ -1304,7 +1304,7 @@ int generic_find(char *arg, bitvector_t bitvector, BaseCharacter *ch,
 
     if (IS_SET(bitvector, FIND_OBJ_EQUIP)) {
         for (found = false, i = 0; i < NUM_WEARS && !found; i++)
-            if (GET_EQ(ch, i) && isname(name, GET_EQ(ch, i)->name) && --number == 0) {
+            if (GET_EQ(ch, i) && isname(name, GET_EQ(ch, i)->getName().c_str()) && --number == 0) {
                 *tar_obj = GET_EQ(ch, i);
                 found = true;
             }

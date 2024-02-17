@@ -3050,62 +3050,23 @@ void weight_change_object(Object *obj, int weight) {
 }
 
 void name_from_drinkcon(Object *obj) {
-    char *new_name, *cur_name, *next;
-    const char *liqname;
-    int liqlen, cpylen;
-
     if (!obj || (GET_OBJ_TYPE(obj) != ITEM_DRINKCON && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN))
         return;
 
-    liqname = drinknames[GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID)];
-    if (!isname(liqname, obj->name)) {
-        /*log("SYSERR: Can't remove liquid '%s' from '%s' (%d) item.", liqname, obj->name, obj->item_number);*/
-        /*  SYSERR_DESC:
-     *  From name_from_drinkcon(), this error comes about if the object
-     *  noted (by keywords and item vnum) does not contain the liquid string
-     *  being searched for.
-     */
-        return;
+    auto liqname = drinknames[GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID)];
+
+    std::string curName = obj->getName();
+    // remove liqname from curName.
+    if (auto find = curName.find(liqname); find != std::string::npos) {
+        curName.erase(find, strlen(liqname));
     }
 
-    liqlen = strlen(liqname);
-    CREATE(new_name, char, strlen(obj->name) - strlen(liqname)); /* +1 for NUL, -1 for space */
-
-    for (cur_name = obj->name; cur_name; cur_name = next) {
-        if (*cur_name == ' ')
-            cur_name++;
-
-        if ((next = strchr(cur_name, ' ')))
-            cpylen = next - cur_name;
-        else
-            cpylen = strlen(cur_name);
-
-        if (!strncasecmp(cur_name, liqname, liqlen))
-            continue;
-
-        if (*new_name)
-            strcat(new_name, " ");    /* strcat: OK (size precalculated) */
-        strncat(new_name, cur_name, cpylen);    /* strncat: OK (size precalculated) */
-    }
-
-    if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto[GET_OBJ_RNUM(obj)]["name"])
-        free(obj->name);
-    obj->name = new_name;
+    obj->setName(curName);
 }
 
 void name_to_drinkcon(Object *obj, int type) {
-    char *new_name;
-
-    if (!obj || (GET_OBJ_TYPE(obj) != ITEM_DRINKCON && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN))
-        return;
-
-    CREATE(new_name, char, strlen(obj->name) + strlen(drinknames[type]) + 2);
-    sprintf(new_name, "%s %s", obj->name, drinknames[type]);    /* sprintf: OK */
-
-    if (GET_OBJ_RNUM(obj) == NOTHING || obj->name != obj_proto[GET_OBJ_RNUM(obj)]["name"])
-        free(obj->name);
-
-    obj->name = new_name;
+    auto curName = obj->getName();
+    obj->setName(curName + " " + drinknames[type]);
 }
 
 ACMD(do_drink) {

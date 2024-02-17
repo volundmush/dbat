@@ -1274,7 +1274,7 @@ void fingerUser(BaseCharacter *ch, std::shared_ptr<account_data> account) {
         for(auto c : account->characters) {
             auto p = players.find(c);
             if(p == players.end()) continue;
-            ch->sendf("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second->character->name);
+            ch->sendf("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second->character->getDisplayName(ch));
         }
         ch->sendf("\n");
     }

@@ -268,7 +268,7 @@ DgResults Room::dgCallMember(trig_data *trig, const std::string& member, const s
             }
     }
 
-    if(lmember == "name") return name;
+    if(lmember == "name") return getName();
     if(lmember == "sector") return sector_types[sector_type];
     if(lmember == "gravity") return fmt::format("{}", (int64_t)getEnvVar(EnvVar::Gravity));
 
