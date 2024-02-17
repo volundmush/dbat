@@ -1939,3 +1939,54 @@ bool BaseCharacter::isProvidingLight() {
     return false;
 }
 
+
+std::vector<std::string> BaseCharacter::baseKeywordsFor(GameEntity* looker) {
+    std::vector<std::string> out;
+
+    out.emplace_back(juggleRaceName(false));
+    // todo: account for mimicking a race with an unavailable sex?
+    if(auto sex = get(CharAppearance::Sex); sex > 0) {
+        out.emplace_back(genders[sex]);
+    }
+
+    return out;
+}
+
+std::vector<std::string> NonPlayerCharacter::getKeywords(GameEntity* looker) {
+    auto out = baseKeywordsFor(looker);
+
+    auto sname = split(getName(), ' ');
+    out.insert(out.end(), sname.begin(), sname.end());
+
+    return out;
+}
+
+std::string NonPlayerCharacter::getDisplayName(GameEntity* looker) {
+    return getShortDesc();
+}
+
+std::string PlayerCharacter::getDisplayName(GameEntity* looker) {
+    if(looker == this) return getName();
+    if(looker->canSeeAdminInvisible()) return getName();
+    if(auto otherPC = dynamic_cast<PlayerCharacter*>(looker); otherPC) {
+        if(checkFlag(FlagType::PC, PLR_DISGUISED)) {
+            return AN(RACE(this));
+        }
+        auto p = players[otherPC->getUID()];
+        if(auto found = p->dubNames.find(getUID()); found != p->dubNames.end()) {
+            return AN(RACE(this));
+        }
+        return found->second;
+    }
+    
+    return getName();
+}
+
+std::vector<std::string> PlayerCharacter::getKeywords(GameEntity* looker) {
+    auto out = baseKeywordsFor(looker);
+
+    auto sname = split(getDisplayName(looker), ' ');
+    out.insert(out.end(), sname.begin(), sname.end());
+
+    return out;
+}

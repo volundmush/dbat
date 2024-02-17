@@ -2864,7 +2864,7 @@ static void list_one_char(BaseCharacter *i, BaseCharacter *ch) {
             " is standing here"
     };
 
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i)) {
+    if (PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i)) {
         ch->sendf("@D[@G%d@D]@w %s", GET_MOB_VNUM(i), i->scriptString().c_str());
     }
 
@@ -2938,29 +2938,19 @@ static void list_one_char(BaseCharacter *i, BaseCharacter *ch) {
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
         ch->sendf("@w%s is being grappled with by YOU!", shd);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
-        ch->sendf("@w%s is being absorbed from by %s!", shd,
-                     readIntro(ch, GRAPPLED(i)) == 1 ? get_i_name(ch, GRAPPLED(i)) : AN(RACE(GRAPPLED(i))));
+        ch->sendf("@w%s is being absorbed from by %s!", shd, GRAPPLED(i)->getDisplayName(ch));
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
         ch->sendf("@w%s is being absorbed from by YOU!", shd);
     else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
-        ch->sendf("@w%s is being absorbed from by %s!", shd,
-                     readIntro(ch, ABSORBBY(i)) == 1 ? get_i_name(ch, ABSORBBY(i)) : AN(RACE(ABSORBBY(i))));
+        ch->sendf("@w%s is being absorbed from by %s!", shd, ABSORBBY(i)->getDisplayName(ch));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING &&
              is_sparring(i))
-        ch->sendf("@w%c%s is sparring with %s!", shd,
-                     GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch,
-                                                                                                              FIGHTING(
-                                                                                                                      i))
-                                                                                                 : LRACE(FIGHTING(i))));
+        ch->sendf("@w%c%s is sparring with %s!", shd, FIGHTING(i)->getDisplayName(ch));
     else if (IS_NPC(i) && FIGHTING(i) && is_sparring(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
              GET_POS(i) != POS_SLEEPING)
         ch->sendf("@w%s is sparring with you!", shd);
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->sendf("@w%s is fighting %s!", shd,
-                     GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1 ? get_i_name(ch,
-                                                                                                              FIGHTING(
-                                                                                                                      i))
-                                                                                                 : LRACE(FIGHTING(i))));
+        ch->sendf("@w%s is fighting %s!", shd, FIGHTING(i)->getDisplayName(ch));
     else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
         ch->sendf("@w%s is fighting YOU!", shd);
     else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)

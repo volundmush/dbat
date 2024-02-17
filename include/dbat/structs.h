@@ -962,6 +962,8 @@ struct BaseCharacter : public GameEntity {
     nlohmann::json serializeRelations() override;
     void deserializeRelations(const nlohmann::json& j) override;
 
+    std::vector<std::string> baseKeywordsFor(GameEntity* looker);
+
     virtual bool isPC();
     virtual bool isNPC();
 
@@ -1532,6 +1534,10 @@ struct NonPlayerCharacter : public BaseCharacter {
 
     bool isPC() override;
     bool isNPC() override;
+
+    std::string getDisplayName(GameEntity* looker) override;
+    std::vector<std::string> getKeywords(GameEntity* looker) override;
+
 };
 
 struct PlayerCharacter : public BaseCharacter {
@@ -1546,6 +1552,9 @@ struct PlayerCharacter : public BaseCharacter {
 
     void deserialize(const nlohmann::json& j) override;
     nlohmann::json serialize() override;
+
+    std::string getDisplayName(GameEntity* looker) override;
+    std::vector<std::string> getKeywords(GameEntity* looker) override;
 
     bool isPC() override;
     bool isNPC() override;

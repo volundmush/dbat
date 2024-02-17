@@ -1994,7 +1994,7 @@ static int load_char(const char *name, BaseCharacter *ch) {
                     break;
 
                 case 'N':
-                    if (!strcmp(tag, "Name")) GET_PC_NAME(ch) = strdup(line);
+                    if (!strcmp(tag, "Name")) ch->name = strdup(line);
                     break;
 
                 case 'O':
@@ -2005,10 +2005,6 @@ static int load_char(const char *name, BaseCharacter *ch) {
                     if (!strcmp(tag, "Phas")) ch->set(CharAppearance::DistinguishingFeature, atoi(line));
                     else if (!strcmp(tag, "Phse")) GET_PHASE(ch) = atoi(line);
                     else if (!strcmp(tag, "Plyd")) ch->time.played = atol(line);
-#ifdef ASCII_SAVE_POOFS
-                    else if (!strcmp(tag, "PfIn")) POOFIN(ch) = strdup(line);
-                    else if (!strcmp(tag, "PfOt")) POOFOUT(ch) = strdup(line);
-#endif
                     else if (!strcmp(tag, "Pole")) GET_POLE_BONUS(ch) = atoi(line);
                     else if (!strcmp(tag, "Posi")) GET_POS(ch) = atoi(line);
                     else if (!strcmp(tag, "Pref")) {

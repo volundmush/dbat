@@ -57,22 +57,7 @@ SPECIAL(shop_keeper);
 const char *get_i_name(BaseCharacter *ch, BaseCharacter *vict) {
     static char name[50];
 
-    /* Read Introduction File */
-    if (!vict || vict == ch) {
-        return ("");
-    }
-
-    if (IS_NPC(ch) || IS_NPC(vict)) {
-        return (RACE(vict));
-    }
-
-    auto p = players[ch->getUID()];
-
-    auto found = p->dubNames.find(vict->getUID());
-    if(found == p->dubNames.end()) return RACE(vict);
-
-    // print *found to name and return buf pointer.
-    sprintf(name, "%s", found->second.c_str());
+    sprintf(name, "%s", vict->getDisplayName(ch).c_str());
     return (name);
 }
 
