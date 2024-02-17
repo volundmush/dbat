@@ -196,3 +196,12 @@ using DgResults = std::variant<std::string, GameEntity*>;
 using DgHolder = std::variant<std::string, GameEntity*, std::function<DgResults(struct trig_data*, const std::string& field, const std::string& args)>>;
 
 using Event = std::pair<std::string, nlohmann::json>;
+
+class InternedString {
+public:
+    InternedString(const std::string& txt);
+    ~InternedString();
+    std::string get() const;
+private:
+    std::string txt;
+};

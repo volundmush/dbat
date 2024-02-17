@@ -43,6 +43,26 @@
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
+std::unordered_map<std::string, std::shared_ptr<InternedString>> intern;
+std::shared_ptr<InternedString> internString(const std::string& str) {
+    if(auto it = intern.find(str); it != intern.end()) {
+        return it->second;
+    }
+    auto i = std::make_shared<InternedString>(str);
+    intern[str] = i;
+    return i;
+
+}
+
+InternedString::InternedString(const std::string& str) : txt(str) {};
+
+InternedString::~InternedString() {
+    intern.erase(txt);
+}
+
+std::string InternedString::get() const {
+    return txt;
+}
 
 bool gameIsLoading = true;
 bool saveAll = false;

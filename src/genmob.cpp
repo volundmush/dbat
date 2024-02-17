@@ -45,14 +45,6 @@ int save_mobiles(zone_rnum zone_num) {
 }
 
 
-void check_mobile_strings(BaseCharacter *mob) {
-    mob_vnum mvnum = mob_index[mob->getVN()].vn;
-    check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
-    check_mobile_string(mvnum, &GET_DDESC(mob), "detailed description");
-    check_mobile_string(mvnum, &GET_ALIAS(mob), "alias list");
-    check_mobile_string(mvnum, &GET_SDESC(mob), "short description");
-}
-
 void check_mobile_string(mob_vnum i, char **string, const char *dscr) {
     if (*string == nullptr || **string == '\0') {
         char smbuf[128];
@@ -745,14 +737,6 @@ double BaseCharacter::getTotalWeight() {
 bool BaseCharacter::isActive() {
     return active;
 }
-
-
-nlohmann::json BaseCharacter::serializeRelations() {
-    auto j = nlohmann::json::object();
-
-    return j;
-}
-
 
 double BaseCharacter::currentGravity() {
     return myEnvVar(EnvVar::Gravity);

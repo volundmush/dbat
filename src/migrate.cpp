@@ -782,17 +782,17 @@ static int parse_mobile_from_file(FILE *mob_f, nlohmann::json& ch) {
     sprintf(buf2, "mob vnum %d", nr);   /* sprintf: OK (for 'buf2 >= 19') */
 
     /***** String data *****/
-    ch["name"] = fread_string(mob_f, buf2);
+    ch["strings"]["name"] = fread_string(mob_f, buf2);
     tmpptr = fread_string(mob_f, buf2);
     if (tmpptr && *tmpptr) {
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
-            ch["short_description"] = tmpptr;
+            ch["strings"]["short_description"] = tmpptr;
             free(tmpptr);
     }
-    ch["room_description"] = fread_string(mob_f, buf2);
-    ch["look_description"] = fread_string(mob_f, buf2);
+    ch["strings"]["room_description"] = fread_string(mob_f, buf2);
+    ch["strings"]["look_description"] = fread_string(mob_f, buf2);
 
     /* *** Numeric data *** */
     if (!get_line(mob_f, line)) {
@@ -900,7 +900,6 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     char f1[READ_SIZE], f2[READ_SIZE], f3[READ_SIZE], f4[READ_SIZE];
     char f5[READ_SIZE], f6[READ_SIZE], f7[READ_SIZE], f8[READ_SIZE];
     char f9[READ_SIZE], f10[READ_SIZE], f11[READ_SIZE], f12[READ_SIZE];
-    struct extra_descr_data *new_descr;
 
     auto &idx = obj_index[nr];
     auto oi = obj_proto.emplace(nr, nlohmann::json::object());
@@ -912,7 +911,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     sprintf(buf2, "object #%d", nr);    /* sprintf: OK (for 'buf2 >= 19') */
     char* tempStr = fread_string(obj_f, buf2);
     if(tempStr != nullptr) {
-        obj["name"] = std::string(tempStr);
+        obj["strings"]["name"] = std::string(tempStr);
     }
 
     auto &z = zone_table[real_zone_by_thing(nr)];
@@ -923,18 +922,18 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         if (!strcasecmp(fname(tmpptr), "a") || !strcasecmp(fname(tmpptr), "an") ||
             !strcasecmp(fname(tmpptr), "the"))
             *tmpptr = LOWER(*tmpptr);
-            obj["short_description"] = tmpptr;
+            obj["strings"]["short_description"] = tmpptr;
             free(tmpptr);
     }
     tmpptr = fread_string(obj_f, buf2);
     if (tmpptr && *tmpptr) {
         CAP(tmpptr);
-        obj["room_description"] = tmpptr;
+        obj["strings"]["room_description"] = tmpptr;
         free(tmpptr);
     }
     tmpptr = fread_string(obj_f, buf2);
     if(tmpptr && *tmpptr) {
-        obj["look_description"] = tmpptr;
+        obj["strings"]["look_description"] = tmpptr;
         free(tmpptr);
     }
 
@@ -1818,7 +1817,7 @@ static int load_char(const char *name, BaseCharacter *ch) {
                 case 'D':
                     if (!strcmp(tag, "Deat")) GET_DTIME(ch) = atoi(line);
                     else if (!strcmp(tag, "Deac")) GET_DCOUNT(ch) = atoi(line);
-                    else if (!strcmp(tag, "Desc")) ch->look_description = fread_string(fl, buf2);
+                    else if (!strcmp(tag, "Desc")) ch->setLookDesc(fread_string(fl, buf2));
                     else if (!strcmp(tag, "Dex ")) ch->set(CharAttribute::Agility, atoi(line));
                     else if (!strcmp(tag, "Drnk")) GET_COND(ch, DRUNK) = atoi(line);
                     else if (!strcmp(tag, "Damg")) GET_DAMAGE_MOD(ch) = atoi(line);
@@ -3351,7 +3350,7 @@ void migrate_grid() {
         auto o = obj_proto.find(ovn);
         if(o == obj_proto.end()) continue;
         old_ship_data shipData;
-        shipData.name = o->second["name"];
+        shipData.name = o->second["strings"]["name"];
         shipData.ship_obj = ovn;
         shipData.vnums.insert(vn);
         shipData.hatch_room = vn;

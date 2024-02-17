@@ -312,7 +312,7 @@ struct mob_special_data {
 
 enum class UnitFamily : uint8_t {
     Character = 0,
-    Item = 1,
+    Object = 1,
     Room = 2,
     Exit = 3,
 };
@@ -330,7 +330,7 @@ struct coordinates {
 
 struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     GameEntity() = default;
-    virtual ~GameEntity();
+    virtual ~GameEntity() = default;
 
     int64_t getUID();
     vnum getVN();
@@ -354,10 +354,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     // Oh no, the thing you're inside is being extracted. What now?
     virtual void onHolderExtraction();
 
-    char *name{};
-    char *room_description{};      /* When thing is listed in room */
-    char *look_description{};      /* what to show when looked at */
-    char *short_description{};     /* when displayed in list or action message. */
+    std::unordered_map<std::string, std::shared_ptr<InternedString>> strings;
 
     std::vector<extra_descr_data> ex_description{}; /* extra descriptions     */
 
@@ -529,7 +526,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual void executeCommand(const std::string& cmd);
 
     // Returns viable landing locations within this, for u.
-    virtual std::vector<GameEntity*> getLandingLocations(GameEntity *u);
+    //virtual std::vector<GameEntity*> getLandingLocations(GameEntity *u);
 
     virtual void assignTriggers();
 
@@ -648,7 +645,6 @@ struct Object : public GameEntity {
     bool isActive() override;
 
     bool isWorking();
-    void clearLocation();
 
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
@@ -699,11 +695,6 @@ struct Object : public GameEntity {
     bool isProvidingLight() override;
     double currentGravity();
 
-    std::string getName() override;
-    std::string getShortDesc() override;
-    std::string getRoomDesc() override;
-    std::string getLookDesc() override;
-
     void assignTriggers() override;
 
 };
@@ -711,12 +702,10 @@ struct Object : public GameEntity {
 
 struct Structure : public Object {
     Structure() = default;
-    virtual ~Structure();
     explicit Structure(const nlohmann::json& j);
 
-    void extractFromWorld() override;
+    //void extractFromWorld() override;
 
-    UnitFamily getFamily() override;
     std::string getUnitClass() override;
 
     nlohmann::json serialize() override;
@@ -752,6 +741,12 @@ struct Exit : public GameEntity {
     std::string getUnitClass() override;
     nlohmann::json serializeRelations() override;
     nlohmann::json serialize() override;
+    void deserializeRelations(const nlohmann::json& j) override;
+    void deserialize(const nlohmann::json& j) override;
+
+    std::string getName() override;
+    //std::string getAlias() override;
+    std::vector<std::string> getKeywords(GameEntity* ch) override;
 };
 
 enum class MoonCheck : uint8_t {
@@ -764,7 +759,6 @@ enum class MoonCheck : uint8_t {
 /* ================== Memory Structure for room ======================= */
 struct Room : public GameEntity {
     Room() = default;
-    ~Room() override;
 
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
@@ -797,7 +791,6 @@ struct Room : public GameEntity {
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
     void assignTriggers() override;
-    std::string scriptString() override;
 
     //Event renderLocationFor(GameEntity* u) override;
 
@@ -964,8 +957,8 @@ struct BaseCharacter : public GameEntity {
 
     std::vector<std::string> baseKeywordsFor(GameEntity* looker);
 
-    virtual bool isPC();
-    virtual bool isNPC();
+    virtual bool isPC() = 0;
+    virtual bool isNPC() = 0;
 
     bool isActive() override;
 
@@ -1524,7 +1517,6 @@ struct NonPlayerCharacter : public BaseCharacter {
     NonPlayerCharacter() = default;
     explicit NonPlayerCharacter(const nlohmann::json &j);
 
-    UnitFamily getFamily() override;
     std::string getUnitClass() override;
 
     void assignTriggers() override;
@@ -1547,7 +1539,6 @@ struct PlayerCharacter : public BaseCharacter {
     void onHolderExtraction() override;
     void extractFromWorld() override;
 
-    UnitFamily getFamily() override;
     std::string getUnitClass() override;
 
     void deserialize(const nlohmann::json& j) override;

@@ -183,7 +183,7 @@ void script_damage(BaseCharacter *vict, int dam) {
     if (GET_POS(vict) == POS_DEAD) {
         if (!IS_NPC(vict))
             mudlog(BRF, 0, true, "%s killed by script at %s",
-                   GET_NAME(vict), vict->getRoom()->getDisplayName());
+                   GET_NAME(vict), vict->getRoom()->getDisplayName(nullptr));
         die(vict, nullptr);
     }
 }

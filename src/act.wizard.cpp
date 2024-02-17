@@ -1896,7 +1896,7 @@ ACMD(do_stat) {
             ch->sendf("Stats on which zone?\r\n");
             return;
         } else {
-            print_zone(ch, atoi(buf2));
+            //print_zone(ch, atoi(buf2));
             return;
         }
     } else {

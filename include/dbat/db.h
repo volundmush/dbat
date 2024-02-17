@@ -113,6 +113,9 @@
 
 // global variables
 
+extern std::unordered_map<std::string, std::shared_ptr<InternedString>> intern;
+std::shared_ptr<InternedString> internString(const std::string& str);
+
 bool isUID(const std::string& uid);
 GameEntity* resolveUID(const std::string& uid);
 

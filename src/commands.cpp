@@ -244,8 +244,6 @@ ACMD(do_dc);
 
 ACMD(do_disable);
 
-ACMD(do_dig);
-
 ACMD(do_bury);
 
 ACMD(do_disarm);
@@ -629,8 +627,6 @@ ACMD(do_shutdown);
 
 ACMD(do_sit);
 
-ACMD(do_rcopy);
-
 ACMD(do_skillset);
 
 ACMD(do_sleep);
@@ -803,8 +799,6 @@ ACMD(do_mzoneecho);
 ACMD(do_vdelete);
 
 ACMD(do_mfollow);
-
-ACMD(do_dig);
 
 ACMD(do_rdisplay);
 
@@ -1171,8 +1165,8 @@ const struct command_info cmd_info[] = {
         {"rescue",        "rescu",        POS_STANDING, do_rescue,          0,  ADMLVL_NONE,    0},
         {"rest",          "re",           POS_RESTING,  do_rest,            0,  ADMLVL_NONE,    0},
         {"restring",      "restring",     POS_STANDING, do_restring,        0,  ADMLVL_NONE,    0},
-        {"rclone",        "rclon",        POS_DEAD,     do_rcopy,           0,  ADMLVL_BUILDER, 0},
-        {"rcopy",         "rcopy",        POS_DEAD,     do_rcopy,           0,  ADMLVL_BUILDER, 0},
+//        {"rclone",        "rclon",        POS_DEAD,     do_rcopy,           0,  ADMLVL_BUILDER, 0},
+//        {"rcopy",         "rcopy",        POS_DEAD,     do_rcopy,           0,  ADMLVL_BUILDER, 0},
         {"roomdisplay",   "roomdisplay",  POS_RESTING,  do_rdisplay,        0,  ADMLVL_NONE,    0},
         {"read",          "rea",          POS_RESTING,  do_look,            0,  ADMLVL_NONE,    SCMD_READ},
         {"recall",        "reca",         POS_STANDING, do_recall,          0,  ADMLVL_IMMORT,  0},
@@ -1297,7 +1291,7 @@ const struct command_info cmd_info[] = {
         {"trigedit",      "trigedit",     POS_DEAD,     do_oasis,           0,  ADMLVL_IMMORT,  SCMD_OASIS_TRIGEDIT},
         {"trip",          "trip",         POS_FIGHTING, do_trip,            0,  ADMLVL_NONE,    0},
         {"tsuihidan",     "tsuihida",     POS_FIGHTING, do_tsuihidan,       0,  ADMLVL_NONE,    0},
-        {"tunnel",        "tunne",        POS_DEAD,     do_dig,             0,  ADMLVL_IMMORT,  0},
+//        {"tunnel",        "tunne",        POS_DEAD,     do_dig,             0,  ADMLVL_IMMORT,  0},
         {"twinslash",     "twins",        POS_FIGHTING, do_tslash,          0,  ADMLVL_NONE,    0},
         {"twohand",       "twohand",      POS_DEAD,     do_twohand,         0,  ADMLVL_NONE,    0},
         {"typo",          "typo",         POS_DEAD,     do_gen_write,       0,  ADMLVL_NONE,    SCMD_TYPO},

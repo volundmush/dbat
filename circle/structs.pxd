@@ -38,12 +38,13 @@ cdef extern from "dbat/structs.h":
     cdef cppclass GameEntity:
         int vn
         int zone
-        char* name
-        char* room_description
-        char* look_description
-        char* short_description
+        string getName()
+        string getRoomDesc()
+        string getLookDesc()
+        string getShortDesc()
+        string getAlias()
         bool exists
-        extra_descr_data *ex_description
+        vector[extra_descr_data] ex_description
 
         vector[int] proto_script
         Object* contents

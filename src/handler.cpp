@@ -578,8 +578,6 @@ static void _obj_to_room(struct obj_data *object, Room *room) {
 /* Extract an object from the world */
 void Object::extractFromWorld() {
     GameEntity::extractFromWorld();
-    
-    clearLocation();
 
     /* Get rid of the contents of the object, as well. */
     if (GET_FELLOW_WALL(this) && vn == 79) {

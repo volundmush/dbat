@@ -502,7 +502,7 @@ Object *get_obj_in_list(char *name, std::vector<Object*> list) {
             if(i == obj) return obj;
     } else {
         for (auto i : list)
-            if (isname(name, i->getName().c_str())
+            if (isname(name, i->getName().c_str()))
                 return i;
     }
 

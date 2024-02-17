@@ -14,8 +14,8 @@ extern int save_mobiles(zone_rnum rznum);
 /* Handy macros. */
 #define GET_NDD(mob)    ((mob)->mob_specials.damnodice)
 #define GET_SDD(mob)    ((mob)->mob_specials.damsizedice)
-#define GET_ALIAS(mob)    ((mob)->name)
-#define GET_SDESC(mob)    ((mob)->short_description)
-#define GET_LDESC(mob)    ((mob)->room_description)
-#define GET_DDESC(mob)    ((mob)->look_description)
+#define GET_ALIAS(mob)    ((mob)->getName().c_str())
+#define GET_SDESC(mob)    ((mob)->getShortDesc().c_str())
+#define GET_LDESC(mob)    ((mob)->getRoomDesc().c_str())
+#define GET_DDESC(mob)    ((mob)->getLookDesc().c_str())
 #define GET_ATTACK(mob)    ((mob)->mob_specials.attack_type)

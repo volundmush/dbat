@@ -883,7 +883,7 @@ extern Object* GET_EQ(GameEntity* u, int i);
     (obj)->getShortDesc().c_str()  : "something")
 
 #define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-    fname((obj)->name) : "something")
+    fname((obj)->getName().c_str()) : "something")
 
 extern Exit *EXIT(GameEntity *ch, int door);
 extern Exit* SECOND_EXIT(GameEntity *ch, int door);

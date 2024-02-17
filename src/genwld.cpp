@@ -60,39 +60,7 @@ int free_room_strings(Room *room) {
 
 }
 
-nlohmann::json Exit::serialize() {
-    nlohmann::json j;
 
-    if(key > 0) j["key"] = key;
-
-    if(dclock) j["dclock"] = dclock;
-    if(dchide) j["dchide"] = dchide;
-    if(dcskill) j["dcskill"] = dcskill;
-    if(dcmove) j["dcmove"] = dcmove;
-    if(failsavetype) j["failsavetype"] = failsavetype;
-    if(dcfailsave) j["dcfailsave"] = dcfailsave;
-
-    return j;
-}
-
-nlohmann::json Exit::serializeRelations() {
-    nlohmann::json j;
-    if(destination) j["destination"] = destination->getUIDString();
-    if(failroom) j["failroom"] = failroom->getUIDString();
-    if(totalfailroom) j["totalfailroom"] = totalfailroom->getUIDString();
-    return j;
-
-}
-
-Exit::Exit(const nlohmann::json &j) : Exit() {
-    if(j.contains("key")) key = j["key"];
-    if(j.contains("dclock")) dclock = j["dclock"];
-    if(j.contains("dchide")) dchide = j["dchide"];
-    if(j.contains("dcskill")) dcskill = j["dcskill"];
-    if(j.contains("dcmove")) dcmove = j["dcmove"];
-    if(j.contains("failsavetype")) failsavetype = j["failsavetype"];
-    if(j.contains("dcfailsave")) dcfailsave = j["dcfailsave"];
-}
 
 nlohmann::json Room::serialize() {
     auto j = GameEntity::serialize();
@@ -112,16 +80,22 @@ nlohmann::json Room::serialize() {
 
 Room::Room(const nlohmann::json &j) {
     deserialize(j);
+}
 
+void Room::deserialize(const nlohmann::json &j) {
+    GameEntity::deserialize(j);
     if(j.contains("sector_type")) sector_type = j["sector_type"];
     if(j.contains("timed")) timed = j["timed"];
     if(j.contains("dmg")) dmg = j["dmg"];
     if(j.contains("geffect")) geffect = j["geffect"];
-
 }
 
 bool Room::isEnvironment() {
     return true;
+}
+
+std::optional<room_vnum> Room::getLaunchDestination() {
+    return {};
 }
 
 double Room::getEnvVar(EnvVar v) {
@@ -186,9 +160,8 @@ int Room::modDamage(int amount) {
     return setDamage(dmg + amount);
 }
 
-Room* Exit::getDestination() {
-    return destination;
-}
+
+
 
 
 bool Room::isSunken() {
@@ -410,4 +383,73 @@ bool Room::isInsideDark() {
     }
 
     return true;
+}
+
+// EXITS below here.
+Room* Exit::getDestination() {
+    return destination;
+}
+
+UnitFamily Exit::getFamily() {
+    return UnitFamily::Exit;
+}
+
+std::string Exit::getUnitClass() {
+    return "Exit";
+}
+
+nlohmann::json Exit::serialize() {
+    auto j = GameEntity::serialize();
+
+    if(key > 0) j["key"] = key;
+
+    if(dclock) j["dclock"] = dclock;
+    if(dchide) j["dchide"] = dchide;
+    if(dcskill) j["dcskill"] = dcskill;
+    if(dcmove) j["dcmove"] = dcmove;
+    if(failsavetype) j["failsavetype"] = failsavetype;
+    if(dcfailsave) j["dcfailsave"] = dcfailsave;
+
+    return j;
+}
+
+void Exit::deserialize(const nlohmann::json& j) {
+    GameEntity::deserialize(j);
+    if(j.contains("key")) key = j["key"];
+    if(j.contains("dclock")) dclock = j["dclock"];
+    if(j.contains("dchide")) dchide = j["dchide"];
+    if(j.contains("dcskill")) dcskill = j["dcskill"];
+    if(j.contains("dcmove")) dcmove = j["dcmove"];
+    if(j.contains("failsavetype")) failsavetype = j["failsavetype"];
+    if(j.contains("dcfailsave")) dcfailsave = j["dcfailsave"];
+
+}
+
+nlohmann::json Exit::serializeRelations() {
+    auto j = GameEntity::serializeRelations();
+    if(destination) j["destination"] = destination->getUIDString();
+    if(failroom) j["failroom"] = failroom->getUIDString();
+    if(totalfailroom) j["totalfailroom"] = totalfailroom->getUIDString();
+    return j;
+
+}
+
+void Exit::deserializeRelations(const nlohmann::json& j) {
+    GameEntity::deserializeRelations(j);
+}
+
+Exit::Exit(const nlohmann::json &j) : Exit() {
+    deserialize(j);
+}
+
+
+std::string Exit::getName() {
+    return dirs[locationType];
+}
+
+std::vector<std::string> Exit::getKeywords(GameEntity *looker) {
+    std::vector<std::string> out;
+    out.emplace_back(getName());
+    if(auto al = getAlias(); !al.empty()) out.emplace_back(al);
+    return out;
 }

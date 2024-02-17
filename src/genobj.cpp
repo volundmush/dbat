@@ -42,6 +42,10 @@ nlohmann::json obj_affected_type::serialize() {
     return j;
 }
 
+Object::Object(const nlohmann::json& j) {
+    deserialize(j);
+
+}
 
 nlohmann::json Object::serialize() {
     auto j = GameEntity::serialize();
@@ -496,7 +500,7 @@ std::string Object::getUnitClass() {
 }
 
 UnitFamily Object::getFamily() {
-    return UnitFamily::Item;
+    return UnitFamily::Object;
 }
 
 Object::~Object() {
@@ -551,4 +555,37 @@ void Object::assignTriggers() {
         }
         script->dgScripts = sorted;
     }
+}
+
+
+Structure::Structure(const nlohmann::json& j) {
+    deserialize(j);
+}
+
+nlohmann::json Structure::serialize() {
+    return Object::serialize();
+}
+
+void Structure::deserialize(const nlohmann::json& j) {
+    Object::deserialize(j);
+}
+
+std::string Structure::getUnitClass() {
+    return "Structure";
+}
+
+nlohmann::json Structure::serializeRelations() {
+    return Object::serializeRelations();
+}
+
+void Structure::deserializeRelations(const nlohmann::json& j) {
+    Object::deserializeRelations(j);
+}
+
+bool Structure::isEnvironment() {
+    return true;
+}
+
+bool Structure::isStructure() {
+    return true;
 }

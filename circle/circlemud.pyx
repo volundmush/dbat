@@ -58,7 +58,7 @@ cdef class GameSession:
             "idle_time": self.idle_time()
         }
         if c.desc is not NULL:
-            out["character"] = c.desc.character.name.decode("UTF-8", errors='ignore')
+            out["character"] = c.desc.character.getName().decode("UTF-8", errors='ignore')
         return out
 
     async def run(self):

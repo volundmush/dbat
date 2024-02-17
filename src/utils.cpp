@@ -3542,3 +3542,7 @@ Object *GET_EQ(GameEntity *u, int i) {
     }
     return nullptr;
 }
+
+std::string withPlaceholder(const std::string& orig, const std::string& placeholder) {
+    return orig.empty() ? placeholder : orig;
+}

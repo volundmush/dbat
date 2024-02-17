@@ -1854,16 +1854,16 @@ DgResults BaseCharacter::dgCallMember(trig_data *trig, const std::string& member
     return "";
 }
 
-std::string NonPlayerCharacter::getUnitClass() {
-    return "NonPlayerCharacter";
-}
-
-std::string PlayerCharacter::getUnitClass() {
-    return "PlayerCharacter";
-}
-
 UnitFamily BaseCharacter::getFamily() {
     return UnitFamily::Character;
+}
+
+void BaseCharacter::deserializeRelations(const nlohmann::json& j) {
+    GameEntity::deserializeRelations(j);
+}
+
+nlohmann::json BaseCharacter::serializeRelations() {
+    return GameEntity::serializeRelations();
 }
 
 BaseCharacter::~BaseCharacter() {
@@ -1989,4 +1989,36 @@ std::vector<std::string> PlayerCharacter::getKeywords(GameEntity* looker) {
     out.insert(out.end(), sname.begin(), sname.end());
 
     return out;
+}
+
+std::string NonPlayerCharacter::getUnitClass() {
+    return "NonPlayerCharacter";
+}
+
+void NonPlayerCharacter::deserialize(const nlohmann::json& j) {
+    BaseCharacter::deserialize(j);
+}
+
+nlohmann::json NonPlayerCharacter::serialize() {
+    return BaseCharacter::serialize();
+}
+
+NonPlayerCharacter::NonPlayerCharacter(const nlohmann::json& j) {
+    deserialize(j);
+}
+
+void PlayerCharacter::deserialize(const nlohmann::json& j) {
+    BaseCharacter::deserialize(j);
+}
+
+nlohmann::json PlayerCharacter::serialize() {
+    return BaseCharacter::serialize();
+}
+
+PlayerCharacter::PlayerCharacter(const nlohmann::json& j) {
+    deserialize(j);
+}
+
+std::string PlayerCharacter::getUnitClass() {
+    return "PlayerCharacter";
 }

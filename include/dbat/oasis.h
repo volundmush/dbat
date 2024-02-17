@@ -758,8 +758,6 @@ extern int parse_stats(struct descriptor_data *d, char *arg);
 
 extern int stats_disp_menu(struct descriptor_data *d);
 
-extern int free_strings(void *data, int type);
-
 extern void list_rooms(BaseCharacter *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
 
 extern void list_mobiles(BaseCharacter *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
@@ -769,8 +767,6 @@ extern void list_objects(BaseCharacter *ch, zone_rnum rnum, obj_vnum vmin, obj_v
 extern void list_shops(BaseCharacter *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
 
 extern void list_zones(BaseCharacter *ch);
-
-extern void print_zone(BaseCharacter *ch, zone_vnum vnum);
 
 extern int can_edit_zone(BaseCharacter *ch, zone_rnum rnum);
 

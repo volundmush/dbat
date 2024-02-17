@@ -2479,7 +2479,7 @@ static int show_obj_modifiers(Object *obj, BaseCharacter *ch) {
         ch->sendf(" @D(@YCUSTOM@D)@n");
     }
     if (OBJ_FLAGGED(obj, ITEM_RESTRING)) {
-        ch->sendf(" @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? !obj->getName().empty() : "*");
+        //ch->sendf(" @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? !obj->getName().empty() : "*");
     }
     if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
         if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL ||

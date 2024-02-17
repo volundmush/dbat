@@ -1,11 +1,16 @@
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
-
+#include "dbat/constants.h"
 
 
 extra_descr_data::extra_descr_data(const nlohmann::json& j) {
     deserialize(j);
+}
+
+void extra_descr_data::deserialize(const nlohmann::json& j) {
+    if(j.contains("keyword")) keyword = j["keyword"];
+    if(j.contains("description")) description = j["description"];
 }
 
 nlohmann::json extra_descr_data::serialize() {
@@ -94,10 +99,13 @@ nlohmann::json GameEntity::serialize() {
 
     if(vn != NOTHING) j["vn"] = vn;
 
-    if(name && strlen(name)) j["name"] = name;
-    if(room_description && strlen(room_description)) j["room_description"] = room_description;
-    if(look_description && strlen(look_description)) j["look_description"] = look_description;
-    if(short_description && strlen(short_description)) j["short_description"] = short_description;
+    if(!strings.empty()) {
+        nlohmann::json s;
+        for(auto &[n, v] : strings) {
+            s[n] = v->get();
+        }
+        j["strings"] = s;
+    }
 
     for(auto &ex : ex_description) {
         j["ex_description"].push_back(ex.serialize());
@@ -125,21 +133,13 @@ nlohmann::json GameEntity::serialize() {
 
 void GameEntity::deserialize(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"];
-    if(j.contains("name")) {
-        if(name) free(name);
-        name = strdup(j["name"].get<std::string>().c_str());
-    }
-    if(j.contains("room_description")) {
-        if(room_description) free(room_description);
-        room_description = strdup(j["room_description"].get<std::string>().c_str());
-    }
-    if(j.contains("look_description")) {
-        if(look_description) free(look_description);
-        look_description = strdup(j["look_description"].get<std::string>().c_str());
-    }
-    if(j.contains("short_description")) {
-        if(short_description) free(short_description);
-        short_description = strdup(j["short_description"].get<std::string>().c_str());
+
+    if(j.contains("strings")) {
+        for(auto j2 : j["strings"]) {
+            std::string nm = j2[0].get<std::string>();
+            std::string val = j2[1].get<std::string>();
+            strings[nm] = internString(val);
+        }
     }
 
     if(j.contains("ex_description")) {
@@ -232,39 +232,48 @@ bool GameEntity::isActive() {
 }
 
 std::string GameEntity::getName() {
-    return name ? name : "";
+    if(auto found = strings.find("name"); found != strings.end()) return found->second->get();
+    return "";
 }
 
 void GameEntity::setName(const std::string& n) {
-    if(name) free(name);
-    name = strdup(n.c_str());
+    strings["name"] = internString(n);
+}
+
+std::string GameEntity::getAlias() {
+    if(auto found = strings.find("alias"); found != strings.end()) return found->second->get();
+    return "";
+}
+
+void GameEntity::setAlias(const std::string& n) {
+    strings["alias"] = internString(n);
 }
 
 std::string GameEntity::getShortDesc() {
-    return short_description ? short_description : "";
+    if(auto found = strings.find("short_description"); found != strings.end()) return found->second->get();
+    return "";
 }
 
 void GameEntity::setShortDesc(const std::string& n) {
-    if(short_description) free(short_description);
-    short_description = strdup(n.c_str());
+    strings["short_description"] = internString(n);
 }
 
 std::string GameEntity::getRoomDesc() {
-    return room_description ? room_description : "";
+    if(auto found = strings.find("room_description"); found != strings.end()) return found->second->get();
+    return "";
 }
 
 void GameEntity::setRoomDesc(const std::string& n) {
-    if(room_description) free(room_description);
-    room_description = strdup(n.c_str());
+    strings["room_description"] = internString(n);
 }
 
 std::string GameEntity::getLookDesc() {
-    return look_description ? look_description : "";
+    if(auto found = strings.find("look_description"); found != strings.end()) return found->second->get();
+    return "";
 }
 
 void GameEntity::setLookDesc(const std::string& n) {
-    if(look_description) free(look_description);
-    look_description = strdup(n.c_str());
+    strings["look_description"] = internString(n);
 }
 
 
@@ -288,18 +297,66 @@ std::vector<std::string> GameEntity::getKeywords(GameEntity* ch) {
 }
 
 
-
-GameEntity::~GameEntity() {
-    if(name) free(name);
-    if(short_description) free(short_description);
-    if(room_description) free(room_description);
-    if(look_description) free(look_description);
-    if(script) script.reset();
-}
-
-
 void GameEntity::assignTriggers() {
     // does nothing.
+}
+
+std::vector<std::string> GameEntity::getFlagNames(FlagType type) {
+    std::vector<std::string> out;
+
+    auto f = flags.find(type);
+    if(f == flags.end()) return out;
+
+    switch(type) {
+        case FlagType::Admin:
+            for(auto i : f->second) {
+                out.push_back(admin_flag_names[i]);
+            }
+            break;
+        case FlagType::PC:
+            for(auto i : f->second) {
+                out.push_back(player_bits[i]);
+            }
+            break;
+        case FlagType::NPC:
+            for(auto i : f->second) {
+                out.push_back(action_bits[i]);
+            }
+            break;
+        case FlagType::Wear:
+            for(auto i : f->second) {
+                out.push_back(wear_bits[i]);
+            }
+            break;
+        case FlagType::Item:
+            for(auto i : f->second) {
+                out.push_back(extra_bits[i]);
+            }
+            break;
+        case FlagType::Affect:
+            for(auto i : f->second) {
+                out.push_back(affected_bits[i]);
+            }
+            break;
+        case FlagType::Pref:
+            for(auto i : f->second) {
+                out.push_back(preference_bits[i]);
+            }
+            break;
+        case FlagType::Room:
+            for(auto i : f->second) {
+                out.push_back(room_bits[i]);
+            }
+            break;
+        case FlagType::Exit:
+            for(auto i : f->second) {
+                out.push_back(exit_bits[i]);
+            }
+            break;
+    }
+
+    return out;
+
 }
 
 bool GameEntity::checkFlag(FlagType type, int flag) {
@@ -719,4 +776,23 @@ vnum GameEntity::getVN() {
 
 zone_vnum GameEntity::getZone() {
     return zone;
+}
+
+
+coordinates::coordinates(const nlohmann::json& j) {
+    deserialize(j);
+}
+
+void coordinates::deserialize(const nlohmann::json& j) {
+    if(j.contains("x")) x = j["x"];
+    if(j.contains("y")) y = j["y"];
+    if(j.contains("z")) z = j["z"];
+}
+
+nlohmann::json coordinates::serialize() {
+    nlohmann::json j;
+    if(x != 0) j["x"] = x;
+    if(y != 0) j["y"] = y;
+    if(z != 0) j["z"] = z;
+    return j;
 }

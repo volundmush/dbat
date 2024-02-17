@@ -377,7 +377,7 @@ static int evaluate_expression(Object *obj, char *expr) {
                         break;
                     }
                 if (*extra_bits[eindex] == '\n')
-                    push(&vals, isname(name, obj->getName()));
+                    push(&vals, isname(name, obj->getName().c_str()));
             } else {
                 if (temp != OPER_OPEN_PAREN)
                     while (top(&ops) > temp)
@@ -1030,7 +1030,7 @@ SPECIAL(shop_keeper) {
             snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
             act(argm, false, ch, nullptr, keeper, TO_CHAR);
             act(argm, false, ch, nullptr, keeper, TO_ROOM);
-            do_action(keeper, GET_NAME(ch), cmd_slap, 0);
+            do_action(keeper, (char*)GET_NAME(ch), cmd_slap, 0);
 
             return (true);
         } else {
@@ -1075,7 +1075,7 @@ int ok_damage_shopkeeper(BaseCharacter *ch, BaseCharacter *victim) {
             snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_CANT_KILL_KEEPER);
             do_tell(victim, buf, cmd_tell, 0);
 
-            do_action(victim, GET_NAME(ch), cmd_slap, 0);
+            do_action(victim, (char*)GET_NAME(ch), cmd_slap, 0);
             return (false);
         }
     }
