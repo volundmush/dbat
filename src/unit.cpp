@@ -20,9 +20,18 @@ nlohmann::json extra_descr_data::serialize() {
     return j;
 }
 
+std::vector<GameEntity*> GameEntity::getContents() {
+    std::vector<GameEntity*> out;
+    for(auto u : contents) {
+        if(u->exists) out.push_back(u);
+    }
+    return out;
+
+}
+
 std::vector<Room*> GameEntity::getRooms() {
     std::vector<Room*> out;
-    for(auto u : contents) {
+    for(auto u : getContents()) {
         if(auto r = dynamic_cast<Room*>(u); r) out.push_back(r);
     }
     return out;
@@ -30,7 +39,7 @@ std::vector<Room*> GameEntity::getRooms() {
 
 std::vector<BaseCharacter*> GameEntity::getPeople() {
     std::vector<BaseCharacter*> out;
-    for(auto u : contents) {
+    for(auto u : getContents()) {
         if(auto c = dynamic_cast<BaseCharacter*>(u); c) out.push_back(c);
     }
     return out;
@@ -38,7 +47,7 @@ std::vector<BaseCharacter*> GameEntity::getPeople() {
 
 std::vector<Object*> GameEntity::getInventory() {
     std::vector<Object*> out;
-    for(auto u : contents) {
+    for(auto u : getContents()) {
         auto o = dynamic_cast<Object*>(u);
         if(o && o->locationType == 0) out.push_back(o);
     }
@@ -47,7 +56,7 @@ std::vector<Object*> GameEntity::getInventory() {
 
 std::map<int, Object*> GameEntity::getEquipment() {
     std::map<int, Object*> out;
-    for(auto u : contents) {
+    for(auto u : getContents()) {
         auto o = dynamic_cast<Object*>(u);
         if(o && o->locationType > 0) out[o->locationType] = o;
     }
@@ -56,7 +65,7 @@ std::map<int, Object*> GameEntity::getEquipment() {
 
 std::map<int, Exit*> GameEntity::getExits() {
     std::map<int, Exit*> out;
-    for(auto u : contents) {
+    for(auto u : getContents()) {
         auto o = dynamic_cast<Exit*>(u);
         if(!o) continue;
         out[o->locationType] = o;
@@ -66,7 +75,7 @@ std::map<int, Exit*> GameEntity::getExits() {
 
 std::map<int, Exit*> GameEntity::getUsableExits() {
     std::map<int, Exit*> out;
-    for(auto u : contents) {
+    for(auto u : getContents()) {
         auto o = dynamic_cast<Exit*>(u);
         if(!o) continue;
         if(o->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
@@ -135,10 +144,9 @@ void GameEntity::deserialize(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"];
 
     if(j.contains("strings")) {
-        for(auto j2 : j["strings"]) {
-            std::string nm = j2[0].get<std::string>();
-            std::string val = j2[1].get<std::string>();
-            strings[nm] = internString(val);
+        auto &s = j["strings"];
+        for(auto &[n, v] : s.items()) {
+            strings[n] = internString(v.get<std::string>());
         }
     }
 
@@ -496,6 +504,11 @@ Searcher& Searcher::setAllowRecurse(bool allow) {
     return *this;
 }
 
+Searcher& Searcher::setAllowAsterisk(bool allow) {
+    allowAsterisk = allow;
+    return *this;
+}
+
 
 std::vector<GameEntity*> Searcher::search() {
     trim(args);
@@ -795,4 +808,23 @@ nlohmann::json coordinates::serialize() {
     if(y != 0) j["y"] = y;
     if(z != 0) j["z"] = z;
     return j;
+}
+
+void coordinates::clear() {
+    x = 0;
+    y = 0;
+    z = 0;
+
+}
+
+void Messager::addVar(const std::string& key, MsgVar value) {
+    variables[key] = value;
+}
+
+void Messager::deliver() {
+
+}
+
+void GameEntity::lookAtLocation() {
+
 }

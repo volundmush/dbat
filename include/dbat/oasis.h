@@ -502,10 +502,6 @@ extern ACMD(do_oasis);
 /*
  * Prototypes, to be moved later.
  */
-extern ACMD(do_oasis_list);
-
-extern ACMD(do_oasis_links);
-
 extern void medit_free_mobile(BaseCharacter *mob);
 
 extern void medit_setup_new(struct descriptor_data *d);

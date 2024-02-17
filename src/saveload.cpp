@@ -43,34 +43,6 @@ static void dump_state_players(const std::filesystem::path &loc) {
     dump_to_file(loc, "players.json", j);
 }
 
-static void dump_state_characters(const std::filesystem::path &loc) {
-    nlohmann::json j;
-
-    for(auto &[v, r] : uniqueCharacters) {
-        if(v != r.second->getUID()) r.second->uid = v;
-        nlohmann::json j2;
-        j2["id"] = v;
-        j2["data"] = r.second->serialize();
-        j2["relations"] = r.second->serializeRelations();
-        j.push_back(j2);
-    }
-    dump_to_file(loc, "characters.json", j);
-
-}
-
-static void dump_state_items(const std::filesystem::path &loc) {
-    nlohmann::json j;
-
-    for(auto &[v, r] : uniqueObjects) {
-        if(v != r.second->getUID()) r.second->uid = v;
-        nlohmann::json j2;
-        j2["id"] = v;
-        j2["data"] = r.second->serialize();
-        j2["relations"] = r.second->serializeRelations();
-        j.push_back(j2);
-    }
-    dump_to_file(loc, "items.json", j);
-}
 
 void dump_state_globalData(const std::filesystem::path &loc) {
     nlohmann::json j;
@@ -81,15 +53,26 @@ void dump_state_globalData(const std::filesystem::path &loc) {
     dump_to_file(loc, "globaldata.json", j);
 }
 
-static void process_dirty_rooms(const std::filesystem::path &loc) {
-    nlohmann::json rooms;
+static void process_dirty_instances(const std::filesystem::path &loc) {
+    nlohmann::json instances;
 
     for(auto &[v, u] : world) {
-        auto r = dynamic_cast<Room*>(u);
-        if(!r) continue;
-        rooms.push_back(r->serialize());
+        nlohmann::json j;
+        j["uid"] = v;
+        j["unitClass"] = u->getUnitClass();
+        j["data"] = u->serialize();
+        instances.push_back(j);
     }
-    dump_to_file(loc, "rooms.json", rooms);
+    dump_to_file(loc, "instances.json", instances);
+}
+
+static void process_dirty_relations(const std::filesystem::path &loc) {
+    nlohmann::json relations;
+
+    for(auto &[v, u] : world) {
+        relations.push_back(u->serializeRelations());
+    }
+    dump_to_file(loc, "relations.json", relations);
 }
 
 
@@ -195,10 +178,10 @@ void runSave() {
     try {
         auto startTime = std::chrono::high_resolution_clock::now();
         std::vector<std::thread> threads;
-        for(const auto func : {dump_state_accounts, dump_state_characters,
+        for(const auto func : {dump_state_accounts,
               dump_state_players,
-                          dump_state_items, dump_state_globalData,
-                          process_dirty_rooms, process_dirty_item_prototypes,
+                           dump_state_globalData,
+                          process_dirty_instances, process_dirty_relations, process_dirty_item_prototypes,
                           process_dirty_npc_prototypes, process_dirty_shops,
                           process_dirty_guilds, process_dirty_zones,
                           process_dirty_dgscript_prototypes}) {

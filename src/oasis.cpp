@@ -135,7 +135,6 @@ ACMD(do_oasis) {
         case SCMD_OASIS_ZLIST:
         case SCMD_OASIS_TLIST:
         case SCMD_OASIS_GLIST:
-            do_oasis_list(ch, argument, cmd, subcmd);
             break;
 
         case SCMD_OASIS_TRIGEDIT:
@@ -143,7 +142,6 @@ ACMD(do_oasis) {
             break;
 
         case SCMD_OASIS_LINKS:
-            do_oasis_links(ch, argument, cmd, subcmd);
             break;
 
         case SCMD_OASIS_GEDIT:

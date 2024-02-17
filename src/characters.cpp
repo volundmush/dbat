@@ -2022,3 +2022,9 @@ PlayerCharacter::PlayerCharacter(const nlohmann::json& j) {
 std::string PlayerCharacter::getUnitClass() {
     return "PlayerCharacter";
 }
+
+void BaseCharacter::lookAtLocation() {
+    auto r = getRoom();
+    if(!r) return;
+    look_at_room(r, this, 0);
+}

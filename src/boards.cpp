@@ -249,10 +249,16 @@ struct board_info *load_board(obj_vnum board_vnum) {
         BOARD_VERSION(temp_board) = t[4];
         basic_mud_log("Board vnum %d, Version %d", BOARD_VNUM(temp_board), BOARD_VERSION(temp_board));
     } else {
-
-        READ_LVL(temp_board) = GET_OBJ_VAL(obj, VAL_BOARD_READ);
-        WRITE_LVL(temp_board) = GET_OBJ_VAL(obj, VAL_BOARD_WRITE);
-        REMOVE_LVL(temp_board) = GET_OBJ_VAL(obj, VAL_BOARD_ERASE);
+        auto o = obj_proto.at(board_vnum);
+        std::unordered_map<int, int> values;
+        for (auto &jv : o["values"]) {
+            auto k = jv[0].get<int>();
+            auto v = jv[1].get<int>();
+            values[k] = v;
+        }
+        READ_LVL(temp_board) = values[VAL_BOARD_READ];
+        WRITE_LVL(temp_board) = values[VAL_BOARD_WRITE];
+        REMOVE_LVL(temp_board) = values[VAL_BOARD_ERASE];
         BOARD_MNUM(temp_board) = t[3];
         BOARD_VERSION(temp_board) = t[4];
     }

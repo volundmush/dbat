@@ -449,7 +449,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual bool isProvidingLight();
 
     // Look at location.
-    void lookAtLocation();
+    virtual void lookAtLocation();
     // The business part of the above.
     //virtual Event renderLocationFor(GameEntity* u);
 
@@ -959,6 +959,7 @@ struct BaseCharacter : public GameEntity {
 
     virtual bool isPC() = 0;
     virtual bool isNPC() = 0;
+    void lookAtLocation() override;
 
     bool isActive() override;
 
@@ -966,8 +967,6 @@ struct BaseCharacter : public GameEntity {
     void setAge(double newAge);
 
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
-
-    Room* getRoom();
 
     Object* findObject(const std::function<bool(Object*)> &func, bool working = true) override;
     std::set<Object*> gatherObjects(const std::function<bool(Object*)> &func, bool working = true) override;

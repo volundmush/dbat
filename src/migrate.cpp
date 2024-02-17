@@ -376,9 +376,17 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
     auto d = new Exit();
     d->script = std::make_shared<script_data>(d);
     d->uid = getNextUID();
+    
 
-    d->setLookDesc(fread_string(fl, buf2));
-    d->setAlias(fread_string(fl, buf2));
+    if(auto b = fread_string(fl, buf2); b) {
+        d->setLookDesc(b);
+        free(b);
+    }
+
+    if(auto b = fread_string(fl, buf2); b) {
+        d->setAlias(b);
+        free(b);
+    }
 
     d->addToLocation(r, dir);
 
@@ -578,8 +586,9 @@ static int parse_simple_mob(FILE *mob_f, nlohmann::json& ch, mob_vnum nr) {
             "...expecting line of form '# # # #d#+# #d#+#'", nr);
         return 0;
     }
-
-    ch["nums"].push_back(std::make_pair(CharNum::Level, t[0]));
+    auto level = t[0];
+    ch["level"] = t[0];
+    ch["nums"].push_back(std::make_pair(CharNum::Level, level));
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
     ch["stats"].push_back(std::make_pair(CharStat::PowerLevel, t[3]));
@@ -1075,6 +1084,11 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                 break;
             case 'A': {
                 t[1] = 0;
+                if (!get_line(obj_f, line)) {
+                    basic_mud_log("SYSERR: Format error in 'A' field, %s\n"
+                        "...expecting 2 numeric constants but file ended!", buf2);
+                    exit(1);
+                }
                 if ((retval = sscanf(line, " %ld %ld %ld ", t, t + 1, t + 2)) != 3) {
                     if (retval != 2) {
                         basic_mud_log("SYSERR: Format error in 'A' field, %s\n"
@@ -1093,6 +1107,11 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
             }
                 break;
             case 'S':  /* Spells for Spellbooks*/
+                if (!get_line(obj_f, line)) {
+                    basic_mud_log("SYSERR: Format error in 'S' field, %s\n"
+                        "...expecting 2 numeric constants but file ended!", buf2);
+                    exit(1);
+                }
                 if ((retval = sscanf(line, " %d %d ", t, t + 1)) != 2) {
                     basic_mud_log("SYSERR: Format error in 'S' field, %s\n"
                         "...expecting 2 numeric arguments, got %d\n"
@@ -2107,6 +2126,9 @@ void boot_db_world_legacy() {
 
     basic_mud_log("Loading guild masters.");
     index_boot(DB_BOOT_GLD);
+
+    //boot_db_help();
+
     boot_db_shadow();
 }
 
@@ -2117,7 +2139,6 @@ static void boot_db_legacy() {
     boot_db_world_legacy();
     boot_db_mail();
     boot_db_socials();
-    boot_db_clans();
     boot_db_commands();
     boot_db_specials();
     boot_db_assemblies();
@@ -2125,6 +2146,7 @@ static void boot_db_legacy() {
     boot_db_boards();
     boot_db_banned();
     boot_db_spacemap();
+    //boot_db_help();
     topLoad();
 }
 
@@ -2197,7 +2219,7 @@ static struct old_ship_data customs[] = {
 struct AreaDef {
     std::string name;
     int type{ITEM_REGION};
-    GameEntity *location;
+    GameEntity *location{};
     std::optional<vnum> parent;
     std::set<std::size_t> roomFlags{};
     std::vector<std::pair<std::size_t, std::size_t>> roomRanges;
@@ -2254,6 +2276,7 @@ static Structure* assembleArea(const AreaDef &def) {
         if(found == world.end()) continue;
         auto room = dynamic_cast<Room*>(found->second);
         if(!room) continue;
+        if(room->location) continue;
         room->addToLocation(a);
     }
 

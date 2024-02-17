@@ -292,14 +292,18 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
         auto unitClass = j["unitClass"].get<std::string>();
         auto data = j["data"];
         GameEntity *u = nullptr;
-        if(unitClass == "pc_data") {
+        if(unitClass == "PlayerCharacter") {
             u = new PlayerCharacter(data);
-        } else if(unitClass == "npc_data") {
+        } else if(unitClass == "NonPlayerCharacter") {
             u = new NonPlayerCharacter(data);
-        } else if(unitClass == "obj_data") {
+        } else if(unitClass == "Object") {
             u = new Object(data);
-        } else if(unitClass == "room_data") {
+        } else if(unitClass == "Room") {
             u = new Room(data);
+        } else if(unitClass == "Exit") {
+            u = new Exit(data);
+        } else if(unitClass == "Structure") {
+            u = new Structure(data);
         }
 
         if(auto pc = dynamic_cast<PlayerCharacter*>(u); pc) {
@@ -705,7 +709,6 @@ void boot_db_new() {
     boot_db_world();
     boot_db_mail();
     boot_db_socials();
-    boot_db_clans();
     boot_db_commands();
     boot_db_specials();
     boot_db_assemblies();

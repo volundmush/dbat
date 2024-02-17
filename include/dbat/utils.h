@@ -421,7 +421,7 @@ extern int wield_type(int chsize, const Object *weap);
 #define IS_NPC(ch)    ((ch)->isNPC())
 #define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
 
-extern bool MOB_FLAGGED(const BaseCharacter *ch, int flag);
+extern bool MOB_FLAGGED(BaseCharacter *ch, int flag);
 extern bool PLR_FLAGGED(BaseCharacter *ch, int flag);
 extern bool AFF_FLAGGED(BaseCharacter *ch, int flag);
 extern bool PRF_FLAGGED(BaseCharacter *ch, int flag);
@@ -433,7 +433,7 @@ bool ROOM_FLAGGED(Room *loc, int flag);
 extern bool OBJAFF_FLAGGED(Object *obj, int flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
 extern bool OBJWEAR_FLAGGED(Object *obj, int flag);
-extern bool OBJ_FLAGGED(const Object *obj, int flag);
+extern bool OBJ_FLAGGED(Object *obj, int flag);
 #define BODY_FLAGGED(ch, flag) ((ch)->bodyparts.test(flag))
 #define ZONE_FLAGGED(rnum, flag)   (IS_SET_AR(zone_table[(rnum)].zone_flags, flag))
 #define HAS_SPELL_ROUTINE(spl, flag) (IS_SET(SPELL_ROUTINES(spl), (flag)))
