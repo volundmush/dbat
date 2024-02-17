@@ -332,6 +332,10 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     unit_data() = default;
     virtual ~unit_data();
 
+    int64_t getUID();
+    vnum getVNUM();
+    zone_vnum getZone();
+
     /* unique id for this unit */
     int64_t uid{NOTHING}; 
 
@@ -465,7 +469,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     
     virtual std::string scriptString();
 
-    std::string getUID(bool active = true);
+    std::string getUIDString(bool active = true);
     virtual bool isActive();
 
     struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
@@ -646,8 +650,6 @@ struct obj_data : public unit_data {
     bool isWorking();
     void clearLocation();
 
-    
-  
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
     std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value{};   /* Values of the item (see list)    */

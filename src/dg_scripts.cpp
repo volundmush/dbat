@@ -69,7 +69,7 @@ int trig_data::execute() {
     }
     catch(const DgScriptException& err) {
         script_log("DgScript Error on %s: '%s' - DgScript ID %d, Name: %s. Exception: %s", 
-            sc->owner->getUID(false).c_str(), sc->owner->name, GET_TRIG_VNUM(this), GET_TRIG_NAME(this), err.what());
+            sc->owner->getUIDString(false).c_str(), sc->owner->name, GET_TRIG_VNUM(this), GET_TRIG_NAME(this), err.what());
         reset();
         return 0;
     }
@@ -2142,7 +2142,7 @@ void trig_data::deserialize(const nlohmann::json &j) {
 // not individually.
 void trig_data::activate() {
     if(active) {
-        basic_mud_log("SYSERR: Attempt to activate already-active trigger %s / %ld", sc->owner->getUID(), parent->vn);
+        basic_mud_log("SYSERR: Attempt to activate already-active trigger %s / %ld", sc->owner->getUIDString(), parent->vn);
         return;
     }
     active = true;
@@ -2151,7 +2151,7 @@ void trig_data::activate() {
 
 void trig_data::deactivate() {
     if(!active) {
-        basic_mud_log("SYSERR: Attempt to deactivate already-inactive trigger %s / %ld", sc->owner->getUID(), parent->vn);
+        basic_mud_log("SYSERR: Attempt to deactivate already-inactive trigger %s / %ld", sc->owner->getUIDString(), parent->vn);
         return;
     }
     active = false;
@@ -2198,7 +2198,7 @@ void HasVars::addVar(const std::string& name, const std::string& val) {
 }
 
 void HasVars::addVar(const std::string& name, struct unit_data *u) {
-    addVar(name, u->getUID(false));
+    addVar(name, u->getUIDString(false));
 }
 
 bool HasVars::hasVar(const std::string& name) {

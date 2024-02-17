@@ -219,7 +219,7 @@ std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(str
     return out;
 }
 
-std::string unit_data::getUID(bool active) {
+std::string unit_data::getUIDString(bool active) {
     return fmt::format("#{}{}", uid, active ? "" : "!");
 }
 
@@ -338,7 +338,7 @@ nlohmann::json unit_data::serializeRelations() {
     nlohmann::json j = nlohmann::json::object();
 
     if(location) {
-        j["location"] = location->getUID();
+        j["location"] = location->getUIDString();
         if(locationType) j["locationType"] = locationType;
         if(auto co = coords.serialize(); !co.empty()) j["coords"] = co;
     }

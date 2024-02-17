@@ -579,7 +579,7 @@ std::string trig_data::varSubst(const std::string& expr) {
             }
                 break;
             case 1: {
-                out += std::get<1>(back)->getUID();
+                out += std::get<1>(back)->getUIDString();
             }
                 break;
             default:

@@ -77,9 +77,9 @@ nlohmann::json exit_data::serialize() {
 
 nlohmann::json exit_data::serializeRelations() {
     nlohmann::json j;
-    if(destination) j["destination"] = destination->getUID();
-    if(failroom) j["failroom"] = failroom->getUID();
-    if(totalfailroom) j["totalfailroom"] = totalfailroom->getUID();
+    if(destination) j["destination"] = destination->getUIDString();
+    if(failroom) j["failroom"] = failroom->getUIDString();
+    if(totalfailroom) j["totalfailroom"] = totalfailroom->getUIDString();
     return j;
 
 }

@@ -94,8 +94,8 @@ void obj_data::deserialize(const nlohmann::json &j) {
 nlohmann::json obj_data::serializeRelations() {
     auto j = unit_data::serializeRelations();
 
-    if(posted_to) j["posted_to"] = posted_to->getUID();
-    if(fellow_wall) j["fellow_wall"] = fellow_wall->getUID();
+    if(posted_to) j["posted_to"] = posted_to->getUIDString();
+    if(fellow_wall) j["fellow_wall"] = fellow_wall->getUIDString();
 
     return j;
 }

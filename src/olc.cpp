@@ -215,15 +215,6 @@ void olc_interpreter(void *targ, int mode, char *arg) {
             break;
         case OLC_NAME:
             switch (mode) {
-                case OLC_ROOM:
-                    olc_string(&(olc_room->name), MAX_ROOM_NAME, arg);
-                    break;
-                case OLC_MOB:
-                    olc_string(&olc_mob->short_description, MAX_MOB_NAME, arg);
-                    break;
-                case OLC_OBJ:
-                    olc_string(&olc_obj->short_description, MAX_OBJ_NAME, arg);
-                    break;
                 default:
                     error = 1;
                     break;
@@ -232,15 +223,6 @@ void olc_interpreter(void *targ, int mode, char *arg) {
 
         case OLC_DESC:
             switch (mode) {
-                case OLC_ROOM:
-                    olc_string(&olc_room->look_description, MAX_ROOM_DESC, arg);
-                    break;
-                case OLC_MOB:
-                    olc_string(&olc_mob->room_description, MAX_MOB_DESC, arg);
-                    break;
-                case OLC_OBJ:
-                    olc_string(&olc_obj->room_description, MAX_OBJ_DESC, arg);
-                    break;
                 default:
                     error = 1;
                     break;
