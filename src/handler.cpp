@@ -28,33 +28,33 @@
 #include "dbat/mobact.h"
 
 /* local vars */
-static std::set<struct char_data*> extractions_pending;
+static std::set<BaseCharacter*> extractions_pending;
 
 /* external vars */
 
 /* local functions */
-static int apply_ac(struct char_data *ch, int eq_pos);
+static int apply_ac(BaseCharacter *ch, int eq_pos);
 
-static void update_object(struct obj_data *obj, int use);
+static void update_object(Object *obj, int use);
 
 
 /* external functions */
-struct obj_data *find_vehicle_by_vnum(int vnum);
+Object *find_vehicle_by_vnum(int vnum);
 
-void remove_follower(struct char_data *ch);
+void remove_follower(BaseCharacter *ch);
 
 ACMD(do_return);
 
-void perform_wear(struct char_data *ch, struct obj_data *obj, int where);
+void perform_wear(BaseCharacter *ch, Object *obj, int where);
 
-void perform_remove(struct char_data *ch, int pos);
+void perform_remove(BaseCharacter *ch, int pos);
 
-int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
+int find_eq_pos(BaseCharacter *ch, Object *obj, char *arg);
 
 SPECIAL(shop_keeper);
 
 /* For Getting An Intro Name */
-const char *get_i_name(struct char_data *ch, struct char_data *vict) {
+const char *get_i_name(BaseCharacter *ch, BaseCharacter *vict) {
     static char name[50];
 
     /* Read Introduction File */
@@ -173,12 +173,12 @@ int isname(const char *str, const char *namelist) {
     return 0;
 }
 
-void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *msg) {
+void aff_apply_modify(BaseCharacter *ch, int loc, int mod, int spec, char *msg) {
 
 }
 
 
-void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add) {
+void affect_modify(BaseCharacter *ch, int loc, int mod, int spec, long bitv, bool add) {
     if (add) {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
             ch->setFlag(FlagType::Affect, bitv);
@@ -194,7 +194,7 @@ void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, 
 }
 
 
-void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS>& bitv, bool add) {
+void affect_modify_ar(BaseCharacter *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS>& bitv, bool add) {
     int i, j;
 
     if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->setFlag(FlagType::Affect, i);
@@ -209,14 +209,14 @@ void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const st
 
 /* This updates a character by subtracting everything he is affected by */
 /* restoring original abilities, and then affecting all again           */
-void affect_total(struct char_data *ch) {
+void affect_total(BaseCharacter *ch) {
 
 }
 
 
-/* Insert an affect_type in a char_data structure
+/* Insert an affect_type in a BaseCharacter structure
    Automatically sets apropriate bits and apply's */
-void affect_to_char(struct char_data *ch, struct affected_type *af) {
+void affect_to_char(BaseCharacter *ch, struct affected_type *af) {
     struct affected_type *affected_alloc;
 
     CREATE(affected_alloc, struct affected_type, 1);
@@ -238,7 +238,7 @@ void affect_to_char(struct char_data *ch, struct affected_type *af) {
  * reaches zero). Pointer *af must never be NIL!  Frees mem and calls
  * affect_location_apply
  */
-void affect_remove(struct char_data *ch, struct affected_type *af) {
+void affect_remove(BaseCharacter *ch, struct affected_type *af) {
     struct affected_type *cmtemp;
 
     if (ch->affected == nullptr) {
@@ -250,7 +250,7 @@ void affect_remove(struct char_data *ch, struct affected_type *af) {
     REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
     free(af);
     if (!ch->affected) {
-        struct char_data *temp;
+        BaseCharacter *temp;
         REMOVE_FROM_LIST(ch, affect_list, next_affect, temp);
         ch->next_affect = nullptr;
     }
@@ -258,7 +258,7 @@ void affect_remove(struct char_data *ch, struct affected_type *af) {
 
 
 /* Call affect_remove with every spell of spelltype "skill" */
-void affect_from_char(struct char_data *ch, int type) {
+void affect_from_char(BaseCharacter *ch, int type) {
     struct affected_type *hjp, *next;
 
     for (hjp = ch->affected; hjp; hjp = next) {
@@ -270,7 +270,7 @@ void affect_from_char(struct char_data *ch, int type) {
 
 
 /* Call affect_remove with every spell of spelltype "skill" */
-void affectv_from_char(struct char_data *ch, int type) {
+void affectv_from_char(BaseCharacter *ch, int type) {
     struct affected_type *hjp, *next;
 
     for (hjp = ch->affectedv; hjp; hjp = next) {
@@ -285,7 +285,7 @@ void affectv_from_char(struct char_data *ch, int type) {
  * Return TRUE if a char is affected by a spell (SPELL_XXX),
  * FALSE indicates not affected.
  */
-bool affected_by_spell(struct char_data *ch, int type) {
+bool affected_by_spell(BaseCharacter *ch, int type) {
     struct affected_type *hjp;
 
     for (hjp = ch->affected; hjp; hjp = hjp->next)
@@ -300,7 +300,7 @@ bool affected_by_spell(struct char_data *ch, int type) {
  * Return TRUE if a char is affected by a spell (SPELL_XXX),
  * FALSE indicates not affected.
  */
-bool affectedv_by_spell(struct char_data *ch, int type) {
+bool affectedv_by_spell(BaseCharacter *ch, int type) {
     struct affected_type *hjp;
 
     for (hjp = ch->affectedv; hjp; hjp = hjp->next)
@@ -311,7 +311,7 @@ bool affectedv_by_spell(struct char_data *ch, int type) {
 }
 
 
-void affect_join(struct char_data *ch, struct affected_type *af,
+void affect_join(BaseCharacter *ch, struct affected_type *af,
                  bool add_dur, bool avg_dur, bool add_mod, bool avg_mod) {
     struct affected_type *hjp, *next;
     bool found = false;
@@ -342,7 +342,7 @@ void affect_join(struct char_data *ch, struct affected_type *af,
 
 
 /* Return the effect of a piece of armor in position eq_pos */
-static int apply_ac(struct char_data *ch, int eq_pos) {
+static int apply_ac(BaseCharacter *ch, int eq_pos) {
     if (GET_EQ(ch, eq_pos) == nullptr) {
         core_dump();
         return (0);
@@ -375,7 +375,7 @@ static int apply_ac(struct char_data *ch, int eq_pos) {
     return (GET_OBJ_VAL(GET_EQ(ch, eq_pos), VAL_ARMOR_APPLYAC));
 }
 
-int invalid_align(struct char_data *ch, struct obj_data *obj) {
+int invalid_align(BaseCharacter *ch, Object *obj) {
     if (OBJ_FLAGGED(obj, ITEM_ANTI_EVIL) && IS_EVIL(ch))
         return true;
     if (OBJ_FLAGGED(obj, ITEM_ANTI_GOOD) && IS_GOOD(ch))
@@ -385,7 +385,7 @@ int invalid_align(struct char_data *ch, struct obj_data *obj) {
     return false;
 }
 
-void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
+void equip_char(BaseCharacter *ch, Object *obj, int pos) {
     int j;
 
     if (pos < 0 || pos >= NUM_WEARS) {
@@ -419,7 +419,7 @@ void equip_char(struct char_data *ch, struct obj_data *obj, int pos) {
 }
 
 
-struct obj_data *unequip_char(struct char_data *ch, int pos) {
+Object *unequip_char(BaseCharacter *ch, int pos) {
     int j;
     auto obj = GET_EQ(ch, pos);
 
@@ -457,14 +457,14 @@ int get_number(char **name) {
 
 
 /* search the entire world for an object number, and return a pointer  */
-struct obj_data *get_obj_num(obj_rnum nr) {
+Object *get_obj_num(obj_rnum nr) {
     return get_last_inserted(objectVnumIndex, nr);
 }
 
 
 /* search a room for a char, and return a pointer if found..  */
-struct char_data *get_char_room(char *name, int *number, room_rnum room) {
-    struct char_data *i;
+BaseCharacter *get_char_room(char *name, int *number, room_rnum room) {
+    BaseCharacter *i;
     int num;
 
     if (!number) {
@@ -475,7 +475,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
     if (*number == 0)
         return (nullptr);
 
-    for (auto i : dynamic_cast<room_data*>(world[room])->getPeople())
+    for (auto i : dynamic_cast<Room*>(world[room])->getPeople())
         if (isname(name, i->name))
             if (--(*number) == 0)
                 return (i);
@@ -485,8 +485,8 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
 
 
 /* search all over the world for a char num, and return a pointer if found */
-struct char_data *get_char_num(mob_rnum nr) {
-    struct char_data *i;
+BaseCharacter *get_char_num(mob_rnum nr) {
+    BaseCharacter *i;
 
     for (i = character_list; i; i = i->next)
         if (GET_MOB_RNUM(i) == nr)
@@ -497,7 +497,7 @@ struct char_data *get_char_num(mob_rnum nr) {
 
 
 /*
-static void _obj_to_room(struct obj_data *object, struct room_data *room) {
+static void _obj_to_room(struct obj_data *object, Room *room) {
     struct obj_data *vehicle = nullptr;
 
     if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
@@ -591,8 +591,8 @@ static void _obj_to_room(struct obj_data *object, struct room_data *room) {
 
 
 /* Extract an object from the world */
-void obj_data::extractFromWorld() {
-    unit_data::extractFromWorld();
+void Object::extractFromWorld() {
+    GameEntity::extractFromWorld();
     
     clearLocation();
 
@@ -617,7 +617,7 @@ void obj_data::extractFromWorld() {
 }
 
 
-static void update_object(struct obj_data *obj, int use) {
+static void update_object(Object *obj, int use) {
     if (!obj)
         return;
     /* dont update objects with a timer trigger */
@@ -628,7 +628,7 @@ static void update_object(struct obj_data *obj, int use) {
 }
 
 
-void update_char_objects(struct char_data *ch) {
+void update_char_objects(BaseCharacter *ch) {
     int i, j;
 
     for (i = 0; i < NUM_WEARS; i++)
@@ -657,11 +657,11 @@ void update_char_objects(struct char_data *ch) {
 
 
 /* Extract a ch completely from the world, and leave his stuff behind */
-void extract_char_final(struct char_data *ch) {
-    struct char_data *k, *temp;
-    struct obj_data *chair;
+void extract_char_final(BaseCharacter *ch) {
+    BaseCharacter *k, *temp;
+    Object *chair;
     struct descriptor_data *d;
-    struct obj_data *obj;
+    Object *obj;
     int i;
 
     if (IN_ROOM(ch) == NOWHERE) {
@@ -862,7 +862,7 @@ void extract_char_final(struct char_data *ch) {
  * A: Because code doing 'vict = vict->next' would
  *    get really confused otherwise.
  */
-void extract_char(struct char_data *ch) {
+void extract_char(BaseCharacter *ch) {
     if(!ch->active) {
         basic_mud_log("Attempt to extract an inactive character.");
         return;
@@ -917,8 +917,8 @@ void extract_pending_chars(uint64_t heartBeat, double deltaTime) {
 *********************************************************************** */
 
 
-struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, int inroom) {
-    struct char_data *i;
+BaseCharacter *get_player_vis(BaseCharacter *ch, char *name, int *number, int inroom) {
+    BaseCharacter *i;
     int num;
 
     if (!number) {
@@ -966,8 +966,8 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
 }
 
 
-struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *number) {
-    struct char_data *i;
+BaseCharacter *get_char_room_vis(BaseCharacter *ch, char *name, int *number) {
+    BaseCharacter *i;
     int num;
 
     if (!number) {
@@ -1027,8 +1027,8 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
 }
 
 
-struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *number) {
-    struct char_data *i;
+BaseCharacter *get_char_world_vis(BaseCharacter *ch, char *name, int *number) {
+    BaseCharacter *i;
     int num;
 
     if (!number) {
@@ -1080,7 +1080,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
 }
 
 
-struct char_data *get_char_vis(struct char_data *ch, char *name, int *number, int where) {
+BaseCharacter *get_char_vis(BaseCharacter *ch, char *name, int *number, int where) {
     if (where == FIND_CHAR_ROOM)
         return get_char_room_vis(ch, name, number);
     else if (where == FIND_CHAR_WORLD)
@@ -1090,7 +1090,7 @@ struct char_data *get_char_vis(struct char_data *ch, char *name, int *number, in
 }
 
 
-struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, std::vector<obj_data*> list) {
+Object *get_obj_in_list_vis(BaseCharacter *ch, char *name, int *number, std::vector<Object*> list) {
     int num;
 
     if (!number) {
@@ -1112,8 +1112,8 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *numb
 
 
 /* search the entire world for an object, and return a pointer  */
-struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
-    struct obj_data *i;
+Object *get_obj_vis(BaseCharacter *ch, char *name, int *number) {
+    Object *i;
     int num;
 
     if (!number) {
@@ -1143,7 +1143,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
 }
 
 
-struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, std::map<int, obj_data*> equipment) {
+Object *get_obj_in_equip_vis(BaseCharacter *ch, char *arg, int *number, std::map<int, Object*> equipment) {
     int j, num;
 
     if (!number) {
@@ -1163,7 +1163,7 @@ struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *numb
 }
 
 
-int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *number, std::map<int, obj_data*> equipment) {
+int get_obj_pos_in_equip_vis(BaseCharacter *ch, char *arg, int *number, std::map<int, Object*> equipment) {
     int j, num;
 
     if (!number) {
@@ -1219,8 +1219,8 @@ const char *money_desc(int amount) {
 }
 
 
-struct obj_data *create_money(int amount) {
-    struct obj_data *obj;
+Object *create_money(int amount) {
+    Object *obj;
     struct extra_descr_data *new_descr;
     char buf[200];
     int y;
@@ -1291,8 +1291,8 @@ struct obj_data *create_money(int amount) {
  * like the one_argument routine), but now it returns an integer that
  * describes what it filled in.
  */
-int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
-                 struct char_data **tar_ch, struct obj_data **tar_obj) {
+int generic_find(char *arg, bitvector_t bitvector, BaseCharacter *ch,
+                 BaseCharacter **tar_ch, Object **tar_obj) {
     int i, found, number;
     char name_val[MAX_INPUT_LENGTH];
     char *name = name_val;
@@ -1357,7 +1357,7 @@ int find_all_dots(char *arg) {
         return (FIND_INDIV);
 }
 
-void affectv_to_char(struct char_data *ch, struct affected_type *af) {
+void affectv_to_char(BaseCharacter *ch, struct affected_type *af) {
     struct affected_type *affected_alloc;
 
     CREATE(affected_alloc, struct affected_type, 1);
@@ -1374,7 +1374,7 @@ void affectv_to_char(struct char_data *ch, struct affected_type *af) {
     affect_total(ch);
 }
 
-void affectv_remove(struct char_data *ch, struct affected_type *af) {
+void affectv_remove(BaseCharacter *ch, struct affected_type *af) {
     struct affected_type *cmtemp;
 
     if (ch->affectedv == nullptr) {
@@ -1387,13 +1387,13 @@ void affectv_remove(struct char_data *ch, struct affected_type *af) {
     free(af);
     affect_total(ch);
     if (!ch->affectedv) {
-        struct char_data *temp;
+        BaseCharacter *temp;
         REMOVE_FROM_LIST(ch, affectv_list, next_affectv, temp);
         ch->next_affectv = nullptr;
     }
 }
 
-void affectv_join(struct char_data *ch, struct affected_type *af,
+void affectv_join(BaseCharacter *ch, struct affected_type *af,
                   bool add_dur, bool avg_dur, bool add_mod, bool avg_mod) {
     struct affected_type *hjp, *next;
     bool found = false;
@@ -1421,7 +1421,7 @@ void affectv_join(struct char_data *ch, struct affected_type *af,
         affectv_to_char(ch, af);
 }
 
-int is_better(struct obj_data *object, struct obj_data *object2) {
+int is_better(Object *object, Object *object2) {
     int value1 = 0, value2 = 0;
 
     switch (GET_OBJ_TYPE(object)) {
@@ -1444,7 +1444,7 @@ int is_better(struct obj_data *object, struct obj_data *object2) {
 }
 
 /* check and see if this item is better */
-void item_check(struct obj_data *object, struct char_data *ch) {
+void item_check(Object *object, BaseCharacter *ch) {
     int where = 0;
 
     if (IS_HUMANOID(ch) && !(mob_index[GET_MOB_RNUM(ch)].func == shop_keeper)) {

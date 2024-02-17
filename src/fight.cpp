@@ -28,34 +28,34 @@
 #include "dbat/transformation.h"
 
 /* Structures */
-struct char_data *combat_list = nullptr;    /* head of l-list of fighting chars */
-struct char_data *next_combat_list = nullptr;
+BaseCharacter *combat_list = nullptr;    /* head of l-list of fighting chars */
+BaseCharacter *next_combat_list = nullptr;
 
 /* local functions */
-static void perform_group_gain(struct char_data *ch, int base, struct char_data *victim);
+static void perform_group_gain(BaseCharacter *ch, int base, BaseCharacter *victim);
 
-static void check_killer(struct char_data *ch, struct char_data *vict);
+static void check_killer(BaseCharacter *ch, BaseCharacter *vict);
 
-static void make_corpse(struct char_data *ch, struct char_data *tch);
+static void make_corpse(BaseCharacter *ch, BaseCharacter *tch);
 
-static void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch);
+static void handle_corpse_condition(Object *corpse, BaseCharacter *ch);
 
-static void make_pcorpse(struct char_data *ch);
+static void make_pcorpse(BaseCharacter *ch);
 
-static void change_alignment(struct char_data *ch, struct char_data *victim);
+static void change_alignment(BaseCharacter *ch, BaseCharacter *victim);
 
-static void final_combat_resolve(struct char_data *ch);
+static void final_combat_resolve(BaseCharacter *ch);
 
 static void shadow_dragons_live();
 
-static void cleanup_arena_watch(struct char_data *ch);
+static void cleanup_arena_watch(BaseCharacter *ch);
 
-static void mob_attack(struct char_data *ch, char *buf);
+static void mob_attack(BaseCharacter *ch, char *buf);
 
-static int pick_n_throw(struct char_data *ch, char *buf);
+static int pick_n_throw(BaseCharacter *ch, char *buf);
 
 
-int group_bonus(struct char_data *ch, int type) {
+int group_bonus(BaseCharacter *ch, int type) {
     struct follow_type *k, *next;
 
     if (!AFF_FLAGGED(ch, AFF_GROUP))
@@ -148,7 +148,7 @@ int group_bonus(struct char_data *ch, int type) {
     return (false);
 }
 
-void mutant_limb_regen(struct char_data *ch) {
+void mutant_limb_regen(BaseCharacter *ch) {
     if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50) {
         act("The bones in your right arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n starts moving $s right arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -195,7 +195,7 @@ void mutant_limb_regen(struct char_data *ch) {
     }
 }
 
-static int pick_n_throw(struct char_data *ch, char *buf) {
+static int pick_n_throw(BaseCharacter *ch, char *buf) {
     char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];;
 
     if (rand_number(1, 20) < 18) {
@@ -216,7 +216,7 @@ static int pick_n_throw(struct char_data *ch, char *buf) {
     return (false);
 }
 
-static void mob_attack(struct char_data *ch, char *buf) {
+static void mob_attack(BaseCharacter *ch, char *buf) {
 
     int power = rand_number(1, 5);
     int bonus = GET_LEVEL(ch) * 0.1;
@@ -641,7 +641,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
 
 } /* End mob_attack */
 
-static void cleanup_arena_watch(struct char_data *ch) {
+static void cleanup_arena_watch(BaseCharacter *ch) {
     struct descriptor_data *d;
 
     for (d = descriptor_list; d; d = d->next) {
@@ -672,7 +672,7 @@ static void shadow_dragons_live() {
 }
 
 /* For announcing the sounds of battle to nearby rooms */
-void impact_sound(struct char_data *ch, char *mssg) {
+void impact_sound(BaseCharacter *ch, char *mssg) {
     for (auto &[dir, ex] : ch->getRoom()->getExits()) {
         if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
         if(auto dest = ex->getDestination(); dest) dest->sendfContents("%s", mssg);
@@ -680,10 +680,10 @@ void impact_sound(struct char_data *ch, char *mssg) {
 }
 
 /* For removing body parts */
-void remove_limb(struct char_data *vict, int num) {
+void remove_limb(BaseCharacter *vict, int num) {
     /* 0 = head, 1 = rarm, 2 = larm, 3 = rleg, 4 = lleg , 5 = tail, 6 = tail*/
 
-    struct obj_data *body_part;
+    Object *body_part;
     char part[1000];
     char buf[1000];
     char buf2[1000];
@@ -778,9 +778,9 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
 /* The Fight related routines */
 void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
-    struct char_data *ch;
-    struct char_data *tch;
-    struct char_data *wch;
+    BaseCharacter *ch;
+    BaseCharacter *tch;
+    BaseCharacter *wch;
 
     for (tch = character_list; tch; tch = tch->next) {
         ch = tch;
@@ -883,7 +883,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                             TO_ROOM);
                         ch->setFlag(FlagType::Affect, AFF_POSITION);
                     } else {
-                        struct char_data *vict = FIGHTING(ch);
+                        BaseCharacter *vict = FIGHTING(ch);
                         if (roll_balance(ch) > roll_balance(vict)) {
                             act("@YYou struggle to gain a better position than @y$N@Y and succeed!@n", true, ch,
                                 nullptr, vict, TO_CHAR);
@@ -1036,7 +1036,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 do_stand(ch, nullptr, 0, 0);
                 continue;
             }
-            struct char_data *vict;
+            BaseCharacter *vict;
             char buf[100];
 
             vict = FIGHTING(ch);
@@ -1355,7 +1355,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
     }
 }
 
-void appear(struct char_data *ch) {
+void appear(BaseCharacter *ch) {
     if (affected_by_spell(ch, SPELL_INVISIBLE))
         affect_from_char(ch, SPELL_INVISIBLE);
 
@@ -1364,7 +1364,7 @@ void appear(struct char_data *ch) {
     act("$n slowly fades into existence.", false, ch, nullptr, nullptr, TO_ROOM);
 }
 
-void update_pos(struct char_data *victim) {
+void update_pos(BaseCharacter *victim) {
     if (AFF_FLAGGED(victim, AFF_KNOCKED)) {
         return;
     }
@@ -1387,7 +1387,7 @@ void update_pos(struct char_data *victim) {
 }
 
 
-static void check_killer(struct char_data *ch, struct char_data *vict) {
+static void check_killer(BaseCharacter *ch, BaseCharacter *vict) {
     if (PLR_FLAGGED(vict, PLR_KILLER) || PLR_FLAGGED(vict, PLR_THIEF))
         return;
     if (PLR_FLAGGED(ch, PLR_KILLER) || IS_NPC(ch) || IS_NPC(vict) || ch == vict)
@@ -1397,7 +1397,7 @@ static void check_killer(struct char_data *ch, struct char_data *vict) {
 
 
 /* start one char fighting another (yes, it is horrible, I know... )  */
-void set_fighting(struct char_data *ch, struct char_data *vict) {
+void set_fighting(BaseCharacter *ch, BaseCharacter *vict) {
     if (ch == vict)
         return;
 
@@ -1423,8 +1423,8 @@ void set_fighting(struct char_data *ch, struct char_data *vict) {
 
 
 /* remove a char from the list of fighting chars */
-void stop_fighting(struct char_data *ch) {
-    struct char_data *temp;
+void stop_fighting(BaseCharacter *ch) {
+    BaseCharacter *temp;
 
     if (ch == next_combat_list)
         next_combat_list = ch->next_fighting;
@@ -1440,10 +1440,10 @@ void stop_fighting(struct char_data *ch) {
     update_pos(ch);
 }
 
-static void make_pcorpse(struct char_data *ch) {
+static void make_pcorpse(BaseCharacter *ch) {
 
-    struct obj_data *corpse;
-    struct obj_data *money;
+    Object *corpse;
+    Object *money;
     int x, y;
 
 
@@ -1456,7 +1456,7 @@ static void make_pcorpse(struct char_data *ch) {
 
     if (AFF_FLAGGED(ch, AFF_ASHED)) {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        struct obj_data *ashes;
+        Object *ashes;
         auto r = ch->getRoom();
         auto ashcount = rand_number(1,3);
         while(ashcount) {
@@ -1483,7 +1483,7 @@ static void make_pcorpse(struct char_data *ch) {
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
 
 
-    struct obj_data *obj, *next_obj;
+    Object *obj, *next_obj;
 
     for (auto obj : ch->getInventory()) {
 
@@ -1522,7 +1522,7 @@ static void make_pcorpse(struct char_data *ch) {
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
  * disintergrated, blown in half, beat to a pulp, etc.        - Iovan 3/2/2011 */
-static void handle_corpse_condition(struct obj_data *corpse, struct char_data *ch) {
+static void handle_corpse_condition(Object *corpse, BaseCharacter *ch) {
 
     char buf2[MAX_NAME_LENGTH + 128];
     char descBuf[512];
@@ -1596,10 +1596,10 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
     }
 }
 
-static void make_corpse(struct char_data *ch, struct char_data *tch) {
-    struct obj_data *corpse, *o;
-    struct obj_data *money;
-    struct obj_data *obj, *next_obj;
+static void make_corpse(BaseCharacter *ch, BaseCharacter *tch) {
+    Object *corpse, *o;
+    Object *money;
+    Object *obj, *next_obj;
     int i, x, y;
 
     corpse = create_obj();
@@ -1651,7 +1651,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
                 }
 
                 for (int ind = 0; ind < repeats; ind++) {
-                    struct obj_data *meat;
+                    Object *meat;
                     tch->sendf("The choice edible meat is preserved because of your skill.\r\n");
                     meat = read_object(1612, VIRTUAL);
                     meat->addToLocation(ch);
@@ -1732,13 +1732,13 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 }
 
 
-void loadmap(struct char_data *ch) {
+void loadmap(BaseCharacter *ch) {
 
 }
 
 
 /* When ch kills victim */
-static void change_alignment(struct char_data *ch, struct char_data *victim) {
+static void change_alignment(BaseCharacter *ch, BaseCharacter *victim) {
     /*
      * If you kill a monster with alignment A, you move 1/20th of the way to
      * having alignment -A.
@@ -1754,7 +1754,7 @@ static void change_alignment(struct char_data *ch, struct char_data *victim) {
 }
 
 
-void death_cry(struct char_data *ch) {
+void death_cry(BaseCharacter *ch) {
     auto r = ch->getRoom();
     for (auto &[door, ex] : r->getExits()) {
         if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
@@ -1766,8 +1766,8 @@ void death_cry(struct char_data *ch) {
 }
 
 /* Let's clean up necessary things after "death" */
-static void final_combat_resolve(struct char_data *ch) {
-    struct obj_data *chair;
+static void final_combat_resolve(BaseCharacter *ch) {
+    Object *chair;
 
     if (SITS(ch)) {
         chair = SITS(ch);
@@ -1832,8 +1832,8 @@ enum DeathType : uint8_t {
     Newbie = 3
 };
 
-void raw_kill(struct char_data *ch, struct char_data *killer) {
-    struct char_data *k, *temp;
+void raw_kill(BaseCharacter *ch, BaseCharacter *killer) {
+    BaseCharacter *k, *temp;
 
     if (FIGHTING(ch))
         stop_fighting(ch);
@@ -1931,7 +1931,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         int shadowed = false;
         ch->decCurHealthPercent(1);
         if (IS_SHADOW_DRAGON1(ch)) {
-            struct obj_data *obj = nullptr;
+            Object *obj = nullptr;
             SHADOW_DRAGON1 = -1;
             send_to_room(IN_ROOM(ch), "@YThe one star dragon ball falls to the ground!@n\r\n");
 
@@ -1939,7 +1939,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON2(ch)) {
-            struct obj_data *obj = nullptr;
+            Object *obj = nullptr;
             SHADOW_DRAGON2 = -1;
             send_to_room(IN_ROOM(ch), "@YThe two star dragon ball falls to the ground!@n\r\n");
 
@@ -1947,7 +1947,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON3(ch)) {
-            struct obj_data *obj = nullptr;
+            Object *obj = nullptr;
             SHADOW_DRAGON3 = -1;
             send_to_room(IN_ROOM(ch), "@YThe three star dragon ball falls to the ground!@n\r\n");
 
@@ -1955,7 +1955,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON4(ch)) {
-            struct obj_data *obj = nullptr;
+            Object *obj = nullptr;
             SHADOW_DRAGON4 = -1;
             send_to_room(IN_ROOM(ch), "@YThe four star dragon ball falls to the ground!@n\r\n");
 
@@ -1963,7 +1963,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON5(ch)) {
-            struct obj_data *obj = nullptr;
+            Object *obj = nullptr;
             SHADOW_DRAGON5 = -1;
             send_to_room(IN_ROOM(ch), "@YThe five star dragon ball falls to the ground!@n\r\n");
 
@@ -1971,7 +1971,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON6(ch)) {
-            struct obj_data *obj = nullptr;
+            Object *obj = nullptr;
             SHADOW_DRAGON6 = -1;
             send_to_room(IN_ROOM(ch), "@YThe six star dragon ball falls to the ground!@n\r\n");
 
@@ -1979,7 +1979,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             obj->addToLocation(r);
             shadowed = true;
         } else if (IS_SHADOW_DRAGON7(ch)) {
-            struct obj_data *obj = nullptr;
+            Object *obj = nullptr;
             SHADOW_DRAGON7 = -1;
             send_to_room(IN_ROOM(ch), "@YThe seven star dragon ball falls to the ground!@n\r\n");
 
@@ -2073,7 +2073,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
     }
 }
 
-void die(struct char_data *ch, struct char_data *killer) {
+void die(BaseCharacter *ch, BaseCharacter *killer) {
     if (!IS_NPC(ch)) {
         ch->clearFlag(FlagType::PC, PLR_HEALT);
         if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
@@ -2168,7 +2168,7 @@ void die(struct char_data *ch, struct char_data *killer) {
     raw_kill(ch, killer);
 }
 
-static void perform_group_gain(struct char_data *ch, int base, struct char_data *victim) {
+static void perform_group_gain(BaseCharacter *ch, int base, BaseCharacter *victim) {
     int64_t share;
 
     if (IN_ARENA(ch)) {
@@ -2211,7 +2211,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
             checkit = true;
         }
         if (checkit == false && ch->master != nullptr) {
-            struct char_data *master = ch->master;
+            BaseCharacter *master = ch->master;
             for (f = master->followers; f; f = f->next) {
                 if (f->follower != ch) {
                     if (AFF_FLAGGED(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower)) {
@@ -2310,10 +2310,10 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     /*change_alignment(ch, victim);*/
 }
 
-void group_gain(struct char_data *ch, struct char_data *victim) {
+void group_gain(BaseCharacter *ch, BaseCharacter *victim) {
     int tot_levels, tot_members;
     int64_t tot_gain, base;
-    struct char_data *k;
+    BaseCharacter *k;
     struct follow_type *f;
 
     if (!(k = ch->master))
@@ -2389,7 +2389,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
 }
 
 
-void solo_gain(struct char_data *ch, struct char_data *victim) {
+void solo_gain(BaseCharacter *ch, BaseCharacter *victim) {
     return; // disabled for now.
 
     if (IS_NPC(ch)) {

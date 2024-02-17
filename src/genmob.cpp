@@ -21,7 +21,7 @@
 #include "dbat/account.h"
 
 /* From db.c */
-void check_mobile_strings(struct char_data *mob);
+void check_mobile_strings(BaseCharacter *mob);
 
 void check_mobile_string(mob_vnum i, char **string, const char *dscr);
 
@@ -30,7 +30,7 @@ void extract_mobile_all(mob_vnum vnum);
 
 
 void extract_mobile_all(mob_vnum vnum) {
-    struct char_data *next, *ch;
+    BaseCharacter *next, *ch;
 
     for (ch = character_list; ch; ch = next) {
         next = ch->next;
@@ -45,7 +45,7 @@ int save_mobiles(zone_rnum zone_num) {
 }
 
 
-void check_mobile_strings(struct char_data *mob) {
+void check_mobile_strings(BaseCharacter *mob) {
     mob_vnum mvnum = mob_index[mob->vn].vn;
     check_mobile_string(mvnum, &GET_LDESC(mob), "long description");
     check_mobile_string(mvnum, &GET_DDESC(mob), "detailed description");
@@ -116,8 +116,8 @@ time_data::time_data(const nlohmann::json &j) : time_data() {
 }
 
 
-nlohmann::json char_data::serialize() {
-    auto j = unit_data::serialize();
+nlohmann::json BaseCharacter::serialize() {
+    auto j = GameEntity::serialize();
 
     for(auto &[id, train] : trains) {
         if(train) j["trains"].push_back(std::make_pair(id, train));
@@ -283,8 +283,8 @@ nlohmann::json char_data::serialize() {
 }
 
 
-void char_data::deserialize(const nlohmann::json &j) {
-    unit_data::deserialize(j);
+void BaseCharacter::deserialize(const nlohmann::json &j) {
+    GameEntity::deserialize(j);
 
     if(j.contains("trains")) {
         for(auto j2 : j["trains"]) {
@@ -510,7 +510,7 @@ void char_data::deserialize(const nlohmann::json &j) {
 }
 
 
-char_data::char_data(const nlohmann::json &j) : char_data() {
+BaseCharacter::BaseCharacter(const nlohmann::json &j) : BaseCharacter() {
     deserialize(j);
 
     SPEAKING(this) = SKILL_LANG_COMMON;
@@ -630,7 +630,7 @@ player_data::player_data(const nlohmann::json &j) {
 
 }
 
-void char_data::activate() {
+void BaseCharacter::activate() {
     if(active) {
         basic_mud_log("Attempted to activate an already active character.");
         return;
@@ -661,10 +661,10 @@ void char_data::activate() {
 }
 
 
-void char_data::deactivate() {
+void BaseCharacter::deactivate() {
     if(!active) return;
     active = false;
-    struct char_data *temp;
+    BaseCharacter *temp;
     REMOVE_FROM_LIST(this, character_list, next, temp);
 
     if(vn != NOTHING) {
@@ -708,7 +708,7 @@ affected_type::affected_type(const nlohmann::json &j) {
     if(j.contains("bitvector")) bitvector = j["bitvector"];
 }
 
-weight_t char_data::getWeight(bool base) {
+weight_t BaseCharacter::getWeight(bool base) {
     auto total = weight;
 
     if(!base) {
@@ -719,7 +719,7 @@ weight_t char_data::getWeight(bool base) {
     return total;
 }
 
-int char_data::getHeight(bool base) {
+int BaseCharacter::getHeight(bool base) {
     int total = get(CharNum::Height);
 
     if(!base) {
@@ -730,36 +730,36 @@ int char_data::getHeight(bool base) {
     return total;
 }
 
-int char_data::setHeight(int val) {
+int BaseCharacter::setHeight(int val) {
     return set(CharNum::Height, std::max(0, val));
 }
 
-int char_data::modHeight(int val) {
+int BaseCharacter::modHeight(int val) {
     return setHeight(getHeight(true) + val);
 }
 
-double char_data::getTotalWeight() {
+double BaseCharacter::getTotalWeight() {
     return getWeight() + getCarriedWeight();
 }
 
-bool char_data::isActive() {
+bool BaseCharacter::isActive() {
     return active;
 }
 
 
-nlohmann::json char_data::serializeRelations() {
+nlohmann::json BaseCharacter::serializeRelations() {
     auto j = nlohmann::json::object();
 
     return j;
 }
 
 
-double char_data::currentGravity() {
+double BaseCharacter::currentGravity() {
     return myEnvVar(EnvVar::Gravity);
 }
 
-struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
-    auto o = unit_data::findObject(func, working);
+Object* BaseCharacter::findObject(const std::function<bool(Object*)> &func, bool working) {
+    auto o = GameEntity::findObject(func, working);
     if(o) return o;
 
     for(auto [pos, obj] : getEquipment()) {
@@ -772,8 +772,8 @@ struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*
     return nullptr;
 }
 
-std::set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
-    auto out = unit_data::gatherObjects(func, working);
+std::set<Object*> BaseCharacter::gatherObjects(const std::function<bool(Object*)> &func, bool working) {
+    auto out = GameEntity::gatherObjects(func, working);
 
     for(auto [pos, obj] : getEquipment()) {
         if(working && !obj->isWorking()) continue;
@@ -784,11 +784,11 @@ std::set<struct obj_data*> char_data::gatherObjects(const std::function<bool(str
     return out;
 }
 
-void char_data::ageBy(double addedTime) {
+void BaseCharacter::ageBy(double addedTime) {
     this->time.secondsAged += addedTime;
 }
 
-void char_data::setAge(double newAge) {
+void BaseCharacter::setAge(double newAge) {
     this->time.secondsAged = newAge * SECS_PER_GAME_YEAR;
 }
 

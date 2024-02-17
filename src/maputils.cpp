@@ -18,8 +18,8 @@ int mapnums[MAP_ROWS + 1][MAP_COLS + 1];
 
 void ping_ship(int vnum, int vnum2) {
 
-    struct char_data *tch, *next_ch;
-    struct obj_data *controls = nullptr, *obj = nullptr;
+    BaseCharacter *tch, *next_ch;
+    Object *controls = nullptr, *obj = nullptr;
     int found = false;
 
     if (vnum2 == -1) {
@@ -60,7 +60,7 @@ int checkship(int rnum, int vnum) {
     return there;
 }
 
-char *getmapchar(int rnum, struct char_data *ch, int start, int vnum) {
+char *getmapchar(int rnum, BaseCharacter *ch, int start, int vnum) {
     static char mapchar[50];
     int there = false, enemy = false;
 
@@ -273,7 +273,7 @@ MapStruct findcoord(int rnum) {
     return coords;
 }
 
-void printmap(int rnum, struct char_data *ch, int type, int vnum) {
+void printmap(int rnum, BaseCharacter *ch, int type, int vnum) {
     int x = 0, lasty = -1;
     int y = 0;
     int sightradius;

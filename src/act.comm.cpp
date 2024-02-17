@@ -25,15 +25,15 @@
 #include "dbat/class.h"
 
 /* local functions */
-static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg);
+static void perform_tell(BaseCharacter *ch, BaseCharacter *vict, char *arg);
 
-static int is_tell_ok(struct char_data *ch, struct char_data *vict);
+static int is_tell_ok(BaseCharacter *ch, BaseCharacter *vict);
 
-static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict);
+static void handle_whisper(char *buf, BaseCharacter *ch, BaseCharacter *vict);
 
 static char *overhear(char *buf, int type);
 
-static void list_languages(struct char_data *ch);
+static void list_languages(BaseCharacter *ch);
 
 static void garble_text(char *string, int known, int lang);
 
@@ -51,7 +51,7 @@ static const char *languages[] =
                 "\n"
         };
 
-static void list_languages(struct char_data *ch) {
+static void list_languages(BaseCharacter *ch) {
     int a = 0, i;
 
     ch->sendf("Languages:\r\n[");
@@ -189,8 +189,8 @@ ACMD(do_osay) {
 
 ACMD(do_say) {
     struct descriptor_data *d;
-    struct char_data *wch = nullptr, *wch2 = nullptr, *wch3 = nullptr, *tch = nullptr, *sch = nullptr;
-    struct obj_data *obj = nullptr;
+    BaseCharacter *wch = nullptr, *wch2 = nullptr, *wch3 = nullptr, *tch = nullptr, *sch = nullptr;
+    Object *obj = nullptr;
     int granted = false, found = false;
     char buf2[MAX_INPUT_LENGTH];
     *buf2 = '\0';
@@ -728,7 +728,7 @@ ACMD(do_say) {
 }
 
 ACMD(do_gsay) {
-    struct char_data *k;
+    BaseCharacter *k;
     struct follow_type *f;
     char blah[MAX_INPUT_LENGTH];
 
@@ -787,7 +787,7 @@ ACMD(do_gsay) {
     }
 }
 
-static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg) {
+static void perform_tell(BaseCharacter *ch, BaseCharacter *vict, char *arg) {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
     strcpy(buf, arg);
@@ -834,7 +834,7 @@ static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg
         GET_LAST_TELL(vict) = GET_IDNUM(ch);
 }
 
-static int is_tell_ok(struct char_data *ch, struct char_data *vict) {
+static int is_tell_ok(BaseCharacter *ch, BaseCharacter *vict) {
 
     if (ch == vict)
         ch->sendf("You try to tell yourself something.\r\n");
@@ -872,7 +872,7 @@ static int is_tell_ok(struct char_data *ch, struct char_data *vict) {
  * called frequently, and should IMHO be kept as tight as possible.
  */
 ACMD(do_tell) {
-    struct char_data *vict = nullptr;
+    BaseCharacter *vict = nullptr;
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
 
     half_chop(argument, buf, buf2);
@@ -913,7 +913,7 @@ ACMD(do_tell) {
 }
 
 ACMD(do_reply) {
-    struct char_data *tch = character_list;
+    BaseCharacter *tch = character_list;
 
     if (IS_NPC(ch))
         return;
@@ -958,7 +958,7 @@ ACMD(do_reply) {
 
 ACMD(do_spec_comm) {
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    BaseCharacter *vict;
     const char *action_sing, *action_plur, *action_others;
 
     if (GET_BONUS(ch, BONUS_MUTE) > 0) {
@@ -1026,7 +1026,7 @@ ACMD(do_spec_comm) {
     }
 }
 
-static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict) {
+static void handle_whisper(char *buf, BaseCharacter *ch, BaseCharacter *vict) {
 
     for (auto tch : ch->getRoom()->getPeople()) {
         if (IS_NPC(tch)) {
@@ -1215,7 +1215,7 @@ static char *overhear(char *buf, int type) {
  *	(if it existed)
  */
 ACMD(do_write) {
-    struct obj_data *paper, *pen = nullptr;
+    Object *paper, *pen = nullptr;
     char *papername, *penname;
     char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
@@ -1308,7 +1308,7 @@ ACMD(do_write) {
 
 ACMD(do_page) {
     struct descriptor_data *d;
-    struct char_data *vict;
+    BaseCharacter *vict;
     char buf2[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
 
     half_chop(argument, arg, buf2);

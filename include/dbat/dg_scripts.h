@@ -178,10 +178,10 @@ public:
 
 /* typedefs that the dg functions rely on */
 typedef struct index_data index_data;
-typedef struct room_data room_data;
-typedef struct obj_data obj_data;
+typedef Room Room;
+typedef Object Object;
 typedef struct trig_data trig_data;
-typedef struct char_data char_data;
+typedef BaseCharacter BaseCharacter;
 
 /* used for actor memory triggers */
 struct script_memory {
@@ -198,132 +198,132 @@ extern int is_substring(char *sub, char *string);
 
 extern int word_check(char *str, char *wordlist);
 
-extern void act_mtrigger(char_data *ch, char *str, char_data *actor, char_data *victim, obj_data *object,
-                         obj_data *target, char *arg);
+extern void act_mtrigger(BaseCharacter *ch, char *str, BaseCharacter *actor, BaseCharacter *victim, Object *object,
+                         Object *target, char *arg);
 
-extern void speech_mtrigger(char_data *actor, char *str);
+extern void speech_mtrigger(BaseCharacter *actor, char *str);
 
-extern void speech_wtrigger(char_data *actor, char *str);
+extern void speech_wtrigger(BaseCharacter *actor, char *str);
 
-extern void greet_memory_mtrigger(char_data *ch);
+extern void greet_memory_mtrigger(BaseCharacter *ch);
 
-extern int greet_mtrigger(char_data *actor, int dir);
+extern int greet_mtrigger(BaseCharacter *actor, int dir);
 
-extern int entry_mtrigger(char_data *ch);
+extern int entry_mtrigger(BaseCharacter *ch);
 
-extern void entry_memory_mtrigger(char_data *ch);
+extern void entry_memory_mtrigger(BaseCharacter *ch);
 
-extern int enter_wtrigger(room_data *room, char_data *actor, int dir);
+extern int enter_wtrigger(Room *room, BaseCharacter *actor, int dir);
 
-extern int drop_otrigger(obj_data *obj, char_data *actor);
+extern int drop_otrigger(Object *obj, BaseCharacter *actor);
 
-extern void timer_otrigger(obj_data *obj);
+extern void timer_otrigger(Object *obj);
 
-extern int get_otrigger(obj_data *obj, char_data *actor);
+extern int get_otrigger(Object *obj, BaseCharacter *actor);
 
-extern int drop_wtrigger(obj_data *obj, char_data *actor);
+extern int drop_wtrigger(Object *obj, BaseCharacter *actor);
 
-extern int give_otrigger(obj_data *obj, char_data *actor,
-                         char_data *victim);
+extern int give_otrigger(Object *obj, BaseCharacter *actor,
+                         BaseCharacter *victim);
 
-extern int receive_mtrigger(char_data *ch, char_data *actor,
-                            obj_data *obj);
+extern int receive_mtrigger(BaseCharacter *ch, BaseCharacter *actor,
+                            Object *obj);
 
-extern void bribe_mtrigger(char_data *ch, char_data *actor,
+extern void bribe_mtrigger(BaseCharacter *ch, BaseCharacter *actor,
                            int amount);
 
-extern int wear_otrigger(obj_data *obj, char_data *actor, int where);
+extern int wear_otrigger(Object *obj, BaseCharacter *actor, int where);
 
-extern int remove_otrigger(obj_data *obj, char_data *actor);
+extern int remove_otrigger(Object *obj, BaseCharacter *actor);
 
-extern int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
+extern int cmd_otrig(Object *obj, BaseCharacter *actor, char *cmd,
                      char *argument, int type);
 
-extern int command_mtrigger(char_data *actor, char *cmd, char *argument);
+extern int command_mtrigger(BaseCharacter *actor, char *cmd, char *argument);
 
-extern int command_otrigger(char_data *actor, char *cmd, char *argument);
+extern int command_otrigger(BaseCharacter *actor, char *cmd, char *argument);
 
-extern int command_wtrigger(char_data *actor, char *cmd, char *argument);
+extern int command_wtrigger(BaseCharacter *actor, char *cmd, char *argument);
 
-extern int death_mtrigger(char_data *ch, char_data *actor);
+extern int death_mtrigger(BaseCharacter *ch, BaseCharacter *actor);
 
-extern void fight_mtrigger(char_data *ch);
+extern void fight_mtrigger(BaseCharacter *ch);
 
-extern void hitprcnt_mtrigger(char_data *ch);
+extern void hitprcnt_mtrigger(BaseCharacter *ch);
 
-extern void random_mtrigger(char_data *ch);
+extern void random_mtrigger(BaseCharacter *ch);
 
-extern void random_otrigger(obj_data *obj);
+extern void random_otrigger(Object *obj);
 
-extern void random_wtrigger(room_data *ch);
+extern void random_wtrigger(Room *ch);
 
-extern void reset_wtrigger(room_data *ch);
+extern void reset_wtrigger(Room *ch);
 
-extern void load_mtrigger(char_data *ch);
+extern void load_mtrigger(BaseCharacter *ch);
 
-extern void load_otrigger(obj_data *obj);
+extern void load_otrigger(Object *obj);
 
-extern int cast_mtrigger(char_data *actor, char_data *ch, int spellnum);
+extern int cast_mtrigger(BaseCharacter *actor, BaseCharacter *ch, int spellnum);
 
-extern int cast_otrigger(char_data *actor, obj_data *obj, int spellnum);
+extern int cast_otrigger(BaseCharacter *actor, Object *obj, int spellnum);
 
-extern int cast_wtrigger(char_data *actor, char_data *vict, obj_data *obj, int spellnum);
+extern int cast_wtrigger(BaseCharacter *actor, BaseCharacter *vict, Object *obj, int spellnum);
 
-extern int leave_mtrigger(char_data *actor, int dir);
+extern int leave_mtrigger(BaseCharacter *actor, int dir);
 
-extern int leave_wtrigger(room_data *room, char_data *actor, int dir);
+extern int leave_wtrigger(Room *room, BaseCharacter *actor, int dir);
 
-extern int leave_otrigger(room_data *room, char_data *actor, int dir);
+extern int leave_otrigger(Room *room, BaseCharacter *actor, int dir);
 
-extern int door_mtrigger(char_data *actor, int subcmd, int dir);
+extern int door_mtrigger(BaseCharacter *actor, int subcmd, int dir);
 
-extern int door_wtrigger(char_data *actor, int subcmd, int dir);
+extern int door_wtrigger(BaseCharacter *actor, int subcmd, int dir);
 
-extern int consume_otrigger(obj_data *obj, char_data *actor, int cmd);
+extern int consume_otrigger(Object *obj, BaseCharacter *actor, int cmd);
 
-extern void time_mtrigger(char_data *ch);
-extern void interval_mtrigger(char_data *ch, int trigFlag);
+extern void time_mtrigger(BaseCharacter *ch);
+extern void interval_mtrigger(BaseCharacter *ch, int trigFlag);
 
-extern void time_otrigger(obj_data *obj);
-extern void interval_otrigger(obj_data *obj, int trigFlag);
+extern void time_otrigger(Object *obj);
+extern void interval_otrigger(Object *obj, int trigFlag);
 
-extern void time_wtrigger(room_data *room);
-extern void interval_wtrigger(room_data *room, int trigFlag);
+extern void time_wtrigger(Room *room);
+extern void interval_wtrigger(Room *room, int trigFlag);
 
 /* function prototypes from dg_scripts.c */
 extern char *str_str(char *cs, char *ct);
 
 extern int find_eq_pos_script(char *arg);
 
-extern int can_wear_on_pos(struct obj_data *obj, int pos);
+extern int can_wear_on_pos(Object *obj, int pos);
 
-extern char_data *get_char(char *name);
+extern BaseCharacter *get_char(char *name);
 
-extern char_data *get_char_near_obj(obj_data *obj, char *name);
+extern BaseCharacter *get_char_near_obj(Object *obj, char *name);
 
-extern char_data *get_char_in_room(room_data *room, char *name);
+extern BaseCharacter *get_char_in_room(Room *room, char *name);
 
-extern obj_data *get_obj_near_obj(obj_data *obj, char *name);
+extern Object *get_obj_near_obj(Object *obj, char *name);
 
-extern obj_data *get_obj(char *name);
+extern Object *get_obj(char *name);
 
-extern room_data *get_room(char *name);
+extern Room *get_room(char *name);
 
-extern char_data *get_char_by_obj(obj_data *obj, char *name);
+extern BaseCharacter *get_char_by_obj(Object *obj, char *name);
 
-extern char_data *get_char_by_room(room_data *room, char *name);
+extern BaseCharacter *get_char_by_room(Room *room, char *name);
 
-extern obj_data *get_obj_by_obj(obj_data *obj, char *name);
+extern Object *get_obj_by_obj(Object *obj, char *name);
 
-extern obj_data *get_obj_in_room(room_data *room, char *name);
+extern Object *get_obj_in_room(Room *room, char *name);
 
-extern obj_data *get_obj_by_room(room_data *room, char *name);
+extern Object *get_obj_by_room(Room *room, char *name);
 
 extern int trgvar_in_room(room_vnum vnum);
 
-extern obj_data *get_obj_in_list(char *name, std::vector<obj_data*> list);
+extern Object *get_obj_in_list(char *name, std::vector<Object*> list);
 
-extern obj_data *get_object_in_equip(char_data *ch, char *name);
+extern Object *get_object_in_equip(BaseCharacter *ch, char *name);
 
 extern void script_trigger_check(uint64_t heartPulse, double deltaTime);
 
@@ -333,7 +333,7 @@ extern void check_interval_triggers(int trigFlag);
 
 extern void find_uid_name(char *uid, char *name, size_t nlen);
 
-extern void do_sstat(struct char_data *ch, struct unit_data *ud);
+extern void do_sstat(BaseCharacter *ch, GameEntity *ud);
 
 extern void script_vlog(const char *format, va_list args);
 
@@ -341,13 +341,13 @@ extern void script_log(const char *format, ...) __attribute__ ((format (printf, 
 
 extern char *matching_quote(char *p);
 
-struct room_data *dg_room_of_obj(struct obj_data *obj);
+Room *dg_room_of_obj(Object *obj);
 
 /* To maintain strict-aliasing we'll have to do this trick with a union */
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
 extern trig_rnum real_trigger(trig_vnum vnum);
 
-extern void read_saved_vars(struct char_data *ch);
+extern void read_saved_vars(BaseCharacter *ch);
 
 extern void add_to_lookup_table(long uid, void *c);
 
@@ -361,11 +361,11 @@ extern std::shared_ptr<trig_data> read_trigger(int nr);
 extern void trig_data_copy(trig_data *this_data, const trig_data *trg);
 
 /* From dg_variables.c */
-extern int item_in_list(char *item, std::vector<obj_data*> list);
+extern int item_in_list(char *item, std::vector<Object*> list);
 
-extern char *skill_percent(struct char_data *ch, char *skill);
+extern char *skill_percent(BaseCharacter *ch, char *skill);
 
-extern int char_has_item(char *item, struct char_data *ch);
+extern int char_has_item(char *item, BaseCharacter *ch);
 
 /* From dg_handler.c */
 
@@ -373,14 +373,14 @@ extern void extract_script(void *thing, int type);
 
 extern void extract_script_mem(struct script_memory *sc);
 
-extern void free_proto_script(struct unit_data *thing, int type);
+extern void free_proto_script(GameEntity *thing, int type);
 
-extern void copy_proto_script(struct unit_data *source, struct unit_data *dest, int type);
+extern void copy_proto_script(GameEntity *source, GameEntity *dest, int type);
 
 /* from dg_comm.c */
 extern char *any_one_name(char *argument, char *first_arg);
 
-extern void sub_write(char *arg, char_data *ch, int8_t find_invis, int targets);
+extern void sub_write(char *arg, BaseCharacter *ch, int8_t find_invis, int targets);
 
 extern void send_to_zone(char *messg, zone_rnum zone);
 
@@ -388,16 +388,16 @@ extern void send_to_zone(char *messg, zone_rnum zone);
 extern void do_dg_affect(void *go, struct script_data *sc, trig_data *trig,
                          int type, char *cmd);
 
-extern void send_char_pos(struct char_data *ch, int dam);
+extern void send_char_pos(BaseCharacter *ch, int dam);
 
-extern int valid_dg_target(char_data *ch, int bitvector);
+extern int valid_dg_target(BaseCharacter *ch, int bitvector);
 
-extern void script_damage(char_data *vict, int dam);
+extern void script_damage(BaseCharacter *vict, int dam);
 
 extern int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]);
 
 /* from dg_objcmd.c */
-extern room_rnum obj_room(obj_data *obj);
+extern room_rnum obj_room(Object *obj);
 
 /* defines for valid_dg_target */
 #define DG_ALLOW_GODS (1<<0)

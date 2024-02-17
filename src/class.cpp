@@ -303,7 +303,7 @@ static const int race_template[NUM_RACES][6] = {
                 {10, 10, 10, 10, 10, 10}
 };
 
-void cedit_creation(struct char_data *ch) {
+void cedit_creation(BaseCharacter *ch) {
     switch (CONFIG_CREATION_METHOD) {
         case CEDIT_CREATION_METHOD_3: /* Points Pool */
             break;
@@ -362,9 +362,9 @@ const int class_hit_die_size[NUM_CLASSES] = {
 };
 
 /* Some initializations for characters, including initial skills */
-void do_start(struct char_data *ch) {
+void do_start(BaseCharacter *ch) {
     int punch;
-    struct obj_data *obj;
+    Object *obj;
 
     ch->set(CharNum::Level, 1);
     ch->setExperience(1);
@@ -577,12 +577,12 @@ void do_start(struct char_data *ch) {
         obj = read_object(3428, VIRTUAL);
         obj->addToLocation(ch);
     }
-    struct obj_data *obj2;
+    Object *obj2;
     obj2 = read_object(17998, VIRTUAL);
     obj2->addToLocation(ch);
 
     if (IS_TAPION(ch) || IS_GINYU(ch)) {
-        struct obj_data *throw_obj;
+        Object *throw_obj;
         throw_obj = read_object(19050, VIRTUAL);
         throw_obj->addToLocation(ch);
         if (rand_number(1, 2) == 2) {
@@ -597,7 +597,7 @@ void do_start(struct char_data *ch) {
         }
 
     } else if (IS_DABURA(ch)) {
-        struct obj_data *throw_obj;
+        Object *throw_obj;
         throw_obj = read_object(19055, VIRTUAL);
         throw_obj->addToLocation(ch);
         throw_obj = nullptr;
@@ -773,7 +773,7 @@ static const int *free_start_feats[] = {
  * each class every time they gain a level.
  */
 /* Rillao: transloc, add new transes here */
-void advance_level(struct char_data *ch) {
+void advance_level(BaseCharacter *ch) {
     int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
     int add_prac = 1, add_train, i, j = 0, ranks;
     int add_gen_feats = 0, add_class_feats = 0;
@@ -1208,7 +1208,7 @@ void advance_level(struct char_data *ch) {
  * invalid_class is used by handler.c to determine if a piece of equipment is
  * usable by a particular class, based on the ITEM_ANTI_{class} bitvectors.
  */
-int invalid_class(struct char_data *ch, struct obj_data *obj) {
+int invalid_class(BaseCharacter *ch, Object *obj) {
     if (OBJ_FLAGGED(obj, ITEM_ANTI_WIZARD) && IS_ROSHI(ch))
         return true;
 
@@ -1290,7 +1290,7 @@ int invalid_class(struct char_data *ch, struct obj_data *obj) {
  */
 
 /* Function to return the exp required for each class/level */
-int64_t level_exp(struct char_data *ch, int level) {
+int64_t level_exp(BaseCharacter *ch, int level) {
     int req = 1;
 
     switch (level) {
@@ -1613,9 +1613,9 @@ int8_t ability_mod_value(int abil) {
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int8_t dex_mod_capped(struct char_data *ch) {
+int8_t dex_mod_capped(BaseCharacter *ch) {
     int8_t mod;
-    struct obj_data *armor;
+    Object *armor;
     mod = ability_mod_value(GET_DEX(ch));
     armor = GET_EQ(ch, WEAR_BODY);
     if (armor && GET_OBJ_TYPE(armor) == ITEM_ARMOR) {
@@ -1642,7 +1642,7 @@ int highest_skill_value(int level, int type) {
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-time_t birth_age(struct char_data *ch) {
+time_t birth_age(BaseCharacter *ch) {
     int tmp;
 
     tmp = rand_number(16, 18);
@@ -1831,12 +1831,12 @@ namespace sensei {
         int location{};
         double modifier{};
         int specific{-1};
-        std::function<double(struct char_data *ch)> func{};
+        std::function<double(BaseCharacter *ch)> func{};
     };
 
     static std::unordered_map<SenseiID, std::vector<sen_affect_type>> sensei_affects = {};
 
-    double getModifier(char_data* ch, int location, int specific) {
+    double getModifier(BaseCharacter* ch, int location, int specific) {
         double out = 0.0;
         if(auto found = sensei_affects.find(ch->chclass); found != sensei_affects.end()) {
 

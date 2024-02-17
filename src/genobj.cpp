@@ -43,8 +43,8 @@ nlohmann::json obj_affected_type::serialize() {
 }
 
 
-nlohmann::json obj_data::serialize() {
-    auto j = unit_data::serialize();
+nlohmann::json Object::serialize() {
+    auto j = GameEntity::serialize();
 
     for(auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++) {
         if(value[i]) j["value"].push_back(std::make_pair(i, value[i]));
@@ -65,8 +65,8 @@ nlohmann::json obj_data::serialize() {
     return j;
 }
 
-void obj_data::deserialize(const nlohmann::json &j) {
-    unit_data::deserialize(j);
+void Object::deserialize(const nlohmann::json &j) {
+    GameEntity::deserialize(j);
 
     if(j.contains("value")) {
         for(auto & i : j["value"]) {
@@ -91,8 +91,8 @@ void obj_data::deserialize(const nlohmann::json &j) {
 
 }
 
-nlohmann::json obj_data::serializeRelations() {
-    auto j = unit_data::serializeRelations();
+nlohmann::json Object::serializeRelations() {
+    auto j = GameEntity::serializeRelations();
 
     if(posted_to) j["posted_to"] = posted_to->getUIDString();
     if(fellow_wall) j["fellow_wall"] = fellow_wall->getUIDString();
@@ -100,22 +100,22 @@ nlohmann::json obj_data::serializeRelations() {
     return j;
 }
 
-void obj_data::deserializeRelations(const nlohmann::json& j) {
-    unit_data::deserializeRelations(j);
+void Object::deserializeRelations(const nlohmann::json& j) {
+    GameEntity::deserializeRelations(j);
     
     if(j.contains("posted_to")) {
         auto check = resolveUID(j["posted_to"]);
-        if(check) posted_to = dynamic_cast<obj_data*>(check);
+        if(check) posted_to = dynamic_cast<Object*>(check);
     }
     if(j.contains("fellow_wall")) {
         auto check = resolveUID(j["fellow_wall"]);
-        if(check) fellow_wall = dynamic_cast<obj_data*>(check);
+        if(check) fellow_wall = dynamic_cast<Object*>(check);
     }
 }
 
 
 
-void obj_data::activate() {
+void Object::activate() {
     if(active) {
         basic_mud_log("Attempted to activate an already active item.");
         return;
@@ -132,10 +132,10 @@ void obj_data::activate() {
 
 }
 
-void obj_data::deactivate() {
+void Object::deactivate() {
     if(!active) return;
     active = false;
-    struct obj_data *temp;
+    Object *temp;
     REMOVE_FROM_LIST(this, object_list, next, temp);
 
     if(obj_proto.contains(vn)) {
@@ -148,7 +148,7 @@ void obj_data::deactivate() {
 
 
 
-int obj_data::getAffectModifier(int location, int specific) {
+int Object::getAffectModifier(int location, int specific) {
     int modifier = 0;
     for(auto &aff : affected) {
         if(aff.location == location && (specific == -1 || aff.specific == specific)) {
@@ -158,20 +158,20 @@ int obj_data::getAffectModifier(int location, int specific) {
     return modifier;
 }
 
-weight_t obj_data::getWeight() {
+weight_t Object::getWeight() {
     return weight;
 }
 
-weight_t obj_data::getTotalWeight() {
+weight_t Object::getTotalWeight() {
     return getWeight() + getInventoryWeight() + (sitting ? sitting->getTotalWeight() : 0);
 }
 
-bool obj_data::isActive() {
+bool Object::isActive() {
     return active;
 }
 
 #define LOC_INVENTORY    0
-void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
+void auto_equip(BaseCharacter *ch, Object *obj, int location) {
     int j;
 
     /* Lots of checks... */
@@ -285,7 +285,7 @@ void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
 
 
 
-bool obj_data::isProvidingLight() {
+bool Object::isProvidingLight() {
     if(checkFlag(FlagType::Item, ITEM_GLOW)) return true;
     // Equipper is carrying this as a light source.
     if(locationType > 0 && GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS)) return true;
@@ -296,11 +296,11 @@ bool obj_data::isProvidingLight() {
 }
 
 
-double obj_data::currentGravity() {
+double Object::currentGravity() {
     return myEnvVar(EnvVar::Gravity);
 }
 
-bool obj_data::isWorking() {
+bool Object::isWorking() {
     return !(OBJ_FLAGGED(this, ITEM_BROKEN) || OBJ_FLAGGED(this, ITEM_FORGED));
 }
 
@@ -315,7 +315,7 @@ static const std::map<std::string, int> _values = {
     {"val7", 7}
 };
 
-DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+DgResults Object::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     std::string lmember = member;
     to_lower(lmember);
     trim(lmember);
@@ -491,21 +491,21 @@ DgResults obj_data::dgCallMember(trig_data *trig, const std::string& member, con
 }
 
 
-std::string obj_data::getUnitClass() {
+std::string Object::getUnitClass() {
     return "obj_data";
 }
 
-UnitFamily obj_data::getFamily() {
+UnitFamily Object::getFamily() {
     return UnitFamily::Item;
 }
 
-obj_data::~obj_data() {
+Object::~Object() {
     if(auctname) free(auctname);
     if(sbinfo) free(sbinfo);
 }
 
 
-void obj_data::assignTriggers() {
+void Object::assignTriggers() {
     // Nothing to do without a prototype...
 
     // remove all duplicates from i->proto_script but do not change its order otherwise.

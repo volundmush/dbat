@@ -7,7 +7,7 @@
 
 #include "structs.h"
 
-extern int free_mobile_strings(struct char_data *mob);
+extern int free_mobile_strings(BaseCharacter *mob);
 
 extern int save_mobiles(zone_rnum rznum);
 

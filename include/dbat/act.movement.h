@@ -6,17 +6,17 @@
 extern const char *cmd_door[NUM_DOOR_CMD];
 
 // functions
-extern void handle_teleport(struct char_data *ch, struct char_data *tar, int location);
+extern void handle_teleport(BaseCharacter *ch, BaseCharacter *tar, int location);
 
 extern std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms);
 
-extern void carry_drop(struct char_data *ch, int type);
+extern void carry_drop(BaseCharacter *ch, int type);
 
-extern int has_o2(struct char_data *ch);
+extern int has_o2(BaseCharacter *ch);
 
-extern int do_simple_move(struct char_data *ch, int dir, int need_specials_check);
+extern int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check);
 
-extern int perform_move(struct char_data *ch, int dir, int need_specials_check);
+extern int perform_move(BaseCharacter *ch, int dir, int need_specials_check);
 
 // commands
 extern ACMD(do_gen_door);

@@ -114,7 +114,7 @@
 // global variables
 
 bool isUID(const std::string& uid);
-unit_data* resolveUID(const std::string& uid);
+GameEntity* resolveUID(const std::string& uid);
 
 extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infomation about the time    */
 extern struct time_info_data time_info;/* the infomation about the time    */
@@ -124,7 +124,7 @@ extern std::set<zone_vnum> zone_reset_queue;
 extern bool gameIsLoading;
 extern bool saveAll;
 
-extern struct char_data *EDRAGON;
+extern BaseCharacter *EDRAGON;
 extern int WISH[2];
 extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
 extern int circle_restrict;
@@ -140,7 +140,7 @@ extern room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
 extern time_t old_beginning_of_time;
 
 /* public procedures in db.c */
-extern void auc_load(struct obj_data *obj);
+extern void auc_load(Object *obj);
 
 void create_schema();
 
@@ -213,41 +213,41 @@ extern mob_rnum real_mobile(mob_vnum vnum);
 
 extern obj_rnum real_object(obj_vnum vnum);
 
-extern void init_char(struct char_data *ch);
+extern void init_char(BaseCharacter *ch);
 
-struct char_data *read_mobile(mob_vnum nr, int type);
+BaseCharacter *read_mobile(mob_vnum nr, int type);
 
-extern int vnum_mobile(char *searchname, struct char_data *ch);
+extern int vnum_mobile(char *searchname, BaseCharacter *ch);
 
-extern void reset_char(struct char_data *ch);
+extern void reset_char(BaseCharacter *ch);
 
-extern void free_char(struct char_data *ch);
+extern void free_char(BaseCharacter *ch);
 
 extern void save_player_index();
 
 extern long get_ptable_by_name(const char *name);
 
-extern void read_level_data(struct char_data *ch, FILE *fl);
+extern void read_level_data(BaseCharacter *ch, FILE *fl);
 
-extern void write_level_data(struct char_data *ch, FILE *fl);
+extern void write_level_data(BaseCharacter *ch, FILE *fl);
 
-extern int parse_mobile_from_file(FILE *mob_f, struct char_data *ch);
+extern int parse_mobile_from_file(FILE *mob_f, BaseCharacter *ch);
 
-struct obj_data *create_obj(bool activate = true);
+Object *create_obj(bool activate = true);
 
-extern void free_obj(struct obj_data *obj);
+extern void free_obj(Object *obj);
 
-struct obj_data *read_object(obj_vnum nr, int type, bool activate = true);
+Object *read_object(obj_vnum nr, int type, bool activate = true);
 
-extern int vnum_object(char *searchname, struct char_data *ch);
+extern int vnum_object(char *searchname, BaseCharacter *ch);
 
 extern char *sprintuniques(int low, int high);
 
-extern int vnum_material(char *searchname, struct char_data *ch);
+extern int vnum_material(char *searchname, BaseCharacter *ch);
 
-extern int vnum_weapontype(char *searchname, struct char_data *ch);
+extern int vnum_weapontype(char *searchname, BaseCharacter *ch);
 
-extern int vnum_armortype(char *searchname, struct char_data *ch);
+extern int vnum_armortype(char *searchname, BaseCharacter *ch);
 
 extern void migrate_db();
 
@@ -300,31 +300,31 @@ extern int64_t nextUID;
 extern int64_t getNextUID();
 
 
-extern std::unordered_set<unit_data*> pendingDeletions;
+extern std::unordered_set<GameEntity*> pendingDeletions;
 
 extern std::unordered_map<zone_vnum, struct zone_data> zone_table;
 
 extern struct descriptor_data *descriptor_list;
 extern std::unordered_map<int64_t, struct descriptor_data*> sessions;
 
-extern struct char_data *affect_list;
-extern struct char_data *affectv_list;
+extern BaseCharacter *affect_list;
+extern BaseCharacter *affectv_list;
 
 extern std::unordered_map<mob_vnum, struct index_data> mob_index;
 extern std::unordered_map<mob_vnum, nlohmann::json> mob_proto;
 
-extern struct char_data *character_list;
-extern std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
+extern BaseCharacter *character_list;
+extern std::unordered_map<int64_t, std::pair<time_t, BaseCharacter*>> uniqueCharacters;
 
-extern VnumIndex<obj_data> objectVnumIndex;
-extern VnumIndex<char_data> characterVnumIndex;
+extern VnumIndex<Object> objectVnumIndex;
+extern VnumIndex<BaseCharacter> characterVnumIndex;
 
 
 extern std::unordered_map<obj_vnum, struct index_data> obj_index;
 extern std::unordered_map<obj_vnum, nlohmann::json> obj_proto;
 
-extern struct obj_data *object_list;
-extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
+extern Object *object_list;
+extern std::unordered_map<int64_t, std::pair<time_t, Object*>> uniqueObjects;
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;

@@ -31,16 +31,16 @@
 #define OLC_USAGE "Usage: olc { . | set | show | obj | mob | room} [args]\r\n"
 
 /* local globals */
-struct char_data *olc_ch;
+BaseCharacter *olc_ch;
 
 /* local functions */
 void olc_interpreter(void *targ, int mode, char *arg);
 
-void olc_set_show(struct char_data *ch, int olc_mode, char *arg);
+void olc_set_show(BaseCharacter *ch, int olc_mode, char *arg);
 
 void olc_string(char **string, size_t maxlen, char *arg);
 
-int can_modify(struct char_data *ch, int vnum);
+int can_modify(BaseCharacter *ch, int vnum);
 
 ACMD(do_olc);
 
@@ -174,9 +174,9 @@ ACMD(do_olc) {
 void olc_interpreter(void *targ, int mode, char *arg) {
     int error = 0, command;
     char command_string[MAX_INPUT_LENGTH];
-    struct char_data *olc_mob = nullptr;
-    struct room_data *olc_room = nullptr;
-    struct obj_data *olc_obj = nullptr;
+    BaseCharacter *olc_mob = nullptr;
+    Room *olc_room = nullptr;
+    Object *olc_obj = nullptr;
 
     half_chop(arg, command_string, arg);
     if ((command = search_block(command_string, olc_commands, false)) < 0) {
@@ -185,13 +185,13 @@ void olc_interpreter(void *targ, int mode, char *arg) {
     }
     switch (mode) {
         case OLC_ROOM:
-            olc_room = (struct room_data *) targ;
+            olc_room = (Room *) targ;
             break;
         case OLC_MOB:
-            olc_mob = (struct char_data *) targ;
+            olc_mob = (BaseCharacter *) targ;
             break;
         case OLC_OBJ:
-            olc_obj = (struct obj_data *) targ;
+            olc_obj = (Object *) targ;
             break;
         default:
             basic_mud_log("SYSERR: Invalid OLC mode %d passed to interp.", mode);
@@ -247,7 +247,7 @@ void olc_interpreter(void *targ, int mode, char *arg) {
 
 
 /* can_modify: determine if a particular char can modify a vnum */
-int can_modify(struct char_data *ch, int vnum) {
+int can_modify(BaseCharacter *ch, int vnum) {
     return (1);
 }
 
@@ -327,5 +327,5 @@ void olc_bitvector(int *bv, const char **names, char *arg) {
     olc_ch->sendf("Flags now set to: %s\r\n", buf);
 }
 
-void olc_set_show(struct char_data *ch, int olc_mode, char *arg) {
+void olc_set_show(BaseCharacter *ch, int olc_mode, char *arg) {
 }

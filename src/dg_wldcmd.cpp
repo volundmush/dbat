@@ -22,11 +22,11 @@
  */
 
 #define WCMD(name)  \
-    void (name)(room_data *room, char *argument, int cmd, int subcmd)
+    void (name)(Room *room, char *argument, int cmd, int subcmd)
 
-void wld_log(room_data *room, const char *format, ...);
+void wld_log(Room *room, const char *format, ...);
 
-void act_to_room(char *str, room_data *room);
+void act_to_room(char *str, Room *room);
 
 WCMD(do_wasound);
 
@@ -54,14 +54,14 @@ WCMD(do_wat);
 
 WCMD(do_weffect);
 
-void wld_command_interpreter(room_data *room, char *argument);
+void wld_command_interpreter(Room *room, char *argument);
 
 
 struct wld_command_info {
     char *command;
 
     void (*command_pointer)
-            (room_data *room, char *argument, int cmd, int subcmd);
+            (Room *room, char *argument, int cmd, int subcmd);
 
     int subcmd;
 };
@@ -73,7 +73,7 @@ struct wld_command_info {
 
 
 /* attaches room vnum to msg and sends it to script_log */
-void wld_log(room_data *room, const char *format, ...) {
+void wld_log(Room *room, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
@@ -85,7 +85,7 @@ void wld_log(room_data *room, const char *format, ...) {
 }
 
 /* sends str to room */
-void act_to_room(char *str, room_data *room) {
+void act_to_room(char *str, Room *room) {
     /* no one is in the room */
     auto people = room->getPeople();
     if (people.empty()) {
@@ -194,7 +194,7 @@ WCMD(do_wecho) {
 
 WCMD(do_wsend) {
     char buf[MAX_INPUT_LENGTH], *msg;
-    char_data *ch;
+    BaseCharacter *ch;
 
     msg = any_one_arg(argument, buf);
 
@@ -257,8 +257,8 @@ WCMD(do_wrecho) {
 WCMD(do_wdoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
-    room_data *rm;
-    struct exit_data *newexit;
+    Room *rm;
+    Exit *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -302,7 +302,7 @@ WCMD(do_wdoor) {
 
     auto exists = rm->getExits();
 
-    exit_data *ex = exists[dir];
+    Exit *ex = exists[dir];
     /* purge exit */
     if (fd == 0) {
         if (ex) {
@@ -310,7 +310,7 @@ WCMD(do_wdoor) {
         }
     } else {
         if (!exists[dir]) {
-            ex = new exit_data();
+            ex = new Exit();
             ex->uid = getNextUID();
             ex->script = std::make_shared<script_data>(ex);
             ex->addToLocation(rm, dir);
@@ -334,7 +334,7 @@ WCMD(do_wdoor) {
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->destination = dynamic_cast<room_data*>(world.at(to_room));
+                    newexit->destination = dynamic_cast<Room*>(world.at(to_room));
                 else
                     wld_log(room, "wdoor: invalid door target");
                 break;
@@ -344,7 +344,7 @@ WCMD(do_wdoor) {
 
 
 WCMD(do_wteleport) {
-    char_data *ch, *next_ch;
+    BaseCharacter *ch, *next_ch;
     room_rnum target, nr;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -362,7 +362,7 @@ WCMD(do_wteleport) {
         wld_log(room, "wteleport target is an invalid room");
         return;
     }
-    auto r = dynamic_cast<room_data*>(world.at(target));
+    auto r = dynamic_cast<Room*>(world.at(target));
 
     if (!strcasecmp(arg1, "all")) {
         if (nr == room->vn) {
@@ -391,7 +391,7 @@ WCMD(do_wteleport) {
 
 
 WCMD(do_wforce) {
-    char_data *ch, *next_ch;
+    BaseCharacter *ch, *next_ch;
     char arg1[MAX_INPUT_LENGTH], *line;
 
     line = one_argument(argument, arg1);
@@ -422,8 +422,8 @@ WCMD(do_wforce) {
 /* purge all objects an npcs in room, or specified object or mob */
 WCMD(do_wpurge) {
     char arg[MAX_INPUT_LENGTH];
-    char_data *ch, *next_ch;
-    obj_data *obj, *next_obj;
+    BaseCharacter *ch, *next_ch;
+    Object *obj, *next_obj;
 
     one_argument(argument, arg);
 
@@ -473,11 +473,11 @@ WCMD(do_wpurge) {
 WCMD(do_wload) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int number = 0;
-    char_data *mob;
-    obj_data *object;
+    BaseCharacter *mob;
+    Object *object;
     char *target;
-    char_data *tch;
-    obj_data *cnt;
+    BaseCharacter *tch;
+    Object *cnt;
     int pos;
 
     target = two_arguments(argument, arg1, arg2);
@@ -554,7 +554,7 @@ WCMD(do_wload) {
 WCMD(do_wdamage) {
     char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
     int dam = 0;
-    char_data *ch;
+    BaseCharacter *ch;
 
     two_arguments(argument, name, amount);
 
@@ -577,7 +577,7 @@ WCMD(do_wdamage) {
 
 WCMD(do_wat) {
     room_rnum loc = NOWHERE;
-    struct char_data *ch;
+    BaseCharacter *ch;
     char arg[MAX_INPUT_LENGTH], *command;
 
     command = any_one_arg(argument, arg);
@@ -605,7 +605,7 @@ WCMD(do_wat) {
         return;
     }
 
-    wld_command_interpreter(dynamic_cast<room_data*>(world[loc]), command);
+    wld_command_interpreter(dynamic_cast<Room*>(world[loc]), command);
 }
 
 const struct wld_command_info wld_cmd_info[] = {
@@ -632,7 +632,7 @@ const struct wld_command_info wld_cmd_info[] = {
 /*
  *  This is the command interpreter used by rooms, called by script_driver.
  */
-void wld_command_interpreter(room_data *room, char *argument) {
+void wld_command_interpreter(Room *room, char *argument) {
     int cmd, length;
     char *line, arg[MAX_INPUT_LENGTH];
 

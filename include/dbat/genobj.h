@@ -7,7 +7,7 @@
 #pragma once
 
 #include "structs.h"
-extern void auto_equip(struct char_data *ch, struct obj_data *obj, int location);
+extern void auto_equip(BaseCharacter *ch, Object *obj, int location);
 
 extern int save_objects(zone_rnum vznum);
 

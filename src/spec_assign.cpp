@@ -46,7 +46,7 @@ void ASSIGNROOM(room_vnum room, SPECIAL(fname)) {
     room_rnum rnum;
 
     if ((rnum = real_room(room)) != NOWHERE)
-        dynamic_cast<room_data*>(world[rnum])->func = fname;
+        dynamic_cast<Room*>(world[rnum])->func = fname;
     else if (!mini_mud)
         basic_mud_log("SYSERR: Attempt to assign spec to non-existant room #%d", room);
 }
@@ -90,7 +90,7 @@ void assign_rooms() {
 
     if (CONFIG_DTS_ARE_DUMPS)
         for (auto &[vn, u] : world) {
-            auto r = dynamic_cast<room_data *>(u);
+            auto r = dynamic_cast<Room *>(u);
             if (!r) continue;
             if (ROOM_FLAGGED(r, ROOM_DEATH))
                 r->func = dump;

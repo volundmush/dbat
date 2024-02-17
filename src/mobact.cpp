@@ -29,9 +29,9 @@
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
 
 /* local functions */
-static int player_present(struct char_data *ch) {
+static int player_present(BaseCharacter *ch) {
 
-    struct char_data *vict, *next_v;
+    BaseCharacter *vict, *next_v;
     int found = false;
 
     if (IN_ROOM(ch) == NOWHERE)
@@ -57,8 +57,8 @@ static const std::vector<std::string> scavengerTalk = {
 
 
 void mobile_activity(uint64_t heartPulse, double deltaTime) {
-    struct char_data *ch, *next_ch, *vict;
-    struct obj_data *obj, *best_obj;
+    BaseCharacter *ch, *next_ch, *vict;
+    Object *obj, *best_obj;
     int door, found, max;
     memory_rec *names;
 
@@ -251,7 +251,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
         /* Be helpful */ /* - temporarily disabled by the first false check */
         if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-            struct char_data *vict, *next_v;
+            BaseCharacter *vict, *next_v;
             int done = false;
             for (auto vict : ch->getRoom()->getPeople()) {
                 if (vict == ch)
@@ -287,7 +287,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
         /* Help those under attack! */ /* - temporarily disabled by the first false check */
         if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-            struct char_data *vict, *next_v;
+            BaseCharacter *vict, *next_v;
             int done = false;
             for (auto vict : ch->getRoom()->getPeople()) {
                 if (vict == ch)
@@ -402,7 +402,7 @@ static const std::vector<std::pair<std::string, std::string>> intelligentLand = 
 
 
 /* This handles NPCs taunting opponents or reacting to combat. */
-void mob_taunt(struct char_data *ch) {
+void mob_taunt(BaseCharacter *ch) {
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
         return;
     }
@@ -431,7 +431,7 @@ void mob_taunt(struct char_data *ch) {
 /* Mob Memory Routines */
 
 /* make ch remember victim */
-void remember(struct char_data *ch, struct char_data *victim) {
+void remember(BaseCharacter *ch, BaseCharacter *victim) {
     memory_rec *tmp;
     bool present = false;
 
@@ -452,7 +452,7 @@ void remember(struct char_data *ch, struct char_data *victim) {
 
 
 /* make ch forget victim */
-void forget(struct char_data *ch, struct char_data *victim) {
+void forget(BaseCharacter *ch, BaseCharacter *victim) {
     memory_rec *curr, *prev = nullptr;
 
     if (!(curr = MEMORY(ch)))
@@ -476,7 +476,7 @@ void forget(struct char_data *ch, struct char_data *victim) {
 
 
 /* erase ch's memory */
-void clearMemory(struct char_data *ch) {
+void clearMemory(BaseCharacter *ch) {
     memory_rec *curr, *next;
 
     curr = MEMORY(ch);

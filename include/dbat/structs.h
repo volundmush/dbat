@@ -11,7 +11,7 @@
 
 #include "net.h"
 #include <type_traits> // For std::is_base_of
-extern std::unordered_map<room_vnum, unit_data*> world;
+extern std::unordered_map<room_vnum, GameEntity*> world;
 
 struct trig_data;
 
@@ -168,7 +168,7 @@ struct obj_spellbook_spell {
 struct HasVars {
     std::unordered_map<std::string, std::string> vars;
     void addVar(const std::string &name, const std::string &value);
-    void addVar(const std::string &name, struct unit_data* u);
+    void addVar(const std::string &name, GameEntity* u);
     DgResults getVar(const std::string& name);
     std::string getRaw(const std::string& name);
     bool hasVar(const std::string& name);
@@ -196,13 +196,13 @@ struct trig_proto {
 /* a complete script (composed of several triggers) */
 struct script_data : public HasVars {
     script_data() = default;
-    explicit script_data(struct unit_data *u) : script_data() {
+    explicit script_data(GameEntity *u) : script_data() {
         owner = u;
     };
     long types{};                /* bitvector of trigger types */
     std::list<std::shared_ptr<trig_data>> dgScripts;
     bool purged{};                /* script is set to be purged */
-    struct unit_data* owner{};
+    GameEntity* owner{};
     void activate();
     void deactivate();
 
@@ -328,9 +328,9 @@ struct coordinates {
     void deserialize(const nlohmann::json& j);
 };
 
-struct unit_data : public std::enable_shared_from_this<unit_data> {
-    unit_data() = default;
-    virtual ~unit_data();
+struct GameEntity : public std::enable_shared_from_this<GameEntity> {
+    GameEntity() = default;
+    virtual ~GameEntity();
 
     int64_t getUID();
     vnum getVNUM();
@@ -365,7 +365,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
     std::shared_ptr<script_data> script{};  /* script info for the object */
 
-    std::vector<unit_data*> contents{};     /* Contains objects  */
+    std::vector<GameEntity*> contents{};     /* Contains objects  */
 
     std::unordered_map<FlagType, std::unordered_set<int>> flags;
     virtual bool checkFlag(FlagType type, int flag);
@@ -378,28 +378,28 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     int64_t getInventoryCount();
 
     /* Equipment array			*/
-    std::vector<unit_data*> getContents();
-    std::vector<struct obj_data*> getInventory();
-    std::vector<char_data*> getPeople();
-    std::map<int, obj_data*> getEquipment();
-    std::vector<room_data*> getRooms();
-    std::map<int, exit_data*> getExits();
-    std::map<int, exit_data*> getUsableExits();
+    std::vector<GameEntity*> getContents();
+    std::vector<Object*> getInventory();
+    std::vector<BaseCharacter*> getPeople();
+    std::map<int, Object*> getEquipment();
+    std::vector<Room*> getRooms();
+    std::map<int, Exit*> getExits();
+    std::map<int, Exit*> getUsableExits();
 
-    room_data* getAbsoluteRoom();
-    room_data* getRoom();
-    unit_data* getLocation();
+    Room* getAbsoluteRoom();
+    Room* getRoom();
+    GameEntity* getLocation();
 
     // removeFromLocation is called first, and handleRemove is called BY removeFromLocation on its location.
     virtual void removeFromLocation();
-    virtual void handleRemove(unit_data *u);
+    virtual void handleRemove(GameEntity *u);
 
     // As above, the process is to call addToLocation which will then call handleAdd ON the location.
-    virtual void addToLocation(unit_data *u, int locationType = 0, std::optional<coordinates> coords = std::nullopt);
-    virtual void handleAdd(unit_data *u);
+    virtual void addToLocation(GameEntity *u, int locationType = 0, std::optional<coordinates> coords = std::nullopt);
+    virtual void handleAdd(GameEntity *u);
 
-    // the unit_data you are located in. Which might be null.
-    unit_data *location{nullptr};
+    // the GameEntity you are located in. Which might be null.
+    GameEntity *location{nullptr};
     // LocationType is extra information about how you are inside <location>.
     // For instance, if you are a character, then the locationType of units
     // you contain should represent inventory/equipment slots. 0 is inventory,
@@ -408,16 +408,16 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     coordinates coords{};
 
     // Returns a collection of 'units within reach' for commands like look or get.
-    std::vector<unit_data*> getNeighbors(bool visible = true);
+    std::vector<GameEntity*> getNeighbors(bool visible = true);
 
     // The business part of the above.
-    virtual std::vector<unit_data*> getNeighborsFor(unit_data* u, bool visible = true);
+    virtual std::vector<GameEntity*> getNeighborsFor(GameEntity* u, bool visible = true);
 
     virtual bool isInvisible();
     virtual bool isHidden();
     virtual bool isAdminInvisible();
 
-    virtual bool canSee(unit_data *target);
+    virtual bool canSee(GameEntity *target);
     virtual bool canSeeInvisible();
     virtual bool canSeeHidden();
     virtual bool canSeeAdminInvisible();
@@ -429,23 +429,23 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // the optional string contains the reason why it's NOT OK, otherwise.
 
     // Whether u can access this unit's inventory.
-    virtual std::optional<std::string> checkAllowInventoryAcesss(unit_data *u);
+    virtual std::optional<std::string> checkAllowInventoryAcesss(GameEntity *u);
 
     // whether this unit will allow u to take/give/drop it. give/put are identical.
-    virtual std::optional<std::string> checkIsGettable(unit_data *u);
-    virtual std::optional<std::string> checkIsDroppable(unit_data *u);
-    virtual std::optional<std::string> checkIsGivable(unit_data *u);
+    virtual std::optional<std::string> checkIsGettable(GameEntity *u);
+    virtual std::optional<std::string> checkIsDroppable(GameEntity *u);
+    virtual std::optional<std::string> checkIsGivable(GameEntity *u);
 
     // if this can store u in its inventory. This includes a room accepting items.
     // Things to check might be weight, item capacity, whether it's appropriate for the space, etc.
-    virtual std::optional<std::string> checkCanStore(unit_data *u);
+    virtual std::optional<std::string> checkCanStore(GameEntity *u);
 
     // Check to see whether giver can give u to this.
-    virtual std::optional<std::string> checkAllowReceive(unit_data *giver, unit_data *u);
+    virtual std::optional<std::string> checkAllowReceive(GameEntity *giver, GameEntity *u);
 
     // Whether this can be equipped by u.
-    virtual std::optional<std::string> checkAllowEquip(unit_data *u, int location);
-    virtual std::optional<std::string> checkAllowRemove(unit_data *u);
+    virtual std::optional<std::string> checkAllowEquip(GameEntity *u, int location);
+    virtual std::optional<std::string> checkAllowRemove(GameEntity *u);
 
     virtual bool isInsideNormallyDark();
     virtual bool isInsideDark();
@@ -454,10 +454,10 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // Look at location.
     void lookAtLocation();
     // The business part of the above.
-    //virtual Event renderLocationFor(unit_data* u);
+    //virtual Event renderLocationFor(GameEntity* u);
 
-    //virtual std::string renderRoomListFor(unit_data* u, bool statuses = false);
-    //virtual std::string renderContentsListFor(unit_data* u);
+    //virtual std::string renderRoomListFor(GameEntity* u, bool statuses = false);
+    //virtual std::string renderContentsListFor(GameEntity* u);
 
     void activateContents();
     void deactivateContents();
@@ -472,9 +472,9 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     std::string getUIDString(bool active = true);
     virtual bool isActive();
 
-    struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
-    virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
-    virtual std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
+    Object* findObjectVnum(obj_vnum objVnum, bool working = true);
+    virtual Object* findObject(const std::function<bool(Object*)> &func, bool working = true);
+    virtual std::set<Object*> gatherObjects(const std::function<bool(Object*)> &func, bool working = true);
     virtual DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg);
 
     virtual std::string getName();
@@ -489,9 +489,9 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void setRoomDesc(const std::string& desc);
     virtual void setLookDesc(const std::string& desc);
 
-    virtual std::string getDisplayName(unit_data* ch);
-    virtual std::vector<std::string> getKeywords(unit_data* ch);
-    virtual std::string renderAppearance(unit_data* ch);
+    virtual std::string getDisplayName(GameEntity* ch);
+    virtual std::vector<std::string> getKeywords(GameEntity* ch);
+    virtual std::string renderAppearance(GameEntity* ch);
 
     virtual UnitFamily getFamily() = 0;
     virtual std::string getUnitClass() = 0;
@@ -501,19 +501,19 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // The object which provides environmental data for this unit.
     // An example would be current gravity. Rooms are one example of an environment, but
     // rooms might get their environment from a region/structure too.
-    unit_data* getEnvironment();
+    GameEntity* getEnvironment();
 
     virtual bool isEnvironment();
 
     // The object which is 'roughly where the unit is.' This is likely a planet, dimension,
     // or similar major boundary.
-    unit_data* getRegion();
+    GameEntity* getRegion();
 
     virtual bool isRegion();
 
     // The object which represents a point of entry/exit. This is likely a vehicle, structure, planet, etc.
     // You can generally board/land/enter these things and similarly leave/fly out of them.
-    unit_data* getStructure();
+    GameEntity* getStructure();
 
     virtual bool isStructure();
 
@@ -521,7 +521,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // and have their own special uses like checking for having moons or being able to 'fly space' from them.
     // This can be used for things that are also LIKE planets too, such as moons, large asteroids, floating
     // islands in space, whatever.
-    unit_data* getPlanet();
+    GameEntity* getPlanet();
 
     virtual bool isPlanet();
 
@@ -529,7 +529,7 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void executeCommand(const std::string& cmd);
 
     // Returns viable landing locations within this, for u.
-    virtual std::vector<unit_data*> getLandingLocations(unit_data *u);
+    virtual std::vector<GameEntity*> getLandingLocations(GameEntity *u);
 
     virtual void assignTriggers();
 
@@ -621,10 +621,10 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 };
 
 /* ================== Memory Structure for Objects ================== */
-struct obj_data : public unit_data {
-    obj_data() = default;
-    virtual ~obj_data();
-    explicit obj_data(const nlohmann::json& j);
+struct Object : public GameEntity {
+    Object() = default;
+    virtual ~Object();
+    explicit Object(const nlohmann::json& j);
 
     void extractFromWorld() override;
 
@@ -666,22 +666,22 @@ struct obj_data : public unit_data {
 
     std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
 
-    struct obj_data *in_obj{};       /* In what object nullptr when none    */
-    struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
-    struct char_data *worn_by{};      /* Worn by? */
+    Object *in_obj{};       /* In what object nullptr when none    */
+    BaseCharacter *carried_by{};  /* Carried by :nullptr in room/conta   */
+    BaseCharacter *worn_by{};      /* Worn by? */
     int16_t worn_on{-1};          /* Worn where?		      */
 
-    struct obj_data *next{};         /* For the object list              */
+    Object *next{};         /* For the object list              */
 
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
-    struct char_data *sitting{};       /* Who is sitting on me? */
+    BaseCharacter *sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
     time_t lload{};
     int healcharge{};
     int64_t kicharge{};
     int kitype{};
-    struct char_data *user{};
-    struct char_data *target{};
+    BaseCharacter *user{};
+    BaseCharacter *target{};
     int distance{};
     int foob{};
     int64_t aucter{};
@@ -691,8 +691,8 @@ struct obj_data : public unit_data {
     int startbid{};
     char *auctname{};
     int posttype{};
-    struct obj_data *posted_to{};
-    struct obj_data *fellow_wall{};
+    Object *posted_to{};
+    Object *fellow_wall{};
 
     std::optional<double> gravity;
 
@@ -709,7 +709,7 @@ struct obj_data : public unit_data {
 };
 /* ======================================================================= */
 
-struct Structure : public obj_data {
+struct Structure : public Object {
     Structure() = default;
     virtual ~Structure();
     explicit Structure(const nlohmann::json& j);
@@ -731,22 +731,22 @@ struct Structure : public obj_data {
 
 /* room-related structures ************************************************/
 
-struct exit_data : public unit_data {
-    exit_data() = default;
-    explicit exit_data(const nlohmann::json &j);
+struct Exit : public GameEntity {
+    Exit() = default;
+    explicit Exit(const nlohmann::json &j);
 
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
-    room_data *destination{nullptr};        /* Where direction leads (NOWHERE)	*/
+    Room *destination{nullptr};        /* Where direction leads (NOWHERE)	*/
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
     int dcskill{};            /* Skill req. to move through exit	*/
     int dcmove{};            /* DC for skill to move through exit	*/
     int failsavetype{};        /* Saving Throw type on skill fail	*/
     int dcfailsave{};        /* DC to save against on fail		*/
-    room_data *failroom{nullptr};        /* Room # to put char in when fail > 5  */
-    room_data *totalfailroom{nullptr};        /* Room # if char fails save < 5	*/
+    Room *failroom{nullptr};        /* Room # to put char in when fail > 5  */
+    Room *totalfailroom{nullptr};        /* Room # if char fails save < 5	*/
 
-    struct room_data* getDestination();
+    Room* getDestination();
 
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
@@ -762,14 +762,14 @@ enum class MoonCheck : uint8_t {
 
 
 /* ================== Memory Structure for room ======================= */
-struct room_data : public unit_data {
-    room_data() = default;
-    ~room_data() override;
+struct Room : public GameEntity {
+    Room() = default;
+    ~Room() override;
 
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
 
-    explicit room_data(const nlohmann::json &j);
+    explicit Room(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
     SpecialFunc func{};
     int timed{};                   /* For timed Dt's                     */
@@ -799,7 +799,7 @@ struct room_data : public unit_data {
     void assignTriggers() override;
     std::string scriptString() override;
 
-    //Event renderLocationFor(unit_data* u) override;
+    //Event renderLocationFor(GameEntity* u) override;
 
     bool isInsideNormallyDark() override;
     bool isInsideDark() override;
@@ -911,7 +911,7 @@ struct queued_act {
 
 /* Structure used for chars following other chars */
 struct follow_type {
-    struct char_data *follower;
+    BaseCharacter *follower;
     struct follow_type *next;
 };
 
@@ -946,11 +946,11 @@ struct trans_data {
 
 
 /* ================== Structure for player/non-player base class ===================== */
-struct char_data : public unit_data {
-    char_data() = default;
-    ~char_data() override;
+struct BaseCharacter : public GameEntity {
+    BaseCharacter() = default;
+    ~BaseCharacter() override;
     // this constructor below is to be used only for the mob_proto map.
-    explicit char_data(const nlohmann::json& j);
+    explicit BaseCharacter(const nlohmann::json& j);
 
     nlohmann::json serialize() override;
     void deserialize(const nlohmann::json& j) override;
@@ -972,17 +972,17 @@ struct char_data : public unit_data {
 
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
-    struct room_data* getRoom();
+    Room* getRoom();
 
-    struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
-    std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
+    Object* findObject(const std::function<bool(Object*)> &func, bool working = true) override;
+    std::set<Object*> gatherObjects(const std::function<bool(Object*)> &func, bool working = true) override;
 
     weight_t getWeight(bool base = false);
     weight_t getTotalWeight();
     weight_t getCurrentBurden();
     double getBurdenRatio();
-    bool canCarryWeight(struct obj_data *obj);
-    bool canCarryWeight(struct char_data *obj);
+    bool canCarryWeight(Object *obj);
+    bool canCarryWeight(BaseCharacter *obj);
     bool canCarryWeight(weight_t val);
 
     int getHeight(bool base = false);
@@ -1046,7 +1046,7 @@ struct char_data : public unit_data {
 
     void ghostify();
 
-    void restore_by(char_data *ch);
+    void restore_by(BaseCharacter *ch);
 
     void gainTail(bool announce = true);
     void loseTail();
@@ -1325,30 +1325,30 @@ struct char_data : public unit_data {
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
     /* For room->people - list		*/
-    struct char_data *next{};    /* For either monster or ppl-list	*/
-    struct char_data *next_fighting{};
+    BaseCharacter *next{};    /* For either monster or ppl-list	*/
+    BaseCharacter *next_fighting{};
     /* For fighting list			*/
-    struct char_data *next_affect{};/* For affect wearoff			*/
-    struct char_data *next_affectv{};
+    BaseCharacter *next_affect{};/* For affect wearoff			*/
+    BaseCharacter *next_affectv{};
     /* For round based affect wearoff	*/
 
     struct follow_type *followers{};/* List of chars followers		*/
-    struct char_data *master{};    /* Who is char following?		*/
+    BaseCharacter *master{};    /* Who is char following?		*/
     int64_t master_id{};
 
-    struct char_data *fighting{};    /* Opponent				*/
+    BaseCharacter *fighting{};    /* Opponent				*/
 
     int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
 
     int timer{};            /* Timer for update			*/
 
-    struct obj_data *sits{};      /* What am I sitting on? */
-    struct char_data *blocks{};    /* Who am I blocking?    */
-    struct char_data *blocked{};   /* Who is blocking me?    */
-    struct char_data *absorbing{}; /* Who am I absorbing */
-    struct char_data *absorbby{};  /* Who is absorbing me */
-    struct char_data *carrying{};
-    struct char_data *carried_by{};
+    Object *sits{};      /* What am I sitting on? */
+    BaseCharacter *blocks{};    /* Who am I blocking?    */
+    BaseCharacter *blocked{};   /* Who is blocking me?    */
+    BaseCharacter *absorbing{}; /* Who am I absorbing */
+    BaseCharacter *absorbby{};  /* Who is absorbing me */
+    BaseCharacter *carrying{};
+    BaseCharacter *carried_by{};
 
     int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
     int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
@@ -1413,16 +1413,16 @@ struct char_data : public unit_data {
     time_t deathtime{};
 
     int64_t suppression{};
-    struct char_data *drag{};
-    struct char_data *dragged{};
-    struct char_data *mindlink{};
+    BaseCharacter *drag{};
+    BaseCharacter *dragged{};
+    BaseCharacter *mindlink{};
     int lasthit{};
     int dcount{};
     char *voice{};                  /* PC's snet voice */
     int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
     time_t rewtime{};
-    struct char_data *grappling{};
-    struct char_data *grappled{};
+    BaseCharacter *grappling{};
+    BaseCharacter *grappled{};
     int grap{};
     int genome[2]{};                /* Bio racial bonus, Genome */
     int combo{};
@@ -1462,14 +1462,14 @@ struct char_data : public unit_data {
     int fishstate{};
     int throws{};
 
-    struct char_data *defender{};
-    struct char_data *defending{};
+    BaseCharacter *defender{};
+    BaseCharacter *defending{};
 
     int lifeperc{};
     int gooptime{};
     int blesslvl{};
-    struct char_data *poisonby{};
-    std::set<struct char_data*> poisoned;
+    BaseCharacter *poisonby{};
+    std::set<BaseCharacter*> poisoned;
 
     int mobcharge{};
     int preference{};
@@ -1484,9 +1484,9 @@ struct char_data : public unit_data {
 
     char *rdisplay{};
 
-    struct char_data *original{};
+    BaseCharacter *original{};
 
-    std::set<struct char_data*> clones{};
+    std::set<BaseCharacter*> clones{};
     int relax_count{};
     int ingestLearned{};
 
@@ -1518,7 +1518,7 @@ struct char_data : public unit_data {
 
 };
 
-struct NonPlayerCharacter : public char_data {
+struct NonPlayerCharacter : public BaseCharacter {
     NonPlayerCharacter() = default;
     explicit NonPlayerCharacter(const nlohmann::json &j);
 
@@ -1534,7 +1534,7 @@ struct NonPlayerCharacter : public char_data {
     bool isNPC() override;
 };
 
-struct PlayerCharacter : public char_data {
+struct PlayerCharacter : public BaseCharacter {
     PlayerCharacter() = default;
     explicit PlayerCharacter(const nlohmann::json &j);
 
@@ -1590,8 +1590,8 @@ struct descriptor_data {
     std::list<std::string> raw_input_queue, input_queue;
     std::string output;        /* ptr to the current output buffer	*/
     std::list<std::string> history;        /* History of commands, for ! mostly.	*/
-    struct char_data *character{};    /* linked to char			*/
-    struct char_data *original{};    /* original char if switched		*/
+    BaseCharacter *character{};    /* linked to char			*/
+    BaseCharacter *original{};    /* original char if switched		*/
     struct descriptor_data *snooping{}; /* Who is this char snooping	*/
     struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
     struct descriptor_data *next{}; /* link to next descriptor		*/
@@ -1608,7 +1608,7 @@ struct descriptor_data {
     char *obj_long{};
     int obj_type{};
     int obj_weapon{};
-    struct obj_data *obj_point{};
+    Object *obj_point{};
     char *title{};
     double timeoutCounter{0};
     void handle_input();
@@ -1857,10 +1857,10 @@ enum class SearchType : uint8_t {
 };
 
 template<typename T>
-std::vector<unit_data*> unitVector(const std::vector<T*>& vec) {
-    std::vector<unit_data*> out;
+std::vector<GameEntity*> unitVector(const std::vector<T*>& vec) {
+    std::vector<GameEntity*> out;
     for(auto* unit : vec) {
-        if(auto o = dynamic_cast<unit_data*>(unit); o) {
+        if(auto o = dynamic_cast<GameEntity*>(unit); o) {
             out.push_back(o);
         }
     }
@@ -1870,8 +1870,8 @@ std::vector<unit_data*> unitVector(const std::vector<T*>& vec) {
 template<typename Derived>
 class Dispatcher {
     public:
-    Dispatcher(unit_data* caller, const std::string& args) : caller(caller), args(args) {};
-    Dispatcher& setFilter(const std::function<bool(unit_data*)> &f) {
+    Dispatcher(GameEntity* caller, const std::string& args) : caller(caller), args(args) {};
+    Dispatcher& setFilter(const std::function<bool(GameEntity*)> &f) {
         filter = f;
         return static_cast<Derived&>(*this);
     }
@@ -1879,19 +1879,19 @@ class Dispatcher {
         checkVisible = val;
         return static_cast<Derived&>(*this);
     }
-    Dispatcher& addPeople(unit_data* target) {
+    Dispatcher& addPeople(GameEntity* target) {
         targets.push_back({SearchType::People, target});
         return static_cast<Derived&>(*this);
     }
-    Dispatcher& addInventory(unit_data* target) {
+    Dispatcher& addInventory(GameEntity* target) {
         targets.push_back({SearchType::Inventory, target});
         return static_cast<Derived&>(*this);
     }
-    Dispatcher& addEquipment(unit_data* target) {
+    Dispatcher& addEquipment(GameEntity* target) {
         targets.push_back({SearchType::Equipment, target});
         return static_cast<Derived&>(*this);
     }
-    Dispatcher& addLocation(unit_data* target) {
+    Dispatcher& addLocation(GameEntity* target) {
         targets.push_back({SearchType::Location, target});
         return static_cast<Derived&>(*this);
     }
@@ -1900,18 +1900,18 @@ class Dispatcher {
         return static_cast<Derived&>(*this);
     }
     protected:
-    unit_data* caller;
+    GameEntity* caller;
     std::string args;
     bool checkVisible{true};
-    std::function<bool(unit_data*)> filter;
-    std::vector<std::pair<SearchType, unit_data*>> targets;
-    std::vector<unit_data*> searchHelper(SearchType type, unit_data* target) {
+    std::function<bool(GameEntity*)> filter;
+    std::vector<std::pair<SearchType, GameEntity*>> targets;
+    std::vector<GameEntity*> searchHelper(SearchType type, GameEntity* target) {
         switch(type) {
             case SearchType::Inventory:
                 return unitVector(target->getContents());
                 break;
             case SearchType::Equipment: {
-                std::vector<unit_data*> out;
+                std::vector<GameEntity*> out;
                 for(auto [id, obj] : target->getEquipment()) {
                     out.push_back(obj);
                 }
@@ -1922,7 +1922,7 @@ class Dispatcher {
                 return unitVector(target->getNeighbors(checkVisible));
                 break;
             case SearchType::World: {
-                std::vector<unit_data*> out;
+                std::vector<GameEntity*> out;
                 for(auto [id, obj] : world) {
                     out.push_back(obj);
                 }
@@ -1935,8 +1935,8 @@ class Dispatcher {
         }
     }
 
-    std::vector<unit_data*> doSearch() {
-        std::vector<unit_data*> out;
+    std::vector<GameEntity*> doSearch() {
+        std::vector<GameEntity*> out;
         for(auto [type, target] : targets) {
             auto results = searchHelper(type, target);
             // if filter is set, apply it.
@@ -1954,19 +1954,19 @@ class Dispatcher {
 
 class Searcher : public Dispatcher<Searcher> {
 public:
-    Searcher(unit_data* caller, const std::string& args) : Dispatcher<Searcher>(caller, args) {}
+    Searcher(GameEntity* caller, const std::string& args) : Dispatcher<Searcher>(caller, args) {}
 
     Searcher& setAllowAll(bool val = true);
     Searcher& setAllowAsterisk(bool val = true);
     Searcher& setAllowSelf(bool val = true);
     Searcher& setAllowHere(bool val = true);
     Searcher& setAllowRecurse(bool val = true);
-    std::vector<unit_data*> search();
-    unit_data* getOne();
+    std::vector<GameEntity*> search();
+    GameEntity* getOne();
 
     template<typename T>
     std::vector<T*> types() {
-        static_assert(std::is_base_of<unit_data, T>::value, "T must be derived from unit_data");
+        static_assert(std::is_base_of<GameEntity, T>::value, "T must be derived from GameEntity");
         std::vector<T*> filtered;
         for (auto* unit : search()) {
             if (T* casted = dynamic_cast<T*>(unit); casted) {
@@ -1985,11 +1985,11 @@ protected:
     bool allowRecurse{false};
 };
 
-using MsgVar = std::variant<unit_data*, std::string>;
+using MsgVar = std::variant<GameEntity*, std::string>;
 
 class Messager : public Dispatcher<Messager> {
 public:
-    Messager(unit_data* caller, const std::string& args) : Dispatcher<Messager>(caller, args) {}
+    Messager(GameEntity* caller, const std::string& args) : Dispatcher<Messager>(caller, args) {}
     void deliver();
     void addVar(const std::string& key, MsgVar value);
 protected:

@@ -347,7 +347,7 @@ static int check_bitvector_names(bitvector_t bits, size_t namecount, const char 
     return (error);
 }
 
-int load_inv_backup(struct char_data *ch) {
+int load_inv_backup(BaseCharacter *ch) {
     if (GET_LEVEL(ch) < 2)
         return (-1);
 
@@ -404,7 +404,7 @@ int load_inv_backup(struct char_data *ch) {
     return 1;
 }
 
-static int inv_backup(struct char_data *ch) {
+static int inv_backup(BaseCharacter *ch) {
     FILE *backup;
     char buf[20480];
 
@@ -466,7 +466,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     auto r = world.at(room);
     
-    auto d = new exit_data();
+    auto d = new Exit();
     d->script = std::make_shared<script_data>(d);
     d->uid = getNextUID();
 
@@ -497,7 +497,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
         for(auto i = 0; i < NUM_EXIT_FLAGS; i++) if(IS_SET(flags, i)) d->setFlag(FlagType::Exit, i);
         d->key = world.contains(t[1]) ? t[1] : NOTHING;
-        d->destination = dynamic_cast<room_data*>(world.contains(t[2]) ? world.at(t[2]) : nullptr);
+        d->destination = dynamic_cast<Room*>(world.contains(t[2]) ? world.at(t[2]) : nullptr);
 
         if (retval == 3) {
             basic_mud_log("Converting world files to include DC add ons.");
@@ -539,8 +539,8 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = t[6];
             d->failsavetype = t[7];
             d->dcfailsave = t[8];
-            d->failroom = dynamic_cast<room_data*>(world.contains(t[9]) ? world.at(t[9]) : nullptr);
-            d->totalfailroom = dynamic_cast<room_data*>(world.contains(t[10]) ? world.at(t[10]) : nullptr);
+            d->failroom = dynamic_cast<Room*>(world.contains(t[9]) ? world.at(t[9]) : nullptr);
+            d->totalfailroom = dynamic_cast<Room*>(world.contains(t[10]) ? world.at(t[10]) : nullptr);
         }
     }
 }
@@ -569,7 +569,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
     auto &z = zone_table[zone];
-    auto r = new room_data();
+    auto r = new Room();
     world[virtual_nr] = r;
     z.rooms.insert(virtual_nr);
     r->script = std::make_shared<script_data>(r);
@@ -1545,17 +1545,17 @@ static void index_boot(int mode) {
         case DB_BOOT_TRG:
             break;
         case DB_BOOT_WLD:
-            size[0] = sizeof(struct room_data) * rec_count;
+            size[0] = sizeof(Room) * rec_count;
             basic_mud_log("   %d rooms, %d bytes.", rec_count, size[0]);
             break;
         case DB_BOOT_MOB:
             size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(struct char_data) * rec_count;
+            size[1] = sizeof(BaseCharacter) * rec_count;
             basic_mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
             break;
         case DB_BOOT_OBJ:
             size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(struct obj_data) * rec_count;
+            size[1] = sizeof(Object) * rec_count;
             basic_mud_log("   %d objs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
             break;
         case DB_BOOT_ZON:
@@ -1645,7 +1645,7 @@ static void tag_argument(char *argument, char *tag) {
 }
 
 
-static void load_affects(FILE *fl, struct char_data *ch, int violence) {
+static void load_affects(FILE *fl, BaseCharacter *ch, int violence) {
     int num, num2, num3, num4, num5, num6, i;
     char line[MAX_INPUT_LENGTH + 1];
     struct affected_type af;
@@ -1672,7 +1672,7 @@ static void load_affects(FILE *fl, struct char_data *ch, int violence) {
 }
 
 
-static void load_skills(FILE *fl, struct char_data *ch, bool mods) {
+static void load_skills(FILE *fl, BaseCharacter *ch, bool mods) {
     int num = 0, num2 = 0, num3 = 0;
     char line[MAX_INPUT_LENGTH + 1];
 
@@ -1690,7 +1690,7 @@ static void load_skills(FILE *fl, struct char_data *ch, bool mods) {
     } while (num != 0);
 }
 
-static void load_bonuses(FILE *fl, struct char_data *ch, bool mods) {
+static void load_bonuses(FILE *fl, BaseCharacter *ch, bool mods) {
     int num[52] = {0}, i;
     char line[MAX_INPUT_LENGTH + 1];
 
@@ -1715,7 +1715,7 @@ static void load_bonuses(FILE *fl, struct char_data *ch, bool mods) {
 #define LOAD_KI        3
 #define LOAD_LIFE       4
 
-static void load_HMVS(struct char_data *ch, const char *line, int mode) {
+static void load_HMVS(BaseCharacter *ch, const char *line, int mode) {
     int64_t num = 0, num2 = 0;
 
     sscanf(line, "%" I64T "/%" I64T "", &num, &num2);
@@ -1739,7 +1739,7 @@ static void load_HMVS(struct char_data *ch, const char *line, int mode) {
     }
 }
 
-static void load_BASE(struct char_data *ch, const char *line, int mode) {
+static void load_BASE(BaseCharacter *ch, const char *line, int mode) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -1763,7 +1763,7 @@ static void load_BASE(struct char_data *ch, const char *line, int mode) {
     }
 }
 
-static void load_majin(struct char_data *ch, const char *line) {
+static void load_majin(BaseCharacter *ch, const char *line) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -1771,7 +1771,7 @@ static void load_majin(struct char_data *ch, const char *line) {
 
 }
 
-static void load_molt(struct char_data *ch, const char *line) {
+static void load_molt(BaseCharacter *ch, const char *line) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -1781,7 +1781,7 @@ static void load_molt(struct char_data *ch, const char *line) {
 
 /* new load_char reads ASCII Player Files */
 /* Load a char, TRUE if loaded, FALSE if not */
-static int load_char(const char *name, struct char_data *ch) {
+static int load_char(const char *name, BaseCharacter *ch) {
     int id = 0, i, num = 0, num2 = 0, num3 = 0;
     FILE *fl = nullptr;
     char fname[READ_SIZE];
@@ -2295,7 +2295,7 @@ static struct old_ship_data customs[] = {
 struct AreaDef {
     std::string name;
     int type{ITEM_REGION};
-    unit_data *location;
+    GameEntity *location;
     std::optional<vnum> parent;
     std::set<std::size_t> roomFlags{};
     std::vector<std::pair<std::size_t, std::size_t>> roomRanges;
@@ -2332,7 +2332,7 @@ static Structure* assembleArea(const AreaDef &def) {
 
     if(!def.roomFlags.empty()) {
         for(auto &[vn, u] : world) {
-            if(auto room = dynamic_cast<room_data*>(u); room) {
+            if(auto room = dynamic_cast<Room*>(u); room) {
                 for(auto &f : def.roomFlags) {
                     if(room->checkFlag(FlagType::Room, f)) {
                         rooms.insert(vn);
@@ -2350,7 +2350,7 @@ static Structure* assembleArea(const AreaDef &def) {
     for(auto r : rooms) {
         auto found = world.find(r);
         if(found == world.end()) continue;
-        auto room = dynamic_cast<room_data*>(found->second);
+        auto room = dynamic_cast<Room*>(found->second);
         if(!room) continue;
         room->addToLocation(a);
     }
@@ -2499,7 +2499,7 @@ void migrate_grid() {
     }
 
     for(auto &[rv, u] : world) {
-        auto room = dynamic_cast<room_data*>(u);
+        auto room = dynamic_cast<Room*>(u);
         if(!room) continue;
         if(room->area) continue;
         auto sense = sense_location_name(rv);
@@ -2875,7 +2875,7 @@ void migrate_grid() {
     basic_mud_log("Attempting to deduce Areas to Planets...");
     for(auto &[vnum, u] : world) {
         // check for planetMap flags and, if found, bind the area this room belongs to, to the respective planet.
-        auto room = dynamic_cast<room_data*>(u);
+        auto room = dynamic_cast<Room*>(u);
         if(!room) continue;
 
         for(auto &[rflag, a] : planetMap) {
@@ -3515,7 +3515,7 @@ void migrate_grid() {
     AreaDef misc;
     misc.name = "Miscellaneous";
     for(auto &[rv, u] : world) {
-        if(auto room = dynamic_cast<room_data*>(u); room && !room->area) {
+        if(auto room = dynamic_cast<Room*>(u); room && !room->area) {
             misc.roomIDs.insert(rv);
         }
     }
@@ -3535,7 +3535,7 @@ void migrate_grid() {
         16009, 16544, 16600 // Arlia
     }) {
         if(auto u = world.find(r); u != world.end()) {
-            auto room = dynamic_cast<room_data*>(u->second);
+            auto room = dynamic_cast<Room*>(u->second);
             room->setFlag(FlagType::Room, ROOM_LANDING);
         }
     }

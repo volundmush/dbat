@@ -9,7 +9,7 @@
 #include "dbat/comm.h"
 #include "dbat/spells.h"
 
-bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string &name) {
+bool tech_handle_zanzoken(BaseCharacter *ch, BaseCharacter *vict, const std::string &name) {
     if (((!IS_NPC(vict) && IS_ICER(vict) && rand_number(1, 30) >= 28) || AFF_FLAGGED(vict, AFF_ZANZOKEN)) &&
         (vict->getCurST()) >= 1 && GET_POS(vict) != POS_SLEEPING) {
         if (!AFF_FLAGGED(ch, AFF_ZANZOKEN) || (AFF_FLAGGED(ch, AFF_ZANZOKEN) && GET_SPEEDI(ch) + rand_number(1, 5) <
@@ -35,7 +35,7 @@ bool tech_handle_zanzoken(char_data *ch, char_data *vict, const std::string &nam
     return true;
 }
 
-void tech_handle_posmodifier(char_data *vict, int &pry, int &blk, int &dge, int &prob) {
+void tech_handle_posmodifier(BaseCharacter *vict, int &pry, int &blk, int &dge, int &prob) {
     switch (GET_POS(vict)) {
         case POS_SLEEPING:
             pry = 0;
@@ -55,7 +55,7 @@ void tech_handle_posmodifier(char_data *vict, int &pry, int &blk, int &dge, int 
     }
 }
 
-bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attperc) {
+bool tech_handle_charge(BaseCharacter *ch, char *arg, double minimum, double *attperc) {
     if (*arg) {
         double adjust = (double) (atoi(arg)) * 0.01;
         if (adjust < 0.01 || adjust > 1.00) {
@@ -71,7 +71,7 @@ bool tech_handle_charge(char_data *ch, char *arg, double minimum, double *attper
     return true;
 }
 
-bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data **obj) {
+bool tech_handle_targeting(BaseCharacter *ch, char *arg, BaseCharacter **vict, Object **obj) {
     *vict = nullptr;
     *obj = nullptr;
     if (!*arg || !(*vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
@@ -88,7 +88,7 @@ bool tech_handle_targeting(char_data *ch, char *arg, char_data **vict, obj_data 
 }
 
 
-void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string &part) {
+void tech_handle_fireshield(BaseCharacter *ch, BaseCharacter *vict, const std::string &part) {
     if (GET_HIT(vict) > 0 && !AFF_FLAGGED(vict, AFF_SPIRIT) && AFF_FLAGGED(vict, AFF_FIRESHIELD) &&
         !GET_BONUS(ch, BONUS_FIREPROOF) && !IS_DEMON(ch)) {
         auto msg = fmt::format("@c$N's@W fireshield burns your {}!@n", part);
@@ -115,7 +115,7 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string &p
     }
 }
 
-bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
+bool tech_handle_android_absorb(BaseCharacter *ch, BaseCharacter *vict) {
     if (IS_ANDROID(vict) && HAS_ARMS(vict) && GET_SKILL(vict, SKILL_ABSORB) > rand_number(1, 140)) {
         act("@C$N@W absorbs your ki attack and all your charged ki with $S hand!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@WYou absorb @C$n's@W ki attack and all $s charged ki with your hand!@n", true, ch, nullptr, vict,
@@ -137,7 +137,7 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
     return false;
 }
 
-void tech_handle_crashdown(char_data *ch, char_data *vict) {
+void tech_handle_crashdown(BaseCharacter *ch, BaseCharacter *vict) {
     if (AFF_FLAGGED(vict, AFF_FLYING)) {
         act("@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@wYou are knocked out of the air!@n", true, ch, nullptr, vict, TO_VICT);

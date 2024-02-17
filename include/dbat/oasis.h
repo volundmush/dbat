@@ -83,7 +83,7 @@ extern void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type);
 
 extern void split_argument(char *argument, char *tag);
 
-extern void send_cannot_edit(struct char_data *ch, zone_vnum zone);
+extern void send_cannot_edit(BaseCharacter *ch, zone_vnum zone);
 
 /*
  * OLC structures.
@@ -101,9 +101,9 @@ struct oasis_olc_data {
     int value;                     /* mostly 'has changed' flag*/
     char *storage;                 /* used for 'tedit'         */
     std::shared_ptr<NonPlayerCharacter> mob;         /* used for 'medit'         */
-    struct room_data *room;        /* used for 'redit'         */
-    std::shared_ptr<obj_data> obj;          /* used for 'oedit'         */
-    struct obj_data *iobj;         /* used for 'iedit'         */
+    Room *room;        /* used for 'redit'         */
+    std::shared_ptr<Object> obj;          /* used for 'oedit'         */
+    Object *iobj;         /* used for 'iedit'         */
     struct zone_data *zone;        /* used for 'zedit'         */
     struct shop_data *shop;        /* used for 'sedit'         */
     struct config_data *config;    /* used for 'cedit'         */
@@ -506,13 +506,13 @@ extern ACMD(do_oasis_list);
 
 extern ACMD(do_oasis_links);
 
-extern void medit_free_mobile(struct char_data *mob);
+extern void medit_free_mobile(BaseCharacter *mob);
 
 extern void medit_setup_new(struct descriptor_data *d);
 
 extern void medit_setup_existing(struct descriptor_data *d, int rmob_num);
 
-extern void init_mobile(struct char_data *mob);
+extern void init_mobile(BaseCharacter *mob);
 
 extern void medit_save_internally(struct descriptor_data *d);
 
@@ -602,7 +602,7 @@ extern ACMD(do_oasis_oedit);
 
 extern void oedit_disp_use_menu(struct descriptor_data *d);
 
-extern void iedit_setup_existing(struct descriptor_data *d, struct obj_data *obj);
+extern void iedit_setup_existing(struct descriptor_data *d, Object *obj);
 
 extern void iedit_parse(struct descriptor_data *d, char *arg);
 
@@ -630,7 +630,7 @@ extern void redit_disp_menu(struct descriptor_data *d);
 
 extern void redit_parse(struct descriptor_data *d, char *arg);
 
-extern void free_room(struct room_data *room);
+extern void free_room(Room *room);
 
 extern ACMD(do_oasis_redit);
 
@@ -684,7 +684,7 @@ extern ACMD(do_oasis_gedit);
 
 extern void zedit_setup(struct descriptor_data *d, int room_num);
 
-extern void zedit_new_zone(struct char_data *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
+extern void zedit_new_zone(BaseCharacter *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
 
 extern void zedit_create_index(int znum, char *type);
 
@@ -760,19 +760,19 @@ extern int stats_disp_menu(struct descriptor_data *d);
 
 extern int free_strings(void *data, int type);
 
-extern void list_rooms(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
+extern void list_rooms(BaseCharacter *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
 
-extern void list_mobiles(struct char_data *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
+extern void list_mobiles(BaseCharacter *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
 
-extern void list_objects(struct char_data *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
+extern void list_objects(BaseCharacter *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
 
-extern void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
+extern void list_shops(BaseCharacter *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
 
-extern void list_zones(struct char_data *ch);
+extern void list_zones(BaseCharacter *ch);
 
-extern void print_zone(struct char_data *ch, zone_vnum vnum);
+extern void print_zone(BaseCharacter *ch, zone_vnum vnum);
 
-extern int can_edit_zone(struct char_data *ch, zone_rnum rnum);
+extern int can_edit_zone(BaseCharacter *ch, zone_rnum rnum);
 
 #define CONTEXT_HELP_STRING "help"
 

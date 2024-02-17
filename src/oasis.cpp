@@ -361,7 +361,7 @@ void free_config(struct config_data *data) {
 /**                  FALSE.                                                  **/
 /**                                                                          **/
 /******************************************************************************/
-int can_edit_zone(struct char_data *ch, zone_rnum rnum) {
+int can_edit_zone(BaseCharacter *ch, zone_rnum rnum) {
     /* no access if called with bad arguments */
     if (!ch->desc || IS_NPC(ch) || rnum == NOWHERE)
         return false;
@@ -392,7 +392,7 @@ int can_edit_zone(struct char_data *ch, zone_rnum rnum) {
     return (false);
 }
 
-void send_cannot_edit(struct char_data *ch, zone_vnum zone) {
+void send_cannot_edit(BaseCharacter *ch, zone_vnum zone) {
     ch->sendf("You do not have permission to edit zone %d.", zone);
     if (GET_OLC_ZONE(ch) != NOWHERE)
         ch->sendf("  Try zone %d.", GET_OLC_ZONE(ch));

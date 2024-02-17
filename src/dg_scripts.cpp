@@ -20,8 +20,8 @@
 
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)
 
-void obj_command_interpreter(obj_data *obj, char *argument);
-void wld_command_interpreter(room_data *room, char *argument);
+void obj_command_interpreter(Object *obj, char *argument);
+void wld_command_interpreter(Room *room, char *argument);
 
 void trig_data::setState(DgScriptState st) {
     state = st;
@@ -236,13 +236,13 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
             else {
                 switch (parent->attach_type) {
                     case MOB_TRIGGER:
-                        command_interpreter((char_data *) sc->owner, cmd);
+                        command_interpreter((BaseCharacter *) sc->owner, cmd);
                         break;
                     case OBJ_TRIGGER:
-                        obj_command_interpreter((obj_data *) sc->owner, cmd);
+                        obj_command_interpreter((Object *) sc->owner, cmd);
                         break;
                     case WLD_TRIGGER:
-                        wld_command_interpreter((struct room_data *)sc->owner, cmd);
+                        wld_command_interpreter((Room *)sc->owner, cmd);
                         break;
                 }
                 if (sc->purged) {
@@ -428,9 +428,9 @@ std::size_t trig_data::findCase(const std::string& cond) {
 
 
 /* Local functions not used elsewhere */
-void do_stat_trigger(struct char_data *ch, const std::shared_ptr<trig_data> &trig);
+void do_stat_trigger(BaseCharacter *ch, const std::shared_ptr<trig_data> &trig);
 
-void script_stat(char_data *ch, const std::shared_ptr<script_data>& sc);
+void script_stat(BaseCharacter *ch, const std::shared_ptr<script_data>& sc);
 
 int remove_trigger(struct script_data *sc, char *name);
 
@@ -480,7 +480,7 @@ char *str_str(char *cs, char *ct) {
 int trgvar_in_room(room_vnum vnum) {
     auto u = world.find(vnum);
     if(u == world.end()) return 0;
-    auto r = dynamic_cast<room_data*>(u->second);
+    auto r = dynamic_cast<Room*>(u->second);
     if(!r) return 0;
     int i = 0;
 
@@ -490,12 +490,12 @@ int trgvar_in_room(room_vnum vnum) {
     return i;
 }
 
-obj_data *get_obj_in_list(char *name, std::vector<obj_data*> list) {
-    obj_data *i;
+Object *get_obj_in_list(char *name, std::vector<Object*> list) {
+    Object *i;
     int32_t id;
 
     if (*name == UID_CHAR) {
-        auto obj = dynamic_cast<obj_data*>(resolveUID(name));
+        auto obj = dynamic_cast<Object*>(resolveUID(name));
         if(!obj) return nullptr;
 
         for (auto i : list)
@@ -509,15 +509,15 @@ obj_data *get_obj_in_list(char *name, std::vector<obj_data*> list) {
     return nullptr;
 }
 
-obj_data *get_object_in_equip(char_data *ch, char *name) {
+Object *get_object_in_equip(BaseCharacter *ch, char *name) {
     int j, n = 0, number;
-    obj_data *obj;
+    Object *obj;
     char tmpname[MAX_INPUT_LENGTH];
     char *tmp = tmpname;
     int32_t id;
 
     if (*name == UID_CHAR) {
-        auto o = dynamic_cast<obj_data*>(resolveUID(name));
+        auto o = dynamic_cast<Object*>(resolveUID(name));
         if(!o) return nullptr;
 
         for (j = 0; j < NUM_WEARS; j++)
@@ -590,7 +590,7 @@ int find_eq_pos_script(char *arg) {
     return (-1);
 }
 
-int can_wear_on_pos(struct obj_data *obj, int pos) {
+int can_wear_on_pos(Object *obj, int pos) {
     switch (pos) {
         case WEAR_WIELD1:
             return CAN_WEAR(obj, ITEM_WEAR_WIELD);
@@ -640,10 +640,10 @@ int can_wear_on_pos(struct obj_data *obj, int pos) {
  ************************************************************/
 
 /* search the entire world for a char, and return a pointer */
-char_data *get_char(char *name) {
+BaseCharacter *get_char(char *name) {
 
     if (*name == UID_CHAR) {
-        auto ch = dynamic_cast<char_data*>(resolveUID(name));
+        auto ch = dynamic_cast<BaseCharacter*>(resolveUID(name));
         if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
@@ -661,11 +661,11 @@ char_data *get_char(char *name) {
 /*
  * Finds a char in the same room as the object with the name 'name'
  */
-char_data *get_char_near_obj(obj_data *obj, char *name) {
-    char_data *ch;
+BaseCharacter *get_char_near_obj(Object *obj, char *name) {
+    BaseCharacter *ch;
 
     if (*name == UID_CHAR) {
-        auto ch = dynamic_cast<char_data*>(resolveUID(name));
+        auto ch = dynamic_cast<BaseCharacter*>(resolveUID(name));
         if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
@@ -687,11 +687,11 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
  * returns a pointer to the first character in world by name name,
  * or nullptr if none found.  Starts searching in room room first
  */
-char_data *get_char_in_room(room_data *room, char *name) {
-    char_data *ch;
+BaseCharacter *get_char_in_room(Room *room, char *name) {
+    BaseCharacter *ch;
 
     if (*name == UID_CHAR) {
-        auto ch = dynamic_cast<char_data*>(resolveUID(name));
+        auto ch = dynamic_cast<BaseCharacter*>(resolveUID(name));
         if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
@@ -708,9 +708,9 @@ char_data *get_char_in_room(room_data *room, char *name) {
 
 /* searches the room with the object for an object with name 'name'*/
 
-obj_data *get_obj_near_obj(obj_data *obj, char *name) {
-    obj_data *i = nullptr;
-    char_data *ch;
+Object *get_obj_near_obj(Object *obj, char *name) {
+    Object *i = nullptr;
+    BaseCharacter *ch;
     room_vnum rm;
     int32_t id;
 
@@ -724,7 +724,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
     /* or outside ? */
     if (obj->in_obj) {
         if (*name == UID_CHAR) {
-            auto o = dynamic_cast<obj_data*>(resolveUID(name));
+            auto o = dynamic_cast<Object*>(resolveUID(name));
             if(!o) return nullptr;
             if(o == obj->in_obj) return o;
         } else if (isname(name, obj->in_obj->name))
@@ -751,11 +751,11 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
 }
 
 /* returns the object in the world with name name, or nullptr if not found */
-obj_data *get_obj(char *name) {
-    obj_data *obj;
+Object *get_obj(char *name) {
+    Object *obj;
 
     if (*name == UID_CHAR) {
-        return dynamic_cast<obj_data*>(resolveUID(name));
+        return dynamic_cast<Object*>(resolveUID(name));
     }
     else {
         for (obj = object_list; obj; obj = obj->next)
@@ -768,16 +768,16 @@ obj_data *get_obj(char *name) {
 
 
 /* finds room by id or vnum.  returns nullptr if not found */
-room_data *get_room(char *name) {
+Room *get_room(char *name) {
     room_rnum nr;
 
     if (*name == UID_CHAR) {
-        return dynamic_cast<room_data*>(resolveUID(name));
+        return dynamic_cast<Room*>(resolveUID(name));
     }
     else if ((nr = real_room(atoi(name))) == NOWHERE)
         return nullptr;
     else
-        return dynamic_cast<room_data*>(world[nr]);
+        return dynamic_cast<Room*>(world[nr]);
 }
 
 
@@ -785,11 +785,11 @@ room_data *get_room(char *name) {
  * returns a pointer to the first character in world by name name,
  * or nullptr if none found.  Starts searching with the person owing the object
  */
-char_data *get_char_by_obj(obj_data *obj, char *name) {
-    char_data *ch;
+BaseCharacter *get_char_by_obj(Object *obj, char *name) {
+    BaseCharacter *ch;
 
     if (*name == UID_CHAR) {
-        auto ch = dynamic_cast<char_data*>(resolveUID(name));
+        auto ch = dynamic_cast<BaseCharacter*>(resolveUID(name));
         if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
@@ -819,11 +819,11 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
  * returns a pointer to the first character in world by name name,
  * or nullptr if none found.  Starts searching in room room first
  */
-char_data *get_char_by_room(room_data *room, char *name) {
-    char_data *ch;
+BaseCharacter *get_char_by_room(Room *room, char *name) {
+    BaseCharacter *ch;
 
     if (*name == UID_CHAR) {
-        auto ch = dynamic_cast<char_data*>(resolveUID(name));
+        auto ch = dynamic_cast<BaseCharacter*>(resolveUID(name));
         if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
@@ -848,12 +848,12 @@ char_data *get_char_by_room(room_data *room, char *name) {
  * returns the object in the world with name name, or nullptr if not found
  * search based on obj
  */
-obj_data *get_obj_by_obj(obj_data *obj, char *name) {
-    obj_data *i = nullptr;
+Object *get_obj_by_obj(Object *obj, char *name) {
+    Object *i = nullptr;
     room_vnum rm;
 
     if (*name == UID_CHAR) {
-        return dynamic_cast<obj_data*>(resolveUID(name));
+        return dynamic_cast<Object*>(resolveUID(name));
     }
 
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
@@ -880,11 +880,11 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
 }
 
 /* only searches the room */
-obj_data *get_obj_in_room(room_data *room, char *name) {
+Object *get_obj_in_room(Room *room, char *name) {
     int32_t id;
 
     if (*name == UID_CHAR) {
-        auto o = dynamic_cast<obj_data*>(resolveUID(name));
+        auto o = dynamic_cast<Object*>(resolveUID(name));
         if(!o) return nullptr;
         for (auto obj : room->getInventory())
             if (o == obj)
@@ -899,10 +899,10 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
 }
 
 /* returns obj with name - searches room, then world */
-obj_data *get_obj_by_room(room_data *room, char *name) {
+Object *get_obj_by_room(Room *room, char *name) {
 
     if (*name == UID_CHAR) {
-        return dynamic_cast<obj_data*>(resolveUID(name));
+        return dynamic_cast<Object*>(resolveUID(name));
     }
 
     for (auto obj : room->getInventory())
@@ -918,9 +918,9 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
 
 /* checks every PULSE_SCRIPT for random triggers */
 void script_trigger_check(uint64_t heartPulse, double deltaTime) {
-    char_data *ch;
-    obj_data *obj;
-    struct room_data *room = nullptr;
+    BaseCharacter *ch;
+    Object *obj;
+    Room *room = nullptr;
     int nr;
 
     for (ch = character_list; ch; ch = ch->next) {
@@ -938,7 +938,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     }
 
     for (auto &[vn, u] : world) {
-        auto r = dynamic_cast<room_data*>(u);
+        auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         auto sc = SCRIPT(r); 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
@@ -949,9 +949,9 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
 }
 
 void check_time_triggers() {
-    char_data *ch;
-    obj_data *obj;
-    struct room_data *room = nullptr;
+    BaseCharacter *ch;
+    Object *obj;
+    Room *room = nullptr;
     int nr;
 
     for (ch = character_list; ch; ch = ch->next) {
@@ -968,7 +968,7 @@ void check_time_triggers() {
     }
 
     for (auto &[vn, u] : world) {
-        auto r = dynamic_cast<room_data*>(u);
+        auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         auto sc = SCRIPT(r);
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
@@ -995,7 +995,7 @@ void check_interval_triggers(int trigFlag) {
     }
 
     for (auto &[vn, u] : world) {
-        auto r = dynamic_cast<room_data*>(u);
+        auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         auto sc = SCRIPT(r);
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
@@ -1006,7 +1006,7 @@ void check_interval_triggers(int trigFlag) {
 }
 
 
-void do_stat_trigger(struct char_data *ch, const std::shared_ptr<trig_data>& trig) {
+void do_stat_trigger(BaseCharacter *ch, const std::shared_ptr<trig_data>& trig) {
     char sb[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
     int len = 0;
 
@@ -1051,8 +1051,8 @@ void do_stat_trigger(struct char_data *ch, const std::shared_ptr<trig_data>& tri
 
 /* find the name of what the uid points to */
 void find_uid_name(char *uid, char *name, size_t nlen) {
-    char_data *ch;
-    obj_data *obj;
+    BaseCharacter *ch;
+    Object *obj;
 
     if ((ch = get_char(uid)))
         snprintf(name, nlen, "%s", ch->name);
@@ -1064,7 +1064,7 @@ void find_uid_name(char *uid, char *name, size_t nlen) {
 
 
 /* general function to display stats on script sc */
-void script_stat(char_data *ch, const std::shared_ptr<script_data>& sc) {
+void script_stat(BaseCharacter *ch, const std::shared_ptr<script_data>& sc) {
     ch->sendf("Global Variables: %d\r\n", sc->vars.size());
     char buf1[MAX_STRING_LENGTH];
 
@@ -1120,7 +1120,7 @@ void script_stat(char_data *ch, const std::shared_ptr<script_data>& sc) {
 }
 
 
-void do_sstat(struct char_data *ch, struct unit_data *ud) {
+void do_sstat(BaseCharacter *ch, GameEntity *ud) {
     ch->sendf("Triggers:\r\n");
     if (!SCRIPT(ud)) {
         ch->sendf("  None.\r\n");
@@ -1154,9 +1154,9 @@ void script_data::addTrigger(const std::shared_ptr<trig_data> t, int loc) {
 
 
 ACMD(do_attach) {
-    char_data *victim;
-    obj_data *object;
-    room_data *room;
+    BaseCharacter *victim;
+    Object *object;
+    Room *room;
     trig_data *trig;
     char targ_name[MAX_INPUT_LENGTH], trig_name[MAX_INPUT_LENGTH];
     char loc_name[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
@@ -1263,7 +1263,7 @@ ACMD(do_attach) {
             return;
         }
 
-        room = dynamic_cast<room_data*>(world[rnum]);
+        room = dynamic_cast<Room*>(world[rnum]);
         room->script->addTrigger(trig, loc);
 
         ch->sendf("Trigger %d (%s) attached to room %d.\r\n",
@@ -1709,9 +1709,9 @@ void trig_data::processAttach(const std::string &cmd) {
 void trig_data::processDetach(const std::string& cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
-    char_data *c = nullptr;
-    obj_data *o = nullptr;
-    room_data *r = nullptr;
+    BaseCharacter *c = nullptr;
+    Object *o = nullptr;
+    Room *r = nullptr;
     long id;
 
     id_p = two_arguments((char*)cmd.c_str(), arg, trignum_s);
@@ -1744,7 +1744,7 @@ void trig_data::processDetach(const std::string& cmd) {
     }
 }
 
-struct room_data *dg_room_of_obj(struct obj_data *obj) {
+Room *dg_room_of_obj(Object *obj) {
     return obj->getAbsoluteRoom();
 }
 
@@ -1952,7 +1952,7 @@ int fgetline(FILE *file, char *p) {
 
 
 /* load in a character's saved variables */
-void read_saved_vars(struct char_data *ch) {
+void read_saved_vars(BaseCharacter *ch) {
     FILE *file;
     long context;
     char fn[127];
@@ -1998,7 +1998,7 @@ void read_saved_vars(struct char_data *ch) {
 }
 
 /* load in a character's saved variables from an ASCII pfile*/
-void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count) {
+void read_saved_vars_ascii(FILE *file, BaseCharacter *ch, int count) {
     long context;
     char input_line[1024], *temp, *p;
     char varname[READ_SIZE];
@@ -2197,7 +2197,7 @@ void HasVars::addVar(const std::string& name, const std::string& val) {
     vars[n] = val;
 }
 
-void HasVars::addVar(const std::string& name, struct unit_data *u) {
+void HasVars::addVar(const std::string& name, GameEntity *u) {
     addVar(name, u->getUIDString(false));
 }
 

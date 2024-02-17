@@ -21,7 +21,7 @@ namespace atk {
             SKILL_SLAM, SKILL_HEELDROP, SKILL_BASH, SKILL_HEADBUTT, SKILL_TAILWHIP
     };
 
-    Attack::Attack(struct char_data *ch, char *arg) : user(ch) {
+    Attack::Attack(BaseCharacter *ch, char *arg) : user(ch) {
         if(arg && strlen(arg)) input = arg;
         trim(input);
         args = split(input, ' ');
@@ -176,7 +176,7 @@ namespace atk {
         return 0;
     }
 
-    DefenseResult Attack::attackOutcome(char_data* user, char_data* victim, int skillID, bool kiAttack) {
+    DefenseResult Attack::attackOutcome(BaseCharacter* user, BaseCharacter* victim, int skillID, bool kiAttack) {
         initStats();
 
         currentHitProbability = roll_accuracy(user, init_skill(user, skillID), kiAttack);
@@ -1740,7 +1740,7 @@ namespace atk {
 
         if (GET_HIT(victim) > 0 && calcDamage > GET_MAX_HIT(victim) / 4 && master_pass == true) {
             auto r = victim->getRoom();
-            std::vector<exit_data*> candidates;
+            std::vector<Exit*> candidates;
             for(auto &[door, ex] : r->getExits()) {
                 if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
                 if(auto dest = ex->getDestination(); dest) candidates.push_back(ex);
@@ -4193,7 +4193,7 @@ namespace atk {
     void KiAreaAttack::processAttack() {
         announceAttack();
 
-        for(char_data *value : targets) {
+        for(BaseCharacter *value : targets) {
             victim = value;
             switch(doAttack()) {
                 case Result::Landed:
@@ -4837,7 +4837,7 @@ namespace atk {
         
 
         int guncost = 1;
-        struct obj_data *weap = nullptr;
+        Object *weap = nullptr;
         if (GET_EQ(user, WEAR_WIELD1)) {
             weap = GET_EQ(user, WEAR_WIELD1);
         } else {

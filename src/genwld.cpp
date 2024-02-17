@@ -20,7 +20,7 @@
  * This function will copy the strings so be sure you free your own
  * copies of the description, title, and such.
  */
-room_rnum add_room(struct room_data *room) {
+room_rnum add_room(Room *room) {
 
     return 0;
 }
@@ -37,7 +37,7 @@ int save_rooms(zone_rnum zone_num) {
     return true;
 }
 
-int copy_room(struct room_data *to, struct room_data *from) {
+int copy_room(Room *to, Room *from) {
 
 
     return true;
@@ -51,16 +51,16 @@ int copy_room(struct room_data *to, struct room_data *from) {
  * and we'd be freeing the very strings we're copying.  If this function
  * is used elsewhere, be sure to free_room_strings() the 'dest' room first.
  */
-int copy_room_strings(struct room_data *dest, struct room_data *source) {
+int copy_room_strings(Room *dest, Room *source) {
 
     return true;
 }
 
-int free_room_strings(struct room_data *room) {
+int free_room_strings(Room *room) {
 
 }
 
-nlohmann::json exit_data::serialize() {
+nlohmann::json Exit::serialize() {
     nlohmann::json j;
 
     if(key > 0) j["key"] = key;
@@ -75,7 +75,7 @@ nlohmann::json exit_data::serialize() {
     return j;
 }
 
-nlohmann::json exit_data::serializeRelations() {
+nlohmann::json Exit::serializeRelations() {
     nlohmann::json j;
     if(destination) j["destination"] = destination->getUIDString();
     if(failroom) j["failroom"] = failroom->getUIDString();
@@ -84,7 +84,7 @@ nlohmann::json exit_data::serializeRelations() {
 
 }
 
-exit_data::exit_data(const nlohmann::json &j) : exit_data() {
+Exit::Exit(const nlohmann::json &j) : Exit() {
     if(j.contains("key")) key = j["key"];
     if(j.contains("dclock")) dclock = j["dclock"];
     if(j.contains("dchide")) dchide = j["dchide"];
@@ -94,8 +94,8 @@ exit_data::exit_data(const nlohmann::json &j) : exit_data() {
     if(j.contains("dcfailsave")) dcfailsave = j["dcfailsave"];
 }
 
-nlohmann::json room_data::serialize() {
-    auto j = unit_data::serialize();
+nlohmann::json Room::serialize() {
+    auto j = GameEntity::serialize();
 
     if(sector_type) j["sector_type"] = sector_type;
 
@@ -110,7 +110,7 @@ nlohmann::json room_data::serialize() {
     return j;
 }
 
-room_data::room_data(const nlohmann::json &j) {
+Room::Room(const nlohmann::json &j) {
     deserialize(j);
 
     if(j.contains("sector_type")) sector_type = j["sector_type"];
@@ -120,11 +120,11 @@ room_data::room_data(const nlohmann::json &j) {
 
 }
 
-bool room_data::isEnvironment() {
+bool Room::isEnvironment() {
     return true;
 }
 
-double room_data::getEnvVar(EnvVar v) {
+double Room::getEnvVar(EnvVar v) {
     switch(v) {
         case EnvVar::Gravity: {
             // Check for a gravity generator.
@@ -166,39 +166,39 @@ double room_data::getEnvVar(EnvVar v) {
     }
 }
 
-bool room_data::isActive() {
+bool Room::isActive() {
     return world.contains(vn);
 }
 
 
-int room_data::getDamage() {
+int Room::getDamage() {
     return dmg;
 }
 
-int room_data::setDamage(int amount) {
+int Room::setDamage(int amount) {
     auto before = dmg;
     dmg = std::clamp<int>(amount, 0, 100);
     // if(dmg != before) save();
     return dmg;
 }
 
-int room_data::modDamage(int amount) {
+int Room::modDamage(int amount) {
     return setDamage(dmg + amount);
 }
 
-struct room_data* exit_data::getDestination() {
+Room* Exit::getDestination() {
     return destination;
 }
 
 
-bool room_data::isSunken() {
+bool Room::isSunken() {
     return sector_type == SECT_UNDERWATER || geffect < 0;
 }
 
 
 static const std::set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
 
-MoonCheck room_data::checkMoon() {
+MoonCheck Room::checkMoon() {
     for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(checkFlag(FlagType::Room, f)) return MoonCheck::NoMoon;
     if(inside_sectors.contains(sector_type)) return MoonCheck::NoMoon;
     auto plan = getPlanet();
@@ -232,7 +232,7 @@ const std::vector<std::string> sky_look = {
                         "lightning"
                 };
 
-DgResults room_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+DgResults Room::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     std::string lmember = member;
     to_lower(lmember);
     trim(lmember);
@@ -323,15 +323,15 @@ DgResults room_data::dgCallMember(trig_data *trig, const std::string& member, co
     return "";
 }
 
-std::string room_data::getUnitClass() {
+std::string Room::getUnitClass() {
     return "room_data";
 }
 
-UnitFamily room_data::getFamily() {
+UnitFamily Room::getFamily() {
     return UnitFamily::Room;
 }
 
-void room_data::assignTriggers() {
+void Room::assignTriggers() {
 
     // remove all duplicates from i->proto_script but do not change its order otherwise.
     std::set<trig_vnum> existVnums;
@@ -383,7 +383,7 @@ static const std::set<int> lit_sectors = {SECT_INSIDE, SECT_CITY, SECT_IMPORTANT
 
 
 // Check to see whether a room should normally be considered dark as a basic matter of course.
-bool room_data::isInsideNormallyDark() {
+bool Room::isInsideNormallyDark() {
     if(checkFlag(FlagType::Room, ROOM_DARK)) return true;
     if(lit_sectors.contains(sector_type)) return false;
     if(checkFlag(FlagType::Room, ROOM_INDOORS)) return false;
@@ -393,7 +393,7 @@ bool room_data::isInsideNormallyDark() {
 
 static const std::set<int> sun_down = {SUN_SET, SUN_DARK};
 
-bool room_data::isInsideDark() {
+bool Room::isInsideDark() {
 
     // If the room is not normally dark, then it's definitely not dark.
     if(!isInsideNormallyDark()) return false;

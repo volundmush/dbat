@@ -56,7 +56,7 @@ struct shop_data {
     int lastsort{};        /* How many items are sorted in inven?	*/
     SpecialFunc func{};        /* Secondary spec_proc for shopkeeper	*/
     
-    std::list<char_data*> getKeepers();
+    std::list<BaseCharacter*> getKeepers();
     bool isProducing(obj_vnum vn);
     void runPurge();
 };
@@ -274,15 +274,15 @@ extern int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 extern shop_vnum top_shop;
 
 // functions
-extern int shop_producing(struct obj_data *item, vnum shop_nr);
+extern int shop_producing(Object *item, vnum shop_nr);
 
-extern int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim);
+extern int ok_damage_shopkeeper(BaseCharacter *ch, BaseCharacter *victim);
 
 extern void assign_the_shopkeepers();
 
 extern int ok_shop_room(vnum shop_nr, room_vnum room);
 
-extern void show_shops(struct char_data *ch, char *arg);
+extern void show_shops(BaseCharacter *ch, char *arg);
 
 // special
 extern SPECIAL(shop_keeper);

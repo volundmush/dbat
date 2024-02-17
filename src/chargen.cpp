@@ -506,7 +506,7 @@ namespace net {
     ChargenParser::~ChargenParser() {
         // Completing chargen should set our state to -1.
         // That will prevent the character from being freed.
-        // Because in all other cases, we don't want this char_data to be laying around if
+        // Because in all other cases, we don't want this BaseCharacter to be laying around if
         // chargen is canceled somehow.
         if(state != -1 && ch) {
             free_char(ch);
@@ -577,7 +577,7 @@ namespace net {
         int roll = rand_number(1, 6);
         int value;
 
-        struct char_data *found;
+        BaseCharacter *found;
 
         switch(state) {
             case CON_GET_NAME:

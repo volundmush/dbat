@@ -251,7 +251,7 @@ void oedit_string_cleanup(struct descriptor_data *d, int terminator) {
 }
 
 /* this is all iedit stuff */
-void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num) {
+void iedit_setup_existing(struct descriptor_data *d, Object *real_num) {
 
 }
 

@@ -24,23 +24,23 @@
 
 /* remove all triggers from a mob/obj/room */
 void extract_script(void *thing, int type) {
-    char_data *mob;
-    obj_data *obj;
-    room_data *room;
+    BaseCharacter *mob;
+    Object *obj;
+    Room *room;
 
     switch (type) {
         case MOB_TRIGGER:
-            mob = (struct char_data *) thing;
+            mob = (BaseCharacter *) thing;
             mob->script->purged = true;
             mob->script->removeAll();
             break;
         case OBJ_TRIGGER:
-            obj = (struct obj_data *) thing;
+            obj = (Object *) thing;
             obj->script->purged = true;
             obj->script->removeAll();
             break;
         case WLD_TRIGGER:
-            room = (struct room_data *) thing;
+            room = (Room *) thing;
             room->script->purged = true;
             room->script->removeAll();
             break;
@@ -58,11 +58,11 @@ void extract_script_mem(struct script_memory *sc) {
     }
 }
 
-void free_proto_script(struct unit_data *thing, int type) {
+void free_proto_script(GameEntity *thing, int type) {
     thing->proto_script.clear();
 }
 
-void copy_proto_script(struct unit_data *source, struct unit_data *dest, int type) {
+void copy_proto_script(GameEntity *source, GameEntity *dest, int type) {
     dest->proto_script = source->proto_script;
 }
 

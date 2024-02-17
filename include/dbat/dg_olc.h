@@ -40,7 +40,7 @@
 #define OLC_ITEM_TYPE(d)    (OLC(d)->item_type)    /* mob/obj/room     */
 
 /* prototype exported functions from dg_olc.c */
-extern void script_save_to_disk(FILE *fp, struct unit_data *item, int type);
+extern void script_save_to_disk(FILE *fp, GameEntity *item, int type);
 
 extern void dg_olc_script_copy(struct descriptor_data *d);
 

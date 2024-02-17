@@ -24,11 +24,11 @@
  * Local functions
  */
 #define OCMD(name)  \
-   void (name)(obj_data *obj, char *argument, int cmd, int subcmd)
+   void (name)(Object *obj, char *argument, int cmd, int subcmd)
 
-void obj_log(obj_data *obj, const char *format, ...);
+void obj_log(Object *obj, const char *format, ...);
 
-room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr);
+room_rnum find_obj_target_room(Object *obj, char *rawroomstr);
 
 OCMD(do_oecho);
 
@@ -64,13 +64,13 @@ OCMD(do_osetval);
 
 OCMD(do_oat);
 
-void obj_command_interpreter(obj_data *obj, char *argument);
+void obj_command_interpreter(Object *obj, char *argument);
 
 
 struct obj_command_info {
     char *command;
 
-    void (*command_pointer)(obj_data *obj, char *argument, int cmd, int subcmd);
+    void (*command_pointer)(Object *obj, char *argument, int cmd, int subcmd);
 
     int subcmd;
 };
@@ -82,7 +82,7 @@ struct obj_command_info {
 
 
 /* attaches object name and vnum to msg and sends it to script_log */
-void obj_log(obj_data *obj, const char *format, ...) {
+void obj_log(Object *obj, const char *format, ...) {
     va_list args;
     char output[MAX_STRING_LENGTH];
 
@@ -94,7 +94,7 @@ void obj_log(obj_data *obj, const char *format, ...) {
 }
 
 /* returns the real room number that the object or object's carrier is in */
-room_rnum obj_room(obj_data *obj) {
+room_rnum obj_room(Object *obj) {
     if (IN_ROOM(obj) != NOWHERE)
         return IN_ROOM(obj);
     else if (obj->carried_by)
@@ -109,11 +109,11 @@ room_rnum obj_room(obj_data *obj) {
 
 
 /* returns the real room number, or NOWHERE if not found or invalid */
-room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr) {
+room_rnum find_obj_target_room(Object *obj, char *rawroomstr) {
     int tmp;
     room_rnum location;
-    char_data *target_mob;
-    obj_data *target_obj;
+    BaseCharacter *target_mob;
+    Object *target_obj;
     char roomstr[MAX_INPUT_LENGTH];
 
     one_argument(rawroomstr, roomstr);
@@ -164,7 +164,7 @@ OCMD(do_oecho) {
 
 
 OCMD(do_oforce) {
-    char_data *ch, *next_ch;
+    BaseCharacter *ch, *next_ch;
     char arg1[MAX_INPUT_LENGTH], *line;
 
     line = one_argument(argument, arg1);
@@ -215,7 +215,7 @@ OCMD(do_ozoneecho) {
 
 OCMD(do_osend) {
     char buf[MAX_INPUT_LENGTH], *msg;
-    char_data *ch;
+    BaseCharacter *ch;
 
     msg = any_one_arg(argument, buf);
 
@@ -283,8 +283,8 @@ OCMD(do_otimer) {
 /* are containers! */
 OCMD(do_otransform) {
     char arg[MAX_INPUT_LENGTH];
-    obj_data *o, tmpobj;
-    struct char_data *wearer = nullptr;
+    Object *o, tmpobj;
+    BaseCharacter *wearer = nullptr;
     int pos = 0;
 
     one_argument(argument, arg);
@@ -333,7 +333,7 @@ OCMD(do_dupe) {
 /* purge all objects an npcs in room, or specified object or mob */
 OCMD(do_opurge) {
     char arg[MAX_INPUT_LENGTH];
-    char_data *ch, *next_ch;
+    BaseCharacter *ch, *next_ch;
 
     one_argument(argument, arg);
 
@@ -400,7 +400,7 @@ OCMD(do_ogoto) {
 }
 
 OCMD(do_oteleport) {
-    char_data *ch, *next_ch;
+    BaseCharacter *ch, *next_ch;
     room_rnum target;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -417,7 +417,7 @@ OCMD(do_oteleport) {
         obj_log(obj, "oteleport target is an invalid room");
         return;
     }
-    auto r = dynamic_cast<room_data*>(world.at(target));
+    auto r = dynamic_cast<Room*>(world.at(target));
 
     if (!strcasecmp(arg1, "all")) {
         auto rm = obj->getRoom();
@@ -447,11 +447,11 @@ OCMD(do_oteleport) {
 OCMD(do_dgoload) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int number = 0, room;
-    char_data *mob;
-    obj_data *object;
+    BaseCharacter *mob;
+    Object *object;
     char *target;
-    char_data *tch;
-    obj_data *cnt;
+    BaseCharacter *tch;
+    Object *cnt;
     int pos;
 
     target = two_arguments(argument, arg1, arg2);
@@ -538,7 +538,7 @@ OCMD(do_dgoload) {
 OCMD(do_odamage) {
     char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
     int dam = 0;
-    char_data *ch;
+    BaseCharacter *ch;
 
     two_arguments(argument, name, amount);
 
@@ -588,8 +588,8 @@ OCMD(do_oasound) {
 OCMD(do_odoor) {
     char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
     char field[MAX_INPUT_LENGTH], *value;
-    room_data *rm;
-    struct exit_data *newexit;
+    Room *rm;
+    Exit *newexit;
     int dir, fd, to_room;
 
     const char *door_field[] = {
@@ -629,7 +629,7 @@ OCMD(do_odoor) {
 
     auto exists = rm->getExits();
 
-    exit_data *ex = exists[dir];
+    Exit *ex = exists[dir];
 
     /* purge exit */
     if (fd == 0) {
@@ -638,7 +638,7 @@ OCMD(do_odoor) {
         }
     } else {
         if (!ex) {
-            ex = new exit_data();
+            ex = new Exit();
             ex->uid = getNextUID();
             ex->script = std::make_shared<script_data>(ex);
             ex->addToLocation(rm, dir);
@@ -661,7 +661,7 @@ OCMD(do_odoor) {
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->destination = dynamic_cast<room_data*>(world.at(to_room));
+                    newexit->destination = dynamic_cast<Room*>(world.at(to_room));
                 else
                     obj_log(obj, "odoor: invalid door target");
                 break;
@@ -692,8 +692,8 @@ OCMD(do_osetval) {
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/
 OCMD(do_oat) {
     room_rnum loc = NOWHERE;
-    struct char_data *ch;
-    struct obj_data *object;
+    BaseCharacter *ch;
+    Object *object;
     char arg[MAX_INPUT_LENGTH], *command;
 
     command = any_one_arg(argument, arg);
@@ -758,7 +758,7 @@ const struct obj_command_info obj_cmd_info[] = {
 /*
  *  This is the command interpreter used by objects, called by script_driver.
  */
-void obj_command_interpreter(obj_data *obj, char *argument) {
+void obj_command_interpreter(Object *obj, char *argument) {
     int cmd, length;
     char *line, arg[MAX_INPUT_LENGTH];
 

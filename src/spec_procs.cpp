@@ -97,7 +97,7 @@ int num_players_in_room(room_vnum room) {
 
 bool check_mob_in_room(mob_vnum mob, room_vnum room) {
     if(auto u = world.find(room); u != world.end()) {
-        auto r = dynamic_cast<room_data*>(u->second);
+        auto r = dynamic_cast<Room*>(u->second);
         for(auto i : r->getPeople()) {
             if(i->vn == mob) return true;
         }
@@ -167,7 +167,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 {
     int i = 0;
     int proceed = 1;
-    struct char_data *tch;
+    BaseCharacter *tch;
     char *buf2 = "$N tried to sneak past without a fight, and got nowhere.";
     char buf[MAX_STRING_LENGTH];
     bool nomob = true;
@@ -239,7 +239,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
                     nomob = true;
 
                     /* Check the next room for players and ensure mob is waiting */
-                    for (auto tch : dynamic_cast<room_data*>(world[real_room(gauntlet_info[i + 1][1])])->getPeople()) {
+                    for (auto tch : dynamic_cast<Room*>(world[real_room(gauntlet_info[i + 1][1])])->getPeople()) {
                         if (!IS_NPC(tch)) {
                             proceed = 0;  /* There is a player there */
                             sprintf(buf, "%s is in the next room.  You must wait for them to finish.\r\n",
@@ -321,7 +321,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
 {
     int i = 0;
     int proceed = 1, door;
-    struct char_data *tch;
+    BaseCharacter *tch;
     char *buf2 = "$N tried to return to the gauntlet, and got nowhere.";
     char buf[MAX_STRING_LENGTH];
     bool nomob = true;
@@ -361,7 +361,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
-                for (auto tch : dynamic_cast<room_data*>(world[real_room(gauntlet_info[i][1])])->getPeople()) {
+                for (auto tch : dynamic_cast<Room*>(world[real_room(gauntlet_info[i][1])])->getPeople()) {
                     if (!IS_NPC(tch)) {
                         proceed = 0;  /* There is a player there */
                         sprintf(buf, "%s has moved into the next room.  You must wait for them to finish.\r\n",
@@ -388,7 +388,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
     return false;
 }
 
-void npc_steal(struct char_data *ch, struct char_data *victim) {
+void npc_steal(BaseCharacter *ch, BaseCharacter *victim) {
     int gold;
 
     if (IS_NPC(victim))
@@ -422,14 +422,14 @@ void npc_steal(struct char_data *ch, struct char_data *victim) {
 SPECIAL(pet_shops) {
     char buf[MAX_STRING_LENGTH], pet_name[256];
     room_rnum pet_room;
-    struct char_data *pet;
+    BaseCharacter *pet;
 
     /* Gross. */
     pet_room = IN_ROOM(ch) + 1;
 
     if (CMD_IS("list")) {
         ch->sendf("Available pets are:\r\n");
-        for (auto pet : dynamic_cast<room_data*>(world[pet_room])->getPeople()) {
+        for (auto pet : dynamic_cast<Room*>(world[pet_room])->getPeople()) {
             /* No, you can't have the Implementor as a pet if he's in there. */
             if (!IS_NPC(pet))
                 continue;
@@ -479,7 +479,7 @@ SPECIAL(pet_shops) {
 
 SPECIAL(auction) {
     room_rnum auct_room;
-    struct obj_data *obj, *next_obj, *obj2 = nullptr;
+    Object *obj, *next_obj, *obj2 = nullptr;
     int found = false;
 
     /* Gross. */
@@ -679,7 +679,7 @@ SPECIAL(auction) {
 ******************************************************************** */
 
 SPECIAL(healtank) {
-    struct obj_data *htank = nullptr, *i;
+    Object *htank = nullptr, *i;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
@@ -918,7 +918,7 @@ static std::map<std::string, double> gravMap = {
 
 /* This controls gravity generator functions */
 SPECIAL(gravity) {
-    struct obj_data *obj = nullptr;
+    Object *obj = nullptr;
     char arg[MAX_INPUT_LENGTH];
     int match = false;
 
@@ -995,7 +995,7 @@ SPECIAL(gravity) {
 SPECIAL(bank) {
     int amount, num = 0;
 
-    struct obj_data *obj = nullptr;
+    Object *obj = nullptr;
     obj = ch->getRoom()->findObjectVnum(3034);
 
     if (CMD_IS("balance")) {
@@ -1011,7 +1011,7 @@ SPECIAL(bank) {
         return (true);
     } else if (CMD_IS("wire")) {
         char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-        struct char_data *vict = nullptr;
+        BaseCharacter *vict = nullptr;
 
         two_arguments(argument, arg, arg2);
 

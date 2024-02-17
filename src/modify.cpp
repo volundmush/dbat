@@ -321,7 +321,7 @@ static void exdesc_string_cleanup(struct descriptor_data *d, int action) {
    ********************************************************************* */
 
 ACMD(do_skillset) {
-    struct char_data *vict;
+    BaseCharacter *vict;
     char name[MAX_INPUT_LENGTH];
     char buf[MAX_INPUT_LENGTH], help[MAX_STRING_LENGTH];
     int skill, value, i = 0, qend;

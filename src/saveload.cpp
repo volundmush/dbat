@@ -85,7 +85,7 @@ static void process_dirty_rooms(const std::filesystem::path &loc) {
     nlohmann::json rooms;
 
     for(auto &[v, u] : world) {
-        auto r = dynamic_cast<room_data*>(u);
+        auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         rooms.push_back(r->serialize());
     }

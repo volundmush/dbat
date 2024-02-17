@@ -2240,7 +2240,7 @@ void reassign_rooms() {
 
     /* remove old funcs */
     for (auto &[vn, u] : world) {
-        auto r = dynamic_cast<room_data*>(u);
+        auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         r->func = nullptr;
     }

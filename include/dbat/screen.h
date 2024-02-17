@@ -18,7 +18,7 @@
 #define KWHT  "\x1B[37m"
 #define KNUL  ""
 
-/* conditional color.  pass it a pointer to a char_data and a color level. */
+/* conditional color.  pass it a pointer to a BaseCharacter and a color level. */
 #define C_OFF    0
 #define C_ON    1
 #define C_BRI    C_ON    /* Compatibility hack */

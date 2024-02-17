@@ -27,7 +27,7 @@ namespace atk {
     };
 
     struct Attack {
-        Attack(struct char_data *ch, char *arg);
+        Attack(BaseCharacter *ch, char *arg);
         virtual int getSkillID() = 0;
         virtual int getAtkID() = 0; // used for damtype and roll_hitloc
         virtual std::string getName() = 0;
@@ -37,7 +37,7 @@ namespace atk {
         virtual int autoTrainSkillID() { return 0;};
 
         virtual Result doAttack();
-        virtual DefenseResult attackOutcome(char_data*, char_data*, int, bool);
+        virtual DefenseResult attackOutcome(BaseCharacter*, BaseCharacter*, int, bool);
         virtual DefenseResult calculateDefense();
         virtual Result attackCharacter();
         virtual Result attackObject();
@@ -111,9 +111,9 @@ namespace atk {
         virtual void announceMiss() = 0;
         virtual void announceObject() = 0;
 
-        struct char_data *user{};
-        struct char_data *victim{};
-        struct obj_data *obj{};
+        BaseCharacter *user{};
+        BaseCharacter *victim{};
+        Object *obj{};
         std::string input;
         std::vector<std::string> args;
 
@@ -1035,7 +1035,7 @@ namespace atk {
     struct KiAreaAttack : RangedKiAttack {
         using RangedKiAttack::RangedKiAttack;
 
-        std::vector<char_data*> targets;
+        std::vector<BaseCharacter*> targets;
         bool paidCost = false;
         bool canParry() override {return false;};
         bool canBlock() override {return false;};
@@ -1124,7 +1124,7 @@ namespace atk {
     struct WeaponAttack : MeleeAttack {
         using MeleeAttack::MeleeAttack;
 
-        struct obj_data *weap = nullptr;
+        Object *weap = nullptr;
         bool secondAttack = false;
         int wielded = 0;
         int dualWield = 0;

@@ -24,7 +24,7 @@
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
 
-std::string char_data::juggleRaceName(bool capitalized) {
+std::string BaseCharacter::juggleRaceName(bool capitalized) {
 
     auto apparent = race;
 
@@ -74,20 +74,20 @@ std::string char_data::juggleRaceName(bool capitalized) {
     }
 }
 
-void char_data::restore_by(char_data *ch) {
+void BaseCharacter::restore_by(BaseCharacter *ch) {
     this->restore(true);
 
     ::act("You have been fully healed by $N!", false, this, nullptr, ch, TO_CHAR | TO_SLEEP);
 }
 
-void char_data::restore(bool announce) {
+void BaseCharacter::restore(bool announce) {
     restoreVitals(announce);
     restoreLimbs(announce);
     restoreStatus(announce);
     restoreLF(announce);
 }
 
-void char_data::resurrect(ResurrectionMode mode) {
+void BaseCharacter::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
     restore(true);
     for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) clearFlag(FlagType::Affect,f);
@@ -160,7 +160,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     ::act("$n's body forms in a pool of @Bblue light@n.", true, this, nullptr, nullptr, TO_ROOM);
 }
 
-void char_data::ghostify() {
+void BaseCharacter::ghostify() {
     restore(true);
     for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) clearFlag(FlagType::Affect,f);
 
@@ -172,27 +172,27 @@ void char_data::ghostify() {
 
 }
 
-void char_data::teleport_to(IDXTYPE rnum) {
+void BaseCharacter::teleport_to(IDXTYPE rnum) {
     removeFromLocation();
-    auto r = dynamic_cast<room_data*>(world.at(rnum));
+    auto r = dynamic_cast<Room*>(world.at(rnum));
     addToLocation(r);
     lookAtLocation();
     update_pos(this);
 }
 
-bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
+bool BaseCharacter::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
     return GET_ROOM_VNUM(IN_ROOM(this)) >= low_rnum && GET_ROOM_VNUM(IN_ROOM(this)) <= high_rnum;
 }
 
-bool char_data::in_past() {
+bool BaseCharacter::in_past() {
     return ROOM_FLAGGED(IN_ROOM(this), ROOM_PAST);
 }
 
-bool char_data::is_newbie() {
+bool BaseCharacter::is_newbie() {
     return GET_LEVEL(this) < 9;
 }
 
-bool char_data::in_northran() {
+bool BaseCharacter::in_northran() {
     return in_room_range(17900, 17999);
 }
 
@@ -212,17 +212,17 @@ static std::map<int, uint16_t> grav_threshold = {
         {10000, 200000000}
 };
 
-int64_t char_data::calc_soft_cap() {
+int64_t BaseCharacter::calc_soft_cap() {
     auto level = get(CharNum::Level);
     if(level >= 100) return 5e9;
     return race::getSoftCap(race, level);
 }
 
-bool char_data::is_soft_cap(int64_t type) {
+bool BaseCharacter::is_soft_cap(int64_t type) {
     return is_soft_cap(type, 1.0);
 }
 
-bool char_data::is_soft_cap(int64_t type, long double mult) {
+bool BaseCharacter::is_soft_cap(int64_t type, long double mult) {
     if (IS_NPC(this))
         return true;
 
@@ -249,7 +249,7 @@ bool char_data::is_soft_cap(int64_t type, long double mult) {
     return against >= cur_cap;
 }
 
-int char_data::wearing_android_canister() {
+int BaseCharacter::wearing_android_canister() {
     if (!IS_ANDROID(this))
         return 0;
     auto obj = GET_EQ(this, WEAR_BACKPACK);
@@ -265,7 +265,7 @@ int char_data::wearing_android_canister() {
     }
 }
 
-int64_t char_data::calcGravCost(int64_t num) {
+int64_t BaseCharacter::calcGravCost(int64_t num) {
     double gravity = myEnvVar(EnvVar::Gravity);
     int64_t cost = (gravity * gravity);
 
@@ -286,39 +286,39 @@ int64_t char_data::calcGravCost(int64_t num) {
 }
 
 
-int64_t char_data::getCurHealth() {
+int64_t BaseCharacter::getCurHealth() {
     return getCurPL();
 }
 
-int64_t char_data::getMaxHealth() {
+int64_t BaseCharacter::getMaxHealth() {
     return getMaxPL();
 }
 
-double char_data::getCurHealthPercent() {
+double BaseCharacter::getCurHealthPercent() {
     return getCurPLPercent();
 }
 
-int64_t char_data::getPercentOfCurHealth(double amt) {
+int64_t BaseCharacter::getPercentOfCurHealth(double amt) {
     return getPercentOfCurPL(amt);
 }
 
-int64_t char_data::getPercentOfMaxHealth(double amt) {
+int64_t BaseCharacter::getPercentOfMaxHealth(double amt) {
     return getPercentOfMaxPL(amt);
 }
 
-bool char_data::isFullHealth() {
+bool BaseCharacter::isFullHealth() {
     return isFullPL();
 }
 
-int64_t char_data::setCurHealth(int64_t amt) {
+int64_t BaseCharacter::setCurHealth(int64_t amt) {
     return 0;
 }
 
-int64_t char_data::setCurHealthPercent(double amt) {
+int64_t BaseCharacter::setCurHealthPercent(double amt) {
     return 0;
 }
 
-int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
+int64_t BaseCharacter::incCurHealth(int64_t amt, bool limit_max) {
     if (limit_max)
         health = std::min(1.0, health + (double) std::abs(amt) / (double) getEffMaxPL());
     else
@@ -326,7 +326,7 @@ int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
     return getCurHealth();
 };
 
-int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
+int64_t BaseCharacter::decCurHealth(int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getEffMaxPL();
@@ -337,7 +337,7 @@ int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
     return getCurHealth();
 }
 
-int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
+int64_t BaseCharacter::incCurHealthPercent(double amt, bool limit_max) {
     if (limit_max)
         health = std::min(1.0, health + std::abs(amt));
     else
@@ -345,7 +345,7 @@ int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
     return getCurHealth();
 }
 
-int64_t char_data::decCurHealthPercent(double amt, int64_t floor) {
+int64_t BaseCharacter::decCurHealthPercent(double amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getEffMaxPL();
@@ -353,11 +353,11 @@ int64_t char_data::decCurHealthPercent(double amt, int64_t floor) {
     return getCurHealth();
 }
 
-void char_data::restoreHealth(bool announce) {
+void BaseCharacter::restoreHealth(bool announce) {
     if (!isFullHealth()) health = 1;
 }
 
-int64_t char_data::getMaxPLTrans() {
+int64_t BaseCharacter::getMaxPLTrans() {
     auto total = getEffBasePL();
 
     total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_HIT));
@@ -365,7 +365,7 @@ int64_t char_data::getMaxPLTrans() {
     return total;
 }
 
-int64_t char_data::getMaxPL() {
+int64_t BaseCharacter::getMaxPL() {
     auto total = getMaxPLTrans();
     if (GET_KAIOKEN(this) > 0) {
         total += (total / 10) * GET_KAIOKEN(this);
@@ -376,7 +376,7 @@ int64_t char_data::getMaxPL() {
     return total;
 }
 
-int64_t char_data::getCurPL() {
+int64_t BaseCharacter::getCurPL() {
     if (!IS_NPC(this) && suppression > 0) {
         return getEffMaxPL() * std::min(health, health * ((double) suppression / 100));
     } else {
@@ -384,11 +384,11 @@ int64_t char_data::getCurPL() {
     }
 }
 
-int64_t char_data::getUnsuppressedPL() {
+int64_t BaseCharacter::getUnsuppressedPL() {
         return getEffMaxPL() * health;
 }
 
-int64_t char_data::getEffBasePL() {
+int64_t BaseCharacter::getEffBasePL() {
     if (original) return original->getEffBasePL();
 
     if (!clones.empty()) {
@@ -398,38 +398,38 @@ int64_t char_data::getEffBasePL() {
     }
 }
 
-int64_t char_data::getBasePL() {
+int64_t BaseCharacter::getBasePL() {
     return get(CharStat::PowerLevel);
 }
 
-double char_data::getCurPLPercent() {
+double BaseCharacter::getCurPLPercent() {
     return (double) getCurPL() / (double) getMaxPL();
 }
 
-int64_t char_data::getPercentOfCurPL(double amt) {
+int64_t BaseCharacter::getPercentOfCurPL(double amt) {
     return getCurPL() * std::abs(amt);
 }
 
-int64_t char_data::getPercentOfMaxPL(double amt) {
+int64_t BaseCharacter::getPercentOfMaxPL(double amt) {
     return getMaxPL() * std::abs(amt);
 }
 
-bool char_data::isFullPL() {
+bool BaseCharacter::isFullPL() {
     return health >= 1.0;
 }
 
-int64_t char_data::getCurKI() {
+int64_t BaseCharacter::getCurKI() {
     return getMaxKI() * energy;
 }
 
-int64_t char_data::getMaxKI() {
+int64_t BaseCharacter::getMaxKI() {
     auto total = getEffBaseKI();
     total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_MANA));
     total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_KI_MULT));
     return total;
 }
 
-int64_t char_data::getEffBaseKI() {
+int64_t BaseCharacter::getEffBaseKI() {
     if (original) return original->getEffBaseKI();
     if (!clones.empty()) {
         return getBaseKI() / (clones.size() + 1);
@@ -438,35 +438,35 @@ int64_t char_data::getEffBaseKI() {
     }
 }
 
-int64_t char_data::getBaseKI() {
+int64_t BaseCharacter::getBaseKI() {
     return get(CharStat::Ki);
 }
 
-double char_data::getCurKIPercent() {
+double BaseCharacter::getCurKIPercent() {
     return (double) getCurKI() / (double) getMaxKI();
 }
 
-int64_t char_data::getPercentOfCurKI(double amt) {
+int64_t BaseCharacter::getPercentOfCurKI(double amt) {
     return getCurKI() * std::abs(amt);
 }
 
-int64_t char_data::getPercentOfMaxKI(double amt) {
+int64_t BaseCharacter::getPercentOfMaxKI(double amt) {
     return getMaxKI() * std::abs(amt);
 }
 
-bool char_data::isFullKI() {
+bool BaseCharacter::isFullKI() {
     return energy >= 1.0;
 }
 
-int64_t char_data::setCurKI(int64_t amt) {
+int64_t BaseCharacter::setCurKI(int64_t amt) {
     return 0;
 }
 
-int64_t char_data::setCurKIPercent(double amt) {
+int64_t BaseCharacter::setCurKIPercent(double amt) {
     return 0;
 }
 
-int64_t char_data::incCurKI(int64_t amt, bool limit_max) {
+int64_t BaseCharacter::incCurKI(int64_t amt, bool limit_max) {
     if (limit_max)
         energy = std::min(1.0, energy + (double) std::abs(amt) / (double) getMaxKI());
     else
@@ -474,7 +474,7 @@ int64_t char_data::incCurKI(int64_t amt, bool limit_max) {
     return getCurKI();
 };
 
-int64_t char_data::decCurKI(int64_t amt, int64_t floor) {
+int64_t BaseCharacter::decCurKI(int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getMaxKI();
@@ -482,7 +482,7 @@ int64_t char_data::decCurKI(int64_t amt, int64_t floor) {
     return getCurKI();
 }
 
-int64_t char_data::incCurKIPercent(double amt, bool limit_max) {
+int64_t BaseCharacter::incCurKIPercent(double amt, bool limit_max) {
     if (limit_max)
         energy = std::min(1.0, energy + std::abs(amt));
     else
@@ -490,7 +490,7 @@ int64_t char_data::incCurKIPercent(double amt, bool limit_max) {
     return getCurKI();
 }
 
-int64_t char_data::decCurKIPercent(double amt, int64_t floor) {
+int64_t BaseCharacter::decCurKIPercent(double amt, int64_t floor) {
     if (!strcasecmp(this->name, "Wayland")) {
         this->sendf("decCurKIPercent called with: %f\r\n", amt);
     }
@@ -502,22 +502,22 @@ int64_t char_data::decCurKIPercent(double amt, int64_t floor) {
 }
 
 
-void char_data::restoreKI(bool announce) {
+void BaseCharacter::restoreKI(bool announce) {
     if (!isFullKI()) energy = 1;
 }
 
-int64_t char_data::getCurST() {
+int64_t BaseCharacter::getCurST() {
     return getMaxST() * stamina;
 }
 
-int64_t char_data::getMaxST() {
+int64_t BaseCharacter::getMaxST() {
     auto total = getEffBaseST();
     total += (getAffectModifier(APPLY_ALL_VITALS) + getAffectModifier(APPLY_MOVE));
     total *= (1.0 + getAffectModifier(APPLY_VITALS_MULT) + getAffectModifier(APPLY_ST_MULT));
     return total;
 }
 
-int64_t char_data::getEffBaseST() {
+int64_t BaseCharacter::getEffBaseST() {
     if (original) return original->getEffBaseST();
     if (!clones.empty()) {
         return getBaseST() / (clones.size() + 1);
@@ -526,35 +526,35 @@ int64_t char_data::getEffBaseST() {
     }
 }
 
-int64_t char_data::getBaseST() {
+int64_t BaseCharacter::getBaseST() {
     return get(CharStat::Stamina);
 }
 
-double char_data::getCurSTPercent() {
+double BaseCharacter::getCurSTPercent() {
     return (double) getCurST() / (double) getMaxST();
 }
 
-int64_t char_data::getPercentOfCurST(double amt) {
+int64_t BaseCharacter::getPercentOfCurST(double amt) {
     return getCurST() * std::abs(amt);
 }
 
-int64_t char_data::getPercentOfMaxST(double amt) {
+int64_t BaseCharacter::getPercentOfMaxST(double amt) {
     return getMaxST() * std::abs(amt);
 }
 
-bool char_data::isFullST() {
+bool BaseCharacter::isFullST() {
     return stamina >= 1;
 }
 
-int64_t char_data::setCurST(int64_t amt) {
+int64_t BaseCharacter::setCurST(int64_t amt) {
     return 0;
 }
 
-int64_t char_data::setCurSTPercent(double amt) {
+int64_t BaseCharacter::setCurSTPercent(double amt) {
     return 0;
 }
 
-int64_t char_data::incCurST(int64_t amt, bool limit_max) {
+int64_t BaseCharacter::incCurST(int64_t amt, bool limit_max) {
     if (limit_max)
         stamina = std::min(1.0, stamina + (double) std::abs(amt) / (double) getMaxST());
     else
@@ -562,7 +562,7 @@ int64_t char_data::incCurST(int64_t amt, bool limit_max) {
     return getCurST();
 };
 
-int64_t char_data::decCurST(int64_t amt, int64_t floor) {
+int64_t BaseCharacter::decCurST(int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getMaxST();
@@ -570,7 +570,7 @@ int64_t char_data::decCurST(int64_t amt, int64_t floor) {
     return getCurST();
 }
 
-int64_t char_data::incCurSTPercent(double amt, bool limit_max) {
+int64_t BaseCharacter::incCurSTPercent(double amt, bool limit_max) {
     if (limit_max)
         stamina = std::min(1.0, stamina + std::abs(amt));
     else
@@ -578,7 +578,7 @@ int64_t char_data::incCurSTPercent(double amt, bool limit_max) {
     return getMaxST();
 }
 
-int64_t char_data::decCurSTPercent(double amt, int64_t floor) {
+int64_t BaseCharacter::decCurSTPercent(double amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getMaxST();
@@ -587,16 +587,16 @@ int64_t char_data::decCurSTPercent(double amt, int64_t floor) {
 }
 
 
-void char_data::restoreST(bool announce) {
+void BaseCharacter::restoreST(bool announce) {
     if (!isFullST()) stamina = 1;
 }
 
 
-int64_t char_data::getCurLF() {
+int64_t BaseCharacter::getCurLF() {
     return getMaxLF() * life;
 }
 
-int64_t char_data::getMaxLF() {
+int64_t BaseCharacter::getMaxLF() {
     auto lb = GET_LIFEBONUSES(this);
 
     return (IS_DEMON(this) ? (((GET_MAX_MANA(this) * 0.5) + (GET_MAX_MOVE(this) * 0.5)) * 0.75) + lb
@@ -606,33 +606,33 @@ int64_t char_data::getMaxLF() {
                     lb));
 }
 
-double char_data::getCurLFPercent() {
+double BaseCharacter::getCurLFPercent() {
     return life;
 }
 
-int64_t char_data::getPercentOfCurLF(double amt) {
+int64_t BaseCharacter::getPercentOfCurLF(double amt) {
     return getCurLF() * std::abs(amt);
 }
 
-int64_t char_data::getPercentOfMaxLF(double amt) {
+int64_t BaseCharacter::getPercentOfMaxLF(double amt) {
     return getMaxLF() * std::abs(amt);
 }
 
-bool char_data::isFullLF() {
+bool BaseCharacter::isFullLF() {
     return life >= 1.0;
 }
 
-int64_t char_data::setCurLF(int64_t amt) {
+int64_t BaseCharacter::setCurLF(int64_t amt) {
     life = std::max<int64_t>(0L, std::abs(amt));
     return getCurLF();
 }
 
-int64_t char_data::setCurLFPercent(double amt) {
+int64_t BaseCharacter::setCurLFPercent(double amt) {
     life = std::max<int64_t>(0L, (int64_t) (getMaxLF() * std::abs(amt)));
     return getCurLF();
 }
 
-int64_t char_data::incCurLF(int64_t amt, bool limit_max) {
+int64_t BaseCharacter::incCurLF(int64_t amt, bool limit_max) {
     if (limit_max)
         life = std::min(1.0, stamina + (double) std::abs(amt) / (double) getMaxLF());
     else
@@ -640,7 +640,7 @@ int64_t char_data::incCurLF(int64_t amt, bool limit_max) {
     return getCurLF();
 };
 
-int64_t char_data::decCurLF(int64_t amt, int64_t floor) {
+int64_t BaseCharacter::decCurLF(int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getMaxLF();
@@ -648,7 +648,7 @@ int64_t char_data::decCurLF(int64_t amt, int64_t floor) {
     return getCurLF();
 }
 
-int64_t char_data::incCurLFPercent(double amt, bool limit_max) {
+int64_t BaseCharacter::incCurLFPercent(double amt, bool limit_max) {
     if (limit_max)
         life = std::min(1.0, life + std::abs(amt));
     else
@@ -656,7 +656,7 @@ int64_t char_data::incCurLFPercent(double amt, bool limit_max) {
     return getCurLF();
 }
 
-int64_t char_data::decCurLFPercent(double amt, int64_t floor) {
+int64_t BaseCharacter::decCurLFPercent(double amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
         fl = (double) floor / (double) getMaxLF();
@@ -665,35 +665,35 @@ int64_t char_data::decCurLFPercent(double amt, int64_t floor) {
 }
 
 
-void char_data::restoreLF(bool announce) {
+void BaseCharacter::restoreLF(bool announce) {
     if (!isFullLF()) life = 1;
 }
 
 
-bool char_data::isFullVitals() {
+bool BaseCharacter::isFullVitals() {
     return isFullHealth() && isFullKI() && isFullST();
 }
 
-void char_data::restoreVitals(bool announce) {
+void BaseCharacter::restoreVitals(bool announce) {
     restoreHealth(announce);
     restoreKI(announce);
     restoreST(announce);
 }
 
-void char_data::restoreStatus(bool announce) {
+void BaseCharacter::restoreStatus(bool announce) {
     cureStatusKnockedOut(announce);
     cureStatusBurn(announce);
     cureStatusPoison(announce);
 }
 
-void char_data::setStatusKnockedOut() {
+void BaseCharacter::setStatusKnockedOut() {
     setFlag(FlagType::Affect, AFF_KNOCKED);
     clearFlag(FlagType::Affect,AFF_FLYING);
     altitude = 0;
     GET_POS(this) = POS_SLEEPING;
 }
 
-void char_data::cureStatusKnockedOut(bool announce) {
+void BaseCharacter::cureStatusKnockedOut(bool announce) {
     if (AFF_FLAGGED(this, AFF_KNOCKED)) {
         if (announce) {
             ::act("@W$n@W is no longer senseless, and wakes up.@n", false, this, nullptr, nullptr, TO_ROOM);
@@ -713,7 +713,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
     }
 }
 
-void char_data::cureStatusBurn(bool announce) {
+void BaseCharacter::cureStatusBurn(bool announce) {
     if (AFF_FLAGGED(this, AFF_BURNED)) {
         if (announce) {
             this->sendf("Your burns are healed now.\r\n");
@@ -723,7 +723,7 @@ void char_data::cureStatusBurn(bool announce) {
     }
 }
 
-void char_data::cureStatusPoison(bool announce) {
+void BaseCharacter::cureStatusPoison(bool announce) {
     ::act("@C$n@W suddenly looks a lot better!@b", false, this, nullptr, nullptr, TO_NOTVICT);
     affect_from_char(this, SPELL_POISON);
 }
@@ -735,7 +735,7 @@ static std::map<int, std::string> limb_names = {
         {3, "left leg"}
 };
 
-void char_data::restoreLimbs(bool announce) {
+void BaseCharacter::restoreLimbs(bool announce) {
     // restore head...
     GET_LIMBCOND(this, 0) = 100;
 
@@ -755,7 +755,7 @@ void char_data::restoreLimbs(bool announce) {
 }
 
 
-void char_data::gainTail(bool announce) {
+void BaseCharacter::gainTail(bool announce) {
     if (!race::hasTail(race)) return;
     if(checkFlag(FlagType::PC, PLR_TAIL)) return;
     setFlag(FlagType::PC, PLR_TAIL);
@@ -765,7 +765,7 @@ void char_data::gainTail(bool announce) {
     }
 }
 
-void char_data::loseTail() {
+void BaseCharacter::loseTail() {
     if (!checkFlag(FlagType::PC, PLR_TAIL)) return;
     clearFlag(FlagType::PC, PLR_TAIL);
     remove_limb(this, 6);
@@ -773,20 +773,20 @@ void char_data::loseTail() {
     oozaru_revert(this);
 }
 
-bool char_data::hasTail() {
+bool BaseCharacter::hasTail() {
     return checkFlag(FlagType::PC, PLR_TAIL);
 }
 
-void char_data::addTransform(FormID form) {
+void BaseCharacter::addTransform(FormID form) {
     transforms.insert({form, trans_data()});
 }
 
-void char_data::hideTransform(FormID form, bool hide) {
+void BaseCharacter::hideTransform(FormID form, bool hide) {
     auto foundForm = transforms.find(form);
     foundForm->second.visible = !hide;
 }
 
-bool char_data::removeTransform(FormID form) {
+bool BaseCharacter::removeTransform(FormID form) {
     if (transforms.contains(form))
     {
         transforms.erase(form);
@@ -796,84 +796,84 @@ bool char_data::removeTransform(FormID form) {
     return false;
 }
 
-int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
+int64_t BaseCharacter::gainBasePL(int64_t amt, bool trans_mult) {
     return mod(CharStat::PowerLevel, amt);
 }
 
-int64_t char_data::gainBaseST(int64_t amt, bool trans_mult) {
+int64_t BaseCharacter::gainBaseST(int64_t amt, bool trans_mult) {
     return mod(CharStat::Stamina, amt);
 }
 
-int64_t char_data::gainBaseKI(int64_t amt, bool trans_mult) {
+int64_t BaseCharacter::gainBaseKI(int64_t amt, bool trans_mult) {
     return mod(CharStat::Ki, amt);
 }
 
-void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
+void BaseCharacter::gainBaseAll(int64_t amt, bool trans_mult) {
     gainBasePL(amt, trans_mult);
     gainBaseKI(amt, trans_mult);
     gainBaseST(amt, trans_mult);
 }
 
-int64_t char_data::loseBasePL(int64_t amt, bool trans_mult) {
+int64_t BaseCharacter::loseBasePL(int64_t amt, bool trans_mult) {
     return mod(CharStat::PowerLevel, -amt);
 }
 
-int64_t char_data::loseBaseST(int64_t amt, bool trans_mult) {
+int64_t BaseCharacter::loseBaseST(int64_t amt, bool trans_mult) {
     return mod(CharStat::Stamina, -amt);
 }
 
-int64_t char_data::loseBaseKI(int64_t amt, bool trans_mult) {
+int64_t BaseCharacter::loseBaseKI(int64_t amt, bool trans_mult) {
     return mod(CharStat::Ki, -amt);
 }
 
-void char_data::loseBaseAll(int64_t amt, bool trans_mult) {
+void BaseCharacter::loseBaseAll(int64_t amt, bool trans_mult) {
     loseBasePL(amt, trans_mult);
     loseBaseKI(amt, trans_mult);
     loseBaseST(amt, trans_mult);
 }
 
-int64_t char_data::gainBasePLPercent(double amt, bool trans_mult) {
+int64_t BaseCharacter::gainBasePLPercent(double amt, bool trans_mult) {
     return gainBasePL(get(CharStat::PowerLevel) * amt, trans_mult);
 }
 
-int64_t char_data::gainBaseKIPercent(double amt, bool trans_mult) {
+int64_t BaseCharacter::gainBaseKIPercent(double amt, bool trans_mult) {
     return gainBaseKI(get(CharStat::Ki) * amt, trans_mult);
 }
 
-int64_t char_data::gainBaseSTPercent(double amt, bool trans_mult) {
+int64_t BaseCharacter::gainBaseSTPercent(double amt, bool trans_mult) {
     return gainBaseST(get(CharStat::Stamina) * amt, trans_mult);
 }
 
-int64_t char_data::loseBasePLPercent(double amt, bool trans_mult) {
+int64_t BaseCharacter::loseBasePLPercent(double amt, bool trans_mult) {
     return loseBasePL(get(CharStat::PowerLevel) * amt, trans_mult);
 }
 
-int64_t char_data::loseBaseKIPercent(double amt, bool trans_mult) {
+int64_t BaseCharacter::loseBaseKIPercent(double amt, bool trans_mult) {
     return loseBaseKI(get(CharStat::Ki) * amt, trans_mult);
 }
 
-int64_t char_data::loseBaseSTPercent(double amt, bool trans_mult) {
+int64_t BaseCharacter::loseBaseSTPercent(double amt, bool trans_mult) {
     return loseBaseST(get(CharStat::Stamina) * amt, trans_mult);
 }
 
-void char_data::gainBaseAllPercent(double amt, bool trans_mult) {
+void BaseCharacter::gainBaseAllPercent(double amt, bool trans_mult) {
     gainBasePLPercent(amt, trans_mult);
     gainBaseKIPercent(amt, trans_mult);
     gainBaseSTPercent(amt, trans_mult);
 }
 
-void char_data::loseBaseAllPercent(double amt, bool trans_mult) {
+void BaseCharacter::loseBaseAllPercent(double amt, bool trans_mult) {
     loseBasePLPercent(amt, trans_mult);
     loseBaseKIPercent(amt, trans_mult);
     loseBaseSTPercent(amt, trans_mult);
 }
 
 
-double char_data::getMaxCarryWeight() {
+double BaseCharacter::getMaxCarryWeight() {
     return (getWeight() + 100.0) + (getMaxPL() / 200.0) + (GET_STR(this) * 50) + (IS_BARDOCK(this) ? 10000.0 : 0.0);
 }
 
-double char_data::getEquippedWeight() {
+double BaseCharacter::getEquippedWeight() {
     double total_weight = 0;
 
     for (int i = 0; i < NUM_WEARS; i++) {
@@ -884,33 +884,33 @@ double char_data::getEquippedWeight() {
     return total_weight;
 }
 
-double char_data::getCarriedWeight() {
+double BaseCharacter::getCarriedWeight() {
     return getEquippedWeight() + getInventoryWeight() + (carrying ? carrying->getTotalWeight() : 0);
 }
 
-double char_data::getAvailableCarryWeight() {
+double BaseCharacter::getAvailableCarryWeight() {
     return getMaxCarryWeight() - getCarriedWeight();
 }
 
-double char_data::speednar() {
+double BaseCharacter::speednar() {
     auto ratio = (double) getCarriedWeight() / (double) getMaxCarryWeight();
     if (ratio >= .05)
         return std::max(0.01, std::min(1.0, 1.0 - ratio));
     return 1.0;
 }
 
-int64_t char_data::getEffMaxPL() {
+int64_t BaseCharacter::getEffMaxPL() {
     if (IS_NPC(this)) {
         return getMaxPL();
     }
     return getMaxPL() * speednar();
 }
 
-bool char_data::isWeightedPL() {
+bool BaseCharacter::isWeightedPL() {
     return getMaxPL() > getEffMaxPL();
 }
 
-void char_data::apply_kaioken(int times, bool announce) {
+void BaseCharacter::apply_kaioken(int times, bool announce) {
     GET_KAIOKEN(this) = times;
     clearFlag(FlagType::PC, PLR_POWERUP);
 
@@ -922,7 +922,7 @@ void char_data::apply_kaioken(int times, bool announce) {
 
 }
 
-void char_data::remove_kaioken(int8_t announce) {
+void BaseCharacter::remove_kaioken(int8_t announce) {
     auto kaio = GET_KAIOKEN(this);
     if (!kaio) {
         return;
@@ -941,7 +941,7 @@ void char_data::remove_kaioken(int8_t announce) {
 }
 
 
-int char_data::getRPP() {
+int BaseCharacter::getRPP() {
     if(IS_NPC(this)) {
         return 0;
     }
@@ -959,7 +959,7 @@ void account_data::modRPP(int amt) {
     }
 }
 
-void char_data::modRPP(int amt) {
+void BaseCharacter::modRPP(int amt) {
     if(IS_NPC(this)) {
         return;
     }
@@ -969,11 +969,11 @@ void char_data::modRPP(int amt) {
     p->account->modRPP(amt);
 }
 
-int char_data::getPractices() {
+int BaseCharacter::getPractices() {
     return practice_points;
 }
 
-void char_data::modPractices(int amt) {
+void BaseCharacter::modPractices(int amt) {
     practice_points += amt;
     if(practice_points < 0) {
         practice_points = 0;
@@ -981,7 +981,7 @@ void char_data::modPractices(int amt) {
 }
 
 
-void char_data::login() {
+void BaseCharacter::login() {
     enter_player_game(desc);
     this->sendf("%s", CONFIG_WELC_MESSG);
     ::act("$n has entered the game.", true, this, nullptr, nullptr, TO_ROOM);
@@ -1105,7 +1105,7 @@ void char_data::login() {
 
 }
 
-double char_data::getAffectModifier(int location, int specific) {
+double BaseCharacter::getAffectModifier(int location, int specific) {
     double total = 0;
     for(auto a = affected; a; a = a->next) {
         if(location != a->location) continue;
@@ -1123,63 +1123,63 @@ double char_data::getAffectModifier(int location, int specific) {
     return total;
 }
 
-align_t char_data::get(CharAlign type) {
+align_t BaseCharacter::get(CharAlign type) {
     if(auto find = aligns.find(type); find != aligns.end()) {
         return find->second;
     }
     return 0;
 }
 
-align_t char_data::set(CharAlign type, align_t val) {
+align_t BaseCharacter::set(CharAlign type, align_t val) {
     return aligns[type] = std::clamp<align_t>(val, -1000, 1000);
 }
 
-align_t char_data::mod(CharAlign type, align_t val) {
+align_t BaseCharacter::mod(CharAlign type, align_t val) {
     return set(type, get(type) + val);
 }
 
-appearance_t char_data::get(CharAppearance type) {
+appearance_t BaseCharacter::get(CharAppearance type) {
     if(auto find = appearances.find(type); find != appearances.end()) {
         return find->second;
     }
     return 0;
 }
 
-appearance_t char_data::set(CharAppearance type, appearance_t val) {
+appearance_t BaseCharacter::set(CharAppearance type, appearance_t val) {
     return appearances[type] = std::clamp<appearance_t>(val, 0, 100);
 }
 
-appearance_t char_data::mod(CharAppearance type, appearance_t val) {
+appearance_t BaseCharacter::mod(CharAppearance type, appearance_t val) {
     return set(type, get(type) + val);
 }
 
-int char_data::setSize(int val) {
+int BaseCharacter::setSize(int val) {
     this->size = val;
     return this->size;
 }
 
-int char_data::getSize() {
+int BaseCharacter::getSize() {
     return size != SIZE_UNDEFINED ? size : race::getSize(race);
 }
 
 
-money_t char_data::get(CharMoney mon) {
+money_t BaseCharacter::get(CharMoney mon) {
     if(auto find = moneys.find(mon); find != moneys.end()) {
         return find->second;
     }
     return 0;
 }
 
-money_t char_data::set(CharMoney mon, money_t val) {
+money_t BaseCharacter::set(CharMoney mon, money_t val) {
     return moneys[mon] = std::min<money_t>(val, 999999999999);
 }
 
-money_t char_data::mod(CharMoney mon, money_t val) {
+money_t BaseCharacter::mod(CharMoney mon, money_t val) {
     return set(mon, get(mon) + val);
 }
 
 
-attribute_t char_data::get(CharAttribute attr, bool base) {
+attribute_t BaseCharacter::get(CharAttribute attr, bool base) {
     attribute_t val = 0;
     if(auto stat = attributes.find(attr); stat != attributes.end()) {
         val = stat->second;
@@ -1192,54 +1192,54 @@ attribute_t char_data::get(CharAttribute attr, bool base) {
 
 }
 
-attribute_t char_data::set(CharAttribute attr, attribute_t val) {
+attribute_t BaseCharacter::set(CharAttribute attr, attribute_t val) {
     return attributes[attr] = std::clamp<attribute_t>(val, 0, 80);
 }
 
-attribute_t char_data::mod(CharAttribute attr, attribute_t val) {
+attribute_t BaseCharacter::mod(CharAttribute attr, attribute_t val) {
     return set(attr, get(attr) + val);
 }
 
-attribute_train_t char_data::get(CharTrain attr) {
+attribute_train_t BaseCharacter::get(CharTrain attr) {
     if(auto t = trains.find(attr); t != trains.end()) {
         return t->second;
     }
     return 0;
 }
 
-attribute_train_t char_data::set(CharTrain attr, attribute_train_t val) {
+attribute_train_t BaseCharacter::set(CharTrain attr, attribute_train_t val) {
     return trains[attr] = std::max<attribute_train_t>(0, val);
 }
 
-attribute_train_t char_data::mod(CharTrain attr, attribute_train_t val) {
+attribute_train_t BaseCharacter::mod(CharTrain attr, attribute_train_t val) {
     return set(attr, get(attr) + val);
 }
 
 
-num_t char_data::get(CharNum stat) {
+num_t BaseCharacter::get(CharNum stat) {
     if(auto st = nums.find(stat); st != nums.end()) {
         return st->second;
     }
     return 0;
 }
 
-num_t char_data::set(CharNum stat, num_t val) {
+num_t BaseCharacter::set(CharNum stat, num_t val) {
     return nums[stat] = val;
 }
 
-num_t char_data::mod(CharNum stat, num_t val) {
+num_t BaseCharacter::mod(CharNum stat, num_t val) {
     return set(stat, get(stat) + val);
 }
 
-stat_t char_data::set(CharStat type, stat_t val) {
+stat_t BaseCharacter::set(CharStat type, stat_t val) {
     return stats[type] = std::max<stat_t>(0, val);
 }
 
-stat_t char_data::mod(CharStat type, stat_t val) {
+stat_t BaseCharacter::mod(CharStat type, stat_t val) {
     return set(type, get(type) + val);
 }
 
-stat_t char_data::get(CharStat type, bool base) {
+stat_t BaseCharacter::get(CharStat type, bool base) {
     if(auto st = stats.find(type); st != stats.end()) {
         return st->second;
     }
@@ -1247,33 +1247,33 @@ stat_t char_data::get(CharStat type, bool base) {
 }
 
 
-bool char_data::canCarryWeight(weight_t val) {
+bool BaseCharacter::canCarryWeight(weight_t val) {
     double gravity = myEnvVar(EnvVar::Gravity);
     return getAvailableCarryWeight() >= (val * gravity);
 }
 
-bool char_data::canCarryWeight(struct obj_data *obj) {
+bool BaseCharacter::canCarryWeight(Object *obj) {
     return canCarryWeight(obj->getTotalWeight());
 }
 
-bool char_data::canCarryWeight(struct char_data *obj) {
+bool BaseCharacter::canCarryWeight(BaseCharacter *obj) {
     return canCarryWeight(obj->getTotalWeight());
 }
 
-weight_t char_data::getCurrentBurden() {
+weight_t BaseCharacter::getCurrentBurden() {
     auto total = getTotalWeight();
     auto gravity = myEnvVar(EnvVar::Gravity);
     return total * gravity;
 }
 
-double char_data::getBurdenRatio() {
+double BaseCharacter::getBurdenRatio() {
     auto total = getCurrentBurden();
     auto max = getMaxCarryWeight();
     if(max == 0) return 0;
     return total / max;
 }
 
-room_vnum char_data::normalizeLoadRoom(room_vnum in) {
+room_vnum BaseCharacter::normalizeLoadRoom(room_vnum in) {
     // If they were in the void, then we need to use their last good room.
     room_vnum room = NOWHERE;
     room_vnum lroom = NOWHERE;
@@ -1330,7 +1330,7 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
 }
 
 
-int char_data::getArmor() {
+int BaseCharacter::getArmor() {
     int out = get(CharNum::ArmorWishes) * 5000;
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(auto obj = GET_EQ(this, i); obj)
@@ -1339,18 +1339,18 @@ int char_data::getArmor() {
     return out;
 }
 
-int64_t char_data::getExperience() {
+int64_t BaseCharacter::getExperience() {
     return exp;
 }
 
-int64_t char_data::setExperience(int64_t value) {
+int64_t BaseCharacter::setExperience(int64_t value) {
     exp = value;
     if(exp < 0) exp = 0;
     return exp;
 }
 
 // This returns the exact amount that was modified by.
-int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
+int64_t BaseCharacter::modExperience(int64_t value, bool applyBonuses) {
 
     if(value < 0) {
         // removing experience. We can do this easily.
@@ -1458,7 +1458,7 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
 
 }
 
-void char_data::gazeAtMoon() {
+void BaseCharacter::gazeAtMoon() {
     if(OOZARU_RACE(this) && checkFlag(FlagType::PC, PLR_TAIL)) {
         if(form == FormID::Oozaru || form == FormID::GoldenOozaru) return;
         FormID toForm = FormID::Oozaru;
@@ -1473,11 +1473,11 @@ void char_data::gazeAtMoon() {
     }
 }
 
-void char_data::sendEvent(const Event &ev) {
+void BaseCharacter::sendEvent(const Event &ev) {
     if(desc) desc->sendEvent(ev);
 }
 
-void char_data::sendText(const std::string &text) {
+void BaseCharacter::sendText(const std::string &text) {
     if(desc) desc->sendText(text);
 }
 
@@ -1523,7 +1523,7 @@ static const std::map<std::string, int> _aflags = {
 static const std::set<std::string> _senseiCheck = {"sensei", "class"};
 
 
-DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+DgResults BaseCharacter::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     std::string lmember = member;
     to_lower(lmember);
     trim(lmember);
@@ -1599,7 +1599,7 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
 
     if(lmember == "canbeseen") {
         if(trig->parent->attach_type != 2) return "0";
-        auto owner = (char_data*)trig->sc->owner;
+        auto owner = (BaseCharacter*)trig->sc->owner;
         return CAN_SEE(owner, this) ? "1" : "0";
     }
 
@@ -1865,11 +1865,11 @@ std::string PlayerCharacter::getUnitClass() {
     return "PlayerCharacter";
 }
 
-UnitFamily char_data::getFamily() {
+UnitFamily BaseCharacter::getFamily() {
     return UnitFamily::Character;
 }
 
-char_data::~char_data() {
+BaseCharacter::~BaseCharacter() {
     if (title)
         free(title);
     if(clan)
@@ -1902,27 +1902,27 @@ bool NonPlayerCharacter::isNPC() {
     return true;
 }
 
-bool char_data::isInvisible() {
+bool BaseCharacter::isInvisible() {
     return AFF_FLAGGED(this, AFF_INVISIBLE);
 }
 
-bool char_data::canSeeInvisible() {
+bool BaseCharacter::canSeeInvisible() {
     return AFF_FLAGGED(this, AFF_DETECT_INVIS);
 }
 
-bool char_data::isHidden() {
+bool BaseCharacter::isHidden() {
     return AFF_FLAGGED(this, AFF_HIDE);
 }
 
-bool char_data::isAdminInvisible() {
+bool BaseCharacter::isAdminInvisible() {
     return false;
 }
 
-bool char_data::canSeeAdminInvisible() {
+bool BaseCharacter::canSeeAdminInvisible() {
     return checkFlag(FlagType::Pref, PRF_HOLYLIGHT);
 }
 
-bool char_data::canSeeInDark() {
+bool BaseCharacter::canSeeInDark() {
     if(checkFlag(FlagType::Pref, PRF_HOLYLIGHT)) return true;
     if(isProvidingLight()) return true;
     if(AFF_FLAGGED(this, AFF_INFRAVISION)) return true;
@@ -1931,7 +1931,7 @@ bool char_data::canSeeInDark() {
     return false;
 }
 
-bool char_data::isProvidingLight() {
+bool BaseCharacter::isProvidingLight() {
     if(checkFlag(FlagType::PC, PLR_AURALIGHT)) return true;
     for(auto &[pos, e] : getEquipment()) {
         if(e->isProvidingLight()) return true;

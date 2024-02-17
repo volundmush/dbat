@@ -35,7 +35,7 @@ cdef extern from "dbat/structs.h":
         char* description
         extra_descr_data* next
 
-    cdef cppclass unit_data:
+    cdef cppclass GameEntity:
         int vn
         int zone
         char* name
@@ -46,13 +46,13 @@ cdef extern from "dbat/structs.h":
         extra_descr_data *ex_description
 
         vector[int] proto_script
-        obj_data* contents
+        Object* contents
 
         int64_t id
         time_t generation
 
-    cdef cppclass obj_data(unit_data):
-        obj_data(const utils.json& j)
+    cdef cppclass Object(GameEntity):
+        Object(const utils.json& j)
         utils.json serializeInstance()
         utils.json serializeProto()
         string serializeLocation()
@@ -67,8 +67,8 @@ cdef extern from "dbat/structs.h":
 
         int worn_on
 
-    cdef cppclass room_data(unit_data):
-        room_data(const utils.json& j)
+    cdef cppclass Room(GameEntity):
+        Room(const utils.json& j)
 
         utils.json serialize()
 
@@ -78,8 +78,8 @@ cdef extern from "dbat/structs.h":
         void deserialize(const utils.json& j)
         utils.json serialize()
 
-    cdef cppclass char_data(unit_data):
-        char_data(const utils.json& j)
+    cdef cppclass BaseCharacter(GameEntity):
+        BaseCharacter(const utils.json& j)
         utils.json serializeInstance()
         utils.json serializeProto()
         utils.json serializePlayer()
@@ -103,8 +103,8 @@ cdef extern from "dbat/structs.h":
     cdef cppclass descriptor_data:
         int64_t id
         int connected
-        char_data *character
-        char_data *original
+        BaseCharacter *character
+        BaseCharacter *original
     
     cdef cppclass HasVars:
         unordered_map[string, string] vars

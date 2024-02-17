@@ -60,25 +60,25 @@ int64_t getNextUID() {
     return nextUID++;
 }
 
-std::unordered_map<room_vnum, unit_data*> world;    /* array of rooms		 */
-std::unordered_set<unit_data*> pendingDeletions;
+std::unordered_map<room_vnum, GameEntity*> world;    /* array of rooms		 */
+std::unordered_set<GameEntity*> pendingDeletions;
 
-struct char_data *character_list = nullptr; /* global linked list of chars	 */
-struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
-struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
+BaseCharacter *character_list = nullptr; /* global linked list of chars	 */
+BaseCharacter *affect_list = nullptr; /* global linked list of chars with affects */
+BaseCharacter *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::unordered_map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
 std::unordered_map<mob_vnum, nlohmann::json> mob_proto;    /* prototypes for mobs		 */
 
-VnumIndex<obj_data> objectVnumIndex;
-VnumIndex<char_data> characterVnumIndex;
+VnumIndex<Object> objectVnumIndex;
+VnumIndex<BaseCharacter> characterVnumIndex;
 
-struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
+Object *object_list = nullptr;    /* global linked list of objs	 */
 std::unordered_map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::unordered_map<obj_vnum, nlohmann::json> obj_proto;    /* prototypes for objs		 */
 
-std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
+std::unordered_map<int64_t, std::pair<time_t, BaseCharacter*>> uniqueCharacters;
 /* hash tree for fast obj lookup */
-std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
+std::unordered_map<int64_t, std::pair<time_t, Object*>> uniqueObjects;
 
 std::unordered_map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
@@ -95,7 +95,7 @@ int DRAGONR = 0;                /* Room Shenron has been summoned to */
 int DRAGONZ = 0;                /* Zone Shenron has been summoned to */
 int WISH[2] = {0, 0};           /* Keeps track of wishes granted */
 int DRAGONC = 0;                /* Keeps count of Shenron's remaining time */
-struct char_data *EDRAGON = nullptr;      /* This is Shenron when he is loaded */
+BaseCharacter *EDRAGON = nullptr;      /* This is Shenron when he is loaded */
 room_rnum r_mortal_start_room;    /* rnum of mortal start room	 */
 room_rnum r_immort_start_room;    /* rnum of immort start room	 */
 room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
@@ -130,7 +130,7 @@ std::set<zone_vnum> zone_reset_queue;
 std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
 
 /* local functions */
-static void dragon_level(struct char_data *ch);
+static void dragon_level(BaseCharacter *ch);
 
 static int file_to_string(const char *name, char *buf);
 
@@ -159,7 +159,7 @@ void Read_Invalid_List();
 
 int hsort(const void *a, const void *b);
 
-void memorize_add(struct char_data *ch, int spellnum, int timer);
+void memorize_add(BaseCharacter *ch, int spellnum, int timer);
 
 void free_feats();
 
@@ -167,7 +167,7 @@ void free_assemblies();
 
 /* external vars */
 
-static void dragon_level(struct char_data *ch) {
+static void dragon_level(BaseCharacter *ch) {
     struct descriptor_data *d;
     int level = 0, count = 0;
 
@@ -271,15 +271,15 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
         auto uid = j["uid"].get<int64_t>();
         auto unitClass = j["unitClass"].get<std::string>();
         auto data = j["data"];
-        unit_data *u = nullptr;
+        GameEntity *u = nullptr;
         if(unitClass == "pc_data") {
             u = new PlayerCharacter(data);
         } else if(unitClass == "npc_data") {
             u = new NonPlayerCharacter(data);
         } else if(unitClass == "obj_data") {
-            u = new obj_data(data);
+            u = new Object(data);
         } else if(unitClass == "room_data") {
-            u = new room_data(data);
+            u = new Room(data);
         }
 
         if(auto pc = dynamic_cast<PlayerCharacter*>(u); pc) {
@@ -307,7 +307,7 @@ static void db_load_instances_finish(const std::filesystem::path& loc) {
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
     for(auto &[id, u] : world) {
-        auto r = dynamic_cast<room_data*>(u);
+        auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         if(r->script) r->script->activate();
         r->assignTriggers();
@@ -507,8 +507,8 @@ void boot_db_shadow() {
 /* Free the world, in a memory allocation sense. */
 void destroy_db() {
     ssize_t cnt, itr;
-    struct char_data *chtmp;
-    struct obj_data *objtmp;
+    BaseCharacter *chtmp;
+    Object *objtmp;
 
     /* Active Mobiles & Players */
     while (character_list) {
@@ -717,7 +717,7 @@ void auc_save() {
 }
 
 /* load from auction file */
-void auc_load(struct obj_data *obj) {
+void auc_load(Object *obj) {
     char line[500], filler[50];
     int64_t oID;
     time_t timer;
@@ -1108,22 +1108,14 @@ int hsort(const void *a, const void *b) {
 *************************************************************************/
 
 
-int vnum_mobile(char *searchname, struct char_data *ch) {
+int vnum_mobile(char *searchname, BaseCharacter *ch) {
     int found = 0;
 
     return (found);
 }
 
 
-int vnum_object(char *searchname, struct char_data *ch) {
-    int found = 0;
-
-
-    return (found);
-}
-
-
-int vnum_material(char *searchname, struct char_data *ch) {
+int vnum_object(char *searchname, BaseCharacter *ch) {
     int found = 0;
 
 
@@ -1131,7 +1123,7 @@ int vnum_material(char *searchname, struct char_data *ch) {
 }
 
 
-int vnum_weapontype(char *searchname, struct char_data *ch) {
+int vnum_material(char *searchname, BaseCharacter *ch) {
     int found = 0;
 
 
@@ -1139,7 +1131,15 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
 }
 
 
-int vnum_armortype(char *searchname, struct char_data *ch) {
+int vnum_weapontype(char *searchname, BaseCharacter *ch) {
+    int found = 0;
+
+
+    return (found);
+}
+
+
+int vnum_armortype(char *searchname, BaseCharacter *ch) {
     int found = 0;
 
 
@@ -1148,7 +1148,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
 
 
 /* create a new mobile from a prototype */
-struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
+BaseCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
     auto proto = mob_proto.find(nr);
 
@@ -1706,8 +1706,8 @@ char *sprintuniques(int low, int high) {
 
 
 /* create an object, and add it to the object list */
-struct obj_data *create_obj(bool activate) {
-    auto obj = new obj_data();
+Object *create_obj(bool activate) {
+    auto obj = new Object();
     obj->script = std::make_shared<script_data>(obj);
     if(activate) {
         obj->uid = getNextUID();
@@ -1721,7 +1721,7 @@ struct obj_data *create_obj(bool activate) {
 
 
 /* create a new object from a prototype */
-struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rnum */
+Object *read_object(obj_vnum nr, int type, bool activate) /* and obj_rnum */
 {
     auto i = nr;
     int j;
@@ -1734,7 +1734,7 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
     }
     
     // Weird hack to ensure that script_data is not overritten by prototype.
-    auto obj = new obj_data();
+    auto obj = new Object();
     obj->script = std::make_shared<script_data>(obj);
     obj->deserialize(proto->second);
     
@@ -1807,12 +1807,12 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
 /* execute the reset command table of a given zone */
 void reset_zone(zone_rnum zone) {
     int cmd_no, last_cmd = 0;
-    struct char_data *mob = nullptr;
-    struct obj_data *obj, *obj_to;
+    BaseCharacter *mob = nullptr;
+    Object *obj, *obj_to;
     room_vnum rvnum;
     room_rnum rrnum;
-    struct char_data *tmob = nullptr; /* for trigger assignment */
-    struct obj_data *tobj = nullptr;  /* for trigger assignment */
+    BaseCharacter *tmob = nullptr; /* for trigger assignment */
+    Object *tobj = nullptr;  /* for trigger assignment */
     int mob_load = false; /* ### */
     int obj_load = false; /* ### */
     auto oproto = obj_proto.find(-1);
@@ -1850,7 +1850,7 @@ void reset_zone(zone_rnum zone) {
                     if (mob_proto.contains(c.arg1) && (get_vnum_count(characterVnumIndex, c.arg1) < c.arg2) && room != world.end() &&
                         (rand_number(1, 100) >= c.arg5)) {
                         int room_max = 0;
-                        struct char_data *i;
+                        BaseCharacter *i;
 
                         /* First find out how many mobs of VNUM are in the mud with this rooms */
                         /* VNUM as a load point for max from room checks. */
@@ -1904,7 +1904,7 @@ void reset_zone(zone_rnum zone) {
                     if (obj_proto.contains(c.arg1) && get_vnum_count(objectVnumIndex, c.arg1) < c.arg2 &&
                         room != world.end() && (rand_number(1, 100) >= c.arg5)) {
                         int room_max = 0;
-                        struct obj_data *k;
+                        Object *k;
 
 
                         /* First find out how many obj of VNUM are in the mud with this rooms */
@@ -2034,7 +2034,7 @@ void reset_zone(zone_rnum zone) {
                     auto exits = room->second->getExits();
                     auto ex = exits[c.arg2];
             
-                    auto room = dynamic_cast<room_data*>(u->second);
+                    auto room = dynamic_cast<Room*>(u->second);
                     if (c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
                         (ex == nullptr)) {
                         ZONE_ERROR("room or door does not exist, command disabled");
@@ -2128,7 +2128,7 @@ void reset_zone(zone_rnum zone) {
         for(auto &rvnum : z.rooms) {
             auto u = world.find(rvnum);
             if(u == world.end()) continue;
-            auto room = dynamic_cast<room_data*>(u->second);
+            auto room = dynamic_cast<Room*>(u->second);
             if(!room) continue;
             rrnum = rvnum;
 
@@ -2265,7 +2265,7 @@ void free_followers(struct follow_type *k) {
 
 
 /* release memory allocated for a char struct */
-void free_char(struct char_data *ch) {
+void free_char(BaseCharacter *ch) {
     int i;
     world.erase(ch->uid);
     
@@ -2344,7 +2344,7 @@ static int file_to_string(const char *name, char *buf) {
 
 
 /* clear some of the the working variables of a char */
-void reset_char(struct char_data *ch) {
+void reset_char(BaseCharacter *ch) {
     int i;
 
     ch->followers = nullptr;
@@ -2364,7 +2364,7 @@ void reset_char(struct char_data *ch) {
  * Called during character creation after picking character class
  * (and then never again for that character).
  */
-void init_char(struct char_data *ch) {
+void init_char(BaseCharacter *ch) {
     int i;
 
     GET_CRANK(ch) = 0;
@@ -2866,7 +2866,7 @@ bool isUID(const std::string& uid) {
     return std::regex_match(uid, uid_regex);
 }
 
-unit_data* resolveUID(const std::string& uid) {
+GameEntity* resolveUID(const std::string& uid) {
     // First we need to check if it matches or not.
     std::smatch match;
 

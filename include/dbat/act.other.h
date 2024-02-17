@@ -8,15 +8,15 @@ extern const room_vnum freeres[NUM_ALIGNS];
 // functions
 extern void log_imm_action(char *messg, ...);
 
-extern void hint_system(struct char_data *ch, int num);
+extern void hint_system(BaseCharacter *ch, int num);
 
-extern std::set<struct obj_data*> dball_count(struct char_data *ch);
+extern std::set<Object*> dball_count(BaseCharacter *ch);
 
-extern void log_custom(struct descriptor_data *d, struct obj_data *obj);
+extern void log_custom(struct descriptor_data *d, Object *obj);
 
 extern void wishSYS(uint64_t heartPulse, double deltaTime);
 
-extern void bring_to_cap(struct char_data *ch);
+extern void bring_to_cap(BaseCharacter *ch);
 
 extern void base_update(uint64_t heartPulse, double deltaTime);
 

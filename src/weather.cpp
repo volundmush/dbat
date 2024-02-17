@@ -19,7 +19,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/transformation.h"
 
-static void phase_powerup(struct char_data *ch, int type, int phase);
+static void phase_powerup(BaseCharacter *ch, int type, int phase);
 
 static void grow_plants() {
 
@@ -195,7 +195,7 @@ static void weather_change() {
     }
 }
 
-void oozaru_revert(char_data *ch) {
+void oozaru_revert(BaseCharacter *ch) {
     if (!(ch->form == FormID::Oozaru || ch->form == FormID::GoldenOozaru))
         return;
 
@@ -213,7 +213,7 @@ void oozaru_revert(char_data *ch) {
 
 
 /* This controls the powering up of Hoshi-jin from their Eldritch Star */
-void star_phase(struct char_data *ch, int type) {
+void star_phase(BaseCharacter *ch, int type) {
     struct descriptor_data *d;
 
     if (ch == nullptr) {
@@ -314,7 +314,7 @@ void star_phase(struct char_data *ch, int type) {
 }
 
 /* This handles powering up a Hoshijin or powering them down */
-static void phase_powerup(struct char_data *ch, int type, int phase) {
+static void phase_powerup(BaseCharacter *ch, int type, int phase) {
     if (!ch) {
         return;
     }

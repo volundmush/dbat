@@ -18,11 +18,11 @@
 
 void feato(int featnum, char *name, int in_game, int can_learn, int can_stack);
 
-void list_feats_known(struct char_data *ch);
+void list_feats_known(BaseCharacter *ch);
 
-void list_feats_available(struct char_data *ch);
+void list_feats_available(BaseCharacter *ch);
 
-void list_feats_complete(struct char_data *ch);
+void list_feats_complete(BaseCharacter *ch);
 
 int compare_feats(const void *x, const void *y);
 
@@ -34,7 +34,7 @@ char buf3[MAX_STRING_LENGTH];
 char buf4[MAX_STRING_LENGTH];
 
 /* External functions*/
-int count_metamagic_feats(struct char_data *ch);
+int count_metamagic_feats(BaseCharacter *ch);
 
 void feato(int featnum, char *name, int in_game, int can_learn, int can_stack) {
     feat_list[featnum].name = name;
@@ -193,15 +193,15 @@ void assign_feats() {
 // The follwing function is used to check if the character satisfies the various prerequisite(s) (if any)
 // of a feat in order to learn it.
 
-int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg) {
+int feat_is_available(BaseCharacter *ch, int featnum, int iarg, char *sarg) {
     return false;
 }
 
-int is_proficient_with_armor(const struct char_data *ch, int cmarmor_type) {
+int is_proficient_with_armor(const BaseCharacter *ch, int cmarmor_type) {
     return false;
 }
 
-int is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type) {
+int is_proficient_with_weapon(const BaseCharacter *ch, int cmweapon_type) {
     switch (cmweapon_type) {
         case WEAPON_TYPE_UNARMED:
             return 1;
@@ -257,7 +257,7 @@ void sort_feats() {
     qsort(&feat_sort_info[1], NUM_FEATS_DEFINED, sizeof(int), compare_feats);
 }
 
-void list_feats_known(struct char_data *ch) {
+void list_feats_known(BaseCharacter *ch) {
     int i, j, sortpos;
     int none_shown = true;
     int temp_value;
@@ -323,7 +323,7 @@ void list_feats_known(struct char_data *ch) {
     write_to_output(ch->desc, buf2);
 }
 
-void list_feats_available(struct char_data *ch) {
+void list_feats_available(BaseCharacter *ch) {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
     int i, sortpos;
     int none_shown = true;
@@ -357,7 +357,7 @@ void list_feats_available(struct char_data *ch) {
     write_to_output(ch->desc, buf2);
 }
 
-void list_feats_complete(struct char_data *ch) {
+void list_feats_complete(BaseCharacter *ch) {
 
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
     int i, sortpos;

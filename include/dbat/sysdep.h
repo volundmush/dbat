@@ -105,12 +105,12 @@ typedef vnum guild_rnum;
  */
 typedef uint32_t bitvector_t;
 
-typedef void(*CommandFunc)(struct char_data *ch, char *argument, int cmd, int subcmd);
+typedef void(*CommandFunc)(BaseCharacter *ch, char *argument, int cmd, int subcmd);
 
-typedef int(*SpecialFunc)(struct char_data *ch, void *me, int cmd, char *argument);
+typedef int(*SpecialFunc)(BaseCharacter *ch, void *me, int cmd, char *argument);
 
-#define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
-#define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
+#define ACMD(name) void (name)(BaseCharacter *ch, char *argument, int cmd, int subcmd)
+#define SPECIAL(name) int (name)(BaseCharacter *ch, void *me, int cmd, char *argument)
 
 template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
@@ -192,7 +192,7 @@ std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
 
 extern bool isMigrating;
 
-using DgResults = std::variant<std::string, unit_data*>;
-using DgHolder = std::variant<std::string, unit_data*, std::function<DgResults(struct trig_data*, const std::string& field, const std::string& args)>>;
+using DgResults = std::variant<std::string, GameEntity*>;
+using DgHolder = std::variant<std::string, GameEntity*, std::function<DgResults(struct trig_data*, const std::string& field, const std::string& args)>>;
 
 using Event = std::pair<std::string, nlohmann::json>;

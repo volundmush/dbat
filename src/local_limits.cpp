@@ -28,25 +28,25 @@
 #define sick_fail       2
 
 /* local functions */
-static void heal_limb(struct char_data *ch);
+static void heal_limb(BaseCharacter *ch);
 
-static int64_t move_gain(struct char_data *ch);
+static int64_t move_gain(BaseCharacter *ch);
 
-static int64_t mana_gain(struct char_data *ch);
+static int64_t mana_gain(BaseCharacter *ch);
 
-static int64_t hit_gain(struct char_data *ch);
+static int64_t hit_gain(BaseCharacter *ch);
 
-static void update_flags(struct char_data *ch);
+static void update_flags(BaseCharacter *ch);
 
-static int wearing_stardust(struct char_data *ch);
+static int wearing_stardust(BaseCharacter *ch);
 
-static void healthy_check(struct char_data *ch);
+static void healthy_check(BaseCharacter *ch);
 
-static void barrier_shed(struct char_data *ch);
+static void barrier_shed(BaseCharacter *ch);
 
-static void check_idling(struct char_data *ch);
+static void check_idling(BaseCharacter *ch);
 
-static void barrier_shed(struct char_data *ch) {
+static void barrier_shed(BaseCharacter *ch) {
 
     if (!AFF_FLAGGED(ch, AFF_SANCTUARY)) {
         return;
@@ -108,7 +108,7 @@ static void barrier_shed(struct char_data *ch) {
 }
 
 /* If they have the Healthy trait then they have a chance to lose each of these */
-static void healthy_check(struct char_data *ch) {
+static void healthy_check(BaseCharacter *ch) {
 
     if (!GET_BONUS(ch, BONUS_HEALTHY) || GET_POS(ch) != POS_SLEEPING) {
         return;
@@ -163,13 +163,13 @@ static void healthy_check(struct char_data *ch) {
     return;
 }
 
-static int wearing_stardust(struct char_data *ch) {
+static int wearing_stardust(BaseCharacter *ch) {
 
     int count = 0, i;
 
     for (i = 1; i < NUM_WEARS; i++) {
         if (GET_EQ(ch, i)) {
-            struct obj_data *obj = GET_EQ(ch, i);
+            Object *obj = GET_EQ(ch, i);
             switch (GET_OBJ_VNUM(obj)) {
                 case 1110:
                 case 1111:
@@ -204,7 +204,7 @@ static int wearing_stardust(struct char_data *ch) {
  */
 
 /* manapoint gain pr. game hour */
-static int64_t mana_gain(struct char_data *ch) {
+static int64_t mana_gain(BaseCharacter *ch) {
     int64_t gain = 0;
 
     if (IS_NPC(ch)) {
@@ -363,7 +363,7 @@ static int64_t mana_gain(struct char_data *ch) {
 }
 
 /* Hitpoint gain pr. game hour */
-int64_t hit_gain(struct char_data *ch) {
+int64_t hit_gain(BaseCharacter *ch) {
     int64_t gain = 0;
 
     if (IS_NPC(ch)) {
@@ -512,7 +512,7 @@ int64_t hit_gain(struct char_data *ch) {
 }
 
 /* move gain pr. game hour */
-static int64_t move_gain(struct char_data *ch) {
+static int64_t move_gain(BaseCharacter *ch) {
     int64_t gain = 0;
 
     if (IS_NPC(ch)) {
@@ -637,7 +637,7 @@ static int64_t move_gain(struct char_data *ch) {
     return (gain);
 }
 
-static void update_flags(struct char_data *ch) {
+static void update_flags(BaseCharacter *ch) {
     if (ch == nullptr) {
         send_to_imm("ERROR: Empty ch variable sent to update_flags.");
         return;
@@ -740,7 +740,7 @@ static void update_flags(struct char_data *ch) {
 }
 
 
-void set_title(struct char_data *ch, char *title) {
+void set_title(BaseCharacter *ch, char *title) {
     if (ch) {
         ch->sendf(
                      "Title is disabled for the time being while Iovan works on a brand new and fancier title system.\r\n");
@@ -761,7 +761,7 @@ void set_title(struct char_data *ch, char *title) {
     */
 }
 
-void gain_level(struct char_data *ch) {
+void gain_level(BaseCharacter *ch) {
     if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
         ch->mod(CharNum::Level, 1);
         advance_level(ch);
@@ -776,7 +776,7 @@ void run_autowiz() {
 
 }
 
-void gain_condition(struct char_data *ch, int condition, int value) {
+void gain_condition(BaseCharacter *ch, int condition, int value) {
     bool intoxicated;
 
     //Set-ups for when you cannot gain sustenance
@@ -968,7 +968,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
     }
 }
 
-static void check_idling(struct char_data *ch) {
+static void check_idling(BaseCharacter *ch) {
 
     /*
 
@@ -997,7 +997,7 @@ static void check_idling(struct char_data *ch) {
     */
 }
 
-static void heal_limb(struct char_data *ch) {
+static void heal_limb(BaseCharacter *ch) {
     int healrate = 0, recovered = false;
 
     if (PLR_FLAGGED(ch, PLR_BANDAGED)) {
@@ -1112,8 +1112,8 @@ static void heal_limb(struct char_data *ch) {
 
 /* Update PCs, NPCs, and objects */
 void point_update(uint64_t heartPulse, double deltaTime) {
-    struct char_data *i, *next_char;
-    struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = nullptr;
+    BaseCharacter *i, *next_char;
+    Object *j, *next_thing, *jj, *next_thing2, *vehicle = nullptr;
     int change = false;
     /* characters */
 
@@ -1515,8 +1515,8 @@ void point_update(uint64_t heartPulse, double deltaTime) {
     }
 }
 
-void timed_dt(struct char_data *ch) {
-    struct char_data *vict;
+void timed_dt(BaseCharacter *ch) {
+    BaseCharacter *vict;
     room_rnum rrnum;
 
     if (ch == nullptr) {
@@ -1526,7 +1526,7 @@ void timed_dt(struct char_data *ch) {
           */
 
         for (auto &[vn, u] : world) {
-            auto r = dynamic_cast<room_data*>(u);
+            auto r = dynamic_cast<Room*>(u);
             if(!r) continue;
             r->timed -= (r->timed != -1);
         }

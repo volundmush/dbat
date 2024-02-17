@@ -49,7 +49,7 @@ char *get_name_by_id(long id) {
 *************************************************************************/
 
 
-struct char_data *findPlayer(const std::string& name) {
+BaseCharacter *findPlayer(const std::string& name) {
     for (auto& player : players) {
         if (iequals(player.second->name, name)) {
             return player.second->character;

@@ -23,12 +23,12 @@
 #  define EXITN(room, door)        (world[room].dir_option[door])
 #endif
 
-static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg);
+static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg);
 
-static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle);
+static void disp_ship_locations(BaseCharacter *ch, Object *vehicle);
 
 /* This shows the player what locations the planet has to land at. */
-static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle) {
+static void disp_ship_locations(BaseCharacter *ch, Object *vehicle) {
     auto r = vehicle->getRoom();
     if (r->uid == 50) { // Above Earth
         ch->sendf("@D------------------[ @GEarth@D ]------------------@c\n");
@@ -93,7 +93,7 @@ static void disp_ship_locations(struct char_data *ch, struct obj_data *vehicle) 
     }
 }
 
-static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, char *arg) {
+static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
     int landspot = 50;
     auto r = vehicle->getRoom();
     if (r->uid == 50) { // Above Earth
@@ -328,37 +328,37 @@ static int ship_land_location(struct char_data *ch, struct obj_data *vehicle, ch
     }
 }
 
-struct obj_data *find_vehicle_by_vnum(int vnum) {
+Object *find_vehicle_by_vnum(int vnum) {
     auto o = get_last_inserted(objectVnumIndex, vnum);
     if(o && GET_OBJ_TYPE(o) == ITEM_VEHICLE) return o;
     return nullptr;
 }
 
-struct obj_data *find_hatch_by_vnum(int vnum) {
+Object *find_hatch_by_vnum(int vnum) {
     auto o = get_last_inserted(objectVnumIndex, vnum);
     if(o && GET_OBJ_TYPE(o) == ITEM_HATCH) return o;
     return nullptr;
 }
 
 /* Search the player's room, inventory and equipment for a control */
-struct obj_data *find_control(struct char_data *ch) {
+Object *find_control(BaseCharacter *ch) {
     return nullptr;
 }
 
 /* Drive our vehicle into another vehicle */
-static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, char *arg) {
+static void drive_into_vehicle(BaseCharacter *ch, Object *vehicle, char *arg) {
     return;
 
 }
 
 /* Drive our vehicle out of another vehicle */
-static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) {
+static void drive_outof_vehicle(BaseCharacter *ch, Object *vehicle) {
     return;
 
 }
 
 /* Drive out vehicle in a certain direction */
-void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir) {
+void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir) {
     char buf[MAX_INPUT_LENGTH];
     auto room = vehicle->getRoom();
 
@@ -396,7 +396,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
     vehicle->removeFromLocation();
     vehicle->addToLocation(dest);
-    struct obj_data *controls;
+    Object *controls;
     if ((controls = find_control(ch))) {
         if (GET_FUELCOUNT(controls) < 5) {
             GET_FUELCOUNT(controls) += 1;
@@ -409,7 +409,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         }
     }
 
-    struct obj_data *hatch = nullptr;
+    Object *hatch = nullptr;
 
     for (auto hatch : world[real_room(GET_OBJ_VAL(vehicle, 0))]->getInventory()) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
@@ -449,7 +449,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
 ACMD(do_drive) {
     int dir, confirmed = false, count = 0;
-    struct obj_data *vehicle, *controls;
+    Object *vehicle, *controls;
     char arg3[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg3);
@@ -1126,7 +1126,7 @@ ACMD(do_drive) {
 }
 
 ACMD(do_ship_fire) {
-    struct obj_data *vehicle, *controls;
+    Object *vehicle, *controls;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg1, arg2);
@@ -1141,7 +1141,7 @@ ACMD(do_ship_fire) {
         return;
     }
 
-    struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
+    Object *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int shot = false;
 
     for (auto obj : ch->getRoom()->getInventory()) {

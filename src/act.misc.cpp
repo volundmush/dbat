@@ -27,19 +27,19 @@
 #include "dbat/act.informative.h"
 
 /* local functions  */
-static void generate_multiform(struct char_data *ch, int count);
+static void generate_multiform(BaseCharacter *ch, int count);
 
-static void resolve_song(struct char_data *ch);
+static void resolve_song(BaseCharacter *ch);
 
 static int campfire_cook(int recipe);
 
-static int valid_recipe(struct char_data *ch, int recipe, int type);
+static int valid_recipe(BaseCharacter *ch, int recipe, int type);
 
-static int has_pole(struct char_data *ch);
+static int has_pole(BaseCharacter *ch);
 
-static void catch_fish(struct char_data *ch, int quality);
+static void catch_fish(BaseCharacter *ch, int quality);
 
-static int valid_silk(struct obj_data *obj);
+static int valid_silk(Object *obj);
 
 
 ACMD(do_spiritcontrol) {
@@ -98,7 +98,7 @@ ACMD(do_nogrow) {
 ACMD(do_restring) {
 
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
+    Object *obj;
     int pay = 0;
 
     one_argument(argument, arg);
@@ -150,8 +150,8 @@ ACMD(do_multiform) {
         return;
     }
 
-    std::vector<char_data *> multis;
-    struct char_data *tch = nullptr, *next_v = nullptr;
+    std::vector<BaseCharacter *> multis;
+    BaseCharacter *tch = nullptr, *next_v = nullptr;
 
     for (auto tch : ch->getRoom()->getPeople()) {
         if (tch == ch || !IS_NPC(tch)) {
@@ -221,7 +221,7 @@ ACMD(do_multiform) {
 
 }
 
-static void generate_multiform(struct char_data *ch, int count) {
+static void generate_multiform(BaseCharacter *ch, int count) {
     char blamo[MAX_INPUT_LENGTH];
     sprintf(blamo, "p.%s", GET_NAME(ch));
 
@@ -280,8 +280,8 @@ static void generate_multiform(struct char_data *ch, int count) {
     }
 }
 
-void handle_multi_merge(struct char_data *form) {
-    struct char_data *ch = GET_ORIGINAL(form);
+void handle_multi_merge(BaseCharacter *form) {
+    BaseCharacter *ch = GET_ORIGINAL(form);
 
     if (!ch) {
         extract_char(form);
@@ -320,10 +320,10 @@ static const std::unordered_map<int, std::pair<room_vnum, std::string>> song_des
     {SONG_TELEPORT_KONACK, {8003, "Konack"}}
 };
 
-static void resolve_song(struct char_data *ch) {
+static void resolve_song(BaseCharacter *ch) {
 
-    struct char_data *vict = nullptr, *next_v = nullptr;
-    struct obj_data *obj2 = nullptr, *next_obj;
+    BaseCharacter *vict = nullptr, *next_v = nullptr;
+    Object *obj2 = nullptr, *next_obj;
     int diceroll = axion_dice(0);
     int skill = GET_SKILL(ch, SKILL_MYSTICMUSIC);
     int instrument = 0;
@@ -428,7 +428,7 @@ static void resolve_song(struct char_data *ch) {
                 }
                 break;
             case SONG_SHADOW_STITCH: {
-                auto applyShadow = [skill](struct char_data *user, struct char_data *target) {
+                auto applyShadow = [skill](BaseCharacter *user, BaseCharacter *target) {
                     user->decCurKI(user->getPercentOfMaxKI(.001) + skill);
                     if (!IS_NPC(target)) {
                         WAIT_STATE(target, PULSE_2SEC);
@@ -436,7 +436,7 @@ static void resolve_song(struct char_data *ch) {
                         assign_affect(target, AFF_SHADOWSTITCH, 0, -1, 0, 0, 0, 0, 0, -2);
                     }
                 };
-                auto msgShadow = [](struct char_data *ch, struct char_data* vict) {
+                auto msgShadow = [](BaseCharacter *ch, BaseCharacter* vict) {
                     act("@CYour forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n",
                         true, ch, nullptr, vict, TO_CHAR);
                     act("@c$n's@C forboding music has caused YOUR shadows to stitch into YOUR body, slow YOUR actions down!@n",
@@ -555,7 +555,7 @@ ACMD(do_song) {
         return;
     }
 
-    struct obj_data *obj2 = nullptr, *next_obj;
+    Object *obj2 = nullptr, *next_obj;
     int instrument = 0;
 
     for (auto obj2 : ch->getInventory()) {
@@ -790,7 +790,7 @@ ACMD(do_moondust) {
         true, ch, nullptr, nullptr, TO_ROOM);
     ch->sendf("@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
 
-    struct char_data *vict = nullptr, *next_v = nullptr;
+    BaseCharacter *vict = nullptr, *next_v = nullptr;
 
     for (auto vict : ch->getRoom()->getPeople()) {
 
@@ -916,7 +916,7 @@ ACMD(do_liquefy) {
             return;
         }
     } else if (!strcasecmp(arg, "explode")) {
-        struct char_data *vict;
+        BaseCharacter *vict;
         if (GRAPPLED(ch)) {
             GRAPPLING(GRAPPLED(ch)) = nullptr;
             GRAPPLED(ch) = nullptr;
@@ -1033,7 +1033,7 @@ ACMD(do_lifeforce) {
 }
 
 ACMD(do_defend) {
-    struct char_data *vict;
+    BaseCharacter *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1098,7 +1098,7 @@ ACMD(do_fish) {
             ch->sendf("You are not holding a fishing pole.\r\n");
             return;
         } else {
-            struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
+            Object *pole = GET_EQ(ch, WEAR_WIELD2);
             if (GET_OBJ_TYPE(pole) != ITEM_FISHPOLE) {
                 ch->sendf("You do not have a fishing pole in your hand!\r\n");
                 return;
@@ -1171,7 +1171,7 @@ ACMD(do_fish) {
             ch->sendf("You are not holding a fishing pole.\r\n");
             return;
         } else {
-            struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
+            Object *pole = GET_EQ(ch, WEAR_WIELD2);
             if (GET_OBJ_TYPE(pole) != ITEM_FISHPOLE) {
                 ch->sendf("You do not have a fishing pole in your hand!\r\n");
                 return;
@@ -1179,7 +1179,7 @@ ACMD(do_fish) {
                 ch->sendf("Your fishing pole already has bait on its hook.\r\n");
                 return;
             } else {
-                struct obj_data *bait;
+                Object *bait;
 
                 if (!*arg2) {
                     ch->sendf("Syntax: fish apply (bait)\r\n");
@@ -1220,10 +1220,10 @@ ACMD(do_fish) {
     }
 } /* End fish */
 
-static int has_pole(struct char_data *ch) {
+static int has_pole(BaseCharacter *ch) {
 
     if (GET_EQ(ch, WEAR_WIELD2)) {
-        struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
+        Object *pole = GET_EQ(ch, WEAR_WIELD2);
         if (GET_OBJ_TYPE(pole) == ITEM_FISHPOLE) {
             return (true);
         }
@@ -1234,7 +1234,7 @@ static int has_pole(struct char_data *ch) {
 
 void fish_update(uint64_t heartPulse, double deltaTime) {
 
-    struct char_data *i, *next_char, *ch = nullptr;
+    BaseCharacter *i, *next_char, *ch = nullptr;
     int quality = 0;
 
     for (i = character_list; i; i = next_char) {
@@ -1276,7 +1276,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                         GET_FISHSTATE(ch) = FISH_NOFISH;
                         ch->clearFlag(FlagType::PC, PLR_FISHING);
                         if (has_pole(ch) == true) {
-                            struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
+                            Object *pole = GET_EQ(ch, WEAR_WIELD2);
                             GET_OBJ_VAL(pole, 0) = 0;
                         }
                     } else if (GET_FISHSTATE(ch) == FISH_HOOKED && rand_number(1, 20) >= 12) {
@@ -1313,8 +1313,8 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
 
 }
 
-static void catch_fish(struct char_data *ch, int quality) {
-    struct obj_data *fish = nullptr;
+static void catch_fish(BaseCharacter *ch, int quality) {
+    Object *fish = nullptr;
     int num = 1000;
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH)) {
@@ -1425,7 +1425,7 @@ static void catch_fish(struct char_data *ch, int quality) {
         quality += rand_number(2, 7);
     }
 
-    struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
+    Object *pole = GET_EQ(ch, WEAR_WIELD2);
 
     if (GET_OBJ_VAL(pole, 0) * 2 >= axion_dice(0)) {
         quality += 2;
@@ -1477,7 +1477,7 @@ ACMD(do_extract) {
     }
 
     char arg[MAX_INPUT_LENGTH], argu[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
-    struct obj_data *obj = nullptr, *obj2 = nullptr;
+    Object *obj = nullptr, *obj2 = nullptr;
     int skill = GET_SKILL(ch, SKILL_EXTRACT), chance = axion_dice(0);
 
     half_chop(argument, arg, argu);
@@ -1544,7 +1544,7 @@ ACMD(do_extract) {
                 ch->sendf("It's not mature enough to extract from!\r\n");
                 return;
             }
-            struct obj_data *bottle = nullptr, *next_obj, *obj2;
+            Object *bottle = nullptr, *next_obj, *obj2;
             int found = false;
 
             for (auto obj2 : ch->getInventory()) {
@@ -1590,7 +1590,7 @@ ACMD(do_extract) {
                 obj->extractFromWorld();
                 GET_OBJ_VAL(bottle, 6) += rand_number(4, 6);
                 if (GET_OBJ_VAL(bottle, 6) >= 24) {
-                    struct obj_data *filled = read_object(3424, VIRTUAL);
+                    Object *filled = read_object(3424, VIRTUAL);
                     bottle->extractFromWorld();
                     GET_OBJ_VAL(filled, 6) = 24;
                     filled->addToLocation(ch);
@@ -1639,7 +1639,7 @@ ACMD(do_runic) {
         return;
     }
 
-    struct obj_data *obj, *next_obj, *bottle = nullptr;
+    Object *obj, *next_obj, *bottle = nullptr;
     int found = false, amount = 0, brush = false;
 
     for (auto obj : ch->getInventory()) {
@@ -1674,7 +1674,7 @@ ACMD(do_runic) {
     else
         inkcost += 2;
 
-    struct char_data *vict;
+    BaseCharacter *vict;
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
         ch->sendf("You can't seem to find that person.\r\n");
@@ -1721,7 +1721,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         } else {
@@ -1741,7 +1741,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         }
@@ -1768,7 +1768,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         } else {
@@ -1788,7 +1788,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         }
@@ -1815,7 +1815,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         }
@@ -1839,7 +1839,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         } else {
@@ -1859,7 +1859,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         }
@@ -1888,7 +1888,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         } else {
@@ -1910,7 +1910,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         }
@@ -1938,7 +1938,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         } else {
@@ -1959,7 +1959,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         }
@@ -1984,7 +1984,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         } else {
@@ -2002,7 +2002,7 @@ ACMD(do_runic) {
             GET_OBJ_VAL(bottle, 6) -= inkcost;
             if (GET_OBJ_VAL(bottle, 6) <= 0) {
                 bottle->extractFromWorld();
-                struct obj_data *empty = read_object(3423, VIRTUAL);
+                Object *empty = read_object(3423, VIRTUAL);
                 empty->addToLocation(ch);
             }
         }
@@ -2035,7 +2035,7 @@ ACMD(do_scry) {
         return;
     }
 
-    struct char_data *vict;
+    BaseCharacter *vict;
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
         ch->sendf("Who are you using Oracle Scry on?\r\n");
@@ -2092,7 +2092,7 @@ ACMD(do_scry) {
 
 }
 
-void ash_burn(struct char_data *ch) {
+void ash_burn(BaseCharacter *ch) {
 
     if(!ch) return;
     if(IS_DEMON(ch) || IS_ANDROID(ch)) return;
@@ -2142,7 +2142,7 @@ ACMD(do_ashcloud) {
         return;
     }
 
-    struct obj_data *ash = nullptr, *obj, *next_obj;
+    Object *ash = nullptr, *obj, *next_obj;
     int there = false;
 
     ash = ch->findObjectVnum(1305);
@@ -2218,7 +2218,7 @@ ACMD(do_ashcloud) {
         return;
     }
 
-    struct obj_data *ashcloud;
+    Object *ashcloud;
     reveal_hiding(ch, 0);
 
     ch->decCurKI(cost);
@@ -2249,7 +2249,7 @@ ACMD(do_ashcloud) {
 
 ACMD(do_resize) {
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
+    Object *obj;
 
     two_arguments(argument, arg, arg2);
 
@@ -2305,7 +2305,7 @@ ACMD(do_resize) {
 }
 
 ACMD(do_healglow) {
-    struct char_data *vict;
+    BaseCharacter *vict;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
@@ -2384,7 +2384,7 @@ ACMD(do_amnisiac) {
     }
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    BaseCharacter *vict;
     int skill;
 
     two_arguments(argument, arg, arg2);
@@ -2493,7 +2493,7 @@ ACMD(do_shimmer) {
 
     int skill = 0, perc = 0, location = 0;
     int64_t cost = 0;
-    struct char_data *tar = nullptr;
+    BaseCharacter *tar = nullptr;
 
     char arg[MAX_INPUT_LENGTH] = "";
 
@@ -2643,7 +2643,7 @@ ACMD(do_channel) {
         return;
     }
 
-    struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
+    Object *obj, *next_obj = nullptr, *ruby = nullptr;
     int found = false;
 
     for (auto obj : ch->getInventory()) {
@@ -2739,7 +2739,7 @@ ACMD(do_hydromancy) {
     int attempt = 0;
 
     if (!strcasecmp(arg, "spike")) {
-        struct obj_data *obj;
+        Object *obj;
 
         cost = 100 + (GET_SKILL(ch, SKILL_STYLE) / (1 + (GET_MAX_MANA(ch) * 0.5)));
 
@@ -2805,7 +2805,7 @@ ACMD(do_hydromancy) {
             return;
         }
 
-        struct char_data *vict, *next_v;
+        BaseCharacter *vict, *next_v;
 
         int last = LASTATK(ch);
         LASTATK(ch) = 500;
@@ -2879,7 +2879,7 @@ ACMD(do_kanso) {
         return;
     }
 
-    struct char_data *vict;
+    BaseCharacter *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -2972,7 +2972,7 @@ ACMD(do_kanso) {
 
 }
 
-void rpp_feature(struct char_data *ch, const char *arg) {
+void rpp_feature(BaseCharacter *ch, const char *arg) {
     int cost = 0, change = false;
 
     if (!*arg) {
@@ -3025,7 +3025,7 @@ ACMD(do_instill) {
     if (IS_NPC(ch))
         return;
 
-    struct obj_data *obj, *token;
+    Object *obj, *token;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -3226,7 +3226,7 @@ ACMD(do_bury) {
         return;
     }
 
-    struct obj_data *obj = nullptr, *buried = nullptr, *fobj = nullptr, *next_obj;
+    Object *obj = nullptr, *buried = nullptr, *fobj = nullptr, *next_obj;
 
     for (auto buried : ch->getInventory()) {
         if (OBJ_FLAGGED(buried, ITEM_BURIED)) {
@@ -3383,7 +3383,7 @@ ACMD(do_ensnare) {
         return;
     }
 
-    struct obj_data *weave, *obj = nullptr, *next_obj;
+    Object *weave, *obj = nullptr, *next_obj;
     int found = false;
 
     for (auto weave : ch->getInventory()) {
@@ -3399,7 +3399,7 @@ ACMD(do_ensnare) {
     } else {
         int prob = GET_SKILL(ch, SKILL_ENSNARE), perc = axion_dice(0);
         char arg[MAX_INPUT_LENGTH];
-        struct char_data *vict;
+        BaseCharacter *vict;
 
         one_argument(argument, arg);
 
@@ -3501,7 +3501,7 @@ ACMD(do_ensnare) {
 }
 
 /* This determines of an object is a suitable bundle of silk or not */
-static int valid_silk(struct obj_data *obj) {
+static int valid_silk(Object *obj) {
     int value = 0;
 
     switch (GET_OBJ_VNUM(obj)) {
@@ -3524,7 +3524,7 @@ ACMD(do_silk) {
         return;
     }
 
-    struct obj_data *obj = nullptr, *weave = nullptr, *next_obj = nullptr, *weaved = nullptr;
+    Object *obj = nullptr, *weave = nullptr, *next_obj = nullptr, *weaved = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -3898,7 +3898,7 @@ ACMD(do_adrenaline) {
 }
 
 /* This handles displaying the rpp item store to a player. */
-void disp_rpp_store(struct char_data *ch) {
+void disp_rpp_store(BaseCharacter *ch) {
 
     ch->sendf("@m                        RPP Item Store@n\n");
     ch->sendf("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
@@ -3918,8 +3918,8 @@ void disp_rpp_store(struct char_data *ch) {
 }
 
 /* This handles buying an item from the rpp item store. */
-void handle_rpp_store(struct char_data *ch, int choice) {
-    struct obj_data *obj;
+void handle_rpp_store(BaseCharacter *ch, int choice) {
+    Object *obj;
     int objnum = 0, cost = 0;
 
     switch (choice) { /* Find the cost of their selection. */
@@ -4112,7 +4112,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
     }
 }
 
-static int valid_recipe(struct char_data *ch, int recipe, int type) {
+static int valid_recipe(BaseCharacter *ch, int recipe, int type) {
     /* Plant Variables */
     int tomato = -1, cucumber = -1, onion = -1, greenbean = -1, garlic = -1, redpep = -1;
     int potato = -1, carrot = -1, brownmush = -1, lettuce = -1;
@@ -4679,7 +4679,7 @@ ACMD(do_cook) {
         return;
     } else {
         int num = atoi(arg), pass = false;
-        struct obj_data *meal = nullptr;
+        Object *meal = nullptr;
 
         int recipe = -1;
         switch (num) {
@@ -5280,8 +5280,8 @@ ACMD(do_feed) {
         return;
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct char_data *vict;
-    struct obj_data *obj;
+    BaseCharacter *vict;
+    Object *obj;
 
     two_arguments(argument, arg, arg2);
 
@@ -5348,7 +5348,7 @@ ACMD(do_spoil) {
         return;
 
     char arg[MAX_INPUT_LENGTH];
-    struct obj_data *obj;
+    Object *obj;
     int type = 0;
 
     one_argument(argument, arg);
@@ -5399,7 +5399,7 @@ ACMD(do_spoil) {
 
     GET_OBJ_VAL(obj, VAL_CORPSE_HEAD) = 0;
 
-    struct obj_data *body_part;
+    Object *body_part;
     char part[1000];
     char buf[1000];
     char buf2[1000];

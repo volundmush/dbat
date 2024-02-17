@@ -15,54 +15,54 @@ nlohmann::json extra_descr_data::serialize() {
     return j;
 }
 
-std::vector<room_data*> unit_data::getRooms() {
-    std::vector<struct room_data*> out;
+std::vector<Room*> GameEntity::getRooms() {
+    std::vector<Room*> out;
     for(auto u : contents) {
-        if(auto r = dynamic_cast<room_data*>(u); r) out.push_back(r);
+        if(auto r = dynamic_cast<Room*>(u); r) out.push_back(r);
     }
     return out;
 }
 
-std::vector<char_data*> unit_data::getPeople() {
-    std::vector<struct char_data*> out;
+std::vector<BaseCharacter*> GameEntity::getPeople() {
+    std::vector<BaseCharacter*> out;
     for(auto u : contents) {
-        if(auto c = dynamic_cast<char_data*>(u); c) out.push_back(c);
+        if(auto c = dynamic_cast<BaseCharacter*>(u); c) out.push_back(c);
     }
     return out;
 }
 
-std::vector<obj_data*> unit_data::getInventory() {
-    std::vector<obj_data*> out;
+std::vector<Object*> GameEntity::getInventory() {
+    std::vector<Object*> out;
     for(auto u : contents) {
-        auto o = dynamic_cast<obj_data*>(u);
+        auto o = dynamic_cast<Object*>(u);
         if(o && o->locationType == 0) out.push_back(o);
     }
     return out;
 }
 
-std::map<int, obj_data*> unit_data::getEquipment() {
-    std::map<int, obj_data*> out;
+std::map<int, Object*> GameEntity::getEquipment() {
+    std::map<int, Object*> out;
     for(auto u : contents) {
-        auto o = dynamic_cast<obj_data*>(u);
+        auto o = dynamic_cast<Object*>(u);
         if(o && o->locationType > 0) out[o->locationType] = o;
     }
     return out;
 }
 
-std::map<int, exit_data*> unit_data::getExits() {
-    std::map<int, exit_data*> out;
+std::map<int, Exit*> GameEntity::getExits() {
+    std::map<int, Exit*> out;
     for(auto u : contents) {
-        auto o = dynamic_cast<exit_data*>(u);
+        auto o = dynamic_cast<Exit*>(u);
         if(!o) continue;
         out[o->locationType] = o;
     }
     return out;
 }
 
-std::map<int, exit_data*> unit_data::getUsableExits() {
-    std::map<int, exit_data*> out;
+std::map<int, Exit*> GameEntity::getUsableExits() {
+    std::map<int, Exit*> out;
     for(auto u : contents) {
-        auto o = dynamic_cast<exit_data*>(u);
+        auto o = dynamic_cast<Exit*>(u);
         if(!o) continue;
         if(o->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
         auto dest = o->getDestination();
@@ -73,15 +73,15 @@ std::map<int, exit_data*> unit_data::getUsableExits() {
     return out;
 }
 
-unit_data* unit_data::getLocation() {
+GameEntity* GameEntity::getLocation() {
     return location;
 }
 
-room_data* unit_data::getRoom() {
-    return dynamic_cast<room_data*>(getLocation());
+Room* GameEntity::getRoom() {
+    return dynamic_cast<Room*>(getLocation());
 }
 
-room_data* unit_data::getAbsoluteRoom() {
+Room* GameEntity::getAbsoluteRoom() {
     if(auto room = getRoom(); room) {
         return room;
     }
@@ -89,7 +89,7 @@ room_data* unit_data::getAbsoluteRoom() {
     return nullptr;
 }
 
-nlohmann::json unit_data::serialize() {
+nlohmann::json GameEntity::serialize() {
     nlohmann::json j;
 
     if(vn != NOTHING) j["vn"] = vn;
@@ -123,7 +123,7 @@ nlohmann::json unit_data::serialize() {
 }
 
 
-void unit_data::deserialize(const nlohmann::json& j) {
+void GameEntity::deserialize(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"];
     if(j.contains("name")) {
         if(name) free(name);
@@ -163,19 +163,19 @@ void unit_data::deserialize(const nlohmann::json& j) {
 
 }
 
-void unit_data::activateContents() {
+void GameEntity::activateContents() {
 
 }
 
-void unit_data::deactivateContents() {
+void GameEntity::deactivateContents() {
 
 }
 
-std::string unit_data::scriptString() {
+std::string GameEntity::scriptString() {
     return fmt::format("@D[@wT{}@D]@n", fmt::join(proto_script, ","));
 }
 
-double unit_data::getInventoryWeight() {
+double GameEntity::getInventoryWeight() {
     double weight = 0;
     for(auto obj : getInventory()) {
         weight += obj->getTotalWeight();
@@ -183,7 +183,7 @@ double unit_data::getInventoryWeight() {
     return weight;
 }
 
-int64_t unit_data::getInventoryCount() {
+int64_t GameEntity::getInventoryCount() {
     int64_t total = 0;
     for(auto obj : getInventory()) {
         total++;
@@ -191,7 +191,7 @@ int64_t unit_data::getInventoryCount() {
     return total;
 }
 
-struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
+Object* GameEntity::findObject(const std::function<bool(Object*)> &func, bool working) {
     for(auto obj : getInventory()) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
@@ -202,12 +202,12 @@ struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*
     return nullptr;
 }
 
-struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
+Object* GameEntity::findObjectVnum(obj_vnum objVnum, bool working) {
     return findObject([objVnum](auto o) {return o->vn == objVnum;}, working);
 }
 
-std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
-    std::set<struct obj_data*> out;
+std::set<Object*> GameEntity::gatherObjects(const std::function<bool(Object*)> &func, bool working) {
+    std::set<Object*> out;
     for(auto obj : getInventory()) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
@@ -219,77 +219,77 @@ std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(str
     return out;
 }
 
-std::string unit_data::getUIDString(bool active) {
+std::string GameEntity::getUIDString(bool active) {
     return fmt::format("#{}{}", uid, active ? "" : "!");
 }
 
-DgResults unit_data::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
+DgResults GameEntity::dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) {
     return "";
 }
 
-bool unit_data::isActive() {
+bool GameEntity::isActive() {
     return false;
 }
 
-std::string unit_data::getName() {
+std::string GameEntity::getName() {
     return name ? name : "";
 }
 
-void unit_data::setName(const std::string& n) {
+void GameEntity::setName(const std::string& n) {
     if(name) free(name);
     name = strdup(n.c_str());
 }
 
-std::string unit_data::getShortDesc() {
+std::string GameEntity::getShortDesc() {
     return short_description ? short_description : "";
 }
 
-void unit_data::setShortDesc(const std::string& n) {
+void GameEntity::setShortDesc(const std::string& n) {
     if(short_description) free(short_description);
     short_description = strdup(n.c_str());
 }
 
-std::string unit_data::getRoomDesc() {
+std::string GameEntity::getRoomDesc() {
     return room_description ? room_description : "";
 }
 
-void unit_data::setRoomDesc(const std::string& n) {
+void GameEntity::setRoomDesc(const std::string& n) {
     if(room_description) free(room_description);
     room_description = strdup(n.c_str());
 }
 
-std::string unit_data::getLookDesc() {
+std::string GameEntity::getLookDesc() {
     return look_description ? look_description : "";
 }
 
-void unit_data::setLookDesc(const std::string& n) {
+void GameEntity::setLookDesc(const std::string& n) {
     if(look_description) free(look_description);
     look_description = strdup(n.c_str());
 }
 
 
-void unit_data::checkMyID() {
+void GameEntity::checkMyID() {
     if(uid == -1) {
         uid = getNextUID();
         basic_mud_log("Unit Found with ID -1. Automatically fixed to ID %d", uid);
     }
 }
 
-std::string unit_data::getDisplayName(struct unit_data* ch) {
+std::string GameEntity::getDisplayName(GameEntity* ch) {
     return "Nameless";
 }
 
-std::string unit_data::renderAppearance(struct unit_data* ch) {
+std::string GameEntity::renderAppearance(GameEntity* ch) {
     return "You see nothing special.";
 }
 
-std::vector<std::string> unit_data::getKeywords(struct unit_data* ch) {
+std::vector<std::string> GameEntity::getKeywords(GameEntity* ch) {
     return {};
 }
 
 
 
-unit_data::~unit_data() {
+GameEntity::~GameEntity() {
     if(name) free(name);
     if(short_description) free(short_description);
     if(room_description) free(room_description);
@@ -298,18 +298,18 @@ unit_data::~unit_data() {
 }
 
 
-void unit_data::assignTriggers() {
+void GameEntity::assignTriggers() {
     // does nothing.
 }
 
-bool unit_data::checkFlag(FlagType type, int flag) {
+bool GameEntity::checkFlag(FlagType type, int flag) {
     if(auto foundType = flags.find(type); foundType != flags.end()) {
         return foundType->second.contains(flag);
     }
     return false;
 }
 
-void unit_data::setFlag(FlagType type, int flag, bool value) {
+void GameEntity::setFlag(FlagType type, int flag, bool value) {
     auto &f = flags[type];
     if(value) {
         f.insert(flag);
@@ -318,11 +318,11 @@ void unit_data::setFlag(FlagType type, int flag, bool value) {
     }
 }
 
-void unit_data::clearFlag(FlagType type, int flag) {
+void GameEntity::clearFlag(FlagType type, int flag) {
     setFlag(type, flag, false);
 }
 
-bool unit_data::flipFlag(FlagType type, int flag) {
+bool GameEntity::flipFlag(FlagType type, int flag) {
     auto &f = flags[type];
     if(f.contains(flag)) {
         f.erase(flag);
@@ -334,7 +334,7 @@ bool unit_data::flipFlag(FlagType type, int flag) {
 }
 
 
-nlohmann::json unit_data::serializeRelations() {
+nlohmann::json GameEntity::serializeRelations() {
     nlohmann::json j = nlohmann::json::object();
 
     if(location) {
@@ -346,7 +346,7 @@ nlohmann::json unit_data::serializeRelations() {
     return j;
 }
 
-void unit_data::deserializeRelations(const nlohmann::json& j) {
+void GameEntity::deserializeRelations(const nlohmann::json& j) {
     if(j.contains("location")) {
         auto loc = j["location"].get<std::string>();
         auto locUnit = resolveUID(loc);
@@ -360,7 +360,7 @@ void unit_data::deserializeRelations(const nlohmann::json& j) {
     }
 }
 
-void unit_data::addToLocation(unit_data *u, int locationType, std::optional<coordinates> coords) {
+void GameEntity::addToLocation(GameEntity *u, int locationType, std::optional<coordinates> coords) {
     if(location) {
         basic_mud_log("Attempted to add unit '%d: %s' to location, but location was already found.", uid, getName().c_str());
         return;
@@ -372,7 +372,7 @@ void unit_data::addToLocation(unit_data *u, int locationType, std::optional<coor
     u->handleAdd(this);
 }
 
-void unit_data::removeFromLocation() {
+void GameEntity::removeFromLocation() {
     if(!location) {
         basic_mud_log("Attempted to remove unit '%d: %s' from location, but location was not found.", uid, getName().c_str());
         locationType = -1;
@@ -389,25 +389,25 @@ void unit_data::removeFromLocation() {
     
 }
 
-void unit_data::handleAdd(unit_data *u) {
+void GameEntity::handleAdd(GameEntity *u) {
     
 }
 
 
-void unit_data::handleRemove(unit_data *u) {
+void GameEntity::handleRemove(GameEntity *u) {
 
     // remove uid from loc->contents
     
 }
 
-std::vector<unit_data*> unit_data::getNeighbors(bool visible) {
+std::vector<GameEntity*> GameEntity::getNeighbors(bool visible) {
     auto loc = getLocation();
     if(!loc) return {};
     return loc->getNeighbors(visible);
 }
 
-std::vector<unit_data*> unit_data::getNeighborsFor(unit_data *u, bool visible) {
-    std::vector<unit_data*> out;
+std::vector<GameEntity*> GameEntity::getNeighborsFor(GameEntity *u, bool visible) {
+    std::vector<GameEntity*> out;
     for(auto n : contents) {
         if(u == n) continue;
         if(visible && !u->canSee(n)) continue;
@@ -440,7 +440,7 @@ Searcher& Searcher::setAllowRecurse(bool allow) {
 }
 
 
-std::vector<unit_data*> Searcher::search() {
+std::vector<GameEntity*> Searcher::search() {
     trim(args);
     if(args.empty()) return {};
     if(allowSelf && iequals(args, "self")) return {caller};
@@ -495,31 +495,31 @@ std::vector<unit_data*> Searcher::search() {
     return {};
 }
 
-unit_data* Searcher::getOne() {
+GameEntity* Searcher::getOne() {
     auto results = search();
     if(results.size() == 1) return results.front();
     return nullptr;
 }
 
 
-bool unit_data::isEnvironment() {
+bool GameEntity::isEnvironment() {
     return false;
 }
 
 
-bool unit_data::isRegion() {
+bool GameEntity::isRegion() {
     return false;
 }
 
-bool unit_data::isStructure() {
+bool GameEntity::isStructure() {
     return false;
 }
 
-bool unit_data::isPlanet() {
+bool GameEntity::isPlanet() {
     return false;
 }
 
-unit_data* unit_data::getEnvironment() {
+GameEntity* GameEntity::getEnvironment() {
     auto loc = getLocation();
     while(loc) {
         if(loc->isEnvironment()) return loc;
@@ -529,7 +529,7 @@ unit_data* unit_data::getEnvironment() {
     return nullptr;
 }
 
-unit_data* unit_data::getRegion() {
+GameEntity* GameEntity::getRegion() {
     auto loc = getLocation();
     while(loc) {
         if(loc->isRegion()) return loc;
@@ -539,7 +539,7 @@ unit_data* unit_data::getRegion() {
     return nullptr;
 }
 
-unit_data* unit_data::getStructure() {
+GameEntity* GameEntity::getStructure() {
     auto loc = getLocation();
     while(loc) {
         if(loc->isStructure()) return loc;
@@ -549,7 +549,7 @@ unit_data* unit_data::getStructure() {
     return nullptr;
 }
 
-unit_data* unit_data::getPlanet() {
+GameEntity* GameEntity::getPlanet() {
     auto loc = getLocation();
     while(loc) {
         if(loc->isPlanet()) return loc;
@@ -560,28 +560,28 @@ unit_data* unit_data::getPlanet() {
 
 }
 
-double unit_data::myEnvVar(EnvVar v) {
+double GameEntity::myEnvVar(EnvVar v) {
     if(auto env = getEnvironment(); env) return env->getEnvVar(v);
     return 0.0;
 }
 
 
-std::optional<double> unit_data::emitEnvVar(EnvVar v) {
+std::optional<double> GameEntity::emitEnvVar(EnvVar v) {
     if(auto found = envVars.find(v); found != envVars.end()) {
         return found->second;
     }
     return {};
 }
 
-double unit_data::getEnvVar(EnvVar v) {
+double GameEntity::getEnvVar(EnvVar v) {
     return 0.0;
 }
 
-void unit_data::onHolderExtraction() {
+void GameEntity::onHolderExtraction() {
     extractFromWorld();
 }
 
-void unit_data::extractFromWorld() {
+void GameEntity::extractFromWorld() {
     if(!exists) return; // prevent recursion.
 
     exists = false;
@@ -594,116 +594,116 @@ void unit_data::extractFromWorld() {
 
 }
 
-void unit_data::executeCommand(const std::string& cmd) {
+void GameEntity::executeCommand(const std::string& cmd) {
     // does nothing by default... 
 }
 
-bool unit_data::isInsideNormallyDark() {
+bool GameEntity::isInsideNormallyDark() {
     return false;
 }
 
-bool unit_data::isInsideDark() {
+bool GameEntity::isInsideDark() {
     return false;
 }
 
-bool unit_data::isProvidingLight() {
+bool GameEntity::isProvidingLight() {
     return false;
 }
 
-bool unit_data::isInvisible() {
+bool GameEntity::isInvisible() {
     return false;
 }
 
-bool unit_data::isAdminInvisible() {
+bool GameEntity::isAdminInvisible() {
     return false;
 }
 
-bool unit_data::canSeeInvisible() {
+bool GameEntity::canSeeInvisible() {
     return false;
 }
 
-bool unit_data::canSeeInDark() {
+bool GameEntity::canSeeInDark() {
     return false;
 }
 
-bool unit_data::isHidden() {
+bool GameEntity::isHidden() {
     return false;
 }
 
-bool unit_data::canSeeHidden() {
+bool GameEntity::canSeeHidden() {
     return false;
 }
 
-bool unit_data::canSeeAdminInvisible() {
+bool GameEntity::canSeeAdminInvisible() {
     return false;
 }
 
-bool unit_data::canSee(unit_data *u) {
+bool GameEntity::canSee(GameEntity *u) {
     if(canSeeAdminInvisible()) return true;
     if(u->isInvisible() && !canSeeInvisible()) return false;
     if(u->isHidden() && !canSeeHidden()) return false;
     return true;
 }
 
-void unit_data::sendEvent(const Event& event) {
+void GameEntity::sendEvent(const Event& event) {
     // does nothing...
 }
 
-void unit_data::sendEventContents(const Event& event) {
+void GameEntity::sendEventContents(const Event& event) {
     for(auto c : contents) {
         c->sendEvent(event);
     }
 }
 
-void unit_data::sendText(const std::string& text) {
+void GameEntity::sendText(const std::string& text) {
     // does nothing by default.
 }
 
-void unit_data::sendLine(const std::string& text) {
+void GameEntity::sendLine(const std::string& text) {
     if(text.ends_with("\r\n")) sendText(text);
     else sendText(text + "\r\n");
 }
 
-void unit_data::sendTextContents(const std::string& text) {
+void GameEntity::sendTextContents(const std::string& text) {
     for(auto c : contents) {
         c->sendText(text);
     }
 }
 
-void unit_data::sendLineContents(const std::string& text) {
+void GameEntity::sendLineContents(const std::string& text) {
     for(auto c : contents) {
         c->sendLine(text);
     }
 }
 
-std::optional<std::string> unit_data::checkAllowInventoryAcesss(unit_data *u) {
+std::optional<std::string> GameEntity::checkAllowInventoryAcesss(GameEntity *u) {
     return "you can't access it!";
 }
 
-std::optional<std::string> unit_data::checkIsGettable(unit_data *u) {
+std::optional<std::string> GameEntity::checkIsGettable(GameEntity *u) {
     return "it cannot be picked up!";
 }
 
-std::optional<std::string> unit_data::checkIsDroppable(unit_data *u) {
+std::optional<std::string> GameEntity::checkIsDroppable(GameEntity *u) {
     return "it cannot be dropped!";
 }
 
-std::optional<std::string> unit_data::checkIsGivable(unit_data *u) {
+std::optional<std::string> GameEntity::checkIsGivable(GameEntity *u) {
     return "it cannot be given!";
 }
 
-std::optional<std::string> unit_data::checkCanStore(unit_data *u) {
+std::optional<std::string> GameEntity::checkCanStore(GameEntity *u) {
     return "you can't store it!";
 }
 
-std::optional<std::string> unit_data::checkAllowReceive(unit_data *giver, unit_data *u) {
+std::optional<std::string> GameEntity::checkAllowReceive(GameEntity *giver, GameEntity *u) {
     return "you can't give it!";
 }
 
-std::optional<std::string> unit_data::checkAllowEquip(unit_data *u, int location) {
+std::optional<std::string> GameEntity::checkAllowEquip(GameEntity *u, int location) {
     return "you can't equip it!";
 }
 
-std::optional<std::string> unit_data::checkAllowRemove(unit_data *u) {
+std::optional<std::string> GameEntity::checkAllowRemove(GameEntity *u) {
     return "you can't remove it!";
 }

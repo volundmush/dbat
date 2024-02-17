@@ -4,31 +4,31 @@
 
 /* act.item.c */
 // global variables
-extern struct obj_data *obj_selling;
-extern struct char_data *ch_selling, *ch_buying;
+extern Object *obj_selling;
+extern BaseCharacter *ch_selling, *ch_buying;
 
 // functions
-extern int check_saveroom_count(struct char_data *ch, struct obj_data *cont);
+extern int check_saveroom_count(BaseCharacter *ch, Object *cont);
 
 extern void dball_load(uint64_t heartPulse, double deltaTime);
 
-extern int check_insidebag(struct obj_data *cont, double mult);
+extern int check_insidebag(Object *cont, double mult);
 
-extern int perform_get_from_room(struct char_data *ch, struct obj_data *obj);
+extern int perform_get_from_room(BaseCharacter *ch, Object *obj);
 
-extern void weight_change_object(struct obj_data *obj, int weight);
+extern void weight_change_object(Object *obj, int weight);
 
-extern void name_from_drinkcon(struct obj_data *obj);
+extern void name_from_drinkcon(Object *obj);
 
-extern void name_to_drinkcon(struct obj_data *obj, int type);
+extern void name_to_drinkcon(Object *obj, int type);
 
-extern void perform_wear(struct char_data *ch, struct obj_data *obj, int where);
+extern void perform_wear(BaseCharacter *ch, Object *obj, int where);
 
-extern int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
+extern int find_eq_pos(BaseCharacter *ch, Object *obj, char *arg);
 
-extern void perform_remove(struct char_data *ch, int pos);
+extern void perform_remove(BaseCharacter *ch, int pos);
 
-extern void stop_auction(int type, struct char_data *ch);
+extern void stop_auction(int type, BaseCharacter *ch);
 
 extern void check_auction(uint64_t heartPulse, double deltaTime);
 

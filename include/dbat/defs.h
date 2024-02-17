@@ -923,7 +923,7 @@ enum class FlagType : uint8_t {
 #define AUC_STAT        9
 #define AUC_BID            10
 
-/* Player flags: used by char_data.act */
+/* Player flags: used by BaseCharacter.act */
 #define PLR_KILLER    0   /* Player is a player-killer        */
 #define PLR_THIEF    1   /* Player is a player-thief         */
 #define PLR_FROZEN    2   /* Player is frozen                 */
@@ -1010,7 +1010,7 @@ enum class FlagType : uint8_t {
 /* Mob Personalty */
 #define MAX_PERSONALITIES 5
 
-/* Mobile flags: used by char_data.act */
+/* Mobile flags: used by BaseCharacter.act */
 #define MOB_SPEC        0  /* Mob has a callable spec-proc   	*/
 #define MOB_SENTINEL        1  /* Mob should not move            	*/
 #define MOB_NOSCAVENGER        2  /* Mob won't pick up items from rooms*/
@@ -1049,7 +1049,7 @@ enum class FlagType : uint8_t {
 
 #define NUM_MOB_FLAGS 35
 
-/*  flags: used by char_data.player_specials.pref */
+/*  flags: used by BaseCharacter.player_specials.pref */
 #define PRF_BRIEF    0  /* Room descs won't normally be shown	*/
 #define PRF_COMPACT    1  /* No extra CRLF pair before prompts		*/
 #define PRF_DEAF    2  /* Can't hear shouts              		*/
@@ -1124,7 +1124,7 @@ enum class FlagType : uint8_t {
 #define EXIT_LEV(ch) (exitlevel(ch))
 
 
-/* Affect bits: used in char_data.affected_by */
+/* Affect bits: used in BaseCharacter.affected_by */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
 #define AFF_DONTUSE           0    /* DON'T USE! 		*/
 #define AFF_BLIND             1    /* (R) Char is blind         */
@@ -1311,7 +1311,7 @@ enum class FlagType : uint8_t {
 
 #define NUM_COLOR            16
 
-/* Character equipment positions: used as index for char_data.equipment[] */
+/* Character equipment positions: used as index for BaseCharacter.equipment[] */
 /* NOTE: Don't confuse these constants with the ITEM_ bitvectors
    which control the valid places you can wear a piece of equipment */
 #define WEAR_UNUSED0    0

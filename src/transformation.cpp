@@ -5,11 +5,11 @@
 #include "dbat/weather.h"
 
 namespace trans {
-    static std::string getCustomName(struct char_data* ch, FormID form) {
+    static std::string getCustomName(BaseCharacter* ch, FormID form) {
         return "Unknown";
     }
 
-    std::string getName(struct char_data* ch, FormID form) {
+    std::string getName(BaseCharacter* ch, FormID form) {
         switch (form) {
             case FormID::Base:
                 return "Base";
@@ -157,11 +157,11 @@ namespace trans {
         }
     }
 
-    static std::string getCustomAbbr(struct char_data* ch, FormID form) {
+    static std::string getCustomAbbr(BaseCharacter* ch, FormID form) {
         return "N/A";
     }
 
-    int getMasteryTier(char_data* ch, FormID form) {
+    int getMasteryTier(BaseCharacter* ch, FormID form) {
         if(ch->transforms.contains(form)) {
             double timeSpent = ch->transforms[form].timeSpentInForm;
             if (timeSpent > 100000)
@@ -174,7 +174,7 @@ namespace trans {
         }
     }
     
-    std::string getAbbr(struct char_data* ch, FormID form) {
+    std::string getAbbr(BaseCharacter* ch, FormID form) {
         switch (form) {
             case FormID::Base:
                 return "Base";
@@ -325,10 +325,10 @@ namespace trans {
         int location{};
         double modifier{0.0};
         int specific{-1};
-        std::function<double(struct char_data *ch)> func{};
+        std::function<double(BaseCharacter *ch)> func{};
     };
 
-    static double getModifierHelper(char_data* ch, FormID form, int location, int specific);
+    static double getModifierHelper(BaseCharacter* ch, FormID form, int location, int specific);
 
     static std::unordered_map<FormID, std::vector<trans_affect_type>> trans_affects = {
 
@@ -347,7 +347,7 @@ namespace trans {
             FormID::GoldenOozaru, {
                 {APPLY_HEIGHT_MULT, 9.0},
                 {APPLY_WEIGHT_MULT, 49.0},
-                {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {
+                {APPLY_ALL_VITALS, 0.0, -1, [](BaseCharacter *ch) {
                     if(ch->transforms.contains(FormID::SuperSaiyan4)) return getModifierHelper(ch, FormID::SuperSaiyan4, APPLY_ALL_VITALS, -1);
                     if(ch->transforms.contains(FormID::SuperSaiyan3)) return getModifierHelper(ch, FormID::SuperSaiyan3, APPLY_ALL_VITALS, -1);
                     if(ch->transforms.contains(FormID::SuperSaiyan2)) return getModifierHelper(ch, FormID::SuperSaiyan2, APPLY_ALL_VITALS, -1);
@@ -355,7 +355,7 @@ namespace trans {
                 }},
                 {APPLY_DEFENSE_PERC, -0.3},
                 {APPLY_DAMAGE_PERC, 0.3},
-                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {
+                {APPLY_VITALS_MULT, 0.0, -1, [](BaseCharacter *ch) {
                     if(ch->transforms.contains(FormID::SuperSaiyan4)) return getModifierHelper(ch, FormID::SuperSaiyan4, APPLY_VITALS_MULT, -1);
                     if(ch->transforms.contains(FormID::SuperSaiyan3)) return getModifierHelper(ch, FormID::SuperSaiyan3, APPLY_VITALS_MULT, -1);
                     if(ch->transforms.contains(FormID::SuperSaiyan2)) return getModifierHelper(ch, FormID::SuperSaiyan2, APPLY_VITALS_MULT, -1);
@@ -634,7 +634,7 @@ namespace trans {
         //Unbound Forms
         {
             FormID::PotentialUnleashed, {
-                {APPLY_VITALS_MULT,  0.0, -1, [](struct char_data *ch) {
+                {APPLY_VITALS_MULT,  0.0, -1, [](BaseCharacter *ch) {
                     if(ch->get(CharNum::Level) < 20) return 1.0;
                     if(ch->get(CharNum::Level) < 40) return 2.0;
                     if(ch->get(CharNum::Level) < 60) return 3.0;
@@ -648,12 +648,12 @@ namespace trans {
         {
             FormID::EvilAura, {
                 {APPLY_VITALS_MULT, 2.0},
-                {APPLY_PL_MULT,  0.0, -1, [](struct char_data *ch) {
+                {APPLY_PL_MULT,  0.0, -1, [](BaseCharacter *ch) {
 	                double healthBoost = (1 - ch->health) * 5;
 	                return healthBoost;
                 }},
                 {APPLY_ALL_VITALS, 1300000},
-                {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {
+                {APPLY_DAMAGE_PERC, 0.0, -1, [](BaseCharacter *ch) {
                     double healthBoost = 0.1;
                     if(ch->health < 0.75) {
                         healthBoost = (1 - ch->health) * 4;
@@ -665,16 +665,16 @@ namespace trans {
         },
         {
             FormID::UltraInstinct, {
-                {APPLY_ACCURACY, 0.0, -1, [](struct char_data *ch) {return 1 + (0.1 * getMasteryTier(ch, FormID::UltraInstinct));}},
-                {APPLY_KI_MULT, 0.0, -1, [](struct char_data *ch) {return 2 + (0.4 * getMasteryTier(ch, FormID::UltraInstinct));}},
-                {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {return -0.7 + (0.2 * getMasteryTier(ch, FormID::UltraInstinct));}},
-                {APPLY_PERFECT_DODGE, 0.0, -1, [](struct char_data *ch) {return -0.4 - (0.2 * getMasteryTier(ch, FormID::UltraInstinct));}},
+                {APPLY_ACCURACY, 0.0, -1, [](BaseCharacter *ch) {return 1 + (0.1 * getMasteryTier(ch, FormID::UltraInstinct));}},
+                {APPLY_KI_MULT, 0.0, -1, [](BaseCharacter *ch) {return 2 + (0.4 * getMasteryTier(ch, FormID::UltraInstinct));}},
+                {APPLY_DAMAGE_PERC, 0.0, -1, [](BaseCharacter *ch) {return -0.7 + (0.2 * getMasteryTier(ch, FormID::UltraInstinct));}},
+                {APPLY_PERFECT_DODGE, 0.0, -1, [](BaseCharacter *ch) {return -0.4 - (0.2 * getMasteryTier(ch, FormID::UltraInstinct));}},
             }
         },
 
     };
 
-    static double getModifierHelper(char_data* ch, FormID form, int location, int specific) {
+    static double getModifierHelper(BaseCharacter* ch, FormID form, int location, int specific) {
         if (form == FormID::Base) return 0.0;
         double out = 0.0;
         if (auto found = trans_affects.find(form); found != trans_affects.end()) {
@@ -692,7 +692,7 @@ namespace trans {
         return out;
     }
 
-    double getModifier(char_data* ch, int location, int specific) {
+    double getModifier(BaseCharacter* ch, int location, int specific) {
         return getModifierHelper(ch, ch->form, location, specific);
     }
 
@@ -745,7 +745,7 @@ namespace trans {
 
     };
 
-    double getStaminaDrain(char_data* ch, FormID form, bool upkeep) {
+    double getStaminaDrain(BaseCharacter* ch, FormID form, bool upkeep) {
         if (ch->form == FormID::Base) return 0.0;
 
         double drain = 0.0;
@@ -1129,7 +1129,7 @@ namespace trans {
 
     };
 
-    void handleEchoTransform(struct char_data* ch, FormID form) {
+    void handleEchoTransform(BaseCharacter* ch, FormID form) {
         if (auto found = trans_echoes.find(form); found != trans_echoes.end()) {
             auto& echo = found->second;
             act(echo.self.c_str(), true, ch, nullptr, nullptr, TO_CHAR);
@@ -1137,7 +1137,7 @@ namespace trans {
         }
     }
 
-    void handleEchoRevert(struct char_data* ch, FormID form) {
+    void handleEchoRevert(BaseCharacter* ch, FormID form) {
         if (form == FormID::Base) return;
 
         auto name = getName(ch, form);
@@ -1238,7 +1238,7 @@ namespace trans {
     };
 
 
-    std::optional<FormID> findForm(char_data* ch, const std::string& form) {
+    std::optional<FormID> findForm(BaseCharacter* ch, const std::string& form) {
         for (auto formFound : forms) {
             if (form == getAbbr(ch, formFound)) {
                 return formFound;
@@ -1275,7 +1275,7 @@ namespace trans {
         {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}}
     };
 
-    void initTransforms(char_data* ch) {
+    void initTransforms(BaseCharacter* ch) {
         for (auto form : race_forms.find(ch->race)->second) {
             if(!ch->transforms.contains(form)) {
                 ch->addTransform(form);
@@ -1283,7 +1283,7 @@ namespace trans {
         }
     }
 
-    std::set<FormID> getFormsFor(char_data* ch) {
+    std::set<FormID> getFormsFor(BaseCharacter* ch) {
         initTransforms(ch);
         auto forms = ch->transforms;
         std::set<FormID> pforms;
@@ -1316,7 +1316,7 @@ namespace trans {
             }
     }
 
-    void displayForms(char_data* ch) {
+    void displayForms(BaseCharacter* ch) {
         auto forms = getFormsFor(ch);
         if (forms.empty()) {
             ch->sendf("You have no forms. Bummer.\r\n");
@@ -1364,7 +1364,7 @@ namespace trans {
         }
     }
 
-    bool blockRevertDisallowed(struct char_data* ch, FormID form) {
+    bool blockRevertDisallowed(BaseCharacter* ch, FormID form) {
         auto curForm = ch->form;
         if (curForm == FormID::Base) return false;
 
@@ -1469,14 +1469,14 @@ namespace trans {
 
     };
 
-    int64_t getRequiredPL(struct char_data* ch, FormID trans) {
+    int64_t getRequiredPL(BaseCharacter* ch, FormID trans) {
         if (auto req = trans_pl.find(trans); req != trans_pl.end()) {
             return req->second * (1.0 + ch->transBonus);
         }
         return 0;
     }
 
-    std::optional<FormID> findFormFor(struct char_data* ch, const std::string& arg) {
+    std::optional<FormID> findFormFor(BaseCharacter* ch, const std::string& arg) {
         for (auto form: getFormsFor(ch)) {
             if (iequals(arg, getAbbr(ch, form))) return form;
         }
@@ -1484,7 +1484,7 @@ namespace trans {
         return {};
     }
 
-    bool unlock(struct char_data *ch, FormID form) {
+    bool unlock(BaseCharacter *ch, FormID form) {
         return true;
     }
 

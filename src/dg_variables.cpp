@@ -45,7 +45,7 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 
 /* perhaps not the best place for this, but I didn't want a new file */
-char *skill_percent(struct char_data *ch, char *skill) {
+char *skill_percent(BaseCharacter *ch, char *skill) {
     static char retval[16];
     int skillnum;
 
@@ -66,7 +66,7 @@ char *skill_percent(struct char_data *ch, char *skill) {
    Now returns the number of matching objects -- Welcor 02/04
 */
 
-int item_in_list(char *item, std::vector<obj_data*> list) {
+int item_in_list(char *item, std::vector<Object*> list) {
     int count = 0;
 
     if (!item || !*item)
@@ -75,7 +75,7 @@ int item_in_list(char *item, std::vector<obj_data*> list) {
     if (*item == UID_CHAR) {
         auto result = resolveUID(item);
         if(!result) return 0;
-        auto obj = dynamic_cast<obj_data*>(result);
+        auto obj = dynamic_cast<Object*>(result);
         if(!obj) return 0;
 
         for (auto i : list) {
@@ -114,7 +114,7 @@ int item_in_list(char *item, std::vector<obj_data*> list) {
    MUD -- 4dimensions.org:6000
 */
 
-int char_has_item(char *item, struct char_data *ch) {
+int char_has_item(char *item, BaseCharacter *ch) {
 
     /* If this works, no more searching needed */
     if (get_object_in_equip(ch, item) != nullptr)
@@ -220,7 +220,7 @@ DgResults scriptFindMob(trig_data *trig, const std::string& field, const std::st
         return "0";
     }
     auto i = 0;
-    for (auto ch : dynamic_cast<room_data*>(world[rrnum])->getPeople())
+    for (auto ch : dynamic_cast<Room*>(world[rrnum])->getPeople())
         if (GET_MOB_VNUM(ch) == mvnum)
             i++;
     return fmt::format("{}", i);
@@ -246,24 +246,24 @@ DgResults scriptGlobal(trig_data *trig, const std::string& field, const std::str
 
 DgResults scriptRandom(trig_data *trig, const std::string& field, const std::string& args) {
     auto type = trig->parent->attach_type;
-    struct char_data *enactor;
-    room_data *r;
+    BaseCharacter *enactor;
+    Room *r;
     switch(type) {
             case MOB_TRIGGER:
-                enactor = (struct char_data*)trig->sc->owner;
+                enactor = (BaseCharacter*)trig->sc->owner;
                 r = enactor->getRoom();
                 break;
             case OBJ_TRIGGER:
-                r = ((struct obj_data*)trig->sc->owner)->getRoom();
+                r = ((Object*)trig->sc->owner)->getRoom();
                 break;
             case WLD_TRIGGER:
-                r = (struct room_data*)trig->sc->owner;
+                r = (Room*)trig->sc->owner;
                 break;
         }
 
     if(iequals(field, "char")) {
         if(!r) return "";
-        std::vector<struct char_data*> candidates;
+        std::vector<BaseCharacter*> candidates;
         for(auto c : r->getPeople()) {
             if(type == MOB_TRIGGER && !CAN_SEE(enactor, c)) continue;
             if(!valid_dg_target(c, DG_ALLOW_GODS)) continue;
@@ -430,7 +430,6 @@ void trig_data::handleSubst(std::vector<DgHolder> &current, const std::string& f
             }
             break;
         case 1: {
-            // a unit_data*.
             auto u = std::get<1>(back);
             // here we'll call the dgCallMember method and set the result into current...
             auto res = u->dgCallMember(this, field, args);

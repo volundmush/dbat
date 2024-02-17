@@ -16,103 +16,103 @@
 /* combat.c functions */
 extern void homing_update(uint64_t heartPulse, double deltaTime);
 
-extern void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict);
+extern void damage_weapon(BaseCharacter *ch, Object *obj, BaseCharacter *vict);
 
-extern int64_t advanced_energy(struct char_data *ch, int64_t dmg);
+extern int64_t advanced_energy(BaseCharacter *ch, int64_t dmg);
 
-extern int roll_accuracy(struct char_data *ch, int skill, bool kiatt);
+extern int roll_accuracy(BaseCharacter *ch, int skill, bool kiatt);
 
-extern void handle_death_msg(struct char_data *ch, struct char_data *vict, int type);
+extern void handle_death_msg(BaseCharacter *ch, BaseCharacter *vict, int type);
 
-extern int handle_combo(struct char_data *ch, struct char_data *vict);
+extern int handle_combo(BaseCharacter *ch, BaseCharacter *vict);
 
-extern int handle_parry(struct char_data *ch);
+extern int handle_parry(BaseCharacter *ch);
 
-extern void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int first);
+extern void handle_spiral(BaseCharacter *ch, BaseCharacter *vict, int skill, int first);
 
-extern void handle_cooldown(struct char_data *ch, int cooldown);
+extern void handle_cooldown(BaseCharacter *ch, int cooldown);
 
 extern void
-parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char sname[1000], int prob, int perc, int skill,
+parry_ki(double attperc, BaseCharacter *ch, BaseCharacter *vict, char sname[1000], int prob, int perc, int skill,
          int type);
 
-extern void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2);
+extern void dodge_ki(BaseCharacter *ch, BaseCharacter *vict, int type, int type2, int skill, int skill2);
 
-extern void damage_eq(struct char_data *vict, int location);
+extern void damage_eq(BaseCharacter *vict, int location);
 
-extern void remove_limb(struct char_data *vict, int num);
+extern void remove_limb(BaseCharacter *vict, int num);
 
-extern int check_skill(struct char_data *ch, int skill);
+extern int check_skill(BaseCharacter *ch, int skill);
 
-extern bool check_points(struct char_data *ch, int64_t ki, int64_t st);
+extern bool check_points(BaseCharacter *ch, int64_t ki, int64_t st);
 
-extern void pcost(struct char_data *ch, double ki, int64_t st);
+extern void pcost(BaseCharacter *ch, double ki, int64_t st);
 
 extern void
-hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, struct obj_data *obj, int64_t dmg, int type);
+hurt(int limb, int chance, BaseCharacter *ch, BaseCharacter *vict, Object *obj, int64_t dmg, int type);
 
-extern int64_t damtype(struct char_data *ch, int type, int skill, double percent);
+extern int64_t damtype(BaseCharacter *ch, int type, int skill, double percent);
 
-extern int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj, int num);
+extern int can_kill(BaseCharacter *ch, BaseCharacter *vict, Object *obj, int num);
 
 extern void huge_update(uint64_t heartPulse, double deltaTime);
 
-extern int init_skill(struct char_data *ch, int snum);
+extern int init_skill(BaseCharacter *ch, int snum);
 
-extern bool can_grav(struct char_data *ch);
+extern bool can_grav(BaseCharacter *ch);
 
-extern int limb_ok(struct char_data *ch, int type);
+extern int limb_ok(BaseCharacter *ch, int type);
 
-extern int check_def(struct char_data *vict);
+extern int check_def(BaseCharacter *vict);
 
-extern void dam_eq_loc(struct char_data *vict, int area);
+extern void dam_eq_loc(BaseCharacter *vict, int area);
 
-extern void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int area, int64_t power);
+extern void hurt_limb(BaseCharacter *ch, BaseCharacter *vict, int chance, int area, int64_t power);
 
-extern int handle_speed(struct char_data *ch, struct char_data *vict);
+extern int handle_speed(BaseCharacter *ch, BaseCharacter *vict);
 
-extern void handle_defense(struct char_data *vict, int *pry, int *blk, int *dge);
+extern void handle_defense(BaseCharacter *vict, int *pry, int *blk, int *dge);
 
-extern void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg);
+extern void spar_gain(BaseCharacter *ch, BaseCharacter *vict, int type, int64_t dmg);
 
-extern int chance_to_hit(struct char_data *ch);
+extern int chance_to_hit(BaseCharacter *ch);
 
-extern int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill);
+extern int roll_hitloc(BaseCharacter *ch, BaseCharacter *vict, int skill);
 
-long double calc_critical(struct char_data *ch, int loc);
+long double calc_critical(BaseCharacter *ch, int loc);
 
-extern int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg);
+extern int backstab(BaseCharacter *ch, BaseCharacter *vict, int wlvl, int64_t dmg);
 
-extern int64_t gun_dam(struct char_data *ch, int wlvl);
+extern int64_t gun_dam(BaseCharacter *ch, int wlvl);
 
-extern int physical_mastery(struct char_data *ch);
+extern int physical_mastery(BaseCharacter *ch);
 
-extern int count_physical(struct char_data *ch);
+extern int count_physical(BaseCharacter *ch);
 
-extern int handle_dodge(struct char_data *ch);
+extern int handle_dodge(BaseCharacter *ch);
 
-extern int handle_block(struct char_data *ch);
+extern int handle_block(BaseCharacter *ch);
 
-extern void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspot);
+extern void cut_limb(BaseCharacter *ch, BaseCharacter *vict, int wlvl, int hitspot);
 
-extern void club_stamina(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg);
+extern void club_stamina(BaseCharacter *ch, BaseCharacter *vict, int wlvl, int64_t dmg);
 
-extern int boom_headshot(struct char_data *ch);
+extern int boom_headshot(BaseCharacter *ch);
 
-extern void handle_knockdown(struct char_data *ch);
+extern void handle_knockdown(BaseCharacter *ch);
 
-extern int roll_balance(struct char_data *ch);
+extern int roll_balance(BaseCharacter *ch);
 
-extern int64_t combo_damage(struct char_data *ch, int64_t damage, int type);
+extern int64_t combo_damage(BaseCharacter *ch, int64_t damage, int type);
 
-extern int check_ruby(struct char_data *ch);
+extern int check_ruby(BaseCharacter *ch);
 
-extern void combine_attacks(struct char_data *ch, struct char_data *vict);
+extern void combine_attacks(BaseCharacter *ch, BaseCharacter *vict);
 
-extern void handle_disarm(struct char_data *ch, struct char_data *vict);
+extern void handle_disarm(BaseCharacter *ch, BaseCharacter *vict);
 
-extern int handle_defender(struct char_data *vict, struct char_data *ch);
+extern int handle_defender(BaseCharacter *vict, BaseCharacter *ch);
 
-extern void handle_multihit(struct char_data *ch, struct char_data *vict);
+extern void handle_multihit(BaseCharacter *ch, BaseCharacter *vict);
 
-extern int64_t armor_calc(struct char_data *ch, int64_t dmg, int type);
+extern int64_t armor_calc(BaseCharacter *ch, int64_t dmg, int type);

@@ -12,40 +12,40 @@
 #include "structs.h"
 
 /* handling the affected-structures */
-extern void update_char_objects(struct char_data *ch);    /* handler.c */
-extern void item_check(struct obj_data *object, struct char_data *ch);
+extern void update_char_objects(BaseCharacter *ch);    /* handler.c */
+extern void item_check(Object *object, BaseCharacter *ch);
 
-extern void affect_total(struct char_data *ch);
+extern void affect_total(BaseCharacter *ch);
 
-extern void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add);
+extern void affect_modify(BaseCharacter *ch, int loc, int mod, int spec, long bitv, bool add);
 
-extern void affect_to_char(struct char_data *ch, struct affected_type *af);
+extern void affect_to_char(BaseCharacter *ch, struct affected_type *af);
 
-extern void affect_remove(struct char_data *ch, struct affected_type *af);
+extern void affect_remove(BaseCharacter *ch, struct affected_type *af);
 
-extern void affect_from_char(struct char_data *ch, int type);
+extern void affect_from_char(BaseCharacter *ch, int type);
 
-extern bool affected_by_spell(struct char_data *ch, int type);
+extern bool affected_by_spell(BaseCharacter *ch, int type);
 
-extern bool affectedv_by_spell(struct char_data *ch, int type);
+extern bool affectedv_by_spell(BaseCharacter *ch, int type);
 
-extern void affect_join(struct char_data *ch, struct affected_type *af,
+extern void affect_join(BaseCharacter *ch, struct affected_type *af,
                         bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
 
-extern void affectv_join(struct char_data *ch, struct affected_type *af,
+extern void affectv_join(BaseCharacter *ch, struct affected_type *af,
                          bool add_dur, bool avg_dur, bool add_mod, bool avg_mod);
 
-extern void affectv_remove(struct char_data *ch, struct affected_type *af);
+extern void affectv_remove(BaseCharacter *ch, struct affected_type *af);
 
-extern void affectv_to_char(struct char_data *ch, struct affected_type *af);
+extern void affectv_to_char(BaseCharacter *ch, struct affected_type *af);
 
-extern void affectv_from_char(struct char_data *ch, int type);
+extern void affectv_from_char(BaseCharacter *ch, int type);
 
 
 /* utility */
 const char *money_desc(int amount);
 
-struct obj_data *create_money(int amount);
+Object *create_money(int amount);
 
 extern int isname(const char *str, const char *namelist);
 
@@ -55,50 +55,50 @@ extern char *fname(const char *namelist);
 
 extern int get_number(char **name);
 
-const char *get_i_name(struct char_data *ch, struct char_data *vict);
+const char *get_i_name(BaseCharacter *ch, BaseCharacter *vict);
 
 /* ******** objects *********** */
 
-extern void equip_char(struct char_data *ch, struct obj_data *obj, int pos);
+extern void equip_char(BaseCharacter *ch, Object *obj, int pos);
 
-struct obj_data *unequip_char(struct char_data *ch, int pos);
+Object *unequip_char(BaseCharacter *ch, int pos);
 
-extern int invalid_align(struct char_data *ch, struct obj_data *obj);
+extern int invalid_align(BaseCharacter *ch, Object *obj);
 
-extern void extract_obj(struct obj_data *obj);
+extern void extract_obj(Object *obj);
 
 /* ******* characters ********* */
 
-struct char_data *get_char_room(char *name, int *num, room_rnum room);
+BaseCharacter *get_char_room(char *name, int *num, room_rnum room);
 
-struct char_data *get_char_num(mob_rnum nr);
+BaseCharacter *get_char_num(mob_rnum nr);
 
-extern void extract_char(struct char_data *ch);
+extern void extract_char(BaseCharacter *ch);
 
-extern void extract_char_final(struct char_data *ch);
+extern void extract_char_final(BaseCharacter *ch);
 
 extern void extract_pending_chars(uint64_t heartBeat, double deltaTime);
 
 /* find if character can see */
-struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, int inroom);
+BaseCharacter *get_player_vis(BaseCharacter *ch, char *name, int *number, int inroom);
 
-struct char_data *get_char_vis(struct char_data *ch, char *name, int *number, int where);
+BaseCharacter *get_char_vis(BaseCharacter *ch, char *name, int *number, int where);
 
-struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *number);
+BaseCharacter *get_char_room_vis(BaseCharacter *ch, char *name, int *number);
 
-struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *number);
+BaseCharacter *get_char_world_vis(BaseCharacter *ch, char *name, int *number);
 
-struct obj_data *get_obj_num(obj_rnum nr);
+Object *get_obj_num(obj_rnum nr);
 
-struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, std::vector<obj_data*> list);
+Object *get_obj_in_list_vis(BaseCharacter *ch, char *name, int *number, std::vector<Object*> list);
 
-struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *num);
+Object *get_obj_vis(BaseCharacter *ch, char *name, int *num);
 
-struct obj_data *get_obj_in_equip_vis(struct char_data *ch, char *arg, int *number, std::map<int, obj_data*> equipment);
+Object *get_obj_in_equip_vis(BaseCharacter *ch, char *arg, int *number, std::map<int, Object*> equipment);
 
-extern int get_obj_pos_in_equip_vis(struct char_data *ch, char *arg, int *num, std::map<int, obj_data*> equipment);
+extern int get_obj_pos_in_equip_vis(BaseCharacter *ch, char *arg, int *num, std::map<int, Object*> equipment);
 
-extern int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
+extern int find_eq_pos(BaseCharacter *ch, Object *obj, char *arg);
 
 
 /* find all dots */
@@ -112,8 +112,8 @@ extern int find_all_dots(char *arg);
 
 /* Generic Find */
 
-extern int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
-                        struct char_data **tar_ch, struct obj_data **tar_obj);
+extern int generic_find(char *arg, bitvector_t bitvector, BaseCharacter *ch,
+                        BaseCharacter **tar_ch, Object **tar_obj);
 
 #define FIND_CHAR_ROOM     (1 << 0)
 #define FIND_CHAR_WORLD    (1 << 1)

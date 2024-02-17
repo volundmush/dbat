@@ -43,31 +43,31 @@
 static int copyover_timer = 0; /* for timed copyovers */
 
 /* local functions */
-static void print_lockout(struct char_data *ch);
+static void print_lockout(BaseCharacter *ch);
 
 static void execute_copyover();
 
-static int perform_set(struct char_data *ch, struct char_data *vict, int mode, char *val_arg);
+static int perform_set(BaseCharacter *ch, BaseCharacter *vict, int mode, char *val_arg);
 
-static void perform_immort_invis(struct char_data *ch, int level);
+static void perform_immort_invis(BaseCharacter *ch, int level);
 
-static void do_stat_room(struct char_data *ch);
+static void do_stat_room(BaseCharacter *ch);
 
-static void do_stat_object(struct char_data *ch, struct obj_data *j);
+static void do_stat_object(BaseCharacter *ch, Object *j);
 
-static void do_stat_character(struct char_data *ch, struct char_data *k);
+static void do_stat_character(BaseCharacter *ch, BaseCharacter *k);
 
-static void stop_snooping(struct char_data *ch);
+static void stop_snooping(BaseCharacter *ch);
 
 static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall);
 
-static void mob_checkload(struct char_data *ch, mob_vnum mvnum);
+static void mob_checkload(BaseCharacter *ch, mob_vnum mvnum);
 
-static void obj_checkload(struct char_data *ch, obj_vnum ovnum);
+static void obj_checkload(BaseCharacter *ch, obj_vnum ovnum);
 
-static void trg_checkload(struct char_data *ch, trig_vnum tvnum);
+static void trg_checkload(BaseCharacter *ch, trig_vnum tvnum);
 
-static void lockWrite(struct char_data *ch, char *name);
+static void lockWrite(BaseCharacter *ch, char *name);
 
 // definitions
 ACMD(do_lag) {
@@ -358,7 +358,7 @@ ACMD(do_newsedit) {
     STATE(ch->desc) = CON_NEWSEDIT;
 }
 
-static void print_lockout(struct char_data *ch) {
+static void print_lockout(BaseCharacter *ch) {
     if (IS_NPC(ch))
         return;
 
@@ -406,7 +406,7 @@ static void print_lockout(struct char_data *ch) {
 ACMD(do_approve) {
 
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *vict = nullptr;
+    BaseCharacter *vict = nullptr;
 
     one_argument(argument, arg);
 
@@ -430,7 +430,7 @@ ACMD(do_approve) {
     }
 }
 
-static void lockWrite(struct char_data *ch, char *name) {
+static void lockWrite(BaseCharacter *ch, char *name) {
     FILE *file;
     char fname[40], filler[50], line[256];
     char *names[500] = {""};
@@ -576,8 +576,8 @@ ACMD(do_permission) {
 
 ACMD(do_transobj) {
 
-    struct obj_data *obj;
-    struct char_data *vict;
+    Object *obj;
+    BaseCharacter *vict;
     struct descriptor_data *d;
     char arg[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
@@ -599,7 +599,7 @@ ACMD(do_transobj) {
         return;
     } else if (!strcasecmp("all", arg2)) {
         int num = GET_OBJ_VNUM(obj);
-        struct obj_data *obj2 = nullptr;
+        Object *obj2 = nullptr;
 
         act("You send $p to everyone in the game.", true, ch, obj, nullptr, TO_CHAR);
 
@@ -681,8 +681,8 @@ ACMD(do_finddoor) {
     room_rnum i;
     char arg[MAX_INPUT_LENGTH];
     char buf[MAX_STRING_LENGTH] = {0};
-    struct char_data *tmp_char;
-    struct obj_data *obj;
+    BaseCharacter *tmp_char;
+    Object *obj;
 
     one_argument(argument, arg);
 
@@ -704,7 +704,7 @@ ACMD(do_finddoor) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, GET_OBJ_SHORT(obj));
         for (auto &[vn, u] : world) {
-            auto r = dynamic_cast<room_data*>(u);
+            auto r = dynamic_cast<Room*>(u);
             if (!r)
                 continue;
             for (auto &[d, e] : r->getExits()) {
@@ -746,7 +746,7 @@ ACMD(do_recall) {
 }
 
 ACMD(do_hell) {
-    struct char_data *vict;
+    BaseCharacter *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -796,7 +796,7 @@ ACMD(do_echo) {
         char buf[8096];
         char name[128];
         int found = false, trunc = 0;
-        struct char_data *vict = nullptr, *next_v = nullptr, *tch = nullptr;
+        BaseCharacter *vict = nullptr, *next_v = nullptr, *tch = nullptr;
 
         if (strlen(argument) > 7000) {
             trunc = strlen(argument) - 7000;
@@ -873,7 +873,7 @@ ACMD(do_echo) {
 
 ACMD(do_send) {
     char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    BaseCharacter *vict;
 
     half_chop(argument, arg, buf);
 
@@ -893,10 +893,10 @@ ACMD(do_send) {
 }
 
 /* take a string, and return an rnum.. used for goto, at, etc.  -je 4/6/93 */
-room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
+room_rnum find_target_room(BaseCharacter *ch, char *rawroomstr) {
     room_rnum location = NOWHERE;
     char roomstr[MAX_INPUT_LENGTH];
-    struct room_data *rm;
+    Room *rm;
 
     one_argument(rawroomstr, roomstr);
 
@@ -911,8 +911,8 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
             return (NOWHERE);
         }
     } else {
-        struct char_data *target_mob;
-        struct obj_data *target_obj;
+        BaseCharacter *target_mob;
+        Object *target_obj;
         char *mobobjstr = roomstr;
         int num;
 
@@ -946,7 +946,7 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_VICE)
         return (location);
 
-    rm = dynamic_cast<room_data*>(world[location]);
+    rm = dynamic_cast<Room*>(world[location]);
 
     if ((!can_edit_zone(ch, rm->zone) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
         && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
@@ -1010,7 +1010,7 @@ ACMD(do_goto) {
         return;
     }
 
-    auto r = dynamic_cast<room_data*>(world.at(location));
+    auto r = dynamic_cast<Room*>(world.at(location));
 
     snprintf(buf, sizeof(buf), "$n %s", POOFOUT(ch) ? POOFOUT(ch) : "disappears in a puff of smoke.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
@@ -1028,7 +1028,7 @@ ACMD(do_goto) {
 ACMD(do_trans) {
     char buf[MAX_INPUT_LENGTH];
     struct descriptor_data *i;
-    struct char_data *victim;
+    BaseCharacter *victim;
 
     one_argument(argument, buf);
     if (!*buf)
@@ -1082,7 +1082,7 @@ ACMD(do_trans) {
 
 ACMD(do_teleport) {
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
-    struct char_data *victim;
+    BaseCharacter *victim;
     room_rnum target;
 
     two_arguments(argument, buf, buf2);
@@ -1102,7 +1102,7 @@ ACMD(do_teleport) {
             ch->sendf("They are inside a healing tank!\r\n");
             return;
         }
-        auto r = dynamic_cast<room_data*>(world.at(target));
+        auto r = dynamic_cast<Room*>(world.at(target));
         ch->sendf("%s", CONFIG_OK);
         act("$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         victim->removeFromLocation();
@@ -1149,7 +1149,7 @@ ACMD(do_vnum) {
 
 #define ZOCMD zone_table[zrnum].cmd[subcmd]
 
-void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
+void list_zone_commands_room(BaseCharacter *ch, room_vnum rvnum) {
     zone_rnum zrnum = real_zone_by_thing(rvnum);
     room_rnum rrnum = real_room(rvnum), cmd_room = NOWHERE;
     int subcmd = 0, count = 0;
@@ -1269,13 +1269,13 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
 
 #undef ZOCMD
 
-static void do_stat_room(struct char_data *ch) {
+static void do_stat_room(BaseCharacter *ch) {
     char buf2[MAX_STRING_LENGTH];
     struct extra_descr_data *desc;
-    struct room_data *rm = ch->getRoom();
+    Room *rm = ch->getRoom();
     int i, found, column;
-    struct obj_data *j;
-    struct char_data *k;
+    Object *j;
+    BaseCharacter *k;
 
     ch->sendf("Room name: @c%s@n\r\n", rm->name);
 
@@ -1348,11 +1348,11 @@ static void do_stat_room(struct char_data *ch) {
     list_zone_commands_room(ch, rm->vn);
 }
 
-static void do_stat_object(struct char_data *ch, struct obj_data *j) {
+static void do_stat_object(BaseCharacter *ch, Object *j) {
     int i, found;
     obj_vnum vnum;
-    struct obj_data *j2;
-    struct char_data *sitter;
+    Object *j2;
+    BaseCharacter *sitter;
     struct extra_descr_data *desc;
     char buf[MAX_STRING_LENGTH];
 
@@ -1543,12 +1543,12 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     do_sstat(ch, j);
 }
 
-static void do_stat_character(struct char_data *ch, struct char_data *k) {
+static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
     char buf[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
     int i, i2, column, found = false;
-    struct obj_data *j;
-    struct obj_data *chair;
+    Object *j;
+    Object *chair;
     struct follow_type *fol;
     struct affected_type *aff;
 
@@ -1802,7 +1802,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 }
 
 ACMD(do_varstat) {
-    struct char_data *vict;
+    BaseCharacter *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1838,8 +1838,8 @@ ACMD(do_varstat) {
 
 ACMD(do_stat) {
     char buf1[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
-    struct char_data *victim;
-    struct obj_data *object;
+    BaseCharacter *victim;
+    Object *object;
 
     half_chop(argument, buf1, buf2);
 
@@ -1957,7 +1957,7 @@ ACMD(do_shutdown) {
         ch->sendf("Unknown shutdown option.\r\n");
 }
 
-void snoop_check(struct char_data *ch) {
+void snoop_check(BaseCharacter *ch) {
     /*  This short routine is to ensure that characters that happen
    *  to be snooping (or snooped) and get advanced/demoted will
    *  not be snooping/snooped someone of a higher/lower level (and
@@ -1978,7 +1978,7 @@ void snoop_check(struct char_data *ch) {
     }
 }
 
-static void stop_snooping(struct char_data *ch) {
+static void stop_snooping(BaseCharacter *ch) {
     if (!ch->desc->snooping)
         ch->sendf("You aren't snooping anyone.\r\n");
     else {
@@ -1990,7 +1990,7 @@ static void stop_snooping(struct char_data *ch) {
 
 ACMD(do_snoop) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *victim, *tch;
+    BaseCharacter *victim, *tch;
 
     if (!ch->desc)
         return;
@@ -2031,7 +2031,7 @@ ACMD(do_snoop) {
 
 ACMD(do_switch) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *victim;
+    BaseCharacter *victim;
 
     one_argument(argument, arg);
 
@@ -2114,7 +2114,7 @@ ACMD(do_load) {
     }
 
     if (is_abbrev(buf, "mob")) {
-        struct char_data *mob = nullptr;
+        BaseCharacter *mob = nullptr;
         mob_rnum r_num;
 
         if ((r_num = real_mobile(atoi(buf2))) == NOBODY) {
@@ -2131,7 +2131,7 @@ ACMD(do_load) {
             load_mtrigger(mob);
         }
     } else if (is_abbrev(buf, "obj")) {
-        struct obj_data *obj;
+        Object *obj;
         obj_rnum r_num;
 
         if ((r_num = real_object(atoi(buf2))) == NOTHING) {
@@ -2172,7 +2172,7 @@ ACMD(do_vstat) {
     }
 
     if (is_abbrev(buf, "mob")) {
-        struct char_data *mob;
+        BaseCharacter *mob;
         mob_rnum r_num;
 
         if ((r_num = real_mobile(atoi(buf2))) == NOBODY) {
@@ -2184,7 +2184,7 @@ ACMD(do_vstat) {
         do_stat_character(ch, mob);
         extract_char(mob);
     } else if (is_abbrev(buf, "obj")) {
-        struct obj_data *obj;
+        Object *obj;
         obj_rnum r_num;
 
         if ((r_num = real_object(atoi(buf2))) == NOTHING) {
@@ -2200,7 +2200,7 @@ ACMD(do_vstat) {
 
 ACMD(do_pgrant) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    BaseCharacter *vict;
 
     two_arguments(argument, arg1, arg2);
 
@@ -2247,8 +2247,8 @@ ACMD(do_pgrant) {
 /* clean a room of all mobiles and objects */
 ACMD(do_purge) {
     char buf[MAX_INPUT_LENGTH];
-    struct char_data *vict;
-    struct obj_data *obj;
+    BaseCharacter *vict;
+    Object *obj;
 
     one_argument(argument, buf);
 
@@ -2415,7 +2415,7 @@ void copyover_check(uint64_t heartPulse, double deltaTime) {
 }
 
 ACMD(do_advance) {
-    struct char_data *victim;
+    BaseCharacter *victim;
     char name[MAX_INPUT_LENGTH], level[MAX_INPUT_LENGTH];
     int newlevel, oldlevel;
 
@@ -2512,7 +2512,7 @@ ACMD(do_handout) {
 
 ACMD(do_restore) {
     char buf[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    BaseCharacter *vict;
     struct descriptor_data *j;
     int i;
 
@@ -2540,12 +2540,12 @@ ACMD(do_restore) {
     }
 }
 
-void perform_immort_vis(struct char_data *ch) {
+void perform_immort_vis(BaseCharacter *ch) {
     GET_INVIS_LEV(ch) = 0;
 }
 
-static void perform_immort_invis(struct char_data *ch, int level) {
-    struct char_data *tch;
+static void perform_immort_invis(BaseCharacter *ch, int level) {
+    BaseCharacter *tch;
 
     for (auto tch : ch->getRoom()->getPeople()) {
         if (tch == ch)
@@ -2771,7 +2771,7 @@ ACMD(do_last) {
 
 ACMD(do_force) {
     struct descriptor_data *i, *next_desc;
-    struct char_data *vict, *next_force;
+    BaseCharacter *vict, *next_force;
     char arg[MAX_INPUT_LENGTH], to_force[MAX_INPUT_LENGTH], buf1[MAX_INPUT_LENGTH + 32];
 
     half_chop(argument, arg, to_force);
@@ -2955,7 +2955,7 @@ ACMD(do_zreset) {
  */
 ACMD(do_wizutil) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    BaseCharacter *vict;
     int taeller;
     long result;
 
@@ -3108,8 +3108,8 @@ ACMD(do_show) {
     zone_vnum zvn;
     int low, high;
     int8_t self = false;
-    struct char_data *vict = nullptr;
-    struct obj_data *obj;
+    BaseCharacter *vict = nullptr;
+    Object *obj;
     struct descriptor_data *d;
     struct affected_type *aff;
     char field[MAX_INPUT_LENGTH], value[MAX_INPUT_LENGTH], *strp,
@@ -3273,7 +3273,7 @@ ACMD(do_show) {
         case 5:
             len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
             for (auto &[vn, u] : world) {
-                auto r = dynamic_cast<room_data*>(u);
+                auto r = dynamic_cast<Room*>(u);
                 if(!r) continue;
                 for (auto &[j, e] : r->getExits()) {
                     auto dest = e->getDestination();
@@ -3565,7 +3565,7 @@ static const struct set_struct {
         {"\n", 0,                      BOTH, MISC}
 };
 
-static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
+static int perform_set(BaseCharacter *ch, BaseCharacter *vict, int mode,
                        char *val_arg) {
     int i, on = 0, off = 0;
     int64_t value = 0;
@@ -4122,7 +4122,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
 
 ACMD(do_set) {
-    struct char_data *vict = nullptr, *cbuf = nullptr;
+    BaseCharacter *vict = nullptr, *cbuf = nullptr;
     char field[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
     int mode, len, player_i = 0, retval;
     char is_file = 0, is_player = 0;
@@ -4206,7 +4206,7 @@ ACMD(do_wizupdate) {
 }
 
 ACMD(do_raise) {
-    struct char_data *vict = nullptr;
+    BaseCharacter *vict = nullptr;
     char name[MAX_INPUT_LENGTH];
 
     one_argument(argument, name);
@@ -4246,8 +4246,8 @@ ACMD(do_raise) {
 }
 
 ACMD(do_chown) {
-    struct char_data *victim;
-    struct obj_data *obj;
+    BaseCharacter *victim;
+    Object *obj;
     char buf2[80];
     char buf3[80];
     int i, k = 0;
@@ -4290,7 +4290,7 @@ ACMD(do_chown) {
 }
 
 ACMD(do_zpurge) {
-    struct char_data *mob, *next_mob;
+    BaseCharacter *mob, *next_mob;
     vnum i, stored = -1, zone;
     char arg[MAX_INPUT_LENGTH];
 
@@ -4310,7 +4310,7 @@ ACMD(do_zpurge) {
         if (found == world.end()) {
             continue;
         }
-        auto r = dynamic_cast<room_data*>(found->second);
+        auto r = dynamic_cast<Room*>(found->second);
         if (r) {
             for (auto mob : r->getPeople()) {
                 if (IS_NPC(mob)) {
@@ -4392,7 +4392,7 @@ static const int offlimit_zones[] = {0, 12, 13, 14, -1};  /*what zones can no ro
 
 ACMD (do_zcheck) {
     zone_rnum zrnum;
-    struct obj_data *obj;
+    Object *obj;
     room_vnum exroom = 0;
     int ac = 0;
     int affs = 0, tohit, todam, value;

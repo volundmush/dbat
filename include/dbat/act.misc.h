@@ -2,19 +2,19 @@
 
 #include "structs.h"
 
-extern void handle_multi_merge(struct char_data *form);
+extern void handle_multi_merge(BaseCharacter *form);
 
 extern void handle_songs(uint64_t heartPulse, double deltaTime);
 
 extern void fish_update(uint64_t heartPulse, double deltaTime);
 
-extern void disp_rpp_store(struct char_data *ch);
+extern void disp_rpp_store(BaseCharacter *ch);
 
-extern void handle_rpp_store(struct char_data *ch, int choice);
+extern void handle_rpp_store(BaseCharacter *ch, int choice);
 
-extern void rpp_feature(struct char_data *ch, const char *arg);
+extern void rpp_feature(BaseCharacter *ch, const char *arg);
 
-extern void ash_burn(struct char_data *ch);
+extern void ash_burn(BaseCharacter *ch);
 
 // commands
 extern ACMD(do_transform);

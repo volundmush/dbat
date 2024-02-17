@@ -33,13 +33,13 @@
 /* comm.c */
 void enter_player_game(struct descriptor_data *d);
 
-extern int arena_watch(struct char_data *ch);
+extern int arena_watch(BaseCharacter *ch);
 
 extern void
-perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to);
+perform_act(const char *orig, BaseCharacter *ch, Object *obj, const void *vict_obj, BaseCharacter *to);
 
 extern char *
-act(const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+act(const char *str, int hide_invisible, BaseCharacter *ch, Object *obj, const void *vict_obj, int type);
 
 extern void close_socket(struct descriptor_data *d);
 

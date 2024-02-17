@@ -22,7 +22,7 @@ typedef struct mapstruct MapStruct;
 
 extern MapStruct findcoord(int rnum);
 
-extern void printmap(int rnum, struct char_data *ch, int type, int vnum);
+extern void printmap(int rnum, BaseCharacter *ch, int type, int vnum);
 
 extern void ping_ship(int vnum, int vnum2);
 

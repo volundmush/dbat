@@ -65,7 +65,7 @@ void redit_save_to_disk(zone_vnum zone_num) {
 
 /*------------------------------------------------------------------------*/
 
-void free_room(struct room_data *room) {
+void free_room(Room *room) {
 
 }
 

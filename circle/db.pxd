@@ -12,8 +12,8 @@ from libcpp.memory cimport shared_ptr
 cimport structs
 cimport utils
 
-ctypedef structs.char_data* char_data_ptr
-ctypedef structs.obj_data* obj_data_ptr
+ctypedef structs.BaseCharacter* BaseCharacter_ptr
+ctypedef structs.Object* Object_ptr
 
 cdef extern from "dbat/db.h":
     structs.time_info_data time_info
@@ -22,19 +22,19 @@ cdef extern from "dbat/db.h":
     void load_config()
     void migrate_db()
 
-    unordered_map[int, structs.room_data] world
+    unordered_map[int, structs.Room] world
     unordered_map[int, structs.zone_data] zone_table
     unordered_map[int, structs.area_data] areas
 
     unordered_map[int, structs.index_data] mob_index
-    unordered_map[int, structs.char_data] mob_proto
+    unordered_map[int, structs.BaseCharacter] mob_proto
 
-    unordered_map[int64_t, pair[time_t, char_data_ptr]] uniqueCharacters
+    unordered_map[int64_t, pair[time_t, BaseCharacter_ptr]] uniqueCharacters
 
     unordered_map[int, structs.index_data] obj_index
-    unordered_map[int, structs.obj_data] obj_proto
+    unordered_map[int, structs.Object] obj_proto
 
-    unordered_map[int64_t, pair[time_t, obj_data_ptr]] uniqueObjects
+    unordered_map[int64_t, pair[time_t, Object_ptr]] uniqueObjects
 
     unordered_map[int, shared_ptr[structs.trig_proto]] trig_index
 

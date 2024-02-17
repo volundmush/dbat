@@ -6,7 +6,7 @@
 #include "dbat/accmenu.h"
 
 namespace net {
-    CharacterMenu::CharacterMenu(std::shared_ptr<Connection>& co, char_data *c) : ConnectionParser(co) {
+    CharacterMenu::CharacterMenu(std::shared_ptr<Connection>& co, BaseCharacter *c) : ConnectionParser(co) {
         ch = c;
     }
 

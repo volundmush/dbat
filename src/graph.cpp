@@ -22,9 +22,9 @@
 #include "dbat/random.h"
 
 /* local functions */
-static std::list<std::pair<struct room_data*, int>> bfs_queue;
+static std::list<std::pair<Room*, int>> bfs_queue;
 
-static int VALID_EDGE(struct room_data *x, int y) {
+static int VALID_EDGE(Room *x, int y) {
     
     auto d = x->getExits()[y];
     if(!d) return false;
@@ -35,7 +35,7 @@ static int VALID_EDGE(struct room_data *x, int y) {
     return true;
 }
 
-static void bfs_enqueue(struct room_data *r, int dir) {
+static void bfs_enqueue(Room *r, int dir) {
     bfs_queue.emplace_back(r, dir);
 }
 
@@ -56,7 +56,7 @@ static void bfs_clear_queue() {
  * Intended usage: in mobile_activity, give a mob a dir to go if they're
  * tracking another mob or a PC.  Or, a 'track' skill for PCs.
  */
-int find_first_step(struct room_data *src, struct room_data *target) {
+int find_first_step(Room *src, Room *target) {
     int curr_dir;
 
     if (src == target)
@@ -64,7 +64,7 @@ int find_first_step(struct room_data *src, struct room_data *target) {
 
     /* clear marks first, some OLC systems will save the mark. */
     for (auto &[vn, u] : world) {
-        auto r = dynamic_cast<room_data*>(u);
+        auto r = dynamic_cast<Room*>(u);
         if(r) r->clearFlag(FlagType::Room, ROOM_BFS_MARK);
     }
     src->setFlag(FlagType::Room, ROOM_BFS_MARK);
@@ -111,7 +111,7 @@ static std::map<std::string, room_vnum> planetLocations = {
 };
 
 ACMD(do_sradar) {
-    struct obj_data *vehicle = nullptr, *controls = nullptr;
+    Object *vehicle = nullptr, *controls = nullptr;
     int dir = 0, noship = false;
     char arg[MAX_INPUT_LENGTH];
     char planet[20];
@@ -168,7 +168,7 @@ ACMD(do_sradar) {
     std::string argstr(arg);
     to_lower(argstr);
 
-    struct room_data *startRoom;
+    Room *startRoom;
     if (noship == false) {
         startRoom = vehicle->getRoom();
     } else {
@@ -177,13 +177,13 @@ ACMD(do_sradar) {
 
     auto find = planetLocations.find(argstr);
     if(find != planetLocations.end()) {
-        dir = find_first_step(startRoom, dynamic_cast<room_data*>(world[find->second]));
+        dir = find_first_step(startRoom, dynamic_cast<Room*>(world[find->second]));
         sprintf(planet, "%s", argstr.c_str());
     } else {
         if(!strcasecmp(arg, "buoy1")) {
             auto room = world.find(GET_RADAR1(ch));
             if(room != world.end()) {
-                dir = find_first_step(startRoom, dynamic_cast<room_data*>(room->second));
+                dir = find_first_step(startRoom, dynamic_cast<Room*>(room->second));
             } else {
                 ch->sendf("@wYou haven't launched that buoy.\r\n");
                 return;
@@ -191,7 +191,7 @@ ACMD(do_sradar) {
         } else if(!strcasecmp(arg, "buoy2")) {
             auto room = world.find(GET_RADAR2(ch));
             if(room != world.end()) {
-                dir = find_first_step(startRoom, dynamic_cast<room_data*>(room->second));
+                dir = find_first_step(startRoom, dynamic_cast<Room*>(room->second));
             } else {
                 ch->sendf("@wYou haven't launched that buoy.\r\n");
                 return;
@@ -199,7 +199,7 @@ ACMD(do_sradar) {
         } else if(!strcasecmp(arg, "buoy3")) {
             auto room = world.find(GET_RADAR3(ch));
             if(room != world.end()) {
-                dir = find_first_step(startRoom, dynamic_cast<room_data*>(room->second));
+                dir = find_first_step(startRoom, dynamic_cast<Room*>(room->second));
             } else {
                 ch->sendf("@wYou haven't launched that buoy.\r\n");
                 return;
@@ -280,7 +280,7 @@ ACMD(do_radar) {
     }
 }
 
-static std::string sense_align(struct char_data *vict) {
+static std::string sense_align(BaseCharacter *vict) {
     auto align = GET_ALIGNMENT(vict);
     if (align > 50 && align < 200) {
         return "You sense slightly pure and good ki from them.\r\n";
@@ -299,7 +299,7 @@ static std::string sense_align(struct char_data *vict) {
     }
 }
 
-static std::string sense_compare(struct char_data *ch, struct char_data *vict) {
+static std::string sense_compare(BaseCharacter *ch, BaseCharacter *vict) {
     auto hitv = GET_HIT(vict);
     auto hitc = GET_HIT(ch);
     if (hitv > hitc * 50) {
@@ -333,7 +333,7 @@ static std::string sense_compare(struct char_data *ch, struct char_data *vict) {
 
 ACMD(do_track) {
     char arg[MAX_INPUT_LENGTH];
-    struct char_data *vict;
+    BaseCharacter *vict;
     struct descriptor_data *i;
     int count = 0, dir;
 
