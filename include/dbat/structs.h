@@ -126,7 +126,7 @@ struct player_data {
     int64_t id{NOTHING};
     std::string name;
     std::shared_ptr<account_data> account{};
-    pc_data* character{};
+    PlayerCharacter* character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
     std::set<int64_t> sensePlayer;
     std::set<mob_vnum> senseMemory;
@@ -238,7 +238,7 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
     ~trig_data();
 
     nlohmann::json serialize();
-    std::string serializeLocation();
+    void deserialize(const nlohmann::json& j);
 
     std::shared_ptr<trig_proto> parent;
     struct script_data *sc;
@@ -254,9 +254,6 @@ struct trig_data : public HasVars, public std::enable_shared_from_this<trig_data
     DgScriptState state{DgScriptState::DORMANT};
     void activate();
     void deactivate();
-
-    void deserialize(const nlohmann::json& j);
-    void deserializeLocation(const std::string& txt);
 
     void reset();
     void setState(DgScriptState st);
@@ -313,13 +310,11 @@ struct mob_special_data {
     bool newitem{};             /* Check if mob has new inv item       */
 };
 
-
 enum class UnitFamily : uint8_t {
     Character = 0,
     Item = 1,
     Room = 2,
     Exit = 3,
-    Area = 4
 };
 
 struct coordinates {
@@ -414,7 +409,14 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // The business part of the above.
     virtual std::vector<unit_data*> getNeighborsFor(unit_data* u, bool visible = true);
 
+    virtual bool isInvisible();
+    virtual bool isHidden();
+    virtual bool isAdminInvisible();
+
     virtual bool canSee(unit_data *target);
+    virtual bool canSeeInvisible();
+    virtual bool canSeeHidden();
+    virtual bool canSeeAdminInvisible();
 
     // whether this has some form of nightvision.
     virtual bool canSeeInDark();
@@ -425,41 +427,46 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     // Whether u can access this unit's inventory.
     virtual std::optional<std::string> checkAllowInventoryAcesss(unit_data *u);
 
-    // whether this unit will allow u to take it.
-    virtual std::optional<std::string> checkAllowGet(unit_data *u);
+    // whether this unit will allow u to take/give/drop it. give/put are identical.
+    virtual std::optional<std::string> checkIsGettable(unit_data *u);
+    virtual std::optional<std::string> checkIsDroppable(unit_data *u);
+    virtual std::optional<std::string> checkIsGivable(unit_data *u);
 
-    // whether this unit is capable of picking up u. This is related to the above, but is more about the unit's own state.
-    virtual std::optional<std::string> checkCanPickup(unit_data *u);
+    // if this can store u in its inventory. This includes a room accepting items.
+    // Things to check might be weight, item capacity, whether it's appropriate for the space, etc.
+    virtual std::optional<std::string> checkCanStore(unit_data *u);
 
-    // if u is allowed to drop items into this. Doesn't matter what kinda item. Anything.
-    virtual std::optional<std::string> checkAllowDrop(unit_data *u);
+    // Check to see whether giver can give u to this.
+    virtual std::optional<std::string> checkAllowReceive(unit_data *giver, unit_data *u);
 
+    // Whether this can be equipped by u.
+    virtual std::optional<std::string> checkAllowEquip(unit_data *u, int location);
+    virtual std::optional<std::string> checkAllowRemove(unit_data *u);
+
+    virtual bool isInsideNormallyDark();
     virtual bool isInsideDark();
     virtual bool isProvidingLight();
 
     // Look at location.
     void lookAtLocation();
     // The business part of the above.
-    virtual Event renderLocationFor(unit_data* u);
+    //virtual Event renderLocationFor(unit_data* u);
 
-    virtual std::string renderRoomListFor(unit_data* u, bool statuses = false);
-    virtual std::string renderContentsListFor(unit_data* u);
+    //virtual std::string renderRoomListFor(unit_data* u, bool statuses = false);
+    //virtual std::string renderContentsListFor(unit_data* u);
 
     void activateContents();
     void deactivateContents();
 
     virtual void deserialize(const nlohmann::json& j);
     virtual void deserializeRelations(const nlohmann::json& j);
-    virtual void deserializeLocation(const nlohmann::json& j);
     virtual nlohmann::json serialize();
     virtual nlohmann::json serializeRelations();
-    virtual nlohmann::json serializeLocation();
     
     virtual std::string scriptString();
 
     std::string getUID(bool active = true);
     virtual bool isActive();
-    virtual void save();
 
     struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
     virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
@@ -488,7 +495,8 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     void checkMyID();
 
     // The object which provides environmental data for this unit.
-    // An example would be current gravity.
+    // An example would be current gravity. Rooms are one example of an environment, but
+    // rooms might get their environment from a region/structure too.
     unit_data* getEnvironment();
 
     virtual bool isEnvironment();
@@ -505,7 +513,16 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
     virtual bool isStructure();
 
+    // Planets are a special kind of structure. They are effectively top-level structures for many areas
+    // and have their own special uses like checking for having moons or being able to 'fly space' from them.
+    // This can be used for things that are also LIKE planets too, such as moons, large asteroids, floating
+    // islands in space, whatever.
     unit_data* getPlanet();
+
+    virtual bool isPlanet();
+
+    // Replacement for existing command interpreter
+    virtual void executeCommand(const std::string& cmd);
 
     // Returns viable landing locations within this, for u.
     virtual std::vector<unit_data*> getLandingLocations(unit_data *u);
@@ -520,8 +537,15 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
     virtual void sendTextContents(const std::string& text);
     virtual void sendLineContents(const std::string& text);
 
+    // called by this to know what environment it operates under.
     virtual double myEnvVar(EnvVar v);
+
+    // Called by a thing IN this to know what environment it operates under.
     virtual double getEnvVar(EnvVar v);
+
+    // called by a location to aggregate things affecting the environment.
+    virtual std::optional<double> emitEnvVar(EnvVar v);
+    std::unordered_map<EnvVar, double> envVars;
     
     template<typename... Args>
     void sendText(fmt::string_view format, Args&&... args) {
@@ -592,28 +616,6 @@ struct unit_data : public std::enable_shared_from_this<unit_data> {
 
 };
 
-enum class AreaType {
-    Dimension = 0,
-    CelestialBody = 1,
-    Region = 2,
-    Structure = 3,
-    Vehicle = 4
-};
-
-struct area_data : public unit_data {
-    area_data() = default;
-    explicit area_data(const nlohmann::json &j);
-
-    std::optional<double> gravity; /* gravity in this area			*/
-    AreaType type{AreaType::Dimension}; /* type of area				*/
-
-    nlohmann::json serialize() override;
-
-    UnitFamily getFamily() override;
-    std::string getUnitClass() override;
-};
-
-
 /* ================== Memory Structure for Objects ================== */
 struct obj_data : public unit_data {
     obj_data() = default;
@@ -640,10 +642,11 @@ struct obj_data : public unit_data {
 
     bool active{false};
     bool isActive() override;
-    void save() override;
 
     bool isWorking();
     void clearLocation();
+
+    
   
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
@@ -691,7 +694,7 @@ struct obj_data : public unit_data {
 
     std::optional<double> gravity;
 
-    bool isProvidingLight();
+    bool isProvidingLight() override;
     double currentGravity();
 
     std::string getName() override;
@@ -700,10 +703,28 @@ struct obj_data : public unit_data {
     std::string getLookDesc() override;
 
     void assignTriggers() override;
-    std::string scriptString() override;
 
 };
 /* ======================================================================= */
+
+struct Structure : public obj_data {
+    Structure() = default;
+    virtual ~Structure();
+    explicit Structure(const nlohmann::json& j);
+
+    void extractFromWorld() override;
+
+    UnitFamily getFamily() override;
+    std::string getUnitClass() override;
+
+    nlohmann::json serialize() override;
+    nlohmann::json serializeRelations() override;
+    void deserializeRelations(const nlohmann::json& j) override;
+    void deserialize(const nlohmann::json& j) override;
+
+    bool isEnvironment() override;
+    bool isStructure() override;
+};
 
 
 /* room-related structures ************************************************/
@@ -748,7 +769,6 @@ struct room_data : public unit_data {
 
     explicit room_data(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
-    std::array<exit_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     SpecialFunc func{};
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
@@ -763,11 +783,10 @@ struct room_data : public unit_data {
     int setDamage(int amount);
     int modDamage(int amount);
 
-    nlohmann::json serialize();
-    void deserializeContents(const nlohmann::json& j, bool isActive);
+    nlohmann::json serialize() override;
+    void deserialize(const nlohmann::json& j) override;
 
     bool isActive() override;
-    void save() override;
 
     std::optional<room_vnum> getLaunchDestination();
 
@@ -778,10 +797,10 @@ struct room_data : public unit_data {
     void assignTriggers() override;
     std::string scriptString() override;
 
-    Event renderLocationFor(unit_data* u) override;
+    //Event renderLocationFor(unit_data* u) override;
 
+    bool isInsideNormallyDark() override;
     bool isInsideDark() override;
-
     bool isEnvironment() override;
 
     double getEnvVar(EnvVar v) override;
@@ -941,11 +960,10 @@ struct char_data : public unit_data {
     nlohmann::json serializeRelations() override;
     void deserializeRelations(const nlohmann::json& j) override;
 
-    void sendGMCP(const std::string &cmd, const nlohmann::json &j);
+    virtual bool isPC();
+    virtual bool isNPC();
 
-    bool active{false};
     bool isActive() override;
-    void save() override;
 
     void ageBy(double addedTime);
     void setAge(double newAge);
@@ -957,13 +975,6 @@ struct char_data : public unit_data {
     struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
     std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
 
-    char *title{};
-    RaceID race{RaceID::Spirit};
-    SenseiID chclass{SenseiID::Commoner};
-
-
-    /* PC / NPC's weight                    */
-    weight_t weight{0};
     weight_t getWeight(bool base = false);
     weight_t getTotalWeight();
     weight_t getCurrentBurden();
@@ -978,261 +989,55 @@ struct char_data : public unit_data {
 
     int getArmor();
 
-    std::unordered_map<CharNum, num_t> nums{};
-
-    num_t get(CharNum stat);
-    num_t set(CharNum stat, num_t val);
-    num_t mod(CharNum stat, num_t val);
-
-    struct mob_special_data mob_specials{};
-
-    int size{SIZE_UNDEFINED};
     int getSize();
     int setSize(int val);
 
-    std::unordered_map<CharMoney, money_t> moneys;
     money_t get(CharMoney type);
     money_t set(CharMoney type, money_t val);
     money_t mod(CharMoney type, money_t val);
 
-    std::unordered_map<CharAlign, align_t> aligns;
     align_t get(CharAlign type);
     align_t set(CharAlign type, align_t val);
     align_t mod(CharAlign type, align_t val);
 
-    std::unordered_map<CharAppearance, appearance_t> appearances;
     appearance_t get(CharAppearance type);
     appearance_t set(CharAppearance type, appearance_t val);
     appearance_t mod(CharAppearance type, appearance_t val);
 
-    std::unordered_map<CharStat, stat_t> stats;
     stat_t get(CharStat type, bool base = true);
     stat_t set(CharStat type, stat_t val);
     stat_t mod(CharStat type, stat_t val);
 
-    // Instance-relevant fields below...
-    room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
-
-    room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
-    struct time_data time{};    /* PC's AGE in days			*/
-    struct affected_type *affected{};
-    /* affected by what spells		*/
-    struct affected_type *affectedv{};
-    /* affected by what combat spells	*/
-    struct queued_act *actq{};    /* queued spells / other actions	*/
-
-    struct descriptor_data *desc{};    /* nullptr for mobiles			*/
-
-    struct script_memory *memory{};    /* for mob memory triggers		*/
-
-    /* For room->people - list		*/
-    struct char_data *next{};    /* For either monster or ppl-list	*/
-    struct char_data *next_fighting{};
-    /* For fighting list			*/
-    struct char_data *next_affect{};/* For affect wearoff			*/
-    struct char_data *next_affectv{};
-    /* For round based affect wearoff	*/
-
-    struct follow_type *followers{};/* List of chars followers		*/
-    struct char_data *master{};    /* Who is char following?		*/
-    int64_t master_id{};
-
-    struct memorize_node *memorized{};
-    struct innate_node *innate{};
-
-    struct char_data *fighting{};    /* Opponent				*/
-
-    int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
-
-    int timer{};            /* Timer for update			*/
-
-    struct obj_data *sits{};      /* What am I sitting on? */
-    struct char_data *blocks{};    /* Who am I blocking?    */
-    struct char_data *blocked{};   /* Who is blocking me?    */
-    struct char_data *absorbing{}; /* Who am I absorbing */
-    struct char_data *absorbby{};  /* Who is absorbing me */
-    struct char_data *carrying{};
-    struct char_data *carried_by{};
-
-    int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
-    int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
-    /* One bitvector array per CFEAT_ type	*/
-    int school_feats[SFEAT_MAX + 1]{};/* One bitvector array per CFEAT_ type	*/
-
-    std::map<uint16_t, skill_data> skill;
-
-    std::bitset<NUM_MOB_FLAGS> mobFlags{};
-
-    std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */
-    int16_t saving_throw[3]{};    /* Saving throw				*/
-    int16_t apply_saving_throw[3]{};    /* Saving throw bonuses			*/
-
-    int armor{0};        /* Internally stored *10		*/
-
-    int64_t exp{};            /* The experience of the player		*/
     int64_t getExperience();
     int64_t setExperience(int64_t value);
     int64_t modExperience(int64_t value, bool applyBonuses = true);
 
-    int accuracy{};            /* Base hit accuracy			*/
-    int accuracy_mod{};        /* Any bonus or penalty to the accuracy	*/
-    int damage_mod{};        /* Any bonus or penalty to the damage	*/
-
-    FormID form{FormID::Base};        /* Current form of the character		*/
-    double transBonus{0.0};   // Varies from -0.3 to 0.3
     void gazeAtMoon();
-
-    // Data stored about different forms.
-    std::unordered_map<FormID, trans_data> transforms;
-
-    int16_t spellfail{};        /* Total spell failure %                 */
-    int16_t armorcheck{};        /* Total armorcheck penalty with proficiency forgiveness */
-    int16_t armorcheckall{};    /* Total armorcheck penalty regardless of proficiency */
-
-    /* All below added by Iovan for sure o.o */
-    int64_t charge{};
-    int64_t chargeto{};
-    int64_t barrier{};
-    char *clan{};
-    room_vnum droom{};
-    int choice{};
-    int sleeptime{};
-    int foodr{};
-    int altitude{};
-    int overf{};
-    int spam{};
-
-    room_vnum radar1{};
-    room_vnum radar2{};
-    room_vnum radar3{};
-    int ship{};
-    room_vnum shipr{};
-    time_t lastpl{};
-    time_t lboard[5]{};
-
-    room_vnum listenroom{};
-    int crank{};
-    int kaioken{};
-    int absorbs{};
-    int boosts{};
-    int upgrade{};
-    time_t lastint{};
-    int majinize{};
-    short fury{};
-    short btime{};
-    int eavesdir{};
-    time_t deathtime{};
-
-    int64_t suppression{};
-    struct char_data *drag{};
-    struct char_data *dragged{};
-    struct char_data *mindlink{};
-    int lasthit{};
-    int dcount{};
-    char *voice{};                  /* PC's snet voice */
-    int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
-    time_t rewtime{};
-    struct char_data *grappling{};
-    struct char_data *grappled{};
-    int grap{};
-    int genome[2]{};                /* Bio racial bonus, Genome */
-    int combo{};
-    int lastattack{};
-    int combhits{};
-    int ping{};
-    int starphase{};
-    std::optional<RaceID> mimic{};
-    std::bitset<MAX_BONUSES> bonuses{};
-
-    int cooldown{};
-    int death_type{};
-
-    int64_t moltexp{};
-    int moltlevel{};
-
-    char *loguser{};                /* What user was I last saved as?      */
-    int arenawatch{};
-    int64_t majinizer{};
-    int speedboost{};
-    int skill_slots{};
-    int tail_growth{};
-    int rage_meter{};
-    char *feature{};
-
-    int armor_last{};
-    int forgeting{};
-    int forgetcount{};
-    int backstabcool{};
-    int con_cooldown{};
-    short stupidkiss{};
-    char *temp_prompt{};
-
-    int personality{};
-    int combine{};
-    int linker{};
-    int fishstate{};
-    int throws{};
-
-    struct char_data *defender{};
-    struct char_data *defending{};
-
-    int lifeperc{};
-    int gooptime{};
-    int blesslvl{};
-    struct char_data *poisonby{};
-    std::set<struct char_data*> poisoned;
-
-    int mobcharge{};
-    int preference{};
-    int aggtimer{};
-
-    int lifebonus{};
-    int asb{};
-    int regen{};
-    int con_sdcooldown{};
-
-    int8_t limb_condition[4]{};
-
-    char *rdisplay{};
-
-    struct char_data *original{};
-
-    std::set<struct char_data*> clones{};
-    int relax_count{};
-    int ingestLearned{};
-
-    int64_t last_tell{-1};        /* idnum of last tell from              */
-    void *last_olc_targ{};        /* olc control                          */
-    int last_olc_mode{};        /* olc control                          */
-    int olc_zone{};            /* Zone where OLC is permitted		*/
-    int gauntlet{};                 /* Highest Gauntlet Position */
-    char *poofin{};            /* Description on arrival of a god.     */
-    char *poofout{};        /* Description upon a god's exit.       */
-    int speaking{};            /* Language currently speaking		*/
-
-    int8_t conditions[NUM_CONDITIONS]{};        /* Drunk, full, thirsty			*/
-    int practice_points{};        /* Skill points earned from race HD	*/
-
-    int wimp_level{0};        /* Below this # of hit points, flee!	*/
-    int8_t freeze_level{};        /* Level of god who froze char, if any	*/
-    int16_t invis_level{};        /* level of invisibility		*/
-    room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
 
     room_vnum normalizeLoadRoom(room_vnum in);
 
     double getAffectModifier(int location, int specific = -1);
 
-    std::unordered_map<CharAttribute, attribute_t> attributes;
     attribute_t get(CharAttribute attr, bool base = false);
     attribute_t set(CharAttribute attr, attribute_t val);
     attribute_t mod(CharAttribute attr, attribute_t val);
 
-    std::unordered_map<CharTrain, attribute_train_t> trains;
     attribute_train_t get(CharTrain attr);
     attribute_train_t set(CharTrain attr, attribute_train_t val);
     attribute_train_t mod(CharTrain attr, attribute_train_t val);
 
-    // C++ reworking
+    bool isInvisible() override;
+    bool isHidden() override;
+    bool isAdminInvisible() override;
+    bool canSeeInvisible() override;
+    //bool canSeeHidden() override;
+    bool canSeeAdminInvisible() override;
+    bool canSeeInDark() override;
+    bool isProvidingLight() override;
+
+    void sendText(const std::string& text) override;
+    void sendEvent(const Event& event) override;
+
     std::string juggleRaceName(bool capitalized);
 
     void restore(bool announce);
@@ -1481,46 +1286,267 @@ struct char_data : public unit_data {
 
     void remove_kaioken(int8_t announce);
 
-    double health = 1;
-    double energy = 1;
-    double stamina = 1;
-    double life = 1;
-
     int getRPP();
     void modRPP(int amt);
     int getPractices();
     void modPractices(int amt);
 
-    bool isProvidingLight();
     double currentGravity();
 
     UnitFamily getFamily() override;
 
+    num_t get(CharNum stat);
+    num_t set(CharNum stat, num_t val);
+    num_t mod(CharNum stat, num_t val);
+
+    // THE BELOW VARIABLES NEED TO BE MADE PRIVATE EVENTUALLY.
+    std::unordered_map<CharNum, num_t> nums{};
+    char *title{};
+    bool active{false};
+    weight_t weight{0};
+    struct mob_special_data mob_specials{};
+    int size{SIZE_UNDEFINED};
+    std::unordered_map<CharMoney, money_t> moneys;
+    std::unordered_map<CharAlign, align_t> aligns;
+    std::unordered_map<CharAppearance, appearance_t> appearances;
+    std::unordered_map<CharStat, stat_t> stats;
+
+    room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
+    room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
+    struct time_data time{};    /* PC's AGE in days			*/
+    struct affected_type *affected{};
+    /* affected by what spells		*/
+    struct affected_type *affectedv{};
+
+    struct descriptor_data *desc{};    /* nullptr for mobiles			*/
+
+    struct script_memory *memory{};    /* for mob memory triggers		*/
+
+    /* For room->people - list		*/
+    struct char_data *next{};    /* For either monster or ppl-list	*/
+    struct char_data *next_fighting{};
+    /* For fighting list			*/
+    struct char_data *next_affect{};/* For affect wearoff			*/
+    struct char_data *next_affectv{};
+    /* For round based affect wearoff	*/
+
+    struct follow_type *followers{};/* List of chars followers		*/
+    struct char_data *master{};    /* Who is char following?		*/
+    int64_t master_id{};
+
+    struct char_data *fighting{};    /* Opponent				*/
+
+    int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
+
+    int timer{};            /* Timer for update			*/
+
+    struct obj_data *sits{};      /* What am I sitting on? */
+    struct char_data *blocks{};    /* Who am I blocking?    */
+    struct char_data *blocked{};   /* Who is blocking me?    */
+    struct char_data *absorbing{}; /* Who am I absorbing */
+    struct char_data *absorbby{};  /* Who is absorbing me */
+    struct char_data *carrying{};
+    struct char_data *carried_by{};
+
+    int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
+    int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
+    /* One bitvector array per CFEAT_ type	*/
+    int school_feats[SFEAT_MAX + 1]{};/* One bitvector array per CFEAT_ type	*/
+
+    std::map<uint16_t, skill_data> skill;
+
+    std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */
+    int16_t saving_throw[3]{};    /* Saving throw				*/
+    int16_t apply_saving_throw[3]{};    /* Saving throw bonuses			*/
+
+    int armor{0};        /* Internally stored *10		*/
+
+    int64_t exp{};            /* The experience of the player		*/
+    int accuracy{};            /* Base hit accuracy			*/
+    int accuracy_mod{};        /* Any bonus or penalty to the accuracy	*/
+    int damage_mod{};        /* Any bonus or penalty to the damage	*/
+
+    FormID form{FormID::Base};        /* Current form of the character		*/
+    double transBonus{0.0};   // Varies from -0.3 to 0.3
+
+    // Data stored about different forms.
+    std::unordered_map<FormID, trans_data> transforms;
+
+    int16_t spellfail{};        /* Total spell failure %                 */
+    int16_t armorcheck{};        /* Total armorcheck penalty with proficiency forgiveness */
+    int16_t armorcheckall{};    /* Total armorcheck penalty regardless of proficiency */
+
+    /* All below added by Iovan for sure o.o */
+    int64_t charge{};
+    int64_t chargeto{};
+    int64_t barrier{};
+    char *clan{};
+    room_vnum droom{};
+    int choice{};
+    int sleeptime{};
+    int foodr{};
+    int altitude{};
+    int overf{};
+    int spam{};
+
+    room_vnum radar1{};
+    room_vnum radar2{};
+    room_vnum radar3{};
+    int ship{};
+    room_vnum shipr{};
+    time_t lastpl{};
+    time_t lboard[5]{};
+
+    room_vnum listenroom{};
+    int crank{};
+    int kaioken{};
+    int absorbs{};
+    int boosts{};
+    int upgrade{};
+    time_t lastint{};
+    int majinize{};
+    short fury{};
+    short btime{};
+    int eavesdir{};
+    time_t deathtime{};
+
+    int64_t suppression{};
+    struct char_data *drag{};
+    struct char_data *dragged{};
+    struct char_data *mindlink{};
+    int lasthit{};
+    int dcount{};
+    char *voice{};                  /* PC's snet voice */
+    int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
+    time_t rewtime{};
+    struct char_data *grappling{};
+    struct char_data *grappled{};
+    int grap{};
+    int genome[2]{};                /* Bio racial bonus, Genome */
+    int combo{};
+    int lastattack{};
+    int combhits{};
+    int ping{};
+    int starphase{};
+    std::optional<RaceID> mimic{};
+    std::bitset<MAX_BONUSES> bonuses{};
+
+    int cooldown{};
+    int death_type{};
+
+    int64_t moltexp{};
+    int moltlevel{};
+
+    char *loguser{};                /* What user was I last saved as?      */
+    int arenawatch{};
+    int64_t majinizer{};
+    int speedboost{};
+    int skill_slots{};
+    int tail_growth{};
+    int rage_meter{};
+    char *feature{};
+
+    int armor_last{};
+    int forgeting{};
+    int forgetcount{};
+    int backstabcool{};
+    int con_cooldown{};
+    short stupidkiss{};
+    char *temp_prompt{};
+
+    int personality{};
+    int combine{};
+    int linker{};
+    int fishstate{};
+    int throws{};
+
+    struct char_data *defender{};
+    struct char_data *defending{};
+
+    int lifeperc{};
+    int gooptime{};
+    int blesslvl{};
+    struct char_data *poisonby{};
+    std::set<struct char_data*> poisoned;
+
+    int mobcharge{};
+    int preference{};
+    int aggtimer{};
+
+    int lifebonus{};
+    int asb{};
+    int regen{};
+    int con_sdcooldown{};
+
+    int8_t limb_condition[4]{};
+
+    char *rdisplay{};
+
+    struct char_data *original{};
+
+    std::set<struct char_data*> clones{};
+    int relax_count{};
+    int ingestLearned{};
+
+    int64_t last_tell{-1};        /* idnum of last tell from              */
+    void *last_olc_targ{};        /* olc control                          */
+    int last_olc_mode{};        /* olc control                          */
+    int olc_zone{};            /* Zone where OLC is permitted		*/
+    int gauntlet{};                 /* Highest Gauntlet Position */
+    char *poofin{};            /* Description on arrival of a god.     */
+    char *poofout{};        /* Description upon a god's exit.       */
+    int speaking{};            /* Language currently speaking		*/
+
+    int8_t conditions[NUM_CONDITIONS]{};        /* Drunk, full, thirsty			*/
+    int practice_points{};        /* Skill points earned from race HD	*/
+
+    int wimp_level{0};        /* Below this # of hit points, flee!	*/
+    int8_t freeze_level{};        /* Level of god who froze char, if any	*/
+    int16_t invis_level{};        /* level of invisibility		*/
+    room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
+
+    std::unordered_map<CharAttribute, attribute_t> attributes;
+    std::unordered_map<CharTrain, attribute_train_t> trains;
+    double health = 1;
+    double energy = 1;
+    double stamina = 1;
+    double life = 1;
+    RaceID race{RaceID::Spirit};
+    SenseiID chclass{SenseiID::Commoner};
+
 };
 
-struct npc_data : public char_data {
-    npc_data() = default;
-    explicit npc_data(const nlohmann::json &j);
+struct NonPlayerCharacter : public char_data {
+    NonPlayerCharacter() = default;
+    explicit NonPlayerCharacter(const nlohmann::json &j);
+
+    UnitFamily getFamily() override;
+    std::string getUnitClass() override;
 
     void assignTriggers() override;
-    std::string scriptString() override;
-
-    UnitFamily getFamily() override;
-    std::string getUnitClass() override;
 
     void deserialize(const nlohmann::json& j) override;
     nlohmann::json serialize() override;
+
+    bool isPC() override;
+    bool isNPC() override;
 };
 
-struct pc_data : public char_data {
-    pc_data() = default;
-    explicit pc_data(const nlohmann::json &j);
+struct PlayerCharacter : public char_data {
+    PlayerCharacter() = default;
+    explicit PlayerCharacter(const nlohmann::json &j);
+
+    void onHolderExtraction() override;
+    void extractFromWorld() override;
 
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
 
     void deserialize(const nlohmann::json& j) override;
     nlohmann::json serialize() override;
+
+    bool isPC() override;
+    bool isNPC() override;
 };
 
 
@@ -1587,7 +1613,7 @@ struct descriptor_data {
     void start();
     void handleLostLastConnection(bool graceful);
     void sendText(const std::string &txt);
-    void sendGMCP(const std::string &cmd, const nlohmann::json &j);
+    void sendEvent(const Event& ev);
 };
 
 /* used in the socials */

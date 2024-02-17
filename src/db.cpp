@@ -273,16 +273,16 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
         auto data = j["data"];
         unit_data *u = nullptr;
         if(unitClass == "pc_data") {
-            u = new pc_data(data);
+            u = new PlayerCharacter(data);
         } else if(unitClass == "npc_data") {
-            u = new npc_data(data);
+            u = new NonPlayerCharacter(data);
         } else if(unitClass == "obj_data") {
             u = new obj_data(data);
         } else if(unitClass == "room_data") {
             u = new room_data(data);
         }
 
-        if(auto pc = dynamic_cast<pc_data*>(u); pc) {
+        if(auto pc = dynamic_cast<PlayerCharacter*>(u); pc) {
             if(auto isPlayer = players.find(uid); isPlayer != players.end()) {
                 isPlayer->second->character = pc;
             }
@@ -293,12 +293,11 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
 }
 
 static void db_load_instances_finish(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "instances.json")) {
+    for(auto j : load_from_file(loc, "relations.json")) {
         auto uid = j["uid"].get<int64_t>();
         if(auto uf = world.find(uid); uf != world.end()) {
             if(auto u = uf->second) {
                 u->deserializeRelations(j["relations"]);
-                u->deserializeLocation(j["location"]);
             }
         }
     }
@@ -1159,7 +1158,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     // Weird hack to ensure script_data is not overwritten by prototype...
-    auto mob = new npc_data();
+    auto mob = new NonPlayerCharacter();
     mob->script = std::make_shared<script_data>(mob);
     mob->deserialize(proto->second);
     

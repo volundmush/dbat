@@ -831,8 +831,6 @@ void extract_char_final(struct char_data *ch) {
             extract_script(ch, MOB_TRIGGER);
         if (SCRIPT_MEM(ch))
             extract_script_mem(SCRIPT_MEM(ch));
-    } else {
-        ch->save();
     }
 
     /* If there's a descriptor, they're in the menu now. */

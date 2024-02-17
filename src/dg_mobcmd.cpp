@@ -937,7 +937,7 @@ ACMD(do_mforget) {
 ACMD(do_mtransform) {
     char arg[MAX_INPUT_LENGTH];
     char_data *m;
-    npc_data tmpmob;
+    NonPlayerCharacter tmpmob;
     obj_data *obj[NUM_WEARS];
     mob_rnum this_rnum = GET_MOB_RNUM(ch);
     int pos;

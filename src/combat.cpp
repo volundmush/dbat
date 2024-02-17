@@ -1636,9 +1636,6 @@ void damage_eq(struct char_data *vict, int location) {
             act("@WYour $p@W completely breaks!@n", false, nullptr, eq, vict, TO_VICT);
             act("@C$N's@W $p@W completely breaks!@n", false, nullptr, eq, vict, TO_NOTVICT);
             perform_remove(vict, location);
-            if (!IS_NPC(vict)) {
-                vict->save();
-            }
         } else if (GET_OBJ_VAL(eq, VAL_ALL_MATERIAL) == MATERIAL_LEATHER ||
                    GET_OBJ_VAL(eq, VAL_ALL_MATERIAL) == MATERIAL_COTTON ||
                    GET_OBJ_VAL(eq, VAL_ALL_MATERIAL) == MATERIAL_SILK) {

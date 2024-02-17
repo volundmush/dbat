@@ -2571,11 +2571,11 @@ ACMD(do_get) {
 
     for(auto o : results) {
         // TODO: Filter whether thing can be gotten...
-        if(auto check = o->checkAllowGet(ch); check) {
+        if(auto check = o->checkIsGettable(ch); check) {
             ch->sendLine("{}: {}", o->getDisplayName(ch), check.value());
             continue;
         }
-        if(auto check = ch->checkCanPickup(ch); check) {
+        if(auto check = ch->checkCanStore(ch); check) {
             ch->sendLine("{}: {}", o->getDisplayName(ch), check.value());
             continue;
         }
@@ -2778,7 +2778,7 @@ ACMD(do_drop) {
     }
 
     auto loc = ch->getLocation();
-    if(auto check = loc->checkAllowDrop(ch); check) {
+    if(auto check = loc->checkAllowInventoryAcesss(ch); check) {
         std::string msg(check.value());
         ch->sendLine("You can't drop anything here: {}", msg);
         return;

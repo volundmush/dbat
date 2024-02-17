@@ -203,10 +203,6 @@ void send_to_zone(char *messg, zone_rnum zone) {
             write_to_output(i, "%s", messg);
 }
 
-static bool isPlanet(const area_data& a) {
-    return a.type == AreaType::CelestialBody;
-}
-
 void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;

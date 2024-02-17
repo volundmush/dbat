@@ -160,7 +160,7 @@ nlohmann::json char_data::serialize() {
     if(armor) j["armor"] = armor;
     if(damage_mod) j["damage_mod"] = damage_mod;
 
-        if(health < 1.0) j["health"] = health;
+    if(health < 1.0) j["health"] = health;
     if(energy < 1.0) j["energy"] = energy;
     if(stamina < 1.0) j["stamina"] = stamina;
     if(life < 1.0) j["life"] = life;
@@ -349,8 +349,6 @@ void char_data::deserialize(const nlohmann::json &j) {
     if(j.contains("armor")) armor = j["armor"];
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
-    if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) setFlag(FlagType::NPC, i.get<int>());
-    if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) setFlag(FlagType::PC, i.get<int>());
     if(j.contains("pref")) for(auto &i : j["pref"]) setFlag(FlagType::Pref, i.get<int>());
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) bodyparts.set(i.get<int>());
 
@@ -514,9 +512,6 @@ void char_data::deserialize(const nlohmann::json &j) {
 
 char_data::char_data(const nlohmann::json &j) : char_data() {
     deserialize(j);
-
-    if (!IS_HUMAN(this))
-        setFlag(FlagType::Affect, AFF_INFRAVISION);
 
     SPEAKING(this) = SKILL_LANG_COMMON;
     set_height_and_weight_by_race(this);
@@ -759,17 +754,6 @@ nlohmann::json char_data::serializeRelations() {
 }
 
 
-void char_data::save() {
-
-}
-
-bool char_data::isProvidingLight() {
-    if(!IS_NPC(this) && PLR_FLAGGED(this, PLR_AURALIGHT)) return true;
-    for(auto i = 0; i < NUM_WEARS; i++) if(auto e = GET_EQ(this, i); e) if(e->isProvidingLight()) return true;
-    return false;
-}
-
-
 double char_data::currentGravity() {
     return myEnvVar(EnvVar::Gravity);
 }
@@ -808,7 +792,7 @@ void char_data::setAge(double newAge) {
     this->time.secondsAged = newAge * SECS_PER_GAME_YEAR;
 }
 
-void npc_data::assignTriggers() {
+void NonPlayerCharacter::assignTriggers() {
     // Nothing to do without a prototype...
 
     // remove all duplicates from i->proto_script but do not change its order otherwise.

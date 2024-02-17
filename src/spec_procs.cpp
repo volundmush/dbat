@@ -890,7 +890,6 @@ SPECIAL(augmenter) {
         } else {
             ch->sendf("Syntax: augment [str | con | int | wis | agi | spe]\r\n");
         }
-        ch->save();
         return (true);
     } else { /* They are not using the right command, ignore them. */
         return (false);
@@ -1061,7 +1060,6 @@ SPECIAL(bank) {
             ch->mod(CharMoney::Bank, -(amount + (amount / 100)));
             mudlog(NRM, MAX(ADMLVL_IMPL, GET_INVIS_LEV(ch)), true, "EXCHANGE: %s gave %s zenni to user %s",
                    GET_NAME(ch), add_commas(amount).c_str(), GET_NAME(vict));
-            vict->save();
         } else {
             vict->mod(CharMoney::Bank, amount);
             ch->mod(CharMoney::Bank, -(amount + (amount / 100)));

@@ -311,7 +311,6 @@ ACMD(do_say) {
                                              "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
                                 wch->mod(CharAttribute::Speed, 10);
-                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a speed wish on %s.", GET_NAME(ch),
@@ -354,7 +353,6 @@ ACMD(do_say) {
                                              "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
                                 wch->mod(CharAttribute::Intelligence, 10);
-                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a intelligence wish on %s.",
@@ -414,7 +412,6 @@ ACMD(do_say) {
                                 wch->sendf("@GYou suddenly feel like you could learn %d more skills!@n\r\n",
                                              roll);
                                 GET_SLOTS(wch) += roll;
-                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a skill wish on %s.", GET_NAME(ch),
@@ -707,15 +704,6 @@ ACMD(do_say) {
                             } else {
                                 WISH[0] = 1;
                             } /*end WISH if */
-                            if (wch != nullptr) {
-                                wch->save();
-                            }
-                            if (wch2 != nullptr) {
-                                wch->save();
-                            }
-                            if (wch3 != nullptr) {
-                                wch->save();
-                            }
                             save_mud_time(&time_info);
                         } else if (wch == nullptr) {
                             send_to_room(real_room(DRAGONR),

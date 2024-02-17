@@ -2137,9 +2137,6 @@ void trig_data::deserialize(const nlohmann::json &j) {
     if(j.contains("vars")) vars = j["vars"];
 }
 
-std::string trig_data::serializeLocation() {
-    return sc->owner->getUID(false);
-}
 
 // Note: Trigger instances are meant to be set all active or inactive on a per room/character/item basis,
 // not individually.

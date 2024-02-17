@@ -14,7 +14,7 @@ namespace net {
         void start() override;
 
     protected:
-        pc_data *ch{};
+        PlayerCharacter *ch{};
         int state{CON_GET_NAME};
         int total{};
         int ccpoints{};

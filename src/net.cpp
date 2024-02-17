@@ -30,23 +30,15 @@ namespace net {
 
     }
 
-    void Connection::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-        if(cmd.empty()) return;
-        nlohmann::json j2;
-        j2["cmd"] = cmd;
-        j2["data"] = j;
-        sendEvent("GMCP", j2);
-    }
-
     void Connection::sendText(const std::string &text) {
         if(text.empty()) return;
         nlohmann::json j;
         j["data"] = text;
-        sendEvent("CircleText", j);
+        sendEvent(Event("CircleText", j));
     }
 
-    void Connection::sendEvent(const std::string &name, const nlohmann::json &data) {
-        outQueue.emplace_back(name, jdump(data));
+    void Connection::sendEvent(const Event &ev) {
+        outQueue.emplace_back(ev.first, jdump(ev.second));
     }
 
     void Connection::queueMessage(const std::string& event, const std::string& data) {

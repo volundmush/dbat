@@ -17,12 +17,6 @@
 #include "dbat/constants.h"
 #include "dbat/dg_scripts.h"
 
-
-
-
-
-/* ------------------------------------------------------------------------------------------------------------------------------ */
-
 int save_objects(zone_rnum zone_num) {
     return true;
 }
@@ -71,6 +65,53 @@ nlohmann::json obj_data::serialize() {
     return j;
 }
 
+void obj_data::deserialize(const nlohmann::json &j) {
+    unit_data::deserialize(j);
+
+    if(j.contains("value")) {
+        for(auto & i : j["value"]) {
+            value[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("type_flag")) type_flag = j["type_flag"];
+    if(j.contains("level")) level = j["level"];
+
+    if(j.contains("weight")) weight = j["weight"];
+    if(j.contains("cost")) cost = j["cost"];
+    if(j.contains("cost_per_day")) cost_per_day = j["cost_per_day"];
+
+    if(j.contains("affected")) {
+        int counter = 0;
+        for(auto & i : j["affected"]) {
+            affected[counter].deserialize(i);
+            counter++;
+        }
+    }
+
+}
+
+nlohmann::json obj_data::serializeRelations() {
+    auto j = unit_data::serializeRelations();
+
+    if(posted_to) j["posted_to"] = posted_to->getUID();
+    if(fellow_wall) j["fellow_wall"] = fellow_wall->getUID();
+
+    return j;
+}
+
+void obj_data::deserializeRelations(const nlohmann::json& j) {
+    unit_data::deserializeRelations(j);
+    
+    if(j.contains("posted_to")) {
+        auto check = resolveUID(j["posted_to"]);
+        if(check) posted_to = dynamic_cast<obj_data*>(check);
+    }
+    if(j.contains("fellow_wall")) {
+        auto check = resolveUID(j["fellow_wall"]);
+        if(check) fellow_wall = dynamic_cast<obj_data*>(check);
+    }
+}
 
 
 
@@ -105,12 +146,6 @@ void obj_data::deactivate() {
 
 }
 
-void obj_data::deserialize(const nlohmann::json &j) {
-    unit_data::deserialize(j);
-
-    if(j.contains("room_loaded")) room_loaded = j["room_loaded"];
-
-}
 
 
 int obj_data::getAffectModifier(int location, int specific) {
@@ -247,32 +282,17 @@ void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
 }
 
 
-nlohmann::json obj_data::serializeRelations() {
-    auto j = nlohmann::json::object();
 
-    if(posted_to) j["posted_to"] = posted_to->getUID();
-    if(fellow_wall) j["fellow_wall"] = fellow_wall->getUID();
-
-    return j;
-}
-
-
-void obj_data::deserializeRelations(const nlohmann::json& j) {
-    unit_data::deserializeRelations(j);
-    
-    if(j.contains("posted_to")) {
-        auto check = resolveUID(j["posted_to"]);
-        if(check) posted_to = dynamic_cast<obj_data*>(check);
-    }
-    if(j.contains("fellow_wall")) {
-        auto check = resolveUID(j["fellow_wall"]);
-        if(check) fellow_wall = dynamic_cast<obj_data*>(check);
-    }
-}
 
 
 bool obj_data::isProvidingLight() {
-    return GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS);
+    if(checkFlag(FlagType::Item, ITEM_GLOW)) return true;
+    // Equipper is carrying this as a light source.
+    if(locationType > 0 && GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS)) return true;
+    if(GET_OBJ_TYPE(this) == ITEM_CAMPFIRE) return true;
+    // Flambus stove, dammit.
+    if(vn == 19093) return true;
+    return false;
 }
 
 

@@ -362,7 +362,9 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     char buf[MAX_INPUT_LENGTH];
     auto room = vehicle->getRoom();
 
-    auto d = room->dir_option[dir];
+    auto exits = room->getExits();
+
+    auto d = exits[dir];
     if(!d) {
         ch->sendf("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
@@ -421,7 +423,8 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
     ch->sendf("@wThe ship flies onward:\r\n");
-    ch->sendEvent(vehicle->getLocation()->renderLocationFor(ch));
+    look_at_room(vehicle->getRoom(), ch, 0);
+    //ch->sendEvent(vehicle->getLocation()->renderLocationFor(ch));
     if (controls) {
         ch->sendf("@RFUEL@D: %s%s@n\r\n",
                      GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
@@ -429,9 +432,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     }
     int door;
     room = vehicle->getRoom();
-    for (door = 0; door < NUM_OF_DIRS; door++) {
-        auto e = room->dir_option[door];
-        if(!e) continue;
+    for (auto &[door, e] : room->getExits()) {
         dest = e->getDestination();
         if(!dest) continue;
         if(!e->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
@@ -980,7 +981,8 @@ ACMD(do_drive) {
                 if (land_location <= 50) {
                     sprintf(buf3, "%s @wcomes in from above and slowly settles on the launch-pad.@n\r\n",
                             vehicle->getShortDesc().c_str());
-                    ch->sendEvent(room->renderLocationFor(ch));
+                    look_at_room(room, ch, 0);
+                    //ch->sendEvent(room->renderLocationFor(ch));
                     send_to_room(IN_ROOM(vehicle), buf3);
                 } else {
                     sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n",
@@ -990,7 +992,8 @@ ACMD(do_drive) {
                     if (room->dmg >= 10) {
                         room->dmg = 10;
                     }
-                    ch->sendEvent(room->renderLocationFor(ch));
+                    look_at_room(room, ch, 0);
+                    //ch->sendEvent(room->renderLocationFor(ch));
                     send_to_room(IN_ROOM(vehicle), buf3);
                 }
             } else if (!strcasecmp(arg, "launch")) {
@@ -1022,7 +1025,8 @@ ACMD(do_drive) {
                 }
                 vehicle->removeFromLocation();
                 vehicle->lookAtLocation();
-                ch->sendEvent(vehicle->getLocation()->renderLocationFor(ch));
+                look_at_room(vehicle->getRoom(), ch, 0);
+                //ch->sendEvent(vehicle->getLocation()->renderLocationFor(ch));
                 ch->sendf("@RFUEL@D: %s%s@n\r\n",
                              GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
                              add_commas(GET_FUEL(controls)).c_str());

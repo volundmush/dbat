@@ -1304,8 +1304,8 @@ void descriptor_data::sendText(const std::string& txt) {
     output += txt;
 }
 
-void descriptor_data::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-    for(auto &[id, conn] : conns) conn->sendGMCP(cmd, j);
+void descriptor_data::sendEvent(const Event& ev) {
+    for(auto &[id, conn] : conns) conn->sendEvent(ev);
 }
 
 void free_bufpool() {

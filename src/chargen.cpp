@@ -496,7 +496,7 @@ namespace net {
 
 
     ChargenParser::ChargenParser(std::shared_ptr<Connection>& co) : ConnectionParser(co) {
-        ch = new pc_data();
+        ch = new PlayerCharacter();
     }
 
     void ChargenParser::start() {

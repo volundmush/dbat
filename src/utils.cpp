@@ -470,8 +470,6 @@ int roll_aff_duration(int num, int add) {
 }
 
 void null_affect(struct char_data *ch, int aff_flag) {
-    ch->save();
-
     struct affected_type *af, *next_af;
 
     for (af = ch->affected; af; af = next_af) {
@@ -496,8 +494,6 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
 
     if (dur <= 0)
         dur = 1;
-
-    ch->save();
 
     if (str == 0 && con == 0 && wis == 0 && intel == 0 && agl == 0 && spd == 0) {
         af[num].type = skill;
@@ -3003,39 +2999,8 @@ size_t countColors(const std::string &txt) {
  *
  * Inside and City rooms are always lit.
  * Outside rooms are dark at sunset and night.  */
-static const std::set<int> lit_sectors = {SECT_INSIDE, SECT_CITY, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
 
-bool room_data::isInsideDark() {
 
-    for(auto u : getContents()) {
-        if(u->isProvidingLight()) return false;
-    }
-
-    auto rfd = checkFlag(FlagType::Room, ROOM_DARK);
-
-    if (checkFlag(FlagType::Room, ROOM_NOINSTANT) && rfd) {
-        return (true);
-    }
-    if (checkFlag(FlagType::Room, ROOM_NOINSTANT) && !rfd) {
-        return (false);
-    }
-
-    if (rfd)
-        return (true);
-
-    if (checkFlag(FlagType::Room, ROOM_INDOORS))
-        return (false);
-
-    if(lit_sectors.contains(sector_type)) return false;
-
-    if (weather_info.sunlight == SUN_SET)
-        return (true);
-
-    if (weather_info.sunlight == SUN_DARK)
-        return (true);
-
-    return (false);
-}
 
 int count_metamagic_feats(struct char_data *ch) {
     int count = 0;                /* Number of Metamagic Feats Known */

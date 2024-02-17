@@ -32,6 +32,9 @@ extern int perf_skill(int skill);
 
 extern int search_help(const char *argument, int level);
 
+extern void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief);
+extern void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief);
+
 
 // commands
 extern ACMD(do_desc);

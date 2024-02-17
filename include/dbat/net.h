@@ -46,9 +46,8 @@ namespace net {
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
         explicit Connection(const std::string& connId, const std::string& host);
-        void sendGMCP(const std::string &cmd, const nlohmann::json &j);
         void sendText(const std::string &messg);
-        void sendEvent(const std::string &name, const nlohmann::json &data);
+        void sendEvent(const Event &ev);
         void onHeartbeat(double deltaTime);
         void onNetworkDisconnected();
         void onWelcome();

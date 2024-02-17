@@ -925,6 +925,10 @@ const char *item_types[NUM_ITEM_TYPES + 1] = {
         "PLANT",
         "FISHINGPOLE",
         "FISHBAIT",
+        "REGION",
+        "BUILDING",
+        "DIMENSION",
+        "CELESTIALBODY",
         "\n"
 };
 
@@ -1051,7 +1055,7 @@ const char *extra_bits[NUM_ITEM_FLAGS + 1] = {
         "CARDCASE",
         "MOB_NOPICKUP",
         "NOSTEAL",
-        "RESTRING",
+        "PLANET",
         "\n"
 };
 

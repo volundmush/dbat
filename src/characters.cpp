@@ -1473,8 +1473,12 @@ void char_data::gazeAtMoon() {
     }
 }
 
-void char_data::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-    if(desc) desc->sendGMCP(cmd, j);
+void char_data::sendEvent(const Event &ev) {
+    if(desc) desc->sendEvent(ev);
+}
+
+void char_data::sendText(const std::string &text) {
+    if(desc) desc->sendText(text);
 }
 
 static const std::map<std::string, CharAttribute> _attr_names = {
@@ -1853,12 +1857,12 @@ DgResults char_data::dgCallMember(trig_data *trig, const std::string& member, co
     return "";
 }
 
-std::string npc_data::getUnitClass() {
-    return "npc_data";
+std::string NonPlayerCharacter::getUnitClass() {
+    return "NonPlayerCharacter";
 }
 
-std::string pc_data::getUnitClass() {
-    return "pc_data";
+std::string PlayerCharacter::getUnitClass() {
+    return "PlayerCharacter";
 }
 
 UnitFamily char_data::getFamily() {
@@ -1874,4 +1878,64 @@ char_data::~char_data() {
         free(voice);
 }
 
+void PlayerCharacter::extractFromWorld() {
+
+}
+
+void PlayerCharacter::onHolderExtraction() {
+    // Player Characters are not deleted this way.
+}
+
+bool PlayerCharacter::isPC() {
+    return true;
+}
+
+bool PlayerCharacter::isNPC() {
+    return false;
+}
+
+bool NonPlayerCharacter::isPC() {
+    return false;
+}
+
+bool NonPlayerCharacter::isNPC() {
+    return true;
+}
+
+bool char_data::isInvisible() {
+    return AFF_FLAGGED(this, AFF_INVISIBLE);
+}
+
+bool char_data::canSeeInvisible() {
+    return AFF_FLAGGED(this, AFF_DETECT_INVIS);
+}
+
+bool char_data::isHidden() {
+    return AFF_FLAGGED(this, AFF_HIDE);
+}
+
+bool char_data::isAdminInvisible() {
+    return false;
+}
+
+bool char_data::canSeeAdminInvisible() {
+    return checkFlag(FlagType::Pref, PRF_HOLYLIGHT);
+}
+
+bool char_data::canSeeInDark() {
+    if(checkFlag(FlagType::Pref, PRF_HOLYLIGHT)) return true;
+    if(isProvidingLight()) return true;
+    if(AFF_FLAGGED(this, AFF_INFRAVISION)) return true;
+    if(race == RaceID::Mutant && (genome[0] == 4 || genome[1] == 4)) return true;
+    if(race == RaceID::Animal) return true;
+    return false;
+}
+
+bool char_data::isProvidingLight() {
+    if(checkFlag(FlagType::PC, PLR_AURALIGHT)) return true;
+    for(auto &[pos, e] : getEquipment()) {
+        if(e->isProvidingLight()) return true;
+    }
+    return false;
+}
 

@@ -405,7 +405,6 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #define CHECK_PLAYER_SPECIAL(ch, var)	(var)
 #endif
 
-#define MOB_FLAGS(ch)    ((ch)->mobFlags)
 #define AFF_FLAGS(ch)    ((ch)->affected_by)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
 #define SPELL_ROUTINES(spl)    (spell_info[spl].routines)
@@ -419,7 +418,7 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  * See http://www.circlemud.org/~greerga/todo/todo.009 to eliminate MOB_ISNPC.
  * IS_MOB() acts as a VALID_MOB_RNUM()-like function.
  */
-#define IS_NPC(ch)    (MOB_FLAGGED((ch), MOB_ISNPC))
+#define IS_NPC(ch)    ((ch)->isNPC())
 #define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
 
 extern bool MOB_FLAGGED(const struct char_data *ch, int flag);

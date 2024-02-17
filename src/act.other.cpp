@@ -579,7 +579,6 @@ ACMD(do_rpp) {
                 struct obj_data *hobj = read_object(6, VIRTUAL);
                 hobj->addToLocation(ch);
                 ch->modRPP(-pay);
-                ch->save();
                 ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
                 send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
                 return;
@@ -630,7 +629,6 @@ ACMD(do_rpp) {
             save_mud_time(&time_info);
         }
         ch->modRPP(-pay);
-        ch->save();
         ch->sendf(
                      "@R%d@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n",
                      pay);
@@ -641,14 +639,12 @@ ACMD(do_rpp) {
     /* Pay for purchases here */
     if (selection >= 4 && selection < 12 && pay > 0) {
         ch->modRPP(-pay);
-        ch->save();
         ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
 
     if (selection > 12 && pay > 0) {
         ch->modRPP(-pay);
-        ch->save();
         ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
@@ -1587,7 +1583,6 @@ ACMD(do_train) {
             ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * 0.25);
             ch->sendf("You gained quite a bit of experience from that!\r\n");
         }
-        ch->save();
     }
 }
 
@@ -2666,7 +2661,8 @@ ACMD(do_telepathy) {
             ch->sendf("Their eyes are closed!\r\n");
             return;
         } else {
-            ch->sendEvent(vict->getRoom()->renderLocationFor(ch));
+            look_at_room(vict->getRoom(), ch, 0);
+            //ch->sendEvent(vict->getRoom()->renderLocationFor(ch));
             ch->sendf("You see all this through their eyes!\r\n");
             if (GET_INT(vict) > GET_INT(ch)) {
                 ch->sendf("You feel like someone was using your mind for something...\r\n");
@@ -8873,7 +8869,6 @@ ACMD(do_scouter) {
                 ch->sendf("Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
                 obj->extractFromWorld();
-                ch->save();
                 return;
             } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
                 act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
@@ -8882,7 +8877,6 @@ ACMD(do_scouter) {
                 ch->sendf("Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
                 obj->extractFromWorld();
-                ch->save();
                 return;
             } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
                 act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
@@ -8891,7 +8885,6 @@ ACMD(do_scouter) {
                 ch->sendf("Your scouter overloads and explodes!\r\n");
                 act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
                 obj->extractFromWorld();
-                ch->save();
                 return;
             } else {
                 long double percent = 0.0, cur = 0.0, max = 0.0;
@@ -9012,7 +9005,8 @@ ACMD(do_quit) {
     if (MINDLINK(ch) && LINKER(ch) == 0) {
         ch->sendf("@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
         if (auto mindroom = MINDLINK(ch)->getRoom(); mindroom) {
-            ch->sendEvent(mindroom->renderLocationFor(ch));
+            look_at_room(mindroom, ch, 0);
+            //ch->sendEvent(mindroom->renderLocationFor(ch));
             ch->sendf("You get an impression of where this interference is originating from.\r\n");
         }
         return;
@@ -9106,7 +9100,6 @@ ACMD(do_save) {
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
     }
-    ch->save();
 }
 
 /* generic function for commands which are normally overridden by

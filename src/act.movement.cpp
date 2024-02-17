@@ -254,10 +254,6 @@ std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms) {
 
 static std::set<vnum> _areaRecurseGuard;
 
-std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data*)>& func) {
-    std::size_t count = 0;
-    return count;
-}
 
 /* This shows the player what locations the planet has to land at. */
 static void disp_locations(struct char_data *ch, vnum areaVnum, std::set<room_vnum>& rooms) {
@@ -1724,9 +1720,6 @@ static int check_swim(struct char_data *ch) {
     }
 }
 
-static bool isPlanet(const area_data& a) {
-    return a.type == AreaType::CelestialBody;
-}
 
 ACMD(do_fly) {
     char arg[MAX_INPUT_LENGTH];

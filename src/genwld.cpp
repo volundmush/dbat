@@ -99,12 +99,11 @@ nlohmann::json room_data::serialize() {
 
     if(sector_type) j["sector_type"] = sector_type;
 
-
     if(timed) j["timed"] = timed;
     if(dmg) j["dmg"] = dmg;
     if(geffect) j["geffect"] = geffect;
 
-    for(auto p :proto_script) {
+    for(auto p : proto_script) {
         if(trig_index.contains(p)) j["proto_script"].push_back(p);
     }
 
@@ -119,10 +118,6 @@ room_data::room_data(const nlohmann::json &j) {
     if(j.contains("dmg")) dmg = j["dmg"];
     if(j.contains("geffect")) geffect = j["geffect"];
 
-}
-
-static bool checkGravity(const area_data &a) {
-    return a.gravity.has_value();
 }
 
 bool room_data::isEnvironment() {
@@ -176,10 +171,6 @@ bool room_data::isActive() {
 }
 
 
-void room_data::save() {
-
-}
-
 int room_data::getDamage() {
     return dmg;
 }
@@ -210,9 +201,9 @@ static const std::set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_
 MoonCheck room_data::checkMoon() {
     for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(checkFlag(FlagType::Room, f)) return MoonCheck::NoMoon;
     if(inside_sectors.contains(sector_type)) return MoonCheck::NoMoon;
-    auto reg = getRegion();
-    if(!reg) return MoonCheck::NoMoon;
-    if(!reg->checkFlag(FlagType::Area, AREA_MOON)) return MoonCheck::NoMoon;
+    auto plan = getPlanet();
+    if(!plan) return MoonCheck::NoMoon;
+    if(!plan->checkFlag(FlagType::Structure, STRUCTURE_MOON)) return MoonCheck::NoMoon;
 
     return MOON_TIMECHECK() ? MoonCheck::Full : MoonCheck::NotFull;
 
@@ -386,4 +377,37 @@ void room_data::assignTriggers() {
         script->dgScripts = sorted;
     }
 
+}
+
+static const std::set<int> lit_sectors = {SECT_INSIDE, SECT_CITY, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
+
+
+// Check to see whether a room should normally be considered dark as a basic matter of course.
+bool room_data::isInsideNormallyDark() {
+    if(checkFlag(FlagType::Room, ROOM_DARK)) return true;
+    if(lit_sectors.contains(sector_type)) return false;
+    if(checkFlag(FlagType::Room, ROOM_INDOORS)) return false;
+
+    return false;
+}
+
+static const std::set<int> sun_down = {SUN_SET, SUN_DARK};
+
+bool room_data::isInsideDark() {
+
+    // If the room is not normally dark, then it's definitely not dark.
+    if(!isInsideNormallyDark()) return false;
+
+    // Certain sectors, like cities, provide free light.
+    if(lit_sectors.contains(sector_type)) return false;
+
+    // Failing that, maybe the sun is up?
+    if(!sun_down.contains(weather_info.sunlight)) return false;
+
+    // welp, now it's time for the most expensive operation of all.
+    for(auto u : getContents()) {
+        if(u->isProvidingLight()) return false;
+    }
+
+    return true;
 }

@@ -2,7 +2,6 @@
 #include "dbat/structs.h"
 #include "dbat/act.movement.h"
 #include "dbat/act.informative.h"
-#include "dbat/area.h"
 #include "dbat/tedit.h"
 
 
@@ -848,7 +847,6 @@ const struct command_info cmd_info[] = {
         {"appraise",      "apprais",      POS_STANDING, do_appraise,        0,  ADMLVL_NONE,    0},
         {"approve",       "approve",      POS_STANDING, do_approve,         0,  ADMLVL_IMMORT,  0},
         {"arena",         "aren",         POS_RESTING,  do_arena,           0,  ADMLVL_NONE,    0},
-        {"arlist",         "arl",         POS_DEAD,     do_arlist,          0,  ADMLVL_BUILDER, 0},
         {"ashcloud",      "ashclou",      POS_RESTING,  do_ashcloud,        0,  ADMLVL_NONE,    0},
         {"assedit",       "assed",        POS_STANDING, do_assedit,         0,  ADMLVL_GOD,     0},
         {"assist",        "assis",        POS_STANDING, do_assist,          0,  ADMLVL_NONE,    0},

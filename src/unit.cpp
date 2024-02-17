@@ -110,11 +110,13 @@ nlohmann::json unit_data::serialize() {
         j["dgScripts"] = script->serialize();
     }
 
-    if(!flags.empty()) {
-        for(auto &[type, f] : flags) {
-            if(f.empty()) continue;
-            j["flags"].push_back(std::make_pair(type, std::vector<int>(f.begin(), f.end())));
-        }
+    for(auto &[type, f] : flags) {
+        if(f.empty()) continue;
+        j["flags"].push_back(std::make_pair(type, std::vector<int>(f.begin(), f.end())));
+    }
+
+    for(auto &[v, d] : envVars) {
+        j["envVars"].push_back(std::make_pair(v, d));
     }
 
     return j;
@@ -151,6 +153,12 @@ void unit_data::deserialize(const nlohmann::json& j) {
     if(j.contains("dgScripts")) {
         if(!script) script = std::make_shared<script_data>(this);
         script->deserialize(j["dgScripts"]);
+    }
+
+    if(j.contains("envVars")) {
+        for(auto &jv : j["envVars"]) {
+            envVars[jv[0].get<EnvVar>()] = jv[1].get<double>();
+        }
     }
 
 }
@@ -221,10 +229,6 @@ DgResults unit_data::dgCallMember(trig_data *trig, const std::string& member, co
 
 bool unit_data::isActive() {
     return false;
-}
-
-void unit_data::save() {
-
 }
 
 std::string unit_data::getName() {
@@ -330,7 +334,7 @@ bool unit_data::flipFlag(FlagType type, int flag) {
 }
 
 
-nlohmann::json unit_data::serializeLocation() {
+nlohmann::json unit_data::serializeRelations() {
     nlohmann::json j = nlohmann::json::object();
 
     if(location) {
@@ -342,22 +346,41 @@ nlohmann::json unit_data::serializeLocation() {
     return j;
 }
 
-nlohmann::json unit_data::serializeRelations() {
-    nlohmann::json j = nlohmann::json::object();
+void unit_data::deserializeRelations(const nlohmann::json& j) {
+    if(j.contains("location")) {
+        auto loc = j["location"].get<std::string>();
+        auto locUnit = resolveUID(loc);
+        if(locUnit) {
+            location = locUnit;
+            location->contents.push_back(this);
+            if(j.contains("locationType")) locationType = j["locationType"];
+            if(j.contains("coords")) coords.deserialize(j["coords"]);
+        }
 
-
-    return j;
+    }
 }
 
+void unit_data::addToLocation(unit_data *u, int locationType, std::optional<coordinates> coords) {
+    if(location) {
+        basic_mud_log("Attempted to add unit '%d: %s' to location, but location was already found.", uid, getName().c_str());
+        return;
+    }
+    location = u;
+    this->locationType = locationType;
+    if(coords) this->coords = *coords;
+    u->contents.push_back(this);
+    u->handleAdd(this);
+}
 
 void unit_data::removeFromLocation() {
-    if(location) {
+    if(!location) {
         basic_mud_log("Attempted to remove unit '%d: %s' from location, but location was not found.", uid, getName().c_str());
         locationType = -1;
         coords.clear();
         return;
     }
     
+    std::erase_if(location->contents, [&](auto ud) {return ud == this;});
     location->handleRemove(this);
 
     location = nullptr;
@@ -366,21 +389,21 @@ void unit_data::removeFromLocation() {
     
 }
 
+void unit_data::handleAdd(unit_data *u) {
+    
+}
+
 
 void unit_data::handleRemove(unit_data *u) {
 
     // remove uid from loc->contents
-    std::erase_if(contents, [&](auto ud) {return ud == u;});
+    
 }
 
 std::vector<unit_data*> unit_data::getNeighbors(bool visible) {
     auto loc = getLocation();
     if(!loc) return {};
     return loc->getNeighbors(visible);
-}
-
-bool unit_data::canSee(unit_data *u) {
-    return true;
 }
 
 std::vector<unit_data*> unit_data::getNeighborsFor(unit_data *u, bool visible) {
@@ -492,6 +515,10 @@ bool unit_data::isStructure() {
     return false;
 }
 
+bool unit_data::isPlanet() {
+    return false;
+}
+
 unit_data* unit_data::getEnvironment() {
     auto loc = getLocation();
     while(loc) {
@@ -522,16 +549,41 @@ unit_data* unit_data::getStructure() {
     return nullptr;
 }
 
+unit_data* unit_data::getPlanet() {
+    auto loc = getLocation();
+    while(loc) {
+        if(loc->isPlanet()) return loc;
+        loc = loc->getLocation();
+        if(loc == this) return nullptr;
+    }
+    return nullptr;
+
+}
+
 double unit_data::myEnvVar(EnvVar v) {
     if(auto env = getEnvironment(); env) return env->getEnvVar(v);
     return 0.0;
+}
+
+
+std::optional<double> unit_data::emitEnvVar(EnvVar v) {
+    if(auto found = envVars.find(v); found != envVars.end()) {
+        return found->second;
+    }
+    return {};
 }
 
 double unit_data::getEnvVar(EnvVar v) {
     return 0.0;
 }
 
+void unit_data::onHolderExtraction() {
+    extractFromWorld();
+}
+
 void unit_data::extractFromWorld() {
+    if(!exists) return; // prevent recursion.
+
     exists = false;
     pendingDeletions.insert(this);
     if(script) script->deactivate();
@@ -540,4 +592,118 @@ void unit_data::extractFromWorld() {
         c->onHolderExtraction();
     }
 
+}
+
+void unit_data::executeCommand(const std::string& cmd) {
+    // does nothing by default... 
+}
+
+bool unit_data::isInsideNormallyDark() {
+    return false;
+}
+
+bool unit_data::isInsideDark() {
+    return false;
+}
+
+bool unit_data::isProvidingLight() {
+    return false;
+}
+
+bool unit_data::isInvisible() {
+    return false;
+}
+
+bool unit_data::isAdminInvisible() {
+    return false;
+}
+
+bool unit_data::canSeeInvisible() {
+    return false;
+}
+
+bool unit_data::canSeeInDark() {
+    return false;
+}
+
+bool unit_data::isHidden() {
+    return false;
+}
+
+bool unit_data::canSeeHidden() {
+    return false;
+}
+
+bool unit_data::canSeeAdminInvisible() {
+    return false;
+}
+
+bool unit_data::canSee(unit_data *u) {
+    if(canSeeAdminInvisible()) return true;
+    if(u->isInvisible() && !canSeeInvisible()) return false;
+    if(u->isHidden() && !canSeeHidden()) return false;
+    return true;
+}
+
+void unit_data::sendEvent(const Event& event) {
+    // does nothing...
+}
+
+void unit_data::sendEventContents(const Event& event) {
+    for(auto c : contents) {
+        c->sendEvent(event);
+    }
+}
+
+void unit_data::sendText(const std::string& text) {
+    // does nothing by default.
+}
+
+void unit_data::sendLine(const std::string& text) {
+    if(text.ends_with("\r\n")) sendText(text);
+    else sendText(text + "\r\n");
+}
+
+void unit_data::sendTextContents(const std::string& text) {
+    for(auto c : contents) {
+        c->sendText(text);
+    }
+}
+
+void unit_data::sendLineContents(const std::string& text) {
+    for(auto c : contents) {
+        c->sendLine(text);
+    }
+}
+
+std::optional<std::string> unit_data::checkAllowInventoryAcesss(unit_data *u) {
+    return "you can't access it!";
+}
+
+std::optional<std::string> unit_data::checkIsGettable(unit_data *u) {
+    return "it cannot be picked up!";
+}
+
+std::optional<std::string> unit_data::checkIsDroppable(unit_data *u) {
+    return "it cannot be dropped!";
+}
+
+std::optional<std::string> unit_data::checkIsGivable(unit_data *u) {
+    return "it cannot be given!";
+}
+
+std::optional<std::string> unit_data::checkCanStore(unit_data *u) {
+    return "you can't store it!";
+}
+
+std::optional<std::string> unit_data::checkAllowReceive(unit_data *giver, unit_data *u) {
+    return "you can't give it!";
+}
+
+std::optional<std::string> unit_data::checkAllowEquip(unit_data *u, int location) {
+    return "you can't equip it!";
+}
+
+std::optional<std::string> unit_data::checkAllowRemove(unit_data *u) {
+    return "you can't remove it!";
 }

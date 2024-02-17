@@ -343,7 +343,7 @@ enum class FlagType : uint8_t {
     Wear = 3,
     Item = 4,
     Affect = 5,
-    Area = 6,
+    Structure = 6,
     Pref = 7,
     Room = 8,
     Exit = 9
@@ -1467,8 +1467,13 @@ enum class FlagType : uint8_t {
 #define ITEM_PLANT     34               /* This will grow!              */
 #define ITEM_FISHPOLE  35               /* FOR FISHING                  */
 #define ITEM_FISHBAIT  36               /* DITTO                        */
+#define ITEM_REGION    37               /* REGIONAL OBJECT              */
+#define ITEM_BUILDING  38
+#define ITEM_DIMENSION 39
+#define ITEM_CELESTIAL_BODY 40
+#define ITEM_SPACE_STATION 41
 
-#define NUM_ITEM_TYPES 37
+#define NUM_ITEM_TYPES 42
 
 /* Take/Wear flags: used by obj_data.wear_flags */
 #define ITEM_WEAR_TAKE        0  /* Item can be taken         */
@@ -1589,6 +1594,7 @@ enum class FlagType : uint8_t {
 #define ITEM_CARDCASE                  92
 #define ITEM_NOPICKUP                  93
 #define ITEM_NOSTEAL                   94
+#define ITEM_PLANET                    95
 
 #define NUM_ITEM_FLAGS 96
 
@@ -1733,6 +1739,11 @@ enum class FlagType : uint8_t {
 #define MATERIAL_OIL        46
 
 #define NUM_MATERIALS           47
+
+constexpr int STRUCTURE_MOON = 0;
+constexpr int STRUCTURE_ETHER = 1;
+
+constexpr int NUM_STRUCTURE_FLAGS = 0;
 
 /* other miscellaneous defines *******************************************/
 

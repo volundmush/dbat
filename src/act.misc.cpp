@@ -3313,7 +3313,8 @@ ACMD(do_arena) {
             ch->sendf("You are not even watching anyone in the arena.\r\n");
             return;
         } else if (arena_watch(ch) != NOWHERE) {
-            ch->sendEvent(world.at(arena_watch(ch))->renderLocationFor(ch));
+            look_at_room(arena_watch(ch), ch, 0);
+            //ch->sendEvent(world.at(arena_watch(ch))->renderLocationFor(ch));
         }
     } else if (!strcasecmp(arg, "scan")) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) == 17875) {
@@ -3975,7 +3976,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                         }
                     }
                     ch->modRPP(-cost);
-                    ch->save();
+
                     ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -3992,7 +3993,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     ch->sendf("@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4009,7 +4009,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4026,7 +4025,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4043,7 +4041,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4060,7 +4057,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4077,7 +4073,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4094,7 +4089,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4110,7 +4104,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj->addToLocation(ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     ch->sendf("@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
