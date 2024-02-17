@@ -207,7 +207,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
         act("@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", true, ch, nullptr, vict, TO_VICT);
         act("@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", true, ch, nullptr, vict, TO_NOTVICT);
         ch->throws += 1;
-        ch->playerFlags.set(PLR_MULTIHIT);
+        ch->setFlag(FlagType::PC, PLR_MULTIHIT);
         if (COMBO(ch) > -1) {
             switch (COMBO(ch)) {
                 case 0:
@@ -949,14 +949,14 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
             if (HAS_ARMS(vict) && rand_number(1, 2) == 2) {
                 if (GET_LIMBCOND(vict, 1) > 0) {
                     GET_LIMBCOND(vict, 1) = 0;
-                    vict->playerFlags.reset(PLR_CLARM);
+                    vict->clearFlag(FlagType::PC, PLR_CLARM);
                     act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@RYOU lose your left arm!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
                     remove_limb(vict, 2);
                 } else if (GET_LIMBCOND(vict, 0) > 0) {
                     GET_LIMBCOND(vict, 0) = 100;
-                    vict->playerFlags.reset(PLR_CRARM);
+                    vict->clearFlag(FlagType::PC, PLR_CRARM);
                     act("@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@RYOU lose your right arm!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -965,14 +965,14 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
             } else { /* It's a leg */
                 if (GET_LIMBCOND(vict, 3) > 0) {
                     GET_LIMBCOND(vict, 3) = 100;
-                    vict->playerFlags.reset(PLR_CLLEG);
+                    vict->clearFlag(FlagType::PC, PLR_CLLEG);
                     act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@RYOU lose your left leg!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
                     remove_limb(vict, 4);
                 } else if (GET_LIMBCOND(vict, 2) > 0) {
                     GET_LIMBCOND(vict, 2) = 100;
-                    vict->playerFlags.reset(PLR_CRLEG);
+                    vict->clearFlag(FlagType::PC, PLR_CRLEG);
                     act("@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@RYOU lose your right leg!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -1460,7 +1460,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 act("@r$n's@R attack @YDESTROYS@R YOUR left arm!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 1) = 0;
-                for(auto f : {PLR_THANDW, PLR_CLARM}) vict->playerFlags.reset(f);
+                for(auto f : {PLR_THANDW, PLR_CLARM}) vict->clearFlag(FlagType::PC, f);
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 1) > 0) {
                 GET_LIMBCOND(vict, 1) -= dmg;
@@ -1472,7 +1472,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 act("@r$n's@R attack @YDESTROYS@R YOUR right arm!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 0) = 0;
-                for(auto f : {PLR_THANDW, PLR_CRARM}) vict->playerFlags.reset(f);
+                for(auto f : {PLR_THANDW, PLR_CRARM}) vict->clearFlag(FlagType::PC, f);
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 0) > 0) {
                 GET_LIMBCOND(vict, 0) -= dmg;
@@ -1486,7 +1486,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 act("@r$n's@R attack @YDESTROYS@R YOUR left leg!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 3) = 0;
-                for(auto f : {PLR_THANDW, PLR_CLLEG}) vict->playerFlags.reset(f);
+                for(auto f : {PLR_THANDW, PLR_CLLEG}) vict->clearFlag(FlagType::PC, f);
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 3) > 0) {
                 GET_LIMBCOND(vict, 3) -= dmg;
@@ -1498,7 +1498,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 act("@r$n's@R attack @YDESTROYS@R YOUR right leg!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 2) = 0;
-                for(auto f : {PLR_THANDW, PLR_CRLEG}) vict->playerFlags.reset(f);
+                for(auto f : {PLR_THANDW, PLR_CRLEG}) vict->clearFlag(FlagType::PC, f);
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 2) > 0) {
                 GET_LIMBCOND(vict, 2) -= dmg;
@@ -5149,7 +5149,7 @@ void handle_cooldown(struct char_data *ch, int cooldown) {
 
     if (!IS_NPC(ch)) {
         if (PLR_FLAGGED(ch, PLR_MULTIHIT)) {
-            ch->playerFlags.reset(PLR_MULTIHIT);
+            ch->clearFlag(FlagType::PC, PLR_MULTIHIT);
             return;
         }
     }
@@ -5976,7 +5976,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
         act("@WHaving lost your target you slow down until your vortex disappears, and end your attack.@n", true, ch,
             nullptr, nullptr, TO_CHAR);
         act("@C$n@W slows down until $s vortex disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->playerFlags.reset(PLR_SPIRAL);
+        ch->clearFlag(FlagType::PC, PLR_SPIRAL);
         return;
     }
 
@@ -5984,7 +5984,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
         act("@WHaving no more charged ki you slow down until your vortex disappears, and end your attack.@n", true, ch,
             nullptr, nullptr, TO_CHAR);
         act("@C$n@W slows down until $s vortex disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->playerFlags.reset(PLR_SPIRAL);
+        ch->clearFlag(FlagType::PC, PLR_SPIRAL);
         return;
     }
 

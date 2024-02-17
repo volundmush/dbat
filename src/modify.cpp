@@ -111,7 +111,7 @@ static void smash_numb(char *str) {
  */
 void string_write(struct descriptor_data *d, char **writeto, size_t len, long mailto, void *data) {
     if (d->character && !IS_NPC(d->character))
-        d->character->playerFlags.set(PLR_WRITING);
+        d->character->setFlag(FlagType::PC, PLR_WRITING);
 
     if (using_improved_editor)
         d->backstr = (char *) data;
@@ -244,7 +244,7 @@ void string_add(struct descriptor_data *d, char *str) {
         d->mail_to = 0;
         d->max_str = 0;
         if (d->character && !IS_NPC(d->character)) {
-            for(auto f : {PLR_MAILING, PLR_WRITING}) d->character->playerFlags.reset(f);
+            for(auto f : {PLR_MAILING, PLR_WRITING}) d->character->clearFlag(FlagType::PC, f);
         }
     } else if (action != STRINGADD_ACTION && strlen(*d->str) + 3 <= d->max_str) /* 3 = \r\n\0 */
         strcat(*d->str, "\r\n");

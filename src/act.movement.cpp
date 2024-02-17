@@ -2286,7 +2286,7 @@ ACMD(do_sleep) {
                 if (PLR_FLAGGED(ch, PLR_FURY)) {
                     ch->sendf(
                                  "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-                    ch->playerFlags.reset(PLR_FURY);
+                    ch->clearFlag(FlagType::PC, PLR_FURY);
                 }
 
                 /* Fury Mode Loss for halfbreeds */
@@ -2348,7 +2348,7 @@ ACMD(do_sleep) {
                 if (PLR_FLAGGED(ch, PLR_FURY)) {
                     ch->sendf(
                                  "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-                    ch->playerFlags.reset(PLR_FURY);
+                    ch->clearFlag(FlagType::PC, PLR_FURY);
                 }
 
                 /* Fury Mode Loss for halfbreeds */

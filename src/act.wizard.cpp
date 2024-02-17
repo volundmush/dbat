@@ -424,7 +424,7 @@ ACMD(do_approve) {
         ch->sendf("They have already been approved. If this was made in error inform Iovan.\r\n");
         return;
     } else {
-        vict->playerFlags.set(PLR_BIOGR);
+        vict->setFlag(FlagType::PC, PLR_BIOGR);
         ch->sendf("They have now been approved.\r\n");
         return;
     }
@@ -2984,20 +2984,20 @@ ACMD(do_wizutil) {
                     ch->sendf("Your victim is not flagged.\r\n");
                     return;
                 }
-            for(auto f : {PLR_THIEF, PLR_KILLER}) vict->playerFlags.reset(f);
+            for(auto f : {PLR_THIEF, PLR_KILLER}) vict->clearFlag(FlagType::PC, f);
                 ch->sendf("Pardoned.\r\n");
                 vict->sendf("You have been pardoned by the Gods!\r\n");
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s pardoned by %s", GET_NAME(vict),
                        GET_NAME(ch));
                 break;
             case SCMD_NOTITLE:
-                result = vict->playerFlags.flip(PLR_NOTITLE).test(PLR_NOTITLE);
+                result = vict->flipFlag(FlagType::PC, PLR_NOTITLE);
                 mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Notitle %s for %s by %s.",
                        ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 ch->sendf("(GC) Notitle %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 break;
             case SCMD_SQUELCH:
-                result = vict->playerFlags.flip(PLR_NOSHOUT).test(PLR_NOSHOUT);
+                result = vict->flipFlag(FlagType::PC, PLR_NOSHOUT);
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Squelch %s for %s by %s.",
                        ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 ch->sendf("(GC) Mute turned %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
@@ -3017,7 +3017,7 @@ ACMD(do_wizutil) {
                     ch->sendf("Your victim is already pretty cold.\r\n");
                     return;
                 }
-                vict->playerFlags.set(PLR_FROZEN);
+                vict->setFlag(FlagType::PC, PLR_FROZEN);
                 GET_FREEZE_LEV(vict) = GET_ADMLEVEL(ch);
                 vict->sendf(
                              "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
@@ -3038,7 +3038,7 @@ ACMD(do_wizutil) {
                 }
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s un-frozen by %s.", GET_NAME(vict),
                        GET_NAME(ch));
-                vict->playerFlags.reset(PLR_FROZEN);
+                vict->clearFlag(FlagType::PC, PLR_FROZEN);
                 vict->sendf(
                              "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
                 ch->sendf("Thawed.\r\n");
@@ -3839,12 +3839,12 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 42:
             if (!strcasecmp(val_arg, "off")) {
-                vict->playerFlags.reset(PLR_LOADROOM);
+                vict->clearFlag(FlagType::PC, PLR_LOADROOM);
                 GET_LOADROOM(vict) = NOWHERE;
             } else if (is_number(val_arg)) {
                 rvnum = atoi(val_arg);
                 if (real_room(rvnum) != NOWHERE) {
-                    vict->playerFlags.set(PLR_LOADROOM);
+                    vict->setFlag(FlagType::PC, PLR_LOADROOM);
                     GET_LOADROOM(vict) = rvnum;
                     ch->sendf("%s will enter at room #%d.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
                 } else {

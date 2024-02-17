@@ -132,7 +132,7 @@ void assedit_setup(struct descriptor_data *d, int number) {
 
     STATE(d) = CON_ASSEDIT;
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    d->character->playerFlags.set(PLR_WRITING);
+    d->character->setFlag(FlagType::PC, PLR_WRITING);
     assedit_disp_menu(d);
 
 }

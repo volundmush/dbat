@@ -386,7 +386,7 @@ void do_start(struct char_data *ch) {
     GET_LIMBCOND(ch, 1) = 100;
     GET_LIMBCOND(ch, 2) = 100;
     GET_LIMBCOND(ch, 3) = 100;
-    ch->playerFlags.set(PLR_HEAD);
+    ch->setFlag(FlagType::PC, PLR_HEAD);
 
     GET_SLOTS(ch) = 30;
 
@@ -492,7 +492,7 @@ void do_start(struct char_data *ch) {
         SET_SKILL(ch, SKILL_PUNCH, GET_SKILL_BASE(ch, SKILL_PUNCH) + punch);
     } /* End CC skills */
     else {
-        ch->playerFlags.reset(PLR_FORGET);
+        ch->clearFlag(FlagType::PC, PLR_FORGET);
     }
 
     if (IS_KAI(ch) || IS_KANASSAN(ch)) {
@@ -629,10 +629,10 @@ void do_start(struct char_data *ch) {
     ch->transBonus = Random::get<double>(-0.3, 0.3);
 
     if (CONFIG_SITEOK_ALL)
-        ch->playerFlags.set(PLR_SITEOK);
+        ch->setFlag(FlagType::PC, PLR_SITEOK);
 
     if (GET_RACE(ch) == RACE_SAIYAN && rand_number(1, 100) >= 95) {
-        ch->playerFlags.set(PLR_LSSJ);
+        ch->setFlag(FlagType::PC, PLR_LSSJ);
         write_to_output(ch->desc, "@GYou were one of the few born a Legendary Super Saiyan!@n\r\n");
     }
     ch->restoreVitals();
@@ -1008,7 +1008,7 @@ void advance_level(struct char_data *ch) {
 
         add_prac = 5;
         if (PLR_FLAGGED(ch, PLR_SKILLP)) {
-            ch->playerFlags.reset(PLR_SKILLP);
+            ch->clearFlag(FlagType::PC, PLR_SKILLP);
             add_prac *= 5;
         } else {
             add_prac *= 2;

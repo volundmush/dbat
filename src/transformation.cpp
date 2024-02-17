@@ -775,7 +775,7 @@ namespace trans {
                     if(room->checkMoon() == MoonCheck::Full) data.blutz = 60.0 * 30;
                 }
                 data.blutz -= deltaTime;
-                if(data.blutz <= 0 || !ch->playerFlags.test(PLR_TAIL)) {
+                if(data.blutz <= 0 || !ch->checkFlag(FlagType::PC, PLR_TAIL)) {
                     data.blutz = 0.0;
                     oozaru_revert(ch);
                 }

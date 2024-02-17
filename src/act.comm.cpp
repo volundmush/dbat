@@ -627,7 +627,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now immortal!@w'@n\r\n",
                                              GET_NAME(wch));
-                                wch->playerFlags.set(PLR_IMMORTAL);
+                                wch->setFlag(FlagType::PC, PLR_IMMORTAL);
                                 WISH[0] = 1;
                                 WISH[1] = 1;
                                 granted = true;
@@ -650,7 +650,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now mortal!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->playerFlags.reset(PLR_IMMORTAL);
+                                wch->clearFlag(FlagType::PC, PLR_IMMORTAL);
                                 granted = true;
                                 SELFISHMETER += 4;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a mortal wish on %s.", GET_NAME(ch),
@@ -1536,7 +1536,7 @@ ACMD(do_gen_comm) {
         send_to_imm("SPAMMING: %s has been frozen for spamming!\r\n", GET_NAME(ch));
         send_to_all("@rSPAMMING@D: @C%s@w has been frozen for spamming, let that be a lesson to 'em.@n\r\n",
                     GET_NAME(ch));
-        ch->playerFlags.set(PLR_FROZEN);
+        ch->setFlag(FlagType::PC, PLR_FROZEN);
         GET_FREEZE_LEV(ch) = 1;
     } else if (GET_SPAM(ch) < 3) {
         GET_SPAM(ch) += 1;

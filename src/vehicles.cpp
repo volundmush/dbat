@@ -466,7 +466,7 @@ ACMD(do_drive) {
             act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
             ch->sendf("@wYou stand up from the pilot's seat.\r\n");
             GET_POS(ch) = POS_STANDING;
-            ch->playerFlags.reset(PLR_PILOTING);
+            ch->clearFlag(FlagType::PC, PLR_PILOTING);
             return;
         }
     }
@@ -506,7 +506,7 @@ ACMD(do_drive) {
         }
     }
     if (confirmed == true) {
-        ch->playerFlags.set(PLR_PILOTING);
+        ch->setFlag(FlagType::PC, PLR_PILOTING);
         act("@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
         GET_POS(ch) = POS_SITTING;
         ch->sendf("@wYou take a seat in the pilot's chair.\r\n");

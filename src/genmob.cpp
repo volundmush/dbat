@@ -350,7 +350,7 @@ void char_data::deserialize(const nlohmann::json &j) {
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
     if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) setFlag(FlagType::NPC, i.get<int>());
-    if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
+    if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) setFlag(FlagType::PC, i.get<int>());
     if(j.contains("pref")) for(auto &i : j["pref"]) setFlag(FlagType::Pref, i.get<int>());
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) bodyparts.set(i.get<int>());
 
@@ -524,7 +524,7 @@ char_data::char_data(const nlohmann::json &j) : char_data() {
     setFlag(FlagType::NPC, MOB_ISNPC);
     clearFlag(FlagType::NPC, MOB_NOTDEADYET);
 
-    playerFlags.reset(PLR_NOTDEADYET);
+    clearFlag(FlagType::PC, PLR_NOTDEADYET);
 
 }
 

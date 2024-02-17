@@ -5348,7 +5348,7 @@ ACMD(do_inventory) {
     ch->sendf("@w              @YInventory\r\n@D-------------------------------------@w\r\n");
     if (!IS_NPC(ch)) {
         if (PLR_FLAGGED(ch, PLR_STOLEN)) {
-            ch->playerFlags.reset(PLR_STOLEN);
+            ch->clearFlag(FlagType::PC, PLR_STOLEN);
             ch->sendf("@r   --------------------------------------------------@n\n");
             ch->sendf("@R    You notice that you have been robbed sometime recently!\n");
             ch->sendf("@r   --------------------------------------------------@n\n");

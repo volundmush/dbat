@@ -957,7 +957,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
         if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
             ch->sendf("Your disguise comes off because of your swift movements!\r\n");
-            ch->playerFlags.reset(PLR_DISGUISED);
+            ch->clearFlag(FlagType::PC, PLR_DISGUISED);
             act("@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
         }
         if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
@@ -1055,7 +1055,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (GET_POS(ch) <= POS_RESTING && PLR_FLAGGED(ch, PLR_POWERUP)) {
-            ch->playerFlags.reset(PLR_POWERUP);
+            ch->clearFlag(FlagType::PC, PLR_POWERUP);
         }
 
         if (GET_BARRIER(ch) > 0) {
@@ -1078,7 +1078,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
-                ch->playerFlags.reset(PLR_POWERUP);
+                ch->clearFlag(FlagType::PC, PLR_POWERUP);
             } else if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1 &&
                        GET_PREFERENCE(ch) == PREFERENCE_KI) {
                 if ((ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1) {
@@ -1093,7 +1093,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
-                ch->playerFlags.reset(PLR_POWERUP);
+                ch->clearFlag(FlagType::PC, PLR_POWERUP);
             }
             if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20 && GET_PREFERENCE(ch) != PREFERENCE_KI) {
                 ch->decCurKI(ch->getMaxKI() / 20);
@@ -1102,7 +1102,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
-                ch->playerFlags.reset(PLR_POWERUP);
+                ch->clearFlag(FlagType::PC, PLR_POWERUP);
             } else if ((ch->getCurKI()) < (GET_MAX_MANA(ch) * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
                 ch->decCurKI((GET_MAX_MANA(ch) * 0.0375) + 1);
                 act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1110,7 +1110,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_sense(0, "You sense someone stop powering up", ch);
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
-                ch->playerFlags.reset(PLR_POWERUP);
+                ch->clearFlag(FlagType::PC, PLR_POWERUP);
             }
             if (GET_HIT(ch) < (ch->getEffMaxPL()) && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
                                                        (ch->getCurKI()) >= GET_MAX_MANA(ch) / 20) ||
@@ -1186,7 +1186,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
-            ch->playerFlags.reset(PLR_CHARGE);
+            ch->clearFlag(FlagType::PC, PLR_CHARGE);
             ch->incCurKI(GET_CHARGE(ch));
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
@@ -1207,7 +1207,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
-            ch->playerFlags.reset(PLR_CHARGE);
+            ch->clearFlag(FlagType::PC, PLR_CHARGE);
             ch->incCurKI(GET_CHARGE(ch));
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
@@ -1294,7 +1294,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             if ((ch->getCurKI()) <= 0) {
                 ch->sendf("You can not charge anymore, you have charged all your energy!\r\n");
                 act("$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->playerFlags.reset(PLR_CHARGE);
+                ch->clearFlag(FlagType::PC, PLR_CHARGE);
             } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >= (ch->getCurKI())) {
                 ch->sendf("You have charged the last that you can.\r\n");
                 act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
@@ -1302,13 +1302,13 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 GET_CHARGE(ch) += (ch->getCurKI());
                 ch->decCurKIPercent(1);
                 GET_CHARGETO(ch) = 0;
-                ch->playerFlags.reset(PLR_CHARGE);
+                ch->clearFlag(FlagType::PC, PLR_CHARGE);
             } else {
                 if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
                     ch->sendf("You have already reached the maximum that you wished to charge.\r\n");
                     act("$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     GET_CHARGETO(ch) = 0;
-                    ch->playerFlags.reset(PLR_CHARGE);
+                    ch->clearFlag(FlagType::PC, PLR_CHARGE);
                 } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
                     ch->decCurKI(GET_CHARGETO(ch) - GET_CHARGE(ch));
                     GET_CHARGE(ch) = GET_CHARGETO(ch);
@@ -1316,7 +1316,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
                         TO_ROOM);
                     GET_CHARGETO(ch) = 0;
-                    ch->playerFlags.reset(PLR_CHARGE);
+                    ch->clearFlag(FlagType::PC, PLR_CHARGE);
                 } else {
                     ch->decCurKI(((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
                     GET_CHARGE(ch) += ((GET_MAX_MANA(ch) * 0.01) * perc) + 1;
@@ -1343,7 +1343,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                         GET_CHARGE(ch) += GET_LEVEL(ch);
                         ch->sendf("You have finished charging!\r\n");
                         act("$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        ch->playerFlags.reset(PLR_CHARGE);
+                        ch->clearFlag(FlagType::PC, PLR_CHARGE);
                         GET_CHARGETO(ch) = 0;
                     }
                 }
@@ -2003,7 +2003,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 make_pcorpse(ch);
                 loadmap(ch);
             } else {
-                ch->playerFlags.reset(PLR_ABSORBED);
+                ch->clearFlag(FlagType::PC, PLR_ABSORBED);
             }
         }
         final_combat_resolve(ch);
@@ -2075,13 +2075,13 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
 
 void die(struct char_data *ch, struct char_data *killer) {
     if (!IS_NPC(ch)) {
-        ch->playerFlags.reset(PLR_HEALT);
+        ch->clearFlag(FlagType::PC, PLR_HEALT);
         if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
             ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
                                                              (ch->getCurLF()) >= (ch->getMaxLF()) * 0.5))) {
             ch->decCurLFPercent(2, -1);
             ch->decCurHealthPercent(1, 1);
-            ch->playerFlags.set(PLR_GOOP);
+            ch->setFlag(FlagType::PC, PLR_GOOP);
             ch->gooptime = 32;
             return;
         }
@@ -2107,7 +2107,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             ch->teleport_to(sensei::getStartRoom(ch->chclass));
             return;
         }
-        for(auto f : {PLR_KILLER, PLR_THIEF}) ch->playerFlags.reset(f);
+        for(auto f : {PLR_KILLER, PLR_THIEF}) ch->clearFlag(FlagType::PC, f);
         for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->clearFlag(FlagType::Affect,f);
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && GET_LEVEL(ch) > 8) {
             if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
@@ -2138,7 +2138,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                     GET_DCOUNT(ch) += 1;
                 } else if (killer != nullptr && !IS_NPC(killer)) {
                     GET_DTIME(ch) = time(nullptr) + 1123200;
-                    ch->playerFlags.set(PLR_PDEATH);
+                    ch->setFlag(FlagType::PC, PLR_PDEATH);
                     GET_DCOUNT(ch) += 1;
                 } else {
                     if (GET_DCOUNT(ch) <= 0) {

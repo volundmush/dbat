@@ -10,7 +10,7 @@ namespace net {
     }
 
     void PuppetParser::start() {
-        ch->playerFlags.reset(PLR_NOTDEADYET);
+        ch->clearFlag(FlagType::PC, PLR_NOTDEADYET);
         if(ch->desc) {
             if(STATE(ch->desc) == CON_COPYOVER) return;
 

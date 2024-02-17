@@ -406,7 +406,6 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 #endif
 
 #define MOB_FLAGS(ch)    ((ch)->mobFlags)
-#define PLR_FLAGS(ch)    ((ch)->playerFlags)
 #define AFF_FLAGS(ch)    ((ch)->affected_by)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
 #define SPELL_ROUTINES(spl)    (spell_info[spl].routines)

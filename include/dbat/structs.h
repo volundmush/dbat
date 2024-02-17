@@ -1061,7 +1061,6 @@ struct char_data : public unit_data {
 
     std::map<uint16_t, skill_data> skill;
 
-    std::bitset<NUM_PLR_FLAGS> playerFlags{}; /* act flag for NPC's; player flag for PC's */
     std::bitset<NUM_MOB_FLAGS> mobFlags{};
 
     std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */

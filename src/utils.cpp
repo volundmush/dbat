@@ -2068,10 +2068,10 @@ bool is_sparring(struct char_data *ch) {
     if(IS_NPC(ch)) {
         auto opponent = ch->fighting;
         if(!opponent) return false;
-        return IS_NPC(opponent) ? false : opponent->playerFlags.test(PLR_SPAR) && spar_friendly(opponent, ch);
+        return IS_NPC(opponent) ? false : opponent->checkFlag(FlagType::PC, PLR_SPAR) && spar_friendly(opponent, ch);
     }
 
-    return ch->playerFlags.test(PLR_SPAR);
+    return ch->checkFlag(FlagType::PC, PLR_SPAR);
 }
 
 char *introd_calc(struct char_data *ch) {

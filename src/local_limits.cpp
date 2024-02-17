@@ -488,7 +488,7 @@ int64_t hit_gain(struct char_data *ch) {
 
     if (PLR_FLAGGED(ch, PLR_FURY)) {
         ch->sendf("Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-        ch->playerFlags.reset(PLR_FURY);
+        ch->clearFlag(FlagType::PC, PLR_FURY);
     }
 
     /* Fury Mode Loss for halfbreeds */
@@ -676,7 +676,7 @@ static void update_flags(struct char_data *ch) {
         if (GET_ABSORBS(ch) >= 300) {
             ch->sendf(
                          "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
-            ch->playerFlags.set(PLR_FPSSJ);
+            ch->setFlag(FlagType::PC, PLR_FPSSJ);
             GET_ABSORBS(ch) = 0;
         }
     }
@@ -1105,7 +1105,7 @@ static void heal_limb(struct char_data *ch) {
     }
 
     if (PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
-        ch->playerFlags.reset(PLR_BANDAGED);
+        ch->clearFlag(FlagType::PC, PLR_BANDAGED);
         ch->sendf("You remove your bandages.\r\n");
         return;
     }
@@ -1170,7 +1170,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 } else {
                     i->sendf("You don't have enough energy to keep the aura active.\r\n");
                     act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
-                    i->playerFlags.reset(PLR_AURALIGHT);
+                    i->clearFlag(FlagType::PC, PLR_AURALIGHT);
                 }
             }
             if (IS_MUTANT(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6)) {
@@ -1282,19 +1282,19 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                         i->sendf("@wThe healing tank is now too low on energy to heal you.\r\n");
                         act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
                         act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-                        i->playerFlags.reset(PLR_HEALT);
+                        i->clearFlag(FlagType::PC, PLR_HEALT);
                         SITTING(SITS(i)) = nullptr;
                         SITS(i) = nullptr;
                     } else if (i->isFullVitals()) {
                         i->sendf("@wYou are fully recovered now.\r\n");
                         act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
                         act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-                        i->playerFlags.reset(PLR_HEALT);
+                        i->clearFlag(FlagType::PC, PLR_HEALT);
                         SITTING(SITS(i)) = nullptr;
                         SITS(i) = nullptr;
                     }
                 } else if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) == nullptr) {
-                    i->playerFlags.reset(PLR_HEALT);
+                    i->clearFlag(FlagType::PC, PLR_HEALT);
                 } else if (GET_POS(i) == POS_SLEEPING) {
                     i->sendf("@wYour sleep does you some good.@n\r\n");
                     if (!IS_ANDROID(i) && !FIGHTING(i))

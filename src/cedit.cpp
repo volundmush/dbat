@@ -66,7 +66,7 @@ ACMD(do_oasis_cedit) {
         cedit_setup(d);
         STATE(d) = CON_CEDIT;
         act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-        ch->playerFlags.set(PLR_WRITING);
+        ch->setFlag(FlagType::PC, PLR_WRITING);
 
         mudlog(BRF, ADMLVL_IMMORT, true,
                "OLC: %s starts editing the game configuration.", GET_NAME(ch));

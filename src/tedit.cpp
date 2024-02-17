@@ -216,6 +216,6 @@ ACMD(do_tedit) {
     string_write(ch->desc, fields[l].buffer, fields[l].size, 0, backstr);
 
     act("$n begins editing a text file.", true, ch, nullptr, nullptr, TO_ROOM);
-    ch->playerFlags.set(PLR_WRITING);
+    ch->setFlag(FlagType::PC, PLR_WRITING);
     STATE(ch->desc) = CON_TEDIT;
 }

@@ -1062,7 +1062,7 @@ void enter_player_game(struct descriptor_data *d) {
     }
 
     for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->clearFlag(FlagType::Affect,f);
-    d->character->playerFlags.reset(PLR_KNOCKED);
+    d->character->clearFlag(FlagType::PC, PLR_KNOCKED);
 
     if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION)) {
         d->character->setFlag(FlagType::Affect, AFF_INFRAVISION);
@@ -1085,7 +1085,7 @@ void enter_player_game(struct descriptor_data *d) {
         GET_SPEEDBOOST(d->character) = 0;
     }
 
-    d->character->playerFlags.reset(PLR_HEALT);
+    d->character->clearFlag(FlagType::PC, PLR_HEALT);
 
     if (GET_ADMLEVEL(d->character) > 0) {
         d->level = 1;

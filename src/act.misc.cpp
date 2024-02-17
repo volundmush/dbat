@@ -74,7 +74,7 @@ ACMD(do_tailhide) {
         ch->sendf("You have no need to hide your tail!\r\n");
         return;
     }
-    if (ch->playerFlags.flip(PLR_TAILHIDE).test(PLR_TAILHIDE)) {
+    if (ch->flipFlag(FlagType::PC, PLR_TAILHIDE)) {
         ch->sendf("You have decided to hide your tail!\r\n");
     } else {
         ch->sendf("You have decided to display your tail for all to see!\r\n");
@@ -88,7 +88,7 @@ ACMD(do_nogrow) {
         return;
     } 
 
-    if (ch->playerFlags.flip(PLR_NOGROW).test(PLR_NOGROW)) {
+    if (ch->flipFlag(FlagType::PC, PLR_NOGROW)) {
         ch->sendf("You have decided to halt your tail growth!\r\n");
     } else {
         ch->sendf("You have decided to regrow your tail!\r\n");
@@ -1112,7 +1112,7 @@ ACMD(do_fish) {
             act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             GET_FISHD(ch) = rand_number(30, 80);
-            ch->playerFlags.set(PLR_FISHING);
+            ch->setFlag(FlagType::PC, PLR_FISHING);
             ch->sendf("@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch));
             return;
         }
@@ -1209,7 +1209,7 @@ ACMD(do_fish) {
             reveal_hiding(ch, 0);
             act("@CYou reel in your line and stop fishing.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reels in $s fishing line and stops fishing.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->playerFlags.reset(PLR_FISHING);
+            ch->clearFlag(FlagType::PC, PLR_FISHING);
             GET_FISHSTATE(ch) = FISH_NOFISH;
             GET_FISHD(ch) = 0;
             return;
@@ -1274,7 +1274,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                         act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         GET_FISHD(ch) = 0;
                         GET_FISHSTATE(ch) = FISH_NOFISH;
-                        ch->playerFlags.reset(PLR_FISHING);
+                        ch->clearFlag(FlagType::PC, PLR_FISHING);
                         if (has_pole(ch) == true) {
                             struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
                             GET_OBJ_VAL(pole, 0) = 0;
@@ -1285,7 +1285,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                         act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
                         GET_FISHD(ch) = 0;
                         GET_FISHSTATE(ch) = FISH_NOFISH;
-                        ch->playerFlags.reset(PLR_FISHING);
+                        ch->clearFlag(FlagType::PC, PLR_FISHING);
                     } else if (GET_FISHSTATE(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
                         act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
                         GET_FISHSTATE(ch) = FISH_NOFISH;
@@ -1298,13 +1298,13 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     }
                 } /* End reel section */
             } else if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == false) { /* End of, Is Fishing */
-                i->playerFlags.reset(PLR_FISHING);
+                i->clearFlag(FlagType::PC, PLR_FISHING);
                 GET_FISHD(i) = 0;
                 GET_FISHSTATE(i) = FISH_NOFISH;
             }
         } else { /* Is not in a fishing room */
             if (PLR_FLAGGED(i, PLR_FISHING)) {
-                i->playerFlags.reset(PLR_FISHING);
+                i->clearFlag(FlagType::PC, PLR_FISHING);
                 GET_FISHD(i) = 0;
                 GET_FISHSTATE(i) = FISH_NOFISH;
             }
@@ -1464,7 +1464,7 @@ static void catch_fish(struct char_data *ch, int quality) {
     fish->addToLocation(ch->getRoom());
     do_get(ch, "fish", 0, 0);
     ch->sendf("@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
-    ch->playerFlags.reset(PLR_FISHING);
+    ch->clearFlag(FlagType::PC, PLR_FISHING);
     GET_FISHD(ch) = 0;
     GET_FISHSTATE(ch) = FISH_NOFISH;
 }
@@ -2609,7 +2609,7 @@ ACMD(do_shimmer) {
         act("@w$n@w appears in an instant out of nowhere right next to you!@n", true, ch, nullptr, tar, TO_VICT);
         act("@w$n@w body begins to fade away almost appearing ghost like, before a ripple passes through $s image and $e is gone in an instant!@n",
             true, ch, nullptr, tar, TO_NOTVICT);
-        ch->playerFlags.set(PLR_TRANSMISSION);
+        ch->setFlag(FlagType::PC, PLR_TRANSMISSION);
         handle_teleport(ch, tar, 0);
     } else {
         ch->decCurKI(cost);

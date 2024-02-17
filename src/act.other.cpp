@@ -1001,7 +1001,7 @@ ACMD(do_grapple) {
             GRAPTYPE(vict) = 3;
             /* Let's grapple! */
 
-            vict->playerFlags.reset(PLR_THANDW);
+            vict->clearFlag(FlagType::PC, PLR_THANDW);
 
             ch->decCurST(cost);
             improve_skill(ch, SKILL_GRAPPLE, 1);
@@ -2299,7 +2299,7 @@ ACMD(do_implant) {
                 act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right arm!@n",
                     true, ch, limb, nullptr, TO_ROOM);
             }
-            vict->playerFlags.set(PLR_CRARM);
+            vict->setFlag(FlagType::PC, PLR_CRARM);
             limb->removeFromLocation();
             limb->extractFromWorld();
             return;
@@ -2330,7 +2330,7 @@ ACMD(do_implant) {
                 act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left arm!@n",
                     true, ch, limb, nullptr, TO_ROOM);
             }
-            vict->playerFlags.set(PLR_CLARM);
+            vict->setFlag(FlagType::PC, PLR_CLARM);
             limb->removeFromLocation();
             limb->extractFromWorld();
             return;
@@ -2361,7 +2361,7 @@ ACMD(do_implant) {
                 act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new right leg!@n",
                     true, ch, limb, nullptr, TO_ROOM);
             }
-            vict->playerFlags.set(PLR_CRLEG);
+            vict->setFlag(FlagType::PC, PLR_CRLEG);
             limb->removeFromLocation();
             limb->extractFromWorld();
             return;
@@ -2392,7 +2392,7 @@ ACMD(do_implant) {
                 act("@C$n@W places the $p@W up to $s body. It automaticly adjusts itself, becoming a new left leg!@n",
                     true, ch, limb, nullptr, TO_ROOM);
             }
-            vict->playerFlags.set(PLR_CLLEG);
+            vict->setFlag(FlagType::PC, PLR_CLLEG);
             limb->removeFromLocation();
             limb->extractFromWorld();
             return;
@@ -2473,7 +2473,7 @@ ACMD(do_pose) {
         ch->sendf("@WYou feel your confidence increase! @G+3 Str @Wand@G +3 Agl!@n\r\n");
         assign_affect(ch, AFF_POSE, SKILL_POSE, -1, 8, 0, 0, 8, 0, 0);
         int64_t before = (ch->getMaxLF());
-        ch->playerFlags.set(PLR_POSE);
+        ch->setFlag(FlagType::PC, PLR_POSE);
 
         ch->incCurLF((ch->getMaxLF()) - before);
         ch->decCurST(ch->getMaxST() / 40);
@@ -2528,7 +2528,7 @@ ACMD(do_fury) {
     act("You release your fury! Your very next attack is guaranteed to rip your foes a new one!", true, ch, nullptr,
         nullptr, TO_CHAR);
     act("$n screams furiously as a look of anger appears on $s face!", true, ch, nullptr, nullptr, TO_ROOM);
-    ch->playerFlags.set(PLR_FURY);
+    ch->setFlag(FlagType::PC, PLR_FURY);
 }
 
 /* End of do_fury for halfbreeds to release their raaage, rawrg! */
@@ -4234,7 +4234,7 @@ ACMD(do_ingest) {
             if (!IS_NPC(vict) && !IS_NPC(ch)) {
                 send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict),
                             GET_ROOM_VNUM(IN_ROOM(vict)));
-                vict->playerFlags.set(PLR_ABSORBED);
+                vict->setFlag(FlagType::PC, PLR_ABSORBED);
             }
             ch->sendf("@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n",
                          add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
@@ -4468,7 +4468,7 @@ ACMD(do_absorb) {
             if (!IS_NPC(vict) && !IS_NPC(ch)) {
                 send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict),
                             GET_ROOM_VNUM(IN_ROOM(vict)));
-                vict->playerFlags.set(PLR_ABSORBED);
+                vict->setFlag(FlagType::PC, PLR_ABSORBED);
             }
 
             ch->sendf("@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n",
@@ -4832,7 +4832,7 @@ ACMD(do_regenerate) {
             act("$n regenerates $s broken right leg!", true, ch, nullptr, nullptr, TO_ROOM);
         }
         if (!PLR_FLAGGED(ch, PLR_TAIL) && IS_BIO(ch)) {
-            ch->playerFlags.set(PLR_TAIL);
+            ch->setFlag(FlagType::PC, PLR_TAIL);
             act("You regrow your tail!", true, ch, nullptr, nullptr, TO_CHAR);
             act("$n regrows $s tail!", true, ch, nullptr, nullptr, TO_ROOM);
         }
@@ -6329,7 +6329,7 @@ ACMD(do_disguise) {
 
     if (PLR_FLAGGED(ch, PLR_DISGUISED)) {
         ch->sendf("You stop disguising yourself.\r\n");
-        ch->playerFlags.set(PLR_DISGUISED);
+        ch->setFlag(FlagType::PC, PLR_DISGUISED);
         act("@C$n @wpulls off $s disguise and reveals $mself!", true, ch, nullptr, nullptr, TO_ROOM);
         return;
     }
@@ -6355,7 +6355,7 @@ ACMD(do_disguise) {
         ch->sendf("You managed to disguise yourself with some skilled manipulation of your headwear.\r\n");
         act("@C$n @wmanages to disguise $mself with some skilled manipulation of $s headwear.", true, ch, nullptr,
             nullptr, TO_ROOM);
-        ch->playerFlags.set(PLR_DISGUISED);
+        ch->setFlag(FlagType::PC, PLR_DISGUISED);
         return;
     } else {
         ch->sendf(
@@ -6501,11 +6501,11 @@ ACMD(do_eyec) {
         return;
 
     if (PLR_FLAGGED(ch, PLR_EYEC)) {
-        ch->playerFlags.reset(PLR_EYEC);
+        ch->clearFlag(FlagType::PC, PLR_EYEC);
         act("@wYou open your eyes.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@w opens $s eyes.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (!PLR_FLAGGED(ch, PLR_EYEC)) {
-        ch->playerFlags.set(PLR_EYEC);
+        ch->setFlag(FlagType::PC, PLR_EYEC);
         act("@wYou close your eyes.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@w closes $s eyes.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
@@ -7014,7 +7014,7 @@ ACMD(do_instant) {
         act("@w$n@w appears in an instant out of nowhere right next to you!@n", true, ch, nullptr, tar, TO_VICT);
         act("@w$n@w places two fingers on $s forehead and disappears in an instant!@n", true, ch, nullptr, tar,
             TO_NOTVICT);
-        ch->playerFlags.set(PLR_TRANSMISSION);
+        ch->setFlag(FlagType::PC, PLR_TRANSMISSION);
         handle_teleport(ch, tar, 0);
         improve_skill(ch, skill_num, 2);
     } else {
@@ -8018,7 +8018,7 @@ ACMD(do_spar) {
         return;
     }
     //Will return true when you have PLR_SPAR flagged
-    if (ch->playerFlags.flip(PLR_SPAR).test(PLR_SPAR)) {
+    if (ch->flipFlag(FlagType::PC, PLR_SPAR)) {
         act("@wYou move into your sparring stance.@n", false, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@w moves into $s sparring stance.@n", false, ch, nullptr, nullptr, TO_ROOM);
     }
@@ -8200,7 +8200,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                 act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!",
                     true, d->character, nullptr, nullptr, TO_ROOM);
             }
-            d->character->playerFlags.reset(PLR_GOOP);
+            d->character->clearFlag(FlagType::PC, PLR_GOOP);
         } else {
             d->character->gooptime -= 1;
         }
@@ -8236,7 +8236,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                 GET_DEFENDING(d->character) = nullptr;
             }
         }
-        d->character->playerFlags.reset(PLR_TRANSMISSION);
+        d->character->clearFlag(FlagType::PC, PLR_TRANSMISSION);
 
         if (!FIGHTING(d->character) && AFF_FLAGGED(d->character, AFF_POSITION)) {
             d->character->clearFlag(FlagType::Affect,AFF_POSITION);
@@ -8261,7 +8261,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         if (PLR_FLAGGED(d->character, PLR_SELFD) && !PLR_FLAGGED(d->character, PLR_SELFD2)) {
             if (rand_number(4, 100) < GET_SKILL(d->character, SKILL_SELFD)) {
                 d->character->sendf("You feel you are ready to self destruct!\r\n");
-                d->character->playerFlags.set(PLR_SELFD2);
+                d->character->setFlag(FlagType::PC, PLR_SELFD2);
             }
         }
         if (!FIGHTING(d->character) && COMBO(d->character) > -1) {
@@ -9218,7 +9218,7 @@ ACMD(do_steal) {
                     vict->mod(CharMoney::Carried, -gold);
                     ch->mod(CharMoney::Carried, gold);
                     if (!IS_NPC(vict)) {
-                        vict->playerFlags.set(PLR_STOLEN);
+                        vict->setFlag(FlagType::PC, PLR_STOLEN);
                         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
                                "THEFT: %s has stolen %s zenni@n from %s", GET_NAME(ch), add_commas(gold).c_str(),
                                GET_NAME(vict));
@@ -9348,7 +9348,7 @@ ACMD(do_steal) {
                     obj->removeFromLocation();
                     obj->addToLocation(ch);
                     if (!IS_NPC(vict)) {
-                        vict->playerFlags.set(PLR_STOLEN);
+                        vict->setFlag(FlagType::PC, PLR_STOLEN);
                         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "THEFT: %s has stolen %s@n from %s",
                                GET_NAME(ch), obj->getShortDesc(), GET_NAME(vict));
                     }
@@ -10717,10 +10717,10 @@ ACMD(do_fix) {
             (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {
             int64_t gain = (level_exp(ch, GET_LEVEL(ch) + 1) * 0.0003) * GET_SKILL(ch, SKILL_REPAIR);
             ch->sendf("@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain).c_str());
-            ch->playerFlags.set(PLR_REPLEARN);
+            ch->setFlag(FlagType::PC, PLR_REPLEARN);
             ch->modExperience(gain);
         } else if (rand_number(2, 12) >= 10 && PLR_FLAGGED(ch, PLR_REPLEARN)) {
-            ch->playerFlags.reset(PLR_REPLEARN);
+            ch->clearFlag(FlagType::PC, PLR_REPLEARN);
             ch->sendf("@mYou think you might be on to something...@n\r\n");
         }
         improve_skill(ch, SKILL_REPAIR, 1);
@@ -10962,7 +10962,7 @@ ACMD(do_aid) {
 
                 vict->sendf("Your wounds are bandaged by %s!\r\n", GET_NAME(ch));
                 act("$n's wounds are stablized by $N!", true, vict, nullptr, ch, TO_NOTVICT);
-                vict->playerFlags.set(PLR_BANDAGED);
+                vict->setFlag(FlagType::PC, PLR_BANDAGED);
                 aid_obj->extractFromWorld();
             } else {
                 if (vict != ch) {
@@ -11108,7 +11108,7 @@ ACMD(do_aura) {
         if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
             ch->sendf("Your aura fades as you stop shining light.\r\n");
             act("$n's aura fades as they stop shining light on the area.", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->playerFlags.reset(PLR_AURALIGHT);
+            ch->clearFlag(FlagType::PC, PLR_AURALIGHT);
 
         } else if ((ch->getCurKI()) > GET_MAX_MANA(ch) * 0.12) {
             reveal_hiding(ch, 0);
@@ -11120,7 +11120,7 @@ ACMD(do_aura) {
             sprintf(bloom, "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n",
                     aura_types[GET_AURA(ch)]);
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
-            ch->playerFlags.set(PLR_AURALIGHT);
+            ch->setFlag(FlagType::PC, PLR_AURALIGHT);
 
         } else {
             ch->sendf("You don't have enough KI to do that.\r\n");

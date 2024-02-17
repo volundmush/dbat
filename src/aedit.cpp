@@ -89,7 +89,7 @@ ACMD(do_oasis_aedit) {
     }
     STATE(d) = CON_AEDIT;
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    ch->playerFlags.set(PLR_WRITING);
+    ch->setFlag(FlagType::PC, PLR_WRITING);
     mudlog(CMP, ADMLVL_IMMORT, true, "OLC: %s starts editing actions.", GET_NAME(ch));
 }
 

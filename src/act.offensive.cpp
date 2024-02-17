@@ -828,7 +828,7 @@ ACMD(do_charge) {
         ch->incCurKI(GET_CHARGE(ch));
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
-        ch->playerFlags.reset(PLR_CHARGE);
+        ch->clearFlag(FlagType::PC, PLR_CHARGE);
         return;
     } else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0) {
         ch->sendf("You release your pent up energy.\r\n");
@@ -866,7 +866,7 @@ ACMD(do_charge) {
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 break;
         }
-        ch->playerFlags.reset(PLR_CHARGE);
+        ch->clearFlag(FlagType::PC, PLR_CHARGE);
         GET_CHARGETO(ch) = 0;
         return;
     } else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
@@ -921,7 +921,7 @@ ACMD(do_charge) {
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
             GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
             GET_CHARGE(ch) += 1;
-            ch->playerFlags.set(PLR_CHARGE);
+            ch->setFlag(FlagType::PC, PLR_CHARGE);
         }
     } else if (amt < 1 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1562) {
         ch->sendf("You have set it too low!\r\n");
@@ -985,7 +985,7 @@ ACMD(do_powerup) {
     }
     if (PLR_FLAGGED(ch, PLR_POWERUP)) {
         ch->sendf("@WYou stop powering up.@n");
-        ch->playerFlags.reset(PLR_POWERUP);
+        ch->clearFlag(FlagType::PC, PLR_POWERUP);
         return;
     }
     if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
@@ -1032,7 +1032,7 @@ ACMD(do_powerup) {
             act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
         }
-        ch->playerFlags.set(PLR_POWERUP);
+        ch->setFlag(FlagType::PC, PLR_POWERUP);
         return;
     }
 }

@@ -1258,7 +1258,7 @@ namespace net {
                         basepl += roll_stats(5, 65);
                     basest += roll_stats(8, 65);
                     baseki += roll_stats(6, 65);
-                    ch->playerFlags.set(PLR_SKILLP);
+                    ch->setFlag(FlagType::PC, PLR_SKILLP);
                     break;
                     case '5':
                         basepl += roll_stats(5, 75);
@@ -1844,14 +1844,14 @@ namespace net {
                 } else if (!strcasecmp(arg.c_str(), "forget")) {
                     if (!IS_BIO(ch) && !IS_MUTANT(ch)) {
                         ch->modPractices(200);
-                        ch->playerFlags.set(PLR_FORGET);
+                        ch->setFlag(FlagType::PC, PLR_FORGET);
                         display_bonus_menu(0);
                         sendText("@CThis menu (and the Negatives menu) are for selecting various traits about your character.\n");
                         sendText("@wChoose: ");
                         state = CON_BONUS;
                     } else if (IS_MUTANT(ch)) {
                         ch->modPractices(200);
-                        ch->playerFlags.set(PLR_FORGET);
+                        ch->setFlag(FlagType::PC, PLR_FORGET);
                         sendText("\n@RSelect a mutation. A second will be chosen automatically..\n");
                         sendText("@D--------------------------------------------------------@n\n");
                         sendText("@B 1@W) @CExtreme Speed       @c-+30%s to Speed Index @C@n\n");
@@ -1871,7 +1871,7 @@ namespace net {
                     } else {
 
                         ch->modPractices(200);
-                        ch->playerFlags.set(PLR_FORGET);
+                        ch->setFlag(FlagType::PC, PLR_FORGET);
                         sendText("\n@RSelect two genomes to be your primary DNA strains.\n");
                         sendText("@D--------------------------------------------------------@n\n");
                         sendText("@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
@@ -2213,7 +2213,7 @@ namespace net {
             case CON_ANDROID:
                 switch(arg[0]) {
                     case '1':
-                        ch->playerFlags.set(PLR_ABSORB);
+                        ch->setFlag(FlagType::PC, PLR_ABSORB);
                         sendText("\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your liking.\r\n\r\n");
                         sendText("\r\n@WQuestion (@G1@W out of @g10@W)");
                         sendText("@YAnswer the following question:\r\n");
@@ -2228,7 +2228,7 @@ namespace net {
                         state = CON_Q1;
                         break;
                     case '2':
-                        ch->playerFlags.set(PLR_REPAIR);
+                        ch->setFlag(FlagType::PC, PLR_REPAIR);
                         sendText("\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer, or your stats contrary to your linking.\r\n\r\n");
                         sendText("@YAnswer the following question:\r\n");
                         sendText("@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
@@ -2242,7 +2242,7 @@ namespace net {
                         state = CON_Q1;
                         break;
                     case '3':
-                        ch->playerFlags.set(PLR_SENSEM);
+                        ch->setFlag(FlagType::PC, PLR_SENSEM);
                         sendText("\r\n@RAnswer The following questions carefully, they may construct your alignment in conflict with your trainer or your stats contrary to your liking.\r\n\r\n");
                         sendText("@YAnswer the following question:\r\n");
                         sendText("@wYou go to train one day, but do not know the best\r\nway to approach it, What do you do?\r\n");
