@@ -1577,7 +1577,7 @@ static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
 
         ch->sendf("Title: %s\r\n", k->title ? k->title : "<None>");
 
-    ch->sendf("L-Des: %s@n", k->room_description ? k->room_description : "<None>\r\n");
+    ch->sendf("L-Des: %s@n", withPlaceholder(k->getRoomDesc(), "<None>\r\n"));
     snprintf(buf, sizeof(buf), "%s", sensei::getName(k->chclass).c_str());
     snprintf(buf2, sizeof(buf2), "%s", race::getName(k->race).c_str());
     ch->sendf("Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n",

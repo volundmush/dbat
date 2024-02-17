@@ -479,9 +479,9 @@ ACMD(do_rpp) {
                 *theshort = '\0';
                 *thelong = '\0';
 
-                sprintf(thename, "%s", obj->name);
-                sprintf(theshort, "%s", obj->getShortDesc());
-                sprintf(thelong, "%s", obj->room_description);
+                sprintf(thename, "%s", obj->getName().c_str());
+                sprintf(theshort, "%s", obj->getShortDesc().c_str());
+                sprintf(thelong, "%s", obj->getRoomDesc().c_str());
 
                 ch->desc->obj_name = strdup(thename);
                 ch->desc->obj_was = strdup(theshort);

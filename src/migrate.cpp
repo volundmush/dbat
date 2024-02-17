@@ -576,8 +576,8 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     r->zone = zone;
     r->vn = virtual_nr;
     r->uid = virtual_nr;
-    r->name = fread_string(fl, buf2);
-    r->look_description = fread_string(fl, buf2);
+    r->setName(fread_string(fl, buf2));
+    r->setLookDesc(fread_string(fl, buf2));
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",

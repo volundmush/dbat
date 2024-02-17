@@ -2423,7 +2423,7 @@ void prune_crlf(char *txt) {
 /* log a death trap hit */
 void log_death_trap(BaseCharacter *ch) {
     mudlog(BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)),
-           ch->getRoom()->name);
+           ch->getRoom()->getName().c_str());
 }
 
 

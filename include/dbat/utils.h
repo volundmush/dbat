@@ -477,7 +477,7 @@ extern zone_vnum IN_ZONE(GameEntity *ch);
 #define GET_WAS_IN(ch)    ((ch)->was_in_room)
 #define GET_AGE(ch)     ((ch)->time.currentAge())
 
-#define GET_PC_NAME(ch)    ((ch)->name)
+#define GET_PC_NAME(ch)    ((ch)->getName().c_str())
 #define GET_NAME(ch)    (IS_NPC(ch) ? \
              (char*)((ch)->getShortDesc().c_str()) : GET_PC_NAME(ch))
 #define GET_TITLE(ch)   ((ch)->desc ? ((ch)->desc->title ? (ch)->desc->title : "[Unset Title]") : "@D[@GNew User@D]")
@@ -825,8 +825,8 @@ extern Object* GET_EQ(GameEntity* u, int i);
 #define HMHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "him":"her") : "it")
 #define MAFE(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "male":"female") : "questionably gendered")
 
-#define ANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "An" : "A")
-#define SANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "an" : "a")
+#define ANA(obj) (strchr("aeiouAEIOU", *(obj)->getName().c_str()) ? "An" : "A")
+#define SANA(obj) (strchr("aeiouAEIOU", *(obj)->getName().c_str()) ? "an" : "a")
 
 
 /* Various macros building up to CAN_SEE */

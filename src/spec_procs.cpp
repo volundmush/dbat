@@ -454,14 +454,14 @@ SPECIAL(pet_shops) {
         pet->setFlag(FlagType::Affect, AFF_CHARM);
 
         if (*pet_name) {
-            snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);
+            snprintf(buf, sizeof(buf), "%s %s", pet->getName().c_str(), pet_name);
             /* free(pet->name); don't free the prototype! */
-            pet->name = strdup(buf);
+            pet->setName(buf);
 
             snprintf(buf, sizeof(buf), "%sA small sign on a chain around the neck says 'My name is %s'\r\n",
-                     pet->look_description, pet_name);
+                     pet->getLookDesc().c_str(), pet_name);
             /* free(pet->description); don't free the prototype! */
-            pet->look_description = strdup(buf);
+            pet->setLookDesc(buf);
         }
         pet->addToLocation(ch->getRoom());
         add_follower(pet, ch);

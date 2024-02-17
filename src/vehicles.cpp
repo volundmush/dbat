@@ -1147,7 +1147,7 @@ ACMD(do_ship_fire) {
     for (auto obj : ch->getRoom()->getInventory()) {
         if (shot == false) {
             if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle) {
-                if (!strcasecmp(arg1, obj->name)) {
+                if (!strcasecmp(arg1, obj->getName().c_str())) {
                     obj2 = obj;
                     shot = true;
                 }

@@ -2034,7 +2034,7 @@ static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode) {
      * hide objects starting with . from non-holylighted people
      * Idea from Elaseth of TBA
      */
-            if (*obj->room_description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
+            if (obj->getRoomDesc().starts_with('.') && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
                 return;
             if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && GET_ROOM_VNUM(IN_ROOM(ch)) == GET_OBJ_VAL(obj, 0)) {
                 return;
@@ -2109,7 +2109,7 @@ static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode) {
                     }
                 } else {
                     if (!OBJ_FLAGGED(obj, ITEM_BURIED)) {
-                        ch->sendf("%s@n", obj->room_description);
+                        ch->sendf("%s@n", obj->getRoomDesc());
                     }
                 }
 
@@ -2329,7 +2329,7 @@ static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode) {
                     break;
 
                 case ITEM_WINDOW:
-                    look_out_window(ch, obj->name);
+                    look_out_window(ch, (char*)obj->getName().c_str());
                     return;
                     break;
 
@@ -2522,14 +2522,14 @@ static void list_obj_to_char(std::vector<Object*> list, BaseCharacter *ch, int m
 
     /* Loop through all objects in the list */
     for (auto i : list) {
-        if (i->room_description == nullptr)
+        if (i->getRoomDesc().empty())
             continue;
-        if (strcasecmp(i->room_description, "undefined") == 0)
+        if (strcasecmp(i->getRoomDesc().c_str(), "undefined") == 0)
             continue;
         num = 0;
         d = i;
         if ((CAN_SEE_OBJ(ch, d) &&
-             ((*d->room_description != '.' && *d->getShortDesc().c_str() != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
+             ((!d->getRoomDesc().starts_with('.') && !d->getShortDesc().starts_with('.')) || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
             (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
             if (num > 1)
                 ch->sendf("@D(@Rx@Y%2i@D)@n ", num);
@@ -2868,8 +2868,8 @@ static void list_one_char(BaseCharacter *i, BaseCharacter *ch) {
         ch->sendf("@D[@G%d@D]@w %s", GET_MOB_VNUM(i), i->scriptString().c_str());
     }
 
-    if (IS_NPC(i) && i->room_description && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
-        ch->sendf("%s", i->room_description);
+    if (IS_NPC(i) && !i->getRoomDesc().empty() && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
+        ch->sendf("%s", i->getRoomDesc());
 
         auto icur = GET_HIT(i);
         auto imax = i->getEffMaxPL();
@@ -3307,7 +3307,7 @@ static void list_char_to_char(std::vector<BaseCharacter*> people, BaseCharacter 
         /* hide npcs whose description starts with a '.' from non-holylighted people
     - Idea from Elaseth of TBA */
         if ((ch == i) || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i)
-                          && i->room_description && *i->room_description == '.'))
+                          && i->getRoomDesc().starts_with('.')))
             continue;
 
         for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
