@@ -9252,7 +9252,7 @@ ACMD(do_steal) {
         } else { /* It's an object... */
             if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, vict->getInventory()))) {
                 for (eq_pos = 0; eq_pos < NUM_WEARS; eq_pos++)
-                    if (GET_EQ(vict, eq_pos) && (isname(arg, GET_EQ(vict, eq_pos)->getDisplayName(ch).c_str())) &&
+                    if (GET_EQ(vict, eq_pos) && (isname(arg, GET_EQ(vict, eq_pos)->getName().c_str())) &&
                         CAN_SEE_OBJ(ch, GET_EQ(vict, eq_pos))) {
                         obj = GET_EQ(vict, eq_pos);
                         break;

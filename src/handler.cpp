@@ -1087,7 +1087,7 @@ Object *get_obj_in_list_vis(BaseCharacter *ch, char *name, int *number, std::vec
         return (nullptr);
 
     for (auto i : list)
-        if (isname(name, i->name))
+        if (isname(name, i->getName().c_str()))
             if (CAN_SEE_OBJ(ch, i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
                 if (--(*number) == 0)
                     return (i);
@@ -1119,7 +1119,7 @@ Object *get_obj_vis(BaseCharacter *ch, char *name, int *number) {
 
     /* ok.. no luck yet. scan the entire obj list   */
     for (i = object_list; i && *number; i = i->next)
-        if (isname(name, i->name))
+        if (isname(name, i->getName().c_str()))
             if (CAN_SEE_OBJ(ch, i))
                 if (--(*number) == 0)
                     return (i);

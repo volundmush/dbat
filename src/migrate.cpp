@@ -347,99 +347,6 @@ static int check_bitvector_names(bitvector_t bits, size_t namecount, const char 
     return (error);
 }
 
-int load_inv_backup(BaseCharacter *ch) {
-    if (GET_LEVEL(ch) < 2)
-        return (-1);
-
-    char chx;
-    FILE *source, *target;
-    char source_file[20480], target_file[20480], buf2[20480];
-    char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
-
-    if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' ||
-        name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
-        sprintf(alpha, "A-E");
-    } else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' ||
-               name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J') {
-        sprintf(alpha, "F-J");
-    } else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' ||
-               name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O') {
-        sprintf(alpha, "K-O");
-    } else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' ||
-               name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T') {
-        sprintf(alpha, "P-T");
-    } else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' ||
-               name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' ||
-               name[0] == 'z' || name[0] == 'Z') {
-        sprintf(alpha, "U-Z");
-    }
-
-    sprintf(source_file, "plrobjs" SLASH"%s" SLASH"%s.copy",
-            alpha, ch->name);
-    if (!get_filename(buf2, sizeof(buf2), NEW_OBJ_FILES, GET_NAME(ch)))
-        return -1;
-    sprintf(target_file, "%s", buf2);
-
-    if (!(source = fopen(source_file, "r"))) {
-        basic_mud_log("Source in load_inv_backup failed to load.");
-        basic_mud_log(source_file);
-        return -1;
-    }
-
-    if (!(target = fopen(target_file, "w"))) {
-        basic_mud_log("Target in load_inv_backup failed to load.");
-        basic_mud_log(target_file);
-        return -1;
-    }
-
-    while ((chx = fgetc(source)) != EOF)
-        fputc(chx, target);
-
-    basic_mud_log("Inventory backup restore successful.");
-
-    fclose(source);
-    fclose(target);
-
-    return 1;
-}
-
-static int inv_backup(BaseCharacter *ch) {
-    FILE *backup;
-    char buf[20480];
-
-    char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
-
-    if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' ||
-        name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
-        sprintf(alpha, "A-E");
-    } else if (name[0] == 'f' || name[0] == 'F' || name[0] == 'g' || name[0] == 'G' || name[0] == 'h' ||
-               name[0] == 'H' || name[0] == 'i' || name[0] == 'I' || name[0] == 'j' || name[0] == 'J') {
-        sprintf(alpha, "F-J");
-    } else if (name[0] == 'k' || name[0] == 'K' || name[0] == 'l' || name[0] == 'L' || name[0] == 'm' ||
-               name[0] == 'M' || name[0] == 'n' || name[0] == 'N' || name[0] == 'o' || name[0] == 'O') {
-        sprintf(alpha, "K-O");
-    } else if (name[0] == 'p' || name[0] == 'P' || name[0] == 'q' || name[0] == 'Q' || name[0] == 'r' ||
-               name[0] == 'R' || name[0] == 's' || name[0] == 'S' || name[0] == 't' || name[0] == 'T') {
-        sprintf(alpha, "P-T");
-    } else if (name[0] == 'u' || name[0] == 'U' || name[0] == 'v' || name[0] == 'V' || name[0] == 'w' ||
-               name[0] == 'W' || name[0] == 'x' || name[0] == 'X' || name[0] == 'y' || name[0] == 'Y' ||
-               name[0] == 'z' || name[0] == 'Z') {
-        sprintf(alpha, "U-Z");
-    }
-
-    sprintf(buf, "plrobjs" SLASH"%s" SLASH"%s.copy", alpha,
-            ch->name);
-
-    if (!(backup = fopen(buf, "r")))
-        return -1;
-
-    fclose(backup);
-
-    return 1;
-}
-
 static char fread_letter(FILE *fp) {
     char c;
     do {
@@ -1994,7 +1901,7 @@ static int load_char(const char *name, BaseCharacter *ch) {
                     break;
 
                 case 'N':
-                    if (!strcmp(tag, "Name")) ch->name = strdup(line);
+                    if (!strcmp(tag, "Name")) ch->setName(line);
                     break;
 
                 case 'O':
@@ -2619,7 +2526,7 @@ void migrate_grid() {
     bodef.roomIDs.insert(19053);
     bodef.roomIDs.insert(19039);
     for(auto &[r, room] : world) {
-        if(icontains(stripAnsi(room->name), "Black Omen")) bodef.roomIDs.insert(r);
+        if(icontains(stripAnsi(room->getName()), "Black Omen")) bodef.roomIDs.insert(r);
     }
     bodef.roomIDs.insert(19050);
     bodef.type = ITEM_VEHICLE;
@@ -2899,7 +2806,7 @@ void migrate_grid() {
     celdef.type = ITEM_SPACE_STATION;
     celdef.roomRanges.emplace_back(16305, 16399);
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room->name), "Celestial Corp")) celdef.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->getName()), "Celestial Corp")) celdef.roomIDs.insert(rv);
     }
     auto celestial_corp = assembleArea(celdef);
 
@@ -2916,7 +2823,7 @@ void migrate_grid() {
     cooler.location = space;
     cooler.type = ITEM_VEHICLE;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room->name), "Cooler's Ship")) {
+        if(icontains(stripAnsi(room->getName()), "Cooler's Ship")) {
             cooler.roomIDs.insert(rv);
         }
     }
@@ -2927,7 +2834,7 @@ void migrate_grid() {
     alph.type = ITEM_SPACE_STATION;
     alph.location = space;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room->name), "Alpharis")) alph.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->getName()), "Alpharis")) alph.roomIDs.insert(rv);
     }
     auto alpharis = assembleArea(alph);
 
@@ -2936,7 +2843,7 @@ void migrate_grid() {
     dzone.location = universe7;
     dzone.type = ITEM_DIMENSION;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room->name), "Dead Zone")) dzone.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->getName()), "Dead Zone")) dzone.roomIDs.insert(rv);
     }
     auto dead_zone = assembleArea(dzone);
 
@@ -2945,7 +2852,7 @@ void migrate_grid() {
     bast.location = space;
     bast.type = ITEM_CELESTIAL_BODY;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room->name), "Blasted Asteroid")) bast.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->getName()), "Blasted Asteroid")) bast.roomIDs.insert(rv);
     }
     auto blasted_asteroid = assembleArea(bast);
 
@@ -2955,7 +2862,7 @@ void migrate_grid() {
     listres.location = xenoverse;
     listres.type = ITEM_BUILDING;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room->name), "Lister's Restaurant")) listres.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->getName()), "Lister's Restaurant")) listres.roomIDs.insert(rv);
     }
     listres.roomIDs = {18640};
     auto listers_restaurant = assembleArea(listres);
@@ -2965,7 +2872,7 @@ void migrate_grid() {
     scasino.type = ITEM_BUILDING;
     scasino.location = xenoverse;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room->name), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->getName()), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
     }
     auto shooting_star_casino = assembleArea(scasino);
 
@@ -2974,7 +2881,7 @@ void migrate_grid() {
     outdef.location = celestial_plane;
 	outdef.type = ITEM_BUILDING;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room->name), "The Outpost")) outdef.roomIDs.insert(rv);
+        if(icontains(stripAnsi(room->getName()), "The Outpost")) outdef.roomIDs.insert(rv);
     }
     auto outpost = assembleArea(outdef);
 
@@ -3655,7 +3562,7 @@ void migrate_characters() {
         players[id] = p;
         p->id = id;
         p->character = ch;
-        p->name = ch->name;
+        p->name = ch->getName();
         auto a = accounts[accID];
         accounts[accID] = a;
         p->account = a;

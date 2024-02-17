@@ -4103,7 +4103,7 @@ static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
 	 difference between the two?  Well, there's a period in the second,
 	 so, we'll just stick with that basic difference */
 
-            if (isname(number, obj->getDisplayName(ch).c_str())) {
+            if (isname(number, obj->getName().c_str())) {
                 show_board(GET_OBJ_VNUM(obj), ch);
             } else if ((!isdigit(*number) || (!(msg = atoi(number)))) ||
                        (strchr(number, '.'))) {
@@ -4146,7 +4146,7 @@ static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
             if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)))
                 if ((desc = find_exdesc(arg, GET_EQ(ch, j)->ex_description)) != nullptr && ++i == fnum) {
                     ch->sendf("%s", desc);
-                    if (isname(arg, GET_EQ(ch, j)->getDisplayName(ch).c_str())) {
+                    if (isname(arg, GET_EQ(ch, j)->getName().c_str())) {
                         if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_WEAPON) {
                             ch->sendf("The weapon type of %s is a %s.\r\n",
                                          GET_OBJ_SHORT(GET_EQ(ch, j)),
@@ -4173,7 +4173,7 @@ static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
                         show_board(GET_OBJ_VNUM(obj), ch);
                     } else {
                         ch->sendf("%s", desc);
-                        if (isname(arg, obj->getDisplayName(ch).c_str())) {
+                        if (isname(arg, obj->getName().c_str())) {
                             if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
                                 ch->sendf("The weapon type of %s is a %s.\r\n",
                                              GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj,
@@ -6269,7 +6269,7 @@ static void perform_mortal_where(BaseCharacter *ch, char *arg) {
                 continue;
             if (!CAN_SEE(ch, i) || i->getRoom()->zone != ch->getRoom()->zone)
                 continue;
-            if (!isname(arg, i->getDisplayName(ch).c_str()))
+            if (!isname(arg, i->getName().c_str()))
                 continue;
             ch->sendf("%-25s - %s\r\n", GET_NAME(i), i->getRoom()->getDisplayName(ch));
             return;
@@ -6327,7 +6327,7 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
         for (i = character_list; i; i = i->next) {
-            if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->getDisplayName(ch).c_str())) {
+            if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->getName().c_str())) {
                 found = 1;
                 ch->sendf("M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
                              GET_ROOM_VNUM(IN_ROOM(i)), i->getRoom()->getDisplayName(ch));
@@ -6339,7 +6339,7 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
             }
         }
         for (k = object_list; k; k = k->next)
-            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->getDisplayName(ch).c_str())) {
+            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->getName().c_str())) {
                 found = 1;
                 print_object_location(++num, k, ch, true);
             }

@@ -1423,7 +1423,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
                 }
                 else {
-                    Messager msg(j, strstr(j->name, "android") ? "$you() breaks down completely into a pile of junk." : "A quivering horde of maggots consumes $you().");
+                    Messager msg(j, strstr(j->getName().c_str(), "android") ? "$you() breaks down completely into a pile of junk." : "A quivering horde of maggots consumes $you().");
                     msg.addLocation(j->carried_by);
                     msg.deliver();
                 }

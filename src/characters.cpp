@@ -1971,9 +1971,12 @@ std::string PlayerCharacter::getDisplayName(GameEntity* looker) {
         }
         auto p = players[otherPC->getUID()];
         if(auto found = p->dubNames.find(getUID()); found != p->dubNames.end()) {
-            return AN(RACE(this));
+            auto raceName = juggleRaceName(false);
+            return fmt::format("{} {}", AN(raceName.c_str()), raceName);
+        } else {
+            return found->second;
         }
-        return found->second;
+        
     }
     
     return getName();

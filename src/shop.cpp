@@ -377,7 +377,7 @@ static int evaluate_expression(Object *obj, char *expr) {
                         break;
                     }
                 if (*extra_bits[eindex] == '\n')
-                    push(&vals, isname(name, obj->name));
+                    push(&vals, isname(name, obj->getName()));
             } else {
                 if (temp != OPER_OPEN_PAREN)
                     while (top(&ops) > temp)
@@ -952,7 +952,7 @@ static void shopping_list(char *arg, BaseCharacter *ch, BaseCharacter *keeper, v
                     cnt++;
                 else {
                     lindex++;
-                    if (!*name || isname(name, last_obj->name)) {
+                    if (!*name || isname(name, last_obj->getName().c_str())) {
                         strncat(buf, list_object(last_obj, cnt, lindex, shop_nr, keeper, ch),
                                 sizeof(buf) - len - 1);    /* strncat: OK */
                         len = strlen(buf);
@@ -971,7 +971,7 @@ static void shopping_list(char *arg, BaseCharacter *ch, BaseCharacter *keeper, v
         ch->sendf("Presently, none of those are for sale.\r\n");
     else {
         char zen[80];
-        if (!*name || isname(name, last_obj->name))    /* show last obj */
+        if (!*name || isname(name, last_obj->getName().c_str()))    /* show last obj */
             if (len < sizeof(buf)) {
                 strncat(buf, list_object(last_obj, cnt, lindex, shop_nr, keeper, ch),
                         sizeof(buf) - len - 1);    /* strncat: OK */
@@ -1199,7 +1199,7 @@ static void list_detailed_shop(BaseCharacter *ch, vnum shop_nr) {
             column += 2;
         }
         if(world.contains(r)) {
-            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[r]->name, r);
+            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[r]->getName().c_str(), r);
         } else {
             linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", r);
         }

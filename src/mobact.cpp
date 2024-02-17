@@ -238,7 +238,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 char target[MAX_INPUT_LENGTH];
                 auto targ = FIGHTING(original);
 
-                sprintf(target, "%s", targ->name);
+                sprintf(target, "%s", targ->getName().c_str());
                 if (rand_number(1, 5) >= 4) {
                     do_kick(ch, target, 0, 0);
                 } else if (rand_number(1, 5) >= 4) {

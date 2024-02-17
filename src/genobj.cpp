@@ -398,7 +398,7 @@ DgResults Object::dgCallMember(trig_data *trig, const std::string& member, const
         if(!arg.empty()) {
             setName(arg);
         }
-        return name;
+        return getName();
     }
 
     if(lmember == "next_in_list") {

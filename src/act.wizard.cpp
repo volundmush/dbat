@@ -4267,7 +4267,7 @@ ACMD(do_chown) {
     else {
         for (i = 0; i < NUM_WEARS; i++) {
             if (GET_EQ(victim, i) && CAN_SEE_OBJ(ch, GET_EQ(victim, i)) &&
-                isname(buf2, GET_EQ(victim, i)->getDisplayName(ch).c_str())) {
+                isname(buf2, GET_EQ(victim, i)->getName().c_str())) {
                     unequip_char(victim, i)->addToLocation(victim);
                 k = 1;
             }

@@ -287,7 +287,7 @@ ACMD(do_mjunk) {
         return;
     } else {
         for (auto obj : ch->getInventory()) {
-            if (arg[3] == '\0' || isname(arg + 4, obj->getDisplayName(ch).c_str())) {
+            if (arg[3] == '\0' || isname(arg + 4, obj->getName().c_str())) {
                 obj->extractFromWorld();
             }
         }
