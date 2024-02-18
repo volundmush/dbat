@@ -235,6 +235,57 @@ static void see_plant(Object *obj, BaseCharacter *ch) {
 
 }
 
+std::string Plant::renderRoomListingHelper(GameEntity *viewer) {
+
+    int water = GET_OBJ_VAL(this, VAL_WATERLEVEL);
+    auto sd = getShortDesc();
+    if (water >= 0) {
+        
+        switch (GET_OBJ_VAL(this, VAL_MATURITY)) {
+            case 0:
+                return fmt::sprintf("@wA @G%s@y seed@w has been planted here. @D(@C%d Water Hours@D)@n\r\n",
+                             sd, water);
+                break;
+            case 1:
+                return fmt::sprintf("@wA very young @G%s@w has sprouted from a planter here. @D(@C%d Water Hours@D)@n\r\n",
+                             sd, water);
+                break;
+            case 2:
+                return fmt::sprintf("@wA half grown @G%s@w is in a planter here. @D(@C%d Water Hours@D)@n\r\n",
+                             sd, water);
+                break;
+            case 3:
+                return fmt::sprintf("@wA mature @G%s@w is growing in a planter here. @D(@C%d Water Hours@D)@n\r\n",
+                             sd, water);
+                break;
+            case 4:
+                return fmt::sprintf("@wA mature @G%s@w is flowering in a planter here. @D(@C%d Water Hours@D)@n\r\n",
+                             sd, water);
+                break;
+            case 5:
+                return fmt::sprintf("@wA mature @G%s@w that is close to harvestable is here. @D(@C%d Water Hours@D)@n\r\n",
+                             sd, water);
+                break;
+            case 6:
+                return fmt::sprintf("@wA @Rharvestable @G%s@w is in the planter here. @D(@C%d Water Hours@D)@n\r\n",
+                             sd, water);
+                break;
+            default:
+                break;
+        }
+    } else {
+        if (water > -4) {
+            return fmt::sprintf("@yA @G%s@y that is looking a bit @rdry@y, is here.@n\r\n", sd);
+        } else if (water > -10) {
+            return fmt::sprintf("@yA @G%s@y that is looking extremely @rdry@y, is here.@n\r\n", sd);
+        } else if (water <= -10) {
+            return fmt::sprintf("@yA @G%s@y that is completely @rdead@y and @rwithered@y, is here.@n\r\n",
+                         sd);
+        }
+    }
+
+}
+
 /* This is used to determine the terrain bonus for search_room - Iovan 12/16/2012*/
 static double terrain_bonus(BaseCharacter *ch) {
 
@@ -1248,11 +1299,8 @@ static void bringdesc(BaseCharacter *ch, BaseCharacter *tch) {
         ch->sendf("Error in bring-desc, please report.\r\n");
     }
 }
-
-static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
-                          BaseCharacter *ch) {
-
-    auto room = getWorld<Room>(rnum);
+static void map_draw_room(char map[9][10], int x, int y, Room* room,
+                          GameEntity *viewer) {
 
     for (auto &[door, d] : room->getExits()) {
         auto dest = d->getDestination();
@@ -1767,6 +1815,17 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
     }
 }
 
+
+static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
+                          GameEntity *viewer) {
+
+    auto room = getWorld<Room>(rnum);
+    if (!room) {
+        return;
+    }
+    map_draw_room(map, x, y, room, viewer);
+}
+
 ACMD(do_map) {
     gen_map(ch, 1);
 }
@@ -1803,7 +1862,7 @@ static void gen_map(BaseCharacter *ch, int num) {
     auto room = ch->getRoom();
     
     /* print out exits */
-    map_draw_room(map, 4, 4, ch->getRoom()->getUID(), ch);
+    map_draw_room(map, 4, 4, room, ch);
     auto exits = room->getExits();
     for (auto &[door, d] : exits) {
         if(d->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
@@ -1812,28 +1871,28 @@ static void gen_map(BaseCharacter *ch, int num) {
 
         switch (door) {
             case NORTH:
-                map_draw_room(map, 4, 3, dest->getUID(), ch);
+                map_draw_room(map, 4, 3, dest, ch);
                 break;
             case EAST:
-                map_draw_room(map, 5, 4, dest->getUID(), ch);
+                map_draw_room(map, 5, 4, dest, ch);
                 break;
             case SOUTH:
-                map_draw_room(map, 4, 5, dest->getUID(), ch);
+                map_draw_room(map, 4, 5, dest, ch);
                 break;
             case WEST:
-                map_draw_room(map, 3, 4, dest->getUID(), ch);
+                map_draw_room(map, 3, 4, dest, ch);
                 break;
             case NORTHEAST:
-                map_draw_room(map, 5, 3, dest->getUID(), ch);
+                map_draw_room(map, 5, 3, dest, ch);
                 break;
             case NORTHWEST:
-                map_draw_room(map, 3, 3, dest->getUID(), ch);
+                map_draw_room(map, 3, 3, dest, ch);
                 break;
             case SOUTHEAST:
-                map_draw_room(map, 5, 5, dest->getUID(), ch);
+                map_draw_room(map, 5, 5, dest, ch);
                 break;
             case SOUTHWEST:
-                map_draw_room(map, 3, 5, dest->getUID(), ch);
+                map_draw_room(map, 3, 5, dest, ch);
                 break;
         }
     }
@@ -1982,6 +2041,216 @@ static void gen_map(BaseCharacter *ch, int num) {
 }
 
 
+std::string Room::generateMap(GameEntity *viewer, int num) {
+    std::string result;
+    int door, i;
+    char map[9][10] = {{'-'},
+                       {'-'}};
+    char buf2[MAX_INPUT_LENGTH];
+
+    if (num == 1) {
+        /* Map Key */
+        result += fmt::sprintf("@W               @D-[@CArea Map@D]-\r\n");
+        result += fmt::sprintf("@D-------------------------------------------@w\r\n");
+        result += fmt::sprintf("@WC = City, @wI@W = Inside, @GP@W = Plain, @gF@W = Forest\r\n");
+        result += fmt::sprintf("@DM@W = Mountain, @yH@W = Hills, @CS@W = Sky, @BW@W = Water\r\n");
+        result += fmt::sprintf("@bU@W = Underwater, @m$@W = Shop, @m#@W = Important,\r\n");
+        result += fmt::sprintf("@YD@W = Desert, @c~@W = Shallow Water, @4 @n@W = Lava,\r\n");
+        result += fmt::sprintf("@WLastly @RX@W = You.\r\n");
+        result += fmt::sprintf("@D-------------------------------------------\r\n");
+        result += fmt::sprintf("@D                  @CNorth@w\r\n");
+        result += fmt::sprintf("@D                    @c^@w\r\n");
+        result += fmt::sprintf("@D             @CWest @c< O > @CEast@w\r\n");
+        result += fmt::sprintf("@D                    @cv@w\r\n");
+        result += fmt::sprintf("@D                  @CSouth@w\r\n");
+        result += fmt::sprintf("@D                ---------@w\r\n");
+    }
+
+    /* blank the map */
+    for (i = 0; i < 9; i++) {
+        strcpy(map[i], "         ");
+    }
+    
+    /* print out exits */
+    map_draw_room(map, 4, 4, this, viewer);
+    auto exits = getExits();
+    for (auto &[door, d] : exits) {
+        if(d->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
+        auto dest = d->getDestination();
+        if(!dest) continue;
+
+        switch (door) {
+            case NORTH:
+                map_draw_room(map, 4, 3, dest, viewer);
+                break;
+            case EAST:
+                map_draw_room(map, 5, 4, dest, viewer);
+                break;
+            case SOUTH:
+                map_draw_room(map, 4, 5, dest, viewer);
+                break;
+            case WEST:
+                map_draw_room(map, 3, 4, dest, viewer);
+                break;
+            case NORTHEAST:
+                map_draw_room(map, 5, 3, dest, viewer);
+                break;
+            case NORTHWEST:
+                map_draw_room(map, 3, 3, dest, viewer);
+                break;
+            case SOUTHEAST:
+                map_draw_room(map, 5, 5, dest, viewer);
+                break;
+            case SOUTHWEST:
+                map_draw_room(map, 3, 5, dest, viewer);
+                break;
+        }
+    }
+
+    /* make it obvious what room they are in */
+    map[4][4] = 'x';
+
+    /* print out the map */
+    int key = 0;
+    *buf2 = '\0';
+    for (i = 2; i < 9; i++) {
+        if (i > 6) {
+            continue;
+        }
+        if (num == 1) {
+            sprintf(buf2, "@w                %s\r\n", map[i]);
+        } else {
+            if (i == 2) {
+                sprintf(buf2, "@w       @w|%s@w|           %s",
+                        (exits[0] && !EXIT_FLAGGED(exits[0], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[0],
+                                                                                                     EX_CLOSED)
+                                                                                             ? " @rN " : " @CN ")
+                                                                                          : "   ", map[i]);
+            }
+            if (i == 3) {
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
+                        (exits[6] && !EXIT_FLAGGED(exits[6], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[6],
+                                                                                                     EX_CLOSED)
+                                                                                             ? " @rNW" : " @CNW")
+                                                                                          : "   ",
+                        (exits[4] && !EXIT_FLAGGED(exits[4], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[4],
+                                                                                                     EX_CLOSED)
+                                                                                             ? " @yU " : " @YU ")
+                                                                                          : "   ",
+                        (exits[7] && !EXIT_FLAGGED(exits[7], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[7],
+                                                                                                     EX_SECRET)
+                                                                                             ? "@rNE " : "@CNE ")
+                                                                                          : "   ", map[i]);
+            }
+            if (i == 4) {
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
+                        (exits[3] && !EXIT_FLAGGED(exits[3], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[3],
+                                                                                                     EX_CLOSED)
+                                                                                             ? "  @rW" : "  @CW")
+                                                                                          : "   ",
+                        (exits[10] && !EXIT_FLAGGED(exits[10], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                            exits[10],
+                                                                                                       EX_CLOSED)
+                                                                                               ? " @rI " : " @mI ")
+                                                                                            : ((exits[11] &&
+                                                                                                !EXIT_FLAGGED(
+                                                                                                        exits[11],
+                                                                                                        EX_SECRET))
+                                                                                               ? (EXIT_FLAGGED(
+                                                                                                          exits[11],
+                                                                                                          EX_CLOSED)
+                                                                                                  ? "@rOUT" : "@mOUT")
+                                                                                               : "@r{ }"),
+                        (exits[1] && !EXIT_FLAGGED(exits[1], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[1],
+                                                                                                     EX_CLOSED)
+                                                                                             ? "@rE  " : "@CE  ")
+                                                                                          : "   ", map[i]);
+            }
+            if (i == 5) {
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
+                        (exits[9] && !EXIT_FLAGGED(exits[9], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[9],
+                                                                                                     EX_CLOSED)
+                                                                                             ? " @rSW" : " @CSW")
+                                                                                          : "   ",
+                        (exits[5] && !EXIT_FLAGGED(exits[5], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[5],
+                                                                                                     EX_CLOSED)
+                                                                                             ? " @yD " : " @YD ")
+                                                                                          : "   ",
+                        (exits[8] && !EXIT_FLAGGED(exits[8], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[8],
+                                                                                                     EX_SECRET)
+                                                                                             ? "@rSE " : "@CSE ")
+                                                                                          : "   ", map[i]);
+            }
+            if (i == 6) {
+                sprintf(buf2, "@w       @w|%s@w|           %s",
+                        (exits[2] && !EXIT_FLAGGED(exits[2], EX_SECRET)) ? (EXIT_FLAGGED(
+                                                                                                          exits[2],
+                                                                                                     EX_CLOSED)
+                                                                                             ? " @rS " : " @CS ")
+                                                                                          : "   ", map[i]);
+            }
+        }
+        search_replace(buf2, "x", "@RX");
+        search_replace(buf2, "&", "@m$");
+        search_replace(buf2, "*", "@m#");
+        search_replace(buf2, "+", "@c~");
+        search_replace(buf2, "s", "@CS");
+        search_replace(buf2, "i", "@wI");
+        search_replace(buf2, "(", "@WC");
+        search_replace(buf2, "^", "@DM");
+        search_replace(buf2, "h", "@yH");
+        search_replace(buf2, "`", "@BW");
+        search_replace(buf2, "=", "@bU");
+        search_replace(buf2, "p", "@GP");
+        search_replace(buf2, "f", "@gF");
+        search_replace(buf2, "!", "@YD");
+        search_replace(buf2, "-", "@w:");
+        /* ------- Do Lava Rooms ------- */
+        search_replace(buf2, "1", "@4@YC@n");
+        search_replace(buf2, "2", "@4@YP@n");
+        search_replace(buf2, "3", "@4@YH@n");
+        search_replace(buf2, "7", "@4@YD@n");
+        search_replace(buf2, "5", "@4@YM@n");
+        search_replace(buf2, "6", "@4@YF@n");
+        /* ------- Do Closed Rooms------- */
+        search_replace(buf2, "8", "@1 @n");
+
+        if (num != 1) {
+            if (key == 0) {
+                result += fmt::sprintf("%s    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n", buf2);
+            }
+            if (key == 1) {
+                result += fmt::sprintf("%s    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n", buf2);
+            }
+            if (key == 2) {
+                result += fmt::sprintf("%s    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n", buf2);
+            }
+            if (key == 3) {
+                result += fmt::sprintf("%s    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n", buf2);
+            }
+            if (key == 4) {
+                result += fmt::sprintf("%s    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n", buf2);
+            }
+            key += 1;
+        } else {
+            result += fmt::sprintf(buf2);
+        }
+    }
+    if (num == 1) {
+        result += fmt::sprintf("@D                ---------@w\r\n");
+    }
+    return result;
+}
+
 static void display_spells(BaseCharacter *ch, Object *obj) {
     int i;
 
@@ -2008,6 +2277,94 @@ static void display_scroll(BaseCharacter *ch, Object *obj) {
     ch->sendf("@c---@wSpell Name@c---------------------------------------------------@n\r\n");
     ch->sendf("@y%-20s@n\r\n", skill_name(GET_OBJ_VAL(obj, VAL_SCROLL_SPELL1)));
     return;
+}
+
+std::string Object::renderListPrefixFor(GameEntity *viewer) {
+    std::string result;
+
+    if (viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) {
+        result += fmt::format("@G[#{}] [VN{}]", uid, vn);
+        if(auto sstring = scriptString(); !sstring.empty()) {
+            result += fmt::format(" {}", sstring);
+        }
+        result += "@n ";
+    }
+
+    return result;
+}
+
+std::string GravityGenerator::renderRoomListingHelper(GameEntity *viewer) {
+    auto result = renderListPrefixFor(viewer);
+
+    if (auto grav = emitEnvVar(EnvVar::Gravity); grav) {
+        result += fmt::sprintf("@wA gravity generator, set to {}x gravity, is built here.", grav.value());
+    } else {
+        result += fmt::sprintf("@wA gravity generator, currently on standby, is built here.");
+    }
+
+    return result;
+
+}
+
+std::string GlacialWall::renderRoomListingHelper(GameEntity *viewer) {
+    auto result = renderListPrefixFor(viewer);
+    auto curWeight = GET_OBJ_WEIGHT(this);
+
+    result += fmt::sprintf(
+                        "@wA @cG@Cl@wa@cc@Ci@wa@cl @wW@ca@Cl@wl @D[@C%s@D]@w is blocking access to the @G%s@w direction",
+                        add_commas(curWeight).c_str(), dirs[cost]);
+
+    return result;
+
+}
+
+std::string GameEntity::renderRoomListingFor(GameEntity *viewer) {
+    std::vector<std::string> results;
+    results.emplace_back(renderListPrefixFor(viewer));
+    results.emplace_back(renderRoomListingHelper(viewer));
+    results.emplace_back(renderModifiers(viewer));
+
+    return join(results, "@n ") + "@n";
+}
+
+std::string Object::renderRoomListingHelper(GameEntity *viewer) {
+    std::string result;
+
+    if (GET_OBJ_POSTTYPE(this) > 0) {
+        result += fmt::sprintf("%s@w, has been posted here.@n", getShortDesc());
+    } else {
+        result += fmt::sprintf("%s@n", getRoomDesc());
+    }
+
+    if (type_flag == ITEM_VEHICLE) {
+        if (!OBJVAL_FLAGGED(this, CONT_CLOSED) && vn > 19199)
+            result += fmt::sprintf("\r\n@c...its outer hatch is open@n");
+        else if (!OBJVAL_FLAGGED(this, CONT_CLOSED) && vn <= 19199)
+            result += fmt::sprintf("\r\n@c...its door is open@n");
+    }
+    if (type_flag == ITEM_CONTAINER && !IS_CORPSE(this)) {
+        if (!OBJVAL_FLAGGED(this, CONT_CLOSED) && !OBJ_FLAGGED(this, ITEM_SHEATH))
+            result += fmt::sprintf(". @D[@G-open-@D]@n");
+        else if (!OBJ_FLAGGED(this, ITEM_SHEATH))
+            result += fmt::sprintf(". @D[@rclosed@D]@n");
+    }
+    if (type_flag == ITEM_HATCH) {
+        if (!OBJVAL_FLAGGED(this, CONT_CLOSED))
+            result += fmt::sprintf(", it is open");
+        else if (OBJVAL_FLAGGED(this, CONT_CLOSED))
+            result += fmt::sprintf(", it is closed");
+        if (OBJVAL_FLAGGED(this, CONT_LOCKED))
+            result += fmt::sprintf(" and locked@n");
+        else
+            result += fmt::sprintf("@n");
+    }
+    if (type_flag == ITEM_FOOD) {
+        if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this)) {
+            result += fmt::sprintf(", and it has been ate on@n");
+        }
+    }
+    
+    return result;
 }
 
 static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode) {
@@ -2515,6 +2872,79 @@ static int show_obj_modifiers(Object *obj, BaseCharacter *ch) {
     return (found);
 }
 
+std::string Object::renderModifiers(GameEntity *viewer) {
+    std::string result;
+
+    if (OBJ_FLAGGED(this, ITEM_INVISIBLE)) {
+        result += fmt::sprintf(" (invisible)");
+    }
+    if (OBJ_FLAGGED(this, ITEM_BLESS) && viewer->checkFlag(FlagType::Affect, AFF_DETECT_ALIGN)) {
+        result += fmt::sprintf(" ..It glows blue!");
+    }
+    if (OBJ_FLAGGED(this, ITEM_MAGIC) && viewer->checkFlag(FlagType::Affect, AFF_DETECT_MAGIC)) {
+        result += fmt::sprintf(" ..It glows yellow!");
+    }
+    if (OBJ_FLAGGED(this, ITEM_GLOW)) {
+        result += fmt::sprintf(" @D(@GGlowing@D)@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_HOT)) {
+        result += fmt::sprintf(" @D(@RHOT@D)@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_HUM)) {
+        result += fmt::sprintf(" @D(@RHumming@D)@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_SLOT2)) {
+        if (OBJ_FLAGGED(this, ITEM_SLOT_ONE) && !OBJ_FLAGGED(this, ITEM_SLOTS_FILLED))
+            result += fmt::sprintf(" @D[@m1/2 Tokens@D]@n");
+        else if (OBJ_FLAGGED(this, ITEM_SLOTS_FILLED))
+            result += fmt::sprintf(" @D[@m2/2 Tokens@D]@n");
+        else
+            result += fmt::sprintf(" @D[@m0/2 Tokens@D]@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_SLOT1)) {
+        if (OBJ_FLAGGED(this, ITEM_SLOTS_FILLED))
+            result += fmt::sprintf(" @D[@m1/1 Tokens@D]@n");
+        else
+            result += fmt::sprintf(" @D[@m0/1 Tokens@D]@n");
+    }
+    if (KICHARGE(this) > 0) {
+        int num = (KIDIST(this) * 20) + rand_number(1, 5);
+        result += fmt::sprintf(" %d meters away", num);
+    }
+    if (OBJ_FLAGGED(this, ITEM_CUSTOM)) {
+        result += fmt::sprintf(" @D(@YCUSTOM@D)@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_RESTRING)) {
+        //result += fmt::sprintf(" @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? !obj->getName().empty() : "*");
+    }
+    if (OBJ_FLAGGED(this, ITEM_BROKEN)) {
+        if (GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_STEEL ||
+            GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL ||
+            GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
+            result += fmt::sprintf(", and appears to be twisted and broken.");
+        } else if (GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_WOOD) {
+            result += fmt::sprintf(", and is broken into hundreds of splinters.");
+        } else if (GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_GLASS) {
+            result += fmt::sprintf(", and is shattered on the ground.");
+        } else if (GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_STONE) {
+            result += fmt::sprintf(", and is a pile of rubble.");
+        } else {
+            result += fmt::sprintf(", and is broken.");
+        }
+    } else {
+        if (GET_OBJ_TYPE(this) != ITEM_BOARD) {
+            if (GET_OBJ_TYPE(this) != ITEM_CONTAINER) {
+                result += fmt::sprintf(".");
+            }
+            if (auto obj2 = GET_OBJ_POSTED(this); obj2 && GET_OBJ_POSTTYPE(this) <= 0) {
+                auto dvnum = viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS) ? fmt::sprintf("@D[@G%d@D]@w ", GET_OBJ_VNUM(obj2)) : "";
+                result += fmt::sprintf("\n...%s%s has been posted to it.", dvnum, obj2->getShortDesc());
+            }
+        }
+    }
+    return result;
+}
+
 static void list_obj_to_char(std::vector<Object*> list, BaseCharacter *ch, int mode, int show) {
     Object *i, *j, *d;
     bool found = false;
@@ -2522,14 +2952,15 @@ static void list_obj_to_char(std::vector<Object*> list, BaseCharacter *ch, int m
 
     /* Loop through all objects in the list */
     for (auto i : list) {
-        if (i->getRoomDesc().empty())
+        auto rdesc = i->getRoomDesc();
+        if (rdesc.empty())
             continue;
-        if (strcasecmp(i->getRoomDesc().c_str(), "undefined") == 0)
+        if (strcasecmp(rdesc.c_str(), "undefined") == 0)
             continue;
         num = 0;
         d = i;
         if ((CAN_SEE_OBJ(ch, d) &&
-             ((!d->getRoomDesc().starts_with('.') && !d->getShortDesc().starts_with('.')) || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
+             ((!rdesc.starts_with('.') && !d->getShortDesc().starts_with('.')) || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
             (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
             if (num > 1)
                 ch->sendf("@D(@Rx@Y%2i@D)@n ", num);
@@ -2848,6 +3279,445 @@ static void look_at_char(BaseCharacter *i, BaseCharacter *ch) {
         }
     }
 }
+
+static const char *positions[] = {
+    " is dead",
+    " is mortally wounded",
+    " is lying here, incapacitated",
+    " is lying here, stunned",
+    " is sleeping here",
+    " is resting here",
+    " is sitting here",
+    "!FIGHTING!",
+    " is standing here"
+};
+
+std::string BaseCharacter::renderStatusLines(GameEntity* viewer) {
+    std::string result;
+
+    auto icur = GET_HIT(this);
+    auto imax = getEffMaxPL();
+
+    if (icur >= (imax) * .9 && icur != (imax))
+        messages.emplace_back("@R...Some slight wounds on $s body.@w");
+    else if (icur >= (imax) * .8 && icur < (imax) * .9)
+        messages.emplace_back("@R...A few wounds on $s body.@w");
+    else if (icur >= (imax) * .7 && icur < (imax) * .8)
+        messages.emplace_back("@R...Many wounds on $s body.@w");
+    else if (icur >= (imax) * .6 && icur < (imax) * .7)
+        messages.emplace_back("@R...Quite a few wounds on $s body.@w");
+    else if (icur >= (imax) * .5 && icur < (imax) * .6)
+        messages.emplace_back("@R...Horrible wounds on $s body.@w");
+    else if (icur >= (imax) * .4 && icur < (imax) * .5)
+        messages.emplace_back("@R...Blood is seeping from the wounds on $s body.@w");
+    else if (icur >= (imax) * .3 && icur < (imax) * .4)
+        messages.emplace_back("@R...$s body is in terrible shape.@w");
+    else if (icur >= (imax) * .2 && icur < (imax) * .3)
+        messages.emplace_back("@R...Is absolutely covered in wounds.@w");
+    else if (icur >= (imax) * .1 && icur < (imax) * .2)
+        messages.emplace_back("@R...Is on $s last leg.@w");
+    else if (icur < (imax) * .1)
+        messages.emplace_back("@R...Should be DEAD soon.@w");
+
+    if (GET_EAVESDROP(this) > 0) {
+        messages.emplace_back(fmt::format("@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(this)]));
+    }
+    if (checkFlag(FlagType::Affect, AFF_FLYING) && GET_ALT(this) == 1)
+        messages.emplace_back("...$e is in the air!");
+    if (checkFlag(FlagType::Affect, AFF_FLYING) && GET_ALT(this) == 2)
+        messages.emplace_back("...$e is high in the air!");
+    if (checkFlag(FlagType::Affect, AFF_SANCTUARY) && !GET_SKILL(this, SKILL_AQUA_BARRIER))
+        messages.emplace_back("...$e has a barrier around $s body!");
+    if (checkFlag(FlagType::Affect, AFF_FIRESHIELD))
+        messages.emplace_back("...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!");
+    if (checkFlag(FlagType::Affect, AFF_SANCTUARY) && GET_SKILL(this, SKILL_AQUA_BARRIER))
+        messages.emplace_back("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!");
+    if (PLR_FLAGGED(i, PLR_SPIRAL))
+        messages.emplace_back("...$e is spinning in a vortex!");
+    if (GET_CHARGE(this))
+        messages.emplace_back("...$e has a bright %s aura around $s body!");
+    if (checkFlag(FlagType::Affect, AFF_METAMORPH))
+        messages.emplace_back("@w...$e has a dark, @rred@w aura and menacing presence.");
+    if (checkFlag(FlagType::Affect, AFF_HAYASA))
+        messages.emplace_back("@w...$e has a soft @cblue@w glow around $s body!");
+    if (checkFlag(FlagType::Affect, AFF_BLIND))
+        messages.emplace_back("...$e is groping around blindly!");
+    if (affected_by_spell(i, SPELL_FAERIE_FIRE))
+        messages.emplace_back("@m...$e @mis outlined with purple fire!@m");
+    if (GET_FEATURE(this)) {
+        messages.emplace_back(fmt::format("@C%s@n", GET_FEATURE(this)));
+    }
+
+        std::string result;
+    Object *chair = nullptr;
+    int count = false;
+
+    auto isNPC = IS_NPC(this);
+
+    std::vector<std::string> messages;
+
+    if (GET_EAVESDROP(i) > 0) {
+        messages.emplace_back(fmt::format("@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]));
+    }
+    if (PLR_FLAGGED(i, PLR_FISHING)) {
+        messages.emplace_back("@w...$e is @Cfishing@w.@n");
+    }
+    if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
+        messages.emplace_back(fmt::format("...is surrounded by a bright %s aura.", aura_types[GET_AURA(i)]));
+    }
+
+    auto is_oozaru = (form == FormID::Oozaru || form == FormID::GoldenOozaru);
+
+    if (checkFlag(FlagType::Affect, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
+        messages.emplace_back("@w...$e has a @bbarrier@w around $s body!");
+    if (checkFlag(FlagType::Affect, AFF_FIRESHIELD))
+        messages.emplace_back("@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!");
+    if (checkFlag(FlagType::Affect, AFF_HEALGLOW))
+        messages.emplace_back("@w...$e has a serene @Cblue@Y glow@w around $s body.");
+    if (checkFlag(FlagType::Affect, AFF_EARMOR))
+        messages.emplace_back("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.");
+    if (checkFlag(FlagType::Affect, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
+        messages.emplace_back("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!");
+    if (checkFlag(FlagType::Affect, AFF_FLYING) && GET_ALT(i) == 1)
+        messages.emplace_back("@w...$e is in the air!");
+    if (checkFlag(FlagType::Affect, AFF_FLYING) && GET_ALT(i) == 2)
+        messages.emplace_back("@w...$e is high in the air!");
+    if (GET_KAIOKEN(i) > 0)
+        messages.emplace_back("@w...@r$e has a red aura around $s body!");
+    if (!isNPC && PLR_FLAGGED(i, PLR_SPIRAL))
+        messages.emplace_back("@w...$e is spinning in a vortex!");
+    if (IS_TRANSFORMED(i) && !IS_ANDROID(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i))
+        messages.emplace_back("@w...$e has energy crackling around $s body!");
+    if (GET_CHARGE(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i)) {
+        messages.emplace_back(fmt::format("@w...$e has a bright %s aura around $s body!", aura_types[GET_AURA(i)]));
+    }
+    if (!is_oozaru && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+        messages.emplace_back("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!");
+    if (!is_oozaru && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
+        messages.emplace_back(fmt::format("@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]));
+    }
+    if (form != FormID::Oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+        messages.emplace_back("@w...$e has energy crackling around $s body!");
+    if (form == FormID::Oozaru && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+        messages.emplace_back("@w...$e is in the form of a @rgreat ape@w!");
+    if (checkFlag(FlagType::Affect, AFF_KYODAIKA))
+        messages.emplace_back("@w...$e has expanded $s body size@w!");
+    if (checkFlag(FlagType::Affect, AFF_HAYASA))
+        messages.emplace_back("@w...$e has a soft @cblue@w glow around $s body!");
+    if (form == FormID::Oozaru && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+        messages.emplace_back("@w...$e has energy crackling around $s @rgreat ape@w body!");
+    if (GET_FEATURE(i)) {
+        messages.emplace_back(fmt::format("@C%s@n", GET_FEATURE(i)));
+    }
+
+    if (GET_RDISPLAY(i)) {
+        if (GET_RDISPLAY(i) != "Empty") {
+            messages.emplace_back(fmt::format("...%s", GET_RDISPLAY(i)));
+        }
+    }
+
+    for(const auto& msg : messages) act(msg.c_str(), false, this, nullptr, viewer, TO_VICT);
+
+    return result;
+}
+
+std::string BaseCharacter::renderRoomListingHelper(GameEntity* viewer) {
+    std::string result;
+
+    auto shd = renderRoomListName(viewer);
+
+    if (!FIGHTING(this) && GET_POS(this) != POS_SITTING && GET_POS(this) != POS_SLEEPING)
+        result += fmt::sprintf("@w%s", shd);
+    else if (GRAPPLED(this) && GRAPPLED(this) == ch)
+        result += fmt::sprintf("@w%s is being grappled with by YOU!", shd);
+    else if (GRAPPLED(this) && GRAPPLED(this) != ch)
+        result += fmt::sprintf("@w%s is being absorbed from by %s!", shd, GRAPPLED(this)->getDisplayName(ch));
+    else if (ABSORBBY(this) && ABSORBBY(this) == ch)
+        result += fmt::sprintf("@w%s is being absorbed from by YOU!", shd);
+    else if (ABSORBBY(this) && ABSORBBY(this) != ch)
+        result += fmt::sprintf("@w%s is being absorbed from by %s!", shd, ABSORBBY(this)->getDisplayName(ch));
+    else if (FIGHTING(this) && FIGHTING(this) != ch && GET_POS(this) != POS_SITTING && GET_POS(this) != POS_SLEEPING &&
+             is_sparring(this))
+        result += fmt::sprintf("@w%c%s is sparring with %s!", shd, FIGHTING(this)->getDisplayName(ch));
+    else if (FIGHTING(this) && is_sparring(this) && FIGHTING(this) == ch && GET_POS(this) != POS_SITTING &&
+             GET_POS(this) != POS_SLEEPING)
+        result += fmt::sprintf("@w%s is sparring with you!", shd);
+    else if (FIGHTING(this) && FIGHTING(this) != ch && GET_POS(this) != POS_SITTING && GET_POS(this) != POS_SLEEPING)
+        result += fmt::sprintf("@w%s is fighting %s!", shd, FIGHTING(this)->getDisplayName(ch));
+    else if (FIGHTING(this) && FIGHTING(this) == ch && GET_POS(this) != POS_SITTING && GET_POS(this) != POS_SLEEPING)
+        result += fmt::sprintf("@w%s is fighting YOU!", shd);
+    else if (FIGHTING(this) && GET_POS(this) == POS_SITTING)
+        result += fmt::sprintf("@w%s is sitting here.", shd);
+    else if (FIGHTING(this) && GET_POS(this) == POS_SLEEPING)
+        result += fmt::sprintf("@w%s is sleeping here.", shd);
+    else
+        result += fmt::sprintf("@w%s", isNPC() ? getRoomDesc() : shd);
+
+
+        if (!isNPC || !FIGHTING(i)) {
+        if (checkFlag(FlagType::Affect, AFF_INVISIBLE)) {
+            result += fmt::sprintf(", is invisible");
+            count = true;
+        }
+        if (checkFlag(FlagType::Affect, AFF_ETHEREAL)) {
+            result += fmt::sprintf(", has a halo");
+            count = true;
+        }
+        if (checkFlag(FlagType::Affect, AFF_HIDE) && i != ch) {
+            result += fmt::sprintf(", is hiding");
+            if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
+                improve_skill(i, SKILL_HIDE, 1);
+            }
+            count = true;
+        }
+        if (!isNPC && !desc) {
+            result += fmt::sprintf(", has a blank stare");
+            count = true;
+        }
+        if (!isNPC && PLR_FLAGGED(i, PLR_WRITING)) {
+            result += fmt::sprintf(", is writing");
+            count = true;
+        }
+        if (!isNPC && PRF_FLAGGED(i, PRF_BUILDWALK)) {
+            result += fmt::sprintf(", is buildwalking");
+            count = true;
+        }
+        if (!isNPC && ABSORBING(i) && ABSORBING(i) != ch) {
+            result += fmt::sprintf(", is absorbing from %s", GET_NAME(ABSORBING(i)));
+            count = true;
+        }
+        if (!isNPC && GRAPPLING(i) && GRAPPLING(i) != ch) {
+            result += fmt::sprintf(", is grappling with %s",
+                         readIntro(ch, GRAPPLING(i)) == 1 ? get_i_name(ch, GRAPPLING(i)) : introd_calc(GRAPPLING(i)));
+            count = true;
+        }
+        if (!isNPC && CARRYING(i) && CARRYING(i) != ch) {
+            result += fmt::sprintf(", is carrying %s",
+                         readIntro(ch, CARRYING(i)) == 1 ? get_i_name(ch, CARRYING(i)) : introd_calc(CARRYING(i)));
+            count = true;
+        }
+        if (!isNPC && CARRIED_BY(i) && CARRIED_BY(i) != ch) {
+            result += fmt::sprintf(", is being carried by %s",
+                         readIntro(ch, CARRIED_BY(i)) == 1 ? get_i_name(ch, CARRIED_BY(i)) : introd_calc(
+                                 CARRIED_BY(i)));
+            count = true;
+        }
+        if (!isNPC && GRAPPLING(i) && GRAPPLING(i) == ch) {
+            result += fmt::sprintf(", is grappling with YOU");
+            count = true;
+        }
+        if (!isNPC && ABSORBING(i) && ABSORBING(i) == ch) {
+            result += fmt::sprintf(", is absorbing from YOU");
+            count = true;
+        }
+        if (!isNPC && ABSORBING(ch) && ABSORBING(ch) == i) {
+            result += fmt::sprintf(", is being absorbed from by YOU");
+            count = true;
+        }
+        if (!isNPC && GRAPPLING(ch) && GRAPPLING(ch) == i) {
+            result += fmt::sprintf(", is being grappled with by YOU");
+            count = true;
+        }
+        if (!isNPC && CARRYING(ch) && CARRYING(ch) == i) {
+            result += fmt::sprintf(", is being carried by you");
+            count = true;
+        }
+
+        if (!IS_NPC(ch) && !isNPC && FIGHTING(i)) {
+            if (!PLR_FLAGGED(i, PLR_SPAR) ||
+                (PLR_FLAGGED(i, PLR_SPAR) && (!PLR_FLAGGED(FIGHTING(i), PLR_SPAR) || IS_NPC(FIGHTING(i))))) {
+                result += fmt::sprintf(", is here fighting ");
+            }
+            if (PLR_FLAGGED(i, PLR_SPAR) && PLR_FLAGGED(FIGHTING(i), PLR_SPAR)) {
+                result += fmt::sprintf(", is here sparring ");
+            }
+            if (FIGHTING(i) == ch) {
+                result += fmt::sprintf("@rYOU@w");
+                count = true;
+            } else {
+                if (IN_ROOM(i) == IN_ROOM(FIGHTING(i))) {
+                    result += fmt::sprintf("%s", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
+                                                                                       ? get_i_name(ch, FIGHTING(i))
+                                                                                       : LRACE(FIGHTING(i))));
+                    count = true;
+                } else {
+                    result += fmt::sprintf("someone who has already left!");
+                }
+            }
+        }
+    }
+
+    if (SITS(i)) {
+        chair = SITS(i);
+        if (PLR_FLAGGED(i, PLR_HEALT)) {
+            result += fmt::sprintf("@w is floating inside a healing tank.");
+        } else if (count == true) {
+            result += fmt::sprintf(",@w and%s on %s.", positions[(int) GET_POS(i)], chair->getShortDesc());
+        } else if (count == false) {
+            result += fmt::sprintf("@w%s on %s.", positions[(int) GET_POS(i)], chair->getShortDesc());
+        }
+    } else if (!PLR_FLAGGED(i, PLR_PILOTING) && !SITS(i) && (!isNPC || !FIGHTING(i))) {
+        if (count == true) {
+            result += fmt::sprintf("@w, and%s.", positions[(int) GET_POS(i)]);
+        }
+        if (count == false) {
+            result += fmt::sprintf("@w%s.", positions[(int) GET_POS(i)]);
+        }
+    } else if (PLR_FLAGGED(i, PLR_PILOTING)) {
+        result += fmt::sprintf("@w, is sitting in the pilot's chair.\r\n");
+    } else {
+
+        if (FIGHTING(i) && !IS_NPC(ch) && !isNPC) {
+            if (!PLR_FLAGGED(i, PLR_SPAR)) {
+                result += fmt::sprintf(", is here fighting ");
+            }
+            if (PLR_FLAGGED(i, PLR_SPAR)) {
+                result += fmt::sprintf(", is here sparring ");
+            }
+            if (FIGHTING(i) == ch)
+                result += fmt::sprintf("@rYOU@w!");
+            else {
+                if (IN_ROOM(i) == IN_ROOM(FIGHTING(i)))
+                    result += fmt::sprintf("%s!", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
+                                                                                        ? get_i_name(ch, FIGHTING(i))
+                                                                                        : LRACE(FIGHTING(i))));
+                else
+                    result += fmt::sprintf("someone who has already left!");
+            }
+        } else if (!isNPC) {            /* NIL fighting pointer */
+            result += fmt::sprintf(" is here struggling with thin air.");
+        }
+    }
+
+    if (AFF_FLAGGED(ch, AFF_DETECT_ALIGN)) {
+        if (IS_EVIL(i))
+            result += fmt::sprintf(" (@rRed@[3] Aura)");
+        else if (IS_GOOD(i))
+            result += fmt::sprintf(" (@bBlue@[3] Aura)");
+    }
+    if (!isNPC && PRF_FLAGGED(i, PRF_AFK))
+        result += fmt::sprintf(" @D(@RAFK@D)");
+    else if (!isNPC && timer > 3)
+        result += fmt::sprintf(" @D(@RIDLE@D)");
+    result += fmt::sprintf("@n\r\n");
+
+    return result;
+}
+
+std::string BaseCharacter::renderRoomListingFor(GameEntity* viewer) {
+    std::vector<std::string> results;
+    results.emplace_back(renderListPrefixFor(viewer));
+    if(IS_MAJIN(this) && checkFlag(FlagType::Affect, AFF_LIQUEFIED)) {
+        results.emplace_back(fmt::sprintf("@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int) GET_SKIN(i)]));
+    } else {
+        results.emplace_back(renderRoomListingHelper(viewer));
+        results.emplace_back(renderStatusLines(viewer));
+    }
+    
+    return join(results, "@n ") + "@n";
+}
+
+std::string NonPlayerCharacter::renderRoomListName(GameEntity* viewer) {
+    return getDisplayName(viewer);
+}
+
+std::string PlayerCharacter::renderRoomListName(GameEntity* viewer) {
+    if(viewer->canSeeAdminInvisible()) return getName();
+
+    auto otherPC = dynamic_cast<PlayerCharacter*>(viewer);
+    if(!otherPC) return getDisplayName(viewer);
+    auto p = players[otherPC->getUID()];
+    auto found = p->dubNames.find(getUID());
+    if(found != p->dubNames.end() && !PLR_FLAGGED(this, PLR_DISGUISED)) return found->second;
+
+    if(PLR_FLAGGED(this, PLR_DISGUISED)) {
+        return fmt::sprintf("@wA disguised %s %s", MAFE(i), LRACE(i));
+    }
+
+    std::string result;
+    if (GET_DISTFEA(i) == DISTFEA_HAIR) {
+        if (IS_MAJIN(i)) {
+            result += fmt::sprintf("@wA %s majin, with a %s forelock,", MAFE(i), FHA_types[(int) GET_HAIRL(i)]);
+        } else if (IS_NAMEK(i)) {
+            result += fmt::sprintf("@wA namek, with %s antennae,", FHA_types[(int) GET_HAIRL(i)]);
+        } else if (IS_ARLIAN(i)) {
+            result += fmt::sprintf("@wA arlian, with %s antennae,", FHA_types[(int) GET_HAIRL(i)]);
+        } else if (IS_ICER(i) || IS_DEMON(i)) {
+            result += fmt::sprintf("@wA %s %s, with %s horns", MAFE(i), LRACE(i), FHA_types[(int) GET_HAIRL(i)]);
+        } else {
+            char blarg[MAX_INPUT_LENGTH];
+            sprintf(blarg, "%s %s hair %s", hairl_types[(int) GET_HAIRL(i)], hairc_types[(int) GET_HAIRC(i)],
+                    hairs_types[(int) GET_HAIRS(i)]);
+            result += fmt::sprintf("@wA %s %s, with %s", MAFE(i), LRACE(i),
+                            GET_HAIRL(i) == 0 ? "a bald head" : (blarg));
+        }
+    } else if (GET_DISTFEA(i) == DISTFEA_SKIN) {
+        result += fmt::sprintf("@wA %s skinned %s %s", skin_types[(int) GET_SKIN(i)], MAFE(i), LRACE(i));
+    } else if (GET_DISTFEA(i) == DISTFEA_HEIGHT) {
+        char *height;
+        if (IS_TRUFFLE(i)) {
+            if (GET_PC_HEIGHT(i) > 70) {
+                height = strdup("very tall");
+            } else if (GET_PC_HEIGHT(i) > 55) {
+                height = strdup("tall");
+            } else if (GET_PC_HEIGHT(i) > 35) {
+                height = strdup("average height");
+            } else {
+                height = strdup("short");
+            }
+        } else {
+            if (GET_PC_HEIGHT(i) > 200) {
+                height = strdup("very tall");
+            } else if (GET_PC_HEIGHT(i) > 180) {
+                height = strdup("tall");
+            } else if (GET_PC_HEIGHT(i) > 150) {
+                height = strdup("average height");
+            } else if (GET_PC_HEIGHT(i) > 120) {
+                height = strdup("short");
+            } else {
+                height = strdup("very short");
+            }
+        }
+        result += fmt::sprintf("@wA %s %s %s", height, MAFE(i), LRACE(i));
+        if (height) {
+            free(height);
+        }
+    } else if (GET_DISTFEA(i) == DISTFEA_WEIGHT) {
+        char *height;
+        auto w = getWeight();
+        if (IS_TRUFFLE(i)) {
+            if (w > 35) {
+                height = strdup("very heavy");
+            } else if (w > 25) {
+                height = strdup("heavy");
+            } else if (w > 15) {
+                height = strdup("average weight");
+            } else {
+                height = strdup("welterweight");
+            }
+        } else {
+            if (w > 120) {
+                height = strdup("very heavy");
+            } else if (w > 100) {
+                height = strdup("heavy");
+            } else if (w > 80) {
+                height = strdup("average weight");
+            } else if (w > 60) {
+                height = strdup("lightweight");
+            } else {
+                height = strdup("welterweight");
+            }
+        }
+        result += fmt::sprintf("@wA %s %s %s", height, MAFE(i), LRACE(i));
+        if (height) {
+            free(height);
+        }
+    }
+    return result;
+
+}
+
+
 
 static void list_one_char(BaseCharacter *i, BaseCharacter *ch) {
     Object *chair = nullptr;
@@ -3265,6 +4135,7 @@ static void list_one_char(BaseCharacter *i, BaseCharacter *ch) {
 
 }
 
+
 static void list_char_to_char(std::vector<BaseCharacter*> people, BaseCharacter *ch) {
     BaseCharacter *i, *j;
     struct hide_node {
@@ -3562,6 +4433,228 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
     }
 }
 
+std::string Room::renderExits1(GameEntity *viewer) {
+    std::string result;
+
+    int door, door_found = 0, has_light = false, i;
+    char dlist1[500];
+    char dlist2[500];
+    char dlist3[500];
+    char dlist4[500];
+    char dlist5[500];
+    char dlist6[500];
+    char dlist7[500];
+    char dlist8[500];
+    char dlist9[500];
+    char dlist10[500];
+    char dlist11[500];
+    char dlist12[500];
+
+    *dlist1 = '\0';
+    *dlist2 = '\0';
+    *dlist3 = '\0';
+    *dlist4 = '\0';
+    *dlist5 = '\0';
+    *dlist6 = '\0';
+    *dlist7 = '\0';
+    *dlist8 = '\0';
+    *dlist9 = '\0';
+    *dlist10 = '\0';
+    *dlist11 = '\0';
+    *dlist12 = '\0';
+    auto exit_mode = exitlevel(viewer);
+
+    if (exit_mode == EXIT_OFF) {
+        result += fmt::sprintf("@D------------------------------------------------------------------------@n\r\n");
+    }
+    int space = false;
+    if (sector_type == SECT_SPACE && getUID() >= 20000) {
+        space = true;
+    }
+    if (exit_mode == EXIT_NORMAL && space == false && viewer->getRoom() == this) {
+        /* Compass and Auto-map - Iovan 9-11-10 */
+        result += fmt::sprintf("@D------------------------------------------------------------------------@n\r\n");
+        result += fmt::sprintf("@w      Compass           Auto-Map            Map Key\r\n");
+        result += fmt::sprintf("@R     ---------         ----------   -----------------------------\r\n");
+        result += generateMap(viewer, 0);
+        result += fmt::sprintf("@D------------------------------------------------------------------------@n\r\n");
+    }
+    if (exit_mode == EXIT_NORMAL && space == true) {
+        /* printmap */
+        result += fmt::sprintf("@D------------------------------[@CRadar@D]---------------------------------@n\r\n");
+        result += printMap(viewer, 1, -1);
+        result += fmt::sprintf("     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
+        result += fmt::sprintf("@D------------------------------------------------------------------------@n\r\n");
+    }
+    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == false && viewer->getRoom() != this)) {
+        result += fmt::sprintf("@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
+        
+        bool admVision = viewer->checkFlag(FlagType::Admin, ADM_SEESECRET);
+
+        std::map<int, char*> dlists = {
+                {0, dlist2},
+                {1, dlist4},
+                {2, dlist6},
+                {3, dlist8},
+                {4, dlist9},
+                {5, dlist10},
+                {6, dlist1},
+                {7, dlist3},
+                {8, dlist5},
+                {9, dlist7},
+                {10, dlist11},
+                {11, dlist12}
+        };
+
+        auto exits = getExits();
+        auto has_light = viewer->isProvidingLight();
+        auto nightvision = viewer->canSeeInDark();
+
+        for (auto &[door, d] : exits) {
+            auto dest = d->getDestination();
+            if(!dest) continue;
+            auto dl = dlists[door];
+
+            auto al = d->getAlias();
+
+            if (admVision) {
+                /* Immortals see everything */
+                door_found++;
+                char blam[9];
+                sprintf(blam, "%s", dirs[door]);
+                *blam = toupper(*blam);
+
+                auto dirname = dirs[door];
+                auto rdirname = dirs[rev_dir[door]];
+
+
+                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->getUID(), dest->getDisplayName(viewer).c_str());
+                if (d->checkFlag(FlagType::Exit, EX_ISDOOR) || d->checkFlag(FlagType::Exit, EX_SECRET)) {
+                    /* This exit has a door - tell all about it */
+                    char argh[100];
+                    sprintf(argh, "%s ",
+                            strcasecmp(fname(al.c_str()), "undefined") ? fname(
+                                    al.c_str()) : "opening");
+                    sprintf(dl + strlen(dl), "                    The %s%s %s %s %s%s.\r\n",
+                            d->checkFlag(FlagType::Exit, EX_SECRET) ?
+                            "@rsecret@w " : "",
+                            (al.c_str() && strcasecmp(fname(al.c_str()), "undefined")) ?
+                            fname(al.c_str()) : "opening",
+                            strstr(argh, "s ") != nullptr ? "are" : "is",
+                            d->checkFlag(FlagType::Exit, EX_CLOSED) ?
+                            "closed" : "open",
+                            d->checkFlag(FlagType::Exit, EX_LOCKED) ?
+                            "and locked" : "and unlocked",
+                            d->checkFlag(FlagType::Exit, EX_PICKPROOF) ?
+                            " (pickproof)" : "");
+                }
+            }
+            else { /* This is what mortal characters see */
+                if (!d->checkFlag(FlagType::Exit, EX_CLOSED)) {
+                    /* And the door is open */
+                    door_found++;
+                    char blam[9];
+                    sprintf(blam, "%s", dirs[door]);
+                    *blam = toupper(*blam);
+
+                    sprintf(dl, "@c%-9s @D-@w %s\r\n", blam,
+                            IS_DARK(dest->getUID()) && !nightvision && !has_light
+                            ? "@bToo dark to tell.@w" : dest->getDisplayName(viewer).c_str());
+
+                } else if (CONFIG_DISP_CLOSED_DOORS && !d->checkFlag(FlagType::Exit, EX_SECRET)) {
+                    /* But we tell them the door is closed */
+                    door_found++;
+                    char blam[9];
+                    sprintf(blam, "%s", dirs[door]);
+                    *blam = toupper(*blam);
+                    if (door == 6) {
+
+                    }
+                    sprintf(dl, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam,
+                            (al.c_str()) ? fname(al.c_str())
+                                         : "opening");
+                }
+            }
+        }
+
+        if (!door_found)
+            result += fmt::sprintf(" None.\r\n");
+        if (strstr(dlist1, "Northwest")) {
+            result += fmt::sprintf("%s", dlist1);
+            *dlist1 = '\0';
+        }
+        if (strstr(dlist2, "North")) {
+            result += fmt::sprintf("%s", dlist2);
+            *dlist2 = '\0';
+        }
+        if (strstr(dlist3, "Northeast")) {
+            result += fmt::sprintf("%s", dlist3);
+            *dlist3 = '\0';
+        }
+        if (strstr(dlist4, "East")) {
+            result += fmt::sprintf("%s", dlist4);
+            *dlist4 = '\0';
+        }
+        if (strstr(dlist5, "Southeast")) {
+            result += fmt::sprintf("%s", dlist5);
+            *dlist5 = '\0';
+        }
+        if (strstr(dlist6, "South")) {
+            result += fmt::sprintf("%s", dlist6);
+            *dlist6 = '\0';
+        }
+        if (strstr(dlist7, "Southwest")) {
+            result += fmt::sprintf("%s", dlist7);
+            *dlist7 = '\0';
+        }
+        if (strstr(dlist8, "West")) {
+            result += fmt::sprintf("%s", dlist8);
+            *dlist8 = '\0';
+        }
+        if (strstr(dlist9, "Up")) {
+            result += fmt::sprintf("%s", dlist9);
+            *dlist9 = '\0';
+        }
+        if (strstr(dlist10, "Down")) {
+            result += fmt::sprintf("%s", dlist10);
+            *dlist10 = '\0';
+        }
+        if (strstr(dlist11, "Inside")) {
+            result += fmt::sprintf("%s", dlist11);
+            *dlist11 = '\0';
+        }
+        if (strstr(dlist12, "Outside")) {
+            result += fmt::sprintf("%s", dlist12);
+            *dlist12 = '\0';
+        }
+        
+        result += fmt::sprintf("@D------------------------------------------------------------------------@n\r\n");
+    }
+    return result;
+}
+
+
+std::string Room::renderExits2(GameEntity* viewer) {
+    int door, slen = 0;
+    std::string result;
+    result += fmt::snprintf("\nExits: ");
+
+    for (auto &[door, d] : room->getExits()) {
+
+        auto dest = d->getDestination();
+        if(!dest) continue;
+        if (d->checkFlag(FlagType::Exit, EX_CLOSED))
+            continue;
+
+        result += fmt::snprintf("%s ", abbr_dirs[door]);
+        slen++;
+    }
+
+    result += fmt::snprintf("%s\r\n", slen ? "" : "None!");
+    return result;
+}
+
+
 static void do_auto_exits2(Room *room, BaseCharacter *ch) {
     int door, slen = 0;
 
@@ -3582,11 +4675,32 @@ static void do_auto_exits2(Room *room, BaseCharacter *ch) {
 }
 
 ACMD(do_exits) {
+    if (IS_AFFECTED(ch, AFF_BLIND)) {
+        ch->sendf("You can't see a damned thing, you're blind!\r\n");
+        return;
+    }
+    if (PLR_FLAGGED(ch, PLR_EYEC)) {
+        ch->sendf("You can't see a damned thing, your eyes are closed!\r\n");
+        return;
+    }
+    auto loc = ch->getRoom();
+    if(!loc) {
+        ch->sendf("You are in the void.\r\n");
+        return;
+    }
+
+    if(!ch->canSeeInDark()) {
+        if(loc->isInsideDark()) {
+            ch->sendf("It is pitch black...\r\n");
+            return;
+        }
+    }
+
     /* Why duplicate code? */
     if (!PRF_FLAGGED(ch, PRF_NODEC)) {
-        do_auto_exits(ch->getRoom(), ch, EXIT_COMPLETE);
+        ch->sendLine(loc->renderExits1(ch));
     } else {
-        do_auto_exits2(ch->getRoom(), ch);
+        ch->sendLine(loc->renderExits2(ch));
     }
 }
 
@@ -3672,6 +4786,7 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
             while(parent) {
                 ancestors.emplace_back(fmt::format("[{}] {}@n", parent->getUID(), parent->getDisplayName(ch)));
                 parent = parent->getLocation();
+                if(parent == rm) break;
             }
             // Reverse areas.
             std::reverse(ancestors.begin(), ancestors.end());
@@ -3886,6 +5001,253 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
     list_obj_to_char(rm->getInventory(), ch, SHOW_OBJ_LONG, false);
     list_char_to_char(rm->getPeople(), ch);
 }
+
+
+
+std::string Room::renderLocationFor(GameEntity *viewer) {
+    std::string result;
+    
+    auto sunk = isSunken();
+    auto nodec = viewer->checkFlag(FlagType::Pref, PRF_NODEC);
+    double grav = getEnvVar(EnvVar::Gravity);
+
+    if (viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) {
+        char buf[MAX_STRING_LENGTH];
+        char buf2[MAX_STRING_LENGTH];
+        char buf3[MAX_STRING_LENGTH];
+
+        sprintf(buf, "%s", join(getFlagNames(FlagType::Room), " ").c_str());
+        sprinttype(sector_type, sector_types, buf2, sizeof(buf2));
+        if (!nodec) {
+            result += "\r\n@wO----------------------------------------------------------------------O@n\r\n";
+        }
+
+        result += fmt::sprintf("@wLocation: @G%-70s@w\r\n", getDisplayName(viewer));
+        if (!script->dgScripts.empty()) {
+            result += fmt::sprintf("@D[@GTriggers");
+            for (auto t : script->dgScripts)
+                result += fmt::sprintf(" %d", GET_TRIG_VNUM(t));
+            result += fmt::sprintf("@D] ");
+        }
+        if(auto parent = getLocation(); parent) {
+            std::vector<std::string> ancestors;
+            while(parent) {
+                ancestors.emplace_back(fmt::format("[{}] {}@n", parent->getUID(), parent->getDisplayName(viewer)));
+                parent = parent->getLocation();
+                if(parent == this) break;
+            }
+            // Reverse areas.
+            std::reverse(ancestors.begin(), ancestors.end());
+            auto joined = join(ancestors, " -> ");
+            result += fmt::sprintf("@wArea: @D[@n %s @D]@n\r\n", joined.c_str());
+        }
+        
+        auto g = fmt::format("{}", grav);
+        sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2,
+                getUID(), g.c_str());
+        result += fmt::sprintf("@wFlags: %-70s@w\r\n", buf3);
+        if (!nodec) {
+            result += fmt::sprintf("@wO----------------------------------------------------------------------O@n\r\n");
+        }
+    } else {
+        if (!nodec) {
+            result += fmt::sprintf("@wO----------------------------------------------------------------------O@n\r\n");
+        }
+        result += fmt::sprintf("@wLocation: %-70s@n\r\n", getDisplayName(viewer));
+        if(auto planet = getPlanet(); planet) {
+            result += fmt::sprintf("@wPlanet: @G%s@n\r\n", planet->getDisplayName(viewer));
+        } else {
+            if (checkFlag(FlagType::Room, ROOM_NEO)) {
+                result += fmt::sprintf("@wPlanet: @WNeo Nirvana@n\r\n");
+            } else if (checkFlag(FlagType::Room, ROOM_AL)) {
+                result += fmt::sprintf("@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
+            } else if (checkFlag(FlagType::Room, ROOM_HELL)) {
+                result += fmt::sprintf("@wDimension: @RPunishment Hell@n\r\n");
+            } else if (checkFlag(FlagType::Room, ROOM_RHELL)) {
+                result += fmt::sprintf("@wDimension: @RH@re@Dl@Rl@n\r\n");
+            }
+        }
+
+        if(grav <= 1.0) {
+            result += fmt::sprintf("@wGravity: @WNormal@n\r\n");
+        } else {
+            auto g = fmt::format("{}", grav);
+            result += fmt::sprintf("@wGravity: @W%sx@n\r\n", g.c_str());
+        }
+        if (checkFlag(FlagType::Room, ROOM_REGEN)) {
+            result += fmt::sprintf("@CA feeling of calm and relaxation fills this room.@n\r\n");
+        }
+        if (checkFlag(FlagType::Room, ROOM_AURA)) {
+            result += fmt::sprintf("@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
+        }
+        if (checkFlag(FlagType::Room, ROOM_HBTC)) {
+            result += fmt::sprintf("@rThis room feels like it opperates in a different time frame.@n\r\n");
+        }
+        if (!nodec) {
+            result += fmt::sprintf("@wO----------------------------------------------------------------------O@n\r\n");
+        }
+    }
+    
+    auto dmg = getDamage();
+
+    if ((!viewer->checkFlag(FlagType::Pref, PRF_BRIEF)) || checkFlag(FlagType::Room, ROOM_DEATH)) {
+        if (dmg <= 99) {
+            result += fmt::sprintf("@w%s@n",getLookDesc());
+        }
+        if (dmg == 100 &&
+            (sector_type == SECT_WATER_SWIM || sunk || sector_type == SECT_FLYING ||
+             sector_type == SECT_SHOP || sector_type == SECT_IMPORTANT)) {
+            result += fmt::sprintf("@w%s@n", getLookDesc());
+        }
+        if (sector_type == SECT_INSIDE && dmg > 0) {
+            result += fmt::sprintf("\r\n");
+            if (dmg <= 2) {
+                result += fmt::sprintf("@wA small hole with chunks of debris that can be seen scarring the floor.@n");
+            } else if (dmg <= 4) {
+                result += fmt::sprintf("@wA couple small holes with chunks of debris that can be seen scarring the floor.@n");
+            } else if (dmg <= 6) {
+                result += fmt::sprintf("@wA few small holes with chunks of debris that can be seen scarring the floor.@n");
+            } else if (dmg <= 10) {
+                result += fmt::sprintf(
+                             "@wThere are several small holes with chunks of debris that can be seen scarring the floor.@n");
+            } else if (dmg <= 20) {
+                result += fmt::sprintf("@wMany holes fill the floor of this area, many of which have burn marks.@n");
+            } else if (dmg <= 30) {
+                result += fmt::sprintf("@wThe floor is severely damaged with many large holes.@n");
+            } else if (dmg <= 50) {
+                result += fmt::sprintf(
+                             "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
+            } else if (dmg <= 75) {
+                result += fmt::sprintf("@wThis entire area is falling apart, it has been damaged so badly.@n");
+            } else if (dmg <= 99) {
+                result += fmt::sprintf(
+                             "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
+            } else if (dmg >= 100) {
+                result += fmt::sprintf(
+                             "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
+            }
+            result += fmt::sprintf("\r\n");
+        } else if (
+                (sector_type == SECT_CITY || sector_type == SECT_FIELD || sector_type == SECT_HILLS ||
+                 sector_type == SECT_IMPORTANT) && dmg > 0) {
+            result += fmt::sprintf("\r\n");
+            if (dmg <= 2) {
+                result += fmt::sprintf("@wA small hole with chunks of debris that can be seen scarring the ground.@n");
+            } else if (dmg <= 4) {
+                result += fmt::sprintf(
+                             "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n");
+            } else if (dmg <= 6) {
+                result += fmt::sprintf("@wA few small craters with chunks of debris that can be seen scarring the ground.@n");
+            } else if (dmg <= 10) {
+                result += fmt::sprintf(
+                             "@wThere are several small craters with chunks of debris that can be seen scarring the ground.@n");
+            } else if (dmg <= 20) {
+                result += fmt::sprintf("@wMany craters fill the ground of this area, many of which have burn marks.@n");
+            } else if (dmg <= 30) {
+                result += fmt::sprintf("@wThe ground is severely damaged with many large craters.@n");
+            } else if (dmg <= 50) {
+                result += fmt::sprintf(
+                             "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
+            } else if (dmg <= 75) {
+                result += fmt::sprintf("@wThis entire area is falling apart, it has been damaged so badly.@n");
+            } else if (dmg <= 99) {
+                result += fmt::sprintf(
+                             "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
+            } else if (dmg >= 100) {
+                result += fmt::sprintf(
+                             "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
+            }
+            result += fmt::sprintf("\r\n");
+        } else if (sector_type == SECT_FOREST && dmg > 0) {
+            result += fmt::sprintf("\r\n");
+            if (dmg <= 2) {
+                result += fmt::sprintf("@wA small tree sits in a little crater here.@n");
+            } else if (dmg <= 4) {
+                result += fmt::sprintf("@wTrees have been uprooted by craters in the ground.@n");
+            } else if (dmg <= 6) {
+                result += fmt::sprintf(
+                             "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n");
+            } else if (dmg <= 10) {
+                result += fmt::sprintf("@wA large patch of trees have been destroyed and are laying in craters here.@n");
+            } else if (dmg <= 20) {
+                result += fmt::sprintf("@wSeveral craters have merged into one large crater in one part of this forest.@n");
+            } else if (dmg <= 30) {
+                result += fmt::sprintf(
+                             "@wThe open sky can easily be seen through a hole of trees destroyed\r\nand resting at the bottom of several craters here.@n");
+            } else if (dmg <= 50) {
+                result += fmt::sprintf(
+                             "@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n");
+            } else if (dmg <= 75) {
+                result += fmt::sprintf(
+                             "@wVery few trees are left standing in this area, replaced instead by large craters.@n");
+            } else if (dmg <= 99) {
+                result += fmt::sprintf(
+                             "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n");
+            } else if (dmg >= 100) {
+                result += fmt::sprintf(
+                             "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n");
+            }
+            result += fmt::sprintf("\r\n");
+        } else if (sector_type == SECT_MOUNTAIN && dmg > 0) {
+            result += fmt::sprintf("\r\n");
+            
+            if (dmg <= 2) {
+                result += fmt::sprintf("@wA small crater has been burned into the side of this mountain.@n");
+            } else if (dmg <= 4) {
+                result += fmt::sprintf("@wA couple craters have been burned into the side of this mountain.@n");
+            } else if (dmg <= 6) {
+                result += fmt::sprintf(
+                             "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n");
+            } else if (dmg <= 10) {
+                result += fmt::sprintf("@wSeveral bad craters can be seen in the side of the mountain here.@n");
+            } else if (dmg <= 20) {
+                result += fmt::sprintf(
+                             "@wLarge boulders have rolled down the mountain side and collected in many nearby craters.@n");
+            } else if (dmg <= 30) {
+                result += fmt::sprintf("@wMany craters are covering the mountainside here.@n");
+            } else if (dmg <= 50) {
+                result += fmt::sprintf(
+                             "@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n");
+            } else if (dmg <= 75) {
+                result += fmt::sprintf("@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n");
+            } else if (dmg <= 99) {
+                result += fmt::sprintf(
+                             "@wThe mountain side here has completely collapsed, shedding dangerous rubble down to its base.@n");
+            } else if (dmg >= 100) {
+                result += fmt::sprintf(
+                             "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n");
+            }
+            result += fmt::sprintf("\r\n");
+        }
+        if (geffect >= 1 && geffect <= 5) {
+            result += fmt::sprintf("@rLava@w is pooling in someplaces here...@n\r\n");
+        }
+        if (geffect >= 6) {
+            result += fmt::sprintf("@RLava@r covers pretty much the entire area!@n\r\n");
+        }
+        if (geffect < 0) {
+            result += fmt::sprintf("@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n\r\n");
+        }
+    }
+
+    if(auto exstr = nodec ? renderExits1(viewer) : renderExits2(viewer); !exstr.empty()) result += exstr;
+
+    std::vector<std::string> contentLines;
+    for(auto c : getContents()) {
+        if(c == viewer) continue;
+        if(c->getFamily() == UnitFamily::Exit) continue;
+        if(viewer->canSee(c)) continue;
+        contentLines.emplace_back(c->renderRoomListingFor(viewer));
+    }
+    if(!contentLines.empty()) {
+        auto joined = join(contentLines, "\r\n");
+        result += fmt::sprintf("@wYou can see:@n\r\n%s@n\r\n", joined.c_str());
+    }
+
+    return result;
+}
+
+
 
 static void look_in_direction(BaseCharacter *ch, int dir) {
     auto r = ch->getRoom();

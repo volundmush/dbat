@@ -2024,6 +2024,24 @@ std::string PlayerCharacter::getUnitClass() {
 }
 
 void BaseCharacter::lookAtLocation() {
+    if (GET_POS(this) < POS_SLEEPING)
+    {
+        sendf("You can't see anything but stars!\r\n");
+        return;
+    }
+
+    if (AFF_FLAGGED(this, AFF_BLIND))
+    {
+        sendf("You can't see a damned thing, you're blind!\r\n");
+        return;
+    }
+
+    if (PLR_FLAGGED(this, PLR_EYEC)) {
+        sendf("You can't see a damned thing, your eyes are closed!\r\n");
+        return;
+    }
+    
+    
     auto r = getRoom();
     if(!r) return;
     look_at_room(r, this, 0);

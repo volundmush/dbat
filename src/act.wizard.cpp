@@ -1011,6 +1011,10 @@ ACMD(do_goto) {
     }
 
     auto r = getWorld<Room>(location);
+    if(!r) {
+        ch->sendf("That room does not exist.\r\n");
+        return;
+    }
 
     snprintf(buf, sizeof(buf), "$n %s", POOFOUT(ch) ? POOFOUT(ch) : "disappears in a puff of smoke.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);

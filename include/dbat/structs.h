@@ -451,10 +451,20 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     // Look at location.
     virtual void lookAtLocation();
     // The business part of the above.
-    //virtual Event renderLocationFor(GameEntity* u);
+    virtual std::string renderLocationFor(GameEntity* viewer);
+    virtual std::string renderListingFor(GameEntity* viewer);
 
-    //virtual std::string renderRoomListFor(GameEntity* u, bool statuses = false);
+    // The prefix is used for many listings so it's split off.
+    virtual std::string renderListPrefixFor(GameEntity* viewer);
+
+    // The RoomListingHelper renders the 'room description' for a room listing.
+    virtual std::string renderRoomListingHelper(GameEntity* viewer);
+
+    // Although this is virtual, it shouldn't normally need to be overriden.
+    virtual std::string renderRoomListingFor(GameEntity* viewer);
     //virtual std::string renderContentsListFor(GameEntity* u);
+
+    virtual std::string renderModifiers(GameEntity* viewer);
 
     void activateContents();
     void deactivateContents();
@@ -619,10 +629,9 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 
 /* ================== Memory Structure for Objects ================== */
 struct Object : public GameEntity {
-    Object() = default;
-    virtual ~Object();
-    explicit Object(const nlohmann::json& j);
-
+    using GameEntity::GameEntity;
+    ~Object() override;
+    
     void extractFromWorld() override;
 
     UnitFamily getFamily() override;
@@ -633,6 +642,9 @@ struct Object : public GameEntity {
     void deserializeRelations(const nlohmann::json& j) override;
     void deserialize(const nlohmann::json& j) override;
 
+    std::string renderRoomListingHelper(GameEntity* u) override;
+    std::string renderListPrefixFor(GameEntity* viewer) override;
+    std::string renderModifiers(GameEntity* viewer);
 
     void activate();
 
@@ -700,9 +712,32 @@ struct Object : public GameEntity {
 };
 /* ======================================================================= */
 
+// Type: ITEM_PLANT should always use this.
+struct Plant : public Object {
+    using Object::Object;
+
+    std::string getUnitClass() override;
+    std::string renderRoomListingHelper(GameEntity* u) override;
+};
+
+// Type: Vnum 11 alyways...
+struct GravityGenerator : public Object {
+    using Object::Object;
+
+    std::string getUnitClass() override;
+    std::string renderRoomListingHelper(GameEntity* u) override;
+};
+
+struct GlacialWall : public Object {
+    using Object::Object;
+
+    std::string getUnitClass() override;
+    std::string renderRoomListingHelper(GameEntity* u) override;
+};
+
+
 struct Structure : public Object {
-    Structure() = default;
-    explicit Structure(const nlohmann::json& j);
+    using Object::Object;
 
     //void extractFromWorld() override;
 
@@ -715,6 +750,11 @@ struct Structure : public Object {
 
     bool isEnvironment() override;
     bool isStructure() override;
+};
+
+// Type: ITEM_VEHICLE should always use this.
+struct Vehicle : public Structure {
+    using Structure::Structure;
 };
 
 
@@ -783,6 +823,12 @@ struct Room : public GameEntity {
 
     bool isActive() override;
 
+    std::string renderLocationFor(GameEntity* u) override;
+
+    std::string renderExits1(GameEntity* u);
+    std::string renderExits2(GameEntity* u);
+    std::string generateMap(GameEntity* viewer, int num);
+    std::string printMap(GameEntity* viewer, int type, int64_t vnum)
     std::optional<room_vnum> getLaunchDestination();
 
     MoonCheck checkMoon();
@@ -955,6 +1001,8 @@ struct BaseCharacter : public GameEntity {
     void deserializeRelations(const nlohmann::json& j) override;
 
     std::vector<std::string> baseKeywordsFor(GameEntity* looker);
+
+    virtual std::string renderRoomListName(GameEntity* looker) = 0;
 
     virtual bool isPC() = 0;
     virtual bool isNPC() = 0;

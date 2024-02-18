@@ -60,7 +60,7 @@ int checkship(int rnum, int vnum) {
     return there;
 }
 
-char *getmapchar(int rnum, BaseCharacter *ch, int start, int vnum) {
+char *getmapchar(int rnum, GameEntity *ch, int start, int vnum) {
     static char mapchar[50];
     int there = false, enemy = false;
 
@@ -71,16 +71,7 @@ char *getmapchar(int rnum, BaseCharacter *ch, int start, int vnum) {
         enemy = true;
     }
 
-    if (rnum == real_room(GET_RADAR1(ch)) || rnum == real_room(GET_RADAR2(ch)) || rnum == real_room(GET_RADAR3(ch))) {
-        if (there) {
-            sprintf(mapchar, "@WB@RX");
-        } else if (enemy == true) {
-            sprintf(mapchar, "@WB@r#");
-        } else {
-            sprintf(mapchar, "@WBB");
-        }
-    } /* End Buoy */
-    else if (ROOM_FLAGGED(rnum, ROOM_EORBIT)) {
+    if (ROOM_FLAGGED(rnum, ROOM_EORBIT)) {
         if (there) {
             sprintf(mapchar, "@GE@RX");
         } else if (enemy == true) {
@@ -271,6 +262,130 @@ MapStruct findcoord(int rnum) {
 
     basic_mud_log("SYSERR: findcoord for non-map rnum");
     return coords;
+}
+
+std::string Room::printMap(GameEntity *viewer, int type, int vnum) {
+    int x = 0, lasty = -1;
+    int y = 0;
+    int sightradius;
+    int count = 0, initline = 0;
+    char buf[MAX_STRING_LENGTH * 2];
+    char buf2[512];
+    MapStruct coord;
+
+    int start = rnum;
+
+    coord = findcoord(rnum);
+    strcpy(buf, "\n");
+    if (type == 0) {
+        sightradius = 12;
+    } else {
+        sightradius = 4;
+    }
+
+    if (type == 0) {
+        ch->sendf("@b______________________________________________________________________@n\n");
+    }
+
+    for (y = coord.y - sightradius; y <= coord.y + sightradius; y++) {
+        if (type == 0) {
+            if (count == initline) {
+                strcat(buf, "@b     [@CR. Key@b]     | ");
+            } else if (count == initline + 1) {
+                strcat(buf, "@GEE@D:@w Earth@b         | ");
+            } else if (count == initline + 2) {
+                strcat(buf, "@gNN@D:@w Namek@b         | ");
+            } else if (count == initline + 3) {
+                strcat(buf, "@YVV@D:@w Vegeta@b        | ");
+            } else if (count == initline + 4) {
+                strcat(buf, "@CFF@D:@w Frigid@b        | ");
+            } else if (count == initline + 5) {
+                strcat(buf, "@mKK@D:@w Konack@b        | ");
+            } else if (count == initline + 6) {
+                strcat(buf, "@BAA@D:@w Aether@b        | ");
+            } else if (count == initline + 7) {
+                strcat(buf, "@MYY@D:@w Yardrat@b       | ");
+            } else if (count == initline + 8) {
+                strcat(buf, "@CKK@D:@w Kanassa@b       | ");
+            } else if (count == initline + 9) {
+                strcat(buf, "@mAA@D:@w Arlia@b         | ");
+            } else if (count == initline + 10) {
+                strcat(buf, "@cZZ@D:@w Zenith@b        | ");
+            } else if (count == initline + 11) {
+                strcat(buf, "@MCC@D:@w Cerria@b        | ");
+            } else if (count == initline + 12) {
+                strcat(buf, "@WBB@D:@w Buoy@b          | ");
+            } else if (count == initline + 13) {
+                strcat(buf, "@m&&@D:@w Nebula@b        | ");
+            } else if (count == initline + 14) {
+                strcat(buf, "@yQQ@D:@w Asteroid@b      | ");
+            } else if (count == initline + 15) {
+                strcat(buf, "@y::@D:@w Asteroid Field@b| ");
+            } else if (count == initline + 16) {
+                strcat(buf, "@b@1**@n@D:@w Wormhole@b      | ");
+            } else if (count == initline + 17) {
+                strcat(buf, "@DSS@D:@w S. Station@b    | ");
+            } else if (count == initline + 18) {
+                strcat(buf, " @r#@D:@w Unknown Ship@b  | ");
+            } else if (count == initline + 19) {
+                strcat(buf, "@6  @n@D:@w Star@b          | ");
+            } else {
+                strcat(buf, "                  @b| ");
+            }
+            count++;
+        } else {
+            if (count == 0) {
+                strcat(buf, "      @RCompass@n           ");
+            } else if (count == 2) {
+                sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(rnum, 0) ? " @CN " : "   "));
+                strcat(buf, buf2);
+            } else if (count == 3) {
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 6) ? " @CNW" : "   "),
+                        (W_EXIT(rnum, 4) ? " @YU " : "   "), (W_EXIT(rnum, 7) ? "@CNE " : "   "));
+                strcat(buf, buf2);
+            } else if (count == 4) {
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 3) ? "  @CW" : "   "),
+                        (W_EXIT(rnum, 10) ? "@m I " : (W_EXIT(rnum, 11) ? "@mOUT" : "   ")),
+                        (W_EXIT(rnum, 1) ? "@CE  " : "   "));
+                strcat(buf, buf2);
+            } else if (count == 5) {
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 9) ? " @CSW" : "   "),
+                        (W_EXIT(rnum, 5) ? " @YD " : "   "), (W_EXIT(rnum, 8) ? "@CSE " : "   "));
+                strcat(buf, buf2);
+            } else if (count == 6) {
+                sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(rnum, 2) ? " @CS " : "   "));
+                strcat(buf, buf2);
+            } else {
+                strcat(buf, "                        ");
+            }
+            count++;
+        }
+        for (x = coord.x - sightradius; x <= coord.x + sightradius; x++) {
+            if (x == coord.x && y == coord.y) {
+                strcat(buf, getmapchar(mapnums[y][x], viewer, start, vnum));
+            } else if (x > MAP_COLS || x < 0) {
+                if (lasty != true && y > -1 && y < 200) {
+                    strcat(buf, "@D?");
+                    lasty = true;
+                }
+            } else if (y > MAP_ROWS || y < 0) {
+                if (y == -1 || y == 200) {
+                    strcat(buf, "@D??");
+                }
+            } else
+                strcat(buf, getmapchar(mapnums[y][x], viewer, start, vnum));
+        }
+        strcat(buf, "\n");
+        lasty = false;
+    }
+    
+    std::string result(buf);
+    *buf2 = '\0';
+    *buf = '\0';
+    if (type == 0) {
+        result += "\n@b______________________________________________________________________@n";
+    }
+    return result;
 }
 
 void printmap(int rnum, BaseCharacter *ch, int type, int vnum) {

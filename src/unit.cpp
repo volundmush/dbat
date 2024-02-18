@@ -259,7 +259,7 @@ void GameEntity::setAlias(const std::string& n) {
 
 std::string GameEntity::getShortDesc() {
     if(auto found = strings.find("short_description"); found != strings.end()) return found->second->get();
-    return "";
+    return getName();
 }
 
 void GameEntity::setShortDesc(const std::string& n) {
@@ -268,7 +268,7 @@ void GameEntity::setShortDesc(const std::string& n) {
 
 std::string GameEntity::getRoomDesc() {
     if(auto found = strings.find("room_description"); found != strings.end()) return found->second->get();
-    return "";
+    return getName();
 }
 
 void GameEntity::setRoomDesc(const std::string& n) {
@@ -298,6 +298,10 @@ std::string GameEntity::getDisplayName(GameEntity* ch) {
 
 std::string GameEntity::renderAppearance(GameEntity* ch) {
     return "You see nothing special.";
+}
+
+std::string GameEntity::renderRoomListingHelper(GameEntity* viewer) {
+    return getRoomDesc();
 }
 
 std::vector<std::string> GameEntity::getKeywords(GameEntity* ch) {

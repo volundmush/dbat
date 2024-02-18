@@ -2454,6 +2454,7 @@ void migrate_grid() {
     pearth.type = ITEM_CELESTIAL_BODY;
     pearth.location = getWorld(50);
     auto planet_earth = assembleArea(pearth);
+    getWorld(50)->addToLocation(space);
 
     AreaDef pvegeta;
     pvegeta.name = "@YVegeta@n";
@@ -2461,54 +2462,63 @@ void migrate_grid() {
     pvegeta.location = getWorld(53);
     pvegeta.envVars[EnvVar::Gravity] = 10.0;
     auto planet_vegeta = assembleArea(pvegeta);
+    getWorld(53)->addToLocation(space);
 
     AreaDef pfrigid;
     pfrigid.name = "@CFrigid@n";
     pfrigid.type = ITEM_CELESTIAL_BODY;
     pfrigid.location = getWorld(51);
     auto planet_frigid = assembleArea(pfrigid);
+    getWorld(51)->addToLocation(space);
 
     AreaDef pnamek;
     pnamek.name = "@gNamek@n";
     pnamek.type = ITEM_CELESTIAL_BODY;
     pnamek.location = getWorld(54);
     auto planet_namek = assembleArea(pnamek);
+    getWorld(54)->addToLocation(space);
 
     AreaDef pkonack;
     pkonack.name = "@MKonack@n";
     pkonack.type = ITEM_CELESTIAL_BODY;
     pkonack.location = getWorld(52);
     auto planet_konack = assembleArea(pkonack);
+    getWorld(52)->addToLocation(space);
 
     AreaDef paether;
     paether.name = "@MAether@n";
     paether.type = ITEM_CELESTIAL_BODY;
     paether.location = getWorld(55);
     auto planet_aether = assembleArea(paether);
+    getWorld(55)->addToLocation(space);
 
     AreaDef pyardrat;
     pyardrat.name = "@mYardrat@n";
     pyardrat.type = ITEM_CELESTIAL_BODY;
     pyardrat.location = getWorld(56);
     auto planet_yardrat = assembleArea(pyardrat);
+    getWorld(56)->addToLocation(space);
 
     AreaDef pkanassa;
     pkanassa.name = "@BKanassa@n";
     pkanassa.type = ITEM_CELESTIAL_BODY;
     pkanassa.location = getWorld(58);
     auto planet_kanassa = assembleArea(pkanassa);
+    getWorld(58)->addToLocation(space);
 
     AreaDef pcerria;
     pcerria.name = "@RCerria@n";
     pcerria.type = ITEM_CELESTIAL_BODY;
     pcerria.location = getWorld(198);
     auto planet_cerria = assembleArea(pcerria);
+    getWorld(198)->addToLocation(space);
 
     AreaDef parlia;
     parlia.name = "@GArlia@n";
     parlia.type = ITEM_CELESTIAL_BODY;
     parlia.location = getWorld(59);
     auto planet_arlia = assembleArea(parlia);
+    getWorld(59)->addToLocation(space);
 
     AreaDef pzenith;
     pzenith.name = "@BZenith@n";
@@ -2519,6 +2529,7 @@ void migrate_grid() {
         auto a = areaObjects[name];
         a->addToLocation(moon_zenith);
     }
+    getWorld(57)->addToLocation(space);
 
 
     AreaDef ucdef;
@@ -2811,8 +2822,8 @@ void migrate_grid() {
 
         for(auto &[rflag, a] : planetMap) {
             if(auto loc = room->getLocation(); loc) {
-                if(loc->checkFlag(FlagType::Structure, rflag)) {
-                    a->addToLocation(loc);
+                if(room->checkFlag(FlagType::Room, rflag)) {
+                    loc->addToLocation(a);
                     break;
                 }
             }
@@ -3442,15 +3453,6 @@ void migrate_grid() {
         pdim.envVars[EnvVar::Gravity] = 1000.0;
         auto pd = assembleArea(pdim);
     }
-
-    AreaDef misc;
-    misc.name = "Miscellaneous";
-    for(auto &[rv, u] : world) {
-        if(auto room = dynamic_cast<Room*>(u); room && !room->location) {
-            misc.roomIDs.insert(rv);
-        }
-    }
-    auto misc_area = assembleArea(misc);
 
     for(auto r : {
         300, 800, 1150, 1180, 1287, 1428, 1456, 1506, 1636, 1710, 19510, 2141, 13020, // earth vnums

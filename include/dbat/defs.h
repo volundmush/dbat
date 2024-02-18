@@ -1120,7 +1120,7 @@ enum class FlagType : uint8_t {
 #define EXIT_NA         2       /* Not implemented - do not use     */
 #define EXIT_COMPLETE   3       /* Full display                     */
 
-#define exitlevel(ch) (!IS_NPC(ch) ? (PRF_FLAGGED((ch),PRF_AUTOEXIT) ? 1 : 0 ) + (PRF_FLAGGED((ch),PRF_FULL_EXIT) ? 2 : 0 ) : 0 )
+#define exitlevel(ch) ((ch)->checkFlag(FlagType::Pref, PRF_AUTOEXIT) ? 1 : 0 ) + ((ch)->checkFlag(FlagType::Pref, PRF_FULL_EXIT) ? 2 : 0)
 #define EXIT_LEV(ch) (exitlevel(ch))
 
 
