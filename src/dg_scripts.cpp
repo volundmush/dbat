@@ -478,9 +478,7 @@ char *str_str(char *cs, char *ct) {
 
 
 int trgvar_in_room(room_vnum vnum) {
-    auto u = world.find(vnum);
-    if(u == world.end()) return 0;
-    auto r = dynamic_cast<Room*>(u->second);
+    auto r = getWorld<Room>(vnum);
     if(!r) return 0;
     int i = 0;
 
@@ -777,7 +775,7 @@ Room *get_room(char *name) {
     else if ((nr = real_room(atoi(name))) == NOWHERE)
         return nullptr;
     else
-        return dynamic_cast<Room*>(world[nr]);
+        return getWorld<Room>(nr);
 }
 
 
@@ -873,7 +871,7 @@ Object *get_obj_by_obj(Object *obj, char *name) {
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
-        (i = get_obj_in_list(name, world[rm]->getInventory())))
+        (i = get_obj_in_list(name, getWorld<Room>(rm)->getInventory())))
         return i;
 
     return get_obj(name);
@@ -1246,13 +1244,15 @@ ACMD(do_attach) {
             rnum = find_target_room(ch, targ_name);
         else
             rnum = NOWHERE;
+        
+        auto room = getWorld<Room>(rnum);
 
-        if (rnum == NOWHERE) {
+        if (!room) {
             ch->sendf("You need to supply a room number or . for current room.\r\n");
             return;
         }
 
-        if (!can_edit_zone(ch, world[rnum]->zone)) {
+        if (!can_edit_zone(ch, room->zone)) {
             ch->sendf("You can only attach triggers in your own zone\r\n");
             return;
         }
@@ -1263,11 +1263,10 @@ ACMD(do_attach) {
             return;
         }
 
-        room = dynamic_cast<Room*>(world[rnum]);
         room->script->addTrigger(trig, loc);
 
         ch->sendf("Trigger %d (%s) attached to room %d.\r\n",
-                     tn, GET_TRIG_NAME(trig), world[rnum]->getVN());
+                     tn, GET_TRIG_NAME(trig), getWorld<Room>(rnum)->getVN());
     } else
         ch->sendf("Please specify 'mob', 'obj', or 'room'.\r\n");
 }

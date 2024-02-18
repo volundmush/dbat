@@ -460,7 +460,7 @@ BaseCharacter *get_char_room(char *name, int *number, room_rnum room) {
     if (*number == 0)
         return (nullptr);
 
-    for (auto i : dynamic_cast<Room*>(world[room])->getPeople())
+    for (auto i : getWorld<Room>(room)->getPeople())
         if (isname(name, i->getName().c_str()))
             if (--(*number) == 0)
                 return (i);
@@ -509,7 +509,7 @@ static void _obj_to_room(struct obj_data *object, Room *room) {
                 (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
                 int hnum = GET_OBJ_VAL(object, 0);
                 auto house = read_object(hnum, VIRTUAL);
-                house->addToLocation(world.at(GET_OBJ_VAL(object, 6)));
+                house->addToLocation(getWorld(GET_OBJ_VAL(object, 6)));
                 SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
                 SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
             }
@@ -522,7 +522,7 @@ static void _obj_to_room(struct obj_data *object, Room *room) {
                     if(!vehicle) {
                         basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
                     }
-                    vehicle->addToLocation(world.at(GET_OBJ_VAL(object, 3)));
+                    vehicle->addToLocation(getWorld(GET_OBJ_VAL(object, 3)));
                     if (auto ld = object->getLookDesc(); !ld.empty()) {
                         char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                             if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
@@ -554,14 +554,14 @@ static void _obj_to_room(struct obj_data *object, Room *room) {
         act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
         int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
         object->removeFromLocation();
-        object->addToLocation(world.at(numb));
+        object->addToLocation(getWorld(numb));
     }
     if (EXIT(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING &&
         (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
         act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
         int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
         object->removeFromLocation();
-        object->addToLocation(world.at(numb));
+        object->addToLocation(getWorld(numb));
         if (SECT(IN_ROOM(object)) != SECT_FLYING) {
             act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
         }

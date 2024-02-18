@@ -77,10 +77,20 @@ int64_t getNextUID() {
     while(world.contains(nextUID)) {
         nextUID++;
     }
-    return nextUID++;
+    return nextUID;
 }
 
-std::unordered_map<room_vnum, GameEntity*> world;    /* array of rooms		 */
+void setWorld(int64_t uid, GameEntity* entity) {
+    if(uid < 0) {
+        throw std::runtime_error("Invalid key");
+    }
+    if(world.contains(uid)) {
+        throw std::runtime_error("Key already exists!");
+    }
+    world[uid] = entity;
+}
+
+DebugMap<int64_t, GameEntity*> world;    /* array of rooms		 */
 std::unordered_set<GameEntity*> pendingDeletions;
 
 BaseCharacter *character_list = nullptr; /* global linked list of chars	 */
@@ -305,6 +315,7 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
         } else if(unitClass == "Structure") {
             u = new Structure(data);
         }
+        u->script = std::make_shared<script_data>(u);
 
         if(auto pc = dynamic_cast<PlayerCharacter*>(u); pc) {
             if(auto isPlayer = players.find(uid); isPlayer != players.end()) {
@@ -312,17 +323,15 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
             }
         }
 
-        world[uid] = u;
+        setWorld(uid, u);
     }
 }
 
 static void db_load_instances_finish(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "relations.json")) {
-        auto uid = j["uid"].get<int64_t>();
-        if(auto uf = world.find(uid); uf != world.end()) {
-            if(auto u = uf->second) {
-                u->deserializeRelations(j["relations"]);
-            }
+        auto uid = j[0].get<int64_t>();
+        if(auto u = getWorld(uid); u) {
+            u->deserializeRelations(j[1]);
         }
     }
 }
@@ -331,16 +340,7 @@ static void db_load_instances_finish(const std::filesystem::path& loc) {
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
     for(auto &[id, u] : world) {
-        auto r = dynamic_cast<Room*>(u);
-        if(!r) continue;
-        if(r->script) r->script->activate();
-        r->assignTriggers();
-        r->activateContents();
-        for(auto c : r->getPeople()) {
-            if(IS_NPC(c)) {
-                c->activate();
-            }
-        }
+        //u->activate();
     }
 }
 
@@ -352,6 +352,10 @@ static void db_load_globaldata(const std::filesystem::path& loc) {
     }
     if(j.contains("weather")) {
         weather_info.deserialize(j["weather"]);
+    }
+    if(j.contains("nextUID")) {
+        nextUID = j["nextUID"].get<int64_t>();
+    
     }
 }
 
@@ -446,20 +450,23 @@ void boot_db_world() {
 
     std::vector<std::thread> threads;
 
+    basic_mud_log("Loading accounts.");
+    db_load_accounts(latest);
+
     basic_mud_log("Loading global data...");
     threads.emplace_back([&latest] {
         db_load_globaldata(latest);
-    });
-
-    basic_mud_log("Loading accounts.");
-    threads.emplace_back([&latest] {
-        db_load_accounts(latest);
     });
 
     basic_mud_log("Loading player index...");
     threads.emplace_back([&latest] {
         db_load_players(latest);
     });
+
+    for(auto &t : threads) {
+        t.join();
+    }
+    threads.clear();
 
     basic_mud_log("Loading Zones...");
     threads.emplace_back([&latest] {
@@ -480,6 +487,11 @@ void boot_db_world() {
     threads.emplace_back([&latest] {
         db_load_item_prototypes(latest);
     });
+
+    for(auto &t : threads) {
+        t.join();
+    }
+    threads.clear();
 
     basic_mud_log("Loading shops.");
     threads.emplace_back([&latest] {
@@ -728,7 +740,7 @@ void auc_save() {
         basic_mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
     else {
 
-        for (auto obj : world[real_room(80)]->getInventory()) {
+        for (auto obj : getWorld<Room>(80)->getInventory()) {
             if (obj) {
                 fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->getUID(), GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
@@ -1186,7 +1198,7 @@ BaseCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->deserialize(proto->second);
     
     mob->uid = getNextUID();
-    world[mob->getUID()] = mob;
+    setWorld(mob->getUID(), mob);
     mob->activate();
 
     std::map<CharAppearance, int> setNumsTo;
@@ -1735,7 +1747,7 @@ Object *create_obj(bool activate) {
     if(activate) {
         obj->uid = getNextUID();
         obj->checkMyID();
-        world[obj->getUID()] = obj;
+        setWorld(obj->getUID(), obj);
         obj->activate();
     }
 
@@ -1774,7 +1786,7 @@ Object *read_object(obj_vnum nr, int type, bool activate) /* and obj_rnum */
     }
     if(activate) {
         obj->uid = getNextUID();
-        world[obj->getUID()] = obj;
+        setWorld(obj->getUID(), obj);
         obj->activate();
     }
     return (obj);
@@ -1829,7 +1841,7 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
 
 /* execute the reset command table of a given zone */
 void reset_zone(zone_rnum zone) {
-    int cmd_no, last_cmd = 0;
+    int cmd_no = -1, last_cmd = 0;
     BaseCharacter *mob = nullptr;
     Object *obj, *obj_to;
     room_vnum rvnum;
@@ -1847,6 +1859,7 @@ void reset_zone(zone_rnum zone) {
     if (pre_reset(z.number) == false) {
 
         for (auto &c : z.cmd) {
+            cmd_no++;
             if(c.command == 'S') break;
 
             if (c.if_flag && !last_cmd && !mob_load && !obj_load)
@@ -1901,7 +1914,7 @@ void reset_zone(zone_rnum zone) {
                         mob = read_mobile(c.arg1, REAL);
                         /*  Set the mobs loadroom for room_max checks. */
                         MOB_LOADROOM(mob) = c.arg3;
-                        mob->addToLocation(world.at(c.arg3));
+                        mob->addToLocation(getWorld(c.arg3));
 
                         load_mtrigger(mob);
                         tmob = mob;
@@ -1955,7 +1968,7 @@ void reset_zone(zone_rnum zone) {
                         }
 
                         obj = read_object(c.arg1, REAL);
-                        obj->addToLocation(world.at(c.arg3));
+                        obj->addToLocation(getWorld(c.arg3));
                         /* Set the loadroom for room_max checks */
                         OBJ_LOADROOM(obj) = c.arg3;
 
@@ -2037,7 +2050,7 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'R': /* rem obj from room */
-                    if ((obj = world[c.arg1]->findObjectVnum(c.arg2)) != nullptr)
+                    if ((obj = getWorld(c.arg1)->findObjectVnum(c.arg2)) != nullptr)
                         obj->extractFromWorld();
                     last_cmd = 1;
                     tmob = nullptr;
@@ -2047,19 +2060,19 @@ void reset_zone(zone_rnum zone) {
 
                 case 'D':            /* set state of door */
                     {
-                    auto u = world.find(c.arg1);
-                    if(u == world.end()) {
+                    auto room = getWorld<Room>(c.arg1);
+                    if(!room) {
                         ZONE_ERROR("room does not exist, command disabled");
                         c.command = '*';
                         break;
                     }
 
-                    auto exits = room->second->getExits();
+                    auto exits = room->getExits();
                     auto ex = exits[c.arg2];
             
-                    auto room = dynamic_cast<Room*>(u->second);
+                    
                     if (c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
-                        (ex == nullptr)) {
+                        (!ex)) {
                         ZONE_ERROR("room or door does not exist, command disabled");
                         c.command = '*';
                     } else
@@ -2125,10 +2138,10 @@ void reset_zone(zone_rnum zone) {
                         if (!world.count(c.arg3)) {
                             ZONE_ERROR("Invalid room number in variable assignment");
                         } else {
-                            if (!(world[c.arg3]->script)) {
+                            if (!(getWorld(c.arg3)->script)) {
                                 ZONE_ERROR("Attempt to give variable to scriptless object");
                             } else
-                                world[c.arg3]->script->addVar(c.sarg1, c.sarg2);
+                                getWorld(c.arg3)->script->addVar(c.sarg1, c.sarg2);
                             last_cmd = 1;
                         }
                     }
@@ -2149,9 +2162,7 @@ void reset_zone(zone_rnum zone) {
         /* handle reset_wtrigger's */
 
         for(auto &rvnum : z.rooms) {
-            auto u = world.find(rvnum);
-            if(u == world.end()) continue;
-            auto room = dynamic_cast<Room*>(u->second);
+            auto room = getWorld<Room>(rvnum);
             if(!room) continue;
             rrnum = rvnum;
 
@@ -2902,8 +2913,7 @@ GameEntity* resolveUID(const std::string& uid) {
 
     if(auto found = world.find(id); found != world.end()) {
         auto u = found->second;
-        if(!active) return u;
-        if(u->isActive()) return u;
+        if(u->exists) return u;
     }
     return nullptr;
 }

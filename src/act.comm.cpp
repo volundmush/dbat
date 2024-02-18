@@ -496,9 +496,9 @@ ACMD(do_say) {
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
                                         wch->removeFromLocation();
                                         if (GET_DROOM(wch) > 0) {
-                                            wch->addToLocation(world.at(GET_DROOM(wch)));
+                                            wch->addToLocation(getWorld(GET_DROOM(wch)));
                                         } else {
-                                            wch->addToLocation(world.at(300));
+                                            wch->addToLocation(getWorld(300));
                                         }
                                         wch->lookAtLocation();
                                         wch->sendf(
@@ -532,7 +532,7 @@ ACMD(do_say) {
                                     }
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
                                         wch->removeFromLocation();
-                                        wch->addToLocation(world.at(GET_DROOM(wch)));
+                                        wch->addToLocation(getWorld(GET_DROOM(wch)));
                                         wch->lookAtLocation();
                                         wch->sendf(
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -543,7 +543,7 @@ ACMD(do_say) {
                                     }
                                     if (real_room(GET_DROOM(wch2)) != NOWHERE) {
                                         wch2->removeFromLocation();
-                                        wch2->addToLocation(world.at(GET_DROOM(wch2)));
+                                        wch2->addToLocation(getWorld(GET_DROOM(wch2)));
                                         wch2->lookAtLocation();
                                         wch2->sendf(
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -582,7 +582,7 @@ ACMD(do_say) {
                                     }
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
                                         wch->removeFromLocation();
-                                        wch->addToLocation(world.at(GET_DROOM(wch)));
+                                        wch->addToLocation(getWorld(GET_DROOM(wch)));
                                         wch->lookAtLocation();
                                         wch->sendf(
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -593,7 +593,7 @@ ACMD(do_say) {
                                     }
                                     if (real_room(GET_DROOM(wch2)) != NOWHERE) {
                                         wch2->removeFromLocation();
-                                        wch2->addToLocation(world.at(GET_DROOM(wch2)));
+                                        wch2->addToLocation(getWorld(GET_DROOM(wch2)));
                                         wch2->lookAtLocation();
                                         wch2->sendf(
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
@@ -604,7 +604,7 @@ ACMD(do_say) {
                                     }
                                     if (real_room(GET_DROOM(wch3)) != NOWHERE) {
                                         wch3->removeFromLocation();
-                                        wch3->addToLocation(world.at(GET_DROOM(wch3)));
+                                        wch3->addToLocation(getWorld(GET_DROOM(wch3)));
                                         wch3->lookAtLocation();
                                         wch3->sendf(
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");

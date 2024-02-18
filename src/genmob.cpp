@@ -174,8 +174,6 @@ nlohmann::json BaseCharacter::serialize() {
     if(freeze_level) j["freeze_level"] = freeze_level;
     if(invis_level) j["invis_level"] = invis_level;
     if(wimp_level) j["wimp_level"] = wimp_level;
-    if(world.contains(load_room)) j["load_room"] = load_room;
-    if(world.contains(hometown)) j["hometown"] = hometown;
 
     for(auto &[skill_id, s] : skill) {
         auto sk = s.serialize();
@@ -588,6 +586,9 @@ player_data::player_data(const nlohmann::json &j) {
     if(j.contains("account")) {
         auto accID = j["account"].get<vnum>();
         if(auto accFind = accounts.find(accID); accFind != accounts.end()) account = accFind->second;
+        else {
+            basic_mud_log("Player data found with invalid account ID.");
+        }
     }
 
     if(j.contains("aliases")) {

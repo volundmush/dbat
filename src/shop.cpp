@@ -1199,7 +1199,7 @@ static void list_detailed_shop(BaseCharacter *ch, vnum shop_nr) {
             column += 2;
         }
         if(world.contains(r)) {
-            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[r]->getName().c_str(), r);
+            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", getWorld<Room>(r)->getName().c_str(), r);
         } else {
             linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", r);
         }

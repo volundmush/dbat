@@ -334,7 +334,7 @@ WCMD(do_wdoor) {
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->destination = dynamic_cast<Room*>(world.at(to_room));
+                    newexit->destination = getWorld<Room>(to_room);
                 else
                     wld_log(room, "wdoor: invalid door target");
                 break;
@@ -362,7 +362,7 @@ WCMD(do_wteleport) {
         wld_log(room, "wteleport target is an invalid room");
         return;
     }
-    auto r = dynamic_cast<Room*>(world.at(target));
+    auto r = getWorld<Room>(target);
 
     if (!strcasecmp(arg1, "all")) {
         if (nr == room->getUID()) {
@@ -502,7 +502,7 @@ WCMD(do_wload) {
             wld_log(room, "mload: bad mob vnum");
             return;
         }
-        mob->addToLocation(world.at(rnum));
+        mob->addToLocation(getWorld(rnum));
         if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
             room->script->addVar("lastloaded", mob);
         }
@@ -600,12 +600,13 @@ WCMD(do_wat) {
         loc = IN_ROOM(ch);
     }
 
-    if (loc == NOWHERE) {
+    auto r = getWorld<Room>(loc);
+    if (!r) {
         wld_log(room, "wat: location not found (%s)", arg);
         return;
     }
 
-    wld_command_interpreter(dynamic_cast<Room*>(world[loc]), command);
+    wld_command_interpreter(room, command);
 }
 
 const struct wld_command_info wld_cmd_info[] = {

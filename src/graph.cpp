@@ -177,7 +177,7 @@ ACMD(do_sradar) {
 
     auto find = planetLocations.find(argstr);
     if(find != planetLocations.end()) {
-        dir = find_first_step(startRoom, dynamic_cast<Room*>(world[find->second]));
+        dir = find_first_step(startRoom, getWorld<Room>(find->second));
         sprintf(planet, "%s", argstr.c_str());
     } else {
         if(!strcasecmp(arg, "buoy1")) {

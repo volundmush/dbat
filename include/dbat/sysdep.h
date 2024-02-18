@@ -205,3 +205,27 @@ public:
 private:
     std::string txt;
 };
+
+template <typename Key, typename T>
+class DebugMap : public std::unordered_map<Key, T> {
+public:
+    T& operator[](const Key& key) {
+        if (key < 0) {
+            throw std::runtime_error("Invalid key");
+        }
+        return std::unordered_map<Key, T>::operator[](key);
+    }
+};
+
+extern DebugMap<int64_t, GameEntity*> world;
+
+template<typename T = GameEntity>
+T* getWorld(int64_t uid) {
+    auto it = world.find(uid);
+    if (it != world.end()) {
+        return dynamic_cast<T*>(it->second);
+    }
+    return nullptr;
+}
+
+extern void setWorld(int64_t uid, GameEntity* entity);

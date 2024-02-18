@@ -96,8 +96,7 @@ int num_players_in_room(room_vnum room) {
 }
 
 bool check_mob_in_room(mob_vnum mob, room_vnum room) {
-    if(auto u = world.find(room); u != world.end()) {
-        auto r = dynamic_cast<Room*>(u->second);
+    if(auto r = getWorld<Room>(room); r) {
         for(auto i : r->getPeople()) {
             if(i->getVN() == mob) return true;
         }
@@ -112,7 +111,7 @@ bool check_obj_in_room(obj_vnum obj, room_vnum room) {
 
     r_room = real_room(room);
     if(r_room == NOWHERE) return false;
-    return world.at(r_room)->findObjectVnum(obj) != nullptr;
+    return getWorld(r_room)->findObjectVnum(obj) != nullptr;
 }
 
 static const int gauntlet_info[][3] = {  /* --mystic 26 Oct 2005 */
@@ -202,7 +201,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
         if (FIGHTING(ch)) {
             /* OK, player has had enough - position is already stored, so throw them back to the start */
             ch->removeFromLocation();
-            ch->addToLocation(world[real_room(gauntlet_info[0][1])]);
+            ch->addToLocation(getWorld<Room>(gauntlet_info[0][1]));
             act("$n suddenly appears looking relieved after $s trial in the Gauntlet", false, ch, nullptr, ch,
                 TO_NOTVICT);
             act("You are returned to the start of the Gauntlet", false, ch, nullptr, ch, TO_VICT);
@@ -239,7 +238,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
                     nomob = true;
 
                     /* Check the next room for players and ensure mob is waiting */
-                    for (auto tch : dynamic_cast<Room*>(world[real_room(gauntlet_info[i + 1][1])])->getPeople()) {
+                    for (auto tch : getWorld<Room>(gauntlet_info[i + 1][1])->getPeople()) {
                         if (!IS_NPC(tch)) {
                             proceed = 0;  /* There is a player there */
                             sprintf(buf, "%s is in the next room.  You must wait for them to finish.\r\n",
@@ -309,7 +308,7 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[EXIT(ch, (cmd - 1))->destination->getUID()]->getVN() == gauntlet_info[i][1]) {
+        if (getWorld(EXIT(ch, (cmd - 1))->destination->getUID())->getVN() == gauntlet_info[i][1]) {
             ch->sendf("You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
@@ -357,11 +356,11 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
             if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
                 continue;
 
-            if ((world[EXIT(ch, door)->destination->getUID()]->getVN() == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if ((getWorld<Room>(EXIT(ch, door)->destination->getUID())->getVN() == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
-                for (auto tch : dynamic_cast<Room*>(world[real_room(gauntlet_info[i][1])])->getPeople()) {
+                for (auto tch : getWorld<Room>(gauntlet_info[i][1])->getPeople()) {
                     if (!IS_NPC(tch)) {
                         proceed = 0;  /* There is a player there */
                         sprintf(buf, "%s has moved into the next room.  You must wait for them to finish.\r\n",
@@ -429,7 +428,7 @@ SPECIAL(pet_shops) {
 
     if (CMD_IS("list")) {
         ch->sendf("Available pets are:\r\n");
-        for (auto pet : dynamic_cast<Room*>(world[pet_room])->getPeople()) {
+        for (auto pet : getWorld<Room>(pet_room)->getPeople()) {
             /* No, you can't have the Implementor as a pet if he's in there. */
             if (!IS_NPC(pet))
                 continue;
@@ -487,7 +486,7 @@ SPECIAL(auction) {
 
     if (CMD_IS("cancel")) {
 
-        for (auto obj : world[auct_room]->getInventory()) {
+        for (auto obj : getWorld<Room>(auct_room)->getInventory()) {
             if (obj && GET_AUCTER(obj) == ((ch)->getUID())) {
                 obj2 = obj;
                 found = true;
@@ -535,7 +534,7 @@ SPECIAL(auction) {
         struct descriptor_data *d;
         int founded = false;
 
-        for (auto obj : world[auct_room]->getInventory()) {
+        for (auto obj : getWorld<Room>(auct_room)->getInventory()) {
             if (obj && GET_CURBID(obj) == ((ch)->getUID())) {
                 obj2 = obj;
                 found = true;
@@ -649,7 +648,7 @@ SPECIAL(auction) {
         GET_AUCTIME(obj2) = time(nullptr);
         GET_CURBID(obj2) = -1;
         obj2->removeFromLocation();
-        obj2->addToLocation(world.at(auct_room));
+        obj2->addToLocation(getWorld(auct_room));
         auc_save();
         ch->sendf("You place %s on auction for %s zenni.\r\n", obj2->getShortDesc(),
                      add_commas(GET_BID(obj2)).c_str());

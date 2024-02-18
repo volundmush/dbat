@@ -552,10 +552,10 @@ ACMD(do_shuffle) {
     int total = count;
     for (auto obj2 : obj->getInventory()) {
         obj2->removeFromLocation();
-        obj2->addToLocation(world.at(48));
+        obj2->addToLocation(getWorld(48));
     }
     while (count > 0) {
-        for (auto obj2 : world[48]->getInventory()) {
+        for (auto obj2 : getWorld(48)->getInventory()) {
             if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
                 continue;
             }
@@ -799,7 +799,7 @@ ACMD(do_nickname) {
                         k->extractFromWorld();
                         int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
                         ship2->removeFromLocation();
-                        ship2->addToLocation(world.at(was_in));
+                        ship2->addToLocation(getWorld(was_in));
                     }
                 }
             }
@@ -1252,7 +1252,7 @@ static void bringdesc(BaseCharacter *ch, BaseCharacter *tch) {
 static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                           BaseCharacter *ch) {
 
-    auto room = dynamic_cast<Room*>(world[rnum]);
+    auto room = getWorld<Room>(rnum);
 
     for (auto &[door, d] : room->getExits()) {
         auto dest = d->getDestination();
@@ -3406,7 +3406,9 @@ static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
                 {11, dlist12}
         };
 
-        for (auto &[door, d] : room->getExits()) {
+        auto exits = room->getExits();
+
+        for (auto &[door, d] : exits) {
             auto dest = d->getDestination();
             if(!dest) continue;
             auto dl = dlists[door];
@@ -3625,7 +3627,7 @@ ACMD(do_autoexit) {
 }
 
 void look_at_room(room_rnum target_room, BaseCharacter *ch, int ignore_brief) {
-    auto rm = dynamic_cast<Room*>(world.at(target_room));
+    auto rm = getWorld<Room>(target_room);
     look_at_room(rm, ch, ignore_brief);
 }
 
@@ -3647,14 +3649,14 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
         ch->sendf("You can't see a damned thing, your eyes are closed!\r\n");
         return;
     }
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
+    if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
         char buf[MAX_STRING_LENGTH];
         char buf2[MAX_STRING_LENGTH];
         char buf3[MAX_STRING_LENGTH];
 
         sprintf(buf, "%s", join(rm->getFlagNames(FlagType::Room), " ").c_str());
         sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+        if (!PRF_FLAGGED(ch, PRF_NODEC)) {
             ch->sendf("\r\n@wO----------------------------------------------------------------------O@n\r\n");
         }
 
@@ -3665,9 +3667,8 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
                 ch->sendf(" %d", GET_TRIG_VNUM(t));
             ch->sendf("@D] ");
         }
-        if(rm->area) {
+        if(auto parent = rm->getLocation(); parent) {
             std::vector<std::string> ancestors;
-            auto parent = rm->getLocation();
             while(parent) {
                 ancestors.emplace_back(fmt::format("[{}] {}@n", parent->getUID(), parent->getDisplayName(ch)));
                 parent = parent->getLocation();
@@ -3867,9 +3868,9 @@ void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
         }
     }
     /* autoexits */
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NODEC))
+    if (PRF_FLAGGED(ch, PRF_NODEC))
         do_auto_exits2(rm, ch);
-    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
+    else
         do_auto_exits(rm, ch, EXIT_LEV(ch));
 
     /* now list characters & objects */
@@ -3955,7 +3956,7 @@ static void look_in_obj(BaseCharacter *ch, char *arg) {
                 ch->sendf("You see nothing but infinite darkness...\r\n");
             } else {
                 ch->sendf("After seconds of concentration you see the image of %s.\r\n",
-                             world[portal_dest]->getDisplayName(ch));
+                             getWorld<Room>(portal_dest)->getDisplayName(ch));
             }
         } else if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
             /* display the appropriate description from the list of descriptions
@@ -3979,7 +3980,7 @@ static void look_in_obj(BaseCharacter *ch, char *arg) {
             } else {
                 ch->sendf("You look inside and see:\r\n");
                 look_at_room(vehicle_inside, ch, 0);
-                //ch->sendEvent(world.at(vehicle_inside)->renderLocationFor(ch));
+                //ch->sendEvent(getWorld(vehicle_inside)->renderLocationFor(ch));
             }
         } else {
             ch->sendf("You cannot see inside that.\r\n");
@@ -4215,7 +4216,7 @@ static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
                             ch->sendf("@YSyntax@D: @CUnlock hatch\r\n");
                             ch->sendf("@YSyntax@D: @CLeave@n\r\n");
                         } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
-                            look_out_window(ch, obj->getDisplayName(ch).c_str());
+                            look_out_window(ch, (char*)obj->getDisplayName(ch).c_str());
                         }
 
                         if (GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
@@ -4312,7 +4313,7 @@ static void look_out_window(BaseCharacter *ch, char *arg) {
                 act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
             ch->sendf("You look outside and see:\r\n");
             look_at_room(target_room, ch, 0);
-            //ch->sendEvent(world.at(target_room)->renderLocationFor(ch));
+            //ch->sendEvent(getWorld(target_room)->renderLocationFor(ch));
         }
     }
 }

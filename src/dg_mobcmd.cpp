@@ -465,7 +465,7 @@ ACMD(do_mload) {
             mob_log(ch, "mload: bad mob vnum");
             return;
         }
-        mob->addToLocation(world.at(rnum));
+        mob->addToLocation(getWorld(rnum));
         if (SCRIPT(ch)) { /* It _should_ have, but it might be detached. */
             ch->script->addVar("lastloaded", mob);
         }
@@ -613,7 +613,7 @@ ACMD(do_mgoto) {
         return;
     }
 
-    auto r = dynamic_cast<Room*>(world.at(location));
+    auto r = getWorld<Room>(location);
 
     if (FIGHTING(ch))
         stop_fighting(ch);
@@ -651,7 +651,7 @@ ACMD(do_mat) {
 
     auto original = ch->getRoom();
     ch->removeFromLocation();
-    ch->addToLocation(world.at(location));
+    ch->addToLocation(getWorld(location));
     command_interpreter(ch, argument);
 
     /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
@@ -693,7 +693,7 @@ ACMD(do_mteleport) {
         return;
     }
 
-    auto r = dynamic_cast<Room*>(world.at(target));
+    auto r = getWorld<Room>(target);
 
     if (!strcasecmp(arg1, "all")) {
         if (r == ch->getRoom()) {
@@ -1132,7 +1132,7 @@ ACMD(do_mdoor) {
         if (!ex) {
             ex = new Exit();
             ex->uid = getNextUID();
-            world[ex->getUID()] = ex;
+            setWorld(ex->getUID(), ex);
             ex->script = std::make_shared<script_data>(ex);
         }
 
@@ -1153,7 +1153,7 @@ ACMD(do_mdoor) {
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    ex->destination = dynamic_cast<Room*>(world.at(to_room));
+                    ex->destination = getWorld<Room>(to_room);
                 else
                     mob_log(ch, "mdoor: invalid door target");
                 break;

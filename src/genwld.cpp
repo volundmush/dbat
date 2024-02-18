@@ -297,7 +297,7 @@ DgResults Room::dgCallMember(trig_data *trig, const std::string& member, const s
 }
 
 std::string Room::getUnitClass() {
-    return "room_data";
+    return "Room";
 }
 
 UnitFamily Room::getFamily() {
@@ -436,6 +436,15 @@ nlohmann::json Exit::serializeRelations() {
 
 void Exit::deserializeRelations(const nlohmann::json& j) {
     GameEntity::deserializeRelations(j);
+    if(j.contains("destination")) {
+        destination = dynamic_cast<Room*>(resolveUID(j["destination"].get<std::string>()));
+    }
+    if(j.contains("failroom")) {
+        failroom = dynamic_cast<Room*>(resolveUID(j["failroom"].get<std::string>()));
+    }
+    if(j.contains("totalfailroom")) {
+        totalfailroom = dynamic_cast<Room*>(resolveUID(j["totalfailroom"].get<std::string>()));
+    }
 }
 
 Exit::Exit(const nlohmann::json &j) : Exit() {

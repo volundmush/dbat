@@ -54,11 +54,16 @@
 
 #define HOUSE_NUM_FLAGS 7
 
-#define TOROOM(room, dir) (world[room].dir_option[dir] ? \
-world[room].dir_option[dir]->to_room : NOWHERE)
-
 
 static bool converting = false;
+
+struct TempExit {
+    room_vnum destination;
+    room_vnum failroom;
+    room_vnum totalfailroom;
+};
+
+std::unordered_map<int64_t, TempExit> temp_exits;
 
 static void parse_trigger(FILE *trig_f, trig_vnum nr) {
     int t[2], k, attach_type;
@@ -371,11 +376,14 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
 
-    auto r = world.at(room);
+    auto r = getWorld(room);
     
     auto d = new Exit();
     d->script = std::make_shared<script_data>(d);
     d->uid = getNextUID();
+    setWorld(d->uid, d);
+
+    auto &te = temp_exits[d->uid];
     
 
     if(auto b = fread_string(fl, buf2); b) {
@@ -412,7 +420,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
         for(auto i = 0; i < NUM_EXIT_FLAGS; i++) if(IS_SET(flags, i)) d->setFlag(FlagType::Exit, i);
         d->key = world.contains(t[1]) ? t[1] : NOTHING;
-        d->destination = dynamic_cast<Room*>(world.contains(t[2]) ? world.at(t[2]) : nullptr);
+        te.destination = t[2];
 
         if (retval == 3) {
             basic_mud_log("Converting world files to include DC add ons.");
@@ -422,8 +430,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = 0;
             d->failsavetype = 0;
             d->dcfailsave = 0;
-            d->failroom = nullptr;
-            d->totalfailroom = nullptr;
             if (bitsavetodisk) {
                 converting = true;
             }
@@ -454,8 +460,8 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->dcmove = t[6];
             d->failsavetype = t[7];
             d->dcfailsave = t[8];
-            d->failroom = dynamic_cast<Room*>(world.contains(t[9]) ? world.at(t[9]) : nullptr);
-            d->totalfailroom = dynamic_cast<Room*>(world.contains(t[10]) ? world.at(t[10]) : nullptr);
+            te.failroom = t[9];
+            te.totalfailroom = t[10];
         }
     }
 }
@@ -485,7 +491,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     }
     auto &z = zone_table[zone];
     auto r = new Room();
-    world[virtual_nr] = r;
+    setWorld(virtual_nr, r);
     z.rooms.insert(virtual_nr);
     r->script = std::make_shared<script_data>(r);
     r->zone = zone;
@@ -1331,6 +1337,8 @@ static void discrete_load(FILE *fl, int mode, char *filename) {
 
     const char *modes[] = {"world", "mob", "obj", "ZON", "SHP", "HLP", "trg"};
     /* modes positions correspond to DB_BOOT_xxx in db.h */
+
+    
 
     for (;;) {
         /*
@@ -2233,7 +2241,7 @@ static Structure* assembleArea(const AreaDef &def) {
     auto a = new Structure();
     a->script = std::make_shared<script_data>(a);
     a->uid = vn;
-    world[vn] = a;
+    setWorld(vn, a);
     a->setName(def.name);
     a->type_flag= def.type;
     a->flags[FlagType::Structure] = def.flags;
@@ -2272,9 +2280,7 @@ static Structure* assembleArea(const AreaDef &def) {
     basic_mud_log("Assembling Area: %s, Rooms: %d", def.name.c_str(), rooms.size());
 
     for(auto r : rooms) {
-        auto found = world.find(r);
-        if(found == world.end()) continue;
-        auto room = dynamic_cast<Room*>(found->second);
+        auto room = getWorld<Room>(r);
         if(!room) continue;
         if(room->location) continue;
         room->addToLocation(a);
@@ -2426,7 +2432,7 @@ void migrate_grid() {
     for(auto &[rv, u] : world) {
         auto room = dynamic_cast<Room*>(u);
         if(!room) continue;
-        if(room->area) continue;
+        if(room->location) continue;
         auto sense = sense_location_name(rv);
         if(sense != "Unknown.") {
             auto &area = areaDefs[sense];
@@ -2446,68 +2452,68 @@ void migrate_grid() {
     AreaDef pearth;
     pearth.name = "@GEarth@n";
     pearth.type = ITEM_CELESTIAL_BODY;
-    pearth.location = world.at(50);
+    pearth.location = getWorld(50);
     auto planet_earth = assembleArea(pearth);
 
     AreaDef pvegeta;
     pvegeta.name = "@YVegeta@n";
     pvegeta.type = ITEM_CELESTIAL_BODY;
-    pvegeta.location = world.at(53);
+    pvegeta.location = getWorld(53);
     pvegeta.envVars[EnvVar::Gravity] = 10.0;
     auto planet_vegeta = assembleArea(pvegeta);
 
     AreaDef pfrigid;
     pfrigid.name = "@CFrigid@n";
     pfrigid.type = ITEM_CELESTIAL_BODY;
-    pfrigid.location = world.at(51);
+    pfrigid.location = getWorld(51);
     auto planet_frigid = assembleArea(pfrigid);
 
     AreaDef pnamek;
     pnamek.name = "@gNamek@n";
     pnamek.type = ITEM_CELESTIAL_BODY;
-    pnamek.location = world.at(54);
+    pnamek.location = getWorld(54);
     auto planet_namek = assembleArea(pnamek);
 
     AreaDef pkonack;
     pkonack.name = "@MKonack@n";
     pkonack.type = ITEM_CELESTIAL_BODY;
-    pkonack.location = world.at(52);
+    pkonack.location = getWorld(52);
     auto planet_konack = assembleArea(pkonack);
 
     AreaDef paether;
     paether.name = "@MAether@n";
     paether.type = ITEM_CELESTIAL_BODY;
-    paether.location = world.at(55);
+    paether.location = getWorld(55);
     auto planet_aether = assembleArea(paether);
 
     AreaDef pyardrat;
     pyardrat.name = "@mYardrat@n";
     pyardrat.type = ITEM_CELESTIAL_BODY;
-    pyardrat.location = world.at(56);
+    pyardrat.location = getWorld(56);
     auto planet_yardrat = assembleArea(pyardrat);
 
     AreaDef pkanassa;
     pkanassa.name = "@BKanassa@n";
     pkanassa.type = ITEM_CELESTIAL_BODY;
-    pkanassa.location = world.at(58);
+    pkanassa.location = getWorld(58);
     auto planet_kanassa = assembleArea(pkanassa);
 
     AreaDef pcerria;
     pcerria.name = "@RCerria@n";
     pcerria.type = ITEM_CELESTIAL_BODY;
-    pcerria.location = world.at(198);
+    pcerria.location = getWorld(198);
     auto planet_cerria = assembleArea(pcerria);
 
     AreaDef parlia;
     parlia.name = "@GArlia@n";
     parlia.type = ITEM_CELESTIAL_BODY;
-    parlia.location = world.at(59);
+    parlia.location = getWorld(59);
     auto planet_arlia = assembleArea(parlia);
 
     AreaDef pzenith;
     pzenith.name = "@BZenith@n";
     pzenith.type = ITEM_CELESTIAL_BODY;
-    pzenith.location = world.at(57);
+    pzenith.location = getWorld(57);
     auto moon_zenith = assembleArea(pzenith);
     for(const auto& name : {"Ancient Castle", "Utatlan City", "Zenith Jungle"}) {
         auto a = areaObjects[name];
@@ -2804,11 +2810,11 @@ void migrate_grid() {
         if(!room) continue;
 
         for(auto &[rflag, a] : planetMap) {
-            if(!room->area) continue;
-            if(room->checkFlag(FlagType::Room, rflag)) {
-                auto avn = room->getLocation();
-                avn->addToLocation(a);
-                break;
+            if(auto loc = room->getLocation(); loc) {
+                if(loc->checkFlag(FlagType::Structure, rflag)) {
+                    a->addToLocation(loc);
+                    break;
+                }
             }
         }
     }
@@ -3339,7 +3345,7 @@ void migrate_grid() {
         sdata.name = data.name;
         sdata.roomIDs = data.vnums;
         sdata.type = ITEM_VEHICLE;
-        sdata.location = world.at(data.location ? data.location.value() : 16694);
+        sdata.location = getWorld(data.location ? data.location.value() : 16694);
         return assembleArea(sdata);
     };
 
@@ -3440,7 +3446,7 @@ void migrate_grid() {
     AreaDef misc;
     misc.name = "Miscellaneous";
     for(auto &[rv, u] : world) {
-        if(auto room = dynamic_cast<Room*>(u); room && !room->area) {
+        if(auto room = dynamic_cast<Room*>(u); room && !room->location) {
             misc.roomIDs.insert(rv);
         }
     }
@@ -3459,8 +3465,7 @@ void migrate_grid() {
         14904, 15655, // kanassa
         16009, 16544, 16600 // Arlia
     }) {
-        if(auto u = world.find(r); u != world.end()) {
-            auto room = dynamic_cast<Room*>(u->second);
+        if(auto room = getWorld<Room>(r) ; room) {
             room->setFlag(FlagType::Room, ROOM_LANDING);
         }
     }
@@ -3569,6 +3574,7 @@ void migrate_characters() {
 
     // The procedure we will use is: iterate through characterToAccount and attempt to load the character.
     // if we can load them, we'll convert them and bind them to the appropriate account.
+    auto room = getWorld<Room>(300);
 
     for(auto &[cname, accID] : characterToAccount) {
         auto ch = new PlayerCharacter();
@@ -3578,7 +3584,8 @@ void migrate_characters() {
             delete ch;
             continue;
         }
-        auto id = ch->getUID();
+        auto id = world.contains(ch->getUID()) ? getNextUID() : ch->getUID();
+        ch->uid = id;
         auto p = std::make_shared<player_data>();
         p->id = id;
         players[id] = p;
@@ -3590,84 +3597,12 @@ void migrate_characters() {
         p->account = a;
         a->adminLevel = std::max(a->adminLevel, GET_ADMLEVEL(ch));
         a->characters.emplace_back(id);
-        ch->location = world[ch->load_room];
-        ch->was_in_room = ch->load_room;
-        world[id] = ch;
+        ch->addToLocation(room);
+        setWorld(id, ch);
     }
 
-    // migrate sense files...
-    auto path = std::filesystem::current_path() / "sense";
-    if(!std::filesystem::exists(path)) {
-        basic_mud_log("No sense directory found, skipping account migration.");
-        return;
-    }
 
-    for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
-        if(p.path().extension() != ".sen") continue;
-
-        // use the file stem against findPlayer...
-        auto name = p.path().stem().string();
-        auto ch = findPlayer(name);
-        if(!ch) {
-            basic_mud_log("Error loading %s for sense migration.", name.c_str());
-            continue;
-        }
-        auto pa = players[ch->getUID()];
-        // The file contains a sequence of lines, with each line containing a number.
-		// The number is the vnum of a mobile the player's sensed.
-        // We will read each line and insert the vnum into the player's sensed list.
-        std::ifstream file(p.path());
-        std::string line;
-        while(std::getline(file, line)) {
-            try {
-                auto vnum = std::stoi(line);
-                if(mob_proto.contains(vnum)) pa->senseMemory.insert(vnum);
-            } catch(...) {
-                basic_mud_log("Error parsing %s for sense migration.", line.c_str());
-            }
-        }
-        file.close();
-    }
-
-    path = std::filesystem::current_path() / "intro";
-    if(!std::filesystem::exists(path)) {
-        basic_mud_log("No intro directory found, skipping intro migration.");
-        return;
-    }
-
-    for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
-        if(p.path().extension() != ".itr") continue;
-
-        // use the file stem against findPlayer...
-        auto name = p.path().stem().string();
-        auto ch = findPlayer(name);
-        if(!ch) {
-            basic_mud_log("Error loading %s for dub migration.", name.c_str());
-            continue;
-        }
-
-        auto pa = players[ch->getUID()];
-
-		// The file contains a series of lines.
-        // Each line looks like: <name> <dub>
-        // We will need to use findPlayer on name, and then save id->dub to ch->player_specials->dubNames.
-        // ignore if <name> == "Gibbles"
-
-        std::ifstream file(p.path());
-        std::string line;
-        while(std::getline(file, line)) {
-            auto pos = line.find(' ');
-            if(pos == std::string::npos) continue;
-            auto name = line.substr(0, pos);
-            auto dub = line.substr(pos + 1);
-            if(name == "Gibbles") continue;
-            auto pc = findPlayer(name);
-            if(!pc) continue;
-            pa->dubNames[pc->getUID()] = dub;
-        }
-    }
-
-    path = std::filesystem::current_path() / "plrvars";
+    auto path = std::filesystem::current_path() / "plrvars";
     if(!std::filesystem::exists(path)) {
         basic_mud_log("No intro directory found, skipping intro migration.");
         return;
@@ -3763,10 +3698,22 @@ void migrate_characters() {
     }
 }
 
+static void migrate_exits() {
+    for(auto &[uid, te] : temp_exits) {
+        if(auto e = getWorld<Exit>(uid);e) {
+            e->destination = getWorld<Room>(te.destination);
+            e->failroom = getWorld<Room>(te.failroom);
+            e->totalfailroom = getWorld<Room>(te.totalfailroom);
+        }
+
+    }
+}
+
 void migrate_db() {
     boot_db_legacy();
 
     migrate_grid();
+    migrate_exits();
 
     migrate_accounts();
 

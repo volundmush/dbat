@@ -95,9 +95,9 @@ void BaseCharacter::resurrect(ResurrectionMode mode) {
     // Send them to their starting room and have them 'look'.
     removeFromLocation();
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
-        addToLocation(world.at(GET_DROOM(this)));
+        addToLocation(getWorld(GET_DROOM(this)));
     } else {
-        addToLocation(world.at(sensei::getStartRoom(chclass)));
+        addToLocation(getWorld(sensei::getStartRoom(chclass)));
     }
     lookAtLocation();
 
@@ -174,7 +174,7 @@ void BaseCharacter::ghostify() {
 
 void BaseCharacter::teleport_to(IDXTYPE rnum) {
     removeFromLocation();
-    auto r = dynamic_cast<Room*>(world.at(rnum));
+    auto r = getWorld<Room>(rnum);
     addToLocation(r);
     lookAtLocation();
     update_pos(this);
@@ -1027,10 +1027,10 @@ void BaseCharacter::login() {
     }
     if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1 && GET_LOADROOM(this) != NOWHERE) {
         removeFromLocation();
-        addToLocation(world.at(GET_LOADROOM(this)));
+        addToLocation(getWorld(GET_LOADROOM(this)));
     } else if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1) {
         removeFromLocation();
-        addToLocation(world.at(300));
+        addToLocation(getWorld(300));
     } else {
         lookAtLocation();
     }
@@ -1971,10 +1971,10 @@ std::string PlayerCharacter::getDisplayName(GameEntity* looker) {
         }
         auto p = players[otherPC->getUID()];
         if(auto found = p->dubNames.find(getUID()); found != p->dubNames.end()) {
+            return found->second;
+        } else {
             auto raceName = juggleRaceName(false);
             return fmt::format("{} {}", AN(raceName.c_str()), raceName);
-        } else {
-            return found->second;
         }
         
     }

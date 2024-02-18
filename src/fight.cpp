@@ -2126,7 +2126,7 @@ void die(BaseCharacter *ch, BaseCharacter *killer) {
                 }
                 ch->removeFromLocation();
                 // God damned VNUMS.
-                ch->addToLocation(world.at(17875));
+                ch->addToLocation(getWorld(17875));
                 ch->decCurHealthPercent(1, 1);
                 ch->lookAtLocation();
                 final_combat_resolve(ch);

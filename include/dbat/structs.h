@@ -11,7 +11,7 @@
 
 #include "net.h"
 #include <type_traits> // For std::is_base_of
-extern std::unordered_map<room_vnum, GameEntity*> world;
+
 
 struct trig_data;
 
@@ -769,7 +769,6 @@ struct Room : public GameEntity {
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
     int geffect{};            /* Effect of ground destruction       */
-    std::optional<vnum> area;      /* Area number; empty for unassigned     */
 
     std::optional<double> gravity;
 

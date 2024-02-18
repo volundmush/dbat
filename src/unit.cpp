@@ -293,7 +293,7 @@ void GameEntity::checkMyID() {
 }
 
 std::string GameEntity::getDisplayName(GameEntity* ch) {
-    return "Nameless";
+    return getName();
 }
 
 std::string GameEntity::renderAppearance(GameEntity* ch) {
@@ -430,6 +430,14 @@ void GameEntity::addToLocation(GameEntity *u, int locationType, std::optional<co
         basic_mud_log("Attempted to add unit '%d: %s' to location, but location was already found.", uid, getName().c_str());
         return;
     }
+
+    if(auto c = dynamic_cast<BaseCharacter*>(this); c) {
+        auto r = dynamic_cast<Room*>(u);
+        if(!r) {
+            basic_mud_log("Whoah!");
+        }
+    }
+
     location = u;
     this->locationType = locationType;
     if(coords) this->coords = *coords;

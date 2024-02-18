@@ -739,7 +739,7 @@ ACMD(do_pack) {
                     }
                     money = 65000;
                     while (count < 4) {
-                        for (auto o : world[rnum]->getInventory())
+                        for (auto o : getWorld(rnum)->getInventory())
                             o->extractFromWorld();
                         count++;
                         rnum++;
@@ -748,7 +748,7 @@ ACMD(do_pack) {
                     rnum = rnum - 1;
                     money = 150000;
                     while (count < 4) {
-                        for (auto o : world[rnum]->getInventory())
+                        for (auto o : getWorld(rnum)->getInventory())
                             o->extractFromWorld();
                         count++;
                         rnum++;
@@ -757,7 +757,7 @@ ACMD(do_pack) {
                     rnum = rnum - 1;
                     money = 1000000;
                     while (count < 4) {
-                        for (auto o : world[rnum]->getInventory())
+                        for (auto o : getWorld(rnum)->getInventory())
                             o->extractFromWorld();
                         count++;
                         rnum++;
@@ -930,7 +930,7 @@ ACMD(do_deploy) {
     int final = rnum + 99;
 
     while (giveup == false && cont == false) {
-        for (auto obj3 : world[real_room(rnum)]->getInventory()) {
+        for (auto obj3 : getWorld(rnum)->getInventory()) {
             if (GET_OBJ_VNUM(obj3) == 18801) {
                 found = true;
             }
@@ -959,7 +959,7 @@ ACMD(do_deploy) {
         else
             GET_OBJ_VAL(door, 0) = 18802;
         GET_OBJ_VAL(door, 2) = rnum;
-        door->addToLocation(world.at(rnum));
+        door->addToLocation(getWorld(rnum));
         Object *key = read_object(rnum, VIRTUAL);
         key->addToLocation(ch);
         act("@WYou click the capsule and toss it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
@@ -967,7 +967,7 @@ ACMD(do_deploy) {
         act("@C$n@W clicks a capsule and then tosses it to the ground. A large cloud of smoke erupts from the capsule and after it clears a house is visible in its place!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         Object *foun = read_object(18803, VIRTUAL);
-        foun->addToLocation(world.at(rnum+1));
+        foun->addToLocation(getWorld(rnum+1));
         obj->extractFromWorld();
     } else {
         ch->sendf(
@@ -1226,7 +1226,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(20, VIRTUAL);
@@ -1236,18 +1236,18 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(20, VIRTUAL);
                     k->addToLocation(hunter);
                 } else {
                     k = read_object(20, VIRTUAL);
-                    k->addToLocation(world.at(room));
+                    k->addToLocation(getWorld(room));
                 }
             } else {
                 k = read_object(20, VIRTUAL);
-                k->addToLocation(world.at(room));
+                k->addToLocation(getWorld(room));
             }
             loaded = true;
         }
@@ -1275,7 +1275,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(21, VIRTUAL);
@@ -1285,18 +1285,18 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(21, VIRTUAL);
                     k->addToLocation(hunter);
                 } else {
                     k = read_object(21, VIRTUAL);
-                    k->addToLocation(world.at(room));
+                    k->addToLocation(getWorld(room));
                 }
             } else {
                 k = read_object(21, VIRTUAL);
-                k->addToLocation(world.at(room));
+                k->addToLocation(getWorld(room));
             }
             loaded = true;
         }
@@ -1324,7 +1324,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(22, VIRTUAL);
@@ -1334,18 +1334,18 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(22, VIRTUAL);
                     k->addToLocation(hunter);
                 } else {
                     k = read_object(22, VIRTUAL);
-                    k->addToLocation(world.at(room));
+                    k->addToLocation(getWorld(room));
                 }
             } else {
                 k = read_object(22, VIRTUAL);
-                k->addToLocation(world.at(room));
+                k->addToLocation(getWorld(room));
             }
             loaded = true;
         }
@@ -1373,7 +1373,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(23, VIRTUAL);
@@ -1383,18 +1383,18 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(23, VIRTUAL);
                     k->addToLocation(hunter);
                 } else {
                     k = read_object(23, VIRTUAL);
-                    k->addToLocation(world.at(room));
+                    k->addToLocation(getWorld(room));
                 }
             } else {
                 k = read_object(23, VIRTUAL);
-                k->addToLocation(world.at(room));
+                k->addToLocation(getWorld(room));
             }
             loaded = true;
         }
@@ -1422,7 +1422,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(24, VIRTUAL);
@@ -1432,18 +1432,18 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(24, VIRTUAL);
                     k->addToLocation(hunter);
                 } else {
                     k = read_object(24, VIRTUAL);
-                    k->addToLocation(world.at(room));
+                    k->addToLocation(getWorld(room));
                 }
             } else {
                 k = read_object(24, VIRTUAL);
-                k->addToLocation(world.at(room));
+                k->addToLocation(getWorld(room));
             }
             loaded = true;
         }
@@ -1471,7 +1471,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(25, VIRTUAL);
@@ -1481,18 +1481,18 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(25, VIRTUAL);
                     k->addToLocation(hunter);
                 } else {
                     k = read_object(25, VIRTUAL);
-                    k->addToLocation(world.at(room));
+                    k->addToLocation(getWorld(room));
                 }
             } else {
                 k = read_object(25, VIRTUAL);
-                k->addToLocation(world.at(room));
+                k->addToLocation(getWorld(room));
             }
             loaded = true;
         }
@@ -1520,7 +1520,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter1 = true;
                     DBALL_HUNTER1 = room;
                     k = read_object(26, VIRTUAL);
@@ -1530,18 +1530,18 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
                         return;
                     }
                     hunter = read_mobile(r_num, REAL);
-                    hunter->addToLocation(world.at(room));
+                    hunter->addToLocation(getWorld(room));
                     hunter2 = true;
                     DBALL_HUNTER2 = room;
                     k = read_object(26, VIRTUAL);
                     k->addToLocation(hunter);
                 } else {
                     k = read_object(26, VIRTUAL);
-                    k->addToLocation(world.at(room));
+                    k->addToLocation(getWorld(room));
                 }
             } else {
                 k = read_object(26, VIRTUAL);
-                k->addToLocation(world.at(room));
+                k->addToLocation(getWorld(room));
             }
             loaded = true;
         }
@@ -1658,7 +1658,7 @@ ACMD(do_bid) {
         ch->sendf("Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
         return;
     }
-    for (auto obj : world[auct_room]->getInventory()) {
+    for (auto obj : getWorld(auct_room)->getInventory()) {
         if (obj) {
             list++;
         }
@@ -1669,7 +1669,7 @@ ACMD(do_bid) {
     if (!strcasecmp(arg, "list")) {
         ch->sendf("@Y                                   Auction@n\r\n");
         ch->sendf("@c------------------------------------------------------------------------------@n\r\n");
-        for (auto obj : world[auct_room]->getInventory()) {
+        for (auto obj : getWorld(auct_room)->getInventory()) {
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {
                     continue;
@@ -1722,7 +1722,7 @@ ACMD(do_bid) {
             return;
         }
 
-        for (auto obj : world[auct_room]->getInventory()) {
+        for (auto obj : getWorld(auct_room)->getInventory()) {
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {
                     continue;
@@ -1826,7 +1826,7 @@ ACMD(do_bid) {
             return;
         }
 
-        for (auto obj : world[auct_room]->getInventory()) {
+        for (auto obj : getWorld(auct_room)->getInventory()) {
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {
                     continue;
@@ -2283,7 +2283,7 @@ static void perform_put(BaseCharacter *ch, Object *obj,
         if ((GET_OBJ_TYPE(cont) == ITEM_PORTAL) ||
             (GET_OBJ_TYPE(cont) == ITEM_VEHICLE)) {
             obj->removeFromLocation();
-            obj->addToLocation(world.at(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)));
+            obj->addToLocation(getWorld(GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY)));
             if (GET_OBJ_TYPE(cont) == ITEM_PORTAL) {
                 act("What? $U$p disappears from $P in a puff of smoke!",
                     true, ch, obj, cont, TO_ROOM);
@@ -2602,7 +2602,7 @@ static void perform_drop_gold(BaseCharacter *ch, int amount,
                 ch->sendf("You throw some zenni into the air where it disappears in a puff of smoke!\r\n");
                 act("$n throws some gold into the air where it disappears in a puff of smoke!",
                     false, ch, nullptr, nullptr, TO_ROOM);
-                obj->addToLocation(world.at(RDR));
+                obj->addToLocation(getWorld(RDR));
                 act("$p suddenly appears in a puff of orange smoke!", 0, nullptr, obj, nullptr, TO_ROOM);
             } else {
                 char buf[MAX_STRING_LENGTH];
@@ -2745,7 +2745,7 @@ static int perform_drop(BaseCharacter *ch, Object *obj,
             }
             return (0);
         case SCMD_DONATE:
-            obj->addToLocation(world.at(RDR));
+            obj->addToLocation(getWorld(RDR));
             act("$p suddenly appears in a puff a smoke!", false, nullptr, obj, nullptr, TO_ROOM);
             return (0);
         case SCMD_JUNK:

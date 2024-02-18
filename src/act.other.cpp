@@ -7032,49 +7032,49 @@ void load_shadow_dragons() {
     if (SHADOW_DRAGON1 > 0) {
         r_num = real_mobile(SHADOW_DRAGON1_VNUM);
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(world.at(SHADOW_DRAGON1));
+        mob->addToLocation(getWorld(SHADOW_DRAGON1));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON2 > 0) {
         r_num = real_mobile(SHADOW_DRAGON2_VNUM);
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(world.at(SHADOW_DRAGON2));
+        mob->addToLocation(getWorld(SHADOW_DRAGON2));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON3 > 0) {
         r_num = real_mobile(SHADOW_DRAGON3_VNUM);
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(world.at(SHADOW_DRAGON3));
+        mob->addToLocation(getWorld(SHADOW_DRAGON3));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON4 > 0) {
         r_num = real_mobile(SHADOW_DRAGON4_VNUM);
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(world.at(SHADOW_DRAGON4));
+        mob->addToLocation(getWorld(SHADOW_DRAGON4));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON5 > 0) {
         r_num = real_mobile(SHADOW_DRAGON5_VNUM);
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(world.at(SHADOW_DRAGON5));
+        mob->addToLocation(getWorld(SHADOW_DRAGON5));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON6 > 0) {
         r_num = real_mobile(SHADOW_DRAGON6_VNUM);
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(world.at(SHADOW_DRAGON6));
+        mob->addToLocation(getWorld(SHADOW_DRAGON6));
         mob = nullptr;
     }
 
     if (SHADOW_DRAGON7 > 0) {
         r_num = real_mobile(SHADOW_DRAGON7_VNUM);
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(world.at(SHADOW_DRAGON7));
+        mob->addToLocation(getWorld(SHADOW_DRAGON7));
     }
 
     save_mud_time(&time_info);
@@ -7100,7 +7100,7 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
                     send_to_room(real_room(DRAGONR),
                                  "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
                     EDRAGON->removeFromLocation();
-                    EDRAGON->addToLocation(world.at(DRAGONR));
+                    EDRAGON->addToLocation(getWorld(DRAGONR));
                     DRAGONC -= 1;
                     break;
                 case 285:
@@ -7295,37 +7295,37 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
 
             r_num = real_mobile(SHADOW_DRAGON1_VNUM);
             mob = read_mobile(r_num, REAL);
-            mob->addToLocation(world.at(SHADOW_DRAGON1));
+            mob->addToLocation(getWorld(SHADOW_DRAGON1));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON2_VNUM);
             mob = read_mobile(r_num, REAL);
-            mob->addToLocation(world.at(SHADOW_DRAGON2));
+            mob->addToLocation(getWorld(SHADOW_DRAGON2));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON3_VNUM);
             mob = read_mobile(r_num, REAL);
-            mob->addToLocation(world.at(SHADOW_DRAGON3));
+            mob->addToLocation(getWorld(SHADOW_DRAGON3));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON4_VNUM);
             mob = read_mobile(r_num, REAL);
-            mob->addToLocation(world.at(SHADOW_DRAGON4));
+            mob->addToLocation(getWorld(SHADOW_DRAGON4));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON5_VNUM);
             mob = read_mobile(r_num, REAL);
-            mob->addToLocation(world.at(SHADOW_DRAGON5));
+            mob->addToLocation(getWorld(SHADOW_DRAGON5));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON6_VNUM);
             mob = read_mobile(r_num, REAL);
-            mob->addToLocation(world.at(SHADOW_DRAGON6));
+            mob->addToLocation(getWorld(SHADOW_DRAGON6));
             mob = nullptr;
 
             r_num = real_mobile(SHADOW_DRAGON7_VNUM);
             mob = read_mobile(r_num, REAL);
-            mob->addToLocation(world.at(SHADOW_DRAGON7));
+            mob->addToLocation(getWorld(SHADOW_DRAGON7));
             mob = nullptr;
 
             extract_char(EDRAGON);
@@ -7364,7 +7364,7 @@ ACMD(do_summon) {
         send_to_imm("Shenron doesn't exist!");
         return;
     }
-    dragon->addToLocation(world.at(0));;
+    dragon->addToLocation(getWorld(0));;
 
     reveal_hiding(ch, 0);
     act("@WYou place the dragon balls on the ground and with both hands outstretched towards them you say '@CArise Eternal Dragon Shenron!@W'@n",
@@ -10828,7 +10828,7 @@ ACMD(do_resurrect) {
         rm = real_room(CONFIG_MORTAL_START);
 
     if (rm != NOWHERE) {
-        auto r = dynamic_cast<Room*>(world.at(rm));
+        auto r = getWorld<Room>(rm);
         ch->removeFromLocation();
         ch->addToLocation(r);
         ch->lookAtLocation();

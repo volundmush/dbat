@@ -59,7 +59,7 @@ void handle_teleport(BaseCharacter *ch, BaseCharacter *tar, int location) {
 
     if (location != 0) { /* Teleport to a particular room */
         ch->removeFromLocation();
-        ch->addToLocation(world.at(location));
+        ch->addToLocation(getWorld(location));
         success = true;
     } else if (tar != nullptr) { /* Teleport to a particular character */
         ch->removeFromLocation();
@@ -234,9 +234,8 @@ void carry_drop(BaseCharacter *ch, int type) {
 std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms) {
     std::vector<std::pair<room_vnum, std::string>> names;
     for(auto r : rooms) {
-        auto room = world.find(r);
-        if(room == world.end()) continue;
-        names.emplace_back(r, processColors(room->second->getDisplayName(nullptr), false, nullptr));
+        if(auto room = getWorld<Room>(r); room)
+        names.emplace_back(r, processColors(room->getDisplayName(nullptr), false, nullptr));
     }
 
     std::sort(names.begin(), names.end(), [](const std::pair<room_vnum, std::string>& a, const std::pair<room_vnum, std::string>& b) {
@@ -336,7 +335,7 @@ ACMD(do_land) {
         sprintf(sendback, "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", landName.c_str());
         act(sendback, true, ch, nullptr, nullptr, TO_ROOM);
         ch->removeFromLocation();
-        ch->addToLocation(world.at(landing));
+        ch->addToLocation(getWorld(landing));
         fly_planet(landing, "can be seen landing from space nearby!@n\r\n", ch);
         send_to_sense(1, "landing on the planet", ch);
         send_to_scouter("A powerlevel signal has been detected landing on the planet", ch, 0, 1);
@@ -796,7 +795,7 @@ int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check) {
     entry_memory_mtrigger(ch);
     if (!greet_mtrigger(ch, dir)) {
         ch->removeFromLocation();
-        ch->addToLocation(world.at(was_in));
+        ch->addToLocation(getWorld(was_in));
         ch->lookAtLocation();
     } else greet_memory_mtrigger(ch);
     if (willfall == true) {
@@ -1268,7 +1267,7 @@ static int do_simple_enter(BaseCharacter *ch, Object *obj, int need_specials_che
     }
 
     if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
-        num_pc_in_room((dynamic_cast<Room*>(world[dest_room]))) >= CONFIG_TUNNEL_SIZE) {
+        num_pc_in_room(getWorld<Room>(dest_room)) >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)
             ch->sendf("There isn't enough room for you to go there!\r\n");
         else
@@ -1294,13 +1293,13 @@ static int do_simple_enter(BaseCharacter *ch, Object *obj, int need_specials_che
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
     }
     ch->removeFromLocation();
-    ch->addToLocation(world.at(dest_room));
+    ch->addToLocation(getWorld(dest_room));
 
     /* move them first, then move them back if they aren't allowed to go. */
     /* see if an entry trigger disallows the move */
     if (!entry_mtrigger(ch)) {
         ch->removeFromLocation();
-        ch->addToLocation(world.at(was_in));
+        ch->addToLocation(getWorld(was_in));
         return 0;
     }
 
@@ -1376,7 +1375,7 @@ static int perform_enter_obj(BaseCharacter *ch, Object *obj, int need_specials_c
             if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099) {
                 BaseCharacter *tch, *next_v;
                 int filled = false;
-                for (auto tch : dynamic_cast<Room*>(world[real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))])->getPeople()) {
+                for (auto tch : getWorld<Room>(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->getPeople()) {
                     if (tch) {
                         filled = true;
                     }
@@ -1509,7 +1508,7 @@ static int do_simple_leave(BaseCharacter *ch, Object *obj, int need_specials_che
     }
 
     if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
-        num_pc_in_room((dynamic_cast<Room*>(world[dest_room]))) >= CONFIG_TUNNEL_SIZE) {
+        num_pc_in_room(getWorld<Room>(dest_room)) >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)
             ch->sendf("There isn't enough room for you to go there!\r\n");
         else
@@ -1529,13 +1528,13 @@ static int do_simple_leave(BaseCharacter *ch, Object *obj, int need_specials_che
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
     }
     ch->removeFromLocation();
-    ch->addToLocation(world.at(dest_room));
+    ch->addToLocation(getWorld(dest_room));
 
     /* move them first, then move them back if they aren't allowed to go. */
     /* see if an entry trigger disallows the move */
     if (!entry_mtrigger(ch)) {
         ch->removeFromLocation();
-        ch->addToLocation(world.at(was_in));
+        ch->addToLocation(getWorld(was_in));
         return 0;
     }
 
@@ -1664,10 +1663,10 @@ static void handle_fall(BaseCharacter *ch) {
     while (EXIT(ch, 5) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
         room = EXIT(ch, 5)->getDestination()->getUID();
         ch->removeFromLocation();
-        ch->addToLocation(world.at(room));
+        ch->addToLocation(getWorld(room));
         if (auto carry = CARRYING(ch); carry) {
             carry->removeFromLocation();
-            carry->addToLocation(world.at(room));
+            carry->addToLocation(getWorld(room));
         }
         if (!EXIT(ch, 5) || SECT(IN_ROOM(ch)) != SECT_FLYING) {
             act("@r$n slams into the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1859,7 +1858,7 @@ ACMD(do_fly) {
         act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->removeFromLocation();
-        ch->addToLocation(world.at(dest.value()));
+        ch->addToLocation(getWorld(dest.value()));
         if(planet) {
             act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
             TO_ROOM);

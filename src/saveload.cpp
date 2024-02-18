@@ -49,6 +49,7 @@ void dump_state_globalData(const std::filesystem::path &loc) {
 
     j["time"] = time_info.serialize();
     j["weather"] = weather_info.serialize();
+    j["nextUID"] = nextUID;
 
     dump_to_file(loc, "globaldata.json", j);
 }
@@ -70,7 +71,7 @@ static void process_dirty_relations(const std::filesystem::path &loc) {
     nlohmann::json relations;
 
     for(auto &[v, u] : world) {
-        relations.push_back(u->serializeRelations());
+        relations.push_back(std::make_pair(v, u->serializeRelations()));
     }
     dump_to_file(loc, "relations.json", relations);
 }

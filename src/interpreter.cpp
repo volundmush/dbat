@@ -1044,7 +1044,7 @@ void enter_player_game(struct descriptor_data *d) {
         load_room = real_room(CONFIG_FROZEN_START);
 
     d->character->activate();
-    d->character->addToLocation(world.at(load_room));
+    d->character->addToLocation(getWorld(load_room));
 
     /*load_char_pets(d->character);*/
     for (check = character_list; check; check = check->next)

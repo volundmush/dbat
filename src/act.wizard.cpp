@@ -737,7 +737,7 @@ ACMD(do_recall) {
         act("$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
         if (real_room(2) != NOWHERE) {
             ch->removeFromLocation();
-            ch->addToLocation(world.at(2));
+            ch->addToLocation(getWorld(2));
             ch->lookAtLocation();
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
@@ -946,7 +946,7 @@ room_rnum find_target_room(BaseCharacter *ch, char *rawroomstr) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_VICE)
         return (location);
 
-    rm = dynamic_cast<Room*>(world[location]);
+    rm = getWorld<Room>(location);
 
     if ((!can_edit_zone(ch, rm->zone) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
         && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
@@ -984,7 +984,7 @@ ACMD(do_at) {
 
     if ((location = find_target_room(ch, buf)) == NOWHERE)
         return;
-    auto r = world.at(location);
+    auto r = getWorld(location);
 
     /* a location has been found. */
     auto original = ch->getRoom();
@@ -1010,7 +1010,7 @@ ACMD(do_goto) {
         return;
     }
 
-    auto r = dynamic_cast<Room*>(world.at(location));
+    auto r = getWorld<Room>(location);
 
     snprintf(buf, sizeof(buf), "$n %s", POOFOUT(ch) ? POOFOUT(ch) : "disappears in a puff of smoke.");
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
@@ -1102,7 +1102,7 @@ ACMD(do_teleport) {
             ch->sendf("They are inside a healing tank!\r\n");
             return;
         }
-        auto r = dynamic_cast<Room*>(world.at(target));
+        auto r = getWorld<Room>(target);
         ch->sendf("%s", CONFIG_OK);
         act("$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         victim->removeFromLocation();
@@ -2180,7 +2180,7 @@ ACMD(do_vstat) {
             return;
         }
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(world.at(0));
+        mob->addToLocation(getWorld(0));
         do_stat_character(ch, mob);
         extract_char(mob);
     } else if (is_abbrev(buf, "obj")) {
@@ -3813,7 +3813,7 @@ static int perform_set(BaseCharacter *ch, BaseCharacter *vict, int mode,
             }
             if (IN_ROOM(vict) != NOWHERE)    /* Another Eric Green special. */
                 vict->removeFromLocation();
-            vict->addToLocation(world.at(rnum));
+            vict->addToLocation(getWorld(rnum));
             break;
         case 36: vict->flipFlag(FlagType::Pref, PRF_ROOMFLAGS);
             break;
@@ -4306,21 +4306,16 @@ ACMD(do_zpurge) {
     auto &z = zone_table[zone];
 
     for (auto rvn : z.rooms) {
-        auto found = world.find(rvn);
-        if (found == world.end()) {
-            continue;
+        auto r = getWorld<Room>(rvn);
+        if(!r) continue;
+        for (auto mob : r->getPeople()) {
+            if (IS_NPC(mob)) {
+                extract_char(mob);
+            }
         }
-        auto r = dynamic_cast<Room*>(found->second);
-        if (r) {
-            for (auto mob : r->getPeople()) {
-                if (IS_NPC(mob)) {
-                    extract_char(mob);
-                }
-            }
 
-            for (auto obj : r->getInventory()) {
-                obj->extractFromWorld();
-            }
+        for (auto obj : r->getInventory()) {
+            obj->extractFromWorld();
         }
     }
 

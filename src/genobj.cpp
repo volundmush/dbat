@@ -496,7 +496,7 @@ DgResults Object::dgCallMember(trig_data *trig, const std::string& member, const
 
 
 std::string Object::getUnitClass() {
-    return "obj_data";
+    return "Object";
 }
 
 UnitFamily Object::getFamily() {
