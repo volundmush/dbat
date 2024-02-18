@@ -3298,127 +3298,113 @@ std::string BaseCharacter::renderStatusLines(GameEntity* viewer) {
     auto icur = GET_HIT(this);
     auto imax = getEffMaxPL();
 
+    std::vector<std::string> messages;
+
+    // display current health approximation.
+    auto heshe = HSSH(this);
+    auto himher = HMHR(this);
+    auto hisher = HSHR(this);
+
     if (icur >= (imax) * .9 && icur != (imax))
-        messages.emplace_back("@R...Some slight wounds on $s body.@w");
+        messages.emplace_back(fmt::format("@R...Some slight wounds on {} body.@w", hisher));
     else if (icur >= (imax) * .8 && icur < (imax) * .9)
-        messages.emplace_back("@R...A few wounds on $s body.@w");
+        messages.emplace_back(fmt::format("@R...A few wounds on {} body.@w", hisher));
     else if (icur >= (imax) * .7 && icur < (imax) * .8)
-        messages.emplace_back("@R...Many wounds on $s body.@w");
+        messages.emplace_back(fmt::format("@R...Many wounds on {} body.@w", hisher));
     else if (icur >= (imax) * .6 && icur < (imax) * .7)
-        messages.emplace_back("@R...Quite a few wounds on $s body.@w");
+        messages.emplace_back(fmt::format("@R...Quite a few wounds on {} body.@w", hisher));
     else if (icur >= (imax) * .5 && icur < (imax) * .6)
-        messages.emplace_back("@R...Horrible wounds on $s body.@w");
+        messages.emplace_back(fmt::format("@R...Horrible wounds on {} body.@w", hisher));
     else if (icur >= (imax) * .4 && icur < (imax) * .5)
-        messages.emplace_back("@R...Blood is seeping from the wounds on $s body.@w");
+        messages.emplace_back(fmt::format("@R...Blood is seeping from the wounds on {} body.@w", hisher));
     else if (icur >= (imax) * .3 && icur < (imax) * .4)
-        messages.emplace_back("@R...$s body is in terrible shape.@w");
+        messages.emplace_back(fmt::format("@R...{} body is in terrible shape.@w", hisher));
     else if (icur >= (imax) * .2 && icur < (imax) * .3)
-        messages.emplace_back("@R...Is absolutely covered in wounds.@w");
+        messages.emplace_back(fmt::format("@R...{} absolutely covered in wounds.@w", heshe));
     else if (icur >= (imax) * .1 && icur < (imax) * .2)
-        messages.emplace_back("@R...Is on $s last leg.@w");
+        messages.emplace_back(fmt::format("@R...Is on {} last leg.@w", hisher));
     else if (icur < (imax) * .1)
         messages.emplace_back("@R...Should be DEAD soon.@w");
 
+    
+
+    // current actions.
     if (GET_EAVESDROP(this) > 0) {
-        messages.emplace_back(fmt::format("@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(this)]));
+        messages.emplace_back(fmt::format("@w...{} is spying on everything to the @c{}@w.", heshe, dirs[GET_EAVESDIR(this)]));
     }
-    if (checkFlag(FlagType::Affect, AFF_FLYING) && GET_ALT(this) == 1)
-        messages.emplace_back("...$e is in the air!");
-    if (checkFlag(FlagType::Affect, AFF_FLYING) && GET_ALT(this) == 2)
-        messages.emplace_back("...$e is high in the air!");
-    if (checkFlag(FlagType::Affect, AFF_SANCTUARY) && !GET_SKILL(this, SKILL_AQUA_BARRIER))
-        messages.emplace_back("...$e has a barrier around $s body!");
-    if (checkFlag(FlagType::Affect, AFF_FIRESHIELD))
-        messages.emplace_back("...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!");
-    if (checkFlag(FlagType::Affect, AFF_SANCTUARY) && GET_SKILL(this, SKILL_AQUA_BARRIER))
-        messages.emplace_back("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!");
-    if (PLR_FLAGGED(i, PLR_SPIRAL))
-        messages.emplace_back("...$e is spinning in a vortex!");
-    if (GET_CHARGE(this))
-        messages.emplace_back("...$e has a bright %s aura around $s body!");
-    if (checkFlag(FlagType::Affect, AFF_METAMORPH))
-        messages.emplace_back("@w...$e has a dark, @rred@w aura and menacing presence.");
-    if (checkFlag(FlagType::Affect, AFF_HAYASA))
-        messages.emplace_back("@w...$e has a soft @cblue@w glow around $s body!");
-    if (checkFlag(FlagType::Affect, AFF_BLIND))
-        messages.emplace_back("...$e is groping around blindly!");
-    if (affected_by_spell(i, SPELL_FAERIE_FIRE))
-        messages.emplace_back("@m...$e @mis outlined with purple fire!@m");
-    if (GET_FEATURE(this)) {
-        messages.emplace_back(fmt::format("@C%s@n", GET_FEATURE(this)));
+    // Maybe this should go to the main line and not a status modifier?
+    if (PLR_FLAGGED(this, PLR_FISHING)) {
+        messages.emplace_back(fmt::format("@w...{} is @Cfishing@w.@n", heshe));
     }
-
-        std::string result;
-    Object *chair = nullptr;
-    int count = false;
-
-    auto isNPC = IS_NPC(this);
-
-    std::vector<std::string> messages;
-
-    if (GET_EAVESDROP(i) > 0) {
-        messages.emplace_back(fmt::format("@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]));
-    }
-    if (PLR_FLAGGED(i, PLR_FISHING)) {
-        messages.emplace_back("@w...$e is @Cfishing@w.@n");
-    }
-    if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
-        messages.emplace_back(fmt::format("...is surrounded by a bright %s aura.", aura_types[GET_AURA(i)]));
+    if (PLR_FLAGGED(this, PLR_AURALIGHT)) {
+        // TODO: implement aura-based-on-form and modifiers.
+        messages.emplace_back(fmt::format("...is surrounded by a bright {} aura.", aura_types[GET_AURA(this)]));
     }
 
     auto is_oozaru = (form == FormID::Oozaru || form == FormID::GoldenOozaru);
 
-    if (checkFlag(FlagType::Affect, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
-        messages.emplace_back("@w...$e has a @bbarrier@w around $s body!");
+    if(checkFlag(FlagType::Affect, AFF_FLYING)) {
+        if (GET_ALT(this) == 1)
+            messages.emplace_back(fmt::format("...{} is in the air!", heshe));
+        if (GET_ALT(this) == 2)
+            messages.emplace_back(fmt::format("...{} is high in the air!", heshe));
+    }
+
+    if(checkFlag(FlagType::Affect, AFF_SANCTUARY)) {
+        if (GET_SKILL(this, SKILL_AQUA_BARRIER))
+            messages.emplace_back(fmt::format("...{} has a @Gbarrier@w of @cwater@w and @Cki@w around {} body!", heshe, hisher));
+        else
+            messages.emplace_back(fmt::format("...{} has a barrier around {} body!", heshe, hisher));
+    }
+
     if (checkFlag(FlagType::Affect, AFF_FIRESHIELD))
-        messages.emplace_back("@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!");
-    if (checkFlag(FlagType::Affect, AFF_HEALGLOW))
-        messages.emplace_back("@w...$e has a serene @Cblue@Y glow@w around $s body.");
-    if (checkFlag(FlagType::Affect, AFF_EARMOR))
-        messages.emplace_back("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.");
-    if (checkFlag(FlagType::Affect, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
-        messages.emplace_back("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!");
-    if (checkFlag(FlagType::Affect, AFF_FLYING) && GET_ALT(i) == 1)
-        messages.emplace_back("@w...$e is in the air!");
-    if (checkFlag(FlagType::Affect, AFF_FLYING) && GET_ALT(i) == 2)
-        messages.emplace_back("@w...$e is high in the air!");
-    if (GET_KAIOKEN(i) > 0)
-        messages.emplace_back("@w...@r$e has a red aura around $s body!");
-    if (!isNPC && PLR_FLAGGED(i, PLR_SPIRAL))
-        messages.emplace_back("@w...$e is spinning in a vortex!");
-    if (IS_TRANSFORMED(i) && !IS_ANDROID(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i))
-        messages.emplace_back("@w...$e has energy crackling around $s body!");
-    if (GET_CHARGE(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i)) {
-        messages.emplace_back(fmt::format("@w...$e has a bright %s aura around $s body!", aura_types[GET_AURA(i)]));
-    }
-    if (!is_oozaru && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        messages.emplace_back("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!");
-    if (!is_oozaru && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
-        messages.emplace_back(fmt::format("@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]));
-    }
-    if (form != FormID::Oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        messages.emplace_back("@w...$e has energy crackling around $s body!");
-    if (form == FormID::Oozaru && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        messages.emplace_back("@w...$e is in the form of a @rgreat ape@w!");
-    if (checkFlag(FlagType::Affect, AFF_KYODAIKA))
-        messages.emplace_back("@w...$e has expanded $s body size@w!");
+        messages.emplace_back(fmt::format("...{} has @rf@Rl@Ya@rm@Re@Ys@w around {} body!", heshe, hisher));
+    if (PLR_FLAGGED(this, PLR_SPIRAL))
+        messages.emplace_back(fmt::format("...{} is spinning in a vortex!", heshe));
+    if (GET_CHARGE(this))
+        messages.emplace_back(fmt::format("...{} has a bright {} aura around {} body!", heshe, aura_types[GET_AURA(this)], hisher));
+    if (checkFlag(FlagType::Affect, AFF_METAMORPH))
+        messages.emplace_back(fmt::format("@w...{} has a dark, @rred@w aura and menacing presence.", heshe));
     if (checkFlag(FlagType::Affect, AFF_HAYASA))
-        messages.emplace_back("@w...$e has a soft @cblue@w glow around $s body!");
-    if (form == FormID::Oozaru && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        messages.emplace_back("@w...$e has energy crackling around $s @rgreat ape@w body!");
-    if (GET_FEATURE(i)) {
-        messages.emplace_back(fmt::format("@C%s@n", GET_FEATURE(i)));
+        messages.emplace_back(fmt::format("@w...{} has a soft @cblue@w glow around {} body!", heshe, hisher));
+    if (checkFlag(FlagType::Affect, AFF_BLIND))
+        messages.emplace_back(fmt::format("...{} is groping around blindly!", heshe));
+    // is this even USED?
+    if (affected_by_spell(this, SPELL_FAERIE_FIRE))
+        messages.emplace_back(fmt::format("@m...{} @mis outlined with purple fire!", heshe));
+
+    if (checkFlag(FlagType::Affect, AFF_HEALGLOW))
+        messages.emplace_back(fmt::format("@w...{} has a serene @Cblue@Y glow@w around {} body.", heshe, hisher));
+    if (checkFlag(FlagType::Affect, AFF_EARMOR))
+        messages.emplace_back(fmt::format("@w...{} has ghostly @Ggreen@w ethereal armor around {} body.", heshe, hisher));
+
+    if (GET_KAIOKEN(this) > 0)
+        messages.emplace_back(fmt::format("@w...@r{} has a red aura around {} body!", heshe, hisher));
+    if (!isNPC && PLR_FLAGGED(this, PLR_SPIRAL))
+        messages.emplace_back(fmt::format("@w...{} is spinning in a vortex!", heshe));
+    if (IS_TRANSFORMED(this) && !IS_ANDROID(this) && !IS_SAIYAN(this) && !IS_HALFBREED(this))
+        messages.emplace_back(fmt::format("@w...{} has energy crackling around {} body!", heshe, hisher));
+    if (GET_CHARGE(this) && !IS_SAIYAN(this) && !IS_HALFBREED(this)) {
+        messages.emplace_back(fmt::format("@w...{} has a bright {} aura around {} body!", heshe, aura_types[GET_AURA(this)], hisher));
+    }
+    if (!is_oozaru && GET_CHARGE(this) && IS_TRANSFORMED(this) && (IS_SAIYAN(this) || IS_HALFBREED(this)))
+        messages.emplace_back(fmt::format("@w...{} has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around {} body!", heshe, hisher));
+    if (!is_oozaru && GET_CHARGE(this) && !IS_TRANSFORMED(this) && (IS_SAIYAN(this) || IS_HALFBREED(this))) {
+        messages.emplace_back(fmt::format("@w...{} has a @Ybright@w {} aura around {} body!", heshe, aura_types[GET_AURA(this)], hisher));
+    }
+    if (form != FormID::Oozaru && !GET_CHARGE(this) && IS_TRANSFORMED(this) && (IS_SAIYAN(this) || IS_HALFBREED(this)))
+        messages.emplace_back(fmt::format("@w...{} has energy crackling around {} body!", heshe, hisher));
+    if (form == FormID::Oozaru && GET_CHARGE(this) && (IS_SAIYAN(this) || IS_HALFBREED(this)))
+        messages.emplace_back(fmt::format("@w...{} is in the form of a @rgreat ape@w!", heshe));
+    if (checkFlag(FlagType::Affect, AFF_KYODAIKA))
+        messages.emplace_back(fmt::format("@w...{} has expanded {} body size@w!", heshe, hisher));
+    if (form == FormID::Oozaru && !GET_CHARGE(this) && (IS_SAIYAN(this) || IS_HALFBREED(this)))
+        messages.emplace_back(fmt::format("@w...{} has energy crackling around {} @rgreat ape@w body!", heshe, hisher));
+    if (GET_FEATURE(this)) {
+        messages.emplace_back(fmt::format("@C{}@n", GET_FEATURE(this)));
     }
 
-    if (GET_RDISPLAY(i)) {
-        if (GET_RDISPLAY(i) != "Empty") {
-            messages.emplace_back(fmt::format("...%s", GET_RDISPLAY(i)));
-        }
-    }
-
-    for(const auto& msg : messages) act(msg.c_str(), false, this, nullptr, viewer, TO_VICT);
-
-    return result;
+    return join(messages, "@w\r\n");
 }
 
 std::string BaseCharacter::renderRoomListingHelper(GameEntity* viewer) {
@@ -3426,180 +3412,124 @@ std::string BaseCharacter::renderRoomListingHelper(GameEntity* viewer) {
 
     auto shd = renderRoomListName(viewer);
 
-    if (!FIGHTING(this) && GET_POS(this) != POS_SITTING && GET_POS(this) != POS_SLEEPING)
-        result += fmt::sprintf("@w%s", shd);
-    else if (GRAPPLED(this) && GRAPPLED(this) == ch)
-        result += fmt::sprintf("@w%s is being grappled with by YOU!", shd);
-    else if (GRAPPLED(this) && GRAPPLED(this) != ch)
-        result += fmt::sprintf("@w%s is being absorbed from by %s!", shd, GRAPPLED(this)->getDisplayName(ch));
-    else if (ABSORBBY(this) && ABSORBBY(this) == ch)
-        result += fmt::sprintf("@w%s is being absorbed from by YOU!", shd);
-    else if (ABSORBBY(this) && ABSORBBY(this) != ch)
-        result += fmt::sprintf("@w%s is being absorbed from by %s!", shd, ABSORBBY(this)->getDisplayName(ch));
-    else if (FIGHTING(this) && FIGHTING(this) != ch && GET_POS(this) != POS_SITTING && GET_POS(this) != POS_SLEEPING &&
-             is_sparring(this))
-        result += fmt::sprintf("@w%c%s is sparring with %s!", shd, FIGHTING(this)->getDisplayName(ch));
-    else if (FIGHTING(this) && is_sparring(this) && FIGHTING(this) == ch && GET_POS(this) != POS_SITTING &&
-             GET_POS(this) != POS_SLEEPING)
-        result += fmt::sprintf("@w%s is sparring with you!", shd);
-    else if (FIGHTING(this) && FIGHTING(this) != ch && GET_POS(this) != POS_SITTING && GET_POS(this) != POS_SLEEPING)
-        result += fmt::sprintf("@w%s is fighting %s!", shd, FIGHTING(this)->getDisplayName(ch));
-    else if (FIGHTING(this) && FIGHTING(this) == ch && GET_POS(this) != POS_SITTING && GET_POS(this) != POS_SLEEPING)
-        result += fmt::sprintf("@w%s is fighting YOU!", shd);
-    else if (FIGHTING(this) && GET_POS(this) == POS_SITTING)
-        result += fmt::sprintf("@w%s is sitting here.", shd);
-    else if (FIGHTING(this) && GET_POS(this) == POS_SLEEPING)
-        result += fmt::sprintf("@w%s is sleeping here.", shd);
-    else
-        result += fmt::sprintf("@w%s", isNPC() ? getRoomDesc() : shd);
+    // should an exclamation be used at the end of the line instead of a period?
+    bool exclamation = false;
 
-
-        if (!isNPC || !FIGHTING(i)) {
-        if (checkFlag(FlagType::Affect, AFF_INVISIBLE)) {
-            result += fmt::sprintf(", is invisible");
-            count = true;
-        }
-        if (checkFlag(FlagType::Affect, AFF_ETHEREAL)) {
-            result += fmt::sprintf(", has a halo");
-            count = true;
-        }
-        if (checkFlag(FlagType::Affect, AFF_HIDE) && i != ch) {
-            result += fmt::sprintf(", is hiding");
-            if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
-                improve_skill(i, SKILL_HIDE, 1);
-            }
-            count = true;
-        }
-        if (!isNPC && !desc) {
-            result += fmt::sprintf(", has a blank stare");
-            count = true;
-        }
-        if (!isNPC && PLR_FLAGGED(i, PLR_WRITING)) {
-            result += fmt::sprintf(", is writing");
-            count = true;
-        }
-        if (!isNPC && PRF_FLAGGED(i, PRF_BUILDWALK)) {
-            result += fmt::sprintf(", is buildwalking");
-            count = true;
-        }
-        if (!isNPC && ABSORBING(i) && ABSORBING(i) != ch) {
-            result += fmt::sprintf(", is absorbing from %s", GET_NAME(ABSORBING(i)));
-            count = true;
-        }
-        if (!isNPC && GRAPPLING(i) && GRAPPLING(i) != ch) {
-            result += fmt::sprintf(", is grappling with %s",
-                         readIntro(ch, GRAPPLING(i)) == 1 ? get_i_name(ch, GRAPPLING(i)) : introd_calc(GRAPPLING(i)));
-            count = true;
-        }
-        if (!isNPC && CARRYING(i) && CARRYING(i) != ch) {
-            result += fmt::sprintf(", is carrying %s",
-                         readIntro(ch, CARRYING(i)) == 1 ? get_i_name(ch, CARRYING(i)) : introd_calc(CARRYING(i)));
-            count = true;
-        }
-        if (!isNPC && CARRIED_BY(i) && CARRIED_BY(i) != ch) {
-            result += fmt::sprintf(", is being carried by %s",
-                         readIntro(ch, CARRIED_BY(i)) == 1 ? get_i_name(ch, CARRIED_BY(i)) : introd_calc(
-                                 CARRIED_BY(i)));
-            count = true;
-        }
-        if (!isNPC && GRAPPLING(i) && GRAPPLING(i) == ch) {
-            result += fmt::sprintf(", is grappling with YOU");
-            count = true;
-        }
-        if (!isNPC && ABSORBING(i) && ABSORBING(i) == ch) {
-            result += fmt::sprintf(", is absorbing from YOU");
-            count = true;
-        }
-        if (!isNPC && ABSORBING(ch) && ABSORBING(ch) == i) {
-            result += fmt::sprintf(", is being absorbed from by YOU");
-            count = true;
-        }
-        if (!isNPC && GRAPPLING(ch) && GRAPPLING(ch) == i) {
-            result += fmt::sprintf(", is being grappled with by YOU");
-            count = true;
-        }
-        if (!isNPC && CARRYING(ch) && CARRYING(ch) == i) {
-            result += fmt::sprintf(", is being carried by you");
-            count = true;
-        }
-
-        if (!IS_NPC(ch) && !isNPC && FIGHTING(i)) {
-            if (!PLR_FLAGGED(i, PLR_SPAR) ||
-                (PLR_FLAGGED(i, PLR_SPAR) && (!PLR_FLAGGED(FIGHTING(i), PLR_SPAR) || IS_NPC(FIGHTING(i))))) {
-                result += fmt::sprintf(", is here fighting ");
-            }
-            if (PLR_FLAGGED(i, PLR_SPAR) && PLR_FLAGGED(FIGHTING(i), PLR_SPAR)) {
-                result += fmt::sprintf(", is here sparring ");
-            }
-            if (FIGHTING(i) == ch) {
-                result += fmt::sprintf("@rYOU@w");
-                count = true;
+    std::vector<std::string> commaSeparated;
+    auto spar = is_sparring(this);
+    if (checkFlag(FlagType::Affect, AFF_INVISIBLE)) {
+        commaSeparated.emplace_back("is invisible");
+    }
+    if(checkFlag(FlagType::Affect, AFF_ETHEREAL)) {
+        commaSeparated.emplace_back("has a halo");
+    }
+    if(checkFlag(FlagType::Affect, AFF_HIDE)) {
+        commaSeparated.emplace_back("is hiding");
+    }
+    if(PLR_FLAGGED(this, PLR_WRITING)) {
+        commaSeparated.emplace_back("is writing");
+    }
+    if (PRF_FLAGGED(this, PRF_BUILDWALK)) {
+        commaSeparated.emplace_back("is buildwalking");
+    }
+    if(auto fight = FIGHTING(this); fight) {
+        exclamation = true;
+        if(spar) {
+            if(fight == viewer) {
+                commaSeparated.emplace_back("is sparring with YOU");
             } else {
-                if (IN_ROOM(i) == IN_ROOM(FIGHTING(i))) {
-                    result += fmt::sprintf("%s", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
-                                                                                       ? get_i_name(ch, FIGHTING(i))
-                                                                                       : LRACE(FIGHTING(i))));
-                    count = true;
-                } else {
-                    result += fmt::sprintf("someone who has already left!");
-                }
+                commaSeparated.emplace_back(fmt::sprintf("is sparring with %s", fight->getDisplayName(viewer)));
+            }
+        } else {
+            if(fight == viewer) {
+                commaSeparated.emplace_back("is fighting YOU");
+            } else {
+                commaSeparated.emplace_back(fmt::sprintf("is fighting %s", fight->getDisplayName(viewer)));
             }
         }
     }
+    if(auto grap = GRAPPLED(this); grap) {
+        exclamation = true;
+        if(grap == viewer) {
+            commaSeparated.emplace_back("is being grappled with by YOU");
+        } else {
+            commaSeparated.emplace_back(fmt::sprintf("is being grappled with by %s", grap->getDisplayName(viewer)));
+        }
+    }
+    if(auto abs = ABSORBBY(this); abs) {
+        exclamation = true;
+        if(abs == viewer) {
+            commaSeparated.emplace_back("is being absorbed from by YOU");
+        } else {
+            commaSeparated.emplace_back(fmt::sprintf("is being absorbed from by %s", abs->getDisplayName(viewer)));
+        }
+    }
+    if(auto carry = CARRYING(this); carry) {
+        if(carry == viewer) {
+            commaSeparated.emplace_back("is carrying YOU");
+        } else {
+            commaSeparated.emplace_back(fmt::sprintf("is carrying %s", carry->getDisplayName(viewer)));
+        }
+    }
+    if(auto carryby = CARRIED_BY(this); carryby) {
+        if(carryby == viewer) {
+            commaSeparated.emplace_back("is being carried by YOU");
+        } else {
+            commaSeparated.emplace_back(fmt::sprintf("is being carried by %s", carryby->getDisplayName(viewer)));
+        }
+    }
+    if (auto chair = SITS(this); chair) {
+        if (PLR_FLAGGED(this, PLR_HEALT)) {
+            commaSeparated.emplace_back("is floating inside a healing tank");
+        } else if (PLR_FLAGGED(this, PLR_PILOTING)) {
+            commaSeparated.emplace_back("is sitting in the pilot's chair");
+        } else {
+            commaSeparated.emplace_back(fmt::format("{} on {}", positions[(int) GET_POS(this)], chair->getDisplayName(viewer)));
+        }
+    }
 
-    if (SITS(i)) {
-        chair = SITS(i);
-        if (PLR_FLAGGED(i, PLR_HEALT)) {
-            result += fmt::sprintf("@w is floating inside a healing tank.");
-        } else if (count == true) {
-            result += fmt::sprintf(",@w and%s on %s.", positions[(int) GET_POS(i)], chair->getShortDesc());
-        } else if (count == false) {
-            result += fmt::sprintf("@w%s on %s.", positions[(int) GET_POS(i)], chair->getShortDesc());
+    // If there are commaSeparated sections, we want result to open up as:
+    // <name>, who <value, value, value>, and <last value>
+    // But there might only be one value, or maybe none at all.
+    if(commaSeparated.empty()) {
+        if(isNPC()) {
+            result = getRoomDesc();
+        } else {
+            // TODO: Add a custom posture for Player characters?
+            result = fmt::sprintf("@w%s is standing here.", shd);
         }
-    } else if (!PLR_FLAGGED(i, PLR_PILOTING) && !SITS(i) && (!isNPC || !FIGHTING(i))) {
-        if (count == true) {
-            result += fmt::sprintf("@w, and%s.", positions[(int) GET_POS(i)]);
-        }
-        if (count == false) {
-            result += fmt::sprintf("@w%s.", positions[(int) GET_POS(i)]);
-        }
-    } else if (PLR_FLAGGED(i, PLR_PILOTING)) {
-        result += fmt::sprintf("@w, is sitting in the pilot's chair.\r\n");
+    } else if(commaSeparated.size() == 1) {
+        result += fmt::sprintf("@w%s, who %s%s", shd, commaSeparated[0], exclamation ? "!" : ".");
     } else {
-
-        if (FIGHTING(i) && !IS_NPC(ch) && !isNPC) {
-            if (!PLR_FLAGGED(i, PLR_SPAR)) {
-                result += fmt::sprintf(", is here fighting ");
+        for(size_t i = 0; i < commaSeparated.size(); ++i) {
+            if(i == commaSeparated.size() - 1) {
+                result += fmt::sprintf("and %s%s", commaSeparated[i], exclamation ? "!" : ".");
+            } else {
+                result += fmt::sprintf("%s, ", commaSeparated[i]);
             }
-            if (PLR_FLAGGED(i, PLR_SPAR)) {
-                result += fmt::sprintf(", is here sparring ");
-            }
-            if (FIGHTING(i) == ch)
-                result += fmt::sprintf("@rYOU@w!");
-            else {
-                if (IN_ROOM(i) == IN_ROOM(FIGHTING(i)))
-                    result += fmt::sprintf("%s!", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
-                                                                                        ? get_i_name(ch, FIGHTING(i))
-                                                                                        : LRACE(FIGHTING(i))));
-                else
-                    result += fmt::sprintf("someone who has already left!");
-            }
-        } else if (!isNPC) {            /* NIL fighting pointer */
-            result += fmt::sprintf(" is here struggling with thin air.");
         }
     }
 
-    if (AFF_FLAGGED(ch, AFF_DETECT_ALIGN)) {
-        if (IS_EVIL(i))
-            result += fmt::sprintf(" (@rRed@[3] Aura)");
-        else if (IS_GOOD(i))
-            result += fmt::sprintf(" (@bBlue@[3] Aura)");
+    // Lastly, we will append any suffix states, if needed.
+    // There shouldn't be many of these.
+    // TODO: Add a new Linkdead detection, the old one was dumb.
+    std::vector<std::string> states;
+
+    if (viewer->checkFlag(FlagType::Affect, AFF_DETECT_ALIGN)) {
+        if (IS_EVIL(this))
+            states.emplace_back("(@rRed@[3] Aura)@n");
+        else if (IS_GOOD(this))
+            states.emplace_back("(@bBlue@[3] Aura)@n");
     }
-    if (!isNPC && PRF_FLAGGED(i, PRF_AFK))
-        result += fmt::sprintf(" @D(@RAFK@D)");
-    else if (!isNPC && timer > 3)
-        result += fmt::sprintf(" @D(@RIDLE@D)");
-    result += fmt::sprintf("@n\r\n");
+    if (checkFlag(FlagType::Pref, PRF_AFK))
+        states.emplace_back("@D(@RAFK@D)@n");
+    else if (timer > 3)
+        states.emplace_back("@D(@RIDLE@D)@n");
+
+    if(!states.empty()) {
+        result += " ";
+        result += join(states, " ");
+    }
 
     return result;
 }
@@ -3608,7 +3538,7 @@ std::string BaseCharacter::renderRoomListingFor(GameEntity* viewer) {
     std::vector<std::string> results;
     results.emplace_back(renderListPrefixFor(viewer));
     if(IS_MAJIN(this) && checkFlag(FlagType::Affect, AFF_LIQUEFIED)) {
-        results.emplace_back(fmt::sprintf("@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int) GET_SKIN(i)]));
+        results.emplace_back(fmt::sprintf("@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int)GET_SKIN(this)]));
     } else {
         results.emplace_back(renderRoomListingHelper(viewer));
         results.emplace_back(renderStatusLines(viewer));
@@ -3631,61 +3561,61 @@ std::string PlayerCharacter::renderRoomListName(GameEntity* viewer) {
     if(found != p->dubNames.end() && !PLR_FLAGGED(this, PLR_DISGUISED)) return found->second;
 
     if(PLR_FLAGGED(this, PLR_DISGUISED)) {
-        return fmt::sprintf("@wA disguised %s %s", MAFE(i), LRACE(i));
+        return fmt::sprintf("@wA disguised %s %s", MAFE(this), LRACE(this));
     }
 
     std::string result;
-    if (GET_DISTFEA(i) == DISTFEA_HAIR) {
-        if (IS_MAJIN(i)) {
-            result += fmt::sprintf("@wA %s majin, with a %s forelock,", MAFE(i), FHA_types[(int) GET_HAIRL(i)]);
-        } else if (IS_NAMEK(i)) {
-            result += fmt::sprintf("@wA namek, with %s antennae,", FHA_types[(int) GET_HAIRL(i)]);
-        } else if (IS_ARLIAN(i)) {
-            result += fmt::sprintf("@wA arlian, with %s antennae,", FHA_types[(int) GET_HAIRL(i)]);
-        } else if (IS_ICER(i) || IS_DEMON(i)) {
-            result += fmt::sprintf("@wA %s %s, with %s horns", MAFE(i), LRACE(i), FHA_types[(int) GET_HAIRL(i)]);
+    if (GET_DISTFEA(this) == DISTFEA_HAIR) {
+        if (IS_MAJIN(this)) {
+            result += fmt::sprintf("@wA %s majin, with a %s forelock,", MAFE(this), FHA_types[(int) GET_HAIRL(this)]);
+        } else if (IS_NAMEK(this)) {
+            result += fmt::sprintf("@wA namek, with %s antennae,", FHA_types[(int) GET_HAIRL(this)]);
+        } else if (IS_ARLIAN(this)) {
+            result += fmt::sprintf("@wA %s arlian, with %s antennae,", MAFE(this), FHA_types[(int) GET_HAIRL(this)]);
+        } else if (IS_ICER(this) || IS_DEMON(this)) {
+            result += fmt::sprintf("@wA %s %s, with %s horns", MAFE(this), LRACE(this), FHA_types[(int) GET_HAIRL(this)]);
         } else {
             char blarg[MAX_INPUT_LENGTH];
-            sprintf(blarg, "%s %s hair %s", hairl_types[(int) GET_HAIRL(i)], hairc_types[(int) GET_HAIRC(i)],
-                    hairs_types[(int) GET_HAIRS(i)]);
-            result += fmt::sprintf("@wA %s %s, with %s", MAFE(i), LRACE(i),
-                            GET_HAIRL(i) == 0 ? "a bald head" : (blarg));
+            sprintf(blarg, "%s %s hair %s", hairl_types[(int) GET_HAIRL(this)], hairc_types[(int) GET_HAIRC(this)],
+                    hairs_types[(int) GET_HAIRS(this)]);
+            result += fmt::sprintf("@wA %s %s, with %s", MAFE(this), LRACE(this),
+                            GET_HAIRL(this) == 0 ? "a bald head" : (blarg));
         }
-    } else if (GET_DISTFEA(i) == DISTFEA_SKIN) {
-        result += fmt::sprintf("@wA %s skinned %s %s", skin_types[(int) GET_SKIN(i)], MAFE(i), LRACE(i));
-    } else if (GET_DISTFEA(i) == DISTFEA_HEIGHT) {
+    } else if (GET_DISTFEA(this) == DISTFEA_SKIN) {
+        result += fmt::sprintf("@wA %s skinned %s %s", skin_types[(int) GET_SKIN(this)], MAFE(this), LRACE(this));
+    } else if (GET_DISTFEA(this) == DISTFEA_HEIGHT) {
         char *height;
-        if (IS_TRUFFLE(i)) {
-            if (GET_PC_HEIGHT(i) > 70) {
+        if (IS_TRUFFLE(this)) {
+            if (GET_PC_HEIGHT(this) > 70) {
                 height = strdup("very tall");
-            } else if (GET_PC_HEIGHT(i) > 55) {
+            } else if (GET_PC_HEIGHT(this) > 55) {
                 height = strdup("tall");
-            } else if (GET_PC_HEIGHT(i) > 35) {
+            } else if (GET_PC_HEIGHT(this) > 35) {
                 height = strdup("average height");
             } else {
                 height = strdup("short");
             }
         } else {
-            if (GET_PC_HEIGHT(i) > 200) {
+            if (GET_PC_HEIGHT(this) > 200) {
                 height = strdup("very tall");
-            } else if (GET_PC_HEIGHT(i) > 180) {
+            } else if (GET_PC_HEIGHT(this) > 180) {
                 height = strdup("tall");
-            } else if (GET_PC_HEIGHT(i) > 150) {
+            } else if (GET_PC_HEIGHT(this) > 150) {
                 height = strdup("average height");
-            } else if (GET_PC_HEIGHT(i) > 120) {
+            } else if (GET_PC_HEIGHT(this) > 120) {
                 height = strdup("short");
             } else {
                 height = strdup("very short");
             }
         }
-        result += fmt::sprintf("@wA %s %s %s", height, MAFE(i), LRACE(i));
+        result += fmt::sprintf("@wA %s %s %s", height, MAFE(this), LRACE(this));
         if (height) {
             free(height);
         }
-    } else if (GET_DISTFEA(i) == DISTFEA_WEIGHT) {
+    } else if (GET_DISTFEA(this) == DISTFEA_WEIGHT) {
         char *height;
         auto w = getWeight();
-        if (IS_TRUFFLE(i)) {
+        if (IS_TRUFFLE(this)) {
             if (w > 35) {
                 height = strdup("very heavy");
             } else if (w > 25) {
@@ -3708,7 +3638,7 @@ std::string PlayerCharacter::renderRoomListName(GameEntity* viewer) {
                 height = strdup("welterweight");
             }
         }
-        result += fmt::sprintf("@wA %s %s %s", height, MAFE(i), LRACE(i));
+        result += fmt::sprintf("@wA %s %s %s", height, MAFE(this), LRACE(this));
         if (height) {
             free(height);
         }
@@ -4637,20 +4567,20 @@ std::string Room::renderExits1(GameEntity *viewer) {
 std::string Room::renderExits2(GameEntity* viewer) {
     int door, slen = 0;
     std::string result;
-    result += fmt::snprintf("\nExits: ");
+    result += fmt::sprintf("\nExits: ");
 
-    for (auto &[door, d] : room->getExits()) {
+    for (auto &[door, d] : getExits()) {
 
         auto dest = d->getDestination();
         if(!dest) continue;
         if (d->checkFlag(FlagType::Exit, EX_CLOSED))
             continue;
 
-        result += fmt::snprintf("%s ", abbr_dirs[door]);
+        result += fmt::sprintf("%s ", abbr_dirs[door]);
         slen++;
     }
 
-    result += fmt::snprintf("%s\r\n", slen ? "" : "None!");
+    result += fmt::sprintf("%s\r\n", slen ? "" : "None!");
     return result;
 }
 

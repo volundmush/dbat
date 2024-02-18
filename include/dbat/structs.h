@@ -1003,6 +1003,9 @@ struct BaseCharacter : public GameEntity {
     std::vector<std::string> baseKeywordsFor(GameEntity* looker);
 
     virtual std::string renderRoomListName(GameEntity* looker) = 0;
+    std::string renderRoomListingHelper(GameEntity* u) override;
+    std::string renderRoomListingFor(GameEntity* u) override;
+    virtual std::string renderStatusLines(GameEntity* viewer);
 
     virtual bool isPC() = 0;
     virtual bool isNPC() = 0;
@@ -1576,6 +1579,8 @@ struct NonPlayerCharacter : public BaseCharacter {
     std::string getDisplayName(GameEntity* looker) override;
     std::vector<std::string> getKeywords(GameEntity* looker) override;
 
+    std::string renderRoomListName(GameEntity* looker) override;
+
 };
 
 struct PlayerCharacter : public BaseCharacter {
@@ -1592,6 +1597,8 @@ struct PlayerCharacter : public BaseCharacter {
 
     std::string getDisplayName(GameEntity* looker) override;
     std::vector<std::string> getKeywords(GameEntity* looker) override;
+
+    std::string renderRoomListName(GameEntity* looker) override;
 
     bool isPC() override;
     bool isNPC() override;
