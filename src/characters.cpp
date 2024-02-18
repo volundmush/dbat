@@ -2041,8 +2041,9 @@ void BaseCharacter::lookAtLocation() {
         return;
     }
     
-    
-    auto r = getRoom();
-    if(!r) return;
-    look_at_room(r, this, 0);
+    if(auto loc = getLocation(); loc) {
+        sendLine(loc->renderLocationFor(this));
+    } else {
+        sendf("You are in a void.\r\n");
+    }
 }

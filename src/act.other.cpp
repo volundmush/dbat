@@ -2661,8 +2661,7 @@ ACMD(do_telepathy) {
             ch->sendf("Their eyes are closed!\r\n");
             return;
         } else {
-            look_at_room(vict->getRoom(), ch, 0);
-            //ch->sendEvent(vict->getRoom()->renderLocationFor(ch));
+            ch->sendLine(vict->getRoom()->renderLocationFor(ch));
             ch->sendf("You see all this through their eyes!\r\n");
             if (GET_INT(vict) > GET_INT(ch)) {
                 ch->sendf("You feel like someone was using your mind for something...\r\n");
@@ -9005,8 +9004,7 @@ ACMD(do_quit) {
     if (MINDLINK(ch) && LINKER(ch) == 0) {
         ch->sendf("@RYou feel like the mind that is linked with yours is preventing you from quiting!@n\r\n");
         if (auto mindroom = MINDLINK(ch)->getRoom(); mindroom) {
-            look_at_room(mindroom, ch, 0);
-            //ch->sendEvent(mindroom->renderLocationFor(ch));
+            ch->sendLine(mindroom->renderLocationFor(ch));
             ch->sendf("You get an impression of where this interference is originating from.\r\n");
         }
         return;

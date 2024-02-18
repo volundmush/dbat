@@ -428,9 +428,8 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     // Whether u can access this unit's inventory.
     virtual std::optional<std::string> checkAllowInventoryAcesss(GameEntity *u);
 
-    // whether this unit will allow u to take/give/drop it. give/put are identical.
+    // whether this unit will allow u to take/give/drop it. give/put/drop are identical.
     virtual std::optional<std::string> checkIsGettable(GameEntity *u);
-    virtual std::optional<std::string> checkIsDroppable(GameEntity *u);
     virtual std::optional<std::string> checkIsGivable(GameEntity *u);
 
     // if this can store u in its inventory. This includes a room accepting items.
@@ -464,7 +463,15 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual std::string renderRoomListingFor(GameEntity* viewer);
     //virtual std::string renderContentsListFor(GameEntity* u);
 
+    virtual std::string renderInventoryListingFor(GameEntity* viewer);
+    virtual std::string renderInventoryListingHelper(GameEntity* viewer);
+
     virtual std::string renderModifiers(GameEntity* viewer);
+
+    virtual std::string renderDiagnostics(GameEntity* viewer);
+
+    virtual std::string renderInventory(GameEntity* viewer);
+    virtual std::string renderEquipment(GameEntity* viewer, bool showEmpty = false);
 
     void activateContents();
     void deactivateContents();
@@ -645,6 +652,13 @@ struct Object : public GameEntity {
     std::string renderRoomListingHelper(GameEntity* u) override;
     std::string renderListPrefixFor(GameEntity* viewer) override;
     std::string renderModifiers(GameEntity* viewer);
+
+    std::string renderInventoryListingHelper(GameEntity* viewer) override;
+    std::string renderInventoryListingFor(GameEntity* viewer) override;
+
+    std::string renderDiagnostics(GameEntity* viewer) override;
+
+    std::string renderAppearance(GameEntity* viewer) override;
 
     void activate();
 
@@ -828,7 +842,7 @@ struct Room : public GameEntity {
     std::string renderExits1(GameEntity* u);
     std::string renderExits2(GameEntity* u);
     std::string generateMap(GameEntity* viewer, int num);
-    std::string printMap(GameEntity* viewer, int type, int64_t vnum)
+    std::string printMap(GameEntity* viewer, int type, int64_t vnum);
     std::optional<room_vnum> getLaunchDestination();
 
     MoonCheck checkMoon();
@@ -1006,6 +1020,11 @@ struct BaseCharacter : public GameEntity {
     std::string renderRoomListingHelper(GameEntity* u) override;
     std::string renderRoomListingFor(GameEntity* u) override;
     virtual std::string renderStatusLines(GameEntity* viewer);
+
+    std::string renderDiagnostics(GameEntity* viewer) override;
+    std::string renderAppearance(GameEntity* viewer) override;
+
+    std::optional<std::string> getDubFor(BaseCharacter* target);
 
     virtual bool isPC() = 0;
     virtual bool isNPC() = 0;

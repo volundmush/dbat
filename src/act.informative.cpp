@@ -52,7 +52,7 @@ static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode);
 
 static void list_obj_to_char(std::vector<Object*> list, BaseCharacter *ch, int mode, int show);
 
-static void trans_check(BaseCharacter *ch, BaseCharacter *vict);
+static std::string trans_check(BaseCharacter *ch, GameEntity *viewer);
 
 static int show_obj_modifiers(Object *obj, BaseCharacter *ch);
 
@@ -66,10 +66,6 @@ static void diag_obj_to_char(Object *obj, BaseCharacter *ch);
 
 static void look_at_char(BaseCharacter *i, BaseCharacter *ch);
 
-static void list_one_char(BaseCharacter *i, BaseCharacter *ch);
-
-static void list_char_to_char(std::vector<BaseCharacter*> people, BaseCharacter *ch);
-
 static void look_in_direction(BaseCharacter *ch, int dir);
 
 static void look_in_obj(BaseCharacter *ch, char *arg);
@@ -79,10 +75,6 @@ static void look_out_window(BaseCharacter *ch, char *arg);
 static void look_at_target(BaseCharacter *ch, char *arg, int read);
 
 static void search_in_direction(BaseCharacter *ch, int dir);
-
-static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode);
-
-static void do_auto_exits2(room_rnum target_room, BaseCharacter *ch);
 
 static void display_spells(BaseCharacter *ch, Object *obj);
 
@@ -1007,298 +999,7 @@ ACMD(do_intro) {
     }
 }
 
-/* Used when checking status or looking at a character */
-static void bringdesc(BaseCharacter *ch, BaseCharacter *tch) {
 
-    if (ch != nullptr && tch != nullptr && IS_HUMANOID(tch)) {
-
-        if (ch != tch && PLR_FLAGGED(tch, PLR_DISGUISED)) {
-            ch->sendf("            @D[@cHair Length @D: @WHidden.         @D]@n\r\n");
-            ch->sendf("            @D[@cHair Color  @D: @WHidden.         @D]@n\r\n");
-            ch->sendf("            @D[@cHair Style  @D: @WHidden.         @D]@n\r\n");
-            ch->sendf("            @D[@cEye Color   @D: @WHidden.         @D]@n\r\n");
-            if (GET_SKIN(tch) == SKIN_WHITE) {
-                ch->sendf("            @D[@cSkin Color  @D: @WWhite.        @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_TAN) {
-                ch->sendf("            @D[@cSkin Color  @D: @WTan.          @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_BLACK) {
-                ch->sendf("            @D[@cSkin Color  @D: @WBlack.        @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_GREEN) {
-                ch->sendf("            @D[@cSkin Color  @D: @WGreen.        @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_ORANGE) {
-                ch->sendf("            @D[@cSkin Color  @D: @WOrange.       @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_YELLOW) {
-                ch->sendf("            @D[@cSkin Color  @D: @WYellow.       @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_RED) {
-                ch->sendf("            @D[@cSkin Color  @D: @WRed.          @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_GREY) {
-                ch->sendf("            @D[@cSkin Color  @D: @WGrey.         @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_BLUE) {
-                ch->sendf("            @D[@cSkin Color  @D: @WBlue.         @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_AQUA) {
-                ch->sendf("            @D[@cSkin Color  @D: @WAqua.         @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_PINK) {
-                ch->sendf("            @D[@cSkin Color  @D: @WPink.         @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_PURPLE) {
-                ch->sendf("            @D[@cSkin Color  @D: @WPurple.       @D]@n\r\n");
-            }
-            return;
-        }
-
-        if (IS_HUMAN(tch) || IS_SAIYAN(tch) || IS_KONATSU(tch) || IS_MUTANT(tch) || IS_ANDROID(tch) || IS_KAI(tch) ||
-            IS_HALFBREED(tch) || IS_TRUFFLE(tch) || IS_HOSHIJIN(tch)) {
-            if ((!IS_SAIYAN(tch) && !IS_HALFBREED(tch)) ||
-                ((IS_SAIYAN(tch) || IS_HALFBREED(tch)) && !IS_TRANSFORMED(tch))) {
-                if (GET_HAIRL(tch) == HAIRL_LONG) {
-                    ch->sendf("            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
-                } else if (GET_HAIRL(tch) == HAIRL_BALD) {
-                    ch->sendf("            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
-                } else if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                    ch->sendf("            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
-                } else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                    ch->sendf("            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
-                } else if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                    ch->sendf("            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
-                }
-                if (GET_HAIRS(tch) == HAIRS_PLAIN) {
-                    ch->sendf("            @D[@cHair Style  @D: @WPlain.        @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_MOHAWK) {
-                    ch->sendf("            @D[@cHair Style  @D: @WMohawk.       @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_SPIKY) {
-                    ch->sendf("            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_CURLY) {
-                    ch->sendf("            @D[@cHair Style  @D: @WCurly.        @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_UNEVEN) {
-                    ch->sendf("            @D[@cHair Style  @D: @WUneven.       @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_PONYTAIL) {
-                    ch->sendf("            @D[@cHair Style  @D: @WPony Tail.    @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_AFRO) {
-                    ch->sendf("            @D[@cHair Style  @D: @WAfro.         @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_FADE) {
-                    ch->sendf("            @D[@cHair Style  @D: @WFade.         @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_CREW) {
-                    ch->sendf("            @D[@cHair Style  @D: @WCrew Cut.     @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_FEATHERED) {
-                    ch->sendf("            @D[@cHair Style  @D: @WFeathered.    @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_DRED) {
-                    ch->sendf("            @D[@cHair Style  @D: @WDread Locks.  @D]@n\r\n");
-                }
-                if (GET_HAIRC(tch) == HAIRC_BLACK) {
-                    ch->sendf("            @D[@cHair Color  @D: @WBlack.        @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_BROWN) {
-                    ch->sendf("            @D[@cHair Color  @D: @WBrown.        @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_BLONDE) {
-                    ch->sendf("            @D[@cHair Color  @D: @WBlonde.       @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_GREY) {
-                    ch->sendf("            @D[@cHair Color  @D: @WGrey.         @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_RED) {
-                    ch->sendf("            @D[@cHair Color  @D: @WRed.          @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_ORANGE) {
-                    ch->sendf("            @D[@cHair Color  @D: @WOrange.       @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_GREEN) {
-                    ch->sendf("            @D[@cHair Color  @D: @WGreen.        @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_BLUE) {
-                    ch->sendf("            @D[@cHair Color  @D: @WBlue.         @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_PINK) {
-                    ch->sendf("            @D[@cHair Color  @D: @WPink.         @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_PURPLE) {
-                    ch->sendf("            @D[@cHair Color  @D: @WPurple.       @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_SILVER) {
-                    ch->sendf("            @D[@cHair Color  @D: @WSilver.       @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_CRIMSON) {
-                    ch->sendf("            @D[@cHair Color  @D: @WCrimson.      @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_WHITE) {
-                    ch->sendf("            @D[@cHair Color  @D: @WWhite.        @D]@n\r\n");
-                }
-            } else if (IS_SAIYAN(tch) || IS_HALFBREED(tch)) {
-                if (tch->form == FormID::SuperSaiyan) {
-                    if (GET_HAIRL(tch) == HAIRL_LONG) {
-                        ch->sendf("            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_BALD) {
-                        ch->sendf("            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                        ch->sendf("            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                        ch->sendf("            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                        ch->sendf("            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
-                    }
-                    ch->sendf("            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
-                    ch->sendf("            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
-                    ch->sendf("            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-                } else if (tch->form == FormID::SuperSaiyan2) {
-                    if (GET_HAIRL(tch) == HAIRL_LONG) {
-                        ch->sendf("            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_BALD) {
-                        ch->sendf("            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                        ch->sendf("            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                        ch->sendf("            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                        ch->sendf("            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
-                    }
-                    ch->sendf("            @D[@cHair Style  @D: @WSharp Spikes. @D]@n\r\n");
-                    ch->sendf("            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
-                    ch->sendf("            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-                } else if (tch->form == FormID::SuperSaiyan3) {
-                    ch->sendf("            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
-                    ch->sendf("            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
-                    ch->sendf("            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
-                    ch->sendf("            @D[@cEye Color   @D: @WAqua Green.   @D]@n\r\n");
-                } else if (tch->form == FormID::SuperSaiyan4) {
-                    ch->sendf("            @D[@cHair Length @D: @WLong.        @D]@n\r\n");
-                    ch->sendf("            @D[@cHair Style  @D: @WSoft Spikes. @D]@n\r\n");
-                    ch->sendf("            @D[@cHair Color  @D: @WBlack.       @D]@n\r\n");
-                    ch->sendf("            @D[@cEye Color   @D: @WAmber.       @D]@n\r\n");
-                }
-            }
-        }
-        if (IS_DEMON(tch) || IS_ICER(tch)) {
-            if (GET_HAIRL(tch) == HAIRL_BALD) {
-                ch->sendf("            @D[@cHorn Length @D: @WNone.         @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                ch->sendf("            @D[@cHorn Length @D: @WShort.        @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                ch->sendf("            @D[@cHorn Length @D: @WMedium.       @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_LONG) {
-                ch->sendf("            @D[@cHorn Length @D: @WLong.         @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                ch->sendf("            @D[@cHorn Length @D: @WReally Long.  @D]@n\r\n");
-            }
-        }
-        if (IS_NAMEK(tch) || IS_ARLIAN(tch)) {
-            if (GET_HAIRL(tch) == HAIRL_BALD) {
-                ch->sendf("            @D[@cAnt. Length @D: @WTiny.        @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                ch->sendf("            @D[@cAnt. Length @D: @WShort.       @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                ch->sendf("            @D[@cAnt. Length @D: @WMedium.      @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_LONG) {
-                ch->sendf("            @D[@cAnt. Length @D: @WLong.        @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                ch->sendf("            @D[@cAnt. Length @D: @WR. Long.     @D]@n\r\n");
-            }
-        }
-        if (IS_ARLIAN(tch) && IS_FEMALE(tch)) {
-            if (GET_HAIRC(tch) == HAIRC_BLACK) {
-                ch->sendf("            @D[@cWing Color  @D: @WBlack.        @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_BROWN) {
-                ch->sendf("            @D[@cWing Color  @D: @WBrown.        @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_BLONDE) {
-                ch->sendf("            @D[@cWing Color  @D: @WBlonde.       @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_GREY) {
-                ch->sendf("            @D[@cWing Color  @D: @WGrey.         @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_RED) {
-                ch->sendf("            @D[@cWing Color  @D: @WRed.          @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_ORANGE) {
-                ch->sendf("            @D[@cWing Color  @D: @WOrange.       @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_GREEN) {
-                ch->sendf("            @D[@cWing Color  @D: @WGreen.        @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_BLUE) {
-                ch->sendf("            @D[@cWing Color  @D: @WBlue.         @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_PINK) {
-                ch->sendf("            @D[@cWing Color  @D: @WPink.         @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_PURPLE) {
-                ch->sendf("            @D[@cWing Color  @D: @WPurple.       @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_SILVER) {
-                ch->sendf("            @D[@cWing Color  @D: @WSilver.       @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_CRIMSON) {
-                ch->sendf("            @D[@cWing Color  @D: @WCrimson.      @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_WHITE) {
-                ch->sendf("            @D[@cWing Color  @D: @WWhite.        @D]@n\r\n");
-            }
-        } else if (IS_ARLIAN(tch) && !IS_FEMALE(tch)) {
-            ch->sendf("            @D[@cWing Color  @D: @WWhite.        @D]@n\r\n");
-        }
-        if (IS_MAJIN(tch)) {
-            if (GET_HAIRL(tch) == HAIRL_BALD) {
-                ch->sendf("            @D[@cFor. Length @D: @WTiny.         @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                ch->sendf("            @D[@cFor. Length @D: @WShort.        @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                ch->sendf("            @D[@cFor. Length @D: @WMedium.       @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_LONG) {
-                ch->sendf("            @D[@cFor. Length @D: @WLong.         @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                ch->sendf("            @D[@cFor. Length @D: @WR. Long.      @D]@n\r\n");
-            }
-        }
-        if ((!IS_SAIYAN(tch) && !IS_HALFBREED(tch)) ||
-            ((IS_SAIYAN(tch) || IS_HALFBREED(tch)) && !IS_TRANSFORMED(tch))) {
-            if (GET_EYE(tch) == EYE_BLUE) {
-                ch->sendf("            @D[@cEye Color   @D: @WBlue.         @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_BLACK) {
-                ch->sendf("            @D[@cEye Color   @D: @WBlack.        @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_GREEN) {
-                ch->sendf("            @D[@cEye Color   @D: @WGreen.        @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_BROWN) {
-                ch->sendf("            @D[@cEye Color   @D: @WBrown.        @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_RED) {
-                ch->sendf("            @D[@cEye Color   @D: @WRed.          @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_AQUA) {
-                ch->sendf("            @D[@cEye Color   @D: @WAqua.         @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_PINK) {
-                ch->sendf("            @D[@cEye Color   @D: @WPink.         @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_PURPLE) {
-                ch->sendf("            @D[@cEye Color   @D: @WPurple.       @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_CRIMSON) {
-                ch->sendf("            @D[@cEye Color   @D: @WCrimson.      @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_GOLD) {
-                ch->sendf("            @D[@cEye Color   @D: @WGold.         @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_AMBER) {
-                ch->sendf("            @D[@cEye Color   @D: @WAmber.        @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_EMERALD) {
-                ch->sendf("            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-            }
-        }
-        if (GET_SKIN(tch) == SKIN_WHITE) {
-            ch->sendf("            @D[@cSkin Color  @D: @WWhite.        @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_TAN) {
-            ch->sendf("            @D[@cSkin Color  @D: @WTan.          @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_BLACK) {
-            ch->sendf("            @D[@cSkin Color  @D: @WBlack.        @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_GREEN) {
-            ch->sendf("            @D[@cSkin Color  @D: @WGreen.        @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_ORANGE) {
-            ch->sendf("            @D[@cSkin Color  @D: @WOrange.       @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_YELLOW) {
-            ch->sendf("            @D[@cSkin Color  @D: @WYellow.       @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_RED) {
-            ch->sendf("            @D[@cSkin Color  @D: @WRed.          @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_GREY) {
-            ch->sendf("            @D[@cSkin Color  @D: @WGrey.         @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_BLUE) {
-            ch->sendf("            @D[@cSkin Color  @D: @WBlue.         @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_AQUA) {
-            ch->sendf("            @D[@cSkin Color  @D: @WAqua.         @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_PINK) {
-            ch->sendf("            @D[@cSkin Color  @D: @WPink.         @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_PURPLE) {
-            ch->sendf("            @D[@cSkin Color  @D: @WPurple.       @D]@n\r\n");
-        }
-        if (MAJINIZED(tch) != 0 && MAJINIZED(tch) != 3) {
-            ch->sendf("            @D[@cForehead    @D: @mMajin Symbol  @D]@n\r\n");
-        }
-    } else if (!IS_HUMANOID(tch)) {
-        /* Display nothing */
-        return;
-    } else {
-        ch->sendf("Error in bring-desc, please report.\r\n");
-    }
-}
 static void map_draw_room(char map[9][10], int x, int y, Room* room,
                           GameEntity *viewer) {
 
@@ -2367,6 +2068,289 @@ std::string Object::renderRoomListingHelper(GameEntity *viewer) {
     return result;
 }
 
+std::string Object::renderInventoryListingFor(GameEntity *viewer) {
+    std::vector<std::string> results;
+    results.emplace_back(renderListPrefixFor(viewer));
+    results.emplace_back(renderInventoryListingHelper(viewer));
+
+    return join(results, " ") + "@n";
+}
+
+std::string Object::renderInventoryListingHelper(GameEntity* viewer) {
+    std::string result;
+
+    if (viewer->checkFlag(FlagType::Pref, PRF_IHEALTH)) {
+        result += fmt::sprintf("@D<@gH@D: @C%d@D>@w %s", GET_OBJ_VAL(this, VAL_ALL_HEALTH), getShortDesc());
+    } else {
+        result += fmt::sprintf("%s", getShortDesc());
+    }
+    if (type_flag == ITEM_FOOD) {
+        if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this)) {
+            result += fmt::sprintf(", and it has been ate on.@n");
+        }
+    }
+    if (vn == 255) {
+        switch (GET_OBJ_VAL(this, 0)) {
+            case 0:
+            case 1:
+                result += fmt::sprintf(" @D[@wQuality @RC@D]@n");
+                break;
+            case 2:
+                result += fmt::sprintf(" @D[@wQuality @RC+@D]@n");
+                break;
+            case 3:
+                result += fmt::sprintf(" @D[@wQuality @yC++@D]@n");
+                break;
+            case 4:
+                result += fmt::sprintf(" @D[@wQuality @yB@D]@n");
+                break;
+            case 5:
+                result += fmt::sprintf(" @D[@wQuality @CB+@D]@n");
+                break;
+            case 6:
+                result += fmt::sprintf(" @D[@wQuality @CB++@D]@n");
+                break;
+            case 7:
+                result += fmt::sprintf(" @D[@wQuality @CA@D]@n");
+                break;
+            case 8:
+                result += fmt::sprintf(" @D[@wQuality @GA+@D]@n");
+                break;
+        }
+    }
+
+    if (vn == 3424) {
+        result += fmt::sprintf(" @D[@bInk Remaining@D: @w%d@D]@n", GET_OBJ_VAL(this, 6));
+    }
+    if (vn == 3423) {
+        result += fmt::sprintf(" @D[@B%d@D/@B24 Inks@D]@n", GET_OBJ_VAL(this, 6));
+    }
+    if (OBJ_FLAGGED(this, ITEM_THROW)) {
+        result += fmt::sprintf(" @D[@RThrow Only@D]@n");
+    }
+    if (type_flag == ITEM_PLANT && !OBJ_FLAGGED(this, ITEM_MATURE)) {
+        if (GET_OBJ_VAL(this, VAL_WATERLEVEL) < -9) {
+            result += fmt::sprintf("@D[@RDead@D]@n");
+        } else {
+            switch (GET_OBJ_VAL(this, VAL_MATURITY)) {
+                case 0:
+                    result += fmt::sprintf(" @D[@ySeed@D]@n");
+                    break;
+                case 1:
+                    result += fmt::sprintf(" @D[@GSprout@D]@n");
+                    break;
+                case 2:
+                    result += fmt::sprintf(" @D[@GYoung@D]@n");
+                    break;
+                case 3:
+                    result += fmt::sprintf(" @D[@GMature@D]@n");
+                    break;
+                case 4:
+                    result += fmt::sprintf(" @D[@GBudding@D]@n");
+                    break;
+                case 5:
+                    result += fmt::sprintf("@D[@GClose Harvest@D]@n");
+                    break;
+                case 6:
+                    result += fmt::sprintf("@D[@gHarvest@D]@n");
+                    break;
+            }
+        }
+    }
+    if (GET_OBJ_TYPE(this) == ITEM_CONTAINER && !IS_CORPSE(this)) {
+        if (!OBJVAL_FLAGGED(this, CONT_CLOSED) && !OBJ_FLAGGED(this, ITEM_SHEATH))
+            result += fmt::sprintf(" @D[@G-open-@D]@n");
+        else if (!OBJ_FLAGGED(this, ITEM_SHEATH))
+            result += fmt::sprintf(" @D[@rclosed@D]@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_DUPLICATE)) {
+        result += fmt::sprintf(" @D[@YDuplicate@D]@n");
+    }
+
+    return result;
+}
+
+std::string Object::renderAppearance(GameEntity* viewer) {
+    std::string result;
+
+    switch (type_flag) {
+        case ITEM_NOTE:
+            if (auto ld = getLookDesc(); !ld.empty()) {
+                result += fmt::sprintf("There is something written on it:\r\n\r\n%s", ld);
+            } else
+                result += fmt::sprintf("There appears to be nothing written on it.\r\n");
+            return;
+
+        // TODO: special class for boards.
+        case ITEM_BOARD:
+            show_board(vn, ch);
+            break;
+
+        case ITEM_CONTROL:
+            result += fmt::sprintf("@RFUEL@D: %s%s@n\r\n",
+                            GET_FUEL(this) >= 200 ? "@G" : GET_FUEL(this) >= 100 ? "@Y" : "@r",
+                            add_commas(GET_FUEL(this)).c_str());
+            break;
+
+        case ITEM_DRINKCON:
+            result += fmt::sprintf("It looks like a drink container.\r\n");
+            break;
+
+        case ITEM_LIGHT:
+            if (GET_OBJ_VAL(this, VAL_LIGHT_HOURS) == -1)
+                result += fmt::sprintf("Light Cycles left: Infinite\r\n");
+            else
+                result += fmt::sprintf("Light Cycles left: [%d]\r\n", GET_OBJ_VAL(this, VAL_LIGHT_HOURS));
+            break;
+
+        case ITEM_FOOD:
+            if (FOOB(this) >= 4) {
+                if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this) / 4) {
+                    result += fmt::sprintf("Condition of the food: Almost gone.\r\n");
+                } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this) / 2) {
+                    result += fmt::sprintf("Condition of the food: Half Eaten.");
+                } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this)) {
+                    result += fmt::sprintf("Condition of the food: Partially Eaten.");
+                } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) == FOOB(this)) {
+                    result += fmt::sprintf("Condition of the food: Whole.");
+                }
+            } else if (FOOB(this) > 0) {
+                if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this)) {
+                    result += fmt::sprintf("Condition of the food: Almost gone.");
+                } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) == FOOB(this)) {
+                    result += fmt::sprintf("Condition of the food: Whole.");
+                }
+            } else {
+                result += fmt::sprintf("Condition of the food: Insignificant.");
+            }
+            break;
+
+        // is this even used?
+        case ITEM_SPELLBOOK:
+            result += fmt::sprintf("It looks like an arcane tome.\r\n");
+            display_spells(ch, this);
+            break;
+
+        // or this?
+        case ITEM_SCROLL:
+            result += fmt::sprintf("It looks like an arcane scroll.\r\n");
+            display_scroll(ch, this);
+            break;
+
+        case ITEM_VEHICLE:
+            if (GET_OBJ_VNUM(this) > 19199) {
+                result += fmt::sprintf("@YSyntax@D: @CUnlock hatch\r\n");
+                result += fmt::sprintf("@YSyntax@D: @COpen hatch\r\n");
+                result += fmt::sprintf("@YSyntax@D: @CClose hatch\r\n");
+                result += fmt::sprintf("@YSyntax@D: @CEnter hatch\r\n");
+            } else {
+                result += fmt::sprintf("@YSyntax@D: @CUnlock door\r\n");
+                result += fmt::sprintf("@YSyntax@D: @COpen door\r\n");
+                result += fmt::sprintf("@YSyntax@D: @CClose door\r\n");
+                result += fmt::sprintf("@YSyntax@D: @CEnter door\r\n");
+            }
+            break;
+
+        case ITEM_HATCH:
+            if (GET_OBJ_VNUM(this) > 19199) {
+                result += fmt::sprintf("@YSyntax@D: @CUnlock hatch\r\n");
+                result += fmt::sprintf("@YSyntax@D: @COpen hatch\r\n");
+                result += fmt::sprintf("@YSyntax@D: @CClose hatch\r\n");
+                result += fmt::sprintf("@YSyntax@D: @CLeave@n\r\n");
+            } else {
+                result += fmt::sprintf("@YSyntax@D: @CUnlock door\r\n");
+                result += fmt::sprintf("@YSyntax@D: @COpen door\r\n");
+                result += fmt::sprintf("@YSyntax@D: @CClose door\r\n");
+                result += fmt::sprintf("@YSyntax@D: @CEnter door\r\n");
+            }
+            break;
+
+        case ITEM_WINDOW:
+            look_out_window(ch, (char*)obj->getName().c_str());
+            return;
+            break;
+
+        default:
+            if (!IS_CORPSE(this)) {
+                result += fmt::sprintf("You see nothing special..\r\n");
+            } else {
+                int mention = false;
+                result += fmt::sprintf("This corpse has ");
+
+                if (GET_OBJ_VAL(this, VAL_CORPSE_HEAD) == 0) {
+                    result += fmt::sprintf("no head,");
+                    mention = true;
+                }
+
+                if (GET_OBJ_VAL(this, VAL_CORPSE_RARM) == 0) {
+                    result += fmt::sprintf("no right arm, ");
+                    mention = true;
+                } else if (GET_OBJ_VAL(this, VAL_CORPSE_RARM) == 2) {
+                    result += fmt::sprintf("a broken right arm, ");
+                    mention = true;
+                }
+
+                if (GET_OBJ_VAL(this, VAL_CORPSE_LARM) == 0) {
+                    result += fmt::sprintf("no left arm, ");
+                    mention = true;
+                } else if (GET_OBJ_VAL(this, VAL_CORPSE_LARM) == 2) {
+                    result += fmt::sprintf("a broken left arm, ");
+                    mention = true;
+                }
+
+                if (GET_OBJ_VAL(this, VAL_CORPSE_RLEG) == 0) {
+                    result += fmt::sprintf("no right leg, ");
+                    mention = true;
+                } else if (GET_OBJ_VAL(this, VAL_CORPSE_RLEG) == 2) {
+                    result += fmt::sprintf("a broken right leg, ");
+                    mention = true;
+                }
+
+                if (GET_OBJ_VAL(this, VAL_CORPSE_LLEG) == 0) {
+                    result += fmt::sprintf("no left leg, ");
+                    mention = true;
+                } else if (GET_OBJ_VAL(this, VAL_CORPSE_LLEG) == 2) {
+                    result += fmt::sprintf("a broken left leg, ");
+                    mention = true;
+                }
+
+                if (mention == false) {
+                    result += fmt::sprintf("nothing missing from it but life.");
+                } else {
+                    result += fmt::sprintf("and is dead.");
+                }
+
+                result += fmt::sprintf("\r\n");
+            }
+            break;
+    }
+
+    if (GET_OBJ_TYPE(this) == ITEM_WEAPON) {
+        int num = 0;
+        if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
+            num = 1;
+        } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
+            num = 0;
+        } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
+            num = 3;
+        } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
+            num = 2;
+        } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+            num = 4;
+        } else {
+            num = 5;
+        }
+        result += fmt::sprintf("The weapon type of %s@n is '%s'.\r\n", GET_OBJ_SHORT(this), weapon_disp[num]);
+        //result += fmt::sprintf("You could wield it %s.\r\n", wield_names[wield_type(get_size(ch), this)]);
+    }
+    result += renderDiagnostics(viewer);
+    result += fmt::sprintf("It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(this)],
+                    add_commas(GET_OBJ_WEIGHT(this)).c_str());
+
+    return result;
+}
+
+
 static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode) {
     if (!obj || !ch) {
         basic_mud_log("SYSERR: nullptr pointer in show_obj_to_char()");
@@ -2386,386 +2370,10 @@ static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode) {
     }
 
     switch (mode) {
-        case SHOW_OBJ_LONG:
-            /*
-     * hide objects starting with . from non-holylighted people
-     * Idea from Elaseth of TBA
-     */
-            if (obj->getRoomDesc().starts_with('.') && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
-                return;
-            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && GET_ROOM_VNUM(IN_ROOM(ch)) == GET_OBJ_VAL(obj, 0)) {
-                return;
-            }
-            if (SITTING(obj) && GET_ADMLEVEL(ch) < 1) {
-                return;
-            }
-            if (SITTING(obj) && GET_ADMLEVEL(ch) >= 1) {
-                ch->sendf("@D(@YBeing Used@D)@w");
-            }
-            if (GET_OBJ_TYPE(obj) == ITEM_PLANT &&
-                (ROOM_FLAGGED(IN_ROOM(obj), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(obj), ROOM_GARDEN2))) {
-                see_plant(obj, ch);
-                return;
-            }
-            if (OBJ_FLAGGED(obj, ITEM_BURIED)) {
-                char bury[MAX_INPUT_LENGTH];
-                if (!IS_CORPSE(obj)) {
-                    if (GET_OBJ_WEIGHT(obj) < 10) {
-                        sprintf(bury, "small mound of");
-                    } else if (GET_OBJ_WEIGHT(obj) < 50) {
-                        sprintf(bury, "medium sized mound of");
-                    } else if (GET_OBJ_WEIGHT(obj) < 1000) {
-                        sprintf(bury, "large mound of");
-                    } else {
-                        sprintf(bury, "gigantic mound of");
-                    }
-                } else {
-                    sprintf(bury, "recent grave covered by");
-                }
-                if (spotted == true && SECT(IN_ROOM(obj)) != SECT_DESERT) {
-                    ch->sendf("@yA %s soft dirt is here.@n\r\n", bury);
-                    return;
-                } else if (spotted == true && SECT(IN_ROOM(obj)) == SECT_DESERT) {
-                    ch->sendf("@YA %s soft sand is here.@n\r\n", bury);
-                    return;
-                } else {
-                    return;
-                }
-            }
-            if (GET_OBJ_VNUM(obj) == 11) {
-                if(obj->gravity) {
-                    auto msg = fmt::format("@wA gravity generator, set to {}x gravity, is built here", obj->gravity.value());
-                    ch->sendf(msg.c_str());
-                } else {
-                    ch->sendf("@wA gravity generator, currently on standby, is built here");
-                }
 
-            } else if (GET_OBJ_VNUM(obj) == 79) {
-                ch->sendf(
-                             "@wA @cG@Cl@wa@cc@Ci@wa@cl @wW@ca@Cl@wl @D[@C%s@D]@w is blocking access to the @G%s@w direction",
-                             add_commas(GET_OBJ_WEIGHT(obj)).c_str(), dirs[GET_OBJ_COST(obj)]);
-            } else {
-                ch->sendf("@w");
-                if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
-                    if (GET_OBJ_POSTED(obj) == nullptr) {
-                        ch->sendf("@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
-                            ch->sendf("%s ", obj->scriptString().c_str());
-                    } else {
-                        if (GET_OBJ_POSTTYPE(obj) <= 0) {
-                            ch->sendf("@D[@G%d@D]@w ", GET_OBJ_VNUM(obj));
-                                ch->sendf("%s ", obj->scriptString().c_str());
-                        }
-                    }
-                }
-
-                if (GET_OBJ_POSTTYPE(obj) > 0) {
-                    if (GET_OBJ_POSTED(obj)) {
-                        return;
-                    } else {
-                        ch->sendf("%s@w, has been posted here.@n", obj->getShortDesc());
-                    }
-                } else {
-                    if (!OBJ_FLAGGED(obj, ITEM_BURIED)) {
-                        ch->sendf("%s@n", obj->getRoomDesc());
-                    }
-                }
-
-                if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
-                    if (!OBJVAL_FLAGGED(obj, CONT_CLOSED) && GET_OBJ_VNUM(obj) > 19199)
-                        ch->sendf("\r\n@c...its outer hatch is open@n");
-                    else if (!OBJVAL_FLAGGED(obj, CONT_CLOSED) && GET_OBJ_VNUM(obj) <= 19199)
-                        ch->sendf("\r\n@c...its door is open@n");
-                }
-                if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && !IS_CORPSE(obj)) {
-                    if (!OBJVAL_FLAGGED(obj, CONT_CLOSED) && !OBJ_FLAGGED(obj, ITEM_SHEATH))
-                        ch->sendf(". @D[@G-open-@D]@n");
-                    else if (!OBJ_FLAGGED(obj, ITEM_SHEATH))
-                        ch->sendf(". @D[@rclosed@D]@n");
-                }
-                if (GET_OBJ_TYPE(obj) == ITEM_HATCH) {
-                    if (!OBJVAL_FLAGGED(obj, CONT_CLOSED))
-                        ch->sendf(", it is open");
-                    else if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
-                        ch->sendf(", it is closed");
-                    if (OBJVAL_FLAGGED(obj, CONT_LOCKED))
-                        ch->sendf(" and locked@n");
-                    else
-                        ch->sendf("@n");
-                }
-                if (GET_OBJ_TYPE(obj) == ITEM_FOOD) {
-                    if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
-                        ch->sendf(", and it has been ate on@n");
-                    }
-                }
-            }
-            break;
-
-        case SHOW_OBJ_SHORT:
-            if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
-                ch->sendf("[%d] ", GET_OBJ_VNUM(obj));
-                    ch->sendf("%s ", obj->scriptString().c_str());
-            }
-
-            if (PRF_FLAGGED(ch, PRF_IHEALTH)) {
-                ch->sendf("@D<@gH@D: @C%d@D>@w %s", GET_OBJ_VAL(obj, VAL_ALL_HEALTH), obj->getShortDesc());
-            } else {
-                ch->sendf("%s", obj->getShortDesc());
-            }
-            if (GET_OBJ_TYPE(obj) == ITEM_FOOD) {
-                if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
-                    ch->sendf(", and it has been ate on.@n");
-                }
-            }
-            if (GET_OBJ_VNUM(obj) == 255) {
-                switch (GET_OBJ_VAL(obj, 0)) {
-                    case 0:
-                    case 1:
-                        ch->sendf(" @D[@wQuality @RC@D]@n");
-                        break;
-                    case 2:
-                        ch->sendf(" @D[@wQuality @RC+@D]@n");
-                        break;
-                    case 3:
-                        ch->sendf(" @D[@wQuality @yC++@D]@n");
-                        break;
-                    case 4:
-                        ch->sendf(" @D[@wQuality @yB@D]@n");
-                        break;
-                    case 5:
-                        ch->sendf(" @D[@wQuality @CB+@D]@n");
-                        break;
-                    case 6:
-                        ch->sendf(" @D[@wQuality @CB++@D]@n");
-                        break;
-                    case 7:
-                        ch->sendf(" @D[@wQuality @CA@D]@n");
-                        break;
-                    case 8:
-                        ch->sendf(" @D[@wQuality @GA+@D]@n");
-                        break;
-                }
-            }
-
-            if (GET_OBJ_VNUM(obj) == 3424) {
-                ch->sendf(" @D[@bInk Remaining@D: @w%d@D]@n", GET_OBJ_VAL(obj, 6));
-            }
-            if (GET_OBJ_VNUM(obj) == 3423) {
-                ch->sendf(" @D[@B%d@D/@B24 Inks@D]@n", GET_OBJ_VAL(obj, 6));
-            }
-            if (OBJ_FLAGGED(obj, ITEM_THROW)) {
-                ch->sendf(" @D[@RThrow Only@D]@n");
-            }
-            if (GET_OBJ_TYPE(obj) == ITEM_PLANT && !OBJ_FLAGGED(obj, ITEM_MATURE)) {
-                if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) < -9) {
-                    ch->sendf("@D[@RDead@D]@n");
-                } else {
-                    switch (GET_OBJ_VAL(obj, VAL_MATURITY)) {
-                        case 0:
-                            ch->sendf(" @D[@ySeed@D]@n");
-                            break;
-                        case 1:
-                            ch->sendf(" @D[@GSprout@D]@n");
-                            break;
-                        case 2:
-                            ch->sendf(" @D[@GYoung@D]@n");
-                            break;
-                        case 3:
-                            ch->sendf(" @D[@GMature@D]@n");
-                            break;
-                        case 4:
-                            ch->sendf(" @D[@GBudding@D]@n");
-                            break;
-                        case 5:
-                            ch->sendf("@D[@GClose Harvest@D]@n");
-                            break;
-                        case 6:
-                            ch->sendf("@D[@gHarvest@D]@n");
-                            break;
-                    }
-                }
-            }
-            if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && !IS_CORPSE(obj)) {
-                if (!OBJVAL_FLAGGED(obj, CONT_CLOSED) && !OBJ_FLAGGED(obj, ITEM_SHEATH))
-                    ch->sendf(" @D[@G-open-@D]@n");
-                else if (!OBJ_FLAGGED(obj, ITEM_SHEATH))
-                    ch->sendf(" @D[@rclosed@D]@n");
-            }
-            if (OBJ_FLAGGED(obj, ITEM_DUPLICATE)) {
-                ch->sendf(" @D[@YDuplicate@D]@n");
-            }
-            break;
 
         case SHOW_OBJ_ACTION:
-            switch (GET_OBJ_TYPE(obj)) {
-                case ITEM_NOTE:
-                    if (auto ld = obj->getLookDesc(); !ld.empty()) {
-                        write_to_output(ch->desc, "There is something written on it:\r\n\r\n%s", ld);
-                    } else
-                        ch->sendf("There appears to be nothing written on it.\r\n");
-                    return;
 
-                case ITEM_BOARD:
-                    show_board(GET_OBJ_VNUM(obj), ch);
-                    break;
-
-                case ITEM_CONTROL:
-                    ch->sendf("@RFUEL@D: %s%s@n\r\n",
-                                 GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y" : "@r",
-                                 add_commas(GET_FUEL(obj)).c_str());
-                    break;
-
-                case ITEM_DRINKCON:
-                    ch->sendf("It looks like a drink container.\r\n");
-                    break;
-
-                case ITEM_LIGHT:
-                    if (GET_OBJ_VAL(obj, VAL_LIGHT_HOURS) == -1)
-                        ch->sendf("Light Cycles left: Infinite\r\n");
-                    else
-                        ch->sendf("Light Cycles left: [%d]\r\n", GET_OBJ_VAL(obj, VAL_LIGHT_HOURS));
-                    break;
-
-                case ITEM_FOOD:
-                    if (FOOB(obj) >= 4) {
-                        if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj) / 4) {
-                            ch->sendf("Condition of the food: Almost gone.\r\n");
-                        } else if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj) / 2) {
-                            ch->sendf("Condition of the food: Half Eaten.");
-                        } else if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
-                            ch->sendf("Condition of the food: Partially Eaten.");
-                        } else if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) == FOOB(obj)) {
-                            ch->sendf("Condition of the food: Whole.");
-                        }
-                    } else if (FOOB(obj) > 0) {
-                        if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) < FOOB(obj)) {
-                            ch->sendf("Condition of the food: Almost gone.");
-                        } else if (GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL) == FOOB(obj)) {
-                            ch->sendf("Condition of the food: Whole.");
-                        }
-                    } else {
-                        ch->sendf("Condition of the food: Insignificant.");
-                    }
-                    break;
-
-                case ITEM_SPELLBOOK:
-                    ch->sendf("It looks like an arcane tome.\r\n");
-                    display_spells(ch, obj);
-                    break;
-
-                case ITEM_SCROLL:
-                    ch->sendf("It looks like an arcane scroll.\r\n");
-                    display_scroll(ch, obj);
-                    break;
-
-                case ITEM_VEHICLE:
-                    if (GET_OBJ_VNUM(obj) > 19199) {
-                        ch->sendf("@YSyntax@D: @CUnlock hatch\r\n");
-                        ch->sendf("@YSyntax@D: @COpen hatch\r\n");
-                        ch->sendf("@YSyntax@D: @CClose hatch\r\n");
-                        ch->sendf("@YSyntax@D: @CEnter hatch\r\n");
-                    } else {
-                        ch->sendf("@YSyntax@D: @CUnlock door\r\n");
-                        ch->sendf("@YSyntax@D: @COpen door\r\n");
-                        ch->sendf("@YSyntax@D: @CClose door\r\n");
-                        ch->sendf("@YSyntax@D: @CEnter door\r\n");
-                    }
-                    break;
-
-                case ITEM_HATCH:
-                    if (GET_OBJ_VNUM(obj) > 19199) {
-                        ch->sendf("@YSyntax@D: @CUnlock hatch\r\n");
-                        ch->sendf("@YSyntax@D: @COpen hatch\r\n");
-                        ch->sendf("@YSyntax@D: @CClose hatch\r\n");
-                        ch->sendf("@YSyntax@D: @CLeave@n\r\n");
-                    } else {
-                        ch->sendf("@YSyntax@D: @CUnlock door\r\n");
-                        ch->sendf("@YSyntax@D: @COpen door\r\n");
-                        ch->sendf("@YSyntax@D: @CClose door\r\n");
-                        ch->sendf("@YSyntax@D: @CEnter door\r\n");
-                    }
-                    break;
-
-                case ITEM_WINDOW:
-                    look_out_window(ch, (char*)obj->getName().c_str());
-                    return;
-                    break;
-
-                default:
-                    if (!IS_CORPSE(obj)) {
-                        ch->sendf("You see nothing special..\r\n");
-                    } else {
-                        int mention = false;
-                        ch->sendf("This corpse has ");
-
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_HEAD) == 0) {
-                            ch->sendf("no head,");
-                            mention = true;
-                        }
-
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_RARM) == 0) {
-                            ch->sendf("no right arm, ");
-                            mention = true;
-                        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_RARM) == 2) {
-                            ch->sendf("a broken right arm, ");
-                            mention = true;
-                        }
-
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_LARM) == 0) {
-                            ch->sendf("no left arm, ");
-                            mention = true;
-                        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_LARM) == 2) {
-                            ch->sendf("a broken left arm, ");
-                            mention = true;
-                        }
-
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_RLEG) == 0) {
-                            ch->sendf("no right leg, ");
-                            mention = true;
-                        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_RLEG) == 2) {
-                            ch->sendf("a broken right leg, ");
-                            mention = true;
-                        }
-
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_LLEG) == 0) {
-                            ch->sendf("no left leg, ");
-                            mention = true;
-                        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_LLEG) == 2) {
-                            ch->sendf("a broken left leg, ");
-                            mention = true;
-                        }
-
-                        if (mention == false) {
-                            ch->sendf("nothing missing from it but life.");
-                        } else {
-                            ch->sendf("and is dead.");
-                        }
-
-                        ch->sendf("\r\n");
-                    }
-                    break;
-            }
-
-            if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-                int num = 0;
-                if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
-                    num = 1;
-                } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
-                    num = 0;
-                } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
-                    num = 3;
-                } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
-                    num = 2;
-                } else if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
-                    num = 4;
-                } else {
-                    num = 5;
-                }
-                ch->sendf("The weapon type of %s@n is '%s'.\r\n", GET_OBJ_SHORT(obj), weapon_disp[num]);
-                ch->sendf("You could wield it %s.\r\n", wield_names[wield_type(get_size(ch), obj)]);
-            }
-            diag_obj_to_char(obj, ch);
-            ch->sendf("It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(obj)],
-                         add_commas(GET_OBJ_WEIGHT(obj)).c_str());
             break;
 
         default:
@@ -2972,7 +2580,7 @@ static void list_obj_to_char(std::vector<Object*> list, BaseCharacter *ch, int m
         ch->sendf(" Nothing.\r\n");
 }
 
-static void diag_obj_to_char(Object *obj, BaseCharacter *ch) {
+std::string Object::renderDiagnostics(GameEntity *viewer) {
     struct {
         int percent;
         const char *text;
@@ -2986,11 +2594,12 @@ static void diag_obj_to_char(Object *obj, BaseCharacter *ch) {
             {0,   "is in awful condition."},
             {-1,  "is in need of repair."},
     };
-    int percent, ar_index;
-    const char *objs = OBJS(obj, ch);
 
-    if (GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH) > 0)
-        percent = (100 * GET_OBJ_VAL(obj, VAL_ALL_HEALTH)) / GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH);
+    int percent, ar_index;
+    std::string objs = viewer->canSee(this) ? getShortDesc() : "something";
+
+    if (GET_OBJ_VAL(this, VAL_ALL_MAXHEALTH) > 0)
+        percent = (100 * GET_OBJ_VAL(this, VAL_ALL_HEALTH)) / GET_OBJ_VAL(this, VAL_ALL_MAXHEALTH);
     else
         percent = 0;               /* How could MAX_HIT be < 1?? */
 
@@ -2998,10 +2607,10 @@ static void diag_obj_to_char(Object *obj, BaseCharacter *ch) {
         if (percent >= diagnosis[ar_index].percent)
             break;
 
-    ch->sendf("\r\n%c%s %s\r\n", UPPER(*objs), objs + 1, diagnosis[ar_index].text);
+    return fmt::sprintf("\r\n%c%s %s\r\n", UPPER(objs[0]), objs.substr(1), diagnosis[ar_index].text);
 }
 
-static void diag_char_to_char(BaseCharacter *i, BaseCharacter *ch) {
+std::string BaseCharacter::renderDiagnostics(GameEntity* viewer) {
     static struct {
         int percent;
         const char *text;
@@ -3021,7 +2630,7 @@ static void diag_char_to_char(BaseCharacter *i, BaseCharacter *ch) {
     };
     int percent, ar_index;
 
-    int64_t hit = GET_HIT(i), max = (i->getEffMaxPL());
+    int64_t hit = GET_HIT(this), max = (getEffMaxPL());
 
     int64_t total = max;
 
@@ -3055,229 +2664,107 @@ static void diag_char_to_char(BaseCharacter *i, BaseCharacter *ch) {
         if (percent >= diagnosis[ar_index].percent)
             break;
 
-    ch->sendf("%s\r\n", diagnosis[ar_index].text);
+    return fmt::sprintf("%s\r\n", diagnosis[ar_index].text);
 }
 
-static void look_at_char(BaseCharacter *i, BaseCharacter *ch) {
-    int j, found, clan = false;
-    char buf[100];
-    Object *tmp_obj;
+std::string BaseCharacter::renderAppearance(GameEntity* viewer) {
+    std::string result;
 
-    if (!ch->desc) {
-        return;
+    // getLookDesc() may be anything, for PCs. for NPCs, it's a fixed thing.
+    if (auto ld = getLookDesc(); !ld.empty()) {
+        result += fmt::sprintf("%s\r\n", ld);
     }
-    if (auto ld = i->getLookDesc(); !ld.empty()) {
-        ch->sendf("%s", ld);
-    }
-    if (!MOB_FLAGGED(i, MOB_JUSTDESC)) {
-        bringdesc(ch, i);
-    }
-    ch->sendf("\r\n");
-    if (!IS_NPC(i)) {
-        if (GET_LIMBCOND(i, 0) >= 50 && !PLR_FLAGGED(i, PLR_CRARM)) {
-            ch->sendf("            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 0),
-                         "%", "%");
-        } else if (GET_LIMBCOND(i, 0) > 0 && !PLR_FLAGGED(i, PLR_CRARM)) {
-            ch->sendf("            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
-                         GET_LIMBCOND(i, 0), "%", "%");
-        } else if (GET_LIMBCOND(i, 0) > 0 && PLR_FLAGGED(i, PLR_CRARM)) {
-            ch->sendf("            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
-                         GET_LIMBCOND(i, 0), "%", "%");
-        } else if (GET_LIMBCOND(i, 0) <= 0) {
-            ch->sendf("            @D[@cRight Arm   @D: @rMissing.            @D]@n\r\n");
+
+    if(IS_HUMANOID(this)) {
+        if (GET_LIMBCOND(this, 0) >= 50 && !PLR_FLAGGED(this, PLR_CRARM)) {
+            result += fmt::sprintf("            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(this, 0),
+                        "%", "%");
+        } else if (GET_LIMBCOND(this, 0) > 0 && !PLR_FLAGGED(this, PLR_CRARM)) {
+            result += fmt::sprintf("            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
+                            GET_LIMBCOND(this, 0), "%", "%");
+        } else if (GET_LIMBCOND(this, 0) > 0 && PLR_FLAGGED(this, PLR_CRARM)) {
+            result += fmt::sprintf("            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
+                            GET_LIMBCOND(this, 0), "%", "%");
+        } else if (GET_LIMBCOND(this, 0) <= 0) {
+            result += fmt::sprintf("            @D[@cRight Arm   @D: @rMissing.            @D]@n\r\n");
         }
-        if (GET_LIMBCOND(i, 1) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
-            ch->sendf("            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 1),
-                         "%", "%");
-        } else if (GET_LIMBCOND(i, 1) > 0 && !PLR_FLAGGED(i, PLR_CLARM)) {
-            ch->sendf("            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
-                         GET_LIMBCOND(i, 1), "%", "%");
-        } else if (GET_LIMBCOND(i, 1) > 0 && PLR_FLAGGED(i, PLR_CLARM)) {
-            ch->sendf("            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
-                         GET_LIMBCOND(i, 1), "%", "%");
-        } else if (GET_LIMBCOND(i, 1) <= 0) {
-            ch->sendf("            @D[@cLeft Arm    @D: @rMissing.            @D]@n\r\n");
+        if (GET_LIMBCOND(this, 1) >= 50 && !PLR_FLAGGED(this, PLR_CLARM)) {
+            result += fmt::sprintf("            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(this, 1),
+                            "%", "%");
+        } else if (GET_LIMBCOND(this, 1) > 0 && !PLR_FLAGGED(this, PLR_CLARM)) {
+            result += fmt::sprintf("            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
+                            GET_LIMBCOND(this, 1), "%", "%");
+        } else if (GET_LIMBCOND(this, 1) > 0 && PLR_FLAGGED(this, PLR_CLARM)) {
+            result += fmt::sprintf("            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
+                            GET_LIMBCOND(this, 1), "%", "%");
+        } else if (GET_LIMBCOND(this, 1) <= 0) {
+            result += fmt::sprintf("            @D[@cLeft Arm    @D: @rMissing.            @D]@n\r\n");
         }
-        if (GET_LIMBCOND(i, 2) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
-            ch->sendf("            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 2),
-                         "%", "%");
-        } else if (GET_LIMBCOND(i, 2) > 0 && !PLR_FLAGGED(i, PLR_CRLEG)) {
-            ch->sendf("            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
-                         GET_LIMBCOND(i, 2), "%", "%");
-        } else if (GET_LIMBCOND(i, 2) > 0 && PLR_FLAGGED(i, PLR_CRLEG)) {
-            ch->sendf("            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
-                         GET_LIMBCOND(i, 2), "%", "%");
-        } else if (GET_LIMBCOND(i, 2) <= 0) {
-            ch->sendf("            @D[@cRight Leg   @D: @rMissing.            @D]@n\r\n");
+        if (GET_LIMBCOND(this, 2) >= 50 && !PLR_FLAGGED(this, PLR_CLARM)) {
+            result += fmt::sprintf("            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(this, 2),
+                            "%", "%");
+        } else if (GET_LIMBCOND(this, 2) > 0 && !PLR_FLAGGED(this, PLR_CRLEG)) {
+            result += fmt::sprintf("            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
+                            GET_LIMBCOND(this, 2), "%", "%");
+        } else if (GET_LIMBCOND(this, 2) > 0 && PLR_FLAGGED(this, PLR_CRLEG)) {
+            result += fmt::sprintf("            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
+                            GET_LIMBCOND(this, 2), "%", "%");
+        } else if (GET_LIMBCOND(this, 2) <= 0) {
+            result += fmt::sprintf("            @D[@cRight Leg   @D: @rMissing.            @D]@n\r\n");
         }
-        if (GET_LIMBCOND(i, 3) >= 50 && !PLR_FLAGGED(i, PLR_CLLEG)) {
-            ch->sendf("            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 3),
-                         "%", "%");
-        } else if (GET_LIMBCOND(i, 3) > 0 && !PLR_FLAGGED(i, PLR_CLLEG)) {
-            ch->sendf("            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
-                         GET_LIMBCOND(i, 3), "%", "%");
-        } else if (GET_LIMBCOND(i, 3) > 0 && PLR_FLAGGED(i, PLR_CLLEG)) {
-            ch->sendf("            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
-                         GET_LIMBCOND(i, 3), "%", "%");
-        } else if (GET_LIMBCOND(i, 3) <= 0) {
-            ch->sendf("            @D[@cLeft Leg    @D: @rMissing.             @D]@n\r\n");
+        if (GET_LIMBCOND(this, 3) >= 50 && !PLR_FLAGGED(this, PLR_CLLEG)) {
+            result += fmt::sprintf("            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(this, 3),
+                            "%", "%");
+        } else if (GET_LIMBCOND(this, 3) > 0 && !PLR_FLAGGED(this, PLR_CLLEG)) {
+            result += fmt::sprintf("            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
+                            GET_LIMBCOND(this, 3), "%", "%");
+        } else if (GET_LIMBCOND(this, 3) > 0 && PLR_FLAGGED(this, PLR_CLLEG)) {
+            result += fmt::sprintf("            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
+                            GET_LIMBCOND(this, 3), "%", "%");
+        } else if (GET_LIMBCOND(this, 3) <= 0) {
+            result += fmt::sprintf("            @D[@cLeft Leg    @D: @rMissing.             @D]@n\r\n");
         }
-        if (PLR_FLAGGED(i, PLR_HEAD)) {
-            ch->sendf("            @D[@cHead        @D: @GHas.                 @D]@n\r\n");
+        if (PLR_FLAGGED(this, PLR_HEAD)) {
+            result += fmt::sprintf("            @D[@cHead        @D: @GHas.                 @D]@n\r\n");
         }
-        if (!PLR_FLAGGED(i, PLR_HEAD)) {
-            ch->sendf("            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
+        if (!PLR_FLAGGED(this, PLR_HEAD)) {
+            result += fmt::sprintf("            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
         }
-        if (race::hasTail(i->race) && !PLR_FLAGGED(i, PLR_TAILHIDE)) {
-            if(PLR_FLAGGED(i, PLR_TAIL))
-                ch->sendf("            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
+        if (race::hasTail(race) && !PLR_FLAGGED(this, PLR_TAILHIDE)) {
+            if(PLR_FLAGGED(this, PLR_TAIL))
+                result += fmt::sprintf("            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
             else
-                ch->sendf("            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
+                result += fmt::sprintf("            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
         }
-    }
-    ch->sendf("\r\n");
-    if (GET_CLAN(i) != nullptr && strstr(GET_CLAN(i), "None") == false) {
-        sprintf(buf, "%s", GET_CLAN(i));
-        clan = true;
-    }
-    if (GET_CLAN(i) == nullptr) {
-        clan = false;
-    }
-    if (!IS_NPC(i)) {
-        ch->sendf("            @D[@mClan        @D: @W%-20s@D]@n\r\n", clan ? buf : "None.");
-    }
-    if (!IS_NPC(i)) {
-        ch->sendf("\r\n         @D----------------------------------------@n\r\n");
-        trans_check(ch, i);
-        ch->sendf("         @D----------------------------------------@n\r\n");
-    }
-    ch->sendf("\r\n");
-
-    if ((!PLR_FLAGGED(i, PLR_DISGUISED) && (readIntro(ch, i) == 1 && !IS_NPC(i)))) {
-        if (GET_SEX(i) == SEX_NEUTRAL)
-            ch->sendf("%s appears to be %s %s, ", get_i_name(ch, i), AN(RACE(i)), LRACE(i));
-        else
-            ch->sendf("%s appears to be %s %s %s, ", get_i_name(ch, i), AN(MAFE(i)), MAFE(i), LRACE(i));
-    } else if (ch == i || IS_NPC(i)) {
-        if (GET_SEX(i) == SEX_NEUTRAL)
-            ch->sendf("%c%s appears to be %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(RACE(i)), LRACE(i));
-        else
-            ch->sendf("%c%s appears to be %s %s %s, ", UPPER(*GET_NAME(i)), GET_NAME(i) + 1, AN(MAFE(i)),
-                         MAFE(i), LRACE(i));
-    } else {
-        if (GET_SEX(i) == SEX_NEUTRAL)
-            ch->sendf("Appears to be %s %s, ", AN(RACE(i)), LRACE(i));
-        else
-            ch->sendf("Appears to be %s %s %s, ", AN(MAFE(i)), MAFE(i), LRACE(i));
+        result += fmt::sprintf("\r\n");
     }
 
-    if (IS_NPC(i)) {
-        ch->sendf("is %s sized, and\r\n", size_names[get_size(i)]);
-    }
-    if (!IS_NPC(i)) {
-        auto w = i->getWeight();
-        int h = i->getHeight();
-        auto wString = fmt::format("{}kg", w);
-        ch->sendf("is %s sized, about %dcm tall,\r\nabout %s heavy,", size_names[get_size(i)],
-                     h, wString.c_str());
+    result += fmt::sprintf("\r\n         @D----------------------------------------@n\r\n");
+    result += trans_check(this, viewer);
+    result += fmt::sprintf("         @D----------------------------------------@n\r\n");
+    result += fmt::sprintf("\r\n");
 
-        if (i == ch) {
-            ch->sendf(" and ");
-        } else if (GET_AGE(ch) >= GET_AGE(i) + 30) {
-            ch->sendf(" appears to be very much younger than you, and ");
-        } else if (GET_AGE(ch) >= GET_AGE(i) + 25) {
-            ch->sendf(" appears to be much younger than you, and ");
-        } else if (GET_AGE(ch) >= GET_AGE(i) + 15) {
-            ch->sendf(" appears to be a good amount younger than you, and ");
-        } else if (GET_AGE(ch) >= GET_AGE(i) + 10) {
-            ch->sendf(" appears to be about a decade younger than you, and ");
-        } else if (GET_AGE(ch) >= GET_AGE(i) + 5) {
-            ch->sendf(" appears to be several years younger than you, and ");
-        } else if (GET_AGE(ch) >= GET_AGE(i) + 2) {
-            ch->sendf(" appears to be a bit younger than you, and ");
-        } else if (GET_AGE(ch) > GET_AGE(i)) {
-            ch->sendf(" appears to be slightly younger than you, and ");
-        } else if (GET_AGE(ch) == GET_AGE(i)) {
-            ch->sendf(" appears to be the same age as you, and ");
-        }
-        if (GET_AGE(i) >= GET_AGE(ch) + 30) {
-            ch->sendf(" appears to be very much older than you, and ");
-        } else if (GET_AGE(i) >= GET_AGE(ch) + 25) {
-            ch->sendf(" appears to be much older than you, and ");
-        } else if (GET_AGE(i) >= GET_AGE(ch) + 15) {
-            ch->sendf(" appears to be a good amount older than you, and ");
-        } else if (GET_AGE(i) >= GET_AGE(ch) + 10) {
-            ch->sendf(" appears to be about a decade older than you, and ");
-        } else if (GET_AGE(i) >= GET_AGE(ch) + 5) {
-            ch->sendf(" appears to be several years older than you, and ");
-        } else if (GET_AGE(i) >= GET_AGE(ch) + 2) {
-            ch->sendf(" appears to be a bit older than you, and ");
-        } else if (GET_AGE(i) > GET_AGE(ch)) {
-            ch->sendf(" appears to be slightly older than you, and ");
-        }
-    }
-    diag_char_to_char(i, ch);
-    found = false;
-    for (j = 0; !found && j < NUM_WEARS; j++)
-        if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)))
-            found = true;
+    auto heshe = HSSH(this);
+    auto raceName = juggleRaceName(false);
 
-    if (found && (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NOEQSEE))) {
-        ch->sendf("\r\n");    /* act() does capitalization. */
-        if (!PLR_FLAGGED(i, PLR_DISGUISED)) {
-            act("$n is using:", false, i, nullptr, ch, TO_VICT);
-        } else {
-            act("The disguised person is using:", false, i, nullptr, ch, TO_VICT);
+    result += fmt::format("{} appears to be a {} {}, ", heshe, AN(raceName.c_str()), raceName);
+
+    auto w = getWeight();
+    int h = getHeight();
+    auto wString = fmt::format("{}kg", w);
+    result += fmt::sprintf("is %s sized, about %dcm tall,\r\nabout %s heavy,", size_names[get_size(this)],
+                    h, wString.c_str());
+    
+    result += renderDiagnostics(viewer);
+
+    if(!viewer->checkFlag(FlagType::Pref, PRF_NOEQSEE))
+        if(auto eq = renderEquipment(viewer); !eq.empty()) {
+            result += fmt::sprintf("\r\n");    /* act() does capitalization. */
+            result += fmt::sprintf("They are using:\r\n");
+            result += eq;
         }
 
-        for (j = 0; j < NUM_WEARS; j++) {
-            auto eq = GET_EQ(i, j);
-            if(!eq) continue;
-            if(!CAN_SEE_OBJ(ch, eq)) continue;
-                
-            if ((j != WEAR_WIELD1 && j != WEAR_WIELD2) || (!PLR_FLAGGED(i, PLR_THANDW))) {
-                ch->sendf("%s", wear_where[j]);
-                show_obj_to_char(eq, ch, SHOW_OBJ_SHORT);
-                if (OBJ_FLAGGED(eq, ITEM_SHEATH)) {
-                    for (auto obj2 : eq->getInventory()) {
-                        ch->sendf("@D  ---- @YSheathed@D ----@c> @n");
-                        show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
-                    }
-                }
-            } else if (PLR_FLAGGED(i, PLR_THANDW)) {
-                ch->sendf("@c<@CWielded by B. Hands@c>@n ");
-                show_obj_to_char(eq, ch, SHOW_OBJ_SHORT);
-            }
-        }
-    }
-    if (ch != i && ((GET_SKILL(ch, SKILL_KEEN) && AFF_FLAGGED(ch, AFF_SNEAK)) || GET_ADMLEVEL(ch))) {
-        found = false;
-        act("\r\nYou attempt to peek at $s inventory:", false, i, nullptr, ch, TO_VICT);
-        if (CAN_SEE(i, ch))
-            act("$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
-        if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
-            for (auto tmp_obj : i->getInventory()) {
-                if (CAN_SEE_OBJ(ch, tmp_obj) &&
-                    (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_LEVEL(ch)))) {
-                    show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
-                    found = true;
-                }
-            }
-            improve_skill(ch, SKILL_KEEN, 1);
-        } else if (IS_NPC(i) && GET_ADMLEVEL(ch) < 2) {
-            return;
-        } else {
-            act("You are unsure about $s inventory.", false, i, nullptr, ch, TO_VICT);
-            if (CAN_SEE(i, ch))
-                act("$n didn't seem to get a good enough look.", true, ch, nullptr, i, TO_VICT);
-            improve_skill(ch, SKILL_KEEN, 1);
-            return;
-        }
-        if (!found) {
-            ch->sendf("You can't see anything.\r\n");
-            improve_skill(ch, SKILL_KEEN, 1);
-        }
-    }
+    return result;
 }
 
 static const char *positions[] = {
@@ -3369,6 +2856,9 @@ std::string BaseCharacter::renderStatusLines(GameEntity* viewer) {
         messages.emplace_back(fmt::format("@w...{} has a soft @cblue@w glow around {} body!", heshe, hisher));
     if (checkFlag(FlagType::Affect, AFF_BLIND))
         messages.emplace_back(fmt::format("...{} is groping around blindly!", heshe));
+    if (checkFlag(FlagType::Affect, AFF_KYODAIKA))
+        messages.emplace_back(fmt::format("@w...{} has expanded {} body size@w!", heshe, hisher));
+
     // is this even USED?
     if (affected_by_spell(this, SPELL_FAERIE_FIRE))
         messages.emplace_back(fmt::format("@m...{} @mis outlined with purple fire!", heshe));
@@ -3396,8 +2886,7 @@ std::string BaseCharacter::renderStatusLines(GameEntity* viewer) {
         messages.emplace_back(fmt::format("@w...{} has energy crackling around {} body!", heshe, hisher));
     if (form == FormID::Oozaru && GET_CHARGE(this) && (IS_SAIYAN(this) || IS_HALFBREED(this)))
         messages.emplace_back(fmt::format("@w...{} is in the form of a @rgreat ape@w!", heshe));
-    if (checkFlag(FlagType::Affect, AFF_KYODAIKA))
-        messages.emplace_back(fmt::format("@w...{} has expanded {} body size@w!", heshe, hisher));
+    
     if (form == FormID::Oozaru && !GET_CHARGE(this) && (IS_SAIYAN(this) || IS_HALFBREED(this)))
         messages.emplace_back(fmt::format("@w...{} has energy crackling around {} @rgreat ape@w body!", heshe, hisher));
     if (GET_FEATURE(this)) {
@@ -3648,721 +3137,6 @@ std::string PlayerCharacter::renderRoomListName(GameEntity* viewer) {
 }
 
 
-
-static void list_one_char(BaseCharacter *i, BaseCharacter *ch) {
-    Object *chair = nullptr;
-    int count = false;
-    const char *positions[] = {
-            " is dead",
-            " is mortally wounded",
-            " is lying here, incapacitated",
-            " is lying here, stunned",
-            " is sleeping here",
-            " is resting here",
-            " is sitting here",
-            "!FIGHTING!",
-            " is standing here"
-    };
-
-    if (PRF_FLAGGED(ch, PRF_ROOMFLAGS) && IS_NPC(i)) {
-        ch->sendf("@D[@G%d@D]@w %s", GET_MOB_VNUM(i), i->scriptString().c_str());
-    }
-
-    if (IS_NPC(i) && !i->getRoomDesc().empty() && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
-        ch->sendf("%s", i->getRoomDesc());
-
-        auto icur = GET_HIT(i);
-        auto imax = i->getEffMaxPL();
-
-        std::vector<std::string> messages;
-
-        if (icur >= (imax) * .9 && icur != (imax))
-            messages.emplace_back("@R...Some slight wounds on $s body.@w");
-        else if (icur >= (imax) * .8 && icur < (imax) * .9)
-            messages.emplace_back("@R...A few wounds on $s body.@w");
-        else if (icur >= (imax) * .7 && icur < (imax) * .8)
-            messages.emplace_back("@R...Many wounds on $s body.@w");
-        else if (icur >= (imax) * .6 && icur < (imax) * .7)
-            messages.emplace_back("@R...Quite a few wounds on $s body.@w");
-        else if (icur >= (imax) * .5 && icur < (imax) * .6)
-            messages.emplace_back("@R...Horrible wounds on $s body.@w");
-        else if (icur >= (imax) * .4 && icur < (imax) * .5)
-            messages.emplace_back("@R...Blood is seeping from the wounds on $s body.@w");
-        else if (icur >= (imax) * .3 && icur < (imax) * .4)
-            messages.emplace_back("@R...$s body is in terrible shape.@w");
-        else if (icur >= (imax) * .2 && icur < (imax) * .3)
-            messages.emplace_back("@R...Is absolutely covered in wounds.@w");
-        else if (icur >= (imax) * .1 && icur < (imax) * .2)
-            messages.emplace_back("@R...Is on $s last leg.@w");
-        else if (icur < (imax) * .1)
-            messages.emplace_back("@R...Should be DEAD soon.@w");
-
-        if (GET_EAVESDROP(i) > 0) {
-            messages.emplace_back(fmt::format("@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]));
-        }
-        if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 1)
-            messages.emplace_back("...$e is in the air!");
-        if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 2)
-            messages.emplace_back("...$e is high in the air!");
-        if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
-            messages.emplace_back("...$e has a barrier around $s body!");
-        if (AFF_FLAGGED(i, AFF_FIRESHIELD))
-            messages.emplace_back("...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!");
-        if (AFF_FLAGGED(i, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
-            messages.emplace_back("...$e has a @Gbarrier@w of @cwater@w and @Cki@w around $s body!");
-        if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
-            messages.emplace_back("...$e is spinning in a vortex!");
-        if (GET_CHARGE(i))
-            messages.emplace_back("...$e has a bright %s aura around $s body!");
-        if (AFF_FLAGGED(i, AFF_METAMORPH))
-            messages.emplace_back("@w...$e has a dark, @rred@w aura and menacing presence.");
-        if (AFF_FLAGGED(i, AFF_HAYASA))
-            messages.emplace_back("@w...$e has a soft @cblue@w glow around $s body!");
-        if (AFF_FLAGGED(i, AFF_BLIND))
-            messages.emplace_back("...$e is groping around blindly!");
-        if (affected_by_spell(i, SPELL_FAERIE_FIRE))
-            messages.emplace_back("@m...$e @mis outlined with purple fire!@m");
-        if (GET_FEATURE(i)) {
-            messages.emplace_back(fmt::format("@C%s@n", GET_FEATURE(i)));
-        }
-
-        for(const auto& msg : messages) act(msg.c_str(), false, i, nullptr, ch, TO_VICT);
-
-        return;
-    }
-
-    auto shd = i->getShortDesc();
-
-    if (IS_NPC(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->sendf("@w%s", shd);
-    else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
-        ch->sendf("@w%s is being grappled with by YOU!", shd);
-    else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)
-        ch->sendf("@w%s is being absorbed from by %s!", shd, GRAPPLED(i)->getDisplayName(ch));
-    else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) == ch)
-        ch->sendf("@w%s is being absorbed from by YOU!", shd);
-    else if (IS_NPC(i) && ABSORBBY(i) && ABSORBBY(i) != ch)
-        ch->sendf("@w%s is being absorbed from by %s!", shd, ABSORBBY(i)->getDisplayName(ch));
-    else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING &&
-             is_sparring(i))
-        ch->sendf("@w%c%s is sparring with %s!", shd, FIGHTING(i)->getDisplayName(ch));
-    else if (IS_NPC(i) && FIGHTING(i) && is_sparring(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING &&
-             GET_POS(i) != POS_SLEEPING)
-        ch->sendf("@w%s is sparring with you!", shd);
-    else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) != ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->sendf("@w%s is fighting %s!", shd, FIGHTING(i)->getDisplayName(ch));
-    else if (IS_NPC(i) && FIGHTING(i) && FIGHTING(i) == ch && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        ch->sendf("@w%s is fighting YOU!", shd);
-    else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SITTING)
-        ch->sendf("@w%s is sitting here.", shd);
-    else if (IS_NPC(i) && FIGHTING(i) && GET_POS(i) == POS_SLEEPING)
-        ch->sendf("@w%s is sleeping here.", shd);
-    else if (IS_NPC(i))
-        ch->sendf("@w%s", shd);
-    else if (!IS_NPC(i)) {
-        if (IS_MAJIN(i) && AFF_FLAGGED(i, AFF_LIQUEFIED)) {
-            ch->sendf("@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int) GET_SKIN(i)]);
-            return;
-        }
-        if ((GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(i) > 0) || IS_NPC(ch)) {
-            ch->sendf("@w%s", i->getDisplayName(ch));
-        } else if ((!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
-            ch->sendf("@w%s", i->getDisplayName(ch));
-        } else if (!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
-            if (GET_DISTFEA(i) == DISTFEA_EYE) {
-                ch->sendf("@wA %s eyed %s %s", eye_types[(int) GET_EYE(i)], MAFE(i), LRACE(i));
-            } else if (GET_DISTFEA(i) == DISTFEA_HAIR) {
-                if (IS_MAJIN(i)) {
-                    ch->sendf("@wA %s majin, with a %s forelock,", MAFE(i), FHA_types[(int) GET_HAIRL(i)]);
-                } else if (IS_NAMEK(i)) {
-                    ch->sendf("@wA namek, with %s antennae,", FHA_types[(int) GET_HAIRL(i)]);
-                } else if (IS_ARLIAN(i)) {
-                    ch->sendf("@wA arlian, with %s antennae,", FHA_types[(int) GET_HAIRL(i)]);
-                } else if (IS_ICER(i) || IS_DEMON(i)) {
-                    ch->sendf("@wA %s %s, with %s horns", MAFE(i), LRACE(i), FHA_types[(int) GET_HAIRL(i)]);
-                } else {
-                    char blarg[MAX_INPUT_LENGTH];
-                    sprintf(blarg, "%s %s hair %s", hairl_types[(int) GET_HAIRL(i)], hairc_types[(int) GET_HAIRC(i)],
-                            hairs_types[(int) GET_HAIRS(i)]);
-                    ch->sendf("@wA %s %s, with %s", MAFE(i), LRACE(i),
-                                 GET_HAIRL(i) == 0 ? "a bald head" : (blarg));
-                }
-            } else if (GET_DISTFEA(i) == DISTFEA_SKIN) {
-                ch->sendf("@wA %s skinned %s %s", skin_types[(int) GET_SKIN(i)], MAFE(i), LRACE(i));
-            } else if (GET_DISTFEA(i) == DISTFEA_HEIGHT) {
-                char *height;
-                if (IS_TRUFFLE(i)) {
-                    if (GET_PC_HEIGHT(i) > 70) {
-                        height = strdup("very tall");
-                    } else if (GET_PC_HEIGHT(i) > 55) {
-                        height = strdup("tall");
-                    } else if (GET_PC_HEIGHT(i) > 35) {
-                        height = strdup("average height");
-                    } else {
-                        height = strdup("short");
-                    }
-                } else {
-                    if (GET_PC_HEIGHT(i) > 200) {
-                        height = strdup("very tall");
-                    } else if (GET_PC_HEIGHT(i) > 180) {
-                        height = strdup("tall");
-                    } else if (GET_PC_HEIGHT(i) > 150) {
-                        height = strdup("average height");
-                    } else if (GET_PC_HEIGHT(i) > 120) {
-                        height = strdup("short");
-                    } else {
-                        height = strdup("very short");
-                    }
-                }
-                ch->sendf("@wA %s %s %s", height, MAFE(i), LRACE(i));
-                if (height) {
-                    free(height);
-                }
-            } else if (GET_DISTFEA(i) == DISTFEA_WEIGHT) {
-                char *height;
-                auto w = i->getWeight();
-                if (IS_TRUFFLE(i)) {
-                    if (w > 35) {
-                        height = strdup("very heavy");
-                    } else if (w > 25) {
-                        height = strdup("heavy");
-                    } else if (w > 15) {
-                        height = strdup("average weight");
-                    } else {
-                        height = strdup("welterweight");
-                    }
-                } else {
-                    if (w > 120) {
-                        height = strdup("very heavy");
-                    } else if (w > 100) {
-                        height = strdup("heavy");
-                    } else if (w > 80) {
-                        height = strdup("average weight");
-                    } else if (w > 60) {
-                        height = strdup("lightweight");
-                    } else {
-                        height = strdup("welterweight");
-                    }
-                }
-                ch->sendf("@wA %s %s %s", height, MAFE(i), LRACE(i));
-                if (height) {
-                    free(height);
-                }
-            }
-        } else {
-            ch->sendf("@wA disguised %s %s", MAFE(i), LRACE(i));
-        }
-    }
-
-    if (!IS_NPC(i) || !FIGHTING(i)) {
-        if (AFF_FLAGGED(i, AFF_INVISIBLE)) {
-            ch->sendf(", is invisible");
-            count = true;
-        }
-        if (AFF_FLAGGED(i, AFF_ETHEREAL)) {
-            ch->sendf(", has a halo");
-            count = true;
-        }
-        if (AFF_FLAGGED(i, AFF_HIDE) && i != ch) {
-            ch->sendf(", is hiding");
-            if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
-                improve_skill(i, SKILL_HIDE, 1);
-            }
-            count = true;
-        }
-        if (!IS_NPC(i) && !i->desc) {
-            ch->sendf(", has a blank stare");
-            count = true;
-        }
-        if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_WRITING)) {
-            ch->sendf(", is writing");
-            count = true;
-        }
-        if (!IS_NPC(i) && PRF_FLAGGED(i, PRF_BUILDWALK)) {
-            ch->sendf(", is buildwalking");
-            count = true;
-        }
-        if (!IS_NPC(i) && ABSORBING(i) && ABSORBING(i) != ch) {
-            ch->sendf(", is absorbing from %s", GET_NAME(ABSORBING(i)));
-            count = true;
-        }
-        if (!IS_NPC(i) && GRAPPLING(i) && GRAPPLING(i) != ch) {
-            ch->sendf(", is grappling with %s",
-                         readIntro(ch, GRAPPLING(i)) == 1 ? get_i_name(ch, GRAPPLING(i)) : introd_calc(GRAPPLING(i)));
-            count = true;
-        }
-        if (!IS_NPC(i) && CARRYING(i) && CARRYING(i) != ch) {
-            ch->sendf(", is carrying %s",
-                         readIntro(ch, CARRYING(i)) == 1 ? get_i_name(ch, CARRYING(i)) : introd_calc(CARRYING(i)));
-            count = true;
-        }
-        if (!IS_NPC(i) && CARRIED_BY(i) && CARRIED_BY(i) != ch) {
-            ch->sendf(", is being carried by %s",
-                         readIntro(ch, CARRIED_BY(i)) == 1 ? get_i_name(ch, CARRIED_BY(i)) : introd_calc(
-                                 CARRIED_BY(i)));
-            count = true;
-        }
-        if (!IS_NPC(i) && GRAPPLING(i) && GRAPPLING(i) == ch) {
-            ch->sendf(", is grappling with YOU");
-            count = true;
-        }
-        if (!IS_NPC(i) && ABSORBING(i) && ABSORBING(i) == ch) {
-            ch->sendf(", is absorbing from YOU");
-            count = true;
-        }
-        if (!IS_NPC(i) && ABSORBING(ch) && ABSORBING(ch) == i) {
-            ch->sendf(", is being absorbed from by YOU");
-            count = true;
-        }
-        if (!IS_NPC(i) && GRAPPLING(ch) && GRAPPLING(ch) == i) {
-            ch->sendf(", is being grappled with by YOU");
-            count = true;
-        }
-        if (!IS_NPC(i) && CARRYING(ch) && CARRYING(ch) == i) {
-            ch->sendf(", is being carried by you");
-            count = true;
-        }
-        if (!IS_NPC(ch) && !IS_NPC(i) && FIGHTING(i)) {
-            if (!PLR_FLAGGED(i, PLR_SPAR) ||
-                (PLR_FLAGGED(i, PLR_SPAR) && (!PLR_FLAGGED(FIGHTING(i), PLR_SPAR) || IS_NPC(FIGHTING(i))))) {
-                ch->sendf(", is here fighting ");
-            }
-            if (PLR_FLAGGED(i, PLR_SPAR) && PLR_FLAGGED(FIGHTING(i), PLR_SPAR)) {
-                ch->sendf(", is here sparring ");
-            }
-            if (FIGHTING(i) == ch) {
-                ch->sendf("@rYOU@w");
-                count = true;
-            } else {
-                if (IN_ROOM(i) == IN_ROOM(FIGHTING(i))) {
-                    ch->sendf("%s", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
-                                                                                       ? get_i_name(ch, FIGHTING(i))
-                                                                                       : LRACE(FIGHTING(i))));
-                    count = true;
-                } else {
-                    ch->sendf("someone who has already left!");
-                }
-            }
-        }
-    }
-    if (SITS(i)) {
-        chair = SITS(i);
-        if (PLR_FLAGGED(i, PLR_HEALT)) {
-            ch->sendf("@w is floating inside a healing tank.");
-        } else if (count == true) {
-            ch->sendf(",@w and%s on %s.", positions[(int) GET_POS(i)], chair->getShortDesc());
-        } else if (count == false) {
-            ch->sendf("@w%s on %s.", positions[(int) GET_POS(i)], chair->getShortDesc());
-        }
-    } else if (!PLR_FLAGGED(i, PLR_PILOTING) && !SITS(i) && (!IS_NPC(i) || !FIGHTING(i))) {
-        if (count == true) {
-            ch->sendf("@w, and%s.", positions[(int) GET_POS(i)]);
-        }
-        if (count == false) {
-            ch->sendf("@w%s.", positions[(int) GET_POS(i)]);
-        }
-    } else if (PLR_FLAGGED(i, PLR_PILOTING)) {
-        ch->sendf("@w, is sitting in the pilot's chair.\r\n");
-    } else {
-
-        if (FIGHTING(i) && !IS_NPC(ch) && !IS_NPC(i)) {
-            if (!PLR_FLAGGED(i, PLR_SPAR)) {
-                ch->sendf(", is here fighting ");
-            }
-            if (PLR_FLAGGED(i, PLR_SPAR)) {
-                ch->sendf(", is here sparring ");
-            }
-            if (FIGHTING(i) == ch)
-                ch->sendf("@rYOU@w!");
-            else {
-                if (IN_ROOM(i) == IN_ROOM(FIGHTING(i)))
-                    ch->sendf("%s!", GET_ADMLEVEL(ch) ? GET_NAME(FIGHTING(i)) : (readIntro(ch, FIGHTING(i)) == 1
-                                                                                        ? get_i_name(ch, FIGHTING(i))
-                                                                                        : LRACE(FIGHTING(i))));
-                else
-                    ch->sendf("someone who has already left!");
-            }
-        } else if (!IS_NPC(i)) {            /* NIL fighting pointer */
-            ch->sendf(" is here struggling with thin air.");
-        }
-    }
-
-
-    if (AFF_FLAGGED(ch, AFF_DETECT_ALIGN)) {
-        if (IS_EVIL(i))
-            ch->sendf(" (@rRed@[3] Aura)");
-        else if (IS_GOOD(i))
-            ch->sendf(" (@bBlue@[3] Aura)");
-    }
-    if (!IS_NPC(i) && PRF_FLAGGED(i, PRF_AFK))
-        ch->sendf(" @D(@RAFK@D)");
-    else if (!IS_NPC(i) && i->timer > 3)
-        ch->sendf(" @D(@RIDLE@D)");
-    ch->sendf("@n\r\n");
-
-    std::vector<std::string> messages;
-
-    if (GET_EAVESDROP(i) > 0) {
-        messages.emplace_back(fmt::format("@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]));
-    }
-    if (PLR_FLAGGED(i, PLR_FISHING)) {
-        messages.emplace_back("@w...$e is @Cfishing@w.@n");
-    }
-    if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
-        messages.emplace_back(fmt::format("...is surrounded by a bright %s aura.", aura_types[GET_AURA(i)]));
-    }
-
-    auto is_oozaru = (i->form == FormID::Oozaru || i->form == FormID::GoldenOozaru);
-
-    if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
-        messages.emplace_back("@w...$e has a @bbarrier@w around $s body!");
-    if (AFF_FLAGGED(i, AFF_FIRESHIELD))
-        messages.emplace_back("@w...$e has @rf@Rl@Ya@rm@Re@Ys@w around $s body!");
-    if (AFF_FLAGGED(i, AFF_HEALGLOW))
-        messages.emplace_back("@w...$e has a serene @Cblue@Y glow@w around $s body.");
-    if (AFF_FLAGGED(i, AFF_EARMOR))
-        messages.emplace_back("@w...$e has ghostly @Ggreen@w ethereal armor around $s body.");
-    if (AFF_FLAGGED(i, AFF_SANCTUARY) && GET_SKILL(i, SKILL_AQUA_BARRIER))
-        messages.emplace_back("@w...$e has a @bbarrier@w of @cwater@w and @CKi@w around $s body!");
-    if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 1)
-        messages.emplace_back("@w...$e is in the air!");
-    if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 2)
-        messages.emplace_back("@w...$e is high in the air!");
-    if (GET_KAIOKEN(i) > 0)
-        messages.emplace_back("@w...@r$e has a red aura around $s body!");
-    if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
-        messages.emplace_back("@w...$e is spinning in a vortex!");
-    if (IS_TRANSFORMED(i) && !IS_ANDROID(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i))
-        messages.emplace_back("@w...$e has energy crackling around $s body!");
-    if (GET_CHARGE(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i)) {
-        messages.emplace_back(fmt::format("@w...$e has a bright %s aura around $s body!", aura_types[GET_AURA(i)]));
-    }
-    if (!is_oozaru && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        messages.emplace_back("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!");
-    if (!is_oozaru && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
-        messages.emplace_back(fmt::format("@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]));
-    }
-    if (i->form != FormID::Oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        messages.emplace_back("@w...$e has energy crackling around $s body!");
-    if (i->form == FormID::Oozaru && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        messages.emplace_back("@w...$e is in the form of a @rgreat ape@w!");
-    if (AFF_FLAGGED(ch, AFF_KYODAIKA))
-        messages.emplace_back("@w...$e has expanded $s body size@w!");
-    if (AFF_FLAGGED(i, AFF_HAYASA))
-        messages.emplace_back("@w...$e has a soft @cblue@w glow around $s body!");
-    if (i->form == FormID::Oozaru && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        messages.emplace_back("@w...$e has energy crackling around $s @rgreat ape@w body!");
-    if (GET_FEATURE(i)) {
-        messages.emplace_back(fmt::format("@C%s@n", GET_FEATURE(i)));
-    }
-
-    if (GET_RDISPLAY(i)) {
-        if (GET_RDISPLAY(i) != "Empty") {
-            messages.emplace_back(fmt::format("...%s", GET_RDISPLAY(i)));
-        }
-    }
-    for(const auto& msg : messages) act(msg.c_str(), false, i, nullptr, ch, TO_VICT);
-
-}
-
-
-static void list_char_to_char(std::vector<BaseCharacter*> people, BaseCharacter *ch) {
-    BaseCharacter *i, *j;
-    struct hide_node {
-        struct hide_node *next;
-        BaseCharacter *hidden;
-    } *hideinfo, *lasthide, *tmphide;
-    int num;
-
-    hideinfo = lasthide = nullptr;
-
-    for (auto i : people) {
-        if (AFF_FLAGGED(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
-            if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
-                improve_skill(i, SKILL_HIDE, 1);
-            }
-            CREATE(tmphide, struct hide_node, 1);
-            tmphide->next = nullptr;
-            tmphide->hidden = i;
-            if (!lasthide) {
-                hideinfo = lasthide = tmphide;
-            } else {
-                lasthide->next = tmphide;
-                lasthide = tmphide;
-            }
-            continue;
-        }
-    }
-
-    for (auto i : people) {
-        /* hide npcs whose description starts with a '.' from non-holylighted people
-    - Idea from Elaseth of TBA */
-        if ((ch == i) || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i)
-                          && i->getRoomDesc().starts_with('.')))
-            continue;
-
-        for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-            if (tmphide->hidden == i)
-                break;
-        if (tmphide)
-            continue;
-
-        if (CAN_SEE(ch, i)) {
-            num = 0;
-            /* Now show this mob's name and other stuff */
-            ch->sendf("@w");
-            if (num > 1)
-                ch->sendf("@D(@Rx@Y%2i@D)@n ", num);
-            list_one_char(i, ch);
-            ch->sendf("@n");
-        } /* processed a character we can see */
-        else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) &&
-                 AFF_FLAGGED(i, AFF_INFRAVISION))
-            ch->sendf("@wYou see a pair of glowing red eyes looking your way.@n\r\n");
-    } /* loop through all characters in room */
-}
-
-static void do_auto_exits(Room *room, BaseCharacter *ch, int exit_mode) {
-    int door, door_found = 0, has_light = false, i;
-    char dlist1[500];
-    char dlist2[500];
-    char dlist3[500];
-    char dlist4[500];
-    char dlist5[500];
-    char dlist6[500];
-    char dlist7[500];
-    char dlist8[500];
-    char dlist9[500];
-    char dlist10[500];
-    char dlist11[500];
-    char dlist12[500];
-
-    *dlist1 = '\0';
-    *dlist2 = '\0';
-    *dlist3 = '\0';
-    *dlist4 = '\0';
-    *dlist5 = '\0';
-    *dlist6 = '\0';
-    *dlist7 = '\0';
-    *dlist8 = '\0';
-    *dlist9 = '\0';
-    *dlist10 = '\0';
-    *dlist11 = '\0';
-    *dlist12 = '\0';
-
-    if (exit_mode == EXIT_OFF) {
-        ch->sendf("@D------------------------------------------------------------------------@n\r\n");
-    }
-    int space = false;
-    if (room->sector_type == SECT_SPACE && room->getUID() >= 20000) {
-        space = true;
-    }
-    if (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) == room->getUID()) {
-        /* Compass and Auto-map - Iovan 9-11-10 */
-        ch->sendf("@D------------------------------------------------------------------------@n\r\n");
-        ch->sendf("@w      Compass           Auto-Map            Map Key\r\n");
-        ch->sendf("@R     ---------         ----------   -----------------------------\r\n");
-        gen_map(ch, 0);
-        ch->sendf("@D------------------------------------------------------------------------@n\r\n");
-    }
-    if (exit_mode == EXIT_NORMAL && space == true) {
-        /* printmap */
-        ch->sendf("@D------------------------------[@CRadar@D]---------------------------------@n\r\n");
-        printmap(room->getUID(), ch, 1, -1);
-        ch->sendf("     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
-        ch->sendf("@D------------------------------------------------------------------------@n\r\n");
-    }
-    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) != room->getUID())) {
-        ch->sendf("@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
-        if (IS_AFFECTED(ch, AFF_BLIND)) {
-            ch->sendf("You can't see a damned thing, you're blind!\r\n");
-            return;
-        }
-        if (PLR_FLAGGED(ch, PLR_EYEC)) {
-            ch->sendf("You can't see a damned thing, your eyes are closed!\r\n");
-            return;
-        }
-        if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-            ch->sendf("It is pitch black...\r\n");
-            return;
-        }
-
-        /* Is the character using a working light source? */
-        has_light = ch->isProvidingLight();
-
-        bool admVision = ADM_FLAGGED(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4;
-
-        std::map<int, char*> dlists = {
-                {0, dlist2},
-                {1, dlist4},
-                {2, dlist6},
-                {3, dlist8},
-                {4, dlist9},
-                {5, dlist10},
-                {6, dlist1},
-                {7, dlist3},
-                {8, dlist5},
-                {9, dlist7},
-                {10, dlist11},
-                {11, dlist12}
-        };
-
-        auto exits = room->getExits();
-
-        for (auto &[door, d] : exits) {
-            auto dest = d->getDestination();
-            if(!dest) continue;
-            auto dl = dlists[door];
-
-            auto al = d->getAlias();
-
-            if (admVision) {
-                /* Immortals see everything */
-                door_found++;
-                char blam[9];
-                sprintf(blam, "%s", dirs[door]);
-                *blam = toupper(*blam);
-
-                auto dirname = dirs[door];
-                auto rdirname = dirs[rev_dir[door]];
-
-
-                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->getUID(), dest->getDisplayName(ch).c_str());
-                if (d->checkFlag(FlagType::Exit, EX_ISDOOR) || d->checkFlag(FlagType::Exit, EX_SECRET)) {
-                    /* This exit has a door - tell all about it */
-                    char argh[100];
-                    sprintf(argh, "%s ",
-                            strcasecmp(fname(al.c_str()), "undefined") ? fname(
-                                    al.c_str()) : "opening");
-                    sprintf(dl + strlen(dl), "                    The %s%s %s %s %s%s.\r\n",
-                            d->checkFlag(FlagType::Exit, EX_SECRET) ?
-                            "@rsecret@w " : "",
-                            (al.c_str() && strcasecmp(fname(al.c_str()), "undefined")) ?
-                            fname(al.c_str()) : "opening",
-                            strstr(argh, "s ") != nullptr ? "are" : "is",
-                            d->checkFlag(FlagType::Exit, EX_CLOSED) ?
-                            "closed" : "open",
-                            d->checkFlag(FlagType::Exit, EX_LOCKED) ?
-                            "and locked" : "and unlocked",
-                            d->checkFlag(FlagType::Exit, EX_PICKPROOF) ?
-                            " (pickproof)" : "");
-                }
-            }
-            else { /* This is what mortal characters see */
-                if (!d->checkFlag(FlagType::Exit, EX_CLOSED)) {
-                    /* And the door is open */
-                    door_found++;
-                    char blam[9];
-                    sprintf(blam, "%s", dirs[door]);
-                    *blam = toupper(*blam);
-
-                    sprintf(dl, "@c%-9s @D-@w %s\r\n", blam,
-                            IS_DARK(dest->getUID()) && !CAN_SEE_IN_DARK(ch) && !has_light
-                            ? "@bToo dark to tell.@w" : dest->getDisplayName(ch).c_str());
-
-                } else if (CONFIG_DISP_CLOSED_DOORS && !d->checkFlag(FlagType::Exit, EX_SECRET)) {
-                    /* But we tell them the door is closed */
-                    door_found++;
-                    char blam[9];
-                    sprintf(blam, "%s", dirs[door]);
-                    *blam = toupper(*blam);
-                    if (door == 6) {
-
-                    }
-                    sprintf(dl, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam,
-                            (al.c_str()) ? fname(al.c_str())
-                                         : "opening");
-                }
-            }
-        }
-
-        if (!door_found)
-            ch->sendf(" None.\r\n");
-        if (strstr(dlist1, "Northwest")) {
-            ch->sendf("%s", dlist1);
-            *dlist1 = '\0';
-        }
-        if (strstr(dlist2, "North")) {
-            ch->sendf("%s", dlist2);
-            *dlist2 = '\0';
-        }
-        if (strstr(dlist3, "Northeast")) {
-            ch->sendf("%s", dlist3);
-            *dlist3 = '\0';
-        }
-        if (strstr(dlist4, "East")) {
-            ch->sendf("%s", dlist4);
-            *dlist4 = '\0';
-        }
-        if (strstr(dlist5, "Southeast")) {
-            ch->sendf("%s", dlist5);
-            *dlist5 = '\0';
-        }
-        if (strstr(dlist6, "South")) {
-            ch->sendf("%s", dlist6);
-            *dlist6 = '\0';
-        }
-        if (strstr(dlist7, "Southwest")) {
-            ch->sendf("%s", dlist7);
-            *dlist7 = '\0';
-        }
-        if (strstr(dlist8, "West")) {
-            ch->sendf("%s", dlist8);
-            *dlist8 = '\0';
-        }
-        if (strstr(dlist9, "Up")) {
-            ch->sendf("%s", dlist9);
-            *dlist9 = '\0';
-        }
-        if (strstr(dlist10, "Down")) {
-            ch->sendf("%s", dlist10);
-            *dlist10 = '\0';
-        }
-        if (strstr(dlist11, "Inside")) {
-            ch->sendf("%s", dlist11);
-            *dlist11 = '\0';
-        }
-        if (strstr(dlist12, "Outside")) {
-            ch->sendf("%s", dlist12);
-            *dlist12 = '\0';
-        }
-        
-        ch->sendf("@D------------------------------------------------------------------------@n\r\n");
-        if (room->checkFlag(FlagType::Room, ROOM_HOUSE) && !room->checkFlag(FlagType::Room, ROOM_GARDEN1) &&
-            !room->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
-            ch->sendf("@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
-        }
-        if (room->checkFlag(FlagType::Room, ROOM_HOUSE) && room->checkFlag(FlagType::Room, ROOM_GARDEN1) &&
-            !room->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
-            ch->sendf("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
-        }
-        if (room->checkFlag(FlagType::Room, ROOM_HOUSE) && !room->checkFlag(FlagType::Room, ROOM_GARDEN1) &&
-                room->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
-            ch->sendf("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n",
-                         check_saveroom_count(ch, nullptr));
-        }
-        if (GET_RADAR1(ch) == room->getUID() && GET_RADAR2(ch) == room->getUID() &&
-            GET_RADAR3(ch) != room->getUID()) {
-            ch->sendf("@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) == room->getUID() && GET_RADAR2(ch) != room->getUID() &&
-                   GET_RADAR3(ch) == room->getUID()) {
-            ch->sendf("@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) != room->getUID() && GET_RADAR2(ch) == room->getUID() &&
-                   GET_RADAR3(ch) == room->getUID()) {
-            ch->sendf("@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) == room->getUID() && GET_RADAR2(ch) == room->getUID() &&
-                   GET_RADAR3(ch) == room->getUID()) {
-            ch->sendf("@CAll three of your buoys are floating here. Why?@n\r\n");
-        } else if (GET_RADAR1(ch) == room->getUID()) {
-            ch->sendf("@CYour @cBuoy #1@C is floating here.@n\r\n");
-        } else if (GET_RADAR2(ch) == room->getUID()) {
-            ch->sendf("@CYour @cBuoy #2@C is floating here.@n\r\n");
-        } else if (GET_RADAR3(ch) == room->getUID()) {
-            ch->sendf("@CYour @cBuoy #3@C is floating here.@n\r\n");
-        }
-    }
-}
-
 std::string Room::renderExits1(GameEntity *viewer) {
     std::string result;
 
@@ -4584,26 +3358,6 @@ std::string Room::renderExits2(GameEntity* viewer) {
     return result;
 }
 
-
-static void do_auto_exits2(Room *room, BaseCharacter *ch) {
-    int door, slen = 0;
-
-    ch->sendf("\nExits: ");
-
-    for (auto &[door, d] : room->getExits()) {
-
-        auto dest = d->getDestination();
-        if(!dest) continue;
-        if (d->checkFlag(FlagType::Exit, EX_CLOSED))
-            continue;
-
-        ch->sendf("%s ", abbr_dirs[door]);
-        slen++;
-    }
-
-    ch->sendf("%s\r\n", slen ? "" : "None!");
-}
-
 ACMD(do_exits) {
     if (IS_AFFECTED(ch, AFF_BLIND)) {
         ch->sendf("You can't see a damned thing, you're blind!\r\n");
@@ -4668,268 +3422,6 @@ ACMD(do_autoexit) {
             break;
     }
     ch->sendf("Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
-}
-
-void look_at_room(room_rnum target_room, BaseCharacter *ch, int ignore_brief) {
-    auto rm = getWorld<Room>(target_room);
-    look_at_room(rm, ch, ignore_brief);
-}
-
-void look_at_room(Room *rm, BaseCharacter *ch, int ignore_brief) {
-    trig_data *t;
-
-    if (!ch->desc)
-        return;
-    
-    auto sect = rm->sector_type;
-    auto sunk = rm->isSunken();
-
-    if (IS_DARK(rm->getUID()) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-        ch->sendf("It's too dark to make out much detail...\r\n");
-    } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
-        ch->sendf("You see nothing but infinite darkness...\r\n");
-        return;
-    } else if (PLR_FLAGGED(ch, PLR_EYEC)) {
-        ch->sendf("You can't see a damned thing, your eyes are closed!\r\n");
-        return;
-    }
-    if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
-        char buf[MAX_STRING_LENGTH];
-        char buf2[MAX_STRING_LENGTH];
-        char buf3[MAX_STRING_LENGTH];
-
-        sprintf(buf, "%s", join(rm->getFlagNames(FlagType::Room), " ").c_str());
-        sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
-        if (!PRF_FLAGGED(ch, PRF_NODEC)) {
-            ch->sendf("\r\n@wO----------------------------------------------------------------------O@n\r\n");
-        }
-
-        ch->sendf("@wLocation: @G%-70s@w\r\n", rm->getDisplayName(ch));
-        if (!rm->script->dgScripts.empty()) {
-            ch->sendf("@D[@GTriggers");
-            for (auto t : rm->script->dgScripts)
-                ch->sendf(" %d", GET_TRIG_VNUM(t));
-            ch->sendf("@D] ");
-        }
-        if(auto parent = rm->getLocation(); parent) {
-            std::vector<std::string> ancestors;
-            while(parent) {
-                ancestors.emplace_back(fmt::format("[{}] {}@n", parent->getUID(), parent->getDisplayName(ch)));
-                parent = parent->getLocation();
-                if(parent == rm) break;
-            }
-            // Reverse areas.
-            std::reverse(ancestors.begin(), ancestors.end());
-            auto joined = join(ancestors, " -> ");
-            ch->sendf("@wArea: @D[@n %s @D]@n\r\n", joined.c_str());
-        }
-        double grav = rm->getEnvVar(EnvVar::Gravity);
-        auto g = fmt::format("{}", grav);
-        sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2,
-                rm->getUID(), g.c_str());
-        ch->sendf("@wFlags: %-70s@w\r\n", buf3);
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            ch->sendf("@wO----------------------------------------------------------------------O@n\r\n");
-        }
-    } else {
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            ch->sendf("@wO----------------------------------------------------------------------O@n\r\n");
-        }
-        ch->sendf("@wLocation: %-70s@n\r\n", rm->getDisplayName(ch));
-        if(auto planet = ch->getPlanet(); planet) {
-            ch->sendf("@wPlanet: @G%s@n\r\n", planet->getDisplayName(ch));
-        } else {
-            if (rm->checkFlag(FlagType::Room, ROOM_NEO)) {
-                ch->sendf("@wPlanet: @WNeo Nirvana@n\r\n");
-            } else if (rm->checkFlag(FlagType::Room, ROOM_AL)) {
-                ch->sendf("@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
-            } else if (rm->checkFlag(FlagType::Room, ROOM_HELL)) {
-                ch->sendf("@wDimension: @RPunishment Hell@n\r\n");
-            } else if (rm->checkFlag(FlagType::Room, ROOM_RHELL)) {
-                ch->sendf("@wDimension: @RH@re@Dl@Rl@n\r\n");
-            }
-        }
-
-        double grav = rm->getEnvVar(EnvVar::Gravity);
-        if(grav <= 1.0) {
-            ch->sendf("@wGravity: @WNormal@n\r\n");
-        } else {
-            auto g = fmt::format("{}", grav);
-            ch->sendf("@wGravity: @W%sx@n\r\n", g.c_str());
-        }
-        if (rm->checkFlag(FlagType::Room, ROOM_REGEN)) {
-            ch->sendf("@CA feeling of calm and relaxation fills this room.@n\r\n");
-        }
-        if (rm->checkFlag(FlagType::Room, ROOM_AURA)) {
-            ch->sendf("@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
-        }
-        if (rm->checkFlag(FlagType::Room, ROOM_HBTC)) {
-            ch->sendf("@rThis room feels like it opperates in a different time frame.@n\r\n");
-        }
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            ch->sendf("@wO----------------------------------------------------------------------O@n\r\n");
-        }
-    }
-    
-    auto dmg = rm->getDamage();
-
-    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->checkFlag(FlagType::Room, ROOM_DEATH)) {
-        if (dmg <= 99) {
-            ch->sendf("@w%s@n", rm->getLookDesc());
-        }
-        if (dmg == 100 &&
-            (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING ||
-             sect == SECT_SHOP || sect == SECT_IMPORTANT)) {
-            ch->sendf("@w%s@n", rm->getLookDesc());
-        }
-        if (sect == SECT_INSIDE && dmg > 0) {
-            ch->sendf("\r\n");
-            if (dmg <= 2) {
-                ch->sendf("@wA small hole with chunks of debris that can be seen scarring the floor.@n");
-            } else if (dmg <= 4) {
-                ch->sendf("@wA couple small holes with chunks of debris that can be seen scarring the floor.@n");
-            } else if (dmg <= 6) {
-                ch->sendf("@wA few small holes with chunks of debris that can be seen scarring the floor.@n");
-            } else if (dmg <= 10) {
-                ch->sendf(
-                             "@wThere are several small holes with chunks of debris that can be seen scarring the floor.@n");
-            } else if (dmg <= 20) {
-                ch->sendf("@wMany holes fill the floor of this area, many of which have burn marks.@n");
-            } else if (dmg <= 30) {
-                ch->sendf("@wThe floor is severely damaged with many large holes.@n");
-            } else if (dmg <= 50) {
-                ch->sendf(
-                             "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
-            } else if (dmg <= 75) {
-                ch->sendf("@wThis entire area is falling apart, it has been damaged so badly.@n");
-            } else if (dmg <= 99) {
-                ch->sendf(
-                             "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
-            } else if (dmg >= 100) {
-                ch->sendf(
-                             "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
-            }
-            ch->sendf("\r\n");
-        } else if (
-                (sect == SECT_CITY || sect == SECT_FIELD || sect == SECT_HILLS ||
-                 sect == SECT_IMPORTANT) && dmg > 0) {
-            ch->sendf("\r\n");
-            if (dmg <= 2) {
-                ch->sendf("@wA small hole with chunks of debris that can be seen scarring the ground.@n");
-            } else if (dmg <= 4) {
-                ch->sendf(
-                             "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n");
-            } else if (dmg <= 6) {
-                ch->sendf("@wA few small craters with chunks of debris that can be seen scarring the ground.@n");
-            } else if (dmg <= 10) {
-                ch->sendf(
-                             "@wThere are several small craters with chunks of debris that can be seen scarring the ground.@n");
-            } else if (dmg <= 20) {
-                ch->sendf("@wMany craters fill the ground of this area, many of which have burn marks.@n");
-            } else if (dmg <= 30) {
-                ch->sendf("@wThe ground is severely damaged with many large craters.@n");
-            } else if (dmg <= 50) {
-                ch->sendf(
-                             "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
-            } else if (dmg <= 75) {
-                ch->sendf("@wThis entire area is falling apart, it has been damaged so badly.@n");
-            } else if (dmg <= 99) {
-                ch->sendf(
-                             "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
-            } else if (dmg >= 100) {
-                ch->sendf(
-                             "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
-            }
-            ch->sendf("\r\n");
-        } else if (sect == SECT_FOREST && dmg > 0) {
-            ch->sendf("\r\n");
-            if (dmg <= 2) {
-                ch->sendf("@wA small tree sits in a little crater here.@n");
-            } else if (dmg <= 4) {
-                ch->sendf("@wTrees have been uprooted by craters in the ground.@n");
-            } else if (dmg <= 6) {
-                ch->sendf(
-                             "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n");
-            } else if (dmg <= 10) {
-                ch->sendf("@wA large patch of trees have been destroyed and are laying in craters here.@n");
-            } else if (dmg <= 20) {
-                ch->sendf("@wSeveral craters have merged into one large crater in one part of this forest.@n");
-            } else if (dmg <= 30) {
-                ch->sendf(
-                             "@wThe open sky can easily be seen through a hole of trees destroyed\r\nand resting at the bottom of several craters here.@n");
-            } else if (dmg <= 50) {
-                ch->sendf(
-                             "@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n");
-            } else if (dmg <= 75) {
-                ch->sendf(
-                             "@wVery few trees are left standing in this area, replaced instead by large craters.@n");
-            } else if (dmg <= 99) {
-                ch->sendf(
-                             "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n");
-            } else if (dmg >= 100) {
-                ch->sendf(
-                             "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n");
-            }
-            ch->sendf("\r\n");
-        } else if (sect == SECT_MOUNTAIN && dmg > 0) {
-            ch->sendf("\r\n");
-            
-            if (dmg <= 2) {
-                ch->sendf("@wA small crater has been burned into the side of this mountain.@n");
-            } else if (dmg <= 4) {
-                ch->sendf("@wA couple craters have been burned into the side of this mountain.@n");
-            } else if (dmg <= 6) {
-                ch->sendf(
-                             "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n");
-            } else if (dmg <= 10) {
-                ch->sendf("@wSeveral bad craters can be seen in the side of the mountain here.@n");
-            } else if (dmg <= 20) {
-                ch->sendf(
-                             "@wLarge boulders have rolled down the mountain side and collected in many nearby craters.@n");
-            } else if (dmg <= 30) {
-                ch->sendf("@wMany craters are covering the mountainside here.@n");
-            } else if (dmg <= 50) {
-                ch->sendf(
-                             "@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n");
-            } else if (dmg <= 75) {
-                ch->sendf("@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n");
-            } else if (dmg <= 99) {
-                ch->sendf(
-                             "@wThe mountain side here has completely collapsed, shedding dangerous rubble down to its base.@n");
-            } else if (dmg >= 100) {
-                ch->sendf(
-                             "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n");
-            }
-            ch->sendf("\r\n");
-        }
-        if (rm->geffect >= 1 && rm->geffect <= 5) {
-            ch->sendf("@rLava@w is pooling in someplaces here...@n\r\n");
-        }
-        if (rm->geffect >= 6) {
-            ch->sendf("@RLava@r covers pretty much the entire area!@n\r\n");
-        }
-        if (rm->geffect < 0) {
-            ch->sendf("@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n\r\n");
-        }
-    }
-    /* autoexits */
-    if (PRF_FLAGGED(ch, PRF_NODEC))
-        do_auto_exits2(rm, ch);
-    else
-        do_auto_exits(rm, ch, EXIT_LEV(ch));
-
-    /* now list characters & objects */
-    if (rm->checkFlag(FlagType::Room, ROOM_GARDEN1)) {
-        ch->sendf("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
-    } else {
-        if (rm->checkFlag(FlagType::Room, ROOM_GARDEN2)) {
-            ch->sendf("@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
-        } else if (rm->checkFlag(FlagType::Room, ROOM_HOUSE)) {
-            ch->sendf("@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
-        }
-    }
-    list_obj_to_char(rm->getInventory(), ch, SHOW_OBJ_LONG, false);
-    list_char_to_char(rm->getPeople(), ch);
 }
 
 
@@ -5271,7 +3763,7 @@ static void look_in_obj(BaseCharacter *ch, char *arg) {
                 ch->sendf("It is pitch black...\r\n");
             } else {
                 ch->sendf("You look inside and see:\r\n");
-                look_at_room(vehicle_inside, ch, 0);
+                ch->sendLine(getWorld<Room>(vehicle_inside)->renderLocationFor(ch));
                 //ch->sendEvent(getWorld(vehicle_inside)->renderLocationFor(ch));
             }
         } else {
@@ -5604,8 +4096,7 @@ static void look_out_window(BaseCharacter *ch, char *arg) {
             else
                 act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
             ch->sendf("You look outside and see:\r\n");
-            look_at_room(target_room, ch, 0);
-            //ch->sendEvent(getWorld(target_room)->renderLocationFor(ch));
+            ch->sendLine(getWorld(target_room)->renderLocationFor(ch));
         }
     }
 }
@@ -5832,7 +4323,13 @@ ACMD(do_look) {
 
     if(IS_DARK(room->getUID()) && !CAN_SEE_IN_DARK(ch)) {
         ch->sendf("It is pitch black...\r\n");
-        list_char_to_char(room->getPeople(), ch);    /* glowing red eyes */
+        for(auto c : room->getPeople()) {
+            if(c == ch) continue;
+            if(ch->canSee(c) && c->canSeeInDark()) {
+                c->sendLine("Glowing red eyes peer out of the darkness at you.");
+                break;
+            }
+        }
         return;
     }
 
@@ -6138,14 +4635,13 @@ ACMD(do_score) {
 
 }
 
-static void trans_check(BaseCharacter *ch, BaseCharacter *vict) {
+static std::string trans_check(BaseCharacter *ch, GameEntity *viewer) {
 /* Rillao: transloc, add new transes here */
-    if(vict->form == FormID::Base || (vict->mimic && vict != ch)) {
-        ch->sendf("         @cCurrent Transformation@D: @wNone@n\r\n");
-        return;
+    if(ch->form == FormID::Base || (ch->mimic && viewer != ch)) {
+        return "         @cCurrent Transformation@D: @wNone@n\r\n";
     }
 
-    ch->sendf("         @cCurrent Transformation@D: %s\r\n", trans::getName(vict, vict->form));
+    return fmt::sprintf("         @cCurrent Transformation@D: %s\r\n", trans::getName(ch, ch->form));
 
 } // End trans check
 
@@ -6279,7 +4775,7 @@ ACMD(do_status) {
             ch->sendf("         You need not drink.\r\n");
         }
         ch->sendf("         @D--------------------@D[@GInfo@D]---------------------@n\r\n");
-        trans_check(ch, ch);
+        ch->sendf(trans_check(ch, ch));
         ch->sendf("         You have died %d times.\r\n", GET_DCOUNT(ch));
         if (PLR_FLAGGED(ch, PLR_NOSHOUT)) {
             ch->sendf("         You have been @rmuted@n on public channels.\r\n");
@@ -6892,51 +5388,58 @@ static void bonus_status(BaseCharacter *ch) {
 
 ACMD(do_inventory) {
     ch->sendf("@w              @YInventory\r\n@D-------------------------------------@w\r\n");
-    if (!IS_NPC(ch)) {
-        if (PLR_FLAGGED(ch, PLR_STOLEN)) {
-            ch->clearFlag(FlagType::PC, PLR_STOLEN);
-            ch->sendf("@r   --------------------------------------------------@n\n");
-            ch->sendf("@R    You notice that you have been robbed sometime recently!\n");
-            ch->sendf("@r   --------------------------------------------------@n\n");
-            return;
+    if (PLR_FLAGGED(ch, PLR_STOLEN)) {
+        ch->clearFlag(FlagType::PC, PLR_STOLEN);
+        ch->sendf("@r   --------------------------------------------------@n\n");
+        ch->sendf("@R    You notice that you have been robbed sometime recently!\n");
+        ch->sendf("@r   --------------------------------------------------@n\n");
+        return;
+    }
+    if(auto inv = ch->getInventory(); !inv.empty()) {
+        for(auto i : inv) {
+            if(!ch->canSee(i)) continue;
+            ch->sendLine(i->renderInventoryListingFor(ch));
+        }
+    } else {
+        ch->sendLine("Nothing.");
+    }
+}
+
+std::string GameEntity::renderEquipment(GameEntity* viewer, bool showEmpty) {
+    std::vector<std::string> lines;
+
+    auto equipment = getEquipment();
+    for(auto i = 1; i < NUM_WEARS; i++) {
+        auto eq = equipment[i];
+        if(!eq) {
+            if(showEmpty) {
+                lines.push_back(std::string(wear_where[i]) + "Nothing.");
+            }
+            continue;
+        };
+        if(viewer->canSee(eq)) {
+            if ((i != WEAR_WIELD1 && i != WEAR_WIELD2) || (!checkFlag(FlagType::PC, PLR_THANDW))) {
+                lines.emplace_back(std::string(wear_where[i]) + eq->renderInventoryListingFor(viewer));
+
+                if (OBJ_FLAGGED(eq, ITEM_SHEATH)) {
+                    for (auto obj2 : eq->getInventory()) {
+                        lines.emplace_back("@D  ---- @YSheathed@D ----@c> @n" + obj2->renderInventoryListingFor(viewer));
+                    }
+                }
+            } else if (checkFlag(FlagType::PC, PLR_THANDW)) {
+                lines.emplace_back("@c<@CWielded by B. Hands@c>@n " + eq->renderInventoryListingFor(viewer));
+            }
+        } else {
+            lines.push_back(std::string(wear_where[i]) + "Something.");
         }
     }
-    list_obj_to_char(ch->getInventory(), ch, SHOW_OBJ_SHORT, true);
-    ch->sendf("\n");
+
+    return join(lines, "@w\r\n") + "@w";
 }
 
 ACMD(do_equipment) {
     ch->sendf("        @YEquipment Being Worn\r\n@D-------------------------------------@w\r\n");
-    for (auto i = 1; i < NUM_WEARS; i++) {
-        if (auto eq = GET_EQ(ch, i); eq) {
-            if(CAN_SEE_OBJ(ch, eq)) {
-                if ((i != WEAR_WIELD1 && i != WEAR_WIELD2) || (!PLR_FLAGGED(ch, PLR_THANDW))) {
-                    ch->sendf("%s", wear_where[i]);
-                    show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
-
-                    if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_SHEATH)) {
-                        for (auto obj2 : eq->getInventory()) {
-                            ch->sendf("@D  ---- @YSheathed@D ----@c> @n");
-                            show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
-                        }
-                    }
-                } else if ((PLR_FLAGGED(ch, PLR_THANDW))) {
-                    ch->sendf("@c<@CWielded by B. Hands@c>@n ");
-                    show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
-                }
-            }
-            else {
-                ch->sendf("%s", wear_where[i]);
-                ch->sendf("Something.\r\n");
-            }
-        } else {
-            if (BODY_FLAGGED(ch, i) && (i != WEAR_WIELD2)) {
-                ch->sendf("%s@wNothing.@n\r\n", wear_where[i]);
-            } else if (BODY_FLAGGED(ch, i) && (i == WEAR_WIELD2 && !PLR_FLAGGED(ch, PLR_THANDW))) {
-                ch->sendf("%s@wNothing.@n\r\n", wear_where[i]);
-            }
-        }
-    }
+    ch->sendLine(ch->renderEquipment(ch, true));
 }
 
 ACMD(do_time) {
@@ -8339,8 +6842,7 @@ ACMD(do_scan) {
     for (auto &[i, d] : room->getExits()) {
         if(i > 10) break;
 
-        if (darkHere && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
-            (!AFF_FLAGGED(ch, AFF_INFRAVISION))) {
+        if (darkHere && !ch->canSeeInDark()) {
             ch->sendf("%s: DARK\r\n", dirnames[i]);
             continue;
         }
@@ -8355,9 +6857,13 @@ ACMD(do_scan) {
                      CCNRM(ch, C_NRM));
         ch->sendf("@W          -----------------          @n\r\n");
 
-        list_obj_to_char(dest->getInventory(), ch, SHOW_OBJ_LONG, false);
-        auto people = dest->getPeople();
-        list_char_to_char(people, ch);
+        for(auto c : dest->getContents()) {
+            if(c == ch) continue;
+            if(c->getFamily() == UnitFamily::Exit) continue;
+            if(!ch->canSee(c)) continue;
+            ch->sendLine(c->renderRoomListingFor(ch));
+        }
+
         if (dest->geffect >= 1 && dest->geffect <= 5) {
             ch->sendf("@rLava@w is pooling in someplaces here...@n\r\n");
         }
@@ -8380,8 +6886,12 @@ ACMD(do_scan) {
                          CCNRM(ch, C_NRM));
             ch->sendf("@W          -----------------          @n\r\n");
 
-            list_obj_to_char(dest2->getInventory(), ch, SHOW_OBJ_LONG, false);
-            list_char_to_char(dest2->getPeople(), ch);
+            for(auto c : dest->getContents()) {
+                if(c == ch) continue;
+                if(c->getFamily() == UnitFamily::Exit) continue;
+                if(!ch->canSee(c)) continue;
+                ch->sendLine(c->renderRoomListingFor(ch));
+            }
             if (dest2->geffect >= 1 && dest2->geffect <= 5) {
                 ch->sendf("@rLava@w is pooling in someplaces here...@n\r\n");
             }

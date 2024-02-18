@@ -423,8 +423,7 @@ void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir) {
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
     ch->sendf("@wThe ship flies onward:\r\n");
-    look_at_room(vehicle->getRoom(), ch, 0);
-    //ch->sendEvent(vehicle->getLocation()->renderLocationFor(ch));
+    ch->sendText(vehicle->getRoom()->renderLocationFor(ch));
     if (controls) {
         ch->sendf("@RFUEL@D: %s%s@n\r\n",
                      GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
@@ -981,8 +980,7 @@ ACMD(do_drive) {
                 if (land_location <= 50) {
                     sprintf(buf3, "%s @wcomes in from above and slowly settles on the launch-pad.@n\r\n",
                             vehicle->getShortDesc().c_str());
-                    look_at_room(room, ch, 0);
-                    //ch->sendEvent(room->renderLocationFor(ch));
+                    ch->sendText(room->renderLocationFor(ch));
                     send_to_room(IN_ROOM(vehicle), buf3);
                 } else {
                     sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n",
@@ -992,8 +990,7 @@ ACMD(do_drive) {
                     if (room->dmg >= 10) {
                         room->dmg = 10;
                     }
-                    look_at_room(room, ch, 0);
-                    //ch->sendEvent(room->renderLocationFor(ch));
+                    ch->lookAtLocation();
                     send_to_room(IN_ROOM(vehicle), buf3);
                 }
             } else if (!strcasecmp(arg, "launch")) {
@@ -1024,9 +1021,8 @@ ACMD(do_drive) {
                     }
                 }
                 vehicle->removeFromLocation();
-                vehicle->lookAtLocation();
-                look_at_room(vehicle->getRoom(), ch, 0);
-                //ch->sendEvent(vehicle->getLocation()->renderLocationFor(ch));
+                //vehicle->lookAtLocation();
+                ch->sendText(vehicle->getRoom()->renderLocationFor(ch));
                 ch->sendf("@RFUEL@D: %s%s@n\r\n",
                              GET_FUEL(controls) >= 200 ? "@G" : GET_FUEL(controls) >= 100 ? "@Y" : "@r",
                              add_commas(GET_FUEL(controls)).c_str());
