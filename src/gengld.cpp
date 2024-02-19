@@ -16,7 +16,7 @@
 
 /*-------------------------------------------------------------------*/
 
-void copy_guild(struct guild_data *tgm, struct guild_data *fgm) {
+void copy_guild(struct Guild *tgm, struct Guild *fgm) {
     *tgm = *fgm;
 }
 
@@ -50,7 +50,7 @@ void gedit_modify_string(std::string &str, char *new_g) {
 
 /*-------------------------------------------------------------------*/
 
-int add_guild(struct guild_data *ngld) {
+int add_guild(struct Guild *ngld) {
     guild_rnum rguild = G_NUM(ngld);
     zone_rnum rznum = real_zone_by_thing(rguild);
     auto exists = guild_index.contains(rguild);

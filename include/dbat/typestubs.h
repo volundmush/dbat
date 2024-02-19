@@ -16,6 +16,8 @@ struct player_data;
 struct trig_data;
 struct trans_data;
 struct mob_special_data;
+struct Shop;
+struct Guild;
 
 struct memory_rec_struct {
     int id;

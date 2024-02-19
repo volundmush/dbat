@@ -652,7 +652,7 @@ ACMD(do_mat) {
     auto original = ch->getRoom();
     ch->removeFromLocation();
     ch->addToLocation(getWorld(location));
-    command_interpreter(ch, argument);
+    ch->executeCommand(argument);
 
     /* See if 'ch' still exists before continuing! Handles 'at XXXX quit' case. */
     if (IN_ROOM(ch) == location) {
@@ -798,7 +798,7 @@ ACMD(do_mforce) {
                 vch = i->character;
                 if (GET_LEVEL(vch) < GET_LEVEL(ch) && CAN_SEE(ch, vch) &&
                     valid_dg_target(vch, 0)) {
-                    command_interpreter(vch, argument);
+                    vch->executeCommand(argument);
                 }
             }
         }
@@ -821,7 +821,7 @@ ACMD(do_mforce) {
         }
 
         if (valid_dg_target(victim, 0))
-            command_interpreter(victim, argument);
+            victim->executeCommand(argument);
     }
 }
 

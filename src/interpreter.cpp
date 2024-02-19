@@ -87,57 +87,44 @@ const char *reserved[] =
  * It makes sure you are the proper level and position to execute the command,
  * then calls the appropriate function.
  */
-void command_interpreter(BaseCharacter *ch, char *argument) {
+void BaseCharacter::executeCommand(const std::string &input) {
     int cmd, length;
     int skip_ld = 0;
-    char *line;
-    char arg[MAX_INPUT_LENGTH];
 
-    switch (GET_POS(ch)) {
+    switch (GET_POS(this)) {
         case POS_DEAD:
         case POS_INCAP:
         case POS_MORTALLYW:
         case POS_STUNNED:
-            GET_POS(ch) = POS_SITTING;
+            GET_POS(this) = POS_SITTING;
             break;
     }
 
-    /* just drop to next line for hitting CR */
-    skip_spaces(&argument);
-    if (!*argument)
+    std::string complete = input;
+    trim(complete);
+
+    if (!complete.empty())
         return;
+    auto args = split(complete, ' ');
+    std::string command = args[0];
+    std::string line = complete.substr(command.size());
+    trim(line);
 
-    /*
-   * special case to handle one-character, non-alphanumeric commands;
-   * requested by many people so "'hi" or ";godnet test" is possible.
-   * Patch sent by Eric Green and Stefan Wasilewski.
-   */
-    if (!isalpha(*argument)) {
-        arg[0] = argument[0];
-        arg[1] = '\0';
-        line = argument + 1;
-    } else
-        line = any_one_arg(argument, arg);
-
-
-    if (!strcasecmp(arg, "-")) {
-        return;
-    }
     /* Since all command triggers check for valid_dg_target before acting, the levelcheck
    * here has been removed.
    */
     /* otherwise, find the command */
     {
         int cont;                                            /* continue the command checks */
-        cont = command_wtrigger(ch, arg, line);              /* any world triggers ? */
-        if (!cont) cont = command_mtrigger(ch, arg, line);   /* any mobile triggers ? */
-        if (!cont) cont = command_otrigger(ch, arg, line);   /* any object triggers ? */
+        cont = command_wtrigger(this, (char*)command.c_str(), (char*)line.c_str());              /* any world triggers ? */
+        if (!cont) cont = command_mtrigger(this, (char*)command.c_str(), (char*)line.c_str());   /* any mobile triggers ? */
+        if (!cont) cont = command_otrigger(this, (char*)command.c_str(), (char*)line.c_str());   /* any object triggers ? */
         if (cont) return;                                    /* yes, command trigger took over */
     }
-    for (length = strlen(arg), cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++) {
-        if (!strncmp(complete_cmd_info[cmd].command, arg, length))
-            if (GET_LEVEL(ch) >= complete_cmd_info[cmd].minimum_level &&
-                GET_ADMLEVEL(ch) >= complete_cmd_info[cmd].minimum_admlevel)
+    for (length = command.size(), cmd = 0; *complete_cmd_info[cmd].command != '\n'; cmd++) {
+        if (!strncmp(complete_cmd_info[cmd].command, command.c_str(), length))
+            if (GET_LEVEL(this) >= complete_cmd_info[cmd].minimum_level &&
+                GET_ADMLEVEL(this) >= complete_cmd_info[cmd].minimum_admlevel)
                 break;
     }
 
@@ -145,56 +132,56 @@ void command_interpreter(BaseCharacter *ch, char *argument) {
 
     sprintf(blah, "%s", complete_cmd_info[cmd].command);
     if (!strcasecmp(blah, "throw"))
-        ch->throws = rand_number(1, 3);
+        throws = rand_number(1, 3);
 
 
     if (*complete_cmd_info[cmd].command == '\n') {
-        ch->sendf("Huh!?!\r\n");
+        sendf("Huh!?!\r\n");
         return;
     }
 
-    if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1)
-        ch->sendf("It's unfortunate...\r\n");
+    if (!command_pass(blah, this) && GET_ADMLEVEL(this) < 1)
+        sendf("It's unfortunate...\r\n");
     else if (check_disabled(&complete_cmd_info[cmd]))    /* is it disabled? */
-        ch->sendf("This command has been temporarily disabled.\r\n");
-    else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_GOOP) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
-        ch->sendf("You only have your internal thoughts until your body has finished regenerating!\r\n");
-    else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_FROZEN) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
-        ch->sendf("You try, but the mind-numbing cold prevents you...\r\n");
-    else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPIRAL))
-        ch->sendf("You are occupied with your Spiral Comet attack!\r\n");
+        sendf("This command has been temporarily disabled.\r\n");
+    else if (!IS_NPC(this) && PLR_FLAGGED(this, PLR_GOOP) && GET_ADMLEVEL(this) < ADMLVL_IMPL)
+        sendf("You only have your internal thoughts until your body has finished regenerating!\r\n");
+    else if (!IS_NPC(this) && PLR_FLAGGED(this, PLR_FROZEN) && GET_ADMLEVEL(this) < ADMLVL_IMPL)
+        sendf("You try, but the mind-numbing cold prevents you...\r\n");
+    else if (!IS_NPC(this) && PLR_FLAGGED(this, PLR_SPIRAL))
+        sendf("You are occupied with your Spiral Comet attack!\r\n");
     else if (complete_cmd_info[cmd].command_pointer == nullptr)
-        ch->sendf("Sorry, that command hasn't been implemented yet.\r\n");
-    else if (IS_NPC(ch) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
-        ch->sendf("You can't use immortal commands while switched.\r\n");
-    else if (GET_POS(ch) < complete_cmd_info[cmd].minimum_position && GET_POS(ch) != POS_FIGHTING) {
-        switch (GET_POS(ch)) {
+        sendf("Sorry, that command hasn't been implemented yet.\r\n");
+    else if (IS_NPC(this) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
+        sendf("You can't use immortal commands while switched.\r\n");
+    else if (GET_POS(this) < complete_cmd_info[cmd].minimum_position && GET_POS(this) != POS_FIGHTING) {
+        switch (GET_POS(this)) {
             case POS_DEAD:
-                ch->sendf("Lie still; you are DEAD!!! :-(\r\n");
+                sendf("Lie still; you are DEAD!!! :-(\r\n");
                 break;
             case POS_INCAP:
             case POS_MORTALLYW:
-                ch->sendf("You are in a pretty bad shape, unable to do anything!\r\n");
+                sendf("You are in a pretty bad shape, unable to do anything!\r\n");
                 break;
             case POS_STUNNED:
-                ch->sendf("All you can do right now is think about the stars!\r\n");
+                sendf("All you can do right now is think about the stars!\r\n");
                 break;
             case POS_SLEEPING:
-                ch->sendf("In your dreams, or what?\r\n");
+                sendf("In your dreams, or what?\r\n");
                 break;
             case POS_RESTING:
-                ch->sendf("Nah... You feel too relaxed to do that..\r\n");
+                sendf("Nah... You feel too relaxed to do that..\r\n");
                 break;
             case POS_SITTING:
-                ch->sendf("Maybe you should get on your feet first?\r\n");
+                sendf("Maybe you should get on your feet first?\r\n");
                 break;
             case POS_FIGHTING:
-                ch->sendf("No way!  You're fighting for your life!\r\n");
+                sendf("No way!  You're fighting for your life!\r\n");
                 break;
         }
-    } else if (no_specials || !special(ch, cmd, line)) {
+    } else if (no_specials || !special(this, cmd, (char*)line.c_str())) {
         if (!skip_ld) {
-            ((*complete_cmd_info[cmd].command_pointer)(ch, line, cmd, complete_cmd_info[cmd].subcmd));
+            ((*complete_cmd_info[cmd].command_pointer)(this, (char*)line.c_str(), cmd, complete_cmd_info[cmd].subcmd));
         }
     }
 }

@@ -17,8 +17,8 @@ extern void gedit_save_internally(struct descriptor_data *d);
 
 extern void gedit_save_to_disk(int num);
 
-extern void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
+extern void copy_guild(struct Guild *tgm, struct Guild *fgm);
 
-extern void free_guild(struct guild_data *guild);
+extern void free_guild(struct Guild *guild);
 
 extern void gedit_modify_string(std::string &str, char *new_g);

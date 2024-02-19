@@ -100,7 +100,7 @@ std::unordered_map<mob_vnum, struct index_data> mob_index;    /* index table for
 std::unordered_map<mob_vnum, nlohmann::json> mob_proto;    /* prototypes for mobs		 */
 
 VnumIndex<Object> objectVnumIndex;
-VnumIndex<BaseCharacter> characterVnumIndex;
+VnumIndex<NonPlayerCharacter> characterVnumIndex;
 
 Object *object_list = nullptr;    /* global linked list of objs	 */
 std::unordered_map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
@@ -1183,7 +1183,7 @@ int vnum_armortype(char *searchname, BaseCharacter *ch) {
 
 
 /* create a new mobile from a prototype */
-BaseCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
+NonPlayerCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
     auto proto = mob_proto.find(nr);
 
@@ -1842,11 +1842,11 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
 /* execute the reset command table of a given zone */
 void reset_zone(zone_rnum zone) {
     int cmd_no = -1, last_cmd = 0;
-    BaseCharacter *mob = nullptr;
+    NonPlayerCharacter *mob = nullptr;
     Object *obj, *obj_to;
     room_vnum rvnum;
     room_rnum rrnum;
-    BaseCharacter *tmob = nullptr; /* for trigger assignment */
+    NonPlayerCharacter *tmob = nullptr; /* for trigger assignment */
     Object *tobj = nullptr;  /* for trigger assignment */
     int mob_load = false; /* ### */
     int obj_load = false; /* ### */
@@ -2010,9 +2010,6 @@ void reset_zone(zone_rnum zone) {
                         mob_load && (rand_number(1, 100) >= c.arg5)) {
                         obj = read_object(c.arg1, REAL);
                         obj->addToLocation(mob);
-                        if (GET_MOB_SPEC(mob) != shop_keeper) {
-                            randomize_eq(obj);
-                        }
                         last_cmd = 1;
                         load_otrigger(obj);
                         tobj = obj;

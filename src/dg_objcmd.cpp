@@ -180,14 +180,14 @@ OCMD(do_oforce) {
         else {
             for (auto ch : room->getPeople()) {
                 if (valid_dg_target(ch, 0)) {
-                    command_interpreter(ch, line);
+                    ch->executeCommand(line);
                 }
             }
         }
     } else {
         if ((ch = get_char_by_obj(obj, arg1))) {
             if (valid_dg_target(ch, 0)) {
-                command_interpreter(ch, line);
+                ch->executeCommand(line);
             }
         } else
             obj_log(obj, "oforce: no target found");

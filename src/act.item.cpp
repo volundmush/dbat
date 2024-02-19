@@ -2468,7 +2468,7 @@ static void perform_get_from_container(BaseCharacter *ch, Object *obj,
                 }
             }
             if (IS_NPC(ch)) {
-                item_check(obj, ch);
+                item_check(obj, dynamic_cast<NonPlayerCharacter*>(ch));
             }
             get_check_money(ch, obj);
         }
@@ -2512,7 +2512,7 @@ int perform_get_from_room(BaseCharacter *ch, Object *obj) {
         }
 
         if (IS_NPC(ch))
-            item_check(obj, ch);
+            item_check(obj, dynamic_cast<NonPlayerCharacter*>(ch));
         get_check_money(ch, obj);
     }
     return (0);

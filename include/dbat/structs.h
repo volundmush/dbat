@@ -18,6 +18,87 @@ struct trig_data;
 /**********************************************************************
 * Structures                                                          *
 **********************************************************************/
+struct shop_buy_data {
+    shop_buy_data() = default;
+    explicit shop_buy_data(const nlohmann::json& j);
+    nlohmann::json serialize();
+    int type{};
+    std::string keywords{};
+};
+
+struct Shop {
+    Shop() = default;
+    explicit Shop(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void add_product(obj_vnum v);
+    void remove_product(obj_vnum v);
+    shop_vnum vnum{NOTHING};        /* Virtual number of this shop		*/
+    std::vector<obj_vnum> producing{};        /* Which item to produce (virtual)	*/
+    float profit_buy{1.0};        /* Factor to multiply cost with		*/
+    float profit_sell{1.0};        /* Factor to multiply cost with		*/
+    std::vector<shop_buy_data> type{};    /* Which items to trade			*/
+    std::string no_such_item1{};        /* Message if keeper hasn't got an item	*/
+    std::string no_such_item2{};        /* Message if player hasn't got an item	*/
+    std::string missing_cash1{};        /* Message if keeper hasn't got cash	*/
+    std::string missing_cash2{};        /* Message if player hasn't got cash	*/
+    std::string do_not_buy{};        /* If keeper dosn't buy such things	*/
+    std::string message_buy{};        /* Message when player buys item	*/
+    std::string message_sell{};        /* Message when player sells item	*/
+    int temper1{};        /* How does keeper react if no money	*/
+    std::unordered_set<int> flags{};    /* Can attack? Use bank? Cast here?	*/
+    mob_vnum keeper{NOBODY};    /* The mobile who owns the shop (rnum)	*/
+    std::unordered_set<int> with_who{};/* Who does the shop trade with?	*/
+    std::set<room_vnum> in_room;        /* Where is the shop?			*/
+    int open1{}, open2{};        /* When does the shop open?		*/
+    int close1{}, close2{};    /* When does the shop close?		*/
+    int bankAccount{};        /* Store all gold over 15000 (disabled)	*/
+    int lastsort{};        /* How many items are sorted in inven?	*/
+    
+    std::list<NonPlayerCharacter*> getKeepers();
+    bool isProducing(obj_vnum vn);
+    bool isProducing(Object *obj1);
+    void runPurge();
+    int tradeWith(Object* item);
+    Object* getSellingObject(BaseCharacter* ch, const std::string& name, NonPlayerCharacter *keeper, bool msg);
+    Object* getPurchaseObject(BaseCharacter* ch, const std::string& name, NonPlayerCharacter *keeper, bool msg);
+    std::string listObject(Object *obj, int cnt, int aindex, NonPlayerCharacter *keeper, BaseCharacter *ch);
+    int64_t buyPrice(Object *obj, NonPlayerCharacter* keeper, BaseCharacter* ch);
+    int64_t sellPrice(Object *obj, NonPlayerCharacter* keeper, BaseCharacter* ch);
+    bool executeCommand(NonPlayerCharacter *keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    
+    void executeBuy(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeSell(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeList(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeValue(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeAppraise(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+
+    bool isOk(NonPlayerCharacter* keeper, BaseCharacter *ch);
+    bool isOkChar(NonPlayerCharacter* keeper, BaseCharacter *ch);
+    bool isOkObj(NonPlayerCharacter* keeper, BaseCharacter *ch, Object *obj);
+    bool isOpen(NonPlayerCharacter* keeper, bool msg);
+
+};
+
+
+struct Guild {
+    Guild() = default;
+    explicit Guild(const nlohmann::json& j);
+    nlohmann::json serialize();
+    room_vnum vnum{NOBODY};                /* number of the guild */
+    void toggle_skill(uint16_t skill_id);
+    void toggle_feat(uint16_t skill_id);
+    std::set<uint16_t> skills;  /* array to keep track of which feats things we'll train */
+    float charge{1.0};                  /* charge * skill level = how much we'll charge */
+    std::string no_such_skill{};           /* message when we don't teach that skill */
+    std::string not_enough_gold{};         /* message when the student doesn't have enough gold */
+    int minlvl{0};                    /* Minumum level guildmaster will train */
+    mob_vnum gm{NOBODY};                   /* GM's vnum */
+    bitvector_t with_who[4]{};    /* whom we dislike */
+    int open{0}, close{28};               /* when we will train */
+    std::set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
+};
+
+
 /* structure for the reset commands */
 struct reset_com {
     reset_com() = default;
@@ -1098,6 +1179,8 @@ struct BaseCharacter : public GameEntity {
     void deactivate();
     void login();
 
+    void executeCommand(const std::string& cmd) override;
+
     nlohmann::json serializeRelations() override;
     void deserializeRelations(const nlohmann::json& j) override;
 
@@ -1690,6 +1773,9 @@ struct NonPlayerCharacter : public BaseCharacter {
 
     std::string renderRoomListName(GameEntity* looker) override;
 
+    std::shared_ptr<Shop> shopKeeperOf;
+    std::shared_ptr<Guild> guildMasterOf;
+
 };
 
 struct PlayerCharacter : public BaseCharacter {
@@ -2051,6 +2137,10 @@ class Dispatcher {
     }
     Dispatcher& addEquipment(GameEntity* target) {
         targets.push_back({SearchType::Equipment, target});
+        return static_cast<Derived&>(*this);
+    }
+    Dispatcher& addContents(GameEntity* target) {
+        targets.push_back({SearchType::Contents, target});
         return static_cast<Derived&>(*this);
     }
     Dispatcher& addLocation(GameEntity* target) {

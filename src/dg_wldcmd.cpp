@@ -408,13 +408,13 @@ WCMD(do_wforce) {
         for (auto ch : room->getPeople()) {
 
             if (valid_dg_target(ch, 0)) {
-                command_interpreter(ch, line);
+                ch->executeCommand(line);
             }
         }
     } else {
         if ((ch = get_char_by_room(room, arg1))) {
             if (valid_dg_target(ch, 0)) {
-                command_interpreter(ch, line);
+                ch->executeCommand(line);
             }
         } else
             wld_log(room, "wforce: no target found");

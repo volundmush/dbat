@@ -105,7 +105,7 @@ struct oasis_olc_data {
     std::shared_ptr<Object> obj;          /* used for 'oedit'         */
     Object *iobj;         /* used for 'iedit'         */
     struct zone_data *zone;        /* used for 'zedit'         */
-    struct shop_data *shop;        /* used for 'sedit'         */
+    struct Shop *shop;        /* used for 'sedit'         */
     struct config_data *config;    /* used for 'cedit'         */
     struct extra_descr_data *desc; /* used in '[r|o|m]edit'    */
     struct social_messg *action;   /* Aedit uses this one      */
@@ -115,7 +115,7 @@ struct oasis_olc_data {
     int item_type;
     std::vector<trig_vnum> script; /* for assigning triggers in [r|o|m]edit*/
     struct assembly_data *OlcAssembly; /* used for 'assedit'         */
-    struct guild_data *guild; /* used for 'gedit'         */
+    struct Guild *guild; /* used for 'gedit'         */
     struct help_index_element *help;   /* Hedit uses this */
 };
 
@@ -672,7 +672,7 @@ extern void gedit_save_internally(struct descriptor_data *d);
 
 extern void gedit_save_to_disk(int num);
 
-extern void copy_guild(struct guild_data *tgm, struct guild_data *fgm);
+extern void copy_guild(struct Guild *tgm, struct Guild *fgm);
 
 extern void gedit_modify_string(std::string &str, char *new_g);
 

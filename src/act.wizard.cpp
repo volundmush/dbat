@@ -990,7 +990,7 @@ ACMD(do_at) {
     auto original = ch->getRoom();
     ch->removeFromLocation();
     ch->addToLocation(r);
-    command_interpreter(ch, command);
+    ch->executeCommand(command);
 
     /* check if the char is still there */
     if (ch->getRoom()->getUID() == location) {
@@ -2794,7 +2794,7 @@ ACMD(do_force) {
             act(buf1, true, ch, nullptr, vict, TO_VICT);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced %s to %s", GET_NAME(ch),
                    GET_NAME(vict), to_force);
-            command_interpreter(vict, to_force);
+            vict->executeCommand(to_force);
         }
     } else if (!strcasecmp("room", arg)) {
         ch->sendf("%s", CONFIG_OK);
@@ -2805,7 +2805,7 @@ ACMD(do_force) {
             if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
                 continue;
             act(buf1, true, ch, nullptr, vict, TO_VICT);
-            command_interpreter(vict, to_force);
+            vict->executeCommand(to_force);
         }
     } else { /* force all */
         ch->sendf("%s", CONFIG_OK);
@@ -2818,7 +2818,7 @@ ACMD(do_force) {
                 (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch)))
                 continue;
             act(buf1, true, ch, nullptr, vict, TO_VICT);
-            command_interpreter(vict, to_force);
+            vict->executeCommand(to_force);
         }
     }
 }

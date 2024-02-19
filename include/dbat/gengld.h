@@ -8,7 +8,7 @@
 #include "structs.h"
 #include "guild.h"
 
-extern void copy_guild(struct guild_data *tguild, struct guild_data *fguild);
+extern void copy_guild(struct Guild *tguild, struct Guild *fguild);
 
 extern void copy_list(vnum **tlist, vnum *flist);
 
@@ -16,11 +16,11 @@ extern void remove_from_int_list(vnum **list, vnum num);
 
 extern void add_to_int_list(vnum **tlist, vnum newi);
 
-extern void free_guild(struct guild_data *guild);
+extern void free_guild(struct Guild *guild);
 
 extern void modify_string(char **str, char *newstr);
 
-extern int add_guild(struct guild_data *guild);
+extern int add_guild(struct Guild *guild);
 
 extern int save_guilds(zone_rnum zone_num);
 

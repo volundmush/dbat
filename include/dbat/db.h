@@ -217,7 +217,7 @@ extern obj_rnum real_object(obj_vnum vnum);
 
 extern void init_char(BaseCharacter *ch);
 
-BaseCharacter *read_mobile(mob_vnum nr, int type);
+NonPlayerCharacter *read_mobile(mob_vnum nr, int type);
 
 extern int vnum_mobile(char *searchname, BaseCharacter *ch);
 
@@ -319,7 +319,7 @@ extern BaseCharacter *character_list;
 extern std::unordered_map<int64_t, std::pair<time_t, BaseCharacter*>> uniqueCharacters;
 
 extern VnumIndex<Object> objectVnumIndex;
-extern VnumIndex<BaseCharacter> characterVnumIndex;
+extern VnumIndex<NonPlayerCharacter> characterVnumIndex;
 
 
 extern std::unordered_map<obj_vnum, struct index_data> obj_index;

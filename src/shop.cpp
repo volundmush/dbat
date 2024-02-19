@@ -29,40 +29,19 @@
 #include "dbat/genzon.h"
 #include "dbat/genshp.h"
 
-/* Forward/External function declarations */
-static void sort_keeper_objs(BaseCharacter *keeper, vnum shop_nr);
-
 /* Local variables */
-std::unordered_map<shop_vnum, struct shop_data> shop_index;
+std::unordered_map<shop_vnum, std::shared_ptr<Shop>> shop_index;
 shop_vnum top_shop = NOTHING;
 int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 
 /* local functions */
 static char *read_shop_message(int mnum, room_vnum shr, FILE *shop_f, const char *why);
 
-static int read_list(FILE *shop_f, struct shop_buy_data *list, int new_format, int max, int type);
-
-static void shopping_list(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr);
-
-static void shopping_value(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr);
-
-static void shopping_sell(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr);
-
-static Object *
-get_selling_obj(BaseCharacter *ch, char *name, BaseCharacter *keeper, vnum shop_nr, int msg);
-
-static Object *slide_obj(Object *obj, BaseCharacter *keeper, vnum shop_nr);
-
 static void shopping_buy(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr);
 
 static void shopping_app(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr);
 
-static Object *
-get_purchase_obj(BaseCharacter *ch, char *arg, BaseCharacter *keeper, vnum shop_nr, int msg);
-
-static Object *get_hash_obj_vis(BaseCharacter *ch, char *name, Object *list);
-
-static Object *get_slide_obj_vis(BaseCharacter *ch, char *name, Object *list);
+static Object *get_purchase_obj(BaseCharacter *ch, char *arg, BaseCharacter *keeper, vnum shop_nr, int msg);
 
 static char *customer_string(vnum shop_nr, int detailed);
 
@@ -70,54 +49,10 @@ static void list_all_shops(BaseCharacter *ch);
 
 static void list_detailed_shop(BaseCharacter *ch, vnum shop_nr);
 
-static int is_ok_char(BaseCharacter *keeper, BaseCharacter *ch, vnum shop_nr);
-
-static int is_ok_obj(BaseCharacter *keeper, BaseCharacter *ch, Object *obj, vnum shop_nr);
-
-static int is_open(BaseCharacter *keeper, vnum shop_nr, int msg);
-
-static int is_ok(BaseCharacter *keeper, BaseCharacter *ch, vnum shop_nr);
-
-static void push(struct stack_data *stack, int pushval);
-
-static int top(struct stack_data *stack);
-
-static int pop(struct stack_data *stack);
-
-static void evaluate_operation(struct stack_data *ops, struct stack_data *vals);
-
-static int find_oper_num(char token);
-
-static int evaluate_expression(Object *obj, char *expr);
-
-static int trade_with(Object *item, vnum shop_nr);
-
-static int same_obj(Object *obj1, Object *obj2);
-
 static int transaction_amt(char *arg);
 
 static char *times_message(Object *obj, char *name, int num);
 
-static int buy_price(Object *obj, vnum shop_nr, BaseCharacter *keeper, BaseCharacter *buyer);
-
-static int sell_price(Object *obj, vnum shop_nr, BaseCharacter *keeper, BaseCharacter *seller);
-
-static char *list_object(Object *obj, int cnt, int oindex, vnum shop_nr, BaseCharacter *keeper,
-                         BaseCharacter *seller);
-
-static int add_to_list(struct shop_buy_data *list, int type, int *len, int *val);
-
-static int end_read_list(struct shop_buy_data *list, int len, int error);
-
-
-/* config arrays */
-static const char *operator_str[] = {
-        "[({",
-        "])}",
-        "|+",
-        "&*",
-        "^'"
-};
 
 /* Constant list for printing out who we sell to */
 const char *trade_letters[NUM_TRADERS + 1] = {
@@ -209,202 +144,114 @@ const char *shop_bits[] = {
         "\n"
 };
 
-static int is_ok_char(BaseCharacter *keeper, BaseCharacter *ch, vnum shop_nr) {
+static const std::unordered_map<SenseiID, int> senseiCheck = {
+    {SenseiID::Roshi, TRADE_NOWIZARD},
+    {SenseiID::Piccolo, TRADE_NOCLERIC},
+    {SenseiID::Krane, TRADE_NOROGUE},
+    {SenseiID::Bardock, TRADE_NOMONK},
+    {SenseiID::Ginyu, TRADE_NOPALADIN},
+    {SenseiID::Nail, TRADE_NOFIGHTER},
+    {SenseiID::Kibito, TRADE_NOBARBARIAN},
+    {SenseiID::Frieza, TRADE_NOSORCERER},
+    {SenseiID::Sixteen, TRADE_NOBARD},
+    {SenseiID::Dabura, TRADE_NORANGER},
+    {SenseiID::Tapion, TRADE_NODRUID},
+    {SenseiID::Jinto, TRADE_NOARCANE_ARCHER},
+    {SenseiID::Tsuna, TRADE_NOARCANE_TRICKSTER},
+    {SenseiID::Kurzak, TRADE_NOARCHMAGE}
+};
+
+static const std::unordered_map<RaceID, int> raceCheck = {
+    {RaceID::Human, TRADE_NOHUMAN},
+    {RaceID::Icer, TRADE_NOICER},
+    {RaceID::Saiyan, TRADE_NOSAIYAN},
+    {RaceID::Konatsu, TRADE_NOKONATSU}
+};
+
+bool Shop::isOkChar(NonPlayerCharacter* keeper, BaseCharacter *ch) {
     char buf[MAX_INPUT_LENGTH];
 
     if (!CAN_SEE(keeper, ch)) {
         char actbuf[MAX_INPUT_LENGTH] = MSG_NO_SEE_CHAR;
         do_say(keeper, actbuf, cmd_say, 0);
-        return (false);
+        return false;
     }
-    if (ADM_FLAGGED(ch, ADM_ALLSHOPS))
-        return (true);
 
-    if ((GET_ALIGNMENT(ch) > 0 && NOTRADE_GOOD(shop_nr)) ||
-        (GET_ALIGNMENT(ch) < 0 && NOTRADE_EVIL(shop_nr)) ||
-        (GET_ALIGNMENT(ch) == 0 && NOTRADE_NEUTRAL(shop_nr))) {
+    if (ADM_FLAGGED(ch, ADM_ALLSHOPS))
+        return true;
+
+    auto align = GET_ALIGNMENT(ch);
+
+    if ((align > 0 && with_who.contains(TRADE_NOGOOD)) ||
+        (align < 0 && with_who.contains(TRADE_NOEVIL)) ||
+        (align == 0 && with_who.contains(TRADE_NONEUTRAL))) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_ALIGN);
         do_tell(keeper, buf, cmd_tell, 0);
-        return (false);
+        return false;
     }
     if (IS_NPC(ch))
-        return (true);
+        return true;
 
-    if ((IS_ROSHI(ch) && NOTRADE_WIZARD(shop_nr)) ||
-        (IS_PICCOLO(ch) && NOTRADE_CLERIC(shop_nr)) ||
-        (IS_KRANE(ch) && NOTRADE_ROGUE(shop_nr)) ||
-        (IS_BARDOCK(ch) && NOTRADE_MONK(shop_nr)) ||
-        (IS_GINYU(ch) && NOTRADE_PALADIN(shop_nr)) ||
-        (IS_NAIL(ch) && NOTRADE_FIGHTER(shop_nr)) ||
-        (IS_KABITO(ch) && NOTRADE_BARBARIAN(shop_nr)) ||
-        (IS_FRIEZA(ch) && NOTRADE_SORCERER(shop_nr)) ||
-        (IS_ANDSIX(ch) && NOTRADE_BARD(shop_nr)) ||
-        (IS_DABURA(ch) && NOTRADE_RANGER(shop_nr)) ||
-        (IS_TAPION(ch) && NOTRADE_DRUID(shop_nr)) ||
-        (IS_NAIL(ch) && NOTRADE_FIGHTER(shop_nr)) ||
-        (IS_JINTO(ch) && NOTRADE_ARCANE_ARCHER(shop_nr)) ||
-        (IS_TSUNA(ch) && NOTRADE_ARCANE_TRICKSTER(shop_nr)) ||
-        (IS_KURZAK(ch) && NOTRADE_ARCHMAGE(shop_nr))) {
-
+    if (auto notrade = senseiCheck.find(ch->chclass); notrade != senseiCheck.end() && with_who.contains(notrade->second)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
         do_tell(keeper, buf, cmd_tell, 0);
-        return (false);
+        return false;
     }
-    if ((IS_HUMAN(ch) && NOTRADE_HUMAN(shop_nr)) ||
-        (IS_ICER(ch) && NOTRADE_ICER(shop_nr)) ||
-        (IS_SAIYAN(ch) && NOTRADE_SAIYAN(shop_nr)) ||
-        (IS_KONATSU(ch) && NOTRADE_KONATSU(shop_nr))) {
+
+    if (auto notrade = raceCheck.find(ch->race); notrade != raceCheck.end() && with_who.contains(notrade->second)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_RACE);
         do_tell(keeper, buf, cmd_tell, 0);
-        return (false);
+        return false;
     }
 
-    return (true);
+    return true;
 }
 
-static int is_ok_obj(BaseCharacter *keeper, BaseCharacter *ch, Object *obj, vnum shop_nr) {
+bool Shop::isOkObj(NonPlayerCharacter *keeper, BaseCharacter *ch, Object *obj) {
     char buf[MAX_INPUT_LENGTH];
 
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN) && NOTRADE_BROKEN(shop_nr)) {
+    if (OBJ_FLAGGED(obj, ITEM_BROKEN) && with_who.contains(TRADE_NOBROKEN)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_BUY_BROKEN);
         do_tell(keeper, buf, cmd_tell, 0);
-        return (false);
+        return false;
     }
     if (OBJ_FLAGGED(obj, ITEM_FORGED)) {
         snprintf(buf, sizeof(buf), "%s that piece of junk is an obvious forgery!", GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
-        return (false);
+        return false;
     }
 
-    return (true);
+    return true;
 }
 
-static int is_open(BaseCharacter *keeper, vnum shop_nr, int msg) {
+bool Shop::isOpen(NonPlayerCharacter *keeper, bool msg) {
     char buf[MAX_INPUT_LENGTH];
 
     *buf = '\0';
-    if (SHOP_OPEN1(shop_nr) > time_info.hours)
+    if (open1 > time_info.hours)
         strlcpy(buf, MSG_NOT_OPEN_YET, sizeof(buf));
-    else if (SHOP_CLOSE1(shop_nr) < time_info.hours) {
-        if (SHOP_OPEN2(shop_nr) > time_info.hours)
+    else if (close1 < time_info.hours) {
+        if (open2 > time_info.hours)
             strlcpy(buf, MSG_NOT_REOPEN_YET, sizeof(buf));
-        else if (SHOP_CLOSE2(shop_nr) < time_info.hours)
+        else if (close2 < time_info.hours)
             strlcpy(buf, MSG_CLOSED_FOR_DAY, sizeof(buf));
     }
     if (!*buf)
-        return (true);
+        return true;
     if (msg)
         do_say(keeper, buf, cmd_tell, 0);
-    return (false);
+    return false;
 }
 
-static int is_ok(BaseCharacter *keeper, BaseCharacter *ch, vnum shop_nr) {
-    if (is_open(keeper, shop_nr, true))
-        return (is_ok_char(keeper, ch, shop_nr));
+bool Shop::isOk(NonPlayerCharacter* keeper, BaseCharacter *ch) {
+    if (isOpen(keeper, true))
+        return isOkChar(keeper, ch);
     else
-        return (false);
+        return false;
 }
 
-static void push(struct stack_data *stack, int pushval) {
-    S_DATA(stack, S_LEN(stack)++) = pushval;
-}
 
-static int top(struct stack_data *stack) {
-    if (S_LEN(stack) > 0)
-        return (S_DATA(stack, S_LEN(stack) - 1));
-    else
-        return (-1);
-}
-
-static int pop(struct stack_data *stack) {
-    if (S_LEN(stack) > 0)
-        return (S_DATA(stack, --S_LEN(stack)));
-    else {
-        basic_mud_log("SYSERR: Illegal expression %d in shop keyword list.", S_LEN(stack));
-        return (0);
-    }
-}
-
-static void evaluate_operation(struct stack_data *ops, struct stack_data *vals) {
-    int oper;
-
-    if ((oper = pop(ops)) == OPER_NOT)
-        push(vals, !pop(vals));
-    else {
-        int val1 = pop(vals),
-                val2 = pop(vals);
-
-        /* Compiler would previously short-circuit these. */
-        if (oper == OPER_AND)
-            push(vals, val1 && val2);
-        else if (oper == OPER_OR)
-            push(vals, val1 || val2);
-    }
-}
-
-static int find_oper_num(char token) {
-    int oindex;
-
-    for (oindex = 0; oindex <= MAX_OPER; oindex++)
-        if (strchr(operator_str[oindex], token))
-            return (oindex);
-    return (NOTHING);
-}
-
-static int evaluate_expression(Object *obj, char *expr) {
-    struct stack_data ops, vals;
-    char *ptr, *end, name[MAX_STRING_LENGTH];
-    int temp, eindex;
-
-    if (!expr || !*expr)    /* Allows opening ( first. */
-        return (true);
-
-    ops.len = vals.len = 0;
-    ptr = expr;
-    while (*ptr) {
-        if (isspace(*ptr))
-            ptr++;
-        else {
-            if ((temp = find_oper_num(*ptr)) == NOTHING) {
-                end = ptr;
-                while (*ptr && !isspace(*ptr) && find_oper_num(*ptr) == NOTHING)
-                    ptr++;
-                strncpy(name, end, ptr - end);    /* strncpy: OK (name/end:MAX_STRING_LENGTH) */
-                name[ptr - end] = '\0';
-                for (eindex = 0; *extra_bits[eindex] != '\n'; eindex++)
-                    if (!strcasecmp(name, extra_bits[eindex])) {
-                        push(&vals, OBJ_FLAGGED(obj, eindex));
-                        break;
-                    }
-                if (*extra_bits[eindex] == '\n')
-                    push(&vals, isname(name, obj->getName().c_str()));
-            } else {
-                if (temp != OPER_OPEN_PAREN)
-                    while (top(&ops) > temp)
-                        evaluate_operation(&ops, &vals);
-
-                if (temp == OPER_CLOSE_PAREN) {
-                    if ((temp = pop(&ops)) != OPER_OPEN_PAREN) {
-                        basic_mud_log("SYSERR: Illegal parenthesis in shop keyword expression.");
-                        return (false);
-                    }
-                } else
-                    push(&ops, temp);
-                ptr++;
-            }
-        }
-    }
-    while (top(&ops) != -1)
-        evaluate_operation(&ops, &vals);
-    temp = pop(&vals);
-    if (top(&vals) != -1) {
-        basic_mud_log("SYSERR: Extra operands left on shop keyword expression stack.");
-        return (false);
-    }
-    return (temp);
-}
-
-static int trade_with(Object *item, vnum shop_nr) {
+int Shop::tradeWith(Object *item) {
     int counter;
 
 
@@ -413,36 +260,28 @@ static int trade_with(Object *item, vnum shop_nr) {
 
     if (OBJ_FLAGGED(item, ITEM_NOSELL))
         return (OBJECT_NOTOK);
-    auto &shop = shop_index[shop_nr];
 
-    for (const auto &product : shop.type)
+    for (const auto &product : type)
         if (product.type == GET_OBJ_TYPE(item)) {
             if (GET_OBJ_VAL(item, VAL_WAND_CHARGES) == 0 &&
                 (GET_OBJ_TYPE(item) == ITEM_WAND ||
                  GET_OBJ_TYPE(item) == ITEM_STAFF))
                 return (OBJECT_DEAD);
-            else if (evaluate_expression(item, (char*)SHOP_BUYWORD(shop_nr, counter)))
-                return (OBJECT_OK);
+            return (OBJECT_OK);
         }
     return (OBJECT_NOTOK);
 }
 
-static int same_obj(Object *obj1, Object *obj2) {
-    return false;
+
+bool Shop::isProducing(obj_vnum vn) {
+    auto find = std::ranges::find(producing, vn);
+    return (find != producing.end());
 }
 
-int shop_producing(Object *item, vnum shop_nr) {
-    int counter;
-
-    if (GET_OBJ_RNUM(item) == NOTHING)
-        return (false);
-    auto &shop = shop_index[shop_nr];
-
-    auto find = std::ranges::find_if(shop.producing, [&](const auto &product) {
-        return (product == item->getVN());
-    });
-    return (find != shop.producing.end());
+bool Shop::isProducing(Object* item) {
+    return isProducing(item->getVN());
 }
+
 
 static int transaction_amt(char *arg) {
     char buf[MAX_INPUT_LENGTH];
@@ -483,15 +322,6 @@ static char *times_message(Object *obj, char *name, int num) {
     return (buf);
 }
 
-static Object *get_slide_obj_vis(BaseCharacter *ch, char *name,
-                                          Object *list) {
-    return nullptr;
-}
-
-static Object *get_hash_obj_vis(BaseCharacter *ch, char *name,
-                                         Object *list) {
-    return nullptr;
-}
 
 static Object *get_purchase_obj(BaseCharacter *ch, char *arg, BaseCharacter *keeper, vnum shop_nr, int msg) {
     return nullptr;
@@ -518,8 +348,8 @@ static Object *get_purchase_obj(BaseCharacter *ch, char *arg, BaseCharacter *kee
  * into charisma, because on the flip side they'd get 11% inflation by
  * having a 3.
  */
-static int buy_price(Object *obj, vnum shop_nr, BaseCharacter *keeper, BaseCharacter *buyer) {
-    int cost = (GET_OBJ_COST(obj) * SHOP_BUYPROFIT(shop_nr));
+int64_t Shop::buyPrice(Object *obj, NonPlayerCharacter *keeper, BaseCharacter *buyer) {
+    int cost = (GET_OBJ_COST(obj) * profit_buy);
 
     double adjust = 1.0;
     Object *k;
@@ -548,7 +378,7 @@ static int buy_price(Object *obj, vnum shop_nr, BaseCharacter *keeper, BaseChara
         cost += cost * 0.20;
         return (cost);
     } else {
-        return (int) (GET_OBJ_COST(obj) * SHOP_BUYPROFIT(shop_nr));
+        return (int) (GET_OBJ_COST(obj) * profit_buy);
     }
 }
 
@@ -556,9 +386,9 @@ static int buy_price(Object *obj, vnum shop_nr, BaseCharacter *keeper, BaseChara
  * When the shopkeeper is buying, we reverse the discount. Also make sure
  * we don't buy for more than we sell for, to prevent infinite money-making.
  */
-static int sell_price(Object *obj, vnum shop_nr, BaseCharacter *keeper, BaseCharacter *seller) {
-    float sell_cost_modifier = SHOP_SELLPROFIT(shop_nr);
-    float buy_cost_modifier = SHOP_BUYPROFIT(shop_nr);
+int64_t Shop::sellPrice(Object *obj, NonPlayerCharacter *keeper, BaseCharacter *seller) {
+    float sell_cost_modifier = profit_sell;
+    float buy_cost_modifier = profit_buy;
 
     if (sell_cost_modifier > buy_cost_modifier)
         sell_cost_modifier = buy_cost_modifier;
@@ -593,26 +423,23 @@ static int sell_price(Object *obj, vnum shop_nr, BaseCharacter *keeper, BaseChar
     }
 }
 
-static void shopping_app(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr) {
+void Shop::executeAppraise(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     Object *obj;
     int i, found = false;
     char buf[MAX_STRING_LENGTH];
 
-    if (!is_ok(keeper, ch, shop_nr))
+    if (!isOk(keeper, ch))
         return;
 
-    if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
-        sort_keeper_objs(keeper, shop_nr);
-
-    if (!*arg) {
+    if (arguments.empty()) {
         char buf[MAX_INPUT_LENGTH];
 
         snprintf(buf, sizeof(buf), "%s What do you want to appraise?", GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
-    if (!(obj = get_purchase_obj(ch, arg, keeper, shop_nr, true))) {
-        do_appraise(ch, arg, 0, 0);
+    if (!(obj = getPurchaseObject(ch, arguments, keeper, true))) {
+        do_appraise(ch, (char*)arguments.c_str(), 0, 0);
         return;
     }
 
@@ -707,37 +534,37 @@ static void shopping_app(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vn
     }
 }
 
-static void shopping_buy(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr) {
+void Shop::executeBuy(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+    ch->sendf("Not yet implemented.\r\n");
     return;
 }
 
-static Object *
-get_selling_obj(BaseCharacter *ch, char *name, BaseCharacter *keeper, vnum shop_nr, int msg) {
+Object* Shop::getSellingObject(BaseCharacter *ch, const std::string &name, NonPlayerCharacter *keeper, bool msg) {
     char buf[MAX_INPUT_LENGTH];
     Object *obj;
     int result;
 
-    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->getInventory()))) {
+    if (!(obj = get_obj_in_list_vis(ch, (char*)name.c_str(), nullptr, ch->getInventory()))) {
         if (msg) {
             char tbuf[MAX_INPUT_LENGTH];
 
-            snprintf(tbuf, sizeof(tbuf), shop_index[shop_nr].no_such_item2, GET_NAME(ch));
+            snprintf(tbuf, sizeof(tbuf), no_such_item2.c_str(), GET_NAME(ch));
             do_tell(keeper, tbuf, cmd_tell, 0);
         }
-        return (nullptr);
+        return nullptr;
     }
-    if ((result = trade_with(obj, shop_nr)) == OBJECT_OK)
-        return (obj);
+    if ((result = tradeWith(obj)) == OBJECT_OK)
+        return obj;
 
     if (!msg)
-        return (nullptr);
+        return nullptr;
 
     switch (result) {
         case OBJECT_NOVAL:
             snprintf(buf, sizeof(buf), "%s You've got to be kidding, that thing is worthless!", GET_NAME(ch));
             break;
         case OBJECT_NOTOK:
-            snprintf(buf, sizeof(buf), shop_index[shop_nr].do_not_buy, GET_NAME(ch));
+            snprintf(buf, sizeof(buf), do_not_buy.c_str(), GET_NAME(ch));
             break;
         case OBJECT_DEAD:
             snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_USED_WANDSTAFF);
@@ -749,44 +576,35 @@ get_selling_obj(BaseCharacter *ch, char *name, BaseCharacter *keeper, vnum shop_
             break;
     }
     do_tell(keeper, buf, cmd_tell, 0);
-    return (nullptr);
-}
-
-static Object *slide_obj(Object *obj, BaseCharacter *keeper,
-                                  vnum shop_nr)
-
-{
     return nullptr;
 }
 
-static void sort_keeper_objs(BaseCharacter *keeper, vnum shop_nr) {
-    
-}
 
-static void shopping_sell(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr) {
+void Shop::executeSell(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     char tempstr[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], tempbuf[MAX_INPUT_LENGTH];
     Object *obj;
     int sellnum, sold = 0, goldamt = 0;
 
-    if (!(is_ok(keeper, ch, shop_nr)))
+    if (!isOk(keeper, ch))
         return;
 
-    if ((sellnum = transaction_amt(arg)) < 0) {
+    if ((sellnum = transaction_amt((char*)arguments.c_str())) < 0) {
         char buf[MAX_INPUT_LENGTH];
 
         snprintf(buf, sizeof(buf), "%s A negative amount?  Try buying something.", GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
-    if (!*arg || !sellnum) {
+
+    if (arguments.empty() || !sellnum) {
         char buf[MAX_INPUT_LENGTH];
 
         snprintf(buf, sizeof(buf), "%s What do you want to sell??", GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
-    one_argument(arg, name);
-    if (!(obj = get_selling_obj(ch, name, keeper, shop_nr, true)))
+    one_argument((char*)arguments.c_str(), name);
+    if (!(obj = getSellingObject(ch, name, keeper, true)))
         return;
 
     if (GET_OBJ_TYPE(obj) == ITEM_PLANT && GET_OBJ_VAL(obj, VAL_WATERLEVEL) <= -10) {
@@ -796,26 +614,25 @@ static void shopping_sell(char *arg, BaseCharacter *ch, BaseCharacter *keeper, v
         return;
     }
 
-    if (!(is_ok_obj(keeper, ch, obj, shop_nr)))
+    if (!isOkObj(keeper, ch, obj))
         return;
 
-    if (GET_GOLD(keeper) + SHOP_BANK(shop_nr) < sell_price(obj, shop_nr, keeper, ch)) {
+    if (GET_GOLD(keeper) + bankAccount < sellPrice(obj, keeper, ch)) {
         char buf[MAX_INPUT_LENGTH];
 
-        snprintf(buf, sizeof(buf), shop_index[shop_nr].missing_cash1, GET_NAME(ch));
+        snprintf(buf, sizeof(buf), missing_cash1.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
-    while (obj && GET_GOLD(keeper) + SHOP_BANK(shop_nr) >= sell_price(obj, shop_nr, keeper, ch) && sold < sellnum) {
-        int charged = sell_price(obj, shop_nr, keeper, ch);
+    while (obj && GET_GOLD(keeper) + bankAccount >= sellPrice(obj, keeper, ch) && sold < sellnum) {
+        auto charged = sellPrice(obj, keeper, ch);
 
         goldamt += charged;
         keeper->mod(CharMoney::Carried, -charged);
 
         sold++;
         obj->removeFromLocation();
-        slide_obj(obj, keeper, shop_nr);    /* Seems we don't use return value. */
-        obj = get_selling_obj(ch, name, keeper, shop_nr, false);
+        obj = getSellingObject(ch, name, keeper, false);
     }
 
     if (sold < sellnum) {
@@ -823,7 +640,7 @@ static void shopping_sell(char *arg, BaseCharacter *ch, BaseCharacter *keeper, v
 
         if (!obj)
             snprintf(buf, sizeof(buf), "%s You only have %d of those.", GET_NAME(ch), sold);
-        else if (GET_GOLD(keeper) + SHOP_BANK(shop_nr) < sell_price(obj, shop_nr, keeper, ch))
+        else if (GET_GOLD(keeper) + bankAccount < sellPrice(obj, keeper, ch))
             snprintf(buf, sizeof(buf), "%s I can only afford to buy %d of those.", GET_NAME(ch), sold);
         else
             snprintf(buf, sizeof(buf), "%s Something really screwy made me buy %d.", GET_NAME(ch), sold);
@@ -834,7 +651,7 @@ static void shopping_sell(char *arg, BaseCharacter *ch, BaseCharacter *keeper, v
     snprintf(tempbuf, sizeof(tempbuf), "$n sells something to %s.\r\n", GET_NAME(keeper));
     act(tempbuf, false, ch, obj, nullptr, TO_ROOM);
 
-    snprintf(tempbuf, sizeof(tempbuf), shop_index[shop_nr].message_sell, GET_NAME(ch), goldamt);
+    snprintf(tempbuf, sizeof(tempbuf), message_sell.c_str(), GET_NAME(ch), goldamt);
     do_tell(keeper, tempbuf, cmd_tell, 0);
 
     ch->sendf("The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt).c_str());
@@ -848,43 +665,41 @@ static void shopping_sell(char *arg, BaseCharacter *ch, BaseCharacter *keeper, v
     }
 
     if (GET_GOLD(keeper) < MIN_OUTSIDE_BANK) {
-        goldamt = MIN(MAX_OUTSIDE_BANK - GET_GOLD(keeper), SHOP_BANK(shop_nr));
-        SHOP_BANK(shop_nr) -= goldamt;
+        goldamt = MIN(MAX_OUTSIDE_BANK - GET_GOLD(keeper), bankAccount);
+        bankAccount -= goldamt;
         keeper->mod(CharMoney::Carried, goldamt);
     }
 }
 
-static void shopping_value(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr) {
+void Shop::executeValue(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     char buf[MAX_STRING_LENGTH], name[MAX_INPUT_LENGTH];
     Object *obj;
 
-    if (!is_ok(keeper, ch, shop_nr))
+    if (!isOk(keeper, ch))
         return;
 
-    if (!*arg) {
+    if (arguments.empty()) {
         snprintf(buf, sizeof(buf), "%s What do you want me to evaluate??", GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
-    one_argument(arg, name);
-    if (!(obj = get_selling_obj(ch, name, keeper, shop_nr, true)))
+    one_argument((char*)arguments.c_str(), name);
+    if (!(obj = getSellingObject(ch, name, keeper, true)))
         return;
 
-    if (!is_ok_obj(keeper, ch, obj, shop_nr))
+    if (!isOkObj(keeper, ch, obj))
         return;
 
     snprintf(buf, sizeof(buf), "%s I'll give you %d zenni for that!", GET_NAME(ch),
-             sell_price(obj, shop_nr, keeper, ch));
+             sellPrice(obj, keeper, ch));
     do_tell(keeper, buf, cmd_tell, 0);
 }
 
-static char *
-list_object(Object *obj, int cnt, int aindex, vnum shop_nr, BaseCharacter *keeper, BaseCharacter *ch) {
-    static char result[256];
-    char itemname[128],
-            quantity[16];    /* "Unlimited" or "%d" */
+std::string Shop::listObject(Object *obj, int cnt, int aindex, NonPlayerCharacter *keeper, BaseCharacter *ch) {
+    std::string result;
+    char itemname[128], quantity[16];    /* "Unlimited" or "%d" */
 
-    if (shop_producing(obj, shop_nr))
+    if (isProducing(obj))
         strcpy(quantity, "Unlimited");    /* strcpy: OK (for 'quantity >= 10') */
     else
         sprintf(quantity, "%d", cnt);    /* sprintf: OK (for 'quantity >= 11', 32-bit int) */
@@ -921,168 +736,91 @@ list_object(Object *obj, int cnt, int aindex, vnum shop_nr, BaseCharacter *keepe
     if (GET_OBJ_TYPE(obj) == ITEM_WEAPON && OBJ_FLAGGED(obj, ITEM_CUSTOM))
         displevel = 20;
 
-    snprintf(result, sizeof(result), " %2d)  %9s %-*s %3d %13s\r\n", aindex, quantity,
-             count_color_chars(itemname) + 36, itemname, displevel, add_commas(buy_price(obj, shop_nr, keeper, ch)).c_str());
+    result += fmt::sprintf(" %2d)  %9s %-*s %3d %13s\r\n", aindex, quantity,
+             count_color_chars(itemname) + 36, itemname, displevel, add_commas(buyPrice(obj, keeper, ch)));
     return (result);
 }
 
-static void shopping_list(char *arg, BaseCharacter *ch, BaseCharacter *keeper, vnum shop_nr) {
-    char buf[MAX_STRING_LENGTH * 4], name[MAX_INPUT_LENGTH];
-    Object *obj, *last_obj = nullptr;
-    int cnt = 0, lindex = 0, found = false;
-    size_t len;
-    /* cnt is the number of that particular object available */
-
-    if (!is_ok(keeper, ch, shop_nr))
+void Shop::executeList(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+    if (!isOk(keeper, ch))
         return;
 
-    if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
-        sort_keeper_objs(keeper, shop_nr);
-
-    one_argument(arg, name);
-
-    len = strlcpy(buf, " ##   Available   Item                             Min. Lvl       Cost\r\n"
-                       "----------------------------------------------------------------------\r\n", sizeof(buf));
-    for (auto obj : keeper->getInventory())
-            if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_COST(obj) > 0) {
-                if (!last_obj) {
-                    last_obj = obj;
-                    cnt = 1;
-                } else if (same_obj(last_obj, obj))
-                    cnt++;
-                else {
-                    lindex++;
-                    if (!*name || isname(name, last_obj->getName().c_str())) {
-                        strncat(buf, list_object(last_obj, cnt, lindex, shop_nr, keeper, ch),
-                                sizeof(buf) - len - 1);    /* strncat: OK */
-                        len = strlen(buf);
-                        if (len + 1 >= sizeof(buf))
-                            break;
-                        found = true;
-                    }
-                    cnt = 1;
-                    last_obj = obj;
-                }
-            }
-    lindex++;
-    if (!last_obj)    /* we actually have nothing in our list for sale, period */
-        ch->sendf("Currently, there is nothing for sale.\r\n");
-    else if (*name && !found)    /* nothing the char was looking for was found */
-        ch->sendf("Presently, none of those are for sale.\r\n");
-    else {
-        char zen[80];
-        if (!*name || isname(name, last_obj->getName().c_str()))    /* show last obj */
-            if (len < sizeof(buf)) {
-                strncat(buf, list_object(last_obj, cnt, lindex, shop_nr, keeper, ch),
-                        sizeof(buf) - len - 1);    /* strncat: OK */
-            }
-        if (len < sizeof(buf)) {
-            sprintf(zen, "@W[@wYour Zenni@D: @Y%s@W]", add_commas(GET_GOLD(ch)).c_str());
-            strncat(buf, zen, sizeof(buf) - len - 1);
-        }
-        write_to_output(ch->desc, buf);
-    }
-}
-
-int ok_shop_room(vnum shop_nr, room_vnum room) {
-    int mindex;
-    auto &sh = shop_index[shop_nr];
-
-    return sh.in_room.contains(room);
-}
-
-SPECIAL(shop_keeper) {
-    auto keeper = (BaseCharacter *) me;
-    vnum shop_nr = NOTHING;
-
-    for (auto &[nr, sh] : shop_index) {
-        if (sh.keeper == keeper->getVN()) {
-            shop_nr = nr;
-            break;
+    std::vector<Object*> display;
+    for(auto o : keeper->getInventory()) {
+        if(CAN_SEE_OBJ(ch, o) && GET_OBJ_COST(o) > 0) {
+            display.push_back(o);
         }
     }
+    if(display.empty()) {
+        ch->sendf("Currently, you can see nothing for sale.\r\n");
+        return;
+    }
+
+    std::string result;
+
+    result += " ##   Available   Item                             Min. Lvl       Cost\r\n"
+                       "----------------------------------------------------------------------\r\n";
+
+    std::vector<std::string> lines;
+    int cnt = 0;
+    int aindex = 1;
+    for (auto obj : display) {
+        cnt++;
+        aindex++;
+        lines.push_back(listObject(obj, cnt, aindex, keeper, ch));
+    }
+    result += join(lines, "@w\r\n");
+    ch->sendLine(result);
+}
 
 
-    if (!shop_index.count(shop_nr))
+bool Shop::executeCommand(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+
+    auto loc = keeper->getLocation();
+    if(!loc) {
         return false;
-
-    auto &sh = shop_index[shop_nr];
-
-    if (sh.func)    /* Check secondary function */
-        if (sh.func(ch, me, cmd, argument))
-            return (true);
-
-    if (keeper == ch) {
-        if (cmd)
-            SHOP_SORT(shop_nr) = 0;    /* Safety in case "drop all" */
-        return (false);
     }
-    if (!ok_shop_room(shop_nr, GET_ROOM_VNUM(IN_ROOM(ch))))
-        return (0);
+    if(!in_room.contains(loc->getUID())) {
+        return false;
+    }
 
     if (!AWAKE(keeper))
-        return (false);
+        return false;
 
-    if (CMD_IS("steal")) {
+    if (iequals("steal", cmd)) {
         char argm[MAX_INPUT_LENGTH];
 
-        if (!SHOP_ALLOW_STEAL(shop_nr)) {
+        if (!flags.contains(WILL_ALLOW_STEAL)) {
             snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
             act(argm, false, ch, nullptr, keeper, TO_CHAR);
             act(argm, false, ch, nullptr, keeper, TO_ROOM);
             do_action(keeper, (char*)GET_NAME(ch), cmd_slap, 0);
 
-            return (true);
+            return true;
         } else {
-            return (false);
+            return false;
         }
     }
 
-    if (CMD_IS("buy")) {
-        shopping_buy(argument, ch, keeper, shop_nr);
-        return (true);
-    } else if (CMD_IS("sell")) {
-        shopping_sell(argument, ch, keeper, shop_nr);
-        return (true);
-    } else if (CMD_IS("value")) {
-        shopping_value(argument, ch, keeper, shop_nr);
-        return (true);
-    } else if (CMD_IS("list")) {
-        shopping_list(argument, ch, keeper, shop_nr);
-        return (true);
-    } else if (CMD_IS("appraise")) {
-        shopping_app(argument, ch, keeper, shop_nr);
-        return (true);
+    if (iequals("buy", cmd)) {
+        executeBuy(keeper, ch, cmd, arguments);
+        return true;
+    } else if (iequals("sell", cmd)) {
+        executeSell(keeper, ch, cmd, arguments);
+        return true;
+    } else if (iequals("value", cmd)) {
+        executeValue(keeper, ch, cmd, arguments);
+        return true;
+    } else if (iequals("list", cmd)) {
+        executeList(keeper, ch, cmd, arguments);
+        return true;
+    } else if (iequals("appraise", cmd)) {
+        executeAppraise(keeper, ch, cmd, arguments);
+        return true;
     }
-    return (false);
+    return false;
 }
 
-int ok_damage_shopkeeper(BaseCharacter *ch, BaseCharacter *victim) {
-    shop_vnum sindex;
-
-    if (!IS_MOB(victim) || mob_index[GET_MOB_RNUM(victim)].func != shop_keeper)
-        return (true);
-
-    /* Prevent "invincible" shopkeepers if they're charmed. */
-    if (AFF_FLAGGED(victim, AFF_CHARM))
-        return (true);
-
-    for (auto &sh : shop_index) {
-        sindex = sh.first;
-        if (GET_MOB_RNUM(victim) == SHOP_KEEPER(sindex) && !SHOP_KILL_CHARS(sindex)) {
-            char buf[MAX_INPUT_LENGTH];
-
-            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_CANT_KILL_KEEPER);
-            do_tell(victim, buf, cmd_tell, 0);
-
-            do_action(victim, (char*)GET_NAME(ch), cmd_slap, 0);
-            return (false);
-        }
-    }
-
-
-    return (true);
-}
 
 
 void assign_the_shopkeepers() {
@@ -1093,261 +831,31 @@ void assign_the_shopkeepers() {
     cmd_puke = find_command("puke");
 
     for (auto &[vn, sh] : shop_index) {
-        if (sh.keeper == NOBODY)
-            continue;
-
-        /* Having SHOP_FUNC() as 'shop_keeper' will cause infinite recursion. */
-        if (mob_index[sh.keeper].func && mob_index[sh.keeper].func != shop_keeper)
-            sh.func = mob_index[sh.keeper].func;
-
-        mob_index[sh.keeper].func = shop_keeper;
-    }
-}
-
-static char *customer_string(vnum shop_nr, int detailed) {
-    int sindex = 0, flag = 0, nlen;
-    size_t len = 0;
-    static char buf[256];
-
-    while (*trade_letters[sindex] != '\n' && len + 1 < sizeof(buf)) {
-        if (detailed) {
-            if (!IS_SET_AR(SHOP_TRADE_WITH(shop_nr), flag)) {
-                nlen = snprintf(buf + len, sizeof(buf) - len, ", %s", trade_letters[sindex]);
-
-                if (len + nlen >= sizeof(buf) || nlen < 0)
-                    break;
-
-                len += nlen;
-            }
-        } else {
-            buf[len++] = (IS_SET_AR(SHOP_TRADE_WITH(shop_nr), flag) ? '_' : *trade_letters[sindex]);
-            buf[len] = '\0';
-
-            if (len >= sizeof(buf))
-                break;
+        for(auto keeper : sh->getKeepers()) {
+            keeper->shopKeeperOf = sh;
         }
-
-        sindex++;
-        flag += 1;
     }
-
-    buf[sizeof(buf) - 1] = '\0';
-    return (buf);
 }
 
 /* END_OF inefficient */
 static void list_all_shops(BaseCharacter *ch) {
-    const char *list_all_shops_header =
-            " ##   Virtual   Where    Keeper    Buy   Sell   Customers\r\n"
-            "---------------------------------------------------------\r\n";
-    vnum shop_nr, headerlen = strlen(list_all_shops_header);
-    size_t len = 0;
-    char buf[MAX_STRING_LENGTH], buf1[16];
 
-    *buf = '\0';
-    for (auto &[shop_nr, sh] : shop_index) {
-        if(!(len < sizeof(buf))) break;
-        /* New page in page_string() mechanism, print the header again. */
-        if (!(shop_nr % (PAGE_LENGTH - 2))) {
-            /*
-             * If we don't have enough room for the header, or all we have room left
-             * for is the header, then don't add it and just quit now.
-             */
-            if (len + headerlen + 1 >= sizeof(buf))
-                break;
-            strcpy(buf + len, list_all_shops_header);    /* strcpy: OK (length checked above) */
-            len += headerlen;
-        }
-
-        if (sh.keeper == NOBODY) {
-            strcpy(buf1, "<NONE>");    /* strcpy: OK (for 'buf1 >= 7') */
-        } else {
-            sprintf(buf1, "%6d", sh.keeper);    /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
-        }
-
-        auto first = sh.in_room.begin();
-        auto in_room = NOWHERE;
-        if(first != sh.in_room.end()) in_room = *first;
-
-        len += snprintf(buf + len, sizeof(buf) - len,
-                        "%3d   %6d   %6d    %s   %3.2f   %3.2f    %s\r\n",
-                        shop_nr + 1, SHOP_NUM(shop_nr), in_room, buf1,
-                        SHOP_SELLPROFIT(shop_nr), SHOP_BUYPROFIT(shop_nr),
-                        customer_string(shop_nr, false));
-    }
-
-    write_to_output(ch->desc, buf);
 }
 
 static void list_detailed_shop(BaseCharacter *ch, vnum shop_nr) {
-    BaseCharacter *k;
-    int sindex, column;
-    char *ptrsave;
 
-    ch->sendf("Vnum:       [%5d], Rnum: [%5d]\r\n", SHOP_NUM(shop_nr), shop_nr + 1);
-
-
-    ch->sendf("Rooms:      ");
-    column = 12;    /* ^^^ strlen ^^^ */
-    auto &sh = shop_index[shop_nr];
-	for(auto r : sh.in_room) {
-        char buf1[128];
-        int linelen, temp;
-
-        if (sindex) {
-            ch->sendf(", ");
-            column += 2;
-        }
-        if(world.contains(r)) {
-            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", getWorld<Room>(r)->getName().c_str(), r);
-        } else {
-            linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", r);
-        }
-        /* Implementing word-wrapping: assumes screen-size == 80 */
-        if (linelen + column >= 78 && column >= 20) {
-            ch->sendf("\r\n            ");
-            /* 12 is to line up with "Rooms:" printed first, and spaces above. */
-            column = 12;
-        }
-
-        ch->sendf("%s", buf1);
-        column += linelen;
-    }
-    if (sh.in_room.empty())
-        ch->sendf("Rooms:      None!");
-
-    ch->sendf("\r\nShopkeeper: ");
-    if (sh.keeper != NOBODY) {
-        ch->sendf("%s (#%d), Special Function: %s\r\n",
-                     mob_proto[SHOP_KEEPER(shop_nr)]["name"].get<std::string>(),
-                     sh.keeper,
-                     YESNO(SHOP_FUNC(shop_nr)));
-
-        if ((k = get_char_num(sh.keeper)))
-            ch->sendf("Coins:      [%9d], Bank: [%9d] (Total: %d)\r\n",
-                         GET_GOLD(k), SHOP_BANK(shop_nr), GET_GOLD(k) + SHOP_BANK(shop_nr));
-    } else
-        ch->sendf("<NONE>\r\n");
-
-
-    ch->sendf("Customers:  %s\r\n", (ptrsave = customer_string(shop_nr, true)) ? ptrsave : "None");
-
-
-    ch->sendf("Produces:   ");
-    column = 12;    /* ^^^ strlen ^^^ */
-    sindex = 0;
-    for (auto &p : sh.producing) {
-        if(!obj_proto.contains(p)) continue;
-        char buf1[128];
-        int linelen;
-
-        if (sindex) {
-            ch->sendf(", ");
-            column += 2;
-        }
-        linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)",
-                           obj_proto[p]["short_description"].get<std::string>(),
-                           p);
-
-        /* Implementing word-wrapping: assumes screen-size == 80 */
-        if (linelen + column >= 78 && column >= 20) {
-            ch->sendf("\r\n            ");
-            /* 12 is to line up with "Produces:" printed first, and spaces above. */
-            column = 12;
-        }
-
-        ch->sendf("%s", buf1);
-        column += linelen;
-    }
-    if (!sindex)
-        ch->sendf("Produces:   Nothing!");
-
-    ch->sendf("\r\nBuys:       ");
-    column = 12;    /* ^^^ strlen ^^^ */
-    sindex = 0;
-    for (auto &t : sh.type) {
-        char buf1[128];
-        size_t linelen;
-
-        if (sindex) {
-            ch->sendf(", ");
-            column += 2;
-        }
-
-        linelen = snprintf(buf1, sizeof(buf1), "%s (#%d) [%s]",
-                           item_types[t.type],
-                           t.type,
-                           !t.keywords.empty() ? t.keywords.c_str() : "all");
-
-        /* Implementing word-wrapping: assumes screen-size == 80 */
-        if (linelen + column >= 78 && column >= 20) {
-            ch->sendf("\r\n            ");
-            /* 12 is to line up with "Buys:" printed first, and spaces above. */
-            column = 12;
-        }
-
-        ch->sendf("%s", buf1);
-
-        column += linelen;
-        sindex++;
-    }
-    if (!sindex)
-        ch->sendf("Buys:       Nothing!");
-
-    ch->sendf("\r\nBuy at:     [%4.2f], Sell at: [%4.2f], Open: [%d-%d, %d-%d]\r\n",
-                 SHOP_SELLPROFIT(shop_nr), SHOP_BUYPROFIT(shop_nr), SHOP_OPEN1(shop_nr),
-                 SHOP_CLOSE1(shop_nr), SHOP_OPEN2(shop_nr), SHOP_CLOSE2(shop_nr));
-
-
-    /* Need a local buffer. */
-    {
-        char buf1[128];
-        sprintbit(SHOP_BITVECTOR(shop_nr), shop_bits, buf1, sizeof(buf1));
-        ch->sendf("Bits:       %s\r\n", buf1);
-    }
 }
 
 void show_shops(BaseCharacter *ch, char *arg) {
-    vnum shop_nr = NOTHING;
 
-    if (!*arg)
-        list_all_shops(ch);
-    else {
-        if (!strcasecmp(arg, ".")) {
-            for (auto &sh : shop_index) {
-                if (ok_shop_room(sh.first, GET_ROOM_VNUM(IN_ROOM(ch)))) {
-                    shop_nr = sh.first;
-                    break;
-                }
-            }
-
-            if (shop_nr == NOTHING) {
-                ch->sendf("This isn't a shop!\r\n");
-                return;
-            }
-        } else if (is_number(arg))
-            shop_nr = atol(arg);
-        else
-            shop_nr = NOTHING;
-
-        if (!shop_index.count(shop_nr)) {
-            ch->sendf("Illegal shop number.\r\n");
-            return;
-        }
-        list_detailed_shop(ch, shop_nr);
-    }
 }
 
 
-shop_data::~shop_data() {
-    free_shop_strings(this);
-}
-
-void shop_data::add_product(obj_vnum v) {
+void Shop::add_product(obj_vnum v) {
     producing.push_back(v);
 }
 
-void shop_data::remove_product(obj_vnum v) {
+void Shop::remove_product(obj_vnum v) {
     std::remove_if(producing.begin(), producing.end(), [&](obj_vnum &o) {return o == v;});
 }
 
@@ -1366,7 +874,7 @@ shop_buy_data::shop_buy_data(const nlohmann::json &j) : shop_buy_data() {
     if(j.contains("keywords")) keywords = j["keywords"];
 }
 
-nlohmann::json shop_data::serialize() {
+nlohmann::json Shop::serialize() {
     nlohmann::json j;
 
     j["vnum"] = vnum;
@@ -1374,17 +882,17 @@ nlohmann::json shop_data::serialize() {
     if(profit_buy) j["profit_buy"] = profit_buy;
     if(profit_sell) j["profit_sell"] = profit_sell;
     for(auto &t : type) j["type"].push_back(t.serialize());
-    if(no_such_item1 && strlen(no_such_item1)) j["no_such_item1"] = no_such_item1;
-    if(no_such_item2 && strlen(no_such_item2)) j["no_such_item2"] = no_such_item2;
-    if(missing_cash1 && strlen(missing_cash1)) j["missing_cash1"] = missing_cash1;
-    if(missing_cash2 && strlen(missing_cash2)) j["missing_cash2"] = missing_cash2;
-    if(do_not_buy && strlen(do_not_buy)) j["do_not_buy"] = do_not_buy;
-    if(message_buy && strlen(message_buy)) j["message_buy"] = message_buy;
-    if(message_sell && strlen(message_sell)) j["message_sell"] = message_sell;
+    if(!no_such_item1.empty()) j["no_such_item1"] = no_such_item1;
+    if(!no_such_item2.empty()) j["no_such_item2"] = no_such_item2;
+    if(!missing_cash1.empty()) j["missing_cash1"] = missing_cash1;
+    if(!missing_cash2.empty()) j["missing_cash2"] = missing_cash2;
+    if(!do_not_buy.empty()) j["do_not_buy"] = do_not_buy;
+    if(!message_buy.empty()) j["message_buy"] = message_buy;
+    if(!message_sell.empty()) j["message_sell"] = message_sell;
     if(temper1) j["temper1"] = temper1;
-    if(bitvector) j["bitvector"] = bitvector;
+    for(auto f : flags) j["flags"].push_back(f);
     if(keeper != NOBODY) j["keeper"] = keeper;
-    for(auto i = 0; i < 79; i++) if(IS_SET_AR(with_who, i)) j["with_who"].push_back(i);
+    for(auto f : with_who) j["with_who"].push_back(f);
     for(auto r : in_room) j["in_room"].push_back(r);
     if(open1) j["open1"] = open1;
     if(close1) j["close1"] = close1;
@@ -1397,7 +905,7 @@ nlohmann::json shop_data::serialize() {
 }
 
 
-shop_data::shop_data(const nlohmann::json &j) : shop_data() {
+Shop::Shop(const nlohmann::json &j) : Shop() {
     if(j.contains("vnum")) vnum = j["vnum"];
     if(j.contains("producing")) for(const auto& i : j["producing"]) producing.emplace_back(i);
     if(j.contains("profit_buy")) profit_buy = j["profit_buy"];
@@ -1411,9 +919,12 @@ shop_data::shop_data(const nlohmann::json &j) : shop_data() {
     if(j.contains("message_buy")) message_buy = strdup(j["message_buy"].get<std::string>().c_str());
     if(j.contains("message_sell")) message_sell = strdup(j["message_sell"].get<std::string>().c_str());
     if(j.contains("temper1")) temper1 = j["temper1"];
-    if(j.contains("bitvector")) bitvector = j["bitvector"];
+    if(j.contains("flags")) {
+        // flags is an array of numbers, insert into flags.
+        for(const auto& f : j["flags"]) flags.insert(f.get<int>());
+    }
     if(j.contains("keeper")) keeper = j["keeper"];
-    if(j.contains("with_who")) for(const auto& i : j["with_who"]) SET_BIT_AR(with_who, i.get<int>());
+    if(j.contains("with_who")) for(const auto& i : j["with_who"]) with_who.insert(i.get<int>());
     if(j.contains("in_room")) for(const auto& i : j["in_room"]) in_room.insert(i.get<int>());
     if(j.contains("open1")) open1 = j["open1"];
     if(j.contains("close1")) close1 = j["close1"];
@@ -1423,18 +934,18 @@ shop_data::shop_data(const nlohmann::json &j) : shop_data() {
     if(j.contains("lastsort")) lastsort = j["lastsort"];
 }
 
-std::list<BaseCharacter*> shop_data::getKeepers() {
+std::list<NonPlayerCharacter*> Shop::getKeepers() {
     return get_vnum_list(characterVnumIndex, keeper);
 }
 
-bool shop_data::isProducing(obj_vnum vn) {
+bool Shop::isProducing(obj_vnum vn) {
     if(auto found = std::find(producing.begin(), producing.end(), vn); found != producing.end()) {
         return true; 
     }
     return false;
 }
 
-void shop_data::runPurge() {
+void Shop::runPurge() {
     Object *next_obj;
     for(auto keeper : getKeepers()) {
         for (auto sobj : keeper->getInventory()) {
@@ -1449,6 +960,6 @@ void shop_data::runPurge() {
 
 void shop_purge(uint64_t heartPulse, double deltaTime) {
     for(auto &[vn, shop] : shop_index) {
-        shop.runPurge();
+        shop->runPurge();
     }
 }

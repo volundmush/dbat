@@ -19,7 +19,7 @@
 
 /*-------------------------------------------------------------------*/
 
-void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings) {
+void copy_shop(struct Shop *tshop, struct Shop *fshop, int free_old_strings) {
     int i;
 
     /*
@@ -185,7 +185,7 @@ void remove_from_int_list(IDXTYPE **list, IDXTYPE num) {
 /*
  * Free all the notice character strings in a shop structure.
  */
-void free_shop_strings(struct shop_data *shop) {
+void free_shop_strings(struct Shop *shop) {
     if (S_NOITEM1(shop)) {
         free(S_NOITEM1(shop));
         S_NOITEM1(shop) = nullptr;
@@ -224,7 +224,7 @@ void free_shop_strings(struct shop_data *shop) {
 /*
  * Free up the whole shop structure and it's content.
  */
-void free_shop(struct shop_data *shop) {
+void free_shop(struct Shop *shop) {
     free_shop_strings(shop);
 
     delete shop;
@@ -266,7 +266,7 @@ void modify_string(char **str, char *new_s) {
 
 /*-------------------------------------------------------------------*/
 
-int add_shop(struct shop_data *nshp) {
+int add_shop(struct Shop *nshp) {
     shop_rnum rshop;
     zone_rnum rznum = real_zone_by_thing(S_NUM(nshp));
     auto &z = zone_table[rznum];

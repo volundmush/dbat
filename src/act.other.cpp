@@ -6042,7 +6042,8 @@ ACMD(do_plant) {
         detect = (roll_skill(vict, SKILL_SPOT) + rand_number(1, 3));
 
     /* NO NO With Imp's and Shopkeepers, and if player planting is not allowed */
-    if ((ADM_FLAGGED(vict, ADM_NOSTEAL) || GET_MOB_SPEC(vict) == shop_keeper) && GET_ADMLEVEL(ch) < 5)
+    auto npc = dynamic_cast<NonPlayerCharacter*>(vict);
+    if ((ADM_FLAGGED(vict, ADM_NOSTEAL) || npc && npc->shopKeeperOf) && GET_ADMLEVEL(ch) < 5)
         roll = -10;         /* Failure */
 
 

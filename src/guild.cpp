@@ -26,7 +26,7 @@
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
 guild_vnum top_guild = NOTHING;
-std::unordered_map<guild_vnum, struct guild_data> guild_index;
+std::unordered_map<guild_vnum, struct Guild> guild_index;
 
 char *guild_customer_string(int guild_nr, int detailed);
 
@@ -1349,7 +1349,7 @@ void show_guild(BaseCharacter *ch, char *arg) {
 void list_guilds(BaseCharacter *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax) {
     int i, bottom, top, counter = 0;
 
-    auto glist = [&](const guild_data& g) {
+    auto glist = [&](const Guild& g) {
         counter++;
 
         ch->sendf("@g%4d@n) [@c%-5d@n]", counter, GM_NUM(i));
@@ -1394,7 +1394,7 @@ void levelup_parse(struct descriptor_data *d, char *arg) {
 }
 
 
-void guild_data::toggle_skill(uint16_t skill_id) {
+void Guild::toggle_skill(uint16_t skill_id) {
     if(skills.count(skill_id)) {
         skills.erase(skill_id);
     } else {
@@ -1402,7 +1402,7 @@ void guild_data::toggle_skill(uint16_t skill_id) {
     }
 }
 
-void guild_data::toggle_feat(uint16_t skill_id) {
+void Guild::toggle_feat(uint16_t skill_id) {
     if(feats.count(skill_id)) {
         feats.erase(skill_id);
     } else {
@@ -1410,7 +1410,7 @@ void guild_data::toggle_feat(uint16_t skill_id) {
     }
 }
 
-nlohmann::json guild_data::serialize() {
+nlohmann::json Guild::serialize() {
     nlohmann::json j;
 
     j["vnum"] = vnum;
@@ -1429,7 +1429,7 @@ nlohmann::json guild_data::serialize() {
 }
 
 
-guild_data::guild_data(const nlohmann::json &j) : guild_data() {
+Guild::Guild(const nlohmann::json &j) : Guild() {
     if(j.contains("vnum")) vnum = j["vnum"];
     if(j.contains("skills")) for(const auto& s : j["skills"]) skills.insert(s.get<int>());
     if(j.contains("feats")) for(const auto& f : j["feats"]) feats.insert(f.get<int>());

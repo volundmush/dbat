@@ -1865,7 +1865,7 @@ void descriptor_data::handle_input() {
         nanny(this, comm);
     else {            /* else: we're playing normally. */
         try {
-            command_interpreter(character, comm); /* Send it to interpreter */
+            character->executeCommand(comm); /* Send it to interpreter */
         }
         catch(const std::exception & err) {
             basic_mud_log("Exception when running Command Interpreter for %s: %s", GET_NAME(character), err.what());

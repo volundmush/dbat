@@ -51,8 +51,6 @@ void perform_remove(BaseCharacter *ch, int pos);
 
 int find_eq_pos(BaseCharacter *ch, Object *obj, char *arg);
 
-SPECIAL(shop_keeper);
-
 /* For Getting An Intro Name */
 const char *get_i_name(BaseCharacter *ch, BaseCharacter *vict) {
     static char name[50];
@@ -811,7 +809,7 @@ void extract_char_final(BaseCharacter *ch) {
 
     if (IS_NPC(ch)) {
         if (GET_MOB_RNUM(ch) != NOTHING)    /* prototyped */
-            erase_vnum(characterVnumIndex, ch);
+            erase_vnum(characterVnumIndex, dynamic_cast<NonPlayerCharacter*>(ch));
         clearMemory(ch);
         if (SCRIPT(ch))
             extract_script(ch, MOB_TRIGGER);
@@ -1430,10 +1428,10 @@ int is_better(Object *object, Object *object2) {
 }
 
 /* check and see if this item is better */
-void item_check(Object *object, BaseCharacter *ch) {
+void item_check(Object *object, NonPlayerCharacter *ch) {
     int where = 0;
 
-    if (IS_HUMANOID(ch) && !(mob_index[GET_MOB_RNUM(ch)].func == shop_keeper)) {
+    if (IS_HUMANOID(ch) && !ch->shopKeeperOf) {
         if (invalid_align(ch, object) || invalid_class(ch, object))
             return;
 

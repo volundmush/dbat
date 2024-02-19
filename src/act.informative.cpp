@@ -34,8 +34,6 @@
 /* local functions */
 static void gen_map(BaseCharacter *ch, int num);
 
-static void bringdesc(BaseCharacter *ch, BaseCharacter *tch);
-
 static void see_plant(Object *obj, BaseCharacter *ch);
 
 static double terrain_bonus(BaseCharacter *ch);
@@ -48,37 +46,11 @@ static int sort_commands_helper(const void *a, const void *b);
 
 static void print_object_location(int num, Object *obj, BaseCharacter *ch, int recur);
 
-static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode);
-
-static void list_obj_to_char(std::vector<Object*> list, BaseCharacter *ch, int mode, int show);
-
 static std::string trans_check(BaseCharacter *ch, GameEntity *viewer);
-
-static int show_obj_modifiers(Object *obj, BaseCharacter *ch);
 
 static void perform_mortal_where(BaseCharacter *ch, char *arg);
 
 static void perform_immort_where(BaseCharacter *ch, char *arg);
-
-static void diag_char_to_char(BaseCharacter *i, BaseCharacter *ch);
-
-static void diag_obj_to_char(Object *obj, BaseCharacter *ch);
-
-static void look_at_char(BaseCharacter *i, BaseCharacter *ch);
-
-static void look_in_direction(BaseCharacter *ch, int dir);
-
-static void look_in_obj(BaseCharacter *ch, char *arg);
-
-static void look_out_window(BaseCharacter *ch, char *arg);
-
-static void look_at_target(BaseCharacter *ch, char *arg, int read);
-
-static void search_in_direction(BaseCharacter *ch, int dir);
-
-static void display_spells(BaseCharacter *ch, Object *obj);
-
-static void display_scroll(BaseCharacter *ch, Object *obj);
 
 static void space_to_minus(char *str);
 
@@ -908,7 +880,7 @@ ACMD(do_showoff) {
         act("@WYou hold up $p@W for @C$N@W to see:@n", true, ch, obj, vict, TO_CHAR);
         act("@C$n@W holds up $p@W for you to see:@n", true, ch, obj, vict, TO_VICT);
         act("@C$n@W holds up $p@W for @c$N@W to see.@n", true, ch, obj, vict, TO_NOTVICT);
-        show_obj_to_char(obj, vict, SHOW_OBJ_ACTION);
+        vict->sendLine(obj->renderAppearance(vict));
         return;
     }
 }
@@ -1952,34 +1924,6 @@ std::string Room::generateMap(GameEntity *viewer, int num) {
     return result;
 }
 
-static void display_spells(BaseCharacter *ch, Object *obj) {
-    int i;
-
-    ch->sendf("The spellbook contains the following spells:\r\n");
-    ch->sendf("@c---@wSpell Name@c------------------------------------@w# of pages@c-----@n\r\n");
-
-    if (!obj->sbinfo) {
-        return;
-    }
-    for (i = 0; i < SPELLBOOK_SIZE; i++) {
-        if (obj->sbinfo[i].spellname != 0) {
-            if (obj->sbinfo[i].spellname > MAX_SPELLS) {
-                continue;
-            }
-            ch->sendf("@y%-20s@n					[@R%2d@n]\r\n", spell_info[obj->sbinfo[i].spellname].name,
-                         obj->sbinfo[i].pages);
-        }
-    }
-    return;
-}
-
-static void display_scroll(BaseCharacter *ch, Object *obj) {
-    ch->sendf("The scroll contains the following spell:\r\n");
-    ch->sendf("@c---@wSpell Name@c---------------------------------------------------@n\r\n");
-    ch->sendf("@y%-20s@n\r\n", skill_name(GET_OBJ_VAL(obj, VAL_SCROLL_SPELL1)));
-    return;
-}
-
 std::string Object::renderListPrefixFor(GameEntity *viewer) {
     std::string result;
 
@@ -2310,134 +2254,6 @@ std::string Object::renderAppearance(GameEntity* viewer) {
 }
 
 
-static void show_obj_to_char(Object *obj, BaseCharacter *ch, int mode) {
-    if (!obj || !ch) {
-        basic_mud_log("SYSERR: nullptr pointer in show_obj_to_char()");
-        /*  SYSERR_DESC:
-     *  Somehow a nullptr pointer was sent to show_obj_to_char() in either the
-     *  'obj' or the 'ch' variable.  The error will indicate which was nullptr
-     *  be listing both of the pointers passed to it.  This is often a
-     *  difficult one to trace, and may require stepping through a debugger.
-     */
-        return;
-    }
-
-    int spotted = false;
-
-    if (GET_SKILL(ch, SKILL_SPOT) > rand_number(20, 110)) {
-        spotted = true;
-    }
-
-    switch (mode) {
-
-
-        case SHOW_OBJ_ACTION:
-
-            break;
-
-        default:
-            basic_mud_log("SYSERR: Bad display mode (%d) in show_obj_to_char().", mode);
-            /*  SYSERR_DESC:
-     *  show_obj_to_char() has some predefined 'mode's (argument #3) to tell
-     *  it what to display to the character when it is called.  If the mode
-     *  is not one of these, it will output this error, and indicate what
-     *  mode was passed to it.  To correct it, you will need to find the
-     *  call with the incorrect mode and change it to an acceptable mode.
-     */
-            return;
-    }
-
-    if ((show_obj_modifiers(obj, ch) || (mode != SHOW_OBJ_ACTION)))
-        ch->sendf("\r\n");
-}
-
-static int show_obj_modifiers(Object *obj, BaseCharacter *ch) {
-    int found = false;
-
-    if (OBJ_FLAGGED(obj, ITEM_INVISIBLE)) {
-        ch->sendf(" (invisible)");
-        found++;
-    }
-    if (OBJ_FLAGGED(obj, ITEM_BLESS) && AFF_FLAGGED(ch, AFF_DETECT_ALIGN)) {
-        ch->sendf(" ..It glows blue!");
-        found++;
-    }
-    if (OBJ_FLAGGED(obj, ITEM_MAGIC) && AFF_FLAGGED(ch, AFF_DETECT_MAGIC)) {
-        ch->sendf(" ..It glows yellow!");
-        found++;
-    }
-    if (OBJ_FLAGGED(obj, ITEM_GLOW)) {
-        ch->sendf(" @D(@GGlowing@D)@n");
-        found++;
-    }
-    if (OBJ_FLAGGED(obj, ITEM_HOT)) {
-        ch->sendf(" @D(@RHOT@D)@n");
-        found++;
-    }
-    if (OBJ_FLAGGED(obj, ITEM_HUM)) {
-        ch->sendf(" @D(@RHumming@D)@n");
-        found++;
-    }
-    if (OBJ_FLAGGED(obj, ITEM_SLOT2)) {
-        if (OBJ_FLAGGED(obj, ITEM_SLOT_ONE) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED))
-            ch->sendf(" @D[@m1/2 Tokens@D]@n");
-        else if (OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED))
-            ch->sendf(" @D[@m2/2 Tokens@D]@n");
-        else
-            ch->sendf(" @D[@m0/2 Tokens@D]@n");
-        found++;
-    }
-    if (OBJ_FLAGGED(obj, ITEM_SLOT1)) {
-        if (OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED))
-            ch->sendf(" @D[@m1/1 Tokens@D]@n");
-        else
-            ch->sendf(" @D[@m0/1 Tokens@D]@n");
-        found++;
-    }
-    if (KICHARGE(obj) > 0) {
-        int num = (KIDIST(obj) * 20) + rand_number(1, 5);
-        ch->sendf(" %d meters away", num);
-        found++;
-    }
-    if (OBJ_FLAGGED(obj, ITEM_CUSTOM)) {
-        ch->sendf(" @D(@YCUSTOM@D)@n");
-    }
-    if (OBJ_FLAGGED(obj, ITEM_RESTRING)) {
-        //ch->sendf(" @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? !obj->getName().empty() : "*");
-    }
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {
-        if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STEEL ||
-            GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL ||
-            GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
-            ch->sendf(", and appears to be twisted and broken.");
-        } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_WOOD) {
-            ch->sendf(", and is broken into hundreds of splinters.");
-        } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_GLASS) {
-            ch->sendf(", and is shattered on the ground.");
-        } else if (GET_OBJ_VAL(obj, VAL_ALL_MATERIAL) == MATERIAL_STONE) {
-            ch->sendf(", and is a pile of rubble.");
-        } else {
-            ch->sendf(", and is broken.");
-        }
-        found++;
-    } else {
-        if (GET_OBJ_TYPE(obj) != ITEM_BOARD) {
-            if (GET_OBJ_TYPE(obj) != ITEM_CONTAINER) {
-                ch->sendf(".");
-            }
-            if (!IS_NPC(ch) && GET_OBJ_POSTED(obj) && GET_OBJ_POSTTYPE(obj) <= 0) {
-                Object *obj2 = GET_OBJ_POSTED(obj);
-                char dvnum[200];
-                *dvnum = '\0';
-                sprintf(dvnum, "@D[@G%d@D] @w", GET_OBJ_VNUM(obj2));
-                ch->sendf("\n...%s%s has been posted to it.", PRF_FLAGGED(ch, PRF_ROOMFLAGS) ? dvnum : "",
-                             obj2->getShortDesc());
-            }
-        }
-        found++;
-    }
-    return (found);
-}
 
 std::string Object::renderModifiers(GameEntity *viewer) {
     std::string result;
@@ -2512,32 +2328,6 @@ std::string Object::renderModifiers(GameEntity *viewer) {
     return result;
 }
 
-static void list_obj_to_char(std::vector<Object*> list, BaseCharacter *ch, int mode, int show) {
-    Object *i, *j, *d;
-    bool found = false;
-    int num;
-
-    /* Loop through all objects in the list */
-    for (auto i : list) {
-        auto rdesc = i->getRoomDesc();
-        if (rdesc.empty())
-            continue;
-        if (strcasecmp(rdesc.c_str(), "undefined") == 0)
-            continue;
-        num = 0;
-        d = i;
-        if ((CAN_SEE_OBJ(ch, d) &&
-             ((!rdesc.starts_with('.') && !d->getShortDesc().starts_with('.')) || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
-            (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
-            if (num > 1)
-                ch->sendf("@D(@Rx@Y%2i@D)@n ", num);
-            show_obj_to_char(d, ch, mode);
-            found = true;
-        }
-    }
-    if (!found && show)
-        ch->sendf(" Nothing.\r\n");
-}
 
 std::string Object::renderDiagnostics(GameEntity *viewer) {
     struct {
@@ -3630,171 +3420,6 @@ std::string Room::renderLocationFor(GameEntity *viewer) {
 
 
 
-static void look_in_direction(BaseCharacter *ch, int dir) {
-    auto r = ch->getRoom();
-    if(!r) {
-        ch->sendf("Nothing special there...\r\n");
-        return;
-    }
-    auto exits = r->getExits();
-    auto d = exits[dir];
-    if(!d) {
-        ch->sendf("Nothing special there...\r\n");
-        return;
-    }
-    auto dest = d->getDestination();
-    if(!dest) {
-        ch->sendf("Nothing special there...\r\n");
-        return;
-    }
-
-    if (auto desc = d->getLookDesc(); !desc.empty()) {
-        ch->sendText(desc);
-
-        bool canSeeRoom = false;
-
-        auto alias = d->getAlias();
-
-        if (d->checkFlag(FlagType::Exit, EX_ISDOOR) && !alias.empty()) {
-            if (!d->checkFlag(FlagType::Exit, EX_SECRET) &&
-                d->checkFlag(FlagType::Exit, EX_CLOSED))
-                ch->sendf("The %s is closed.\r\n", fname(alias.c_str()));
-            else if (!d->checkFlag(FlagType::Exit, EX_CLOSED)) {
-                ch->sendf("The %s is open.\r\n", fname(alias.c_str()));
-                canSeeRoom = true;
-            }
-        } else {
-            canSeeRoom = true;
-        }
-
-        if(canSeeRoom) {
-            ch->sendf("You peek over and see:\r\n");
-            ch->lookAtLocation();
-        }
-    }
-
-}
-
-
-
-static void look_in_obj(BaseCharacter *ch, char *arg) {
-    Object *obj = nullptr;
-    BaseCharacter *dummy = nullptr;
-    int amt, bits;
-
-    if (!*arg)
-        ch->sendf("Look in what?\r\n");
-    else if (!(bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
-        ch->sendf("There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
-    } else if (find_exdesc(arg, obj->ex_description) != nullptr && !bits)
-        ch->sendf("There's nothing inside that!\r\n");
-    else if ((GET_OBJ_TYPE(obj) == ITEM_PORTAL) && !OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) {
-        if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < 0) {
-            /* You can look through the portal to the destination */
-            /* where does this lead to? */
-            room_rnum portal_dest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
-            if (portal_dest == NOWHERE) {
-                ch->sendf("You see nothing but infinite darkness...\r\n");
-            } else if (IS_DARK(portal_dest) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-                ch->sendf("You see nothing but infinite darkness...\r\n");
-            } else {
-                ch->sendf("After seconds of concentration you see the image of %s.\r\n",
-                             getWorld<Room>(portal_dest)->getDisplayName(ch));
-            }
-        } else if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
-            /* display the appropriate description from the list of descriptions
-*/
-            ch->sendf("%s\r\n", portal_appearance[GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR)]);
-        } else {
-            /* We shouldn't really get here, so give a default message */
-            ch->sendf("All you can see is the glow of the portal.\r\n");
-        }
-    } else if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
-        if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
-            ch->sendf("It is closed.\r\n");
-        else if (GET_OBJ_VAL(obj, VAL_VEHICLE_APPEAR) < 0) {
-            /* You can look inside the vehicle */
-            /* where does this lead to? */
-            room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM));
-            if (vehicle_inside == NOWHERE) {
-                ch->sendf("You cannot see inside that.\r\n");
-            } else if (IS_DARK(vehicle_inside) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-                ch->sendf("It is pitch black...\r\n");
-            } else {
-                ch->sendf("You look inside and see:\r\n");
-                ch->sendLine(getWorld<Room>(vehicle_inside)->renderLocationFor(ch));
-                //ch->sendEvent(getWorld(vehicle_inside)->renderLocationFor(ch));
-            }
-        } else {
-            ch->sendf("You cannot see inside that.\r\n");
-        }
-    } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
-        look_out_window(ch, arg);
-    } else if ((GET_OBJ_TYPE(obj) != ITEM_DRINKCON) &&
-               (GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN) &&
-               (GET_OBJ_TYPE(obj) != ITEM_CONTAINER) &&
-               (GET_OBJ_TYPE(obj) != ITEM_PORTAL)) {
-        ch->sendf("There's nothing inside that!\r\n");
-    } else if ((GET_OBJ_TYPE(obj) == ITEM_CONTAINER) ||
-               (GET_OBJ_TYPE(obj) == ITEM_PORTAL)) {
-        if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
-            ch->sendf("It is closed.\r\n");
-        else {
-            ch->sendf("%s", obj->getShortDesc());
-            if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER &&
-                (GET_OBJ_VNUM(obj) == 697 || GET_OBJ_VNUM(obj) == 698 || GET_OBJ_VNUM(obj) == 682 ||
-                 GET_OBJ_VNUM(obj) == 683 || GET_OBJ_VNUM(obj) == 684)) {
-                act("$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
-            }
-            switch (bits) {
-                case FIND_OBJ_INV:
-                    ch->sendf(" (carried): \r\n");
-                    break;
-                case FIND_OBJ_ROOM:
-                    ch->sendf(" (here): \r\n");
-                    break;
-                case FIND_OBJ_EQUIP:
-                    ch->sendf(" (used): \r\n");
-                    break;
-            }
-
-            if(auto inv = obj->renderInventory(ch); !inv.empty()) {
-                ch->sendf("%s", inv);
-            }
-        }
-    } else {        /* item must be a fountain or drink container */
-        if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) == 1))
-            ch->sendf("It is empty.\r\n");
-        else {
-            if (GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) < 0) {
-                char buf2[MAX_STRING_LENGTH];
-                sprinttype(GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
-                ch->sendf("It's full of a %s liquid.\r\n", buf2);
-            } else if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) > GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY)) {
-                ch->sendf("Its contents seem somewhat murky.\r\n"); /* BUG */
-            } else {
-                char buf2[MAX_STRING_LENGTH];
-                amt = GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY);
-                int leftin = GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL);
-                sprinttype(GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
-                if (leftin == amt) {
-                    ch->sendf("It's full of a %s liquid.\r\n", buf2);
-                } else if (leftin >= amt * .8) {
-                    ch->sendf("It's almost full of a %s liquid.\r\n", buf2);
-                } else if (leftin >= amt * .5) {
-                    ch->sendf("It's about half full of a %s liquid.\r\n", buf2);
-                } else if (leftin >= amt * .2) {
-                    ch->sendf("It's less than half full of a %s liquid.\r\n", buf2);
-                } else if (leftin > 0) {
-                    ch->sendf("It's barely filled with a %s liquid.\r\n", buf2);
-                } else {
-                    ch->sendf("It's empty.\r\n");
-                }
-            }
-        }
-    }
-}
-
 char *find_exdesc(char *word, const std::vector<extra_descr_data>& list) {
 
     for (auto i : list)
@@ -3814,253 +3439,6 @@ char *find_exdesc(char *word, const std::vector<extra_descr_data>& list) {
  * Thanks to Angus Mezick <angus@EDGIL.CCMAIL.COMPUSERVE.COM> for the
  * suggested fix to this problem.
  */
-static void look_at_target(BaseCharacter *ch, char *arg, int cmread) {
-    int bits, found = false, j, fnum, i = 0, msg = 1;
-    BaseCharacter *found_char = nullptr;
-    Object *obj, *found_obj = nullptr;
-    char *desc;
-    char number[MAX_STRING_LENGTH];
-
-    if (!ch->desc)
-        return;
-
-    if (!*arg) {
-        ch->sendf("Look at what?\r\n");
-        return;
-    }
-
-     auto isBoard = [](const auto &o) {
-        return GET_OBJ_TYPE(o) == ITEM_BOARD;};
-
-    if (cmread) {
-
-        obj = ch->findObject(isBoard);
-        if(!obj) obj = ch->getRoom()->findObject(isBoard);
-
-        if (obj) {
-            arg = one_argument(arg, number);
-            if (!*number) {
-                ch->sendf("Read what?\r\n");
-                return;
-            }
-
-            /* Okay, here i'm faced with the fact that the person could be
-	 entering in something like 'read 5' or 'read 4.mail' .. so, whats the
-	 difference between the two?  Well, there's a period in the second,
-	 so, we'll just stick with that basic difference */
-
-            if (isname(number, obj->getName().c_str())) {
-                show_board(GET_OBJ_VNUM(obj), ch);
-            } else if ((!isdigit(*number) || (!(msg = atoi(number)))) ||
-                       (strchr(number, '.'))) {
-                sprintf(arg, "%s %s", number, arg);
-                look_at_target(ch, arg, 0);
-            } else {
-                board_display_msg(GET_OBJ_VNUM(obj), ch, msg);
-            }
-        }
-    } else {
-        bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP |
-                                 FIND_CHAR_ROOM, ch, &found_char, &found_obj);
-
-        /* Is the target a character? */
-        if (found_char != nullptr) {
-            look_at_char(found_char, ch);
-            if (ch != found_char) {
-                if (!AFF_FLAGGED(ch, AFF_HIDE)) {
-                    act("$n looks at you.", true, ch, nullptr, found_char, TO_VICT);
-                    act("$n looks at $N.", true, ch, nullptr, found_char, TO_NOTVICT);
-                }
-            }
-            return;
-        }
-
-        /* Strip off "number." from 2.foo and friends. */
-        if (!(fnum = get_number(&arg))) {
-            ch->sendf("Look at what?\r\n");
-            return;
-        }
-
-        /* Does the argument match an extra desc in the room? */
-        if ((desc = find_exdesc(arg, ch->getRoom()->ex_description)) != nullptr && ++i == fnum) {
-            write_to_output(ch->desc, desc);
-            return;
-        }
-
-        /* Does the argument match an extra desc in the char's equipment? */
-        for (j = 0; j < NUM_WEARS && !found; j++)
-            if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)))
-                if ((desc = find_exdesc(arg, GET_EQ(ch, j)->ex_description)) != nullptr && ++i == fnum) {
-                    ch->sendf("%s", desc);
-                    if (isname(arg, GET_EQ(ch, j)->getName().c_str())) {
-                        if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_WEAPON) {
-                            ch->sendf("The weapon type of %s is a %s.\r\n",
-                                         GET_OBJ_SHORT(GET_EQ(ch, j)),
-                                         weapon_type[(int) GET_OBJ_VAL(GET_EQ(ch, j), VAL_WEAPON_SKILL)]);
-                        }
-                        if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_SPELLBOOK) {
-                            display_spells(ch, GET_EQ(ch, j));
-                        }
-                        if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_SCROLL) {
-                            display_scroll(ch, GET_EQ(ch, j));
-                        }
-                        diag_obj_to_char(GET_EQ(ch, j), ch);
-                        ch->sendf("It appears to be made of %s",
-                                     material_names[GET_OBJ_MATERIAL(GET_EQ(ch, j))]);
-                    }
-                    found = true;
-                }
-
-        /* Does the argument match an extra desc in the char's inventory? */
-        for (auto obj : ch->getInventory()) {
-            if (CAN_SEE_OBJ(ch, obj))
-                if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
-                    if (isBoard(obj)) {
-                        show_board(GET_OBJ_VNUM(obj), ch);
-                    } else {
-                        ch->sendf("%s", desc);
-                        if (isname(arg, obj->getName().c_str())) {
-                            if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-                                ch->sendf("The weapon type of %s is a %s.\r\n",
-                                             GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj,
-                                                                                               VAL_WEAPON_SKILL)]);
-                            }
-                            if (GET_OBJ_TYPE(obj) == ITEM_SPELLBOOK) {
-                                display_spells(ch, obj);
-                            }
-                            if (GET_OBJ_TYPE(obj) == ITEM_SCROLL) {
-                                display_scroll(ch, obj);
-                            }
-                            diag_obj_to_char(obj, ch);
-                            ch->sendf("It appears to be made of %s, and weights %s",
-                                         material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
-                        }
-                    }
-                    found = true;
-                }
-        }
-
-        /* Does the argument match an extra desc of an object in the room? */
-        for (auto obj : ch->getRoom()->getInventory())
-            if (CAN_SEE_OBJ(ch, obj))
-                if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
-                    if (isBoard(obj)) {
-                        show_board(GET_OBJ_VNUM(obj), ch);
-                    } else {
-                        ch->sendf("%s", desc);
-                        if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
-                            ch->sendf("@YSyntax@D: @CUnlock hatch\r\n");
-                            ch->sendf("@YSyntax@D: @COpen hatch\r\n");
-                            ch->sendf("@YSyntax@D: @CClose hatch\r\n");
-                            ch->sendf("@YSyntax@D: @CUnlock hatch\r\n");
-                            ch->sendf("@YSyntax@D: @CEnter hatch\r\n");
-                        } else if (GET_OBJ_TYPE(obj) == ITEM_HATCH) {
-                            ch->sendf("@YSyntax@D: @CUnlock hatch\r\n");
-                            ch->sendf("@YSyntax@D: @COpen hatch\r\n");
-                            ch->sendf("@YSyntax@D: @CClose hatch\r\n");
-                            ch->sendf("@YSyntax@D: @CUnlock hatch\r\n");
-                            ch->sendf("@YSyntax@D: @CLeave@n\r\n");
-                        } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
-                            look_out_window(ch, (char*)obj->getDisplayName(ch).c_str());
-                        }
-
-                        if (GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
-                            ch->sendf("@RFUEL@D: %s%s@n\r\n",
-                                         GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y" : "@r",
-                                         add_commas(GET_FUEL(obj)).c_str());
-                        }
-                        if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-                            ch->sendf("The weapon type of %s is a %s.\r\n", GET_OBJ_SHORT(obj),
-                                         weapon_type[(int) GET_OBJ_VAL(obj, VAL_WEAPON_SKILL)]);
-                        }
-                        diag_obj_to_char(obj, ch);
-                        ch->sendf("It appears to be made of %s, and weights %s",
-                                     material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
-                    }
-                    found = true;
-                }
-
-        /* If an object was found back in generic_find */
-        if (bits) {
-            if (!found)
-                show_obj_to_char(found_obj, ch, SHOW_OBJ_ACTION);
-            else {
-                if (show_obj_modifiers(found_obj, ch))
-                    ch->sendf("\r\n");
-            }
-        } else if (!found)
-            ch->sendf("You do not see that here.\r\n");
-    }
-}
-
-static void look_out_window(BaseCharacter *ch, char *arg) {
-    Object *i, *viewport = nullptr, *vehicle = nullptr;
-    BaseCharacter *dummy = nullptr;
-    room_rnum target_room = NOWHERE;
-    int bits, door;
-
-    auto r = ch->getRoom();
-
-    /* First, lets find something to look out of or through. */
-    if (*arg) {
-        /* Find this object and see if it is a window */
-        if (!(bits = generic_find(arg,
-                                  FIND_OBJ_ROOM | FIND_OBJ_INV | FIND_OBJ_EQUIP,
-                                  ch, &dummy, &viewport))) {
-            ch->sendf("You don't see that here.\r\n");
-            return;
-        } else if (GET_OBJ_TYPE(viewport) != ITEM_WINDOW) {
-            ch->sendf("You can't look out that!\r\n");
-            return;
-        }
-    } else if (OUTSIDE(ch)) {
-        /* yeah, sure stupid */
-        ch->sendf("But you are already outside.\r\n");
-        return;
-    } else {
-        /* Look for any old window in the room */
-        viewport = ch->getRoom()->findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->getDisplayName(ch).c_str());});
-    }
-    if (!viewport) {
-        /* Nothing suitable to look through */
-        ch->sendf("You don't seem to be able to see outside.\r\n");
-    } else if (OBJVAL_FLAGGED(viewport, CONT_CLOSEABLE) &&
-               OBJVAL_FLAGGED(viewport, CONT_CLOSED)) {
-        /* The window is closed */
-        ch->sendf("It is closed.\r\n");
-    } else {
-        if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1) < 0) {
-            /* We are looking out of the room */
-            if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4) < 0) {
-                /* Look for the default "outside" room */
-                for (auto &[door, e] : r->getExits()) {
-                    auto dest = e->getDestination();
-                    if(!dest) continue;
-                    if(!dest->checkFlag(FlagType::Room, ROOM_INDOORS)) {
-                        target_room = dest->getUID();
-                        break;
-                    }
-                }
-            } else {
-                target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4));
-            }
-        } else {
-            /* We are looking out of a vehicle */
-            if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1))))
-                target_room = IN_ROOM(vehicle);
-        }
-        if (target_room == NOWHERE) {
-            ch->sendf("You don't seem to be able to see outside.\r\n");
-        } else {
-            if (auto vp = viewport->getLookDesc(); !vp.empty())
-                act(vp.c_str(), true, ch, viewport, nullptr, TO_CHAR);
-            else
-                act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->sendf("You look outside and see:\r\n");
-            ch->sendLine(getWorld(target_room)->renderLocationFor(ch));
-        }
-    }
-}
 
 ACMD(do_finger) {
 
@@ -4259,9 +3637,6 @@ ACMD(do_perf) {
 ACMD(do_look) {
     int look_type;
 
-    if (!ch->desc)
-        return;
-
     if (GET_POS(ch) < POS_SLEEPING)
     {
         ch->sendf("You can't see anything but stars!\r\n");
@@ -4279,114 +3654,41 @@ ACMD(do_look) {
         return;
     }
 
-    auto room = ch->getRoom();
-    auto exits = room->getExits();
+    auto loc = ch->getLocation();
+    if(argument && *argument) {
+        
+        if(iequals(argument, "sky")) {
+            // do sky check...
 
-    if(IS_DARK(room->getUID()) && !CAN_SEE_IN_DARK(ch)) {
-        ch->sendf("It is pitch black...\r\n");
-        for(auto c : room->getPeople()) {
-            if(c == ch) continue;
-            if(ch->canSee(c) && c->canSeeInDark()) {
-                c->sendLine("Glowing red eyes peer out of the darkness at you.");
-                break;
-            }
+            return;
         }
-        return;
-    }
 
-    char arg[MAX_INPUT_LENGTH], arg2[200];
+        // Normal check for GameEntities in the room
+        Searcher search(ch, argument);
+        search.setAllowSelf().setAllowHere();
+        if(loc) search.addContents(loc);
+        search.addInventory(ch).addEquipment(ch);
 
-    if (subcmd == SCMD_READ) {
-        one_argument(argument, arg);
-        if (!*arg)
-            ch->sendf("Read what?\r\n");
-        else
-            look_at_target(ch, arg, 1);
-        return;
-    }
-    argument = any_one_arg(argument, arg);
-    one_argument(argument, arg2);
-    if (!*arg) {
-        if (subcmd == SCMD_SEARCH) {
-            search_room(ch);
+        if(auto results = search.getOne(); results) {
+            if(results == loc) ch->lookAtLocation();
+            else ch->sendLine(results->renderAppearance(ch));
         } else {
-            ch->lookAtLocation();
-            if (GET_ADMLEVEL(ch) < 1 && !AFF_FLAGGED(ch, AFF_HIDE)) {
-                //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
-            }
+            // we can do a check for local ex_descs before giving up...
         }
-    } else if(is_abbrev(arg, "moon")) {
-        switch(room->checkMoon()) {
-            case MoonCheck::NoMoon:
-                ch->sendf("It's kinda hard to see any moons from here.\r\n");
-                return;
-            case MoonCheck::NotFull:
-                ch->sendf("You gaze skyward, but there's no full moon in sight.\r\n");
-                return;
-            case MoonCheck::Full:
-                ch->sendf("You gaze upon a wondrous full moon... it's an amazing sight.\r\n");
-                ch->gazeAtMoon();
-                return;
-        }
-    }
-    else if (is_abbrev(arg, "inside") && exits[INDIR] && !*arg2) {
-        if (subcmd == SCMD_SEARCH)
-            search_in_direction(ch, INDIR);
-        else
-            look_in_direction(ch, INDIR);
-    } else if (is_abbrev(arg, "inside") && (subcmd == SCMD_SEARCH) && !*arg2) {
-        search_in_direction(ch, INDIR);
-    } else if (is_abbrev(arg, "inside") ||
-               is_abbrev(arg, "into") || is_abbrev(arg, "onto")) {
-        look_in_obj(ch, arg2);
-    } else if ((is_abbrev(arg, "outside") ||
-                is_abbrev(arg, "through") ||
-                is_abbrev(arg, "thru")) &&
-               (subcmd == SCMD_LOOK) && *arg2) {
-        look_out_window(ch, arg2);
-    } else if (is_abbrev(arg, "outside") &&
-               (subcmd == SCMD_LOOK) && !exits[OUTDIR]) {
-        look_out_window(ch, arg2);
-    } else if ((look_type = search_block(arg, dirs, false)) >= 0 ||
-               (look_type = search_block(arg, abbr_dirs, false)) >= 0) {
-        if (subcmd == SCMD_SEARCH)
-            search_in_direction(ch, look_type);
-        else
-            look_in_direction(ch, look_type);
-    } else if ((is_abbrev(arg, "towards")) &&
-               ((look_type = search_block(arg2, dirs, false)) >= 0 ||
-                (look_type = search_block(arg2, abbr_dirs, false)) >= 0)) {
-        if (subcmd == SCMD_SEARCH)
-            search_in_direction(ch, look_type);
-        else
-            look_in_direction(ch, look_type);
-    } else if (is_abbrev(arg, "at")) {
-        if (subcmd == SCMD_SEARCH)
-            ch->sendf("That is not a direction!\r\n");
-        else
-            look_at_target(ch, arg2, 0);
-    } else if (is_abbrev(arg, "around")) {
-        struct extra_descr_data *i;
-        int found = 0;
-
-        for (auto i : ch->getRoom()->ex_description) {
-            if (!i.keyword.starts_with(".")) {
-                ch->sendf("%s%s:\r\n%s",
-                             (found ? "\r\n" : ""), i.keyword, i.description);
-                found = 1;
-            }
-        }
-        if (!found)
-            ch->sendf("You couldn't find anything noticeable.\r\n");
-    } else if (find_exdesc(arg, ch->getRoom()->ex_description) != nullptr) {
-        look_at_target(ch, arg, 0);
+        
     } else {
-        if (subcmd == SCMD_SEARCH)
-            ch->sendf("That is not a direction!\r\n");
-        else
-            look_at_target(ch, arg, 0);
+        if(!loc) {
+            ch->sendf("You can't see anything but endless nothingness! Oops! Where are you?\r\n");
+            return;
+        }
+        ch->lookAtLocation();
     }
 
+    
+    if(!loc) {
+        ch->sendf("You can't see anything but endless nothingness! Oops! Where are you?\r\n");
+        return;
+    }
 }
 
 ACMD(do_examine) {
@@ -4401,20 +3703,6 @@ ACMD(do_examine) {
         return;
     }
 
-    /* look_at_target() eats the number. */
-    look_at_target(ch, strcpy(tempsave, arg), 0);    /* strcpy: OK */
-
-    generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_CHAR_ROOM |
-                      FIND_OBJ_EQUIP, ch, &tmp_char, &tmp_object);
-
-    if (tmp_object) {
-        if ((GET_OBJ_TYPE(tmp_object) == ITEM_DRINKCON) ||
-            (GET_OBJ_TYPE(tmp_object) == ITEM_FOUNTAIN) ||
-            (GET_OBJ_TYPE(tmp_object) == ITEM_CONTAINER)) {
-            ch->sendf("When you look inside, you see:\r\n");
-            look_in_obj(ch, arg);
-        }
-    }
 }
 
 ACMD(do_gold) {
@@ -4624,8 +3912,6 @@ ACMD(do_status) {
 
     if (!*arg) {
         ch->sendf("@D<@b------------------------@D[@YYour Status@D]@b-------------------------@D>@n\r\n\r\n");
-        ch->sendf("            @D---------------@CAppearance@D---------------\n");
-        bringdesc(ch, ch);
         ch->sendf("            @D---------------@RAppendages@D---------------\n");
 
         if (PLR_FLAGGED(ch, PLR_HEAD)) {
@@ -4773,28 +4059,6 @@ ACMD(do_status) {
             ch->sendf("         You preferred a body dominate form of fighting.\r\n");
         } else if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
             ch->sendf("         You preferred a throwing dominate form of fighting.\r\n");
-        }
-
-        if (GET_DISTFEA(ch) == DISTFEA_HAIR && !IS_DEMON(ch) && !IS_MAJIN(ch) && !IS_ICER(ch) && !IS_NAMEK(ch)) {
-            ch->sendf("         Your hair is your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_DEMON(ch)) {
-            ch->sendf("         Your horns are your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_MAJIN(ch)) {
-            ch->sendf("         Your forelock is your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_ICER(ch)) {
-            ch->sendf("         Your horns are your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_NAMEK(ch)) {
-            ch->sendf("         Your antennae are your most distinctive feature.\r\n");
-        }
-
-        if (GET_DISTFEA(ch) == DISTFEA_SKIN) {
-            ch->sendf("         Your skin is your most distinctive feature.\r\n");
-        }
-        if (GET_DISTFEA(ch) == DISTFEA_HEIGHT) {
-            ch->sendf("         Your height is your most distinctive feature.\r\n");
-        }
-        if (GET_DISTFEA(ch) == DISTFEA_WEIGHT) {
-            ch->sendf("         Your weight is your most distinctive feature.\r\n");
         }
 
         if (GET_EQ(ch, WEAR_EYE)) {
@@ -5347,6 +4611,18 @@ static void bonus_status(BaseCharacter *ch) {
     return;
 }
 
+std::string GameEntity::renderInventory(GameEntity* viewer) {
+    std::vector<std::string> lines;
+
+    for(auto i : getInventory()) {
+        if(!viewer->canSee(i)) continue;
+        lines.push_back(i->renderInventoryListingFor(viewer));
+    }
+
+    return join(lines, "@w\r\n");
+
+}
+
 ACMD(do_inventory) {
     ch->sendf("@w              @YInventory\r\n@D-------------------------------------@w\r\n");
     if (PLR_FLAGGED(ch, PLR_STOLEN)) {
@@ -5356,11 +4632,8 @@ ACMD(do_inventory) {
         ch->sendf("@r   --------------------------------------------------@n\n");
         return;
     }
-    if(auto inv = ch->getInventory(); !inv.empty()) {
-        for(auto i : inv) {
-            if(!ch->canSee(i)) continue;
-            ch->sendLine(i->renderInventoryListingFor(ch));
-        }
+    if(auto inv = renderInventory(this); !inv.empty()) {
+        ch->sendLine(inv);
     } else {
         ch->sendLine("Nothing.");
     }
@@ -6196,14 +5469,14 @@ ACMD(do_diagnose) {
             ch->sendf("%s", CONFIG_NOPERSON);
         else {
             ch->sendf("%s", GET_SEX(vict) == SEX_MALE ? "He " : (GET_SEX(vict) == SEX_FEMALE ? "She " : "It "));
-            diag_char_to_char(vict, ch);
+            ch->sendLine(vict->renderDiagnostics(ch));
         }
     } else {
         if (FIGHTING(ch)) {
             ch->sendf("%s",
                          GET_SEX(FIGHTING(ch)) == SEX_MALE ? "He " : (GET_SEX(FIGHTING(ch)) == SEX_FEMALE ? "She "
                                                                                                           : "It "));
-            diag_char_to_char(FIGHTING(ch), ch);
+            ch->sendLine(FIGHTING(ch)->renderDiagnostics(ch));
         } else {
             ch->sendf("Diagnose who?\r\n");
         }
@@ -7070,53 +6343,6 @@ ACMD(do_whois) {
 
     }
     ch->sendf("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\r\n");
-}
-
-static void search_in_direction(BaseCharacter *ch, int dir) {
-    int check = false, skill_lvl, dchide = 20;
-
-    ch->sendf("You search for secret doors.\r\n");
-    act("$n searches the area intently.", true, ch, nullptr, nullptr, TO_ROOM);
-
-    auto r = ch->getRoom();
-    auto exits = r->getExits();
-    auto e = exits[dir];
-
-    if(!e) {
-        ch->sendf("There is no exit there.\r\n");
-        return;
-    }
-    auto dest = e->getDestination();
-    if(!dest) {
-        ch->sendf("That leads nowhere.\r\n");
-        return;
-    }
-
-    /* SEARCHING is allowed untrained */
-    skill_lvl = GET_SKILL(ch, SKILL_SEARCH);
-    if (IS_TRUFFLE(ch) || IS_HUMAN(ch))
-        skill_lvl = skill_lvl + 2;
-    if (IS_HALFBREED(ch))
-        skill_lvl = skill_lvl + 1;
-
-    dchide = e->dchide;
-
-    if (skill_lvl > dchide)
-        check = true;
-
-    if (auto gen = e->getLookDesc(); !gen.empty() && !e->checkFlag(FlagType::Exit, EX_SECRET))
-        ch->sendf(gen);
-    else if (!e->checkFlag(FlagType::Exit, EX_SECRET))
-        ch->sendf("There is a normal exit there.\r\n");
-    else if (e->checkFlag(FlagType::Exit, EX_ISDOOR) &&
-             e->checkFlag(FlagType::Exit, EX_SECRET) &&
-             !e->getAlias().empty() && (check == true))
-        ch->sendf("There is a hidden door keyword: '%s' %sthere.\r\n",
-                     fname(e->getAlias().c_str()),
-                     (e->checkFlag(FlagType::Exit, EX_CLOSED)) ? "" : "open ");
-    else
-        ch->sendf("There is no exit there.\r\n");
-
 }
 
 ACMD(do_oaffects) {

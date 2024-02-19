@@ -8,7 +8,7 @@
 #include "structs.h"
 #include "shop.h"
 
-extern void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_strings);
+extern void copy_shop(struct Shop *tshop, struct Shop *fshop, int free_old_strings);
 
 extern void copy_list(vnum **tlist, vnum *flist);
 
@@ -18,15 +18,15 @@ extern void add_to_type_list(struct shop_buy_data **list, struct shop_buy_data *
 
 extern void add_to_int_list(vnum **tlist, vnum newi);
 
-extern void free_shop_string(struct shop_data *shop);
+extern void free_shop_string(struct Shop *shop);
 
-extern void free_shop(struct shop_data *shop);
+extern void free_shop(struct Shop *shop);
 
-extern void free_shop_strings(struct shop_data *shop);
+extern void free_shop_strings(struct Shop *shop);
 
 extern void modify_string(char **str, char *newstr);
 
-extern int add_shop(struct shop_data *shop);
+extern int add_shop(struct Shop *shop);
 
 extern int save_shops(zone_rnum zone_num);
 
