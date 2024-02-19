@@ -14,10 +14,6 @@ extern void carry_drop(BaseCharacter *ch, int type);
 
 extern int has_o2(BaseCharacter *ch);
 
-extern int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check);
-
-extern int perform_move(BaseCharacter *ch, int dir, int need_specials_check);
-
 // commands
 extern ACMD(do_gen_door);
 

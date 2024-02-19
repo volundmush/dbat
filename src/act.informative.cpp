@@ -2170,179 +2170,138 @@ std::string Object::renderInventoryListingHelper(GameEntity* viewer) {
     return result;
 }
 
-std::string Object::renderAppearance(GameEntity* viewer) {
+std::string DrinkContainer::renderAppearanceHelper(GameEntity* viewer) {
+    std::string result;
+    result += fmt::sprintf("It looks like a drink container.\r\n");
+
+    result += renderDiagnostics(viewer);
+    result += fmt::sprintf("It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(this)],
+                    add_commas(GET_OBJ_WEIGHT(this)).c_str());
+    return result;
+}
+
+std::string Food::renderAppearanceHelper(GameEntity* viewer) {
     std::string result;
 
-    switch (type_flag) {
-        case ITEM_NOTE:
-            if (auto ld = getLookDesc(); !ld.empty()) {
-                result += fmt::sprintf("There is something written on it:\r\n\r\n%s", ld);
-            } else
-                result += fmt::sprintf("There appears to be nothing written on it.\r\n");
-            return;
-
-        // TODO: special class for boards.
-        case ITEM_BOARD:
-            show_board(vn, ch);
-            break;
-
-        case ITEM_CONTROL:
-            result += fmt::sprintf("@RFUEL@D: %s%s@n\r\n",
-                            GET_FUEL(this) >= 200 ? "@G" : GET_FUEL(this) >= 100 ? "@Y" : "@r",
-                            add_commas(GET_FUEL(this)).c_str());
-            break;
-
-        case ITEM_DRINKCON:
-            result += fmt::sprintf("It looks like a drink container.\r\n");
-            break;
-
-        case ITEM_LIGHT:
-            if (GET_OBJ_VAL(this, VAL_LIGHT_HOURS) == -1)
-                result += fmt::sprintf("Light Cycles left: Infinite\r\n");
-            else
-                result += fmt::sprintf("Light Cycles left: [%d]\r\n", GET_OBJ_VAL(this, VAL_LIGHT_HOURS));
-            break;
-
-        case ITEM_FOOD:
-            if (FOOB(this) >= 4) {
-                if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this) / 4) {
-                    result += fmt::sprintf("Condition of the food: Almost gone.\r\n");
-                } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this) / 2) {
-                    result += fmt::sprintf("Condition of the food: Half Eaten.");
-                } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this)) {
-                    result += fmt::sprintf("Condition of the food: Partially Eaten.");
-                } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) == FOOB(this)) {
-                    result += fmt::sprintf("Condition of the food: Whole.");
-                }
-            } else if (FOOB(this) > 0) {
-                if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this)) {
-                    result += fmt::sprintf("Condition of the food: Almost gone.");
-                } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) == FOOB(this)) {
-                    result += fmt::sprintf("Condition of the food: Whole.");
-                }
-            } else {
-                result += fmt::sprintf("Condition of the food: Insignificant.");
-            }
-            break;
-
-        // is this even used?
-        case ITEM_SPELLBOOK:
-            result += fmt::sprintf("It looks like an arcane tome.\r\n");
-            display_spells(ch, this);
-            break;
-
-        // or this?
-        case ITEM_SCROLL:
-            result += fmt::sprintf("It looks like an arcane scroll.\r\n");
-            display_scroll(ch, this);
-            break;
-
-        case ITEM_VEHICLE:
-            if (GET_OBJ_VNUM(this) > 19199) {
-                result += fmt::sprintf("@YSyntax@D: @CUnlock hatch\r\n");
-                result += fmt::sprintf("@YSyntax@D: @COpen hatch\r\n");
-                result += fmt::sprintf("@YSyntax@D: @CClose hatch\r\n");
-                result += fmt::sprintf("@YSyntax@D: @CEnter hatch\r\n");
-            } else {
-                result += fmt::sprintf("@YSyntax@D: @CUnlock door\r\n");
-                result += fmt::sprintf("@YSyntax@D: @COpen door\r\n");
-                result += fmt::sprintf("@YSyntax@D: @CClose door\r\n");
-                result += fmt::sprintf("@YSyntax@D: @CEnter door\r\n");
-            }
-            break;
-
-        case ITEM_HATCH:
-            if (GET_OBJ_VNUM(this) > 19199) {
-                result += fmt::sprintf("@YSyntax@D: @CUnlock hatch\r\n");
-                result += fmt::sprintf("@YSyntax@D: @COpen hatch\r\n");
-                result += fmt::sprintf("@YSyntax@D: @CClose hatch\r\n");
-                result += fmt::sprintf("@YSyntax@D: @CLeave@n\r\n");
-            } else {
-                result += fmt::sprintf("@YSyntax@D: @CUnlock door\r\n");
-                result += fmt::sprintf("@YSyntax@D: @COpen door\r\n");
-                result += fmt::sprintf("@YSyntax@D: @CClose door\r\n");
-                result += fmt::sprintf("@YSyntax@D: @CEnter door\r\n");
-            }
-            break;
-
-        case ITEM_WINDOW:
-            look_out_window(ch, (char*)obj->getName().c_str());
-            return;
-            break;
-
-        default:
-            if (!IS_CORPSE(this)) {
-                result += fmt::sprintf("You see nothing special..\r\n");
-            } else {
-                int mention = false;
-                result += fmt::sprintf("This corpse has ");
-
-                if (GET_OBJ_VAL(this, VAL_CORPSE_HEAD) == 0) {
-                    result += fmt::sprintf("no head,");
-                    mention = true;
-                }
-
-                if (GET_OBJ_VAL(this, VAL_CORPSE_RARM) == 0) {
-                    result += fmt::sprintf("no right arm, ");
-                    mention = true;
-                } else if (GET_OBJ_VAL(this, VAL_CORPSE_RARM) == 2) {
-                    result += fmt::sprintf("a broken right arm, ");
-                    mention = true;
-                }
-
-                if (GET_OBJ_VAL(this, VAL_CORPSE_LARM) == 0) {
-                    result += fmt::sprintf("no left arm, ");
-                    mention = true;
-                } else if (GET_OBJ_VAL(this, VAL_CORPSE_LARM) == 2) {
-                    result += fmt::sprintf("a broken left arm, ");
-                    mention = true;
-                }
-
-                if (GET_OBJ_VAL(this, VAL_CORPSE_RLEG) == 0) {
-                    result += fmt::sprintf("no right leg, ");
-                    mention = true;
-                } else if (GET_OBJ_VAL(this, VAL_CORPSE_RLEG) == 2) {
-                    result += fmt::sprintf("a broken right leg, ");
-                    mention = true;
-                }
-
-                if (GET_OBJ_VAL(this, VAL_CORPSE_LLEG) == 0) {
-                    result += fmt::sprintf("no left leg, ");
-                    mention = true;
-                } else if (GET_OBJ_VAL(this, VAL_CORPSE_LLEG) == 2) {
-                    result += fmt::sprintf("a broken left leg, ");
-                    mention = true;
-                }
-
-                if (mention == false) {
-                    result += fmt::sprintf("nothing missing from it but life.");
-                } else {
-                    result += fmt::sprintf("and is dead.");
-                }
-
-                result += fmt::sprintf("\r\n");
-            }
-            break;
-    }
-
-    if (GET_OBJ_TYPE(this) == ITEM_WEAPON) {
-        int num = 0;
-        if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
-            num = 1;
-        } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
-            num = 0;
-        } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
-            num = 3;
-        } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
-            num = 2;
-        } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
-            num = 4;
-        } else {
-            num = 5;
+    if (FOOB(this) >= 4) {
+        if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this) / 4) {
+            result += fmt::sprintf("Condition of the food: Almost gone.\r\n");
+        } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this) / 2) {
+            result += fmt::sprintf("Condition of the food: Half Eaten.");
+        } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this)) {
+            result += fmt::sprintf("Condition of the food: Partially Eaten.");
+        } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) == FOOB(this)) {
+            result += fmt::sprintf("Condition of the food: Whole.");
         }
-        result += fmt::sprintf("The weapon type of %s@n is '%s'.\r\n", GET_OBJ_SHORT(this), weapon_disp[num]);
-        //result += fmt::sprintf("You could wield it %s.\r\n", wield_names[wield_type(get_size(ch), this)]);
+    } else if (FOOB(this) > 0) {
+        if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) < FOOB(this)) {
+            result += fmt::sprintf("Condition of the food: Almost gone.");
+        } else if (GET_OBJ_VAL(this, VAL_FOOD_FOODVAL) == FOOB(this)) {
+            result += fmt::sprintf("Condition of the food: Whole.");
+        }
+    } else {
+        result += fmt::sprintf("Condition of the food: Insignificant.");
     }
+
+    return result;
+}
+
+std::string Corpse::renderAppearanceHelper(GameEntity* viewer) {
+    std::string result;
+
+    int mention = false;
+    result += fmt::sprintf("This corpse has ");
+
+    if (GET_OBJ_VAL(this, VAL_CORPSE_HEAD) == 0) {
+        result += fmt::sprintf("no head,");
+        mention = true;
+    }
+
+    if (GET_OBJ_VAL(this, VAL_CORPSE_RARM) == 0) {
+        result += fmt::sprintf("no right arm, ");
+        mention = true;
+    } else if (GET_OBJ_VAL(this, VAL_CORPSE_RARM) == 2) {
+        result += fmt::sprintf("a broken right arm, ");
+        mention = true;
+    }
+
+    if (GET_OBJ_VAL(this, VAL_CORPSE_LARM) == 0) {
+        result += fmt::sprintf("no left arm, ");
+        mention = true;
+    } else if (GET_OBJ_VAL(this, VAL_CORPSE_LARM) == 2) {
+        result += fmt::sprintf("a broken left arm, ");
+        mention = true;
+    }
+
+    if (GET_OBJ_VAL(this, VAL_CORPSE_RLEG) == 0) {
+        result += fmt::sprintf("no right leg, ");
+        mention = true;
+    } else if (GET_OBJ_VAL(this, VAL_CORPSE_RLEG) == 2) {
+        result += fmt::sprintf("a broken right leg, ");
+        mention = true;
+    }
+
+    if (GET_OBJ_VAL(this, VAL_CORPSE_LLEG) == 0) {
+        result += fmt::sprintf("no left leg, ");
+        mention = true;
+    } else if (GET_OBJ_VAL(this, VAL_CORPSE_LLEG) == 2) {
+        result += fmt::sprintf("a broken left leg, ");
+        mention = true;
+    }
+
+    if (mention == false) {
+        result += fmt::sprintf("nothing missing from it but life.");
+    } else {
+        result += fmt::sprintf("and is dead.");
+    }
+
+    result += fmt::sprintf("\r\n");
+
+    return result;
+}
+
+std::string Vehicle::renderAppearanceHelper(GameEntity* viewer) {
+    std::string result;
+
+    result += fmt::sprintf("It looks like a vehicle.\r\n");
+    result += fmt::sprintf("@YSyntax@D: @CUnlock hatch\r\n");
+    result += fmt::sprintf("@YSyntax@D: @COpen hatch\r\n");
+    result += fmt::sprintf("@YSyntax@D: @CClose hatch\r\n");
+    result += fmt::sprintf("@YSyntax@D: @CEnter hatch\r\n");
+
+
+    return result;
+
+}
+
+std::string Weapon::renderAppearanceHelper(GameEntity* viewer) {
+    std::string result;
+
+    int num = 0;
+    if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
+        num = 1;
+    } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_SLASH - TYPE_HIT) {
+        num = 0;
+    } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_CRUSH - TYPE_HIT) {
+        num = 3;
+    } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_STAB - TYPE_HIT) {
+        num = 2;
+    } else if (GET_OBJ_VAL(this, VAL_WEAPON_DAMTYPE) == TYPE_BLAST - TYPE_HIT) {
+        num = 4;
+    } else {
+        num = 5;
+    }
+    result += fmt::sprintf("The weapon type of %s@n is '%s'.\r\n", GET_OBJ_SHORT(this), weapon_disp[num]);
+    //result += fmt::sprintf("You could wield it %s.\r\n", wield_names[wield_type(get_size(ch), this)]);
+
+    return result;
+
+}
+
+std::string Object::renderAppearance(GameEntity* viewer) {
+    std::string result = renderAppearanceHelper(viewer);
+
+
     result += renderDiagnostics(viewer);
     result += fmt::sprintf("It appears to be made of %s, and weighs %s", material_names[GET_OBJ_MATERIAL(this)],
                     add_commas(GET_OBJ_WEIGHT(this)).c_str());

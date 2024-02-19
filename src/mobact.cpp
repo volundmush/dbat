@@ -120,7 +120,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             }
             if(!availableDirections.empty()) {
                 auto door = Random::get(availableDirections);
-                perform_move(ch, *door, 1);
+                ch->moveInDirection(*door, 1);
             }
         }
         

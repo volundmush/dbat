@@ -326,6 +326,28 @@ struct coordinates {
     void clear();
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
+    bool operator==(const coordinates& rhs);
+};
+
+
+
+struct Location {
+    GameEntity* location{};
+    int locationType{};
+    coordinates coords{};
+    bool operator==(const Location& rhs);
+};
+
+struct Destination {
+    Destination() = default;
+    Destination(GameEntity* target) : target(target) {};
+    Destination(const Location& loc) : target(loc.location), locationType(loc.locationType), coords(loc.coords) {};
+    GameEntity* target{};
+    Exit* via{};
+    int direction{-1};
+    int locationType{};
+    coordinates coords{};
+    bool operator==(const Destination& rhs);
 };
 
 struct GameEntity : public std::enable_shared_from_this<GameEntity> {
@@ -387,13 +409,18 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     Room* getRoom();
     GameEntity* getLocation();
 
+    Location getLocationInfo();
+
     // removeFromLocation is called first, and handleRemove is called BY removeFromLocation on its location.
     virtual void removeFromLocation();
     virtual void handleRemove(GameEntity *u);
 
     // As above, the process is to call addToLocation which will then call handleAdd ON the location.
-    virtual void addToLocation(GameEntity *u, int locationType = 0, std::optional<coordinates> coords = std::nullopt);
+    virtual void addToLocation(const Destination &dest);
     virtual void handleAdd(GameEntity *u);
+
+    // called for this, when mover has changed coordinates within it.
+    virtual void updateCoordinates(GameEntity *mover);
 
     // the GameEntity you are located in. Which might be null.
     GameEntity *location{nullptr};
@@ -565,6 +592,20 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual std::optional<double> emitEnvVar(EnvVar v);
     std::unordered_map<EnvVar, double> envVars;
     
+    virtual std::map<int, Destination> getDestinations(GameEntity* viewer);
+    virtual std::optional<Destination> getDestination(GameEntity* viewer, int direction);
+
+    virtual bool moveInDirection(int direction, bool need_specials_check = true);
+    virtual bool doSimpleMove(int direction, bool need_specials_check = true);
+
+    // this is used for leaving ANY kind of location. not just the command 'leave'.
+    virtual bool checkCanLeave(GameEntity *mover, const Destination& dest, bool need_specials_check);
+
+    virtual bool checkCanReachDestination(GameEntity *mover, const Destination& dest);
+
+    // this should be called as dest.target as this.
+    virtual bool checkPostEnter(GameEntity *mover, const Location& cameFrom, const Destination& dest);
+
     template<typename... Args>
     void sendText(fmt::string_view format, Args&&... args) {
         try {
@@ -658,6 +699,8 @@ struct Object : public GameEntity {
 
     std::string renderDiagnostics(GameEntity* viewer) override;
 
+    virtual std::string renderAppearanceHelper(GameEntity* viewer);
+
     std::string renderAppearance(GameEntity* viewer) override;
 
     void activate();
@@ -749,6 +792,34 @@ struct GlacialWall : public Object {
     std::string renderRoomListingHelper(GameEntity* u) override;
 };
 
+struct DrinkContainer : public Object {
+    using Object::Object;
+
+    std::string getUnitClass() override;
+    std::string renderAppearanceHelper(GameEntity* u) override;
+};
+
+struct Food : public Object {
+    using Object::Object;
+
+    std::string getUnitClass() override;
+    std::string renderAppearanceHelper(GameEntity* u) override;
+};
+
+struct Corpse : public Object {
+    using Object::Object;
+
+    std::string getUnitClass() override;
+    std::string renderAppearanceHelper(GameEntity* u) override;
+};
+
+struct Weapon : public Object {
+    using Object::Object;
+
+    std::string getUnitClass() override;
+    std::string renderAppearanceHelper(GameEntity* u) override;
+};
+
 
 struct Structure : public Object {
     using Object::Object;
@@ -769,6 +840,9 @@ struct Structure : public Object {
 // Type: ITEM_VEHICLE should always use this.
 struct Vehicle : public Structure {
     using Structure::Structure;
+
+    std::string getUnitClass() override;
+    std::string renderAppearanceHelper(GameEntity* u) override;
 };
 
 
@@ -858,6 +932,10 @@ struct Room : public GameEntity {
     bool isEnvironment() override;
 
     double getEnvVar(EnvVar v) override;
+
+    bool checkPostEnter(GameEntity* mover, const Location& loc, const Destination& dest) override;
+    bool checkCanReachDestination(GameEntity *mover, const Destination& dest) override;
+    bool checkCanLeave(GameEntity* mover, const Destination& dest, bool need_specials_check = true) override;
 
 
 };
@@ -1025,6 +1103,9 @@ struct BaseCharacter : public GameEntity {
     std::string renderAppearance(GameEntity* viewer) override;
 
     std::optional<std::string> getDubFor(BaseCharacter* target);
+
+    bool moveInDirection(int direction, bool need_specials_check = true) override;
+    bool doSimpleMove(int direction, bool need_specials_check = true) override;
 
     virtual bool isPC() = 0;
     virtual bool isNPC() = 0;

@@ -425,42 +425,64 @@ int has_o2(BaseCharacter *ch) {
  *   0 : If fail
  */
 
-int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check) {
+bool Room::checkCanLeave(GameEntity* mover, const Destination& dest, bool need_specials_check) {
+    auto was_in = mover->getLocationInfo();
     char throwaway[MAX_INPUT_LENGTH] = ""; /* Functions assume writable. */
-    char buf2[MAX_STRING_LENGTH];
-    char buf3[MAX_STRING_LENGTH];
-    room_rnum was_in = IN_ROOM(ch);
-    int need_movement;
-    Room *rm;
+    auto direction = dest.direction;
 
-    /*
-   * Check for special routines (North is 1 in command list, but 0 here) Note
-   * -- only check if following; this avoids 'double spec-proc' bug
-   */
-    if (need_specials_check && special(ch, dir + 1, throwaway))
-        return (0);
-
-    /* blocked by a leave trigger ? */
-    if (!leave_mtrigger(ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
-        return 0;
-    if (!leave_wtrigger(ch->getRoom(), ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
-        return 0;
-    if (!leave_otrigger(ch->getRoom(), ch, dir) || IN_ROOM(ch) != was_in) /* prevent teleport crashes */
-        return 0;
-    /* charmed? */
-    if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master && IN_ROOM(ch) == IN_ROOM(ch->master)) {
-        ch->sendf("The thought of leaving your master makes you weep.\r\n");
-        act("$n bursts into tears.", false, ch, nullptr, nullptr, TO_ROOM);
-        return (0);
+    if(auto ch = dynamic_cast<BaseCharacter*>(mover); ch) {
+        if (need_specials_check && special(ch, direction + 1, throwaway))
+            return false;
+        if (!leave_mtrigger(ch, direction) || ch->getLocationInfo() != was_in) /* prevent teleport crashes */
+            return false;
+        if (!leave_wtrigger(this, ch, direction) || ch->getLocationInfo() != was_in) /* prevent teleport crashes */
+            return false;
+        if (!leave_otrigger(this, ch, direction) || ch->getLocationInfo() != was_in) /* prevent teleport crashes */
+            return false;
     }
 
-    auto r = ch->getRoom();
-    auto exits = r->getExits();
-    auto e = exits[dir];
-    auto dest = e->getDestination();
+    return true;
 
-    int willfall = false;
-    /* if this room or the one we're going to needs flight, check for it */
+}
+
+bool Room::checkCanReachDestination(GameEntity* mover, const Destination& dest) {
+    
+    if(auto ch = dynamic_cast<BaseCharacter*>(mover); ch) {
+        // First check for zone restrictions.
+        if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
+            (GET_LEVEL(ch) < ZONE_MINLVL(zone)) && (ZONE_MINLVL(zone) > 0)) {
+            ch->sendf("Sorry, you are too low a level to enter this zone.\r\n");
+            return false;
+        }
+
+        if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_LEVEL(ch) > ZONE_MAXLVL(zone)) &&
+            (ZONE_MAXLVL(zone) > 0)) {
+            ch->sendf("Sorry, you are too high a level to enter this zone.\r\n");
+            return false;
+        }
+
+        if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && ZONE_FLAGGED(zone, ZONE_CLOSED)) {
+            ch->sendf("This zone is currently closed to mortals.\r\n");
+            return false;
+        }
+
+        if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GRGOD)
+            && ZONE_FLAGGED(zone, ZONE_NOIMMORT)) {
+            ch->sendf("This zone is closed to all.\r\n");
+            return false;
+        }
+
+        if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GOD) &&
+            !can_edit_zone(ch, zone) && ZONE_FLAGGED(zone, ZONE_QUEST)) {
+            ch->sendf("This is a Quest zone.\r\n");
+            return false;
+        }
+
+        // Next, we'll handle terrain checks.
+
+
+        /*
+        int willfall = false;
     if ((r->sector_type == SECT_FLYING) || (dest->sector_type == SECT_FLYING)) {
         if (!has_flight(ch)) {
             if (dir != 4) {
@@ -534,7 +556,6 @@ int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check) {
         }
     }
 
-    /* move points needed is avg. move loss for src and destination sect type */
     if(!IS_NPC(ch)) {
         auto gravity = ch->myEnvVar(EnvVar::Gravity);
         need_movement = (gravity * gravity) * ch->getBurdenRatio();
@@ -543,7 +564,7 @@ int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check) {
     if (GET_LEVEL(ch) <= 1) {
         need_movement = 0;
     }
-    /* Stealth increases your move cost, less if you are good at it */
+
     if (AFF_FLAGGED(ch, AFF_HIDE))
         need_movement *= ((roll_skill(ch, SKILL_HIDE) > 15) ? 2 : 4);
 
@@ -584,12 +605,11 @@ int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check) {
         return (0);
     }
 
-    /* Check if the character needs a skill check to go that way. */
     if (e->dcskill != 0) {
         if (e->dcmove > roll_skill(ch, e->dcskill)) {
             ch->sendf("Your skill in %s isn't enough to move that way!\r\n",
                          spell_info[e->dcskill].name);
-            /* A failed skill check still spends the movement points! */
+
             if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING))
                 ch->decCurST(need_movement);
             return (0);
@@ -598,7 +618,6 @@ int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check) {
         }
     }
 
-
     if (dest->checkFlag(FlagType::Room, ROOM_TUNNEL) && (num_pc_in_room(dest) >= CONFIG_TUNNEL_SIZE)) {
         if (CONFIG_TUNNEL_SIZE > 1)
             ch->sendf("There isn't enough room for you to go there!\r\n");
@@ -606,299 +625,202 @@ int do_simple_move(BaseCharacter *ch, int dir, int need_specials_check) {
             ch->sendf("There isn't enough room there for more than one person!\r\n");
         return (0);
     }
-    /* Mortals and low level gods cannot enter greater god rooms. */
+
     if (dest->checkFlag(FlagType::Room, ROOM_GODROOM) &&
         GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
         ch->sendf("You aren't godly enough to use that room!\r\n");
         return (0);
     }
+    */
 
-    /******* Zone flag checks *******/
+    }
+    
+    return true;
 
-    rm = dest;
+}
 
-    if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
-        (GET_LEVEL(ch) < ZONE_MINLVL(rm->zone)) && (ZONE_MINLVL(rm->zone) > 0)) {
-        ch->sendf("Sorry, you are too low a level to enter this zone.\r\n");
-        return (0);
+bool BaseCharacter::doSimpleMove(int direction, bool need_specials_check) {
+    char buf2[MAX_STRING_LENGTH];
+    char buf3[MAX_STRING_LENGTH];
+    auto was_in = getLocationInfo();
+    int need_movement;
+
+    auto destMaybe = was_in.location->getDestination(this, direction);
+    if(!destMaybe) {
+        sendf("Alas, you cannot go that way.\r\n");
+        return false;
+    }
+    auto &dest = destMaybe.value();
+
+    if (AFF_FLAGGED(this, AFF_CHARM) && master && was_in == master->getLocationInfo()) {
+        sendf("The thought of leaving your master makes you weep.\r\n");
+        act("$n bursts into tears.", false, this, nullptr, nullptr, TO_ROOM);
+        return false;
     }
 
-    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_LEVEL(ch) > ZONE_MAXLVL(rm->zone)) &&
-        (ZONE_MAXLVL(rm->zone) > 0)) {
-        ch->sendf("Sorry, you are too high a level to enter this zone.\r\n");
-        return (0);
-    }
+    if(!was_in.location->checkCanLeave(this, dest, need_specials_check)) return false;
 
-    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && ZONE_FLAGGED(rm->zone, ZONE_CLOSED)) {
-        ch->sendf("This zone is currently closed to mortals.\r\n");
-        return (0);
-    }
+    if(!dest.target->checkCanReachDestination(this, dest)) return false;
 
-    if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GRGOD)
-        && ZONE_FLAGGED(rm->zone, ZONE_NOIMMORT)) {
-        ch->sendf("This zone is closed to all.\r\n");
-        return (0);
-    }
+    // We now know we can go into the room.
 
-    /* No low level immortal scouting */
-    if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT && GET_ADMLEVEL(ch) < ADMLVL_GOD) &&
-        !can_edit_zone(ch, rm->zone) && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
-        ch->sendf("This is a Quest zone.\r\n");
-        return (0);
-    }
-
-    /* Now we know we're allowed to go into the room. */
+    /*
     if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING)) {
         ch->decCurST(need_movement);
     }
+    */
 
-    if (AFF_FLAGGED(ch, AFF_SNEAK) && !IS_NPC(ch)) {
-        sprintf(buf2, "$n sneaks %s.", dirs[dir]);
-        if (GET_SKILL(ch, SKILL_MOVE_SILENTLY)) {
-            improve_skill(ch, SKILL_MOVE_SILENTLY, 0);
-        } else if (slot_count(ch) + 1 > GET_SLOTS(ch)) {
-            ch->sendf("@RYour skill slots are full. You can not learn Move Silently.\r\n");
-            ch->clearFlag(FlagType::Affect,AFF_SNEAK);
+    if (AFF_FLAGGED(this, AFF_SNEAK) && !IS_NPC(this)) {
+        sprintf(buf2, "$n sneaks %s.", dirs[dest.direction]);
+        if (GET_SKILL(this, SKILL_MOVE_SILENTLY)) {
+            improve_skill(this, SKILL_MOVE_SILENTLY, 0);
+        } else if (slot_count(this) + 1 > GET_SLOTS(this)) {
+            sendf("@RYour skill slots are full. You can not learn Move Silently.\r\n");
+            clearFlag(FlagType::Affect,AFF_SNEAK);
         } else {
-            ch->sendf("@GYou learn the very basics of moving silently.@n\r\n");
-            SET_SKILL(ch, SKILL_MOVE_SILENTLY, rand_number(5, 10));
-            act(buf2, true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
-            if (GET_DEX(ch) < rand_number(1, 30)) {
-                WAIT_STATE(ch, PULSE_1SEC);
+            sendf("@GYou learn the very basics of moving silently.@n\r\n");
+            SET_SKILL(this, SKILL_MOVE_SILENTLY, rand_number(5, 10));
+            act(buf2, true, this, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
+            if (GET_DEX(this) < rand_number(1, 30)) {
+                WAIT_STATE(this, PULSE_1SEC);
             }
         }
     }
 
-    if (!AFF_FLAGGED(ch, AFF_SNEAK) && !AFF_FLAGGED(ch, AFF_FLYING)) {
-        sprintf(buf2, "$n leaves %s.", dirs[dir]);
-        act(buf2, true, ch, nullptr, nullptr, TO_ROOM);
+    if (!AFF_FLAGGED(this, AFF_SNEAK) && !AFF_FLAGGED(this, AFF_FLYING)) {
+        sprintf(buf2, "$n leaves %s.", dirs[dest.direction]);
+        act(buf2, true, this, nullptr, nullptr, TO_ROOM);
     }
-    if (!AFF_FLAGGED(ch, AFF_SNEAK) && AFF_FLAGGED(ch, AFF_FLYING)) {
-        sprintf(buf2, "$n flies %s.", dirs[dir]);
-        act(buf2, true, ch, nullptr, nullptr, TO_ROOM);
-    }
-
-    was_in = IN_ROOM(ch);
-    r = ch->getRoom();
-    if (DRAGGING(ch)) {
-        act("@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
-    }
-    if (CARRYING(ch)) {
-        act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
-    }
-    ch->setFlag(FlagType::Affect, AFF_PURSUIT);
-    ch->removeFromLocation();
-    ch->addToLocation(dest);
-    if ((dest->zone != r->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
-        send_to_sense(0, "You sense someone", ch);
-        sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.",
-                add_commas(GET_HIT(ch)).c_str());
-        send_to_scouter(buf3, ch, 0, 0);
-    }
-    /* move them first, then move them back if they aren't allowed to go. */
-    /* see if an entry trigger disallows the move */
-    if (!entry_mtrigger(ch) || !enter_wtrigger(ch->getRoom(), ch, dir)) {
-        ch->removeFromLocation();
-        ch->addToLocation(r);
-        ch->clearFlag(FlagType::Affect,AFF_PURSUIT);
-        return 0;
+    if (!AFF_FLAGGED(this, AFF_SNEAK) && AFF_FLAGGED(this, AFF_FLYING)) {
+        sprintf(buf2, "$n flies %s.", dirs[dest.direction]);
+        act(buf2, true, this, nullptr, nullptr, TO_ROOM);
     }
 
-    r = ch->getRoom();
 
-    snprintf(buf2, sizeof(buf2), "%s%s",
-             ((dir == UP) || (dir == DOWN) ? "" : "the "),
-             (dir == UP ? "below" :
-              (dir == DOWN) ? "above" : dirs[rev_dir[dir]]));
-    act("$n arrives from $T.", true, ch, nullptr, buf2, TO_ROOM | TO_SNEAKRESIST);
-    if (auto fight = FIGHTING(ch); fight) {
-        if (r->sector_type != SECT_FLYING &&
-            r->sector_type != SECT_WATER_NOSWIM &&
-            r->geffect == 0) {
-            roll_pursue(fight, ch);
-        }
-        ch->clearFlag(FlagType::Affect,AFF_PURSUIT);
+    if (auto drag = DRAGGING(this); drag) {
+        act("@C$n@w drags @c$N@w with $m.@n", true, this, nullptr, drag, TO_ROOM);
     }
-    if (auto drag = DRAGGING(ch); drag) {
-        act("@wYou drag @C$N@w with you.@n", true, ch, nullptr, drag, TO_CHAR);
-        act("@C$n@w drags @c$N@w with $m.@n", true, ch, nullptr, drag, TO_ROOM);
-        drag->removeFromLocation();
-        drag->addToLocation(r);
-        if (auto s = SITS(drag); s) {
-            s->removeFromLocation();
-            s->addToLocation(r);
-        }
-        if (!AFF_FLAGGED(drag, AFF_KNOCKED) && !AFF_FLAGGED(drag, AFF_SLEEP) && rand_number(1, 3)) {
-            drag->sendf("You feel your sleeping body being moved.\r\n");
-            if (IS_NPC(drag) && !FIGHTING(drag)) {
-                set_fighting(drag, ch);
-            }
-        }
+    if (auto carry = CARRYING(this); carry) {
+        act("@C$n@w carries @c$N@w with $m.@n", true, this, nullptr, carry, TO_ROOM);
     }
-    if (auto carry = CARRYING(ch); carry) {
-        act("@wYou carry @C$N@w with you.@n", true, ch, nullptr, carry, TO_CHAR);
-        act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, carry, TO_ROOM);
-        carry->removeFromLocation();
-        carry->addToLocation(r);
-        if (!AFF_FLAGGED(carry, AFF_KNOCKED) && !AFF_FLAGGED(carry, AFF_SLEEP) && rand_number(1, 3)) {
-            carry->sendf("You feel your sleeping body being moved.\r\n");
-        }
-    }
+    setFlag(FlagType::Affect, AFF_PURSUIT);
+    removeFromLocation();
+    addToLocation(dest);
 
-    if (ch->desc != nullptr) {
-        ch->lookAtLocation();
-        if (AFF_FLAGGED(ch, AFF_SNEAK) && !IS_NPC(ch) && GET_SKILL(ch, SKILL_MOVE_SILENTLY) &&
-            GET_SKILL(ch, SKILL_MOVE_SILENTLY) < rand_number(1, 101)) {
-            ch->sendf("@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
-            act("@c$n@w makes a noise revealing $s sneaking!@n", true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
-            reveal_hiding(ch, 0);
-            ch->clearFlag(FlagType::Affect,AFF_SNEAK);
-        }
-    }
+    
 
-    if (r->geffect == 6 || ROOM_EFFECT(was_in) == 6) {
-        if (!IS_DEMON(ch) && !AFF_FLAGGED(ch, AFF_FLYING) && group_bonus(ch, 2) != 14) {
-            act("@rYour legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n@r's legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (IS_NPC(ch) && IS_HUMANOID(ch) && rand_number(1, 2) == 2) {
-                do_fly(ch, nullptr, 0, 0);
-            }
-            ch->decCurHealth(ch->getEffMaxPL() / 20);
-            if (GET_HIT(ch) <= 0) {
-                act("@rYou have burned to death!@n", true, ch, nullptr, nullptr, TO_CHAR);
-                act("@R$n@r has burned to death!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                die(ch, nullptr);
-            }
-        }
-        if (auto drag = DRAGGING(ch) ; drag && !IS_DEMON(drag)) {
-            act("@R$N@r gets burned!@n", true, ch, nullptr, drag, TO_CHAR);
-            act("@R$N@r gets burned!@n", true, ch, nullptr, drag, TO_ROOM);
-            drag->decCurHealth(drag->getEffMaxPL() / 20);
-            if (GET_HIT(drag) < 0) {
-                act("@rYou have burned to death!@n", true, drag, nullptr, nullptr, TO_CHAR);
-                act("@R$n@r has burned to death!@n", true, drag, nullptr, nullptr, TO_ROOM);
-                die(drag, nullptr);
-            }
-        }
-    }
+    if(!dest.target->checkPostEnter(this, was_in, dest))
+        return false;
 
-    if (ROOM_FLAGGED(r, ROOM_TIMED_DT) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE))
-        timed_dt(nullptr);
-
-    if (ROOM_FLAGGED(r, ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
-        log_death_trap(ch);
-        death_cry(ch);
-        extract_char(ch);
-        return (0);
-    }
-
-    entry_memory_mtrigger(ch);
-    if (!greet_mtrigger(ch, dir)) {
-        ch->removeFromLocation();
-        ch->addToLocation(getWorld(was_in));
-        ch->lookAtLocation();
-    } else greet_memory_mtrigger(ch);
-    if (willfall == true) {
-        handle_fall(ch);
-        if (auto drag = DRAGGING(ch); drag) {
-            handle_fall(drag);
-        }
-    }
-    return (1);
+    return true;
 }
 
-int perform_move(BaseCharacter *ch, int dir, int need_specials_check) {
-    room_rnum was_in;
-    struct follow_type *k, *next;
-    /*
 
-    if (GRAPPLING(ch) || GRAPPLED(ch)) {
-        ch->sendf("You are grappling with someone!\r\n");
-        return (0);
+bool Room::checkPostEnter(GameEntity* mover, const Location& loc, const Destination& dest) {
+    if(auto ch = dynamic_cast<BaseCharacter*>(mover); ch) {
+        entry_memory_mtrigger(ch);
+    if (!greet_mtrigger(ch, dest.direction)) {
+        ch->removeFromLocation();
+        ch->addToLocation(loc);
+        ch->lookAtLocation();
+    } else greet_memory_mtrigger(ch);
+
     }
 
-    if (ABSORBING(ch) || ABSORBBY(ch)) {
-        ch->sendf("You are struggling with someone!\r\n");
-        return (0);
+    return 1;
+}
+
+bool BaseCharacter::moveInDirection(int direction, bool need_specials_check) {
+
+    if (GRAPPLING(this) || GRAPPLED(this)) {
+        sendf("You are grappling with someone!\r\n");
+        return false;
     }
 
-    if (!AFF_FLAGGED(ch, AFF_SNEAK) ||
-        (AFF_FLAGGED(ch, AFF_SNEAK) && GET_SKILL(ch, SKILL_MOVE_SILENTLY) < axion_dice(0))) {
-        reveal_hiding(ch, 0);
+    if (ABSORBING(this) || ABSORBBY(this)) {
+        sendf("You are struggling with someone!\r\n");
+        return false;
     }
 
-    if (ch == nullptr || dir < 0 || dir >= NUM_OF_DIRS)
-        return (0);
-    else if ((!EXIT(ch, dir) && !buildwalk(ch, dir)) || EXIT(ch, dir)->to_room == NOWHERE ||
-             (EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET) && (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))))
-        ch->sendf("Alas, you cannot go that way...\r\n");
-    else if (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED)) {
-        if (EXIT(ch, dir)->keyword)
-            ch->sendf("The %s seems to be closed.\r\n", fname(EXIT(ch, dir)->keyword));
-        else
-            ch->sendf("It seems to be closed.\r\n");
-    } else if (GET_ROOM_VNUM(EXIT(ch, dir)->to_room) == 0 || GET_ROOM_VNUM(EXIT(ch, dir)->to_room) == 1) {
-        ch->sendf("Report this direction, it is illegal.\r\n");
-    } else {
+    if (!AFF_FLAGGED(this, AFF_SNEAK) || (AFF_FLAGGED(this, AFF_SNEAK) && GET_SKILL(this, SKILL_MOVE_SILENTLY) < axion_dice(0))) {
+        reveal_hiding(this, 0);
+    }
 
-        for (auto wall : ch->getRoom()->getInventory()) {
-            if (GET_OBJ_VNUM(wall) == 79) {
-                if (GET_OBJ_COST(wall) == dir) {
-                    ch->sendf("That direction has a glacial wall blocking it.\r\n");
-                    return (0);
-                }
+    auto loc = getLocation();
+    if(!loc) {
+        sendf("You are nowhere!\r\n");
+        return false;
+    }
+    auto destinations = loc->getDestinations(this);
+    auto found = destinations.find(direction);
+    if(found == destinations.end()) {
+        sendf("Alas, you cannot go that way...\r\n");
+        return false;
+    }
+
+    auto &dest = found->second;
+    if(auto ex = dest.via; ex) {
+        if (ex->checkFlag(FlagType::Exit, EX_CLOSED)) {
+            if(ex->checkFlag(FlagType::Exit, EX_SECRET)) {
+                sendf("Alas, you cannot go that way...\r\n");
+            }
+            
+            if (auto alias = ex->getAlias(); !alias.empty())
+                sendf("The %s seems to be closed.\r\n", alias);
+            else
+                sendf("It seems to be closed.\r\n");
+            return false;
+        }
+    }
+
+    for (auto wall : loc->getInventory()) {
+        if (GET_OBJ_VNUM(wall) == 79) {
+            if (GET_OBJ_COST(wall) == direction) {
+                sendf("That direction has a glacial wall blocking it.\r\n");
+                return false;
             }
         }
-
-        if (!ch->followers)
-            return (do_simple_move(ch, dir, need_specials_check));
-
-        was_in = IN_ROOM(ch);
-        if (!do_simple_move(ch, dir, need_specials_check))
-            return (0);
-
-        for (k = ch->followers; k; k = next) {
-            next = k->next;
-            if ((IN_ROOM(k->follower) == was_in) &&
-                (GET_POS(k->follower) >= POS_STANDING) &&
-                (!AFF_FLAGGED(ch, AFF_ZANZOKEN) ||
-                 (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP)))) {
-                act("You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-                perform_move(k->follower, dir, 1);
-            } else if ((IN_ROOM(k->follower) == was_in) &&
-                       (GET_POS(k->follower) >= POS_STANDING) &&
-                       (AFF_FLAGGED(ch, AFF_ZANZOKEN) && AFF_FLAGGED(k->follower, AFF_ZANZOKEN)) &&
-                       (!AFF_FLAGGED(ch, AFF_GROUP) || !AFF_FLAGGED(k->follower, AFF_GROUP))) {
-                act("$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, k->follower, nullptr,
-                    ch, TO_CHAR);
-                act("$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, k->follower, nullptr,
-                    ch, TO_NOTVICT);
-                act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr,
-                    ch, TO_VICT);
-                for(auto c : {ch, k->follower}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
-                perform_move(k->follower, dir, 1);
-            } else if ((IN_ROOM(k->follower) == was_in) &&
-                       (GET_POS(k->follower) >= POS_STANDING) &&
-                       (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(k->follower, AFF_ZANZOKEN))) {
-                act("You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr,
-                    ch, TO_CHAR);
-                act("$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr,
-                    ch, TO_NOTVICT);
-                act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, ch,
-                    TO_VICT);
-                ch->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
-            }
-        }
-        return (1);
     }
-    */
-    return (0);
+
+    if (!followers)
+        return doSimpleMove(direction, need_specials_check);
+
+    auto was_in = getLocationInfo();
+
+    if (!doSimpleMove(direction, need_specials_check))
+        return false;
+
+    auto zanz = checkFlag(FlagType::Affect, AFF_ZANZOKEN);
+
+    for (auto k = followers; k; k = k->next) {
+        auto follower = k->follower;
+        auto folLoc = follower->getLocationInfo();
+        if(folLoc != was_in) continue;
+        if(GET_POS(follower) < POS_STANDING) continue;
+
+        if ((!zanz || (AFF_FLAGGED(this, AFF_GROUP) && AFF_FLAGGED(follower, AFF_GROUP)))) {
+            act("You follow $N.\r\n", false, follower, nullptr, this, TO_CHAR);
+            follower->moveInDirection(direction, 1);
+        } else if ((zanz && AFF_FLAGGED(follower, AFF_ZANZOKEN)) && (!AFF_FLAGGED(this, AFF_GROUP) || !AFF_FLAGGED(follower, AFF_GROUP))) {
+            act("$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, follower, nullptr, this, TO_CHAR);
+            act("$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, follower, nullptr, this, TO_NOTVICT);
+            act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, follower, nullptr, this, TO_VICT);
+            for(auto c : {this, follower}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
+            follower->moveInDirection(direction, 1);
+        } else if ((zanz && !AFF_FLAGGED(k->follower, AFF_ZANZOKEN))) {
+            act("You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr, this, TO_CHAR);
+            act("$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr, this, TO_NOTVICT);
+            act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, this, TO_VICT);
+            clearFlag(FlagType::Affect,AFF_ZANZOKEN);
+        }
+    }
+    return true;
     
 }
 
 ACMD(do_move) {
     if (IS_NPC(ch)) {
-        perform_move(ch, subcmd - 1, 0);
+        ch->moveInDirection(subcmd - 1, 0);
         return;
     }
     if (PLR_FLAGGED(ch, PLR_SELFD)) {
@@ -1145,7 +1067,7 @@ ACMD(do_move) {
             return;
         }
     }
-    perform_move(ch, subcmd - 1, 0);
+    ch->moveInDirection(subcmd - 1, 0);
     if (GET_RDISPLAY(ch)) {
         if (GET_RDISPLAY(ch) != "Empty") {
             GET_RDISPLAY(ch) = "Empty";
@@ -1650,7 +1572,7 @@ ACMD(do_leave) {
         auto dest = e->getDestination();
         if(!dest) continue;
         if (!e->checkFlag(FlagType::Exit, EX_CLOSED) && !dest->checkFlag(FlagType::Room, ROOM_INDOORS)) {
-            perform_move(ch, door, 1);
+            ch->moveInDirection(door, 1);
             return;
         }
     }

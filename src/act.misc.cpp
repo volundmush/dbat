@@ -2851,7 +2851,7 @@ ACMD(do_hydromancy) {
                         nullptr, TO_CHAR);
                     act("@c$n@c is caught by the rushing waters and sent tumbling away!@n", true, vict, nullptr,
                         nullptr, TO_ROOM);
-                    do_simple_move(vict, attempt, true);
+                    vict->doSimpleMove(attempt, true);
                     hurt(0, 0, ch, vict, nullptr, cost * 4, 1);
                 }
             }

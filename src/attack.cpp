@@ -1751,7 +1751,7 @@ namespace atk {
                 act("$N@W is pushed away by the blast!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@WYou are pushed away by the blast!@n", true, user, nullptr, victim, TO_VICT);
                 act("$N@W is pushed away by the blast!@n", true, user, nullptr, victim, TO_NOTVICT);
-                do_simple_move(victim, (*dir)->locationType, true);
+                victim->doSimpleMove((*dir)->locationType, true);
             } else {
                 act("$N@W is pushed away by the blast, but is slammed into an obstruction!@n", true, user, nullptr,
                     victim,

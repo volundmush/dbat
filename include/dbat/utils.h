@@ -204,11 +204,6 @@ extern bool circle_follow(BaseCharacter *ch, BaseCharacter *victim);
 /* in act.informative.c */
 extern void add_history(BaseCharacter *ch, char *msg, int type);
 
-/* in act.movement.c */
-extern int do_simple_move(BaseCharacter *ch, int dir, int following);
-
-extern int perform_move(BaseCharacter *ch, int dir, int following);
-
 /* in limits.c */
 extern void advance_level(BaseCharacter *ch);
 

@@ -1249,7 +1249,7 @@ ACMD(do_flee) {
             ABSORBBY(ch) = nullptr;
         }
     }
-    if (do_simple_move(ch, attempt, true)) {
+    if (ch->doSimpleMove(attempt, true)) {
         ch->sendf("You flee head over heels.\r\n");
         WAIT_STATE(ch, PULSE_2SEC);
     } else {

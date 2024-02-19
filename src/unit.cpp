@@ -4,6 +4,19 @@
 #include "dbat/constants.h"
 
 
+bool coordinates::operator==(const coordinates& rhs) {
+    return x == rhs.x && y == rhs.y && z == rhs.z;
+}
+
+bool Destination::operator==(const Destination& rhs) {
+    return target == rhs.target && locationType == rhs.locationType && coords == rhs.coords;
+}
+
+bool Location::operator==(const Location& rhs) {
+    return location == rhs.location && locationType == rhs.locationType && coords == rhs.coords;
+}
+
+
 extra_descr_data::extra_descr_data(const nlohmann::json& j) {
     deserialize(j);
 }
@@ -429,24 +442,24 @@ void GameEntity::deserializeRelations(const nlohmann::json& j) {
     }
 }
 
-void GameEntity::addToLocation(GameEntity *u, int locationType, std::optional<coordinates> coords) {
+void GameEntity::addToLocation(const Destination &dest) {
     if(location) {
         basic_mud_log("Attempted to add unit '%d: %s' to location, but location was already found.", uid, getName().c_str());
         return;
     }
 
     if(auto c = dynamic_cast<BaseCharacter*>(this); c) {
-        auto r = dynamic_cast<Room*>(u);
+        auto r = dynamic_cast<Room*>(dest.target);
         if(!r) {
             basic_mud_log("Whoah!");
         }
     }
 
-    location = u;
-    this->locationType = locationType;
-    if(coords) this->coords = *coords;
-    u->contents.push_back(this);
-    u->handleAdd(this);
+    location = dest.target;
+    locationType = dest.locationType;
+    coords = dest.coords;
+    dest.target->contents.push_back(this);
+    dest.target->handleAdd(this);
 }
 
 void GameEntity::removeFromLocation() {
@@ -466,8 +479,12 @@ void GameEntity::removeFromLocation() {
     
 }
 
+void GameEntity::updateCoordinates(GameEntity *u) {
+    // does nothing by default.
+}
+
 void GameEntity::handleAdd(GameEntity *u) {
-    
+    updateCoordinates(u);
 }
 
 
