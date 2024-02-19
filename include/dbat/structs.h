@@ -657,9 +657,9 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual void sendEventContents(const Event& event);
 
     virtual void sendText(const std::string& text);
-    virtual void sendLine(const std::string& text);
+    void sendLine(const std::string& text);
     virtual void sendTextContents(const std::string& text);
-    virtual void sendLineContents(const std::string& text);
+    void sendLineContents(const std::string& text);
 
     // called by this to know what environment it operates under.
     virtual double myEnvVar(EnvVar v);
@@ -762,6 +762,8 @@ struct Object : public GameEntity {
     
     void extractFromWorld() override;
 
+    void executeCommand(const std::string& argument) override;
+
     UnitFamily getFamily() override;
     std::string getUnitClass() override;
 
@@ -838,6 +840,7 @@ struct Object : public GameEntity {
     int posttype{};
     Object *posted_to{};
     Object *fellow_wall{};
+    BaseCharacter *owner{};
 
     std::optional<double> gravity;
 
@@ -932,6 +935,10 @@ struct Vehicle : public Structure {
 
     std::string getUnitClass() override;
     std::string renderAppearanceHelper(GameEntity* u) override;
+
+    void sendText(const std::string& text) override;
+
+    void executeCommand(const std::string& argument) override;
 };
 
 
@@ -988,6 +995,8 @@ struct Room : public GameEntity {
     int geffect{};            /* Effect of ground destruction       */
 
     std::optional<double> gravity;
+
+    void executeCommand(const std::string& argument) override;
 
     bool isSunken();
 

@@ -54,9 +54,6 @@ WCMD(do_wat);
 
 WCMD(do_weffect);
 
-void wld_command_interpreter(Room *room, char *argument);
-
-
 struct wld_command_info {
     char *command;
 
@@ -609,7 +606,7 @@ WCMD(do_wat) {
         return;
     }
 
-    wld_command_interpreter(room, command);
+    r->executeCommand(command);
 }
 
 const struct wld_command_info wld_cmd_info[] = {
@@ -636,17 +633,17 @@ const struct wld_command_info wld_cmd_info[] = {
 /*
  *  This is the command interpreter used by rooms, called by script_driver.
  */
-void wld_command_interpreter(Room *room, char *argument) {
+void Room::executeCommand(const std::string& argument) {
     int cmd, length;
     char *line, arg[MAX_INPUT_LENGTH];
 
-    skip_spaces(&argument);
+    std::string complete(argument);
+    trim(complete);
 
-    /* just drop to next line for hitting CR */
-    if (!*argument)
+    if (complete.empty())
         return;
 
-    line = any_one_arg(argument, arg);
+    line = any_one_arg((char*)complete.c_str(), arg);
 
 
     /* find the command */
@@ -656,8 +653,8 @@ void wld_command_interpreter(Room *room, char *argument) {
             break;
 
     if (*wld_cmd_info[cmd].command == '\n')
-        wld_log(room, "Unknown world cmd: '%s'", argument);
+        wld_log(this, "Unknown world cmd: '%s'", argument);
     else
         ((*wld_cmd_info[cmd].command_pointer)
-                (room, line, cmd, wld_cmd_info[cmd].subcmd));
+                (this, line, cmd, wld_cmd_info[cmd].subcmd));
 }

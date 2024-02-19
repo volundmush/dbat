@@ -20,9 +20,6 @@
 
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)
 
-void obj_command_interpreter(Object *obj, char *argument);
-void wld_command_interpreter(Room *room, char *argument);
-
 void trig_data::setState(DgScriptState st) {
     state = st;
     auto sh = shared_from_this();
@@ -234,17 +231,7 @@ int trig_data::executeBlock(std::size_t start, std::size_t end) {
                 mudlog(NRM, ADMLVL_GOD, true, "%s", DG_SCRIPT_VERSION);
 
             else {
-                switch (parent->attach_type) {
-                    case MOB_TRIGGER:
-                        command_interpreter((BaseCharacter *) sc->owner, cmd);
-                        break;
-                    case OBJ_TRIGGER:
-                        obj_command_interpreter((Object *) sc->owner, cmd);
-                        break;
-                    case WLD_TRIGGER:
-                        wld_command_interpreter((Room *)sc->owner, cmd);
-                        break;
-                }
+                sc->owner->executeCommand(cmd);
                 if (sc->purged) {
                     loops--;
                     setState(DgScriptState::PURGED);
