@@ -3313,7 +3313,7 @@ ACMD(do_arena) {
             ch->sendf("You are not even watching anyone in the arena.\r\n");
             return;
         } else if (arena_watch(ch) != NOWHERE) {
-            look_at_room(arena_watch(ch), ch, 0);
+            ch->sendLine(getWorld<Room>(arena_watch(ch))->renderLocationFor(ch));
             //ch->sendEvent(getWorld(arena_watch(ch))->renderLocationFor(ch));
         }
     } else if (!strcasecmp(arg, "scan")) {

@@ -395,8 +395,11 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
         d->setAlias(b);
         free(b);
     }
-
-    d->addToLocation(r, dir);
+    
+    Destination dest;
+    dest.target = r;
+    dest.locationType = dir;
+    d->addToLocation(dest);
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Format error, %s", buf2);

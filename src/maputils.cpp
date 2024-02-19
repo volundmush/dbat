@@ -264,7 +264,7 @@ MapStruct findcoord(int rnum) {
     return coords;
 }
 
-std::string Room::printMap(GameEntity *viewer, int type, int vnum) {
+std::string Room::printMap(GameEntity* viewer, int type, int64_t v) {
     int x = 0, lasty = -1;
     int y = 0;
     int sightradius;
@@ -273,18 +273,18 @@ std::string Room::printMap(GameEntity *viewer, int type, int vnum) {
     char buf2[512];
     MapStruct coord;
 
-    int start = rnum;
+    auto start = v;
 
-    coord = findcoord(rnum);
+    coord = findcoord(v);
     strcpy(buf, "\n");
     if (type == 0) {
         sightradius = 12;
     } else {
         sightradius = 4;
     }
-
+    std::string result;
     if (type == 0) {
-        ch->sendf("@b______________________________________________________________________@n\n");
+        result += "@b______________________________________________________________________@n\n";
     }
 
     for (y = coord.y - sightradius; y <= coord.y + sightradius; y++) {
@@ -337,23 +337,23 @@ std::string Room::printMap(GameEntity *viewer, int type, int vnum) {
             if (count == 0) {
                 strcat(buf, "      @RCompass@n           ");
             } else if (count == 2) {
-                sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(rnum, 0) ? " @CN " : "   "));
+                sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(vn, 0) ? " @CN " : "   "));
                 strcat(buf, buf2);
             } else if (count == 3) {
-                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 6) ? " @CNW" : "   "),
-                        (W_EXIT(rnum, 4) ? " @YU " : "   "), (W_EXIT(rnum, 7) ? "@CNE " : "   "));
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(vn, 6) ? " @CNW" : "   "),
+                        (W_EXIT(vn, 4) ? " @YU " : "   "), (W_EXIT(vn, 7) ? "@CNE " : "   "));
                 strcat(buf, buf2);
             } else if (count == 4) {
-                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 3) ? "  @CW" : "   "),
-                        (W_EXIT(rnum, 10) ? "@m I " : (W_EXIT(rnum, 11) ? "@mOUT" : "   ")),
-                        (W_EXIT(rnum, 1) ? "@CE  " : "   "));
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(vn, 3) ? "  @CW" : "   "),
+                        (W_EXIT(vn, 10) ? "@m I " : (W_EXIT(vn, 11) ? "@mOUT" : "   ")),
+                        (W_EXIT(vn, 1) ? "@CE  " : "   "));
                 strcat(buf, buf2);
             } else if (count == 5) {
-                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(rnum, 9) ? " @CSW" : "   "),
-                        (W_EXIT(rnum, 5) ? " @YD " : "   "), (W_EXIT(rnum, 8) ? "@CSE " : "   "));
+                sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|      ", (W_EXIT(vn, 9) ? " @CSW" : "   "),
+                        (W_EXIT(vn, 5) ? " @YD " : "   "), (W_EXIT(vn, 8) ? "@CSE " : "   "));
                 strcat(buf, buf2);
             } else if (count == 6) {
-                sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(rnum, 2) ? " @CS " : "   "));
+                sprintf(buf2, "@w       @w|%s@w|            ", (W_EXIT(vn, 2) ? " @CS " : "   "));
                 strcat(buf, buf2);
             } else {
                 strcat(buf, "                        ");
@@ -362,7 +362,7 @@ std::string Room::printMap(GameEntity *viewer, int type, int vnum) {
         }
         for (x = coord.x - sightradius; x <= coord.x + sightradius; x++) {
             if (x == coord.x && y == coord.y) {
-                strcat(buf, getmapchar(mapnums[y][x], viewer, start, vnum));
+                strcat(buf, getmapchar(mapnums[y][x], viewer, start, v));
             } else if (x > MAP_COLS || x < 0) {
                 if (lasty != true && y > -1 && y < 200) {
                     strcat(buf, "@D?");
@@ -373,13 +373,13 @@ std::string Room::printMap(GameEntity *viewer, int type, int vnum) {
                     strcat(buf, "@D??");
                 }
             } else
-                strcat(buf, getmapchar(mapnums[y][x], viewer, start, vnum));
+                strcat(buf, getmapchar(mapnums[y][x], viewer, start, v));
         }
         strcat(buf, "\n");
         lasty = false;
     }
     
-    std::string result(buf);
+    result += buf;
     *buf2 = '\0';
     *buf = '\0';
     if (type == 0) {

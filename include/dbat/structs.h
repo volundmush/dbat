@@ -329,8 +329,6 @@ struct coordinates {
     bool operator==(const coordinates& rhs);
 };
 
-
-
 struct Location {
     GameEntity* location{};
     int locationType{};
@@ -677,7 +675,8 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 
 /* ================== Memory Structure for Objects ================== */
 struct Object : public GameEntity {
-    using GameEntity::GameEntity;
+    Object() = default;
+    explicit Object(const nlohmann::json &j);
     ~Object() override;
     
     void extractFromWorld() override;
@@ -771,7 +770,8 @@ struct Object : public GameEntity {
 
 // Type: ITEM_PLANT should always use this.
 struct Plant : public Object {
-    using Object::Object;
+    Plant() = default;
+    explicit Plant(const nlohmann::json &j);
 
     std::string getUnitClass() override;
     std::string renderRoomListingHelper(GameEntity* u) override;
@@ -779,42 +779,48 @@ struct Plant : public Object {
 
 // Type: Vnum 11 alyways...
 struct GravityGenerator : public Object {
-    using Object::Object;
+    GravityGenerator() = default;
+    explicit GravityGenerator(const nlohmann::json &j);
 
     std::string getUnitClass() override;
     std::string renderRoomListingHelper(GameEntity* u) override;
 };
 
 struct GlacialWall : public Object {
-    using Object::Object;
+    GlacialWall() = default;
+    explicit GlacialWall(const nlohmann::json &j);
 
     std::string getUnitClass() override;
     std::string renderRoomListingHelper(GameEntity* u) override;
 };
 
 struct DrinkContainer : public Object {
-    using Object::Object;
+    DrinkContainer() = default;
+    explicit DrinkContainer(const nlohmann::json &j);
 
     std::string getUnitClass() override;
     std::string renderAppearanceHelper(GameEntity* u) override;
 };
 
 struct Food : public Object {
-    using Object::Object;
+    Food() = default;
+    explicit Food(const nlohmann::json &j);
 
     std::string getUnitClass() override;
     std::string renderAppearanceHelper(GameEntity* u) override;
 };
 
 struct Corpse : public Object {
-    using Object::Object;
+    Corpse() = default;
+    explicit Corpse(const nlohmann::json &j);
 
     std::string getUnitClass() override;
     std::string renderAppearanceHelper(GameEntity* u) override;
 };
 
 struct Weapon : public Object {
-    using Object::Object;
+    Weapon() = default;
+    explicit Weapon(const nlohmann::json &j);
 
     std::string getUnitClass() override;
     std::string renderAppearanceHelper(GameEntity* u) override;
@@ -822,7 +828,8 @@ struct Weapon : public Object {
 
 
 struct Structure : public Object {
-    using Object::Object;
+    Structure() = default;
+    explicit Structure(const nlohmann::json &j);
 
     //void extractFromWorld() override;
 
@@ -839,7 +846,8 @@ struct Structure : public Object {
 
 // Type: ITEM_VEHICLE should always use this.
 struct Vehicle : public Structure {
-    using Structure::Structure;
+    Vehicle() = default;
+    explicit Vehicle(const nlohmann::json &j);
 
     std::string getUnitClass() override;
     std::string renderAppearanceHelper(GameEntity* u) override;
@@ -916,7 +924,7 @@ struct Room : public GameEntity {
     std::string renderExits1(GameEntity* u);
     std::string renderExits2(GameEntity* u);
     std::string generateMap(GameEntity* viewer, int num);
-    std::string printMap(GameEntity* viewer, int type, int64_t vnum);
+    std::string printMap(GameEntity* viewer, int type, int64_t v);
     std::optional<room_vnum> getLaunchDestination();
 
     MoonCheck checkMoon();
@@ -933,6 +941,7 @@ struct Room : public GameEntity {
 
     double getEnvVar(EnvVar v) override;
 
+    std::map<int, Destination> getDestinations(GameEntity* viewer) override;
     bool checkPostEnter(GameEntity* mover, const Location& loc, const Destination& dest) override;
     bool checkCanReachDestination(GameEntity *mover, const Destination& dest) override;
     bool checkCanLeave(GameEntity* mover, const Destination& dest, bool need_specials_check = true) override;

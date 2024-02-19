@@ -400,7 +400,10 @@ void equip_char(BaseCharacter *ch, Object *obj, int pos) {
     }
 
     obj->removeFromLocation();
-    obj->addToLocation(ch, pos);
+    Destination dest;
+    dest.target = ch;
+    dest.locationType = pos;
+    obj->addToLocation(dest);
 }
 
 

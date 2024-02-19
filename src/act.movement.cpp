@@ -704,10 +704,11 @@ bool BaseCharacter::doSimpleMove(int direction, bool need_specials_check) {
         act("@C$n@w carries @c$N@w with $m.@n", true, this, nullptr, carry, TO_ROOM);
     }
     setFlag(FlagType::Affect, AFF_PURSUIT);
-    removeFromLocation();
-    addToLocation(dest);
 
-    
+    if(dest.target != was_in.location) {
+        removeFromLocation();
+    }
+    addToLocation(dest);
 
     if(!dest.target->checkPostEnter(this, was_in, dest))
         return false;

@@ -443,7 +443,7 @@ void GameEntity::deserializeRelations(const nlohmann::json& j) {
 }
 
 void GameEntity::addToLocation(const Destination &dest) {
-    if(location) {
+    if(location && location != dest.target) {
         basic_mud_log("Attempted to add unit '%d: %s' to location, but location was already found.", uid, getName().c_str());
         return;
     }
@@ -455,11 +455,17 @@ void GameEntity::addToLocation(const Destination &dest) {
         }
     }
 
-    location = dest.target;
-    locationType = dest.locationType;
-    coords = dest.coords;
-    dest.target->contents.push_back(this);
-    dest.target->handleAdd(this);
+    if(location == dest.target) {
+        locationType = dest.locationType;
+        coords = dest.coords;
+        location->updateCoordinates(this);
+    } else {
+        location = dest.target;
+        locationType = dest.locationType;
+        coords = dest.coords;
+        dest.target->contents.push_back(this);
+        dest.target->handleAdd(this);
+    }
 }
 
 void GameEntity::removeFromLocation() {
@@ -784,9 +790,6 @@ std::optional<std::string> GameEntity::checkIsGettable(GameEntity *u) {
     return "it cannot be picked up!";
 }
 
-std::optional<std::string> GameEntity::checkIsDroppable(GameEntity *u) {
-    return "it cannot be dropped!";
-}
 
 std::optional<std::string> GameEntity::checkIsGivable(GameEntity *u) {
     return "it cannot be given!";
@@ -856,4 +859,12 @@ void Messager::deliver() {
 
 void GameEntity::lookAtLocation() {
 
+}
+
+std::optional<Destination> GameEntity::getDestination(GameEntity* viewer, int direction) {
+    auto destinations = getDestinations(viewer);
+    if(auto found = destinations.find(direction); found != destinations.end()) {
+        return found->second;
+    }
+    return {};
 }

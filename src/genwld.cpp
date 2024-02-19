@@ -462,3 +462,14 @@ std::vector<std::string> Exit::getKeywords(GameEntity *looker) {
     if(auto al = getAlias(); !al.empty()) out.emplace_back(al);
     return out;
 }
+
+std::map<int, Destination> Room::getDestinations(GameEntity* viewer) {
+    std::map<int, Destination> out;
+    for(auto &[dir, e] : getExits()) {
+        auto &dest = out[e->locationType];
+        dest.target = e->getDestination();
+        dest.via = e;
+        dest.direction = dir;
+    }
+    return out;
+}

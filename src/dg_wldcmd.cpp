@@ -313,7 +313,10 @@ WCMD(do_wdoor) {
             ex = new Exit();
             ex->uid = getNextUID();
             ex->script = std::make_shared<script_data>(ex);
-            ex->addToLocation(rm, dir);
+            Destination dest;
+            dest.target = rm;
+            dest.locationType = dir;
+            ex->addToLocation(dest);
         }
 
         bitvector_t flags = 0;

@@ -2829,7 +2829,7 @@ std::string BaseCharacter::renderStatusLines(GameEntity* viewer) {
 
     if (GET_KAIOKEN(this) > 0)
         messages.emplace_back(fmt::format("@w...@r{} has a red aura around {} body!", heshe, hisher));
-    if (!isNPC && PLR_FLAGGED(this, PLR_SPIRAL))
+    if (!isNPC() && PLR_FLAGGED(this, PLR_SPIRAL))
         messages.emplace_back(fmt::format("@w...{} is spinning in a vortex!", heshe));
     if (IS_TRANSFORMED(this) && !IS_ANDROID(this) && !IS_SAIYAN(this) && !IS_HALFBREED(this))
         messages.emplace_back(fmt::format("@w...{} has energy crackling around {} body!", heshe, hisher));
@@ -3758,7 +3758,9 @@ static void look_in_obj(BaseCharacter *ch, char *arg) {
                     break;
             }
 
-            list_obj_to_char(obj->getInventory(), ch, SHOW_OBJ_SHORT, true);
+            if(auto inv = obj->renderInventory(ch); !inv.empty()) {
+                ch->sendf("%s", inv);
+            }
         }
     } else {        /* item must be a fountain or drink container */
         if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) == 1))
