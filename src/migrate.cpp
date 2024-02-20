@@ -2239,7 +2239,7 @@ static struct old_ship_data customs[] = {
 
 struct AreaDef {
     std::string name;
-    int type{ITEM_REGION};
+    Structure *exists{};
     GameEntity *location{};
     std::optional<vnum> parent;
     std::set<std::size_t> roomFlags{};
@@ -2250,13 +2250,8 @@ struct AreaDef {
 };
 
 static Structure* assembleArea(const AreaDef &def) {
-    auto vn = getNextUID();
-    auto a = new Structure();
-    a->script = std::make_shared<script_data>(a);
-    a->uid = vn;
-    setWorld(vn, a);
+    auto a = def.exists ? def.exists : create_obj<Region>();
     a->setName(def.name);
-    a->type_flag= def.type;
     a->flags[FlagType::Structure] = def.flags;
 
     a->envVars = def.envVars;
@@ -2309,46 +2304,46 @@ void migrate_grid() {
     adef.name = "Admin Land";
     adef.roomRanges.emplace_back(0, 16);
     adef.roomIDs = {16694, 16698};
-    adef.type = ITEM_DIMENSION;
+    adef.exists = create_obj<Dimension>();
     auto admin_land = assembleArea(adef);
 
     AreaDef mudschooldef;
     mudschooldef.name = "MUD School";
     mudschooldef.roomRanges.emplace_back(100, 154);
-    mudschooldef.type = ITEM_DIMENSION;
+    mudschooldef.exists = create_obj<Dimension>();
     auto mud_school = assembleArea(mudschooldef);
 
     AreaDef mvdef;
     mvdef.name = "Multiverse";
-    mvdef.type = ITEM_DIMENSION;
+    mvdef.exists = create_obj<Dimension>();
     auto multiverse = assembleArea(mvdef);
 
     AreaDef xvdef;
     xvdef.name = "Xenoverse";
-    xvdef.type = ITEM_DIMENSION;
+    xvdef.exists = create_obj<Dimension>();
     auto xenoverse = assembleArea(xvdef);
 
     AreaDef u7def;
     u7def.name = "Universe 7";
-    u7def.type = ITEM_DIMENSION;
+    u7def.exists = create_obj<Dimension>();
     u7def.location = multiverse;
     auto universe7 = assembleArea(u7def);
 
     AreaDef mplane;
     mplane.name = "Mortal Plane";
-    mplane.type = ITEM_DIMENSION;
+    mplane.exists = create_obj<Dimension>();
     mplane.location = universe7;
     auto mortal_plane = assembleArea(mplane);
 
     AreaDef cplane;
     cplane.name = "Celestial Plane";
-    cplane.type = ITEM_DIMENSION;
+    cplane.exists = create_obj<Dimension>();
     cplane.location = universe7;
     auto celestial_plane = assembleArea(cplane);
 
     AreaDef spacedef;
+    spacedef.exists = create_obj<Interstellar>();
     spacedef.name = "Depths of Space";
-    spacedef.type = ITEM_REGION;
     spacedef.location = mortal_plane;
     // Insert every room id from mapnums (the 2d array) into spacedef.roomIDs...
     for(auto &row : mapnums) {
@@ -2457,21 +2452,20 @@ void migrate_grid() {
 
     for(auto &[name, def] : areaDefs) {
         def.name = name;
-        def.type = ITEM_REGION;
         auto aent = assembleArea(def);
         areaObjects[name] = aent;
     }
 
     AreaDef pearth;
     pearth.name = "@GEarth@n";
-    pearth.type = ITEM_CELESTIAL_BODY;
+    pearth.exists = create_obj<Planet>();
     pearth.location = getWorld(50);
     auto planet_earth = assembleArea(pearth);
     getWorld(50)->addToLocation(space);
 
     AreaDef pvegeta;
     pvegeta.name = "@YVegeta@n";
-    pvegeta.type = ITEM_CELESTIAL_BODY;
+    pvegeta.exists = create_obj<Planet>();
     pvegeta.location = getWorld(53);
     pvegeta.envVars[EnvVar::Gravity] = 10.0;
     auto planet_vegeta = assembleArea(pvegeta);
@@ -2479,63 +2473,63 @@ void migrate_grid() {
 
     AreaDef pfrigid;
     pfrigid.name = "@CFrigid@n";
-    pfrigid.type = ITEM_CELESTIAL_BODY;
+    pfrigid.exists = create_obj<Planet>();
     pfrigid.location = getWorld(51);
     auto planet_frigid = assembleArea(pfrigid);
     getWorld(51)->addToLocation(space);
 
     AreaDef pnamek;
     pnamek.name = "@gNamek@n";
-    pnamek.type = ITEM_CELESTIAL_BODY;
+    pnamek.exists = create_obj<Planet>();
     pnamek.location = getWorld(54);
     auto planet_namek = assembleArea(pnamek);
     getWorld(54)->addToLocation(space);
 
     AreaDef pkonack;
     pkonack.name = "@MKonack@n";
-    pkonack.type = ITEM_CELESTIAL_BODY;
+    pkonack.exists = create_obj<Planet>();
     pkonack.location = getWorld(52);
     auto planet_konack = assembleArea(pkonack);
     getWorld(52)->addToLocation(space);
 
     AreaDef paether;
     paether.name = "@MAether@n";
-    paether.type = ITEM_CELESTIAL_BODY;
+    paether.exists = create_obj<Planet>();
     paether.location = getWorld(55);
     auto planet_aether = assembleArea(paether);
     getWorld(55)->addToLocation(space);
 
     AreaDef pyardrat;
     pyardrat.name = "@mYardrat@n";
-    pyardrat.type = ITEM_CELESTIAL_BODY;
+    pyardrat.exists = create_obj<Planet>();
     pyardrat.location = getWorld(56);
     auto planet_yardrat = assembleArea(pyardrat);
     getWorld(56)->addToLocation(space);
 
     AreaDef pkanassa;
     pkanassa.name = "@BKanassa@n";
-    pkanassa.type = ITEM_CELESTIAL_BODY;
+    pkanassa.exists = create_obj<Planet>();
     pkanassa.location = getWorld(58);
     auto planet_kanassa = assembleArea(pkanassa);
     getWorld(58)->addToLocation(space);
 
     AreaDef pcerria;
     pcerria.name = "@RCerria@n";
-    pcerria.type = ITEM_CELESTIAL_BODY;
+    pcerria.exists = create_obj<Planet>();
     pcerria.location = getWorld(198);
     auto planet_cerria = assembleArea(pcerria);
     getWorld(198)->addToLocation(space);
 
     AreaDef parlia;
     parlia.name = "@GArlia@n";
-    parlia.type = ITEM_CELESTIAL_BODY;
+    parlia.exists = create_obj<Planet>();
     parlia.location = getWorld(59);
     auto planet_arlia = assembleArea(parlia);
     getWorld(59)->addToLocation(space);
 
     AreaDef pzenith;
     pzenith.name = "@BZenith@n";
-    pzenith.type = ITEM_CELESTIAL_BODY;
+    pzenith.exists = create_obj<Planet>();
     pzenith.location = getWorld(57);
     auto moon_zenith = assembleArea(pzenith);
     for(const auto& name : {"Ancient Castle", "Utatlan City", "Zenith Jungle"}) {
@@ -2556,7 +2550,7 @@ void migrate_grid() {
     }
 
     for(auto &p : {planet_earth, planet_aether, planet_vegeta, planet_frigid}) {
-        p->setFlag(FlagType::Structure, STRUCTURE_MOON);
+        p->setFlag(FlagType::Structure, STRUCTURE_HASMOON);
     }
 
     AreaDef zelakinfarm;
@@ -2569,7 +2563,7 @@ void migrate_grid() {
     hbtcdef.name = "Hyperbolic Time Chamber";
     hbtcdef.location = universe7;
     hbtcdef.roomRanges.emplace_back(64000, 64097);
-    hbtcdef.type = ITEM_DIMENSION;
+    hbtcdef.exists = create_obj<Dimension>();
     auto hbtc = assembleArea(hbtcdef);
 
     AreaDef bodef;
@@ -2581,7 +2575,7 @@ void migrate_grid() {
         if(icontains(stripAnsi(room->getName()), "Black Omen")) bodef.roomIDs.insert(r);
     }
     bodef.roomIDs.insert(19050);
-    bodef.type = ITEM_VEHICLE;
+    bodef.exists = create_obj<Vehicle>();
     auto black_omen = assembleArea(bodef);
 
     AreaDef earthduel;
@@ -2652,21 +2646,21 @@ void migrate_grid() {
     AreaDef edfhq;
     edfhq.name = "EDF Headquarters";
     edfhq.location = planet_earth;
-    edfhq.type = ITEM_BUILDING;
+    edfhq.exists = create_obj<Building>();
     edfhq.roomRanges.emplace_back(9101, 9110);
     auto edf_hq = assembleArea(edfhq);
 
     AreaDef bar;
     bar.name = "Bar";
     bar.location = planet_earth;
-    bar.type = ITEM_BUILDING;
+    bar.exists = create_obj<Building>();
     bar.roomRanges.emplace_back(18100, 18114);
     auto bar_ = assembleArea(bar);
 
     AreaDef themoon;
     themoon.name = "The Moon";
     themoon.location = space;
-    themoon.type = ITEM_CELESTIAL_BODY;
+    themoon.exists = create_obj<Planet>();
     themoon.envVars[EnvVar::Gravity] = 10.0;
     auto moon = assembleArea(themoon);
 
@@ -2848,14 +2842,14 @@ void migrate_grid() {
     AreaDef nodef;
     nodef.name = "Northran";
     nodef.location = xenoverse;
-    nodef.type = ITEM_DIMENSION;
+    nodef.exists = create_obj<Dimension>();
     nodef.roomRanges.emplace_back(17900, 17999);
     auto northran = assembleArea(nodef);
 
     AreaDef celdef;
     celdef.name = "Celestial Corp";
     celdef.location = space;
-    celdef.type = ITEM_SPACE_STATION;
+    celdef.exists = create_obj<Building>();
     celdef.roomRanges.emplace_back(16305, 16399);
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->getName()), "Celestial Corp")) celdef.roomIDs.insert(rv);
@@ -2865,7 +2859,7 @@ void migrate_grid() {
     AreaDef gneb;
     gneb.name = "Green Nebula Mall";
     gneb.location = space;
-    gneb.type = ITEM_SPACE_STATION;
+    gneb.exists = create_obj<Building>();
     gneb.roomRanges.emplace_back(17200, 17276);
     gneb.roomIDs.insert(184);
     auto green_nebula = assembleArea(gneb);
@@ -2873,7 +2867,7 @@ void migrate_grid() {
     AreaDef cooler;
     cooler.name = "Cooler's Ship";
     cooler.location = space;
-    cooler.type = ITEM_VEHICLE;
+    cooler.exists = create_obj<Vehicle>();
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->getName()), "Cooler's Ship")) {
             cooler.roomIDs.insert(rv);
@@ -2883,7 +2877,7 @@ void migrate_grid() {
 
     AreaDef alph;
     alph.name = "Alpharis";
-    alph.type = ITEM_SPACE_STATION;
+    alph.exists = create_obj<Building>();
     alph.location = space;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->getName()), "Alpharis")) alph.roomIDs.insert(rv);
@@ -2893,7 +2887,7 @@ void migrate_grid() {
     AreaDef dzone;
     dzone.name = "Dead Zone";
     dzone.location = universe7;
-    dzone.type = ITEM_DIMENSION;
+    dzone.exists = create_obj<Dimension>();
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->getName()), "Dead Zone")) dzone.roomIDs.insert(rv);
     }
@@ -2902,7 +2896,7 @@ void migrate_grid() {
     AreaDef bast;
     bast.name = "Blasted Asteroid";
     bast.location = space;
-    bast.type = ITEM_CELESTIAL_BODY;
+    bast.exists = create_obj<Planet>();
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->getName()), "Blasted Asteroid")) bast.roomIDs.insert(rv);
     }
@@ -2912,7 +2906,7 @@ void migrate_grid() {
     AreaDef listres;
     listres.name = "Lister's Restaurant";
     listres.location = xenoverse;
-    listres.type = ITEM_BUILDING;
+    listres.exists = create_obj<Building>();
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->getName()), "Lister's Restaurant")) listres.roomIDs.insert(rv);
     }
@@ -2921,7 +2915,7 @@ void migrate_grid() {
 
     AreaDef scasino;
     scasino.name = "Shooting Star Casino";
-    scasino.type = ITEM_BUILDING;
+    scasino.exists = create_obj<Building>();
     scasino.location = xenoverse;
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->getName()), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
@@ -2931,7 +2925,7 @@ void migrate_grid() {
     AreaDef outdef;
     outdef.name = "The Outpost";
     outdef.location = celestial_plane;
-	outdef.type = ITEM_BUILDING;
+	outdef.exists = create_obj<Building>();
     for(auto &[rv, room] : world) {
         if(icontains(stripAnsi(room->getName()), "The Outpost")) outdef.roomIDs.insert(rv);
     }
@@ -2956,28 +2950,28 @@ void migrate_grid() {
     nkai.name = "North Kai's Planet";
     nkai.location = celestial_plane;
     nkai.envVars[EnvVar::Gravity] = 10.0;
-    nkai.type = ITEM_CELESTIAL_BODY;
+    nkai.exists = create_obj<Planet>();
     nkai.roomRanges.emplace_back(6100, 6138);
     auto north_kai = assembleArea(nkai);
 
     AreaDef serp;
     serp.name = "Serpent's Castle";
     serp.location = snake_way;
-    serp.type = ITEM_BUILDING;
+    serp.exists = create_obj<Building>();
     serp.roomRanges.emplace_back(6139, 6166);
     auto serpents_castle = assembleArea(serp);
 
     AreaDef gkai;
     gkai.name = "Grand Kai's Planet";
     gkai.location = celestial_plane;
-    gkai.type = ITEM_CELESTIAL_BODY;
+    gkai.exists = create_obj<Planet>();
     gkai.roomRanges.emplace_back(6800, 6960);
     auto grand_kai = assembleArea(gkai);
 
     AreaDef gkaipalace;
     gkaipalace.name = "Grand Kai's Palace";
     gkaipalace.location = grand_kai;
-    gkaipalace.type = ITEM_BUILDING;
+    gkaipalace.exists = create_obj<Building>();
     gkaipalace.roomRanges.emplace_back(6961, 7076);
     auto grand_kais_palace = assembleArea(gkaipalace);
 
@@ -3045,7 +3039,7 @@ void migrate_grid() {
 
     AreaDef fbagdojo;
     fbagdojo.name = "Flaming Bag Dojo";
-    fbagdojo.type = ITEM_BUILDING;
+    fbagdojo.exists = create_obj<Building>();
     fbagdojo.location = hellfire_city;
     fbagdojo.roomRanges.emplace_back(6530, 6568);
     auto flaming_bag_dojo = assembleArea(fbagdojo);
@@ -3059,21 +3053,21 @@ void migrate_grid() {
     AreaDef psihnon;
     psihnon.name = "Sihnon";
     psihnon.location = space;
-    psihnon.type = ITEM_CELESTIAL_BODY;
+    psihnon.exists = create_obj<Planet>();
     psihnon.roomRanges.emplace_back(3600, 3699);
     auto planet_sihnon = assembleArea(psihnon);
 
     AreaDef majdef;
     majdef.name = "Majinton";
     majdef.location = planet_sihnon;
-    majdef.type = ITEM_DIMENSION;
+    majdef.exists = create_obj<Dimension>();
     majdef.roomRanges.emplace_back(3700, 3797);
     auto majinton = assembleArea(majdef);
 
     AreaDef wistower;
     wistower.name = "Wisdom Tower";
     wistower.location = planet_namek;
-    wistower.type = ITEM_BUILDING;
+    wistower.exists = create_obj<Building>();
     wistower.roomRanges.emplace_back(9600, 9666);
     auto wisdom_tower = assembleArea(wistower);
 
@@ -3086,7 +3080,7 @@ void migrate_grid() {
     AreaDef machia;
     machia.name = "Machiavilla";
     machia.location = planet_konack;
-    machia.type = ITEM_BUILDING;
+    machia.exists = create_obj<Building>();
     machia.roomRanges.emplace_back(12743, 12798);
     machia.roomRanges.emplace_back(12700, 12761);
     machia.roomIDs.insert(9356);
@@ -3107,7 +3101,7 @@ void migrate_grid() {
 
     AreaDef nazchief;
     nazchief.name = "Chieftain's House";
-    nazchief.type = ITEM_BUILDING;
+    nazchief.exists = create_obj<Building>();
     nazchief.location = nazrin_village;
     nazchief.roomRanges.emplace_back(19348, 19397);
     auto chieftains_house = assembleArea(nazchief);
@@ -3121,7 +3115,7 @@ void migrate_grid() {
 
     AreaDef monbal;
     monbal.name = "Monastery of Balance";
-    monbal.type = ITEM_BUILDING;
+    monbal.exists = create_obj<Building>();
     monbal.location = planet_konack;
     monbal.roomRanges.emplace_back(9500, 9599);
     monbal.roomRanges.emplace_back(9357, 9364);
@@ -3131,35 +3125,35 @@ void migrate_grid() {
     AreaDef futschool;
     futschool.name = "Future School";
     futschool.location = xenoverse;
-    futschool.type = ITEM_DIMENSION;
+    futschool.exists = create_obj<Dimension>();
     futschool.roomRanges.emplace_back(15938, 15999);
     auto future_school = assembleArea(futschool);
 
     AreaDef udfhq;
     udfhq.name = "UDF Headquarters";
     udfhq.location = space;
-    udfhq.type = ITEM_VEHICLE;
+    udfhq.exists = create_obj<Vehicle>();
     udfhq.roomRanges.emplace_back(18000, 18059);
     auto udf_headquarters = assembleArea(udfhq);
 
     AreaDef hspire;
     hspire.name = "The Haven Spire";
     hspire.location = space;
-    hspire.type = ITEM_VEHICLE;
+    hspire.exists = create_obj<Vehicle>();
     hspire.roomRanges.emplace_back(18300, 18341);
     auto haven_spire = assembleArea(hspire);
 
     AreaDef knoit;
     knoit.name = "Kame no Itto";
     knoit.location = space;
-    knoit.type = ITEM_VEHICLE;
+    knoit.exists = create_obj<Vehicle>();
     knoit.roomRanges.emplace_back(18400, 18460);
     auto kame_no_itto = assembleArea(knoit);
 
     AreaDef neonirvana;
     neonirvana.name = "Neo Nirvana";
     neonirvana.location = space;
-    neonirvana.type = ITEM_VEHICLE;
+    neonirvana.exists = create_obj<Vehicle>();
     neonirvana.roomRanges.emplace_back(13500, 13552);
     neonirvana.roomRanges.emplace_back(14782, 14790);
     auto neo_nirvana = assembleArea(neonirvana);
@@ -3287,14 +3281,14 @@ void migrate_grid() {
     AreaDef shatplan;
     shatplan.name = "Shattered Planet";
     shatplan.location = south_galaxy;
-    shatplan.type = ITEM_CELESTIAL_BODY;
+    shatplan.exists = create_obj<Planet>();
     shatplan.roomRanges.emplace_back(64301, 64399);
     auto shattered_planet = assembleArea(shatplan);
 
     AreaDef wzdef;
     wzdef.name = "War Zone";
     wzdef.location = xenoverse;
-    wzdef.type = ITEM_BUILDING;
+    wzdef.exists = create_obj<Building>();
     wzdef.roomRanges.emplace_back(17700, 17702);
     auto war_zone = assembleArea(wzdef);
 
@@ -3319,21 +3313,21 @@ void migrate_grid() {
     AreaDef hhouse;
     hhouse.name = "Haunted House";
     hhouse.location = xenoverse;
-    hhouse.type = ITEM_DIMENSION;
+    hhouse.exists = create_obj<Dimension>();
     hhouse.roomRanges.emplace_back(18600, 18693);
     auto haunted_house = assembleArea(hhouse);
 
     AreaDef roc;
     roc.name = "Random Occurences, WTF?";
     roc.location = xenoverse;
-    roc.type = ITEM_DIMENSION;
+    roc.exists = create_obj<Dimension>();
     roc.roomRanges.emplace_back(18700, 18776);
     auto random_occurences = assembleArea(roc);
 
     AreaDef galstrong;
     galstrong.name = "Galaxy's Strongest Tournament";
     galstrong.location = space;
-    galstrong.type = ITEM_SPACE_STATION;
+    galstrong.exists = create_obj<Building>();
     galstrong.roomRanges.emplace_back(17875, 17894);
     auto galaxy_strongest_tournament = assembleArea(galstrong);
 
@@ -3368,7 +3362,7 @@ void migrate_grid() {
         AreaDef sdata;
         sdata.name = data.name;
         sdata.roomIDs = data.vnums;
-        sdata.type = ITEM_VEHICLE;
+        sdata.exists = create_obj<Vehicle>();
         sdata.location = getWorld(data.location ? data.location.value() : 16694);
         return assembleArea(sdata);
     };
@@ -3462,7 +3456,7 @@ void migrate_grid() {
         pdim.name = "Personal Pocket Dimension " + std::to_string(counter++);
         pdim.location = personal_dimensions;
         pdim.roomIDs.insert(vn);
-        pdim.type = ITEM_DIMENSION;
+        pdim.exists = create_obj<Dimension>();
         pdim.envVars[EnvVar::Gravity] = 1000.0;
         auto pd = assembleArea(pdim);
     }

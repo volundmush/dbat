@@ -43,6 +43,7 @@
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
+entt::registry reg;
 std::unordered_map<std::string, std::shared_ptr<InternedString>> intern;
 std::shared_ptr<InternedString> internString(const std::string& str) {
     if(auto it = intern.find(str); it != intern.end()) {
@@ -1740,19 +1741,7 @@ char *sprintuniques(int low, int high) {
 }
 
 
-/* create an object, and add it to the object list */
-Object *create_obj(bool activate) {
-    auto obj = new Object();
-    obj->script = std::make_shared<script_data>(obj);
-    if(activate) {
-        obj->uid = getNextUID();
-        obj->checkMyID();
-        setWorld(obj->getUID(), obj);
-        obj->activate();
-    }
 
-    return (obj);
-}
 
 
 /* create a new object from a prototype */

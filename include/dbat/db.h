@@ -235,8 +235,6 @@ extern void write_level_data(BaseCharacter *ch, FILE *fl);
 
 extern int parse_mobile_from_file(FILE *mob_f, BaseCharacter *ch);
 
-Object *create_obj(bool activate = true);
-
 extern void free_obj(Object *obj);
 
 Object *read_object(obj_vnum nr, int type, bool activate = true);
@@ -321,7 +319,6 @@ extern std::unordered_map<int64_t, std::pair<time_t, BaseCharacter*>> uniqueChar
 extern VnumIndex<Object> objectVnumIndex;
 extern VnumIndex<NonPlayerCharacter> characterVnumIndex;
 
-
 extern std::unordered_map<obj_vnum, struct index_data> obj_index;
 extern std::unordered_map<obj_vnum, nlohmann::json> obj_proto;
 
@@ -359,3 +356,20 @@ struct disabled_data {
 
 // commands
 extern ACMD(do_reboot);
+
+
+/* create an object, and add it to the object list */
+template <typename T = Object>
+T *create_obj(bool activate = true) {
+    auto obj = new T();
+    obj->script = std::make_shared<script_data>(obj);
+    obj->ent = reg.create();
+    if(activate) {
+        obj->uid = getNextUID();
+        obj->checkMyID();
+        setWorld(obj->getUID(), obj);
+        obj->activate();
+    }
+
+    return (obj);
+}

@@ -1467,13 +1467,8 @@ enum class FlagType : uint8_t {
 #define ITEM_PLANT     34               /* This will grow!              */
 #define ITEM_FISHPOLE  35               /* FOR FISHING                  */
 #define ITEM_FISHBAIT  36               /* DITTO                        */
-#define ITEM_REGION    37               /* REGIONAL OBJECT              */
-#define ITEM_BUILDING  38
-#define ITEM_DIMENSION 39
-#define ITEM_CELESTIAL_BODY 40
-#define ITEM_SPACE_STATION 41
 
-#define NUM_ITEM_TYPES 42
+#define NUM_ITEM_TYPES 37
 
 /* Take/Wear flags: used by obj_data.wear_flags */
 #define ITEM_WEAR_TAKE        0  /* Item can be taken         */
@@ -1740,10 +1735,7 @@ enum class FlagType : uint8_t {
 
 #define NUM_MATERIALS           47
 
-constexpr int STRUCTURE_MOON = 0;
-constexpr int STRUCTURE_ETHER = 1;
 
-constexpr int NUM_STRUCTURE_FLAGS = 0;
 
 /* other miscellaneous defines *******************************************/
 
@@ -2301,3 +2293,17 @@ using effect_t = uint16_t;
 enum class EnvVar : uint8_t {
     Gravity = 0
 };
+
+enum class StructureType : uint8_t {
+    Rooms = 0, // traditional, legacy rooms and exits.
+    Grid3D = 1, // integer-based grid coordinates.
+    Space3D = 2 // floating point-based grid coordinates.
+};
+
+// The structure is indoors. Applies just to Grid3D.
+// If STRUCTURE_INDOORS, then movement up and down is only possible
+// through explicitly defined movement points like stairs or exits.
+constexpr int STRUCTURE_INDOORS = 0;
+constexpr int STRUCTURE_HASMOON = 1;
+constexpr int STRUCTURE_ETHER = 2;
+constexpr int NUM_STRUCTURE_FLAGS = 3;

@@ -184,8 +184,14 @@ nlohmann::json GameEntity::serialize() {
     return j;
 }
 
+GameEntity::~GameEntity() {
+    if(ent != entt::null) reg.destroy(ent);
+}
 
 void GameEntity::deserialize(const nlohmann::json& j) {
+    if(ent == entt::null) {
+        ent = reg.create();
+    }
     if(j.contains("vn")) vn = j["vn"];
 
     if(j.contains("strings")) {
@@ -489,8 +495,9 @@ void GameEntity::addToLocation(const Destination &dest) {
 
     if(location == dest.target) {
         locationType = dest.locationType;
+        auto prevCoords = coords;
         coords = dest.coords;
-        location->updateCoordinates(this);
+        location->updateCoordinates(this, prevCoords);
     } else {
         location = dest.target;
         locationType = dest.locationType;
@@ -517,7 +524,7 @@ void GameEntity::removeFromLocation() {
     
 }
 
-void GameEntity::updateCoordinates(GameEntity *u) {
+void GameEntity::updateCoordinates(GameEntity *u, std::optional<coordinates> previous) {
     // does nothing by default.
 }
 
@@ -645,11 +652,11 @@ void GameEntity::executeCommand(const std::string& cmd) {
     // does nothing by default... 
 }
 
-bool GameEntity::isInsideNormallyDark() {
+bool GameEntity::isInsideNormallyDark(GameEntity* viewer) {
     return false;
 }
 
-bool GameEntity::isInsideDark() {
+bool GameEntity::isInsideDark(GameEntity* viewer) {
     return false;
 }
 
@@ -774,5 +781,30 @@ std::optional<Destination> GameEntity::getDestination(GameEntity* viewer, int di
     if(auto found = destinations.find(direction); found != destinations.end()) {
         return found->second;
     }
+    return {};
+}
+
+std::string GameEntity::renderListPrefixFor(GameEntity *viewer) {
+    std::vector<std::string> sections;
+
+    if (viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) {
+        sections.emplace_back(fmt::format("@D[@w{}@D]@n", getUIDString()));
+        if(vn != NOTHING) {
+            sections.emplace_back(fmt::format("@G[VN{}]@n", vn));
+        }
+        if(auto sstring = scriptString(); !sstring.empty()) {
+            sections.emplace_back(sstring);
+        }
+        return join(sections, " ");
+    }
+
+    return "";
+}
+
+std::vector<std::pair<std::string, Destination>> GameEntity::getLandingSpotsFor(GameEntity *mover) {
+    return {};
+}
+
+std::optional<Destination> GameEntity::getLaunchDestinationFor(GameEntity *mover) {
     return {};
 }

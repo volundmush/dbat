@@ -55,6 +55,7 @@
 #include "fmt/core.h"
 #include "fmt/printf.h"
 #include "json.hpp"
+#include "entt.hpp"
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)
@@ -116,6 +117,8 @@ template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
 
 using weight_t = double;
+
+extern entt::registry reg;
 
 template <typename Iterator, typename Key = std::function<std::string(typename std::iterator_traits<Iterator>::value_type)>>
 Iterator partialMatch(

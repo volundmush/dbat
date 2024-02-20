@@ -11,7 +11,7 @@ static const std::set<int> lit_sectors = {SECT_INSIDE, SECT_CITY, SECT_IMPORTANT
 
 
 // Check to see whether a room should normally be considered dark as a basic matter of course.
-bool Room::isInsideNormallyDark() {
+bool Room::isInsideNormallyDark(GameEntity* viewer) {
     if(checkFlag(FlagType::Room, ROOM_DARK)) return true;
     if(lit_sectors.contains(sector_type)) return false;
     if(checkFlag(FlagType::Room, ROOM_INDOORS)) return false;
@@ -21,10 +21,10 @@ bool Room::isInsideNormallyDark() {
 
 static const std::set<int> sun_down = {SUN_SET, SUN_DARK};
 
-bool Room::isInsideDark() {
+bool Room::isInsideDark(GameEntity* viewer) {
 
     // If the room is not normally dark, then it's definitely not dark.
-    if(!isInsideNormallyDark()) return false;
+    if(!isInsideNormallyDark(viewer)) return false;
 
     // Certain sectors, like cities, provide free light.
     if(lit_sectors.contains(sector_type)) return false;
@@ -39,8 +39,6 @@ bool Room::isInsideDark() {
 
     return true;
 }
-
-// EXITS below here.
 
 
 std::map<int, Destination> Room::getDestinations(GameEntity* viewer) {
@@ -165,7 +163,7 @@ MoonCheck Room::checkMoon() {
     if(inside_sectors.contains(sector_type)) return MoonCheck::NoMoon;
     auto plan = getPlanet();
     if(!plan) return MoonCheck::NoMoon;
-    if(!plan->checkFlag(FlagType::Structure, STRUCTURE_MOON)) return MoonCheck::NoMoon;
+    if(!plan->checkFlag(FlagType::Structure, STRUCTURE_HASMOON)) return MoonCheck::NoMoon;
 
     return MOON_TIMECHECK() ? MoonCheck::Full : MoonCheck::NotFull;
 

@@ -925,10 +925,6 @@ const char *item_types[NUM_ITEM_TYPES + 1] = {
         "PLANT",
         "FISHINGPOLE",
         "FISHBAIT",
-        "REGION",
-        "BUILDING",
-        "DIMENSION",
-        "CELESTIALBODY",
         "\n"
 };
 

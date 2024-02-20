@@ -202,12 +202,6 @@ nlohmann::json BaseCharacter::serialize() {
     if(suppression) j["suppression"] = suppression;
     if(tail_growth) j["tail_growth"] = tail_growth;
 
-    for(auto i = 0; i < 3; i++) {
-        if(saving_throw[i]) j["saving_throw"].push_back(std::make_pair(i, saving_throw[i]));
-    }
-    for(auto i = 0; i < 3; i++) {
-        if(apply_saving_throw[i]) j["apply_saving_throw"].push_back(std::make_pair(i, apply_saving_throw[i]));
-    }
     if(upgrade) j["upgrade"] = upgrade;
     if(voice && strlen(voice)) j["voice"] = voice;
 

@@ -8,7 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
-
+#include <functional>
 #include "net.h"
 #include <type_traits> // For std::is_base_of
 
@@ -412,6 +412,22 @@ struct coordinates {
     bool operator==(const coordinates& rhs);
 };
 
+namespace std {
+    template<>
+    struct hash<coordinates> {
+        size_t operator()(const coordinates& coord) const noexcept {
+            // A simple yet effective hash combining technique
+            std::hash<double> hasher;
+            size_t h1 = hasher(coord.x);
+            size_t h2 = hasher(coord.y);
+            size_t h3 = hasher(coord.z);
+
+            // Combine the hash values
+            return h1 ^ (h2 << 1) ^ (h3 << 2); // Shift and XOR for simple mixing
+        }
+    };
+}
+
 struct Location {
     GameEntity* location{};
     int locationType{};
@@ -433,11 +449,15 @@ struct Destination {
 
 struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     GameEntity() = default;
-    virtual ~GameEntity() = default;
+    virtual ~GameEntity();
 
     int64_t getUID();
     vnum getVN();
     zone_vnum getZone();
+
+    // This is not how you're supposed to use entt.
+    // Oh well. Now we can attach Component data structures to things at least.
+    entt::entity ent{entt::null};
 
     /* unique id for this unit */
     int64_t uid{NOTHING}; 
@@ -501,7 +521,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual void handleAdd(GameEntity *u);
 
     // called for this, when mover has changed coordinates within it.
-    virtual void updateCoordinates(GameEntity *mover);
+    virtual void updateCoordinates(GameEntity *mover, std::optional<coordinates> previous = std::nullopt);
 
     // the GameEntity you are located in. Which might be null.
     GameEntity *location{nullptr};
@@ -517,6 +537,9 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 
     // The business part of the above.
     virtual std::vector<GameEntity*> getNeighborsFor(GameEntity* u, bool visible = true);
+
+    virtual std::vector<std::pair<std::string, Destination>> getLandingSpotsFor(GameEntity *mover);
+    virtual std::optional<Destination> getLaunchDestinationFor(GameEntity *mover);
 
     virtual bool isInvisible();
     virtual bool isHidden();
@@ -551,8 +574,8 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual std::optional<std::string> checkAllowEquip(GameEntity *u, int location);
     virtual std::optional<std::string> checkAllowRemove(GameEntity *u);
 
-    virtual bool isInsideNormallyDark();
-    virtual bool isInsideDark();
+    virtual bool isInsideNormallyDark(GameEntity *viewer);
+    virtual bool isInsideDark(GameEntity *viewer);
     virtual bool isProvidingLight();
 
     // Look at location.
@@ -560,8 +583,6 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     // The business part of the above.
     virtual std::string renderLocationFor(GameEntity* viewer);
     virtual std::string renderListingFor(GameEntity* viewer);
-
-    // The prefix is used for many listings so it's split off.
     virtual std::string renderListPrefixFor(GameEntity* viewer);
 
     // The RoomListingHelper renders the 'room description' for a room listing.
@@ -912,13 +933,49 @@ struct Weapon : public Object {
     std::string renderAppearanceHelper(GameEntity* u) override;
 };
 
+// STRUCTURE STUFF BELOW THIS.
 
-struct Structure : public Object {
+// TileDetails is used to store information about a tile. Part of the Grid3D system.
+struct TileDetails {
+    std::string name;
+    std::string description;
+    std::optional<int> tile;
+    std::set<int> flags;
+};
+
+struct Grid3D {
+    int defaultSectorFloor{SECT_FIELD};
+    int defaultSectorAbove{SECT_FLYING};
+    int defaultSectorBelow{SECT_UNDERWATER};
+    std::unordered_map<coordinates, TileDetails> tiles;
+};
+
+struct CoordinateContents {
+    std::unordered_map<coordinates, std::vector<GameEntity*>> coordinateContents;
+};
+
+struct Boundaries {
+    std::optional<double> maxX, maxY, maxZ, minX, minY, minZ;
+};
+
+// A new kind of entity. Entity family Structure.
+struct Structure : public GameEntity {
     Structure() = default;
     explicit Structure(const nlohmann::json &j);
 
     //void extractFromWorld() override;
 
+    void handleRemove(GameEntity *u) override;
+    void handleAdd(GameEntity *u) override;
+    void updateCoordinates(GameEntity *mover, std::optional<coordinates> previous = std::nullopt) override;
+
+    std::map<int, Destination> getDestinations(GameEntity* viewer) override;
+    bool checkCanLeave(GameEntity *mover, const Destination& dest, bool need_specials_check) override;
+    bool checkCanReachDestination(GameEntity *mover, const Destination& dest) override;
+    bool checkPostEnter(GameEntity *mover, const Location& cameFrom, const Destination& dest) override;
+    std::string renderLocationFor(GameEntity* viewer) override;
+
+    UnitFamily getFamily() override;
     std::string getUnitClass() override;
 
     nlohmann::json serialize() override;
@@ -926,22 +983,83 @@ struct Structure : public Object {
     void deserializeRelations(const nlohmann::json& j) override;
     void deserialize(const nlohmann::json& j) override;
 
+    bool isInsideNormallyDark(GameEntity* viewer) override;
+    bool isInsideDark(GameEntity* viewer) override;
     bool isEnvironment() override;
     bool isStructure() override;
+
+    std::vector<std::pair<std::string, Destination>> getLandingSpotsFor(GameEntity *mover) override;
+    std::optional<Destination> getLaunchDestinationFor(GameEntity *mover) override;
+
+    StructureType type{StructureType::Rooms};
 };
 
-// Type: ITEM_VEHICLE should always use this.
+// Vehicles. Spaceships, boats, submarines, fighter jets, cars, buses...
 struct Vehicle : public Structure {
     Vehicle() = default;
     explicit Vehicle(const nlohmann::json &j);
 
     std::string getUnitClass() override;
-    std::string renderAppearanceHelper(GameEntity* u) override;
+    std::string renderAppearance(GameEntity* u) override;
 
     void sendText(const std::string& text) override;
 
     void executeCommand(const std::string& argument) override;
 };
+
+// Note: Also used for moons, planetoids, dwarf planets, gigantic asteroids and... 
+// I dunno, floating islands in space? Like the world of Golden Sun?
+struct Planet : public Structure {
+    Planet() = default;
+    explicit Planet(const nlohmann::json &j);
+
+    std::string getUnitClass() override;
+    std::string renderAppearance(GameEntity* u) override;
+};
+
+// Used for things like space stations, large buildings, possibly elaborate dungeons.
+struct Building : public Structure {
+    Building() = default;
+    explicit Building(const nlohmann::json &j);
+
+    std::string getUnitClass() override;
+    std::string renderAppearance(GameEntity* u) override;
+};
+
+// Used for regions - usually wilderness areas like forests, plains, deserts, mountaintops, etc.
+struct Region : public Structure {
+    Region() = default;
+    explicit Region(const nlohmann::json &j);
+
+    std::string getUnitClass() override;
+    std::string renderAppearance(GameEntity* u) override;
+};
+
+struct Dimension : public Structure {
+    Dimension() = default;
+    explicit Dimension(const nlohmann::json &j);
+
+    std::string getUnitClass() override;
+    std::string renderAppearance(GameEntity* u) override;
+};
+
+
+struct Interstellar : public Structure {
+    Interstellar() = default;
+    explicit Interstellar(const nlohmann::json &j);
+
+    std::string getUnitClass() override;
+    std::string renderAppearance(GameEntity* u) override;
+};
+
+struct Stellar : public Structure {
+    Stellar() = default;
+    explicit Stellar(const nlohmann::json &j);
+
+    std::string getUnitClass() override;
+    std::string renderAppearance(GameEntity* u) override;
+};
+
 
 
 /* room-related structures ************************************************/
@@ -1027,8 +1145,8 @@ struct Room : public GameEntity {
 
     //Event renderLocationFor(GameEntity* u) override;
 
-    bool isInsideNormallyDark() override;
-    bool isInsideDark() override;
+    bool isInsideNormallyDark(GameEntity* viewer) override;
+    bool isInsideDark(GameEntity* viewer) override;
     bool isEnvironment() override;
 
     double getEnvVar(EnvVar v) override;
@@ -1605,8 +1723,6 @@ struct BaseCharacter : public GameEntity {
     std::map<uint16_t, skill_data> skill;
 
     std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */
-    int16_t saving_throw[3]{};    /* Saving throw				*/
-    int16_t apply_saving_throw[3]{};    /* Saving throw bonuses			*/
 
     int armor{0};        /* Internally stored *10		*/
 

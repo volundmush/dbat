@@ -423,20 +423,6 @@ void Object::assignTriggers() {
     }
 }
 
-std::string Object::renderListPrefixFor(GameEntity *viewer) {
-    std::string result;
-
-    if (viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) {
-        result += fmt::format("@G[#{}] [VN{}]", uid, vn);
-        if(auto sstring = scriptString(); !sstring.empty()) {
-            result += fmt::format(" {}", sstring);
-        }
-        result += "@n ";
-    }
-
-    return result;
-}
-
 std::string Object::renderRoomListingHelper(GameEntity *viewer) {
     std::string result;
 
