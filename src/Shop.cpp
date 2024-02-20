@@ -821,8 +821,6 @@ bool Shop::executeCommand(NonPlayerCharacter* keeper, BaseCharacter *ch, const s
     return false;
 }
 
-
-
 void assign_the_shopkeepers() {
     cmd_say = find_command("say");
     cmd_tell = find_command("tell");
@@ -936,13 +934,6 @@ Shop::Shop(const nlohmann::json &j) : Shop() {
 
 std::list<NonPlayerCharacter*> Shop::getKeepers() {
     return get_vnum_list(characterVnumIndex, keeper);
-}
-
-bool Shop::isProducing(obj_vnum vn) {
-    if(auto found = std::find(producing.begin(), producing.end(), vn); found != producing.end()) {
-        return true; 
-    }
-    return false;
 }
 
 void Shop::runPurge() {

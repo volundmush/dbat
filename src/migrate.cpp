@@ -177,12 +177,12 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             rv = sscanf(buf3, "%d %d", &t1, &t2);
             while (t1 > -1) {
                 if (rv == 1) { /* old style guilds, only skills */
-                    g.skills.insert(t1);
+                    g->skills.insert(t1);
                 } else if (rv == 2) { /* new style guilds, skills and feats */
                     if (t2 == 1) {
-                        g.skills.insert(t1);
+                        g->skills.insert(t1);
                     } else if (t2 == 2) {
-                        g.feats.insert(t1);
+                        g->feats.insert(t1);
                     } else {
                         basic_mud_log("SYSERR: Invalid 2nd arg in guild file!");
                         exit(1);
@@ -194,18 +194,19 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                 get_line(gm_f, buf3);
                 rv = sscanf(buf3, "%d %d", &t1, &t2);
             }
-            read_guild_line(gm_f, "%f", &g.charge, "GM_CHARGE");
-            g.no_such_skill = fread_string(gm_f, buf2);
-            g.not_enough_gold = fread_string(gm_f, buf2);
+            read_guild_line(gm_f, "%f", &g->charge, "GM_CHARGE");
+            g->no_such_skill = fread_string(gm_f, buf2);
+            g->not_enough_gold = fread_string(gm_f, buf2);
 
-            read_guild_line(gm_f, "%d", &g.minlvl, "GM_MINLVL");
-            read_guild_line(gm_f, "%d", &g.gm, "GM_TRAINER");
+            read_guild_line(gm_f, "%d", &g->minlvl, "GM_MINLVL");
+            read_guild_line(gm_f, "%d", &g->gm, "GM_TRAINER");
 
-            g.gm = real_mobile(g.gm);
-            read_guild_line(gm_f, "%d", &g.with_who[0], "GM_WITH_WHO");
+            g->gm = real_mobile(g->gm);
+            bitvector_t flags[0];
+            read_guild_line(gm_f, "%d", &flags[0], "GM_WITH_WHO");
 
-            read_guild_line(gm_f, "%d", &g.open, "GM_OPEN");
-            read_guild_line(gm_f, "%d", &g.close, "GM_CLOSE");
+            read_guild_line(gm_f, "%d", &g->open, "GM_OPEN");
+            read_guild_line(gm_f, "%d", &g->close, "GM_CLOSE");
 
             CREATE(buf, char, READ_SIZE);
             get_line(gm_f, buf);
@@ -218,13 +219,16 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                         basic_mud_log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
                         break;
                     }
-                    g.with_who[temp] = val;
+                    flags[temp] = val;
                     while (isdigit(*p) || *p == '-') {
                         p++;
                     }
                     while (*p && !(isdigit(*p) || *p == '-')) {
                         p++;
                     }
+                }
+                for(auto i = 0; i < 128; i++) {
+                    if(IS_SET_AR(flags, i)) g->with_who.insert(i);
                 }
                 free(buf);
                 buf = fread_string(gm_f, buf2);
@@ -251,44 +255,51 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
         if (*buf == '#') {        /* New shop */
             sscanf(buf, "#%ld\n", &temp);
             snprintf(buf2, sizeof(buf2)-1, "shop #%ld in shop file %s", temp, filename);
-            auto &sh = shop_index[temp];
+            auto sh = std::make_shared<Shop>();
+            shop_index[temp] = sh;
             free(buf);        /* Plug memory leak! */
-            sh.vnum = temp;
-            auto &z = zone_table[real_zone_by_thing(sh.vnum)];
-            z.shops.insert(sh.vnum);
+            sh->vnum = temp;
+            auto &z = zone_table[real_zone_by_thing(sh->vnum)];
+            z.shops.insert(sh->vnum);
             top_shop = temp;
+            auto vn = temp;
             while(true) {
                 read_line(shop_f, "%ld", &shop_temp);
                 if(shop_temp == -1) break;
                 temp = (shop_vnum)shop_temp;
-                if(obj_index.count(temp)) sh.producing.push_back(temp);
+                if(obj_index.count(temp)) sh->producing.push_back(temp);
             }
 
-            read_line(shop_f, "%f", &SHOP_BUYPROFIT(top_shop));
-            read_line(shop_f, "%f", &SHOP_SELLPROFIT(top_shop));
+            read_line(shop_f, "%f", &sh->profit_buy);
+            read_line(shop_f, "%f", &sh->profit_sell);
 
             while(true) {
                 read_line(shop_f, "%ld", &shop_temp);
                 if(shop_temp == -1) break;
-                auto &t = sh.type.emplace_back();
+                auto &t = sh->type.emplace_back();
                 t.type = shop_temp;
             }
 
-            sh.no_such_item1 = read_shop_message(0, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.no_such_item2 = read_shop_message(1, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.do_not_buy = read_shop_message(2, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.missing_cash1 = read_shop_message(3, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.missing_cash2 = read_shop_message(4, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
-            sh.message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
-            read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
-            read_line(shop_f, "%ld", &SHOP_BITVECTOR(top_shop));
-            read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));
+            sh->no_such_item1 = read_shop_message(0, vn, shop_f, buf2);
+            sh->no_such_item2 = read_shop_message(1, vn, shop_f, buf2);
+            sh->do_not_buy = read_shop_message(2, vn, shop_f, buf2);
+            sh->missing_cash1 = read_shop_message(3, vn, shop_f, buf2);
+            sh->missing_cash2 = read_shop_message(4, vn, shop_f, buf2);
+            sh->message_buy = read_shop_message(5, vn, shop_f, buf2);
+            sh->message_sell = read_shop_message(6, vn, shop_f, buf2);
+            read_line(shop_f, "%d", &sh->temper1);
+            bitvector_t flags;
+            read_line(shop_f, "%ld", &flags);
+            // iterate over flags and set them in sh->flags...
+            for(auto i = 0; i < NUM_SHOP_FLAGS; i++) if(IS_SET(flags, 1 << i)) sh->flags.insert(i);
 
-            SHOP_KEEPER(top_shop) = real_mobile(SHOP_KEEPER(top_shop));
+            read_line(shop_f, "%hd", &sh->keeper);
+
+            sh->keeper = real_mobile(sh->keeper);
             CREATE(buf, char, READ_SIZE);
             get_line(shop_f, buf);
             p = buf;
+            bitvector_t bits[4];
             for (temp = 0; temp < SW_ARRAY_MAX; temp++) {
                 if (!p || !*p)
                     break;
@@ -296,7 +307,8 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                     basic_mud_log("SYSERR: Can't parse TRADE_WITH line in %s: '%s'", buf2, buf);
                     break;
                 }
-                SHOP_TRADE_WITH(top_shop)[temp] = count;
+
+                bits[temp] = count;
                 while (isdigit(*p) || *p == '-') {
                     p++;
                 }
@@ -305,25 +317,23 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 }
             }
             free(buf);
-            while (temp < SW_ARRAY_MAX)
-                SHOP_TRADE_WITH(top_shop)[temp++] = 0;
+            for(auto i = 0; i < 128; i++) {
+                if(IS_SET_AR(bits, i)) sh->with_who.insert(i);
+            }
 
             while(true) {
                 read_line(shop_f, "%ld", &shop_temp);
                 if(shop_temp == -1) break;
-                if(world.contains(shop_temp)) sh.in_room.insert(shop_temp);
+                if(world.contains(shop_temp)) sh->in_room.insert(shop_temp);
 
             }
 
 
-            read_line(shop_f, "%d", &SHOP_OPEN1(top_shop));
-            read_line(shop_f, "%d", &SHOP_CLOSE1(top_shop));
-            read_line(shop_f, "%d", &SHOP_OPEN2(top_shop));
-            read_line(shop_f, "%d", &SHOP_CLOSE2(top_shop));
+            read_line(shop_f, "%d", &sh->open1);
+            read_line(shop_f, "%d", &sh->close1);
+            read_line(shop_f, "%d", &sh->open2);
+            read_line(shop_f, "%d", &sh->close2);
 
-            SHOP_BANK(top_shop) = 0;
-            SHOP_SORT(top_shop) = 0;
-            SHOP_FUNC(top_shop) = nullptr;
         } else {
             if (*buf == '$')        /* EOF */
                 done = true;

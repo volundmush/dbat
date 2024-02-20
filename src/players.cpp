@@ -15,6 +15,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"
 #include "dbat/ban.h"
+#include "dbat/account.h"
 
 
 std::unordered_map<int64_t, std::shared_ptr<player_data>> players;
@@ -79,4 +80,94 @@ OpResult<> validate_pc_name(const std::string& name) {
     }
 
     return {true, n};
+}
+
+nlohmann::json alias_data::serialize() {
+    auto j = nlohmann::json::object();
+
+    if(!name.empty()) j["name"] = name;
+    if(!replacement.empty()) j["replacement"] = replacement;
+    if(type) j["type"] = type;
+
+    return j;
+}
+
+
+alias_data::alias_data(const nlohmann::json &j) : alias_data() {
+    if(j.contains("name")) name = j["name"].get<std::string>();
+    if(j.contains("replacement")) replacement = j["replacement"].get<std::string>();
+    if(j.contains("type")) type = j["type"];
+}
+
+nlohmann::json player_data::serialize() {
+    auto j = nlohmann::json::object();
+    j["id"] = id;
+    j["name"] = name;
+    if(account) j["account"] = account->vn;
+
+    for(auto &a : aliases) {
+        j["aliases"].push_back(a.serialize());
+    }
+
+    for(auto &i : sensePlayer) {
+        j["sensePlayer"].push_back(i);
+    }
+
+    for(auto &i : senseMemory) {
+        j["senseMemory"].push_back(i);
+    }
+
+    for(auto &i : dubNames) {
+        j["dubNames"].push_back(i);
+    }
+
+    for(auto i = 0; i < NUM_COLOR; i++) {
+        if(color_choices[i] && strlen(color_choices[i])) j["color_choices"].push_back(std::make_pair(i, color_choices[i]));
+    }
+
+    return j;
+}
+
+
+player_data::player_data(const nlohmann::json &j) {
+    id = j["id"];
+    name = j["name"].get<std::string>();
+    if(j.contains("account")) {
+        auto accID = j["account"].get<vnum>();
+        if(auto accFind = accounts.find(accID); accFind != accounts.end()) account = accFind->second;
+        else {
+            basic_mud_log("Player data found with invalid account ID.");
+        }
+    }
+
+    if(j.contains("aliases")) {
+        for(auto ja : j["aliases"]) {
+            aliases.emplace_back(ja);
+        }
+    }
+
+    if(j.contains("sensePlayer")) {
+        for(auto &i : j["sensePlayer"]) {
+            sensePlayer.insert(i.get<int64_t>());
+        }
+    }
+
+    if(j.contains("senseMemory")) {
+        for(auto &i : j["senseMemory"]) {
+            senseMemory.insert(i.get<vnum>());
+        }
+    }
+
+    if(j.contains("dubNames")) {
+        for(auto &i : j["dubNames"]) {
+            dubNames.emplace(i[0].get<int64_t>(), i[1].get<std::string>());
+        }
+    }
+
+    if(j.contains("color_choices")) {
+        for(auto &i : j["color_choices"]) {
+            color_choices[i[0].get<int>()] = strdup(i[1].get<std::string>().c_str());
+        }
+    }
+
 }

@@ -97,7 +97,7 @@ static void process_dirty_npc_prototypes(const std::filesystem::path &loc) {
 static void process_dirty_shops(const std::filesystem::path &loc) {
     nlohmann::json j;
     for(auto &[v, s] : shop_index) {
-        j.push_back(s.serialize());
+        j.push_back(s->serialize());
     }
     dump_to_file(loc, "shops.json", j);
 }
@@ -105,7 +105,7 @@ static void process_dirty_shops(const std::filesystem::path &loc) {
 static void process_dirty_guilds(const std::filesystem::path &loc) {
     nlohmann::json j;
     for(auto &[v, g] : guild_index) {
-        j.push_back(g.serialize());
+        j.push_back(g->serialize());
     }
     dump_to_file(loc, "guilds.json", j);
 }

@@ -76,6 +76,7 @@ struct Shop {
     bool isOkChar(NonPlayerCharacter* keeper, BaseCharacter *ch);
     bool isOkObj(NonPlayerCharacter* keeper, BaseCharacter *ch, Object *obj);
     bool isOpen(NonPlayerCharacter* keeper, bool msg);
+    
 
 };
 
@@ -93,9 +94,10 @@ struct Guild {
     std::string not_enough_gold{};         /* message when the student doesn't have enough gold */
     int minlvl{0};                    /* Minumum level guildmaster will train */
     mob_vnum gm{NOBODY};                   /* GM's vnum */
-    bitvector_t with_who[4]{};    /* whom we dislike */
+    std::unordered_set<int> with_who{};/* Who does the shop trade with?	*/
     int open{0}, close{28};               /* when we will train */
     std::set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
+    std::list<NonPlayerCharacter*> getMasters();
 };
 
 

@@ -384,7 +384,7 @@ static void db_load_shops(const std::filesystem::path& loc) {
     shop_index.reserve(data.size());
     for(auto j : data) {
         auto id = j["vnum"].get<int64_t>();
-        shop_index.emplace(id, j);
+        shop_index.emplace(id, std::make_shared<Shop>(j));
     }
 }
 
@@ -393,7 +393,7 @@ static void db_load_guilds(const std::filesystem::path& loc) {
     guild_index.reserve(data.size());
     for(auto j : data) {
         auto id = j["vnum"].get<int64_t>();
-        guild_index.emplace(id, j);
+        guild_index.emplace(id, std::make_shared<Guild>(j));
     }
 }
 
@@ -2886,9 +2886,6 @@ void load_config() {
 
     fclose(fl);
 }
-
-
-
 
 // ^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?
 static std::regex uid_regex(R"(^#(\d+)(!)?)", std::regex::icase);

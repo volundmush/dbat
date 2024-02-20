@@ -26,7 +26,7 @@
 /* Local variables */
 int spell_sort_info[SKILL_TABLE_SIZE + 1];
 guild_vnum top_guild = NOTHING;
-std::unordered_map<guild_vnum, struct Guild> guild_index;
+std::unordered_map<guild_vnum, std::shared_ptr<Guild>> guild_index;
 
 char *guild_customer_string(int guild_nr, int detailed);
 
@@ -549,11 +549,11 @@ int is_guild_ok(BaseCharacter *keeper, BaseCharacter *ch, int guild_nr) {
 
 
 int does_guild_know(int guild_nr, int i) {
-    return guild_index[guild_nr].skills.count(i);
+    return guild_index[guild_nr]->skills.count(i);
 }
 
 int does_guild_know_feat(int guild_nr, int i) {
-    return guild_index[guild_nr].feats.count(i);
+    return guild_index[guild_nr]->feats.count(i);
 }
 
 
@@ -830,7 +830,7 @@ void handle_grand(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *
     char buf[MAX_STRING_LENGTH];
 
     if (!(does_guild_know(guild_nr, skill_num))) {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index[guild_nr]->no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -898,7 +898,7 @@ void handle_practice(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, cha
 
     /****  Does the GM know the skill the player wants to learn?  ****/
     if (!(does_guild_know(guild_nr, skill_num))) {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index[guild_nr]->no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
         return;
     }
@@ -910,7 +910,7 @@ void handle_practice(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, cha
                 learntype = spell_info[skill_num].can_learn_skill[i];
         switch (learntype) {
             case SKLEARN_CANT:
-                snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
+                snprintf(buf, sizeof(buf), guild_index[guild_nr]->no_such_skill.c_str(), GET_NAME(ch));
                 do_tell(keeper, buf, cmd_tell, 0);
                 return;
             case SKLEARN_CROSSCLASS:
@@ -1038,7 +1038,7 @@ void handle_practice(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, cha
                          pointcost, (pointcost == 1) ? "" : "s");
         }
     } else {
-        snprintf(buf, sizeof(buf), guild_index[guild_nr].no_such_skill.c_str(), GET_NAME(ch));
+        snprintf(buf, sizeof(buf), guild_index[guild_nr]->no_such_skill.c_str(), GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);
     }
 }
@@ -1169,7 +1169,7 @@ SPECIAL(guild) {
     };
 
     for (auto &[vn, g] : guild_index)
-        if (g.gm == keeper->getVN()) {
+        if (g->gm == keeper->getVN()) {
             guild_nr = vn;
             break;
         }
@@ -1177,9 +1177,6 @@ SPECIAL(guild) {
     if (!guild_index.contains(guild_nr))
         return (false);
 
-    if (GM_FUNC(guild_nr))
-        if ((GM_FUNC(guild_nr))(ch, me, cmd, arg))
-            return (true);
 
     /*** Is the GM able to train?    ****/
     if (!AWAKE(keeper))
@@ -1204,25 +1201,18 @@ SPECIAL(guild) {
 /****  This is ripped off of read_line from shop.c.  They could be
  *  combined. But why? ****/
 
-
+std::list<NonPlayerCharacter*> Guild::getMasters() {
+    return get_vnum_list(characterVnumIndex, gm);
+}
 
 void assign_the_guilds() {
-    guild_vnum gdindex;
-
     cmd_say = find_command("say");
     cmd_tell = find_command("tell");
 
-    for (auto &[vn, g] : guild_index) {
-        if (g.gm == NOBODY)
-            continue;
-
-        auto &gm = mob_index[g.gm];
-        auto &p = mob_proto[g.gm];
-
-        if (gm.func && gm.func != guild)
-            g.func = gm.func;
-
-        gm.func = guild;
+    for (auto &[vn, gld] : guild_index) {
+        for(auto keeper : gld->getMasters()) {
+            keeper->guildMasterOf = gld;
+        }
     }
 }
 
@@ -1233,7 +1223,7 @@ char *guild_customer_string(int guild_nr, int detailed) {
 
     while (*trade_letters[gindex] != '\n' && len + 1 < sizeof(buf)) {
         if (detailed) {
-            if (!IS_SET_AR(GM_WITH_WHO(guild_nr), flag)) {
+            if (!GM_WITH_WHO(guild_nr).contains(flag)) {
                 nlen = snprintf(buf + len, sizeof(buf) - len, ", %s", trade_letters[gindex]);
 
                 if (len + nlen >= sizeof(buf) || nlen < 0)
@@ -1242,7 +1232,7 @@ char *guild_customer_string(int guild_nr, int detailed) {
                 len += nlen;
             }
         } else {
-            buf[len++] = (IS_SET_AR(GM_WITH_WHO(guild_nr), flag) ? '_' : *trade_letters[gindex]);
+            buf[len++] = (GM_WITH_WHO(guild_nr).contains(flag) ? '_' : *trade_letters[gindex]);
             buf[len] = '\0';
 
             if (len >= sizeof(buf))
@@ -1280,13 +1270,13 @@ void list_all_guilds(BaseCharacter *ch) {
             len += headerlen;
         }
 
-        if (g.gm == NOBODY)
+        if (g->gm == NOBODY)
             strcpy(buf1, "<NONE>");  /* strcpy: OK (for 'buf1 >= 7') */
         else
-            sprintf(buf1, "%6d", g.gm);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+            sprintf(buf1, "%6d", g->gm);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
         len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
-                        gm_nr, buf1, g.charge, guild_customer_string(gm_nr, false));
+                        gm_nr, buf1, g->charge, guild_customer_string(gm_nr, false));
     }
 
     write_to_output(ch->desc, buf);
@@ -1294,99 +1284,19 @@ void list_all_guilds(BaseCharacter *ch) {
 
 
 void list_detailed_guild(BaseCharacter *ch, int gm_nr) {
-    int i;
-    char buf[MAX_STRING_LENGTH];
-    char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
-    if (GM_TRAINER(gm_nr) < NOBODY)
-        strcpy(buf1, "<NONE>");
-    else
-        sprintf(buf1, "%6d   ", mob_index[GM_TRAINER(gm_nr)].vn);
-
-    sprintf(buf, " Guild Master: %s\r\n", buf1);
-    sprintf(buf, "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
-            GM_OPEN(gm_nr), GM_CLOSE(gm_nr), GM_CHARGE(gm_nr));
-    sprintf(buf, "%s Min Level will train: %d\r\n", buf, GM_MINLVL(gm_nr));
-    sprintf(buf, "%s Whom will train: %s\r\n", buf, guild_customer_string(gm_nr, true));
-
-    /* now for the REAL reason why someone would want to see a Guild :) */
-
-    sprintf(buf, "%s The GM can teach the following:\r\n", buf);
-
-    *buf2 = '\0';
-    for (i = 0; i < SKILL_TABLE_SIZE; i++) {
-        if (does_guild_know(gm_nr, i))
-            sprintf(buf2, "%s %s \r\n", buf2, spell_info[i].name);
-    }
-
-    strcat(buf, buf2);
-
-    write_to_output(ch->desc, buf);
 }
 
 
 void show_guild(BaseCharacter *ch, char *arg) {
-    vnum gm_num = NOBODY;
 
-    if (!*arg)
-        list_all_guilds(ch);
-    else {
-        if (is_number(arg))
-            gm_num = atoi(arg);
-
-        auto g = guild_index.find(gm_num);
-        if(g == guild_index.end()) {
-            ch->sendf("Illegal guild master number.\r\n");
-            return;
-        }
-        list_detailed_guild(ch, g->first);
-    }
 }
 
 /*
  * List all guilds in a zone.                              
  */
 void list_guilds(BaseCharacter *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax) {
-    int i, bottom, top, counter = 0;
 
-    auto glist = [&](const Guild& g) {
-        counter++;
-
-        ch->sendf("@g%4d@n) [@c%-5d@n]", counter, GM_NUM(i));
-
-        /************************************************************************/
-        /** Retrieve the list of rooms for this guild.                         **/
-        /************************************************************************/
-
-        ch->sendf(" @c[@y%d@c]@y %s@n",
-                     (g.gm == NOBODY) ?
-                     -1 : g.gm,
-                     (g.gm == NOBODY) ?
-                     "" : mob_proto[g.gm]["short_description"].get<std::string>().c_str());
-
-        ch->sendf("\r\n");
-    };
-
-    ch->sendf(
-                 "Index VNum    Guild Master\r\n"
-                 "----- ------- ---------------------------------------------\r\n");
-
-    if (rnum != NOWHERE) {
-        auto &z = zone_table[rnum];
-        for(auto vn : z.guilds) {
-            auto &g = guild_index[vn];
-            glist(g);
-        }
-    } else {
-        for(auto &[vn, g] : guild_index) {
-            if(vn < vmin || vn > vmax)
-                continue;
-            glist(g);
-        }
-    }
-
-    if (counter == 0)
-        ch->sendf("None found.\r\n");
 }
 
 
@@ -1421,7 +1331,7 @@ nlohmann::json Guild::serialize() {
     if(!not_enough_gold.empty()) j["not_enough_gold"] = not_enough_gold;
     if(minlvl) j["minlvl"] = minlvl;
     if(gm != NOBODY) j["gm"] = gm;
-    for(auto i = 0; i < 79; i++) if(IS_SET_AR(with_who, i)) j["with_who"].push_back(i);
+    for(auto i : with_who) j["with_who"].push_back(i);
     if(open) j["open"] = open;
     if(close) j["close"] = close;
 
@@ -1438,7 +1348,7 @@ Guild::Guild(const nlohmann::json &j) : Guild() {
     if(j.count("not_enough_gold")) not_enough_gold = strdup(j["not_enough_gold"].get<std::string>().c_str());
     if(j.count("minlvl")) minlvl = j["minlvl"];
     if(j.count("gm")) gm = j["gm"];
-    if(j.contains("with_who")) for(const auto& i : j["with_who"]) SET_BIT_AR(with_who, i.get<int>());
+    if(j.contains("with_who")) for(const auto& i : j["with_who"]) with_who.insert(i.get<int>());
     if(j.count("open")) open = j["open"];
     if(j.count("close")) close = j["close"];
 }

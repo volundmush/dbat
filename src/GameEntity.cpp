@@ -3,7 +3,6 @@
 #include "dbat/utils.h"
 #include "dbat/constants.h"
 
-
 bool coordinates::operator==(const coordinates& rhs) {
     return x == rhs.x && y == rhs.y && z == rhs.z;
 }
@@ -16,6 +15,29 @@ bool Location::operator==(const Location& rhs) {
     return location == rhs.location && locationType == rhs.locationType && coords == rhs.coords;
 }
 
+coordinates::coordinates(const nlohmann::json& j) {
+    deserialize(j);
+}
+
+void coordinates::deserialize(const nlohmann::json& j) {
+    if(j.contains("x")) x = j["x"];
+    if(j.contains("y")) y = j["y"];
+    if(j.contains("z")) z = j["z"];
+}
+
+nlohmann::json coordinates::serialize() {
+    nlohmann::json j;
+    if(x != 0) j["x"] = x;
+    if(y != 0) j["y"] = y;
+    if(z != 0) j["z"] = z;
+    return j;
+}
+
+void coordinates::clear() {
+    x = 0;
+    y = 0;
+    z = 0;
+}
 
 extra_descr_data::extra_descr_data(const nlohmann::json& j) {
     deserialize(j);
@@ -31,6 +53,16 @@ nlohmann::json extra_descr_data::serialize() {
     if(!keyword.empty()) j["keyword"] = keyword;
     if(!description.empty()) j["description"] = description;
     return j;
+}
+
+
+std::string GameEntity::renderRoomListingFor(GameEntity *viewer) {
+    std::vector<std::string> results;
+    results.emplace_back(renderListPrefixFor(viewer));
+    results.emplace_back(renderRoomListingHelper(viewer));
+    results.emplace_back(renderModifiers(viewer));
+
+    return join(results, "@n ") + "@n";
 }
 
 std::vector<GameEntity*> GameEntity::getContents() {
@@ -517,96 +549,6 @@ std::vector<GameEntity*> GameEntity::getNeighborsFor(GameEntity *u, bool visible
     return out;
 }
 
-
-
-Searcher& Searcher::setAllowAll(bool allow) {
-    allowAll = allow;
-    return *this;
-}
-
-Searcher& Searcher::setAllowSelf(bool allow) {
-    allowSelf = allow;
-    return *this;
-}
-
-Searcher& Searcher::setAllowHere(bool allow) {
-    allowHere = allow;
-    return *this;
-} 
-
-Searcher& Searcher::setAllowRecurse(bool allow) {
-    allowRecurse = allow;
-    return *this;
-}
-
-Searcher& Searcher::setAllowAsterisk(bool allow) {
-    allowAsterisk = allow;
-    return *this;
-}
-
-
-std::vector<GameEntity*> Searcher::search() {
-    trim(args);
-    if(args.empty()) return {};
-    if(allowSelf && iequals(args, "self")) return {caller};
-    if(allowHere && iequals(args, "here")) return {caller->getLocation()};
-
-    auto candidates = doSearch();
-    
-    int counter = 0;
-    int prefix = 1;
-    bool allMode = false;
-    std::string targetName;
-    
-    // args might be formatted like "blah" or like "5.blah" or "all.blah".
-    // We need to split by the first . if it exists.
-    // Then we check if it's a number or all.
-
-    if(auto dot = args.find('.'); dot != std::string::npos) {
-        auto prefixStr = args.substr(0, dot);
-        if(iequals(prefixStr, "all")) {
-            allMode = allowAll;
-            if(!allMode) {
-                caller->sendLine("You are not allowed to use 'all' in this context.");
-                return {};
-            }
-        } else {
-            prefix = std::stoi(prefixStr);
-        }
-        targetName = args.substr(dot+1);
-    } else {
-        targetName = args;
-    }
-
-    if(allowAsterisk && iequals(targetName, "*")) {
-        return candidates;
-    }
-
-    for(auto c : candidates) {
-        auto keywords = c->getKeywords(caller);
-
-        for(auto k : keywords) {
-            if(iequals(k, targetName)) {
-                if(counter == prefix) {
-                    return {c};
-                }
-                counter++;
-                break;
-            }
-        }
-
-    }
-
-    return {};
-}
-
-GameEntity* Searcher::getOne() {
-    auto results = search();
-    if(results.size() == 1) return results.front();
-    return nullptr;
-}
-
-
 bool GameEntity::isEnvironment() {
     return false;
 }
@@ -821,40 +763,6 @@ vnum GameEntity::getVN() {
 
 zone_vnum GameEntity::getZone() {
     return zone;
-}
-
-
-coordinates::coordinates(const nlohmann::json& j) {
-    deserialize(j);
-}
-
-void coordinates::deserialize(const nlohmann::json& j) {
-    if(j.contains("x")) x = j["x"];
-    if(j.contains("y")) y = j["y"];
-    if(j.contains("z")) z = j["z"];
-}
-
-nlohmann::json coordinates::serialize() {
-    nlohmann::json j;
-    if(x != 0) j["x"] = x;
-    if(y != 0) j["y"] = y;
-    if(z != 0) j["z"] = z;
-    return j;
-}
-
-void coordinates::clear() {
-    x = 0;
-    y = 0;
-    z = 0;
-
-}
-
-void Messager::addVar(const std::string& key, MsgVar value) {
-    variables[key] = value;
-}
-
-void Messager::deliver() {
-
 }
 
 void GameEntity::lookAtLocation() {

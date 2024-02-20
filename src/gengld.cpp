@@ -17,7 +17,7 @@
 /*-------------------------------------------------------------------*/
 
 void copy_guild(struct Guild *tgm, struct Guild *fgm) {
-    *tgm = *fgm;
+
 }
 
 /*-------------------------------------------------------------------*/
@@ -35,35 +35,13 @@ guild_rnum real_guild(guild_vnum vnum) {
 /*. Generic string modifyer for guild master messages . */
 
 void gedit_modify_string(std::string &str, char *new_g) {
-    char *pointer;
-    char buf[MAX_STRING_LENGTH];
 
-    /*. Check the '%s' is present, if not, add it . */
-    if (*new_g != '%') {
-        snprintf(buf, sizeof(buf), "%%s %s", new_g);
-        pointer = buf;
-    } else
-        pointer = new_g;
-
-    str = pointer;
 }
 
 /*-------------------------------------------------------------------*/
 
 int add_guild(struct Guild *ngld) {
-    guild_rnum rguild = G_NUM(ngld);
-    zone_rnum rznum = real_zone_by_thing(rguild);
-    auto exists = guild_index.contains(rguild);
-    auto &g = guild_index[rguild];
 
-    auto &z = zone_table[rznum];
-    z.guilds.insert(rguild);
-
-    if(!exists) mudlog(BRF, ADMLVL_BUILDER, true, "SYSERR: GenOLC: Creating new guild.");
-
-    copy_guild(&g, ngld);
-
-    return rguild;
 }
 
 /*-------------------------------------------------------------------*/
