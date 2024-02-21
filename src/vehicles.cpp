@@ -517,7 +517,7 @@ ACMD(do_drive) {
         ch->sendf("@wYou can't see anything but stars!\r\n");
     } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
         ch->sendf("@wYou can't see a damned thing, you're blind!\r\n");
-    } else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch)) {
+    } else if (ch->getRoom()->isInsideDark(ch) && !CAN_SEE_IN_DARK(ch)) {
         ch->sendf("@wIt is pitch black...\r\n");
     } else if (!(controls = find_control(ch))) {
         ch->sendf("@wYou have nothing to control here!\r\n");

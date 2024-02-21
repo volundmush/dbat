@@ -423,6 +423,10 @@ int64_t Shop::sellPrice(Object *obj, NonPlayerCharacter *keeper, BaseCharacter *
     }
 }
 
+Object* Shop::getPurchaseObject(BaseCharacter *ch, const std::string& arguments, NonPlayerCharacter *keeper, bool msg) {
+    return nullptr;
+}
+
 void Shop::executeAppraise(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     Object *obj;
     int i, found = false;

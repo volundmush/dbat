@@ -464,7 +464,7 @@ std::string Room::renderExits1(GameEntity *viewer) {
                     *blam = toupper(*blam);
 
                     sprintf(dl, "@c%-9s @D-@w %s\r\n", blam,
-                            IS_DARK(dest->getUID()) && !nightvision && !has_light
+                            dest->isInsideDark(viewer) && !nightvision && !has_light
                             ? "@bToo dark to tell.@w" : dest->getDisplayName(viewer).c_str());
 
                 } else if (CONFIG_DISP_CLOSED_DOORS && !d->checkFlag(FlagType::Exit, EX_SECRET)) {

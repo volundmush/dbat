@@ -1760,7 +1760,7 @@ ACMD(do_exits) {
     }
 
     if(!ch->canSeeInDark()) {
-        if(loc->isInsideDark()) {
+        if(loc->isInsideDark(ch)) {
             ch->sendf("It is pitch black...\r\n");
             return;
         }
@@ -3249,18 +3249,6 @@ static void bonus_status(BaseCharacter *ch) {
     return;
 }
 
-std::string GameEntity::renderInventory(GameEntity* viewer) {
-    std::vector<std::string> lines;
-
-    for(auto i : getInventory()) {
-        if(!viewer->canSee(i)) continue;
-        lines.push_back(i->renderInventoryListingFor(viewer));
-    }
-
-    return join(lines, "@w\r\n");
-
-}
-
 ACMD(do_inventory) {
     ch->sendf("@w              @YInventory\r\n@D-------------------------------------@w\r\n");
     if (PLR_FLAGGED(ch, PLR_STOLEN)) {
@@ -4709,7 +4697,7 @@ ACMD(do_scan) {
         return;
     }
 
-    auto darkHere = room->isInsideDark();
+    auto darkHere = room->isInsideDark(ch);
 
     for (auto &[i, d] : room->getExits()) {
         if(i > 10) break;
@@ -4751,7 +4739,7 @@ ACMD(do_scan) {
         if(!dest2) continue;
         if(d2->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
 
-        if (!IS_DARK(dest2->getUID())) {
+        if (!dest2->isInsideDark(ch)) {
             ch->sendf("@w-----------------------------------------@n\r\n");
             ch->sendf("          %sFar %s: %s %s\r\n", CCCYN(ch, C_NRM), dirnames[i],
                          withPlaceholder(dest2->getDisplayName(ch), "You don't think you saw what you just saw."),

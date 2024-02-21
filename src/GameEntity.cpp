@@ -351,6 +351,46 @@ std::string GameEntity::renderAppearance(GameEntity* ch) {
     return "You see nothing special.";
 }
 
+std::string GameEntity::renderLocationFor(GameEntity* viewer) {
+    return "";
+}
+
+std::string GameEntity::renderListingFor(GameEntity* viewer) {
+    return "";
+}
+
+std::string GameEntity::renderInventoryListingFor(GameEntity* viewer) {
+    return "";
+}
+
+std::string GameEntity::renderInventoryListingHelper(GameEntity* viewer) {
+    return "";
+}
+
+std::string GameEntity::renderModifiers(GameEntity* viewer) {
+    return "";
+}
+
+std::string GameEntity::renderDiagnostics(GameEntity* viewer) {
+    return "";
+}
+
+std::map<int, Destination> GameEntity::getDestinations(GameEntity* viewer) {
+    return {};
+}
+
+
+
+std::string GameEntity::renderInventory(GameEntity* viewer) {
+    std::vector<std::string> lines;
+
+    for(auto obj : getInventory()) {
+        if(viewer->canSee(obj)) lines.push_back(obj->renderListingFor(viewer));
+    }
+
+    return join(lines, "@n\r\n");
+}
+
 std::string GameEntity::renderRoomListingHelper(GameEntity* viewer) {
     return getRoomDesc();
 }
@@ -807,4 +847,28 @@ std::vector<std::pair<std::string, Destination>> GameEntity::getLandingSpotsFor(
 
 std::optional<Destination> GameEntity::getLaunchDestinationFor(GameEntity *mover) {
     return {};
+}
+
+bool GameEntity::moveInDirection(int direction, bool need_specials_check) {
+    return false;
+}
+
+bool GameEntity::doSimpleMove(int direction, bool need_specials_check) {
+    return false;
+}
+
+bool GameEntity::checkCanLeave(GameEntity *mover, const Destination& dest, bool need_specials_check) {
+    return false;
+}
+
+bool GameEntity::checkCanReachDestination(GameEntity *mover, const Destination& dest) {
+    return false;
+}
+
+bool GameEntity::checkPostEnter(GameEntity *mover, const Location& cameFrom, const Destination& dest) {
+    return false;
+}
+
+Location GameEntity::getLocationInfo() {
+    return {location, locationType, coords};
 }

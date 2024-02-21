@@ -177,7 +177,7 @@ void greet_memory_mtrigger(BaseCharacter *actor)
                 continue;
             if (mem->cmd)
             {
-                command_interpreter(ch, mem->cmd); /* no script */
+                ch->executeCommand(mem->cmd); /* no script */
                 command_performed = 1;
                 break;
             }
@@ -273,7 +273,7 @@ void entry_memory_mtrigger(BaseCharacter *ch)
                 if (((actor)->getUID()) == mem->id) {
                     struct script_memory *prev;
                     if (mem->cmd)
-                        command_interpreter(ch, mem->cmd);
+                        ch->executeCommand(mem->cmd);
                     else
                     {
                         for (auto t : ch->script->dgScripts)

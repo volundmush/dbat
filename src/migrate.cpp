@@ -167,11 +167,11 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             snprintf(buf2, sizeof(buf2), "GM #%d in GM file %s", temp, filename);
             free(buf);        /* Plug memory leak! */
             top_guild = temp;
-            auto &g = guild_index[temp];
+            auto g = std::make_shared<Guild>();
+            guild_index[temp] = g;
+            g->vnum = temp;
             auto &z = zone_table[real_zone_by_thing(temp)];
             z.guilds.insert(temp);
-
-            GM_NUM(top_guild) = temp;
 
             get_line(gm_f, buf3);
             rv = sscanf(buf3, "%d %d", &t1, &t2);
@@ -2020,13 +2020,7 @@ static int load_char(const char *name, BaseCharacter *ch) {
                         sscanf(line, "%d %d", &num2, &num3);
                         //GET_TRANSCOST(ch, num2) = num3;
                     } else if (!strcmp(tag, "Thir")) GET_COND(ch, THIRST) = atoi(line);
-                    else if (!strcmp(tag, "Thr1")) GET_SAVE_MOD(ch, 0) = atoi(line);
-                    else if (!strcmp(tag, "Thr2")) GET_SAVE_MOD(ch, 1) = atoi(line);
-                    else if (!strcmp(tag, "Thr3")) GET_SAVE_MOD(ch, 2) = atoi(line);
                     else if (!strcmp(tag, "Thr4") || !strcmp(tag, "Thr5")); /* Discard extra saves */
-                    else if (!strcmp(tag, "ThB1")) GET_SAVE_BASE(ch, 0) = atoi(line);
-                    else if (!strcmp(tag, "ThB2")) GET_SAVE_BASE(ch, 1) = atoi(line);
-                    else if (!strcmp(tag, "ThB3")) GET_SAVE_BASE(ch, 2) = atoi(line);
                     else if (!strcmp(tag, "Trag")) ch->set(CharTrain::Agility, atoi(line));
                     else if (!strcmp(tag, "Trco")) ch->set(CharTrain::Constitution, atoi(line));
                     else if (!strcmp(tag, "Trin")) ch->set(CharTrain::Intelligence, atoi(line));
@@ -2829,7 +2823,8 @@ void migrate_grid() {
 
         for(auto &[rflag, a] : planetMap) {
             if(auto loc = room->getLocation(); loc) {
-                if(room->checkFlag(FlagType::Room, rflag)) {
+                if(!loc->getLocation() && room->checkFlag(FlagType::Room, rflag)) {
+                    basic_mud_log("Deducing Area: %s to Planet: %s", loc->getName().c_str(), a->getName().c_str());
                     loc->addToLocation(a);
                     break;
                 }
@@ -3108,7 +3103,6 @@ void migrate_grid() {
 
     AreaDef shmaze;
     shmaze.name = "Shadow Maze";
-    shmaze.type = ITEM_REGION;
     shmaze.location = chieftains_house;
     shmaze.roomRanges.emplace_back(19400, 19499);
     auto shadow_maze = assembleArea(shmaze);

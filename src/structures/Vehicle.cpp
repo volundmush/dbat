@@ -1,16 +1,18 @@
 #include "dbat/structs.h"
 
+Vehicle::Vehicle(const nlohmann::json& j) {
+    deserialize(j);
+}
 
-std::string Vehicle::renderAppearanceHelper(GameEntity* viewer) {
-    std::string result;
-
-    result += fmt::sprintf("It looks like a vehicle.\r\n");
-    result += fmt::sprintf("@YSyntax@D: @CUnlock hatch\r\n");
-    result += fmt::sprintf("@YSyntax@D: @COpen hatch\r\n");
-    result += fmt::sprintf("@YSyntax@D: @CClose hatch\r\n");
-    result += fmt::sprintf("@YSyntax@D: @CEnter hatch\r\n");
+std::string Vehicle::getUnitClass() {
+    return "Vehicle";
+}
 
 
-    return result;
+void Vehicle::executeCommand(const std::string& command) {
+
+}
+
+void Vehicle::sendText(const std::string& text) {
 
 }

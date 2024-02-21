@@ -360,16 +360,13 @@ extern ACMD(do_reboot);
 
 /* create an object, and add it to the object list */
 template <typename T = Object>
-T *create_obj(bool activate = true) {
+T *create_obj() {
     auto obj = new T();
     obj->script = std::make_shared<script_data>(obj);
     obj->ent = reg.create();
-    if(activate) {
-        obj->uid = getNextUID();
-        obj->checkMyID();
-        setWorld(obj->getUID(), obj);
-        obj->activate();
-    }
+    obj->uid = getNextUID();
+    obj->checkMyID();
+    setWorld(obj->getUID(), obj);
 
     return (obj);
 }

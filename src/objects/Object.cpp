@@ -565,6 +565,10 @@ std::string Object::renderInventoryListingHelper(GameEntity* viewer) {
     return result;
 }
 
+std::string Object::renderAppearanceHelper(GameEntity *viewer) {
+    return "";
+}
+
 std::string Object::renderAppearance(GameEntity* viewer) {
     std::string result = renderAppearanceHelper(viewer);
 

@@ -398,6 +398,7 @@ enum class UnitFamily : uint8_t {
     Object = 1,
     Room = 2,
     Exit = 3,
+    Structure = 4
 };
 
 struct coordinates {
@@ -796,7 +797,6 @@ struct Object : public GameEntity {
     void deserialize(const nlohmann::json& j) override;
 
     std::string renderRoomListingHelper(GameEntity* u) override;
-    std::string renderListPrefixFor(GameEntity* viewer) override;
     std::string renderModifiers(GameEntity* viewer);
 
     std::string renderInventoryListingHelper(GameEntity* viewer) override;
@@ -1000,7 +1000,6 @@ struct Vehicle : public Structure {
     explicit Vehicle(const nlohmann::json &j);
 
     std::string getUnitClass() override;
-    std::string renderAppearance(GameEntity* u) override;
 
     void sendText(const std::string& text) override;
 
@@ -1014,7 +1013,6 @@ struct Planet : public Structure {
     explicit Planet(const nlohmann::json &j);
 
     std::string getUnitClass() override;
-    std::string renderAppearance(GameEntity* u) override;
 };
 
 // Used for things like space stations, large buildings, possibly elaborate dungeons.
@@ -1023,7 +1021,6 @@ struct Building : public Structure {
     explicit Building(const nlohmann::json &j);
 
     std::string getUnitClass() override;
-    std::string renderAppearance(GameEntity* u) override;
 };
 
 // Used for regions - usually wilderness areas like forests, plains, deserts, mountaintops, etc.
@@ -1032,7 +1029,6 @@ struct Region : public Structure {
     explicit Region(const nlohmann::json &j);
 
     std::string getUnitClass() override;
-    std::string renderAppearance(GameEntity* u) override;
 };
 
 struct Dimension : public Structure {
@@ -1040,7 +1036,6 @@ struct Dimension : public Structure {
     explicit Dimension(const nlohmann::json &j);
 
     std::string getUnitClass() override;
-    std::string renderAppearance(GameEntity* u) override;
 };
 
 
@@ -1049,7 +1044,6 @@ struct Interstellar : public Structure {
     explicit Interstellar(const nlohmann::json &j);
 
     std::string getUnitClass() override;
-    std::string renderAppearance(GameEntity* u) override;
 };
 
 struct Stellar : public Structure {
@@ -1057,7 +1051,6 @@ struct Stellar : public Structure {
     explicit Stellar(const nlohmann::json &j);
 
     std::string getUnitClass() override;
-    std::string renderAppearance(GameEntity* u) override;
 };
 
 

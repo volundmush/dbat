@@ -34,8 +34,6 @@ extern void fingerUser(BaseCharacter *ch, std::shared_ptr<account_data> acc);
 
 extern int readUserIndex(char *name);
 
-extern void command_interpreter(BaseCharacter *ch, char *argument);
-
 extern int search_block(char *arg, const char **list, int exact);
 
 extern char lower(char c);

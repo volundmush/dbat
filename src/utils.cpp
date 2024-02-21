@@ -2890,10 +2890,6 @@ int cook_element(room_rnum room) {
     return found;
 }
 
-bool room_is_dark(room_vnum room) {
-    if(auto r = getWorld<Room>(room); r) return r->isInsideDark();
-    return false;
-}
 
 // A C++ version of proc_color from comm.c. it returns the colored string.
 std::string processColors(const std::string &txt, int parse, char **choices) {

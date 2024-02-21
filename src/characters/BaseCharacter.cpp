@@ -407,16 +407,6 @@ void BaseCharacter::deserialize(const nlohmann::json &j) {
     if(j.contains("suppression")) suppression = j["suppression"];
     if(j.contains("tail_growth")) tail_growth = j["tail_growth"];
 
-    if(j.contains("saving_throw")) {
-        for(auto t : j["saving_throw"]) {
-            saving_throw[t[0].get<int>()] = t[1];
-        }
-    }
-    if(j.contains("apply_saving_throw")) {
-        for(auto t : j["apply_saving_throw"]) {
-            apply_saving_throw[t[0].get<int>()] = t[1];
-        }
-    }
     if(j.contains("upgrade")) upgrade = j["upgrade"];
     if(j.contains("voice")) voice = strdup(j["voice"].get<std::string>().c_str());
     if(j.contains("wimp_level")) wimp_level = j["wimp_level"];
@@ -896,9 +886,8 @@ DgResults BaseCharacter::dgCallMember(trig_data *trig, const std::string& member
     if(auto save = _save_names.find(lmember); save != _save_names.end()) {
         if (!arg.empty()) {
             int addition = atof(arg.c_str());
-            GET_SAVE_MOD(this, save->second) += addition;
         }
-        return fmt::format("{}", GET_SAVE_MOD(this, save->second));
+        return "";
     }
 
     if(auto pf = _pflags.find(lmember); pf != _pflags.end()) {

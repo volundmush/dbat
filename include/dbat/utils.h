@@ -152,8 +152,6 @@ extern int num_pc_in_room(Room *room);
 
 extern void core_dump_real(const char *who, int line);
 
-extern bool room_is_dark(room_rnum room);
-
 extern int count_color_chars(char *string);
 
 extern bool is_sparring(BaseCharacter *ch);
@@ -454,9 +452,6 @@ extern double ROOM_GRAVITY(room_vnum room);
 
 #define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
 
-#define IS_DARK(room)    room_is_dark((room))
-#define IS_LIGHT(room)  (!IS_DARK(room))
-
 #define GET_ROOM_VNUM(rnum) (rnum)
 extern SpecialFunc GET_ROOM_SPEC(room_rnum rnum);
 
@@ -632,8 +627,6 @@ extern int GET_SPEEDI(BaseCharacter *ch);
 #define FIGHTING(ch)        ((ch)->fighting)
 #define GET_POWERATTACK(ch)    ((ch)->powerattack)
 #define GET_GROUPKILLS(ch)    ((ch)->get(CharNum::GroupKills))
-#define GET_SAVE_BASE(ch, i)    ((ch)->saving_throw[i])
-#define GET_SAVE_MOD(ch, i)    ((ch)->apply_saving_throw[i])
 #define GET_SAVE(ch, i)        (GET_SAVE_BASE(ch, i) + GET_SAVE_MOD(ch, i))
 #define GET_ALIGNMENT(ch)    ((ch)->get(CharAlign::GoodEvil))
 #define GET_ETHIC_ALIGNMENT(ch)    ((ch)->get(CharAlign::LawChaos))

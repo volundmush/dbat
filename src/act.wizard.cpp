@@ -1642,9 +1642,8 @@ static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
     ch->sendf("Coins: [%9d], Bank: [%9d] (Total: %d)\r\n",
                  GET_GOLD(k), GET_BANK_GOLD(k), GET_GOLD(k) + GET_BANK_GOLD(k));
 
-    ch->sendf("Armor: [%d ], Damage: [%2d], Saving throws: [%d/%d/%d]\r\n",
-                 GET_ARMOR(k), GET_DAMAGE_MOD(k), GET_SAVE_MOD(k, 0),
-                 GET_SAVE_MOD(k, 1), GET_SAVE_MOD(k, 2));
+    ch->sendf("Armor: [%d ], Damage: [%2d]\r\n",
+                 GET_ARMOR(k), GET_DAMAGE_MOD(k));
 
     sprinttype(GET_POS(k), position_types, buf, sizeof(buf));
     ch->sendf("Pos: %s, Fighting: %s", buf, FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
