@@ -1,4 +1,5 @@
 #include "dbat/structs.h"
+#include "dbat/utils.h"
 
 Structure::Structure(const nlohmann::json& j) {
     deserialize(j);
@@ -33,8 +34,8 @@ bool Structure::isStructure() {
 }
 
 void Structure::handleRemove(GameEntity *u) {
-    
     GameEntity::handleRemove(u);
+    handleRemoveFromCoordinates(u, u->coords);
 }
 
 void Structure::handleAdd(GameEntity *u) {
@@ -42,16 +43,64 @@ void Structure::handleAdd(GameEntity *u) {
     GameEntity::handleAdd(u);
 }
 
+void Structure::handleRemoveFromCoordinates(GameEntity *mover, const coordinates& c) {
+    auto &con = reg.get_or_emplace<CoordinateContents>(ent);
+    if(auto found = con.coordinateContents.find(c); found != con.coordinateContents.end()) {
+        auto &c = found->second;
+        // erase mover from c...
+        std::erase_if(c, [mover](auto& p) { return p == mover; });
+        if(c.empty())
+            con.coordinateContents.erase(found);
+    }
+}
+
 void Structure::updateCoordinates(GameEntity *mover, std::optional<coordinates> previous) {
-        
-    GameEntity::updateCoordinates(mover, previous);
+    if(previous) {
+        handleRemoveFromCoordinates(mover, previous.value());
+    }
+    auto &con = reg.get_or_emplace<CoordinateContents>(ent);
+    con.coordinateContents[mover->coords].push_back(mover);
 }
 
 std::vector<std::pair<std::string, Destination>> Structure::getLandingSpotsFor(GameEntity *mover) {
-    return {};
+    std::vector<std::pair<std::string, Destination>> ret;
+
+    switch(type) {
+        case StructureType::Rooms:
+        // this one entails a recursive search through all contained Rooms and Regions.
+        for(auto o : getContents()) {
+            if(auto r = dynamic_cast<Room*>(o)) {
+                if(r->checkFlag(FlagType::Room, ROOM_LANDING)) {
+                    ret.push_back({r->getName(), Destination{r}});
+                }
+            } else if(auto r = dynamic_cast<Region*>(o)) {
+                auto res = r->getLandingSpotsFor(mover);
+                ret.insert(ret.end(), res.begin(), res.end());
+            }
+        }
+        break;
+        case StructureType::Grid3D: {
+            if(auto tiles = reg.try_get<Grid3D>(ent); tiles) {
+                for(auto& [k, v] : tiles->tiles) {
+                    if(v.flags.contains(ROOM_LANDING)) {
+                        Destination dest;
+                        dest.target = this;
+                        dest.coords = k;
+                        ret.push_back({withPlaceholder(v.name, getDisplayName(mover)), dest});
+                    }
+                }
+            }
+        }
+        break;
+        case StructureType::Space3D:
+        break;
+    }
+    return ret;
 }
 
 std::optional<Destination> Structure::getLaunchDestinationFor(GameEntity *mover) {
+    auto loc = getLocationInfo();
+    if(loc.location) return Destination(loc);
     return {};
 }
 

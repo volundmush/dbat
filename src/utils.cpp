@@ -3283,11 +3283,11 @@ bool PLANET_FLAGGED(BaseCharacter *ch, int flag) {
 }
 
 bool ETHER_STREAM(BaseCharacter *ch) {
-    return PLANET_FLAGGED(ch, AREA_ETHER);
+    return false;
 }
 
 bool HAS_MOON(BaseCharacter *ch) {
-    return PLANET_FLAGGED(ch, AREA_MOON);
+    return false;
 }
 
 int GET_SPEEDI(BaseCharacter *ch) {
@@ -3518,4 +3518,16 @@ Object *GET_EQ(GameEntity *u, int i) {
 
 std::string withPlaceholder(const std::string& orig, const std::string& placeholder) {
     return orig.empty() ? placeholder : orig;
+}
+
+const char *PERS(GameEntity *ch, GameEntity *vict) {
+    static char buf[MAX_STRING_LENGTH];
+    sprintf(buf, "%s", ch->getDisplayName(vict).c_str());
+    return buf;
+}
+
+const char *OBJS(GameEntity *obj, GameEntity *vict) {
+    static char buf[MAX_STRING_LENGTH];
+    sprintf(buf, "%s", vict->canSee(obj) ? obj->getDisplayName(vict).c_str() : "something");
+    return buf;
 }

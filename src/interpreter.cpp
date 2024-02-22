@@ -103,7 +103,7 @@ void BaseCharacter::executeCommand(const std::string &input) {
     std::string complete = input;
     trim(complete);
 
-    if (!complete.empty())
+    if (complete.empty())
         return;
     auto args = split(complete, ' ');
     std::string command = args[0];

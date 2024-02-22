@@ -609,3 +609,83 @@ std::string Object::renderDiagnostics(GameEntity *viewer) {
 
     return fmt::sprintf("\r\n%c%s %s\r\n", UPPER(objs[0]), objs.substr(1), diagnosis[ar_index].text);
 }
+
+std::string Object::renderModifiers(GameEntity *viewer) {
+    std::string result;
+
+    if (OBJ_FLAGGED(this, ITEM_INVISIBLE)) {
+        result += fmt::sprintf(" (invisible)");
+    }
+    if (OBJ_FLAGGED(this, ITEM_BLESS) && viewer->checkFlag(FlagType::Affect, AFF_DETECT_ALIGN)) {
+        result += fmt::sprintf(" ..It glows blue!");
+    }
+    if (OBJ_FLAGGED(this, ITEM_MAGIC) && viewer->checkFlag(FlagType::Affect, AFF_DETECT_MAGIC)) {
+        result += fmt::sprintf(" ..It glows yellow!");
+    }
+    if (OBJ_FLAGGED(this, ITEM_GLOW)) {
+        result += fmt::sprintf(" @D(@GGlowing@D)@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_HOT)) {
+        result += fmt::sprintf(" @D(@RHOT@D)@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_HUM)) {
+        result += fmt::sprintf(" @D(@RHumming@D)@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_SLOT2)) {
+        if (OBJ_FLAGGED(this, ITEM_SLOT_ONE) && !OBJ_FLAGGED(this, ITEM_SLOTS_FILLED))
+            result += fmt::sprintf(" @D[@m1/2 Tokens@D]@n");
+        else if (OBJ_FLAGGED(this, ITEM_SLOTS_FILLED))
+            result += fmt::sprintf(" @D[@m2/2 Tokens@D]@n");
+        else
+            result += fmt::sprintf(" @D[@m0/2 Tokens@D]@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_SLOT1)) {
+        if (OBJ_FLAGGED(this, ITEM_SLOTS_FILLED))
+            result += fmt::sprintf(" @D[@m1/1 Tokens@D]@n");
+        else
+            result += fmt::sprintf(" @D[@m0/1 Tokens@D]@n");
+    }
+    if (KICHARGE(this) > 0) {
+        int num = (KIDIST(this) * 20) + rand_number(1, 5);
+        result += fmt::sprintf(" %d meters away", num);
+    }
+    if (OBJ_FLAGGED(this, ITEM_CUSTOM)) {
+        result += fmt::sprintf(" @D(@YCUSTOM@D)@n");
+    }
+    if (OBJ_FLAGGED(this, ITEM_RESTRING)) {
+        //result += fmt::sprintf(" @D(@R%s@D)@n", GET_ADMLEVEL(ch) > 0 ? !obj->getName().empty() : "*");
+    }
+    if (OBJ_FLAGGED(this, ITEM_BROKEN)) {
+        if (GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_STEEL ||
+            GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_MITHRIL ||
+            GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_METAL) {
+            result += fmt::sprintf(", and appears to be twisted and broken.");
+        } else if (GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_WOOD) {
+            result += fmt::sprintf(", and is broken into hundreds of splinters.");
+        } else if (GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_GLASS) {
+            result += fmt::sprintf(", and is shattered on the ground.");
+        } else if (GET_OBJ_VAL(this, VAL_ALL_MATERIAL) == MATERIAL_STONE) {
+            result += fmt::sprintf(", and is a pile of rubble.");
+        } else {
+            result += fmt::sprintf(", and is broken.");
+        }
+    } else {
+        if (GET_OBJ_TYPE(this) != ITEM_BOARD) {
+            if (GET_OBJ_TYPE(this) != ITEM_CONTAINER) {
+                result += fmt::sprintf(".");
+            }
+            if (auto obj2 = GET_OBJ_POSTED(this); obj2 && GET_OBJ_POSTTYPE(this) <= 0) {
+                auto dvnum = viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS) ? fmt::sprintf("@D[@G%d@D]@w ", GET_OBJ_VNUM(obj2)) : "";
+                result += fmt::sprintf("\n...%s%s has been posted to it.", dvnum, obj2->getShortDesc());
+            }
+        }
+    }
+    return result;
+}
+
+std::string Object::renderRoomListingFor(GameEntity *viewer) {
+    std::vector<std::string> results;
+    if(auto pref = renderListPrefixFor(viewer); !pref.empty()) results.push_back(pref);
+    if(auto helper = renderRoomListingHelper(viewer); !helper.empty()) results.push_back(helper);
+    return join(results, "@n ") + renderModifiers(viewer);
+}

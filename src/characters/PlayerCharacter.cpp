@@ -78,7 +78,10 @@ std::string PlayerCharacter::renderRoomListName(GameEntity* viewer) {
     }
 
     std::string result;
-    if (GET_DISTFEA(this) == DISTFEA_HAIR) {
+    if (GET_DISTFEA(this) == DISTFEA_EYE) {
+         result += fmt::sprintf("@wA %s eyed %s %s", eye_types[(int) GET_EYE(this)], MAFE(this), LRACE(this));
+    }
+    else if (GET_DISTFEA(this) == DISTFEA_HAIR) {
         if (IS_MAJIN(this)) {
             result += fmt::sprintf("@wA %s majin, with a %s forelock,", MAFE(this), FHA_types[(int) GET_HAIRL(this)]);
         } else if (IS_NAMEK(this)) {

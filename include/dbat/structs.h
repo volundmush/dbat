@@ -410,13 +410,24 @@ struct coordinates {
     void clear();
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
-    bool operator==(const coordinates& rhs);
+    bool operator==(const coordinates& rhs) const;
 };
 
 namespace std {
     template<>
     struct hash<coordinates> {
         size_t operator()(const coordinates& coord) const noexcept {
+            // A simple yet effective hash combining technique
+            std::hash<double> hasher;
+            size_t h1 = hasher(coord.x);
+            size_t h2 = hasher(coord.y);
+            size_t h3 = hasher(coord.z);
+
+            // Combine the hash values
+            return h1 ^ (h2 << 1) ^ (h3 << 2); // Shift and XOR for simple mixing
+        }
+
+        size_t operator()(coordinates& coord) const noexcept {
             // A simple yet effective hash combining technique
             std::hash<double> hasher;
             size_t h1 = hasher(coord.x);
@@ -796,6 +807,7 @@ struct Object : public GameEntity {
     void deserializeRelations(const nlohmann::json& j) override;
     void deserialize(const nlohmann::json& j) override;
 
+    std::string renderRoomListingFor(GameEntity* viewer) override;
     std::string renderRoomListingHelper(GameEntity* u) override;
     std::string renderModifiers(GameEntity* viewer);
 
@@ -992,6 +1004,8 @@ struct Structure : public GameEntity {
     std::optional<Destination> getLaunchDestinationFor(GameEntity *mover) override;
 
     StructureType type{StructureType::Rooms};
+
+    void handleRemoveFromCoordinates(GameEntity *mover, const coordinates &coor);
 };
 
 // Vehicles. Spaceships, boats, submarines, fighter jets, cars, buses...

@@ -863,12 +863,8 @@ extern Object* GET_EQ(GameEntity* u, int i);
 
 #define ISWIZ(ch, vict) ((ch) == (vict) || GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(vict) > 0 || IS_NPC(vict) || IS_NPC(ch))
 
-#define PERS(ch, vict) ((DISG(ch, vict) ? (CAN_SEE(vict, ch) ? (INTROD(vict, ch) ? (ISWIZ(ch, vict) ? GET_NAME(ch) :\
-                        get_i_name(vict, ch)) : introd_calc(ch)) : "Someone") :\
-                        race::getName((ch)->race).c_str()))
-
-#define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-    (obj)->getShortDesc().c_str()  : "something")
+const char *PERS(GameEntity *ch, GameEntity *vict);
+const char *OBJS(GameEntity *obj, GameEntity *vict);
 
 #define OBJN(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
     fname((obj)->getName().c_str()) : "something")

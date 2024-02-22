@@ -315,6 +315,24 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
             u = new Exit(data);
         } else if(unitClass == "Structure") {
             u = new Structure(data);
+        } else if(unitClass == "Vehicle") {
+            u = new Vehicle(data);
+        } else if(unitClass == "Stellar") {
+            u = new Stellar(data);
+        } else if(unitClass == "Region") {
+            u = new Region(data);
+        } else if(unitClass == "Dimension") {
+            u = new Dimension(data);
+        } else if(unitClass == "Building") {
+            u = new Building(data);
+        } else if(unitClass == "Planet") {
+            u = new Planet(data);
+        } else if(unitClass == "Interstellar") {
+            u = new Interstellar(data);
+        }
+        else {
+            basic_mud_log("Unknown unit class %s", unitClass.c_str());
+            shutdown_game(EXIT_FAILURE);
         }
         u->script = std::make_shared<script_data>(u);
 

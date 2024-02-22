@@ -3,7 +3,7 @@
 #include "dbat/utils.h"
 #include "dbat/constants.h"
 
-bool coordinates::operator==(const coordinates& rhs) {
+bool coordinates::operator==(const coordinates& rhs) const {
     return x == rhs.x && y == rhs.y && z == rhs.z;
 }
 
@@ -58,11 +58,11 @@ nlohmann::json extra_descr_data::serialize() {
 
 std::string GameEntity::renderRoomListingFor(GameEntity *viewer) {
     std::vector<std::string> results;
-    results.emplace_back(renderListPrefixFor(viewer));
-    results.emplace_back(renderRoomListingHelper(viewer));
-    results.emplace_back(renderModifiers(viewer));
+    if(auto pref = renderListPrefixFor(viewer); !pref.empty()) results.push_back(pref);
+    if(auto helper = renderRoomListingHelper(viewer); !helper.empty()) results.push_back(helper);
+    if(auto modif = renderModifiers(viewer); !modif.empty()) results.emplace_back(modif);
 
-    return join(results, "@n ") + "@n";
+    return join(results, "@n ");
 }
 
 std::vector<GameEntity*> GameEntity::getContents() {
@@ -220,6 +220,16 @@ void GameEntity::deserialize(const nlohmann::json& j) {
         }
     }
 
+    if(j.contains("flags")) {
+        for(auto &f : j["flags"]) {
+            auto ftype = f[0].get<FlagType>();
+            auto &fset = flags[ftype];
+            for(auto i : f[1]) {
+                fset.insert(i.get<int>());
+            }
+        }
+    }
+
 }
 
 void GameEntity::activateContents() {
@@ -231,7 +241,7 @@ void GameEntity::deactivateContents() {
 }
 
 std::string GameEntity::scriptString() {
-    return fmt::format("@D[@wT{}@D]@n", fmt::join(proto_script, ","));
+    return proto_script.empty() ? "" : fmt::format("@D[@wT{}@D]@n", fmt::join(proto_script, ","));
 }
 
 double GameEntity::getInventoryWeight() {
@@ -828,7 +838,7 @@ std::string GameEntity::renderListPrefixFor(GameEntity *viewer) {
     std::vector<std::string> sections;
 
     if (viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) {
-        sections.emplace_back(fmt::format("@D[@w{}@D]@n", getUIDString()));
+        sections.emplace_back(fmt::format("@W[@w{}@W]@n", getUIDString()));
         if(vn != NOTHING) {
             sections.emplace_back(fmt::format("@G[VN{}]@n", vn));
         }

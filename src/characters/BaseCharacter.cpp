@@ -18,6 +18,7 @@
 #include "dbat/constants.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/constants.h"
+#include "dbat/guild.h"
 
 
 nlohmann::json skill_data::serialize() {
@@ -2925,13 +2926,183 @@ std::string BaseCharacter::renderRoomListingHelper(GameEntity* viewer) {
 
 std::string BaseCharacter::renderRoomListingFor(GameEntity* viewer) {
     std::vector<std::string> results;
-    results.emplace_back(renderListPrefixFor(viewer));
+    if(viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) results.emplace_back(renderListPrefixFor(viewer));
     if(IS_MAJIN(this) && checkFlag(FlagType::Affect, AFF_LIQUEFIED)) {
-        results.emplace_back(fmt::sprintf("@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int)GET_SKIN(this)]));
+        results.emplace_back(fmt::sprintf("@wSeveral blobs of %s colored goo spread out here.", skin_types[(int)GET_SKIN(this)]));
+        return join(results, "@n ") + "@n";
     } else {
         results.emplace_back(renderRoomListingHelper(viewer));
-        results.emplace_back(renderStatusLines(viewer));
+        auto res = join(results, "@n ") + "@n";
+        results.clear();
+        results.emplace_back(res);
+        if(auto lines = renderStatusLines(viewer); !lines.empty()) {
+            results.emplace_back(lines);
+        }
+        return join(results, "@n\r\n");
     }
+}
+
+bool BaseCharacter::doSimpleMove(int direction, bool need_specials_check) {
+    char buf2[MAX_STRING_LENGTH];
+    char buf3[MAX_STRING_LENGTH];
+    auto was_in = getLocationInfo();
+    int need_movement;
+
+    auto destMaybe = was_in.location->getDestination(this, direction);
+    if(!destMaybe) {
+        sendf("Alas, you cannot go that way.\r\n");
+        return false;
+    }
+    auto &dest = destMaybe.value();
+
+    if (AFF_FLAGGED(this, AFF_CHARM) && master && was_in == master->getLocationInfo()) {
+        sendf("The thought of leaving your master makes you weep.\r\n");
+        act("$n bursts into tears.", false, this, nullptr, nullptr, TO_ROOM);
+        return false;
+    }
+
+    if(!was_in.location->checkCanLeave(this, dest, need_specials_check)) return false;
+
+    if(!dest.target->checkCanReachDestination(this, dest)) return false;
+
+    // We now know we can go into the room.
+
+    /*
+    if (!ADM_FLAGGED(ch, ADM_WALKANYWHERE) && !IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_FLYING)) {
+        ch->decCurST(need_movement);
+    }
+    */
+
+    if (AFF_FLAGGED(this, AFF_SNEAK) && !IS_NPC(this)) {
+        sprintf(buf2, "$n sneaks %s.", dirs[dest.direction]);
+        if (GET_SKILL(this, SKILL_MOVE_SILENTLY)) {
+            improve_skill(this, SKILL_MOVE_SILENTLY, 0);
+        } else if (slot_count(this) + 1 > GET_SLOTS(this)) {
+            sendf("@RYour skill slots are full. You can not learn Move Silently.\r\n");
+            clearFlag(FlagType::Affect,AFF_SNEAK);
+        } else {
+            sendf("@GYou learn the very basics of moving silently.@n\r\n");
+            SET_SKILL(this, SKILL_MOVE_SILENTLY, rand_number(5, 10));
+            act(buf2, true, this, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
+            if (GET_DEX(this) < rand_number(1, 30)) {
+                WAIT_STATE(this, PULSE_1SEC);
+            }
+        }
+    }
+
+    if (!AFF_FLAGGED(this, AFF_SNEAK) && !AFF_FLAGGED(this, AFF_FLYING)) {
+        sprintf(buf2, "$n leaves %s.", dirs[dest.direction]);
+        act(buf2, true, this, nullptr, nullptr, TO_ROOM);
+    }
+    if (!AFF_FLAGGED(this, AFF_SNEAK) && AFF_FLAGGED(this, AFF_FLYING)) {
+        sprintf(buf2, "$n flies %s.", dirs[dest.direction]);
+        act(buf2, true, this, nullptr, nullptr, TO_ROOM);
+    }
+
+
+    if (auto drag = DRAGGING(this); drag) {
+        act("@C$n@w drags @c$N@w with $m.@n", true, this, nullptr, drag, TO_ROOM);
+    }
+    if (auto carry = CARRYING(this); carry) {
+        act("@C$n@w carries @c$N@w with $m.@n", true, this, nullptr, carry, TO_ROOM);
+    }
+    setFlag(FlagType::Affect, AFF_PURSUIT);
+
+    if(dest.target != was_in.location) {
+        removeFromLocation();
+    }
+    addToLocation(dest);
+
+    if(!dest.target->checkPostEnter(this, was_in, dest))
+        return false;
+
+    return true;
+}
+
+bool BaseCharacter::moveInDirection(int direction, bool need_specials_check) {
+
+    if (GRAPPLING(this) || GRAPPLED(this)) {
+        sendf("You are grappling with someone!\r\n");
+        return false;
+    }
+
+    if (ABSORBING(this) || ABSORBBY(this)) {
+        sendf("You are struggling with someone!\r\n");
+        return false;
+    }
+
+    if (!AFF_FLAGGED(this, AFF_SNEAK) || (AFF_FLAGGED(this, AFF_SNEAK) && GET_SKILL(this, SKILL_MOVE_SILENTLY) < axion_dice(0))) {
+        reveal_hiding(this, 0);
+    }
+
+    auto loc = getLocation();
+    if(!loc) {
+        sendf("You are nowhere!\r\n");
+        return false;
+    }
+    auto destinations = loc->getDestinations(this);
+    auto found = destinations.find(direction);
+    if(found == destinations.end()) {
+        sendf("Alas, you cannot go that way...\r\n");
+        return false;
+    }
+
+    auto &dest = found->second;
+    if(auto ex = dest.via; ex) {
+        if (ex->checkFlag(FlagType::Exit, EX_CLOSED)) {
+            if(ex->checkFlag(FlagType::Exit, EX_SECRET)) {
+                sendf("Alas, you cannot go that way...\r\n");
+            }
+            
+            if (auto alias = ex->getAlias(); !alias.empty())
+                sendf("The %s seems to be closed.\r\n", alias);
+            else
+                sendf("It seems to be closed.\r\n");
+            return false;
+        }
+    }
+
+    for (auto wall : loc->getInventory()) {
+        if (GET_OBJ_VNUM(wall) == 79) {
+            if (GET_OBJ_COST(wall) == direction) {
+                sendf("That direction has a glacial wall blocking it.\r\n");
+                return false;
+            }
+        }
+    }
+
+    if (!followers)
+        return doSimpleMove(direction, need_specials_check);
+
+    auto was_in = getLocationInfo();
+
+    if (!doSimpleMove(direction, need_specials_check))
+        return false;
+
+    auto zanz = checkFlag(FlagType::Affect, AFF_ZANZOKEN);
+
+    for (auto k = followers; k; k = k->next) {
+        auto follower = k->follower;
+        auto folLoc = follower->getLocationInfo();
+        if(folLoc != was_in) continue;
+        if(GET_POS(follower) < POS_STANDING) continue;
+
+        if ((!zanz || (AFF_FLAGGED(this, AFF_GROUP) && AFF_FLAGGED(follower, AFF_GROUP)))) {
+            act("You follow $N.\r\n", false, follower, nullptr, this, TO_CHAR);
+            follower->moveInDirection(direction, 1);
+        } else if ((zanz && AFF_FLAGGED(follower, AFF_ZANZOKEN)) && (!AFF_FLAGGED(this, AFF_GROUP) || !AFF_FLAGGED(follower, AFF_GROUP))) {
+            act("$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, follower, nullptr, this, TO_CHAR);
+            act("$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, follower, nullptr, this, TO_NOTVICT);
+            act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, follower, nullptr, this, TO_VICT);
+            for(auto c : {this, follower}) c->clearFlag(FlagType::Affect,AFF_ZANZOKEN);
+            follower->moveInDirection(direction, 1);
+        } else if ((zanz && !AFF_FLAGGED(k->follower, AFF_ZANZOKEN))) {
+            act("You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr, this, TO_CHAR);
+            act("$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr, this, TO_NOTVICT);
+            act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, this, TO_VICT);
+            clearFlag(FlagType::Affect,AFF_ZANZOKEN);
+        }
+    }
+    return true;
     
-    return join(results, "@n ") + "@n";
 }
