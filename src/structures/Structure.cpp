@@ -43,7 +43,7 @@ void Structure::handleAdd(GameEntity *u) {
     GameEntity::handleAdd(u);
 }
 
-void Structure::handleRemoveFromCoordinates(GameEntity *mover, const coordinates& c) {
+void Structure::handleRemoveFromCoordinates(GameEntity *mover, const Coordinates& c) {
     auto &con = reg.get_or_emplace<CoordinateContents>(ent);
     if(auto found = con.coordinateContents.find(c); found != con.coordinateContents.end()) {
         auto &c = found->second;
@@ -54,12 +54,13 @@ void Structure::handleRemoveFromCoordinates(GameEntity *mover, const coordinates
     }
 }
 
-void Structure::updateCoordinates(GameEntity *mover, std::optional<coordinates> previous) {
+void Structure::updateCoordinates(GameEntity *mover, std::optional<Coordinates> previous) {
     if(previous) {
         handleRemoveFromCoordinates(mover, previous.value());
     }
     auto &con = reg.get_or_emplace<CoordinateContents>(ent);
-    con.coordinateContents[mover->coords].push_back(mover);
+    auto &loc = reg.get<Location>(mover->ent);
+    con.coordinateContents[loc.coords].push_back(mover);
 }
 
 std::vector<std::pair<std::string, Destination>> Structure::getLandingSpotsFor(GameEntity *mover) {
@@ -99,8 +100,8 @@ std::vector<std::pair<std::string, Destination>> Structure::getLandingSpotsFor(G
 }
 
 std::optional<Destination> Structure::getLaunchDestinationFor(GameEntity *mover) {
-    auto loc = getLocationInfo();
-    if(loc.location) return Destination(loc);
+    auto loc = reg.try_get<Location>(ent);
+    if(loc && loc->location) return Destination(*loc);
     return {};
 }
 
@@ -116,8 +117,8 @@ std::string Structure::renderLocationFor(GameEntity* viewer) {
     return "";
 }
 
-UnitFamily Structure::getFamily() {
-    return UnitFamily::Structure;
+EntityFamily Structure::getFamily() {
+    return EntityFamily::Structure;
 }
 
 std::map<int, Destination> Structure::getDestinations(GameEntity *mover) {

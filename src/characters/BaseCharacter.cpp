@@ -584,8 +584,8 @@ bool BaseCharacter::isProvidingLight() {
     return false;
 }
 
-UnitFamily BaseCharacter::getFamily() {
-    return UnitFamily::Character;
+EntityFamily BaseCharacter::getFamily() {
+    return EntityFamily::Character;
 }
 
 void BaseCharacter::deserializeRelations(const nlohmann::json& j) {
@@ -2945,7 +2945,7 @@ std::string BaseCharacter::renderRoomListingFor(GameEntity* viewer) {
 bool BaseCharacter::doSimpleMove(int direction, bool need_specials_check) {
     char buf2[MAX_STRING_LENGTH];
     char buf3[MAX_STRING_LENGTH];
-    auto was_in = getLocationInfo();
+    auto was_in = reg.get<Location>(ent);
     int need_movement;
 
     auto destMaybe = was_in.location->getDestination(this, direction);
@@ -2955,7 +2955,7 @@ bool BaseCharacter::doSimpleMove(int direction, bool need_specials_check) {
     }
     auto &dest = destMaybe.value();
 
-    if (AFF_FLAGGED(this, AFF_CHARM) && master && was_in == master->getLocationInfo()) {
+    if (AFF_FLAGGED(this, AFF_CHARM) && master && was_in == reg.get<Location>(master->ent)) {
         sendf("The thought of leaving your master makes you weep.\r\n");
         act("$n bursts into tears.", false, this, nullptr, nullptr, TO_ROOM);
         return false;
@@ -3074,7 +3074,7 @@ bool BaseCharacter::moveInDirection(int direction, bool need_specials_check) {
     if (!followers)
         return doSimpleMove(direction, need_specials_check);
 
-    auto was_in = getLocationInfo();
+    auto was_in = reg.get<Location>(ent);
 
     if (!doSimpleMove(direction, need_specials_check))
         return false;
@@ -3083,7 +3083,7 @@ bool BaseCharacter::moveInDirection(int direction, bool need_specials_check) {
 
     for (auto k = followers; k; k = k->next) {
         auto follower = k->follower;
-        auto folLoc = follower->getLocationInfo();
+        auto folLoc = reg.get<Location>(follower->ent);
         if(folLoc != was_in) continue;
         if(GET_POS(follower) < POS_STANDING) continue;
 

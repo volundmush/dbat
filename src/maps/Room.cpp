@@ -287,8 +287,8 @@ std::string Room::getUnitClass() {
     return "Room";
 }
 
-UnitFamily Room::getFamily() {
-    return UnitFamily::Room;
+EntityFamily Room::getFamily() {
+    return EntityFamily::Room;
 }
 
 void Room::assignTriggers() {
@@ -1001,7 +1001,7 @@ std::string Room::renderLocationFor(GameEntity *viewer) {
     std::vector<std::string> contentLines;
     for(auto c : getContents()) {
         if(c == viewer) continue;
-        if(c->getFamily() == UnitFamily::Exit) continue;
+        if(c->getFamily() == EntityFamily::Exit) continue;
         if(!viewer->canSee(c)) continue;
         auto line = c->renderRoomListingFor(viewer);
         trim(line);
@@ -1030,18 +1030,18 @@ bool Room::checkPostEnter(GameEntity* mover, const Location& loc, const Destinat
 }
 
 bool Room::checkCanLeave(GameEntity* mover, const Destination& dest, bool need_specials_check) {
-    auto was_in = mover->getLocationInfo();
+    auto was_in = reg.get<Location>(mover->ent);
     char throwaway[MAX_INPUT_LENGTH] = ""; /* Functions assume writable. */
     auto direction = dest.direction;
 
     if(auto ch = dynamic_cast<BaseCharacter*>(mover); ch) {
         if (need_specials_check && special(ch, direction + 1, throwaway))
             return false;
-        if (!leave_mtrigger(ch, direction) || ch->getLocationInfo() != was_in) /* prevent teleport crashes */
+        if (!leave_mtrigger(ch, direction) || reg.get<Location>(ch->ent) != was_in) /* prevent teleport crashes */
             return false;
-        if (!leave_wtrigger(this, ch, direction) || ch->getLocationInfo() != was_in) /* prevent teleport crashes */
+        if (!leave_wtrigger(this, ch, direction) || reg.get<Location>(ch->ent) != was_in) /* prevent teleport crashes */
             return false;
-        if (!leave_otrigger(this, ch, direction) || ch->getLocationInfo() != was_in) /* prevent teleport crashes */
+        if (!leave_otrigger(this, ch, direction) || reg.get<Location>(ch->ent) != was_in) /* prevent teleport crashes */
             return false;
     }
 

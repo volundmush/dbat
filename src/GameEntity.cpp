@@ -3,7 +3,7 @@
 #include "dbat/utils.h"
 #include "dbat/constants.h"
 
-bool coordinates::operator==(const coordinates& rhs) const {
+bool Coordinates::operator==(const Coordinates& rhs) const {
     return x == rhs.x && y == rhs.y && z == rhs.z;
 }
 
@@ -15,17 +15,17 @@ bool Location::operator==(const Location& rhs) {
     return location == rhs.location && locationType == rhs.locationType && coords == rhs.coords;
 }
 
-coordinates::coordinates(const nlohmann::json& j) {
+Coordinates::Coordinates(const nlohmann::json& j) {
     deserialize(j);
 }
 
-void coordinates::deserialize(const nlohmann::json& j) {
+void Coordinates::deserialize(const nlohmann::json& j) {
     if(j.contains("x")) x = j["x"];
     if(j.contains("y")) y = j["y"];
     if(j.contains("z")) z = j["z"];
 }
 
-nlohmann::json coordinates::serialize() {
+nlohmann::json Coordinates::serialize() {
     nlohmann::json j;
     if(x != 0) j["x"] = x;
     if(y != 0) j["y"] = y;
@@ -33,7 +33,7 @@ nlohmann::json coordinates::serialize() {
     return j;
 }
 
-void coordinates::clear() {
+void Coordinates::clear() {
     x = 0;
     y = 0;
     z = 0;
@@ -66,12 +66,10 @@ std::string GameEntity::renderRoomListingFor(GameEntity *viewer) {
 }
 
 std::vector<GameEntity*> GameEntity::getContents() {
-    std::vector<GameEntity*> out;
-    for(auto u : contents) {
-        if(u->exists) out.push_back(u);
+    if(auto con = reg.try_get<EntityContents>(ent); con) {
+        return con->contents;
     }
-    return out;
-
+    return {};
 }
 
 std::vector<Room*> GameEntity::getRooms() {
@@ -94,7 +92,9 @@ std::vector<Object*> GameEntity::getInventory() {
     std::vector<Object*> out;
     for(auto u : getContents()) {
         auto o = dynamic_cast<Object*>(u);
-        if(o && o->locationType == 0) out.push_back(o);
+        if(!o) continue;
+        auto &loc = reg.get<Location>(o->ent);
+        if(loc.locationType == 0) out.push_back(o);
     }
     return out;
 }
@@ -103,7 +103,9 @@ std::map<int, Object*> GameEntity::getEquipment() {
     std::map<int, Object*> out;
     for(auto u : getContents()) {
         auto o = dynamic_cast<Object*>(u);
-        if(o && o->locationType > 0) out[o->locationType] = o;
+        if(!o) continue;
+        auto &loc = reg.get<Location>(o->ent);
+        if(loc.locationType > 0) out[loc.locationType] = o;
     }
     return out;
 }
@@ -113,7 +115,8 @@ std::map<int, Exit*> GameEntity::getExits() {
     for(auto u : getContents()) {
         auto o = dynamic_cast<Exit*>(u);
         if(!o) continue;
-        out[o->locationType] = o;
+        auto &loc = reg.get<Location>(o->ent);
+        out[loc.locationType] = o;
     }
     return out;
 }
@@ -127,13 +130,16 @@ std::map<int, Exit*> GameEntity::getUsableExits() {
         auto dest = o->getDestination();
         if(!dest) continue;
         if(dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
-        out[o->locationType] = o;
+        auto &loc = reg.get<Location>(o->ent);
+        out[loc.locationType] = o;
     }
     return out;
 }
 
 GameEntity* GameEntity::getLocation() {
-    return location;
+    auto loc = reg.try_get<Location>(ent);
+    if(loc) return loc->location;
+    return nullptr;
 }
 
 Room* GameEntity::getRoom() {
@@ -507,10 +513,8 @@ bool GameEntity::flipFlag(FlagType type, int flag) {
 nlohmann::json GameEntity::serializeRelations() {
     nlohmann::json j = nlohmann::json::object();
 
-    if(location) {
-        j["location"] = location->getUIDString();
-        if(locationType) j["locationType"] = locationType;
-        if(auto co = coords.serialize(); !co.empty()) j["coords"] = co;
+    if(auto loc = reg.try_get<Location>(ent) ; loc) {
+        j["location"] = loc->serialize();
     }
 
     return j;
@@ -518,75 +522,56 @@ nlohmann::json GameEntity::serializeRelations() {
 
 void GameEntity::deserializeRelations(const nlohmann::json& j) {
     if(j.contains("location")) {
-        auto loc = j["location"].get<std::string>();
-        auto locUnit = resolveUID(loc);
-        if(locUnit) {
-            location = locUnit;
-            location->contents.push_back(this);
-            if(j.contains("locationType")) locationType = j["locationType"];
-            if(j.contains("coords")) coords.deserialize(j["coords"]);
-        }
-
+        auto &loc = reg.get_or_emplace<Location>(ent, j["location"]);
     }
 }
 
 void GameEntity::addToLocation(const Destination &dest) {
-    if(location && location != dest.target) {
-        basic_mud_log("Attempted to add unit '%d: %s' to location, but location was already found.", uid, getName().c_str());
-        return;
-    }
-
-    if(auto c = dynamic_cast<BaseCharacter*>(this); c) {
-        auto r = dynamic_cast<Room*>(dest.target);
-        if(!r) {
-            basic_mud_log("Whoah!");
+    if(auto location = reg.try_get<Location>(ent); location) {
+        if(location->location != dest.target) {
+            basic_mud_log("Attempted to add unit '%d: %s' to location, but location was already found.", uid, getName().c_str());
+            return;
         }
-    }
-
-    if(location == dest.target) {
         locationType = dest.locationType;
         auto prevCoords = coords;
         coords = dest.coords;
-        location->updateCoordinates(this, prevCoords);
+        location->location->updateCoordinates(this, prevCoords);
     } else {
-        location = dest.target;
-        locationType = dest.locationType;
-        coords = dest.coords;
-        dest.target->contents.push_back(this);
+        auto &loc = reg.get_or_emplace<Location>(ent);
+        loc.location = dest.target;
+        loc.locationType = dest.locationType;
+        loc.coords = dest.coords;
         dest.target->handleAdd(this);
     }
 }
 
 void GameEntity::removeFromLocation() {
-    if(!location) {
+    if(auto loc = reg.try_get<Location>(ent); !loc) {
         basic_mud_log("Attempted to remove unit '%d: %s' from location, but location was not found.", uid, getName().c_str());
-        locationType = -1;
-        coords.clear();
         return;
+    } else {
+        loc->location->handleRemove(this);
+        reg.remove<Location>(ent);
     }
-    
-    std::erase_if(location->contents, [&](auto ud) {return ud == this;});
-    location->handleRemove(this);
-
-    location = nullptr;
-    locationType = -1;
-    coords.clear();
     
 }
 
-void GameEntity::updateCoordinates(GameEntity *u, std::optional<coordinates> previous) {
+void GameEntity::updateCoordinates(GameEntity *u, std::optional<Coordinates> previous) {
     // does nothing by default.
 }
 
 void GameEntity::handleAdd(GameEntity *u) {
+    auto &con = reg.get_or_emplace<EntityContents>(ent);
+    con.contents.push_back(u);
     updateCoordinates(u);
 }
 
 
 void GameEntity::handleRemove(GameEntity *u) {
-
-    // remove uid from loc->contents
-    
+    if(auto con = reg.try_get<EntityContents>(ent); con) {
+        std::erase_if(con->contents, [u](auto c) {return c == u;});
+        if(con->contents.empty()) reg.remove<EntityContents>(ent);
+    }
 }
 
 std::vector<GameEntity*> GameEntity::getNeighbors(bool visible) {
@@ -597,7 +582,7 @@ std::vector<GameEntity*> GameEntity::getNeighbors(bool visible) {
 
 std::vector<GameEntity*> GameEntity::getNeighborsFor(GameEntity *u, bool visible) {
     std::vector<GameEntity*> out;
-    for(auto n : contents) {
+    for(auto n : getContents()) {
         if(u == n) continue;
         if(visible && !u->canSee(n)) continue;
         out.push_back(n);
@@ -692,7 +677,7 @@ void GameEntity::extractFromWorld() {
     pendingDeletions.insert(this);
     if(script) script->deactivate();
 
-    for(auto c : contents) {
+    for(auto c : getContents()) {
         c->onHolderExtraction();
     }
 
@@ -755,7 +740,7 @@ void GameEntity::sendEvent(const Event& event) {
 }
 
 void GameEntity::sendEventContents(const Event& event) {
-    for(auto c : contents) {
+    for(auto c : getContents()) {
         c->sendEvent(event);
     }
 }
@@ -770,13 +755,13 @@ void GameEntity::sendLine(const std::string& text) {
 }
 
 void GameEntity::sendTextContents(const std::string& text) {
-    for(auto c : contents) {
+    for(auto c : getContents()) {
         c->sendText(text);
     }
 }
 
 void GameEntity::sendLineContents(const std::string& text) {
-    for(auto c : contents) {
+    for(auto c : getContents()) {
         c->sendLine(text);
     }
 }
@@ -877,8 +862,4 @@ bool GameEntity::checkCanReachDestination(GameEntity *mover, const Destination& 
 
 bool GameEntity::checkPostEnter(GameEntity *mover, const Location& cameFrom, const Destination& dest) {
     return false;
-}
-
-Location GameEntity::getLocationInfo() {
-    return {location, locationType, coords};
 }

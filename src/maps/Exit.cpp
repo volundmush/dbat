@@ -6,8 +6,8 @@ Room* Exit::getDestination() {
     return destination;
 }
 
-UnitFamily Exit::getFamily() {
-    return UnitFamily::Exit;
+EntityFamily Exit::getFamily() {
+    return EntityFamily::Exit;
 }
 
 std::string Exit::getUnitClass() {
@@ -69,7 +69,8 @@ Exit::Exit(const nlohmann::json &j) : Exit() {
 
 
 std::string Exit::getName() {
-    return dirs[locationType];
+    if(auto loc = reg.try_get<Location>(ent); loc) return dirs[loc->locationType];
+    return "Nowhere";
 }
 
 std::vector<std::string> Exit::getKeywords(GameEntity *looker) {

@@ -4386,7 +4386,7 @@ ACMD(do_scan) {
 
         for(auto c : dest->getContents()) {
             if(c == ch) continue;
-            if(c->getFamily() == UnitFamily::Exit) continue;
+            if(c->getFamily() == EntityFamily::Exit) continue;
             if(!ch->canSee(c)) continue;
             ch->sendLine(c->renderRoomListingFor(ch));
         }
@@ -4415,7 +4415,7 @@ ACMD(do_scan) {
 
             for(auto c : dest->getContents()) {
                 if(c == ch) continue;
-                if(c->getFamily() == UnitFamily::Exit) continue;
+                if(c->getFamily() == EntityFamily::Exit) continue;
                 if(!ch->canSee(c)) continue;
                 ch->sendLine(c->renderRoomListingFor(ch));
             }

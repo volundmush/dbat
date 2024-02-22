@@ -393,7 +393,7 @@ struct mob_special_data {
     bool newitem{};             /* Check if mob has new inv item       */
 };
 
-enum class UnitFamily : uint8_t {
+enum class EntityFamily : uint8_t {
     Character = 0,
     Object = 1,
     Room = 2,
@@ -401,22 +401,28 @@ enum class UnitFamily : uint8_t {
     Structure = 4
 };
 
-struct coordinates {
-    coordinates() = default;
-    explicit coordinates(const nlohmann::json& j);
+
+struct EntityInfo {
+    int64_t uid;
+    EntityFamily family;
+};
+
+struct Coordinates {
+    Coordinates() = default;
+    explicit Coordinates(const nlohmann::json& j);
     double x{0};
     double y{0};
     double z{0};
     void clear();
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
-    bool operator==(const coordinates& rhs) const;
+    bool operator==(const Coordinates& rhs) const;
 };
 
 namespace std {
     template<>
-    struct hash<coordinates> {
-        size_t operator()(const coordinates& coord) const noexcept {
+    struct hash<Coordinates> {
+        size_t operator()(const Coordinates& coord) const noexcept {
             // A simple yet effective hash combining technique
             std::hash<double> hasher;
             size_t h1 = hasher(coord.x);
@@ -427,7 +433,7 @@ namespace std {
             return h1 ^ (h2 << 1) ^ (h3 << 2); // Shift and XOR for simple mixing
         }
 
-        size_t operator()(coordinates& coord) const noexcept {
+        size_t operator()(Coordinates& coord) const noexcept {
             // A simple yet effective hash combining technique
             std::hash<double> hasher;
             size_t h1 = hasher(coord.x);
@@ -442,9 +448,17 @@ namespace std {
 
 struct Location {
     GameEntity* location{};
+    // LocationType is extra information about how you are inside <location>.
+    // For instance, if you are a character, then the locationType of units
+    // you contain should represent inventory/equipment slots. 0 is inventory,
+    // positive number is equipment slot.
     int locationType{};
-    coordinates coords{};
+    Coordinates coords{};
     bool operator==(const Location& rhs);
+};
+
+struct EntityContents {
+    std::vector<GameEntity*> contents;
 };
 
 struct Destination {
@@ -455,9 +469,38 @@ struct Destination {
     Exit* via{};
     int direction{-1};
     int locationType{};
-    coordinates coords{};
+    Coordinates coords{};
     bool operator==(const Destination& rhs);
 };
+
+// STRUCTURE STUFF BELOW THIS.
+
+// TileDetails is used to store information about a tile. Part of the Grid3D system.
+struct TileDetails {
+    std::string name;
+    std::string description;
+    std::optional<int> tile;
+    std::set<int> flags;
+};
+
+struct Grid3D {
+    int defaultSectorFloor{SECT_FIELD};
+    int defaultSectorAbove{SECT_FLYING};
+    int defaultSectorBelow{SECT_UNDERWATER};
+    std::unordered_map<Coordinates, TileDetails> tiles;
+};
+
+struct CoordinateContents {
+    std::unordered_map<Coordinates, std::vector<GameEntity*>> coordinateContents;
+};
+
+struct Boundaries {
+    std::optional<double> maxX, maxY, maxZ, minX, minY, minZ;
+};
+
+struct Flags {
+    std::unordered_map<FlagType, std::unordered_set<int>> flags;
+}
 
 struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     GameEntity() = default;
@@ -497,9 +540,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 
     std::shared_ptr<script_data> script{};  /* script info for the object */
 
-    std::vector<GameEntity*> contents{};     /* Contains objects  */
-
-    std::unordered_map<FlagType, std::unordered_set<int>> flags;
+    
     virtual bool checkFlag(FlagType type, int flag);
     virtual void setFlag(FlagType type, int flag, bool value = true);
     virtual void clearFlag(FlagType type, int flag);
@@ -522,8 +563,6 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     Room* getRoom();
     GameEntity* getLocation();
 
-    Location getLocationInfo();
-
     // removeFromLocation is called first, and handleRemove is called BY removeFromLocation on its location.
     virtual void removeFromLocation();
     virtual void handleRemove(GameEntity *u);
@@ -533,16 +572,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual void handleAdd(GameEntity *u);
 
     // called for this, when mover has changed coordinates within it.
-    virtual void updateCoordinates(GameEntity *mover, std::optional<coordinates> previous = std::nullopt);
-
-    // the GameEntity you are located in. Which might be null.
-    GameEntity *location{nullptr};
-    // LocationType is extra information about how you are inside <location>.
-    // For instance, if you are a character, then the locationType of units
-    // you contain should represent inventory/equipment slots. 0 is inventory,
-    // positive number is equipment slot.
-    int16_t locationType{0};
-    coordinates coords{};
+    virtual void updateCoordinates(GameEntity *mover, std::optional<Coordinates> previous = std::nullopt);
 
     // Returns a collection of 'units within reach' for commands like look or get.
     std::vector<GameEntity*> getNeighbors(bool visible = true);
@@ -648,7 +678,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual std::vector<std::string> getKeywords(GameEntity* ch);
     virtual std::string renderAppearance(GameEntity* ch);
 
-    virtual UnitFamily getFamily() = 0;
+    virtual EntityFamily getFamily() = 0;
     virtual std::string getUnitClass() = 0;
     
     void checkMyID();
@@ -799,7 +829,7 @@ struct Object : public GameEntity {
 
     void executeCommand(const std::string& argument) override;
 
-    UnitFamily getFamily() override;
+    EntityFamily getFamily() override;
     std::string getUnitClass() override;
 
     nlohmann::json serialize() override;
@@ -945,30 +975,7 @@ struct Weapon : public Object {
     std::string renderAppearanceHelper(GameEntity* u) override;
 };
 
-// STRUCTURE STUFF BELOW THIS.
 
-// TileDetails is used to store information about a tile. Part of the Grid3D system.
-struct TileDetails {
-    std::string name;
-    std::string description;
-    std::optional<int> tile;
-    std::set<int> flags;
-};
-
-struct Grid3D {
-    int defaultSectorFloor{SECT_FIELD};
-    int defaultSectorAbove{SECT_FLYING};
-    int defaultSectorBelow{SECT_UNDERWATER};
-    std::unordered_map<coordinates, TileDetails> tiles;
-};
-
-struct CoordinateContents {
-    std::unordered_map<coordinates, std::vector<GameEntity*>> coordinateContents;
-};
-
-struct Boundaries {
-    std::optional<double> maxX, maxY, maxZ, minX, minY, minZ;
-};
 
 // A new kind of entity. Entity family Structure.
 struct Structure : public GameEntity {
@@ -979,7 +986,7 @@ struct Structure : public GameEntity {
 
     void handleRemove(GameEntity *u) override;
     void handleAdd(GameEntity *u) override;
-    void updateCoordinates(GameEntity *mover, std::optional<coordinates> previous = std::nullopt) override;
+    void updateCoordinates(GameEntity *mover, std::optional<Coordinates> previous = std::nullopt) override;
 
     std::map<int, Destination> getDestinations(GameEntity* viewer) override;
     bool checkCanLeave(GameEntity *mover, const Destination& dest, bool need_specials_check) override;
@@ -987,7 +994,7 @@ struct Structure : public GameEntity {
     bool checkPostEnter(GameEntity *mover, const Location& cameFrom, const Destination& dest) override;
     std::string renderLocationFor(GameEntity* viewer) override;
 
-    UnitFamily getFamily() override;
+    EntityFamily getFamily() override;
     std::string getUnitClass() override;
 
     nlohmann::json serialize() override;
@@ -1003,7 +1010,7 @@ struct Structure : public GameEntity {
 
     StructureType type{StructureType::Rooms};
 
-    void handleRemoveFromCoordinates(GameEntity *mover, const coordinates &coor);
+    void handleRemoveFromCoordinates(GameEntity *mover, const Coordinates &coor);
 };
 
 // Vehicles. Spaceships, boats, submarines, fighter jets, cars, buses...
@@ -1104,7 +1111,7 @@ struct Exit : public GameEntity {
 
     Room* getDestination();
 
-    UnitFamily getFamily() override;
+    EntityFamily getFamily() override;
     std::string getUnitClass() override;
     nlohmann::json serializeRelations() override;
     nlohmann::json serialize() override;
@@ -1127,7 +1134,7 @@ enum class MoonCheck : uint8_t {
 struct Room : public GameEntity {
     Room() = default;
 
-    UnitFamily getFamily() override;
+    EntityFamily getFamily() override;
     std::string getUnitClass() override;
 
     explicit Room(const nlohmann::json &j);
@@ -1683,7 +1690,7 @@ struct BaseCharacter : public GameEntity {
 
     double currentGravity();
 
-    UnitFamily getFamily() override;
+    EntityFamily getFamily() override;
 
     num_t get(CharNum stat);
     num_t set(CharNum stat, num_t val);

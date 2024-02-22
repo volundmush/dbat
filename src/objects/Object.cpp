@@ -158,7 +158,7 @@ bool Object::isActive() {
 bool Object::isProvidingLight() {
     if(checkFlag(FlagType::Item, ITEM_GLOW)) return true;
     // Equipper is carrying this as a light source.
-    if(locationType > 0 && GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS)) return true;
+    if(GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS)) return true;
     if(GET_OBJ_TYPE(this) == ITEM_CAMPFIRE) return true;
     // Flambus stove, dammit.
     if(vn == 19093) return true;
@@ -273,10 +273,11 @@ DgResults Object::dgCallMember(trig_data *trig, const std::string& member, const
 
     if(lmember == "next_in_list") {
         // Okay this one's stupid. We're not a manual linked list anymore, so for this to work we'll have to fake it.
-        auto loc = getLocation();
+        auto loc = reg.try_get<Location>(ent);
         if(!loc) return "";
-        if(locationType != 0) return "";
-        auto inv = loc->getInventory();
+        if(!loc->location) return "";
+        if(loc->locationType != 0) return "";
+        auto inv = loc->location->getInventory();
         // so we should be in here somewhere, and if so we want to return a pointer to the next available item, if any.
         auto found = std::find(inv.begin(), inv.end(), this);
         if(found == inv.end()) return "";
@@ -365,8 +366,8 @@ std::string Object::getUnitClass() {
     return "Object";
 }
 
-UnitFamily Object::getFamily() {
-    return UnitFamily::Object;
+EntityFamily Object::getFamily() {
+    return EntityFamily::Object;
 }
 
 Object::~Object() {

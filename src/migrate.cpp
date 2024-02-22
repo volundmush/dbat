@@ -2284,7 +2284,7 @@ static Structure* assembleArea(const AreaDef &def) {
     for(auto r : rooms) {
         auto room = getEntity<Room>(r);
         if(!room) continue;
-        if(room->location) continue;
+        if(auto loc = reg.try_get<Location>(room->ent); loc) continue;
         room->addToLocation(a);
     }
 
@@ -2434,7 +2434,7 @@ void migrate_grid() {
     for(auto &[rv, u] : entities) {
         auto room = dynamic_cast<Room*>(u);
         if(!room) continue;
-        if(room->location) continue;
+        if(auto loc = reg.try_get<Location>(room->ent); loc) continue;
         auto sense = sense_location_name(rv);
         if(sense != "Unknown.") {
             auto &area = areaDefs[sense];
