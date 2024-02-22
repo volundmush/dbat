@@ -507,10 +507,10 @@ ACMD(do_shuffle) {
     int total = count;
     for (auto obj2 : obj->getInventory()) {
         obj2->removeFromLocation();
-        obj2->addToLocation(getWorld(48));
+        obj2->addToLocation(getEntity(48));
     }
     while (count > 0) {
-        for (auto obj2 : getWorld(48)->getInventory()) {
+        for (auto obj2 : getEntity(48)->getInventory()) {
             if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
                 continue;
             }
@@ -754,7 +754,7 @@ ACMD(do_nickname) {
                         k->extractFromWorld();
                         int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
                         ship2->removeFromLocation();
-                        ship2->addToLocation(getWorld(was_in));
+                        ship2->addToLocation(getEntity(was_in));
                     }
                 }
             }
@@ -1432,7 +1432,7 @@ void map_draw_room(char map[9][10], int x, int y, Room* room,
 static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                           GameEntity *viewer) {
 
-    auto room = getWorld<Room>(rnum);
+    auto room = getEntity<Room>(rnum);
     if (!room) {
         return;
     }
@@ -3640,7 +3640,7 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
             auto loc = d->character->getLocation();
             if(!loc) continue;
             if(!CAN_SEE(ch, d->character)) continue;
-            auto reg = loc->getRegion();
+            auto reg = loc->getWorld();
 
             ch->sendf("%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)),
                             reg ? reg->getDisplayName(ch) : "Unknown", loc->getDisplayName(ch));

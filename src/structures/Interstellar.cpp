@@ -8,3 +8,10 @@ std::string Interstellar::getUnitClass() {
     return "Interstellar";
 }
 
+bool Interstellar::isWorld() {
+    return true;
+}
+
+bool Interstellar::isEnvironment() {
+    return true;
+}

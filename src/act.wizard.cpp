@@ -703,7 +703,7 @@ ACMD(do_finddoor) {
     if (vnum != NOTHING) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, GET_OBJ_SHORT(obj));
-        for (auto &[vn, u] : world) {
+        for (auto &[vn, u] : entities) {
             auto r = dynamic_cast<Room*>(u);
             if (!r)
                 continue;
@@ -737,7 +737,7 @@ ACMD(do_recall) {
         act("$n disappears in a burst of light!", false, ch, nullptr, nullptr, TO_ROOM);
         if (real_room(2) != NOWHERE) {
             ch->removeFromLocation();
-            ch->addToLocation(getWorld(2));
+            ch->addToLocation(getEntity(2));
             ch->lookAtLocation();
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
@@ -946,7 +946,7 @@ room_rnum find_target_room(BaseCharacter *ch, char *rawroomstr) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_VICE)
         return (location);
 
-    rm = getWorld<Room>(location);
+    rm = getEntity<Room>(location);
 
     if ((!can_edit_zone(ch, rm->zone) && GET_ADMLEVEL(ch) < ADMLVL_GOD)
         && ZONE_FLAGGED(rm->zone, ZONE_QUEST)) {
@@ -984,7 +984,7 @@ ACMD(do_at) {
 
     if ((location = find_target_room(ch, buf)) == NOWHERE)
         return;
-    auto r = getWorld(location);
+    auto r = getEntity(location);
 
     /* a location has been found. */
     auto original = ch->getRoom();
@@ -1010,7 +1010,7 @@ ACMD(do_goto) {
         return;
     }
 
-    auto r = getWorld<Room>(location);
+    auto r = getEntity<Room>(location);
     if(!r) {
         ch->sendf("That room does not exist.\r\n");
         return;
@@ -1106,7 +1106,7 @@ ACMD(do_teleport) {
             ch->sendf("They are inside a healing tank!\r\n");
             return;
         }
-        auto r = getWorld<Room>(target);
+        auto r = getEntity<Room>(target);
         ch->sendf("%s", CONFIG_OK);
         act("$n disappears in a puff of smoke.", false, victim, nullptr, nullptr, TO_ROOM);
         victim->removeFromLocation();
@@ -2183,7 +2183,7 @@ ACMD(do_vstat) {
             return;
         }
         mob = read_mobile(r_num, REAL);
-        mob->addToLocation(getWorld(0));
+        mob->addToLocation(getEntity(0));
         do_stat_character(ch, mob);
         extract_char(mob);
     } else if (is_abbrev(buf, "obj")) {
@@ -3262,7 +3262,7 @@ ACMD(do_show) {
                          players.size(),
                          j, mob_proto.size(),
                          k, obj_proto.size(),
-                         world.size(), zone_table.size(),
+                         entities.size(), zone_table.size(),
                          trig_index.size(),
                          buf_largecount,
                          buf_switches, buf_overflows,
@@ -3275,7 +3275,7 @@ ACMD(do_show) {
             /* show errors */
         case 5:
             len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
-            for (auto &[vn, u] : world) {
+            for (auto &[vn, u] : entities) {
                 auto r = dynamic_cast<Room*>(u);
                 if(!r) continue;
                 for (auto &[j, e] : r->getExits()) {
@@ -3314,7 +3314,7 @@ ACMD(do_show) {
         case 6:
             j = 0;
             len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
-            for (auto &[vn, r] : world)
+            for (auto &[vn, r] : entities)
                 if (ROOM_FLAGGED(vn, ROOM_DEATH)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
                                     r->getDisplayName(ch).c_str());
@@ -3329,7 +3329,7 @@ ACMD(do_show) {
         case 7:
             j = 0;
             len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
-            for (auto &[vn, r] : world)
+            for (auto &[vn, r] : entities)
                 if (ROOM_FLAGGED(vn, ROOM_GODROOM)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
                                     r->getDisplayName(ch).c_str());
@@ -3816,7 +3816,7 @@ static int perform_set(BaseCharacter *ch, BaseCharacter *vict, int mode,
             }
             if (IN_ROOM(vict) != NOWHERE)    /* Another Eric Green special. */
                 vict->removeFromLocation();
-            vict->addToLocation(getWorld(rnum));
+            vict->addToLocation(getEntity(rnum));
             break;
         case 36: vict->flipFlag(FlagType::Pref, PRF_ROOMFLAGS);
             break;
@@ -4309,7 +4309,7 @@ ACMD(do_zpurge) {
     auto &z = zone_table[zone];
 
     for (auto rvn : z.rooms) {
-        auto r = getWorld<Room>(rvn);
+        auto r = getEntity<Room>(rvn);
         if(!r) continue;
         for (auto mob : r->getPeople()) {
             if (IS_NPC(mob)) {

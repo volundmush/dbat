@@ -461,7 +461,7 @@ BaseCharacter *get_char_room(char *name, int *number, room_rnum room) {
     if (*number == 0)
         return (nullptr);
 
-    for (auto i : getWorld<Room>(room)->getPeople())
+    for (auto i : getEntity<Room>(room)->getPeople())
         if (isname(name, i->getName().c_str()))
             if (--(*number) == 0)
                 return (i);

@@ -366,7 +366,7 @@ T *create_obj() {
     obj->ent = reg.create();
     obj->uid = getNextUID();
     obj->checkMyID();
-    setWorld(obj->getUID(), obj);
+    setEntity(obj->getUID(), obj);
 
     return (obj);
 }

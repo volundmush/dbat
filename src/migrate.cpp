@@ -324,7 +324,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             while(true) {
                 read_line(shop_f, "%ld", &shop_temp);
                 if(shop_temp == -1) break;
-                if(world.contains(shop_temp)) sh->in_room.insert(shop_temp);
+                if(entities.contains(shop_temp)) sh->in_room.insert(shop_temp);
 
             }
 
@@ -386,12 +386,12 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
 
-    auto r = getWorld(room);
+    auto r = getEntity(room);
     
     auto d = new Exit();
     d->script = std::make_shared<script_data>(d);
     d->uid = getNextUID();
-    setWorld(d->uid, d);
+    setEntity(d->uid, d);
 
     auto &te = temp_exits[d->uid];
     
@@ -432,7 +432,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             flags = EX_ISDOOR | EX_PICKPROOF | EX_SECRET;
 
         for(auto i = 0; i < NUM_EXIT_FLAGS; i++) if(IS_SET(flags, i)) d->setFlag(FlagType::Exit, i);
-        d->key = world.contains(t[1]) ? t[1] : NOTHING;
+        d->key = entities.contains(t[1]) ? t[1] : NOTHING;
         te.destination = t[2];
 
         if (retval == 3) {
@@ -498,13 +498,13 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
 
-    if(world.count(virtual_nr)) {
+    if(entities.count(virtual_nr)) {
         basic_mud_log("SYSERR: Room #%d already exists, cannot parse!", virtual_nr);
         exit(1);
     }
     auto &z = zone_table[zone];
     auto r = new Room();
-    setWorld(virtual_nr, r);
+    setEntity(virtual_nr, r);
     z.rooms.insert(virtual_nr);
     r->script = std::make_shared<script_data>(r);
     r->zone = zone;
@@ -2258,14 +2258,14 @@ static Structure* assembleArea(const AreaDef &def) {
 
     for(auto &[start, end] : def.roomRanges) {
         for(auto i = start; i <= end; i++) {
-            auto found = world.find(i);
-            if(found == world.end()) continue;
+            auto found = entities.find(i);
+            if(found == entities.end()) continue;
             rooms.insert(i);
         }
     }
 
     if(!def.roomFlags.empty()) {
-        for(auto &[vn, u] : world) {
+        for(auto &[vn, u] : entities) {
             if(auto room = dynamic_cast<Room*>(u); room) {
                 for(auto &f : def.roomFlags) {
                     if(room->checkFlag(FlagType::Room, f)) {
@@ -2282,7 +2282,7 @@ static Structure* assembleArea(const AreaDef &def) {
     basic_mud_log("Assembling Area: %s, Rooms: %d", def.name.c_str(), rooms.size());
 
     for(auto r : rooms) {
-        auto room = getWorld<Room>(r);
+        auto room = getEntity<Room>(r);
         if(!room) continue;
         if(room->location) continue;
         room->addToLocation(a);
@@ -2431,7 +2431,7 @@ void migrate_grid() {
         a.roomIDs.insert(177);
     }
 
-    for(auto &[rv, u] : world) {
+    for(auto &[rv, u] : entities) {
         auto room = dynamic_cast<Room*>(u);
         if(!room) continue;
         if(room->location) continue;
@@ -2453,84 +2453,84 @@ void migrate_grid() {
     AreaDef pearth;
     pearth.name = "@GEarth@n";
     pearth.exists = create_obj<Planet>();
-    pearth.location = getWorld(50);
+    pearth.location = getEntity(50);
     auto planet_earth = assembleArea(pearth);
-    getWorld(50)->addToLocation(space);
+    getEntity(50)->addToLocation(space);
 
     AreaDef pvegeta;
     pvegeta.name = "@YVegeta@n";
     pvegeta.exists = create_obj<Planet>();
-    pvegeta.location = getWorld(53);
+    pvegeta.location = getEntity(53);
     pvegeta.envVars[EnvVar::Gravity] = 10.0;
     auto planet_vegeta = assembleArea(pvegeta);
-    getWorld(53)->addToLocation(space);
+    getEntity(53)->addToLocation(space);
 
     AreaDef pfrigid;
     pfrigid.name = "@CFrigid@n";
     pfrigid.exists = create_obj<Planet>();
-    pfrigid.location = getWorld(51);
+    pfrigid.location = getEntity(51);
     auto planet_frigid = assembleArea(pfrigid);
-    getWorld(51)->addToLocation(space);
+    getEntity(51)->addToLocation(space);
 
     AreaDef pnamek;
     pnamek.name = "@gNamek@n";
     pnamek.exists = create_obj<Planet>();
-    pnamek.location = getWorld(54);
+    pnamek.location = getEntity(54);
     auto planet_namek = assembleArea(pnamek);
-    getWorld(54)->addToLocation(space);
+    getEntity(54)->addToLocation(space);
 
     AreaDef pkonack;
     pkonack.name = "@MKonack@n";
     pkonack.exists = create_obj<Planet>();
-    pkonack.location = getWorld(52);
+    pkonack.location = getEntity(52);
     auto planet_konack = assembleArea(pkonack);
-    getWorld(52)->addToLocation(space);
+    getEntity(52)->addToLocation(space);
 
     AreaDef paether;
     paether.name = "@MAether@n";
     paether.exists = create_obj<Planet>();
-    paether.location = getWorld(55);
+    paether.location = getEntity(55);
     auto planet_aether = assembleArea(paether);
-    getWorld(55)->addToLocation(space);
+    getEntity(55)->addToLocation(space);
 
     AreaDef pyardrat;
     pyardrat.name = "@mYardrat@n";
     pyardrat.exists = create_obj<Planet>();
-    pyardrat.location = getWorld(56);
+    pyardrat.location = getEntity(56);
     auto planet_yardrat = assembleArea(pyardrat);
-    getWorld(56)->addToLocation(space);
+    getEntity(56)->addToLocation(space);
 
     AreaDef pkanassa;
     pkanassa.name = "@BKanassa@n";
     pkanassa.exists = create_obj<Planet>();
-    pkanassa.location = getWorld(58);
+    pkanassa.location = getEntity(58);
     auto planet_kanassa = assembleArea(pkanassa);
-    getWorld(58)->addToLocation(space);
+    getEntity(58)->addToLocation(space);
 
     AreaDef pcerria;
     pcerria.name = "@RCerria@n";
     pcerria.exists = create_obj<Planet>();
-    pcerria.location = getWorld(198);
+    pcerria.location = getEntity(198);
     auto planet_cerria = assembleArea(pcerria);
-    getWorld(198)->addToLocation(space);
+    getEntity(198)->addToLocation(space);
 
     AreaDef parlia;
     parlia.name = "@GArlia@n";
     parlia.exists = create_obj<Planet>();
-    parlia.location = getWorld(59);
+    parlia.location = getEntity(59);
     auto planet_arlia = assembleArea(parlia);
-    getWorld(59)->addToLocation(space);
+    getEntity(59)->addToLocation(space);
 
     AreaDef pzenith;
     pzenith.name = "@BZenith@n";
     pzenith.exists = create_obj<Planet>();
-    pzenith.location = getWorld(57);
+    pzenith.location = getEntity(57);
     auto moon_zenith = assembleArea(pzenith);
     for(const auto& name : {"Ancient Castle", "Utatlan City", "Zenith Jungle"}) {
         auto a = areaObjects[name];
         a->addToLocation(moon_zenith);
     }
-    getWorld(57)->addToLocation(space);
+    getEntity(57)->addToLocation(space);
 
 
     AreaDef ucdef;
@@ -2565,7 +2565,7 @@ void migrate_grid() {
     bodef.location = space;
     bodef.roomIDs.insert(19053);
     bodef.roomIDs.insert(19039);
-    for(auto &[r, room] : world) {
+    for(auto &[r, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "Black Omen")) bodef.roomIDs.insert(r);
     }
     bodef.roomIDs.insert(19050);
@@ -2816,7 +2816,7 @@ void migrate_grid() {
     };
 
     basic_mud_log("Attempting to deduce Areas to Planets...");
-    for(auto &[vnum, u] : world) {
+    for(auto &[vnum, u] : entities) {
         // check for planetMap flags and, if found, bind the area this room belongs to, to the respective planet.
         auto room = dynamic_cast<Room*>(u);
         if(!room) continue;
@@ -2846,7 +2846,7 @@ void migrate_grid() {
     celdef.location = space;
     celdef.exists = create_obj<Building>();
     celdef.roomRanges.emplace_back(16305, 16399);
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "Celestial Corp")) celdef.roomIDs.insert(rv);
     }
     auto celestial_corp = assembleArea(celdef);
@@ -2863,7 +2863,7 @@ void migrate_grid() {
     cooler.name = "Cooler's Ship";
     cooler.location = space;
     cooler.exists = create_obj<Vehicle>();
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "Cooler's Ship")) {
             cooler.roomIDs.insert(rv);
         }
@@ -2874,7 +2874,7 @@ void migrate_grid() {
     alph.name = "Alpharis";
     alph.exists = create_obj<Building>();
     alph.location = space;
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "Alpharis")) alph.roomIDs.insert(rv);
     }
     auto alpharis = assembleArea(alph);
@@ -2883,7 +2883,7 @@ void migrate_grid() {
     dzone.name = "Dead Zone";
     dzone.location = universe7;
     dzone.exists = create_obj<Dimension>();
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "Dead Zone")) dzone.roomIDs.insert(rv);
     }
     auto dead_zone = assembleArea(dzone);
@@ -2892,7 +2892,7 @@ void migrate_grid() {
     bast.name = "Blasted Asteroid";
     bast.location = space;
     bast.exists = create_obj<Planet>();
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "Blasted Asteroid")) bast.roomIDs.insert(rv);
     }
     auto blasted_asteroid = assembleArea(bast);
@@ -2902,7 +2902,7 @@ void migrate_grid() {
     listres.name = "Lister's Restaurant";
     listres.location = xenoverse;
     listres.exists = create_obj<Building>();
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "Lister's Restaurant")) listres.roomIDs.insert(rv);
     }
     listres.roomIDs = {18640};
@@ -2912,7 +2912,7 @@ void migrate_grid() {
     scasino.name = "Shooting Star Casino";
     scasino.exists = create_obj<Building>();
     scasino.location = xenoverse;
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
     }
     auto shooting_star_casino = assembleArea(scasino);
@@ -2921,7 +2921,7 @@ void migrate_grid() {
     outdef.name = "The Outpost";
     outdef.location = celestial_plane;
 	outdef.exists = create_obj<Building>();
-    for(auto &[rv, room] : world) {
+    for(auto &[rv, room] : entities) {
         if(icontains(stripAnsi(room->getName()), "The Outpost")) outdef.roomIDs.insert(rv);
     }
     auto outpost = assembleArea(outdef);
@@ -3357,7 +3357,7 @@ void migrate_grid() {
         sdata.name = data.name;
         sdata.roomIDs = data.vnums;
         sdata.exists = create_obj<Vehicle>();
-        sdata.location = getWorld(data.location ? data.location.value() : 16694);
+        sdata.location = getEntity(data.location ? data.location.value() : 16694);
         return assembleArea(sdata);
     };
 
@@ -3468,7 +3468,7 @@ void migrate_grid() {
         14904, 15655, // kanassa
         16009, 16544, 16600 // Arlia
     }) {
-        if(auto room = getWorld<Room>(r) ; room) {
+        if(auto room = getEntity<Room>(r) ; room) {
             room->setFlag(FlagType::Room, ROOM_LANDING);
         }
     }
@@ -3577,7 +3577,7 @@ void migrate_characters() {
 
     // The procedure we will use is: iterate through characterToAccount and attempt to load the character.
     // if we can load them, we'll convert them and bind them to the appropriate account.
-    auto room = getWorld<Room>(300);
+    auto room = getEntity<Room>(300);
 
     for(auto &[cname, accID] : characterToAccount) {
         auto ch = new PlayerCharacter();
@@ -3587,7 +3587,7 @@ void migrate_characters() {
             delete ch;
             continue;
         }
-        auto id = world.contains(ch->getUID()) ? getNextUID() : ch->getUID();
+        auto id = entities.contains(ch->getUID()) ? getNextUID() : ch->getUID();
         ch->uid = id;
         auto p = std::make_shared<player_data>();
         p->id = id;
@@ -3601,7 +3601,7 @@ void migrate_characters() {
         a->adminLevel = std::max(a->adminLevel, GET_ADMLEVEL(ch));
         a->characters.emplace_back(id);
         ch->addToLocation(room);
-        setWorld(id, ch);
+        setEntity(id, ch);
     }
 
 
@@ -3703,10 +3703,10 @@ void migrate_characters() {
 
 static void migrate_exits() {
     for(auto &[uid, te] : temp_exits) {
-        if(auto e = getWorld<Exit>(uid);e) {
-            e->destination = getWorld<Room>(te.destination);
-            e->failroom = getWorld<Room>(te.failroom);
-            e->totalfailroom = getWorld<Room>(te.totalfailroom);
+        if(auto e = getEntity<Exit>(uid);e) {
+            e->destination = getEntity<Room>(te.destination);
+            e->failroom = getEntity<Room>(te.failroom);
+            e->totalfailroom = getEntity<Room>(te.totalfailroom);
         }
 
     }

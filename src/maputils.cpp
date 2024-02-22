@@ -48,7 +48,7 @@ void ping_ship(int vnum, int vnum2) {
 int checkship(int rnum, int vnum) {
     int there = false;
 
-    for (auto i : getWorld(rnum)->getInventory()) {
+    for (auto i : getEntity(rnum)->getInventory()) {
         if (!ROOM_FLAGGED(rnum, ROOM_NEBULA)) {
             if (GET_OBJ_TYPE(i) == ITEM_VEHICLE && there != true) {
                 there = true;

@@ -57,7 +57,7 @@ void dump_state_globalData(const std::filesystem::path &loc) {
 static void process_dirty_instances(const std::filesystem::path &loc) {
     nlohmann::json instances;
 
-    for(auto &[v, u] : world) {
+    for(auto &[v, u] : entities) {
         nlohmann::json j;
         j["uid"] = v;
         j["unitClass"] = u->getUnitClass();
@@ -70,7 +70,7 @@ static void process_dirty_instances(const std::filesystem::path &loc) {
 static void process_dirty_relations(const std::filesystem::path &loc) {
     nlohmann::json relations;
 
-    for(auto &[v, u] : world) {
+    for(auto &[v, u] : entities) {
         relations.push_back(std::make_pair(v, u->serializeRelations()));
     }
     dump_to_file(loc, "relations.json", relations);

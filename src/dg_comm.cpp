@@ -307,7 +307,7 @@ void send_to_sense(int type, char *messg, BaseCharacter *ch) {
         } else if (planet_check(ch, tch)) {
             std::string blah = "UNKNOWN";
             {
-                auto av = tch->getRegion();
+                auto av = tch->getWorld();
                 if(av) {
                     blah = av->getDisplayName(ch);
                 }

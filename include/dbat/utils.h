@@ -1256,7 +1256,7 @@ void send_to_planet(int type, int planet, fmt::string_view format, Args&&... arg
 
 template<typename... Args>
 void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
-    auto r = getWorld<Room>(room);
+    auto r = getEntity<Room>(room);
     if(!r) return;
     auto out = fmt::sprintf(format, std::forward<Args>(args)...);
     r->sendText(out);
@@ -1272,7 +1272,7 @@ void send_to_range(room_vnum start, room_vnum finish, fmt::string_view format, A
     auto out = fmt::sprintf(format, std::forward<Args>(args)...);
 
     for(auto r = start; r <= finish; r++) {
-        if(auto ru = getWorld<Room>(r); ru) {
+        if(auto ru = getEntity<Room>(r); ru) {
             ru->sendTextContents(out);
         }
     }

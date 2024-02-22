@@ -393,7 +393,7 @@ OCMD(do_ogoto) {
         obj_log(obj, "ogoto tried to leave nowhere");
     } else {
         obj->removeFromLocation();
-        obj->addToLocation(getWorld(target));
+        obj->addToLocation(getEntity(target));
     }
 }
 
@@ -415,7 +415,7 @@ OCMD(do_oteleport) {
         obj_log(obj, "oteleport target is an invalid room");
         return;
     }
-    auto r = getWorld<Room>(target);
+    auto r = getEntity<Room>(target);
 
     if (!strcasecmp(arg1, "all")) {
         auto rm = obj->getRoom();
@@ -480,7 +480,7 @@ OCMD(do_dgoload) {
             obj_log(obj, "oload: bad mob vnum");
             return;
         }
-        mob->addToLocation(getWorld(rnum));
+        mob->addToLocation(getEntity(rnum));
 
         if (SCRIPT(obj)) { /* It _should_ have, but it might be detached. */
             obj->script->addVar("lastloaded", mob);
@@ -499,7 +499,7 @@ OCMD(do_dgoload) {
 
         /* special handling to make objects able to load on a person/in a container/worn etc. */
         if (!target || !*target) {
-            object->addToLocation(getWorld(room));
+            object->addToLocation(getEntity(room));
             load_otrigger(object);
             return;
         }
@@ -525,7 +525,7 @@ OCMD(do_dgoload) {
             return;
         }
         /* neither char nor container found - just dump it in room */
-        object->addToLocation(getWorld(room));
+        object->addToLocation(getEntity(room));
         load_otrigger(object);
         return;
     } else
@@ -662,7 +662,7 @@ OCMD(do_odoor) {
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->destination = getWorld<Room>(to_room);
+                    newexit->destination = getEntity<Room>(to_room);
                 else
                     obj_log(obj, "odoor: invalid door target");
                 break;
@@ -723,7 +723,7 @@ OCMD(do_oat) {
 
     if (!(object = read_object(GET_OBJ_VNUM(obj), VIRTUAL)))
         return;
-    object->addToLocation(getWorld(loc));
+    object->addToLocation(getEntity(loc));
     object->executeCommand(command);
 
     if (IN_ROOM(object) == loc)

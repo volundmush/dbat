@@ -656,7 +656,7 @@ room_vnum BaseCharacter::normalizeLoadRoom(room_vnum in) {
     }
 
     // if lroom is valid, save it... else... emergency fallback to mud school.
-    if(world.contains(lroom)) return lroom;
+    if(entities.contains(lroom)) return lroom;
     return CONFIG_MORTAL_START;
 
 }
@@ -1929,10 +1929,10 @@ void BaseCharacter::login() {
     }
     if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1 && GET_LOADROOM(this) != NOWHERE) {
         removeFromLocation();
-        addToLocation(getWorld(GET_LOADROOM(this)));
+        addToLocation(getEntity(GET_LOADROOM(this)));
     } else if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1) {
         removeFromLocation();
-        addToLocation(getWorld(300));
+        addToLocation(getEntity(300));
     } else {
         lookAtLocation();
     }
@@ -2243,9 +2243,9 @@ void BaseCharacter::resurrect(ResurrectionMode mode) {
     // Send them to their starting room and have them 'look'.
     removeFromLocation();
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
-        addToLocation(getWorld(GET_DROOM(this)));
+        addToLocation(getEntity(GET_DROOM(this)));
     } else {
-        addToLocation(getWorld(sensei::getStartRoom(chclass)));
+        addToLocation(getEntity(sensei::getStartRoom(chclass)));
     }
     lookAtLocation();
 
@@ -2322,7 +2322,7 @@ void BaseCharacter::ghostify() {
 
 void BaseCharacter::teleport_to(IDXTYPE rnum) {
     removeFromLocation();
-    auto r = getWorld<Room>(rnum);
+    auto r = getEntity<Room>(rnum);
     addToLocation(r);
     lookAtLocation();
     update_pos(this);

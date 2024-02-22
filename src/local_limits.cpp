@@ -1525,7 +1525,7 @@ void timed_dt(BaseCharacter *ch) {
           value decreased if its not -1.
           */
 
-        for (auto &[vn, u] : world) {
+        for (auto &[vn, u] : entities) {
             auto r = dynamic_cast<Room*>(u);
             if(!r) continue;
             r->timed -= (r->timed != -1);

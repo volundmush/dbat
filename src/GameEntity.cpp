@@ -611,7 +611,7 @@ bool GameEntity::isEnvironment() {
 }
 
 
-bool GameEntity::isRegion() {
+bool GameEntity::isWorld() {
     return false;
 }
 
@@ -633,10 +633,10 @@ GameEntity* GameEntity::getEnvironment() {
     return nullptr;
 }
 
-GameEntity* GameEntity::getRegion() {
+GameEntity* GameEntity::getWorld() {
     auto loc = getLocation();
     while(loc) {
-        if(loc->isRegion()) return loc;
+        if(loc->isWorld()) return loc;
         loc = loc->getLocation();
         if(loc == this) return nullptr;
     }

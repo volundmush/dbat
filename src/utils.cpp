@@ -2875,7 +2875,7 @@ void core_dump_real(const char *who, int line) {
 
 /* Is there a campfire in the room? */
 int cook_element(room_rnum room) {
-    auto r = getWorld<Room>(room);
+    auto r = getEntity<Room>(room);
     if (!r) {
         basic_mud_log("cook_element: Invalid room rnum %d.", room);
         return 0;
@@ -3245,7 +3245,7 @@ bool OBJAFF_FLAGGED(Object *obj, int flag) {
 
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
     
-    if (auto r = getWorld<Room>(loc); r) return r->checkFlag(FlagType::Room, flag);
+    if (auto r = getEntity<Room>(loc); r) return r->checkFlag(FlagType::Room, flag);
     return false;
 }
 
@@ -3417,7 +3417,7 @@ std::string withPlaceholder(const std::string& str, const std::string& placehold
 }
 
 int SECT(room_vnum room) {
-    if(auto u = world.find(room); u != world.end()) {
+    if(auto u = entities.find(room); u != entities.end()) {
         auto r = dynamic_cast<Room*>(u->second);
         if(r) return r->sector_type;
     }
@@ -3425,22 +3425,22 @@ int SECT(room_vnum room) {
 }
 
 int ROOM_DAMAGE(room_vnum room) {
-    if(auto r = getWorld<Room>(room);r ) return r->dmg;
+    if(auto r = getEntity<Room>(room);r ) return r->dmg;
     return 0;
 }
 
 int ROOM_EFFECT(room_vnum room) {
-    if(auto r = getWorld<Room>(room);r ) return r->geffect;
+    if(auto r = getEntity<Room>(room);r ) return r->geffect;
     return 0;
 }
 
 double ROOM_GRAVITY(room_vnum room) {
-    if(auto r = getWorld<Room>(room);r ) return r->getEnvVar(EnvVar::Gravity);
+    if(auto r = getEntity<Room>(room);r ) return r->getEnvVar(EnvVar::Gravity);
     return 1.0;
 }
 
 SpecialFunc GET_ROOM_SPEC(room_vnum room) {
-    if(auto r = getWorld<Room>(room); r) return r->func;
+    if(auto r = getEntity<Room>(room); r) return r->func;
     return nullptr;
 }
 
@@ -3490,7 +3490,7 @@ Exit* THIRD_EXIT(GameEntity *ch, int door) {
 }
 
 Exit* W_EXIT(room_rnum room, int door) {
-    if(auto r = getWorld<Room>(room); r) {
+    if(auto r = getEntity<Room>(room); r) {
         if(!r) return nullptr;
         auto ex = r->getExits();
         if(auto found = ex.find(door); found != ex.end()) {

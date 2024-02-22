@@ -2239,7 +2239,7 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 void reassign_rooms() {
 
     /* remove old funcs */
-    for (auto &[vn, u] : world) {
+    for (auto &[vn, u] : entities) {
         auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         r->func = nullptr;

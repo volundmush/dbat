@@ -8,3 +8,10 @@ std::string Stellar::getUnitClass() {
     return "Stellar";
 }
 
+bool Stellar::isWorld() {
+    return true;
+}
+
+bool Stellar::isEnvironment() {
+    return true;
+}

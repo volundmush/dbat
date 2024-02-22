@@ -465,7 +465,7 @@ char *str_str(char *cs, char *ct) {
 
 
 int trgvar_in_room(room_vnum vnum) {
-    auto r = getWorld<Room>(vnum);
+    auto r = getEntity<Room>(vnum);
     if(!r) return 0;
     int i = 0;
 
@@ -762,7 +762,7 @@ Room *get_room(char *name) {
     else if ((nr = real_room(atoi(name))) == NOWHERE)
         return nullptr;
     else
-        return getWorld<Room>(nr);
+        return getEntity<Room>(nr);
 }
 
 
@@ -858,7 +858,7 @@ Object *get_obj_by_obj(Object *obj, char *name) {
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
-        (i = get_obj_in_list(name, getWorld<Room>(rm)->getInventory())))
+        (i = get_obj_in_list(name, getEntity<Room>(rm)->getInventory())))
         return i;
 
     return get_obj(name);
@@ -922,7 +922,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
                 random_otrigger(obj);
     }
 
-    for (auto &[vn, u] : world) {
+    for (auto &[vn, u] : entities) {
         auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         auto sc = SCRIPT(r); 
@@ -952,7 +952,7 @@ void check_time_triggers() {
                 time_otrigger(obj);
     }
 
-    for (auto &[vn, u] : world) {
+    for (auto &[vn, u] : entities) {
         auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         auto sc = SCRIPT(r);
@@ -979,7 +979,7 @@ void check_interval_triggers(int trigFlag) {
                 interval_otrigger(obj, trigFlag);
     }
 
-    for (auto &[vn, u] : world) {
+    for (auto &[vn, u] : entities) {
         auto r = dynamic_cast<Room*>(u);
         if(!r) continue;
         auto sc = SCRIPT(r);
@@ -1232,7 +1232,7 @@ ACMD(do_attach) {
         else
             rnum = NOWHERE;
         
-        auto room = getWorld<Room>(rnum);
+        auto room = getEntity<Room>(rnum);
 
         if (!room) {
             ch->sendf("You need to supply a room number or . for current room.\r\n");
@@ -1253,7 +1253,7 @@ ACMD(do_attach) {
         room->script->addTrigger(trig, loc);
 
         ch->sendf("Trigger %d (%s) attached to room %d.\r\n",
-                     tn, GET_TRIG_NAME(trig), getWorld<Room>(rnum)->getVN());
+                     tn, GET_TRIG_NAME(trig), getEntity<Room>(rnum)->getVN());
     } else
         ch->sendf("Please specify 'mob', 'obj', or 'room'.\r\n");
 }

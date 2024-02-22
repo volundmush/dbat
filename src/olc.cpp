@@ -123,7 +123,7 @@ ACMD(do_olc) {
 	 ch->sendf("That room is not modifyable.\r\n");
      else
 */
-            olc_targ = (void *) &(world[rnum]);
+            olc_targ = (void *) &(entities[rnum]);
             break;
         case OLC_MOB:
             argument = one_argument(argument, arg);

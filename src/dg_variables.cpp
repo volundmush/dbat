@@ -220,7 +220,7 @@ DgResults scriptFindMob(trig_data *trig, const std::string& field, const std::st
         return "0";
     }
     auto i = 0;
-    for (auto ch : getWorld<Room>(rrnum)->getPeople())
+    for (auto ch : getEntity<Room>(rrnum)->getPeople())
         if (GET_MOB_VNUM(ch) == mvnum)
             i++;
     return fmt::format("{}", i);
@@ -236,7 +236,7 @@ DgResults scriptFindObj(trig_data *trig, const std::string& field, const std::st
         return "0";
     }
      /* item_in_list looks within containers as well. */
-    return fmt::format("{}", item_in_list((char*)args.c_str(), getWorld<Room>(rrnum)->getInventory()));
+    return fmt::format("{}", item_in_list((char*)args.c_str(), getEntity<Room>(rrnum)->getInventory()));
 }
 
 DgResults scriptGlobal(trig_data *trig, const std::string& field, const std::string& args) {

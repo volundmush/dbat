@@ -662,9 +662,9 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 
     // The object which is 'roughly where the unit is.' This is likely a planet, dimension,
     // or similar major boundary.
-    GameEntity* getRegion();
+    GameEntity* getWorld();
 
-    virtual bool isRegion();
+    virtual bool isWorld();
 
     // The object which represents a point of entry/exit. This is likely a vehicle, structure, planet, etc.
     // You can generally board/land/enter these things and similarly leave/fly out of them.
@@ -997,8 +997,6 @@ struct Structure : public GameEntity {
 
     bool isInsideNormallyDark(GameEntity* viewer) override;
     bool isInsideDark(GameEntity* viewer) override;
-    bool isEnvironment() override;
-    bool isStructure() override;
 
     std::vector<std::pair<std::string, Destination>> getLandingSpotsFor(GameEntity *mover) override;
     std::optional<Destination> getLaunchDestinationFor(GameEntity *mover) override;
@@ -1018,6 +1016,9 @@ struct Vehicle : public Structure {
     void sendText(const std::string& text) override;
 
     void executeCommand(const std::string& argument) override;
+
+    bool isEnvironment() override;
+    bool isStructure() override;
 };
 
 // Note: Also used for moons, planetoids, dwarf planets, gigantic asteroids and... 
@@ -1027,6 +1028,11 @@ struct Planet : public Structure {
     explicit Planet(const nlohmann::json &j);
 
     std::string getUnitClass() override;
+
+    bool isEnvironment() override;
+    bool isPlanet() override;
+    bool isStructure() override;
+    bool isWorld() override;
 };
 
 // Used for things like space stations, large buildings, possibly elaborate dungeons.
@@ -1034,7 +1040,11 @@ struct Building : public Structure {
     Building() = default;
     explicit Building(const nlohmann::json &j);
 
+
     std::string getUnitClass() override;
+    
+    bool isEnvironment() override;
+    bool isStructure() override;
 };
 
 // Used for regions - usually wilderness areas like forests, plains, deserts, mountaintops, etc.
@@ -1050,6 +1060,8 @@ struct Dimension : public Structure {
     explicit Dimension(const nlohmann::json &j);
 
     std::string getUnitClass() override;
+    bool isEnvironment() override;
+    bool isWorld() override;
 };
 
 
@@ -1058,6 +1070,8 @@ struct Interstellar : public Structure {
     explicit Interstellar(const nlohmann::json &j);
 
     std::string getUnitClass() override;
+    bool isWorld() override;
+    bool isEnvironment() override;
 };
 
 struct Stellar : public Structure {
@@ -1065,6 +1079,8 @@ struct Stellar : public Structure {
     explicit Stellar(const nlohmann::json &j);
 
     std::string getUnitClass() override;
+    bool isWorld() override;
+    bool isEnvironment() override;
 };
 
 
@@ -2309,7 +2325,7 @@ class Dispatcher {
                 break;
             case SearchType::World: {
                 std::vector<GameEntity*> out;
-                for(auto [id, obj] : world) {
+                for(auto [id, obj] : entities) {
                     out.push_back(obj);
                 }
                 return out;

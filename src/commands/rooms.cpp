@@ -334,7 +334,7 @@ WCMD(do_wdoor) {
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->destination = getWorld<Room>(to_room);
+                    newexit->destination = getEntity<Room>(to_room);
                 else
                     wld_log(room, "wdoor: invalid door target");
                 break;
@@ -362,7 +362,7 @@ WCMD(do_wteleport) {
         wld_log(room, "wteleport target is an invalid room");
         return;
     }
-    auto r = getWorld<Room>(target);
+    auto r = getEntity<Room>(target);
 
     if (!strcasecmp(arg1, "all")) {
         if (nr == room->getUID()) {
@@ -502,7 +502,7 @@ WCMD(do_wload) {
             wld_log(room, "mload: bad mob vnum");
             return;
         }
-        mob->addToLocation(getWorld(rnum));
+        mob->addToLocation(getEntity(rnum));
         if (SCRIPT(room)) { /* It _should_ have, but it might be detached. */
             room->script->addVar("lastloaded", mob);
         }
@@ -600,7 +600,7 @@ WCMD(do_wat) {
         loc = IN_ROOM(ch);
     }
 
-    auto r = getWorld<Room>(loc);
+    auto r = getEntity<Room>(loc);
     if (!r) {
         wld_log(room, "wat: location not found (%s)", arg);
         return;

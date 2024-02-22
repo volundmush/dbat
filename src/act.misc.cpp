@@ -482,7 +482,7 @@ static void resolve_song(BaseCharacter *ch) {
                 if (vict == ch)
                     continue;
                 auto &dest = song_destinations.at((int)GET_SONG(ch));
-                auto r = getWorld(dest.first);
+                auto r = getEntity(dest.first);
                 if (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(vict, AFF_GROUP)) {
                     if (ch == vict->master || ch->master == vict || ch->master == vict->master) {
                         if (skill > diceroll) {
@@ -542,7 +542,7 @@ static void resolve_song(BaseCharacter *ch) {
             act(fmt::format("@CYour Teleportation Melody has transported you to @c{}@C!@n", name).c_str(), true, ch, nullptr, nullptr, TO_CHAR);
             act(fmt::format("@c$n's@C Teleportation Melody has transported $m to @c{}@C!@n",name).c_str(), true, ch, nullptr, nullptr, TO_ROOM);
             ch->removeFromLocation();
-            ch->addToLocation(getWorld(room));
+            ch->addToLocation(getEntity(room));
             ch->set(CharNum::MysticMelody, 0);
         }
     }
@@ -3313,8 +3313,7 @@ ACMD(do_arena) {
             ch->sendf("You are not even watching anyone in the arena.\r\n");
             return;
         } else if (arena_watch(ch) != NOWHERE) {
-            ch->sendLine(getWorld<Room>(arena_watch(ch))->renderLocationFor(ch));
-            //ch->sendEvent(getWorld(arena_watch(ch))->renderLocationFor(ch));
+            ch->sendLine(getEntity<Room>(arena_watch(ch))->renderLocationFor(ch));
         }
     } else if (!strcasecmp(arg, "scan")) {
         if (GET_ROOM_VNUM(IN_ROOM(ch)) == 17875) {
@@ -5053,7 +5052,7 @@ ACMD(do_warppool) {
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_WARP, 1);
         ch->removeFromLocation();
-        ch->addToLocation(getWorld(wfind->second.second));
+        ch->addToLocation(getEntity(wfind->second.second));
         act("@CSuddenly a large whirlpool of flashing water begins to form nearby. After a few seconds @c$n@C pops out of the center of the pool! The water then return to normal a moment laterr...@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->decCurKI(cost);
@@ -5165,7 +5164,7 @@ ACMD(do_obstruct) {
     }
 
     auto obj2 = read_object(79, VIRTUAL);
-    obj2->addToLocation(getWorld(newroom));
+    obj2->addToLocation(getEntity(newroom));
     auto obj3 = read_object(79, VIRTUAL);
     obj3->addToLocation(ch->getRoom());
 

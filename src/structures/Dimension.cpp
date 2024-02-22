@@ -8,3 +8,10 @@ std::string Dimension::getUnitClass() {
     return "Dimension";
 }
 
+bool Dimension::isWorld() {
+    return true;
+}
+
+bool Dimension::isEnvironment() {
+    return true;
+}

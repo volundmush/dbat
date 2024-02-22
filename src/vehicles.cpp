@@ -411,7 +411,7 @@ void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir) {
 
     Object *hatch = nullptr;
 
-    for (auto hatch : getWorld(real_room(GET_OBJ_VAL(vehicle, 0)))->getInventory()) {
+    for (auto hatch : getEntity(real_room(GET_OBJ_VAL(vehicle, 0)))->getInventory()) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             GET_OBJ_VAL(hatch, 3) = GET_ROOM_VNUM(IN_ROOM(vehicle));
         }
@@ -771,29 +771,29 @@ ACMD(do_drive) {
                     act("@wThe ship slams into the ground and forms a small crater!@n", false, ch, nullptr, nullptr,
                         TO_ROOM);
                     vehicle->removeFromLocation();
-                    vehicle->addToLocation(getWorld(land_location));
+                    vehicle->addToLocation(getEntity(land_location));
                 } else if (IN_ROOM(vehicle) == real_room(50)) {
                     if (!strcasecmp(arg2, "1")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(409));
+                        vehicle->addToLocation(getEntity(409));
                     } else if (!strcasecmp(arg2, "2")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(411));
+                        vehicle->addToLocation(getEntity(411));
                     } else if (!strcasecmp(arg2, "3")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(412));
+                        vehicle->addToLocation(getEntity(412));
                     } else if (!strcasecmp(arg2, "4")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(410));
+                        vehicle->addToLocation(getEntity(410));
                     } else if (!strcasecmp(arg2, "4365")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(18904));
+                        vehicle->addToLocation(getEntity(18904));
                     } else if (!strcasecmp(arg2, "6329")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(18925));
+                        vehicle->addToLocation(getEntity(18925));
                     } else if (!strcasecmp(arg2, "1983")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(18995));
+                        vehicle->addToLocation(getEntity(18995));
                     } else {
                         act("@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr,
                             TO_CHAR);
@@ -804,35 +804,35 @@ ACMD(do_drive) {
                     /* For Zenith */
                 else if (IN_ROOM(vehicle) == real_room(57)) {
                     vehicle->removeFromLocation();
-                    vehicle->addToLocation(getWorld(3508));
+                    vehicle->addToLocation(getEntity(3508));
                 }
                     /* For Cerria*/
                 else if (IN_ROOM(vehicle) == real_room(198)) {
                     vehicle->removeFromLocation();
-                    vehicle->addToLocation(getWorld(17420));
+                    vehicle->addToLocation(getEntity(17420));
                 }
                     /* For Kanassa */
                 else if (IN_ROOM(vehicle) == real_room(58)) {
                     vehicle->removeFromLocation();
-                    vehicle->addToLocation(getWorld(14904));
+                    vehicle->addToLocation(getEntity(14904));
                 }
                     /* For Vegeta */
                 else if (IN_ROOM(vehicle) == real_room(53)) {
                     if (!strcasecmp(arg2, "1")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(2319));
+                        vehicle->addToLocation(getEntity(2319));
                     } else if (!strcasecmp(arg2, "2")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(2318));
+                        vehicle->addToLocation(getEntity(2318));
                     } else if (!strcasecmp(arg2, "3")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(2320));
+                        vehicle->addToLocation(getEntity(2320));
                     } else if (!strcasecmp(arg2, "4")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(2322));
+                        vehicle->addToLocation(getEntity(2322));
                     } else if (!strcasecmp(arg2, "4126")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(18212));
+                        vehicle->addToLocation(getEntity(18212));
                     } else {
                         act("@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr,
                             TO_CHAR);
@@ -845,16 +845,16 @@ ACMD(do_drive) {
                 else if (IN_ROOM(vehicle) == real_room(56)) {
                     if (!strcasecmp(arg2, "1")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(14003));
+                        vehicle->addToLocation(getEntity(14003));
                     } else if (!strcasecmp(arg2, "2")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(14004));
+                        vehicle->addToLocation(getEntity(14004));
                     } else if (!strcasecmp(arg2, "3")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(14005));
+                        vehicle->addToLocation(getEntity(14005));
                     } else if (!strcasecmp(arg2, "4")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(14006));
+                        vehicle->addToLocation(getEntity(14006));
                     } else {
                         act("@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr,
                             TO_CHAR);
@@ -867,16 +867,16 @@ ACMD(do_drive) {
                 else if (IN_ROOM(vehicle) == real_room(55)) {
                     if (!strcasecmp(arg2, "1")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(12003));
+                        vehicle->addToLocation(getEntity(12003));
                     } else if (!strcasecmp(arg2, "2")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(12004));
+                        vehicle->addToLocation(getEntity(12004));
                     } else if (!strcasecmp(arg2, "3")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(12006));
+                        vehicle->addToLocation(getEntity(12006));
                     } else if (!strcasecmp(arg2, "4")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(12005));
+                        vehicle->addToLocation(getEntity(12005));
                     } else {
                         act("@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr,
                             TO_CHAR);
@@ -889,16 +889,16 @@ ACMD(do_drive) {
                 else if (IN_ROOM(vehicle) == real_room(59)) {
                     if (!strcasecmp(arg2, "1")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(16065));
+                        vehicle->addToLocation(getEntity(16065));
                     } else if (!strcasecmp(arg2, "2")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(16066));
+                        vehicle->addToLocation(getEntity(16066));
                     } else if (!strcasecmp(arg2, "3")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(16067));
+                        vehicle->addToLocation(getEntity(16067));
                     } else if (!strcasecmp(arg2, "4")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(16068));
+                        vehicle->addToLocation(getEntity(16068));
                     } else {
                         act("@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr,
                             TO_CHAR);
@@ -912,19 +912,19 @@ ACMD(do_drive) {
                 else if (IN_ROOM(vehicle) == real_room(51)) {
                     if (!strcasecmp(arg2, "1")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(4264));
+                        vehicle->addToLocation(getEntity(4264));
                     } else if (!strcasecmp(arg2, "2")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(4263));
+                        vehicle->addToLocation(getEntity(4263));
                     } else if (!strcasecmp(arg2, "3")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(4261));
+                        vehicle->addToLocation(getEntity(4261));
                     } else if (!strcasecmp(arg2, "4")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(4262));
+                        vehicle->addToLocation(getEntity(4262));
                     } else if (!strcasecmp(arg2, "1337")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(18116));
+                        vehicle->addToLocation(getEntity(18116));
                     } else {
                         act("@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr,
                             TO_CHAR);
@@ -936,16 +936,16 @@ ACMD(do_drive) {
                 else if (IN_ROOM(vehicle) == real_room(54)) {
                     if (!strcasecmp(arg2, "1")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(11628));
+                        vehicle->addToLocation(getEntity(11628));
                     } else if (!strcasecmp(arg2, "2")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(11629));
+                        vehicle->addToLocation(getEntity(11629));
                     } else if (!strcasecmp(arg2, "3")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(11630));
+                        vehicle->addToLocation(getEntity(11630));
                     } else if (!strcasecmp(arg2, "4")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(11627));
+                        vehicle->addToLocation(getEntity(11627));
                     } else {
                         act("@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr,
                             TO_CHAR);
@@ -957,16 +957,16 @@ ACMD(do_drive) {
                 else if (IN_ROOM(vehicle) == real_room(52)) {
                     if (!strcasecmp(arg2, "1")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(8195));
+                        vehicle->addToLocation(getEntity(8195));
                     } else if (!strcasecmp(arg2, "2")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(8196));
+                        vehicle->addToLocation(getEntity(8196));
                     } else if (!strcasecmp(arg2, "3")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(8197));
+                        vehicle->addToLocation(getEntity(8197));
                     } else if (!strcasecmp(arg2, "4")) {
                         vehicle->removeFromLocation();
-                        vehicle->addToLocation(getWorld(8198));
+                        vehicle->addToLocation(getEntity(8198));
                     } else {
                         act("@wLanding sequence aborted, improper coordinates.@n", false, ch, nullptr, nullptr,
                             TO_CHAR);

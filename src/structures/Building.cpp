@@ -8,3 +8,10 @@ std::string Building::getUnitClass() {
     return "Building";
 }
 
+bool Building::isStructure() {
+    return true;
+}
+
+bool Building::isEnvironment() {
+    return true;
+}

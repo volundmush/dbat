@@ -131,7 +131,7 @@ double Room::getEnvVar(EnvVar v) {
 }
 
 bool Room::isActive() {
-    return world.contains(vn);
+    return entities.contains(vn);
 }
 
 

@@ -4750,7 +4750,7 @@ void hurt(int limb, int chance, BaseCharacter *ch, BaseCharacter *vict, Object *
         if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && vict->getCurHealth() - dmg <= 0) {
             if (IN_ARENA(vict)) {
                 send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(ch), GET_NAME(vict));
-                auto r = getWorld<Room>(17875);
+                auto r = getEntity<Room>(17875);
                 for(auto x : {ch, vict}) {
                     x->removeFromLocation();
                     x->addToLocation(r);
@@ -4780,7 +4780,7 @@ void hurt(int limb, int chance, BaseCharacter *ch, BaseCharacter *vict, Object *
                 }
                 GET_POS(vict) = POS_SITTING;
                 vict->removeFromLocation();
-                vict->addToLocation(getWorld((sensei::getStartRoom(vict->chclass))));
+                vict->addToLocation(getEntity((sensei::getStartRoom(vict->chclass))));
 
             }
             return;

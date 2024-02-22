@@ -16,3 +16,11 @@ void Vehicle::executeCommand(const std::string& command) {
 void Vehicle::sendText(const std::string& text) {
 
 }
+
+bool Vehicle::isStructure() {
+    return true;
+}
+
+bool Vehicle::isEnvironment() {
+    return true;
+}
