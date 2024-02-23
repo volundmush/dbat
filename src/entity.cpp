@@ -3,11 +3,19 @@
 #include "dbat/races.h"
 
 void deserializeEntity(entt::entity ent, const nlohmann::json& j) {
-
+    if(j.contains("Flags")) {
+        auto &flags = reg.get_or_emplace<Flags>(ent);
+        flags.deserialize(j["Flags"]);
+    }
+    
 }
 
 void serializeEntity(entt::entity ent, nlohmann::json& j) {
     nlohmann::json j;
+
+    if(auto flags = reg.try_get<Flags>(ent); flags) {
+        j["Flags"] = flags.serialize();
+    }
 
     return j;
 }
