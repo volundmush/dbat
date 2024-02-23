@@ -2,6 +2,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
 #include "dbat/constants.h"
+#include "dbat/entity.h"
 
 bool Coordinates::operator==(const Coordinates& rhs) const {
     return x == rhs.x && y == rhs.y && z == rhs.z;
@@ -39,22 +40,6 @@ void Coordinates::clear() {
     z = 0;
 }
 
-extra_descr_data::extra_descr_data(const nlohmann::json& j) {
-    deserialize(j);
-}
-
-void extra_descr_data::deserialize(const nlohmann::json& j) {
-    if(j.contains("keyword")) keyword = j["keyword"];
-    if(j.contains("description")) description = j["description"];
-}
-
-nlohmann::json extra_descr_data::serialize() {
-    nlohmann::json j;
-    if(!keyword.empty()) j["keyword"] = keyword;
-    if(!description.empty()) j["description"] = description;
-    return j;
-}
-
 
 std::string GameEntity::renderRoomListingFor(GameEntity *viewer) {
     std::vector<std::string> results;
@@ -66,72 +51,37 @@ std::string GameEntity::renderRoomListingFor(GameEntity *viewer) {
 }
 
 std::vector<GameEntity*> GameEntity::getContents() {
-    if(auto con = reg.try_get<EntityContents>(ent); con) {
-        return con->contents;
-    }
-    return {};
+    return contents::getContents(ent);
 }
 
 std::vector<Room*> GameEntity::getRooms() {
-    std::vector<Room*> out;
-    for(auto u : getContents()) {
-        if(auto r = dynamic_cast<Room*>(u); r) out.push_back(r);
-    }
-    return out;
+    return contents::getRooms(ent);
 }
 
-std::vector<BaseCharacter*> GameEntity::getPeople() {
-    std::vector<BaseCharacter*> out;
-    for(auto u : getContents()) {
-        if(auto c = dynamic_cast<BaseCharacter*>(u); c) out.push_back(c);
-    }
-    return out;
+std::vector<Character*> GameEntity::getPeople() {
+    return contents::getPeople(ent);
 }
 
 std::vector<Object*> GameEntity::getInventory() {
-    std::vector<Object*> out;
-    for(auto u : getContents()) {
-        auto o = dynamic_cast<Object*>(u);
-        if(!o) continue;
-        auto &loc = reg.get<Location>(o->ent);
-        if(loc.locationType == 0) out.push_back(o);
-    }
-    return out;
+    return contents::getInventory(ent);
 }
 
 std::map<int, Object*> GameEntity::getEquipment() {
-    std::map<int, Object*> out;
-    for(auto u : getContents()) {
-        auto o = dynamic_cast<Object*>(u);
-        if(!o) continue;
-        auto &loc = reg.get<Location>(o->ent);
-        if(loc.locationType > 0) out[loc.locationType] = o;
-    }
-    return out;
+    return contents::getEquipment(ent);
 }
 
 std::map<int, Exit*> GameEntity::getExits() {
-    std::map<int, Exit*> out;
-    for(auto u : getContents()) {
-        auto o = dynamic_cast<Exit*>(u);
-        if(!o) continue;
-        auto &loc = reg.get<Location>(o->ent);
-        out[loc.locationType] = o;
-    }
-    return out;
+    return contents::getExits(ent);
 }
 
 std::map<int, Exit*> GameEntity::getUsableExits() {
     std::map<int, Exit*> out;
-    for(auto u : getContents()) {
-        auto o = dynamic_cast<Exit*>(u);
-        if(!o) continue;
+    for(auto &[door, o] : getExits(ent)) {
         if(o->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
         auto dest = o->getDestination();
         if(!dest) continue;
         if(dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
-        auto &loc = reg.get<Location>(o->ent);
-        out[loc.locationType] = o;
+        out[door] = o;
     }
     return out;
 }
@@ -307,48 +257,43 @@ bool GameEntity::isActive() {
 }
 
 std::string GameEntity::getName() {
-    if(auto found = strings.find("name"); found != strings.end()) return found->second->get();
-    return "";
+    return text::get(ent, "name");
 }
 
 void GameEntity::setName(const std::string& n) {
-    strings["name"] = internString(n);
+    text::set(ent, "name", n);
 }
 
 std::string GameEntity::getAlias() {
-    if(auto found = strings.find("alias"); found != strings.end()) return found->second->get();
-    return "";
+    return text::get(ent, "alias");
 }
 
 void GameEntity::setAlias(const std::string& n) {
-    strings["alias"] = internString(n);
+    text::set(ent, "alias", n);
 }
 
 std::string GameEntity::getShortDesc() {
-    if(auto found = strings.find("short_description"); found != strings.end()) return found->second->get();
-    return getName();
+    return text::get(ent, "short_description");
 }
 
 void GameEntity::setShortDesc(const std::string& n) {
-    strings["short_description"] = internString(n);
+    text::set(ent, "short_description", n);
 }
 
 std::string GameEntity::getRoomDesc() {
-    if(auto found = strings.find("room_description"); found != strings.end()) return found->second->get();
-    return getName();
+    return text::get(ent, "room_description");
 }
 
 void GameEntity::setRoomDesc(const std::string& n) {
-    strings["room_description"] = internString(n);
+    text::set(ent, "room_description", n);
 }
 
 std::string GameEntity::getLookDesc() {
-    if(auto found = strings.find("look_description"); found != strings.end()) return found->second->get();
-    return "";
+    return text::get(ent, "look_description");
 }
 
 void GameEntity::setLookDesc(const std::string& n) {
-    strings["look_description"] = internString(n);
+    text::set(ent, "look_description", n);
 }
 
 
@@ -421,77 +366,15 @@ void GameEntity::assignTriggers() {
 }
 
 std::vector<std::string> GameEntity::getFlagNames(FlagType type) {
-    std::vector<std::string> out;
-
-    auto f = flags.find(type);
-    if(f == flags.end()) return out;
-
-    switch(type) {
-        case FlagType::Admin:
-            for(auto i : f->second) {
-                out.push_back(admin_flag_names[i]);
-            }
-            break;
-        case FlagType::PC:
-            for(auto i : f->second) {
-                out.push_back(player_bits[i]);
-            }
-            break;
-        case FlagType::NPC:
-            for(auto i : f->second) {
-                out.push_back(action_bits[i]);
-            }
-            break;
-        case FlagType::Wear:
-            for(auto i : f->second) {
-                out.push_back(wear_bits[i]);
-            }
-            break;
-        case FlagType::Item:
-            for(auto i : f->second) {
-                out.push_back(extra_bits[i]);
-            }
-            break;
-        case FlagType::Affect:
-            for(auto i : f->second) {
-                out.push_back(affected_bits[i]);
-            }
-            break;
-        case FlagType::Pref:
-            for(auto i : f->second) {
-                out.push_back(preference_bits[i]);
-            }
-            break;
-        case FlagType::Room:
-            for(auto i : f->second) {
-                out.push_back(room_bits[i]);
-            }
-            break;
-        case FlagType::Exit:
-            for(auto i : f->second) {
-                out.push_back(exit_bits[i]);
-            }
-            break;
-    }
-
-    return out;
-
+    return flags::getNames(ent, type);
 }
 
 bool GameEntity::checkFlag(FlagType type, int flag) {
-    if(auto foundType = flags.find(type); foundType != flags.end()) {
-        return foundType->second.contains(flag);
-    }
-    return false;
+    return flags::check(ent, type, flag);
 }
 
 void GameEntity::setFlag(FlagType type, int flag, bool value) {
-    auto &f = flags[type];
-    if(value) {
-        f.insert(flag);
-    } else {
-        f.erase(flag);
-    }
+    flags::set(ent, type, flag, value);
 }
 
 void GameEntity::clearFlag(FlagType type, int flag) {
@@ -499,80 +382,17 @@ void GameEntity::clearFlag(FlagType type, int flag) {
 }
 
 bool GameEntity::flipFlag(FlagType type, int flag) {
-    auto &f = flags[type];
-    if(f.contains(flag)) {
-        f.erase(flag);
-        return false;
-    } else {
-        f.insert(flag);
-        return true;
-    }
-}
-
-
-nlohmann::json GameEntity::serializeRelations() {
-    nlohmann::json j = nlohmann::json::object();
-
-    if(auto loc = reg.try_get<Location>(ent) ; loc) {
-        j["location"] = loc->serialize();
-    }
-
-    return j;
-}
-
-void GameEntity::deserializeRelations(const nlohmann::json& j) {
-    if(j.contains("location")) {
-        auto &loc = reg.get_or_emplace<Location>(ent, j["location"]);
-    }
+    return flags::flip(ent, type, flag);
 }
 
 void GameEntity::addToLocation(const Destination &dest) {
-    if(auto location = reg.try_get<Location>(ent); location) {
-        if(location->location != dest.target) {
-            basic_mud_log("Attempted to add unit '%d: %s' to location, but location was already found.", uid, getName().c_str());
-            return;
-        }
-        locationType = dest.locationType;
-        auto prevCoords = coords;
-        coords = dest.coords;
-        location->location->updateCoordinates(this, prevCoords);
-    } else {
-        auto &loc = reg.get_or_emplace<Location>(ent);
-        loc.location = dest.target;
-        loc.locationType = dest.locationType;
-        loc.coords = dest.coords;
-        dest.target->handleAdd(this);
-    }
+    contents::addTo(ent, dest);
 }
 
 void GameEntity::removeFromLocation() {
-    if(auto loc = reg.try_get<Location>(ent); !loc) {
-        basic_mud_log("Attempted to remove unit '%d: %s' from location, but location was not found.", uid, getName().c_str());
-        return;
-    } else {
-        loc->location->handleRemove(this);
-        reg.remove<Location>(ent);
-    }
-    
+    contents::removeFrom(ent);
 }
 
-void GameEntity::updateCoordinates(GameEntity *u, std::optional<Coordinates> previous) {
-    // does nothing by default.
-}
-
-void GameEntity::handleAdd(GameEntity *u) {
-    auto &con = reg.get_or_emplace<EntityContents>(ent);
-    con.contents.push_back(u);
-    updateCoordinates(u);
-}
-
-
-void GameEntity::handleRemove(GameEntity *u) {
-    if(auto con = reg.try_get<EntityContents>(ent); con) {
-        std::erase_if(con->contents, [u](auto c) {return c == u;});
-        if(con->contents.empty()) reg.remove<EntityContents>(ent);
-    }
-}
 
 std::vector<GameEntity*> GameEntity::getNeighbors(bool visible) {
     auto loc = getLocation();
@@ -796,7 +616,7 @@ std::optional<std::string> GameEntity::checkAllowRemove(GameEntity *u) {
 }
 
 int64_t GameEntity::getUID() {
-    return uid;
+    return info::uid(ent);
 }
 
 vnum GameEntity::getVN() {
@@ -820,20 +640,7 @@ std::optional<Destination> GameEntity::getDestination(GameEntity* viewer, int di
 }
 
 std::string GameEntity::renderListPrefixFor(GameEntity *viewer) {
-    std::vector<std::string> sections;
-
-    if (viewer->checkFlag(FlagType::Pref, PRF_ROOMFLAGS)) {
-        sections.emplace_back(fmt::format("@W[@w{}@W]@n", getUIDString()));
-        if(vn != NOTHING) {
-            sections.emplace_back(fmt::format("@G[VN{}]@n", vn));
-        }
-        if(auto sstring = scriptString(); !sstring.empty()) {
-            sections.emplace_back(sstring);
-        }
-        return join(sections, " ");
-    }
-
-    return "";
+    return render::listPrefix(ent, viewer->ent);
 }
 
 std::vector<std::pair<std::string, Destination>> GameEntity::getLandingSpotsFor(GameEntity *mover) {

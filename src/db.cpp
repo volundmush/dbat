@@ -81,7 +81,7 @@ int64_t getNextUID() {
     return nextUID;
 }
 
-void setEntity(int64_t uid, GameEntity* entity) {
+void setEntity(int64_t uid, entt::entity entity) {
     if(uid < 0) {
         throw std::runtime_error("Invalid key");
     }
@@ -91,7 +91,7 @@ void setEntity(int64_t uid, GameEntity* entity) {
     entities[uid] = entity;
 }
 
-DebugMap<int64_t, GameEntity*> entities;    /* array of rooms		 */
+DebugMap<int64_t, entt::entity> entities;    /* array of rooms		 */
 std::unordered_set<GameEntity*> pendingDeletions;
 
 BaseCharacter *character_list = nullptr; /* global linked list of chars	 */

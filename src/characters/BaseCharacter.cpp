@@ -2702,8 +2702,6 @@ std::string BaseCharacter::renderStatusLines(GameEntity* viewer) {
     else if (icur < (imax) * .1)
         messages.emplace_back("@R...Should be DEAD soon.@w");
 
-    
-
     // current actions.
     if (GET_EAVESDROP(this) > 0) {
         messages.emplace_back(fmt::format("@w...{} is spying on everything to the @c{}@w.", heshe, dirs[GET_EAVESDIR(this)]));

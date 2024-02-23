@@ -64,7 +64,7 @@ int find_first_step(Room *src, Room *target) {
 
     /* clear marks first, some OLC systems will save the mark. */
     for (auto &[vn, u] : entities) {
-        auto r = dynamic_cast<Room*>(u);
+        auto r = reg.try_get<Room>(u);
         if(r) r->clearFlag(FlagType::Room, ROOM_BFS_MARK);
     }
     src->setFlag(FlagType::Room, ROOM_BFS_MARK);

@@ -2240,7 +2240,7 @@ void reassign_rooms() {
 
     /* remove old funcs */
     for (auto &[vn, u] : entities) {
-        auto r = dynamic_cast<Room*>(u);
+        auto r = reg.try_get<Room>(u);
         if(!r) continue;
         r->func = nullptr;
     }

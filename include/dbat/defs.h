@@ -346,7 +346,8 @@ enum class FlagType : uint8_t {
     Structure = 6,
     Pref = 7,
     Room = 8,
-    Exit = 9
+    Exit = 9,
+    ItemType = 10,
 };
 
 
@@ -1460,8 +1461,11 @@ enum class FlagType : uint8_t {
 #define ITEM_PLANT     34               /* This will grow!              */
 #define ITEM_FISHPOLE  35               /* FOR FISHING                  */
 #define ITEM_FISHBAIT  36               /* DITTO                        */
+#define ITEM_WORLD     37
+#define ITEM_STRUCTURE 38
+#define ITEM_ENVIRONMENT 39
 
-#define NUM_ITEM_TYPES 37
+#define NUM_ITEM_TYPES 40
 
 /* Take/Wear flags: used by obj_data.wear_flags */
 #define ITEM_WEAR_TAKE        0  /* Item can be taken         */

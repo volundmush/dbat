@@ -220,15 +220,15 @@ public:
     }
 };
 
-extern DebugMap<int64_t, GameEntity*> entities;
+extern DebugMap<int64_t, entt::entity> entities;
 
 template<typename T = GameEntity>
 T* getEntity(int64_t uid) {
     auto it = entities.find(uid);
     if (it != entities.end()) {
-        return dynamic_cast<T*>(it->second);
+        return reg.try_get<T>(it->second);
     }
     return nullptr;
 }
 
-extern void setEntity(int64_t uid, GameEntity* entity);
+extern void setEntity(int64_t uid, entt::entity entity);

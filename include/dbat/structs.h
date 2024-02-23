@@ -203,25 +203,6 @@ struct account_data {
 
 };
 
-struct player_data {
-    player_data() = default;
-    explicit player_data(const nlohmann::json& j);
-    int64_t id{NOTHING};
-    std::string name;
-    std::shared_ptr<account_data> account{};
-    PlayerCharacter* character{};
-    std::vector<struct alias_data> aliases;    /* Character's aliases                  */
-    std::set<int64_t> sensePlayer;
-    std::set<mob_vnum> senseMemory;
-    std::map<int64_t, std::string> dubNames;
-    char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
-    struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
-
-    nlohmann::json serialize();
-};
-
-
-
 /* Extra description: used in objects, mobiles, and rooms */
 struct extra_descr_data {
     extra_descr_data() = default;
@@ -231,6 +212,13 @@ struct extra_descr_data {
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
 };
+
+struct ExtraDescriptions {
+    ExtraDescriptions() = default;
+    explicit ExtraDescriptions(const nlohmann::json& j);
+    std::vector<extra_descr_data> ex_description{}; /* extra descriptions     */
+    void deserialize(const nlohmann::json& j);
+}
 
 
 struct obj_affected_type {
@@ -398,14 +386,60 @@ enum class EntityFamily : uint8_t {
     Object = 1,
     Room = 2,
     Exit = 3,
-    Structure = 4
 };
 
 
-struct EntityInfo {
+struct Info {
+    Info() = default;
+    explicit Info(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
     int64_t uid;
     EntityFamily family;
 };
+
+struct Proto {
+    Proto() = default;
+    explicit Proto(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+    vnum vn;
+    EntityFamily family;
+};
+
+struct Physiology {
+    Physiology() = default;
+    explicit Physiology(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+    RaceID race{RaceID::Spirit},
+    int sex{SEX_NEUTRAL};
+}
+
+struct Mimic : public Physiology {
+    Physiology() = default;
+    explicit Physiology(const nlohmann::json& j);
+}
+
+struct PlayerCharacter {
+    PlayerCharacter() = default;
+    PlayerCharacter player_data(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    std::shared_ptr<account_data> account{};
+    std::vector<struct alias_data> aliases;    /* Character's aliases                  */
+    std::set<int64_t> senseEntity;
+    std::set<mob_vnum> senseMemory;
+    std::map<int64_t, std::string> dubNames;
+    char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
+    struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
+    
+};
+
+struct NonPlayerCharacter {
+    // TODO: certainly there is something about NPCs that is different from PCs...
+}
 
 struct Coordinates {
     Coordinates() = default;
@@ -447,7 +481,12 @@ namespace std {
 }
 
 struct Location {
-    GameEntity* location{};
+    Location() = default;
+    explicit Location(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    entt::entity location{entt::null};
     // LocationType is extra information about how you are inside <location>.
     // For instance, if you are a character, then the locationType of units
     // you contain should represent inventory/equipment slots. 0 is inventory,
@@ -457,16 +496,20 @@ struct Location {
     bool operator==(const Location& rhs);
 };
 
-struct EntityContents {
-    std::vector<GameEntity*> contents;
+struct Contents {
+    std::vector<entt::entity> contents;
 };
 
 struct Destination {
     Destination() = default;
-    Destination(GameEntity* target) : target(target) {};
+    explicit Destination(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    Destination(entt::entity target) : target(target) {};
     Destination(const Location& loc) : target(loc.location), locationType(loc.locationType), coords(loc.coords) {};
-    GameEntity* target{};
-    Exit* via{};
+    entt::entity target{entt::null};
+    entt::entity via{entt::null};
     int direction{-1};
     int locationType{};
     Coordinates coords{};
@@ -477,6 +520,11 @@ struct Destination {
 
 // TileDetails is used to store information about a tile. Part of the Grid3D system.
 struct TileDetails {
+    TileDetails() = default;
+    explicit TileDetails(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
     std::string name;
     std::string description;
     std::optional<int> tile;
@@ -484,6 +532,11 @@ struct TileDetails {
 };
 
 struct Grid3D {
+    Grid3D() = default;
+    explicit Grid3D(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
     int defaultSectorFloor{SECT_FIELD};
     int defaultSectorAbove{SECT_FLYING};
     int defaultSectorBelow{SECT_UNDERWATER};
@@ -495,11 +548,35 @@ struct CoordinateContents {
 };
 
 struct Boundaries {
+    Boundaries() = default;
+    explicit Boundaries(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
     std::optional<double> maxX, maxY, maxZ, minX, minY, minZ;
 };
 
 struct Flags {
+    Flags() = default;
+    explicit Flags(const nlohmann::json& j);
     std::unordered_map<FlagType, std::unordered_set<int>> flags;
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+};
+
+struct Text {
+    Text() = default;
+    explicit Text(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    std::unordered_map<std::string, std::shared_ptr<InternedString>> strings;
+    
+}
+
+// Tag component used to show that an entity is to be deleted.
+struct Deleted {
+
 }
 
 struct GameEntity : public std::enable_shared_from_this<GameEntity> {
@@ -531,10 +608,6 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     virtual void extractFromWorld();
     // Oh no, the thing you're inside is being extracted. What now?
     virtual void onHolderExtraction();
-
-    std::unordered_map<std::string, std::shared_ptr<InternedString>> strings;
-
-    std::vector<extra_descr_data> ex_description{}; /* extra descriptions     */
 
     bool exists{true}; // used for deleted objects. invalid ones are !exists
 
@@ -821,6 +894,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 
 /* ================== Memory Structure for Objects ================== */
 struct Object : public GameEntity {
+    static constexpr auto in_place_delete = true;
     Object() = default;
     explicit Object(const nlohmann::json &j);
     ~Object() override;
@@ -1095,6 +1169,7 @@ struct Stellar : public Structure {
 /* room-related structures ************************************************/
 
 struct Exit : public GameEntity {
+    static constexpr auto in_place_delete = true;
     Exit() = default;
     explicit Exit(const nlohmann::json &j);
 
@@ -1132,6 +1207,7 @@ enum class MoonCheck : uint8_t {
 
 /* ================== Memory Structure for room ======================= */
 struct Room : public GameEntity {
+    static constexpr auto in_place_delete = true;
     Room() = default;
 
     EntityFamily getFamily() override;
@@ -1326,6 +1402,7 @@ struct trans_data {
 
 /* ================== Structure for player/non-player base class ===================== */
 struct BaseCharacter : public GameEntity {
+    static constexpr auto in_place_delete = true;
     BaseCharacter() = default;
     ~BaseCharacter() override;
     // this constructor below is to be used only for the mob_proto map.

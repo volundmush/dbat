@@ -2266,7 +2266,7 @@ static Structure* assembleArea(const AreaDef &def) {
 
     if(!def.roomFlags.empty()) {
         for(auto &[vn, u] : entities) {
-            if(auto room = dynamic_cast<Room*>(u); room) {
+            if(auto room = reg.try_get<Room>(u); room) {
                 for(auto &f : def.roomFlags) {
                     if(room->checkFlag(FlagType::Room, f)) {
                         rooms.insert(vn);
@@ -2432,7 +2432,7 @@ void migrate_grid() {
     }
 
     for(auto &[rv, u] : entities) {
-        auto room = dynamic_cast<Room*>(u);
+        auto room = reg.try_get<Room>(u);
         if(!room) continue;
         if(auto loc = reg.try_get<Location>(room->ent); loc) continue;
         auto sense = sense_location_name(rv);
@@ -2565,8 +2565,10 @@ void migrate_grid() {
     bodef.location = space;
     bodef.roomIDs.insert(19053);
     bodef.roomIDs.insert(19039);
-    for(auto &[r, room] : entities) {
-        if(icontains(stripAnsi(room->getName()), "Black Omen")) bodef.roomIDs.insert(r);
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
+        if(icontains(stripAnsi(room->getName()), "Black Omen")) bodef.roomIDs.insert(vn);
     }
     bodef.roomIDs.insert(19050);
     bodef.exists = create_obj<Vehicle>();
@@ -2818,7 +2820,7 @@ void migrate_grid() {
     basic_mud_log("Attempting to deduce Areas to Planets...");
     for(auto &[vnum, u] : entities) {
         // check for planetMap flags and, if found, bind the area this room belongs to, to the respective planet.
-        auto room = dynamic_cast<Room*>(u);
+        auto room = reg.try_get<Room>(u);
         if(!room) continue;
 
         for(auto &[rflag, a] : planetMap) {
@@ -2846,8 +2848,10 @@ void migrate_grid() {
     celdef.location = space;
     celdef.exists = create_obj<Building>();
     celdef.roomRanges.emplace_back(16305, 16399);
-    for(auto &[rv, room] : entities) {
-        if(icontains(stripAnsi(room->getName()), "Celestial Corp")) celdef.roomIDs.insert(rv);
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
+        if(icontains(stripAnsi(room->getName()), "Celestial Corp")) celdef.roomIDs.insert(vn);
     }
     auto celestial_corp = assembleArea(celdef);
 
@@ -2863,9 +2867,11 @@ void migrate_grid() {
     cooler.name = "Cooler's Ship";
     cooler.location = space;
     cooler.exists = create_obj<Vehicle>();
-    for(auto &[rv, room] : entities) {
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Cooler's Ship")) {
-            cooler.roomIDs.insert(rv);
+            cooler.roomIDs.insert(vn);
         }
     }
     auto cooler_ship = assembleArea(cooler);
@@ -2874,8 +2880,10 @@ void migrate_grid() {
     alph.name = "Alpharis";
     alph.exists = create_obj<Building>();
     alph.location = space;
-    for(auto &[rv, room] : entities) {
-        if(icontains(stripAnsi(room->getName()), "Alpharis")) alph.roomIDs.insert(rv);
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
+        if(icontains(stripAnsi(room->getName()), "Alpharis")) alph.roomIDs.insert(vn);
     }
     auto alpharis = assembleArea(alph);
 
@@ -2883,8 +2891,10 @@ void migrate_grid() {
     dzone.name = "Dead Zone";
     dzone.location = universe7;
     dzone.exists = create_obj<Dimension>();
-    for(auto &[rv, room] : entities) {
-        if(icontains(stripAnsi(room->getName()), "Dead Zone")) dzone.roomIDs.insert(rv);
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
+        if(icontains(stripAnsi(room->getName()), "Dead Zone")) dzone.roomIDs.insert(vn);
     }
     auto dead_zone = assembleArea(dzone);
 
@@ -2892,8 +2902,10 @@ void migrate_grid() {
     bast.name = "Blasted Asteroid";
     bast.location = space;
     bast.exists = create_obj<Planet>();
-    for(auto &[rv, room] : entities) {
-        if(icontains(stripAnsi(room->getName()), "Blasted Asteroid")) bast.roomIDs.insert(rv);
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
+        if(icontains(stripAnsi(room->getName()), "Blasted Asteroid")) bast.roomIDs.insert(vn);
     }
     auto blasted_asteroid = assembleArea(bast);
 
@@ -2902,8 +2914,10 @@ void migrate_grid() {
     listres.name = "Lister's Restaurant";
     listres.location = xenoverse;
     listres.exists = create_obj<Building>();
-    for(auto &[rv, room] : entities) {
-        if(icontains(stripAnsi(room->getName()), "Lister's Restaurant")) listres.roomIDs.insert(rv);
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
+        if(icontains(stripAnsi(room->getName()), "Lister's Restaurant")) listres.roomIDs.insert(vn);
     }
     listres.roomIDs = {18640};
     auto listers_restaurant = assembleArea(listres);
@@ -2912,8 +2926,10 @@ void migrate_grid() {
     scasino.name = "Shooting Star Casino";
     scasino.exists = create_obj<Building>();
     scasino.location = xenoverse;
-    for(auto &[rv, room] : entities) {
-        if(icontains(stripAnsi(room->getName()), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
+        if(icontains(stripAnsi(room->getName()), "Shooting Star Casino")) scasino.roomIDs.insert(vn);
     }
     auto shooting_star_casino = assembleArea(scasino);
 
@@ -2921,8 +2937,10 @@ void migrate_grid() {
     outdef.name = "The Outpost";
     outdef.location = celestial_plane;
 	outdef.exists = create_obj<Building>();
-    for(auto &[rv, room] : entities) {
-        if(icontains(stripAnsi(room->getName()), "The Outpost")) outdef.roomIDs.insert(rv);
+    for(auto &[vn, u] : entities) {
+        auto room = reg.try_get<Room>(u);
+        if(!room) continue;
+        if(icontains(stripAnsi(room->getName()), "The Outpost")) outdef.roomIDs.insert(vn);
     }
     auto outpost = assembleArea(outdef);
 

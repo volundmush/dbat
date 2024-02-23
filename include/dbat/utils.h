@@ -808,6 +808,8 @@ extern Object* GET_EQ(GameEntity* u, int i);
 #define CIRCLEMUD_VERSION(major, minor, patchlevel) \
     (((major) << 16) + ((minor) << 8) + (patchlevel))
 
+
+
 #define HSHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "his":"her") :"its")
 #define HSSH(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "he" :"she") : "it")
 #define HMHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "him":"her") : "it")

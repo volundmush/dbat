@@ -90,7 +90,7 @@ ACMD(do_lag) {
     }
 
     for (d = descriptor_list; d; d = d->next) {
-        if (!strcasecmp(CAP(GET_NAME(d->character)), CAP(arg))) {
+        if (!strcasecmp(CAP((char*)GET_NAME(d->character)), CAP(arg))) {
             if (GET_ADMLEVEL(d->character) > GET_ADMLEVEL(ch)) {
                 ch->sendf("Sorry, you've been outranked.\r\n");
                 return;
@@ -704,7 +704,7 @@ ACMD(do_finddoor) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, GET_OBJ_SHORT(obj));
         for (auto &[vn, u] : entities) {
-            auto r = dynamic_cast<Room*>(u);
+            auto r = reg.try_get<Room>(u);
             if (!r)
                 continue;
             for (auto &[d, e] : r->getExits()) {
@@ -775,7 +775,7 @@ ACMD(do_hell) {
     } else {
         struct descriptor_data *d = vict->desc;
         extract_char(vict);
-        lockWrite(ch, GET_NAME(vict));
+        lockWrite(ch, (char*)GET_NAME(vict));
         if (d && STATE(d) != CON_PLAYING) {
             STATE(d) = CON_CLOSE;
             vict->desc->character = nullptr;
@@ -3276,7 +3276,7 @@ ACMD(do_show) {
         case 5:
             len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
             for (auto &[vn, u] : entities) {
-                auto r = dynamic_cast<Room*>(u);
+                auto r = reg.try_get<Room>(u);
                 if(!r) continue;
                 for (auto &[j, e] : r->getExits()) {
                     auto dest = e->getDestination();
@@ -3314,7 +3314,9 @@ ACMD(do_show) {
         case 6:
             j = 0;
             len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
-            for (auto &[vn, r] : entities)
+            for (auto &[vn, u] : entities) {
+                auto r = reg.try_get<Room>(u);
+                if(!r) continue;
                 if (ROOM_FLAGGED(vn, ROOM_DEATH)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
                                     r->getDisplayName(ch).c_str());
@@ -3322,6 +3324,7 @@ ACMD(do_show) {
                         break;
                     len += nlen;
                 }
+            }
             write_to_output(ch->desc, buf);
             break;
 
@@ -3329,14 +3332,18 @@ ACMD(do_show) {
         case 7:
             j = 0;
             len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
-            for (auto &[vn, r] : entities)
-                if (ROOM_FLAGGED(vn, ROOM_GODROOM)) {
+            for (auto &[vn, u] : entities) {
+                auto r = reg.try_get<Room>(u);
+                if(!r) continue;
+                if (ROOM_FLAGGED(r, ROOM_GODROOM)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
                                     r->getDisplayName(ch).c_str());
                     if (len + nlen >= sizeof(buf) || nlen < 0)
                         break;
                     len += nlen;
                 }
+            }
+                
             write_to_output(ch->desc, buf);
             break;
 

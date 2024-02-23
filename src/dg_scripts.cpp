@@ -923,7 +923,7 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     }
 
     for (auto &[vn, u] : entities) {
-        auto r = dynamic_cast<Room*>(u);
+        auto r = reg.try_get<Room>(u);
         if(!r) continue;
         auto sc = SCRIPT(r); 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
@@ -953,7 +953,7 @@ void check_time_triggers() {
     }
 
     for (auto &[vn, u] : entities) {
-        auto r = dynamic_cast<Room*>(u);
+        auto r = reg.try_get<Room>(u);
         if(!r) continue;
         auto sc = SCRIPT(r);
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
@@ -980,7 +980,7 @@ void check_interval_triggers(int trigFlag) {
     }
 
     for (auto &[vn, u] : entities) {
-        auto r = dynamic_cast<Room*>(u);
+        auto r = reg.try_get<Room>(u);
         if(!r) continue;
         auto sc = SCRIPT(r);
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
