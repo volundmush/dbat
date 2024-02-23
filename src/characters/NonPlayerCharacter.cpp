@@ -3,43 +3,6 @@
 #include "dbat/dg_scripts.h"
 
 
-std::string NonPlayerCharacter::getUnitClass() {
-    return "NonPlayerCharacter";
-}
-
-void NonPlayerCharacter::deserialize(const nlohmann::json& j) {
-    BaseCharacter::deserialize(j);
-}
-
-nlohmann::json NonPlayerCharacter::serialize() {
-    return BaseCharacter::serialize();
-}
-
-NonPlayerCharacter::NonPlayerCharacter(const nlohmann::json& j) {
-    deserialize(j);
-}
-
-bool NonPlayerCharacter::isPC() {
-    return false;
-}
-
-bool NonPlayerCharacter::isNPC() {
-    return true;
-}
-
-std::vector<std::string> NonPlayerCharacter::getKeywords(GameEntity* looker) {
-    auto out = baseKeywordsFor(looker);
-
-    auto sname = split(getName(), ' ');
-    out.insert(out.end(), sname.begin(), sname.end());
-
-    return out;
-}
-
-std::string NonPlayerCharacter::getDisplayName(GameEntity* looker) {
-    return getShortDesc();
-}
-
 void NonPlayerCharacter::assignTriggers() {
     // Nothing to do without a prototype...
 
@@ -86,30 +49,4 @@ void NonPlayerCharacter::assignTriggers() {
         }
         script->dgScripts = sorted;
     }
-}
-
-nlohmann::json mob_special_data::serialize() {
-    nlohmann::json j;
-    if(attack_type) j["attack_type"] = attack_type;
-    if(default_pos != POS_STANDING) j["default_pos"] = default_pos;
-    if(damnodice) j["damnodice"] = damnodice;
-    if(damsizedice) j["damsizedice"] = damsizedice;
-
-    return j;
-}
-
-
-void mob_special_data::deserialize(const nlohmann::json &j) {
-    if(j.contains("attack_type")) attack_type = j["attack_type"];
-    if(j.contains("default_pos")) default_pos = j["default_pos"];
-    if(j.contains("damnodice")) damnodice = j["damnodice"];
-    if(j.contains("damsizedice")) damsizedice = j["damsizedice"];
-}
-
-mob_special_data::mob_special_data(const nlohmann::json &j) : mob_special_data() {
-    deserialize(j);
-}
-
-std::string NonPlayerCharacter::renderRoomListName(GameEntity* viewer) {
-    return getDisplayName(viewer);
 }

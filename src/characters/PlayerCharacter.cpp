@@ -3,66 +3,6 @@
 #include "dbat/utils.h"
 #include "dbat/constants.h"
 
-void PlayerCharacter::deserialize(const nlohmann::json& j) {
-    BaseCharacter::deserialize(j);
-}
-
-nlohmann::json PlayerCharacter::serialize() {
-    return BaseCharacter::serialize();
-}
-
-PlayerCharacter::PlayerCharacter(const nlohmann::json& j) {
-    deserialize(j);
-}
-
-std::string PlayerCharacter::getUnitClass() {
-    return "PlayerCharacter";
-}
-
-void PlayerCharacter::extractFromWorld() {
-
-}
-
-void PlayerCharacter::onHolderExtraction() {
-    // Player Characters are not deleted this way.
-}
-
-bool PlayerCharacter::isPC() {
-    return true;
-}
-
-bool PlayerCharacter::isNPC() {
-    return false;
-}
-
-std::string PlayerCharacter::getDisplayName(GameEntity* looker) {
-    if(looker == this) return getName();
-    if(looker->canSeeAdminInvisible()) return getName();
-    if(auto otherPC = dynamic_cast<PlayerCharacter*>(looker); otherPC) {
-        if(checkFlag(FlagType::PC, PLR_DISGUISED)) {
-            return AN(RACE(this));
-        }
-        auto p = players[otherPC->getUID()];
-        if(auto found = p->dubNames.find(getUID()); found != p->dubNames.end()) {
-            return found->second;
-        } else {
-            auto raceName = juggleRaceName(false);
-            return fmt::format("{} {}", AN(raceName.c_str()), raceName);
-        }
-        
-    }
-    
-    return getName();
-}
-
-std::vector<std::string> PlayerCharacter::getKeywords(GameEntity* looker) {
-    auto out = baseKeywordsFor(looker);
-
-    auto sname = split(getDisplayName(looker), ' ');
-    out.insert(out.end(), sname.begin(), sname.end());
-
-    return out;
-}
 
 std::string PlayerCharacter::renderRoomListName(GameEntity* viewer) {
     if(viewer->canSeeAdminInvisible()) return getName();
@@ -160,5 +100,4 @@ std::string PlayerCharacter::renderRoomListName(GameEntity* viewer) {
         }
     }
     return result;
-
 }

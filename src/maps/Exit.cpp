@@ -6,40 +6,6 @@ Room* Exit::getDestination() {
     return destination;
 }
 
-EntityFamily Exit::getFamily() {
-    return EntityFamily::Exit;
-}
-
-std::string Exit::getUnitClass() {
-    return "Exit";
-}
-
-nlohmann::json Exit::serialize() {
-    auto j = GameEntity::serialize();
-
-    if(key > 0) j["key"] = key;
-
-    if(dclock) j["dclock"] = dclock;
-    if(dchide) j["dchide"] = dchide;
-    if(dcskill) j["dcskill"] = dcskill;
-    if(dcmove) j["dcmove"] = dcmove;
-    if(failsavetype) j["failsavetype"] = failsavetype;
-    if(dcfailsave) j["dcfailsave"] = dcfailsave;
-
-    return j;
-}
-
-void Exit::deserialize(const nlohmann::json& j) {
-    GameEntity::deserialize(j);
-    if(j.contains("key")) key = j["key"];
-    if(j.contains("dclock")) dclock = j["dclock"];
-    if(j.contains("dchide")) dchide = j["dchide"];
-    if(j.contains("dcskill")) dcskill = j["dcskill"];
-    if(j.contains("dcmove")) dcmove = j["dcmove"];
-    if(j.contains("failsavetype")) failsavetype = j["failsavetype"];
-    if(j.contains("dcfailsave")) dcfailsave = j["dcfailsave"];
-
-}
 
 nlohmann::json Exit::serializeRelations() {
     auto j = GameEntity::serializeRelations();

@@ -62,3 +62,52 @@ nlohmann::json ExtraDescriptions::serialize() {
     }
     return j;
 }
+
+nlohmann::json mob_special_data::serialize() {
+    nlohmann::json j;
+    if(attack_type) j["attack_type"] = attack_type;
+    if(default_pos != POS_STANDING) j["default_pos"] = default_pos;
+    if(damnodice) j["damnodice"] = damnodice;
+    if(damsizedice) j["damsizedice"] = damsizedice;
+
+    return j;
+}
+
+
+void mob_special_data::deserialize(const nlohmann::json &j) {
+    if(j.contains("attack_type")) attack_type = j["attack_type"];
+    if(j.contains("default_pos")) default_pos = j["default_pos"];
+    if(j.contains("damnodice")) damnodice = j["damnodice"];
+    if(j.contains("damsizedice")) damsizedice = j["damsizedice"];
+}
+
+mob_special_data::mob_special_data(const nlohmann::json &j) : mob_special_data() {
+    deserialize(j);
+}
+
+nlohmann::json Exit::serialize() {
+    auto j = GameEntity::serialize();
+
+    if(key > 0) j["key"] = key;
+
+    if(dclock) j["dclock"] = dclock;
+    if(dchide) j["dchide"] = dchide;
+    if(dcskill) j["dcskill"] = dcskill;
+    if(dcmove) j["dcmove"] = dcmove;
+    if(failsavetype) j["failsavetype"] = failsavetype;
+    if(dcfailsave) j["dcfailsave"] = dcfailsave;
+
+    return j;
+}
+
+void Exit::deserialize(const nlohmann::json& j) {
+    GameEntity::deserialize(j);
+    if(j.contains("key")) key = j["key"];
+    if(j.contains("dclock")) dclock = j["dclock"];
+    if(j.contains("dchide")) dchide = j["dchide"];
+    if(j.contains("dcskill")) dcskill = j["dcskill"];
+    if(j.contains("dcmove")) dcmove = j["dcmove"];
+    if(j.contains("failsavetype")) failsavetype = j["failsavetype"];
+    if(j.contains("dcfailsave")) dcfailsave = j["dcfailsave"];
+
+}

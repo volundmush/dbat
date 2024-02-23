@@ -412,14 +412,39 @@ struct Physiology {
     explicit Physiology(const nlohmann::json& j);
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
-    RaceID race{RaceID::Spirit},
+    RaceID race{RaceID::Spirit};
     int sex{SEX_NEUTRAL};
-}
+};
+
+struct Limb {
+    Limb() = default;
+    explicit Limb(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+    double health{1.0};
+    std::set<int> flags;
+};
+
+// used for Characters and Corpses... maybe mechas?
+struct Limbs {
+    Limbs() = default;
+    explicit Limbs(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+    std::map<LimbID, Limb> limbs;
+};
+
+// used for dismembered body parts like arms.
+struct IsLimb {
+    LimbID limbType;
+    Limb limbData;
+};
+
 
 struct Mimic : public Physiology {
-    Physiology() = default;
-    explicit Physiology(const nlohmann::json& j);
-}
+    Mimic() = default;
+    explicit Mimic(const nlohmann::json& j);
+};
 
 struct PlayerCharacter {
     PlayerCharacter() = default;
@@ -439,7 +464,7 @@ struct PlayerCharacter {
 
 struct NonPlayerCharacter {
     // TODO: certainly there is something about NPCs that is different from PCs...
-}
+};
 
 struct Coordinates {
     Coordinates() = default;

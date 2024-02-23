@@ -2304,3 +2304,12 @@ constexpr int STRUCTURE_INDOORS = 0;
 constexpr int STRUCTURE_HASMOON = 1;
 constexpr int STRUCTURE_ETHER = 2;
 constexpr int NUM_STRUCTURE_FLAGS = 3;
+
+enum class LimbID : uint8_t {
+    Head = 0,
+    LeftArm = 1,
+    RightArm = 2,
+    LeftLeg = 3,
+    RightLeg = 4,
+    Tail = 5
+};

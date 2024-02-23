@@ -488,6 +488,33 @@ namespace render {
         return capitalized ? "Questionably Gendered" : "questionably gendered";
     }
 
+    static std::string _pcRenderName(entt::entity ent, entt::entity viewer) {
+        if(ent == viewer || check::canSeeAdminInvisible(ent)) {
+            return text::get(ent, "name", "nameless");
+        }
+        auto &pc = reg.get<PlayerCharacter>(viewer);
+        auto &info = reg.get<Info>(ent);
+        auto found = pc.dubNames.find(info.uid);
+        if(flags::check(ent, FlagType::PC, PLR_DISGUISED) || reg.has<Mimic>(ent)) found = pc.dubNames.end();
+        if(found != pc.dubNames.end()) {
+            return found->second;
+        }
+        auto [race, sex] = getApparentRaceSex(ent, viewer);
+        auto rname = to_lower(race::getName(race));
+        auto an = AN(rname.c_str();)
+        if(sex) {
+            return fmt::format("{} {} {}",an,genders[sex], rname);
+        } else {
+            return fmt::format("{} {}",an,rname);
+        }  
+    }
+
+    std::string displayName(entt::entity ent, entt::entity viewer) {
+        if(check::isPC(ent) && check::isPC(viewer)) {
+            return _pcRenderName(ent, viewer);
+        }
+    }
+
     std::string apparentRaceName(entt::entity ent, entt::entity viewer, bool capitalized) {
         const auto [race, sex] = getApparentRaceSex(ent, viewer);
 
