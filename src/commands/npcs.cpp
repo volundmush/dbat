@@ -937,7 +937,7 @@ ACMD(do_mforget) {
 ACMD(do_mtransform) {
     char arg[MAX_INPUT_LENGTH];
     BaseCharacter *m;
-    NonPlayerCharacter tmpmob;
+    BaseCharacter tmpmob;
     Object *obj[NUM_WEARS];
     mob_rnum this_rnum = GET_MOB_RNUM(ch);
     int pos;
@@ -1130,11 +1130,11 @@ ACMD(do_mdoor) {
         }
     } else {
         if (!ex) {
-            ex = new Exit();
-            ex->uid = getNextUID();
-            setEntity(ex->getUID(), ex);
-            ex->script = std::make_shared<script_data>(ex);
+            ex = create_obj<Exit>(EntityFamily::Exit);
         }
+
+        auto &dest = reg.get_or_emplace<Destination>(ex->ent);
+        dest.direction = dir;
 
         bitvector_t flags = 0;
         switch (fd) {
@@ -1153,7 +1153,7 @@ ACMD(do_mdoor) {
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    ex->destination = getEntity<Room>(to_room);
+                    dest.target = entities.at(to_room);
                 else
                     mob_log(ch, "mdoor: invalid door target");
                 break;

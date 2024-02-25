@@ -42,7 +42,7 @@ namespace check {
 }
 
 namespace text {
-    std::string get(entt::entity ent, const std::string& key, std::optional<std::string> placeholder);
+    std::string get(entt::entity ent, const std::string& key, std::optional<std::string> placeholder = std::nullopt);
     void set(entt::entity ent, const std::string& key, const std::string& value);
     void clear(entt::entity ent, const std::string& key);
 }
@@ -51,17 +51,31 @@ namespace vis {
     bool isInvisible(entt::entity ent);
     bool isHidden(entt::entity ent);
     bool isAdminInvisible(entt::entity ent);
+    bool isProvidingLight(entt::entity ent);
 
     bool canSee(entt::entity viewer, entt::entity target);
     bool canSeeInvisible(entt::entity ent);
     bool canSeeHidden(entt::entity ent);
     bool canSeeAdminInvisible(entt::entity ent);
     bool canSeeInDark(entt::entity ent);
+
+    bool isInsideNormallyDark(entt::entity ent, entt::entity viewer);
+    bool isInsideDark(entt::entity ent, entt::entity viewer);
+
 }
 
 namespace find {
     entt::entity locationAncestorFlag(entt::entity ent, FlagType type, int flag);
+
+    Object* object(entt::entity ent, const std::function<bool(Object*)> &func, bool working);
+
+    std::set<Object*> gatherObjects(entt::entity ent, const std::function<bool(Object*)> &func, bool working);
+    entt::entity holderType(entt::entity ent, int type);
 }
+
+int64_t getUID(entt::entity ent);
+EntityFamily getFamily(entt::entity ent);
+double getEnvVar(entt::entity env, EnvVar v);
 
 namespace contents {
     std::vector<entt::entity> get(entt::entity ent);
@@ -86,6 +100,9 @@ namespace contents {
 
     std::map<int, Object*> getEquipment(entt::entity ent);
     std::map<int, Object*> getEquipment(GameEntity* ent);
+
+    std::vector<BaseCharacter*> getPeople(entt::entity ent);
+    std::vector<BaseCharacter*> getPeople(GameEntity* ent);
 
     std::vector<Room*> getRooms(entt::entity ent);
     std::vector<Room*> getRooms(GameEntity* ent);
@@ -116,21 +133,27 @@ namespace render {
     std::pair<RaceID, int> getApparentRaceSex(entt::entity ent, entt::entity viewer);
 
     // Helpful methods for getting pronouns and possessives.
-    std::string hisHer(int sex, bool capitalized);
-    std::string heShe(int sex, bool capitalized);
-    std::string hisHer(int sex, bool capitalized);
-    std::string himHer(int sex, bool capitalized);
-    std::string hisHers(int sex, bool capitalized);
-    std::string maFe(int sex, bool capitalized);
+    std::string hisHer(int sex, bool capitalized = false);
+    std::string heShe(int sex, bool capitalized = false);
+    std::string hisHer(int sex, bool capitalized = false);
+    std::string himHer(int sex, bool capitalized = false);
+    std::string hisHers(int sex, bool capitalized = false);
+    std::string maFe(int sex, bool capitalized = false);
 
     // gets the apparent race name for ent to viewer.
-    std::string apparentRaceName(entt::entity ent, entt::entity viewer, bool capitalized);
+    std::string apparentRaceName(entt::entity ent, entt::entity viewer, bool capitalized = false);
 
     // the search keywords viewer can use to find ent.
     std::vector<std::string> keywords(entt::entity ent, entt::entity viewer);
 
     // the personalized name viewer sees for ent.
     std::string displayName(entt::entity ent, entt::entity viewer);
+
+    std::string inventory(entt::entity ent, entt::entity viewer);
+
+    std::string equipment(entt::entity ent, entt::entity viewer, bool showEmpty = false);
+
+    std::string diagnostics(entt::entity ent, entt::entity viewer);
 
     // renders the internal view. if ent is a room for instance, this is a room appearance
     // with exits and so on.
@@ -145,6 +168,8 @@ namespace render {
 
     // A single line that is shown to represent ent to viewer when listed in inventory, equipment, etc.
     std::string contentLine(entt::entity ent, entt::entity viewer);
+
+    std::string modifiers(entt::entity ent, entt::entity viewer);
 
     // A series of lines shown 'under' the main list line detailing special status.
     // about the ent. This might be health status, buffs, whether food is partially eaten, etc.
@@ -219,7 +244,7 @@ namespace send {
     }
 
     template<typename... Args>
-    void printfContents(fmt::string_view format, Args&&... args) {
+    void printfContents(entt::entity ent, fmt::string_view format, Args&&... args) {
         try {
             std::string msg = fmt::sprintf(format, std::forward<Args>(args)...);
             textContents(ent, msg);
@@ -228,5 +253,21 @@ namespace send {
             basic_mud_log("Error in send::printfContents: %s", e.what());
         }
     }
+
+}
+
+namespace movement {
+    std::map<int, Destination> getDestinations(entt::entity ent, entt::entity viewer);
+    std::optional<Destination> getDestination(entt::entity ent, entt::entity viewer, int direction);
+    bool moveInDirection(entt::entity ent, int direction, bool need_specials_check = true);
+    bool doSimpleMove(entt::entity ent, int direction, bool need_specials_check = true);
+
+    std::optional<Destination> getLaunchDestinationFor(entt::entity ent, entt::entity mover);
+    std::vector<std::pair<std::string, Destination>> getLandingSpotsFor(entt::entity ent, entt::entity mover);
+
+    bool checkPostEnter(entt::entity ent, entt::entity mover, const Location& loc, const Destination& dest);
+    bool checkCanReachDestination(entt::entity ent, entt::entity mover, const Destination& dest);
+    bool checkCanLeave(entt::entity ent, entt::entity mover, const Destination& dest, bool need_specials_check = true);
+
 
 }

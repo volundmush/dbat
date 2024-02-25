@@ -30,6 +30,7 @@
 #include "dbat/account.h"
 #include "dbat/improved-edit.h"
 #include "dbat/transformation.h"
+#include "dbat/entity.h"
 
 /* local functions */
 static void gen_map(BaseCharacter *ch, int num);
@@ -834,15 +835,15 @@ int readIntro(BaseCharacter *ch, BaseCharacter *vict) {
         return 1;
     }
 
-    auto p = players[ch->getUID()];
+    auto &p = reg.get_or_emplace<PlayerCharacter>(ch->ent);
 
-    return p->dubNames.contains(vict->getUID());
+    return p.dubNames.contains(vict->getUID());
 }
 
 void introWrite(BaseCharacter *ch, BaseCharacter *vict, char *name) {
     std::string n(name);
-    auto p = players[ch->getUID()];
-    p->dubNames[vict->getUID()] = n;
+    auto &p = reg.get_or_emplace<PlayerCharacter>(ch->ent);
+    p.dubNames[vict->getUID()] = n;
 }
 
 ACMD(do_intro) {
@@ -913,7 +914,7 @@ ACMD(do_intro) {
 
 
 void map_draw_room(char map[9][10], int x, int y, Room* room,
-                          GameEntity *viewer) {
+                          entt::entity viewer) {
 
     for (auto &[door, d] : room->getExits()) {
         auto dest = d->getDestination();
@@ -1430,7 +1431,7 @@ void map_draw_room(char map[9][10], int x, int y, Room* room,
 
 
 static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
-                          GameEntity *viewer) {
+                          entt::entity viewer) {
 
     auto room = getEntity<Room>(rnum);
     if (!room) {
@@ -1475,7 +1476,7 @@ static void gen_map(BaseCharacter *ch, int num) {
     auto room = ch->getRoom();
     
     /* print out exits */
-    map_draw_room(map, 4, 4, room, ch);
+    map_draw_room(map, 4, 4, room, ch->ent);
     auto exits = room->getExits();
     for (auto &[door, d] : exits) {
         if(d->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
@@ -1484,28 +1485,28 @@ static void gen_map(BaseCharacter *ch, int num) {
 
         switch (door) {
             case NORTH:
-                map_draw_room(map, 4, 3, dest, ch);
+                map_draw_room(map, 4, 3, dest, ch->ent);
                 break;
             case EAST:
-                map_draw_room(map, 5, 4, dest, ch);
+                map_draw_room(map, 5, 4, dest, ch->ent);
                 break;
             case SOUTH:
-                map_draw_room(map, 4, 5, dest, ch);
+                map_draw_room(map, 4, 5, dest, ch->ent);
                 break;
             case WEST:
-                map_draw_room(map, 3, 4, dest, ch);
+                map_draw_room(map, 3, 4, dest, ch->ent);
                 break;
             case NORTHEAST:
-                map_draw_room(map, 5, 3, dest, ch);
+                map_draw_room(map, 5, 3, dest, ch->ent);
                 break;
             case NORTHWEST:
-                map_draw_room(map, 3, 3, dest, ch);
+                map_draw_room(map, 3, 3, dest, ch->ent);
                 break;
             case SOUTHEAST:
-                map_draw_room(map, 5, 5, dest, ch);
+                map_draw_room(map, 5, 5, dest, ch->ent);
                 break;
             case SOUTHWEST:
-                map_draw_room(map, 3, 5, dest, ch);
+                map_draw_room(map, 3, 5, dest, ch->ent);
                 break;
         }
     }
@@ -1680,9 +1681,9 @@ ACMD(do_exits) {
 
     /* Why duplicate code? */
     if (!PRF_FLAGGED(ch, PRF_NODEC)) {
-        ch->sendLine(loc->renderExits1(ch));
+        ch->sendLine(loc->renderExits1(ch->ent));
     } else {
-        ch->sendLine(loc->renderExits2(ch));
+        ch->sendLine(loc->renderExits2(ch->ent));
     }
 }
 
@@ -3637,13 +3638,13 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
                      "Players                  Vnum    Planet        Location\r\n-------                 ------   ----------    ----------------\r\n");
         for (auto d = descriptor_list; d; d = d->next) {
             if(!IS_PLAYING(d)) continue;
-            auto loc = d->character->getLocation();
+            auto loc = reg.try_get<Location>(d->character->ent);
             if(!loc) continue;
             if(!CAN_SEE(ch, d->character)) continue;
-            auto reg = loc->getWorld();
+            auto reg = find::holderType(loc->location, ITEM_WORLD);
 
             ch->sendf("%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)),
-                            reg ? reg->getDisplayName(ch) : "Unknown", loc->getDisplayName(ch));
+                            reg != entt::null ? render::displayName(reg, ch->ent) : "Unknown", render::displayName(loc->location, ch->ent));
             
         }
     } else {
@@ -4260,7 +4261,7 @@ ACMD(do_history) {
     one_argument(argument, arg);
     if(IS_NPC(ch)) return;
 
-    auto p = players[ch->getUID()];
+    auto &p = reg.get_or_emplace<PlayerCharacter>(ch->ent);
 
     type = search_block(arg, history_types, false);
     if (!*arg || type < 0) {
@@ -4282,9 +4283,9 @@ ACMD(do_history) {
         return;
     }
 
-    if (p->comm_hist[type] && p->comm_hist[type]->text && *p->comm_hist[type]->text) {
+    if (p.comm_hist[type] && p.comm_hist[type]->text && *p.comm_hist[type]->text) {
         struct txt_block *tmp;
-        for (tmp = p->comm_hist[type]; tmp; tmp = tmp->next)
+        for (tmp = p.comm_hist[type]; tmp; tmp = tmp->next)
             ch->sendf("%s", tmp->text);
 /* Make this a 1 if you want history to cear after viewing */
 #if 0
@@ -4303,28 +4304,28 @@ void add_history(BaseCharacter *ch, char *str, int type) {
     if (IS_NPC(ch))
         return;
 
-    auto p = players[ch->getUID()];
+    auto &p = reg.get_or_emplace<PlayerCharacter>(ch->ent);
 
-    tmp = p->comm_hist[type];
+    tmp = p.comm_hist[type];
     ct = time(nullptr);
     strftime(time_str, sizeof(time_str), "%H:%M ", localtime(&ct));
 
     sprintf(buf, "%s%s", time_str, str);
 
     if (!tmp) {
-        CREATE(p->comm_hist[type], struct txt_block, 1);
-        p->comm_hist[type]->text = strdup(buf);
+        CREATE(p.comm_hist[type], struct txt_block, 1);
+        p.comm_hist[type]->text = strdup(buf);
     } else {
         while (tmp->next)
             tmp = tmp->next;
         CREATE(tmp->next, struct txt_block, 1);
         tmp->next->text = strdup(buf);
 
-        for (tmp = p->comm_hist[type]; tmp; tmp = tmp->next, i++);
+        for (tmp = p.comm_hist[type]; tmp; tmp = tmp->next, i++);
 
-        for (; i > HIST_LENGTH && p->comm_hist[type]; i--) {
-            tmp = p->comm_hist[type];
-            p->comm_hist[type] = tmp->next;
+        for (; i > HIST_LENGTH && p.comm_hist[type]; i--) {
+            tmp = p.comm_hist[type];
+            p.comm_hist[type] = tmp->next;
             if (tmp->text)
                 free(tmp->text);
             free(tmp);
@@ -4386,7 +4387,7 @@ ACMD(do_scan) {
 
         for(auto c : dest->getContents()) {
             if(c == ch) continue;
-            if(c->getFamily() == EntityFamily::Exit) continue;
+            if(getFamily(c->ent) == EntityFamily::Exit) continue;
             if(!ch->canSee(c)) continue;
             ch->sendLine(c->renderRoomListingFor(ch));
         }
@@ -4415,7 +4416,7 @@ ACMD(do_scan) {
 
             for(auto c : dest->getContents()) {
                 if(c == ch) continue;
-                if(c->getFamily() == EntityFamily::Exit) continue;
+                if(getFamily(c->ent) == EntityFamily::Exit) continue;
                 if(!ch->canSee(c)) continue;
                 ch->sendLine(c->renderRoomListingFor(ch));
             }

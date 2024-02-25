@@ -1115,6 +1115,7 @@ enum class FlagType : uint8_t {
 #define EXIT_COMPLETE   3       /* Full display                     */
 
 #define exitlevel(ch) ((ch)->checkFlag(FlagType::Pref, PRF_AUTOEXIT) ? 1 : 0 ) + ((ch)->checkFlag(FlagType::Pref, PRF_FULL_EXIT) ? 2 : 0)
+#define exitlevelent(ch) (flags::check((ch), FlagType::Pref, PRF_AUTOEXIT) ? 1 : 0 ) + (flags::check((ch), FlagType::Pref, PRF_FULL_EXIT) ? 2 : 0)
 #define EXIT_LEV(ch) (exitlevel(ch))
 
 
@@ -1464,8 +1465,10 @@ enum class FlagType : uint8_t {
 #define ITEM_WORLD     37
 #define ITEM_STRUCTURE 38
 #define ITEM_ENVIRONMENT 39
+#define ITEM_PLANET      40
+#define ITEM_CORPSE      41
 
-#define NUM_ITEM_TYPES 40
+#define NUM_ITEM_TYPES 42
 
 /* Take/Wear flags: used by obj_data.wear_flags */
 #define ITEM_WEAR_TAKE        0  /* Item can be taken         */
@@ -1586,9 +1589,8 @@ enum class FlagType : uint8_t {
 #define ITEM_CARDCASE                  92
 #define ITEM_NOPICKUP                  93
 #define ITEM_NOSTEAL                   94
-#define ITEM_PLANET                    95
 
-#define NUM_ITEM_FLAGS 96
+#define NUM_ITEM_FLAGS 95
 
 /* Modifier constants used with obj affects ('A' fields) */
 #define APPLY_NONE              0    /* No effect			*/
@@ -2312,4 +2314,11 @@ enum class LimbID : uint8_t {
     LeftLeg = 3,
     RightLeg = 4,
     Tail = 5
+};
+
+enum class DamageType : uint8_t {
+    Bashing = 0,
+    Lethal = 1,
+    Aggravated = 2,
+    Structural = 3 // used for objects/vehicles/etc
 };

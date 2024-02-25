@@ -1201,7 +1201,7 @@ SPECIAL(guild) {
 /****  This is ripped off of read_line from shop.c.  They could be
  *  combined. But why? ****/
 
-std::list<NonPlayerCharacter*> Guild::getMasters() {
+std::list<BaseCharacter*> Guild::getMasters() {
     return get_vnum_list(characterVnumIndex, gm);
 }
 
@@ -1211,7 +1211,8 @@ void assign_the_guilds() {
 
     for (auto &[vn, gld] : guild_index) {
         for(auto keeper : gld->getMasters()) {
-            keeper->guildMasterOf = gld;
+            auto &gm = reg.get_or_emplace<GuildMaster>(keeper->ent);
+            gm.guildMasterOf = gld;
         }
     }
 }

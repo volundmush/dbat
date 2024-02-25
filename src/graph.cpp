@@ -20,6 +20,7 @@
 #include "dbat/vehicles.h"
 #include "dbat/act.informative.h"
 #include "dbat/random.h"
+#include "dbat/entity.h"
 
 /* local functions */
 static std::list<std::pair<Room*, int>> bfs_queue;
@@ -181,25 +182,25 @@ ACMD(do_sradar) {
         sprintf(planet, "%s", argstr.c_str());
     } else {
         if(!strcasecmp(arg, "buoy1")) {
-            auto room = entities.find(GET_RADAR1(ch));
-            if(room != entities.end()) {
-                dir = find_first_step(startRoom, dynamic_cast<Room*>(room->second));
+            auto room = getEntity<Room>(GET_RADAR1(ch));
+            if(room) {
+                dir = find_first_step(startRoom, room);
             } else {
                 ch->sendf("@wYou haven't launched that buoy.\r\n");
                 return;
             }
         } else if(!strcasecmp(arg, "buoy2")) {
-            auto room = entities.find(GET_RADAR2(ch));
-            if(room != entities.end()) {
-                dir = find_first_step(startRoom, dynamic_cast<Room*>(room->second));
+            auto room = getEntity<Room>(GET_RADAR2(ch));
+            if(room) {
+                dir = find_first_step(startRoom, room);
             } else {
                 ch->sendf("@wYou haven't launched that buoy.\r\n");
                 return;
             }
         } else if(!strcasecmp(arg, "buoy3")) {
-            auto room = entities.find(GET_RADAR3(ch));
-            if(room != entities.end()) {
-                dir = find_first_step(startRoom, dynamic_cast<Room*>(room->second));
+            auto room = getEntity<Room>(GET_RADAR3(ch));
+            if(room) {
+                dir = find_first_step(startRoom, room);
             } else {
                 ch->sendf("@wYou haven't launched that buoy.\r\n");
                 return;
@@ -440,10 +441,10 @@ ACMD(do_track) {
     }
 
     if(GET_SKILL_BASE(ch, SKILL_SENSE) == 100) {
-        auto chRegion = ch->getWorld();
-        auto vRegion = vict->getWorld();
-        if(chRegion && chRegion == vRegion) {
-            ch->sendf("@WSense@D: %s@n\r\n", vRegion->getDisplayName(ch));
+        auto chRegion = find::holderType(ch->ent, ITEM_WORLD);
+        auto vRegion = find::holderType(vict->ent, ITEM_WORLD);
+        if(chRegion == vRegion) {
+            ch->sendf("@WSense@D: %s@n\r\n", render::displayName(vRegion, ch->ent));
         }
     } else {
 
@@ -491,7 +492,7 @@ ACMD(do_track) {
                 if ((GET_SKILL_BASE(ch, SKILL_SENSE) >= 75)) {
                     
                     ch->sendf("You sense them %s from here!\r\n", dirs[dir]);
-                    if(auto reg = vict->getWorld(); reg) ch->sendf("@WSense@D: @Y%s@n\r\n", reg->getDisplayName(ch));
+                    if(auto reg = find::holderType(vict->ent, ITEM_WORLD); reg != entt::null) ch->sendf("@WSense@D: @Y%s@n\r\n", render::displayName(reg, ch->ent));
                 } else {
                     ch->sendf("You sense them %s from here!\r\n", dirs[dir]);
                     break;

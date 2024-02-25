@@ -25,6 +25,7 @@
 #include "dbat/fight.h"
 #include "dbat/class.h"
 #include "dbat/act.informative.h"
+#include "dbat/entity.h"
 
 /* local functions  */
 static void generate_multiform(BaseCharacter *ch, int count);
@@ -5409,7 +5410,7 @@ ACMD(do_spoil) {
     *buf2 = '\0';
     *buf3 = '\0';
 
-    body_part = create_obj();
+    body_part = create_obj(EntityFamily::Object);
     body_part->vn = NOTHING;
     snprintf(part, sizeof(part), "%s", obj->getName().c_str());
     search_replace(part, "headless", "");
@@ -5429,6 +5430,7 @@ ACMD(do_spoil) {
     body_part->setShortDesc(buf3);
 
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;
+    flags::set(body_part->ent, FlagType::ItemType, ITEM_OTHER);
     body_part->setFlag(FlagType::Wear, ITEM_WEAR_TAKE);
     body_part->setFlag(FlagType::Item, ITEM_UNIQUE_SAVE);
     GET_OBJ_VAL(body_part, 0) = 0;

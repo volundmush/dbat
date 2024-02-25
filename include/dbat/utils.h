@@ -749,15 +749,12 @@ extern Object* GET_EQ(GameEntity* u, int i);
  * If using unsigned types, the top array index will catch everything.
  * If using signed types, NOTHING will catch the majority of bad accesses.
  */
-#define VALID_OBJ_RNUM(obj)    (obj_proto.contains(GET_OBJ_RNUM(obj)))
+#define VALID_OBJ_RNUM(obj)    (obj_proto.contains((obj)->vn))
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
-#define GET_OBJ_PERM(obj)       ((obj)->bitvector)
 #define GET_OBJ_TYPE(obj)    ((obj)->type_flag)
 #define GET_OBJ_COST(obj)    ((obj)->cost)
 #define GET_OBJ_RENT(obj)    ((obj)->cost_per_day)
-#define GET_OBJ_EXTRA(obj)    ((obj)->extra_flags)
-#define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->extra_flags[(i)])
 #define GET_OBJ_WEAR(obj)    ((obj)->wear_flags)
 #define GET_OBJ_VAL(obj, val)    ((obj)->value[(val)])
 #define GET_OBJ_WEIGHT(obj)    ((obj)->weight)

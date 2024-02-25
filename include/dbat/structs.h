@@ -54,28 +54,28 @@ struct Shop {
     int bankAccount{};        /* Store all gold over 15000 (disabled)	*/
     int lastsort{};        /* How many items are sorted in inven?	*/
     
-    std::list<NonPlayerCharacter*> getKeepers();
+    std::list<BaseCharacter*> getKeepers();
     bool isProducing(obj_vnum vn);
     bool isProducing(Object *obj1);
     void runPurge();
     int tradeWith(Object* item);
-    Object* getSellingObject(BaseCharacter* ch, const std::string& name, NonPlayerCharacter *keeper, bool msg);
-    Object* getPurchaseObject(BaseCharacter* ch, const std::string& name, NonPlayerCharacter *keeper, bool msg);
-    std::string listObject(Object *obj, int cnt, int aindex, NonPlayerCharacter *keeper, BaseCharacter *ch);
-    int64_t buyPrice(Object *obj, NonPlayerCharacter* keeper, BaseCharacter* ch);
-    int64_t sellPrice(Object *obj, NonPlayerCharacter* keeper, BaseCharacter* ch);
-    bool executeCommand(NonPlayerCharacter *keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    Object* getSellingObject(BaseCharacter* ch, const std::string& name, BaseCharacter *keeper, bool msg);
+    Object* getPurchaseObject(BaseCharacter* ch, const std::string& name, BaseCharacter *keeper, bool msg);
+    std::string listObject(Object *obj, int cnt, int aindex, BaseCharacter *keeper, BaseCharacter *ch);
+    int64_t buyPrice(Object *obj, BaseCharacter* keeper, BaseCharacter* ch);
+    int64_t sellPrice(Object *obj, BaseCharacter* keeper, BaseCharacter* ch);
+    bool executeCommand(BaseCharacter *keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
     
-    void executeBuy(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
-    void executeSell(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
-    void executeList(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
-    void executeValue(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
-    void executeAppraise(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeBuy(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeSell(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeList(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeValue(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeAppraise(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
 
-    bool isOk(NonPlayerCharacter* keeper, BaseCharacter *ch);
-    bool isOkChar(NonPlayerCharacter* keeper, BaseCharacter *ch);
-    bool isOkObj(NonPlayerCharacter* keeper, BaseCharacter *ch, Object *obj);
-    bool isOpen(NonPlayerCharacter* keeper, bool msg);
+    bool isOk(BaseCharacter* keeper, BaseCharacter *ch);
+    bool isOkChar(BaseCharacter* keeper, BaseCharacter *ch);
+    bool isOkObj(BaseCharacter* keeper, BaseCharacter *ch, Object *obj);
+    bool isOpen(BaseCharacter* keeper, bool msg);
     
 
 };
@@ -97,7 +97,7 @@ struct Guild {
     std::unordered_set<int> with_who{};/* Who does the shop trade with?	*/
     int open{0}, close{28};               /* when we will train */
     std::set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
-    std::list<NonPlayerCharacter*> getMasters();
+    std::list<BaseCharacter*> getMasters();
 };
 
 
@@ -187,7 +187,7 @@ struct account_data {
     int rpp{};
     int slots{3};
     std::vector<std::string> customs;
-    std::vector<vnum> characters;
+    std::vector<int64_t> characters;
     std::set<descriptor_data*> descriptors;
     std::set<net::Connection*> connections;
 
@@ -218,8 +218,8 @@ struct ExtraDescriptions {
     explicit ExtraDescriptions(const nlohmann::json& j);
     std::vector<extra_descr_data> ex_description{}; /* extra descriptions     */
     void deserialize(const nlohmann::json& j);
-}
-
+    nlohmann::json serialize();
+};
 
 struct obj_affected_type {
     obj_affected_type() = default;
@@ -229,11 +229,6 @@ struct obj_affected_type {
     int location{};       /* Which ability to change (APPLY_XXX) */
     int specific{};       /* Some locations have parameters      */
     double modifier{};       /* How much it changes by              */
-};
-
-struct obj_spellbook_spell {
-    int spellname;    /* Which spell is written */
-    int pages;        /* How many pages does it take up */
 };
 
 struct HasVars {
@@ -466,6 +461,11 @@ struct NonPlayerCharacter {
     // TODO: certainly there is something about NPCs that is different from PCs...
 };
 
+struct Damage {
+    std::map<DamageType, int> levels;
+    std::map<DamageType, int64_t> soak;
+};
+
 struct Coordinates {
     Coordinates() = default;
     explicit Coordinates(const nlohmann::json& j);
@@ -531,8 +531,11 @@ struct Destination {
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
 
-    Destination(entt::entity target) : target(target) {};
-    Destination(const Location& loc) : target(loc.location), locationType(loc.locationType), coords(loc.coords) {};
+    explicit Destination(GameEntity* target);
+    explicit Destination(Room* target);
+    explicit Destination(BaseCharacter* target);
+    explicit Destination(entt::entity target) : target(target) {};
+    explicit Destination(const Location& loc) : target(loc.location), locationType(loc.locationType), coords(loc.coords) {};
     entt::entity target{entt::null};
     entt::entity via{entt::null};
     int direction{-1};
@@ -541,7 +544,6 @@ struct Destination {
     bool operator==(const Destination& rhs);
 };
 
-// STRUCTURE STUFF BELOW THIS.
 
 // TileDetails is used to store information about a tile. Part of the Grid3D system.
 struct TileDetails {
@@ -569,7 +571,7 @@ struct Grid3D {
 };
 
 struct CoordinateContents {
-    std::unordered_map<Coordinates, std::vector<GameEntity*>> coordinateContents;
+    std::unordered_map<Coordinates, std::vector<entt::entity>> coordinateContents;
 };
 
 struct Boundaries {
@@ -584,9 +586,10 @@ struct Boundaries {
 struct Flags {
     Flags() = default;
     explicit Flags(const nlohmann::json& j);
-    std::unordered_map<FlagType, std::unordered_set<int>> flags;
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
+
+    std::unordered_map<FlagType, std::unordered_set<int>> flags;
 };
 
 struct Text {
@@ -597,16 +600,18 @@ struct Text {
 
     std::unordered_map<std::string, std::shared_ptr<InternedString>> strings;
     
-}
+};
 
 // Tag component used to show that an entity is to be deleted.
 struct Deleted {
 
-}
+};
 
 struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     GameEntity() = default;
     virtual ~GameEntity();
+    virtual void deserialize(const nlohmann::json& j);
+    virtual nlohmann::json serialize();
 
     int64_t getUID();
     vnum getVN();
@@ -638,11 +643,10 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 
     std::shared_ptr<script_data> script{};  /* script info for the object */
 
-    
-    virtual bool checkFlag(FlagType type, int flag);
-    virtual void setFlag(FlagType type, int flag, bool value = true);
-    virtual void clearFlag(FlagType type, int flag);
-    virtual bool flipFlag(FlagType type, int flag);
+    bool checkFlag(FlagType type, int flag);
+    void setFlag(FlagType type, int flag, bool value = true);
+    void clearFlag(FlagType type, int flag);
+    bool flipFlag(FlagType type, int flag);
     std::vector<std::string> getFlagNames(FlagType type);
 
     weight_t getInventoryWeight();
@@ -662,151 +666,106 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     GameEntity* getLocation();
 
     // removeFromLocation is called first, and handleRemove is called BY removeFromLocation on its location.
-    virtual void removeFromLocation();
-    virtual void handleRemove(GameEntity *u);
+    void removeFromLocation();
 
     // As above, the process is to call addToLocation which will then call handleAdd ON the location.
-    virtual void addToLocation(const Destination &dest);
-    virtual void handleAdd(GameEntity *u);
-
-    // called for this, when mover has changed coordinates within it.
-    virtual void updateCoordinates(GameEntity *mover, std::optional<Coordinates> previous = std::nullopt);
+    void addToLocation(const Destination &dest);
+    void addToLocation(GameEntity* mover);
 
     // Returns a collection of 'units within reach' for commands like look or get.
     std::vector<GameEntity*> getNeighbors(bool visible = true);
 
     // The business part of the above.
-    virtual std::vector<GameEntity*> getNeighborsFor(GameEntity* u, bool visible = true);
+    std::vector<GameEntity*> getNeighborsFor(GameEntity* u, bool visible = true);
 
-    virtual std::vector<std::pair<std::string, Destination>> getLandingSpotsFor(GameEntity *mover);
-    virtual std::optional<Destination> getLaunchDestinationFor(GameEntity *mover);
+    std::vector<std::pair<std::string, Destination>> getLandingSpotsFor(GameEntity *mover);
+    std::optional<Destination> getLaunchDestinationFor(GameEntity *mover);
 
-    virtual bool isInvisible();
-    virtual bool isHidden();
-    virtual bool isAdminInvisible();
-
-    virtual bool canSee(GameEntity *target);
-    virtual bool canSeeInvisible();
-    virtual bool canSeeHidden();
-    virtual bool canSeeAdminInvisible();
-
-    // whether this has some form of nightvision.
-    virtual bool canSeeInDark();
+    bool isInvisible();
+    bool isHidden();
+    bool isAdminInvisible();
+    bool canSee(GameEntity *target);
+    bool canSeeInvisible();
+    bool canSeeHidden();
+    bool canSeeAdminInvisible();
+    bool canSeeInDark();
 
     // NOTE: all functions beginning with check return an empty optional if it's OK.
     // the optional string contains the reason why it's NOT OK, otherwise.
 
     // Whether u can access this unit's inventory.
-    virtual std::optional<std::string> checkAllowInventoryAcesss(GameEntity *u);
+    std::optional<std::string> checkAllowInventoryAcesss(GameEntity *u);
 
     // whether this unit will allow u to take/give/drop it. give/put/drop are identical.
-    virtual std::optional<std::string> checkIsGettable(GameEntity *u);
-    virtual std::optional<std::string> checkIsGivable(GameEntity *u);
+    std::optional<std::string> checkIsGettable(GameEntity *u);
+    std::optional<std::string> checkIsGivable(GameEntity *u);
 
     // if this can store u in its inventory. This includes a room accepting items.
     // Things to check might be weight, item capacity, whether it's appropriate for the space, etc.
-    virtual std::optional<std::string> checkCanStore(GameEntity *u);
+    std::optional<std::string> checkCanStore(GameEntity *u);
 
     // Check to see whether giver can give u to this.
-    virtual std::optional<std::string> checkAllowReceive(GameEntity *giver, GameEntity *u);
+    std::optional<std::string> checkAllowReceive(GameEntity *giver, GameEntity *u);
 
     // Whether this can be equipped by u.
-    virtual std::optional<std::string> checkAllowEquip(GameEntity *u, int location);
-    virtual std::optional<std::string> checkAllowRemove(GameEntity *u);
+    std::optional<std::string> checkAllowEquip(GameEntity *u, int location);
+    std::optional<std::string> checkAllowRemove(GameEntity *u);
 
-    virtual bool isInsideNormallyDark(GameEntity *viewer);
-    virtual bool isInsideDark(GameEntity *viewer);
-    virtual bool isProvidingLight();
+    bool isInsideNormallyDark(GameEntity *viewer);
+    bool isInsideDark(GameEntity *viewer);
+    bool isProvidingLight();
 
     // Look at location.
-    virtual void lookAtLocation();
+    void lookAtLocation();
     // The business part of the above.
-    virtual std::string renderLocationFor(GameEntity* viewer);
-    virtual std::string renderListingFor(GameEntity* viewer);
-    virtual std::string renderListPrefixFor(GameEntity* viewer);
+    std::string renderLocationFor(GameEntity* viewer);
+    std::string renderListingFor(GameEntity* viewer);
+    std::string renderListPrefixFor(GameEntity* viewer);
 
     // The RoomListingHelper renders the 'room description' for a room listing.
-    virtual std::string renderRoomListingHelper(GameEntity* viewer);
+    std::string renderRoomListingHelper(GameEntity* viewer);
 
     // Although this is virtual, it shouldn't normally need to be overriden.
-    virtual std::string renderRoomListingFor(GameEntity* viewer);
+    std::string renderRoomListingFor(GameEntity* viewer);
     //virtual std::string renderContentsListFor(GameEntity* u);
 
-    virtual std::string renderInventoryListingFor(GameEntity* viewer);
-    virtual std::string renderInventoryListingHelper(GameEntity* viewer);
+    std::string renderInventoryListingFor(GameEntity* viewer);
+    std::string renderInventoryListingHelper(GameEntity* viewer);
 
-    virtual std::string renderModifiers(GameEntity* viewer);
+    std::string renderModifiers(GameEntity* viewer);
 
-    virtual std::string renderDiagnostics(GameEntity* viewer);
+    std::string renderDiagnostics(GameEntity* viewer);
 
-    virtual std::string renderInventory(GameEntity* viewer);
-    virtual std::string renderEquipment(GameEntity* viewer, bool showEmpty = false);
+    std::string renderInventory(GameEntity* viewer);
+    std::string renderEquipment(GameEntity* viewer, bool showEmpty = false);
 
-    void activateContents();
-    void deactivateContents();
-
-    virtual void deserialize(const nlohmann::json& j);
-    virtual void deserializeRelations(const nlohmann::json& j);
-    virtual nlohmann::json serialize();
-    virtual nlohmann::json serializeRelations();
-    
-    virtual std::string scriptString();
+    std::string scriptString();
 
     std::string getUIDString(bool active = true);
-    virtual bool isActive();
+
 
     Object* findObjectVnum(obj_vnum objVnum, bool working = true);
-    virtual Object* findObject(const std::function<bool(Object*)> &func, bool working = true);
-    virtual std::set<Object*> gatherObjects(const std::function<bool(Object*)> &func, bool working = true);
+    Object* findObject(const std::function<bool(Object*)> &func, bool working = true);
+    std::set<Object*> gatherObjects(const std::function<bool(Object*)> &func, bool working = true);
     virtual DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg);
 
-    virtual std::string getName();
-    virtual std::string getAlias();
-    virtual std::string getShortDesc();
-    virtual std::string getRoomDesc();
-    virtual std::string getLookDesc();
+    std::string getName();
+    std::string getAlias();
+    std::string getShortDesc();
+    std::string getRoomDesc();
+    std::string getLookDesc();
 
-    virtual void setName(const std::string& desc);
-    virtual void setAlias(const std::string& alias);
-    virtual void setShortDesc(const std::string& desc);
-    virtual void setRoomDesc(const std::string& desc);
-    virtual void setLookDesc(const std::string& desc);
+    void setName(const std::string& desc);
+    void setAlias(const std::string& alias);
+    void setShortDesc(const std::string& desc);
+    void setRoomDesc(const std::string& desc);
+    void setLookDesc(const std::string& desc);
 
-    virtual std::string getDisplayName(GameEntity* ch);
-    virtual std::vector<std::string> getKeywords(GameEntity* ch);
-    virtual std::string renderAppearance(GameEntity* ch);
-
-    virtual EntityFamily getFamily() = 0;
-    virtual std::string getUnitClass() = 0;
+    std::string getDisplayName(GameEntity* ch);
+    std::vector<std::string> getKeywords(GameEntity* ch);
+    std::string renderAppearance(GameEntity* ch);
     
     void checkMyID();
-
-    // The object which provides environmental data for this unit.
-    // An example would be current gravity. Rooms are one example of an environment, but
-    // rooms might get their environment from a region/structure too.
-    GameEntity* getEnvironment();
-
-    virtual bool isEnvironment();
-
-    // The object which is 'roughly where the unit is.' This is likely a planet, dimension,
-    // or similar major boundary.
-    GameEntity* getWorld();
-
-    virtual bool isWorld();
-
-    // The object which represents a point of entry/exit. This is likely a vehicle, structure, planet, etc.
-    // You can generally board/land/enter these things and similarly leave/fly out of them.
-    GameEntity* getStructure();
-
-    virtual bool isStructure();
-
-    // Planets are a special kind of structure. They are effectively top-level structures for many areas
-    // and have their own special uses like checking for having moons or being able to 'fly space' from them.
-    // This can be used for things that are also LIKE planets too, such as moons, large asteroids, floating
-    // islands in space, whatever.
-    GameEntity* getPlanet();
-
-    virtual bool isPlanet();
 
     // Replacement for existing command interpreter
     virtual void executeCommand(const std::string& cmd);
@@ -814,39 +773,39 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     // Returns viable landing locations within this, for u.
     //virtual std::vector<GameEntity*> getLandingLocations(GameEntity *u);
 
-    virtual void assignTriggers();
+    void assignTriggers();
 
-    virtual void sendEvent(const Event& event);
-    virtual void sendEventContents(const Event& event);
+    void sendEvent(const Event& event);
+    void sendEventContents(const Event& event);
 
-    virtual void sendText(const std::string& text);
+    void sendText(const std::string& text);
     void sendLine(const std::string& text);
-    virtual void sendTextContents(const std::string& text);
+    void sendTextContents(const std::string& text);
     void sendLineContents(const std::string& text);
 
     // called by this to know what environment it operates under.
-    virtual double myEnvVar(EnvVar v);
+    double myEnvVar(EnvVar v);
 
     // Called by a thing IN this to know what environment it operates under.
-    virtual double getEnvVar(EnvVar v);
+    double getEnvVar(EnvVar v);
 
     // called by a location to aggregate things affecting the environment.
-    virtual std::optional<double> emitEnvVar(EnvVar v);
+    std::optional<double> emitEnvVar(EnvVar v);
     std::unordered_map<EnvVar, double> envVars;
     
-    virtual std::map<int, Destination> getDestinations(GameEntity* viewer);
-    virtual std::optional<Destination> getDestination(GameEntity* viewer, int direction);
+    std::map<int, Destination> getDestinations(GameEntity* viewer);
+    std::optional<Destination> getDestination(GameEntity* viewer, int direction);
 
-    virtual bool moveInDirection(int direction, bool need_specials_check = true);
-    virtual bool doSimpleMove(int direction, bool need_specials_check = true);
+    bool moveInDirection(int direction, bool need_specials_check = true);
+    bool doSimpleMove(int direction, bool need_specials_check = true);
 
     // this is used for leaving ANY kind of location. not just the command 'leave'.
-    virtual bool checkCanLeave(GameEntity *mover, const Destination& dest, bool need_specials_check);
+    bool checkCanLeave(GameEntity *mover, const Destination& dest, bool need_specials_check);
 
-    virtual bool checkCanReachDestination(GameEntity *mover, const Destination& dest);
+    bool checkCanReachDestination(GameEntity *mover, const Destination& dest);
 
     // this should be called as dest.target as this.
-    virtual bool checkPostEnter(GameEntity *mover, const Location& cameFrom, const Destination& dest);
+    bool checkPostEnter(GameEntity *mover, const Location& cameFrom, const Destination& dest);
 
     template<typename... Args>
     void sendText(fmt::string_view format, Args&&... args) {
@@ -923,41 +882,14 @@ struct Object : public GameEntity {
     Object() = default;
     explicit Object(const nlohmann::json &j);
     ~Object() override;
+    nlohmann::json serialize() override;
+    void deserialize(const nlohmann::json& j) override;
     
     void extractFromWorld() override;
-
     void executeCommand(const std::string& argument) override;
-
-    EntityFamily getFamily() override;
-    std::string getUnitClass() override;
-
-    nlohmann::json serialize() override;
-    nlohmann::json serializeRelations() override;
-    void deserializeRelations(const nlohmann::json& j) override;
-    void deserialize(const nlohmann::json& j) override;
-
-    std::string renderRoomListingFor(GameEntity* viewer) override;
-    std::string renderRoomListingHelper(GameEntity* u) override;
-    std::string renderModifiers(GameEntity* viewer);
-
-    std::string renderInventoryListingHelper(GameEntity* viewer) override;
-    std::string renderInventoryListingFor(GameEntity* viewer) override;
-
-    std::string renderDiagnostics(GameEntity* viewer) override;
-
-    virtual std::string renderAppearanceHelper(GameEntity* viewer);
-
-    std::string renderAppearance(GameEntity* viewer) override;
-
-    void activate();
-
-    void deactivate();
 
     int getAffectModifier(int location, int specific = -1);
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
-
-    bool active{false};
-    bool isActive() override;
 
     bool isWorking();
 
@@ -984,7 +916,6 @@ struct Object : public GameEntity {
 
     Object *next{};         /* For the object list              */
 
-    struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
     BaseCharacter *sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
     time_t lload{};
@@ -1008,188 +939,17 @@ struct Object : public GameEntity {
 
     std::optional<double> gravity;
 
-    bool isProvidingLight() override;
-    double currentGravity();
-
-    void assignTriggers() override;
-
 };
-/* ======================================================================= */
-
-// Type: ITEM_PLANT should always use this.
-struct Plant : public Object {
-    Plant() = default;
-    explicit Plant(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    std::string renderRoomListingHelper(GameEntity* u) override;
-};
-
-// Type: Vnum 11 alyways...
-struct GravityGenerator : public Object {
-    GravityGenerator() = default;
-    explicit GravityGenerator(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    std::string renderRoomListingHelper(GameEntity* u) override;
-};
-
-struct GlacialWall : public Object {
-    GlacialWall() = default;
-    explicit GlacialWall(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    std::string renderRoomListingHelper(GameEntity* u) override;
-};
-
-struct DrinkContainer : public Object {
-    DrinkContainer() = default;
-    explicit DrinkContainer(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    std::string renderAppearanceHelper(GameEntity* u) override;
-};
-
-struct Food : public Object {
-    Food() = default;
-    explicit Food(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    std::string renderAppearanceHelper(GameEntity* u) override;
-};
-
-struct Corpse : public Object {
-    Corpse() = default;
-    explicit Corpse(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    std::string renderAppearanceHelper(GameEntity* u) override;
-};
-
-struct Weapon : public Object {
-    Weapon() = default;
-    explicit Weapon(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    std::string renderAppearanceHelper(GameEntity* u) override;
-};
-
-
 
 // A new kind of entity. Entity family Structure.
-struct Structure : public GameEntity {
+struct Structure {
     Structure() = default;
     explicit Structure(const nlohmann::json &j);
-
-    //void extractFromWorld() override;
-
-    void handleRemove(GameEntity *u) override;
-    void handleAdd(GameEntity *u) override;
-    void updateCoordinates(GameEntity *mover, std::optional<Coordinates> previous = std::nullopt) override;
-
-    std::map<int, Destination> getDestinations(GameEntity* viewer) override;
-    bool checkCanLeave(GameEntity *mover, const Destination& dest, bool need_specials_check) override;
-    bool checkCanReachDestination(GameEntity *mover, const Destination& dest) override;
-    bool checkPostEnter(GameEntity *mover, const Location& cameFrom, const Destination& dest) override;
-    std::string renderLocationFor(GameEntity* viewer) override;
-
-    EntityFamily getFamily() override;
-    std::string getUnitClass() override;
-
-    nlohmann::json serialize() override;
-    nlohmann::json serializeRelations() override;
-    void deserializeRelations(const nlohmann::json& j) override;
-    void deserialize(const nlohmann::json& j) override;
-
-    bool isInsideNormallyDark(GameEntity* viewer) override;
-    bool isInsideDark(GameEntity* viewer) override;
-
-    std::vector<std::pair<std::string, Destination>> getLandingSpotsFor(GameEntity *mover) override;
-    std::optional<Destination> getLaunchDestinationFor(GameEntity *mover) override;
+    void deserialize(const nlohmann::json& j);
+    nlohmann::json serialize();
 
     StructureType type{StructureType::Rooms};
-
-    void handleRemoveFromCoordinates(GameEntity *mover, const Coordinates &coor);
 };
-
-// Vehicles. Spaceships, boats, submarines, fighter jets, cars, buses...
-struct Vehicle : public Structure {
-    Vehicle() = default;
-    explicit Vehicle(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-
-    void sendText(const std::string& text) override;
-
-    void executeCommand(const std::string& argument) override;
-
-    bool isEnvironment() override;
-    bool isStructure() override;
-};
-
-// Note: Also used for moons, planetoids, dwarf planets, gigantic asteroids and... 
-// I dunno, floating islands in space? Like the world of Golden Sun?
-struct Planet : public Structure {
-    Planet() = default;
-    explicit Planet(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-
-    bool isEnvironment() override;
-    bool isPlanet() override;
-    bool isStructure() override;
-    bool isWorld() override;
-};
-
-// Used for things like space stations, large buildings, possibly elaborate dungeons.
-struct Building : public Structure {
-    Building() = default;
-    explicit Building(const nlohmann::json &j);
-
-
-    std::string getUnitClass() override;
-    
-    bool isEnvironment() override;
-    bool isStructure() override;
-};
-
-// Used for regions - usually wilderness areas like forests, plains, deserts, mountaintops, etc.
-struct Region : public Structure {
-    Region() = default;
-    explicit Region(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-};
-
-struct Dimension : public Structure {
-    Dimension() = default;
-    explicit Dimension(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    bool isEnvironment() override;
-    bool isWorld() override;
-};
-
-
-struct Interstellar : public Structure {
-    Interstellar() = default;
-    explicit Interstellar(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    bool isWorld() override;
-    bool isEnvironment() override;
-};
-
-struct Stellar : public Structure {
-    Stellar() = default;
-    explicit Stellar(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-    bool isWorld() override;
-    bool isEnvironment() override;
-};
-
-
 
 /* room-related structures ************************************************/
 
@@ -1211,16 +971,8 @@ struct Exit : public GameEntity {
 
     Room* getDestination();
 
-    EntityFamily getFamily() override;
-    std::string getUnitClass() override;
-    nlohmann::json serializeRelations() override;
     nlohmann::json serialize() override;
-    void deserializeRelations(const nlohmann::json& j) override;
     void deserialize(const nlohmann::json& j) override;
-
-    std::string getName() override;
-    //std::string getAlias() override;
-    std::vector<std::string> getKeywords(GameEntity* ch) override;
 };
 
 enum class MoonCheck : uint8_t {
@@ -1235,19 +987,14 @@ struct Room : public GameEntity {
     static constexpr auto in_place_delete = true;
     Room() = default;
 
-    EntityFamily getFamily() override;
-    std::string getUnitClass() override;
-
     explicit Room(const nlohmann::json &j);
     int sector_type{};            /* sector type (move/hide)            */
     SpecialFunc func{};
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
     int geffect{};            /* Effect of ground destruction       */
-
-    std::optional<double> gravity;
-
     void executeCommand(const std::string& argument) override;
+    std::optional<double> gravity;
 
     bool isSunken();
 
@@ -1258,36 +1005,15 @@ struct Room : public GameEntity {
     nlohmann::json serialize() override;
     void deserialize(const nlohmann::json& j) override;
 
-    bool isActive() override;
-
-    std::string renderLocationFor(GameEntity* u) override;
-
-    std::string renderExits1(GameEntity* u);
-    std::string renderExits2(GameEntity* u);
-    std::string generateMap(GameEntity* viewer, int num);
-    std::string printMap(GameEntity* viewer, int type, int64_t v);
+    std::string renderExits1(entt::entity viewer);
+    std::string renderExits2(entt::entity viewer);
+    std::string generateMap(entt::entity viewer, int num);
+    std::string printMap(entt::entity viewer, int type, int64_t v);
     std::optional<room_vnum> getLaunchDestination();
 
     MoonCheck checkMoon();
 
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
-
-    void assignTriggers() override;
-
-    //Event renderLocationFor(GameEntity* u) override;
-
-    bool isInsideNormallyDark(GameEntity* viewer) override;
-    bool isInsideDark(GameEntity* viewer) override;
-    bool isEnvironment() override;
-
-    double getEnvVar(EnvVar v) override;
-
-    std::map<int, Destination> getDestinations(GameEntity* viewer) override;
-    bool checkPostEnter(GameEntity* mover, const Location& loc, const Destination& dest) override;
-    bool checkCanReachDestination(GameEntity *mover, const Destination& dest) override;
-    bool checkCanLeave(GameEntity* mover, const Destination& dest, bool need_specials_check = true) override;
-
-
 };
 /* ====================================================================== */
 
@@ -1436,43 +1162,19 @@ struct BaseCharacter : public GameEntity {
     nlohmann::json serialize() override;
     void deserialize(const nlohmann::json& j) override;
 
-    void activate();
-    void deactivate();
-    void login();
-
     void executeCommand(const std::string& cmd) override;
 
-    nlohmann::json serializeRelations() override;
-    void deserializeRelations(const nlohmann::json& j) override;
+    void login();
 
-    std::vector<std::string> baseKeywordsFor(GameEntity* looker);
-
-    virtual std::string renderRoomListName(GameEntity* looker) = 0;
-    std::string renderRoomListingHelper(GameEntity* u) override;
-    std::string renderRoomListingFor(GameEntity* u) override;
-    virtual std::string renderStatusLines(GameEntity* viewer);
-
-    std::string renderDiagnostics(GameEntity* viewer) override;
-    std::string renderAppearance(GameEntity* viewer) override;
-
-    std::optional<std::string> getDubFor(BaseCharacter* target);
-
-    bool moveInDirection(int direction, bool need_specials_check = true) override;
-    bool doSimpleMove(int direction, bool need_specials_check = true) override;
-
-    virtual bool isPC() = 0;
-    virtual bool isNPC() = 0;
-    void lookAtLocation() override;
-
-    bool isActive() override;
+    bool isPC();
+    bool isNPC();
 
     void ageBy(double addedTime);
     void setAge(double newAge);
 
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
-    Object* findObject(const std::function<bool(Object*)> &func, bool working = true) override;
-    std::set<Object*> gatherObjects(const std::function<bool(Object*)> &func, bool working = true) override;
+    std::string juggleRaceName(bool capitalized);
 
     weight_t getWeight(bool base = false);
     weight_t getTotalWeight();
@@ -1524,20 +1226,6 @@ struct BaseCharacter : public GameEntity {
     attribute_train_t get(CharTrain attr);
     attribute_train_t set(CharTrain attr, attribute_train_t val);
     attribute_train_t mod(CharTrain attr, attribute_train_t val);
-
-    bool isInvisible() override;
-    bool isHidden() override;
-    bool isAdminInvisible() override;
-    bool canSeeInvisible() override;
-    //bool canSeeHidden() override;
-    bool canSeeAdminInvisible() override;
-    bool canSeeInDark() override;
-    bool isProvidingLight() override;
-
-    void sendText(const std::string& text) override;
-    void sendEvent(const Event& event) override;
-
-    std::string juggleRaceName(bool capitalized);
 
     void restore(bool announce);
 
@@ -1792,8 +1480,6 @@ struct BaseCharacter : public GameEntity {
 
     double currentGravity();
 
-    EntityFamily getFamily() override;
-
     num_t get(CharNum stat);
     num_t set(CharNum stat, num_t val);
     num_t mod(CharNum stat, num_t val);
@@ -2013,57 +1699,13 @@ struct BaseCharacter : public GameEntity {
 
 };
 
-struct NonPlayerCharacter : public BaseCharacter {
-    NonPlayerCharacter() = default;
-    explicit NonPlayerCharacter(const nlohmann::json &j);
-
-    std::string getUnitClass() override;
-
-    void assignTriggers() override;
-
-    void deserialize(const nlohmann::json& j) override;
-    nlohmann::json serialize() override;
-
-    bool isPC() override;
-    bool isNPC() override;
-
-    std::string getDisplayName(GameEntity* looker) override;
-    std::vector<std::string> getKeywords(GameEntity* looker) override;
-
-    std::string renderRoomListName(GameEntity* looker) override;
-
+struct ShopKeeper {
     std::shared_ptr<Shop> shopKeeperOf;
+};
+
+struct GuildMaster {
     std::shared_ptr<Guild> guildMasterOf;
-
 };
-
-struct PlayerCharacter : public BaseCharacter {
-    PlayerCharacter() = default;
-    explicit PlayerCharacter(const nlohmann::json &j);
-
-    void onHolderExtraction() override;
-    void extractFromWorld() override;
-
-    std::string getUnitClass() override;
-
-    void deserialize(const nlohmann::json& j) override;
-    nlohmann::json serialize() override;
-
-    std::string getDisplayName(GameEntity* looker) override;
-    std::vector<std::string> getKeywords(GameEntity* looker) override;
-
-    std::string renderRoomListName(GameEntity* looker) override;
-
-    bool isPC() override;
-    bool isNPC() override;
-};
-
-
-/* ====================================================================== */
-
-
-/* descriptor-related structures ******************************************/
-
 
 struct txt_block {
     char *text;
@@ -2435,7 +2077,29 @@ class Dispatcher {
             case SearchType::World: {
                 std::vector<GameEntity*> out;
                 for(auto [id, obj] : entities) {
-                    out.push_back(obj);
+                    auto &info = reg.get<Info>(obj);
+                    switch(info.family) {
+                        case EntityFamily::Character: {
+                            auto ch = reg.try_get<BaseCharacter>(obj);
+                            out.push_back(ch);
+                        }
+                            break;
+                        case EntityFamily::Object: {
+                            auto o = reg.try_get<Object>(obj);
+                            out.push_back(o);
+                        }
+                            break;
+                        case EntityFamily::Room: {
+                            auto room = reg.try_get<Room>(obj);
+                            out.push_back(room);
+                        }
+                            break;
+                        case EntityFamily::Exit: {
+                            auto exit = reg.try_get<Exit>(obj);
+                            out.push_back(exit);
+                        }
+                            break;
+                    }
                 }
                 return out;
             }

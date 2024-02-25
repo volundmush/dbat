@@ -168,7 +168,7 @@ static const std::unordered_map<RaceID, int> raceCheck = {
     {RaceID::Konatsu, TRADE_NOKONATSU}
 };
 
-bool Shop::isOkChar(NonPlayerCharacter* keeper, BaseCharacter *ch) {
+bool Shop::isOkChar(BaseCharacter* keeper, BaseCharacter *ch) {
     char buf[MAX_INPUT_LENGTH];
 
     if (!CAN_SEE(keeper, ch)) {
@@ -207,7 +207,7 @@ bool Shop::isOkChar(NonPlayerCharacter* keeper, BaseCharacter *ch) {
     return true;
 }
 
-bool Shop::isOkObj(NonPlayerCharacter *keeper, BaseCharacter *ch, Object *obj) {
+bool Shop::isOkObj(BaseCharacter *keeper, BaseCharacter *ch, Object *obj) {
     char buf[MAX_INPUT_LENGTH];
 
     if (OBJ_FLAGGED(obj, ITEM_BROKEN) && with_who.contains(TRADE_NOBROKEN)) {
@@ -224,7 +224,7 @@ bool Shop::isOkObj(NonPlayerCharacter *keeper, BaseCharacter *ch, Object *obj) {
     return true;
 }
 
-bool Shop::isOpen(NonPlayerCharacter *keeper, bool msg) {
+bool Shop::isOpen(BaseCharacter *keeper, bool msg) {
     char buf[MAX_INPUT_LENGTH];
 
     *buf = '\0';
@@ -243,7 +243,7 @@ bool Shop::isOpen(NonPlayerCharacter *keeper, bool msg) {
     return false;
 }
 
-bool Shop::isOk(NonPlayerCharacter* keeper, BaseCharacter *ch) {
+bool Shop::isOk(BaseCharacter* keeper, BaseCharacter *ch) {
     if (isOpen(keeper, true))
         return isOkChar(keeper, ch);
     else
@@ -348,7 +348,7 @@ static Object *get_purchase_obj(BaseCharacter *ch, char *arg, BaseCharacter *kee
  * into charisma, because on the flip side they'd get 11% inflation by
  * having a 3.
  */
-int64_t Shop::buyPrice(Object *obj, NonPlayerCharacter *keeper, BaseCharacter *buyer) {
+int64_t Shop::buyPrice(Object *obj, BaseCharacter *keeper, BaseCharacter *buyer) {
     int cost = (GET_OBJ_COST(obj) * profit_buy);
 
     double adjust = 1.0;
@@ -386,7 +386,7 @@ int64_t Shop::buyPrice(Object *obj, NonPlayerCharacter *keeper, BaseCharacter *b
  * When the shopkeeper is buying, we reverse the discount. Also make sure
  * we don't buy for more than we sell for, to prevent infinite money-making.
  */
-int64_t Shop::sellPrice(Object *obj, NonPlayerCharacter *keeper, BaseCharacter *seller) {
+int64_t Shop::sellPrice(Object *obj, BaseCharacter *keeper, BaseCharacter *seller) {
     float sell_cost_modifier = profit_sell;
     float buy_cost_modifier = profit_buy;
 
@@ -423,11 +423,11 @@ int64_t Shop::sellPrice(Object *obj, NonPlayerCharacter *keeper, BaseCharacter *
     }
 }
 
-Object* Shop::getPurchaseObject(BaseCharacter *ch, const std::string& arguments, NonPlayerCharacter *keeper, bool msg) {
+Object* Shop::getPurchaseObject(BaseCharacter *ch, const std::string& arguments, BaseCharacter *keeper, bool msg) {
     return nullptr;
 }
 
-void Shop::executeAppraise(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+void Shop::executeAppraise(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     Object *obj;
     int i, found = false;
     char buf[MAX_STRING_LENGTH];
@@ -538,12 +538,12 @@ void Shop::executeAppraise(NonPlayerCharacter* keeper, BaseCharacter *ch, const 
     }
 }
 
-void Shop::executeBuy(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+void Shop::executeBuy(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     ch->sendf("Not yet implemented.\r\n");
     return;
 }
 
-Object* Shop::getSellingObject(BaseCharacter *ch, const std::string &name, NonPlayerCharacter *keeper, bool msg) {
+Object* Shop::getSellingObject(BaseCharacter *ch, const std::string &name, BaseCharacter *keeper, bool msg) {
     char buf[MAX_INPUT_LENGTH];
     Object *obj;
     int result;
@@ -584,7 +584,7 @@ Object* Shop::getSellingObject(BaseCharacter *ch, const std::string &name, NonPl
 }
 
 
-void Shop::executeSell(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+void Shop::executeSell(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     char tempstr[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], tempbuf[MAX_INPUT_LENGTH];
     Object *obj;
     int sellnum, sold = 0, goldamt = 0;
@@ -675,7 +675,7 @@ void Shop::executeSell(NonPlayerCharacter* keeper, BaseCharacter *ch, const std:
     }
 }
 
-void Shop::executeValue(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+void Shop::executeValue(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     char buf[MAX_STRING_LENGTH], name[MAX_INPUT_LENGTH];
     Object *obj;
 
@@ -699,7 +699,7 @@ void Shop::executeValue(NonPlayerCharacter* keeper, BaseCharacter *ch, const std
     do_tell(keeper, buf, cmd_tell, 0);
 }
 
-std::string Shop::listObject(Object *obj, int cnt, int aindex, NonPlayerCharacter *keeper, BaseCharacter *ch) {
+std::string Shop::listObject(Object *obj, int cnt, int aindex, BaseCharacter *keeper, BaseCharacter *ch) {
     std::string result;
     char itemname[128], quantity[16];    /* "Unlimited" or "%d" */
 
@@ -745,7 +745,7 @@ std::string Shop::listObject(Object *obj, int cnt, int aindex, NonPlayerCharacte
     return (result);
 }
 
-void Shop::executeList(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+void Shop::executeList(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
     if (!isOk(keeper, ch))
         return;
 
@@ -778,7 +778,7 @@ void Shop::executeList(NonPlayerCharacter* keeper, BaseCharacter *ch, const std:
 }
 
 
-bool Shop::executeCommand(NonPlayerCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
+bool Shop::executeCommand(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments) {
 
     auto loc = keeper->getLocation();
     if(!loc) {
@@ -834,7 +834,8 @@ void assign_the_shopkeepers() {
 
     for (auto &[vn, sh] : shop_index) {
         for(auto keeper : sh->getKeepers()) {
-            keeper->shopKeeperOf = sh;
+            auto &k = reg.get_or_emplace<ShopKeeper>(keeper->ent);
+            k.shopKeeperOf = sh;
         }
     }
 }
@@ -936,7 +937,7 @@ Shop::Shop(const nlohmann::json &j) : Shop() {
     if(j.contains("lastsort")) lastsort = j["lastsort"];
 }
 
-std::list<NonPlayerCharacter*> Shop::getKeepers() {
+std::list<BaseCharacter*> Shop::getKeepers() {
     return get_vnum_list(characterVnumIndex, keeper);
 }
 

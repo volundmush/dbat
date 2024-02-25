@@ -496,7 +496,9 @@ namespace net {
 
 
     ChargenParser::ChargenParser(std::shared_ptr<Connection>& co) : ConnectionParser(co) {
-        ch = new PlayerCharacter();
+        ent = reg.create();
+        auto &c = reg.get_or_emplace<BaseCharacter>(ent);
+        ch = reg.try_get<BaseCharacter>(ent);
     }
 
     void ChargenParser::start() {
@@ -509,7 +511,7 @@ namespace net {
         // Because in all other cases, we don't want this BaseCharacter to be laying around if
         // chargen is canceled somehow.
         if(state != -1 && ch) {
-            free_char(ch);
+            reg.destroy(ent);
         }
     }
 
@@ -2266,19 +2268,18 @@ namespace net {
     void ChargenParser::finish() {
         // CREATE PLAYER ENTRY
         ch->uid = getNextUID();
+        auto &info = reg.get_or_emplace<Info>(ent);
+        info.uid = ch->uid;
+        info.family = EntityFamily::Character;
+        auto &pc = reg.get_or_emplace<PlayerCharacter>(ent);
         ch->setFlag(FlagType::Pref, PRF_COLOR);
-        setEntity(ch->getUID(), ch);
-        auto p = std::make_shared<player_data>();
-        p->id = ch->getUID();
-        players[p->id] = p;
-        p->name = ch->getName();
-        p->account = conn->account;
-        conn->account->characters.push_back(p->id);
-        p->character = ch;
+        setEntity(ch->getUID(), ent);
+        pc.account = conn->account;
+        conn->account->characters.push_back(ch->uid);
         init_char(ch);
         // set state to -1 to prevent accidental freeing of ch...
         state = -1;
-        send_to_imm("New Character '%s' created by Account: %s", ch->getName(), p->account->name.c_str());
+        send_to_imm("New Character '%s' created by Account: %s", ch->getName(), conn->account->name.c_str());
         conn->setParser(new CharacterMenu(conn, ch));
     }
 }

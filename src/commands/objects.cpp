@@ -640,7 +640,7 @@ OCMD(do_odoor) {
             ex->uid = getNextUID();
             ex->script = std::make_shared<script_data>(ex);
             Destination dest;
-            dest.target = rm;
+            dest.target = rm->ent;
             dest.locationType = dir;
             ex->addToLocation(dest);
         }

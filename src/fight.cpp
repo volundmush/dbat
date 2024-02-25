@@ -1447,7 +1447,7 @@ static void make_pcorpse(BaseCharacter *ch) {
     int x, y;
 
 
-    corpse = create_obj();
+    corpse = create_obj(EntityFamily::Object);
 
     corpse->vn = NOTHING;
 
@@ -1602,7 +1602,7 @@ static void make_corpse(BaseCharacter *ch, BaseCharacter *tch) {
     Object *obj, *next_obj;
     int i, x, y;
 
-    corpse = create_obj();
+    corpse = create_obj(EntityFamily::Object);
 
     corpse->vn = NOTHING;
 

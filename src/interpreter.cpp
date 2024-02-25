@@ -199,14 +199,14 @@ ACMD(do_alias) {
     if (IS_NPC(ch))
         return;
 
-    auto p = players[ch->getUID()];
+    auto &p = reg.get<PlayerCharacter>(ch->ent);
 
     repl = any_one_arg(argument, arg);
 
     if (!*arg) {            /* no argument specified -- list currently defined aliases */
         ch->sendf("Currently defined aliases:\r\n");
         int count = 0;
-        for(auto &a : p->aliases) {
+        for(auto &a : p.aliases) {
             count++;
             ch->sendf("%-15s %s\r\n", a.name.c_str(), a.replacement.c_str());
         }
@@ -217,7 +217,7 @@ ACMD(do_alias) {
     }
     /* otherwise, add or remove aliases */
     /* is this an alias we've already defined? */
-    auto &aliases = p->aliases;
+    auto &aliases = p.aliases;
     auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a) {
         return iequals(a.name, arg);
     });
@@ -338,8 +338,8 @@ void perform_alias(struct descriptor_data *d, char *orig) {
         d->input_queue.emplace_back(orig);
         return;
     }
-    auto p = players[d->character->getUID()];
-    auto &aliases = p->aliases;
+    auto &p = reg.get<PlayerCharacter>(d->character->ent);
+    auto &aliases = p.aliases;
 
     /* bail out immediately if the guy doesn't have any aliases */
     if (aliases.empty()) {
@@ -1030,7 +1030,6 @@ void enter_player_game(struct descriptor_data *d) {
     if (PLR_FLAGGED(d->character, PLR_FROZEN))
         load_room = real_room(CONFIG_FROZEN_START);
 
-    d->character->activate();
     d->character->addToLocation(getEntity(load_room));
 
     /*load_char_pets(d->character);*/
@@ -1259,9 +1258,9 @@ void fingerUser(BaseCharacter *ch, std::shared_ptr<account_data> account) {
     if (GET_ADMLEVEL(ch) > 0) {
         int counter = 0;
         for(auto c : account->characters) {
-            auto p = players.find(c);
-            if(p == players.end()) continue;
-            ch->sendf("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second->character->getDisplayName(ch));
+            auto p = getEntity<BaseCharacter>(c);
+            if(!p) continue;
+            ch->sendf("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->getDisplayName(ch));
         }
         ch->sendf("\n");
     }

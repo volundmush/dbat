@@ -663,12 +663,12 @@ int read_sense_memory(BaseCharacter *ch, BaseCharacter *vict) {
 
     if(IS_NPC(ch)) return 0;
 
-    auto p = players[ch->getUID()];
+    auto &p = reg.get_or_emplace<PlayerCharacter>(ch->ent);
 
     if(IS_NPC(vict)) {
-        return p->senseMemory.contains(vict->getVN());
+        return p.senseMemory.contains(vict->getVN());
     } else {
-        return p->sensePlayer.contains(vict->getUID());
+        return p.senseEntity.contains(vict->getUID());
     }
 }
 
@@ -679,12 +679,12 @@ void sense_memory_write(BaseCharacter *ch, BaseCharacter *vict) {
     }
 
     if(IS_NPC(ch)) return;
-    auto p = players[ch->getUID()];
+    auto &p = reg.get_or_emplace<PlayerCharacter>(ch->ent);
 
     if(IS_NPC(vict)) {
-        p->senseMemory.insert(vict->getVN());
+        p.senseMemory.insert(vict->getVN());
     } else {
-        p->sensePlayer.insert(vict->getUID());
+        p.senseEntity.insert(vict->getUID());
     }
 }
 
@@ -3418,7 +3418,7 @@ std::string withPlaceholder(const std::string& str, const std::string& placehold
 
 int SECT(room_vnum room) {
     if(auto u = entities.find(room); u != entities.end()) {
-        auto r = dynamic_cast<Room*>(u->second);
+        auto r = reg.try_get<Room>(u->second);
         if(r) return r->sector_type;
     }
     return SECT_INSIDE;

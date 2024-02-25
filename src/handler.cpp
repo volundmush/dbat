@@ -399,7 +399,7 @@ void equip_char(BaseCharacter *ch, Object *obj, int pos) {
 
     obj->removeFromLocation();
     Destination dest;
-    dest.target = ch;
+    dest.target = ch->ent;
     dest.locationType = pos;
     obj->addToLocation(dest);
 }
@@ -809,7 +809,7 @@ void extract_char_final(BaseCharacter *ch) {
 
     if (IS_NPC(ch)) {
         if (GET_MOB_RNUM(ch) != NOTHING)    /* prototyped */
-            erase_vnum(characterVnumIndex, dynamic_cast<NonPlayerCharacter*>(ch));
+            erase_vnum(characterVnumIndex, ch);
         clearMemory(ch);
         if (SCRIPT(ch))
             extract_script(ch, MOB_TRIGGER);
@@ -822,7 +822,6 @@ void extract_char_final(BaseCharacter *ch) {
         ch->desc->connected = CON_QUITGAME;
     }
 
-    ch->deactivate();
     if (IS_NPC(ch)) {
         auto found = uniqueCharacters.find(ch->getUID());
         if (found != uniqueCharacters.end()) {
@@ -1214,7 +1213,8 @@ Object *create_money(int amount) {
         return (nullptr);
     }
     obj = create_obj();
-    auto &e = obj->ex_description.emplace_back();
+    auto &ex = reg.get_or_emplace<ExtraDescriptions>(obj->ent);
+    auto &e = ex.ex_description.emplace_back();
 
     if (amount == 1) {
         obj->setName("zenni money");
@@ -1428,10 +1428,12 @@ int is_better(Object *object, Object *object2) {
 }
 
 /* check and see if this item is better */
-void item_check(Object *object, NonPlayerCharacter *ch) {
+void item_check(Object *object, BaseCharacter *ch) {
     int where = 0;
 
-    if (IS_HUMANOID(ch) && !ch->shopKeeperOf) {
+    auto shopkeeper = reg.try_get<ShopKeeper>(ch->ent);
+
+    if (IS_HUMANOID(ch) && !shopkeeper) {
         if (invalid_align(ch, object) || invalid_class(ch, object))
             return;
 

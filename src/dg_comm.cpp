@@ -21,6 +21,7 @@
 #include "dbat/graph.h"
 #include "dbat/spells.h"
 #include "dbat/handler.h"
+#include "dbat/entity.h"
 
 /* local functions */
 void sub_write_to_char(BaseCharacter *ch, char *tokens[], void *otokens[], char type[]);
@@ -207,8 +208,8 @@ void fly_planet(room_vnum roomVnum, char *messg, BaseCharacter *ch) {
     if (!messg || !*messg)
         return;
 
-    auto planet = ch->getPlanet();
-    if(!planet) return;
+    auto planet = find::holderType(ch->ent, ITEM_PLANET);
+    if(planet == entt::null) return;
 
     for(auto i = descriptor_list; i; i = i->next) {
         if(!i->connected) continue;
@@ -217,8 +218,8 @@ void fly_planet(room_vnum roomVnum, char *messg, BaseCharacter *ch) {
         if(IN_ROOM(i->character) == NOWHERE) continue;
         if(!OUTSIDE(i->character)) continue;
 
-        auto found = i->character->getPlanet();
-        if(!found) continue;
+        auto found = find::holderType(i->character->ent, ITEM_PLANET);
+        if(found == entt::null) continue;
         if(found != planet) continue;
         if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
             write_to_output(i, "A disguised figure %s", messg);
@@ -252,8 +253,8 @@ void send_to_sense(int type, char *messg, BaseCharacter *ch) {
     if (!messg || !*messg)
         return;
 
-    auto planet = ch->getPlanet();
-    if(!planet && type == 0) {
+    auto planet = find::holderType(ch->ent, ITEM_PLANET);
+    if(planet == entt::null && type == 0) {
         return;
     }
 
@@ -271,8 +272,8 @@ void send_to_sense(int type, char *messg, BaseCharacter *ch) {
         if (!GET_SKILL(tch, SKILL_SENSE)) {
             continue;
         }
-        if(auto p = tch->getPlanet(); type == 0) {
-            if (!p) {
+        if(auto p = find::holderType(tch->ent, ITEM_PLANET); type == 0) {
+            if (p == entt::null) {
                 continue;
             }
             if (p != planet) {
@@ -307,9 +308,9 @@ void send_to_sense(int type, char *messg, BaseCharacter *ch) {
         } else if (planet_check(ch, tch)) {
             std::string blah = "UNKNOWN";
             {
-                auto av = tch->getWorld();
-                if(av) {
-                    blah = av->getDisplayName(ch);
+                auto av = find::holderType(tch->ent, ITEM_WORLD);
+                if(av != entt::null) {
+                    blah = render::displayName(av, ch->ent);
                 }
             }
             char power[MAX_INPUT_LENGTH];
@@ -364,8 +365,8 @@ void send_to_scouter(char *messg, BaseCharacter *ch, int num, int type) {
     if (!messg || !*messg)
         return;
 
-    auto planet = ch->getPlanet();
-    if(!planet && type == 0) {
+    auto planet = find::holderType(ch->ent, ITEM_PLANET);
+    if(planet == entt::null && type == 0) {
         return;
     }
 
@@ -378,8 +379,8 @@ void send_to_scouter(char *messg, BaseCharacter *ch, int num, int type) {
         if (tch == ch) continue;
         if(!AWAKE(tch)) continue;
 
-        if(auto p = tch->getPlanet(); type == 0) {
-            if (!p) {
+        if(auto p = find::holderType(tch->ent, ITEM_PLANET); type == 0) {
+            if (p == entt::null) {
                 continue;
             }
             if (p != planet) {
@@ -431,9 +432,9 @@ void send_to_scouter(char *messg, BaseCharacter *ch, int num, int type) {
         } else if (type == 2 && GET_SKILL(tch, SKILL_SENSE) < 20) {
             std::string blah = "UNKNOWN";
             {
-                auto av = tch->getPlanet();
-                if(av) {
-                    blah = av->getDisplayName(i->character);
+                auto av = find::holderType(tch->ent, ITEM_PLANET);
+                if(av != entt::null) {
+                    blah = render::displayName(av, i->character->ent);
                 }
             }
             if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(ch) >= 150000) {
@@ -467,15 +468,15 @@ void send_to_worlds(BaseCharacter *ch) {
         return;
     }
 
-    auto p = ch->getPlanet();
-    if(!p) return;
+    auto p = find::holderType(ch->ent, ITEM_PLANET);
+    if(p == entt::null) return;
 
     for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
         }
-        auto op = i->character->getPlanet();
-        if(!op) continue;
+        auto op = find::holderType(i->character->ent, ITEM_PLANET);
+        if(op == entt::null) continue;
         if(op != p) continue;
         i->character->sendf("%s", message);
     }

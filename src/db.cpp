@@ -39,6 +39,7 @@
 #include "dbat/genobj.h"
 #include "dbat/account.h"
 #include "dbat/maputils.h"
+#include "dbat/entity.h"
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -101,7 +102,7 @@ std::unordered_map<mob_vnum, struct index_data> mob_index;    /* index table for
 std::unordered_map<mob_vnum, nlohmann::json> mob_proto;    /* prototypes for mobs		 */
 
 VnumIndex<Object> objectVnumIndex;
-VnumIndex<NonPlayerCharacter> characterVnumIndex;
+VnumIndex<BaseCharacter> characterVnumIndex;
 
 Object *object_list = nullptr;    /* global linked list of objs	 */
 std::unordered_map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
@@ -285,72 +286,24 @@ static void db_load_accounts(const std::filesystem::path& loc) {
 
 }
 
-static void db_load_players(const std::filesystem::path& loc) {
-    auto data = load_from_file(loc, "players.json");
-    players.reserve(data.size());
-    for(auto j : data) {
-        auto id = j["id"].get<int64_t>();
-        auto p = std::make_shared<player_data>(j);
-        players[id] = p;
-    }
-}
-
 static void db_load_instances_initial(const std::filesystem::path& loc) {
     auto data = load_from_file(loc, "instances.json");
     entities.reserve(data.size());
     for(auto j : data) {
-        auto uid = j["uid"].get<int64_t>();
-        auto unitClass = j["unitClass"].get<std::string>();
-        auto data = j["data"];
-        GameEntity *u = nullptr;
-        if(unitClass == "PlayerCharacter") {
-            u = new PlayerCharacter(data);
-        } else if(unitClass == "NonPlayerCharacter") {
-            u = new NonPlayerCharacter(data);
-        } else if(unitClass == "Object") {
-            u = new Object(data);
-        } else if(unitClass == "Room") {
-            u = new Room(data);
-        } else if(unitClass == "Exit") {
-            u = new Exit(data);
-        } else if(unitClass == "Structure") {
-            u = new Structure(data);
-        } else if(unitClass == "Vehicle") {
-            u = new Vehicle(data);
-        } else if(unitClass == "Stellar") {
-            u = new Stellar(data);
-        } else if(unitClass == "Region") {
-            u = new Region(data);
-        } else if(unitClass == "Dimension") {
-            u = new Dimension(data);
-        } else if(unitClass == "Building") {
-            u = new Building(data);
-        } else if(unitClass == "Planet") {
-            u = new Planet(data);
-        } else if(unitClass == "Interstellar") {
-            u = new Interstellar(data);
-        }
-        else {
-            basic_mud_log("Unknown unit class %s", unitClass.c_str());
-            shutdown_game(EXIT_FAILURE);
-        }
-        u->script = std::make_shared<script_data>(u);
-
-        if(auto pc = dynamic_cast<PlayerCharacter*>(u); pc) {
-            if(auto isPlayer = players.find(uid); isPlayer != players.end()) {
-                isPlayer->second->character = pc;
-            }
-        }
-
-        setEntity(uid, u);
+        auto uid = j[0].get<int64_t>();
+        auto jd = j[1];
+        auto ent = reg.create();
+        deserializeEntity(ent, jd);
+        setEntity(uid, ent);
     }
 }
 
 static void db_load_instances_finish(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "relations.json")) {
         auto uid = j[0].get<int64_t>();
-        if(auto u = getEntity(uid); u) {
-            u->deserializeRelations(j[1]);
+        auto jd = j[1];
+        if(auto found = entities.find(uid); found != entities.end()) {
+            deserializeEntityRelations(found->second, jd);
         }
     }
 }
@@ -475,11 +428,6 @@ void boot_db_world() {
     basic_mud_log("Loading global data...");
     threads.emplace_back([&latest] {
         db_load_globaldata(latest);
-    });
-
-    basic_mud_log("Loading player index...");
-    threads.emplace_back([&latest] {
-        db_load_players(latest);
     });
 
     for(auto &t : threads) {
@@ -1202,7 +1150,7 @@ int vnum_armortype(char *searchname, BaseCharacter *ch) {
 
 
 /* create a new mobile from a prototype */
-NonPlayerCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
+BaseCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
     auto proto = mob_proto.find(nr);
 
@@ -1211,14 +1159,11 @@ NonPlayerCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         return (nullptr);
     }
 
-    // Weird hack to ensure script_data is not overwritten by prototype...
-    auto mob = new NonPlayerCharacter();
-    mob->script = std::make_shared<script_data>(mob);
-    mob->deserialize(proto->second);
-    
-    mob->uid = getNextUID();
-    setEntity(mob->getUID(), mob);
-    mob->activate();
+    auto uid = getNextUID();
+    auto ent = reg.create();
+    deserializeEntity(ent, proto->second);
+    auto mob = reg.try_get<BaseCharacter>(ent);
+    setEntity(uid, ent);
 
     std::map<CharAppearance, int> setNumsTo;
 
@@ -1775,10 +1720,11 @@ Object *read_object(obj_vnum nr, int type, bool activate) /* and obj_rnum */
         return (nullptr);
     }
     
+    auto uid = getNextUID();
+    auto ent = reg.create();
+    deserializeEntity(ent, proto->second);
     // Weird hack to ensure that script_data is not overritten by prototype.
-    auto obj = new Object();
-    obj->script = std::make_shared<script_data>(obj);
-    obj->deserialize(proto->second);
+    auto obj = reg.try_get<Object>(ent);
     
     OBJ_LOADROOM(obj) = NOWHERE;
 
@@ -1791,11 +1737,7 @@ Object *read_object(obj_vnum nr, int type, bool activate) /* and obj_rnum */
         }
         FOOB(obj) = GET_OBJ_VAL(obj, 1);
     }
-    if(activate) {
-        obj->uid = getNextUID();
-        setEntity(obj->getUID(), obj);
-        obj->activate();
-    }
+
     return (obj);
 }
 
@@ -1849,17 +1791,17 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
 /* execute the reset command table of a given zone */
 void reset_zone(zone_rnum zone) {
     int cmd_no = -1, last_cmd = 0;
-    NonPlayerCharacter *mob = nullptr;
+    BaseCharacter *mob = nullptr;
     Object *obj, *obj_to;
     room_vnum rvnum;
     room_rnum rrnum;
-    NonPlayerCharacter *tmob = nullptr; /* for trigger assignment */
+    BaseCharacter *tmob = nullptr; /* for trigger assignment */
     Object *tobj = nullptr;  /* for trigger assignment */
     int mob_load = false; /* ### */
     int obj_load = false; /* ### */
     auto oproto = obj_proto.find(-1);
     auto mproto = mob_proto.find(-1);
-    auto room = entities.find(-1);
+    Room* room = nullptr;
 
     auto &z = zone_table[zone];
 
@@ -1889,8 +1831,8 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'M':            /* read a mobile */
-                    room = entities.find(c.arg3);
-                    if (mob_proto.contains(c.arg1) && (get_vnum_count(characterVnumIndex, c.arg1) < c.arg2) && room != entities.end() &&
+                    room = getEntity<Room>(c.arg3);
+                    if (mob_proto.contains(c.arg1) && (get_vnum_count(characterVnumIndex, c.arg1) < c.arg2) && room &&
                         (rand_number(1, 100) >= c.arg5)) {
                         int room_max = 0;
                         BaseCharacter *i;
@@ -1933,7 +1875,7 @@ void reset_zone(zone_rnum zone) {
                     break;
 
                 case 'O':            /* read an object */
-                    room = entities.find(c.arg3);
+                    room = getEntity<Room>(c.arg3);
                     oproto = obj_proto.find(c.arg1);
                     if(oproto != obj_proto.end()) {
                         auto tf = oproto->second["type_flag"];
@@ -1945,7 +1887,7 @@ void reset_zone(zone_rnum zone) {
                     }
 
                     if (obj_proto.contains(c.arg1) && get_vnum_count(objectVnumIndex, c.arg1) < c.arg2 &&
-                        room != entities.end() && (rand_number(1, 100) >= c.arg5)) {
+                        room && (rand_number(1, 100) >= c.arg5)) {
                         int room_max = 0;
                         Object *k;
 
@@ -2114,11 +2056,11 @@ void reset_zone(zone_rnum zone) {
                         tobj->script->addTrigger(read_trigger(c.arg2), -1);
                         last_cmd = 1;
                     } else if (c.arg1 == WLD_TRIGGER) {
-                        room = entities.find(c.arg3);
-                        if (room == entities.end()) {
+                        room = getEntity<Room>(c.arg3);
+                        if (!room) {
                             ZONE_ERROR("Invalid room number in trigger assignment");
                         }
-                        room->second->script->addTrigger(read_trigger(c.arg2), -1);
+                        room->script->addTrigger(read_trigger(c.arg2), -1);
                         last_cmd = 1;
                     }
 
@@ -2914,7 +2856,18 @@ GameEntity* resolveUID(const std::string& uid) {
 
     if(auto found = entities.find(id); found != entities.end()) {
         auto u = found->second;
-        if(u->exists) return u;
+        if(reg.any_of<Deleted>(u)) return nullptr;
+        auto &info = reg.get<Info>(u);
+        switch(info.family) {
+            case EntityFamily::Character:
+                return reg.try_get<BaseCharacter>(u);
+            case EntityFamily::Object:
+                return reg.try_get<Object>(u);
+            case EntityFamily::Room:
+                return reg.try_get<Room>(u);
+            case EntityFamily::Exit:
+                return reg.try_get<Exit>(u);
+        }
     }
     return nullptr;
 }

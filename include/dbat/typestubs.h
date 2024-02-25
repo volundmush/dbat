@@ -3,8 +3,6 @@ struct GameEntity;
 struct zone_data;
 struct reset_com;
 struct BaseCharacter;
-struct PlayerCharacter;
-struct NonPlayerCharacter;
 struct Object;
 struct Room;
 struct Exit;

@@ -60,7 +60,7 @@ int checkship(int rnum, int vnum) {
     return there;
 }
 
-char *getmapchar(int rnum, GameEntity *ch, int start, int vnum) {
+char *getmapchar(int rnum, entt::entity viewer, int start, int vnum) {
     static char mapchar[50];
     int there = false, enemy = false;
 
@@ -264,7 +264,7 @@ MapStruct findcoord(int rnum) {
     return coords;
 }
 
-std::string Room::printMap(GameEntity* viewer, int type, int64_t v) {
+std::string Room::printMap(entt::entity viewer, int type, int64_t v) {
     int x = 0, lasty = -1;
     int y = 0;
     int sightradius;
@@ -486,7 +486,7 @@ void printmap(int rnum, BaseCharacter *ch, int type, int vnum) {
         }
         for (x = coord.x - sightradius; x <= coord.x + sightradius; x++) {
             if (x == coord.x && y == coord.y) {
-                strcat(buf, getmapchar(mapnums[y][x], ch, start, vnum));
+                strcat(buf, getmapchar(mapnums[y][x], ch->ent, start, vnum));
             } else if (x > MAP_COLS || x < 0) {
                 if (lasty != true && y > -1 && y < 200) {
                     strcat(buf, "@D?");
@@ -497,7 +497,7 @@ void printmap(int rnum, BaseCharacter *ch, int type, int vnum) {
                     strcat(buf, "@D??");
                 }
             } else
-                strcat(buf, getmapchar(mapnums[y][x], ch, start, vnum));
+                strcat(buf, getmapchar(mapnums[y][x], ch->ent, start, vnum));
         }
         strcat(buf, "\n");
         lasty = false;

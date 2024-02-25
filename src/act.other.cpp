@@ -48,10 +48,6 @@ static void print_group(BaseCharacter *ch);
 
 static void check_eq(BaseCharacter *ch);
 
-static int spell_in_book(Object *obj, int spellnum);
-
-static int spell_in_scroll(Object *obj, int spellnum);
-
 static int spell_in_domain(BaseCharacter *ch, int spellnum);
 
 static void show_clan_info(BaseCharacter *ch);
@@ -6042,8 +6038,7 @@ ACMD(do_plant) {
         detect = (roll_skill(vict, SKILL_SPOT) + rand_number(1, 3));
 
     /* NO NO With Imp's and Shopkeepers, and if player planting is not allowed */
-    auto npc = dynamic_cast<NonPlayerCharacter*>(vict);
-    if ((ADM_FLAGGED(vict, ADM_NOSTEAL) || npc && npc->shopKeeperOf) && GET_ADMLEVEL(ch) < 5)
+    if ((ADM_FLAGGED(vict, ADM_NOSTEAL) || reg.all_of<ShopKeeper>(vict->ent)) && GET_ADMLEVEL(ch) < 5)
         roll = -10;         /* Failure */
 
 
@@ -10747,33 +10742,6 @@ ACMD(do_fix) {
             }
         }
     }
-}
-
-
-static int spell_in_book(Object *obj, int spellnum) {
-    int i;
-    bool found = false;
-
-    if (!obj->sbinfo)
-        return false;
-
-    for (i = 0; i < SPELLBOOK_SIZE; i++)
-        if (obj->sbinfo[i].spellname == spellnum) {
-            found = true;
-            break;
-        }
-
-    if (found)
-        return 1;
-
-    return 0;
-}
-
-static int spell_in_scroll(Object *obj, int spellnum) {
-    if (GET_OBJ_VAL(obj, VAL_SCROLL_SPELL1) == spellnum)
-        return true;
-
-    return false;
 }
 
 static int spell_in_domain(BaseCharacter *ch, int spellnum) {

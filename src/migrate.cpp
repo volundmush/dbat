@@ -23,6 +23,7 @@
 #include "dbat/genobj.h"
 #include "dbat/saveload.h"
 #include "dbat/random.h"
+#include "dbat/entity.h"
 
 #define RENT_FACTOR    1
 #define CRYO_FACTOR    4
@@ -386,12 +387,10 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
 
-    auto r = getEntity(room);
-    
-    auto d = new Exit();
-    d->script = std::make_shared<script_data>(d);
-    d->uid = getNextUID();
-    setEntity(d->uid, d);
+    auto r = getEntity<Room>(room);
+
+    auto d = create_obj<Exit>(EntityFamily::Exit);
+    setEntity(d->uid, d->ent);
 
     auto &te = temp_exits[d->uid];
     
@@ -407,7 +406,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
     }
     
     Destination dest;
-    dest.target = r;
+    dest.target = r->ent;
     dest.locationType = dir;
     d->addToLocation(dest);
 
@@ -503,12 +502,19 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
     auto &z = zone_table[zone];
-    auto r = new Room();
-    setEntity(virtual_nr, r);
+    auto ent = reg.create();
+    reg.get_or_emplace<Room>(ent);
+    auto r = reg.try_get<Room>(ent);
+    r->ent = ent;
+    r->uid = virtual_nr;
+    auto &info = reg.get_or_emplace<Info>(ent);
+    info.uid = virtual_nr;
+    info.family = EntityFamily::Room;
+
+    setEntity(virtual_nr, ent);
     z.rooms.insert(virtual_nr);
     r->script = std::make_shared<script_data>(r);
     r->zone = zone;
-    r->vn = virtual_nr;
     r->uid = virtual_nr;
     r->setName(fread_string(fl, buf2));
     r->setLookDesc(fread_string(fl, buf2));
@@ -551,7 +557,8 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
                 break;
             case 'E':
                 {
-                    auto &e = r->ex_description.emplace_back();
+                    auto &ex = reg.get_or_emplace<ExtraDescriptions>(ent);
+                    auto &e = ex.ex_description.emplace_back();
                     e.keyword = fread_string(fl, buf2);
                     e.description = fread_string(fl, buf2);
                 }
@@ -2233,7 +2240,6 @@ static struct old_ship_data customs[] = {
 
 struct AreaDef {
     std::string name;
-    Structure *exists{};
     GameEntity *location{};
     std::optional<vnum> parent;
     std::set<std::size_t> roomFlags{};
@@ -2243,10 +2249,12 @@ struct AreaDef {
     std::unordered_map<EnvVar, double> envVars;
 };
 
-static Structure* assembleArea(const AreaDef &def) {
-    auto a = def.exists ? def.exists : create_obj<Region>();
+static Object* assembleArea(const AreaDef &def) {
+    auto a = create_obj<Object>(EntityFamily::Object);
     a->setName(def.name);
-    a->flags[FlagType::Structure] = def.flags;
+    for(auto f : def.flags) flags::set(a->ent, FlagType::ItemType, f);
+    auto &s = reg.get_or_emplace<Structure>(a->ent);
+    s.type = StructureType::Rooms;
 
     a->envVars = def.envVars;
 
@@ -2298,45 +2306,45 @@ void migrate_grid() {
     adef.name = "Admin Land";
     adef.roomRanges.emplace_back(0, 16);
     adef.roomIDs = {16694, 16698};
-    adef.exists = create_obj<Dimension>();
+    adef.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     auto admin_land = assembleArea(adef);
 
     AreaDef mudschooldef;
     mudschooldef.name = "MUD School";
     mudschooldef.roomRanges.emplace_back(100, 154);
-    mudschooldef.exists = create_obj<Dimension>();
+    mudschooldef.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     auto mud_school = assembleArea(mudschooldef);
 
     AreaDef mvdef;
     mvdef.name = "Multiverse";
-    mvdef.exists = create_obj<Dimension>();
+    mvdef.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     auto multiverse = assembleArea(mvdef);
 
     AreaDef xvdef;
     xvdef.name = "Xenoverse";
-    xvdef.exists = create_obj<Dimension>();
+    xvdef.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     auto xenoverse = assembleArea(xvdef);
 
     AreaDef u7def;
     u7def.name = "Universe 7";
-    u7def.exists = create_obj<Dimension>();
+    u7def.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     u7def.location = multiverse;
     auto universe7 = assembleArea(u7def);
 
     AreaDef mplane;
     mplane.name = "Mortal Plane";
-    mplane.exists = create_obj<Dimension>();
+    mplane.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     mplane.location = universe7;
     auto mortal_plane = assembleArea(mplane);
 
     AreaDef cplane;
     cplane.name = "Celestial Plane";
-    cplane.exists = create_obj<Dimension>();
+    cplane.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     cplane.location = universe7;
     auto celestial_plane = assembleArea(cplane);
 
     AreaDef spacedef;
-    spacedef.exists = create_obj<Interstellar>();
+    spacedef.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     spacedef.name = "Depths of Space";
     spacedef.location = mortal_plane;
     // Insert every room id from mapnums (the 2d array) into spacedef.roomIDs...
@@ -2442,7 +2450,7 @@ void migrate_grid() {
         }
     }
 
-    std::unordered_map<std::string, Structure*> areaObjects;
+    std::unordered_map<std::string, GameEntity*> areaObjects;
 
     for(auto &[name, def] : areaDefs) {
         def.name = name;
@@ -2452,14 +2460,14 @@ void migrate_grid() {
 
     AreaDef pearth;
     pearth.name = "@GEarth@n";
-    pearth.exists = create_obj<Planet>();
+    pearth.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pearth.location = getEntity(50);
     auto planet_earth = assembleArea(pearth);
     getEntity(50)->addToLocation(space);
 
     AreaDef pvegeta;
     pvegeta.name = "@YVegeta@n";
-    pvegeta.exists = create_obj<Planet>();
+    pvegeta.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pvegeta.location = getEntity(53);
     pvegeta.envVars[EnvVar::Gravity] = 10.0;
     auto planet_vegeta = assembleArea(pvegeta);
@@ -2467,63 +2475,63 @@ void migrate_grid() {
 
     AreaDef pfrigid;
     pfrigid.name = "@CFrigid@n";
-    pfrigid.exists = create_obj<Planet>();
+    pfrigid.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pfrigid.location = getEntity(51);
     auto planet_frigid = assembleArea(pfrigid);
     getEntity(51)->addToLocation(space);
 
     AreaDef pnamek;
     pnamek.name = "@gNamek@n";
-    pnamek.exists = create_obj<Planet>();
+    pnamek.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pnamek.location = getEntity(54);
     auto planet_namek = assembleArea(pnamek);
     getEntity(54)->addToLocation(space);
 
     AreaDef pkonack;
     pkonack.name = "@MKonack@n";
-    pkonack.exists = create_obj<Planet>();
+    pkonack.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pkonack.location = getEntity(52);
     auto planet_konack = assembleArea(pkonack);
     getEntity(52)->addToLocation(space);
 
     AreaDef paether;
     paether.name = "@MAether@n";
-    paether.exists = create_obj<Planet>();
+    paether.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     paether.location = getEntity(55);
     auto planet_aether = assembleArea(paether);
     getEntity(55)->addToLocation(space);
 
     AreaDef pyardrat;
     pyardrat.name = "@mYardrat@n";
-    pyardrat.exists = create_obj<Planet>();
+    pyardrat.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pyardrat.location = getEntity(56);
     auto planet_yardrat = assembleArea(pyardrat);
     getEntity(56)->addToLocation(space);
 
     AreaDef pkanassa;
     pkanassa.name = "@BKanassa@n";
-    pkanassa.exists = create_obj<Planet>();
+    pkanassa.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pkanassa.location = getEntity(58);
     auto planet_kanassa = assembleArea(pkanassa);
     getEntity(58)->addToLocation(space);
 
     AreaDef pcerria;
     pcerria.name = "@RCerria@n";
-    pcerria.exists = create_obj<Planet>();
+    pcerria.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pcerria.location = getEntity(198);
     auto planet_cerria = assembleArea(pcerria);
     getEntity(198)->addToLocation(space);
 
     AreaDef parlia;
     parlia.name = "@GArlia@n";
-    parlia.exists = create_obj<Planet>();
+    parlia.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     parlia.location = getEntity(59);
     auto planet_arlia = assembleArea(parlia);
     getEntity(59)->addToLocation(space);
 
     AreaDef pzenith;
     pzenith.name = "@BZenith@n";
-    pzenith.exists = create_obj<Planet>();
+    pzenith.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     pzenith.location = getEntity(57);
     auto moon_zenith = assembleArea(pzenith);
     for(const auto& name : {"Ancient Castle", "Utatlan City", "Zenith Jungle"}) {
@@ -2557,7 +2565,7 @@ void migrate_grid() {
     hbtcdef.name = "Hyperbolic Time Chamber";
     hbtcdef.location = universe7;
     hbtcdef.roomRanges.emplace_back(64000, 64097);
-    hbtcdef.exists = create_obj<Dimension>();
+    hbtcdef.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     auto hbtc = assembleArea(hbtcdef);
 
     AreaDef bodef;
@@ -2571,7 +2579,7 @@ void migrate_grid() {
         if(icontains(stripAnsi(room->getName()), "Black Omen")) bodef.roomIDs.insert(vn);
     }
     bodef.roomIDs.insert(19050);
-    bodef.exists = create_obj<Vehicle>();
+    bodef.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_VEHICLE};
     auto black_omen = assembleArea(bodef);
 
     AreaDef earthduel;
@@ -2642,21 +2650,21 @@ void migrate_grid() {
     AreaDef edfhq;
     edfhq.name = "EDF Headquarters";
     edfhq.location = planet_earth;
-    edfhq.exists = create_obj<Building>();
+    edfhq.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     edfhq.roomRanges.emplace_back(9101, 9110);
     auto edf_hq = assembleArea(edfhq);
 
     AreaDef bar;
     bar.name = "Bar";
     bar.location = planet_earth;
-    bar.exists = create_obj<Building>();
+    bar.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     bar.roomRanges.emplace_back(18100, 18114);
     auto bar_ = assembleArea(bar);
 
     AreaDef themoon;
     themoon.name = "The Moon";
     themoon.location = space;
-    themoon.exists = create_obj<Planet>();
+    themoon.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     themoon.envVars[EnvVar::Gravity] = 10.0;
     auto moon = assembleArea(themoon);
 
@@ -2804,7 +2812,7 @@ void migrate_grid() {
     auto darkthorne_compound = assembleArea(darkthorne);
 
 
-    std::unordered_map<int, Structure*> planetMap = {
+    std::unordered_map<int, Object*> planetMap = {
             {ROOM_EARTH, planet_earth},
             {ROOM_VEGETA, planet_vegeta},
             {ROOM_FRIGID, planet_frigid},
@@ -2839,14 +2847,14 @@ void migrate_grid() {
     AreaDef nodef;
     nodef.name = "Northran";
     nodef.location = xenoverse;
-    nodef.exists = create_obj<Dimension>();
+    nodef.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     nodef.roomRanges.emplace_back(17900, 17999);
     auto northran = assembleArea(nodef);
 
     AreaDef celdef;
     celdef.name = "Celestial Corp";
     celdef.location = space;
-    celdef.exists = create_obj<Building>();
+    celdef.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     celdef.roomRanges.emplace_back(16305, 16399);
     for(auto &[vn, u] : entities) {
         auto room = reg.try_get<Room>(u);
@@ -2858,7 +2866,7 @@ void migrate_grid() {
     AreaDef gneb;
     gneb.name = "Green Nebula Mall";
     gneb.location = space;
-    gneb.exists = create_obj<Building>();
+    gneb.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     gneb.roomRanges.emplace_back(17200, 17276);
     gneb.roomIDs.insert(184);
     auto green_nebula = assembleArea(gneb);
@@ -2866,7 +2874,7 @@ void migrate_grid() {
     AreaDef cooler;
     cooler.name = "Cooler's Ship";
     cooler.location = space;
-    cooler.exists = create_obj<Vehicle>();
+    cooler.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_VEHICLE};
     for(auto &[vn, u] : entities) {
         auto room = reg.try_get<Room>(u);
         if(!room) continue;
@@ -2878,7 +2886,7 @@ void migrate_grid() {
 
     AreaDef alph;
     alph.name = "Alpharis";
-    alph.exists = create_obj<Building>();
+    alph.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     alph.location = space;
     for(auto &[vn, u] : entities) {
         auto room = reg.try_get<Room>(u);
@@ -2890,7 +2898,7 @@ void migrate_grid() {
     AreaDef dzone;
     dzone.name = "Dead Zone";
     dzone.location = universe7;
-    dzone.exists = create_obj<Dimension>();
+    dzone.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     for(auto &[vn, u] : entities) {
         auto room = reg.try_get<Room>(u);
         if(!room) continue;
@@ -2901,7 +2909,7 @@ void migrate_grid() {
     AreaDef bast;
     bast.name = "Blasted Asteroid";
     bast.location = space;
-    bast.exists = create_obj<Planet>();
+    bast.flags = {ITEM_ENVIRONMENT, ITEM_WORLD, ITEM_PLANET, ITEM_STRUCTURE};
     for(auto &[vn, u] : entities) {
         auto room = reg.try_get<Room>(u);
         if(!room) continue;
@@ -2913,7 +2921,7 @@ void migrate_grid() {
     AreaDef listres;
     listres.name = "Lister's Restaurant";
     listres.location = xenoverse;
-    listres.exists = create_obj<Building>();
+    listres.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     for(auto &[vn, u] : entities) {
         auto room = reg.try_get<Room>(u);
         if(!room) continue;
@@ -2924,7 +2932,7 @@ void migrate_grid() {
 
     AreaDef scasino;
     scasino.name = "Shooting Star Casino";
-    scasino.exists = create_obj<Building>();
+    scasino.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     scasino.location = xenoverse;
     for(auto &[vn, u] : entities) {
         auto room = reg.try_get<Room>(u);
@@ -2936,7 +2944,7 @@ void migrate_grid() {
     AreaDef outdef;
     outdef.name = "The Outpost";
     outdef.location = celestial_plane;
-	outdef.exists = create_obj<Building>();
+	outdef.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     for(auto &[vn, u] : entities) {
         auto room = reg.try_get<Room>(u);
         if(!room) continue;
@@ -2963,28 +2971,28 @@ void migrate_grid() {
     nkai.name = "North Kai's Planet";
     nkai.location = celestial_plane;
     nkai.envVars[EnvVar::Gravity] = 10.0;
-    nkai.exists = create_obj<Planet>();
+    nkai.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     nkai.roomRanges.emplace_back(6100, 6138);
     auto north_kai = assembleArea(nkai);
 
     AreaDef serp;
     serp.name = "Serpent's Castle";
     serp.location = snake_way;
-    serp.exists = create_obj<Building>();
+    serp.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     serp.roomRanges.emplace_back(6139, 6166);
     auto serpents_castle = assembleArea(serp);
 
     AreaDef gkai;
     gkai.name = "Grand Kai's Planet";
     gkai.location = celestial_plane;
-    gkai.exists = create_obj<Planet>();
+    gkai.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     gkai.roomRanges.emplace_back(6800, 6960);
     auto grand_kai = assembleArea(gkai);
 
     AreaDef gkaipalace;
     gkaipalace.name = "Grand Kai's Palace";
     gkaipalace.location = grand_kai;
-    gkaipalace.exists = create_obj<Building>();
+    gkaipalace.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     gkaipalace.roomRanges.emplace_back(6961, 7076);
     auto grand_kais_palace = assembleArea(gkaipalace);
 
@@ -3052,7 +3060,7 @@ void migrate_grid() {
 
     AreaDef fbagdojo;
     fbagdojo.name = "Flaming Bag Dojo";
-    fbagdojo.exists = create_obj<Building>();
+    fbagdojo.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     fbagdojo.location = hellfire_city;
     fbagdojo.roomRanges.emplace_back(6530, 6568);
     auto flaming_bag_dojo = assembleArea(fbagdojo);
@@ -3066,21 +3074,21 @@ void migrate_grid() {
     AreaDef psihnon;
     psihnon.name = "Sihnon";
     psihnon.location = space;
-    psihnon.exists = create_obj<Planet>();
+    psihnon.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     psihnon.roomRanges.emplace_back(3600, 3699);
     auto planet_sihnon = assembleArea(psihnon);
 
     AreaDef majdef;
     majdef.name = "Majinton";
     majdef.location = planet_sihnon;
-    majdef.exists = create_obj<Dimension>();
+    majdef.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     majdef.roomRanges.emplace_back(3700, 3797);
     auto majinton = assembleArea(majdef);
 
     AreaDef wistower;
     wistower.name = "Wisdom Tower";
     wistower.location = planet_namek;
-    wistower.exists = create_obj<Building>();
+    wistower.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     wistower.roomRanges.emplace_back(9600, 9666);
     auto wisdom_tower = assembleArea(wistower);
 
@@ -3093,7 +3101,7 @@ void migrate_grid() {
     AreaDef machia;
     machia.name = "Machiavilla";
     machia.location = planet_konack;
-    machia.exists = create_obj<Building>();
+    machia.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     machia.roomRanges.emplace_back(12743, 12798);
     machia.roomRanges.emplace_back(12700, 12761);
     machia.roomIDs.insert(9356);
@@ -3114,7 +3122,7 @@ void migrate_grid() {
 
     AreaDef nazchief;
     nazchief.name = "Chieftain's House";
-    nazchief.exists = create_obj<Building>();
+    nazchief.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     nazchief.location = nazrin_village;
     nazchief.roomRanges.emplace_back(19348, 19397);
     auto chieftains_house = assembleArea(nazchief);
@@ -3127,7 +3135,7 @@ void migrate_grid() {
 
     AreaDef monbal;
     monbal.name = "Monastery of Balance";
-    monbal.exists = create_obj<Building>();
+    monbal.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     monbal.location = planet_konack;
     monbal.roomRanges.emplace_back(9500, 9599);
     monbal.roomRanges.emplace_back(9357, 9364);
@@ -3137,35 +3145,35 @@ void migrate_grid() {
     AreaDef futschool;
     futschool.name = "Future School";
     futschool.location = xenoverse;
-    futschool.exists = create_obj<Dimension>();
+    futschool.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     futschool.roomRanges.emplace_back(15938, 15999);
     auto future_school = assembleArea(futschool);
 
     AreaDef udfhq;
     udfhq.name = "UDF Headquarters";
     udfhq.location = space;
-    udfhq.exists = create_obj<Vehicle>();
+    udfhq.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_VEHICLE};
     udfhq.roomRanges.emplace_back(18000, 18059);
     auto udf_headquarters = assembleArea(udfhq);
 
     AreaDef hspire;
     hspire.name = "The Haven Spire";
     hspire.location = space;
-    hspire.exists = create_obj<Vehicle>();
+    hspire.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_VEHICLE};
     hspire.roomRanges.emplace_back(18300, 18341);
     auto haven_spire = assembleArea(hspire);
 
     AreaDef knoit;
     knoit.name = "Kame no Itto";
     knoit.location = space;
-    knoit.exists = create_obj<Vehicle>();
+    knoit.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_VEHICLE};
     knoit.roomRanges.emplace_back(18400, 18460);
     auto kame_no_itto = assembleArea(knoit);
 
     AreaDef neonirvana;
     neonirvana.name = "Neo Nirvana";
     neonirvana.location = space;
-    neonirvana.exists = create_obj<Vehicle>();
+    neonirvana.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_VEHICLE};
     neonirvana.roomRanges.emplace_back(13500, 13552);
     neonirvana.roomRanges.emplace_back(14782, 14790);
     auto neo_nirvana = assembleArea(neonirvana);
@@ -3293,14 +3301,14 @@ void migrate_grid() {
     AreaDef shatplan;
     shatplan.name = "Shattered Planet";
     shatplan.location = south_galaxy;
-    shatplan.exists = create_obj<Planet>();
+    shatplan.flags = {ITEM_WORLD, ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_PLANET};
     shatplan.roomRanges.emplace_back(64301, 64399);
     auto shattered_planet = assembleArea(shatplan);
 
     AreaDef wzdef;
     wzdef.name = "War Zone";
     wzdef.location = xenoverse;
-    wzdef.exists = create_obj<Building>();
+    wzdef.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     wzdef.roomRanges.emplace_back(17700, 17702);
     auto war_zone = assembleArea(wzdef);
 
@@ -3325,21 +3333,21 @@ void migrate_grid() {
     AreaDef hhouse;
     hhouse.name = "Haunted House";
     hhouse.location = xenoverse;
-    hhouse.exists = create_obj<Dimension>();
+    hhouse.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     hhouse.roomRanges.emplace_back(18600, 18693);
     auto haunted_house = assembleArea(hhouse);
 
     AreaDef roc;
     roc.name = "Random Occurences, WTF?";
     roc.location = xenoverse;
-    roc.exists = create_obj<Dimension>();
+    roc.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     roc.roomRanges.emplace_back(18700, 18776);
     auto random_occurences = assembleArea(roc);
 
     AreaDef galstrong;
     galstrong.name = "Galaxy's Strongest Tournament";
     galstrong.location = space;
-    galstrong.exists = create_obj<Building>();
+    galstrong.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     galstrong.roomRanges.emplace_back(17875, 17894);
     auto galaxy_strongest_tournament = assembleArea(galstrong);
 
@@ -3374,7 +3382,7 @@ void migrate_grid() {
         AreaDef sdata;
         sdata.name = data.name;
         sdata.roomIDs = data.vnums;
-        sdata.exists = create_obj<Vehicle>();
+        sdata.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_VEHICLE};
         sdata.location = getEntity(data.location ? data.location.value() : 16694);
         return assembleArea(sdata);
     };
@@ -3468,7 +3476,7 @@ void migrate_grid() {
         pdim.name = "Personal Pocket Dimension " + std::to_string(counter++);
         pdim.location = personal_dimensions;
         pdim.roomIDs.insert(vn);
-        pdim.exists = create_obj<Dimension>();
+        pdim.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
         pdim.envVars[EnvVar::Gravity] = 1000.0;
         auto pd = assembleArea(pdim);
     }
@@ -3598,28 +3606,29 @@ void migrate_characters() {
     auto room = getEntity<Room>(300);
 
     for(auto &[cname, accID] : characterToAccount) {
-        auto ch = new PlayerCharacter();
-        ch->script = std::make_shared<script_data>(ch);
+        auto ent = reg.create();
+        auto &c = reg.get_or_emplace<BaseCharacter>(ent);
+        auto ch = &c;
+
         if(load_char(cname.c_str(), ch) < 0) {
             basic_mud_log("Error loading %s for account migration.", cname.c_str());
-            delete ch;
+            reg.destroy(ent);
             continue;
         }
+        ch->script = std::make_shared<script_data>();
         auto id = entities.contains(ch->getUID()) ? getNextUID() : ch->getUID();
         ch->uid = id;
-        auto p = std::make_shared<player_data>();
-        p->id = id;
-        players[id] = p;
-        p->id = id;
-        p->character = ch;
-        p->name = ch->getName();
+        auto &info = reg.get_or_emplace<Info>(ent);
+        info.family = EntityFamily::Character;
+        info.uid = id;
+        auto &p = reg.get_or_emplace<PlayerCharacter>(ent);
         auto a = accounts[accID];
         accounts[accID] = a;
-        p->account = a;
+        p.account = a;
         a->adminLevel = std::max(a->adminLevel, GET_ADMLEVEL(ch));
         a->characters.emplace_back(id);
         ch->addToLocation(room);
-        setEntity(id, ch);
+        setEntity(id, ent);
     }
 
 
@@ -3679,11 +3688,7 @@ void migrate_characters() {
             basic_mud_log("Error loading %s for alias migration.", name.c_str());
             continue;
         }
-        auto pa = players.find(ch->getUID());
-        if(pa == players.end()) {
-            basic_mud_log("Error loading %s for alias migration.", name.c_str());
-            continue;
-        }
+        auto &pa = reg.get_or_emplace<PlayerCharacter>(ch->ent);
 
 
         std::ifstream file(p.path());
@@ -3694,7 +3699,7 @@ void migrate_characters() {
         // replacement string length  (size_t), replacement string, alias type (a bool)
 
         while(std::getline(file, line)) {
-            auto &a = pa->second->aliases.emplace_back();
+            auto &a = pa.aliases.emplace_back();
             std::getline(file, a.name);
             std::getline(file, line);
             std::getline(file, a.replacement);

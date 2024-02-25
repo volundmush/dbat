@@ -1048,8 +1048,8 @@ SPECIAL(bank) {
                 return (true);
             }
             auto id = vict->getUID();
-            auto p = players[id];
-            auto &c = p->account->characters;
+            auto &p = reg.get<PlayerCharacter>(vict->ent);
+            auto &c = p.account->characters;
             auto found = std::find_if(c.begin(), c.end(), [&](auto i) {return i == id;});
             if(found != c.end()) {
                 ch->sendf("You can not transfer money to your own offline characters...");

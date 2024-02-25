@@ -23,6 +23,7 @@
 #include "dbat/local_limits.h"
 #include "dbat/constants.h"
 #include "dbat/act.informative.h"
+#include "dbat/entity.h"
 
 /* local functions */
 static void handle_fall(BaseCharacter *ch);
@@ -1606,13 +1607,13 @@ ACMD(do_fly)
             return;
         }
 
-        auto planet = ch->getPlanet();
-        if (!planet)
+        auto planet = find::holderType(ch->ent, ITEM_PLANET);
+        if (planet == entt::null)
         {
             ch->sendf("You can't fly to space from here!");
             return;
         }
-        auto dest = planet->getLaunchDestinationFor(ch);
+        auto dest = movement::getLaunchDestinationFor(planet, ch->ent);
         if (!dest)
         {
             ch->sendf("You can't fly to space from here!");
@@ -1630,7 +1631,7 @@ ACMD(do_fly)
         GET_ALT(ch) = 0;
         ch->clearFlag(FlagType::Affect, AFF_FLYING);
 
-        if (planet)
+        if (planet != entt::null)
         {
             fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
             send_to_sense(1, "leaving the planet", ch);
@@ -1643,7 +1644,7 @@ ACMD(do_fly)
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->removeFromLocation();
         ch->addToLocation(d);
-        if (planet)
+        if (planet != entt::null)
         {
             act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
                 TO_ROOM);

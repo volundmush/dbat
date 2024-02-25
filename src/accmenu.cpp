@@ -35,12 +35,12 @@ namespace net {
         sendText("      @D[@y------@YAvailable Characters@y------@D]@n\n");
         int counter = 0;
         for(auto cid : a->characters) {
-            auto p = players.find(cid);
-            if(p == players.end()) continue;
-            auto c = p->second->character;
-            std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, c->getName());
-            if(c->desc) {
-                line += fmt::format(" @D[@y{} Connections@D]@n\r\n", c->desc->conns.size());
+            auto p = getEntity<BaseCharacter>(cid);;
+            if(!p) continue;
+
+            std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, p->getName());
+            if(p->desc) {
+                line += fmt::format(" @D[@y{} Connections@D]@n\r\n", p->desc->conns.size());
             } else {
                 line += "\r\n";
             }
@@ -83,13 +83,13 @@ namespace net {
             }
 
             auto id = conn->account->characters[slot];
-            auto p = players.find(id);
-            if(p == players.end()) {
+            auto p = getEntity<BaseCharacter>(id);
+            if(!p) {
                 sendText(fmt::format("ERROR: Player ID {} not found. Please alert staff.\r\n", id));
                 return;
             }
 
-            conn->setParser(new CharacterMenu(conn, p->second->character));
+            conn->setParser(new CharacterMenu(conn, p));
             return;
         }
 

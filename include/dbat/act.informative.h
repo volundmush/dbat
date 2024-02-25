@@ -17,7 +17,7 @@ extern char *default_color_choices[NUM_COLOR + 1];
 
 // functions
 extern void map_draw_room(char map[9][10], int x, int y, Room* room,
-                          GameEntity *viewer);
+                          entt::entity viewer);
 extern std::string trans_check(BaseCharacter *ch, GameEntity *viewer);
 extern int readIntro(BaseCharacter *ch, BaseCharacter *vict);
 

@@ -217,7 +217,7 @@ extern obj_rnum real_object(obj_vnum vnum);
 
 extern void init_char(BaseCharacter *ch);
 
-NonPlayerCharacter *read_mobile(mob_vnum nr, int type);
+BaseCharacter *read_mobile(mob_vnum nr, int type);
 
 extern int vnum_mobile(char *searchname, BaseCharacter *ch);
 
@@ -317,7 +317,7 @@ extern BaseCharacter *character_list;
 extern std::unordered_map<int64_t, std::pair<time_t, BaseCharacter*>> uniqueCharacters;
 
 extern VnumIndex<Object> objectVnumIndex;
-extern VnumIndex<NonPlayerCharacter> characterVnumIndex;
+extern VnumIndex<BaseCharacter> characterVnumIndex;
 
 extern std::unordered_map<obj_vnum, struct index_data> obj_index;
 extern std::unordered_map<obj_vnum, nlohmann::json> obj_proto;
@@ -360,13 +360,18 @@ extern ACMD(do_reboot);
 
 /* create an object, and add it to the object list */
 template <typename T = Object>
-T *create_obj() {
-    auto obj = new T();
-    obj->script = std::make_shared<script_data>(obj);
-    obj->ent = reg.create();
-    obj->uid = getNextUID();
-    obj->checkMyID();
-    setEntity(obj->getUID(), obj);
+T *create_obj(EntityFamily family = EntityFamily::Object) {
+    auto id = getNextUID();
+    auto ent = reg.create();
+    auto &t = reg.get_or_emplace<T>(ent);
+    t.script = std::make_shared<script_data>(&t);
+    t.ent = ent;
+    t.uid = id;
+    auto &info = reg.get_or_emplace<Info>(ent);
+    info.family = family;
+    info.uid = id;
 
-    return (obj);
+    setEntity(id, ent);
+
+    return reg.try_get<T>(ent);
 }

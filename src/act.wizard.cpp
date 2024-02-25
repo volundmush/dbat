@@ -1293,9 +1293,10 @@ static void do_stat_room(BaseCharacter *ch) {
 
     ch->sendf("Description:\r\n%s", withPlaceholder(rm->getLookDesc(), "  None.\r\n"));
 
-    if (!rm->ex_description.empty()) {
+
+    if (auto ex = reg.try_get<ExtraDescriptions>(rm->ent); ex && !ex->ex_description.empty()) {
         ch->sendf("Extra descs:");
-        for (auto desc : rm->ex_description)
+        for (auto desc : ex->ex_description)
             ch->sendf(" [@c%s@n]", desc.keyword);
         ch->sendf("\r\n");
     }
@@ -1395,9 +1396,9 @@ static void do_stat_object(BaseCharacter *ch, Object *j) {
         ch->sendf("HOLDING: %s\r\n", GET_NAME(sitter));
     }
 
-    if (!j->ex_description.empty()) {
+    if (auto ex = reg.try_get<ExtraDescriptions>(j->ent); ex && !ex->ex_description.empty()) {
         ch->sendf("Extra descs:");
-        for (auto desc : j->ex_description)
+        for (auto desc : ex->ex_description)
             ch->sendf(" [@c%s@n]", desc.keyword);
         ch->sendf("\r\n");
     }

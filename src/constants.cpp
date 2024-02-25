@@ -1051,7 +1051,6 @@ const char *extra_bits[NUM_ITEM_FLAGS + 1] = {
         "CARDCASE",
         "MOB_NOPICKUP",
         "NOSTEAL",
-        "PLANET",
         "\n"
 };
 
