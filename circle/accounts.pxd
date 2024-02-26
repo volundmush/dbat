@@ -1,4 +1,5 @@
 from libc.time cimport time_t
+from libc.stdint cimport int64_t, int16_t, int8_t
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.vector cimport vector
@@ -24,7 +25,7 @@ cdef extern from "dbat/structs.h":
         int adminLevel
         int rpp
         int slots
-        vector[int] characters
+        vector[int64_t] characters
 
         void modRPP(int amt)
 
