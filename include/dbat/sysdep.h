@@ -54,8 +54,14 @@
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
 #include "fmt/printf.h"
-#include "json.hpp"
-#include "entt.hpp"
+#include <boost/algorithm/string.hpp>
+#include "nlohmann/json.hpp"
+#include "entt/entt.hpp"
+#include "effolkronium/random.hpp"
+using Random = effolkronium::random_static;
+#include <rfl/json.hpp>
+#include <rfl.hpp>
+#include <magic_enum/magic_enum_all.hpp>
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)

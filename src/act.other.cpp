@@ -34,7 +34,6 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/mail.h"
 #include "dbat/players.h"
-#include "dbat/random.h"
 #include "dbat/entity.h"
 
 /* local functions */

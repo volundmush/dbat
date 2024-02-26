@@ -22,7 +22,6 @@
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 #include "dbat/attack.h"
-#include "dbat/random.h"
 #include "dbat/entity.h"
 
 /* Combat commands below this line */

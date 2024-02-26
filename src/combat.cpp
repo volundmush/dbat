@@ -27,7 +27,6 @@
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 #include "dbat/act.informative.h"
-#include "dbat/random.h"
 
 /* local functions */
 void damage_weapon(BaseCharacter *ch, Object *obj, BaseCharacter *vict) {

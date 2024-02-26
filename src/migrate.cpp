@@ -22,7 +22,6 @@
 #include "dbat/guild.h"
 #include "dbat/genobj.h"
 #include "dbat/saveload.h"
-#include "dbat/random.h"
 #include "dbat/entity.h"
 
 #define RENT_FACTOR    1

@@ -25,7 +25,6 @@
 #include "dbat/act.informative.h"
 #include "dbat/screen.h"
 #include "dbat/players.h"
-#include "dbat/random.h"
 #include "dbat/entity.h"
 
 /* local functions */

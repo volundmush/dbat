@@ -19,7 +19,6 @@
 #include "dbat/maputils.h"
 #include "dbat/vehicles.h"
 #include "dbat/act.informative.h"
-#include "dbat/random.h"
 #include "dbat/entity.h"
 
 /* local functions */
