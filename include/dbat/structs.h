@@ -459,6 +459,7 @@ struct PlayerCharacter {
 
 struct NonPlayerCharacter {
     // TODO: certainly there is something about NPCs that is different from PCs...
+    bool barf;
 };
 
 struct Damage {

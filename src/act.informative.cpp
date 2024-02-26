@@ -750,7 +750,8 @@ ACMD(do_nickname) {
                 sprintf(nick, "%s", CAP(arg2));
                 ship2->setLookDesc(nick);
                 Object *k;
-                for (k = object_list; k; k = k->next) {
+                for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+                    k = &object;
                     if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(ship2) + 1000) {
                         k->extractFromWorld();
                         int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
@@ -3588,7 +3589,8 @@ static void perform_mortal_where(BaseCharacter *ch, char *arg) {
             ch->sendf("%-20s - %s\r\n", GET_NAME(i), i->getRoom()->getDisplayName(ch));
         }
     } else {            /* print only FIRST char, not all. */
-        for (i = character_list; i; i = i->next) {
+        for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+            i = &character;
             if (IN_ROOM(i) == NOWHERE || i == ch)
                 continue;
             if (!CAN_SEE(ch, i) || i->getRoom()->zone != ch->getRoom()->zone)
@@ -3650,7 +3652,8 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
     } else {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
-        for (i = character_list; i; i = i->next) {
+        for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+            i = &character;
             if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->getName().c_str())) {
                 found = 1;
                 ch->sendf("M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
@@ -3662,11 +3665,13 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
                 ch->sendf("\r\n");
             }
         }
-        for (k = object_list; k; k = k->next)
+        for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+            k = &object;
             if (CAN_SEE_OBJ(ch, k) && isname(arg, k->getName().c_str())) {
                 found = 1;
                 print_object_location(++num, k, ch, true);
             }
+        }
         if (!found) {
             ch->sendf("Couldn't find any such thing.\r\n");
         } else {

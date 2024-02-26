@@ -472,13 +472,11 @@ BaseCharacter *get_char_room(char *name, int *number, room_rnum room) {
 
 /* search all over the world for a char num, and return a pointer if found */
 BaseCharacter *get_char_num(mob_rnum nr) {
-    BaseCharacter *i;
-
-    for (i = character_list; i; i = i->next)
-        if (GET_MOB_RNUM(i) == nr)
-            return (i);
-
-    return (nullptr);
+    
+    if(auto found = characterVnumIndex.find(nr); found != characterVnumIndex.end()) {
+        return !found->second.empty() ? found->second.front() : nullptr;
+    }
+    return nullptr;
 }
 
 
@@ -637,7 +635,6 @@ void update_char_objects(BaseCharacter *ch) {
     for(auto obj : ch->getInventory())
         update_object(obj, 1);
 }
-
 
 
 /* Extract a ch completely from the world, and leave his stuff behind */
@@ -823,9 +820,9 @@ void extract_char_final(BaseCharacter *ch) {
     }
 
     if (IS_NPC(ch)) {
-        auto found = uniqueCharacters.find(ch->getUID());
-        if (found != uniqueCharacters.end()) {
-            uniqueCharacters.erase(found);
+        auto found = entities.find(ch->getUID());
+        if (found != entities.end()) {
+            entities.erase(found);
         }
         free_char(ch);
     }
@@ -901,7 +898,6 @@ void extract_pending_chars(uint64_t heartBeat, double deltaTime) {
 
 
 BaseCharacter *get_player_vis(BaseCharacter *ch, char *name, int *number, int inroom) {
-    BaseCharacter *i;
     int num;
 
     if (!number) {
@@ -909,9 +905,8 @@ BaseCharacter *get_player_vis(BaseCharacter *ch, char *name, int *number, int in
         num = get_number(&name);
     }
 
-    for (i = character_list; i; i = i->next) {
-        if (IS_NPC(i))
-            continue;
+    for (auto &&[ent, character, player] : reg.view<BaseCharacter, PlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto i = &character;
         if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
@@ -1025,7 +1020,8 @@ BaseCharacter *get_char_world_vis(BaseCharacter *ch, char *name, int *number) {
     if (*number == 0)
         return get_player_vis(ch, name, nullptr, 0);
 
-    for (i = character_list; i && *number; i = i->next) {
+    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        i = &character;
         if (IN_ROOM(ch) == IN_ROOM(i))
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
@@ -1116,11 +1112,13 @@ Object *get_obj_vis(BaseCharacter *ch, char *name, int *number) {
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
-    for (i = object_list; i && *number; i = i->next)
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        i = &object;
         if (isname(name, i->getName().c_str()))
             if (CAN_SEE_OBJ(ch, i))
                 if (--(*number) == 0)
                     return (i);
+    }
 
     return (nullptr);
 }

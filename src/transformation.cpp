@@ -764,7 +764,9 @@ namespace trans {
     }
 
     void gamesys_transform(uint64_t heartPulse, double deltaTime) {
-        for(auto ch = character_list; ch; ch = ch->next) {
+        for(auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+            auto ch = &character;
+            
             auto form = ch->form;
             auto &data = ch->transforms[form];
             data.timeSpentInForm += deltaTime;

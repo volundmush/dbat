@@ -26,8 +26,8 @@ void ping_ship(int vnum, int vnum2) {
         return;
     }
 
-    for (tch = character_list; tch; tch = next_ch) {
-        next_ch = tch->next;
+    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
         if (found == false) {
             if (!(obj = find_control(tch))) {
                 continue;
@@ -35,6 +35,7 @@ void ping_ship(int vnum, int vnum2) {
                 if (GET_OBJ_VAL(obj, 0) == vnum && vnum != vnum2) {
                     controls = obj;
                     found = true;
+                    break;
                 }
             }
         }

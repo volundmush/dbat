@@ -95,7 +95,6 @@ void setEntity(int64_t uid, entt::entity entity) {
 DebugMap<int64_t, entt::entity> entities;    /* array of rooms		 */
 std::unordered_set<GameEntity*> pendingDeletions;
 
-BaseCharacter *character_list = nullptr; /* global linked list of chars	 */
 BaseCharacter *affect_list = nullptr; /* global linked list of chars with affects */
 BaseCharacter *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::unordered_map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
@@ -104,14 +103,10 @@ std::unordered_map<mob_vnum, nlohmann::json> mob_proto;    /* prototypes for mob
 VnumIndex<Object> objectVnumIndex;
 VnumIndex<BaseCharacter> characterVnumIndex;
 
-Object *object_list = nullptr;    /* global linked list of objs	 */
 std::unordered_map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::unordered_map<obj_vnum, nlohmann::json> obj_proto;    /* prototypes for objs		 */
 
-std::unordered_map<int64_t, std::pair<time_t, BaseCharacter*>> uniqueCharacters;
 /* hash tree for fast obj lookup */
-std::unordered_map<int64_t, std::pair<time_t, Object*>> uniqueObjects;
-
 std::unordered_map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::unordered_map<trig_vnum, std::shared_ptr<trig_proto>> trig_index; /* index table for triggers      */
@@ -512,23 +507,6 @@ void destroy_db() {
     ssize_t cnt, itr;
     BaseCharacter *chtmp;
     Object *objtmp;
-
-    /* Active Mobiles & Players */
-    while (character_list) {
-        chtmp = character_list;
-        character_list = character_list->next;
-        if (chtmp->master)
-            stop_follower(chtmp);
-        free_char(chtmp);
-    }
-
-    /* Active Objects */
-    while (object_list) {
-        objtmp = object_list;
-        object_list = object_list->next;
-    }
-
-    uniqueObjects.clear();
 
     /* Objects */
     obj_proto.clear();

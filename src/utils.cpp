@@ -760,7 +760,8 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
     int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
 
-    for (k = object_list; k; k = k->next) {
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        k = &object;
         if (k->carried_by != nullptr) {
             continue;
         }

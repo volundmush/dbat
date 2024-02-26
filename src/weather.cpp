@@ -23,7 +23,8 @@ static void phase_powerup(BaseCharacter *ch, int type, int phase);
 
 static void grow_plants() {
 
-    for (auto k = object_list; k; k = k->next) {
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        auto k = &object;
         auto r = k->getRoom();
         if(!r) continue;
         if(!(r->checkFlag(FlagType::Room, ROOM_GARDEN1) || r->checkFlag(FlagType::Room, ROOM_GARDEN2))) continue;
@@ -434,8 +435,8 @@ static void yearChanged() {
 }
 
 static void ageAllCharacters(double addedTime) {
-    for(const auto &[id, p] : uniqueCharacters) {
-        p.second->ageBy(addedTime);
+    for(auto &&[ent, ch] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        ch.ageBy(addedTime);
     }
 }
 

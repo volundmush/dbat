@@ -913,47 +913,7 @@ ACMD(do_tell) {
 }
 
 ACMD(do_reply) {
-    BaseCharacter *tch = character_list;
 
-    if (IS_NPC(ch))
-        return;
-
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
-        ch->sendf("This is a different dimension!\r\n");
-        return;
-    }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
-        ch->sendf("This is the past, you can't send tells!\r\n");
-        return;
-    }
-
-    skip_spaces(&argument);
-
-    if (GET_LAST_TELL(ch) == NOBODY)
-        ch->sendf("You have nobody to reply to!\r\n");
-    else if (!*argument)
-        ch->sendf("What is your reply?\r\n");
-    else {
-        /*
-         * Make sure the person you're replying to is still playing by searching
-         * for them.  Note, now last tell is stored as player IDnum instead of
-         * a pointer, which is much better because it's safer, plus will still
-         * work if someone logs out and back in again.
-         */
-
-        /*
-         * XXX: A descriptor list based search would be faster although
-         *      we could not find link dead people.  Not that they can
-         *      hear tells anyway. :) -gg 2/24/98
-         */
-        while (tch != nullptr && (IS_NPC(tch) || GET_IDNUM(tch) != GET_LAST_TELL(ch)))
-            tch = tch->next;
-
-        if (tch == nullptr)
-            ch->sendf("They are no longer playing.\r\n");
-        else if (is_tell_ok(ch, tch))
-            perform_tell(ch, tch, argument);
-    }
 }
 
 ACMD(do_spec_comm) {

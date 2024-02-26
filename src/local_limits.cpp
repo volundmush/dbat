@@ -1110,33 +1110,37 @@ static void heal_limb(BaseCharacter *ch) {
     }
 }
 
-/* Update PCs, NPCs, and objects */
-void point_update(uint64_t heartPulse, double deltaTime) {
-    BaseCharacter *i, *next_char;
+
+static void point_update_characters_relax(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, player] : reg.view<BaseCharacter, PlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        auto room = ch->getRoom();
+        if(!room) continue;
+
+        if(room->checkFlag(FlagType::Room, ROOM_HOUSE)) {
+            ch->relax_count += 1;
+        } else if(ch->relax_count >= 464) {
+            ch->relax_count -= 4;
+        } else if(ch->relax_count >= 232) {
+            ch->relax_count -= 3;
+        } else if(ch->relax_count > 0 && rand_number(1, 3) == 3) {
+            ch->relax_count -= 2;
+        } else {
+            ch->relax_count -= 1;
+        }
+        if(ch->relax_count < 0) ch->relax_count = 0;
+    }
+}
+
+
+
+static void point_update_characters(uint64_t heartPulse, double deltaTime) {
     Object *j, *next_thing, *jj, *next_thing2, *vehicle = nullptr;
     int change = false;
-    /* characters */
 
-    for (i = character_list; i; i = next_char) {
-        next_char = i->next;
+    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        auto i = &character;
 
-        if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE) {
-            if (ROOM_FLAGGED(IN_ROOM(i), ROOM_HOUSE)) {
-                GET_RELAXCOUNT(i) += 1;
-            } else if (GET_RELAXCOUNT(i) >= 464) {
-                GET_RELAXCOUNT(i) -= 4;
-            } else if (GET_RELAXCOUNT(i) >= 232) {
-                GET_RELAXCOUNT(i) -= 3;
-            } else if (GET_RELAXCOUNT(i) > 0 && rand_number(1, 3) == 3) {
-                GET_RELAXCOUNT(i) -= 2;
-            } else {
-                GET_RELAXCOUNT(i) -= 1;
-            }
-
-            if (GET_RELAXCOUNT(i) < 0) {
-                GET_RELAXCOUNT(i) = 0;
-            }
-        }
         // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
         if (!i->isFullHealth()) {
             if (rand_number(1, 2) == 2) {
@@ -1365,11 +1369,15 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 (i->timer)++;
         }
     }
+}
 
-    /* objects */
-    for (j = object_list; j; j = next_thing) {
-        next_thing = j->next;    /* Next in object list */
+static void point_update_objects(uint64_t heartPulse, double deltaTime) {
+    Object *jj, *next_thing2, *vehicle = nullptr;
+    int change = false;
 
+        /* objects */
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        auto j = &object;
 
         /* Let's get rid of dropped norent items. */
         if (OBJ_FLAGGED(j, ITEM_NORENT) && j->worn_by == nullptr && j->carried_by == nullptr && obj_selling != j &&
@@ -1513,6 +1521,13 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 timer_otrigger(j);
         }
     }
+
+}
+
+/* Update PCs, NPCs, and objects */
+void point_update(uint64_t heartPulse, double deltaTime) {
+    point_update_characters(heartPulse, deltaTime);
+    point_update_objects(heartPulse, deltaTime);
 }
 
 void timed_dt(BaseCharacter *ch) {
@@ -1531,9 +1546,8 @@ void timed_dt(BaseCharacter *ch) {
             r->timed -= (r->timed != -1);
         }
 
-        for (vict = character_list; vict; vict = vict->next) {
-            if (IS_NPC(vict))
-                continue;
+        for (auto &&[ent, character, player] : reg.view<BaseCharacter, PlayerCharacter>(entt::exclude<Deleted>).each()) {
+            vict = &character;
 
             if (IN_ROOM(vict) == NOWHERE)
                 continue;

@@ -1674,7 +1674,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
     BaseCharacter *ch, *vict, *next_v;
 
     /* Checking the object list for any huge ki attacks */
-    for (k = object_list; k; k = k->next) {
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        k = &object;
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
             if (IN_ROOM(k) && GET_ROOM_VNUM(IN_ROOM(k)) == 80) {
                 room_vnum inroom = IN_ROOM(k);
@@ -2058,9 +2059,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
 void homing_update(uint64_t heartPulse, double deltaTime) {
     Object *k;
 
-    for (k = object_list; k; k = k->next) {
-        if (!k || k == nullptr)
-            continue;
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        k = &object;
 
         if (KICHARGE(k) <= 0) {
             continue;

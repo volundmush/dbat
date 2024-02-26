@@ -8,6 +8,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/guild.h"
 #include "dbat/shop.h"
+#include "dbat/entity.h"
 
 #include <fstream>
 #include <thread>
@@ -34,15 +35,6 @@ static void dump_state_accounts(const std::filesystem::path &loc) {
 
 }
 
-static void dump_state_players(const std::filesystem::path &loc) {
-    nlohmann::json j;
-
-    for(auto &[v, r] : players) {
-        j.push_back(r->serialize());
-    }
-    dump_to_file(loc, "players.json", j);
-}
-
 
 void dump_state_globalData(const std::filesystem::path &loc) {
     nlohmann::json j;
@@ -58,11 +50,7 @@ static void process_dirty_instances(const std::filesystem::path &loc) {
     nlohmann::json instances;
 
     for(auto &[v, u] : entities) {
-        nlohmann::json j;
-        j["uid"] = v;
-        j["unitClass"] = u->getUnitClass();
-        j["data"] = u->serialize();
-        instances.push_back(j);
+        instances.push_back(std::make_pair(v, serializeEntity(u)));
     }
     dump_to_file(loc, "instances.json", instances);
 }
@@ -71,7 +59,7 @@ static void process_dirty_relations(const std::filesystem::path &loc) {
     nlohmann::json relations;
 
     for(auto &[v, u] : entities) {
-        relations.push_back(std::make_pair(v, u->serializeRelations()));
+        relations.push_back(std::make_pair(v, serializeEntityRelations(u)));
     }
     dump_to_file(loc, "relations.json", relations);
 }
@@ -180,7 +168,6 @@ void runSave() {
         auto startTime = std::chrono::high_resolution_clock::now();
         std::vector<std::thread> threads;
         for(const auto func : {dump_state_accounts,
-              dump_state_players,
                            dump_state_globalData,
                           process_dirty_instances, process_dirty_relations, process_dirty_item_prototypes,
                           process_dirty_npc_prototypes, process_dirty_shops,

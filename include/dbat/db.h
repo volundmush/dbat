@@ -313,17 +313,12 @@ extern BaseCharacter *affectv_list;
 extern std::unordered_map<mob_vnum, struct index_data> mob_index;
 extern std::unordered_map<mob_vnum, nlohmann::json> mob_proto;
 
-extern BaseCharacter *character_list;
-extern std::unordered_map<int64_t, std::pair<time_t, BaseCharacter*>> uniqueCharacters;
 
 extern VnumIndex<Object> objectVnumIndex;
 extern VnumIndex<BaseCharacter> characterVnumIndex;
 
 extern std::unordered_map<obj_vnum, struct index_data> obj_index;
 extern std::unordered_map<obj_vnum, nlohmann::json> obj_proto;
-
-extern Object *object_list;
-extern std::unordered_map<int64_t, std::pair<time_t, Object*>> uniqueObjects;
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;

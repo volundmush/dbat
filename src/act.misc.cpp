@@ -1238,8 +1238,8 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
     BaseCharacter *i, *next_char, *ch = nullptr;
     int quality = 0;
 
-    for (i = character_list; i; i = next_char) {
-        next_char = i->next;
+    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        i = &character;
         if (ROOM_FLAGGED(IN_ROOM(i), ROOM_FISHING)) {
             if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == true) {
                 ch = i;

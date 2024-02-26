@@ -778,12 +778,11 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
 /* The Fight related routines */
 void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
-    BaseCharacter *ch;
-    BaseCharacter *tch;
+
     BaseCharacter *wch;
 
-    for (tch = character_list; tch; tch = tch->next) {
-        ch = tch;
+    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
 
         if (GET_POS(ch) == POS_FIGHTING) {
             GET_POS(ch) = POS_STANDING;

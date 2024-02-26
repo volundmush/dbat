@@ -295,19 +295,3 @@ cdef class _SkillManager:
 
 
 skill_manager = _SkillManager()
-
-
-cdef class _PlayerManager:
-    def get(self, vn: int):
-        player = db.players.find(vn)
-        if player == db.players.end():
-            return None
-        return orjson.loads(utils.jdump(deref(player).second.get().serialize()))
-
-    def create(self, data: dict[str, "Any"]):
-        pass
-    
-    def patch(self, target: int, data: dict[str, "Any"]) -> typing.Optional[str]:
-        pass
-
-player_manager = _PlayerManager()

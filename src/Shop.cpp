@@ -354,7 +354,8 @@ int64_t Shop::buyPrice(Object *obj, BaseCharacter *keeper, BaseCharacter *buyer)
     double adjust = 1.0;
     Object *k;
 
-    for (k = object_list; k; k = k->next) {
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        k = &object;
         if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj)) {
             adjust -= 0.00025;
         }
@@ -396,7 +397,8 @@ int64_t Shop::sellPrice(Object *obj, BaseCharacter *keeper, BaseCharacter *selle
     double adjust = 1.0;
     Object *k;
 
-    for (k = object_list; k; k = k->next) {
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        k = &object;
         if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj)) {
             adjust -= 0.00025;
         }

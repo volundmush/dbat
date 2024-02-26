@@ -1175,7 +1175,8 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
         mob_rnum r_num;
 
         WISHTIME = 0;
-        for (k = object_list; k; k = k->next) {
+        for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+            k = &object;
             if (OBJ_FLAGGED(k, ITEM_FORGED)) {
                 continue;
             }

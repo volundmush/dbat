@@ -22,14 +22,6 @@ cdef extern from "dbat/structs.h":
         area_data(const utils.json& j)
         utils.json serialize()
 
-    cdef cppclass player_data:
-        player_data(const utils.json& j)
-        int64_t id
-        string name
-        accounts.account_data* account
-
-        utils.json serialize()
-
     cdef cppclass extra_descr_data:
         char* keyword
         char* description

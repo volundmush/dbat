@@ -44,6 +44,3 @@ cdef extern from "dbat/guild.h":
 
 cdef extern from "dbat/shop.h":
     unordered_map[int, structs.shop_data] shop_index
-
-cdef extern from "dbat/players.h":
-    unordered_map[int64_t, shared_ptr[structs.player_data]] players

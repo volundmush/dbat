@@ -55,296 +55,262 @@ static const std::vector<std::string> scavengerTalk = {
     "$n@W looks around quickly to see if anyone is paying attention.@n"
 };
 
+void mobile_activity_specials(uint64_t heartPulse, double deltaTime) {
+    if(no_specials) return;
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(!MOB_FLAGGED(ch, MOB_SPEC)) continue;
+        if (mob_index[GET_MOB_RNUM(ch)].func == nullptr) {
+            basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
+                GET_NAME(ch), GET_MOB_VNUM(ch));
+            ch->clearFlag(FlagType::NPC, MOB_SPEC);
+            auto &mp = mob_proto[ch->getVN()];
+        } else {
+            char actbuf[MAX_INPUT_LENGTH] = "";
+            (mob_index[GET_MOB_RNUM(ch)].func)(ch, ch, 0, actbuf);
+        }
+    }
+}
 
-void mobile_activity(uint64_t heartPulse, double deltaTime) {
-    BaseCharacter *ch, *next_ch, *vict;
-    Object *obj, *best_obj;
-    int door, found, max;
-    memory_rec *names;
+void mobile_activity_scavenger(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(MOB_FLAGGED(ch, MOB_NOSCAVENGER)) continue;
+        if(MOB_FLAGGED(ch, MOB_NOKILL)) continue;
+        if(!AWAKE(ch)) continue;
+        if(!IS_HUMANOID(ch)) continue;
+        if(FIGHTING(ch)) continue;
+        if(!player_present(ch)) continue;
+        if(axion_dice(0) > 118) continue;
 
-    for (ch = character_list; ch; ch = next_ch) {
-        next_ch = ch->next;
-
-        if (!IS_MOB(ch))
-            continue;
-
-        /* Examine call for special procedure */
-        if (MOB_FLAGGED(ch, MOB_SPEC) && !no_specials) {
-            if (mob_index[GET_MOB_RNUM(ch)].func == nullptr) {
-                basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
-                    GET_NAME(ch), GET_MOB_VNUM(ch));
-                ch->clearFlag(FlagType::NPC, MOB_SPEC);
-                auto &mp = mob_proto[ch->getVN()];
-            } else {
-                char actbuf[MAX_INPUT_LENGTH] = "";
-                if ((mob_index[GET_MOB_RNUM(ch)].func)(ch, ch, 0, actbuf))
-                    continue;        /* go to next char */
-            }
+        if (auto contents = ch->getRoom()->getInventory(); !contents.empty() && rand_number(1, 100) >= 95) {
+            int max = 1;
+            Object* best_obj = nullptr;
+            for (auto obj : contents)
+                if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {
+                    best_obj = obj;
+                    max = GET_OBJ_COST(obj);
+                }
+            if (best_obj != nullptr && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED &&
+                !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
+                    auto line = Random::get(scavengerTalk);
+                    act(line->c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+                    perform_get_from_room(ch, best_obj);
+                }
         }
 
-        /* If the mob has no specproc, do the default actions */
-        if (!AWAKE(ch))
-            continue;
+    }
+}
 
-        /* Scavenger (picking up objects) */
-        if (IS_HUMANOID(ch) && !FIGHTING(ch) && AWAKE(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) &&
-            !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118))
-            if (auto contents = ch->getRoom()->getInventory(); !contents.empty() && rand_number(1, 100) >= 95) {
-                max = 1;
-                best_obj = nullptr;
-                for (auto obj : contents)
-                    if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {
-                        best_obj = obj;
-                        max = GET_OBJ_COST(obj);
-                    }
-                if (best_obj != nullptr && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED &&
-                    !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
-                        auto line = Random::get(scavengerTalk);
-                        act(line->c_str(), true, ch, nullptr, nullptr, TO_ROOM);
-                        perform_get_from_room(ch, best_obj);
-                    }
-            }
-        
-        /* Mob Movement */
-        if (!MOB_FLAGGED(ch, MOB_SENTINEL) && rand_number(1,2) == 2 && !IS_AFFECTED(ch, AFF_PARALYZE) && block_calc(ch) && (GET_POS(ch) == POS_STANDING) && !FIGHTING(ch) && (!AFF_FLAGGED(ch, AFF_TAMED)) && !ABSORBBY(ch)) {
-            std::vector<int> availableDirections;
-            //Check if door is a viable movement
-            auto r = ch->getRoom();
-            for(auto &[i, ex] : r->getExits()) {
-                if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
-                auto dest = ex->getDestination();
-                if(!dest) continue;
-                if(dest->checkFlag(FlagType::Room, ROOM_NOMOB) || dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
-                if(MOB_FLAGGED(ch, MOB_STAY_ZONE) && dest->zone != r->zone) continue;
-                availableDirections.push_back(i);
-            }
-            if(!availableDirections.empty()) {
-                auto door = Random::get(availableDirections);
-                ch->moveInDirection(*door, 1);
-            }
+void mobile_activity_movement(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(rand_number(1,2) != 2) continue;
+        if(!AWAKE(ch)) continue;
+        if(MOB_FLAGGED(ch, MOB_SENTINEL)) continue;
+        if(IS_AFFECTED(ch, AFF_PARALYZE)) continue;
+        if(!block_calc(ch)) continue;
+        if(GET_POS(ch) != POS_STANDING) continue;
+        if(AFF_FLAGGED(ch, AFF_TAMED)) continue;
+        if(ABSORBBY(ch)) continue;
+
+        std::vector<int> availableDirections;
+        //Check if door is a viable movement
+        auto r = ch->getRoom();
+        for(auto &[i, ex] : r->getExits()) {
+            if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
+            auto dest = ex->getDestination();
+            if(!dest) continue;
+            if(dest->checkFlag(FlagType::Room, ROOM_NOMOB) || dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
+            if(MOB_FLAGGED(ch, MOB_STAY_ZONE) && dest->zone != r->zone) continue;
+            availableDirections.push_back(i);
         }
-        
-        /* RESPOND TO A HUGE ATTACK */
+        if(!availableDirections.empty()) {
+            auto door = Random::get(availableDirections);
+            ch->moveInDirection(*door, 1);
+        }
+    }
+}
+
+// The serious small count of such attacks means that we should instead iterate over the list of ki attacks that exist in rooms.
+void mobile_activity_kirespond(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(!AWAKE(ch)) continue;
+        if(MOB_FLAGGED(ch, MOB_NOKILL)) continue;
+        if(FIGHTING(ch)) continue;
+
         for (auto hugeatk : ch->getRoom()->getInventory()) {
-            if (FIGHTING(ch)) {
-                continue;
-            }
-            if (MOB_FLAGGED(ch, MOB_NOKILL)) {
-                continue;
-            }
+
             if (GET_OBJ_VNUM(hugeatk) == 82 || GET_OBJ_VNUM(hugeatk) == 83) {
                 if (USER(hugeatk) != nullptr) {
                     act("@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, USER(hugeatk), TO_ROOM);
                     act("@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, USER(hugeatk), TO_VICT);
+                    char tar[MAX_INPUT_LENGTH];
+                    sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
                     if (IS_HUMANOID(ch)) {
-                        char tar[MAX_INPUT_LENGTH];
-                        sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
                         do_punch(ch, tar, 0, 0);
                     } else {
-                        char tar[MAX_INPUT_LENGTH];
-                        sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
                         do_bite(ch, tar, 0, 0);
                     }
                 }
             }
         }
 
-        /* Aggressive Mobs */
-        if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
-            int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
-            found = false;
-            for (auto vict : ch->getRoom()->getPeople()) {
-                if (vict == ch)
-                    continue;
-                else if (FIGHTING(ch))
-                    continue;
-                else if (!CAN_SEE(ch, vict))
-                    continue;
-                else if (IS_NPC(vict))
-                    continue;
-                else if (PRF_FLAGGED(vict, PRF_NOHASSLE))
-                    continue;
-                else if (MOB_FLAGGED(ch, MOB_AGGR_EVIL) && GET_ALIGNMENT(vict) < 50)
-                    continue;
-                else if (MOB_FLAGGED(ch, MOB_AGGR_GOOD) && GET_ALIGNMENT(vict) > -50)
-                    continue;
-                else if (GET_LEVEL(vict) < 5)
-                    continue;
-                else if (AFF_FLAGGED(vict, AFF_HIDE) && GET_SKILL(vict, SKILL_HIDE) > spot_roll)
-                    continue;
-                else if (AFF_FLAGGED(vict, AFF_SNEAK) && GET_SKILL(vict, SKILL_MOVE_SILENTLY) > spot_roll)
-                    continue;
-                else if (ch->aggtimer < 8)
-                    ch->aggtimer += 1;
-                else {
-                    ch->aggtimer = 0;
-                    char tar[MAX_INPUT_LENGTH];
+    }
+}
 
-                    sprintf(tar, "%s", GET_NAME(vict));
-                    if (IS_HUMANOID(ch)) {
-                        if (!AFF_FLAGGED(vict, AFF_HIDE) && !AFF_FLAGGED(vict, AFF_SNEAK)) {
-                            act("@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch, nullptr, vict, TO_VICT);
-                            act("@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true, ch, nullptr, vict,
-                                TO_NOTVICT);
-                        } else {
-                            act("@C$n@w notices YOU.\n@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch,
-                                nullptr, vict, TO_VICT);
-                            act("@C$n@w notices @c$N@w.\n@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true,
-                                ch, nullptr, vict, TO_NOTVICT);
-                        }
-                        if (AFF_FLAGGED(vict, AFF_FLYING) && !AFF_FLAGGED(ch, AFF_FLYING) && IS_HUMANOID(ch) &&
-                            GET_LEVEL(ch) > 10) {
-                            do_fly(ch, nullptr, 0, 0);
-                            continue;
-                        }
-                        if (!AFF_FLAGGED(vict, AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING)) {
-                            do_fly(ch, nullptr, 0, 0);
-                            continue;
-                        }
-                        do_punch(ch, tar, 0, 0);
+void mobile_activity_aggressive(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(!AWAKE(ch)) continue;
+        if(!MOB_FLAGGED(ch, MOB_AGGRESSIVE)) continue;
+        if(IS_AFFECTED(ch, AFF_PARALYZE)) continue;
+
+        int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
+        bool found = false;
+        for (auto vict : ch->getRoom()->getPeople()) {
+            if (vict == ch)
+                continue;
+            else if (FIGHTING(ch))
+                continue;
+            else if (!CAN_SEE(ch, vict))
+                continue;
+            else if (IS_NPC(vict))
+                continue;
+            else if (PRF_FLAGGED(vict, PRF_NOHASSLE))
+                continue;
+            else if (MOB_FLAGGED(ch, MOB_AGGR_EVIL) && GET_ALIGNMENT(vict) < 50)
+                continue;
+            else if (MOB_FLAGGED(ch, MOB_AGGR_GOOD) && GET_ALIGNMENT(vict) > -50)
+                continue;
+            else if (GET_LEVEL(vict) < 5)
+                continue;
+            else if (AFF_FLAGGED(vict, AFF_HIDE) && GET_SKILL(vict, SKILL_HIDE) > spot_roll)
+                continue;
+            else if (AFF_FLAGGED(vict, AFF_SNEAK) && GET_SKILL(vict, SKILL_MOVE_SILENTLY) > spot_roll)
+                continue;
+            else if (ch->aggtimer < 8)
+                ch->aggtimer += 1;
+            else {
+                ch->aggtimer = 0;
+                char tar[MAX_INPUT_LENGTH];
+
+                sprintf(tar, "%s", GET_NAME(vict));
+                if (IS_HUMANOID(ch)) {
+                    if (!AFF_FLAGGED(vict, AFF_HIDE) && !AFF_FLAGGED(vict, AFF_SNEAK)) {
+                        act("@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch, nullptr, vict, TO_VICT);
+                        act("@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true, ch, nullptr, vict,
+                            TO_NOTVICT);
+                    } else {
+                        act("@C$n@w notices YOU.\n@w'I am going to get you!' @C$n@w shouts at you!@n", true, ch,
+                            nullptr, vict, TO_VICT);
+                        act("@C$n@w notices @c$N@w.\n@w'I am going to get you!' @C$n@w shouts at @c$N@w!@n", true,
+                            ch, nullptr, vict, TO_NOTVICT);
                     }
-                    if (!IS_HUMANOID(ch)) {
-                        if (AFF_FLAGGED(vict, AFF_FLYING) && !AFF_FLAGGED(ch, AFF_FLYING) && IS_HUMANOID(ch) &&
-                            GET_LEVEL(ch) > 10) {
-                            do_fly(ch, nullptr, 0, 0);
-                            continue;
-                        }
-                        if (!AFF_FLAGGED(vict, AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING)) {
-                            do_fly(ch, nullptr, 0, 0);
-                            continue;
-                        }
-                        if (!AFF_FLAGGED(vict, AFF_HIDE) && !AFF_FLAGGED(vict, AFF_SNEAK)) {
-                            act("@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict, TO_VICT);
-                            act("@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                        } else {
-                            act("@C$n@w notices YOU.\n@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict,
-                                TO_VICT);
-                            act("@C$n@w notices @c$N@w.\n@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict,
-                                TO_NOTVICT);
-                        }
-                        do_bite(ch, tar, 0, 0);
+                    if (AFF_FLAGGED(vict, AFF_FLYING) && !AFF_FLAGGED(ch, AFF_FLYING) && IS_HUMANOID(ch) &&
+                        GET_LEVEL(ch) > 10) {
+                        do_fly(ch, nullptr, 0, 0);
+                        continue;
                     }
-                    /*hit(ch, vict, TYPE_UNDEFINED);*/
-                    found = true;
-                }
-            }
-        }
-
-        // Clones help their original in a fight.
-        if (GET_ORIGINAL(ch) && rand_number(1, 5) >= 4) {
-            auto original = GET_ORIGINAL(ch);
-
-            if (FIGHTING(original) && !FIGHTING(ch)) {
-                char target[MAX_INPUT_LENGTH];
-                auto targ = FIGHTING(original);
-
-                sprintf(target, "%s", targ->getName().c_str());
-                if (rand_number(1, 5) >= 4) {
-                    do_kick(ch, target, 0, 0);
-                } else if (rand_number(1, 5) >= 4) {
-                    do_elbow(ch, target, 0, 0);
-                } else {
-                    do_punch(ch, target, 0, 0);
-                }
-            }
-        }
-
-        /* Be helpful */ /* - temporarily disabled by the first false check */
-        if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-            BaseCharacter *vict, *next_v;
-            int done = false;
-            for (auto vict : ch->getRoom()->getPeople()) {
-                if (vict == ch)
-                    continue;
-                if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
-                    if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 &&
-                        axion_dice(0) >= 90) {
-                        act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
-                        char buf[MAX_INPUT_LENGTH];
-                        sprintf(buf, "%s", GET_NAME(vict));
-                        if (GET_CLASS(ch) == CLASS_KABITO || GET_CLASS(ch) == CLASS_NAIL) {
-                            do_heal(ch, buf, 0, 0);
-                        } else {
-                            do_rescue(ch, buf, 0, 0);
-                            if (rand_number(1, 6) == 2) {
-                                char tar[MAX_INPUT_LENGTH];
-                                sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
-                                do_kiblast(ch, tar, 0, 0);
-                            } else if (rand_number(1, 6) >= 4) {
-                                char tar[MAX_INPUT_LENGTH];
-                                sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
-                                do_slam(ch, tar, 0, 0);
-                            } else {
-                                char tar[MAX_INPUT_LENGTH];
-                                sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
-                                do_punch(ch, tar, 0, 0);
-                            }
-                        }
+                    if (!AFF_FLAGGED(vict, AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING)) {
+                        do_fly(ch, nullptr, 0, 0);
+                        continue;
                     }
-                }
-            } /* End of for */
-        }
-
-        /* Help those under attack! */ /* - temporarily disabled by the first false check */
-        if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-            BaseCharacter *vict, *next_v;
-            int done = false;
-            for (auto vict : ch->getRoom()->getPeople()) {
-                if (vict == ch)
-                    continue;
-                if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
-                    if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 &&
-                        axion_dice(0) >= 70) {
-                        act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
-                        char buf[MAX_INPUT_LENGTH];
-                        sprintf(buf, "%s", GET_NAME(vict));
-                        if (GET_CLASS(ch) == CLASS_KABITO || GET_CLASS(ch) == CLASS_NAIL) {
-                            do_heal(ch, buf, 0, 0);
-                            done = true;
-                        } else {
-                            do_rescue(ch, buf, 0, 0);
-                            done = true;
-                        }
-                    }
-                }
-            } /* End of for */
-        }
-
-        /* Absorb protection */
-        if (ABSORBBY(ch) && rand_number(1, 3) == 3) {
-            do_escape(ch, nullptr, 0, 0);
-        }
-        if (GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
-            do_wake(ch, nullptr, 0, 0);
-        }
-
-        if (FIGHTING(ch) && rand_number(1, 30) >= 25) {
-            mob_taunt(ch);
-        }
-
-        /* Helper Mobs */
-        if (MOB_FLAGGED(ch, MOB_HELPER) &&
-            !AFF_FLAGGED(ch, AFF_BLIND) &&
-            !AFF_FLAGGED(ch, AFF_CHARM)) {
-            found = false;
-            for (auto vict : ch->getRoom()->getPeople()) {
-                if (ch == vict || !IS_NPC(vict) || !FIGHTING(vict))
-                    continue;
-                if (IS_NPC(FIGHTING(vict)) || ch == FIGHTING(vict))
-                    continue;
-
-                if (IS_HUMANOID(vict)) {
-                    act("$n jumps to the aid of $N!", false, ch, nullptr, vict, TO_ROOM);
-                    char tar[MAX_INPUT_LENGTH];
-
-                    sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
                     do_punch(ch, tar, 0, 0);
-                    found = true;
-                    break;
                 }
+                if (!IS_HUMANOID(ch)) {
+                    if (AFF_FLAGGED(vict, AFF_FLYING) && !AFF_FLAGGED(ch, AFF_FLYING) && IS_HUMANOID(ch) &&
+                        GET_LEVEL(ch) > 10) {
+                        do_fly(ch, nullptr, 0, 0);
+                        continue;
+                    }
+                    if (!AFF_FLAGGED(vict, AFF_FLYING) && AFF_FLAGGED(ch, AFF_FLYING)) {
+                        do_fly(ch, nullptr, 0, 0);
+                        continue;
+                    }
+                    if (!AFF_FLAGGED(vict, AFF_HIDE) && !AFF_FLAGGED(vict, AFF_SNEAK)) {
+                        act("@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict, TO_VICT);
+                        act("@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                    } else {
+                        act("@C$n@w notices YOU.\n@C$n @wgrowls viciously at you!@n", true, ch, nullptr, vict,
+                            TO_VICT);
+                        act("@C$n@w notices @c$N@w.\n@C$n @wgrowls viciously at @c$N@w!@n", true, ch, nullptr, vict,
+                            TO_NOTVICT);
+                    }
+                    do_bite(ch, tar, 0, 0);
+                }
+                /*hit(ch, vict, TYPE_UNDEFINED);*/
+                found = true;
+            }
+        }
+
+    }
+}
+
+void mobile_activity_clonehelp(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(!AWAKE(ch)) continue;
+        auto original = GET_ORIGINAL(ch);
+        if(!original) continue;
+        if(rand_number(1, 5) < 4) continue;
+
+        if (FIGHTING(original) && !FIGHTING(ch)) {
+            char target[MAX_INPUT_LENGTH];
+            auto targ = FIGHTING(original);
+
+            sprintf(target, "%s", targ->getName().c_str());
+            if (rand_number(1, 5) >= 4) {
+                do_kick(ch, target, 0, 0);
+            } else if (rand_number(1, 5) >= 4) {
+                do_elbow(ch, target, 0, 0);
+            } else {
+                do_punch(ch, target, 0, 0);
             }
         }
     }
+}
+
+void mobile_activity_absorb_escape(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(!AWAKE(ch)) continue;
+        if(!ABSORBBY(ch)) continue;
+        if(rand_number(1, 5) < 4) continue;
+        do_escape(ch, nullptr, 0, 0);
+    }
+}
+
+void mobile_activity_wake(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(GET_POS(ch) != POS_SLEEPING) continue;
+        if(rand_number(1, 3) != 3) continue;
+        do_wake(ch, nullptr, 0, 0);
+    }
+}
+
+void mobile_activity_taunt(uint64_t heartPulse, double deltaTime) {
+    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
+        if(!AWAKE(ch)) continue;
+        if(!FIGHTING(ch)) continue;
+        if(rand_number(1, 30) < 25) continue;
+        mob_taunt(ch);
+    }
+}
+
+void mobile_activity(uint64_t heartPulse, double deltaTime) {
+    mobile_activity_specials(heartPulse, deltaTime);
+    mobile_activity_scavenger(heartPulse, deltaTime);
+    mobile_activity_movement(heartPulse, deltaTime);
+    mobile_activity_kirespond(heartPulse, deltaTime);
+    mobile_activity_aggressive(heartPulse, deltaTime);
+    mobile_activity_clonehelp(heartPulse, deltaTime);
+    mobile_activity_absorb_escape(heartPulse, deltaTime);
+    mobile_activity_wake(heartPulse, deltaTime);
+    mobile_activity_taunt(heartPulse, deltaTime);
 }
 
 static const std::vector<std::pair<std::string, std::string>> animalLand = {

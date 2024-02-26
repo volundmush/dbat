@@ -634,10 +634,12 @@ BaseCharacter *get_char(char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        for (auto i = character_list; i; i = i->next)
+        for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+            auto i = &character;
             if (isname(name, i->getName().c_str()) &&
                 valid_dg_target(i, DG_ALLOW_GODS))
                 return i;
+        }
     }
 
     return nullptr;
@@ -743,9 +745,11 @@ Object *get_obj(char *name) {
         return dynamic_cast<Object*>(resolveUID(name));
     }
     else {
-        for (obj = object_list; obj; obj = obj->next)
+        for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+            obj = &object;
             if (isname(name, obj->getName().c_str()))
                 return obj;
+        }
     }
 
     return nullptr;
@@ -780,20 +784,20 @@ BaseCharacter *get_char_by_obj(Object *obj, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        if (obj->carried_by &&
-            isname(name, obj->carried_by->getName().c_str()) &&
+        if (obj->carried_by && isname(name, obj->carried_by->getName().c_str()) &&
             valid_dg_target(obj->carried_by, DG_ALLOW_GODS))
             return obj->carried_by;
 
-        if (obj->worn_by &&
-            isname(name, obj->worn_by->getName().c_str()) &&
+        if (obj->worn_by && isname(name, obj->worn_by->getName().c_str()) &&
             valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
             return obj->worn_by;
 
-        for (ch = character_list; ch; ch = ch->next)
+        for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+            ch = &character;
             if (isname(name, ch->getName().c_str()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
+        }
     }
 
     return nullptr;
@@ -819,10 +823,12 @@ BaseCharacter *get_char_by_room(Room *room, char *name) {
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
 
-        for (ch = character_list; ch; ch = ch->next)
+        for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+            ch = &character;
             if (isname(name, ch->getName().c_str()) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
+        }
     }
 
     return nullptr;
@@ -894,9 +900,9 @@ Object *get_obj_by_room(Room *room, char *name) {
         if (isname(name, obj->getName().c_str()))
             return obj;
 
-    for (auto obj = object_list; obj; obj = obj->next)
-        if (isname(name, obj->getName().c_str()))
-            return obj;
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each())
+        if (isname(name, object.getName().c_str()))
+            return &object;
 
     return nullptr;
 }
@@ -908,7 +914,8 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     Room *room = nullptr;
     int nr;
 
-    for (ch = character_list; ch; ch = ch->next) {
+    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        ch = &character;
         auto sc = SCRIPT(ch);
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
             (!is_empty(ch->getRoom()->zone) ||
@@ -916,7 +923,8 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
             random_mtrigger(ch);
     }
 
-    for (obj = object_list; obj; obj = obj->next) {
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        obj = &object;
         auto sc = SCRIPT(obj);
         if (IS_SET(SCRIPT_TYPES(sc), OTRIG_RANDOM))
                 random_otrigger(obj);
@@ -939,14 +947,16 @@ void check_time_triggers() {
     Room *room = nullptr;
     int nr;
 
-    for (ch = character_list; ch; ch = ch->next) {
+    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        ch = &character;
         auto sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) && (!is_empty(ch->getRoom()->zone) || IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
             time_mtrigger(ch);
     }
 
-    for (obj = object_list; obj; obj = obj->next) {
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        obj = &object;
         auto sc = SCRIPT(obj);
         if (IS_SET(SCRIPT_TYPES(sc), OTRIG_TIME))
                 time_otrigger(obj);
@@ -965,7 +975,8 @@ void check_time_triggers() {
 
 void check_interval_triggers(int trigFlag) {
 
-    for (auto ch = character_list; ch; ch = ch->next) {
+    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        auto ch = &character;
         auto sc = SCRIPT(ch);
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
                 (!is_empty(ch->getRoom()->zone) ||
@@ -973,7 +984,8 @@ void check_interval_triggers(int trigFlag) {
                 interval_mtrigger(ch, trigFlag);
     }
 
-    for (auto obj = object_list; obj; obj = obj->next) {
+    for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+        auto obj = &object;
         auto sc = SCRIPT(obj);
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag))
                 interval_otrigger(obj, trigFlag);

@@ -517,7 +517,8 @@ ACMD(do_rpp) {
             } else {
                 int found = false;
                 Object *k = nullptr;
-                for (k = object_list; k; k = k->next) {
+                for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
+                    k = &object;
                     if (OBJ_FLAGGED(k, ITEM_FORGED)) {
                         continue;
                     }

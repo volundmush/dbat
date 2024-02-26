@@ -1771,11 +1771,11 @@ static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
             struct script_memory *mem = SCRIPT_MEM(k);
             ch->sendf("Script memory:\r\n  Remember             Command\r\n");
             while (mem) {
-                auto find = uniqueCharacters.find(mem->id);
-                if(find == uniqueCharacters.end()) {
+                auto find = getEntity<BaseCharacter>(mem->id);
+                if(!find) {
                     ch->sendf("  ** Corrupted!\r\n");
                 } else {
-                    ch->sendf("  %-20.20s <default>\r\n", GET_NAME(find->second.second));
+                    ch->sendf("  %-20.20s <default>\r\n", GET_NAME(find));
                 }
                 mem = mem->next;
             }
@@ -3234,7 +3234,8 @@ ACMD(do_show) {
             j = 0;
             k = 0;
             con = 0;
-            for (vict = character_list; vict; vict = vict->next) {
+            for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+                vict = &character;
                 if (IS_NPC(vict))
                     j++;
                 else if (CAN_SEE(ch, vict)) {
@@ -3243,7 +3244,7 @@ ACMD(do_show) {
                         con++;
                 }
             }
-            for (obj = object_list; obj; obj = obj->next)
+            for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each())
                 k++;
             ch->sendf(
                          "             @D---   @CCore Stats   @D---\r\n"

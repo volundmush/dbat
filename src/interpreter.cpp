@@ -1032,12 +1032,6 @@ void enter_player_game(struct descriptor_data *d) {
 
     d->character->addToLocation(getEntity(load_room));
 
-    /*load_char_pets(d->character);*/
-    for (check = character_list; check; check = check->next)
-        if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
-            AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
-            add_follower(check, d->character);
-
     GET_COMBINE(d->character) = -1;
     GET_SLEEPT(d->character) = 8;
     GET_FOODR(d->character) = 2;
