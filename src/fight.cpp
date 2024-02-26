@@ -26,6 +26,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/act.informative.h"
 #include "dbat/transformation.h"
+#include "dbat/entity.h"
 
 /* Structures */
 BaseCharacter *combat_list = nullptr;    /* head of l-list of fighting chars */
@@ -675,7 +676,7 @@ static void shadow_dragons_live() {
 void impact_sound(BaseCharacter *ch, char *mssg) {
     for (auto &[dir, ex] : ch->getRoom()->getExits()) {
         if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
-        if(auto dest = ex->getDestination(); dest) dest->sendfContents("%s", mssg);
+        if(auto dest = reg.try_get<Destination>(ex->ent); dest) send::printfContents(dest->target, "%s", mssg);
     }
 }
 
@@ -1756,8 +1757,8 @@ void death_cry(BaseCharacter *ch) {
     auto r = ch->getRoom();
     for (auto &[door, ex] : r->getExits()) {
         if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
-        if(auto dest = ex->getDestination(); dest) {
-            dest->sendText("Your blood freezes as you hear someone's death cry.\r\n");
+        if(auto dest = reg.try_get<Destination>(ex->ent); dest) {
+           send::textContents(dest->target, "Your blood freezes as you hear someone's death cry.\r\n");
         }
         
     }

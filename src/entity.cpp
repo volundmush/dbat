@@ -46,6 +46,36 @@ nlohmann::json serializeEntityRelations(entt::entity ent, nlohmann::json& j) {
 
 }
 
+namespace send {
+    void text(entt::entity ent, const std::string& txt) {
+
+    }
+
+    void event(entt::entity ent, const Event& event) {
+        
+    }
+
+    void line(entt::entity ent, const std::string& txt) {
+        if(!txt.ends_with("\r\n")) {
+            text(ent, txt + "\r\n");
+        } else {
+            text(ent, txt);
+        }
+    }
+
+    void textContents(entt::entity ent, const std::string& txt) {
+
+    }
+
+    void lineContents(entt::entity ent, const std::string& txt) {
+        if(!txt.ends_with("\r\n")) {
+            textContents(ent, txt + "\r\n");
+        } else {
+            textContents(ent, txt);
+        }
+    }
+}
+
 namespace flags {
     bool check(entt::entity ent, FlagType type, int flag) {
         if(auto flags = reg.try_get<Flags>(ent); flags) {

@@ -78,9 +78,9 @@ std::map<int, Exit*> GameEntity::getUsableExits() {
     std::map<int, Exit*> out;
     for(auto &[door, o] : getExits()) {
         if(o->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
-        auto dest = o->getDestination();
+        auto dest = reg.try_get<Destination>(o->ent);
         if(!dest) continue;
-        if(dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
+        if(flags::check(dest->target, FlagType::Room, ROOM_DEATH)) continue;
         out[door] = o;
     }
     return out;

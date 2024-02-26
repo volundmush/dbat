@@ -21,4 +21,8 @@ add_library(circlemud ${CIRCLE_INCLUDE} ${CIRCLE_SRC})
 # everything we make will link to it.
 target_include_directories(circlemud PUBLIC include)
 
+add_executable(circletest apps/test.cpp)
+target_link_libraries(circletest circlemud)
+target_include_directories(circletest PUBLIC include)
+
 SET(circle_link ${CMAKE_INSTALL_PREFIX}/bin/)

@@ -436,44 +436,17 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
         if (retval == 3) {
             basic_mud_log("Converting world files to include DC add ons.");
-            d->dclock = 20;
-            d->dchide = 20;
-            d->dcskill = 0;
-            d->dcmove = 0;
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
-            if (bitsavetodisk) {
-                converting = true;
-            }
+
         } else if (retval == 5) {
-            d->dclock = t[3];
-            d->dchide = t[4];
-            d->dcskill = 0;
-            d->dcmove = 0;
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
             if (bitsavetodisk) {
                 converting = true;
             }
         } else if (retval == 7) {
-            d->dclock = t[3];
-            d->dchide = t[4];
-            d->dcskill = t[5];
-            d->dcmove = t[6];
-            d->failsavetype = 0;
-            d->dcfailsave = 0;
             if (bitsavetodisk) {
                 converting = true;
             }
         } else if (retval == 11) {
-            d->dclock = t[3];
-            d->dchide = t[4];
-            d->dcskill = t[5];
-            d->dcmove = t[6];
-            d->failsavetype = t[7];
-            d->dcfailsave = t[8];
-            te.failroom = t[9];
-            te.totalfailroom = t[10];
+
         }
     }
 }
@@ -3726,10 +3699,8 @@ void migrate_characters() {
 
 static void migrate_exits() {
     for(auto &[uid, te] : temp_exits) {
-        if(auto e = getEntity<Exit>(uid);e) {
+        if(auto e = getEntity<Exit>(uid); e) {
             e->destination = getEntity<Room>(te.destination);
-            e->failroom = getEntity<Room>(te.failroom);
-            e->totalfailroom = getEntity<Room>(te.totalfailroom);
         }
 
     }

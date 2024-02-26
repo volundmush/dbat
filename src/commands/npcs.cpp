@@ -46,6 +46,7 @@
 #include "dbat/act.wizard.h"
 #include "dbat/fight.h"
 #include "dbat/transformation.h"
+#include "dbat/entity.h"
 
 /*
  * Local functions.
@@ -137,9 +138,9 @@ ACMD(do_masound) {
 
     auto r = ch->getRoom();
     for (auto &[door, ex] : r->getExits()) {
-        auto dest = ex->getDestination();
+        auto dest = reg.try_get<Destination>(ex->ent);
         if(!dest) continue;
-        dest->sendTextContents(argument);
+        send::textContents(dest->target, argument);
     }
 
 }

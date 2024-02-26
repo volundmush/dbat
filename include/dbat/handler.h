@@ -13,7 +13,7 @@
 
 /* handling the affected-structures */
 extern void update_char_objects(BaseCharacter *ch);    /* handler.c */
-extern void item_check(Object *object, NonPlayerCharacter *ch);
+extern void item_check(Object *object, BaseCharacter *ch);
 
 extern void affect_total(BaseCharacter *ch);
 

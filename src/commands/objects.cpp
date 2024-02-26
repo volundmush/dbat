@@ -19,6 +19,7 @@
 #include "dbat/db.h"
 #include "dbat/constants.h"
 #include "dbat/act.wizard.h"
+#include "dbat/entity.h"
 
 /*
  * Local functions
@@ -576,9 +577,9 @@ OCMD(do_oasound) {
     }
 
     for (auto &[door, ex] : r->getExits()) {
-        auto dest = ex->getDestination();
+        auto dest = reg.try_get<Destination>(ex->ent);
         if(!dest) continue;
-        dest->sendTextContents(argument);
+        send::textContents(dest->target, argument);
     }
 }
 

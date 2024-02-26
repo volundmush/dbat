@@ -882,7 +882,6 @@ struct Object : public GameEntity {
     static constexpr auto in_place_delete = true;
     Object() = default;
     explicit Object(const nlohmann::json &j);
-    ~Object() override;
     nlohmann::json serialize() override;
     void deserialize(const nlohmann::json& j) override;
     
@@ -965,12 +964,6 @@ struct Exit : public GameEntity {
     int dchide{};            /* DC to find hidden			*/
     int dcskill{};            /* Skill req. to move through exit	*/
     int dcmove{};            /* DC for skill to move through exit	*/
-    int failsavetype{};        /* Saving Throw type on skill fail	*/
-    int dcfailsave{};        /* DC to save against on fail		*/
-    Room *failroom{nullptr};        /* Room # to put char in when fail > 5  */
-    Room *totalfailroom{nullptr};        /* Room # if char fails save < 5	*/
-
-    Room* getDestination();
 
     nlohmann::json serialize() override;
     void deserialize(const nlohmann::json& j) override;
@@ -1156,7 +1149,6 @@ struct trans_data {
 struct BaseCharacter : public GameEntity {
     static constexpr auto in_place_delete = true;
     BaseCharacter() = default;
-    ~BaseCharacter() override;
     // this constructor below is to be used only for the mob_proto map.
     explicit BaseCharacter(const nlohmann::json& j);
 
@@ -1215,8 +1207,6 @@ struct BaseCharacter : public GameEntity {
     int64_t modExperience(int64_t value, bool applyBonuses = true);
 
     void gazeAtMoon();
-
-    room_vnum normalizeLoadRoom(room_vnum in);
 
     double getAffectModifier(int location, int specific = -1);
 

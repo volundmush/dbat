@@ -26,6 +26,7 @@
 #include "dbat/screen.h"
 #include "dbat/players.h"
 #include "dbat/random.h"
+#include "dbat/entity.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -3465,8 +3466,8 @@ Exit* EXIT(GameEntity *ch, int door) {
 
 Exit* SECOND_EXIT(GameEntity *ch, int door) {
     if(auto ex = EXIT(ch, door); ex) {
-        if(auto r = ex->getDestination(); r) {
-            if(auto ex2 = r->getExits(); !ex2.empty()) {
+        if(auto r = reg.try_get<Destination>(ex->ent); r) {
+            if(auto ex2 = contents::getExits(r->target); !ex2.empty()) {
                 if(auto e2 = ex2.find(door); e2 != ex2.end()) {
                     return e2->second;
                 }
@@ -3479,8 +3480,8 @@ Exit* SECOND_EXIT(GameEntity *ch, int door) {
 
 Exit* THIRD_EXIT(GameEntity *ch, int door) {
     if(auto ex = SECOND_EXIT(ch, door); ex) {
-        if(auto r = ex->getDestination(); r) {
-            if(auto ex2 = r->getExits(); !ex2.empty()) {
+        if(auto r = reg.try_get<Destination>(ex->ent); r) {
+            if(auto ex2 = contents::getExits(r->target); !ex2.empty()) {
                 if(auto e2 = ex2.find(door); e2 != ex2.end()) {
                     return e2->second;
                 }

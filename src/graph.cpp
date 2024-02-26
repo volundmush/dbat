@@ -29,10 +29,10 @@ static int VALID_EDGE(Room *x, int y) {
     
     auto d = x->getExits()[y];
     if(!d) return false;
-    auto dest = d->getDestination();
+    auto dest = reg.try_get<Destination>(d->ent);
     if(!dest) return false;
     if(CONFIG_TRACK_T_DOORS == false && d->checkFlag(FlagType::Exit, EX_CLOSED)) return false;
-    if(dest->checkFlag(FlagType::Room, ROOM_NOTRACK) || dest->checkFlag(FlagType::Room, ROOM_BFS_MARK)) return false;
+    if(flags::check(dest->target, FlagType::Room, ROOM_NOTRACK) || flags::check(dest->target, FlagType::Room, ROOM_BFS_MARK)) return false;
     return true;
 }
 
@@ -73,9 +73,11 @@ int find_first_step(Room *src, Room *target) {
     /* first, enqueue the first steps, saving which direction we're going. */
     for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {
         if (VALID_EDGE(src, curr_dir)) {
-            auto dest = src->getExits()[curr_dir]->getDestination();
-            dest->setFlag(FlagType::Room, ROOM_BFS_MARK);
-            bfs_enqueue(dest, curr_dir);
+            auto dest = reg.try_get<Destination>(src->getExits()[curr_dir]->ent);
+            if(auto room = reg.try_get<Room>(dest->target); room) {
+                room->setFlag(FlagType::Room, ROOM_BFS_MARK);
+                bfs_enqueue(room, curr_dir);
+            }
         }
     }
     /* now, do the classic BFS. */
@@ -88,9 +90,11 @@ int find_first_step(Room *src, Room *target) {
         } else {
             for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++)
                 if (VALID_EDGE(f.first, curr_dir)) {
-                    auto dest = f.first->getExits()[curr_dir]->getDestination();
-                    dest->setFlag(FlagType::Room, ROOM_BFS_MARK);
-                    bfs_enqueue(dest, f.second);
+                    auto dest = reg.try_get<Destination>(f.first->getExits()[curr_dir]->ent);
+                    if(auto room = reg.try_get<Room>(dest->target); room) {
+                        room->setFlag(FlagType::Room, ROOM_BFS_MARK);
+                        bfs_enqueue(room, f.second);
+                    }
                 }
             bfs_dequeue();
         }

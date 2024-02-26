@@ -2796,7 +2796,7 @@ ACMD(do_hydromancy) {
             ch->sendf("You can not flood the water that direction!\r\n");
             return;
         }
-        auto dest = e->getDestination();
+        auto dest = reg.try_get<Destination>(e->ent);
         if(!dest) {
             ch->sendf("You can not flood the water that direction!\r\n");
             return;
@@ -2856,7 +2856,8 @@ ACMD(do_hydromancy) {
                     hurt(0, 0, ch, vict, nullptr, cost * 4, 1);
                 }
             }
-            dest->geffect = -3;
+            auto room = reg.try_get<Room>(dest->target);
+            if(room) room->geffect = -3;
             LASTATK(ch) = last;
             WAIT_STATE(ch, PULSE_2SEC);
             GET_COOLDOWN(ch) = 15;
@@ -5120,7 +5121,7 @@ ACMD(do_obstruct) {
         ch->sendf("That direction does not exist here.\r\n");
         return;
     }
-    auto dest = e->getDestination();
+    auto dest = reg.try_get<Destination>(e->ent);
     if(!dest) {
         ch->sendf("That leads nowhere.\r\n");
         return;
@@ -5135,14 +5136,14 @@ ACMD(do_obstruct) {
         improve_skill(ch, SKILL_HYOGA_KABE, 0);
         return;
     }
-    int newroom = dest->getVN();
+    int newroom = getUID(dest->target);
 
     if (ROOM_FLAGGED(newroom, ROOM_PEACEFUL)) {
         ch->sendf("You can not block off a peaceful area.\r\n");
         return;
     }
 
-    for (auto obj : dest->getInventory()) {
+    for (auto obj : contents::getInventory(dest->target)) {
         if (GET_OBJ_VNUM(obj) == 79) {
             if (GET_OBJ_COST(obj) == dir2) {
                 if (skill < prob) {

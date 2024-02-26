@@ -1743,7 +1743,7 @@ namespace atk {
             std::vector<Exit*> candidates;
             for(auto &[door, ex] : r->getExits()) {
                 if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
-                if(auto dest = ex->getDestination(); dest) candidates.push_back(ex);
+                if(reg.any_of<Destination>(ex->ent)) candidates.push_back(ex);
             }
             
             if (!candidates.empty()) {

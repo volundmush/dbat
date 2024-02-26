@@ -23,6 +23,7 @@
 #include "dbat/techniques.h"
 #include "dbat/attack.h"
 #include "dbat/random.h"
+#include "dbat/entity.h"
 
 /* Combat commands below this line */
 
@@ -1199,10 +1200,10 @@ ACMD(do_flee) {
     std::map<int, Exit*> candidates;
     for(auto &[door, ex] : ch->getRoom()->getExits()) {
         if (EXIT_FLAGGED(ex, EX_CLOSED)) continue;
-        auto dest = ex->getDestination();
+        auto dest = reg.try_get<Destination>(ex->ent);
         if(!dest) continue;
-        if(dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
-        if(IS_NPC(ch) && dest->checkFlag(FlagType::Room, ROOM_NOMOB)) continue;
+        if(flags::check(dest->target, FlagType::Room, ROOM_DEATH)) continue;
+        if(IS_NPC(ch) && flags::check(dest->target, FlagType::Room, ROOM_NOMOB)) continue;
         candidates[door] = ex;
     }
 

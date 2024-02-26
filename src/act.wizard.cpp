@@ -38,6 +38,7 @@
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
 #include "dbat/transformation.h"
+#include "dbat/entity.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */
@@ -1329,10 +1330,10 @@ static void do_stat_room(BaseCharacter *ch) {
         if (!e)
             continue;
 
-        if (auto dest = e->getDestination(); dest)
+        if (auto dest = reg.try_get<Destination>(e->ent); !dest)
             snprintf(buf1, sizeof(buf1), " @cNONE@n");
         else
-            snprintf(buf1, sizeof(buf1), "@c%5d@n", dest->getUID());
+            snprintf(buf1, sizeof(buf1), "@c%5d@n", getUID(dest->target));
         
         snprintf(buf2, sizeof(buf2), "%s", join(e->getFlagNames(FlagType::Exit), ", ").c_str());
 
@@ -3281,7 +3282,7 @@ ACMD(do_show) {
                 auto r = reg.try_get<Room>(u);
                 if(!r) continue;
                 for (auto &[j, e] : r->getExits()) {
-                    auto dest = e->getDestination();
+                    auto dest = reg.try_get<Destination>(e->ent);
                     if(!dest) {
                         if(auto gen = e->getLookDesc(); !gen.empty()) {
                             nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->getDisplayName(ch), gen.c_str());
@@ -3291,14 +3292,14 @@ ACMD(do_show) {
                         }
                     }
                     else {
-                        if(dest->getUID() == 0) {
+                        if(dest->target == entt::null) {
                             nlen = snprintf(buf + len, sizeof(buf) - len, "[%5d] %s: %s\r\n", vn, r->getDisplayName(ch), e->getLookDesc().c_str());
                             if (len + nlen >= sizeof(buf) || nlen < 0)
                                 break;
                             len += nlen;
                         }
                     }
-                    if (dest && dest->getUID() == 0) {
+                    if (dest && dest->target == entt::null) {
                         nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: (void   ) [%5d] %-*s%s (%s)\r\n", ++k,
                                         vn, count_color_chars((char*)r->getDisplayName(ch).c_str()) + 40, r->getDisplayName(ch).c_str(), QNRM,
                                         dirs[j]);

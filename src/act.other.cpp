@@ -35,6 +35,7 @@
 #include "dbat/mail.h"
 #include "dbat/players.h"
 #include "dbat/random.h"
+#include "dbat/entity.h"
 
 /* local functions */
 static int has_scanner(BaseCharacter *ch);
@@ -6387,7 +6388,9 @@ ACMD(do_eavesdrop) {
             sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->getAlias().c_str()));
             ch->sendf(buf);
         } else {
-            GET_EAVESDROP(ch) = EXIT(ch, dir)->getDestination()->getUID();
+            auto ex = EXIT(ch, dir);
+            auto dest = reg.try_get<Destination>(ex->ent);
+            GET_EAVESDROP(ch) = getUID(dest->target);
             GET_EAVESDIR(ch) = dir;
             ch->sendf("Okay.\r\n");
         }

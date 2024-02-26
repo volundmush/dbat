@@ -25,6 +25,7 @@
 #include "dbat/spec_procs.h"
 #include "dbat/class.h"
 #include "dbat/random.h"
+#include "dbat/entity.h"
 
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
 
@@ -119,10 +120,12 @@ void mobile_activity_movement(uint64_t heartPulse, double deltaTime) {
         auto r = ch->getRoom();
         for(auto &[i, ex] : r->getExits()) {
             if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
-            auto dest = ex->getDestination();
+            auto dest = reg.try_get<Destination>(ex->ent);
             if(!dest) continue;
-            if(dest->checkFlag(FlagType::Room, ROOM_NOMOB) || dest->checkFlag(FlagType::Room, ROOM_DEATH)) continue;
-            if(MOB_FLAGGED(ch, MOB_STAY_ZONE) && dest->zone != r->zone) continue;
+            if(flags::check(dest->target, FlagType::Room, ROOM_NOMOB) || flags::check(dest->target, FlagType::Room, ROOM_DEATH)) continue;
+            if(auto room = reg.try_get<Room>(dest->target); room) {
+                if(MOB_FLAGGED(ch, MOB_STAY_ZONE) && room->zone != r->zone) continue;
+            }
             availableDirections.push_back(i);
         }
         if(!availableDirections.empty()) {

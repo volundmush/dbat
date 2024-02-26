@@ -169,10 +169,11 @@ WCMD(do_wasound) {
     }
 
     for (auto &[dir, ex] : room->getExits()) {
-        auto dest = ex->getDestination();
+        auto dest = reg.try_get<Destination>(ex->ent);
         if(!dest) continue;
-
-        act_to_room(argument, dest);
+        if(auto room = reg.try_get<Room>(dest->target); room) {
+            act_to_room(argument, room);
+        }
             
     }
 }

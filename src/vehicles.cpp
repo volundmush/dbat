@@ -18,6 +18,7 @@
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
+#include "dbat/entity.h"
 
 #ifndef EXITN
 #  define EXITN(room, door)        (world[room].dir_option[door])
@@ -369,7 +370,7 @@ void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir) {
         ch->sendf("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
     }
-    auto dest = d->getDestination();
+    auto dest = reg.try_get<Destination>(d->ent);
     if(!dest) {
         ch->sendf("@wApparently %s doesn't exist there.\r\n", dirs[dir]);
         return;
@@ -383,7 +384,7 @@ void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir) {
         return;
     }
 
-    if (!dest->checkFlag(FlagType::Room, ROOM_VEHICLE) && !dest->checkFlag(FlagType::Room, ROOM_SPACE)) {
+    if (!flags::check(dest->target, FlagType::Room, ROOM_VEHICLE) && !flags::check(dest->target, FlagType::Room, ROOM_SPACE)) {
         /* But the vehicle can't go that way*/
         ch->sendf("@wThe ship can't fit there!\r\n");
         return;
@@ -395,7 +396,7 @@ void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir) {
     send_to_room(IN_ROOM(vehicle), buf);
 
     vehicle->removeFromLocation();
-    vehicle->addToLocation(dest);
+    vehicle->addToLocation(*dest);
     Object *controls;
     if ((controls = find_control(ch))) {
         if (GET_FUELCOUNT(controls) < 5) {
@@ -432,11 +433,11 @@ void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir) {
     int door;
     room = vehicle->getRoom();
     for (auto &[door, e] : room->getExits()) {
-        dest = e->getDestination();
+        dest = reg.try_get<Destination>(e->ent);
         if(!dest) continue;
         if(!e->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
 
-        dest->sendfContents("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
+        send::printfContents(dest->target, "@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.\r\n");
     }
     sprintf(buf, "%s @wflies in from the %s.\r\n",
             vehicle->getShortDesc().c_str(), dirs[rev_dir[dir]]);
@@ -997,12 +998,11 @@ ACMD(do_drive) {
                 int lnum = 0;
                 int rnum = 0;
                 auto room = vehicle->getRoom();
-                auto dest = room->getLaunchDestination();
+                auto dest = movement::getLaunchDestinationFor(room->ent, vehicle->ent);
                 if(!dest) {
                     ch->sendf("@wYou are not on a planet.@n\r\n");
                     return;
                 }
-                rnum = dest.value();
                 act("@wYou set the controls to launch.@n", false, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n @wmanipulates the ship controls.@n", false, ch, nullptr, nullptr, TO_ROOM);
                 act("@RThe ship shudders as it launches up into the sky!@n", false, ch, nullptr, nullptr, TO_CHAR);
@@ -1021,6 +1021,7 @@ ACMD(do_drive) {
                     }
                 }
                 vehicle->removeFromLocation();
+                vehicle->addToLocation(dest.value());
                 //vehicle->lookAtLocation();
                 ch->sendText(vehicle->getRoom()->renderLocationFor(ch));
                 ch->sendf("@RFUEL@D: %s%s@n\r\n",

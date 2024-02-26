@@ -78,10 +78,10 @@ DgResults Room::dgCallMember(trig_data *trig, const std::string& member, const s
             return "";
         }
         if (!arg.empty()) {
-            auto dest = ex->getDestination();
+            auto dest = reg.try_get<Destination>(ex->ent);
             if (!strcasecmp(arg.c_str(), "vnum")) {
                 
-                if(ex) return std::to_string(dest->getUID());
+                if(ex) return std::to_string(::getUID(dest->target));
                 return "";
             }
             else if (!strcasecmp(arg.c_str(), "key"))
@@ -91,7 +91,10 @@ DgResults Room::dgCallMember(trig_data *trig, const std::string& member, const s
                 return bitholder;
             }
             else if (!strcasecmp(arg.c_str(), "room")) {
-                if(dest) return dest;
+                if(dest) {
+                    auto r = reg.try_get<Room>(dest->target);
+                    if(r) return r;
+                }
                 return "";
             }
         } else /* no subfield - default to bits */
@@ -236,7 +239,7 @@ std::string Room::renderExits1(entt::entity viewer) {
         auto nightvision = vis::canSeeInDark(viewer);
 
         for (auto &[door, d] : exits) {
-            auto dest = d->getDestination();
+            auto dest = reg.try_get<Destination>(d->ent);
             if(!dest) continue;
             auto dl = dlists[door];
 
@@ -253,7 +256,7 @@ std::string Room::renderExits1(entt::entity viewer) {
                 auto rdirname = dirs[rev_dir[door]];
 
 
-                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->getUID(), render::displayName(dest->ent, viewer).c_str());
+                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, ::getUID(dest->target), render::displayName(dest->target, viewer).c_str());
                 if (d->checkFlag(FlagType::Exit, EX_ISDOOR) || d->checkFlag(FlagType::Exit, EX_SECRET)) {
                     /* This exit has a door - tell all about it */
                     char argh[100];
@@ -283,8 +286,8 @@ std::string Room::renderExits1(entt::entity viewer) {
                     *blam = toupper(*blam);
 
                     sprintf(dl, "@c%-9s @D-@w %s\r\n", blam,
-                            vis::isInsideDark(dest->ent, viewer) && !nightvision && !has_light
-                            ? "@bToo dark to tell.@w" : render::displayName(dest->ent, viewer).c_str());
+                            vis::isInsideDark(dest->target, viewer) && !nightvision && !has_light
+                            ? "@bToo dark to tell.@w" : render::displayName(dest->target, viewer).c_str());
 
                 } else if (CONFIG_DISP_CLOSED_DOORS && !d->checkFlag(FlagType::Exit, EX_SECRET)) {
                     /* But we tell them the door is closed */
@@ -366,7 +369,7 @@ std::string Room::renderExits2(entt::entity viewer) {
 
     for (auto &[door, d] : getExits()) {
 
-        auto dest = d->getDestination();
+        auto dest = reg.try_get<Destination>(d->ent);
         if(!dest) continue;
         if (d->checkFlag(FlagType::Exit, EX_CLOSED))
             continue;
@@ -414,33 +417,35 @@ std::string Room::generateMap(entt::entity viewer, int num) {
     auto exits = getExits();
     for (auto &[door, d] : exits) {
         if(d->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
-        auto dest = d->getDestination();
+        auto dest = reg.try_get<Destination>(d->ent);
         if(!dest) continue;
+        auto room = reg.try_get<Room>(dest->target);
+        if(!room) continue;
 
         switch (door) {
             case NORTH:
-                map_draw_room(map, 4, 3, dest, viewer);
+                map_draw_room(map, 4, 3, room, viewer);
                 break;
             case EAST:
-                map_draw_room(map, 5, 4, dest, viewer);
+                map_draw_room(map, 5, 4, room, viewer);
                 break;
             case SOUTH:
-                map_draw_room(map, 4, 5, dest, viewer);
+                map_draw_room(map, 4, 5, room, viewer);
                 break;
             case WEST:
-                map_draw_room(map, 3, 4, dest, viewer);
+                map_draw_room(map, 3, 4, room, viewer);
                 break;
             case NORTHEAST:
-                map_draw_room(map, 5, 3, dest, viewer);
+                map_draw_room(map, 5, 3, room, viewer);
                 break;
             case NORTHWEST:
-                map_draw_room(map, 3, 3, dest, viewer);
+                map_draw_room(map, 3, 3, room, viewer);
                 break;
             case SOUTHEAST:
-                map_draw_room(map, 5, 5, dest, viewer);
+                map_draw_room(map, 5, 5, room, viewer);
                 break;
             case SOUTHWEST:
-                map_draw_room(map, 3, 5, dest, viewer);
+                map_draw_room(map, 3, 5, room, viewer);
                 break;
         }
     }

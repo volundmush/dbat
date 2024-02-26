@@ -1383,10 +1383,10 @@ ACMD(do_leave)
 
     for (auto &[door, e] : r->getExits())
     {
-        auto dest = e->getDestination();
+        auto dest = reg.try_get<Destination>(e->ent);
         if (!dest)
             continue;
-        if (!e->checkFlag(FlagType::Exit, EX_CLOSED) && !dest->checkFlag(FlagType::Room, ROOM_INDOORS))
+        if (!e->checkFlag(FlagType::Exit, EX_CLOSED) && !flags::check(dest->target, FlagType::Room, ROOM_INDOORS))
         {
             ch->moveInDirection(door, 1);
             return;
@@ -1398,16 +1398,17 @@ ACMD(do_leave)
 
 static void handle_fall(BaseCharacter *ch)
 {
-    int room = -1;
     while (EXIT(ch, 5) && SECT(IN_ROOM(ch)) == SECT_FLYING)
     {
-        room = EXIT(ch, 5)->getDestination()->getUID();
+        auto ex = EXIT(ch, 5);
+        auto dest = reg.try_get<Destination>(ex->ent);
+        if(!dest) break;
         ch->removeFromLocation();
-        ch->addToLocation(getEntity(room));
+        ch->addToLocation(*dest);
         if (auto carry = CARRYING(ch); carry)
         {
             carry->removeFromLocation();
-            carry->addToLocation(getEntity(room));
+            carry->addToLocation(*dest);
         }
         if (!EXIT(ch, 5) || SECT(IN_ROOM(ch)) != SECT_FLYING)
         {

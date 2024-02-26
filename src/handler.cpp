@@ -651,12 +651,6 @@ void extract_char_final(BaseCharacter *ch) {
         shutdown_game(1);
     }
 
-    if(!IS_NPC(ch)) {
-        // PCs have a very complicated set of places they're not allowed to log off from.
-        // If they do, somehow, then this function will ensure they show up somewhere sane.
-        ch->load_room = ch->normalizeLoadRoom(IN_ROOM(ch));
-    }
-
     if(ch->script) {
         ch->script->purged = true;
     }
