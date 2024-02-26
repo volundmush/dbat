@@ -58,7 +58,7 @@ std::vector<Room*> GameEntity::getRooms() {
     return contents::getRooms(ent);
 }
 
-std::vector<BaseCharacter*> GameEntity::getPeople() {
+std::vector<Character*> GameEntity::getPeople() {
     return contents::getPeople(ent);
 }
 
@@ -91,7 +91,7 @@ GameEntity* GameEntity::getLocation() {
         auto &info = reg.get<Info>(loc->location);
         switch(info.family) {
             case EntityFamily::Character:
-                return reg.try_get<BaseCharacter>(loc->location);
+                return reg.try_get<Character>(loc->location);
             case EntityFamily::Object:
                 return reg.try_get<Object>(loc->location);
             case EntityFamily::Room:

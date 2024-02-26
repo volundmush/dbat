@@ -29,9 +29,9 @@
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
 
 /* local functions */
-static int player_present(BaseCharacter *ch) {
+static int player_present(Character *ch) {
 
-    BaseCharacter *vict, *next_v;
+    Character *vict, *next_v;
     int found = false;
 
     if (IN_ROOM(ch) == NOWHERE)
@@ -57,7 +57,7 @@ static const std::vector<std::string> scavengerTalk = {
 
 void mobile_activity_specials(uint64_t heartPulse, double deltaTime) {
     if(no_specials) return;
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(!MOB_FLAGGED(ch, MOB_SPEC)) continue;
         if (mob_index[GET_MOB_RNUM(ch)].func == nullptr) {
@@ -73,7 +73,7 @@ void mobile_activity_specials(uint64_t heartPulse, double deltaTime) {
 }
 
 void mobile_activity_scavenger(uint64_t heartPulse, double deltaTime) {
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(MOB_FLAGGED(ch, MOB_NOSCAVENGER)) continue;
         if(MOB_FLAGGED(ch, MOB_NOKILL)) continue;
@@ -103,7 +103,7 @@ void mobile_activity_scavenger(uint64_t heartPulse, double deltaTime) {
 }
 
 void mobile_activity_movement(uint64_t heartPulse, double deltaTime) {
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(rand_number(1,2) != 2) continue;
         if(!AWAKE(ch)) continue;
@@ -136,7 +136,7 @@ void mobile_activity_movement(uint64_t heartPulse, double deltaTime) {
 
 // The serious small count of such attacks means that we should instead iterate over the list of ki attacks that exist in rooms.
 void mobile_activity_kirespond(uint64_t heartPulse, double deltaTime) {
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(!AWAKE(ch)) continue;
         if(MOB_FLAGGED(ch, MOB_NOKILL)) continue;
@@ -163,7 +163,7 @@ void mobile_activity_kirespond(uint64_t heartPulse, double deltaTime) {
 }
 
 void mobile_activity_aggressive(uint64_t heartPulse, double deltaTime) {
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(!AWAKE(ch)) continue;
         if(!MOB_FLAGGED(ch, MOB_AGGRESSIVE)) continue;
@@ -251,7 +251,7 @@ void mobile_activity_aggressive(uint64_t heartPulse, double deltaTime) {
 }
 
 void mobile_activity_clonehelp(uint64_t heartPulse, double deltaTime) {
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(!AWAKE(ch)) continue;
         auto original = GET_ORIGINAL(ch);
@@ -275,7 +275,7 @@ void mobile_activity_clonehelp(uint64_t heartPulse, double deltaTime) {
 }
 
 void mobile_activity_absorb_escape(uint64_t heartPulse, double deltaTime) {
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(!AWAKE(ch)) continue;
         if(!ABSORBBY(ch)) continue;
@@ -285,7 +285,7 @@ void mobile_activity_absorb_escape(uint64_t heartPulse, double deltaTime) {
 }
 
 void mobile_activity_wake(uint64_t heartPulse, double deltaTime) {
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(GET_POS(ch) != POS_SLEEPING) continue;
         if(rand_number(1, 3) != 3) continue;
@@ -294,7 +294,7 @@ void mobile_activity_wake(uint64_t heartPulse, double deltaTime) {
 }
 
 void mobile_activity_taunt(uint64_t heartPulse, double deltaTime) {
-    for(auto &&[ent, character, npc] : reg.view<BaseCharacter, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
+    for(auto &&[ent, character, npc] : reg.view<Character, NonPlayerCharacter>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if(!AWAKE(ch)) continue;
         if(!FIGHTING(ch)) continue;
@@ -370,7 +370,7 @@ static const std::vector<std::pair<std::string, std::string>> intelligentLand = 
 
 
 /* This handles NPCs taunting opponents or reacting to combat. */
-void mob_taunt(BaseCharacter *ch) {
+void mob_taunt(Character *ch) {
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
         return;
     }
@@ -399,7 +399,7 @@ void mob_taunt(BaseCharacter *ch) {
 /* Mob Memory Routines */
 
 /* make ch remember victim */
-void remember(BaseCharacter *ch, BaseCharacter *victim) {
+void remember(Character *ch, Character *victim) {
     memory_rec *tmp;
     bool present = false;
 
@@ -420,7 +420,7 @@ void remember(BaseCharacter *ch, BaseCharacter *victim) {
 
 
 /* make ch forget victim */
-void forget(BaseCharacter *ch, BaseCharacter *victim) {
+void forget(Character *ch, Character *victim) {
     memory_rec *curr, *prev = nullptr;
 
     if (!(curr = MEMORY(ch)))
@@ -444,7 +444,7 @@ void forget(BaseCharacter *ch, BaseCharacter *victim) {
 
 
 /* erase ch's memory */
-void clearMemory(BaseCharacter *ch) {
+void clearMemory(Character *ch) {
     memory_rec *curr, *next;
 
     curr = MEMORY(ch);

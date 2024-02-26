@@ -570,11 +570,11 @@ enum class FlagType : uint8_t {
 
 
 /* Exit info: used in room_data.dir_option.exit_info */
-#define EX_ISDOOR        (1 << 0)   /* Exit is a door		*/
-#define EX_CLOSED        (1 << 1)   /* The door is closed	*/
-#define EX_LOCKED        (1 << 2)   /* The door is locked	*/
-#define EX_PICKPROOF        (1 << 3)   /* Lock can't be picked	*/
-#define EX_SECRET        (1 << 4)   /* The door is hidden        */
+#define EX_ISDOOR        0   /* Exit is a door		*/
+#define EX_CLOSED        1   /* The door is closed	*/
+#define EX_LOCKED        2   /* The door is locked	*/
+#define EX_PICKPROOF        3   /* Lock can't be picked	*/
+#define EX_SECRET        4   /* The door is hidden        */
 
 #define NUM_EXIT_FLAGS 5
 
@@ -917,7 +917,7 @@ enum class FlagType : uint8_t {
 #define AUC_STAT        9
 #define AUC_BID            10
 
-/* Player flags: used by BaseCharacter.act */
+/* Player flags: used by Character.act */
 #define PLR_KILLER    0   /* Player is a player-killer        */
 #define PLR_THIEF    1   /* Player is a player-thief         */
 #define PLR_FROZEN    2   /* Player is frozen                 */
@@ -1004,7 +1004,7 @@ enum class FlagType : uint8_t {
 /* Mob Personalty */
 #define MAX_PERSONALITIES 5
 
-/* Mobile flags: used by BaseCharacter.act */
+/* Mobile flags: used by Character.act */
 #define MOB_SPEC        0  /* Mob has a callable spec-proc   	*/
 #define MOB_SENTINEL        1  /* Mob should not move            	*/
 #define MOB_NOSCAVENGER        2  /* Mob won't pick up items from rooms*/
@@ -1043,7 +1043,7 @@ enum class FlagType : uint8_t {
 
 #define NUM_MOB_FLAGS 35
 
-/*  flags: used by BaseCharacter.player_specials.pref */
+/*  flags: used by Character.player_specials.pref */
 #define PRF_BRIEF    0  /* Room descs won't normally be shown	*/
 #define PRF_COMPACT    1  /* No extra CRLF pair before prompts		*/
 #define PRF_DEAF    2  /* Can't hear shouts              		*/
@@ -1119,7 +1119,7 @@ enum class FlagType : uint8_t {
 #define EXIT_LEV(ch) (exitlevel(ch))
 
 
-/* Affect bits: used in BaseCharacter.affected_by */
+/* Affect bits: used in Character.affected_by */
 /* WARNING: In the world files, NEVER set the bits marked "R" ("Reserved") */
 #define AFF_DONTUSE           0    /* DON'T USE! 		*/
 #define AFF_BLIND             1    /* (R) Char is blind         */
@@ -1306,7 +1306,7 @@ enum class FlagType : uint8_t {
 
 #define NUM_COLOR            16
 
-/* Character equipment positions: used as index for BaseCharacter.equipment[] */
+/* Character equipment positions: used as index for Character.equipment[] */
 /* NOTE: Don't confuse these constants with the ITEM_ bitvectors
    which control the valid places you can wear a piece of equipment */
 #define WEAR_UNUSED0    0

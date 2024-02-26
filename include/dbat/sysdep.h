@@ -50,6 +50,7 @@
 #include <bitset>
 #include <variant>
 #include <functional>
+#include <type_traits>
 
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
@@ -112,12 +113,12 @@ typedef vnum guild_rnum;
  */
 typedef uint32_t bitvector_t;
 
-typedef void(*CommandFunc)(BaseCharacter *ch, char *argument, int cmd, int subcmd);
+typedef void(*CommandFunc)(Character *ch, char *argument, int cmd, int subcmd);
 
-typedef int(*SpecialFunc)(BaseCharacter *ch, void *me, int cmd, char *argument);
+typedef int(*SpecialFunc)(Character *ch, void *me, int cmd, char *argument);
 
-#define ACMD(name) void (name)(BaseCharacter *ch, char *argument, int cmd, int subcmd)
-#define SPECIAL(name) int (name)(BaseCharacter *ch, void *me, int cmd, char *argument)
+#define ACMD(name) void (name)(Character *ch, char *argument, int cmd, int subcmd)
+#define SPECIAL(name) int (name)(Character *ch, void *me, int cmd, char *argument)
 
 template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
@@ -238,3 +239,23 @@ T* getEntity(int64_t uid) {
 }
 
 extern void setEntity(int64_t uid, entt::entity entity);
+
+class ObjectID {
+    public:
+    ObjectID(int64_t id, time_t time) : id(id), time(time) {}
+    int64_t getId() const { return id; }
+    time_t getTime() const { return time; }
+    bool operator==(const ObjectID& rhs) const;
+    protected:
+    int64_t id;
+    time_t time;
+};
+
+namespace std {
+    template <>
+    struct hash<ObjectID> {
+        std::size_t operator()(const ObjectID& id) const {
+            return std::hash<int64_t>()(id.getId());
+        }
+    };
+}

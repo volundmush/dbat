@@ -5,16 +5,16 @@
 /* act.item.c */
 // global variables
 extern Object *obj_selling;
-extern BaseCharacter *ch_selling, *ch_buying;
+extern Character *ch_selling, *ch_buying;
 
 // functions
-extern int check_saveroom_count(BaseCharacter *ch, Object *cont);
+extern int check_saveroom_count(Character *ch, Object *cont);
 
 extern void dball_load(uint64_t heartPulse, double deltaTime);
 
 extern int check_insidebag(Object *cont, double mult);
 
-extern int perform_get_from_room(BaseCharacter *ch, Object *obj);
+extern int perform_get_from_room(Character *ch, Object *obj);
 
 extern void weight_change_object(Object *obj, int weight);
 
@@ -22,13 +22,13 @@ extern void name_from_drinkcon(Object *obj);
 
 extern void name_to_drinkcon(Object *obj, int type);
 
-extern void perform_wear(BaseCharacter *ch, Object *obj, int where);
+extern void perform_wear(Character *ch, Object *obj, int where);
 
-extern int find_eq_pos(BaseCharacter *ch, Object *obj, char *arg);
+extern int find_eq_pos(Character *ch, Object *obj, char *arg);
 
-extern void perform_remove(BaseCharacter *ch, int pos);
+extern void perform_remove(Character *ch, int pos);
 
-extern void stop_auction(int type, BaseCharacter *ch);
+extern void stop_auction(int type, Character *ch);
 
 extern void check_auction(uint64_t heartPulse, double deltaTime);
 

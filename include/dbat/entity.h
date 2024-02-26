@@ -101,8 +101,8 @@ namespace contents {
     std::map<int, Object*> getEquipment(entt::entity ent);
     std::map<int, Object*> getEquipment(GameEntity* ent);
 
-    std::vector<BaseCharacter*> getPeople(entt::entity ent);
-    std::vector<BaseCharacter*> getPeople(GameEntity* ent);
+    std::vector<Character*> getPeople(entt::entity ent);
+    std::vector<Character*> getPeople(GameEntity* ent);
 
     std::vector<Room*> getRooms(entt::entity ent);
     std::vector<Room*> getRooms(GameEntity* ent);

@@ -83,7 +83,7 @@ extern void cleanup_olc(struct descriptor_data *d, int8_t cleanup_type);
 
 extern void split_argument(char *argument, char *tag);
 
-extern void send_cannot_edit(BaseCharacter *ch, zone_vnum zone);
+extern void send_cannot_edit(Character *ch, zone_vnum zone);
 
 /*
  * OLC structures.
@@ -502,13 +502,13 @@ extern ACMD(do_oasis);
 /*
  * Prototypes, to be moved later.
  */
-extern void medit_free_mobile(BaseCharacter *mob);
+extern void medit_free_mobile(Character *mob);
 
 extern void medit_setup_new(struct descriptor_data *d);
 
 extern void medit_setup_existing(struct descriptor_data *d, int rmob_num);
 
-extern void init_mobile(BaseCharacter *mob);
+extern void init_mobile(Character *mob);
 
 extern void medit_save_internally(struct descriptor_data *d);
 
@@ -680,7 +680,7 @@ extern ACMD(do_oasis_gedit);
 
 extern void zedit_setup(struct descriptor_data *d, int room_num);
 
-extern void zedit_new_zone(BaseCharacter *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
+extern void zedit_new_zone(Character *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top);
 
 extern void zedit_create_index(int znum, char *type);
 
@@ -754,17 +754,17 @@ extern int parse_stats(struct descriptor_data *d, char *arg);
 
 extern int stats_disp_menu(struct descriptor_data *d);
 
-extern void list_rooms(BaseCharacter *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
+extern void list_rooms(Character *ch, zone_rnum rnum, room_vnum vmin, room_vnum vmax);
 
-extern void list_mobiles(BaseCharacter *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
+extern void list_mobiles(Character *ch, zone_rnum rnum, mob_vnum vmin, mob_vnum vmax);
 
-extern void list_objects(BaseCharacter *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
+extern void list_objects(Character *ch, zone_rnum rnum, obj_vnum vmin, obj_vnum vmax);
 
-extern void list_shops(BaseCharacter *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
+extern void list_shops(Character *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum vmax);
 
-extern void list_zones(BaseCharacter *ch);
+extern void list_zones(Character *ch);
 
-extern int can_edit_zone(BaseCharacter *ch, zone_rnum rnum);
+extern int can_edit_zone(Character *ch, zone_rnum rnum);
 
 #define CONTEXT_HELP_STRING "help"
 

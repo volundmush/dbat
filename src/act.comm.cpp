@@ -25,15 +25,15 @@
 #include "dbat/class.h"
 
 /* local functions */
-static void perform_tell(BaseCharacter *ch, BaseCharacter *vict, char *arg);
+static void perform_tell(Character *ch, Character *vict, char *arg);
 
-static int is_tell_ok(BaseCharacter *ch, BaseCharacter *vict);
+static int is_tell_ok(Character *ch, Character *vict);
 
-static void handle_whisper(char *buf, BaseCharacter *ch, BaseCharacter *vict);
+static void handle_whisper(char *buf, Character *ch, Character *vict);
 
 static char *overhear(char *buf, int type);
 
-static void list_languages(BaseCharacter *ch);
+static void list_languages(Character *ch);
 
 static void garble_text(char *string, int known, int lang);
 
@@ -51,7 +51,7 @@ static const char *languages[] =
                 "\n"
         };
 
-static void list_languages(BaseCharacter *ch) {
+static void list_languages(Character *ch) {
     int a = 0, i;
 
     ch->sendf("Languages:\r\n[");
@@ -189,7 +189,7 @@ ACMD(do_osay) {
 
 ACMD(do_say) {
     struct descriptor_data *d;
-    BaseCharacter *wch = nullptr, *wch2 = nullptr, *wch3 = nullptr, *tch = nullptr, *sch = nullptr;
+    Character *wch = nullptr, *wch2 = nullptr, *wch3 = nullptr, *tch = nullptr, *sch = nullptr;
     Object *obj = nullptr;
     int granted = false, found = false;
     char buf2[MAX_INPUT_LENGTH];
@@ -728,7 +728,7 @@ ACMD(do_say) {
 }
 
 ACMD(do_gsay) {
-    BaseCharacter *k;
+    Character *k;
     struct follow_type *f;
     char blah[MAX_INPUT_LENGTH];
 
@@ -787,7 +787,7 @@ ACMD(do_gsay) {
     }
 }
 
-static void perform_tell(BaseCharacter *ch, BaseCharacter *vict, char *arg) {
+static void perform_tell(Character *ch, Character *vict, char *arg) {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 
     strcpy(buf, arg);
@@ -834,7 +834,7 @@ static void perform_tell(BaseCharacter *ch, BaseCharacter *vict, char *arg) {
         GET_LAST_TELL(vict) = GET_IDNUM(ch);
 }
 
-static int is_tell_ok(BaseCharacter *ch, BaseCharacter *vict) {
+static int is_tell_ok(Character *ch, Character *vict) {
 
     if (ch == vict)
         ch->sendf("You try to tell yourself something.\r\n");
@@ -872,7 +872,7 @@ static int is_tell_ok(BaseCharacter *ch, BaseCharacter *vict) {
  * called frequently, and should IMHO be kept as tight as possible.
  */
 ACMD(do_tell) {
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
 
     half_chop(argument, buf, buf2);
@@ -918,7 +918,7 @@ ACMD(do_reply) {
 
 ACMD(do_spec_comm) {
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     const char *action_sing, *action_plur, *action_others;
 
     if (GET_BONUS(ch, BONUS_MUTE) > 0) {
@@ -986,7 +986,7 @@ ACMD(do_spec_comm) {
     }
 }
 
-static void handle_whisper(char *buf, BaseCharacter *ch, BaseCharacter *vict) {
+static void handle_whisper(char *buf, Character *ch, Character *vict) {
 
     for (auto tch : ch->getRoom()->getPeople()) {
         if (IS_NPC(tch)) {
@@ -1268,7 +1268,7 @@ ACMD(do_write) {
 
 ACMD(do_page) {
     struct descriptor_data *d;
-    BaseCharacter *vict;
+    Character *vict;
     char buf2[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
 
     half_chop(argument, arg, buf2);

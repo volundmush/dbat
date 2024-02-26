@@ -22,7 +22,7 @@ int save_objects(zone_rnum zone_num) {
 }
 
 #define LOC_INVENTORY    0
-void auto_equip(BaseCharacter *ch, Object *obj, int location) {
+void auto_equip(Character *ch, Object *obj, int location) {
     int j;
 
     /* Lots of checks... */

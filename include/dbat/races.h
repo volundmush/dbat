@@ -6,12 +6,12 @@
 extern const struct guild_info_type guild_info[6];
 
 // functions
-extern void racial_body_parts(BaseCharacter *ch);
+extern void racial_body_parts(Character *ch);
 
-extern void set_height_and_weight_by_race(BaseCharacter *ch);
+extern void set_height_and_weight_by_race(Character *ch);
 extern void set_height_and_weight_by_race(nlohmann::json& ch, int sex);
 
-extern int invalid_race(BaseCharacter *ch, Object *obj);
+extern int invalid_race(Character *ch, Object *obj);
 
 // C++ conversion
 
@@ -33,7 +33,7 @@ namespace race {
     extern int getSize(RaceID id);
     extern bool exists(RaceID id);
 
-    extern double getModifier(BaseCharacter *ch, int location, int specific = 0);
+    extern double getModifier(Character *ch, int location, int specific = 0);
 
     extern std::vector<RaceID> filterRaces(std::function<bool(RaceID)> func);
     extern std::optional<RaceID> findRace(const std::string& arg, std::function<bool(RaceID)> func);

@@ -7,9 +7,9 @@
 
 
 // functions
-extern void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir);
+extern void drive_in_direction(Character *ch, Object *vehicle, int dir);
 
-Object *find_control(BaseCharacter *ch);
+Object *find_control(Character *ch);
 
 Object *find_vehicle_by_vnum(int vnum);
 

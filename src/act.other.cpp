@@ -37,20 +37,20 @@
 #include "dbat/entity.h"
 
 /* local functions */
-static int has_scanner(BaseCharacter *ch);
+static int has_scanner(Character *ch);
 
-static void boost_obj(Object *obj, BaseCharacter *ch, int type);
+static void boost_obj(Object *obj, Character *ch, int type);
 
 static int
-perform_group(BaseCharacter *ch, BaseCharacter *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
+perform_group(Character *ch, Character *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl);
 
-static void print_group(BaseCharacter *ch);
+static void print_group(Character *ch);
 
-static void check_eq(BaseCharacter *ch);
+static void check_eq(Character *ch);
 
-static int spell_in_domain(BaseCharacter *ch, int spellnum);
+static int spell_in_domain(Character *ch, int spellnum);
 
-static void show_clan_info(BaseCharacter *ch);
+static void show_clan_info(Character *ch);
 
 // definitions
 void log_imm_action(char *messg, ...) {
@@ -136,7 +136,7 @@ void log_custom(struct descriptor_data *d, Object *obj) {
 }
 
 /* Used by do_rpp for soft-cap */
-void bring_to_cap(BaseCharacter *ch) {
+void bring_to_cap(Character *ch) {
 
     auto cap = ch->calc_soft_cap();
 
@@ -785,7 +785,7 @@ ACMD(do_grapple) {
         return;
     }
 
-    BaseCharacter *vict;
+    Character *vict;
     char arg[200], arg2[200];
 
     two_arguments(argument, arg, arg2);
@@ -1010,7 +1010,7 @@ ACMD(do_grapple) {
 ACMD(do_trip) {
 
     char arg[200];
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
 
     one_argument(argument, arg);
 
@@ -1584,7 +1584,7 @@ ACMD(do_train) {
 }
 
 ACMD(do_rip) {
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1688,7 +1688,7 @@ ACMD(do_infuse) {
 }
 
 ACMD(do_paralyze) {
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1870,7 +1870,7 @@ ACMD(do_kura) {
 
 ACMD(do_candy) {
 
-    BaseCharacter *vict;
+    Character *vict;
     Object *obj;
     char arg[MAX_INPUT_LENGTH];
 
@@ -1956,7 +1956,7 @@ ACMD(do_candy) {
 
 ACMD(do_future) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     one_argument(argument, arg);
 
     if (IS_NPC(ch) || !IS_KANASSAN(ch)) {
@@ -2020,7 +2020,7 @@ ACMD(do_future) {
 }
 
 ACMD(do_drag) {
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -2236,7 +2236,7 @@ ACMD(do_hass) {
 ACMD(do_implant) {
 
     Object *limb = nullptr, *obj = nullptr, *next_obj;
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
     int found = false;
@@ -2525,7 +2525,7 @@ ACMD(do_fury) {
 
 /* End of do_fury for halfbreeds to release their raaage, rawrg! */
 
-void hint_system(BaseCharacter *ch, int num) {
+void hint_system(Character *ch, int num) {
     const char *hints[22] = {"Remember to save often.", /* 0 */
                              "Remember to eat or drink if you want to stay alive.", /* 1 */
                              "It is a good idea to save up PS for learning skills instead of just practicing them.", /* 2 */
@@ -2586,7 +2586,7 @@ ACMD(do_think) {
         ch->sendf("Syntax: think (message)\r\n");
         return;
     } else {
-        BaseCharacter *tch;
+        Character *tch;
         tch = MINDLINK(ch);
         ch->sendf("@c%s@w reads your thoughts, '@C%s@w'@n\r\n", GET_NAME(tch), argument);
         tch->sendf("@c%s@w thinks, '@C%s@w'@n\r\n", GET_NAME(ch), argument);
@@ -2598,7 +2598,7 @@ ACMD(do_think) {
 }
 
 ACMD(do_telepathy) {
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
 
@@ -2826,7 +2826,7 @@ ACMD(do_telepathy) {
 ACMD(do_potential) {
     int boost = 0;
 
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -2902,7 +2902,7 @@ ACMD(do_potential) {
 
 ACMD(do_majinize) {
 
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -2998,7 +2998,7 @@ ACMD(do_majinize) {
 
 ACMD(do_spit) {
     int cost = 0;
-    BaseCharacter *vict;
+    Character *vict;
     struct affected_type af;
     char arg[MAX_INPUT_LENGTH];
 
@@ -3089,7 +3089,7 @@ ACMD(do_spit) {
 
 /* This handles increasing the stats of a created object based on the skill *
  * and/or stats of the user.                                                */
-static void boost_obj(Object *obj, BaseCharacter *ch, int type) {
+static void boost_obj(Object *obj, Character *ch, int type) {
 
     if (!obj || !ch)
         return;
@@ -3507,7 +3507,7 @@ ACMD(do_form) {
             return;
         }
 
-        BaseCharacter *vict = nullptr;
+        Character *vict = nullptr;
 
         if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
             ch->sendf("Clothesbeam who?\r\nSyntax: create clothesbeam (target)\r\n");
@@ -4139,7 +4139,7 @@ ACMD(do_upgrade) {
 ACMD(do_ingest) {
 
     if (IS_MAJIN(ch)) {
-        BaseCharacter *vict;
+        Character *vict;
         char arg[MAX_INPUT_LENGTH];
 
         one_argument(argument, arg);
@@ -4271,7 +4271,7 @@ ACMD(do_ingest) {
 }
 
 ACMD(do_absorb) {
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -4833,7 +4833,7 @@ ACMD(do_regenerate) {
 }
 
 ACMD(do_focus) {
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH];
     char name[MAX_INPUT_LENGTH];
 
@@ -6003,7 +6003,7 @@ ACMD(do_kaioken) {
 }
 
 ACMD(do_plant) {
-    BaseCharacter *vict;
+    Character *vict;
     Object *obj;
     char vict_name[100], obj_name[100];
     int roll = 0, detect = 0, fail = 0;
@@ -6420,7 +6420,7 @@ ACMD(do_zanzoken) {
 }
 
 ACMD(do_block) {
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -6468,7 +6468,7 @@ ACMD(do_block) {
         act("@wYou stop blocking @c$N@w.@n", true, ch, nullptr, BLOCKS(ch), TO_CHAR);
         act("@C$n@w stops blocking you.@n", true, ch, nullptr, BLOCKS(ch), TO_VICT);
         act("@C$n@w stops blocking @c$N@w.@n", true, ch, nullptr, BLOCKS(ch), TO_NOTVICT);
-        BaseCharacter *oldv = BLOCKS(ch);
+        Character *oldv = BLOCKS(ch);
         BLOCKED(oldv) = nullptr;
         BLOCKS(ch) = vict;
         BLOCKED(vict) = ch;
@@ -6508,7 +6508,7 @@ ACMD(do_eyec) {
 }
 
 ACMD(do_solar) {
-    BaseCharacter *vict = nullptr, *next_v = nullptr;
+    Character *vict = nullptr, *next_v = nullptr;
 
     int prob = 0, perc = 0, cost = 0, bonus = 0;
 
@@ -6582,7 +6582,7 @@ ACMD(do_solar) {
 
 ACMD(do_heal) {
     int64_t cost = 0, prob = 0, perc = 0, heal = 0, bonus = 0;
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -6873,7 +6873,7 @@ ACMD(do_instant) {
 
     int skill = 0, perc = 0, skill_num = 0, location = 0;
     int64_t cost = 0;
-    BaseCharacter *tar = nullptr;
+    Character *tar = nullptr;
 
     char arg[MAX_INPUT_LENGTH] = "";
 
@@ -7024,7 +7024,7 @@ ACMD(do_instant) {
 }
 
 void load_shadow_dragons() {
-    BaseCharacter *mob = nullptr;
+    Character *mob = nullptr;
     mob_rnum r_num;
 
     if (SHADOW_DRAGON1 > 0) {
@@ -7288,7 +7288,7 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
                 } /* End switch */
                 save_mud_time(&time_info);
             } /* End while */
-            BaseCharacter *mob = nullptr;
+            Character *mob = nullptr;
             mob_rnum r_num;
 
             r_num = real_mobile(SHADOW_DRAGON1_VNUM);
@@ -8023,7 +8023,7 @@ ACMD(do_spar) {
     }
 }
 
-static void check_eq(BaseCharacter *ch) {
+static void check_eq(Character *ch) {
     Object *obj;
     int i;
     for (i = 0; i < NUM_WEARS; i++) {
@@ -8080,7 +8080,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             }
             if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
                 int64_t drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
-                BaseCharacter *drained = ABSORBING(d->character);
+                Character *drained = ABSORBING(d->character);
                 if ((drained->getCurST()) - drain2 < 0) {
                     drain2 = (drained->getCurST());
                 }
@@ -8498,7 +8498,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (BLOCKS(d->character)) {
-            BaseCharacter *vict = BLOCKS(d->character);
+            Character *vict = BLOCKS(d->character);
             if (IN_ROOM(vict) != IN_ROOM(d->character)) {
                 BLOCKED(vict) = nullptr;
                 BLOCKS(d->character) = nullptr;
@@ -8525,7 +8525,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
     }
 }
 
-static int has_scanner(BaseCharacter *ch) {
+static int has_scanner(Character *ch) {
     return ch->findObjectVnum(13600) != nullptr;
 }
 
@@ -8760,7 +8760,7 @@ ACMD(do_snet) {
 } /*end snet command */
 
 ACMD(do_scouter) {
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     struct descriptor_data *i;
     int count = 0;
     char arg[MAX_INPUT_LENGTH];
@@ -8961,7 +8961,7 @@ ACMD(do_scouter) {
     }
 }
 
-std::set<Object*> dball_count(BaseCharacter *ch) {
+std::set<Object*> dball_count(Character *ch) {
     std::set<obj_vnum> dbVn;
     dbVn.insert(dbVnums.begin(), dbVnums.end());
 
@@ -9116,7 +9116,7 @@ ACMD(do_steal) {
     }
 
 
-    BaseCharacter *vict;
+    Character *vict;
     Object *obj;
     char arg[500], arg2[500];
     int gold = 0, prob = GET_SKILL(ch, SKILL_SLEIGHT_OF_HAND), perc = 0, eq_pos;
@@ -9446,7 +9446,7 @@ ACMD(do_title) {
 }
 
 static int
-perform_group(BaseCharacter *ch, BaseCharacter *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl) {
+perform_group(Character *ch, Character *vict, int highlvl, int lowlvl, int64_t highpl, int64_t lowpl) {
     if (AFF_FLAGGED(vict, AFF_GROUP) || !CAN_SEE(ch, vict))
         return (0);
 
@@ -9487,8 +9487,8 @@ perform_group(BaseCharacter *ch, BaseCharacter *vict, int highlvl, int lowlvl, i
     return (1);
 }
 
-static void print_group(BaseCharacter *ch) {
-    BaseCharacter *k;
+static void print_group(Character *ch) {
+    Character *k;
     struct follow_type *f;
 
     if (!AFF_FLAGGED(ch, AFF_GROUP))
@@ -9543,7 +9543,7 @@ static void print_group(BaseCharacter *ch) {
 
 ACMD(do_group) {
     char buf[MAX_STRING_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     struct follow_type *f;
     int found, highlvl = 0, lowlvl = 0;
     int64_t highpl = 0, lowpl = 0;
@@ -9626,7 +9626,7 @@ ACMD(do_group) {
 ACMD(do_ungroup) {
     char buf[MAX_INPUT_LENGTH];
     struct follow_type *f, *next_fol;
-    BaseCharacter *tch;
+    Character *tch;
 
     one_argument(argument, buf);
 
@@ -9679,7 +9679,7 @@ ACMD(do_ungroup) {
 
 ACMD(do_report) {
     char buf[MAX_STRING_LENGTH];
-    BaseCharacter *k;
+    Character *k;
     struct follow_type *f;
 
     if (!AFF_FLAGGED(ch, AFF_GROUP)) {
@@ -9708,7 +9708,7 @@ ACMD(do_split) {
     char buf[MAX_INPUT_LENGTH];
     int amount, num, share, rest;
     size_t len;
-    BaseCharacter *k;
+    Character *k;
     struct follow_type *f;
 
     if (IS_NPC(ch))
@@ -10528,7 +10528,7 @@ ACMD(do_compare) {
     char arg1[100];
     char arg2[MAX_INPUT_LENGTH];
     Object *obj1, *obj2;
-    BaseCharacter *tchar;
+    Character *tchar;
     int value1 = 0, value2 = 0, o1, o2;
     char *msg = nullptr;
 
@@ -10582,7 +10582,7 @@ ACMD(do_compare) {
 ACMD(do_break) {
     char arg[MAX_INPUT_LENGTH];
     Object *obj;
-    BaseCharacter *dummy = nullptr;
+    Character *dummy = nullptr;
     int cmbrk;
 
     one_argument(argument, arg);
@@ -10615,7 +10615,7 @@ ACMD(do_break) {
 ACMD(do_fix) {
     char arg[MAX_INPUT_LENGTH];
     Object *obj, *obj4 = nullptr, *rep, *next_obj;
-    BaseCharacter *dummy = nullptr;
+    Character *dummy = nullptr;
     int cmbrk, found = false, self = false, custom = false;
 
     one_argument(argument, arg);
@@ -10747,7 +10747,7 @@ ACMD(do_fix) {
     }
 }
 
-static int spell_in_domain(BaseCharacter *ch, int spellnum) {
+static int spell_in_domain(Character *ch, int spellnum) {
     if (spell_info[spellnum].domain == DOMAIN_UNDEFINED) {
         return false;
     }
@@ -10807,7 +10807,7 @@ ACMD(do_resurrect) {
     act("$n's body forms in a pool of @Bblue light@n.", true, ch, nullptr, nullptr, TO_ROOM);
 }
 
-static void show_clan_info(BaseCharacter *ch) {
+static void show_clan_info(Character *ch) {
 
     ch->sendf("@c----------------------------------------\r\n"
                      "@c|@WProvided by@D: @YAlister of Aeonian Dreams@c|\r\n"
@@ -10848,7 +10848,7 @@ static void show_clan_info(BaseCharacter *ch) {
 
 
 ACMD(do_aid) {
-    BaseCharacter *vict;
+    Character *vict;
     Object *obj = nullptr, *aid_obj = nullptr, *aid_prod = nullptr, *next_obj;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int dc = 0, found = false, num = 47, num2 = 0, survival = 0;

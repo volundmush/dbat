@@ -497,8 +497,8 @@ namespace net {
 
     ChargenParser::ChargenParser(std::shared_ptr<Connection>& co) : ConnectionParser(co) {
         ent = reg.create();
-        auto &c = reg.get_or_emplace<BaseCharacter>(ent);
-        ch = reg.try_get<BaseCharacter>(ent);
+        auto &c = reg.get_or_emplace<Character>(ent);
+        ch = reg.try_get<Character>(ent);
     }
 
     void ChargenParser::start() {
@@ -508,7 +508,7 @@ namespace net {
     ChargenParser::~ChargenParser() {
         // Completing chargen should set our state to -1.
         // That will prevent the character from being freed.
-        // Because in all other cases, we don't want this BaseCharacter to be laying around if
+        // Because in all other cases, we don't want this Character to be laying around if
         // chargen is canceled somehow.
         if(state != -1 && ch) {
             reg.destroy(ent);
@@ -579,7 +579,7 @@ namespace net {
         int roll = rand_number(1, 6);
         int value;
 
-        BaseCharacter *found;
+        Character *found;
 
         switch(state) {
             case CON_GET_NAME:

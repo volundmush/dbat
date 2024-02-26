@@ -83,7 +83,7 @@ ACMD(do_strike) {
 ACMD(do_combine) {
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     struct follow_type *f;
     int fire = false, temp = -1, temp2 = -1;
 
@@ -237,7 +237,7 @@ ACMD(do_seishou) {
 }
 
 ACMD(do_throw) {
-    BaseCharacter *vict = nullptr, *tch = nullptr;
+    Character *vict = nullptr, *tch = nullptr;
     Object *obj = nullptr;
     char arg[MAX_INPUT_LENGTH];
     char arg2[1000], chunk[2000], arg3[1000];
@@ -285,7 +285,7 @@ ACMD(do_throw) {
     }
 
     if (handle_defender(vict, ch)) {
-        BaseCharacter *def = GET_DEFENDER(vict);
+        Character *def = GET_DEFENDER(vict);
         vict = def;
     }
 
@@ -713,7 +713,7 @@ ACMD(do_throw) {
 
 ACMD(do_selfd) {
 
-    BaseCharacter *tch = nullptr, *next_v = nullptr;
+    Character *tch = nullptr, *next_v = nullptr;
     int64_t dmg = 0;
 
     if (IS_NPC(ch))
@@ -868,7 +868,7 @@ ACMD(do_hspiral) {
 
 ACMD(do_spiral) {
     int skill;
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -915,7 +915,7 @@ ACMD(do_spiral) {
     }
 
     if (handle_defender(vict, ch)) {
-        BaseCharacter *def = GET_DEFENDER(vict);
+        Character *def = GET_DEFENDER(vict);
         vict = def;
     }
 

@@ -31,7 +31,7 @@ long get_id_by_name(const char *name) {
 
 char *get_name_by_id(long id) {
     static char buf[128];
-    auto find = getEntity<BaseCharacter>(id);
+    auto find = getEntity<Character>(id);
     if(!find) return nullptr;
     if(find->isNPC()) return nullptr;
     sprintf(buf, "%s", find->getName().c_str());
@@ -52,12 +52,12 @@ char *get_name_by_id(long id) {
 *************************************************************************/
 
 
-BaseCharacter *findPlayer(const std::string& name) {
-    auto view = reg.view<BaseCharacter, PlayerCharacter>(entt::exclude<Deleted>);
+Character *findPlayer(const std::string& name) {
+    auto view = reg.view<Character, PlayerCharacter>(entt::exclude<Deleted>);
     
     for (auto ent : view) {
         if (iequals(text::get(ent, "name"), name)) {
-            return reg.try_get<BaseCharacter>(ent);
+            return reg.try_get<Character>(ent);
         }
     }
     return nullptr;

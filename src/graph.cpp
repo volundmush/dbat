@@ -284,7 +284,7 @@ ACMD(do_radar) {
     }
 }
 
-static std::string sense_align(BaseCharacter *vict) {
+static std::string sense_align(Character *vict) {
     auto align = GET_ALIGNMENT(vict);
     if (align > 50 && align < 200) {
         return "You sense slightly pure and good ki from them.\r\n";
@@ -303,7 +303,7 @@ static std::string sense_align(BaseCharacter *vict) {
     }
 }
 
-static std::string sense_compare(BaseCharacter *ch, BaseCharacter *vict) {
+static std::string sense_compare(Character *ch, Character *vict) {
     auto hitv = GET_HIT(vict);
     auto hitc = GET_HIT(ch);
     if (hitv > hitc * 50) {
@@ -337,7 +337,7 @@ static std::string sense_compare(BaseCharacter *ch, BaseCharacter *vict) {
 
 ACMD(do_track) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     struct descriptor_data *i;
     int count = 0, dir;
 

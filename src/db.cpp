@@ -95,13 +95,13 @@ void setEntity(int64_t uid, entt::entity entity) {
 DebugMap<int64_t, entt::entity> entities;    /* array of rooms		 */
 std::unordered_set<GameEntity*> pendingDeletions;
 
-BaseCharacter *affect_list = nullptr; /* global linked list of chars with affects */
-BaseCharacter *affectv_list = nullptr; /* global linked list of chars with round-based affects */
+Character *affect_list = nullptr; /* global linked list of chars with affects */
+Character *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::unordered_map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
 std::unordered_map<mob_vnum, nlohmann::json> mob_proto;    /* prototypes for mobs		 */
 
 VnumIndex<Object> objectVnumIndex;
-VnumIndex<BaseCharacter> characterVnumIndex;
+VnumIndex<Character> characterVnumIndex;
 
 std::unordered_map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::unordered_map<obj_vnum, nlohmann::json> obj_proto;    /* prototypes for objs		 */
@@ -122,7 +122,7 @@ int DRAGONR = 0;                /* Room Shenron has been summoned to */
 int DRAGONZ = 0;                /* Zone Shenron has been summoned to */
 int WISH[2] = {0, 0};           /* Keeps track of wishes granted */
 int DRAGONC = 0;                /* Keeps count of Shenron's remaining time */
-BaseCharacter *EDRAGON = nullptr;      /* This is Shenron when he is loaded */
+Character *EDRAGON = nullptr;      /* This is Shenron when he is loaded */
 room_rnum r_mortal_start_room;    /* rnum of mortal start room	 */
 room_rnum r_immort_start_room;    /* rnum of immort start room	 */
 room_rnum r_frozen_start_room;    /* rnum of frozen start room	 */
@@ -157,7 +157,7 @@ std::set<zone_vnum> zone_reset_queue;
 std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
 
 /* local functions */
-static void dragon_level(BaseCharacter *ch);
+static void dragon_level(Character *ch);
 
 static int file_to_string(const char *name, char *buf);
 
@@ -186,7 +186,7 @@ void Read_Invalid_List();
 
 int hsort(const void *a, const void *b);
 
-void memorize_add(BaseCharacter *ch, int spellnum, int timer);
+void memorize_add(Character *ch, int spellnum, int timer);
 
 void free_feats();
 
@@ -194,7 +194,7 @@ void free_assemblies();
 
 /* external vars */
 
-static void dragon_level(BaseCharacter *ch) {
+static void dragon_level(Character *ch) {
     struct descriptor_data *d;
     int level = 0, count = 0;
 
@@ -505,7 +505,7 @@ void boot_db_shadow() {
 /* Free the world, in a memory allocation sense. */
 void destroy_db() {
     ssize_t cnt, itr;
-    BaseCharacter *chtmp;
+    Character *chtmp;
     Object *objtmp;
 
     /* Objects */
@@ -1088,22 +1088,14 @@ int hsort(const void *a, const void *b) {
 *************************************************************************/
 
 
-int vnum_mobile(char *searchname, BaseCharacter *ch) {
+int vnum_mobile(char *searchname, Character *ch) {
     int found = 0;
 
     return (found);
 }
 
 
-int vnum_object(char *searchname, BaseCharacter *ch) {
-    int found = 0;
-
-
-    return (found);
-}
-
-
-int vnum_material(char *searchname, BaseCharacter *ch) {
+int vnum_object(char *searchname, Character *ch) {
     int found = 0;
 
 
@@ -1111,7 +1103,7 @@ int vnum_material(char *searchname, BaseCharacter *ch) {
 }
 
 
-int vnum_weapontype(char *searchname, BaseCharacter *ch) {
+int vnum_material(char *searchname, Character *ch) {
     int found = 0;
 
 
@@ -1119,7 +1111,15 @@ int vnum_weapontype(char *searchname, BaseCharacter *ch) {
 }
 
 
-int vnum_armortype(char *searchname, BaseCharacter *ch) {
+int vnum_weapontype(char *searchname, Character *ch) {
+    int found = 0;
+
+
+    return (found);
+}
+
+
+int vnum_armortype(char *searchname, Character *ch) {
     int found = 0;
 
 
@@ -1128,7 +1128,7 @@ int vnum_armortype(char *searchname, BaseCharacter *ch) {
 
 
 /* create a new mobile from a prototype */
-BaseCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
+Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
     auto proto = mob_proto.find(nr);
 
@@ -1140,7 +1140,7 @@ BaseCharacter *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     auto uid = getNextUID();
     auto ent = reg.create();
     deserializeEntity(ent, proto->second);
-    auto mob = reg.try_get<BaseCharacter>(ent);
+    auto mob = reg.try_get<Character>(ent);
     setEntity(uid, ent);
 
     std::map<CharAppearance, int> setNumsTo;
@@ -1769,11 +1769,11 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
 /* execute the reset command table of a given zone */
 void reset_zone(zone_rnum zone) {
     int cmd_no = -1, last_cmd = 0;
-    BaseCharacter *mob = nullptr;
+    Character *mob = nullptr;
     Object *obj, *obj_to;
     room_vnum rvnum;
     room_rnum rrnum;
-    BaseCharacter *tmob = nullptr; /* for trigger assignment */
+    Character *tmob = nullptr; /* for trigger assignment */
     Object *tobj = nullptr;  /* for trigger assignment */
     int mob_load = false; /* ### */
     int obj_load = false; /* ### */
@@ -1813,7 +1813,7 @@ void reset_zone(zone_rnum zone) {
                     if (mob_proto.contains(c.arg1) && (get_vnum_count(characterVnumIndex, c.arg1) < c.arg2) && room &&
                         (rand_number(1, 100) >= c.arg5)) {
                         int room_max = 0;
-                        BaseCharacter *i;
+                        Character *i;
 
                         /* First find out how many mobs of VNUM are in the mud with this rooms */
                         /* VNUM as a load point for max from room checks. */
@@ -2223,7 +2223,7 @@ void free_followers(struct follow_type *k) {
 
 
 /* release memory allocated for a char struct */
-void free_char(BaseCharacter *ch) {
+void free_char(Character *ch) {
     int i;
     entities.erase(ch->getUID());
     
@@ -2302,7 +2302,7 @@ static int file_to_string(const char *name, char *buf) {
 
 
 /* clear some of the the working variables of a char */
-void reset_char(BaseCharacter *ch) {
+void reset_char(Character *ch) {
     int i;
 
     ch->followers = nullptr;
@@ -2322,7 +2322,7 @@ void reset_char(BaseCharacter *ch) {
  * Called during character creation after picking character class
  * (and then never again for that character).
  */
-void init_char(BaseCharacter *ch) {
+void init_char(Character *ch) {
     int i;
 
     GET_CRANK(ch) = 0;
@@ -2838,7 +2838,7 @@ GameEntity* resolveUID(const std::string& uid) {
         auto &info = reg.get<Info>(u);
         switch(info.family) {
             case EntityFamily::Character:
-                return reg.try_get<BaseCharacter>(u);
+                return reg.try_get<Character>(u);
             case EntityFamily::Object:
                 return reg.try_get<Object>(u);
             case EntityFamily::Room:

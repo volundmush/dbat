@@ -32,8 +32,8 @@
 
 /* global variables */
 Object *obj_selling = nullptr;    /* current object for sale */
-BaseCharacter *ch_selling = nullptr;    /* current character selling obj */
-BaseCharacter *ch_buying = nullptr;    /* current character buying the object */
+Character *ch_selling = nullptr;    /* current character selling obj */
+Character *ch_buying = nullptr;    /* current character buying the object */
 
 /* local vvariables  */
 static int curbid = 0;                /* current bid on item being auctioned */
@@ -55,40 +55,40 @@ static const char *auctioneer[AUC_BID + 1] = {
 };
 
 /* local functions */
-static void majin_gain(BaseCharacter *ch, Object *food, int foob);
+static void majin_gain(Character *ch, Object *food, int foob);
 
-static int can_take_obj(BaseCharacter *ch, Object *obj);
+static int can_take_obj(Character *ch, Object *obj);
 
-static void get_check_money(BaseCharacter *ch, Object *obj);
+static void get_check_money(Character *ch, Object *obj);
 
-static void perform_give_gold(BaseCharacter *ch, BaseCharacter *vict, int amount);
+static void perform_give_gold(Character *ch, Character *vict, int amount);
 
-static void perform_give(BaseCharacter *ch, BaseCharacter *vict, Object *obj);
+static void perform_give(Character *ch, Character *vict, Object *obj);
 
-static int perform_drop(BaseCharacter *ch, Object *obj, int8_t mode, const char *sname, room_rnum RDR);
+static int perform_drop(Character *ch, Object *obj, int8_t mode, const char *sname, room_rnum RDR);
 
-static void perform_drop_gold(BaseCharacter *ch, int amount, int8_t mode, room_rnum RDR);
+static void perform_drop_gold(Character *ch, int amount, int8_t mode, room_rnum RDR);
 
-static BaseCharacter *give_find_vict(BaseCharacter *ch, char *arg);
+static Character *give_find_vict(Character *ch, char *arg);
 
-static void perform_put(BaseCharacter *ch, Object *obj, Object *cont);
+static void perform_put(Character *ch, Object *obj, Object *cont);
 
-static void wear_message(BaseCharacter *ch, Object *obj, int where);
+static void wear_message(Character *ch, Object *obj, int where);
 
-static void perform_get_from_container(BaseCharacter *ch, Object *obj, Object *cont, int mode);
+static void perform_get_from_container(Character *ch, Object *obj, Object *cont, int mode);
 
-static int hands(BaseCharacter *ch);
+static int hands(Character *ch);
 
-static void start_auction(BaseCharacter *ch, Object *obj, int
+static void start_auction(Character *ch, Object *obj, int
 bid);
 
-static void auc_stat(BaseCharacter *ch, Object *obj);
+static void auc_stat(Character *ch, Object *obj);
 
 static void auc_send_to_all(char *messg, bool buyer);
 
-static bool has_housekey(BaseCharacter *ch, Object *obj);
+static bool has_housekey(Character *ch, Object *obj);
 
-static void harvest_plant(BaseCharacter *ch, Object *plant);
+static void harvest_plant(Character *ch, Object *plant);
 
 static int can_harvest(Object *plant);
 
@@ -165,7 +165,7 @@ static int can_harvest(Object *plant) {
 
 }
 
-static void harvest_plant(BaseCharacter *ch, Object *plant) {
+static void harvest_plant(Character *ch, Object *plant) {
     int extract = false, reward = rand_number(5, 15), count = reward;
     Object *fruit = nullptr;
 
@@ -664,7 +664,7 @@ ACMD(do_garden) {
     }
 }
 
-static bool has_housekey(BaseCharacter *ch, Object *obj) {
+static bool has_housekey(Character *ch, Object *obj) {
 
     if(OBJ_FLAGGED(obj, ITEM_DUPLICATE)) return false;
 
@@ -807,7 +807,7 @@ int check_insidebag(Object *cont, double mult) {
     return (count);
 }
 
-int check_saveroom_count(BaseCharacter *ch, Object *cont) {
+int check_saveroom_count(Character *ch, Object *cont) {
     int count = 0, was = 0;
 
     if (IN_ROOM(ch) == NOWHERE)
@@ -1010,7 +1010,7 @@ ACMD(do_twohand) {
     }
 }
 
-static void start_auction(BaseCharacter *ch, Object *obj, int bid) {
+static void start_auction(Character *ch, Object *obj, int bid) {
     /* Take object from character and set variables */
 
     obj->removeFromLocation();
@@ -1170,7 +1170,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
     }
 
     if (dballtime == 0) {
-        BaseCharacter *hunter = nullptr;
+        Character *hunter = nullptr;
         mob_rnum r_num;
 
         WISHTIME = 0;
@@ -1890,7 +1890,7 @@ ACMD(do_bid) {
 
 }
 
-void stop_auction(int type, BaseCharacter *ch) {
+void stop_auction(int type, Character *ch) {
     if (obj_selling == nullptr) {
         auc_send_to_all("@RThe auction has stopped because someone has made off with the auctioned object!@n\r\n",
                         false);
@@ -1952,7 +1952,7 @@ void stop_auction(int type, BaseCharacter *ch) {
 
 }
 
-static void auc_stat(BaseCharacter *ch, Object *obj) {
+static void auc_stat(Character *ch, Object *obj) {
 
     if (aucstat == AUC_NULL_STATE) {
         ch->sendf("Nothing is being auctioned!\r\n");
@@ -2210,7 +2210,7 @@ ACMD(do_assemble) {
     }
 }
 
-static void perform_put(BaseCharacter *ch, Object *obj,
+static void perform_put(Character *ch, Object *obj,
                         Object *cont) {
 
     int dball[7] = {20, 21, 22, 23, 24, 25, 26};
@@ -2310,7 +2310,7 @@ ACMD(do_put) {
     char arg2[MAX_INPUT_LENGTH];
     char arg3[MAX_INPUT_LENGTH];
     Object *obj, *next_obj, *cont;
-    BaseCharacter *tmp_char;
+    Character *tmp_char;
     int obj_dotmode, cont_dotmode, found = 0, howmany = 1;
     char *theobj, *thecont;
 
@@ -2386,7 +2386,7 @@ ACMD(do_put) {
     */
 }
 
-static int can_take_obj(BaseCharacter *ch, Object *obj) {
+static int can_take_obj(Character *ch, Object *obj) {
     if (!(CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
         act("$p: you can't take that!", false, ch, obj, nullptr, TO_CHAR);
         return (0);
@@ -2400,7 +2400,7 @@ static int can_take_obj(BaseCharacter *ch, Object *obj) {
     return (1);
 }
 
-static void get_check_money(BaseCharacter *ch, Object *obj) {
+static void get_check_money(Character *ch, Object *obj) {
     int value = GET_OBJ_VAL(obj, VAL_MONEY_SIZE);
 
     if (GET_OBJ_TYPE(obj) != ITEM_MONEY || value <= 0)
@@ -2435,7 +2435,7 @@ static void get_check_money(BaseCharacter *ch, Object *obj) {
     }
 }
 
-static void perform_get_from_container(BaseCharacter *ch, Object *obj,
+static void perform_get_from_container(Character *ch, Object *obj,
                                        Object *cont, int mode) {
     if (mode == FIND_OBJ_INV || mode == FIND_OBJ_EQUIP || can_take_obj(ch, obj)) {
         if (IS_CARRYING_N(ch) >= CAN_CARRY_N(ch)) {
@@ -2476,7 +2476,7 @@ static void perform_get_from_container(BaseCharacter *ch, Object *obj,
 }
 
 
-int perform_get_from_room(BaseCharacter *ch, Object *obj) {
+int perform_get_from_room(Character *ch, Object *obj) {
 
     if (SITTING(obj)) {
         ch->sendf("Someone is on that!\r\n");
@@ -2586,7 +2586,7 @@ ACMD(do_get) {
     }
 }
 
-static void perform_drop_gold(BaseCharacter *ch, int amount,
+static void perform_drop_gold(Character *ch, int amount,
                               int8_t mode, room_rnum RDR) {
     Object *obj;
 
@@ -2648,7 +2648,7 @@ static void perform_drop_gold(BaseCharacter *ch, int amount,
 #define VANISH(mode) ((mode == SCMD_DONATE || mode == SCMD_JUNK) ? \
               "  It vanishes in a puff of smoke!" : "")
 
-static int perform_drop(BaseCharacter *ch, Object *obj,
+static int perform_drop(Character *ch, Object *obj,
                         int8_t mode, const char *sname, room_rnum RDR) {
     char buf[MAX_STRING_LENGTH];
     int value;
@@ -2802,7 +2802,7 @@ ACMD(do_drop) {
 
 }
 
-static void perform_give(BaseCharacter *ch, BaseCharacter *vict,
+static void perform_give(Character *ch, Character *vict,
                          Object *obj) {
     if (!give_otrigger(obj, ch, vict))
         return;
@@ -2880,8 +2880,8 @@ static void perform_give(BaseCharacter *ch, BaseCharacter *vict,
 }
 
 /* utility function for give */
-static BaseCharacter *give_find_vict(BaseCharacter *ch, char *arg) {
-    BaseCharacter *vict;
+static Character *give_find_vict(Character *ch, char *arg) {
+    Character *vict;
 
     skip_spaces(&arg);
     if (!*arg)
@@ -2898,7 +2898,7 @@ static BaseCharacter *give_find_vict(BaseCharacter *ch, char *arg) {
     return (nullptr);
 }
 
-static void perform_give_gold(BaseCharacter *ch, BaseCharacter *vict,
+static void perform_give_gold(Character *ch, Character *vict,
                               int amount) {
     char buf[MAX_STRING_LENGTH];
 
@@ -2933,7 +2933,7 @@ static void perform_give_gold(BaseCharacter *ch, BaseCharacter *vict,
 ACMD(do_give) {
     char arg[MAX_STRING_LENGTH];
     int amount, dotmode;
-    BaseCharacter *vict;
+    Character *vict;
     Object *obj, *next_obj;
 
     argument = one_argument(argument, arg);
@@ -3028,7 +3028,7 @@ ACMD(do_give) {
 
 void weight_change_object(Object *obj, int weight) {
     Object *tmp_obj;
-    BaseCharacter *tmp_ch;
+    Character *tmp_ch;
 
     if (IN_ROOM(obj) != NOWHERE) {
         GET_OBJ_WEIGHT(obj) += weight;
@@ -3453,7 +3453,7 @@ ACMD(do_eat) {
     }
 }
 
-static void majin_gain(BaseCharacter *ch, Object *food, int foob) {
+static void majin_gain(Character *ch, Object *food, int foob) {
     if (!IS_MAJIN(ch) || IS_NPC(ch)) {
         return;
     }
@@ -3657,7 +3657,7 @@ ACMD(do_pour) {
     weight_change_object(to_obj, amount);    /* Add weight */
 }
 
-static void wear_message(BaseCharacter *ch, Object *obj, int where) {
+static void wear_message(Character *ch, Object *obj, int where) {
     const char *wear_messages[][2] = {
             {"$n lights $p and holds it.",
                     "You light $p and hold it."},
@@ -3734,7 +3734,7 @@ static void wear_message(BaseCharacter *ch, Object *obj, int where) {
     act(wear_messages[where][1], false, ch, obj, nullptr, TO_CHAR);
 }
 
-static int hands(BaseCharacter *ch) {
+static int hands(Character *ch) {
     for(auto flag : {WEAR_WIELD1, WEAR_WIELD2}) {
         if (GET_EQ(ch, flag)) {
             if (OBJ_FLAGGED(GET_EQ(ch, flag), ITEM_2H) ||
@@ -3766,7 +3766,7 @@ static const std::vector<std::pair<int, int>> wearchecks = {
             {ITEM_WEAR_EYE, WEAR_EYE}
         };
 
-void perform_wear(BaseCharacter *ch, Object *obj, int where) {
+void perform_wear(Character *ch, Object *obj, int where) {
     /*
    * ITEM_WEAR_TAKE is used for objects that do not require special bits
    * to be put into that position (e.g. you can hold any object, not just
@@ -3870,7 +3870,7 @@ void perform_wear(BaseCharacter *ch, Object *obj, int where) {
     equip_char(ch, obj, where);
 }
 
-int find_eq_pos(BaseCharacter *ch, Object *obj, char *arg) {
+int find_eq_pos(Character *ch, Object *obj, char *arg) {
     int where = -1;
 
     const char *keywords[] = {
@@ -4070,7 +4070,7 @@ ACMD(do_grab) {
     }
 }
 
-void perform_remove(BaseCharacter *ch, int pos) {
+void perform_remove(Character *ch, int pos) {
     Object *obj;
 
     int64_t previous = GET_HIT(ch);

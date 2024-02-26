@@ -56,12 +56,12 @@ extern void assemblyBootAssemblies();
 
 extern void assemblySaveAssemblies();
 
-extern void assemblyListToChar(BaseCharacter *pCharacter);
+extern void assemblyListToChar(Character *pCharacter);
 
 extern bool assemblyAddComponent(long lVnum, long lComponentVnum,
                                  bool bExtract, bool bInRoom);
 
-extern bool assemblyCheckComponents(long lVnum, BaseCharacter
+extern bool assemblyCheckComponents(long lVnum, Character
 *pCharacter, int extract_yes);
 
 extern bool assemblyCreate(long lVnum, int iAssembledType);

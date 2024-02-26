@@ -24,13 +24,13 @@
 
 /* remove all triggers from a mob/obj/room */
 void extract_script(void *thing, int type) {
-    BaseCharacter *mob;
+    Character *mob;
     Object *obj;
     Room *room;
 
     switch (type) {
         case MOB_TRIGGER:
-            mob = (BaseCharacter *) thing;
+            mob = (Character *) thing;
             mob->script->purged = true;
             mob->script->removeAll();
             break;

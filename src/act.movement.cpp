@@ -26,29 +26,29 @@
 #include "dbat/entity.h"
 
 /* local functions */
-static void handle_fall(BaseCharacter *ch);
+static void handle_fall(Character *ch);
 
-static int check_swim(BaseCharacter *ch);
+static int check_swim(Character *ch);
 
-static void disp_locations(BaseCharacter *ch, vnum areaVnum, std::set<room_vnum> &rooms);
+static void disp_locations(Character *ch, vnum areaVnum, std::set<room_vnum> &rooms);
 
-static int has_boat(BaseCharacter *ch);
+static int has_boat(Character *ch);
 
-static int has_key(BaseCharacter *ch, obj_vnum key);
+static int has_key(Character *ch, obj_vnum key);
 
-static int ok_pick(BaseCharacter *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, Object *obj);
+static int ok_pick(Character *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, Object *obj);
 
-static int has_flight(BaseCharacter *ch);
+static int has_flight(Character *ch);
 
-static int do_simple_enter(BaseCharacter *ch, Object *obj, int need_specials_check);
+static int do_simple_enter(Character *ch, Object *obj, int need_specials_check);
 
-static int perform_enter_obj(BaseCharacter *ch, Object *obj, int need_specials_check);
+static int perform_enter_obj(Character *ch, Object *obj, int need_specials_check);
 
-static int do_simple_leave(BaseCharacter *ch, Object *obj, int need_specials_check);
+static int do_simple_leave(Character *ch, Object *obj, int need_specials_check);
 
-static int perform_leave_obj(BaseCharacter *ch, Object *obj, int need_specials_check);
+static int perform_leave_obj(Character *ch, Object *obj, int need_specials_check);
 
-static int64_t calcNeedMovementGravity(BaseCharacter *ch)
+static int64_t calcNeedMovementGravity(Character *ch)
 {
     if (IS_NPC(ch))
         return 0.0;
@@ -57,7 +57,7 @@ static int64_t calcNeedMovementGravity(BaseCharacter *ch)
 }
 
 /* This handles teleporting players with instant transmission or skills like it. */
-void handle_teleport(BaseCharacter *ch, BaseCharacter *tar, int location)
+void handle_teleport(Character *ch, Character *tar, int location)
 {
     int success = false;
 
@@ -142,7 +142,7 @@ ACMD(do_carry)
     if (IS_NPC(ch))
         return;
 
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH];
 
     if (DRAGGING(ch))
@@ -232,10 +232,10 @@ ACMD(do_carry)
 }
 
 /* Handles dropping someone you are carrying. */
-void carry_drop(BaseCharacter *ch, int type)
+void carry_drop(Character *ch, int type)
 {
 
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
 
     vict = CARRYING(ch);
 
@@ -291,7 +291,7 @@ std::optional<room_vnum> land_location(char *arg, std::set<room_vnum> &rooms)
 static std::set<vnum> _areaRecurseGuard;
 
 /* This shows the player what locations the planet has to land at. */
-static void disp_locations(BaseCharacter *ch, vnum areaVnum, std::set<room_vnum> &rooms)
+static void disp_locations(Character *ch, vnum areaVnum, std::set<room_vnum> &rooms)
 {
     /*
     auto &a = areas[areaVnum];
@@ -385,7 +385,7 @@ ACMD(do_land)
 }
 
 /* simple function to determine if char can walk on water */
-static int has_boat(BaseCharacter *ch)
+static int has_boat(Character *ch)
 {
     Object *obj;
     int i;
@@ -411,7 +411,7 @@ static int has_boat(BaseCharacter *ch)
 }
 
 /* simple function to determine if char can fly */
-static int has_flight(BaseCharacter *ch)
+static int has_flight(Character *ch)
 {
     Object *obj;
 
@@ -449,7 +449,7 @@ static int has_flight(BaseCharacter *ch)
 }
 
 /* simple function to determine if char can breathe non-o2 */
-int has_o2(BaseCharacter *ch)
+int has_o2(Character *ch)
 {
     if (ADM_FLAGGED(ch, ADM_WALKANYWHERE))
         return (1);
@@ -809,7 +809,7 @@ ACMD(do_move)
     }
 }
 
-static int has_key(BaseCharacter *ch, obj_vnum key)
+static int has_key(Character *ch, obj_vnum key)
 {
     return ch->findObjectVnum(key) != nullptr;
 }
@@ -835,7 +835,7 @@ static const int flags_door[] =
         NEED_CLOSED | NEED_UNLOCKED,
         NEED_CLOSED | NEED_LOCKED};
 
-static int ok_pick(BaseCharacter *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, Object *hatch)
+static int ok_pick(Character *ch, obj_vnum keynum, int pickproof, int dclock, int scmd, Object *hatch)
 {
     int skill_lvl, found = false;
     Object *obj, *next_obj;
@@ -904,7 +904,7 @@ ACMD(do_gen_door)
 {
 }
 
-static int do_simple_enter(BaseCharacter *ch, Object *obj, int need_specials_check)
+static int do_simple_enter(Character *ch, Object *obj, int need_specials_check)
 {
     room_rnum dest_room = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
     room_rnum was_in = IN_ROOM(ch);
@@ -1039,7 +1039,7 @@ static int do_simple_enter(BaseCharacter *ch, Object *obj, int need_specials_che
     return 1;
 }
 
-static int perform_enter_obj(BaseCharacter *ch, Object *obj, int need_specials_check)
+static int perform_enter_obj(Character *ch, Object *obj, int need_specials_check)
 {
     room_rnum was_in = IN_ROOM(ch);
     int could_move = false;
@@ -1063,7 +1063,7 @@ static int perform_enter_obj(BaseCharacter *ch, Object *obj, int need_specials_c
         {
             if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099)
             {
-                BaseCharacter *tch, *next_v;
+                Character *tch, *next_v;
                 int filled = false;
                 for (auto tch : getEntity<Room>(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->getPeople())
                 {
@@ -1152,7 +1152,7 @@ ACMD(do_enter)
     */
 }
 
-static int do_simple_leave(BaseCharacter *ch, Object *obj, int need_specials_check)
+static int do_simple_leave(Character *ch, Object *obj, int need_specials_check)
 {
     room_rnum was_in = IN_ROOM(ch), dest_room = NOWHERE;
     int need_movement = 0;
@@ -1324,7 +1324,7 @@ static int do_simple_leave(BaseCharacter *ch, Object *obj, int need_specials_che
     return 1;
 }
 
-static int perform_leave_obj(BaseCharacter *ch, Object *obj, int need_specials_check)
+static int perform_leave_obj(Character *ch, Object *obj, int need_specials_check)
 {
     room_rnum was_in = IN_ROOM(ch);
     int could_move = false;
@@ -1396,7 +1396,7 @@ ACMD(do_leave)
     ch->sendf("I see no obvious exits to the outside.\r\n");
 }
 
-static void handle_fall(BaseCharacter *ch)
+static void handle_fall(Character *ch)
 {
     while (EXIT(ch, 5) && SECT(IN_ROOM(ch)) == SECT_FLYING)
     {
@@ -1448,7 +1448,7 @@ static void handle_fall(BaseCharacter *ch)
     }
 }
 
-static int check_swim(BaseCharacter *ch)
+static int check_swim(Character *ch)
 {
     auto can = false;
 
@@ -1661,7 +1661,7 @@ ACMD(do_fly)
     }
 }
 
-static void autochair(BaseCharacter *ch, Object *chair)
+static void autochair(Character *ch, Object *chair)
 {
     // TODO: Make this configurable.
     SITTING(chair) = nullptr;
@@ -2245,7 +2245,7 @@ ACMD(do_sleep)
 ACMD(do_wake)
 {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     int self = 0;
 
     one_argument(argument, arg);
@@ -2341,7 +2341,7 @@ ACMD(do_wake)
 ACMD(do_follow)
 {
     char buf[MAX_INPUT_LENGTH];
-    BaseCharacter *leader;
+    Character *leader;
 
     one_argument(argument, buf);
 

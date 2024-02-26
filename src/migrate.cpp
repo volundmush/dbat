@@ -1475,7 +1475,7 @@ static void index_boot(int mode) {
             break;
         case DB_BOOT_MOB:
             size[0] = sizeof(struct index_data) * rec_count;
-            size[1] = sizeof(BaseCharacter) * rec_count;
+            size[1] = sizeof(Character) * rec_count;
             basic_mud_log("   %d mobs, %d bytes in index, %d bytes in prototypes.", rec_count, size[0], size[1]);
             break;
         case DB_BOOT_OBJ:
@@ -1570,7 +1570,7 @@ static void tag_argument(char *argument, char *tag) {
 }
 
 
-static void load_affects(FILE *fl, BaseCharacter *ch, int violence) {
+static void load_affects(FILE *fl, Character *ch, int violence) {
     int num, num2, num3, num4, num5, num6, i;
     char line[MAX_INPUT_LENGTH + 1];
     struct affected_type af;
@@ -1597,7 +1597,7 @@ static void load_affects(FILE *fl, BaseCharacter *ch, int violence) {
 }
 
 
-static void load_skills(FILE *fl, BaseCharacter *ch, bool mods) {
+static void load_skills(FILE *fl, Character *ch, bool mods) {
     int num = 0, num2 = 0, num3 = 0;
     char line[MAX_INPUT_LENGTH + 1];
 
@@ -1615,7 +1615,7 @@ static void load_skills(FILE *fl, BaseCharacter *ch, bool mods) {
     } while (num != 0);
 }
 
-static void load_bonuses(FILE *fl, BaseCharacter *ch, bool mods) {
+static void load_bonuses(FILE *fl, Character *ch, bool mods) {
     int num[52] = {0}, i;
     char line[MAX_INPUT_LENGTH + 1];
 
@@ -1640,7 +1640,7 @@ static void load_bonuses(FILE *fl, BaseCharacter *ch, bool mods) {
 #define LOAD_KI        3
 #define LOAD_LIFE       4
 
-static void load_HMVS(BaseCharacter *ch, const char *line, int mode) {
+static void load_HMVS(Character *ch, const char *line, int mode) {
     int64_t num = 0, num2 = 0;
 
     sscanf(line, "%" I64T "/%" I64T "", &num, &num2);
@@ -1664,7 +1664,7 @@ static void load_HMVS(BaseCharacter *ch, const char *line, int mode) {
     }
 }
 
-static void load_BASE(BaseCharacter *ch, const char *line, int mode) {
+static void load_BASE(Character *ch, const char *line, int mode) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -1688,7 +1688,7 @@ static void load_BASE(BaseCharacter *ch, const char *line, int mode) {
     }
 }
 
-static void load_majin(BaseCharacter *ch, const char *line) {
+static void load_majin(Character *ch, const char *line) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -1696,7 +1696,7 @@ static void load_majin(BaseCharacter *ch, const char *line) {
 
 }
 
-static void load_molt(BaseCharacter *ch, const char *line) {
+static void load_molt(Character *ch, const char *line) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
@@ -1706,7 +1706,7 @@ static void load_molt(BaseCharacter *ch, const char *line) {
 
 /* new load_char reads ASCII Player Files */
 /* Load a char, TRUE if loaded, FALSE if not */
-static int load_char(const char *name, BaseCharacter *ch) {
+static int load_char(const char *name, Character *ch) {
     int id = 0, i, num = 0, num2 = 0, num3 = 0;
     FILE *fl = nullptr;
     char fname[READ_SIZE];
@@ -3579,7 +3579,7 @@ void migrate_characters() {
 
     for(auto &[cname, accID] : characterToAccount) {
         auto ent = reg.create();
-        auto &c = reg.get_or_emplace<BaseCharacter>(ent);
+        auto &c = reg.get_or_emplace<Character>(ent);
         auto ch = &c;
 
         if(load_char(cname.c_str(), ch) < 0) {
@@ -3699,7 +3699,8 @@ void migrate_characters() {
 static void migrate_exits() {
     for(auto &[uid, te] : temp_exits) {
         if(auto e = getEntity<Exit>(uid); e) {
-            e->destination = getEntity<Room>(te.destination);
+            auto &dest = reg.get_or_emplace<Destination>(e->ent);
+            dest.target = entities.at(te.destination);
         }
 
     }

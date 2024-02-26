@@ -127,7 +127,7 @@ extern std::set<zone_vnum> zone_reset_queue;
 extern bool gameIsLoading;
 extern bool saveAll;
 
-extern BaseCharacter *EDRAGON;
+extern Character *EDRAGON;
 extern int WISH[2];
 extern int DRAGONR, DRAGONZ, DRAGONC, SHENRON;
 extern int circle_restrict;
@@ -215,39 +215,39 @@ extern mob_rnum real_mobile(mob_vnum vnum);
 
 extern obj_rnum real_object(obj_vnum vnum);
 
-extern void init_char(BaseCharacter *ch);
+extern void init_char(Character *ch);
 
-BaseCharacter *read_mobile(mob_vnum nr, int type);
+Character *read_mobile(mob_vnum nr, int type);
 
-extern int vnum_mobile(char *searchname, BaseCharacter *ch);
+extern int vnum_mobile(char *searchname, Character *ch);
 
-extern void reset_char(BaseCharacter *ch);
+extern void reset_char(Character *ch);
 
-extern void free_char(BaseCharacter *ch);
+extern void free_char(Character *ch);
 
 extern void save_player_index();
 
 extern long get_ptable_by_name(const char *name);
 
-extern void read_level_data(BaseCharacter *ch, FILE *fl);
+extern void read_level_data(Character *ch, FILE *fl);
 
-extern void write_level_data(BaseCharacter *ch, FILE *fl);
+extern void write_level_data(Character *ch, FILE *fl);
 
-extern int parse_mobile_from_file(FILE *mob_f, BaseCharacter *ch);
+extern int parse_mobile_from_file(FILE *mob_f, Character *ch);
 
 extern void free_obj(Object *obj);
 
 Object *read_object(obj_vnum nr, int type, bool activate = true);
 
-extern int vnum_object(char *searchname, BaseCharacter *ch);
+extern int vnum_object(char *searchname, Character *ch);
 
 extern char *sprintuniques(int low, int high);
 
-extern int vnum_material(char *searchname, BaseCharacter *ch);
+extern int vnum_material(char *searchname, Character *ch);
 
-extern int vnum_weapontype(char *searchname, BaseCharacter *ch);
+extern int vnum_weapontype(char *searchname, Character *ch);
 
-extern int vnum_armortype(char *searchname, BaseCharacter *ch);
+extern int vnum_armortype(char *searchname, Character *ch);
 
 extern void migrate_db();
 
@@ -307,15 +307,15 @@ extern std::unordered_map<zone_vnum, struct zone_data> zone_table;
 extern struct descriptor_data *descriptor_list;
 extern std::unordered_map<int64_t, struct descriptor_data*> sessions;
 
-extern BaseCharacter *affect_list;
-extern BaseCharacter *affectv_list;
+extern Character *affect_list;
+extern Character *affectv_list;
 
 extern std::unordered_map<mob_vnum, struct index_data> mob_index;
 extern std::unordered_map<mob_vnum, nlohmann::json> mob_proto;
 
 
 extern VnumIndex<Object> objectVnumIndex;
-extern VnumIndex<BaseCharacter> characterVnumIndex;
+extern VnumIndex<Character> characterVnumIndex;
 
 extern std::unordered_map<obj_vnum, struct index_data> obj_index;
 extern std::unordered_map<obj_vnum, nlohmann::json> obj_proto;

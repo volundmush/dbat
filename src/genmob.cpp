@@ -21,7 +21,7 @@
 #include "dbat/account.h"
 
 /* From db.c */
-void check_mobile_strings(BaseCharacter *mob);
+void check_mobile_strings(Character *mob);
 
 void check_mobile_string(mob_vnum i, char **string, const char *dscr);
 

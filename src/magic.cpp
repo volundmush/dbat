@@ -26,7 +26,7 @@
 /* affect_update: called from comm.c (causes spells to wear off) */
 void affect_update(uint64_t heartPulse, double deltaTime) {
     struct affected_type *af, *next;
-    BaseCharacter *i;
+    Character *i;
 
     for (i = affect_list; i; i = i->next_affect) {
         for (af = i->affected; af; af = next) {
@@ -59,7 +59,7 @@ void affect_update(uint64_t heartPulse, double deltaTime) {
 /* affect_update_violence: called from fight.c (causes spells to wear off) */
 void affect_update_violence(uint64_t heartPulse, double deltaTime) {
     struct affected_type *af, *next;
-    BaseCharacter *i;
+    Character *i;
     int dam;
     int maxdam;
 

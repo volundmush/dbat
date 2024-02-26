@@ -103,7 +103,7 @@ ACMD(do_geno) {
 
     int perc, prob;
     double attperc = 0.5, minimum = .4;
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -151,7 +151,7 @@ ACMD(do_geno) {
     }
 
     if (handle_defender(vict, ch)) {
-        BaseCharacter *def = GET_DEFENDER(vict);
+        Character *def = GET_DEFENDER(vict);
         vict = def;
     }
 
@@ -205,7 +205,7 @@ ACMD(do_genki) {
 
     int perc, prob;
     double attperc = .5, minimum = .4;
-    BaseCharacter *friend_char = nullptr, *vict = nullptr, *next_v = nullptr;
+    Character *friend_char = nullptr, *vict = nullptr, *next_v = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     two_arguments(argument, arg, arg2);
@@ -253,7 +253,7 @@ ACMD(do_genki) {
     }
 
     if (handle_defender(vict, ch)) {
-        BaseCharacter *def = GET_DEFENDER(vict);
+        Character *def = GET_DEFENDER(vict);
         vict = def;
     }
 
@@ -411,7 +411,7 @@ ACMD(do_blessedhammer) {
     int prob, perc, avo, index, pry = 2, dge = 2, blk = 2, skill;
     int64_t dmg;
     double attperc = .05, minimum = .01;
-    BaseCharacter *vict;
+    Character *vict;
     Object *obj;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -455,7 +455,7 @@ ACMD(do_blessedhammer) {
             return;
         }
         if (handle_defender(vict, ch)) {
-            BaseCharacter *def = GET_DEFENDER(vict);
+            Character *def = GET_DEFENDER(vict);
             vict = def;
         }
         improve_skill(ch, SKILL_BLESSEDHAMMER, 0);
@@ -1040,7 +1040,7 @@ ACMD(do_powerup) {
 ACMD(do_rescue) {
 
     char arg[100];
-    BaseCharacter *helpee, *opponent;
+    Character *helpee, *opponent;
 
     one_argument(argument, arg);
 
@@ -1082,7 +1082,7 @@ ACMD(do_rescue) {
 
 ACMD(do_assist) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *helpee, *opponent;
+    Character *helpee, *opponent;
 
     if (FIGHTING(ch)) {
         ch->sendf("You're already fighting!  How can you assist someone else?\r\n");
@@ -1132,7 +1132,7 @@ ACMD(do_assist) {
 
 ACMD(do_kill) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
 
     if (IS_NPC(ch) || !ADM_FLAGGED(ch, ADM_INSTANTKILL)) {
         return;
@@ -1157,7 +1157,7 @@ ACMD(do_kill) {
 
 ACMD(do_flee) {
     int i, attempt = -1;
-    BaseCharacter *was_fighting;
+    Character *was_fighting;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);

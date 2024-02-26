@@ -35,7 +35,7 @@ namespace net {
         sendText("      @D[@y------@YAvailable Characters@y------@D]@n\n");
         int counter = 0;
         for(auto cid : a->characters) {
-            auto p = getEntity<BaseCharacter>(cid);;
+            auto p = getEntity<Character>(cid);;
             if(!p) continue;
 
             std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, p->getName());
@@ -83,7 +83,7 @@ namespace net {
             }
 
             auto id = conn->account->characters[slot];
-            auto p = getEntity<BaseCharacter>(id);
+            auto p = getEntity<Character>(id);
             if(!p) {
                 sendText(fmt::format("ERROR: Player ID {} not found. Please alert staff.\r\n", id));
                 return;

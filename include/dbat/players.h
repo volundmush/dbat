@@ -5,6 +5,6 @@
 // global variables
 extern std::unordered_map<int64_t, std::shared_ptr<player_data>> players;
 
-BaseCharacter *findPlayer(const std::string& name);
+Character *findPlayer(const std::string& name);
 
 OpResult<> validate_pc_name(const std::string& name);

@@ -5,7 +5,7 @@
 #include "dbat/class.h"
 
 namespace net {
-    PuppetParser::PuppetParser(std::shared_ptr<Connection>& co, BaseCharacter *c) : ConnectionParser(co) {
+    PuppetParser::PuppetParser(std::shared_ptr<Connection>& co, Character *c) : ConnectionParser(co) {
         ch = c;
     }
 

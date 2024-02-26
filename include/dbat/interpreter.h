@@ -22,15 +22,15 @@ extern void perform_alias(struct descriptor_data *d, char *orig);
 
 extern void topLoad(void);
 
-extern void topWrite(BaseCharacter *ch);
+extern void topWrite(Character *ch);
 
-extern char *rIntro(BaseCharacter *ch, char *arg);
+extern char *rIntro(Character *ch, char *arg);
 
-extern int special(BaseCharacter *ch, int cmd, char *arg);
+extern int special(Character *ch, int cmd, char *arg);
 
 void payout(int num);
 int lockRead(char *name);
-extern void fingerUser(BaseCharacter *ch, std::shared_ptr<account_data> acc);
+extern void fingerUser(Character *ch, std::shared_ptr<account_data> acc);
 
 extern int readUserIndex(char *name);
 

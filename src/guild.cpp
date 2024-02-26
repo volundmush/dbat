@@ -30,9 +30,9 @@ std::unordered_map<guild_vnum, std::shared_ptr<Guild>> guild_index;
 
 char *guild_customer_string(int guild_nr, int detailed);
 
-int calculate_skill_cost(BaseCharacter *ch, int skill);
+int calculate_skill_cost(Character *ch, int skill);
 
-int calculate_skill_cost(BaseCharacter *ch, int skill) {
+int calculate_skill_cost(Character *ch, int skill) {
     int cost = 0;
 
     if (IS_SET(spell_info[skill].flags, SKFLAG_TIER2)) {
@@ -98,7 +98,7 @@ int calculate_skill_cost(BaseCharacter *ch, int skill) {
     return (cost);
 }
 
-void handle_ingest_learn(BaseCharacter *ch, BaseCharacter *vict) {
+void handle_ingest_learn(Character *ch, Character *vict) {
 
     int i = 1;
     ch->sendf("@YAll your current skills improve somewhat!@n\r\n");
@@ -133,7 +133,7 @@ ACMD(do_teach) {
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int skill = 100;
-    BaseCharacter *vict;
+    Character *vict;
 
     two_arguments(argument, arg, arg2);
 
@@ -253,7 +253,7 @@ int compare_spells(const void *x, const void *y) {
 }
 
 
-int print_skills_by_type(BaseCharacter *ch, char *buf, int maxsz, int sktype, char *argument) {
+int print_skills_by_type(Character *ch, char *buf, int maxsz, int sktype, char *argument) {
     char arg[1000];
     size_t len = 0;
     int t, known, nlen = 0, count = 0, canknow = 0;
@@ -311,7 +311,7 @@ int print_skills_by_type(BaseCharacter *ch, char *buf, int maxsz, int sktype, ch
     return len;
 }
 
-int slot_count(BaseCharacter *ch) {
+int slot_count(Character *ch) {
     int i, skills = -1, fail = false;
     int punch = false, kick = false, knee = false, elbow = false, kiball = false, kiblast = false, beam = false, renzo = false, shogekiha = false;
 
@@ -397,7 +397,7 @@ int slot_count(BaseCharacter *ch) {
     return (skills);
 }
 
-void list_skills(BaseCharacter *ch, char *arg) {
+void list_skills(Character *ch, char *arg) {
     const char *overflow = "\r\n**OVERFLOW**\r\n";
     size_t len = 0;
     int slots = false;
@@ -423,7 +423,7 @@ void list_skills(BaseCharacter *ch, char *arg) {
 }
 
 
-int is_guild_open(BaseCharacter *keeper, int guild_nr, int msg) {
+int is_guild_open(Character *keeper, int guild_nr, int msg) {
     char buf[200];
     *buf = 0;
 
@@ -440,7 +440,7 @@ int is_guild_open(BaseCharacter *keeper, int guild_nr, int msg) {
 }
 
 
-int is_guild_ok_char(BaseCharacter *keeper, BaseCharacter *ch, int guild_nr) {
+int is_guild_ok_char(Character *keeper, Character *ch, int guild_nr) {
     char buf[200];
 
     if (!(CAN_SEE(keeper, ch))) {
@@ -540,7 +540,7 @@ int is_guild_ok_char(BaseCharacter *keeper, BaseCharacter *ch, int guild_nr) {
 }
 
 
-int is_guild_ok(BaseCharacter *keeper, BaseCharacter *ch, int guild_nr) {
+int is_guild_ok(Character *keeper, Character *ch, int guild_nr) {
     if (is_guild_open(keeper, guild_nr, true))
         return (is_guild_ok_char(keeper, ch, guild_nr));
 
@@ -570,7 +570,7 @@ void sort_spells() {
 
 /* this and list skills should probally be combined.  perhaps in the
  * next release?  */
-void what_does_guild_know(int guild_nr, BaseCharacter *ch) {
+void what_does_guild_know(int guild_nr, Character *ch) {
     const char *overflow = "\r\n**OVERFLOW**\r\n";
     char buf2[MAX_STRING_LENGTH];
     int i, sortpos, canknow, j, k, count = 0, cost = 0;
@@ -659,7 +659,7 @@ void what_does_guild_know(int guild_nr, BaseCharacter *ch) {
     write_to_output(ch->desc, buf2);
 }
 
-int prereq_pass(BaseCharacter *ch, int snum) {
+int prereq_pass(Character *ch, int snum) {
     if (snum == SKILL_KOUSENGAN || snum == SKILL_TSUIHIDAN || snum == SKILL_RENZO || snum == SKILL_SHOGEKIHA) {
         if (GET_SKILL_BASE(ch, SKILL_KIBALL) < 40 || GET_SKILL_BASE(ch, SKILL_KIBLAST) < 40 ||
             GET_SKILL_BASE(ch, SKILL_BEAM) < 40) {
@@ -771,7 +771,7 @@ int prereq_pass(BaseCharacter *ch, int snum) {
 }
 
 
-void handle_forget(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *argument) {
+void handle_forget(Character *keeper, int guild_nr, Character *ch, char *argument) {
 
     int skill_num;
 
@@ -810,7 +810,7 @@ void handle_forget(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char 
 
 }
 
-void handle_grand(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *argument) {
+void handle_grand(Character *keeper, int guild_nr, Character *ch, char *argument) {
 
     int skill_num;
 
@@ -863,7 +863,7 @@ void handle_grand(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *
 
 }
 
-void handle_practice(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *argument) {
+void handle_practice(Character *keeper, int guild_nr, Character *ch, char *argument) {
     //int percent = GET_SKILL(ch, skill);
     int skill_num, learntype, pointcost, highest, i;
     char buf[MAX_STRING_LENGTH];
@@ -1044,12 +1044,12 @@ void handle_practice(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, cha
 }
 
 
-void handle_train(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *argument) {
+void handle_train(Character *keeper, int guild_nr, Character *ch, char *argument) {
 
 }
 
 
-void handle_gain(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *argument) {
+void handle_gain(Character *keeper, int guild_nr, Character *ch, char *argument) {
     skip_spaces(&argument);
     auto rpp_cost = rpp_to_level(ch);
 
@@ -1068,7 +1068,7 @@ void handle_gain(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *a
     }
 }
 
-int rpp_to_level(BaseCharacter *ch) {
+int rpp_to_level(Character *ch) {
 
     switch (GET_LEVEL(ch)) {
         case 2:
@@ -1091,7 +1091,7 @@ int rpp_to_level(BaseCharacter *ch) {
     }
 }
 
-void handle_study(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *argument) {
+void handle_study(Character *keeper, int guild_nr, Character *ch, char *argument) {
 
     int expcost = 25000, goldcost = 750, fail = false, reward = 25, goldadjust = 0, expadjust = 0;
 
@@ -1154,11 +1154,11 @@ void handle_study(BaseCharacter *keeper, int guild_nr, BaseCharacter *ch, char *
 SPECIAL(guild) {
     char arg[MAX_INPUT_LENGTH];
     int guild_nr, i;
-    BaseCharacter *keeper = (BaseCharacter *) me;
+    Character *keeper = (Character *) me;
     struct {
         const char *cmd;
 
-        void (*func)(BaseCharacter *, int, BaseCharacter *, char *);
+        void (*func)(Character *, int, Character *, char *);
     } guild_cmd_tab[] = {
             {"practice", handle_practice},
             {"gain",     handle_gain},
@@ -1201,7 +1201,7 @@ SPECIAL(guild) {
 /****  This is ripped off of read_line from shop.c.  They could be
  *  combined. But why? ****/
 
-std::list<BaseCharacter*> Guild::getMasters() {
+std::list<Character*> Guild::getMasters() {
     return get_vnum_list(characterVnumIndex, gm);
 }
 
@@ -1248,7 +1248,7 @@ char *guild_customer_string(int guild_nr, int detailed) {
     return (buf);
 }
 
-void list_all_guilds(BaseCharacter *ch) {
+void list_all_guilds(Character *ch) {
     const char *list_all_guilds_header =
             "Virtual   G.Master	Charge   Members\r\n"
             "----------------------------------------------------------------------\r\n";
@@ -1284,19 +1284,19 @@ void list_all_guilds(BaseCharacter *ch) {
 }
 
 
-void list_detailed_guild(BaseCharacter *ch, int gm_nr) {
+void list_detailed_guild(Character *ch, int gm_nr) {
 
 }
 
 
-void show_guild(BaseCharacter *ch, char *arg) {
+void show_guild(Character *ch, char *arg) {
 
 }
 
 /*
  * List all guilds in a zone.                              
  */
-void list_guilds(BaseCharacter *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax) {
+void list_guilds(Character *ch, zone_rnum rnum, guild_vnum vmin, guild_vnum vmax) {
 
 }
 

@@ -88,19 +88,19 @@ extern int parse_message(FILE *fl, struct board_info *temp_board);
 
 extern void look_at_boards();
 
-extern void show_board(obj_vnum board_vnum, BaseCharacter *ch);
+extern void show_board(obj_vnum board_vnum, Character *ch);
 
-extern void board_display_msg(obj_vnum board_vnum, BaseCharacter *ch, int arg);
+extern void board_display_msg(obj_vnum board_vnum, Character *ch, int arg);
 
-extern int mesglookup(struct board_msg *message, BaseCharacter *ch,
+extern int mesglookup(struct board_msg *message, Character *ch,
                       struct board_info *board);
 
-extern void write_board_message(obj_vnum board_vnum, BaseCharacter *ch, char *arg);
+extern void write_board_message(obj_vnum board_vnum, Character *ch, char *arg);
 
-extern void board_respond(long board_vnum, BaseCharacter *ch, int mnum);
+extern void board_respond(long board_vnum, Character *ch, int mnum);
 
 struct board_info *locate_board(obj_vnum board_vnum);
 
-extern void remove_board_msg(obj_vnum board_vnum, BaseCharacter *ch, int arg);
+extern void remove_board_msg(obj_vnum board_vnum, Character *ch, int arg);
 
 extern struct board_info *bboards;

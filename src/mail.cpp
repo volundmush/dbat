@@ -28,11 +28,11 @@ static position_list_type *free_list = nullptr;    /* list of free positions in 
 static long file_end_pos = 0;            /* length of file */
 
 /* local functions */
-void postmaster_send_mail(BaseCharacter *ch, BaseCharacter *mailman, int cmd, char *arg);
+void postmaster_send_mail(Character *ch, Character *mailman, int cmd, char *arg);
 
-void postmaster_check_mail(BaseCharacter *ch, BaseCharacter *mailman, int cmd, char *arg);
+void postmaster_check_mail(Character *ch, Character *mailman, int cmd, char *arg);
 
-void postmaster_receive_mail(BaseCharacter *ch, BaseCharacter *mailman, int cmd, char *arg);
+void postmaster_receive_mail(Character *ch, Character *mailman, int cmd, char *arg);
 
 void push_free_list(long pos);
 
@@ -513,20 +513,20 @@ SPECIAL(postmaster) {
     }
 
     if (CMD_IS("mail")) {
-        postmaster_send_mail(ch, (BaseCharacter *) me, cmd, argument);
+        postmaster_send_mail(ch, (Character *) me, cmd, argument);
         return (1);
     } else if (CMD_IS("check")) {
-        postmaster_check_mail(ch, (BaseCharacter *) me, cmd, argument);
+        postmaster_check_mail(ch, (Character *) me, cmd, argument);
         return (1);
     } else if (CMD_IS("receive")) {
-        postmaster_receive_mail(ch, (BaseCharacter *) me, cmd, argument);
+        postmaster_receive_mail(ch, (Character *) me, cmd, argument);
         return (1);
     } else
         return (0);
 }
 
 
-void postmaster_send_mail(BaseCharacter *ch, BaseCharacter *mailman,
+void postmaster_send_mail(Character *ch, Character *mailman,
                           int cmd, char *arg) {
     long recipient;
     char buf[MAX_INPUT_LENGTH], **mailwrite;
@@ -570,7 +570,7 @@ void postmaster_send_mail(BaseCharacter *ch, BaseCharacter *mailman,
 }
 
 
-void postmaster_check_mail(BaseCharacter *ch, BaseCharacter *mailman,
+void postmaster_check_mail(Character *ch, Character *mailman,
                            int cmd, char *arg) {
     if (has_mail(GET_IDNUM(ch)))
         act("$n tells you, 'You have mail waiting.'", false, mailman, nullptr, ch, TO_VICT);
@@ -579,7 +579,7 @@ void postmaster_check_mail(BaseCharacter *ch, BaseCharacter *mailman,
 }
 
 
-void postmaster_receive_mail(BaseCharacter *ch, BaseCharacter *mailman,
+void postmaster_receive_mail(Character *ch, Character *mailman,
                              int cmd, char *arg) {
     char buf[256];
     Object *obj;
@@ -636,7 +636,7 @@ void postmaster_receive_mail(BaseCharacter *ch, BaseCharacter *mailman,
     }
 }
 
-void notify_if_playing(BaseCharacter *from, int recipient_id) {
+void notify_if_playing(Character *from, int recipient_id) {
     struct descriptor_data *d;
 
     for (d = descriptor_list; d; d = d->next) {

@@ -104,7 +104,7 @@ struct syllable syls[] = {
 const char *unused_spellname = "!UNUSED!"; /* So we can get &unused_spellname */
 
 
-int mag_kicost(BaseCharacter *ch, int spellnum) {
+int mag_kicost(Character *ch, int spellnum) {
     int i, min, tval;
     SenseiID whichclass;
     return MAX(SINFO.ki_max - (SINFO.ki_change *

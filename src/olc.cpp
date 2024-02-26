@@ -31,16 +31,16 @@
 #define OLC_USAGE "Usage: olc { . | set | show | obj | mob | room} [args]\r\n"
 
 /* local globals */
-BaseCharacter *olc_ch;
+Character *olc_ch;
 
 /* local functions */
 void olc_interpreter(void *targ, int mode, char *arg);
 
-void olc_set_show(BaseCharacter *ch, int olc_mode, char *arg);
+void olc_set_show(Character *ch, int olc_mode, char *arg);
 
 void olc_string(char **string, size_t maxlen, char *arg);
 
-int can_modify(BaseCharacter *ch, int vnum);
+int can_modify(Character *ch, int vnum);
 
 ACMD(do_olc);
 
@@ -174,7 +174,7 @@ ACMD(do_olc) {
 void olc_interpreter(void *targ, int mode, char *arg) {
     int error = 0, command;
     char command_string[MAX_INPUT_LENGTH];
-    BaseCharacter *olc_mob = nullptr;
+    Character *olc_mob = nullptr;
     Room *olc_room = nullptr;
     Object *olc_obj = nullptr;
 
@@ -188,7 +188,7 @@ void olc_interpreter(void *targ, int mode, char *arg) {
             olc_room = (Room *) targ;
             break;
         case OLC_MOB:
-            olc_mob = (BaseCharacter *) targ;
+            olc_mob = (Character *) targ;
             break;
         case OLC_OBJ:
             olc_obj = (Object *) targ;
@@ -247,7 +247,7 @@ void olc_interpreter(void *targ, int mode, char *arg) {
 
 
 /* can_modify: determine if a particular char can modify a vnum */
-int can_modify(BaseCharacter *ch, int vnum) {
+int can_modify(Character *ch, int vnum) {
     return (1);
 }
 
@@ -327,5 +327,5 @@ void olc_bitvector(int *bv, const char **names, char *arg) {
     olc_ch->sendf("Flags now set to: %s\r\n", buf);
 }
 
-void olc_set_show(BaseCharacter *ch, int olc_mode, char *arg) {
+void olc_set_show(Character *ch, int olc_mode, char *arg) {
 }

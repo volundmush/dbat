@@ -31,7 +31,7 @@
 char commastring[MAX_STRING_LENGTH];
 
 
-void dispel_ash(BaseCharacter *ch) {
+void dispel_ash(Character *ch) {
     Object *obj, *next_obj, *ash = nullptr;
     int there = false;
 
@@ -50,7 +50,7 @@ void dispel_ash(BaseCharacter *ch) {
 
 }
 
-int has_group(BaseCharacter *ch) {
+int has_group(Character *ch) {
 
     struct follow_type *k, *next;
 
@@ -76,7 +76,7 @@ int has_group(BaseCharacter *ch) {
     return (false);
 }
 
-const char *report_party_health(BaseCharacter *ch) {
+const char *report_party_health(Character *ch) {
 
     if (!AFF_FLAGGED(ch, AFF_GROUP))
         return ("");
@@ -86,7 +86,7 @@ const char *report_party_health(BaseCharacter *ch) {
 
     struct follow_type *k, *next;
     int count = 0, stam1 = 8, stam2 = 8, stam3 = 8, stam4 = 8, plc1 = 4, plc2 = 4, plc3 = 4, plc4 = 4;
-    BaseCharacter *party1 = nullptr, *party2 = nullptr, *party3 = nullptr, *party4 = nullptr;
+    Character *party1 = nullptr, *party2 = nullptr, *party3 = nullptr, *party4 = nullptr;
     int64_t plperc1 = 0, plperc2 = 0, plperc3 = 0, plperc4 = 0;
     int64_t kiperc1 = 0, kiperc2 = 0, kiperc3 = 0, kiperc4 = 0;
     char result_party_health[MAX_STRING_LENGTH], result1[MAX_STRING_LENGTH], result2[MAX_STRING_LENGTH], result3[MAX_STRING_LENGTH], result4[MAX_STRING_LENGTH], result5[MAX_STRING_LENGTH];
@@ -435,7 +435,7 @@ const char *report_party_health(BaseCharacter *ch) {
 
 
 /* Check to see if anything interferes with their "knowing" the skill */
-int know_skill(BaseCharacter *ch, int skill) {
+int know_skill(Character *ch, int skill) {
 
     int know = 0;
 
@@ -469,7 +469,7 @@ int roll_aff_duration(int num, int add) {
     return (outcome);
 }
 
-void null_affect(BaseCharacter *ch, int aff_flag) {
+void null_affect(Character *ch, int aff_flag) {
     struct affected_type *af, *next_af;
 
     for (af = ch->affected; af; af = next_af) {
@@ -487,7 +487,7 @@ void null_affect(BaseCharacter *ch, int aff_flag) {
 }
 
 void
-assign_affect(BaseCharacter *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
+assign_affect(Character *ch, int aff_flag, int skill, int dur, int str, int con, int intel, int agl, int wis,
               int spd) {
     struct affected_type af[6];
     int num = 0;
@@ -560,7 +560,7 @@ assign_affect(BaseCharacter *ch, int aff_flag, int skill, int dur, int str, int 
     }
 }
 
-int sec_roll_check(BaseCharacter *ch) {
+int sec_roll_check(Character *ch) {
 
     int figure = 0, chance = 0, outcome = 0;
 
@@ -576,7 +576,7 @@ int sec_roll_check(BaseCharacter *ch) {
 }
 
 
-int64_t physical_cost(BaseCharacter *ch, int skill) {
+int64_t physical_cost(Character *ch, int skill) {
 
     int64_t result = 0;
 
@@ -629,7 +629,7 @@ int64_t physical_cost(BaseCharacter *ch, int skill) {
 }
 
 
-const char *disp_align(BaseCharacter *ch) {
+const char *disp_align(Character *ch) {
     int align;
 
     if (GET_ALIGNMENT(ch) < -800) { // Horrifically Evil
@@ -655,7 +655,7 @@ const char *disp_align(BaseCharacter *ch) {
     return (alignments[align]);
 }
 
-int read_sense_memory(BaseCharacter *ch, BaseCharacter *vict) {
+int read_sense_memory(Character *ch, Character *vict) {
     /* Read Sense File */
     if (!vict || vict == ch) {
         return 0;
@@ -673,7 +673,7 @@ int read_sense_memory(BaseCharacter *ch, BaseCharacter *vict) {
 }
 
 /* This writes a player's sense memory to file. */
-void sense_memory_write(BaseCharacter *ch, BaseCharacter *vict) {
+void sense_memory_write(Character *ch, Character *vict) {
     if (!vict || vict == ch) {
         return;
     }
@@ -689,7 +689,7 @@ void sense_memory_write(BaseCharacter *ch, BaseCharacter *vict) {
 }
 
 /* Will they manage to pursue a fleeing enemy? */
-int roll_pursue(BaseCharacter *ch, BaseCharacter *vict) {
+int roll_pursue(Character *ch, Character *vict) {
 
     int skill, perc = axion_dice(0);
 
@@ -1473,13 +1473,13 @@ const char* sense_location_name(room_vnum roomnum) {
     }
 }
 
-const char *sense_location(BaseCharacter *ch) {
+const char *sense_location(Character *ch) {
     
     return sense_location_name(GET_ROOM_VNUM(IN_ROOM(ch)));
 
 }
 
-void reveal_hiding(BaseCharacter *ch, int type) {
+void reveal_hiding(Character *ch, int type) {
     if (IS_NPC(ch) || !AFF_FLAGGED(ch, AFF_HIDE))
         return;
 
@@ -1503,7 +1503,7 @@ void reveal_hiding(BaseCharacter *ch, int type) {
         }
     } else if (type == 2) { /* They were spotted */
         struct descriptor_data *d;
-        BaseCharacter *tch = nullptr;
+        Character *tch = nullptr;
         for (d = descriptor_list; d; d = d->next) {
             if (STATE(d) != CON_PLAYING)
                 continue;
@@ -1526,7 +1526,7 @@ void reveal_hiding(BaseCharacter *ch, int type) {
         }
     } else if (type == 3) { /* They were heard, reveal with different messages. */
         struct descriptor_data *d;
-        BaseCharacter *tch = nullptr;
+        Character *tch = nullptr;
 
         act("@MThe scouter makes some beeping sounds as you tinker with its buttons.@n", true, ch, nullptr, nullptr,
             TO_CHAR);
@@ -1559,8 +1559,8 @@ void reveal_hiding(BaseCharacter *ch, int type) {
     }
 }
 
-int block_calc(BaseCharacter *ch) {
-    BaseCharacter *blocker = nullptr;
+int block_calc(Character *ch) {
+    Character *blocker = nullptr;
 
     if (BLOCKED(ch)) {
         blocker = BLOCKED(ch);
@@ -1628,7 +1628,7 @@ int block_calc(BaseCharacter *ch) {
     return (1);
 }
 
-int64_t molt_threshold(BaseCharacter *ch) {
+int64_t molt_threshold(Character *ch) {
 
     int64_t threshold = 0, max = 2000000000;
 
@@ -1656,7 +1656,7 @@ int64_t molt_threshold(BaseCharacter *ch) {
     return std::min(threshold, max);
 }
 
-int armor_evolve(BaseCharacter *ch) {
+int armor_evolve(Character *ch) {
     int value = 0;
 
     if (GET_MOLT_LEVEL(ch) <= 5) {
@@ -1685,7 +1685,7 @@ int armor_evolve(BaseCharacter *ch) {
 }
 
 /* This handles arlian exoskeleton molting */
-void handle_evolution(BaseCharacter *ch, int64_t dmg) {
+void handle_evolution(Character *ch, int64_t dmg) {
 
     /* Reject NPCs and non-arlians */
     if (IS_NPC(ch) || !IS_ARLIAN(ch)) {
@@ -1748,8 +1748,8 @@ void handle_evolution(BaseCharacter *ch, int64_t dmg) {
 
 }
 
-void demon_refill_lf(BaseCharacter *ch, int64_t num) {
-    BaseCharacter *tch = nullptr;
+void demon_refill_lf(Character *ch, int64_t num) {
+    Character *tch = nullptr;
 
     for (auto tch : ch->getRoom()->getPeople()) {
         if (!IS_DEMON(tch))
@@ -1765,9 +1765,9 @@ void demon_refill_lf(BaseCharacter *ch, int64_t num) {
 }
 
 
-void mob_talk(BaseCharacter *ch, const char *speech) {
+void mob_talk(Character *ch, const char *speech) {
 
-    BaseCharacter *tch = nullptr, *vict = nullptr;
+    Character *tch = nullptr, *vict = nullptr;
     int stop = 1;
 
     if (IS_NPC(ch)) {
@@ -1791,7 +1791,7 @@ void mob_talk(BaseCharacter *ch, const char *speech) {
     } /* End for loop */
 } /* End Mob Talk */
 
-bool spar_friendly(BaseCharacter *ch, BaseCharacter *npc) {
+bool spar_friendly(Character *ch, Character *npc) {
     if(!IS_NPC(npc)) return false;
 
     if(!IS_HUMANOID(npc)) return false;
@@ -1811,7 +1811,7 @@ bool spar_friendly(BaseCharacter *ch, BaseCharacter *npc) {
 
 }
 
-int mob_respond(BaseCharacter *ch, BaseCharacter *vict, const char *speech) {
+int mob_respond(Character *ch, Character *vict, const char *speech) {
     if (ch != nullptr && vict != nullptr) {
         if (!IS_NPC(ch) && IS_NPC(vict)) {
             if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") ||
@@ -2060,7 +2060,7 @@ int mob_respond(BaseCharacter *ch, BaseCharacter *vict, const char *speech) {
     return 1;
 }
 
-bool is_sparring(BaseCharacter *ch) {
+bool is_sparring(Character *ch) {
 
     if(IS_NPC(ch)) {
         auto opponent = ch->fighting;
@@ -2071,7 +2071,7 @@ bool is_sparring(BaseCharacter *ch) {
     return ch->checkFlag(FlagType::PC, PLR_SPAR);
 }
 
-char *introd_calc(BaseCharacter *ch) {
+char *introd_calc(Character *ch) {
     char *sex, *race;
     static char intro[100];
 
@@ -2116,12 +2116,12 @@ char *introd_calc(BaseCharacter *ch) {
     return (intro);
 }
 
-double speednar(BaseCharacter *ch) {
+double speednar(Character *ch) {
     auto ratio = 1.0 - ch->getBurdenRatio();
     return std::clamp<double>(ratio, 0.01, 1.0);
 }
 
-int64_t gear_exp(BaseCharacter *ch, int64_t exp) {
+int64_t gear_exp(Character *ch, int64_t exp) {
 
     if (IS_NPC(ch)) {
         return exp;
@@ -2132,12 +2132,12 @@ int64_t gear_exp(BaseCharacter *ch, int64_t exp) {
     return exp;
 }
 
-int planet_check(BaseCharacter *ch, BaseCharacter *vict) {
+int planet_check(Character *ch, Character *vict) {
 
     return false;
 }
 
-void purge_homing(BaseCharacter *ch) {
+void purge_homing(Character *ch) {
 
     auto isHoming = [&](const auto& o) {return (o->getVN() == 80 || o->getVN() == 81) && (TARGET(o) == ch || USER(o) == ch);};
     auto gather = ch->getRoom()->gatherObjects(isHoming);
@@ -2156,7 +2156,7 @@ static std::unordered_set<uint16_t> masoSkills = {
         SKILL_TSKIN
 };
 
-void improve_skill(BaseCharacter *ch, int skill, int num) {
+void improve_skill(Character *ch, int skill, int num) {
     if (IS_NPC(ch))
         return;
 
@@ -2422,7 +2422,7 @@ void prune_crlf(char *txt) {
 }
 
 /* log a death trap hit */
-void log_death_trap(BaseCharacter *ch) {
+void log_death_trap(Character *ch) {
     mudlog(BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)),
            ch->getRoom()->getName().c_str());
 }
@@ -2586,8 +2586,8 @@ time_t mud_time_to_secs(struct time_info_data *now) {
 
 /* Check if making CH follow VICTIM will create an illegal */
 /* Follow "Loop/circle"                                    */
-bool circle_follow(BaseCharacter *ch, BaseCharacter *victim) {
-    BaseCharacter *k;
+bool circle_follow(Character *ch, Character *victim) {
+    Character *k;
 
     for (k = victim; k; k = k->master) {
         if (k == ch)
@@ -2601,7 +2601,7 @@ bool circle_follow(BaseCharacter *ch, BaseCharacter *victim) {
 
 /* Called when stop following persons, or stopping charm */
 /* This will NOT do if a character quits/dies!!          */
-void stop_follower(BaseCharacter *ch) {
+void stop_follower(Character *ch) {
     struct follow_type *j, *k;
 
     if (ch->master == nullptr) {
@@ -2632,7 +2632,7 @@ void stop_follower(BaseCharacter *ch) {
     ch->master = nullptr;
 }
 
-int num_followers_charmed(BaseCharacter *ch) {
+int num_followers_charmed(Character *ch) {
     struct follow_type *lackey;
     int total = 0;
 
@@ -2646,9 +2646,9 @@ int num_followers_charmed(BaseCharacter *ch) {
     return (total);
 }
 
-void switch_leader(BaseCharacter *old, BaseCharacter *new_leader) {
+void switch_leader(Character *old, Character *new_leader) {
     struct follow_type *f;
-    BaseCharacter *tch = nullptr;
+    Character *tch = nullptr;
 
     for (f = old->followers; f; f = f->next) {
         if (f->follower == new_leader) {
@@ -2664,7 +2664,7 @@ void switch_leader(BaseCharacter *old, BaseCharacter *new_leader) {
 }
 
 /* Called when a character that follows/is followed dies */
-void die_follower(BaseCharacter *ch) {
+void die_follower(Character *ch) {
     struct follow_type *j, *k;
 
     if (ch->master)
@@ -2680,7 +2680,7 @@ void die_follower(BaseCharacter *ch) {
 
 /* Do NOT call this before having checked if a circle of followers */
 /* will arise. CH will follow leader                               */
-void add_follower(BaseCharacter *ch, BaseCharacter *leader) {
+void add_follower(Character *ch, Character *leader) {
     struct follow_type *k;
 
     if (ch->master) {
@@ -2847,7 +2847,7 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
 
 int num_pc_in_room(Room *room) {
     int i = 0;
-    BaseCharacter *ch;
+    Character *ch;
 
     for (auto ch : ch->getRoom()->getPeople())
         if (!IS_NPC(ch))
@@ -3004,7 +3004,7 @@ size_t countColors(const std::string &txt) {
 
 
 
-int count_metamagic_feats(BaseCharacter *ch) {
+int count_metamagic_feats(Character *ch) {
     int count = 0;                /* Number of Metamagic Feats Known */
 
     if (HAS_FEAT(ch, FEAT_STILL_SPELL))
@@ -3061,7 +3061,7 @@ int *default_admin_flags[ADMLVL_IMPL + 1] = {
         default_admin_flags_impl
 };
 
-void admin_set(BaseCharacter *ch, int value) {
+void admin_set(Character *ch, int value) {
     void run_autowiz();
     int i;
     int orig = GET_ADMLEVEL(ch);
@@ -3194,11 +3194,11 @@ int get_flag_by_name(const char *flag_list[], char *flag_name) {
     return (NOFLAG);
 }
 
-int16_t GET_SKILL_BONUS(BaseCharacter *ch, uint16_t skill) {
+int16_t GET_SKILL_BONUS(Character *ch, uint16_t skill) {
     return ch->getAffectModifier(APPLY_SKILL, skill);
 }
 
-int16_t GET_SKILL_PERF(BaseCharacter *ch, uint16_t skill) {
+int16_t GET_SKILL_PERF(Character *ch, uint16_t skill) {
     auto found = ch->skill.find(skill);
     if (found != ch->skill.end()) {
         return found->second.perfs;
@@ -3206,7 +3206,7 @@ int16_t GET_SKILL_PERF(BaseCharacter *ch, uint16_t skill) {
     return 0;
 }
 
-int16_t GET_SKILL_BASE(BaseCharacter *ch, uint16_t skill) {
+int16_t GET_SKILL_BASE(Character *ch, uint16_t skill) {
     auto found = ch->skill.find(skill);
     if (found != ch->skill.end()) {
         return found->second.level;
@@ -3214,20 +3214,20 @@ int16_t GET_SKILL_BASE(BaseCharacter *ch, uint16_t skill) {
     return 0;
 }
 
-int16_t GET_SKILL(BaseCharacter *ch, uint16_t skill) {
+int16_t GET_SKILL(Character *ch, uint16_t skill) {
     return GET_SKILL_BASE(ch, skill) + GET_SKILL_BONUS(ch, skill);
 }
 
-void SET_SKILL(BaseCharacter *ch, uint16_t skill, int16_t val) {
+void SET_SKILL(Character *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[skill];
     s.level = val;
 }
 
-void SET_SKILL_BONUS(BaseCharacter *ch, uint16_t skill, int16_t val) {
+void SET_SKILL_BONUS(Character *ch, uint16_t skill, int16_t val) {
 
 }
 
-void SET_SKILL_PERF(BaseCharacter *ch, uint16_t skill, int16_t val) {
+void SET_SKILL_PERF(Character *ch, uint16_t skill, int16_t val) {
     auto &s = ch->skill[skill];
     s.perfs = val;
 }
@@ -3255,23 +3255,23 @@ bool ROOM_FLAGGED(Room *loc, int flag) {
     return loc->checkFlag(FlagType::Room, flag);
 }
 
-bool ADM_FLAGGED(BaseCharacter *ch, int flag) {
+bool ADM_FLAGGED(Character *ch, int flag) {
     return ch->checkFlag(FlagType::Admin, flag);
 }
 
-bool PRF_FLAGGED(BaseCharacter *ch, int flag) {
+bool PRF_FLAGGED(Character *ch, int flag) {
     return ch->checkFlag(FlagType::Pref, flag);
 }
 
-bool MOB_FLAGGED(BaseCharacter *ch, int flag) {
+bool MOB_FLAGGED(Character *ch, int flag) {
     return ch->checkFlag(FlagType::NPC, flag);
 }
 
-bool PLR_FLAGGED(BaseCharacter *ch, int flag) {
+bool PLR_FLAGGED(Character *ch, int flag) {
     return ch->checkFlag(FlagType::PC, flag);
 }
 
-bool AFF_FLAGGED(BaseCharacter *ch, int flag) {
+bool AFF_FLAGGED(Character *ch, int flag) {
     if(ch->checkFlag(FlagType::Affect, flag)) return true;
     for(auto i = 0; i < NUM_WEARS; i++)
         if(auto eq = GET_EQ(ch, i); eq)
@@ -3279,19 +3279,19 @@ bool AFF_FLAGGED(BaseCharacter *ch, int flag) {
     return false;
 }
 
-bool PLANET_FLAGGED(BaseCharacter *ch, int flag) {
+bool PLANET_FLAGGED(Character *ch, int flag) {
     return false;
 }
 
-bool ETHER_STREAM(BaseCharacter *ch) {
+bool ETHER_STREAM(Character *ch) {
     return false;
 }
 
-bool HAS_MOON(BaseCharacter *ch) {
+bool HAS_MOON(Character *ch) {
     return false;
 }
 
-int GET_SPEEDI(BaseCharacter *ch) {
+int GET_SPEEDI(Character *ch) {
     return (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch));
 }
 

@@ -28,17 +28,17 @@
 #include "dbat/entity.h"
 
 /* local functions  */
-static void generate_multiform(BaseCharacter *ch, int count);
+static void generate_multiform(Character *ch, int count);
 
-static void resolve_song(BaseCharacter *ch);
+static void resolve_song(Character *ch);
 
 static int campfire_cook(int recipe);
 
-static int valid_recipe(BaseCharacter *ch, int recipe, int type);
+static int valid_recipe(Character *ch, int recipe, int type);
 
-static int has_pole(BaseCharacter *ch);
+static int has_pole(Character *ch);
 
-static void catch_fish(BaseCharacter *ch, int quality);
+static void catch_fish(Character *ch, int quality);
 
 static int valid_silk(Object *obj);
 
@@ -151,8 +151,8 @@ ACMD(do_multiform) {
         return;
     }
 
-    std::vector<BaseCharacter *> multis;
-    BaseCharacter *tch = nullptr, *next_v = nullptr;
+    std::vector<Character *> multis;
+    Character *tch = nullptr, *next_v = nullptr;
 
     for (auto tch : ch->getRoom()->getPeople()) {
         if (tch == ch || !IS_NPC(tch)) {
@@ -222,7 +222,7 @@ ACMD(do_multiform) {
 
 }
 
-static void generate_multiform(BaseCharacter *ch, int count) {
+static void generate_multiform(Character *ch, int count) {
     char blamo[MAX_INPUT_LENGTH];
     sprintf(blamo, "p.%s", GET_NAME(ch));
 
@@ -281,8 +281,8 @@ static void generate_multiform(BaseCharacter *ch, int count) {
     }
 }
 
-void handle_multi_merge(BaseCharacter *form) {
-    BaseCharacter *ch = GET_ORIGINAL(form);
+void handle_multi_merge(Character *form) {
+    Character *ch = GET_ORIGINAL(form);
 
     if (!ch) {
         extract_char(form);
@@ -321,9 +321,9 @@ static const std::unordered_map<int, std::pair<room_vnum, std::string>> song_des
     {SONG_TELEPORT_KONACK, {8003, "Konack"}}
 };
 
-static void resolve_song(BaseCharacter *ch) {
+static void resolve_song(Character *ch) {
 
-    BaseCharacter *vict = nullptr, *next_v = nullptr;
+    Character *vict = nullptr, *next_v = nullptr;
     Object *obj2 = nullptr, *next_obj;
     int diceroll = axion_dice(0);
     int skill = GET_SKILL(ch, SKILL_MYSTICMUSIC);
@@ -429,7 +429,7 @@ static void resolve_song(BaseCharacter *ch) {
                 }
                 break;
             case SONG_SHADOW_STITCH: {
-                auto applyShadow = [skill](BaseCharacter *user, BaseCharacter *target) {
+                auto applyShadow = [skill](Character *user, Character *target) {
                     user->decCurKI(user->getPercentOfMaxKI(.001) + skill);
                     if (!IS_NPC(target)) {
                         WAIT_STATE(target, PULSE_2SEC);
@@ -437,7 +437,7 @@ static void resolve_song(BaseCharacter *ch) {
                         assign_affect(target, AFF_SHADOWSTITCH, 0, -1, 0, 0, 0, 0, 0, -2);
                     }
                 };
-                auto msgShadow = [](BaseCharacter *ch, BaseCharacter* vict) {
+                auto msgShadow = [](Character *ch, Character* vict) {
                     act("@CYour forboding music has caused @c$N's@C shadows to stitch into $S body, slowing $S actions!@n",
                         true, ch, nullptr, vict, TO_CHAR);
                     act("@c$n's@C forboding music has caused YOUR shadows to stitch into YOUR body, slow YOUR actions down!@n",
@@ -791,7 +791,7 @@ ACMD(do_moondust) {
         true, ch, nullptr, nullptr, TO_ROOM);
     ch->sendf("@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
 
-    BaseCharacter *vict = nullptr, *next_v = nullptr;
+    Character *vict = nullptr, *next_v = nullptr;
 
     for (auto vict : ch->getRoom()->getPeople()) {
 
@@ -917,7 +917,7 @@ ACMD(do_liquefy) {
             return;
         }
     } else if (!strcasecmp(arg, "explode")) {
-        BaseCharacter *vict;
+        Character *vict;
         if (GRAPPLED(ch)) {
             GRAPPLING(GRAPPLED(ch)) = nullptr;
             GRAPPLED(ch) = nullptr;
@@ -1034,7 +1034,7 @@ ACMD(do_lifeforce) {
 }
 
 ACMD(do_defend) {
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1221,7 +1221,7 @@ ACMD(do_fish) {
     }
 } /* End fish */
 
-static int has_pole(BaseCharacter *ch) {
+static int has_pole(Character *ch) {
 
     if (GET_EQ(ch, WEAR_WIELD2)) {
         Object *pole = GET_EQ(ch, WEAR_WIELD2);
@@ -1235,10 +1235,10 @@ static int has_pole(BaseCharacter *ch) {
 
 void fish_update(uint64_t heartPulse, double deltaTime) {
 
-    BaseCharacter *i, *next_char, *ch = nullptr;
+    Character *i, *next_char, *ch = nullptr;
     int quality = 0;
 
-    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+    for (auto &&[ent, character] : reg.view<Character>(entt::exclude<Deleted>).each()) {
         i = &character;
         if (ROOM_FLAGGED(IN_ROOM(i), ROOM_FISHING)) {
             if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == true) {
@@ -1314,7 +1314,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
 
 }
 
-static void catch_fish(BaseCharacter *ch, int quality) {
+static void catch_fish(Character *ch, int quality) {
     Object *fish = nullptr;
     int num = 1000;
 
@@ -1675,7 +1675,7 @@ ACMD(do_runic) {
     else
         inkcost += 2;
 
-    BaseCharacter *vict;
+    Character *vict;
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
         ch->sendf("You can't seem to find that person.\r\n");
@@ -2036,7 +2036,7 @@ ACMD(do_scry) {
         return;
     }
 
-    BaseCharacter *vict;
+    Character *vict;
 
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
         ch->sendf("Who are you using Oracle Scry on?\r\n");
@@ -2093,7 +2093,7 @@ ACMD(do_scry) {
 
 }
 
-void ash_burn(BaseCharacter *ch) {
+void ash_burn(Character *ch) {
 
     if(!ch) return;
     if(IS_DEMON(ch) || IS_ANDROID(ch)) return;
@@ -2306,7 +2306,7 @@ ACMD(do_resize) {
 }
 
 ACMD(do_healglow) {
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
@@ -2385,7 +2385,7 @@ ACMD(do_amnisiac) {
     }
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     int skill;
 
     two_arguments(argument, arg, arg2);
@@ -2494,7 +2494,7 @@ ACMD(do_shimmer) {
 
     int skill = 0, perc = 0, location = 0;
     int64_t cost = 0;
-    BaseCharacter *tar = nullptr;
+    Character *tar = nullptr;
 
     char arg[MAX_INPUT_LENGTH] = "";
 
@@ -2806,7 +2806,7 @@ ACMD(do_hydromancy) {
             return;
         }
 
-        BaseCharacter *vict, *next_v;
+        Character *vict, *next_v;
 
         int last = LASTATK(ch);
         LASTATK(ch) = 500;
@@ -2881,7 +2881,7 @@ ACMD(do_kanso) {
         return;
     }
 
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -2974,7 +2974,7 @@ ACMD(do_kanso) {
 
 }
 
-void rpp_feature(BaseCharacter *ch, const char *arg) {
+void rpp_feature(Character *ch, const char *arg) {
     int cost = 0, change = false;
 
     if (!*arg) {
@@ -3400,7 +3400,7 @@ ACMD(do_ensnare) {
     } else {
         int prob = GET_SKILL(ch, SKILL_ENSNARE), perc = axion_dice(0);
         char arg[MAX_INPUT_LENGTH];
-        BaseCharacter *vict;
+        Character *vict;
 
         one_argument(argument, arg);
 
@@ -3899,7 +3899,7 @@ ACMD(do_adrenaline) {
 }
 
 /* This handles displaying the rpp item store to a player. */
-void disp_rpp_store(BaseCharacter *ch) {
+void disp_rpp_store(Character *ch) {
 
     ch->sendf("@m                        RPP Item Store@n\n");
     ch->sendf("@D~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~@n\n");
@@ -3919,7 +3919,7 @@ void disp_rpp_store(BaseCharacter *ch) {
 }
 
 /* This handles buying an item from the rpp item store. */
-void handle_rpp_store(BaseCharacter *ch, int choice) {
+void handle_rpp_store(Character *ch, int choice) {
     Object *obj;
     int objnum = 0, cost = 0;
 
@@ -4113,7 +4113,7 @@ void handle_rpp_store(BaseCharacter *ch, int choice) {
     }
 }
 
-static int valid_recipe(BaseCharacter *ch, int recipe, int type) {
+static int valid_recipe(Character *ch, int recipe, int type) {
     /* Plant Variables */
     int tomato = -1, cucumber = -1, onion = -1, greenbean = -1, garlic = -1, redpep = -1;
     int potato = -1, carrot = -1, brownmush = -1, lettuce = -1;
@@ -5281,7 +5281,7 @@ ACMD(do_feed) {
         return;
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     Object *obj;
 
     two_arguments(argument, arg, arg2);

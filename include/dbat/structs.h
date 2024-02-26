@@ -8,9 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
-#include <functional>
 #include "net.h"
-#include <type_traits> // For std::is_base_of
 
 
 struct trig_data;
@@ -54,28 +52,28 @@ struct Shop {
     int bankAccount{};        /* Store all gold over 15000 (disabled)	*/
     int lastsort{};        /* How many items are sorted in inven?	*/
     
-    std::list<BaseCharacter*> getKeepers();
+    std::list<Character*> getKeepers();
     bool isProducing(obj_vnum vn);
     bool isProducing(Object *obj1);
     void runPurge();
     int tradeWith(Object* item);
-    Object* getSellingObject(BaseCharacter* ch, const std::string& name, BaseCharacter *keeper, bool msg);
-    Object* getPurchaseObject(BaseCharacter* ch, const std::string& name, BaseCharacter *keeper, bool msg);
-    std::string listObject(Object *obj, int cnt, int aindex, BaseCharacter *keeper, BaseCharacter *ch);
-    int64_t buyPrice(Object *obj, BaseCharacter* keeper, BaseCharacter* ch);
-    int64_t sellPrice(Object *obj, BaseCharacter* keeper, BaseCharacter* ch);
-    bool executeCommand(BaseCharacter *keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    Object* getSellingObject(Character* ch, const std::string& name, Character *keeper, bool msg);
+    Object* getPurchaseObject(Character* ch, const std::string& name, Character *keeper, bool msg);
+    std::string listObject(Object *obj, int cnt, int aindex, Character *keeper, Character *ch);
+    int64_t buyPrice(Object *obj, Character* keeper, Character* ch);
+    int64_t sellPrice(Object *obj, Character* keeper, Character* ch);
+    bool executeCommand(Character *keeper, Character *ch, const std::string &cmd, const std::string &arguments);
     
-    void executeBuy(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
-    void executeSell(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
-    void executeList(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
-    void executeValue(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
-    void executeAppraise(BaseCharacter* keeper, BaseCharacter *ch, const std::string &cmd, const std::string &arguments);
+    void executeBuy(Character* keeper, Character *ch, const std::string &cmd, const std::string &arguments);
+    void executeSell(Character* keeper, Character *ch, const std::string &cmd, const std::string &arguments);
+    void executeList(Character* keeper, Character *ch, const std::string &cmd, const std::string &arguments);
+    void executeValue(Character* keeper, Character *ch, const std::string &cmd, const std::string &arguments);
+    void executeAppraise(Character* keeper, Character *ch, const std::string &cmd, const std::string &arguments);
 
-    bool isOk(BaseCharacter* keeper, BaseCharacter *ch);
-    bool isOkChar(BaseCharacter* keeper, BaseCharacter *ch);
-    bool isOkObj(BaseCharacter* keeper, BaseCharacter *ch, Object *obj);
-    bool isOpen(BaseCharacter* keeper, bool msg);
+    bool isOk(Character* keeper, Character *ch);
+    bool isOkChar(Character* keeper, Character *ch);
+    bool isOkObj(Character* keeper, Character *ch, Object *obj);
+    bool isOpen(Character* keeper, bool msg);
     
 
 };
@@ -97,7 +95,7 @@ struct Guild {
     std::unordered_set<int> with_who{};/* Who does the shop trade with?	*/
     int open{0}, close{28};               /* when we will train */
     std::set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
-    std::list<BaseCharacter*> getMasters();
+    std::list<Character*> getMasters();
 };
 
 
@@ -534,7 +532,7 @@ struct Destination {
 
     explicit Destination(GameEntity* target);
     explicit Destination(Room* target);
-    explicit Destination(BaseCharacter* target);
+    explicit Destination(Character* target);
     explicit Destination(entt::entity target) : target(target) {};
     explicit Destination(const Location& loc) : target(loc.location), locationType(loc.locationType), coords(loc.coords) {};
     entt::entity target{entt::null};
@@ -656,7 +654,7 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     /* Equipment array			*/
     std::vector<GameEntity*> getContents();
     std::vector<Object*> getInventory();
-    std::vector<BaseCharacter*> getPeople();
+    std::vector<Character*> getPeople();
     std::map<int, Object*> getEquipment();
     std::vector<Room*> getRooms();
     std::map<int, Exit*> getExits();
@@ -910,32 +908,29 @@ struct Object : public GameEntity {
     std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
 
     Object *in_obj{};       /* In what object nullptr when none    */
-    BaseCharacter *carried_by{};  /* Carried by :nullptr in room/conta   */
-    BaseCharacter *worn_by{};      /* Worn by? */
-    int16_t worn_on{-1};          /* Worn where?		      */
+    Character *carried_by{};  /* Carried by :nullptr in room/conta   */
+    Character *worn_by{};      /* Worn by? */
 
-    Object *next{};         /* For the object list              */
-
-    BaseCharacter *sitting{};       /* Who is sitting on me? */
+    Character *sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
     time_t lload{};
     int healcharge{};
     int64_t kicharge{};
     int kitype{};
-    BaseCharacter *user{};
-    BaseCharacter *target{};
+    Character *user{};
+    Character *target{};
     int distance{};
     int foob{};
     int64_t aucter{};
     int64_t curBidder{};
     time_t aucTime{};
-    int bid{};
-    int startbid{};
+    money_t bid{};
+    money_t startbid{};
     char *auctname{};
     int posttype{};
     Object *posted_to{};
     Object *fellow_wall{};
-    BaseCharacter *owner{};
+    Character *owner{};
 
     std::optional<double> gravity;
 
@@ -959,7 +954,6 @@ struct Exit : public GameEntity {
     explicit Exit(const nlohmann::json &j);
 
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
-    Room *destination{nullptr};        /* Where direction leads (NOWHERE)	*/
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
     int dcskill{};            /* Skill req. to move through exit	*/
@@ -1111,7 +1105,7 @@ struct queued_act {
 
 /* Structure used for chars following other chars */
 struct follow_type {
-    BaseCharacter *follower;
+    Character *follower;
     struct follow_type *next;
 };
 
@@ -1146,11 +1140,11 @@ struct trans_data {
 
 
 /* ================== Structure for player/non-player base class ===================== */
-struct BaseCharacter : public GameEntity {
+struct Character : public GameEntity {
     static constexpr auto in_place_delete = true;
-    BaseCharacter() = default;
+    Character() = default;
     // this constructor below is to be used only for the mob_proto map.
-    explicit BaseCharacter(const nlohmann::json& j);
+    explicit Character(const nlohmann::json& j);
 
     nlohmann::json serialize() override;
     void deserialize(const nlohmann::json& j) override;
@@ -1174,7 +1168,7 @@ struct BaseCharacter : public GameEntity {
     weight_t getCurrentBurden();
     double getBurdenRatio();
     bool canCarryWeight(Object *obj);
-    bool canCarryWeight(BaseCharacter *obj);
+    bool canCarryWeight(Character *obj);
     bool canCarryWeight(weight_t val);
 
     int getHeight(bool base = false);
@@ -1222,7 +1216,7 @@ struct BaseCharacter : public GameEntity {
 
     void ghostify();
 
-    void restore_by(BaseCharacter *ch);
+    void restore_by(Character *ch);
 
     void gainTail(bool announce = true);
     void loseTail();
@@ -1499,30 +1493,30 @@ struct BaseCharacter : public GameEntity {
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
     /* For room->people - list		*/
-    BaseCharacter *next{};    /* For either monster or ppl-list	*/
-    BaseCharacter *next_fighting{};
+    Character *next{};    /* For either monster or ppl-list	*/
+    Character *next_fighting{};
     /* For fighting list			*/
-    BaseCharacter *next_affect{};/* For affect wearoff			*/
-    BaseCharacter *next_affectv{};
+    Character *next_affect{};/* For affect wearoff			*/
+    Character *next_affectv{};
     /* For round based affect wearoff	*/
 
     struct follow_type *followers{};/* List of chars followers		*/
-    BaseCharacter *master{};    /* Who is char following?		*/
+    Character *master{};    /* Who is char following?		*/
     int64_t master_id{};
 
-    BaseCharacter *fighting{};    /* Opponent				*/
+    Character *fighting{};    /* Opponent				*/
 
     int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
 
     int timer{};            /* Timer for update			*/
 
     Object *sits{};      /* What am I sitting on? */
-    BaseCharacter *blocks{};    /* Who am I blocking?    */
-    BaseCharacter *blocked{};   /* Who is blocking me?    */
-    BaseCharacter *absorbing{}; /* Who am I absorbing */
-    BaseCharacter *absorbby{};  /* Who is absorbing me */
-    BaseCharacter *carrying{};
-    BaseCharacter *carried_by{};
+    Character *blocks{};    /* Who am I blocking?    */
+    Character *blocked{};   /* Who is blocking me?    */
+    Character *absorbing{}; /* Who am I absorbing */
+    Character *absorbby{};  /* Who is absorbing me */
+    Character *carrying{};
+    Character *carried_by{};
 
     int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
     int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
@@ -1585,16 +1579,16 @@ struct BaseCharacter : public GameEntity {
     time_t deathtime{};
 
     int64_t suppression{};
-    BaseCharacter *drag{};
-    BaseCharacter *dragged{};
-    BaseCharacter *mindlink{};
+    Character *drag{};
+    Character *dragged{};
+    Character *mindlink{};
     int lasthit{};
     int dcount{};
     char *voice{};                  /* PC's snet voice */
     int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
     time_t rewtime{};
-    BaseCharacter *grappling{};
-    BaseCharacter *grappled{};
+    Character *grappling{};
+    Character *grappled{};
     int grap{};
     int genome[2]{};                /* Bio racial bonus, Genome */
     int combo{};
@@ -1634,14 +1628,14 @@ struct BaseCharacter : public GameEntity {
     int fishstate{};
     int throws{};
 
-    BaseCharacter *defender{};
-    BaseCharacter *defending{};
+    Character *defender{};
+    Character *defending{};
 
     int lifeperc{};
     int gooptime{};
     int blesslvl{};
-    BaseCharacter *poisonby{};
-    std::set<BaseCharacter*> poisoned;
+    Character *poisonby{};
+    std::set<Character*> poisoned;
 
     int mobcharge{};
     int preference{};
@@ -1656,9 +1650,9 @@ struct BaseCharacter : public GameEntity {
 
     char *rdisplay{};
 
-    BaseCharacter *original{};
+    Character *original{};
 
-    std::set<BaseCharacter*> clones{};
+    std::set<Character*> clones{};
     int relax_count{};
     int ingestLearned{};
 
@@ -1730,8 +1724,8 @@ struct descriptor_data {
     std::list<std::string> raw_input_queue, input_queue;
     std::string output;        /* ptr to the current output buffer	*/
     std::list<std::string> history;        /* History of commands, for ! mostly.	*/
-    BaseCharacter *character{};    /* linked to char			*/
-    BaseCharacter *original{};    /* original char if switched		*/
+    Character *character{};    /* linked to char			*/
+    Character *original{};    /* original char if switched		*/
     struct descriptor_data *snooping{}; /* Who is this char snooping	*/
     struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
     struct descriptor_data *next{}; /* link to next descriptor		*/
@@ -2071,7 +2065,7 @@ class Dispatcher {
                     auto &info = reg.get<Info>(obj);
                     switch(info.family) {
                         case EntityFamily::Character: {
-                            auto ch = reg.try_get<BaseCharacter>(obj);
+                            auto ch = reg.try_get<Character>(obj);
                             out.push_back(ch);
                         }
                             break;

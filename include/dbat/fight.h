@@ -7,35 +7,35 @@
 #include "spells.h"
 
 // global variables
-extern BaseCharacter *combat_list, *next_combat_list;
+extern Character *combat_list, *next_combat_list;
 extern struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES];
 
 // functions
-extern void death_cry(BaseCharacter *ch);
+extern void death_cry(Character *ch);
 
-extern int group_bonus(BaseCharacter *ch, int type);
+extern int group_bonus(Character *ch, int type);
 
-extern void die(BaseCharacter *ch, BaseCharacter *killer);
+extern void die(Character *ch, Character *killer);
 
-extern void remove_limb(BaseCharacter *vict, int num);
+extern void remove_limb(Character *vict, int num);
 
-extern void impact_sound(BaseCharacter *ch, char *mssg);
+extern void impact_sound(Character *ch, char *mssg);
 
 extern void fight_stack(uint64_t heartPulse, double deltaTime);
 
-extern void appear(BaseCharacter *ch);
+extern void appear(Character *ch);
 
-extern void raw_kill(BaseCharacter *ch, BaseCharacter *killer);
+extern void raw_kill(Character *ch, Character *killer);
 
-extern void set_fighting(BaseCharacter *ch, BaseCharacter *victim);
+extern void set_fighting(Character *ch, Character *victim);
 
-extern void stop_fighting(BaseCharacter *ch);
+extern void stop_fighting(Character *ch);
 
-extern void group_gain(BaseCharacter *ch, BaseCharacter *victim);
+extern void group_gain(Character *ch, Character *victim);
 
-extern void solo_gain(BaseCharacter *ch, BaseCharacter *victim);
+extern void solo_gain(Character *ch, Character *victim);
 
-extern void mutant_limb_regen(BaseCharacter *ch);
+extern void mutant_limb_regen(Character *ch);
 
 // commands
 extern ACMD(do_kousengan);

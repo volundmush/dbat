@@ -33,23 +33,23 @@
 #include "dbat/entity.h"
 
 /* local functions */
-static void gen_map(BaseCharacter *ch, int num);
+static void gen_map(Character *ch, int num);
 
-static void see_plant(Object *obj, BaseCharacter *ch);
+static void see_plant(Object *obj, Character *ch);
 
-static double terrain_bonus(BaseCharacter *ch);
+static double terrain_bonus(Character *ch);
 
-static void search_room(BaseCharacter *ch);
+static void search_room(Character *ch);
 
-static void bonus_status(BaseCharacter *ch);
+static void bonus_status(Character *ch);
 
 static int sort_commands_helper(const void *a, const void *b);
 
-static void print_object_location(int num, Object *obj, BaseCharacter *ch, int recur);
+static void print_object_location(int num, Object *obj, Character *ch, int recur);
 
-static void perform_mortal_where(BaseCharacter *ch, char *arg);
+static void perform_mortal_where(Character *ch, char *arg);
 
-static void perform_immort_where(BaseCharacter *ch, char *arg);
+static void perform_immort_where(Character *ch, char *arg);
 
 static void space_to_minus(char *str);
 
@@ -146,7 +146,7 @@ ACMD(do_evolve) {
     }
 }
 
-static void see_plant(Object *obj, BaseCharacter *ch) {
+static void see_plant(Object *obj, Character *ch) {
 
     int water = GET_OBJ_VAL(obj, VAL_WATERLEVEL);
     auto sd = obj->getShortDesc();
@@ -199,7 +199,7 @@ static void see_plant(Object *obj, BaseCharacter *ch) {
 
 
 /* This is used to determine the terrain bonus for search_room - Iovan 12/16/2012*/
-static double terrain_bonus(BaseCharacter *ch) {
+static double terrain_bonus(Character *ch) {
 
     double bonus = 0.0;
 
@@ -231,9 +231,9 @@ static double terrain_bonus(BaseCharacter *ch) {
 
 
 /* This is used to find hidden people in a room with search - Iovan 12/16/2012 */
-static void search_room(BaseCharacter *ch) {
+static void search_room(Character *ch) {
 
-    BaseCharacter *vict, *next_v;
+    Character *vict, *next_v;
     int perc =
             (GET_INT(ch) * 0.6) + GET_SKILL(ch, SKILL_SPOT) + GET_SKILL(ch, SKILL_SEARCH) + GET_SKILL(ch, SKILL_LISTEN);
     int prob = 0, found = 0;
@@ -799,7 +799,7 @@ static const char *portal_appearance[] = {
 
 ACMD(do_showoff) {
     Object *obj = nullptr;
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     *arg = '\0';
@@ -827,7 +827,7 @@ ACMD(do_showoff) {
     }
 }
 
-int readIntro(BaseCharacter *ch, BaseCharacter *vict) {
+int readIntro(Character *ch, Character *vict) {
     if (vict == nullptr) {
         return 0;
     }
@@ -841,7 +841,7 @@ int readIntro(BaseCharacter *ch, BaseCharacter *vict) {
     return p.dubNames.contains(vict->getUID());
 }
 
-void introWrite(BaseCharacter *ch, BaseCharacter *vict, char *name) {
+void introWrite(Character *ch, Character *vict, char *name) {
     std::string n(name);
     auto &p = reg.get_or_emplace<PlayerCharacter>(ch->ent);
     p.dubNames[vict->getUID()] = n;
@@ -853,7 +853,7 @@ ACMD(do_intro) {
         return;
 
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
 
     two_arguments(argument, arg, arg2);
 
@@ -1054,7 +1054,7 @@ ACMD(do_map) {
     gen_map(ch, 1);
 }
 
-static void gen_map(BaseCharacter *ch, int num) {
+static void gen_map(Character *ch, int num) {
     int door, i;
     char map[9][10] = {{'-'},
                        {'-'}};
@@ -1377,7 +1377,7 @@ ACMD(do_finger) {
 }
 
 ACMD(do_rptrans) {
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     struct descriptor_data *k;
     int amt = 0;
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -1609,7 +1609,7 @@ ACMD(do_look) {
 }
 
 ACMD(do_examine) {
-    BaseCharacter *tmp_char;
+    Character *tmp_char;
     Object *tmp_object;
     char tempsave[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH];
 
@@ -1801,7 +1801,7 @@ ACMD(do_score) {
 
 }
 
-std::string trans_check(BaseCharacter *ch, GameEntity *viewer) {
+std::string trans_check(Character *ch, GameEntity *viewer) {
 /* Rillao: transloc, add new transes here */
     if(ch->form == FormID::Base || (ch->mimic && viewer != ch)) {
         return "         @cCurrent Transformation@D: @wNone@n\r\n";
@@ -2499,7 +2499,7 @@ const char *list_bonuses[] = {
 };
 
 /* Display What Bonuses/Negatives Player Has */
-static void bonus_status(BaseCharacter *ch) {
+static void bonus_status(Character *ch) {
     int i, max = 52, count = 0;
 
     if (IS_NPC(ch))
@@ -2750,7 +2750,7 @@ ACMD(do_help) {
 /* Written by Rhade */
 ACMD(do_who) {
     struct descriptor_data *d;
-    BaseCharacter *tch;
+    Character *tch;
     int i, num_can_see = 0;
     char name_search[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
     int low = 0, high = CONFIG_LEVEL_CAP, localwho = 0, questwho = 0, hide = 0;
@@ -2983,7 +2983,7 @@ ACMD(do_users) {
     char line[200], line2[220], idletime[10];
     char state[30], *timeptr, mode;
     char name_search[MAX_INPUT_LENGTH], host_search[MAX_INPUT_LENGTH];
-    BaseCharacter *tch;
+    Character *tch;
     struct descriptor_data *d;
     int low = 0, high = CONFIG_LEVEL_CAP, num_can_see = 0;
     int showclass = 0, outlaws = 0, playing = 0, deadweight = 0, showrace = 0;
@@ -3182,8 +3182,8 @@ ACMD(do_gen_ps) {
     }
 }
 
-static void perform_mortal_where(BaseCharacter *ch, char *arg) {
-    BaseCharacter *i;
+static void perform_mortal_where(Character *ch, char *arg) {
+    Character *i;
     struct descriptor_data *d;
 
     if (!*arg) {
@@ -3200,7 +3200,7 @@ static void perform_mortal_where(BaseCharacter *ch, char *arg) {
             ch->sendf("%-20s - %s\r\n", GET_NAME(i), i->getRoom()->getDisplayName(ch));
         }
     } else {            /* print only FIRST char, not all. */
-        for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        for (auto &&[ent, character] : reg.view<Character>(entt::exclude<Deleted>).each()) {
             i = &character;
             if (IN_ROOM(i) == NOWHERE || i == ch)
                 continue;
@@ -3215,7 +3215,7 @@ static void perform_mortal_where(BaseCharacter *ch, char *arg) {
     }
 }
 
-static void print_object_location(int num, Object *obj, BaseCharacter *ch,
+static void print_object_location(int num, Object *obj, Character *ch,
                                   int recur) {
     if (num > 0)
         ch->sendf("O%3d. %-25s - ", num, obj->getShortDesc());
@@ -3239,8 +3239,8 @@ static void print_object_location(int num, Object *obj, BaseCharacter *ch,
         ch->sendf("in an unknown location\r\n");
 }
 
-static void perform_immort_where(BaseCharacter *ch, char *arg) {
-    BaseCharacter *i;
+static void perform_immort_where(Character *ch, char *arg) {
+    Character *i;
     Object *k;
     int num = 0, num2 = 0, found = 0;
 
@@ -3263,7 +3263,7 @@ static void perform_immort_where(BaseCharacter *ch, char *arg) {
     } else {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
-        for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+        for (auto &&[ent, character] : reg.view<Character>(entt::exclude<Deleted>).each()) {
             i = &character;
             if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->getName().c_str())) {
                 found = 1;
@@ -3327,7 +3327,7 @@ ACMD(do_levels) {
 
 ACMD(do_consider) {
     char buf[MAX_INPUT_LENGTH];
-    BaseCharacter *victim;
+    Character *victim;
     int diff;
 
     one_argument(argument, buf);
@@ -3370,7 +3370,7 @@ ACMD(do_consider) {
 
 ACMD(do_diagnose) {
     char buf[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
 
     one_argument(argument, buf);
 
@@ -3810,7 +3810,7 @@ void sort_commands() {
 ACMD(do_commands) {
     int no, i, cmd_num;
     int wizhelp = 0, socials = 0;
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -3911,7 +3911,7 @@ ACMD(do_history) {
         ch->sendf("You have no history in that channel.\r\n");
 }
 
-void add_history(BaseCharacter *ch, char *str, int type) {
+void add_history(Character *ch, char *str, int type) {
     int i = 0;
     char time_str[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
     struct txt_block *tmp;

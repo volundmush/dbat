@@ -24,7 +24,7 @@ ACMD(do_action) {
     char arg[MAX_INPUT_LENGTH], part[MAX_INPUT_LENGTH];
     int act_nr;
     struct social_messg *action;
-    BaseCharacter *vict;
+    Character *vict;
     Object *targ;
 
     if ((act_nr = find_action(cmd)) < 0) {
@@ -99,7 +99,7 @@ ACMD(do_action) {
 
 ACMD(do_insult) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *victim;
+    Character *victim;
 
     one_argument(argument, arg);
 
@@ -420,7 +420,7 @@ ACMD(do_gmote) {
     int act_nr, length;
     char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
     struct social_messg *action;
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
 
     half_chop(argument, buf, arg);
 

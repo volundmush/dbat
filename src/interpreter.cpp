@@ -36,7 +36,7 @@ void perform_complex_alias(struct txt_q *input_q, char *orig, struct alias_data 
 
 int reserved_word(char *argument);
 
-int command_pass(char *cmd, BaseCharacter *ch);
+int command_pass(char *cmd, Character *ch);
 
 void payout(int num);
 
@@ -87,7 +87,7 @@ const char *reserved[] =
  * It makes sure you are the proper level and position to execute the command,
  * then calls the appropriate function.
  */
-void BaseCharacter::executeCommand(const std::string &input) {
+void Character::executeCommand(const std::string &input) {
     int cmd, length;
     int skip_ld = 0;
 
@@ -498,7 +498,7 @@ void topLoad() {
 }
 
 /* Write the toplist to file */
-void topWrite(BaseCharacter *ch) {
+void topWrite(Character *ch) {
     if (GET_ADMLEVEL(ch) > 0 || IS_NPC(ch))
         return;
 
@@ -932,7 +932,7 @@ int find_command(const char *command) {
 }
 
 
-int special(BaseCharacter *ch, int cmd, char *arg) {
+int special(Character *ch, int cmd, char *arg) {
     /* special in room? */
     auto room = ch->getRoom();
 
@@ -1001,7 +1001,7 @@ int _parse_name(char *arg, char *name) {
 /* load the player, put them in the right room - used by copyover_recover too */
 void enter_player_game(struct descriptor_data *d) {
     IDXTYPE load_room;
-    BaseCharacter *check;
+    Character *check;
 
     d->character->timer = 0;
     reset_char(d->character);
@@ -1148,7 +1148,7 @@ void payout(int num) {
     }
 }
 
-int command_pass(char *cmd, BaseCharacter *ch) {
+int command_pass(char *cmd, Character *ch) {
 
     if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
         if (strcasecmp(cmd, "liquefy") && strcasecmp(cmd, "ingest") && strcasecmp(cmd, "look") &&
@@ -1210,7 +1210,7 @@ int lockRead(char *name) {
 }
 
 /* For transfering money or doing things with an offline player */
-char *rIntro(BaseCharacter *ch, char *arg) {
+char *rIntro(Character *ch, char *arg) {
     char fname[40], filler[50], scrap[100], line[256];
     static char name[80];
     int known = false;
@@ -1243,7 +1243,7 @@ char *rIntro(BaseCharacter *ch, char *arg) {
         return "NOTHING";
 }
 
-void fingerUser(BaseCharacter *ch, std::shared_ptr<account_data> account) {
+void fingerUser(Character *ch, std::shared_ptr<account_data> account) {
     ch->sendf("@D[@gUsername   @D: @w%-30s@D]@n\r\n", account->name.c_str());
     ch->sendf("@D[@gEmail      @D: @w%-30s@D]@n\r\n", account->email.c_str());
     ch->sendf("@D[@gTotal Slots@D: @w%-30d@D]@n\r\n", account->slots);
@@ -1252,7 +1252,7 @@ void fingerUser(BaseCharacter *ch, std::shared_ptr<account_data> account) {
     if (GET_ADMLEVEL(ch) > 0) {
         int counter = 0;
         for(auto c : account->characters) {
-            auto p = getEntity<BaseCharacter>(c);
+            auto p = getEntity<Character>(c);
             if(!p) continue;
             ch->sendf("@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->getDisplayName(ch));
         }

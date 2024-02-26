@@ -44,7 +44,7 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 
 /* perhaps not the best place for this, but I didn't want a new file */
-char *skill_percent(BaseCharacter *ch, char *skill) {
+char *skill_percent(Character *ch, char *skill) {
     static char retval[16];
     int skillnum;
 
@@ -113,7 +113,7 @@ int item_in_list(char *item, std::vector<Object*> list) {
    MUD -- 4dimensions.org:6000
 */
 
-int char_has_item(char *item, BaseCharacter *ch) {
+int char_has_item(char *item, Character *ch) {
 
     /* If this works, no more searching needed */
     if (get_object_in_equip(ch, item) != nullptr)
@@ -245,11 +245,11 @@ DgResults scriptGlobal(trig_data *trig, const std::string& field, const std::str
 
 DgResults scriptRandom(trig_data *trig, const std::string& field, const std::string& args) {
     auto type = trig->parent->attach_type;
-    BaseCharacter *enactor;
+    Character *enactor;
     Room *r;
     switch(type) {
             case MOB_TRIGGER:
-                enactor = (BaseCharacter*)trig->sc->owner;
+                enactor = (Character*)trig->sc->owner;
                 r = enactor->getRoom();
                 break;
             case OBJ_TRIGGER:
@@ -262,7 +262,7 @@ DgResults scriptRandom(trig_data *trig, const std::string& field, const std::str
 
     if(iequals(field, "char")) {
         if(!r) return "";
-        std::vector<BaseCharacter*> candidates;
+        std::vector<Character*> candidates;
         for(auto c : r->getPeople()) {
             if(type == MOB_TRIGGER && !CAN_SEE(enactor, c)) continue;
             if(!valid_dg_target(c, DG_ALLOW_GODS)) continue;

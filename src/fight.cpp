@@ -29,34 +29,34 @@
 #include "dbat/entity.h"
 
 /* Structures */
-BaseCharacter *combat_list = nullptr;    /* head of l-list of fighting chars */
-BaseCharacter *next_combat_list = nullptr;
+Character *combat_list = nullptr;    /* head of l-list of fighting chars */
+Character *next_combat_list = nullptr;
 
 /* local functions */
-static void perform_group_gain(BaseCharacter *ch, int base, BaseCharacter *victim);
+static void perform_group_gain(Character *ch, int base, Character *victim);
 
-static void check_killer(BaseCharacter *ch, BaseCharacter *vict);
+static void check_killer(Character *ch, Character *vict);
 
-static void make_corpse(BaseCharacter *ch, BaseCharacter *tch);
+static void make_corpse(Character *ch, Character *tch);
 
-static void handle_corpse_condition(Object *corpse, BaseCharacter *ch);
+static void handle_corpse_condition(Object *corpse, Character *ch);
 
-static void make_pcorpse(BaseCharacter *ch);
+static void make_pcorpse(Character *ch);
 
-static void change_alignment(BaseCharacter *ch, BaseCharacter *victim);
+static void change_alignment(Character *ch, Character *victim);
 
-static void final_combat_resolve(BaseCharacter *ch);
+static void final_combat_resolve(Character *ch);
 
 static void shadow_dragons_live();
 
-static void cleanup_arena_watch(BaseCharacter *ch);
+static void cleanup_arena_watch(Character *ch);
 
-static void mob_attack(BaseCharacter *ch, char *buf);
+static void mob_attack(Character *ch, char *buf);
 
-static int pick_n_throw(BaseCharacter *ch, char *buf);
+static int pick_n_throw(Character *ch, char *buf);
 
 
-int group_bonus(BaseCharacter *ch, int type) {
+int group_bonus(Character *ch, int type) {
     struct follow_type *k, *next;
 
     if (!AFF_FLAGGED(ch, AFF_GROUP))
@@ -149,7 +149,7 @@ int group_bonus(BaseCharacter *ch, int type) {
     return (false);
 }
 
-void mutant_limb_regen(BaseCharacter *ch) {
+void mutant_limb_regen(Character *ch) {
     if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50) {
         act("The bones in your right arm have mended them selves.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n starts moving $s right arm gingerly for a moment.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -196,7 +196,7 @@ void mutant_limb_regen(BaseCharacter *ch) {
     }
 }
 
-static int pick_n_throw(BaseCharacter *ch, char *buf) {
+static int pick_n_throw(Character *ch, char *buf) {
     char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];;
 
     if (rand_number(1, 20) < 18) {
@@ -217,7 +217,7 @@ static int pick_n_throw(BaseCharacter *ch, char *buf) {
     return (false);
 }
 
-static void mob_attack(BaseCharacter *ch, char *buf) {
+static void mob_attack(Character *ch, char *buf) {
 
     int power = rand_number(1, 5);
     int bonus = GET_LEVEL(ch) * 0.1;
@@ -642,7 +642,7 @@ static void mob_attack(BaseCharacter *ch, char *buf) {
 
 } /* End mob_attack */
 
-static void cleanup_arena_watch(BaseCharacter *ch) {
+static void cleanup_arena_watch(Character *ch) {
     struct descriptor_data *d;
 
     for (d = descriptor_list; d; d = d->next) {
@@ -673,7 +673,7 @@ static void shadow_dragons_live() {
 }
 
 /* For announcing the sounds of battle to nearby rooms */
-void impact_sound(BaseCharacter *ch, char *mssg) {
+void impact_sound(Character *ch, char *mssg) {
     for (auto &[dir, ex] : ch->getRoom()->getExits()) {
         if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
         if(auto dest = reg.try_get<Destination>(ex->ent); dest) send::printfContents(dest->target, "%s", mssg);
@@ -681,7 +681,7 @@ void impact_sound(BaseCharacter *ch, char *mssg) {
 }
 
 /* For removing body parts */
-void remove_limb(BaseCharacter *vict, int num) {
+void remove_limb(Character *vict, int num) {
     /* 0 = head, 1 = rarm, 2 = larm, 3 = rleg, 4 = lleg , 5 = tail, 6 = tail*/
 
     Object *body_part;
@@ -780,9 +780,9 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
 void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
 
-    BaseCharacter *wch;
+    Character *wch;
 
-    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+    for (auto &&[ent, character] : reg.view<Character>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
 
         if (GET_POS(ch) == POS_FIGHTING) {
@@ -883,7 +883,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                             TO_ROOM);
                         ch->setFlag(FlagType::Affect, AFF_POSITION);
                     } else {
-                        BaseCharacter *vict = FIGHTING(ch);
+                        Character *vict = FIGHTING(ch);
                         if (roll_balance(ch) > roll_balance(vict)) {
                             act("@YYou struggle to gain a better position than @y$N@Y and succeed!@n", true, ch,
                                 nullptr, vict, TO_CHAR);
@@ -1036,7 +1036,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 do_stand(ch, nullptr, 0, 0);
                 continue;
             }
-            BaseCharacter *vict;
+            Character *vict;
             char buf[100];
 
             vict = FIGHTING(ch);
@@ -1355,7 +1355,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
     }
 }
 
-void appear(BaseCharacter *ch) {
+void appear(Character *ch) {
     if (affected_by_spell(ch, SPELL_INVISIBLE))
         affect_from_char(ch, SPELL_INVISIBLE);
 
@@ -1364,7 +1364,7 @@ void appear(BaseCharacter *ch) {
     act("$n slowly fades into existence.", false, ch, nullptr, nullptr, TO_ROOM);
 }
 
-void update_pos(BaseCharacter *victim) {
+void update_pos(Character *victim) {
     if (AFF_FLAGGED(victim, AFF_KNOCKED)) {
         return;
     }
@@ -1387,7 +1387,7 @@ void update_pos(BaseCharacter *victim) {
 }
 
 
-static void check_killer(BaseCharacter *ch, BaseCharacter *vict) {
+static void check_killer(Character *ch, Character *vict) {
     if (PLR_FLAGGED(vict, PLR_KILLER) || PLR_FLAGGED(vict, PLR_THIEF))
         return;
     if (PLR_FLAGGED(ch, PLR_KILLER) || IS_NPC(ch) || IS_NPC(vict) || ch == vict)
@@ -1397,7 +1397,7 @@ static void check_killer(BaseCharacter *ch, BaseCharacter *vict) {
 
 
 /* start one char fighting another (yes, it is horrible, I know... )  */
-void set_fighting(BaseCharacter *ch, BaseCharacter *vict) {
+void set_fighting(Character *ch, Character *vict) {
     if (ch == vict)
         return;
 
@@ -1423,8 +1423,8 @@ void set_fighting(BaseCharacter *ch, BaseCharacter *vict) {
 
 
 /* remove a char from the list of fighting chars */
-void stop_fighting(BaseCharacter *ch) {
-    BaseCharacter *temp;
+void stop_fighting(Character *ch) {
+    Character *temp;
 
     if (ch == next_combat_list)
         next_combat_list = ch->next_fighting;
@@ -1440,7 +1440,7 @@ void stop_fighting(BaseCharacter *ch) {
     update_pos(ch);
 }
 
-static void make_pcorpse(BaseCharacter *ch) {
+static void make_pcorpse(Character *ch) {
 
     Object *corpse;
     Object *money;
@@ -1522,7 +1522,7 @@ static void make_pcorpse(BaseCharacter *ch) {
 
 /* This handles how corpses are viewed. How many limbs they have. If they were *
  * disintergrated, blown in half, beat to a pulp, etc.        - Iovan 3/2/2011 */
-static void handle_corpse_condition(Object *corpse, BaseCharacter *ch) {
+static void handle_corpse_condition(Object *corpse, Character *ch) {
 
     char buf2[MAX_NAME_LENGTH + 128];
     char descBuf[512];
@@ -1596,7 +1596,7 @@ static void handle_corpse_condition(Object *corpse, BaseCharacter *ch) {
     }
 }
 
-static void make_corpse(BaseCharacter *ch, BaseCharacter *tch) {
+static void make_corpse(Character *ch, Character *tch) {
     Object *corpse, *o;
     Object *money;
     Object *obj, *next_obj;
@@ -1731,13 +1731,13 @@ static void make_corpse(BaseCharacter *ch, BaseCharacter *tch) {
 }
 
 
-void loadmap(BaseCharacter *ch) {
+void loadmap(Character *ch) {
 
 }
 
 
 /* When ch kills victim */
-static void change_alignment(BaseCharacter *ch, BaseCharacter *victim) {
+static void change_alignment(Character *ch, Character *victim) {
     /*
      * If you kill a monster with alignment A, you move 1/20th of the way to
      * having alignment -A.
@@ -1753,7 +1753,7 @@ static void change_alignment(BaseCharacter *ch, BaseCharacter *victim) {
 }
 
 
-void death_cry(BaseCharacter *ch) {
+void death_cry(Character *ch) {
     auto r = ch->getRoom();
     for (auto &[door, ex] : r->getExits()) {
         if(ex->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
@@ -1765,7 +1765,7 @@ void death_cry(BaseCharacter *ch) {
 }
 
 /* Let's clean up necessary things after "death" */
-static void final_combat_resolve(BaseCharacter *ch) {
+static void final_combat_resolve(Character *ch) {
     Object *chair;
 
     if (SITS(ch)) {
@@ -1831,8 +1831,8 @@ enum DeathType : uint8_t {
     Newbie = 3
 };
 
-void raw_kill(BaseCharacter *ch, BaseCharacter *killer) {
-    BaseCharacter *k, *temp;
+void raw_kill(Character *ch, Character *killer) {
+    Character *k, *temp;
 
     if (FIGHTING(ch))
         stop_fighting(ch);
@@ -2072,7 +2072,7 @@ void raw_kill(BaseCharacter *ch, BaseCharacter *killer) {
     }
 }
 
-void die(BaseCharacter *ch, BaseCharacter *killer) {
+void die(Character *ch, Character *killer) {
     if (!IS_NPC(ch)) {
         ch->clearFlag(FlagType::PC, PLR_HEALT);
         if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
@@ -2167,7 +2167,7 @@ void die(BaseCharacter *ch, BaseCharacter *killer) {
     raw_kill(ch, killer);
 }
 
-static void perform_group_gain(BaseCharacter *ch, int base, BaseCharacter *victim) {
+static void perform_group_gain(Character *ch, int base, Character *victim) {
     int64_t share;
 
     if (IN_ARENA(ch)) {
@@ -2210,7 +2210,7 @@ static void perform_group_gain(BaseCharacter *ch, int base, BaseCharacter *victi
             checkit = true;
         }
         if (checkit == false && ch->master != nullptr) {
-            BaseCharacter *master = ch->master;
+            Character *master = ch->master;
             for (f = master->followers; f; f = f->next) {
                 if (f->follower != ch) {
                     if (AFF_FLAGGED(f->follower, AFF_GROUP) && LASTHIT(victim) == GET_IDNUM(f->follower)) {
@@ -2309,10 +2309,10 @@ static void perform_group_gain(BaseCharacter *ch, int base, BaseCharacter *victi
     /*change_alignment(ch, victim);*/
 }
 
-void group_gain(BaseCharacter *ch, BaseCharacter *victim) {
+void group_gain(Character *ch, Character *victim) {
     int tot_levels, tot_members;
     int64_t tot_gain, base;
-    BaseCharacter *k;
+    Character *k;
     struct follow_type *f;
 
     if (!(k = ch->master))
@@ -2388,7 +2388,7 @@ void group_gain(BaseCharacter *ch, BaseCharacter *victim) {
 }
 
 
-void solo_gain(BaseCharacter *ch, BaseCharacter *victim) {
+void solo_gain(Character *ch, Character *victim) {
     return; // disabled for now.
 
     if (IS_NPC(ch)) {

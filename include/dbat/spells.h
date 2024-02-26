@@ -468,8 +468,8 @@ struct attack_hit_type {
 
 
 #define ASPELL(spellname) \
-extern void spellname(int level, BaseCharacter *ch, \
-          BaseCharacter *victim, OBject *obj, const char *arg)
+extern void spellname(int level, Character *ch, \
+          Character *victim, OBject *obj, const char *arg)
 
 #define MANUAL_SPELL(spellname)    spellname(level, caster, cvict, ovict, arg);
 
@@ -483,8 +483,8 @@ extern void skill_level(int spell, int chclass, int level);
 
 const char *skill_name(int num);
 
-extern int roll_skill(BaseCharacter *ch, int snum);
+extern int roll_skill(Character *ch, int snum);
 
-extern int roll_resisted(BaseCharacter *actor, int sact, BaseCharacter *resistor, int sres);
+extern int roll_resisted(Character *actor, int sact, Character *resistor, int sres);
 
 extern int skill_type(int skill);

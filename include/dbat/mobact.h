@@ -7,12 +7,12 @@
 
 
 // functions
-extern void remember(BaseCharacter *ch, BaseCharacter *victim);
+extern void remember(Character *ch, Character *victim);
 
 extern void mobile_activity(uint64_t heartPulse, double deltaTime);
 
-extern void forget(BaseCharacter *ch, BaseCharacter *victim);
+extern void forget(Character *ch, Character *victim);
 
-extern void mob_taunt(BaseCharacter *ch);
+extern void mob_taunt(Character *ch);
 
-extern void clearMemory(BaseCharacter *ch);
+extern void clearMemory(Character *ch);

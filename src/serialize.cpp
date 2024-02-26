@@ -150,7 +150,7 @@ affected_type::affected_type(const nlohmann::json &j) {
     if(j.contains("bitvector")) bitvector = j["bitvector"];
 }
 
-nlohmann::json BaseCharacter::serialize() {
+nlohmann::json Character::serialize() {
     auto j = GameEntity::serialize();
 
     for(auto &[id, train] : trains) {
@@ -308,7 +308,7 @@ nlohmann::json BaseCharacter::serialize() {
 }
 
 
-void BaseCharacter::deserialize(const nlohmann::json &j) {
+void Character::deserialize(const nlohmann::json &j) {
     GameEntity::deserialize(j);
 
     if(j.contains("trains")) {
@@ -525,7 +525,7 @@ void BaseCharacter::deserialize(const nlohmann::json &j) {
 }
 
 
-BaseCharacter::BaseCharacter(const nlohmann::json &j) : BaseCharacter() {
+Character::Character(const nlohmann::json &j) : Character() {
     deserialize(j);
 
     SPEAKING(this) = SKILL_LANG_COMMON;

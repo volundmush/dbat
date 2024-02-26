@@ -236,4 +236,4 @@ extern shop_vnum top_shop;
 // functions
 extern void assign_the_shopkeepers();
 
-extern void show_shops(BaseCharacter *ch, char *arg);
+extern void show_shops(Character *ch, char *arg);

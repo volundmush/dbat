@@ -24,12 +24,12 @@
 #  define EXITN(room, door)        (world[room].dir_option[door])
 #endif
 
-static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg);
+static int ship_land_location(Character *ch, Object *vehicle, char *arg);
 
-static void disp_ship_locations(BaseCharacter *ch, Object *vehicle);
+static void disp_ship_locations(Character *ch, Object *vehicle);
 
 /* This shows the player what locations the planet has to land at. */
-static void disp_ship_locations(BaseCharacter *ch, Object *vehicle) {
+static void disp_ship_locations(Character *ch, Object *vehicle) {
     auto r = vehicle->getRoom();
     if (r->getUID() == 50) { // Above Earth
         ch->sendf("@D------------------[ @GEarth@D ]------------------@c\n");
@@ -94,7 +94,7 @@ static void disp_ship_locations(BaseCharacter *ch, Object *vehicle) {
     }
 }
 
-static int ship_land_location(BaseCharacter *ch, Object *vehicle, char *arg) {
+static int ship_land_location(Character *ch, Object *vehicle, char *arg) {
     int landspot = 50;
     auto r = vehicle->getRoom();
     if (r->getUID() == 50) { // Above Earth
@@ -342,24 +342,24 @@ Object *find_hatch_by_vnum(int vnum) {
 }
 
 /* Search the player's room, inventory and equipment for a control */
-Object *find_control(BaseCharacter *ch) {
+Object *find_control(Character *ch) {
     return nullptr;
 }
 
 /* Drive our vehicle into another vehicle */
-static void drive_into_vehicle(BaseCharacter *ch, Object *vehicle, char *arg) {
+static void drive_into_vehicle(Character *ch, Object *vehicle, char *arg) {
     return;
 
 }
 
 /* Drive our vehicle out of another vehicle */
-static void drive_outof_vehicle(BaseCharacter *ch, Object *vehicle) {
+static void drive_outof_vehicle(Character *ch, Object *vehicle) {
     return;
 
 }
 
 /* Drive out vehicle in a certain direction */
-void drive_in_direction(BaseCharacter *ch, Object *vehicle, int dir) {
+void drive_in_direction(Character *ch, Object *vehicle, int dir) {
     char buf[MAX_INPUT_LENGTH];
     auto room = vehicle->getRoom();
 

@@ -289,7 +289,7 @@ void zedit_disp_flag_menu(struct descriptor_data *d) {
 /*
  * Create a new zone.
  */
-void zedit_new_zone(BaseCharacter *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top) {
+void zedit_new_zone(Character *ch, zone_vnum vzone_num, room_vnum bottom, room_vnum top) {
     int result;
     const char *error;
     struct descriptor_data *dsc;

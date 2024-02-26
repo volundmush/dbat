@@ -111,7 +111,7 @@ room_rnum obj_room(Object *obj) {
 room_rnum find_obj_target_room(Object *obj, char *rawroomstr) {
     int tmp;
     room_rnum location;
-    BaseCharacter *target_mob;
+    Character *target_mob;
     Object *target_obj;
     char roomstr[MAX_INPUT_LENGTH];
 
@@ -163,7 +163,7 @@ OCMD(do_oecho) {
 
 
 OCMD(do_oforce) {
-    BaseCharacter *ch, *next_ch;
+    Character *ch, *next_ch;
     char arg1[MAX_INPUT_LENGTH], *line;
 
     line = one_argument(argument, arg1);
@@ -214,7 +214,7 @@ OCMD(do_ozoneecho) {
 
 OCMD(do_osend) {
     char buf[MAX_INPUT_LENGTH], *msg;
-    BaseCharacter *ch;
+    Character *ch;
 
     msg = any_one_arg(argument, buf);
 
@@ -283,7 +283,7 @@ OCMD(do_otimer) {
 OCMD(do_otransform) {
     char arg[MAX_INPUT_LENGTH];
     Object *o, tmpobj;
-    BaseCharacter *wearer = nullptr;
+    Character *wearer = nullptr;
     int pos = 0;
 
     one_argument(argument, arg);
@@ -300,7 +300,6 @@ OCMD(do_otransform) {
         }
 
         if (obj->worn_by) {
-            pos = obj->worn_on;
             wearer = obj->worn_by;
             unequip_char(obj->worn_by, pos);
         }
@@ -309,12 +308,9 @@ OCMD(do_otransform) {
 
         tmpobj.carried_by = obj->carried_by;
         tmpobj.worn_by = obj->worn_by;
-        tmpobj.worn_on = obj->worn_on;
         tmpobj.in_obj = obj->in_obj;
 
         tmpobj.script = obj->script;
-        tmpobj.next = obj->next;
-        memcpy(obj, &tmpobj, sizeof(*obj));
 
         if (wearer) {
             equip_char(wearer, obj, pos);
@@ -332,7 +328,7 @@ OCMD(do_dupe) {
 /* purge all objects an npcs in room, or specified object or mob */
 OCMD(do_opurge) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *ch, *next_ch;
+    Character *ch, *next_ch;
 
     one_argument(argument, arg);
 
@@ -399,7 +395,7 @@ OCMD(do_ogoto) {
 }
 
 OCMD(do_oteleport) {
-    BaseCharacter *ch, *next_ch;
+    Character *ch, *next_ch;
     room_rnum target;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -446,10 +442,10 @@ OCMD(do_oteleport) {
 OCMD(do_dgoload) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int number = 0, room;
-    BaseCharacter *mob;
+    Character *mob;
     Object *object;
     char *target;
-    BaseCharacter *tch;
+    Character *tch;
     Object *cnt;
     int pos;
 
@@ -537,7 +533,7 @@ OCMD(do_dgoload) {
 OCMD(do_odamage) {
     char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
     int dam = 0;
-    BaseCharacter *ch;
+    Character *ch;
 
     two_arguments(argument, name, amount);
 
@@ -662,8 +658,11 @@ OCMD(do_odoor) {
                 ex->setAlias(value);
                 break;
             case 5:  /* room        */
-                if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->destination = getEntity<Room>(to_room);
+                if ((to_room = real_room(atoi(value))) != NOWHERE) {
+                    auto &dest = reg.get_or_emplace<Destination>(newexit->ent);
+                    dest.target = entities.at(to_room);
+                    dest.direction = dir;
+                }
                 else
                     obj_log(obj, "odoor: invalid door target");
                 break;
@@ -694,7 +693,7 @@ OCMD(do_osetval) {
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/
 OCMD(do_oat) {
     room_rnum loc = NOWHERE;
-    BaseCharacter *ch;
+    Character *ch;
     Object *object;
     char arg[MAX_INPUT_LENGTH], *command;
 

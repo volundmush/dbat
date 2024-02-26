@@ -10,9 +10,9 @@
 #include "structs.h"
 
 /* Functions defined in feats.c */
-extern int is_proficient_with_armor(const BaseCharacter *ch, int armor_type);
+extern int is_proficient_with_armor(const Character *ch, int armor_type);
 
-extern int is_proficient_with_weapon(const BaseCharacter *ch, int weapon_type);
+extern int is_proficient_with_weapon(const Character *ch, int weapon_type);
 
 extern int find_feat_num(char *name);
 
@@ -22,7 +22,7 @@ extern void assign_feats();
 
 extern void sort_feats();
 
-extern int feat_is_available(BaseCharacter *ch, int featnum, int iarg, char *sarg);
+extern int feat_is_available(Character *ch, int featnum, int iarg, char *sarg);
 
 extern int feat_sort_info[MAX_FEATS + 1];
 

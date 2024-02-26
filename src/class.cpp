@@ -302,7 +302,7 @@ static const int race_template[NUM_RACES][6] = {
                 {10, 10, 10, 10, 10, 10}
 };
 
-void cedit_creation(BaseCharacter *ch) {
+void cedit_creation(Character *ch) {
     switch (CONFIG_CREATION_METHOD) {
         case CEDIT_CREATION_METHOD_3: /* Points Pool */
             break;
@@ -361,7 +361,7 @@ const int class_hit_die_size[NUM_CLASSES] = {
 };
 
 /* Some initializations for characters, including initial skills */
-void do_start(BaseCharacter *ch) {
+void do_start(Character *ch) {
     int punch;
     Object *obj;
 
@@ -772,7 +772,7 @@ static const int *free_start_feats[] = {
  * each class every time they gain a level.
  */
 /* Rillao: transloc, add new transes here */
-void advance_level(BaseCharacter *ch) {
+void advance_level(Character *ch) {
     int64_t add_hp = 0, add_move = 0, add_mana = 0, add_ki = 0;
     int add_prac = 1, add_train, i, j = 0, ranks;
     int add_gen_feats = 0, add_class_feats = 0;
@@ -1207,7 +1207,7 @@ void advance_level(BaseCharacter *ch) {
  * invalid_class is used by handler.c to determine if a piece of equipment is
  * usable by a particular class, based on the ITEM_ANTI_{class} bitvectors.
  */
-int invalid_class(BaseCharacter *ch, Object *obj) {
+int invalid_class(Character *ch, Object *obj) {
     if (OBJ_FLAGGED(obj, ITEM_ANTI_WIZARD) && IS_ROSHI(ch))
         return true;
 
@@ -1289,7 +1289,7 @@ int invalid_class(BaseCharacter *ch, Object *obj) {
  */
 
 /* Function to return the exp required for each class/level */
-int64_t level_exp(BaseCharacter *ch, int level) {
+int64_t level_exp(Character *ch, int level) {
     int req = 1;
 
     switch (level) {
@@ -1612,7 +1612,7 @@ int8_t ability_mod_value(int abil) {
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int8_t dex_mod_capped(BaseCharacter *ch) {
+int8_t dex_mod_capped(Character *ch) {
     int8_t mod;
     Object *armor;
     mod = ability_mod_value(GET_DEX(ch));
@@ -1641,7 +1641,7 @@ int highest_skill_value(int level, int type) {
 
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-time_t birth_age(BaseCharacter *ch) {
+time_t birth_age(Character *ch) {
     int tmp;
 
     tmp = rand_number(16, 18);
@@ -1830,12 +1830,12 @@ namespace sensei {
         int location{};
         double modifier{};
         int specific{-1};
-        std::function<double(BaseCharacter *ch)> func{};
+        std::function<double(Character *ch)> func{};
     };
 
     static std::unordered_map<SenseiID, std::vector<sen_affect_type>> sensei_affects = {};
 
-    double getModifier(BaseCharacter* ch, int location, int specific) {
+    double getModifier(Character* ch, int location, int specific) {
         double out = 0.0;
         if(auto found = sensei_affects.find(ch->chclass); found != sensei_affects.end()) {
 

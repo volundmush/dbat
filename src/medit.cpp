@@ -55,7 +55,7 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
  * Ideally, this function should be in db.c, but I'll put it here for
  * portability.
  */
-void init_mobile(BaseCharacter *mob) {
+void init_mobile(Character *mob) {
 
     //GET_HIT(mob) = 0;
     //GET_MAX_MANA(mob) = 0;

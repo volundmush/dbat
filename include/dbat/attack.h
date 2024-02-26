@@ -27,7 +27,7 @@ namespace atk {
     };
 
     struct Attack {
-        Attack(BaseCharacter *ch, char *arg);
+        Attack(Character *ch, char *arg);
         virtual int getSkillID() = 0;
         virtual int getAtkID() = 0; // used for damtype and roll_hitloc
         virtual std::string getName() = 0;
@@ -37,7 +37,7 @@ namespace atk {
         virtual int autoTrainSkillID() { return 0;};
 
         virtual Result doAttack();
-        virtual DefenseResult attackOutcome(BaseCharacter*, BaseCharacter*, int, bool);
+        virtual DefenseResult attackOutcome(Character*, Character*, int, bool);
         virtual DefenseResult calculateDefense();
         virtual Result attackCharacter();
         virtual Result attackObject();
@@ -111,8 +111,8 @@ namespace atk {
         virtual void announceMiss() = 0;
         virtual void announceObject() = 0;
 
-        BaseCharacter *user{};
-        BaseCharacter *victim{};
+        Character *user{};
+        Character *victim{};
         Object *obj{};
         std::string input;
         std::vector<std::string> args;
@@ -1035,7 +1035,7 @@ namespace atk {
     struct KiAreaAttack : RangedKiAttack {
         using RangedKiAttack::RangedKiAttack;
 
-        std::vector<BaseCharacter*> targets;
+        std::vector<Character*> targets;
         bool paidCost = false;
         bool canParry() override {return false;};
         bool canBlock() override {return false;};

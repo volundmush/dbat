@@ -15,7 +15,7 @@ namespace net {
 
     protected:
         entt::entity ent;
-        BaseCharacter *ch{};
+        Character *ch{};
         int state{CON_GET_NAME};
         int total{};
         int ccpoints{};

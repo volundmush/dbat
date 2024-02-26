@@ -438,7 +438,7 @@ void clear_one_board(struct board_info *tmp) {
     tmp = nullptr;
 }
 
-void show_board(obj_vnum board_vnum, BaseCharacter *ch) {
+void show_board(obj_vnum board_vnum, Character *ch) {
     struct board_info *thisboard;
     struct board_msg *message;
     char *tmstr;
@@ -563,7 +563,7 @@ void show_board(obj_vnum board_vnum, BaseCharacter *ch) {
 
 }
 
-void board_display_msg(obj_vnum board_vnum, BaseCharacter *ch, int arg) {
+void board_display_msg(obj_vnum board_vnum, Character *ch, int arg) {
     struct board_info *thisboard = bboards;
     struct board_msg *message;
     char *tmstr;
@@ -725,7 +725,7 @@ void board_display_msg(obj_vnum board_vnum, BaseCharacter *ch, int arg) {
 }
 
 
-int mesglookup(struct board_msg *message, BaseCharacter *ch, struct board_info *board) {
+int mesglookup(struct board_msg *message, Character *ch, struct board_info *board) {
     int mem = 0;
     struct board_memory *mboard_type;
     char *tempname = nullptr;
@@ -762,7 +762,7 @@ int mesglookup(struct board_msg *message, BaseCharacter *ch, struct board_info *
     return 0;
 }
 
-void write_board_message(obj_vnum board_vnum, BaseCharacter *ch, char *arg) {
+void write_board_message(obj_vnum board_vnum, Character *ch, char *arg) {
     struct board_info *thisboard = bboards;
     struct board_msg *message;
 
@@ -850,7 +850,7 @@ void write_board_message(obj_vnum board_vnum, BaseCharacter *ch, char *arg) {
     return;
 }
 
-void board_respond(long board_vnum, BaseCharacter *ch, int mnum) {
+void board_respond(long board_vnum, Character *ch, int mnum) {
     struct board_info *thisboard = bboards;
     struct board_msg *message, *other;
     char number[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
@@ -963,7 +963,7 @@ struct board_info *locate_board(obj_vnum board_vnum) {
 }
 
 
-void remove_board_msg(obj_vnum board_vnum, BaseCharacter *ch, int arg) {
+void remove_board_msg(obj_vnum board_vnum, Character *ch, int arg) {
     struct board_info *thisboard;
     struct board_msg *cur, *temp;
     struct descriptor_data *d;

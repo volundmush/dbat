@@ -15,7 +15,7 @@ Destination::Destination(Room* target) : Destination() {
     this->locationType = 0;
 }
 
-Destination::Destination(BaseCharacter* target) : Destination() {
+Destination::Destination(Character* target) : Destination() {
     this->target = target->ent;
     this->locationType = 0;
 }
@@ -318,7 +318,7 @@ namespace find {
                 return obj;
             }
         }
-        if(reg.all_of<BaseCharacter>(ent)) {
+        if(reg.all_of<Character>(ent)) {
             for(auto &[pos, obj] : contents::getEquipment(ent)) {
                 if(func(obj)) {
                     if(working && !obj->isWorking()) continue;
@@ -341,7 +341,7 @@ namespace find {
             out.insert(contents.begin(), contents.end());
         }
 
-        if(reg.all_of<BaseCharacter>(ent)) {
+        if(reg.all_of<Character>(ent)) {
             for(auto &[pos, obj] : contents::getEquipment(ent)) {
                 if(func(obj)) {
                     if(working && !obj->isWorking()) continue;
@@ -410,7 +410,7 @@ namespace contents {
         for(auto e : get(ent)) {
             auto &i = reg.get<Info>(e);
             if(i.family == EntityFamily::Character) {
-                auto c = reg.try_get<BaseCharacter>(e);
+                auto c = reg.try_get<Character>(e);
                 out.push_back(c);
             } else if(i.family == EntityFamily::Object) {
                 auto o = reg.try_get<Object>(e);
@@ -438,11 +438,11 @@ namespace contents {
         return getRooms(ent->ent);
     }
 
-    std::vector<BaseCharacter*> getPeople(entt::entity ent) {
-        return get<BaseCharacter>(ent);
+    std::vector<Character*> getPeople(entt::entity ent) {
+        return get<Character>(ent);
     }
 
-    std::vector<BaseCharacter*> getPeople(GameEntity* ent) {
+    std::vector<Character*> getPeople(GameEntity* ent) {
         return getPeople(ent->ent);
     }
 
@@ -616,7 +616,7 @@ namespace render {
     std::string appearance(entt::entity ent, entt::entity viewer) {
         std::string result;
 
-        auto ch = reg.try_get<BaseCharacter>(ent);
+        auto ch = reg.try_get<Character>(ent);
         auto obj = reg.try_get<Object>(ent);
         auto proto = reg.try_get<Proto>(ent);
 
@@ -892,7 +892,7 @@ namespace render {
     std::string diagnostics(entt::entity ent, entt::entity viewer) {
         std::string result;
 
-        if(auto ch = reg.try_get<BaseCharacter>(ent); ch) {
+        if(auto ch = reg.try_get<Character>(ent); ch) {
             int percent, ar_index;
 
             int64_t hit = GET_HIT(ch), max = (ch->getEffMaxPL());
@@ -1181,7 +1181,7 @@ namespace render {
         std::string result;
 
         auto shd = displayName(ent, viewer);
-        auto ch = reg.try_get<BaseCharacter>(ent);
+        auto ch = reg.try_get<Character>(ent);
 
         // should an exclamation be used at the end of the line instead of a period?
         bool exclamation = false;
@@ -1399,7 +1399,7 @@ namespace render {
         
         std::vector<std::string> messages;
 
-        auto ch = reg.try_get<BaseCharacter>(ent);
+        auto ch = reg.try_get<Character>(ent);
 
         auto icur = ch->getCurPL();
         auto imax = ch->getEffMaxPL();
@@ -1861,7 +1861,7 @@ namespace movement {
     }
 
     bool moveInDirection(entt::entity ent, int direction, bool need_specials_check) {
-        auto ch = reg.try_get<BaseCharacter>(ent);
+        auto ch = reg.try_get<Character>(ent);
         
         if(ch) {
             if (GRAPPLING(ch) || GRAPPLED(ch)) {
@@ -1967,7 +1967,7 @@ namespace movement {
         }
         auto &dest = destMaybe.value();
 
-        auto ch = reg.try_get<BaseCharacter>(ent);
+        auto ch = reg.try_get<Character>(ent);
 
         if(ch) {
             auto master = ch->master;
@@ -2087,7 +2087,7 @@ namespace movement {
     }
 
     bool checkCanReachDestination(entt::entity ent, entt::entity mover, const Destination& dest) {
-        if(auto ch = reg.try_get<BaseCharacter>(mover); ch) {
+        if(auto ch = reg.try_get<Character>(mover); ch) {
 
             // Next, we'll handle terrain checks.
 
@@ -2250,7 +2250,7 @@ namespace movement {
     }
 
     bool checkPostEnter(entt::entity ent, entt::entity mover, const Location& loc, const Destination& dest) {
-        if(auto ch = reg.try_get<BaseCharacter>(mover); ch) {
+        if(auto ch = reg.try_get<Character>(mover); ch) {
             entry_memory_mtrigger(ch);
         if (!greet_mtrigger(ch, dest.direction)) {
             ch->removeFromLocation();
@@ -2269,7 +2269,7 @@ namespace movement {
         auto direction = dest.direction;
         auto room = reg.try_get<Room>(ent);
 
-        if(auto ch = reg.try_get<BaseCharacter>(mover); ch) {
+        if(auto ch = reg.try_get<Character>(mover); ch) {
             if (need_specials_check && special(ch, direction + 1, throwaway))
                 return false;
             if (!leave_mtrigger(ch, direction) || reg.get<Location>(ch->ent) != was_in) /* prevent teleport crashes */

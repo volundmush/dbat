@@ -18,8 +18,8 @@ extern char *default_color_choices[NUM_COLOR + 1];
 // functions
 extern void map_draw_room(char map[9][10], int x, int y, Room* room,
                           entt::entity viewer);
-extern std::string trans_check(BaseCharacter *ch, GameEntity *viewer);
-extern int readIntro(BaseCharacter *ch, BaseCharacter *vict);
+extern std::string trans_check(Character *ch, GameEntity *viewer);
+extern int readIntro(Character *ch, Character *vict);
 
 extern int check_disabled(const struct command_info *command);
 
@@ -27,9 +27,9 @@ extern void sort_commands();
 
 extern char *find_exdesc(char *word, const std::vector<extra_descr_data>& list);
 
-extern void add_history(BaseCharacter *ch, char *str, int type);
+extern void add_history(Character *ch, char *str, int type);
 
-extern void introWrite(BaseCharacter *ch, BaseCharacter *vict, char *name);
+extern void introWrite(Character *ch, Character *vict, char *name);
 
 extern int perf_skill(int skill);
 

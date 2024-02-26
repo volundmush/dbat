@@ -20,7 +20,7 @@ namespace atk {
             SKILL_SLAM, SKILL_HEELDROP, SKILL_BASH, SKILL_HEADBUTT, SKILL_TAILWHIP
     };
 
-    Attack::Attack(BaseCharacter *ch, char *arg) : user(ch) {
+    Attack::Attack(Character *ch, char *arg) : user(ch) {
         if(arg && strlen(arg)) input = arg;
         trim(input);
         args = split(input, ' ');
@@ -175,7 +175,7 @@ namespace atk {
         return 0;
     }
 
-    DefenseResult Attack::attackOutcome(BaseCharacter* user, BaseCharacter* victim, int skillID, bool kiAttack) {
+    DefenseResult Attack::attackOutcome(Character* user, Character* victim, int skillID, bool kiAttack) {
         initStats();
 
         currentHitProbability = roll_accuracy(user, init_skill(user, skillID), kiAttack);
@@ -4193,7 +4193,7 @@ namespace atk {
     void KiAreaAttack::processAttack() {
         announceAttack();
 
-        for(BaseCharacter *value : targets) {
+        for(Character *value : targets) {
             victim = value;
             switch(doAttack()) {
                 case Result::Landed:

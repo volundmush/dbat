@@ -192,7 +192,7 @@ WCMD(do_wecho) {
 
 WCMD(do_wsend) {
     char buf[MAX_INPUT_LENGTH], *msg;
-    BaseCharacter *ch;
+    Character *ch;
 
     msg = any_one_arg(argument, buf);
 
@@ -334,8 +334,11 @@ WCMD(do_wdoor) {
                 ex->setAlias(value);
                 break;
             case 5:  /* room        */
-                if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    newexit->destination = getEntity<Room>(to_room);
+                if ((to_room = real_room(atoi(value))) != NOWHERE) {
+                    auto &dest = reg.get_or_emplace<Destination>(newexit->ent);
+                    dest.target = entities.at(to_room);
+                    dest.direction = dir;
+                }
                 else
                     wld_log(room, "wdoor: invalid door target");
                 break;
@@ -345,7 +348,7 @@ WCMD(do_wdoor) {
 
 
 WCMD(do_wteleport) {
-    BaseCharacter *ch, *next_ch;
+    Character *ch, *next_ch;
     room_rnum target, nr;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -392,7 +395,7 @@ WCMD(do_wteleport) {
 
 
 WCMD(do_wforce) {
-    BaseCharacter *ch, *next_ch;
+    Character *ch, *next_ch;
     char arg1[MAX_INPUT_LENGTH], *line;
 
     line = one_argument(argument, arg1);
@@ -423,7 +426,7 @@ WCMD(do_wforce) {
 /* purge all objects an npcs in room, or specified object or mob */
 WCMD(do_wpurge) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *ch, *next_ch;
+    Character *ch, *next_ch;
     Object *obj, *next_obj;
 
     one_argument(argument, arg);
@@ -474,10 +477,10 @@ WCMD(do_wpurge) {
 WCMD(do_wload) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
     int number = 0;
-    BaseCharacter *mob;
+    Character *mob;
     Object *object;
     char *target;
-    BaseCharacter *tch;
+    Character *tch;
     Object *cnt;
     int pos;
 
@@ -555,7 +558,7 @@ WCMD(do_wload) {
 WCMD(do_wdamage) {
     char name[MAX_INPUT_LENGTH], amount[MAX_INPUT_LENGTH];
     int dam = 0;
-    BaseCharacter *ch;
+    Character *ch;
 
     two_arguments(argument, name, amount);
 
@@ -578,7 +581,7 @@ WCMD(do_wdamage) {
 
 WCMD(do_wat) {
     room_rnum loc = NOWHERE;
-    BaseCharacter *ch;
+    Character *ch;
     char arg[MAX_INPUT_LENGTH], *command;
 
     command = any_one_arg(argument, arg);

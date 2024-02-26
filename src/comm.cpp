@@ -411,7 +411,7 @@ char *make_prompt(struct descriptor_data *d) {
         }
         /* show only when below 25% */
         if (PRF_FLAGGED(d->character, PRF_DISPAUTO) && GET_LEVEL(d->character) >= 500 && len < sizeof(prompt)) {
-            BaseCharacter *ch = d->character;
+            Character *ch = d->character;
             if (GET_HIT(ch) << 2 < GET_MAX_HIT(ch)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" I64T " ", GET_HIT(ch));
                 if (count >= 0)
@@ -1474,7 +1474,7 @@ void close_socket(struct descriptor_data *d) {
 **************************************************************** */
 
 
-int arena_watch(BaseCharacter *ch) {
+int arena_watch(Character *ch) {
 
     struct descriptor_data *d;
     int found = false, room = NOWHERE;
@@ -1508,11 +1508,11 @@ const char *ACTNULL = "<nullptr>";
 
 
 /* higher-level communication: the act() function */
-void perform_act(const char *orig, BaseCharacter *ch, Object *obj, const void *vict_obj, BaseCharacter *to) {
+void perform_act(const char *orig, Character *ch, Object *obj, const void *vict_obj, Character *to) {
     const char *i = nullptr;
     char lbuf[MAX_STRING_LENGTH], *buf, *j;
     bool uppercasenext = false;
-    BaseCharacter *dg_victim = nullptr;
+    Character *dg_victim = nullptr;
     Object *dg_target = nullptr;
     char *dg_arg = nullptr;
 
@@ -1525,29 +1525,29 @@ void perform_act(const char *orig, BaseCharacter *ch, Object *obj, const void *v
                     i = PERS(ch, to);
                     break;
                 case 'N':
-                    CHECK_NULL(vict_obj, PERS((BaseCharacter *) vict_obj, to));
-                    dg_victim = (BaseCharacter *) vict_obj;
+                    CHECK_NULL(vict_obj, PERS((Character *) vict_obj, to));
+                    dg_victim = (Character *) vict_obj;
                     break;
                 case 'm':
                     i = HMHR(ch);
                     break;
                 case 'M':
-                    CHECK_NULL(vict_obj, HMHR((BaseCharacter *) vict_obj));
-                    dg_victim = (BaseCharacter *) vict_obj;
+                    CHECK_NULL(vict_obj, HMHR((Character *) vict_obj));
+                    dg_victim = (Character *) vict_obj;
                     break;
                 case 's':
                     i = HSHR(ch);
                     break;
                 case 'S':
-                    CHECK_NULL(vict_obj, HSHR((BaseCharacter *) vict_obj));
-                    dg_victim = (BaseCharacter *) vict_obj;
+                    CHECK_NULL(vict_obj, HSHR((Character *) vict_obj));
+                    dg_victim = (Character *) vict_obj;
                     break;
                 case 'e':
                     i = HSSH(ch);
                     break;
                 case 'E':
-                    CHECK_NULL(vict_obj, HSSH((BaseCharacter *) vict_obj));
-                    dg_victim = (BaseCharacter *) vict_obj;
+                    CHECK_NULL(vict_obj, HSSH((Character *) vict_obj));
+                    dg_victim = (Character *) vict_obj;
                     break;
                 case 'o':
                     CHECK_NULL(obj, OBJN(obj, to));
@@ -1631,7 +1631,7 @@ void perform_act(const char *orig, BaseCharacter *ch, Object *obj, const void *v
 
 }
 
-char *act(const char *str, int hide_invisible, BaseCharacter *ch,
+char *act(const char *str, int hide_invisible, Character *ch,
           Object *obj, const void *vict_obj, int type) {
     int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
 
@@ -1685,7 +1685,7 @@ char *act(const char *str, int hide_invisible, BaseCharacter *ch,
     }
 
     if (type == TO_VICT) {
-        auto to = (BaseCharacter *) vict_obj;
+        auto to = (Character *) vict_obj;
         if (to && SENDOK(to) && (!resskill || (roll_skill(to, resskill) >= dcval))) {
             perform_act(str, ch, obj, vict_obj, to);
             return last_act_message;
@@ -1713,7 +1713,7 @@ char *act(const char *str, int hide_invisible, BaseCharacter *ch,
 
     /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
-    std::vector<BaseCharacter*> to;
+    std::vector<Character*> to;
     if (ch && IN_ROOM(ch) != NOWHERE)
         to = ch->getRoom()->getPeople();
     else if (obj && IN_ROOM(obj) != NOWHERE)

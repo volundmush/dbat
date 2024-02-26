@@ -32,7 +32,7 @@
  * Special spells appear below.
  */
 
-int roll_skill(BaseCharacter *ch, int snum) {
+int roll_skill(Character *ch, int snum) {
     int roll, skval, i;
     if (!IS_NPC(ch)) {
         skval = GET_SKILL(ch, snum);
@@ -115,6 +115,6 @@ int roll_skill(BaseCharacter *ch, int snum) {
     }
 }
 
-int roll_resisted(BaseCharacter *actor, int sact, BaseCharacter *resistor, int sres) {
+int roll_resisted(Character *actor, int sact, Character *resistor, int sres) {
     return roll_skill(actor, sact) >= roll_skill(resistor, sres);
 }

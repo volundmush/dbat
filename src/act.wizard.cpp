@@ -44,31 +44,31 @@
 static int copyover_timer = 0; /* for timed copyovers */
 
 /* local functions */
-static void print_lockout(BaseCharacter *ch);
+static void print_lockout(Character *ch);
 
 static void execute_copyover();
 
-static int perform_set(BaseCharacter *ch, BaseCharacter *vict, int mode, char *val_arg);
+static int perform_set(Character *ch, Character *vict, int mode, char *val_arg);
 
-static void perform_immort_invis(BaseCharacter *ch, int level);
+static void perform_immort_invis(Character *ch, int level);
 
-static void do_stat_room(BaseCharacter *ch);
+static void do_stat_room(Character *ch);
 
-static void do_stat_object(BaseCharacter *ch, Object *j);
+static void do_stat_object(Character *ch, Object *j);
 
-static void do_stat_character(BaseCharacter *ch, BaseCharacter *k);
+static void do_stat_character(Character *ch, Character *k);
 
-static void stop_snooping(BaseCharacter *ch);
+static void stop_snooping(Character *ch);
 
 static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int listall);
 
-static void mob_checkload(BaseCharacter *ch, mob_vnum mvnum);
+static void mob_checkload(Character *ch, mob_vnum mvnum);
 
-static void obj_checkload(BaseCharacter *ch, obj_vnum ovnum);
+static void obj_checkload(Character *ch, obj_vnum ovnum);
 
-static void trg_checkload(BaseCharacter *ch, trig_vnum tvnum);
+static void trg_checkload(Character *ch, trig_vnum tvnum);
 
-static void lockWrite(BaseCharacter *ch, char *name);
+static void lockWrite(Character *ch, char *name);
 
 // definitions
 ACMD(do_lag) {
@@ -359,7 +359,7 @@ ACMD(do_newsedit) {
     STATE(ch->desc) = CON_NEWSEDIT;
 }
 
-static void print_lockout(BaseCharacter *ch) {
+static void print_lockout(Character *ch) {
     if (IS_NPC(ch))
         return;
 
@@ -407,7 +407,7 @@ static void print_lockout(BaseCharacter *ch) {
 ACMD(do_approve) {
 
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
 
     one_argument(argument, arg);
 
@@ -431,7 +431,7 @@ ACMD(do_approve) {
     }
 }
 
-static void lockWrite(BaseCharacter *ch, char *name) {
+static void lockWrite(Character *ch, char *name) {
     FILE *file;
     char fname[40], filler[50], line[256];
     char *names[500] = {""};
@@ -578,7 +578,7 @@ ACMD(do_permission) {
 ACMD(do_transobj) {
 
     Object *obj;
-    BaseCharacter *vict;
+    Character *vict;
     struct descriptor_data *d;
     char arg[MAX_INPUT_LENGTH];
     char arg2[MAX_INPUT_LENGTH];
@@ -682,7 +682,7 @@ ACMD(do_finddoor) {
     room_rnum i;
     char arg[MAX_INPUT_LENGTH];
     char buf[MAX_STRING_LENGTH] = {0};
-    BaseCharacter *tmp_char;
+    Character *tmp_char;
     Object *obj;
 
     one_argument(argument, arg);
@@ -747,7 +747,7 @@ ACMD(do_recall) {
 }
 
 ACMD(do_hell) {
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -797,7 +797,7 @@ ACMD(do_echo) {
         char buf[8096];
         char name[128];
         int found = false, trunc = 0;
-        BaseCharacter *vict = nullptr, *next_v = nullptr, *tch = nullptr;
+        Character *vict = nullptr, *next_v = nullptr, *tch = nullptr;
 
         if (strlen(argument) > 7000) {
             trunc = strlen(argument) - 7000;
@@ -874,7 +874,7 @@ ACMD(do_echo) {
 
 ACMD(do_send) {
     char arg[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
 
     half_chop(argument, arg, buf);
 
@@ -894,7 +894,7 @@ ACMD(do_send) {
 }
 
 /* take a string, and return an rnum.. used for goto, at, etc.  -je 4/6/93 */
-room_rnum find_target_room(BaseCharacter *ch, char *rawroomstr) {
+room_rnum find_target_room(Character *ch, char *rawroomstr) {
     room_rnum location = NOWHERE;
     char roomstr[MAX_INPUT_LENGTH];
     Room *rm;
@@ -912,7 +912,7 @@ room_rnum find_target_room(BaseCharacter *ch, char *rawroomstr) {
             return (NOWHERE);
         }
     } else {
-        BaseCharacter *target_mob;
+        Character *target_mob;
         Object *target_obj;
         char *mobobjstr = roomstr;
         int num;
@@ -1033,7 +1033,7 @@ ACMD(do_goto) {
 ACMD(do_trans) {
     char buf[MAX_INPUT_LENGTH];
     struct descriptor_data *i;
-    BaseCharacter *victim;
+    Character *victim;
 
     one_argument(argument, buf);
     if (!*buf)
@@ -1087,7 +1087,7 @@ ACMD(do_trans) {
 
 ACMD(do_teleport) {
     char buf[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
-    BaseCharacter *victim;
+    Character *victim;
     room_rnum target;
 
     two_arguments(argument, buf, buf2);
@@ -1154,7 +1154,7 @@ ACMD(do_vnum) {
 
 #define ZOCMD zone_table[zrnum].cmd[subcmd]
 
-void list_zone_commands_room(BaseCharacter *ch, room_vnum rvnum) {
+void list_zone_commands_room(Character *ch, room_vnum rvnum) {
     zone_rnum zrnum = real_zone_by_thing(rvnum);
     room_rnum rrnum = real_room(rvnum), cmd_room = NOWHERE;
     int subcmd = 0, count = 0;
@@ -1274,13 +1274,13 @@ void list_zone_commands_room(BaseCharacter *ch, room_vnum rvnum) {
 
 #undef ZOCMD
 
-static void do_stat_room(BaseCharacter *ch) {
+static void do_stat_room(Character *ch) {
     char buf2[MAX_STRING_LENGTH];
     struct extra_descr_data *desc;
     Room *rm = ch->getRoom();
     int i, found, column;
     Object *j;
-    BaseCharacter *k;
+    Character *k;
 
     ch->sendf("Room name: @c%s@n\r\n", rm->getDisplayName(ch));
 
@@ -1354,11 +1354,11 @@ static void do_stat_room(BaseCharacter *ch) {
     list_zone_commands_room(ch, rm->getVN());
 }
 
-static void do_stat_object(BaseCharacter *ch, Object *j) {
+static void do_stat_object(Character *ch, Object *j) {
     int i, found;
     obj_vnum vnum;
     Object *j2;
-    BaseCharacter *sitter;
+    Character *sitter;
     struct extra_descr_data *desc;
     char buf[MAX_STRING_LENGTH];
 
@@ -1549,7 +1549,7 @@ static void do_stat_object(BaseCharacter *ch, Object *j) {
     do_sstat(ch, j);
 }
 
-static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
+static void do_stat_character(Character *ch, Character *k) {
     char buf[MAX_STRING_LENGTH];
     char buf2[MAX_STRING_LENGTH];
     int i, i2, column, found = false;
@@ -1772,7 +1772,7 @@ static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
             struct script_memory *mem = SCRIPT_MEM(k);
             ch->sendf("Script memory:\r\n  Remember             Command\r\n");
             while (mem) {
-                auto find = getEntity<BaseCharacter>(mem->id);
+                auto find = getEntity<Character>(mem->id);
                 if(!find) {
                     ch->sendf("  ** Corrupted!\r\n");
                 } else {
@@ -1807,7 +1807,7 @@ static void do_stat_character(BaseCharacter *ch, BaseCharacter *k) {
 }
 
 ACMD(do_varstat) {
-    BaseCharacter *vict;
+    Character *vict;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -1843,7 +1843,7 @@ ACMD(do_varstat) {
 
 ACMD(do_stat) {
     char buf1[MAX_INPUT_LENGTH], buf2[MAX_INPUT_LENGTH];
-    BaseCharacter *victim;
+    Character *victim;
     Object *object;
 
     half_chop(argument, buf1, buf2);
@@ -1962,7 +1962,7 @@ ACMD(do_shutdown) {
         ch->sendf("Unknown shutdown option.\r\n");
 }
 
-void snoop_check(BaseCharacter *ch) {
+void snoop_check(Character *ch) {
     /*  This short routine is to ensure that characters that happen
    *  to be snooping (or snooped) and get advanced/demoted will
    *  not be snooping/snooped someone of a higher/lower level (and
@@ -1983,7 +1983,7 @@ void snoop_check(BaseCharacter *ch) {
     }
 }
 
-static void stop_snooping(BaseCharacter *ch) {
+static void stop_snooping(Character *ch) {
     if (!ch->desc->snooping)
         ch->sendf("You aren't snooping anyone.\r\n");
     else {
@@ -1995,7 +1995,7 @@ static void stop_snooping(BaseCharacter *ch) {
 
 ACMD(do_snoop) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *victim, *tch;
+    Character *victim, *tch;
 
     if (!ch->desc)
         return;
@@ -2036,7 +2036,7 @@ ACMD(do_snoop) {
 
 ACMD(do_switch) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *victim;
+    Character *victim;
 
     one_argument(argument, arg);
 
@@ -2119,7 +2119,7 @@ ACMD(do_load) {
     }
 
     if (is_abbrev(buf, "mob")) {
-        BaseCharacter *mob = nullptr;
+        Character *mob = nullptr;
         mob_rnum r_num;
 
         if ((r_num = real_mobile(atoi(buf2))) == NOBODY) {
@@ -2177,7 +2177,7 @@ ACMD(do_vstat) {
     }
 
     if (is_abbrev(buf, "mob")) {
-        BaseCharacter *mob;
+        Character *mob;
         mob_rnum r_num;
 
         if ((r_num = real_mobile(atoi(buf2))) == NOBODY) {
@@ -2205,7 +2205,7 @@ ACMD(do_vstat) {
 
 ACMD(do_pgrant) {
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
 
     two_arguments(argument, arg1, arg2);
 
@@ -2252,7 +2252,7 @@ ACMD(do_pgrant) {
 /* clean a room of all mobiles and objects */
 ACMD(do_purge) {
     char buf[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     Object *obj;
 
     one_argument(argument, buf);
@@ -2420,7 +2420,7 @@ void copyover_check(uint64_t heartPulse, double deltaTime) {
 }
 
 ACMD(do_advance) {
-    BaseCharacter *victim;
+    Character *victim;
     char name[MAX_INPUT_LENGTH], level[MAX_INPUT_LENGTH];
     int newlevel, oldlevel;
 
@@ -2517,7 +2517,7 @@ ACMD(do_handout) {
 
 ACMD(do_restore) {
     char buf[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     struct descriptor_data *j;
     int i;
 
@@ -2545,12 +2545,12 @@ ACMD(do_restore) {
     }
 }
 
-void perform_immort_vis(BaseCharacter *ch) {
+void perform_immort_vis(Character *ch) {
     GET_INVIS_LEV(ch) = 0;
 }
 
-static void perform_immort_invis(BaseCharacter *ch, int level) {
-    BaseCharacter *tch;
+static void perform_immort_invis(Character *ch, int level) {
+    Character *tch;
 
     for (auto tch : ch->getRoom()->getPeople()) {
         if (tch == ch)
@@ -2776,7 +2776,7 @@ ACMD(do_last) {
 
 ACMD(do_force) {
     struct descriptor_data *i, *next_desc;
-    BaseCharacter *vict, *next_force;
+    Character *vict, *next_force;
     char arg[MAX_INPUT_LENGTH], to_force[MAX_INPUT_LENGTH], buf1[MAX_INPUT_LENGTH + 32];
 
     half_chop(argument, arg, to_force);
@@ -2960,7 +2960,7 @@ ACMD(do_zreset) {
  */
 ACMD(do_wizutil) {
     char arg[MAX_INPUT_LENGTH];
-    BaseCharacter *vict;
+    Character *vict;
     int taeller;
     long result;
 
@@ -3113,7 +3113,7 @@ ACMD(do_show) {
     zone_vnum zvn;
     int low, high;
     int8_t self = false;
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     Object *obj;
     struct descriptor_data *d;
     struct affected_type *aff;
@@ -3235,7 +3235,7 @@ ACMD(do_show) {
             j = 0;
             k = 0;
             con = 0;
-            for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+            for (auto &&[ent, character] : reg.view<Character>(entt::exclude<Deleted>).each()) {
                 vict = &character;
                 if (IS_NPC(vict))
                     j++;
@@ -3578,7 +3578,7 @@ static const struct set_struct {
         {"\n", 0,                      BOTH, MISC}
 };
 
-static int perform_set(BaseCharacter *ch, BaseCharacter *vict, int mode,
+static int perform_set(Character *ch, Character *vict, int mode,
                        char *val_arg) {
     int i, on = 0, off = 0;
     int64_t value = 0;
@@ -4135,7 +4135,7 @@ static int perform_set(BaseCharacter *ch, BaseCharacter *vict, int mode,
 
 
 ACMD(do_set) {
-    BaseCharacter *vict = nullptr, *cbuf = nullptr;
+    Character *vict = nullptr, *cbuf = nullptr;
     char field[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH];
     int mode, len, player_i = 0, retval;
     char is_file = 0, is_player = 0;
@@ -4219,7 +4219,7 @@ ACMD(do_wizupdate) {
 }
 
 ACMD(do_raise) {
-    BaseCharacter *vict = nullptr;
+    Character *vict = nullptr;
     char name[MAX_INPUT_LENGTH];
 
     one_argument(argument, name);
@@ -4259,7 +4259,7 @@ ACMD(do_raise) {
 }
 
 ACMD(do_chown) {
-    BaseCharacter *victim;
+    Character *victim;
     Object *obj;
     char buf2[80];
     char buf3[80];
@@ -4303,7 +4303,7 @@ ACMD(do_chown) {
 }
 
 ACMD(do_zpurge) {
-    BaseCharacter *mob, *next_mob;
+    Character *mob, *next_mob;
     vnum i, stored = -1, zone;
     char arg[MAX_INPUT_LENGTH];
 

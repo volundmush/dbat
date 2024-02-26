@@ -31,7 +31,7 @@
 #define AFFECT_TYPE    2
 
 void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_type, char *cmd) {
-    BaseCharacter *ch = nullptr;
+    Character *ch = nullptr;
     int value = 0, duration = 0;
     char junk[MAX_INPUT_LENGTH]; /* will be set to "dg_affect" */
     char charname[MAX_INPUT_LENGTH], property[MAX_INPUT_LENGTH];
@@ -120,7 +120,7 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_
     affect_to_char(ch, &af);
 }
 
-void send_char_pos(BaseCharacter *ch, int dam) {
+void send_char_pos(Character *ch, int dam) {
     switch (GET_POS(ch)) {
         case POS_MORTALLYW:
             act("$n is mortally wounded, and will die soon, if not aided.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -152,7 +152,7 @@ void send_char_pos(BaseCharacter *ch, int dam) {
  * - allow_gods is false when called by %force%, for instance,
  * while true for %teleport%.  -- Welcor
  */
-int valid_dg_target(BaseCharacter *ch, int bitvector) {
+int valid_dg_target(Character *ch, int bitvector) {
     if (IS_NPC(ch))
         return true;  /* all npcs are allowed as targets */
     else if (GET_ADMLEVEL(ch) < ADMLVL_IMMORT)
@@ -168,7 +168,7 @@ int valid_dg_target(BaseCharacter *ch, int bitvector) {
 }
 
 
-void script_damage(BaseCharacter *vict, int dam) {
+void script_damage(Character *vict, int dam) {
     if (ADM_FLAGGED(vict, ADM_NODAMAGE) && (dam > 0)) {
         vict->sendf("Being the cool immortal you are, you sidestep a trap, "
                            "obviously placed to kill you.\r\n");

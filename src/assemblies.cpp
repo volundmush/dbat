@@ -110,7 +110,7 @@ void assemblySaveAssemblies() {
     fclose(pFile);
 }
 
-void assemblyListToChar(BaseCharacter *pCharacter) {
+void assemblyListToChar(Character *pCharacter) {
     char szBuffer[MAX_STRING_LENGTH] = {'\0'};
     char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
     long i = 0;                  // Outer iterator.
@@ -200,7 +200,7 @@ bool assemblyAddComponent(long lVnum, long lComponentVnum, bool bExtract, bool b
     return (true);
 }
 
-bool assemblyCheckComponents(long lVnum, BaseCharacter *pCharacter, int extract_yes) {
+bool assemblyCheckComponents(long lVnum, Character *pCharacter, int extract_yes) {
     bool bOk = true;
     long i = 0;
     long lRnum = 0;

@@ -18,7 +18,7 @@ int mapnums[MAP_ROWS + 1][MAP_COLS + 1];
 
 void ping_ship(int vnum, int vnum2) {
 
-    BaseCharacter *tch, *next_ch;
+    Character *tch, *next_ch;
     Object *controls = nullptr, *obj = nullptr;
     int found = false;
 
@@ -26,7 +26,7 @@ void ping_ship(int vnum, int vnum2) {
         return;
     }
 
-    for (auto &&[ent, character] : reg.view<BaseCharacter>(entt::exclude<Deleted>).each()) {
+    for (auto &&[ent, character] : reg.view<Character>(entt::exclude<Deleted>).each()) {
         auto ch = &character;
         if (found == false) {
             if (!(obj = find_control(tch))) {
@@ -389,7 +389,7 @@ std::string Room::printMap(entt::entity viewer, int type, int64_t v) {
     return result;
 }
 
-void printmap(int rnum, BaseCharacter *ch, int type, int vnum) {
+void printmap(int rnum, Character *ch, int type, int vnum) {
     int x = 0, lasty = -1;
     int y = 0;
     int sightradius;

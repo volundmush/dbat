@@ -5,7 +5,7 @@
 
 #include "structs.h"
 
-extern int buildwalk(BaseCharacter *ch, int dir);
+extern int buildwalk(Character *ch, int dir);
 
 // commands
 extern ACMD(do_dig);

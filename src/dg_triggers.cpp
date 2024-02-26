@@ -116,7 +116,7 @@ int word_check(char *str, char *wordlist)
  *  mob triggers
  */
 
-void random_mtrigger(BaseCharacter *ch)
+void random_mtrigger(Character *ch)
 {
     /*
      * This trigger is only called if a char is in the zone without nohassle.
@@ -135,7 +135,7 @@ void random_mtrigger(BaseCharacter *ch)
     }
 }
 
-void bribe_mtrigger(BaseCharacter *ch, BaseCharacter *actor, int amount)
+void bribe_mtrigger(Character *ch, Character *actor, int amount)
 {
     if (!SCRIPT_CHECK(ch, MTRIG_BRIBE) || AFF_FLAGGED(ch, AFF_CHARM))
         return;
@@ -155,9 +155,9 @@ void bribe_mtrigger(BaseCharacter *ch, BaseCharacter *actor, int amount)
     }
 }
 
-void greet_memory_mtrigger(BaseCharacter *actor)
+void greet_memory_mtrigger(Character *actor)
 {
-    BaseCharacter *ch;
+    Character *ch;
     struct script_memory *mem;
     char buf[MAX_INPUT_LENGTH];
     int command_performed = 0;
@@ -219,9 +219,9 @@ void greet_memory_mtrigger(BaseCharacter *actor)
     }
 }
 
-int greet_mtrigger(BaseCharacter *actor, int dir)
+int greet_mtrigger(Character *actor, int dir)
 {
-    BaseCharacter *ch;
+    Character *ch;
     char buf[MAX_INPUT_LENGTH];
     int intermediate, final = true;
 
@@ -258,9 +258,9 @@ int greet_mtrigger(BaseCharacter *actor, int dir)
     return final;
 }
 
-void entry_memory_mtrigger(BaseCharacter *ch)
+void entry_memory_mtrigger(Character *ch)
 {
-    BaseCharacter *actor;
+    Character *actor;
     struct script_memory *mem;
     char buf[MAX_INPUT_LENGTH];
 
@@ -307,7 +307,7 @@ void entry_memory_mtrigger(BaseCharacter *ch)
     }
 }
 
-int entry_mtrigger(BaseCharacter *ch)
+int entry_mtrigger(Character *ch)
 {
     if (!SCRIPT_CHECK(ch, MTRIG_ENTRY) || AFF_FLAGGED(ch, AFF_CHARM))
         return 1;
@@ -324,9 +324,9 @@ int entry_mtrigger(BaseCharacter *ch)
     return 1;
 }
 
-int command_mtrigger(BaseCharacter *actor, char *cmd, char *argument)
+int command_mtrigger(Character *actor, char *cmd, char *argument)
 {
-    BaseCharacter *ch, *ch_next;
+    Character *ch, *ch_next;
     char buf[MAX_INPUT_LENGTH];
 
     /* prevent people we like from becoming trapped :P */
@@ -369,9 +369,9 @@ int command_mtrigger(BaseCharacter *actor, char *cmd, char *argument)
     return 0;
 }
 
-void speech_mtrigger(BaseCharacter *actor, char *str)
+void speech_mtrigger(Character *actor, char *str)
 {
-    BaseCharacter *ch, *ch_next;
+    Character *ch, *ch_next;
     char buf[MAX_INPUT_LENGTH];
 
     for (auto ch : actor->getRoom()->getPeople())
@@ -403,7 +403,7 @@ void speech_mtrigger(BaseCharacter *actor, char *str)
     }
 }
 
-void act_mtrigger(BaseCharacter *ch, char *str, BaseCharacter *actor, BaseCharacter *victim, Object *object,
+void act_mtrigger(Character *ch, char *str, Character *actor, Character *victim, Object *object,
                   Object *target, char *arg)
 {
     char buf[MAX_INPUT_LENGTH];
@@ -448,9 +448,9 @@ void act_mtrigger(BaseCharacter *ch, char *str, BaseCharacter *actor, BaseCharac
         }
 }
 
-void fight_mtrigger(BaseCharacter *ch)
+void fight_mtrigger(Character *ch)
 {
-    BaseCharacter *actor;
+    Character *actor;
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(ch, MTRIG_FIGHT) || !FIGHTING(ch) ||
@@ -474,9 +474,9 @@ void fight_mtrigger(BaseCharacter *ch)
     }
 }
 
-void hitprcnt_mtrigger(BaseCharacter *ch)
+void hitprcnt_mtrigger(Character *ch)
 {
-    BaseCharacter *actor;
+    Character *actor;
     char buf[MAX_INPUT_LENGTH];
 
     if (!SCRIPT_CHECK(ch, MTRIG_HITPRCNT) || !FIGHTING(ch) ||
@@ -497,7 +497,7 @@ void hitprcnt_mtrigger(BaseCharacter *ch)
     }
 }
 
-int receive_mtrigger(BaseCharacter *ch, BaseCharacter *actor, Object *obj)
+int receive_mtrigger(Character *ch, Character *actor, Object *obj)
 {
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
@@ -523,7 +523,7 @@ int receive_mtrigger(BaseCharacter *ch, BaseCharacter *actor, Object *obj)
     return 1;
 }
 
-int death_mtrigger(BaseCharacter *ch, BaseCharacter *actor)
+int death_mtrigger(Character *ch, Character *actor)
 {
     char buf[MAX_INPUT_LENGTH];
 
@@ -544,7 +544,7 @@ int death_mtrigger(BaseCharacter *ch, BaseCharacter *actor)
     return 1;
 }
 
-void load_mtrigger(BaseCharacter *ch)
+void load_mtrigger(Character *ch)
 {
     int result = 0;
 
@@ -561,7 +561,7 @@ void load_mtrigger(BaseCharacter *ch)
     }
 }
 
-int cast_mtrigger(BaseCharacter *actor, BaseCharacter *ch, int spellnum)
+int cast_mtrigger(Character *actor, Character *ch, int spellnum)
 {
     char buf[MAX_INPUT_LENGTH];
 
@@ -586,9 +586,9 @@ int cast_mtrigger(BaseCharacter *actor, BaseCharacter *ch, int spellnum)
     return 1;
 }
 
-int leave_mtrigger(BaseCharacter *actor, int dir)
+int leave_mtrigger(Character *actor, int dir)
 {
-    BaseCharacter *ch;
+    Character *ch;
     char buf[MAX_INPUT_LENGTH];
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
@@ -618,9 +618,9 @@ int leave_mtrigger(BaseCharacter *actor, int dir)
     return 1;
 }
 
-int door_mtrigger(BaseCharacter *actor, int subcmd, int dir)
+int door_mtrigger(Character *actor, int subcmd, int dir)
 {
-    BaseCharacter *ch;
+    Character *ch;
     char buf[MAX_INPUT_LENGTH];
 
     for(auto ch : actor->getRoom()->getPeople())
@@ -648,7 +648,7 @@ int door_mtrigger(BaseCharacter *actor, int subcmd, int dir)
     return 1;
 }
 
-void time_mtrigger(BaseCharacter *ch)
+void time_mtrigger(Character *ch)
 {
     /*
      * This trigger is called if the hour is the same as specified in Narg.
@@ -668,7 +668,7 @@ void time_mtrigger(BaseCharacter *ch)
     }
 }
 
-void interval_mtrigger(BaseCharacter *ch, int trigFlag)
+void interval_mtrigger(Character *ch, int trigFlag)
 {
     /*
      * This trigger is called if the hour is the same as specified in Narg.
@@ -724,7 +724,7 @@ void timer_otrigger(Object *obj)
     return;
 }
 
-int get_otrigger(Object *obj, BaseCharacter *actor)
+int get_otrigger(Object *obj, Character *actor)
 {
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
@@ -752,7 +752,7 @@ int get_otrigger(Object *obj, BaseCharacter *actor)
 }
 
 /* checks for command trigger on specific object. assumes obj has cmd trig */
-int cmd_otrig(Object *obj, BaseCharacter *actor, char *cmd,
+int cmd_otrig(Object *obj, Character *actor, char *cmd,
               char *argument, int type)
 {
     char buf[MAX_INPUT_LENGTH];
@@ -790,7 +790,7 @@ int cmd_otrig(Object *obj, BaseCharacter *actor, char *cmd,
     return 0;
 }
 
-int command_otrigger(BaseCharacter *actor, char *cmd, char *argument)
+int command_otrigger(Character *actor, char *cmd, char *argument)
 {
     int i;
 
@@ -815,7 +815,7 @@ int command_otrigger(BaseCharacter *actor, char *cmd, char *argument)
     return 0;
 }
 
-int wear_otrigger(Object *obj, BaseCharacter *actor, int where)
+int wear_otrigger(Object *obj, Character *actor, int where)
 {
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
@@ -842,7 +842,7 @@ int wear_otrigger(Object *obj, BaseCharacter *actor, int where)
     return 1;
 }
 
-int remove_otrigger(Object *obj, BaseCharacter *actor)
+int remove_otrigger(Object *obj, Character *actor)
 {
     char buf[MAX_INPUT_LENGTH];
     int ret_val;
@@ -872,7 +872,7 @@ int remove_otrigger(Object *obj, BaseCharacter *actor)
     return 1;
 }
 
-int drop_otrigger(Object *obj, BaseCharacter *actor)
+int drop_otrigger(Object *obj, Character *actor)
 {
     trig_data *t;
     char buf[MAX_INPUT_LENGTH];
@@ -900,7 +900,7 @@ int drop_otrigger(Object *obj, BaseCharacter *actor)
     return 1;
 }
 
-int give_otrigger(Object *obj, BaseCharacter *actor, BaseCharacter *victim)
+int give_otrigger(Object *obj, Character *actor, Character *victim)
 {
     trig_data *t;
     char buf[MAX_INPUT_LENGTH];
@@ -949,7 +949,7 @@ void load_otrigger(Object *obj)
     }
 }
 
-int cast_otrigger(BaseCharacter *actor, Object *obj, int spellnum)
+int cast_otrigger(Character *actor, Object *obj, int spellnum)
 {
     trig_data *t;
     char buf[MAX_INPUT_LENGTH];
@@ -976,7 +976,7 @@ int cast_otrigger(BaseCharacter *actor, Object *obj, int spellnum)
     return 1;
 }
 
-int leave_otrigger(Room *room, BaseCharacter *actor, int dir)
+int leave_otrigger(Room *room, Character *actor, int dir)
 {
     trig_data *t;
     char buf[MAX_INPUT_LENGTH];
@@ -1010,7 +1010,7 @@ int leave_otrigger(Room *room, BaseCharacter *actor, int dir)
     return final;
 }
 
-int consume_otrigger(Object *obj, BaseCharacter *actor, int cmd)
+int consume_otrigger(Object *obj, Character *actor, int cmd)
 {
     trig_data *t;
     char buf[MAX_INPUT_LENGTH];
@@ -1121,7 +1121,7 @@ void random_wtrigger(Room *room)
     }
 }
 
-int enter_wtrigger(Room *room, BaseCharacter *actor, int dir)
+int enter_wtrigger(Room *room, Character *actor, int dir)
 {
     char buf[MAX_INPUT_LENGTH];
 
@@ -1145,7 +1145,7 @@ int enter_wtrigger(Room *room, BaseCharacter *actor, int dir)
     return 1;
 }
 
-int command_wtrigger(BaseCharacter *actor, char *cmd, char *argument)
+int command_wtrigger(Character *actor, char *cmd, char *argument)
 {
     Room *room;
     char buf[MAX_INPUT_LENGTH];
@@ -1186,7 +1186,7 @@ int command_wtrigger(BaseCharacter *actor, char *cmd, char *argument)
     return 0;
 }
 
-void speech_wtrigger(BaseCharacter *actor, char *str)
+void speech_wtrigger(Character *actor, char *str)
 {
     Room *room;
     char buf[MAX_INPUT_LENGTH];
@@ -1219,7 +1219,7 @@ void speech_wtrigger(BaseCharacter *actor, char *str)
     }
 }
 
-int drop_wtrigger(Object *obj, BaseCharacter *actor)
+int drop_wtrigger(Object *obj, Character *actor)
 {
     Room *room;
     char buf[MAX_INPUT_LENGTH];
@@ -1246,7 +1246,7 @@ int drop_wtrigger(Object *obj, BaseCharacter *actor)
     return 1;
 }
 
-int cast_wtrigger(BaseCharacter *actor, BaseCharacter *vict, Object *obj, int spellnum)
+int cast_wtrigger(Character *actor, Character *vict, Object *obj, int spellnum)
 {
     Room *room;
     char buf[MAX_INPUT_LENGTH];
@@ -1276,7 +1276,7 @@ int cast_wtrigger(BaseCharacter *actor, BaseCharacter *vict, Object *obj, int sp
     return 1;
 }
 
-int leave_wtrigger(Room *room, BaseCharacter *actor, int dir)
+int leave_wtrigger(Room *room, Character *actor, int dir)
 {
     char buf[MAX_INPUT_LENGTH];
 
@@ -1303,7 +1303,7 @@ int leave_wtrigger(Room *room, BaseCharacter *actor, int dir)
     return 1;
 }
 
-int door_wtrigger(BaseCharacter *actor, int subcmd, int dir)
+int door_wtrigger(Character *actor, int subcmd, int dir)
 {
     Room *room;
     char buf[MAX_INPUT_LENGTH];

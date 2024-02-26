@@ -26,6 +26,7 @@
 #include "dbat/class.h"
 #include "dbat/players.h"
 #include "dbat/act.informative.h"
+#include "dbat/entity.h"
 
 /* local functions */
 
@@ -166,7 +167,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
 {
     int i = 0;
     int proceed = 1;
-    BaseCharacter *tch;
+    Character *tch;
     char *buf2 = "$N tried to sneak past without a fight, and got nowhere.";
     char buf[MAX_STRING_LENGTH];
     bool nomob = true;
@@ -302,13 +303,19 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
     if (IS_NPC(ch))                  /* Mobs can move about - Jamdog 20th July 2006   */
         return false;                  /* This also allows following pets!              */
 
-    if (!EXIT(ch, cmd - 1) || EXIT(ch, cmd - 1)->destination == nullptr)
+    auto ex = EXIT(ch, cmd-1);
+
+    if (!ex)
         return false;
-    if (EXIT_FLAGGED(EXIT(ch, cmd - 1), EX_CLOSED))
+    
+    auto dest = reg.try_get<Destination>(ex->ent);
+    if(!dest) return false;
+    
+    if (EXIT_FLAGGED(ex, EX_CLOSED))
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (getEntity(EXIT(ch, (cmd - 1))->destination->getUID())->getVN() == gauntlet_info[i][1]) {
+        if (getUID(dest->target) == gauntlet_info[i][1]) {
             ch->sendf("You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
@@ -320,7 +327,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
 {
     int i = 0;
     int proceed = 1, door;
-    BaseCharacter *tch;
+    Character *tch;
     char *buf2 = "$N tried to return to the gauntlet, and got nowhere.";
     char buf[MAX_STRING_LENGTH];
     bool nomob = true;
@@ -351,12 +358,15 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
         for (door = 0; door < NUM_OF_DIRS; door++) {
-            if (!EXIT(ch, door) || EXIT(ch, door)->destination == nullptr)
+            auto ex = EXIT(ch, door);
+            if (!ex)
                 continue;
-            if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
+            auto dest = reg.try_get<Destination>(ex->ent);
+            if(!dest) continue;
+            if (EXIT_FLAGGED(ex, EX_CLOSED))
                 continue;
 
-            if ((getEntity<Room>(EXIT(ch, door)->destination->getUID())->getVN() == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if (getUID(dest->target) == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
@@ -387,7 +397,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
     return false;
 }
 
-void npc_steal(BaseCharacter *ch, BaseCharacter *victim) {
+void npc_steal(Character *ch, Character *victim) {
     int gold;
 
     if (IS_NPC(victim))
@@ -421,7 +431,7 @@ void npc_steal(BaseCharacter *ch, BaseCharacter *victim) {
 SPECIAL(pet_shops) {
     char buf[MAX_STRING_LENGTH], pet_name[256];
     room_rnum pet_room;
-    BaseCharacter *pet;
+    Character *pet;
 
     /* Gross. */
     pet_room = IN_ROOM(ch) + 1;
@@ -1010,7 +1020,7 @@ SPECIAL(bank) {
         return (true);
     } else if (CMD_IS("wire")) {
         char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-        BaseCharacter *vict = nullptr;
+        Character *vict = nullptr;
 
         two_arguments(argument, arg, arg2);
 
