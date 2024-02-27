@@ -29,6 +29,22 @@ Flags::Flags(const nlohmann::json& j) {
     deserialize(j);
 }
 
+nlohmann::json Info::serialize() {
+    nlohmann::json j;
+    j["uid"] = uid;
+    j["family"] = family;
+    return j;
+}
+
+void Info::deserialize(const nlohmann::json& j) {
+    if(j.contains("uid")) uid = j["uid"];
+    if(j.contains("family")) family = j["family"].get<EntityFamily>();
+}
+
+Info::Info(const nlohmann::json& j) {
+    deserialize(j);
+}
+
 
 // Extra Descriptions
 extra_descr_data::extra_descr_data(const nlohmann::json& j) {

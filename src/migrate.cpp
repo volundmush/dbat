@@ -389,7 +389,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
     auto r = getEntity<Room>(room);
 
     auto d = create_obj<Exit>(EntityFamily::Exit);
-    setEntity(d->uid, d->ent);
 
     auto &te = temp_exits[d->uid];
     
@@ -479,11 +478,13 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     auto r = reg.try_get<Room>(ent);
     r->ent = ent;
     r->uid = virtual_nr;
+    auto gen = time(nullptr);
+    auto &objid = reg.get_or_emplace<ObjectID>(ent, virtual_nr, gen);
     auto &info = reg.get_or_emplace<Info>(ent);
     info.uid = virtual_nr;
     info.family = EntityFamily::Room;
 
-    setEntity(virtual_nr, ent);
+    setEntity(objid, ent);
     z.rooms.insert(virtual_nr);
     r->script = std::make_shared<script_data>(r);
     r->zone = zone;
@@ -2246,7 +2247,7 @@ static Object* assembleArea(const AreaDef &def) {
 
     if(!def.roomFlags.empty()) {
         for(auto &[vn, u] : entities) {
-            if(auto room = reg.try_get<Room>(u); room) {
+            if(auto room = reg.try_get<Room>(u.second); room) {
                 for(auto &f : def.roomFlags) {
                     if(room->checkFlag(FlagType::Room, f)) {
                         rooms.insert(vn);
@@ -2412,7 +2413,7 @@ void migrate_grid() {
     }
 
     for(auto &[rv, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(auto loc = reg.try_get<Location>(room->ent); loc) continue;
         auto sense = sense_location_name(rv);
@@ -2546,7 +2547,7 @@ void migrate_grid() {
     bodef.roomIDs.insert(19053);
     bodef.roomIDs.insert(19039);
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Black Omen")) bodef.roomIDs.insert(vn);
     }
@@ -2800,7 +2801,7 @@ void migrate_grid() {
     basic_mud_log("Attempting to deduce Areas to Planets...");
     for(auto &[vnum, u] : entities) {
         // check for planetMap flags and, if found, bind the area this room belongs to, to the respective planet.
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
 
         for(auto &[rflag, a] : planetMap) {
@@ -2829,7 +2830,7 @@ void migrate_grid() {
     celdef.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     celdef.roomRanges.emplace_back(16305, 16399);
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Celestial Corp")) celdef.roomIDs.insert(vn);
     }
@@ -2848,7 +2849,7 @@ void migrate_grid() {
     cooler.location = space;
     cooler.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE, ITEM_VEHICLE};
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Cooler's Ship")) {
             cooler.roomIDs.insert(vn);
@@ -2861,7 +2862,7 @@ void migrate_grid() {
     alph.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     alph.location = space;
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Alpharis")) alph.roomIDs.insert(vn);
     }
@@ -2872,7 +2873,7 @@ void migrate_grid() {
     dzone.location = universe7;
     dzone.flags = {ITEM_WORLD, ITEM_ENVIRONMENT};
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Dead Zone")) dzone.roomIDs.insert(vn);
     }
@@ -2883,7 +2884,7 @@ void migrate_grid() {
     bast.location = space;
     bast.flags = {ITEM_ENVIRONMENT, ITEM_WORLD, ITEM_PLANET, ITEM_STRUCTURE};
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Blasted Asteroid")) bast.roomIDs.insert(vn);
     }
@@ -2895,7 +2896,7 @@ void migrate_grid() {
     listres.location = xenoverse;
     listres.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Lister's Restaurant")) listres.roomIDs.insert(vn);
     }
@@ -2907,7 +2908,7 @@ void migrate_grid() {
     scasino.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     scasino.location = xenoverse;
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "Shooting Star Casino")) scasino.roomIDs.insert(vn);
     }
@@ -2918,7 +2919,7 @@ void migrate_grid() {
     outdef.location = celestial_plane;
 	outdef.flags = {ITEM_ENVIRONMENT, ITEM_STRUCTURE};
     for(auto &[vn, u] : entities) {
-        auto room = reg.try_get<Room>(u);
+        auto room = reg.try_get<Room>(u.second);
         if(!room) continue;
         if(icontains(stripAnsi(room->getName()), "The Outpost")) outdef.roomIDs.insert(vn);
     }
@@ -3590,6 +3591,8 @@ void migrate_characters() {
         ch->script = std::make_shared<script_data>();
         auto id = entities.contains(ch->getUID()) ? getNextUID() : ch->getUID();
         ch->uid = id;
+        auto gen = time(nullptr);
+        auto &objid = reg.emplace<ObjectID>(ent, id, gen);
         auto &info = reg.get_or_emplace<Info>(ent);
         info.family = EntityFamily::Character;
         info.uid = id;
@@ -3600,7 +3603,7 @@ void migrate_characters() {
         a->adminLevel = std::max(a->adminLevel, GET_ADMLEVEL(ch));
         a->characters.emplace_back(id);
         ch->addToLocation(room);
-        setEntity(id, ent);
+        setEntity(objid, ent);
     }
 
 
@@ -3700,7 +3703,7 @@ static void migrate_exits() {
     for(auto &[uid, te] : temp_exits) {
         if(auto e = getEntity<Exit>(uid); e) {
             auto &dest = reg.get_or_emplace<Destination>(e->ent);
-            dest.target = entities.at(te.destination);
+            dest.target = entities.at(te.destination).second;
         }
 
     }

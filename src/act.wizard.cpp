@@ -705,7 +705,7 @@ ACMD(do_finddoor) {
         len = snprintf(buf, sizeof(buf), "Doors unlocked by key [%d] %s are:\r\n",
                        vnum, GET_OBJ_SHORT(obj));
         for (auto &[vn, u] : entities) {
-            auto r = reg.try_get<Room>(u);
+            auto r = reg.try_get<Room>(u.second);
             if (!r)
                 continue;
             for (auto &[d, e] : r->getExits()) {
@@ -3292,7 +3292,7 @@ ACMD(do_show) {
         case 5:
             len = strlcpy(buf, "Errant Rooms\r\n------------\r\n", sizeof(buf));
             for (auto &[vn, u] : entities) {
-                auto r = reg.try_get<Room>(u);
+                auto r = reg.try_get<Room>(u.second);
                 if(!r) continue;
                 for (auto &[j, e] : r->getExits()) {
                     auto dest = reg.try_get<Destination>(e->ent);
@@ -3331,7 +3331,7 @@ ACMD(do_show) {
             j = 0;
             len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
             for (auto &[vn, u] : entities) {
-                auto r = reg.try_get<Room>(u);
+                auto r = reg.try_get<Room>(u.second);
                 if(!r) continue;
                 if (ROOM_FLAGGED(vn, ROOM_DEATH)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
@@ -3349,7 +3349,7 @@ ACMD(do_show) {
             j = 0;
             len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
             for (auto &[vn, u] : entities) {
-                auto r = reg.try_get<Room>(u);
+                auto r = reg.try_get<Room>(u.second);
                 if(!r) continue;
                 if (ROOM_FLAGGED(r, ROOM_GODROOM)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,

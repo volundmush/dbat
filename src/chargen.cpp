@@ -2268,12 +2268,14 @@ namespace net {
     void ChargenParser::finish() {
         // CREATE PLAYER ENTRY
         ch->uid = getNextUID();
+        auto time = ::time(nullptr);
         auto &info = reg.get_or_emplace<Info>(ent);
         info.uid = ch->uid;
         info.family = EntityFamily::Character;
+        auto &objid = reg.get_or_emplace<ObjectID>(ent, ch->uid, time);
         auto &pc = reg.get_or_emplace<PlayerCharacter>(ent);
         ch->setFlag(FlagType::Pref, PRF_COLOR);
-        setEntity(ch->getUID(), ent);
+        setEntity(objid, ent);
         pc.account = conn->account;
         conn->account->characters.push_back(ch->uid);
         init_char(ch);

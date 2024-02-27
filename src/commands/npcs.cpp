@@ -1154,7 +1154,7 @@ ACMD(do_mdoor) {
                 break;
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE)
-                    dest.target = entities.at(to_room);
+                    dest.target = entities.at(to_room).second;
                 else
                     mob_log(ch, "mdoor: invalid door target");
                 break;

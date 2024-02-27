@@ -90,7 +90,7 @@ void assign_rooms() {
 
     if (CONFIG_DTS_ARE_DUMPS)
         for (auto &[vn, u] : entities) {
-            auto r = reg.try_get<Room>(u);
+            auto r = reg.try_get<Room>(u.second);
             if (!r) continue;
             if (ROOM_FLAGGED(r, ROOM_DEATH))
                 r->func = dump;

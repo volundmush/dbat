@@ -744,7 +744,6 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 
     std::string getUIDString(bool active = true);
 
-
     Object* findObjectVnum(obj_vnum objVnum, bool working = true);
     Object* findObject(const std::function<bool(Object*)> &func, bool working = true);
     std::set<Object*> gatherObjects(const std::function<bool(Object*)> &func, bool working = true);
@@ -892,27 +891,26 @@ struct Object : public GameEntity {
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
 
     bool isWorking();
+    weight_t getWeight();
+    weight_t getTotalWeight();
+    Object* getInObj();
+    Character* getCarriedBy();
+    Character* getWornBy();
 
+    // variables below here...
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
-
     std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value{};   /* Values of the item (see list)    */
     int8_t type_flag{};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
 
     weight_t weight{};         /* Weight what else                     */
-    weight_t getWeight();
-    weight_t getTotalWeight();
+    
     int cost{};           /* Value when sold (gp.)               */
     int cost_per_day{};   /* Cost to keep pr. real day           */
     int timer{};          /* Timer for object                    */
     int size{SIZE_MEDIUM};           /* Size class of object                */
 
     std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
-
-    Object* getInObj();
-    Character* getCarriedBy();
-    Character* getWornBy();
-
     Character *sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
     time_t lload{};
@@ -2063,7 +2061,8 @@ class Dispatcher {
                 break;
             case SearchType::World: {
                 std::vector<GameEntity*> out;
-                for(auto [id, obj] : entities) {
+                for(auto [id, pobj] : entities) {
+                    auto obj = pobj.second;
                     auto &info = reg.get<Info>(obj);
                     switch(info.family) {
                         case EntityFamily::Character: {

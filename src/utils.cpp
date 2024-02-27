@@ -3419,7 +3419,7 @@ std::string withPlaceholder(const std::string& str, const std::string& placehold
 
 int SECT(room_vnum room) {
     if(auto u = entities.find(room); u != entities.end()) {
-        auto r = reg.try_get<Room>(u->second);
+        auto r = reg.try_get<Room>(u->second.second);
         if(r) return r->sector_type;
     }
     return SECT_INSIDE;

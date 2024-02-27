@@ -40,6 +40,7 @@
 #include "dbat/account.h"
 #include "dbat/maputils.h"
 #include "dbat/entity.h"
+#include <boost/regex.hpp>
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -82,14 +83,15 @@ int64_t getNextUID() {
     return nextUID;
 }
 
-void setEntity(int64_t uid, entt::entity entity) {
-    if(uid < 0) {
+void setEntity(ObjectID oid, entt::entity entity) {
+    auto id = oid.getId();
+    if(id < 0) {
         throw std::runtime_error("Invalid key");
     }
-    if(entities.contains(uid)) {
+    if(entities.contains(id)) {
         throw std::runtime_error("Key already exists!");
     }
-    entities[uid] = entity;
+    entities[id] = std::make_pair(oid.getTime(), entity);
 }
 
 DebugMap<int64_t, std::pair<time_t, entt::entity>> entities;    /* array of rooms		 */
@@ -285,11 +287,12 @@ static void db_load_instances_initial(const std::filesystem::path& loc) {
     auto data = load_from_file(loc, "instances.json");
     entities.reserve(data.size());
     for(auto j : data) {
-        auto uid = j[0].get<int64_t>();
+        auto objid = ObjectID(j[0]);
         auto jd = j[1];
         auto ent = reg.create();
         deserializeEntity(ent, jd);
-        setEntity(uid, ent);
+        reg.emplace_or_replace<ObjectID>(ent, objid);
+        setEntity(objid, ent);
     }
 }
 
@@ -298,7 +301,7 @@ static void db_load_instances_finish(const std::filesystem::path& loc) {
         auto uid = j[0].get<int64_t>();
         auto jd = j[1];
         if(auto found = entities.find(uid); found != entities.end()) {
-            deserializeEntityRelations(found->second, jd);
+            deserializeEntityRelations(found->second.second, jd);
         }
     }
 }
@@ -1138,10 +1141,13 @@ Character *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     auto uid = getNextUID();
+    auto ver = time(nullptr);
     auto ent = reg.create();
+    auto &objid = reg.emplace<ObjectID>(ent, uid, ver);
+    
     deserializeEntity(ent, proto->second);
     auto mob = reg.try_get<Character>(ent);
-    setEntity(uid, ent);
+    setEntity(objid, ent);
 
     std::map<CharAppearance, int> setNumsTo;
 
@@ -2815,37 +2821,51 @@ void load_config() {
 }
 
 // ^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?
-static std::regex uid_regex(R"(^#(\d+)(!)?)", std::regex::icase);
+static boost::regex uid_regex(R"(^#(?<id>\d+)(?::(?<generation>\d+)?)?(?<active>!)?)", boost::regex::icase);
 
 bool isUID(const std::string& uid) {
-    return std::regex_match(uid, uid_regex);
+    return boost::regex_match(uid, uid_regex);
+}
+
+entt::entity entityFromUID(const std::string& uid) {
+    // First we need to check if it matches or not.
+    boost::smatch match;
+
+    if(!boost::regex_search(uid, match, uid_regex)) {
+        return entt::null;
+    }
+
+    int64_t id = std::stoll(match["id"].str()); // Second capture group
+    time_t generation = 0;
+    if(match["generation"].matched) {
+        generation = std::stoll(match["generation"].str());
+    }
+    bool active = match["active"].matched; // Fourth capture group
+
+    if(auto found = entities.find(id); found != entities.end()) {
+        if(generation && generation != found->second.first) return entt::null;
+        auto u = found->second.second;
+        if(active && reg.any_of<Deleted>(u)) return entt::null;
+        return u;
+    }
+    return entt::null;
+
 }
 
 GameEntity* resolveUID(const std::string& uid) {
-    // First we need to check if it matches or not.
-    std::smatch match;
+    auto ent = entityFromUID(uid);
+    if(ent == entt::null) return nullptr;
 
-    if(!std::regex_search(uid, match, uid_regex)) {
-        return nullptr;
-    }
-
-    int64_t id = std::stoll(match[1].str()); // Second capture group
-    bool active = match[2].matched; // Fourth capture group
-
-    if(auto found = entities.find(id); found != entities.end()) {
-        auto u = found->second;
-        if(reg.any_of<Deleted>(u)) return nullptr;
-        auto &info = reg.get<Info>(u);
-        switch(info.family) {
-            case EntityFamily::Character:
-                return reg.try_get<Character>(u);
-            case EntityFamily::Object:
-                return reg.try_get<Object>(u);
-            case EntityFamily::Room:
-                return reg.try_get<Room>(u);
-            case EntityFamily::Exit:
-                return reg.try_get<Exit>(u);
-        }
+    auto &info = reg.get<Info>(ent);
+    switch(info.family) {
+        case EntityFamily::Character:
+            return reg.try_get<Character>(ent);
+        case EntityFamily::Object:
+            return reg.try_get<Object>(ent);
+        case EntityFamily::Room:
+            return reg.try_get<Room>(ent);
+        case EntityFamily::Exit:
+            return reg.try_get<Exit>(ent);
     }
     return nullptr;
 }

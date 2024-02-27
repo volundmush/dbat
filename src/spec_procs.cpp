@@ -366,7 +366,7 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
             if (EXIT_FLAGGED(ex, EX_CLOSED))
                 continue;
 
-            if (getUID(dest->target) == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if ((getUID(dest->target) == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */

@@ -50,7 +50,7 @@ static void process_dirty_instances(const std::filesystem::path &loc) {
     nlohmann::json instances;
 
     for(auto &[v, u] : entities) {
-        instances.push_back(std::make_pair(v, serializeEntity(u)));
+        instances.push_back(std::make_pair(v, serializeEntity(u.second)));
     }
     dump_to_file(loc, "instances.json", instances);
 }
@@ -59,7 +59,7 @@ static void process_dirty_relations(const std::filesystem::path &loc) {
     nlohmann::json relations;
 
     for(auto &[v, u] : entities) {
-        relations.push_back(std::make_pair(v, serializeEntityRelations(u)));
+        relations.push_back(std::make_pair(v, serializeEntityRelations(u.second)));
     }
     dump_to_file(loc, "relations.json", relations);
 }

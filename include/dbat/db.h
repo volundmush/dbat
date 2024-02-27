@@ -117,6 +117,7 @@ extern std::unordered_map<std::string, std::shared_ptr<InternedString>> intern;
 std::shared_ptr<InternedString> internString(const std::string& str);
 
 bool isUID(const std::string& uid);
+entt::entity entityFromUID(const std::string& uid);
 GameEntity* resolveUID(const std::string& uid);
 
 extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infomation about the time    */
@@ -357,7 +358,9 @@ extern ACMD(do_reboot);
 template <typename T = Object>
 T *create_obj(EntityFamily family = EntityFamily::Object) {
     auto id = getNextUID();
+    auto gen = time(nullptr);
     auto ent = reg.create();
+    auto &objid = reg.emplace<ObjectID>(ent, id, gen);
     auto &t = reg.get_or_emplace<T>(ent);
     t.script = std::make_shared<script_data>(&t);
     t.ent = ent;
@@ -366,7 +369,7 @@ T *create_obj(EntityFamily family = EntityFamily::Object) {
     info.family = family;
     info.uid = id;
 
-    setEntity(id, ent);
+    setEntity(objid, ent);
 
     return reg.try_get<T>(ent);
 }

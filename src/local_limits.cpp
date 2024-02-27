@@ -1532,7 +1532,7 @@ void timed_dt(Character *ch) {
           */
 
         for (auto &[vn, u] : entities) {
-            auto r = reg.try_get<Room>(u);
+            auto r = reg.try_get<Room>(u.second);
             if(!r) continue;
             r->timed -= (r->timed != -1);
         }

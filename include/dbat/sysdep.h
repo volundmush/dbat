@@ -238,7 +238,7 @@ T* getEntity(int64_t uid) {
     return nullptr;
 }
 
-extern void setEntity(ObjectID oid, entt::entity entity);
+
 
 class ObjectID {
     public:
@@ -265,3 +265,5 @@ namespace std {
         }
     };
 }
+
+extern void setEntity(ObjectID oid, entt::entity entity);

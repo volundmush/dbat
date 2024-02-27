@@ -590,7 +590,7 @@ OCMD(do_odoor) {
             case 5:  /* room        */
                 if ((to_room = real_room(atoi(value))) != NOWHERE) {
                     auto &dest = reg.get_or_emplace<Destination>(newexit->ent);
-                    dest.target = entities.at(to_room);
+                    dest.target = entities.at(to_room).second;
                     dest.direction = dir;
                 }
                 else
