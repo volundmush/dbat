@@ -227,28 +227,34 @@ public:
     }
 };
 
-extern DebugMap<int64_t, entt::entity> entities;
+extern DebugMap<int64_t, std::pair<time_t, entt::entity>> entities;
 
 template<typename T = GameEntity>
 T* getEntity(int64_t uid) {
     auto it = entities.find(uid);
     if (it != entities.end()) {
-        return reg.try_get<T>(it->second);
+        return reg.try_get<T>(it->second.second);
     }
     return nullptr;
 }
 
-extern void setEntity(int64_t uid, entt::entity entity);
+extern void setEntity(ObjectID oid, entt::entity entity);
 
 class ObjectID {
     public:
+    ObjectID() = default;
+    explicit ObjectID(const nlohmann::json& j);
     ObjectID(int64_t id, time_t time) : id(id), time(time) {}
     int64_t getId() const { return id; }
     time_t getTime() const { return time; }
     bool operator==(const ObjectID& rhs) const;
+    operator bool() const;
+    entt::entity get() const;
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
     protected:
-    int64_t id;
-    time_t time;
+    int64_t id{NOTHING};
+    time_t time{0};
 };
 
 namespace std {

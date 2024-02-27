@@ -5,6 +5,41 @@
 #include "dbat/guild.h"
 #include "dbat/dg_scripts.h"
 
+bool ObjectID::operator==(const ObjectID& other) const {
+    return id == other.id && time == other.time;
+}
+
+void ObjectID::deserialize(const nlohmann::json& j) {
+    if(j.contains("id")) id = j["id"];
+    if(j.contains("time")) time = j["time"];
+}
+
+nlohmann::json ObjectID::serialize() {
+    nlohmann::json j;
+    j["id"] = id;
+    j["time"] = time;
+    return j;
+}
+
+ObjectID::ObjectID(const nlohmann::json& j) {
+    deserialize(j);
+}
+
+entt::entity ObjectID::get() const {
+    auto find = entities.find(id);
+    if(find == entities.end()) return entt::null;
+    if(find->second.first != time) return entt::null;
+    if(!reg.valid(find->second.second)) {
+        entities.erase(id);
+        return entt::null;
+    }
+    return find->second.second;
+}
+
+ObjectID::operator bool() const {
+    return get() != entt::null;
+}
+
 Destination::Destination(GameEntity* target) : Destination() {
     this->target = target->ent;
     this->locationType = 0;

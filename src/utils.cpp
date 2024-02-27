@@ -762,7 +762,7 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
 
     for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
         k = &object;
-        if (k->carried_by != nullptr) {
+        if (k->getCarriedBy() != nullptr) {
             continue;
         }
 

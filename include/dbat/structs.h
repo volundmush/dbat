@@ -8,7 +8,9 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
+#include <functional>
 #include "net.h"
+#include <type_traits> // For std::is_base_of
 
 
 struct trig_data;
@@ -907,9 +909,9 @@ struct Object : public GameEntity {
 
     std::array<obj_affected_type, MAX_OBJ_AFFECT> affected{};  /* affects */
 
-    Object *in_obj{};       /* In what object nullptr when none    */
-    Character *carried_by{};  /* Carried by :nullptr in room/conta   */
-    Character *worn_by{};      /* Worn by? */
+    Object* getInObj();
+    Character* getCarriedBy();
+    Character* getWornBy();
 
     Character *sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
@@ -924,13 +926,12 @@ struct Object : public GameEntity {
     int64_t aucter{};
     int64_t curBidder{};
     time_t aucTime{};
-    money_t bid{};
-    money_t startbid{};
+    int bid{};
+    int startbid{};
     char *auctname{};
     int posttype{};
     Object *posted_to{};
     Object *fellow_wall{};
-    Character *owner{};
 
     std::optional<double> gravity;
 
@@ -954,6 +955,7 @@ struct Exit : public GameEntity {
     explicit Exit(const nlohmann::json &j);
 
     obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
+    Room *destination{nullptr};        /* Where direction leads (NOWHERE)	*/
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
     int dcskill{};            /* Skill req. to move through exit	*/

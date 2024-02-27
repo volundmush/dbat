@@ -10703,7 +10703,7 @@ ACMD(do_fix) {
             GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
             obj->clearFlag(FlagType::Item, ITEM_BROKEN);
         }
-        if (obj->carried_by == nullptr && !PLR_FLAGGED(ch, PLR_REPLEARN) &&
+        if (obj->getCarriedBy() == nullptr && !PLR_FLAGGED(ch, PLR_REPLEARN) &&
             (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {
             int64_t gain = (level_exp(ch, GET_LEVEL(ch) + 1) * 0.0003) * GET_SKILL(ch, SKILL_REPAIR);
             ch->sendf("@mYou've learned a bit from repairing it. @D[@gEXP@W: @G+%s@D]@n\r\n", add_commas(gain).c_str());

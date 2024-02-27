@@ -3032,11 +3032,11 @@ void weight_change_object(Object *obj, int weight) {
 
     if (IN_ROOM(obj) != NOWHERE) {
         GET_OBJ_WEIGHT(obj) += weight;
-    } else if ((tmp_ch = obj->carried_by)) {
+    } else if ((tmp_ch = obj->getCarriedBy())) {
         obj->removeFromLocation();
         GET_OBJ_WEIGHT(obj) += weight;
         obj->addToLocation(tmp_ch);
-    } else if ((tmp_obj = obj->in_obj)) {
+    } else if ((tmp_obj = obj->getInObj())) {
         obj->removeFromLocation();
         GET_OBJ_WEIGHT(obj) += weight;
         obj->addToLocation(tmp_obj);
@@ -3846,7 +3846,7 @@ void perform_wear(Character *ch, Object *obj, int where) {
     }
 
     /* See if a trigger disallows it */
-    if (!wear_otrigger(obj, ch, where) || (obj->carried_by != ch))
+    if (!wear_otrigger(obj, ch, where) || (obj->getCarriedBy() != ch))
         return;
 
     if (GET_OBJ_TYPE(obj) == ITEM_WEAPON && OBJ_FLAGGED(obj, ITEM_CUSTOM)) {

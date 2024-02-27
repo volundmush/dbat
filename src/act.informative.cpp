@@ -3224,19 +3224,39 @@ static void print_object_location(int num, Object *obj, Character *ch,
 
     ch->sendf("%s", obj->scriptString().c_str());
 
-    if (IN_ROOM(obj) != NOWHERE)
-        ch->sendf("[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), obj->getRoom()->getDisplayName(ch));
-    else if (obj->carried_by)
-        ch->sendf("carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch),
-                     GET_ROOM_VNUM(IN_ROOM(obj->carried_by)));
-    else if (obj->worn_by)
-        ch->sendf("worn by %s in room [%d]\r\n", PERS(obj->worn_by, ch), GET_ROOM_VNUM(IN_ROOM(obj->worn_by)));
-    else if (obj->in_obj) {
-        ch->sendf("inside %s%s\r\n", obj->in_obj->getShortDesc(), (recur ? ", which is" : " "));
-        if (recur)
-            print_object_location(0, obj->in_obj, ch, recur);
-    } else
+    auto loc = reg.try_get<Location>(obj->ent);
+    if(!loc) {
         ch->sendf("in an unknown location\r\n");
+        return;
+    }
+    if(!reg.valid(loc->location)) {
+        ch->sendf("in an unknown location\r\n");
+        reg.remove<Location>(obj->ent);
+        return;
+    }
+
+    auto &info = reg.get<Info>(loc->location);
+
+    switch(info.family) {
+        case EntityFamily::Room:
+            ch->sendf("in room [%d] %s\r\n", info.uid, render::displayName(loc->location, ch->ent));
+            break;
+        case EntityFamily::Character:
+            if(loc->locationType == 0) {
+                // inventory...
+                ch->sendf("carried by %s\r\n", render::displayName(loc->location, ch->ent));
+            } else {
+                // equipped...
+                ch->sendf("worn by %s\r\n", render::displayName(loc->location, ch->ent));
+            }
+            break;
+        case EntityFamily::Object:
+            // always inventory...
+            ch->sendf("inside %s\r\n", render::displayName(loc->location, ch->ent));
+            break;
+        case EntityFamily::Exit:
+            break; // shouldn't happen.
+    }
 }
 
 static void perform_immort_where(Character *ch, char *arg) {

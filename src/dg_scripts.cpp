@@ -709,20 +709,20 @@ Object *get_obj_near_obj(Object *obj, char *name) {
         return i;
 
     /* or outside ? */
-    if (obj->in_obj) {
+    if (auto inobj = obj->getInObj()) {
         if (*name == UID_CHAR) {
             auto o = dynamic_cast<Object*>(resolveUID(name));
             if(!o) return nullptr;
-            if(o == obj->in_obj) return o;
-        } else if (isname(name, obj->in_obj->getName().c_str()))
-            return obj->in_obj;
+            if(o == inobj) return o;
+        } else if (isname(name, inobj->getName().c_str()))
+            return inobj;
     }
         /* or worn ?*/
-    else if (obj->worn_by && (i = get_object_in_equip(obj->worn_by, name)))
+    else if (obj->getWornBy() && (i = get_object_in_equip(obj->getWornBy(), name)))
         return i;
         /* or carried ? */
-    else if (obj->carried_by &&
-             (i = get_obj_in_list(name, obj->carried_by->getInventory())))
+    else if (obj->getCarriedBy() &&
+             (i = get_obj_in_list(name, obj->getCarriedBy()->getInventory())))
         return i;
     else if (auto rm = obj->getRoom(); rm) {
         /* check the floor */
@@ -784,13 +784,13 @@ Character *get_char_by_obj(Object *obj, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        if (obj->carried_by && isname(name, obj->carried_by->getName().c_str()) &&
-            valid_dg_target(obj->carried_by, DG_ALLOW_GODS))
-            return obj->carried_by;
+        if (auto carriedby = obj->getCarriedBy(); carriedby && isname(name, carriedby->getName().c_str()) &&
+            valid_dg_target(carriedby, DG_ALLOW_GODS))
+            return carriedby;
 
-        if (obj->worn_by && isname(name, obj->worn_by->getName().c_str()) &&
-            valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
-            return obj->worn_by;
+        if (auto wornby = obj->getWornBy(); wornby && isname(name, wornby->getName().c_str()) &&
+            valid_dg_target(wornby, DG_ALLOW_GODS))
+            return wornby;
 
         for (auto &&[ent, character] : reg.view<Character>(entt::exclude<Deleted>).each()) {
             ch = &character;
@@ -853,14 +853,13 @@ Object *get_obj_by_obj(Object *obj, char *name) {
     if (auto con = obj->getInventory(); !con.empty() && (i = get_obj_in_list(name, con)))
         return i;
 
-    if (obj->in_obj && isname(name, obj->in_obj->getName().c_str()))
-        return obj->in_obj;
+    if (auto inobj = obj->getInObj(); inobj && isname(name, inobj->getName().c_str()))
+        return inobj;
 
-    if (obj->worn_by && (i = get_object_in_equip(obj->worn_by, name)))
+    if (auto wornby = obj->getWornBy(); wornby && (i = get_object_in_equip(wornby, name)))
         return i;
 
-    if (obj->carried_by &&
-        (i = get_obj_in_list(name, obj->carried_by->getInventory())))
+    if (auto carriedby = obj->getCarriedBy(); carriedby && (i = get_obj_in_list(name, carriedby->getInventory())))
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&

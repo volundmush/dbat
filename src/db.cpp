@@ -92,7 +92,7 @@ void setEntity(int64_t uid, entt::entity entity) {
     entities[uid] = entity;
 }
 
-DebugMap<int64_t, entt::entity> entities;    /* array of rooms		 */
+DebugMap<int64_t, std::pair<time_t, entt::entity>> entities;    /* array of rooms		 */
 std::unordered_set<GameEntity*> pendingDeletions;
 
 Character *affect_list = nullptr; /* global linked list of chars with affects */

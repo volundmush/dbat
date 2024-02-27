@@ -381,7 +381,7 @@ void equip_char(Character *ch, Object *obj, int pos) {
             obj->getShortDesc());
         return;
     }
-    if (obj->carried_by) {
+    if (obj->getCarriedBy()) {
         basic_mud_log("SYSERR: EQUIP: Obj is carried_by when equip.");
         return;
     }

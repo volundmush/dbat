@@ -513,7 +513,7 @@ int receive_mtrigger(Character *ch, Character *actor, Object *obj)
             t->addVar("actor", actor);
             t->addVar("object", obj);
             ret_val = t->execute();
-            if (DEAD(actor) || DEAD(ch) || obj->carried_by != actor)
+            if (DEAD(actor) || DEAD(ch) || obj->getCarriedBy() != actor)
                 return 0;
             else
                 return ret_val;
@@ -920,7 +920,7 @@ int give_otrigger(Object *obj, Character *actor, Character *victim)
              * a) the object is purged.
              * b) the object is not carried by the giver.
              */
-            if (!obj || obj->carried_by != actor)
+            if (!obj || obj->getCarriedBy() != actor)
                 return 0;
             else
                 return ret_val;
@@ -1236,7 +1236,7 @@ int drop_wtrigger(Object *obj, Character *actor)
             t->addVar("actor", actor);
             t->addVar("object", obj);
             ret_val = t->execute();
-            if (obj->carried_by != actor)
+            if (obj->getCarriedBy() != actor)
                 return 0;
             else
                 return ret_val;

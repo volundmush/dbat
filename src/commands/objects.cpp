@@ -94,16 +94,9 @@ void obj_log(Object *obj, const char *format, ...) {
 
 /* returns the real room number that the object or object's carrier is in */
 room_rnum obj_room(Object *obj) {
-    if (IN_ROOM(obj) != NOWHERE)
-        return IN_ROOM(obj);
-    else if (obj->carried_by)
-        return IN_ROOM(obj->carried_by);
-    else if (obj->worn_by)
-        return IN_ROOM(obj->worn_by);
-    else if (obj->in_obj)
-        return obj_room(obj->in_obj);
-    else
-        return NOWHERE;
+    auto absolute = obj->getAbsoluteRoom();
+    if (absolute) return absolute->getVN();
+    return NOWHERE;
 }
 
 
@@ -281,43 +274,7 @@ OCMD(do_otimer) {
 /* note: this shouldn't be used with containers unless both objects */
 /* are containers! */
 OCMD(do_otransform) {
-    char arg[MAX_INPUT_LENGTH];
-    Object *o, tmpobj;
-    Character *wearer = nullptr;
-    int pos = 0;
-
-    one_argument(argument, arg);
-
-    if (!*arg)
-        obj_log(obj, "otransform: missing argument");
-    else if (!isdigit(*arg))
-        obj_log(obj, "otransform: bad argument");
-    else {
-        o = read_object(atoi(arg), VIRTUAL);
-        if (o == nullptr) {
-            obj_log(obj, "otransform: bad object vnum");
-            return;
-        }
-
-        if (obj->worn_by) {
-            wearer = obj->worn_by;
-            unequip_char(obj->worn_by, pos);
-        }
-
-        /* move new obj info over to old object and delete new obj */
-
-        tmpobj.carried_by = obj->carried_by;
-        tmpobj.worn_by = obj->worn_by;
-        tmpobj.in_obj = obj->in_obj;
-
-        tmpobj.script = obj->script;
-
-        if (wearer) {
-            equip_char(wearer, obj, pos);
-        }
-
-        o->extractFromWorld();
-    }
+    obj_log(obj, "otransform: currently disabled");
 }
 
 OCMD(do_dupe) {
@@ -495,33 +452,6 @@ OCMD(do_dgoload) {
         }
 
         /* special handling to make objects able to load on a person/in a container/worn etc. */
-        if (!target || !*target) {
-            object->addToLocation(getEntity(room));
-            load_otrigger(object);
-            return;
-        }
-        two_arguments(target, arg1, arg2); /* recycling ... */
-        tch = get_char_near_obj(obj, arg1);
-        if (tch) {
-            if (arg2 != nullptr && *arg2 &&
-                (pos = find_eq_pos_script(arg2)) >= 0 &&
-                !GET_EQ(tch, pos) &&
-                can_wear_on_pos(object, pos)) {
-                equip_char(tch, object, pos);
-                load_otrigger(object);
-                return;
-            }
-            object->addToLocation(tch);
-            load_otrigger(object);
-            return;
-        }
-        cnt = get_obj_near_obj(obj, arg1);
-        if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
-            object->addToLocation(cnt);
-            load_otrigger(object);
-            return;
-        }
-        /* neither char nor container found - just dump it in room */
         object->addToLocation(getEntity(room));
         load_otrigger(object);
         return;

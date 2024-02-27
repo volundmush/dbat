@@ -1379,17 +1379,6 @@ static void point_update_objects(uint64_t heartPulse, double deltaTime) {
     for (auto &&[ent, object] : reg.view<Object>(entt::exclude<Deleted>).each()) {
         auto j = &object;
 
-        /* Let's get rid of dropped norent items. */
-        if (OBJ_FLAGGED(j, ITEM_NORENT) && j->worn_by == nullptr && j->carried_by == nullptr && obj_selling != j &&
-            GET_OBJ_VNUM(j) != 7200) {
-            time_t diff = 0;
-
-            diff = time(nullptr) - GET_LAST_LOAD(j);
-            if (diff > 240 && GET_LAST_LOAD(j) > 0) {
-                basic_mud_log("No rent object (%s) extracted from room (%d)", j->getShortDesc().c_str(), GET_ROOM_VNUM(IN_ROOM(j)));
-                j->extractFromWorld();
-            }
-        }
 
         if (GET_OBJ_TYPE(j) == ITEM_HATCH) {
             if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST)))) {
@@ -1427,12 +1416,12 @@ static void point_update_objects(uint64_t heartPulse, double deltaTime) {
             }
             if (!GET_OBJ_TIMER(j)) {
 
-                if (j->carried_by) {
-                    act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
+                if (auto carried = j->getCarriedBy(); carried) {
+                    act("$p decays in your hands.", false, carried, j, nullptr, TO_CHAR);
                 }
                 else {
                     Messager msg(j, strstr(j->getName().c_str(), "android") ? "$you() breaks down completely into a pile of junk." : "A quivering horde of maggots consumes $you().");
-                    msg.addLocation(j->carried_by);
+                    msg.addLocation(j);
                     msg.deliver();
                 }
                 for (auto jj : j->getInventory()) {
@@ -1491,13 +1480,15 @@ static void point_update_objects(uint64_t heartPulse, double deltaTime) {
                     j->extractFromWorld();
                 }
             } else if (GET_OBJ_VNUM(j) != 79) {
-                if (j->carried_by && !j->in_obj) {
+                auto carried = j->getCarriedBy();
+                auto inobj = j->getInObj();
+                if (carried && !inobj) {
                     int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
                     if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0) {
                         GET_OBJ_WEIGHT(j) -= melt;
-                        j->carried_by->sendf("%s @wmelts a little.\r\n", j->getShortDesc());
+                        carried->sendf("%s @wmelts a little.\r\n", j->getShortDesc());
                     } else {
-                        j->carried_by->sendf("%s @wmelts completely away.\r\n", j->getShortDesc());
+                        carried->sendf("%s @wmelts completely away.\r\n", j->getShortDesc());
                         int remainder = melt - GET_OBJ_WEIGHT(j);
                         j->extractFromWorld();
                     }

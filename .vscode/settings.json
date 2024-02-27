@@ -74,7 +74,9 @@
         "valarray": "cpp",
         "variant": "cpp",
         "shared_mutex": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "coroutine": "cpp",
+        "*.ipp": "cpp"
     },
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }

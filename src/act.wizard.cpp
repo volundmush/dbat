@@ -924,17 +924,12 @@ room_rnum find_target_room(Character *ch, char *rawroomstr) {
                 return (NOWHERE);
             }
         } else if ((target_obj = get_obj_vis(ch, mobobjstr, &num)) != nullptr) {
-            if (IN_ROOM(target_obj) != NOWHERE)
-                location = IN_ROOM(target_obj);
-            else if (target_obj->carried_by && IN_ROOM(target_obj->carried_by) != NOWHERE)
-                location = IN_ROOM(target_obj->carried_by);
-            else if (target_obj->worn_by && IN_ROOM(target_obj->worn_by) != NOWHERE)
-                location = IN_ROOM(target_obj->worn_by);
-
-            if (location == NOWHERE) {
+            auto absolute = target_obj->getAbsoluteRoom();
+            if(!absolute) {
                 ch->sendf("That object is currently not in a room.\r\n");
                 return (NOWHERE);
             }
+            location = absolute->getUID();
         }
 
         if (location == NOWHERE) {
@@ -1424,9 +1419,27 @@ static void do_stat_object(Character *ch, Object *j) {
    * NOTE: In order to make it this far, we must already be able to see the
    *       character holding the object. Therefore, we do not need CAN_SEE().
    */
-    ch->sendf("In object: %s, ", j->in_obj ? j->in_obj->getShortDesc() : "None");
-    ch->sendf("Carried by: %s, ", j->carried_by ? GET_NAME(j->carried_by) : "Nobody");
-    ch->sendf("Worn by: %s\r\n", j->worn_by ? GET_NAME(j->worn_by) : "Nobody");
+    if(auto loc = reg.try_get<Location>(j->ent); loc && reg.valid(loc->location)) {
+        auto &info = reg.get<Info>(loc->location);
+        switch(info.family) {
+            case EntityFamily::Character:
+                if(loc->locationType == 0) {
+                    ch->sendf("Carried by: %s\r\n", render::displayName(loc->location, ch->ent));
+                } else {
+                    ch->sendf("Worn by: %s\r\n", render::displayName(loc->location, ch->ent));
+                }
+                break;
+            case EntityFamily::Object:
+                ch->sendf("In object: %s\r\n", render::displayName(loc->location, ch->ent));
+                break;
+            case EntityFamily::Room:
+                ch->sendf("In room: %s\r\n", render::displayName(loc->location, ch->ent));
+                break;
+            default:
+                ch->sendf("Location: Unknown\r\n");
+                break;
+        }
+    }
 
     switch (GET_OBJ_TYPE(j)) {
         case ITEM_LIGHT:

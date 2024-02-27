@@ -146,7 +146,10 @@ DgResults Object::dgCallMember(trig_data *trig, const std::string& member, const
         return "0";
     }
 
-    if(lmember == "carried_by") return carried_by;
+    if(lmember == "carried_by") {
+        if(auto carried = getCarriedBy(); carried) return carried;
+        return "";
+    }
 
     if(lmember == "contents") {
         if(arg.empty()) {
@@ -267,7 +270,6 @@ DgResults Object::dgCallMember(trig_data *trig, const std::string& member, const
     }
 
     if(lmember == "worn_by") {
-        if(worn_by) return worn_by;
         return "";
     }
 
@@ -289,3 +291,28 @@ DgResults Object::dgCallMember(trig_data *trig, const std::string& member, const
 
 }
 
+Object* Object::getInObj() {
+    auto loc = reg.try_get<Location>(ent);
+    if(!loc || !reg.valid(loc->location)) return nullptr;
+    return reg.try_get<Object>(loc->location);
+}
+
+Character* Object::getCarriedBy() {
+    auto loc = reg.try_get<Location>(ent);
+    if(!loc || !reg.valid(loc->location)) return nullptr;
+    auto &info = reg.get<Info>(loc->location);
+    if(info.family == EntityFamily::Character && loc->locationType == 0) {
+        return getEntity<Character>(info.uid);
+    }
+    return nullptr;
+}
+
+Character* Object::getWornBy() {
+    auto loc = reg.try_get<Location>(ent);
+    if(!loc || !reg.valid(loc->location)) return nullptr;
+    auto &info = reg.get<Info>(loc->location);
+    if(info.family == EntityFamily::Character && loc->locationType > 0) {
+        return getEntity<Character>(info.uid);
+    }
+    return nullptr;
+}
