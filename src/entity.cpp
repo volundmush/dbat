@@ -511,18 +511,13 @@ namespace contents {
         return getEquipment(ent->ent);
     }
 
-    std::map<int, Exit*> getExits(entt::entity ent) {
-        std::map<int, Exit*> out;
-        for(auto e : get(ent)) {
-            if(auto o = reg.try_get<Exit>(e); o) {
-                auto &loc = reg.get<Location>(e);
-                out[loc.locationType] = o;
-            }
-        }
-        return out;
+    std::map<int, entt::entity> getExits(entt::entity ent) {
+        if(auto exits = reg.try_get<Exits>(ent); exits)
+            return exits->exits;
+        return {};
     }
 
-    std::map<int, Exit*> getExits(GameEntity* ent) {
+    std::map<int, entt::entity> getExits(GameEntity* ent) {
         return getExits(ent->ent);
     }
 
@@ -604,6 +599,9 @@ namespace check {
         return reg.all_of<NonPlayerCharacter>(ent);
     }
 }
+
+
+
 
 static const struct {
         int percent;

@@ -107,8 +107,8 @@ namespace contents {
     std::vector<Room*> getRooms(entt::entity ent);
     std::vector<Room*> getRooms(GameEntity* ent);
 
-    std::map<int, Exit*> getExits(entt::entity ent);
-    std::map<int, Exit*> getExits(GameEntity* ent);
+    std::map<int, entt::entity> getExits(entt::entity ent);
+    std::map<int, entt::entity> getExits(GameEntity* ent);
 
     std::vector<GameEntity*> getNeighbors(entt::entity ent, bool visible = true);
     std::vector<GameEntity*> getNeighbors(GameEntity* ent, bool visible = true);
@@ -126,6 +126,7 @@ namespace contents {
     void updateCoordinates(entt::entity ent, entt::entity mover, std::optional<Coordinates> previous = std::nullopt);
     void updateCoordinates(GameEntity* ent, std::optional<Coordinates> previous = std::nullopt);
 }
+
 
 
 namespace render {

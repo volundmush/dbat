@@ -586,9 +586,9 @@ void Object::extractFromWorld() {
         trash->extractFromWorld();
     }
 
-    if (auto ch = SITTING(this); ch) {
-        SITTING(this) = nullptr;
-        SITS(ch) = nullptr;
+    if (auto occupiedby = reg.try_get<OccupiedBy>(ent); occupiedby) {
+        reg.erase<Occupying>(occupiedby->occupant);
+        reg.erase<OccupiedBy>(ent);
     }
 
     if (USER(this)) {
@@ -611,26 +611,24 @@ static void update_object(Object *obj, int use) {
 
 
 void update_char_objects(Character *ch) {
-    int i, j;
 
-    for (i = 0; i < NUM_WEARS; i++)
-        if (GET_EQ(ch, i)) {
-            if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0 &&
-                GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) <= 0) {
-                j = --GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS);
-                GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) = 3;
-                if (j == 1) {
-                    ch->sendf("Your light begins to flicker and fade.\r\n");
-                    act("$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
-                } else if (j == 0) {
-                    ch->sendf("Your light sputters out and dies.\r\n");
-                    act("$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
-                }
-            } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
-                GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) -= 1;
+    for (auto &[pos, eq] : ch->getEquipment()) {
+        if (GET_OBJ_TYPE(eq) == ITEM_LIGHT && GET_OBJ_VAL(eq, VAL_LIGHT_HOURS) > 0 &&
+            GET_OBJ_VAL(eq, VAL_LIGHT_TIME) <= 0) {
+            auto j = --GET_OBJ_VAL(eq, VAL_LIGHT_HOURS);
+            GET_OBJ_VAL(eq, VAL_LIGHT_TIME) = 3;
+            if (j == 1) {
+                ch->sendf("Your light begins to flicker and fade.\r\n");
+                act("$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
+            } else if (j == 0) {
+                ch->sendf("Your light sputters out and dies.\r\n");
+                act("$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
             }
-            update_object(GET_EQ(ch, i), 2);
+        } else if (GET_OBJ_TYPE(eq) == ITEM_LIGHT && GET_OBJ_VAL(eq, VAL_LIGHT_HOURS) > 0) {
+            GET_OBJ_VAL(eq, VAL_LIGHT_TIME) -= 1;
         }
+        update_object(eq, 2);
+    }
 
     for(auto obj : ch->getInventory())
         update_object(obj, 1);

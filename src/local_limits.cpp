@@ -1278,25 +1278,27 @@ static void point_update_characters(uint64_t heartPulse, double deltaTime) {
                 }
             }
             if (change && !AFF_FLAGGED(i, AFF_POISON)) {
-                if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) != nullptr) {
+                if (PLR_FLAGGED(i, PLR_HEALT) && reg.try_get<Occupying>(i->ent) != nullptr) {
+                    auto &occ = reg.get<Occupying>(i->ent);
+                    auto htank = reg.try_get<Object>(occ.target);
                     i->sendf("@wThe healing tank works wonders on your injuries.@n\r\n");
-                    HCHARGE(SITS(i)) -= rand_number(1, 2);
-                    if (HCHARGE(SITS(i)) == 0) {
+                    HCHARGE(htank) -= rand_number(1, 2);
+                    bool leaveTank = false;
+                    if (HCHARGE(htank) == 0) {
                         i->sendf("@wThe healing tank is now too low on energy to heal you.\r\n");
-                        act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
-                        act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-                        i->clearFlag(FlagType::PC, PLR_HEALT);
-                        SITTING(SITS(i)) = nullptr;
-                        SITS(i) = nullptr;
+                        leaveTank = true;
                     } else if (i->isFullVitals()) {
                         i->sendf("@wYou are fully recovered now.\r\n");
+                        leaveTank = true;
+                    }
+                    if(leaveTank) {
                         act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
                         act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
                         i->clearFlag(FlagType::PC, PLR_HEALT);
-                        SITTING(SITS(i)) = nullptr;
-                        SITS(i) = nullptr;
+                        reg.erase<Occupying>(i->ent);
+                        reg.erase<OccupiedBy>(htank->ent);
                     }
-                } else if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) == nullptr) {
+                } else if (PLR_FLAGGED(i, PLR_HEALT) && !reg.all_of<Occupying>(i->ent)) {
                     i->clearFlag(FlagType::PC, PLR_HEALT);
                 } else if (GET_POS(i) == POS_SLEEPING) {
                     i->sendf("@wYour sleep does you some good.@n\r\n");

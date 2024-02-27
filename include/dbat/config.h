@@ -50,8 +50,6 @@ extern int free_rent, max_obj_save, min_rent_cost, auto_save, autosave_time;
 
 extern int auto_pwipe, selfdelete_fastwipe;
 
-extern const struct pclean_criteria_data pclean_criteria[7];
-
 extern room_vnum death_start_room, mortal_start_room, immort_start_room, frozen_start_room;
 
 extern room_vnum donation_room_1, donation_room_2, donation_room_3;

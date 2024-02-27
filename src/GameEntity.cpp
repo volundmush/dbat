@@ -70,17 +70,19 @@ std::map<int, Object*> GameEntity::getEquipment() {
     return contents::getEquipment(ent);
 }
 
-std::map<int, Exit*> GameEntity::getExits() {
+std::map<int, entt::entity> GameEntity::getExits() {
     return contents::getExits(ent);
 }
 
-std::map<int, Exit*> GameEntity::getUsableExits() {
-    std::map<int, Exit*> out;
+std::map<int, entt::entity> GameEntity::getUsableExits() {
+    std::map<int, entt::entity> out;
     for(auto &[door, o] : getExits()) {
-        if(o->checkFlag(FlagType::Exit, EX_CLOSED)) continue;
-        auto dest = reg.try_get<Destination>(o->ent);
+        if(auto gateway = reg.try_get<Gateway>(o); gateway) {
+            if(!gateway->isOpen) continue;
+        }
+        auto dest = reg.try_get<Destination>(o);
         if(!dest) continue;
-        if(flags::check(dest->target, FlagType::Room, ROOM_DEATH)) continue;
+        if(!reg.valid(dest->target)) continue;
         out[door] = o;
     }
     return out;

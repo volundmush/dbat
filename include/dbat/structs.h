@@ -462,6 +462,20 @@ struct NonPlayerCharacter {
     bool barf;
 };
 
+
+struct Relations {
+    Relations() = default;
+    explicit Relations(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    std::unordered_map<std::string, std::set<entt::entity>> relations;
+};
+
+struct ReverseRelations {
+    std::unordered_map<std::string, std::set<entt::entity>> relations;
+};
+
 struct Damage {
     std::map<DamageType, int> levels;
     std::map<DamageType, int64_t> soak;
@@ -659,8 +673,8 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
     std::vector<Character*> getPeople();
     std::map<int, Object*> getEquipment();
     std::vector<Room*> getRooms();
-    std::map<int, Exit*> getExits();
-    std::map<int, Exit*> getUsableExits();
+    std::map<int, entt::entity> getExits();
+    std::map<int, entt::entity> getUsableExits();
 
     Room* getAbsoluteRoom();
     Room* getRoom();
@@ -877,6 +891,20 @@ struct GameEntity : public std::enable_shared_from_this<GameEntity> {
 };
 
 /* ================== Memory Structure for Objects ================== */
+struct Occupying {
+    Occupying() = default;
+    explicit Occupying(const nlohmann::json& j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    entt::entity target;
+};
+
+struct OccupiedBy {
+    entt::entity occupant;
+};
+
+
 struct Object : public GameEntity {
     static constexpr auto in_place_delete = true;
     Object() = default;
@@ -947,20 +975,33 @@ struct Structure {
 
 /* room-related structures ************************************************/
 
-struct Exit : public GameEntity {
-    static constexpr auto in_place_delete = true;
-    Exit() = default;
-    explicit Exit(const nlohmann::json &j);
+struct Gateway {
+    Gateway() = default;
+    explicit Gateway(const nlohmann::json &j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
 
-    obj_vnum key{NOTHING};        /* Key's number (-1 for no key)		*/
-    Room *destination{nullptr};        /* Where direction leads (NOWHERE)	*/
+    std::optional<obj_vnum> key;
+    bool isOpen{true};
+    bool isLocked{false};
     int dclock{};            /* DC to pick the lock			*/
     int dchide{};            /* DC to find hidden			*/
     int dcskill{};            /* Skill req. to move through exit	*/
     int dcmove{};            /* DC for skill to move through exit	*/
+};
 
-    nlohmann::json serialize() override;
-    void deserialize(const nlohmann::json& j) override;
+struct Exit {
+    Exit() = default;
+    explicit Exit(const nlohmann::json &j);
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    entt::entity room{entt::null};
+    int direction{-1};
+};
+
+struct Exits {
+    std::map<int, entt::entity> exits;
 };
 
 enum class MoonCheck : uint8_t {
@@ -974,34 +1015,29 @@ enum class MoonCheck : uint8_t {
 struct Room : public GameEntity {
     static constexpr auto in_place_delete = true;
     Room() = default;
-
     explicit Room(const nlohmann::json &j);
-    int sector_type{};            /* sector type (move/hide)            */
-    SpecialFunc func{};
-    int timed{};                   /* For timed Dt's                     */
-    int dmg{};                     /* How damaged the room is            */
-    int geffect{};            /* Effect of ground destruction       */
-    void executeCommand(const std::string& argument) override;
-    std::optional<double> gravity;
-
-    bool isSunken();
-
-    int getDamage();
-    int setDamage(int amount);
-    int modDamage(int amount);
-
     nlohmann::json serialize() override;
     void deserialize(const nlohmann::json& j) override;
 
+    void executeCommand(const std::string& argument) override;
+    std::optional<double> gravity;
+    bool isSunken();
+    int getDamage();
+    int setDamage(int amount);
+    int modDamage(int amount);
     std::string renderExits1(entt::entity viewer);
     std::string renderExits2(entt::entity viewer);
     std::string generateMap(entt::entity viewer, int num);
     std::string printMap(entt::entity viewer, int type, int64_t v);
     std::optional<room_vnum> getLaunchDestination();
-
     MoonCheck checkMoon();
-
     DgResults dgCallMember(trig_data *trig, const std::string& member, const std::string& arg) override;
+
+    int sector_type{};            /* sector type (move/hide)            */
+    SpecialFunc func{};
+    int timed{};                   /* For timed Dt's                     */
+    int dmg{};                     /* How damaged the room is            */
+    int geffect{};            /* Effect of ground destruction       */
 };
 /* ====================================================================== */
 
@@ -1018,11 +1054,13 @@ struct Room : public GameEntity {
 struct time_info_data {
     time_info_data() = default;
     explicit time_info_data(int64_t timestamp);
+    void deserialize(const nlohmann::json& j);
+    nlohmann::json serialize();
+
     double remainder{};
     int seconds{}, minutes{}, hours{}, day{}, month{};
     int64_t year{};
-    void deserialize(const nlohmann::json& j);
-    nlohmann::json serialize();
+    
     // The number of seconds since year 0. Can be negative.
     int64_t current();
 };
@@ -1033,24 +1071,16 @@ struct time_data {
     time_data() = default;
     explicit time_data(const nlohmann::json &j);
     void deserialize(const nlohmann::json& j);
+    nlohmann::json serialize();
+    int currentAge();
+
+
     int64_t birth{};    /* NO LONGER USED This represents the characters current IC age        */
     time_t created{};    /* This does not change                              */
     int64_t maxage{};    /* This represents death by natural causes (UNUSED) */
     time_t logon{};    /* Time of the last logon (used to calculate played) */
     double played{};    /* This is the total accumulated time played in secs */
     double secondsAged{}; // The player's current IC age, in seconds.
-    int currentAge();
-    nlohmann::json serialize();
-};
-
-
-/* The pclean_criteria_data is set up in config.c and used in db.c to
-   determine the conditions which will cause a player character to be
-   deleted from disk if the automagic pwipe system is enabled (see config.c).
-*/
-struct pclean_criteria_data {
-    int level;        /* max level for this time limit	*/
-    int days;        /* time limit in days			*/
 };
 
 
@@ -1062,25 +1092,12 @@ struct pclean_criteria_data {
 struct alias_data {
     alias_data() = default;
     explicit alias_data(const nlohmann::json &j);
+    nlohmann::json serialize();
+
     std::string name;
     std::string replacement;
     int type{};
-    nlohmann::json serialize();
 };
-
-/* this can be used for skills that can be used per-day */
-struct memorize_node {
-    int timer;            /* how many ticks till memorized */
-    int spell;            /* the spell number */
-    struct memorize_node *next;    /* link to the next node */
-};
-
-struct innate_node {
-    int timer;
-    int spellnum;
-    struct innate_node *next;
-};
-
 
 
 /* An affect structure. */
@@ -1097,11 +1114,6 @@ struct affected_type {
     struct affected_type *next{};
 };
 
-/* Queued spell entry */
-struct queued_act {
-    int level;
-    int spellnum;
-};
 
 /* Structure used for chars following other chars */
 struct follow_type {

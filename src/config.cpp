@@ -299,16 +299,7 @@ int auto_pwipe = true;
 	be the end of the criteria.  The days entry is not used in this
 	case.
 */
-const struct pclean_criteria_data pclean_criteria[7] = {
-/*	LEVEL		DAYS	*/
-        {0,   0}, /* level 0 */
-        {1,   30},
-        {4,   90},
-        {10,  180},
-        {50,  360}, /* highest mortal */
-        {100, 360}, /* all immortals */
-        {-1,  0}  /* no more level checks */
-};
+
 
 /* Do you want players who self-delete to be wiped immediately with no
    backup?

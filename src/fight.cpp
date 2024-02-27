@@ -1766,12 +1766,11 @@ void death_cry(Character *ch) {
 
 /* Let's clean up necessary things after "death" */
 static void final_combat_resolve(Character *ch) {
-    Object *chair;
 
-    if (SITS(ch)) {
-        chair = SITS(ch);
-        SITS(ch) = nullptr;
-        SITTING(chair) = nullptr;
+    if (auto occupying = reg.try_get<Occupying>(ch->ent); occupying) {
+        reg.erase<OccupiedBy>(occupying->target);
+        reg.erase<Occupying>(ch->ent);
+        ch->clearFlag(FlagType::PC, PLR_HEALT);
     }
     if (!IS_NPC(ch) && !ch->clones.empty()) {
         auto clones = ch->clones;
