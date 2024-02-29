@@ -101,6 +101,7 @@ void shutdown_game(int code);
 
 namespace game {
     void init_locale();
+    void init_sodium();
     void init_database();
     void init_zones();
     void run_loop_once(double deltaTime);

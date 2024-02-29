@@ -171,7 +171,10 @@ int main(int argc, char **argv)
     else {
         basic_mud_log("Running game.");
         try {
-            init_game();
+            game::init_locale();
+            game::init_sodium();
+            game::init_database();
+            game::init_zones();
         }
         catch(std::exception& e) {
             std::cerr << "Uncaught exception: " << e.what() << std::endl;
