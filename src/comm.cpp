@@ -41,11 +41,12 @@
 #include "dbat/charmenu.h"
 #include "dbat/puppet.h"
 #include "dbat/transformation.h"
-#include <mutex>
 #include "dbat/db.h"
 #include <locale>
 #include "dbat/transformation.h"
 #include "dbat/shop.h"
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
@@ -72,6 +73,21 @@ char *last_act_message = nullptr;
 /***********************************************************************
 *  main game loop and related stuff                                    *
 ***********************************************************************/
+
+void setup_log() {
+    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    console_sink->set_level(spdlog::level::info); // Set the console to output info level and above messages
+    console_sink->set_pattern("[%^%l%$] %v"); // Example pattern: [INFO] some message
+
+    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(config::logFile, 1024 * 1024 * 5, 3);
+    file_sink->set_level(spdlog::level::trace); // Set the file to output all levels of messages
+
+    std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
+
+    logger = std::make_shared<spdlog::logger>("logger", begin(sinks), end(sinks));
+    logger->set_level(spdlog::level::trace); // Set the logger to trace level
+    spdlog::register_logger(logger);
+}
 
 void broadcast(const std::string& txt) {
     /*
@@ -168,36 +184,33 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
 }
 
 void processConnections(double deltaTime) {
-    std::set<std::string> deadConnections;
+    // First, handle any disconnected connections.
+    for(auto &[id, reason] : net::deadConnections) {
+        auto it = net::connections.find(id);
+        // This shouldn't happen, but whatever.
+        if(it == net::connections.end()) continue;
+        it->second->cleanup(reason);
+    }
+    for(auto &[id, reason] : net::deadConnections) {
+        net::connections.erase(id);
+    }
+    net::deadConnections.clear();
 
-    if(!net::connections.empty()) {
-        std::lock_guard lock(net::connectionMutex);
-        for(auto &[id, conn] : net::connections) {
-            switch(conn->state) {
-                case net::ConnectionState::Negotiating:
-                    break;
-                case net::ConnectionState::Pending:
-                    conn->onWelcome();
-                    conn->state = net::ConnectionState::Connected;
-                break;
-                case net::ConnectionState::Connected:
-                    conn->onHeartbeat(deltaTime);
-                    break;
-                case net::ConnectionState::Dead:
-                    deadConnections.insert(id);
-                break;
-            }
+    // Second, welcome any new connections!
+    auto pending = net::pendingConnections;
+    for(const auto& id : pending) {
+        auto it = net::connections.find(id);
+        if (it != net::connections.end()) {
+            auto conn = it->second;
+            // Need a proper welcoming later....
+            conn->onWelcome();
+            net::pendingConnections.erase(id);
         }
+    }
 
-        if(!deadConnections.empty()) {
-
-            for(auto &did : deadConnections) {
-                auto it = net::connections.find(did);
-                if(it == net::connections.end()) continue;
-                it->second->cleanup();
-                net::connections.erase(did);
-            }
-        }
+    // Next, we must handle the heartbeat routine for each connection.
+    for(auto& [id, c] : net::connections) {
+        c->onHeartbeat(deltaTime);
     }
 }
 
@@ -1891,14 +1904,14 @@ void shutdown_game(int exitCode) {
     std::exit(exitCode);
 }
 
-void descriptor_data::onConnectionClosed(const std::string& connId) {
+void descriptor_data::onConnectionClosed(int64_t connId) {
     conns.erase(connId);
     if(conns.empty()) {
         handleLostLastConnection(true);
     }
 }
 
-void descriptor_data::onConnectionLost(const std::string& connId) {
+void descriptor_data::onConnectionLost(int64_t connId) {
     conns.erase(connId);
     if(conns.empty()) {
         handleLostLastConnection(false);

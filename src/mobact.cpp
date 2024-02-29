@@ -24,7 +24,6 @@
 #include "dbat/act.social.h"
 #include "dbat/spec_procs.h"
 #include "dbat/class.h"
-#include "dbat/random.h"
 
 #define MOB_AGGR_TO_ALIGN (MOB_AGGR_EVIL | MOB_AGGR_NEUTRAL | MOB_AGGR_GOOD)
 

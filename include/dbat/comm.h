@@ -35,6 +35,8 @@ void enter_player_game(struct descriptor_data *d);
 
 extern int arena_watch(struct char_data *ch);
 
+extern void setup_log();
+
 extern void
 perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to);
 

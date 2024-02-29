@@ -5,7 +5,6 @@
 #include "dbat/techniques.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
-#include "dbat/random.h"
 #include "dbat/fight.h"
 #include "dbat/guild.h"
 

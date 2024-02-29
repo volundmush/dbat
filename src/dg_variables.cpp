@@ -22,7 +22,6 @@
 #include "dbat/oasis.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
-#include "dbat/random.h"
 
 /* Utility functions */
 

@@ -30,7 +30,6 @@
 #include "dbat/act.wizard.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.other.h"
-#include "dbat/random.h"
 
 /* Names first */
 

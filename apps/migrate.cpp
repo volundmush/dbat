@@ -1,5 +1,3 @@
-#include "dbat/migrate.h"
-
 #include "dbat/comm.h"
 #include "dbat/utils.h"
 #include "dbat/dg_scripts.h"
@@ -15,7 +13,6 @@
 #include <fstream>
 #include "dbat/class.h"
 #include "dbat/players.h"
-#include "json.hpp"
 #include "dbat/account.h"
 #include "dbat/act.item.h"
 #include "dbat/pfdefaults.h"
@@ -24,7 +21,6 @@
 #include "dbat/guild.h"
 #include "dbat/genobj.h"
 #include "dbat/saveload.h"
-#include "dbat/random.h"
 
 #define RENT_FACTOR    1
 #define CRYO_FACTOR    4

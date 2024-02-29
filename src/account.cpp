@@ -1,6 +1,7 @@
 #include "dbat/account.h"
 #include "dbat/db.h"
 #include "dbat/utils.h"
+#include "sodium.h"
 #include <stdexcept>
 
 std::map<vnum, account_data> accounts;
@@ -14,19 +15,28 @@ struct account_data *findAccount(const std::string &name) {
     return nullptr;
 }
 
-bool account_data::checkPassword(const std::string &password) {
-    return password == passHash;
+static std::optional<std::string> hashPassword(const std::string& password) {
+    char hashed_password[crypto_pwhash_STRBYTES];
+    if(password.empty()) return std::nullopt;
+    if(crypto_pwhash_str(hashed_password, password.data(), password.size(),
+                         crypto_pwhash_OPSLIMIT_INTERACTIVE, crypto_pwhash_MEMLIMIT_INTERACTIVE) != 0) {
+        return std::nullopt;
+    }
+    return hashed_password;
+
 }
 
-static std::optional<std::string> hashPassword(const std::string &password) {
-
-    return password;
+bool account_data::checkPassword(const std::string &password) {
+    auto result = crypto_pwhash_str_verify(passHash.data(), password.data(), password.size());
+    return result == 0;
 }
 
 bool account_data::setPassword(const std::string &password) {
-    passHash = password;
+    auto hash = hashPassword(password);
+    if(!hash) return false;
+    passHash = hash.value();
+    lastPasswordChanged = time(nullptr);
     return true;
-
 }
 
 nlohmann::json account_data::serialize() {

@@ -49,6 +49,8 @@ bool gameIsLoading = true;
 bool saveAll = false;
 bool isMigrating = false;
 
+std::shared_ptr<spdlog::logger> logger;
+
 struct config_data config_info; /* Game configuration list.    */
 
 std::map<room_vnum, room_data> world;    /* array of rooms		 */
