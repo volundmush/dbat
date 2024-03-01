@@ -4828,10 +4828,17 @@ void migrate_db() {
 
 
 void run_migration() {
-    game::init_locale();
     load_config();
+    game::init_locale();
+    game::init_sodium();
+    game::init_asio();
     chdir("lib");
+    game::init_database();
     migrate_db();
-
     runSave();
+}
+
+int main(int argc, char **argv) {
+    run_migration();
+    return 0;
 }

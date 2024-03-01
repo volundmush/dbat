@@ -197,6 +197,49 @@ namespace net {
         co_return;
     }
 
+    awaitable<void> runLinkManager() {
+        bool do_standoff = false;
+        boost::asio::steady_timer standoff(co_await boost::asio::this_coro::executor);
+        while (true) {
+            if(do_standoff) {
+                standoff.expires_after(5s);
+                co_await standoff.async_wait(boost::asio::use_awaitable);
+                do_standoff = false;
+            }
+
+            auto &endpoint = thermiteEndpoint;
+
+            try {
+                logger->info("LinkManager: Connecting to {}:{}...", endpoint.address().to_string(), endpoint.port());
+                // Create a new TCP socket
+                boost::beast::websocket::stream<boost::beast::tcp_stream> ws(co_await boost::asio::this_coro::executor);
+
+                // Connect to the endpoint
+                co_await boost::beast::get_lowest_layer(ws).async_connect(endpoint, boost::asio::use_awaitable);
+                // Initialize a WebSocket using the connected socket
+
+                // Perform the WebSocket handshake
+                co_await ws.async_handshake(endpoint.address().to_string() + ":" + std::to_string(endpoint.port()), "/", boost::asio::use_awaitable);
+
+                // Construct a Link using the WebSocket
+                link = std::make_unique<Link>(std::move(ws));
+
+                // Run the Link
+                logger->info("LinkManager: Link established! Running Link...");
+                co_await link->run();
+                link.reset();
+
+            } catch (const boost::system::system_error& error) {
+                // If there was an error, handle it (e.g., log the error message)
+                logger->error("Error in LinkManager::run(): {}", error.what());
+
+                // You might want to add a delay before attempting to reconnect, e.g.,
+                do_standoff = true;
+            }
+        }
+        co_return;
+    }
+
     void ProtocolCapabilities::deserialize(const nlohmann::json& j) {
         if(j.contains("protocol")) {
             auto s = j["protocol"].get<std::string>();
@@ -299,49 +342,6 @@ namespace net {
         if(j.contains("kwargs")) kwargs = j["kwargs"];
     }
 
-    awaitable<void> runLinkManager() {
-        bool do_standoff = false;
-        boost::asio::steady_timer standoff(co_await boost::asio::this_coro::executor);
-        while (true) {
-            if(do_standoff) {
-                standoff.expires_after(5s);
-                co_await standoff.async_wait(boost::asio::use_awaitable);
-                do_standoff = false;
-            }
-
-            auto &endpoint = thermiteEndpoint;
-
-            try {
-                logger->info("LinkManager: Connecting to {}:{}...", endpoint.address().to_string(), endpoint.port());
-                // Create a new TCP socket
-                boost::beast::websocket::stream<boost::beast::tcp_stream> ws(co_await boost::asio::this_coro::executor);
-
-                // Connect to the endpoint
-                co_await boost::beast::get_lowest_layer(ws).async_connect(endpoint, boost::asio::use_awaitable);
-                // Initialize a WebSocket using the connected socket
-
-                // Perform the WebSocket handshake
-                co_await ws.async_handshake(endpoint.address().to_string() + ":" + std::to_string(endpoint.port()), "/", boost::asio::use_awaitable);
-
-                // Construct a Link using the WebSocket
-                link = std::make_unique<Link>(std::move(ws));
-
-                // Run the Link
-                logger->info("LinkManager: Link established! Running Link...");
-                co_await link->run();
-                link.reset();
-
-            } catch (const boost::system::system_error& error) {
-                // If there was an error, handle it (e.g., log the error message)
-                logger->error("Error in LinkManager::run(): {}", error.what());
-
-                // You might want to add a delay before attempting to reconnect, e.g.,
-                do_standoff = true;
-            }
-        }
-        co_return;
-    }
-
     void Connection::sendMessage(const Message &msg) {
         nlohmann::json j, d;
         j["kind"] = "client_data";
@@ -373,6 +373,10 @@ namespace net {
 
     }
 
+    void ConnectionParser::handleMessage(const Message &m) {
+        // The default does nothing, but later it will handle API stuff.
+    }
+
     void Connection::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
         if(cmd.empty()) return;
         nlohmann::json j2;
@@ -383,9 +387,18 @@ namespace net {
 
     void Connection::sendText(const std::string &text) {
         if(text.empty()) return;
-        nlohmann::json j;
-        j["data"] = text;
-        sendEvent("CircleText", j);
+        Message msg;
+        msg.cmd = "text";
+        if(boost::icontains(text, "\r\r\n")) {
+            logger->info("WHAT THE HELL?");
+        }
+        if(desc && desc->character) {
+            auto &p = players[desc->character->id];
+            msg.args.push_back(processColors(text, COLOR_ON(desc->character), p.color_choices));
+        } else {
+            msg.args.push_back(processColors(text, true, nullptr));
+        }
+        sendMessage(msg);
     }
 
     void Connection::sendEvent(const std::string &name, const nlohmann::json &data) {
@@ -472,24 +485,54 @@ namespace net {
         }
     }
 
+    void Connection::handleMessage(const Message &m) {
+        if(m.cmd == "text") {
+            for(auto &arg : m.args) {
+                if(arg.is_string()) {
+                    auto t = arg.get<std::string>();
+                    if(boost::iequals(t, "idle")) continue;
+                    if(parser) parser->parse(t);
+                }
+            }
+        } else {
+            if(parser) parser->handleMessage(m);
+        }
+    }
+
 
     void Connection::onHeartbeat(double deltaTime) {
-        if(!inQueue.empty())
-            lastActivity = std::chrono::steady_clock::now();
+                // Every time the heartbeat runs, we want to pull everything out of fromLink
+        // first of all.
 
-        for(auto &[name, jdata] : inQueue) {
-            nlohmann::json j;
-            try {
-                j = jparse(jdata);
-            }
-            catch (const nlohmann::json::parse_error &e) {
-                basic_mud_log("Error parsing JSON for event %s: %s", name, e.what());
-                continue;
-            }
+        // We need to do this in a loop, because we may have multiple messages in the
+        // channel.
 
-            handleEvent(name, j);
+        std::error_code ec;
+        nlohmann::json value;
+        while (fromLink.ready()) {
+            if(!fromLink.try_receive([&](std::error_code ec2, nlohmann::json value2) {
+                ec = ec2;
+                value = value2;
+            })) {
+                break;
+            }
+            if (ec) {
+                // TODO: Handle any errors..
+            } else {
+                // If we got a json value, it should look like this.
+                // {"kind": "client_data", "id": 123, "data": [{"cmd": "text", "args": ["hello world!"], "kwargs": {}}]}
+                // We're only interested in iterating over the contents of the "data" array.
+                // Now we must for-each over the contents of jarr, extract the cmd, args, and kwargs data, and call
+                // the appropriate handle routine.
+                //logger->info("Received data from link: {}", value.dump());
+                lastActivity = std::chrono::steady_clock::now();
+                for (auto &jval : value["data"]) {
+                    //logger->info("Processing data from link: {}", jval.dump());
+                    Message m(jval);
+                    handleMessage(m);
+                }
+            }
         }
-        inQueue.clear();
     }
 
     void Connection::executeGMCP(const std::string &cmd, const nlohmann::json &j) {

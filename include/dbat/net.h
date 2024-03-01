@@ -23,6 +23,8 @@ namespace net {
         boost::beast::websocket::stream<boost::beast::tcp_stream> conn;
         bool is_stopped;
     };
+    
+    awaitable<void> runLinkManager();
 
     template<typename T>
     using Channel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, T)>;
@@ -114,6 +116,7 @@ namespace net {
         virtual ~ConnectionParser() = default;
         virtual void parse(const std::string &txt) = 0;
         virtual void handleGMCP(const std::string &txt, const nlohmann::json &j);
+        virtual void handleMessage(const Message &m);
         virtual void start();
         virtual void close();
 
@@ -131,6 +134,7 @@ namespace net {
         void sendText(const std::string &messg);
         void sendEvent(const std::string &name, const nlohmann::json &data);
         void onHeartbeat(double deltaTime);
+        void handleMessage(const Message &m);
         void onNetworkDisconnected();
         void onWelcome();
         void close();

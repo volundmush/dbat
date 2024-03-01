@@ -7,8 +7,8 @@ namespace config {
     extern int threadsCount;
     extern bool usingMultithreading;
     extern std::chrono::milliseconds heartbeatInterval;
-    extern std::string serverAddress;
-    extern uint16_t serverPort;
+    extern std::string thermiteAddress;
+    extern uint16_t thermitePort;
 
 
     extern std::string logFile;

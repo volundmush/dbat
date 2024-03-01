@@ -166,21 +166,18 @@ int main(int argc, char **argv)
     std::filesystem::current_path(dir);
     basic_mud_log("Using %s as data directory.", dir);
 
-    if (scheck)
-        boot_world();
-    else {
-        basic_mud_log("Running game.");
-        try {
-            game::init_locale();
-            game::init_sodium();
-            game::init_database();
-            game::init_zones();
-        }
-        catch(std::exception& e) {
-            std::cerr << "Uncaught exception: " << e.what() << std::endl;
-            exit(1);
-        }
-
+    basic_mud_log("Running game.");
+    try {
+        game::init_locale();
+        game::init_sodium();
+        game::init_database();
+        game::init_asio();
+        game::init_zones();
+        game::run_game();
+    }
+    catch(std::exception& e) {
+        std::cerr << "Uncaught exception: " << e.what() << std::endl;
+        exit(1);
     }
 
     basic_mud_log("Clearing game world.");
@@ -189,7 +186,6 @@ int main(int argc, char **argv)
     if (!scheck) {
         basic_mud_log("Clearing other memory.");
         free_bufpool();             /* comm.c */
-        free_player_index();	/* players.c */
         clear_free_list();		/* mail.c */
         free_mail_index();          /* mail.c */
         free_text_files();		/* db.c */

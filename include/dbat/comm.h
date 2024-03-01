@@ -37,11 +37,9 @@ extern int arena_watch(struct char_data *ch);
 
 extern void setup_log();
 
-extern void
-perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to);
+extern void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, const void *vict_obj, struct char_data *to);
 
-extern char *
-act(const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
+extern char *act(const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 
 extern void close_socket(struct descriptor_data *d);
 
@@ -102,7 +100,10 @@ void shutdown_game(int code);
 namespace game {
     void init_locale();
     void init_sodium();
+    void init_asio();
     void init_database();
     void init_zones();
-    void run_loop_once(double deltaTime);
+    void run_game();
+    boost::asio::awaitable<void> run_loop();
+    boost::asio::awaitable<void> run_loop_once(double deltaTime);
 }
