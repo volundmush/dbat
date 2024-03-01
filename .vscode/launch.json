@@ -2,25 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "DBAT: Portal",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/portal.py",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "DBAT: Server",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/server.py",
-            "console": "integratedTerminal"
-        },
-        {
             "name": "DBAT: (GDB) Server",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${command:python.interpreterPath}",
-            "args": ["server.py"],
+            "program": "${workspaceFolder}/bin/circle",
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -34,14 +19,16 @@
                 }
             ],
             "miDebuggerPath": "/usr/bin/gdb",
-            "preLaunchTask": "setPythonPath" // This is optional, see below
         },
         {
-            "name": "(GDB) Attach to Python",
+            "name": "DBAT: (GDB) Migrate",
             "type": "cppdbg",
-            "request": "attach",
-            "program": "${command:python.interpreterPath}", // Specify the path to the venv Python interpreter
-            "processId": "${command:pickProcess}",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/migrate",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -50,7 +37,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "miDebuggerPath": "/usr/bin/gdb"
-        }
+            "miDebuggerPath": "/usr/bin/gdb",
+        },
     ]
 }

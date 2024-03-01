@@ -4829,11 +4829,11 @@ void migrate_db() {
 
 void run_migration() {
     load_config();
+    setup_log();
     game::init_locale();
     game::init_sodium();
     game::init_asio();
     chdir("lib");
-    game::init_database();
     migrate_db();
     runSave();
 }
