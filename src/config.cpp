@@ -51,7 +51,7 @@ namespace config {
     bool usingMultithreading{false};
     std::chrono::milliseconds heartbeatInterval{100ms};
     std::string thermiteAddress{"127.0.0.1"};
-    uint16_t thermitePort{6999};
+    uint16_t thermitePort{7000};
     std::string logFile = "logs/dbat.log";
 
     std::string assetDbName = "assets";
