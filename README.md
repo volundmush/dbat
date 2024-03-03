@@ -97,8 +97,6 @@ From there, open the `dbat` folder (or whatever else you cloned it to) as your p
 
 You will need to then go to Extensions again and tell VS Code to install your extensions in WSL.
 
-Finally, after that, use the Command Palette (F5) and tell it to Python: Create Environment. it should detect Python3.11 of some variation as an option, and after that it should see requirements.txt. Tell it to use those. After this, VS Code will manage the Virtual Environment for you.
-
 # Project Breakdown
 The project relies on several major components to work properly.
 
@@ -109,6 +107,8 @@ The second is the `circle` and `migrate` executables, which links to the above a
 In order for the game to work, the `lib` folder must be present in the project root. That is not (yet) included.
 
 The Thermite project opens up an internal listening port which DBAT connects to so the two can exchange client activity data. Thermite is the program which handles telnet, webclient, and the website static files.
+
+For compiling and running Thermite, simply use `cargo build` then `cargo run` in Thermite project directory.
 
 # Things to Watch Out For
 In my experiences, WSL2 can get screwy sometimes, though that was working with JetBrains IDEs. I'm not sure about VS Code. Still, if the WSL instance freezes or starts acting bizarre, you can use `wsl --shutdown` from the Windows Command Prompt and then re-open the WSL instance.
