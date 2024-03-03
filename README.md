@@ -37,6 +37,31 @@ Install requirements.
 
 `pip install -r requirements.txt`
 
+## Installing Boost
+As of this writing, the project was written with Boost 1.84.0 in mind. Owing to its size and unique compilation requirements, it cannot be handled via CPM in the CMakeLists.txt, and must be installed as a system library.
+
+The latest .tar.gz can be found at [The Boost Downloads website](https://www.boost.org/users/download/). The quickest way to install, using the 1.84 variant as an example, is...
+
+`wget https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/boost_1_84_0.tar.gz`
+to download boost into your home directory.
+
+`tar zxvf boost_1_84_0.tar.gz`
+to decompress it into a folder...
+
+`cd boost_1_84_0`
+to enter the folder... then...
+
+`./bootstrap.sh --with-libraries=all --with-toolset=gcc`
+to configure,
+
+`./b2 toolset=gcc`
+to compile, and
+
+`sudo ./b2 install --prefix=/usr`
+to install.
+
+It does take a minute or two to configure and compile 'cuz boost is huge.
+
 ## Windows
 
 ### Getting WSL working (Windows Subsystem for Linux)
