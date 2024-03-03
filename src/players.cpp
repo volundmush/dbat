@@ -51,7 +51,7 @@ char *get_name_by_id(long id) {
 
 struct char_data *findPlayer(const std::string& name) {
     for (auto& player : players) {
-        if (iequals(player.second.name, name)) {
+        if (boost::iequals(player.second.name, name)) {
             return player.second.character;
         }
     }
@@ -60,7 +60,7 @@ struct char_data *findPlayer(const std::string& name) {
 
 OpResult<> validate_pc_name(const std::string& name) {
     auto n = name;
-    trim(n);
+    boost::trim(n);
     // Cannot be empty.
     if(n.empty()) return {false, "Player names cannot be empty."};
 
@@ -73,7 +73,7 @@ OpResult<> validate_pc_name(const std::string& name) {
     if(!is_all_alpha(n)) return {false, "No special symbols or numbers in names, please."};
     // And nothing from our badnames list...
     for(auto &badname : invalid_list) {
-        if(iequals(n, badname)) {
+        if(boost::iequals(n, badname)) {
             return {false, "That name is disallowed. Nothing profane, lame, or conflicting with an official character please."};
         }
     }

@@ -235,7 +235,7 @@ ACMD(do_alias) {
     /* is this an alias we've already defined? */
     auto &aliases = p.aliases;
     auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a) {
-        return iequals(a.name, arg);
+        return boost::iequals(a.name, arg);
     });
 
     /* if no replacement string is specified, assume we want to delete */
@@ -373,7 +373,7 @@ void perform_alias(struct descriptor_data *d, char *orig) {
     }
 
     auto find = std::find_if(aliases.begin(), aliases.end(), [&](const auto &a) {
-        return iequals(a.name, first_arg);
+        return boost::iequals(a.name, first_arg);
     });
 
     /* if the first arg is not an alias, return without doing anything */

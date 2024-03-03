@@ -3379,89 +3379,15 @@ nlohmann::json jparse(const std::string& s) {
 }
 
 
-bool iequals(const std::string& a, const std::string& b) {
-    return std::equal(a.begin(), a.end(), b.begin(), b.end(),
-        [](char a, char b) {
-            return std::tolower(a) == std::tolower(b);
-        }
-    );
-}
-
-std::vector<std::string> split(const std::string& s, char delimiter) {
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(s);
-    while (std::getline(tokenStream, token, delimiter)) {
-        tokens.push_back(token);
-    }
-    return tokens;
-}
-
-std::string join(const std::vector<std::string>& vec, const std::string& delimiter) {
-    std::string result;
-    for (auto it = vec.begin(); it != vec.end(); ++it) {
-        if (it != vec.begin()) {
-            result += delimiter;
-        }
-        result += *it;
-    }
-    return result;
-}
-
-bool istarts_with(const std::string& haystack, const std::string& needle) {
-    return std::mismatch(needle.begin(), needle.end(), haystack.begin(), haystack.end(),
-        [](char a, char b) {
-            return std::tolower(a) == std::tolower(b);
-        }
-    ).first == needle.end();
-}
-
-void trim(std::string& str) {
-    auto start = str.begin();
-    while (start != str.end() && std::isspace(*start)) {
-        start++;
-    }
-
-    auto end = str.end();
-    do {
-        end--;
-    } while (std::distance(start, end) > 0 && std::isspace(*end));
-
-    str = std::string(start, end + 1);
-}
-
 bool is_numeric(const std::string& str) {
-    return std::all_of(str.begin(), str.end(), [](unsigned char c) {
+    return boost::algorithm::all(str, [](unsigned char c) {
         return std::isdigit(c);
     });
 }
 
-void trim_right(std::string& str) {
-    auto it = std::find_if(str.rbegin(), str.rend(), [](char ch) {
-        return !std::isspace(ch);
-    }).base();
-    str.erase(it, str.end());
-}
-
-void to_lower(std::string& str) {
-    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){
-        return std::tolower(c);
-    });
-}
 
 bool is_all_alpha(const std::string& str) {
-    return std::all_of(str.begin(), str.end(), [](unsigned char c) {
+    return boost::algorithm::all(str, [](unsigned char c) {
         return std::isalpha(c);
     });
-}
-
-bool icontains(const std::string& haystack, const std::string& needle) {
-    auto it = std::search(
-        haystack.begin(), haystack.end(),
-        needle.begin(), needle.end(),
-        [](char ch1, char ch2) {
-            return std::tolower(ch1) == std::tolower(ch2);
-        }
-    );
-    return (it != haystack.end());
 }

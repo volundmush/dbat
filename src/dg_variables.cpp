@@ -1317,7 +1317,7 @@ void var_subst(void *go, struct script_data *sc, trig_data *trig,
     int paren_count = 0;
     int dots = 0;
 
-    if(istarts_with(line, "eval loss 500 + %500000.random%")) {
+    if(boost::istarts_with(line, "eval loss 500 + %500000.random%")) {
         script_log("barf!");
     }
 

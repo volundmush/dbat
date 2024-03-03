@@ -67,7 +67,7 @@ std::string char_data::juggleRaceName(bool capitalized) {
         return race::getName(apparent);
     } else {
         auto out = race::getName(apparent);
-        to_lower(out);
+        boost::to_lower(out);
         return out;
     }
 }
@@ -797,6 +797,27 @@ bool char_data::removeTransform(FormID form) {
     return false;
 }
 
+void char_data::attemptLimitBreak() {
+    if(form == FormID::Base)
+        return;
+    if(transforms[form].timeSpentInForm > 50000 && rand_number(0, 1000) == 1000) {
+        transforms[form].limitBroken = true;
+        incCurHealthPercent(0.35);
+        incCurKIPercent(0.35);
+        incCurSTPercent(0.35);
+        send_to_char(this, "@mA rush of energy bursts through your system as you defy your limits.@n\r\n");
+        if(race != RaceID::Android && race != RaceID::Tuffle && race != RaceID::BioAndroid && race != RaceID::Majin )
+            affected_by.set(AFF_LIMIT_BREAKING);         
+    }
+}
+
+void char_data::removeLimitBreak() {
+    if (AFF_FLAGGED(this, AFF_LIMIT_BREAKING)) {
+        this->affected_by.set(AFF_LIMIT_BREAKING, false);
+        send_to_char(this, "@mYou feel your body finally calm down.@n\r\n");
+    }
+}
+
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
     return mod(CharStat::PowerLevel, amt);
 }
@@ -1193,7 +1214,7 @@ attribute_t char_data::get(CharAttribute attr, bool base) {
     }
     if(!base) {
         val += getAffectModifier((int)attr+1) + getAffectModifier(APPLY_ALL_ATTRS);
-        return std::clamp<attribute_t>(val, 5, 100);
+        return std::clamp<attribute_t>(val, 5, 150);
     }
     return val;
 
@@ -1549,8 +1570,8 @@ static const std::map<std::string, int> _aflags = {
 
 std::optional<std::string> char_data::dgCallMember(const std::string& member, const std::string& arg) {
     std::string lmember = member;
-    to_lower(lmember);
-    trim(lmember);
+    boost::to_lower(lmember);
+    boost::trim(lmember);
 
     if(auto attr = _attr_names.find(lmember); attr != _attr_names.end()) {
         if (!arg.empty()) {

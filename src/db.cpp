@@ -2716,7 +2716,7 @@ static int file_to_string(const char *name, char *buf) {
         std::string out;
         // read all of f to out.
         std::getline(f, out, '\0');
-        trim_right(out);
+        boost::trim_right(out);
         strcpy(buf, out.c_str());
         return 0;
     } catch (std::exception &e) {

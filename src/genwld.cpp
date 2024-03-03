@@ -475,8 +475,8 @@ static const std::map<std::string, int> _dirNames = {
 
 std::optional<std::string> room_data::dgCallMember(const std::string& member, const std::string& arg) {
     std::string lmember = member;
-    to_lower(lmember);
-    trim(lmember);
+    boost::to_lower(lmember);
+    boost::trim(lmember);
     char bitholder[MAX_STRING_LENGTH];
 
     if(auto d = _dirNames.find(lmember); d != _dirNames.end()) {

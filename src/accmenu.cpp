@@ -68,7 +68,7 @@ namespace net {
     }
 
     void AccountMenu::parse(const std::string &txt) {
-        if(iequals(txt, "return") || istarts_with(txt, "return ")) {
+        if(boost::iequals(txt, "return") || boost::istarts_with(txt, "return ")) {
             start();
             return;
         }
@@ -93,7 +93,7 @@ namespace net {
             return;
         }
 
-        if(iequals(txt, "A") || istarts_with(txt, "A ")) {
+        if(boost::iequals(txt, "A") || boost::istarts_with(txt, "A ")) {
             // Start chargen...
             if(conn->account->slots <= conn->account->characters.size()) {
                 sendText("Sorry, your slots are all full.\r\n");
@@ -103,7 +103,7 @@ namespace net {
             return;
         }
 
-        if (iequals(txt, "B") || istarts_with(txt, "B ")) {
+        if (boost::iequals(txt, "B") || boost::istarts_with(txt, "B ")) {
             // Buying a slot.
             if(conn->account->rpp < 15) {
                 sendText("You need at least 15 RPP to purchase a new character slot.\r\n");
@@ -120,11 +120,11 @@ namespace net {
             return;
         }
 
-        if(iequals(txt, "D") || istarts_with(txt, "D ")) {
+        if(boost::iequals(txt, "D") || boost::istarts_with(txt, "D ")) {
             // todo: implement...
         }
 
-        if(iequals(txt, "Q") || istarts_with(txt, "Q ")) {
+        if(boost::iequals(txt, "Q") || boost::istarts_with(txt, "Q ")) {
             sendText("Goodbye!\r\n");
             conn->close();
             return;

@@ -256,7 +256,7 @@ void Read_Invalid_List() {
     std::string line;
     while(std::getline(file, line))
     {
-        trim(line);
+        boost::trim(line);
         if(!line.empty())
         {
             invalid_list.insert(line);

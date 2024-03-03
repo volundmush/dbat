@@ -505,7 +505,7 @@ namespace race {
     std::optional<RaceID> findRace(const std::string& arg, std::function<bool(RaceID)> func) {
         for(auto r : all_races) {
             if(!func(r)) continue;
-            if(iequals(arg, getName(r))) return r;
+            if(boost::iequals(arg, getName(r))) return r;
         }
         return {};
 

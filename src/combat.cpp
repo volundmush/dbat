@@ -1382,6 +1382,9 @@ int chance_to_hit(struct char_data *ch) {
         num += GET_COND(ch, DRUNK);
     }
 
+    if(IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !AFF_FLAGGED(ch, AFF_INFRAVISION))
+        num += 30;
+
     return (num);
 }
 
@@ -3685,13 +3688,21 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
 static void spar_helper(struct char_data *ch, struct char_data *vict, int type, int64_t dmg) {
     int chance = 0, gmult, gravity, bonus = 1, pscost = 2, difference = 0;
     int64_t gain = 0, pl = 0, ki = 0, st = 0, gaincalc = 0;
+    int attrChance = 3;
 
 	//If damage is greater than a tenth of the opponents health, there's a greater chance to proc the spar gains
     if (dmg > GET_MAX_HIT(vict) / 10) {
         chance = rand_number(20, 100);
+        chance = rand_number(20, 100);
+    } else if (dmg <= GET_MAX_HIT(vict) / 10) {
     } else if (dmg <= GET_MAX_HIT(vict) / 10) {
         chance = rand_number(1, 75);
+        chance = rand_number(1, 75);
+    } else if (dmg <= GET_MAX_HIT(vict) / 3) {
+        chance = rand_number(1, 50);
+        attrChance = 10;
     }
+
 
 	//The chance is reduced if you keep farming in one area via Relaxcount
     if (GET_RELAXCOUNT(ch) >= 464) {
@@ -3881,14 +3892,53 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
                 case 0:
                     send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
                     ch->gainBasePL(pl);
+                    if(axion_dice(0) <= attrChance) {
+                        int rand = rand_number(1, 2);
+                        CharAttribute val;
+                        if(rand == 1) {
+                            val = CharAttribute::Agility;
+                            send_to_char(ch, "@mYour body feels like it's light as a feather!@n\r\n");
+                        } else {
+                            val = CharAttribute::Speed;
+                            send_to_char(ch, "@mThe world feels just a little slower.@n\r\n");
+                        }
+
+                        ch->mod(val, 1);
+                    }
                     break;
                 case 1:
                     send_to_char(ch, "@D[@Y+ @C%s @cKI@D]@n\r\n", add_commas(ki).c_str());
                     ch->gainBaseKI(ki);
+                    if(axion_dice(0) <= attrChance) {
+                        int rand = rand_number(1, 2);
+                        CharAttribute val;
+                        if(rand == 1) {
+                            val = CharAttribute::Intelligence;
+                            send_to_char(ch, "@mYou begin to notice new ways to put together your attacks.@n\r\n");
+                        } else {
+                            val = CharAttribute::Wisdom;
+                            send_to_char(ch, "@mYou notice a couple of flaws in your opponents technique.@n\r\n");
+                        }
+
+                        ch->mod(val, 1);
+                    }
                     break;
                 case 2:
                     send_to_char(ch, "@D[@Y+ @C%s @cST@D]@n\r\n", add_commas(st).c_str());
                     ch->gainBaseST(st);
+                    if(axion_dice(0) <= attrChance) {
+                        int rand = rand_number(1, 2);
+                        CharAttribute val;
+                        if(rand == 1) {
+                            val = CharAttribute::Constitution;
+                            send_to_char(ch, "@mThe pain of your wounds feel just a little bit less important.@n\r\n");
+                        } else {
+                            val = CharAttribute::Strength;
+                            send_to_char(ch, "@mYour hits seem to be landing just a bit harder.@n\r\n");
+                        }
+
+                        ch->mod(val, 1);
+                    }
                     break;
             }
         } else {
@@ -4828,6 +4878,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     } else {
                         vict->incCurHealth(GET_LEVEL(vict) * 100);
                     }
+                    vict->attemptLimitBreak();
                     return;
                 }
                 if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {

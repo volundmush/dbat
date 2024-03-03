@@ -1692,7 +1692,7 @@ namespace sensei {
     std::optional<SenseiID> findSensei(const std::string& arg, const std::function<bool(SenseiID)>& func) {
         for(auto s : all_senseis) {
             if(!func(s)) continue;
-            if(iequals(arg, getName(s))) return s;
+            if(boost::iequals(arg, getName(s))) return s;
         }
 
         return {};

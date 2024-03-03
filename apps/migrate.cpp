@@ -3592,7 +3592,7 @@ void migrate_grid() {
     bodef.roomIDs.insert(19053);
     bodef.roomIDs.insert(19039);
     for(auto &[r, room] : world) {
-        if(icontains(stripAnsi(room.name), "Black Omen")) bodef.roomIDs.insert(r);
+        if(boost::icontains(stripAnsi(room.name), "Black Omen")) bodef.roomIDs.insert(r);
     }
     bodef.roomIDs.insert(19050);
     bodef.type = AreaType::Vehicle;
@@ -3874,7 +3874,7 @@ void migrate_grid() {
     celdef.type = AreaType::Structure;
     celdef.roomRanges.emplace_back(16305, 16399);
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Celestial Corp")) celdef.roomIDs.insert(rv);
+        if(boost::icontains(stripAnsi(room.name), "Celestial Corp")) celdef.roomIDs.insert(rv);
     }
     auto celestial_corp = assembleArea(celdef);
 
@@ -3891,7 +3891,7 @@ void migrate_grid() {
     cooler.parent = space;
     cooler.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Cooler's Ship")) {
+        if(boost::icontains(stripAnsi(room.name), "Cooler's Ship")) {
             cooler.roomIDs.insert(rv);
         }
     }
@@ -3902,7 +3902,7 @@ void migrate_grid() {
     alph.type = AreaType::Structure;
     alph.parent = space;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Alpharis")) alph.roomIDs.insert(rv);
+        if(boost::icontains(stripAnsi(room.name), "Alpharis")) alph.roomIDs.insert(rv);
     }
     auto alpharis = assembleArea(alph);
 
@@ -3911,7 +3911,7 @@ void migrate_grid() {
     dzone.parent = universe7;
     dzone.type = AreaType::Dimension;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Dead Zone")) dzone.roomIDs.insert(rv);
+        if(boost::icontains(stripAnsi(room.name), "Dead Zone")) dzone.roomIDs.insert(rv);
     }
     auto dead_zone = assembleArea(dzone);
 
@@ -3920,7 +3920,7 @@ void migrate_grid() {
     bast.parent = space;
     bast.type = AreaType::CelestialBody;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Blasted Asteroid")) bast.roomIDs.insert(rv);
+        if(boost::icontains(stripAnsi(room.name), "Blasted Asteroid")) bast.roomIDs.insert(rv);
     }
     auto blasted_asteroid = assembleArea(bast);
 
@@ -3930,7 +3930,7 @@ void migrate_grid() {
     listres.parent = xenoverse;
     listres.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Lister's Restaurant")) listres.roomIDs.insert(rv);
+        if(boost::icontains(stripAnsi(room.name), "Lister's Restaurant")) listres.roomIDs.insert(rv);
     }
     listres.roomIDs = {18640};
     auto listers_restaurant = assembleArea(listres);
@@ -3940,7 +3940,7 @@ void migrate_grid() {
     scasino.type = AreaType::Structure;
     scasino.parent = xenoverse;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
+        if(boost::icontains(stripAnsi(room.name), "Shooting Star Casino")) scasino.roomIDs.insert(rv);
     }
     auto shooting_star_casino = assembleArea(scasino);
 
@@ -3949,7 +3949,7 @@ void migrate_grid() {
     outdef.parent = celestial_plane;
 	outdef.type = AreaType::Structure;
     for(auto &[rv, room] : world) {
-        if(icontains(stripAnsi(room.name), "The Outpost")) outdef.roomIDs.insert(rv);
+        if(boost::icontains(stripAnsi(room.name), "The Outpost")) outdef.roomIDs.insert(rv);
     }
     auto outpost = assembleArea(outdef);
 

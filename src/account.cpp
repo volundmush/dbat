@@ -8,7 +8,7 @@ std::map<vnum, account_data> accounts;
 
 struct account_data *findAccount(const std::string &name) {
     for (auto &[aid, account] : accounts) {
-        if (iequals(account.name, name)) {
+        if (boost::iequals(account.name, name)) {
             return &account;
         }
     }
