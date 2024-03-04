@@ -762,6 +762,8 @@ void set_title(struct char_data *ch, char *title) {
 }
 
 void gain_level(struct char_data *ch) {
+    send_to_char(ch, "Levelling no longer exists!\r\n");
+    /*
     if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
         ch->mod(CharNum::Level, 1);
         advance_level(ch);
@@ -770,6 +772,7 @@ void gain_level(struct char_data *ch) {
         send_to_char(ch, "You rise a level!\r\n");
         ch->modExperience(-level_exp(ch, GET_LEVEL(ch)));
     }
+    */
 }
 
 void run_autowiz() {
@@ -1359,6 +1362,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
             GET_CHARGE(i) = GET_MAX_MANA(i) * 0.1;
         }
         if (!IS_NPC(i)) {
+            i->raiseGravAcclim();
             update_char_objects(i);
             if (GET_ADMLEVEL(i) < CONFIG_IDLE_MAX_LEVEL)
                 check_idling(i);

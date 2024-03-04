@@ -428,11 +428,11 @@ static int has_flight(struct char_data *ch) {
         return (1);
 
     if (AFF_FLAGGED(ch, AFF_FLYING) &&
-        (ch->getCurKI()) >= (GET_LEVEL(ch) + (GET_MAX_MANA(ch) / (GET_LEVEL(ch) * 30))) && !IS_ANDROID(ch) &&
+        (ch->getCurKI()) >= (GET_MAX_MANA(ch) / (GET_WIS(ch) * 30)) && !IS_ANDROID(ch) &&
         !IS_NPC(ch)) {
         return (1);
     }
-    if (AFF_FLAGGED(ch, AFF_FLYING) && (ch->getCurKI()) < (GET_LEVEL(ch) + (GET_MAX_MANA(ch) / (GET_LEVEL(ch) * 30))) &&
+    if (AFF_FLAGGED(ch, AFF_FLYING) && (ch->getCurKI()) < (GET_MAX_MANA(ch) / (GET_WIS(ch) * 30)) &&
         !IS_ANDROID(ch) && !IS_NPC(ch)) {
         act("@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -667,12 +667,12 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     rm = dest;
 
     if (!IS_NPC(ch) && (GET_ADMLEVEL(ch) < ADMLVL_IMMORT) &&
-        (GET_LEVEL(ch) < ZONE_MINLVL(rm->zone)) && (ZONE_MINLVL(rm->zone) > 0)) {
+        (GET_MAX_HIT(ch) < ZONE_MINLVL(rm->zone)) && (ZONE_MINLVL(rm->zone) > 0)) {
         send_to_char(ch, "Sorry, you are too low a level to enter this zone.\r\n");
         return (0);
     }
 
-    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_LEVEL(ch) > ZONE_MAXLVL(rm->zone)) &&
+    if ((GET_ADMLEVEL(ch) < ADMLVL_IMMORT) && (GET_MAX_HIT(ch) > ZONE_MAXLVL(rm->zone)) &&
         (ZONE_MAXLVL(rm->zone) > 0)) {
         send_to_char(ch, "Sorry, you are too high a level to enter this zone.\r\n");
         return (0);
@@ -1903,9 +1903,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
 
     /* move points needed is avg. move loss for src and destination sect type */
     need_movement = calcNeedMovementGravity(ch);
-    if (GET_LEVEL(ch) <= 1) {
-        need_movement = 0;
-    }
+
     if ((ch->getCurST()) < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
         if (need_specials_check && ch->master)
             send_to_char(ch, "You are too exhausted to follow.\r\n");

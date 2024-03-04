@@ -2914,7 +2914,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
             for (tmp_obj = i->contents; tmp_obj; tmp_obj = tmp_obj->next_content) {
                 if (CAN_SEE_OBJ(ch, tmp_obj) &&
-                    (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_LEVEL(ch)))) {
+                    (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_WIS(ch)))) {
                     show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
                     found = true;
                 }
@@ -4929,18 +4929,27 @@ ACMD(do_score) {
                             (ch->getMaxLF())).c_str(), GET_LIFEPERC(ch), "%");
         }
     }
+    std::string grav = "x1";
+    if(ch->hasGravAcclim(5))
+        grav = "x1000";
+    else if(ch->hasGravAcclim(4))
+        grav = "x100";
+    else if(ch->hasGravAcclim(3))
+        grav = "x50";
+    else if(ch->hasGravAcclim(2))
+        grav = "x10";
+    else if(ch->hasGravAcclim(1))
+        grav = "x5";
+    else if(ch->hasGravAcclim(0))
+        grav = "x2";
+
     if (view == full || view == stats) {
-        send_to_char(ch,
-                     "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
-        send_to_char(ch, "      @D<@wCharacter Level@D: @w%-3d@D> <@wRPP@D: @w%-3d@D>@n\n",
-                     GET_LEVEL(ch), GET_RP(ch));
-        send_to_char(ch, "      @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n",
-                     add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
-        send_to_char(ch,
-                     "    @D[    @RStrength@D|@G%2d (%3d)@D] [     @YAgility@D|@G%2d (%3d)@D] [      @BSpeed@D|@G%2d (%3d)@D]@n\n",
+        send_to_char(ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
+        send_to_char(ch, "        @D<@wGravity Acclim@D: @w" + grav + "@D> <@wRPP@D: @w%-3d@D>@n\n", GET_RP(ch));
+        send_to_char(ch, "        @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n");
+        send_to_char(ch, " @D[ @RStrength@D|@G%2d (%3d)@D] [ @YAgility@D|@G%2d (%3d)@D] [ @BSpeed@D|@G%2d (%3d)@D]@n\n",
                      ch->get(CharAttribute::Strength, true), GET_STR(ch), ch->get(CharAttribute::Agility, true), GET_DEX(ch), ch->get(CharAttribute::Speed, true), GET_CHA(ch));
-        send_to_char(ch,
-                     "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [     @MWisdom@D|@G%2d (%3d)@D]@n\n",
+        send_to_char(ch, " @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [ @MWisdom@D|@G%2d (%3d)@D]@n\n",
                      ch->get(CharAttribute::Constitution, true), GET_CON(ch), ch->get(CharAttribute::Intelligence, true), GET_INT(ch), ch->get(CharAttribute::Wisdom, true),
                      GET_WIS(ch));
     }

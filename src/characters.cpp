@@ -186,7 +186,7 @@ bool char_data::in_past() {
 }
 
 bool char_data::is_newbie() {
-    return GET_LEVEL(this) < 9;
+    return GET_MAX_HIT(this) <= 10000;
 }
 
 bool char_data::in_northran() {
@@ -210,9 +210,10 @@ static std::map<int, uint16_t> grav_threshold = {
 };
 
 int64_t char_data::calc_soft_cap() {
-    auto level = get(CharNum::Level);
-    if(level >= 100) return 5e9;
-    return race::getSoftCap(race, level);
+    return 750000000;
+    //auto level = get(CharNum::Level);
+    //if(level >= 100) return 5e9;
+    //return race::getSoftCap(race, level);
 }
 
 bool char_data::is_soft_cap(int64_t type) {
@@ -222,6 +223,8 @@ bool char_data::is_soft_cap(int64_t type) {
 bool char_data::is_soft_cap(int64_t type, long double mult) {
     if (IS_NPC(this))
         return true;
+    
+    return false;
 
     // Level 100 characters are never softcapped.
     if (get(CharNum::Level) >= 100) {
@@ -262,12 +265,51 @@ int char_data::wearing_android_canister() {
     }
 }
 
+bool char_data::hasGravAcclim(int grav) {
+    //0 is x2, 1 is x5, 2 is x10, 3 is x50 and 4 is x100, 5 is x1000
+    if(gravAcclim[grav] >= 10000)
+        return true;
+    return false;
+}
+
+void char_data::raiseGravAcclim() {
+    if (rand_number(1, 140) >= get(CharAttribute::Strength)) {
+        auto room = getRoom();
+        if(!room) return;
+        auto gravity = room->getGravity();
+
+        if(gravity >= 1000 && !hasGravAcclim(5) && hasGravAcclim(4))
+            gravAcclim[5] += 1;
+        else if(gravity >= 100 && !hasGravAcclim(4) && hasGravAcclim(3))
+            gravAcclim[4] += 1;
+        else if(gravity >= 50 && !hasGravAcclim(3) && hasGravAcclim(2))
+            gravAcclim[3] += 1;
+        else if(gravity >= 10 && !hasGravAcclim(2) && hasGravAcclim(1))
+            gravAcclim[2] += 1;
+        else if(gravity >= 5 && !hasGravAcclim(1) && hasGravAcclim(0))
+            gravAcclim[1] += 1;
+        else if(gravity >= 2 && !hasGravAcclim(0))
+            gravAcclim[0] += 1;
+    }
+}
+
 int64_t char_data::calcGravCost(int64_t num) {
     double gravity = 1.0;
-    auto room = world.find(in_room);
-    if (room != world.end()) {
-        gravity = room->second.getGravity();
-    }
+    if(auto room = getRoom(); room) gravity = room->getGravity();
+
+    if(gravity >= 1000 && hasGravAcclim(5))
+        gravity /= 1000;
+    else if(gravity >= 100 && hasGravAcclim(4))
+        gravity /= 100;
+    else if(gravity >= 50 && hasGravAcclim(3))
+        gravity /= 50;
+    else if(gravity >= 10 && hasGravAcclim(2))
+        gravity /= 10;
+    else if(gravity >= 5 && hasGravAcclim(1))
+        gravity /= 5;
+    else if(gravity >= 2 && hasGravAcclim(0))
+        gravity /= 2;
+
     int64_t cost = (gravity * gravity);
 
     if (!num) {
@@ -819,14 +861,17 @@ void char_data::removeLimitBreak() {
 }
 
 int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
+    raiseGravAcclim();
     return mod(CharStat::PowerLevel, amt);
 }
 
 int64_t char_data::gainBaseST(int64_t amt, bool trans_mult) {
+    raiseGravAcclim();
     return mod(CharStat::Stamina, amt);
 }
 
 int64_t char_data::gainBaseKI(int64_t amt, bool trans_mult) {
+    raiseGravAcclim();
     return mod(CharStat::Ki, amt);
 }
 
@@ -1020,7 +1065,7 @@ void char_data::login() {
     struct descriptor_data *k;
 
     for (k = descriptor_list; k; k = k->next) {
-        if (!IS_NPC(k->character) && GET_LEVEL(k->character) > 3) {
+        if (!IS_NPC(k->character) && GET_MAX_HIT(k->character) > 5000) {
             count += 1;
         }
 
@@ -1190,6 +1235,44 @@ int char_data::getSize() {
     return size != SIZE_UNDEFINED ? size : race::getSize(race);
 }
 
+double char_data::getTimeModifier() {
+    return 1 + (time_info.month / 3) + (time_info.year * 4);
+}
+
+double getServerDaysPassed() {
+    double ingameDays = time_info.day + (time_info.month * 30) + (time_info.year * 365);
+    return ingameDays / 12;
+}
+
+double char_data::getPotential() {
+    //Gain one potential per RL week, reaches 100 in two years
+    double timePotential = getTimeModifier();
+    timePotential /= 4;
+
+    int physiquePotential = 1;
+    if(hasGravAcclim(0)) physiquePotential += 1;
+    if(hasGravAcclim(1)) physiquePotential += 1;
+    if(hasGravAcclim(2)) physiquePotential += 1;
+    if(hasGravAcclim(3)) physiquePotential += 1;
+    if(hasGravAcclim(4)) physiquePotential += 1;
+    if(hasGravAcclim(5)) physiquePotential += 1;
+    return timePotential * physiquePotential;
+}
+
+void char_data::gainGrowth() {
+    double modifier = 1;
+    if (ROOM_FLAGGED(IN_ROOM(this), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(this), ROOM_AL)) {
+        modifier = 2;
+    }
+
+    // You cannot exceed the amount of days the server has been online for
+    double gain = (modifier * (getTimeModifier() / 20.0)) / 10000.0;
+    if(lifetimeGrowth + gain < getServerDaysPassed()) {
+        internalGrowth += gain;
+        lifetimeGrowth += gain;
+    }
+}
+
 
 money_t char_data::get(CharMoney mon) {
     if(auto find = moneys.find(mon); find != moneys.end()) {
@@ -1277,10 +1360,20 @@ stat_t char_data::get(CharStat type, bool base) {
 
 bool char_data::canCarryWeight(weight_t val) {
     double gravity = 1.0;
-    auto room = world.find(in_room);
-    if(room != world.end()) {
-        gravity = room->second.getGravity();
-    }
+    if(auto room = getRoom(); room) gravity = room->getGravity();
+    if(gravity >= 1000 && hasGravAcclim(5))
+        gravity /= 1000;
+    else if(gravity >= 100 && hasGravAcclim(4))
+        gravity /= 100;
+    else if(gravity >= 50 && hasGravAcclim(3))
+        gravity /= 50;
+    else if(gravity >= 10 && hasGravAcclim(2))
+        gravity /= 10;
+    else if(gravity >= 5 && hasGravAcclim(1))
+        gravity /= 5;
+    else if(gravity >= 2 && hasGravAcclim(0))
+        gravity /= 2;
+
     return getAvailableCarryWeight() >= (val * gravity);
 }
 
@@ -1473,9 +1566,9 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
     gain = std::max<int64_t>(gain, 0);
 
     if (MINDLINK(this) && gain > 0 && LINKER(this) == 0) {
-        if (GET_LEVEL(this) + 20 < GET_LEVEL(MINDLINK(this)) || GET_LEVEL(this) - 20 > GET_LEVEL(MINDLINK(this))) {
+        if (GET_INT(this) + 20 < GET_INT(MINDLINK(this)) || GET_INT(this) - 20 > GET_INT(MINDLINK(this))) {
             send_to_char(MINDLINK(this),
-                         "The level difference between the two of you is too great to gain from mind read.\r\n");
+                         "The intelligence difference between the two of you is too great to gain from mind read.\r\n");
         } else {
             act("@GYou've absorbed some new experiences from @W$n@G!@n", false, this, nullptr, MINDLINK(this),
                 TO_VICT);

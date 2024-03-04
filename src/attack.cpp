@@ -3775,20 +3775,23 @@ namespace atk {
     void StarBreaker::attackPreprocess() {
         theft = 0;
         taken = 0;
-        if (GET_LEVEL(user) - 30 > GET_LEVEL(user)) {
+        auto userInt = GET_INT(user);
+        auto vInt = GET_INT(victim);
+        auto vExp = GET_EXP(victim);
+        if (userInt - 30 > userInt) {
             theft = 1;
-        } else if (GET_LEVEL(user) - 20 > GET_LEVEL(victim)) {
-            theft = GET_EXP(victim) / 1000;
-        } else if (GET_LEVEL(user) - 10 > GET_LEVEL(victim)) {
-            theft = GET_EXP(victim) / 100;
-        } else if (GET_LEVEL(user) >= GET_LEVEL(victim)) {
-            theft = GET_EXP(victim) / 50;
-        } else if (GET_LEVEL(user) + 10 >= GET_LEVEL(victim)) {
-            theft = GET_EXP(victim) / 500;
-        } else if (GET_LEVEL(user) + 20 >= GET_LEVEL(victim)) {
-            theft = GET_EXP(victim) / 1000;
+        } else if (userInt - 20 > vInt) {
+            theft = vExp / 1000;
+        } else if (userInt - 10 > vInt) {
+            theft = vExp / 100;
+        } else if (userInt >= vInt) {
+            theft = vExp / 50;
+        } else if (userInt + 10 >= vInt) {
+            theft = vExp / 500;
+        } else if (userInt + 20 >= vInt) {
+            theft = vExp / 1000;
         } else {
-            theft = GET_EXP(victim) / 2000;
+            theft = vExp / 2000;
         }
         if(theft > 0) {
             taken = victim->modExperience(-theft);
@@ -3796,7 +3799,7 @@ namespace atk {
     }
 
     void StarBreaker::attackPostprocess() {
-        if (level_exp(user, GET_LEVEL(user) + 1) - (GET_EXP(user)) > 0 || GET_LEVEL(user) >= 100) {
+        if (level_exp(user, GET_INT(user) + 1) - (GET_EXP(user)) > 0 || GET_INT(user) >= 100) {
             auto xp = user->modExperience(theft * 2, false); // we will not apply bonuses to stolen exp.
             send_to_char(user, "The returning Eldritch energy blesses you with some experience. @D[@G%s@D]@n\r\n",
                             add_commas(xp).c_str());
@@ -4164,7 +4167,7 @@ namespace atk {
             if (AFF_FLAGGED(person, AFF_GROUP) && (person->master == user || user->master == person)) {
                 continue;
             }
-            if (GET_LEVEL(person) <= 8 && !IS_NPC(person)) {
+            if (GET_MAX_HIT(person) <= 10000 && !IS_NPC(person)) {
                 continue;
             }
             if (MOB_FLAGGED(person, MOB_NOKILL)) {

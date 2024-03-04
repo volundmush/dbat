@@ -496,6 +496,12 @@ nlohmann::json char_data::serializeInstance() {
         if(conditions[i]) j["conditions"].push_back(std::make_pair(i, conditions[i]));
     }
 
+    for(auto i = 0; i < gravAcclim.size() ; i++) {
+        if(gravAcclim[i]) j["gravAcclim"].push_back(std::make_pair(i, gravAcclim[i]));
+    }
+
+    if(internalGrowth) j["internalGrowth"] = internalGrowth;
+    if(lifetimeGrowth) j["lifetimeGrowth"] = lifetimeGrowth;
     if(freeze_level) j["freeze_level"] = freeze_level;
     if(invis_level) j["invis_level"] = invis_level;
     if(wimp_level) j["wimp_level"] = wimp_level;
@@ -600,6 +606,10 @@ nlohmann::json char_data::serializeInstance() {
         j["transforms"].push_back(std::make_pair(static_cast<int>(frm), tra.serialize()));
     }
 
+    for(auto form : permForms) {
+        j["permForms"].push_back(form);
+    }
+
     return j;
 }
 
@@ -695,6 +705,14 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         }
     }
 
+    if(j.contains("gravAcclim")) {
+        for(auto &i : j["gravAcclim"]) {
+            gravAcclim[i[0].get<int>()] = i[1];
+        }
+    }
+
+    if(j.contains("internalGrowth")) internalGrowth = j["internalGrowth"];
+    if(j.contains("lifetimeGrowth")) lifetimeGrowth = j["lifetimeGrowth"];
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
     if(j.contains("droom")) droom = j["droom"];
     if(j.contains("accuracy_mod")) accuracy_mod = j["accuracy_mod"];
@@ -771,6 +789,13 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
             transforms.emplace(j2[0].get<FormID>(), j2[1]);
         }
     }
+
+    if(j.contains("permForms")) {
+        for(auto form : j["permForms"]) {
+            permForms.insert(form.get<FormID>());
+        }
+    }
+    
 
     if(j.contains("preference")) preference = j["preference"];
     if(j.contains("freeze_level")) freeze_level = j["freeze_level"];
