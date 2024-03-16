@@ -1760,7 +1760,7 @@ namespace trans {
 
     int64_t getRequiredPL(struct char_data* ch, FormID trans) {
         if (auto req = trans_pl.find(trans); req != trans_pl.end()) {
-            return req->second.first * (1.0 + ch->transBonus);
+            return req->second.first;
         }
         return 0;
     }

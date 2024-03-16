@@ -1267,9 +1267,30 @@ void char_data::gainGrowth() {
 
     // You cannot exceed the amount of days the server has been online for
     double gain = (modifier * (getTimeModifier() / 20.0)) / 10000.0;
-    if(lifetimeGrowth + gain < getServerDaysPassed()) {
+    gainGrowth(gain);
+}
+
+void char_data::gainGrowth(double gain) {
+    // You cannot exceed the amount of days the server has been online for
+    double days = getServerDaysPassed();
+    
+
+    if (lifetimeGrowth + gain < days) {
+        // If you have stored growth, we double the amount gained and reduce overgrowth by that amount
+        if (overGrowth >= gain && lifetimeGrowth + (gain * 2) < days) {
+            overGrowth -= gain;
+            gain *= 2;
+        }
         internalGrowth += gain;
         lifetimeGrowth += gain;
+    } else {
+        // Any overflow is stored in overGrowth
+        double cangain = days - lifetimeGrowth;
+        internalGrowth += cangain;
+        lifetimeGrowth += cangain;
+
+        cangain = gain - cangain;
+        overGrowth += cangain;
     }
 }
 

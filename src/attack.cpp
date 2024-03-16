@@ -286,7 +286,7 @@ namespace atk {
         if(result == DefenseResult::Dodged) return handleDodge();
         if(result == DefenseResult::Perfect_Dodged) return handlePerfectDodge();
         if(result == DefenseResult::Failed) return handleCleanHit();
-        if(result == DefenseResult::Missed) return Result::Missed;
+        if(result == DefenseResult::Missed) return handleMiss();
 
     }
 

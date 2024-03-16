@@ -183,23 +183,19 @@ ACMD(do_rpp) {
         send_to_char(ch, "@C                             Rewards Menu\n");
         send_to_char(ch, "@b  ------------------------------------------------------------------\n");
         send_to_char(ch,
-                     "  @C1@D)@R Disabled            @D[@G -- RPP @D]  @C2@D)@R Disabled              @D[@G -- RPP @D]@n\n");
+                     "  @C1@D)@R Disabled            @D[@G -- RPP @D]  @C2@D)@R Custom Equipment      @D[@G -- RPP @D]@n\n");
         send_to_char(ch,
-                     "  @C3@D)@c Custom Equipment    @D[@G 20 RPP @D]  @C4@D)@c Alignment Change      @D[@G 20 RPP @D]\n");
+                     "  @C3@D)@c Alignment Change    @D[@G 20 RPP @D]  @C4@D)@c 7,500 zenni           @D[@G 20 RPP @D]\n");
         send_to_char(ch,
-                     "  @C5@D)@c 7,500 zenni         @D[@G  1 RPP @D]  @C6@D)@c +2 To A Stat          @D[@G  2 RPP @D]\n");
+                     "  @C5@D)@c +2 To A Stat        @D[@G  1 RPP @D]  @C6@D)@c +750 PS               @D[@G  2 RPP @D]\n");
         send_to_char(ch,
-                     "  @C7@D)@c +750 PS             @D[@G  4 RPP @D]  @C8@D)@c Revival               @D[@G%3d RPP @D]\n",
+                     "  @C7@D)@c Revival             @D[@G  4 RPP @D]  @C8@D)@c Aura Change           @D[@G%3d RPP @D]\n",
                      revcost);
         send_to_char(ch,
-                     "  @C9@D)@c 50%s TNL Exp         @D[@G%3d RPP @D] @C10@D)@c Aura Change           @D[@G  2 RPP @D]\n",
+                     "  @C9@D)@c RPP Store           @D[@G%3d RPP @D] @C10@D)@c Extra Feature         @D[@G  2 RPP @D]\n",
                      "%", tnlcost);
         send_to_char(ch,
-                     " @C11@D)@c Reach Softcap       @D[@G  5 RPP @D] @C12@D)@c RPP Store             @D[@G ?? RPP @D]\n");
-        send_to_char(ch,
-                     " @C13@D)@c Extra Feature       @D[@G  1 RPP @D] @C14@D)@c Restring Equipment    @D[@G  1 RPP @D]\n");
-        send_to_char(ch,
-                     " @C15@D)@c Extra Skillslot     @D[@G  3 RPP @D] @C16@D)@R Disabled              @D[@G -- RPP @D]@n\n");
+                     " @C11@D)@c Restring Equipment  @D[@G  5 RPP @D] @C12@D)@c Extra Skillslot       @D[@G ?? RPP @D]\n");
         send_to_char(ch, "@b  ------------------------------------------------------------------@n\n");
         send_to_char(ch, "@D                           [@YYour RPP@D:@G %3d@D]@n\n", GET_RP(ch));
         // send_to_char(ch, "@D                           [@YRPP Bank@D:@G %3d@D]@n\n", GET_RBANK(ch));
@@ -220,7 +216,7 @@ ACMD(do_rpp) {
     /* Instant Reward Section*/
     if (selection > 2) {
 
-        if (selection == 3) { /* Custom Equipment Construction */
+        if (selection == 2) { /* Custom Equipment Construction */
             if (GET_RP(ch) < 20) {
                 send_to_char(ch, "You need at least 20 RPP to initiate a custom equipment build.\r\n");
                 return;
@@ -237,7 +233,7 @@ ACMD(do_rpp) {
                 return;
             }
         }
-        if (selection == 4) {     /* Simple Align Change*/
+        if (selection == 3) {     /* Simple Align Change*/
             pay = 20;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -271,7 +267,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Align Change */
 
-        if (selection == 5) { /*Simple Zenni Reward*/
+        if (selection == 4) { /*Simple Zenni Reward*/
             pay = 1;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -282,7 +278,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Zenni Reward */
 
-        if (selection == 6) {     /* Simple Stat Change*/
+        if (selection == 5) {     /* Simple Stat Change*/
             pay = 2;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -330,7 +326,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Align Change */
 
-        if (selection == 7) { /*Simple PS Reward*/
+        if (selection == 6) { /*Simple PS Reward*/
             pay = 4;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -341,7 +337,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Zenni Reward */
 
-        if (selection == 8) { /* Simple Revival Reward */
+        if (selection == 7) { /* Simple Revival Reward */
             pay = revcost;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -355,24 +351,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Revival Reward */
 
-        if (selection == 9) { /*Simple Exp Reward*/
-            pay = tnlcost;
-            if (GET_RP(ch) < pay) {
-                send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
-                return;
-            } else if (GET_LEVEL(ch) >= 100) {
-                send_to_char(ch, "You can not buy experience anymore at your level. I think you know why.\r\n");
-                return;
-            } else if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0) {
-                send_to_char(ch, "You can not buy experience anymore UNTIL you level.\r\n");
-                return;
-            } else {
-                ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * .52);
-                send_to_char(ch, "You gained 50%s of the entire experience needed for your next level.\r\n", "%");
-            } /* Can pay for it */
-        } /* End Simple Exp Reward */
-
-        if (selection == 10) {     /* Simple Aura Change*/
+        if (selection == 8) {     /* Simple Aura Change*/
             pay = 2;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -420,27 +399,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Aura Change */
 
-        if (selection == 11) {     /* Simple Soft-cap Reward*/
-            pay = 5;
-            if (GET_RP(ch) < pay) {
-                send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
-                return;
-            } else if (GET_LEVEL(ch) >= 100) {
-                send_to_char(ch, "You can't use this at level 100.\r\n");
-                return;
-            } else if (IS_ARLIAN(ch)) {
-                send_to_char(ch, "This is not available to bugs.\r\n");
-                return;
-            } else {
-                if (ch->is_soft_cap(0) && ch->is_soft_cap(1) && ch->is_soft_cap(2)) {
-                    send_to_char(ch, "You are already above your softcap for this level.\r\n");
-                    return;
-                }
-                bring_to_cap(ch);
-            } /* Can pay for it */
-        } /* End Simple Soft-cap Reward */
-
-        if (selection == 12) {
+        if (selection == 9) {
             if (!*arg2) {
                 disp_rpp_store(ch);
                 return;
@@ -454,12 +413,12 @@ ACMD(do_rpp) {
             }
         }
 
-        if (selection == 13) { /* Extra Feature Reward*/
+        if (selection == 10) { /* Extra Feature Reward*/
             rpp_feature(ch, arg2);
             return;
         } /* End Extra Feature Reward */
 
-        if (selection == 14) { /* Restring equipment reward */
+        if (selection == 11) { /* Restring equipment reward */
             pay = 1;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You need at least 1 RPP to initiate an equipment restring.\r\n");
@@ -497,7 +456,7 @@ ACMD(do_rpp) {
             }
         } /* End equipment restring reward */
 
-        if (selection == 15) { /* Skillslot Reward */
+        if (selection == 12) { /* Skillslot Reward */
             pay = 3;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP in your bank for that selection.\r\n");
@@ -513,7 +472,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /*End Skillslot Reward */
 
-        if (selection == 16) { /* DB Spawn Reward */
+        if (selection == -1) { /* DB Spawn Reward */
             pay = 5000;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP in your bank for that selection.\r\n");

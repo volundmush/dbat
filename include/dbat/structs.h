@@ -597,6 +597,7 @@ struct char_data : public unit_data {
     double getTimeModifier();
     double getPotential();
     void gainGrowth();
+    void gainGrowth(double);
 
     std::unordered_map<CharMoney, money_t> moneys;
     money_t get(CharMoney type);
@@ -703,6 +704,7 @@ struct char_data : public unit_data {
     double transBonus{0.0};   // Varies from -0.3 to 0.3
     double internalGrowth{0.0};
     double lifetimeGrowth{0.0};
+    double overGrowth{0.0};
     void gazeAtMoon();
 
     // Data stored about different forms.
