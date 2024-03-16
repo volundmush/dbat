@@ -144,9 +144,9 @@ namespace trans {
 
             // Demon
             case FormID::DarkKing:
-                if(ch->getBasePL() >= 1225000000)
+                if(ch->getBasePL() >= 600000000)
                     return "@bDark @rKing@n";
-                else if (ch->getBasePL() >= 85000000)
+                else if (ch->getBasePL() >= 50000000)
                     return "@bDark @yLord@n";
                 else if (ch->getBasePL() >= 2000000)
                     return "@bDark @yCourtier@n";
@@ -690,9 +690,9 @@ namespace trans {
                     auto bpl = ch->getBasePL();
                     if(bpl < 2000000)
                         base = 1.0;
-                    else if(bpl < 85000000)
+                    else if(bpl < 50000000)
                         base = 1.5;
-                    else if(bpl < 1225000000)
+                    else if(bpl < 600000000)
                         base = 2.0;
                     else
                         base = 3.0;
@@ -707,10 +707,10 @@ namespace trans {
                         if(bpl < 2000000) {
                             base = 0.4;
                         }
-                        else if(bpl < 85000000) {
+                        else if(bpl < 50000000) {
                             base = 0.6;
                         }
-                        else if(bpl < 1225000000) {
+                        else if(bpl < 600000000) {
                             base = 0.8;
                         }
                         else {
@@ -1344,6 +1344,14 @@ namespace trans {
             auto& echo = found->second;
             act(echo.self.c_str(), true, ch, nullptr, nullptr, TO_CHAR);
             act(echo.room.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+        } else {
+            auto name = getName(ch, form);
+            auto self = fmt::format("@wYou transform to {}.@n", name);
+            auto room = fmt::format("@w$n@w transforms into {}.@n", name);
+
+            act(self.c_str(), true, ch, nullptr, nullptr, TO_CHAR);
+            act(room.c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+
         }
     }
 
