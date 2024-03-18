@@ -2328,6 +2328,9 @@ ACMD(do_rpreward) {
     vict->gainBasePLPercent(vitalsGain * (1.0 / boundPL), true);
     vict->gainBaseKIPercent(vitalsGain * (1.0 / boundKI), true);
     vict->gainBaseSTPercent(vitalsGain * (1.0 / boundST), true);
+
+    send_to_char(ch, "Granted RP rewards to %s", vict->name);
+    log_imm_action("RP Reward: %s granted %s an RP reward!", ch, vict);
 }
 
 /* clean a room of all mobiles and objects */

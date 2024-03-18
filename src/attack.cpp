@@ -555,10 +555,19 @@ namespace atk {
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
 
+        double incomingDamage = calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE);
+
+
         if(victim->getCurKI() > 0) {
-            victim->decCurKI(calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+            if (currentDodgeCheck > axion_dice(10))
+                incomingDamage /= 10;
+            if(incomingDamage > victim->getMaxKI() / 5 && !incomingDamage > victim->getMaxKI() * 5)
+                incomingDamage = victim->getMaxKI() / 5;
+
+            
+            victim->decCurKI(incomingDamage);
         } else {
-            victim->decCurST(2 * calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+            victim->decCurST(1.5 * incomingDamage);
             actVictim("@WContinuing to dodge without Ki takes a heavy toll.@n");
         }
 

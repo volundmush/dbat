@@ -153,6 +153,12 @@ namespace trans {
                 else
                     return "@bDark @ySeed@n";
 
+            // LSSJ
+            case FormID::Ikari:
+                return "@GIkari@n";
+            case FormID::LegendarySaiyan:
+                return "@GLegendary Super Saiyan@n";
+
             // Unbound Alternate Forms
             case FormID::PotentialUnleashed:
                 return "@YPotential @WUnleashed@n";
@@ -339,6 +345,13 @@ namespace trans {
             case FormID::DarkKing:
                 return "dark";
 
+
+            // LSSJ
+            case FormID::Ikari:
+                return "ikari";
+            case FormID::LegendarySaiyan:
+                return "lssj";
+
             // Unbound Alternate Forms
             case FormID::PotentialUnleashed:
                 return "potential";
@@ -361,6 +374,65 @@ namespace trans {
                 return "Unknown";
         }
     }
+
+    static std::unordered_map<FormID, std::vector<FormID>> transform_exclusive = {
+        {FormID::SuperSaiyan2, {FormID::LegendarySaiyan, FormID::Ikari}},
+        {FormID::Ikari, {FormID::SuperSaiyan2}},
+        {FormID::LegendarySaiyan, {FormID::SuperSaiyan2, FormID::GoldenOozaru}},
+    };
+
+    static std::unordered_map<FormID, std::vector<FormID>> trans_requirments = {
+        {FormID::SuperSaiyan4, {FormID::SuperSaiyan3, FormID::GoldenOozaru}},
+        {FormID::SuperSaiyan3, {FormID::SuperSaiyan2}},
+        {FormID::SuperSaiyan2, {FormID::SuperSaiyan}},
+
+        {FormID::SuperHuman4, {FormID::SuperHuman3}},
+        {FormID::SuperHuman3, {FormID::SuperHuman2}},
+        {FormID::SuperHuman2, {FormID::SuperHuman}},
+
+        {FormID::IcerFourth, {FormID::IcerThird}},
+        {FormID::IcerThird, {FormID::IcerSecond}},
+        {FormID::IcerSecond, {FormID::IcerFirst}},
+
+        {FormID::SuperNamekian4, {FormID::SuperNamekian3}},
+        {FormID::SuperNamekian3, {FormID::SuperNamekian2}},
+        {FormID::SuperNamekian2, {FormID::SuperNamekian}},
+
+        {FormID::MutateThird, {FormID::MutateSecond}},
+        {FormID::MutateSecond, {FormID::MutateFirst}},
+
+        {FormID::BioSuperPerfect, {FormID::BioPerfect}},
+        {FormID::BioPerfect, {FormID::BioSemiPerfect}},
+        {FormID::BioSemiPerfect, {FormID::BioMature}},
+
+        {FormID::Android60, {FormID::Android50}},
+        {FormID::Android50, {FormID::Android40}},
+        {FormID::Android40, {FormID::Android30}},
+        {FormID::Android30, {FormID::Android20}},
+        {FormID::Android20, {FormID::Android10}},
+
+        {FormID::MajAffinity, {FormID::MajSuper}},
+        {FormID::MajSuper, {FormID::MajTrue}},
+
+        {FormID::MysticThird, {FormID::MysticSecond}},
+        {FormID::MysticSecond, {FormID::MysticFirst}},
+
+        {FormID::AscendThird, {FormID::AscendSecond}},
+        {FormID::AscendSecond, {FormID::AscendFirst}},
+
+        {FormID::LegendarySaiyan, {FormID::Ikari, FormID::SuperSaiyan}},
+        
+    };
+
+    static std::unordered_map<FormID, std::function<bool(struct char_data *ch)>> trans_unlocks = {
+        {FormID::Ikari, [](struct char_data *ch) {
+            return (ch->race == RaceID::Saiyan && !ch->transforms.contains(FormID::SuperSaiyan2) && getMasteryTier(ch, FormID::Oozaru) >=3);
+            }},
+        {FormID::LegendarySaiyan, [](struct char_data *ch) {
+            return (ch->race == RaceID::Saiyan && !ch->transforms.contains(FormID::SuperSaiyan2) && ch->transforms.contains(FormID::SuperSaiyan) 
+                && getMasteryTier(ch, FormID::SuperSaiyan) >=4 && getMasteryTier(ch, FormID::Ikari) >=3);
+            }},
+    };
 
     struct trans_affect_type {
         int location{};
@@ -578,48 +650,42 @@ namespace trans {
         {
             FormID::Android10, {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 11000000 * 1.0 + (0.05 * getMasteryTier(ch, FormID::Android10));}},
-                {APPLY_PL_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.05 + (0.02 * getMasteryTier(ch, FormID::Android10));}},
-                {APPLY_ST_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.05 + (0.02 * getMasteryTier(ch, FormID::Android10));}},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, FormID::Android10));}},
                 {APPLY_ALL_ATTRS, 2},
             }
         },
         {
             FormID::Android20, {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 45000000 * 1.0 + (0.1 * getMasteryTier(ch, FormID::Android20));}},
-                {APPLY_PL_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.1 + (0.05 * getMasteryTier(ch, FormID::Android20));}},
-                {APPLY_ST_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.1 + (0.05 * getMasteryTier(ch, FormID::Android20));}},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, FormID::Android20));}},
                 {APPLY_ALL_ATTRS, 2},
             }
         },
         {
             FormID::Android30, {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 300000000 * 1.0 + (0.15 * getMasteryTier(ch, FormID::Android30));}},
-                {APPLY_PL_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.2 + (0.05 * getMasteryTier(ch, FormID::Android30));}},
-                {APPLY_ST_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.2 + (0.05 * getMasteryTier(ch, FormID::Android30));}},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, FormID::Android30));}},
                 {APPLY_ALL_ATTRS, 2},
             }
         },
         {
             FormID::Android40, {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 2000000000 * 1.0 + (0.2 * getMasteryTier(ch, FormID::Android40));}},
-                {APPLY_PL_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.3 + (0.05 * getMasteryTier(ch, FormID::Android40));}},
-                {APPLY_ST_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.3 + (0.05 * getMasteryTier(ch, FormID::Android40));}},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, FormID::Android40));}},
                 {APPLY_ALL_ATTRS, 2},
             }
         },
         {
             FormID::Android50, {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 4000000000 * 1.0 + (0.25 * getMasteryTier(ch, FormID::Android50));}},
-                {APPLY_PL_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.4 + (0.05 * getMasteryTier(ch, FormID::Android50));}},
-                {APPLY_ST_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.4 + (0.05 * getMasteryTier(ch, FormID::Android50));}},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, FormID::Android50));}},
                 {APPLY_ALL_ATTRS, 2},
             }
         },
         {
             FormID::Android60, {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 7000000000 * 1.0 + (0.3 * getMasteryTier(ch, FormID::Android60));}},
-                {APPLY_PL_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.5 + (0.05 * getMasteryTier(ch, FormID::Android60));}},
-                {APPLY_ST_GAIN_MULT, 0.0, -1, [](struct char_data *ch) {return 0.5 + (0.05 * getMasteryTier(ch, FormID::Android60));}},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {return 0.001 + (0.05 * getMasteryTier(ch, FormID::Android60));}},
                 {APPLY_ALL_ATTRS, 2},
             }
         },
@@ -765,6 +831,64 @@ namespace trans {
             }
         },
 
+        // LSSJ
+        {
+            FormID::Ikari, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {
+                    return 1.0 + (0.15 * getMasteryTier(ch, FormID::Ikari) + 0.15 * getMasteryTier(ch, FormID::Oozaru));
+                    }},
+                {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {
+                    return 700000 * 1.0 + (0.15 * getMasteryTier(ch, FormID::Ikari) + 0.15 * getMasteryTier(ch, FormID::Oozaru));
+                    }},
+                {APPLY_PARRY_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return -0.3 - (0.04 * getMasteryTier(ch, FormID::Ikari) + 0.04 * getMasteryTier(ch, FormID::Oozaru));
+                    }},
+                {APPLY_DODGE_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return -0.3 - (0.04 * getMasteryTier(ch, FormID::Ikari) + 0.04 * getMasteryTier(ch, FormID::Oozaru));
+                    }},
+                {APPLY_ALL_ATTRS, 0.0, -1, [](struct char_data *ch) {
+                    return 2 * 1.0 + (0.15 * getMasteryTier(ch, FormID::Ikari) + 0.15 * getMasteryTier(ch, FormID::Oozaru));
+                    }},
+                {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return 0.1 * 1.0 + (0.15 * getMasteryTier(ch, FormID::Ikari) + 0.15 * getMasteryTier(ch, FormID::Oozaru));
+                    }},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return 0.02 * 1.0 + (0.15 * getMasteryTier(ch, FormID::Ikari) + 0.15 * getMasteryTier(ch, FormID::Oozaru));
+                    }},
+            }
+        },
+        {
+            FormID::LegendarySaiyan, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {
+                    return 4.0 + (0.1 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+                {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {
+                    return 100000000 * 1.0 + (0.15 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return 1 * 1.0 + (0.15 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+                {APPLY_PARRY_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return -0.4 - (0.8 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+                {APPLY_DODGE_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return -0.4 - (0.8 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+                {APPLY_BLOCK_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return 0.2 + (0.1 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+                {APPLY_ALL_ATTRS, 0.0, -1, [](struct char_data *ch) {
+                    return 5 * 1.0 + (0.15 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+                {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return 0.3 * 1.0 + (0.15 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {
+                    return 0.1 * 1.0 + (0.15 * getMasteryTier(ch, FormID::LegendarySaiyan));
+                    }},
+            }
+        },
+
         // Unbound Forms
         {
             FormID::PotentialUnleashed, {
@@ -878,6 +1002,10 @@ namespace trans {
         {FormID::SuperSaiyan3, .2},
         {FormID::SuperSaiyan4, .15},
 
+        // Lssj
+        {FormID::Ikari, .2},
+        {FormID::LegendarySaiyan, .4},
+
         // Human Forms
         {FormID::SuperHuman, .06},
         {FormID::SuperHuman2, .08},
@@ -967,6 +1095,11 @@ namespace trans {
 
             }
 
+            double kigain = getModifierHelper(ch, form, APPLY_REGEN_KI_PERC, -1);
+            double plgain = getModifierHelper(ch, form, APPLY_REGEN_PL_PERC, -1);
+            ch->incCurHealthPercent(plgain);
+            ch->incCurKIPercent(kigain);
+
             // Increment Growth
             ch->gainGrowth();
 
@@ -1014,9 +1147,6 @@ namespace trans {
                                              }
             },
 
-            // Old LSSJ: "@WYou roar and then stand at your full height. You flex every muscle in your body as you feel your strength grow! Your eyes begin to glow @wwhite@W with energy, your hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around your body! You release your @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n"
-            // OLd LSSJ: "@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n"
-
             {
                     FormID::SuperSaiyan2,    {
                                                      "@WBlinding rage burns through your mind as a sudden eruption of energy surges forth! A golden aura bursts up around your body, glowing as bright as the sun. Rushing winds rocket out from your body in every direction as bolts of electricity begin to crackle in your aura. As your aura dims you are left standing confidently, having achieved @CSuper @YSaiyan @GSecond@W!@n",
@@ -1037,6 +1167,22 @@ namespace trans {
                                                      "@WHaving absorbed enough blutz waves, @C$n@W's body begins to transform! Red fur grows over certain parts of $s skin as $s hair grows longer and unkempt. A red outline forms around $s eyes while the irises of those very same eyes change to an amber color. Energy crackles about $s body violently as $e achieves the peak of saiyan perfection, @CSuper @YSaiyan @GFourth@W!@n"
                                              }
             },
+
+            {
+                FormID::Ikari,    {
+                                                    "@WYou roar and then stand at your full height. You flex every muscle in your body as you feel your strength grow! Your eyes begin to glow @wwhite@W with energy, your hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around your body! You release your @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
+                                                    "@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n"
+                                            }
+            },
+
+            {
+                FormID::LegendarySaiyan,    {
+                                                    "@WYou roar and then stand at your full height. You flex every muscle in your body as you feel your strength grow! Your eyes begin to glow @wwhite@W with energy, your hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around your body! You release your @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n",
+                                                    "@C$n @Wroars and then stands at $s full height. Then $s muscles start to buldge and grow as $e flexes them! Suddenly $s eyes begin to glow @wwhite@W with energy, $s hair turns @Ygold@W, and at the same time a @wbright @Yg@yo@Yl@yd@Ye@yn@W aura flashes up around $s body! @C$n@W releases $s @YL@ye@Dg@We@wn@Yd@ya@Dr@Yy@W power upon the universe!@n"
+                                            }
+            },
+
+
 
 
             // Human Forms
@@ -1389,6 +1535,10 @@ namespace trans {
         FormID::SuperSaiyanGod,
         FormID::SuperSaiyanBlue,
 
+        // Lssj
+        FormID::Ikari,
+        FormID::LegendarySaiyan,
+
         // Human'y Forms
         FormID::SuperHuman,
         FormID::SuperHuman2,
@@ -1504,9 +1654,17 @@ namespace trans {
     };
 
     void initTransforms(char_data* ch) {
+        auto transforms = ch->transforms;
         for (auto form : race_forms.find(ch->race)->second) {
-            if(!ch->transforms.contains(form)) {
+            if(!transforms.contains(form)) {
                 ch->addTransform(form);
+            }
+        }
+
+        for (auto unlockForms : trans_unlocks) {
+            if (!transforms.contains(unlockForms.first)) {
+                if(unlockForms.second(ch))
+                    ch->addTransform(unlockForms.first);
             }
         }
     }
@@ -1525,8 +1683,10 @@ namespace trans {
                 for (auto form : forms) {
                     if(form.first == FormID::Base)
                         form.second.visible = false;
-                    if(form.second.visible)
+                    if(form.second.visible) {
+                        pforms = removeExclusives(ch, form.first, pforms);
                         pforms.insert(form.first);
+                    }
                 }
                 return pforms;
 
@@ -1534,12 +1694,28 @@ namespace trans {
                 for (auto form : forms) {
                     if(form.first == FormID::Base || form.first == FormID::Oozaru || form.first == FormID::GoldenOozaru)
                         form.second.visible = false;
-                    if(form.second.visible)
+                    if(form.second.visible) {
+                        pforms = removeExclusives(ch, form.first, pforms);
                         pforms.insert(form.first);
+                    }
                 }
                 return pforms;
 
             }
+    }
+
+    std::set<FormID> removeExclusives(char_data* ch, FormID form, std::set<FormID> pforms) {
+        if(!transform_exclusive.contains(form) || !ch->transforms[form].unlocked)
+            return;
+
+        auto formList = transform_exclusive.find(form);
+        
+        for (auto& checkForm : formList->second ) {
+            if (pforms.contains(checkForm))
+                pforms.erase(checkForm);
+        }
+        return pforms;
+        
     }
 
     void displayForms(char_data* ch) {
@@ -1550,9 +1726,10 @@ namespace trans {
         }
 
         send_to_char(ch, "              @YForms@n\r\n");
-        send_to_char(ch, "@b------------------------------------------------@n\r\n");
+        send_to_char(ch, "@b-------------------Unlocked--------------------@n\r\n");
         auto ik = ch->internalGrowth;
         std::vector<std::string> form_names;
+        std::vector<FormID> locked_forms;
         for (auto form: forms) {
             bool unlocked = ch->transforms[form].unlocked;
             bool permActive = ch->permForms.contains(form);
@@ -1563,16 +1740,27 @@ namespace trans {
                 name = "@RLIMIT@n " + name;
             else if (getMasteryTier(ch, form) > 1)
                 name = "@BMASTERED@n " + name;
-            auto req = getRequiredPL(ch, form);
             if(!permActive) {
                 if (unlocked) {
                     send_to_char(ch, "@W%s@n\r\n", name);
                 } else {
-                    send_to_char(ch, "@W%s@n @R-@G %s Growth Req\r\n", name,
-                            (ik >= (req * 0.75) && !unlocked) ? add_commas(req) : "??????????");
+                    //send_to_char(ch, "@W%s@n @R-@G %s Growth Req\r\n", name,
+                    //       (ik >= (req * 0.75) && !unlocked) ? add_commas(req) : "??????????");
+                    locked_forms.push_back(form);
                 }
 
                 form_names.push_back(getAbbr(ch, form));
+            }
+        }
+
+        if(!locked_forms.empty()) {
+            send_to_char(ch, "@b--------------------Locked---------------------@n\r\n");
+            for (auto form: locked_forms) {
+                auto name = getName(ch, form);
+                auto req = getRequiredPL(ch, form);
+                send_to_char(ch, "@W%s@n @R-@G %s Growth Req (%s)\r\n", name,
+                       (ik >= (req * 0.75)) ? add_commas(req) : "??????????",
+                       getFormType(ch, form) == 0 ? "alt":"perm");
             }
         }
 
@@ -1652,35 +1840,20 @@ namespace trans {
     }
 
     bool checkHasPreviousForm(struct char_data* ch, FormID form) {
-        bool unlocked = false;
-        bool found = false;
-        if (auto forms = race_forms.find(ch->race); forms != race_forms.end()) {
-            auto& f = forms->second;
-            FormID curForm = f[0];
-            FormID prevForm = FormID::Base;
-        
-            for(int i=0; i < f.size(); i++) {
-                if(i == 0) prevForm = FormID::Base;
-                else prevForm = f[i - 1];
+        if(!trans_requirments.contains(form))
+            return true;
 
-                curForm = f[i];
+        bool pass = true;
 
-                if(curForm == form)
-                {
-                    if( prevForm != FormID::Base)
-                        unlocked = ch->transforms[prevForm].unlocked;
-                    else
-                        unlocked = true;
-                    found = true;
-                }
+        auto reqForms = trans_requirments.find(form);
+        auto transforms = ch->transforms;
+        for (auto& reqForm : reqForms->second) {
+            if(!transforms.contains(reqForm) && !transforms[reqForm].unlocked && getMasteryTier(ch, reqForm) <= 1) {
+                pass = false;
             }
-        } else {
-            unlocked = true;
         }
-        if(!found)
-            unlocked = true;
 
-        return unlocked;
+        return pass;
     }
 
 
@@ -1696,6 +1869,10 @@ namespace trans {
         {FormID::SuperSaiyan2, {60, 0}},
         {FormID::SuperSaiyan3, {90, 0}},
         {FormID::SuperSaiyan4, {180, 0}},
+
+        // Lssj
+        {FormID::Ikari, {120, 0}},
+        {FormID::LegendarySaiyan, {220, 0}},
 
         // Namek Forms
         {FormID::SuperNamekian, {50, 0}},
@@ -1791,6 +1968,7 @@ namespace trans {
     bool unlock(struct char_data *ch, FormID form) {
         auto &data = ch->transforms[form];
         if(!checkHasPreviousForm(ch, form)) {
+            send_to_char(ch, "You do not have mastery in the previous forms\n");
             return false;
         }
 

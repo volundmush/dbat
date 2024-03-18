@@ -174,10 +174,14 @@ enum class FormID : uint8_t {
     // Demon
     DarkKing = 58,
 
+    // LSSJ
+    Ikari = 59,
+    LegendarySaiyan = 60,
+
     // Alternate Unbound Forms
-    PotentialUnleashed = 59,
-    EvilAura = 60,
-    UltraInstinct = 61,
+    PotentialUnleashed = 70,
+    EvilAura = 71,
+    UltraInstinct = 72,
 
      // Unbound Perm Forms
     PotentialUnlocked = 90,
@@ -1650,8 +1654,10 @@ enum class SkillID : uint16_t {
 #define APPLY_PARRY_PERC       57
 #define APPLY_DODGE_PERC       58
 #define APPLY_BLOCK_PERC       59
+#define APPLY_REGEN_PL_PERC    60
+#define APPLY_REGEN_KI_PERC    61
 
-#define NUM_APPLIES 60
+#define NUM_APPLIES 62
 
 /* Container flags - value[1] */
 #define CONT_CLOSEABLE      (1 << 0)    /* Container can be closed	*/
