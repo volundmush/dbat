@@ -294,11 +294,17 @@ static void mob_attack(struct char_data *ch, char *buf) {
                 /* This determines if they throw and also handles it */
             } else if (MOB_FLAGGED(ch, MOB_KNOWKAIO) && rand_number(1, 50) >= 46) {
                 if (rand_number(1, 10) == 10) {
-                    do_kaioken(ch, "20", 0, 0);
+                    ch->addTransform(FormID::Kaioken);
+                    ch->technique = FormID::Kaioken;
+                    ch->transforms[FormID::Kaioken].grade = 5;
                 } else if (rand_number(1, 10) >= 8) {
-                    do_kaioken(ch, "10", 0, 0);
+                    ch->addTransform(FormID::Kaioken);
+                    ch->technique = FormID::Kaioken;
+                    ch->transforms[FormID::Kaioken].grade = 10;
                 } else {
-                    do_kaioken(ch, "5", 0, 0);
+                    ch->addTransform(FormID::Kaioken);
+                    ch->technique = FormID::Kaioken;
+                    ch->transforms[FormID::Kaioken].grade = 20;
                 }
             } else {
                 switch (power) {

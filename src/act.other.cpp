@@ -2112,10 +2112,6 @@ ACMD(do_suppress) {
         send_to_char(ch, "You are currently powering up, can't suppress.\r\n");
         return;
     }
-    if (GET_KAIOKEN(ch)) {
-        send_to_char(ch, "You are currently concentrating on kaioken!\r\n");
-        return;
-    }
 
     if (!*arg) {
         send_to_char(ch, "Suppress to what percent?\r\nSyntax: suppress (1 - 99 | release)\r\n");
@@ -5848,125 +5844,6 @@ ACMD(do_focus) {
     }
 }
 
-static std::map<int, int64_t> kaioken_levels = {
-        {1,  0},
-        {2,  0},
-        {3,  5000},
-        {4,  10000},
-        {5,  15000},
-        {6,  25000},
-        {7,  35000},
-        {8,  50000},
-        {9,  75000},
-        {10, 100000},
-        {11, 150000},
-        {12, 200000},
-        {13, 250000},
-        {14, 300000},
-        {15, 400000},
-        {16, 500000},
-        {17, 600000},
-        {18, 700000},
-        {19, 800000},
-        {20, 1000000}
-};
-
-ACMD(do_kaioken) {
-    char arg[MAX_INPUT_LENGTH];
-    int roll = axion_dice(0), x = 0, pass = false;
-    int64_t boost = 0;
-    one_argument(argument, arg);
-
-    if (!check_skill(ch, SKILL_KAIOKEN)) {
-        return;
-    }
-    if (GET_ALIGNMENT(ch) <= -50) {
-        send_to_char(ch, "Your heart is too corrupt to use that technique!\r\n");
-        return;
-    }
-    if (!IS_NPC(ch)) {
-        if (PLR_FLAGGED(ch, PLR_HEALT)) {
-            send_to_char(ch, "You are inside a healing tank!\r\n");
-            return;
-        }
-    }
-
-    if (!*arg) {
-        send_to_char(ch, "What level of kaioken do you want to try and achieve?\r\n"
-                         "Syntax: kaioken 1-20\r\n");
-        return;
-    }
-
-    x = atoi(arg);
-
-    if (x < 0 || x > 20) {
-        send_to_char(ch, "That level of kaioken dosn't exist...\r\n"
-                         "Syntax: kaioken 0-20\r\n");
-        return;
-    }
-
-    if (x == 0) {
-        if (GET_KAIOKEN(ch) > 0) {
-            ch->remove_kaioken(1);
-            return;
-        } else {
-            send_to_char(ch, "You are not in kaioken!\r\n");
-            return;
-        }
-    }
-
-    if (x == GET_KAIOKEN(ch)) {
-        send_to_char(ch, "You are already at that kaioken level! To release, try kaioken 0\r\n");
-        return;
-    }
-
-    if (!IS_NPC(ch)) {
-        if ((IS_TRANSFORMED(ch) || (IS_HOSHIJIN(ch) && GET_PHASE(ch) > 0)) && x > 5) {
-            send_to_char(ch, "You can not manage a kaioken level higher than 5 when transformed.\r\n");
-            return;
-        }
-    }
-
-    auto cost_unit = ch->getMaxKI() / 50;
-    auto cost_diff = cost_unit * GET_KAIOKEN(ch);
-    auto cost = (cost_unit * x) - cost_diff;
-
-    // it costs nothing to reduce your kaioken level.
-    if (x < GET_KAIOKEN(ch)) {
-        cost = 0;
-    }
-
-    if ((ch->getCurKI()) < cost) {
-        send_to_char(ch, "You do not have enough ki to focus into your body for that level.\r\n");
-        return;
-    }
-
-    int xnum = (x * 5) + 1;
-    roll = rand_number(1, xnum);
-    reveal_hiding(ch, 0);
-
-    ch->decCurKI(cost);
-    improve_skill(ch, SKILL_KAIOKEN, 1);
-
-    if (init_skill(ch, SKILL_KAIOKEN) < roll) {
-        send_to_char(ch, "You try to focus your ki into your body but mess up somehow.\r\n");
-        act("$n tries to use kaioken but messes up somehow.", true, ch, nullptr, nullptr, TO_ROOM);
-        WAIT_STATE(ch, PULSE_1SEC);
-        return;
-    }
-
-    if (ch->getMaxHealth() < kaioken_levels[x]) {
-        act("@rA blazing red aura bursts up around your body, flashing intensely before your body gives out and you release the kaioken because of the pressure!@n",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@rA blazing red aura bursts up around @R$n's @rbody, flashing intensely before $s body gives out and $e releases the kaioken because of the pressure!@n",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        return;
-    }
-
-    ch->apply_kaioken(x, true);
-
-    WAIT_STATE(ch, PULSE_1SEC);
-}
 
 ACMD(do_plant) {
     struct char_data *vict;
@@ -7366,6 +7243,7 @@ ACMD(do_transform) {
     }/* End of No Argument */
 
     auto cur_form = ch->form;
+    auto cur_tech = ch->technique;
 
     // If we are in kaioken or something weird like that, prevent transforming.
     if (ch->form == FormID::GoldenOozaru || ch->form == FormID::Oozaru) {
@@ -7383,13 +7261,8 @@ ACMD(do_transform) {
     // check for revert.
     if (!strcasecmp("revert", arg)) {
         // Check if we can revert.
-        if (cur_form == FormID::Base) {
+        if (ch->form == FormID::Base && ch->technique == FormID::Base) {
             send_to_char(ch, "You are not transformed.\r\n");
-            return;
-        }
-
-        if (trans::blockRevertDisallowed(ch, FormID::Base)) {
-            send_to_char(ch, "That would be unthinkable.\r\n");
             return;
         }
 
@@ -7398,8 +7271,14 @@ ACMD(do_transform) {
             do_charge(ch, "release", 0, 0);
         }
 
-        trans::handleEchoRevert(ch, ch->form);
-        ch->form = FormID::Base;
+        if(ch->form != FormID::Base) {
+            trans::handleEchoRevert(ch, ch->form);
+            ch->form = FormID::Base;
+        }
+        if(ch->technique != FormID::Base) {
+            trans::handleEchoRevert(ch, ch->technique);
+            ch->technique = FormID::Base;
+        }
         ch->removeLimitBreak();
 
         int64_t afterKi = ch->getMaxKI();
@@ -7423,8 +7302,13 @@ ACMD(do_transform) {
         return;
     }
     auto trans = trans_maybe.value();
+    int formtype = trans::getFormType(ch, trans);
+    int grade = 1;
 
-    if (cur_form == trans) {
+    if (arg2) 
+        grade = atoi(arg2);
+
+    if ((cur_form == trans || (formtype == 2 && cur_tech == trans)) && grade == ch->transforms[trans].grade) {
         send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
         return;
     }
@@ -7434,7 +7318,7 @@ ACMD(do_transform) {
         return;
     }
 
-    if(ch->permForms.contains(trans)) {
+    if(formtype == 1 && ch->permForms.contains(trans)) {
         send_to_char(ch, "You are already evolved into that form!.\r\n");
         return;
     }
@@ -7452,13 +7336,23 @@ ACMD(do_transform) {
         }
     }
 
+    if (grade > trans::getMaxGrade(ch, trans)) {
+        grade = trans::getMaxGrade(ch, trans);
+        send_to_char(ch, "The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
+    }
+    if (grade < 1)
+        grade = 1;
+
     
     ch->removeLimitBreak();
-    int formtype = trans::getFormType(ch, trans);
+    
     if(formtype == 0)
         ch->form = trans;
     else if (formtype == 1)
         ch->permForms.insert(trans);
+    else if (formtype == 2)
+        ch->technique = trans;
+    ch->transforms[trans].grade = grade;
     // No way is this a stealthy process...
     reveal_hiding(ch, 0);
     trans::handleEchoTransform(ch, trans);
@@ -9964,13 +9858,13 @@ ACMD(do_display) {
     size_t i;
 
     if (IS_NPC(ch)) {
-        send_to_char(ch, "Mosters don't need displays.  Go away.\r\n");
+        send_to_char(ch, "Monsters don't need displays.  Go away.\r\n");
         return;
     }
     skip_spaces(&argument);
 
     if (!*argument) {
-        send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | O | all/on | none/off }\r\n");
+        send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | O | E | all/on | none/off }\r\n");
         return;
     }
 
@@ -10019,6 +9913,9 @@ ACMD(do_display) {
                 case 'o':
                     ch->pref.flip(PRF_FORM);
                     break;
+                case 'e':
+                    ch->pref.flip(PRF_TECH);
+                    break;
                 case 'f':
                     if (!IS_HALFBREED(ch)) {
                         send_to_char(ch, "Only halfbreeds use fury.\r\n");
@@ -10026,7 +9923,7 @@ ACMD(do_display) {
                     ch->pref.flip(PRF_FURY);
                     break;
                 default:
-                    send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
+                    send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | O | E | all/on | none/off }\r\n");
                     return;
             }
         }

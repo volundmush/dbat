@@ -1336,8 +1336,16 @@ char *make_prompt(struct descriptor_data *d) {
             if (PRF_FLAGGED(d->character, PRF_FORM) && len < sizeof(prompt)) {
                 FormID form = d->character->form;
 
-                count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s@D]@n",
-                    trans::getAbbr(d->character, form).c_str());
+                count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s - %s@D]@n",
+                    trans::getAbbr(d->character, form).c_str(), std::to_string(d->character->transforms[form].grade).c_str());
+                if (count >= 0)
+                    len += count;
+            }
+            if (PRF_FLAGGED(d->character, PRF_TECH) && len < sizeof(prompt)) {
+                FormID form = d->character->technique;
+
+                count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s - %s@D]@n",
+                    trans::getAbbr(d->character, form).c_str(), std::to_string(d->character->transforms[form].grade).c_str());
                 if (count >= 0)
                     len += count;
             }

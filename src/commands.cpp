@@ -375,8 +375,6 @@ ACMD(do_plant);
 
 ACMD(do_meditate);
 
-ACMD(do_metamorph);
-
 ACMD(do_malice);
 
 ACMD(do_mimic);
@@ -474,8 +472,6 @@ ACMD(do_invis);
 ACMD(do_kill);
 
 ACMD(do_kamehameha);
-
-ACMD(do_kaioken);
 
 ACMD(do_kiball);
 
@@ -1055,7 +1051,6 @@ const struct command_info cmd_info[] = {
 
         {"junk",          "junk",         POS_RESTING,  do_drop,            0,  ADMLVL_NONE,    SCMD_JUNK},
 
-        {"kaioken",       "kaioken",      POS_STANDING, do_kaioken,         0,  ADMLVL_NONE,    0},
         {"kakusanha",     "kakusan",      POS_FIGHTING, do_kakusanha,       0,  ADMLVL_NONE,    0},
         {"kamehameha",    "kame",         POS_FIGHTING, do_kamehameha,      0,  ADMLVL_NONE,    0},
         {"kanso",         "kans",         POS_FIGHTING, do_kanso,           0,  ADMLVL_NONE,    0},
@@ -1097,7 +1092,6 @@ const struct command_info cmd_info[] = {
         /*{ "mcopy"    , "mcopy"	, POS_DEAD    , do_oasis_copy, 0, ADMLVL_GOD	, SCMD_MEDIT },*/
         {"medit",         "medit",        POS_DEAD,     do_oasis,           0,  ADMLVL_IMMORT,  SCMD_OASIS_MEDIT},
         {"meditate",      "medita",       POS_SITTING,  do_meditate,        0,  ADMLVL_NONE,    0},
-        {"metamorph",     "metamorp",     POS_STANDING, do_metamorph,       0,  ADMLVL_NONE,    0},
         {"mimic",         "mimi",         POS_STANDING, do_mimic,           0,  ADMLVL_NONE,    0},
         {"mlist",         "mlist",        POS_DEAD,     do_oasis,           0,  ADMLVL_IMMORT,  SCMD_OASIS_MLIST},
         {"moondust",      "moondus",      POS_STANDING, do_moondust,        0,  ADMLVL_NONE,    0},

@@ -410,12 +410,12 @@ int64_t char_data::getMaxPLTrans() {
 
 int64_t char_data::getMaxPL() {
     auto total = getMaxPLTrans();
-    if (GET_KAIOKEN(this) > 0) {
+    /*if (GET_KAIOKEN(this) > 0) {
         total += (total / 10) * GET_KAIOKEN(this);
     }
     if (AFF_FLAGGED(this, AFF_METAMORPH)) {
         total += (total * .6);
-    }
+    }*/
     return total;
 }
 

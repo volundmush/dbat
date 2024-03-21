@@ -86,7 +86,7 @@ enum class SenseiID : uint8_t {
     Commoner = 14
 };
 
-enum class FormID : uint8_t {
+enum class FormID : uint16_t {
     // Universal,
     Base = 0,
     Custom1 = 1,
@@ -196,6 +196,11 @@ enum class FormID : uint8_t {
     PotentialUnlockedMax = 211,
     Majinized = 212,
     DivineWater = 213,
+
+
+    // Techniques
+    Kaioken = 300,
+    DarkMeta = 301,
 
 };
 
@@ -1122,8 +1127,9 @@ enum class SkillID : uint16_t {
 #define PRF_IHEALTH     58
 #define PRF_ENERGIZE    59
 #define PRF_FORM        60
+#define PRF_TECH        61
 
-#define NUM_PRF_FLAGS   61
+#define NUM_PRF_FLAGS   62
 
 /* Player autoexit levels: used as an index to exitlevels           */
 #define EXIT_OFF        0       /* Autoexit off                     */

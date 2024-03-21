@@ -5,6 +5,7 @@ namespace trans {
     extern std::string getName(struct char_data *ch, FormID form);
     extern std::string getAbbr(struct char_data *ch, FormID form);
     extern std::string getExtra(struct char_data *ch, FormID form);
+    extern int getMaxGrade(struct char_data *ch, FormID form);
 
     extern bool unlock(struct char_data *ch, FormID form);
 

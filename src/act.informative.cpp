@@ -3326,8 +3326,6 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         act("@w...$e is in the air!", true, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_FLYING) && GET_ALT(i) == 2)
         act("@w...$e is high in the air!", true, i, nullptr, ch, TO_VICT);
-    if (GET_KAIOKEN(i) > 0)
-        act("@w...@r$e has a red aura around $s body!", true, i, nullptr, ch, TO_VICT);
     if (!IS_NPC(i) && PLR_FLAGGED(i, PLR_SPIRAL))
         act("@w...$e is spinning in a vortex!", false, i, nullptr, ch, TO_VICT);
     if (IS_TRANSFORMED(i) && !IS_ANDROID(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i))
@@ -3352,6 +3350,8 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         act("@w...$e has an overflowing aura around $s body!", false, i, nullptr, ch, TO_VICT);
 
     if(i->form != FormID::Base)
+        act(trans::getExtra(i, i->form).c_str(), true, i, nullptr, ch, TO_VICT);
+    if(i->technique != FormID::Base)
         act(trans::getExtra(i, i->form).c_str(), true, i, nullptr, ch, TO_VICT);
     if (GET_FEATURE(i)) {
         char woo[MAX_STRING_LENGTH];

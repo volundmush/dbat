@@ -3572,10 +3572,6 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
     }
 
 
-    if (GET_KAIOKEN(ch) > 0) {
-        dam += (dam / 200) * GET_KAIOKEN(ch);
-    }
-
     /* Start of Fury Mode for halfbreeds */
     if (PLR_FLAGGED(ch, PLR_FURY) &&
         (type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5 || type == 6 || type == 8 ||
@@ -4170,9 +4166,6 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
         if (GET_CHARGE(ch) < 0) {
             GET_CHARGE(ch) = 0;
         }
-        if (GET_KAIOKEN(ch) > 0) {
-            st += (st / 20) * GET_KAIOKEN(ch);
-        }
         if (AFF_FLAGGED(ch, AFF_HASS)) {
             st += st * .3;
         }
@@ -4299,9 +4292,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             return;
         }
 
-        if (GET_KAIOKEN(ch) > 0) {
-            dmg += (dmg / 100) * (GET_KAIOKEN(ch) * 2);
-        }
 
         if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 8 || GET_GENOME(vict, 1) == 8) && type == 0) {
             int64_t drain = dmg * 0.1;
@@ -4846,7 +4836,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     int64_t healhp = (long double) (GET_MAX_HIT(vict)) * 0.12;
-                    if (AFF_FLAGGED(ch, AFF_METAMORPH) ) {
+                    if (ch->technique == FormID::DarkMeta ) {
                         act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@r$n@R's dark aura saps some of your life energy!@n", true, ch, nullptr, vict, TO_VICT);
                         if (GET_HIT(ch) <= GET_MAX_HIT(ch)) {

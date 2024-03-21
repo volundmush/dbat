@@ -2602,62 +2602,6 @@ ACMD(do_amnisiac) {
 
 }
 
-/* Demon's lame skill */
-ACMD(do_metamorph) {
-
-    if (IS_NPC(ch))
-        return;
-
-    if (!know_skill(ch, SKILL_METAMORPH)) {
-        return;
-    }
-
-    if (GET_ALIGNMENT(ch) >= 51) {
-        send_to_char(ch, "Your heart is too pure to use that technique!\r\n");
-        return;
-    }
-
-    int64_t cost = (GET_MAX_MANA(ch) * 0.16);
-
-    if (AFF_FLAGGED(ch, AFF_METAMORPH)) {
-        send_to_char(ch, "You are already surrounded by a dark aura!\r\n");
-        return;
-    }
-
-    if ((ch->getCurKI()) < cost) {
-        send_to_char(ch, "You do not have enough ki. You need %s.\r\n", add_commas(cost).c_str());
-        return;
-    }
-
-    int chance = axion_dice(0), perc = (GET_WIS(ch) * 2);
-
-    if (perc < 100 && perc > 60)
-        perc += 100 - perc;
-    else if (perc < 100)
-        perc += 10;
-
-    ch->decCurKI(cost / 2);
-    if (perc < chance) {
-        act("@WYou focus your energies and prepare your @RDark Metamorphisis@W but screw up your focus!@n", true, ch,
-            nullptr, nullptr, TO_CHAR);
-        act("@WA dark @Rred@W glow starts to surround @C$n@W, but it fades quickly.@n", true, ch, nullptr, nullptr,
-            TO_ROOM);
-
-        return;
-    } else {
-        act("'@RDark@W...' An explosion of sanguine aura erupts over the surface of your body, your eyes darkening to a bleeding crimson. The flaring glow emanating from your body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as you hiss; You complete the transition, relaxing visibly, '...@RMetamorphosis@W'@n",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("'@RDark@W...' An explosion of sanguine aura erupts over the surface of @C$n@W's body, $s eyes darkening to a bleeding crimson. The flaring glow emanating from $s body pronounces the shadows cast, a darkening umbrage that threatens a malicious promise. Fists clench tightly, muscles bulking as $e hisses; $e completes the transition, relaxing visibly, '...@RMetamorphosis@W'@n",
-            true, ch, nullptr, nullptr, TO_ROOM);
-
-        int duration = GET_INT(ch) / 12;
-        assign_affect(ch, AFF_METAMORPH, SKILL_METAMORPH, duration, 0, 0, 0, 0, 0, 0);
-        ch->incCurHealthPercent(.6);
-        return;
-    }
-
-}
-
 ACMD(do_shimmer) {
 
     int skill = 0, perc = 0, location = 0;

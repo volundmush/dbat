@@ -188,6 +188,13 @@ namespace trans {
                 return "@YMajinized@n";
             case FormID::DivineWater:
                 return "@YDivine @WWater@n";
+
+
+            // Techniques
+            case FormID::Kaioken:
+                return "Kaioken";
+            case FormID::DarkMeta:
+                return "Dark Meta";
                 
             // Whoops?
             default: 
@@ -210,10 +217,36 @@ namespace trans {
             case FormID::SuperSaiyan4:
                 return "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!";
 
+            case FormID::Kaioken:
+                return "@w...@r$e has a red aura around $s body!";
+            case FormID::DarkMeta:
+                return "@w...$e has a dark, @rred@w aura and menacing presence.";
+
             default:
                 return "@w...$e has energy crackling around $s body!";
         }
 
+    }
+
+    int getMaxGrade(struct char_data* ch, FormID form) {
+        int maxGrade = 1;
+        switch (form) {
+            case FormID::Kaioken:
+                maxGrade = GET_SKILL(ch, (int)SkillID::Kaioken) / 5;
+                if (maxGrade > 20)
+                    maxGrade = 20;
+                if(ch->form != FormID::Base)
+                    maxGrade /= 4;
+                if (maxGrade < 1)
+                    maxGrade = 1;
+
+                return maxGrade;
+            case FormID::DarkMeta:
+                return GET_SKILL(ch, (int)SkillID::Metamorph) >= 100 ? 2 : 1;
+
+            default:
+                return 1;
+        }
     }
 
     static std::string getCustomAbbr(struct char_data* ch, FormID form) {
@@ -412,6 +445,13 @@ namespace trans {
             case FormID::DivineWater:
                 return "divinewater";
 
+
+            // Techniques
+            case FormID::Kaioken:
+                return "kaioken";
+            case FormID::DarkMeta:
+                return "dm";
+
             // Whoops?
             default:
                 return "Unknown";
@@ -425,49 +465,9 @@ namespace trans {
 
         {FormID::DivineHalo, {FormID::MysticThird}},
         {FormID::MysticThird, {FormID::DivineHalo}},
-    };
 
-    static std::unordered_map<FormID, std::vector<FormID>> trans_requirments = {
-        {FormID::SuperSaiyan4, {FormID::SuperSaiyan3, FormID::GoldenOozaru}},
-        {FormID::SuperSaiyan3, {FormID::SuperSaiyan2}},
-        {FormID::SuperSaiyan2, {FormID::SuperSaiyan}},
-
-        {FormID::SuperHuman4, {FormID::SuperHuman3}},
-        {FormID::SuperHuman3, {FormID::SuperHuman2}},
-        {FormID::SuperHuman2, {FormID::SuperHuman}},
-
-        {FormID::IcerFourth, {FormID::IcerThird}},
-        {FormID::IcerThird, {FormID::IcerSecond}},
-        {FormID::IcerSecond, {FormID::IcerFirst}},
-
-        {FormID::SuperNamekian4, {FormID::SuperNamekian3}},
-        {FormID::SuperNamekian3, {FormID::SuperNamekian2}},
-        {FormID::SuperNamekian2, {FormID::SuperNamekian}},
-
-        {FormID::MutateThird, {FormID::MutateSecond}},
-        {FormID::MutateSecond, {FormID::MutateFirst}},
-
-        {FormID::BioSuperPerfect, {FormID::BioPerfect}},
-        {FormID::BioPerfect, {FormID::BioSemiPerfect}},
-        {FormID::BioSemiPerfect, {FormID::BioMature}},
-
-        {FormID::Android60, {FormID::Android50}},
-        {FormID::Android50, {FormID::Android40}},
-        {FormID::Android40, {FormID::Android30}},
-        {FormID::Android30, {FormID::Android20}},
-        {FormID::Android20, {FormID::Android10}},
-
-        {FormID::MajAffinity, {FormID::MajSuper}},
-        {FormID::MajSuper, {FormID::MajTrue}},
-
-        {FormID::MysticThird, {FormID::MysticSecond}},
-        {FormID::MysticSecond, {FormID::MysticFirst}},
-
-        {FormID::AscendThird, {FormID::AscendSecond}},
-        {FormID::AscendSecond, {FormID::AscendFirst}},
-
-        {FormID::LegendarySaiyan, {FormID::Ikari, FormID::SuperSaiyan}},
-        
+        {FormID::DarkMeta, {FormID::Kaioken}},
+        {FormID::Kaioken, {FormID::DarkMeta}},
     };
 
     static std::unordered_map<FormID, std::function<bool(struct char_data *ch)>> trans_unlocks = {
@@ -641,6 +641,15 @@ namespace trans {
             }},
         {FormID::AlphaLycanthrope, [](struct char_data *ch) {
             return (MOON_DATE && HAS_MOON(ch) && (time_info.hours >= 21 || time_info.hours >= 4) && OUTSIDE(ch) && getMasteryTier(ch, FormID::Lycanthrope) >=4);
+            }},
+
+        // Techniques
+        {FormID::Kaioken, [](struct char_data *ch) {
+            return GET_SKILL(ch, (int) SkillID::Kaioken) > 0 && !ch->transforms.contains(FormID::DarkMeta);
+            }},
+
+        {FormID::DarkMeta, [](struct char_data *ch) {
+            return GET_SKILL(ch, (int) SkillID::Metamorph) > 0 && !ch->transforms.contains(FormID::Kaioken);
             }},
 
     };
@@ -1238,6 +1247,22 @@ namespace trans {
             }
         },
 
+
+        // Techniques
+        {
+            FormID::Kaioken, {
+                {APPLY_PL_MULT, 0.0, -1, [](struct char_data *ch) {return 0.1 * (ch->transforms[FormID::Kaioken].grade);}},
+                {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {return 0.05 * (ch->transforms[FormID::Kaioken].grade);}},
+                {APPLY_REGEN_PL_PERC, 0.0, -1, [](struct char_data *ch) {return -0.05 * (ch->transforms[FormID::Kaioken].grade) + (0.01 * getMasteryTier(ch, FormID::Kaioken));}},
+                {APPLY_REGEN_KI_PERC, 0.0, -1, [](struct char_data *ch) {return -0.05 * (ch->transforms[FormID::Kaioken].grade) + (0.01 * getMasteryTier(ch, FormID::Kaioken));}},
+            }
+        },
+        {
+            FormID::DarkMeta, {
+                {APPLY_PL_MULT, 0.0, -1, [](struct char_data *ch) {return 0.6 * (ch->transforms[FormID::DarkMeta].grade) + (0.05 * getMasteryTier(ch, FormID::Kaioken));}},
+            }
+        },
+
     };
 
     static double getModifierHelper(char_data* ch, FormID form, int location, int specific) {
@@ -1266,6 +1291,7 @@ namespace trans {
             }
         }
         modifier += getModifierHelper(ch, ch->form, location, specific);
+        modifier += getModifierHelper(ch, ch->technique, location, specific);
         return modifier;
     }
 
@@ -1326,10 +1352,14 @@ namespace trans {
         // Unbound Alternate Forms
         {FormID::PotentialUnleashed, .1},
         {FormID::EvilAura, .08},
-        {FormID::UltraInstinct, .08}
+        {FormID::UltraInstinct, .08},
 
         // Unbound Permanant Forms
 
+
+        // Techniques
+        {FormID::Kaioken, .05},
+        {FormID::DarkMeta, .1}
     };
 
     double getStaminaDrain(char_data* ch, FormID form, bool upkeep) {
@@ -1346,20 +1376,29 @@ namespace trans {
         if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) 
             drain *= 0.75;
 
+        if(ch->form != FormID::Base && ch->technique != FormID::Base)
+            drain *= 2;
+
         if(upkeep) {
             drain *= 0.01;
             if(ch->race == RaceID::Icer) drain = 0.0;
         }
-        return drain;
+        return drain * ch->transforms[form].grade;
     }
 
     void gamesys_transform(uint64_t heartPulse, double deltaTime) {
         for(auto ch = character_list; ch; ch = ch->next) {
             auto form = ch->form;
+            auto technique = ch->technique;
             auto &data = ch->transforms[form];
             double timeBefore = data.timeSpentInForm;
             data.timeSpentInForm += deltaTime;
             double timeAfter = data.timeSpentInForm;
+
+            auto &techdata = ch->transforms[technique];
+            double techTimeBefore = data.timeSpentInForm;
+            techdata.timeSpentInForm += deltaTime;
+            double techTimeAfter = data.timeSpentInForm;
 
             if(ch->form == FormID::Oozaru || form == FormID::GoldenOozaru || ch->form == FormID::Lycanthrope || ch->form == FormID::AlphaLycanthrope) {
                 if(auto room = ch->getRoom(); room) {
@@ -1393,21 +1432,30 @@ namespace trans {
                 if(timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limitBroken == true)
                     send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n\r\n");
             }
+            if(technique != FormID::Base) {
+                if(techTimeBefore < MASTERY_THRESHOLD && techTimeAfter >= MASTERY_THRESHOLD)
+                    send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, technique) + "\r\n");
+
+                if(techTimeBefore < LIMIT_THRESHOLD && techTimeAfter >= LIMIT_THRESHOLD)
+                    send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, technique) + "\r\n");
+
+                if(techTimeBefore < LIMITBREAK_THRESHOLD && techTimeAfter >= LIMITBREAK_THRESHOLD && techdata.limitBroken == true)
+                    send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, technique) + " @mhas evolved.@n\r\n");
+            }
             
 
             // Check stamina drain.
-            if (auto drain = getStaminaDrain(ch, ch->form, true) * deltaTime; drain > 0) {
+            if (auto drain = (getStaminaDrain(ch, ch->form, true) + getStaminaDrain(ch, ch->technique, true)) * deltaTime; drain > 0) {
                 if(ch->decCurSTPercent(drain) == 0) {
-                    if(!blockRevertDisallowed(ch, FormID::Base)) {
-                        act("@mExhausted of stamina, your body forcibly reverts from its form.@n\r\n", true, ch, nullptr,
-                            nullptr, TO_CHAR);
-                        act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n\r\n", true, ch, nullptr,
-                            nullptr, TO_ROOM);
-                        ch->form = FormID::Base;
-                        ch->remove_kaioken(true);
-                        ch->removeLimitBreak();
-            
-                    }
+                    act("@mExhausted of stamina, your body forcibly reverts from its form.@n\r\n", true, ch, nullptr,
+                        nullptr, TO_CHAR);
+                    act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n\r\n", true, ch, nullptr,
+                        nullptr, TO_ROOM);
+                    ch->form = FormID::Base;
+                    ch->technique = FormID::Base;
+                    ch->remove_kaioken(true);
+                    ch->removeLimitBreak();
+
                 }
             }
         }
@@ -1761,6 +1809,14 @@ namespace trans {
                                              }
             },
 
+            // Techniques
+            {
+                    FormID::Kaioken,        {
+                                                     "@rA blazing red aura bursts up around your body, flashing intensely as the pressure of your aura magnifies!@n",
+                                                     "@rA blazing red aura bursts up around @R$n's @rbody, flashing intensely as the pressure of $e aura magnifies!@n"
+                                             }
+            },
+
 
     };
 
@@ -1897,7 +1953,11 @@ namespace trans {
         FormID::PotentialUnlocked,
         FormID::PotentialUnlockedMax,
         FormID::Majinized,
-        FormID::DivineWater
+        FormID::DivineWater,
+
+        // Techniques
+        FormID::Kaioken,
+        FormID::DarkMeta
     };
 
 
@@ -1913,39 +1973,8 @@ namespace trans {
         return {};
     }
 
-
-    static const std::unordered_map<RaceID, std::vector<FormID>> race_forms = {
-        {RaceID::Human, {FormID::SuperHuman, FormID::SuperHuman2, FormID::SuperHuman3, FormID::SuperHuman4}},
-        {RaceID::Saiyan, {FormID::SuperSaiyan, FormID::SuperSaiyan2, FormID::SuperSaiyan3, FormID::SuperSaiyan4}},
-        {RaceID::Halfbreed, {FormID::SuperSaiyan, FormID::SuperSaiyan2, FormID::SuperSaiyan3, FormID::SuperSaiyan4}},
-        {RaceID::Icer, {FormID::IcerFirst, FormID::IcerSecond, FormID::IcerThird, FormID::IcerFourth}},
-        {RaceID::Konatsu, {FormID::ShadowFirst, FormID::ShadowSecond, FormID::ShadowThird}},
-        {
-            RaceID::Namekian,
-            {FormID::SuperNamekian, FormID::SuperNamekian2, FormID::SuperNamekian3, FormID::SuperNamekian4}
-        },
-        {RaceID::Mutant, {FormID::MutateFirst, FormID::MutateSecond, FormID::MutateThird}},
-        {RaceID::BioAndroid, {FormID::BioMature, FormID::BioSemiPerfect, FormID::BioPerfect, FormID::BioSuperPerfect}},
-        {
-            RaceID::Android,
-            {
-                FormID::Android10, FormID::Android20, FormID::Android30, FormID::Android40, FormID::Android50,
-                FormID::Android60
-            }
-        },
-        {RaceID::Majin, {FormID::MajAffinity, FormID::MajSuper, FormID::MajTrue}},
-        {RaceID::Kai, {FormID::MysticFirst, FormID::MysticSecond, FormID::MysticThird}},
-        {RaceID::Tuffle, {FormID::AscendFirst, FormID::AscendSecond, FormID::AscendThird}},
-        {RaceID::Demon, {FormID::DarkKing}}
-    };
-
     void initTransforms(char_data* ch) {
         auto transforms = ch->transforms;
-        /*for (auto form : race_forms.find(ch->race)->second) {
-            if(!transforms.contains(form)) {
-                ch->addTransform(form);
-            }
-        }*/
 
         for (auto unlockForms : trans_unlocks) {
             if (!transforms.contains(unlockForms.first)) {
@@ -2045,7 +2074,13 @@ namespace trans {
             for (auto form: locked_forms) {
                 auto name = getName(ch, form);
                 auto req = getRequiredPL(ch, form);
-                send_to_char(ch, "@W(%s) %s@n @R-@G %s Growth Req\r\n", getFormType(ch, form) == 0 ? "alt":"perm", name,
+                std::string type = "alt";
+                if(getFormType(ch, form) == 1)
+                    type = "perm";
+                else if(getFormType(ch, form) == 2)
+                    type = "tech";
+
+                send_to_char(ch, "@W(%s) %s@n @R-@G %s Growth Req\r\n", type.c_str(), name,
                        (ik >= (req * 0.75)) ? add_commas(req) : "??????????");
             }
         }
@@ -2092,54 +2127,6 @@ namespace trans {
         ss << std::fixed << std::setprecision(0) << ik;
         std::string growthString = ss.str();
         send_to_char(ch, "\r\n@BGrowth: %s@n\r\n", growthString);
-    }
-
-    bool blockRevertDisallowed(struct char_data* ch, FormID form) {
-        auto curForm = ch->form;
-        if (curForm == FormID::Base) return false;
-
-        switch (ch->race) {
-            case RaceID::Majin:
-            case RaceID::Android:
-            case RaceID::BioAndroid:
-            case RaceID::Tuffle: {
-                if (form == FormID::Base) {
-                    return true;
-                }
-                if (auto forms = race_forms.find(ch->race); forms != race_forms.end()) {
-                    auto& f = forms->second;
-                    // We need to find the index number of the current form and the proposed form...
-                    // If the proposed form is lower than the current form, we need to block it.
-                    auto cur = std::find(f.begin(), f.end(), curForm);
-                    auto proposed = std::find(f.begin(), f.end(), form);
-                    if (cur != f.end() && proposed != f.end()) {
-                        if (std::distance(f.begin(), proposed) < std::distance(f.begin(), cur)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            default:
-                break;
-        }
-        return false;
-    }
-
-    bool checkHasPreviousForm(struct char_data* ch, FormID form) {
-        if(!trans_requirments.contains(form))
-            return true;
-
-        bool pass = true;
-
-        auto reqForms = trans_requirments.find(form);
-        auto transforms = ch->transforms;
-        for (auto& reqForm : reqForms->second) {
-            if(!transforms.contains(reqForm) && !transforms[reqForm].unlocked && getMasteryTier(ch, reqForm) <= 1) {
-                pass = false;
-            }
-        }
-
-        return pass;
     }
 
 
@@ -2231,7 +2218,11 @@ namespace trans {
         {FormID::PotentialUnlocked, {40, 1}},
         {FormID::PotentialUnlockedMax, {90, 1}},
         {FormID::Majinized, {0, 1}},
-        {FormID::DivineWater, {25, 1}}
+        {FormID::DivineWater, {25, 1}},
+
+        // Techniques
+        {FormID::Kaioken, {0, 2}},
+        {FormID::DarkMeta, {0, 2}}
 
     };
 
@@ -2260,10 +2251,6 @@ namespace trans {
     bool unlock(struct char_data *ch, FormID form) {
         initTransforms(ch);
         auto &data = ch->transforms[form];
-        /*if(!checkHasPreviousForm(ch, form)) {
-            send_to_char(ch, "You do not have mastery in the previous forms\n");
-            return false;
-        }*/
 
         if(data.unlocked == false) {
             if(ch->internalGrowth >= getRequiredPL(ch, form))
@@ -2297,6 +2284,7 @@ void trans_data::deserialize(const nlohmann::json &j) {
     if(j.contains("visible")) timeSpentInForm = j["visible"];
     if(j.contains("limitBroken")) limitBroken = j["limitBroken"];
     if(j.contains("unlocked")) unlocked = j["unlocked"];
+    if(j.contains("grade")) grade = j["grade"];
     if(j.contains("blutz")) blutz = j["blutz"];
     if(j.contains("description")) {
         if(description) free(description);
@@ -2310,6 +2298,7 @@ nlohmann::json trans_data::serialize() {
     j["visible"] = visible;
     j["limitBroken"] = limitBroken;
     j["unlocked"] = unlocked;
+    j["grade"] = grade;
     if(blutz != 0.0) j["blutz"] = blutz;
     if(description && strlen(description)) j["description"] = description;
     return j;

@@ -503,6 +503,7 @@ struct trans_data {
 
     char *description{nullptr};
     double timeSpentInForm{0.0};
+    int grade = 1;
     bool visible = true;
     bool limitBroken = false;
     bool unlocked = false;
@@ -700,6 +701,7 @@ struct char_data : public unit_data {
     int damage_mod{};        /* Any bonus or penalty to the damage	*/
 
     FormID form{FormID::Base};        /* Current form of the character		*/
+    FormID technique{FormID::Base};        /* Current technique form of the character		*/
     std::set<FormID> permForms;    /* Permanent forms of the character	*/
     double transBonus{0.0};   // Varies from -0.3 to 0.3
     double internalGrowth{0.0};
