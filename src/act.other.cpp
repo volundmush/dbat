@@ -4480,13 +4480,13 @@ ACMD(do_absorb) {
                 true, ch, nullptr, vict, TO_CHAR);
             act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            int64_t stam = (vict->getBaseST()) / 2000;
-            int64_t ki = (vict->getBaseKI()) / 2000;
-            int64_t pl = (vict->getBasePL()) / 2000;
+            int64_t stam = (vict->getBaseST()) / 12000;
+            int64_t ki = (vict->getBaseKI()) / 12000;
+            int64_t pl = (vict->getBasePL()) / 12000;
             auto chCon = GET_CON(ch);
-            stam += rand_number(chCon, chCon * 2);
-            pl += rand_number(chCon, chCon * 2);
-            ki += rand_number(chCon, chCon * 2);
+            stam *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
+            pl *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
+            ki *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
             stam = std::min<int64_t>(stam, 1500000L);
             ki = std::min<int64_t>(ki, 1500000L);
             pl = std::min<int64_t>(pl, 1500000L);
