@@ -936,7 +936,7 @@ ACMD(do_moondust) {
     cost += (ch->getMaxLF()) * 0.02;
     heal = cost * 3;
 
-    if (GET_HIT(ch) >= (ch->getEffMaxPL()) * 0.8) {
+    if (GET_HIT(ch) >= (ch->getMaxPL()) * 0.8) {
         cost = cost * 0.5;
     }
 
@@ -3110,7 +3110,7 @@ ACMD(do_kanso) {
             GET_COND(ch, THIRST) = 48;
 
         /* Heal the user */
-        ch->incCurHealth((ch->getEffMaxPL() * .01) * dam);
+        ch->incCurHealth((ch->getMaxPL() * .01) * dam);
 
         WAIT_STATE(ch, PULSE_2SEC); /* 2 second lag for the technique */
 
@@ -4044,7 +4044,7 @@ ACMD(do_adrenaline) {
                     true, ch, nullptr, nullptr, TO_CHAR);
                 act("@g$n@G seems to concentrate and $s wounds begin to heal!@n", true, ch, nullptr, nullptr, TO_ROOM);
 
-                if (GET_HIT(ch) + trade > (ch->getEffMaxPL()))
+                if (GET_HIT(ch) + trade > (ch->getMaxPL()))
                     send_to_char(ch, "Some of your stamina was wasted because your powerlevel maxed out.\r\n");
                 ch->incCurHealth(trade);
                 ch->decCurST(trade);

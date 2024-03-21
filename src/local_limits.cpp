@@ -644,7 +644,7 @@ static void update_flags(struct char_data *ch) {
     }
 
     if (GET_BONUS(ch, BONUS_LATE) && GET_POS(ch) == POS_SLEEPING && rand_number(1, 3) == 3) {
-        if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurST()) >= GET_MAX_MOVE(ch) &&
+        if (GET_HIT(ch) >= (ch->getMaxPL()) && (ch->getCurST()) >= GET_MAX_MOVE(ch) &&
             (ch->getCurKI()) >= GET_MAX_MANA(ch)) {
             send_to_char(ch, "You FINALLY wake up.\r\n");
             act("$n wakes up.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -1237,7 +1237,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
                     i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.005));
                 } else {
-                    if ((GET_HIT(i) - hit_gain(i)) > (i->getEffMaxPL()) * 0.05) {
+                    if ((GET_HIT(i) - hit_gain(i)) > (i->getMaxPL()) * 0.05) {
                         send_to_char(i, "You struggle trying to hold your breath!\r\n");
                         i->decCurHealth(hit_gain(i) + i->getPercentOfMaxHealth(.05));
                     } else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
@@ -1252,7 +1252,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
                     i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.005));
                 } else {
-                    if ((GET_HIT(i) - hit_gain(i)) > (i->getEffMaxPL()) * 0.05) {
+                    if ((GET_HIT(i) - hit_gain(i)) > (i->getMaxPL()) * 0.05) {
                         send_to_char(i, "You struggle trying to hold your breath!\r\n");
                         i->decCurHealth(hit_gain(i) + i->getPercentOfMaxHealth(.05));
                     } else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
@@ -1306,7 +1306,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
                     if (!i->isFullLF()) {
                         if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 &&
-                            GET_HIT(i) != (i->getEffMaxPL())) {
+                            GET_HIT(i) != (i->getMaxPL())) {
                             i->incCurLFPercent(.15);
                             send_to_char(i, "@CYou feel more lively.@n\r\n");
                         }
@@ -1334,7 +1334,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 if (GET_HIT(i) - GET_MAX_HIT(i) * cost > 0) {
                     send_to_char(i, "You puke as the poison burns through your blood.\r\n");
                     act("$n shivers and then pukes.", true, i, nullptr, nullptr, TO_ROOM);
-                    i->decCurHealth(i->getEffMaxPL() * cost);
+                    i->decCurHealth(i->getMaxPL() * cost);
                 } else {
                     send_to_char(i, "The poison claims your life!\r\n");
                     act("$n pukes up blood and falls down dead!", true, i, nullptr, nullptr, TO_ROOM);

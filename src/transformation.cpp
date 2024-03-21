@@ -134,6 +134,9 @@ namespace trans {
             case FormID::MysticThird:
                 return "@YMystic @WThird@n";
 
+            case FormID::DivineHalo:
+                return "@YDivine @WHalo@n";
+
             // Tuffle
             case FormID::AscendFirst:
                 return "@YAscend @WFirst@n";
@@ -157,7 +160,16 @@ namespace trans {
             case FormID::Ikari:
                 return "@GIkari@n";
             case FormID::LegendarySaiyan:
-                return "@GLegendary Super Saiyan@n";
+                return "@GLegendary @YSuper Saiyan@n";
+
+            // Lycanthrope
+            case FormID::LesserLycanthrope:
+                return "@YLesser @WLycan@n";
+            case FormID::Lycanthrope:
+                return "@WLycanthrope@n";
+            case FormID::AlphaLycanthrope:
+                return "@YAlpha @WLycanthrope@n";
+
 
             // Unbound Alternate Forms
             case FormID::PotentialUnleashed:
@@ -181,6 +193,27 @@ namespace trans {
             default: 
                 return "Unknown";
         }
+    }
+
+    std::string getExtra(struct char_data* ch, FormID form) {
+        switch (form) {
+            case FormID::Oozaru:
+                return "@w...$e is in the form of a @rgreat ape@w!";
+            case FormID::GoldenOozaru:
+                return "@w...$e is in the form of a @rgolden great ape@w!";
+            case FormID::SuperSaiyan:
+                return "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!";
+            case FormID::SuperSaiyan2:
+                return "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!";
+            case FormID::SuperSaiyan3:
+                return "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!";
+            case FormID::SuperSaiyan4:
+                return "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!";
+
+            default:
+                return "@w...$e has energy crackling around $s body!";
+        }
+
     }
 
     static std::string getCustomAbbr(struct char_data* ch, FormID form) {
@@ -333,6 +366,9 @@ namespace trans {
             case FormID::MysticThird:
                 return "third";
 
+            case FormID::DivineHalo:
+                return "halo";
+
             // Tuffle
             case FormID::AscendFirst:
                 return "first";
@@ -345,12 +381,19 @@ namespace trans {
             case FormID::DarkKing:
                 return "dark";
 
-
             // LSSJ
             case FormID::Ikari:
                 return "ikari";
             case FormID::LegendarySaiyan:
                 return "lssj";
+
+            // Lycanthrope
+            case FormID::LesserLycanthrope:
+                return "llycan";
+            case FormID::Lycanthrope:
+                return "lycan";
+            case FormID::AlphaLycanthrope:
+                return "alycan";
 
             // Unbound Alternate Forms
             case FormID::PotentialUnleashed:
@@ -379,6 +422,9 @@ namespace trans {
         {FormID::SuperSaiyan2, {FormID::LegendarySaiyan, FormID::Ikari}},
         {FormID::Ikari, {FormID::SuperSaiyan2}},
         {FormID::LegendarySaiyan, {FormID::SuperSaiyan2, FormID::GoldenOozaru}},
+
+        {FormID::DivineHalo, {FormID::MysticThird}},
+        {FormID::MysticThird, {FormID::DivineHalo}},
     };
 
     static std::unordered_map<FormID, std::vector<FormID>> trans_requirments = {
@@ -425,6 +471,22 @@ namespace trans {
     };
 
     static std::unordered_map<FormID, std::function<bool(struct char_data *ch)>> trans_unlocks = {
+        // Saiyan
+        {FormID::SuperSaiyan, [](struct char_data *ch) {
+            return ((ch->race == RaceID::Saiyan || ch->race == RaceID::Halfbreed));
+            }},
+        {FormID::SuperSaiyan2, [](struct char_data *ch) {
+            return ((ch->race == RaceID::Saiyan || ch->race == RaceID::Halfbreed) && !ch->transforms.contains(FormID::Ikari) 
+                && !ch->transforms.contains(FormID::LegendarySaiyan) && getMasteryTier(ch, FormID::SuperSaiyan) >=2);
+            }},
+        {FormID::SuperSaiyan3, [](struct char_data *ch) {
+            return ((ch->race == RaceID::Saiyan || ch->race == RaceID::Halfbreed) && getMasteryTier(ch, FormID::SuperSaiyan2) >=2);
+            }},
+        {FormID::SuperSaiyan4, [](struct char_data *ch) {
+            return ((ch->race == RaceID::Saiyan || ch->race == RaceID::Halfbreed) && getMasteryTier(ch, FormID::GoldenOozaru) >=3 && getMasteryTier(ch, FormID::SuperSaiyan3) >=3);
+            }},
+
+        // Legendary Saiyan
         {FormID::Ikari, [](struct char_data *ch) {
             return (ch->race == RaceID::Saiyan && !ch->transforms.contains(FormID::SuperSaiyan2) && getMasteryTier(ch, FormID::Oozaru) >=3);
             }},
@@ -432,6 +494,155 @@ namespace trans {
             return (ch->race == RaceID::Saiyan && !ch->transforms.contains(FormID::SuperSaiyan2) && ch->transforms.contains(FormID::SuperSaiyan) 
                 && getMasteryTier(ch, FormID::SuperSaiyan) >=4 && getMasteryTier(ch, FormID::Ikari) >=3);
             }},
+
+        // Human
+        {FormID::SuperHuman, [](struct char_data *ch) {
+            return (ch->race == RaceID::Human);
+            }},
+        {FormID::SuperHuman2, [](struct char_data *ch) {
+            return (ch->race == RaceID::Human && getMasteryTier(ch, FormID::SuperHuman) >=2);
+            }},
+        {FormID::SuperHuman3, [](struct char_data *ch) {
+            return (ch->race == RaceID::Human && getMasteryTier(ch, FormID::SuperHuman2) >=2);
+            }},
+        {FormID::SuperHuman4, [](struct char_data *ch) {
+            return (ch->race == RaceID::Human && getMasteryTier(ch, FormID::SuperHuman3) >=3);
+            }},
+
+        // Icer
+        {FormID::IcerFirst, [](struct char_data *ch) {
+            return (ch->race == RaceID::Icer);
+            }},
+        {FormID::IcerSecond, [](struct char_data *ch) {
+            return (ch->race == RaceID::Icer && getMasteryTier(ch, FormID::IcerFirst) >=2);
+            }},
+        {FormID::IcerThird, [](struct char_data *ch) {
+            return (ch->race == RaceID::Icer && getMasteryTier(ch, FormID::IcerSecond) >=2);
+            }},
+        {FormID::IcerFourth, [](struct char_data *ch) {
+            return (ch->race == RaceID::Icer && getMasteryTier(ch, FormID::IcerThird) >=3);
+            }},
+
+        // Namekian
+        {FormID::SuperNamekian, [](struct char_data *ch) {
+            return (ch->race == RaceID::Namekian);
+            }},
+        {FormID::SuperNamekian2, [](struct char_data *ch) {
+            return (ch->race == RaceID::Namekian && getMasteryTier(ch, FormID::SuperNamekian) >=2);
+            }},
+        {FormID::SuperNamekian3, [](struct char_data *ch) {
+            return (ch->race == RaceID::Namekian && getMasteryTier(ch, FormID::SuperNamekian2) >=2);
+            }},
+        {FormID::SuperNamekian4, [](struct char_data *ch) {
+            return (ch->race == RaceID::Namekian && getMasteryTier(ch, FormID::SuperNamekian3) >=3);
+            }},
+
+        // Konatsu
+        {FormID::ShadowFirst, [](struct char_data *ch) {
+            return (ch->race == RaceID::Konatsu);
+            }},
+        {FormID::ShadowSecond, [](struct char_data *ch) {
+            return (ch->race == RaceID::Konatsu && getMasteryTier(ch, FormID::ShadowFirst) >=2);
+            }},
+        {FormID::ShadowThird, [](struct char_data *ch) {
+            return (ch->race == RaceID::Konatsu && getMasteryTier(ch, FormID::ShadowSecond) >=3);
+            }},
+
+        // Mutant
+        {FormID::MutateFirst, [](struct char_data *ch) {
+            return (ch->race == RaceID::Mutant);
+            }},
+        {FormID::MutateSecond, [](struct char_data *ch) {
+            return (ch->race == RaceID::Mutant && getMasteryTier(ch, FormID::MutateFirst) >=2);
+            }},
+        {FormID::MutateThird, [](struct char_data *ch) {
+            return (ch->race == RaceID::Mutant && getMasteryTier(ch, FormID::MutateSecond) >=3);
+            }},
+
+        // BioAndroid
+        {FormID::BioMature, [](struct char_data *ch) {
+            return (ch->race == RaceID::BioAndroid);
+            }},
+        {FormID::BioSemiPerfect, [](struct char_data *ch) {
+            return (ch->race == RaceID::BioAndroid && getMasteryTier(ch, FormID::BioMature) >=2);
+            }},
+        {FormID::BioPerfect, [](struct char_data *ch) {
+            return (ch->race == RaceID::BioAndroid && getMasteryTier(ch, FormID::BioSemiPerfect) >=2);
+            }},
+        {FormID::BioSuperPerfect, [](struct char_data *ch) {
+            return (ch->race == RaceID::BioAndroid && getMasteryTier(ch, FormID::BioPerfect) >=3);
+            }},
+
+        // Android
+        {FormID::Android10, [](struct char_data *ch) {
+            return (ch->race == RaceID::Android);
+            }},
+        {FormID::Android20, [](struct char_data *ch) {
+            return (ch->race == RaceID::Android && getMasteryTier(ch, FormID::Android10) >=2);
+            }},
+        {FormID::Android30, [](struct char_data *ch) {
+            return (ch->race == RaceID::Android && getMasteryTier(ch, FormID::Android20) >=2);
+            }},
+        {FormID::Android40, [](struct char_data *ch) {
+            return (ch->race == RaceID::Android && getMasteryTier(ch, FormID::Android30) >=2);
+            }},
+        {FormID::Android50, [](struct char_data *ch) {
+            return (ch->race == RaceID::Android && getMasteryTier(ch, FormID::Android40) >=2);
+            }},
+        {FormID::Android60, [](struct char_data *ch) {
+            return (ch->race == RaceID::Android && getMasteryTier(ch, FormID::Android50) >=3);
+            }},
+
+        // Majin
+        {FormID::MajAffinity, [](struct char_data *ch) {
+            return (ch->race == RaceID::Majin);
+            }},
+        {FormID::MajSuper, [](struct char_data *ch) {
+            return (ch->race == RaceID::Majin && getMasteryTier(ch, FormID::MajAffinity) >=2);
+            }},
+        {FormID::MajTrue, [](struct char_data *ch) {
+            return (ch->race == RaceID::Majin && getMasteryTier(ch, FormID::MajSuper) >=3);
+            }},
+
+        // Kai
+        {FormID::MysticFirst, [](struct char_data *ch) {
+            return (ch->race == RaceID::Kai);
+            }},
+        {FormID::MysticSecond, [](struct char_data *ch) {
+            return (ch->race == RaceID::Kai && getMasteryTier(ch, FormID::MysticFirst) >=2);
+            }},
+        {FormID::MysticThird, [](struct char_data *ch) {
+            return (ch->race == RaceID::Kai && getMasteryTier(ch, FormID::MysticSecond) >=3);
+            }},
+
+        {FormID::DivineHalo, [](struct char_data *ch) {
+            return (ch->race == RaceID::Kai && getMasteryTier(ch, FormID::MysticSecond) >=3);
+            }},
+
+        // Tuffle
+        {FormID::AscendFirst, [](struct char_data *ch) {
+            return (ch->race == RaceID::Tuffle);
+            }},
+        {FormID::AscendSecond, [](struct char_data *ch) {
+            return (ch->race == RaceID::Tuffle && getMasteryTier(ch, FormID::AscendFirst) >=2);
+            }},
+        {FormID::AscendThird, [](struct char_data *ch) {
+            return (ch->race == RaceID::Tuffle && getMasteryTier(ch, FormID::AscendSecond) >=3);
+            }},
+
+        // Demon
+        {FormID::DarkKing, [](struct char_data *ch) {
+            return (ch->race == RaceID::Demon);
+            }},
+
+        // Lycanthrope
+        {FormID::Lycanthrope, [](struct char_data *ch) {
+            return (ch->race == RaceID::Konatsu && MOON_DATE && HAS_MOON(ch) && (time_info.hours >= 21 || time_info.hours >= 4) && OUTSIDE(ch));
+            }},
+        {FormID::AlphaLycanthrope, [](struct char_data *ch) {
+            return (MOON_DATE && HAS_MOON(ch) && (time_info.hours >= 21 || time_info.hours >= 4) && OUTSIDE(ch) && getMasteryTier(ch, FormID::Lycanthrope) >=4);
+            }},
+
     };
 
     struct trans_affect_type {
@@ -601,6 +812,27 @@ namespace trans {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 210000000 * 1.0 + (0.2 * getMasteryTier(ch, FormID::SuperNamekian4));}},
             }
         },
+
+        // Konatsu Forms.
+        {
+            FormID::ShadowFirst, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {return 1.0 + (0.05 * getMasteryTier(ch, FormID::ShadowFirst));}},
+                {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 70000 * 1.0 + (0.05 * getMasteryTier(ch, FormID::ShadowFirst));}},
+            }
+        },
+        {
+            FormID::ShadowSecond, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {return 1.8 + (0.15 * getMasteryTier(ch, FormID::ShadowSecond));}},
+                {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 7000000 * 1.0 + (0.15 * getMasteryTier(ch, FormID::ShadowSecond));}},
+            }
+        },
+        {
+            FormID::ShadowThird, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {return 2.5 + (0.3 * getMasteryTier(ch, FormID::ShadowThird));}},
+                {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 60000000 * 1.0 + (0.3 * getMasteryTier(ch, FormID::ShadowThird));}},
+            }
+        },
+
         // Mutant Forms.
         {
             FormID::MutateFirst, {
@@ -729,6 +961,15 @@ namespace trans {
                 {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 220000000 * 1.0 + (0.2 * getMasteryTier(ch, FormID::MysticThird));}},
             }
         },
+
+        {
+            FormID::DivineHalo, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {return 3.6 + (0.2 * getMasteryTier(ch, FormID::DivineHalo));}},
+                {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {return 220000000 * 1.0 + (0.2 * getMasteryTier(ch, FormID::DivineHalo));}},
+                {APPLY_SKILL, 0.0, (int) SkillID::DivineHalo, [](struct char_data *ch) {return 20 * getMasteryTier(ch, FormID::DivineHalo);}},
+            }
+        },
+
         // Tuffle Forms
         {
             FormID::AscendFirst, {
@@ -889,6 +1130,38 @@ namespace trans {
             }
         },
 
+        // Lycan
+        {
+            FormID::LesserLycanthrope, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {return 0.5 + (0.1 * getMasteryTier(ch, FormID::LesserLycanthrope));}},
+                {APPLY_PHYS_DAM_PERC, 0.0, -1, [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, FormID::LesserLycanthrope));}},
+                {APPLY_PARRY_PERC, 0.0, -1, [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, FormID::LesserLycanthrope));}},
+                {APPLY_REGEN_PL_PERC, 0.0, -1, [](struct char_data *ch) {return 0.1 * 1.0 + (0.10 * getMasteryTier(ch, FormID::LesserLycanthrope));}},
+                {APPLY_PHYS_DAM_RES, 0.0, -1, [](struct char_data *ch) {return 0.3 * 1.0 + (0.10 * getMasteryTier(ch, FormID::LesserLycanthrope));}},
+                {APPLY_KI_DAM_RES, 0.0, -1, [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, FormID::LesserLycanthrope));}},
+            }
+        },
+        {
+            FormID::Lycanthrope, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {return 1.0 + (0.1 * getMasteryTier(ch, FormID::Lycanthrope));}},
+                {APPLY_PHYS_DAM_PERC, 0.0, -1, [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, FormID::Lycanthrope));}},
+                {APPLY_PARRY_PERC, 0.0, -1, [](struct char_data *ch) {return 0.3 * 1.0 + (0.10 * getMasteryTier(ch, FormID::Lycanthrope));}},
+                {APPLY_REGEN_PL_PERC, 0.0, -1, [](struct char_data *ch) {return 0.2 * 1.0 + (0.10 * getMasteryTier(ch, FormID::Lycanthrope));}},
+                {APPLY_PHYS_DAM_RES, 0.0, -1, [](struct char_data *ch) {return 0.5 * 1.0 + (0.10 * getMasteryTier(ch, FormID::Lycanthrope));}},
+                {APPLY_KI_DAM_RES, 0.0, -1, [](struct char_data *ch) {return 0.25 * 1.0 + (0.10 * getMasteryTier(ch, FormID::Lycanthrope));}},
+            }
+        },
+        {
+            FormID::AlphaLycanthrope, {
+                {APPLY_VITALS_MULT, 0.0, -1, [](struct char_data *ch) {return 1.4 + (0.1 * getMasteryTier(ch, FormID::AlphaLycanthrope));}},
+                {APPLY_PHYS_DAM_PERC, 0.0, -1, [](struct char_data *ch) {return 0.7 * 1.0 + (0.10 * getMasteryTier(ch, FormID::AlphaLycanthrope));}},
+                {APPLY_PARRY_PERC, 0.0, -1, [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, FormID::AlphaLycanthrope));}},
+                {APPLY_REGEN_PL_PERC, 0.0, -1, [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, FormID::AlphaLycanthrope));}},
+                {APPLY_PHYS_DAM_RES, 0.0, -1, [](struct char_data *ch) {return 0.8 * 1.0 + (0.10 * getMasteryTier(ch, FormID::AlphaLycanthrope));}},
+                {APPLY_KI_DAM_RES, 0.0, -1, [](struct char_data *ch) {return 0.4 * 1.0 + (0.10 * getMasteryTier(ch, FormID::AlphaLycanthrope));}},
+            }
+        },
+
         // Unbound Forms
         {
             FormID::PotentialUnleashed, {
@@ -935,6 +1208,7 @@ namespace trans {
                 {APPLY_KI_MULT, 0.0, -1, [](struct char_data *ch) {return 2 + (0.4 * getMasteryTier(ch, FormID::UltraInstinct));}},
                 {APPLY_DAMAGE_PERC, 0.0, -1, [](struct char_data *ch) {return -0.7 + (0.2 * getMasteryTier(ch, FormID::UltraInstinct));}},
                 {APPLY_PERFECT_DODGE, 0.0, -1, [](struct char_data *ch) {return -0.4 - (0.05 * getMasteryTier(ch, FormID::UltraInstinct));}},
+                {APPLY_SKILL, 0.0, (int) SkillID::InstinctualCombat, [](struct char_data *ch) {return 20 * getMasteryTier(ch, FormID::UltraInstinct);}},
             }
         },
 
@@ -1041,8 +1315,13 @@ namespace trans {
         {FormID::MysticSecond, .07},
         {FormID::MysticThird, .1},
 
+        {FormID::DivineHalo, .1},
+
         // Demon
         {FormID::DarkKing, .1},
+
+        // Lycan
+        {FormID::LesserLycanthrope, .1},
 
         // Unbound Alternate Forms
         {FormID::PotentialUnleashed, .1},
@@ -1082,7 +1361,7 @@ namespace trans {
             data.timeSpentInForm += deltaTime;
             double timeAfter = data.timeSpentInForm;
 
-            if(ch->form == FormID::Oozaru || form == FormID::GoldenOozaru) {
+            if(ch->form == FormID::Oozaru || form == FormID::GoldenOozaru || ch->form == FormID::Lycanthrope || ch->form == FormID::AlphaLycanthrope) {
                 if(auto room = ch->getRoom(); room) {
                     // Top off the blutz.
                     if(room->checkMoon() == MoonCheck::Full) data.blutz = 60.0 * 30;
@@ -1594,6 +1873,8 @@ namespace trans {
         FormID::MysticSecond,
         FormID::MysticThird,
 
+        FormID::DivineHalo,
+
         // Tuffle
         FormID::AscendFirst,
         FormID::AscendSecond,
@@ -1602,7 +1883,12 @@ namespace trans {
         // Demon
         FormID::DarkKing,
 
-       // Unbound Alternate Forms
+        // Lycanthrope
+        FormID::LesserLycanthrope,
+        FormID::Lycanthrope,
+        FormID::AlphaLycanthrope,
+
+        // Unbound Alternate Forms
         FormID::PotentialUnleashed,
         FormID::EvilAura,
         FormID::UltraInstinct,
@@ -1655,17 +1941,29 @@ namespace trans {
 
     void initTransforms(char_data* ch) {
         auto transforms = ch->transforms;
-        for (auto form : race_forms.find(ch->race)->second) {
+        /*for (auto form : race_forms.find(ch->race)->second) {
             if(!transforms.contains(form)) {
                 ch->addTransform(form);
             }
-        }
+        }*/
 
         for (auto unlockForms : trans_unlocks) {
             if (!transforms.contains(unlockForms.first)) {
                 if(unlockForms.second(ch))
                     ch->addTransform(unlockForms.first);
             }
+        }
+    }
+
+    void removeExclusives(char_data* ch, FormID form) {
+        if(!transform_exclusive.contains(form) || !ch->transforms[form].unlocked)
+            return;
+
+        auto formList = transform_exclusive.find(form);
+        
+        for (auto& checkForm : formList->second ) {
+            if (ch->transforms.contains(checkForm))
+                ch->transforms.erase(checkForm);
         }
     }
 
@@ -1684,7 +1982,7 @@ namespace trans {
                     if(form.first == FormID::Base)
                         form.second.visible = false;
                     if(form.second.visible) {
-                        pforms = removeExclusives(ch, form.first, pforms);
+                        //pforms = removeExclusives(ch, form.first, pforms);
                         pforms.insert(form.first);
                     }
                 }
@@ -1695,27 +1993,13 @@ namespace trans {
                     if(form.first == FormID::Base || form.first == FormID::Oozaru || form.first == FormID::GoldenOozaru)
                         form.second.visible = false;
                     if(form.second.visible) {
-                        pforms = removeExclusives(ch, form.first, pforms);
+                        //pforms = removeExclusives(ch, form.first, pforms);
                         pforms.insert(form.first);
                     }
                 }
                 return pforms;
 
             }
-    }
-
-    std::set<FormID> removeExclusives(char_data* ch, FormID form, std::set<FormID> pforms) {
-        if(!transform_exclusive.contains(form) || !ch->transforms[form].unlocked)
-            return;
-
-        auto formList = transform_exclusive.find(form);
-        
-        for (auto& checkForm : formList->second ) {
-            if (pforms.contains(checkForm))
-                pforms.erase(checkForm);
-        }
-        return pforms;
-        
     }
 
     void displayForms(char_data* ch) {
@@ -1726,10 +2010,11 @@ namespace trans {
         }
 
         send_to_char(ch, "              @YForms@n\r\n");
-        send_to_char(ch, "@b-------------------Unlocked--------------------@n\r\n");
+        
         auto ik = ch->internalGrowth;
         std::vector<std::string> form_names;
         std::vector<FormID> locked_forms;
+        bool bannerDisplayed = false;
         for (auto form: forms) {
             bool unlocked = ch->transforms[form].unlocked;
             bool permActive = ch->permForms.contains(form);
@@ -1742,6 +2027,8 @@ namespace trans {
                 name = "@BMASTERED@n " + name;
             if(!permActive) {
                 if (unlocked) {
+                    if (!bannerDisplayed)
+                        send_to_char(ch, "@b-------------------Unlocked--------------------@n\r\n");
                     send_to_char(ch, "@W%s@n\r\n", name);
                 } else {
                     //send_to_char(ch, "@W%s@n @R-@G %s Growth Req\r\n", name,
@@ -1758,9 +2045,8 @@ namespace trans {
             for (auto form: locked_forms) {
                 auto name = getName(ch, form);
                 auto req = getRequiredPL(ch, form);
-                send_to_char(ch, "@W%s@n @R-@G %s Growth Req (%s)\r\n", name,
-                       (ik >= (req * 0.75)) ? add_commas(req) : "??????????",
-                       getFormType(ch, form) == 0 ? "alt":"perm");
+                send_to_char(ch, "@W(%s) %s@n @R-@G %s Growth Req\r\n", getFormType(ch, form) == 0 ? "alt":"perm", name,
+                       (ik >= (req * 0.75)) ? add_commas(req) : "??????????");
             }
         }
 
@@ -1907,6 +2193,8 @@ namespace trans {
         {FormID::MysticSecond, {80, 0}},
         {FormID::MysticThird, {150, 0}},
 
+        {FormID::DivineHalo, {250, 0}},
+
         // Konatsu Forms
 
         {FormID::ShadowFirst, {35, 0}},
@@ -1929,6 +2217,10 @@ namespace trans {
 
         // Demon Forms
         {FormID::DarkKing, {180, 0}},
+
+        // Lycan Forms
+        {FormID::Lycanthrope, {60, 0}},
+        {FormID::AlphaLycanthrope, {120, 0}},
 
         // Unbound Alternate Forms
         {FormID::PotentialUnleashed, {120, 0}},
@@ -1966,11 +2258,12 @@ namespace trans {
     }
 
     bool unlock(struct char_data *ch, FormID form) {
+        initTransforms(ch);
         auto &data = ch->transforms[form];
-        if(!checkHasPreviousForm(ch, form)) {
+        /*if(!checkHasPreviousForm(ch, form)) {
             send_to_char(ch, "You do not have mastery in the previous forms\n");
             return false;
-        }
+        }*/
 
         if(data.unlocked == false) {
             if(ch->internalGrowth >= getRequiredPL(ch, form))
@@ -1978,6 +2271,9 @@ namespace trans {
             else 
                 return false;
             data.unlocked = true;
+            removeExclusives(ch, form);
+            if(form == FormID::Lycanthrope || form == FormID::AlphaLycanthrope)
+                data.visible = false;
         }
         return data.unlocked;
     }

@@ -809,7 +809,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             if (IS_NPC(ch) && IS_HUMANOID(ch) && rand_number(1, 2) == 2) {
                 do_fly(ch, nullptr, 0, 0);
             }
-            ch->decCurHealth(ch->getEffMaxPL() / 20);
+            ch->decCurHealth(ch->getMaxPL() / 20);
             if (GET_HIT(ch) <= 0) {
                 act("@rYou have burned to death!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@r has burned to death!@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -819,7 +819,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         if (DRAGGING(ch) && !IS_DEMON(DRAGGING(ch))) {
             act("@R$N@r gets burned!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
             act("@R$N@r gets burned!@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
-            DRAGGING(ch)->decCurHealth(DRAGGING(ch)->getEffMaxPL() / 20);
+            DRAGGING(ch)->decCurHealth(DRAGGING(ch)->getMaxPL() / 20);
             if (GET_HIT(DRAGGING(ch)) < 0) {
                 act("@rYou have burned to death!@n", true, DRAGGING(ch), nullptr, nullptr, TO_CHAR);
                 act("@R$n@r has burned to death!@n", true, DRAGGING(ch), nullptr, nullptr, TO_ROOM);
@@ -2078,7 +2078,7 @@ static void handle_fall(struct char_data *ch) {
         }
         if (!EXIT(ch, 5) || SECT(IN_ROOM(ch)) != SECT_FLYING) {
             act("@r$n slams into the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurHealth(ch->getEffMaxPL() / 20, 1);
+            ch->decCurHealth(ch->getMaxPL() / 20, 1);
 
             act("@rYou slam into the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
             look_at_room(IN_ROOM(ch), ch, 0);
@@ -2094,7 +2094,7 @@ static void handle_fall(struct char_data *ch) {
             act("@RYou are drowning!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
-            if (GET_HIT(ch) - ((ch->getEffMaxPL()) / 3) <= 0) {
+            if (GET_HIT(ch) - ((ch->getMaxPL()) / 3) <= 0) {
                 act("@rYou drown!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@r drowns!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 die(ch, nullptr);

@@ -155,7 +155,10 @@ namespace skill {
             {SkillID::Multiform, "Multiform"},
             {SkillID::SpiritControl, "Spirit Control"},
             {SkillID::Balefire, "Balefire"},
-            {SkillID::BlessedHammer, "Blessed Hammer"}
+            {SkillID::BlessedHammer, "Blessed Hammer"},
+
+            {SkillID::DivineHalo, "Divine Halo"},
+            {SkillID::InstinctualCombat, "Instinctual Combat"},
     };
 
     std::string getName(SkillID skill) {

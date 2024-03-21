@@ -447,7 +447,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
         IN_ROOM(object) = NOWHERE;
         if ((GET_KAIOKEN(ch) <= 0 && !AFF_FLAGGED(ch, AFF_METAMORPH)) && !OBJ_FLAGGED(object, ITEM_THROW)) {
 
-        } else if (GET_HIT(ch) > (ch->getEffMaxPL())) {
+        } else if (GET_HIT(ch) > (ch->getMaxPL())) {
             if (GET_KAIOKEN(ch) > 0) {
                 send_to_char(ch, "@RThe strain of the weight has reduced your kaioken somewhat!@n\n");
             } else if (AFF_FLAGGED(ch, AFF_METAMORPH)) {
@@ -482,7 +482,7 @@ void obj_from_char(struct obj_data *object) {
     if (!IS_NPC(object->carried_by))
         object->carried_by->playerFlags.set(PLR_CRASH);
 
-    int64_t previous = (object->carried_by->getEffMaxPL());
+    int64_t previous = (object->carried_by->getMaxPL());
 
     if (GET_OBJ_VAL(object, 0) != 0) {
         if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {

@@ -939,7 +939,7 @@ struct char_data : public unit_data {
 
     int64_t harmCurHealth(int64_t amt);
 
-    int64_t getMaxPL();
+    int64_t getPL();
 
     int64_t getMaxPLTrans();
 
@@ -1106,9 +1106,7 @@ struct char_data : public unit_data {
 
     double speednar();
 
-    int64_t getEffMaxPL();
-
-    bool isWeightedPL();
+    int64_t getMaxPL();
 
     void apply_kaioken(int times, bool announce);
 

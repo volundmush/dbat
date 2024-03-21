@@ -363,20 +363,20 @@ int64_t char_data::setCurHealthPercent(double amt) {
 
 int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
     if (limit_max)
-        health = std::min(1.0, health + (double) std::abs(amt) / (double) getEffMaxPL());
+        health = std::min(1.0, health + (double) std::abs(amt) / (double) getMaxPL());
     else
-        health += (double) std::abs(amt) / (double) getEffMaxPL();
+        health += (double) std::abs(amt) / (double) getMaxPL();
     return getCurHealth();
 };
 
 int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
-        fl = (double) floor / (double) getEffMaxPL();
+        fl = (double) floor / (double) getMaxPL();
     if (suppression > 0)
-        health = std::max(fl, health - (double) std::abs(amt) / ((double) getEffMaxPL() * ((double) suppression / 100.0)));
+        health = std::max(fl, health - (double) std::abs(amt) / ((double) getMaxPL() * ((double) suppression / 100.0)));
     else
-        health = std::max(fl, health - (double) std::abs(amt) / (double) getEffMaxPL());
+        health = std::max(fl, health - (double) std::abs(amt) / (double) getMaxPL());
     return getCurHealth();
 }
 
@@ -391,7 +391,7 @@ int64_t char_data::incCurHealthPercent(double amt, bool limit_max) {
 int64_t char_data::decCurHealthPercent(double amt, int64_t floor) {
     auto fl = 0.0;
     if (floor > 0)
-        fl = (double) floor / (double) getEffMaxPL();
+        fl = (double) floor / (double) getMaxPL();
     health = std::max(fl, health - std::abs(amt));
     return getCurHealth();
 }
@@ -421,14 +421,14 @@ int64_t char_data::getMaxPL() {
 
 int64_t char_data::getCurPL() {
     if (!IS_NPC(this) && suppression > 0) {
-        return getEffMaxPL() * std::min(health, health * ((double) suppression / 100));
+        return getMaxPL() * std::min(health, health * ((double) suppression / 100));
     } else {
-        return getEffMaxPL() * health;
+        return getMaxPL() * health;
     }
 }
 
 int64_t char_data::getUnsuppressedPL() {
-        return getEffMaxPL() * health;
+        return getMaxPL() * health;
 }
 
 int64_t char_data::getEffBasePL() {
@@ -966,15 +966,23 @@ double char_data::speednar() {
     return 1.0;
 }
 
-int64_t char_data::getEffMaxPL() {
-    if (IS_NPC(this)) {
-        return getMaxPL();
+int64_t char_data::getPL() {
+    int64_t vitalCalc = (getMaxPL() + getMaxKI()) / 2;
+    int attrCalc = (get(CharAttribute::Agility) + get(CharAttribute::Constitution, false) + get(CharAttribute::Intelligence, false) + get(CharAttribute::Speed, false)
+    + get(CharAttribute::Strength, false) + get(CharAttribute::Wisdom, false)) / 50;
+    double skillCalc = 5;
+    for (auto curSkill : skill) {
+        auto data = curSkill.second;
+        if(data.level > 0)
+            skillCalc += data.level / 100;
     }
-    return getMaxPL() * speednar();
-}
+    skillCalc /= 10;
 
-bool char_data::isWeightedPL() {
-    return getMaxPL() > getEffMaxPL();
+
+    double suppressed = suppression > 0 ? ((double) suppression / 100.0) : 1;
+    double speed = speednar();
+
+    return vitalCalc * attrCalc * skillCalc * speed * suppressed;
 }
 
 void char_data::apply_kaioken(int times, bool announce) {
@@ -1633,9 +1641,15 @@ void char_data::gazeAtMoon() {
         || transforms.contains(FormID::SuperSaiyan4))
             toForm = FormID::GoldenOozaru;
 
-        trans::handleEchoTransform(this, toForm);
         form = toForm;
+    } else if (transforms.contains(FormID::Lycanthrope)) {
+        if (transforms.contains(FormID::AlphaLycanthrope)) {
+            form = FormID::AlphaLycanthrope;
+        } else { 
+            form = FormID::Lycanthrope;
+        }
     }
+    trans::handleEchoTransform(this, form);
 }
 
 void char_data::sendGMCP(const std::string &cmd, const nlohmann::json &j) {

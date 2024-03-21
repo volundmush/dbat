@@ -1179,8 +1179,6 @@ char *make_prompt(struct descriptor_data *d) {
                     auto ch = d->character;
                     if (ch->getMaxPL() > ch->getMaxPLTrans())
                         col = "g";
-                    else if (ch->isWeightedPL())
-                        col = "m";
                     else if (ch->getCurHealthPercent() > .5)
                         col = "c";
                     else if (ch->getCurHealthPercent() > .1)
@@ -1188,7 +1186,7 @@ char *make_prompt(struct descriptor_data *d) {
                     else if (ch->getCurHealthPercent() <= .1)
                         col = "r";
 
-                    if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%s@D]@n", col,
+                    if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RHL@n@Y: @%s%s@D]@n", col,
                                           add_commas(ch->getCurPL()).c_str())) > 0)
                         len += count;
                 }
@@ -1339,7 +1337,7 @@ char *make_prompt(struct descriptor_data *d) {
                 FormID form = d->character->form;
 
                 count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s@D]@n",
-                    trans::getName(d->character, form));
+                    trans::getAbbr(d->character, form).c_str());
                 if (count >= 0)
                     len += count;
             }

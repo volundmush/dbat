@@ -2659,7 +2659,7 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch) {
     };
     int percent, ar_index;
 
-    int64_t hit = GET_HIT(i), max = (i->getEffMaxPL());
+    int64_t hit = GET_HIT(i), max = (i->getMaxPL());
 
     int64_t total = max;
 
@@ -2959,25 +2959,25 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     if (IS_NPC(i) && i->room_description && GET_POS(i) == GET_DEFAULT_POS(i) && !FIGHTING(i)) {
         send_to_char(ch, "%s", i->room_description);
 
-        if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .9 && GET_HIT(i) != (i->getEffMaxPL()))
+        if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .9 && GET_HIT(i) != (i->getMaxPL()))
             act("@R...Some slight wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .8 && GET_HIT(i) < (i->getEffMaxPL()) * .9)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .8 && GET_HIT(i) < (i->getMaxPL()) * .9)
             act("@R...A few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .7 && GET_HIT(i) < (i->getEffMaxPL()) * .8)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .7 && GET_HIT(i) < (i->getMaxPL()) * .8)
             act("@R...Many wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .6 && GET_HIT(i) < (i->getEffMaxPL()) * .7)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .6 && GET_HIT(i) < (i->getMaxPL()) * .7)
             act("@R...Quite a few wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .5 && GET_HIT(i) < (i->getEffMaxPL()) * .6)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .5 && GET_HIT(i) < (i->getMaxPL()) * .6)
             act("@R...Horrible wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .4 && GET_HIT(i) < (i->getEffMaxPL()) * .5)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .4 && GET_HIT(i) < (i->getMaxPL()) * .5)
             act("@R...Blood is seeping from the wounds on $s body.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .3 && GET_HIT(i) < (i->getEffMaxPL()) * .4)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .3 && GET_HIT(i) < (i->getMaxPL()) * .4)
             act("@R...$s body is in terrible shape.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .2 && GET_HIT(i) < (i->getEffMaxPL()) * .3)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .2 && GET_HIT(i) < (i->getMaxPL()) * .3)
             act("@R...Is absolutely covered in wounds.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) >= (i->getEffMaxPL()) * .1 && GET_HIT(i) < (i->getEffMaxPL()) * .2)
+        else if (IS_NPC(i) && GET_HIT(i) >= (i->getMaxPL()) * .1 && GET_HIT(i) < (i->getMaxPL()) * .2)
             act("@R...Is on $s last leg.@w", true, i, nullptr, ch, TO_VICT);
-        else if (IS_NPC(i) && GET_HIT(i) < (i->getEffMaxPL()) * .1)
+        else if (IS_NPC(i) && GET_HIT(i) < (i->getMaxPL()) * .1)
             act("@R...Should be DEAD soon.@w", true, i, nullptr, ch, TO_VICT);
 
 
@@ -3337,8 +3337,6 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
         act(aura, true, i, nullptr, ch, TO_VICT);
     }
-    if (!is_oozaru && GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        act("@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!", true, i, nullptr, ch, TO_VICT);
     if (!is_oozaru && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
         char aura[MAX_INPUT_LENGTH];
         sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
@@ -3346,14 +3344,15 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     }
     if (i->form != FormID::Oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
-    if (i->form == FormID::Oozaru && GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        act("@w...$e is in the form of a @rgreat ape@w!", true, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(ch, AFF_KYODAIKA))
         act("@w...$e has expanded $s body size@w!", true, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(i, AFF_HAYASA))
         act("@w...$e has a soft @cblue@w glow around $s body!", false, i, nullptr, ch, TO_VICT);
-    if (i->form == FormID::Oozaru && !GET_CHARGE(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
-        act("@w...$e has energy crackling around $s @rgreat ape@w body!", true, i, nullptr, ch, TO_VICT);
+    if (AFF_FLAGGED(i, AFF_LIMIT_BREAKING))
+        act("@w...$e has an overflowing aura around $s body!", false, i, nullptr, ch, TO_VICT);
+
+    if(i->form != FormID::Base)
+        act(trans::getExtra(i, i->form).c_str(), true, i, nullptr, ch, TO_VICT);
     if (GET_FEATURE(i)) {
         char woo[MAX_STRING_LENGTH];
         sprintf(woo, "@C%s@n", GET_FEATURE(i));
@@ -3423,7 +3422,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
                         (AFF_FLAGS(i)[2] == AFF_FLAGS(j)[2]) &&
                         (AFF_FLAGS(i)[3] == AFF_FLAGS(j)[3]) &&
                         (!FIGHTING(i) && !FIGHTING(j)) &&
-                        (GET_HIT(i) == (i->getEffMaxPL()) && GET_HIT(j) == (j->getEffMaxPL())) &&
+                        (GET_HIT(i) == (i->getMaxPL()) && GET_HIT(j) == (j->getMaxPL())) &&
                         !strcmp(GET_NAME(i), GET_NAME(j))) {
                         for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
                             if (tmphide->hidden == j)
@@ -4911,11 +4910,12 @@ ACMD(do_score) {
     if (view == full || view == health) {
         send_to_char(ch,
                      "  @cO@D-----------------------------@D[   @cHealth   @D]-----------------------------@cO@n\n");
-        send_to_char(ch, "                 @D<@rPowerlevel@D>          <@BKi@D>             <@GStamina@D>@n\n");
+        send_to_char(ch, "                      @D<@rPowerlevel@D>     [@B%s@D]             @n\n\n", add_commas(ch->getPL()).c_str());
+        send_to_char(ch, "                 @D<@rHealth@D>              <@BKi@D>             <@GStamina@D>@n\n");
         send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurPL()).c_str(),
                      add_commas(
                              (ch->getCurKI())).c_str(), add_commas((ch->getCurST())).c_str());
-        send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getEffMaxPL()).c_str(),
+        send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getMaxPL()).c_str(),
                      add_commas(GET_MAX_MANA(ch)).c_str(), add_commas(GET_MAX_MOVE(ch)).c_str());
         send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((ch->getEffBasePL())).c_str(),
                      add_commas(
@@ -4945,11 +4945,11 @@ ACMD(do_score) {
 
     if (view == full || view == stats) {
         send_to_char(ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
-        send_to_char(ch, "        @D<@wGravity Acclim@D: @w" + grav + "@D> <@wRPP@D: @w%-3d@D>@n\n", GET_RP(ch));
-        send_to_char(ch, "        @D<@wSpeed Index@D: @w%-15s@D> <@wArmor Index@D: @w%-15s@D>@n\n");
-        send_to_char(ch, " @D[ @RStrength@D|@G%2d (%3d)@D] [ @YAgility@D|@G%2d (%3d)@D] [ @BSpeed@D|@G%2d (%3d)@D]@n\n",
+        send_to_char(ch, "            @D<@wGravity Acclim@D: @w" + grav + "@D> <@wRPP@D: @w%-3d@D>@n\n", GET_RP(ch));
+        send_to_char(ch, "        @D<@wSpeed Index@D: @w%s@D> <@wArmor Index@D: @w%s@D>@n\n", add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
+        send_to_char(ch, "    @D[ @RStrength@D|@G%2d (%3d)@D] [ @YAgility@D|@G%2d (%3d)@D] [ @BSpeed@D|@G%2d (%3d)@D]@n\n",
                      ch->get(CharAttribute::Strength, true), GET_STR(ch), ch->get(CharAttribute::Agility, true), GET_DEX(ch), ch->get(CharAttribute::Speed, true), GET_CHA(ch));
-        send_to_char(ch, " @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [ @MWisdom@D|@G%2d (%3d)@D]@n\n",
+        send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [ @MWisdom@D|@G%2d (%3d)@D]@n\n",
                      ch->get(CharAttribute::Constitution, true), GET_CON(ch), ch->get(CharAttribute::Intelligence, true), GET_INT(ch), ch->get(CharAttribute::Wisdom, true),
                      GET_WIS(ch));
     }

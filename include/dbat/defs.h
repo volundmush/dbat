@@ -178,6 +178,14 @@ enum class FormID : uint8_t {
     Ikari = 59,
     LegendarySaiyan = 60,
 
+    // Kai Alt
+    DivineHalo = 61,
+
+    // Lycanthrope
+    LesserLycanthrope = 120,
+    Lycanthrope = 121,
+    AlphaLycanthrope = 122,
+
     // Alternate Unbound Forms
     PotentialUnleashed = 70,
     EvilAura = 71,
@@ -346,7 +354,10 @@ enum class SkillID : uint16_t {
     Multiform = 554,
     SpiritControl = 555,
     Balefire = 556,
-    BlessedHammer = 557
+    BlessedHammer = 557,
+
+    DivineHalo = 558,
+    InstinctualCombat = 559,
 };
 
 
