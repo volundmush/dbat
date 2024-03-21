@@ -109,93 +109,93 @@ enum class FormID : uint8_t {
     SuperSaiyanGod = 16,
     SuperSaiyanBlue = 17,
 
+    // LSSJ
+    Ikari = 20,
+    LegendarySaiyan = 21,
+
     // Human'y Forms
-    SuperHuman = 18,
-    SuperHuman2 = 19,
-    SuperHuman3 = 20,
-    SuperHuman4 = 21,
+    SuperHuman = 30,
+    SuperHuman2 = 31,
+    SuperHuman3 = 32,
+    SuperHuman4 = 33,
 
 
     // Icer'y Forms
-    IcerFirst = 22,
-    IcerSecond = 23,
-    IcerThird = 24,
-    IcerFourth = 25,
-    IcerMetal = 26,
-    IcerGolden = 27,
-    IcerBlack = 28,
+    IcerFirst = 40,
+    IcerSecond = 41,
+    IcerThird = 42,
+    IcerFourth = 43,
+    IcerMetal = 44,
+    IcerGolden = 45,
+    IcerBlack = 46,
 
     // Konatsu
-    ShadowFirst = 29,
-    ShadowSecond = 30,
-    ShadowThird = 31,
+    ShadowFirst = 50,
+    ShadowSecond = 51,
+    ShadowThird = 52,
+
+    // Lycanthrope
+    LesserLycanthrope = 60,
+    Lycanthrope = 61,
+    AlphaLycanthrope = 62,
 
     // Namekian
-    SuperNamekian = 32,
-    SuperNamekian2 = 33,
-    SuperNamekian3 = 34,
-    SuperNamekian4 = 35,
+    SuperNamekian = 70,
+    SuperNamekian2 = 71,
+    SuperNamekian3 = 72,
+    SuperNamekian4 = 73,
 
     // Mutant
-    MutateFirst = 36,
-    MutateSecond = 37,
-    MutateThird = 38,
+    MutateFirst = 80,
+    MutateSecond = 81,
+    MutateThird = 82,
 
     // BioAndroid
-    BioMature = 39,
-    BioSemiPerfect = 40,
-    BioPerfect = 41,
-    BioSuperPerfect = 42,
+    BioMature = 90,
+    BioSemiPerfect = 91,
+    BioPerfect = 92,
+    BioSuperPerfect = 93,
 
     // Android
-    Android10 = 43,
-    Android20 = 44,
-    Android30 = 45,
-    Android40 = 46,
-    Android50 = 47,
-    Android60 = 48,
+    Android10 = 100,
+    Android20 = 101,
+    Android30 = 102,
+    Android40 = 103,
+    Android50 = 104,
+    Android60 = 105,
 
     // Majin
-    MajAffinity = 49,
-    MajSuper = 50,
-    MajTrue = 51,
+    MajAffinity = 110,
+    MajSuper = 111,
+    MajTrue = 112,
 
 
     // Kai
-    MysticFirst = 52,
-    MysticSecond = 53,
-    MysticThird = 54,
-
-    // Tuffle
-    AscendFirst = 55,
-    AscendSecond = 56,
-    AscendThird = 57,
-
-    // Demon
-    DarkKing = 58,
-
-    // LSSJ
-    Ikari = 59,
-    LegendarySaiyan = 60,
+    MysticFirst = 120,
+    MysticSecond = 121,
+    MysticThird = 123,
 
     // Kai Alt
-    DivineHalo = 61,
+    DivineHalo = 126,
 
-    // Lycanthrope
-    LesserLycanthrope = 120,
-    Lycanthrope = 121,
-    AlphaLycanthrope = 122,
+    // Tuffle
+    AscendFirst = 130,
+    AscendSecond = 131,
+    AscendThird = 132,
+
+    // Demon
+    DarkKing = 140,
 
     // Alternate Unbound Forms
-    PotentialUnleashed = 70,
-    EvilAura = 71,
-    UltraInstinct = 72,
+    PotentialUnleashed = 180,
+    EvilAura = 181,
+    UltraInstinct = 182,
 
      // Unbound Perm Forms
-    PotentialUnlocked = 90,
-    PotentialUnlockedMax = 91,
-    Majinized = 92,
-    DivineWater = 93,
+    PotentialUnlocked = 210,
+    PotentialUnlockedMax = 211,
+    Majinized = 212,
+    DivineWater = 213,
 
 };
 
