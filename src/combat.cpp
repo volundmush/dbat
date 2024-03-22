@@ -1424,13 +1424,13 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
         return;
     }
 
-    if (power > (vict->getEffMaxPL()) * 0.5) {
+    if (power > (vict->getMaxPL()) * 0.5) {
         dmg = rand_number(25, 40);
-    } else if (power > (vict->getEffMaxPL()) * 0.25) {
+    } else if (power > (vict->getMaxPL()) * 0.25) {
         dmg = rand_number(15, 24);
-    } else if (power > (vict->getEffMaxPL()) * 0.10) {
+    } else if (power > (vict->getMaxPL()) * 0.10) {
         dmg = rand_number(8, 14);
-    } else if (power > (vict->getEffMaxPL()) * 0.05) {
+    } else if (power > (vict->getMaxPL()) * 0.05) {
         dmg = rand_number(4, 7);
     } else {
         dmg = rand_number(1, 3);;
@@ -3111,56 +3111,58 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
             type = 0;
         }
 
+        int64_t pl = ch->getPL();
+
         // split switch approach to compress code.
         switch (type) {
             // big list of h2h stuff for starters.
             case -1:
-                cou1 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
-                cou2 = 1 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+                cou1 = 1 + ((skill / 4) * ((pl / 1200) + GET_STR(ch)));
+                cou2 = 1 + ((skill / 4) * ((pl / 1000) + GET_STR(ch)));
                 break;
             case 0: /* Punch */
-                cou1 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1600) + GET_STR(ch)));
-                cou2 = 15 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
+                cou1 = 15 + ((skill / 4) * ((pl / 1600) + GET_STR(ch)));
+                cou2 = 15 + ((skill / 4) * ((pl / 1300) + GET_STR(ch)));
                 break;
             case 1: /* Kick */
-                cou1 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1200) + GET_STR(ch)));
-                cou2 = 40 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+                cou1 = 40 + ((skill / 4) * ((pl / 1200) + GET_STR(ch)));
+                cou2 = 40 + ((skill / 4) * ((pl / 1000) + GET_STR(ch)));
                 break;
             case 2: /* Elbow */
-                cou1 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1300) + GET_STR(ch)));
-                cou2 = 100 + ((skill / 4) * ((GET_HIT(ch) / 1050) + GET_STR(ch)));
+                cou1 = 100 + ((skill / 4) * ((pl / 1300) + GET_STR(ch)));
+                cou2 = 100 + ((skill / 4) * ((pl / 1050) + GET_STR(ch)));
                 break;
             case 3: /* Knee */
-                cou1 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
-                cou2 = 150 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+                cou1 = 150 + ((skill / 4) * ((pl / 1100) + GET_STR(ch)));
+                cou2 = 150 + ((skill / 4) * ((pl / 1000) + GET_STR(ch)));
                 break;
             case 4: /* Roundhouse */
-                cou1 = 500 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
-                cou2 = 500 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
+                cou1 = 500 + ((skill / 4) * ((pl / 1000) + GET_STR(ch)));
+                cou2 = 500 + ((skill / 4) * ((pl / 800) + GET_STR(ch)));
                 break;
             case 5: /* Uppercut */
-                cou1 = 350 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
-                cou2 = 350 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
+                cou1 = 350 + ((skill / 4) * ((pl / 1100) + GET_STR(ch)));
+                cou2 = 350 + ((skill / 4) * ((pl / 900) + GET_STR(ch)));
                 break;
             case 6: /* Slam */
-                cou1 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 800) + GET_STR(ch)));
-                cou2 = 8000 + ((skill / 4) * ((GET_HIT(ch) / 500) + GET_STR(ch)));
+                cou1 = 8000 + ((skill / 4) * ((pl / 800) + GET_STR(ch)));
+                cou2 = 8000 + ((skill / 4) * ((pl / 500) + GET_STR(ch)));
                 break;
             case 8: /* Heeldrop */
-                cou1 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 700) + GET_STR(ch)));
-                cou2 = 12500 + ((skill / 4) * ((GET_HIT(ch) / 400) + GET_STR(ch)));
+                cou1 = 12500 + ((skill / 4) * ((pl / 700) + GET_STR(ch)));
+                cou2 = 12500 + ((skill / 4) * ((pl / 400) + GET_STR(ch)));
                 break;
             case 51: /* Bash */
-                cou1 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 700) + GET_STR(ch)));
-                cou2 = 1000 + ((skill / 4) * ((GET_HIT(ch) / 550) + GET_STR(ch)));
+                cou1 = 1000 + ((skill / 4) * ((pl / 700) + GET_STR(ch)));
+                cou2 = 1000 + ((skill / 4) * ((pl / 550) + GET_STR(ch)));
                 break;
             case 52: /* Headbutt */
-                cou1 = 800 + ((skill / 4) * ((GET_HIT(ch) / 900) + GET_STR(ch)));
-                cou2 = 800 + ((skill / 4) * ((GET_HIT(ch) / 650) + GET_STR(ch)));
+                cou1 = 800 + ((skill / 4) * ((pl / 900) + GET_STR(ch)));
+                cou2 = 800 + ((skill / 4) * ((pl / 650) + GET_STR(ch)));
                 break;
             case 56: /* TAILWHIP */
-                cou1 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1100) + GET_STR(ch)));
-                cou2 = 400 + ((skill / 4) * ((GET_HIT(ch) / 1000) + GET_STR(ch)));
+                cou1 = 400 + ((skill / 4) * ((pl / 1100) + GET_STR(ch)));
+                cou2 = 400 + ((skill / 4) * ((pl / 1000) + GET_STR(ch)));
                 break;
         }
 
@@ -3370,7 +3372,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
 
                 if (!IS_NPC(ch) && percent > 0.15) {
                     double hitperc = (percent - 0.15) * 5;
-                    int64_t amount = ch->getEffMaxPL() * hitperc;
+                    int64_t amount = ch->getMaxPL() * hitperc;
                     int64_t difference = GET_HIT(ch) - amount;
 
                     ch->decCurHealth(amount, 1);
@@ -3527,7 +3529,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
                 break;
         }
     } else {
-        dam = (GET_HIT(ch) * 0.05) + (GET_MAX_HIT(ch) * 0.025);
+        dam = (GET_HIT(ch) * 0.05) + (ch->getPL() * 0.025);
         dam += (dam * 0.005) * GET_STR(ch);
         if (GET_LEVEL(ch) >= 120) {
             dam *= 0.25;
@@ -3547,7 +3549,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
             dam += GET_INT(ch) * (dam * 0.005);
         }
 
-        auto mob_hit = GET_HIT(ch);
+        auto mob_hit = ch->getPL();
         auto max_hit = GET_MAX_HIT(ch);
         int64_t mobperc = (mob_hit * 100) / max_hit;
         if (mobperc < 98 && mobperc >= 90) {
@@ -3569,10 +3571,6 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
         }
     }
 
-
-    if (GET_KAIOKEN(ch) > 0) {
-        dam += (dam / 200) * GET_KAIOKEN(ch);
-    }
 
     /* Start of Fury Mode for halfbreeds */
     if (PLR_FLAGGED(ch, PLR_FURY) &&
@@ -3623,28 +3621,17 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
     if (IS_NPC(ch))
         return;
 
-    if (GET_MAX_HIT(vict) < GET_MAX_HIT(ch) / 10) {
+    if (vict->getPL() < vict->getPL() / 10) {
         weak = true;
     }
 
-    if (GET_LEVEL(ch) > 99) {
-        gain += rand_number(GET_LEVEL(ch) * 300, GET_LEVEL(ch) * 500);
-    } else if (GET_LEVEL(ch) > 80) {
-        gain += rand_number(GET_LEVEL(ch) * 150, GET_LEVEL(ch) * 200);
-    } else if (GET_LEVEL(ch) > 60) {
-        gain += rand_number(GET_LEVEL(ch) * 80, GET_LEVEL(ch) * 100);
-    } else if (GET_LEVEL(ch) > 50) {
-        gain += rand_number(GET_LEVEL(ch) * 20, GET_LEVEL(ch) * 25);
-    } else if (GET_LEVEL(ch) > 40) {
-        gain += rand_number(GET_LEVEL(ch) * 8, GET_LEVEL(ch) * 10);
-    } else if (GET_LEVEL(ch) > 30) {
-        gain += rand_number(GET_LEVEL(ch) * 5, GET_LEVEL(ch) * 8);
-    }
+    gain += rand_number(GET_CON(ch) / 2, GET_CON(ch) * 2);
+    
 
     if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
         gain /= 2;
     }
-    if (!(rand_number(1, 22) >= 18 && (GET_LEVEL(ch) == 100 || level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) > 0))) {
+    if (rand_number(1, 22) >= 18) {
         return;
     }
     if (weak) {
@@ -3960,7 +3947,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         } else if (MAJINIZED(ch) == ((vict)->id)) {
             send_to_char(ch, "You can not harm your master!\r\n");
             return 0;
-        } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && GET_MAX_HIT(vict) > GET_MAX_HIT(ch) + (GET_MAX_HIT(ch) * .5) &&
+        } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && vict->getPL() > ch->getPL() + (ch->getPL() * .5) &&
                    !FIGHTING(ch)) {
             send_to_char(ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
             return 0;
@@ -4179,9 +4166,6 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
         if (GET_CHARGE(ch) < 0) {
             GET_CHARGE(ch) = 0;
         }
-        if (GET_KAIOKEN(ch) > 0) {
-            st += (st / 20) * GET_KAIOKEN(ch);
-        }
         if (AFF_FLAGGED(ch, AFF_HASS)) {
             st += st * .3;
         }
@@ -4308,9 +4292,6 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             return;
         }
 
-        if (GET_KAIOKEN(ch) > 0) {
-            dmg += (dmg / 100) * (GET_KAIOKEN(ch) * 2);
-        }
 
         if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 8 || GET_GENOME(vict, 1) == 8) && type == 0) {
             int64_t drain = dmg * 0.1;
@@ -4616,7 +4597,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
             remember(vict, ch);
         }
-        if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getEffMaxPL())) / 4) {
+        if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getMaxPL())) / 4) {
             LASTHIT(vict) = GET_IDNUM(ch);
         }
         if (AFF_FLAGGED(vict, AFF_SLEEP) && rand_number(1, 2) == 2) {
@@ -4679,11 +4660,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
 
-        if (CARRYING(vict) && dmg > (((vict->getEffMaxPL())) * 0.01) && rand_number(1, 10) >= 8) {
+        if (CARRYING(vict) && dmg > (((vict->getMaxPL())) * 0.01) && rand_number(1, 10) >= 8) {
             carry_drop(vict, 2);
         }
 
-        if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= ((vict->getEffMaxPL())) * .98) {
+        if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= ((vict->getMaxPL())) * .98) {
             do_stand(vict, nullptr, 0, 0);
         }
         bool suppresso = (GET_SUPPRESS(vict) > 0);
@@ -4848,14 +4829,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     act("@R$N@w self destructs with a mild explosion!@n", true, ch, nullptr, vict, TO_ROOM);
                 }
                 if (dmg > 1) {
-                    if (type <= 0 && GET_HIT(ch) >= ((ch->getEffMaxPL()) * 0.5)) {
+                    if (type <= 0 && GET_HIT(ch) >= ((ch->getMaxPL()) * 0.5)) {
                         int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
                         ch->incCurKI(raise);
                     }
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     int64_t healhp = (long double) (GET_MAX_HIT(vict)) * 0.12;
-                    if (AFF_FLAGGED(ch, AFF_METAMORPH) ) {
+                    if (ch->technique == FormID::DarkMeta ) {
                         act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@r$n@R's dark aura saps some of your life energy!@n", true, ch, nullptr, vict, TO_VICT);
                         if (GET_HIT(ch) <= GET_MAX_HIT(ch)) {
@@ -4926,7 +4907,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 set_fighting(vict, ch);
             }
             if (dmg > 1 && suppresso == false) {
-                if (type == 0 && GET_HIT(ch) >= ((ch->getEffMaxPL()) * 0.5)) {
+                if (type == 0 && GET_HIT(ch) >= ((ch->getMaxPL()) * 0.5)) {
                     int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
                     ch->incCurKI(raise);
                 }

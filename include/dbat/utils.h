@@ -549,7 +549,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define IS_GRAP(ch)     (GRAPPLING(ch) || GRAPPLED(ch))
 #define GET_SPEEDINT(ch) (IS_BIO(ch) ? ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)) : ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)))
 #define IS_INFERIOR(ch) (IS_KONATSU(ch) || IS_DEMON(ch))
-#define IS_WEIGHTED(ch) ((ch)->getEffMaxPL() < GET_MAX_HIT(ch))
+#define IS_WEIGHTED(ch) ((ch)->speednar() < 1.0)
 
 
 #define GET_EXP(ch)      ((ch)->getExperience())
@@ -568,7 +568,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_ARMOR(ch)     ((ch)->getArmor())
 #define GET_ARMOR_LAST(ch) ((ch)->armor_last)
 #define GET_HIT(ch)      ((ch)->getCurPL())
-#define GET_MAX_HIT(ch)      ((ch)->getEffMaxPL())
+#define GET_MAX_HIT(ch)      ((ch)->getMaxPL())
 #define GET_MAX_MOVE(ch)  ((ch)->getMaxST())
 #define GET_MAX_MANA(ch)  ((ch)->getMaxKI())
 #define GET_KI(ch)      ((ch)->getCurKI())

@@ -183,23 +183,19 @@ ACMD(do_rpp) {
         send_to_char(ch, "@C                             Rewards Menu\n");
         send_to_char(ch, "@b  ------------------------------------------------------------------\n");
         send_to_char(ch,
-                     "  @C1@D)@R Disabled            @D[@G -- RPP @D]  @C2@D)@R Disabled              @D[@G -- RPP @D]@n\n");
+                     "  @C1@D)@R Disabled            @D[@G -- RPP @D]  @C2@D)@R Custom Equipment      @D[@G -- RPP @D]@n\n");
         send_to_char(ch,
-                     "  @C3@D)@c Custom Equipment    @D[@G 20 RPP @D]  @C4@D)@c Alignment Change      @D[@G 20 RPP @D]\n");
+                     "  @C3@D)@c Alignment Change    @D[@G 20 RPP @D]  @C4@D)@c 7,500 zenni           @D[@G 20 RPP @D]\n");
         send_to_char(ch,
-                     "  @C5@D)@c 7,500 zenni         @D[@G  1 RPP @D]  @C6@D)@c +2 To A Stat          @D[@G  2 RPP @D]\n");
+                     "  @C5@D)@c +2 To A Stat        @D[@G  1 RPP @D]  @C6@D)@c +750 PS               @D[@G  2 RPP @D]\n");
         send_to_char(ch,
-                     "  @C7@D)@c +750 PS             @D[@G  4 RPP @D]  @C8@D)@c Revival               @D[@G%3d RPP @D]\n",
+                     "  @C7@D)@c Revival             @D[@G  4 RPP @D]  @C8@D)@c Aura Change           @D[@G%3d RPP @D]\n",
                      revcost);
         send_to_char(ch,
-                     "  @C9@D)@c 50%s TNL Exp         @D[@G%3d RPP @D] @C10@D)@c Aura Change           @D[@G  2 RPP @D]\n",
+                     "  @C9@D)@c RPP Store           @D[@G%3d RPP @D] @C10@D)@c Extra Feature         @D[@G  2 RPP @D]\n",
                      "%", tnlcost);
         send_to_char(ch,
-                     " @C11@D)@c Reach Softcap       @D[@G  5 RPP @D] @C12@D)@c RPP Store             @D[@G ?? RPP @D]\n");
-        send_to_char(ch,
-                     " @C13@D)@c Extra Feature       @D[@G  1 RPP @D] @C14@D)@c Restring Equipment    @D[@G  1 RPP @D]\n");
-        send_to_char(ch,
-                     " @C15@D)@c Extra Skillslot     @D[@G  3 RPP @D] @C16@D)@R Disabled              @D[@G -- RPP @D]@n\n");
+                     " @C11@D)@c Restring Equipment  @D[@G  5 RPP @D] @C12@D)@c Extra Skillslot       @D[@G ?? RPP @D]\n");
         send_to_char(ch, "@b  ------------------------------------------------------------------@n\n");
         send_to_char(ch, "@D                           [@YYour RPP@D:@G %3d@D]@n\n", GET_RP(ch));
         // send_to_char(ch, "@D                           [@YRPP Bank@D:@G %3d@D]@n\n", GET_RBANK(ch));
@@ -220,7 +216,7 @@ ACMD(do_rpp) {
     /* Instant Reward Section*/
     if (selection > 2) {
 
-        if (selection == 3) { /* Custom Equipment Construction */
+        if (selection == 2) { /* Custom Equipment Construction */
             if (GET_RP(ch) < 20) {
                 send_to_char(ch, "You need at least 20 RPP to initiate a custom equipment build.\r\n");
                 return;
@@ -237,7 +233,7 @@ ACMD(do_rpp) {
                 return;
             }
         }
-        if (selection == 4) {     /* Simple Align Change*/
+        if (selection == 3) {     /* Simple Align Change*/
             pay = 20;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -271,7 +267,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Align Change */
 
-        if (selection == 5) { /*Simple Zenni Reward*/
+        if (selection == 4) { /*Simple Zenni Reward*/
             pay = 1;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -282,7 +278,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Zenni Reward */
 
-        if (selection == 6) {     /* Simple Stat Change*/
+        if (selection == 5) {     /* Simple Stat Change*/
             pay = 2;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -330,7 +326,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Align Change */
 
-        if (selection == 7) { /*Simple PS Reward*/
+        if (selection == 6) { /*Simple PS Reward*/
             pay = 4;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -341,7 +337,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Zenni Reward */
 
-        if (selection == 8) { /* Simple Revival Reward */
+        if (selection == 7) { /* Simple Revival Reward */
             pay = revcost;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -355,24 +351,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Revival Reward */
 
-        if (selection == 9) { /*Simple Exp Reward*/
-            pay = tnlcost;
-            if (GET_RP(ch) < pay) {
-                send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
-                return;
-            } else if (GET_LEVEL(ch) >= 100) {
-                send_to_char(ch, "You can not buy experience anymore at your level. I think you know why.\r\n");
-                return;
-            } else if (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) < 0) {
-                send_to_char(ch, "You can not buy experience anymore UNTIL you level.\r\n");
-                return;
-            } else {
-                ch->modExperience(level_exp(ch, GET_LEVEL(ch) + 1) * .52);
-                send_to_char(ch, "You gained 50%s of the entire experience needed for your next level.\r\n", "%");
-            } /* Can pay for it */
-        } /* End Simple Exp Reward */
-
-        if (selection == 10) {     /* Simple Aura Change*/
+        if (selection == 8) {     /* Simple Aura Change*/
             pay = 2;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
@@ -420,27 +399,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /* End Simple Aura Change */
 
-        if (selection == 11) {     /* Simple Soft-cap Reward*/
-            pay = 5;
-            if (GET_RP(ch) < pay) {
-                send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
-                return;
-            } else if (GET_LEVEL(ch) >= 100) {
-                send_to_char(ch, "You can't use this at level 100.\r\n");
-                return;
-            } else if (IS_ARLIAN(ch)) {
-                send_to_char(ch, "This is not available to bugs.\r\n");
-                return;
-            } else {
-                if (ch->is_soft_cap(0) && ch->is_soft_cap(1) && ch->is_soft_cap(2)) {
-                    send_to_char(ch, "You are already above your softcap for this level.\r\n");
-                    return;
-                }
-                bring_to_cap(ch);
-            } /* Can pay for it */
-        } /* End Simple Soft-cap Reward */
-
-        if (selection == 12) {
+        if (selection == 9) {
             if (!*arg2) {
                 disp_rpp_store(ch);
                 return;
@@ -454,12 +413,12 @@ ACMD(do_rpp) {
             }
         }
 
-        if (selection == 13) { /* Extra Feature Reward*/
+        if (selection == 10) { /* Extra Feature Reward*/
             rpp_feature(ch, arg2);
             return;
         } /* End Extra Feature Reward */
 
-        if (selection == 14) { /* Restring equipment reward */
+        if (selection == 11) { /* Restring equipment reward */
             pay = 1;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You need at least 1 RPP to initiate an equipment restring.\r\n");
@@ -497,7 +456,7 @@ ACMD(do_rpp) {
             }
         } /* End equipment restring reward */
 
-        if (selection == 15) { /* Skillslot Reward */
+        if (selection == 12) { /* Skillslot Reward */
             pay = 3;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP in your bank for that selection.\r\n");
@@ -513,7 +472,7 @@ ACMD(do_rpp) {
             } /* Can pay for it */
         } /*End Skillslot Reward */
 
-        if (selection == 16) { /* DB Spawn Reward */
+        if (selection == -1) { /* DB Spawn Reward */
             pay = 5000;
             if (GET_RP(ch) < pay) {
                 send_to_char(ch, "You do not have enough RPP in your bank for that selection.\r\n");
@@ -2153,10 +2112,6 @@ ACMD(do_suppress) {
         send_to_char(ch, "You are currently powering up, can't suppress.\r\n");
         return;
     }
-    if (GET_KAIOKEN(ch)) {
-        send_to_char(ch, "You are currently concentrating on kaioken!\r\n");
-        return;
-    }
 
     if (!*arg) {
         send_to_char(ch, "Suppress to what percent?\r\nSyntax: suppress (1 - 99 | release)\r\n");
@@ -2183,7 +2138,7 @@ ACMD(do_suppress) {
         return;
     }
 
-    int64_t max = (ch->getEffMaxPL());
+    int64_t max = (ch->getMaxPL());
     int64_t amt = ((max * 0.01) * num);
 
     reveal_hiding(ch, 0);
@@ -2503,7 +2458,7 @@ ACMD(do_fury) {
     }
 
     if (!*arg) {
-        if (GET_HIT(ch) < (ch->getEffMaxPL())) {
+        if (GET_HIT(ch) < (ch->getMaxPL())) {
             if ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.2) {
                 ch->restoreHealth(false);
                 ch->decCurLFPercent(.2);
@@ -3739,7 +3694,7 @@ ACMD(do_form) {
         }
     } else if (!(strcmp(arg, "senzu"))) {
         cost = GET_MAX_MANA(ch);
-        int64_t cost2 = (ch->getEffMaxPL()) - 1;
+        int64_t cost2 = (ch->getMaxPL()) - 1;
 
         if (senzu == false) {
             send_to_char(ch, "What do you want to create?\r\n");
@@ -3845,7 +3800,7 @@ ACMD(do_srepair) {
         if ((ch->getCurST()) < cost) {
             send_to_char(ch, "You do not have enough stamina to repair yourself.\r\n");
             return;
-        } else if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
+        } else if (GET_HIT(ch) >= (ch->getMaxPL())) {
             send_to_char(ch, "You are already at full functionality and do not require repairs.\r\n");
             return;
         } else {
@@ -3881,7 +3836,7 @@ ACMD(do_srepair) {
                 heal += heal * .25;
             }
 
-            if (ch->incCurHealth(heal) == ch->getEffMaxPL()) {
+            if (ch->incCurHealth(heal) == ch->getMaxPL()) {
                 send_to_char(ch, "You are fully repaired now.\r\n");
             }
 
@@ -4525,13 +4480,13 @@ ACMD(do_absorb) {
                 true, ch, nullptr, vict, TO_CHAR);
             act("@C$n@w rushes at @c$N@W and stabs $M with $s tail! $e quickly sucks out all the bio extract and leaves the empty husk of @c$N@W behind!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            int64_t stam = (vict->getBaseST()) / 2000;
-            int64_t ki = (vict->getBaseKI()) / 2000;
-            int64_t pl = (vict->getBasePL()) / 2000;
+            int64_t stam = (vict->getBaseST()) / 12000;
+            int64_t ki = (vict->getBaseKI()) / 12000;
+            int64_t pl = (vict->getBasePL()) / 12000;
             auto chCon = GET_CON(ch);
-            stam += rand_number(chCon, chCon * 2);
-            pl += rand_number(chCon, chCon * 2);
-            ki += rand_number(chCon, chCon * 2);
+            stam *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
+            pl *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
+            ki *= rand_number(chCon / 8, chCon / 4) * ch->getPotential();
             stam = std::min<int64_t>(stam, 1500000L);
             ki = std::min<int64_t>(ki, 1500000L);
             pl = std::min<int64_t>(pl, 1500000L);
@@ -4710,12 +4665,12 @@ ACMD(do_regenerate) {
         return;
     }
 
-    if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
+    if (GET_HIT(ch) >= (ch->getMaxPL())) {
         send_to_char(ch, "You do not need to regenerate, you are at full health.\r\n");
         return;
     }
 
-    if (GET_SUPPRESS(ch) > 0 && GET_HIT(ch) >= (((ch->getEffMaxPL()) / 100) * GET_SUPPRESS(ch))) {
+    if (GET_SUPPRESS(ch) > 0 && GET_HIT(ch) >= (((ch->getMaxPL()) / 100) * GET_SUPPRESS(ch))) {
         send_to_char(ch, "You do not need to regenerate, you are at full health.\r\n");
         return;
     }
@@ -4742,7 +4697,7 @@ ACMD(do_regenerate) {
         return;
     }
 
-    amt = ((ch->getEffMaxPL()) * 0.01) * num;
+    amt = ((ch->getMaxPL()) * 0.01) * num;
     if (amt > 1)
         amt /= 2;
 
@@ -4770,7 +4725,7 @@ ACMD(do_regenerate) {
 
     reveal_hiding(ch, 0);
 
-    if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
+    if (GET_HIT(ch) >= (ch->getMaxPL())) {
         act("You concentrate your ki and regenerate your body completely.", true, ch, nullptr, nullptr, TO_CHAR);
         act("$n concentrates and regenerates $s body completely.", true, ch, nullptr, nullptr, TO_ROOM);
     } else if (amt < GET_MAX_HIT(ch) / 10) {
@@ -5889,125 +5844,6 @@ ACMD(do_focus) {
     }
 }
 
-static std::map<int, int64_t> kaioken_levels = {
-        {1,  0},
-        {2,  0},
-        {3,  5000},
-        {4,  10000},
-        {5,  15000},
-        {6,  25000},
-        {7,  35000},
-        {8,  50000},
-        {9,  75000},
-        {10, 100000},
-        {11, 150000},
-        {12, 200000},
-        {13, 250000},
-        {14, 300000},
-        {15, 400000},
-        {16, 500000},
-        {17, 600000},
-        {18, 700000},
-        {19, 800000},
-        {20, 1000000}
-};
-
-ACMD(do_kaioken) {
-    char arg[MAX_INPUT_LENGTH];
-    int roll = axion_dice(0), x = 0, pass = false;
-    int64_t boost = 0;
-    one_argument(argument, arg);
-
-    if (!check_skill(ch, SKILL_KAIOKEN)) {
-        return;
-    }
-    if (GET_ALIGNMENT(ch) <= -50) {
-        send_to_char(ch, "Your heart is too corrupt to use that technique!\r\n");
-        return;
-    }
-    if (!IS_NPC(ch)) {
-        if (PLR_FLAGGED(ch, PLR_HEALT)) {
-            send_to_char(ch, "You are inside a healing tank!\r\n");
-            return;
-        }
-    }
-
-    if (!*arg) {
-        send_to_char(ch, "What level of kaioken do you want to try and achieve?\r\n"
-                         "Syntax: kaioken 1-20\r\n");
-        return;
-    }
-
-    x = atoi(arg);
-
-    if (x < 0 || x > 20) {
-        send_to_char(ch, "That level of kaioken dosn't exist...\r\n"
-                         "Syntax: kaioken 0-20\r\n");
-        return;
-    }
-
-    if (x == 0) {
-        if (GET_KAIOKEN(ch) > 0) {
-            ch->remove_kaioken(1);
-            return;
-        } else {
-            send_to_char(ch, "You are not in kaioken!\r\n");
-            return;
-        }
-    }
-
-    if (x == GET_KAIOKEN(ch)) {
-        send_to_char(ch, "You are already at that kaioken level! To release, try kaioken 0\r\n");
-        return;
-    }
-
-    if (!IS_NPC(ch)) {
-        if ((IS_TRANSFORMED(ch) || (IS_HOSHIJIN(ch) && GET_PHASE(ch) > 0)) && x > 5) {
-            send_to_char(ch, "You can not manage a kaioken level higher than 5 when transformed.\r\n");
-            return;
-        }
-    }
-
-    auto cost_unit = ch->getMaxKI() / 50;
-    auto cost_diff = cost_unit * GET_KAIOKEN(ch);
-    auto cost = (cost_unit * x) - cost_diff;
-
-    // it costs nothing to reduce your kaioken level.
-    if (x < GET_KAIOKEN(ch)) {
-        cost = 0;
-    }
-
-    if ((ch->getCurKI()) < cost) {
-        send_to_char(ch, "You do not have enough ki to focus into your body for that level.\r\n");
-        return;
-    }
-
-    int xnum = (x * 5) + 1;
-    roll = rand_number(1, xnum);
-    reveal_hiding(ch, 0);
-
-    ch->decCurKI(cost);
-    improve_skill(ch, SKILL_KAIOKEN, 1);
-
-    if (init_skill(ch, SKILL_KAIOKEN) < roll) {
-        send_to_char(ch, "You try to focus your ki into your body but mess up somehow.\r\n");
-        act("$n tries to use kaioken but messes up somehow.", true, ch, nullptr, nullptr, TO_ROOM);
-        WAIT_STATE(ch, PULSE_1SEC);
-        return;
-    }
-
-    if (ch->getMaxHealth() < kaioken_levels[x]) {
-        act("@rA blazing red aura bursts up around your body, flashing intensely before your body gives out and you release the kaioken because of the pressure!@n",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@rA blazing red aura bursts up around @R$n's @rbody, flashing intensely before $s body gives out and $e releases the kaioken because of the pressure!@n",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        return;
-    }
-
-    ch->apply_kaioken(x, true);
-
-    WAIT_STATE(ch, PULSE_1SEC);
-}
 
 ACMD(do_plant) {
     struct char_data *vict;
@@ -6638,7 +6474,7 @@ ACMD(do_heal) {
         heal += heal * .1;
     }
 
-    if (heal < (vict->getEffMaxPL())) {
+    if (heal < (vict->getMaxPL())) {
         heal += (heal / 100) * (GET_WIS(ch) / 4);
     }
 
@@ -6647,7 +6483,7 @@ ACMD(do_heal) {
         return;
     }
 
-    if (GET_HIT(vict) >= (vict->getEffMaxPL())) {
+    if (GET_HIT(vict) >= (vict->getMaxPL())) {
         if (vict != ch) {
             send_to_char(ch, "They are already at full health.\r\n");
         } else {
@@ -6656,7 +6492,7 @@ ACMD(do_heal) {
         return;
     }
 
-    if (GET_SUPPRESS(vict) > 0 && GET_HIT(vict) >= (((vict->getEffMaxPL()) / 100) * GET_SUPPRESS(vict))) {
+    if (GET_SUPPRESS(vict) > 0 && GET_HIT(vict) >= (((vict->getMaxPL()) / 100) * GET_SUPPRESS(vict))) {
         send_to_char(ch, "They are already at full health.\r\n");
         return;
     }
@@ -6732,7 +6568,7 @@ ACMD(do_heal) {
         improve_skill(ch, SKILL_HEAL, 0);
         if (vict->master == ch || ch->master == vict || ch->master == vict->master) {
             if (IS_NAIL(ch) && IS_NAMEK(ch) && level_exp(ch, GET_INT(ch) + 1) - GET_EXP(ch) > 0 && GET_HIT(vict) <=
-                                                                                                     (vict->getEffMaxPL()) *
+                                                                                                     (vict->getMaxPL()) *
                                                                                                      0.85 &&
                 rand_number(1, 3) == 3) {
                 ch->modExperience(level_exp(ch, GET_INT(ch) + 1) * 0.005);
@@ -7407,6 +7243,7 @@ ACMD(do_transform) {
     }/* End of No Argument */
 
     auto cur_form = ch->form;
+    auto cur_tech = ch->technique;
 
     // If we are in kaioken or something weird like that, prevent transforming.
     if (ch->form == FormID::GoldenOozaru || ch->form == FormID::Oozaru) {
@@ -7424,13 +7261,8 @@ ACMD(do_transform) {
     // check for revert.
     if (!strcasecmp("revert", arg)) {
         // Check if we can revert.
-        if (cur_form == FormID::Base) {
+        if (ch->form == FormID::Base && ch->technique == FormID::Base) {
             send_to_char(ch, "You are not transformed.\r\n");
-            return;
-        }
-
-        if (trans::blockRevertDisallowed(ch, FormID::Base)) {
-            send_to_char(ch, "That would be unthinkable.\r\n");
             return;
         }
 
@@ -7439,8 +7271,14 @@ ACMD(do_transform) {
             do_charge(ch, "release", 0, 0);
         }
 
-        trans::handleEchoRevert(ch, ch->form);
-        ch->form = FormID::Base;
+        if(ch->form != FormID::Base) {
+            trans::handleEchoRevert(ch, ch->form);
+            ch->form = FormID::Base;
+        }
+        if(ch->technique != FormID::Base) {
+            trans::handleEchoRevert(ch, ch->technique);
+            ch->technique = FormID::Base;
+        }
         ch->removeLimitBreak();
 
         int64_t afterKi = ch->getMaxKI();
@@ -7464,8 +7302,13 @@ ACMD(do_transform) {
         return;
     }
     auto trans = trans_maybe.value();
+    int formtype = trans::getFormType(ch, trans);
+    int grade = 1;
 
-    if (cur_form == trans) {
+    if (arg2) 
+        grade = atoi(arg2);
+
+    if ((cur_form == trans || (formtype == 2 && cur_tech == trans)) && grade == ch->transforms[trans].grade) {
         send_to_char(ch, "You are already in that form! Try 'revert'.\r\n");
         return;
     }
@@ -7475,7 +7318,7 @@ ACMD(do_transform) {
         return;
     }
 
-    if(ch->permForms.contains(trans)) {
+    if(formtype == 1 && ch->permForms.contains(trans)) {
         send_to_char(ch, "You are already evolved into that form!.\r\n");
         return;
     }
@@ -7493,13 +7336,23 @@ ACMD(do_transform) {
         }
     }
 
+    if (grade > trans::getMaxGrade(ch, trans)) {
+        grade = trans::getMaxGrade(ch, trans);
+        send_to_char(ch, "The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
+    }
+    if (grade < 1)
+        grade = 1;
+
     
     ch->removeLimitBreak();
-    int formtype = trans::getFormType(ch, trans);
+    
     if(formtype == 0)
         ch->form = trans;
     else if (formtype == 1)
         ch->permForms.insert(trans);
+    else if (formtype == 2)
+        ch->technique = trans;
+    ch->transforms[trans].grade = grade;
     // No way is this a stealthy process...
     reveal_hiding(ch, 0);
     trans::handleEchoTransform(ch, trans);
@@ -8365,7 +8218,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                 send_to_char(ABSORBING(d->character), "@wTry 'escape'!@n\r\n");
                 act("@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, nullptr,
                     ABSORBING(d->character), TO_NOTVICT);
-                if (GET_HIT(d->character) < (d->character->getEffMaxPL())) {
+                if (GET_HIT(d->character) < (d->character->getMaxPL())) {
                     d->character->incCurHealth(d->character->getMaxKI() * .04);
                     send_to_char(d->character,
                                  "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
@@ -9588,8 +9441,8 @@ ACMD(do_group) {
 
     highlvl = GET_LEVEL(ch);
     lowlvl = GET_LEVEL(ch);
-    highpl = (ch->getEffMaxPL());
-    lowpl = (ch->getEffMaxPL());
+    highpl = (ch->getMaxPL());
+    lowpl = (ch->getMaxPL());
 
     for (found = 0, f = ch->followers; f; f = f->next) {
         if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
@@ -9925,10 +9778,10 @@ ACMD(do_use) {
                         }
                         refreshed = false;
 
-                        if (GET_HIT(ch) <= (ch->getEffMaxPL()) * 0.99) {
-                            ch->incCurHealth(large_rand((ch->getEffMaxPL()) * 0.08, (ch->getEffMaxPL()) * 0.16));
+                        if (GET_HIT(ch) <= (ch->getMaxPL()) * 0.99) {
+                            ch->incCurHealth(large_rand((ch->getMaxPL()) * 0.08, (ch->getMaxPL()) * 0.16));
                             refreshed = true;
-                        } else if ((ch->getCurKI()) <= (ch->getEffMaxPL()) * 0.99) {
+                        } else if ((ch->getCurKI()) <= (ch->getMaxPL()) * 0.99) {
                             ch->incCurKI(large_rand(GET_MAX_MANA(ch) * 0.08, GET_MAX_MANA(ch) * 0.16));
                             refreshed = true;
                         } else if ((ch->getCurST()) <= GET_MAX_MOVE(ch) * 0.99) {
@@ -10005,13 +9858,13 @@ ACMD(do_display) {
     size_t i;
 
     if (IS_NPC(ch)) {
-        send_to_char(ch, "Mosters don't need displays.  Go away.\r\n");
+        send_to_char(ch, "Monsters don't need displays.  Go away.\r\n");
         return;
     }
     skip_spaces(&argument);
 
     if (!*argument) {
-        send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | C | M | O | all/on | none/off }\r\n");
+        send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | O | E | all/on | none/off }\r\n");
         return;
     }
 
@@ -10060,6 +9913,9 @@ ACMD(do_display) {
                 case 'o':
                     ch->pref.flip(PRF_FORM);
                     break;
+                case 'e':
+                    ch->pref.flip(PRF_TECH);
+                    break;
                 case 'f':
                     if (!IS_HALFBREED(ch)) {
                         send_to_char(ch, "Only halfbreeds use fury.\r\n");
@@ -10067,7 +9923,7 @@ ACMD(do_display) {
                     ch->pref.flip(PRF_FURY);
                     break;
                 default:
-                    send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | all/on | none/off }\r\n");
+                    send_to_char(ch, "Usage: prompt { P | K | T | S | F | H | G | L | O | E | all/on | none/off }\r\n");
                     return;
             }
         }
@@ -10742,7 +10598,7 @@ ACMD(do_fix) {
         return;
     } else { /* For androids repairing themselves */
 
-        if (GET_HIT(ch) >= (ch->getEffMaxPL())) {
+        if (GET_HIT(ch) >= (ch->getMaxPL())) {
             send_to_char(ch, "Your body is already in peak condition.\r\n");
             return;
         } else if (GET_SKILL(ch, SKILL_REPAIR) < axion_dice(0)) {
@@ -10756,10 +10612,10 @@ ACMD(do_fix) {
             act("You use the repair kit to fix part of your body...", true, ch, nullptr, nullptr, TO_CHAR);
             act("$n works on their body with a repair kit.", true, ch, nullptr, nullptr, TO_ROOM);
             int64_t mult = GET_SKILL(ch, SKILL_REPAIR);
-            int64_t add = (((ch->getEffMaxPL()) * 0.005) + 10) * mult;
+            int64_t add = (((ch->getMaxPL()) * 0.005) + 10) * mult;
 
             extract_obj(obj4);
-            if (ch->incCurHealth(add) == ch->getEffMaxPL()) {
+            if (ch->incCurHealth(add) == ch->getMaxPL()) {
                 send_to_char(ch, "Your body has been totally repaired.\r\n");
                 WAIT_STATE(ch, PULSE_5SEC);
             } else {
@@ -11479,7 +11335,7 @@ ACMD(do_aid) {
             dc = axion_dice(0);
             if ((GET_SKILL(ch, SKILL_FIRST_AID) + 1) > dc) {
                 send_to_char(ch, "You bandage %s's wounds.\r\n", GET_NAME(vict));
-                int64_t roll = (((vict->getEffMaxPL()) / 100) * (GET_WIS(ch) / 4)) + (vict->getEffMaxPL()) * 0.25;
+                int64_t roll = (((vict->getMaxPL()) / 100) * (GET_WIS(ch) / 4)) + (vict->getMaxPL()) * 0.25;
                 if (GET_BONUS(ch, BONUS_HEALER) > 0) {
                     roll += roll * .1;
                 }

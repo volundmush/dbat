@@ -503,6 +503,7 @@ struct trans_data {
 
     char *description{nullptr};
     double timeSpentInForm{0.0};
+    int grade = 1;
     bool visible = true;
     bool limitBroken = false;
     bool unlocked = false;
@@ -597,6 +598,7 @@ struct char_data : public unit_data {
     double getTimeModifier();
     double getPotential();
     void gainGrowth();
+    void gainGrowth(double);
 
     std::unordered_map<CharMoney, money_t> moneys;
     money_t get(CharMoney type);
@@ -699,10 +701,12 @@ struct char_data : public unit_data {
     int damage_mod{};        /* Any bonus or penalty to the damage	*/
 
     FormID form{FormID::Base};        /* Current form of the character		*/
+    FormID technique{FormID::Base};        /* Current technique form of the character		*/
     std::set<FormID> permForms;    /* Permanent forms of the character	*/
     double transBonus{0.0};   // Varies from -0.3 to 0.3
     double internalGrowth{0.0};
     double lifetimeGrowth{0.0};
+    double overGrowth{0.0};
     void gazeAtMoon();
 
     // Data stored about different forms.
@@ -937,7 +941,7 @@ struct char_data : public unit_data {
 
     int64_t harmCurHealth(int64_t amt);
 
-    int64_t getMaxPL();
+    int64_t getPL();
 
     int64_t getMaxPLTrans();
 
@@ -1104,9 +1108,7 @@ struct char_data : public unit_data {
 
     double speednar();
 
-    int64_t getEffMaxPL();
-
-    bool isWeightedPL();
+    int64_t getMaxPL();
 
     void apply_kaioken(int times, bool announce);
 

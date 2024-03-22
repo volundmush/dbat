@@ -286,7 +286,7 @@ namespace atk {
         if(result == DefenseResult::Dodged) return handleDodge();
         if(result == DefenseResult::Perfect_Dodged) return handlePerfectDodge();
         if(result == DefenseResult::Failed) return handleCleanHit();
-        if(result == DefenseResult::Missed) return Result::Missed;
+        if(result == DefenseResult::Missed) return handleMiss();
 
     }
 
@@ -376,6 +376,20 @@ namespace atk {
                     break;
             }
             if(calcDamage < 1) calcDamage = 1;
+
+            int divine = GET_SKILL(user, (int16_t) SkillID::DivineHalo);
+            int vicDivine = GET_SKILL(victim, (int16_t) SkillID::DivineHalo);
+            if(isKiAttack() && divine > 0 && divine >= axion_dice(0)) {
+                send_to_char(user, "You feel your Halo intensify, purging the impurity of your attack.\n");
+                send_to_room(user->getRoom(), "%s's halo flares, leaving their attack shimmering as it moves.\n");
+                calcDamage *= divine / 2;
+            }
+            if(isKiAttack() && vicDivine > 0 && vicDivine >= axion_dice(0)) {
+                send_to_char(user, "You feel your Halo intensify, burning away at your opponents attack.\n");
+                send_to_room(user->getRoom(), "%s's halo flares, burning away part of the blast coming for them.\n");
+                calcDamage /= (vicDivine / 50);
+            }
+
             hurt(targetLimb, limbhurtChance(), user, victim, obj, calcDamage, isKiAttack());
             if(victim) {
                 if(isPhysical()) tech_handle_fireshield(user, victim, getBodyPart().c_str());
@@ -555,10 +569,28 @@ namespace atk {
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
 
+        double incomingDamage = calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE);
+
+
         if(victim->getCurKI() > 0) {
-            victim->decCurKI(calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+            if (currentDodgeCheck > axion_dice(10))
+                incomingDamage /= 10;
+            if(incomingDamage > victim->getMaxKI() / 5 && !incomingDamage > victim->getMaxKI() * 5)
+                incomingDamage = victim->getMaxKI() / 5;
+
+            
+            victim->decCurKI(incomingDamage);
+
+            int instinct = GET_SKILL(user, (int16_t) SkillID::InstinctualCombat);
+            if(instinct >= axion_dice(20)) {
+                actVictim("@C$n@W, without even thinking about it you lash out towards $N, using their own momentum against them.@n");
+                actUser("@C$n@W, without breaking for a moment, lashes out, catching you offguard.@n");
+                actOthers("@C$n@W, without breaking for a moment, lashes out, using their momentum against them, and catches $N offguard.@n");
+
+                hurt(targetLimb, limbhurtChance(), victim, user, obj, (calcDamage / 2) * (instinct / 100), isKiAttack());
+            }
         } else {
-            victim->decCurST(2 * calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+            victim->decCurST(1.5 * incomingDamage);
             actVictim("@WContinuing to dodge without Ki takes a heavy toll.@n");
         }
 
@@ -1651,7 +1683,7 @@ namespace atk {
             master_pass = true;
 
         if (master_pass == true && record > GET_HIT(victim) &&
-            (record - GET_HIT(victim) > (victim->getEffMaxPL()) * 0.025)) {
+            (record - GET_HIT(victim) > (victim->getMaxPL()) * 0.025)) {
             if (!AFF_FLAGGED(victim, AFF_KNOCKED) && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
                 act("@C$N@W is knocked out!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@WYou are knocked out!@n", true, user, nullptr, victim, TO_VICT);
@@ -4022,7 +4054,7 @@ namespace atk {
     }
 
     void Bite::attackPostprocess() {
-        if (!IS_NPC(user)) {
+        if (!IS_NPC(user) && IS_MUTANT(user)) {
             if (axion_dice(0) > GET_CON(victim) && rand_number(1, 5) == 5) {
                 act("@R$N@r was poisoned by your bite!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@rYou were poisoned by the bite!@n", true, user, nullptr, victim, TO_VICT);
@@ -4030,6 +4062,12 @@ namespace atk {
                 user->poisoned.insert(victim);
                 int duration = (GET_INT(user) / 50) + 1;
                 assign_affect(victim, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
+            }
+        }
+        if((user->form == FormID::Lycanthrope && victim->getCurHealthPercent() <= 0.2) || user->form == FormID::AlphaLycanthrope) {
+            if(!victim->transforms.contains(FormID::Lycanthrope) && axion_dice(0) <= 30) {
+                victim->addTransform(FormID::Lycanthrope);
+                send_to_char(victim, "@rYour heart races, you feel like something is about to tear free of you.@n\n");
             }
         }
     }
@@ -4677,7 +4715,7 @@ namespace atk {
     }
 
     void Slash::attackPostprocess() {
-        if (beforepl - GET_HIT(victim) >= (victim->getEffMaxPL()) * 0.025) {
+        if (beforepl - GET_HIT(victim) >= (victim->getMaxPL()) * 0.025) {
             cut_limb(user, victim, wlvl, hitspot);
         }
     }

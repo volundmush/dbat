@@ -86,7 +86,7 @@ enum class SenseiID : uint8_t {
     Commoner = 14
 };
 
-enum class FormID : uint8_t {
+enum class FormID : uint16_t {
     // Universal,
     Base = 0,
     Custom1 = 1,
@@ -109,81 +109,98 @@ enum class FormID : uint8_t {
     SuperSaiyanGod = 16,
     SuperSaiyanBlue = 17,
 
+    // LSSJ
+    Ikari = 20,
+    LegendarySaiyan = 21,
+
     // Human'y Forms
-    SuperHuman = 18,
-    SuperHuman2 = 19,
-    SuperHuman3 = 20,
-    SuperHuman4 = 21,
+    SuperHuman = 30,
+    SuperHuman2 = 31,
+    SuperHuman3 = 32,
+    SuperHuman4 = 33,
 
 
     // Icer'y Forms
-    IcerFirst = 22,
-    IcerSecond = 23,
-    IcerThird = 24,
-    IcerFourth = 25,
-    IcerMetal = 26,
-    IcerGolden = 27,
-    IcerBlack = 28,
+    IcerFirst = 40,
+    IcerSecond = 41,
+    IcerThird = 42,
+    IcerFourth = 43,
+    IcerMetal = 44,
+    IcerGolden = 45,
+    IcerBlack = 46,
 
     // Konatsu
-    ShadowFirst = 29,
-    ShadowSecond = 30,
-    ShadowThird = 31,
+    ShadowFirst = 50,
+    ShadowSecond = 51,
+    ShadowThird = 52,
+
+    // Lycanthrope
+    LesserLycanthrope = 60,
+    Lycanthrope = 61,
+    AlphaLycanthrope = 62,
 
     // Namekian
-    SuperNamekian = 32,
-    SuperNamekian2 = 33,
-    SuperNamekian3 = 34,
-    SuperNamekian4 = 35,
+    SuperNamekian = 70,
+    SuperNamekian2 = 71,
+    SuperNamekian3 = 72,
+    SuperNamekian4 = 73,
 
     // Mutant
-    MutateFirst = 36,
-    MutateSecond = 37,
-    MutateThird = 38,
+    MutateFirst = 80,
+    MutateSecond = 81,
+    MutateThird = 82,
 
     // BioAndroid
-    BioMature = 39,
-    BioSemiPerfect = 40,
-    BioPerfect = 41,
-    BioSuperPerfect = 42,
+    BioMature = 90,
+    BioSemiPerfect = 91,
+    BioPerfect = 92,
+    BioSuperPerfect = 93,
 
     // Android
-    Android10 = 43,
-    Android20 = 44,
-    Android30 = 45,
-    Android40 = 46,
-    Android50 = 47,
-    Android60 = 48,
+    Android10 = 100,
+    Android20 = 101,
+    Android30 = 102,
+    Android40 = 103,
+    Android50 = 104,
+    Android60 = 105,
 
     // Majin
-    MajAffinity = 49,
-    MajSuper = 50,
-    MajTrue = 51,
+    MajAffinity = 110,
+    MajSuper = 111,
+    MajTrue = 112,
 
 
     // Kai
-    MysticFirst = 52,
-    MysticSecond = 53,
-    MysticThird = 54,
+    MysticFirst = 120,
+    MysticSecond = 121,
+    MysticThird = 123,
+
+    // Kai Alt
+    DivineHalo = 126,
 
     // Tuffle
-    AscendFirst = 55,
-    AscendSecond = 56,
-    AscendThird = 57,
+    AscendFirst = 130,
+    AscendSecond = 131,
+    AscendThird = 132,
 
     // Demon
-    DarkKing = 58,
+    DarkKing = 140,
 
     // Alternate Unbound Forms
-    PotentialUnleashed = 59,
-    EvilAura = 60,
-    UltraInstinct = 61,
+    PotentialUnleashed = 180,
+    EvilAura = 181,
+    UltraInstinct = 182,
 
      // Unbound Perm Forms
-    PotentialUnlocked = 90,
-    PotentialUnlockedMax = 91,
-    Majinized = 92,
-    DivineWater = 93,
+    PotentialUnlocked = 210,
+    PotentialUnlockedMax = 211,
+    Majinized = 212,
+    DivineWater = 213,
+
+
+    // Techniques
+    Kaioken = 300,
+    DarkMeta = 301,
 
 };
 
@@ -342,7 +359,10 @@ enum class SkillID : uint16_t {
     Multiform = 554,
     SpiritControl = 555,
     Balefire = 556,
-    BlessedHammer = 557
+    BlessedHammer = 557,
+
+    DivineHalo = 558,
+    InstinctualCombat = 559,
 };
 
 
@@ -1107,8 +1127,9 @@ enum class SkillID : uint16_t {
 #define PRF_IHEALTH     58
 #define PRF_ENERGIZE    59
 #define PRF_FORM        60
+#define PRF_TECH        61
 
-#define NUM_PRF_FLAGS   61
+#define NUM_PRF_FLAGS   62
 
 /* Player autoexit levels: used as an index to exitlevels           */
 #define EXIT_OFF        0       /* Autoexit off                     */
@@ -1650,8 +1671,10 @@ enum class SkillID : uint16_t {
 #define APPLY_PARRY_PERC       57
 #define APPLY_DODGE_PERC       58
 #define APPLY_BLOCK_PERC       59
+#define APPLY_REGEN_PL_PERC    60
+#define APPLY_REGEN_KI_PERC    61
 
-#define NUM_APPLIES 60
+#define NUM_APPLIES 62
 
 /* Container flags - value[1] */
 #define CONT_CLOSEABLE      (1 << 0)    /* Container can be closed	*/

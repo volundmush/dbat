@@ -2258,7 +2258,7 @@ ACMD(do_pgrant) {
         strForm = arg2;
     }
 
-     if(strForm == "growth") {
+    if(strForm == "growth") {
         if (vict)
             vict->internalGrowth += 500;
         else
@@ -2291,6 +2291,46 @@ ACMD(do_pgrant) {
         
     }
 
+}
+
+ACMD(do_rpreward) {
+    char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+    struct char_data *vict;
+
+    two_arguments(argument, arg1, arg2);
+ 
+    if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)) || !(arg2 == "low") || !(arg2 == "medium") || !(arg2 == "high")) {
+        send_to_char(ch, "No such character.\r\nUsage: rpreward <char> <low|medium|high>\r\n");
+        return;
+    }
+
+    int rppGain = 3;
+    double vitalsGain = 0.3;
+    int growthGain = 2;
+
+    if (arg2 == "medium") {
+        int rppGain = 5;
+        int vitalsGain = 0.6;
+        int growthGain = 3;
+    } else if (arg2 == "high") {
+        int rppGain = 7;
+        int vitalsGain = 0.9;
+        int growthGain = 4;
+    }
+
+    double boundPL = log(ch->getBasePL());
+    double boundKI = log(ch->getBaseKI());
+    double boundST = log(ch->getBaseST());
+
+    vict->modRPP(rppGain);
+    vict->gainGrowth(growthGain);
+
+    vict->gainBasePLPercent(vitalsGain * (1.0 / boundPL), true);
+    vict->gainBaseKIPercent(vitalsGain * (1.0 / boundKI), true);
+    vict->gainBaseSTPercent(vitalsGain * (1.0 / boundST), true);
+
+    send_to_char(ch, "Granted RP rewards to %s", vict->name);
+    log_imm_action("RP Reward: %s granted %s an RP reward!", ch, vict);
 }
 
 /* clean a room of all mobiles and objects */

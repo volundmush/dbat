@@ -280,25 +280,31 @@ static void mob_attack(struct char_data *ch, char *buf) {
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
             return;
         } else if (special < 100) { /* Normal physical attack */
-            if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_REPAIR) && GET_HIT(ch) <= (ch->getEffMaxPL()) * 0.5 &&
+            if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_REPAIR) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
                        rand_number(1, 20) >= 16) {
                 do_srepair(ch, nullptr, 0, 0);
             } else if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_ABSORB) && rand_number(1, 20) >= 19) {
                 do_absorb(ch, buf2, 0, 0);
-            } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getEffMaxPL()) * 0.5 &&
+            } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
                        rand_number(1, 20) >= 17) {
                 do_regenerate(ch, "25", 0, 0);
-            } else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getEffMaxPL()) * 0.5 && rand_number(1, 20) == 20) {
+            } else if (IS_NAMEK(ch) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 && rand_number(1, 20) == 20) {
                 do_regenerate(ch, "25", 0, 0);
             } else if (pick_n_throw(ch, buf)) {
                 /* This determines if they throw and also handles it */
             } else if (MOB_FLAGGED(ch, MOB_KNOWKAIO) && rand_number(1, 50) >= 46) {
                 if (rand_number(1, 10) == 10) {
-                    do_kaioken(ch, "20", 0, 0);
+                    ch->addTransform(FormID::Kaioken);
+                    ch->technique = FormID::Kaioken;
+                    ch->transforms[FormID::Kaioken].grade = 5;
                 } else if (rand_number(1, 10) >= 8) {
-                    do_kaioken(ch, "10", 0, 0);
+                    ch->addTransform(FormID::Kaioken);
+                    ch->technique = FormID::Kaioken;
+                    ch->transforms[FormID::Kaioken].grade = 10;
                 } else {
-                    do_kaioken(ch, "5", 0, 0);
+                    ch->addTransform(FormID::Kaioken);
+                    ch->technique = FormID::Kaioken;
+                    ch->transforms[FormID::Kaioken].grade = 20;
                 }
             } else {
                 switch (power) {
@@ -1066,7 +1072,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
 
         if (PLR_FLAGGED(ch, PLR_POWERUP) && rand_number(1, 3) == 3) {
             char buf3[MAX_STRING_LENGTH];
-            if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurKI()) >= GET_MAX_MANA(ch) / 20 &&
+            if (GET_HIT(ch) >= (ch->getMaxPL()) && (ch->getCurKI()) >= GET_MAX_MANA(ch) / 20 &&
                 GET_PREFERENCE(ch) != PREFERENCE_KI) {
                 if ((ch->getCurKI()) >= GET_MAX_MANA(ch) * 0.5) {
                     int64_t raise = GET_MAX_MOVE(ch) * 0.02;
@@ -1081,7 +1087,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
                 ch->playerFlags.reset(PLR_POWERUP);
-            } else if (GET_HIT(ch) >= (ch->getEffMaxPL()) && (ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1 &&
+            } else if (GET_HIT(ch) >= (ch->getMaxPL()) && (ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1 &&
                        GET_PREFERENCE(ch) == PREFERENCE_KI) {
                 if ((ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1) {
                     int64_t raise = GET_MAX_MOVE(ch) * 0.02;
@@ -1114,7 +1120,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 send_to_scouter(buf3, ch, 1, 0);
                 ch->playerFlags.reset(PLR_POWERUP);
             }
-            if (GET_HIT(ch) < (ch->getEffMaxPL()) && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
+            if (GET_HIT(ch) < (ch->getMaxPL()) && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
                                                        (ch->getCurKI()) >= GET_MAX_MANA(ch) / 20) ||
                                                       (GET_PREFERENCE(ch) == PREFERENCE_KI &&
                                                        (ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1))) {
@@ -2392,7 +2398,7 @@ void group_gain(struct char_data *ch, struct char_data *victim) {
             if (!IS_WEIGHTED(f->follower)) {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
-            } else if ((f->follower->getEffMaxPL()) >= (ch->getEffMaxPL()) * 0.5) {
+            } else if ((f->follower->getMaxPL()) >= (ch->getMaxPL()) * 0.5) {
                 tot_levels += GET_LEVEL(f->follower);
                 tot_members++;
             }

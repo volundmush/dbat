@@ -3710,8 +3710,8 @@ ACMD(do_eat) {
                 send_to_char(ch, "Practice Sessions capped for food at 1000 PS.\r\n");
         }
         //Good food can heal you
-        if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getEffMaxPL()) && subcmd != SCMD_TASTE) {
-            int64_t suppress = ((ch->getEffMaxPL()) * 0.01) * GET_SUPPRESS(ch);
+        if (!GET_OBJ_VAL(food, VAL_FOOD_POISON) && GET_HIT(ch) < (ch->getMaxPL()) && subcmd != SCMD_TASTE) {
+            int64_t suppress = ((ch->getMaxPL()) * 0.01) * GET_SUPPRESS(ch);
             if (GET_WEIGHT(food) < 6) {
                 ch->incCurHealthPercent(.05);
             } else {
