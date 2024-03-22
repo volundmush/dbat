@@ -741,6 +741,7 @@ const char *affected_bits[NUM_AFF_FLAGS + 1] =
                 "ETHEREALCHAINS_DEBUFF",
                 "STARPHASE",
                 "MINDBREAK_DEBUFF",
+                "LIMIT_BREAK",
                 "\n"
         };
 
