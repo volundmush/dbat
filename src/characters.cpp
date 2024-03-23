@@ -1273,8 +1273,8 @@ void char_data::gainGrowth() {
         modifier = 1.5;
     }
 
-    // You cannot exceed the amount of days the server has been online for
-    double gain = modifier / 24.0;
+    // Set with the idea its triggered once every 5 mins. Calculates to 0.5 per day. (288 '5 mins' in a day. Double to half the gain)
+    double gain = modifier / (288.0 * 2);
     gainGrowth(gain);
 }
 
