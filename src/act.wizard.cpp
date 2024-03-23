@@ -2299,8 +2299,12 @@ ACMD(do_rpreward) {
 
     two_arguments(argument, arg1, arg2);
  
-    if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)) || !(arg2 == "low") || !(arg2 == "medium") || !(arg2 == "high")) {
+    if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD))) {
         send_to_char(ch, "No such character.\r\nUsage: rpreward <char> <low|medium|high>\r\n");
+        return;
+    }
+    if (!(arg2 == "low" || arg2 == "medium" || arg2 == "high")) {
+        send_to_char(ch, "Usage: rpreward <char> <low|medium|high>\r\n");
         return;
     }
 

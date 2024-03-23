@@ -1418,9 +1418,6 @@ namespace trans {
             ch->incCurHealthPercent(plgain);
             ch->incCurKIPercent(kigain);
 
-            // Increment Growth
-            ch->gainGrowth();
-
             // Notify at thresholds
             if(form != FormID::Base) {
                 if(timeBefore < MASTERY_THRESHOLD && timeAfter >= MASTERY_THRESHOLD)

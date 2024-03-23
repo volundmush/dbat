@@ -322,7 +322,7 @@ void list_shops(struct char_data *ch, zone_rnum rnum, shop_vnum vmin, shop_vnum 
 			j = 0;
             for (auto r : sh.in_room)
                 send_to_char(ch, "%s@c[@y%d@c]@n",
-                             ((j > 0) && (j++ % 8 == 0)) ? "\r\n              " : " ", r);
+                             (j++ % 8 == 0) ? "\r\n              " : " ", r);
 
             if (j == 0)
                 send_to_char(ch, "@cNone.@n");

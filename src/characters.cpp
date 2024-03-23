@@ -1254,8 +1254,8 @@ double getServerDaysPassed() {
 
 double char_data::getPotential() {
     //Gain one potential per RL week, reaches 100 in two years
-    double timePotential = getTimeModifier();
-    timePotential /= 4;
+    double timePotential = getServerDaysPassed();
+    timePotential /= 7;
 
     int physiquePotential = 1;
     if(hasGravAcclim(0)) physiquePotential += 1;
@@ -1270,17 +1270,22 @@ double char_data::getPotential() {
 void char_data::gainGrowth() {
     double modifier = 1;
     if (ROOM_FLAGGED(IN_ROOM(this), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(this), ROOM_AL)) {
-        modifier = 2;
+        modifier = 1.5;
     }
 
     // You cannot exceed the amount of days the server has been online for
-    double gain = (modifier * (getTimeModifier() / 20.0)) / 10000.0;
+    double gain = modifier / 24.0;
     gainGrowth(gain);
 }
 
 void char_data::gainGrowth(double gain) {
     // You cannot exceed the amount of days the server has been online for
     double days = getServerDaysPassed();
+
+    // Roughly increase by a multiplier of 1 every 60 days past the first 60
+    double timeMod = std::max((getServerDaysPassed() / 60.0) , 1.0);
+
+    gain *= timeMod;
     
 
     if (lifetimeGrowth + gain < days) {
