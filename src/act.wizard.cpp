@@ -2303,7 +2303,7 @@ ACMD(do_rpreward) {
         send_to_char(ch, "No such character.\r\nUsage: rpreward <char> <low|medium|high>\r\n");
         return;
     }
-    if (!(arg2 == "low" || arg2 == "medium" || arg2 == "high")) {
+    if (!(is_abbrev(arg2, "low") || is_abbrev(arg2, "medium") || is_abbrev(arg2, "high"))) {
         send_to_char(ch, "Usage: rpreward <char> <low|medium|high>\r\n");
         return;
     }
@@ -2312,11 +2312,11 @@ ACMD(do_rpreward) {
     double vitalsGain = 0.3;
     int growthGain = 2;
 
-    if (arg2 == "medium") {
+    if (is_abbrev(arg2, "medium")) {
         int rppGain = 5;
         int vitalsGain = 0.6;
         int growthGain = 3;
-    } else if (arg2 == "high") {
+    } else if (is_abbrev(arg2, "high")) {
         int rppGain = 7;
         int vitalsGain = 0.9;
         int growthGain = 4;
