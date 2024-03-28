@@ -3818,10 +3818,14 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
 		//Handling for awarding vitals to the player
         std::vector<int64_t> stats;
-        for (const auto stat: {0, 1, 2}) {
-            if (!ch->is_soft_cap(stat, 1.0))
-                stats.push_back(stat);
+        for (const auto stat: {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+            if (!ch->is_soft_cap((int) stat, 1.0))
+                stats.push_back((int) stat);
         }
+
+        if(ch->technique == FormID::TigerStance) stats.push_back((int) CharStat::PowerLevel);
+        if(ch->technique == FormID::EagleStance) stats.push_back((int) CharStat::Ki);
+        if(ch->technique == FormID::OxStance) stats.push_back((int) CharStat::Stamina);
 
         if(!stats.empty()) {
 

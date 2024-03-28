@@ -195,6 +195,15 @@ namespace trans {
                 return "Kaioken";
             case FormID::DarkMeta:
                 return "Dark Meta";
+
+
+
+            case FormID::TigerStance:
+                return "Tiger Stance";
+            case FormID::EagleStance:
+                return "Eagle Stance";
+            case FormID::OxStance:
+                return "Ox Stance";
                 
             // Whoops?
             default: 
@@ -222,6 +231,13 @@ namespace trans {
             case FormID::DarkMeta:
                 return "@w...$e has a dark, @rred@w aura and menacing presence.";
 
+            case FormID::TigerStance:
+                return "@w...$e has a an aggressive demeanour, ready for a fight.";
+            case FormID::EagleStance:
+                return "@w...$e has a calm appearance, eyes constantly alert.";
+            case FormID::OxStance:
+                return "@w...$e is hunkered down, yet their presence appears larger.";
+
             default:
                 return "@w...$e has energy crackling around $s body!";
         }
@@ -243,6 +259,13 @@ namespace trans {
                 return maxGrade;
             case FormID::DarkMeta:
                 return GET_SKILL(ch, (int)SkillID::Metamorph) >= 100 ? 2 : 1;
+
+            case FormID::TigerStance:
+                return std::max(GET_SKILL(ch, (int)SkillID::TigerStance) / 20, 1);
+            case FormID::EagleStance:
+                return std::max(GET_SKILL(ch, (int)SkillID::EagleStance) / 20, 1);
+            case FormID::OxStance:
+                return std::max(GET_SKILL(ch, (int)SkillID::OxStance) / 20, 1);
 
             default:
                 return 1;
@@ -452,6 +475,14 @@ namespace trans {
             case FormID::DarkMeta:
                 return "dm";
 
+
+            case FormID::TigerStance:
+                return "tiger";
+            case FormID::EagleStance:
+                return "eagle";
+            case FormID::OxStance:
+                return "ox";
+
             // Whoops?
             default:
                 return "Unknown";
@@ -650,6 +681,19 @@ namespace trans {
 
         {FormID::DarkMeta, [](struct char_data *ch) {
             return GET_SKILL(ch, (int) SkillID::Metamorph) > 0 && !ch->transforms.contains(FormID::Kaioken);
+            }},
+
+
+        {FormID::TigerStance, [](struct char_data *ch) {
+            return GET_SKILL(ch, (int) SkillID::TigerStance) > 0;
+            }},
+
+        {FormID::EagleStance, [](struct char_data *ch) {
+            return GET_SKILL(ch, (int) SkillID::EagleStance) > 0;
+            }},
+        
+        {FormID::OxStance, [](struct char_data *ch) {
+            return GET_SKILL(ch, (int) SkillID::OxStance) > 0;
             }},
 
     };
@@ -1263,6 +1307,49 @@ namespace trans {
             }
         },
 
+        {
+            FormID::TigerStance, {
+                {APPLY_PHYS_DAM_PERC, 0.0, -1, [](struct char_data *ch) {
+                    double mult = (1 + (0.05 * getMasteryTier(ch, FormID::TigerStance)));
+                    
+                    if (axion_dice(0) <= (GET_SKILL(ch, (int)SkillID::TigerStance) * mult)) {
+                        send_to_char(ch, "Primal strength courses through you.\r\n");
+                        send_to_room(ch->getRoom(), "$n lurches forwards with ferocious might.\r\n");
+                        return (0.05 * ch->transforms[FormID::TigerStance].grade) * mult;
+                    }
+
+                    return 0.0;}},
+            }
+        },
+        {
+            FormID::EagleStance, {
+                {APPLY_PHYS_DAM_PERC, 0.0, -1, [](struct char_data *ch) {
+                    double mult = (1 + (0.05 * getMasteryTier(ch, FormID::EagleStance)));
+                    
+                    if (axion_dice(0) <= (GET_SKILL(ch, (int)SkillID::EagleStance) * mult)) {
+                        send_to_char(ch, "Your mind an ki align, power flaring.\r\n");
+                        send_to_room(ch->getRoom(), "$n's movements slow, their ki redoubling in strength.\r\n");
+                        return (0.05 * ch->transforms[FormID::EagleStance].grade) * mult;
+                    }
+
+                    return 0.0;}},
+            }
+        },
+        {
+            FormID::OxStance, {
+                {APPLY_PHYS_DAM_PERC, 0.0, -1, [](struct char_data *ch) {
+                    double mult = (1 + (0.05 * getMasteryTier(ch, FormID::OxStance)));
+                    
+                    if (axion_dice(0) <= (GET_SKILL(ch, (int)SkillID::OxStance) * mult)) {
+                        send_to_char(ch, "Hah, that didn't hurt half as much!\r\n");
+                        send_to_room(ch->getRoom(), "$n's hulking form barely seems grazed by the attack!\r\n");
+                        return (0.05 * ch->transforms[FormID::OxStance].grade) * mult;
+                    }
+
+                    return 0.0;}},
+            }
+        },
+
     };
 
     static double getModifierHelper(char_data* ch, FormID form, int location, int specific) {
@@ -1359,7 +1446,11 @@ namespace trans {
 
         // Techniques
         {FormID::Kaioken, .05},
-        {FormID::DarkMeta, .1}
+        {FormID::DarkMeta, .1},
+
+        {FormID::TigerStance, .02},
+        {FormID::EagleStance, .02},
+        {FormID::OxStance, .02},
     };
 
     double getStaminaDrain(char_data* ch, FormID form, bool upkeep) {
@@ -1954,7 +2045,11 @@ namespace trans {
 
         // Techniques
         FormID::Kaioken,
-        FormID::DarkMeta
+        FormID::DarkMeta,
+
+        FormID::TigerStance,
+        FormID::EagleStance,
+        FormID::OxStance,
     };
 
 
@@ -2219,7 +2314,11 @@ namespace trans {
 
         // Techniques
         {FormID::Kaioken, {0, 2}},
-        {FormID::DarkMeta, {0, 2}}
+        {FormID::DarkMeta, {0, 2}},
+
+        {FormID::TigerStance, {0, 2}},
+        {FormID::EagleStance, {0, 2}},
+        {FormID::OxStance, {0, 2}},
 
     };
 
