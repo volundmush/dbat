@@ -159,6 +159,10 @@ namespace skill {
 
             {SkillID::DivineHalo, "Divine Halo"},
             {SkillID::InstinctualCombat, "Instinctual Combat"},
+
+            {SkillID::TigerStance, "Tiger Stance"},
+            {SkillID::EagleStance, "Eagle Stance"},
+            {SkillID::OxStance, "Ox Stance"},
     };
 
     std::string getName(SkillID skill) {

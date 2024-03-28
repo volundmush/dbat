@@ -192,6 +192,8 @@ void sedit_setup_new(struct descriptor_data *d) {
      * Stir the lists lightly.
      */
 
+    shop_buy_data* buy_data = new shop_buy_data();
+    shop->type.push_back(*buy_data);
     S_BUYTYPE(shop, 0) = NOTHING;
     SET_BIT_AR(S_NOTRADE(shop), TRADE_NOBROKEN);
 

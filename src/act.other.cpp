@@ -668,11 +668,11 @@ ACMD(do_willpower) {
         send_to_char(ch, "You are not majinized and have no need to reclaim full control of your own will.\r\n");
         return;
     } else {
-        if (GET_PRACTICES(ch) < 100 && GET_WIS(ch) < 100) {
-            send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
+        if (ch->internalGrowth < 30 && GET_WIS(ch) < 100) {
+            send_to_char(ch, "You do not have enough Growth to focus your attempt to break free.\r\n");
             fail = true;
         }
-        if (GET_PRACTICES(ch) < 200 && GET_WIS(ch) >= 100) {
+        if (ch->internalGrowth < 60 && GET_WIS(ch) >= 100) {
             send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
             fail = true;
         }
@@ -681,7 +681,6 @@ ACMD(do_willpower) {
             return;
         } else {
             ch->setExperience(0);
-            ch->modPractices(-100);
             if (rand_number(10, 100) - GET_INT(ch) > 60) {
                 reveal_hiding(ch, 0);
                 act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n",
@@ -691,7 +690,7 @@ ACMD(do_willpower) {
                 return;
             } else {
                 ch->setExperience(0);
-                ch->modPractices(-100);
+                ch->internalGrowth -= 30;
                 reveal_hiding(ch, 0);
                 act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
