@@ -1089,6 +1089,7 @@ ACMD(do_liquefy) {
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
             ch->affected_by.set(AFF_LIQUEFIED);
+            ch->affected_by.set(AFF_HIDE);
             return;
         }
     } else if (!strcasecmp(arg, "explode")) {
