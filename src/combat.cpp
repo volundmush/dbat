@@ -3816,76 +3816,88 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         if(ki > (ch->getBaseKI() / 20)) ki = ch->getBaseKI() / 20;
         if(st > (ch->getBaseST() / 20)) st = ch->getBaseST() / 20;
 
-		//Handling for awarding vitals to the player
-        std::vector<int64_t> stats;
-        for (const auto stat: {0, 1, 2}) {
-            if (!ch->is_soft_cap(stat, 1.0))
-                stats.push_back(stat);
-        }
-
-        if(!stats.empty()) {
-
-            auto itr = Random::get(stats);
-
-            do {
-                switch(*itr) {
-                    case 0:
-                        send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
-                        ch->gainBasePL(pl);
-                        if(axion_dice(0) <= attrChance) {
-                            int rand = rand_number(1, 2);
-                            CharAttribute val;
-                            if(rand == 1) {
-                                val = CharAttribute::Agility;
-                                send_to_char(ch, "@mYour body feels like it's light as a feather!@n\r\n");
-                            } else {
-                                val = CharAttribute::Speed;
-                                send_to_char(ch, "@mThe world feels just a little slower.@n\r\n");
-                            }
-
-                        ch->mod(val, 1);
-                    }
-                    break;
-                    case 1:
-                        send_to_char(ch, "@D[@Y+ @C%s @cKI@D]@n\r\n", add_commas(ki).c_str());
-                        ch->gainBaseKI(ki);
-                        if(axion_dice(0) <= attrChance) {
-                            int rand = rand_number(1, 2);
-                            CharAttribute val;
-                            if(rand == 1) {
-                                val = CharAttribute::Intelligence;
-                                send_to_char(ch, "@mYou begin to notice new ways to put together your attacks.@n\r\n");
-                            } else {
-                                val = CharAttribute::Wisdom;
-                                send_to_char(ch, "@mYou notice a couple of flaws in your opponents technique.@n\r\n");
-                            }
-
-                        ch->mod(val, 1);
-                    }
-                    break;
-                    case 2:
-                        send_to_char(ch, "@D[@Y+ @C%s @cST@D]@n\r\n", add_commas(st).c_str());
-                        ch->gainBaseST(st);
-                        if(axion_dice(0) <= attrChance) {
-                            int rand = rand_number(1, 2);
-                            CharAttribute val;
-                            if(rand == 1) {
-                                val = CharAttribute::Constitution;
-                                send_to_char(ch, "@mThe pain of your wounds feel just a little bit less important.@n\r\n");
-                            } else {
-                                val = CharAttribute::Strength;
-                                send_to_char(ch, "@mYour hits seem to be landing just a bit harder.@n\r\n");
-                            }
-
-                        ch->mod(val, 1);
-                    }
-                    break;
-                }
-            } while (rand_number(1,3) == 3);
-        } else {
-            send_to_char(ch, "\r\n");
-        }
+		giveRandomVital(ch, pl, ki, st, attrChance);
     }
+}
+
+void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attrChance) {
+    //Handling for awarding vitals to the player
+    if(pl > (ch->getBasePL() / 10)) pl = ch->getBasePL() / 10;
+    if(ki > (ch->getBaseKI() / 10)) ki = ch->getBaseKI() / 10;
+    if(st > (ch->getBaseST() / 10)) st = ch->getBaseST() / 10;
+    
+    std::vector<int64_t> stats;
+    for (const auto stat: {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+        if (!ch->is_soft_cap((int) stat, 1.0))
+            stats.push_back((int) stat);
+    }
+
+    if(ch->technique == FormID::TigerStance) stats.push_back((int) CharStat::PowerLevel);
+    if(ch->technique == FormID::EagleStance) stats.push_back((int) CharStat::Ki);
+    if(ch->technique == FormID::OxStance) stats.push_back((int) CharStat::Stamina);
+
+    if(!stats.empty()) {
+
+        do {
+            auto itr = Random::get(stats);
+            switch(*itr) {
+                case 0:
+                    send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
+                    ch->gainBasePL(pl);
+                    if(axion_dice(0) <= attrChance) {
+                        int rand = rand_number(1, 2);
+                        CharAttribute val;
+                        if(rand == 1) {
+                            val = CharAttribute::Agility;
+                            send_to_char(ch, "@mYour body feels like it's light as a feather!@n\r\n");
+                        } else {
+                            val = CharAttribute::Speed;
+                            send_to_char(ch, "@mThe world feels just a little slower.@n\r\n");
+                        }
+
+                    ch->mod(val, 1);
+                }
+                break;
+                case 1:
+                    send_to_char(ch, "@D[@Y+ @C%s @cKI@D]@n\r\n", add_commas(ki).c_str());
+                    ch->gainBaseKI(ki);
+                    if(axion_dice(0) <= attrChance) {
+                        int rand = rand_number(1, 2);
+                        CharAttribute val;
+                        if(rand == 1) {
+                            val = CharAttribute::Intelligence;
+                            send_to_char(ch, "@mYou begin to notice new ways to put together your attacks.@n\r\n");
+                        } else {
+                            val = CharAttribute::Wisdom;
+                            send_to_char(ch, "@mYou notice a couple of flaws in your opponents technique.@n\r\n");
+                        }
+
+                    ch->mod(val, 1);
+                }
+                break;
+                case 2:
+                    send_to_char(ch, "@D[@Y+ @C%s @cST@D]@n\r\n", add_commas(st).c_str());
+                    ch->gainBaseST(st);
+                    if(axion_dice(0) <= attrChance) {
+                        int rand = rand_number(1, 2);
+                        CharAttribute val;
+                        if(rand == 1) {
+                            val = CharAttribute::Constitution;
+                            send_to_char(ch, "@mThe pain of your wounds feel just a little bit less important.@n\r\n");
+                        } else {
+                            val = CharAttribute::Strength;
+                            send_to_char(ch, "@mYour hits seem to be landing just a bit harder.@n\r\n");
+                        }
+
+                    ch->mod(val, 1);
+                }
+                break;
+            }
+        } while (rand_number(1,3) == 3);
+    } else {
+        send_to_char(ch, "\r\n");
+    }
+    
 }
 
 void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t dmg) {

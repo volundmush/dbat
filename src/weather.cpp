@@ -371,6 +371,21 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
     }
 }
 
+static void advanceGrowth() {
+    struct descriptor_data *d;
+    struct char_data *tch;
+    for (d = descriptor_list; d; d = d->next) {
+        if (!IS_PLAYING(d))
+            continue;
+        if (d->original)
+            tch = d->original;
+        else if (!(tch = d->character))
+            continue;
+
+        tch->gainGrowth();
+    }
+}
+
 static void secondChanged() {
 
 }
@@ -392,6 +407,7 @@ static void hourChanged() {
     weather_change();
     check_time_triggers();
     check_interval_triggers(MTRIG_HOURLY);
+    advanceGrowth();
 
     switch (time_info.hours) {
         case 4:
@@ -432,6 +448,8 @@ static void hourChanged() {
         default:
             break;
     }
+
+
 }
 
 static void dayChanged() {

@@ -202,6 +202,10 @@ enum class FormID : uint16_t {
     Kaioken = 300,
     DarkMeta = 301,
 
+    TigerStance = 302,
+    EagleStance = 303,
+    OxStance = 304,
+
 };
 
 
@@ -363,6 +367,10 @@ enum class SkillID : uint16_t {
 
     DivineHalo = 558,
     InstinctualCombat = 559,
+
+    TigerStance = 560,
+    EagleStance = 561,
+    OxStance = 562,
 };
 
 

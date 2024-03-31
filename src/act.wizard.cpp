@@ -1162,7 +1162,7 @@ void list_zone_commands_room(struct char_data *ch, room_vnum rvnum) {
     }
 
     send_to_char(ch, "Zone commands in this room:@y\r\n");
-    while (ZOCMD.command != 'S') {
+    for(int i; i < zone_table[zrnum].cmd.size(); i++) {
         switch (ZOCMD.command) {
             case 'M':
             case 'O':
@@ -2299,8 +2299,12 @@ ACMD(do_rpreward) {
 
     two_arguments(argument, arg1, arg2);
  
-    if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)) || !(arg2 == "low") || !(arg2 == "medium") || !(arg2 == "high")) {
+    if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD))) {
         send_to_char(ch, "No such character.\r\nUsage: rpreward <char> <low|medium|high>\r\n");
+        return;
+    }
+    if (!(is_abbrev(arg2, "low") || is_abbrev(arg2, "medium") || is_abbrev(arg2, "high"))) {
+        send_to_char(ch, "Usage: rpreward <char> <low|medium|high>\r\n");
         return;
     }
 
@@ -2308,11 +2312,11 @@ ACMD(do_rpreward) {
     double vitalsGain = 0.3;
     int growthGain = 2;
 
-    if (arg2 == "medium") {
+    if (is_abbrev(arg2, "medium")) {
         int rppGain = 5;
         int vitalsGain = 0.6;
         int growthGain = 3;
-    } else if (arg2 == "high") {
+    } else if (is_abbrev(arg2, "high")) {
         int rppGain = 7;
         int vitalsGain = 0.9;
         int growthGain = 4;
