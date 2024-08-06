@@ -3,6 +3,11 @@
 #include "dbat/comm.h"
 #include "dbat/utils.h"
 #include "dbat/weather.h"
+#include "dbat/genzon.h"
+#include "dbat/dg_comm.h"
+#include "dbat/dg_scripts.h"
+#include <dbat/combat.h>
+#include <dbat/attack.h>
 
 namespace trans {
     static std::string getCustomName(struct char_data* ch, FormID form) {
@@ -204,6 +209,9 @@ namespace trans {
                 return "Eagle Stance";
             case FormID::OxStance:
                 return "Ox Stance";
+
+            case FormID::SpiritAbsorption:
+                return "@YSpirit Absorption@n";
                 
             // Whoops?
             default: 
@@ -212,6 +220,8 @@ namespace trans {
     }
 
     std::string getExtra(struct char_data* ch, FormID form) {
+        double energy = 0;
+        std::string tag = "";
         switch (form) {
             case FormID::Oozaru:
                 return "@w...$e is in the form of a @rgreat ape@w!";
@@ -224,7 +234,7 @@ namespace trans {
             case FormID::SuperSaiyan3:
                 return "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!";
             case FormID::SuperSaiyan4:
-                return "@w...$e has a @Ybright @Yg@yo@Yl@yd@Ye@yn@w aura around $s body!";
+                return "@w...$e has a covering of @rdark red fur@n around $s body!";
 
             case FormID::Kaioken:
                 return "@w...@r$e has a red aura around $s body!";
@@ -232,11 +242,28 @@ namespace trans {
                 return "@w...$e has a dark, @rred@w aura and menacing presence.";
 
             case FormID::TigerStance:
-                return "@w...$e has a an aggressive demeanour, ready for a fight.";
+                return "@w...$e has an aggressive demeanour, ready for a fight.";
             case FormID::EagleStance:
                 return "@w...$e has a calm appearance, eyes constantly alert.";
             case FormID::OxStance:
-                return "@w...$e is hunkered down, yet their presence appears larger.";
+                return "@w...$e is hunkered down, yet $s presence appears larger.";
+
+            case FormID::SpiritAbsorption:
+                energy = ch->transforms[FormID::SpiritAbsorption].vars[0];
+                if(energy > 1000000000) {
+                    tag = "@Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n";
+                } else if(energy > 100000000) {
+                    tag = "@Ceclipsing@n";
+                } else if(energy > 10000000) {
+                    tag = "@crackling@n";
+                } else if(energy > 1000000) {
+                    tag = "bright";
+                } else if(energy > 100000) {
+                    tag = "fading";
+                } else {
+                    tag = "faint";
+                }
+                return "@w...$e has a " + tag + " aura wrapped around $s body!";
 
             default:
                 return "@w...$e has energy crackling around $s body!";
@@ -266,6 +293,9 @@ namespace trans {
                 return std::max(GET_SKILL(ch, (int)SkillID::EagleStance) / 20, 1);
             case FormID::OxStance:
                 return std::max(GET_SKILL(ch, (int)SkillID::OxStance) / 20, 1);
+
+            case FormID::SpiritAbsorption:
+                return 3;
 
             default:
                 return 1;
@@ -483,6 +513,9 @@ namespace trans {
             case FormID::OxStance:
                 return "ox";
 
+            case FormID::SpiritAbsorption:
+                return "spiritab";
+
             // Whoops?
             default:
                 return "Unknown";
@@ -501,6 +534,16 @@ namespace trans {
         {FormID::Kaioken, {FormID::DarkMeta}},
     };
 
+    static std::unordered_map<FormID, std::function<bool(struct char_data *ch)>> trans_requirements = {
+        {FormID::SpiritAbsorption, [](struct char_data *ch) {
+            auto loc = get_obj_in_room(ch->getRoom(), "Spirit Bomb");
+            return loc == nullptr ? false : true;
+            }},
+        {FormID::SuperSaiyan4, [](struct char_data *ch) {
+            return ch->hasTail();
+            }},
+    };
+
     static std::unordered_map<FormID, std::function<bool(struct char_data *ch)>> trans_unlocks = {
         // Saiyan
         {FormID::SuperSaiyan, [](struct char_data *ch) {
@@ -514,7 +557,7 @@ namespace trans {
             return ((ch->race == RaceID::Saiyan || ch->race == RaceID::Halfbreed) && getMasteryTier(ch, FormID::SuperSaiyan2) >=2);
             }},
         {FormID::SuperSaiyan4, [](struct char_data *ch) {
-            return ((ch->race == RaceID::Saiyan || ch->race == RaceID::Halfbreed) && getMasteryTier(ch, FormID::GoldenOozaru) >=3 && getMasteryTier(ch, FormID::SuperSaiyan3) >=3);
+            return ((ch->race == RaceID::Saiyan || ch->race == RaceID::Halfbreed) && ch->hasTail() && getMasteryTier(ch, FormID::GoldenOozaru) >=3 && getMasteryTier(ch, FormID::SuperSaiyan3) >=3);
             }},
 
         // Legendary Saiyan
@@ -694,6 +737,11 @@ namespace trans {
         
         {FormID::OxStance, [](struct char_data *ch) {
             return GET_SKILL(ch, (int) SkillID::OxStance) > 0;
+            }},
+
+        {FormID::SpiritAbsorption, [](struct char_data *ch) {
+            auto loc = get_obj_in_room(ch->getRoom(), "Spirit Bomb");
+            return loc == nullptr ? false : true;
             }},
 
     };
@@ -1371,7 +1419,14 @@ namespace trans {
                     return 0.0;}},
             }
         },
-
+        {
+            FormID::SpiritAbsorption, {
+                {APPLY_AC, 0.0, -1, [](struct char_data *ch) {
+                    return sqrt(ch->transforms[FormID::SpiritAbsorption].vars[0]) * 10;}},
+                {APPLY_ALL_VITALS, 0.0, -1, [](struct char_data *ch) {
+                    return (ch->transforms[FormID::SpiritAbsorption].vars[0] / 5) * 1 + (0.1 * ch->transforms[FormID::SpiritAbsorption].grade);}},
+            }
+        },
     };
 
     static double getModifierHelper(char_data* ch, FormID form, int location, int specific) {
@@ -1473,6 +1528,8 @@ namespace trans {
         {FormID::TigerStance, .02},
         {FormID::EagleStance, .02},
         {FormID::OxStance, .02},
+
+        {FormID::SpiritAbsorption, .15},
     };
 
     double getStaminaDrain(char_data* ch, FormID form, bool upkeep) {
@@ -1496,7 +1553,7 @@ namespace trans {
             drain *= 0.01;
             if(ch->race == RaceID::Icer) drain = 0.0;
         }
-        return drain * ch->transforms[form].grade;
+        return drain * ch->transforms[form].grade * (1 + ch->getAffectModifier(APPLY_TRANS_ST_UPKEEP));
     }
 
     void gamesys_transform(uint64_t heartPulse, double deltaTime) {
@@ -1561,10 +1618,7 @@ namespace trans {
                         nullptr, TO_CHAR);
                     act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n\r\n", true, ch, nullptr,
                         nullptr, TO_ROOM);
-                    ch->form = FormID::Base;
-                    ch->technique = FormID::Base;
-                    ch->remove_kaioken(true);
-                    ch->removeLimitBreak();
+                    revert(ch);
 
                 }
             }
@@ -2072,6 +2126,8 @@ namespace trans {
         FormID::TigerStance,
         FormID::EagleStance,
         FormID::OxStance,
+
+        FormID::SpiritAbsorption,
     };
 
 
@@ -2098,6 +2154,15 @@ namespace trans {
         }
     }
 
+    bool requirementsMet(char_data* ch, FormID form) {
+        if(trans_requirements.contains(form)) {
+            auto formReq = trans_requirements.find(form);
+            return formReq->second(ch);
+        }
+
+        return true;
+    }
+
     void removeExclusives(char_data* ch, FormID form) {
         if(!transform_exclusive.contains(form) || !ch->transforms[form].unlocked)
             return;
@@ -2115,34 +2180,14 @@ namespace trans {
         auto forms = ch->transforms;
         std::set<FormID> pforms;
         
-
-        switch (ch->race) {
-            case RaceID::Majin:
-            case RaceID::Android:
-            case RaceID::BioAndroid:
-            case RaceID::Tuffle: 
-                for (auto form : forms) {
-                    if(form.first == FormID::Base)
-                        form.second.visible = false;
-                    if(form.second.visible) {
-                        //pforms = removeExclusives(ch, form.first, pforms);
-                        pforms.insert(form.first);
-                    }
-                }
-                return pforms;
-
-            default:
-                for (auto form : forms) {
-                    if(form.first == FormID::Base || form.first == FormID::Oozaru || form.first == FormID::GoldenOozaru)
-                        form.second.visible = false;
-                    if(form.second.visible) {
-                        //pforms = removeExclusives(ch, form.first, pforms);
-                        pforms.insert(form.first);
-                    }
-                }
-                return pforms;
-
+        for (auto form : forms) {
+            if(form.first == FormID::Base || form.first == FormID::Oozaru || form.first == FormID::GoldenOozaru)
+                form.second.visible = false;
+            if(form.second.visible && requirementsMet(ch, form.first)) {
+                pforms.insert(form.first);
             }
+        }
+        return pforms;
     }
 
     void displayForms(char_data* ch) {
@@ -2170,8 +2215,10 @@ namespace trans {
                 name = "@BMASTERED@n " + name;
             if(!permActive) {
                 if (unlocked) {
-                    if (!bannerDisplayed)
+                    if (!bannerDisplayed) {
                         send_to_char(ch, "@b-------------------Unlocked--------------------@n\r\n");
+                        bannerDisplayed = true;
+                    }
                     send_to_char(ch, "@W%s@n\r\n", name);
                 } else {
                     //send_to_char(ch, "@W%s@n @R-@G %s Growth Req\r\n", name,
@@ -2325,7 +2372,6 @@ namespace trans {
 
         // Unbound Alternate Forms
         {FormID::PotentialUnleashed, {120, 0}},
-        {FormID::EvilAura, {90, 0}},
         {FormID::UltraInstinct, {200, 0}},
 
         // Unbound Perm Forms
@@ -2341,6 +2387,9 @@ namespace trans {
         {FormID::TigerStance, {0, 2}},
         {FormID::EagleStance, {0, 2}},
         {FormID::OxStance, {0, 2}},
+
+        {FormID::EvilAura, {90, 2}},
+        {FormID::SpiritAbsorption, {0, 2}},
 
     };
 
@@ -2387,6 +2436,186 @@ namespace trans {
 
     };
 
+    static std::unordered_map<FormID, std::function<void(struct char_data *ch)>> trans_on_transform = {
+        {FormID::SpiritAbsorption, [](struct char_data *ch) {
+            auto loc = get_obj_in_room(ch->getRoom(), "Spirit Bomb");
+            if (loc == nullptr)
+                revert(ch);
+            else {
+                act("@WYou launch yourself into the large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W! It eclipses everything in your sight as you desperately try to hold onto the coursing energy!@n",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+                act("@W$n jumps directly into the @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W as it descends! It completely obscures $n from view before starting to be absorbed by them!@n",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+                hurt(0, 0, loc->user, ch, nullptr, loc->kicharge * 1.25, 1);
+                ch->transforms[FormID::SpiritAbsorption].vars[0] = loc->kicharge * 0.9 + (0.1 * getMasteryTier(ch, FormID::SpiritAbsorption));
+                ch->transforms[FormID::SpiritAbsorption].vars[1] = loc->kicharge * 0.9 + (0.1 * getMasteryTier(ch, FormID::SpiritAbsorption));
+                send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::SpiritAbsorption].vars[0]).c_str());
+                extract_obj(loc);
+                act("@WThe @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W completely vanishes as it's absorbed, imploding inwards!@n",
+                    true, nullptr, nullptr, nullptr, TO_ROOM);
+            }
+
+            return loc == nullptr ? false : true;
+            }},
+        {FormID::Lycanthrope, [](struct char_data *ch) {
+            if(!ch->transforms.contains(FormID::LesserLycanthrope)) 
+                ch->addTransform(FormID::LesserLycanthrope);
+            
+            if(!ch->transforms[FormID::LesserLycanthrope].unlocked)
+                ch->transforms[FormID::LesserLycanthrope].unlocked = true;
+
+            }},
+    };
+
+    static std::unordered_map<FormID, std::function<void(struct char_data *ch, atk::Attack& outgoing)>> trans_on_attack = {
+        {FormID::SpiritAbsorption, [](struct char_data *ch, atk::Attack& outgoing) {
+            send_to_char(ch, "Spirit Force infuses your %s, cloaking it in an @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n hue.\r\n", outgoing.getName());
+            act("@W$n's @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura infuses the attack with cataclysmic energy.@n",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+            
+            double empower = ch->transforms[FormID::SpiritAbsorption].vars[1] / 50;
+            empower *= ch->transforms[FormID::SpiritAbsorption].grade;
+            if(outgoing.isKiAttack())
+                empower *= 4;
+            if(empower > ch->transforms[FormID::SpiritAbsorption].vars[0])
+                empower = ch->transforms[FormID::SpiritAbsorption].vars[0];
+            ch->transforms[FormID::SpiritAbsorption].vars[0] -= empower;
+            outgoing.calcDamage += empower * 2;
+
+            if(ch->transforms[FormID::SpiritAbsorption].vars[0] <= 0)
+                revert(ch);
+            send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::SpiritAbsorption].vars[0]).c_str());
+            }},
+    };
+
+    static std::unordered_map<FormID, std::function<void(struct char_data *ch, atk::Attack& incoming)>> trans_on_attacked = {
+        {FormID::SpiritAbsorption, [](struct char_data *ch, atk::Attack& incoming) {
+            send_to_char(ch, "Your @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura burns away at your opponent's %s.\r\n", incoming.getName());
+            act("@W$n's @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura burns away some of the incoming attack.@n",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+            
+            double disempower = ch->transforms[FormID::SpiritAbsorption].vars[1] / 50;
+            disempower *= ch->transforms[FormID::SpiritAbsorption].grade;
+            if(disempower > ch->transforms[FormID::SpiritAbsorption].vars[0])
+                disempower = ch->transforms[FormID::SpiritAbsorption].vars[0];
+            ch->transforms[FormID::SpiritAbsorption].vars[0] -= disempower;
+            incoming.calcDamage -= disempower * 2;
+
+            if(ch->transforms[FormID::SpiritAbsorption].vars[0] <= 0)
+                revert(ch);
+            send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::SpiritAbsorption].vars[0]).c_str());
+            }},
+    };
+
+    void onAttack(char_data *ch, atk::Attack& outgoing, FormID form) {
+        if(trans_on_attack.contains(form)) {
+            auto on_trans_attk = trans_on_attack.at(form);
+            on_trans_attk(ch, outgoing);
+        }
+    }
+
+    void onAttacked(char_data *ch, atk::Attack& incoming, FormID form) {
+        if(trans_on_attacked.contains(form)) {
+            auto on_trans_attkd = trans_on_attacked.at(form);
+            on_trans_attkd(ch, incoming);
+        }
+    }
+
+    void onTransform(char_data *ch, FormID form) {
+        ch->removeLimitBreak();
+        reveal_hiding(ch, 0);
+        handleEchoTransform(ch, form);
+        for (double var : ch->transforms[form].vars)
+                var = 0.0;
+        
+        if(trans_on_transform.contains(form)) {
+            auto on_trans = trans_on_transform.at(form);
+            on_trans(ch);
+        }
+    }
+
+    void onRevert(char_data *ch, FormID form) {
+        handleEchoRevert(ch, ch->form);
+        ch->removeLimitBreak();
+        for (double var : ch->transforms[form].vars)
+                var = 0.0;
+    }
+
+    void revert(char_data *ch) {
+        int64_t beforeKi = ch->getMaxKI();
+        if(ch->form != FormID::Base) {
+            onRevert(ch, ch->form);
+            ch->form = FormID::Base;
+        }
+        if(ch->technique != FormID::Base) {
+            onRevert(ch, ch->technique);
+            ch->technique = FormID::Base;
+        }
+        int64_t afterKi = ch->getMaxKI();
+
+        if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
+            int64_t barrier = GET_BARRIER(ch);
+            float ratio = (float) afterKi / (float) beforeKi;
+            GET_BARRIER(ch) = barrier * ratio;
+
+            send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
+        }
+    }
+
+    void transform(char_data *ch, FormID form, int grade = 1) {
+        int64_t beforeKi = ch->getMaxKI();
+        if (grade > getMaxGrade(ch, form)) {
+            grade = getMaxGrade(ch, form);
+            send_to_char(ch, "The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
+        }
+        if (grade < 1)
+            grade = 1;
+
+        int formtype = getFormType(ch, form);
+
+        if (grade > getMaxGrade(ch, form)) {
+            grade = getMaxGrade(ch, form);
+            send_to_char(ch, "The max grade of this form is %s!\r\nSetting to max.\r\n", std::to_string(grade));
+        }
+        if (grade < 1)
+        grade = 1;
+        if(formtype == 0)
+            ch->form = form;
+        else if (formtype == 1)
+            ch->permForms.insert(form);
+        else if (formtype == 2)
+            ch->technique = form;
+        ch->transforms[form].grade = grade;
+        
+        onTransform(ch, form);
+
+        int64_t afterKi = ch->getMaxKI();
+
+        if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
+            int64_t barrier = GET_BARRIER(ch);
+            float ratio = (float) afterKi / (float) beforeKi;
+            GET_BARRIER(ch) = barrier * ratio;
+
+            send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
+        }
+
+        // Announce noisy transformations in the zone.
+        int zone = 0;
+        if (race::isSenseable(ch->race)) {
+            if ((zone = real_zone_by_thing(IN_ROOM(ch))) != NOWHERE) {
+                send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
+            };
+        }
+
+
+        char buf3[MAX_INPUT_LENGTH];
+        send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
+        sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(ch->getPL()).c_str());
+        send_to_scouter(buf3, ch, 1, 0);
+    }
+
+    
+
 }
 
 trans_data::trans_data(const nlohmann::json &j) : trans_data() {
@@ -2399,7 +2628,7 @@ trans_data::~trans_data() {
 
 void trans_data::deserialize(const nlohmann::json &j) {
     if(j.contains("timeSpentInForm")) timeSpentInForm = j["timeSpentInForm"];
-    if(j.contains("visible")) timeSpentInForm = j["visible"];
+    if(j.contains("visible")) visible = j["visible"];
     if(j.contains("limitBroken")) limitBroken = j["limitBroken"];
     if(j.contains("unlocked")) unlocked = j["unlocked"];
     if(j.contains("grade")) grade = j["grade"];

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "net.h"
+#include "dbat/attack.h"
 
 /**********************************************************************
 * Structures                                                          *
@@ -508,10 +509,77 @@ struct trans_data {
     bool limitBroken = false;
     bool unlocked = false;
 
+    double vars[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
 
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
+};
+
+enum Task 
+{
+    nothing = 0,
+    meditate = 1,
+    situps = 2,
+    pushups = 3,
+    crafting = 4,
+
+    trainStr = 10,
+    trainAgl = 11,
+    trainCon = 12,
+    trainSpd = 13,
+    trainInt = 14,
+    trainWis = 15,
+};
+
+const std::string DoingTaskName[] {
+    "nothing",
+    "meditating",
+    "situps",
+    "pushups",
+    "crafting",
+    "RES",
+    "RES",
+    "RES",
+    "RES",
+    "RES",
+    "str training",
+    "agl training",
+    "con training",
+    "spd training",
+    "int training",
+    "wis training",
+};
+
+struct card {
+    std::string name = "Default";
+    std::function<bool(struct char_data *ch)> effect;
+    std::string playerAnnounce = "You focus hard on your work.\r\n";
+    std::string roomAnnounce = "$n focuses hard on $s work.\r\n";
+    bool discard = false;
+
+};
+
+struct deck {
+    std::vector<struct card> deck;
+    std::vector<struct card> discard;
+
+    void shuffleDeck();
+    void discardCard(std::string);
+    void discardCard(card card);
+    bool playTopCard(char_data* ch);
+    card findCard(std::string);
+    void addCardToDeck(std::string, int num = 1);
+    void removeCard(std::string);
+    void addCardToDeck(card, int num = 1);
+    void removeCard(card);
+    void initDeck(char_data* ch);
+};
+
+struct craftTask {
+    struct obj_data *pObject = nullptr;
+    int improvementRounds = 0;
 };
 
 
@@ -552,6 +620,9 @@ struct char_data : public unit_data {
     void ageBy(double addedTime);
     void setAge(double newAge);
 
+    void onAttack(atk::Attack& outgoing);
+    void onAttacked(atk::Attack& incoming);
+
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
     struct room_data* getRoom();
@@ -565,6 +636,11 @@ struct char_data : public unit_data {
     char *title{};
     RaceID race{RaceID::Spirit};
     SenseiID chclass{SenseiID::Commoner};
+
+    std::list<std::pair<int, std::string>> wait_input_queue;
+    Task task = Task::nothing;
+    struct craftTask craftingTask;
+    struct deck craftingDeck;
 
 
     /* PC / NPC's weight                    */
@@ -712,6 +788,7 @@ struct char_data : public unit_data {
     // Data stored about different forms.
     std::unordered_map<FormID, trans_data> transforms;
 
+    int genBonus = 0;
     int16_t spellfail{};        /* Total spell failure %                 */
     int16_t armorcheck{};        /* Total armorcheck penalty with proficiency forgiveness */
     int16_t armorcheckall{};    /* Total armorcheck penalty regardless of proficiency */

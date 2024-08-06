@@ -206,6 +206,8 @@ enum class FormID : uint16_t {
     EagleStance = 303,
     OxStance = 304,
 
+    SpiritAbsorption = 305,
+
 };
 
 
@@ -588,7 +590,7 @@ enum class SkillID : uint16_t {
 #define AREA_ETHER             1 /* FOR CelestialBody: Planet has Ether Stream for Hoshijin. */
 #define AREA_EARTH_DBALL       2 /* (Not Inherited): Earth DragonBalls may spawn here. */
 #define AREA_NAMEK_DBALL       3 /* (Not Inherited): Namek DragonBalls may spawn here. */
-#define AREA_SHADOW_DRAGON     4 */ (Not Inherited): The Shadow Dragons of Black Smoke Shenron may spawn here. */
+#define AREA_SHADOW_DRAGON     4 /* (Not Inherited): The Shadow Dragons of Black Smoke Shenron may spawn here. */
 
 #define NUM_AREA_FLAGS        5
 
@@ -1635,7 +1637,7 @@ enum class SkillID : uint16_t {
 #define APPLY_HIT              13    /* Apply to max hit points	*/
 #define APPLY_MOVE             14    /* Apply to max move points	*/
 #define APPLY_GOLD             15    /* Reserved			*/
-#define APPLY_EXP_GAIN_MULT         16    /* Bonus/Penalty to XP gain. +/- % */
+#define APPLY_EXP_GAIN_MULT    16    /* Bonus/Penalty to XP gain. +/- % */
 #define APPLY_AC               17    /* Apply to Armor Class		*/
 #define APPLY_ACCURACY         18    /* Apply to accuracy		*/
 #define APPLY_DAMAGE           19    /* Apply to damage 		*/
@@ -1665,10 +1667,10 @@ enum class SkillID : uint16_t {
 #define APPLY_ALLSAVES         43       /* Apply to all 3 save types 	*/
 #define APPLY_RESISTANCE       44       /* Apply to resistance	 	*/
 #define APPLY_ALL_ATTRS        45       /* Apply to all attributes	*/
-#define APPLY_ALL_VITALS         46       // Apply to all CharStats base.
+#define APPLY_ALL_VITALS       46       // Apply to all CharStats base.
 #define APPLY_SKILL_SLOTS      47     // Add/Remove Skill Slots.
 #define APPLY_ATTR_TRAIN_COST  48     // Add/Reduce cost in train points to increase attribute by percent.
-#define APPLY_PS_GAIN_MULT          49     // Add/Reduce gained PS from things that grant PS.
+#define APPLY_PS_GAIN_MULT     49     // Add/Reduce gained PS from things that grant PS.
 #define APPLY_TRANS_ST_UPKEEP  50    // Add/Reduce perc of stamina by % for transformation upkeep.
 #define APPLY_VITALS_GAIN_MULT 51     // improves gains to PL/KI/ST/LF by percent.
 #define APPLY_PL_GAIN_MULT     52
@@ -1936,7 +1938,7 @@ input */
 #define MAX_TONGUE        3
 #define MAX_SKILLS        200
 #define MAX_AFFECT        32
-#define MAX_OBJ_AFFECT        6
+#define MAX_OBJ_AFFECT        20
 #define MAX_NOTE_LENGTH        6000    /* arbitrary */
 #define SKILL_TABLE_SIZE    1000
 #define SPELLBOOK_SIZE        50

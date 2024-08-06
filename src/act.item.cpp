@@ -2014,10 +2014,12 @@ ACMD(do_assemble) {
     long lVnum = NOTHING;
     struct obj_data *pObject = nullptr;
     char buf[MAX_STRING_LENGTH];
+    char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
     int roll = 0;
 
-    skip_spaces(&argument);
+    //skip_spaces(&argument);
+    two_arguments(argument, arg, arg2);
 
     struct obj_data *tools = nullptr, *tool = nullptr, *next_obj;
 
@@ -2030,14 +2032,37 @@ ACMD(do_assemble) {
         }
     }
 
-    if (*argument == '\0') {
+    int menu = 0;
+
+    for(int i = 0; i < NUM_ITEM_TYPES; i++) {  
+        if(strcasestr(arg, item_types[i]))
+            menu = i;
+    }
+
+    if (*argument == '\0' || menu > 0) {
         send_to_char(ch, "What would you like to %s?\r\n", CMD_NAME);
+        assemblyListToChar(ch, menu);
         return;
-    } else if ((lVnum = assemblyFindAssembly(argument)) < 0) {
-        send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+    } 
+
+    if(!strcasestr(arg, "create")) {
+        send_to_char(ch, "If you wish to make something, the syntax is 'build create <item>'\r\n");
+        send_to_char(ch, "Categories available to show via 'build <category>':\r\n");
+        send_to_char(ch, "[WEAPON]\r\n");
+        send_to_char(ch, "[ARMOR]\r\n");
+        send_to_char(ch, "[LIGHT]\r\n");
+        send_to_char(ch, "[WORN]\r\n");
+        send_to_char(ch, "[LIQCONTAINER]\r\n");
+        send_to_char(ch, "[CAMPFIRE]\r\n");
+        send_to_char(ch, "[OTHER]\r\n");
+        
         return;
-    } else if (assemblyGetType(lVnum) != subcmd) {
-        send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+    }
+    
+    
+    
+    if ((lVnum = assemblyFindAssembly(arg2)) < 0 && (lVnum = assemblyGetAssemblyIndex(atoi(arg2))) < 0) {
+        send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(arg2), arg2);
         return;
     } else if (!assemblyCheckComponents(lVnum, ch, false)) {
         send_to_char(ch, "You haven't got all the things you need.\r\n");
@@ -2045,24 +2070,19 @@ ACMD(do_assemble) {
     } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
         send_to_char(ch, "You can't do that in space.");
         return;
-    } else if (!GET_SKILL(ch, SKILL_SURVIVAL) && !strcasecmp(argument, "campfire")) {
+    } else if (!GET_SKILL(ch, SKILL_SURVIVAL) && !strcasecmp(arg2, "campfire")) {
         send_to_char(ch, "You know nothing about building campfires.\r\n");
         return;
     }
 
-    if (strstr(argument, "Signal") || strstr(argument, "signal")) {
+    if (strstr(arg2, "Signal") || strstr(arg2, "signal")) {
         if (GET_SKILL(ch, SKILL_BUILD) < 70) {
             send_to_char(ch, "You need at least a build skill level of 70.\r\n");
             return;
         }
     }
 
-    if (tool == nullptr) {
-        send_to_char(ch, "You wish you had tools, but make the best out of what you do have anyway...\r\n");
-        roll = 20;
-    }
-
-    if (strcasecmp(argument, "campfire")) {
+    if (strcasecmp(arg2, "campfire")) {
         if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE) || SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM || SUNKEN(IN_ROOM(ch))) {
             send_to_char(ch, "This area will not allow a fire to burn properly.\r\n");
             return;
@@ -2071,154 +2091,36 @@ ACMD(do_assemble) {
         roll += axion_dice(0);
 
         improve_skill(ch, SKILL_SURVIVAL, 1);
-        if (70 + (GET_SKILL(ch, SKILL_SURVIVAL) / 2) >= roll) {
-            if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
-                send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
-                return;
-            }
 
-            extract_obj(pObject);
-            send_to_char(ch, "You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(argument), argument);
-
-            if (assemblyCheckComponents(lVnum, ch, true)) {
-                roll = 9001; /* Just a place holder */
-            }
-            return;
-        }
-    } else {
-        if (GET_SKILL(ch, SKILL_SURVIVAL) >= 90) {
-            roll += axion_dice(0);
-        } else if (GET_SKILL(ch, SKILL_SURVIVAL) < 90) {
-            roll += axion_dice(-10);
-        }
-        improve_skill(ch, SKILL_BUILD, 1);
-        if (GET_SKILL(ch, SKILL_SURVIVAL) <= roll) {
-            if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
-                send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
-                return;
-            }
-
-            extract_obj(pObject);
-            send_to_char(ch, "You start to %s %s %s, but mess up royally!\r\n", CMD_NAME, AN(argument), argument);
-
-            if (tool && rand_number(1, 3) == 3 && GET_OBJ_VAL(tool, VAL_ALL_HEALTH) > 0) {
-                GET_OBJ_VAL(tool, VAL_ALL_HEALTH) -= rand_number(1, 5);
-                act("@RYour toolset is looking a bit more worn.@n", true, ch, nullptr, nullptr, TO_CHAR);
-                if (GET_OBJ_VAL(tool, VAL_ALL_HEALTH) <= 0) {
-                    GET_OBJ_VAL(tool, VAL_ALL_HEALTH) = 0;
-                }
-            }
-            if (assemblyCheckComponents(lVnum, ch, true)) {
-                roll = 9001; /* Just a place holder */
-            }
-            return;
-        }
-    }
-
-    if (axion_dice(0) - (GET_INT(ch) / 5) > 95) {
-        if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
-            send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
-            return;
-        }
-
-        extract_obj(pObject);
-        send_to_char(ch, "You start to %s %s %s, but forget a couple of steps. You take it apart and give up.\r\n",
-                     CMD_NAME, AN(argument), argument);
-        WAIT_STATE(ch, PULSE_6SEC);
-        return;
-    } else if (rand_number(1, 100) >= 92) {
-        if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
-            send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
-            return;
-        }
-
-        extract_obj(pObject);
-        send_to_char(ch,
-                     "You start to %s %s %s, but put it together wrong and have to stop. You take it apart and give up.\r\n",
-                     CMD_NAME, AN(argument), argument);
-        WAIT_STATE(ch, PULSE_4SEC);
-        return;
-    }
+    } 
+    improve_skill(ch, SKILL_BUILD, 1);
 
     /* Create the assembled object. */
     if ((pObject = read_object(lVnum, VIRTUAL)) == nullptr) {
-        send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(argument), argument);
+        send_to_char(ch, "You can't %s %s %s.\r\n", CMD_NAME, AN(arg2), arg2);
         return;
     }
 
+    assemblyCheckComponents(lVnum, ch, true);
+
     /* Now give the object to the character. */
     if (GET_OBJ_VNUM(pObject) != 1611) {
-        obj_to_char(pObject, ch);
-        if (IS_TRUFFLE(ch)) {
-            int count = 0, plused = false, hasstat = 0, failsafe = 0;
+        //obj_to_char(pObject, ch);
+        ch->craftingTask.improvementRounds = 0;
+        ch->craftingTask.pObject = pObject;
 
-            while (count < 6) {
-                if (pObject->affected[count].location > 0 && rand_number(1, 6) <= 2 && plused == false) {
-                    pObject->affected[count].modifier += rand_number(1, 3);
-                    plused = true;
-                } else if (pObject->affected[count].location > 0) {
-                    hasstat += 1;
-                }
-                failsafe++;
-                count++;
-                if (plused == true) {
-                    send_to_char(ch, "@YYour intuitive skill with building has made this item even better!@n\r\n");
-                    count = 6;
-                } else if (failsafe >= 12) {
-                    send_to_char(ch, "@yIt seems this item could not be upgraded with your truffle knowledge...@n\r\n");
-                    count = 6;
-                } else if (failsafe == 11 && plused == false) {
-                    send_to_char(ch, "@YYour intuitive skill with building has made this item even better!@n\r\n");
-                    pObject->affected[count].location = rand_number(1, 6);
-                    pObject->affected[count].modifier += rand_number(1, 3);
-                    plused = true;
-                    count = 6;
-                } else if (count == 6 && hasstat > 0) {
-                    count = 0;
-                }
-            }
-        }
+        ch->craftingDeck.initDeck(ch);
+        ch->task=Task::crafting;
+
+        send_to_char(ch, "You start crafting a %s\r\n", pObject->name);
+        act("$n starts to work on creating something.\r\n", true, ch, nullptr, nullptr, TO_ROOM);
+
+        WAIT_STATE(ch, PULSE_5SEC * 4);
+
+
     } else {
         obj_to_room(pObject, IN_ROOM(ch));
         GET_OBJ_TIMER(pObject) = (GET_SKILL(ch, SKILL_SURVIVAL) * 0.12);
-    }
-
-    /*if (wearable_obj(pObject)) {
-   GET_OBJ_SIZE(pObject) = get_size(ch);
-  }*/
-
-    /* Tell the character they made something. */
-    sprintf(buf, "You %s $p.", CMD_NAME);
-    act(buf, false, ch, pObject, nullptr, TO_CHAR);
-
-    /* Tell the room the character made something. */
-    sprintf(buf, "$n %ss $p.", CMD_NAME);
-    act(buf, false, ch, pObject, nullptr, TO_ROOM);
-
-    if (assemblyCheckComponents(lVnum, ch, true)) {
-        roll = 9001; /* Just a place holder */
-    }
-
-    if (!IS_TRUFFLE(ch) && axion_dice(8) > GET_SKILL(ch, SKILL_BUILD)) {
-        send_to_char(ch, "@yYou've made an inferior product. Its value will be somewhat less.@n\r\n");
-        GET_OBJ_COST(pObject) -= GET_OBJ_COST(pObject) * 0.25;
-    } else if (IS_TRUFFLE(ch) && axion_dice(18) > GET_SKILL(ch, SKILL_BUILD)) {
-        send_to_char(ch, "@yYou've made an inferior product. Its value will be somewhat less.@n\r\n");
-        GET_OBJ_COST(pObject) -= GET_OBJ_COST(pObject) * 0.12;
-    } else if (IS_TRUFFLE(ch) < GET_SKILL(ch, SKILL_BUILD)) {
-        send_to_char(ch, "@YYou've made an excellent product. Its value will be somewhat more.@n\r\n");
-        GET_OBJ_COST(pObject) += GET_OBJ_COST(pObject) * 0.12;
-    }
-
-    if (IS_TRUFFLE(ch) && rand_number(1, 5) >= 4 && GET_OBJ_COST(pObject) >= 500) {
-        if (GET_LEVEL(ch) < 100 && level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0) {
-            int64_t gain = level_exp(ch, GET_LEVEL(ch) + 1) * 0.011;
-            send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(gain).c_str());
-            ch->modExperience(gain);
-        } else {
-            ch->modExperience(1375000);
-            send_to_char(ch, "@RExp Bonus@D: @G%s@n\r\n", add_commas(1375000).c_str());
-        }
     }
 }
 
@@ -3775,6 +3677,17 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
         return;
     }
 
+    double max = 0;
+    double start_bonus = Random::get<double>(0.8, 1.2) * (1 + (GET_CON(ch) / 20)) * ch->getPotential();
+    double diminishing_returns = (soft_cap - current) / soft_cap;
+    if (diminishing_returns > 0.0)
+        diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    else
+        diminishing_returns = 0;
+    max = start_bonus * diminishing_returns * 8;
+
+
+
     int64_t st = food->value[VAL_FOOD_CANDY_ST], ki = food->value[VAL_FOOD_CANDY_KI], pl = food->value[VAL_FOOD_CANDY_PL];
 
     st *= 0.05;
@@ -3794,16 +3707,19 @@ static void majin_gain(struct char_data *ch, struct obj_data *food, int foob) {
         switch(t) {
             case 0:
                 addPL = std::min(pl, available);
+                addPL = std::min(addPL, (int64_t) max);
                 available -= addPL;
                 if(addPL <= 0) addPL = 1;
                 break;
             case 1:
                 addKI = std::min(ki, available);
+                addKI = std::min(addKI, (int64_t) max);
                 available -= addKI;
                 if(addKI <= 0) addKI = 1;
                 break;
             case 2:
                 addST = std::min(st, available);
+                addST = std::min(addST, (int64_t) max);
                 available -= addST;
                 if(addST <= 0) addST = 1;
                 break;
@@ -4153,14 +4069,14 @@ void perform_wear(struct char_data *ch, struct obj_data *obj, int where) {
         }
     }
 
-    if (GET_OBJ_TYPE(obj) != ITEM_LIGHT && GET_OBJ_SIZE(obj) > get_size(ch)) {
-        send_to_char(ch, "Seems like it is too big for you.\r\n");
-        return;
-    }
-    if (GET_OBJ_SIZE(obj) < get_size(ch) && GET_OBJ_TYPE(obj) != ITEM_LIGHT) {
-        send_to_char(ch, "Seems like it is too small for you.\r\n");
-        return;
-    }
+    //if (GET_OBJ_TYPE(obj) != ITEM_LIGHT && GET_OBJ_SIZE(obj) > get_size(ch)) {
+    //    send_to_char(ch, "Seems like it is too big for you.\r\n");
+    //    return;
+    //}
+    //if (GET_OBJ_SIZE(obj) < get_size(ch) && GET_OBJ_TYPE(obj) != ITEM_LIGHT) {
+    //    send_to_char(ch, "Seems like it is too small for you.\r\n");
+    //    return;
+    //}
 
     wear_message(ch, obj, where);
     obj_from_char(obj);

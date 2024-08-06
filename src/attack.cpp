@@ -179,7 +179,7 @@ namespace atk {
         initStats();
 
         currentHitProbability = roll_accuracy(user, init_skill(user, skillID), kiAttack);
-        currentChanceToHit = chance_to_hit(user);
+        currentChanceToHit = chance_to_hit(user) * (1 + user->getAffectModifier(APPLY_ACCURACY));
 
         if(isPhysical() && !usesWeapon()) {
             if (IS_KABITO(user) && !IS_NPC(user)) {
@@ -381,14 +381,17 @@ namespace atk {
             int vicDivine = GET_SKILL(victim, (int16_t) SkillID::DivineHalo);
             if(isKiAttack() && divine > 0 && divine >= axion_dice(0)) {
                 send_to_char(user, "You feel your Halo intensify, purging the impurity of your attack.\n");
-                send_to_room(user->getRoom(), "%s's halo flares, leaving their attack shimmering as it moves.\n");
+                send_to_room(user->getRoom(), "%s's halo flares, leaving their attack shimmering as it moves.\n", user->name);
                 calcDamage *= divine / 2;
             }
             if(isKiAttack() && vicDivine > 0 && vicDivine >= axion_dice(0)) {
                 send_to_char(user, "You feel your Halo intensify, burning away at your opponents attack.\n");
-                send_to_room(user->getRoom(), "%s's halo flares, burning away part of the blast coming for them.\n");
+                send_to_room(user->getRoom(), "%s's halo flares, burning away part of the blast coming for them.\n", user->name);
                 calcDamage /= (vicDivine / 50);
             }
+
+            user->onAttack(*this);
+            victim->onAttacked(*this);
 
             hurt(targetLimb, limbhurtChance(), user, victim, obj, calcDamage, isKiAttack());
             if(victim) {
@@ -569,7 +572,7 @@ namespace atk {
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
 
-        double incomingDamage = calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE);
+        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
 
 
         if(victim->getCurKI() > 0) {
@@ -1528,10 +1531,28 @@ namespace atk {
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
 
+        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+
+
         if(victim->getCurKI() > 0) {
-            victim->decCurKI(calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+            if (currentDodgeCheck > axion_dice(10))
+                incomingDamage /= 10;
+            if(incomingDamage > victim->getMaxKI() / 5 && !incomingDamage > victim->getMaxKI() * 5)
+                incomingDamage = victim->getMaxKI() / 5;
+
+            
+            victim->decCurKI(incomingDamage);
+
+            int instinct = GET_SKILL(user, (int16_t) SkillID::InstinctualCombat);
+            if(instinct >= axion_dice(20)) {
+                actVictim("@C$n@W, without even thinking about it you lash out towards $N, using their own momentum against them.@n");
+                actUser("@C$n@W, without breaking for a moment, lashes out, catching you offguard.@n");
+                actOthers("@C$n@W, without breaking for a moment, lashes out, using their momentum against them, and catches $N offguard.@n");
+
+                hurt(targetLimb, limbhurtChance(), victim, user, obj, (calcDamage / 2) * (instinct / 100), isKiAttack());
+            }
         } else {
-            victim->decCurST(2 * calcDamage * 1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+            victim->decCurST(1.5 * incomingDamage);
             actVictim("@WContinuing to dodge without Ki takes a heavy toll.@n");
         }
 
@@ -3492,7 +3513,7 @@ namespace atk {
     // SeishouEnko
     void SeishouEnko::attackPreprocess() {
         if (GET_MOLT_LEVEL(user) >= 150) {
-            calcDamage *= 2;
+            calcDamage *= 1.5;
         }
     }
 

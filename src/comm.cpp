@@ -595,7 +595,7 @@ namespace game {
             co_await run_loop_once(deltaTimeInSeconds);
             auto end = std::chrono::high_resolution_clock::now();
 
-            saveTimer -deltaTimeInSeconds;
+            saveTimer -= deltaTimeInSeconds;
             if(saveTimer <= 0.0) {
                 saveTimer = 60.0 * 5.0;
                 // save the game state...
@@ -609,8 +609,7 @@ namespace game {
             }
             deltaTimeInSeconds = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start).count();
         }
-
-
+        runSave();
     }
 
     void run_game() {
@@ -723,7 +722,7 @@ char *make_prompt(struct descriptor_data *d) {
         if (PRF_FLAGGED(d->character, PRF_DISPAUTO) && GET_LEVEL(d->character) >= 500 && len < sizeof(prompt)) {
             struct char_data *ch = d->character;
             if (GET_HIT(ch) << 2 < GET_MAX_HIT(ch)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "PL: %" I64T " ", GET_HIT(ch));
+                count = snprintf(prompt + len, sizeof(prompt) - len, "HL: %" I64T " ", GET_HIT(ch));
                 if (count >= 0)
                     len += count;
             }
@@ -760,6 +759,12 @@ char *make_prompt(struct descriptor_data *d) {
             if (IS_HALFBREED(d->character) && PLR_FLAGGED(d->character, PLR_FURY) &&
                 PRF_FLAGGED(d->character, PRF_FURY)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mFury@W: @rENGAGED@D]@w");
+                flagged = true;
+                if (count >= 0)
+                    len += count;
+            }
+            if (d->character->task != Task::nothing) {
+                count = snprintf(prompt + len, sizeof(prompt) - len, "   @D-@r%s@D-@w   ", DoingTaskName[d->character->task].c_str());
                 flagged = true;
                 if (count >= 0)
                     len += count;
@@ -832,6 +837,34 @@ char *make_prompt(struct descriptor_data *d) {
             if (PLR_FLAGGED(d->character, PLR_SPAR) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "SPARRING - ");
                 flagged = true;
+                if (count >= 0)
+                    len += count;
+            }
+            if (PRF_FLAGGED(d->character, PRF_FORM) && len < sizeof(prompt)) {
+                FormID form = d->character->form;
+                
+                if(d->character->transforms[form].grade > 1)
+                    count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s - %s@D]@n",
+                        trans::getAbbr(d->character, form).c_str(), std::to_string(d->character->transforms[form].grade).c_str());
+                else
+                    count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s@D]@n",
+                        trans::getAbbr(d->character, form).c_str());
+                flagged = true;
+
+                if (count >= 0)
+                    len += count;
+            }
+            if (PRF_FLAGGED(d->character, PRF_TECH) && len < sizeof(prompt)) {
+                FormID form = d->character->technique;
+
+                if(d->character->transforms[form].grade > 1)
+                    count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mTech@y: @W%s - %s@D]@n",
+                        trans::getAbbr(d->character, form).c_str(), std::to_string(d->character->transforms[form].grade).c_str());
+                else
+                    count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mTech@y: @W%s@D]@n",
+                        trans::getAbbr(d->character, form).c_str());
+                flagged = true;
+
                 if (count >= 0)
                     len += count;
             }
@@ -1206,7 +1239,7 @@ char *make_prompt(struct descriptor_data *d) {
                 else
                     col = "r";
 
-                if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RPL@n@Y: @%s%d%s@D]@n", col, (int) perc,
+                if ((count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@RHL@n@Y: @%s%d%s@D]@n", col, (int) perc,
                                       "@w%")) > 0)
                     len += count;
             }
@@ -1330,22 +1363,6 @@ char *make_prompt(struct descriptor_data *d) {
             if (PRF_FLAGGED(d->character, PRF_DISPRAC) && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mPS@y: @W%s@D]@n",
                                  add_commas(GET_PRACTICES(d->character)).c_str());
-                if (count >= 0)
-                    len += count;
-            }
-            if (PRF_FLAGGED(d->character, PRF_FORM) && len < sizeof(prompt)) {
-                FormID form = d->character->form;
-
-                count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s - %s@D]@n",
-                    trans::getAbbr(d->character, form).c_str(), std::to_string(d->character->transforms[form].grade).c_str());
-                if (count >= 0)
-                    len += count;
-            }
-            if (PRF_FLAGGED(d->character, PRF_TECH) && len < sizeof(prompt)) {
-                FormID form = d->character->technique;
-
-                count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s - %s@D]@n",
-                    trans::getAbbr(d->character, form).c_str(), std::to_string(d->character->transforms[form].grade).c_str());
                 if (count >= 0)
                     len += count;
             }
@@ -2150,20 +2167,25 @@ void descriptor_data::handle_input() {
         if(command == "--") {
             // this is a special command that clears out the processed input_queue.
             input_queue.clear();
+            character->wait_input_queue.clear();
             write_to_output(this, "All queued commands cancelled.\r\n");
+            if (character->task != Task::nothing) {
+                character->task = Task::nothing;
+                write_to_output(this, "You stop focussing on your task.\r\n");
+            }
         } else {
             perform_alias(this, (char*)command.c_str());
         }
     }
     raw_input_queue.clear();
 
-    if (character && GET_WAIT_STATE(character)) {
-        character->mod(CharNum::Wait, -1);
-        if(GET_WAIT_STATE(character) < 0) character->set(CharNum::Wait, 0);
-        if (GET_WAIT_STATE(character)) return;
+    if(input_queue.empty()) {
+        if((!character->wait_input_queue.empty()) || (character->task != Task::nothing)) {
+            pushWaitQueue(character);
+            return;
+        } else
+            return;
     }
-
-    if(input_queue.empty()) return;
     auto command = input_queue.front();
     input_queue.pop_front();
 

@@ -25,6 +25,7 @@
 #include "dbat/act.informative.h"
 #include "dbat/screen.h"
 #include "dbat/players.h"
+#include <dbat/act.other.h>
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -1719,31 +1720,53 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
         if (GET_MOLT_LEVEL(ch) <= chCon * 2 || chCon >= 100) {
             GET_MOLT_EXP(ch) = 0;
             GET_MOLT_LEVEL(ch) += 1;
-            double rand1 = 0.02;
-            double rand2 = 0.03;
-            if (rand_number(1, 4) == 3) {
-                rand1 += 0.02;
-                rand2 += 0.02;
-            } else if (rand_number(1, 4) >= 3) {
-                rand1 += 0.01;
-                rand2 += 0.01;
-            }
-            int armorgain = 0;
-            int64_t plgain = ch->getBasePL() * rand1, stamgain = ch->getBaseST() * rand2;
-            armorgain = armor_evolve(ch);
-            ch->gainBasePL(plgain);
-            ch->gainBaseST(stamgain);
+            int armorgain = armor_evolve(ch);
+
+            if(ch->armor + armorgain < 500000)
+                ch->armor += armorgain;
+
+
+            double baseHl = ch->getBasePL();
+            double baseSt = ch->getBaseST();
+            double attrBonus = (1 + (GET_CON(ch) / 20));
+
+            int64_t bonusHl = 0;
+            int64_t bonusSt = 0;
+            double start_bonusHl = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
+            double start_bonusSt = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
+            double soft_cap = (double)ch->calc_soft_cap();
+            double diminishing_returnsHl = (soft_cap - baseHl) / soft_cap;
+            double diminishing_returnsSt = (soft_cap - baseSt) / soft_cap;
+            if (diminishing_returnsHl > 0.0)
+                diminishing_returnsHl = std::max<double>(diminishing_returnsHl, 0.05);
+            else
+                diminishing_returnsHl = 0;
+
+            if (diminishing_returnsSt > 0.0)
+                diminishing_returnsSt = std::max<double>(diminishing_returnsSt, 0.05);
+            else
+                diminishing_returnsSt = 0;
+
+            bonusHl = start_bonusHl * diminishing_returnsHl * 16;
+            bonusSt = start_bonusSt * diminishing_returnsSt * 16;
+
+
+            if(bonusHl > (ch->getBasePL() / 10)) bonusHl = ch->getBasePL() / 10;
+            if(bonusSt > (ch->getBaseST() / 10)) bonusSt = ch->getBaseST() / 10;
+
+            bonusHl *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonusSt *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
 
             act("@gYour @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. You quickly shed it and reveal a stronger version that was growing beneath it! At the same time you feel your adrenal sacs to be more efficient@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@G$n's@g @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. Suddenly $e sheds the damaged @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn and reveals a stronger version that had been growing underneath!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "@D[@RPL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n",
-                         add_commas(plgain).c_str(), add_commas(stamgain).c_str(),
-                         GET_ARMOR(ch) >= 50000 ? "50k CAP" : add_commas(armorgain).c_str());
+            send_to_char(ch, "@D[@RHL@W: @G+%s@D] [@gStamina@W: @G+%s@D] [@wArmor Index@W: @G+%s@D]@n\r\n",
+                         add_commas(bonusHl).c_str(), add_commas(bonusSt).c_str(),
+                         GET_ARMOR(ch) >= 500000 ? "500k CAP" : add_commas(armorgain).c_str());
         } else {
             send_to_char(ch,
-                         "@gYou are unable to evolve while your evolution level is higher than twice your character level.@n\r\n");
+                         "@gYou are unable to evolve while your evolution level is higher than twice your character Constitution.@n\r\n");
         }
     }
 
@@ -2370,8 +2393,7 @@ int rand_number(int from, int to) {
         to = tmp;
     }
     //To make it inclusive of the last number.
-    to = to + 1;
-    return Random::get<int>(from, to);
+    return rand()%(to-from + 1) + from;
 }
 
 /* Axion engine dice function */
@@ -3390,4 +3412,48 @@ bool is_all_alpha(const std::string& str) {
     return boost::algorithm::all(str, [](unsigned char c) {
         return std::isalpha(c);
     });
+}
+
+void craftProgress(char_data* ch) {
+    bool continueCraft = true;
+    continueCraft = ch->craftingDeck.playTopCard(ch);
+
+    if(!continueCraft) {
+        send_to_char(ch, "You finish your project!\r\n");
+        act("$n finally finishes their project!", true, ch, nullptr, nullptr, TO_ROOM);
+
+        obj_to_char(ch->craftingTask.pObject, ch);
+        ch->craftingTask.pObject = nullptr;
+        ch->craftingTask.improvementRounds = 0;
+
+        ch->task = Task::nothing;
+    } else {
+        improve_skill(ch, SKILL_BUILD, 1);
+        WAIT_STATE(ch, PULSE_5SEC * 4);
+    }
+}
+
+void doContinuedTask(char_data* ch) {
+    auto task = ch->task;
+
+    if (task == Task::meditate) {
+        meditateProgress(ch);
+    }
+
+    if (task == Task::situps) {
+        situpProgress(ch);
+    }
+
+    if (task == Task::pushups) {
+        pushupProgress(ch);
+    }
+
+    if (task == Task::trainStr || task == Task::trainAgl || task == Task::trainCon || task == Task::trainSpd
+        || task == Task::trainInt || task == Task::trainWis) {
+        trainProgress(ch);
+    }
+
+    if (task == Task::crafting) {
+        craftProgress(ch);
+    }
 }

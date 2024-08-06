@@ -1263,15 +1263,11 @@ int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill) {
 
 int64_t armor_calc(struct char_data *ch, int64_t dmg, int type) {
     if (IS_NPC(ch))
-        return (0);
+        return (70);
 
     int64_t reduce = 0;
 
-    if (GET_ARMOR(ch) < 1000) {
-        reduce = GET_ARMOR(ch) * 0.5;
-    } else if (GET_ARMOR(ch) < 2000) {
-        reduce = GET_ARMOR(ch) * .75;
-    } else if (GET_ARMOR(ch) < 5000) {
+    if (GET_ARMOR(ch) < 5000) {
         reduce = GET_ARMOR(ch);
     } else if (GET_ARMOR(ch) < 10000) {
         reduce = GET_ARMOR(ch) * 2;
@@ -3529,14 +3525,16 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
                 break;
         }
     } else {
-        dam = (GET_HIT(ch) * 0.05) + (ch->getPL() * 0.025);
-        dam += (dam * 0.005) * GET_STR(ch);
+        dam = 40 + (ch->getPL() * 0.15);
+        dam += (dam * 0.005) * GET_LEVEL(ch);
         if (GET_LEVEL(ch) >= 120) {
             dam *= 0.25;
         } else if (GET_LEVEL(ch) >= 110) {
             dam *= 0.45;
         } else if (GET_LEVEL(ch) >= 100) {
             dam *= 0.75;
+        } else {
+            dam *= 2;
         }
     }
 
@@ -3544,9 +3542,9 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
 
         if (type == 0 || type == 1 || type == 2 || type == 3 || type == 4 || type == 5 || type == 6 || type == 8 ||
             type == 51 || type == 52 || type == 56) {
-            dam += GET_STR(ch) * (dam * 0.005);
+            dam += GET_LEVEL(ch) * (dam * 0.005);
         } else {
-            dam += GET_INT(ch) * (dam * 0.005);
+            dam += GET_LEVEL(ch) * (dam * 0.005);
         }
 
         auto mob_hit = ch->getPL();
@@ -3612,9 +3610,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
 }
 
 void saiyan_gain(struct char_data *ch, struct char_data *vict) {
-    int gain = rand_number(GET_LEVEL(ch) * 6, GET_LEVEL(ch) * 8);
     int weak = false;
-
     if (!vict)
         return;
 
@@ -3622,51 +3618,81 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
         return;
 
     if (vict->getPL() < vict->getPL() / 10) {
-        weak = true;
-    }
-
-    gain += rand_number(GET_CON(ch) / 2, GET_CON(ch) * 2);
-    
-
-    if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
-        gain /= 2;
-    }
-    if (rand_number(1, 22) >= 18) {
-        return;
-    }
-    if (weak) {
         send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WThey are too weak to inspire your saiyan soul!@n\r\n");
         return;
     }
 
-    std::vector<int64_t> stats;
-    for (const auto stat: {0, 1, 2}) {
-        if (!ch->is_soft_cap(stat, 1.5))
-            stats.push_back(stat);
+    if (rand_number(1, 22) >= 8) {
+        return;
     }
+
+    std::vector<int64_t> stats;
+    for (const auto stat: {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+        if (!ch->is_soft_cap((int) stat, 1.0))
+            stats.push_back((int) stat);
+    }
+
+    if(ch->technique == FormID::TigerStance) stats.push_back((int) CharStat::PowerLevel);
+    if(ch->technique == FormID::EagleStance) stats.push_back((int) CharStat::Ki);
+    if(ch->technique == FormID::OxStance) stats.push_back((int) CharStat::Stamina);
+
+    auto itr = Random::get(stats);
 
     if (stats.empty()) {
         send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel you have reached your current limits.@n\r\n");
         return;
     }
 
-    auto itr = Random::get(stats);
+    double attrBonus = 0;
+    double base = 0;
+    switch (*itr) {
+        case 0:
+            base = ch->getBasePL();
+            attrBonus = (1 + (GET_CON(ch) / 20));
+            break;
+        case 1:
+            base = ch->getBaseKI();
+            attrBonus = (1 + (GET_WIS(ch) / 20));
+            break;
+        case 2:
+            base = ch->getBaseST();
+            attrBonus = (1 + (GET_CON(ch) / 20));
+            break;
+    }
+
+    int64_t bonus = 0;
+    double start_bonus = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
+    double soft_cap = (double)ch->calc_soft_cap();
+    double diminishing_returns = (soft_cap - base) / soft_cap;
+    if (diminishing_returns > 0.0)
+        diminishing_returns = std::max<double>(diminishing_returns, 0.05);
+    else
+        diminishing_returns = 0;
+    bonus = (start_bonus) * diminishing_returns;
+    
+    if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
+        bonus /= 2;
+    }
+    
 
     switch (*itr) {
         case 0:
-            ch->gainBasePL(gain);
+            bonus *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            ch->gainBasePL(bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
-                         add_commas(gain).c_str());
+                         add_commas(bonus).c_str());
             break;
         case 1:
-            ch->gainBaseKI(gain);
+            bonus *= (1 + ch->getAffectModifier(APPLY_KI_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            ch->gainBaseKI(bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n",
-                         add_commas(gain).c_str());
+                         add_commas(bonus).c_str());
             break;
         case 2:
-            ch->gainBaseST(gain);
+            bonus *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            ch->gainBaseST(bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n",
-                         add_commas(gain).c_str());
+                         add_commas(bonus).c_str());
             break;
     }
 
@@ -3705,7 +3731,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
     if (auto obj = GET_EQ(ch, WEAR_SH); obj) {
 		//If you are using a spar booster
         if (GET_OBJ_VNUM(obj) == 1127) {
-            gmult *= 4;
+            gmult *= 1.5;
         }
     }
 
@@ -3822,6 +3848,9 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
 void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attrChance) {
     //Handling for awarding vitals to the player
+    pl *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+    ki *= (1 + ch->getAffectModifier(APPLY_KI_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+    st *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
     if(pl > (ch->getBasePL() / 10)) pl = ch->getBasePL() / 10;
     if(ki > (ch->getBaseKI() / 10)) ki = ch->getBaseKI() / 10;
     if(st > (ch->getBaseST() / 10)) st = ch->getBaseST() / 10;
@@ -3913,6 +3942,8 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
 }
 
 bool can_grav(struct char_data *ch) {
+    if(IS_NPC(ch))
+        return true;
     auto result = ch->getBurdenRatio() <= 1.0;
     if(!result) {
         send_to_char(ch, "You are too burdened to even think about it!\r\n");
@@ -4315,7 +4346,18 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
 
         dmg *= (1.0 + ch->getAffectModifier(APPLY_DAMAGE_PERC));
+        if(type == 0) {
+            dmg *= (1.0 + ch->getAffectModifier(APPLY_PHYS_DAM_PERC));
+        } else {
+            dmg *= (1.0 + ch->getAffectModifier(APPLY_KI_DAM_PERC));
+        }
+
         dmg *= (1.0 + vict->getAffectModifier(APPLY_DEFENSE_PERC));
+        if(type == 0) {
+            dmg *= (1.0 + vict->getAffectModifier(APPLY_PHYS_DAM_RES));
+        } else {
+            dmg *= (1.0 + vict->getAffectModifier(APPLY_KI_DAM_RES));
+        }
 
 
         if (type > -1) {
@@ -4328,7 +4370,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     } else if (COMBHITS(ch) < physical_mastery(ch)) {
                         dmg += combo_damage(ch, dmg, 0);
                         if (COMBHITS(ch) == 10 || COMBHITS(ch) == 20 || COMBHITS(ch) == 30) {
-                            int64_t gain = GET_INT(ch) * 1000;
+                            int64_t gain = GET_INT(ch) * 10 * ch->getPotential();
                             if (GET_SKILL(ch, SKILL_STYLE) >= 100) {
                                 gain += gain * 2;
                             } else if (GET_SKILL(ch, SKILL_STYLE) >= 80) {
@@ -4340,13 +4382,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                             } else if (GET_SKILL(ch, SKILL_STYLE) >= 20) {
                                 gain += gain * 0.1;
                             }
-                            auto gained = ch->modExperience(gain);
-                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gained).c_str());
+                            giveRandomVital(ch, gain, gain, gain, 2);
                         }
                     } else {
                         dmg += combo_damage(ch, dmg, 1);
                         if (COMBHITS(ch) == 10 || COMBHITS(ch) == 20 || COMBHITS(ch) == 30) {
-                            int64_t gain = GET_INT(ch) * 1000;
+                            int64_t gain = GET_INT(ch) * 10 * ch->getPotential();
                             if (GET_SKILL(ch, SKILL_STYLE) >= 100) {
                                 gain += gain * 2;
                             } else if (GET_SKILL(ch, SKILL_STYLE) >= 80) {
@@ -4358,8 +4399,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                             } else if (GET_SKILL(ch, SKILL_STYLE) >= 20) {
                                 gain += gain * 0.1;
                             }
-                            ch->modExperience(gain);
-                            send_to_char(ch, "@D[@mExp@W: @G%s@D]@n\r\n", add_commas(gain).c_str());
+                            giveRandomVital(ch, gain, gain, gain, 5);
                         }
                         COMBO(ch) = -1;
                         COMBHITS(ch) = 0;
@@ -4625,33 +4665,38 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 GET_POS(vict) = POS_STANDING;
             }
         }
-        if (IS_NPC(ch)) {
-            if (GET_LEVEL(ch) > 10) {
+        if (IS_NPC(vict)) {
+            if (GET_LEVEL(vict) > 10) {
                 if (dmg - index > 0) {
                     dmg -= index;
                 } else if (dmg - index <= 0 && dmg >= 1) {
                     dmg = 1;
                 }
-            } else if (GET_LEVEL(ch) <= 10) {
+            } else if (GET_LEVEL(vict) <= 10) {
                 dmg = (dmg * .8);
             }
-        }
-        if (!IS_NPC(ch)) {
+        } else {
             if (dmg >= 1) {
-                if ((dmg + (dmg * 0.5)) - index <= 0) {
-                    dmg = 1;
-                } else if ((dmg + (dmg * 0.4)) - index <= 0) {
-                    dmg = dmg * 0.04;
-                } else if ((dmg + (dmg * 0.3)) - index <= 0) {
-                    dmg = dmg * 0.08;
-                } else if ((dmg + (dmg * 0.2)) - index <= 0) {
-                    dmg = dmg * 0.12;
-                } else if ((dmg + (dmg * 0.1)) - index <= 0) {
-                    dmg = dmg * 0.16;
-                } else if (dmg - index <= 0) {
+                if(dmg * 2 <= index) {
+                    dmg = dmg * 0.025;
+                } else if (dmg * 1.8 <= index) {
+                    dmg = dmg * 0.05;
+                } else if (dmg * 1.6 <= index) {
+                    dmg = dmg * 0.1;
+                } else if (dmg * 1.4 <= index) {
                     dmg = dmg * 0.2;
-                } else if (dmg - index <= dmg * 0.25) {
-                    dmg = dmg * 0.25;
+                } else if (dmg * 1.2 <= index) {
+                    dmg = dmg * 0.3;
+                } else if (dmg <= index) {
+                    dmg = dmg * 0.4;
+                } else if (dmg * 0.75 <= index) {
+                    dmg = dmg * 0.5;
+                } else if (dmg * 0.5 <= index) {
+                    dmg = dmg * 0.6;
+                } else if (dmg * 0.25 <= index) {
+                    dmg = dmg * 0.7;
+                } else if (dmg * 0.1 <= index) {
+                    dmg = dmg * 0.85;
                 } else {
                     dmg -= index;
                 }
@@ -4932,14 +4977,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     if (IS_ANDROID(vict)) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && vict->getPL() >= 150000) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && vict->getPL() >= 5000000) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && vict->getPL() >= 15000000) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else {
-                        send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
+                        send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) (vict->health * 100)));
                     }
                 } else {
                     send_to_char(ch, "\r\n");
@@ -4951,14 +4996,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         if (IS_ANDROID(vict)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && vict->getPL() >= 150000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && vict->getPL() >= 5000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && vict->getPL() >= 15000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) (vict->health * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");
@@ -4977,14 +5022,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                         if (IS_ANDROID(vict)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && vict->getPL() >= 150000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && vict->getPL() >= 5000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && vict->getPL() >= 15000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) (vict->health * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");
@@ -4994,14 +5039,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     if (GET_EQ(ch, WEAR_EYE) && vict) {
                         if (IS_ANDROID(vict) && !PRF_FLAGGED(ch, PRF_NODEC)) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && vict->getPL() >= 150000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && vict->getPL() >= 5000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
+                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && vict->getPL() >= 15000000) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s@D>@n\r\n", add_commas(GET_HIT(vict)).c_str());
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) (vict->health * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");

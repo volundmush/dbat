@@ -18,6 +18,7 @@
 #include "dbat/players.h"
 #include "dbat/transformation.h"
 #include "dbat/weather.h"
+#include "dbat/attack.h"
 
 static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
 
@@ -848,8 +849,8 @@ void char_data::attemptLimitBreak() {
         incCurKIPercent(0.35);
         incCurSTPercent(0.35);
         send_to_char(this, "@mA rush of energy bursts through your system as you defy your limits.@n\r\n");
-        if(race != RaceID::Android && race != RaceID::Tuffle && race != RaceID::BioAndroid && race != RaceID::Majin )
-            affected_by.set(AFF_LIMIT_BREAKING);         
+        
+        affected_by.set(AFF_LIMIT_BREAKING);         
     }
 }
 
@@ -967,22 +968,31 @@ double char_data::speednar() {
 }
 
 int64_t char_data::getPL() {
-    int64_t vitalCalc = (getMaxPL() + getMaxKI()) / 2;
+    int64_t vitalCalc = (getMaxPL() + getMaxKI()) / 4;
     int attrCalc = (get(CharAttribute::Agility) + get(CharAttribute::Constitution, false) + get(CharAttribute::Intelligence, false) + get(CharAttribute::Speed, false)
     + get(CharAttribute::Strength, false) + get(CharAttribute::Wisdom, false)) / 50;
-    double skillCalc = 5;
-    for (auto curSkill : skill) {
-        auto data = curSkill.second;
-        if(data.level > 0)
-            skillCalc += data.level / 100;
-    }
-    skillCalc /= 10;
-
 
     double suppressed = suppression > 0 ? ((double) suppression / 100.0) : 1;
     double speed = speednar();
 
-    return vitalCalc * attrCalc * skillCalc * speed * suppressed;
+    double pl = vitalCalc * attrCalc * speed * suppressed;
+
+    if(IS_NPC(this)) {
+        if(GET_LEVEL(this) < 10)
+            pl *= 2;
+        else if(GET_LEVEL(this) < 30)
+            pl /= 1;
+        else if(GET_LEVEL(this) < 50)
+            pl /= 4;
+        else if(GET_LEVEL(this) < 70)
+            pl /= 6;
+        else if(GET_LEVEL(this) < 90)
+            pl /= 8;
+        else
+            pl /= 10;
+    }
+
+    return pl;
 }
 
 void char_data::apply_kaioken(int times, bool announce) {
@@ -1105,8 +1115,7 @@ void char_data::login() {
     }
 
     /*~~~ End PCOUNT and HIGHPCOUNT ~~~*/
-    if (GET_LEVEL(this) == 0) {
-        do_start(this);
+    if (GET_LEVEL(this) == 0) {      
         send_to_char(this, "%s", CONFIG_START_MESSG);
     }
     if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1 && GET_LOADROOM(this) != NOWHERE) {
@@ -1243,19 +1252,14 @@ int char_data::getSize() {
     return size != SIZE_UNDEFINED ? size : race::getSize(race);
 }
 
-double char_data::getTimeModifier() {
-    return 1 + (time_info.month / 3) + (time_info.year * 4);
-}
-
-double getServerDaysPassed() {
-    double ingameDays = time_info.day + (time_info.month * 30) + (time_info.year * 365);
-    return ingameDays / 12;
+double getDaysPassed() {
+    double ingameDays = era_uptime.day + (era_uptime.month * 30) + (era_uptime.year * 365);
+    return ingameDays;
 }
 
 double char_data::getPotential() {
     //Gain one potential per RL week, reaches 100 in two years
-    double timePotential = getServerDaysPassed();
-    timePotential /= 7;
+    double timePotential = 1 + (getDaysPassed() / 7);
 
     int physiquePotential = 1;
     if(hasGravAcclim(0)) physiquePotential += 1;
@@ -1280,10 +1284,10 @@ void char_data::gainGrowth() {
 
 void char_data::gainGrowth(double gain) {
     // You cannot exceed the amount of days the server has been online for
-    double days = getServerDaysPassed();
+    double days = getDaysPassed();
 
     // Roughly increase by a multiplier of 1 every 60 days past the first 60
-    double timeMod = std::max((getServerDaysPassed() / 60.0) , 1.0);
+    double timeMod = std::max((getDaysPassed() / 60.0) , 1.0);
 
     gain *= timeMod;
     
@@ -1509,11 +1513,30 @@ obj_data* char_data::getEquipSlot(int slot) {
 
 int char_data::getArmor() {
     int out = get(CharNum::ArmorWishes) * 5000;
+    out += armor;
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(auto obj = GET_EQ(this, i); obj)
             out += obj->getAffectModifier(APPLY_AC, -1);
     }
+
+    out += race::getModifier(this, APPLY_AC, -1);
+    out += trans::getModifier(this, APPLY_AC, -1);
+
     return out;
+}
+
+void char_data::onAttack(atk::Attack& outgoing) {
+    if(form != FormID::Base)
+        trans::onAttack(this, outgoing, form);
+    if(technique != FormID::Base)
+        trans::onAttack(this, outgoing, technique);
+}
+
+void char_data::onAttacked(atk::Attack& incoming) {
+    if(form != FormID::Base)
+        trans::onAttacked(this, incoming, form);
+    if(technique != FormID::Base)
+        trans::onAttacked(this, incoming, technique);
 }
 
 int64_t char_data::getExperience() {

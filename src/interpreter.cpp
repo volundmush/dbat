@@ -143,8 +143,43 @@ void command_interpreter(struct char_data *ch, char *argument) {
                 GET_ADMLEVEL(ch) >= complete_cmd_info[cmd].minimum_admlevel)
                 break;
     }
+    
+    if(!IS_NPC(ch) && complete_cmd_info[cmd].wait_list == 1) {
+        if (ch->task != Task::nothing) {
+            send_to_char(ch, "Use '--' if you want to stop your current task.\r\n");
+        } else {
+            std::string ln = line;
+            std::pair<int, std::string> pair = {cmd, ln};
+            ch->wait_input_queue.emplace_back(pair);
+        }
+        return;
+    }
 
+    processCommand(ch, cmd, line);
+
+}
+
+void pushWaitQueue(char_data* ch) {
+    if (ch && GET_WAIT_STATE(ch)) {
+        ch->mod(CharNum::Wait, -1);
+        if(GET_WAIT_STATE(ch) < 0) ch->set(CharNum::Wait, 0);
+        if(GET_WAIT_STATE(ch) == 0 && ch->task != Task::nothing) {
+            doContinuedTask(ch);
+            return;
+        }
+        if (GET_WAIT_STATE(ch)) return;
+    }
+
+    auto command = ch->wait_input_queue.front();
+    ch->wait_input_queue.pop_front();
+
+    processCommand(ch, command.first, command.second);
+}
+
+void processCommand(char_data* ch, int cmd, std::string ln) {
     char blah[MAX_INPUT_LENGTH];
+    int skip_ld = 0;
+    char *line = ln.data();
 
     sprintf(blah, "%s", complete_cmd_info[cmd].command);
     if (!strcasecmp(blah, "throw"))

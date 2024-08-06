@@ -345,6 +345,17 @@ ACMD(do_land) {
     };
     std::size_t count = 0;
 
+    if(above_planet == false && !*argument) {
+        if(ch->affected_by.test(AFF_FLYING)) {
+            act("@WYou land.@n", true, ch, nullptr, nullptr, TO_CHAR);
+            act("@W$n@W lands nearby.@n", true, ch, nullptr, nullptr, TO_ROOM);
+            ch->affected_by.reset(AFF_FLYING);
+            return;
+        }
+        send_to_char(ch, "You are not even in the lower atmosphere of a planet!\r\n");
+        return;
+    }
+
     if(onPlanet) {
         auto &a = areas[onPlanet.value()];
         count = recurseScanRooms(a, rooms, scan);
@@ -740,7 +751,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     if ((ch->getRoom()->zone != world[was_in].zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
         send_to_sense(0, "You sense someone", ch);
         sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.",
-                add_commas(GET_HIT(ch)).c_str());
+                add_commas(ch->getPL()).c_str());
         send_to_scouter(buf3, ch, 0, 0);
     }
     /* move them first, then move them back if they aren't allowed to go. */
@@ -1982,7 +1993,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     char buf3[MAX_STRING_LENGTH];
     send_to_sense(0, "You sense someone ", ch);
     sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range.@n",
-            add_commas(GET_HIT(ch)).c_str());
+            add_commas(ch->getPL()).c_str());
     send_to_scouter(buf3, ch, 0, 0);
 
     if (ch->desc != nullptr) {

@@ -2247,22 +2247,30 @@ ACMD(do_pgrant) {
     two_arguments(argument, arg1, arg2);
 
     std::string strForm;
+    if(!*arg1) {
+        send_to_char(ch, "Usage: pgrant <char> <form>||growth\r\n");
+        return;
+    }
+
     if(!*arg2) {
         vict = ch;
         strForm = arg1;
     } else {
         if (!(vict = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD))) {
-            send_to_char(ch, "No such character.\r\nUsage: pgrant <char> <target>\r\n");
+            send_to_char(ch, "No such character.\r\nUsage: pgrant <char> <form>||growth\r\n");
             return;
         }
         strForm = arg2;
     }
 
     if(strForm == "growth") {
-        if (vict)
+        if (vict) {
             vict->internalGrowth += 500;
-        else
+            send_to_char(ch, "Given 500 growth to %s\r\n", vict->name);
+        } else {
             ch->internalGrowth += 500;
+            send_to_char(ch, "500 growth has been given to you.\r\n");
+        }
         return;
     }
 
@@ -2273,7 +2281,7 @@ ACMD(do_pgrant) {
         return;
     }
 
-    if(!trans::getFormsFor(vict).contains(*foundForm)) {
+    if(!vict->transforms.contains(*foundForm)) {
         vict->addTransform(*foundForm);
         send_to_char(ch, "Form %s added!\r\n", strForm);
         log_imm_action("Form Added: %s added %s to %s!", ch, strForm, vict);
@@ -2287,8 +2295,6 @@ ACMD(do_pgrant) {
             send_to_char(ch, "Form %s unhidden!\r\n", strForm);
             log_imm_action("Form Unhidden: %s unhidden %s from %s!", ch, strForm, vict);
         }
-
-        
     }
 
 }
@@ -2335,6 +2341,90 @@ ACMD(do_rpreward) {
 
     send_to_char(ch, "Granted RP rewards to %s", vict->name);
     log_imm_action("RP Reward: %s granted %s an RP reward!", ch, vict);
+}
+
+ACMD(do_eratime) {
+    char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+
+    two_arguments(argument, arg1, arg2);
+
+    if(!*arg1) {
+        send_to_char(ch, "The server has been up for: %s Years, %s Months, %s Days and %s Hours.\r\n", 
+            std::to_string(era_uptime.year), std::to_string(era_uptime.month), std::to_string(era_uptime.day), std::to_string(era_uptime.hours));
+    }
+
+    int days = 0;
+    int months = 0;
+    int years = 0;
+
+    if(*arg1 && !is_abbrev(arg1, "add") && !is_abbrev(arg1, "remove")) {
+        send_to_char(ch, "Syntax: eratime <add / remove> <days>\r\n");
+    }
+
+    if(is_abbrev(arg1, "add")) {
+        if(!*arg2){
+            send_to_char(ch, "Please add a number of days to advance time by.");
+            return;
+        }
+
+        days = atoi(arg2);
+
+        years = days / (int) DAYS_PER_YEAR;
+        days = days % (int) DAYS_PER_YEAR;
+
+        months = days / (int) DAYS_PER_MONTH;
+        days = days % (int) DAYS_PER_MONTH;
+
+        if (days + era_uptime.day >= DAYS_PER_MONTH) {
+            months += 1;
+            days -= DAYS_PER_MONTH;
+        }
+        if (months + era_uptime.month >= MONTHS_PER_YEAR) {
+            years += 1;
+            months -= MONTHS_PER_YEAR;
+        }
+
+        era_uptime.day += days;
+        era_uptime.month += months;
+        era_uptime.year += years;
+        send_to_char(ch, "Time advanced by %s days.\r\n", arg2);
+    }
+
+    if(is_abbrev(arg1, "remove")) {
+        if(!*arg2){
+            send_to_char(ch, "Please add a number of days to advance time by.");
+            return;
+        }
+
+        days = atoi(arg2);
+
+        years = days / (int) DAYS_PER_YEAR;
+        days = days % (int) DAYS_PER_YEAR;
+
+        months = days / (int) DAYS_PER_MONTH;
+        days = days % (int) DAYS_PER_MONTH;
+
+        if(era_uptime.year - years < 0) {
+            years = era_uptime.year;
+            months = era_uptime.month;
+            days = era_uptime.day;
+        }
+
+        if(era_uptime.month - months < 0) {
+            months = era_uptime.month;
+            days = era_uptime.day;
+        }
+
+        if(era_uptime.day - days < 0) {
+            days = era_uptime.day;
+        }
+
+        era_uptime.day -= days;
+        era_uptime.month -= months;
+        era_uptime.year -= years;
+
+        send_to_char(ch, "Time reduced by %s days.\r\n", arg2);
+    }
 }
 
 /* clean a room of all mobiles and objects */

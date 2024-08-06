@@ -108,7 +108,7 @@ ACMD(do_evolve) {
 
     int64_t plcost = GET_LEVEL(ch), stcost = GET_LEVEL(ch), kicost = GET_LEVEL(ch);
 
-    plcost += molt_threshold(ch) * 0.65 + (ch->getBasePL() * 0.15);
+    plcost += (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15);
     kicost += (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22);
     stcost += (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15);
 
@@ -128,18 +128,28 @@ ACMD(do_evolve) {
             send_to_char(ch, "You do not have enough evolution experience.\r\n");
             return;
         } else {
-            int64_t plgain = (ch->getBasePL()) * 0.01;
+            double baseHl = ch->getBasePL();
+            double attrBonus = (1 + (GET_CON(ch) / 20));
 
-            if (plgain <= 0) {
-                plgain = rand_number(1, 5);
-            } else {
-                plgain = rand_number(plgain, plgain * .5);
-            }
-            ch->gainBasePL(plgain);
+            int64_t bonusHl = 0;
+            double start_bonusHl = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
+            double soft_cap = (double)ch->calc_soft_cap();
+            double diminishing_returnsHl = (soft_cap - baseHl) / soft_cap;
+            if (diminishing_returnsHl > 0.0)
+                diminishing_returnsHl = std::max<double>(diminishing_returnsHl, 0.05);
+            else
+                diminishing_returnsHl = 0;
+
+            bonusHl = start_bonusHl * diminishing_returnsHl * 20;
+
+            if(bonusHl > (ch->getBaseST() / 10)) bonusHl = ch->getBaseST() / 10;
+
+            bonusHl *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            ch->gainBasePL(bonusHl);
             GET_MOLT_EXP(ch) -= plcost;
             send_to_char(ch,
                          "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n",
-                         add_commas(plgain).c_str());
+                         add_commas(bonusHl).c_str());
         }
     } else if (!strcasecmp(arg, "ki")) {
         if (kicost > molt_threshold(ch)) {
@@ -149,18 +159,26 @@ ACMD(do_evolve) {
             send_to_char(ch, "You do not have enough evolution experience.\r\n");
             return;
         } else {
-            int64_t kigain = (ch->getBaseKI()) * 0.01;
+            double baseKi = ch->getBaseKI();
+            double attrBonus = (1 + (GET_WIS(ch) / 20));
 
-            if (kigain <= 0) {
-                kigain = rand_number(1, 5);
-            } else {
-                kigain = rand_number(kigain, kigain * .5);
-            }
-            ch->gainBaseKI(kigain);
+            int64_t bonusKi = 0;
+            double start_bonusKi = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
+            double soft_cap = (double)ch->calc_soft_cap();
+            double diminishing_returnsKi = (soft_cap - baseKi) / soft_cap;
+            if (diminishing_returnsKi > 0.0)
+                diminishing_returnsKi = std::max<double>(diminishing_returnsKi, 0.05);
+            else
+                diminishing_returnsKi = 0;
+
+            bonusKi = start_bonusKi * diminishing_returnsKi * 20;
+            bonusKi *= (1 + ch->getAffectModifier(APPLY_KI_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            if(bonusKi > (ch->getBaseST() / 10)) bonusKi = ch->getBaseST() / 10;
+            ch->gainBaseKI(bonusKi);
             GET_MOLT_EXP(ch) -= kicost;
             send_to_char(ch,
                          "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n",
-                         add_commas(kigain).c_str());
+                         add_commas(bonusKi).c_str());
         }
     } else if (!strcasecmp(arg, "stamina") || !strcasecmp(arg, "st")) {
         if (stcost > molt_threshold(ch)) {
@@ -170,18 +188,26 @@ ACMD(do_evolve) {
             send_to_char(ch, "You do not have enough evolution experience.\r\n");
             return;
         } else {
-            int64_t stgain = (ch->getBaseST()) * 0.01;
+            double baseSt = ch->getBaseST();
+            double attrBonus = (1 + (GET_CON(ch) / 20));
 
-            if (stgain <= 0) {
-                stgain = rand_number(1, 5);
-            } else {
-                stgain = rand_number(stgain, stgain * .5);
-            }
-            ch->gainBaseST(stgain);
+            int64_t bonusSt = 0;
+            double start_bonusSt = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
+            double soft_cap = (double)ch->calc_soft_cap();
+            double diminishing_returnsSt = (soft_cap - baseSt) / soft_cap;
+            if (diminishing_returnsSt > 0.0)
+                diminishing_returnsSt = std::max<double>(diminishing_returnsSt, 0.05);
+            else
+                diminishing_returnsSt = 0;
+
+            bonusSt = start_bonusSt * diminishing_returnsSt * 20;
+            bonusSt *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            if(bonusSt > (ch->getBaseST() / 10)) bonusSt = ch->getBaseST() / 10;
+            ch->gainBaseST(bonusSt);
             GET_MOLT_EXP(ch) -= stcost;
             send_to_char(ch,
                          "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+%s@D]@n\r\n",
-                         add_commas(stgain).c_str());
+                         add_commas(bonusSt).c_str());
         }
     }
 }
@@ -365,7 +391,7 @@ ACMD(do_mimic) {
     int count = 0, x = 0;
 
     // generate a list of mimic'able races.
-    auto check = [&](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isValidMimic(id);};
+    auto check = [&](RaceID id) {return race::isValidMimic(id);};
     auto races = race::filterRaces(check);
     if (!*arg) {
         send_to_char(ch, "@CMimic Menu\n@c--------------------@W\r\n");
@@ -3352,7 +3378,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     if(i->form != FormID::Base)
         act(trans::getExtra(i, i->form).c_str(), true, i, nullptr, ch, TO_VICT);
     if(i->technique != FormID::Base)
-        act(trans::getExtra(i, i->form).c_str(), true, i, nullptr, ch, TO_VICT);
+        act(trans::getExtra(i, i->technique).c_str(), true, i, nullptr, ch, TO_VICT);
     if (GET_FEATURE(i)) {
         char woo[MAX_STRING_LENGTH];
         sprintf(woo, "@C%s@n", GET_FEATURE(i));
@@ -4910,7 +4936,7 @@ ACMD(do_score) {
     if (view == full || view == health) {
         send_to_char(ch,
                      "  @cO@D-----------------------------@D[   @cHealth   @D]-----------------------------@cO@n\n");
-        send_to_char(ch, "                      @D<@rPowerlevel@D>     [@B%s@D]             @n\n\n", add_commas(ch->getPL()).c_str());
+        send_to_char(ch, "                          @D<@rPowerlevel@D>     [@B%s@D]             @n\n\n", add_commas(ch->getPL()).c_str());
         send_to_char(ch, "                 @D<@rHealth@D>              <@BKi@D>             <@GStamina@D>@n\n");
         send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurPL()).c_str(),
                      add_commas(
@@ -4945,18 +4971,18 @@ ACMD(do_score) {
 
     if (view == full || view == stats) {
         send_to_char(ch, "  @cO@D-----------------------------@D[ @cStatistics @D]-----------------------------@cO@n\n");
-        send_to_char(ch, "            @D<@wGravity Acclim@D: @w" + grav + "@D> <@wRPP@D: @w%-3d@D>@n\n", GET_RP(ch));
-        send_to_char(ch, "        @D<@wSpeed Index@D: @w%s@D> <@wArmor Index@D: @w%s@D>@n\n", add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
-        send_to_char(ch, "    @D[ @RStrength@D|@G%2d (%3d)@D] [ @YAgility@D|@G%2d (%3d)@D] [ @BSpeed@D|@G%2d (%3d)@D]@n\n",
+        send_to_char(ch, "                   @D<@wGravity Acclim@D: @w" + grav + "@D> <@wRPP@D: @w%-3d@D>@n\n", GET_RP(ch));
+        send_to_char(ch, "               @D<@wSpeed Index@D: @w%-8s@D> <@wArmor Index@D: @w%-8s@D>@n\n", add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
+        send_to_char(ch, "  @D[@RStrength     @D|@G%2d (%3d)@D] [@YAgility      @D|@G%2d (%3d)@D] [@BSpeed        @D|@G%2d (%3d)@D]@n\n",
                      ch->get(CharAttribute::Strength, true), GET_STR(ch), ch->get(CharAttribute::Agility, true), GET_DEX(ch), ch->get(CharAttribute::Speed, true), GET_CHA(ch));
-        send_to_char(ch, "    @D[@gConstitution@D|@G%2d (%3d)@D] [@CIntelligence@D|@G%2d (%3d)@D] [ @MWisdom@D|@G%2d (%3d)@D]@n\n",
+        send_to_char(ch, "  @D[@gConstitution @D|@G%2d (%3d)@D] [@CIntelligence @D|@G%2d (%3d)@D] [@MWisdom       @D|@G%2d (%3d)@D]@n\n",
                      ch->get(CharAttribute::Constitution, true), GET_CON(ch), ch->get(CharAttribute::Intelligence, true), GET_INT(ch), ch->get(CharAttribute::Wisdom, true),
                      GET_WIS(ch));
     }
     if (view == full || view == other) {
         send_to_char(ch,
                      "  @cO@D-----------------------------@D[   @cOther    @D]-----------------------------@cO@n\n");
-        send_to_char(ch, "                @D<@YZenni@D>                 <@rInventory Weight@D>@n\n");
+        send_to_char(ch, "                @D<@YZenni@D>                    <@rInventory Weight@D>@n\n");
         send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n",
                      add_commas(GET_GOLD(ch)).c_str(), add_commas(
                         (ch->getCarriedWeight())).c_str());
@@ -4989,14 +5015,6 @@ ACMD(do_score) {
             send_to_char(ch, "      @D[ @CEvo Level@D| @W%-15d@D] [   @CEvo Exp@D| @W%-15s@D]\n", GET_MOLT_LEVEL(ch),
                          add_commas(GET_MOLT_EXP(ch)).c_str());
             send_to_char(ch, "      @D[ @CThreshold@D| @W%-15s@D]@n\n", add_commas(molt_threshold(ch)).c_str());
-        }
-        if (GET_LEVEL(ch) < 100) {
-            send_to_char(ch, "                             @D<@gAdvancement@D>@n\n");
-        }
-        if (GET_LEVEL(ch) < 100) {
-            send_to_char(ch, "      @D[@CExperience@D| @W%-15s@D] [@CNext Level@D| @W%-15s@D]@n\n",
-                         add_commas(GET_EXP(ch)).c_str(), add_commas(level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch)).c_str());
-            send_to_char(ch, "      @D[  @CRpp Cost@D| @W%-15d@D]@n\n", rpp_to_level(ch));
         }
 
         send_to_char(ch,
@@ -5392,7 +5410,7 @@ ACMD(do_status) {
                         race = "Icer";
                         break;
                     case 5:
-                        race = "Truffle";
+                        race = "Tuffle";
                         break;
                     case 6:
                         race = "Arlian";
@@ -6585,7 +6603,7 @@ ACMD(do_levels) {
 ACMD(do_consider) {
     char buf[MAX_INPUT_LENGTH];
     struct char_data *victim;
-    int diff;
+    double diff;
 
     one_argument(argument, buf);
 
@@ -6597,29 +6615,29 @@ ACMD(do_consider) {
         send_to_char(ch, "Easy!  Very easy indeed!\r\n");
         return;
     }
-    diff = (GET_LEVEL(victim) - GET_LEVEL(ch));
+    diff = (victim->getPL() / ch->getPL());
 
-    if (diff <= -10)
+    if (diff <= 0.05)
         send_to_char(ch, "Now where did that chicken go?\r\n");
-    else if (diff <= -5)
+    else if (diff <= 0.1)
         send_to_char(ch, "You could do it with a needle!\r\n");
-    else if (diff <= -2)
+    else if (diff <= 0.4)
         send_to_char(ch, "Easy.\r\n");
-    else if (diff <= -1)
+    else if (diff <= 0.8)
         send_to_char(ch, "Fairly easy.\r\n");
-    else if (diff == 0)
+    else if (diff == 1.1)
         send_to_char(ch, "The perfect match!\r\n");
-    else if (diff <= 1)
+    else if (diff <= 1.3)
         send_to_char(ch, "You could probably manage it.\r\n");
-    else if (diff <= 2)
+    else if (diff <= 1.5)
         send_to_char(ch, "You might take a beating.\r\n");
-    else if (diff <= 3)
+    else if (diff <= 1.8)
         send_to_char(ch, "You MIGHT win, maybe.\r\n");
-    else if (diff <= 5)
+    else if (diff <= 2)
         send_to_char(ch, "Do you feel lucky? You better.\r\n");
-    else if (diff <= 10)
+    else if (diff <= 2.5)
         send_to_char(ch, "Better bring some tough backup!\r\n");
-    else if (diff <= 25)
+    else if (diff <= 3)
         send_to_char(ch, "Maybe if they are allergic to you, otherwise your last words will be 'Oh shit.'\r\n");
     else
         send_to_char(ch, "No chance.\r\n");
@@ -6635,14 +6653,13 @@ ACMD(do_diagnose) {
         if (!(vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM)))
             send_to_char(ch, "%s", CONFIG_NOPERSON);
         else {
-            send_to_char(ch, "%s", GET_SEX(vict) == SEX_MALE ? "He " : (GET_SEX(vict) == SEX_FEMALE ? "She " : "It "));
+            send_to_char(ch, "%s", HSSH(ch));
             diag_char_to_char(vict, ch);
         }
     } else {
         if (FIGHTING(ch)) {
             send_to_char(ch, "%s",
-                         GET_SEX(FIGHTING(ch)) == SEX_MALE ? "He " : (GET_SEX(FIGHTING(ch)) == SEX_FEMALE ? "She "
-                                                                                                          : "It "));
+                         HSSH(ch));
             diag_char_to_char(FIGHTING(ch), ch);
         } else {
             send_to_char(ch, "Diagnose who?\r\n");
