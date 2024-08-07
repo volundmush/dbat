@@ -60,13 +60,6 @@ using Random = effolkronium::random_static;
 #include "nlohmann/json.hpp"
 #include "magic_enum/magic_enum_all.hpp"
 
-#include <boost/asio.hpp>
-#include <boost/beast.hpp>
-#include <boost/beast/websocket.hpp>
-#include <boost/asio/experimental/concurrent_channel.hpp>
-#include <boost/asio/experimental/awaitable_operators.hpp>
-using namespace boost::asio::experimental::awaitable_operators;
-
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)
 #error "Cannot use GNU C library memory tracking without <mcheck.h>"

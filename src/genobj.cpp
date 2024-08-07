@@ -675,10 +675,6 @@ void obj_data::deserializeRelations(const nlohmann::json& j) {
     }
 }
 
-void obj_data::save() {
-    if(id == NOTHING) return;
-}
-
 bool obj_data::isProvidingLight() {
     return GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS);
 }

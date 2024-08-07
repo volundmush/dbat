@@ -2,52 +2,14 @@
 #include "sysdep.h"
 #include "defs.h"
 #include <mutex>
+#include <boost/beast/core.hpp>
+#include "libtelnet.h"
 
 namespace net {
     using namespace std::chrono_literals;
-    using namespace boost::asio;
-    using namespace boost::beast;
 
-    class Link {
-    public:
-        explicit Link(boost::beast::websocket::stream<boost::beast::tcp_stream> ws);
-
-        awaitable<void> run();
-        void stop();
-
-    protected:
-        awaitable<void> runReader();
-        awaitable<void> runWriter();
-        awaitable<void> runPinger();
-        awaitable<void> createUpdateClient(const nlohmann::json &j);
-        boost::beast::websocket::stream<boost::beast::tcp_stream> conn;
-        bool is_stopped;
-    };
-    
-    awaitable<void> runLinkManager();
-
-    template<typename T>
-    using Channel = boost::asio::experimental::concurrent_channel<void(boost::system::error_code, T)>;
-
-    using JsonChannel = Channel<nlohmann::json>;
-
-    extern std::unique_ptr<io_context> io;
-
-    extern std::unique_ptr<signal_set> signals;
-
-    extern std::unique_ptr<Channel<nlohmann::json>> linkChannel;
-    extern boost::asio::ip::tcp::endpoint thermiteEndpoint;
-
-    extern std::unique_ptr<Link> link;
-
-    enum class DisconnectReason {
-        // In these first two examples, the connection is dead on the portal and we have been informed of such.
-        ConnectionLost = 0,
-        ConnectionClosed = 1,
-        // In the remaining enums, the connection is still alive on the portal, but we are disconnecting for some reason.
-        // We must inform the portal.
-        GameLogoff = 2,
-    };
+    extern void init();
+    extern void prepareForCopyover();
 
     enum class Protocol : uint8_t {
         Telnet = 0,
@@ -60,16 +22,6 @@ namespace net {
         Xterm256 = 2,
         TrueColor = 3
     };
-
-    struct Message {
-        Message();
-        explicit Message(const nlohmann::json& j);
-        std::string cmd;
-        nlohmann::json args;
-        nlohmann::json kwargs;
-        nlohmann::json serialize() const;
-    };
-
 
     struct ProtocolCapabilities {
         Protocol protocol{Protocol::Telnet};
@@ -93,20 +45,36 @@ namespace net {
 
         void deserialize(const nlohmann::json& j);
         nlohmann::json serialize();
-        std::string protocolName();
+        [[nodiscard]] std::string protocolName() const;
     };
 
     enum class ConnectionState : uint8_t {
-        Negotiating = 0,
-        Pending = 1,
-        Connected = 2,
-        Dead = 3
+        Pending = 0,
+        Connected = 1,
+        Dead = 2
     };
 
-    extern std::mutex connectionMutex, pendingConnectionsMutex;
-    extern std::unordered_map<int64_t, std::shared_ptr<Connection>> connections;
-    extern std::set<int64_t> pendingConnections;
-    extern std::unordered_map<int64_t, DisconnectReason> deadConnections;
+    enum class DisconnectReason {
+        // In these first two examples, the connection is TCP-dead.
+
+        // ConnectionLost means a timeout or similar error on TCP.
+        ConnectionLost = 0,
+        // ConnectionClosed means we got a 0 on a read(). Whether the user wanted this to happen, we dunnno
+        ConnectionClosed = 1,
+
+        // This last disconnectreason was initiated by the game. usually from the QUIT command
+        GameLogoff = 2,
+    };
+
+    extern std::unordered_map<int, std::shared_ptr<Connection>> connections;
+    extern std::unordered_map<int, DisconnectReason> deadConnections;
+    extern std::set<int> pendingConnections, pendingOutData, pendingReads, pendingWrites;
+
+    extern int server_fd;
+    extern void update(double deltaTime);
+    extern void acceptAllIncomingConnections();
+    extern void prepareForCopyover();
+    extern void telnet_handler(telnet_t *telnet, telnet_event_t *event, void *user_data);
 
     class Connection;
 
@@ -116,10 +84,8 @@ namespace net {
         virtual ~ConnectionParser() = default;
         virtual void parse(const std::string &txt) = 0;
         virtual void handleGMCP(const std::string &txt, const nlohmann::json &j);
-        virtual void handleMessage(const Message &m);
         virtual void start();
         virtual void close();
-
 
     protected:
         void sendText(const std::string &txt);
@@ -128,49 +94,67 @@ namespace net {
 
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
-        explicit Connection(int64_t connId, JsonChannel fromLink);
-        void sendMessage(const Message &msg);
-        void sendGMCP(const std::string &cmd, const nlohmann::json &j);
+        explicit Connection(int connId);
+        Connection(int connId, const nlohmann::json& j);
+        ~Connection();
         void sendText(const std::string &messg);
-        void sendEvent(const std::string &name, const nlohmann::json &data);
-        void onHeartbeat(double deltaTime);
-        void handleMessage(const Message &m);
+        void update(double deltaTime);
         void onNetworkDisconnected();
         void onWelcome();
         void close();
-        void executeGMCP(const std::string& cmd, const nlohmann::json& j);
-        void executeCommand(const std::string& cmd);
+
+        nlohmann::json serialize();
+        void deserialize(const nlohmann::json& j);
 
         void cleanup(DisconnectReason reason);
         void setParser(ConnectionParser *p);
 
         bool running{true};
-        int64_t connId{}, host{};
+        int connId{};
         account_data *account{};
         int64_t adminLevel{0};
+
         struct descriptor_data *desc{};
 
-        void queueMessage(const std::string& event, const std::string& data);
-
-        void handleEvent(const std::string& event, const nlohmann::json& data);
-
-        std::list<std::pair<std::string, std::string>> outQueue, inQueue;
-
         // Some time structs to handle when we received connections.
-        // These probably need some updating on this and Thermite side...
+        // lastReceivedBytes is used to track network activity.
         std::chrono::system_clock::time_point connected{};
-        std::chrono::steady_clock::time_point connectedSteady{}, lastActivity{}, lastMsg{};
+        std::chrono::steady_clock::time_point connectedSteady{}, lastActivity{}, lastReceivedBytes{}, lastMsg{};
 
         // This is embedded for ease of segmentation but this struct isn't
         // actually used anywhere else.
         ProtocolCapabilities capabilities{};
 
-        JsonChannel fromLink;
+        std::deque<std::string> pendingCommands;
 
         std::unique_ptr<ConnectionParser> parser;
 
-        ConnectionState state{ConnectionState::Negotiating};
+        ConnectionState state{ConnectionState::Pending};
+
+        void epollRegister();
+        void epollUnregister();
+        void readFromSocket();
+        void writeToSocket();
+        void handleTelnet(telnet_event_t *event);
+
+        void handleAppData();
+
+        void sendTelnetNegotiations();
+
+        void handleTelnetCommand(char cmd);
+
+        void handleTelnetWill(char telopt);
+        void handleTelnetDo(char telopt);
+        void handleTelnetWont(char telopt);
+        void handleTelnetDont(char telopt);
+
+        void handleTelnetSubNegotiate(char telopt, const char *buffer, size_t size);
+
+        void disableCompression();
+
     protected:
+        std::vector<char> outbuf, appbuf;
+        telnet_t *teldata;
 
     };
 

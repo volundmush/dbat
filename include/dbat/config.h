@@ -3,13 +3,9 @@
 #include "structs.h"
 
 namespace config {
-    extern bool enableMultithreading;
-    extern int threadsCount;
-    extern bool usingMultithreading;
     extern std::chrono::milliseconds heartbeatInterval;
-    extern std::string thermiteAddress;
-    extern uint16_t thermitePort;
-
+    extern std::string hostAddress;
+    extern uint16_t port;
 
     extern std::string logFile;
     // the filename for the game save database.

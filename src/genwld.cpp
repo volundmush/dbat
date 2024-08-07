@@ -37,7 +37,6 @@ room_rnum add_room(struct room_data *room) {
         copy_room(&ro, room);
         ro.people = tch;
         ro.contents = tobj;
-        ro.save();
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
@@ -45,7 +44,6 @@ room_rnum add_room(struct room_data *room) {
     auto &r = world[room->vn];
     r = *room;
     basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
-    r.save();
 
     /*
      * Return what array entry we placed the new room in.
@@ -66,7 +64,6 @@ int delete_room(room_rnum rnum) {
         return false;
 
     room = &world[rnum];
-    room->save();
 
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
@@ -397,10 +394,6 @@ bool room_data::isActive() {
     return world.contains(vn);
 }
 
-
-void room_data::save() {
-
-}
 
 int room_data::getDamage() {
     return dmg;

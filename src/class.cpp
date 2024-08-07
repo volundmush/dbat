@@ -1197,7 +1197,6 @@ void advance_level(struct char_data *ch) {
 
 
     snoop_check(ch);
-    ch->save();
 }
 
 /*

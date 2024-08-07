@@ -404,8 +404,6 @@ void char_from_room(struct char_data *ch) {
     REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
     IN_ROOM(ch) = NOWHERE;
     ch->next_in_room = nullptr;
-    
-    if(!gameIsLoading) ch->save();
 }
 
 /* place a character in a room */
@@ -797,8 +795,6 @@ void obj_from_room(struct obj_data *object) {
     IN_ROOM(object) = NOWHERE;
     object->next_content = nullptr;
 
-    if(!gameIsLoading) object->save();
-
 }
 
 
@@ -814,8 +810,6 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
     obj_to->contents = obj;
     obj->in_obj = obj_to;
     tmp_obj = obj->in_obj;
-
-    if(!gameIsLoading) obj->save();
 }
 
 
@@ -830,8 +824,6 @@ void obj_from_obj(struct obj_data *obj) {
     obj_from = obj->in_obj;
     temp = obj->in_obj;
     REMOVE_FROM_LIST(obj, obj_from->contents, next_content, temp);
-    
-    if(!gameIsLoading) obj->save();
 
     obj->in_obj = nullptr;
     obj->next_content = nullptr;
@@ -1112,8 +1104,6 @@ void extract_char_final(struct char_data *ch) {
             extract_script(ch, MOB_TRIGGER);
         if (SCRIPT_MEM(ch))
             extract_script_mem(SCRIPT_MEM(ch));
-    } else {
-        ch->save();
     }
 
     /* If there's a descriptor, they're in the menu now. */

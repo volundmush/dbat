@@ -538,7 +538,6 @@ ACMD(do_rpp) {
                 struct obj_data *hobj = read_object(6, VIRTUAL);
                 obj_to_char(hobj, ch);
                 ch->modRPP(-pay);
-                ch->save();
                 send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
                 send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
                 return;
@@ -589,7 +588,6 @@ ACMD(do_rpp) {
             save_mud_time(&time_info);
         }
         ch->modRPP(-pay);
-        ch->save();
         send_to_char(ch,
                      "@R%d@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n",
                      pay);
@@ -600,14 +598,12 @@ ACMD(do_rpp) {
     /* Pay for purchases here */
     if (selection >= 4 && selection < 12 && pay > 0) {
         ch->modRPP(-pay);
-        ch->save();
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
 
     if (selection > 12 && pay > 0) {
         ch->modRPP(-pay);
-        ch->save();
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
@@ -1705,7 +1701,6 @@ void trainProgress(char_data* ch) {
             giveRandomVital(ch, ch->getMaxPL() / 5, ch->getMaxKI() / 5, ch->getMaxST() / 5, 30);
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
         }
-        ch->save();
     }
 }
 
@@ -9262,7 +9257,6 @@ ACMD(do_save) {
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
     }
-    ch->save();
 }
 
 /* generic function for commands which are normally overridden by

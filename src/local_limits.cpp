@@ -1102,7 +1102,6 @@ static void heal_limb(struct char_data *ch) {
                 ch->mod(CharAttribute::Speed, -1);
                 ch->mod(CharAttribute::Agility, -1);
                 send_to_char(ch, "@RYou lose 1 Strength, Agility, and Speed!\r\n");
-                ch->save();
             }
         }
     }

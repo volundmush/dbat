@@ -171,8 +171,9 @@ int main(int argc, char **argv)
         game::init_locale();
         game::init_sodium();
         game::init_database();
-        game::init_asio();
+        game::init_networking();
         game::init_zones();
+        game::init_copyover();
         game::run_game();
     }
     catch(std::exception& e) {

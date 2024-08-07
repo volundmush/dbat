@@ -2669,7 +2669,6 @@ ACMD(do_advance) {
 
     int gain = level_exp(victim, newlevel) - GET_EXP(victim);
     victim->modExperience(gain);
-    victim->save();
 }
 
 ACMD(do_handout) {
@@ -3240,7 +3239,6 @@ ACMD(do_wizutil) {
        */
                 break;
         }
-        vict->save();
     }
 }
 
@@ -4351,11 +4349,6 @@ ACMD(do_set) {
 
     /* perform the set */
     retval = perform_set(ch, vict, mode, buf);
-
-    /* save the character if a change was made */
-    if (retval && !IS_NPC(ch)) {
-        vict->save();
-    }
 }
 
 ACMD(do_saveall) {
@@ -4475,8 +4468,6 @@ ACMD(do_chown) {
 
         obj_from_char(obj);
         obj_to_char(obj, ch);
-        ch->save();
-        victim->save();
     }
 }
 

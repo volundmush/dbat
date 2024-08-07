@@ -168,7 +168,6 @@ struct unit_data {
 
     virtual std::string getUID(bool active = true) = 0;
     virtual bool isActive() = 0;
-    virtual void save() = 0;
 
     nlohmann::json serializeScripts();
     void deserializeScripts();
@@ -209,7 +208,6 @@ struct obj_data : public unit_data {
     std::string getUID(bool active = true) override;
     bool active{false};
     bool isActive() override;
-    void save() override;
 
     struct room_data* getAbsoluteRoom();
     struct room_data* getRoom();
@@ -343,7 +341,6 @@ struct room_data : public unit_data {
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
     std::string getUID(bool active = true) override;
     bool isActive() override;
-    void save() override;
 
     room_ref ref() { return room_ref{id, generation}; }
 
@@ -615,7 +612,6 @@ struct char_data : public unit_data {
 
     bool active{false};
     bool isActive() override;
-    void save() override;
 
     void ageBy(double addedTime);
     void setAge(double newAge);

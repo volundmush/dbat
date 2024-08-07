@@ -1059,8 +1059,6 @@ int char_data::modHeight(int val) {
     return setHeight(getHeight(true) + val);
 }
 
-
-
 double char_data::getTotalWeight() {
     return getWeight() + getCarriedWeight();
 }
@@ -1105,10 +1103,6 @@ void char_data::deserializeLocation(const nlohmann::json &j) {
 }
 
 void char_data::deserializeRelations(const nlohmann::json &j) {
-
-}
-
-void char_data::save() {
 
 }
 

@@ -100,10 +100,10 @@ void shutdown_game(int code);
 namespace game {
     void init_locale();
     void init_sodium();
-    void init_asio();
+    void init_networking();
     void init_database();
     void init_zones();
+    void init_copyover();
     void run_game();
-    boost::asio::awaitable<void> run_loop();
-    boost::asio::awaitable<void> run_loop_once(double deltaTime);
+    void run_loop();
 }

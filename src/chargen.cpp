@@ -2289,7 +2289,6 @@ namespace net {
         ch->chclass == SenseiID::Commoner;
 
         init_char(ch);
-        ch->save();
         // set state to -1 to prevent accidental freeing of ch...
         state = -1;
         send_to_imm("New Character '%s' created by Account: %s", ch->name, p.account->name.c_str());

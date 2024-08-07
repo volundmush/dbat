@@ -1010,7 +1010,6 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                                 if(skill_num == (int)SkillID::OxStance) {
                                     ch->transforms.erase(FormID::OxStance);
                                 }
-                                ch->save();
                             }
                         } else if (GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
                             GET_FORGETING(ch) = 0;
@@ -1045,7 +1044,6 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                                          spell_info[GET_FORGETING(ch)].name);
                             GET_FORGETING(ch) = 0;
                             GET_FORGET_COUNT(ch) = 0;
-                            ch->save();
                         }
                     }
                 }
