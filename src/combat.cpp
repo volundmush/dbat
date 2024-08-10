@@ -1781,7 +1781,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 continue;
                             }
                         }
-                        ROOM_DAMAGE(IN_ROOM(k)) = 100;
+                        world.at(IN_ROOM(k)).setDamage(100);
                         int zone = 0;
                         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -1856,7 +1856,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             continue;
                         }
                     }
-                    ROOM_DAMAGE(IN_ROOM(k)) = 100;
+                    world.at(IN_ROOM(k)).setDamage(100);
                     int zone = 0;
                     if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -1961,7 +1961,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 continue;
                             }
                         }
-                        ROOM_DAMAGE(IN_ROOM(k)) = 100;
+                        world.at(IN_ROOM(k)).setDamage(100);
                         int zone = 0;
                         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -2034,7 +2034,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             continue;
                         }
                     }
-                    ROOM_DAMAGE(IN_ROOM(k)) = 100;
+                    world.at(IN_ROOM(k)).setDamage(100);
                     int zone = 0;
                     if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -2118,7 +2118,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
                             true, vict, k, nullptr, TO_ROOM);
                         if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
-                            ROOM_DAMAGE(IN_ROOM(vict)) += 5;
+                            world.at(IN_ROOM(vict)).modDamage(5);
                         }
                         extract_obj(k);
                         continue;
@@ -2232,7 +2232,7 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
                             true, vict, k, nullptr, TO_ROOM);
                         if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
-                            ROOM_DAMAGE(IN_ROOM(vict)) += 5;
+                            world.at(IN_ROOM(vict)).modDamage(5);
                         }
                         extract_obj(k);
                         continue;
@@ -2740,7 +2740,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
             }
         }
         if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-            ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+            world.at(IN_ROOM(ch)).modDamage(5);
         }
         int zone = 0;
         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
@@ -2866,7 +2866,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
             }
         }
         if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-            ROOM_DAMAGE(IN_ROOM(ch)) += 5;
+            world.at(IN_ROOM(ch)).modDamage(5);
         }
         int zone = 0;
         if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
@@ -3624,14 +3624,14 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
     }
 
     std::vector<int64_t> stats;
-    for (const auto stat: {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+    for (const auto stat: {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
         if (!ch->is_soft_cap((int) stat, 1.0))
             stats.push_back((int) stat);
     }
 
-    if(ch->technique == FormID::TigerStance) stats.push_back((int) CharStat::PowerLevel);
-    if(ch->technique == FormID::EagleStance) stats.push_back((int) CharStat::Ki);
-    if(ch->technique == FormID::OxStance) stats.push_back((int) CharStat::Stamina);
+    if(ch->technique == FormID::TigerStance) stats.push_back((int) CharVital::PowerLevel);
+    if(ch->technique == FormID::EagleStance) stats.push_back((int) CharVital::Ki);
+    if(ch->technique == FormID::OxStance) stats.push_back((int) CharVital::Stamina);
 
     auto itr = Random::get(stats);
 
@@ -3674,19 +3674,19 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
 
     switch (*itr) {
         case 0:
-            bonus *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonus *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::PowerLevel)));
             ch->gainBasePL(bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
                          add_commas(bonus).c_str());
             break;
         case 1:
-            bonus *= (1 + ch->getAffectModifier(APPLY_KI_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonus *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Ki)));
             ch->gainBaseKI(bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n",
                          add_commas(bonus).c_str());
             break;
         case 2:
-            bonus *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonus *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Stamina)));
             ch->gainBaseST(bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n",
                          add_commas(bonus).c_str());
@@ -3845,22 +3845,22 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
 void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attrChance) {
     //Handling for awarding vitals to the player
-    pl *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
-    ki *= (1 + ch->getAffectModifier(APPLY_KI_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
-    st *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+    pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::PowerLevel)));
+    ki *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Ki)));
+    st *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Stamina)));
     if(pl > (ch->getBasePL() / 10)) pl = ch->getBasePL() / 10;
     if(ki > (ch->getBaseKI() / 10)) ki = ch->getBaseKI() / 10;
     if(st > (ch->getBaseST() / 10)) st = ch->getBaseST() / 10;
     
     std::vector<int64_t> stats;
-    for (const auto stat: {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+    for (const auto stat: {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
         if (!ch->is_soft_cap((int) stat, 1.0))
             stats.push_back((int) stat);
     }
 
-    if(ch->technique == FormID::TigerStance) stats.push_back((int) CharStat::PowerLevel);
-    if(ch->technique == FormID::EagleStance) stats.push_back((int) CharStat::Ki);
-    if(ch->technique == FormID::OxStance) stats.push_back((int) CharStat::Stamina);
+    if(ch->technique == FormID::TigerStance) stats.push_back((int) CharVital::PowerLevel);
+    if(ch->technique == FormID::EagleStance) stats.push_back((int) CharVital::Ki);
+    if(ch->technique == FormID::OxStance) stats.push_back((int) CharVital::Stamina);
 
     if(!stats.empty()) {
 
@@ -4342,18 +4342,18 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
 
-        dmg *= (1.0 + ch->getAffectModifier(APPLY_DAMAGE_PERC));
+        dmg *= (1.0 + ch->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Damage)));
         if(type == 0) {
-            dmg *= (1.0 + ch->getAffectModifier(APPLY_PHYS_DAM_PERC));
+            dmg *= (1.0 + ch->getAffectModifier(APPLY_DTYPE_BON, static_cast<int>(DamType::Physical)));
         } else {
-            dmg *= (1.0 + ch->getAffectModifier(APPLY_KI_DAM_PERC));
+            dmg *= (1.0 + ch->getAffectModifier(APPLY_DTYPE_BON, static_cast<int>(DamType::Ki)));
         }
 
-        dmg *= (1.0 + vict->getAffectModifier(APPLY_DEFENSE_PERC));
+        dmg *= (1.0 + vict->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Defense)));
         if(type == 0) {
-            dmg *= (1.0 + vict->getAffectModifier(APPLY_PHYS_DAM_RES));
+            dmg *= (1.0 + vict->getAffectModifier(APPLY_DTYPE_RES, static_cast<int>(DamType::Physical)));
         } else {
-            dmg *= (1.0 + vict->getAffectModifier(APPLY_KI_DAM_RES));
+            dmg *= (1.0 + vict->getAffectModifier(APPLY_DTYPE_RES, static_cast<int>(DamType::Ki)));
         }
 
 
@@ -4971,17 +4971,13 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
                 send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                 //int64_t healhp = GET_HIT(vict) * 0.12;
-                if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
+                if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->value[VAL_WORN_SCOUTER] && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     if (IS_ANDROID(vict)) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && vict->getPL() >= 150000) {
-                        send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && vict->getPL() >= 5000000) {
-                        send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                    } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && vict->getPL() >= 15000000) {
+                    } else if (vict->getPL() >= scouter->value[VAL_WORN_SCOUTER]) {
                         send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                     } else {
-                        send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) (vict->health * 100)));
+                        send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::PowerLevel)) * 100)));
                     }
                 } else {
                     send_to_char(ch, "\r\n");
@@ -4990,17 +4986,12 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (dmg <= 1 && suppresso == false && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
                     send_to_char(vict, "@D[@rDamage@W: @BPitiful...@D]@n\r\n");
-                    if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
-                        if (IS_ANDROID(vict)) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && vict->getPL() >= 150000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && vict->getPL() >= 5000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && vict->getPL() >= 15000000) {
+                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->value[VAL_WORN_SCOUTER] && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
+                        auto vpl = vict->getPL();
+                        if (IS_ANDROID(vict) || vpl > scouter->value[VAL_WORN_SCOUTER]) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) (vict->health * 100)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::PowerLevel)) * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");
@@ -5016,34 +5007,24 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     
                     vict->decCurHealth(calcdamage);
 
-                    if (GET_EQ(ch, WEAR_EYE) && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
-                        if (IS_ANDROID(vict)) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && vict->getPL() >= 150000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && vict->getPL() >= 5000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && vict->getPL() >= 15000000) {
+                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->value[VAL_WORN_SCOUTER] && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
+                        auto vpl = vict->getPL();
+                        if (IS_ANDROID(vict) || vpl >= scouter->value[VAL_WORN_SCOUTER]) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) (vict->health * 100)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::PowerLevel)) * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");
                     }
                 } else if (dmg <= 1 && suppresso == true && !PRF_FLAGGED(ch, PRF_NODEC)) {
                     send_to_char(ch, "@D[@GDamage@W: @BPitiful...@D]@n");
-                    if (GET_EQ(ch, WEAR_EYE) && vict) {
-                        if (IS_ANDROID(vict) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_BSCOUTER) && vict->getPL() >= 150000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_MSCOUTER) && vict->getPL() >= 5000000) {
-                            send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
-                        } else if (OBJ_FLAGGED(GET_EQ(ch, WEAR_EYE), ITEM_ASCOUTER) && vict->getPL() >= 15000000) {
+                    if (auto scouter = GET_EQ(ch, WEAR_EYE); scouter && scouter->value[VAL_WORN_SCOUTER] && vict && !PRF_FLAGGED(ch, PRF_NODEC)) {
+                        auto vpl = vict->getPL();
+                        if (IS_ANDROID(vict) || vpl >= scouter->value[VAL_WORN_SCOUTER]) {
                             send_to_char(ch, " @D<@YProcessing@D: @c?????????????@D>@n\r\n");
                         } else {
-                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vict->getPL()).c_str(), std::to_string((int) (vict->health * 100)));
+                            send_to_char(ch, " @D<@YProcessing@D: @c%s - @r%s%%@D>@n\r\n", add_commas(vpl).c_str(), std::to_string((int) ((1.0 - vict->getCurVitalDam(CharVital::PowerLevel)) * 100)));
                         }
                     } else {
                         send_to_char(ch, "\r\n");

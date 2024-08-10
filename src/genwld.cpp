@@ -399,10 +399,24 @@ int room_data::getDamage() {
     return dmg;
 }
 
+void room_data::activate() {
+    if(dmg != 0)
+        roomSubscriptions.subscribe("roomRepairDamage", ref());
+}
+
+void room_data::deactivate() {
+    // this really has no meaning but is there for later.
+}
+
 int room_data::setDamage(int amount) {
     auto before = dmg;
     dmg = std::clamp<int>(amount, 0, 100);
     // if(dmg != before) save();
+    if(dmg == 0) {
+        roomSubscriptions.unsubscribe("roomRepairDamage", ref());
+    } else {
+        roomSubscriptions.subscribe("roomRepairDamage", ref());
+    }
     return dmg;
 }
 

@@ -130,7 +130,7 @@ public:
 template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
 extern std::shared_ptr<spdlog::logger> logger;
-using weight_t = double;
+
 
 template <typename Iterator, typename Key = std::function<std::string(typename std::iterator_traits<Iterator>::value_type)>>
 Iterator partialMatch(

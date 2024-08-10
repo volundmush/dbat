@@ -461,7 +461,7 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 
 #define SECT(room)    (VALID_ROOM_RNUM(room) ? \
                 world[(room)].sector_type : SECT_INSIDE)
-#define ROOM_DAMAGE(room)   (world[(room)].dmg)
+#define ROOM_DAMAGE(room)   (world[(room)].getDamage())
 #define ROOM_EFFECT(room)   (world[(room)].geffect)
 #define ROOM_GRAVITY(room)  (world[(room)].getGravity())
 #define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)

@@ -236,7 +236,7 @@ void init_mobile(struct char_data *mob) {
     mob->set(CharAppearance::Sex, SEX_MALE);
     mob->chclass = SenseiID::Commoner;
 
-    GET_WEIGHT(mob) = rand_number(100, 200);
+    mob->set(CharDim::Weight, rand_number(100, 200));
     mob->setHeight(rand_number(100, 200));
 
     auto base1 = rand_number(8, 16);

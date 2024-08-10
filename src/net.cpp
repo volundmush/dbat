@@ -8,6 +8,7 @@
 #include <memory>
 #include <regex>
 #include <sys/epoll.h>
+#include <cppcodec/base64_rfc4648.hpp>
 
 #include "dbat/net.h"
 #include "dbat/utils.h"
@@ -17,16 +18,41 @@
 #include "dbat/config.h"
 #include "dbat/account.h"
 #include "dbat/accmenu.h"
+#include "dbat/charmenu.h"
+#include "dbat/chargen.h"
+#include "dbat/puppet.h"
 
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
 namespace net {
     std::unordered_map<int, std::shared_ptr<Connection>> connections;
     std::unordered_map<int, DisconnectReason> deadConnections;
-    std::set<int> pendingConnections, pendingOutData, pendingReads, pendingWrites;
+    std::set<int> pendingOutData, pendingReads, pendingWrites;
 
     int server_fd = -1;
     int epoll_fd = -1;
+
+    using base64 = cppcodec::base64_rfc4648;
+
+    // Overload for std::vector<uint8_t>
+    std::string encodeBase64(const std::vector<uint8_t>& data) {
+        return base64::encode(data);
+    }
+
+    // Overload for std::string
+    std::string encodeBase64(const std::string& data) {
+        return base64::encode(reinterpret_cast<const uint8_t*>(data.data()), data.size());
+    }
+
+    std::vector<uint8_t> decodeBase64(const std::string& base64Str) {
+        return base64::decode<std::vector<uint8_t>>(base64Str);
+    }
+
+    // Optionally, you can also provide a decode overload for std::string if needed
+    std::string decodeBase64ToString(const std::string& base64Str) {
+        auto decodedData = base64::decode<std::vector<uint8_t>>(base64Str);
+        return std::string(decodedData.begin(), decodedData.end());
+    }
 
     void ProtocolCapabilities::deserialize(const nlohmann::json& j) {
         if(j.contains("protocol")) {
@@ -45,7 +71,7 @@ namespace net {
         if(j.contains("encoding")) encoding = j["encoding"];
         if(j.contains("utf8")) utf8 = j["utf8"];
 
-        if(j.contains("colorType")) colorType = j["color"].get<ColorType>();
+        if(j.contains("colorType")) colorType = static_cast<ColorType>(j.at("colorType").get<int>());
 
         if(j.contains("width")) width = j["width"];
         if(j.contains("height")) height = j["height"];
@@ -68,6 +94,7 @@ namespace net {
         if(j.contains("osc_color_palette")) osc_color_palette = j["osc_color_palette"];
         if(j.contains("proxy")) proxy = j["proxy"];
         if(j.contains("mnes")) mnes = j["mnes"];
+        if(j.contains("mslp")) mslp = j["mslp"];
     }
 
     nlohmann::json ProtocolCapabilities::serialize() {
@@ -105,6 +132,7 @@ namespace net {
         if(osc_color_palette) j["osc_color_palette"] = osc_color_palette;
         if(proxy) j["proxy"] = proxy;
         if(mnes) j["mnes"] = mnes;
+        if(mslp) j["mslp"] = mslp;
 
         return j;
     }
@@ -118,12 +146,31 @@ namespace net {
         }
     }
 
+    nlohmann::json SendBuffer::serialize() {
+        nlohmann::json j;
+        j["data"] = encodeBase64(data);
+        j["sent"] = sent;
+        j["bitflags"] = bitflags;
+        return j;
+    }
+
+    SendBuffer::SendBuffer(const nlohmann::json& j) {
+        std::string dataStr = j["data"];
+        if(j.contains("data")) data = decodeBase64ToString(dataStr);
+        if(j.contains("sent")) sent = j["sent"];
+        if(j.contains("bitflags")) bitflags = j["bitflags"];
+    }
+
     void ConnectionParser::close() {
 
     }
 
-    void ConnectionParser::sendText(const std::string &txt) {
-        conn->sendText(txt);
+    void ConnectionParser::sendText(const std::string &txt, int bitflags) {
+        conn->sendText(txt, bitflags);
+    }
+
+    void ConnectionParser::sendGMCP(const std::string &cmd, const nlohmann::json& j, int bitflags) {
+        conn->sendGMCP(cmd, j, bitflags);
     }
 
     void ConnectionParser::start() {
@@ -134,10 +181,37 @@ namespace net {
 
     }
 
-    void Connection::sendText(const std::string &text) {
-        auto colored = processColors(text, true, nullptr);
+    nlohmann::json ConnectionParser::serialize() {
+        nlohmann::json j;
+        j["parserName"] = getName();
+        return j;
+    }
 
+    void ConnectionParser::deserialize(const nlohmann::json& j) {
+
+    }
+
+    bool ConnectionParser::canCopyover() {
+        return false;
+    }
+
+
+
+    void Connection::sendText(const std::string &text, int bitflags) {
+        auto colored = processColors(text, true, nullptr);
         telnet_send_text(teldata, colored.c_str(), colored.size());
+        // telnet_send_text will use outbuf.emplace_back() so to apply the
+        // bitflags we need to do it immediately afterwards.
+        auto &latest = outbuf.back();
+        latest.bitflags = bitflags;
+    }
+
+    void Connection::sendGMCP(const std::string &cmd, const nlohmann::json &j, int bitflags) {
+
+        // telnet_send_text will use outbuf.emplace_back() so to apply the
+        // bitflags we need to do it immediately afterwards.
+        auto &latest = outbuf.back();
+        latest.bitflags = bitflags;
     }
 
     void Connection::onWelcome() {
@@ -160,10 +234,11 @@ namespace net {
     }
 
     static const telnet_telopt_t my_telopts[] = {
-            { TELNET_TELOPT_TTYPE,     TELNET_WILL, TELNET_DONT },
-            //{ TELNET_TELOPT_COMPRESS2, TELNET_WONT, TELNET_DO   },
-            { TELNET_TELOPT_MSSP,      TELNET_WONT, TELNET_DO   },
-            { TELNET_TELOPT_NAWS,      TELNET_WILL, TELNET_DONT },
+            { TELNET_TELOPT_TTYPE,     TELNET_WONT, TELNET_DO },
+            { TELNET_TELOPT_COMPRESS2, TELNET_WILL, TELNET_DONT   },
+            { TELNET_TELOPT_COMPRESS3, TELNET_WILL, TELNET_DONT   },
+            { TELNET_TELOPT_MSSP,      TELNET_WILL, TELNET_DONT   },
+            { TELNET_TELOPT_NAWS,      TELNET_WONT, TELNET_DO },
             { -1, 0, 0 }
     };
 
@@ -191,25 +266,28 @@ namespace net {
         }
     }
 
+    void Connection::handleGMCP(char* cmd, char *data) {
+
+    }
+
     void Connection::handleAppData() {
         lastReceivedBytes = std::chrono::steady_clock::now();
 
         // Find the first occurrence of "\r\n" in the buffer
-        auto it = std::search(appbuf.begin(), appbuf.end(), "\r\n", "\r\n" + 2);
+        auto it = appbuf.find("\r\n");
 
-        while (it != appbuf.end()) {
+        while (it != std::string::npos) {
             // Extract the command up to the "\r\n"
-            std::string command(appbuf.begin(), it);
+            std::string command = appbuf.substr(0, it);
 
             // Append the command to pendingCommands
             pendingCommands.push_back(std::move(command));
 
             // Remove the processed command and "\r\n" from appbuf
-            it += 2; // Move past the "\r\n"
-            appbuf.erase(appbuf.begin(), it);
+            appbuf.erase(0, it + 2);
 
             // Look for the next "\r\n" in the remaining buffer
-            it = std::search(appbuf.begin(), appbuf.end(), "\r\n", "\r\n" + 2);
+            it = appbuf.find("\r\n");
         }
 
         // If no more complete commands are found, the remaining data in appbuf is left as-is
@@ -221,14 +299,36 @@ namespace net {
 
     void Connection::handleTelnetWill(char telopt) {
         lastReceivedBytes = std::chrono::steady_clock::now();
+
+        switch(telopt) {
+            case TELNET_TELOPT_NAWS:
+                capabilities.naws = true;
+                break;
+            case TELNET_TELOPT_TTYPE:
+                capabilities.ttype = true;
+                telnet_ttype_send(teldata);
+                break;
+        }
+
     }
 
     void Connection::handleTelnetDo(char telopt) {
         lastReceivedBytes = std::chrono::steady_clock::now();
+
+        switch(telopt) {
+            default:
+                break;
+        }
+
     }
 
     void Connection::handleTelnetDont(char telopt) {
         lastReceivedBytes = std::chrono::steady_clock::now();
+
+        switch(telopt) {
+            default:
+                break;
+        }
     }
 
     void Connection::handleTelnetWont(char telopt) {
@@ -237,17 +337,128 @@ namespace net {
 
     void Connection::handleTelnetSubNegotiate(char telopt, const char *buffer, size_t size) {
         lastReceivedBytes = std::chrono::steady_clock::now();
+
+        // just ignore anything coming from these, they have special handlers.
+        switch(telopt) {
+            case TELNET_TELOPT_ZMP:
+            case TELNET_TELOPT_NAWS:
+            case TELNET_TELOPT_GMCP:
+            case TELNET_TELOPT_TTYPE:
+            case TELNET_TELOPT_NEW_ENVIRON:
+                return;
+        }
+
+    }
+
+    static const std::set<std::string> clientsWithXterm256Support = {
+            "ATLANTIS", "CMUD", "KILDCLIENT", "MUDLET", "MUSHCLIENT", "PUTTY", "BEIP", "POTATO", "TINYFUGUE"
+    };
+
+    void Connection::handleTelnetTTYPE(unsigned char cmd, const char *data) {
+        std::string newData(data);
+
+        // Check if the received TTYPE is the same as the last one
+        if (newData == lastTTYPE) {
+            return;
+        }
+
+        // Update last TTYPE
+        lastTTYPE = newData;
+
+        // Process the TTYPE based on the current state
+        switch (ttypeState) {
+            case 0:
+                // Some clients respond with <name> <version>
+                // Split the data into name and version if applicable
+            {
+                size_t spacePos = newData.find(' ');
+                if (spacePos != std::string::npos) {
+                    capabilities.clientName = newData.substr(0, spacePos);
+                    capabilities.clientVersion = newData.substr(spacePos + 1);
+                } else {
+                    capabilities.clientName = newData;
+                }
+
+                // Anything that answers TTYPE always at least supports ANSI.
+                if(capabilities.colorType < ColorType::Standard)
+                    capabilities.colorType = ColorType::Standard;
+
+                std::string upperStr = capabilities.clientName;
+                std::transform(upperStr.begin(), upperStr.end(), upperStr.begin(), ::toupper);
+
+                if(clientsWithXterm256Support.contains(upperStr)) {
+                    if(capabilities.colorType < ColorType::Xterm256)
+                        capabilities.colorType = ColorType::Xterm256;
+                }
+            }
+                break;
+
+            case 1:
+                // Terminal type information
+                // The client should report one of the following: DUMB, ANSI, VT100, XTERM
+                if (newData == "DUMB") {
+                    if(capabilities.colorType < ColorType::NoColor)
+                        capabilities.colorType = ColorType::NoColor;
+                } else if (newData == "ANSI") {
+                    if(capabilities.colorType < ColorType::Standard)
+                        capabilities.colorType = ColorType::Standard;
+                } else if (newData == "VT100") {
+                    if(capabilities.colorType < ColorType::Standard)
+                        capabilities.colorType = ColorType::Standard;
+                    capabilities.vt100 = true;
+                } else if (newData == "XTERM") {
+                    if(capabilities.colorType < ColorType::Xterm256)
+                        capabilities.colorType = ColorType::Xterm256;
+                    capabilities.vt100 = true;
+                    capabilities.mouse_tracking = true;
+                } else if (newData == "ANSI-256COLOR" || newData == "VT100-256COLOR" || newData == "XTERM-256COLOR") {
+                    if(capabilities.colorType < ColorType::Xterm256)
+                        capabilities.colorType = ColorType::Xterm256;
+                } else if (newData.find("-TRUECOLOR") != std::string::npos) {
+                    if(capabilities.colorType < ColorType::TrueColor)
+                        capabilities.colorType = ColorType::TrueColor;
+                    capabilities.osc_color_palette = true;
+                }
+                break;
+            case 2:
+                // MTTS information
+                if (newData.find("MTTS") == 0) {
+                    int mttsCapabilities = std::stoi(newData.substr(5));
+                    capabilities.gmcp = mttsCapabilities & 1;
+                    capabilities.vt100 = mttsCapabilities & 2;
+                    capabilities.utf8 = mttsCapabilities & 4;
+                    if(mttsCapabilities & 8 && capabilities.colorType < ColorType::Xterm256)
+                        capabilities.colorType = ColorType::Xterm256;
+                    capabilities.mouse_tracking = mttsCapabilities & 16;
+                    capabilities.osc_color_palette = mttsCapabilities & 32;
+                    capabilities.screen_reader = mttsCapabilities & 64;
+                    capabilities.proxy = mttsCapabilities & 128;
+                    if(mttsCapabilities & 256 && capabilities.colorType < ColorType::TrueColor)
+                        capabilities.colorType = ColorType::TrueColor;
+                    capabilities.mnes = mttsCapabilities & 512;
+                    capabilities.mslp = mttsCapabilities & 1024;
+                    capabilities.tls = mttsCapabilities & 2048;
+                }
+                break;
+
+                // Add more cases as needed to handle further TTYPE negotiations
+        }
+
+        // Move to the next state
+        ttypeState++;
+        if(ttypeState < 3)
+            telnet_ttype_send(teldata);
     }
 
     void Connection::handleTelnet(telnet_event_t *event) {
         switch(event->type) {
             case TELNET_EV_DATA: {
-                appbuf.insert(appbuf.end(), event->data.buffer, event->data.buffer + event->data.size);
+                appbuf += std::string(event->data.buffer, event->data.size);
                 handleAppData();
             }
                 break;
             case TELNET_EV_SEND: {
-                outbuf.insert(outbuf.end(), event->data.buffer, event->data.buffer + event->data.size);
+                outbuf.emplace_back(std::string(event->data.buffer, event->data.size));
                 pendingOutData.insert(connId);
             }
                 break;
@@ -274,10 +485,18 @@ namespace net {
             case TELNET_EV_ZMP:
                 break;
             case TELNET_EV_TTYPE:
+                handleTelnetTTYPE(event->ttype.cmd, event->ttype.name);
                 break;
             case TELNET_EV_ENVIRON:
                 break;
             case TELNET_EV_MSSP:
+                break;
+            case TELNET_EV_GMCP:
+                handleGMCP(event->gmcp.cmd, event->gmcp.data);
+                break;
+            case TELNET_EV_NAWS:
+                capabilities.width = event->naws.width;
+                capabilities.height = event->naws.height;
                 break;
             case TELNET_EV_WARNING:
                 break;
@@ -287,23 +506,167 @@ namespace net {
     }
 
     Connection::Connection(int connId) : connId(connId) {
-        teldata = telnet_init(my_telopts, &telnet_handler, 0, this);
+        teldata = telnet_init(my_telopts, &telnet_handler, TELNET_FLAG_ROLE_SERVER, this);
     }
 
     Connection::Connection(int connId, const nlohmann::json &j) : Connection(connId) {
         deserialize(j);
+        epollRegister();
     }
 
     nlohmann::json Connection::serialize() {
+        nlohmann::json j;
 
+        j["connId"] = connId;
+        j["capabilities"] = capabilities.serialize();
+        if(account) j["account"] = account->vn;
+        if(adminLevel) j["adminLevel"] = adminLevel;
+        // We don't serialize descriptors, since the descriptor will rebuild that.
+
+        j["connected"] = std::chrono::duration_cast<std::chrono::nanoseconds>(connected.time_since_epoch()).count();
+        j["lastActivity"] = std::chrono::duration_cast<std::chrono::nanoseconds>(lastActivity.time_since_epoch()).count();
+        j["lastReceivedBytes"] = std::chrono::duration_cast<std::chrono::nanoseconds>(lastReceivedBytes.time_since_epoch()).count();
+
+        for(auto &cmd : pendingCommands) {
+            j["pendingCommands"].push_back(cmd);
+        }
+
+        if(parser) {
+            j["parser"] = parser->serialize();
+        }
+
+        j["state"] = static_cast<int>(state);
+
+        // Serialize the deque<SendBuffer>
+        j["outbuf"] = nlohmann::json::array();
+        for (auto& buffer : outbuf) {
+            j["outbuf"].push_back(buffer.serialize());
+        }
+
+        if(!appbuf.empty()) j["appbuf"] = encodeBase64(appbuf);
+        if(!lastTTYPE.empty()) j["lastTTYPE"] = lastTTYPE;
+        if(ttypeState) j["ttypeState"] = ttypeState;
+
+        if(teldata) {
+            nlohmann::json t;
+
+            std::string tbuf(teldata->buffer, teldata->buffer_pos);
+            if(teldata->buffer_pos > 0) {
+                t["buffer"] = encodeBase64(tbuf);
+                t["buffer_pos"] = teldata->buffer_pos;
+                t["buffer_size"] = teldata->buffer_size;
+            }
+
+            for(auto i = 0; i < teldata->q_cnt; i++) {
+                t["q"].push_back(std::make_pair(teldata->q[i].telopt, teldata->q[i].state));
+            }
+
+            t["state"] = teldata->state;
+            if(teldata->flags) t["flags"] = teldata->flags;
+            t["sb_telopt"] = teldata->sb_telopt;
+
+            j["teldata"] = t;
+        }
+
+        return j;
     }
 
     void Connection::deserialize(const nlohmann::json &j) {
+        connId = j.at("connId").get<int>();
+        capabilities.deserialize(j.at("capabilities"));
+        if (j.contains("account")) {
+            auto &acc = accounts[j.at("account").get<int>()];
+            account = &acc;
+        }
+        if (j.contains("adminLevel")) adminLevel = j.at("adminLevel").get<int>();
 
+        connected = std::chrono::system_clock::time_point(std::chrono::nanoseconds(j.at("connected").get<int64_t>()));
+        lastActivity = std::chrono::steady_clock::time_point(std::chrono::nanoseconds(j.at("lastActivity").get<int64_t>()));
+        lastReceivedBytes = std::chrono::steady_clock::time_point(std::chrono::nanoseconds(j.at("lastReceivedBytes").get<int64_t>()));
+
+        if(j.contains("pendingCommands"))
+            for (const auto& cmd : j.at("pendingCommands"))
+                pendingCommands.emplace_back(cmd.get<std::string>());
+
+        state = static_cast<ConnectionState>(j.at("state").get<int>());
+
+        if(j.contains("outbuf"))
+            for (const auto& bufferJson : j.at("outbuf"))
+                outbuf.emplace_back(bufferJson);
+
+        if(j.contains("appbuf")) {
+            std::string appbufData = j.at("appbuf").get<std::string>();
+            appbuf = decodeBase64ToString(appbufData);
+        }
+
+        if(j.contains("parser")) {
+            auto p = j["parser"];
+            auto pname = p.at("parserName").get<std::string>();
+
+            if(pname == "AccountMenu") {
+                parser = std::make_unique<AccountMenu>(shared_from_this());
+            } else if(pname == "ChargenParser") {
+                parser = std::make_unique<ChargenParser>(shared_from_this());
+            } else if(pname == "CharacterMenu") {
+                parser = std::make_unique<CharacterMenu>(shared_from_this(), nullptr);
+            } else if(pname == "LoginParser") {
+                parser = std::make_unique<LoginParser>(shared_from_this());
+            } else if(pname == "PuppetParser") {
+                parser = std::make_unique<PuppetParser>(shared_from_this(), nullptr);
+            }
+            parser->deserialize(p);
+            //parser->parse("");
+
+        } else {
+            // This really, really should not happen.
+            // But if it did, let's set them up with a login.
+            onWelcome();
+        }
+
+        if(j.contains("teldata")) {
+            auto t = j["teldata"];
+            if(t.contains("buffer")) {
+                std::string tbuf = decodeBase64ToString(t.at("buffer").get<std::string>());
+                if(teldata->buffer) {
+                    free(teldata->buffer);
+                    teldata->buffer = (char*)calloc(1, tbuf.size());
+                    memcpy(teldata->buffer, tbuf.c_str(), tbuf.size());
+                    teldata->buffer_size = tbuf.size();
+                    teldata->buffer_pos = t.at("buffer_pos").get<size_t>();
+                }
+            }
+
+            if(t.contains("q")) {
+                auto q = t["q"];
+                int i = 0;
+                if(teldata->q) {
+                    free(teldata->q);
+                    teldata->q = (telnet_rfc1143_t*)calloc(sizeof(telnet_rfc1143_t), q.size());
+                    teldata->q_cnt = q.size();
+                    teldata->q_size = sizeof(telnet_rfc1143_t) * q.size();
+                }
+                for(const auto &qop : q) {
+                    teldata->q[i].telopt = qop[0].get<unsigned char>();
+                    teldata->q[i].state = qop[1].get<unsigned char>();
+                    i++;
+                }
+            }
+
+            if(t.contains("flags")) {
+                teldata->flags = t.at("flags").get<int>();
+            }
+
+            if(t.contains("sb_telopt")) {
+                teldata->sb_telopt = t.at("sb_telopt").get<unsigned char>();
+            }
+
+            if(t.contains("state")) {
+                teldata->state = static_cast<telnet_state_t>(t.at("state").get<int>());
+            }
+        }
     }
 
     Connection::~Connection() {
-        epollUnregister();
         // Free the telnet data.
         telnet_free(teldata);
         // Close the descriptor.
@@ -425,14 +788,16 @@ namespace net {
         return listen_fd;
     }
 
-    void init() {
+    void init_epoll() {
         // Let's initialize the epoll
         epoll_fd = epoll_create1(0);
         if (epoll_fd == -1) {
             perror("epoll_create1");
             exit(EXIT_FAILURE);
         }
+    }
 
+    void init_listeners() {
         // server_fd might already be set to a proper port by the copyover process.
         if(server_fd == -1) {
             // This is a fresh start. We need to create and bind a server to config::hostAddress config::port and set
@@ -456,10 +821,6 @@ namespace net {
         if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, connId, NULL) == -1) {
             perror("epoll_ctl: EPOLL_CTL_DEL");
         }
-    }
-
-    void Connection::disableCompression() {
-
     }
 
     void Connection::readFromSocket() {
@@ -497,23 +858,38 @@ namespace net {
     void Connection::writeToSocket() {
         // Iterate over the buffer's data sequence and attempt to send it
         while (!outbuf.empty()) {
-            // Access the first data sequence in the buffer
-            // Attempt to send the data
-            ssize_t bytesSent = send(connId, outbuf.data(), outbuf.size(), 0);
+            // Access the front data sequence in the buffer.
+            auto &sbuf = outbuf.front();
+            int remaining = sbuf.data.size() - sbuf.sent;
 
-            if (bytesSent == -1) {
-                if(errno == EAGAIN || errno == EWOULDBLOCK) {
-                    // Socket is not ready to send more data; stop and wait for EPOLLOUT
-                    pendingWrites.erase(connId);
-                    break;
-                } else {
-                    onNetworkDisconnected();
-                    break;
+            if(remaining > 0) {
+                // Attempt to send the data
+                ssize_t bytesSent = send(connId, sbuf.data.c_str() + sbuf.sent, remaining, 0);
+
+                if (bytesSent == -1) {
+                    if(errno == EAGAIN || errno == EWOULDBLOCK) {
+                        // Socket is not ready to send more data; stop and wait for EPOLLOUT
+                        pendingWrites.erase(connId);
+                        break;
+                    } else {
+                        onNetworkDisconnected();
+                        break;
+                    }
                 }
+
+                // Consume the sent data from the buffer
+                sbuf.sent += bytesSent;
+                remaining -= bytesSent;
             }
 
-            // Consume the sent data from the buffer
-            outbuf.erase(outbuf.begin(), outbuf.begin() + bytesSent);
+            if(remaining == 0) {
+                if(sbuf.bitflags & SendBuffer::BF_CLOSE_AFTER_SEND) {
+                    outbuf.clear();
+                    close();
+                } else {
+                    outbuf.pop_front();
+                }
+            }
         }
 
         if (outbuf.empty()) {
@@ -614,30 +990,48 @@ namespace net {
 
         for(int i = 0; i < nfds; i++) {
             auto &ev = events[i];
+            int fd = ev.data.fd;
+
+            if(ev.events & EPOLLERR) {
+                // Handle error condition
+                int err = 0;
+                socklen_t len = sizeof(err);
+                if (getsockopt(ev.data.fd, SOL_SOCKET, SO_ERROR, &err, &len) == 0) {
+                    basic_mud_log("Error on fd %d: %s\n", fd, strerror(err));
+                } else {
+                    basic_mud_log("getsockopt failed on fd %d", fd);
+                }
+
+                // Close the file descriptor and remove it from your connections
+                deadConnections[ev.data.fd] = DisconnectReason::ConnectionLost;
+
+                // Skip further processing for this fd
+                continue;
+            }
 
             if(ev.events & EPOLLIN) {
-                pendingReads.insert(ev.data.fd);
+                pendingReads.insert(fd);
             }
 
             if(ev.events & EPOLLOUT) {
-                pendingWrites.insert(ev.data.fd);
+                pendingWrites.insert(fd);
             }
         }
     }
 
     void prepareForCopyover() {
         // This must iterate through all connections,
-        // force them to disable MCCP2 compression, and ensure that all outgoing buffers are
+        // kick any connections that can't be safely serialized, and ensure that all outgoing buffers are
         // fully flushed to the OS.
 
         std::set<int> toClose;
 
         for(auto &[connId, conn] : connections) {
-            conn->disableCompression();
-            if(conn->state == net::ConnectionState::Pending) {
-                conn->sendText("\r\nSorry, we are rebooting. Please wait warmly for a few seconds.\r\n");
+            if(conn->state == net::ConnectionState::Pending || conn->parser && !conn->parser->canCopyover()) {
+                conn->sendText("\r\nSorry, we are rebooting. This may take a minute or two. Please reconnect in a bit.\r\n", SendBuffer::BF_CLOSE_AFTER_SEND);
                 toClose.insert(connId);
             }
+            // There shouldn't be any dead connections here, but we'll check anyway.
             if(conn->state == net::ConnectionState::Dead) {
                 toClose.insert(connId);
             }
@@ -645,16 +1039,20 @@ namespace net {
 
         // Ensure all pending data is sent out.
         while(!pendingOutData.empty()) {
-            for(auto &connId : pendingOutData) {
+            auto pending = pendingOutData;
+            for(auto &connId : pending) {
                 auto conn = connections.at(connId);
                 conn->writeToSocket();
             }
             if(!pendingOutData.empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                std::this_thread::sleep_for(std::chrono::milliseconds(15));
         }
 
-        // Close the pending connections.
+        // Close the pending and any remaining connections.
         for(auto &id : toClose) {
+            net::connections.erase(id);
+        }
+        for(auto const &[id, reason] : deadConnections) {
             net::connections.erase(id);
         }
 

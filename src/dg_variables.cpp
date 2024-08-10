@@ -899,7 +899,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'w':
                     if (!strcasecmp(field, "weight"))
-                        snprintf(str, slen, "%s", fmt::format("{}", GET_WEIGHT(c)).c_str());
+                        snprintf(str, slen, "%s", fmt::format("{}", c->get(CharDim::Weight)).c_str());
             
                     break;
             } /* switch *field */

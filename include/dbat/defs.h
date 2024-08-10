@@ -42,48 +42,48 @@
  */
 
 enum class RaceID : uint8_t {
- Human = 0,
- Saiyan = 1,
- Icer = 2,
- Konatsu = 3,
- Namekian = 4,
- Mutant = 5,
- Kanassan = 6,
- Halfbreed = 7,
- BioAndroid = 8,
- Android = 9,
- Demon = 10,
- Majin = 11,
- Kai = 12,
- Tuffle = 13,
- Hoshijin = 14,
- Animal = 15,
- Saiba = 16,
- Serpent = 17,
- Ogre = 18,
- Yardratian = 19,
- Arlian = 20,
- Dragon = 21,
- Mechanical = 22,
- Spirit = 23
+    Spirit = 0,
+    Human = 1,
+    Saiyan = 2,
+    Icer = 3,
+    Konatsu = 4,
+    Namekian = 5,
+    Mutant = 6,
+    Kanassan = 7,
+    Halfbreed = 8,
+    BioAndroid = 9,
+    Android = 10,
+    Demon = 11,
+    Majin = 12,
+    Kai = 13,
+    Tuffle = 14,
+    Hoshijin = 15,
+    Animal = 16,
+    Saiba = 17,
+    Serpent = 18,
+    Ogre = 19,
+    Yardratian = 20,
+    Arlian = 21,
+    Dragon = 22,
+    Mechanical = 23,
 };
 
 enum class SenseiID : uint8_t {
-    Roshi = 0,
-    Piccolo = 1,
-    Krane = 2,
-    Nail = 3,
-    Bardock = 4,
-    Ginyu = 5,
-    Frieza = 6,
-    Tapion = 7,
-    Sixteen = 8,
-    Dabura = 9,
-    Kibito = 10,
-    Jinto = 11,
-    Tsuna = 12,
-    Kurzak = 13,
-    Commoner = 14
+    Commoner = 0,
+    Roshi = 1,
+    Piccolo = 2,
+    Krane = 3,
+    Nail = 4,
+    Bardock = 5,
+    Ginyu = 6,
+    Frieza = 7,
+    Tapion = 8,
+    Sixteen = 9,
+    Dabura = 10,
+    Kibito = 11,
+    Jinto = 12,
+    Tsuna = 13,
+    Kurzak = 14
 };
 
 enum class FormID : uint16_t {
@@ -632,42 +632,6 @@ enum class SkillID : uint16_t {
 
 /* char and mob-related defines *****************************************/
 
-/* PC classes */
-/* Taken from the SRD under OGL, see ../doc/srd.txt for information */
-#define CLASS_ROSHI             SenseiID::Roshi
-#define CLASS_PICCOLO           SenseiID::Piccolo
-#define CLASS_KRANE             SenseiID::Krane
-#define CLASS_NAIL              SenseiID::Nail
-#define CLASS_BARDOCK           SenseiID::Bardock
-#define CLASS_GINYU             SenseiID::Ginyu
-#define CLASS_FRIEZA            SenseiID::Frieza
-#define CLASS_TAPION            SenseiID::Tapion
-#define CLASS_ANDSIX            SenseiID::Sixteen
-#define CLASS_DABURA            SenseiID::Dabura
-#define CLASS_KABITO            SenseiID::Kibito
-#define CLASS_JINTO             SenseiID::Jinto
-#define CLASS_TSUNA             SenseiID::Tsuna
-#define CLASS_KURZAK            SenseiID::Kurzak
-#define CLASS_ASSASSIN          14
-#define CLASS_BLACKGUARD        15
-#define CLASS_DRAGON_DISCIPLE   16
-#define CLASS_DUELIST           17
-#define CLASS_DWARVEN_DEFENDER  18
-#define CLASS_ELDRITCH_KNIGHT   19
-#define CLASS_HIEROPHANT        20
-#define CLASS_HORIZON_WALKER    21
-#define CLASS_LOREMASTER        22
-#define CLASS_MYSTIC_THEURGE    23
-#define CLASS_SHADOWDANCER      24
-#define CLASS_THAUMATURGIST     25
-#define CLASS_NPC_EXPERT    26
-#define CLASS_NPC_ADEPT        27
-#define CLASS_NPC_COMMONER    28
-#define CLASS_NPC_ARISTOCRAT    29
-#define CLASS_NPC_WARRIOR    30
-
-#define MAX_SENSEI              15 /* Used by Sensei Style */
-
 
 #define NUM_CLASSES             31
 #define NUM_NPC_CLASSES    4
@@ -979,7 +943,7 @@ enum class SkillID : uint16_t {
 #define PLR_RLEG        26  /* Player has a right leg           */
 #define PLR_LLEG        27  /* Player has a left leg            */
 #define PLR_HEAD        28  /* Player has a head                */
-#define PLR_STAIL       29  /* UNUSED         */
+#define PLR_UNUSED_0       29  /* UNUSED         */
 #define PLR_TAIL        30  /* Player has a tail     */
 #define PLR_PILOTING    31  /* Player is sitting in the pilots chair */
 #define PLR_SKILLP      32  /* Player made a good choice in CC  */
@@ -1009,7 +973,7 @@ enum class SkillID : uint16_t {
 #define PLR_HEALT       56  /* Is inside a healing tank         */
 #define PLR_FURY        57  /* Is in fury mode                  */
 #define PLR_POSE        58  /* Ginyu Pose Effect                */
-#define PLR_OOZARU      59 // UNUSED
+#define PLR_UNUSED_1      59 // UNUSED. was oozaru
 #define PLR_ABSORBED    60
 #define PLR_MULTP       61
 #define PLR_PDEATH      62
@@ -1531,160 +1495,68 @@ enum class SkillID : uint16_t {
 #define ITEM_MAGIC           6  /* Item is magical              */
 #define ITEM_NODROP          7  /* Item is cursed: can't drop   */
 #define ITEM_BLESS           8  /* Item is blessed              */
-#define ITEM_ANTI_GOOD       9  /* Not usable by good people    */
-#define ITEM_ANTI_EVIL       10 /* Not usable by evil people    */
-#define ITEM_ANTI_NEUTRAL    11 /* Not usable by neutral people */
-#define ITEM_ANTI_WIZARD     12 /* Not usable by mages          */
-#define ITEM_ANTI_CLERIC     13 /* Not usable by clerics        */
-#define ITEM_ANTI_ROGUE      14 /* Not usable by thieves        */
-#define ITEM_ANTI_FIGHTER    15 /* Not usable by warriors       */
-#define ITEM_NOSELL          16 /* Shopkeepers won't touch it   */
-#define ITEM_ANTI_DRUID      17 /* Not usable by druids         */
-#define ITEM_2H              18 /* Requires two free hands      */
-#define ITEM_ANTI_BARD       19 /* Not usable by bards          */
-#define ITEM_ANTI_RANGER     20 /* Not usable by rangers        */
-#define ITEM_ANTI_PALADIN    21 /* Not usable by paladins       */
-#define ITEM_ANTI_HUMAN      22 /* Not usable by humans         */
-#define ITEM_ANTI_ICER       23 /* Not usable by dwarves        */
-#define ITEM_ANTI_SAIYAN     24 /* Not usable by elves          */
-#define ITEM_ANTI_KONATSU    25 /* Not usable by gnomes         */
-#define ITEM_UNIQUE_SAVE     26    /* unique object save           */
-#define ITEM_BROKEN          27 /* Item is broken hands         */
-#define ITEM_UNBREAKABLE     28 /* Item is unbreakable          */
-#define ITEM_ANTI_MONK       29 /* Not usable by monks          */
-#define ITEM_ANTI_BARBARIAN  30 /* Not usable by barbarians     */
-#define ITEM_ANTI_SORCERER   31 /* Not usable by sorcerers      */
-#define ITEM_DOUBLE          32 /* Double weapon                */
-#define ITEM_ONLY_WIZARD     33 /* Only usable by mages         */
-#define ITEM_ONLY_CLERIC     34 /* Only usable by clerics       */
-#define ITEM_ONLY_ROGUE      35 /* Only usable by thieves       */
-#define ITEM_ONLY_FIGHTER    36 /* Only usable by warriors      */
-#define ITEM_ONLY_DRUID      37 /* Only usable by druids        */
-#define ITEM_ONLY_BARD       38 /* Only usable by bards         */
-#define ITEM_ONLY_RANGER     39 /* Only usable by rangers       */
-#define ITEM_ONLY_PALADIN    40 /* Only usable by paladins      */
-#define ITEM_ONLY_HUMAN      41 /* Only usable by humans        */
-#define ITEM_ONLY_ICER       42 /* Only usable by dwarves       */
-#define ITEM_ONLY_SAIYAN     43 /* Only usable by elves         */
-#define ITEM_ONLY_KONATSU    44 /* Only usable by gnomes        */
-#define ITEM_ONLY_MONK       45 /* Only usable by monks         */
-#define ITEM_ONLY_BARBARIAN  46 /* Only usable by barbarians    */
-#define ITEM_ONLY_SORCERER   47 /* Only usable by sorcerers     */
-#define ITEM_ANTI_ARCANE_ARCHER        48 /* Not usable by Aracane Archers          */
-#define ITEM_ANTI_ARCANE_TRICKSTER     49 /* Not usable by Aracane tricksters       */
-#define ITEM_ANTI_ARCHMAGE             50 /* Not usable by Archmages                */
-#define ITEM_ANTI_ASSASSIN             51 /* Not usable by Assassins                */
-#define ITEM_ANTI_BLACKGUARD           52 /* Not usable by Blackguards              */
-#define ITEM_ANTI_DRAGON_DISCIPLE      53 /* Not usable by Dragon disciples         */
-#define ITEM_ANTI_DUELIST              54 /* Not usable by Duelists                 */
-#define ITEM_ANTI_DWARVEN_DEFENDER     55 /* Not usable by Dwarven defenders        */
-#define ITEM_ANTI_ELDRITCH_KNIGHT      56 /* Not usable by Eldritch knights         */
-#define ITEM_ANTI_HIEROPHANT           57 /* Not usable by Hierophants              */
-#define ITEM_ANTI_HORIZON_WALKER       58 /* Not usable by Horizon walkers          */
-#define ITEM_ANTI_LOREMASTER           59 /* Not usable by Loremasters              */
-#define ITEM_ANTI_MYSTIC_THEURGE       60 /* Not usable by Mystic theurges          */
-#define ITEM_ANTI_SHADOWDANCER         61 /* Not useable by shadowdancers           */
-#define ITEM_ANTI_THAUMATURGIST        62 /* Not useable by thaumaturgists          */
-#define ITEM_BSCOUTER                  63
-#define ITEM_MSCOUTER                  64
-#define ITEM_ASCOUTER                  65
-#define ITEM_USCOUTER                  66
-#define ITEM_WEAPLVL1                  67
-#define ITEM_WEAPLVL2                  68
-#define ITEM_WEAPLVL3                  69
-#define ITEM_WEAPLVL4                  70
-#define ITEM_WEAPLVL5                  71
-#define ITEM_CBOARD                    72
-#define ITEM_FORGED                    73
-#define ITEM_SHEATH                    74
-#define ITEM_ONLY_JINTO                75
-#define ITEM_BURIED                    76
-#define ITEM_SLOT1                     77
-#define ITEM_SLOT2                     78
-#define ITEM_TOKEN                     79
-#define ITEM_SLOT_ONE                  80
-#define ITEM_SLOTS_FILLED              81
-#define ITEM_RESTRING                  82
-#define ITEM_CUSTOM                    83
-#define ITEM_PROTECTED                 84
-#define ITEM_NORANDOM                  85
-#define ITEM_THROW                     86
-#define ITEM_HOT                       87
-#define ITEM_PURGE                     88
-#define ITEM_ICE                       89
-#define ITEM_DUPLICATE                 90
-#define ITEM_MATURE                    91
-#define ITEM_CARDCASE                  92
-#define ITEM_NOPICKUP                  93
-#define ITEM_NOSTEAL                   94
+#define ITEM_NOSELL          9 /* Shopkeepers won't touch it   */
+#define ITEM_2H              10 /* Requires two free hands      */
+#define ITEM_UNIQUE_SAVE     11    /* unique object save           */
+#define ITEM_BROKEN          12 /* Item is broken hands         */
+#define ITEM_UNBREAKABLE     13 /* Item is unbreakable          */
+#define ITEM_DOUBLE          14 /* Double weapon                */
+#define ITEM_CARD            15 /* Item is a card              */
+#define ITEM_CBOARD          16
+#define ITEM_FORGED          17
+#define ITEM_SHEATH          18
+#define ITEM_BURIED          19
+#define ITEM_SLOT1           20
+#define ITEM_SLOT2           21
+#define ITEM_TOKEN           22
+#define ITEM_SLOT_ONE        23
+#define ITEM_SLOTS_FILLED    24
+#define ITEM_RESTRING        25
+#define ITEM_CUSTOM          26
+#define ITEM_PROTECTED       27
+#define ITEM_NORANDOM        28
+#define ITEM_THROW           29
+#define ITEM_HOT             30
+#define ITEM_PURGE           31
+#define ITEM_ICE             32
+#define ITEM_DUPLICATE       33
+#define ITEM_MATURE          34
+#define ITEM_CARDCASE        35
+#define ITEM_NOPICKUP        36
+#define ITEM_NOSTEAL         37
 
+// TODO: after completing migration, reduce this to 39
 #define NUM_ITEM_FLAGS 96
 
 /* Modifier constants used with obj affects ('A' fields) */
-#define APPLY_NONE              0    /* No effect			*/
-#define APPLY_STR               1    /* Apply to strength		*/
-#define APPLY_DEX               2    /* Apply to dexterity		*/
-#define APPLY_INT               3    /* Apply to intelligence	*/
-#define APPLY_WIS               4    /* Apply to wisdom		*/
-#define APPLY_CON               5    /* Apply to constitution	*/
-#define APPLY_CHA               6    /* Apply to charisma		*/
-#define APPLY_SPI               7    /* Reserved			*/
-#define APPLY_LEVEL             8    /* Reserved			*/
-#define APPLY_AGE               9    /* Apply to age			*/
-#define APPLY_CHAR_WEIGHT      10    /* Apply to weight		*/
-#define APPLY_CHAR_HEIGHT      11    /* Apply to height		*/
-#define APPLY_MANA             12    /* Apply to max mana		*/
-#define APPLY_HIT              13    /* Apply to max hit points	*/
-#define APPLY_MOVE             14    /* Apply to max move points	*/
-#define APPLY_GOLD             15    /* Reserved			*/
-#define APPLY_EXP_GAIN_MULT    16    /* Bonus/Penalty to XP gain. +/- % */
-#define APPLY_AC               17    /* Apply to Armor Class		*/
-#define APPLY_ACCURACY         18    /* Apply to accuracy		*/
-#define APPLY_DAMAGE           19    /* Apply to damage 		*/
-#define APPLY_REGEN            20    /* Regen Rate Buffed            */
-#define APPLY_TRAIN            21    /* Skill training rate buffed   */
-#define APPLY_LIFEMAX          22    /* Life Force max buffed        */
-#define APPLY_DAMAGE_PERC      23    /* Modify damage inflicted by -/+%			*/
-#define APPLY_DEFENSE_PERC     24    /* -/+% damage resistance.		*/
-#define APPLY_PL_MULT          25       /* Apply to race                */
-#define APPLY_KI_MULT          26       /* Apply to turn undead         */
-#define APPLY_ST_MULT          27       /* Apply to spell cast per day  */
-#define APPLY_LF_MULT          28       /* Apply to spell cast per day  */
-#define APPLY_VITALS_MULT      29       /* Apply to spell cast per day  */
-#define APPLY_WEIGHT_MULT      30       /* Apply to spell cast per day  */
-#define APPLY_HEIGHT_MULT      31       /* Apply to spell cast per day  */
-#define APPLY_PHYS_DAM_PERC    32       /* Bonus percentage to physical damage output.  */
-#define APPLY_KI_DAM_PERC      33       /* Bonus percentage to ki damage output.  */
-#define APPLY_PHYS_DAM_RES     34       /* Bonus resistance percentage to physical damage received.  */
-#define APPLY_KI_DAM_RES       35       /* Bonus resistance percentage to ki damage received. */
-#define APPLY_DAM_ATK_TIER     36       /* Bonus perc applied to damage output of a specific attack tier.  */
-#define APPLY_KI               37    /* Apply to max ki		*/
-#define APPLY_FORTITUDE        38    /* Apply to fortitue save	*/
-#define APPLY_REFLEX           39    /* Apply to reflex save		*/
-#define APPLY_WILL             40    /* Apply to will save		*/
-#define APPLY_SKILL            41       /* Apply to a specific skill    */
-#define APPLY_FEAT             42       /* Apply to a specific feat     */
-#define APPLY_ALLSAVES         43       /* Apply to all 3 save types 	*/
-#define APPLY_RESISTANCE       44       /* Apply to resistance	 	*/
-#define APPLY_ALL_ATTRS        45       /* Apply to all attributes	*/
-#define APPLY_ALL_VITALS       46       // Apply to all CharStats base.
-#define APPLY_SKILL_SLOTS      47     // Add/Remove Skill Slots.
-#define APPLY_ATTR_TRAIN_COST  48     // Add/Reduce cost in train points to increase attribute by percent.
-#define APPLY_PS_GAIN_MULT     49     // Add/Reduce gained PS from things that grant PS.
-#define APPLY_TRANS_ST_UPKEEP  50    // Add/Reduce perc of stamina by % for transformation upkeep.
-#define APPLY_VITALS_GAIN_MULT 51     // improves gains to PL/KI/ST/LF by percent.
-#define APPLY_PL_GAIN_MULT     52
-#define APPLY_ST_GAIN_MULT     53
-#define APPLY_KI_GAIN_MULT     54
-#define APPLY_LF_GAIN_MULT     55
-#define APPLY_PERFECT_DODGE    56
-#define APPLY_PARRY_PERC       57
-#define APPLY_DODGE_PERC       58
-#define APPLY_BLOCK_PERC       59
-#define APPLY_REGEN_PL_PERC    60
-#define APPLY_REGEN_KI_PERC    61
+#define APPLY_NONE              0    /* No effect */
+#define APPLY_CATTR_BASE        1    /* Bitwise: Flat Modifier applied to Attribute base */
+#define APPLY_CATTR_MULT        2    /* Bitwise: Modifier for Attribute mult */
+#define APPLY_CATTR_POST        3    /* Bitwise: Flat modifier added after mult.  */
+#define APPLY_CATTR_GAIN_MULT   4    /* bitwise: other stats gain multiplier */
+#define APPLY_CVIT_BASE         5    /* Bitwise: Flat modifier applied to vital base */
+#define APPLY_CVIT_MULT         6    /* Bitwise: modifier for vitals mult */
+#define APPLY_CVIT_POST         7    /* Bitwise: flat modifier applied after mult */
+#define APPLY_CVIT_GAIN_MULT    8    /* Bitwise: base gains multiplier */
+#define APPLY_CVIT_REGEN_MULT   9    /* Bitwise: regen multiplier */
+#define APPLY_CVIT_DOT_MULT     10    /* Bitwise: damage over time multiplier */
+#define APPLY_CSTAT_BASE        11    /* bitwise: other stats base */
+#define APPLY_CSTAT_MULT        12    /* bitwise: other stats multiplier */
+#define APPLY_CSTAT_POST        13    /* bitwise: flat modifier applied after mult */
+#define APPLY_CSTAT_GAIN_MULT   14    /* bitwise: other stats gain multiplier */
+#define APPLY_CDIM_BASE         15    /* bitwise: character dimension base */
+#define APPLY_CDIM_MULT         16    /* bitwise: character dimension multiplier */
+#define APPLY_CDIM_POST         17    /* bitwise: flat modifier applied after mult */
+#define APPLY_COMBAT_BASE       18    /* bitwise: combat base bonuses */
+#define APPLY_COMBAT_MULT       19    /* bitwise: combat multiplicative bonuses */
+#define APPLY_DTYPE_RES         20    /* bitwise: damage type resistance */
+#define APPLY_DTYPE_BON         21    /* bitwise: damage type bonuses */
+#define APPLY_ATKTIER_RES       22    /* bitwise: attack tier resistance */
+#define APPLY_ATKTIER_BON       23    /* bitwise: attack tier bonuses */
+#define APPLY_TRANS_UPKEEP_CVIT 24    /* bitwise: cvitals cost modifier for transformations */
+#define APPLY_SKILL             25     /* !bitwise: Apply to a specific skill    */
 
-#define NUM_APPLIES 62
+#define NUM_APPLIES 26
 
 /* Container flags - value[1] */
 #define CONT_CLOSEABLE      (1 << 0)    /* Container can be closed	*/
@@ -2029,6 +1901,7 @@ input */
 #define VAL_WEAPON_CRITTYPE           6
 #define VAL_WEAPON_MATERIAL           7
 #define VAL_WEAPON_CRITRANGE          8
+#define VAL_WEAPON_LEVEL              9
 #define VAL_FIREWEAPON_UNUSED1        0
 #define VAL_FIREWEAPON_UNUSED2        1
 #define VAL_FIREWEAPON_UNUSED3        2
@@ -2077,6 +1950,7 @@ input */
 #define VAL_WORN_MAXHEALTH            5
 #define VAL_WORN_UNUSED7              6
 #define VAL_WORN_MATERIAL             7
+#define VAL_WORN_SCOUTER             15
 #define VAL_OTHER_UNUSED1             0
 #define VAL_OTHER_UNUSED2             1
 #define VAL_OTHER_UNUSED3             2
@@ -2252,27 +2126,24 @@ input */
 #define LIMITBREAK_THRESHOLD    5000000
 
 
-
-// The IDs in this enum are designed to correlate with the APPLY_<STAT> defines.
-// Each ID is APPLY_<STAT> - 1
 using attribute_t = uint8_t;
 enum class CharAttribute : uint8_t {
- Strength = 0,
- Agility = 1, // lots of code references this as Dexterity. dex
- Intelligence = 2,
- Wisdom = 3,
- Constitution = 4,
- Speed = 5 // this is actually Charisma in the code. cha
+    Strength      = 1 << 0, // 1
+    Agility       = 1 << 1, // 2
+    Intelligence  = 1 << 2, // 4
+    Wisdom        = 1 << 3, // 8
+    Constitution  = 1 << 4, // 16
+    Speed         = 1 << 5  // 32
 };
 
 using attribute_train_t = uint32_t;
 enum class CharTrain : uint8_t {
- Strength = 0,
- Agility = 1, // lots of code references this as Dexterity. dex
- Intelligence = 2,
- Wisdom = 3,
- Constitution = 4,
- Speed = 5 // this is actually Charisma in the code. cha
+    Strength      = 1 << 0, // 1
+    Agility       = 1 << 1, // 2
+    Intelligence  = 1 << 2, // 4
+    Wisdom        = 1 << 3, // 8
+    Constitution  = 1 << 4, // 16
+    Speed         = 1 << 5  // 32
 };
 
 using appearance_t = uint8_t;
@@ -2289,21 +2160,22 @@ enum class CharAppearance : uint8_t {
 
 using align_t = int16_t;
 enum class CharAlign : uint8_t {
- GoodEvil = 0,
- LawChaos = 1,
+ GoodEvil = 1 << 0,
+ LawChaos = 1 << 1,
 };
 
 using money_t = uint64_t;
 enum class CharMoney : uint8_t {
- Carried = 0,
- Bank = 1
+ Carried = 1 << 0,
+ Bank = 1 << 0
 };
 
-using stat_t = int64_t;
-enum class CharStat : uint8_t {
- PowerLevel = 0,
- Ki = 1,
- Stamina = 2
+using vital_t = int64_t;
+enum class CharVital : uint8_t {
+ PowerLevel = 1 << 0,
+ Ki = 1 << 1,
+ Stamina = 1 << 2,
+ LifeForce = 1 << 3
 };
 
 using num_t = int;
@@ -2311,12 +2183,51 @@ enum class CharNum : uint8_t {
  Level = 0,
  Wait = 1,
  AdmLevel = 2,
- Height = 3,
  RacialPref = 4,
  MysticMelody = 5,
  GroupKills = 6,
  ArmorWishes = 7
-
 };
 
+using stat_t = int64_t;
+enum class CharStat : uint8_t {
+    Exp = 1 << 0,
+    SkillTrain = 1 << 1,
+    PS = 1 << 2,
+    UpgradePoints = 1 << 3
+};
+
+
+using dim_t = double;
+enum class CharDim : uint8_t {
+    Height = 1 << 0,
+    Weight = 1 << 1,
+};
+using weight_t = dim_t;
 using effect_t = uint16_t;
+
+enum class ComStat : uint8_t {
+    Accuracy = 1 << 0,
+    Damage = 1 << 1,
+    Armor = 1 << 2,
+    Parry = 1 << 3,
+    Dodge = 1 << 4,
+    Block = 1 << 5,
+    PerfectDodge = 1 << 6,
+    Defense = 1 << 7,
+};
+
+
+enum class AtkTier : uint8_t {
+    One = 1 << 0,
+    Two = 1 << 1,
+    Three = 1 << 2,
+    Four = 1 << 3,
+    Five = 1 << 4,
+    Six = 1 << 5
+};
+
+enum class DamType : uint8_t {
+    Physical = 1 << 0,
+    Ki = 1 << 1,
+};

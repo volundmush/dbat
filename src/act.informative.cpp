@@ -144,7 +144,7 @@ ACMD(do_evolve) {
 
             if(bonusHl > (ch->getBaseST() / 10)) bonusHl = ch->getBaseST() / 10;
 
-            bonusHl *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::PowerLevel)));
             ch->gainBasePL(bonusHl);
             GET_MOLT_EXP(ch) -= plcost;
             send_to_char(ch,
@@ -172,7 +172,7 @@ ACMD(do_evolve) {
                 diminishing_returnsKi = 0;
 
             bonusKi = start_bonusKi * diminishing_returnsKi * 20;
-            bonusKi *= (1 + ch->getAffectModifier(APPLY_KI_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonusKi *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Ki)));
             if(bonusKi > (ch->getBaseST() / 10)) bonusKi = ch->getBaseST() / 10;
             ch->gainBaseKI(bonusKi);
             GET_MOLT_EXP(ch) -= kicost;
@@ -201,7 +201,7 @@ ACMD(do_evolve) {
                 diminishing_returnsSt = 0;
 
             bonusSt = start_bonusSt * diminishing_returnsSt * 20;
-            bonusSt *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonusSt *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Stamina)));
             if(bonusSt > (ch->getBaseST() / 10)) bonusSt = ch->getBaseST() / 10;
             ch->gainBaseST(bonusSt);
             GET_MOLT_EXP(ch) -= stcost;
@@ -572,7 +572,7 @@ ACMD(do_shuffle) {
 
     for (obj2 = obj->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
-        if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
+        if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
             continue;
         }
         count += 1;
@@ -590,7 +590,7 @@ ACMD(do_shuffle) {
     while (count > 0) {
         for (obj2 = world[real_room(48)].contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
-            if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
+            if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
                 continue;
             }
             if (obj2 && count > 1 && rand_number(1, 4) == 3) {
@@ -626,7 +626,7 @@ ACMD(do_hand) {
         send_to_char(ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
         for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
+            if (obj && !OBJ_FLAGGED(obj, ITEM_CARD)) {
                 continue;
             }
             if (obj) {
@@ -651,7 +651,7 @@ ACMD(do_hand) {
         act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
         for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
+            if (obj && !OBJ_FLAGGED(obj, ITEM_CARD)) {
                 continue;
             }
             if (obj) {

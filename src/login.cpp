@@ -10,6 +10,26 @@
 #include "dbat/players.h"
 
 namespace net {
+    std::string LoginParser::getName() {
+        return "LoginParser";
+    }
+
+    nlohmann::json LoginParser::serialize() {
+        auto j = ConnectionParser::serialize();
+        if(!name.empty()) j["name"] = name;
+        if(!email.empty()) j["email"] = email;
+        if(!password.empty()) j["password"] = password;
+
+        return j;
+    }
+
+    void LoginParser::deserialize(const nlohmann::json& j) {
+        if(j.contains("state")) state = static_cast<LoginState>(j.at("state").get<int>());
+        if(j.contains("name")) name = j.at("name").get<std::string>();
+        if(j.contains("email")) email = j.at("email").get<std::string>();
+        if(j.contains("password")) password = j.at("password").get<std::string>();
+    }
+
     void LoginParser::start() {
         sendText(GREETANSI);
         sendText("\r\n@w                  Welcome to Dragonball Advent Truth\r\n");

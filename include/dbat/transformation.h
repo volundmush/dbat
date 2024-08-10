@@ -10,7 +10,8 @@ namespace trans {
 
     extern bool unlock(struct char_data *ch, FormID form);
 
-    extern double getModifier(struct char_data *ch, int location, int specific = 0);
+    extern double getModifier(struct char_data *ch, int location, int specific);
+    extern double getModifierExact(struct char_data *ch, int location, int specific);
 
     extern double getStaminaDrain(struct char_data *ch, FormID form, bool upkeep = false);
 

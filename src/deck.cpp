@@ -17,7 +17,7 @@ static card refine = {"Refine",
     [](struct char_data *ch) {
         craftTask* task = &ch->craftingTask;
 
-        int bonus = APPLY_AC;
+        int bonus = APPLY_COMBAT_BASE;
 
         int slot = findItemApplySlot(task->pObject, bonus);
         int mod = 0;
@@ -28,6 +28,7 @@ static card refine = {"Refine",
         }
 
         task->pObject->affected[slot].modifier += mod;
+        task->pObject->affected[slot].specific = static_cast<int>(ComStat::Armor);
         task->pObject->affected[slot].location = bonus;
 
         task->pObject->cost *= 1.2; 
@@ -56,32 +57,15 @@ static card basicAttr = {"Basic Enhancement (Attributes)",
     [](struct char_data *ch) {
         craftTask* task = &ch->craftingTask;
 
-        int rand = std::rand() % 6;
-        int bonus = 1;
-        switch(rand) {
-            case 0:
-                bonus = APPLY_STR;
-                break;
-            case 1:
-                bonus = APPLY_DEX;
-                break;
-            case 2:
-                bonus = APPLY_INT;
-                break;
-            case 3:
-                bonus = APPLY_WIS;
-                break;
-            case 4:
-                bonus = APPLY_CON;
-                break;
-            case 5:
-                bonus = APPLY_CHA;
-                break;
-        }
+        std::vector<CharAttribute> possibles = {CharAttribute::Strength, CharAttribute::Agility, CharAttribute::Intelligence,
+                                                CharAttribute::Wisdom, CharAttribute::Constitution, CharAttribute::Speed};
 
-        rand = 1;
+        auto bonus = static_cast<int>(*Random::get(possibles));
 
-        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = bonus;
+        int rand = 1;
+
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = APPLY_CATTR_BASE;
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].specific = bonus;
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].modifier += rand;
         
         if(task->improvementRounds++ * 20 + (axion_dice(0) / 6) <= GET_SKILL(ch, SKILL_BUILD) * (axion_dice(0) / 100))
@@ -99,15 +83,19 @@ static card basicTrain = {"Basic Enhancement (Training)",
 
         int rand = std::rand() % 3;
         int bonus = 1;
+        int specific = 0;
         switch(rand) {
             case 0:
-                bonus = APPLY_PL_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = static_cast<int>(CharVital::PowerLevel);
                 break;
             case 1:
-                bonus = APPLY_KI_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = static_cast<int>(CharVital::Ki);
                 break;
             case 2:
-                bonus = APPLY_VITALS_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = ~0;
                 break;
             
         }
@@ -115,6 +103,7 @@ static card basicTrain = {"Basic Enhancement (Training)",
         double increase = 0.05;
 
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = bonus;
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].specific = specific;
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].modifier += increase;
         
         if(task->improvementRounds++ * 20 + (axion_dice(0) / 6) <= GET_SKILL(ch, SKILL_BUILD) * (axion_dice(0) / 100))
@@ -130,32 +119,14 @@ static card improvedAttr = {"Improved Enhancement (Attributes)",
     [](struct char_data *ch) {
         craftTask* task = &ch->craftingTask;
 
-        int rand = std::rand() % 6;
-        int bonus = 1;
-        switch(rand) {
-            case 0:
-                bonus = APPLY_STR;
-                break;
-            case 1:
-                bonus = APPLY_DEX;
-                break;
-            case 2:
-                bonus = APPLY_INT;
-                break;
-            case 3:
-                bonus = APPLY_WIS;
-                break;
-            case 4:
-                bonus = APPLY_CON;
-                break;
-            case 5:
-                bonus = APPLY_CHA;
-                break;
-        }
+        std::vector<CharAttribute> possibles = {CharAttribute::Strength, CharAttribute::Agility, CharAttribute::Intelligence,
+                                                CharAttribute::Wisdom, CharAttribute::Constitution, CharAttribute::Speed};
 
-        rand = 2;
+        auto bonus = static_cast<int>(*Random::get(possibles));
+        int rand = 2;
 
-        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = bonus;
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = APPLY_CATTR_BASE;
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].specific = bonus;
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].modifier += rand;
         
         if(task->improvementRounds++ * 20 + (axion_dice(0) / 6) <= GET_SKILL(ch, SKILL_BUILD) * (axion_dice(0) / 100))
@@ -173,22 +144,27 @@ static card improvedTrain = {"Improved Enhancement (Training)",
 
         int rand = std::rand() % 3;
         int bonus = 1;
+        int specific = 0;
         switch(rand) {
             case 0:
-                bonus = APPLY_PL_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = static_cast<int>(CharVital::PowerLevel);
                 break;
             case 1:
-                bonus = APPLY_KI_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = static_cast<int>(CharVital::Ki);
                 break;
             case 2:
-                bonus = APPLY_VITALS_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = ~0;
                 break;
-            
+
         }
 
         double increase = 0.08;
 
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = bonus;
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].specific = specific;
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].modifier += increase;
         
         if(task->improvementRounds++ * 20 + (axion_dice(0) / 6) <= GET_SKILL(ch, SKILL_BUILD) * (axion_dice(0) / 100))
@@ -203,32 +179,15 @@ static card expertAttr = {"Expert Enhancement (Attributes)",
     [](struct char_data *ch) {
         craftTask* task = &ch->craftingTask;
 
-        int rand = std::rand() % 6;
-        int bonus = 1;
-        switch(rand) {
-            case 0:
-                bonus = APPLY_STR;
-                break;
-            case 1:
-                bonus = APPLY_DEX;
-                break;
-            case 2:
-                bonus = APPLY_INT;
-                break;
-            case 3:
-                bonus = APPLY_WIS;
-                break;
-            case 4:
-                bonus = APPLY_CON;
-                break;
-            case 5:
-                bonus = APPLY_CHA;
-                break;
-        }
+        std::vector<CharAttribute> possibles = {CharAttribute::Strength, CharAttribute::Agility, CharAttribute::Intelligence,
+                                                CharAttribute::Wisdom, CharAttribute::Constitution, CharAttribute::Speed};
 
-        rand = 3;
+        auto bonus = static_cast<int>(*Random::get(possibles));
 
-        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = bonus;
+        int rand = 3;
+
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = APPLY_CATTR_BASE;
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].specific = bonus;
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].modifier += rand;
         
         if(task->improvementRounds++ * 20 + (axion_dice(0) / 6) <= GET_SKILL(ch, SKILL_BUILD) * (axion_dice(0) / 100))
@@ -245,22 +204,27 @@ static card expertTrain = {"Expert Enhancement (Training)",
 
         int rand = std::rand() % 3;
         int bonus = 1;
+        int specific = 0;
         switch(rand) {
             case 0:
-                bonus = APPLY_PL_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = static_cast<int>(CharVital::PowerLevel);
                 break;
             case 1:
-                bonus = APPLY_KI_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = static_cast<int>(CharVital::Ki);
                 break;
             case 2:
-                bonus = APPLY_VITALS_GAIN_MULT;
+                bonus = APPLY_CVIT_GAIN_MULT;
+                specific = ~0;
                 break;
-            
+
         }
 
         double increase = 0.1;
 
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = bonus;
+        task->pObject->affected[findItemApplySlot(task->pObject, bonus)].specific = specific;
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].modifier += increase;
 
         return true;},
@@ -275,24 +239,31 @@ static card tuffleArtisany = {"Tuffle Artisany",
 
         int rand = std::rand() % 6;
         int bonus = 1;
+        int specific = -1;
         switch(rand) {
             case 0:
-                bonus = APPLY_PHYS_DAM_PERC;
+                bonus = APPLY_DTYPE_BON;
+                specific = static_cast<int>(DamType::Physical);
                 break;
             case 1:
-                bonus = APPLY_KI_DAM_PERC;
+                bonus = APPLY_DTYPE_BON;
+                specific = static_cast<int>(DamType::Ki);
                 break;
             case 2:
-                bonus = APPLY_DEFENSE_PERC;
+                bonus = APPLY_COMBAT_MULT;
+                specific = static_cast<int>(ComStat::Defense);
                 break;
             case 3:
-                bonus = APPLY_PL_MULT;
+                bonus = APPLY_CVIT_MULT;
+                specific = static_cast<int>(CharVital::PowerLevel);
                 break;
             case 4:
-                bonus = APPLY_KI_MULT;
+                bonus = APPLY_CVIT_MULT;
+                specific = static_cast<int>(CharVital::Ki);
                 break;
             case 5:
-                bonus = APPLY_LF_MULT;
+                bonus = APPLY_CVIT_MULT;
+                specific = static_cast<int>(CharVital::LifeForce);
                 break;
             
         }
@@ -300,6 +271,8 @@ static card tuffleArtisany = {"Tuffle Artisany",
         double inc = 0.08;
 
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = bonus;
+        if(specific != -1)
+            task->pObject->affected[findItemApplySlot(task->pObject, bonus)].specific = specific;
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].modifier += inc;
         
         if(task->improvementRounds++ * 20 + (axion_dice(0) / 6) <= GET_SKILL(ch, SKILL_BUILD) * (axion_dice(0) / 100))
@@ -318,24 +291,31 @@ static card tuffleIngenuity = {"Tuffle Ingenuity",
 
         int rand = std::rand() % 6;
         int bonus = 1;
+        int specific = -1;
         switch(rand) {
             case 0:
-                bonus = APPLY_PHYS_DAM_PERC;
+                bonus = APPLY_DTYPE_BON;
+                specific = static_cast<int>(DamType::Physical);
                 break;
             case 1:
-                bonus = APPLY_KI_DAM_PERC;
+                bonus = APPLY_DTYPE_BON;
+                specific = static_cast<int>(DamType::Ki);
                 break;
             case 2:
-                bonus = APPLY_DEFENSE_PERC;
+                bonus = APPLY_COMBAT_MULT;
+                specific = static_cast<int>(ComStat::Defense);
                 break;
             case 3:
-                bonus = APPLY_PL_MULT;
+                bonus = APPLY_CVIT_MULT;
+                specific = static_cast<int>(CharVital::PowerLevel);
                 break;
             case 4:
-                bonus = APPLY_KI_MULT;
+                bonus = APPLY_CVIT_MULT;
+                specific = static_cast<int>(CharVital::Ki);
                 break;
             case 5:
-                bonus = APPLY_LF_MULT;
+                bonus = APPLY_CVIT_MULT;
+                specific = static_cast<int>(CharVital::LifeForce);
                 break;
             
         }
@@ -343,6 +323,8 @@ static card tuffleIngenuity = {"Tuffle Ingenuity",
         double inc = 0.15;
 
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].location = bonus;
+        if(specific != -1)
+            task->pObject->affected[findItemApplySlot(task->pObject, bonus)].specific = specific;
         task->pObject->affected[findItemApplySlot(task->pObject, bonus)].modifier += inc;
         
         if(task->improvementRounds++ * 20 + (axion_dice(0) / 6) <= GET_SKILL(ch, SKILL_BUILD) * (axion_dice(0) / 100))
@@ -388,9 +370,9 @@ static card comprehension = {   "Comprehension",
         int64_t ki = (GET_WIS(ch) / 2) * Random::get<double>(0.8, 1.2) * ch->getPotential();
         int64_t st = (GET_CON(ch) / 2) * Random::get<double>(0.8, 1.2) * ch->getPotential();
 
-        pl *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
-        ki *= (1 + ch->getAffectModifier(APPLY_KI_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
-        st *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+        pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::PowerLevel)));
+        ki *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Ki)));
+        st *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Stamina)));
 
         if(pl > (ch->getBasePL() / 10)) pl = ch->getBasePL() / 10;
         if(ki > (ch->getBaseKI() / 10)) ki = ch->getBaseKI() / 10;

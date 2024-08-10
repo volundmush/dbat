@@ -254,7 +254,7 @@ static void generate_multiform(struct char_data *ch, int count) {
             clone->look_description = strdup(ch->look_description);
         clone->race = ch->race;
         clone->chclass = ch->chclass;
-        clone->stats = ch->stats;
+        clone->vitals = ch->vitals;
         clone->nums = ch->nums;
 
         clone->appearances = ch->appearances;
@@ -263,7 +263,9 @@ static void generate_multiform(struct char_data *ch, int count) {
         clone->attributes = ch->attributes;
         clone->trains = ch->trains;
 
-        clone->weight = ch->weight;
+        clone->dims = ch->dims;
+        clone->nums = ch->nums;
+
         clone->time = ch->time;
 
         clone->tail_growth = ch->tail_growth;

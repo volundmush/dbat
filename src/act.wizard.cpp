@@ -1549,9 +1549,6 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
             auto m = fmt::format("{}", j->affected[i].modifier);
             send_to_char(ch, "%s %s to %s", found++ ? "," : "", m.c_str(), buf);
             switch (j->affected[i].location) {
-                case APPLY_FEAT:
-                    send_to_char(ch, " (%s)", feat_list[j->affected[i].specific].name);
-                    break;
                 case APPLY_SKILL:
                     send_to_char(ch, " (%s)", spell_info[j->affected[i].specific].name);
                     break;
@@ -2625,9 +2622,9 @@ ACMD(do_advance) {
     } else if ((newlevel = atoi(level)) <= 0) {
         if (!strcasecmp("demote", level)) {
             victim->set(CharNum::Level, 1);
-            victim->set(CharStat::PowerLevel, 150);
-            victim->set(CharStat::Ki, 150);
-            victim->set(CharStat::Stamina, 150);
+            victim->set(CharVital::PowerLevel, 150);
+            victim->set(CharVital::Ki, 150);
+            victim->set(CharVital::Stamina, 150);
             send_to_char(ch, "They have now been demoted!\r\n");
             send_to_char(victim, "You were demoted to level 1!\r\n");
             return;
@@ -3919,7 +3916,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             log_imm_action("SET: %s has set bank for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 21:
-            vict->exp = RANGE(0, 50000000);
+            vict->setExperience(RANGE(0, 50000000));
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set exp for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set exp for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4080,7 +4077,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 50:
-            GET_WEIGHT(vict) = value;
+            vict->set(CharDim::Weight, value);
             affect_total(vict);
             break;
 
@@ -4196,21 +4193,21 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 64:
-            vict->set(CharStat::PowerLevel, value);
+            vict->set(CharVital::PowerLevel, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basepl for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
 
         case 65:
-            vict->set(CharStat::Ki, value);
+            vict->set(CharVital::Ki, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set baseki for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
 
         case 66:
-            vict->set(CharStat::Stamina, value);
+            vict->set(CharVital::Stamina, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basest for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4781,7 +4778,7 @@ ACMD (do_zcheck) {
 
             /* special handling of +hit and +dam because of +hit_n_dam */
             for (todam = 0, tohit = 0, j = 0; j < MAX_OBJ_AFFECT; j++) {
-                if (obj->affected[j].location == APPLY_DAMAGE)
+                if (obj->affected[j].location == APPLY_COMBAT_BASE && obj->affected[j].specific | static_cast<int>(ComStat::Damage))
                     todam += obj->affected[j].modifier;
             }
             if (abs(todam) > MAX_APPLY_DAMAGE_MOD_TOTAL && (found = 1))

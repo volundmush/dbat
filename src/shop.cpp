@@ -756,15 +756,16 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
         search_replace(bits, "TAKE", "");
         send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-            if (OBJ_FLAGGED(obj, ITEM_WEAPLVL1)) {
+            auto wlvl = obj->value[VAL_WEAPON_LEVEL];
+            if (wlvl == 1) {
                 send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
-            } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL2)) {
+            } else if (wlvl == 2) {
                 send_to_char(ch, "@GWeapon Level@W: @D[@C2@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
-            } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL3)) {
+            } else if (wlvl == 3) {
                 send_to_char(ch, "@GWeapon Level@W: @D[@C3@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
-            } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL4)) {
+            } else if (wlvl == 4) {
                 send_to_char(ch, "@GWeapon Level@W: @D[@C4@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
-            } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL5)) {
+            } else if (wlvl == 5) {
                 send_to_char(ch, "@GWeapon Level@W: @D[@C5@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
             }
         }
@@ -774,9 +775,6 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
                 sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
                 send_to_char(ch, "%s %+f to %s", found++ ? "," : "", obj->affected[i].modifier, buf);
                 switch (obj->affected[i].location) {
-                    case APPLY_FEAT:
-                        send_to_char(ch, " (%s)", feat_list[obj->affected[i].specific].name);
-                        break;
                     case APPLY_SKILL:
                         send_to_char(ch, " (%s)", spell_info[obj->affected[i].specific].name);
                         break;

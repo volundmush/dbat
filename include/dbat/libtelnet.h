@@ -120,10 +120,6 @@ struct telnet_t {
     const telnet_telopt_t *telopts;
     /* event handler */
     telnet_event_handler_t eh;
-#if defined(HAVE_ZLIB)
-    /* zlib (mccp2) compression */
-	z_stream *z;
-#endif
     /* RFC1143 option negotiation states */
     struct telnet_rfc1143_t *q;
     /* sub-request buffer */
@@ -135,7 +131,7 @@ struct telnet_t {
     /* current state */
     enum telnet_state_t state;
     /* option flags */
-    unsigned char flags;
+    unsigned short flags;
     /* current subnegotiation telopt */
     unsigned char sb_telopt;
     /* length of RFC1143 queue */
@@ -219,12 +215,16 @@ typedef struct telnet_telopt_t telnet_telopt_t;
 #define TELNET_TELOPT_ENCRYPT 38
 #define TELNET_TELOPT_NEW_ENVIRON 39
 #define TELNET_TELOPT_MSSP 70
-#define TELNET_TELOPT_COMPRESS 85
+#define TELNET_TELOPT_COMPRESS 85 // for the love of god don't use this.
 #define TELNET_TELOPT_COMPRESS2 86
+#define TELNET_TELOPT_MCCP2 86
+#define TELNET_TELOPT_COMPRESS3 87
+#define TELNET_TELOPT_MCCP3 87
 #define TELNET_TELOPT_ZMP 93
+#define TELNET_TELOPT_GMCP 201
 #define TELNET_TELOPT_EXOPL 255
 
-#define TELNET_TELOPT_MCCP2 86
+
 /*@}*/
 
 /*! \name Protocol codes for TERMINAL-TYPE commands. */
@@ -263,6 +263,12 @@ typedef struct telnet_telopt_t telnet_telopt_t;
 #define TELNET_FLAG_TRANSMIT_BINARY (1<<5)
 #define TELNET_FLAG_RECEIVE_BINARY (1<<6)
 #define TELNET_PFLAG_DEFLATE (1<<7)
+#define TELNET_PFLAG_INFLATE (1<<8)
+/* The server role reverses the meaning of MCCP2 and MCCP3.
+ * In Client mode, MCCP2 is used for incoming data and MCCP3 for outgoing.
+ * In server mode, MCCP2 is used for outgoing data and MCCp3 for incoming.
+ * */
+#define TELNET_FLAG_ROLE_SERVER (1<<9)
 /*@}*/
 
 /*!
@@ -295,6 +301,8 @@ enum telnet_event_type_t {
     TELNET_EV_TTYPE,           /*!< TTYPE command has been received */
     TELNET_EV_ENVIRON,         /*!< ENVIRON command has been received */
     TELNET_EV_MSSP,            /*!< MSSP command has been received */
+    TELNET_EV_NAWS,            /*!< NAWS command has been received */
+    TELNET_EV_GMCP,            /*!< GMCP data has been received */
     TELNET_EV_WARNING,         /*!< recoverable error has occured */
     TELNET_EV_ERROR            /*!< non-recoverable error has occured */
 };
@@ -393,6 +401,7 @@ union telnet_event_t {
      */
     struct compress_t {
         enum telnet_event_type_t _type; /*!< alias for type */
+        unsigned char telopt;           /*< 86 for MCCP2, 87 for MCCP3  */
         unsigned char state;            /*!< 1 if compression is enabled,
 	                                         0 if disabled */
     } compress; /*!< COMPRESS */
@@ -415,6 +424,24 @@ union telnet_event_t {
         const struct telnet_environ_t *values; /*!< array of variable values */
         size_t size;                           /*!< number of elements in values */
     } mssp; /*!< MSSP */
+
+    /*!
+     * NAWS event
+     */
+    struct naws_t {
+        enum telnet_event_type_t _type;        /*!< alias for type */
+        unsigned short height; /*!< the negotiated height */
+        unsigned short width; /*!< the negotiated width */
+    } naws; /*!< NAWS */
+
+    /*!
+     * NAWS event
+     */
+    struct gmcp_t {
+        enum telnet_event_type_t _type;        /*!< alias for type */
+        char *cmd; /*!< the GMCP package.subpackage.command  */
+        char *data; /*!< the GMCP json data */
+    } gmcp; /*!< GMCP */
 };
 
 
@@ -433,13 +460,12 @@ struct telnet_t;
  *
  * \param telopts   Table of TELNET options the application supports.
  * \param eh        Event handler function called for every event.
- * \param flags     0 or TELNET_FLAG_PROXY.
+ * \param flags     0 or TELNET_FLAG_PROXY or TELNET_FLAG_ROLE_SERVER.
  * \param user_data Optional data pointer that will be passsed to eh.
  * \return Telnet state tracker object.
  */
 extern telnet_t* telnet_init(const telnet_telopt_t *telopts,
                              telnet_event_handler_t eh, unsigned char flags, void *user_data);
-
 /*!
  * \brief Free up any memory allocated by a state tracker.
  *
@@ -548,19 +574,6 @@ extern void telnet_begin_sb(telnet_t *telnet,
 extern void telnet_subnegotiation(telnet_t *telnet, unsigned char telopt,
                                   const char *buffer, size_t size);
 
-/*!
- * \brief Begin sending compressed data.
- *
- * This function will begein sending data using the COMPRESS2 option,
- * which enables the use of zlib to compress data sent to the client.
- * The client must offer support for COMPRESS2 with option negotiation,
- * and zlib support must be compiled into libtelnet.
- *
- * Only the server may call this command.
- *
- * \param telnet Telnet state tracker object.
- */
-extern void telnet_begin_compress2(telnet_t *telnet);
 
 /*!
  * \brief Send formatted data.
@@ -738,6 +751,12 @@ extern void telnet_zmp_arg(telnet_t *telnet, const char *arg);
  * \param telnet Telnet state tracker object.
  */
 #define telnet_finish_zmp(telnet) telnet_finish_sb((telnet))
+
+
+extern void telnet_send_naws(telnet_t *telnet, unsigned short width, unsigned short height);
+
+
+extern void telnet_send_gmcp(telnet_t *telnet, const char *package, const char *data);
 
 /* C++ support */
 #if defined(__cplusplus)

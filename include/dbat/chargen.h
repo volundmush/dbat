@@ -8,10 +8,14 @@ namespace net {
 
     class ChargenParser : public ConnectionParser {
     public:
-        explicit ChargenParser(std::shared_ptr<Connection>& co);
+        explicit ChargenParser(const std::shared_ptr<Connection>& co);
         ~ChargenParser() override;
         void parse(const std::string &txt) override;
         void start() override;
+        std::string getName() override;
+        bool canCopyover() override {return true;};
+        nlohmann::json serialize() override;
+        void deserialize(const nlohmann::json& j) override;
 
     protected:
         char_data *ch{};

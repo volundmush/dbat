@@ -174,6 +174,35 @@ static const std::map<RaceID, std::map<CharAttribute, std::pair<int, int>>> star
 
 namespace net {
 
+    std::string ChargenParser::getName() {
+        return "ChargenParser";
+    }
+
+    nlohmann::json ChargenParser::serialize() {
+        auto j = ConnectionParser::serialize();
+        j["state"] = state;
+        j["total"] = total;
+        j["ccpoints"] = ccpoints;
+        j["negcount"] = negcount;
+        j["maybeName"] = maybeName;
+        if(ch) j["ch"] = ch->serializeInstance();
+
+        return j;
+    }
+
+    void ChargenParser::deserialize(const nlohmann::json& j) {
+        if(j.contains("state")) state = j.at("state").get<int>();
+        if(j.contains("total")) total = j.at("statotal").get<int>();
+        if(j.contains("ccpoints")) ccpoints = j.at("ccpoints").get<int>();
+        if(j.contains("stnegcount")) negcount = j.at("negcount").get<int>();
+        if(j.contains("maybeName")) maybeName = j.at("maybeName").get<std::string>();
+
+        if(j.contains("ch")) {
+            ch->deserializeInstance(j["ch"], false);
+        }
+
+    }
+
     int ChargenParser::roll_stats(int type, int bonus) {
 
         int pool = 0, base_num = bonus, max_num = bonus;
@@ -498,7 +527,7 @@ namespace net {
     }
 
 
-    ChargenParser::ChargenParser(std::shared_ptr<Connection>& co) : ConnectionParser(co) {
+    ChargenParser::ChargenParser(const std::shared_ptr<Connection>& co) : ConnectionParser(co) {
         ch = new char_data();
     }
 
@@ -1170,7 +1199,7 @@ namespace net {
                     return;
                 }
                 else {
-                    ch->weight = weight;
+                    ch->set(CharDim::Weight, weight);
                 }
                 
             }
@@ -1230,9 +1259,9 @@ namespace net {
                 break;
 
             case CON_Q1: {
-                stat_t basepl = rand_number(30, 50);
-                stat_t basest = rand_number(30, 50);
-                stat_t baseki = rand_number(30, 50);
+                vital_t basepl = rand_number(30, 50);
+                vital_t basest = rand_number(30, 50);
+                vital_t baseki = rand_number(30, 50);
                 {
                     auto defStats = startAttrRanges.at(ch->race);
                     for(auto &[attr, range] : defStats) {
@@ -1271,9 +1300,9 @@ namespace net {
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->set(CharStat::PowerLevel, basepl);
-                ch->set(CharStat::Stamina, basest);
-                ch->set(CharStat::Ki, baseki);
+                ch->set(CharVital::PowerLevel, basepl);
+                ch->set(CharVital::Stamina, basest);
+                ch->set(CharVital::Ki, baseki);
             }
                 sendText("\r\n@WQuestion (@G2@W out of @g10@W)\r\n");
                 sendText("@YAnswer the following question:\r\n");
@@ -1326,7 +1355,7 @@ namespace net {
                 break;
             case CON_Q3: {
                 align_t align = 0;
-                stat_t basepl = 0, basest = 0, baseki = 0;
+                vital_t basepl = 0, basest = 0, baseki = 0;
                 switch(arg[0]) {
                     case '1':
                         align += -100;
@@ -1357,9 +1386,9 @@ namespace net {
                     return;
                 }
                 ch->mod(CharAlign::GoodEvil, align);
-                ch->mod(CharStat::PowerLevel, basepl);
-                ch->mod(CharStat::Stamina, basest);
-                ch->mod(CharStat::Ki, baseki);
+                ch->mod(CharVital::PowerLevel, basepl);
+                ch->mod(CharVital::Stamina, basest);
+                ch->mod(CharVital::Ki, baseki);
             }
 
                 sendText("\r\n@WQuestion (@G4@W out of @g10@W)\r\n");
@@ -1376,7 +1405,7 @@ namespace net {
 
             case CON_Q4: {
                 money_t gold = 0;
-                stat_t basepl = 0, basest = 0, baseki = 0;
+                vital_t basepl = 0, basest = 0, baseki = 0;
                 switch(arg[0]) {
                     case '1':
                         gold += 1000;
@@ -1407,9 +1436,9 @@ namespace net {
                     return;
                 }
                 if(gold) ch->mod(CharMoney::Carried, gold);
-                ch->mod(CharStat::PowerLevel, basepl);
-                ch->mod(CharStat::Stamina, basest);
-                ch->mod(CharStat::Ki, baseki);
+                ch->mod(CharVital::PowerLevel, basepl);
+                ch->mod(CharVital::Stamina, basest);
+                ch->mod(CharVital::Ki, baseki);
             }
                 sendText("\r\n@WQuestion (@G5@W out of @g10@W)\r\n");
                 sendText("@YAnswer the following question:\r\n");
@@ -1424,7 +1453,7 @@ namespace net {
                 break;
 
             case CON_Q5: {
-                stat_t pl = 0;
+                vital_t pl = 0;
                 switch(arg[0]) {
                     case '1':
                         pl += rand_number(0, 40);
@@ -1442,7 +1471,7 @@ namespace net {
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->mod(CharStat::PowerLevel, pl);
+                ch->mod(CharVital::PowerLevel, pl);
             }
                 sendText("\r\n@WQuestion (@G6@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
@@ -1459,7 +1488,7 @@ namespace net {
 
 
             case CON_Q6: {
-                stat_t basepl = 0, basest = 0, baseki = 0;
+                vital_t basepl = 0, basest = 0, baseki = 0;
                 switch(arg[0]) {
                     case '1':
                         basepl += rand_number(0, 15);
@@ -1486,9 +1515,9 @@ namespace net {
                         sendText("That is not an acceptable option.\r\n");
                     return;
                 }
-                ch->mod(CharStat::PowerLevel, basepl);
-                ch->mod(CharStat::Stamina, basest);
-                ch->mod(CharStat::Ki, baseki);
+                ch->mod(CharVital::PowerLevel, basepl);
+                ch->mod(CharVital::Stamina, basest);
+                ch->mod(CharVital::Ki, baseki);
             }
                 sendText("\r\n@WQuestion (@G7@W out of @g10@W)\r\n");
                 sendText("\r\n@YAnswer the following question:\r\n");
@@ -2115,7 +2144,7 @@ namespace net {
                     state = CON_BONUS;
                 } else if (!strcasecmp(arg.c_str(), "x") || !strcasecmp(arg.c_str(), "X")) {
                     negcount = 0;
-                    for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+                    for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
                         if(ch->get(c) < 90) ch->set(c, 90);
                     }
                     sendText("\r\n@wTo check the bonuses/negatives you have in game use the status command");

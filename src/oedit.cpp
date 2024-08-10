@@ -361,9 +361,6 @@ void oedit_disp_prompt_apply_menu(struct descriptor_data *d) {
             write_to_output(d, " @g%s@n) %s to @b%s@n", std::to_string(counter + 1),
                             std::to_string(OLC_OBJ(d)->affected[counter].modifier), apply_buf);
             switch (OLC_OBJ(d)->affected[counter].location) {
-                case APPLY_FEAT:
-                    write_to_output(d, " (%s)", feat_list[OLC_OBJ(d)->affected[counter].specific].name);
-                    break;
                 case APPLY_SKILL:
                     write_to_output(d, " (%s)", spell_info[OLC_OBJ(d)->affected[counter].specific].name);
                     break;
@@ -417,9 +414,6 @@ void oedit_disp_apply_spec_menu(struct descriptor_data *d) {
     char *buf;
 
     switch (OLC_OBJ(d)->affected[OLC_VAL(d)].location) {
-        case APPLY_FEAT:
-            buf = "What feat should be modified : ";
-            break;
         case APPLY_SKILL:
             buf = "What skill should be modified : ";
             break;
@@ -1571,11 +1565,6 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                 switch (OLC_OBJ(d)->affected[OLC_VAL(d)].location) {
                     case APPLY_SKILL:
                         number = find_skill_num(arg, SKTYPE_SKILL);
-                        if (number > -1)
-                            OLC_OBJ(d)->affected[OLC_VAL(d)].specific = number;
-                        break;
-                    case APPLY_FEAT:
-                        number = find_feat_num(arg);
                         if (number > -1)
                             OLC_OBJ(d)->affected[OLC_VAL(d)].specific = number;
                         break;

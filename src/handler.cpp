@@ -260,9 +260,7 @@ void affect_total(struct char_data *ch) {
 /* Insert an affect_type in a char_data structure
    Automatically sets apropriate bits and apply's */
 void affect_to_char(struct char_data *ch, struct affected_type *af) {
-    struct affected_type *affected_alloc;
-
-    CREATE(affected_alloc, struct affected_type, 1);
+    auto affected_alloc = new affected_type();
 
     if (!ch->affected) {
         ch->next_affect = affect_list;
@@ -292,7 +290,7 @@ void affect_remove(struct char_data *ch, struct affected_type *af) {
 
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
     REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
-    free(af);
+    delete af;
     affect_total(ch);
     if (!ch->affected) {
         struct char_data *temp;
@@ -401,9 +399,19 @@ void char_from_room(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         ch->affected_by.reset(AFF_PURSUIT);
 
+    auto &z = zone_table[r->zone];
+    if(IS_NPC(ch)) {
+        z.npcsInZone.erase(ch->ref());
+    } else {
+        z.playersInZone.erase(ch->ref());
+    }
+
     REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
     IN_ROOM(ch) = NOWHERE;
     ch->next_in_room = nullptr;
+
+
+
 }
 
 /* place a character in a room */
@@ -413,6 +421,13 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     ch->next_in_room = room->people;
     room->people = ch;
     IN_ROOM(ch) = room->vn;
+
+    auto &z = zone_table[room->zone];
+    if(IS_NPC(ch)) {
+        z.npcsInZone.insert(ch->ref());
+    } else {
+        z.playersInZone.insert(ch->ref());
+    }
 
     /* Stop fighting now, if we left. */
     if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
@@ -519,11 +534,11 @@ static int apply_ac(struct char_data *ch, int eq_pos) {
 }
 
 int invalid_align(struct char_data *ch, struct obj_data *obj) {
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_EVIL) && IS_EVIL(ch))
+    if (obj->antiAlignGoodEvil.test(0) && IS_EVIL(ch))
         return true;
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_GOOD) && IS_GOOD(ch))
+    if (obj->antiAlignGoodEvil.test(2) && IS_GOOD(ch))
         return true;
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_NEUTRAL) && IS_NEUTRAL(ch))
+    if (obj->antiAlignGoodEvil.test(1) && IS_NEUTRAL(ch))
         return true;
     return false;
 }
@@ -678,6 +693,9 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     object->carried_by = nullptr;
     GET_LAST_LOAD(object) = time(nullptr);
 
+    auto &z = zone_table[room->zone];
+    z.objectsInZone.insert(object->ref());
+
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
         object->extra_flags.set(ITEM_UNBREAKABLE);
@@ -768,6 +786,7 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
 /* Take an object from a room */
 void obj_from_room(struct obj_data *object) {
     struct obj_data *temp;
+    auto r = object->getRoom();
 
     if (!object || IN_ROOM(object) == NOWHERE) {
         basic_mud_log("SYSERR: nullptr object or obj not in a room (%d) passed to obj_from_room",
@@ -789,6 +808,9 @@ void obj_from_room(struct obj_data *object) {
         GET_OBJ_POSTED(object) = nullptr;
         GET_OBJ_POSTTYPE(object) = 0;
     }
+
+    auto &z = zone_table[r->zone];
+    z.objectsInZone.erase(object->ref());
 
     REMOVE_FROM_LIST(object, object->getRoom()->contents, next_content, temp);
 

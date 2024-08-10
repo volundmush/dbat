@@ -363,7 +363,8 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
             mult += .5;
 
         struct affected_type aff;
-        aff.location = APPLY_VITALS_MULT;
+        aff.location = APPLY_CVIT_MULT;
+        aff.specific = ~0;
         aff.modifier = mult;
         aff.bitvector = AFF_STARPHASE;
         affect_join(ch, &aff, false, false, false, false);

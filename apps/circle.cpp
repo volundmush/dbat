@@ -17,6 +17,7 @@ int main(int argc, char **argv)
 {
     int pos = 1;
     const char *dir;
+    original_cwd = std::filesystem::current_path();
 
 #ifdef MEMORY_DEBUG
     zmalloc_init();
@@ -71,9 +72,6 @@ int main(int argc, char **argv)
                     puts("SYSERR: File name to log to expected after option -o.");
                     exit(1);
                 }
-                break;
-            case 'C': /* -C<socket number> - recover from copyover, this is the control socket */
-                fCopyOver = true;
                 break;
             case 'd':
                 if (*(argv[pos] + 2))
@@ -168,12 +166,7 @@ int main(int argc, char **argv)
 
     basic_mud_log("Running game.");
     try {
-        game::init_locale();
-        game::init_sodium();
-        game::init_database();
-        game::init_networking();
-        game::init_zones();
-        game::init_copyover();
+        game::init();
         game::run_game();
     }
     catch(std::exception& e) {

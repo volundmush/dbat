@@ -68,9 +68,10 @@ int8_t emergency_unban;        /* signal: SIGUSR2 */
 FILE *logfile = nullptr;        /* Where to send the log messages. */
 int dg_act_check;               /* toggle for act_trigger */
 uint64_t pulse = 0;        /* number of pulses since game start */
-bool fCopyOver;          /* Are we booting in copyover mode? */
 uint16_t port;
 char *last_act_message = nullptr;
+
+std::string original_cwd;
 
 /***********************************************************************
 *  main game loop and related stuff                                    *
@@ -137,7 +138,6 @@ void copyover_recover_final() {
         }
         d->account = &accFind->second;
         d->account->descriptors.insert(d);
-        for(auto &[cid, c] : d->conns) c->account = d->account;
 
         auto playFind = players.find(playerID);
         if(playFind == players.end()) {
@@ -150,11 +150,6 @@ void copyover_recover_final() {
 
 		GET_LOADROOM(c) = room;
         for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->playerFlags.reset(f);
-        auto conns = d->conns;
-        for(auto &[cid, con] : conns) {
-            d->account->connections.insert(con.get());
-            con->setParser(new net::PuppetParser(con, c));
-        }
 
         write_to_output(d, "@rThe world comes back into focus... has something changed?@n\r\n");
 
@@ -181,10 +176,29 @@ void copyover_recover() {
     // erase the file.
     std::filesystem::remove(COPYOVER_FILE);
 
-    if(j.contains("server_fd")) {
-        net::server_fd = j["server_fd"];
+    // restore the server_fd.
+    if(j.contains("server_fd")) net::server_fd = j.at("server_fd").get<int>();
+
+    // Rebuild connection data.
+    if(j.contains("pendingReads")) {
+        for(const auto &c : j.at("pendingReads")) net::pendingReads.insert(c.get<int>());
     }
 
+    if(j.contains("pendingOutData")) {
+        for(const auto &c : j.at("pendingOutData")) net::pendingOutData.insert(c.get<int>());
+    }
+
+    if(j.contains("pendingWrites")) {
+        for(const auto &c : j.at("pendingWrites")) net::pendingWrites.insert(c.get<int>());
+    }
+
+    if(j.contains("connections"))
+        for(auto &jc : j.at("connections")) {
+            auto connId = jc[0].get<int>();
+            net::connections[connId] = std::make_shared<net::Connection>(connId, jc[1]);
+        }
+
+    // rebuild descriptor data...
     if(j.contains("descriptors")) {
         for(const auto &jd : j["descriptors"]) {
             auto d = new descriptor_data();
@@ -196,10 +210,9 @@ void copyover_recover() {
             if(jd.contains("connections")) {
                 {
                     for(const auto& jc : jd["connections"]) {
-                        auto c = std::make_shared<net::Connection>(jc.get<int64_t>());
+                        auto c = net::connections.at(jc.get<int64_t>());
                         c->desc = d;
                         d->conns[c->connId] = c;
-                        net::connections[c->connId] = c;
                     }
                 }
             }
@@ -223,15 +236,30 @@ static void performReboot(int mode) {
         return;
     }
 
-    broadcast("\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
-    save_mud_time(&time_info);
+    broadcast("\t@RThe universe stops for a moment as space and time fold.@n\r\n");
+    // Flush all pending output and otherwise get connections ready for a copyover.
+    net::prepareForCopyover();
 
     nlohmann::json j;
 
-    /* For each playing descriptor, save its state */
-    net::prepareForCopyover();
+    // save the server_fd...
+    j["server_fd"] = net::server_fd;
+
+    // Serialize all connections.
     for(auto &[id, conn] : net::connections) {
         j["connections"].push_back(std::make_pair(id, conn->serialize()));
+    }
+
+    for(const auto &c : net::pendingOutData) {
+        j["pendingOutData"].push_back(c);
+    }
+
+    for(const auto &c : net::pendingReads) {
+        j["pendingReads"].push_back(c);
+    }
+
+    for(const auto &c : net::pendingWrites) {
+        j["pendingWrites"].push_back(c);
     }
 
     /* For each descriptor/connection, halt them and save state. */
@@ -260,6 +288,7 @@ static void performReboot(int mode) {
 
     fp << jdump(j) << std::endl;
     fp.close();
+    close(net::epoll_fd);
 }
 
 static std::vector<std::pair<std::string, double>> timings;
@@ -287,6 +316,7 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("event_process", 0.0, event_process),
         GameSystem("script_trigger_check", 13.0, script_trigger_check),
         GameSystem("zone_update", 0.0, zone_update),
+        GameSystem("repairRoomDamage", 600.0, repairRoomDamage),
         GameSystem("dball_load", 1.0, dball_load),
         GameSystem("base_update", 2.0, base_update),
         GameSystem("fish_update", 2.0, fish_update),
@@ -322,7 +352,7 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
         if(s.countdown <= 0.0) {
             auto start = std::chrono::high_resolution_clock::now();
             try {
-                s.func(heart_pulse, deltaTime);
+                s.func(heart_pulse, abs(s.countdown) + s.interval);
             }
             catch(const std::exception &e) {
                 basic_mud_log("Exception while running GameService '%s': %s", s.name.c_str(), e.what());
@@ -333,7 +363,7 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
                 shutdown_game(1);
             }
             auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back(s.name, std::chrono::duration<double>(end - start).count());
+            timings.emplace_back(fmt::format("heartbeat system: {}", s.name), std::chrono::duration<double>(end - start).count());
             s.countdown += s.interval;
         }
     }
@@ -352,11 +382,15 @@ void processConnections(double deltaTime) {
         auto it = net::connections.find(id);
         // This shouldn't happen, but whatever.
         if(it == net::connections.end()) continue;
+        it->second->cleanup(reason);
         toErase.insert(id);
     }
     for(auto &id : toErase) {
         net::connections.erase(id);
         net::deadConnections.erase(id);
+        net::pendingOutData.erase(id);
+        net::pendingReads.erase(id);
+        net::pendingWrites.erase(id);
     }
 
     // Second, welcome any new connections!
@@ -420,8 +454,13 @@ void processOutputs() {
 void runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
+    // Clear profile data.
+    timings.clear();
 
+    auto start = std::chrono::high_resolution_clock::now();
     processConnections(deltaTime);
+    auto end = std::chrono::high_resolution_clock::now();
+    timings.emplace_back("processConnections", std::chrono::duration<double>(end - start).count());
 
     if(sleeping && descriptor_list) {
         basic_mud_log("Waking up.");
@@ -437,7 +476,7 @@ void runOneLoop(double deltaTime) {
 
     {
         std::set<struct descriptor_data*> toLook;
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for(auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
             switch(STATE(d)) {
@@ -454,20 +493,20 @@ void runOneLoop(double deltaTime) {
             }
         }
         for(auto d : toLook) look_at_room(IN_ROOM(d->character), d->character, 0);
-        auto end = std::chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("handle logins", std::chrono::duration<double>(end - start).count());
     }
 
 
     /* Process commands we just read from process_input */
     try {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
             if(d->character) d->character->time.played += deltaTime;
             d->handle_input();
         }
-        auto end = std::chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("handle input", std::chrono::duration<double>(end - start).count());
     }
     catch(const std::exception& e) {
@@ -478,6 +517,7 @@ void runOneLoop(double deltaTime) {
         shutdown_game(1);
     }
 
+    start = std::chrono::high_resolution_clock::now();
     bool gameActive = false;
     // TODO: replace this with a smarter check...
     // to determine if the game is active, we need to check if there are any players in the game.
@@ -489,17 +529,19 @@ void runOneLoop(double deltaTime) {
             break;
         }
     }
+    end = std::chrono::high_resolution_clock::now();
+    timings.emplace_back("check for active descriptors", std::chrono::duration<double>(end - start).count());
 
     if(gameActive) {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         heartbeat(++pulse, deltaTime);
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("heartbeat total", std::chrono::duration<double>(end - start).count());
+        end = std::chrono::high_resolution_clock::now();
+        //timings.emplace_back("heartbeat total", std::chrono::duration<double>(end - start).count());
     }
 
     /* Send queued output out to the operating system (ultimately to user). */
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
             if (!d->output.empty()) {
@@ -508,13 +550,13 @@ void runOneLoop(double deltaTime) {
             }
         }
         processOutputs();
-        auto end = std::chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("process output", std::chrono::duration<double>(end - start).count());
     }
 
     /* Print prompts for other descriptors who had no other output */
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = d->next) {
             if (!d->has_prompt) {
                 write_to_output(d, "@n");
@@ -522,13 +564,13 @@ void runOneLoop(double deltaTime) {
                 d->has_prompt = true;
             }
         }
-        auto end = std::chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("print prompts", std::chrono::duration<double>(end - start).count());
     }
 
     /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
             if(d->conns.empty()) {
@@ -541,7 +583,7 @@ void runOneLoop(double deltaTime) {
                 close_socket(d);
         }
         processDisconnects();
-        auto end = std::chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("close sockets", std::chrono::duration<double>(end - start).count());
     }
 
@@ -563,6 +605,16 @@ void runOneLoop(double deltaTime) {
 
 namespace game {
 
+    void init() {
+        game::init_locale();
+        game::init_sodium();
+        game::init_database();
+        game::init_zones();
+        net::init_epoll();
+        game::init_copyover();
+        net::init_listeners();
+    }
+
     void init_sodium() {
         if (sodium_init() != 0) {
             basic_mud_log("Could not initialize libsodium!");
@@ -575,10 +627,6 @@ namespace game {
             copyover_recover();
             copyover_recover_final();
         }
-    }
-
-    void init_networking() {
-        net::init();
     }
 
     void init_locale() {
@@ -598,44 +646,56 @@ namespace game {
 
     void run_loop() {
         broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
-        
+
         double saveTimer = 60.0 * 5.0;
-        double deltaTimeInSeconds = std::chrono::duration<double>(config::heartbeatInterval).count();
+        const std::chrono::milliseconds heartbeatInterval(config::heartbeatInterval);
         gameIsLoading = false;
 
-        while(!circle_shutdown) {
+        while (!circle_shutdown) {
             auto start = std::chrono::high_resolution_clock::now();
+
             try {
-                runOneLoop(deltaTimeInSeconds);
-            } catch(std::exception& e) {
+                runOneLoop(std::chrono::duration<double>(heartbeatInterval).count());
+            } catch (std::exception& e) {
                 basic_mud_log("Exception in runOneLoop(): %s", e.what());
                 shutdown_game(1);
-            } catch(...) {
+            } catch (...) {
                 basic_mud_log("Unknown exception in runOneLoop()");
                 shutdown_game(1);
             }
+
             auto end = std::chrono::high_resolution_clock::now();
 
-            saveTimer -= deltaTimeInSeconds;
-            if(saveTimer <= 0.0) {
+            saveTimer -= std::chrono::duration<double>(heartbeatInterval).count();
+            if (saveTimer <= 0.0) {
                 saveTimer = 60.0 * 5.0;
-                // save the game state...
+                // Save the game state...
                 runSave();
             }
 
-            auto waitTime = config::heartbeatInterval - (end - start);
-            if(waitTime.count() > 0.0) {
-                std::this_thread::sleep_for(waitTime);
+            auto elapsedTime = end - start;
+            //logger->info("Main Loop duration: {:.10f}s", std::chrono::duration<double>(elapsedTime).count());
+            if (elapsedTime < heartbeatInterval) {
+                std::this_thread::sleep_for(heartbeatInterval - elapsedTime);
+            } else {
+                logger->warn("Main loop is taking up too much time: {}s", std::chrono::duration<double>(elapsedTime).count());
+                for(const auto &[name, time] : timings) {
+                    logger->warn("{}: {:.10f}s", name, time);
+                }
             }
-            deltaTimeInSeconds = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start).count();
         }
         runSave();
+
+        if (circle_reboot) {
+            performReboot(circle_reboot);
+        }
     }
 
     void run_game() {
         basic_mud_log("Signal trapping.");
         signal(SIGUSR1, signal_handler);
         signal(SIGUSR2, signal_handler);
+        signal(SIGPIPE, SIG_IGN);
 
         logger->info("Entering main loop...");
 
@@ -643,14 +703,17 @@ namespace game {
 
         logger->info("run_loop() has finished. Stopping...");
 
-        basic_mud_log("Saving current MUD time.");
-        save_mud_time(&time_info);
-
         if (circle_reboot) {
             basic_mud_log("Rebooting.");
-            std::filesystem::current_path("..");
-            execl("bin/circle", "circle", "-C%d", "1280", (char *) NULL);
-            // if exec fires, nothing else after this should.
+            std::filesystem::current_path(original_cwd);
+            // Attempt to execute the new program
+            if (execl("bin/circle", "circle", nullptr) == -1) {
+                // If execl fails, log the error
+                basic_mud_log("Error during execl: %s", strerror(errno));
+                // Optionally, you can exit with an error code if execl fails
+                exit(EXIT_FAILURE);
+            }
+            // If execl succeeds, nothing after this point will be executed
         }
         basic_mud_log("Normal termination of game.");
         shutdown_game(0);
@@ -661,9 +724,6 @@ namespace game {
 void record_usage(uint64_t heartPulse, double deltaTime) {
 
 }
-
-
-
 
 char *make_prompt(struct descriptor_data *d) {
     static char prompt[MAX_PROMPT_LENGTH];

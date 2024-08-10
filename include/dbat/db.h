@@ -179,6 +179,7 @@ extern void boot_db_new();
 extern void destroy_db();
 
 extern void zone_update(uint64_t heartPulse, double deltaTime);
+extern void repairRoomDamage(uint64_t heartPulse, double deltaTime);
 
 extern char *fread_string(FILE *fl, const char *error);
 
@@ -341,7 +342,9 @@ struct zone_data {
     std::set<trig_vnum> triggers;
     std::set<guild_vnum> guilds;
 
-
+    std::set<CharRef> npcsInZone;
+    std::set<CharRef> playersInZone;
+    std::set<ObjRef> objectsInZone;
 };
 
 
@@ -409,6 +412,10 @@ extern std::map<obj_vnum, struct obj_data> obj_proto;
 extern struct obj_data *object_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
 int64_t nextObjID();
+
+extern SubscriptionManager<CharRef> characterSubscriptions;
+extern SubscriptionManager<ObjRef> objectSubscriptions;
+extern SubscriptionManager<RoomRef> roomSubscriptions;
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;

@@ -5,7 +5,25 @@
 #include "dbat/class.h"
 
 namespace net {
-    PuppetParser::PuppetParser(std::shared_ptr<Connection>& co, char_data *c) : ConnectionParser(co) {
+    std::string PuppetParser::getName() {
+        return "PuppetParser";
+    }
+
+    nlohmann::json PuppetParser::serialize() {
+        auto j = ConnectionParser::serialize();
+        if(ch) j["ch"] = ch->id;
+
+        return j;
+    }
+
+    void PuppetParser::deserialize(const nlohmann::json& j) {
+        if(j.contains("ch")) {
+            auto id = j["ch"].get<int>();
+            ch = uniqueCharacters.at(id).second;
+        }
+    }
+
+    PuppetParser::PuppetParser(const std::shared_ptr<Connection>& co, char_data *c) : ConnectionParser(co) {
         ch = c;
     }
 

@@ -319,23 +319,25 @@ ACMD(do_throw) {
             if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
                 chance -= chance * 0.25;
             }
-
-            if (OBJ_FLAGGED(obj, ITEM_WEAPLVL1)) {
-                damage += damage * 0.1;
-                wlvl = 1;
-            } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL2)) {
-                damage += damage * 0.2;
-                wlvl = 2;
-            } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL3)) {
-                damage += damage * 0.3;
-                wlvl = 3;
-            } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL4)) {
-                damage += damage * 0.4;
-                wlvl = 4;
-            } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL5)) {
-                damage += damage * 0.5;
-                wlvl = 5;
+            wlvl = obj->value[VAL_WEAPON_LEVEL];
+            switch(obj->value[VAL_WEAPON_LEVEL]) {
+                case 1:
+                    damage += damage * 0.1;
+                    break;
+                case 2:
+                    damage += damage * 0.2;
+                    break;
+                case 3:
+                    damage += damage * 0.3;
+                    break;
+                case 4:
+                    damage += damage * 0.4;
+                    break;
+                case 5:
+                    damage += damage * 0.5;
+                    break;
             }
+
             if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
                 if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {
                     wtype = 1;
@@ -774,8 +776,8 @@ ACMD(do_selfd) {
         tch = GRAPPLING(ch);
         dmg += GET_CHARGE(ch);
         GET_CHARGE(ch) = 0;
-        dmg += (ch->getBasePL()) * 0.6;
-        dmg += (ch->getBaseST());
+        dmg += ch->getBasePL() * 0.6;
+        dmg += ch->getBaseST();
         ch->decCurHealthPercent(1, 1);
         GET_SUPPRESS(ch) = 0;
         act("@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true,
@@ -790,8 +792,8 @@ ACMD(do_selfd) {
         if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
             GET_SDCOOLDOWN(ch) = 600;
         }
-        if ((IS_MAJIN(ch) || IS_BIO(ch)) && ch->getCurLFPercent() > 0.5) {
-            ch->decCurLFPercent(2, -1);
+        if ((IS_MAJIN(ch) || IS_BIO(ch)) && ch->getCurVitalDam(CharVital::LifeForce) < 0.5) {
+            ch->modCurVitalDam(CharVital::LifeForce, -2.0);
             ch->playerFlags.set(PLR_GOOP);
             ch->gooptime = 70;
         } else {

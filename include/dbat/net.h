@@ -8,7 +8,8 @@
 namespace net {
     using namespace std::chrono_literals;
 
-    extern void init();
+    extern void init_epoll();
+    extern void init_listeners();
     extern void prepareForCopyover();
 
     enum class Protocol : uint8_t {
@@ -41,7 +42,7 @@ namespace net {
         bool ttype = false, naws = false, sga = false, linemode = false;
         bool force_endline = false, oob = false, tls = false;
         bool screen_reader = false, mouse_tracking = false, vt100 = false;
-        bool osc_color_palette = false, proxy = false, mnes = false;
+        bool osc_color_palette = false, proxy = false, mnes = false, mslp = false;
 
         void deserialize(const nlohmann::json& j);
         nlohmann::json serialize();
@@ -68,9 +69,9 @@ namespace net {
 
     extern std::unordered_map<int, std::shared_ptr<Connection>> connections;
     extern std::unordered_map<int, DisconnectReason> deadConnections;
-    extern std::set<int> pendingConnections, pendingOutData, pendingReads, pendingWrites;
+    extern std::set<int> pendingOutData, pendingReads, pendingWrites;
 
-    extern int server_fd;
+    extern int server_fd, epoll_fd;
     extern void update(double deltaTime);
     extern void acceptAllIncomingConnections();
     extern void prepareForCopyover();
@@ -86,10 +87,25 @@ namespace net {
         virtual void handleGMCP(const std::string &txt, const nlohmann::json &j);
         virtual void start();
         virtual void close();
+        virtual std::string getName() = 0;
+        virtual nlohmann::json serialize();
+        virtual void deserialize(const nlohmann::json& j);
+        virtual bool canCopyover();
 
     protected:
-        void sendText(const std::string &txt);
+        void sendText(const std::string &txt, int bitflags = 0);
+        void sendGMCP(const std::string &cmd, const nlohmann::json& j, int bitflags = 0);
         std::shared_ptr<Connection> conn;
+    };
+
+    struct SendBuffer {
+        SendBuffer(const std::string &data, int bitflags = 0) : data(data), bitflags(bitflags) {};
+        explicit SendBuffer(const nlohmann::json& j);
+        std::string data{};
+        std::size_t sent{};
+        int bitflags{};
+        static constexpr int BF_CLOSE_AFTER_SEND = 1;
+        nlohmann::json serialize();
     };
 
     class Connection : public std::enable_shared_from_this<Connection> {
@@ -97,7 +113,8 @@ namespace net {
         explicit Connection(int connId);
         Connection(int connId, const nlohmann::json& j);
         ~Connection();
-        void sendText(const std::string &messg);
+        void sendText(const std::string &messg, int bitflags = 0);
+        void sendGMCP(const std::string &cmd, const nlohmann::json& j, int bitflags = 0);
         void update(double deltaTime);
         void onNetworkDisconnected();
         void onWelcome();
@@ -109,7 +126,6 @@ namespace net {
         void cleanup(DisconnectReason reason);
         void setParser(ConnectionParser *p);
 
-        bool running{true};
         int connId{};
         account_data *account{};
         int64_t adminLevel{0};
@@ -119,7 +135,7 @@ namespace net {
         // Some time structs to handle when we received connections.
         // lastReceivedBytes is used to track network activity.
         std::chrono::system_clock::time_point connected{};
-        std::chrono::steady_clock::time_point connectedSteady{}, lastActivity{}, lastReceivedBytes{}, lastMsg{};
+        std::chrono::steady_clock::time_point lastActivity{}, lastReceivedBytes{};
 
         // This is embedded for ease of segmentation but this struct isn't
         // actually used anywhere else.
@@ -138,6 +154,7 @@ namespace net {
         void handleTelnet(telnet_event_t *event);
 
         void handleAppData();
+        void handleGMCP(char* cmd, char *data);
 
         void sendTelnetNegotiations();
 
@@ -147,14 +164,18 @@ namespace net {
         void handleTelnetDo(char telopt);
         void handleTelnetWont(char telopt);
         void handleTelnetDont(char telopt);
+        void handleTelnetTTYPE(unsigned char cmd, const char *data);
 
         void handleTelnetSubNegotiate(char telopt, const char *buffer, size_t size);
 
         void disableCompression();
 
     protected:
-        std::vector<char> outbuf, appbuf;
+        std::deque<SendBuffer> outbuf;
+        std::string appbuf;
         telnet_t *teldata;
+        std::string lastTTYPE{};
+        unsigned char ttypeState{0};
 
     };
 

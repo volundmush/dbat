@@ -325,9 +325,6 @@ ASPELL(spell_identify) {
                 }
                 sprinttype(obj->affected[i].location, apply_types, bitbuf, sizeof(bitbuf));
                 switch (obj->affected[i].location) {
-                    case APPLY_FEAT:
-                        snprintf(buf2, sizeof(buf2), " (%s)", feat_list[obj->affected[i].specific].name);
-                        break;
                     case APPLY_SKILL:
                         snprintf(buf2, sizeof(buf2), " (%s)", spell_info[obj->affected[i].specific].name);
                         break;
@@ -367,7 +364,8 @@ ASPELL(spell_enchant_weapon) {
 
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location == APPLY_NONE) {
-            obj->affected[i].location = APPLY_ACCURACY;
+            obj->affected[i].location = APPLY_COMBAT_MULT;
+            obj->affected[i].specific = static_cast<int>(ComStat::Accuracy);
             obj->affected[i].modifier = 1 + (level >= 18);
             break;
         }
@@ -375,17 +373,18 @@ ASPELL(spell_enchant_weapon) {
 
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location == APPLY_NONE) {
-            obj->affected[i].location = APPLY_DAMAGE;
+            obj->affected[i].location = APPLY_COMBAT_BASE;
+            obj->affected[i].specific = static_cast<int>(ComStat::Damage);
             obj->affected[i].modifier = 1 + (level >= 20);
             break;
         }
     }
 
     if (IS_GOOD(ch)) {
-        obj->extra_flags.set(ITEM_ANTI_EVIL);
+        obj->antiAlignGoodEvil.set(0);
         act("$p glows blue.", false, ch, obj, nullptr, TO_CHAR);
     } else if (IS_EVIL(ch)) {
-        obj->extra_flags.set(ITEM_ANTI_GOOD);
+        obj->antiAlignGoodEvil.set(2);
         act("$p glows red.", false, ch, obj, nullptr, TO_CHAR);
     } else
         act("$p glows yellow.", false, ch, obj, nullptr, TO_CHAR);

@@ -129,6 +129,10 @@ std::set<zone_vnum> zone_reset_queue;
 
 std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
 
+SubscriptionManager<CharRef> characterSubscriptions;
+SubscriptionManager<ObjRef> objectSubscriptions;
+SubscriptionManager<RoomRef> roomSubscriptions;
+
 /* local functions */
 static void dragon_level(struct char_data *ch);
 
@@ -140,12 +144,9 @@ static int count_alias_records(FILE *fl);
 
 static void get_one_line(FILE *fl, char *buf);
 
-static void check_start_rooms();
-
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
 
 static void reset_time();
-
 
 void mag_assign_spells();
 
@@ -415,6 +416,7 @@ static void db_load_rooms(const std::filesystem::path& loc) {
         auto id = j["vn"].get<int64_t>();
         auto r = world.emplace(id, j);
         r.first->second.zone = real_zone_by_thing(id);
+        r.first->second.activate();
     }
 }
 
@@ -1166,7 +1168,7 @@ bitvector_t asciiflag_conv(char *flag) {
 }
 
 /* make sure the start rooms exist & resolve their vnums to rnums */
-static void check_start_rooms() {
+void check_start_rooms() {
     if ((r_mortal_start_room = real_room(CONFIG_MORTAL_START)) == NOWHERE) {
         basic_mud_log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
         exit(1);
@@ -1649,10 +1651,10 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     GET_LPLAY(mob) = time(nullptr);
-    bool autoset = mob->get(CharStat::PowerLevel) <= 1;
+    bool autoset = mob->get(CharVital::PowerLevel) <= 1;
     if(autoset) {
-        for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
-            stat_t base = GET_LEVEL(mob) * mult;
+        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
+            vital_t base = GET_LEVEL(mob) * mult;
             if (GET_LEVEL(mob) > 140) {
                 base *= 8;
             } else if (GET_LEVEL(mob) > 130) {
@@ -1667,7 +1669,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     if (GET_MOB_VNUM(mob) == 2245) {
-        for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
             mob->set(c, rand_number(1, 4));
         }
     }
@@ -2463,47 +2465,58 @@ void reset_zone(zone_rnum zone) {
             if(room == world.end()) continue;
             rrnum = rvnum;
 
+            auto r = &room->second;
+
             reset_wtrigger(&room->second);
-            if (room->second.room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
-                send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-                room->second.room_flags.reset(ROOM_AURA);
-            }
-            if (room->second.sector_type == SECT_LAVA) {
-                room->second.geffect = 5;
-            }
-            if (room->second.geffect < -1) {
-                send_to_room(rrnum, "The area loses some of the water flooding it.\r\n");
-                room->second.geffect += 1;
-            } else if (room->second.geffect == -1) {
-                send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
-                room->second.geffect = 0;
+
+            if (r->room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
+                send_to_room(r, "The aura of regeneration covering the surrounding area disappears.\r\n");
+                r->room_flags.reset(ROOM_AURA);
             }
 
-            if(auto dmg = room->second.getDamage(); dmg > 0) {
-                int toRepair = 0;
-                if(dmg >= 100) toRepair = rand_number(5, 10);
-                else if(dmg >= 10) toRepair = rand_number(1, 10);
-                else if(dmg > 1) toRepair = rand_number(1, dmg);
-                else toRepair = 1;
-                room->second.modDamage(-toRepair);
-                send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
+            if (r->sector_type == SECT_LAVA) {
+                r->geffect = 5;
+            }
+            if (r->geffect < -1) {
+                send_to_room(r, "The area loses some of the water flooding it.\r\n");
+                r->geffect += 1;
+            } else if (r->geffect == -1) {
+                send_to_room(r, "The area loses the last of the water flooding it in one large rush.\r\n");
+                r->geffect = 0;
             }
 
-
-            if (room->second.geffect >= 1 && rand_number(1, 4) == 4 && !room->second.isSunken() && room->second.sector_type != SECT_LAVA) {
-                send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
-                room->second.geffect = 0;
-            } else if (room->second.geffect >= 1 && rand_number(1, 2) == 2 && room->second.isSunken() &&
-                    room->second.sector_type != SECT_LAVA) {
-                send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
-                room->second.geffect = 0;
+            if (r->geffect >= 1 && rand_number(1, 4) == 4 && !r->isSunken() && r->sector_type != SECT_LAVA) {
+                send_to_room(r, "The lava has cooled and become solid rock.\r\n");
+                r->geffect = 0;
+            } else if (r->geffect >= 1 && rand_number(1, 2) == 2 && r->isSunken() &&
+                    r->sector_type != SECT_LAVA) {
+                send_to_room(r, "The water has cooled the lava and it has become solid rock.\r\n");
+                r->geffect = 0;
             }
+
         }
     } else {
         /* even if reset is blocked, age should be reset */
         z.age = 0;
     }
     post_reset(z.number);
+}
+
+void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
+    for(auto ref : roomSubscriptions.all("repairRoomDamage")) {
+        auto room = ref.get();
+        if(!room) continue;
+
+        if(auto dmg = room->getDamage(); dmg > 0) {
+            int toRepair = 0;
+            if(dmg >= 100) toRepair = rand_number(5, 10);
+            else if(dmg >= 10) toRepair = rand_number(1, 10);
+            else if(dmg > 1) toRepair = rand_number(1, dmg);
+            else toRepair = 1;
+            room->modDamage(-toRepair);
+            send_to_room(room, "The area gets rebuilt a little.\r\n");
+        }
+    }
 }
 
 
@@ -2768,7 +2781,7 @@ void init_char(struct char_data *ch) {
         admin_set(ch, ADMLVL_IMPL);
 
         /* The implementor never goes through do_start(). */
-        for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
             ch->set(c, 1000);
         }
     }
@@ -2835,9 +2848,6 @@ zone_rnum real_zone(zone_vnum vnum) {
  *
  * TODO: Add checks for unknown bitvectors.
  */
-
-
-
 
 
 int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
@@ -3391,55 +3401,51 @@ std::optional<UID> resolveUID(const std::string& uid) {
     if(type == 'R') {
         if(world.contains(id)) return &world[id];
     } else if(type == 'O') {
-        auto find = uniqueObjects.find(id);
-        if(find != uniqueObjects.end()) {
-            if(!generation || (find->second.first == generation)) {
-                if(active && !find->second.second->isActive())
-                    return std::nullopt;
-                return find->second.second;
-            }
-        }
+        ObjRef ref{id, generation};
+        return ref.get(active);
     } else if(type == 'C') {
-        auto find = uniqueCharacters.find(id);
-        if(find != uniqueCharacters.end()) {
-            if(!generation || (find->second.first == generation)) {
-                if(active && !find->second.second->isActive())
-                    return std::nullopt;
-                return find->second.second;
-            }
-        }
+        CharRef ref{id, generation};
+        return ref.get(active);
     }
     return std::nullopt;
 }
 
-struct obj_data* obj_ref::get(bool checkActive) {
+obj_data* ObjRef::get(bool checkActive) {
     auto find = uniqueObjects.find(id);
-    if(find != uniqueObjects.end()) {
-        if(find->second.first == generation) {
-            if(checkActive && !find->second.second->isActive())
-                return nullptr;
-            return find->second.second;
-        }
-    }
-    return nullptr;
+    if(find == uniqueObjects.end()) return nullptr;
+    if(find->second.first != generation) return nullptr;
+    if(checkActive && !find->second.second->isActive()) return nullptr;
+    return find->second.second;
 }
 
-struct char_data* char_ref::get(bool checkActive) {
+char_data* CharRef::get(bool checkActive) {
     auto find = uniqueCharacters.find(id);
-    if(find != uniqueCharacters.end()) {
-        if(find->second.first == generation) {
-            if(checkActive && !find->second.second->isActive())
-                return nullptr;
-            return find->second.second;
-        }
-    }
+    if(find == uniqueCharacters.end()) return nullptr;
+    if(find->second.first != generation) return nullptr;
+    if(checkActive && !find->second.second->isActive()) return nullptr;
+    return find->second.second;
+}
+
+room_data* RoomRef::get(bool checkActive) {
+    auto find = world.find(id);
+    if(find != world.end()) return &find->second;
     return nullptr;
 }
 
-struct room_data* room_ref::get(bool checkActive) {
-    auto find = world.find(id);
-    if(find != world.end()) {
-        return &find->second;
-    }
-    return nullptr;
+nlohmann::json RefBase::serialize() {
+    nlohmann::json j;
+    j["id"] = id;
+    j["generation"] = generation;
+    return j;
+}
+
+void RefBase::deserialize(const nlohmann::json& j) {
+    id = j.at("id").get<int64_t>();
+    generation = j.at("generation").get<time_t>();
+}
+
+RefBase::RefBase(int64_t id, time_t generation) : id(id), generation(generation) {}
+
+RefBase::RefBase(const nlohmann::json& j) {
+    deserialize(j);
 }

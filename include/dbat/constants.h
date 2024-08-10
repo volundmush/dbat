@@ -90,4 +90,4 @@ extern const std::unordered_map<std::string, CharTrain> CharTrainNames;
 extern const std::unordered_map<std::string, CharAppearance> CharAppearanceNames;
 extern const std::unordered_map<std::string, CharAlign> CharAlignNames;
 extern const std::unordered_map<std::string, CharMoney> CharMoneyNames;
-extern const std::unordered_map<std::string, CharStat> CharStatNames;
+extern const std::unordered_map<std::string, CharVital> CharStatNames;

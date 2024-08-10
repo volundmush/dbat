@@ -846,7 +846,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             DRAGGING(ch) = nullptr;
         }
 
-        if (GET_LIFEPERC(ch) > 0 && ch->health < (double) GET_LIFEPERC(ch) / 100 && (ch->getCurLF()) > 0 &&
+        if (GET_LIFEPERC(ch) > 0 && (1.0 - ch->getCurVitalDam(CharVital::PowerLevel)) < (double) GET_LIFEPERC(ch) / 100 && (ch->getCurLF()) > 0 &&
             !IS_ANDROID(ch)) {
             if (rand_number(1, 15) >= 14) {
                 if ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.05 || AFF_FLAGGED(ch, AFF_HEALGLOW) || (IS_KANASSAN(ch) &&

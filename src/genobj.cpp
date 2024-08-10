@@ -253,27 +253,6 @@ int delete_object(obj_rnum rnum) {
     return rnum;
 }
 
-void obj_affected_type::deserialize(const nlohmann::json &j) {
-    if(j.count("location")) location = j["location"];
-    if(j.count("modifier")) modifier = j["modifier"];
-    if(j.count("specific")) specific = j["specific"];
-}
-
-obj_affected_type::obj_affected_type(const nlohmann::json &j) {
-    deserialize(j);
-}
-
-nlohmann::json obj_affected_type::serialize() {
-    nlohmann::json j;
-
-    if(location) j["location"] = location;
-    if(modifier != 0.0) j["modifier"] = modifier;
-    if(specific) j["specific"] = specific;
-
-    return j;
-}
-
-
 nlohmann::json obj_data::serializeBase() {
     auto j = serializeUnit();
 
@@ -289,6 +268,23 @@ nlohmann::json obj_data::serializeBase() {
 
     for(auto i = 0; i < extra_flags.size(); i++)
         if(extra_flags.test(i)) j["extra_flags"].push_back(i);
+
+    for(auto i = 0; i < onlyAlignLawChaos.size(); i++)
+        if(onlyAlignLawChaos.test(i)) j["onlyAlignLawChaos"].push_back(i);
+    for(auto i = 0; i < antiAlignLawChaos.size(); i++)
+        if(antiAlignLawChaos.test(i)) j["antiAlignLawChaos"].push_back(i);
+    for(auto i = 0; i < onlyAlignGoodEvil.size(); i++)
+        if(onlyAlignGoodEvil.test(i)) j["onlyAlignGoodEvil"].push_back(i);
+    for(auto i = 0; i < antiAlignGoodEvil.size(); i++)
+        if(antiAlignGoodEvil.test(i)) j["antiAlignGoodEvil"].push_back(i);
+    for(auto i = 0; i < onlyClass.size(); i++)
+        if(onlyClass.test(i)) j["onlyClass"].push_back(i);
+    for(auto i = 0; i < antiClass.size(); i++)
+        if(antiClass.test(i)) j["antiClass"].push_back(i);
+    for(auto i = 0; i < onlyRace.size(); i++)
+        if(onlyRace.test(i)) j["onlyRace"].push_back(i);
+    for(auto i = 0; i < antiRace.size(); i++)
+        if(antiRace.test(i)) j["antiRace"].push_back(i);
 
     if(weight != 0.0) j["weight"] = weight;
     if(cost) j["cost"] = cost;
@@ -357,11 +353,17 @@ void obj_data::deserializeBase(const nlohmann::json &j) {
         }
     }
 
-    if(j.contains("extra_flags")) {
-        for(auto & i : j["extra_flags"]) {
-            extra_flags.set(i.get<int>());
-        }
-    }
+    if(j.contains("extra_flags")) for(auto & i : j["extra_flags"]) extra_flags.set(i.get<int>());
+
+    if(j.contains("onlyAlignLawChaos")) for(auto & i : j["onlyAlignLawChaos"]) onlyAlignLawChaos.set(i.get<int>());
+    if(j.contains("antiAlignLawChaos")) for(auto & i : j["antiAlignLawChaos"]) antiAlignLawChaos.set(i.get<int>());
+    if(j.contains("onlyAlignGoodEvil")) for(auto & i : j["onlyAlignGoodEvil"]) onlyAlignGoodEvil.set(i.get<int>());
+    if(j.contains("antiAlignGoodEvil")) for(auto & i : j["antiAlignGoodEvil"]) antiAlignGoodEvil.set(i.get<int>());
+
+    if(j.contains("onlyClass")) for(auto & i : j["onlyClass"]) onlyClass.set(i.get<int>());
+    if(j.contains("antiClass")) for(auto & i : j["antiClass"]) antiClass.set(i.get<int>());
+    if(j.contains("onlyRace")) for(auto & i : j["onlyRace"]) onlyRace.set(i.get<int>());
+    if(j.contains("tiRace")) for(auto & i : j["tiRace"]) antiAlignGoodEvil.set(i.get<int>());
 
     if(j.contains("weight")) weight = j["weight"];
     if(j.contains("cost")) cost = j["cost"];
@@ -462,6 +464,7 @@ void obj_data::deactivate() {
         }
         TRIGGERS(script) = nullptr;
     }
+    objectSubscriptions.unsubscribeFromAll(ref());
     if(contents) deactivateContents();
 }
 
@@ -489,10 +492,10 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 }
 
 
-int obj_data::getAffectModifier(int location, int specific) {
-    int modifier = 0;
+double obj_data::getAffectModifier(int location, int specific) {
+    double modifier = 0;
     for(auto &aff : affected) {
-        if(aff.location == location && (specific == -1 || aff.specific == specific)) {
+        if(aff.match(location, specific)) {
             modifier += aff.modifier;
         }
     }

@@ -6,7 +6,29 @@
 #include "dbat/accmenu.h"
 
 namespace net {
-    CharacterMenu::CharacterMenu(std::shared_ptr<Connection>& co, char_data *c) : ConnectionParser(co) {
+
+    std::string CharacterMenu::getName() {
+        return "CharacterMenu";
+    }
+
+    nlohmann::json CharacterMenu::serialize() {
+        auto j = ConnectionParser::serialize();
+        j["state"] = state;
+        if(ch) j["ch"] = ch->id;
+
+        return j;
+    }
+
+    void CharacterMenu::deserialize(const nlohmann::json& j) {
+        if(j.contains("state")) state = j.at("state").get<int>();
+        if(j.contains("ch")) {
+            auto id = j["ch"].get<int>();
+            ch = uniqueCharacters.at(id).second;
+        }
+
+    }
+
+    CharacterMenu::CharacterMenu(const std::shared_ptr<Connection>& co, char_data *c) : ConnectionParser(co) {
         ch = c;
     }
 
@@ -20,8 +42,7 @@ namespace net {
 
         switch (arg) {
             case 0:
-                sendText("Goodbye.\r\n");
-                conn->close();
+                sendText("Goodbye.\r\n", net::SendBuffer::BF_CLOSE_AFTER_SEND);
                 break;
 
             case 1:

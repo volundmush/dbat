@@ -144,7 +144,7 @@ void bring_to_cap(struct char_data *ch) {
 
     auto cap = ch->calc_soft_cap();
 
-    for(auto stat : {CharStat::PowerLevel, CharStat::Stamina, CharStat::Ki}) {
+    for(auto stat : {CharVital::PowerLevel, CharVital::Stamina, CharVital::Ki}) {
         if(auto diff = cap - ch->get(stat); diff > 0) {
             ch->mod(stat, diff);
         }
@@ -2066,9 +2066,9 @@ ACMD(do_candy) {
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", obj->short_description, vict->short_description);
     obj->short_description = strdup(newsh);
     obj_to_char(obj, ch);
-    obj->value[VAL_FOOD_CANDY_PL] = vict->get(CharStat::PowerLevel);
-    obj->value[VAL_FOOD_CANDY_KI] = vict->get(CharStat::Ki);
-    obj->value[VAL_FOOD_CANDY_ST] = vict->get(CharStat::Stamina);
+    obj->value[VAL_FOOD_CANDY_PL] = vict->get(CharVital::PowerLevel);
+    obj->value[VAL_FOOD_CANDY_KI] = vict->get(CharVital::Ki);
+    obj->value[VAL_FOOD_CANDY_ST] = vict->get(CharVital::Stamina);
 
     vict->mobFlags.reset(MOB_HUSK);
     die(vict, ch);
@@ -3246,23 +3246,23 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type) {
         case 1: /* This object is a weapon. */
             switch (boost) {
                 case 30:
-                    obj->extra_flags.set(ITEM_WEAPLVL2);
+                    obj->value[VAL_WEAPON_LEVEL] = 2;
                     break;
                 case 40:
                 case 50:
-                    obj->extra_flags.set(ITEM_WEAPLVL3);
+                    obj->value[VAL_WEAPON_LEVEL] = 3;
                     break;
                 case 60:
                 case 70:
                 case 80:
                 case 90:
-                    obj->extra_flags.set(ITEM_WEAPLVL4);
+                    obj->value[VAL_WEAPON_LEVEL] = 4;
                     break;
                 case 100:
-                    obj->extra_flags.set(ITEM_WEAPLVL5);
+                    obj->value[VAL_WEAPON_LEVEL] = 5;
                     break;
                 default:
-                    obj->extra_flags.set(ITEM_WEAPLVL1);
+                    obj->value[VAL_WEAPON_LEVEL] = 1;
                     break;
             }
             if (boost != 0) {
@@ -4365,11 +4365,11 @@ ACMD(do_ingest) {
                 auto chw = ch->getWeight(true);
                 auto vw = vict->getWeight(true);
                 if (chw > vict->getWeight(true)) {
-                    ch->weight -= ((chw - vict->getWeight(true)) / 2);
+                    ch->mod(CharDim::Weight, -((chw - vict->getWeight(true)) / 2));
                 } else if (ch->getWeight(true) < vw) {
-                    ch->weight += ((vw - chw) / 2);
+                    ch->mod(CharDim::Weight, ((vw - chw) / 2));
                 } else {
-                    ch->weight = vict->getWeight(true);
+                    ch->set(CharDim::Weight, vict->getWeight(true));
                 }
             } else {
                 send_to_char(ch, "Your forelock length changes because of %s.\r\n", GET_NAME(vict));
@@ -6250,16 +6250,27 @@ ACMD(do_appraise) {
     send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj->short_description, add_commas(GET_OBJ_COST(obj)).c_str(),
                  displevel);
     if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-        if (OBJ_FLAGGED(obj, ITEM_WEAPLVL1)) {
-            send_to_char(ch, "Weapon Level: 1\nDamage Bonus: 5%s\r\n", "%");
-        } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL2)) {
-            send_to_char(ch, "Weapon Level: 2\nDamage Bonus: 10%s\r\n", "%");
-        } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL3)) {
-            send_to_char(ch, "Weapon Level: 3\nDamage Bonus: 20%s\r\n", "%");
-        } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL4)) {
-            send_to_char(ch, "Weapon Level: 4\nDamage Bonus: 30%s\r\n", "%");
-        } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL5)) {
-            send_to_char(ch, "Weapon Level: 5\nDamage Bonus: 50%s\r\n", "%");
+        auto wlvl = obj->value[VAL_WEAPON_LEVEL];
+        int dambon = 0;
+        switch(wlvl) {
+            case 1:
+                dambon = 5;
+                break;
+            case 2:
+                dambon = 10;
+                break;
+            case 3:
+                dambon = 20;
+                break;
+            case 4:
+                dambon = 30;
+                break;
+            case 5:
+                dambon = 50;
+                break;
+        }
+        if(dambon) {
+            send_to_char(ch, "Weapon Level: %d\nDamage Bonus: %d%s\r\n", wlvl, dambon, "%");
         }
     }
     send_to_char(ch, "Size: %s\r\n", size_names[GET_OBJ_SIZE(obj)]);
@@ -6281,19 +6292,13 @@ ACMD(do_appraise) {
     int percent = false;
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location != APPLY_NONE) {
-            if (obj->affected[i].location == APPLY_REGEN || obj->affected[i].location == APPLY_TRAIN ||
-                obj->affected[i].location == APPLY_LIFEMAX ) {
-                percent = true;
-            }
+            percent = obj->affected[i].isPercent();
             sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
             auto m = fmt::format("{}", obj->affected[i].modifier);
             send_to_char(ch, "%s %s%s to %s", found++ ? "," : "", m.c_str(),
                          percent == true ? "%" : "", buf);
             percent = false;
             switch (obj->affected[i].location) {
-                case APPLY_FEAT:
-                    send_to_char(ch, " (%s)", feat_list[obj->affected[i].specific].name);
-                    break;
                 case APPLY_SKILL:
                     send_to_char(ch, " (%s)", spell_info[obj->affected[i].specific].name);
                     break;
@@ -8932,193 +8937,159 @@ ACMD(do_scouter) {
     struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
     if (!obj) {
         send_to_char(ch, "You do not even have a scouter!");
-        obj = nullptr;
         return;
-    } else {
-        if (!*arg) {
-            send_to_char(ch, "[Syntax] scouter < target | scan>\r\n");
-            return;
-        }
-        reveal_hiding(ch, 3);
-        if (!strcasecmp("scan", arg)) {
-            for (i = descriptor_list; i; i = i->next) {
-                if (STATE(i) != CON_PLAYING) {
-                    continue;
-                } else if (i->character == ch) {
-                    continue;
-                } else if (IS_ANDROID(i->character)) {
-                    continue;
-                } else if (planet_check(ch, i->character)) {
-                    int dir = find_first_step(ch->getRoom(), i->character->getRoom());
-                    int same = false;
-                    char pathway[MAX_STRING_LENGTH];
+    }
+    if (!*arg) {
+        send_to_char(ch, "[Syntax] scouter < target | scan>\r\n");
+        return;
+    }
+    reveal_hiding(ch, 3);
+    if (!strcasecmp("scan", arg)) {
+        for (i = descriptor_list; i; i = i->next) {
+            if (STATE(i) != CON_PLAYING) {
+                continue;
+            } else if (i->character == ch) {
+                continue;
+            } else if (IS_ANDROID(i->character)) {
+                continue;
+            } else if (planet_check(ch, i->character)) {
+                int dir = find_first_step(ch->getRoom(), i->character->getRoom());
+                int same = false;
+                char pathway[MAX_STRING_LENGTH];
 
-                    if (IN_ZONE(ch) == IN_ZONE(i->character))
-                        same = true;
+                if (IN_ZONE(ch) == IN_ZONE(i->character))
+                    same = true;
 
-                    switch (dir) {
-                        case BFS_ERROR:
-                            sprintf(pathway, "@rERROR");
-                            break;
-                        case BFS_ALREADY_THERE:
-                            sprintf(pathway, "@RHERE");
-                            break;
-                        case BFS_NO_PATH:
-                            send_to_char(ch, "@MUNKNOWN");
-                            break;
-                        default:
-                            send_to_char(ch, "@G%s\r\n", dirs[dir]);
-                            break;
-                    }
-
-                    auto blah = sense_location(i->character);
-                    if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && i->character->getPL() >= 150000) {
-                        send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
-                                     same == true ? pathway : blah);
-                    } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && i->character->getPL() >= 5000000) {
-                        send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
-                                     same == true ? pathway : blah);
-                    } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && i->character->getPL() >= 15000000) {
-                        send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
-                                     same == true ? pathway : blah);
-                    } else {
-                        send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n",
-                                     add_commas(i->character->getPL()).c_str(), same ==
-                                                                        true ? pathway : blah);
-                    }
-                    ++count;
+                switch (dir) {
+                    case BFS_ERROR:
+                        sprintf(pathway, "@rERROR");
+                        break;
+                    case BFS_ALREADY_THERE:
+                        sprintf(pathway, "@RHERE");
+                        break;
+                    case BFS_NO_PATH:
+                        send_to_char(ch, "@MUNKNOWN");
+                        break;
+                    default:
+                        send_to_char(ch, "@G%s\r\n", dirs[dir]);
+                        break;
                 }
-            }
-            if (count == 0) {
-                send_to_char(ch, "You didn't detect anyone of notice.\r\n");
-                return;
-            } else if (count >= 1) {
-                send_to_char(ch, "%d powerlevels detected.\r\n", count);
-                return;
+
+                auto blah = sense_location(i->character);
+                auto cpl = i->character->getPL();
+                if (cpl > obj->value[VAL_WORN_SCOUTER]) {
+                    send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
+                                 same == true ? pathway : blah);
+                } else {
+                    send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n",
+                                 add_commas(cpl).c_str(), same ==
+                                                          true ? pathway : blah);
+                }
+                ++count;
             }
         }
-        if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-            send_to_char(ch, "They don't seem to be here.\r\n");
+        if (count == 0) {
+            send_to_char(ch, "You didn't detect anyone of notice.\r\n");
             return;
-        }
-        if (IS_ANDROID(vict)) {
-            act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-            act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-            send_to_char(ch, "@D,==================================|@n\r\n");
-            send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
-            send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:                 @RERROR@n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:                 @RERROR@n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:                 @RERROR@n@D|@n\r\n");
-            send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:                 @RERROR@n@D|@n\r\n");
-            send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-            send_to_char(ch, "@D`==================================|@n\r\n");
+        } else if (count >= 1) {
+            send_to_char(ch, "%d powerlevels detected.\r\n", count);
             return;
-        } else {
-            if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
-                act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-                act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-                //perform_remove(ch, WEAR_EYE);
-                //send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-                //act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                //extract_obj(obj);
-                //ch->save();
-                return;
-            } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
-                act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-                act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-                //perform_remove(ch, WEAR_EYE);
-                //send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-                //act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                //extract_obj(obj);
-                //ch->save();
-                return;
-            } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
-                act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-                act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-                //perform_remove(ch, WEAR_EYE);
-                //send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-                //act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                //extract_obj(obj);
-                //ch->save();
-                return;
-            } else {
-                long double percent = 0.0, cur = 0.0, max = 0.0;
-                int64_t stam = (vict->getCurST()), mstam = GET_MAX_MOVE(vict);
-                if (stam <= 0)
-                    stam = 1;
-                if (mstam <= 0)
-                    mstam = 1;
-
-                cur = (long double) (stam);
-                max = (long double) (mstam);
-
-                percent = (cur / max) * 100;
-                act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-                act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-                send_to_char(ch, "@D,==================================|@n\r\n");
-                send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-                send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
-                send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-                send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n",
-                             add_commas(vict->getPL()).c_str());
-                if (!IS_NPC(vict)) {
-                    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
-                                 add_commas(GET_CHARGE(vict)).c_str());
-                } else if (IS_NPC(vict)) {
-                    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
-                                 add_commas(vict->mobcharge * rand_number(GET_INT(ch) * 50, GET_INT(ch) * 200)).c_str());
-                }
-                if (percent < 10)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
-                else if (percent < 25)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Extremely Tired");
-                else if (percent < 50)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Very Tired");
-                else if (percent < 75)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Tired");
-                else if (percent < 90)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Winded");
-                else if (percent < 100)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Untired");
-                else if (percent >= 100)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Energetic");
-                send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-                int check = false;
-                send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
-                if (AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
-                    send_to_char(ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
-                    check = true;
-                }
-                if (AFF_FLAGGED(vict, AFF_HASS)) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
-                                 "Accelerated Arms");
-                    check = true;
-                }
-                if (AFF_FLAGGED(vict, AFF_HEALGLOW)) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
-                                 "Healing Glow Prepared");
-                    check = true;
-                }
-                if (AFF_FLAGGED(vict, AFF_POISON)) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Poisoned");
-                    check = true;
-                }
-                if (PLR_FLAGGED(vict, PLR_SELFD)) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
-                                 "Explosive Energy");
-                    check = true;
-                }
-                if (check == false) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "None Detected.");
-                }
-                send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-                send_to_char(ch, "@D`==================================|@n\r\n");
-            }
         }
     }
+    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
+        send_to_char(ch, "They don't seem to be here.\r\n");
+        return;
+    }
+    act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
+    act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
+    if (IS_ANDROID(vict)) {
+        send_to_char(ch, "@D,==================================|@n\r\n");
+        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
+        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:                 @RERROR@n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:                 @RERROR@n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:                 @RERROR@n@D|@n\r\n");
+        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:                 @RERROR@n@D|@n\r\n");
+        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+        send_to_char(ch, "@D`==================================|@n\r\n");
+        return;
+    }
+    auto vpl = vict->getPL();
+    long double percent = 0.0, cur = 0.0, max = 0.0;
+    int64_t stam = (vict->getCurST()), mstam = GET_MAX_MOVE(vict);
+    if (stam <= 0)
+        stam = 1;
+    if (mstam <= 0)
+        mstam = 1;
+    cur = (long double) (stam);
+    max = (long double) (mstam);
+
+    percent = (cur / max) * 100;
+
+    send_to_char(ch, "@D,==================================|@n\r\n");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    if(obj->value[VAL_WORN_SCOUTER] <= vpl)
+        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n",
+                     add_commas(vpl).c_str());
+    else
+        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n",
+                     "??????????");
+    if (!IS_NPC(vict)) {
+        send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
+                     add_commas(GET_CHARGE(vict)).c_str());
+    } else if (IS_NPC(vict)) {
+        send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
+                     add_commas(vict->mobcharge * rand_number(GET_INT(ch) * 50, GET_INT(ch) * 200)).c_str());
+    }
+    if (percent < 10)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
+    else if (percent < 25)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Extremely Tired");
+    else if (percent < 50)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Very Tired");
+    else if (percent < 75)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Tired");
+    else if (percent < 90)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Winded");
+    else if (percent < 100)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Untired");
+    else if (percent >= 100)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Energetic");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    int check = false;
+    send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
+    if (AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
+        send_to_char(ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
+        check = true;
+    }
+    if (AFF_FLAGGED(vict, AFF_HASS)) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
+                     "Accelerated Arms");
+        check = true;
+    }
+    if (AFF_FLAGGED(vict, AFF_HEALGLOW)) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
+                     "Healing Glow Prepared");
+        check = true;
+    }
+    if (AFF_FLAGGED(vict, AFF_POISON)) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Poisoned");
+        check = true;
+    }
+    if (PLR_FLAGGED(vict, PLR_SELFD)) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
+                     "Explosive Energy");
+        check = true;
+    }
+    if (check == false) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "None Detected.");
+    }
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char(ch, "@D`==================================|@n\r\n");
 }
 
 std::set<struct obj_data*> dball_count(struct char_data *ch) {
@@ -12618,12 +12589,12 @@ void genWeight(char_data* ch, std::string suggestedWeight) {
     int weight = atoi(suggestedWeight.c_str());
 
     if (ch->race == RaceID::Tuffle && (weight >= 3 && weight <= 40)) {
-        ch->weight = weight;
+        ch->set(CharDim::Weight, weight);
         send_to_char(ch, "Weight set.\r\n");
         return;
     }
     else if (weight >= 25 && weight <= 150) {
-        ch->weight = weight;
+        ch->set(CharDim::Weight, weight);
         send_to_char(ch, "Weight set.\r\n");
         return;
     }
@@ -12691,9 +12662,9 @@ void genFinish(char_data* ch) {
     }
 
     if(ch->genBonus == 1) {
-        ch->mod(CharStat::PowerLevel, 200);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 100);
+        ch->mod(CharVital::PowerLevel, 200);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 100);
         ch->mod(CharMoney::Carried, 200);
 
         ch->mod(CharAttribute::Strength, 2);
@@ -12705,9 +12676,9 @@ void genFinish(char_data* ch) {
 
     }
     if(ch->genBonus == 2) {
-        ch->mod(CharStat::PowerLevel, 50);
-        ch->mod(CharStat::Ki, 200);
-        ch->mod(CharStat::Stamina, 100);
+        ch->mod(CharVital::PowerLevel, 50);
+        ch->mod(CharVital::Ki, 200);
+        ch->mod(CharVital::Stamina, 100);
         ch->mod(CharMoney::Carried, 200);
 
         ch->mod(CharAttribute::Intelligence, 2);
@@ -12719,9 +12690,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 3) {
-        ch->mod(CharStat::PowerLevel, 200);
-        ch->mod(CharStat::Ki, 200);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 200);
+        ch->mod(CharVital::Ki, 200);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 10);
 
         ch->mod(CharAttribute::Strength, 2);
@@ -12735,9 +12706,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 4) {
-        ch->mod(CharStat::PowerLevel, 50);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 50);
+        ch->mod(CharVital::PowerLevel, 50);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 50);
         ch->mod(CharMoney::Carried, 5000);
 
         ch->mod(CharAttribute::Intelligence, 2);
@@ -12748,9 +12719,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 5) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12761,9 +12732,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 6) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12774,9 +12745,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 7) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12787,9 +12758,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 8) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12800,9 +12771,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 9) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12813,9 +12784,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 10) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);

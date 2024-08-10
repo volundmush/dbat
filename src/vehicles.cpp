@@ -1300,9 +1300,9 @@ ACMD(do_drive) {
                 } else {
                     sprintf(buf3, "%s @wcomes in from above and slams into the ground!@n\r\n",
                             vehicle->short_description);
-                    ROOM_DAMAGE(IN_ROOM(vehicle)) += 1;
+                    world.at(IN_ROOM(vehicle)).modDamage(1);
                     if (ROOM_DAMAGE(IN_ROOM(vehicle)) >= 10) {
-                        ROOM_DAMAGE(IN_ROOM(vehicle)) = 10;
+                        world.at(IN_ROOM(vehicle)).setDamage(10);
                     }
                     look_at_room(IN_ROOM(vehicle), ch, 0);
                     send_to_room(IN_ROOM(vehicle), buf3);

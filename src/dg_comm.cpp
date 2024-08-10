@@ -412,32 +412,20 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
         if (type == 0) {
             if (num == 1) {
                 auto obj = GET_EQ(tch, WEAR_EYE);
-                if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && ch->getPL() >= 150000) {
-                    write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-                } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && ch->getPL() >= 5000000) {
-                    write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
-                } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && ch->getPL() >= 15000000) {
+                if (ch->getPL() >= obj->value[VAL_WORN_SCOUTER]) {
                     write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
                     write_to_output(i, "%s@n", messg);
                 }
             } else {
-                if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && ch->getPL() >= 150000) {
-                    write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-                } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && ch->getPL() >= 5000000) {
-                    write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
-                } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && ch->getPL() >= 15000000) {
+                if (ch->getPL() >= obj->value[VAL_WORN_SCOUTER]) {
                     write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
                     write_to_output(i, "%s\r\n", messg);
                 }
             }
         } else if (type == 1 && GET_SKILL(tch, SKILL_SENSE) < 20) {
-            if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && ch->getPL() >= 150000) {
-                write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
-            } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && ch->getPL() >= 5000000) {
-                write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
-            } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && ch->getPL() >= 15000000) {
+            if (ch->getPL() >= obj->value[VAL_WORN_SCOUTER]) {
                 write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
             } else {
                 write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(ch->getPL()).c_str());
@@ -450,11 +438,7 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
                     blah = areas[av.value()].name;
                 }
             }
-            if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && ch->getPL() >= 150000) {
-                write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah.c_str());
-            } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && ch->getPL() >= 5000000) {
-                write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah.c_str());
-            } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && ch->getPL() >= 15000000) {
+            if (ch->getPL() >= obj->value[VAL_WORN_SCOUTER]) {
                 write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah.c_str());
             } else {
                 write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah.c_str(),

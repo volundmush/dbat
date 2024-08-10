@@ -884,71 +884,77 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
     }
 
     if (ch == nullptr || dir < 0 || dir >= NUM_OF_DIRS)
-        return (0);
-    else if ((!EXIT(ch, dir) && !buildwalk(ch, dir)) || EXIT(ch, dir)->to_room == NOWHERE ||
-             (EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET) && (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED))))
+        return 0;
+
+    if ((!EXIT(ch, dir) && !buildwalk(ch, dir)) || EXIT(ch, dir)->to_room == NOWHERE ||
+             (EXIT_FLAGGED(EXIT(ch, dir), EX_SECRET) && (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED)))) {
         send_to_char(ch, "Alas, you cannot go that way...\r\n");
-    else if (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED)) {
+        return 0;
+    }
+
+    if (EXIT_FLAGGED(EXIT(ch, dir), EX_CLOSED)) {
         if (EXIT(ch, dir)->keyword)
             send_to_char(ch, "The %s seems to be closed.\r\n", fname(EXIT(ch, dir)->keyword));
         else
             send_to_char(ch, "It seems to be closed.\r\n");
-    } else if (GET_ROOM_VNUM(EXIT(ch, dir)->to_room) == 0 || GET_ROOM_VNUM(EXIT(ch, dir)->to_room) == 1) {
-        send_to_char(ch, "Report this direction, it is illegal.\r\n");
-    } else {
-
-        struct obj_data *wall;
-        for (wall = ch->getRoom()->contents; wall; wall = wall->next_content) {
-            if (GET_OBJ_VNUM(wall) == 79) {
-                if (GET_OBJ_COST(wall) == dir) {
-                    send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
-                    return (0);
-                }
-            }
-        }
-
-        if (!ch->followers)
-            return (do_simple_move(ch, dir, need_specials_check));
-
-        was_in = IN_ROOM(ch);
-        if (!do_simple_move(ch, dir, need_specials_check))
-            return (0);
-
-        for (k = ch->followers; k; k = next) {
-            next = k->next;
-            if ((IN_ROOM(k->follower) == was_in) &&
-                (GET_POS(k->follower) >= POS_STANDING) &&
-                (!AFF_FLAGGED(ch, AFF_ZANZOKEN) ||
-                 (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP)))) {
-                act("You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
-                perform_move(k->follower, dir, 1);
-            } else if ((IN_ROOM(k->follower) == was_in) &&
-                       (GET_POS(k->follower) >= POS_STANDING) &&
-                       (AFF_FLAGGED(ch, AFF_ZANZOKEN) && AFF_FLAGGED(k->follower, AFF_ZANZOKEN)) &&
-                       (!AFF_FLAGGED(ch, AFF_GROUP) || !AFF_FLAGGED(k->follower, AFF_GROUP))) {
-                act("$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, k->follower, nullptr,
-                    ch, TO_CHAR);
-                act("$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, k->follower, nullptr,
-                    ch, TO_NOTVICT);
-                act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr,
-                    ch, TO_VICT);
-                for(auto c : {ch, k->follower}) c->affected_by.reset(AFF_ZANZOKEN);
-                perform_move(k->follower, dir, 1);
-            } else if ((IN_ROOM(k->follower) == was_in) &&
-                       (GET_POS(k->follower) >= POS_STANDING) &&
-                       (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(k->follower, AFF_ZANZOKEN))) {
-                act("You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr,
-                    ch, TO_CHAR);
-                act("$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr,
-                    ch, TO_NOTVICT);
-                act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, ch,
-                    TO_VICT);
-                ch->affected_by.reset(AFF_ZANZOKEN);
-            }
-        }
-        return (1);
+        return 0;
     }
-    return (0);
+
+    if (GET_ROOM_VNUM(EXIT(ch, dir)->to_room) == 0 || GET_ROOM_VNUM(EXIT(ch, dir)->to_room) == 1) {
+        send_to_char(ch, "Report this direction, it is illegal.\r\n");
+        return 0;
+    }
+
+    struct obj_data *wall;
+    for (wall = ch->getRoom()->contents; wall; wall = wall->next_content) {
+        if (GET_OBJ_VNUM(wall) == 79) {
+            if (GET_OBJ_COST(wall) == dir) {
+                send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
+                return 0;
+            }
+        }
+    }
+
+    if (!ch->followers)
+        return do_simple_move(ch, dir, need_specials_check);
+
+    was_in = IN_ROOM(ch);
+    if (!do_simple_move(ch, dir, need_specials_check))
+        return 0;
+
+    for (k = ch->followers; k; k = next) {
+        next = k->next;
+        if ((IN_ROOM(k->follower) == was_in) &&
+            (GET_POS(k->follower) >= POS_STANDING) &&
+            (!AFF_FLAGGED(ch, AFF_ZANZOKEN) ||
+             (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP)))) {
+            act("You follow $N.\r\n", false, k->follower, nullptr, ch, TO_CHAR);
+            perform_move(k->follower, dir, 1);
+        } else if ((IN_ROOM(k->follower) == was_in) &&
+                   (GET_POS(k->follower) >= POS_STANDING) &&
+                   (AFF_FLAGGED(ch, AFF_ZANZOKEN) && AFF_FLAGGED(k->follower, AFF_ZANZOKEN)) &&
+                   (!AFF_FLAGGED(ch, AFF_GROUP) || !AFF_FLAGGED(k->follower, AFF_GROUP))) {
+            act("$N tries to zanzoken and escape, but your zanzoken matches $S!\r\n", false, k->follower, nullptr,
+                ch, TO_CHAR);
+            act("$N tries to zanzoken and escape, but $n's zanzoken matches $S!\r\n", false, k->follower, nullptr,
+                ch, TO_NOTVICT);
+            act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr,
+                ch, TO_VICT);
+            for(auto c : {ch, k->follower}) c->affected_by.reset(AFF_ZANZOKEN);
+            perform_move(k->follower, dir, 1);
+        } else if ((IN_ROOM(k->follower) == was_in) &&
+                   (GET_POS(k->follower) >= POS_STANDING) &&
+                   (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(k->follower, AFF_ZANZOKEN))) {
+            act("You try to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr,
+                ch, TO_CHAR);
+            act("$n tries to follow $N, but $E disappears in a flash of movement!\r\n", false, k->follower, nullptr,
+                ch, TO_NOTVICT);
+            act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, ch,
+                TO_VICT);
+            ch->affected_by.reset(AFF_ZANZOKEN);
+        }
+    }
+    return 1;
 }
 
 ACMD(do_move) {
