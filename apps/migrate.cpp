@@ -4922,6 +4922,44 @@ static void migrate_obj_data(obj_data *o) {
         migrate_aff(&aff);
     }
 
+    // Iterate from tail to head to combine matching affects
+    for (int i = MAX_OBJ_AFFECT - 1; i > 0; --i) {
+        if (o->affected[i].location == 0) continue; // Skip empty slots
+
+        for (int j = 0; j < i; ++j) {
+            if (o->affected[j].location == o->affected[i].location &&
+                o->affected[j].modifier == o->affected[i].modifier &&
+                o->affected[j].isBitwise()) {
+                // Combine the specifics with bitwise OR
+                o->affected[j].specific |= o->affected[i].specific;
+
+                // Clear the tail-wards element
+                o->affected[i].location = 0;
+                o->affected[i].modifier = 0.0;
+                o->affected[i].specific = 0;
+                break;
+            }
+        }
+    }
+
+    // Now compact the array, moving everything towards index 0
+    int empty_index = -1;
+    for (int i = 0; i < MAX_OBJ_AFFECT; ++i) {
+        if (o->affected[i].location == 0 && empty_index == -1) {
+            // Mark the first empty slot found
+            empty_index = i;
+        } else if (o->affected[i].location != 0 && empty_index != -1) {
+            // Move the non-empty slot to the first empty slot found
+            o->affected[empty_index] = o->affected[i];
+            // Clear the current slot
+            o->affected[i].location = 0;
+            o->affected[i].modifier = 0.0;
+            o->affected[i].specific = 0;
+            // Update empty_index to the next empty slot
+            ++empty_index;
+        }
+    }
+
     // extra_flags data.
 
     // First let's cconvert all relevant flags to new data structures.

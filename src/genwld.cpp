@@ -19,6 +19,10 @@
  * This function will copy the strings so be sure you free your own
  * copies of the description, title, and such.
  */
+RoomRef room_data::ref() {
+    return RoomRef(this);
+}
+
 room_rnum add_room(struct room_data *room) {
     struct char_data *tch;
     struct obj_data *tobj;
@@ -400,12 +404,19 @@ int room_data::getDamage() {
 }
 
 void room_data::activate() {
+    auto r = ref();
+    if(script) {
+        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
+            roomSubscriptions.subscribe("randomTriggers", r);
+        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
+            roomSubscriptions.subscribe("timeTriggers", r);
+    }
     if(dmg != 0)
-        roomSubscriptions.subscribe("roomRepairDamage", ref());
+        roomSubscriptions.subscribe("roomRepairDamage", r);
 }
 
 void room_data::deactivate() {
-    // this really has no meaning but is there for later.
+    roomSubscriptions.unsubscribeFromAll(ref());
 }
 
 int room_data::setDamage(int amount) {
@@ -450,7 +461,7 @@ std::list<char_data *> room_data::getPeople() {
     return out;
 }
 
-static const std::set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
+static const std::unordered_set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
 
 MoonCheck room_data::checkMoon() {
     for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return MoonCheck::NoMoon;

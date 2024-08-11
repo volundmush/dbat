@@ -51,9 +51,7 @@ int update_objects(struct obj_data *refobj) {
     struct obj_data *obj, swap;
     int count = 0;
 
-    for (obj = object_list; obj; obj = obj->next) {
-        if (obj->vn != refobj->vn)
-            continue;
+    for (auto obj : get_vnum_list(objectVnumIndex, refobj->vn)) {
 
         count++;
 
@@ -69,7 +67,6 @@ int update_objects(struct obj_data *refobj) {
         obj->in_obj = swap.in_obj;
         obj->contents = swap.contents;
         obj->next_content = swap.next_content;
-        obj->next = swap.next;
     }
 
     return count;
@@ -104,25 +101,6 @@ int save_objects(zone_rnum zone_num) {
  * Free all, unconditionally.
  */
 void free_object_strings(struct obj_data *obj) {
-#if 0 /* Debugging, do not enable. */
-    extern struct obj_data *object_list;
-    struct obj_data *t;
-    int i = 0;
-
-    for (t = object_list; t; t = t->next) {
-      if (t == obj) {
-        i++;
-        continue;
-      }
-      assert(obj->name != t->name);
-      assert(obj->description != t->description);
-      assert(obj->short_description != t->short_description);
-      assert(obj->action_description != t->action_description);
-      assert(obj->ex_description != t->ex_description);
-    }
-    assert(i <= 1);
-#endif
-
     if (obj->name)
         free(obj->name);
     if (obj->room_description)
@@ -215,7 +193,7 @@ int delete_object(obj_rnum rnum) {
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
 
-    for (tmp = object_list; tmp; tmp = tmp->next) {
+    for (auto tmp : get_vnum_list(objectVnumIndex, obj->vn)) {
         if (tmp->vn != obj->vn)
             continue;
 
@@ -428,20 +406,34 @@ std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const are
     return std::nullopt;
 }
 
+ObjRef obj_data::ref() {
+    return ObjRef(this);
+}
+
 void obj_data::activate() {
     if(active) {
         basic_mud_log("Attempted to activate an already active item.");
         return;
     }
     active = true;
-    next = object_list;
-    object_list = this;
-
-    if(script) script->activate();
 
     if(obj_proto.contains(vn)) {
         insert_vnum(objectVnumIndex, this);
     }
+
+    auto r = ref();
+    if(script) {
+        script->activate();
+        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
+            objectSubscriptions.subscribe("randomTriggers", r);
+        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
+            objectSubscriptions.subscribe("timeTriggers", r);
+    }
+    activeObjects.insert(r);
+    if(IS_CORPSE(this))
+        objectSubscriptions.subscribe("corpseRotService", r);
+    if(script && SCRIPT_TYPES(SCRIPT(this)) && OTRIG_RANDOM)
+        objectSubscriptions.subscribe("randomTriggers", r);
 
     if(contents) activateContents();
 }
@@ -449,8 +441,6 @@ void obj_data::activate() {
 void obj_data::deactivate() {
     if(!active) return;
     active = false;
-    struct obj_data *temp;
-    REMOVE_FROM_LIST(this, object_list, next, temp);
 
     if(obj_proto.contains(vn)) {
         erase_vnum(objectVnumIndex, this);
@@ -492,7 +482,7 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 }
 
 
-double obj_data::getAffectModifier(int location, int specific) {
+double obj_data::getAffectModifier(uint64_t location, uint64_t specific) {
     double modifier = 0;
     for(auto &aff : affected) {
         if(aff.match(location, specific)) {

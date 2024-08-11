@@ -1186,7 +1186,9 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
         mob_rnum r_num;
 
         WISHTIME = 0;
-        for (k = object_list; k; k = k->next) {
+        for (auto &r : activeObjects) {
+            k = r.get();
+            if(!k) continue;
             if (OBJ_FLAGGED(k, ITEM_FORGED)) {
                 continue;
             }
@@ -3638,7 +3640,7 @@ ACMD(do_eat) {
         affect_join(ch, &af, false, false, false, false);
     }
 
-    std::set<obj_vnum> candies = {53, 93, 94, 95};
+    std::unordered_set<obj_vnum> candies = {53, 93, 94, 95};
 
     if(candies.contains(food->vn)) {
         if(IS_MAJIN(ch)) foob = GET_OBJ_VAL(food, VAL_FOOD_FOODVAL);

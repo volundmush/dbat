@@ -313,12 +313,15 @@ static void deathTrapWrapper(uint64_t heartBeat, double deltaTime) {
 }
 
 static std::vector<GameSystem> gameSystems = {
+        GameSystem("commandWaitQueue", 0.0, commandWaitQueue),
         GameSystem("event_process", 0.0, event_process),
         GameSystem("script_trigger_check", 13.0, script_trigger_check),
         GameSystem("zone_update", 0.0, zone_update),
         GameSystem("repairRoomDamage", 600.0, repairRoomDamage),
         GameSystem("dball_load", 1.0, dball_load),
         GameSystem("base_update", 2.0, base_update),
+        GameSystem("androidAbsorbSystem", 2.0, androidAbsorbSystem),
+        GameSystem("goopTimeService", 2.0, goopTimeService),
         GameSystem("fish_update", 2.0, fish_update),
         GameSystem("handle_songs", 15.0, handle_songs),
         GameSystem("wishSYS", 1.0, wishSYS),
@@ -327,7 +330,10 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("check_auction", 15.0, check_auction),
         GameSystem("gamesys_oozaru", 0.0, trans::gamesys_oozaru),
         GameSystem("gamesys_transform", 0.0, trans::gamesys_transform),
+        GameSystem("powerupService", 4.0, powerupService),
+        GameSystem("lifeforceSystem", 4.0, lifeforceSystem),
         GameSystem("fight_stack", 4.0, fight_stack),
+        GameSystem("kiChargeSystem", 4.0, kiChargeSystem),
         GameSystem("homing_update", 2.0, homing_update),
         GameSystem("huge_update", 2.0, huge_update),
         GameSystem("broken_update", 2.0, broken_update),
@@ -335,6 +341,9 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("affect_update_violence", 5.0, affect_update_violence),
         GameSystem("advanceClock", 0.0, advanceClock),
         GameSystem("affect_update", 300.0, affect_update),
+        GameSystem("characterVitalsRecovery", 0.0, characterVitalsRecovery),
+        GameSystem("healTankService", 0.0, healTankService),
+        GameSystem("corpseRotService", 100.0, corpseRotService),
         GameSystem("point_update", 100.0, point_update),
         GameSystem("clan_update", 60.0, clan_update),
         GameSystem("record_usage", 5.0, record_usage),
@@ -345,14 +354,15 @@ static std::vector<GameSystem> gameSystems = {
 
 void heartbeat(uint64_t heart_pulse, double deltaTime) {
     static int mins_since_crashsave = 0;
-    timings.clear();
 
     for(auto &s : gameSystems) {
-        s.countdown -= deltaTime;
+        if(s.interval > 0.0)
+            s.countdown -= deltaTime;
         if(s.countdown <= 0.0) {
             auto start = std::chrono::high_resolution_clock::now();
+            auto miniDelta = (s.interval > 0.0) ? std::abs<double>(s.countdown + s.interval) : deltaTime;
             try {
-                s.func(heart_pulse, abs(s.countdown) + s.interval);
+                s.func(heart_pulse, miniDelta);
             }
             catch(const std::exception &e) {
                 basic_mud_log("Exception while running GameService '%s': %s", s.name.c_str(), e.what());
@@ -364,7 +374,8 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
             }
             auto end = std::chrono::high_resolution_clock::now();
             timings.emplace_back(fmt::format("heartbeat system: {}", s.name), std::chrono::duration<double>(end - start).count());
-            s.countdown += s.interval;
+            if(s.interval > 0.0)
+                s.countdown += s.interval;
         }
     }
 }
@@ -373,7 +384,7 @@ void processConnections(double deltaTime) {
     // net::update does an epoll_wait and updates our data structures.
     net::update(deltaTime);
 
-    std::set<int> toErase;
+    std::unordered_set<int> toErase;
     // First, handle any disconnected connections caused by a TCP issue.
     for(auto &[id, reason] : net::deadConnections) {
         // We don't want to purge those in the GameLogoff state until their buffers are cleaned.
@@ -423,7 +434,7 @@ void processConnections(double deltaTime) {
 }
 
 void processDisconnects() {
-    std::set<int> toErase;
+    std::unordered_set<int> toErase;
     // First, handle any disconnected connections caused by a TCP issue.
     for(auto &[id, reason] : net::deadConnections) {
         // We don't want to purge those in the GameLogoff state until their buffers are cleaned.
@@ -455,7 +466,7 @@ void runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
     // Clear profile data.
-    timings.clear();
+
 
     auto start = std::chrono::high_resolution_clock::now();
     processConnections(deltaTime);
@@ -475,7 +486,7 @@ void runOneLoop(double deltaTime) {
     }
 
     {
-        std::set<struct descriptor_data*> toLook;
+        std::unordered_set<struct descriptor_data*> toLook;
         start = std::chrono::high_resolution_clock::now();
         for(auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
@@ -652,6 +663,7 @@ namespace game {
         gameIsLoading = false;
 
         while (!circle_shutdown) {
+            timings.clear();
             auto start = std::chrono::high_resolution_clock::now();
 
             try {
@@ -675,10 +687,14 @@ namespace game {
 
             auto elapsedTime = end - start;
             //logger->info("Main Loop duration: {:.10f}s", std::chrono::duration<double>(elapsedTime).count());
+            bool printTimings = false;
             if (elapsedTime < heartbeatInterval) {
                 std::this_thread::sleep_for(heartbeatInterval - elapsedTime);
             } else {
+                printTimings = true;
                 logger->warn("Main loop is taking up too much time: {}s", std::chrono::duration<double>(elapsedTime).count());
+            }
+            if(printTimings) {
                 for(const auto &[name, time] : timings) {
                     logger->warn("{}: {:.10f}s", name, time);
                 }
@@ -2195,7 +2211,7 @@ void show_help(std::shared_ptr<net::Connection>& co, const char *entry) {
 void descriptor_data::handle_input() {
     // Now we need to process the raw_input_queue, watching for special characters and also aliases.
     // Commands are processed first-come-first served...
-    for(auto command : raw_input_queue) {
+    for(auto &command : raw_input_queue) {
         if (snoop_by)
             write_to_output(snoop_by, "%% %s\r\n", command.c_str());
 
@@ -2205,25 +2221,21 @@ void descriptor_data::handle_input() {
             character->wait_input_queue.clear();
             write_to_output(this, "All queued commands cancelled.\r\n");
             if (character->task != Task::nothing) {
-                character->task = Task::nothing;
+                character->setTask(Task::nothing);
                 write_to_output(this, "You stop focussing on your task.\r\n");
             }
+            characterSubscriptions.unsubscribe("commandWaitQueue", character->ref());
         } else {
             perform_alias(this, (char*)command.c_str());
         }
     }
     raw_input_queue.clear();
 
-    if(input_queue.empty()) {
-        if((!character->wait_input_queue.empty()) || (character->task != Task::nothing)) {
-            pushWaitQueue(character);
-            return;
-        } else
-            return;
-    }
+    if(input_queue.empty())
+        return;
+
     auto command = input_queue.front();
     input_queue.pop_front();
-
 
     has_prompt = false;
 

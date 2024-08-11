@@ -97,29 +97,21 @@ int num_players_in_room(room_vnum room) {
 }
 
 bool check_mob_in_room(mob_vnum mob, room_vnum room) {
-    struct char_data *i;
-    bool found = false;
-
-    for (i = character_list; i; i = i->next)
-        if (GET_MOB_VNUM(i) == mob)
-            if (world[i->in_room].vn == room) found = true;
-
-    return found;
+    if(auto rfind = world.find(room); rfind != world.end()) {
+        auto &r = rfind->second;
+        for(auto ch = r.people; ch; ch = ch->next_in_room)
+            if(ch->vn == mob) return true;
+    }
+    return false;
 }
 
 bool check_obj_in_room(obj_vnum obj, room_vnum room) {
-
-    struct obj_data *i, *list;
-    bool found = false;
-    room_rnum r_room;
-
-    r_room = real_room(room);
-    list = world[r_room].contents;
-
-    for (i = list; i; i = i->next_content) {
-        if (GET_OBJ_VNUM(i) == obj) found = true;
+    if(auto rfind = world.find(room); rfind != world.end()) {
+        auto &r = rfind->second;
+        for(auto o = r.contents; o; o = o->next_content)
+            if(o->vn == obj) return true;
     }
-    return found;
+    return false;
 }
 
 static const int gauntlet_info[][3] = {  /* --mystic 26 Oct 2005 */
@@ -727,36 +719,41 @@ SPECIAL(healtank) {
             if (ch->master && ch->master != ch) {
                 send_to_char(ch, "You can't enter it while following someone!\r\n");
                 return (true);
-            } else if (IS_ANDROID(ch)) {
+            }
+            if (IS_ANDROID(ch)) {
                 send_to_char(ch, "A healing tank will have no effect on you.\r\n");
                 return (true);
-            } else if (HCHARGE(htank) <= 0) {
+            }
+            if (htank->dvalue["energy"] <= 0.0) {
                 send_to_char(ch, "That healing tank needs to recharge, wait a while.\r\n");
                 return (true);
-            } else if (OBJ_FLAGGED(htank, ITEM_BROKEN)) {
+            }
+            if (OBJ_FLAGGED(htank, ITEM_BROKEN)) {
                 send_to_char(ch,
                              "It is broken! You will need to fix it yourself or wait for someone else to fix it.\r\n");
                 return (true);
-            } else if (SITS(ch)) {
+            }
+            if (SITS(ch)) {
                 send_to_char(ch, "You are already on something.\r\n");
                 return (true);
-            } else if (SITTING(htank)) {
+            }
+            if (SITTING(htank)) {
                 send_to_char(ch, "Someone else is already inside that healing tank!\r\n");
                 return (true);
-            } else {
-                GET_CHARGE(ch) = 0;
-                ch->playerFlags.reset(PLR_CHARGE);
-                GET_CHARGETO(ch) = 0;
-                GET_BARRIER(ch) = 0;
-                act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                ch->playerFlags.set(PLR_HEALT);
-                SITS(ch) = htank;
-                SITTING(htank) = ch;
-                return (true);
             }
+            GET_CHARGE(ch) = 0;
+            ch->playerFlags.reset(PLR_CHARGE);
+            GET_CHARGETO(ch) = 0;
+            GET_BARRIER(ch) = 0;
+            act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n",
+                true, ch, nullptr, nullptr, TO_CHAR);
+            act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n",
+                true, ch, nullptr, nullptr, TO_ROOM);
+            ch->playerFlags.set(PLR_HEALT);
+            SITS(ch) = htank;
+            SITTING(htank) = ch;
+            objectSubscriptions.subscribe("healTankService", htank->ref());
+            return (true);
 
         } // End of Enter argument
 
@@ -764,20 +761,20 @@ SPECIAL(healtank) {
             if (!PLR_FLAGGED(ch, PLR_HEALT)) {
                 send_to_char(ch, "You are not inside a healing tank.\r\n");
                 return (true);
-            } else {
-                act("@wThe healing tank drains and you exit it shortly after.", true, ch, nullptr, nullptr, TO_CHAR);
-                act("@C$n@w exits the healing tank after letting it drain.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->playerFlags.reset(PLR_HEALT);
-                SITTING(htank) = nullptr;
-                SITS(ch) = nullptr;
-                return (true);
             }
+            act("@wThe healing tank drains and you exit it shortly after.", true, ch, nullptr, nullptr, TO_CHAR);
+            act("@C$n@w exits the healing tank after letting it drain.@n", true, ch, nullptr, nullptr, TO_ROOM);
+            ch->playerFlags.reset(PLR_HEALT);
+            SITTING(htank) = nullptr;
+            SITS(ch) = nullptr;
+            return (true);
         } // End of Exit argument
 
         else if (!strcasecmp("check", arg)) {
-            if (HCHARGE(htank) < 20 && HCHARGE(htank) > 0) {
-                send_to_char(ch, "The healing tank has %d bars of energy displayed on its meter.\r\n", HCHARGE(htank));
-            } else if (HCHARGE(htank) <= 0) {
+            int en = std::floor(htank->dvalue["energy"]);
+            if (en < 200 && en > 0) {
+                send_to_char(ch, "The healing tank has %d bars of energy displayed on its meter.\r\n", en);
+            } else if (en <= 0) {
                 send_to_char(ch, "The healing tank has no energy displayed on its meter.\r\n");
             } else {
                 send_to_char(ch, "The healing tank has full energy shown on its meter.\r\n");

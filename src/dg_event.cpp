@@ -1,7 +1,7 @@
 #include "dbat/dg_event.h"
 #include "dbat/dg_scripts.h"
 
-std::set<struct trig_data*> triggers_waiting;
+std::unordered_set<struct trig_data*> triggers_waiting;
 
 /* Process any events whose time has come. */
 void event_process(uint64_t heart_pulse, double deltaTime) {

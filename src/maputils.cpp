@@ -26,8 +26,9 @@ void ping_ship(int vnum, int vnum2) {
         return;
     }
 
-    for (tch = character_list; tch; tch = next_ch) {
-        next_ch = tch->next;
+    for (auto &r : activeCharacters) {
+        tch = r.get();
+        if(!tch) continue;
         if (found == false) {
             if (!(obj = find_control(tch))) {
                 continue;

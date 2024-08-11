@@ -174,29 +174,6 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    basic_mud_log("Clearing game world.");
-    destroy_db();
-
-    if (!scheck) {
-        basic_mud_log("Clearing other memory.");
-        free_bufpool();             /* comm.c */
-        clear_free_list();		/* mail.c */
-        free_mail_index();          /* mail.c */
-        free_text_files();		/* db.c */
-        clear_boards();             /* boards.c */
-        free(cmd_sort_info);	/* act.informative.c */
-        free_command_list();        /* act.informative.c */
-        free_social_messages();	/* act.social.c */
-        free_help_table();		/* db.c */
-        Free_Invalid_List();	/* ban.c */
-        free_strings(&config_info, OASIS_CFG); /* oasis_delete.c */
-        free_disabled();    /* interpreter.c */
-        save_list.clear();		/* genolc.c */
-    }
-
-    if (last_act_message)
-        free(last_act_message);
-
     /* probably should free the entire config here.. */
     free(CONFIG_CONFFILE);
 

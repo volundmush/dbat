@@ -45,9 +45,8 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
         copy_mobile(&mob_proto[rnum], mob);
 
         /* Now re-point all existing mobile strings to here. */
-        for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-            if (rnum == live_mob->vn)
-                update_mobile_strings(live_mob, &mob_proto[rnum]);
+        for (auto live_mob : get_vnum_list(characterVnumIndex, vnum))
+            update_mobile_strings(live_mob, &mob_proto[rnum]);
 
         basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
         return rnum;
@@ -87,12 +86,9 @@ int copy_mobile(struct char_data *to, struct char_data *from) {
 }
 
 void extract_mobile_all(mob_vnum vnum) {
-    struct char_data *next, *ch;
 
-    for (ch = character_list; ch; ch = next) {
-        next = ch->next;
-        if (GET_MOB_VNUM(ch) == vnum)
-            extract_char(ch);
+    for (auto ch : get_vnum_list(characterVnumIndex, vnum)) {
+        extract_char(ch);
     }
 }
 
@@ -111,10 +107,6 @@ int delete_mobile(mob_rnum refpt) {
     extract_mobile_all(vnum);
     auto &z = zone_table[real_zone_by_thing(refpt)];
     z.mobiles.erase(refpt);
-
-    /* Update live mobile rnums.  */
-    for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-        GET_MOB_RNUM(live_mob) -= (GET_MOB_RNUM(live_mob) >= refpt);
 
     /* Update zone table.  */
     for (auto &[zone, z] : zone_table) {
@@ -966,20 +958,47 @@ player_data::player_data(const nlohmann::json &j) {
 
 }
 
+CharRef char_data::ref() {
+    return CharRef(this);
+}
+
 void char_data::activate() {
     if(active) {
         basic_mud_log("Attempted to activate an already active character.");
         return;
     }
     active = true;
-    next = character_list;
-    character_list = this;
-
-    if(script) script->activate();
 
     if(mob_proto.contains(vn)) {
         insert_vnum(characterVnumIndex, this);
     }
+
+    auto r = ref();
+    if(script) {
+        script->activate();
+
+        if(SCRIPT_TYPES(SCRIPT(this)) & MTRIG_RANDOM)
+            characterSubscriptions.subscribe("randomTriggers", r);
+        if(SCRIPT_TYPES(SCRIPT(this)) & MTRIG_TIME)
+            characterSubscriptions.subscribe("timeTriggers", r);
+    }
+
+    if(PLR_FLAGGED(this, PLR_GOOP))
+        characterSubscriptions.subscribe("goopTimeService", r);
+    if(ABSORBING(this))
+        characterSubscriptions.subscribe("androidAbsorbSystem", r);
+    if(PLR_FLAGGED(this, PLR_POWERUP))
+        characterSubscriptions.subscribe("powerupService", r);
+    if(!damages.empty())
+        characterSubscriptions.subscribe("characterVitalsRecovery", r);
+    if(!IS_ANDROID(this) && GET_LIFEPERC(this) > 0 && getCurHealthPercent() < GET_LIFEPERC(this))
+        characterSubscriptions.subscribe("lifeforceSystem", r);
+    if(GET_CHARGE(this) || PLR_FLAGGED(this, PLR_CHARGE))
+        characterSubscriptions.subscribe("kiChargeSystem", r);
+    if(PLR_FLAGGED(this, PLR_FISHING))
+        characterSubscriptions.subscribe("goneFishing", r);
+
+    activeCharacters.insert(r);
 
     if(contents) activateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
@@ -998,14 +1017,14 @@ void char_data::activate() {
         next_affectv = affectv_list;
         affectv_list = this;
     }
+
 }
 
 
 void char_data::deactivate() {
     if(!active) return;
     active = false;
-    struct char_data *temp;
-    REMOVE_FROM_LIST(this, character_list, next, temp);
+    char_data *temp = nullptr;
 
     if(vn != NOTHING) {
         erase_vnum(characterVnumIndex, this);
@@ -1143,7 +1162,7 @@ struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*
     return nullptr;
 }
 
-std::set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
+std::unordered_set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     auto out = unit_data::gatherObjects(func, working);
 
     for(auto i = 0; i < NUM_WEARS; i++) {

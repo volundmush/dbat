@@ -22,3 +22,12 @@ extern void gain_condition(struct char_data *ch, int condition, int value);
 
 extern void point_update(uint64_t heartPulse, double deltaTime);
 
+extern void healTankService(uint64_t heartPulse, double deltaTime);
+
+extern void characterVitalsRecovery(uint64_t heartPulse, double deltaTime);
+
+extern void corpseRotService(uint64_t heartPulse, double deltaTime);
+
+extern void androidAbsorbSystem(uint64_t heartPulse, double deltaTime);
+
+extern void goopTimeService(uint64_t heartPulse, double deltaTime);

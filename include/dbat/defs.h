@@ -208,6 +208,11 @@ enum class FormID : uint16_t {
 
     SpiritAbsorption = 305,
 
+    // Hoshijin Shit
+    DeathPhase = 306,
+    BirthPhase = 307,
+    LifePhase = 308
+
 };
 
 
@@ -1751,8 +1756,8 @@ enum class SkillID : uint16_t {
  */
 #define OPT_USEC    100000        /* 10 passes per second */
 #define PASSES_PER_SEC    (1000000 / OPT_USEC)
-#define RL_SEC        * PASSES_PER_SEC
-#define CD_TICK         * PASSES_PER_SEC
+#define RL_SEC          * 1.0
+#define CD_TICK         RL_SEC
 
 #define PULSE_ZONE    (CONFIG_PULSE_ZONE RL_SEC)
 #define PULSE_MOBILE    (CONFIG_PULSE_MOBILE RL_SEC)
@@ -1764,27 +1769,27 @@ enum class SkillID : uint16_t {
 #define PULSE_USAGE    (CONFIG_PULSE_SANITY * 60 RL_SEC)   /* 5 mins */
 #define PULSE_TIMESAVE    (CONFIG_PULSE_TIMESAVE * 300 RL_SEC) /* should be >= SECS_PER_MUD_HOUR */
 #define PULSE_CURRENT    (CONFIG_PULSE_CURRENT RL_SEC)
-#define PULSE_1SEC      (1 RL_SEC)
-#define PULSE_2SEC      (2 RL_SEC)
-#define PULSE_3SEC      (3 RL_SEC)
-#define PULSE_4SEC      (4 RL_SEC)
-#define PULSE_5SEC      (5 RL_SEC)
-#define PULSE_6SEC      (6 RL_SEC)
-#define PULSE_7SEC      (7 RL_SEC)
+#define PULSE_1SEC      (1.0 RL_SEC)
+#define PULSE_2SEC      (2.0 RL_SEC)
+#define PULSE_3SEC      (3.0 RL_SEC)
+#define PULSE_4SEC      (4.0 RL_SEC)
+#define PULSE_5SEC      (5.0 RL_SEC)
+#define PULSE_6SEC      (6.0 RL_SEC)
+#define PULSE_7SEC      (7.0 RL_SEC)
 
 /* Cool Down Ticks */
-#define PULSE_CD1       (1 CD_TICK)
-#define PULSE_CD2       (2 CD_TICK)
-#define PULSE_CD3       (3 CD_TICK)
-#define PULSE_CD4       (4 CD_TICK) /* This and the 3 above are for safety */
-#define PULSE_CD5       (5 CD_TICK) /* Punch */
-#define PULSE_CD6       (6 CD_TICK)
-#define PULSE_CD7       (7 CD_TICK)
-#define PULSE_CD8       (8 CD_TICK)
-#define PULSE_CD9       (9 CD_TICK)
-#define PULSE_CD10      (10 CD_TICK)
-#define PULSE_CD11      (11 CD_TICK)
-#define PULSE_CD12      (12 CD_TICK)
+#define PULSE_CD1       (1.0 CD_TICK)
+#define PULSE_CD2       (2.0 CD_TICK)
+#define PULSE_CD3       (3.0 CD_TICK)
+#define PULSE_CD4       (4.0 CD_TICK) /* This and the 3 above are for safety */
+#define PULSE_CD5       (5.0 CD_TICK) /* Punch */
+#define PULSE_CD6       (6.0 CD_TICK)
+#define PULSE_CD7       (7.0 CD_TICK)
+#define PULSE_CD8       (8.0 CD_TICK)
+#define PULSE_CD9       (9.0 CD_TICK)
+#define PULSE_CD10      (10.0 CD_TICK)
+#define PULSE_CD11      (11.0 CD_TICK)
+#define PULSE_CD12      (12.0 CD_TICK)
 /* End CD Ticks    */
 
 
@@ -1860,6 +1865,16 @@ input */
  * Uses for generic object values on specific object types
  * Please use these instead of numbers to prevent overlaps.
  */
+
+#define VAL_BED_UNUSED1               0
+#define VAL_BED_UNUSED2               1
+#define VAL_BED_UNUSED3               2
+#define VAL_BED_UNUSED4               3
+#define VAL_BED_HEALTH                4
+#define VAL_BED_MAXHEALTH             5
+#define VAL_BED_MATERIAL              7
+#define VAL_BED_LEVEL                 8
+#define VAL_BED_HTANK_CHARGE          9
 #define VAL_LIGHT_TIME                0
 #define VAL_LIGHT_UNUSED2             1
 #define VAL_LIGHT_HOURS               2

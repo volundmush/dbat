@@ -767,8 +767,9 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
     int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
 
-    for (k = object_list; k; k = k->next) {
-        if (k->carried_by != nullptr) {
+    // Gravity generators
+    for (auto k : get_vnum_list(objectVnumIndex, 11)) {
+        if (k->carried_by) {
             continue;
         }
 
@@ -778,39 +779,50 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
 
         health = GET_OBJ_VAL(k, VAL_ALL_HEALTH); // Indicated the health of the object in question
 
-        if (GET_OBJ_VNUM(k) == 11) { /* Gravity Generator */
-            grav_roll = rand_number(0, 13);
-            if (health <= 10) {
-                grav_change = true;
-            } else if (health <= 40 && dice <= 8) {
-                grav_change = true;
-            } else if (health <= 80 && dice <= 5) {
-                grav_change = true;
-            } else if (health <= 99 && dice <= 3) {
-                grav_change = true;
-            }
-            if (grav_change == true) {
-                k->gravity = rand_gravity[grav_roll];
-                GET_OBJ_WEIGHT(k) = rand_gravity[grav_roll];
-                send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
-            }
-        } /* End Gravity Section */
+        grav_roll = rand_number(0, 13);
+        if (health <= 10) {
+            grav_change = true;
+        } else if (health <= 40 && dice <= 8) {
+            grav_change = true;
+        } else if (health <= 80 && dice <= 5) {
+            grav_change = true;
+        } else if (health <= 99 && dice <= 3) {
+            grav_change = true;
+        }
+        if (grav_change == true) {
+            k->gravity = rand_gravity[grav_roll];
+            GET_OBJ_WEIGHT(k) = rand_gravity[grav_roll];
+            send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
+        }
+        dice = rand_number(2, 12); // Reset the dice
+    }
 
-        if (GET_OBJ_VNUM(k) == 3034) { /* ATM */
-            if (health <= 10) {
-                send_to_room(IN_ROOM(k),
-                             "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
-            } else if (health <= 40 && dice <= 8) {
-                send_to_room(IN_ROOM(k), "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
-            } else if (health <= 80 && dice == 4) {
-                send_to_room(IN_ROOM(k),
-                             "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
-                money = create_money(rand_number(1, 30));
-                obj_to_room(money, IN_ROOM(k));
-            } else if (health <= 99 && dice < 4) {
-                send_to_room(IN_ROOM(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
-            }
-        } /* End ATM */
+    // ATMS
+    for(auto k : get_vnum_list(objectVnumIndex, 3034)) {
+        if (k->carried_by) {
+            continue;
+        }
+
+        if (rand_number(1, 2) == 2) {
+            continue;
+        }
+
+        health = GET_OBJ_VAL(k, VAL_ALL_HEALTH); // Indicated the health of the object in question
+
+        dice = rand_number(2, 12); // Reset the dice
+        if (health <= 10) {
+            send_to_room(IN_ROOM(k),
+                         "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
+        } else if (health <= 40 && dice <= 8) {
+            send_to_room(IN_ROOM(k), "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
+        } else if (health <= 80 && dice == 4) {
+            send_to_room(IN_ROOM(k),
+                         "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
+            money = create_money(rand_number(1, 30));
+            obj_to_room(money, IN_ROOM(k));
+        } else if (health <= 99 && dice < 4) {
+            send_to_room(IN_ROOM(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
+        }
 
         dice = rand_number(2, 12); // Reset the dice
     } /* End For */
@@ -3212,7 +3224,7 @@ void craftProgress(char_data* ch) {
         ch->craftingTask.pObject = nullptr;
         ch->craftingTask.improvementRounds = 0;
 
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
     } else {
         improve_skill(ch, SKILL_BUILD, 1);
         WAIT_STATE(ch, PULSE_5SEC * 4);

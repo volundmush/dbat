@@ -24,7 +24,7 @@ namespace trans {
     extern int64_t getRequiredPL(struct char_data* ch, FormID trans);
     extern int getFormType(struct char_data* ch, FormID trans);
     extern std::optional<FormID> findFormFor(char_data* ch, const std::string& form);
-    extern std::set<FormID> getFormsFor(char_data* ch);
+    extern std::unordered_set<FormID> getFormsFor(char_data* ch);
 
     extern bool blockRevertDisallowed(struct char_data *ch, FormID form);
 

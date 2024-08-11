@@ -829,14 +829,11 @@ ACMD(do_nickname) {
                 char nick[MAX_INPUT_LENGTH];
                 sprintf(nick, "%s", CAP(arg2));
                 ship2->look_description = strdup(nick);
-                struct obj_data *k;
-                for (k = object_list; k; k = k->next) {
-                    if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(ship2) + 1000) {
-                        extract_obj(k);
-                        int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
-                        obj_from_room(ship2);
-                        obj_to_room(ship2, real_room(was_in));
-                    }
+                for (auto k : get_vnum_list(objectVnumIndex, GET_OBJ_VNUM(ship2) + 1000)) {
+                    extract_obj(k);
+                    int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
+                    obj_from_room(ship2);
+                    obj_to_room(ship2, real_room(was_in));
                 }
             }
         }
@@ -6462,7 +6459,9 @@ static void perform_mortal_where(struct char_data *ch, char *arg) {
             send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), i->getRoom()->name);
         }
     } else {            /* print only FIRST char, not all. */
-        for (i = character_list; i; i = i->next) {
+        for (auto &r : activeCharacters) {
+            i = r.get();
+            if(!i) continue;
             if (IN_ROOM(i) == NOWHERE || i == ch)
                 continue;
             if (!CAN_SEE(ch, i) || i->getRoom()->zone != ch->getRoom()->zone)
@@ -6541,7 +6540,9 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
     } else {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
-        for (i = character_list; i; i = i->next) {
+        for (auto &r : activeCharacters) {
+            i = r.get();
+            if(!i->isActive()) continue;
             if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
@@ -6553,11 +6554,13 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                 send_to_char(ch, "\r\n");
             }
         }
-        for (k = object_list; k; k = k->next)
+        for (auto &r : activeObjects) {
+            k = r.get();
             if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
                 found = 1;
                 print_object_location(++num, k, ch, true);
             }
+        }
         if (!found) {
             send_to_char(ch, "Couldn't find any such thing.\r\n");
         } else {

@@ -280,7 +280,7 @@ namespace race {
         return SIZE_MEDIUM;
     }
 
-    static std::set<RaceID> playable = {RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian,
+    static std::unordered_set<RaceID> playable = {RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian,
     RaceID::Mutant, RaceID::Kanassan, RaceID::Halfbreed, RaceID::BioAndroid, RaceID::Android, RaceID::Demon, RaceID::Majin,
     RaceID::Kai, RaceID::Tuffle};
 
@@ -301,7 +301,7 @@ namespace race {
     }
 
 
-    std::set<int> getValidSexes(RaceID id) {
+    std::unordered_set<int> getValidSexes(RaceID id) {
         switch(id) {
             case RaceID::Namekian:
                 return {SEX_NEUTRAL};
@@ -428,13 +428,35 @@ namespace race {
     }
 
     static std::unordered_map<RaceID, std::vector<character_affect_type>> race_affects = {
+            {RaceID::Human, {
+                                    {APPLY_CVIT_REGEN_MULT, -0.5, ~0},
+            }},
+            {RaceID::Namekian, {
+                                    {APPLY_CVIT_REGEN_MULT, 0.5, ~0},
+                            }},
+            {RaceID::Mutant, {
+                                       {APPLY_CVIT_REGEN_MULT,  -0.1, ~0},
+                               }},
+            {RaceID::Arlian, {
+                                     {APPLY_CVIT_REGEN_MULT,  -0.7, ~0, [](auto ch) {return (IS_FEMALE(ch) && OUTSIDE(ch)) ? 4.0 : 0.0;}},
+                             }},
+            {RaceID::Kanassan, {
+                                     {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {
+                                         double out = 0.0;
+                                         if(weather_info.sky == SKY_RAINING && OUTSIDE(ch)) out += 0.1;
+                                         if(SUNKEN(IN_ROOM(ch))) out += 16.0;
+                                         return out;
+                                     }},
+                             }},
+            {RaceID::Android, {
+                                     {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {return PLR_FLAGGED(ch, PLR_ABSORB) ? -0.66 : 0.0;}},
+                             }},
             {RaceID::Saiyan, {
                                      {APPLY_CSTAT_GAIN_MULT, 0.3,  static_cast<int>(CharStat::Exp)},
                                      //{APPLY_PHYS_DAM_PERC, 0.0, 0, [](struct char_data *ch) {return PLR_FLAGGED(ch, PLR_TAIL) ? 0.15 : 0;}},
                                      //{APPLY_DAM_ATK_TIER, 0.2, 3},
                                      //{APPLY_SKILL_SLOTS, -1},
                                      //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](struct char_data *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
-
                              }},
 
             {RaceID::Halfbreed, {
@@ -443,7 +465,6 @@ namespace race {
                                      //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Intelligence},
                                      //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Strength},
                                      //{APPLY_PS_GAIN_MULT, -0.4}
-
                              }},
 
             {RaceID::Icer, {

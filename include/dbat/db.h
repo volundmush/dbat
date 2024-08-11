@@ -120,7 +120,7 @@ extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infoma
 extern struct time_info_data time_info;/* the infomation about the time    */
 extern struct time_info_data era_uptime;/* the infomation about the time    */
 extern struct weather_data weather_info;    /* the infomation about the weather */
-extern std::set<zone_vnum> zone_reset_queue;
+extern std::unordered_set<zone_vnum> zone_reset_queue;
 
 extern bool gameIsLoading;
 extern bool saveAll;
@@ -176,7 +176,6 @@ extern void boot_db_spacemap();
 extern void boot_db_legacy();
 extern void boot_db_new();
 
-extern void destroy_db();
 
 extern void zone_update(uint64_t heartPulse, double deltaTime);
 extern void repairRoomDamage(uint64_t heartPulse, double deltaTime);
@@ -335,16 +334,16 @@ struct zone_data {
      *   1: Reset if no PC's are located in zone.
      *   2: Just reset.
      */
-    std::set<room_vnum> rooms;
-    std::set<mob_vnum> mobiles;
-    std::set<obj_vnum> objects;
-    std::set<shop_vnum> shops;
-    std::set<trig_vnum> triggers;
-    std::set<guild_vnum> guilds;
+    std::unordered_set<room_vnum> rooms;
+    std::unordered_set<mob_vnum> mobiles;
+    std::unordered_set<obj_vnum> objects;
+    std::unordered_set<shop_vnum> shops;
+    std::unordered_set<trig_vnum> triggers;
+    std::unordered_set<guild_vnum> guilds;
 
-    std::set<CharRef> npcsInZone;
-    std::set<CharRef> playersInZone;
-    std::set<ObjRef> objectsInZone;
+    std::unordered_set<CharRef> npcsInZone;
+    std::unordered_set<CharRef> playersInZone;
+    std::unordered_set<ObjRef> objectsInZone;
 };
 
 
@@ -398,8 +397,9 @@ extern struct char_data *affectv_list;
 extern std::map<mob_vnum, struct index_data> mob_index;
 extern std::map<mob_vnum, struct char_data> mob_proto;
 
-extern struct char_data *character_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
+extern std::unordered_set<CharRef> activeCharacters;
+extern std::vector<CharRef> getAllCharacters();
 int64_t nextCharID();
 
 extern VnumIndex<obj_data> objectVnumIndex;
@@ -409,8 +409,9 @@ extern VnumIndex<trig_data> scriptVnumIndex;
 extern std::map<obj_vnum, struct index_data> obj_index;
 extern std::map<obj_vnum, struct obj_data> obj_proto;
 
-extern struct obj_data *object_list;
 extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
+extern std::unordered_set<ObjRef> activeObjects;
+extern std::vector<ObjRef> getAllObjects();
 int64_t nextObjID();
 
 extern SubscriptionManager<CharRef> characterSubscriptions;

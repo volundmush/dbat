@@ -29,7 +29,7 @@ static void handle_fall(struct char_data *ch);
 
 static int check_swim(struct char_data *ch);
 
-static void disp_locations(struct char_data *ch, vnum areaVnum, std::set<room_vnum>& rooms);
+static void disp_locations(struct char_data *ch, vnum areaVnum, std::unordered_set<room_vnum>& rooms);
 
 static int has_boat(struct char_data *ch);
 
@@ -234,7 +234,7 @@ void carry_drop(struct char_data *ch, int type) {
     CARRIED_BY(vict) = nullptr;
 }
 
-std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms) {
+std::optional<room_vnum> land_location(char *arg, std::unordered_set<room_vnum>& rooms) {
     std::vector<std::pair<room_vnum, std::string>> names;
     for(auto r : rooms) {
         auto room = world.find(r);
@@ -283,9 +283,9 @@ std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<boo
     return governingAreaTypeFor(room, func);
 }
 
-static std::set<vnum> _areaRecurseGuard;
+static std::unordered_set<vnum> _areaRecurseGuard;
 
-std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data&)>& func) {
+std::size_t recurseScanRooms(area_data &start, std::unordered_set<room_vnum>& fill, std::function<bool(room_data&)>& func) {
     std::size_t count = 0;
     for(auto r : start.rooms) {
         if(auto room = world.find(r); room != world.end() && func(room->second)) {
@@ -309,7 +309,7 @@ std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::f
 }
 
 /* This shows the player what locations the planet has to land at. */
-static void disp_locations(struct char_data *ch, vnum areaVnum, std::set<room_vnum>& rooms) {
+static void disp_locations(struct char_data *ch, vnum areaVnum, std::unordered_set<room_vnum>& rooms) {
 	auto &a = areas[areaVnum];
     if(rooms.empty()) {
         send_to_char(ch, "There are no landing locations on this planet.\r\n");
@@ -339,7 +339,7 @@ ACMD(do_land) {
     };
     auto onPlanet = governingAreaTypeFor(ch, governingCelestial);
 
-    std::set<room_vnum> rooms;
+    std::unordered_set<room_vnum> rooms;
     std::function<bool(room_data&)> scan = [&](room_data &r) {
         return r.room_flags.test(ROOM_LANDING);
     };

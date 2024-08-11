@@ -995,7 +995,7 @@ const char *extra_bits[NUM_ITEM_FLAGS + 1] = {
         "MOB_NOPICKUP",
         "NOSTEAL",
         "RESTRING",
-        "\n"
+        nullptr
 };
 
 /* APPLY_x */

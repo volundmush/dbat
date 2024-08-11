@@ -918,8 +918,6 @@ ACMD(do_tell) {
 }
 
 ACMD(do_reply) {
-    struct char_data *tch = character_list;
-
     if (IS_NPC(ch))
         return;
 
@@ -951,13 +949,13 @@ ACMD(do_reply) {
          *      we could not find link dead people.  Not that they can
          *      hear tells anyway. :) -gg 2/24/98
          */
-        while (tch != nullptr && (IS_NPC(tch) || GET_IDNUM(tch) != GET_LAST_TELL(ch)))
-            tch = tch->next;
 
-        if (tch == nullptr)
+        auto find = uniqueCharacters.find(GET_LAST_TELL(ch));
+        if(find == uniqueCharacters.end()) {
             send_to_char(ch, "They are no longer playing.\r\n");
-        else if (is_tell_ok(ch, tch))
-            perform_tell(ch, tch, argument);
+        }
+        else if (is_tell_ok(ch, find->second.second))
+            perform_tell(ch, find->second.second, argument);
     }
 }
 

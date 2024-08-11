@@ -15,7 +15,7 @@
 #pragma once
 #include "structs.h"
 
-extern std::set<struct trig_data*> triggers_waiting;
+extern std::unordered_set<struct trig_data*> triggers_waiting;
 
 /********** Event related section *********/
 /* - events - function protos need by other modules */

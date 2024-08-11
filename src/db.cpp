@@ -56,7 +56,6 @@ struct config_data config_info; /* Game configuration list.    */
 std::map<room_vnum, room_data> world;    /* array of rooms		 */
 std::map<vnum, area_data> areas;    /* area information		 */
 
-struct char_data *character_list = nullptr; /* global linked list of chars	 */
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
@@ -66,19 +65,40 @@ VnumIndex<obj_data> objectVnumIndex;
 VnumIndex<char_data> characterVnumIndex;
 VnumIndex<trig_data> scriptVnumIndex;
 
-struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
 
 std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
+std::unordered_set<CharRef> activeCharacters;
 /* hash tree for fast obj lookup */
 std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
+std::unordered_set<ObjRef> activeObjects;
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
 std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueScripts;
+
+std::vector<CharRef> getAllCharacters() {
+    std::vector<CharRef> out;
+    out.reserve(uniqueCharacters.size());
+
+    for(const auto&[id, ent] : uniqueCharacters)
+        out.emplace_back(id, ent.first);
+
+    return out;
+}
+
+std::vector<ObjRef> getAllObjects() {
+    std::vector<ObjRef> out;
+    out.reserve(uniqueObjects.size());
+
+    for(const auto&[id, ent] : uniqueObjects)
+        out.emplace_back(id, ent.first);
+
+    return out;
+}
 
 
 int dg_owner_purged;            /* For control of scripts */
@@ -125,7 +145,7 @@ struct time_info_data old_time_info;/* the infomation about the time    */
 struct time_info_data time_info;/* the infomation about the time    */
 struct time_info_data era_uptime;/* the infomation about how long the server has been up    */
 struct weather_data weather_info;    /* the infomation about the weather */
-std::set<zone_vnum> zone_reset_queue;
+std::unordered_set<zone_vnum> zone_reset_queue;
 
 std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
 
@@ -606,135 +626,6 @@ void free_extra_descriptions(struct extra_descr_data *edesc) {
 
 
 /* Free the world, in a memory allocation sense. */
-void destroy_db() {
-    ssize_t cnt, itr;
-    struct char_data *chtmp;
-    struct obj_data *objtmp;
-
-    /* Active Mobiles & Players */
-    while (character_list) {
-        chtmp = character_list;
-        character_list = character_list->next;
-        if (chtmp->master)
-            stop_follower(chtmp);
-        free_char(chtmp);
-    }
-
-    /* Active Objects */
-    while (object_list) {
-        objtmp = object_list;
-        object_list = object_list->next;
-        free_obj(objtmp);
-    }
-
-    uniqueObjects.clear();
-
-    /* Rooms */
-    for (auto &r : world) {
-        if (r.second.name)
-            free(r.second.name);
-        if (r.second.look_description)
-            free(r.second.look_description);
-        free_extra_descriptions(r.second.ex_description);
-
-        /* free any assigned scripts */
-        if (SCRIPT(&r.second))
-            extract_script(&r.second, WLD_TRIGGER);
-
-        for (itr = 0; itr < NUM_OF_DIRS; itr++) {
-            if (!r.second.dir_option[itr])
-                continue;
-
-            if (r.second.dir_option[itr]->general_description)
-                free(r.second.dir_option[itr]->general_description);
-            if (r.second.dir_option[itr]->keyword)
-                free(r.second.dir_option[itr]->keyword);
-            free(r.second.dir_option[itr]);
-        }
-    }
-    world.clear();
-
-    /* Objects */
-    for (auto &o : obj_proto) {
-        if (o.second.name)
-            free(o.second.name);
-        if (o.second.room_description)
-            free(o.second.room_description);
-        if (o.second.short_description)
-            free(o.second.short_description);
-        if (o.second.look_description)
-            free(o.second.look_description);
-        if (o.second.ex_description)
-            free_extra_descriptions(o.second.ex_description);
-        if (o.second.sbinfo) free(o.second.sbinfo);
-    }
-    obj_proto.clear();
-    obj_index.clear();
-    
-    /* Mobiles */
-    for (auto &m : mob_proto) {
-        if (m.second.name)
-            free(m.second.name);
-        if (m.second.title)
-            free(m.second.title);
-        if (m.second.short_description)
-            free(m.second.short_description);
-        if (m.second.room_description)
-            free(mob_proto[cnt].room_description);
-        if (m.second.look_description)
-            free(m.second.look_description);
-
-        while (m.second.affected)
-            affect_remove(&m.second, m.second.affected);
-    }
-    mob_proto.clear();
-    mob_index.clear();
-    /* Shops */
-    shop_index.clear();
-
-    /* Guilds */
-    guild_index.clear();
-
-    /* Zones */
-    /* zone table reset queue */
-    zone_reset_queue.clear();
-
-    zone_table.clear();
-
-
-    /* Triggers */
-    for (auto &t : trig_index) {
-        if (t.second.proto) {
-            /* make sure to nuke the command list (memory leak) */
-            /* free_trigger() doesn't free the command list */
-            if (t.second.proto->cmdlist) {
-                struct cmdlist_element *i, *j;
-                i = t.second.proto->cmdlist;
-                while (i) {
-                    j = i->next;
-                    if (i->cmd)
-                        free(i->cmd);
-                    free(i);
-                    i = j;
-                }
-            }
-            free_trigger(t.second.proto);
-        }
-
-    }
-    trig_index.clear();
-
-
-    /* context sensitive help system */
-    free_context_help();
-
-    free_feats();
-
-    basic_mud_log("Freeing Assemblies.");
-    free_assemblies();
-
-}
-
 
 /* You can define this to anything you want; 1 would work but it would
    be very inefficient. I would recommend that it actually be close to
@@ -2103,14 +1994,15 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
 
 #define ZO_DEAD  999
 
+static std::deque<zone_vnum> zonesToUpdate;
+
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
 void zone_update(uint64_t heartPulse, double deltaTime) {
 
     for (auto &[vn, z] : zone_table) {
         z.age += deltaTime;
-        auto secs = (z.lifespan * 60);
+        auto secs = (z.lifespan * 60.0);
         if(z.age < secs) continue;
-        z.age -= secs;
 
         bool doReset = false;
         switch(z.reset_mode) {
@@ -2119,7 +2011,7 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
             break;
             case 1:
                 // reset only if zone is empty.
-                if(is_empty(vn)) doReset = true;
+                if(z.playersInZone.empty()) doReset = true;
             break;
             case 2:
                 // Always reset.
@@ -2130,11 +2022,25 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
                     break;
         }
         if(doReset) {
-            reset_zone(vn);
-            mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
-               z.name, vn);
+            zonesToUpdate.emplace_back(vn);
+
+            z.age -= secs;
+
+            break;
         }
     }
+
+    // Stagger zone updates so they don't all happen in the exact same heartbeat.
+    while(!zonesToUpdate.empty()) {
+        auto vn = zonesToUpdate.front();
+        auto &z = zone_table[vn];
+        reset_zone(vn);
+        mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
+               z.name, vn);
+        zonesToUpdate.pop_front();
+        break;
+    }
+
 }
 
 #define ZCMD2 zone_table[zone].cmd[cmd_no]
@@ -2522,29 +2428,7 @@ void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
 
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
 int is_empty(zone_rnum zone_nr) {
-    struct descriptor_data *i;
-
-    for (i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING)
-            continue;
-        if (IN_ROOM(i->character) == NOWHERE)
-            continue;
-        if (i->character->getRoom()->zone != zone_nr)
-            continue;
-        /*
-     * if an immortal has nohassle off, he counts as present
-     * added for testing zone reset triggers - Welcor
-     */
-        if (IS_NPC(i->character))
-            continue; /* immortal switched into a mob */
-
-        if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (PRF_FLAGGED(i->character, PRF_NOHASSLE)))
-            continue;
-
-        return (0);
-    }
-
-    return (1);
+    return zone_table.at(zone_nr).playersInZone.empty();
 }
 
 
@@ -2748,8 +2632,6 @@ void reset_char(struct char_data *ch) {
     ch->followers = nullptr;
     ch->master = nullptr;
     IN_ROOM(ch) = NOWHERE;
-    ch->next = nullptr;
-    ch->next_fighting = nullptr;
     ch->next_in_room = nullptr;
     FIGHTING(ch) = nullptr;
     ch->position = POS_STANDING;
@@ -3410,42 +3292,4 @@ std::optional<UID> resolveUID(const std::string& uid) {
     return std::nullopt;
 }
 
-obj_data* ObjRef::get(bool checkActive) {
-    auto find = uniqueObjects.find(id);
-    if(find == uniqueObjects.end()) return nullptr;
-    if(find->second.first != generation) return nullptr;
-    if(checkActive && !find->second.second->isActive()) return nullptr;
-    return find->second.second;
-}
 
-char_data* CharRef::get(bool checkActive) {
-    auto find = uniqueCharacters.find(id);
-    if(find == uniqueCharacters.end()) return nullptr;
-    if(find->second.first != generation) return nullptr;
-    if(checkActive && !find->second.second->isActive()) return nullptr;
-    return find->second.second;
-}
-
-room_data* RoomRef::get(bool checkActive) {
-    auto find = world.find(id);
-    if(find != world.end()) return &find->second;
-    return nullptr;
-}
-
-nlohmann::json RefBase::serialize() {
-    nlohmann::json j;
-    j["id"] = id;
-    j["generation"] = generation;
-    return j;
-}
-
-void RefBase::deserialize(const nlohmann::json& j) {
-    id = j.at("id").get<int64_t>();
-    generation = j.at("generation").get<time_t>();
-}
-
-RefBase::RefBase(int64_t id, time_t generation) : id(id), generation(generation) {}
-
-RefBase::RefBase(const nlohmann::json& j) {
-    deserialize(j);
-}

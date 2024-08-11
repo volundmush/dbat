@@ -609,13 +609,9 @@ static int buy_price(struct obj_data *obj, vnum shop_nr, struct char_data *keepe
     int cost = (GET_OBJ_COST(obj) * SHOP_BUYPROFIT(shop_nr));
 
     double adjust = 1.0;
-    struct obj_data *k;
 
-    for (k = object_list; k; k = k->next) {
-        if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj)) {
-            adjust -= 0.00025;
-        }
-    }
+    adjust -= 0.00025 * get_vnum_count(objectVnumIndex, GET_OBJ_VNUM(obj));
+
     if (adjust < 0.015) {
         adjust = 0.5;
     }
@@ -651,13 +647,8 @@ static int sell_price(struct obj_data *obj, vnum shop_nr, struct char_data *keep
         sell_cost_modifier = buy_cost_modifier;
 
     double adjust = 1.0;
-    struct obj_data *k;
+    adjust -= 0.00025 * get_vnum_count(objectVnumIndex, GET_OBJ_VNUM(obj));
 
-    for (k = object_list; k; k = k->next) {
-        if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(obj)) {
-            adjust -= 0.00025;
-        }
-    }
     if (adjust < 0.15) {
         adjust = 0.15;
     }

@@ -1667,11 +1667,13 @@ void damage_eq(struct char_data *vict, int location) {
 void huge_update(uint64_t heartPulse, double deltaTime) {
     int dge = 0, skill = 0, bonus = 1, count = 0;
     int64_t dmg = 0;
-    struct obj_data *k;
     struct char_data *ch, *vict, *next_v;
 
     /* Checking the object list for any huge ki attacks */
-    for (k = object_list; k; k = k->next) {
+    for (const auto& r : objectSubscriptions.all("hugeKiAttacks")) {
+        auto k = r.get();
+        if(!k) continue;
+
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
             if (IN_ROOM(k) && GET_ROOM_VNUM(IN_ROOM(k)) == 80) {
                 room_vnum inroom = IN_ROOM(k);
@@ -2057,189 +2059,188 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
 
 /* For handling homing attacks */
 void homing_update(uint64_t heartPulse, double deltaTime) {
-    struct obj_data *k;
 
-    for (k = object_list; k; k = k->next) {
-        if (!k || k == nullptr)
-            continue;
+    for (const auto& r : objectSubscriptions.all("homingKiAttacks")) {
+        auto k = r.get();
+
+        if (!k) continue;
 
         if (KICHARGE(k) <= 0) {
             continue;
         }
 
-        if (GET_OBJ_VNUM(k) != 80 && GET_OBJ_VNUM(k) != 81 && GET_OBJ_VNUM(k) != 84) {
-            continue;
-        } else if (TARGET(k) && USER(k)) {
-            struct char_data *ch = USER(k);
-            struct char_data *vict = TARGET(k);
+        if (GET_OBJ_VNUM(k) != 80 && GET_OBJ_VNUM(k) != 81 && GET_OBJ_VNUM(k) != 84) continue;
+        if(!(TARGET(k) && USER(k))) continue;
 
-            if (GET_OBJ_VNUM(k) == 80) { // Tsuihidan
-                if (KICHARGE(k) <= 0) {
-                    send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
-                        k->short_description);
+        struct char_data *ch = USER(k);
+        struct char_data *vict = TARGET(k);
+
+        if (GET_OBJ_VNUM(k) == 80) { // Tsuihidan
+            if (KICHARGE(k) <= 0) {
+                send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
+                             k->short_description);
+                extract_obj(k);
+                continue;
+            }
+            if (IN_ROOM(k) != IN_ROOM(vict)) {
+                act("@wThe $p@w pursues after you!@n", true, vict, k, nullptr, TO_CHAR);
+                act("@wThe $p@W pursues after @C$n@w!@n", true, vict, k, nullptr, TO_ROOM);
+                obj_from_room(k);
+                obj_to_room(k, IN_ROOM(vict));
+                continue;
+            } else {
+                act("@RThe $p@R makes a tight turn and rockets straight for you!@n", true, vict, k, nullptr,
+                    TO_CHAR);
+                act("@RThe $p@R makes a tight turn and rockets straight for @r$n@n", true, vict, k, nullptr,
+                    TO_ROOM);
+                if (handle_parry(vict) < rand_number(1, 140)) {
+                    act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k,
+                        nullptr, TO_CHAR);
+                    act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict,
+                        k, nullptr, TO_ROOM);
+                    int64_t dmg = KICHARGE(k);
+                    extract_obj(k);
+                    hurt(0, 0, ch, vict, nullptr, dmg, 1);
+                    continue;
+                } else if (rand_number(1, 3) > 1) {
+                    act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n",
+                        true, vict, k, nullptr, TO_CHAR);
+                    act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n",
+                        true, vict, k, nullptr, TO_ROOM);
+                    KICHARGE(k) -= KICHARGE(k) * 0.1;
+                    if (KICHARGE(k) <= 0) {
+                        send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
+                                     k->short_description);
+                        extract_obj(k);
+                    }
+                    continue;
+                } else {
+                    act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n",
+                        true, vict, k, nullptr, TO_CHAR);
+                    act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
+                        true, vict, k, nullptr, TO_ROOM);
+                    if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
+                        world.at(IN_ROOM(vict)).modDamage(5);
+                    }
                     extract_obj(k);
                     continue;
                 }
-                if (IN_ROOM(k) != IN_ROOM(vict)) {
-                    act("@wThe $p@w pursues after you!@n", true, vict, k, nullptr, TO_CHAR);
-                    act("@wThe $p@W pursues after @C$n@w!@n", true, vict, k, nullptr, TO_ROOM);
-                    obj_from_room(k);
-                    obj_to_room(k, IN_ROOM(vict));
-                    continue;
-                } else {
-                    act("@RThe $p@R makes a tight turn and rockets straight for you!@n", true, vict, k, nullptr,
-                        TO_CHAR);
-                    act("@RThe $p@R makes a tight turn and rockets straight for @r$n@n", true, vict, k, nullptr,
-                        TO_ROOM);
-                    if (handle_parry(vict) < rand_number(1, 140)) {
-                        act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict, k,
-                            nullptr, TO_CHAR);
-                        act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true, vict,
-                            k, nullptr, TO_ROOM);
+            }
+            continue;
+        } else if (GET_OBJ_VNUM(k) == 81 || GET_OBJ_VNUM(k) == 84) { // Spirit Ball
+            if (IN_ROOM(k) != IN_ROOM(vict)) {
+                act("@wYou lose sight of @C$N@W and let $p@W fly away!@n", true, ch, k, vict, TO_CHAR);
+                act("@wYou manage to escape @C$n's@W $p@W!@n", true, ch, k, vict, TO_VICT);
+                act("@C$n@W loses sight of @c$N@W and lets $s $p@W fly away!@n", true, ch, k, vict, TO_NOTVICT);
+                extract_obj(k);
+                continue;
+            } else {
+                act("@RYou move your hand and direct $p@R after @r$N@R!@n", true, ch, k, vict, TO_CHAR);
+                act("@r$n@R moves $s hand and directs $p@R after YOU!@n", true, ch, k, vict, TO_VICT);
+                act("@r$n@R moves $s hand and directs $p@R after @r$N@R!@n", true, ch, k, vict, TO_NOTVICT);
+                if (handle_parry(vict) < rand_number(1, 140)) {
+                    if (GET_OBJ_VNUM(k) != 84) {
+                        act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict,
+                            k, nullptr, TO_CHAR);
+                        act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true,
+                            vict, k, nullptr, TO_ROOM);
                         int64_t dmg = KICHARGE(k);
                         extract_obj(k);
                         hurt(0, 0, ch, vict, nullptr, dmg, 1);
-                        continue;
-                    } else if (rand_number(1, 3) > 1) {
-                        act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n",
-                            true, vict, k, nullptr, TO_CHAR);
-                        act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n",
-                            true, vict, k, nullptr, TO_ROOM);
-                        KICHARGE(k) -= KICHARGE(k) * 0.1;
-                        if (KICHARGE(k) <= 0) {
-                            send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
-                                         k->short_description);
-                            extract_obj(k);
-                        }
-                        continue;
-                    } else {
-                        act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n",
-                            true, vict, k, nullptr, TO_CHAR);
-                        act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
-                            true, vict, k, nullptr, TO_ROOM);
-                        if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
-                            world.at(IN_ROOM(vict)).modDamage(5);
-                        }
-                        extract_obj(k);
-                        continue;
-                    }
-                }
-                continue;
-            } else if (GET_OBJ_VNUM(k) == 81 || GET_OBJ_VNUM(k) == 84) { // Spirit Ball
-                if (IN_ROOM(k) != IN_ROOM(vict)) {
-                    act("@wYou lose sight of @C$N@W and let $p@W fly away!@n", true, ch, k, vict, TO_CHAR);
-                    act("@wYou manage to escape @C$n's@W $p@W!@n", true, ch, k, vict, TO_VICT);
-                    act("@C$n@W loses sight of @c$N@W and lets $s $p@W fly away!@n", true, ch, k, vict, TO_NOTVICT);
-                    extract_obj(k);
-                    continue;
-                } else {
-                    act("@RYou move your hand and direct $p@R after @r$N@R!@n", true, ch, k, vict, TO_CHAR);
-                    act("@r$n@R moves $s hand and directs $p@R after YOU!@n", true, ch, k, vict, TO_VICT);
-                    act("@r$n@R moves $s hand and directs $p@R after @r$N@R!@n", true, ch, k, vict, TO_NOTVICT);
-                    if (handle_parry(vict) < rand_number(1, 140)) {
-                        if (GET_OBJ_VNUM(k) != 84) {
-                            act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true, vict,
-                                k, nullptr, TO_CHAR);
-                            act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n", true,
-                                vict, k, nullptr, TO_ROOM);
-                            int64_t dmg = KICHARGE(k);
-                            extract_obj(k);
-                            hurt(0, 0, ch, vict, nullptr, dmg, 1);
-                        } else if (GET_OBJ_VNUM(k) == 84) {
-                            int64_t dmg = KICHARGE(k);
-                            if (dmg > GET_MAX_HIT(vict) / 5 && (!IS_MAJIN(vict) && !IS_BIO(vict))) {
-                                act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
-                                act("@rYou are cut in half by the attack!@n", true, ch, nullptr, vict, TO_VICT);
-                                act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                                die(vict, ch);
-                                if (AFF_FLAGGED(ch, AFF_GROUP)) {
-                                    group_gain(ch, vict);
-                                } else {
-                                    solo_gain(ch, vict);
-                                }
-                                if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
-                                    do_get(ch, "all.zenni corpse", 0, 0);
-                                }
-                                if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOLOOT)) {
-                                    do_get(ch, "all corpse", 0, 0);
-                                }
+                    } else if (GET_OBJ_VNUM(k) == 84) {
+                        int64_t dmg = KICHARGE(k);
+                        if (dmg > GET_MAX_HIT(vict) / 5 && (!IS_MAJIN(vict) && !IS_BIO(vict))) {
+                            act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+                            act("@rYou are cut in half by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+                            act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                            die(vict, ch);
+                            if (AFF_FLAGGED(ch, AFF_GROUP)) {
+                                group_gain(ch, vict);
+                            } else {
+                                solo_gain(ch, vict);
+                            }
+                            if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
+                                do_get(ch, "all.zenni corpse", 0, 0);
+                            }
+                            if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOLOOT)) {
+                                do_get(ch, "all corpse", 0, 0);
+                            }
+                        } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
+                            if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) &&
+                                (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
+                                act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true,
+                                    ch, nullptr, vict, TO_CHAR);
+                                act("@rYou are cut in half by the attack but regenerate a moment later!@n", true,
+                                    ch, nullptr, vict, TO_VICT);
+                                act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true,
+                                    ch, nullptr, vict, TO_NOTVICT);
+                                vict->decCurKI(vict->getMaxKI() / 40);
+                                hurt(0, 0, ch, vict, nullptr, dmg, 1);
                             } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
                                 if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) &&
                                     (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
-                                    act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true,
-                                        ch, nullptr, vict, TO_CHAR);
-                                    act("@rYou are cut in half by the attack but regenerate a moment later!@n", true,
-                                        ch, nullptr, vict, TO_VICT);
-                                    act("@R$N@r is cut in half by the attack but regenerates a moment later!@n", true,
-                                        ch, nullptr, vict, TO_NOTVICT);
+                                    act("@R$N@r is cut in half by the attack but regenerates a moment later!@n",
+                                        true, ch, nullptr, vict, TO_CHAR);
+                                    act("@rYou are cut in half by the attack but regenerate a moment later!@n",
+                                        true, ch, nullptr, vict, TO_VICT);
+                                    act("@R$N@r is cut in half by the attack but regenerates a moment later!@n",
+                                        true, ch, nullptr, vict, TO_NOTVICT);
                                     vict->decCurKI(vict->getMaxKI() / 40);
                                     hurt(0, 0, ch, vict, nullptr, dmg, 1);
-                                } else if (dmg > GET_MAX_HIT(vict) / 5 && (IS_MAJIN(vict) || IS_BIO(vict))) {
-                                    if (GET_SKILL(vict, SKILL_REGENERATE) > rand_number(1, 101) &&
-                                        (vict->getCurKI()) >= GET_MAX_MANA(vict) / 40) {
-                                        act("@R$N@r is cut in half by the attack but regenerates a moment later!@n",
-                                            true, ch, nullptr, vict, TO_CHAR);
-                                        act("@rYou are cut in half by the attack but regenerate a moment later!@n",
-                                            true, ch, nullptr, vict, TO_VICT);
-                                        act("@R$N@r is cut in half by the attack but regenerates a moment later!@n",
-                                            true, ch, nullptr, vict, TO_NOTVICT);
-                                        vict->decCurKI(vict->getMaxKI() / 40);
-                                        hurt(0, 0, ch, vict, nullptr, dmg, 1);
+                                } else {
+                                    act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
+                                    act("@rYou are cut in half by the attack!@n", true, ch, nullptr, vict, TO_VICT);
+                                    act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict,
+                                        TO_NOTVICT);
+                                    die(vict, ch);
+                                    if (AFF_FLAGGED(ch, AFF_GROUP)) {
+                                        group_gain(ch, vict);
                                     } else {
-                                        act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict, TO_CHAR);
-                                        act("@rYou are cut in half by the attack!@n", true, ch, nullptr, vict, TO_VICT);
-                                        act("@R$N@r is cut in half by the attack!@n", true, ch, nullptr, vict,
-                                            TO_NOTVICT);
-                                        die(vict, ch);
-                                        if (AFF_FLAGGED(ch, AFF_GROUP)) {
-                                            group_gain(ch, vict);
-                                        } else {
-                                            solo_gain(ch, vict);
-                                        }
-                                        if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
-                                            do_get(ch, "all.zenni corpse", 0, 0);
-                                        }
-                                        if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOLOOT)) {
-                                            do_get(ch, "all corpse", 0, 0);
-                                        }
+                                        solo_gain(ch, vict);
+                                    }
+                                    if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOGOLD)) {
+                                        do_get(ch, "all.zenni corpse", 0, 0);
+                                    }
+                                    if (!IS_NPC(ch) && (ch != vict) && PRF_FLAGGED(ch, PRF_AUTOLOOT)) {
+                                        do_get(ch, "all corpse", 0, 0);
                                     }
                                 }
-                            } else {
-                                act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true,
-                                    vict, k, nullptr, TO_CHAR);
-                                act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n",
-                                    true, vict, k, nullptr, TO_ROOM);
-                                hurt(0, 0, ch, vict, nullptr, dmg, 1);
                             }
-                            extract_obj(k);
-                        }
-                        continue;
-                    } else if (rand_number(1, 3) > 1) {
-                        act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n",
-                            true, vict, k, nullptr, TO_CHAR);
-                        act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n",
-                            true, vict, k, nullptr, TO_ROOM);
-                        KICHARGE(k) -= KICHARGE(k) / 10;
-                        if (KICHARGE(k) <= 0) {
-                            send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
-                                         k->short_description);
-                            extract_obj(k);
-                        }
-                        continue;
-                    } else {
-                        act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n",
-                            true, vict, k, nullptr, TO_CHAR);
-                        act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
-                            true, vict, k, nullptr, TO_ROOM);
-                        if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
-                            world.at(IN_ROOM(vict)).modDamage(5);
+                        } else {
+                            act("@rThe $p@r slams into your body, exploding in a flash of bright light!@n", true,
+                                vict, k, nullptr, TO_CHAR);
+                            act("@rThe $p@r slams into @R$n's@r body, exploding in a flash of bright light!@n",
+                                true, vict, k, nullptr, TO_ROOM);
+                            hurt(0, 0, ch, vict, nullptr, dmg, 1);
                         }
                         extract_obj(k);
-                        continue;
                     }
+                    continue;
+                } else if (rand_number(1, 3) > 1) {
+                    act("@wYou manage to deflect the $p@W sending it flying away and depleting some of its energy.@n",
+                        true, vict, k, nullptr, TO_CHAR);
+                    act("@C$n @wmanages to deflect the $p@w sending it flying away and depleting some of its energy.@n",
+                        true, vict, k, nullptr, TO_ROOM);
+                    KICHARGE(k) -= KICHARGE(k) / 10;
+                    if (KICHARGE(k) <= 0) {
+                        send_to_room(IN_ROOM(k), "%s has lost all its energy and disappears.\r\n",
+                                     k->short_description);
+                        extract_obj(k);
+                    }
+                    continue;
+                } else {
+                    act("@wYou manage to deflect the $p@w sending it flying away into the nearby surroundings!@n",
+                        true, vict, k, nullptr, TO_CHAR);
+                    act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
+                        true, vict, k, nullptr, TO_ROOM);
+                    if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
+                        world.at(IN_ROOM(vict)).modDamage(5);
+                    }
+                    extract_obj(k);
+                    continue;
                 }
-            } // Spiritball attack
-        } // pursue the target.
+            }
+        } // Spiritball attack
     } // End for
 }
 
@@ -5183,10 +5184,7 @@ void handle_cooldown(struct char_data *ch, int cooldown) {
 
     reveal_hiding(ch, 0);
     int waitCalc = 10, base = cooldown;
-    int64_t cspd = 0;
-
-    /* Ok calculating speed. */
-    cspd = GET_SPEEDI(ch);
+    int64_t cspd = GET_SPEEDI(ch);
 
     if (cspd > 10000000) { /* WTF Fast */
         waitCalc -= 9;

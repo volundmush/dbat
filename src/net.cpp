@@ -27,7 +27,7 @@
 namespace net {
     std::unordered_map<int, std::shared_ptr<Connection>> connections;
     std::unordered_map<int, DisconnectReason> deadConnections;
-    std::set<int> pendingOutData, pendingReads, pendingWrites;
+    std::unordered_set<int> pendingOutData, pendingReads, pendingWrites;
 
     int server_fd = -1;
     int epoll_fd = -1;
@@ -350,7 +350,7 @@ namespace net {
 
     }
 
-    static const std::set<std::string> clientsWithXterm256Support = {
+    static const std::unordered_set<std::string> clientsWithXterm256Support = {
             "ATLANTIS", "CMUD", "KILDCLIENT", "MUDLET", "MUSHCLIENT", "PUTTY", "BEIP", "POTATO", "TINYFUGUE"
     };
 
@@ -1024,7 +1024,7 @@ namespace net {
         // kick any connections that can't be safely serialized, and ensure that all outgoing buffers are
         // fully flushed to the OS.
 
-        std::set<int> toClose;
+        std::unordered_set<int> toClose;
 
         for(auto &[connId, conn] : connections) {
             if(conn->state == net::ConnectionState::Pending || conn->parser && !conn->parser->canCopyover()) {

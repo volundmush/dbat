@@ -21,7 +21,7 @@ namespace race {
     extern bool isPlayable(RaceID id);
     extern std::vector<RaceID> getAll();
     extern std::vector<RaceID> getPlayable();
-    extern std::set<int> getValidSexes(RaceID id);
+    extern std::unordered_set<int> getValidSexes(RaceID id);
     extern bool isValidMimic(RaceID id);
     extern bool isPeople(RaceID id);
     extern bool hasTail(RaceID id);

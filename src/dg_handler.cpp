@@ -133,23 +133,6 @@ void extract_script(void *thing, int type) {
             break;
     }
 
-#if 1 /* debugging */
-    {
-        struct char_data *i = character_list;
-        struct obj_data *j = object_list;
-        room_rnum k;
-        if (sc) {
-            for (; i; i = i->next)
-                assert(sc != SCRIPT(i));
-
-            for (; j; j = j->next)
-                assert(sc != SCRIPT(j));
-
-            for (auto &r : world)
-                assert(sc != SCRIPT(&r.second));
-        }
-    }
-#endif
     for (trig = TRIGGERS(sc); trig; trig = next_trig) {
         next_trig = trig->next;
         extract_trigger(trig);

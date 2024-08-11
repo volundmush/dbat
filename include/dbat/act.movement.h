@@ -8,7 +8,7 @@ extern const char *cmd_door[NUM_DOOR_CMD];
 // functions
 extern void handle_teleport(struct char_data *ch, struct char_data *tar, int location);
 
-extern std::optional<room_vnum> land_location(char *arg, std::set<room_vnum>& rooms);
+extern std::optional<room_vnum> land_location(char *arg, std::unordered_set<room_vnum>& rooms);
 
 extern void carry_drop(struct char_data *ch, int type);
 
@@ -24,7 +24,7 @@ extern std::optional<vnum> governingAreaTypeFor(struct char_data *ch, std::funct
 
 extern std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<bool(area_data&)>& func);
 
-extern std::size_t recurseScanRooms(area_data &start, std::set<room_vnum>& fill, std::function<bool(room_data&)>& func);
+extern std::size_t recurseScanRooms(area_data &start, std::unordered_set<room_vnum>& fill, std::function<bool(room_data&)>& func);
 
 
 // commands

@@ -224,7 +224,7 @@ ACMD(do_unban) {
  *  Written by Sharon P. Goza						  *
  **************************************************************************/
 
-std::set<std::string> invalid_list;
+std::unordered_set<std::string> invalid_list;
 
 /* What's with the wacky capitalization in here? */
 void Free_Invalid_List() {
@@ -233,7 +233,7 @@ void Free_Invalid_List() {
 
 void Read_Invalid_List() {
     // this function will attempt to open the "misc/xnames" file from cwd and read each
-    // non-empty line into invalid_list (a std::set<std::string>)
+    // non-empty line into invalid_list (a std::unordered_set<std::string>)
     // use std::filesystem!
     std::filesystem::path path = "misc/xnames";
 

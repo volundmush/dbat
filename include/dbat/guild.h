@@ -17,7 +17,7 @@ struct guild_data {
     room_vnum vnum{NOBODY};                /* number of the guild */
     void toggle_skill(uint16_t skill_id);
     void toggle_feat(uint16_t skill_id);
-    std::set<uint16_t> skills;  /* array to keep track of which feats things we'll train */
+    std::unordered_set<uint16_t> skills;  /* array to keep track of which feats things we'll train */
     float charge{1.0};                  /* charge * skill level = how much we'll charge */
     std::string no_such_skill{};           /* message when we don't teach that skill */
     std::string not_enough_gold{};         /* message when the student doesn't have enough gold */
@@ -26,7 +26,7 @@ struct guild_data {
     bitvector_t with_who[GW_ARRAY_MAX]{};    /* whom we dislike */
     int open{0}, close{28};               /* when we will train */
     SpecialFunc func{};                /* secondary spec_proc for the GM */
-    std::set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
+    std::unordered_set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
 };
 
 #define GM_NUM(i)  (guild_index[i].vnum)

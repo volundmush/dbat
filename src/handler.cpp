@@ -28,7 +28,7 @@
 #include "dbat/mobact.h"
 
 /* local vars */
-static std::set<struct char_data*> extractions_pending;
+static std::unordered_set<struct char_data*> extractions_pending;
 
 /* external vars */
 
@@ -661,12 +661,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
 
 /* search all over the world for a char num, and return a pointer if found */
 struct char_data *get_char_num(mob_rnum nr) {
-    struct char_data *i;
-
-    for (i = character_list; i; i = i->next)
-        if (GET_MOB_RNUM(i) == nr)
-            return (i);
-
+    for(auto v : get_vnum_list(characterVnumIndex, nr)) return v;
     return (nullptr);
 }
 
@@ -681,6 +676,8 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                          object->short_description);
             extract_obj(object);
             return;
+        } else {
+            objectSubscriptions.subscribe("growingPlants", object->ref());
         }
     }
     if (room->vn == real_room(80)) {
@@ -793,6 +790,8 @@ void obj_from_room(struct obj_data *object) {
             IN_ROOM(object));
         return;
     }
+
+    if(object->type_flag == ITEM_PLANT) objectSubscriptions.unsubscribe("growingPlants", object->ref());
 
     if (GET_OBJ_POSTED(object) && object->in_obj == nullptr) {
         struct obj_data *obj = GET_OBJ_POSTED(object);
@@ -1110,9 +1109,9 @@ void extract_char_final(struct char_data *ch) {
     if (FIGHTING(ch))
         stop_fighting(ch);
 
-    for (k = combat_list; k; k = temp) {
-        temp = k->next_fighting;
-        if (FIGHTING(k) == ch)
+    for (const auto &r : characterSubscriptions.all("combatSystem")) {
+        k = r.get();
+        if (k && FIGHTING(k) == ch)
             stop_fighting(k);
     }
 
@@ -1223,7 +1222,9 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
         num = get_number(&name);
     }
 
-    for (i = character_list; i; i = i->next) {
+    for (auto &r : activeCharacters) {
+        i = r.get();
+        if(!i) continue;
         if (IS_NPC(i))
             continue;
         if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
@@ -1339,7 +1340,9 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     if (*number == 0)
         return get_player_vis(ch, name, nullptr, 0);
 
-    for (i = character_list; i && *number; i = i->next) {
+    for (auto &r : activeCharacters) {
+        i = r.get();
+        if(!i) continue;
         if (IN_ROOM(ch) == IN_ROOM(i))
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
@@ -1431,11 +1434,13 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
-    for (i = object_list; i && *number; i = i->next)
-        if (isname(name, i->name))
+    for (auto &r : activeObjects) {
+        i = r.get();
+        if (i && isname(name, i->name))
             if (CAN_SEE_OBJ(ch, i))
                 if (--(*number) == 0)
                     return (i);
+    }
 
     return (nullptr);
 }

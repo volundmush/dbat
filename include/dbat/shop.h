@@ -49,7 +49,7 @@ struct shop_data {
     bitvector_t bitvector{};    /* Can attack? Use bank? Cast here?	*/
     mob_vnum keeper{NOBODY};    /* The mobile who owns the shop (rnum)	*/
     bitvector_t with_who[SW_ARRAY_MAX]{};/* Who does the shop trade with?	*/
-    std::set<room_vnum> in_room;        /* Where is the shop?			*/
+    std::unordered_set<room_vnum> in_room;        /* Where is the shop?			*/
     int open1{}, open2{};        /* When does the shop open?		*/
     int close1{}, close2{};    /* When does the shop close?		*/
     int bankAccount{};        /* Store all gold over 15000 (disabled)	*/

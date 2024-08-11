@@ -1440,6 +1440,29 @@ namespace trans {
                     return (ch->transforms[FormID::SpiritAbsorption].vars[0] / 5) * 1 + (0.1 * ch->transforms[FormID::SpiritAbsorption].grade);}},
             }
         },
+        {
+            FormID::DeathPhase, {
+                                    {APPLY_CVIT_REGEN_MULT, -0.5, ~0},
+                },
+        },
+        {
+            FormID::BirthPhase, {
+                                        {APPLY_CVIT_REGEN_MULT, 1.0, ~0},
+                                        {APPLY_CVIT_MULT, 1.0, ~0, [](auto ch) {
+                                            return (IN_ROOM(ch) != NOWHERE && ETHER_STREAM(ch)) ? 0.5 : 0.0;
+                                        }},
+                                        {APPLY_CATTR_BASE, 5.0, static_cast<int>(CharAttribute::Speed)},
+                },
+        },
+        {
+            FormID::LifePhase, {
+                                       {APPLY_CVIT_REGEN_MULT, 2.0, ~0},
+                                       {APPLY_CVIT_MULT, 2.0, ~0, [](auto ch) {
+                                           return (IN_ROOM(ch) != NOWHERE && ETHER_STREAM(ch)) ? 0.5 : 0.0;
+                                       }},
+                                       {APPLY_CATTR_BASE, 8.0, static_cast<int>(CharAttribute::Speed)},
+                },
+        }
     };
 
     static double getModifierHelper(char_data* ch, FormID form, int location, int specific) {
@@ -1468,6 +1491,24 @@ namespace trans {
         }
         modifier += getModifierHelper(ch, ch->form, location, specific);
         modifier += getModifierHelper(ch, ch->technique, location, specific);
+
+        if(IS_HOSHIJIN(ch)) {
+            switch(GET_PHASE(ch)) {
+                case 0: // Death phase
+                    modifier += getModifierHelper(ch, FormID::DeathPhase, location, specific);
+                    break;
+                case 1: // Birth Phase
+                    modifier += getModifierHelper(ch, FormID::BirthPhase, location, specific);
+                    break;
+                case 2: // Life phase
+                    modifier += getModifierHelper(ch, FormID::LifePhase, location, specific);
+                    break;
+                default:
+                    // oops?
+                    break;
+            }
+        }
+
         return modifier;
     }
 
@@ -1569,13 +1610,13 @@ namespace trans {
     }
 
     void gamesys_transform(uint64_t heartPulse, double deltaTime) {
-        std::set<CharRef> processed;
+        std::unordered_set<CharRef> processed;
         for(auto &[zvn, z] : zone_table) {
             if(z.playersInZone.empty()) continue;
 
-            std::set<CharRef> characters;
-            std::set_union(z.npcsInZone.begin(), z.npcsInZone.end(), z.playersInZone.begin(), z.playersInZone.end(),
-                           std::inserter(characters, characters.begin()));
+            std::unordered_set<CharRef> characters;
+            for(auto &r : z.npcsInZone) characters.insert(r);
+            for(auto &r : z.playersInZone) characters.insert(r);
 
             for(auto charId : characters) {
                 if(processed.contains(charId)) continue;
@@ -2204,10 +2245,10 @@ namespace trans {
         }
     }
 
-    std::set<FormID> getFormsFor(char_data* ch) {
+    std::unordered_set<FormID> getFormsFor(char_data* ch) {
         initTransforms(ch);
         auto forms = ch->transforms;
-        std::set<FormID> pforms;
+        std::unordered_set<FormID> pforms;
         
         for (auto form : forms) {
             if(form.first == FormID::Base || form.first == FormID::Oozaru || form.first == FormID::GoldenOozaru)

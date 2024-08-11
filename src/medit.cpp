@@ -280,9 +280,7 @@ void medit_save_internally(struct descriptor_data *d) {
     mob_proto[new_rnum].proto_script = OLC_SCRIPT(d);
 
     /* this takes care of the mobs currently in-game */
-    for (mob = character_list; mob; mob = mob->next) {
-        if (GET_MOB_RNUM(mob) != new_rnum)
-            continue;
+    for (auto mob : get_vnum_list(characterVnumIndex, new_rnum)) {
 
         /* remove any old scripts */
         if (SCRIPT(mob))

@@ -69,7 +69,7 @@ namespace net {
 
     extern std::unordered_map<int, std::shared_ptr<Connection>> connections;
     extern std::unordered_map<int, DisconnectReason> deadConnections;
-    extern std::set<int> pendingOutData, pendingReads, pendingWrites;
+    extern std::unordered_set<int> pendingOutData, pendingReads, pendingWrites;
 
     extern int server_fd, epoll_fd;
     extern void update(double deltaTime);

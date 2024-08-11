@@ -63,7 +63,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
     std::unordered_map<std::string, double> mobTimings;
 
-    std::set<CharRef> processed;
+    std::unordered_set<CharRef> processed;
 
     for(auto &[zvn, z] : zone_table) {
         if(z.playersInZone.empty()) continue;

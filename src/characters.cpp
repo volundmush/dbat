@@ -363,13 +363,24 @@ int64_t char_data::setCurHealthPercent(double amt) {
     return 0;
 }
 
-double char_data::modCurVitalDam(CharVital type, vital_t dam) {
+double char_data::modCurVitalDam(CharVital type, double dam) {
     return setCurVitalDam(type, getCurVitalDam(type) + dam);
 }
 
 double char_data::setCurVitalDam(CharVital type, double dam) {
     if(dam <= 0.0) damages.erase(type);
-    damages[type] = std::min(dam, 1.0);
+    else damages[type] = std::min(dam, 1.0);
+    auto r = ref();
+    if(damages.empty()) {
+        characterSubscriptions.unsubscribe("characterVitalsRecovery", r);
+        characterSubscriptions.unsubscribe("lifeforceSystem", r);
+    }
+    else {
+        characterSubscriptions.subscribe("characterVitalsRecovery", r);
+        if(!IS_ANDROID(this) && type == CharVital::PowerLevel && GET_LIFEPERC(this) > 0 && (getCurHealthPercent() < static_cast<double>(GET_LIFEPERC(this)) / 100) && (getCurLF() > 0)) {
+            characterSubscriptions.subscribe("lifeforceSystem", r);
+        }
+    }
     return getCurVitalDam(type);
 }
 
@@ -1860,4 +1871,13 @@ std::optional<std::string> char_data::dgCallMember(const std::string& member, co
     }
 
     return {};
+}
+
+void char_data::setTask(Task t) {
+    task = t;
+    if(task == Task::nothing) {
+        if(wait_input_queue.empty()) characterSubscriptions.unsubscribe("commandWaitQueue", ref());
+    } else {
+        characterSubscriptions.subscribe("commandWaitQueue", ref());
+    }
 }
