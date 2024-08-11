@@ -151,6 +151,7 @@ void command_interpreter(struct char_data *ch, char *argument) {
             std::string ln = line;
             std::pair<int, std::string> pair = {cmd, ln};
             ch->wait_input_queue.emplace_back(pair);
+            characterSubscriptions.subscribe("commandWaitQueue", ch->ref());
         }
         return;
     }
@@ -159,21 +160,24 @@ void command_interpreter(struct char_data *ch, char *argument) {
 
 }
 
-void pushWaitQueue(char_data* ch) {
-    if (ch && GET_WAIT_STATE(ch)) {
-        ch->mod(CharNum::Wait, -1);
-        if(GET_WAIT_STATE(ch) < 0) ch->set(CharNum::Wait, 0);
-        if(GET_WAIT_STATE(ch) == 0 && ch->task != Task::nothing) {
-            doContinuedTask(ch);
-            return;
+void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
+
+    for(const auto& r : characterSubscriptions.all("commandWaitQueue")) {
+        auto ch = r.get();
+        if(!ch) continue;
+        ch->waitTime = std::max<double>(0.0, ch->waitTime - deltaTime);
+        if(ch->waitTime == 0.0) {
+            if(ch->task != Task::nothing) doContinuedTask(ch);
+            else if(!ch->wait_input_queue.empty()) {
+                auto command = ch->wait_input_queue.front();
+                ch->wait_input_queue.pop_front();
+                processCommand(ch, command.first, command.second);
+            }
+            if(ch->waitTime <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty()) {
+                characterSubscriptions.unsubscribe("commandWaitQueue", r);
+            }
         }
-        if (GET_WAIT_STATE(ch)) return;
     }
-
-    auto command = ch->wait_input_queue.front();
-    ch->wait_input_queue.pop_front();
-
-    processCommand(ch, command.first, command.second);
 }
 
 void processCommand(char_data* ch, int cmd, std::string ln) {
@@ -1115,8 +1119,9 @@ int perform_dupe_check(struct descriptor_data *d) {
   * duplicates, though theoretically none should be able to exist).
   */
 
-    for (ch = character_list; ch; ch = next_ch) {
-        next_ch = ch->next;
+    for (auto &r : activeCharacters) {
+        ch = r.get();
+        if(!ch) continue;
 
         if (IS_NPC(ch))
             continue;
@@ -1301,10 +1306,12 @@ void enter_player_game(struct descriptor_data *d) {
     char_to_room(d->character, load_room);
 
     /*load_char_pets(d->character);*/
-    for (check = character_list; check; check = check->next)
-        if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
+    for (auto &r : activeCharacters) {
+        check = r.get();
+        if (check && !check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
             add_follower(check, d->character);
+    }
 
     GET_COMBINE(d->character) = -1;
     GET_SLEEPT(d->character) = 8;

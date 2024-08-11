@@ -144,7 +144,7 @@ ACMD(do_evolve) {
 
             if(bonusHl > (ch->getBaseST() / 10)) bonusHl = ch->getBaseST() / 10;
 
-            bonusHl *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::PowerLevel)));
             ch->gainBasePL(bonusHl);
             GET_MOLT_EXP(ch) -= plcost;
             send_to_char(ch,
@@ -172,7 +172,7 @@ ACMD(do_evolve) {
                 diminishing_returnsKi = 0;
 
             bonusKi = start_bonusKi * diminishing_returnsKi * 20;
-            bonusKi *= (1 + ch->getAffectModifier(APPLY_KI_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonusKi *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Ki)));
             if(bonusKi > (ch->getBaseST() / 10)) bonusKi = ch->getBaseST() / 10;
             ch->gainBaseKI(bonusKi);
             GET_MOLT_EXP(ch) -= kicost;
@@ -201,7 +201,7 @@ ACMD(do_evolve) {
                 diminishing_returnsSt = 0;
 
             bonusSt = start_bonusSt * diminishing_returnsSt * 20;
-            bonusSt *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonusSt *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Stamina)));
             if(bonusSt > (ch->getBaseST() / 10)) bonusSt = ch->getBaseST() / 10;
             ch->gainBaseST(bonusSt);
             GET_MOLT_EXP(ch) -= stcost;
@@ -572,7 +572,7 @@ ACMD(do_shuffle) {
 
     for (obj2 = obj->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
-        if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
+        if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
             continue;
         }
         count += 1;
@@ -590,7 +590,7 @@ ACMD(do_shuffle) {
     while (count > 0) {
         for (obj2 = world[real_room(48)].contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
-            if (!OBJ_FLAGGED(obj2, ITEM_ANTI_HIEROPHANT)) {
+            if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
                 continue;
             }
             if (obj2 && count > 1 && rand_number(1, 4) == 3) {
@@ -626,7 +626,7 @@ ACMD(do_hand) {
         send_to_char(ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
         for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
+            if (obj && !OBJ_FLAGGED(obj, ITEM_CARD)) {
                 continue;
             }
             if (obj) {
@@ -651,7 +651,7 @@ ACMD(do_hand) {
         act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
         for (obj = ch->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
-            if (obj && !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
+            if (obj && !OBJ_FLAGGED(obj, ITEM_CARD)) {
                 continue;
             }
             if (obj) {
@@ -829,14 +829,11 @@ ACMD(do_nickname) {
                 char nick[MAX_INPUT_LENGTH];
                 sprintf(nick, "%s", CAP(arg2));
                 ship2->look_description = strdup(nick);
-                struct obj_data *k;
-                for (k = object_list; k; k = k->next) {
-                    if (GET_OBJ_VNUM(k) == GET_OBJ_VNUM(ship2) + 1000) {
-                        extract_obj(k);
-                        int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
-                        obj_from_room(ship2);
-                        obj_to_room(ship2, real_room(was_in));
-                    }
+                for (auto k : get_vnum_list(objectVnumIndex, GET_OBJ_VNUM(ship2) + 1000)) {
+                    extract_obj(k);
+                    int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
+                    obj_from_room(ship2);
+                    obj_to_room(ship2, real_room(was_in));
                 }
             }
         }
@@ -6462,7 +6459,9 @@ static void perform_mortal_where(struct char_data *ch, char *arg) {
             send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), i->getRoom()->name);
         }
     } else {            /* print only FIRST char, not all. */
-        for (i = character_list; i; i = i->next) {
+        for (auto &r : activeCharacters) {
+            i = r.get();
+            if(!i) continue;
             if (IN_ROOM(i) == NOWHERE || i == ch)
                 continue;
             if (!CAN_SEE(ch, i) || i->getRoom()->zone != ch->getRoom()->zone)
@@ -6541,7 +6540,9 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
     } else {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
-        for (i = character_list; i; i = i->next) {
+        for (auto &r : activeCharacters) {
+            i = r.get();
+            if(!i->isActive()) continue;
             if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
@@ -6553,11 +6554,13 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                 send_to_char(ch, "\r\n");
             }
         }
-        for (k = object_list; k; k = k->next)
+        for (auto &r : activeObjects) {
+            k = r.get();
             if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
                 found = 1;
                 print_object_location(++num, k, ch, true);
             }
+        }
         if (!found) {
             send_to_char(ch, "Couldn't find any such thing.\r\n");
         } else {

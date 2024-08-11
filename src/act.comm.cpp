@@ -311,7 +311,6 @@ ACMD(do_say) {
                                              "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
                                 wch->mod(CharAttribute::Speed, 10);
-                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a speed wish on %s.", GET_NAME(ch),
@@ -354,7 +353,6 @@ ACMD(do_say) {
                                              "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
                                 wch->mod(CharAttribute::Intelligence, 10);
-                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a intelligence wish on %s.",
@@ -414,7 +412,6 @@ ACMD(do_say) {
                                 send_to_char(wch, "@GYou suddenly feel like you could learn %d more skills!@n\r\n",
                                              roll);
                                 GET_SLOTS(wch) += roll;
-                                wch->save();
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a skill wish on %s.", GET_NAME(ch),
@@ -707,15 +704,6 @@ ACMD(do_say) {
                             } else {
                                 WISH[0] = 1;
                             } /*end WISH if */
-                            if (wch != nullptr) {
-                                wch->save();
-                            }
-                            if (wch2 != nullptr) {
-                                wch->save();
-                            }
-                            if (wch3 != nullptr) {
-                                wch->save();
-                            }
                             save_mud_time(&time_info);
                         } else if (wch == nullptr) {
                             send_to_room(real_room(DRAGONR),
@@ -930,8 +918,6 @@ ACMD(do_tell) {
 }
 
 ACMD(do_reply) {
-    struct char_data *tch = character_list;
-
     if (IS_NPC(ch))
         return;
 
@@ -963,13 +949,13 @@ ACMD(do_reply) {
          *      we could not find link dead people.  Not that they can
          *      hear tells anyway. :) -gg 2/24/98
          */
-        while (tch != nullptr && (IS_NPC(tch) || GET_IDNUM(tch) != GET_LAST_TELL(ch)))
-            tch = tch->next;
 
-        if (tch == nullptr)
+        auto find = uniqueCharacters.find(GET_LAST_TELL(ch));
+        if(find == uniqueCharacters.end()) {
             send_to_char(ch, "They are no longer playing.\r\n");
-        else if (is_tell_ok(ch, tch))
-            perform_tell(ch, tch, argument);
+        }
+        else if (is_tell_ok(ch, find->second.second))
+            perform_tell(ch, find->second.second, argument);
     }
 }
 

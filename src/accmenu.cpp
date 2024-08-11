@@ -9,6 +9,20 @@
 
 namespace net {
 
+    std::string AccountMenu::getName() {
+        return "AccountMenu";
+    }
+
+    nlohmann::json AccountMenu::serialize() {
+        auto j = ConnectionParser::serialize();
+        j["state"] = 0;
+        return j;
+    }
+
+    void AccountMenu::deserialize(const nlohmann::json& j) {
+        if(j.contains("state")) state = static_cast<AccountMenuState>(j.at("state").get<int>());
+    }
+
     void AccountMenu::displayMenu() {
         auto a = conn->account;
         sendText("                 @RUser Menu@n\n");
@@ -125,8 +139,7 @@ namespace net {
         }
 
         if(boost::iequals(txt, "Q") || boost::istarts_with(txt, "Q ")) {
-            sendText("Goodbye!\r\n");
-            conn->close();
+            sendText("Goodbye.\r\n", net::SendBuffer::BF_CLOSE_AFTER_SEND);
             return;
         }
 

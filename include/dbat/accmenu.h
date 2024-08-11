@@ -11,6 +11,10 @@ namespace net {
         using ConnectionParser::ConnectionParser;
         void parse(const std::string &txt) override;
         void start() override;
+        bool canCopyover() override {return true;};
+        std::string getName() override;
+        nlohmann::json serialize() override;
+        void deserialize(const nlohmann::json& j) override;
     protected:
         AccountMenuState state{AccountMenuState::MainMenu};
         void displayMenu();

@@ -144,7 +144,7 @@ void bring_to_cap(struct char_data *ch) {
 
     auto cap = ch->calc_soft_cap();
 
-    for(auto stat : {CharStat::PowerLevel, CharStat::Stamina, CharStat::Ki}) {
+    for(auto stat : {CharVital::PowerLevel, CharVital::Stamina, CharVital::Ki}) {
         if(auto diff = cap - ch->get(stat); diff > 0) {
             ch->mod(stat, diff);
         }
@@ -479,8 +479,9 @@ ACMD(do_rpp) {
                 return;
             } else {
                 int found = false;
-                struct obj_data *k = nullptr;
-                for (k = object_list; k; k = k->next) {
+                for (auto &r : activeObjects) {
+                    auto k = r.get();
+                    if(!k) continue;
                     if (OBJ_FLAGGED(k, ITEM_FORGED)) {
                         continue;
                     }
@@ -538,7 +539,6 @@ ACMD(do_rpp) {
                 struct obj_data *hobj = read_object(6, VIRTUAL);
                 obj_to_char(hobj, ch);
                 ch->modRPP(-pay);
-                ch->save();
                 send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
                 send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
                 return;
@@ -589,7 +589,6 @@ ACMD(do_rpp) {
             save_mud_time(&time_info);
         }
         ch->modRPP(-pay);
-        ch->save();
         send_to_char(ch,
                      "@R%d@W RPP paid for your selection. An immortal will address the request soon enough. Be patient.@n\r\n",
                      pay);
@@ -600,14 +599,12 @@ ACMD(do_rpp) {
     /* Pay for purchases here */
     if (selection >= 4 && selection < 12 && pay > 0) {
         ch->modRPP(-pay);
-        ch->save();
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
 
     if (selection > 12 && pay > 0) {
         ch->modRPP(-pay);
-        ch->save();
         send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", pay);
         send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), pay);
     }
@@ -1277,26 +1274,29 @@ ACMD(do_train) {
     /* what training message is displayed? */
     reveal_hiding(ch, 0);
 
+    Task task;
+
     switch (attr) {
         case CharAttribute::Strength:
-            ch->task = Task::trainStr;
+            task = Task::trainStr;
             break;
         case CharAttribute::Agility:
-            ch->task = Task::trainAgl;
+            task = Task::trainAgl;
             break;
         case CharAttribute::Constitution:
-            ch->task = Task::trainCon;
+            task = Task::trainCon;
             break;
         case CharAttribute::Speed:
-            ch->task = Task::trainSpd;
+            task = Task::trainSpd;
             break;
         case CharAttribute::Intelligence:
-            ch->task = Task::trainInt;
+            task = Task::trainInt;
             break;
         case CharAttribute::Wisdom:
-            ch->task = Task::trainWis;
+            task = Task::trainWis;
             break;
     }
+    ch->setTask(task);
     WAIT_STATE(ch, PULSE_5SEC * 6);
 
 }
@@ -1454,7 +1454,7 @@ void trainProgress(char_data* ch) {
         needed = wiscap;
     } else {
         send_to_char(ch, "Invalid\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
@@ -1462,13 +1462,13 @@ void trainProgress(char_data* ch) {
 
     if (stat_val == 80) {
         send_to_char(ch, "Your base %s is maxed!\r\n", stat_name);
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (stat_val >= 45 && GET_BONUS(ch, nega_trait) > 0) {
         send_to_char(ch, "You're not able to withstand increasing your %s beyond 45.\r\n", stat_name);
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
@@ -1480,7 +1480,7 @@ void trainProgress(char_data* ch) {
         case CharAttribute::Speed:
             if ((ch->getCurST()) < cost) {
                 send_to_char(ch, "You do not have enough stamina with the current weight worn and gravity!\r\n");
-                ch->task = Task::nothing;
+                ch->setTask(Task::nothing);
                 return;
             }
             plus = (((total / 20) + (GET_MAX_MOVE(ch) / 50)) * 100) / GET_MAX_MOVE(ch);
@@ -1490,7 +1490,7 @@ void trainProgress(char_data* ch) {
         case CharAttribute::Wisdom:
             if ((ch->getCurKI()) < cost) {
                 send_to_char(ch, "You do not have enough ki with the current weight worn and gravity!\r\n");
-                ch->task = Task::nothing;
+                ch->setTask(Task::nothing);
                 return;
             }
             plus = (((total / 20) + (GET_MAX_MANA(ch) / 50)) * 100) / GET_MAX_MANA(ch);
@@ -1705,7 +1705,6 @@ void trainProgress(char_data* ch) {
             giveRandomVital(ch, ch->getMaxPL() / 5, ch->getMaxKI() / 5, ch->getMaxST() / 5, 30);
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
         }
-        ch->save();
     }
 }
 
@@ -2071,9 +2070,9 @@ ACMD(do_candy) {
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", obj->short_description, vict->short_description);
     obj->short_description = strdup(newsh);
     obj_to_char(obj, ch);
-    obj->value[VAL_FOOD_CANDY_PL] = vict->get(CharStat::PowerLevel);
-    obj->value[VAL_FOOD_CANDY_KI] = vict->get(CharStat::Ki);
-    obj->value[VAL_FOOD_CANDY_ST] = vict->get(CharStat::Stamina);
+    obj->value[VAL_FOOD_CANDY_PL] = vict->get(CharVital::PowerLevel);
+    obj->value[VAL_FOOD_CANDY_KI] = vict->get(CharVital::Ki);
+    obj->value[VAL_FOOD_CANDY_ST] = vict->get(CharVital::Stamina);
 
     vict->mobFlags.reset(MOB_HUSK);
     die(vict, ch);
@@ -3251,23 +3250,23 @@ static void boost_obj(struct obj_data *obj, struct char_data *ch, int type) {
         case 1: /* This object is a weapon. */
             switch (boost) {
                 case 30:
-                    obj->extra_flags.set(ITEM_WEAPLVL2);
+                    obj->value[VAL_WEAPON_LEVEL] = 2;
                     break;
                 case 40:
                 case 50:
-                    obj->extra_flags.set(ITEM_WEAPLVL3);
+                    obj->value[VAL_WEAPON_LEVEL] = 3;
                     break;
                 case 60:
                 case 70:
                 case 80:
                 case 90:
-                    obj->extra_flags.set(ITEM_WEAPLVL4);
+                    obj->value[VAL_WEAPON_LEVEL] = 4;
                     break;
                 case 100:
-                    obj->extra_flags.set(ITEM_WEAPLVL5);
+                    obj->value[VAL_WEAPON_LEVEL] = 5;
                     break;
                 default:
-                    obj->extra_flags.set(ITEM_WEAPLVL1);
+                    obj->value[VAL_WEAPON_LEVEL] = 1;
                     break;
             }
             if (boost != 0) {
@@ -4370,11 +4369,11 @@ ACMD(do_ingest) {
                 auto chw = ch->getWeight(true);
                 auto vw = vict->getWeight(true);
                 if (chw > vict->getWeight(true)) {
-                    ch->weight -= ((chw - vict->getWeight(true)) / 2);
+                    ch->mod(CharDim::Weight, -((chw - vict->getWeight(true)) / 2));
                 } else if (ch->getWeight(true) < vw) {
-                    ch->weight += ((vw - chw) / 2);
+                    ch->mod(CharDim::Weight, ((vw - chw) / 2));
                 } else {
-                    ch->weight = vict->getWeight(true);
+                    ch->set(CharDim::Weight, vict->getWeight(true));
                 }
             } else {
                 send_to_char(ch, "Your forelock length changes because of %s.\r\n", GET_NAME(vict));
@@ -4444,6 +4443,7 @@ ACMD(do_absorb) {
         }
         ABSORBBY(ABSORBING(ch)) = nullptr;
         ABSORBING(ch) = nullptr;
+        characterSubscriptions.unsubscribe("androidAbsorbSystem", ch->ref());
     }
 
     if (!*arg && IS_ANDROID(ch)) {
@@ -4526,6 +4526,7 @@ ACMD(do_absorb) {
             improve_skill(ch, SKILL_ABSORB, 1);
             ABSORBING(ch) = vict;
             ABSORBBY(vict) = ch;
+            characterSubscriptions.subscribe("androidAbsorbSystem", ch->ref());
             WAIT_STATE(ch, PULSE_3SEC);
             return;
         }
@@ -4770,10 +4771,10 @@ ACMD(do_escape) {
                 act("@WYou manage to break loose of @C$n's@W hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_VICT);
                 act("@c$N@W manages to break loose of your hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_CHAR);
             }
-            if (FIGHTING(ch) == nullptr) {
+            if (!FIGHTING(ch)) {
                 set_fighting(ch, GRAPPLED(ch));
             }
-            if (FIGHTING(GRAPPLED(ch)) == nullptr) {
+            if (!FIGHTING(GRAPPLED(ch))) {
                 set_fighting(GRAPPLED(ch), ch);
             }
             GRAPTYPE(GRAPPLED(ch)) = -1;
@@ -6255,16 +6256,27 @@ ACMD(do_appraise) {
     send_to_char(ch, "%s is worth: %s\r\nMin Lvl: %d\r\n", obj->short_description, add_commas(GET_OBJ_COST(obj)).c_str(),
                  displevel);
     if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-        if (OBJ_FLAGGED(obj, ITEM_WEAPLVL1)) {
-            send_to_char(ch, "Weapon Level: 1\nDamage Bonus: 5%s\r\n", "%");
-        } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL2)) {
-            send_to_char(ch, "Weapon Level: 2\nDamage Bonus: 10%s\r\n", "%");
-        } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL3)) {
-            send_to_char(ch, "Weapon Level: 3\nDamage Bonus: 20%s\r\n", "%");
-        } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL4)) {
-            send_to_char(ch, "Weapon Level: 4\nDamage Bonus: 30%s\r\n", "%");
-        } else if (OBJ_FLAGGED(obj, ITEM_WEAPLVL5)) {
-            send_to_char(ch, "Weapon Level: 5\nDamage Bonus: 50%s\r\n", "%");
+        auto wlvl = obj->value[VAL_WEAPON_LEVEL];
+        int dambon = 0;
+        switch(wlvl) {
+            case 1:
+                dambon = 5;
+                break;
+            case 2:
+                dambon = 10;
+                break;
+            case 3:
+                dambon = 20;
+                break;
+            case 4:
+                dambon = 30;
+                break;
+            case 5:
+                dambon = 50;
+                break;
+        }
+        if(dambon) {
+            send_to_char(ch, "Weapon Level: %d\nDamage Bonus: %d%s\r\n", wlvl, dambon, "%");
         }
     }
     send_to_char(ch, "Size: %s\r\n", size_names[GET_OBJ_SIZE(obj)]);
@@ -6286,19 +6298,13 @@ ACMD(do_appraise) {
     int percent = false;
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location != APPLY_NONE) {
-            if (obj->affected[i].location == APPLY_REGEN || obj->affected[i].location == APPLY_TRAIN ||
-                obj->affected[i].location == APPLY_LIFEMAX ) {
-                percent = true;
-            }
+            percent = obj->affected[i].isPercent();
             sprinttype(obj->affected[i].location, apply_types, buf, sizeof(buf));
             auto m = fmt::format("{}", obj->affected[i].modifier);
             send_to_char(ch, "%s %s%s to %s", found++ ? "," : "", m.c_str(),
                          percent == true ? "%" : "", buf);
             percent = false;
             switch (obj->affected[i].location) {
-                case APPLY_FEAT:
-                    send_to_char(ch, " (%s)", feat_list[obj->affected[i].specific].name);
-                    break;
                 case APPLY_SKILL:
                     send_to_char(ch, " (%s)", spell_info[obj->affected[i].specific].name);
                     break;
@@ -7537,7 +7543,7 @@ ACMD(do_situp) {
     }
 
     send_to_char(ch, "You start to do situps.\r\n");
-    ch->task = Task::situps;
+    ch->setTask(Task::situps);
     WAIT_STATE(ch, PULSE_5SEC * 6);
 }
 
@@ -7546,49 +7552,49 @@ void situpProgress(char_data* ch) {
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
     if (DRAGGING(ch)) {
         send_to_char(ch, "You are dragging someone!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
     if (PLR_FLAGGED(ch, PLR_FISHING)) {
         send_to_char(ch, "Stop fishing first.\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
     if (CARRYING(ch)) {
         send_to_char(ch, "You are carrying someone!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (IS_ANDROID(ch) || IS_BIO(ch) || IS_MAJIN(ch) || IS_ARLIAN(ch)) {
         send_to_char(ch, "You will gain nothing from exercising!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (!limb_ok(ch, 1)) {
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if(!can_grav(ch)) {
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (FIGHTING(ch)) {
         send_to_char(ch, "You are fighting you moron!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
     if (AFF_FLAGGED(ch, AFF_FLYING)) {
         send_to_char(ch, "You can't do situps in midair!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
@@ -7596,7 +7602,7 @@ void situpProgress(char_data* ch) {
 
     if(ratio <= 0.1) {
         send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
@@ -7620,7 +7626,7 @@ void situpProgress(char_data* ch) {
 
     if ((ch->getCurST()) < cost) {
         send_to_char(ch, "You are too tired!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
@@ -7799,7 +7805,7 @@ ACMD(do_meditate) {
 
     
     send_to_char(ch, "You start to meditate.\r\n");
-    ch->task = Task::meditate;
+    ch->setTask(Task::meditate);
     WAIT_STATE(ch, PULSE_5SEC * 6);
 
 }
@@ -7809,42 +7815,42 @@ void meditateProgress(char_data* ch) {
 
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
     if (PLR_FLAGGED(ch, PLR_FISHING)) {
         send_to_char(ch, "Stop fishing first.\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (IS_ANDROID(ch) || IS_BIO(ch) || IS_MAJIN(ch) || IS_ARLIAN(ch)) {
         send_to_char(ch, "You will gain nothing from exercising!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (CARRYING(ch)) {
         send_to_char(ch, "You are carrying someone!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (DRAGGING(ch)) {
         send_to_char(ch, "You are dragging someone!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (FIGHTING(ch)) {
         send_to_char(ch, "You are fighting you moron!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (GET_POS(ch) != POS_SITTING) {
         send_to_char(ch, "You need to be sitting to meditate.\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
@@ -7852,7 +7858,7 @@ void meditateProgress(char_data* ch) {
 
     if(ratio <= 0.1) {
         send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
@@ -7875,7 +7881,7 @@ void meditateProgress(char_data* ch) {
 
     if ((ch->getCurKI()) < cost) {
         send_to_char(ch, "You don't have enough ki!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
@@ -8011,7 +8017,7 @@ ACMD(do_pushup) {
     }
 
     send_to_char(ch, "You start to do push-ups.\r\n");
-    ch->task = Task::pushups;
+    ch->setTask(Task::pushups);
     WAIT_STATE(ch, PULSE_5SEC * 6);
 
     
@@ -8022,43 +8028,43 @@ void pushupProgress(char_data* ch) {
 
     if (PLR_FLAGGED(ch, PLR_FISHING)) {
         send_to_char(ch, "Stop fishing first.\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
     if (DRAGGING(ch)) {
         send_to_char(ch, "You are dragging someone!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
     if (CARRYING(ch)) {
         send_to_char(ch, "You are carrying someone!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (IS_ANDROID(ch) || IS_BIO(ch) || IS_MAJIN(ch) || IS_ARLIAN(ch)) {
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         send_to_char(ch, "You will gain nothing from exercising!\r\n");
         return;
     }
 
     if (!limb_ok(ch, 0)) {
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if(!can_grav(ch)) {
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
 
     if (FIGHTING(ch)) {
         send_to_char(ch, "You are fighting you moron!\r\n");
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         return;
     }
     if (AFF_FLAGGED(ch, AFF_FLYING)) {
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         send_to_char(ch, "You can't do pushups in midair!\r\n");
         return;
     }
@@ -8066,7 +8072,7 @@ void pushupProgress(char_data* ch) {
     auto ratio = ch->getBurdenRatio();
 
     if(ratio <= 0.1) {
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
         return;
     }
@@ -8089,7 +8095,7 @@ void pushupProgress(char_data* ch) {
     }
 
     if ((ch->getCurST()) < cost) {
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
         send_to_char(ch, "You are too tired!\r\n");
         return;
     }
@@ -8232,31 +8238,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
     for (d = descriptor_list; d; d = d->next) {
         if (!IS_PLAYING(d))
             continue;
-        if (IS_NPC(d->character)) {
-            if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
-                send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
-                ABSORBBY(ABSORBING(d->character)) = nullptr;
-                ABSORBING(d->character) = nullptr;
-            }
-            if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 10) >= 7) {
-                int64_t drain1 = GET_MAX_MANA(d->character) * 0.01, drain2 = GET_MAX_MOVE(d->character) * 0.01;
-                struct char_data *drained = ABSORBING(d->character);
-                if ((drained->getCurST()) - drain2 < 0) {
-                    drain2 = (drained->getCurST());
-                }
-                if ((drained->getCurKI()) - drain1 < 0) {
-                    drain1 = (drained->getCurKI());
-                }
-                d->character->incCurST(drain2);
-                d->character->incCurKI(drain1);
-                d->character->incCurHealth(drain1 * .5);
 
-                if (d->character->isFullKI() && d->character->isFullST()) {
-                    do_absorb(d->character, nullptr, 0, 0);
-                }
-            }
-            continue;
-        }
         if (countch == true) {
             pcoun += 1;
         }
@@ -8275,89 +8257,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         if (GET_BACKSTAB_COOL(d->character) > 0) {
             GET_BACKSTAB_COOL(d->character) -= 1;
         }
-        if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 60) {
-            if (IS_BIO(d->character)) {
-                act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n",
-                    true, d->character, nullptr, nullptr, TO_CHAR);
-            } else {
-                act("@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n",
-                    true, d->character, nullptr, nullptr, TO_CHAR);
-                act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, d->character, nullptr,
-                    nullptr, TO_ROOM);
-            }
-            d->character->gooptime -= 1;
-        } else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 30) {
-            if (IS_BIO(d->character)) {
-                act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true,
-                    d->character, nullptr, nullptr, TO_CHAR);
-                act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, d->character,
-                    nullptr, nullptr, TO_ROOM);
-            } else {
-                act("@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ",
-                    true, d->character, nullptr, nullptr, TO_CHAR);
-                act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n",
-                    true, d->character, nullptr, nullptr, TO_ROOM);
-            }
-            d->character->gooptime -= 1;
-        } else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 15) {
-            if (IS_BIO(d->character)) {
-                act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n",
-                    true, d->character, nullptr, nullptr, TO_CHAR);
-                act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n",
-                    true, d->character, nullptr, nullptr, TO_ROOM);
-            } else {
-                act("@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n",
-                    true, d->character, nullptr, nullptr, TO_CHAR);
-                act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n",
-                    true, d->character, nullptr, nullptr, TO_ROOM);
-            }
-            d->character->gooptime -= 1;
-        } else if (PLR_FLAGGED(d->character, PLR_GOOP) && d->character->gooptime == 0) {
-            if (IS_BIO(d->character)) {
-                d->character->restoreHealth();
-                act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n",
-                    true, d->character, nullptr, nullptr, TO_CHAR);
-                act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n",
-                    true, d->character, nullptr, nullptr, TO_ROOM);
-            }
-                //Zenkai Boost
-            else if (IS_SAIYAN(d->character)) {
 
-                int zenkaiPL, zenkaiKi, zenkaiSt;
-                zenkaiPL = (d->character->getBasePL()) * 1.03;
-                zenkaiKi = (d->character->getBaseKI()) * 1.015;
-                zenkaiSt = (d->character->getBaseST()) * 1.015;
-
-                //GET_HIT(d->character) = gear_pl(d->character) * .5;
-                //GET_MANA(d->character) = GET_MAX_MANA(d->character) *.2;
-                //GET_MOVE(d->character) = GET_MAX_MOVE(d->character) *.2;
-
-
-                if (!IN_ARENA(d->character)) {
-                    d->character->gainBasePL(zenkaiPL);
-                    d->character->gainBaseKI(zenkaiKi);
-                    d->character->gainBaseST(zenkaiSt);
-
-                    send_to_char(d->character,
-                                 "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
-                    send_to_char(d->character, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n",
-                                 add_commas(zenkaiPL).c_str(), add_commas(zenkaiKi).c_str(), add_commas(zenkaiSt).c_str());
-                }
-                act("@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n",
-                    true, d->character, nullptr, nullptr, TO_CHAR);
-                act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!",
-                    true, d->character, nullptr, nullptr, TO_ROOM);
-            } else {
-                d->character->restoreHealth();
-                act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n",
-                    true, d->character, nullptr, nullptr, TO_CHAR);
-                act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!",
-                    true, d->character, nullptr, nullptr, TO_ROOM);
-            }
-            d->character->playerFlags.reset(PLR_GOOP);
-        } else {
-            d->character->gooptime -= 1;
-        }
         if (GET_COOLDOWN(d->character) > 0) {
             GET_COOLDOWN(d->character) -= 2;
             if (GET_COOLDOWN(d->character) <= 0) {
@@ -8470,195 +8370,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                 ROOM_EFFECT(IN_ROOM(d->character)) += 1;
             }
         }
-        if (ABSORBING(d->character) && IN_ROOM(d->character) != IN_ROOM(ABSORBING(d->character))) {
-            send_to_char(d->character, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(d->character)));
-            ABSORBBY(ABSORBING(d->character)) = nullptr;
-            ABSORBING(d->character) = nullptr;
-        }
-        if (IS_ANDROID(d->character) && ABSORBING(d->character)) {
-            if ((((d->character)->absorbing)->getCurST()) < (GET_MAX_MOVE(d->character) / 15) &&
-                (((d->character)->absorbing)->getCurKI()) < (GET_MAX_MANA(d->character) / 15)) {
-                act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n",
-                    true, d->character, nullptr, ABSORBING(d->character), TO_CHAR);
-                act("@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr,
-                    ABSORBING(d->character), TO_VICT);
-                act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr,
-                    ABSORBING(d->character), TO_NOTVICT);
-                if (!FIGHTING(d->character) || FIGHTING(d->character) != ABSORBING(d->character)) {
-                    set_fighting(d->character, ABSORBBY(ABSORBING(d->character)));
-                }
-                if (!FIGHTING(ABSORBBY(ABSORBING(d->character))) ||
-                    FIGHTING(ABSORBBY(ABSORBING(d->character))) != d->character) {
-                    set_fighting(ABSORBBY(ABSORBING(d->character)), d->character);
-                }
-                ABSORBBY(ABSORBING(d->character)) = nullptr;
-                ABSORBING(d->character) = nullptr;
-            }
-        }
-        if (IS_ANDROID(d->character) && ABSORBING(d->character) && rand_number(1, 9) >= 6) {
-            if ((((d->character)->absorbing)->getCurST()) > (GET_MAX_MOVE(d->character) / 15) ||
-                (((d->character)->absorbing)->getCurKI()) > (GET_MAX_MANA(d->character) / 15)) {
 
-                d->character->incCurKI(d->character->getMaxKI() * .08);
-                d->character->incCurST(d->character->getMaxST() * .08);
-
-                ABSORBING(d->character)->decCurKI(d->character->getMaxKI() / 20, 1);
-                ABSORBING(d->character)->decCurST(d->character->getMaxST() / 20, 1);
-
-                act("@WYou absorb stamina and ki from @c$N@W!@n", true, d->character, nullptr, ABSORBING(d->character),
-                    TO_CHAR);
-                act("@C$n@W absorbs stamina and ki from you!@n", true, d->character, nullptr, ABSORBING(d->character),
-                    TO_VICT);
-                send_to_char(ABSORBING(d->character), "@wTry 'escape'!@n\r\n");
-                act("@C$n@W absorbs stamina and ki from @c$N@w!@n", true, d->character, nullptr,
-                    ABSORBING(d->character), TO_NOTVICT);
-                if (GET_HIT(d->character) < (d->character->getMaxPL())) {
-                    d->character->incCurHealth(d->character->getMaxKI() * .04);
-                    send_to_char(d->character,
-                                 "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
-                }
-
-                if (d->character->isFullST() && d->character->isFullKI()) {
-
-                    act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, d->character,
-                        nullptr, ABSORBING(d->character), TO_CHAR);
-                    act("@C$n@W stops absorbing stamina and ki from you!@n", true, d->character, nullptr,
-                        ABSORBING(d->character), TO_VICT);
-                    act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, d->character, nullptr,
-                        ABSORBING(d->character), TO_NOTVICT);
-                    if (!FIGHTING(d->character) || FIGHTING(d->character) != ABSORBING(d->character)) {
-                        set_fighting(d->character, ABSORBBY(ABSORBING(d->character)));
-                    }
-                    if (!FIGHTING(ABSORBBY(ABSORBING(d->character))) ||
-                        FIGHTING(ABSORBBY(ABSORBING(d->character))) != d->character) {
-                        set_fighting(ABSORBBY(ABSORBING(d->character)), d->character);
-                    }
-                    ABSORBBY(ABSORBING(d->character)) = nullptr;
-                    ABSORBING(d->character) = nullptr;
-                }
-                bool sum = !d->character->is_soft_cap(0);
-                bool mum = !d->character->is_soft_cap(2);
-                bool ium = !d->character->is_soft_cap(1);
-                auto leader = d->character->master ? d->character->master : d->character;
-                auto dCon = GET_CON(d->character);
-                auto dWis = GET_WIS(d->character);
-                if (sum) {
-                    if (rand_number(1, 8) >= 6) {
-                        
-                        int gain = rand_number(dCon / 2, dCon * 3) +
-                                   (dCon * 18);
-                        if (dCon > 30) {
-                            gain += rand_number(dCon * 2, dCon * 4) +
-                                    (dCon * 50);
-                        }
-                        if (dCon > 60) {
-                            gain *= 2;
-                        }
-                        if (dCon > 80) {
-                            gain *= 3;
-                        }
-                        if (dCon > 90) {
-                            gain *= 4;
-                        }
-                        send_to_char(d->character, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
-                        if (group_bonus(d->character, 2) == 7) {
-                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
-                                int gbonus = gain * 0.15;
-                                gain += gbonus;
-                                send_to_char(d->character,
-                                             "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
-                                             add_commas(gbonus).c_str());
-                            }
-                        }
-                        d->character->gainBasePL(gain);
-                    }
-                }
-                if (mum) {
-                    if (rand_number(1, 8) >= 6) {
-                        int gain = rand_number(dCon / 2, dCon * 3) +
-                                   (dCon * 18);
-                        if (dCon > 30) {
-                            gain += rand_number(dCon * 2, dCon * 4) +
-                                    (dCon * 50);
-                        }
-                        if (dCon > 60) {
-                            gain *= 2;
-                        }
-                        if (dCon > 80) {
-                            gain *= 3;
-                        }
-                        if (dCon > 90) {
-                            gain *= 4;
-                        }
-                        send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
-                        if (group_bonus(d->character, 2) == 7) {
-                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
-                                int gbonus = gain * 0.15;
-                                gain += gbonus;
-                                send_to_char(d->character,
-                                             "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
-                                             add_commas(gbonus).c_str());
-                            }
-                        }
-                        d->character->gainBaseST(gain);
-                    }
-                }
-                if (ium) {
-                    if (rand_number(1, 8) >= 6) {
-                        int gain = rand_number(dWis / 2, dWis * 3) +
-                                   (dWis * 18);
-                        if (dWis > 30) {
-                            gain += rand_number(dWis * 2, dWis * 4) +
-                                    (dWis * 50);
-                        }
-                        if (dWis > 60) {
-                            gain *= 2;
-                        }
-                        if (dWis > 80) {
-                            gain *= 3;
-                        }
-                        if (dWis > 90) {
-                            gain *= 4;
-                        }
-                        send_to_char(d->character, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
-                        if (d->character->master && group_bonus(d->character, 2) == 7) {
-                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
-                                int gbonus = gain * 0.15;
-                                gain += gbonus;
-                                send_to_char(d->character,
-                                             "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
-                                             add_commas(gbonus).c_str());
-                            }
-                        }
-                        d->character->gainBaseKI(gain);
-                    }
-                }
-                if (!sum) {
-                    if (rand_number(1, 8) >= 6) {
-                        int gain = 1;
-                        send_to_char(d->character,
-                                     "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
-                        d->character->gainBasePL(gain);
-                    }
-                }
-                if (!mum) {
-                    if (rand_number(1, 8) >= 6) {
-                        int gain = 1;
-                        send_to_char(d->character, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n",
-                                     gain);
-                        d->character->gainBaseST(gain);
-                    }
-                }
-                if (!ium) {
-                    if (rand_number(1, 8) >= 6) {
-                        int gain = 1;
-                        send_to_char(d->character, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n",
-                                     gain);
-                        d->character->gainBaseKI(gain);
-                    }
-                }
-            }
-        }
         if (BLOCKS(d->character)) {
             struct char_data *vict = BLOCKS(d->character);
             if (IN_ROOM(vict) != IN_ROOM(d->character)) {
@@ -8937,197 +8649,163 @@ ACMD(do_scouter) {
     struct obj_data *obj = GET_EQ(ch, WEAR_EYE);
     if (!obj) {
         send_to_char(ch, "You do not even have a scouter!");
-        obj = nullptr;
         return;
-    } else {
-        if (!*arg) {
-            send_to_char(ch, "[Syntax] scouter < target | scan>\r\n");
-            return;
-        }
-        reveal_hiding(ch, 3);
-        if (!strcasecmp("scan", arg)) {
-            for (i = descriptor_list; i; i = i->next) {
-                if (STATE(i) != CON_PLAYING) {
-                    continue;
-                } else if (i->character == ch) {
-                    continue;
-                } else if (IS_ANDROID(i->character)) {
-                    continue;
-                } else if (planet_check(ch, i->character)) {
-                    int dir = find_first_step(ch->getRoom(), i->character->getRoom());
-                    int same = false;
-                    char pathway[MAX_STRING_LENGTH];
+    }
+    if (!*arg) {
+        send_to_char(ch, "[Syntax] scouter < target | scan>\r\n");
+        return;
+    }
+    reveal_hiding(ch, 3);
+    if (!strcasecmp("scan", arg)) {
+        for (i = descriptor_list; i; i = i->next) {
+            if (STATE(i) != CON_PLAYING) {
+                continue;
+            } else if (i->character == ch) {
+                continue;
+            } else if (IS_ANDROID(i->character)) {
+                continue;
+            } else if (planet_check(ch, i->character)) {
+                int dir = find_first_step(ch->getRoom(), i->character->getRoom());
+                int same = false;
+                char pathway[MAX_STRING_LENGTH];
 
-                    if (IN_ZONE(ch) == IN_ZONE(i->character))
-                        same = true;
+                if (IN_ZONE(ch) == IN_ZONE(i->character))
+                    same = true;
 
-                    switch (dir) {
-                        case BFS_ERROR:
-                            sprintf(pathway, "@rERROR");
-                            break;
-                        case BFS_ALREADY_THERE:
-                            sprintf(pathway, "@RHERE");
-                            break;
-                        case BFS_NO_PATH:
-                            send_to_char(ch, "@MUNKNOWN");
-                            break;
-                        default:
-                            send_to_char(ch, "@G%s\r\n", dirs[dir]);
-                            break;
-                    }
-
-                    auto blah = sense_location(i->character);
-                    if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && i->character->getPL() >= 150000) {
-                        send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
-                                     same == true ? pathway : blah);
-                    } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && i->character->getPL() >= 5000000) {
-                        send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
-                                     same == true ? pathway : blah);
-                    } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && i->character->getPL() >= 15000000) {
-                        send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
-                                     same == true ? pathway : blah);
-                    } else {
-                        send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n",
-                                     add_commas(i->character->getPL()).c_str(), same ==
-                                                                        true ? pathway : blah);
-                    }
-                    ++count;
+                switch (dir) {
+                    case BFS_ERROR:
+                        sprintf(pathway, "@rERROR");
+                        break;
+                    case BFS_ALREADY_THERE:
+                        sprintf(pathway, "@RHERE");
+                        break;
+                    case BFS_NO_PATH:
+                        send_to_char(ch, "@MUNKNOWN");
+                        break;
+                    default:
+                        send_to_char(ch, "@G%s\r\n", dirs[dir]);
+                        break;
                 }
-            }
-            if (count == 0) {
-                send_to_char(ch, "You didn't detect anyone of notice.\r\n");
-                return;
-            } else if (count >= 1) {
-                send_to_char(ch, "%d powerlevels detected.\r\n", count);
-                return;
+
+                auto blah = sense_location(i->character);
+                auto cpl = i->character->getPL();
+                if (cpl > obj->value[VAL_WORN_SCOUTER]) {
+                    send_to_char(ch, "@D<@GPowerlevel Detected@D:@w ?????????@D> @w---> @C%s@n\r\n",
+                                 same == true ? pathway : blah);
+                } else {
+                    send_to_char(ch, "@D<@GPowerlevel Detected@D: [@Y%s@D]@w ---> @C%s@n\r\n",
+                                 add_commas(cpl).c_str(), same ==
+                                                          true ? pathway : blah);
+                }
+                ++count;
             }
         }
-        if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-            send_to_char(ch, "They don't seem to be here.\r\n");
+        if (count == 0) {
+            send_to_char(ch, "You didn't detect anyone of notice.\r\n");
             return;
-        }
-        if (IS_ANDROID(vict)) {
-            act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-            act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-            send_to_char(ch, "@D,==================================|@n\r\n");
-            send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
-            send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:                 @RERROR@n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:                 @RERROR@n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:                 @RERROR@n@D|@n\r\n");
-            send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-            send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:                 @RERROR@n@D|@n\r\n");
-            send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-            send_to_char(ch, "@D`==================================|@n\r\n");
+        } else if (count >= 1) {
+            send_to_char(ch, "%d powerlevels detected.\r\n", count);
             return;
-        } else {
-            if (OBJ_FLAGGED(obj, ITEM_BSCOUTER) && GET_HIT(vict) >= 150000) {
-                act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-                act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-                //perform_remove(ch, WEAR_EYE);
-                //send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-                //act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                //extract_obj(obj);
-                //ch->save();
-                return;
-            } else if (OBJ_FLAGGED(obj, ITEM_MSCOUTER) && GET_HIT(vict) >= 5000000) {
-                act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-                act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-                //perform_remove(ch, WEAR_EYE);
-                //send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-                //act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                //extract_obj(obj);
-                //ch->save();
-                return;
-            } else if (OBJ_FLAGGED(obj, ITEM_ASCOUTER) && GET_HIT(vict) >= 15000000) {
-                act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-                act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-                //perform_remove(ch, WEAR_EYE);
-                //send_to_char(ch, "Your scouter overloads and explodes!\r\n");
-                //act("$n's scouter explodes!", false, ch, nullptr, nullptr, TO_ROOM);
-                //extract_obj(obj);
-                //ch->save();
-                return;
-            } else {
-                long double percent = 0.0, cur = 0.0, max = 0.0;
-                int64_t stam = (vict->getCurST()), mstam = GET_MAX_MOVE(vict);
-                if (stam <= 0)
-                    stam = 1;
-                if (mstam <= 0)
-                    mstam = 1;
-
-                cur = (long double) (stam);
-                max = (long double) (mstam);
-
-                percent = (cur / max) * 100;
-                act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
-                act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
-                send_to_char(ch, "@D,==================================|@n\r\n");
-                send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-                send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
-                send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-                send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n",
-                             add_commas(vict->getPL()).c_str());
-                if (!IS_NPC(vict)) {
-                    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
-                                 add_commas(GET_CHARGE(vict)).c_str());
-                } else if (IS_NPC(vict)) {
-                    send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
-                                 add_commas(vict->mobcharge * rand_number(GET_INT(ch) * 50, GET_INT(ch) * 200)).c_str());
-                }
-                if (percent < 10)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
-                else if (percent < 25)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Extremely Tired");
-                else if (percent < 50)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Very Tired");
-                else if (percent < 75)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Tired");
-                else if (percent < 90)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Winded");
-                else if (percent < 100)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Untired");
-                else if (percent >= 100)
-                    send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Energetic");
-                send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-                int check = false;
-                send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
-                if (AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
-                    send_to_char(ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
-                    check = true;
-                }
-                if (AFF_FLAGGED(vict, AFF_HASS)) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
-                                 "Accelerated Arms");
-                    check = true;
-                }
-                if (AFF_FLAGGED(vict, AFF_HEALGLOW)) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
-                                 "Healing Glow Prepared");
-                    check = true;
-                }
-                if (AFF_FLAGGED(vict, AFF_POISON)) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Poisoned");
-                    check = true;
-                }
-                if (PLR_FLAGGED(vict, PLR_SELFD)) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
-                                 "Explosive Energy");
-                    check = true;
-                }
-                if (check == false) {
-                    send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "None Detected.");
-                }
-                send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
-                send_to_char(ch, "@D`==================================|@n\r\n");
-            }
         }
     }
+    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
+        send_to_char(ch, "They don't seem to be here.\r\n");
+        return;
+    }
+    act("$n points $s scouter at you.", false, ch, nullptr, vict, TO_VICT);
+    act("$n points $s scouter at $N.", false, ch, nullptr, vict, TO_NOTVICT);
+    if (IS_ANDROID(vict)) {
+        send_to_char(ch, "@D,==================================|@n\r\n");
+        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
+        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D:                 @RERROR@n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D:                 @RERROR@n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D:                 @RERROR@n@D|@n\r\n");
+        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+        send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D:                 @RERROR@n@D|@n\r\n");
+        send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+        send_to_char(ch, "@D`==================================|@n\r\n");
+        return;
+    }
+    auto vpl = vict->getPL();
+    long double percent = 0.0, cur = 0.0, max = 0.0;
+    int64_t stam = (vict->getCurST()), mstam = GET_MAX_MOVE(vict);
+    if (stam <= 0)
+        stam = 1;
+    if (mstam <= 0)
+        mstam = 1;
+    cur = (long double) (stam);
+    max = (long double) (mstam);
+
+    percent = (cur / max) * 100;
+
+    send_to_char(ch, "@D,==================================|@n\r\n");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char(ch, "@D|@1@RReading target...                 @n@D|@n\r\n");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    if(obj->value[VAL_WORN_SCOUTER] <= vpl)
+        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n",
+                     add_commas(vpl).c_str());
+    else
+        send_to_char(ch, "@D|@1@RP@r@1o@Rw@r@1e@1@Rr L@r@1e@Rv@r@1e@1@Rl@1@D: @Y%21s@n@D|@n\r\n",
+                     "??????????");
+    if (!IS_NPC(vict)) {
+        send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
+                     add_commas(GET_CHARGE(vict)).c_str());
+    } else if (IS_NPC(vict)) {
+        send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
+                     add_commas(vict->mobcharge * rand_number(GET_INT(ch) * 50, GET_INT(ch) * 200)).c_str());
+    }
+    if (percent < 10)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
+    else if (percent < 25)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Extremely Tired");
+    else if (percent < 50)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Very Tired");
+    else if (percent < 75)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Tired");
+    else if (percent < 90)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Winded");
+    else if (percent < 100)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Untired");
+    else if (percent >= 100)
+        send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Energetic");
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    int check = false;
+    send_to_char(ch, "@D|@1@GE@g@1x@Gt@g@1r@Ga I@g@1nf@Go @D: ");
+    if (AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
+        send_to_char(ch, "@Y%21s@n@D|@n\n", "Zanzoken Prepared");
+        check = true;
+    }
+    if (AFF_FLAGGED(vict, AFF_HASS)) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
+                     "Accelerated Arms");
+        check = true;
+    }
+    if (AFF_FLAGGED(vict, AFF_HEALGLOW)) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
+                     "Healing Glow Prepared");
+        check = true;
+    }
+    if (AFF_FLAGGED(vict, AFF_POISON)) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "Poisoned");
+        check = true;
+    }
+    if (PLR_FLAGGED(vict, PLR_SELFD)) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "",
+                     "Explosive Energy");
+        check = true;
+    }
+    if (check == false) {
+        send_to_char(ch, "%s@Y%21s@n@D|@n\n", check == true ? "@D|@1             " : "", "None Detected.");
+    }
+    send_to_char(ch, "@D|@1                                  @n@D|@n\r\n");
+    send_to_char(ch, "@D`==================================|@n\r\n");
 }
 
-std::set<struct obj_data*> dball_count(struct char_data *ch) {
-    std::set<obj_vnum> dbVn;
+std::unordered_set<struct obj_data*> dball_count(struct char_data *ch) {
+    std::unordered_set<obj_vnum> dbVn;
     dbVn.insert(dbVnums.begin(), dbVnums.end());
 
     auto isDragonBall = [&](struct obj_data *obj) {
@@ -9262,7 +8940,6 @@ ACMD(do_save) {
             GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
         }
     }
-    ch->save();
 }
 
 /* generic function for commands which are normally overridden by
@@ -12624,12 +12301,12 @@ void genWeight(char_data* ch, std::string suggestedWeight) {
     int weight = atoi(suggestedWeight.c_str());
 
     if (ch->race == RaceID::Tuffle && (weight >= 3 && weight <= 40)) {
-        ch->weight = weight;
+        ch->set(CharDim::Weight, weight);
         send_to_char(ch, "Weight set.\r\n");
         return;
     }
     else if (weight >= 25 && weight <= 150) {
-        ch->weight = weight;
+        ch->set(CharDim::Weight, weight);
         send_to_char(ch, "Weight set.\r\n");
         return;
     }
@@ -12697,9 +12374,9 @@ void genFinish(char_data* ch) {
     }
 
     if(ch->genBonus == 1) {
-        ch->mod(CharStat::PowerLevel, 200);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 100);
+        ch->mod(CharVital::PowerLevel, 200);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 100);
         ch->mod(CharMoney::Carried, 200);
 
         ch->mod(CharAttribute::Strength, 2);
@@ -12711,9 +12388,9 @@ void genFinish(char_data* ch) {
 
     }
     if(ch->genBonus == 2) {
-        ch->mod(CharStat::PowerLevel, 50);
-        ch->mod(CharStat::Ki, 200);
-        ch->mod(CharStat::Stamina, 100);
+        ch->mod(CharVital::PowerLevel, 50);
+        ch->mod(CharVital::Ki, 200);
+        ch->mod(CharVital::Stamina, 100);
         ch->mod(CharMoney::Carried, 200);
 
         ch->mod(CharAttribute::Intelligence, 2);
@@ -12725,9 +12402,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 3) {
-        ch->mod(CharStat::PowerLevel, 200);
-        ch->mod(CharStat::Ki, 200);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 200);
+        ch->mod(CharVital::Ki, 200);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 10);
 
         ch->mod(CharAttribute::Strength, 2);
@@ -12741,9 +12418,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 4) {
-        ch->mod(CharStat::PowerLevel, 50);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 50);
+        ch->mod(CharVital::PowerLevel, 50);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 50);
         ch->mod(CharMoney::Carried, 5000);
 
         ch->mod(CharAttribute::Intelligence, 2);
@@ -12754,9 +12431,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 5) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12767,9 +12444,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 6) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12780,9 +12457,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 7) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12793,9 +12470,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 8) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12806,9 +12483,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 9) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);
@@ -12819,9 +12496,9 @@ void genFinish(char_data* ch) {
         
     }
     if(ch->genBonus == 10) {
-        ch->mod(CharStat::PowerLevel, 100);
-        ch->mod(CharStat::Ki, 50);
-        ch->mod(CharStat::Stamina, 200);
+        ch->mod(CharVital::PowerLevel, 100);
+        ch->mod(CharVital::Ki, 50);
+        ch->mod(CharVital::Stamina, 200);
         ch->mod(CharMoney::Carried, 500);
 
         ch->mod(CharAttribute::Wisdom, 3);

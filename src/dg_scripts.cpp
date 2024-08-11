@@ -310,10 +310,12 @@ char_data *get_char(char *name) {
         if (i && valid_dg_target(i, DG_ALLOW_GODS))
             return i;
     } else {
-        for (i = character_list; i; i = i->next)
+        for (const auto& r : getAllCharacters()) {
+            i = r.get();
             if (isname(name, i->name) &&
                 valid_dg_target(i, DG_ALLOW_GODS))
                 return i;
+        }
     }
 
     return nullptr;
@@ -436,9 +438,12 @@ obj_data *get_obj(char *name) {
         return std::get<1>(*uidResult);
     }
     else {
-        for (obj = object_list; obj; obj = obj->next)
+        for (auto &r : activeObjects) {
+            obj = r.get();
+            if(!obj) continue;
             if (isname(name, obj->name))
                 return obj;
+        }
     }
 
     return nullptr;
@@ -493,10 +498,12 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
             valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
             return obj->worn_by;
 
-        for (ch = character_list; ch; ch = ch->next)
-            if (isname(name, ch->name) &&
+        for (auto &r : activeCharacters) {
+            ch = r.get();
+            if (ch && isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
+        }
     }
 
     return nullptr;
@@ -526,10 +533,12 @@ char_data *get_char_by_room(room_data *room, char *name) {
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
 
-        for (ch = character_list; ch; ch = ch->next)
-            if (isname(name, ch->name) &&
+        for (auto &r : activeCharacters) {
+            ch = r.get();
+            if (ch && isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
+        }
     }
 
     return nullptr;
@@ -617,9 +626,11 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
         if (isname(name, obj->name))
             return obj;
 
-    for (obj = object_list; obj; obj = obj->next)
-        if (isname(name, obj->name))
+    for (auto &r : activeObjects) {
+        obj = r.get();
+        if (obj && isname(name, obj->name))
             return obj;
+    }
 
     return nullptr;
 }
@@ -632,8 +643,9 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     int nr;
     struct script_data *sc;
 
-    for (ch = character_list; ch; ch = ch->next) {
-        if (SCRIPT(ch)) {
+    for (const auto &r : characterSubscriptions.all("randomTriggers")) {
+        ch = r.get();
+        if (ch && SCRIPT(ch)) {
             sc = SCRIPT(ch);
 
             if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
@@ -643,8 +655,9 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
         }
     }
 
-    for (obj = object_list; obj; obj = obj->next) {
-        if (SCRIPT(obj)) {
+    for (const auto &r : objectSubscriptions.all("randomTriggers")) {
+        obj = r.get();
+        if (obj && SCRIPT(obj)) {
             sc = SCRIPT(obj);
 
             if (IS_SET(SCRIPT_TYPES(sc), OTRIG_RANDOM))
@@ -652,9 +665,10 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
         }
     }
 
-    for (auto &r : world) {
-        if (SCRIPT(&r.second)) {
-            room = &r.second;
+    for (const auto &re : roomSubscriptions.all("randomTriggers")) {
+        auto room = re.get();
+        if(!room) continue;
+        if (SCRIPT(room)) {
             sc = SCRIPT(room);
 
             if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
@@ -672,8 +686,9 @@ void check_time_triggers() {
     int nr;
     struct script_data *sc;
 
-    for (ch = character_list; ch; ch = ch->next) {
-        if (SCRIPT(ch)) {
+    for (auto &r : characterSubscriptions.all("timeTriggers")) {
+        ch = r.get();
+        if (ch && SCRIPT(ch)) {
             sc = SCRIPT(ch);
 
             if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) &&
@@ -683,8 +698,9 @@ void check_time_triggers() {
         }
     }
 
-    for (obj = object_list; obj; obj = obj->next) {
-        if (SCRIPT(obj)) {
+    for (auto &r : objectSubscriptions.all("timeTriggers")) {
+        obj = r.get();
+        if (obj && SCRIPT(obj)) {
             sc = SCRIPT(obj);
 
             if (IS_SET(SCRIPT_TYPES(sc), OTRIG_TIME))
@@ -692,9 +708,9 @@ void check_time_triggers() {
         }
     }
 
-    for (auto &r : world) {
-        if (SCRIPT(&r.second)) {
-            room = &r.second;
+    for (const auto &re : roomSubscriptions.all("timeTriggers")) {
+        room = re.get();
+        if (room && SCRIPT(room)) {
             sc = SCRIPT(room);
 
             if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
@@ -706,9 +722,10 @@ void check_time_triggers() {
 }
 
 void check_interval_triggers(int trigFlag) {
-
-    for (auto ch = character_list; ch; ch = ch->next) {
-        if (SCRIPT(ch)) {
+    auto ac = activeCharacters;
+    for (auto &r : ac) {
+        auto ch = r.get();
+        if (ch && SCRIPT(ch)) {
             auto sc = SCRIPT(ch);
 
             if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
@@ -718,8 +735,10 @@ void check_interval_triggers(int trigFlag) {
         }
     }
 
-    for (auto obj = object_list; obj; obj = obj->next) {
-        if (SCRIPT(obj)) {
+    auto ao = activeObjects;
+    for (auto &r : ao) {
+        auto obj = r.get();
+        if (obj && SCRIPT(obj)) {
             auto sc = SCRIPT(obj);
 
             if (IS_SET(SCRIPT_TYPES(sc), trigFlag))
@@ -3132,7 +3151,6 @@ void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, cha
 // not individually.
 void trig_data::activate() {
     if(active) {
-        basic_mud_log("SYSERR: Attempt to activate already-active trigger %ld", id);
         return;
     }
     active = true;
@@ -3143,13 +3161,16 @@ void trig_data::activate() {
 
 void trig_data::deactivate() {
     if(!active) {
-        basic_mud_log("SYSERR: Attempt to deactivate already-inactive trigger %ld", id);
         return;
     }
     active = false;
     struct trig_data *temp;
     triggers_waiting.erase(this);
+    auto find = std::find(triggers_queued.begin(), triggers_queued.end(), this);
+    if(find != triggers_queued.end())
+        triggers_queued.erase(find);
     REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);
+
 }
 
 nlohmann::json serializeVars(struct trig_var_data *vd) {
@@ -3184,4 +3205,3 @@ void script_data::deactivate() {
 nlohmann::json index_data::serializeProto() {
     return proto->serializeProto();
 }
-

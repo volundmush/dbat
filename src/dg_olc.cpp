@@ -456,6 +456,9 @@ void trigedit_save(struct descriptor_data *d) {
 
             /* anything could have happened so we don't want to keep these */
             triggers_waiting.erase(live_trig);
+            auto find = std::find(triggers_queued.begin(), triggers_queued.end(), live_trig);
+            if(find != triggers_queued.end())
+                triggers_queued.erase(find);
 
             if (live_trig->var_list) {
                 free_varlist(live_trig->var_list);

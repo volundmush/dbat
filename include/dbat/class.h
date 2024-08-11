@@ -5,8 +5,6 @@
 
 // global variables
 
-extern const char *config_sect[NUM_CONFIG_SECTIONS + 1];
-extern const int class_hit_die_size[NUM_CLASSES];
 
 // functions
 extern void do_start(struct char_data *ch);

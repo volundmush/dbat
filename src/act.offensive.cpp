@@ -182,6 +182,7 @@ ACMD(do_geno) {
 
     obj = read_object(83, VIRTUAL);
     obj_to_room(obj, IN_ROOM(vict));
+    objectSubscriptions.subscribe("hugeKiAttacks", obj->ref());
 
     GET_CHARGE(ch) += GET_MAX_HIT(ch) / 10;
     TARGET(obj) = vict;
@@ -303,6 +304,7 @@ ACMD(do_genki) {
     KITYPE(obj) = SKILL_GENKIDAMA;
     USER(obj) = ch;
     KIDIST(obj) = dista;
+    objectSubscriptions.subscribe("hugeKiAttacks", obj->ref());
     pcost(ch, attperc, 0);
     act("@WYou raise both your arms upwards and begin to pool your charged ki there. You also start calling on the ki of all living beings in the vicinity who are willing to help. A large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W forms above your hands, when it is finished you lob it toward @c$N@W!@n",
         true, ch, nullptr, vict, TO_CHAR);
@@ -829,6 +831,9 @@ ACMD(do_charge) {
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
         ch->playerFlags.reset(PLR_CHARGE);
+        auto r = ch->ref();
+        characterSubscriptions.unsubscribe("chargeMoreKi", r);
+        characterSubscriptions.unsubscribe("kiLeakingSystem", r);
         return;
     } else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0) {
         send_to_char(ch, "You release your pent up energy.\r\n");
@@ -849,6 +854,9 @@ ACMD(do_charge) {
         ch->incCurKI(GET_CHARGE(ch));
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
+        auto r = ch->ref();
+        characterSubscriptions.unsubscribe("chargeMoreKi", r);
+        characterSubscriptions.unsubscribe("kiLeakingSystem", r);
         return;
     } else if (!strcasecmp("cancel", arg) && PLR_FLAGGED(ch, PLR_CHARGE)) {
         send_to_char(ch, "You stop charging.\r\n");
@@ -868,6 +876,7 @@ ACMD(do_charge) {
         }
         ch->playerFlags.reset(PLR_CHARGE);
         GET_CHARGETO(ch) = 0;
+        characterSubscriptions.unsubscribe("chargeMoreKi", ch->ref());
         return;
     } else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
         send_to_char(ch, "You are not even charging!\r\n");
@@ -909,6 +918,7 @@ ACMD(do_charge) {
                 char bloom[MAX_INPUT_LENGTH];
                 sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
                 act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
+                characterSubscriptions.unsubscribe("kiLeakingSystem", ch->ref());
                 GET_CHARGE(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff;
                 ch->decCurKI((((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost);
             }
@@ -921,6 +931,7 @@ ACMD(do_charge) {
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
             GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
             GET_CHARGE(ch) += 1;
+            characterSubscriptions.unsubscribe("kiLeakingSystem", ch->ref());
             ch->playerFlags.set(PLR_CHARGE);
         }
     } else if (amt < 1 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1562) {
@@ -931,46 +942,18 @@ ACMD(do_charge) {
     }
 }
 
+static const std::map<vital_t, std::pair<std::string, std::string>> startPowerUpMessages = {
+        {50000, {"@RYou begin to powerup, and air billows outward around you!@n", "@R$n begins to powerup, and air billows outward around $m!@n"}},
+        {500000, {"@RYou begin to powerup, and loose objects are lifted into the air!@n", "@R$n begins to powerup, and loose objects are lifted into the air!@n"}},
+        {5000000, {"@RYou begin to powerup, and torrents of energy crackle around you!@n", "@R$n begins to powerup, and torrents of energy crackle around $m!@n"}},
+        {50000000, {"@RYou begin to powerup, and the entire area begins to shudder!@n", "@R$n begins to powerup, and the entire area begins to shudder!@n"}},
+        {100000000, {"@RYou begin to powerup, and massive cracks begin to form beneath you!@n", "@R$n begins to powerup, and massive cracks begin to form beneath $m!@n"}},
+        {300000000, {"@RYou begin to powerup, and everything around you shudders from the power!@n", "@R$n begins to powerup, and everything around $m shudders from the power!@n"}},
+        {std::numeric_limits<vital_t>::max(), {"@RYou begin to powerup, and the very air around you begins to burn!@n", "@R$n begins to powerup, and the very air around $m begins to burn!@n"}}
+};
+
 ACMD(do_powerup) {
-    if (IS_NPC(ch)) {
-        ch->mobFlags.set(MOB_POWERUP);
-        if (GET_MAX_HIT(ch) < 50000) {
-            act("@RYou begin to powerup, and air billows outward around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and air billows outward around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 500000) {
-            act("@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 5000000) {
-            act("@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 50000000) {
-            act("@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 100000000) {
-            act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 300000000) {
-            act("@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, nullptr,
-                nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, nullptr,
-                nullptr, TO_ROOM);
-        } else {
-            act("@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        }
-        return;
-    }
+
     if (PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "@WYou are concentrating too much on your aura to be able to power up.");
         return;
@@ -986,6 +969,7 @@ ACMD(do_powerup) {
     if (PLR_FLAGGED(ch, PLR_POWERUP)) {
         send_to_char(ch, "@WYou stop powering up.@n");
         ch->playerFlags.reset(PLR_POWERUP);
+        characterSubscriptions.unsubscribe("powerupService", ch->ref());
         return;
     }
     if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
@@ -995,46 +979,22 @@ ACMD(do_powerup) {
     if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20) {
         send_to_char(ch, "@WYou do not have enough ki to powerup!@n");
         return;
-    } else {
-        reveal_hiding(ch, 0);
-        if (GET_MAX_HIT(ch) < 50000) {
-            act("@RYou begin to powerup, and air billows outward around you!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@R$n begins to powerup, and air billows outward around $m!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 500000) {
-            act("@RYou begin to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and loose objects are lifted into the air!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 5000000) {
-            act("@RYou begin to powerup, and torrents of energy crackle around you!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and torrents of energy crackle around $m!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 50000000) {
-            act("@RYou begin to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and the entire area begins to shudder!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 100000000) {
-            act("@RYou begin to powerup, and massive cracks begin to form beneath you!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and massive cracks begin to form beneath $m!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        } else if (GET_MAX_HIT(ch) < 300000000) {
-            act("@RYou begin to powerup, and everything around you shudders from the power!@n", true, ch, nullptr,
-                nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and everything around $m shudders from the power!@n", true, ch, nullptr,
-                nullptr, TO_ROOM);
-        } else {
-            act("@RYou begin to powerup, and the very air around you begins to burn!@n", true, ch, nullptr, nullptr,
-                TO_CHAR);
-            act("@R$n begins to powerup, and the very air around $m begins to burn!@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-        }
-        ch->playerFlags.set(PLR_POWERUP);
-        return;
     }
+    reveal_hiding(ch, 0);
+
+    auto curPL = ch->getCurPL();
+
+    for(const auto& [threshold, messages] : startPowerUpMessages) {
+        if(curPL < threshold) {
+            act(messages.first.c_str(), true, ch, nullptr, nullptr,
+                TO_CHAR);
+            act(messages.second.c_str(), true, ch, nullptr, nullptr,
+                TO_ROOM);
+            break;
+        }
+    }
+    characterSubscriptions.subscribe("powerupService", ch->ref());
+    ch->playerFlags.set(PLR_POWERUP);
 }
 
 ACMD(do_rescue) {

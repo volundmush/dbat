@@ -17,6 +17,7 @@ int main(int argc, char **argv)
 {
     int pos = 1;
     const char *dir;
+    original_cwd = std::filesystem::current_path();
 
 #ifdef MEMORY_DEBUG
     zmalloc_init();
@@ -71,9 +72,6 @@ int main(int argc, char **argv)
                     puts("SYSERR: File name to log to expected after option -o.");
                     exit(1);
                 }
-                break;
-            case 'C': /* -C<socket number> - recover from copyover, this is the control socket */
-                fCopyOver = true;
                 break;
             case 'd':
                 if (*(argv[pos] + 2))
@@ -168,40 +166,13 @@ int main(int argc, char **argv)
 
     basic_mud_log("Running game.");
     try {
-        game::init_locale();
-        game::init_sodium();
-        game::init_database();
-        game::init_asio();
-        game::init_zones();
+        game::init();
         game::run_game();
     }
     catch(std::exception& e) {
         std::cerr << "Uncaught exception: " << e.what() << std::endl;
         exit(1);
     }
-
-    basic_mud_log("Clearing game world.");
-    destroy_db();
-
-    if (!scheck) {
-        basic_mud_log("Clearing other memory.");
-        free_bufpool();             /* comm.c */
-        clear_free_list();		/* mail.c */
-        free_mail_index();          /* mail.c */
-        free_text_files();		/* db.c */
-        clear_boards();             /* boards.c */
-        free(cmd_sort_info);	/* act.informative.c */
-        free_command_list();        /* act.informative.c */
-        free_social_messages();	/* act.social.c */
-        free_help_table();		/* db.c */
-        Free_Invalid_List();	/* ban.c */
-        free_strings(&config_info, OASIS_CFG); /* oasis_delete.c */
-        free_disabled();    /* interpreter.c */
-        save_list.clear();		/* genolc.c */
-    }
-
-    if (last_act_message)
-        free(last_act_message);
 
     /* probably should free the entire config here.. */
     free(CONFIG_CONFFILE);

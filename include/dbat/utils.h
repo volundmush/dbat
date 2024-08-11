@@ -461,7 +461,7 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 
 #define SECT(room)    (VALID_ROOM_RNUM(room) ? \
                 world[(room)].sector_type : SECT_INSIDE)
-#define ROOM_DAMAGE(room)   (world[(room)].dmg)
+#define ROOM_DAMAGE(room)   (world[(room)].getDamage())
 #define ROOM_EFFECT(room)   (world[(room)].geffect)
 #define ROOM_GRAVITY(room)  (world[(room)].getGravity())
 #define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
@@ -709,7 +709,6 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define GET_DEFAULT_POS(ch)    ((ch)->mob_specials.default_pos)
 #define MEMORY(ch)        ((ch)->mob_specials.memory)
-#define MOB_COOLDOWN(ch)        ((ch)->cooldown)
 
 /* STRENGTH_APPLY_INDEX is no longer needed with the death of GET_ADD */
 /* #define STRENGTH_APPLY_INDEX(ch) \
@@ -739,8 +738,8 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define ARENA_IDNUM(ch) ((ch)->arenawatch)
 
 /* These three deprecated. */
-#define WAIT_STATE(ch, cycle) do { ch->set(CharNum::Wait, (cycle)); } while(0)
-#define GET_WAIT_STATE(ch)    ((ch)->get(CharNum::Wait))
+extern void WAIT_STATE(struct char_data *ch, double timeToWait);
+#define GET_WAIT_STATE(ch)    ((ch)->waitTime)
 #define CHECK_WAIT(ch)                (GET_WAIT_STATE(ch) > 0)
 #define GET_MOB_WAIT(ch)      GET_WAIT_STATE(ch)
 /* New, preferred macro. */
@@ -803,7 +802,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define KIDIST(obj)             ((obj)->distance)
 /* Above is used for "homing ki attacks */
 #define SFREQ(obj)              ((obj)->scoutfreq)
-#define HCHARGE(obj)            ((obj)->healcharge)
+#define HCHARGE(obj)            (GET_OBJ_VAL((obj), VAL_BED_HTANK_CHARGE))
 #define GET_LAST_LOAD(obj)      ((obj)->lload)
 #define GET_OBJ_SIZE(obj)    ((obj)->size)
 #define GET_OBJ_RNUM(obj)    ((obj)->vn)
@@ -1170,18 +1169,16 @@ template<size_t N>
 void sprintbitarray(const std::bitset<N>& bitvector, const char *names[], int maxar, char *result) {
     *result = '\0';
 
-    for (auto i = 0; i < bitvector.size(); i++) {
-        if(!bitvector[i]) continue;
-        if(*names[i] == '\n') break;
+    for (size_t i = 0; i < bitvector.size() && i < static_cast<size_t>(maxar); i++) {
+        if (!bitvector[i]) continue;
+        if (names[i] == nullptr || *names[i] == '\n') break; // Check for nullptr or sentinel value
 
-        if(*names[i] == '\0') {
+        if (*names[i] == '\0') {
             strcat(result, "UNDEFINED ");
         } else {
             strcat(result, names[i]);
-
             strcat(result, " ");
         }
-
     }
 
     if (!*result)

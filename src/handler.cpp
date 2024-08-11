@@ -28,7 +28,7 @@
 #include "dbat/mobact.h"
 
 /* local vars */
-static std::set<struct char_data*> extractions_pending;
+static std::unordered_set<struct char_data*> extractions_pending;
 
 /* external vars */
 
@@ -260,9 +260,7 @@ void affect_total(struct char_data *ch) {
 /* Insert an affect_type in a char_data structure
    Automatically sets apropriate bits and apply's */
 void affect_to_char(struct char_data *ch, struct affected_type *af) {
-    struct affected_type *affected_alloc;
-
-    CREATE(affected_alloc, struct affected_type, 1);
+    auto affected_alloc = new affected_type();
 
     if (!ch->affected) {
         ch->next_affect = affect_list;
@@ -292,7 +290,7 @@ void affect_remove(struct char_data *ch, struct affected_type *af) {
 
     affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
     REMOVE_FROM_LIST(af, ch->affected, next, cmtemp);
-    free(af);
+    delete af;
     affect_total(ch);
     if (!ch->affected) {
         struct char_data *temp;
@@ -401,11 +399,19 @@ void char_from_room(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         ch->affected_by.reset(AFF_PURSUIT);
 
+    auto &z = zone_table[r->zone];
+    if(IS_NPC(ch)) {
+        z.npcsInZone.erase(ch->ref());
+    } else {
+        z.playersInZone.erase(ch->ref());
+    }
+
     REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
     IN_ROOM(ch) = NOWHERE;
     ch->next_in_room = nullptr;
-    
-    if(!gameIsLoading) ch->save();
+
+
+
 }
 
 /* place a character in a room */
@@ -415,6 +421,13 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     ch->next_in_room = room->people;
     room->people = ch;
     IN_ROOM(ch) = room->vn;
+
+    auto &z = zone_table[room->zone];
+    if(IS_NPC(ch)) {
+        z.npcsInZone.insert(ch->ref());
+    } else {
+        z.playersInZone.insert(ch->ref());
+    }
 
     /* Stop fighting now, if we left. */
     if (FIGHTING(ch) && IN_ROOM(ch) != IN_ROOM(FIGHTING(ch)) && !AFF_FLAGGED(ch, AFF_PURSUIT)) {
@@ -521,11 +534,11 @@ static int apply_ac(struct char_data *ch, int eq_pos) {
 }
 
 int invalid_align(struct char_data *ch, struct obj_data *obj) {
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_EVIL) && IS_EVIL(ch))
+    if (obj->antiAlignGoodEvil.test(0) && IS_EVIL(ch))
         return true;
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_GOOD) && IS_GOOD(ch))
+    if (obj->antiAlignGoodEvil.test(2) && IS_GOOD(ch))
         return true;
-    if (OBJ_FLAGGED(obj, ITEM_ANTI_NEUTRAL) && IS_NEUTRAL(ch))
+    if (obj->antiAlignGoodEvil.test(1) && IS_NEUTRAL(ch))
         return true;
     return false;
 }
@@ -648,12 +661,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
 
 /* search all over the world for a char num, and return a pointer if found */
 struct char_data *get_char_num(mob_rnum nr) {
-    struct char_data *i;
-
-    for (i = character_list; i; i = i->next)
-        if (GET_MOB_RNUM(i) == nr)
-            return (i);
-
+    for(auto v : get_vnum_list(characterVnumIndex, nr)) return v;
     return (nullptr);
 }
 
@@ -668,6 +676,8 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                          object->short_description);
             extract_obj(object);
             return;
+        } else {
+            objectSubscriptions.subscribe("growingPlants", object->ref());
         }
     }
     if (room->vn == real_room(80)) {
@@ -679,6 +689,9 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     IN_ROOM(object) = room->vn;
     object->carried_by = nullptr;
     GET_LAST_LOAD(object) = time(nullptr);
+
+    auto &z = zone_table[room->zone];
+    z.objectsInZone.insert(object->ref());
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
@@ -770,12 +783,15 @@ void obj_to_room(struct obj_data *object, room_rnum room) {
 /* Take an object from a room */
 void obj_from_room(struct obj_data *object) {
     struct obj_data *temp;
+    auto r = object->getRoom();
 
     if (!object || IN_ROOM(object) == NOWHERE) {
         basic_mud_log("SYSERR: nullptr object or obj not in a room (%d) passed to obj_from_room",
             IN_ROOM(object));
         return;
     }
+
+    if(object->type_flag == ITEM_PLANT) objectSubscriptions.unsubscribe("growingPlants", object->ref());
 
     if (GET_OBJ_POSTED(object) && object->in_obj == nullptr) {
         struct obj_data *obj = GET_OBJ_POSTED(object);
@@ -792,12 +808,13 @@ void obj_from_room(struct obj_data *object) {
         GET_OBJ_POSTTYPE(object) = 0;
     }
 
+    auto &z = zone_table[r->zone];
+    z.objectsInZone.erase(object->ref());
+
     REMOVE_FROM_LIST(object, object->getRoom()->contents, next_content, temp);
 
     IN_ROOM(object) = NOWHERE;
     object->next_content = nullptr;
-
-    if(!gameIsLoading) object->save();
 
 }
 
@@ -814,8 +831,6 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
     obj_to->contents = obj;
     obj->in_obj = obj_to;
     tmp_obj = obj->in_obj;
-
-    if(!gameIsLoading) obj->save();
 }
 
 
@@ -830,8 +845,6 @@ void obj_from_obj(struct obj_data *obj) {
     obj_from = obj->in_obj;
     temp = obj->in_obj;
     REMOVE_FROM_LIST(obj, obj_from->contents, next_content, temp);
-    
-    if(!gameIsLoading) obj->save();
 
     obj->in_obj = nullptr;
     obj->next_content = nullptr;
@@ -1096,9 +1109,9 @@ void extract_char_final(struct char_data *ch) {
     if (FIGHTING(ch))
         stop_fighting(ch);
 
-    for (k = combat_list; k; k = temp) {
-        temp = k->next_fighting;
-        if (FIGHTING(k) == ch)
+    for (const auto &r : characterSubscriptions.all("combatSystem")) {
+        k = r.get();
+        if (k && FIGHTING(k) == ch)
             stop_fighting(k);
     }
 
@@ -1112,8 +1125,6 @@ void extract_char_final(struct char_data *ch) {
             extract_script(ch, MOB_TRIGGER);
         if (SCRIPT_MEM(ch))
             extract_script_mem(SCRIPT_MEM(ch));
-    } else {
-        ch->save();
     }
 
     /* If there's a descriptor, they're in the menu now. */
@@ -1211,7 +1222,9 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
         num = get_number(&name);
     }
 
-    for (i = character_list; i; i = i->next) {
+    for (auto &r : activeCharacters) {
+        i = r.get();
+        if(!i) continue;
         if (IS_NPC(i))
             continue;
         if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
@@ -1327,7 +1340,9 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     if (*number == 0)
         return get_player_vis(ch, name, nullptr, 0);
 
-    for (i = character_list; i && *number; i = i->next) {
+    for (auto &r : activeCharacters) {
+        i = r.get();
+        if(!i) continue;
         if (IN_ROOM(ch) == IN_ROOM(i))
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
@@ -1419,11 +1434,13 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
-    for (i = object_list; i && *number; i = i->next)
-        if (isname(name, i->name))
+    for (auto &r : activeObjects) {
+        i = r.get();
+        if (i && isname(name, i->name))
             if (CAN_SEE_OBJ(ch, i))
                 if (--(*number) == 0)
                     return (i);
+    }
 
     return (nullptr);
 }

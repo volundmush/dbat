@@ -1363,6 +1363,16 @@ static void do_stat_room(struct char_data *ch) {
     list_zone_commands_room(ch, rm->vn);
 }
 
+static std::string format_double(double value) {
+    if (std::floor(value) == value) {
+        // It's a whole number
+        return fmt::format("{:.0f}", value); // No decimal places
+    } else {
+        // Format with up to 2 decimal places
+        return fmt::format("{:.2f}", value);
+    }
+}
+
 static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     int i, found;
     obj_vnum vnum;
@@ -1508,14 +1518,11 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         case ITEM_MONEY:
             send_to_char(ch, "Coins: %d\r\n", GET_OBJ_VAL(j, VAL_MONEY_SIZE));
             break;
-        default:
-            send_to_char(ch, "Values 0-12: [%d] [%d] [%d] [%d] [%d] [%d] [%d] [%d] [%d] [%d] [%d] [%d]\r\n",
-                         GET_OBJ_VAL(j, 0), GET_OBJ_VAL(j, 1),
-                         GET_OBJ_VAL(j, 2), GET_OBJ_VAL(j, 3),
-                         GET_OBJ_VAL(j, 4), GET_OBJ_VAL(j, 5),
-                         GET_OBJ_VAL(j, 6), GET_OBJ_VAL(j, 7),
-                         GET_OBJ_VAL(j, 8), GET_OBJ_VAL(j, 9),
-                         GET_OBJ_VAL(j, 10), GET_OBJ_VAL(j, 11));
+        default: {
+            std::vector<std::string> value(j->value.size());
+            for(auto &v : j->value) value.emplace_back(fmt::format("[{}]", v));
+            send_to_char(ch, "%s", fmt::format("Values 0-{}: {}", j->value.size()-1, fmt::join(value, " ")));
+        }
             break;
     }
 
@@ -1541,24 +1548,19 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         send_to_char(ch, "@n");
     }
 
-    found = false;
-    send_to_char(ch, "Affections:");
-    for (i = 0; i < MAX_OBJ_AFFECT; i++)
-        if (j->affected[i].location != APPLY_NONE) {
-            sprinttype(j->affected[i].location, apply_types, buf, sizeof(buf));
-            auto m = fmt::format("{}", j->affected[i].modifier);
-            send_to_char(ch, "%s %s to %s", found++ ? "," : "", m.c_str(), buf);
-            switch (j->affected[i].location) {
-                case APPLY_FEAT:
-                    send_to_char(ch, " (%s)", feat_list[j->affected[i].specific].name);
-                    break;
-                case APPLY_SKILL:
-                    send_to_char(ch, " (%s)", spell_info[j->affected[i].specific].name);
-                    break;
-            }
-        }
-    if (!found)
-        send_to_char(ch, " None");
+    send_to_char(ch, "Affections: ");
+    std::vector<std::string> affs;
+    for (auto &aff : j->affected) {
+        if(aff.location == APPLY_NONE) continue;
+        found = true;
+        std::string bon = (aff.modifier >= 0.0 ? "+" : "") + (aff.isPercent() ? fmt::format("{:.2f}%", aff.modifier * 100.0) : format_double(aff.modifier));
+        affs.emplace_back(fmt::format("{} to {} ({})", bon, aff.locName(), fmt::join(aff.specificNames(), ", ")));
+    }
+
+    if (affs.empty())
+        send_to_char(ch, "None");
+    else
+        send_to_char(ch, "%s", fmt::format("{}", fmt::join(affs, ", ")));
 
     send_to_char(ch, "\r\n");
 
@@ -2625,9 +2627,9 @@ ACMD(do_advance) {
     } else if ((newlevel = atoi(level)) <= 0) {
         if (!strcasecmp("demote", level)) {
             victim->set(CharNum::Level, 1);
-            victim->set(CharStat::PowerLevel, 150);
-            victim->set(CharStat::Ki, 150);
-            victim->set(CharStat::Stamina, 150);
+            victim->set(CharVital::PowerLevel, 150);
+            victim->set(CharVital::Ki, 150);
+            victim->set(CharVital::Stamina, 150);
             send_to_char(ch, "They have now been demoted!\r\n");
             send_to_char(victim, "You were demoted to level 1!\r\n");
             return;
@@ -2669,7 +2671,6 @@ ACMD(do_advance) {
 
     int gain = level_exp(victim, newlevel) - GET_EXP(victim);
     victim->modExperience(gain);
-    victim->save();
 }
 
 ACMD(do_handout) {
@@ -3240,7 +3241,6 @@ ACMD(do_wizutil) {
        */
                 break;
         }
-        vict->save();
     }
 }
 
@@ -3415,9 +3415,10 @@ ACMD(do_show) {
         case 4:
             i = 0;
             j = 0;
-            k = 0;
-            con = 0;
-            for (vict = character_list; vict; vict = vict->next) {
+            k = uniqueObjects.size();
+            con = sessions.size();
+            for (auto &[id, ent] : uniqueCharacters) {
+                vict = ent.second;
                 if (IS_NPC(vict))
                     j++;
                 else if (CAN_SEE(ch, vict)) {
@@ -3426,8 +3427,6 @@ ACMD(do_show) {
                         con++;
                 }
             }
-            for (obj = object_list; obj; obj = obj->next)
-                k++;
             send_to_char(ch,
                          "             @D---   @CCore Stats   @D---\r\n"
                          "  @Y%5d@W players in game  @y%5d@W connected\r\n"
@@ -3921,7 +3920,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             log_imm_action("SET: %s has set bank for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
         case 21:
-            vict->exp = RANGE(0, 50000000);
+            vict->setExperience(RANGE(0, 50000000));
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set exp for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set exp for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4082,7 +4081,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 50:
-            GET_WEIGHT(vict) = value;
+            vict->set(CharDim::Weight, value);
             affect_total(vict);
             break;
 
@@ -4198,21 +4197,21 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 64:
-            vict->set(CharStat::PowerLevel, value);
+            vict->set(CharVital::PowerLevel, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basepl for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set basepl for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
 
         case 65:
-            vict->set(CharStat::Ki, value);
+            vict->set(CharVital::Ki, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set baseki for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set baseki for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
 
         case 66:
-            vict->set(CharStat::Stamina, value);
+            vict->set(CharVital::Stamina, value);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set basest for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set basest for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4351,11 +4350,6 @@ ACMD(do_set) {
 
     /* perform the set */
     retval = perform_set(ch, vict, mode, buf);
-
-    /* save the character if a change was made */
-    if (retval && !IS_NPC(ch)) {
-        vict->save();
-    }
 }
 
 ACMD(do_saveall) {
@@ -4475,8 +4469,6 @@ ACMD(do_chown) {
 
         obj_from_char(obj);
         obj_to_char(obj, ch);
-        ch->save();
-        victim->save();
     }
 }
 
@@ -4790,7 +4782,7 @@ ACMD (do_zcheck) {
 
             /* special handling of +hit and +dam because of +hit_n_dam */
             for (todam = 0, tohit = 0, j = 0; j < MAX_OBJ_AFFECT; j++) {
-                if (obj->affected[j].location == APPLY_DAMAGE)
+                if (obj->affected[j].location == APPLY_COMBAT_BASE && obj->affected[j].specific | static_cast<int>(ComStat::Damage))
                     todam += obj->affected[j].modifier;
             }
             if (abs(todam) > MAX_APPLY_DAMAGE_MOD_TOTAL && (found = 1))

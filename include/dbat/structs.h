@@ -34,8 +34,8 @@ struct account_data {
     int slots{3};
     std::vector<std::string> customs;
     std::vector<vnum> characters;
-    std::set<descriptor_data*> descriptors;
-    std::set<net::Connection*> connections;
+    std::unordered_set<descriptor_data*> descriptors;
+    std::unordered_set<net::Connection*> connections;
 
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
@@ -57,8 +57,8 @@ struct player_data {
     struct account_data *account{};
     struct char_data* character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
-    std::set<int64_t> sensePlayer;
-    std::set<mob_vnum> senseMemory;
+    std::unordered_set<int64_t> sensePlayer;
+    std::unordered_set<mob_vnum> senseMemory;
     std::map<int64_t, std::string> dubNames;
     char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
@@ -79,8 +79,8 @@ struct area_data {
     explicit area_data(const nlohmann::json &j);
     vnum vn{NOTHING}; /* virtual number of this area		*/
     std::string name; /* name of this area			*/
-    std::set<room_vnum> rooms; /* rooms in this area			*/
-    std::set<vnum> children; /* child areas				*/
+    std::unordered_set<room_vnum> rooms; /* rooms in this area			*/
+    std::unordered_set<vnum> children; /* child areas				*/
     std::optional<double> gravity; /* gravity in this area			*/
     std::optional<vnum> parent; /* parent area				*/
     AreaType type{AreaType::Dimension}; /* type of area				*/
@@ -100,15 +100,39 @@ struct extra_descr_data {
     struct extra_descr_data *next; /* Next in list                     */
 };
 
+struct affect_t {
+    // DO NOT CHANGE THE ORDER OF THESE FIELDS.
+    explicit affect_t() = default;
+    explicit affect_t(const nlohmann::json& j);
+    affect_t(int loc, double mod, int spec) : location(loc), modifier(mod), specific(spec) {};
+    uint64_t location{0};
+    double modifier{0.0};
+    uint64_t specific{0};
+    std::vector<std::string> specificNames();
+    std::string locName();
+    bool isBitwise();
+    bool match(int loc, int spec);
+    bool isPercent();
+    virtual void deserialize(const nlohmann::json& j);
+    virtual nlohmann::json serialize();
+};
 
-struct obj_affected_type {
-    obj_affected_type() = default;
-    explicit obj_affected_type(const nlohmann::json& j);
-    void deserialize(const nlohmann::json& j);
-    nlohmann::json serialize();
-    int location{};       /* Which ability to change (APPLY_XXX) */
-    int specific{};       /* Some locations have parameters      */
-    double modifier{};       /* How much it changes by              */
+struct character_affect_type : affect_t {
+    std::function<double(struct char_data *ch)> func{};
+
+    character_affect_type(int loc, double mod, int spec, std::function<double(struct char_data *ch)> f = {})
+            : affect_t{loc, mod, spec}, func{f} {}
+};
+
+/* An affect structure. */
+struct affected_type : affect_t {
+    using affect_t::affect_t;
+    int16_t type{};          /* The type of spell that caused this      */
+    int16_t duration{};      /* For how long its effects will last      */
+    bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
+    nlohmann::json serialize() override;
+    void deserialize(const nlohmann::json& j) override;
+    struct affected_type *next{};
 };
 
 struct obj_spellbook_spell {
@@ -116,23 +140,123 @@ struct obj_spellbook_spell {
     int pages;        /* How many pages does it take up */
 };
 
-struct obj_ref {
-    int64_t id{NOTHING};
-    time_t generation{};
-    struct obj_data* get(bool checkActive);
+class ObjRef {
+public:
+    // Constructors
+    ObjRef() = default;
+    ObjRef(int64_t id, time_t generation);
+    explicit ObjRef(const nlohmann::json& j);
+    explicit ObjRef(obj_data* obj);
+
+    // Destructor
+    ~ObjRef() = default;
+
+    // Public methods
+    int64_t getID() const;
+    time_t getGeneration() const;
+    nlohmann::json serialize() const;
+    void deserialize(const nlohmann::json& j);
+    obj_data* get(bool checkActive = false) const;
+
+    // Operators
+    bool operator==(const ObjRef& other) const;
+    bool operator!=(const ObjRef& other) const;
+    obj_data* operator->();
+    operator obj_data*();
+    ObjRef& operator=(const obj_data* obj);
+    ObjRef& operator=(const obj_data& obj);
+
+private:
+    int64_t id{0};
+    time_t generation{0};
 };
 
-struct char_ref {
-    int64_t id{NOTHING};
-    time_t generation{};
-    struct char_data* get(bool checkActive);
+
+class CharRef {
+public:
+    // Constructors
+    CharRef() = default;
+    CharRef(int64_t id, time_t generation);
+    explicit CharRef(const nlohmann::json& j);
+    explicit CharRef(char_data* obj);
+
+    // Destructor
+    ~CharRef() = default;
+
+    // Public methods
+    int64_t getID() const;
+    time_t getGeneration() const;
+    nlohmann::json serialize() const;
+    void deserialize(const nlohmann::json& j);
+    char_data* get(bool checkActive = false) const;
+
+    // Operators
+    bool operator==(const CharRef& other) const;
+    bool operator!=(const CharRef& other) const;
+    char_data* operator->();
+    operator char_data*();
+    CharRef& operator=(const char_data* obj);
+    CharRef& operator=(const char_data& obj);
+
+private:
+    int64_t id{0};
+    time_t generation{0};
 };
 
-struct room_ref {
-    int64_t id{NOTHING};
-    time_t generation{};
-    struct room_data* get(bool checkActive);
+class RoomRef {
+public:
+    // Constructors
+    RoomRef() = default;
+    RoomRef(int64_t id, time_t generation);
+    explicit RoomRef(const nlohmann::json& j);
+    explicit RoomRef(room_data* obj);
+
+    // Destructor
+    ~RoomRef() = default;
+
+    // Public methods
+    int64_t getID() const;
+    time_t getGeneration() const;
+    nlohmann::json serialize() const;
+    void deserialize(const nlohmann::json& j);
+    room_data* get(bool checkActive = false) const;
+
+    // Operators
+    bool operator==(const RoomRef& other) const;
+    bool operator!=(const RoomRef& other) const;
+    room_data* operator->();
+    operator room_data*();
+    RoomRef& operator=(const room_data* obj);
+    RoomRef& operator=(const room_data& obj);
+
+private:
+    int64_t id{0};
+    time_t generation{0};
 };
+
+// Define a hash specialization for RefBase
+namespace std {
+    template <>
+    struct hash<ObjRef> {
+        std::size_t operator()(const ObjRef& ref) const {
+            return std::hash<int64_t>()(ref.getID()) ^ std::hash<time_t>()(ref.getGeneration());
+        }
+    };
+
+    template <>
+    struct hash<CharRef> {
+        std::size_t operator()(const CharRef& ref) const {
+            return std::hash<int64_t>()(ref.getID()) ^ std::hash<time_t>()(ref.getGeneration());
+        }
+    };
+
+    template <>
+    struct hash<RoomRef> {
+        std::size_t operator()(const RoomRef& ref) const {
+            return std::hash<int64_t>()(ref.getID()) ^ std::hash<time_t>()(ref.getGeneration());
+        }
+    };
+}
 
 struct unit_data {
     unit_data() = default;
@@ -168,14 +292,13 @@ struct unit_data {
 
     virtual std::string getUID(bool active = true) = 0;
     virtual bool isActive() = 0;
-    virtual void save() = 0;
 
     nlohmann::json serializeScripts();
     void deserializeScripts();
 
     struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
     virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
-    virtual std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
+    virtual std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
 
 };
 
@@ -204,27 +327,32 @@ struct obj_data : public unit_data {
 
     void deactivate();
 
-    int getAffectModifier(int location, int specific = -1);
+    double getAffectModifier(uint64_t location, uint64_t specific);
 
     std::string getUID(bool active = true) override;
     bool active{false};
     bool isActive() override;
-    void save() override;
 
     struct room_data* getAbsoluteRoom();
     struct room_data* getRoom();
     bool isWorking();
     void clearLocation();
 
-    obj_ref ref() { return obj_ref{id, generation}; }
-
+    ObjRef ref();
 
     room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
-    int64_t value[NUM_OBJ_VAL_POSITIONS]{};   /* Values of the item (see list)    */
+    /* legacy Values of the item (see VAL_ list in defs.h)    */
+    std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value;
+
+    /* arbitrary named doubles */
+    std::unordered_map<std::string, double> dvalue;
     int8_t type_flag{};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
+    std::bitset<3> onlyAlignLawChaos, antiAlignLawChaos, onlyAlignGoodEvil, antiAlignGoodEvil;
+    std::bitset<NUM_CLASSES> onlyClass, antiClass;
+    std::bitset<NUM_RACES> onlyRace, antiRace;
     std::bitset<NUM_ITEM_WEARS> wear_flags{}; /* Where you can wear it     */
     std::bitset<NUM_ITEM_FLAGS> extra_flags{}; /* If it hums, glows, etc.  */
     weight_t weight{};         /* Weight what else                     */
@@ -236,7 +364,7 @@ struct obj_data : public unit_data {
     std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
     int size{SIZE_MEDIUM};           /* Size class of object                */
 
-    struct obj_affected_type affected[MAX_OBJ_AFFECT]{};  /* affects */
+    std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
 
     struct obj_data *in_obj{};       /* In what object nullptr when none    */
     struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
@@ -244,13 +372,11 @@ struct obj_data : public unit_data {
     int16_t worn_on{-1};          /* Worn where?		      */
 
     struct obj_data *next_content{}; /* For 'contains' lists             */
-    struct obj_data *next{};         /* For the object list              */
 
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
     struct char_data *sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
     time_t lload{};
-    int healcharge{};
     int64_t kicharge{};
     int kitype{};
     struct char_data *user{};
@@ -330,6 +456,8 @@ struct room_data : public unit_data {
     std::optional<double> gravity;
 
     bool isSunken();
+    void activate();
+    void deactivate();
 
     int getDamage();
     int setDamage(int amount);
@@ -343,9 +471,8 @@ struct room_data : public unit_data {
     std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
     std::string getUID(bool active = true) override;
     bool isActive() override;
-    void save() override;
 
-    room_ref ref() { return room_ref{id, generation}; }
+    RoomRef ref();
 
     std::optional<room_vnum> getLaunchDestination();
 
@@ -358,6 +485,7 @@ struct room_data : public unit_data {
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
 };
+extern std::map<room_vnum, room_data> world;
 /* ====================================================================== */
 
 
@@ -455,19 +583,7 @@ struct mob_special_data {
     bool newitem{};             /* Check if mob has new inv item       */
 };
 
-/* An affect structure. */
-struct affected_type {
-    affected_type() = default;
-    explicit affected_type(const nlohmann::json& j);
-    int16_t type{};          /* The type of spell that caused this      */
-    int16_t duration{};      /* For how long its effects will last      */
-    double modifier{};         /* This is added to apropriate ability     */
-    int location{};         /* Tells which ability to change(APPLY_XXX)*/
-    int specific{};         /* Some locations have parameters          */
-    bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
-    nlohmann::json serialize();
-    struct affected_type *next{};
-};
+
 
 /* Queued spell entry */
 struct queued_act {
@@ -615,7 +731,6 @@ struct char_data : public unit_data {
 
     bool active{false};
     bool isActive() override;
-    void save() override;
 
     void ageBy(double addedTime);
     void setAge(double newAge);
@@ -628,10 +743,9 @@ struct char_data : public unit_data {
     struct room_data* getRoom();
 
     struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
-    std::set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
+    std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
 
-    char_ref ref() { return char_ref{id, generation}; }
-
+    CharRef ref();
 
     char *title{};
     RaceID race{RaceID::Spirit};
@@ -639,12 +753,12 @@ struct char_data : public unit_data {
 
     std::list<std::pair<int, std::string>> wait_input_queue;
     Task task = Task::nothing;
+    void setTask(Task t);
     struct craftTask craftingTask;
     struct deck craftingDeck;
-
+    double waitTime{0.0};
 
     /* PC / NPC's weight                    */
-    weight_t weight{0};
     weight_t getWeight(bool base = false);
     weight_t getTotalWeight();
     weight_t getCurrentBurden();
@@ -653,14 +767,18 @@ struct char_data : public unit_data {
     bool canCarryWeight(struct char_data *obj);
     bool canCarryWeight(weight_t val);
 
-    int getHeight(bool base = false);
-    int setHeight(int val);
-    int modHeight(int val);
+    dim_t getHeight(bool base = false);
+    dim_t setHeight(dim_t val);
+    dim_t modHeight(dim_t val);
+
+    std::unordered_map<CharDim, dim_t> dims{};
+    dim_t get(CharDim stat, bool base = false);
+    dim_t set(CharDim stat, dim_t val);
+    dim_t mod(CharDim stat, dim_t val);
 
     int getArmor();
 
     std::unordered_map<CharNum, num_t> nums{};
-
     num_t get(CharNum stat);
     num_t set(CharNum stat, num_t val);
     num_t mod(CharNum stat, num_t val);
@@ -693,10 +811,11 @@ struct char_data : public unit_data {
 
     std::bitset<NUM_AFF_FLAGS> affected_by{};/* Bitvector for current affects	*/
 
-    std::unordered_map<CharStat, stat_t> stats;
-    stat_t get(CharStat type, bool base = true);
-    stat_t set(CharStat type, stat_t val);
-    stat_t mod(CharStat type, stat_t val);
+    std::unordered_map<CharVital, vital_t> vitals;
+    vital_t get(CharVital type, bool base = true);
+    vital_t set(CharVital type, vital_t val);
+    vital_t mod(CharVital type, vital_t val);
+    double getRegen(CharVital type);
 
     // Instance-relevant fields below...
     room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
@@ -722,9 +841,6 @@ struct char_data : public unit_data {
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
     struct char_data *next_in_room{};
-    /* For room->people - list		*/
-    struct char_data *next{};    /* For either monster or ppl-list	*/
-    struct char_data *next_fighting{};
     /* For fighting list			*/
     struct char_data *next_affect{};/* For affect wearoff			*/
     struct char_data *next_affectv{};
@@ -737,7 +853,7 @@ struct char_data : public unit_data {
     struct memorize_node *memorized{};
     struct innate_node *innate{};
 
-    struct char_data *fighting{};    /* Opponent				*/
+    CharRef fighting;    /* Opponent				*/
 
     int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
 
@@ -767,10 +883,14 @@ struct char_data : public unit_data {
 
     int armor{0};        /* Internally stored *10		*/
 
-    int64_t exp{};            /* The experience of the player		*/
     int64_t getExperience();
     int64_t setExperience(int64_t value);
     int64_t modExperience(int64_t value, bool applyBonuses = true);
+
+    std::unordered_map<CharStat, stat_t> stats;
+    stat_t get(CharStat type);
+    stat_t set(CharStat type, stat_t val);
+    stat_t mod(CharStat type, stat_t val);
 
     int accuracy{};            /* Base hit accuracy			*/
     int accuracy_mod{};        /* Any bonus or penalty to the accuracy	*/
@@ -778,7 +898,7 @@ struct char_data : public unit_data {
 
     FormID form{FormID::Base};        /* Current form of the character		*/
     FormID technique{FormID::Base};        /* Current technique form of the character		*/
-    std::set<FormID> permForms;    /* Permanent forms of the character	*/
+    std::unordered_set<FormID> permForms;    /* Permanent forms of the character	*/
     double transBonus{0.0};   // Varies from -0.3 to 0.3
     double internalGrowth{0.0};
     double lifetimeGrowth{0.0};
@@ -849,7 +969,6 @@ struct char_data : public unit_data {
     std::optional<RaceID> mimic{};
     std::bitset<MAX_BONUSES> bonuses{};
 
-    int cooldown{};
     int death_type{};
 
     int64_t moltexp{};
@@ -885,7 +1004,7 @@ struct char_data : public unit_data {
     int gooptime{};
     int blesslvl{};
     struct char_data *poisonby{};
-    std::set<struct char_data*> poisoned;
+    std::unordered_set<struct char_data*> poisoned;
 
     int mobcharge{};
     int preference{};
@@ -902,7 +1021,7 @@ struct char_data : public unit_data {
 
     struct char_data *original{};
 
-    std::set<struct char_data*> clones{};
+    std::unordered_set<struct char_data*> clones{};
     int relax_count{};
     int ingestLearned{};
 
@@ -987,6 +1106,12 @@ struct char_data : public unit_data {
     int64_t calcGravCost(int64_t num);
 
     // Stats stuff
+
+    std::unordered_map<CharVital, double> damages;
+    double modCurVitalDam(CharVital type, double dam);
+    double setCurVitalDam(CharVital type, double dam);
+    double getCurVitalDam(CharVital type);
+
 
     int64_t getCurHealth();
 
@@ -1190,11 +1315,6 @@ struct char_data : public unit_data {
     void apply_kaioken(int times, bool announce);
 
     void remove_kaioken(int8_t announce);
-
-    double health = 1;
-    double energy = 1;
-    double stamina = 1;
-    double life = 1;
 
     int getRPP();
     void modRPP(int amt);
@@ -1503,6 +1623,59 @@ struct aging_data {
     int maxdice[2];    /* For roll to determine natural death beyond venerable */
 };
 
-#ifdef MEMORY_DEBUG
-#include "zmalloc.h"
-#endif
+
+
+
+
+template <typename T>
+class SubscriptionManager {
+
+public:
+    // Subscribe an entity to a particular service
+    void subscribe(const std::string& service, const T& ref) {
+        subscriptions[service].insert(ref);
+    }
+
+    // Unsubscribe an entity from a particular service
+    void unsubscribe(const std::string& service, const T& ref) {
+        auto it = subscriptions.find(service);
+        if (it != subscriptions.end()) {
+            it->second.erase(ref);
+            if (it->second.empty()) {
+                subscriptions.erase(it);
+            }
+        }
+    }
+
+    // Get all entities subscribed to a particular service
+    std::unordered_set<T> all(const std::string& service) const {
+        auto it = subscriptions.find(service);
+        if (it != subscriptions.end()) {
+            return it->second;
+        }
+        return {};
+    }
+
+    // Check if an entity is subscribed to a particular service
+    bool isSubscribed(const std::string& service, const T& ref) const {
+        auto it = subscriptions.find(service);
+        if (it != subscriptions.end()) {
+            return it->second.find(ref) != it->second.end();
+        }
+        return false;
+    }
+
+    void unsubscribeFromAll(const T& ref) {
+        for (auto it = subscriptions.begin(); it != subscriptions.end(); ) {
+            it->second.erase(ref);
+            if (it->second.empty()) {
+                it = subscriptions.erase(it); // Erase and get the next iterator
+            } else {
+                ++it;
+            }
+        }
+    }
+
+private:
+    std::unordered_map<std::string, std::unordered_set<T>> subscriptions;
+};

@@ -1,243 +1,57 @@
+#include <iostream>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <memory>
+#include <regex>
+#include <sys/epoll.h>
+#include <cppcodec/base64_rfc4648.hpp>
+
 #include "dbat/net.h"
 #include "dbat/utils.h"
-#include <regex>
 #include "dbat/screen.h"
 #include "dbat/players.h"
 #include "dbat/login.h"
 #include "dbat/config.h"
 #include "dbat/account.h"
 #include "dbat/accmenu.h"
+#include "dbat/charmenu.h"
+#include "dbat/chargen.h"
+#include "dbat/puppet.h"
 
 #define COLOR_ON(ch) (COLOR_LEV(ch) > 0)
 
 namespace net {
-    std::unique_ptr<io_context> io;
-    std::unique_ptr<signal_set> signals;
-    std::unique_ptr<Channel<nlohmann::json>> linkChannel;
-    boost::asio::ip::tcp::endpoint thermiteEndpoint;
+    std::unordered_map<int, std::shared_ptr<Connection>> connections;
+    std::unordered_map<int, DisconnectReason> deadConnections;
+    std::unordered_set<int> pendingOutData, pendingReads, pendingWrites;
 
-    std::mutex connectionMutex, pendingConnectionsMutex;
-    std::unordered_map<int64_t, std::shared_ptr<Connection>> connections;
-    std::set<int64_t> pendingConnections;
-    std::unordered_map<int64_t, DisconnectReason> deadConnections;
+    int server_fd = -1;
+    int epoll_fd = -1;
 
-    std::unique_ptr<Link> link;
+    using base64 = cppcodec::base64_rfc4648;
 
-    Link::Link(boost::beast::websocket::stream<boost::beast::tcp_stream> ws)
-            : conn(std::move(ws)), is_stopped(false) {}
-
-    awaitable<void> Link::run() {
-        try {
-            co_await (runReader() || runWriter() || runPinger());
-        } catch (const boost::system::system_error& e) {
-            logger->error("Error in Link::run(): {}", e.what());
-            // Handle exceptions here if necessary
-        } catch(...) {
-            logger->error("Unknown error in Link::run()");
-        }
-        if(conn.is_open()) {
-            try {
-                conn.close(boost::beast::websocket::close_code::normal);
-            } catch(...) {
-                logger->error("Error closing WebSocket gracefully...");
-            }
-        }
-        co_return;
+    // Overload for std::vector<uint8_t>
+    std::string encodeBase64(const std::vector<uint8_t>& data) {
+        return base64::encode(data);
     }
 
-    awaitable<void> Link::runPinger() {
-        boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor);
-        while(!is_stopped) {
-            timer.expires_after(100ms);
-            co_await timer.async_wait(boost::asio::use_awaitable);
-            if(!is_stopped) {
-                // use async_ping to send a ping...
-                co_await conn.async_ping(boost::beast::websocket::ping_data{}, boost::asio::use_awaitable);
-            }
-        }
-        co_return;
+    // Overload for std::string
+    std::string encodeBase64(const std::string& data) {
+        return base64::encode(reinterpret_cast<const uint8_t*>(data.data()), data.size());
     }
 
-    void Link::stop() {
-        is_stopped = true;
+    std::vector<uint8_t> decodeBase64(const std::string& base64Str) {
+        return base64::decode<std::vector<uint8_t>>(base64Str);
     }
 
-    awaitable<void> Link::createUpdateClient(const nlohmann::json &j) {
-        auto id = j["id"].get<int64_t>();
-        const auto& capabilities = j["capabilities"];
-
-        // Do something with id, addr, and capabilities
-        if (auto it = connections.find(id); it == connections.end()) {
-            // Create a new ClientConnection
-            auto ex = co_await boost::asio::this_coro::executor;
-            JsonChannel fLink(ex, 200);
-            auto cc = std::make_shared<Connection>(id, std::move(fLink));
-            cc->capabilities.deserialize(capabilities);
-            if(config::usingMultithreading) {
-                std::lock_guard<std::mutex> lock(connectionMutex);
-                connections[id] = cc;
-            } else connections[id] = cc;
-
-            if(config::usingMultithreading) {
-                std::lock_guard<std::mutex> lock(pendingConnectionsMutex);
-                pendingConnections.insert(id);
-            } else pendingConnections.insert(id);
-        } else {
-            // Update the existing ClientConnection
-            auto& client_connection = it->second;
-            client_connection->capabilities.deserialize(capabilities);
-        }
-        co_return;
-    }
-
-    awaitable<void> Link::runReader() {
-        while (!is_stopped) {
-            try {
-                // Read a message from the WebSocket
-                boost::beast::flat_buffer buffer;
-                co_await conn.async_read(buffer, boost::asio::use_awaitable);
-
-                // Deserialize the JSON string
-                auto ws_str = boost::beast::buffers_to_string(buffer.data());
-                //std::cout << "Received: " << ws_str << std::endl;
-                auto j = nlohmann::json::parse(ws_str);
-
-
-                // Access the "kind" field in the JSON object
-                std::string kind = j["kind"];
-
-                // Implement your routing logic here
-
-                if (kind == "client_list") {
-                    // This message is sent by Thermite when the game establishes a fresh connection with it.
-                    // It should be the first thing a Link sees.
-                    //logger->info("Link: Received client_list message");
-                    // Get the "data" object
-                    auto &data = j["data"];
-
-                    // Iterate over the contents of the "data" object
-                    for (const auto &entry : data) {
-                        co_await createUpdateClient(entry);
-                    }
-
-                } else if (kind == "client_ready") {
-                    // This message is sent by Thermite when a new client has connected.
-                    auto &data = j["protocol"];
-                    co_await createUpdateClient(data);
-
-                } else {
-                    // Extract the "id" field from the JSON object
-                    int64_t id = j["id"];
-
-                    // Look up the specific ClientConnection in the std::map
-                    auto it = connections.find(id);
-                    if(it == connections.end()) {
-                        logger->info("Link: Received message for unknown client: {}", id);
-                        continue;
-                    }
-
-                    // Found the client connection
-                    auto &client_connection = it->second;
-
-                    if (kind == "client_capabilities") {
-                        auto &capabilities = j["capabilities"];
-                        client_connection->capabilities.deserialize(capabilities);
-
-                    } else if (kind == "client_data") {
-                        try {
-                            co_await client_connection->fromLink.async_send(boost::system::error_code{}, j, boost::asio::use_awaitable);
-                        } catch (const boost::system::system_error &e) {
-                            // Handle exceptions (e.g., WebSocket close or error)
-                        }
-
-                    } else if (kind == "client_disconnected") {
-                        logger->info("Link: Received client_disconnected message for client: {}", id);
-                        deadConnections[id] = DisconnectReason::ConnectionClosed;
-                    }
-                }
-            } catch (const boost::system::system_error &e) {
-                logger->error("Link RunReader flopped at: {}", e.what());
-                break;
-                // Handle exceptions (e.g., WebSocket close or error)
-            } catch (...) {
-                logger->error("Unknown error in Link RunReader");
-                break;
-            }
-        }
-        co_return;
-    }
-
-    awaitable<void> Link::runWriter() {
-        while (!is_stopped) {
-            try {
-                // Receive a message from the channel asynchronously
-                auto message = co_await linkChannel->async_receive(boost::asio::use_awaitable);
-
-                try {
-                    // Serialize the JSON message to text
-                    std::string serialized_msg = message.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);
-
-                    // Send the message across the WebSocket
-                    co_await conn.async_write(boost::asio::buffer(serialized_msg), boost::asio::use_awaitable);
-                } catch (const boost::system::system_error& e) {
-                    logger->error("Link runWriter flopped 1: {}", e.what());
-                    // Handle exceptions (e.g., WebSocket close or error) when sending the message
-                } catch (...) {
-                    logger->error("Unknown error in Link runWriter 1");
-                }
-            } catch (const boost::system::system_error& e) {
-                logger->error("Link runWriter flopped 2: {}", e.what());
-                // Handle exceptions (e.g., error receiving the message from the channel)
-                break;
-            } catch (...) {
-                logger->error("Unknown error in Link runWriter 2");
-                break;
-            }
-        }
-        co_return;
-    }
-
-    awaitable<void> runLinkManager() {
-        bool do_standoff = false;
-        boost::asio::steady_timer standoff(co_await boost::asio::this_coro::executor);
-        while (true) {
-            if(do_standoff) {
-                standoff.expires_after(5s);
-                co_await standoff.async_wait(boost::asio::use_awaitable);
-                do_standoff = false;
-            }
-
-            auto &endpoint = thermiteEndpoint;
-
-            try {
-                logger->info("LinkManager: Connecting to {}:{}...", endpoint.address().to_string(), endpoint.port());
-                // Create a new TCP socket
-                boost::beast::websocket::stream<boost::beast::tcp_stream> ws(co_await boost::asio::this_coro::executor);
-
-                // Connect to the endpoint
-                co_await boost::beast::get_lowest_layer(ws).async_connect(endpoint, boost::asio::use_awaitable);
-                // Initialize a WebSocket using the connected socket
-
-                // Perform the WebSocket handshake
-                co_await ws.async_handshake(endpoint.address().to_string() + ":" + std::to_string(endpoint.port()), "/", boost::asio::use_awaitable);
-
-                // Construct a Link using the WebSocket
-                link = std::make_unique<Link>(std::move(ws));
-
-                // Run the Link
-                logger->info("LinkManager: Link established! Running Link...");
-                co_await link->run();
-                link.reset();
-
-            } catch (const boost::system::system_error& error) {
-                // If there was an error, handle it (e.g., log the error message)
-                logger->error("Error in LinkManager::run(): {}", error.what());
-
-                // You might want to add a delay before attempting to reconnect, e.g.,
-                do_standoff = true;
-            }
-        }
-        co_return;
+    // Optionally, you can also provide a decode overload for std::string if needed
+    std::string decodeBase64ToString(const std::string& base64Str) {
+        auto decodedData = base64::decode<std::vector<uint8_t>>(base64Str);
+        return std::string(decodedData.begin(), decodedData.end());
     }
 
     void ProtocolCapabilities::deserialize(const nlohmann::json& j) {
@@ -257,7 +71,7 @@ namespace net {
         if(j.contains("encoding")) encoding = j["encoding"];
         if(j.contains("utf8")) utf8 = j["utf8"];
 
-        if(j.contains("colorType")) colorType = j["color"].get<ColorType>();
+        if(j.contains("colorType")) colorType = static_cast<ColorType>(j.at("colorType").get<int>());
 
         if(j.contains("width")) width = j["width"];
         if(j.contains("height")) height = j["height"];
@@ -280,6 +94,7 @@ namespace net {
         if(j.contains("osc_color_palette")) osc_color_palette = j["osc_color_palette"];
         if(j.contains("proxy")) proxy = j["proxy"];
         if(j.contains("mnes")) mnes = j["mnes"];
+        if(j.contains("mslp")) mslp = j["mslp"];
     }
 
     nlohmann::json ProtocolCapabilities::serialize() {
@@ -317,11 +132,12 @@ namespace net {
         if(osc_color_palette) j["osc_color_palette"] = osc_color_palette;
         if(proxy) j["proxy"] = proxy;
         if(mnes) j["mnes"] = mnes;
+        if(mslp) j["mslp"] = mslp;
 
         return j;
     }
 
-    std::string ProtocolCapabilities::protocolName() {
+    std::string ProtocolCapabilities::protocolName() const {
         switch(protocol) {
             case Protocol::Telnet: return "telnet";
             case Protocol::WebSocket: return "websocket";
@@ -330,39 +146,31 @@ namespace net {
         }
     }
 
-    Message::Message() {
-        cmd = "";
-        args = nlohmann::json::array();
-        kwargs = nlohmann::json::object();
+    nlohmann::json SendBuffer::serialize() {
+        nlohmann::json j;
+        j["data"] = encodeBase64(data);
+        j["sent"] = sent;
+        j["bitflags"] = bitflags;
+        return j;
     }
 
-    Message::Message(const nlohmann::json& j) : Message() {
-        if(j.contains("cmd")) cmd = j["cmd"].get<std::string>();
-        if(j.contains("args")) args = j["args"];
-        if(j.contains("kwargs")) kwargs = j["kwargs"];
+    SendBuffer::SendBuffer(const nlohmann::json& j) {
+        std::string dataStr = j["data"];
+        if(j.contains("data")) data = decodeBase64ToString(dataStr);
+        if(j.contains("sent")) sent = j["sent"];
+        if(j.contains("bitflags")) bitflags = j["bitflags"];
     }
-
-    void Connection::sendMessage(const Message &msg) {
-        nlohmann::json j, d;
-        j["kind"] = "client_data";
-        j["id"] = this->connId;
-
-        d["cmd"] = msg.cmd;
-        d["args"] = msg.args;
-        d["kwargs"] = msg.kwargs;
-
-        j["data"].push_back(d);
-
-        linkChannel->try_send(boost::system::error_code{}, j);
-    }
-
 
     void ConnectionParser::close() {
 
     }
 
-    void ConnectionParser::sendText(const std::string &txt) {
-        conn->sendText(txt);
+    void ConnectionParser::sendText(const std::string &txt, int bitflags) {
+        conn->sendText(txt, bitflags);
+    }
+
+    void ConnectionParser::sendGMCP(const std::string &cmd, const nlohmann::json& j, int bitflags) {
+        conn->sendGMCP(cmd, j, bitflags);
     }
 
     void ConnectionParser::start() {
@@ -373,59 +181,496 @@ namespace net {
 
     }
 
-    void ConnectionParser::handleMessage(const Message &m) {
-        // The default does nothing, but later it will handle API stuff.
+    nlohmann::json ConnectionParser::serialize() {
+        nlohmann::json j;
+        j["parserName"] = getName();
+        return j;
     }
 
-    void Connection::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-        if(cmd.empty()) return;
-        nlohmann::json j2;
-        j2["cmd"] = cmd;
-        j2["data"] = j;
-        sendEvent("GMCP", j2);
+    void ConnectionParser::deserialize(const nlohmann::json& j) {
+
     }
 
-    void Connection::sendText(const std::string &text) {
-        if(text.empty()) return;
-        Message msg;
-        msg.cmd = "text";
-        if(boost::icontains(text, "\r\r\n")) {
-            logger->info("WHAT THE HELL?");
-        }
-        if(desc && desc->character) {
-            auto &p = players[desc->character->id];
-            msg.args.push_back(processColors(text, COLOR_ON(desc->character), p.color_choices));
-        } else {
-            msg.args.push_back(processColors(text, true, nullptr));
-        }
-        sendMessage(msg);
+    bool ConnectionParser::canCopyover() {
+        return false;
     }
 
-    void Connection::sendEvent(const std::string &name, const nlohmann::json &data) {
-        outQueue.emplace_back(name, jdump(data));
+
+
+    void Connection::sendText(const std::string &text, int bitflags) {
+        auto colored = processColors(text, true, nullptr);
+        telnet_send_text(teldata, colored.c_str(), colored.size());
+        // telnet_send_text will use outbuf.emplace_back() so to apply the
+        // bitflags we need to do it immediately afterwards.
+        auto &latest = outbuf.back();
+        latest.bitflags = bitflags;
     }
 
-    void Connection::queueMessage(const std::string& event, const std::string& data) {
-        inQueue.emplace_back(event, data);
+    void Connection::sendGMCP(const std::string &cmd, const nlohmann::json &j, int bitflags) {
+
+        // telnet_send_text will use outbuf.emplace_back() so to apply the
+        // bitflags we need to do it immediately afterwards.
+        auto &latest = outbuf.back();
+        latest.bitflags = bitflags;
     }
 
     void Connection::onWelcome() {
         account = nullptr;
         desc = nullptr;
+        state = ConnectionState::Connected;
         setParser(new LoginParser(shared_from_this()));
     }
 
     void Connection::close() {
         state = ConnectionState::Dead;
+        deadConnections[connId] = DisconnectReason::GameLogoff;
+        if(parser) parser->close();
+        parser.reset();
     }
 
     void Connection::onNetworkDisconnected() {
         state = ConnectionState::Dead;
+        deadConnections[connId] = DisconnectReason::ConnectionLost;
     }
 
+    static const telnet_telopt_t my_telopts[] = {
+            { TELNET_TELOPT_TTYPE,     TELNET_WONT, TELNET_DO },
+            { TELNET_TELOPT_COMPRESS2, TELNET_WILL, TELNET_DONT   },
+            { TELNET_TELOPT_COMPRESS3, TELNET_WILL, TELNET_DONT   },
+            { TELNET_TELOPT_MSSP,      TELNET_WILL, TELNET_DONT   },
+            { TELNET_TELOPT_NAWS,      TELNET_WONT, TELNET_DO },
+            { -1, 0, 0 }
+    };
 
-    Connection::Connection(int64_t connId, JsonChannel fromLink) : connId(connId), fromLink(std::move(fromLink)) {
+    void telnet_handler(telnet_t *telnet, telnet_event_t *event, void *user_data) {
+        auto conn = (Connection*)user_data;
+        conn->handleTelnet(event);
+    }
 
+    void Connection::sendTelnetNegotiations() {
+        for (int i = 0; teldata->telopts[i].telopt != -1; ++i) {
+            auto &opt = teldata->telopts[i];
+            if(opt.us == TELNET_WILL) {
+                telnet_negotiate(teldata, TELNET_WILL, opt.telopt);
+            }
+            if(opt.him == TELNET_DO) {
+                telnet_negotiate(teldata, TELNET_DO, opt.telopt);
+            }
+        }
+    }
+
+    void Connection::update(double deltaTime) {
+        while(parser && !pendingCommands.empty()) {
+            parser->parse(pendingCommands.front());
+            pendingCommands.pop_front();
+        }
+    }
+
+    void Connection::handleGMCP(char* cmd, char *data) {
+
+    }
+
+    void Connection::handleAppData() {
+        lastReceivedBytes = std::chrono::steady_clock::now();
+
+        // Find the first occurrence of "\r\n" in the buffer
+        auto it = appbuf.find("\r\n");
+
+        while (it != std::string::npos) {
+            // Extract the command up to the "\r\n"
+            std::string command = appbuf.substr(0, it);
+
+            // Append the command to pendingCommands
+            pendingCommands.push_back(std::move(command));
+
+            // Remove the processed command and "\r\n" from appbuf
+            appbuf.erase(0, it + 2);
+
+            // Look for the next "\r\n" in the remaining buffer
+            it = appbuf.find("\r\n");
+        }
+
+        // If no more complete commands are found, the remaining data in appbuf is left as-is
+    }
+
+    void Connection::handleTelnetCommand(char cmd) {
+        lastReceivedBytes = std::chrono::steady_clock::now();
+    }
+
+    void Connection::handleTelnetWill(char telopt) {
+        lastReceivedBytes = std::chrono::steady_clock::now();
+
+        switch(telopt) {
+            case TELNET_TELOPT_NAWS:
+                capabilities.naws = true;
+                break;
+            case TELNET_TELOPT_TTYPE:
+                capabilities.ttype = true;
+                telnet_ttype_send(teldata);
+                break;
+        }
+
+    }
+
+    void Connection::handleTelnetDo(char telopt) {
+        lastReceivedBytes = std::chrono::steady_clock::now();
+
+        switch(telopt) {
+            default:
+                break;
+        }
+
+    }
+
+    void Connection::handleTelnetDont(char telopt) {
+        lastReceivedBytes = std::chrono::steady_clock::now();
+
+        switch(telopt) {
+            default:
+                break;
+        }
+    }
+
+    void Connection::handleTelnetWont(char telopt) {
+        lastReceivedBytes = std::chrono::steady_clock::now();
+    }
+
+    void Connection::handleTelnetSubNegotiate(char telopt, const char *buffer, size_t size) {
+        lastReceivedBytes = std::chrono::steady_clock::now();
+
+        // just ignore anything coming from these, they have special handlers.
+        switch(telopt) {
+            case TELNET_TELOPT_ZMP:
+            case TELNET_TELOPT_NAWS:
+            case TELNET_TELOPT_GMCP:
+            case TELNET_TELOPT_TTYPE:
+            case TELNET_TELOPT_NEW_ENVIRON:
+                return;
+        }
+
+    }
+
+    static const std::unordered_set<std::string> clientsWithXterm256Support = {
+            "ATLANTIS", "CMUD", "KILDCLIENT", "MUDLET", "MUSHCLIENT", "PUTTY", "BEIP", "POTATO", "TINYFUGUE"
+    };
+
+    void Connection::handleTelnetTTYPE(unsigned char cmd, const char *data) {
+        std::string newData(data);
+
+        // Check if the received TTYPE is the same as the last one
+        if (newData == lastTTYPE) {
+            return;
+        }
+
+        // Update last TTYPE
+        lastTTYPE = newData;
+
+        // Process the TTYPE based on the current state
+        switch (ttypeState) {
+            case 0:
+                // Some clients respond with <name> <version>
+                // Split the data into name and version if applicable
+            {
+                size_t spacePos = newData.find(' ');
+                if (spacePos != std::string::npos) {
+                    capabilities.clientName = newData.substr(0, spacePos);
+                    capabilities.clientVersion = newData.substr(spacePos + 1);
+                } else {
+                    capabilities.clientName = newData;
+                }
+
+                // Anything that answers TTYPE always at least supports ANSI.
+                if(capabilities.colorType < ColorType::Standard)
+                    capabilities.colorType = ColorType::Standard;
+
+                std::string upperStr = capabilities.clientName;
+                std::transform(upperStr.begin(), upperStr.end(), upperStr.begin(), ::toupper);
+
+                if(clientsWithXterm256Support.contains(upperStr)) {
+                    if(capabilities.colorType < ColorType::Xterm256)
+                        capabilities.colorType = ColorType::Xterm256;
+                }
+            }
+                break;
+
+            case 1:
+                // Terminal type information
+                // The client should report one of the following: DUMB, ANSI, VT100, XTERM
+                if (newData == "DUMB") {
+                    if(capabilities.colorType < ColorType::NoColor)
+                        capabilities.colorType = ColorType::NoColor;
+                } else if (newData == "ANSI") {
+                    if(capabilities.colorType < ColorType::Standard)
+                        capabilities.colorType = ColorType::Standard;
+                } else if (newData == "VT100") {
+                    if(capabilities.colorType < ColorType::Standard)
+                        capabilities.colorType = ColorType::Standard;
+                    capabilities.vt100 = true;
+                } else if (newData == "XTERM") {
+                    if(capabilities.colorType < ColorType::Xterm256)
+                        capabilities.colorType = ColorType::Xterm256;
+                    capabilities.vt100 = true;
+                    capabilities.mouse_tracking = true;
+                } else if (newData == "ANSI-256COLOR" || newData == "VT100-256COLOR" || newData == "XTERM-256COLOR") {
+                    if(capabilities.colorType < ColorType::Xterm256)
+                        capabilities.colorType = ColorType::Xterm256;
+                } else if (newData.find("-TRUECOLOR") != std::string::npos) {
+                    if(capabilities.colorType < ColorType::TrueColor)
+                        capabilities.colorType = ColorType::TrueColor;
+                    capabilities.osc_color_palette = true;
+                }
+                break;
+            case 2:
+                // MTTS information
+                if (newData.find("MTTS") == 0) {
+                    int mttsCapabilities = std::stoi(newData.substr(5));
+                    capabilities.gmcp = mttsCapabilities & 1;
+                    capabilities.vt100 = mttsCapabilities & 2;
+                    capabilities.utf8 = mttsCapabilities & 4;
+                    if(mttsCapabilities & 8 && capabilities.colorType < ColorType::Xterm256)
+                        capabilities.colorType = ColorType::Xterm256;
+                    capabilities.mouse_tracking = mttsCapabilities & 16;
+                    capabilities.osc_color_palette = mttsCapabilities & 32;
+                    capabilities.screen_reader = mttsCapabilities & 64;
+                    capabilities.proxy = mttsCapabilities & 128;
+                    if(mttsCapabilities & 256 && capabilities.colorType < ColorType::TrueColor)
+                        capabilities.colorType = ColorType::TrueColor;
+                    capabilities.mnes = mttsCapabilities & 512;
+                    capabilities.mslp = mttsCapabilities & 1024;
+                    capabilities.tls = mttsCapabilities & 2048;
+                }
+                break;
+
+                // Add more cases as needed to handle further TTYPE negotiations
+        }
+
+        // Move to the next state
+        ttypeState++;
+        if(ttypeState < 3)
+            telnet_ttype_send(teldata);
+    }
+
+    void Connection::handleTelnet(telnet_event_t *event) {
+        switch(event->type) {
+            case TELNET_EV_DATA: {
+                appbuf += std::string(event->data.buffer, event->data.size);
+                handleAppData();
+            }
+                break;
+            case TELNET_EV_SEND: {
+                outbuf.emplace_back(std::string(event->data.buffer, event->data.size));
+                pendingOutData.insert(connId);
+            }
+                break;
+            case TELNET_EV_IAC:
+                handleTelnetCommand(event->iac.cmd);
+                break;
+            case TELNET_EV_WILL:
+                handleTelnetWill(event->neg.telopt);
+                break;
+            case TELNET_EV_DO:
+                handleTelnetDo(event->neg.telopt);
+                break;
+            case TELNET_EV_WONT:
+                handleTelnetWont(event->neg.telopt);
+                break;
+            case TELNET_EV_DONT:
+                handleTelnetDont(event->neg.telopt);
+                break;
+            case TELNET_EV_SUBNEGOTIATION:
+                handleTelnetSubNegotiate(event->sub.telopt, event->sub.buffer, event->sub.size);
+                break;
+            case TELNET_EV_COMPRESS:
+                break;
+            case TELNET_EV_ZMP:
+                break;
+            case TELNET_EV_TTYPE:
+                handleTelnetTTYPE(event->ttype.cmd, event->ttype.name);
+                break;
+            case TELNET_EV_ENVIRON:
+                break;
+            case TELNET_EV_MSSP:
+                break;
+            case TELNET_EV_GMCP:
+                handleGMCP(event->gmcp.cmd, event->gmcp.data);
+                break;
+            case TELNET_EV_NAWS:
+                capabilities.width = event->naws.width;
+                capabilities.height = event->naws.height;
+                break;
+            case TELNET_EV_WARNING:
+                break;
+            case TELNET_EV_ERROR:
+                break;
+        }
+    }
+
+    Connection::Connection(int connId) : connId(connId) {
+        teldata = telnet_init(my_telopts, &telnet_handler, TELNET_FLAG_ROLE_SERVER, this);
+    }
+
+    Connection::Connection(int connId, const nlohmann::json &j) : Connection(connId) {
+        deserialize(j);
+        epollRegister();
+    }
+
+    nlohmann::json Connection::serialize() {
+        nlohmann::json j;
+
+        j["connId"] = connId;
+        j["capabilities"] = capabilities.serialize();
+        if(account) j["account"] = account->vn;
+        if(adminLevel) j["adminLevel"] = adminLevel;
+        // We don't serialize descriptors, since the descriptor will rebuild that.
+
+        j["connected"] = std::chrono::duration_cast<std::chrono::nanoseconds>(connected.time_since_epoch()).count();
+        j["lastActivity"] = std::chrono::duration_cast<std::chrono::nanoseconds>(lastActivity.time_since_epoch()).count();
+        j["lastReceivedBytes"] = std::chrono::duration_cast<std::chrono::nanoseconds>(lastReceivedBytes.time_since_epoch()).count();
+
+        for(auto &cmd : pendingCommands) {
+            j["pendingCommands"].push_back(cmd);
+        }
+
+        if(parser) {
+            j["parser"] = parser->serialize();
+        }
+
+        j["state"] = static_cast<int>(state);
+
+        // Serialize the deque<SendBuffer>
+        j["outbuf"] = nlohmann::json::array();
+        for (auto& buffer : outbuf) {
+            j["outbuf"].push_back(buffer.serialize());
+        }
+
+        if(!appbuf.empty()) j["appbuf"] = encodeBase64(appbuf);
+        if(!lastTTYPE.empty()) j["lastTTYPE"] = lastTTYPE;
+        if(ttypeState) j["ttypeState"] = ttypeState;
+
+        if(teldata) {
+            nlohmann::json t;
+
+            std::string tbuf(teldata->buffer, teldata->buffer_pos);
+            if(teldata->buffer_pos > 0) {
+                t["buffer"] = encodeBase64(tbuf);
+                t["buffer_pos"] = teldata->buffer_pos;
+                t["buffer_size"] = teldata->buffer_size;
+            }
+
+            for(auto i = 0; i < teldata->q_cnt; i++) {
+                t["q"].push_back(std::make_pair(teldata->q[i].telopt, teldata->q[i].state));
+            }
+
+            t["state"] = teldata->state;
+            if(teldata->flags) t["flags"] = teldata->flags;
+            t["sb_telopt"] = teldata->sb_telopt;
+
+            j["teldata"] = t;
+        }
+
+        return j;
+    }
+
+    void Connection::deserialize(const nlohmann::json &j) {
+        connId = j.at("connId").get<int>();
+        capabilities.deserialize(j.at("capabilities"));
+        if (j.contains("account")) {
+            auto &acc = accounts[j.at("account").get<int>()];
+            account = &acc;
+        }
+        if (j.contains("adminLevel")) adminLevel = j.at("adminLevel").get<int>();
+
+        connected = std::chrono::system_clock::time_point(std::chrono::nanoseconds(j.at("connected").get<int64_t>()));
+        lastActivity = std::chrono::steady_clock::time_point(std::chrono::nanoseconds(j.at("lastActivity").get<int64_t>()));
+        lastReceivedBytes = std::chrono::steady_clock::time_point(std::chrono::nanoseconds(j.at("lastReceivedBytes").get<int64_t>()));
+
+        if(j.contains("pendingCommands"))
+            for (const auto& cmd : j.at("pendingCommands"))
+                pendingCommands.emplace_back(cmd.get<std::string>());
+
+        state = static_cast<ConnectionState>(j.at("state").get<int>());
+
+        if(j.contains("outbuf"))
+            for (const auto& bufferJson : j.at("outbuf"))
+                outbuf.emplace_back(bufferJson);
+
+        if(j.contains("appbuf")) {
+            std::string appbufData = j.at("appbuf").get<std::string>();
+            appbuf = decodeBase64ToString(appbufData);
+        }
+
+        if(j.contains("parser")) {
+            auto p = j["parser"];
+            auto pname = p.at("parserName").get<std::string>();
+
+            if(pname == "AccountMenu") {
+                parser = std::make_unique<AccountMenu>(shared_from_this());
+            } else if(pname == "ChargenParser") {
+                parser = std::make_unique<ChargenParser>(shared_from_this());
+            } else if(pname == "CharacterMenu") {
+                parser = std::make_unique<CharacterMenu>(shared_from_this(), nullptr);
+            } else if(pname == "LoginParser") {
+                parser = std::make_unique<LoginParser>(shared_from_this());
+            } else if(pname == "PuppetParser") {
+                parser = std::make_unique<PuppetParser>(shared_from_this(), nullptr);
+            }
+            parser->deserialize(p);
+            //parser->parse("");
+
+        } else {
+            // This really, really should not happen.
+            // But if it did, let's set them up with a login.
+            onWelcome();
+        }
+
+        if(j.contains("teldata")) {
+            auto t = j["teldata"];
+            if(t.contains("buffer")) {
+                std::string tbuf = decodeBase64ToString(t.at("buffer").get<std::string>());
+                if(teldata->buffer) {
+                    free(teldata->buffer);
+                    teldata->buffer = (char*)calloc(1, tbuf.size());
+                    memcpy(teldata->buffer, tbuf.c_str(), tbuf.size());
+                    teldata->buffer_size = tbuf.size();
+                    teldata->buffer_pos = t.at("buffer_pos").get<size_t>();
+                }
+            }
+
+            if(t.contains("q")) {
+                auto q = t["q"];
+                int i = 0;
+                if(teldata->q) {
+                    free(teldata->q);
+                    teldata->q = (telnet_rfc1143_t*)calloc(sizeof(telnet_rfc1143_t), q.size());
+                    teldata->q_cnt = q.size();
+                    teldata->q_size = sizeof(telnet_rfc1143_t) * q.size();
+                }
+                for(const auto &qop : q) {
+                    teldata->q[i].telopt = qop[0].get<unsigned char>();
+                    teldata->q[i].state = qop[1].get<unsigned char>();
+                    i++;
+                }
+            }
+
+            if(t.contains("flags")) {
+                teldata->flags = t.at("flags").get<int>();
+            }
+
+            if(t.contains("sb_telopt")) {
+                teldata->sb_telopt = t.at("sb_telopt").get<unsigned char>();
+            }
+
+            if(t.contains("state")) {
+                teldata->state = static_cast<telnet_state_t>(t.at("state").get<int>());
+            }
+        }
+    }
+
+    Connection::~Connection() {
+        // Free the telnet data.
+        telnet_free(teldata);
+        // Close the descriptor.
+        ::close(connId);
     }
 
     void Connection::cleanup(DisconnectReason reason) {
@@ -437,7 +682,6 @@ namespace net {
         switch(reason) {
             case DisconnectReason::ConnectionLost:
                 // The connection to remote host was lost for unknown reasons.
-                // The portal is aware of this and already cleaned them up.
                 if(desc) {
                     // If we have a desc then we inform it of the unexpected disconnect.
                     // It can handle this as it sees fit.
@@ -459,12 +703,6 @@ namespace net {
                 break;
             case DisconnectReason::GameLogoff: {
                 // The game server is initiating disconnection for some reason or another.
-                // The portal must be informed so it can boot the remote host.
-                nlohmann::json j;
-                j["kind"] = "client_disconnected";
-                j["id"] = connId;
-                j["reason"] = "logoff";
-                linkChannel->try_send(boost::system::error_code{}, j);
                 }
                 break;
         }
@@ -477,70 +715,347 @@ namespace net {
         p->start();
     }
 
-    void Connection::handleEvent(const std::string& event, const nlohmann::json& data) {
-        if(event == "Command") {
-            executeCommand(data["data"].get<std::string>());
-        } else if(event == "GMCP") {
-            executeGMCP(data["cmd"].get<std::string>(), data["data"]);
-        }
-    }
+    int create_listener(const std::string& host, uint16_t port) {
+        struct addrinfo hints{}, *res, *p;
+        int status;
+        char port_str[6];
+        int listen_fd;
+        snprintf(port_str, sizeof(port_str), "%u", config::port);
 
-    void Connection::handleMessage(const Message &m) {
-        if(m.cmd == "text") {
-            for(auto &arg : m.args) {
-                if(arg.is_string()) {
-                    auto t = arg.get<std::string>();
-                    if(boost::iequals(t, "idle")) continue;
-                    if(parser) parser->parse(t);
-                }
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_UNSPEC;     // Use AF_INET6 to force IPv6
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_flags = AI_PASSIVE;     // Use the IP address provided
+
+        // Convert hostAddress and port to a suitable format for getaddrinfo
+        if ((status = getaddrinfo(host.c_str(), port_str, &hints, &res)) != 0) {
+            std::cerr << "getaddrinfo: " << gai_strerror(status) << std::endl;
+            exit(EXIT_FAILURE);
+        }
+
+        // Loop through the results and bind to the first valid address
+        for (p = res; p != nullptr; p = p->ai_next) {
+            // Create a socket
+            if ((listen_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+                perror("Socket creation failed");
+                continue;
             }
-        } else {
-            if(parser) parser->handleMessage(m);
+
+            // Allow reusing the address
+            int optval = 1;
+            if (setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1) {
+                perror("setsockopt");
+                close(listen_fd);
+                continue;
+            }
+
+            // Bind the socket to the address
+            if (bind(listen_fd, p->ai_addr, p->ai_addrlen) == -1) {
+                perror("Bind failed");
+                close(listen_fd);
+                continue;
+            }
+
+            break; // Successfully bound
+        }
+
+        // Free the address info linked list
+        freeaddrinfo(res);
+
+        // Listen for incoming connections
+        if (listen(listen_fd, 50) < 0) {
+            perror("Listen failed");
+            close(listen_fd);
+            exit(EXIT_FAILURE);
+        }
+
+        int flags = fcntl(listen_fd, F_GETFD);
+        if (flags == -1) {
+            perror("fcntl F_GETFD failed");
+            close(listen_fd);
+            exit(EXIT_FAILURE);
+        }
+        flags &= ~FD_CLOEXEC;  // Clear the FD_CLOEXEC flag
+        if (fcntl(listen_fd, F_SETFD, flags) == -1) {
+            perror("fcntl F_SETFD failed");
+            close(listen_fd);
+            exit(EXIT_FAILURE);
+        }
+        // Set it non-blocking.
+        flags = fcntl(listen_fd, F_GETFL, 0);
+        fcntl(listen_fd, F_SETFL, flags | O_NONBLOCK);
+
+        return listen_fd;
+    }
+
+    void init_epoll() {
+        // Let's initialize the epoll
+        epoll_fd = epoll_create1(0);
+        if (epoll_fd == -1) {
+            perror("epoll_create1");
+            exit(EXIT_FAILURE);
         }
     }
 
+    void init_listeners() {
+        // server_fd might already be set to a proper port by the copyover process.
+        if(server_fd == -1) {
+            // This is a fresh start. We need to create and bind a server to config::hostAddress config::port and set
+            // the fd to server_fd
+            server_fd = create_listener(config::hostAddress, config::port);
+        }
+    }
 
-    void Connection::onHeartbeat(double deltaTime) {
-                // Every time the heartbeat runs, we want to pull everything out of fromLink
-        // first of all.
+    void Connection::epollRegister() {
+        epoll_event ev{};
+        ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+        ev.data.fd = connId;
 
-        // We need to do this in a loop, because we may have multiple messages in the
-        // channel.
+        if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, connId, &ev) == -1) {
+            perror("epoll_ctl: connection fd");
+            exit(EXIT_FAILURE);
+        }
+    }
 
-        std::error_code ec;
-        nlohmann::json value;
-        while (fromLink.ready()) {
-            if(!fromLink.try_receive([&](std::error_code ec2, nlohmann::json value2) {
-                ec = ec2;
-                value = value2;
-            })) {
+    void Connection::epollUnregister() {
+        if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, connId, NULL) == -1) {
+            perror("epoll_ctl: EPOLL_CTL_DEL");
+        }
+    }
+
+    void Connection::readFromSocket() {
+        if(state == ConnectionState::Dead) {
+            return;
+        }
+
+        std::vector<char> buffer(4096);
+
+        while (true) {
+            ssize_t bytesRead = read(connId, buffer.data(), buffer.size());
+            if (bytesRead > 0) {
+                // Successfully read data, process it
+                telnet_recv(teldata, buffer.data(), bytesRead);
+            } else if (bytesRead == 0) {
+                // Connection closed by the client
+                void onNetworkDisconnected();
                 break;
-            }
-            if (ec) {
-                // TODO: Handle any errors..
             } else {
-                // If we got a json value, it should look like this.
-                // {"kind": "client_data", "id": 123, "data": [{"cmd": "text", "args": ["hello world!"], "kwargs": {}}]}
-                // We're only interested in iterating over the contents of the "data" array.
-                // Now we must for-each over the contents of jarr, extract the cmd, args, and kwargs data, and call
-                // the appropriate handle routine.
-                //logger->info("Received data from link: {}", value.dump());
-                lastActivity = std::chrono::steady_clock::now();
-                for (auto &jval : value["data"]) {
-                    //logger->info("Processing data from link: {}", jval.dump());
-                    Message m(jval);
-                    handleMessage(m);
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    // No more data available right now, would block
+                    break;
+                } else if(errno == ETIMEDOUT) {
+                    void onNetworkTimedOut();
+                } else {
+                    // An error occurred, log or handle it
+                    std::cerr << "Read error: " << strerror(errno) << std::endl;
+                    // Handle error if needed
+                    break;
                 }
             }
         }
     }
 
-    void Connection::executeGMCP(const std::string &cmd, const nlohmann::json &j) {
-        if(parser) parser->handleGMCP(cmd, j);
+    void Connection::writeToSocket() {
+        // Iterate over the buffer's data sequence and attempt to send it
+        while (!outbuf.empty()) {
+            // Access the front data sequence in the buffer.
+            auto &sbuf = outbuf.front();
+            int remaining = sbuf.data.size() - sbuf.sent;
+
+            if(remaining > 0) {
+                // Attempt to send the data
+                ssize_t bytesSent = send(connId, sbuf.data.c_str() + sbuf.sent, remaining, 0);
+
+                if (bytesSent == -1) {
+                    if(errno == EAGAIN || errno == EWOULDBLOCK) {
+                        // Socket is not ready to send more data; stop and wait for EPOLLOUT
+                        pendingWrites.erase(connId);
+                        break;
+                    } else {
+                        onNetworkDisconnected();
+                        break;
+                    }
+                }
+
+                // Consume the sent data from the buffer
+                sbuf.sent += bytesSent;
+                remaining -= bytesSent;
+            }
+
+            if(remaining == 0) {
+                if(sbuf.bitflags & SendBuffer::BF_CLOSE_AFTER_SEND) {
+                    outbuf.clear();
+                    close();
+                } else {
+                    outbuf.pop_front();
+                }
+            }
+        }
+
+        if (outbuf.empty()) {
+            pendingOutData.erase(connId);
+        }
     }
 
-    void Connection::executeCommand(const std::string &cmd) {
-        if(parser) parser->parse(cmd);
+    void acceptConnection(int conn_fd, sockaddr_in& client_addr) {
+
+        // Set the new connection to non-blocking
+        int flags = fcntl(conn_fd, F_GETFL, 0);
+        fcntl(conn_fd, F_SETFL, flags | O_NONBLOCK);
+
+        int optval = 1;
+        if (setsockopt(conn_fd, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval)) < 0) {
+            perror("setsockopt(SO_KEEPALIVE) failed");
+            exit(EXIT_FAILURE);
+        }
+
+        optval = 1;
+        if (setsockopt(conn_fd, SOL_SOCKET, SO_KEEPALIVE, &optval, sizeof(optval)) < 0) {
+            perror("setsockopt(SO_KEEPALIVE) failed");
+            exit(EXIT_FAILURE);
+        }
+
+        // Set TCP_KEEPIDLE to 60 seconds (start sending keepalive probes after 60 seconds of idle time)
+        optval = 60;
+        if (setsockopt(conn_fd, IPPROTO_TCP, TCP_KEEPIDLE, &optval, sizeof(optval)) < 0) {
+            perror("setsockopt(TCP_KEEPIDLE) failed");
+            exit(EXIT_FAILURE);
+        }
+
+        // Set TCP_KEEPINTVL to 10 seconds (interval between keepalive probes)
+        optval = 10;
+        if (setsockopt(conn_fd, IPPROTO_TCP, TCP_KEEPINTVL, &optval, sizeof(optval)) < 0) {
+            perror("setsockopt(TCP_KEEPINTVL) failed");
+            exit(EXIT_FAILURE);
+        }
+
+        // Set TCP_KEEPCNT to 5 (number of unacknowledged probes before considering the connection dead)
+        optval = 5;
+        if (setsockopt(conn_fd, IPPROTO_TCP, TCP_KEEPCNT, &optval, sizeof(optval)) < 0) {
+            perror("setsockopt(TCP_KEEPCNT) failed");
+            exit(EXIT_FAILURE);
+        }
+
+        // Create a new Connection object and add it to the map
+        auto conn = std::make_shared<Connection>(conn_fd);
+        connections[conn_fd] = conn;
+
+        char ip_str[INET6_ADDRSTRLEN]; // Enough space to hold both IPv4 and IPv6 addresses
+
+        if (client_addr.sin_family == AF_INET) {
+            auto s = (struct sockaddr_in *)&client_addr;
+            inet_ntop(AF_INET, &s->sin_addr, ip_str, sizeof(ip_str));
+        } else if (client_addr.sin_family == AF_INET6) {
+            auto s = (struct sockaddr_in6 *)&client_addr;
+            inet_ntop(AF_INET6, &s->sin6_addr, ip_str, sizeof(ip_str));
+        } else {
+            fprintf(stderr, "Unknown address family\n");
+            exit(EXIT_FAILURE);
+        }
+        conn->capabilities.hostAddress = ip_str;
+
+        conn->epollRegister();
+        conn->state = ConnectionState::Pending;
+        conn->sendTelnetNegotiations();
+    }
+
+    void acceptAllIncomingConnections() {
+        while (true) {
+            sockaddr_in client_addr{};
+            socklen_t client_len = sizeof(client_addr);
+            int conn_fd = accept(server_fd, (struct sockaddr*)&client_addr, &client_len);
+            if (conn_fd == -1) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    // No more incoming connections
+                    break;
+                } else {
+                    perror("accept");
+                    break;
+                }
+            }
+            acceptConnection(conn_fd, client_addr);
+        }
+    }
+
+    void update(double deltaTime) {
+        if(connections.empty()) return;
+
+        std::vector<epoll_event> events(connections.size());
+
+        int nfds = epoll_wait(epoll_fd, events.data(), events.size(), 0);
+        if (nfds == -1) {
+            perror("epoll_wait");
+            exit(EXIT_FAILURE);
+        }
+
+        for(int i = 0; i < nfds; i++) {
+            auto &ev = events[i];
+            int fd = ev.data.fd;
+
+            if(ev.events & EPOLLERR) {
+                // Handle error condition
+                int err = 0;
+                socklen_t len = sizeof(err);
+                if (getsockopt(ev.data.fd, SOL_SOCKET, SO_ERROR, &err, &len) == 0) {
+                    basic_mud_log("Error on fd %d: %s\n", fd, strerror(err));
+                } else {
+                    basic_mud_log("getsockopt failed on fd %d", fd);
+                }
+
+                // Close the file descriptor and remove it from your connections
+                deadConnections[ev.data.fd] = DisconnectReason::ConnectionLost;
+
+                // Skip further processing for this fd
+                continue;
+            }
+
+            if(ev.events & EPOLLIN) {
+                pendingReads.insert(fd);
+            }
+
+            if(ev.events & EPOLLOUT) {
+                pendingWrites.insert(fd);
+            }
+        }
+    }
+
+    void prepareForCopyover() {
+        // This must iterate through all connections,
+        // kick any connections that can't be safely serialized, and ensure that all outgoing buffers are
+        // fully flushed to the OS.
+
+        std::unordered_set<int> toClose;
+
+        for(auto &[connId, conn] : connections) {
+            if(conn->state == net::ConnectionState::Pending || conn->parser && !conn->parser->canCopyover()) {
+                conn->sendText("\r\nSorry, we are rebooting. This may take a minute or two. Please reconnect in a bit.\r\n", SendBuffer::BF_CLOSE_AFTER_SEND);
+                toClose.insert(connId);
+            }
+            // There shouldn't be any dead connections here, but we'll check anyway.
+            if(conn->state == net::ConnectionState::Dead) {
+                toClose.insert(connId);
+            }
+        }
+
+        // Ensure all pending data is sent out.
+        while(!pendingOutData.empty()) {
+            auto pending = pendingOutData;
+            for(auto &connId : pending) {
+                auto conn = connections.at(connId);
+                conn->writeToSocket();
+            }
+            if(!pendingOutData.empty())
+                std::this_thread::sleep_for(std::chrono::milliseconds(15));
+        }
+
+        // Close the pending and any remaining connections.
+        for(auto &id : toClose) {
+            net::connections.erase(id);
+        }
+        for(auto const &[id, reason] : deadConnections) {
+            net::connections.erase(id);
+        }
+
     }
 
 }

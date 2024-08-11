@@ -179,7 +179,7 @@ namespace atk {
         initStats();
 
         currentHitProbability = roll_accuracy(user, init_skill(user, skillID), kiAttack);
-        currentChanceToHit = chance_to_hit(user) * (1 + user->getAffectModifier(APPLY_ACCURACY));
+        currentChanceToHit = chance_to_hit(user) * (1 + user->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Accuracy)));
 
         if(isPhysical() && !usesWeapon()) {
             if (IS_KABITO(user) && !IS_NPC(user)) {
@@ -231,7 +231,7 @@ namespace atk {
         } else {
             // it was a clean hit! Or should be...
 
-            if(victim->getAffectModifier(APPLY_PERFECT_DODGE) != 0) {
+            if(victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::PerfectDodge)) != 0) {
                 return DefenseResult::Perfect_Dodged;
             }
 
@@ -256,8 +256,8 @@ namespace atk {
     }
 
     DefenseResult Attack::calculateDefense() {
-        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_DODGE_PERC));
-        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_BLOCK_PERC));
+        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Dodge)));
+        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Block)));
 
         if(canZanzoken() && AFF_FLAGGED(user, AFF_ZANZOKEN) && canZanzoken())
             dodgeChance *= (2.0 * GET_SKILL(user, SKILL_ZANZOKEN)); 
@@ -346,7 +346,7 @@ namespace atk {
     }
 
     bool Attack::calculateDeflect() {
-        double parryChance = ((double) currentParryCheck / 6.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_PARRY_PERC));
+        double parryChance = ((double) currentParryCheck / 6.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Parry)));
         double overcomeParry = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
 
         return ((!IS_NPC(victim) || !MOB_FLAGGED(victim, MOB_DUMMY)) && parryChance > overcomeParry);
@@ -572,7 +572,7 @@ namespace atk {
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
 
-        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::PerfectDodge)));
 
 
         if(victim->getCurKI() > 0) {
@@ -1531,7 +1531,7 @@ namespace atk {
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
 
-        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_PERFECT_DODGE));
+        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::PerfectDodge)));
 
 
         if(victim->getCurKI() > 0) {
@@ -1897,8 +1897,8 @@ namespace atk {
 
 
 
-        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_DODGE_PERC));
-        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_BLOCK_PERC));
+        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Dodge)));
+        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Block)));
 
         double overcomeDodge = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
         double overcomeBlock = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
@@ -2357,19 +2357,7 @@ namespace atk {
 
     void TwinSlash::attackPreprocess() {
         auto wobj = GET_EQ(user, WEAR_WIELD1);
-        int wlvl = 0;
-
-        if (OBJ_FLAGGED(wobj, ITEM_WEAPLVL1)) {
-            wlvl = 1;
-        } else if (OBJ_FLAGGED(wobj, ITEM_WEAPLVL2)) {
-            wlvl = 2;
-        } else if (OBJ_FLAGGED(wobj, ITEM_WEAPLVL3)) {
-            wlvl = 3;
-        } else if (OBJ_FLAGGED(wobj, ITEM_WEAPLVL4)) {
-            wlvl = 4;
-        } else if (OBJ_FLAGGED(wobj, ITEM_WEAPLVL5)) {
-            wlvl = 5;
-        }
+        int wlvl = wobj->value[VAL_WEAPON_LEVEL];
 
         if (initSkill >= 100) {
             calcDamage += (calcDamage * 0.05) * wlvl;
@@ -4623,21 +4611,24 @@ namespace atk {
 
     void WeaponAttack::calculateDamage() {
         calcDamage = damtype(user, -1, initSkill, attPerc);
-        if (OBJ_FLAGGED(weap, ITEM_WEAPLVL1)) {
-            calcDamage += calcDamage * 0.05;
-            wlvl = 1;
-        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL2)) {
-            calcDamage += calcDamage * 0.1;
-            wlvl = 2;
-        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL3)) {
-            calcDamage += calcDamage * 0.2;
-            wlvl = 3;
-        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL4)) {
-            calcDamage += calcDamage * 0.3;
-            wlvl = 4;
-        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL5)) {
-            calcDamage += calcDamage * 0.5;
-            wlvl = 5;
+        auto wlvl = weap->value[VAL_WEAPON_LEVEL];
+        switch(wlvl) {
+            case 1:
+                calcDamage += calcDamage * 0.05;
+                break;
+            case 2:
+                calcDamage += calcDamage * 0.1;
+                break;
+            case 3:
+                calcDamage += calcDamage * 0.2;
+                break;
+            case 4:
+                calcDamage += calcDamage * 0.3;
+                break;
+            case 5:
+                calcDamage += calcDamage * 0.5;
+                break;
+
         }
 
         if (PLR_FLAGGED(user, PLR_THANDW)) {
@@ -4903,16 +4894,21 @@ namespace atk {
             weap = GET_EQ(user, WEAR_WIELD2);
         }
 
-
-        if (OBJ_FLAGGED(weap, ITEM_WEAPLVL5)) {
-            guncost = 12;
-        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL4)) {
-            guncost = 6;
-        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL3)) {
-            guncost = 4;
-        } else if (OBJ_FLAGGED(weap, ITEM_WEAPLVL2)) {
-            guncost = 2;
+        switch(weap->value[VAL_WEAPON_LEVEL]) {
+            case 2:
+                guncost = 2;
+                break;
+            case 3:
+                guncost = 4;
+                break;
+            case 4:
+                guncost = 6;
+                break;
+            case 5:
+                guncost = 12;
+                break;
         }
+
         if (GET_GOLD(user) < guncost) {
             send_to_char(user, "You do not have enough zenni. You need %d zenni per shot for that level of gun.\r\n",
                          guncost);

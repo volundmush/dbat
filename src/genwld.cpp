@@ -19,6 +19,10 @@
  * This function will copy the strings so be sure you free your own
  * copies of the description, title, and such.
  */
+RoomRef room_data::ref() {
+    return RoomRef(this);
+}
+
 room_rnum add_room(struct room_data *room) {
     struct char_data *tch;
     struct obj_data *tobj;
@@ -37,7 +41,6 @@ room_rnum add_room(struct room_data *room) {
         copy_room(&ro, room);
         ro.people = tch;
         ro.contents = tobj;
-        ro.save();
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
@@ -45,7 +48,6 @@ room_rnum add_room(struct room_data *room) {
     auto &r = world[room->vn];
     r = *room;
     basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
-    r.save();
 
     /*
      * Return what array entry we placed the new room in.
@@ -66,7 +68,6 @@ int delete_room(room_rnum rnum) {
         return false;
 
     room = &world[rnum];
-    room->save();
 
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
@@ -398,18 +399,35 @@ bool room_data::isActive() {
 }
 
 
-void room_data::save() {
-
-}
-
 int room_data::getDamage() {
     return dmg;
+}
+
+void room_data::activate() {
+    auto r = ref();
+    if(script) {
+        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
+            roomSubscriptions.subscribe("randomTriggers", r);
+        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
+            roomSubscriptions.subscribe("timeTriggers", r);
+    }
+    if(dmg != 0)
+        roomSubscriptions.subscribe("roomRepairDamage", r);
+}
+
+void room_data::deactivate() {
+    roomSubscriptions.unsubscribeFromAll(ref());
 }
 
 int room_data::setDamage(int amount) {
     auto before = dmg;
     dmg = std::clamp<int>(amount, 0, 100);
     // if(dmg != before) save();
+    if(dmg == 0) {
+        roomSubscriptions.unsubscribe("roomRepairDamage", ref());
+    } else {
+        roomSubscriptions.subscribe("roomRepairDamage", ref());
+    }
     return dmg;
 }
 
@@ -443,7 +461,7 @@ std::list<char_data *> room_data::getPeople() {
     return out;
 }
 
-static const std::set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
+static const std::unordered_set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
 
 MoonCheck room_data::checkMoon() {
     for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return MoonCheck::NoMoon;

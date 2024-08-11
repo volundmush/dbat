@@ -254,7 +254,7 @@ static void generate_multiform(struct char_data *ch, int count) {
             clone->look_description = strdup(ch->look_description);
         clone->race = ch->race;
         clone->chclass = ch->chclass;
-        clone->stats = ch->stats;
+        clone->vitals = ch->vitals;
         clone->nums = ch->nums;
 
         clone->appearances = ch->appearances;
@@ -263,7 +263,9 @@ static void generate_multiform(struct char_data *ch, int count) {
         clone->attributes = ch->attributes;
         clone->trains = ch->trains;
 
-        clone->weight = ch->weight;
+        clone->dims = ch->dims;
+        clone->nums = ch->nums;
+
         clone->time = ch->time;
 
         clone->tail_growth = ch->tail_growth;
@@ -1414,77 +1416,82 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
     struct char_data *i, *next_char, *ch = nullptr;
     int quality = 0;
 
-    for (i = character_list; i; i = next_char) {
-        next_char = i->next;
-        if (ROOM_FLAGGED(IN_ROOM(i), ROOM_FISHING)) {
-            if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == true) {
-                ch = i;
-                if (GET_FISHD(ch) <= 0 && GET_FISHSTATE(ch) == FISH_REELING) { /* We've caught it */
-                    if (GET_POLE_BONUS(ch) >= rand_number(60, 100)) {
-                        quality = rand_number(0, 3) + rand_number(0, 3) + rand_number(0, 3);
-                    } else if (GET_POLE_BONUS(ch) >= rand_number(45, 60)) {
-                        quality = rand_number(0, 3) + rand_number(0, 3);
+    for (const auto &r : characterSubscriptions.all("goneFishing")) {
+        i = r.get();
+        if(!i) continue;
+
+        if(!ROOM_FLAGGED(IN_ROOM(i), ROOM_FISHING)) {
+            i->playerFlags.reset(PLR_FISHING);
+            GET_FISHD(i) = 0;
+            GET_FISHSTATE(i) = FISH_NOFISH;
+            characterSubscriptions.unsubscribe("goneFishing", r);
+            continue;
+        }
+
+        if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == true) {
+            ch = i;
+            if (GET_FISHD(ch) <= 0 && GET_FISHSTATE(ch) == FISH_REELING) { /* We've caught it */
+                if (GET_POLE_BONUS(ch) >= rand_number(60, 100)) {
+                    quality = rand_number(0, 3) + rand_number(0, 3) + rand_number(0, 3);
+                } else if (GET_POLE_BONUS(ch) >= rand_number(45, 60)) {
+                    quality = rand_number(0, 3) + rand_number(0, 3);
+                } else {
+                    quality = rand_number(0, 3);
+                }
+                catch_fish(ch, quality);
+            } else if (rand_number(1, 5) >= 3) { /* Reeling section */
+                if (GET_FISHSTATE(ch) == FISH_REELING && rand_number(1, 100) <= 80) {
+                    if (GET_POLE_BONUS(ch) >= 80) {
+                        GET_FISHD(ch) -= rand_number(6, 10);
+                    } else if (GET_POLE_BONUS(ch) >= 40) {
+                        GET_FISHD(ch) -= rand_number(5, 8);
                     } else {
-                        quality = rand_number(0, 3);
+                        GET_FISHD(ch) -= rand_number(1, 4);
                     }
-                    catch_fish(ch, quality);
-                } else if (rand_number(1, 5) >= 3) { /* Reeling section */
-                    if (GET_FISHSTATE(ch) == FISH_REELING && rand_number(1, 100) <= 80) {
-                        if (GET_POLE_BONUS(ch) >= 80) {
-                            GET_FISHD(ch) -= rand_number(6, 10);
-                        } else if (GET_POLE_BONUS(ch) >= 40) {
-                            GET_FISHD(ch) -= rand_number(5, 8);
-                        } else {
-                            GET_FISHD(ch) -= rand_number(1, 4);
-                        }
-                        act("@CYou reel the line on your pole some.@n", true, ch, nullptr, nullptr, TO_CHAR);
-                        act("@c$n@C reels the line on $s pole slowly.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch) > 0 ? GET_FISHD(ch) : 0);
-                    } else if (GET_FISHSTATE(ch) == FISH_REELING && rand_number(1, 58) <= 55) {
-                        act("@CYou struggle as the fish fights against your attempts to reel it in!@n", true, ch,
-                            nullptr, nullptr, TO_CHAR);
-                        act("@c$n@C struggles with the fish on the end of $s pole!@n", true, ch, nullptr, nullptr,
-                            TO_ROOM);
-                    } else if (GET_FISHSTATE(ch) == FISH_REELING) { /* Lose the fish */
-                        act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
-                            true, ch, nullptr, nullptr, TO_CHAR);
-                        act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        GET_FISHD(ch) = 0;
-                        GET_FISHSTATE(ch) = FISH_NOFISH;
-                        ch->playerFlags.reset(PLR_FISHING);
-                        if (has_pole(ch) == true) {
-                            struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
-                            GET_OBJ_VAL(pole, 0) = 0;
-                        }
-                    } else if (GET_FISHSTATE(ch) == FISH_HOOKED && rand_number(1, 20) >= 12) {
-                        act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
-                            true, ch, nullptr, nullptr, TO_CHAR);
-                        act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        GET_FISHD(ch) = 0;
-                        GET_FISHSTATE(ch) = FISH_NOFISH;
-                        ch->playerFlags.reset(PLR_FISHING);
-                    } else if (GET_FISHSTATE(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
-                        act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
-                        GET_FISHSTATE(ch) = FISH_NOFISH;
-                    } else if (GET_FISHSTATE(ch) != FISH_HOOKED && GET_FISHSTATE(ch) != FISH_BITE &&
-                               ((ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH) && rand_number(1, 10) >= 8) ||
-                                (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
-                        act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr,
-                            TO_CHAR);
-                        GET_FISHSTATE(ch) = FISH_BITE;
+                    act("@CYou reel the line on your pole some.@n", true, ch, nullptr, nullptr, TO_CHAR);
+                    act("@c$n@C reels the line on $s pole slowly.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                    send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch) > 0 ? GET_FISHD(ch) : 0);
+                } else if (GET_FISHSTATE(ch) == FISH_REELING && rand_number(1, 58) <= 55) {
+                    act("@CYou struggle as the fish fights against your attempts to reel it in!@n", true, ch,
+                        nullptr, nullptr, TO_CHAR);
+                    act("@c$n@C struggles with the fish on the end of $s pole!@n", true, ch, nullptr, nullptr,
+                        TO_ROOM);
+                } else if (GET_FISHSTATE(ch) == FISH_REELING) { /* Lose the fish */
+                    act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
+                        true, ch, nullptr, nullptr, TO_CHAR);
+                    act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                    GET_FISHD(ch) = 0;
+                    GET_FISHSTATE(ch) = FISH_NOFISH;
+                    ch->playerFlags.reset(PLR_FISHING);
+                    characterSubscriptions.unsubscribe("goneFishing", r);
+                    if (has_pole(ch) == true) {
+                        struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
+                        GET_OBJ_VAL(pole, 0) = 0;
                     }
-                } /* End reel section */
-            } else if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == false) { /* End of, Is Fishing */
-                i->playerFlags.reset(PLR_FISHING);
-                GET_FISHD(i) = 0;
-                GET_FISHSTATE(i) = FISH_NOFISH;
-            }
-        } else { /* Is not in a fishing room */
-            if (PLR_FLAGGED(i, PLR_FISHING)) {
-                i->playerFlags.reset(PLR_FISHING);
-                GET_FISHD(i) = 0;
-                GET_FISHSTATE(i) = FISH_NOFISH;
-            }
+                } else if (GET_FISHSTATE(ch) == FISH_HOOKED && rand_number(1, 20) >= 12) {
+                    act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
+                        true, ch, nullptr, nullptr, TO_CHAR);
+                    act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                    GET_FISHD(ch) = 0;
+                    GET_FISHSTATE(ch) = FISH_NOFISH;
+                    ch->playerFlags.reset(PLR_FISHING);
+                    characterSubscriptions.unsubscribe("goneFishing", r);
+                } else if (GET_FISHSTATE(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
+                    act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
+                    GET_FISHSTATE(ch) = FISH_NOFISH;
+                } else if (GET_FISHSTATE(ch) != FISH_HOOKED && GET_FISHSTATE(ch) != FISH_BITE &&
+                           ((ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH) && rand_number(1, 10) >= 8) ||
+                            (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
+                    act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr,
+                        TO_CHAR);
+                    GET_FISHSTATE(ch) = FISH_BITE;
+                }
+            } /* End reel section */
+        } else if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == false) { /* End of, Is Fishing */
+            i->playerFlags.reset(PLR_FISHING);
+            characterSubscriptions.unsubscribe("goneFishing", r);
+            GET_FISHD(i) = 0;
+            GET_FISHSTATE(i) = FISH_NOFISH;
         }
     } /* End of for */
 
@@ -1642,6 +1649,7 @@ static void catch_fish(struct char_data *ch, int quality) {
     do_get(ch, "fish", 0, 0);
     send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
     ch->playerFlags.reset(PLR_FISHING);
+    characterSubscriptions.unsubscribe("goneFishing", ch->ref());
     GET_FISHD(ch) = 0;
     GET_FISHSTATE(ch) = FISH_NOFISH;
 }
@@ -4088,7 +4096,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                         }
                     }
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4105,7 +4112,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4122,7 +4128,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4139,7 +4144,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4156,7 +4160,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4173,7 +4176,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4190,7 +4192,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4206,7 +4207,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }
@@ -4222,7 +4222,6 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                     obj_to_char(obj, ch);
                     GET_OBJ_SIZE(obj) = get_size(ch);
                     ch->modRPP(-cost);
-                    ch->save();
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
                 }

@@ -144,31 +144,19 @@ void set_height_and_weight_by_race(struct char_data *ch) {
     ch->setHeight( hw_info[race].height[sex] + mod);
     mod *= hw_info[race].weightfac;
     mod /= 100;
-    GET_WEIGHT(ch) = hw_info[race].weight[sex] + mod;
+    ch->set(CharDim::Weight, hw_info[race].weight[sex] + mod);
 }
-
-
-struct race_flags {
-    int anti;
-    int only;
-};
-
-static const std::unordered_map<RaceID, race_flags> race_check = {
-    {RaceID::Human, {ITEM_ANTI_HUMAN, ITEM_ONLY_HUMAN}},
-    {RaceID::Saiyan, {ITEM_ANTI_SAIYAN, ITEM_ONLY_SAIYAN}},
-    {RaceID::Icer, {ITEM_ANTI_ICER, ITEM_ONLY_ICER}},
-    {RaceID::Konatsu, {ITEM_ANTI_KONATSU, ITEM_ONLY_KONATSU}},
-};
 
 
 int invalid_race(struct char_data *ch, struct obj_data *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
-    for(auto &[rid, check] : race_check) {
-        if(OBJ_FLAGGED(obj, check.anti) && ch->race == rid) return true;
-        if(OBJ_FLAGGED(obj, check.only) && ch->race != rid) return true;
-    }
+    if(obj->onlyRace.any() && !obj->onlyRace.test(static_cast<int>(ch->race)))
+        return true;
+
+    if(obj->antiRace.test(static_cast<int>(ch->race)))
+        return true;
 
     return false;
 }
@@ -292,7 +280,7 @@ namespace race {
         return SIZE_MEDIUM;
     }
 
-    static std::set<RaceID> playable = {RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian,
+    static std::unordered_set<RaceID> playable = {RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian,
     RaceID::Mutant, RaceID::Kanassan, RaceID::Halfbreed, RaceID::BioAndroid, RaceID::Android, RaceID::Demon, RaceID::Majin,
     RaceID::Kai, RaceID::Tuffle};
 
@@ -313,7 +301,7 @@ namespace race {
     }
 
 
-    std::set<int> getValidSexes(RaceID id) {
+    std::unordered_set<int> getValidSexes(RaceID id) {
         switch(id) {
             case RaceID::Namekian:
                 return {SEX_NEUTRAL};
@@ -439,51 +427,63 @@ namespace race {
         return id != RaceID::Android;
     }
 
-
-    struct race_affect_type {
-        int location{};
-        double modifier{};
-        int specific{-1};
-        std::function<double(struct char_data *ch)> func{};
-    };
-
-    static std::unordered_map<RaceID, std::vector<race_affect_type>> race_affects = {
-            {RaceID::Saiyan, {
-                    {APPLY_EXP_GAIN_MULT, 0.3},
-                    //{APPLY_PHYS_DAM_PERC, 0.0, 0, [](struct char_data *ch) {return PLR_FLAGGED(ch, PLR_TAIL) ? 0.15 : 0;}},
-                    //{APPLY_DAM_ATK_TIER, 0.2, 3},
-                    //{APPLY_SKILL_SLOTS, -1},
-                    //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](struct char_data *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
-
+    static std::unordered_map<RaceID, std::vector<character_affect_type>> race_affects = {
+            {RaceID::Human, {
+                                    {APPLY_CVIT_REGEN_MULT, -0.5, ~0},
             }},
+            {RaceID::Namekian, {
+                                    {APPLY_CVIT_REGEN_MULT, 0.5, ~0},
+                            }},
+            {RaceID::Mutant, {
+                                       {APPLY_CVIT_REGEN_MULT,  -0.1, ~0},
+                               }},
+            {RaceID::Arlian, {
+                                     {APPLY_CVIT_REGEN_MULT,  -0.7, ~0, [](auto ch) {return (IS_FEMALE(ch) && OUTSIDE(ch)) ? 4.0 : 0.0;}},
+                             }},
+            {RaceID::Kanassan, {
+                                     {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {
+                                         double out = 0.0;
+                                         if(weather_info.sky == SKY_RAINING && OUTSIDE(ch)) out += 0.1;
+                                         if(SUNKEN(IN_ROOM(ch))) out += 16.0;
+                                         return out;
+                                     }},
+                             }},
+            {RaceID::Android, {
+                                     {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {return PLR_FLAGGED(ch, PLR_ABSORB) ? -0.66 : 0.0;}},
+                             }},
+            {RaceID::Saiyan, {
+                                     {APPLY_CSTAT_GAIN_MULT, 0.3,  static_cast<int>(CharStat::Exp)},
+                                     //{APPLY_PHYS_DAM_PERC, 0.0, 0, [](struct char_data *ch) {return PLR_FLAGGED(ch, PLR_TAIL) ? 0.15 : 0;}},
+                                     //{APPLY_DAM_ATK_TIER, 0.2, 3},
+                                     //{APPLY_SKILL_SLOTS, -1},
+                                     //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](struct char_data *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
+                             }},
 
             {RaceID::Halfbreed, {
-                    {APPLY_EXP_GAIN_MULT, 0.2},
-                    //{APPLY_SKILL_SLOTS, 1},
-                    //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Intelligence},
-                    //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Strength},
-                    //{APPLY_PS_GAIN_MULT, -0.4}
-
-            }},
+                                     {APPLY_CSTAT_GAIN_MULT, 0.2,  static_cast<int>(CharStat::Exp)},
+                                     //{APPLY_SKILL_SLOTS, 1},
+                                     //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Intelligence},
+                                     //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Strength},
+                                     //{APPLY_PS_GAIN_MULT, -0.4}
+                             }},
 
             {RaceID::Icer, {
-                     {APPLY_EXP_GAIN_MULT, -0.1},
+                                     {APPLY_CSTAT_GAIN_MULT, -0.1, static_cast<int>(CharStat::Exp)},
 
-            }},
+                             }},
 
             {RaceID::Kai, {
-                                   {APPLY_EXP_GAIN_MULT, -0.1},
+                                     {APPLY_CSTAT_GAIN_MULT, -0.1, static_cast<int>(CharStat::Exp)},
 
-                           }},
+                             }}
     };
 
-    double getModifier(char_data* ch, int location, int specific) {
+    double getModifier(char_data *ch, int location, int specific) {
         double out = 0.0;
         if(auto found = race_affects.find(ch->race); found != race_affects.end()) {
 
             for(auto& affect : found->second) {
-                if(affect.location == location) {
-                    if(specific != -1 && specific != affect.specific) continue;
+                if(affect.match(location, specific)) {
                     out += affect.modifier;
                     if(affect.func) {
                         out += affect.func(ch);

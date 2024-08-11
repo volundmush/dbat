@@ -21,11 +21,17 @@ CPMAddPackage("gh:gabime/spdlog#v1.13.0")
 CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 CPMAddPackage("gh:effolkronium/random#v1.5.0")
 CPMAddPackage("gh:Neargye/magic_enum#v0.9.5")
+CPMAddPackage("gh:tplgy/cppcodec#v0.2")
+
+find_package(ZLIB REQUIRED)
+add_definitions(-DHAVE_ZLIB)
 
 find_package(Boost REQUIRED COMPONENTS system program_options regex)
 
 set(CIRCLE_INCLUDE_DIRS
         include
+        ${ZLIB_INCLUDE_DIRS}
+        ${cppcodec_SOURCE_DIR}
         ${Boost_INCLUDE_DIRS}
         ${fmt_SOURCE_DIR}/include
         ${nlohmann_json_SOURCE_DIR}/single_include
@@ -34,7 +40,6 @@ set(CIRCLE_INCLUDE_DIRS
         ${effolkronium_random_SOURCE_DIR}/include
         ${magic_enum_SOURCE_DIR}/include
         )
-
 
 
 file(GLOB_RECURSE CIRCLE_INCLUDE include/dbat/*.h)
@@ -49,7 +54,7 @@ set(CMAKE_CXX_FLAGS "-fpermissive -w")
 set(BUILD_TESTING OFF)
 
 set(CIRCLE_LINK_LIBRARIES
-        fmt::fmt ${Boost_LIBRARIES}
+        fmt::fmt ${Boost_LIBRARIES} ${ZLIB_LIBRARIES}
         #Luau.VM Luau.Common Luau.Compiler
         sodium
         effolkronium_random

@@ -1186,7 +1186,9 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
         mob_rnum r_num;
 
         WISHTIME = 0;
-        for (k = object_list; k; k = k->next) {
+        for (auto &r : activeObjects) {
+            k = r.get();
+            if(!k) continue;
             if (OBJ_FLAGGED(k, ITEM_FORGED)) {
                 continue;
             }
@@ -1789,15 +1791,16 @@ ACMD(do_bid) {
                 search_replace(bits, "TAKE", "");
                 send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
                 if (GET_OBJ_TYPE(obj2) == ITEM_WEAPON) {
-                    if (OBJ_FLAGGED(obj2, ITEM_WEAPLVL1)) {
+                    auto wlvl = obj2->value[VAL_WEAPON_LEVEL];
+                    if (wlvl == 1) {
                         send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w5%s@D]@n\r\n", "%");
-                    } else if (OBJ_FLAGGED(obj2, ITEM_WEAPLVL2)) {
+                    } else if (wlvl == 2) {
                         send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w10%s@D]@n\r\n", "%");
-                    } else if (OBJ_FLAGGED(obj2, ITEM_WEAPLVL3)) {
+                    } else if (wlvl == 3) {
                         send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w20%s@D]@n\r\n", "%");
-                    } else if (OBJ_FLAGGED(obj2, ITEM_WEAPLVL4)) {
+                    } else if (wlvl == 4) {
                         send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w30%s@D]@n\r\n", "%");
-                    } else if (OBJ_FLAGGED(obj2, ITEM_WEAPLVL5)) {
+                    } else if (wlvl == 5) {
                         send_to_char(ch, "@GWeapon Level@W: @D[@C1@D]\n@GDamage Bonus@W: @D[@w50%s@D]@n\r\n", "%");
                     }
                 }
@@ -1809,9 +1812,6 @@ ACMD(do_bid) {
                         sprinttype(obj2->affected[i].location, apply_types, buf, sizeof(buf));
                         send_to_char(ch, "%s %+d to %s", found++ ? "," : "", obj2->affected[i].modifier, buf);
                         switch (obj2->affected[i].location) {
-                            case APPLY_FEAT:
-                                send_to_char(ch, " (%s)", feat_list[obj2->affected[i].specific].name);
-                                break;
                             case APPLY_SKILL:
                                 send_to_char(ch, " (%s)", spell_info[obj2->affected[i].specific].name);
                                 break;
@@ -2163,7 +2163,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
         send_to_char(ch, "You can't put cards on a duel table. You have to @Gplay@n them.\r\n");
     else if ((GET_OBJ_VNUM(cont) == 697 || GET_OBJ_VNUM(cont) == 698 || GET_OBJ_VNUM(cont) == 682 ||
               GET_OBJ_VNUM(cont) == 683 || GET_OBJ_VNUM(cont) == 684 || OBJ_FLAGGED(cont, ITEM_CARDCASE)) &&
-             !OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT))
+             !OBJ_FLAGGED(obj, ITEM_CARD))
         send_to_char(ch, "You can only put cards in a case.\r\n");
     else if ((GET_OBJ_TYPE(cont) == ITEM_CONTAINER) &&
              (GET_OBJ_VAL(cont, VAL_CONTAINER_CAPACITY) > 0) &&
@@ -2184,7 +2184,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
         obj_from_char(obj);
         obj_to_obj(obj, cont);
 
-        if (!OBJ_FLAGGED(obj, ITEM_ANTI_HIEROPHANT)) {
+        if (!OBJ_FLAGGED(obj, ITEM_CARD)) {
             act("$n puts $p in $P.", true, ch, obj, cont, TO_ROOM);
         } else {
             act("$n puts an @DA@wd@cv@Ce@Wnt @DD@wu@ce@Cl @mC@Ma@Wr@wd@n in $P.", true, ch, obj, cont, TO_ROOM);
@@ -3640,7 +3640,7 @@ ACMD(do_eat) {
         affect_join(ch, &af, false, false, false, false);
     }
 
-    std::set<obj_vnum> candies = {53, 93, 94, 95};
+    std::unordered_set<obj_vnum> candies = {53, 93, 94, 95};
 
     if(candies.contains(food->vn)) {
         if(IS_MAJIN(ch)) foob = GET_OBJ_VAL(food, VAL_FOOD_FOODVAL);

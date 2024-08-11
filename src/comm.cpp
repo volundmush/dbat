@@ -68,9 +68,10 @@ int8_t emergency_unban;        /* signal: SIGUSR2 */
 FILE *logfile = nullptr;        /* Where to send the log messages. */
 int dg_act_check;               /* toggle for act_trigger */
 uint64_t pulse = 0;        /* number of pulses since game start */
-bool fCopyOver;          /* Are we booting in copyover mode? */
 uint16_t port;
 char *last_act_message = nullptr;
+
+std::string original_cwd;
 
 /***********************************************************************
 *  main game loop and related stuff                                    *
@@ -98,29 +99,19 @@ void broadcast(const std::string& txt) {
     }
 }
 
-boost::asio::awaitable<void> signal_watcher() {
-    while (!circle_shutdown) {
-        try {
-            // Wait for a signal to be received
-            int signal_number = co_await net::signals->async_wait(boost::asio::use_awaitable);
-
-            // Process the signal
-            switch(signal_number) {
-                case SIGUSR1:
-                    circle_shutdown = 1;
-                    circle_reboot = 1;
-                    break;
-                case SIGUSR2:
-                    circle_shutdown = 1;
-                    circle_reboot = 2;
-                    break;
-                default:
-                    basic_mud_log("Unexpected signal: %d", signal_number);
-            }
-
-        } catch(const std::exception& e) {
-            std::cerr << "Error in signal watcher: " << e.what() << '\n';
-        }
+void signal_handler(int signal) {
+    // Process the signal
+    switch(signal) {
+        case SIGUSR1:
+            circle_shutdown = 1;
+            circle_reboot = 1;
+            break;
+        case SIGUSR2:
+            circle_shutdown = 1;
+            circle_reboot = 2;
+            break;
+        default:
+            basic_mud_log("Unexpected signal: %d", signal);
     }
 }
 
@@ -147,7 +138,6 @@ void copyover_recover_final() {
         }
         d->account = &accFind->second;
         d->account->descriptors.insert(d);
-        for(auto &[cid, c] : d->conns) c->account = d->account;
 
         auto playFind = players.find(playerID);
         if(playFind == players.end()) {
@@ -160,11 +150,6 @@ void copyover_recover_final() {
 
 		GET_LOADROOM(c) = room;
         for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->playerFlags.reset(f);
-        auto conns = d->conns;
-        for(auto &[cid, con] : conns) {
-            d->account->connections.insert(con.get());
-            con->setParser(new net::PuppetParser(con, c));
-        }
 
         write_to_output(d, "@rThe world comes back into focus... has something changed?@n\r\n");
 
@@ -172,13 +157,6 @@ void copyover_recover_final() {
             GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
         }
     }
-}
-
-boost::asio::awaitable<void> yield_for(std::chrono::milliseconds ms) {
-    boost::asio::steady_timer timer(co_await boost::asio::this_coro::executor, ms);
-    timer.expires_after(ms);
-    co_await timer.async_wait(boost::asio::use_awaitable);
-    co_return;
 }
 
 /* Reload players after a copyover */
@@ -198,6 +176,29 @@ void copyover_recover() {
     // erase the file.
     std::filesystem::remove(COPYOVER_FILE);
 
+    // restore the server_fd.
+    if(j.contains("server_fd")) net::server_fd = j.at("server_fd").get<int>();
+
+    // Rebuild connection data.
+    if(j.contains("pendingReads")) {
+        for(const auto &c : j.at("pendingReads")) net::pendingReads.insert(c.get<int>());
+    }
+
+    if(j.contains("pendingOutData")) {
+        for(const auto &c : j.at("pendingOutData")) net::pendingOutData.insert(c.get<int>());
+    }
+
+    if(j.contains("pendingWrites")) {
+        for(const auto &c : j.at("pendingWrites")) net::pendingWrites.insert(c.get<int>());
+    }
+
+    if(j.contains("connections"))
+        for(auto &jc : j.at("connections")) {
+            auto connId = jc[0].get<int>();
+            net::connections[connId] = std::make_shared<net::Connection>(connId, jc[1]);
+        }
+
+    // rebuild descriptor data...
     if(j.contains("descriptors")) {
         for(const auto &jd : j["descriptors"]) {
             auto d = new descriptor_data();
@@ -208,12 +209,10 @@ void copyover_recover() {
             if(jd.contains("in_room")) d->obj_type = jd["in_room"].get<room_vnum>();
             if(jd.contains("connections")) {
                 {
-                    std::lock_guard<std::mutex> guard(net::connectionMutex);
                     for(const auto& jc : jd["connections"]) {
-                        auto c = std::make_shared<net::Connection>(jc.get<int64_t>(), net::JsonChannel(*net::io, 200));
+                        auto c = net::connections.at(jc.get<int64_t>());
                         c->desc = d;
                         d->conns[c->connId] = c;
-                        net::connections[c->connId] = c;
                     }
                 }
             }
@@ -237,17 +236,31 @@ static void performReboot(int mode) {
         return;
     }
 
-    broadcast("\t\x1B[1;31m \007\007\007The universe stops for a moment as space and time fold.\x1B[0;0m\r\n");
-    save_mud_time(&time_info);
+    broadcast("\t@RThe universe stops for a moment as space and time fold.@n\r\n");
+    // Flush all pending output and otherwise get connections ready for a copyover.
+    net::prepareForCopyover();
 
     nlohmann::json j;
 
-    /* For each playing descriptor, save its state */
-    for (auto &[cid, conn] : net::connections) {
-        if(conn->desc) continue;
-        conn->sendText("\r\nSorry, we are rebooting. Please wait warmly for a few seconds.\r\n");
+    // save the server_fd...
+    j["server_fd"] = net::server_fd;
+
+    // Serialize all connections.
+    for(auto &[id, conn] : net::connections) {
+        j["connections"].push_back(std::make_pair(id, conn->serialize()));
     }
 
+    for(const auto &c : net::pendingOutData) {
+        j["pendingOutData"].push_back(c);
+    }
+
+    for(const auto &c : net::pendingReads) {
+        j["pendingReads"].push_back(c);
+    }
+
+    for(const auto &c : net::pendingWrites) {
+        j["pendingWrites"].push_back(c);
+    }
 
     /* For each descriptor/connection, halt them and save state. */
     for (auto &[cid, d] : sessions) {
@@ -275,6 +288,7 @@ static void performReboot(int mode) {
 
     fp << jdump(j) << std::endl;
     fp.close();
+    close(net::epoll_fd);
 }
 
 static std::vector<std::pair<std::string, double>> timings;
@@ -299,11 +313,15 @@ static void deathTrapWrapper(uint64_t heartBeat, double deltaTime) {
 }
 
 static std::vector<GameSystem> gameSystems = {
+        GameSystem("commandWaitQueue", 0.0, commandWaitQueue),
         GameSystem("event_process", 0.0, event_process),
         GameSystem("script_trigger_check", 13.0, script_trigger_check),
         GameSystem("zone_update", 0.0, zone_update),
+        GameSystem("repairRoomDamage", 600.0, repairRoomDamage),
         GameSystem("dball_load", 1.0, dball_load),
         GameSystem("base_update", 2.0, base_update),
+        GameSystem("androidAbsorbSystem", 2.0, androidAbsorbSystem),
+        GameSystem("goopTimeService", 2.0, goopTimeService),
         GameSystem("fish_update", 2.0, fish_update),
         GameSystem("handle_songs", 15.0, handle_songs),
         GameSystem("wishSYS", 1.0, wishSYS),
@@ -312,7 +330,10 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("check_auction", 15.0, check_auction),
         GameSystem("gamesys_oozaru", 0.0, trans::gamesys_oozaru),
         GameSystem("gamesys_transform", 0.0, trans::gamesys_transform),
+        GameSystem("powerupService", 4.0, powerupService),
+        GameSystem("lifeforceSystem", 4.0, lifeforceSystem),
         GameSystem("fight_stack", 4.0, fight_stack),
+        GameSystem("kiChargeSystem", 4.0, kiChargeSystem),
         GameSystem("homing_update", 2.0, homing_update),
         GameSystem("huge_update", 2.0, huge_update),
         GameSystem("broken_update", 2.0, broken_update),
@@ -320,6 +341,9 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("affect_update_violence", 5.0, affect_update_violence),
         GameSystem("advanceClock", 0.0, advanceClock),
         GameSystem("affect_update", 300.0, affect_update),
+        GameSystem("characterVitalsRecovery", 0.0, characterVitalsRecovery),
+        GameSystem("healTankService", 0.0, healTankService),
+        GameSystem("corpseRotService", 100.0, corpseRotService),
         GameSystem("point_update", 100.0, point_update),
         GameSystem("clan_update", 60.0, clan_update),
         GameSystem("record_usage", 5.0, record_usage),
@@ -330,14 +354,15 @@ static std::vector<GameSystem> gameSystems = {
 
 void heartbeat(uint64_t heart_pulse, double deltaTime) {
     static int mins_since_crashsave = 0;
-    timings.clear();
 
     for(auto &s : gameSystems) {
-        s.countdown -= deltaTime;
+        if(s.interval > 0.0)
+            s.countdown -= deltaTime;
         if(s.countdown <= 0.0) {
             auto start = std::chrono::high_resolution_clock::now();
+            auto miniDelta = (s.interval > 0.0) ? std::abs<double>(s.countdown + s.interval) : deltaTime;
             try {
-                s.func(heart_pulse, deltaTime);
+                s.func(heart_pulse, miniDelta);
             }
             catch(const std::exception &e) {
                 basic_mud_log("Exception while running GameService '%s': %s", s.name.c_str(), e.what());
@@ -348,48 +373,105 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
                 shutdown_game(1);
             }
             auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back(s.name, std::chrono::duration<double>(end - start).count());
-            s.countdown += s.interval;
+            timings.emplace_back(fmt::format("heartbeat system: {}", s.name), std::chrono::duration<double>(end - start).count());
+            if(s.interval > 0.0)
+                s.countdown += s.interval;
         }
     }
 }
 
 void processConnections(double deltaTime) {
-    // First, handle any disconnected connections.
+    // net::update does an epoll_wait and updates our data structures.
+    net::update(deltaTime);
+
+    std::unordered_set<int> toErase;
+    // First, handle any disconnected connections caused by a TCP issue.
     for(auto &[id, reason] : net::deadConnections) {
+        // We don't want to purge those in the GameLogoff state until their buffers are cleaned.
+        if(reason == net::DisconnectReason::GameLogoff) continue;
+
         auto it = net::connections.find(id);
         // This shouldn't happen, but whatever.
         if(it == net::connections.end()) continue;
         it->second->cleanup(reason);
+        toErase.insert(id);
     }
-    for(auto &[id, reason] : net::deadConnections) {
+    for(auto &id : toErase) {
         net::connections.erase(id);
+        net::deadConnections.erase(id);
+        net::pendingOutData.erase(id);
+        net::pendingReads.erase(id);
+        net::pendingWrites.erase(id);
     }
-    net::deadConnections.clear();
 
     // Second, welcome any new connections!
-    auto pending = net::pendingConnections;
-    for(const auto& id : pending) {
+    net::acceptAllIncomingConnections();
+
+    for(const auto &id : net::pendingReads) {
         auto it = net::connections.find(id);
         if (it != net::connections.end()) {
             auto conn = it->second;
             // Need a proper welcoming later....
+            conn->readFromSocket();
+        }
+    }
+    net::pendingReads.clear();
+
+    auto now = std::chrono::system_clock::now();
+
+    // Any connections which have finished negotiation can be welcomed.
+    for(const auto&[id, conn] : net::connections) {
+        if((conn->state == net::ConnectionState::Pending)
+        && ((now - conn->connected) > std::chrono::milliseconds(500))) {
             conn->onWelcome();
-            net::pendingConnections.erase(id);
         }
     }
 
     // Next, we must handle the heartbeat routine for each connection.
     for(auto& [id, c] : net::connections) {
-        c->onHeartbeat(deltaTime);
+        c->update(deltaTime);
     }
 }
 
-boost::asio::awaitable<void> runOneLoop(double deltaTime) {
+void processDisconnects() {
+    std::unordered_set<int> toErase;
+    // First, handle any disconnected connections caused by a TCP issue.
+    for(auto &[id, reason] : net::deadConnections) {
+        // We don't want to purge those in the GameLogoff state until their buffers are cleaned.
+        if(reason != net::DisconnectReason::GameLogoff) continue;
+        if(!net::pendingOutData.contains(id)) toErase.insert(id);
+    }
+    for(auto &id : toErase) {
+        net::connections.erase(id);
+        net::deadConnections.erase(id);
+    }
+}
+
+void processOutputs() {
+    // Vector to store the intersection result
+    std::vector<int> intersection;
+
+    // Calculate the intersection of set1 and set2
+    std::set_intersection(net::pendingWrites.begin(), net::pendingWrites.end(), net::pendingOutData.begin(), net::pendingOutData.end(), std::back_inserter(intersection));
+
+    for(auto &id : intersection) {
+        auto it = net::connections.find(id);
+        if(it == net::connections.end()) continue;
+        auto conn = it->second;
+        conn->writeToSocket();
+    }
+}
+
+void runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
+    // Clear profile data.
 
+
+    auto start = std::chrono::high_resolution_clock::now();
     processConnections(deltaTime);
+    auto end = std::chrono::high_resolution_clock::now();
+    timings.emplace_back("processConnections", std::chrono::duration<double>(end - start).count());
 
     if(sleeping && descriptor_list) {
         basic_mud_log("Waking up.");
@@ -404,8 +486,8 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     }
 
     {
-        std::set<struct descriptor_data*> toLook;
-        auto start = std::chrono::high_resolution_clock::now();
+        std::unordered_set<struct descriptor_data*> toLook;
+        start = std::chrono::high_resolution_clock::now();
         for(auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
             switch(STATE(d)) {
@@ -422,20 +504,20 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
             }
         }
         for(auto d : toLook) look_at_room(IN_ROOM(d->character), d->character, 0);
-        auto end = std::chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("handle logins", std::chrono::duration<double>(end - start).count());
     }
 
 
     /* Process commands we just read from process_input */
     try {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
             if(d->character) d->character->time.played += deltaTime;
             d->handle_input();
         }
-        auto end = std::chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("handle input", std::chrono::duration<double>(end - start).count());
     }
     catch(const std::exception& e) {
@@ -446,6 +528,7 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
         shutdown_game(1);
     }
 
+    start = std::chrono::high_resolution_clock::now();
     bool gameActive = false;
     // TODO: replace this with a smarter check...
     // to determine if the game is active, we need to check if there are any players in the game.
@@ -457,17 +540,19 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
             break;
         }
     }
+    end = std::chrono::high_resolution_clock::now();
+    timings.emplace_back("check for active descriptors", std::chrono::duration<double>(end - start).count());
 
     if(gameActive) {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         heartbeat(++pulse, deltaTime);
-        auto end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("heartbeat total", std::chrono::duration<double>(end - start).count());
+        end = std::chrono::high_resolution_clock::now();
+        //timings.emplace_back("heartbeat total", std::chrono::duration<double>(end - start).count());
     }
 
     /* Send queued output out to the operating system (ultimately to user). */
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
             if (!d->output.empty()) {
@@ -475,13 +560,14 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
                 d->has_prompt = true;
             }
         }
-        auto end = std::chrono::high_resolution_clock::now();
+        processOutputs();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("process output", std::chrono::duration<double>(end - start).count());
     }
 
     /* Print prompts for other descriptors who had no other output */
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = d->next) {
             if (!d->has_prompt) {
                 write_to_output(d, "@n");
@@ -489,13 +575,13 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
                 d->has_prompt = true;
             }
         }
-        auto end = std::chrono::high_resolution_clock::now();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("print prompts", std::chrono::duration<double>(end - start).count());
     }
 
     /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
     {
-        auto start = std::chrono::high_resolution_clock::now();
+        start = std::chrono::high_resolution_clock::now();
         for (auto d = descriptor_list; d; d = next_d) {
             next_d = d->next;
             if(d->conns.empty()) {
@@ -507,7 +593,8 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
             if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT || STATE(d) == CON_QUITGAME)
                 close_socket(d);
         }
-        auto end = std::chrono::high_resolution_clock::now();
+        processDisconnects();
+        end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("close sockets", std::chrono::duration<double>(end - start).count());
     }
 
@@ -525,10 +612,19 @@ boost::asio::awaitable<void> runOneLoop(double deltaTime) {
     }
 
     tics_passed++;
-    co_return;
 }
 
 namespace game {
+
+    void init() {
+        game::init_locale();
+        game::init_sodium();
+        game::init_database();
+        game::init_zones();
+        net::init_epoll();
+        game::init_copyover();
+        net::init_listeners();
+    }
 
     void init_sodium() {
         if (sodium_init() != 0) {
@@ -537,22 +633,12 @@ namespace game {
         }
     }
 
-    void init_asio() {
-        logger->info("Setting up executor...");
-        if(!net::io) net::io = std::make_unique<boost::asio::io_context>();
-        if(!net::linkChannel) net::linkChannel = std::make_unique<net::JsonChannel>(*net::io, 200);
-        logger->info("Setting up thermite endpoint...");
-        try {
-            net::thermiteEndpoint = boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address(config::thermiteAddress), config::thermitePort);
-        } catch (const boost::system::system_error& ex) {
-            logger->critical("Failed to create thermite endpoint: {}", ex.what());
-            shutdown_game(EXIT_FAILURE);
-        } catch(...) {
-            logger->critical("Failed to create thermite endpoint: Unknown exception");
-            shutdown_game(EXIT_FAILURE);
+    void init_copyover() {
+        if(std::filesystem::exists(COPYOVER_FILE)) {
+            copyover_recover();
+            copyover_recover_final();
         }
     }
-
 
     void init_locale() {
         std::locale::global(std::locale("en_US.UTF-8"));
@@ -564,118 +650,86 @@ namespace game {
 
     void init_zones() {
         for (auto &[vn, z] : zone_table) {
-            basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn,
-                          z.name, z.bot, z.top);
+            basic_mud_log("Resetting #%d: %s (rooms %d-%d).", vn, z.name, z.bot, z.top);
             reset_zone(vn);
         }
     }
 
-    boost::asio::awaitable<void> run_loop_once(double deltaTime) {
-        try {
-            co_await runOneLoop(deltaTime);
-        } catch(std::exception& e) {
-            basic_mud_log("Exception in runOneLoop(): %s", e.what());
-            shutdown_game(1);
-        } catch(...) {
-            basic_mud_log("Unknown exception in runOneLoop()");
-            shutdown_game(1);
-        }
-        co_return;
-    }
-
-    boost::asio::awaitable<void> run_loop() {
+    void run_loop() {
         broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
-        
+
         double saveTimer = 60.0 * 5.0;
-        double deltaTimeInSeconds = 0.1;
+        const std::chrono::milliseconds heartbeatInterval(config::heartbeatInterval);
         gameIsLoading = false;
 
-        while(!circle_shutdown) {
+        while (!circle_shutdown) {
+            timings.clear();
             auto start = std::chrono::high_resolution_clock::now();
-            co_await run_loop_once(deltaTimeInSeconds);
+
+            try {
+                runOneLoop(std::chrono::duration<double>(heartbeatInterval).count());
+            } catch (std::exception& e) {
+                basic_mud_log("Exception in runOneLoop(): %s", e.what());
+                shutdown_game(1);
+            } catch (...) {
+                basic_mud_log("Unknown exception in runOneLoop()");
+                shutdown_game(1);
+            }
+
             auto end = std::chrono::high_resolution_clock::now();
 
-            saveTimer -= deltaTimeInSeconds;
-            if(saveTimer <= 0.0) {
+            saveTimer -= std::chrono::duration<double>(heartbeatInterval).count();
+            if (saveTimer <= 0.0) {
                 saveTimer = 60.0 * 5.0;
-                // save the game state...
+                // Save the game state...
                 runSave();
             }
 
-            auto duration = std::chrono::duration<double>(end - start).count();
-            auto waitTime = 0.1 - duration;
-            if(waitTime > 0.0) {
-                co_await yield_for(std::chrono::milliseconds(static_cast<int>(waitTime * 1000.0)));
+            auto elapsedTime = end - start;
+            //logger->info("Main Loop duration: {:.10f}s", std::chrono::duration<double>(elapsedTime).count());
+            bool printTimings = false;
+            if (elapsedTime < heartbeatInterval) {
+                std::this_thread::sleep_for(heartbeatInterval - elapsedTime);
+            } else {
+                printTimings = true;
+                logger->warn("Main loop is taking up too much time: {}s", std::chrono::duration<double>(elapsedTime).count());
             }
-            deltaTimeInSeconds = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - start).count();
+            if(printTimings) {
+                for(const auto &[name, time] : timings) {
+                    logger->warn("{}: {:.10f}s", name, time);
+                }
+            }
         }
         runSave();
+
+        if (circle_reboot) {
+            performReboot(circle_reboot);
+        }
     }
 
     void run_game() {
         basic_mud_log("Signal trapping.");
-        net::signals = std::make_unique<boost::asio::signal_set>(*net::io, SIGUSR1, SIGUSR2);
-
-        boost::asio::co_spawn(boost::asio::make_strand(*net::io), signal_watcher(), boost::asio::detached);
-
-        boost::asio::co_spawn(boost::asio::make_strand(*net::io), net::runLinkManager(), boost::asio::detached);
-
-        boost::asio::co_spawn(boost::asio::make_strand(*net::io), run_loop(), boost::asio::detached);
+        signal(SIGUSR1, signal_handler);
+        signal(SIGUSR2, signal_handler);
+        signal(SIGPIPE, SIG_IGN);
 
         logger->info("Entering main loop...");
 
-        unsigned int threadCount = 0;
-        if(config::enableMultithreading) {
-            logger->info("Multithreading is enabled.");
-            if(config::threadsCount < 1) {
-                threadCount = std::thread::hardware_concurrency() - 1;
-                logger->info("Using {} threads. (Automatic detection)", threadCount+1);
-            } else {
-                threadCount = config::threadsCount - 1;
-                logger->info("Using {} threads. (Manual override)", threadCount+1);
-            }
-        } else {
-            threadCount = 0;
-        }
+        run_loop();
 
-        if(threadCount < 1) threadCount = 1;
-
-        std::vector<std::thread> threads;
-        if(threadCount) {
-            logger->info("Starting {} helper threads...", threadCount);
-            config::usingMultithreading = true;
-        }
-        for (int i = 0; i < threadCount; ++i) {
-            threads.emplace_back([&]() {
-                net::io->run();
-            });
-        }
-        net::io->run();
-
-        logger->info("runGame() has finished. Stopping ASIO...");
-        net::io->stop();
-        logger->info("Joining ASIO threads...");
-        for (auto &thread: threads) {
-            thread.join();
-        }
-        logger->info("Executor has shut down. Running cleanup.");
-        logger->info("All threads joined.");
-        threads.clear();
-
-        net::linkChannel.reset();
-        net::signals.reset();
-        net::link.reset();
-
-        net::io.reset();
-
-        basic_mud_log("Saving current MUD time.");
-        save_mud_time(&time_info);
+        logger->info("run_loop() has finished. Stopping...");
 
         if (circle_reboot) {
             basic_mud_log("Rebooting.");
-            //shutdown_game(52);            /* what's so great about HHGTTG, anyhow? */
-            std::filesystem::current_path("..");
-            execl("bin/circle", "circle", "-C%d", "1280", (char *) NULL);
+            std::filesystem::current_path(original_cwd);
+            // Attempt to execute the new program
+            if (execl("bin/circle", "circle", nullptr) == -1) {
+                // If execl fails, log the error
+                basic_mud_log("Error during execl: %s", strerror(errno));
+                // Optionally, you can exit with an error code if execl fails
+                exit(EXIT_FAILURE);
+            }
+            // If execl succeeds, nothing after this point will be executed
         }
         basic_mud_log("Normal termination of game.");
         shutdown_game(0);
@@ -686,9 +740,6 @@ namespace game {
 void record_usage(uint64_t heartPulse, double deltaTime) {
 
 }
-
-
-
 
 char *make_prompt(struct descriptor_data *d) {
     static char prompt[MAX_PROMPT_LENGTH];
@@ -1632,7 +1683,7 @@ void descriptor_data::sendText(const std::string& txt) {
 }
 
 void descriptor_data::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-    for(auto &[id, conn] : conns) conn->sendGMCP(cmd, j);
+
 }
 
 void free_bufpool() {
@@ -2160,7 +2211,7 @@ void show_help(std::shared_ptr<net::Connection>& co, const char *entry) {
 void descriptor_data::handle_input() {
     // Now we need to process the raw_input_queue, watching for special characters and also aliases.
     // Commands are processed first-come-first served...
-    for(auto command : raw_input_queue) {
+    for(auto &command : raw_input_queue) {
         if (snoop_by)
             write_to_output(snoop_by, "%% %s\r\n", command.c_str());
 
@@ -2170,25 +2221,21 @@ void descriptor_data::handle_input() {
             character->wait_input_queue.clear();
             write_to_output(this, "All queued commands cancelled.\r\n");
             if (character->task != Task::nothing) {
-                character->task = Task::nothing;
+                character->setTask(Task::nothing);
                 write_to_output(this, "You stop focussing on your task.\r\n");
             }
+            characterSubscriptions.unsubscribe("commandWaitQueue", character->ref());
         } else {
             perform_alias(this, (char*)command.c_str());
         }
     }
     raw_input_queue.clear();
 
-    if(input_queue.empty()) {
-        if((!character->wait_input_queue.empty()) || (character->task != Task::nothing)) {
-            pushWaitQueue(character);
-            return;
-        } else
-            return;
-    }
+    if(input_queue.empty())
+        return;
+
     auto command = input_queue.front();
     input_queue.pop_front();
-
 
     has_prompt = false;
 

@@ -988,7 +988,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->failroom = NOWHERE;
             d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                r.save();
                 converting = true;
             }
         } else if (retval == 5) {
@@ -1001,7 +1000,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->failroom = NOWHERE;
             d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                r.save();
                 converting = true;
             }
         } else if (retval == 7) {
@@ -1014,7 +1012,6 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
             d->failroom = NOWHERE;
             d->totalfailroom = NOWHERE;
             if (bitsavetodisk) {
-                r.save();
                 converting = true;
             }
         } else if (retval == 11) {
@@ -1178,12 +1175,9 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     ch->set(CharNum::Level, t[0]);
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
-    ch->set(CharStat::PowerLevel, t[3]);
-    ch->set(CharStat::Ki, t[4]);
-    ch->set(CharStat::Stamina, t[5]);
-    ch->health = 1.0;
-    ch->energy = 1.0;
-    ch->stamina = 1.0;
+    ch->set(CharVital::PowerLevel, t[3]);
+    ch->set(CharVital::Ki, t[4]);
+    ch->set(CharVital::Stamina, t[5]);
 
     ch->mob_specials.damnodice = t[6];
     ch->mob_specials.damsizedice = t[7];
@@ -1202,9 +1196,12 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     }
 
     ch->set(CharMoney::Carried, t[0]);
-    ch->race = static_cast<RaceID>(t[2]);
-
-    ch->chclass = static_cast<SenseiID>(t[3]);
+    auto race = t[2]+1;
+    if(race > 23) race = 0;
+    ch->race = static_cast<RaceID>(race);
+    auto sen = t[3]+1;
+    if(sen > 14) sen = 0;
+    ch->chclass = static_cast<SenseiID>(sen);
     GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
     GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
     GET_SAVE_BASE(ch, SAVING_WILL) = 0;
@@ -1816,10 +1813,6 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                     }
                 }
 
-                if (t[0] >= APPLY_DAMAGE_PERC && t[0] <= APPLY_DEFENSE_PERC) {
-                    basic_mud_log("Warning: object #%d (%s) uses deprecated saving throw applies",
-                        nr, GET_OBJ_SHORT(&o));
-                }
                 o.affected[j].location = t[0];
                 o.affected[j].modifier = t[1];
                 o.affected[j].specific = t[2];
@@ -2402,15 +2395,15 @@ static void load_BASE(struct char_data *ch, const char *line, int mode) {
 
     switch (mode) {
         case LOAD_HIT:
-            ch->set(CharStat::PowerLevel, num);
+            ch->set(CharVital::PowerLevel, num);
             break;
 
         case LOAD_MANA:
-            ch->set(CharStat::Ki, num);
+            ch->set(CharVital::Ki, num);
             break;
 
         case LOAD_MOVE:
-            ch->set(CharStat::Stamina, num);
+            ch->set(CharVital::Stamina, num);
             break;
 
         case LOAD_LIFE:
@@ -2467,21 +2460,16 @@ static int load_char(const char *name, struct char_data *ch) {
         GET_FURY(ch) = PFDEF_HAIRL;
         GET_CLAN(ch) = strdup("None.");
         GET_HOME(ch) = PFDEF_HOMETOWN;
-        GET_WEIGHT(ch) = PFDEF_WEIGHT;
+        ch->set(CharDim::Weight, PFDEF_WEIGHT);
 
-        ch->health = 1.0;
         GET_RELAXCOUNT(ch) = PFDEF_EYE;
         GET_BLESSLVL(ch) = PFDEF_HEIGHT;
-        ch->life = 1.0;
         // GET_LIFEFORCE(ch) = PFDEF_BASEPL;
         GET_LIFEPERC(ch) = PFDEF_WEIGHT;
         GET_STUPIDKISS(ch) = 0;
         GET_POS(ch) = POS_STANDING;
         GET_MAJINIZED(ch) = PFDEF_BASEPL;
         GET_GAUNTLET(ch) = PFDEF_GAUNTLET;
-        ch->energy = 1.0;
-        ch->stamina = 1.0;
-
 
         GET_LOADROOM(ch) = PFDEF_LOADROOM;
         GET_INVIS_LEV(ch) = PFDEF_INVISLEV;
@@ -2555,8 +2543,11 @@ static int load_char(const char *name, struct char_data *ch) {
                     if (!strcmp(tag, "Cha ")) ch->set(CharAttribute::Speed, atoi(line));
                     else if (!strcmp(tag, "Clan")) GET_CLAN(ch) = strdup(line);
                     else if (!strcmp(tag, "Clar")) GET_CRANK(ch) = atoi(line);
-                    else if (!strcmp(tag, "Clas"))
-                        ch->chclass = static_cast<SenseiID>(std::min(14, atoi(line)));
+                    else if (!strcmp(tag, "Clas")) {
+                        auto sen = atoi(line)+1;
+                        if(sen > 14) sen = 0;
+                        ch->chclass = static_cast<SenseiID>(sen);
+                    }
                     else if (!strcmp(tag, "Colr")) {
                         sscanf(line, "%d %s", &num, buf2);
                     } else if (!strcmp(tag, "Con ")) ch->set(CharAttribute::Constitution, atoi(line));
@@ -2575,7 +2566,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'E':
-                    if (!strcmp(tag, "Exp ")) ch->exp = atoi(line);
+                    if (!strcmp(tag, "Exp ")) ch->setExperience(atoi(line));
                     else if (!strcmp(tag, "Eali")) ch->set(CharAlign::LawChaos, atoi(line));
                     else if (!strcmp(tag, "Ecls")) {
 
@@ -2680,7 +2671,11 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'R':
-                    if (!strcmp(tag, "Race")) ch->race = (RaceID)atoi(line);
+                    if (!strcmp(tag, "Race")) {
+                        auto race = atoi(line)+1;
+                        if(race > 23) race = 0;
+                        ch->race = static_cast<RaceID>(race);
+                    }
                     else if (!strcmp(tag, "Raci")) ch->set(CharNum::RacialPref, atoi(line));
                     else if (!strcmp(tag, "rDis")) GET_RDISPLAY(ch) = strdup(line);
                     else if (!strcmp(tag, "Rela")) GET_RELAXCOUNT(ch) = atoi(line);
@@ -2762,7 +2757,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'W':
-                    if (!strcmp(tag, "Wate")) GET_WEIGHT(ch) = atoi(line);
+                    if (!strcmp(tag, "Wate")) ch->set(CharDim::Weight, atoi(line));
                     else if (!strcmp(tag, "Wimp")) GET_WIMP_LEV(ch) = atoi(line);
                     else if (!strcmp(tag, "Wis ")) ch->set(CharAttribute::Wisdom, atoi(line));
                     break;
@@ -4810,6 +4805,374 @@ void migrate_characters() {
     }
 }
 
+static void migrate_aff(affect_t *aff) {
+    switch(aff->location) {
+        // Old Attributes
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6: {
+            auto newLoc = 1 << (aff->location - 1);
+            aff->location = APPLY_CATTR_BASE;
+            aff->specific = newLoc;
+        }
+            break;
+        case 12: // old Ki
+        case 37:
+            aff->location = APPLY_CVIT_BASE;
+            aff->specific = static_cast<int>(CharVital::Ki);
+            break;
+        case 13: // old hit
+            aff->location = APPLY_CVIT_BASE;
+            aff->specific = static_cast<int>(CharVital::PowerLevel);
+            break;
+        case 14: // old stamina
+            aff->location = APPLY_CVIT_BASE;
+            aff->specific = static_cast<int>(CharVital::Stamina);
+            break;
+        case 25: // old apply pl mult
+            aff->location = APPLY_CVIT_MULT;
+            aff->specific = static_cast<int>(CharVital::PowerLevel);
+            break;
+        case 26: // old apply ki mult
+            aff->location = APPLY_CVIT_MULT;
+            aff->specific = static_cast<int>(CharVital::Ki);
+            break;
+        case 27: // old apply st mult
+            aff->location = APPLY_CVIT_MULT;
+            aff->specific = static_cast<int>(CharVital::Stamina);
+            break;
+        case 28: // old apply lf mult
+            aff->location = APPLY_CVIT_MULT;
+            aff->specific = static_cast<int>(CharVital::LifeForce);
+            break;
+        case 29: // old apply vitals mult
+            aff->location = APPLY_CVIT_MULT;
+            aff->specific = ~0;
+            break;
+        case 46: // old apply all vitals
+            aff->location = APPLY_CVIT_BASE;
+            aff->specific = ~0;
+            break;
+        case 16: // old experience gain mult
+            aff->location = APPLY_CSTAT_GAIN_MULT;
+            aff->specific = static_cast<int>(CharStat::Exp);
+            break;
+        case 21: // old skill stat gain mult
+            aff->location = APPLY_CSTAT_BASE;
+            aff->specific = static_cast<int>(CharStat::SkillTrain);
+            break;
+        case 22:
+            aff->location = APPLY_CVIT_MULT;
+            aff->specific = static_cast<int>(CharVital::LifeForce);
+            aff->modifier /= 100.0;
+            break;
+        case 17: // old armor / ac
+            aff->location = APPLY_COMBAT_BASE;
+            aff->specific = static_cast<int>(ComStat::Armor);
+            break;
+        case 18: // old accuracy
+            aff->location = APPLY_COMBAT_MULT;
+            aff->specific = static_cast<int>(ComStat::Accuracy);
+            break;
+        case 32: // old phys dam perc
+            aff->location = APPLY_DTYPE_BON;
+            aff->specific = static_cast<int>(DamType::Physical);
+            break;
+        case 33: // old ki dam perc
+            aff->location = APPLY_DTYPE_BON;
+            aff->specific = static_cast<int>(DamType::Ki);
+            break;
+        case 34: // old phys res perc
+            aff->location = APPLY_DTYPE_RES;
+            aff->specific = static_cast<int>(DamType::Physical);
+            break;
+        case 35: // old ki res perc
+            aff->location = APPLY_DTYPE_RES;
+            aff->specific = static_cast<int>(DamType::Ki);
+            break;
+        case 41: // old skill
+            aff->location = APPLY_SKILL;
+            break;
+        default:
+            break;
+    }
+}
+
+static void migrate_char_data(char_data *c) {
+    // convert affected
+    for(auto aff = c->affected; aff; aff = aff->next) {
+        migrate_aff(aff);
+    }
+
+    for(auto aff = c->affectedv; aff; aff = aff->next) {
+        migrate_aff(aff);
+    }
+
+
+    // convert affectedv
+}
+
+static void migrate_obj_data(obj_data *o) {
+    // Convert obj_affects
+
+    for(auto &aff : o->affected) {
+        migrate_aff(&aff);
+    }
+
+    // Iterate from tail to head to combine matching affects
+    for (int i = MAX_OBJ_AFFECT - 1; i > 0; --i) {
+        if (o->affected[i].location == 0) continue; // Skip empty slots
+
+        for (int j = 0; j < i; ++j) {
+            if (o->affected[j].location == o->affected[i].location &&
+                o->affected[j].modifier == o->affected[i].modifier &&
+                o->affected[j].isBitwise()) {
+                // Combine the specifics with bitwise OR
+                o->affected[j].specific |= o->affected[i].specific;
+
+                // Clear the tail-wards element
+                o->affected[i].location = 0;
+                o->affected[i].modifier = 0.0;
+                o->affected[i].specific = 0;
+                break;
+            }
+        }
+    }
+
+    // Now compact the array, moving everything towards index 0
+    int empty_index = -1;
+    for (int i = 0; i < MAX_OBJ_AFFECT; ++i) {
+        if (o->affected[i].location == 0 && empty_index == -1) {
+            // Mark the first empty slot found
+            empty_index = i;
+        } else if (o->affected[i].location != 0 && empty_index != -1) {
+            // Move the non-empty slot to the first empty slot found
+            o->affected[empty_index] = o->affected[i];
+            // Clear the current slot
+            o->affected[i].location = 0;
+            o->affected[i].modifier = 0.0;
+            o->affected[i].specific = 0;
+            // Update empty_index to the next empty slot
+            ++empty_index;
+        }
+    }
+
+    // extra_flags data.
+
+    // First let's cconvert all relevant flags to new data structures.
+    for(auto i = 0; i < 96; i++) {
+        // Skip if it's not set.
+        if(!o->extra_flags.test(i)) continue;
+
+        bool resetFlag = true;
+
+        // Convert it.
+        switch(i) {
+            case 9: // ITEM_ANTI_GOOD
+                o->antiAlignGoodEvil.set(2);
+                break;
+            case 10: // ITEM_ANTI_EVIL
+                o->antiAlignGoodEvil.set(0);
+                break;
+            case 11: // ITEM_ANTI_NEUTRAL
+                o->antiAlignLawChaos.set(1);
+                o->antiAlignGoodEvil.set(1);
+                break;
+            case 12: // ITEM_ANTI_ROSHI
+                o->antiClass.set(static_cast<int>(SenseiID::Roshi));
+                break;
+            case 13:
+                o->antiClass.set(static_cast<int>(SenseiID::Piccolo));
+                break;
+            case 14:
+                o->antiClass.set(static_cast<int>(SenseiID::Krane));
+                break;
+            case 15:
+                o->antiClass.set(static_cast<int>(SenseiID::Nail));
+                break;
+            case 17:
+                o->antiClass.set(static_cast<int>(SenseiID::Tapion));
+                break;
+            case 19:
+                o->antiClass.set(static_cast<int>(SenseiID::Sixteen));
+                break;
+            case 20:
+                o->antiClass.set(static_cast<int>(SenseiID::Dabura));
+                break;
+            case 21:
+                o->antiClass.set(static_cast<int>(SenseiID::Ginyu));
+                break;
+            case 22: // ITEM_ANTI_HUMAN
+                o->antiRace.set(static_cast<int>(RaceID::Human));
+                break;
+            case 23: // ITEM_ANTI_ICER
+                o->antiRace.set(static_cast<int>(RaceID::Icer));
+                break;
+            case 24: // ITEM_ANTI_SAIYAN
+                o->antiRace.set(static_cast<int>(RaceID::Saiyan));
+                break;
+            case 25: // ITEM_ANTI_KONATSU
+                o->antiRace.set(static_cast<int>(RaceID::Konatsu));
+                break;
+            case 29:
+                o->antiClass.set(static_cast<int>(SenseiID::Bardock));
+                break;
+            case 30:
+                o->antiClass.set(static_cast<int>(SenseiID::Kibito));
+                break;
+            case 31:
+                o->antiClass.set(static_cast<int>(SenseiID::Frieza));
+                break;
+            case 41: // ITEM_ONLY_HUMAN
+                o->onlyRace.set(static_cast<int>(RaceID::Human));
+                break;
+            case 42: // ITEM_ONLY_ICER
+                o->onlyRace.set(static_cast<int>(RaceID::Icer));
+                break;
+            case 43: // ITEM_ONLY_SAIYAN
+                o->onlyRace.set(static_cast<int>(RaceID::Saiyan));
+                break;
+            case 44: // ITEM_ONLY_KONATSU
+                o->onlyRace.set(static_cast<int>(RaceID::Konatsu));
+                break;
+            case 45:
+                o->onlyClass.set(static_cast<int>(SenseiID::Bardock));
+                break;
+            case 46:
+                o->onlyClass.set(static_cast<int>(SenseiID::Kibito));
+                break;
+            case 47:
+                o->onlyClass.set(static_cast<int>(SenseiID::Frieza));
+                break;
+            case 50:
+                o->antiClass.set(static_cast<int>(SenseiID::Kurzak));
+                break;
+            case 51:
+                o->onlyClass.set(static_cast<int>(SenseiID::Kurzak));
+                break;
+            case 75:
+                o->onlyClass.set(static_cast<int>(SenseiID::Jinto));
+                break;
+            case 33:
+            case 34:
+            case 35:
+            case 36:
+            case 37:
+            case 38:
+            case 39:
+            case 40:
+            case 48:
+            case 49:
+            case 52:
+            case 53:
+            case 54:
+            case 55:
+            case 56:
+            case 58:
+            case 59:
+            case 60:
+            case 61:
+            case 62:
+                break;
+            case 63: // ITEM_BSCOUTER
+                o->value[VAL_WORN_SCOUTER] = 500000;
+                break;
+            case 64: // ITEM_MSCOUTER
+                o->value[VAL_WORN_SCOUTER] = 10000000;
+                break;
+            case 65: // ITEM_ASCOUTER
+                o->value[VAL_WORN_SCOUTER] = 150000000;
+                break;
+            case 66: // ITEM_USCOUTER
+                o->value[VAL_WORN_SCOUTER] = std::numeric_limits<int64_t>::max();
+                break;
+            case 67: // ITEM_WEAPLVL1...
+            case 68:
+            case 69:
+            case 70:
+            case 71:
+                o->value[VAL_WEAPON_LEVEL] = i - 66;
+                break;
+            default:
+                resetFlag = false;
+                break;
+        }
+
+        if(resetFlag) {
+            o->extra_flags.reset(i);
+        }
+
+    }
+
+    // now we'll compress the remaining flag space.
+    for(auto i = 0; i < 96; i++) {
+        if(!o->extra_flags.test(i)) continue;
+
+        switch(i) {
+            case 16:
+                o->extra_flags.set(9);
+                break;
+            case 18:
+                o->extra_flags.set(10);
+                break;
+            case 26:
+            case 27:
+            case 28:
+                o->extra_flags.set(i - 15);
+                break;
+            case 32:
+                o->extra_flags.set(14);
+                break;
+            case 57:
+                o->extra_flags.set(15);
+                break;
+            case 72:
+            case 73:
+            case 74:
+                o->extra_flags.set(i - 56);
+                break;
+            default:
+                if(i >= 76 && i <= 94) {
+                    o->extra_flags.set(i - 57);
+                }
+
+                break;
+        }
+
+    }
+
+
+}
+
+void migrate_data() {
+
+    basic_mud_log("Converting Item Prototypes...");
+
+    for(auto &[vn, o] : obj_proto) {
+
+        migrate_obj_data(&o);
+
+    }
+
+    basic_mud_log("Converting Item Instances...");
+
+    for(auto &[id, ent] : uniqueObjects) {
+        migrate_obj_data(ent.second);
+    }
+
+    for(auto &[id, ent] : mob_proto) {
+        migrate_char_data(&ent);
+    }
+
+    for(auto &[id, ent] : uniqueCharacters) {
+        migrate_char_data(ent.second);
+    }
+
+}
+
 void migrate_db() {
     boot_db_legacy();
     House_boot();
@@ -4818,6 +5181,8 @@ void migrate_db() {
 
     migrate_accounts();
 
+    migrate_data();
+
     try {
         migrate_characters();
     } catch(std::exception &e) {
@@ -4825,14 +5190,11 @@ void migrate_db() {
     }
 }
 
-
-
 void run_migration() {
     load_config();
     setup_log();
     game::init_locale();
     game::init_sodium();
-    game::init_asio();
     chdir("lib");
     migrate_db();
     runSave();

@@ -21,24 +21,22 @@
 
 static void phase_powerup(struct char_data *ch, int type, int phase);
 
-static void grow_plants();
-
-
 static void grow_plants() {
-    struct obj_data *k;
 
-    for (k = object_list; k; k = k->next) {
-        if (IN_ROOM(k) == NOWHERE) {
-            continue;
-        } else if (k->carried_by || k->in_obj) {
-            continue;
-        } else if (ROOM_FLAGGED(IN_ROOM(k), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(k), ROOM_GARDEN2)) {
+    for (const auto& r : objectSubscriptions.all("growingPlants")) {
+        auto k = r.get();
+        if(!k) continue;
+
+        auto room = k->getRoom();
+        if(!room) continue;
+
+        if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
             if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
                 GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
                 if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
-                    send_to_room(IN_ROOM(k), "%s@y withers a bit.\r\n", k->short_description);
+                    send_to_room(room, "%s@y withers a bit.\r\n", k->short_description);
                 } else {
-                    send_to_room(IN_ROOM(k), "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
+                    send_to_room(room, "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
                 }
             } else if (GET_OBJ_VAL(k, VAL_WATERLEVEL) >= 0) {
                 GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
@@ -335,40 +333,18 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
         return;
     }
 
-    int bonus = 0;
-    double mult = 0.0;
-
     switch (phase) {
         case 0:
-            return;
         case 1:
-            bonus = 5;
-            mult = 1.0;
-            break;
         case 2:
-            bonus = 8;
-            mult = 2.0;
             break;
         default:
             send_to_imm("Error: phase_powerup called with GET_PHASE equal to zero by: %s", GET_NAME(ch));
             return;
     }
-
-    if (type == 0) { // Drop their stats
-        null_affect(ch, AFF_STARPHASE);
-        GET_PHASE(ch) = 0;
-    } else { // Alter their stats
-        assign_affect(ch, AFF_STARPHASE, 0, -1, bonus, 0, 0, 0, 0, bonus);
-        if (IN_ROOM(ch) != NOWHERE && ETHER_STREAM(ch))
-            mult += .5;
-
-        struct affected_type aff;
-        aff.location = APPLY_VITALS_MULT;
-        aff.modifier = mult;
-        aff.bitvector = AFF_STARPHASE;
-        affect_join(ch, &aff, false, false, false, false);
-        GET_PHASE(ch) = phase;
-    }
+    // Deprecated: This code will remove any lingering AFF_STARPHASE from pre-3.0.
+    null_affect(ch, AFF_STARPHASE);
+    GET_PHASE(ch) = phase;
 }
 
 static void advanceGrowth() {

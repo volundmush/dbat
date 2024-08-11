@@ -210,7 +210,7 @@ void assign_triggers(struct unit_data *i, int type) {
     }
 
     // remove all duplicates from i->proto_script but do not change its order otherwise.
-    std::set<trig_vnum> alreadySeen;
+    std::unordered_set<trig_vnum> alreadySeen;
     auto it = i->proto_script.begin();
     while(it != i->proto_script.end()) {
         if(alreadySeen.contains(*it)) {
@@ -221,7 +221,7 @@ void assign_triggers(struct unit_data *i, int type) {
         }
     }
 
-    std::set<trig_vnum> existVnums;
+    std::unordered_set<trig_vnum> existVnums;
     for(auto t = SCRIPT(i)->trig_list; t; t = t->next) existVnums.insert(t->vn);
 
     for(auto p : i->proto_script) {

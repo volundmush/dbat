@@ -239,7 +239,6 @@ ACMD(do_dig) {
                 free(e->keyword);
             free(e);
             e = nullptr;
-            r->save();
             send_to_char(ch, "You remove the exit to the %s.\r\n", dirs[dir]);
             return;
         }
@@ -319,7 +318,6 @@ ACMD(do_dig) {
     e->general_description = nullptr;
     e->keyword = nullptr;
     e->to_room = rrnum;
-    r->save();
     send_to_char(ch, "You make an exit %s to room %d (%s).\r\n",
                  dirs[dir], rvnum, world[rrnum].name);
 
@@ -338,7 +336,6 @@ ACMD(do_dig) {
         e2->general_description = nullptr;
         e2->keyword = nullptr;
         e2->to_room = IN_ROOM(ch);
-        r2.save();
     }
 }
 

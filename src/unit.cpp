@@ -121,8 +121,8 @@ struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
     return findObject([objVnum](auto o) {return o->vn == objVnum;}, working);
 }
 
-std::set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
-    std::set<struct obj_data*> out;
+std::unordered_set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
+    std::unordered_set<struct obj_data*> out;
     for(auto obj = contents; obj; obj = obj->next_content) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;

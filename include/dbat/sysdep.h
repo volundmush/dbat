@@ -39,6 +39,7 @@
 #include <memory>
 #include <algorithm>
 #include <set>
+#include <unordered_set>
 #include <random>
 #include <chrono>
 #include <optional>
@@ -59,13 +60,6 @@ using Random = effolkronium::random_static;
 #include <boost/algorithm/string.hpp>
 #include "nlohmann/json.hpp"
 #include "magic_enum/magic_enum_all.hpp"
-
-#include <boost/asio.hpp>
-#include <boost/beast.hpp>
-#include <boost/beast/websocket.hpp>
-#include <boost/asio/experimental/concurrent_channel.hpp>
-#include <boost/asio/experimental/awaitable_operators.hpp>
-using namespace boost::asio::experimental::awaitable_operators;
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)
@@ -137,7 +131,7 @@ public:
 template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
 extern std::shared_ptr<spdlog::logger> logger;
-using weight_t = double;
+
 
 template <typename Iterator, typename Key = std::function<std::string(typename std::iterator_traits<Iterator>::value_type)>>
 Iterator partialMatch(

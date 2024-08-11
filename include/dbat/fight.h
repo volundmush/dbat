@@ -7,7 +7,6 @@
 #include "spells.h"
 
 // global variables
-extern struct char_data *combat_list, *next_combat_list;
 extern struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES];
 
 // functions
@@ -22,6 +21,12 @@ extern void remove_limb(struct char_data *vict, int num);
 extern void impact_sound(struct char_data *ch, char *mssg);
 
 extern void fight_stack(uint64_t heartPulse, double deltaTime);
+
+extern void powerupService(uint64_t heartPulse, double deltaTime);
+
+extern void lifeforceSystem(uint64_t heartPulse, double deltaTime);
+
+extern void kiChargeSystem(uint64_t heartPulse, double deltaTime);
 
 extern void appear(struct char_data *ch);
 

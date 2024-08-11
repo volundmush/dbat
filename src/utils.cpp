@@ -470,8 +470,6 @@ int roll_aff_duration(int num, int add) {
 }
 
 void null_affect(struct char_data *ch, int aff_flag) {
-    ch->save();
-
     struct affected_type *af, *next_af;
 
     for (af = ch->affected; af; af = next_af) {
@@ -497,8 +495,6 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
     if (dur <= 0)
         dur = 1;
 
-    ch->save();
-
     if (str == 0 && con == 0 && wis == 0 && intel == 0 && agl == 0 && spd == 0) {
         af[num].type = skill;
         af[num].duration = dur;
@@ -508,11 +504,14 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
     }
+    return;
+
     if (str != 0) {
         af[num].type = skill;
         af[num].duration = dur;
         af[num].modifier = str;
-        af[num].location = APPLY_STR;
+        af[num].location = APPLY_CATTR_BASE;
+        af[num].specific = static_cast<int>(CharAttribute::Strength);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -521,7 +520,8 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].type = skill;
         af[num].duration = dur;
         af[num].modifier = con;
-        af[num].location = APPLY_CON;
+        af[num].location = APPLY_CATTR_BASE;
+        af[num].specific = static_cast<int>(CharAttribute::Constitution);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -530,7 +530,8 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].type = skill;
         af[num].duration = dur;
         af[num].modifier = intel;
-        af[num].location = APPLY_INT;
+        af[num].location = APPLY_CATTR_BASE;
+        af[num].specific = static_cast<int>(CharAttribute::Intelligence);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -539,7 +540,8 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].type = skill;
         af[num].duration = dur;
         af[num].modifier = agl;
-        af[num].location = APPLY_DEX;
+        af[num].location = APPLY_CATTR_BASE;
+        af[num].specific = static_cast<int>(CharAttribute::Agility);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -548,7 +550,8 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].type = skill;
         af[num].duration = dur;
         af[num].modifier = spd;
-        af[num].location = APPLY_CHA;
+        af[num].location = APPLY_CATTR_BASE;
+        af[num].specific = static_cast<int>(CharAttribute::Speed);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -557,7 +560,8 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].type = skill;
         af[num].duration = dur;
         af[num].modifier = wis;
-        af[num].location = APPLY_WIS;
+        af[num].location = APPLY_CATTR_BASE;
+        af[num].specific = static_cast<int>(CharAttribute::Wisdom);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -763,8 +767,9 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     int rand_gravity[14] = {0, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000, 5000, 10000};
     int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
 
-    for (k = object_list; k; k = k->next) {
-        if (k->carried_by != nullptr) {
+    // Gravity generators
+    for (auto k : get_vnum_list(objectVnumIndex, 11)) {
+        if (k->carried_by) {
             continue;
         }
 
@@ -774,39 +779,50 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
 
         health = GET_OBJ_VAL(k, VAL_ALL_HEALTH); // Indicated the health of the object in question
 
-        if (GET_OBJ_VNUM(k) == 11) { /* Gravity Generator */
-            grav_roll = rand_number(0, 13);
-            if (health <= 10) {
-                grav_change = true;
-            } else if (health <= 40 && dice <= 8) {
-                grav_change = true;
-            } else if (health <= 80 && dice <= 5) {
-                grav_change = true;
-            } else if (health <= 99 && dice <= 3) {
-                grav_change = true;
-            }
-            if (grav_change == true) {
-                k->gravity = rand_gravity[grav_roll];
-                GET_OBJ_WEIGHT(k) = rand_gravity[grav_roll];
-                send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
-            }
-        } /* End Gravity Section */
+        grav_roll = rand_number(0, 13);
+        if (health <= 10) {
+            grav_change = true;
+        } else if (health <= 40 && dice <= 8) {
+            grav_change = true;
+        } else if (health <= 80 && dice <= 5) {
+            grav_change = true;
+        } else if (health <= 99 && dice <= 3) {
+            grav_change = true;
+        }
+        if (grav_change == true) {
+            k->gravity = rand_gravity[grav_roll];
+            GET_OBJ_WEIGHT(k) = rand_gravity[grav_roll];
+            send_to_room(IN_ROOM(k), "@RThe gravity generator malfunctions! The gravity level has changed!@n\r\n");
+        }
+        dice = rand_number(2, 12); // Reset the dice
+    }
 
-        if (GET_OBJ_VNUM(k) == 3034) { /* ATM */
-            if (health <= 10) {
-                send_to_room(IN_ROOM(k),
-                             "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
-            } else if (health <= 40 && dice <= 8) {
-                send_to_room(IN_ROOM(k), "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
-            } else if (health <= 80 && dice == 4) {
-                send_to_room(IN_ROOM(k),
-                             "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
-                money = create_money(rand_number(1, 30));
-                obj_to_room(money, IN_ROOM(k));
-            } else if (health <= 99 && dice < 4) {
-                send_to_room(IN_ROOM(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
-            }
-        } /* End ATM */
+    // ATMS
+    for(auto k : get_vnum_list(objectVnumIndex, 3034)) {
+        if (k->carried_by) {
+            continue;
+        }
+
+        if (rand_number(1, 2) == 2) {
+            continue;
+        }
+
+        health = GET_OBJ_VAL(k, VAL_ALL_HEALTH); // Indicated the health of the object in question
+
+        dice = rand_number(2, 12); // Reset the dice
+        if (health <= 10) {
+            send_to_room(IN_ROOM(k),
+                         "@RThe ATM machine shoots smoking bills from its money slot. The bills burn up as they float through the air!@n\r\n");
+        } else if (health <= 40 && dice <= 8) {
+            send_to_room(IN_ROOM(k), "@RGibberish flashes across the cracked ATM info screen.@n\r\n");
+        } else if (health <= 80 && dice == 4) {
+            send_to_room(IN_ROOM(k),
+                         "@GThe damaged ATM spits out some money while flashing ERROR on its screen!@n\r\n");
+            money = create_money(rand_number(1, 30));
+            obj_to_room(money, IN_ROOM(k));
+        } else if (health <= 99 && dice < 4) {
+            send_to_room(IN_ROOM(k), "@RThe ATM machine emits a loud grinding sound from inside.@n\r\n");
+        }
 
         dice = rand_number(2, 12); // Reset the dice
     } /* End For */
@@ -824,264 +840,46 @@ bool wearable_obj(struct obj_data *obj) {
 }
 
 void randomize_eq(struct obj_data *obj) {
-    if (wearable_obj(obj) && !OBJ_FLAGGED(obj, ITEM_NORANDOM)) {
-        int value = 0, slot = 0, roll = rand_number(2,
-                                                    12), slot1 = 1, slot2 = 1, slot3 = 1, slot4 = 1, slot5 = 1, slot6 = 1;
-        int stat = 0;
-        int strength = false, wisdom = false, intelligence = false, dexterity = false, speed = false, constitution = false;
-        // Setting the strength stats
-        int i;
-        for (i = 0; i < 6; i++) {
-            stat = obj->affected[slot].location;
-            value = obj->affected[slot].modifier;
-            if (stat == 1) { /* Strength */
-                if (roll == 12) {
-                    value += 3;
-                } else if (roll >= 9) {
-                    value += 2;
-                } else if (roll >= 6) {
-                    value += 1;
-                } else if (roll == 3) {
-                    value -= 1;
-                } else if (roll <= 2) {
-                    value -= 2;
-                }
-                if (obj->level >= 80) {
-                    if (value <= 0) {
-                        value = 1;
-                    }
-                } else if (obj->level >= 60) {
-                    if (value < 0) {
-                        value = 0;
-                    }
-                }
-                if (value == 0) {
-                    obj->affected[slot].location = 0;
-                    obj->affected[slot].modifier = 0;
-                } else {
-                    obj->affected[slot].modifier = value;
-                    strength = true;
-                }
-            } else if (stat == 2) { /* Agility */
-                if (roll == 12) {
-                    value += 3;
-                } else if (roll >= 9) {
-                    value += 2;
-                } else if (roll >= 6) {
-                    value += 1;
-                } else if (roll == 3) {
-                    value -= 1;
-                } else if (roll <= 2) {
-                    value -= 2;
-                }
-                if (obj->level >= 80) {
-                    if (value <= 0) {
-                        value = 1;
-                    }
-                } else if (obj->level >= 60) {
-                    if (value < 0) {
-                        value = 0;
-                    }
-                }
-                if (value == 0) {
-                    obj->affected[slot].location = 0;
-                    obj->affected[slot].modifier = 0;
-                } else {
-                    obj->affected[slot].modifier = value;
-                    dexterity = true;
-                }
-            } else if (stat == 3) { /* Intelligence */
-                if (roll == 12) {
-                    value += 3;
-                } else if (roll >= 9) {
-                    value += 2;
-                } else if (roll >= 6) {
-                    value += 1;
-                } else if (roll == 3) {
-                    value -= 1;
-                } else if (roll <= 2) {
-                    value -= 2;
-                }
-                if (obj->level >= 80) {
-                    if (value <= 0) {
-                        value = 1;
-                    }
-                } else if (obj->level >= 60) {
-                    if (value < 0) {
-                        value = 0;
-                    }
-                }
-                if (value == 0) {
-                    obj->affected[slot].location = 0;
-                    obj->affected[slot].modifier = 0;
-                } else {
-                    obj->affected[slot].modifier = value;
-                    intelligence = true;
-                }
-            } else if (stat == 4) { /* Wisdom */
-                if (roll == 12) {
-                    value += 3;
-                } else if (roll >= 9) {
-                    value += 2;
-                } else if (roll >= 6) {
-                    value += 1;
-                } else if (roll == 3) {
-                    value -= 1;
-                } else if (roll <= 2) {
-                    value -= 2;
-                }
-                if (obj->level >= 80) {
-                    if (value <= 0) {
-                        value = 1;
-                    }
-                } else if (obj->level >= 60) {
-                    if (value < 0) {
-                        value = 0;
-                    }
-                }
-                if (value == 0) {
-                    obj->affected[slot].location = 0;
-                    obj->affected[slot].modifier = 0;
-                } else {
-                    obj->affected[slot].modifier = value;
-                    wisdom = true;
-                }
-            } else if (stat == 5) { /* Constitution */
-                if (roll == 12) {
-                    value += 3;
-                } else if (roll >= 9) {
-                    value += 2;
-                } else if (roll >= 6) {
-                    value += 1;
-                } else if (roll == 3) {
-                    value -= 1;
-                } else if (roll <= 2) {
-                    value -= 2;
-                }
-                if (obj->level >= 80) {
-                    if (value <= 0) {
-                        value = 1;
-                    }
-                } else if (obj->level >= 60) {
-                    if (value < 0) {
-                        value = 0;
-                    }
-                }
-                if (value == 0) {
-                    obj->affected[slot].location = 0;
-                    obj->affected[slot].modifier = 0;
-                } else {
-                    obj->affected[slot].modifier = value;
-                    constitution = true;
-                }
-            } else if (stat == 6) { /* Speed */
-                if (roll == 12) {
-                    value += 3;
-                } else if (roll >= 9) {
-                    value += 2;
-                } else if (roll >= 6) {
-                    value += 1;
-                } else if (roll == 3) {
-                    value -= 1;
-                } else if (roll <= 2) {
-                    value -= 2;
-                }
-                if (obj->level >= 80) {
-                    if (value <= 0) {
-                        value = 1;
-                    }
-                } else if (obj->level >= 60) {
-                    if (value < 0) {
-                        value = 0;
-                    }
-                }
-                if (value == 0) {
-                    obj->affected[slot].location = 0;
-                    obj->affected[slot].modifier = 0;
-                } else {
-                    obj->affected[slot].modifier = value;
-                    speed = true;
-                }
-            } else if (stat == 0) {
-                switch (slot) {
-                    case 1:
-                        slot1 = 0;
-                        break;
-                    case 2:
-                        slot2 = 0;
-                        break;
-                    case 3:
-                        slot3 = 0;
-                        break;
-                    case 4:
-                        slot4 = 0;
-                        break;
-                    case 5:
-                        slot5 = 0;
-                        break;
-                    case 6:
-                        slot6 = 0;
-                        break;
-                }
-            }
-            slot += 1;
-            roll = rand_number(2, 12);
-        }
+    if (!wearable_obj(obj) || OBJ_FLAGGED(obj, ITEM_NORANDOM)) return;
 
-        if (slot1 == 0) {
-            if (strength == false && rand_number(1, 6) == 1) {
-                strength = true;
-                obj->affected[0].location = 1;
-                obj->affected[0].modifier = 1;
-            } else if (dexterity == false && rand_number(1, 6) == 1) {
-                dexterity = true;
-                obj->affected[0].location = 2;
-                obj->affected[0].modifier = 1;
-            } else if (intelligence == false && rand_number(1, 6) == 1) {
-                intelligence = true;
-                obj->affected[0].location = 3;
-                obj->affected[0].modifier = 1;
-            } else if (wisdom == false && rand_number(1, 6) == 1) {
-                wisdom = true;
-                obj->affected[0].location = 4;
-                obj->affected[0].modifier = 1;
-            } else if (constitution == false && rand_number(1, 6) == 1) {
-                constitution = true;
-                obj->affected[0].location = 5;
-                obj->affected[0].modifier = 1;
-            } else if (speed == false && rand_number(1, 6) == 1) {
-                speed = true;
-                obj->affected[0].location = 6;
-                obj->affected[0].modifier = 1;
+    for(auto &aff : obj->affected) {
+        if(aff.location != APPLY_CATTR_BASE) continue;
+        int value = aff.modifier;
+        int roll = rand_number(2,12);
+        if (roll == 12) {
+            value += 3;
+        } else if (roll >= 9) {
+            value += 2;
+        } else if (roll >= 6) {
+            value += 1;
+        } else if (roll == 3) {
+            value -= 1;
+        } else if (roll <= 2) {
+            value -= 2;
+        }
+        if (obj->level >= 80) {
+            if (value <= 0) {
+                value = 1;
+            }
+        } else if (obj->level >= 60) {
+            if (value < 0) {
+                value = 0;
             }
         }
-        if (slot2 == 0 && roll >= 10) {
-            if (strength == false && rand_number(1, 6) == 1) {
-                obj->affected[1].location = 1;
-                obj->affected[1].modifier = 1;
-            } else if (dexterity == false && rand_number(1, 6) == 1) {
-                obj->affected[1].location = 2;
-                obj->affected[1].modifier = 1;
-            } else if (intelligence == false && rand_number(1, 6) == 1) {
-                obj->affected[1].location = 3;
-                obj->affected[1].modifier = 1;
-            } else if (wisdom == false && rand_number(1, 6) == 1) {
-                obj->affected[1].location = 4;
-                obj->affected[1].modifier = 1;
-            } else if (constitution == false && rand_number(1, 6) == 1) {
-                obj->affected[1].location = 5;
-                obj->affected[1].modifier = 1;
-            } else if (speed == false && rand_number(1, 6) == 1) {
-                obj->affected[1].location = 6;
-                obj->affected[1].modifier = 1;
-            }
+        if (value == 0) {
+            aff.location = 0;
+            aff.specific = 0;
+            aff.modifier = 0;
+        } else {
+            aff.modifier = value;
         }
-        int dice = rand_number(2, 12);
-        if (dice >= 10) {
-            obj->extra_flags.set(ITEM_SLOT2);
-        } else if (dice >= 7) {
-            obj->extra_flags.set(ITEM_SLOT1);
-        }
+    }
+
+    int dice = rand_number(2, 12);
+    if (dice >= 10) {
+        obj->extra_flags.set(ITEM_SLOT2);
+    } else if (dice >= 7) {
+        obj->extra_flags.set(ITEM_SLOT1);
     }
 }
 
@@ -1754,8 +1552,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
             if(bonusHl > (ch->getBasePL() / 10)) bonusHl = ch->getBasePL() / 10;
             if(bonusSt > (ch->getBaseST() / 10)) bonusSt = ch->getBaseST() / 10;
 
-            bonusHl *= (1 + ch->getAffectModifier(APPLY_PL_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
-            bonusSt *= (1 + ch->getAffectModifier(APPLY_ST_GAIN_MULT)) * (1 + ch->getAffectModifier(APPLY_VITALS_GAIN_MULT));
+            bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::PowerLevel)));
+            bonusSt *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::Stamina)));
 
             act("@gYour @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. You quickly shed it and reveal a stronger version that was growing beneath it! At the same time you feel your adrenal sacs to be more efficient@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
@@ -3426,7 +3224,7 @@ void craftProgress(char_data* ch) {
         ch->craftingTask.pObject = nullptr;
         ch->craftingTask.improvementRounds = 0;
 
-        ch->task = Task::nothing;
+        ch->setTask(Task::nothing);
     } else {
         improve_skill(ch, SKILL_BUILD, 1);
         WAIT_STATE(ch, PULSE_5SEC * 4);
@@ -3456,4 +3254,9 @@ void doContinuedTask(char_data* ch) {
     if (task == Task::crafting) {
         craftProgress(ch);
     }
+}
+
+void WAIT_STATE(struct char_data *ch, double timeToWait) {
+    ch->waitTime = std::max<double>(0.0, timeToWait);
+    characterSubscriptions.subscribe("commandWaitQueue", ch->ref());
 }

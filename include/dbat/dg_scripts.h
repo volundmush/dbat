@@ -227,6 +227,7 @@ struct script_data {
     struct script_data *next{};        /* used for purged_scripts    */
     void activate();
     void deactivate();
+    void refreshTypes();
 };
 
 /* The event data for the wait command */

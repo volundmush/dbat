@@ -51,9 +51,7 @@ int update_objects(struct obj_data *refobj) {
     struct obj_data *obj, swap;
     int count = 0;
 
-    for (obj = object_list; obj; obj = obj->next) {
-        if (obj->vn != refobj->vn)
-            continue;
+    for (auto obj : get_vnum_list(objectVnumIndex, refobj->vn)) {
 
         count++;
 
@@ -69,7 +67,6 @@ int update_objects(struct obj_data *refobj) {
         obj->in_obj = swap.in_obj;
         obj->contents = swap.contents;
         obj->next_content = swap.next_content;
-        obj->next = swap.next;
     }
 
     return count;
@@ -104,25 +101,6 @@ int save_objects(zone_rnum zone_num) {
  * Free all, unconditionally.
  */
 void free_object_strings(struct obj_data *obj) {
-#if 0 /* Debugging, do not enable. */
-    extern struct obj_data *object_list;
-    struct obj_data *t;
-    int i = 0;
-
-    for (t = object_list; t; t = t->next) {
-      if (t == obj) {
-        i++;
-        continue;
-      }
-      assert(obj->name != t->name);
-      assert(obj->description != t->description);
-      assert(obj->short_description != t->short_description);
-      assert(obj->action_description != t->action_description);
-      assert(obj->ex_description != t->ex_description);
-    }
-    assert(i <= 1);
-#endif
-
     if (obj->name)
         free(obj->name);
     if (obj->room_description)
@@ -215,7 +193,7 @@ int delete_object(obj_rnum rnum) {
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
 
-    for (tmp = object_list; tmp; tmp = tmp->next) {
+    for (auto tmp : get_vnum_list(objectVnumIndex, obj->vn)) {
         if (tmp->vn != obj->vn)
             continue;
 
@@ -253,27 +231,6 @@ int delete_object(obj_rnum rnum) {
     return rnum;
 }
 
-void obj_affected_type::deserialize(const nlohmann::json &j) {
-    if(j.count("location")) location = j["location"];
-    if(j.count("modifier")) modifier = j["modifier"];
-    if(j.count("specific")) specific = j["specific"];
-}
-
-obj_affected_type::obj_affected_type(const nlohmann::json &j) {
-    deserialize(j);
-}
-
-nlohmann::json obj_affected_type::serialize() {
-    nlohmann::json j;
-
-    if(location) j["location"] = location;
-    if(modifier != 0.0) j["modifier"] = modifier;
-    if(specific) j["specific"] = specific;
-
-    return j;
-}
-
-
 nlohmann::json obj_data::serializeBase() {
     auto j = serializeUnit();
 
@@ -289,6 +246,23 @@ nlohmann::json obj_data::serializeBase() {
 
     for(auto i = 0; i < extra_flags.size(); i++)
         if(extra_flags.test(i)) j["extra_flags"].push_back(i);
+
+    for(auto i = 0; i < onlyAlignLawChaos.size(); i++)
+        if(onlyAlignLawChaos.test(i)) j["onlyAlignLawChaos"].push_back(i);
+    for(auto i = 0; i < antiAlignLawChaos.size(); i++)
+        if(antiAlignLawChaos.test(i)) j["antiAlignLawChaos"].push_back(i);
+    for(auto i = 0; i < onlyAlignGoodEvil.size(); i++)
+        if(onlyAlignGoodEvil.test(i)) j["onlyAlignGoodEvil"].push_back(i);
+    for(auto i = 0; i < antiAlignGoodEvil.size(); i++)
+        if(antiAlignGoodEvil.test(i)) j["antiAlignGoodEvil"].push_back(i);
+    for(auto i = 0; i < onlyClass.size(); i++)
+        if(onlyClass.test(i)) j["onlyClass"].push_back(i);
+    for(auto i = 0; i < antiClass.size(); i++)
+        if(antiClass.test(i)) j["antiClass"].push_back(i);
+    for(auto i = 0; i < onlyRace.size(); i++)
+        if(onlyRace.test(i)) j["onlyRace"].push_back(i);
+    for(auto i = 0; i < antiRace.size(); i++)
+        if(antiRace.test(i)) j["antiRace"].push_back(i);
 
     if(weight != 0.0) j["weight"] = weight;
     if(cost) j["cost"] = cost;
@@ -357,11 +331,17 @@ void obj_data::deserializeBase(const nlohmann::json &j) {
         }
     }
 
-    if(j.contains("extra_flags")) {
-        for(auto & i : j["extra_flags"]) {
-            extra_flags.set(i.get<int>());
-        }
-    }
+    if(j.contains("extra_flags")) for(auto & i : j["extra_flags"]) extra_flags.set(i.get<int>());
+
+    if(j.contains("onlyAlignLawChaos")) for(auto & i : j["onlyAlignLawChaos"]) onlyAlignLawChaos.set(i.get<int>());
+    if(j.contains("antiAlignLawChaos")) for(auto & i : j["antiAlignLawChaos"]) antiAlignLawChaos.set(i.get<int>());
+    if(j.contains("onlyAlignGoodEvil")) for(auto & i : j["onlyAlignGoodEvil"]) onlyAlignGoodEvil.set(i.get<int>());
+    if(j.contains("antiAlignGoodEvil")) for(auto & i : j["antiAlignGoodEvil"]) antiAlignGoodEvil.set(i.get<int>());
+
+    if(j.contains("onlyClass")) for(auto & i : j["onlyClass"]) onlyClass.set(i.get<int>());
+    if(j.contains("antiClass")) for(auto & i : j["antiClass"]) antiClass.set(i.get<int>());
+    if(j.contains("onlyRace")) for(auto & i : j["onlyRace"]) onlyRace.set(i.get<int>());
+    if(j.contains("tiRace")) for(auto & i : j["tiRace"]) antiAlignGoodEvil.set(i.get<int>());
 
     if(j.contains("weight")) weight = j["weight"];
     if(j.contains("cost")) cost = j["cost"];
@@ -426,20 +406,34 @@ std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const are
     return std::nullopt;
 }
 
+ObjRef obj_data::ref() {
+    return ObjRef(this);
+}
+
 void obj_data::activate() {
     if(active) {
         basic_mud_log("Attempted to activate an already active item.");
         return;
     }
     active = true;
-    next = object_list;
-    object_list = this;
-
-    if(script) script->activate();
 
     if(obj_proto.contains(vn)) {
         insert_vnum(objectVnumIndex, this);
     }
+
+    auto r = ref();
+    if(script) {
+        script->activate();
+        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
+            objectSubscriptions.subscribe("randomTriggers", r);
+        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
+            objectSubscriptions.subscribe("timeTriggers", r);
+    }
+    activeObjects.insert(r);
+    if(IS_CORPSE(this))
+        objectSubscriptions.subscribe("corpseRotService", r);
+    if(script && SCRIPT_TYPES(SCRIPT(this)) && OTRIG_RANDOM)
+        objectSubscriptions.subscribe("randomTriggers", r);
 
     if(contents) activateContents();
 }
@@ -447,8 +441,6 @@ void obj_data::activate() {
 void obj_data::deactivate() {
     if(!active) return;
     active = false;
-    struct obj_data *temp;
-    REMOVE_FROM_LIST(this, object_list, next, temp);
 
     if(obj_proto.contains(vn)) {
         erase_vnum(objectVnumIndex, this);
@@ -462,6 +454,7 @@ void obj_data::deactivate() {
         }
         TRIGGERS(script) = nullptr;
     }
+    objectSubscriptions.unsubscribeFromAll(ref());
     if(contents) deactivateContents();
 }
 
@@ -489,10 +482,10 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
 }
 
 
-int obj_data::getAffectModifier(int location, int specific) {
-    int modifier = 0;
+double obj_data::getAffectModifier(uint64_t location, uint64_t specific) {
+    double modifier = 0;
     for(auto &aff : affected) {
-        if(aff.location == location && (specific == -1 || aff.specific == specific)) {
+        if(aff.match(location, specific)) {
             modifier += aff.modifier;
         }
     }
@@ -673,10 +666,6 @@ void obj_data::deserializeRelations(const nlohmann::json& j) {
         auto check = resolveUID(j["fellow_wall"]);
         if(check) fellow_wall = std::get<1>(*check);
     }
-}
-
-void obj_data::save() {
-    if(id == NOTHING) return;
 }
 
 bool obj_data::isProvidingLight() {

@@ -56,7 +56,6 @@ struct config_data config_info; /* Game configuration list.    */
 std::map<room_vnum, room_data> world;    /* array of rooms		 */
 std::map<vnum, area_data> areas;    /* area information		 */
 
-struct char_data *character_list = nullptr; /* global linked list of chars	 */
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
@@ -66,19 +65,40 @@ VnumIndex<obj_data> objectVnumIndex;
 VnumIndex<char_data> characterVnumIndex;
 VnumIndex<trig_data> scriptVnumIndex;
 
-struct obj_data *object_list = nullptr;    /* global linked list of objs	 */
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
 
 std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
+std::unordered_set<CharRef> activeCharacters;
 /* hash tree for fast obj lookup */
 std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
+std::unordered_set<ObjRef> activeObjects;
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
 std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueScripts;
+
+std::vector<CharRef> getAllCharacters() {
+    std::vector<CharRef> out;
+    out.reserve(uniqueCharacters.size());
+
+    for(const auto&[id, ent] : uniqueCharacters)
+        out.emplace_back(id, ent.first);
+
+    return out;
+}
+
+std::vector<ObjRef> getAllObjects() {
+    std::vector<ObjRef> out;
+    out.reserve(uniqueObjects.size());
+
+    for(const auto&[id, ent] : uniqueObjects)
+        out.emplace_back(id, ent.first);
+
+    return out;
+}
 
 
 int dg_owner_purged;            /* For control of scripts */
@@ -125,9 +145,13 @@ struct time_info_data old_time_info;/* the infomation about the time    */
 struct time_info_data time_info;/* the infomation about the time    */
 struct time_info_data era_uptime;/* the infomation about how long the server has been up    */
 struct weather_data weather_info;    /* the infomation about the weather */
-std::set<zone_vnum> zone_reset_queue;
+std::unordered_set<zone_vnum> zone_reset_queue;
 
 std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
+
+SubscriptionManager<CharRef> characterSubscriptions;
+SubscriptionManager<ObjRef> objectSubscriptions;
+SubscriptionManager<RoomRef> roomSubscriptions;
 
 /* local functions */
 static void dragon_level(struct char_data *ch);
@@ -140,12 +164,9 @@ static int count_alias_records(FILE *fl);
 
 static void get_one_line(FILE *fl, char *buf);
 
-static void check_start_rooms();
-
 static void log_zone_error(zone_rnum zone, int cmd_no, const char *message);
 
 static void reset_time();
-
 
 void mag_assign_spells();
 
@@ -415,6 +436,7 @@ static void db_load_rooms(const std::filesystem::path& loc) {
         auto id = j["vn"].get<int64_t>();
         auto r = world.emplace(id, j);
         r.first->second.zone = real_zone_by_thing(id);
+        r.first->second.activate();
     }
 }
 
@@ -604,135 +626,6 @@ void free_extra_descriptions(struct extra_descr_data *edesc) {
 
 
 /* Free the world, in a memory allocation sense. */
-void destroy_db() {
-    ssize_t cnt, itr;
-    struct char_data *chtmp;
-    struct obj_data *objtmp;
-
-    /* Active Mobiles & Players */
-    while (character_list) {
-        chtmp = character_list;
-        character_list = character_list->next;
-        if (chtmp->master)
-            stop_follower(chtmp);
-        free_char(chtmp);
-    }
-
-    /* Active Objects */
-    while (object_list) {
-        objtmp = object_list;
-        object_list = object_list->next;
-        free_obj(objtmp);
-    }
-
-    uniqueObjects.clear();
-
-    /* Rooms */
-    for (auto &r : world) {
-        if (r.second.name)
-            free(r.second.name);
-        if (r.second.look_description)
-            free(r.second.look_description);
-        free_extra_descriptions(r.second.ex_description);
-
-        /* free any assigned scripts */
-        if (SCRIPT(&r.second))
-            extract_script(&r.second, WLD_TRIGGER);
-
-        for (itr = 0; itr < NUM_OF_DIRS; itr++) {
-            if (!r.second.dir_option[itr])
-                continue;
-
-            if (r.second.dir_option[itr]->general_description)
-                free(r.second.dir_option[itr]->general_description);
-            if (r.second.dir_option[itr]->keyword)
-                free(r.second.dir_option[itr]->keyword);
-            free(r.second.dir_option[itr]);
-        }
-    }
-    world.clear();
-
-    /* Objects */
-    for (auto &o : obj_proto) {
-        if (o.second.name)
-            free(o.second.name);
-        if (o.second.room_description)
-            free(o.second.room_description);
-        if (o.second.short_description)
-            free(o.second.short_description);
-        if (o.second.look_description)
-            free(o.second.look_description);
-        if (o.second.ex_description)
-            free_extra_descriptions(o.second.ex_description);
-        if (o.second.sbinfo) free(o.second.sbinfo);
-    }
-    obj_proto.clear();
-    obj_index.clear();
-    
-    /* Mobiles */
-    for (auto &m : mob_proto) {
-        if (m.second.name)
-            free(m.second.name);
-        if (m.second.title)
-            free(m.second.title);
-        if (m.second.short_description)
-            free(m.second.short_description);
-        if (m.second.room_description)
-            free(mob_proto[cnt].room_description);
-        if (m.second.look_description)
-            free(m.second.look_description);
-
-        while (m.second.affected)
-            affect_remove(&m.second, m.second.affected);
-    }
-    mob_proto.clear();
-    mob_index.clear();
-    /* Shops */
-    shop_index.clear();
-
-    /* Guilds */
-    guild_index.clear();
-
-    /* Zones */
-    /* zone table reset queue */
-    zone_reset_queue.clear();
-
-    zone_table.clear();
-
-
-    /* Triggers */
-    for (auto &t : trig_index) {
-        if (t.second.proto) {
-            /* make sure to nuke the command list (memory leak) */
-            /* free_trigger() doesn't free the command list */
-            if (t.second.proto->cmdlist) {
-                struct cmdlist_element *i, *j;
-                i = t.second.proto->cmdlist;
-                while (i) {
-                    j = i->next;
-                    if (i->cmd)
-                        free(i->cmd);
-                    free(i);
-                    i = j;
-                }
-            }
-            free_trigger(t.second.proto);
-        }
-
-    }
-    trig_index.clear();
-
-
-    /* context sensitive help system */
-    free_context_help();
-
-    free_feats();
-
-    basic_mud_log("Freeing Assemblies.");
-    free_assemblies();
-
-}
-
 
 /* You can define this to anything you want; 1 would work but it would
    be very inefficient. I would recommend that it actually be close to
@@ -1166,7 +1059,7 @@ bitvector_t asciiflag_conv(char *flag) {
 }
 
 /* make sure the start rooms exist & resolve their vnums to rnums */
-static void check_start_rooms() {
+void check_start_rooms() {
     if ((r_mortal_start_room = real_room(CONFIG_MORTAL_START)) == NOWHERE) {
         basic_mud_log("SYSERR:  Mortal start room does not exist.  Change mortal_start_room in lib/etc/config.");
         exit(1);
@@ -1649,10 +1542,10 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     GET_LPLAY(mob) = time(nullptr);
-    bool autoset = mob->get(CharStat::PowerLevel) <= 1;
+    bool autoset = mob->get(CharVital::PowerLevel) <= 1;
     if(autoset) {
-        for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
-            stat_t base = GET_LEVEL(mob) * mult;
+        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
+            vital_t base = GET_LEVEL(mob) * mult;
             if (GET_LEVEL(mob) > 140) {
                 base *= 8;
             } else if (GET_LEVEL(mob) > 130) {
@@ -1667,7 +1560,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     if (GET_MOB_VNUM(mob) == 2245) {
-        for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
             mob->set(c, rand_number(1, 4));
         }
     }
@@ -1843,7 +1736,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
             base = rand_number(130000, 180000);
             break;
     }
-    MOB_COOLDOWN(mob) = 0;
+
     auto money = GET_GOLD(mob);
     if (money <= 0 && !MOB_FLAGGED(mob, MOB_DUMMY)) {
         if (GET_LEVEL(mob) < 4) {
@@ -2101,14 +1994,15 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
 
 #define ZO_DEAD  999
 
+static std::deque<zone_vnum> zonesToUpdate;
+
 /* update zone ages, queue for reset if necessary, and dequeue when possible */
 void zone_update(uint64_t heartPulse, double deltaTime) {
 
     for (auto &[vn, z] : zone_table) {
         z.age += deltaTime;
-        auto secs = (z.lifespan * 60);
+        auto secs = (z.lifespan * 60.0);
         if(z.age < secs) continue;
-        z.age -= secs;
 
         bool doReset = false;
         switch(z.reset_mode) {
@@ -2117,7 +2011,7 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
             break;
             case 1:
                 // reset only if zone is empty.
-                if(is_empty(vn)) doReset = true;
+                if(z.playersInZone.empty()) doReset = true;
             break;
             case 2:
                 // Always reset.
@@ -2128,11 +2022,25 @@ void zone_update(uint64_t heartPulse, double deltaTime) {
                     break;
         }
         if(doReset) {
-            reset_zone(vn);
-            mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
-               z.name, vn);
+            zonesToUpdate.emplace_back(vn);
+
+            z.age -= secs;
+
+            break;
         }
     }
+
+    // Stagger zone updates so they don't all happen in the exact same heartbeat.
+    while(!zonesToUpdate.empty()) {
+        auto vn = zonesToUpdate.front();
+        auto &z = zone_table[vn];
+        reset_zone(vn);
+        mudlog(CMP, ADMLVL_GOD, false, "Auto zone reset: %s (Zone %d)",
+               z.name, vn);
+        zonesToUpdate.pop_front();
+        break;
+    }
+
 }
 
 #define ZCMD2 zone_table[zone].cmd[cmd_no]
@@ -2463,41 +2371,35 @@ void reset_zone(zone_rnum zone) {
             if(room == world.end()) continue;
             rrnum = rvnum;
 
+            auto r = &room->second;
+
             reset_wtrigger(&room->second);
-            if (room->second.room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
-                send_to_room(rrnum, "The aura of regeneration covering the surrounding area disappears.\r\n");
-                room->second.room_flags.reset(ROOM_AURA);
-            }
-            if (room->second.sector_type == SECT_LAVA) {
-                room->second.geffect = 5;
-            }
-            if (room->second.geffect < -1) {
-                send_to_room(rrnum, "The area loses some of the water flooding it.\r\n");
-                room->second.geffect += 1;
-            } else if (room->second.geffect == -1) {
-                send_to_room(rrnum, "The area loses the last of the water flooding it in one large rush.\r\n");
-                room->second.geffect = 0;
+
+            if (r->room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4) {
+                send_to_room(r, "The aura of regeneration covering the surrounding area disappears.\r\n");
+                r->room_flags.reset(ROOM_AURA);
             }
 
-            if(auto dmg = room->second.getDamage(); dmg > 0) {
-                int toRepair = 0;
-                if(dmg >= 100) toRepair = rand_number(5, 10);
-                else if(dmg >= 10) toRepair = rand_number(1, 10);
-                else if(dmg > 1) toRepair = rand_number(1, dmg);
-                else toRepair = 1;
-                room->second.modDamage(-toRepair);
-                send_to_room(rrnum, "The area gets rebuilt a little.\r\n");
+            if (r->sector_type == SECT_LAVA) {
+                r->geffect = 5;
+            }
+            if (r->geffect < -1) {
+                send_to_room(r, "The area loses some of the water flooding it.\r\n");
+                r->geffect += 1;
+            } else if (r->geffect == -1) {
+                send_to_room(r, "The area loses the last of the water flooding it in one large rush.\r\n");
+                r->geffect = 0;
             }
 
-
-            if (room->second.geffect >= 1 && rand_number(1, 4) == 4 && !room->second.isSunken() && room->second.sector_type != SECT_LAVA) {
-                send_to_room(rrnum, "The lava has cooled and become solid rock.\r\n");
-                room->second.geffect = 0;
-            } else if (room->second.geffect >= 1 && rand_number(1, 2) == 2 && room->second.isSunken() &&
-                    room->second.sector_type != SECT_LAVA) {
-                send_to_room(rrnum, "The water has cooled the lava and it has become solid rock.\r\n");
-                room->second.geffect = 0;
+            if (r->geffect >= 1 && rand_number(1, 4) == 4 && !r->isSunken() && r->sector_type != SECT_LAVA) {
+                send_to_room(r, "The lava has cooled and become solid rock.\r\n");
+                r->geffect = 0;
+            } else if (r->geffect >= 1 && rand_number(1, 2) == 2 && r->isSunken() &&
+                    r->sector_type != SECT_LAVA) {
+                send_to_room(r, "The water has cooled the lava and it has become solid rock.\r\n");
+                r->geffect = 0;
             }
+
         }
     } else {
         /* even if reset is blocked, age should be reset */
@@ -2506,32 +2408,27 @@ void reset_zone(zone_rnum zone) {
     post_reset(z.number);
 }
 
+void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
+    for(auto ref : roomSubscriptions.all("repairRoomDamage")) {
+        auto room = ref.get();
+        if(!room) continue;
+
+        if(auto dmg = room->getDamage(); dmg > 0) {
+            int toRepair = 0;
+            if(dmg >= 100) toRepair = rand_number(5, 10);
+            else if(dmg >= 10) toRepair = rand_number(1, 10);
+            else if(dmg > 1) toRepair = rand_number(1, dmg);
+            else toRepair = 1;
+            room->modDamage(-toRepair);
+            send_to_room(room, "The area gets rebuilt a little.\r\n");
+        }
+    }
+}
+
 
 /* for use in reset_zone; return TRUE if zone 'nr' is free of PC's  */
 int is_empty(zone_rnum zone_nr) {
-    struct descriptor_data *i;
-
-    for (i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING)
-            continue;
-        if (IN_ROOM(i->character) == NOWHERE)
-            continue;
-        if (i->character->getRoom()->zone != zone_nr)
-            continue;
-        /*
-     * if an immortal has nohassle off, he counts as present
-     * added for testing zone reset triggers - Welcor
-     */
-        if (IS_NPC(i->character))
-            continue; /* immortal switched into a mob */
-
-        if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) && (PRF_FLAGGED(i->character, PRF_NOHASSLE)))
-            continue;
-
-        return (0);
-    }
-
-    return (1);
+    return zone_table.at(zone_nr).playersInZone.empty();
 }
 
 
@@ -2735,8 +2632,6 @@ void reset_char(struct char_data *ch) {
     ch->followers = nullptr;
     ch->master = nullptr;
     IN_ROOM(ch) = NOWHERE;
-    ch->next = nullptr;
-    ch->next_fighting = nullptr;
     ch->next_in_room = nullptr;
     FIGHTING(ch) = nullptr;
     ch->position = POS_STANDING;
@@ -2768,7 +2663,7 @@ void init_char(struct char_data *ch) {
         admin_set(ch, ADMLVL_IMPL);
 
         /* The implementor never goes through do_start(). */
-        for(auto c : {CharStat::PowerLevel, CharStat::Ki, CharStat::Stamina}) {
+        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
             ch->set(c, 1000);
         }
     }
@@ -2835,9 +2730,6 @@ zone_rnum real_zone(zone_vnum vnum) {
  *
  * TODO: Add checks for unknown bitvectors.
  */
-
-
-
 
 
 int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
@@ -3391,55 +3283,15 @@ std::optional<UID> resolveUID(const std::string& uid) {
     if(type == 'R') {
         if(world.contains(id)) return &world[id];
     } else if(type == 'O') {
-        auto find = uniqueObjects.find(id);
-        if(find != uniqueObjects.end()) {
-            if(!generation || (find->second.first == generation)) {
-                if(active && !find->second.second->isActive())
-                    return std::nullopt;
-                return find->second.second;
-            }
-        }
+        ObjRef ref{id, generation};
+        auto o = ref.get(active);
+        if(o) return o;
     } else if(type == 'C') {
-        auto find = uniqueCharacters.find(id);
-        if(find != uniqueCharacters.end()) {
-            if(!generation || (find->second.first == generation)) {
-                if(active && !find->second.second->isActive())
-                    return std::nullopt;
-                return find->second.second;
-            }
-        }
+        CharRef ref{id, generation};
+        auto c = ref.get(active);
+        if(c) return c;
     }
     return std::nullopt;
 }
 
-struct obj_data* obj_ref::get(bool checkActive) {
-    auto find = uniqueObjects.find(id);
-    if(find != uniqueObjects.end()) {
-        if(find->second.first == generation) {
-            if(checkActive && !find->second.second->isActive())
-                return nullptr;
-            return find->second.second;
-        }
-    }
-    return nullptr;
-}
 
-struct char_data* char_ref::get(bool checkActive) {
-    auto find = uniqueCharacters.find(id);
-    if(find != uniqueCharacters.end()) {
-        if(find->second.first == generation) {
-            if(checkActive && !find->second.second->isActive())
-                return nullptr;
-            return find->second.second;
-        }
-    }
-    return nullptr;
-}
-
-struct room_data* room_ref::get(bool checkActive) {
-    auto find = world.find(id);
-    if(find != world.end()) {
-        return &find->second;
-    }
-    return nullptr;
-}

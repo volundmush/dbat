@@ -325,7 +325,6 @@ OCMD(do_otransform) {
         tmpobj.proto_script = obj->proto_script;
         tmpobj.script = obj->script;
         tmpobj.next_content = obj->next_content;
-        tmpobj.next = obj->next;
         memcpy(obj, &tmpobj, sizeof(*obj));
 
         if (wearer) {

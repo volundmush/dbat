@@ -20,7 +20,7 @@ extern const char *list_bonus[];
 
 extern void perform_alias(struct descriptor_data *d, char *orig);
 
-extern void pushWaitQueue(char_data* ch);
+extern void commandWaitQueue(uint64_t heartPulse, double deltaTime);
 
 void processCommand(char_data* ch, int cmd, std::string arg);
 

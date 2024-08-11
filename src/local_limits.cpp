@@ -370,8 +370,7 @@ int64_t hit_gain(struct char_data *ch) {
         /* Neat and fast */
         gain = GET_MAX_HIT(ch) / 70;
     } else {
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) ||
-            (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
+        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
             if (IS_HUMAN(ch)) {
                 gain = GET_MAX_HIT(ch) / 20;
             }
@@ -387,7 +386,7 @@ int64_t hit_gain(struct char_data *ch) {
             if (!IS_HUMAN(ch) && !IS_NAMEK(ch) && !IS_MUTANT(ch)) {
                 gain = GET_MAX_HIT(ch) / 10;
             }
-        } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN)) {
+        } else {
             if (IS_HUMAN(ch)) {
                 gain = GET_MAX_HIT(ch) / 30;
             }
@@ -411,7 +410,7 @@ int64_t hit_gain(struct char_data *ch) {
         /* Position calculations    */
         switch (GET_POS(ch)) {
             case POS_STANDING:
-                if (!IS_HOSHIJIN(ch) || (IS_HOSHIJIN(ch) && GET_PHASE(ch) <= 0)) {
+                if (IS_HOSHIJIN(ch) && GET_PHASE(ch) <= 0) {
                     gain = gain / 4;
                 } else if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) {
                     gain = gain / 3;
@@ -626,9 +625,9 @@ static int64_t move_gain(struct char_data *ch) {
     if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
         gain = GET_MAX_MOVE(ch) - (ch->getCurST());
     }
+
     if (cook_element(IN_ROOM(ch)) == 1)
         gain *= 2;
-
 
     if (GET_REGEN(ch) > 0) {
         gain += (gain * 0.01) * GET_REGEN(ch);
@@ -1102,7 +1101,6 @@ static void heal_limb(struct char_data *ch) {
                 ch->mod(CharAttribute::Speed, -1);
                 ch->mod(CharAttribute::Agility, -1);
                 send_to_char(ch, "@RYou lose 1 Strength, Agility, and Speed!\r\n");
-                ch->save();
             }
         }
     }
@@ -1114,438 +1112,836 @@ static void heal_limb(struct char_data *ch) {
     }
 }
 
+void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
+    for(const auto& r : characterSubscriptions.all("androidAbsorbSystem")) {
+        auto ch = r.get();
+        if (!ch) continue;
+        
+        bool unsubscribe = false;
+        
+        auto victim = ABSORBING(ch);
+        
+        if(!victim) {
+            characterSubscriptions.unsubscribe("androidAbsorbSystem", r);
+        }
+        
+        if(IN_ROOM(ch) != IN_ROOM(victim)) {
+            send_to_char(ch, "You stop absorbing %s!\r\n", GET_NAME(ABSORBING(ch)));
+            ABSORBBY(ABSORBING(ch)) = nullptr;
+            ABSORBING(ch) = nullptr;
+            characterSubscriptions.unsubscribe("androidAbsorbSystem", r);
+            continue;
+        }
+
+        if (IS_ANDROID(ch) && victim) {
+            if ((ch->absorbing)->getCurST() < (GET_MAX_MOVE(ch) / 15) && (ch->absorbing)->getCurKI() < (GET_MAX_MANA(ch) / 15)) {
+                act("@WYou stop absorbing stamina and ki from @c$N as they don't have enough for you to take@W!@n",
+                    true, ch, nullptr, victim, TO_CHAR);
+                act("@C$n@W stops absorbing stamina and ki from you!@n", true, ch, nullptr,
+                    victim, TO_VICT);
+                act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, ch, nullptr,
+                    victim, TO_NOTVICT);
+                if (!FIGHTING(ch) || FIGHTING(ch) != victim) {
+                    set_fighting(ch, ABSORBBY(victim));
+                }
+                if (!FIGHTING(ABSORBBY(victim)) ||
+                    FIGHTING(ABSORBBY(victim)) != ch) {
+                    set_fighting(ABSORBBY(victim), ch);
+                }
+                ABSORBBY(victim) = nullptr;
+                ABSORBING(ch) = nullptr;
+            }
+        }
+        if (IS_ANDROID(ch) && victim && rand_number(1, 9) >= 6) {
+            if (((ch->absorbing)->getCurST()) > (GET_MAX_MOVE(ch) / 15) ||
+                ((ch->absorbing)->getCurKI()) > (GET_MAX_MANA(ch) / 15)) {
+
+                ch->incCurKI(ch->getMaxKI() * .08);
+                ch->incCurST(ch->getMaxST() * .08);
+
+                victim->decCurKI(ch->getMaxKI() / 20, 1);
+                victim->decCurST(ch->getMaxST() / 20, 1);
+
+                act("@WYou absorb stamina and ki from @c$N@W!@n", true, ch, nullptr, victim,
+                    TO_CHAR);
+                act("@C$n@W absorbs stamina and ki from you!@n", true, ch, nullptr, victim,
+                    TO_VICT);
+                send_to_char(victim, "@wTry 'escape'!@n\r\n");
+                act("@C$n@W absorbs stamina and ki from @c$N@w!@n", true, ch, nullptr,
+                    victim, TO_NOTVICT);
+                if (GET_HIT(ch) < (ch->getMaxPL())) {
+                    ch->incCurHealth(ch->getMaxKI() * .04);
+                    send_to_char(ch,
+                                 "@CYou convert a portion of the absorbed energy into refilling your powerlevel.@n\r\n");
+                }
+
+                if (ch->isFullST() && ch->isFullKI()) {
+
+                    act("@WYou stop absorbing stamina and ki from @c$N as you are full@W!@n", true, ch,
+                        nullptr, victim, TO_CHAR);
+                    act("@C$n@W stops absorbing stamina and ki from you!@n", true, ch, nullptr,
+                        victim, TO_VICT);
+                    act("@C$n@W stops absorbing stamina and ki from @c$N@w!@n", true, ch, nullptr,
+                        victim, TO_NOTVICT);
+                    if (!FIGHTING(ch) || FIGHTING(ch) != victim) {
+                        set_fighting(ch, ABSORBBY(victim));
+                    }
+                    if (!FIGHTING(ABSORBBY(victim)) ||
+                        FIGHTING(ABSORBBY(victim)) != ch) {
+                        set_fighting(ABSORBBY(victim), ch);
+                    }
+                    ABSORBBY(victim) = nullptr;
+                    ABSORBING(ch) = nullptr;
+                }
+                bool sum = !ch->is_soft_cap(0);
+                bool mum = !ch->is_soft_cap(2);
+                bool ium = !ch->is_soft_cap(1);
+                auto leader = ch->master ? ch->master : ch;
+                auto dCon = GET_CON(ch);
+                auto dWis = GET_WIS(ch);
+                if (sum) {
+                    if (rand_number(1, 8) >= 6) {
+
+                        int gain = rand_number(dCon / 2, dCon * 3) +
+                                   (dCon * 18);
+                        if (dCon > 30) {
+                            gain += rand_number(dCon * 2, dCon * 4) +
+                                    (dCon * 50);
+                        }
+                        if (dCon > 60) {
+                            gain *= 2;
+                        }
+                        if (dCon > 80) {
+                            gain *= 3;
+                        }
+                        if (dCon > 90) {
+                            gain *= 4;
+                        }
+                        send_to_char(ch, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
+                        if (group_bonus(ch, 2) == 7) {
+                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+                                int gbonus = gain * 0.15;
+                                gain += gbonus;
+                                send_to_char(ch,
+                                             "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
+                                             add_commas(gbonus).c_str());
+                            }
+                        }
+                        ch->gainBasePL(gain);
+                    }
+                }
+                if (mum) {
+                    if (rand_number(1, 8) >= 6) {
+                        int gain = rand_number(dCon / 2, dCon * 3) +
+                                   (dCon * 18);
+                        if (dCon > 30) {
+                            gain += rand_number(dCon * 2, dCon * 4) +
+                                    (dCon * 50);
+                        }
+                        if (dCon > 60) {
+                            gain *= 2;
+                        }
+                        if (dCon > 80) {
+                            gain *= 3;
+                        }
+                        if (dCon > 90) {
+                            gain *= 4;
+                        }
+                        send_to_char(ch, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
+                        if (group_bonus(ch, 2) == 7) {
+                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+                                int gbonus = gain * 0.15;
+                                gain += gbonus;
+                                send_to_char(ch,
+                                             "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
+                                             add_commas(gbonus).c_str());
+                            }
+                        }
+                        ch->gainBaseST(gain);
+                    }
+                }
+                if (ium) {
+                    if (rand_number(1, 8) >= 6) {
+                        int gain = rand_number(dWis / 2, dWis * 3) +
+                                   (dWis * 18);
+                        if (dWis > 30) {
+                            gain += rand_number(dWis * 2, dWis * 4) +
+                                    (dWis * 50);
+                        }
+                        if (dWis > 60) {
+                            gain *= 2;
+                        }
+                        if (dWis > 80) {
+                            gain *= 3;
+                        }
+                        if (dWis > 90) {
+                            gain *= 4;
+                        }
+                        send_to_char(ch, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
+                        if (ch->master && group_bonus(ch, 2) == 7) {
+                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+                                int gbonus = gain * 0.15;
+                                gain += gbonus;
+                                send_to_char(ch,
+                                             "The leader of your group conveys an extra bonus! @D[@G+%s@D]@n \r\n",
+                                             add_commas(gbonus).c_str());
+                            }
+                        }
+                        ch->gainBaseKI(gain);
+                    }
+                }
+                if (!sum) {
+                    if (rand_number(1, 8) >= 6) {
+                        int gain = 1;
+                        send_to_char(ch,
+                                     "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
+                        ch->gainBasePL(gain);
+                    }
+                }
+                if (!mum) {
+                    if (rand_number(1, 8) >= 6) {
+                        int gain = 1;
+                        send_to_char(ch, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n",
+                                     gain);
+                        ch->gainBaseST(gain);
+                    }
+                }
+                if (!ium) {
+                    if (rand_number(1, 8) >= 6) {
+                        int gain = 1;
+                        send_to_char(ch, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n",
+                                     gain);
+                        ch->gainBaseKI(gain);
+                    }
+                }
+            }
+        }
+
+        if(!ABSORBING(ch)) {
+            characterSubscriptions.unsubscribe("androidAbsorbSystem", r);
+        }
+
+    }
+}
+
+void goopTimeService(uint64_t heartPulse, double deltaTime) {
+    for(const auto& r : characterSubscriptions.all("goopTimeService")) {
+        auto ch = r.get();
+        if (!ch) continue;
+
+        if(!PLR_FLAGGED(ch, PLR_GOOP)) {
+            characterSubscriptions.unsubscribe("goopTimeService", r);
+            continue;
+        }
+
+        if (ch->gooptime == 60) {
+            if (IS_BIO(ch)) {
+                act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+            } else {
+                act("@MSlowly you regain conciousness. The various split off chunks of your body begin to likewise stir.@n",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+                act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, ch, nullptr,
+                    nullptr, TO_ROOM);
+            }
+            ch->gooptime -= 1;
+        } else if (ch->gooptime == 30) {
+            if (IS_BIO(ch)) {
+                act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true,
+                    ch, nullptr, nullptr, TO_CHAR);
+                act("@GYou start to notice a large mass of pulsing flesh growing before you!@n", true, ch,
+                    nullptr, nullptr, TO_ROOM);
+            } else {
+                act("@MYou will the various chunks of your body to return and slowly more and more of them begin to fly into you. Your body begins to grow larger and larger as this process unfolds!@n ",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+                act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+            }
+            ch->gooptime -= 1;
+        } else if (ch->gooptime == 15) {
+            if (IS_BIO(ch)) {
+                act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+                act("@GThe lump of flesh has now grown to the size where the likeness of @g$n@G can be seen of it! It appears that $e is regenerating $s body from what was only a few cells!@n",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+            } else {
+                act("@MYour body has reached half its previous size as your limbs ooze slowly out into their proper shape!@n",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+                act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+            }
+            ch->gooptime -= 1;
+        } else if (ch->gooptime == 0) {
+            if (IS_BIO(ch)) {
+                ch->restoreHealth();
+                act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+                act("@g$n@G's body has fully regenerated! Suddenly $e flexes $s arms and legs and a rush of power erupts from off of $s body!@n",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+            }
+                //Zenkai Boost
+            else if (IS_SAIYAN(ch)) {
+
+                int zenkaiPL, zenkaiKi, zenkaiSt;
+                zenkaiPL = ch->getBasePL() * 1.03;
+                zenkaiKi = ch->getBaseKI() * 1.015;
+                zenkaiSt = ch->getBaseST() * 1.015;
+
+                //GET_HIT(ch) = gear_pl(ch) * .5;
+                //GET_MANA(ch) = GET_MAX_MANA(ch) *.2;
+                //GET_MOVE(ch) = GET_MAX_MOVE(ch) *.2;
+
+
+                if (!IN_ARENA(ch)) {
+                    ch->gainBasePL(zenkaiPL);
+                    ch->gainBaseKI(zenkaiKi);
+                    ch->gainBaseST(zenkaiSt);
+
+                    send_to_char(ch,
+                                 "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
+                    send_to_char(ch, "@D[@RPL@Y:@n+%s@D] @D[@CKI@Y:@n+%s@D] @D[@GSTA@Y:@n+%s@D]@n\r\n",
+                                 add_commas(zenkaiPL).c_str(), add_commas(zenkaiKi).c_str(), add_commas(zenkaiSt).c_str());
+                }
+                act("@RYou collapse to the ground, body pushed beyond the typical limits of exhaustion. The passage of time distorts and an indescribable amount of time passes as raw emotions pass through your very being. Your eyes open and focus with a newfound clarity as your unadulterated emotions and feelings revive you for a second wind!@n",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+                act("@r$n@R collapses to the ground, seemingly dead. After a brief moment, their eyes flash open with a determined look on their face!",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+            } else {
+                ch->restoreHealth();
+                act("@MYour body has fully regenerated! You scream out in triumph and a short gust of steam erupts from your pores!@n",
+                    true, ch, nullptr, nullptr, TO_CHAR);
+                act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!",
+                    true, ch, nullptr, nullptr, TO_ROOM);
+            }
+            ch->playerFlags.reset(PLR_GOOP);
+            characterSubscriptions.unsubscribe("goopTimeService", r);
+        } else {
+            ch->gooptime -= 1;
+        }
+    }
+    
+}
+
+void corpseRotService(uint64_t heartPulse, double deltaTime) {
+    obj_data *jj, *next_thing2;
+    for(const auto& ref : objectSubscriptions.all("healTankService")) {
+        auto j = ref.get();
+        if (!j) continue;
+
+        // how the fuck did this happen? TODO add a warning.
+        if(!IS_CORPSE(j)) continue;
+
+        /* timer count down */
+        if (GET_OBJ_TIMER(j) > 0)
+            GET_OBJ_TIMER(j)--;
+        if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
+            if (GET_OBJ_TIMER(j) == 5) {
+                if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                    act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
+                        TO_CHAR);
+                    act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
+                        TO_ROOM);
+                }
+            }
+            if (GET_OBJ_TIMER(j) == 3) {
+                if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                    act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
+                        TO_CHAR);
+                    act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
+                        TO_ROOM);
+                }
+            }
+            if (GET_OBJ_TIMER(j) == 2) {
+                if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                    act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
+                        nullptr, TO_CHAR);
+                    act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
+                        nullptr, TO_ROOM);
+                }
+            }
+            if (GET_OBJ_TIMER(j) == 1) {
+                if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                    act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
+                        j, nullptr, TO_CHAR);
+                    act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
+                        j, nullptr, TO_ROOM);
+                }
+            }
+        }
+        if (!GET_OBJ_TIMER(j)) {
+
+            if (j->carried_by) {
+                if (!strstr(j->name, "android")) {
+                    act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
+                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                        act("A quivering horde of maggots consumes $p.",
+                            true, j->getRoom()->people, j, nullptr, TO_ROOM);
+                        act("A quivering horde of maggots consumes $p.",
+                            true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                    }
+                } else {
+                    act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
+                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
+                        act("$p breaks down completely into a pile of junk.",
+                            true, j->getRoom()->people, j, nullptr, TO_ROOM);
+                        act("$p breaks down completely into a pile of junk.",
+                            true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                    }
+                }
+            }
+            for (jj = j->contents; jj; jj = next_thing2) {
+                next_thing2 = jj->next_content;    /* Next in inventory */
+                obj_from_obj(jj);
+
+                if (j->in_obj)
+                    obj_to_obj(jj, j->in_obj);
+                else if (j->carried_by)
+                    obj_to_room(jj, IN_ROOM(j->carried_by));
+                else if (IN_ROOM(j) != NOWHERE)
+                    obj_to_room(jj, IN_ROOM(j));
+                else
+                    core_dump();
+            }
+            extract_obj(j);
+        }
+
+    }
+}
+
+void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
+
+    for(const auto& r : characterSubscriptions.all("characterVitalsRecovery")) {
+        auto ch = r.get();
+        if(!ch) continue;
+
+        if(AFF_FLAGGED(ch, AFF_POISON)) {
+            // Poison stops all healing.
+            continue;
+        }
+
+        double base = 0.005;
+
+        double universalPerc = 0.0;
+
+        // The healing tank bonus is pretty up there.
+        if(PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch)) {
+            universalPerc += 20.0;
+        }
+
+        // TODO: figure out how to attach this data to rooms.
+        if(auto r = ch->getRoom(); r) {
+            // regen rooms (or destroyed rooms, with the right bonus) grant a huge boost.
+            if (ROOM_FLAGGED(r, ROOM_REGEN)
+                || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && r->getDamage() >= 75))
+                universalPerc += 2.0;
+
+            if(ROOM_FLAGGED(r, ROOM_BEDROOM))
+                universalPerc += 0.25;
+
+            if (cook_element(IN_ROOM(ch)) == 1)
+                universalPerc += 2.0;
+        }
+
+        for(auto v : {CharVital::PowerLevel, CharVital::Stamina, CharVital::Ki, CharVital::LifeForce}) {
+
+            // Androids don't have Lifeforce.
+            if(IS_ANDROID(ch) && v == CharVital::LifeForce) continue;
+
+            // This will loop through most possible modifiers...
+            double perc = universalPerc + ch->getAffectModifier(APPLY_CVIT_REGEN_MULT, static_cast<int>(v));
+
+            if(perc <= 1.0) {
+                // the healing multipliers are so low that all healing is neutralized.
+                // Floor it out for sanity.
+                perc = 0.05;
+            }
+
+            ch->modCurVitalDam(v, -(base * (1.0 + perc)) * deltaTime);
+        }
+    }
+}
+
+
+void healTankService(uint64_t heartPulse, double deltaTime) {
+    for(const auto& ref : objectSubscriptions.all("healTankService")) {
+        auto o = ref.get();
+        if(!o) continue;
+
+        auto en = o->dvalue["energy"];
+
+        if(auto ch = SITTING(o); ch) {
+            // the heal tank is occupied.
+
+            // set this, just in case it wasn't.
+            ch->playerFlags.set(PLR_HEALT);
+
+            bool mustLeave = false;
+
+            en = std::max(0.0, en - deltaTime);
+
+            if(en <= 0.0) {
+                send_to_char(ch, "@wThe healing tank's energy reserves are depleted.\r\n");
+                mustLeave = true;
+            }
+
+            if(ch->isFullVitals()) {
+                // the occupant has reached full health.
+                send_to_char(ch, "@wThe healing tank has fully restored your vigor.\r\n");
+                mustLeave = true;
+            }
+
+            if(mustLeave) {
+                act("You step out of the healing tank.", true, ch, nullptr, nullptr, TO_CHAR);
+                act("@C$n@w steps out of the healing tank.@n", true, ch, nullptr, nullptr,
+                    TO_ROOM);
+                ch->playerFlags.reset(PLR_HEALT);
+                SITTING(o) = nullptr;
+                SITS(ch) = nullptr;
+            }
+
+        } else {
+            // the heal tank has no occupant.
+            if(en < 200.0) {
+                o->dvalue["energy"] = std::min(200.0, en + deltaTime);
+            } else {
+                // No need to update it further.
+                objectSubscriptions.unsubscribe("healTankService", o->ref());
+            }
+        }
+    }
+}
+
+
 /* Update PCs, NPCs, and objects */
 void point_update(uint64_t heartPulse, double deltaTime) {
-    struct char_data *i, *next_char;
-    struct obj_data *j, *next_thing, *jj, *next_thing2, *vehicle = nullptr;
+    struct obj_data *jj, *next_thing2, *vehicle = nullptr;
     int change = false;
     /* characters */
 
-    for (i = character_list; i; i = next_char) {
-        next_char = i->next;
+    std::unordered_set<CharRef> processedCharacters;
+    std::unordered_set<ObjRef> processedObjects;
 
-        if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE) {
-            if (ROOM_FLAGGED(IN_ROOM(i), ROOM_HOUSE)) {
-                GET_RELAXCOUNT(i) += 1;
-            } else if (GET_RELAXCOUNT(i) >= 464) {
-                GET_RELAXCOUNT(i) -= 4;
-            } else if (GET_RELAXCOUNT(i) >= 232) {
-                GET_RELAXCOUNT(i) -= 3;
-            } else if (GET_RELAXCOUNT(i) > 0 && rand_number(1, 3) == 3) {
-                GET_RELAXCOUNT(i) -= 2;
-            } else {
-                GET_RELAXCOUNT(i) -= 1;
-            }
+    for(auto &[zvn, z] : zone_table) {
+        if (z.playersInZone.empty()) continue;
 
-            if (GET_RELAXCOUNT(i) < 0) {
-                GET_RELAXCOUNT(i) = 0;
+        std::unordered_set<CharRef> characters;
+        for(auto &r : z.npcsInZone) characters.insert(r);
+        for(auto &r : z.playersInZone) characters.insert(r);
+
+        for (auto charId: characters) {
+            if (processedCharacters.contains(charId)) continue;
+            auto i = charId.get();
+            if(!i) continue;
+            processedCharacters.insert(charId);
+
+            if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE) {
+                if (ROOM_FLAGGED(IN_ROOM(i), ROOM_HOUSE)) {
+                    GET_RELAXCOUNT(i) += 1;
+                } else if (GET_RELAXCOUNT(i) >= 464) {
+                    GET_RELAXCOUNT(i) -= 4;
+                } else if (GET_RELAXCOUNT(i) >= 232) {
+                    GET_RELAXCOUNT(i) -= 3;
+                } else if (GET_RELAXCOUNT(i) > 0 && rand_number(1, 3) == 3) {
+                    GET_RELAXCOUNT(i) -= 2;
+                } else {
+                    GET_RELAXCOUNT(i) -= 1;
+                }
+
+                if (GET_RELAXCOUNT(i) < 0) {
+                    GET_RELAXCOUNT(i) = 0;
+                }
             }
-        }
-        // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
-        if (!i->isFullHealth()) {
+            // making it so that you don't get hungry/thirsty if you're just leisurely idling, rping, etc.
+            if (!i->isFullHealth()) {
+                if (rand_number(1, 2) == 2) {
+                    gain_condition(i, HUNGER, -1);
+                }
+                if (rand_number(1, 2) == 2) {
+                    gain_condition(i, THIRST, -1);
+                }
+            }
             if (rand_number(1, 2) == 2) {
-                gain_condition(i, HUNGER, -1);
+                gain_condition(i, DRUNK, -1);
             }
-            if (rand_number(1, 2) == 2) {
-                gain_condition(i, THIRST, -1);
-            }
-        }
-        if (rand_number(1, 2) == 2) {
-            gain_condition(i, DRUNK, -1);
-        }
-        if (IS_NPC(i)) {
-            i->aggtimer = 0;
-        }
-
-        if (GET_POS(i) >= POS_STUNNED) {
-            change = false;
-            update_flags(i);
-            if (!IS_NPC(i)) {
-                if (!i->isFullVitals()) {
-                    change = true;
-                }
+            if (IS_NPC(i)) {
+                i->aggtimer = 0;
             }
 
-            if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
-                if ((i->getCurKI()) > (mana_gain(i) + i->getPercentOfMaxKI(.05))) {
-                    send_to_char(i, "You send more energy into your aura to keep the light active.\r\n");
-                    i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.05));
-                } else {
-                    send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
-                    act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
-                    i->playerFlags.reset(PLR_AURALIGHT);
-                }
-            }
-            if (IS_MUTANT(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6)) {
-                mutant_limb_regen(i);
-            }
-
-            int x = (GET_KAIOKEN(i) * 5) + 5;
-
-            if (GET_SLEEPT(i) > 0 && GET_POS(i) != POS_SLEEPING) {
-                GET_SLEEPT(i) -= 1;
-            }
-            if (GET_SLEEPT(i) < 8 && GET_POS(i) == POS_SLEEPING) {
-                GET_SLEEPT(i) += rand_number(2, 4);
-                if (GET_SLEEPT(i) > 8) {
-                    GET_SLEEPT(i) = 8;
-                }
-            }
-
-            if (GET_KAIOKEN(i) > 0) {
-                improve_skill(i, SKILL_KAIOKEN, -1);
-                if ((GET_SKILL(i, SKILL_KAIOKEN) < rand_number(1, x) || (i->getCurST()) <= GET_MAX_MOVE(i) / 10))
-                    i->remove_kaioken(2);
-            }
-
-            if (AFF_FLAGGED(i, AFF_BURNED)) {
-                if (rand_number(1, 5) >= 4) {
-                    send_to_char(i, "Your burns are healed now.\r\n");
-                    act("$n@w's burns are now healed.@n", true, i, nullptr, nullptr, TO_ROOM);
-                    i->affected_by.reset(AFF_BURNED);
-                }
-            }
-
-            i->incCurHealth(hit_gain(i));
-            i->incCurST(move_gain(i));
-            i->incCurKI(mana_gain(i));
-
-            if (!IS_NPC(i)) {
-                heal_limb(i);
-            }
-
-            if (SECT(IN_ROOM(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i)) {
-                if ((i->getCurST()) >= (i->getCarriedWeight())) {
-                    act("@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);
-                    act("@C$n@b swims in place.@n", true, i, nullptr, nullptr, TO_ROOM);
-                    i->decCurST(i->getCarriedWeight());
-
-                } else {
-                    i->decCurST(i->getCarriedWeight());
-                    act("@RYou are drowning!@n", true, i, nullptr, nullptr, TO_CHAR);
-                    act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, i, nullptr, nullptr,
-                        TO_ROOM);
-                    if (i->decCurHealthPercent(0.33) <= 0) {
-                        act("@rYou drown!@n", true, i, nullptr, nullptr, TO_CHAR);
-                        act("@R$n@r drowns!@n", true, i, nullptr, nullptr, TO_ROOM);
-                        die(i, nullptr);
+            if (GET_POS(i) >= POS_STUNNED) {
+                change = false;
+                update_flags(i);
+                if (!IS_NPC(i)) {
+                    if (!i->isFullVitals()) {
+                        change = true;
                     }
                 }
-            }
-            if (!has_o2(i) && SUNKEN(IN_ROOM(i)) && !ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE)) {
-                if (((i->getCurKI()) - mana_gain(i)) > GET_MAX_MANA(i) / 200) {
-                    send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
-                    i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.005));
-                } else {
-                    if ((GET_HIT(i) - hit_gain(i)) > (i->getMaxPL()) * 0.05) {
-                        send_to_char(i, "You struggle trying to hold your breath!\r\n");
-                        i->decCurHealth(hit_gain(i) + i->getPercentOfMaxHealth(.05));
-                    } else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
-                        send_to_char(i, "You have drowned!\r\n");
-                        act("@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
-                        die(i, nullptr);
-                    }
-                }
-            }
-            if (!has_o2(i) && ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE)) {
-                if (((i->getCurKI()) - mana_gain(i)) > GET_MAX_MANA(i) * 0.005) {
-                    send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
-                    i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.005));
-                } else {
-                    if ((GET_HIT(i) - hit_gain(i)) > (i->getMaxPL()) * 0.05) {
-                        send_to_char(i, "You struggle trying to hold your breath!\r\n");
-                        i->decCurHealth(hit_gain(i) + i->getPercentOfMaxHealth(.05));
-                    } else if (GET_HIT(i) <= GET_MAX_HIT(i) / 20) {
-                        send_to_char(i, "You have drowned!\r\n");
-                        i->decCurHealthPercent(1, 1);
-                        act("@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
-                        die(i, nullptr);
-                    }
-                }
-            }
-            if (!AFF_FLAGGED(i, AFF_FLYING) && ROOM_EFFECT(IN_ROOM(i)) == 6 && !MOB_FLAGGED(i, MOB_NOKILL) &&
-                !IS_DEMON(i)) {
-                act("@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_CHAR);
-                act("@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_ROOM);
-                if (IS_NPC(i) && IS_HUMANOID(i) && rand_number(1, 2) == 2) {
-                    do_fly(i, nullptr, 0, 0);
-                }
-                i->decCurHealthPercent(.05);
-                if (GET_HIT(i) < 0) {
-                    act("@rYou have burned to death!@n", true, i, nullptr, nullptr, TO_CHAR);
-                    act("@R$n@r has burned to death!@n", true, i, nullptr, nullptr, TO_ROOM);
-                    die(i, nullptr);
-                }
-            }
-            if (change && !AFF_FLAGGED(i, AFF_POISON)) {
-                if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) != nullptr) {
-                    send_to_char(i, "@wThe healing tank works wonders on your injuries.@n\r\n");
-                    HCHARGE(SITS(i)) -= rand_number(1, 2);
-                    if (HCHARGE(SITS(i)) == 0) {
-                        send_to_char(i, "@wThe healing tank is now too low on energy to heal you.\r\n");
-                        act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
-                        act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-                        i->playerFlags.reset(PLR_HEALT);
-                        SITTING(SITS(i)) = nullptr;
-                        SITS(i) = nullptr;
-                    } else if (i->isFullVitals()) {
-                        send_to_char(i, "@wYou are fully recovered now.\r\n");
-                        act("You step out of the now empty healing tank.", true, i, nullptr, nullptr, TO_CHAR);
-                        act("@C$n@w steps out of the now empty healing tank.@n", true, i, nullptr, nullptr, TO_ROOM);
-                        i->playerFlags.reset(PLR_HEALT);
-                        SITTING(SITS(i)) = nullptr;
-                        SITS(i) = nullptr;
-                    }
-                } else if (PLR_FLAGGED(i, PLR_HEALT) && SITS(i) == nullptr) {
-                    i->playerFlags.reset(PLR_HEALT);
-                } else if (GET_POS(i) == POS_SLEEPING) {
-                    send_to_char(i, "@wYour sleep does you some good.@n\r\n");
-                    if (!IS_ANDROID(i) && !FIGHTING(i))
-                        i->restoreLF(false);
-                } else if (GET_POS(i) == POS_RESTING) {
-                    send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
-                    if (!i->isFullLF()) {
-                        if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 &&
-                            GET_HIT(i) != (i->getMaxPL())) {
-                            i->incCurLFPercent(.15);
-                            send_to_char(i, "@CYou feel more lively.@n\r\n");
-                        }
-                    }
-                } else if (GET_POS(i) == POS_SITTING)
-                    send_to_char(i, "@wYou feel rested and better.@n\r\n");
-                else
-                    send_to_char(i, "You feel slightly better.\r\n");
-            }
-            if (AFF_FLAGGED(i, AFF_POISON)) {
-                double cost = 0.0;
-                if (GET_CON(i) >= 100) {
-                    cost = 0.01;
-                } else if (GET_CON(i) >= 80) {
-                    cost = 0.02;
-                } else if (GET_CON(i) >= 50) {
-                    cost = 0.03;
-                } else if (GET_CON(i) >= 30) {
-                    cost = 0.04;
-                } else if (GET_CON(i) >= 20) {
-                    cost = 0.05;
-                } else {
-                    cost = 0.06;
-                }
-                if (GET_HIT(i) - GET_MAX_HIT(i) * cost > 0) {
-                    send_to_char(i, "You puke as the poison burns through your blood.\r\n");
-                    act("$n shivers and then pukes.", true, i, nullptr, nullptr, TO_ROOM);
-                    i->decCurHealth(i->getMaxPL() * cost);
-                } else {
-                    send_to_char(i, "The poison claims your life!\r\n");
-                    act("$n pukes up blood and falls down dead!", true, i, nullptr, nullptr, TO_ROOM);
-                    if (i->poisonby) {
-                        die(i, i->poisonby);
+
+                if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
+                    if ((i->getCurKI()) > (mana_gain(i) + i->getPercentOfMaxKI(.05))) {
+                        send_to_char(i, "You send more energy into your aura to keep the light active.\r\n");
+                        i->decCurKI(mana_gain(i) + i->getPercentOfMaxKI(.05));
                     } else {
+                        send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
+                        act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
+                        i->playerFlags.reset(PLR_AURALIGHT);
+                    }
+                }
+                if (IS_MUTANT(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6)) {
+                    mutant_limb_regen(i);
+                }
+
+                int x = (GET_KAIOKEN(i) * 5) + 5;
+
+                if (GET_SLEEPT(i) > 0 && GET_POS(i) != POS_SLEEPING) {
+                    GET_SLEEPT(i) -= 1;
+                }
+                if (GET_SLEEPT(i) < 8 && GET_POS(i) == POS_SLEEPING) {
+                    GET_SLEEPT(i) += rand_number(2, 4);
+                    if (GET_SLEEPT(i) > 8) {
+                        GET_SLEEPT(i) = 8;
+                    }
+                }
+
+                if (GET_KAIOKEN(i) > 0) {
+                    improve_skill(i, SKILL_KAIOKEN, -1);
+                    if ((GET_SKILL(i, SKILL_KAIOKEN) < rand_number(1, x) || (i->getCurST()) <= GET_MAX_MOVE(i) / 10))
+                        i->remove_kaioken(2);
+                }
+
+                if (AFF_FLAGGED(i, AFF_BURNED)) {
+                    if (rand_number(1, 5) >= 4) {
+                        send_to_char(i, "Your burns are healed now.\r\n");
+                        act("$n@w's burns are now healed.@n", true, i, nullptr, nullptr, TO_ROOM);
+                        i->affected_by.reset(AFF_BURNED);
+                    }
+                }
+
+                if (!IS_NPC(i)) {
+                    heal_limb(i);
+                }
+
+                if (SECT(IN_ROOM(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i)) {
+                    auto carweight = i->getCarriedWeight();
+                    if ((i->getCurST()) >= carweight) {
+                        act("@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);
+                        act("@C$n@b swims in place.@n", true, i, nullptr, nullptr, TO_ROOM);
+                        i->decCurST(carweight);
+
+                    } else {
+                        i->decCurST(carweight);
+                        act("@RYou are drowning!@n", true, i, nullptr, nullptr, TO_CHAR);
+                        act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, i, nullptr,
+                            nullptr,
+                            TO_ROOM);
+                        if (i->decCurHealthPercent(0.33) <= 0) {
+                            act("@rYou drown!@n", true, i, nullptr, nullptr, TO_CHAR);
+                            act("@R$n@r drowns!@n", true, i, nullptr, nullptr, TO_ROOM);
+                            die(i, nullptr);
+                        }
+                    }
+                }
+
+                if (!has_o2(i) && (SUNKEN(IN_ROOM(i)) || ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE))) {
+                    if (auto remKi = i->modCurVitalDam(CharVital::Ki, .005); remKi < 1.0) {
+                        send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
+                    } else {
+                        if (remKi > 0.9) {
+                            send_to_char(i, "You struggle trying to hold your breath!\r\n");
+                        } else {
+                            if(SUNKEN(IN_ROOM(i))) {
+                                send_to_char(i, "You have drowned!\r\n");
+                                act("@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
+                            } else {
+                                send_to_char(i, "You have run out of air!\r\n");
+                                act("@W$n@W asphyxiates right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
+                            }
+                            die(i, nullptr);
+                        }
+                    }
+                }
+
+                if (!AFF_FLAGGED(i, AFF_FLYING) && ROOM_EFFECT(IN_ROOM(i)) == 6 && !MOB_FLAGGED(i, MOB_NOKILL) &&
+                    !IS_DEMON(i)) {
+                    act("@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_CHAR);
+                    act("@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_ROOM);
+                    if (IS_NPC(i) && IS_HUMANOID(i) && rand_number(1, 2) == 2) {
+                        do_fly(i, nullptr, 0, 0);
+                    }
+                    i->decCurHealthPercent(.05);
+                    if (GET_HIT(i) < 0) {
+                        act("@rYou have burned to death!@n", true, i, nullptr, nullptr, TO_CHAR);
+                        act("@R$n@r has burned to death!@n", true, i, nullptr, nullptr, TO_ROOM);
                         die(i, nullptr);
                     }
                 }
-            }
-            if (GET_POS(i) <= POS_STUNNED)
-                update_pos(i);
-        } else if (GET_POS(i) == POS_INCAP) {
-            continue;
-        } else if (GET_POS(i) == POS_MORTALLYW) {
-            continue;
-        }
-        if ((i->getCurKI()) >= GET_MAX_MANA(i) * 0.5 && GET_CHARGE(i) < GET_MAX_MANA(i) * 0.1 &&
-            GET_PREFERENCE(i) == PREFERENCE_KI && !PLR_FLAGGED(i, PLR_AURALIGHT)) {
-            GET_CHARGE(i) = GET_MAX_MANA(i) * 0.1;
-        }
-        if (!IS_NPC(i)) {
-            i->raiseGravAcclim();
-            update_char_objects(i);
-            if (GET_ADMLEVEL(i) < CONFIG_IDLE_MAX_LEVEL)
-                check_idling(i);
-            else
-                (i->timer)++;
-        }
-    }
-
-    /* objects */
-    for (j = object_list; j; j = next_thing) {
-        next_thing = j->next;    /* Next in object list */
-
-
-        /* Let's get rid of dropped norent items. */
-        if (OBJ_FLAGGED(j, ITEM_NORENT) && j->worn_by == nullptr && j->carried_by == nullptr && obj_selling != j &&
-            GET_OBJ_VNUM(j) != 7200) {
-            time_t diff = 0;
-
-            diff = time(nullptr) - GET_LAST_LOAD(j);
-            if (diff > 240 && GET_LAST_LOAD(j) > 0) {
-                basic_mud_log("No rent object (%s) extracted from room (%d)", j->short_description, GET_ROOM_VNUM(IN_ROOM(j)));
-                extract_obj(j);
-            }
-        }
-
-        if (GET_OBJ_TYPE(j) == ITEM_HATCH) {
-            if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST)))) {
-                GET_OBJ_VAL(j, 3) = GET_ROOM_VNUM(IN_ROOM(vehicle));
-            }
-        }
-
-        /* If this is a corpse */
-        if (IS_CORPSE(j)) {
-            /* timer count down */
-            if (GET_OBJ_TIMER(j) > 0)
-                GET_OBJ_TIMER(j)--;
-            if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
-                if (GET_OBJ_TIMER(j) == 5) {
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                            TO_CHAR);
-                        act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                            TO_ROOM);
-                    }
-                }
-                if (GET_OBJ_TIMER(j) == 3) {
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                            TO_CHAR);
-                        act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                            TO_ROOM);
-                    }
-                }
-                if (GET_OBJ_TIMER(j) == 2) {
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
-                            nullptr, TO_CHAR);
-                        act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
-                            nullptr, TO_ROOM);
-                    }
-                }
-                if (GET_OBJ_TIMER(j) == 1) {
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
-                            j, nullptr, TO_CHAR);
-                        act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
-                            j, nullptr, TO_ROOM);
-                    }
-                }
-            }
-            if (!GET_OBJ_TIMER(j)) {
-
-                if (j->carried_by) {
-                    if (!strstr(j->name, "android")) {
-                        act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
-                        if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                            act("A quivering horde of maggots consumes $p.",
-                                true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                            act("A quivering horde of maggots consumes $p.",
-                                true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                if (change && !AFF_FLAGGED(i, AFF_POISON)) {
+                    if (GET_POS(i) == POS_SLEEPING) {
+                        send_to_char(i, "@wYour sleep does you some good.@n\r\n");
+                        if (!IS_ANDROID(i) && !FIGHTING(i))
+                            i->restoreLF(false);
+                    } else if (GET_POS(i) == POS_RESTING) {
+                        send_to_char(i, "@wYou feel relaxed and better.@n\r\n");
+                        if (!i->isFullLF()) {
+                            if (!IS_ANDROID(i) && !FIGHTING(i) && GET_SUPPRESS(i) <= 0 &&
+                                GET_HIT(i) != (i->getMaxPL())) {
+                                i->incCurLFPercent(.15);
+                                send_to_char(i, "@CYou feel more lively.@n\r\n");
+                            }
                         }
-                    } else {
-                        act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
-                        if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                            act("$p breaks down completely into a pile of junk.",
-                                true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                            act("$p breaks down completely into a pile of junk.",
-                                true, j->getRoom()->people, j, nullptr, TO_CHAR);
-                        }
-                    }
-                }
-                for (jj = j->contents; jj; jj = next_thing2) {
-                    next_thing2 = jj->next_content;    /* Next in inventory */
-                    obj_from_obj(jj);
-
-                    if (j->in_obj)
-                        obj_to_obj(jj, j->in_obj);
-                    else if (j->carried_by)
-                        obj_to_room(jj, IN_ROOM(j->carried_by));
-                    else if (IN_ROOM(j) != NOWHERE)
-                        obj_to_room(jj, IN_ROOM(j));
+                    } else if (GET_POS(i) == POS_SITTING)
+                        send_to_char(i, "@wYou feel rested and better.@n\r\n");
                     else
-                        core_dump();
+                        send_to_char(i, "You feel slightly better.\r\n");
                 }
-                extract_obj(j);
+                if (AFF_FLAGGED(i, AFF_POISON)) {
+                    double cost = 0.0;
+                    if (GET_CON(i) >= 100) {
+                        cost = 0.01;
+                    } else if (GET_CON(i) >= 80) {
+                        cost = 0.02;
+                    } else if (GET_CON(i) >= 50) {
+                        cost = 0.03;
+                    } else if (GET_CON(i) >= 30) {
+                        cost = 0.04;
+                    } else if (GET_CON(i) >= 20) {
+                        cost = 0.05;
+                    } else {
+                        cost = 0.06;
+                    }
+                    if (GET_HIT(i) - GET_MAX_HIT(i) * cost > 0) {
+                        send_to_char(i, "You puke as the poison burns through your blood.\r\n");
+                        act("$n shivers and then pukes.", true, i, nullptr, nullptr, TO_ROOM);
+                        i->decCurHealth(i->getMaxPL() * cost);
+                    } else {
+                        send_to_char(i, "The poison claims your life!\r\n");
+                        act("$n pukes up blood and falls down dead!", true, i, nullptr, nullptr, TO_ROOM);
+                        die(i, i->poisonby ? i->poisonby : nullptr);
+                    }
+                }
+                if (GET_POS(i) <= POS_STUNNED)
+                    update_pos(i);
+            } else if (GET_POS(i) == POS_INCAP) {
+                continue;
+            } else if (GET_POS(i) == POS_MORTALLYW) {
+                continue;
+            }
+            if ((i->getCurKI()) >= GET_MAX_MANA(i) * 0.5 && GET_CHARGE(i) < GET_MAX_MANA(i) * 0.1 &&
+                GET_PREFERENCE(i) == PREFERENCE_KI && !PLR_FLAGGED(i, PLR_AURALIGHT)) {
+                GET_CHARGE(i) = GET_MAX_MANA(i) * 0.1;
+            }
+            if (!IS_NPC(i)) {
+                i->raiseGravAcclim();
+                update_char_objects(i);
+                if (GET_ADMLEVEL(i) < CONFIG_IDLE_MAX_LEVEL)
+                    check_idling(i);
+                else
+                    (i->timer)++;
             }
         }
 
-        if (GET_OBJ_VNUM(j) == 65) {
-            if (HCHARGE(j) < 20 && !SITTING(j)) {
-                HCHARGE(j) += rand_number(0, 1);
-            }
-        }
-        if (GET_OBJ_TYPE(j) == ITEM_PORTAL) {
-            if (GET_OBJ_TIMER(j) > 0)
-                GET_OBJ_TIMER(j)--;
+        auto objects = z.objectsInZone;
 
-            if (GET_OBJ_TIMER(j) == 0) {
-                act("A glowing portal fades from existence.",
-                    true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                act("A glowing portal fades from existence.",
-                    true, j->getRoom()->people, j, nullptr, TO_CHAR);
-                extract_obj(j);
-            }
-        } else if (GET_OBJ_VNUM(j) == 1306) {
-            if (GET_OBJ_TIMER(j) > 0)
-                GET_OBJ_TIMER(j)--;
+        for (auto objId: objects) {
+            if (processedObjects.contains(objId)) continue;
+            auto j = objId.get();
+            if(!j) continue;
+            processedObjects.insert(objId);
 
-            if (GET_OBJ_TIMER(j) == 0) {
-                act("The $p@n settles to the ground and goes out.",
-                    true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                act("A $p@n settles to the ground and goes out.",
-                    true, j->getRoom()->people, j, nullptr, TO_CHAR);
-                extract_obj(j);
+            /* Let's get rid of dropped norent items. */
+            if (OBJ_FLAGGED(j, ITEM_NORENT) && j->worn_by == nullptr && j->carried_by == nullptr && obj_selling != j &&
+                GET_OBJ_VNUM(j) != 7200) {
+                time_t diff = 0;
+
+                diff = time(nullptr) - GET_LAST_LOAD(j);
+                if (diff > 240 && GET_LAST_LOAD(j) > 0) {
+                    basic_mud_log("No rent object (%s) extracted from room (%d)", j->short_description,
+                                  GET_ROOM_VNUM(IN_ROOM(j)));
+                    extract_obj(j);
+                }
             }
-        } else if (OBJ_FLAGGED(j, ITEM_ICE)) {
-            if (GET_OBJ_VNUM(j) == 79 && rand_number(1, 2) == 2) {
-                if (ROOM_EFFECT(IN_ROOM(j)) >= 1 && ROOM_EFFECT(IN_ROOM(j)) <= 5) {
-                    send_to_room(IN_ROOM(j),
-                                 "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
-                    ROOM_EFFECT(IN_ROOM(j)) -= 1;
-                    if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0) {
+
+            if (GET_OBJ_TYPE(j) == ITEM_HATCH) {
+                if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST)))) {
+                    GET_OBJ_VAL(j, 3) = GET_ROOM_VNUM(IN_ROOM(vehicle));
+                }
+            }
+
+            if (GET_OBJ_TYPE(j) == ITEM_PORTAL) {
+                if (GET_OBJ_TIMER(j) > 0)
+                    GET_OBJ_TIMER(j)--;
+
+                if (GET_OBJ_TIMER(j) == 0) {
+                    act("A glowing portal fades from existence.",
+                        true, j->getRoom()->people, j, nullptr, TO_ROOM);
+                    act("A glowing portal fades from existence.",
+                        true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                    extract_obj(j);
+                }
+            } else if (GET_OBJ_VNUM(j) == 1306) {
+                if (GET_OBJ_TIMER(j) > 0)
+                    GET_OBJ_TIMER(j)--;
+
+                if (GET_OBJ_TIMER(j) == 0) {
+                    act("The $p@n settles to the ground and goes out.",
+                        true, j->getRoom()->people, j, nullptr, TO_ROOM);
+                    act("A $p@n settles to the ground and goes out.",
+                        true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                    extract_obj(j);
+                }
+            } else if (OBJ_FLAGGED(j, ITEM_ICE)) {
+                if (GET_OBJ_VNUM(j) == 79 && rand_number(1, 2) == 2) {
+                    if (ROOM_EFFECT(IN_ROOM(j)) >= 1 && ROOM_EFFECT(IN_ROOM(j)) <= 5) {
+                        send_to_room(IN_ROOM(j),
+                                     "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
+                        ROOM_EFFECT(IN_ROOM(j)) -= 1;
+                        if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0) {
+                            GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
+                        } else {
+                            send_to_room(IN_ROOM(j),
+                                         "The glacial wall blocking off the %s direction melts completely away.\r\n",
+                                         dirs[GET_OBJ_COST(j)]);
+                            extract_obj(j);
+                        }
+                    } else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0) {
                         GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
+                        send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts some what.\r\n",
+                                     dirs[GET_OBJ_COST(j)]);
                     } else {
                         send_to_room(IN_ROOM(j),
                                      "The glacial wall blocking off the %s direction melts completely away.\r\n",
                                      dirs[GET_OBJ_COST(j)]);
                         extract_obj(j);
                     }
-                } else if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0) {
-                    GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
-                    send_to_room(IN_ROOM(j), "The glacial wall blocking off the %s direction melts some what.\r\n",
-                                 dirs[GET_OBJ_COST(j)]);
-                } else {
-                    send_to_room(IN_ROOM(j),
-                                 "The glacial wall blocking off the %s direction melts completely away.\r\n",
-                                 dirs[GET_OBJ_COST(j)]);
-                    extract_obj(j);
-                }
-            } else if (GET_OBJ_VNUM(j) != 79) {
-                if (j->carried_by && !j->in_obj) {
-                    int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
-                    if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0) {
-                        GET_OBJ_WEIGHT(j) -= melt;
-                        send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->short_description);
-                    } else {
-                        send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->short_description);
-                        int remainder = melt - GET_OBJ_WEIGHT(j);
-                        extract_obj(j);
-                    }
-                } else if (IN_ROOM(j) != NOWHERE) {
-                    if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0) {
-                        GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.02);
-                        send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->short_description);
-                    } else {
-                        send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->short_description);
-                        extract_obj(j);
+                } else if (GET_OBJ_VNUM(j) != 79) {
+                    if (j->carried_by && !j->in_obj) {
+                        int melt = 5 + (GET_OBJ_WEIGHT(j) * 0.02);
+                        if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0) {
+                            GET_OBJ_WEIGHT(j) -= melt;
+                            send_to_char(j->carried_by, "%s @wmelts a little.\r\n", j->short_description);
+                        } else {
+                            send_to_char(j->carried_by, "%s @wmelts completely away.\r\n", j->short_description);
+                            int remainder = melt - GET_OBJ_WEIGHT(j);
+                            extract_obj(j);
+                        }
+                    } else if (IN_ROOM(j) != NOWHERE) {
+                        if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.02)) > 0) {
+                            GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.02);
+                            send_to_room(IN_ROOM(j), "%s @wmelts a little.\r\n", j->short_description);
+                        } else {
+                            send_to_room(IN_ROOM(j), "%s @wmelts completely away.\r\n", j->short_description);
+                            extract_obj(j);
+                        }
                     }
                 }
             }
-        }
 
-            /* If the timer is set, count it down and at 0, try the trigger */
-            /* note to .rej hand-patchers: make this last in your point-update() */
-        else if (GET_OBJ_TIMER(j) > 0) {
-            GET_OBJ_TIMER(j)--;
-            if (!GET_OBJ_TIMER(j))
-                timer_otrigger(j);
+                /* If the timer is set, count it down and at 0, try the trigger */
+                /* note to .rej hand-patchers: make this last in your point-update() */
+            else if (GET_OBJ_TIMER(j) > 0) {
+                GET_OBJ_TIMER(j)--;
+                if (!GET_OBJ_TIMER(j))
+                    timer_otrigger(j);
+            }
         }
     }
 }
@@ -1563,7 +1959,10 @@ void timed_dt(struct char_data *ch) {
         for (auto &r : world)
             r.second.timed -= (r.second.timed != -1);
 
-        for (vict = character_list; vict; vict = vict->next) {
+        for (auto d = descriptor_list; d; d = d->next) {
+            if(!d->character) continue;
+            auto vict = d->character;
+
             if (IS_NPC(vict))
                 continue;
 

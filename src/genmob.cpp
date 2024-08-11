@@ -45,9 +45,8 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
         copy_mobile(&mob_proto[rnum], mob);
 
         /* Now re-point all existing mobile strings to here. */
-        for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-            if (rnum == live_mob->vn)
-                update_mobile_strings(live_mob, &mob_proto[rnum]);
+        for (auto live_mob : get_vnum_list(characterVnumIndex, vnum))
+            update_mobile_strings(live_mob, &mob_proto[rnum]);
 
         basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
         return rnum;
@@ -87,12 +86,9 @@ int copy_mobile(struct char_data *to, struct char_data *from) {
 }
 
 void extract_mobile_all(mob_vnum vnum) {
-    struct char_data *next, *ch;
 
-    for (ch = character_list; ch; ch = next) {
-        next = ch->next;
-        if (GET_MOB_VNUM(ch) == vnum)
-            extract_char(ch);
+    for (auto ch : get_vnum_list(characterVnumIndex, vnum)) {
+        extract_char(ch);
     }
 }
 
@@ -111,10 +107,6 @@ int delete_mobile(mob_rnum refpt) {
     extract_mobile_all(vnum);
     auto &z = zone_table[real_zone_by_thing(refpt)];
     z.mobiles.erase(refpt);
-
-    /* Update live mobile rnums.  */
-    for (live_mob = character_list; live_mob; live_mob = live_mob->next)
-        GET_MOB_RNUM(live_mob) -= (GET_MOB_RNUM(live_mob) >= refpt);
 
     /* Update zone table.  */
     for (auto &[zone, z] : zone_table) {
@@ -294,9 +286,6 @@ mob_special_data::mob_special_data(const nlohmann::json &j) : mob_special_data()
     deserialize(j);
 }
 
-
-
-
 nlohmann::json time_data::serialize() {
     nlohmann::json j;
 
@@ -347,12 +336,20 @@ nlohmann::json char_data::serializeBase() {
         if(app) j["appearances"].push_back(std::make_pair(id, app));
     }
 
-    for(auto &[id, app] : stats) {
-        if(app) j["stats"].push_back(std::make_pair(id, app));
+    for(auto &[id, app] : vitals) {
+        if(app) j["vitals"].push_back(std::make_pair(id, app));
     }
 
     for(auto &[id, app] : nums) {
         if(app) j["nums"].push_back(std::make_pair(id, app));
+    }
+
+    for(auto &[id, app] : stats) {
+        if(app) j["stats"].push_back(std::make_pair(id, app));
+    }
+
+    for(auto &[id, app] : dims) {
+        if(app) j["dims"].push_back(std::make_pair(id, app));
     }
 
     for(auto i = 0; i < mobFlags.size(); i++)
@@ -371,7 +368,6 @@ nlohmann::json char_data::serializeBase() {
     j["race"] = race;
 
     j["chclass"] = chclass;
-    if(weight != 0.0) j["weight"] = weight;
 
     for(auto i = 0; i < affected_by.size(); i++)
         if(affected_by.test(i)) j["affected_by"].push_back(i);
@@ -422,10 +418,10 @@ void char_data::deserializeBase(const nlohmann::json &j) {
         }
     }
 
-    if(j.contains("stats")) {
-        for(auto j2 : j["stats"]) {
-            auto id = j2[0].get<CharStat>();
-            stats[id] = j2[1].get<stat_t>();
+    if(j.contains("vitals")) {
+        for(auto j2 : j["vitals"]) {
+            auto id = j2[0].get<CharVital>();
+            vitals[id] = j2[1].get<vital_t>();
         }
     }
 
@@ -436,12 +432,24 @@ void char_data::deserializeBase(const nlohmann::json &j) {
         }
     }
 
+    if(j.contains("dims")) {
+        for(auto j2 : j["dims"]) {
+            auto id = j2[0].get<CharDim>();
+            dims[id] = j2[1].get<dim_t>();
+        }
+    }
+
+    if(j.contains("stats")) {
+        for(auto j2 : j["stats"]) {
+            auto id = j2[0].get<CharStat>();
+            stats[id] = j2[1].get<stat_t>();
+        }
+    }
+
     if(j.contains("title")) title = strdup(j["title"].get<std::string>().c_str());
     if(j.contains("race")) race = j["race"].get<RaceID>();
 
     if(j.contains("chclass")) chclass = static_cast<SenseiID>(std::min(14, j["chclass"].get<int>()));
-
-    if(j.contains("weight")) weight = j["weight"];
 
     if(j.contains("affected_by"))
         for(auto &i : j["affected_by"])
@@ -477,12 +485,6 @@ nlohmann::json char_data::serializeInstance() {
     for(auto i = 0; i < NUM_ADMFLAGS; i++)
         if(admflags.test(i)) j["admflags"].push_back(i);
 
-    if(health < 1.0) j["health"] = health;
-    if(energy < 1.0) j["energy"] = energy;
-    if(stamina < 1.0) j["stamina"] = stamina;
-    if(life < 1.0) j["life"] = life;
-
-    if(exp) j["exp"] = exp;
 
     if(was_in_room != NOWHERE) j["was_in_room"] = was_in_room;
     auto td = time.serialize();
@@ -490,6 +492,10 @@ nlohmann::json char_data::serializeInstance() {
 
     for(auto i = 0; i < 4; i++) {
         if(limb_condition[i]) j["limb_condition"].push_back(std::make_pair(i, limb_condition[i]));
+    }
+
+    for(auto &[type, dam] : damages) {
+        if(dam > 0.0) j["damages"].push_back(std::make_pair(type, dam));
     }
 
     for(auto i = 0; i < NUM_CONDITIONS; i++) {
@@ -519,7 +525,10 @@ nlohmann::json char_data::serializeInstance() {
     if(practice_points) j["practice_points"] = practice_points;
 
     for(auto a = affected; a; a = a->next) {
-        if(a->type) j["affected"].push_back(a->serialize());
+        if(a->type) {
+            auto dat = a->serialize();
+            j["affected"].push_back(dat);
+        }
     }
 
     for(auto a = affectedv; a; a = a->next) {
@@ -632,18 +641,18 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
         time.deserialize(j["time"]);
     }
 
-    if(j.contains("health")) health = j["health"];
-    if(j.contains("energy")) energy = j["energy"];
-    if(j.contains("stamina")) stamina = j["stamina"];
-    if(j.contains("life")) life = j["life"];
-
     if(j.contains("limb_condition")) {
         for(auto &i : j["limb_condition"]) {
             limb_condition[i[0].get<int>()] = i[1];
         }
     }
 
-    if(j.contains("exp")) exp = j["exp"];
+    if(j.contains("damages")) {
+        for(auto j2 : j["damages"]) {
+            auto id = j2[0].get<CharVital>();
+            damages[id] = j2[1].get<vital_t>();
+        }
+    }
 
     if(j.contains("was_in_room")) was_in_room = j["was_in_room"];
 
@@ -949,20 +958,47 @@ player_data::player_data(const nlohmann::json &j) {
 
 }
 
+CharRef char_data::ref() {
+    return CharRef(this);
+}
+
 void char_data::activate() {
     if(active) {
         basic_mud_log("Attempted to activate an already active character.");
         return;
     }
     active = true;
-    next = character_list;
-    character_list = this;
-
-    if(script) script->activate();
 
     if(mob_proto.contains(vn)) {
         insert_vnum(characterVnumIndex, this);
     }
+
+    auto r = ref();
+    if(script) {
+        script->activate();
+
+        if(SCRIPT_TYPES(SCRIPT(this)) & MTRIG_RANDOM)
+            characterSubscriptions.subscribe("randomTriggers", r);
+        if(SCRIPT_TYPES(SCRIPT(this)) & MTRIG_TIME)
+            characterSubscriptions.subscribe("timeTriggers", r);
+    }
+
+    if(PLR_FLAGGED(this, PLR_GOOP))
+        characterSubscriptions.subscribe("goopTimeService", r);
+    if(ABSORBING(this))
+        characterSubscriptions.subscribe("androidAbsorbSystem", r);
+    if(PLR_FLAGGED(this, PLR_POWERUP))
+        characterSubscriptions.subscribe("powerupService", r);
+    if(!damages.empty())
+        characterSubscriptions.subscribe("characterVitalsRecovery", r);
+    if(!IS_ANDROID(this) && GET_LIFEPERC(this) > 0 && getCurHealthPercent() < GET_LIFEPERC(this))
+        characterSubscriptions.subscribe("lifeforceSystem", r);
+    if(GET_CHARGE(this) || PLR_FLAGGED(this, PLR_CHARGE))
+        characterSubscriptions.subscribe("kiChargeSystem", r);
+    if(PLR_FLAGGED(this, PLR_FISHING))
+        characterSubscriptions.subscribe("goneFishing", r);
+
+    activeCharacters.insert(r);
 
     if(contents) activateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
@@ -971,22 +1007,24 @@ void char_data::activate() {
             obj->activate();
         }
     }
+
     if(affected) {
         next_affect = affect_list;
         affect_list = this;
     }
+
     if(affectedv) {
         next_affectv = affectv_list;
         affectv_list = this;
     }
+
 }
 
 
 void char_data::deactivate() {
     if(!active) return;
     active = false;
-    struct char_data *temp;
-    REMOVE_FROM_LIST(this, character_list, next, temp);
+    char_data *temp = nullptr;
 
     if(vn != NOTHING) {
         erase_vnum(characterVnumIndex, this);
@@ -998,6 +1036,7 @@ void char_data::deactivate() {
     if(affectedv) {
         REMOVE_FROM_LIST(this, affectv_list, next_affectv, temp);
     }
+    characterSubscriptions.unsubscribeFromAll(ref());
     if(contents) deactivateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(GET_EQ(this, i)) {
@@ -1008,58 +1047,38 @@ void char_data::deactivate() {
 }
 
 nlohmann::json affected_type::serialize() {
-    auto j = nlohmann::json::object();
+    auto j = affect_t::serialize();
 
     if(type) j["type"] = type;
     if(duration) j["duration"] = duration;
-    if(modifier) j["modifier"] = modifier;
-    if(location) j["location"] = location;
-    if(specific) j["specific"] = specific;
     if(bitvector) j["bitvector"] = bitvector;
 
     return j;
 }
 
-affected_type::affected_type(const nlohmann::json &j) {
+void affected_type::deserialize(const nlohmann::json &j) {
+    affect_t::deserialize(j);
     if(j.contains("type")) type = j["type"];
     if(j.contains("duration")) duration = j["duration"];
-    if(j.contains("modifier")) modifier = j["modifier"];
-    if(j.contains("location")) location = j["location"];
-    if(j.contains("specific")) specific = j["specific"];
     if(j.contains("bitvector")) bitvector = j["bitvector"];
 }
 
+
 weight_t char_data::getWeight(bool base) {
-    auto total = weight;
-
-    if(!base) {
-        total += getAffectModifier(APPLY_CHAR_WEIGHT);
-        total *= (1.0 + getAffectModifier(APPLY_WEIGHT_MULT));
-    }
-
-    return total;
+    return get(CharDim::Weight, base);
 }
 
-int char_data::getHeight(bool base) {
-    int total = get(CharNum::Height);
-
-    if(!base) {
-        total += getAffectModifier(APPLY_CHAR_HEIGHT);
-        total *= (1.0 + getAffectModifier(APPLY_HEIGHT_MULT));
-    }
-
-    return total;
+dim_t char_data::getHeight(bool base) {
+    return get(CharDim::Height, base);
 }
 
-int char_data::setHeight(int val) {
-    return set(CharNum::Height, std::max(0, val));
+dim_t char_data::setHeight(dim_t val) {
+    return set(CharDim::Height, std::max(0.0, val));
 }
 
-int char_data::modHeight(int val) {
+dim_t char_data::modHeight(dim_t val) {
     return setHeight(getHeight(true) + val);
 }
-
-
 
 double char_data::getTotalWeight() {
     return getWeight() + getCarriedWeight();
@@ -1108,10 +1127,6 @@ void char_data::deserializeRelations(const nlohmann::json &j) {
 
 }
 
-void char_data::save() {
-
-}
-
 bool char_data::isProvidingLight() {
     if(!IS_NPC(this) && PLR_FLAGGED(this, PLR_AURALIGHT)) return true;
     for(auto i = 0; i < NUM_WEARS; i++) if(auto e = GET_EQ(this, i); e) if(e->isProvidingLight()) return true;
@@ -1147,7 +1162,7 @@ struct obj_data* char_data::findObject(const std::function<bool(struct obj_data*
     return nullptr;
 }
 
-std::set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
+std::unordered_set<struct obj_data*> char_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     auto out = unit_data::gatherObjects(func, working);
 
     for(auto i = 0; i < NUM_WEARS; i++) {

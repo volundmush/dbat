@@ -28,8 +28,7 @@
 #include "dbat/transformation.h"
 
 /* Structures */
-struct char_data *combat_list = nullptr;    /* head of l-list of fighting chars */
-struct char_data *next_combat_list = nullptr;
+
 
 /* local functions */
 static void perform_group_gain(struct char_data *ch, int base, struct char_data *victim);
@@ -247,7 +246,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
         }
     }
 
-    if (axion_dice(-10) > 90 && ch->getCurHealthPercent() <= .5 && !MOB_FLAGGED(ch, MOB_POWERUP) &&
+    if (axion_dice(-10) > 90 && ch->getCurHealthPercent() <= .5 && !PLR_FLAGGED(ch, PLR_POWERUP) &&
         GET_MOB_VNUM(ch) != 25 &&
         !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->chclass == SenseiID::Commoner)) {
         do_powerup(ch, nullptr, 0, 0);
@@ -782,16 +781,147 @@ struct attack_hit_type attack_hit_text[NUM_ATTACK_TYPES] =
 
 #define IS_WEAPON(type) (((type) >= TYPE_HIT) && ((type) < TYPE_SUFFERING))
 
+static const std::map<vital_t, std::pair<std::string, std::string>> powerupMessages = {
+        {50000, {"@RYou continue to powerup, as wind billows out from around you!@n", "@R$n continues to powerup, as wind billows out from around $m!@n"}},
+        {500000, {"@RYou continue to powerup, as the ground splits beneath you!@n", "@R$n continues to powerup, as the ground splits beneath $m!@n"}},
+        {5000000, {"@RYou continue to powerup, as the ground shudders and splits beneath you!@n", "@R$n continues to powerup, as the ground shudders and splits beneath $m!@n"}},
+        {50000000, {"@RYou continue to powerup, as a huge depression forms beneath you!@n", "@R$n continues to powerup, as a huge depression forms beneath $m!@n"}},
+        {100000000, {"@RYou continue to powerup, as the entire area quakes around you!@n", "@R$n continues to powerup, as the entire area quakes around $m!@n"}},
+        {300000000, {"@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", "@R$n continues to powerup, as huge chunks of ground are ripped apart beneath $m!@n"}},
+        {std::numeric_limits<vital_t>::max(), {"@RYou continue to powerup, as the very air around you crackles and burns!@n", "@R$n continues to powerup, as the very air around $m crackles and burns!@n"}}
+};
+
+void powerupService(uint64_t heartPulse, double deltaTime) {
+    char buf3[MAX_STRING_LENGTH];
+    for(const auto& r : characterSubscriptions.all("powerupService")) {
+        auto ch = r.get();
+        if (!ch) continue;
+
+        if(!PLR_FLAGGED(ch, PLR_POWERUP)) {
+            characterSubscriptions.unsubscribe("powerupService", r);
+            continue;
+        }
+
+        if(rand_number(1, 3) != 3) continue;
+
+        bool stopPowerup = false;
+        bool maxedOut = false;
+        auto maxPL = ch->getMaxPL();
+        auto maxKI = ch->getMaxKI();
+        auto curKI = ch->getCurKI();
+        auto maxST = ch->getMaxST();
+        auto curST = ch->getCurST();
+        auto perc = (GET_PREFERENCE(ch) == PREFERENCE_KI) ? 0.0375 : 0.05;
+        if (ch->isFullHealth() && (ch->getCurKIPercent() >= perc)) {
+            curST = ch->incCurSTPercent(0.02);
+            ch->restoreHealth(false);
+            curKI = ch->decCurKIPercent(perc);
+            maxedOut = true;
+        }
+
+        if (ch->getCurKIPercent() <= perc) {
+            act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
+            stopPowerup = true;
+        }
+
+        if(maxedOut) {
+            dispel_ash(ch);
+            act("@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
+            stopPowerup = true;
+        }
+
+        if(stopPowerup) {
+            act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
+            if(!IS_NPC(ch)) {
+                send_to_sense(0, "You sense someone stop powering up", ch);
+                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
+                send_to_scouter(buf3, ch, 1, 0);
+            }
+            ch->playerFlags.reset(PLR_POWERUP);
+            characterSubscriptions.unsubscribe("powerupService", r);
+            continue;
+        }
+
+        if (!ch->isFullHealth() && (ch->getCurKIPercent() >= perc)) {
+            ch->incCurHealthPercent(.1);
+            ch->decCurKIPercent(perc);
+            ch->incCurSTPercent(0.02);
+
+            auto curPL = ch->getCurPL();
+
+            for(const auto& [threshold, messages] : powerupMessages) {
+                if(curPL < threshold) {
+                    act(messages.first.c_str(), true, ch, nullptr, nullptr,
+                        TO_CHAR);
+                    act(messages.second.c_str(), true, ch, nullptr, nullptr,
+                        TO_ROOM);
+                    break;
+                }
+            }
+
+            if(!IS_NPC(ch)) {
+                send_to_sense(0, "You sense someone powering up", ch);
+                send_to_worlds(ch);
+                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
+                send_to_scouter(buf3, ch, 1, 0);
+            }
+
+            dispel_ash(ch);
+        }
+
+    }
+}
+
+void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
+    for(const auto& r : characterSubscriptions.all("lifeforceSystem")) {
+        auto ch = r.get();
+        if (!ch) continue;
+
+        if (rand_number(1, 15) < 14) continue;
+        auto threshold = (AFF_FLAGGED(ch, AFF_HEALGLOW) || IS_KANASSAN(ch)) ? 0.03 : 0.05;
+        auto curperc = 1.0 - ch->getCurVitalDam(CharVital::LifeForce);
+
+        if (curperc >= threshold) {
+            double refill = 0.05;
+            double lfcost = 0.05;
+
+            bool mutantBonus = IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2);
+
+            if (GET_BONUS(ch, BONUS_DIEHARD) > 0) {
+                if (mutantBonus) {
+                    refill = 0.17;
+                } else {
+                    refill = 0.1;
+                }
+            } else if (mutantBonus) {
+                refill = 0.12;
+            } else if (IS_KANASSAN(ch)) {
+                refill = 0.03;
+                lfcost = 0.03;
+            }
+
+            ch->incCurHealthPercent(refill);
+
+            if (!AFF_FLAGGED(ch, AFF_HEALGLOW)) {
+                ch->decCurLFPercent(lfcost);
+            }
+        } else {
+            ch->incCurHealth(ch->getCurLF());
+            ch->decCurLFPercent(2, -1);
+        }
+
+        send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
+
+    }
+}
 
 /* The Fight related routines */
 void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
-    struct char_data *ch;
-    struct char_data *tch;
-    struct char_data *wch;
 
-    for (tch = character_list; tch; tch = tch->next) {
-        ch = tch;
+    for (const auto& r : characterSubscriptions.all("combatSystem")) {
+        auto ch = r.get();
+        if(!ch) continue;
 
         if (GET_POS(ch) == POS_FIGHTING) {
             GET_POS(ch) = POS_STANDING;
@@ -799,86 +929,24 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         if (PLR_FLAGGED(ch, PLR_SPIRAL)) {
             handle_spiral(ch, nullptr, GET_SKILL(ch, SKILL_SPIRAL), false);
         }
-        if (IS_NPC(ch) && MOB_COOLDOWN(ch) > 0) {
-            MOB_COOLDOWN(ch) -= 1;
-            if (rand_number(1, 2) == 2 && MOB_COOLDOWN(ch) > 0) {
-                MOB_COOLDOWN(ch) -= 1;
-            }
-            if (MOB_COOLDOWN(ch) > 0) {
-                continue;
-            }
+
+        if (IS_NPC(ch) && GET_WAIT_STATE(ch) > 0.0) {
+            // mob cooldown now handled by commandWaitQueue.
+            continue;
         }
-        if (IS_NPC(ch) && MOB_FLAGGED(ch, MOB_POWERUP) && axion_dice(0) >= 90) {
-            if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
-                act("@g$n@ finishes powering up as $s aura flashes brightly filling the entire area briefly with its light!@n",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                ch->restoreHealth(false);
-                ch->mobFlags.set(MOB_POWERUP);
-            } else if (GET_HIT(ch) >= GET_MAX_HIT(ch) / 2) {
-                act("@g$n@G continues powering up as torrents of energy crackle within $s aura.@n", true, ch, nullptr,
-                    nullptr, TO_ROOM);
-                ch->incCurHealthPercent(.1);
-            } else if (GET_HIT(ch) > GET_MAX_HIT(ch) / 4) {
-                act("@g$n@G powers up as a steady aura around $s body grow brighter.@n", true, ch, nullptr, nullptr,
-                    TO_ROOM);
-                ch->incCurHealthPercent(.125);
-            } else if (GET_HIT(ch) > 0) {
-                act("@g$n@G powers up, as a weak aura flickers around $s body.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->incCurHealthPercent(.2);
-            }
-        }
+
         if (IS_NPC(ch) && IS_AFFECTED(ch, AFF_FROZEN)) {
             continue;
         }
-        if (!GRAPPLING(ch) && !GRAPPLED(ch) && !FIGHTING(ch) && !PLR_FLAGGED(ch, PLR_CHARGE) &&
-            !PLR_FLAGGED(ch, PLR_POWERUP) && GET_CHARGE(ch) <= 0 && !IS_TRANSFORMED(ch)) {
-            continue;
-        }
+
         if (FIGHTING(ch) && (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch))) {
-            wch = FIGHTING(ch);
-            stop_fighting(wch);
-            stop_fighting(ch);
+            for(auto c : {FIGHTING(ch).get(), ch}) stop_fighting(c);
         }
         if (FIGHTING(ch) && DRAGGING(ch)) {
             act("@WYou are forced to stop dragging @C$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
             act("@C$n@W is forced to stop dragging @c$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_ROOM);
             DRAGGED(DRAGGING(ch)) = nullptr;
             DRAGGING(ch) = nullptr;
-        }
-
-        if (GET_LIFEPERC(ch) > 0 && ch->health < (double) GET_LIFEPERC(ch) / 100 && (ch->getCurLF()) > 0 &&
-            !IS_ANDROID(ch)) {
-            if (rand_number(1, 15) >= 14) {
-                if ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.05 || AFF_FLAGGED(ch, AFF_HEALGLOW) || (IS_KANASSAN(ch) &&
-                                                                                                     (ch->getCurLF()) >=
-                                                                                                     (ch->getMaxLF()) *
-                                                                                                     0.03)) {
-                    int64_t refill = 0, lfcost = (ch->getMaxLF()) * 0.05;
-                    if (GET_BONUS(ch, BONUS_DIEHARD) > 0 &&
-                        (!IS_MUTANT(ch) || (GET_GENOME(ch, 0) != 2 && GET_GENOME(ch, 1) != 2))) {
-                        refill = (ch->getMaxLF()) * 0.1;
-                    } else if (GET_BONUS(ch, BONUS_DIEHARD) > 0 && IS_MUTANT(ch) &&
-                               (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
-                        refill = (ch->getMaxLF()) * 0.17;
-                    } else if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
-                        refill = (ch->getMaxLF()) * 0.12;
-                    } else if (IS_KANASSAN(ch)) {
-                        lfcost = (ch->getMaxLF()) * 0.03;
-                        refill = (ch->getMaxLF()) * 0.03;
-                    } else {
-                        refill = (ch->getMaxLF()) * 0.05;
-                    }
-                    ch->incCurHealth(refill);
-                    if (!AFF_FLAGGED(ch, AFF_HEALGLOW)) {
-                        ch->decCurLF(lfcost);
-                    }
-                } else {
-                    ch->incCurHealth((ch->getCurLF()));
-                    ch->decCurLFPercent(2, -1);
-                }
-
-                send_to_char(ch, "@YYour life force has kept you strong@n!\r\n");
-            }
         }
 
         if (!AFF_FLAGGED(ch, AFF_POSITION)) {
@@ -1069,116 +1137,140 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         if (GET_BARRIER(ch) > 0) {
             improve_skill(ch, SKILL_BARRIER, 0);
         }
+    }
+}
 
-        if (PLR_FLAGGED(ch, PLR_POWERUP) && rand_number(1, 3) == 3) {
-            char buf3[MAX_STRING_LENGTH];
-            if (GET_HIT(ch) >= (ch->getMaxPL()) && (ch->getCurKI()) >= GET_MAX_MANA(ch) / 20 &&
-                GET_PREFERENCE(ch) != PREFERENCE_KI) {
-                if ((ch->getCurKI()) >= GET_MAX_MANA(ch) * 0.5) {
-                    int64_t raise = GET_MAX_MOVE(ch) * 0.02;
-                    ch->incCurST(raise);
-                }
-                ch->restoreHealth(false);
-                ch->decCurKI(ch->getMaxKI() / 20);
-                dispel_ash(ch);
-                act("@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
-                act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                send_to_sense(0, "You sense someone stop powering up", ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
-                send_to_scouter(buf3, ch, 1, 0);
-                ch->playerFlags.reset(PLR_POWERUP);
-            } else if (GET_HIT(ch) >= (ch->getMaxPL()) && (ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1 &&
-                       GET_PREFERENCE(ch) == PREFERENCE_KI) {
-                if ((ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1) {
-                    int64_t raise = GET_MAX_MOVE(ch) * 0.02;
-                    ch->incCurST(raise);
-                }
-                ch->restoreHealth(false);
-                ch->decCurKI((GET_MAX_MANA(ch) * 0.0375) + 1);
-                dispel_ash(ch);
-                act("@RYou have reached your maximum!@n", true, ch, nullptr, nullptr, TO_CHAR);
-                act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                send_to_sense(0, "You sense someone stop powering up", ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
-                send_to_scouter(buf3, ch, 1, 0);
-                ch->playerFlags.reset(PLR_POWERUP);
+void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
+
+    for(const auto& r : characterSubscriptions.all("chargeMoreKi")) {
+        auto ch = r.get();
+        if (!ch) continue;
+
+        if(!PLR_FLAGGED(ch, PLR_CHARGE)) {
+            characterSubscriptions.unsubscribe("chargeMoreKi", r);
+            continue;
+        }
+
+        int perc = 0;
+        auto concentration = GET_SKILL(ch, SKILL_CONCENTRATION);
+        bool stopCharge = false;
+
+        if (concentration > 74) {
+            perc = 10;
+        } else if (concentration > 49) {
+            perc = 5;
+        } else if (concentration > 24) {
+            perc = 2;
+        } else {
+            perc = 1;
+        }
+
+        if(IS_TRUFFLE(ch)) {
+            if (perc == 10) {
+                perc += 10;
             }
-            if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 20 && GET_PREFERENCE(ch) != PREFERENCE_KI) {
-                ch->decCurKI(ch->getMaxKI() / 20);
-                act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
-                act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                send_to_sense(0, "You sense someone stop powering up", ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
-                send_to_scouter(buf3, ch, 1, 0);
-                ch->playerFlags.reset(PLR_POWERUP);
-            } else if ((ch->getCurKI()) < (GET_MAX_MANA(ch) * 0.0375) + 1 && GET_PREFERENCE(ch) == PREFERENCE_KI) {
-                ch->decCurKI((GET_MAX_MANA(ch) * 0.0375) + 1);
-                act("@RYou have run out of ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
-                act("@R$n stops powering up in a flash of light!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                send_to_sense(0, "You sense someone stop powering up", ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
-                send_to_scouter(buf3, ch, 1, 0);
-                ch->playerFlags.reset(PLR_POWERUP);
+            if (perc == 5) {
+                perc += 5;
             }
-            if (GET_HIT(ch) < (ch->getMaxPL()) && ((GET_PREFERENCE(ch) != PREFERENCE_KI &&
-                                                       (ch->getCurKI()) >= GET_MAX_MANA(ch) / 20) ||
-                                                      (GET_PREFERENCE(ch) == PREFERENCE_KI &&
-                                                       (ch->getCurKI()) >= (GET_MAX_MANA(ch) * 0.0375) + 1))) {
-                ch->incCurHealthPercent(.1);
-                if (GET_PREFERENCE(ch) != PREFERENCE_KI) {
-                    ch->decCurKI(ch->getMaxKI() / 20);
-                } else {
-                    ch->decCurKI(ch->getMaxKI() * .0375);
-                }
-                if ((ch->getCurKI()) >= GET_MAX_MANA(ch) * 0.5) {
-                    int64_t raise = GET_MAX_MOVE(ch) * 0.02;
-                    ch->incCurST(raise);
-                }
-                if (GET_MAX_HIT(ch) < 50000) {
-                    act("@RYou continue to powerup, as wind billows out from around you!@n", true, ch, nullptr, nullptr,
-                        TO_CHAR);
-                    act("@R$n continues to powerup, as wind billows out from around $m!@n", true, ch, nullptr, nullptr,
-                        TO_ROOM);
-                } else if (GET_MAX_HIT(ch) < 500000) {
-                    act("@RYou continue to powerup, as the ground splits beneath you!@n", true, ch, nullptr, nullptr,
-                        TO_CHAR);
-                    act("@R$n continues to powerup, as the ground splits beneath $m!@n", true, ch, nullptr, nullptr,
-                        TO_ROOM);
-                } else if (GET_MAX_HIT(ch) < 5000000) {
-                    act("@RYou continue to powerup, as the ground shudders and splits beneath you!@n", true, ch,
-                        nullptr, nullptr, TO_CHAR);
-                    act("@R$n continues to powerup, as the ground shudders and splits beneath $m!@n", true, ch, nullptr,
-                        nullptr, TO_ROOM);
-                } else if (GET_MAX_HIT(ch) < 50000000) {
-                    act("@RYou continue to powerup, as a huge depression forms beneath you!@n", true, ch, nullptr,
-                        nullptr, TO_CHAR);
-                    act("@R$n continues to powerup, as a huge depression forms beneath $m!@n", true, ch, nullptr,
-                        nullptr, TO_ROOM);
-                } else if (GET_MAX_HIT(ch) < 100000000) {
-                    act("@RYou continue to powerup, as the entire area quakes around you!@n", true, ch, nullptr,
-                        nullptr, TO_CHAR);
-                    act("@R$n continues to powerup, as the entire area quakes around $m!@n", true, ch, nullptr, nullptr,
-                        TO_ROOM);
-                } else if (GET_MAX_HIT(ch) < 300000000) {
-                    act("@RYou continue to powerup, as huge chunks of ground are ripped apart beneath you!@n", true, ch,
-                        nullptr, nullptr, TO_CHAR);
-                    act("@R$n continues to powerup, as huge chunks of ground are ripped apart beanth $m!@n", true, ch,
-                        nullptr, nullptr, TO_ROOM);
-                } else {
-                    act("@RYou continue to powerup, as the very air around you crackles and burns!@n", true, ch,
-                        nullptr, nullptr, TO_CHAR);
-                    act("@R$n continues to powerup, as the very air around $m crackles and burns!@n", true, ch, nullptr,
-                        nullptr, TO_ROOM);
-                }
-                send_to_sense(0, "You sense someone powering up", ch);
-                send_to_worlds(ch);
-                sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Detected@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
-                send_to_scouter(buf3, ch, 1, 0);
-                dispel_ash(ch);
+            if (perc == 2) {
+                perc += 3;
+            }
+            if (perc == 1) {
+                perc += 1;
             }
         }
-        if ((GET_POS(ch) == POS_SLEEPING || GET_POS(ch) == POS_RESTING) &&
-            (PLR_FLAGGED(ch, PLR_CHARGE) || GET_CHARGE(ch) >= 1)) {
+
+        if(IS_MUTANT(ch)) {
+            if (perc == 10) {
+                perc -= 1;
+            }
+            if (perc == 5) {
+                perc -= 1;
+            }
+            if (perc == 2) {
+                perc -= 1;
+            }
+        }
+
+        if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
+            perc = perc * 0.5;
+        }
+
+        if (ch->getCurKI() <= 0) {
+            send_to_char(ch, "You can not charge anymore, you have charged all your energy!\r\n");
+            act("$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
+            stopCharge = true;
+        } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >=(ch->getCurKI())) {
+            send_to_char(ch, "You have charged the last that you can.\r\n");
+            act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
+                TO_ROOM);
+            GET_CHARGE(ch) += ch->getCurKI();
+            ch->decCurKIPercent(1);
+            stopCharge = true;
+        } else {
+            if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
+                send_to_char(ch, "You have already reached the maximum that you wished to charge.\r\n");
+                act("$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                stopCharge = true;
+            } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
+                ch->decCurKI(GET_CHARGETO(ch) - GET_CHARGE(ch));
+                GET_CHARGE(ch) = GET_CHARGETO(ch);
+                send_to_char(ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
+                act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
+                    TO_ROOM);
+                stopCharge = true;
+            } else {
+                ch->decCurKI(((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
+                GET_CHARGE(ch) += ((GET_MAX_MANA(ch) * 0.01) * perc) + 1;
+                switch (rand_number(1, 3)) {
+                    case 1:
+                        act("$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr,
+                            nullptr, TO_ROOM);
+                        send_to_char(ch, "Your aura grows bright as you charge more ki.\r\n");
+                        break;
+                    case 2:
+                        act("$n@w's aura ripples with power as it grows larger!@n", true, ch, nullptr, nullptr,
+                            TO_ROOM);
+                        send_to_char(ch, "Your aura ripples with power as you charge more ki.\r\n");
+                        break;
+                    case 3:
+                        act("$n@w's aura throws sparks off violently!.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                        send_to_char(ch, "Your aura throws sparks off violently as you charge more ki.\r\n");
+                        break;
+                    default:
+                        break;
+                }
+                if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
+                    GET_CHARGE(ch) = GET_CHARGETO(ch);
+                    GET_CHARGE(ch) += GET_INT(ch);
+                    send_to_char(ch, "You have finished charging!\r\n");
+                    act("$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
+                    stopCharge = true;
+                }
+            }
+            if (concentration) {
+                improve_skill(ch, SKILL_CONCENTRATION, 1);
+            }
+        }
+        if(stopCharge) {
+            GET_CHARGETO(ch) = 0;
+            ch->playerFlags.reset(PLR_CHARGE);
+        }
+        if(GET_CHARGE(ch) > 0) {
+            characterSubscriptions.subscribe("kiLeakingSystem", r);
+        }
+    }
+
+    for(const auto& r : characterSubscriptions.all("kiLeakingSystem")) {
+        auto ch = r.get();
+        if (!ch) continue;
+
+        if(GET_CHARGE(ch) <= 0) {
+            characterSubscriptions.unsubscribe("kiLeakingSystem", r);
+            continue;
+        }
+
+        if ((GET_POS(ch) == POS_SLEEPING || GET_POS(ch) == POS_RESTING)) {
             send_to_char(ch, "You stop charging and release all your pent up energy!\r\n");
             switch (rand_number(1, 3)) {
                 case 1:
@@ -1199,7 +1291,9 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
         }
-        if (PLR_FLAGGED(ch, PLR_CHARGE) && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70) {
+        auto docharge = PLR_FLAGGED(ch, PLR_CHARGE);
+        auto prefki = GET_PREFERENCE(ch) == PREFERENCE_KI;
+        if (docharge && GET_BONUS(ch, BONUS_UNFOCUSED) > 0 && rand_number(1, 80) >= 70) {
             send_to_char(ch, "You lose concentration due to your unfocused mind and release your charged energy!\r\n");
             switch (rand_number(1, 3)) {
                 case 1:
@@ -1223,8 +1317,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         if (GET_CHARGE(ch) >= ch->getMaxKI() / 2) {
             improve_skill(ch, SKILL_CONCENTRATION, 1);
         }
-        if (!PLR_FLAGGED(ch, PLR_CHARGE) && rand_number(1, 40) >= 38 && !FIGHTING(ch) &&
-            (GET_PREFERENCE(ch) != PREFERENCE_KI || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
+        if (!docharge && rand_number(1, 40) >= 38 && !FIGHTING(ch) &&
+            (!prefki || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
             if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100 && axion_dice(-10) > ch->get(CharAttribute::Intelligence, false)) {
                 int64_t loss = 0;
                 send_to_char(ch, "You lose some of your energy slowly.\r\n");
@@ -1251,115 +1345,9 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 GET_CHARGE(ch) = 0;
             }
         }
-        if (PLR_FLAGGED(ch, PLR_CHARGE)) {
-            if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 74)) {
-                perc = 10;
-            } else if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 49)) {
-                perc = 5;
-            } else if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 24)) {
-                perc = 2;
-            } else {
-                perc = 1;
-            }
-            if (IS_TRUFFLE(ch) && perc == 10) {
-                perc += 10;
-            }
-            if (IS_TRUFFLE(ch) && perc == 5) {
-                perc += 5;
-            }
-            if (IS_TRUFFLE(ch) && perc == 2) {
-                perc += 3;
-            }
-            if (IS_TRUFFLE(ch) && perc == 1) {
-                perc += 1;
-            }
-            if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-                perc = perc * 0.5;
-            }
-        }
-        if (PLR_FLAGGED(ch, PLR_CHARGE)) {
-            if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 74)) {
-                perc = 10;
-            } else if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 49)) {
-                perc = 5;
-            } else if ((GET_SKILL(ch, SKILL_CONCENTRATION) > 24)) {
-                perc = 2;
-            } else {
-                perc = 1;
-            }
-            if (IS_MUTANT(ch) && perc == 10) {
-                perc -= 1;
-            }
-            if (IS_MUTANT(ch) && perc == 5) {
-                perc -= 1;
-            }
-            if (IS_MUTANT(ch) && perc == 2) {
-                perc -= 1;
-            }
-            if (perc > 1 && GET_PREFERENCE(ch) == PREFERENCE_H2H) {
-                perc = perc * 0.5;
-            }
-            if ((ch->getCurKI()) <= 0) {
-                send_to_char(ch, "You can not charge anymore, you have charged all your energy!\r\n");
-                act("$n@w's aura grows calm.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->playerFlags.reset(PLR_CHARGE);
-            } else if (((GET_MAX_MANA(ch) * 0.01) * perc) >= (ch->getCurKI())) {
-                send_to_char(ch, "You have charged the last that you can.\r\n");
-                act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
-                    TO_ROOM);
-                GET_CHARGE(ch) += (ch->getCurKI());
-                ch->decCurKIPercent(1);
-                GET_CHARGETO(ch) = 0;
-                ch->playerFlags.reset(PLR_CHARGE);
-            } else {
-                if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
-                    send_to_char(ch, "You have already reached the maximum that you wished to charge.\r\n");
-                    act("$n@w's aura burns steadily.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    GET_CHARGETO(ch) = 0;
-                    ch->playerFlags.reset(PLR_CHARGE);
-                } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
-                    ch->decCurKI(GET_CHARGETO(ch) - GET_CHARGE(ch));
-                    GET_CHARGE(ch) = GET_CHARGETO(ch);
-                    send_to_char(ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
-                    act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
-                        TO_ROOM);
-                    GET_CHARGETO(ch) = 0;
-                    ch->playerFlags.reset(PLR_CHARGE);
-                } else {
-                    ch->decCurKI(((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
-                    GET_CHARGE(ch) += ((GET_MAX_MANA(ch) * 0.01) * perc) + 1;
-                    switch (rand_number(1, 3)) {
-                        case 1:
-                            act("$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr,
-                                nullptr, TO_ROOM);
-                            send_to_char(ch, "Your aura grows bright as you charge more ki.\r\n");
-                            break;
-                        case 2:
-                            act("$n@w's aura ripples with power as it grows larger!@n", true, ch, nullptr, nullptr,
-                                TO_ROOM);
-                            send_to_char(ch, "Your aura ripples with power as you charge more ki.\r\n");
-                            break;
-                        case 3:
-                            act("$n@w's aura throws sparks off violently!.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                            send_to_char(ch, "Your aura throws sparks off violently as you charge more ki.\r\n");
-                            break;
-                        default:
-                            break;
-                    }
-                    if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
-                        GET_CHARGE(ch) = GET_CHARGETO(ch);
-                        GET_CHARGE(ch) += GET_INT(ch);
-                        send_to_char(ch, "You have finished charging!\r\n");
-                        act("$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                        ch->playerFlags.reset(PLR_CHARGE);
-                        GET_CHARGETO(ch) = 0;
-                    }
-                }
-                if (GET_SKILL(ch, SKILL_CONCENTRATION)) {
-                    improve_skill(ch, SKILL_CONCENTRATION, 1);
-                }
-            }
-        }
+
+        if(GET_CHARGE(ch) <= 0)
+            characterSubscriptions.unsubscribe("kiLeakingSystem", r);
     }
 }
 
@@ -1414,15 +1402,16 @@ void set_fighting(struct char_data *ch, struct char_data *vict) {
         return;
     }
 
-    ch->next_fighting = combat_list;
-    combat_list = ch;
-
     FIGHTING(ch) = vict;
 
     if (GET_POS(ch) == POS_SITTING) {
         GET_POS(ch) = POS_SITTING;
     } else if (GET_POS(ch) == POS_SLEEPING) {
         GET_POS(ch) = POS_SLEEPING;
+    }
+
+    for(auto c : {ch, vict}) {
+        characterSubscriptions.subscribe("combatSystem", c->ref());
     }
 
     if (!CONFIG_PK_ALLOWED)
@@ -1434,17 +1423,14 @@ void set_fighting(struct char_data *ch, struct char_data *vict) {
 void stop_fighting(struct char_data *ch) {
     struct char_data *temp;
 
-    if (ch == next_combat_list)
-        next_combat_list = ch->next_fighting;
-
     if (IS_NPC(ch)) {
         COMBO(ch) = -1;
         COMBHITS(ch) = 0;
     }
-    REMOVE_FROM_LIST(ch, combat_list, next_fighting, temp);
-    ch->next_fighting = nullptr;
+
     FIGHTING(ch) = nullptr;
     ch->affected_by.reset(AFF_POSITION);
+    characterSubscriptions.unsubscribe("combatSystem", ch->ref());
     update_pos(ch);
 }
 
@@ -1459,6 +1445,7 @@ static void make_pcorpse(struct char_data *ch) {
 
     corpse->vn = NOTHING;
     IN_ROOM(corpse) = NOWHERE;
+    objectSubscriptions.subscribe("corpseRotService", corpse->ref());
 
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
@@ -1659,6 +1646,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
     corpse->vn = NOTHING;
     IN_ROOM(corpse) = NOWHERE;
+    objectSubscriptions.subscribe("corpseRotService", corpse->ref());
 
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
@@ -2080,10 +2068,10 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         if (FIGHTING(ch))
             stop_fighting(ch);
 
-        for (k = combat_list; k; k = temp) {
-            temp = k->next_fighting;
-            if (FIGHTING(k) == ch)
-                stop_fighting(k);
+        for (const auto& r : characterSubscriptions.all("combatSystem")) {
+            auto c = r.get();
+            if (c && FIGHTING(c) == ch)
+                stop_fighting(c);
         }
 
         bool android_lose = true;
@@ -2152,6 +2140,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             ch->decCurLFPercent(2, -1);
             ch->decCurHealthPercent(1, 1);
             ch->playerFlags.set(PLR_GOOP);
+            characterSubscriptions.subscribe("goopTimeService", ch->ref());
             ch->gooptime = 32;
             return;
         }
