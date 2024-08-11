@@ -3166,6 +3166,9 @@ void trig_data::deactivate() {
     active = false;
     struct trig_data *temp;
     triggers_waiting.erase(this);
+    auto find = std::find(triggers_queued.begin(), triggers_queued.end(), this);
+    if(find != triggers_queued.end())
+        triggers_queued.erase(find);
     REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);
 
 }

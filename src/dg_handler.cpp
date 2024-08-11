@@ -84,6 +84,9 @@ void free_trigger(struct trig_data *trig) {
         trig->var_list = nullptr;
     }
     triggers_waiting.erase(trig);
+    auto find = std::find(triggers_queued.begin(), triggers_queued.end(), trig);
+    if(find != triggers_queued.end())
+        triggers_queued.erase(find);
 
     delete trig;
 }
@@ -94,6 +97,9 @@ void extract_trigger(struct trig_data *trig) {
     struct trig_data *temp;
 
     triggers_waiting.erase(trig);
+    auto find = std::find(triggers_queued.begin(), triggers_queued.end(), trig);
+    if(find != triggers_queued.end())
+        triggers_queued.erase(find);
     erase_vnum(scriptVnumIndex, trig);
 
     /* walk the trigger list and remove this one */

@@ -709,7 +709,6 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 #define GET_DEFAULT_POS(ch)    ((ch)->mob_specials.default_pos)
 #define MEMORY(ch)        ((ch)->mob_specials.memory)
-#define MOB_COOLDOWN(ch)        ((ch)->cooldown)
 
 /* STRENGTH_APPLY_INDEX is no longer needed with the death of GET_ADD */
 /* #define STRENGTH_APPLY_INDEX(ch) \
@@ -739,7 +738,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define ARENA_IDNUM(ch) ((ch)->arenawatch)
 
 /* These three deprecated. */
-#define WAIT_STATE(ch, cycle) do { (ch)->waitTime = (cycle); } while(0)
+extern void WAIT_STATE(struct char_data *ch, double timeToWait);
 #define GET_WAIT_STATE(ch)    ((ch)->waitTime)
 #define CHECK_WAIT(ch)                (GET_WAIT_STATE(ch) > 0)
 #define GET_MOB_WAIT(ch)      GET_WAIT_STATE(ch)

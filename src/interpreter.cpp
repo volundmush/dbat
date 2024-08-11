@@ -165,16 +165,15 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
     for(const auto& r : characterSubscriptions.all("commandWaitQueue")) {
         auto ch = r.get();
         if(!ch) continue;
-        ch->waitTime -= deltaTime;
-        if(ch->waitTime <= 0.0) {
-            ch->waitTime = 0.0;
+        ch->waitTime = std::max<double>(0.0, ch->waitTime - deltaTime);
+        if(ch->waitTime == 0.0) {
             if(ch->task != Task::nothing) doContinuedTask(ch);
             else if(!ch->wait_input_queue.empty()) {
                 auto command = ch->wait_input_queue.front();
                 ch->wait_input_queue.pop_front();
                 processCommand(ch, command.first, command.second);
             }
-            if(ch->task == Task::nothing && ch->wait_input_queue.empty()) {
+            if(ch->waitTime <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty()) {
                 characterSubscriptions.unsubscribe("commandWaitQueue", r);
             }
         }

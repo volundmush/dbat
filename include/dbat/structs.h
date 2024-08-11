@@ -969,7 +969,6 @@ struct char_data : public unit_data {
     std::optional<RaceID> mimic{};
     std::bitset<MAX_BONUSES> bonuses{};
 
-    int cooldown{};
     int death_type{};
 
     int64_t moltexp{};

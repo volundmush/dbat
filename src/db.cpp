@@ -1736,7 +1736,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
             base = rand_number(130000, 180000);
             break;
     }
-    MOB_COOLDOWN(mob) = 0;
+
     auto money = GET_GOLD(mob);
     if (money <= 0 && !MOB_FLAGGED(mob, MOB_DUMMY)) {
         if (GET_LEVEL(mob) < 4) {
@@ -3284,10 +3284,12 @@ std::optional<UID> resolveUID(const std::string& uid) {
         if(world.contains(id)) return &world[id];
     } else if(type == 'O') {
         ObjRef ref{id, generation};
-        return ref.get(active);
+        auto o = ref.get(active);
+        if(o) return o;
     } else if(type == 'C') {
         CharRef ref{id, generation};
-        return ref.get(active);
+        auto c = ref.get(active);
+        if(c) return c;
     }
     return std::nullopt;
 }

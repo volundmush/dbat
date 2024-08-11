@@ -1326,7 +1326,8 @@ double char_data::getPotential() {
 
 void char_data::gainGrowth() {
     double modifier = 1;
-    if (ROOM_FLAGGED(IN_ROOM(this), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(this), ROOM_AL)) {
+    auto r = getRoom();
+    if (ROOM_FLAGGED(r, ROOM_RHELL) || ROOM_FLAGGED(r, ROOM_AL)) {
         modifier = 1.5;
     }
 

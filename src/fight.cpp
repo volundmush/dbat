@@ -929,14 +929,10 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         if (PLR_FLAGGED(ch, PLR_SPIRAL)) {
             handle_spiral(ch, nullptr, GET_SKILL(ch, SKILL_SPIRAL), false);
         }
-        if (IS_NPC(ch) && MOB_COOLDOWN(ch) > 0) {
-            MOB_COOLDOWN(ch) -= 1;
-            if (rand_number(1, 2) == 2 && MOB_COOLDOWN(ch) > 0) {
-                MOB_COOLDOWN(ch) -= 1;
-            }
-            if (MOB_COOLDOWN(ch) > 0) {
-                continue;
-            }
+
+        if (IS_NPC(ch) && GET_WAIT_STATE(ch) > 0.0) {
+            // mob cooldown now handled by commandWaitQueue.
+            continue;
         }
 
         if (IS_NPC(ch) && IS_AFFECTED(ch, AFF_FROZEN)) {

@@ -5178,10 +5178,6 @@ void handle_cooldown(struct char_data *ch, int cooldown) {
         }
     }
 
-    if (IS_NPC(ch)) {
-        MOB_COOLDOWN(ch) = 0;
-    }
-
     reveal_hiding(ch, 0);
     int waitCalc = 10, base = cooldown;
     int64_t cspd = GET_SPEEDI(ch);
@@ -5218,66 +5214,35 @@ void handle_cooldown(struct char_data *ch, int cooldown) {
 
     /* Alright now let's determine the cooldown based on the wait and cooldown assigned *
    * by the attack which called handle_cooldown.                                      */
-    if (!IS_NPC(ch)) {
-        cooldown *= waitCalc;
-        cooldown += base;
-        if (cooldown <= 0) { /* Can't have this. */
-            cooldown = 10;
-        }
-        if (cooldown >= 120) {
-            WAIT_STATE(ch, PULSE_CD12);
-        } else if (cooldown >= 110) {
-            WAIT_STATE(ch, PULSE_CD11);
-        } else if (cooldown >= 100) {
-            WAIT_STATE(ch, PULSE_CD10);
-        } else if (cooldown >= 90) {
-            WAIT_STATE(ch, PULSE_CD9);
-        } else if (cooldown >= 80) {
-            WAIT_STATE(ch, PULSE_CD8);
-        } else if (cooldown >= 70) {
-            WAIT_STATE(ch, PULSE_CD7);
-        } else if (cooldown >= 60) {
-            WAIT_STATE(ch, PULSE_CD6);
-        } else if (cooldown >= 50) {
-            WAIT_STATE(ch, PULSE_CD5);
-        } else if (cooldown >= 40) {
-            WAIT_STATE(ch, PULSE_CD4);
-        } else if (cooldown >= 30) {
-            WAIT_STATE(ch, PULSE_CD3);
-        } else if (cooldown >= 20) {
-            WAIT_STATE(ch, PULSE_CD2);
-        } else {
-            WAIT_STATE(ch, PULSE_CD1);
-        }
-
-    } else { /* We handle NPCs differently. */
-        cooldown *= waitCalc;
-        cooldown += base;
-        if (cooldown >= 120) {
-            MOB_COOLDOWN(ch) = 12;
-        } else if (cooldown >= 110) {
-            MOB_COOLDOWN(ch) = 11;
-        } else if (cooldown >= 100) {
-            MOB_COOLDOWN(ch) = 10;
-        } else if (cooldown >= 90) {
-            MOB_COOLDOWN(ch) = 9;
-        } else if (cooldown >= 80) {
-            MOB_COOLDOWN(ch) = 8;
-        } else if (cooldown >= 70) {
-            MOB_COOLDOWN(ch) = 7;
-        } else if (cooldown >= 60) {
-            MOB_COOLDOWN(ch) = 6;
-        } else if (cooldown >= 50) {
-            MOB_COOLDOWN(ch) = 5;
-        } else if (cooldown >= 40) {
-            MOB_COOLDOWN(ch) = 4;
-        } else if (cooldown >= 30) {
-            MOB_COOLDOWN(ch) = 3;
-        } else if (cooldown >= 20) {
-            MOB_COOLDOWN(ch) = 2;
-        } else {
-            MOB_COOLDOWN(ch) = 1;
-        }
+    cooldown *= waitCalc;
+    cooldown += base;
+    if (cooldown <= 0) { /* Can't have this. */
+        cooldown = 10;
+    }
+    if (cooldown >= 120) {
+        WAIT_STATE(ch, PULSE_CD12);
+    } else if (cooldown >= 110) {
+        WAIT_STATE(ch, PULSE_CD11);
+    } else if (cooldown >= 100) {
+        WAIT_STATE(ch, PULSE_CD10);
+    } else if (cooldown >= 90) {
+        WAIT_STATE(ch, PULSE_CD9);
+    } else if (cooldown >= 80) {
+        WAIT_STATE(ch, PULSE_CD8);
+    } else if (cooldown >= 70) {
+        WAIT_STATE(ch, PULSE_CD7);
+    } else if (cooldown >= 60) {
+        WAIT_STATE(ch, PULSE_CD6);
+    } else if (cooldown >= 50) {
+        WAIT_STATE(ch, PULSE_CD5);
+    } else if (cooldown >= 40) {
+        WAIT_STATE(ch, PULSE_CD4);
+    } else if (cooldown >= 30) {
+        WAIT_STATE(ch, PULSE_CD3);
+    } else if (cooldown >= 20) {
+        WAIT_STATE(ch, PULSE_CD2);
+    } else {
+        WAIT_STATE(ch, PULSE_CD1);
     }
 }
 

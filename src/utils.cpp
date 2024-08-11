@@ -3255,3 +3255,8 @@ void doContinuedTask(char_data* ch) {
         craftProgress(ch);
     }
 }
+
+void WAIT_STATE(struct char_data *ch, double timeToWait) {
+    ch->waitTime = std::max<double>(0.0, timeToWait);
+    characterSubscriptions.subscribe("commandWaitQueue", ch->ref());
+}
