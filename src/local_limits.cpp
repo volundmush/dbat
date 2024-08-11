@@ -1548,15 +1548,15 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
             if(IS_ANDROID(ch) && v == CharVital::LifeForce) continue;
 
             // This will loop through most possible modifiers...
-            double perc = universalPerc + ch->getAffectModifier(APPLY_CVIT_REGEN_MULT, static_cast<int>(v));
+            double perc = 1.0 + universalPerc + ch->getAffectModifier(APPLY_CVIT_REGEN_MULT, static_cast<int>(v));
 
-            if(perc <= 1.0) {
+            if(perc <= 0.0) {
                 // the healing multipliers are so low that all healing is neutralized.
                 // Floor it out for sanity.
                 perc = 0.05;
             }
 
-            ch->modCurVitalDam(v, -(base * (1.0 + perc)) * deltaTime);
+            ch->modCurVitalDam(v, -(base * (perc)) * deltaTime);
         }
     }
 }

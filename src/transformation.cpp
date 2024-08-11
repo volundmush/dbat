@@ -1361,7 +1361,7 @@ namespace trans {
                     double mult = (1 + (0.05 * getMasteryTier(ch, FormID::Kaioken)));
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)SkillID::Kaioken) * mult)) {
                         send_to_char(ch, "You push yourself to the limit as you attack!.\r\n");
-                        send_to_room(ch->getRoom(), "$n's red aura ripples with power as they strike!\r\n");
+                        act("$n's red aura ripples with power as they strike!", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)SkillID::Kaioken, 0);
                         return (0.06 * ch->transforms[FormID::Kaioken].grade) * mult;
                     }
@@ -1378,7 +1378,7 @@ namespace trans {
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)SkillID::Metamorph) * mult)) {
                         send_to_char(ch, "Your darkness burns into your very ki!.\r\n");
-                        send_to_room(ch->getRoom(), "$n's ki ripples with a horrifying darkness!\r\n");
+                        act("$n's ki ripples with a horrifying darkness!", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)SkillID::Metamorph, 0);
                         return (0.05 * ch->transforms[FormID::DarkMeta].grade) * mult;
                     }
@@ -1394,7 +1394,7 @@ namespace trans {
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)SkillID::TigerStance) * mult)) {
                         send_to_char(ch, "Primal strength courses through you.\r\n");
-                        send_to_room(ch->getRoom(), "$n lurches forwards with ferocious might.\r\n");
+                        act("$n lurches forwards with ferocious might.", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)SkillID::TigerStance, 0);
                         return (0.05 * ch->transforms[FormID::TigerStance].grade) * mult;
                     }
@@ -1408,8 +1408,8 @@ namespace trans {
                     double mult = (1 + (0.05 * getMasteryTier(ch, FormID::EagleStance)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)SkillID::EagleStance) * mult)) {
-                        send_to_char(ch, "Your mind an ki align, power flaring.\r\n");
-                        send_to_room(ch->getRoom(), "$n's movements slow, their ki redoubling in strength.\r\n");
+                        send_to_char(ch, "Your mind and ki align, power flaring.\r\n");
+                        act("$n's movements slow, their ki redoubling in strength.", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)SkillID::EagleStance, 0);
                         return (0.05 * ch->transforms[FormID::EagleStance].grade) * mult;
                     }
@@ -1419,12 +1419,12 @@ namespace trans {
         },
         {
             FormID::OxStance, {
-                {APPLY_DTYPE_BON, 0.0, static_cast<int>(DamType::Physical), [](struct char_data *ch) {
+                {APPLY_DTYPE_RES, 0.0, static_cast<int>(DamType::Physical), [](struct char_data *ch) {
                     double mult = (1 + (0.05 * getMasteryTier(ch, FormID::OxStance)));
 
                     if (axion_dice(0) <= (GET_SKILL(ch, (int)SkillID::OxStance) * mult)) {
                         send_to_char(ch, "Hah, that didn't hurt half as much!\r\n");
-                        send_to_room(ch->getRoom(), "$n's hulking form barely seems grazed by the attack!\r\n");
+                        act("$n's hulking form barely seems grazed by the attack!", true, ch, nullptr, nullptr, TO_ROOM);
                         improve_skill(ch, (int)SkillID::OxStance, 0);
                         return (0.05 * ch->transforms[FormID::OxStance].grade) * mult;
                     }
