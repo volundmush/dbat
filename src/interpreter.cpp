@@ -1544,10 +1544,10 @@ void fingerUser(struct char_data *ch, struct account_data *account) {
 
     if (GET_ADMLEVEL(ch) > 0) {
         int counter = 0;
-        for(auto c : account->characters) {
-            auto p = players.find(c);
-            if(p == players.end()) continue;
-            send_to_char(ch, "@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second.character->name);
+        for(auto ref : account->characters) {
+            auto p = ref.get();
+            if(!p) continue;
+            send_to_char(ch, "@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->name);
         }
         send_to_char(ch, "\n");
     }

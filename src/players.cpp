@@ -15,6 +15,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/class.h"
 #include "dbat/ban.h"
+#include "dbat/account.h"
 
 
 std::map<int64_t, player_data> players;
@@ -48,7 +49,6 @@ char *get_name_by_id(long id) {
 *  stuff related to the player file cleanup system			 *
 *************************************************************************/
 
-
 struct char_data *findPlayer(const std::string& name) {
     for (auto& player : players) {
         if (boost::iequals(player.second.name, name)) {
@@ -79,4 +79,92 @@ OpResult<> validate_pc_name(const std::string& name) {
     }
 
     return {true, n};
+}
+
+bool canDeleteCharacter(CharRef ref) {
+    auto ch = ref.get();
+    if(!ch) return false;
+
+    // We don't want to delete NPCs...
+    if(IS_NPC(ch)) return false;
+
+    // The character must not be logged in!
+    if(ch->desc) return false;
+    if(ch->isActive()) return false;
+
+    return true;
+}
+
+void deletePlayerCharacter(CharRef ref) {
+    if(!canDeleteCharacter(ref)) return;
+
+    auto ch = ref.get();
+    if(!ch) return;
+
+    // Okay the coast is clear.
+
+    // erase their inventory.
+    while(ch->contents)
+        extract_obj(ch->contents);
+
+    // delete their gear.
+    for(auto & i : ch->equipment)
+        if(i) extract_obj(i);
+
+    // unsubscribe from everything, just in case.
+    characterSubscriptions.unsubscribeFromAll(ref);
+
+    // Get a copy of player_data
+    player_data pdata = players.at(ch->id);
+
+    // Erase the character from the players map.
+    players.erase(ch->id);
+
+    for(auto &[id, pd] : players) {
+        // cleanups....
+        pd.sensePlayer.erase(ch->id);
+        pd.dubNames.erase(ch->id);
+    }
+
+    // Now we'll deal with the account.
+    auto acc = pdata.account;
+
+    // Remove the character from the account's list.
+    auto find = std::find(acc->characters.begin(), acc->characters.end(), ref);
+    if(find != acc->characters.end()) acc->characters.erase(find);
+
+    // Let the destructor take it from here, and pray.
+    free_char(ch);
+}
+
+bool account_data::canBeDeleted() {
+    if(!descriptors.empty()) return false;
+    for(auto ref : characters) if(!canDeleteCharacter(ref)) return false;
+    return true;
+}
+
+bool deleteUserAccount(vnum id) {
+    if(!accounts.contains(id)) return false;
+    auto &acc = accounts.at(id);
+
+    auto descs = acc.descriptors;
+    for(auto d : descs) close_socket(d);
+
+    auto conn = acc.connections;
+    for(auto c : conn) c->close();
+
+    auto cha = acc.characters;
+
+    for(const auto &ref : cha) {
+        if(auto ch = ref.get(); ch) {
+            if(canDeleteCharacter(ref)) return false;
+        }
+    }
+
+    for(auto c : cha)
+        deletePlayerCharacter(c);
+
+    accounts.erase(id);
+
+    return true;
 }

@@ -480,7 +480,7 @@ void null_affect(struct char_data *ch, int aff_flag) {
 
     if(aff_flag == AFF_POISON) {
         if(ch->poisonby) {
-            ch->poisonby->poisoned.erase(ch);
+            ch->poisonby->poisoned.erase(ch->ref());
             ch->poisonby = nullptr;
         }
     }

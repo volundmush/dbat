@@ -4068,7 +4068,7 @@ namespace atk {
                 act("@R$N@r was poisoned by your bite!@n", true, user, nullptr, victim, TO_CHAR);
                 act("@rYou were poisoned by the bite!@n", true, user, nullptr, victim, TO_VICT);
                 victim->poisonby = user;
-                user->poisoned.insert(victim);
+                user->poisoned.insert(victim->ref());
                 int duration = (GET_INT(user) / 50) + 1;
                 assign_affect(victim, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
             }

@@ -5986,7 +5986,7 @@ ACMD(do_focus) {
                     act("However $N seems unaffected by the poison.", true, ch, nullptr, vict, TO_NOTVICT);
                 } else {
                     vict->poisonby = ch;
-                    ch->poisoned.insert(vict);
+                    ch->poisoned.insert(vict->ref());
                     if (GET_CHARGE(ch) > 0) {
                         send_to_char(ch, "You lose your concentration and release your charged ki!\r\n");
                         do_charge(ch, "release", 0, 0);

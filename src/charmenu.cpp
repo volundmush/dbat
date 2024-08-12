@@ -4,6 +4,7 @@
 #include "dbat/interpreter.h"
 #include "dbat/puppet.h"
 #include "dbat/accmenu.h"
+#include "dbat/players.h"
 
 namespace net {
 
@@ -60,10 +61,25 @@ namespace net {
                 conn->setParser(new AccountMenu(conn));
                 break;
             case 4:
-                sendText("Temporarily disabled, sorry.\r\n");
+                sendText(fmt::format("To delete {}, please enter the following command: @rdelete {}@n\r\n", ch->name, ch->name));
                 break;
-
             default:
+                if(txt.starts_with("delete ")) {
+                    if(txt.ends_with(fmt::format(" {}", ch->name))) {
+                        if(!canDeleteCharacter(ch->ref())) {
+                            sendText("Having trouble deleting that character. Make sure they're fully logged off.\r\n");
+                            break;
+                        }
+                        sendText(fmt::format("Good bye, {}!\r\n", ch->name));
+                        basic_mud_log("%s deleted their character: %s", conn->account->name, ch->name);
+                        deletePlayerCharacter(ch->ref());
+                        conn->setParser(new AccountMenu(conn));
+                        break;
+                    } else {
+                        sendText(fmt::format("To delete {}, please enter the following command: @rdelete {}@n\r\n", ch->name, ch->name));
+                        break;
+                    }
+                }
                 sendText(fmt::format("\r\nThat's not a menu choice!\r\n{}\r\n{}", motd, CONFIG_MENU));
                 break;
         }

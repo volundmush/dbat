@@ -48,13 +48,12 @@ namespace net {
         sendText("@D=============================================@n\r\n\r\n");
         sendText("      @D[@y------@YAvailable Characters@y------@D]@n\n");
         int counter = 0;
-        for(auto cid : a->characters) {
-            auto p = players.find(cid);
-            if(p == players.end()) continue;
-            auto c = p->second.character;
-            std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, c->name);
-            if(c->desc) {
-                line += fmt::format(" @D[@y{} Connections@D]@n\r\n", c->desc->conns.size());
+        for(auto ref : a->characters) {
+            auto ch = ref.get();
+            if(!ch) continue;
+            std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, ch->name);
+            if(ch->desc) {
+                line += fmt::format(" @D[@y{} Connections@D]@n\r\n", ch->desc->conns.size());
             } else {
                 line += "\r\n";
             }
@@ -96,10 +95,10 @@ namespace net {
                 return;
             }
 
-            auto id = conn->account->characters[slot];
-            auto p = players.find(id);
+            auto ref = conn->account->characters[slot];
+            auto p = players.find(ref.getID());
             if(p == players.end()) {
-                sendText(fmt::format("ERROR: Player ID {} not found. Please alert staff.\r\n", id));
+                sendText(fmt::format("ERROR: Player ID {} not found. Please alert staff.\r\n", ref.getID()));
                 return;
             }
 
@@ -135,7 +134,23 @@ namespace net {
         }
 
         if(boost::iequals(txt, "D") || boost::istarts_with(txt, "D ")) {
-            // todo: implement...
+            sendText("Deleting your account will also delete ALL ASSOCIATED CHARACTERS.\r\n@rThis action cannot be undone.@n\r\n");
+            sendText(fmt::format("To verify account deletion, the true command is:\r\n@rdelete {}@n\r\n", conn->account->name));
+
+            return;
+        }
+
+        if(boost::iequals(txt, fmt::format("delete {}", conn->account->name))) {
+            if(!conn->account->canBeDeleted()) {
+                sendText("Your account can only be deleted when all characters are logged off.");
+                return;
+            }
+            auto vn = conn->account->vn;
+            basic_mud_log("%s deleted their user account.", conn->account->name);
+            sendText("Your account has been deleted. Farewell.\r\n", net::SendBuffer::BF_CLOSE_AFTER_SEND);
+            deleteUserAccount(vn);
+
+            return;
         }
 
         if(boost::iequals(txt, "Q") || boost::istarts_with(txt, "Q ")) {

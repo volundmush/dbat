@@ -4625,7 +4625,7 @@ void migrate_characters() {
         auto &a = accounts[accID];
         p.account = &a;
         a.adminLevel = std::max(a.adminLevel, GET_ADMLEVEL(ch));
-        a.characters.emplace_back(id);
+        a.characters.emplace_back(ch);
         ch->in_room = ch->load_room;
         ch->was_in_room = ch->load_room;
         uniqueCharacters[id] = std::make_pair(ch->generation, ch);

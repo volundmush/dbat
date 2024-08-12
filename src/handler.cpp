@@ -1003,7 +1003,7 @@ void extract_char_final(struct char_data *ch) {
     }
 
     if (auto original = GET_ORIGINAL(ch); original) {
-        original->clones.erase(ch);
+        original->clones.erase(ch->ref());
     }
 
     if (!ch->clones.empty()) {
@@ -1043,7 +1043,7 @@ void extract_char_final(struct char_data *ch) {
     }
 
     if (ch->poisonby) {
-        ch->poisonby->poisoned.erase(ch);
+        ch->poisonby->poisoned.erase(ch->ref());
         ch->poisonby = nullptr;
     }
 

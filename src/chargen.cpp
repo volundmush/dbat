@@ -2305,7 +2305,7 @@ namespace net {
         p.name = ch->name;
         p.id = ch->id;
         p.account = conn->account;
-        conn->account->characters.push_back(p.id);
+        conn->account->characters.emplace_back(ch);
         p.character = ch;
 
         ch->set(CharAppearance::HairColor, 100);

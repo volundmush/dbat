@@ -1081,8 +1081,8 @@ SPECIAL(bank) {
                 send_to_char(ch, "There is an error. Report to staff.");
                 return (true);
             }
-            auto id = vict->id;
-            auto &p = players[id];
+            auto id = vict->ref();
+            auto &p = players[vict->id];
             auto &c = p.account->characters;
             auto found = std::find_if(c.begin(), c.end(), [&](auto i) {return i == id;});
             if(found != c.end()) {

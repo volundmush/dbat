@@ -1521,7 +1521,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         default: {
             std::vector<std::string> value(j->value.size());
             for(auto &v : j->value) value.emplace_back(fmt::format("[{}]", v));
-            send_to_char(ch, "%s", fmt::format("Values 0-{}: {}", j->value.size()-1, fmt::join(value, " ")));
+            send_to_char(ch, "%s", fmt::format("Values 0-{}:\r\n{}\r\n", j->value.size()-1, fmt::join(value, " ")));
         }
             break;
     }

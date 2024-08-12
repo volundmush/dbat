@@ -940,7 +940,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
                 ch, TO_NOTVICT);
             act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr,
                 ch, TO_VICT);
-            for(auto c : {ch, k->follower}) c->affected_by.reset(AFF_ZANZOKEN);
+            for(auto c : {ch, k->follower.get()}) c->affected_by.reset(AFF_ZANZOKEN);
             perform_move(k->follower, dir, 1);
         } else if ((IN_ROOM(k->follower) == was_in) &&
                    (GET_POS(k->follower) >= POS_STANDING) &&

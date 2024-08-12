@@ -15,56 +15,7 @@
 /**********************************************************************
 * Structures                                                          *
 **********************************************************************/
-struct account_data {
-    account_data() = default;
-    explicit account_data(const nlohmann::json& j);
-    vnum vn{NOTHING};
-    std::string name;
-    std::string passHash;
-    std::string email;
-    time_t created{};
-    time_t lastLogin{};
-    time_t lastLogout{};
-    time_t lastPasswordChanged{};
-    double totalPlayTime{};
-    std::string disabledReason;
-    time_t disabledUntil{0};
-    int adminLevel{};
-    int rpp{};
-    int slots{3};
-    std::vector<std::string> customs;
-    std::vector<vnum> characters;
-    std::unordered_set<descriptor_data*> descriptors;
-    std::unordered_set<net::Connection*> connections;
 
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json& j);
-
-    void modRPP(int amt);
-
-    bool checkPassword(const std::string& password);
-    bool setPassword(const std::string& password);
-
-    static int getNextID();
-
-};
-
-struct player_data {
-    player_data() = default;
-    explicit player_data(const nlohmann::json& j);
-    int64_t id{NOTHING};
-    std::string name;
-    struct account_data *account{};
-    struct char_data* character{};
-    std::vector<struct alias_data> aliases;    /* Character's aliases                  */
-    std::unordered_set<int64_t> sensePlayer;
-    std::unordered_set<mob_vnum> senseMemory;
-    std::map<int64_t, std::string> dubNames;
-    char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
-    struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
-
-    nlohmann::json serialize();
-};
 
 enum class AreaType {
     Dimension = 0,
@@ -258,6 +209,59 @@ namespace std {
     };
 }
 
+struct account_data {
+    account_data() = default;
+    explicit account_data(const nlohmann::json& j);
+    vnum vn{NOTHING};
+    std::string name;
+    std::string passHash;
+    std::string email;
+    time_t created{};
+    time_t lastLogin{};
+    time_t lastLogout{};
+    time_t lastPasswordChanged{};
+    double totalPlayTime{};
+    std::string disabledReason;
+    time_t disabledUntil{0};
+    int adminLevel{};
+    int rpp{};
+    int slots{3};
+    std::vector<std::string> customs;
+    std::vector<CharRef> characters;
+    std::unordered_set<descriptor_data*> descriptors;
+    std::unordered_set<net::Connection*> connections;
+
+    nlohmann::json serialize();
+    void deserialize(const nlohmann::json& j);
+
+    void modRPP(int amt);
+
+    bool checkPassword(const std::string& password);
+    bool setPassword(const std::string& password);
+
+    bool canBeDeleted();
+
+    static int getNextID();
+
+};
+
+struct player_data {
+    player_data() = default;
+    explicit player_data(const nlohmann::json& j);
+    int64_t id{NOTHING};
+    std::string name;
+    struct account_data *account{};
+    CharRef character{};
+    std::vector<struct alias_data> aliases;    /* Character's aliases                  */
+    std::unordered_set<int64_t> sensePlayer;
+    std::unordered_set<mob_vnum> senseMemory;
+    std::map<int64_t, std::string> dubNames;
+    char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
+    struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
+
+    nlohmann::json serialize();
+};
+
 struct unit_data {
     unit_data() = default;
     virtual ~unit_data() = default;
@@ -273,7 +277,7 @@ struct unit_data {
     std::vector<trig_vnum> proto_script; /* list of default triggers  */
     struct script_data *script{};  /* script info for the object */
 
-    struct obj_data *contents{};     /* Contains objects  */
+    ObjRef contents{};     /* Contains objects  */
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
@@ -366,21 +370,21 @@ struct obj_data : public unit_data {
 
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
 
-    struct obj_data *in_obj{};       /* In what object nullptr when none    */
-    struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
-    struct char_data *worn_by{};      /* Worn by? */
+    ObjRef in_obj{};       /* In what object nullptr when none    */
+    CharRef carried_by{};  /* Carried by :nullptr in room/conta   */
+    CharRef worn_by{};      /* Worn by? */
     int16_t worn_on{-1};          /* Worn where?		      */
 
-    struct obj_data *next_content{}; /* For 'contains' lists             */
+    ObjRef next_content{}; /* For 'contains' lists             */
 
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
-    struct char_data *sitting{};       /* Who is sitting on me? */
+    CharRef sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
     time_t lload{};
     int64_t kicharge{};
     int kitype{};
-    struct char_data *user{};
-    struct char_data *target{};
+    CharRef user{};
+    CharRef target{};
     int distance{};
     int foob{};
     int64_t aucter{};
@@ -390,8 +394,8 @@ struct obj_data : public unit_data {
     int startbid{};
     char *auctname{};
     int posttype{};
-    struct obj_data *posted_to{};
-    struct obj_data *fellow_wall{};
+    ObjRef posted_to{};
+    ObjRef fellow_wall{};
 
     std::optional<double> gravity;
 
@@ -447,7 +451,7 @@ struct room_data : public unit_data {
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     std::bitset<NUM_ROOM_FLAGS> room_flags{};   /* DEATH,DARK ... etc */
     SpecialFunc func{};
-    struct char_data *people{};    /* List of NPC / PC in room */
+    CharRef people{};    /* List of NPC / PC in room */
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
     int geffect{};            /* Effect of ground destruction       */
@@ -593,7 +597,7 @@ struct queued_act {
 
 /* Structure used for chars following other chars */
 struct follow_type {
-    struct char_data *follower;
+    CharRef follower;
     struct follow_type *next;
 };
 
@@ -840,14 +844,14 @@ struct char_data : public unit_data {
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
-    struct char_data *next_in_room{};
+    CharRef next_in_room{};
     /* For fighting list			*/
-    struct char_data *next_affect{};/* For affect wearoff			*/
-    struct char_data *next_affectv{};
+    CharRef next_affect{};/* For affect wearoff			*/
+    CharRef next_affectv{};
     /* For round based affect wearoff	*/
 
     struct follow_type *followers{};/* List of chars followers		*/
-    struct char_data *master{};    /* Who is char following?		*/
+    CharRef master{};    /* Who is char following?		*/
     int64_t master_id{};
 
     struct memorize_node *memorized{};
@@ -859,13 +863,13 @@ struct char_data : public unit_data {
 
     int timer{};            /* Timer for update			*/
 
-    struct obj_data *sits{};      /* What am I sitting on? */
-    struct char_data *blocks{};    /* Who am I blocking?    */
-    struct char_data *blocked{};   /* Who is blocking me?    */
-    struct char_data *absorbing{}; /* Who am I absorbing */
-    struct char_data *absorbby{};  /* Who is absorbing me */
-    struct char_data *carrying{};
-    struct char_data *carried_by{};
+    ObjRef sits{};      /* What am I sitting on? */
+    CharRef blocks{};    /* Who am I blocking?    */
+    CharRef blocked{};   /* Who is blocking me?    */
+    CharRef absorbing{}; /* Who am I absorbing */
+    CharRef absorbby{};  /* Who is absorbing me */
+    CharRef carrying{};
+    CharRef carried_by{};
 
     int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
     int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
@@ -948,16 +952,16 @@ struct char_data : public unit_data {
     time_t deathtime{};
 
     int64_t suppression{};
-    struct char_data *drag{};
-    struct char_data *dragged{};
-    struct char_data *mindlink{};
+    CharRef drag{};
+    CharRef dragged{};
+    CharRef mindlink{};
     int lasthit{};
     int dcount{};
     char *voice{};                  /* PC's snet voice */
     int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
     time_t rewtime{};
-    struct char_data *grappling{};
-    struct char_data *grappled{};
+    CharRef grappling{};
+    CharRef grappled{};
     std::array<int, 6> gravAcclim;
     int grap{};
     int genome[2]{};                /* Bio racial bonus, Genome */
@@ -997,14 +1001,14 @@ struct char_data : public unit_data {
     int fishstate{};
     int throws{};
 
-    struct char_data *defender{};
-    struct char_data *defending{};
+    CharRef defender{};
+    CharRef defending{};
 
     int lifeperc{};
     int gooptime{};
     int blesslvl{};
-    struct char_data *poisonby{};
-    std::unordered_set<struct char_data*> poisoned;
+    CharRef poisonby{};
+    std::unordered_set<CharRef> poisoned;
 
     int mobcharge{};
     int preference{};
@@ -1019,9 +1023,9 @@ struct char_data : public unit_data {
 
     char *rdisplay{};
 
-    struct char_data *original{};
+    CharRef original{};
 
-    std::unordered_set<struct char_data*> clones{};
+    std::unordered_set<CharRef> clones{};
     int relax_count{};
     int ingestLearned{};
 
@@ -1365,8 +1369,8 @@ struct descriptor_data {
     std::list<std::string> raw_input_queue, input_queue;
     std::string output;        /* ptr to the current output buffer	*/
     std::list<std::string> history;        /* History of commands, for ! mostly.	*/
-    struct char_data *character{};    /* linked to char			*/
-    struct char_data *original{};    /* original char if switched		*/
+    CharRef character{};    /* linked to char			*/
+    CharRef original{};    /* original char if switched		*/
     struct descriptor_data *snooping{}; /* Who is this char snooping	*/
     struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
     struct descriptor_data *next{}; /* link to next descriptor		*/
@@ -1383,7 +1387,7 @@ struct descriptor_data {
     char *obj_long{};
     int obj_type{};
     int obj_weapon{};
-    struct obj_data *obj_point{};
+    ObjRef obj_point{};
     char *title{};
     double timeoutCounter{0};
     void handle_input();

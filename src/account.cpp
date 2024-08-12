@@ -56,7 +56,7 @@ nlohmann::json account_data::serialize() {
     if(rpp) j["rpp"] = rpp;
     if(slots != 3) j["slots"] = slots;
     if(adminLevel) j["adminLevel"] = adminLevel;
-    for(auto c : characters) j["characters"].push_back(c);
+    for(auto c : characters) j["characters"].push_back(c.serialize());
 
     return j;
 }
@@ -78,7 +78,7 @@ void account_data::deserialize(const nlohmann::json& j) {
     if(j.contains("adminLevel")) adminLevel = j["adminLevel"];
     if(j.contains("characters")) {
         for(auto c : j["characters"]) {
-            characters.push_back(c);
+            characters.emplace_back(c);
         }
     }
 }

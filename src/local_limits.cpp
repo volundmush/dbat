@@ -1424,7 +1424,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
 
 void corpseRotService(uint64_t heartPulse, double deltaTime) {
     obj_data *jj, *next_thing2;
-    for(const auto& ref : objectSubscriptions.all("healTankService")) {
+    for(const auto& ref : objectSubscriptions.all("corpseRotService")) {
         auto j = ref.get();
         if (!j) continue;
 
@@ -1815,7 +1815,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     } else {
                         send_to_char(i, "The poison claims your life!\r\n");
                         act("$n pukes up blood and falls down dead!", true, i, nullptr, nullptr, TO_ROOM);
-                        die(i, i->poisonby ? i->poisonby : nullptr);
+                        die(i, i->poisonby);
                     }
                 }
                 if (GET_POS(i) <= POS_STUNNED)

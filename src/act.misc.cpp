@@ -283,7 +283,7 @@ static void generate_multiform(struct char_data *ch, int count) {
             clone->limb_condition[l] = ch->limb_condition[l];
         }
 
-        ch->clones.insert(clone);
+        ch->clones.insert(clone->ref());
 
         GET_ORIGINAL(clone) = ch;
         char_to_room(clone, IN_ROOM(ch));
