@@ -3260,3 +3260,13 @@ void WAIT_STATE(struct char_data *ch, double timeToWait) {
     ch->waitTime = std::max<double>(0.0, timeToWait);
     characterSubscriptions.subscribe("commandWaitQueue", ch->ref());
 }
+
+std::string format_double(double value) {
+    if (std::floor(value) == value) {
+        // It's a whole number
+        return fmt::format("{:.0f}", value); // No decimal places
+    } else {
+        // Format with up to 2 decimal places
+        return fmt::format("{:.2f}", value);
+    }
+}

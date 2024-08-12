@@ -11,6 +11,10 @@ struct descriptor_data;
 struct account_data;
 struct player_data;
 
+class CharRef;
+class ObjRef;
+class RoomRef;
+
 namespace race {
     class Race;
 

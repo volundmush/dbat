@@ -195,7 +195,10 @@ void copyover_recover() {
     if(j.contains("connections"))
         for(auto &jc : j.at("connections")) {
             auto connId = jc[0].get<int>();
-            net::connections[connId] = std::make_shared<net::Connection>(connId, jc[1]);
+            auto conn = std::make_shared<net::Connection>(connId);
+            net::connections[connId] = conn;
+            conn->deserialize(jc[1]);
+            conn->epollRegister();
         }
 
     // rebuild descriptor data...

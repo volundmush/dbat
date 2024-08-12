@@ -434,6 +434,8 @@ void obj_data::activate() {
         objectSubscriptions.subscribe("corpseRotService", r);
     if(script && SCRIPT_TYPES(SCRIPT(this)) && OTRIG_RANDOM)
         objectSubscriptions.subscribe("randomTriggers", r);
+    if(vn == 65)
+        objectSubscriptions.subscribe("healTankService", r);
 
     if(contents) activateContents();
 }

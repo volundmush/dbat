@@ -251,7 +251,7 @@ struct player_data {
     int64_t id{NOTHING};
     std::string name;
     struct account_data *account{};
-    CharRef character{};
+    struct char_data *character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
     std::unordered_set<int64_t> sensePlayer;
     std::unordered_set<mob_vnum> senseMemory;
@@ -371,20 +371,20 @@ struct obj_data : public unit_data {
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
 
     ObjRef in_obj{};       /* In what object nullptr when none    */
-    CharRef carried_by{};  /* Carried by :nullptr in room/conta   */
-    CharRef worn_by{};      /* Worn by? */
+    struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
+    struct char_data *worn_by{};      /* Worn by? */
     int16_t worn_on{-1};          /* Worn where?		      */
 
     ObjRef next_content{}; /* For 'contains' lists             */
 
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
-    CharRef sitting{};       /* Who is sitting on me? */
+    struct char_data *sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
     time_t lload{};
     int64_t kicharge{};
     int kitype{};
-    CharRef user{};
-    CharRef target{};
+    struct char_data *user{};
+    struct char_data *target{};
     int distance{};
     int foob{};
     int64_t aucter{};
@@ -451,7 +451,7 @@ struct room_data : public unit_data {
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     std::bitset<NUM_ROOM_FLAGS> room_flags{};   /* DEATH,DARK ... etc */
     SpecialFunc func{};
-    CharRef people{};    /* List of NPC / PC in room */
+    struct char_data *people{};    /* List of NPC / PC in room */
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
     int geffect{};            /* Effect of ground destruction       */
@@ -597,7 +597,7 @@ struct queued_act {
 
 /* Structure used for chars following other chars */
 struct follow_type {
-    CharRef follower;
+    struct char_data *follower;
     struct follow_type *next;
 };
 
@@ -844,32 +844,32 @@ struct char_data : public unit_data {
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
-    CharRef next_in_room{};
+    struct char_data *next_in_room{};
     /* For fighting list			*/
-    CharRef next_affect{};/* For affect wearoff			*/
-    CharRef next_affectv{};
+    struct char_data *next_affect{};/* For affect wearoff			*/
+    struct char_data *next_affectv{};
     /* For round based affect wearoff	*/
 
     struct follow_type *followers{};/* List of chars followers		*/
-    CharRef master{};    /* Who is char following?		*/
+    struct char_data *master{};    /* Who is char following?		*/
     int64_t master_id{};
 
     struct memorize_node *memorized{};
     struct innate_node *innate{};
 
-    CharRef fighting;    /* Opponent				*/
+    struct char_data *fighting;    /* Opponent				*/
 
     int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
 
     int timer{};            /* Timer for update			*/
 
     ObjRef sits{};      /* What am I sitting on? */
-    CharRef blocks{};    /* Who am I blocking?    */
-    CharRef blocked{};   /* Who is blocking me?    */
-    CharRef absorbing{}; /* Who am I absorbing */
-    CharRef absorbby{};  /* Who is absorbing me */
-    CharRef carrying{};
-    CharRef carried_by{};
+    struct char_data *blocks{};    /* Who am I blocking?    */
+    struct char_data *blocked{};   /* Who is blocking me?    */
+    struct char_data *absorbing{}; /* Who am I absorbing */
+    struct char_data *absorbby{};  /* Who is absorbing me */
+    struct char_data *carrying{};
+    struct char_data *carried_by{};
 
     int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
     int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
@@ -952,16 +952,16 @@ struct char_data : public unit_data {
     time_t deathtime{};
 
     int64_t suppression{};
-    CharRef drag{};
-    CharRef dragged{};
-    CharRef mindlink{};
+    struct char_data *drag{};
+    struct char_data *dragged{};
+    struct char_data *mindlink{};
     int lasthit{};
     int dcount{};
     char *voice{};                  /* PC's snet voice */
     int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
     time_t rewtime{};
-    CharRef grappling{};
-    CharRef grappled{};
+    struct char_data *grappling{};
+    struct char_data *grappled{};
     std::array<int, 6> gravAcclim;
     int grap{};
     int genome[2]{};                /* Bio racial bonus, Genome */
@@ -1001,14 +1001,14 @@ struct char_data : public unit_data {
     int fishstate{};
     int throws{};
 
-    CharRef defender{};
-    CharRef defending{};
+    struct char_data *defender{};
+    struct char_data *defending{};
 
     int lifeperc{};
     int gooptime{};
     int blesslvl{};
-    CharRef poisonby{};
-    std::unordered_set<CharRef> poisoned;
+    struct char_data *poisonby{};
+    std::unordered_set<char_data*> poisoned;
 
     int mobcharge{};
     int preference{};
@@ -1023,7 +1023,7 @@ struct char_data : public unit_data {
 
     char *rdisplay{};
 
-    CharRef original{};
+    struct char_data *original{};
 
     std::unordered_set<CharRef> clones{};
     int relax_count{};

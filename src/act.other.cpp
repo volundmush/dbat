@@ -7694,7 +7694,7 @@ void situpProgress(char_data* ch) {
 
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBaseST(bonus, true);
-    WAIT_STATE(ch, PULSE_5SEC * 6);
+    handle_cooldown(ch, 8);
     ch->decCurST(cost);
 }
 
@@ -7962,7 +7962,7 @@ void meditateProgress(char_data* ch) {
 
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBaseKI(bonus, true);
-    WAIT_STATE(ch, PULSE_5SEC * 6);
+    handle_cooldown(ch, 8);
     ch->decCurKI(cost);
 
 }
@@ -8169,7 +8169,7 @@ void pushupProgress(char_data* ch) {
     if(bonus > (ch->getBasePL() / 40)) bonus = ch->getBasePL() / 40;
     send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBasePL(bonus, true);
-    WAIT_STATE(ch, PULSE_5SEC * 6);
+    handle_cooldown(ch, 8);
     ch->decCurST(cost);
 }
 
@@ -11540,7 +11540,7 @@ void genRace(char_data* ch, std::string suggestedRace) {
     if (!chosen_race) {
         send_to_char(ch,"\r\nThat's not a race.\r\n");
         return;
-    } else if(currentRace == RaceID::BioAndroid || currentRace == RaceID::BioAndroid) {
+    } else if(currentRace == RaceID::BioAndroid || currentRace == RaceID::Mutant) {
         ch->genome[0] = 0;
         ch->genome[1] = 0;
     } else if(currentRace == RaceID::Halfbreed || currentRace == RaceID::Android) {
@@ -11783,7 +11783,7 @@ std::vector<SenseiID> valid_classes(char_data* ch) {
     return sensei::filterSenseis(check);
 }
 
-void genSensei(char_data* ch, std::string suggestedSensei){
+void genSensei(char_data* ch, std::string suggestedSensei) {
     if(suggestedSensei != "") {
         auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
         auto chosen_sensei = sensei::findSensei(suggestedSensei, check);

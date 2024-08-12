@@ -940,7 +940,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
 
         if (FIGHTING(ch) && (IN_ROOM(FIGHTING(ch)) != IN_ROOM(ch))) {
-            for(auto c : {FIGHTING(ch).get(), ch}) stop_fighting(c);
+            for(auto c : {FIGHTING(ch), ch}) stop_fighting(c);
         }
         if (FIGHTING(ch) && DRAGGING(ch)) {
             act("@WYou are forced to stop dragging @C$N@W!@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);

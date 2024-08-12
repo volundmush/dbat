@@ -195,6 +195,10 @@ namespace net {
         return false;
     }
 
+    void ConnectionParser::update() {
+
+    }
+
 
 
     void Connection::sendText(const std::string &text, int bitflags) {
@@ -260,6 +264,9 @@ namespace net {
     }
 
     void Connection::update(double deltaTime) {
+        if(parser) {
+            parser->update(deltaTime);
+        }
         while(parser && !pendingCommands.empty()) {
             parser->parse(pendingCommands.front());
             pendingCommands.pop_front();
@@ -602,17 +609,18 @@ namespace net {
         if(j.contains("parser")) {
             auto p = j["parser"];
             auto pname = p.at("parserName").get<std::string>();
+            auto sh = shared_from_this();
 
             if(pname == "AccountMenu") {
-                parser = std::make_unique<AccountMenu>(shared_from_this());
+                parser = std::make_unique<AccountMenu>(sh);
             } else if(pname == "ChargenParser") {
-                parser = std::make_unique<ChargenParser>(shared_from_this());
+                parser = std::make_unique<ChargenParser>(sh);
             } else if(pname == "CharacterMenu") {
-                parser = std::make_unique<CharacterMenu>(shared_from_this(), nullptr);
+                parser = std::make_unique<CharacterMenu>(sh, nullptr);
             } else if(pname == "LoginParser") {
-                parser = std::make_unique<LoginParser>(shared_from_this());
+                parser = std::make_unique<LoginParser>(sh);
             } else if(pname == "PuppetParser") {
-                parser = std::make_unique<PuppetParser>(shared_from_this(), nullptr);
+                parser = std::make_unique<PuppetParser>(sh, nullptr);
             }
             parser->deserialize(p);
             //parser->parse("");
@@ -639,12 +647,10 @@ namespace net {
             if(t.contains("q")) {
                 auto q = t["q"];
                 int i = 0;
-                if(teldata->q) {
-                    free(teldata->q);
-                    teldata->q = (telnet_rfc1143_t*)calloc(sizeof(telnet_rfc1143_t), q.size());
-                    teldata->q_cnt = q.size();
-                    teldata->q_size = sizeof(telnet_rfc1143_t) * q.size();
-                }
+                if(teldata->q) free(teldata->q);
+                teldata->q = (telnet_rfc1143_t*)calloc(sizeof(telnet_rfc1143_t), q.size());
+                teldata->q_cnt = q.size();
+                teldata->q_size = sizeof(telnet_rfc1143_t) * q.size();
                 for(const auto &qop : q) {
                     teldata->q[i].telopt = qop[0].get<unsigned char>();
                     teldata->q[i].state = qop[1].get<unsigned char>();

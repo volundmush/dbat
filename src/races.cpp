@@ -402,7 +402,6 @@ namespace race {
         switch (id) {
             case RaceID::Icer:
             case RaceID::Namekian:
-            case RaceID::BioAndroid:
             case RaceID::Demon:
             case RaceID::Majin:
             case RaceID::Hoshijin:

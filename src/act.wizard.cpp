@@ -1363,15 +1363,6 @@ static void do_stat_room(struct char_data *ch) {
     list_zone_commands_room(ch, rm->vn);
 }
 
-static std::string format_double(double value) {
-    if (std::floor(value) == value) {
-        // It's a whole number
-        return fmt::format("{:.0f}", value); // No decimal places
-    } else {
-        // Format with up to 2 decimal places
-        return fmt::format("{:.2f}", value);
-    }
-}
 
 static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     int i, found;

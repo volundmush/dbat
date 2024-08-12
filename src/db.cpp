@@ -359,18 +359,24 @@ static void db_load_dgscripts_initial(const std::filesystem::path& loc) {
     }
 }
 
-static void db_load_dgscripts_finish(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "dgscripts.json")) {
+void db_load_dgscripts_finish(const std::filesystem::path& loc) {
+    // Iterating through DgSCripts in reverse to ensure they're added in proper order.
+    auto json_array = load_from_file(loc, "dgscripts.json");
+
+    for (auto it = json_array.rbegin(); it != json_array.rend(); ++it) {
+        auto& j = *it;
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
         auto location = j["location"].get<std::string>();
-        if(auto cf = uniqueScripts.find(id); cf != uniqueScripts.end()) {
-            if(auto t = cf->second.second) {
+
+        if (auto cf = uniqueScripts.find(id); cf != uniqueScripts.end()) {
+            if (auto t = cf->second.second) {
                 t->deserializeLocation(location);
-                struct room_data *r;
-                struct obj_data *o;
-                struct char_data *c;
-                switch(t->owner.index()) {
+                struct room_data* r;
+                struct obj_data* o;
+                struct char_data* c;
+
+                switch (t->owner.index()) {
                     case 0:
                         r = std::get<0>(t->owner);
                         t->next = r->script->trig_list;
@@ -2693,13 +2699,15 @@ void init_char(struct char_data *ch) {
         AFF_FLAGS(ch)[i] = 0;
 
     for (i = 0; i < 3; i++)
-        GET_SAVE_MOD(ch, i) = 0;
+        ch->limbs[i] = 100;
 
     for (i = 0; i < 3; i++)
         GET_COND(ch, i) = (GET_ADMLEVEL(ch) == ADMLVL_IMPL ? -1 : 24);
 
     GET_LOADROOM(ch) = NOWHERE;
     SPEAKING(ch) = SKILL_LANG_COMMON;
+
+    do_start(ch);
 }
 
 /* returns the real number of the room with given virtual number */

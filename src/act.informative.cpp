@@ -4923,12 +4923,12 @@ ACMD(do_score) {
         send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race),
                      sensei::getName(ch->chclass).c_str(), sensei::getStyle(ch->chclass).c_str());
         char hei[300], wei[300];
-        sprintf(hei, "%dcm", ch->getHeight());
-        sprintf(wei, "%dkg", (int)ch->getWeight());
+        sprintf(hei, "%scm", format_double(ch->getHeight()).c_str());
+        sprintf(wei, "%skg", format_double(ch->getWeight()).c_str());
         send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n",
                      add_commas(GET_AGE(ch)).c_str(), hei, wei);
         send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n",
-                     genders[(int) GET_SEX(ch)], size_names[get_size(ch)], disp_align(ch));
+                     genders[static_cast<int>(GET_SEX(ch))], size_names[get_size(ch)], disp_align(ch));
     }
     if (view == full || view == health) {
         send_to_char(ch,
@@ -4937,19 +4937,19 @@ ACMD(do_score) {
         send_to_char(ch, "                 @D<@rHealth@D>              <@BKi@D>             <@GStamina@D>@n\n");
         send_to_char(ch, "    @wCurrent   @D-[@R%-16s@D]-[@R%-16s@D]-[@R%-16s@D]@n\n", add_commas(ch->getCurPL()).c_str(),
                      add_commas(
-                             (ch->getCurKI())).c_str(), add_commas((ch->getCurST())).c_str());
+                             ch->getCurKI()).c_str(), add_commas(ch->getCurST()).c_str());
         send_to_char(ch, "    @wMaximum   @D-[@r%-16s@D]-[@r%-16s@D]-[@r%-16s@D]@n\n", add_commas(ch->getMaxPL()).c_str(),
                      add_commas(GET_MAX_MANA(ch)).c_str(), add_commas(GET_MAX_MOVE(ch)).c_str());
-        send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas((ch->getEffBasePL())).c_str(),
+        send_to_char(ch, "    @wBase      @D-[@m%-16s@D]-[@m%-16s@D]-[@m%-16s@D]@n\n", add_commas(ch->getEffBasePL()).c_str(),
                      add_commas(
-                             (ch->getEffBaseKI())).c_str(), add_commas((ch->getEffBaseST())).c_str());
+                             ch->getEffBaseKI()).c_str(), add_commas(ch->getEffBaseST()).c_str());
         if (!IS_ANDROID(ch) && (ch->getCurLF()) > 0) {
             send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(
-                    (ch->getCurLF())).c_str(), "/", add_commas((ch->getMaxLF())).c_str(), GET_LIFEPERC(ch), "%");
+                    ch->getCurLF()).c_str(), "/", add_commas(ch->getMaxLF()).c_str(), GET_LIFEPERC(ch), "%");
         } else if (!IS_ANDROID(ch)) {
             send_to_char(ch, "    @wLife Force@D-[@C%16s@D%s@c%16s@D]- @wLife Percent@D-[@Y%3d%s@D]@n\n", add_commas(0).c_str(),
                          "/", add_commas(
-                            (ch->getMaxLF())).c_str(), GET_LIFEPERC(ch), "%");
+                            ch->getMaxLF()).c_str(), GET_LIFEPERC(ch), "%");
         }
     }
     std::string grav = "x1";

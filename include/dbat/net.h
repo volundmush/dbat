@@ -91,6 +91,7 @@ namespace net {
         virtual nlohmann::json serialize();
         virtual void deserialize(const nlohmann::json& j);
         virtual bool canCopyover();
+        virtual void update(double deltaTime);
 
     protected:
         void sendText(const std::string &txt, int bitflags = 0);
