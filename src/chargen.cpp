@@ -583,7 +583,7 @@ namespace net {
         }
         sendText(fmt::format("@Y{} Length SELECTION menu:\r\n", buf1));
         sendText("@D---------------------------------------@n\r\n");
-        sendText(fmt::format("@B1@W)@C %s  @B2@W)@C Short  @B3@W)@C Medium\r\n", buf2));
+        sendText(fmt::format("@B1@W)@C {}  @B2@W)@C Short  @B3@W)@C Medium\r\n", buf2));
         sendText("@B4@W)@C Long  @B5@W)@C Really Long@n\r\n");
         sendText("@w\r\nMake a selection:@n\r\n");
     }
@@ -754,9 +754,9 @@ namespace net {
         sendText("@YWhat Height should your character be?:\r\n");
         sendText("@D---------------------------------------@n\r\n");
         if (cg.race != RaceID::Tuffle) {
-            sendText("@C Please enter a number between 40 and 300, height is in cm.\r\n");
+            sendText("@C Please enter a number between 130 and 300, height is in cm.@n\r\n");
         } else {
-            sendText("@C Please enter a number between 20 and 150, height is in cm.\r\n");
+            sendText("@C Please enter a number between 20 and 150, height is in cm.@n\r\n");
         }
     }
 
@@ -768,7 +768,7 @@ namespace net {
 
         int height = atoi(arg.c_str());
         int maxChoice = (cg.race == RaceID::Tuffle) ? 150 : 300;
-        int minChoice = (cg.race == RaceID::Tuffle) ? 40 : 150;
+        int minChoice = (cg.race == RaceID::Tuffle) ? 20 : 130;
         if(height < minChoice || height > maxChoice) {
             sendText("That is not an acceptable option.\r\n");
             return state;
@@ -781,9 +781,9 @@ namespace net {
         sendText("@YWhat Weight should your character be?:\r\n");
         sendText("@D---------------------------------------@n\r\n");
         if (cg.race != RaceID::Tuffle) {
-            sendText("@C Please enter a number between 25 and 150, weight is in kg.\r\n");
+            sendText("@C Please enter a number between 25 and 150, weight is in kg.@n\r\n");
         } else {
-            sendText("@C Please enter a number between 3 and 40, weight is in kg.\r\n");
+            sendText("@C Please enter a number between 3 and 40, weight is in kg.@n\r\n");
         }
     }
 

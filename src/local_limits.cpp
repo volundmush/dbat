@@ -1514,8 +1514,8 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
         auto ch = r.get();
         if(!ch) continue;
 
-        if(AFF_FLAGGED(ch, AFF_POISON)) {
-            // Poison stops all healing.
+        if(AFF_FLAGGED(ch, AFF_POISON) || ch->task != Task::nothing) {
+            // Poison stops all healing. So does having a task.
             continue;
         }
 

@@ -5315,8 +5315,7 @@ ACMD(do_status) {
 
 
         if (GET_RELAXCOUNT(ch) > 464) {
-            send_to_char(ch,
-                         "You are far too at ease to train hard like you should. Get out of the house more often.\r\n");
+            send_to_char(ch, "You are far too at ease to train hard like you should. Get out of the house more often.\r\n");
         } else if (GET_RELAXCOUNT(ch) > 232) {
             send_to_char(ch, "You are too at ease to train hard like you should. Get out of the house more often.\r\n");
         } else if (GET_RELAXCOUNT(ch) > 116) {
@@ -5328,101 +5327,46 @@ ACMD(do_status) {
         }
         if (IS_MUTANT(ch)) {
             send_to_char(ch, "Your Mutations:\r\n");
-            if (GET_GENOME(ch, 0) == 1) {
-                send_to_char(ch, "  Extreme Speed.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 2) {
-                send_to_char(ch, "  Increased Cell Regeneration.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 3) {
-                send_to_char(ch, "  Extreme Reflexes.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 4) {
-                send_to_char(ch, "  Infravision.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 5) {
-                send_to_char(ch, "  Natural Camo.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 6) {
-                send_to_char(ch, "  Limb Regen.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 7) {
-                send_to_char(ch, "  Poisonous (you can use the bite attack).\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 8) {
-                send_to_char(ch, "  Rubbery Body.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 9) {
-                send_to_char(ch, "  Innate Telepathy.\r\n");
-            }
-            if (GET_GENOME(ch, 0) == 10) {
-                send_to_char(ch, "  Natural Energy.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 1) {
-                send_to_char(ch, "  Extreme Speed.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 2) {
-                send_to_char(ch, "  Increased Cell Regeneration.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 3) {
-                send_to_char(ch, "  Extreme Reflexes.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 4) {
-                send_to_char(ch, "  Infravision.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 5) {
-                send_to_char(ch, "  Natural Camo.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 6) {
-                send_to_char(ch, "  Limb Regen.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 7) {
-                send_to_char(ch, "  Poisonous (you can use the bite attack).\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 8) {
-                send_to_char(ch, "  Rubbery Body.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 9) {
-                send_to_char(ch, "  Innate Telepathy.\r\n");
-            }
-            if (GET_GENOME(ch, 1) == 10) {
-                send_to_char(ch, "  Natural Energy.\r\n");
+
+            const char* mutations[] = {
+                "  Extreme Speed.\r\n",
+                "  Increased Cell Regeneration.\r\n",
+                "  Extreme Reflexes.\r\n",
+                "  Infravision.\r\n",
+                "  Natural Camo.\r\n",
+                "  Limb Regen.\r\n",
+                "  Poisonous (you can use the bite attack).\r\n",
+                "  Rubbery Body.\r\n",
+                "  Innate Telepathy.\r\n",
+                "  Natural Energy.\r\n"
+            };
+
+            for (int i = 0; i < 2; ++i) {
+                int genome = GET_GENOME(ch, i);
+                if (genome >= 1 && genome <= 10) {
+                    send_to_char(ch, mutations[genome - 1]);
+                }
             }
         }
         if (IS_BIO(ch)) {
             send_to_char(ch, "Your genes carry:\r\n");
-            for(auto i = 0; i < 2; i++) {
-                std::string race;
-                switch(GET_GENOME(ch, i)) {
-                    case 1:
-                        race = "Human";
-                        break;
-                    case 2:
-                        race = "Saiyan";
-                        break;
-                    case 3:
-                        race = "Namek";
-                        break;
-                    case 4:
-                        race = "Icer";
-                        break;
-                    case 5:
-                        race = "Tuffle";
-                        break;
-                    case 6:
-                        race = "Arlian";
-                        break;
-                    case 7:
-                        race = "Kai";
-                        break;
-                    case 8:
-                        race = "Konatsu";
-                        break;
-                    default:
-                        race = "???";
-                        break;
-                }
-                send_to_char(ch, "  %s DNA.\r\n", race.c_str());
+
+            const char* races[] = {
+                "Human",
+                "Saiyan",
+                "Namek",
+                "Icer",
+                "Tuffle",
+                "Arlian",
+                "Kai",
+                "Konatsu",
+                "???"
+            };
+
+            for (int i = 0; i < 2; i++) {
+                int genome = GET_GENOME(ch, i);
+                const char* race = (genome >= 1 && genome <= 8) ? races[genome - 1] : races[8];
+                send_to_char(ch, "  %s DNA.\r\n", race);
             }
         }
         if (GET_GENOME(ch, 0) == 11) {

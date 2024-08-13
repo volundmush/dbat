@@ -228,7 +228,7 @@ extern int total_skill_levels(struct char_data *ch, int skill);
 
 extern int8_t ability_mod_value(int abil);
 
-extern int highest_skill_value(int level, int type);
+extern int highest_skill_value(int level, int type, int skill);
 
 
 extern int raise_class_only(struct char_data *ch, int cl, int v);

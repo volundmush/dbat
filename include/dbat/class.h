@@ -25,7 +25,7 @@ extern int8_t dex_mod_capped(struct char_data *ch);
 
 extern int total_skill_levels(struct char_data *ch, int skill);
 
-extern int highest_skill_value(int level, int type);
+extern int highest_skill_value(int level, int type, int skill);
 
 extern time_t birth_age(struct char_data *ch);
 

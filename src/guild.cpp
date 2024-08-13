@@ -296,7 +296,7 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
                 buf2[0] = 0;
 
             count++;
-            canknow = highest_skill_value(GET_LEVEL(ch), sklevel);
+            canknow = highest_skill_value(GET_LEVEL(ch), sklevel, i);
             nlen = snprintf(buf + len, maxsz - len, "@y(@Y%3d@y) @W%-30s  @C%3d@D/@c%3d   %s@n%s%s\r\n",
                             count, spell_info[i].name, sklevel, canknow,
                             sk.perfs > 0 ? (sk.perfs == 1 ? "@ROver Charge" : (sk.perfs == 2 ? "@BAccurate" : "@GEfficient")) : "",
@@ -587,7 +587,7 @@ void what_does_guild_know(int guild_nr, struct char_data *ch) {
     for (sortpos = 0; sortpos < SKILL_TABLE_SIZE; sortpos++) {
         i = sortpos; /* spell_sort_info[sortpos]; */
         if (does_guild_know(guild_nr, i) && skill_type(i) == SKTYPE_SKILL) {
-            canknow = highest_skill_value(GET_INT(ch), k);
+            canknow = highest_skill_value(GET_INT(ch), k, i);
             count++;
             cost = calculate_skill_cost(ch, i);
             if (k == SKLEARN_CLASS) {
@@ -641,7 +641,7 @@ void what_does_guild_know(int guild_nr, struct char_data *ch) {
                 for (canknow = 0, j = 0; j < NUM_CLASSES; j++)
                     if (spell_info[i].can_learn_skill[j] > canknow)
                         canknow = spell_info[i].can_learn_skill[j];
-                canknow = highest_skill_value(GET_INT(ch), canknow);
+                canknow = highest_skill_value(GET_INT(ch), canknow, i);
                 if (GET_SKILL_BASE(ch, i) < canknow) {
                     nlen = snprintf(buf2 + len, sizeof(buf2) - len, "%-20s %s\r\n", spell_info[i].name,
                                     GET_SKILL_BASE(ch, i) ? "known" : "unknown");
@@ -915,7 +915,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                 return;
             case SKLEARN_CROSSCLASS:
             case SKLEARN_CLASS:
-                highest = highest_skill_value(GET_INT(ch), learntype);
+                highest = highest_skill_value(GET_INT(ch), learntype, skill_num);
                 break;
             default:
                 basic_mud_log("Unknown SKLEARN type for skill %d in practice", skill_num);

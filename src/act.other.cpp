@@ -7544,7 +7544,7 @@ ACMD(do_situp) {
 
     send_to_char(ch, "You start to do situps.\r\n");
     ch->setTask(Task::situps);
-    WAIT_STATE(ch, PULSE_5SEC * 6);
+    WAIT_STATE(ch, 2.5);
 }
 
 void situpProgress(char_data* ch) {
@@ -7694,7 +7694,7 @@ void situpProgress(char_data* ch) {
 
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBaseST(bonus, true);
-    handle_cooldown(ch, 8);
+    WAIT_STATE(ch, 2.5);
     ch->decCurST(cost);
 }
 
@@ -7806,7 +7806,7 @@ ACMD(do_meditate) {
     
     send_to_char(ch, "You start to meditate.\r\n");
     ch->setTask(Task::meditate);
-    WAIT_STATE(ch, PULSE_5SEC * 6);
+    WAIT_STATE(ch, 2.5);
 
 }
 
@@ -7962,7 +7962,7 @@ void meditateProgress(char_data* ch) {
 
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBaseKI(bonus, true);
-    handle_cooldown(ch, 8);
+    WAIT_STATE(ch, 2.5);
     ch->decCurKI(cost);
 
 }
@@ -8018,7 +8018,7 @@ ACMD(do_pushup) {
 
     send_to_char(ch, "You start to do push-ups.\r\n");
     ch->setTask(Task::pushups);
-    WAIT_STATE(ch, PULSE_5SEC * 6);
+    WAIT_STATE(ch, 2.5);
 
     
 }
@@ -8169,7 +8169,7 @@ void pushupProgress(char_data* ch) {
     if(bonus > (ch->getBasePL() / 40)) bonus = ch->getBasePL() / 40;
     send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
     ch->gainBasePL(bonus, true);
-    handle_cooldown(ch, 8);
+    WAIT_STATE(ch, 2.5);
     ch->decCurST(cost);
 }
 

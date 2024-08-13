@@ -2655,29 +2655,22 @@ void reset_char(struct char_data *ch) {
 void init_char(struct char_data *ch) {
     int i;
 
-    GET_CRANK(ch) = 0;
+    for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
+        ch->set(c, 800);
+    }
+    magic_enum::enum_for_each<CharAttribute>([&] (auto val) {
+                constexpr CharAttribute v = val;
+                ch->set(v, 15);
+                });
+    ch->set(CharMoney::Carried, 1500);
     GET_CLAN(ch) = strdup("None.");
-    GET_ABSORBS(ch) = 0;
-    ABSORBING(ch) = nullptr;
-    ABSORBBY(ch) = nullptr;
-    SITS(ch) = nullptr;
-    BLOCKED(ch) = nullptr;
-    BLOCKS(ch) = nullptr;
+    ch->practice_points = 600;
+
 
     /* If this is our first player make him LVL_IMPL. */
     if (players.size() == 0) {
         admin_set(ch, ADMLVL_IMPL);
-
-        /* The implementor never goes through do_start(). */
-        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
-            ch->set(c, 1000);
-        }
     }
-
-    set_title(ch, nullptr);
-    ch->short_description = nullptr;
-    ch->room_description = nullptr;
-    ch->look_description = nullptr;
 
     /*ch->time.birth = time(0) - birth_age(ch);*/
     ch->time.logon = ch->time.created = time(nullptr);
@@ -2688,15 +2681,9 @@ void init_char(struct char_data *ch) {
     set_height_and_weight_by_race(ch);
 
     for (i = 1; i < SKILL_TABLE_SIZE; i++) {
-        if (GET_ADMLEVEL(ch) < ADMLVL_IMPL)
-            SET_SKILL(ch, i, 0);
-        else
+        if (GET_ADMLEVEL(ch) >= ADMLVL_IMPL)
             SET_SKILL(ch, i, 100);
-        SET_SKILL_BONUS(ch, i, 0);
     }
-
-    for (i = 0; i < AF_ARRAY_MAX; i++)
-        AFF_FLAGS(ch)[i] = 0;
 
     for (i = 0; i < 3; i++)
         ch->limbs[i] = 100;

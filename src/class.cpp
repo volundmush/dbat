@@ -1426,17 +1426,58 @@ int8_t dex_mod_capped(struct char_data *ch) {
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-int highest_skill_value(int level, int type) {
+int highest_skill_value(int level, int type, int skill) {
+
+    int result = 0;
+
     if (level >= 60)
-        return 100;
+        result = 100;
     else if (level >= 20)
-        return level + 40;
+        result = level + 40;
     else if (level >= 10)
-        return level + 30;
+        result = level + 30;
     else if (level >= 1)
-        return level + 25;
-    else
-        return 0;
+        result = level + 25;
+
+    switch(skill) {
+        case SKILL_PUNCH:
+        case SKILL_KICK:
+        case SKILL_ELBOW:
+        case SKILL_KNEE:
+        case SKILL_BLOCK:
+        case SKILL_PARRY:
+        case SKILL_DODGE:
+        case SKILL_ROLL:
+        case SKILL_TRIP:
+        case SKILL_KIBALL:
+        case SKILL_KIBLAST:
+        case SKILL_BEAM:
+        case SKILL_CONCENTRATION:
+        case SKILL_BARRIER:
+        case SKILL_DAGGER:
+        case SKILL_SWORD:
+        case SKILL_CLUB:
+        case SKILL_BRAWL:
+        case SKILL_GUN:
+        case SKILL_FOCUS:
+        case SKILL_BUILD:
+            result += 30;
+            break;
+        case SKILL_THROW:
+        case SKILL_UPPERCUT:
+        case SKILL_SLAM:
+        case SKILL_ROUNDHOUSE:
+        case SKILL_HEELDROP:
+        case SKILL_BASH:
+        case SKILL_HEADBUTT:
+        case SKILL_TAILWHIP:
+        case SKILL_MOVE_SILENTLY:
+        case SKILL_HIDE:
+            result += 15;
+            break;
+    }
+
+    return std::clamp<int>(result, 0, 100);
 }
 
 /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
