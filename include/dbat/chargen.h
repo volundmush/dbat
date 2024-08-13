@@ -21,8 +21,11 @@ namespace net {
         DistinguishingFeature,
         Height,
         Weight,
+        Age,
+        Aura,
         Skills,
         Alignment,
+        Finish
     };
 
     struct ChargenData {
@@ -33,17 +36,18 @@ namespace net {
         RaceID race{RaceID::Spirit};
         SenseiID sensei{SenseiID::Commoner};
         std::unordered_map<CharAppearance, appearance_t> appearances;
-        int genome[2]{};                /* Bio racial bonus, Genome */
-        std::bitset<NUM_PLR_FLAGS> playerFlags{}; /* act flag for NPC's; player flag for PC's */
+        std::unordered_set<int> genome{};                /* Bio racial bonus, Genome */
+
         int androidModel{-1};
         std::unordered_map<CharNum, num_t> nums;
+        std::unordered_map<CharDim, dim_t> dims;
         std::optional<RaceID> mimic;
+        int age;
     };
 
     class ChargenParser : public ConnectionParser {
     public:
         using ConnectionParser::ConnectionParser;
-        explicit ChargenParser(const std::shared_ptr<Connection>& co);
         void parse(const std::string &txt) override;
         void start() override;
         std::string getName() override;
@@ -53,7 +57,7 @@ namespace net {
         void update(double deltaTime) override;
 
     protected:
-        ChargenData ch{};
+        ChargenData cg{};
         double introTimer{0.0};
         size_t introLinesSent{};
         ChargenState state{ChargenState::Intro};
@@ -80,62 +84,56 @@ namespace net {
         // cg handlers.
         void changeState(ChargenState newState);
 
-        // CON_GET_NAME
         void cgDisplayName();
         ChargenState cgHandleName(const std::string& arg);
 
-        // CON_QRACE
         void cgDisplayRace();
         ChargenState cgHandleRace(const std::string& arg);
 
-        // CON_QSEX
         void cgDisplaySex();
         ChargenState cgHandleSex(const std::string& arg);
 
-        // CON_RACIAL
         void cgDisplayRacial();
         ChargenState cgHandleRacial(const std::string& arg);
 
-        // CON_CLASS
         void cgDisplaySensei();
         ChargenState cgHandleSensei(const std::string& arg);
 
-        // CON_QHAIRL
         void cgDisplayHairLength();
         ChargenState cgHandleHairLength(const std::string& arg);
 
-        // CON_HAIRC
         void cgDisplayHairColor();
         ChargenState cgHandleHairColor(const std::string& arg);
 
-        // CON_HAIRS
         void cgDisplayHairStyle();
         ChargenState cgHandleHairStyle(const std::string& arg);
 
-        // CON_SKIN
         void cgDisplaySkinColor();
         ChargenState cgHandleSkinColor(const std::string& arg);
 
-        // CON_EYE
         void cgDisplayEyeColor();
         ChargenState cgHandleEyeColor(const std::string& arg);
 
-        // CON_DISTFEA
         void cgDisplayDistinguishingFeature();
         ChargenState cgHandleDistinguishingFeature(const std::string &arg);
 
-        // CON_AURA
         void cgDisplayAuraColor();
         ChargenState cgHandleAuraColor(const std::string& arg);
 
-        // CON_HEIGHT
         void cgDisplayHeight();
         ChargenState cgHandleHeight(const std::string& arg);
 
-        // CON_WEIGHT
         void cgDisplayWeight();
         ChargenState cgHandleWeight(const std::string& arg);
 
+        void cgDisplayAge();
+        ChargenState cgHandleAge(const std::string& arg);
+
+        void cgDisplaySkills();
+        ChargenState cgHandleSkills(const std::string& arg);
+
+        void cgDisplayAlignment();
+        ChargenState cgHandleAlignment(const std::string& arg);
     };
 
 }

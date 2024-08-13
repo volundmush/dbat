@@ -90,6 +90,9 @@
         "latch": "cpp",
         "scoped_allocator": "cpp",
         "syncstream": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "expected": "cpp",
+        "format": "cpp",
+        "stdfloat": "cpp"
     }
 }

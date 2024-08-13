@@ -195,7 +195,7 @@ namespace net {
         return false;
     }
 
-    void ConnectionParser::update() {
+    void ConnectionParser::update(double deltaTime) {
 
     }
 
