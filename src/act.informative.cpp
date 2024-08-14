@@ -4922,11 +4922,6 @@ ACMD(do_score) {
         }
         send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race),
                      sensei::getName(ch->chclass).c_str(), sensei::getStyle(ch->chclass).c_str());
-        char hei[300], wei[300];
-        sprintf(hei, "%scm", format_double(ch->getHeight()).c_str());
-        sprintf(wei, "%skg", format_double(ch->getWeight()).c_str());
-        send_to_char(ch, "  @D|   @CAge@D: @W%10s@D,  @CHeight@D: @W%15s@D,  @CWeight@D: @W%-17s@D|@n\n",
-                     add_commas(GET_AGE(ch)).c_str(), hei, wei);
         send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n",
                      genders[static_cast<int>(GET_SEX(ch))], size_names[get_size(ch)], disp_align(ch));
     }

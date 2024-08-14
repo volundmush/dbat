@@ -24,11 +24,8 @@ namespace net {
         for(auto [k, v] : nums) {
             j["nums"].push_back(std::make_pair(static_cast<int>(k), v));
         }
-        for(auto [k, v] : dims) {
-            j["dims"].push_back(std::make_pair(static_cast<int>(k), v));
-        }
         if(mimic) j["mimic"] = static_cast<int>(mimic.value());
-        j["age"] = age;
+
     }
 
     void ChargenData::deserialize(const nlohmann::json& j) {
@@ -51,13 +48,7 @@ namespace net {
                 nums[static_cast<CharNum>(n.at(0).get<int>())] = n.at(1).get<int>();
             }
         }
-        if(j.contains("dims")) {
-            for(auto& d : j.at("dims")) {
-                dims[static_cast<CharDim>(d.at(0).get<int>())] = d.at(1).get<int>();
-            }
-        }
         if(j.contains("mimic")) mimic = static_cast<RaceID>(j.at("mimic").get<int>());
-        if(j.contains("age")) age = j.at("age").get<int>();
     }
 
     std::string ChargenParser::getName() {
@@ -70,7 +61,6 @@ namespace net {
         j["total"] = total;
         j["ccpoints"] = ccpoints;
         j["negcount"] = negcount;
-        j["maybeName"] = maybeName;
         j["cg"] = cg.serialize();
 
         return j;
@@ -81,7 +71,6 @@ namespace net {
         if (j.contains("total")) total = j.at("statotal").get<int>();
         if (j.contains("ccpoints")) ccpoints = j.at("ccpoints").get<int>();
         if (j.contains("stnegcount")) negcount = j.at("negcount").get<int>();
-        if (j.contains("maybeName")) maybeName = j.at("maybeName").get<std::string>();
 
         if (j.contains("cg")) {
             cg.deserialize(j["cg"]);
@@ -113,7 +102,6 @@ namespace net {
         display_races_sub();
 
         sendText("\n @BR@W) @CRandom Race Selection!\r\n@n");
-        sendText("\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
         sendText("\n@WRace: @n");
     }
 
@@ -133,23 +121,18 @@ namespace net {
         display_classes_sub();
 
         sendText("\n @BR@W) @CRandom Sensei Selection!\r\n@n");
-        sendText("\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
         sendText("\n@WSensei: @n");
     }
 
     void ChargenParser::display_races_help() {
         sendText("\r\n@YRace HELP menu:\r\n@G--------------------------------------------\r\n@n");
         display_races_sub();
-
-        sendText("\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
         sendText("\n@WHelp on Race #: @n");
     }
 
     void ChargenParser::display_classes_help() {
         sendText("\r\n@YClass HELP menu:\r\n@G-------------------------------------------\r\n@n");
         display_classes_sub();
-
-        sendText("\n @BT@W) @CToggle between SELECTION/HELP Menu\r\n@n");
         sendText("\n@WHelp on Class #: @n");
     }
 
@@ -253,17 +236,17 @@ namespace net {
             case ChargenState::DistinguishingFeature:
                 cgDisplayDistinguishingFeature();
                 break;
-            case ChargenState::Height:
-                cgDisplayHeight();
-                break;
-            case ChargenState::Weight:
-                cgDisplayHeight();
-                break;
             case ChargenState::Alignment:
                 cgDisplayAlignment();
                 break;
+            case ChargenState::Aura:
+                cgDisplayAuraColor();
+                break;
             case ChargenState::Skills:
                 cgDisplaySkills();
+                break;
+            case ChargenState::Finish:
+                finish();
                 break;
         }
     }
@@ -277,7 +260,7 @@ namespace net {
         auto maybe = arg;
         boost::trim(maybe);
 
-        if (maybeName.empty()) {
+        if (cg.name.empty()) {
             if (arg.empty()) {
                 cgDisplayName();
                 return state;
@@ -294,12 +277,12 @@ namespace net {
                 cgDisplayName();
                 return state;
             }
-            maybeName = maybe;
-            sendText(fmt::format("\r\n{}, huh? Let's hear it again to be sure.\r\n", maybeName));
+            cg.name = maybe;
+            sendText(fmt::format("\r\n{}, huh? Let's hear it again to be sure.\r\n", cg.name));
             return state;
         }
-        if (!boost::iequals(maybe, maybeName)) {
-            maybeName.clear();
+        if (!boost::iequals(maybe, cg.name)) {
+            cg.name.clear();
             parse(maybe);
             return state;
         }
@@ -747,88 +730,7 @@ namespace net {
         }
         cg.appearances[CharAppearance::DistinguishingFeature] = dist;
 
-        return ChargenState::Height;
-    }
-
-    void ChargenParser::cgDisplayHeight() {
-        sendText("@YWhat Height should your character be?:\r\n");
-        sendText("@D---------------------------------------@n\r\n");
-        if (cg.race != RaceID::Tuffle) {
-            sendText("@C Please enter a number between 130 and 300, height is in cm.@n\r\n");
-        } else {
-            sendText("@C Please enter a number between 20 and 150, height is in cm.@n\r\n");
-        }
-    }
-
-    ChargenState ChargenParser::cgHandleHeight(const std::string& arg) {
-        if(arg.empty()) {
-            sendText("That is not an acceptable option.\r\n");
-            return state;
-        }
-
-        int height = atoi(arg.c_str());
-        int maxChoice = (cg.race == RaceID::Tuffle) ? 150 : 300;
-        int minChoice = (cg.race == RaceID::Tuffle) ? 20 : 130;
-        if(height < minChoice || height > maxChoice) {
-            sendText("That is not an acceptable option.\r\n");
-            return state;
-        }
-        cg.dims[CharDim::Height] = height;
-        return ChargenState::Weight;
-    }
-
-    void ChargenParser::cgDisplayWeight() {
-        sendText("@YWhat Weight should your character be?:\r\n");
-        sendText("@D---------------------------------------@n\r\n");
-        if (cg.race != RaceID::Tuffle) {
-            sendText("@C Please enter a number between 25 and 150, weight is in kg.@n\r\n");
-        } else {
-            sendText("@C Please enter a number between 3 and 40, weight is in kg.@n\r\n");
-        }
-    }
-
-    ChargenState ChargenParser::cgHandleWeight(const std::string& arg) {
-        if(arg.empty()) {
-            sendText("That is not an acceptable option.\r\n");
-            return state;
-        }
-
-        int weight = atoi(arg.c_str());
-
-        int maxChoice = (cg.race == RaceID::Tuffle) ? 25 : 150;
-        int minChoice = (cg.race == RaceID::Tuffle) ? 3 : 40;
-        if(weight < minChoice || weight > maxChoice) {
-            sendText("That is not an acceptable option.\r\n");
-            return state;
-        }
-        cg.dims[CharDim::Weight] = weight;
-        return ChargenState::Age;
-    }
-
-    void ChargenParser::cgDisplayAge() {
-        sendText("\r\n@WQuestion (@G10@W out of @g10@W)\r\n");
-        sendText("\r\n@YAnswer the following question:\r\n");
-        sendText("@wWhat do you wish your starting age to be?@n\r\n");
-        sendText("@D---------------------------------------@n\r\n");
-        sendText("@wPlease enter something reasonable for your\r\n");
-        sendText("@wrace and backstory. Don't fret too much, as\r\n");
-        sendText("@wadmin can alter it later.\r\n");
-        sendText("@w\r\nEnter Age in Years (decimals are supported):@n\r\n");
-    }
-
-    ChargenState ChargenParser::cgHandleAge(const std::string& arg) {
-        if(arg.empty()) {
-            sendText("That is not an acceptable option.\r\n");
-            return state;
-        }
-
-        int age = atoi(arg.c_str());
-        if(age < 1 || age > 100000) {
-            sendText("That is not an acceptable option.\r\n");
-            return state;
-        }
-        cg.age = age;
-        return ChargenState::Alignment;
+        return ChargenState::Aura;
     }
 
     void ChargenParser::cgDisplayAuraColor() {
@@ -943,25 +845,19 @@ namespace net {
             case ChargenState::DistinguishingFeature:
                 resultState = cgHandleDistinguishingFeature(arg);
                 break;
-            case ChargenState::Height:
-                resultState = cgHandleHeight(arg);
-                break;
-            case ChargenState::Weight:
-                resultState = cgHandleWeight(arg);
-                break;
             case ChargenState::Alignment:
                 resultState = cgHandleAlignment(arg);
                 break;
             case ChargenState::Skills:
                 resultState = cgHandleSkills(arg);
                 break;
+            case ChargenState::Aura:
+                resultState = cgHandleAuraColor(arg);
+                break;
         }
 
             if(resultState != state) {
-                if(resultState == ChargenState::Finish)
-                    finish();
-                else
-                    changeState(resultState);
+                changeState(resultState);
             }
                 
     }
@@ -982,6 +878,20 @@ namespace net {
         conn->account->characters.emplace_back(ch);
         p.character = ch;
         uniqueCharacters[ch->id] = std::make_pair(ch->generation, ch);
+
+        ch->chclass = cg.sensei;
+        ch->race = cg.race;
+        if(cg.androidModel != -1) ch->playerFlags.set(cg.androidModel);
+        if(cg.mimic) ch->mimic = cg.mimic;
+        ch->appearances = cg.appearances;
+        ch->nums = cg.nums;
+        ch->dims = cg.dims;
+        if(cg.race == RaceID::BioAndroid || cg.race == RaceID::Mutant) {
+            auto i = 0;
+            for(auto &g : cg.genome) {
+                ch->genome[i++] = g;
+            }
+        }
 
         init_char(ch);
         // set state to -1 to prevent accidental freeing of cg...

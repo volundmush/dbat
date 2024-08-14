@@ -19,9 +19,6 @@ namespace net {
         SkinColor,
         EyeColor,
         DistinguishingFeature,
-        Height,
-        Weight,
-        Age,
         Aura,
         Skills,
         Alignment,
@@ -64,7 +61,6 @@ namespace net {
         int total{};
         int ccpoints{};
         int negcount{};
-        std::string maybeName;
         int roll_stats(int type, int bonus);
         void display_bonus_menu(int type);
         std::vector<RaceID> valid_races();

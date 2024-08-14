@@ -195,46 +195,82 @@ void processCommand(char_data* ch, int cmd, std::string ln) {
         return;
     }
 
-    if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1)
-        send_to_char(ch, "It's unfortunate...\r\n");
-    else if (check_disabled(&complete_cmd_info[cmd]))    /* is it disabled? */
-        send_to_char(ch, "This command has been temporarily disabled.\r\n");
-    else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_GOOP) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
-        send_to_char(ch, "You only have your internal thoughts until your body has finished regenerating!\r\n");
-    else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_FROZEN) && GET_ADMLEVEL(ch) < ADMLVL_IMPL)
-        send_to_char(ch, "You try, but the mind-numbing cold prevents you...\r\n");
-    else if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPIRAL))
-        send_to_char(ch, "You are occupied with your Spiral Comet attack!\r\n");
-    else if (complete_cmd_info[cmd].command_pointer == nullptr)
+        if (!complete_cmd_info[cmd].command_pointer) {
         send_to_char(ch, "Sorry, that command hasn't been implemented yet.\r\n");
-    else if (IS_NPC(ch) && complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT)
-        send_to_char(ch, "You can't use immortal commands while switched.\r\n");
-    else if (GET_POS(ch) < complete_cmd_info[cmd].minimum_position && GET_POS(ch) != POS_FIGHTING) {
+        return;
+    }
+
+    if (!command_pass(blah, ch) && GET_ADMLEVEL(ch) < 1) {
+        send_to_char(ch, "It's unfortunate...\r\n");
+        return;
+    }
+        
+
+    if (check_disabled(&complete_cmd_info[cmd])) {
+        send_to_char(ch, "This command has been temporarily disabled.\r\n");
+        return;
+    }
+    
+    if(!IS_NPC(ch)) {
+        
+        if(GET_ADMLEVEL(ch) < ADMLVL_IMPL) {
+            if (PLR_FLAGGED(ch, PLR_GOOP)) {
+                send_to_char(ch, "You only have your internal thoughts until your body has finished regenerating!\r\n");
+                return;
+            }
+
+            if (PLR_FLAGGED(ch, PLR_FROZEN)) {
+                send_to_char(ch, "You try, but the mind-numbing cold prevents you...\r\n");
+                return;
+            }
+        }
+
+        if (PLR_FLAGGED(ch, PLR_SPIRAL)) {
+            send_to_char(ch, "You are occupied with your Spiral Comet attack!\r\n");
+            return;
+        }
+    } else {
+        if(complete_cmd_info[cmd].minimum_admlevel >= ADMLVL_IMMORT) {
+            send_to_char(ch, "You can't use immortal commands while switched.\r\n");
+            return;
+        }
+    }
+    
+    if (auto minpos = complete_cmd_info[cmd].minimum_position; GET_POS(ch) < minpos && GET_POS(ch) != POS_FIGHTING) {
         switch (GET_POS(ch)) {
             case POS_DEAD:
                 send_to_char(ch, "Lie still; you are DEAD!!! :-(\r\n");
-                break;
+                return;
             case POS_INCAP:
             case POS_MORTALLYW:
                 send_to_char(ch, "You are in a pretty bad shape, unable to do anything!\r\n");
-                break;
+                return;
             case POS_STUNNED:
                 send_to_char(ch, "All you can do right now is think about the stars!\r\n");
-                break;
+                return;
             case POS_SLEEPING:
                 send_to_char(ch, "In your dreams, or what?\r\n");
-                break;
-            case POS_RESTING:
-                send_to_char(ch, "Nah... You feel too relaxed to do that..\r\n");
+                return;
+            case POS_RESTING: 
+                command_interpreter(ch, "stand");
+                if(GET_POS(ch)!= POS_STANDING) {
+                    send_to_char(ch, "Nah... You feel too relaxed to do that..\r\n");
+                    return;
+                
+                }
                 break;
             case POS_SITTING:
-                send_to_char(ch, "Maybe you should get on your feet first?\r\n");
-                break;
+                command_interpreter(ch, "stand");
+                if(GET_POS(ch)!= POS_STANDING) {
+                    send_to_char(ch, "Maybe you should get on your feet first?\r\n");
+                    return;
+                }
             case POS_FIGHTING:
                 send_to_char(ch, "No way!  You're fighting for your life!\r\n");
-                break;
+                return;
         }
-    } else if (no_specials || !special(ch, cmd, line)) {
+    }
+    if (no_specials || !special(ch, cmd, line)) {
         if (!skip_ld) {
             ((*complete_cmd_info[cmd].command_pointer)(ch, line, cmd, complete_cmd_info[cmd].subcmd));
         }

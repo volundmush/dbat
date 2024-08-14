@@ -7740,8 +7740,13 @@ ACMD(do_meditate) {
     }
 
     if (GET_POS(ch) != POS_SITTING) {
-        send_to_char(ch, "You need to be sitting to meditate.\r\n");
-        return;
+        // Attempt to sit...
+        do_sit(ch, "", 0, 0);
+        if(GET_POS(ch) != POS_SITTING) {
+            send_to_char(ch, "You need to be sitting to meditate.\r\n");
+            return;
+        }
+        
     }
 
     if (!strcasecmp(arg, "expand")) {
