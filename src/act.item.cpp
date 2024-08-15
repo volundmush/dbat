@@ -391,8 +391,9 @@ ACMD(do_garden) {
                 send_to_char(ch, "You need a shovel in order to collect soil.\r\n");
                 return;
             }
-            if (SECT(IN_ROOM(ch)) != SECT_FOREST && SECT(IN_ROOM(ch)) != SECT_FIELD &&
-                SECT(IN_ROOM(ch)) != SECT_MOUNTAIN && SECT(IN_ROOM(ch)) != SECT_HILLS) {
+            const auto tile = ch->getLocationTileType();
+            if (tile != SECT_FOREST && tile != SECT_FIELD &&
+                tile != SECT_MOUNTAIN && tile != SECT_HILLS) {
                 send_to_char(ch, "You can not collect soil from this area.\r\n");
                 return;
             }
@@ -878,6 +879,7 @@ ACMD(do_deploy) {
         }
     }
 
+    
     if (capsule == false) {
         send_to_char(ch, "You do not have any house type capsules to deploy.@n\r\n");
         return;
@@ -891,8 +893,8 @@ ACMD(do_deploy) {
                (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2))) {
         send_to_char(ch, "You can't deploy house furniture capsules here.\r\n");
         return;
-    } else if (furniture == false && (SECT(IN_ROOM(ch)) == SECT_INSIDE || SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM ||
-                                      SECT(IN_ROOM(ch)) == SECT_WATER_SWIM || SECT(IN_ROOM(ch)) == SECT_SPACE)) {
+    } else if (const auto tile = ch->getLocationTileType(); furniture == false && (tile == SECT_INSIDE || tile == SECT_WATER_NOSWIM ||
+                                      tile == SECT_WATER_SWIM || tile == SECT_SPACE)) {
         send_to_char(ch, "You can not deploy that in this kind of area. Try an area more suitable for a house.\r\n");
         return;
     }
@@ -2083,7 +2085,7 @@ ACMD(do_assemble) {
     }
 
     if (strcasecmp(arg2, "campfire")) {
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE) || SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM || SUNKEN(IN_ROOM(ch))) {
+        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE) || ch->getLocationTileType() == SECT_WATER_NOSWIM || SUNKEN(IN_ROOM(ch))) {
             send_to_char(ch, "This area will not allow a fire to burn properly.\r\n");
             return;
         }
@@ -3278,7 +3280,7 @@ ACMD(do_drink) {
     wasthirsty = GET_COND(ch, THIRST);
     if (!*arg && !IS_NPC(ch)) {
         char buf[MAX_STRING_LENGTH];
-        switch (SECT(IN_ROOM(ch))) {
+        switch (ch->getLocationTileType()) {
             case SECT_WATER_SWIM:
             case SECT_WATER_NOSWIM:
             case SECT_UNDERWATER:

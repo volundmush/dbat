@@ -1095,8 +1095,9 @@ namespace atk {
                         act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, user, nullptr,
                             victim,
                             TO_NOTVICT);
-                        if (SECT(IN_ROOM(victim)) != SECT_INSIDE && SECT(IN_ROOM(victim)) != SECT_UNDERWATER &&
-                            SECT(IN_ROOM(victim)) != SECT_WATER_SWIM && SECT(IN_ROOM(victim)) != SECT_WATER_NOSWIM) {
+                        const auto tile = victim->getLocationTileType();
+                        if (tile != SECT_INSIDE && tile != SECT_UNDERWATER &&
+                            tile != SECT_WATER_SWIM && tile != SECT_WATER_NOSWIM) {
                             impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
                             switch (rand_number(1, 8)) {
                                 case 1:
@@ -1144,7 +1145,7 @@ namespace atk {
                                     break;
                             }
                         }
-                        if (SECT(IN_ROOM(victim)) == SECT_UNDERWATER) {
+                        if (tile == SECT_UNDERWATER) {
                             switch (rand_number(1, 3)) {
                                 case 1:
                                     act("The water churns violently!", true, user, nullptr, victim, TO_CHAR);
@@ -1161,7 +1162,7 @@ namespace atk {
                                     break;
                             }
                         }
-                        if (SECT(IN_ROOM(victim)) == SECT_WATER_SWIM || SECT(IN_ROOM(victim)) == SECT_WATER_NOSWIM) {
+                        if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM) {
                             switch (rand_number(1, 3)) {
                                 case 1:
                                     act("A huge column of water erupts from the impact!", true, user, nullptr, victim,
@@ -1185,7 +1186,7 @@ namespace atk {
                                     break;
                             }
                         }
-                        if (SECT(IN_ROOM(victim)) == SECT_INSIDE) {
+                        if (tile == SECT_INSIDE) {
                             impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
                             switch (rand_number(1, 8)) {
                                 case 1:
@@ -4318,8 +4319,8 @@ namespace atk {
         if (count < 5 && !ROOM_FLAGGED(IN_ROOM(user), ROOM_SPACE)) {
             send_to_room(IN_ROOM(user), "The rest of the beams slam into the ground!@n\r\n");
             send_to_room(IN_ROOM(user), "@wBright explosions erupt from the impacts!\r\n");
-
-            if (SECT(IN_ROOM(user)) != SECT_INSIDE) {
+            const auto tile = user->getLocationTileType();
+            if (tile != SECT_INSIDE) {
                 impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
                 switch (rand_number(1, 8)) {
                     case 1:
@@ -4364,7 +4365,7 @@ namespace atk {
                         break;
                 }
             }
-            if (SECT(IN_ROOM(user)) == SECT_UNDERWATER) {
+            if (tile == SECT_UNDERWATER) {
                 switch (rand_number(1, 3)) {
                     case 1:
                         act("The water churns violently!", true, user, nullptr, nullptr, TO_CHAR);
@@ -4380,7 +4381,7 @@ namespace atk {
                         break;
                 }
             }
-            if (SECT(IN_ROOM(user)) == SECT_WATER_SWIM || SECT(IN_ROOM(user)) == SECT_WATER_NOSWIM) {
+            if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM) {
                 switch (rand_number(1, 3)) {
                     case 1:
                         act("A huge column of water erupts from the impact!", true, user, nullptr, nullptr, TO_CHAR);
@@ -4402,7 +4403,7 @@ namespace atk {
                         break;
                 }
             }
-            if (SECT(IN_ROOM(user)) == SECT_INSIDE) {
+            if (tile == SECT_INSIDE) {
                 impact_sound(user, "@wA loud roar is heard nearby!@n\r\n");
                 switch (rand_number(1, 8)) {
                     case 1:

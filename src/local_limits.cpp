@@ -1720,7 +1720,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     heal_limb(i);
                 }
 
-                if (SECT(IN_ROOM(i)) == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i)) {
+                if (i->getLocationTileType() == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i)) {
                     auto carweight = i->getCarriedWeight();
                     if ((i->getCurST()) >= carweight) {
                         act("@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);

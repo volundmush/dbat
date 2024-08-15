@@ -2085,7 +2085,7 @@ ACMD(do_leave) {
 
 static void handle_fall(struct char_data *ch) {
     int room = -1;
-    while (EXIT(ch, 5) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
+    while (EXIT(ch, 5) && ch->getLocationTileType() == SECT_FLYING) {
         room = GET_ROOM_VNUM(EXIT(ch, 5)->to_room);
         char_from_room(ch);
         char_to_room(ch, real_room(room));
@@ -2093,7 +2093,7 @@ static void handle_fall(struct char_data *ch) {
             char_from_room(CARRYING(ch));
             char_to_room(CARRYING(ch), real_room(room));
         }
-        if (!EXIT(ch, 5) || SECT(IN_ROOM(ch)) != SECT_FLYING) {
+        if (!EXIT(ch, 5) || ch->getLocationTileType() != SECT_FLYING) {
             act("@r$n slams into the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->decCurHealth(ch->getMaxPL() / 20, 1);
 
@@ -2103,7 +2103,7 @@ static void handle_fall(struct char_data *ch) {
             act("@r$n pummets down toward the ground below!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
     }
-    if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM && !CARRIED_BY(ch) && !IS_KANASSAN(ch)) {
+    if (ch->getLocationTileType() == SECT_WATER_NOSWIM && !CARRIED_BY(ch) && !IS_KANASSAN(ch)) {
         if ((ch->getCurST()) >= (ch->getCarriedWeight())) {
             act("@bYou swim in place.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b swims in place.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -2179,7 +2179,8 @@ ACMD(do_fly) {
     }
 
     if (!*arg) {
-        if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) != SECT_FLYING && SECT(IN_ROOM(ch)) != SECT_SPACE) {
+        auto tile = ch->getLocationTileType();
+        if (AFF_FLAGGED(ch, AFF_FLYING) && tile != SECT_FLYING && tile != SECT_SPACE) {
             act("@WYou slowly settle down to the ground.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n slowly settles down to the ground.@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->affected_by.reset(AFF_FLYING);
@@ -2187,7 +2188,7 @@ ACMD(do_fly) {
             return;
         }
 
-        if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) == SECT_FLYING) {
+        if (AFF_FLAGGED(ch, AFF_FLYING) && tile == SECT_FLYING) {
             act("@WYou begin to plummet to the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n starts to pummet to the ground below!@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->affected_by.reset(AFF_FLYING);
@@ -2195,7 +2196,7 @@ ACMD(do_fly) {
             handle_fall(ch);
             return;
         }
-        if (AFF_FLAGGED(ch, AFF_FLYING) && SECT(IN_ROOM(ch)) == SECT_SPACE) {
+        if (AFF_FLAGGED(ch, AFF_FLYING) && tile == SECT_SPACE) {
             act("@WYou let yourself drift aimlessly through space.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n starts to drift slowly.!@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->affected_by.reset(AFF_FLYING);
@@ -2478,7 +2479,7 @@ ACMD(do_rest) {
         send_to_char(ch, "You are busy piloting a ship!\r\n");
         return;
     }
-    if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) {
+    if (ch->getLocationTileType() == SECT_WATER_NOSWIM) {
         send_to_char(ch, "You can't rest here!\r\n");
         return;
     }
@@ -2631,7 +2632,7 @@ ACMD(do_sleep) {
         return;
     }
 
-    if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) {
+    if (ch->getLocationTileType() == SECT_WATER_NOSWIM) {
         send_to_char(ch, "You can't rest here!\r\n");
         return;
     }

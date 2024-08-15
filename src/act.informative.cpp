@@ -267,7 +267,7 @@ static double terrain_bonus(struct char_data *ch) {
 
     double bonus = 0.0;
 
-    switch (SECT(IN_ROOM(ch))) {
+    switch (ch->getLocationTileType()) {
         case SECT_FOREST:
             bonus += 0.5;
             break;
@@ -702,7 +702,8 @@ ACMD(do_post) {
     }
 
     if (!*arg2) {
-        if (SECT(IN_ROOM(ch)) != SECT_INSIDE && SECT(IN_ROOM(ch)) != SECT_CITY) {
+        const auto tile = ch->getLocationTileType();
+        if (tile != SECT_INSIDE && tile != SECT_CITY) {
             send_to_char(ch, "You are not near any general structure you can post it on.\r\n");
             return;
         }
@@ -2087,6 +2088,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 see_plant(obj, ch);
                 return;
             }
+            const auto tile = obj->getLocationTileType();
             if (OBJ_FLAGGED(obj, ITEM_BURIED)) {
                 char bury[MAX_INPUT_LENGTH];
                 if (!IS_CORPSE(obj)) {
@@ -2102,10 +2104,10 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 } else {
                     sprintf(bury, "recent grave covered by");
                 }
-                if (spotted == true && SECT(IN_ROOM(obj)) != SECT_DESERT) {
+                if (spotted == true && tile != SECT_DESERT) {
                     send_to_char(ch, "@yA %s soft dirt is here.@n\r\n", bury);
                     return;
-                } else if (spotted == true && SECT(IN_ROOM(obj)) == SECT_DESERT) {
+                } else if (spotted == true && tile == SECT_DESERT) {
                     send_to_char(ch, "@YA %s soft sand is here.@n\r\n", bury);
                     return;
                 } else {

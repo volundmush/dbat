@@ -3338,8 +3338,9 @@ ACMD(do_bury) {
         return;
     }
 
-    if (SECT(IN_ROOM(ch)) != SECT_FIELD && SECT(IN_ROOM(ch)) != SECT_HILLS && SECT(IN_ROOM(ch)) != SECT_FOREST &&
-        SECT(IN_ROOM(ch)) != SECT_DESERT && SECT(IN_ROOM(ch)) != SECT_MOUNTAIN) {
+    const auto tile = ch->getLocationTileType();
+    if (tile != SECT_FIELD && tile != SECT_HILLS && tile != SECT_FOREST &&
+        tile != SECT_DESERT && tile != SECT_MOUNTAIN) {
         send_to_char(ch, "You are not in a room with enough available dirt or sand to dig.\r\n");
         return;
     }
@@ -3364,7 +3365,7 @@ ACMD(do_bury) {
             send_to_char(ch, "There is already something buried near here.\r\n");
             return;
         } else {
-            if (SECT(IN_ROOM(ch)) != SECT_DESERT) {
+            if (tile != SECT_DESERT) {
                 act("@yYou start digging in a spot of soft dirt. Once you have an appropriately sized hole you drop @G$p@y in and then cover it.@n",
                     true, ch, obj, nullptr, TO_CHAR);
                 act("@C$n@y starts digging in a spot of soft dirt. Once $e has an appropriately sized hole $e drops @G$p@y in and then covers it.@n",
@@ -3384,7 +3385,7 @@ ACMD(do_bury) {
             send_to_char(ch, "There is nothing buried here.\r\n");
             return;
         } else {
-            if (SECT(IN_ROOM(ch)) != SECT_DESERT) {
+            if (tile != SECT_DESERT) {
                 act("@yYou slowly dig and reveal @G$p@y buried in the dirt! You pull it out and set it on the ground before covering the hole back up.@n",
                     true, ch, fobj, nullptr, TO_CHAR);
                 act("@C$n@y starts digging and shortly reveals @G$p@y buried in the dirt! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n",
@@ -5148,7 +5149,7 @@ ACMD(do_warppool) {
         pass = true;
     } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 13155 && GET_ROOM_VNUM(IN_ROOM(ch)) < 13199) {
         pass = true;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM) {
+    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && ch->getLocationTileType() == SECT_WATER_NOSWIM) {
         pass = true;
     } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 12103 && GET_ROOM_VNUM(IN_ROOM(ch)) < 12289) {
         pass = true;
@@ -5433,7 +5434,8 @@ ACMD(do_dimizu) {
 
     int skill = GET_SKILL(ch, SKILL_DIMIZU);
     int prob = axion_dice(0);
-
+    
+    const auto tile = ch->getLocationTileType(); 
     if (ROOM_EFFECT(IN_ROOM(ch)) < 0) {
         act("@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.",
             true, ch, nullptr, nullptr, TO_CHAR);
@@ -5442,10 +5444,10 @@ ACMD(do_dimizu) {
         ROOM_EFFECT(IN_ROOM(ch)) = 0;
         WAIT_STATE(ch, PULSE_1SEC);
         return;
-    } else if (SECT(IN_ROOM(ch)) == SECT_UNDERWATER) {
+    } else if (tile == SECT_UNDERWATER) {
         send_to_char(ch, "The area is already underwater!\r\n");
         return;
-    } else if (SECT(IN_ROOM(ch)) == SECT_SPACE || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+    } else if (tile == SECT_SPACE || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
         send_to_char(ch, "You can't flood space!\r\n");
         return;
     } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 12) {

@@ -1001,14 +1001,14 @@ bool HAS_MOON(struct char_data *ch);
              !ROOM_FLAGGED(IN_ROOM(ch), ROOM_UNDERGROUND) && \
                           !ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE))
 
-#define OUTSIDE_SECTTYPE(ch)    ((SECT(IN_ROOM(ch)) != SECT_INSIDE) && \
-                         (SECT(IN_ROOM(ch)) != SECT_UNDERWATER) && \
-                          (SECT(IN_ROOM(ch)) != SECT_IMPORTANT) && \
-                           (SECT(IN_ROOM(ch)) != SECT_SHOP) && \
-                            (SECT(IN_ROOM(ch)) != SECT_SPACE))
+#define OUTSIDE_SECTTYPE(ch)    ((ch->getLocationTileType() != SECT_INSIDE) && \
+                         (ch->getLocationTileType() != SECT_UNDERWATER) && \
+                          (ch->getLocationTileType() != SECT_IMPORTANT) && \
+                           (ch->getLocationTileType() != SECT_SHOP) && \
+                            (ch->getLocationTileType() != SECT_SPACE))
 
-#define DIRT_ROOM(ch) (OUTSIDE_SECTTYPE(ch) && ((SECT(IN_ROOM(ch)) != SECT_WATER_NOSWIM) && \
-                       (SECT(IN_ROOM(ch)) != SECT_WATER_SWIM)))
+#define DIRT_ROOM(ch) (OUTSIDE_SECTTYPE(ch) && ((ch->getLocationTileType() != SECT_WATER_NOSWIM) && \
+                       (ch->getLocationTileType() != SECT_WATER_SWIM)))
 
 #define SPEAKING(ch)     ((ch)->speaking)
 

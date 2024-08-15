@@ -2624,10 +2624,9 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
         sprintf(buf2, "@WThe deflected %s slams into the ground, exploding with a roar of blinding light!@n", sname);
         act(buf, true, vict, nullptr, nullptr, TO_CHAR);
         act(buf2, true, vict, nullptr, nullptr, TO_ROOM);
-        if (SECT(IN_ROOM(vict)) != SECT_INSIDE && SECT(IN_ROOM(vict)) != SECT_UNDERWATER &&
-            SECT(IN_ROOM(vict)) != SECT_WATER_SWIM && SECT(IN_ROOM(vict)) != SECT_WATER_NOSWIM &&
-            SECT(IN_ROOM(vict)) != SECT_UNDERWATER && SECT(IN_ROOM(vict)) != SECT_WATER_SWIM &&
-            SECT(IN_ROOM(vict)) != SECT_WATER_NOSWIM) {
+        const auto tile = vict->getLocationTileType();
+        const std::unordered_set<int> tiles = {SECT_INSIDE, SECT_UNDERWATER, SECT_WATER_SWIM, SECT_WATER_NOSWIM};
+        if (!tiles.contains(tile)) {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
             switch (rand_number(1, 8)) {
                 case 1:
@@ -2668,7 +2667,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
                     break;
             }
         }
-        if (SECT(IN_ROOM(vict)) == SECT_UNDERWATER) {
+        if (tile == SECT_UNDERWATER) {
             switch (rand_number(1, 3)) {
                 case 1:
                     act("The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
@@ -2684,7 +2683,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
                     break;
             }
         }
-        if (SECT(IN_ROOM(vict)) == SECT_WATER_SWIM || SECT(IN_ROOM(vict)) == SECT_WATER_NOSWIM) {
+        if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM) {
             switch (rand_number(1, 3)) {
                 case 1:
                     act("A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
@@ -2702,7 +2701,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
                     break;
             }
         }
-        if (SECT(IN_ROOM(vict)) == SECT_INSIDE) {
+        if (tile == SECT_INSIDE) {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
             switch (rand_number(1, 8)) {
                 case 1:
@@ -2753,7 +2752,8 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
 
 void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2) {
     if (type == 0 && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE)) {
-        if (SECT(IN_ROOM(ch)) != SECT_INSIDE) {
+        const auto tile = ch->getLocationTileType();
+        if (tile != SECT_INSIDE) {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
             switch (rand_number(1, 8)) {
                 case 1:
@@ -2794,7 +2794,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
                     break;
             }
         }
-        if (SECT(IN_ROOM(vict)) == SECT_UNDERWATER) {
+        if (tile == SECT_UNDERWATER) {
             switch (rand_number(1, 3)) {
                 case 1:
                     act("The water churns violently!", true, ch, nullptr, vict, TO_CHAR);
@@ -2810,7 +2810,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
                     break;
             }
         }
-        if (SECT(IN_ROOM(vict)) == SECT_WATER_SWIM || SECT(IN_ROOM(vict)) == SECT_WATER_NOSWIM) {
+        if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM) {
             switch (rand_number(1, 3)) {
                 case 1:
                     act("A huge column of water erupts from the impact!", true, ch, nullptr, vict, TO_CHAR);
@@ -2828,7 +2828,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
                     break;
             }
         }
-        if (SECT(IN_ROOM(ch)) == SECT_INSIDE) {
+        if (tile == SECT_INSIDE) {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
             switch (rand_number(1, 8)) {
                 case 1:
@@ -6121,10 +6121,11 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
 }
 
 void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
+    const auto tile = vict->getLocationTileType();
     if (type == 0) {
-        if (!SUNKEN(IN_ROOM(vict)) && SECT(IN_ROOM(vict)) != SECT_WATER_SWIM &&
-            SECT(IN_ROOM(vict)) != SECT_WATER_NOSWIM && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE) &&
-            SECT(IN_ROOM(vict)) != SECT_FLYING) {
+        if (!SUNKEN(IN_ROOM(vict)) && tile != SECT_WATER_SWIM &&
+            tile != SECT_WATER_NOSWIM && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE) &&
+            tile != SECT_FLYING) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r coughs up blood before falling to the ground dead.@n", true, ch, nullptr, vict,
@@ -6165,7 +6166,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     }
                     break;
             }
-        } else if (SECT(IN_ROOM(vict)) == SECT_WATER_SWIM || SECT(IN_ROOM(vict)) == SECT_WATER_NOSWIM) {
+        } else if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r coughs up blood and dies before falling down to the water. A large splash accompanies $S body hitting the water!@n",
@@ -6258,7 +6259,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     }
                     break;
             }
-        } else if (SECT(IN_ROOM(vict)) == SECT_FLYING) {
+        } else if (tile == SECT_FLYING) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r coughs up blood before $s corpse starts to fall to the ground far below.@n", true, ch,
@@ -6352,9 +6353,9 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
             }
         }
     } else {
-        if (!SUNKEN(IN_ROOM(vict)) && SECT(IN_ROOM(vict)) != SECT_WATER_SWIM &&
-            SECT(IN_ROOM(vict)) != SECT_WATER_NOSWIM && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE) &&
-            SECT(IN_ROOM(vict)) != SECT_FLYING) {
+        if (!SUNKEN(IN_ROOM(vict)) && tile != SECT_WATER_SWIM &&
+            tile != SECT_WATER_NOSWIM && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE) &&
+            tile != SECT_FLYING) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -6392,7 +6393,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_NOTVICT);
                     break;
             }
-        } else if (SECT(IN_ROOM(vict)) == SECT_WATER_SWIM || SECT(IN_ROOM(vict)) == SECT_WATER_NOSWIM) {
+        } else if (tile == SECT_WATER_SWIM || tile == SECT_WATER_NOSWIM) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict, TO_CHAR);
@@ -6468,7 +6469,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_NOTVICT);
                     break;
             }
-        } else if (SECT(IN_ROOM(vict)) == SECT_FLYING) {
+        } else if (tile == SECT_FLYING) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r explodes and chunks of $M shower towards the ground far below.@n", true, ch, nullptr,

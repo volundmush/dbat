@@ -131,12 +131,12 @@ ACMD(do_sradar) {
         send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
         return;
     }
-
-    if (noship == false && SECT(IN_ROOM(vehicle)) != SECT_SPACE) {
+    
+    if (noship == false && vehicle->getLocationTileType() != SECT_SPACE) {
         send_to_char(ch, "@wYour ship is not in space!\r\n");
         return;
     }
-    if (noship == true && SECT(IN_ROOM(ch)) != SECT_SPACE) {
+    if (noship == true && ch->getLocationTileType() != SECT_SPACE) {
         send_to_char(ch, "@wYou are not even in space!\r\n");
         return;
     }

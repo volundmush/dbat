@@ -751,19 +751,19 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     }
 
     if (EXIT(object, 5) &&
-        (SECT(IN_ROOM(object)) == SECT_UNDERWATER || SECT(IN_ROOM(object)) == SECT_WATER_NOSWIM)) {
+        (object->getLocationTileType() == SECT_UNDERWATER || object->getLocationTileType() == SECT_WATER_NOSWIM)) {
         act("$p @Bsinks to deeper waters.@n", true, nullptr, object, nullptr, TO_ROOM);
         int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
         obj_from_room(object);
         obj_to_room(object, real_room(numb));
     }
-    if (EXIT(object, 5) && SECT(IN_ROOM(object)) == SECT_FLYING &&
+    if (EXIT(object, 5) && object->getLocationTileType() == SECT_FLYING &&
         (GET_OBJ_VNUM(object) < 80 || GET_OBJ_VNUM(object) > 83)) {
         act("$p @Cfalls down.@n", true, nullptr, object, nullptr, TO_ROOM);
         int numb = GET_ROOM_VNUM(EXIT(object, 5)->to_room);
         obj_from_room(object);
         obj_to_room(object, real_room(numb));
-        if (SECT(IN_ROOM(object)) != SECT_FLYING) {
+        if (object->getLocationTileType() != SECT_FLYING) {
             act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
         }
     }

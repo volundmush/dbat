@@ -2182,7 +2182,9 @@ ACMD(do_drag) {
         return;
     }
 
-    if (SECT(IN_ROOM(ch)) == SECT_WATER_NOSWIM || SECT(IN_ROOM(ch)) == SECT_WATER_SWIM) {
+    const auto tile = ch->getLocationTileType();
+
+    if (tile == SECT_WATER_NOSWIM || tile == SECT_WATER_SWIM) {
         send_to_char(ch, "You decide to not be a tugboat instead.\r\n");
         return;
     }
