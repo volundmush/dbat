@@ -1133,12 +1133,6 @@ bool char_data::isProvidingLight() {
     return false;
 }
 
-struct room_data* char_data::getRoom() {
-    auto roomFound = world.find(in_room);
-    if(roomFound != world.end()) return &roomFound->second;
-    return nullptr;
-}
-
 double char_data::currentGravity() {
     if(auto room = getRoom(); room) {
         return room->getGravity();

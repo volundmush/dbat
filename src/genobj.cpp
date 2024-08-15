@@ -674,12 +674,6 @@ bool obj_data::isProvidingLight() {
     return GET_OBJ_TYPE(this) == ITEM_LIGHT && GET_OBJ_VAL(this, VAL_LIGHT_HOURS);
 }
 
-struct room_data* obj_data::getRoom() {
-    auto roomFound = world.find(in_room);
-    if(roomFound != world.end()) return &roomFound->second;
-    return nullptr;
-}
-
 struct room_data* obj_data::getAbsoluteRoom() {
     if(auto room = getRoom(); room) {
         return room;

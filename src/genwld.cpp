@@ -453,10 +453,10 @@ std::optional<room_vnum> room_data::getLaunchDestination() {
     return a.getLaunchDestination();
 }
 
-std::list<char_data *> room_data::getPeople() {
-    std::list<struct char_data*> out;
+std::vector<CharRef> room_data::getPeople() {
+    std::vector<CharRef> out;
     for(auto c = people; c; c = c->next_in_room) {
-        out.push_back(c);
+        out.emplace_back(c);
     }
     return out;
 }
@@ -525,4 +525,24 @@ std::optional<std::string> room_data::dgCallMember(const std::string& member, co
     }
 
     return {};
+}
+
+double room_data::setEnvironment(int type, double value) {
+    environment[type] = value;
+    return value;
+}
+
+double room_data::modEnvironment(int type, double value) {
+    environment[type] += value;
+    return environment[type];
+}
+
+void room_data::clearEnvironment(int type) {
+    environment.erase(type);
+}
+
+double room_data::getEnvironment(int type) {
+    // TODO: add the calculator stuff.
+    if(environment.contains(type)) return environment[type];
+    return 0.0;
 }

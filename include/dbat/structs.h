@@ -281,7 +281,7 @@ struct unit_data {
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
-    std::list<struct obj_data*> getContents();
+    std::vector<ObjRef> getContents();
 
     int64_t id{NOTHING}; /* used by DG triggers	*/
     time_t generation{};             /* creation time for dupe check     */
@@ -306,9 +306,48 @@ struct unit_data {
 
 };
 
+struct room_direction_data;
+
+struct thing_data : public unit_data {
+    room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
+
+    struct room_data* room;
+    struct room_data* getRoom() const;
+
+    std::string getLocationName() const;
+    room_direction_data* getLocationExit(int dir) const;
+    std::map<int, room_direction_data*> getLocationExits() const;
+
+    double getLocationEnvironment(int type) const;
+    double setLocationEnvironment(int type, double value) const;
+    double modLocationEnvironment(int type, double value) const;
+    void clearLocationEnvironment(int type) const;
+
+    void setRoomFlag(int flag, bool value = true) const;
+    bool toggleRoomFlag(int flag) const;
+    bool getRoomFlag(int flag) const;
+
+    void broadcastAtLocation(const std::string& message) const;
+
+    std::vector<ObjRef> getLocationObjects() const;
+    std::vector<CharRef> getLocationPeople() const;
+
+    int getLocationDamage() const;
+    int setLocationDamage(int amount) const;
+    int modLocationDamage(int amount) const;
+
+    int getLocationTileType() const;
+
+    int getLocationGroundEffect() const;
+    int setLocationGroundEffect(int val) const;
+    int modLocationGroundEffect(int val) const;
+
+    SpecialFunc getLocationSpecialFunc() const;
+
+};
 
 /* ================== Memory Structure for Objects ================== */
-struct obj_data : public unit_data {
+struct obj_data : public thing_data {
     obj_data() = default;
     explicit obj_data(const nlohmann::json& j);
 
@@ -338,13 +377,11 @@ struct obj_data : public unit_data {
     bool isActive() override;
 
     struct room_data* getAbsoluteRoom();
-    struct room_data* getRoom();
     bool isWorking();
     void clearLocation();
 
     ObjRef ref();
 
-    room_rnum in_room{NOWHERE};        /* In what room -1 when conta/carr	*/
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
     /* legacy Values of the item (see VAL_ list in defs.h)    */
@@ -480,13 +517,19 @@ struct room_data : public unit_data {
 
     std::optional<room_vnum> getLaunchDestination();
 
-    std::list<struct char_data*> getPeople();
+    std::vector<CharRef> getPeople();
 
     MoonCheck checkMoon();
 
     nlohmann::json serializeDgVars();
 
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
+
+    double getEnvironment(int type);
+    double setEnvironment(int type, double value);
+    double modEnvironment(int type, double value);
+    void clearEnvironment(int type);
+    std::unordered_map<int, double> environment;
 
 };
 extern std::map<room_vnum, room_data> world;
@@ -704,7 +747,7 @@ struct craftTask {
 
 
 /* ================== Structure for player/non-player ===================== */
-struct char_data : public unit_data {
+struct char_data : public thing_data {
     char_data() = default;
     // this constructor below is to be used only for the mob_proto map.
     explicit char_data(const nlohmann::json& j);
@@ -743,8 +786,6 @@ struct char_data : public unit_data {
     void onAttacked(atk::Attack& incoming);
 
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
-
-    struct room_data* getRoom();
 
     struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
     std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
@@ -822,7 +863,6 @@ struct char_data : public unit_data {
     double getRegen(CharVital type);
 
     // Instance-relevant fields below...
-    room_vnum in_room{NOWHERE};        /* Location (real room number)		*/
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
 
     std::bitset<NUM_ADMFLAGS> admflags{};    /* Bitvector for admin privs		*/

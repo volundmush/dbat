@@ -4202,9 +4202,12 @@ namespace atk {
 
     bool KiAreaAttack::getOpponent() {
 
-        std::list<struct char_data*> people = user->getRoom()->getPeople();
+        auto people = user->getLocationPeople();
 
-        for (auto person : people) {
+        for (const auto& ref : people) {
+            auto person = ref.get();
+            if(!person) continue;
+
             if (person == user) {
                 continue;
             }

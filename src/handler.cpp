@@ -408,6 +408,7 @@ void char_from_room(struct char_data *ch) {
 
     REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
     IN_ROOM(ch) = NOWHERE;
+    ch->room = nullptr;
     ch->next_in_room = nullptr;
 
 
@@ -421,6 +422,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     ch->next_in_room = room->people;
     room->people = ch;
     IN_ROOM(ch) = room->vn;
+    ch->room = room;
 
     auto &z = zone_table[room->zone];
     if(IS_NPC(ch)) {
@@ -687,6 +689,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     object->next_content = room->contents;
     room->contents = object;
     IN_ROOM(object) = room->vn;
+    object->room = room;
     object->carried_by = nullptr;
     GET_LAST_LOAD(object) = time(nullptr);
 
@@ -814,6 +817,7 @@ void obj_from_room(struct obj_data *object) {
     REMOVE_FROM_LIST(object, object->getRoom()->contents, next_content, temp);
 
     IN_ROOM(object) = NOWHERE;
+    object->room = nullptr;
     object->next_content = nullptr;
 
 }
