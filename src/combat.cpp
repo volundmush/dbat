@@ -167,7 +167,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
     if (IS_KONATSU(ch)) {
         perc *= 1.5;
     }
-    if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 8 || GET_GENOME(ch, 1) == 8)) {
+    if (IS_BIO(ch) && (ch->genome.contains(8))) {
         perc *= 1.4;
     }
 
@@ -2358,7 +2358,7 @@ int handle_block(struct char_data *ch) {
             return (0);
         } else {
             int num = GET_SKILL(ch, SKILL_BLOCK);
-            if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3)) {
+            if (IS_MUTANT(ch) && (ch->genome.contains(3))) {
                 num += 10;
             }
             if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {
@@ -2414,7 +2414,7 @@ int handle_dodge(struct char_data *ch) {
             return (0);
         } else {
             int num = GET_SKILL(ch, SKILL_DODGE);
-            if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3)) {
+            if (IS_MUTANT(ch) && (ch->genome.contains(3))) {
                 num += 10;
             }
             if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {
@@ -3085,7 +3085,7 @@ static void damtype_kai_ki(char_data *ch, int64_t *dam, int bon) {
 }
 
 static void damtype_icer_ki(char_data *ch, int64_t *dam, int bon) {
-    if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
+    if (IS_ICER(ch) || (IS_BIO(ch) && (ch->genome.contains(4)))) {
         *dam += (*dam / 100) * bon;
     }
 }
@@ -3668,7 +3668,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
         diminishing_returns = 0;
     bonus = (start_bonus) * diminishing_returns;
     
-    if (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)) {
+    if (IS_BIO(ch) && (ch->genome.contains(2))) {
         bonus /= 2;
     }
     
@@ -3822,7 +3822,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         if (IS_HALFBREED(ch)) {
             gaincalc = gaincalc * 1.2;
         }
-        if (IS_ICER(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4))) {
+        if (IS_ICER(ch) || (IS_BIO(ch) && (ch->genome.contains(4)))) {
             gaincalc = gaincalc * 0.9;
         }
 		//Room bonuses to xp gain
@@ -4024,7 +4024,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         } else if (ABSORBBY(ch)) {
             send_to_char(ch, "You are too busy being absorbed by %s!\r\n", GET_NAME(ABSORBBY(ch)));
             return 0;
-        } else if ((std::abs(GET_ALT(vict) - GET_ALT(ch)) == 1) && (IS_NAMEK(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3)))) {
+        } else if ((std::abs(GET_ALT(vict) - GET_ALT(ch)) == 1) && (IS_NAMEK(ch) || (IS_BIO(ch) && (ch->genome.contains(3))))) {
             act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, nullptr, vict, TO_CHAR);
             act("@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", true, ch, nullptr, vict,
                 TO_VICT);
@@ -4334,7 +4334,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
 
-        if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 8 || GET_GENOME(vict, 1) == 8) && type == 0) {
+        if (IS_MUTANT(vict) && (vict->genome.contains(8)) && type == 0) {
             int64_t drain = dmg * 0.1;
             dmg -= drain;
             ch->decCurST(drain, 1);
@@ -4900,7 +4900,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         GET_CHARGE(ch) = GET_CHARGE(ch) + (GET_MAX_MANA(vict) * 0.12);
                         
                     }
-                    if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
+                    if (IS_MUTANT(ch) && (ch->genome.contains(10))) {
                         ch->incCurKI(dmg * .05);
                     }
                     if (!is_sparring(ch) && IS_NPC(vict)) {
@@ -4966,7 +4966,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
                     ch->incCurKI(raise);
                 }
-                if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 10 || GET_GENOME(ch, 1) == 10)) {
+                if (IS_MUTANT(ch) && (ch->genome.contains(10))) {
                     ch->incCurKI(dmg * .05);
                 }
                 send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
@@ -5051,7 +5051,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
         if(dmg > 0 && !IS_NPC(ch)) {
-            if((IS_SAIYAN(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2)))) {
+            if((IS_SAIYAN(ch) || (IS_BIO(ch) && (ch->genome.contains(2))))) {
                 if (GET_POS(ch) != POS_RESTING && GET_POS(vict) != POS_RESTING) {
                     saiyan_gain(ch, vict);
                 }
@@ -5284,7 +5284,7 @@ int handle_parry(struct char_data *ch) {
         return (-2);
     } else {
         int num = GET_SKILL(ch, SKILL_PARRY);
-        if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 3 || GET_GENOME(ch, 1) == 3)) {
+        if (IS_MUTANT(ch) && (ch->genome.contains(3))) {
             num += 10;
         }
         if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {

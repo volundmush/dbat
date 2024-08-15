@@ -547,13 +547,13 @@ int roll_skill(struct char_data *ch, int snum) {
     if (!IS_NPC(ch)) {
         skval = GET_SKILL(ch, snum);
         if (SKILL_SPOT == snum) {
-            if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) {
+            if (IS_MUTANT(ch) && (ch->genome.contains(4))) {
                 skval += 5;
             }
         } else if (SKILL_HIDE == snum) {
             if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
                 skval += 5;
-            } else if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 5 || GET_GENOME(ch, 1) == 5)) {
+            } else if (IS_MUTANT(ch) && (ch->genome.contains(5))) {
                 skval += 10;
             }
         }

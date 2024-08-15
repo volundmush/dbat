@@ -1416,12 +1416,12 @@ void enter_player_game(struct descriptor_data *d) {
         SET_SKILL(d->character, SKILL_TAILWHIP, 0);
     }
 
-    if (IS_MUTANT(d->character) && (GET_GENOME(d->character, 0) == 9 || GET_GENOME(d->character, 1) == 9) &&
+    if (IS_MUTANT(d->character) && (d->character->genome.contains(9)) &&
         !GET_SKILL(d->character, SKILL_TELEPATHY)) {
         SET_SKILL(d->character, SKILL_TELEPATHY, 50);
     }
 
-    if (IS_BIO(d->character) && (GET_GENOME(d->character, 0) == 7 || GET_GENOME(d->character, 1) == 7) &&
+    if (IS_BIO(d->character) && (d->character->genome.contains(7)) &&
         !GET_SKILL(d->character, SKILL_TELEPATHY) && !GET_SKILL(d->character, SKILL_FOCUS)) {
         SET_SKILL(d->character, SKILL_TELEPATHY, 30);
         SET_SKILL(d->character, SKILL_FOCUS, 30);

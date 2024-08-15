@@ -885,7 +885,7 @@ void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
             double refill = 0.05;
             double lfcost = 0.05;
 
-            bool mutantBonus = IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 2 || GET_GENOME(ch, 1) == 2);
+            bool mutantBonus = IS_MUTANT(ch) && (ch->genome.contains(2));
 
             if (GET_BONUS(ch, BONUS_DIEHARD) > 0) {
                 if (mutantBonus) {
@@ -1028,7 +1028,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 do_flee(ch, nullptr, 0, 0);
             }
         }
-        if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 6 || GET_GENOME(ch, 1) == 6) && rand_number(1, 200) >= 175) {
+        if (IS_MUTANT(ch) && (ch->genome.contains(6)) && rand_number(1, 200) >= 175) {
             mutant_limb_regen(ch);
         }
         if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
@@ -1921,7 +1921,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                     psreward *= 0.5;
                 }
                 if (IS_HUMAN(killer) ||
-                    (IS_BIO(killer) && (GET_GENOME(killer, 0) == 1 || GET_GENOME(killer, 1) == 1))) {
+                    (IS_BIO(killer) && (killer->genome.contains(1)))) {
                     psreward *= 1.25;
                 }
                 if (IS_HALFBREED(ch)) {

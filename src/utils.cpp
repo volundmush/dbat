@@ -2050,7 +2050,7 @@ void improve_skill(struct char_data *ch, int skill, int num) {
         roll -= 100;
     }
 
-    if (IS_TRUFFLE(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) == 6 || GET_GENOME(ch, 1) == 6))) {
+    if (IS_TRUFFLE(ch) || (IS_BIO(ch) && (ch->genome.contains(6)))) {
         roll *= 0.5;
     } else if (IS_MAJIN(ch)) {
         roll += roll * .3;

@@ -556,9 +556,7 @@ nlohmann::json char_data::serializeInstance() {
     if(damage_mod) j["damage_mod"] = damage_mod;
     if(droom) j["droom"] = droom;
     if(accuracy_mod) j["accuracy_mod"] = accuracy_mod;
-    for(auto i = 0; i < 2; i++) {
-        if(genome[i]) j["genome"].push_back(std::make_pair(i, genome[i]));
-    }
+    for(auto i : genome) j["genome"].push_back(i);
     if(gauntlet) j["gauntlet"] = gauntlet;
     if(ingestLearned) j["ingestLearned"] = ingestLearned;
     if(kaioken) j["kaioken"] = kaioken;
@@ -727,7 +725,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("accuracy_mod")) accuracy_mod = j["accuracy_mod"];
     if(j.contains("genome")) {
         for(auto &i : j["genome"]) {
-            genome[i[0].get<int>()] = i[1];
+            genome.insert(i.get<int>());
         }
     }
     if(j.contains("gauntlet")) gauntlet = j["gauntlet"];

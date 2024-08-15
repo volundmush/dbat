@@ -2042,7 +2042,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
         dcval = roll_skill(ch, SKILL_MOVE_SILENTLY); /* How difficult to counter? */
         if (GET_SKILL(ch, SKILL_BALANCE))
             dcval += GET_SKILL(ch, SKILL_BALANCE) / 10;
-        if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 5 || GET_GENOME(ch, 1) == 5)) {
+        if (IS_MUTANT(ch) && (ch->genome.contains(5))) {
             dcval += 10;
         }
         resskill = SKILL_SPOT;             /* Skill used to resist      */

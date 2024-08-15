@@ -2584,8 +2584,8 @@ static int load_char(const char *name, struct char_data *ch) {
                 case 'G':
                     if (!strcmp(tag, "Gold")) ch->set(CharMoney::Carried, atoi(line));
                     else if (!strcmp(tag, "Gaun")) GET_GAUNTLET(ch) = atoi(line);
-                    else if (!strcmp(tag, "Geno")) GET_GENOME(ch, 0) = atoi(line);
-                    else if (!strcmp(tag, "Gen1")) GET_GENOME(ch, 1) = atoi(line);
+                    else if (!strcmp(tag, "Geno")) ch->genome.insert(atoi(line));
+                    else if (!strcmp(tag, "Gen1")) ch->genome.insert(atoi(line));
                     break;
 
                 case 'H':

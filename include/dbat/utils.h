@@ -525,7 +525,7 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 #define GET_WIS(ch)     ((ch)->get(CharAttribute::Wisdom))
 #define GET_CON(ch)     ((ch)->get(CharAttribute::Constitution))
 #define GET_CHA(ch)     ((ch)->get(CharAttribute::Speed))
-#define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? ((GET_GENOME(ch, 0) == 1 || GET_GENOME(ch, 1) == 1) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
+#define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? (((ch)->genome.contains(1)) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
 extern int GET_SPEEDI(struct char_data *ch);
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
 #define GET_SPEEDBONUS(ch) (IS_ARLIAN(ch) ? AFF_FLAGGED(ch, AFF_SHELL) ? GET_SPEEDVAR(ch) * -0.5 : (IS_MALE(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 0.5) : 0) : 0) : 0)
@@ -572,7 +572,6 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_SONG(ch)      ((ch)->get(CharNum::MysticMelody))
 #define GET_BONUS(ch, i)  ((ch)->bonuses[i])
 #define GET_TRANSCOST(ch, i) ((ch)->transcost[i])
-#define GET_GENOME(ch, i)    ((ch)->genome[i])
 #define COMBO(ch)         ((ch)->combo)
 #define LASTATK(ch)       ((ch)->lastattack)
 #define COMBHITS(ch)      ((ch)->combhits)
@@ -708,7 +707,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define CAN_CARRY_N(ch) (50)
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
 #define CAN_SEE_IN_DARK(ch) \
-   (AFF_FLAGGED(ch, AFF_INFRAVISION) || (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HOLYLIGHT)) || (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) || PLR_FLAGGED(ch, PLR_AURALIGHT))
+   (AFF_FLAGGED(ch, AFF_INFRAVISION) || (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HOLYLIGHT)) || (IS_MUTANT(ch) && ((ch)->genome.contains(4))) || PLR_FLAGGED(ch, PLR_AURALIGHT))
 
 #define IS_GOOD(ch)    (GET_ALIGNMENT(ch) >= 50)
 #define IS_EVIL(ch)    (GET_ALIGNMENT(ch) <= -50)
@@ -826,7 +825,7 @@ extern void WAIT_STATE(struct char_data *ch, double timeToWait);
 /* Various macros building up to CAN_SEE */
 
 #define LIGHT_OK(sub)    (!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && (GET_GENOME(sub, 0) == 4 || GET_GENOME(sub, 1) == 4)) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && ((sub)->genome.contains(4))) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
 
 #define INVIS_OK(sub, obj) \
  (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))

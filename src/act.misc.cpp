@@ -274,8 +274,7 @@ static void generate_multiform(struct char_data *ch, int count) {
 
 
         // Bioandroid Genome copy...
-        clone->genome[0] = ch->genome[0];
-        clone->genome[1] = ch->genome[1];
+        clone->genome = ch->genome;
 
         // Limb copy...
         for (int l = 0; l < 3; l++) {
@@ -3968,7 +3967,7 @@ ACMD(do_silk) {
 /* Let's an Arlian trade Stamina for either PL or Ki*/
 ACMD(do_adrenaline) {
 
-    if (!IS_ARLIAN(ch) && (!IS_BIO(ch) || (IS_BIO(ch) && (GET_GENOME(ch, 0) != 6 && GET_GENOME(ch, 1) != 6)))) {
+    if (!IS_ARLIAN(ch) && (!IS_BIO(ch) || (IS_BIO(ch) && (!ch->genome.contains(6))))) {
         send_to_char(ch, "You are not an arlian and do not possess this ability\r\n");
         return;
     } else {

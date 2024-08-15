@@ -5981,7 +5981,7 @@ ACMD(do_focus) {
                 if (IS_NPC(vict)) {
                     set_fighting(vict, ch);
                 }
-                if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 7 || GET_GENOME(vict, 1) == 7)) {
+                if (IS_MUTANT(vict) && vict->genome.contains(7)) {
                     act("However $N seems unaffected by the poison.", true, ch, nullptr, vict, TO_CHAR);
                     act("Your natural immunity to poison prevents it from affecting you.", true, ch, nullptr, vict,
                         TO_VICT);
@@ -11418,8 +11418,7 @@ void genRace(char_data* ch, std::string suggestedRace) {
         send_to_char(ch,"\r\nThat's not a race.\r\n");
         return;
     } else if(currentRace == RaceID::BioAndroid || currentRace == RaceID::Mutant) {
-        ch->genome[0] = 0;
-        ch->genome[1] = 0;
+        ch->genome.clear();
     } else if(currentRace == RaceID::Halfbreed || currentRace == RaceID::Android) {
         ch->set(CharNum::RacialPref, 0);
     }
@@ -11492,8 +11491,8 @@ void genRaceExtra(char_data* ch, std::string arg){
 
     if(ch->race == RaceID::BioAndroid) {
         bool second = false;
-        if(ch->genome[0] > 0) second = true;
-        if(second && ch->genome[0] == atoi(arg.c_str())) {
+        if(!ch->genome.empty()) second = true;
+        if(second && ch->genome.contains(atoi(arg.c_str()))) {
             send_to_char(ch, "You can't choose the same thing for both genomes!\r\n");
             return;
         }
@@ -11539,8 +11538,7 @@ void genRaceExtra(char_data* ch, std::string arg){
         }
         if(is_abbrev(arg.c_str(), "clear") || arg == "8") {
             send_to_char(ch,"\r\nChoices reset.\r\n");
-            ch->genome[0] = 0;
-            ch->genome[1] = 0;
+            ch->genome.clear();
             return;
         }
         
@@ -11556,11 +11554,10 @@ void genRaceExtra(char_data* ch, std::string arg){
         send_to_char(ch, "@B8@w) @CKonatsu @c- @C40%% higher chance to multihit on physical attacks.\r\n");
         send_to_char(ch, "(Use 'chargen raceextra <num>' twice, or 'chargen raceextra clear' to reset your choices)\r\n");
 
-        if (ch->genome[0] > 0) {
-            if(ch->genome[1] > 0)
-                send_to_char(ch, "\r\nYour current choice is: %s and %s\r\n", std::to_string(ch->genome[0]), std::to_string(ch->genome[1]));
-            else
-                send_to_char(ch, "\r\nYour current choice is: %s\r\n", std::to_string(ch->genome[0]));
+        if (ch->genome.size() > 0) {
+            std::vector<std::string> genomes;
+            for(auto g : ch->genome) genomes.push_back(std::to_string(g));
+            send_to_char(ch, fmt::format("\r\nYour current choices are: {}\r\n", fmt::join(genomes, " and ")));
         }
         return;
     }
@@ -11568,8 +11565,8 @@ void genRaceExtra(char_data* ch, std::string arg){
 
     if(ch->race == RaceID::Mutant) {
         bool second = false;
-        if(ch->genome[0] > 0) second = true;
-        if(second && ch->genome[0] == atoi(arg.c_str())) {
+        if(!ch->genome.empty() > 0) second = true;
+        if(second && ch->genome.contains(atoi(arg.c_str()))) {
             send_to_char(ch, "You can't choose the same thing for both genomes!\r\n");
             return;
         }
@@ -11625,8 +11622,7 @@ void genRaceExtra(char_data* ch, std::string arg){
         }
         if(is_abbrev(arg.c_str(), "clear") || arg == "8") {
             send_to_char(ch,"\r\nChoices reset.\r\n");
-            ch->genome[0] = 0;
-            ch->genome[1] = 0;
+            ch->genome.clear();
             return;
         }
         
@@ -11644,11 +11640,10 @@ void genRaceExtra(char_data* ch, std::string arg){
         send_to_char(ch, "@B10@w) @CNatural Energy      @c-Get 5%% of your ki damage refunded back into your current ki total.@n\n");
         send_to_char(ch, "(Use 'chargen raceextra <num>' twice, or 'chargen raceextra clear' to reset your choices)\r\n");
 
-        if (ch->genome[0] > 0) {
-            if(ch->genome[1] > 0)
-                send_to_char(ch, "\r\nYour current choice is: %s and %s\r\n", std::to_string(ch->genome[0]), std::to_string(ch->genome[1]));
-            else
-                send_to_char(ch, "\r\nYour current choice is: %s\r\n", std::to_string(ch->genome[0]));
+        if (!ch->genome.empty()) {
+            std::vector<std::string> genomes;
+            for(auto g : ch->genome) genomes.push_back(std::to_string(g));
+            send_to_char(ch, fmt::format("\r\nYour current choice is: %s\r\n", fmt::join(genomes, " and ")));
         }
         return;
     }
@@ -12223,7 +12218,7 @@ void genFinish(char_data* ch) {
         if(ch->get(CharNum::RacialPref) == 0) finished = false;
 
     if(ch->race == RaceID::Mutant || ch->race == RaceID::BioAndroid) 
-        if(ch->genome[0] == 0 || ch->genome[1] == 0) finished = false;
+        if(ch->genome.size() != 2) finished = false;
 
     if(ch->chclass == SenseiID::Commoner) finished = false;
     if(ch->genBonus == 0) finished = false;
@@ -12387,14 +12382,14 @@ void genFinish(char_data* ch) {
     }
 
 
-    if (ch->race == RaceID::BioAndroid && (ch->genome[0] == 7 || ch->genome[1] == 7)) {
+    if (ch->race == RaceID::BioAndroid && (ch->genome.contains(7))) {
         SET_SKILL(ch, SKILL_TELEPATHY, 30);
         SET_SKILL(ch, SKILL_FOCUS, 30);
     }
-    if (ch->race == RaceID::Mutant && (ch->genome[0] == 3 || ch->genome[1] == 3)) {
+    if (ch->race == RaceID::Mutant && (ch->genome.contains(3))) {
         ch->mod(CharAttribute::Agility, 10);
     }
-    if (ch->race == RaceID::Mutant && (ch->genome[0] == 9 || ch->genome[1] == 9)) {
+    if (ch->race == RaceID::Mutant && (ch->genome.contains(9))) {
         SET_SKILL(ch, SKILL_TELEPATHY, 50);
     }
 
@@ -12544,14 +12539,20 @@ ACMD(do_gen) {
     if(ch->race == RaceID::Android)
         send_to_char(ch, "[RaceExtra] Type: %s\r\n", ch->get(CharNum::RacialPref) == 0 ? "@@RUnset@n" : std::to_string(ch->get(CharNum::RacialPref)));
 
-    if(ch->race == RaceID::BioAndroid)
-        send_to_char(ch, "[RaceExtra] Genomes: %s, %s\r\n", 
-            ch->genome[0] == 0 ? "@RUnset@n" : std::to_string(ch->genome[0]), ch->genome[1] == 0 ? "@RUnset@n" : std::to_string(ch->genome[1]));
-
-    if(ch->race == RaceID::Mutant)
-        send_to_char(ch, "[RaceExtra] Mutations: %s, %s\r\n", 
-            ch->genome[0] == 0 ? "@RUnset@n" : std::to_string(ch->genome[0]), ch->genome[1] == 0 ? "@RUnset@n" : std::to_string(ch->genome[1]));
-
+    if(ch->race == RaceID::BioAndroid) {
+        std::vector<std::string> genomes;
+        for(auto g : ch->genome) genomes.push_back(std::to_string(g));
+        std::string joined = boost::algorithm::join(genomes, ", ");
+        send_to_char(ch, "[RaceExtra] Genomes: %s\r\n", genomes.empty() ? "@RUnset@n" : joined.c_str());
+    }
+        
+    if(ch->race == RaceID::Mutant) {
+        std::vector<std::string> genomes;
+        for(auto g : ch->genome) genomes.push_back(std::to_string(g));
+        std::string joined = boost::algorithm::join(genomes, ", ");
+        send_to_char(ch, "[RaceExtra] Mutations: %s\r\n", genomes.empty() ? "@RUnset@n" : joined.c_str());
+    }
+    
     send_to_char(ch, "[Eyes] Eyes: %s\r\n", ch->get(CharAppearance::EyeColor) == 100 ? "@RUnset@n" : eye_colour[ch->get(CharAppearance::EyeColor)]);
     send_to_char(ch, "[Skin] Skin: %s\r\n", ch->get(CharAppearance::SkinColor) == 100 ? "@RUnset@n" : skin_tone[ch->get(CharAppearance::SkinColor)]);
     send_to_char(ch, "[Aura] Aura: %s\r\n", ch->get(CharAppearance::Aura) == 100 ? "@RUnset@n" : aura_colour[ch->get(CharAppearance::Aura)]);

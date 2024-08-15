@@ -887,10 +887,7 @@ namespace net {
         ch->nums = cg.nums;
         ch->dims = cg.dims;
         if(cg.race == RaceID::BioAndroid || cg.race == RaceID::Mutant) {
-            auto i = 0;
-            for(auto &g : cg.genome) {
-                ch->genome[i++] = g;
-            }
+            ch->genome = cg.genome;
         }
 
         init_char(ch);

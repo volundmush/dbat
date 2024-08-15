@@ -1686,7 +1686,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                         i->playerFlags.reset(PLR_AURALIGHT);
                     }
                 }
-                if (IS_MUTANT(i) && (GET_GENOME(i, 0) == 6 || GET_GENOME(i, 1) == 6)) {
+                if (IS_MUTANT(i) && i->genome.contains(6)) {
                     mutant_limb_regen(i);
                 }
 

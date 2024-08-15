@@ -2956,8 +2956,7 @@ ACMD(do_drink) {
         send_to_char(ch, "You are inside a healing tank!\r\n");
         return;
     }
-    if (GET_COND(ch, HUNGER) <= 1 && GET_COND(ch, THIRST) >= 2 && !IS_NAMEK(ch) && GET_GENOME(ch, 0) != 3 &&
-        GET_GENOME(ch, 1) != 3) {
+    if (GET_COND(ch, HUNGER) <= 1 && GET_COND(ch, THIRST) >= 2 && !IS_NAMEK(ch) && !ch->genome.contains(3)) {
         send_to_char(ch, "You need to eat first!\r\n");
         return;
     }
@@ -3132,7 +3131,7 @@ ACMD(do_drink) {
         send_to_char(ch, "You don't feel thirsty anymore.\r\n");
 
     if (GET_OBJ_VAL(temp, VAL_DRINKCON_POISON) &&
-        (!IS_MUTANT(ch) || (GET_GENOME(ch, 0) != 7 && GET_GENOME(ch, 1) != 7))) {    /* The crap was poisoned
+        (!IS_MUTANT(ch) || (!ch->genome.contains(7)))) {    /* The crap was poisoned
 ! */
         send_to_char(ch, "Oops, it tasted rather strange!\r\n");
         act("$n chokes and utters some strange sounds.", true, ch, nullptr, nullptr, TO_ROOM);

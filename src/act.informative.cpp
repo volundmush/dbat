@@ -328,10 +328,10 @@ static void search_room(struct char_data *ch) {
             if (AFF_FLAGGED(vict, AFF_LIQUEFIED)) {
                 prob *= 1.5;
             }
-            if (IS_MUTANT(ch) && (GET_GENOME(ch, 0) == 4 || GET_GENOME(ch, 1) == 4)) {
+            if (IS_MUTANT(ch) && (ch->genome.contains(4))) {
                 perc += 5;
             }
-            if (IS_MUTANT(vict) && (GET_GENOME(vict, 0) == 5 || GET_GENOME(vict, 1) == 5)) {
+            if (IS_MUTANT(vict) && (vict->genome.contains(5))) {
                 prob += 10;
             }
             terrain += terrain_bonus(vict);
@@ -5341,10 +5341,9 @@ ACMD(do_status) {
                 "  Natural Energy.\r\n"
             };
 
-            for (int i = 0; i < 2; ++i) {
-                int genome = GET_GENOME(ch, i);
-                if (genome >= 1 && genome <= 10) {
-                    send_to_char(ch, mutations[genome - 1]);
+            for (auto g : ch->genome) {
+                if (g >= 1 && g <= 10) {
+                    send_to_char(ch, mutations[g - 1]);
                 }
             }
         }
@@ -5363,13 +5362,12 @@ ACMD(do_status) {
                 "???"
             };
 
-            for (int i = 0; i < 2; i++) {
-                int genome = GET_GENOME(ch, i);
-                const char* race = (genome >= 1 && genome <= 8) ? races[genome - 1] : races[8];
+            for (auto g : ch->genome) {
+                const char* race = (g >= 1 && g <= 8) ? races[g - 1] : races[8];
                 send_to_char(ch, "  %s DNA.\r\n", race);
             }
         }
-        if (GET_GENOME(ch, 0) == 11) {
+        if (ch->genome.contains(11)) {
             send_to_char(ch, "You have used kyodaika.\r\n");
         }
         if (PRF_FLAGGED(ch, PRF_NOPARRY)) {

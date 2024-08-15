@@ -33,7 +33,7 @@ namespace net {
         RaceID race{RaceID::Spirit};
         SenseiID sensei{SenseiID::Commoner};
         std::unordered_map<CharAppearance, appearance_t> appearances;
-        std::unordered_set<int> genome{};                /* Bio racial bonus, Genome */
+        std::unordered_set<uint8_t> genome{};                /* Bio racial bonus, Genome */
 
         int androidModel{-1};
         std::unordered_map<CharNum, num_t> nums;

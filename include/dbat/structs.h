@@ -1000,7 +1000,7 @@ struct char_data : public thing_data {
     struct char_data *grappled{};
     std::array<int, 6> gravAcclim;
     int grap{};
-    int genome[2]{};                /* Bio racial bonus, Genome */
+    std::unordered_set<uint8_t> genome{};                /* Bio racial bonus, Genome */
     int combo{};
     int lastattack{};
     int combhits{};
