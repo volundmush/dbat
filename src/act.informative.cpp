@@ -2065,7 +2065,8 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
     if (GET_SKILL(ch, SKILL_SPOT) > rand_number(20, 110)) {
         spotted = true;
     }
-
+    
+    const auto tile = obj->getLocationTileType();
     switch (mode) {
         case SHOW_OBJ_LONG:
             /*
@@ -2088,7 +2089,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 see_plant(obj, ch);
                 return;
             }
-            const auto tile = obj->getLocationTileType();
+            
             if (OBJ_FLAGGED(obj, ITEM_BURIED)) {
                 char bury[MAX_INPUT_LENGTH];
                 if (!IS_CORPSE(obj)) {
