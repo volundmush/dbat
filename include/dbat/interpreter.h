@@ -74,7 +74,7 @@ extern char *delete_doubledollar(char *string);
  * beginning of the command list.. change this value to 11 or 15 (depending) */
 /* reserve these commands to come straight from the cmd list then start
  * sorting */
-#define RESERVE_CMDS               15
+constexpr int RESERVE_CMDS = 15;
 
 /* for compatibility with 2.20: */
 #define argument_interpreter(a, b, c) two_arguments(a, b, c)

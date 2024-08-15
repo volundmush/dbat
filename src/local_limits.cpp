@@ -25,7 +25,7 @@
 #include "dbat/dg_scripts.h"
 
 /* local defines */
-#define sick_fail       2
+constexpr int sick_fail = 2;
 
 /* local functions */
 static void heal_limb(struct char_data *ch);

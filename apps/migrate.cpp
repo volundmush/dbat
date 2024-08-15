@@ -577,7 +577,7 @@ static int Crash_load(struct char_data *ch) {
            &netcost, &gold, &account, &nitems);
 
     if (rentcode == RENT_RENTED || rentcode == RENT_TIMEDOUT) {
-        num_of_days = (float) (time(nullptr) - timed) / SECS_PER_REAL_DAY;
+        num_of_days = 0;
         cost = 0;
     }
     switch (orig_rent_code = rentcode) {

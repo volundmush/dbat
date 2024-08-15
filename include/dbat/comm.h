@@ -21,13 +21,13 @@
  */
 
 #ifndef INVALID_SOCKET
-#define INVALID_SOCKET (-1)
+constexpr int INVALID_SOCKET = -1;
 #endif
 
 /* mccp defines */
-#define COMPRESS2 86
+constexpr int COMPRESS2 = 86;
 
-#define NUM_RESERVED_DESCS    8
+constexpr int NUM_RESERVED_DESCS = 8;
 #define COPYOVER_FILE "copyover.dat"
 
 /* comm.c */
@@ -43,11 +43,11 @@ extern char *act(const char *str, int hide_invisible, struct char_data *ch, stru
 
 extern void close_socket(struct descriptor_data *d);
 
-#define TO_ROOM        1
-#define TO_VICT        2
-#define TO_NOTVICT    3
-#define TO_CHAR        4
-#define TO_GMOTE    5
+constexpr int TO_ROOM = 1;
+constexpr int TO_VICT = 2;
+constexpr int TO_NOTVICT = 3;
+constexpr int TO_CHAR = 4;
+constexpr int TO_GMOTE = 5;
 #define TO_SLEEP        (2 << 7)    /* to char, even if sleeping */
 #define DG_NO_TRIG      (2 << 8)    /* don't check act trigger   */
 #define TO_SNEAKRESIST  (2 << 9)    /* resisted sneaking roll    */
@@ -60,8 +60,8 @@ extern void string_add(struct descriptor_data *d, char *str);
 
 extern void string_write(struct descriptor_data *d, char **txt, size_t len, long mailto, void *data);
 
-#define PAGE_LENGTH    22
-#define PAGE_WIDTH    79
+constexpr int PAGE_LENGTH = 22;
+constexpr int PAGE_WIDTH = 79;
 
 
 extern void show_help(std::shared_ptr<net::Connection>& co, const char *entry);

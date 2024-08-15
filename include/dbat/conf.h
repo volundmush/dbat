@@ -10,10 +10,10 @@
 /* #undef HAVE_DOPRNT */
 
 /* Define if you have <sys/wait.h> that is POSIX.1 compatible.  */
-#define HAVE_SYS_WAIT_H 1
+constexpr int HAVE_SYS_WAIT_H = 1;
 
 /* Define if you have the vprintf function.  */
-#define HAVE_VPRINTF 1
+constexpr int HAVE_VPRINTF = 1;
 
 /* Define to `int' if <sys/types.h> doesn't define.  */
 /* #undef pid_t */
@@ -24,22 +24,22 @@
 /* #undef size_t */
 
 /* Define if you have the ANSI C header files.  */
-#define STDC_HEADERS 1
+constexpr int STDC_HEADERS = 1;
 
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
-#define TIME_WITH_SYS_TIME 1
+constexpr int TIME_WITH_SYS_TIME = 1;
 
 /* Define if we're compiling CircleMUD under any type of UNIX system.  */
-#define CIRCLE_UNIX 0
+constexpr int CIRCLE_UNIX = 0;
 
 /* Define if the system is capable of using crypt() to encrypt.  */
-#define CIRCLE_CRYPT 1
+constexpr int CIRCLE_CRYPT = 1;
 
 /* Define if we don't have proper support for the system's crypt().  */
 /* #undef HAVE_UNSAFE_CRYPT */
 
 /* Define is the system has struct in_addr.  */
-#define HAVE_STRUCT_IN_ADDR 1
+constexpr int HAVE_STRUCT_IN_ADDR = 1;
 
 /* Define to `int' if <sys/socket.h> doesn't define.  */
 /* #undef socklen_t */
@@ -48,28 +48,28 @@
 /* #undef ssize_t */
 
 /* Define if you have the gettimeofday function.  */
-#define HAVE_GETTIMEOFDAY 1
+constexpr int HAVE_GETTIMEOFDAY = 1;
 
 /* Define if you have the inet_addr function.  */
-#define HAVE_INET_ADDR 1
+constexpr int HAVE_INET_ADDR = 1;
 
 /* Define if you have the inet_aton function.  */
-#define HAVE_INET_ATON 1
+constexpr int HAVE_INET_ATON = 1;
 
 /* Define if you have the select function.  */
-#define HAVE_SELECT 1
+constexpr int HAVE_SELECT = 1;
 
 /* Define if you have the snprintf function.  */
-#define HAVE_SNPRINTF 1
+constexpr int HAVE_SNPRINTF = 1;
 
 /* Define if you have the strcasecmp function.  */
-#define HAVE_STRCASECMP 1
+constexpr int HAVE_STRCASECMP = 1;
 
 /* Define if you have the strdup function.  */
-#define HAVE_STRDUP 1
+constexpr int HAVE_STRDUP = 1;
 
 /* Define if you have the strerror function.  */
-#define HAVE_STRERROR 1
+constexpr int HAVE_STRERROR = 1;
 
 /* Define if you have the stricmp function.  */
 /* #undef HAVE_STRICMP */
@@ -78,91 +78,91 @@
 /* #undef HAVE_STRLCPY */
 
 /* Define if you have the strncasecmp function.  */
-#define HAVE_STRNCASECMP 1
+constexpr int HAVE_STRNCASECMP = 1;
 
 /* Define if you have the strnicmp function.  */
 /* #undef HAVE_STRNICMP */
 
 /* Define if you have the strstr function.  */
-#define HAVE_STRSTR 1
+constexpr int HAVE_STRSTR = 1;
 
 /* Define if you have the vsnprintf function.  */
-#define HAVE_VSNPRINTF 1
+constexpr int HAVE_VSNPRINTF = 1;
 
 /* Define if you have the <arpa/inet.h> header file.  */
-#define HAVE_ARPA_INET_H 1
+constexpr int HAVE_ARPA_INET_H = 1;
 
 /* Define if you have the <arpa/telnet.h> header file.  */
-#define HAVE_ARPA_TELNET_H 1
+constexpr int HAVE_ARPA_TELNET_H = 1;
 
 /* Define if you have the <assert.h> header file.  */
-#define HAVE_ASSERT_H 1
+constexpr int HAVE_ASSERT_H = 1;
 
 /* Define if you have the <crypt.h> header file.  */
-#define HAVE_CRYPT_H 1
+constexpr int HAVE_CRYPT_H = 1;
 
 /* Define if you have the <errno.h> header file.  */
-#define HAVE_ERRNO_H 1
+constexpr int HAVE_ERRNO_H = 1;
 
 /* Define if you have the <fcntl.h> header file.  */
-#define HAVE_FCNTL_H 1
+constexpr int HAVE_FCNTL_H = 1;
 
 /* Define if you have the <limits.h> header file.  */
-#define HAVE_LIMITS_H 1
+constexpr int HAVE_LIMITS_H = 1;
 
 /* Define if you have the <mcheck.h> header file.  */
-#define HAVE_MCHECK_H 1
+constexpr int HAVE_MCHECK_H = 1;
 
 /* Define if you have the <memory.h> header file.  */
-#define HAVE_MEMORY_H 1
+constexpr int HAVE_MEMORY_H = 1;
 
 /* Define if you have the <net/errno.h> header file.  */
 /* #undef HAVE_NET_ERRNO_H */
 
 /* Define if you have the <netdb.h> header file.  */
-#define HAVE_NETDB_H 1
+constexpr int HAVE_NETDB_H = 1;
 
 /* Define if you have the <netinet/in.h> header file.  */
-#define HAVE_NETINET_IN_H 1
+constexpr int HAVE_NETINET_IN_H = 1;
 
 /* Define if you have the <signal.h> header file.  */
-#define HAVE_SIGNAL_H 1
+constexpr int HAVE_SIGNAL_H = 1;
 
 /* Define if you have the <string.h> header file.  */
-#define HAVE_STRING_H 1
+constexpr int HAVE_STRING_H = 1;
 
 /* Define if you have the <strings.h> header file.  */
-#define HAVE_STRINGS_H 1
+constexpr int HAVE_STRINGS_H = 1;
 
 /* Define if you have the <sys/fcntl.h> header file.  */
-#define HAVE_SYS_FCNTL_H 1
+constexpr int HAVE_SYS_FCNTL_H = 1;
 
 /* Define if you have the <sys/resource.h> header file.  */
-#define HAVE_SYS_RESOURCE_H 1
+constexpr int HAVE_SYS_RESOURCE_H = 1;
 
 /* Define if you have the <sys/select.h> header file.  */
-#define HAVE_SYS_SELECT_H 1
+constexpr int HAVE_SYS_SELECT_H = 1;
 
 /* Define if you have the <sys/socket.h> header file.  */
-#define HAVE_SYS_SOCKET_H 1
+constexpr int HAVE_SYS_SOCKET_H = 1;
 
 /* Define if you have the <sys/stat.h> header file.  */
-#define HAVE_SYS_STAT_H 1
+constexpr int HAVE_SYS_STAT_H = 1;
 
 /* Define if you have the <sys/time.h> header file.  */
-#define HAVE_SYS_TIME_H 1
+constexpr int HAVE_SYS_TIME_H = 1;
 
 /* Define if you have the <sys/types.h> header file.  */
-#define HAVE_SYS_TYPES_H 1
+constexpr int HAVE_SYS_TYPES_H = 1;
 
 /* Define if you have the <sys/uio.h> header file.  */
-#define HAVE_SYS_UIO_H 1
+constexpr int HAVE_SYS_UIO_H = 1;
 
 /* Define if you have the <unistd.h> header file.  */
-#define HAVE_UNISTD_H 1
+constexpr int HAVE_UNISTD_H = 1;
 
 /* Define if you have the <zlib.h> header file.  */
-#define HAVE_ZLIB_H 1
+constexpr int HAVE_ZLIB_H = 1;
 
 /* Define if you have the malloc library (-lmalloc).  */
 /* #undef HAVE_LIBMALLOC */
@@ -336,11 +336,11 @@
 /* #undef NEED_WRITE_PROTO */
 
 /* Variable storage sizes */
-#define SIZEOF_CHAR 1
-#define SIZEOF_INT 4
-#define SIZEOF_SHORT 2
-#define SIZEOF_LONG 8
-#define SIZEOF_LONG_LONG 8
-#define SIZEOF_SIZE_T 8
-#define SIZEOF_TIME_T 8
-#define SIZEOF_CHAR_P 8
+constexpr int SIZEOF_CHAR = 1;
+constexpr int SIZEOF_INT = 4;
+constexpr int SIZEOF_SHORT = 2;
+constexpr int SIZEOF_LONG = 8;
+constexpr int SIZEOF_LONG_LONG = 8;
+constexpr int SIZEOF_SIZE_T = 8;
+constexpr int SIZEOF_TIME_T = 8;
+constexpr int SIZEOF_CHAR_P = 8;

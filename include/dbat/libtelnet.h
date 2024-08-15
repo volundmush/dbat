@@ -40,7 +40,7 @@
  */
 
 #if !defined(LIBTELNET_INCLUDE)
-#define LIBTELNET_INCLUDE 1
+constexpr int LIBTELNET_INCLUDE = 1;
 
 /* standard C headers necessary for the libtelnet API */
 #include <stdarg.h>
@@ -149,80 +149,80 @@ typedef struct telnet_telopt_t telnet_telopt_t;
 /*! \name Telnet commands */
 /*@{*/
 /*! Telnet commands and special values. */
-#define TELNET_IAC 255
-#define TELNET_DONT 254
-#define TELNET_DO 253
-#define TELNET_WONT 252
-#define TELNET_WILL 251
-#define TELNET_SB 250
-#define TELNET_GA 249
-#define TELNET_EL 248
-#define TELNET_EC 247
-#define TELNET_AYT 246
-#define TELNET_AO 245
-#define TELNET_IP 244
-#define TELNET_BREAK 243
-#define TELNET_DM 242
-#define TELNET_NOP 241
-#define TELNET_SE 240
-#define TELNET_EOR 239
-#define TELNET_ABORT 238
-#define TELNET_SUSP 237
-#define TELNET_EOF 236
+constexpr int TELNET_IAC = 255;
+constexpr int TELNET_DONT = 254;
+constexpr int TELNET_DO = 253;
+constexpr int TELNET_WONT = 252;
+constexpr int TELNET_WILL = 251;
+constexpr int TELNET_SB = 250;
+constexpr int TELNET_GA = 249;
+constexpr int TELNET_EL = 248;
+constexpr int TELNET_EC = 247;
+constexpr int TELNET_AYT = 246;
+constexpr int TELNET_AO = 245;
+constexpr int TELNET_IP = 244;
+constexpr int TELNET_BREAK = 243;
+constexpr int TELNET_DM = 242;
+constexpr int TELNET_NOP = 241;
+constexpr int TELNET_SE = 240;
+constexpr int TELNET_EOR = 239;
+constexpr int TELNET_ABORT = 238;
+constexpr int TELNET_SUSP = 237;
+constexpr int TELNET_EOF = 236;
 /*@}*/
 
 /*! \name Telnet option values. */
 /*@{*/
 /*! Telnet options. */
-#define TELNET_TELOPT_BINARY 0
-#define TELNET_TELOPT_ECHO 1
-#define TELNET_TELOPT_RCP 2
-#define TELNET_TELOPT_SGA 3
-#define TELNET_TELOPT_NAMS 4
-#define TELNET_TELOPT_STATUS 5
-#define TELNET_TELOPT_TM 6
-#define TELNET_TELOPT_RCTE 7
-#define TELNET_TELOPT_NAOL 8
-#define TELNET_TELOPT_NAOP 9
-#define TELNET_TELOPT_NAOCRD 10
-#define TELNET_TELOPT_NAOHTS 11
-#define TELNET_TELOPT_NAOHTD 12
-#define TELNET_TELOPT_NAOFFD 13
-#define TELNET_TELOPT_NAOVTS 14
-#define TELNET_TELOPT_NAOVTD 15
-#define TELNET_TELOPT_NAOLFD 16
-#define TELNET_TELOPT_XASCII 17
-#define TELNET_TELOPT_LOGOUT 18
-#define TELNET_TELOPT_BM 19
-#define TELNET_TELOPT_DET 20
-#define TELNET_TELOPT_SUPDUP 21
-#define TELNET_TELOPT_SUPDUPOUTPUT 22
-#define TELNET_TELOPT_SNDLOC 23
-#define TELNET_TELOPT_TTYPE 24
-#define TELNET_TELOPT_EOR 25
-#define TELNET_TELOPT_TUID 26
-#define TELNET_TELOPT_OUTMRK 27
-#define TELNET_TELOPT_TTYLOC 28
-#define TELNET_TELOPT_3270REGIME 29
-#define TELNET_TELOPT_X3PAD 30
-#define TELNET_TELOPT_NAWS 31
-#define TELNET_TELOPT_TSPEED 32
-#define TELNET_TELOPT_LFLOW 33
-#define TELNET_TELOPT_LINEMODE 34
-#define TELNET_TELOPT_XDISPLOC 35
-#define TELNET_TELOPT_ENVIRON 36
-#define TELNET_TELOPT_AUTHENTICATION 37
-#define TELNET_TELOPT_ENCRYPT 38
-#define TELNET_TELOPT_NEW_ENVIRON 39
-#define TELNET_TELOPT_MSSP 70
-#define TELNET_TELOPT_COMPRESS 85 // for the love of god don't use this.
-#define TELNET_TELOPT_COMPRESS2 86
-#define TELNET_TELOPT_MCCP2 86
-#define TELNET_TELOPT_COMPRESS3 87
-#define TELNET_TELOPT_MCCP3 87
-#define TELNET_TELOPT_ZMP 93
-#define TELNET_TELOPT_GMCP 201
-#define TELNET_TELOPT_EXOPL 255
+constexpr int TELNET_TELOPT_BINARY = 0;
+constexpr int TELNET_TELOPT_ECHO = 1;
+constexpr int TELNET_TELOPT_RCP = 2;
+constexpr int TELNET_TELOPT_SGA = 3;
+constexpr int TELNET_TELOPT_NAMS = 4;
+constexpr int TELNET_TELOPT_STATUS = 5;
+constexpr int TELNET_TELOPT_TM = 6;
+constexpr int TELNET_TELOPT_RCTE = 7;
+constexpr int TELNET_TELOPT_NAOL = 8;
+constexpr int TELNET_TELOPT_NAOP = 9;
+constexpr int TELNET_TELOPT_NAOCRD = 10;
+constexpr int TELNET_TELOPT_NAOHTS = 11;
+constexpr int TELNET_TELOPT_NAOHTD = 12;
+constexpr int TELNET_TELOPT_NAOFFD = 13;
+constexpr int TELNET_TELOPT_NAOVTS = 14;
+constexpr int TELNET_TELOPT_NAOVTD = 15;
+constexpr int TELNET_TELOPT_NAOLFD = 16;
+constexpr int TELNET_TELOPT_XASCII = 17;
+constexpr int TELNET_TELOPT_LOGOUT = 18;
+constexpr int TELNET_TELOPT_BM = 19;
+constexpr int TELNET_TELOPT_DET = 20;
+constexpr int TELNET_TELOPT_SUPDUP = 21;
+constexpr int TELNET_TELOPT_SUPDUPOUTPUT = 22;
+constexpr int TELNET_TELOPT_SNDLOC = 23;
+constexpr int TELNET_TELOPT_TTYPE = 24;
+constexpr int TELNET_TELOPT_EOR = 25;
+constexpr int TELNET_TELOPT_TUID = 26;
+constexpr int TELNET_TELOPT_OUTMRK = 27;
+constexpr int TELNET_TELOPT_TTYLOC = 28;
+constexpr int TELNET_TELOPT_3270REGIME = 29;
+constexpr int TELNET_TELOPT_X3PAD = 30;
+constexpr int TELNET_TELOPT_NAWS = 31;
+constexpr int TELNET_TELOPT_TSPEED = 32;
+constexpr int TELNET_TELOPT_LFLOW = 33;
+constexpr int TELNET_TELOPT_LINEMODE = 34;
+constexpr int TELNET_TELOPT_XDISPLOC = 35;
+constexpr int TELNET_TELOPT_ENVIRON = 36;
+constexpr int TELNET_TELOPT_AUTHENTICATION = 37;
+constexpr int TELNET_TELOPT_ENCRYPT = 38;
+constexpr int TELNET_TELOPT_NEW_ENVIRON = 39;
+constexpr int TELNET_TELOPT_MSSP = 70;
+constexpr int TELNET_TELOPT_COMPRESS = 85; // for the love of god don't use this.
+constexpr int TELNET_TELOPT_COMPRESS2 = 86;
+constexpr int TELNET_TELOPT_MCCP2 = 86;
+constexpr int TELNET_TELOPT_COMPRESS3 = 87;
+constexpr int TELNET_TELOPT_MCCP3 = 87;
+constexpr int TELNET_TELOPT_ZMP = 93;
+constexpr int TELNET_TELOPT_GMCP = 201;
+constexpr int TELNET_TELOPT_EXOPL = 255;
 
 
 /*@}*/
@@ -230,27 +230,27 @@ typedef struct telnet_telopt_t telnet_telopt_t;
 /*! \name Protocol codes for TERMINAL-TYPE commands. */
 /*@{*/
 /*! TERMINAL-TYPE codes. */
-#define TELNET_TTYPE_IS 0
-#define TELNET_TTYPE_SEND 1
+constexpr int TELNET_TTYPE_IS = 0;
+constexpr int TELNET_TTYPE_SEND = 1;
 /*@}*/
 
 /*! \name Protocol codes for NEW-ENVIRON/ENVIRON commands. */
 /*@{*/
 /*! NEW-ENVIRON/ENVIRON codes. */
-#define TELNET_ENVIRON_IS 0
-#define TELNET_ENVIRON_SEND 1
-#define TELNET_ENVIRON_INFO 2
-#define TELNET_ENVIRON_VAR 0
-#define TELNET_ENVIRON_VALUE 1
-#define TELNET_ENVIRON_ESC 2
-#define TELNET_ENVIRON_USERVAR 3
+constexpr int TELNET_ENVIRON_IS = 0;
+constexpr int TELNET_ENVIRON_SEND = 1;
+constexpr int TELNET_ENVIRON_INFO = 2;
+constexpr int TELNET_ENVIRON_VAR = 0;
+constexpr int TELNET_ENVIRON_VALUE = 1;
+constexpr int TELNET_ENVIRON_ESC = 2;
+constexpr int TELNET_ENVIRON_USERVAR = 3;
 /*@}*/
 
 /*! \name Protocol codes for MSSP commands. */
 /*@{*/
 /*! MSSP codes. */
-#define TELNET_MSSP_VAR 1
-#define TELNET_MSSP_VAL 2
+constexpr int TELNET_MSSP_VAR = 1;
+constexpr int TELNET_MSSP_VAL = 2;
 /*@}*/
 
 /*! \name Telnet state tracker flags. */

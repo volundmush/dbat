@@ -2,7 +2,7 @@
 //#include "conf.h"
 #include "typestubs.h"
 
-#define CIRCLE_GNU_LIBC_MEMORY_TRACK    0    /* 0 = off, 1 = on */
+#define CIRCLE_GNU_LIBC_MEMORY_TRACK 0    /* 0 = off, 1 = on */
 
 // Some C libraires
 #include <cstdio>
@@ -75,7 +75,7 @@ using Random = effolkronium::random_static;
 #define NOWHERE    ((IDXTYPE)~0)
 #else
 #define IDXTYPE	int
-#define NOWHERE	(-1)	/* nil reference for rooms	*/
+#define NOWHERE -1	/* nil reference for rooms	*/
 #endif
 
 #define NOTHING    NOWHERE

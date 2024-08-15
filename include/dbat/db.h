@@ -13,14 +13,14 @@
 
 
 /* arbitrary constants used by index_boot() (must be unique) */
-#define DB_BOOT_WLD    0
-#define DB_BOOT_MOB    1
-#define DB_BOOT_OBJ    2
-#define DB_BOOT_ZON    3
-#define DB_BOOT_SHP    4
-#define DB_BOOT_HLP    5
-#define DB_BOOT_TRG    6
-#define DB_BOOT_GLD    7
+constexpr int DB_BOOT_WLD = 0;
+constexpr int DB_BOOT_MOB = 1;
+constexpr int DB_BOOT_OBJ = 2;
+constexpr int DB_BOOT_ZON = 3;
+constexpr int DB_BOOT_SHP = 4;
+constexpr int DB_BOOT_HLP = 5;
+constexpr int DB_BOOT_TRG = 6;
+constexpr int DB_BOOT_GLD = 7;
 
 #define LIB_USER        "user/"
 #define LIB_INTRO       "intro/"
@@ -266,8 +266,8 @@ extern int vnum_armortype(char *searchname, struct char_data *ch);
 
 extern void migrate_db();
 
-#define REAL 0
-#define VIRTUAL 1
+constexpr int REAL = 0;
+constexpr int VIRTUAL = 1;
 
 /* structure for the reset commands */
 struct reset_com {
@@ -304,8 +304,8 @@ struct reset_com {
 
 
 /* zone definition structure. for the 'zone-table'   */
-#define CUR_WORLD_VERSION 1
-#define CUR_ZONE_VERSION  2
+constexpr int CUR_WORLD_VERSION = 1;
+constexpr int CUR_ZONE_VERSION = 2;
 
 struct zone_data {
     zone_data() = default;
@@ -359,12 +359,12 @@ struct help_index_element {
 
 
 /* don't change these */
-#define BAN_NOT    0
-#define BAN_NEW    1
-#define BAN_SELECT    2
-#define BAN_ALL        3
+constexpr int BAN_NOT = 0;
+constexpr int BAN_NEW = 1;
+constexpr int BAN_SELECT = 2;
+constexpr int BAN_ALL = 3;
 
-#define BANNED_SITE_LENGTH    50
+constexpr int BANNED_SITE_LENGTH = 50;
 struct ban_list_element {
     char site[BANNED_SITE_LENGTH + 1];
     int type;

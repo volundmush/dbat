@@ -15,20 +15,20 @@
 /*-------------  ship.c defines -------------*/
 
 /* Menus */
-#define SHIP_MAIN   1
-#define SHIP_QUIT   2
-#define SHIP_NAME   3
-#define SHIP_SIZE   4
-#define SHIP_WEAPON 5
-#define SHIP_SHIELD 6
-#define SHIP_ARMOR  7
-#define SHIP_TECH   8
-#define SHIP_EQUIPM 9
+constexpr int SHIP_MAIN = 1;
+constexpr int SHIP_QUIT = 2;
+constexpr int SHIP_NAME = 3;
+constexpr int SHIP_SIZE = 4;
+constexpr int SHIP_WEAPON = 5;
+constexpr int SHIP_SHIELD = 6;
+constexpr int SHIP_ARMOR = 7;
+constexpr int SHIP_TECH = 8;
+constexpr int SHIP_EQUIPM = 9;
 
 /* Name displays */
-#define SHIP_CLASSES  5
-#define SHIP_PACKAGES 6
-#define SHIP_SHIELDS  5
-#define SHIP_EXTRAS   7
-#define SHIP_ARMORS   5
-#define SHIP_EQUIP    5
+constexpr int SHIP_CLASSES = 5;
+constexpr int SHIP_PACKAGES = 6;
+constexpr int SHIP_SHIELDS = 5;
+constexpr int SHIP_EXTRAS = 7;
+constexpr int SHIP_ARMORS = 5;
+constexpr int SHIP_EQUIP = 5;

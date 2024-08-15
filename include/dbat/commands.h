@@ -1,8 +1,8 @@
 #pragma once
 #include "sysdep.h"
 
-#define ALIAS_SIMPLE    0
-#define ALIAS_COMPLEX    1
+constexpr int ALIAS_SIMPLE = 0;
+constexpr int ALIAS_COMPLEX = 1;
 
 #define ALIAS_SEP_CHAR    ';'
 #define ALIAS_VAR_CHAR    '$'
@@ -15,236 +15,236 @@
  */
 
 /* directions */
-#define SCMD_NORTH    1
-#define SCMD_EAST    2
-#define SCMD_SOUTH    3
-#define SCMD_WEST    4
-#define SCMD_UP        5
-#define SCMD_DOWN    6
-#define SCMD_NW         7
-#define SCMD_NE         8
-#define SCMD_SE         9
-#define SCMD_SW        10
-#define SCMD_IN        11
-#define SCMD_OUT       12
+constexpr int SCMD_NORTH = 1;
+constexpr int SCMD_EAST = 2;
+constexpr int SCMD_SOUTH = 3;
+constexpr int SCMD_WEST = 4;
+constexpr int SCMD_UP = 5;
+constexpr int SCMD_DOWN = 6;
+constexpr int SCMD_NW = 7;
+constexpr int SCMD_NE = 8;
+constexpr int SCMD_SE = 9;
+constexpr int SCMD_SW = 10;
+constexpr int SCMD_IN = 11;
+constexpr int SCMD_OUT = 12;
 
 /* do_gen_ps */
-#define SCMD_INFO       0
-#define SCMD_HANDBOOK   1
-#define SCMD_CREDITS    2
-#define SCMD_NEWS       3
-#define SCMD_WIZLIST    4
-#define SCMD_POLICIES   5
-#define SCMD_VERSION    6
-#define SCMD_IMMLIST    7
-#define SCMD_MOTD    8
-#define SCMD_IMOTD    9
-#define SCMD_CLEAR    10
-#define SCMD_WHOAMI    11
+constexpr int SCMD_INFO = 0;
+constexpr int SCMD_HANDBOOK = 1;
+constexpr int SCMD_CREDITS = 2;
+constexpr int SCMD_NEWS = 3;
+constexpr int SCMD_WIZLIST = 4;
+constexpr int SCMD_POLICIES = 5;
+constexpr int SCMD_VERSION = 6;
+constexpr int SCMD_IMMLIST = 7;
+constexpr int SCMD_MOTD = 8;
+constexpr int SCMD_IMOTD = 9;
+constexpr int SCMD_CLEAR = 10;
+constexpr int SCMD_WHOAMI = 11;
 
 /* do_gen_tog */
-#define SCMD_NOSUMMON   0
-#define SCMD_NOHASSLE   1
-#define SCMD_BRIEF      2
-#define SCMD_COMPACT    3
-#define SCMD_NOTELL    4
-#define SCMD_NOAUCTION    5
-#define SCMD_DEAF    6
-#define SCMD_NOGOSSIP    7
-#define SCMD_NOGRATZ    8
-#define SCMD_NOWIZ    9
-#define SCMD_QUEST    10
-#define SCMD_ROOMFLAGS    11
-#define SCMD_NOREPEAT    12
-#define SCMD_HOLYLIGHT    13
-#define SCMD_SLOWNS    14
-#define SCMD_AUTOEXIT    15
-#define SCMD_TRACK    16
-#define SCMD_BUILDWALK  17
-#define SCMD_AFK        18
-#define SCMD_AUTOASSIST 19
-#define SCMD_AUTOLOOT   20
-#define SCMD_AUTOGOLD   21
-#define SCMD_CLS        22
-#define SCMD_AUTOSPLIT  23
-#define SCMD_AUTOSAC    24
-#define SCMD_SNEAK    25
-#define SCMD_HIDE    26
-#define SCMD_AUTOMEM    27
-#define SCMD_VIEWORDER  28
-#define SCMD_NOCOMPRESS 29
-#define SCMD_TEST       30
-#define SCMD_WHOHIDE    31
-#define SCMD_NMWARN     32
-#define SCMD_HINTS      33
-#define SCMD_NODEC      34
-#define SCMD_NOEQSEE    35
-#define SCMD_NOMUSIC    36
-#define SCMD_NOPARRY    37
-#define SCMD_LKEEP      38
-#define SCMD_CARVE      39
-#define SCMD_NOGIVE     40
-#define SCMD_INSTRUCT   41
-#define SCMD_GHEALTH    42
-#define SCMD_IHEALTH    43
+constexpr int SCMD_NOSUMMON = 0;
+constexpr int SCMD_NOHASSLE = 1;
+constexpr int SCMD_BRIEF = 2;
+constexpr int SCMD_COMPACT = 3;
+constexpr int SCMD_NOTELL = 4;
+constexpr int SCMD_NOAUCTION = 5;
+constexpr int SCMD_DEAF = 6;
+constexpr int SCMD_NOGOSSIP = 7;
+constexpr int SCMD_NOGRATZ = 8;
+constexpr int SCMD_NOWIZ = 9;
+constexpr int SCMD_QUEST = 10;
+constexpr int SCMD_ROOMFLAGS = 11;
+constexpr int SCMD_NOREPEAT = 12;
+constexpr int SCMD_HOLYLIGHT = 13;
+constexpr int SCMD_SLOWNS = 14;
+constexpr int SCMD_AUTOEXIT = 15;
+constexpr int SCMD_TRACK = 16;
+constexpr int SCMD_BUILDWALK = 17;
+constexpr int SCMD_AFK = 18;
+constexpr int SCMD_AUTOASSIST = 19;
+constexpr int SCMD_AUTOLOOT = 20;
+constexpr int SCMD_AUTOGOLD = 21;
+constexpr int SCMD_CLS = 22;
+constexpr int SCMD_AUTOSPLIT = 23;
+constexpr int SCMD_AUTOSAC = 24;
+constexpr int SCMD_SNEAK = 25;
+constexpr int SCMD_HIDE = 26;
+constexpr int SCMD_AUTOMEM = 27;
+constexpr int SCMD_VIEWORDER = 28;
+constexpr int SCMD_NOCOMPRESS = 29;
+constexpr int SCMD_TEST = 30;
+constexpr int SCMD_WHOHIDE = 31;
+constexpr int SCMD_NMWARN = 32;
+constexpr int SCMD_HINTS = 33;
+constexpr int SCMD_NODEC = 34;
+constexpr int SCMD_NOEQSEE = 35;
+constexpr int SCMD_NOMUSIC = 36;
+constexpr int SCMD_NOPARRY = 37;
+constexpr int SCMD_LKEEP = 38;
+constexpr int SCMD_CARVE = 39;
+constexpr int SCMD_NOGIVE = 40;
+constexpr int SCMD_INSTRUCT = 41;
+constexpr int SCMD_GHEALTH = 42;
+constexpr int SCMD_IHEALTH = 43;
 
 /* do_wizutil */
-#define SCMD_REROLL    0
-#define SCMD_PARDON     1
-#define SCMD_NOTITLE    2
-#define SCMD_SQUELCH    3
-#define SCMD_FREEZE    4
-#define SCMD_THAW    5
-#define SCMD_UNAFFECT    6
+constexpr int SCMD_REROLL = 0;
+constexpr int SCMD_PARDON = 1;
+constexpr int SCMD_NOTITLE = 2;
+constexpr int SCMD_SQUELCH = 3;
+constexpr int SCMD_FREEZE = 4;
+constexpr int SCMD_THAW = 5;
+constexpr int SCMD_UNAFFECT = 6;
 
 /* do_spec_com */
-#define SCMD_WHISPER    0
-#define SCMD_ASK    1
+constexpr int SCMD_WHISPER = 0;
+constexpr int SCMD_ASK = 1;
 
 /* do_gen_com */
-#define SCMD_HOLLER    0
-#define SCMD_SHOUT    1
-#define SCMD_GOSSIP    2
-#define SCMD_AUCTION    3
-#define SCMD_GRATZ    4
-#define SCMD_GEMOTE    5
+constexpr int SCMD_HOLLER = 0;
+constexpr int SCMD_SHOUT = 1;
+constexpr int SCMD_GOSSIP = 2;
+constexpr int SCMD_AUCTION = 3;
+constexpr int SCMD_GRATZ = 4;
+constexpr int SCMD_GEMOTE = 5;
 
 /* do_shutdown */
-#define SCMD_SHUTDOW    0
-#define SCMD_SHUTDOWN   1
+constexpr int SCMD_SHUTDOW = 0;
+constexpr int SCMD_SHUTDOWN = 1;
 
 /* do_quit */
-#define SCMD_QUI    0
-#define SCMD_QUIT    1
+constexpr int SCMD_QUI = 0;
+constexpr int SCMD_QUIT = 1;
 
 /* do_date */
-#define SCMD_DATE    0
-#define SCMD_UPTIME    1
+constexpr int SCMD_DATE = 0;
+constexpr int SCMD_UPTIME = 1;
 
 /* do_commands */
-#define SCMD_COMMANDS    0
-#define SCMD_SOCIALS    1
-#define SCMD_WIZHELP    2
+constexpr int SCMD_COMMANDS = 0;
+constexpr int SCMD_SOCIALS = 1;
+constexpr int SCMD_WIZHELP = 2;
 
 /* do_drop */
-#define SCMD_DROP    0
-#define SCMD_JUNK    1
-#define SCMD_DONATE    2
+constexpr int SCMD_DROP = 0;
+constexpr int SCMD_JUNK = 1;
+constexpr int SCMD_DONATE = 2;
 
 /* do_gen_write */
-#define SCMD_BUG    0
-#define SCMD_TYPO    1
-#define SCMD_IDEA    2
+constexpr int SCMD_BUG = 0;
+constexpr int SCMD_TYPO = 1;
+constexpr int SCMD_IDEA = 2;
 
 /* do_look */
-#define SCMD_LOOK    0
-#define SCMD_READ    1
-#define SCMD_SEARCH     2
+constexpr int SCMD_LOOK = 0;
+constexpr int SCMD_READ = 1;
+constexpr int SCMD_SEARCH = 2;
 
 /* do_qcomm */
-#define SCMD_QSAY    0
-#define SCMD_QECHO    1
+constexpr int SCMD_QSAY = 0;
+constexpr int SCMD_QECHO = 1;
 
 /* do_pour */
-#define SCMD_POUR    0
-#define SCMD_FILL    1
+constexpr int SCMD_POUR = 0;
+constexpr int SCMD_FILL = 1;
 
 /* do_poof */
-#define SCMD_POOFIN    0
-#define SCMD_POOFOUT    1
+constexpr int SCMD_POOFIN = 0;
+constexpr int SCMD_POOFOUT = 1;
 
 /* do_hit */
-#define SCMD_HIT    0
-#define SCMD_MURDER    1
+constexpr int SCMD_HIT = 0;
+constexpr int SCMD_MURDER = 1;
 
 /* do_eat */
-#define SCMD_EAT    0
-#define SCMD_TASTE    1
-#define SCMD_DRINK    2
-#define SCMD_SIP    3
+constexpr int SCMD_EAT = 0;
+constexpr int SCMD_TASTE = 1;
+constexpr int SCMD_DRINK = 2;
+constexpr int SCMD_SIP = 3;
 
 /* do_use */
-#define SCMD_USE    0
-#define SCMD_QUAFF    1
-#define SCMD_RECITE    2
+constexpr int SCMD_USE = 0;
+constexpr int SCMD_QUAFF = 1;
+constexpr int SCMD_RECITE = 2;
 
 /* do_echo */
-#define SCMD_ECHO    0
-#define SCMD_EMOTE    1
-#define SCMD_SMOTE      2
+constexpr int SCMD_ECHO = 0;
+constexpr int SCMD_EMOTE = 1;
+constexpr int SCMD_SMOTE = 2;
 
 /* do_gen_door */
-#define SCMD_OPEN       0
-#define SCMD_CLOSE      1
-#define SCMD_UNLOCK     2
-#define SCMD_LOCK       3
-#define SCMD_PICK       4
+constexpr int SCMD_OPEN = 0;
+constexpr int SCMD_CLOSE = 1;
+constexpr int SCMD_UNLOCK = 2;
+constexpr int SCMD_LOCK = 3;
+constexpr int SCMD_PICK = 4;
 
 /* do_olc */
-#define SCMD_OASIS_REDIT      0
-#define SCMD_OASIS_OEDIT      1
-#define SCMD_OASIS_ZEDIT      2
-#define SCMD_OASIS_MEDIT      3
-#define SCMD_OASIS_SEDIT      4
-#define SCMD_OASIS_CEDIT      5
-#define SCMD_OLC_SAVEINFO     7
-#define SCMD_OASIS_RLIST      8
-#define SCMD_OASIS_MLIST      9
-#define SCMD_OASIS_OLIST      10
-#define SCMD_OASIS_SLIST      11
-#define SCMD_OASIS_ZLIST      12
-#define SCMD_OASIS_TRIGEDIT   13
-#define SCMD_OASIS_AEDIT      14
-#define SCMD_OASIS_TLIST      15
-#define SCMD_OASIS_LINKS      16
-#define SCMD_OASIS_GEDIT      17
-#define SCMD_OASIS_GLIST      18
-#define SCMD_OASIS_HEDIT      19
-#define SCMD_OASIS_HSEDIT     20
+constexpr int SCMD_OASIS_REDIT = 0;
+constexpr int SCMD_OASIS_OEDIT = 1;
+constexpr int SCMD_OASIS_ZEDIT = 2;
+constexpr int SCMD_OASIS_MEDIT = 3;
+constexpr int SCMD_OASIS_SEDIT = 4;
+constexpr int SCMD_OASIS_CEDIT = 5;
+constexpr int SCMD_OLC_SAVEINFO = 7;
+constexpr int SCMD_OASIS_RLIST = 8;
+constexpr int SCMD_OASIS_MLIST = 9;
+constexpr int SCMD_OASIS_OLIST = 10;
+constexpr int SCMD_OASIS_SLIST = 11;
+constexpr int SCMD_OASIS_ZLIST = 12;
+constexpr int SCMD_OASIS_TRIGEDIT = 13;
+constexpr int SCMD_OASIS_AEDIT = 14;
+constexpr int SCMD_OASIS_TLIST = 15;
+constexpr int SCMD_OASIS_LINKS = 16;
+constexpr int SCMD_OASIS_GEDIT = 17;
+constexpr int SCMD_OASIS_GLIST = 18;
+constexpr int SCMD_OASIS_HEDIT = 19;
+constexpr int SCMD_OASIS_HSEDIT = 20;
 
 /* do_builder_list */
 
-#define SCMD_RLIST  0
-#define SCMD_OLIST  1
-#define SCMD_MLIST  2
-#define SCMD_TLIST  3
-#define SCMD_SLIST  4
-#define SCMD_GLIST  5
+constexpr int SCMD_RLIST = 0;
+constexpr int SCMD_OLIST = 1;
+constexpr int SCMD_MLIST = 2;
+constexpr int SCMD_TLIST = 3;
+constexpr int SCMD_SLIST = 4;
+constexpr int SCMD_GLIST = 5;
 
 /* * do_assemble * These constants *must* corespond with
      the ASSM_xxx constants in * assemblies.h. */
-#define SCMD_MAKE      0
-#define SCMD_BAKE      1
-#define SCMD_BREW      2
-#define SCMD_ASSEMBLE  3
-#define SCMD_CRAFT     4
-#define SCMD_FLETCH    5
-#define SCMD_KNIT      6
-#define SCMD_MIX       7
-#define SCMD_THATCH    8
-#define SCMD_WEAVE     9
-#define SCMD_FORGE     10
+constexpr int SCMD_MAKE = 0;
+constexpr int SCMD_BAKE = 1;
+constexpr int SCMD_BREW = 2;
+constexpr int SCMD_ASSEMBLE = 3;
+constexpr int SCMD_CRAFT = 4;
+constexpr int SCMD_FLETCH = 5;
+constexpr int SCMD_KNIT = 6;
+constexpr int SCMD_MIX = 7;
+constexpr int SCMD_THATCH = 8;
+constexpr int SCMD_WEAVE = 9;
+constexpr int SCMD_FORGE = 10;
 
 
-#define SCMD_MEMORIZE  1
-#define SCMD_FORGET    2
-#define SCMD_STOP      3
-#define SCMD_WHEN_SLOT 4
+constexpr int SCMD_MEMORIZE = 1;
+constexpr int SCMD_FORGET = 2;
+constexpr int SCMD_STOP = 3;
+constexpr int SCMD_WHEN_SLOT = 4;
 
 /* do_value list */
-#define SCMD_WIMPY    0
-#define SCMD_POWERATT    1
-#define SCMD_COMBATEXP  2
+constexpr int SCMD_WIMPY = 0;
+constexpr int SCMD_POWERATT = 1;
+constexpr int SCMD_COMBATEXP = 2;
 
 /* do_cast */
-#define SCMD_CAST    0
-#define SCMD_ART    1
+constexpr int SCMD_CAST = 0;
+constexpr int SCMD_ART = 1;
 
 /* oasis_copy */
-#define SCMD_TEDIT      0
-#define SCMD_REDIT      1
-#define SCMD_OEDIT      2
-#define SCMD_MEDIT      3
+constexpr int SCMD_TEDIT = 0;
+constexpr int SCMD_REDIT = 1;
+constexpr int SCMD_OEDIT = 2;
+constexpr int SCMD_MEDIT = 3;
 
 
 struct command_info {

@@ -510,7 +510,7 @@ bool obj_data::isActive() {
     return active;
 }
 
-#define LOC_INVENTORY    0
+constexpr int LOC_INVENTORY = 0;
 void auto_equip(struct char_data *ch, struct obj_data *obj, int location) {
     int j;
 

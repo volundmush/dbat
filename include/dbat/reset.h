@@ -13,14 +13,14 @@
 #include "structs.h"
 
 /* returned by pre-reset function */
-#define PERFORM_NORMAL_RESET 0
-#define BLOCK_NORMAL_RESET   1
+constexpr int PERFORM_NORMAL_RESET = 0;
+constexpr int BLOCK_NORMAL_RESET = 1;
 
 /* Zone virtual numbers used by reset.c */
-#define RESET_GAUNTLET      328
+constexpr int RESET_GAUNTLET = 328;
 
 /* Miscellaneous defines */
-#define NUM_GAUNTLET_ROOMS 20
+constexpr int NUM_GAUNTLET_ROOMS = 20;
 
 struct gauntlet_mob {
     room_vnum vroom;

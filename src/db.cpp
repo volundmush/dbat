@@ -641,7 +641,7 @@ void free_extra_descriptions(struct extra_descr_data *edesc) {
    that have to traverse are O(n) [n=num elements in pool], so more
    pools are better.
      - Elie Rosenblum Dec. 12 2003 */
-#define NUM_OBJ_UNIQUE_POOLS 5000
+constexpr int NUM_OBJ_UNIQUE_POOLS = 5000;
 
 void boot_db_textfiles() {
     basic_mud_log("Reading news, credits, help, ihelp, bground, info & motds.");
@@ -1998,7 +1998,7 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
 }
 
 
-#define ZO_DEAD  999
+constexpr int ZO_DEAD = 999;
 
 static std::deque<zone_vnum> zonesToUpdate;
 

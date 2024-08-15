@@ -24,7 +24,7 @@ struct shop_buy_data {
 #define BUY_TYPE(i)        ((i).type)
 #define BUY_WORD(i)        ((i).keywords.c_str())
 
-#define SW_ARRAY_MAX    4
+constexpr int SW_ARRAY_MAX = 4;
 
 struct shop_data {
     shop_data() = default;
@@ -62,10 +62,10 @@ struct shop_data {
 };
 
 
-#define MAX_TRADE    5    /* List maximums for compatibility	*/
-#define MAX_PROD    5    /*	with shops before v3.0		*/
+constexpr int MAX_TRADE = 5;    /* List maximums for compatibility	*/
+constexpr int MAX_PROD = 5;    /*	with shops before v3.0		*/
 #define VERSION3_TAG    "v3.0"    /* The file has v3.0 shops in it!	*/
-#define MAX_SHOP_OBJ    100    /* "Soft" maximum for list maximums	*/
+constexpr int MAX_SHOP_OBJ = 100;    /* "Soft" maximum for list maximums	*/
 
 
 /* Pretty general macros that could be used elsewhere */
@@ -73,98 +73,98 @@ struct shop_data {
 
 
 /* Possible states for objects trying to be sold */
-#define OBJECT_DEAD        0
-#define OBJECT_NOTOK        1
-#define OBJECT_OK        2
-#define OBJECT_NOVAL        3
+constexpr int OBJECT_DEAD = 0;
+constexpr int OBJECT_NOTOK = 1;
+constexpr int OBJECT_OK = 2;
+constexpr int OBJECT_NOVAL = 3;
 
 
 /* Types of lists to read */
-#define LIST_PRODUCE        0
-#define LIST_TRADE        1
-#define LIST_ROOM        2
+constexpr int LIST_PRODUCE = 0;
+constexpr int LIST_TRADE = 1;
+constexpr int LIST_ROOM = 2;
 
 
 /* Whom will we not trade with (bitvector for SHOP_TRADE_WITH()) */
-#define TRADE_NOGOOD        0
-#define TRADE_NOEVIL        1
-#define TRADE_NONEUTRAL        2
-#define TRADE_NOWIZARD        3
-#define TRADE_NOCLERIC        4
-#define TRADE_NOROGUE        5
-#define TRADE_NOFIGHTER        6
-#define TRADE_NOHUMAN           7
-#define TRADE_NOICER            8
-#define TRADE_NOSAIYAN          9
-#define TRADE_NOKONATSU         10
-#define TRADE_NONAMEK           11
-#define TRADE_NOMUTANT          12
-#define TRADE_NOKANASSAN        13
-#define TRADE_NOBIO             14
-#define TRADE_NOANDROID         15
-#define TRADE_NODEMON           16
-#define TRADE_NOMAJIN        17
-#define TRADE_NOKAI             18
-#define TRADE_NOTRUFFLE        19
-#define TRADE_NOGOBLIN        20
-#define TRADE_NOANIMAL        21
-#define TRADE_NOORC            22
-#define TRADE_NOSNAKE        23
-#define TRADE_NOTROLL        24
-#define TRADE_NOHALFBREED        25
-#define TRADE_NOMINOTAUR        26
-#define TRADE_NOKOBOLD        27
-#define TRADE_NOLIZARDFOLK    28
-#define TRADE_NOMONK        29
-#define TRADE_NOPALADIN        30
-#define TRADE_UNUSED        31
-#define TRADE_ONLYWIZARD    32
-#define TRADE_ONLYCLERIC    33
-#define TRADE_ONLYROGUE        34
-#define TRADE_ONLYFIGHTER    35
-#define TRADE_ONLYMONK        36
-#define TRADE_ONLYPALADIN    37
-#define TRADE_NOSORCERER        38
-#define TRADE_NODRUID           39
-#define TRADE_NOBARD            40
-#define TRADE_NORANGER          41
-#define TRADE_NOBARBARIAN       42
-#define TRADE_ONLYSORCERER      43
-#define TRADE_ONLYDRUID         44
-#define TRADE_ONLYBARD          45
-#define TRADE_ONLYRANGER        46
-#define TRADE_ONLYBARBARIAN     47
-#define TRADE_ONLYARCANE_ARCHER 48
-#define TRADE_ONLYARCANE_TRICKSTER 49
-#define TRADE_ONLYARCHMAGE      50
-#define TRADE_ONLYASSASSIN      51
-#define TRADE_ONLYBLACKGUARD    52
-#define TRADE_ONLYDRAGON_DISCIPLE 53
-#define TRADE_ONLYDUELIST       54
-#define TRADE_ONLYDWARVEN_DEFENDER 55
-#define TRADE_ONLYELDRITCH_KNIGHT 56
-#define TRADE_ONLYHIEROPHANT    57
-#define TRADE_ONLYHORIZON_WALKER 58
-#define TRADE_ONLYLOREMASTER    59
-#define TRADE_ONLYMYSTIC_THEURGE 60
-#define TRADE_ONLYSHADOWDANCER  61
-#define TRADE_ONLYTHAUMATURGIST 62
-#define TRADE_NOARCANE_ARCHER   63
-#define TRADE_NOARCANE_TRICKSTER 64
-#define TRADE_NOARCHMAGE        65
-#define TRADE_NOASSASSIN        66
-#define TRADE_NOBLACKGUARD      67
-#define TRADE_NODRAGON_DISCIPLE 68
-#define TRADE_NODUELIST         69
-#define TRADE_NODWARVEN_DEFENDER 70
-#define TRADE_NOELDRITCH_KNIGHT 71
-#define TRADE_NOHIEROPHANT      72
-#define TRADE_NOHORIZON_WALKER  73
-#define TRADE_NOLOREMASTER      74
-#define TRADE_NOMYSTIC_THEURGE  75
-#define TRADE_NOSHADOWDANCER    76
-#define TRADE_NOTHAUMATURGIST   77
-#define TRADE_NOBROKEN        78
+constexpr int TRADE_NOGOOD = 0;
+constexpr int TRADE_NOEVIL = 1;
+constexpr int TRADE_NONEUTRAL = 2;
+constexpr int TRADE_NOWIZARD = 3;
+constexpr int TRADE_NOCLERIC = 4;
+constexpr int TRADE_NOROGUE = 5;
+constexpr int TRADE_NOFIGHTER = 6;
+constexpr int TRADE_NOHUMAN = 7;
+constexpr int TRADE_NOICER = 8;
+constexpr int TRADE_NOSAIYAN = 9;
+constexpr int TRADE_NOKONATSU = 10;
+constexpr int TRADE_NONAMEK = 11;
+constexpr int TRADE_NOMUTANT = 12;
+constexpr int TRADE_NOKANASSAN = 13;
+constexpr int TRADE_NOBIO = 14;
+constexpr int TRADE_NOANDROID = 15;
+constexpr int TRADE_NODEMON = 16;
+constexpr int TRADE_NOMAJIN = 17;
+constexpr int TRADE_NOKAI = 18;
+constexpr int TRADE_NOTRUFFLE = 19;
+constexpr int TRADE_NOGOBLIN = 20;
+constexpr int TRADE_NOANIMAL = 21;
+constexpr int TRADE_NOORC = 22;
+constexpr int TRADE_NOSNAKE = 23;
+constexpr int TRADE_NOTROLL = 24;
+constexpr int TRADE_NOHALFBREED = 25;
+constexpr int TRADE_NOMINOTAUR = 26;
+constexpr int TRADE_NOKOBOLD = 27;
+constexpr int TRADE_NOLIZARDFOLK = 28;
+constexpr int TRADE_NOMONK = 29;
+constexpr int TRADE_NOPALADIN = 30;
+constexpr int TRADE_UNUSED = 31;
+constexpr int TRADE_ONLYWIZARD = 32;
+constexpr int TRADE_ONLYCLERIC = 33;
+constexpr int TRADE_ONLYROGUE = 34;
+constexpr int TRADE_ONLYFIGHTER = 35;
+constexpr int TRADE_ONLYMONK = 36;
+constexpr int TRADE_ONLYPALADIN = 37;
+constexpr int TRADE_NOSORCERER = 38;
+constexpr int TRADE_NODRUID = 39;
+constexpr int TRADE_NOBARD = 40;
+constexpr int TRADE_NORANGER = 41;
+constexpr int TRADE_NOBARBARIAN = 42;
+constexpr int TRADE_ONLYSORCERER = 43;
+constexpr int TRADE_ONLYDRUID = 44;
+constexpr int TRADE_ONLYBARD = 45;
+constexpr int TRADE_ONLYRANGER = 46;
+constexpr int TRADE_ONLYBARBARIAN = 47;
+constexpr int TRADE_ONLYARCANE_ARCHER = 48;
+constexpr int TRADE_ONLYARCANE_TRICKSTER = 49;
+constexpr int TRADE_ONLYARCHMAGE = 50;
+constexpr int TRADE_ONLYASSASSIN = 51;
+constexpr int TRADE_ONLYBLACKGUARD = 52;
+constexpr int TRADE_ONLYDRAGON_DISCIPLE = 53;
+constexpr int TRADE_ONLYDUELIST = 54;
+constexpr int TRADE_ONLYDWARVEN_DEFENDER = 55;
+constexpr int TRADE_ONLYELDRITCH_KNIGHT = 56;
+constexpr int TRADE_ONLYHIEROPHANT = 57;
+constexpr int TRADE_ONLYHORIZON_WALKER = 58;
+constexpr int TRADE_ONLYLOREMASTER = 59;
+constexpr int TRADE_ONLYMYSTIC_THEURGE = 60;
+constexpr int TRADE_ONLYSHADOWDANCER = 61;
+constexpr int TRADE_ONLYTHAUMATURGIST = 62;
+constexpr int TRADE_NOARCANE_ARCHER = 63;
+constexpr int TRADE_NOARCANE_TRICKSTER = 64;
+constexpr int TRADE_NOARCHMAGE = 65;
+constexpr int TRADE_NOASSASSIN = 66;
+constexpr int TRADE_NOBLACKGUARD = 67;
+constexpr int TRADE_NODRAGON_DISCIPLE = 68;
+constexpr int TRADE_NODUELIST = 69;
+constexpr int TRADE_NODWARVEN_DEFENDER = 70;
+constexpr int TRADE_NOELDRITCH_KNIGHT = 71;
+constexpr int TRADE_NOHIEROPHANT = 72;
+constexpr int TRADE_NOHORIZON_WALKER = 73;
+constexpr int TRADE_NOLOREMASTER = 74;
+constexpr int TRADE_NOMYSTIC_THEURGE = 75;
+constexpr int TRADE_NOSHADOWDANCER = 76;
+constexpr int TRADE_NOTHAUMATURGIST = 77;
+constexpr int TRADE_NOBROKEN = 78;
 
 struct stack_data {
     int data[100];
@@ -176,12 +176,12 @@ struct stack_data {
 
 
 /* Which expression type we are now parsing */
-#define OPER_OPEN_PAREN        0
-#define OPER_CLOSE_PAREN    1
-#define OPER_OR            2
-#define OPER_AND        3
-#define OPER_NOT        4
-#define MAX_OPER        4
+constexpr int OPER_OPEN_PAREN = 0;
+constexpr int OPER_CLOSE_PAREN = 1;
+constexpr int OPER_OR = 2;
+constexpr int OPER_AND = 3;
+constexpr int OPER_NOT = 4;
+constexpr int MAX_OPER = 4;
 
 
 #define SHOP_NUM(i)        (shop_index[(i)].vnum)
@@ -251,8 +251,8 @@ struct stack_data {
 #define SHOP_ALLOW_STEAL(i)    (IS_SET(SHOP_BITVECTOR(i), WILL_ALLOW_STEAL))
 
 
-#define MIN_OUTSIDE_BANK    5000
-#define MAX_OUTSIDE_BANK    15000
+constexpr int MIN_OUTSIDE_BANK = 5000;
+constexpr int MAX_OUTSIDE_BANK = 15000;
 
 #define MSG_NOT_OPEN_YET    "Come back later!"
 #define MSG_NOT_REOPEN_YET    "Sorry, we have closed, but come back later."

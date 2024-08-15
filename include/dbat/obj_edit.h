@@ -22,24 +22,24 @@ extern void disp_restring_menu(struct descriptor_data *d);
 /*-------------  obj_edit.c defines -------------*/
 
 /* What object edit menu are we in? */
-#define EDIT_NONE         0
-#define EDIT_CUSTOM       1
-#define EDIT_RESTRING     2
+constexpr int EDIT_NONE = 0;
+constexpr int EDIT_CUSTOM = 1;
+constexpr int EDIT_RESTRING = 2;
 
 /* Menu Values */
 /* Custom Equipment */
-#define EDIT_CUSTOM_MAIN   1
-#define EDIT_CUSTOM_NAME   2
-#define EDIT_CUSTOM_SDESC  3
-#define EDIT_CUSTOM_LDESC  4
-#define EDIT_CUSTOM_TYPE   5
-#define EDIT_CUSTOM_WEAPON 6
-#define EDIT_CUSTOM_QUIT   7
+constexpr int EDIT_CUSTOM_MAIN = 1;
+constexpr int EDIT_CUSTOM_NAME = 2;
+constexpr int EDIT_CUSTOM_SDESC = 3;
+constexpr int EDIT_CUSTOM_LDESC = 4;
+constexpr int EDIT_CUSTOM_TYPE = 5;
+constexpr int EDIT_CUSTOM_WEAPON = 6;
+constexpr int EDIT_CUSTOM_QUIT = 7;
 
 /* Restring Equipment */
-#define EDIT_RESTRING_MAIN  1
-#define EDIT_RESTRING_NAME  2
-#define EDIT_RESTRING_SDESC 3
-#define EDIT_RESTRING_LDESC 4
-#define EDIT_RESTRING_QUIT  5
-#define EDIT_RESTRING_CONF  6
+constexpr int EDIT_RESTRING_MAIN = 1;
+constexpr int EDIT_RESTRING_NAME = 2;
+constexpr int EDIT_RESTRING_SDESC = 3;
+constexpr int EDIT_RESTRING_LDESC = 4;
+constexpr int EDIT_RESTRING_QUIT = 5;
+constexpr int EDIT_RESTRING_CONF = 6;

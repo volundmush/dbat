@@ -127,9 +127,9 @@ extern int find_eq_pos(struct char_data *ch, struct obj_data *obj, char *arg);
 
 extern int find_all_dots(char *arg);
 
-#define FIND_INDIV    0
-#define FIND_ALL    1
-#define FIND_ALLDOT    2
+constexpr int FIND_INDIV = 0;
+constexpr int FIND_ALL = 1;
+constexpr int FIND_ALLDOT = 2;
 
 
 /* Generic Find */

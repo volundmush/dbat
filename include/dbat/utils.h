@@ -23,7 +23,7 @@ constexpr size_t PATH_MAX = 4096;
 using ssize_t = ptrdiff_t;
 #endif
 
-#define READ_SIZE    256
+constexpr int READ_SIZE = 256;
 
 /* global variables */
 extern FILE *player_fl;
@@ -244,31 +244,31 @@ extern int wield_type(int chsize, const struct obj_data *weap);
 /* various constants *****************************************************/
 
 /* defines for mudlog() */
-#define OFF    0
-#define BRF    1
-#define NRM    2
-#define CMP    3
+constexpr int OFF = 0;
+constexpr int BRF = 1;
+constexpr int NRM = 2;
+constexpr int CMP = 3;
 
 /* get_filename() */
-#define CRASH_FILE    0
-#define ETEXT_FILE    1
-#define ALIAS_FILE    2
-#define SCRIPT_VARS_FILE 3
-#define NEW_OBJ_FILES   4
-#define PLR_FILE        5
-#define PET_FILE        6
-#define IMC_FILE        7 /**< The IMC2 Data for players */
-#define USER_FILE       8 /* User Account System */
-#define INTRO_FILE      9
-#define SENSE_FILE      10
-#define CUSTOME_FILE    11
-#define MAX_FILES       12
+constexpr int CRASH_FILE = 0;
+constexpr int ETEXT_FILE = 1;
+constexpr int ALIAS_FILE = 2;
+constexpr int SCRIPT_VARS_FILE = 3;
+constexpr int NEW_OBJ_FILES = 4;
+constexpr int PLR_FILE = 5;
+constexpr int PET_FILE = 6;
+constexpr int IMC_FILE = 7; /**< The IMC2 Data for players */
+constexpr int USER_FILE = 8; /* User Account System */
+constexpr int INTRO_FILE = 9;
+constexpr int SENSE_FILE = 10;
+constexpr int CUSTOME_FILE = 11;
+constexpr int MAX_FILES = 12;
 
 /* breadth-first searching */
-#define BFS_ERROR        (-1)
-#define BFS_ALREADY_THERE    (-2)
-#define BFS_TO_FAR              (-3)
-#define BFS_NO_PATH        (-4)
+constexpr int BFS_ERROR = -1;
+constexpr int BFS_ALREADY_THERE = -2;
+constexpr int BFS_TO_FAR = -3;
+constexpr int BFS_NO_PATH = -4;
 
 /*
  * XXX: These constants should be configurable. See act.informative.c
@@ -276,38 +276,23 @@ extern int wield_type(int chsize, const struct obj_data *weap);
  */
 /* mud-life time */
 
-#define MUD_TIME_ACCELERATION  12.0  // 12 MUD seconds pass per real second.
+constexpr double MUD_TIME_ACCELERATION = 12.0;  // 12 MUD seconds pass per real second.
 
-#define SECONDS_PER_MINUTE 60.0
-#define MINUTES_PER_HOUR   60.0
-#define HOURS_PER_DAY      24.0
-#define DAYS_PER_WEEK      7.0
-#define DAYS_PER_MONTH     30.0
-#define MONTHS_PER_YEAR    12.0
-#define DAYS_PER_YEAR      365.0
+constexpr double SECONDS_PER_MINUTE = 60.0;
+constexpr double MINUTES_PER_HOUR = 60.0;
+constexpr double HOURS_PER_DAY = 24.0;
+constexpr double DAYS_PER_WEEK = 7.0;
+constexpr double DAYS_PER_MONTH = 30.0;
+constexpr double MONTHS_PER_YEAR = 12.0;
+constexpr double DAYS_PER_YEAR = 365.0;
 
-#define SECS_PER_MINUTE SECONDS_PER_MINUTE
-#define SECS_PER_HOUR   (SECONDS_PER_MINUTE*MINUTES_PER_HOUR)
-#define SECS_PER_DAY    (SECS_PER_HOUR*HOURS_PER_DAY)
-#define SECS_PER_WEEK   (SECS_PER_DAY*DAYS_PER_WEEK)
-#define SECS_PER_MONTH  (SECS_PER_DAY*DAYS_PER_MONTH)
-#define SECS_PER_YEAR   (SECS_PER_DAY*DAYS_PER_YEAR)
-#define SECS_PER_GAME_YEAR (SECS_PER_MONTH*MONTHS_PER_YEAR)
-
-#define SECS_PER_MUD_SECOND (1.0 / MUD_TIME_ACCELERATION)
-#define SECS_PER_MUD_MINUTE (SECONDS_PER_MINUTE*SECS_PER_MUD_SECOND)
-#define SECS_PER_MUD_HOUR  (MINUTES_PER_HOUR*SECS_PER_MUD_MINUTE)
-#define SECS_PER_MUD_DAY   (HOURS_PER_DAY*SECS_PER_MUD_HOUR)
-#define SECS_PER_MUD_MONTH (DAYS_PER_MONTH*SECS_PER_MUD_DAY)
-#define SECS_PER_MUD_YEAR    (MONTHS_PER_YEAR*SECS_PER_MUD_MONTH)
-
-
-/* real-life time (remember Real Life?) */
-// just keeping these 'cuz some things still use them...
-#define SECS_PER_REAL_MIN    SECONDS_PER_MINUTE
-#define SECS_PER_REAL_HOUR   SECS_PER_HOUR
-#define SECS_PER_REAL_DAY    SECS_PER_DAY
-#define SECS_PER_REAL_YEAR   SECS_PER_YEAR
+constexpr double SECS_PER_MINUTE = SECONDS_PER_MINUTE;
+constexpr double SECS_PER_HOUR =  (SECONDS_PER_MINUTE*MINUTES_PER_HOUR);
+constexpr double SECS_PER_DAY =   (SECS_PER_HOUR*HOURS_PER_DAY);
+constexpr double SECS_PER_WEEK =  (SECS_PER_DAY*DAYS_PER_WEEK);
+constexpr double SECS_PER_MONTH = (SECS_PER_DAY*DAYS_PER_MONTH);
+constexpr double SECS_PER_YEAR =  (SECS_PER_DAY*DAYS_PER_YEAR);
+constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
 
 
 /* string utils **********************************************************/
@@ -1037,9 +1022,9 @@ bool HAS_MOON(struct char_data *ch);
 
 /* defines for fseek */
 #ifndef SEEK_SET
-#define SEEK_SET	0
-#define SEEK_CUR	1
-#define SEEK_END	2
+constexpr int SEEK_SET = 0;
+constexpr int SEEK_CUR = 1;
+constexpr int SEEK_END = 2;
 #endif
 
 /*

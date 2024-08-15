@@ -6277,8 +6277,7 @@ ACMD(do_users) {
             strcpy(state, connected_types[STATE(d)]);
 
         if (d->character && STATE(d) == CON_PLAYING && GET_ADMLEVEL(d->character) <= GET_ADMLEVEL(ch))
-            sprintf(idletime, "%3d", d->character->timer *
-                                     SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
+            sprintf(idletime, "%3d", d->character->timer);
         else
             strcpy(idletime, "");
 

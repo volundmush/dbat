@@ -57,12 +57,12 @@
 	(telnet)->eh((telnet), &ev, (telnet)->ud);
 
 /* RFC1143 state names */
-#define Q_NO 0
-#define Q_YES 1
-#define Q_WANTNO 2
-#define Q_WANTYES 3
-#define Q_WANTNO_OP 4
-#define Q_WANTYES_OP 5
+constexpr int Q_NO = 0;
+constexpr int Q_YES = 1;
+constexpr int Q_WANTNO = 2;
+constexpr int Q_WANTYES = 3;
+constexpr int Q_WANTNO_OP = 4;
+constexpr int Q_WANTYES_OP = 5;
 
 /* telnet NVT EOL sequences */
 static const char CRLF[] = { '\r', '\n' };
@@ -74,7 +74,7 @@ static const size_t _buffer_sizes_count = sizeof(_buffer_sizes) /
                                           sizeof(_buffer_sizes[0]);
 
 /* RFC1143 option negotiation state table allocation quantum */
-#define Q_BUFFER_GROWTH_QUANTUM 4
+constexpr int Q_BUFFER_GROWTH_QUANTUM = 4;
 
 /* error generation function */
 static telnet_error_t _error(telnet_t *telnet, unsigned line,

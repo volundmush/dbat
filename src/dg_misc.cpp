@@ -149,8 +149,8 @@ void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
 /* while AFF_x's have boolean values. In any case, the duration MUST  */
 /* be non-zero.                                                       */
 /* usage:  apply <target> <property> <value> <duration>               */
-#define APPLY_TYPE    1
-#define AFFECT_TYPE    2
+constexpr int APPLY_TYPE = 1;
+constexpr int AFFECT_TYPE = 2;
 
 void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_type, char *cmd) {
     struct char_data *ch = nullptr;

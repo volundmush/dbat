@@ -2417,10 +2417,10 @@ void sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, cha
 time_t mud_time_to_secs(struct time_info_data *now) {
     time_t when = 0;
 
-    when += now->year * SECS_PER_MUD_YEAR;
-    when += now->month * SECS_PER_MUD_MONTH;
-    when += now->day * SECS_PER_MUD_DAY;
-    when += now->hours * SECS_PER_MUD_HOUR;
+    when += now->year * MUD_TIME_ACCELERATION * SECS_PER_YEAR;
+    when += now->month * MUD_TIME_ACCELERATION * SECS_PER_MONTH;
+    when += now->day * MUD_TIME_ACCELERATION * SECS_PER_DAY;
+    when += now->hours * MUD_TIME_ACCELERATION * SECS_PER_HOUR;
 
     return (time(nullptr) - when);
 }

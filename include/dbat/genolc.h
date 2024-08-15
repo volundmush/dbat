@@ -11,7 +11,7 @@
 
 #define STRING_TERMINATOR       '~'
 
-#define CONFIG_GENOLC_MOBPROG    0
+constexpr int CONFIG_GENOLC_MOBPROG = 0;
 
 extern int genolc_checkstring(struct descriptor_data *d, char *arg);
 
@@ -41,13 +41,13 @@ struct save_list_data {
 extern std::list<struct save_list_data> save_list;
 
 /* save_list_data.type */
-#define SL_MOB    0
-#define SL_OBJ    1
-#define SL_SHP    2
-#define SL_WLD    3
-#define SL_ZON    4
-#define SL_CFG    5
-#define SL_GLD    6
+constexpr int SL_MOB = 0;
+constexpr int SL_OBJ = 1;
+constexpr int SL_SHP = 2;
+constexpr int SL_WLD = 3;
+constexpr int SL_ZON = 4;
+constexpr int SL_CFG = 5;
+constexpr int SL_GLD = 6;
 #define SL_MAX    SL_GLD
 #define SL_ACT  SL_MAX + 1 /* must be above MAX */
 #define SL_HLP  SL_MAX + 2 /* must be above MAX */

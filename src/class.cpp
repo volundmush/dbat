@@ -58,20 +58,20 @@
  */
 
 
-#define CONFIG_LEVEL_VERSION    0
-#define CONFIG_LEVEL_EXPERIENCE    1
-#define CONFIG_LEVEL_VERNUM    2
-#define CONFIG_LEVEL_FORTITUDE    3
-#define CONFIG_LEVEL_REFLEX    4
-#define CONFIG_LEVEL_WILL    5
-#define CONFIG_LEVEL_BASEHIT    6
+constexpr int CONFIG_LEVEL_VERSION = 0;
+constexpr int CONFIG_LEVEL_EXPERIENCE = 1;
+constexpr int CONFIG_LEVEL_VERNUM = 2;
+constexpr int CONFIG_LEVEL_FORTITUDE = 3;
+constexpr int CONFIG_LEVEL_REFLEX = 4;
+constexpr int CONFIG_LEVEL_WILL = 5;
+constexpr int CONFIG_LEVEL_BASEHIT = 6;
 
 static char level_version[READ_SIZE];
 
 
-#define SAVE_MANUAL 0
-#define SAVE_LOW 1
-#define SAVE_HIGH 2
+constexpr int SAVE_MANUAL = 0;
+constexpr int SAVE_LOW = 1;
+constexpr int SAVE_HIGH = 2;
 
 static const char *save_type_names[] = {
         "manual",
@@ -79,10 +79,10 @@ static const char *save_type_names[] = {
         "high"
 };
 
-#define BASEHIT_MANUAL 0
-#define BASEHIT_LOW     1
-#define BASEHIT_MEDIUM  2
-#define BASEHIT_HIGH    3
+constexpr int BASEHIT_MANUAL = 0;
+constexpr int BASEHIT_LOW = 1;
+constexpr int BASEHIT_MEDIUM = 2;
+constexpr int BASEHIT_HIGH = 3;
 
 static const char *basehit_type_names[] = {
         "manual",

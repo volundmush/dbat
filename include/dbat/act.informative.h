@@ -3,13 +3,13 @@
 #include "structs.h"
 
 // defines
-#define MAX_PORTAL_TYPES        6
+constexpr int MAX_PORTAL_TYPES = 6;
 /* For show_obj_to_char 'mode'.	/-- arbitrary */
-#define SHOW_OBJ_LONG        0
-#define SHOW_OBJ_SHORT        1
-#define SHOW_OBJ_ACTION        2
+constexpr int SHOW_OBJ_LONG = 0;
+constexpr int SHOW_OBJ_SHORT = 1;
+constexpr int SHOW_OBJ_ACTION = 2;
 
-#define HIST_LENGTH 100
+constexpr int HIST_LENGTH = 100;
 
 // global variables
 extern int *cmd_sort_info;

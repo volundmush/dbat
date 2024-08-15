@@ -4,9 +4,9 @@
 
 /* New Dynamic boards v2.4 -PjD (dughi@imaxx.net) */
 #define BOARD_DIRECTORY                "etc/boards" SLASH
-#define MAX_MESSAGE_LENGTH    4096    /* arbitrary -- change if needed */
+constexpr int MAX_MESSAGE_LENGTH = 4096;    /* arbitrary -- change if needed */
 
-#define BOARD_MAGIC    1048575    /* arbitrary number - see modify.c */
+constexpr int BOARD_MAGIC = 1048575;    /* arbitrary number - see modify.c */
 
 /* Provides individual message structure */
 /* doubly linked so forward or back is relatively simple */
@@ -57,7 +57,7 @@ struct board_info {
 #define BOARD_MESSAGES(i) ((i)->messages)
 #define BOARD_MEMORY(i, j) ((i)->memory[j])
 #define BOARD_VERSION(i)     ((i)->version)
-#define CURRENT_BOARD_VER     2
+constexpr int CURRENT_BOARD_VER = 2;
 
 #define MESG_POSTER(i) ((i)->poster)
 #define MESG_TIMESTAMP(i) ((i)->timestamp)

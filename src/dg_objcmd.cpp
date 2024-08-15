@@ -77,8 +77,8 @@ struct obj_command_info {
 
 
 /* do_osend */
-#define SCMD_OSEND         0
-#define SCMD_OECHOAROUND   1
+constexpr int SCMD_OSEND = 0;
+constexpr int SCMD_OECHOAROUND = 1;
 
 
 /* attaches object name and vnum to msg and sends it to script_log */

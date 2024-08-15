@@ -31,9 +31,9 @@ std::string toDgUID(const DgUID& uid);
 #define    WLD_TRIGGER   2
 
 /* unless you change this, Puff casts all your dg spells */
-#define DG_CASTER_PROXY 1
+constexpr int DG_CASTER_PROXY = 1;
 /* spells cast by objects and rooms use this level */
-#define DG_SPELL_LEVEL  25
+constexpr int DG_SPELL_LEVEL = 25;
 
 /*
  * define this if you don't want wear/remove triggers to fire when
@@ -134,12 +134,12 @@ std::string toDgUID(const DgUID& uid);
 #define OCMD_ROOM              (1 << 2)         /* obj must be in char's room  */
 
 /* obj consume trigger commands */
-#define OCMD_EAT    1
-#define OCMD_DRINK  2
-#define OCMD_QUAFF  3
+constexpr int OCMD_EAT = 1;
+constexpr int OCMD_DRINK = 2;
+constexpr int OCMD_QUAFF = 3;
 
-#define TRIG_NEW                0         /* trigger starts from top  */
-#define TRIG_RESTART            1         /* trigger restarting       */
+constexpr int TRIG_NEW = 0;         /* trigger starts from top  */
+constexpr int TRIG_RESTART = 1;         /* trigger restarting       */
 
 
 /*
@@ -149,10 +149,10 @@ std::string toDgUID(const DgUID& uid);
 #define PULSE_DG_SCRIPT         (13 RL_SEC)
 
 
-#define MAX_SCRIPT_DEPTH      10          /* maximum depth triggers can
+constexpr int MAX_SCRIPT_DEPTH = 10;          /* maximum depth triggers can
 					     recurse into each other */
 
-#define SCRIPT_ERROR_CODE     (-9999999)   /* this shouldn't happen too often */
+constexpr int SCRIPT_ERROR_CODE = -9999999;   /* this shouldn't happen too often */
 
 /* one line of the trigger */
 struct cmdlist_element {
@@ -521,9 +521,9 @@ extern room_rnum obj_room(obj_data *obj);
 /* mob id's: MOB_ID_BASE to ROOM_ID_BASE - 1      */
 /* room id's: ROOM_ID_BASE to OBJ_ID_BASE - 1    */
 /* object id's: OBJ_ID_BASE and higher           */
-#define MOB_ID_BASE      50000  /* 50000 player IDNUMS should suffice */
-#define ROOM_ID_BASE    1050000 /* 1000000 Mobs */
-#define OBJ_ID_BASE     1300000 /* 250000 Rooms */
+constexpr int MOB_ID_BASE = 50000;  /* 50000 player IDNUMS should suffice */
+constexpr int ROOM_ID_BASE = 1050000; /* 1000000 Mobs */
+constexpr int OBJ_ID_BASE = 1300000; /* 250000 Rooms */
 
 #define SCRIPT(o)          ((o)->script)
 #define SCRIPT_MEM(c)             ((c)->memory)

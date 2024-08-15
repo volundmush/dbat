@@ -354,7 +354,7 @@ ACMD(do_alias) {
  * is "$*", which stands for the entire original line after the alias.
  * ";" is used to delimit commands.
  */
-#define NUM_TOKENS       9
+constexpr int NUM_TOKENS = 9;
 
 static void perform_complex_alias(struct descriptor_data *d, char *orig, struct alias_data *a) {
     struct txt_q temp_queue;
@@ -1085,9 +1085,9 @@ int _parse_name(char *arg, char *name) {
 }
 
 
-#define RECON        1
-#define USURP        2
-#define UNSWITCH    3
+constexpr int RECON = 1;
+constexpr int USURP = 2;
+constexpr int UNSWITCH = 3;
 
 /* This function seems a bit over-extended. */
 int perform_dupe_check(struct descriptor_data *d) {

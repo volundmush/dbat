@@ -1285,7 +1285,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             }
 
         case OEDIT_WEIGHT:
-            GET_OBJ_WEIGHT(OLC_OBJ(d)) = std::clamp(atoll(arg), 0LL, MAX_OBJ_WEIGHT);
+            GET_OBJ_WEIGHT(OLC_OBJ(d)) = std::clamp<double>(atoll(arg), 0LL, MAX_OBJ_WEIGHT);
             break;
 
         case OEDIT_COST:

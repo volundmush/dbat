@@ -1743,7 +1743,7 @@ void process_wait(void *go, trig_data *trig, int type, char *cmd,
         double target_mud_seconds = min * SECS_PER_MINUTE;
 
         // Determine waiting time in MUD seconds
-        double waiting_mud_seconds;
+        double waiting_mud_seconds = 0.0;
         if (current_mud_seconds >= target_mud_seconds) {
             // If the target time has already passed, wait until the next day
             waiting_mud_seconds = (SECS_PER_DAY - current_mud_seconds) + target_mud_seconds;
@@ -1753,17 +1753,17 @@ void process_wait(void *go, trig_data *trig, int type, char *cmd,
         }
 
         // Convert waiting time to real seconds
-        trig->waiting = waiting_mud_seconds * SECS_PER_MUD_SECOND;
+        trig->waiting = waiting_mud_seconds / MUD_TIME_ACCELERATION;
 
     } else {
         if (sscanf(arg, "%ld %c", &when, &c) == 2) {
             if (c == 't')
-                when *= PULSES_PER_MUD_HOUR;
+                when *= SECS_PER_HOUR / MUD_TIME_ACCELERATION;
             else if (c == 's')
-                when *= PASSES_PER_SEC;
+                when *= 1.0 / MUD_TIME_ACCELERATION;
         }
         // We need to convert 'when' into a double of seconds-to-wait by dividing by PASSES_PER_SEC.
-        trig->waiting = (double) when / (double) PASSES_PER_SEC;
+        trig->waiting = when;
     }
 
     // we're replacing the old wait_event_obj.
@@ -2949,9 +2949,9 @@ void save_char_vars_ascii(FILE *file, struct char_data *ch) {
 /* find_char() helpers */
 
 // Must be power of 2
-#define BUCKET_COUNT 64
+constexpr int BUCKET_COUNT = 64;
 // to recognize an empty bucket
-#define UID_OUT_OF_RANGE 1000000000
+constexpr int UID_OUT_OF_RANGE = 1000000000;
 
 
 int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const char *namelist[]) {

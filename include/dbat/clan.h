@@ -29,7 +29,7 @@
 
 #include "structs.h"        // for char_data
 
-#define LVL_CLAN_MOD            32
+constexpr int LVL_CLAN_MOD = 32;
 #define DEFAULT_OPEN_JOIN       false
 #define DEFAULT_OPEN_LEAVE      false
 #define DEFAULT_CLAN_INFO       "little is known about this clan, currently."

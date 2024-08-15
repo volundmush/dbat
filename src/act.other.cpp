@@ -9984,8 +9984,8 @@ ACMD(do_gen_write) {
     send_to_char(ch, "Okay.  Thanks!\r\n");
 }
 
-#define TOG_OFF 0
-#define TOG_ON  1
+constexpr int TOG_OFF = 0;
+constexpr int TOG_ON = 1;
 
 ACMD(do_gen_tog) {
     long result;

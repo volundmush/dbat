@@ -51,7 +51,7 @@ extern guild_rnum real_guild(guild_vnum vnum);
 #define MSG_TRAINER_DISLIKE_RACE     "Get out of here, I don't help your kind!"
 #define MSG_TRAINER_MINLVL     "You are not of a skilled enough level to recieve my training."
 
-#define LEARNED_LEVEL   0    /* % known which is considered "learned" */
-#define MAX_PER_PRAC    1    /* max percent gain in skill per practice */
-#define MIN_PER_PRAC    2    /* min percent gain in skill per practice */
-#define PRAC_TYPE       3    /* should it say 'spell' or 'skill'?	 */
+constexpr int LEARNED_LEVEL = 0;    /* % known which is considered "learned" */
+constexpr int MAX_PER_PRAC = 1;    /* max percent gain in skill per practice */
+constexpr int MIN_PER_PRAC = 2;    /* min percent gain in skill per practice */
+constexpr int PRAC_TYPE = 3;    /* should it say 'spell' or 'skill'?	 */

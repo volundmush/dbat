@@ -3630,13 +3630,13 @@ ACMD(do_show) {
 
 /***************** The do_set function ***********************************/
 
-#define PC   1
-#define NPC  2
-#define BOTH 3
+constexpr int PC = 1;
+constexpr int NPC = 2;
+constexpr int BOTH = 3;
 
-#define MISC    0
-#define BINARY    1
-#define NUMBER    2
+constexpr int MISC = 0;
+constexpr int BINARY = 1;
+constexpr int NUMBER = 2;
 
 #define SET_OR_REMOVE(flagset, flags) { \
     if (on) flagset.set(flags); \
@@ -4508,16 +4508,16 @@ ACMD(do_zpurge) {
 #define MAX_DAMAGE_MOD_ALLOWED   MAX(GET_LEVEL(mob)/5, 2)
 #define MAX_GOLD_ALLOWED         GET_LEVEL(mob)*3000
 #define MAX_EXP_ALLOWED          GET_LEVEL(mob)*GET_LEVEL(mob) * 120
-#define MAX_LEVEL_ALLOWED        (100)
+constexpr int MAX_LEVEL_ALLOWED = 100;
 #define GET_OBJ_AVG_DAM(obj)     (((GET_OBJ_VAL(obj, 2) + 1) / 2.0) * GET_OBJ_VAL(obj, 1))
 /* arbitrary limit for per round dam */
-#define MAX_MOB_DAM_ALLOWED      500
+constexpr int MAX_MOB_DAM_ALLOWED = 500;
 
 #define ZCMD2 zone_table[zone].cmd[cmd_no]  /*from DB.C*/
 
 /*item limits*/
-#define MAX_DAM_ALLOWED            50    /* for weapons  - avg. dam*/
-#define MAX_AFFECTS_ALLOWED        3
+constexpr int MAX_DAM_ALLOWED = 50;    /* for weapons  - avg. dam*/
+constexpr int MAX_AFFECTS_ALLOWED = 3;
 
 /* Armor class limits*/
 #define TOTAL_WEAR_CHECKS  (NUM_ITEM_WEARS-2)  /*minus Wield and Take*/
@@ -4546,20 +4546,20 @@ static const struct zcheck_armor {
 };
 
 /*These are strictly boolean*/
-#define CAN_WEAR_WEAPONS         0     /* toggle - can weapon also be armor? */
-#define MAX_APPLIES_LIMIT        1     /* toggle - is there a limit at all?  */
-#define CHECK_ITEM_RENT          0     /* do we check for rent cost == 0 ?   */
-#define CHECK_ITEM_COST          0     /* do we check for item cost == 0 ?   */
+constexpr int CAN_WEAR_WEAPONS = 0;     /* toggle - can weapon also be armor? */
+constexpr int MAX_APPLIES_LIMIT = 1;     /* toggle - is there a limit at all?  */
+constexpr int CHECK_ITEM_RENT = 0;     /* do we check for rent cost == 0 ?   */
+constexpr int CHECK_ITEM_COST = 0;     /* do we check for item cost == 0 ?   */
 
 /* These are ABS() values. */
-#define MAX_APPLY_ACCURCY_MOD_TOTAL    5
-#define MAX_APPLY_DAMAGE_MOD_TOTAL    5
+constexpr int MAX_APPLY_ACCURCY_MOD_TOTAL = 5;
+constexpr int MAX_APPLY_DAMAGE_MOD_TOTAL = 5;
 
 /*room limits*/
 /* Off limit zones are any zones a player should NOT be able to walk to (ex. Limbo) */
 static const int offlimit_zones[] = {0, 12, 13, 14, -1};  /*what zones can no room connect to (virtual num) */
-#define MIN_ROOM_DESC_LENGTH   80       /* at least one line - set to 0 to not care. */
-#define MAX_COLOUMN_WIDTH      80       /* at most 80 chars per line */
+constexpr int MIN_ROOM_DESC_LENGTH = 80;       /* at least one line - set to 0 to not care. */
+constexpr int MAX_COLOUMN_WIDTH = 80;       /* at most 80 chars per line */
 
 
 ACMD (do_zcheck) {

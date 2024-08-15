@@ -292,7 +292,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
  * affect_join(vict, aff, add_dur, avg_dur, add_mod, avg_mod)
  */
 
-#define MAX_SPELL_AFFECTS 5    /* change if more needed */
+constexpr int MAX_SPELL_AFFECTS = 5;    /* change if more needed */
 
 void mag_affects(int level, struct char_data *ch, struct char_data *victim,
                  int spellnum) {
@@ -851,9 +851,9 @@ const char *mag_summon_msgs[] = {
 };
 
 /* Defined mobiles. */
-#define MOB_ELEMENTAL_BASE    20    /* Only one for now. */
-#define MOB_ZOMBIE        11
-#define MOB_AERIALSERVANT    19
+constexpr int MOB_ELEMENTAL_BASE = 20;    /* Only one for now. */
+constexpr int MOB_ZOMBIE = 11;
+constexpr int MOB_AERIALSERVANT = 19;
 
 void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg) {
     struct char_data *mob = nullptr;

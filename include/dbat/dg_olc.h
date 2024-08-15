@@ -14,26 +14,26 @@
 #include "dg_scripts.h"
 
 
-#define NUM_TRIG_TYPE_FLAGS        22
+constexpr int NUM_TRIG_TYPE_FLAGS = 22;
 
 /*
  * Submodes of TRIGEDIT connectedness.
  */
-#define TRIGEDIT_MAIN_MENU              0
-#define TRIGEDIT_TRIGTYPE               1
-#define TRIGEDIT_CONFIRM_SAVESTRING    2
-#define TRIGEDIT_NAME            3
-#define TRIGEDIT_INTENDED        4
-#define TRIGEDIT_TYPES            5
-#define TRIGEDIT_COMMANDS        6
-#define TRIGEDIT_NARG            7
-#define TRIGEDIT_ARGUMENT        8
-#define TRIGEDIT_COPY            9
+constexpr int TRIGEDIT_MAIN_MENU = 0;
+constexpr int TRIGEDIT_TRIGTYPE = 1;
+constexpr int TRIGEDIT_CONFIRM_SAVESTRING = 2;
+constexpr int TRIGEDIT_NAME = 3;
+constexpr int TRIGEDIT_INTENDED = 4;
+constexpr int TRIGEDIT_TYPES = 5;
+constexpr int TRIGEDIT_COMMANDS = 6;
+constexpr int TRIGEDIT_NARG = 7;
+constexpr int TRIGEDIT_ARGUMENT = 8;
+constexpr int TRIGEDIT_COPY = 9;
 
-#define OLC_SCRIPT_EDIT            82766  /* arbitrary > highest possible room number */
-#define SCRIPT_MAIN_MENU        0
-#define SCRIPT_NEW_TRIGGER        1
-#define SCRIPT_DEL_TRIGGER        2
+constexpr int OLC_SCRIPT_EDIT = 82766;  /* arbitrary > highest possible room number */
+constexpr int SCRIPT_MAIN_MENU = 0;
+constexpr int SCRIPT_NEW_TRIGGER = 1;
+constexpr int SCRIPT_DEL_TRIGGER = 2;
 
 #define OLC_SCRIPT_EDIT_MODE(d)    (OLC(d)->script_mode)    /* parse input mode */
 #define OLC_SCRIPT(d)           (OLC(d)->script)    /* script editing   */

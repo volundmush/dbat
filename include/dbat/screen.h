@@ -19,8 +19,8 @@
 #define KNUL  ""
 
 /* conditional color.  pass it a pointer to a char_data and a color level. */
-#define C_OFF    0
-#define C_ON    1
+constexpr int C_OFF = 0;
+constexpr int C_ON = 1;
 #define C_BRI    C_ON    /* Compatibility hack */
 #define C_NRM    C_ON    /* Compatibility hack */
 #define C_CMP    C_ON    /* Compatibility hack */

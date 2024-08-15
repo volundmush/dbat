@@ -8,7 +8,7 @@
 
 #include "structs.h"
 
-#define GW_ARRAY_MAX    4
+constexpr int GW_ARRAY_MAX = 4;
 
 struct guild_data {
     guild_data() = default;

@@ -11,8 +11,8 @@
 #include "structs.h"
 
 
-#define MAP_ROWS    199
-#define MAP_COLS    199
+constexpr int MAP_ROWS = 199;
+constexpr int MAP_COLS = 199;
 
 struct mapstruct {
     int x;

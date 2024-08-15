@@ -38,33 +38,10 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
         return NOWHERE;
     }
 
-#if _CIRCLEMUD < CIRCLEMUD_VERSION(3, 0, 21)
-    /*
-     * New with bpl19, the OLC interface should decide whether
-     * to allow overlap before calling this function. There
-     * are more complicated rules for that but it's not covered
-     * here.
-     */
-    if (vzone_num > 326) {
-      *error = "326 is the highest zone allowed.\r\n";
-      return NOWHERE;
-    }
-
-    /*
-     * Make sure the zone does not exist.
-     */
-    room = vzone_num * 100; /* Old CircleMUD 100-zones. */
-    for (i = 0; i <= top_of_zone_table; i++)
-      if (genolc_zone_bottom(i) <= room && zone_table[i].top >= room) {
-        *error = "A zone already covers that area.\r\n";
-        return NOWHERE;
-      }
-#else
     if(zone_table.count(vzone_num)) {
             *error = "That virtual zone already exists.\r\n";
             return NOWHERE;
         }
-#endif
 
     /*
      * Create the zone file.
@@ -75,13 +52,7 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
         *error = "Could not write zone file.\r\n";
         return NOWHERE;
     }
-#if _CIRCLEMUD >= CIRCLEMUD_VERSION(3, 0, 21)
-    /* File format changed. */
-    fprintf(fp, "#%d\nNone~\nNew Zone~\n%d %d 30 2\nS\n$\n", vzone_num, bottom, top);
-#else
     fprintf(fp, "#%d\nNew Zone~\n%d 30 2\nS\n$\n", vzone_num, (vzone_num * 100) + 99);
-#endif
-    fclose(fp);
 
     /*
      * Create the room file.

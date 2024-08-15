@@ -68,8 +68,8 @@ struct wld_command_info {
 
 
 /* do_wsend */
-#define SCMD_WSEND        0
-#define SCMD_WECHOAROUND  1
+constexpr int SCMD_WSEND = 0;
+constexpr int SCMD_WECHOAROUND = 1;
 
 
 /* attaches room vnum to msg and sends it to script_log */
