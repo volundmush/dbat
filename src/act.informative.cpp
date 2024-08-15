@@ -285,7 +285,7 @@ static double terrain_bonus(struct char_data *ch) {
             break;
     }
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+    if (ch->getRoomFlag(ROOM_SPACE)) {
         bonus += -0.5;
     }
 
@@ -696,7 +696,7 @@ ACMD(do_post) {
         return;
     }
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_GARDEN2)) {
+    if (ch->getRoomFlag(ROOM_GARDEN1) || ch->getRoomFlag(ROOM_GARDEN2)) {
         send_to_char(ch, "You can not post on things in a garden.\r\n");
         return;
     }
@@ -832,7 +832,7 @@ ACMD(do_nickname) {
                 ship2->look_description = strdup(nick);
                 for (auto k : get_vnum_list(objectVnumIndex, GET_OBJ_VNUM(ship2) + 1000)) {
                     extract_obj(k);
-                    int was_in = GET_ROOM_VNUM(IN_ROOM(ship2));
+                    int was_in = ship2->getRoomVnum();
                     obj_from_room(ship2);
                     obj_to_room(ship2, real_room(was_in));
                 }
@@ -1328,7 +1328,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
             auto sect = dest->sector_type;
             switch (door) {
                 case NORTH:
-                    if (dest->isSunken()) {
+                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
                         map[y - 1][x] = '=';
                     } else if (sect == SECT_INSIDE) {
                         if (dest->geffect >= 1) {
@@ -1387,7 +1387,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                     }
                     break;
                 case EAST:
-                    if (dest->isSunken()) {
+                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
                         map[y][x + 1] = '=';
                     } else if (sect == SECT_INSIDE) {
                         if (dest->geffect >= 1) {
@@ -1446,7 +1446,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                     }
                     break;
                 case SOUTH:
-                    if (dest->isSunken()) {
+                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
                         map[y + 1][x] = '=';
                     } else if (sect == SECT_INSIDE) {
                         if (dest->geffect >= 1) {
@@ -1505,7 +1505,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                     }
                     break;
                 case WEST:
-                    if (dest->isSunken()) {
+                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
                         map[y][x - 1] = '=';
                     } else if (sect == SECT_INSIDE) {
                         if (dest->geffect >= 1) {
@@ -1564,7 +1564,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                     }
                     break;
                 case NORTHEAST:
-                    if (dest->isSunken()) {
+                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
                         map[y - 1][x + 1] = '=';
                     } else if (sect == SECT_INSIDE) {
                         if (dest->geffect >= 1) {
@@ -1623,7 +1623,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                     }
                     break;
                 case NORTHWEST:
-                    if (dest->isSunken()) {
+                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
                         map[y - 1][x - 1] = '=';
                     } else if (sect == SECT_INSIDE) {
                         if (dest->geffect >= 1) {
@@ -1682,7 +1682,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                     }
                     break;
                 case SOUTHEAST:
-                    if (dest->isSunken()) {
+                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
                         map[y + 1][x + 1] = '=';
                     } else if (sect == SECT_INSIDE) {
                         if (dest->geffect >= 1) {
@@ -1741,7 +1741,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                     }
                     break;
                 case SOUTHWEST:
-                    if (dest->isSunken()) {
+                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
                         map[y + 1][x - 1] = '=';
                     } else if (sect == SECT_INSIDE) {
                         if (dest->geffect >= 1) {
@@ -2065,7 +2065,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
     if (GET_SKILL(ch, SKILL_SPOT) > rand_number(20, 110)) {
         spotted = true;
     }
-    
+
     const auto tile = obj->getLocationTileType();
     switch (mode) {
         case SHOW_OBJ_LONG:
@@ -2075,7 +2075,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      */
             if (*obj->room_description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
                 return;
-            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && GET_ROOM_VNUM(IN_ROOM(ch)) == GET_OBJ_VAL(obj, 0)) {
+            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && ch->getRoomVnum() == GET_OBJ_VAL(obj, 0)) {
                 return;
             }
             if (SITTING(obj) && GET_ADMLEVEL(ch) < 1) {
@@ -2085,7 +2085,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 send_to_char(ch, "@D(@YBeing Used@D)@w");
             }
             if (GET_OBJ_TYPE(obj) == ITEM_PLANT &&
-                (ROOM_FLAGGED(IN_ROOM(obj), ROOM_GARDEN1) || ROOM_FLAGGED(IN_ROOM(obj), ROOM_GARDEN2))) {
+                (obj->getRoomFlag(ROOM_GARDEN1) || obj->getRoomFlag(ROOM_GARDEN2))) {
                 see_plant(obj, ch);
                 return;
             }
@@ -3605,7 +3605,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
                     if (fname(d->keyword) == nullptr) {
                         send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATELY FOR DIRECTION %s@n\r\n", dirname);
                         basic_mud_log("ERROR: %s found error direction %s at room %d", dirname, GET_NAME(ch),
-                                      GET_ROOM_VNUM(IN_ROOM(ch)));
+                                      ch->getRoomVnum());
                         return;
                     }
                     sprintf(argh, "%s ",
@@ -3817,7 +3817,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
         return;
     
     auto sect = rm->sector_type;
-    auto sunk = SUNKEN(rm->vn);
+    auto sunk = rm->getEnvironment(ENV_WATER) >= 100.0;
 
     if (IS_DARK(rm->vn) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
         send_to_char(ch, "It's too dark to make out much detail...\r\n");
@@ -3859,7 +3859,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
             auto joined = boost::join(ancestors, " -> ");
             send_to_char(ch, "@wArea: @D[@n %s @D]@n\r\n", joined.c_str());
         }
-        double grav = rm->getGravity();
+        double grav = rm->getEnvironment(ENV_GRAVITY);
         auto g = fmt::format("{}", grav);
         sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2,
                 rm->vn, g.c_str());
@@ -3887,7 +3887,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
             }
         }
 
-        double grav = rm->getGravity();
+        double grav = rm->getEnvironment(ENV_GRAVITY);
         if(grav <= 1.0) {
             send_to_char(ch, "@wGravity: @WNormal@n\r\n");
         } else {
@@ -4741,17 +4741,19 @@ ACMD(do_look) {
             }
         }
     } else if(is_abbrev(arg, "moon")) {
-        switch(room->checkMoon()) {
-            case MoonCheck::NoMoon:
-                send_to_char(ch, "It's kinda hard to see any moons from here.\r\n");
-                return;
-            case MoonCheck::NotFull:
-                send_to_char(ch, "You gaze skyward, but there's no full moon in sight.\r\n");
-                return;
-            case MoonCheck::Full:
-                send_to_char(ch, "You gaze upon a wondrous full moon... it's an amazing sight.\r\n");
-                ch->gazeAtMoon();
-                return;
+        auto moonlight = ch->getLocationEnvironment(ENV_MOONLIGHT);
+        if(moonlight < 0) {
+            send_to_char(ch, "It's kinda hard to see any moons from here.\r\n");
+            return;
+        }
+        if(moonlight == 0) {
+            send_to_char(ch, "You gaze skyward, but there's no full moon in sight.\r\n");
+            return;
+        }
+        if(moonlight >= 100.0) {
+            send_to_char(ch, "You gaze upon a wondrous full moon... it's an amazing sight.\r\n");
+            ch->gazeAtMoon();
+            return;
         }
     }
     else if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
@@ -4984,7 +4986,7 @@ ACMD(do_score) {
         double gravity = 1.0;
         auto room = world.find(ch->in_room);
         if(room != world.end()) {
-            gravity = room->second.getGravity();
+            gravity = room->second.getEnvironment(ENV_GRAVITY);
         }
         std::string grav = gravity > 1.0 ? fmt::format("(Gravity:", gravity) : "";
         send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n %s\n",
@@ -6427,12 +6429,12 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
         send_to_char(ch, "%s", obj->scriptString().c_str());
 
     if (IN_ROOM(obj) != NOWHERE)
-        send_to_char(ch, "[%5d] %s\r\n", GET_ROOM_VNUM(IN_ROOM(obj)), obj->getRoom()->name);
+        send_to_char(ch, "[%5d] %s\r\n", obj->getRoomVnum(), obj->getRoom()->name);
     else if (obj->carried_by)
         send_to_char(ch, "carried by %s in room [%d]\r\n", PERS(obj->carried_by, ch),
-                     GET_ROOM_VNUM(IN_ROOM(obj->carried_by)));
+                     obj->carried_by->getRoomVnum());
     else if (obj->worn_by)
-        send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(obj->worn_by, ch), GET_ROOM_VNUM(IN_ROOM(obj->worn_by)));
+        send_to_char(ch, "worn by %s in room [%d]\r\n", PERS(obj->worn_by, ch), obj->worn_by->getRoomVnum());
     else if (obj->in_obj) {
         send_to_char(ch, "inside %s%s\r\n", obj->in_obj->short_description, (recur ? ", which is" : " "));
         if (recur)
@@ -6464,7 +6466,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                 if (i && CAN_SEE(ch, i) && (IN_ROOM(i) != NOWHERE)) {
                     if (d->original)
                         send_to_char(ch, "%-20s - [%5d]   %s (in %s)\r\n",
-                                     GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(d->character)),
+                                     GET_NAME(i), d->character->getRoomVnum(),
                                      d->character->getRoom()->name, GET_NAME(d->character));
                     else {
                         std::string locName = "UNKNOWN";
@@ -6472,7 +6474,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                             auto &a = areas[planet.value()];
                             locName = a.name;
                         }
-                        send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)),
+                        send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->getRoomVnum(),
                                      locName.c_str(), i->getRoom()->name);
                     }
 
@@ -6483,11 +6485,11 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                GET_NAME(ch), arg);
         for (auto &r : activeCharacters) {
             i = r.get();
-            if(!i->isActive()) continue;
+            if(!i) continue;
             if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
-                             GET_ROOM_VNUM(IN_ROOM(i)), i->getRoom()->name);
+                             i->getRoomVnum(), i->getRoom()->name);
                 if (IS_NPC(i) && SCRIPT(i) && SCRIPT(i)->trig_list) {
                     auto t = i->scriptString();
                     send_to_char(ch, "%s ", t.c_str());
@@ -6497,7 +6499,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
         }
         for (auto &r : activeObjects) {
             k = r.get();
-            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
+            if (k && CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
                 found = 1;
                 print_object_location(++num, k, ch, true);
             }

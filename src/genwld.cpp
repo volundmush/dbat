@@ -352,43 +352,6 @@ static bool checkGravity(const area_data &a) {
     return a.gravity.has_value();
 }
 
-double room_data::getGravity() {
-    // check for a gravity generator...
-    for(auto c = contents; c; c = c->next_content) {
-        if(c->gravity) return c->gravity.value();
-    }
-
-    // what about area rules?
-    if(std::optional<vnum> gravArea = getMatchingArea(checkGravity); gravArea) {
-        auto &a = areas[gravArea.value()];
-        return a.gravity.value();
-    }
-
-    // special cases here..
-    if (vn >= 64000 && vn <= 64006) {
-        return 100.0;
-    }
-    if (vn >= 64007 && vn <= 64016) {
-        return 300.0;
-    }
-    if (vn >= 64017 && vn <= 64030) {
-        return 500.0;
-    }
-    if (vn >= 64031 && vn <= 64048) {
-        return 1000.0;
-    }
-    if (vn >= 64049 && vn <= 64070) {
-        return 5000.0;
-    }
-    if (vn >= 64071 && vn <= 64096) {
-        return 10000.0;
-    }
-    if (vn == 64097) {
-        return 1000.0;
-    }
-
-    return 1.0;
-}
 
 std::string room_data::getUID(bool active) {
     return fmt::format("#R{}:{}{}", vn, generation, active ? "" : "!");
@@ -442,10 +405,6 @@ struct room_data* room_direction_data::getDestination() {
 }
 
 
-bool room_data::isSunken() {
-    return sector_type == SECT_UNDERWATER || geffect < 0;
-}
-
 std::optional<room_vnum> room_data::getLaunchDestination() {
     if(!area) return NOWHERE;
     if(!areas.contains(area.value())) return NOWHERE;
@@ -462,18 +421,6 @@ std::vector<CharRef> room_data::getPeople() {
 }
 
 static const std::unordered_set<int> inside_sectors = {SECT_INSIDE, SECT_UNDERWATER, SECT_IMPORTANT, SECT_SHOP, SECT_SPACE};
-
-MoonCheck room_data::checkMoon() {
-    for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return MoonCheck::NoMoon;
-    if(inside_sectors.contains(sector_type)) return MoonCheck::NoMoon;
-    auto check_planet = getMatchingArea(area_data::isPlanet);
-    if(!check_planet) return MoonCheck::NoMoon;
-    auto &area = areas[*check_planet];
-    if(!area.flags.test(AREA_MOON)) return MoonCheck::NoMoon;
-
-    return MOON_TIMECHECK() ? MoonCheck::Full : MoonCheck::NotFull;
-
-}
 
 static const std::map<std::string, int> _dirNames = {
     {"north", NORTH},
@@ -542,7 +489,68 @@ void room_data::clearEnvironment(int type) {
 }
 
 double room_data::getEnvironment(int type) {
-    // TODO: add the calculator stuff.
+    switch(type) {
+        case ENV_GRAVITY: {
+            // check for a gravity generator...
+            for(auto c = contents; c; c = c->next_content) {
+                if(c->gravity) return c->gravity.value();
+            }
+
+            // what about area rules?
+            if(std::optional<vnum> gravArea = getMatchingArea(checkGravity); gravArea) {
+                auto &a = areas[gravArea.value()];
+                return a.gravity.value();
+            }
+
+            // special cases here..
+            if (vn >= 64000 && vn <= 64006) {
+                return 100.0;
+            }
+            if (vn >= 64007 && vn <= 64016) {
+                return 300.0;
+            }
+            if (vn >= 64017 && vn <= 64030) {
+                return 500.0;
+            }
+            if (vn >= 64031 && vn <= 64048) {
+                return 1000.0;
+            }
+            if (vn >= 64049 && vn <= 64070) {
+                return 5000.0;
+            }
+            if (vn >= 64071 && vn <= 64096) {
+                return 10000.0;
+            }
+            if (vn == 64097) {
+                return 1000.0;
+            }
+
+            return 1.0;
+        }
+
+        case ENV_WATER:
+            if(geffect < 0) 
+                return 100.0;
+            switch(sector_type) {
+                case SECT_WATER_SWIM:
+                    return 50.0;
+                case SECT_WATER_NOSWIM:
+                    return 75.0;
+                case SECT_UNDERWATER:
+                    return 100.0;
+            }
+            break;
+        case ENV_MOONLIGHT: {
+            for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return -1;
+            if(inside_sectors.contains(sector_type)) return -1;
+            auto check_planet = getMatchingArea(area_data::isPlanet);
+            if(!check_planet) return -1;
+            auto &area = areas[*check_planet];
+            if(!area.flags.test(AREA_MOON)) return -1;
+
+            return MOON_TIMECHECK() ? 100.0 : 0.0;
+        }
+    }
     if(environment.contains(type)) return environment[type];
     return 0.0;
 }

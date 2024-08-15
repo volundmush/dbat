@@ -1867,7 +1867,7 @@ int arena_watch(struct char_data *ch) {
         if (IN_ARENA(d->character)) {
             if (ARENA_IDNUM(ch) == GET_IDNUM(d->character)) {
                 found = true;
-                room = GET_ROOM_VNUM(IN_ROOM(d->character));
+                room = d->character->getRoomVnum();
             }
         }
     }
@@ -2082,7 +2082,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             if (!i->connected && i->character &&
                 !PRF_FLAGGED(i->character, PRF_NOGOSS) &&
                 !PLR_FLAGGED(i->character, PLR_WRITING) &&
-                !ROOM_FLAGGED(IN_ROOM(i->character), ROOM_SOUNDPROOF)) {
+                !i->character->getRoomFlag(ROOM_SOUNDPROOF)) {
 
                 sprintf(buf, "@y%s@n", str);
                 perform_act(buf, ch, obj, vict_obj, i->character);
@@ -2114,7 +2114,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             if (ch != nullptr) {
                 if (IN_ARENA(ch)) {
                     if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
-                        if (arena_watch(d->character) == GET_ROOM_VNUM(IN_ROOM(ch))) {
+                        if (arena_watch(d->character) == ch->getRoomVnum()) {
                             char buf3[2000];
                             *buf3 = '\0';
                             sprintf(buf3, "@c-----@CArena@c-----@n\r\n%s\r\n@c-----@CArena@c-----@n\r\n", str);
@@ -2126,13 +2126,13 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             if (GET_EAVESDROP(d->character) > 0) {
                 int roll = rand_number(1, 101);
                 if (!resskill || (roll_skill(d->character, resskill) >= dcval)) {
-                    if (ch != nullptr && GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(ch)) &&
+                    if (ch != nullptr && GET_EAVESDROP(d->character) == ch->getRoomVnum() &&
                         GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                         char buf3[1000];
                         *buf3 = '\0';
                         sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
                         perform_act(buf3, ch, obj, vict_obj, d->character);
-                    } else if (obj != nullptr && GET_EAVESDROP(d->character) == GET_ROOM_VNUM(IN_ROOM(obj)) &&
+                    } else if (obj != nullptr && GET_EAVESDROP(d->character) == obj->getRoomVnum() &&
                                GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                         char buf3[1000];
                         *buf3 = '\0';

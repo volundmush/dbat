@@ -1146,14 +1146,14 @@ ACMD(do_train) {
     total = chCon * 6;
     total += total * ratio;
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 6100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 6135) {
+    if (ch->getRoomVnum() >= 6100 && ch->getRoomVnum() <= 6135) {
         total += total * 0.15;
     }
 
     auto sensei = ch->chclass;
     bool senseiPresent = false;
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == sensei::getLocation(sensei)) {
+    if (ch->getRoomVnum() == sensei::getLocation(sensei)) {
         senseiPresent = true;
         if (!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch) >= 1)) {
             send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
@@ -1342,14 +1342,14 @@ void trainProgress(char_data* ch) {
     total = chCon * 6;
     total += total * ratio;
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 6100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 6135) {
+    if (ch->getRoomVnum() >= 6100 && ch->getRoomVnum() <= 6135) {
         total += total * 0.15;
     }
 
     auto sensei = ch->chclass;
     bool senseiPresent = false;
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == sensei::getLocation(sensei)) {
+    if (ch->getRoomVnum() == sensei::getLocation(sensei)) {
         senseiPresent = true;
         if (!(GET_GOLD(ch) >= 8 && GET_PRACTICES(ch) >= 1)) {
             send_to_char(ch, "It costs 8 Zenni and 1 PS to train with your sensei.\r\n");
@@ -1635,10 +1635,10 @@ void trainProgress(char_data* ch) {
 
     plus += 75;
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         plus *= 4;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (ch->getRoomFlag(ROOM_HBTC)) {
         plus *= 3;
     }
     if (GET_BONUS(ch, BONUS_HARDWORKER)) {
@@ -4349,7 +4349,7 @@ ACMD(do_ingest) {
             ch->gainBaseKI(ki, true);
             if (!IS_NPC(vict) && !IS_NPC(ch)) {
                 send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict),
-                            GET_ROOM_VNUM(IN_ROOM(vict)));
+                            vict->getRoomVnum());
                 vict->playerFlags.set(PLR_ABSORBED);
             }
             send_to_char(ch, "@D[@mINGEST@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n",
@@ -4585,7 +4585,7 @@ ACMD(do_absorb) {
 
             if (!IS_NPC(vict) && !IS_NPC(ch)) {
                 send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict),
-                            GET_ROOM_VNUM(IN_ROOM(vict)));
+                            vict->getRoomVnum());
                 vict->playerFlags.set(PLR_ABSORBED);
             }
 
@@ -6014,7 +6014,7 @@ ACMD(do_plant) {
     char vict_name[100], obj_name[100];
     int roll = 0, detect = 0, fail = 0;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+    if (ch->getRoomFlag(ROOM_PEACEFUL)) {
         send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
         return;
     }
@@ -6904,11 +6904,11 @@ ACMD(do_instant) {
     } else if (PLR_FLAGGED(ch, PLR_HEALT)) {
         send_to_char(ch, "You are inside a healing tank!\r\n");
         return;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    } else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
         return;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) ||
-               ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+    } else if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL) ||
+               ch->getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "You can not leave where you are at!\r\n");
         return;
     } else if (!*arg) {
@@ -6998,13 +6998,13 @@ ACMD(do_instant) {
         } else if (IS_ANDROID(tar) || GET_HIT(tar) < (GET_HIT(ch) * 0.001) + 1) {
             send_to_char(ch, "You can't sense them well enough.\r\n");
             return;
-        } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(tar), ROOM_AL)) {
+        } else if (!ch->getRoomFlag(ROOM_AL) && tar->getRoomFlag(ROOM_AL)) {
             send_to_char(ch, "They are dead and can't be reached.\r\n");
             return;
-        } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) && ROOM_FLAGGED(IN_ROOM(tar), ROOM_RHELL)) {
+        } else if (!ch->getRoomFlag(ROOM_RHELL) && tar->getRoomFlag(ROOM_RHELL)) {
             send_to_char(ch, "They are dead and can't be reached.\r\n");
             return;
-        } else if (ROOM_FLAGGED(IN_ROOM(tar), ROOM_NOINSTANT)) {
+        } else if (tar->getRoomFlag(ROOM_NOINSTANT)) {
             send_to_char(ch, "You can not go there as it is a protected area!\r\n");
             return;
         }
@@ -7085,260 +7085,130 @@ void load_shadow_dragons() {
     save_mud_time(&time_info);
 }
 
+void handleShenronAppearance(int &DRAGONC) {
+    switch (DRAGONC) {
+        case 300:
+            send_to_room(real_room(DRAGONR), "@WThe dragon balls on the ground begin to glow yellow in slow pulses.@n\r\n");
+            send_to_planet(0, ROOM_EARTH, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
+            break;
+        case 295:
+            send_to_room(real_room(DRAGONR), "@WSuddenly lightning shoots into the sky, twisting about as a roar can be heard for miles!@n\r\n");
+            send_to_planet(0, ROOM_EARTH, "@DThe sky flashes with lightning.@n\r\n");
+            break;
+        case 290:
+            send_to_room(real_room(DRAGONR), "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
+            char_from_room(EDRAGON);
+            char_to_room(EDRAGON, real_room(DRAGONR));
+            break;
+        case 285:
+            send_to_planet(0, ROOM_EARTH, "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
+            break;
+        case 280:
+            send_to_room(real_room(DRAGONR), "@WThe glow around Shenron becomes subdued as the Eternal Dragon coils so that his head is looking down on the dragon balls!@n\r\n");
+            break;
+        case 275:
+            send_to_room(real_room(DRAGONR), "@wShenron says, '@CWho summoned me? I will grant you any two wishes that are within my power.@w'@n\r\n");
+            break;
+        case 180:
+            send_to_room(real_room(DRAGONR), "@wShenron says, '@CMake your wish already, you only have 3 minutes remaining.@w'@n\r\n");
+            break;
+        case 120:
+            send_to_room(real_room(DRAGONR), "@wShenron says, '@CMake your wish. I am losing patience, you only have 2 minutes left.@w'@n\r\n");
+            break;
+        case 60:
+            send_to_room(real_room(DRAGONR), "@wShenron says, '@CMake your wish now! You only have 1 minute left.@w'@n\r\n");
+            break;
+        case 0:
+            send_to_room(real_room(DRAGONR), "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
+            send_to_planet(0, ROOM_EARTH, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
+            extract_char(EDRAGON);
+            SHENRON = false;
+            save_mud_time(&time_info);
+            break;
+    }
+    DRAGONC--;
+}
+
+bool placeShadowDragon(int &location) {
+    int num = rand_number(200, 20000);
+    while (real_room(num) == NOWHERE || !(ROOM_FLAGGED(real_room(num), ROOM_EARTH) ||
+                                          ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
+                                          ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
+                                          ROOM_FLAGGED(real_room(num), ROOM_AETHER) ||
+                                          ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
+                                          ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
+                                          ROOM_FLAGGED(real_room(num), ROOM_YARDRAT))) {
+        num = rand_number(200, 20000);
+    }
+    location = num;
+    return true;
+}
+
+void summonShadowDragons() {
+    placeShadowDragon(SHADOW_DRAGON1);
+    placeShadowDragon(SHADOW_DRAGON2);
+    placeShadowDragon(SHADOW_DRAGON3);
+    placeShadowDragon(SHADOW_DRAGON4);
+    placeShadowDragon(SHADOW_DRAGON5);
+    placeShadowDragon(SHADOW_DRAGON6);
+    placeShadowDragon(SHADOW_DRAGON7);
+
+    struct char_data *mob = nullptr;
+    mob_rnum r_num;
+
+    r_num = real_mobile(SHADOW_DRAGON1_VNUM);
+    mob = read_mobile(r_num, REAL);
+    char_to_room(mob, real_room(SHADOW_DRAGON1));
+
+    r_num = real_mobile(SHADOW_DRAGON2_VNUM);
+    mob = read_mobile(r_num, REAL);
+    char_to_room(mob, real_room(SHADOW_DRAGON2));
+
+    r_num = real_mobile(SHADOW_DRAGON3_VNUM);
+    mob = read_mobile(r_num, REAL);
+    char_to_room(mob, real_room(SHADOW_DRAGON3));
+
+    r_num = real_mobile(SHADOW_DRAGON4_VNUM);
+    mob = read_mobile(r_num, REAL);
+    char_to_room(mob, real_room(SHADOW_DRAGON4));
+
+    r_num = real_mobile(SHADOW_DRAGON5_VNUM);
+    mob = read_mobile(r_num, REAL);
+    char_to_room(mob, real_room(SHADOW_DRAGON5));
+
+    r_num = real_mobile(SHADOW_DRAGON6_VNUM);
+    mob = read_mobile(r_num, REAL);
+    char_to_room(mob, real_room(SHADOW_DRAGON6));
+
+    r_num = real_mobile(SHADOW_DRAGON7_VNUM);
+    mob = read_mobile(r_num, REAL);
+    char_to_room(mob, real_room(SHADOW_DRAGON7));
+}
+
 void wishSYS(uint64_t heartPulse, double deltaTime) {
-    if (SHENRON == true) {
-        if (SELFISHMETER < 10) {
-            switch (DRAGONC) {
-                case 300:
-                    send_to_room(real_room(DRAGONR),
-                                 "@WThe dragon balls on the ground begin to glow yellow in slow pulses.@n\r\n");
-                    send_to_planet(0, ROOM_EARTH, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
-                    DRAGONC -= 1;
-                    break;
-                case 295:
-                    send_to_room(real_room(DRAGONR),
-                                 "@WSuddenly lightning shoots into the sky, twisting about as a roar can be heard for miles!@n\r\n");
-                    send_to_planet(0, ROOM_EARTH, "@DThe sky flashes with lightning.@n\r\n");
-                    DRAGONC -= 1;
-                    break;
-                case 290:
-                    send_to_room(real_room(DRAGONR),
-                                 "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
-                    char_from_room(EDRAGON);
-                    char_to_room(EDRAGON, real_room(DRAGONR));
-                    DRAGONC -= 1;
-                    break;
-                case 285:
-                    send_to_planet(0, ROOM_EARTH,
-                                   "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
-                    DRAGONC -= 1;
-                    break;
-                case 280:
-                    send_to_room(real_room(DRAGONR),
-                                 "@WThe glow around Shenron becomes subdued as the Eternal Dragon coils so that his head is looking down on the dragon balls!@n\r\n");
-                    DRAGONC -= 1;
-                    break;
-                case 275:
-                    send_to_room(real_room(DRAGONR),
-                                 "@wShenron says, '@CWho summoned me? I will grant you any two wishes that are within my power.@w'@n\r\n");
-                    DRAGONC -= 1;
-                    break;
-                case 180:
-                    send_to_room(real_room(DRAGONR),
-                                 "@wShenron says, '@CMake your wish already, you only have 3 minutes remaining.@w'@n\r\n");
-                    DRAGONC -= 1;
-                    break;
-                case 120:
-                    send_to_room(real_room(DRAGONR),
-                                 "@wShenron says, '@CMake your wish. I am losing patience, you only have 2 minutes left.@w'@n\r\n");
-                    DRAGONC -= 1;
-                    break;
-                case 60:
-                    send_to_room(real_room(DRAGONR),
-                                 "@wShenron says, '@CMake your wish now! You only have 1 minute left.@w'@n\r\n");
-                    DRAGONC -= 1;
-                    break;
-                case 0:
-                    send_to_room(real_room(DRAGONR),
-                                 "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
-                    send_to_planet(0, ROOM_EARTH,
-                                   "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
-                    extract_char(EDRAGON);
-                    SHENRON = false;
-                    DRAGONC -= 1;
-                    save_mud_time(&time_info);
-                    break;
-                default:
-                    DRAGONC -= 1;
-                    break;
-            }
-            if (WISH[0] == 1 && WISH[1] == 1) {
-                DRAGONC = 0;
-                WISH[0] = 0;
-                WISH[1] = 0;
-            }
-        } else {
-            send_to_room(real_room(DRAGONR),
-                         "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
-            int num = rand_number(200, 20000), done = false, place = 1;
+    if (!SHENRON) return;
+
+    if (SELFISHMETER < 10) {
+        handleShenronAppearance(DRAGONC);
+
+        if (WISH[0] == 1 && WISH[1] == 1) {
             DRAGONC = 0;
             WISH[0] = 0;
             WISH[1] = 0;
-            while (done == false) {
-                switch (place) {
-                    case 1:
-                        if (real_room(num) != NOWHERE) {
-                            if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
-                                SHADOW_DRAGON1 = num;
-                                place = 2;
-                                num = rand_number(200, 20000);
-                            } else {
-                                num = rand_number(200, 20000);
-                            }
-                        } else {
-                            num = rand_number(200, 20000);
-                        }
-                        break;
-                    case 2:
-                        if (real_room(num) != NOWHERE) {
-                            if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
-                                SHADOW_DRAGON2 = num;
-                                place = 3;
-                                num = rand_number(200, 20000);
-                            } else {
-                                num = rand_number(200, 20000);
-                            }
-                        } else {
-                            num = rand_number(200, 20000);
-                        }
-                        break;
-                    case 3:
-                        if (real_room(num) != NOWHERE) {
-                            if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
-                                SHADOW_DRAGON3 = num;
-                                place = 4;
-                                num = rand_number(200, 20000);
-                            } else {
-                                num = rand_number(200, 20000);
-                            }
-                        } else {
-                            num = rand_number(200, 20000);
-                        }
-                        break;
-                    case 4:
-                        if (real_room(num) != NOWHERE) {
-                            if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
-                                SHADOW_DRAGON4 = num;
-                                place = 5;
-                                num = rand_number(200, 20000);
-                            } else {
-                                num = rand_number(200, 20000);
-                            }
-                        } else {
-                            num = rand_number(200, 20000);
-                        }
-                        break;
-                    case 5:
-                        if (real_room(num) != NOWHERE) {
-                            if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
-                                SHADOW_DRAGON5 = num;
-                                place = 6;
-                                num = rand_number(200, 20000);
-                            } else {
-                                num = rand_number(200, 20000);
-                            }
-                        } else {
-                            num = rand_number(200, 20000);
-                        }
-                        break;
-                    case 6:
-                        if (real_room(num) != NOWHERE) {
-                            if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
-                                SHADOW_DRAGON6 = num;
-                                place = 7;
-                                num = rand_number(200, 20000);
-                            } else {
-                                num = rand_number(200, 20000);
-                            }
-                        } else {
-                            num = rand_number(200, 20000);
-                        }
-                        break;
-                    case 7:
-                        if (real_room(num) != NOWHERE) {
-                            if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_AETHER) || ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT) ||
-                                ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
-                                SHADOW_DRAGON7 = num;
-                                done = true;
-                                num = rand_number(200, 20000);
-                            } else {
-                                num = rand_number(200, 20000);
-                            }
-                        } else {
-                            num = rand_number(200, 20000);
-                        }
-                        break;
-                } /* End switch */
-                save_mud_time(&time_info);
-            } /* End while */
-            struct char_data *mob = nullptr;
-            mob_rnum r_num;
+        }
+    } else {
+        send_to_room(real_room(DRAGONR), "@RThe dragon balls suddenly begin to crack and darkness begins to pour out through the cracks! Shenron begins to turn pitch black slowly as the darkness escapes. Suddenly Shenron explodes out into the distance in seven parts. Each part taking a dragon ball with it!@n\r\n");
+        DRAGONC = 0;
+        WISH[0] = 0;
+        WISH[1] = 0;
 
-            r_num = real_mobile(SHADOW_DRAGON1_VNUM);
-            mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON1));
-            mob = nullptr;
+        summonShadowDragons();
 
-            r_num = real_mobile(SHADOW_DRAGON2_VNUM);
-            mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON2));
-            mob = nullptr;
-
-            r_num = real_mobile(SHADOW_DRAGON3_VNUM);
-            mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON3));
-            mob = nullptr;
-
-            r_num = real_mobile(SHADOW_DRAGON4_VNUM);
-            mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON4));
-            mob = nullptr;
-
-            r_num = real_mobile(SHADOW_DRAGON5_VNUM);
-            mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON5));
-            mob = nullptr;
-
-            r_num = real_mobile(SHADOW_DRAGON6_VNUM);
-            mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON6));
-            mob = nullptr;
-
-            r_num = real_mobile(SHADOW_DRAGON7_VNUM);
-            mob = read_mobile(r_num, REAL);
-            char_to_room(mob, real_room(SHADOW_DRAGON7));
-            mob = nullptr;
-
-            extract_char(EDRAGON);
-            SHENRON = false;
-            DRAGONC = 0;
-        } /* End else */
+        extract_char(EDRAGON);
+        SHENRON = false;
     }
 }
+
 
 ACMD(do_summon) {
     auto room = ch->getRoom();
@@ -7500,7 +7370,7 @@ ACMD(do_situp) {
         send_to_char(ch, "You are a mob fool!\r\n");
         return;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+    if (ch->getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
         return;
     }
@@ -7552,7 +7422,7 @@ ACMD(do_situp) {
 void situpProgress(char_data* ch) {
     int64_t cost = 1, bonus = 0;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+    if (ch->getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
         ch->setTask(Task::nothing);
         return;
@@ -7660,19 +7530,19 @@ void situpProgress(char_data* ch) {
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (ch->getRoomFlag(ROOM_HBTC)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 8;
         if(bonus <= 10) bonus = 10;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-        if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+    } else if (ch->getRoomFlag(ROOM_WORKOUT)) {
+        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             bonus *= 5;
             if(bonus <= 6) bonus = 6;
         } else {
             bonus *= 2;
             if(bonus <= 4) bonus = 4;
         }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    } else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
         bonus *= 10;
         if(bonus <= 12) bonus = 12;
@@ -7712,7 +7582,7 @@ ACMD(do_meditate) {
         send_to_char(ch, "You are a mob fool!\r\n");
         return;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+    if (ch->getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
         return;
     }
@@ -7820,7 +7690,7 @@ ACMD(do_meditate) {
 void meditateProgress(char_data* ch) {
     int64_t bonus = 0, cost = 1;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+    if (ch->getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire makes it too hot!\r\n");
         ch->setTask(Task::nothing);
         return;
@@ -7921,29 +7791,29 @@ void meditateProgress(char_data* ch) {
     if(bonus <= 0) bonus = 0;
 
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (ch->getRoomFlag(ROOM_HBTC)) {
         if(bonus <= 0) bonus = 10;
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 5;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-        if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+    } else if (ch->getRoomFlag(ROOM_WORKOUT)) {
+        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             if(bonus <= 0) bonus = 6;
             bonus *= 5;
         } else {
             if(bonus <= 0) bonus = 3;
             bonus *= 2;
         }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    } else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
         bonus *= 10;
     } else {
         if(bonus <= 0) bonus = 1;
     }
-    if (bonus <= 0 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (bonus <= 0 && !ch->getRoomFlag(ROOM_HBTC)) {
         bonus = 1;
     }
-    if (bonus <= 1 && ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-        if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+    if (bonus <= 1 && ch->getRoomFlag(ROOM_WORKOUT)) {
+        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             bonus = 6;
         } else {
             bonus = 3;
@@ -8135,19 +8005,19 @@ void pushupProgress(char_data* ch) {
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (ch->getRoomFlag(ROOM_HBTC)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 5;
         if(bonus <= 6) bonus = 6;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT)) {
-        if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+    } else if (ch->getRoomFlag(ROOM_WORKOUT)) {
+        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             bonus *= 5;
             if(bonus <= 6) bonus = 6;
         } else {
             bonus *= 2;
             if(bonus <= 4) bonus = 4;
         }
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    } else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "@rThis place feels like... Magic.@n\r\n");
         bonus *= 10;
         if(bonus <= 12) bonus = 12;
@@ -8342,8 +8212,8 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         if (!IS_NPC(d->character)) {
             check_eq(d->character);
         }
-        if (!IS_NPC(d->character) && ROOM_EFFECT(IN_ROOM(d->character)) >= 1 && rand_number(1, 100) >= 96) {
-            if (ROOM_EFFECT(IN_ROOM(d->character)) <= 4) {
+        if (!IS_NPC(d->character) && d->character->getLocationGroundEffect() >= 1 && rand_number(1, 100) >= 96) {
+            if (d->character->getLocationGroundEffect() <= 4) {
                 switch (rand_number(1, 4)) {
                     case 1:
                         act("@RLava spews up violently from the cracks in the ground!@n", false, d->character, nullptr,
@@ -8370,11 +8240,11 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                             nullptr, nullptr, TO_CHAR);
                         break;
                 }
-                ROOM_EFFECT(IN_ROOM(d->character)) += 1;
-            } else if (ROOM_EFFECT(IN_ROOM(d->character)) == 5) {
+                d->character->modLocationGroundEffect(1);
+            } else if (d->character->getLocationGroundEffect() == 5) {
                 act("@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_ROOM);
                 act("@RLava covers the entire area now!@n", false, d->character, nullptr, nullptr, TO_CHAR);
-                ROOM_EFFECT(IN_ROOM(d->character)) += 1;
+                d->character->modLocationGroundEffect(1);
             }
         }
 
@@ -8421,7 +8291,7 @@ ACMD(do_snet) {
     struct obj_data *obj = nullptr;
     struct obj_data *obj2 = nullptr;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (ch->getRoomFlag(ROOM_HBTC)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
@@ -8429,15 +8299,15 @@ ACMD(do_snet) {
         send_to_char(ch, "Lol, no.\r\n");
         return;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
+    if (ch->getRoomFlag(ROOM_PAST)) {
         send_to_char(ch, "This is the past, you can't talk on scouter net!\r\n");
         return;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+    if (ch->getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "The fire eats your transmission!\r\n");
         return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "Your signal will not be able to escape the walls of the pocket dimension.\r\n");
         return;
     }
@@ -8509,24 +8379,24 @@ ACMD(do_snet) {
             if (IN_ROOM(i->character) == IN_ROOM(ch)) {
                 continue;
             }
-            if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_HBTC)) {
+            if (i->character->getRoomFlag(ROOM_HBTC)) {
                 continue;
             }
-            if (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_PAST)) {
+            if (i->character->getRoomFlag(ROOM_PAST)) {
                 continue;
             }
-            if ((ROOM_FLAGGED(IN_ROOM(i->character), ROOM_RHELL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) ||
-                (ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AL) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL))) {
+            if ((i->character->getRoomFlag(ROOM_RHELL) && !ch->getRoomFlag(ROOM_RHELL)) ||
+                (i->character->getRoomFlag(ROOM_AL) && !ch->getRoomFlag(ROOM_AL))) {
                 continue;
             }
-            if ((!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_RHELL) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) ||
-                (!ROOM_FLAGGED(IN_ROOM(i->character), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL))) {
+            if ((!i->character->getRoomFlag(ROOM_RHELL) && ch->getRoomFlag(ROOM_RHELL)) ||
+                (!i->character->getRoomFlag(ROOM_AL) && ch->getRoomFlag(ROOM_AL))) {
                 continue;
             }
             if (GET_POS(i->character) == POS_SLEEPING) {
                 continue;
             }
-            if (GET_ROOM_VNUM(IN_ROOM(i->character)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(i->character)) <= 19899) {
+            if (i->character->getRoomVnum() >= 19800 && i->character->getRoomVnum() <= 19899) {
                 continue;
             }
             if (GET_EQ(i->character, WEAR_EYE)) {
@@ -8605,7 +8475,7 @@ ACMD(do_snet) {
                 char over[MAX_STRING_LENGTH];
                 sprintf(over, "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
                 act(over, true, ch, nullptr, nullptr, TO_ROOM);
-                if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) {
+                if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL)) {
                     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
                 }
             }
@@ -8620,7 +8490,7 @@ ACMD(do_snet) {
                 char over[MAX_STRING_LENGTH];
                 sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
                 act(over, true, ch, nullptr, nullptr, TO_ROOM);
-                if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) {
+                if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL)) {
                     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
                 }
             }
@@ -8830,23 +8700,23 @@ ACMD(do_quit) {
     if (IS_NPC(ch) || !ch->desc)
         return;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
+    if (ch->getRoomFlag(ROOM_PAST)) {
         send_to_char(ch, "This is the past, you can't quit here!\r\n");
         return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
+    if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
         send_to_char(ch, "You can't quit in the arena!\r\n");
         return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 101 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 139) {
+    if (ch->getRoomVnum() >= 101 && ch->getRoomVnum() <= 139) {
         send_to_char(ch, "You can't quit in the mud school!\r\n");
         return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "You can't quit in a pocket dimension!\r\n");
         return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == 2069) {
+    if (ch->getRoomVnum() == 2069) {
         send_to_char(ch, "You can't quit here!\r\n");
         return;
     }
@@ -8858,7 +8728,7 @@ ACMD(do_quit) {
         }
         return;
     }
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) == 2070) {
+    if (ch->getRoomVnum() == 2070) {
         send_to_char(ch, "You can't quit here!\r\n");
         return;
     }
@@ -8890,16 +8760,16 @@ ACMD(do_quit) {
      */
 
         /* If someone is quitting in their house, let them load back here. */
-        if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) &&
-            (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899)) {
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 &&
-                GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
-                GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+        if (!ch->getRoomFlag(ROOM_PAST) &&
+            (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899)) {
+            if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
+                ch->getRoomVnum() != 1) {
+                GET_LOADROOM(ch) = ch->getRoomVnum();
             }
         }
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 &&
-                GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
+        if (ch->getRoomFlag(ROOM_PAST)) {
+            if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
+                ch->getRoomVnum() != 1) {
                 GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1561));
             }
         }
@@ -8928,10 +8798,10 @@ ACMD(do_save) {
      */
         if (CONFIG_AUTO_SAVE && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "Saving.\r\n");
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899) {
-                if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 &&
-                    GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
-                    GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+            if (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899) {
+                if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
+                    ch->getRoomVnum() != 1) {
+                    GET_LOADROOM(ch) = ch->getRoomVnum();
 
                 }
             }
@@ -8941,10 +8811,10 @@ ACMD(do_save) {
     }
 
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) < 19800 || GET_ROOM_VNUM(IN_ROOM(ch)) > 19899) {
-        if (GET_ROOM_VNUM(IN_ROOM(ch)) != NOWHERE && GET_ROOM_VNUM(IN_ROOM(ch)) != 0 &&
-            GET_ROOM_VNUM(IN_ROOM(ch)) != 1) {
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+    if (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899) {
+        if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
+            ch->getRoomVnum() != 1) {
+            GET_LOADROOM(ch) = ch->getRoomVnum();
         }
     }
 }
@@ -9980,7 +9850,7 @@ ACMD(do_gen_write) {
     }
     fprintf(fl,
             "@D[@WUser: @c%-10s@D] [@WChar: @C%-10s@D] [@WRoom: @G%-4d@D] [@WDate: @Y%6.6s@D]@b \n-----------@w\n%s\n",
-            GET_USER(ch) ? GET_USER(ch) : "ERR", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), (tmp + 4), argument);
+            GET_USER(ch) ? GET_USER(ch) : "ERR", GET_NAME(ch), ch->getRoomVnum(), (tmp + 4), argument);
     fprintf(fl, "@D-------------------------------@n\n");
     fclose(fl);
     send_to_char(ch, "Okay.  Thanks!\r\n");
@@ -10892,7 +10762,7 @@ ACMD(do_clan) {
             if (!clanIsMember(GET_CLAN(ch), ch) && !clanIsModerator(GET_CLAN(ch), ch)) {
                 send_to_char(ch, "You are not in a clan.\r\n");
                 return;
-            } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_CBANK) && clanBANY(GET_CLAN(ch), ch) == false) {
+            } else if (!ch->getRoomFlag(ROOM_CBANK) && clanBANY(GET_CLAN(ch), ch) == false) {
                 send_to_char(ch, "You are not in your clan bank and your clan doesn't have bank anywhere.\r\n");
                 return;
             } else if (!*arg2) {

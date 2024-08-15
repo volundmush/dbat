@@ -1909,7 +1909,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
     if (killer && !IS_NPC(killer)) {
         if (!IS_NPC(killer) && !IS_NPC(ch)) {
             send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(killer), GET_NAME(ch),
-                        GET_ROOM_VNUM(IN_ROOM(killer)));
+                        killer->getRoomVnum());
         }
         if ((IS_SAIYAN(killer) && rand_number(1, 2) == 2) || !IS_SAIYAN(killer)) {
             if (rand_number(1, 6) >= 5 &&
@@ -2055,8 +2055,8 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         ch->decCurHealthPercent(1);
         extract_char(ch);
     } else {
-        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) &&
-            (GET_ROOM_VNUM(IN_ROOM(ch)) < 17900 || GET_ROOM_VNUM(IN_ROOM(ch)) > 17999)) {
+        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getRoomFlag(ROOM_PAST) &&
+            (ch->getRoomVnum() < 17900 || ch->getRoomVnum() > 17999)) {
             if (!PLR_FLAGGED(ch, PLR_ABSORBED)) {
                 make_pcorpse(ch);
                 loadmap(ch);
@@ -2168,10 +2168,10 @@ void die(struct char_data *ch, struct char_data *killer) {
         }
         for(auto f : {PLR_KILLER, PLR_THIEF}) ch->playerFlags.reset(f);
         for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affected_by.reset(f);
-        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST) && !ch->is_newbie()) {
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 2002 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 2011) {
+        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getRoomFlag(ROOM_PAST) && !ch->is_newbie()) {
+            if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
                 GET_DTIME(ch) = time(nullptr);
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+            } else if (ch->getRoomFlag(ROOM_AL) || ch->getRoomFlag(ROOM_HELL)) {
                 send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
             } else if (IN_ARENA(ch)) {
                 cleanup_arena_watch(ch);

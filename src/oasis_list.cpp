@@ -156,7 +156,7 @@ ACMD(do_oasis_links) {
             }
 
             send_to_char(ch, "%3d %-30s at %5d (%-5s) ---> %5d\r\n",
-                         z2->first,z2->second.name,GET_ROOM_VNUM(nr), dirs[j], dest->vn);
+                         z2->first,z2->second.name,nr, dirs[j], dest->vn);
         }
     }
 }

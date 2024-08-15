@@ -686,7 +686,7 @@ struct room_data* obj_data::getAbsoluteRoom() {
 
 double obj_data::currentGravity() {
     if(auto room = getAbsoluteRoom(); room) {
-        return room->getGravity();
+        return room->getEnvironment(ENV_GRAVITY);
     }
     return 1.0;
 }

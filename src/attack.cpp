@@ -1085,7 +1085,7 @@ namespace atk {
                 actVictim("@C$n@W disappears, reappearing in front of you, and $e grabs you! Spinning quickly $e sends you flying into the ground!@n");
                 actOthers("@c$n@W disappears, reappearing in front of @C$N@W, and grabs $M! Spinning quickly $e sends $M flying into the ground!@n");
 
-                if (ROOM_DAMAGE(IN_ROOM(victim)) <= 95 && !ROOM_FLAGGED(IN_ROOM(victim), ROOM_SPACE)) {
+                if (ROOM_DAMAGE(IN_ROOM(victim)) <= 95 && !victim->getRoomFlag(ROOM_SPACE)) {
                         act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, user, nullptr,
                             victim,
                             TO_CHAR);
@@ -1109,8 +1109,8 @@ namespace atk {
                                         victim, TO_ROOM);
                                     break;
                                 case 2:
-                                    if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(victim)) == 0) {
-                                        ROOM_EFFECT(IN_ROOM(victim)) = 1;
+                                    if (rand_number(1, 4) == 4 && victim->getLocationGroundEffect() == 0) {
+                                        victim->setLocationGroundEffect(1);
                                         act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
                                             TO_CHAR);
                                         act("Lava leaks up through cracks in the crater!", true, user, nullptr, victim,
@@ -2527,23 +2527,23 @@ namespace atk {
             } else {
                 pcost(user, attPerc, 0);
             }
-            if (ROOM_EFFECT(IN_ROOM(user)) < -1) {
+            if (user->getLocationGroundEffect() < -1) {
                 send_to_room(IN_ROOM(user), "The water surrounding the area evaporates some!\r\n");
-                ROOM_EFFECT(IN_ROOM(user)) += 1;
-            } else if (ROOM_EFFECT(IN_ROOM(user)) == -1) {
+                user->modLocationGroundEffect(1);
+            } else if (user->getLocationGroundEffect() == -1) {
                 send_to_room(IN_ROOM(user), "The water surrounding the area evaporates completely away!\r\n");
-                ROOM_EFFECT(IN_ROOM(user)) = 0;
+                user->setLocationGroundEffect(0);
             }
             victim->affected_by.reset(AFF_ASHED);
     }
 
     void Honoo::postProcess() {
-        if (ROOM_EFFECT(IN_ROOM(user)) < -1) {
+        if (user->getLocationGroundEffect() < -1) {
             send_to_room(IN_ROOM(user), "The water surrounding the area evaporates some!\r\n");
-            ROOM_EFFECT(IN_ROOM(user)) += 1;
-        } else if (ROOM_EFFECT(IN_ROOM(user)) == -1) {
+            user->modLocationGroundEffect(1);
+        } else if (user->getLocationGroundEffect() == -1) {
             send_to_room(IN_ROOM(user), "The water surrounding the area evaporates completely away!\r\n");
-            ROOM_EFFECT(IN_ROOM(user)) = 0;
+            user->setLocationGroundEffect(0);
         }
     }   
 
@@ -4316,7 +4316,7 @@ namespace atk {
 
     void Kakusanha::postProcess() {
         int count = targets.size();
-        if (count < 5 && !ROOM_FLAGGED(IN_ROOM(user), ROOM_SPACE)) {
+        if (count < 5 && !user->getRoomFlag(ROOM_SPACE)) {
             send_to_room(IN_ROOM(user), "The rest of the beams slam into the ground!@n\r\n");
             send_to_room(IN_ROOM(user), "@wBright explosions erupt from the impacts!\r\n");
             const auto tile = user->getLocationTileType();
@@ -4330,8 +4330,8 @@ namespace atk {
                             TO_ROOM);
                         break;
                     case 2:
-                        if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(user)) == 0) {
-                            ROOM_EFFECT(IN_ROOM(user)) = 5;
+                        if (rand_number(1, 4) == 4 && user->getLocationGroundEffect() == 0) {
+                            user->setLocationGroundEffect(5);
                             act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
                                 true, user, nullptr, nullptr, TO_CHAR);
                             act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",

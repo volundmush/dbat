@@ -49,7 +49,7 @@ ACMD(do_oasis_redit) {
         buf3 = two_arguments(argument, buf1, buf2);
     }
 
-    if (GET_ADMLEVEL(ch) < 1 && !ROOM_FLAGGED(IN_ROOM(ch), ROOM_CANREMODEL)) {
+    if (GET_ADMLEVEL(ch) < 1 && !ch->getRoomFlag(ROOM_CANREMODEL)) {
         send_to_char(ch, "You can not remodel this room.\r\n");
         return;
     }
@@ -79,7 +79,7 @@ ACMD(do_oasis_redit) {
     }
 
     if (!*buf1 || GET_ADMLEVEL(ch) < 1)
-        number = GET_ROOM_VNUM(IN_ROOM(ch));
+        number = ch->getRoomVnum();
     else if (!isdigit(*buf1)) {
         if (strcasecmp("save", buf1) != 0) {
             send_to_char(ch, "Yikes!  Stop that, someone will get hurt!\r\n");

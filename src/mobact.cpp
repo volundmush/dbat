@@ -501,7 +501,7 @@ static const std::vector<std::pair<std::string, std::string>> intelligentLand = 
 
 /* This handles NPCs taunting opponents or reacting to combat. */
 void mob_taunt(struct char_data *ch) {
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) { /* In space.... nobody cares. */
+    if (ch->getRoomFlag(ROOM_SPACE)) { /* In space.... nobody cares. */
         return;
     }
 
@@ -516,7 +516,7 @@ void mob_taunt(struct char_data *ch) {
     }
 
     if(!IS_HUMANOID(ch)) {
-        auto messages = Random::get(SUNKEN(IN_ROOM(ch)) ? animalWater : animalLand);
+        auto messages = Random::get(ch->getLocationEnvironment(ENV_WATER) >= 100.0 ? animalWater : animalLand);
         act(messages->first.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
         act(messages->second.c_str(), true, ch, nullptr, vict, TO_VICT);
     } else if(!MOB_FLAGGED(ch, MOB_DUMMY)) {

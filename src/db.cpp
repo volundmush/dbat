@@ -1864,14 +1864,14 @@ void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
            GET_OBJ_VNUM(obj1), obj1->generation, obj1->id);
     mudlog(BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
                                   "In object: %s, Carried by: %s, Worn by: %s",
-           GET_ROOM_VNUM(IN_ROOM(obj1)),
+           obj1->getRoomVnum(),
            IN_ROOM(obj1) == NOWHERE ? "Nowhere" : obj1->getRoom()->name,
            obj1->in_obj ? obj1->in_obj->short_description : "None",
            obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
            obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
     mudlog(BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
                                   "In object: %s, Carried by: %s, Worn by: %s",
-           GET_ROOM_VNUM(IN_ROOM(obj2)),
+           obj2->getRoomVnum(),
            IN_ROOM(obj2) == NOWHERE ? "Nowhere" : obj2->getRoom()->name,
            obj2->in_obj ? obj2->in_obj->short_description : "None",
            obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
@@ -2397,10 +2397,10 @@ void reset_zone(zone_rnum zone) {
                 r->geffect = 0;
             }
 
-            if (r->geffect >= 1 && rand_number(1, 4) == 4 && !r->isSunken() && r->sector_type != SECT_LAVA) {
+            if (r->geffect >= 1 && rand_number(1, 4) == 4 && !r->getEnvironment(ENV_WATER) >= 100.0 && r->sector_type != SECT_LAVA) {
                 send_to_room(r, "The lava has cooled and become solid rock.\r\n");
                 r->geffect = 0;
-            } else if (r->geffect >= 1 && rand_number(1, 2) == 2 && r->isSunken() &&
+            } else if (r->geffect >= 1 && rand_number(1, 2) == 2 && r->getEnvironment(ENV_WATER) >= 100.0 &&
                     r->sector_type != SECT_LAVA) {
                 send_to_room(r, "The water has cooled the lava and it has become solid rock.\r\n");
                 r->geffect = 0;

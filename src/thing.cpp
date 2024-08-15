@@ -9,6 +9,10 @@ struct room_data* thing_data::getRoom() const {
     return nullptr;
 }
 
+room_vnum thing_data::getRoomVnum() const {
+    return room ? room->vn : NOWHERE;
+}
+
 std::string thing_data::getLocationName() const {
     if(room)
         if(room->name && strlen(room->name) > 0)

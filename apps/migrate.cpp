@@ -4518,6 +4518,8 @@ void migrate_accounts() {
         return;
     }
 
+    std::unordered_map<account_data*, std::string> pendingPasswords;
+
     for(auto &p : std::filesystem::recursive_directory_iterator(path)) {
         if(p.path().extension() != ".usr") continue;
         auto accFile = p.path().parent_path().filename().string();
@@ -4543,8 +4545,8 @@ void migrate_accounts() {
         // Line 3: password (clear text, will hash...)
         std::string pass;
         std::getline(file, pass);
-        if(!a.setPassword(pass)) basic_mud_log("Error hashing %s's password: %s", a.name.c_str(), pass.c_str());
-
+        pendingPasswords.emplace(&a, pass);
+        
         // Line 4: slots (int)
         std::string slots;
         std::getline(file, slots);
@@ -4598,8 +4600,18 @@ void migrate_accounts() {
         auto bank = std::stoi(rppBank);
         file.close();
         a.vn = id;
-
     }
+
+    // Now we hash all the passwords... in a parallelized fashion because it's very CPU intensive.
+    std::vector<std::thread> threads;
+    for(auto &[acc, pass] : pendingPasswords) {
+        threads.emplace_back([acc, pass]() {
+            if(!acc->setPassword(pass)) basic_mud_log("Error hashing %s's password: %s", acc->name.c_str(), pass.c_str());
+        });
+    }
+    // join all threads.
+    for(auto &t : threads) t.join();
+    threads.clear();
 }
 
 void migrate_characters() {
@@ -5191,6 +5203,7 @@ void migrate_db() {
 }
 
 void run_migration() {
+    isMigrating = true;
     load_config();
     setup_log();
     game::init_locale();

@@ -211,7 +211,7 @@ static int64_t mana_gain(struct char_data *ch) {
         /* Neat and fast */
         gain = GET_MAX_MANA(ch) / 70;
     } else {
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) ||
+        if (ch->getRoomFlag(ROOM_REGEN) ||
             (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
             if (IS_KONATSU(ch)) {
                 gain = GET_MAX_MANA(ch) / 12;
@@ -225,7 +225,7 @@ static int64_t mana_gain(struct char_data *ch) {
             if (!IS_KONATSU(ch) && !IS_MUTANT(ch)) {
                 gain = GET_MAX_MANA(ch) / 10;
             }
-        } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN)) {
+        } else if (!ch->getRoomFlag(ROOM_REGEN)) {
             if (IS_KONATSU(ch)) {
                 gain = GET_MAX_MANA(ch) / 15;
             }
@@ -235,7 +235,7 @@ static int64_t mana_gain(struct char_data *ch) {
             if (!IS_KONATSU(ch) && !IS_MUTANT(ch)) {
                 gain = GET_MAX_MANA(ch) / 12;
             }
-            if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_BEDROOM)) {
+            if (ch->getRoomFlag(ROOM_BEDROOM)) {
                 gain += gain * 0.25;
             }
             if (IS_ARLIAN(ch)) {
@@ -307,7 +307,7 @@ static int64_t mana_gain(struct char_data *ch) {
     if (IS_KANASSAN(ch) && weather_info.sky == SKY_RAINING && OUTSIDE(ch)) {
         gain += gain * 0.1;
     }
-    if (IS_KANASSAN(ch) && SUNKEN(IN_ROOM(ch))) {
+    if (IS_KANASSAN(ch) && ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
         gain *= 16;
     }
 
@@ -370,7 +370,7 @@ int64_t hit_gain(struct char_data *ch) {
         /* Neat and fast */
         gain = GET_MAX_HIT(ch) / 70;
     } else {
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
+        if (ch->getRoomFlag(ROOM_REGEN) || (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
             if (IS_HUMAN(ch)) {
                 gain = GET_MAX_HIT(ch) / 20;
             }
@@ -402,7 +402,7 @@ int64_t hit_gain(struct char_data *ch) {
             if (!IS_HUMAN(ch) && !IS_NAMEK(ch) && !IS_MUTANT(ch)) {
                 gain = GET_MAX_HIT(ch) / 15;
             }
-            if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_BEDROOM)) {
+            if (ch->getRoomFlag(ROOM_BEDROOM)) {
                 gain += gain * 0.25;
             }
         }
@@ -465,7 +465,7 @@ int64_t hit_gain(struct char_data *ch) {
     if (IS_KANASSAN(ch) && weather_info.sky == SKY_RAINING && OUTSIDE(ch)) {
         gain += gain * 0.1;
     }
-    if (IS_KANASSAN(ch) && SUNKEN(IN_ROOM(ch))) {
+    if (IS_KANASSAN(ch) && ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
         gain *= 16;
     }
 
@@ -518,7 +518,7 @@ static int64_t move_gain(struct char_data *ch) {
         /* Neat and fast */
         gain = GET_MAX_MOVE(ch) / 70;
     } else {
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN) ||
+        if (ch->getRoomFlag(ROOM_REGEN) ||
             (GET_BONUS(ch, BONUS_DESTROYER) > 0 && ROOM_DAMAGE(IN_ROOM(ch)) >= 75)) {
             if (IS_MUTANT(ch)) {
                 gain = GET_MAX_MOVE(ch) / 7;
@@ -529,14 +529,14 @@ static int64_t move_gain(struct char_data *ch) {
             if (!IS_MUTANT(ch)) {
                 gain = GET_MAX_MOVE(ch) / 6;
             }
-        } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_REGEN)) {
+        } else if (!ch->getRoomFlag(ROOM_REGEN)) {
             if (IS_MUTANT(ch)) {
                 gain = GET_MAX_MOVE(ch) / 9;
             }
             if (!IS_MUTANT(ch)) {
                 gain = GET_MAX_MOVE(ch) / 8;
             }
-            if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_BEDROOM)) {
+            if (ch->getRoomFlag(ROOM_BEDROOM)) {
                 gain += gain * 0.25;
             }
         }
@@ -601,7 +601,7 @@ static int64_t move_gain(struct char_data *ch) {
     if (IS_KANASSAN(ch) && weather_info.sky == SKY_RAINING && OUTSIDE(ch)) {
         gain += gain * 0.1;
     }
-    if (IS_KANASSAN(ch) && SUNKEN(IN_ROOM(ch))) {
+    if (IS_KANASSAN(ch) && ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
         gain *= 16;
     }
 
@@ -622,7 +622,7 @@ static int64_t move_gain(struct char_data *ch) {
     if (AFF_FLAGGED(ch, AFF_POISON))
         gain /= 4;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AURA)) {
+    if (ch->getRoomFlag(ROOM_AURA)) {
         gain = GET_MAX_MOVE(ch) - (ch->getCurST());
     }
 
@@ -788,13 +788,13 @@ void gain_condition(struct char_data *ch, int condition, int value) {
         return;
     } else if (GET_COND(ch, condition) < 0) {    /* No change */
         return;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL)) {
+    } else if (ch->getRoomFlag(ROOM_RHELL)) {
         return;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL)) {
+    } else if (ch->getRoomFlag(ROOM_HELL)) {
         return;
     } else if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
         return;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) <= 1) {
+    } else if (ch->getRoomVnum() <= 1) {
         return;
     }
     if (PLR_FLAGGED(ch, PLR_WRITING))
@@ -1635,7 +1635,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
             processedCharacters.insert(charId);
 
             if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE) {
-                if (ROOM_FLAGGED(IN_ROOM(i), ROOM_HOUSE)) {
+                if (i->getRoomFlag(ROOM_HOUSE)) {
                     GET_RELAXCOUNT(i) += 1;
                 } else if (GET_RELAXCOUNT(i) >= 464) {
                     GET_RELAXCOUNT(i) -= 4;
@@ -1741,14 +1741,14 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     }
                 }
 
-                if (!has_o2(i) && (SUNKEN(IN_ROOM(i)) || ROOM_FLAGGED(IN_ROOM(i), ROOM_SPACE))) {
+                if (!has_o2(i) && (i->getLocationEnvironment(ENV_WATER) >= 100.0 || i->getRoomFlag(ROOM_SPACE))) {
                     if (auto remKi = i->modCurVitalDam(CharVital::Ki, .005); remKi < 1.0) {
                         send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
                     } else {
                         if (remKi > 0.9) {
                             send_to_char(i, "You struggle trying to hold your breath!\r\n");
                         } else {
-                            if(SUNKEN(IN_ROOM(i))) {
+                            if(i->getLocationEnvironment(ENV_WATER) >= 100.0) {
                                 send_to_char(i, "You have drowned!\r\n");
                                 act("@W$n@W drowns right in front of you.@n", false, i, nullptr, nullptr, TO_ROOM);
                             } else {
@@ -1760,7 +1760,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                     }
                 }
 
-                if (!AFF_FLAGGED(i, AFF_FLYING) && ROOM_EFFECT(IN_ROOM(i)) == 6 && !MOB_FLAGGED(i, MOB_NOKILL) &&
+                if (!AFF_FLAGGED(i, AFF_FLYING) && i->getLocationGroundEffect() == 6 && !MOB_FLAGGED(i, MOB_NOKILL) &&
                     !IS_DEMON(i)) {
                     act("@rYour legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_CHAR);
                     act("@R$n@r's legs are burned by the lava!@n", true, i, nullptr, nullptr, TO_ROOM);
@@ -1855,14 +1855,14 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 diff = time(nullptr) - GET_LAST_LOAD(j);
                 if (diff > 240 && GET_LAST_LOAD(j) > 0) {
                     basic_mud_log("No rent object (%s) extracted from room (%d)", j->short_description,
-                                  GET_ROOM_VNUM(IN_ROOM(j)));
+                                  j->getRoomVnum());
                     extract_obj(j);
                 }
             }
 
             if (GET_OBJ_TYPE(j) == ITEM_HATCH) {
                 if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST)))) {
-                    GET_OBJ_VAL(j, 3) = GET_ROOM_VNUM(IN_ROOM(vehicle));
+                    GET_OBJ_VAL(j, 3) = vehicle->getRoomVnum();
                 }
             }
 
@@ -1890,10 +1890,10 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 }
             } else if (OBJ_FLAGGED(j, ITEM_ICE)) {
                 if (GET_OBJ_VNUM(j) == 79 && rand_number(1, 2) == 2) {
-                    if (ROOM_EFFECT(IN_ROOM(j)) >= 1 && ROOM_EFFECT(IN_ROOM(j)) <= 5) {
+                    if (j->getLocationGroundEffect() >= 1 && j->getLocationGroundEffect() <= 5) {
                         send_to_room(IN_ROOM(j),
                                      "The heat from the lava melts a great deal of the glacial wall and the lava cools a bit in turn.\r\n");
-                        ROOM_EFFECT(IN_ROOM(j)) -= 1;
+                        j->modLocationGroundEffect(-1);
                         if (GET_OBJ_WEIGHT(j) - (5 + (GET_OBJ_WEIGHT(j) * 0.025)) > 0) {
                             GET_OBJ_WEIGHT(j) -= 5 + (GET_OBJ_WEIGHT(j) * 0.025);
                         } else {
@@ -1969,7 +1969,7 @@ void timed_dt(struct char_data *ch) {
             if (IN_ROOM(vict) == NOWHERE)
                 continue;
 
-            if (!ROOM_FLAGGED(IN_ROOM(vict), ROOM_TIMED_DT))
+            if (!vict->getRoomFlag(ROOM_TIMED_DT))
                 continue;
 
             timed_dt(vict);

@@ -1596,7 +1596,7 @@ namespace trans {
 
         if(form == FormID::SuperSaiyan && PLR_FLAGGED(ch, PLR_FPSSJ)) drain *= 0.5;
 
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_RHELL) || ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL)) 
+        if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL)) 
             drain *= 0.75;
 
         if(ch->form != FormID::Base && ch->technique != FormID::Base)
@@ -1608,6 +1608,13 @@ namespace trans {
         }
         return drain * ch->transforms[form].grade * (1.0 + ch->getAffectModifier(APPLY_TRANS_UPKEEP_CVIT, static_cast<int>(CharVital::Stamina)));
     }
+
+    static const std::unordered_set<FormID> moonForms = {
+        FormID::Oozaru,
+        FormID::GoldenOozaru,
+        FormID::Lycanthrope,
+        FormID::AlphaLycanthrope,
+    };
 
     void gamesys_transform(uint64_t heartPulse, double deltaTime) {
         std::unordered_set<CharRef> processed;
@@ -1637,10 +1644,10 @@ namespace trans {
                 techdata.timeSpentInForm += deltaTime;
                 double techTimeAfter = data.timeSpentInForm;
 
-                if(ch->form == FormID::Oozaru || form == FormID::GoldenOozaru || ch->form == FormID::Lycanthrope || ch->form == FormID::AlphaLycanthrope) {
-                    if(auto room = ch->getRoom(); room) {
+                if(moonForms.contains(ch->form)) {
+                    if(auto moonlight = ch->getLocationEnvironment(ENV_MOONLIGHT); moonlight >= 100.0) {
                         // Top off the blutz.
-                        if(room->checkMoon() == MoonCheck::Full) data.blutz = 60.0 * 30;
+                        data.blutz = 60.0 * 30;
                     }
                     data.blutz -= deltaTime;
                     if(data.blutz <= 0 || !ch->playerFlags.test(PLR_TAIL)) {

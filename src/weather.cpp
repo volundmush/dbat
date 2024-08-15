@@ -27,16 +27,13 @@ static void grow_plants() {
         auto k = r.get();
         if(!k) continue;
 
-        auto room = k->getRoom();
-        if(!room) continue;
-
-        if (ROOM_FLAGGED(room, ROOM_GARDEN1) || ROOM_FLAGGED(room, ROOM_GARDEN2)) {
+        if (k->getRoomFlag(ROOM_GARDEN1) || k->getRoomFlag(ROOM_GARDEN2)) {
             if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
                 GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
                 if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
-                    send_to_room(room, "%s@y withers a bit.\r\n", k->short_description);
+                    k->broadcastAtLocation(fmt::format("{}@y withers a bit.\r\n", k->short_description));
                 } else {
-                    send_to_room(room, "%s@y has withered to a dried up dead husk.\r\n", k->short_description);
+                    k->broadcastAtLocation(fmt::format("{}@y has withered to a dried up dead husk.\r\n", k->short_description));
                 }
             } else if (GET_OBJ_VAL(k, VAL_WATERLEVEL) >= 0) {
                 GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
@@ -48,7 +45,7 @@ static void grow_plants() {
                         GET_OBJ_VAL(k, VAL_MATURITY) += 1;
                     }
                     if (GET_OBJ_VAL(k, VAL_MATURITY) >= GET_OBJ_VAL(k, VAL_MAXMATURE)) {
-                        send_to_room(IN_ROOM(k), "%s@G is now fully grown!@n\r\n", k->short_description);
+                        k->broadcastAtLocation(fmt::format("{}@G is now fully grown!@n\r\n", k->short_description));
                     }
                 }
             }

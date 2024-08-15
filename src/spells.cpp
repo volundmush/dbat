@@ -450,7 +450,7 @@ ASPELL(spell_portal) {
 
     /* create the portal */
     portal = read_object(portal_object, VIRTUAL);
-    GET_OBJ_VAL(portal, VAL_PORTAL_DEST) = GET_ROOM_VNUM(IN_ROOM(victim));
+    GET_OBJ_VAL(portal, VAL_PORTAL_DEST) = victim->getRoomVnum();
     GET_OBJ_VAL(portal, VAL_PORTAL_HEALTH) = 100;
     GET_OBJ_VAL(portal, VAL_PORTAL_MAXHEALTH) = 100;
     GET_OBJ_TIMER(portal) = (int) (level / 10);
@@ -461,7 +461,7 @@ ASPELL(spell_portal) {
         true, ch, nullptr, nullptr, TO_CHAR);
     /* create the portal at the other end */
     tportal = read_object(portal_object, VIRTUAL);
-    GET_OBJ_VAL(tportal, VAL_PORTAL_DEST) = GET_ROOM_VNUM(IN_ROOM(ch));
+    GET_OBJ_VAL(tportal, VAL_PORTAL_DEST) = ch->getRoomVnum();
     GET_OBJ_VAL(tportal, VAL_PORTAL_HEALTH) = 100;
     GET_OBJ_VAL(tportal, VAL_PORTAL_MAXHEALTH) = 100;
     GET_OBJ_TIMER(tportal) = (int) (level / 10);

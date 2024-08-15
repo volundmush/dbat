@@ -197,7 +197,7 @@ ACMD(do_say) {
 
     skip_spaces(&argument);
 
-    if (GET_BONUS(ch, BONUS_MUTE) > 0 && GET_ROOM_VNUM(IN_ROOM(ch)) > 160) {
+    if (GET_BONUS(ch, BONUS_MUTE) > 0 && ch->getRoomVnum() > 160) {
         send_to_char(ch, "You are mute and unable to talk though.\r\n");
         return;
     } else if (GET_BONUS(ch, BONUS_MUTE) > 0) {
@@ -267,7 +267,7 @@ ACMD(do_say) {
             send_to_char(ch, "%s", buf);
             add_history(ch, buf, HIST_SAY);
             if (SHENRON == true) {
-                if (GET_ROOM_VNUM(IN_ROOM(ch)) == DRAGONR && GET_ROOM_VNUM(IN_ROOM(EDRAGON)) == DRAGONR) {
+                if (ch->getRoomVnum() == DRAGONR && EDRAGON->getRoomVnum() == DRAGONR) {
                     if (strstr(argument, "wish")) {
 
                         for (d = descriptor_list; d; d = d->next) {
@@ -858,13 +858,13 @@ static int is_tell_ok(struct char_data *ch, struct char_data *vict) {
         send_to_char(ch, "They need to be 5000 PL or higher to send or receive tells");
     else if (PRF_FLAGGED(ch, PRF_NOTELL) && GET_ADMLEVEL(vict) < 1)
         send_to_char(ch, "You can't tell other people while you have notell on.\r\n");
-    else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SOUNDPROOF) && GET_ADMLEVEL(vict) < 1)
+    else if (ch->getRoomFlag(ROOM_SOUNDPROOF) && GET_ADMLEVEL(vict) < 1)
         send_to_char(ch, "The walls seem to absorb your words.\r\n");
     else if (!vict->desc)        /* linkless */
         act("$E's linkless at the moment.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
     else if (PLR_FLAGGED(vict, PLR_WRITING))
         act("$E's writing a message right now; try again later.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
-    else if ((GET_ADMLEVEL(ch) < 1 && PRF_FLAGGED(vict, PRF_NOTELL)) || ROOM_FLAGGED(IN_ROOM(vict), ROOM_SOUNDPROOF))
+    else if ((GET_ADMLEVEL(ch) < 1 && PRF_FLAGGED(vict, PRF_NOTELL)) || vict->getRoomFlag(ROOM_SOUNDPROOF))
         act("$E can't hear you.", false, ch, nullptr, vict, TO_CHAR | TO_SLEEP);
     else
         return (true);
@@ -921,11 +921,11 @@ ACMD(do_reply) {
     if (IS_NPC(ch))
         return;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC)) {
+    if (ch->getRoomFlag(ROOM_HBTC)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PAST)) {
+    if (ch->getRoomFlag(ROOM_PAST)) {
         send_to_char(ch, "This is the past, you can't send tells!\r\n");
         return;
     }
@@ -1414,7 +1414,7 @@ ACMD(do_gen_comm) {
         send_to_char(ch, "%s", com_msgs[subcmd][0]);
         return;
     }
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SOUNDPROOF)) {
+    if (ch->getRoomFlag(ROOM_SOUNDPROOF)) {
         send_to_char(ch, "The walls seem to absorb your words.\r\n");
         return;
     }
@@ -1477,7 +1477,7 @@ ACMD(do_gen_comm) {
         if (STATE(i) == CON_PLAYING && i != ch->desc && i->character &&
             (IS_NPC(i->character) || !PRF_FLAGGED(i->character, channels[subcmd])) &&
             (IS_NPC(i->character) || !PLR_FLAGGED(i->character, PLR_WRITING)) &&
-            !ROOM_FLAGGED(IN_ROOM(i->character), ROOM_SOUNDPROOF)) {
+            !i->character->getRoomFlag(ROOM_SOUNDPROOF)) {
 
             if (subcmd == SCMD_SHOUT &&
                 ((ch->getRoom()->zone != i->character->getRoom()->zone) ||

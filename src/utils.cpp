@@ -708,7 +708,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
         skill = GET_SKILL(ch, SKILL_PURSUIT);
     } else if (IS_NPC(ch) && !MOB_FLAGGED(ch, MOB_SENTINEL)) {
         skill = GET_LEVEL(ch);
-        if (ROOM_FLAGGED(IN_ROOM(vict), ROOM_NOMOB))
+        if (vict->getRoomFlag(ROOM_NOMOB))
             skill = -1;
     } else {
         skill = -1;
@@ -721,7 +721,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
     }
 
     if (skill > perc) {
-        int inroom = GET_ROOM_VNUM(IN_ROOM(ch));
+        int inroom = ch->getRoomVnum();
         act("@C$n@R pursues after the fleeing @c$N@R!@n", true, ch, nullptr, vict, TO_NOTVICT);
         char_from_room(ch);
         char_to_room(ch, IN_ROOM(vict));
@@ -734,7 +734,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
         if (ch->followers) {
             for (k = ch->followers; k; k = next) {
                 next = k->next;
-                if ((GET_ROOM_VNUM(IN_ROOM(k->follower)) == inroom) && (GET_POS(k->follower) >= POS_STANDING) &&
+                if ((k->follower->getRoomVnum() == inroom) && (GET_POS(k->follower) >= POS_STANDING) &&
                     (!AFF_FLAGGED(ch, AFF_ZANZOKEN) ||
                      (AFF_FLAGGED(ch, AFF_GROUP) && AFF_FLAGGED(k->follower, AFF_GROUP)))) {
                     act("You follow $N.", true, k->follower, nullptr, ch, TO_CHAR);
@@ -1275,7 +1275,7 @@ const char* sense_location_name(room_vnum roomnum) {
 
 const char *sense_location(struct char_data *ch) {
     
-    return sense_location_name(GET_ROOM_VNUM(IN_ROOM(ch)));
+    return sense_location_name(ch->getRoomVnum());
 
 }
 
@@ -1967,11 +1967,11 @@ int planet_check(struct char_data *ch, struct char_data *vict) {
             auto chPlanet = ch->getMatchingArea(area_data::isPlanet);
             auto victPlanet = vict->getMatchingArea(area_data::isPlanet);
             if(chPlanet && chPlanet == victPlanet) return true;
-            else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_AL)) {
+            else if (ch->getRoomFlag(ROOM_AL) && vict->getRoomFlag(ROOM_AL)) {
                 return true;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HELL) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_HELL)) {
+            } else if (ch->getRoomFlag(ROOM_HELL) && vict->getRoomFlag(ROOM_HELL)) {
                 return true;
-            } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NEO) && ROOM_FLAGGED(IN_ROOM(vict), ROOM_NEO)) {
+            } else if (ch->getRoomFlag(ROOM_NEO) && vict->getRoomFlag(ROOM_NEO)) {
                 return true;
             }
         }
@@ -2264,7 +2264,7 @@ void prune_crlf(char *txt) {
 
 /* log a death trap hit */
 void log_death_trap(struct char_data *ch) {
-    mudlog(BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)),
+    mudlog(BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", GET_NAME(ch), ch->getRoomVnum(),
            ch->getRoom()->name);
 }
 
@@ -2842,30 +2842,34 @@ int room_is_dark(room_rnum room) {
         return (false);
     }
 
-    for(auto c = world[room].people; c; c = c->next_in_room) {
+    auto r = &world.at(room);
+
+    for(auto c = r->people; c; c = c->next_in_room) {
         if(c->isProvidingLight()) return false;
     }
 
     if (cook_element(room))
         return (false);
 
-    if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && ROOM_FLAGGED(room, ROOM_DARK)) {
+    if (ROOM_FLAGGED(r, ROOM_NOINSTANT) && ROOM_FLAGGED(r, ROOM_DARK)) {
         return (true);
     }
-    if (ROOM_FLAGGED(room, ROOM_NOINSTANT) && !ROOM_FLAGGED(room, ROOM_DARK)) {
+    if (ROOM_FLAGGED(r, ROOM_NOINSTANT) && !ROOM_FLAGGED(r, ROOM_DARK)) {
         return (false);
     }
 
-    if (ROOM_FLAGGED(room, ROOM_DARK))
+    if (ROOM_FLAGGED(r, ROOM_DARK))
         return (true);
 
-    if (ROOM_FLAGGED(room, ROOM_INDOORS))
+    if (ROOM_FLAGGED(r, ROOM_INDOORS))
         return (false);
 
-    if (SECT(room) == SECT_INSIDE || SECT(room) == SECT_CITY || SECT(room) == SECT_IMPORTANT || SECT(room) == SECT_SHOP)
+    const auto tile = r->sector_type;
+
+    if (tile == SECT_INSIDE || tile == SECT_CITY || tile == SECT_IMPORTANT || tile == SECT_SHOP)
         return (false);
 
-    if (SECT(room) == SECT_SPACE)
+    if (tile == SECT_SPACE)
         return (false);
 
     if (weather_info.sunlight == SUN_SET)

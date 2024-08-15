@@ -1135,7 +1135,7 @@ bool char_data::isProvidingLight() {
 
 double char_data::currentGravity() {
     if(auto room = getRoom(); room) {
-        return room->getGravity();
+        return room->getEnvironment(ENV_GRAVITY);
     }
     return 1.0;
 }

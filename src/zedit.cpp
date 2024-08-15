@@ -46,7 +46,7 @@ ACMD(do_oasis_zedit) {
     /** If no argument was given, use the zone the builder is standing in.     **/
     /****************************************************************************/
     if (!*buf1)
-        number = GET_ROOM_VNUM(IN_ROOM(ch));
+        number = ch->getRoomVnum();
     else if (!isdigit(*buf1)) {
         if (strcasecmp("save", buf1) == 0) {
             save = true;

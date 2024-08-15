@@ -180,11 +180,11 @@ void char_data::teleport_to(IDXTYPE rnum) {
 }
 
 bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
-    return GET_ROOM_VNUM(IN_ROOM(this)) >= low_rnum && GET_ROOM_VNUM(IN_ROOM(this)) <= high_rnum;
+    return this->getRoomVnum() >= low_rnum && this->getRoomVnum() <= high_rnum;
 }
 
 bool char_data::in_past() {
-    return ROOM_FLAGGED(IN_ROOM(this), ROOM_PAST);
+    return this->getRoomFlag(ROOM_PAST);
 }
 
 bool char_data::is_newbie() {
@@ -278,7 +278,7 @@ void char_data::raiseGravAcclim() {
     if (rand_number(1, 140) >= get(CharAttribute::Strength)) {
         auto room = getRoom();
         if(!room) return;
-        auto gravity = room->getGravity();
+        auto gravity = room->getEnvironment(ENV_GRAVITY);
 
         if(gravity >= 1000 && !hasGravAcclim(5) && hasGravAcclim(4))
             gravAcclim[5] += 1;
@@ -297,7 +297,7 @@ void char_data::raiseGravAcclim() {
 
 int64_t char_data::calcGravCost(int64_t num) {
     double gravity = 1.0;
-    if(auto room = getRoom(); room) gravity = room->getGravity();
+    if(auto room = getRoom(); room) gravity = room->getEnvironment(ENV_GRAVITY);
 
     if(gravity >= 1000 && hasGravAcclim(5))
         gravity /= 1000;
@@ -1160,10 +1160,10 @@ void char_data::login() {
     if (GET_LEVEL(this) == 0) {      
         send_to_char(this, "%s", CONFIG_START_MESSG);
     }
-    if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1 && GET_LOADROOM(this) != NOWHERE) {
+    if (this->getRoomVnum() <= 1 && GET_LOADROOM(this) != NOWHERE) {
         char_from_room(this);
         char_to_room(this, real_room(real_room(GET_LOADROOM(this))));
-    } else if (GET_ROOM_VNUM(IN_ROOM(this)) <= 1) {
+    } else if (this->getRoomVnum() <= 1) {
         char_from_room(this);
         char_to_room(this, real_room(real_room(300)));
     } else {
@@ -1458,7 +1458,7 @@ double char_data::getRegen(CharVital type) {
 
 bool char_data::canCarryWeight(weight_t val) {
     double gravity = 1.0;
-    if(auto room = getRoom(); room) gravity = room->getGravity();
+    if(auto room = getRoom(); room) gravity = room->getEnvironment(ENV_GRAVITY);
     if(gravity >= 1000 && hasGravAcclim(5))
         gravity /= 1000;
     else if(gravity >= 100 && hasGravAcclim(4))
@@ -1487,7 +1487,7 @@ weight_t char_data::getCurrentBurden() {
     auto total = getTotalWeight();
     auto room = world.find(in_room);
     if(room != world.end()) {
-        total *= room->second.getGravity();
+        total *= room->second.getEnvironment(ENV_GRAVITY);
     }
     return total;
 }

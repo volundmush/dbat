@@ -1204,7 +1204,7 @@ in the vault (vnum: 453) now and then. you can just use
                 sprinttype(r->sector_type, sector_types, str, slen);
 
             else if (!strcasecmp(field, "gravity"))
-                snprintf(str, slen, "%d", (int)r->getGravity());
+                snprintf(str, slen, "%d", (int)r->getEnvironment(ENV_GRAVITY));
 
             else if (!strcasecmp(field, "vnum")) {
                 if (subfield && *subfield) {

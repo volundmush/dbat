@@ -360,7 +360,7 @@ ACMD(do_rcopy) {
 
     if (!arg2 || !*arg2) {
         tvnum = atoi(arg);
-        rvnum = GET_ROOM_VNUM(IN_ROOM(ch));
+        rvnum = ch->getRoomVnum();
     } else if (arg2 || *arg2) {
         rvnum = atoi(arg2);
         tvnum = atoi(arg);

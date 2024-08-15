@@ -1675,7 +1675,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
         if(!k) continue;
 
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
-            if (IN_ROOM(k) && GET_ROOM_VNUM(IN_ROOM(k)) == 80) {
+            if (IN_ROOM(k) && k->getRoomVnum() == 80) {
                 room_vnum inroom = IN_ROOM(k);
                 extract_obj(k);
                 continue;
@@ -1691,7 +1691,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
             if (KITYPE(k) == 497) {
                 if (IN_ROOM(TARGET(k)) == IN_ROOM(k)) {
                     ch = USER(k);
-                    if (GET_ROOM_VNUM(IN_ROOM(ch)) == GET_ROOM_VNUM(IN_ROOM(k))) {
+                    if (ch->getRoomVnum() == k->getRoomVnum()) {
                         bonus = 2;
                     }
 
@@ -1785,7 +1785,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         }
                         world.at(IN_ROOM(k)).setDamage(100);
                         int zone = 0;
-                        if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+                        if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
                         }
 
@@ -1860,7 +1860,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     }
                     world.at(IN_ROOM(k)).setDamage(100);
                     int zone = 0;
-                    if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+                    if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
                     }
                     extract_obj(k);
@@ -1872,7 +1872,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
             if (KITYPE(k) == 498) {
                 if (IN_ROOM(TARGET(k)) == IN_ROOM(k)) {
                     ch = USER(k);
-                    if (GET_ROOM_VNUM(IN_ROOM(ch)) == GET_ROOM_VNUM(IN_ROOM(k))) {
+                    if (ch->getRoomVnum() == k->getRoomVnum()) {
                         bonus = 2;
                     }
 
@@ -1965,7 +1965,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         }
                         world.at(IN_ROOM(k)).setDamage(100);
                         int zone = 0;
-                        if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+                        if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
                         }
                         extract_obj(k);
@@ -2038,7 +2038,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     }
                     world.at(IN_ROOM(k)).setDamage(100);
                     int zone = 0;
-                    if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+                    if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
                     }
                     extract_obj(k);
@@ -2617,7 +2617,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
         }
     }
 
-    if ((foundo == false || foundv == false) && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE)) {
+    if ((foundo == false || foundv == false) && !vict->getRoomFlag(ROOM_SPACE)) {
         sprintf(buf,
                 "@WYou watch as the deflected %s slams into the ground, exploding with a roar of blinding light!@n",
                 sname);
@@ -2636,8 +2636,8 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
                         TO_ROOM);
                     break;
                 case 2:
-                    if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(vict)) == 0) {
-                        ROOM_EFFECT(IN_ROOM(vict)) = 1;
+                    if (rand_number(1, 4) == 4 && vict->getLocationGroundEffect() == 0) {
+                        vict->setLocationGroundEffect(1);
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
                             true, ch, nullptr, vict, TO_CHAR);
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
@@ -2743,7 +2743,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
             world.at(IN_ROOM(ch)).modDamage(5);
         }
         int zone = 0;
-        if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+        if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
             send_to_zone("An explosion shakes the entire area!\r\n", zone);
         }
         return;
@@ -2751,7 +2751,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
 }
 
 void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2) {
-    if (type == 0 && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE)) {
+    if (type == 0 && !vict->getRoomFlag(ROOM_SPACE)) {
         const auto tile = ch->getLocationTileType();
         if (tile != SECT_INSIDE) {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
@@ -2763,8 +2763,8 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
                         TO_ROOM);
                     break;
                 case 2:
-                    if (rand_number(1, 4) == 4 && ROOM_EFFECT(IN_ROOM(vict)) == 0) {
-                        ROOM_EFFECT(IN_ROOM(vict)) = 1;
+                    if (rand_number(1, 4) == 4 && vict->getLocationGroundEffect() == 0) {
+                        vict->setLocationGroundEffect(1);
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
                             true, ch, nullptr, vict, TO_CHAR);
                         act("Lava spews up through cracks in the ground, roaring into the sky as a large column of molten rock!",
@@ -2870,7 +2870,7 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
             world.at(IN_ROOM(ch)).modDamage(5);
         }
         int zone = 0;
-        if ((zone = real_zone_by_thing(GET_ROOM_VNUM(IN_ROOM(ch)))) != NOWHERE) {
+        if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
             send_to_zone("An explosion shakes the entire area!\r\n", zone);
         }
     }
@@ -3734,8 +3734,8 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
     }
 
 	//Bonuses by room to vital gains
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-        if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+    if (ch->getRoomFlag(ROOM_WORKOUT) || (ch->getRoomFlag(ROOM_HBTC))) {
+        if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             gmult *= 1.75;
             pscost += 2;
         } else {
@@ -3826,8 +3826,8 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
             gaincalc = gaincalc * 0.9;
         }
 		//Room bonuses to xp gain
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_WORKOUT) || (ROOM_FLAGGED(IN_ROOM(ch), ROOM_HBTC))) {
-            if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19100 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19199) {
+        if (ch->getRoomFlag(ROOM_WORKOUT) || (ch->getRoomFlag(ROOM_HBTC))) {
+            if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
                 gaincalc *= 1.5;
             } else {
                 gaincalc *= 1.25;
@@ -3964,7 +3964,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         if (GET_HIT(vict) <= 0 && FIGHTING(vict)) {
             return 0;
         }
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+        if (ch->getRoomFlag(ROOM_PEACEFUL)) {
             send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
             return 0;
         } else if (vict == ch) {
@@ -4058,7 +4058,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         }
     }
     if (obj) {
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_PEACEFUL)) {
+        if (ch->getRoomFlag(ROOM_PEACEFUL)) {
             send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
             return 0;
         } else if (OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && GET_OBJ_VNUM(obj) != 87 && GET_OBJ_VNUM(obj) != 80 &&
@@ -4323,7 +4323,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
     if (vict) {
         int64_t gain = IS_NPC(ch) ? vict->getExperience() : 0;
 
-        if (GET_ROOM_VNUM(IN_ROOM(vict)) == 17875) {
+        if (vict->getRoomVnum() == 17875) {
             return;
         }
 
@@ -4420,7 +4420,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
         if (AFF_FLAGGED(vict, AFF_SANCTUARY)) {
             if (GET_SKILL(vict, SKILL_AQUA_BARRIER)) {
-                if (!SUNKEN(IN_ROOM(ch))) {
+                if (ch->getLocationEnvironment(ENV_WATER) < 100.0) {
                     dmg = dmg * 0.85;
                 } else {
                     dmg = dmg * 0.75;
@@ -6123,8 +6123,8 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
 void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
     const auto tile = vict->getLocationTileType();
     if (type == 0) {
-        if (!SUNKEN(IN_ROOM(vict)) && tile != SECT_WATER_SWIM &&
-            tile != SECT_WATER_NOSWIM && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE) &&
+        if (vict->getLocationEnvironment(ENV_WATER) < 100.0 && tile != SECT_WATER_SWIM &&
+            tile != SECT_WATER_NOSWIM && !vict->getRoomFlag(ROOM_SPACE) &&
             tile != SECT_FLYING) {
             switch (rand_number(1, 5)) {
                 case 1:
@@ -6213,7 +6213,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     }
                     break;
             }
-        } else if (ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE)) {
+        } else if (vict->getRoomFlag(ROOM_SPACE)) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true,
@@ -6353,8 +6353,8 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
             }
         }
     } else {
-        if (!SUNKEN(IN_ROOM(vict)) && tile != SECT_WATER_SWIM &&
-            tile != SECT_WATER_NOSWIM && !ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE) &&
+        if (vict->getLocationEnvironment(ENV_WATER) < 100.0 && tile != SECT_WATER_SWIM &&
+            tile != SECT_WATER_NOSWIM && !vict->getRoomFlag(ROOM_SPACE) &&
             tile != SECT_FLYING) {
             switch (rand_number(1, 5)) {
                 case 1:
@@ -6431,7 +6431,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_NOTVICT);
                     break;
             }
-        } else if (ROOM_FLAGGED(IN_ROOM(vict), ROOM_SPACE)) {
+        } else if (vict->getRoomFlag(ROOM_SPACE)) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch,

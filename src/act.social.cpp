@@ -436,7 +436,7 @@ ACMD(do_gmote) {
         return;
     }
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_SOUNDPROOF)) {
+    if (ch->getRoomFlag(ROOM_SOUNDPROOF)) {
         send_to_char(ch, "The walls seem to absorb your actions.\r\n");
         return;
     }

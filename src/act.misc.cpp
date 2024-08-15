@@ -110,7 +110,7 @@ ACMD(do_restring) {
 
     one_argument(argument, arg);
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 178 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 184) {
+    if (ch->getRoomVnum() >= 178 && ch->getRoomVnum() <= 184) {
         pay = 5000;
         if (GET_GOLD(ch) < pay) {
             send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
@@ -1264,7 +1264,7 @@ ACMD(do_fish) {
         if (PLR_FLAGGED(ch, PLR_FISHING)) {
             send_to_char(ch, "You are already fishing! Syntax: fish stop\r\n");
             return;
-        } else if (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHING)) {
+        } else if (!ch->getRoomFlag(ROOM_FISHING)) {
             send_to_char(ch, "This is not an area you can fish at.\r\n");
             return;
         } else if (AFF_FLAGGED(ch, AFF_FLYING)) {
@@ -1420,7 +1420,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
         i = r.get();
         if(!i) continue;
 
-        if(!ROOM_FLAGGED(IN_ROOM(i), ROOM_FISHING)) {
+        if(!i->getRoomFlag(ROOM_FISHING)) {
             i->playerFlags.reset(PLR_FISHING);
             GET_FISHD(i) = 0;
             GET_FISHSTATE(i) = FISH_NOFISH;
@@ -1480,8 +1480,8 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
                     GET_FISHSTATE(ch) = FISH_NOFISH;
                 } else if (GET_FISHSTATE(ch) != FISH_HOOKED && GET_FISHSTATE(ch) != FISH_BITE &&
-                           ((ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH) && rand_number(1, 10) >= 8) ||
-                            (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
+                           ((ch->getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 10) >= 8) ||
+                            (!ch->getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
                     act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr,
                         TO_CHAR);
                     GET_FISHSTATE(ch) = FISH_BITE;
@@ -1501,8 +1501,8 @@ static void catch_fish(struct char_data *ch, int quality) {
     struct obj_data *fish = nullptr;
     int num = 1000;
 
-    if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_FISHFRESH)) {
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+    if (ch->getRoomFlag(ROOM_FISHFRESH)) {
+        if (ch->getRoomFlag(ROOM_EARTH)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1523,7 +1523,7 @@ static void catch_fish(struct char_data *ch, int quality) {
                     num = 1003;
                     break;
             }
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
+        } else if (ch->getRoomFlag(ROOM_AETHER)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1546,7 +1546,7 @@ static void catch_fish(struct char_data *ch, int quality) {
             }
         }
     } else {
-        if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+        if (ch->getRoomFlag(ROOM_EARTH)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1567,7 +1567,7 @@ static void catch_fish(struct char_data *ch, int quality) {
                     num = 1007;
                     break;
             }
-        } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
+        } else if (ch->getRoomFlag(ROOM_NAMEK)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -2375,7 +2375,7 @@ ACMD(do_ashcloud) {
         return;
     }
 
-    if (room->isSunken()) {
+    if (room->getEnvironment(ENV_WATER) >= 100.0) {
         send_to_char(ch, "You can not create an ashcloud here, because it is too wet.\r\n");
         return;
     }
@@ -2637,7 +2637,7 @@ ACMD(do_shimmer) {
     } else if (PLR_FLAGGED(ch, PLR_HEALT)) {
         send_to_char(ch, "You are inside a healing tank!\r\n");
         return;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 19800 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 19899) {
+    } else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
         return;
     } else if (!*arg) {
@@ -2711,7 +2711,7 @@ ACMD(do_shimmer) {
         } else if (GET_ADMLEVEL(tar) > 0 && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "That immortal prevents you from reaching them.\r\n");
             return;
-        } else if (ROOM_FLAGGED(IN_ROOM(tar), ROOM_NOINSTANT)) {
+        } else if (tar->getRoomFlag(ROOM_NOINSTANT)) {
             send_to_char(ch, "You can not go there as it is a protected area!\r\n");
             return;
         } else if (GRAPPLING(ch) && AFF_FLAGGED(GRAPPLING(ch), AFF_SPIRIT)) {
@@ -2783,7 +2783,7 @@ ACMD(do_channel) {
         return;
     }
 
-    if (ROOM_EFFECT(IN_ROOM(ch)) <= 0) {
+    if (ch->getLocationGroundEffect() <= 0) {
         send_to_char(ch, "There is no lava here!\r\n");
         return;
     }
@@ -2800,7 +2800,7 @@ ACMD(do_channel) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ROOM_EFFECT(IN_ROOM(ch)) = 0;
+            ch->setLocationGroundEffect(0);
             ruby->extra_flags.set(ITEM_HOT);
         }
         ch->decCurKI(cost);
@@ -3425,7 +3425,7 @@ ACMD(do_arena) {
         ch->pref.reset(PRF_ARENAWATCH);
         ARENA_IDNUM(ch) = -1;
         return;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) != 17875) {
+    } else if (ch->getRoomVnum() != 17875) {
         send_to_char(ch, "You are not close enough to the arena floor to see it.\r\n");
         return;
     } else if (!strcasecmp(arg, "look")) {
@@ -3436,7 +3436,7 @@ ACMD(do_arena) {
             look_at_room(real_room(arena_watch(ch)), ch, 0);
         }
     } else if (!strcasecmp(arg, "scan")) {
-        if (GET_ROOM_VNUM(IN_ROOM(ch)) == 17875) {
+        if (ch->getRoomVnum() == 17875) {
             int found = false;
             struct descriptor_data *d;
 
@@ -5065,7 +5065,7 @@ ACMD(do_fireshield) {
         return;
     }
 
-    if (SUNKEN(IN_ROOM(ch))) {
+    if (ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
         send_to_char(ch, "There is way too much water here!\r\n");
         return;
     }
@@ -5141,17 +5141,17 @@ ACMD(do_warppool) {
         return;
     }
 
-    if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 4600 && GET_ROOM_VNUM(IN_ROOM(ch)) < 4700) {
+    if (ch->getRoomVnum() >= 4600 && ch->getRoomVnum() < 4700) {
         pass = true;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 795 && GET_ROOM_VNUM(IN_ROOM(ch)) < 1099) {
+    } else if (ch->getRoomVnum() >= 795 && ch->getRoomVnum() < 1099) {
         pass = true;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 15100 && GET_ROOM_VNUM(IN_ROOM(ch)) < 15299) {
+    } else if (ch->getRoomVnum() >= 15100 && ch->getRoomVnum() < 15299) {
         pass = true;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 13155 && GET_ROOM_VNUM(IN_ROOM(ch)) < 13199) {
+    } else if (ch->getRoomVnum() >= 13155 && ch->getRoomVnum() < 13199) {
         pass = true;
-    } else if (ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK) && ch->getLocationTileType() == SECT_WATER_NOSWIM) {
+    } else if (ch->getRoomFlag(ROOM_NAMEK) && ch->getLocationTileType() == SECT_WATER_NOSWIM) {
         pass = true;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 12103 && GET_ROOM_VNUM(IN_ROOM(ch)) < 12289) {
+    } else if (ch->getRoomVnum() >= 12103 && ch->getRoomVnum() < 12289) {
         pass = true;
     }
 
@@ -5160,19 +5160,19 @@ ACMD(do_warppool) {
         return;
     }
 
-    if (!strcasecmp("earth", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_EARTH)) {
+    if (!strcasecmp("earth", arg) && ch->getRoomFlag(ROOM_EARTH)) {
         send_to_char(ch, "You are already on Earth!\r\n");
         return;
-    } else if (!strcasecmp("frigid", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_FRIGID)) {
+    } else if (!strcasecmp("frigid", arg) && ch->getRoomFlag(ROOM_FRIGID)) {
         send_to_char(ch, "You are already on Frigid!\r\n");
         return;
-    } else if (!strcasecmp("kanassa", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_KANASSA)) {
+    } else if (!strcasecmp("kanassa", arg) && ch->getRoomFlag(ROOM_KANASSA)) {
         send_to_char(ch, "You are already on Kanasssa!\r\n");
         return;
-    } else if (!strcasecmp("namek", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_NAMEK)) {
+    } else if (!strcasecmp("namek", arg) && ch->getRoomFlag(ROOM_NAMEK)) {
         send_to_char(ch, "You are already on Namek!\r\n");
         return;
-    } else if (!strcasecmp("aether", arg) && ROOM_FLAGGED(IN_ROOM(ch), ROOM_AETHER)) {
+    } else if (!strcasecmp("aether", arg) && ch->getRoomFlag(ROOM_AETHER)) {
         send_to_char(ch, "You are already on Aether!\r\n");
         return;
     } else if (!strcasecmp("earth", arg)) {
@@ -5434,20 +5434,20 @@ ACMD(do_dimizu) {
 
     int skill = GET_SKILL(ch, SKILL_DIMIZU);
     int prob = axion_dice(0);
-    
+
     const auto tile = ch->getLocationTileType(); 
-    if (ROOM_EFFECT(IN_ROOM(ch)) < 0) {
+    if (ch->getLocationGroundEffect() < 0) {
         act("@CYou concentrate and distabilie the water, separating the hydrogen and oxygen. The gases dissipate quickly.",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C concentrates and the water filling the area seems to shudder. Suddenly the water begins to evaporate as the hydrogen and oxygen are separated.",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ROOM_EFFECT(IN_ROOM(ch)) = 0;
+        ch->setLocationGroundEffect(0);
         WAIT_STATE(ch, PULSE_1SEC);
         return;
     } else if (tile == SECT_UNDERWATER) {
         send_to_char(ch, "The area is already underwater!\r\n");
         return;
-    } else if (tile == SECT_SPACE || ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE)) {
+    } else if (tile == SECT_SPACE || ch->getRoomFlag(ROOM_SPACE)) {
         send_to_char(ch, "You can't flood space!\r\n");
         return;
     } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 12) {
@@ -5467,7 +5467,7 @@ ACMD(do_dimizu) {
         act("@c$n@C gathers $s ki and concentrates on creating water from it. Water begins to flow upward around the entire area. @c$n@C forms the water into a perfect cube with barely any ripples in its walls. It appears the water will maintain this form for a while.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->decCurKI(ch->getMaxKI() / 12);
-        ROOM_EFFECT(IN_ROOM(ch)) = -3;
+        ch->modLocationGroundEffect(-3);
         improve_skill(ch, SKILL_DIMIZU, 0);
         return;
     }
@@ -5483,12 +5483,12 @@ ACMD(do_beacon) {
     if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
         send_to_char(ch, "You are dead. You can not stake out a room to return to upon revival.\r\n");
         return;
-    } else if (GET_ROOM_VNUM(IN_ROOM(ch)) >= 0 && GET_ROOM_VNUM(IN_ROOM(ch)) <= 14) {
+    } else if (ch->getRoomVnum() >= 0 && ch->getRoomVnum() <= 14) {
         send_to_char(ch, "You can not stake out an immortal room to be revived in.\r\n");
         return;
     } else {
         send_to_char(ch, "You stake out the room you are in and will return to it if you die and are revived.\r\n");
-        GET_DROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+        GET_DROOM(ch) = ch->getRoomVnum();
         return;
     }
 

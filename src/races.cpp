@@ -443,7 +443,7 @@ namespace race {
                                      {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {
                                          double out = 0.0;
                                          if(weather_info.sky == SKY_RAINING && OUTSIDE(ch)) out += 0.1;
-                                         if(SUNKEN(IN_ROOM(ch))) out += 16.0;
+                                         if(ch->getLocationEnvironment(ENV_WATER) >= 100.0) out += 16.0;
                                          return out;
                                      }},
                              }},

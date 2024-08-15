@@ -737,7 +737,7 @@ ACMD(do_recall) {
             char_from_room(ch);
             char_to_room(ch, real_room(2));
             look_at_room(IN_ROOM(ch), ch, 0);
-            GET_LOADROOM(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+            GET_LOADROOM(ch) = ch->getRoomVnum();
         }
     }
 
@@ -1427,7 +1427,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     send_to_char(ch, "Weight: %s, Value: %d, Cost/day: %d, Timer: %d, Min Level: %d\r\n",
                  wString.c_str(), GET_OBJ_COST(j), GET_OBJ_RENT(j), GET_OBJ_TIMER(j), GET_OBJ_LEVEL(j));
 
-    send_to_char(ch, "In room: %d (%s), ", GET_ROOM_VNUM(IN_ROOM(j)),
+    send_to_char(ch, "In room: %d (%s), ", j->getRoomVnum(),
                  IN_ROOM(j) == NOWHERE ? "Nowhere" : j->getRoom()->name);
 
     /*
@@ -1578,7 +1578,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     sprinttype(GET_SEX(k), genders, buf, sizeof(buf));
     send_to_char(ch, "%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n",
                  buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")),
-                 GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), GET_ROOM_VNUM(IN_ROOM(k)),
+                 GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), k->getRoomVnum(),
                  IS_NPC(k) ? MOB_LOADROOM(k) : GET_LOADROOM(k));
 
     send_to_char(ch, "DROOM: [%5d]\r\n", GET_DROOM(k));
@@ -2082,7 +2082,7 @@ ACMD(do_switch) {
         send_to_char(ch, "You can't do that, the body is already in use!\r\n");
     else if (!(IS_NPC(victim) || ADM_FLAGGED(ch, ADM_SWITCHMORTAL)))
         send_to_char(ch, "You aren't holy enough to use a mortal's body.\r\n");
-    else if (GET_ADMLEVEL(ch) < ADMLVL_VICE && ROOM_FLAGGED(IN_ROOM(victim), ROOM_GODROOM))
+    else if (GET_ADMLEVEL(ch) < ADMLVL_VICE && victim->getRoomFlag(ROOM_GODROOM))
         send_to_char(ch, "You are not godly enough to use that room!\r\n");
     else {
         send_to_char(ch, "%s", CONFIG_OK);
@@ -2972,7 +2972,7 @@ ACMD(do_force) {
     } else if (!strcasecmp("room", arg)) {
         send_to_char(ch, "%s", CONFIG_OK);
         mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
-               GET_NAME(ch), GET_ROOM_VNUM(IN_ROOM(ch)), to_force);
+               GET_NAME(ch), ch->getRoomVnum(), to_force);
 
         for (vict = ch->getRoom()->people; vict; vict = next_force) {
             next_force = vict->next_in_room;

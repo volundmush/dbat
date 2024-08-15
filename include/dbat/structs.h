@@ -313,6 +313,7 @@ struct thing_data : public unit_data {
 
     struct room_data* room;
     struct room_data* getRoom() const;
+    room_vnum getRoomVnum() const;
 
     std::string getLocationName() const;
     room_direction_data* getLocationExit(int dir) const;
@@ -496,15 +497,12 @@ struct room_data : public unit_data {
 
     std::optional<double> gravity;
 
-    bool isSunken();
     void activate();
     void deactivate();
 
     int getDamage();
     int setDamage(int amount);
     int modDamage(int amount);
-
-    double getGravity();
 
     nlohmann::json serialize();
     void deserializeContents(const nlohmann::json& j, bool isActive);
@@ -518,8 +516,6 @@ struct room_data : public unit_data {
     std::optional<room_vnum> getLaunchDestination();
 
     std::vector<CharRef> getPeople();
-
-    MoonCheck checkMoon();
 
     nlohmann::json serializeDgVars();
 

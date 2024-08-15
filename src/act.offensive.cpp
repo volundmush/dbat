@@ -934,7 +934,7 @@ ACMD(do_charge) {
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch->ref());
             ch->playerFlags.set(PLR_CHARGE);
         }
-    } else if (amt < 1 && GET_ROOM_VNUM(IN_ROOM(ch)) != 1562) {
+    } else if (amt < 1 && ch->getRoomVnum() != 1562) {
         send_to_char(ch, "You have set it too low!\r\n");
         return;
     } else {

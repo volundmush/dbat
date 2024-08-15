@@ -1265,7 +1265,7 @@ SPECIAL(shop_keeper) {
             SHOP_SORT(shop_nr) = 0;    /* Safety in case "drop all" */
         return (false);
     }
-    if (!ok_shop_room(shop_nr, GET_ROOM_VNUM(IN_ROOM(ch))))
+    if (!ok_shop_room(shop_nr, ch->getRoomVnum()))
         return (0);
 
     if (!AWAKE(keeper))
@@ -1565,7 +1565,7 @@ void show_shops(struct char_data *ch, char *arg) {
     else {
         if (!strcasecmp(arg, ".")) {
             for (auto &sh : shop_index) {
-                if (ok_shop_room(sh.first, GET_ROOM_VNUM(IN_ROOM(ch)))) {
+                if (ok_shop_room(sh.first, ch->getRoomVnum())) {
                     shop_nr = sh.first;
                     break;
                 }
