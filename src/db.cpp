@@ -768,6 +768,7 @@ void boot_db_new() {
     boot_db_socials();
     boot_db_clans();
     boot_db_commands();
+    boot_db_help();
     boot_db_specials();
     boot_db_assemblies();
     boot_db_sort();
