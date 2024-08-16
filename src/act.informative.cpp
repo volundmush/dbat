@@ -991,815 +991,280 @@ ACMD(do_intro) {
 }
 
 /* Used when checking status or looking at a character */
-static void bringdesc(struct char_data *ch, struct char_data *tch) {
+static void send_attribute_desc(struct char_data *ch, const char *label, const char *value) {
+    send_to_char(ch, "            @D[@c%-12s@D: @W%-12s@D]@n\r\n", label, value);
+}
 
-    if (ch != nullptr && tch != nullptr && IS_HUMANOID(tch)) {
-
-        if (ch != tch && PLR_FLAGGED(tch, PLR_DISGUISED)) {
-            send_to_char(ch, "            @D[@cHair Length @D: @WHidden.         @D]@n\r\n");
-            send_to_char(ch, "            @D[@cHair Color  @D: @WHidden.         @D]@n\r\n");
-            send_to_char(ch, "            @D[@cHair Style  @D: @WHidden.         @D]@n\r\n");
-            send_to_char(ch, "            @D[@cEye Color   @D: @WHidden.         @D]@n\r\n");
-            if (GET_SKIN(tch) == SKIN_WHITE) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WWhite.        @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_TAN) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WTan.          @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_BLACK) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WBlack.        @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_GREEN) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WGreen.        @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_ORANGE) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WOrange.       @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_YELLOW) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WYellow.       @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_RED) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WRed.          @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_GREY) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WGrey.         @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_BLUE) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WBlue.         @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_AQUA) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WAqua.         @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_PINK) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WPink.         @D]@n\r\n");
-            } else if (GET_SKIN(tch) == SKIN_PURPLE) {
-                send_to_char(ch, "            @D[@cSkin Color  @D: @WPurple.       @D]@n\r\n");
-            }
-            return;
-        }
-
-        if (IS_HUMAN(tch) || IS_SAIYAN(tch) || IS_KONATSU(tch) || IS_MUTANT(tch) || IS_ANDROID(tch) || IS_KAI(tch) ||
-            IS_HALFBREED(tch) || IS_TRUFFLE(tch) || IS_HOSHIJIN(tch)) {
-            if ((!IS_SAIYAN(tch) && !IS_HALFBREED(tch)) ||
-                ((IS_SAIYAN(tch) || IS_HALFBREED(tch)) && !IS_TRANSFORMED(tch))) {
-                if (GET_HAIRL(tch) == HAIRL_LONG) {
-                    send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
-                } else if (GET_HAIRL(tch) == HAIRL_BALD) {
-                    send_to_char(ch, "            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
-                } else if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                    send_to_char(ch, "            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
-                } else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                    send_to_char(ch, "            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
-                } else if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                    send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
-                }
-                if (GET_HAIRS(tch) == HAIRS_PLAIN) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WPlain.        @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_MOHAWK) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WMohawk.       @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_SPIKY) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_CURLY) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WCurly.        @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_UNEVEN) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WUneven.       @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_PONYTAIL) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WPony Tail.    @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_AFRO) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WAfro.         @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_FADE) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WFade.         @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_CREW) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WCrew Cut.     @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_FEATHERED) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WFeathered.    @D]@n\r\n");
-                } else if (GET_HAIRS(tch) == HAIRS_DRED) {
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WDread Locks.  @D]@n\r\n");
-                }
-                if (GET_HAIRC(tch) == HAIRC_BLACK) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WBlack.        @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_BROWN) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WBrown.        @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_BLONDE) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WBlonde.       @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_GREY) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WGrey.         @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_RED) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WRed.          @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_ORANGE) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WOrange.       @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_GREEN) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WGreen.        @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_BLUE) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WBlue.         @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_PINK) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WPink.         @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_PURPLE) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WPurple.       @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_SILVER) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WSilver.       @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_CRIMSON) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WCrimson.      @D]@n\r\n");
-                } else if (GET_HAIRC(tch) == HAIRC_WHITE) {
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WWhite.        @D]@n\r\n");
-                }
-            } else if (IS_SAIYAN(tch) || IS_HALFBREED(tch)) {
-                if (tch->form == FormID::SuperSaiyan) {
-                    if (GET_HAIRL(tch) == HAIRL_LONG) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_BALD) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
-                    }
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-                } else if (tch->form == FormID::SuperSaiyan2) {
-                    if (GET_HAIRL(tch) == HAIRL_LONG) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WLong.         @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_BALD) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WBald.         @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WShort.        @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WMedium.       @D]@n\r\n");
-                    } else if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                        send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
-                    }
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WSharp Spikes. @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-                } else if (tch->form == FormID::SuperSaiyan3) {
-                    send_to_char(ch, "            @D[@cHair Length @D: @WReally Long.  @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WSpiky.        @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WGolden.       @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cEye Color   @D: @WAqua Green.   @D]@n\r\n");
-                } else if (tch->form == FormID::SuperSaiyan4) {
-                    send_to_char(ch, "            @D[@cHair Length @D: @WLong.        @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cHair Style  @D: @WSoft Spikes. @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cHair Color  @D: @WBlack.       @D]@n\r\n");
-                    send_to_char(ch, "            @D[@cEye Color   @D: @WAmber.       @D]@n\r\n");
-                }
-            }
-        }
-        if (IS_DEMON(tch) || IS_ICER(tch)) {
-            if (GET_HAIRL(tch) == HAIRL_BALD) {
-                send_to_char(ch, "            @D[@cHorn Length @D: @WNone.         @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                send_to_char(ch, "            @D[@cHorn Length @D: @WShort.        @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                send_to_char(ch, "            @D[@cHorn Length @D: @WMedium.       @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_LONG) {
-                send_to_char(ch, "            @D[@cHorn Length @D: @WLong.         @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                send_to_char(ch, "            @D[@cHorn Length @D: @WReally Long.  @D]@n\r\n");
-            }
-        }
-        if (IS_NAMEK(tch) || IS_ARLIAN(tch)) {
-            if (GET_HAIRL(tch) == HAIRL_BALD) {
-                send_to_char(ch, "            @D[@cAnt. Length @D: @WTiny.        @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                send_to_char(ch, "            @D[@cAnt. Length @D: @WShort.       @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                send_to_char(ch, "            @D[@cAnt. Length @D: @WMedium.      @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_LONG) {
-                send_to_char(ch, "            @D[@cAnt. Length @D: @WLong.        @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                send_to_char(ch, "            @D[@cAnt. Length @D: @WR. Long.     @D]@n\r\n");
-            }
-        }
-        if (IS_ARLIAN(tch) && IS_FEMALE(tch)) {
-            if (GET_HAIRC(tch) == HAIRC_BLACK) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WBlack.        @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_BROWN) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WBrown.        @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_BLONDE) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WBlonde.       @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_GREY) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WGrey.         @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_RED) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WRed.          @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_ORANGE) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WOrange.       @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_GREEN) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WGreen.        @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_BLUE) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WBlue.         @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_PINK) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WPink.         @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_PURPLE) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WPurple.       @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_SILVER) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WSilver.       @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_CRIMSON) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WCrimson.      @D]@n\r\n");
-            } else if (GET_HAIRC(tch) == HAIRC_WHITE) {
-                send_to_char(ch, "            @D[@cWing Color  @D: @WWhite.        @D]@n\r\n");
-            }
-        } else if (IS_ARLIAN(tch) && !IS_FEMALE(tch)) {
-            send_to_char(ch, "            @D[@cWing Color  @D: @WWhite.        @D]@n\r\n");
-        }
-        if (IS_MAJIN(tch)) {
-            if (GET_HAIRL(tch) == HAIRL_BALD) {
-                send_to_char(ch, "            @D[@cFor. Length @D: @WTiny.         @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_SHORT) {
-                send_to_char(ch, "            @D[@cFor. Length @D: @WShort.        @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_MEDIUM) {
-                send_to_char(ch, "            @D[@cFor. Length @D: @WMedium.       @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_LONG) {
-                send_to_char(ch, "            @D[@cFor. Length @D: @WLong.         @D]@n\r\n");
-            }
-            if (GET_HAIRL(tch) == HAIRL_RLONG) {
-                send_to_char(ch, "            @D[@cFor. Length @D: @WR. Long.      @D]@n\r\n");
-            }
-        }
-        if ((!IS_SAIYAN(tch) && !IS_HALFBREED(tch)) ||
-            ((IS_SAIYAN(tch) || IS_HALFBREED(tch)) && !IS_TRANSFORMED(tch))) {
-            if (GET_EYE(tch) == EYE_BLUE) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WBlue.         @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_BLACK) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WBlack.        @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_GREEN) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WGreen.        @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_BROWN) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WBrown.        @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_RED) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WRed.          @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_AQUA) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WAqua.         @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_PINK) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WPink.         @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_PURPLE) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WPurple.       @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_CRIMSON) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WCrimson.      @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_GOLD) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WGold.         @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_AMBER) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WAmber.        @D]@n\r\n");
-            } else if (GET_EYE(tch) == EYE_EMERALD) {
-                send_to_char(ch, "            @D[@cEye Color   @D: @WEmerald.      @D]@n\r\n");
-            }
-        }
-        if (GET_SKIN(tch) == SKIN_WHITE) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WWhite.        @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_TAN) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WTan.          @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_BLACK) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WBlack.        @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_GREEN) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WGreen.        @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_ORANGE) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WOrange.       @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_YELLOW) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WYellow.       @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_RED) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WRed.          @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_GREY) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WGrey.         @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_BLUE) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WBlue.         @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_AQUA) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WAqua.         @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_PINK) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WPink.         @D]@n\r\n");
-        } else if (GET_SKIN(tch) == SKIN_PURPLE) {
-            send_to_char(ch, "            @D[@cSkin Color  @D: @WPurple.       @D]@n\r\n");
-        }
-        if (MAJINIZED(tch) != 0 && MAJINIZED(tch) != 3) {
-            send_to_char(ch, "            @D[@cForehead    @D: @mMajin Symbol  @D]@n\r\n");
-        }
-    } else if (!IS_HUMANOID(tch)) {
-        /* Display nothing */
-        return;
-    } else {
-        send_to_char(ch, "Error in bring-desc, please report.\r\n");
+static const char* get_skin_color_desc(int skin_color) {
+    switch (skin_color) {
+        case SKIN_WHITE: return "White";
+        case SKIN_TAN: return "Tan";
+        case SKIN_BLACK: return "Black";
+        case SKIN_GREEN: return "Green";
+        case SKIN_ORANGE: return "Orange";
+        case SKIN_YELLOW: return "Yellow";
+        case SKIN_RED: return "Red";
+        case SKIN_GREY: return "Grey";
+        case SKIN_BLUE: return "Blue";
+        case SKIN_AQUA: return "Aqua";
+        case SKIN_PINK: return "Pink";
+        case SKIN_PURPLE: return "Purple";
+        default: return "Unknown";
     }
 }
 
-static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
-                          struct char_data *ch) {
-    int door;
+static const char* get_hair_length_desc(int hair_length) {
+    switch (hair_length) {
+        case HAIRL_LONG: return "Long";
+        case HAIRL_BALD: return "Bald";
+        case HAIRL_SHORT: return "Short";
+        case HAIRL_MEDIUM: return "Medium";
+        case HAIRL_RLONG: return "Really Long";
+        default: return "Unknown";
+    }
+}
 
+static const char* get_hair_style_desc(int hair_style) {
+    switch (hair_style) {
+        case HAIRS_PLAIN: return "Plain";
+        case HAIRS_MOHAWK: return "Mohawk";
+        case HAIRS_SPIKY: return "Spiky";
+        case HAIRS_CURLY: return "Curly";
+        case HAIRS_UNEVEN: return "Uneven";
+        case HAIRS_PONYTAIL: return "Pony Tail";
+        case HAIRS_AFRO: return "Afro";
+        case HAIRS_FADE: return "Fade";
+        case HAIRS_CREW: return "Crew Cut";
+        case HAIRS_FEATHERED: return "Feathered";
+        case HAIRS_DRED: return "Dread Locks";
+        default: return "Unknown";
+    }
+}
+
+static const char* get_hair_color_desc(int hair_color) {
+    switch (hair_color) {
+        case HAIRC_BLACK: return "Black";
+        case HAIRC_BROWN: return "Brown";
+        case HAIRC_BLONDE: return "Blonde";
+        case HAIRC_GREY: return "Grey";
+        case HAIRC_RED: return "Red";
+        case HAIRC_ORANGE: return "Orange";
+        case HAIRC_GREEN: return "Green";
+        case HAIRC_BLUE: return "Blue";
+        case HAIRC_PINK: return "Pink";
+        case HAIRC_PURPLE: return "Purple";
+        case HAIRC_SILVER: return "Silver";
+        case HAIRC_CRIMSON: return "Crimson";
+        case HAIRC_WHITE: return "White";
+        default: return "Unknown";
+    }
+}
+
+static const char* get_eye_color_desc(int eye_color) {
+    switch (eye_color) {
+        case EYE_BLUE: return "Blue";
+        case EYE_BLACK: return "Black";
+        case EYE_GREEN: return "Green";
+        case EYE_BROWN: return "Brown";
+        case EYE_RED: return "Red";
+        case EYE_AQUA: return "Aqua";
+        case EYE_PINK: return "Pink";
+        case EYE_PURPLE: return "Purple";
+        case EYE_CRIMSON: return "Crimson";
+        case EYE_GOLD: return "Gold";
+        case EYE_AMBER: return "Amber";
+        case EYE_EMERALD: return "Emerald";
+        default: return "Unknown";
+    }
+}
+
+static void bringdesc(struct char_data *ch, struct char_data *tch) {
+    if (!ch || !tch) {
+        send_to_char(ch, "Error in bring-desc, please report.\r\n");
+        return;
+    }
+
+    if (!IS_HUMANOID(tch)) {
+        return; // No description for non-humanoid characters
+    }
+
+    if (ch != tch && PLR_FLAGGED(tch, PLR_DISGUISED)) {
+        send_attribute_desc(ch, "Hair Length", "Hidden.");
+        send_attribute_desc(ch, "Hair Color", "Hidden.");
+        send_attribute_desc(ch, "Hair Style", "Hidden.");
+        send_attribute_desc(ch, "Eye Color", "Hidden.");
+        send_attribute_desc(ch, "Skin Color", get_skin_color_desc(GET_SKIN(tch)));
+        return;
+    }
+
+    if (IS_HUMAN(tch) || IS_SAIYAN(tch) || IS_KONATSU(tch) || IS_MUTANT(tch) || IS_ANDROID(tch) ||
+        IS_KAI(tch) || IS_HALFBREED(tch) || IS_TRUFFLE(tch) || IS_HOSHIJIN(tch)) {
+
+        if (!IS_TRANSFORMED(tch)) {
+            send_attribute_desc(ch, "Hair Length", get_hair_length_desc(GET_HAIRL(tch)));
+            send_attribute_desc(ch, "Hair Style", get_hair_style_desc(GET_HAIRS(tch)));
+            send_attribute_desc(ch, "Hair Color", get_hair_color_desc(GET_HAIRC(tch)));
+        } else if (IS_SAIYAN(tch) || IS_HALFBREED(tch)) {
+            switch (tch->form) {
+                case FormID::SuperSaiyan:
+                    send_attribute_desc(ch, "Hair Length", get_hair_length_desc(GET_HAIRL(tch)));
+                    send_attribute_desc(ch, "Hair Style", "Spiky");
+                    send_attribute_desc(ch, "Hair Color", "Golden");
+                    send_attribute_desc(ch, "Eye Color", "Emerald");
+                    break;
+                case FormID::SuperSaiyan2:
+                    send_attribute_desc(ch, "Hair Length", get_hair_length_desc(GET_HAIRL(tch)));
+                    send_attribute_desc(ch, "Hair Style", "Sharp Spikes");
+                    send_attribute_desc(ch, "Hair Color", "Golden");
+                    send_attribute_desc(ch, "Eye Color", "Emerald");
+                    break;
+                case FormID::SuperSaiyan3:
+                    send_attribute_desc(ch, "Hair Length", "Really Long");
+                    send_attribute_desc(ch, "Hair Style", "Spiky");
+                    send_attribute_desc(ch, "Hair Color", "Golden");
+                    send_attribute_desc(ch, "Eye Color", "Aqua Green");
+                    break;
+                case FormID::SuperSaiyan4:
+                    send_attribute_desc(ch, "Hair Length", "Long");
+                    send_attribute_desc(ch, "Hair Style", "Soft Spikes");
+                    send_attribute_desc(ch, "Hair Color", "Black");
+                    send_attribute_desc(ch, "Eye Color", "Amber");
+                    break;
+                default:
+                    break;
+            }
+        }
+    } else if (IS_DEMON(tch) || IS_ICER(tch)) {
+        send_attribute_desc(ch, "Horn Length", get_hair_length_desc(GET_HAIRL(tch)));
+    } else if (IS_NAMEK(tch) || IS_ARLIAN(tch)) {
+        send_attribute_desc(ch, "Ant. Length", get_hair_length_desc(GET_HAIRL(tch)));
+    } else if (IS_ARLIAN(tch) && IS_FEMALE(tch)) {
+        send_attribute_desc(ch, "Wing Color", get_hair_color_desc(GET_HAIRC(tch)));
+    } else if (IS_ARLIAN(tch) && !IS_FEMALE(tch)) {
+        send_attribute_desc(ch, "Wing Color", "White");
+    } else if (IS_MAJIN(tch)) {
+        send_attribute_desc(ch, "For. Length", get_hair_length_desc(GET_HAIRL(tch)));
+    }
+
+    if ((!IS_SAIYAN(tch) && !IS_HALFBREED(tch)) || !IS_TRANSFORMED(tch)) {
+        send_attribute_desc(ch, "Eye Color", get_eye_color_desc(GET_EYE(tch)));
+    }
+
+    send_attribute_desc(ch, "Skin Color", get_skin_color_desc(GET_SKIN(tch)));
+
+    if (MAJINIZED(tch) != 0 && MAJINIZED(tch) != 3) {
+        send_attribute_desc(ch, "Forehead", "Majin Symbol");
+    }
+}
+
+static void draw_closed_exit(char map[9][10], int x, int y, int door) {
+    switch (door) {
+        case NORTH:
+            map[y - 1][x] = '8';
+            break;
+        case EAST:
+            map[y][x + 1] = '8';
+            break;
+        case SOUTH:
+            map[y + 1][x] = '8';
+            break;
+        case WEST:
+            map[y][x - 1] = '8';
+            break;
+        case NORTHEAST:
+            map[y - 1][x + 1] = '8';
+            break;
+        case NORTHWEST:
+            map[y - 1][x - 1] = '8';
+            break;
+        case SOUTHEAST:
+            map[y + 1][x + 1] = '8';
+            break;
+        case SOUTHWEST:
+            map[y + 1][x - 1] = '8';
+            break;
+    }
+}
+
+static char get_sector_char(int sect, double geffect, double waterEnv) {
+    if (waterEnv >= 100.0) return '=';
+    if (geffect >= 1) {
+        switch (sect) {
+            case SECT_INSIDE: return '2';
+            case SECT_FIELD: return '2';
+            case SECT_DESERT: return '7';
+            case SECT_CITY: return '1';
+            case SECT_FOREST: return '6';
+            case SECT_MOUNTAIN: return '5';
+            case SECT_HILLS: return '3';
+        }
+    } else {
+        switch (sect) {
+            case SECT_INSIDE: return 'i';
+            case SECT_FIELD: return 'p';
+            case SECT_DESERT: return '!';
+            case SECT_CITY: return '(';
+            case SECT_FOREST: return 'f';
+            case SECT_MOUNTAIN: return '^';
+            case SECT_HILLS: return 'h';
+            case SECT_FLYING: return 's';
+            case SECT_WATER_NOSWIM: return '`';
+            case SECT_WATER_SWIM: return '+';
+            case SECT_SHOP: return '&';
+            case SECT_IMPORTANT: return '*';
+        }
+    }
+    return '-';
+}
+
+static void draw_open_exit(char map[9][10], int x, int y, int door, int sect, double geffect, double waterEnv) {
+    char sectorChar = get_sector_char(sect, geffect, waterEnv);
+    switch (door) {
+        case NORTH:
+            map[y - 1][x] = sectorChar;
+            break;
+        case EAST:
+            map[y][x + 1] = sectorChar;
+            break;
+        case SOUTH:
+            map[y + 1][x] = sectorChar;
+            break;
+        case WEST:
+            map[y][x - 1] = sectorChar;
+            break;
+        case NORTHEAST:
+            map[y - 1][x + 1] = sectorChar;
+            break;
+        case NORTHWEST:
+            map[y - 1][x - 1] = sectorChar;
+            break;
+        case SOUTHEAST:
+            map[y + 1][x + 1] = sectorChar;
+            break;
+        case SOUTHWEST:
+            map[y + 1][x - 1] = sectorChar;
+            break;
+    }
+}
+
+static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum, struct char_data *ch) {
     auto &room = world[rnum];
-
-    for (door = 0; door < NUM_OF_DIRS; door++) {
+    for (int door = 0; door < NUM_OF_DIRS; door++) {
         auto d = room.dir_option[door];
-        if(!d) continue;
+        if (!d) continue;
         auto dest = d->getDestination();
-        if(!dest) continue;
+        if (!dest) continue;
+
         bool isClosed = IS_SET(d->exit_info, EX_CLOSED);
         bool isSecret = IS_SET(d->exit_info, EX_SECRET);
 
-        if(isClosed && !isSecret)  {
-            switch (door) {
-                case NORTH:
-                    map[y - 1][x] = '8';
-                    break;
-                case EAST:
-                    map[y][x + 1] = '8';
-                    break;
-                case SOUTH:
-                    map[y + 1][x] = '8';
-                    break;
-                case WEST:
-                    map[y][x - 1] = '8';
-                    break;
-                case NORTHEAST:
-                    map[y - 1][x + 1] = '8';
-                    break;
-                case NORTHWEST:
-                    map[y - 1][x - 1] = '8';
-                    break;
-                case SOUTHEAST:
-                    map[y + 1][x + 1] = '8';
-                    break;
-                case SOUTHWEST:
-                    map[y + 1][x - 1] = '8';
-                    break;
-            }
+        if (isClosed && !isSecret) {
+            draw_closed_exit(map, x, y, door);
         } else if (!isClosed) {
-            auto sect = dest->sector_type;
-            switch (door) {
-                case NORTH:
-                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
-                        map[y - 1][x] = '=';
-                    } else if (sect == SECT_INSIDE) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x] = '2';
-                        } else {
-                            map[y - 1][x] = 'i';
-                        }
-                    } else if (sect == SECT_FIELD) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x] = '2';
-                        } else {
-                            map[y - 1][x] = 'p';
-                        }
-                    } else if (sect == SECT_DESERT) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x] = '7';
-                        } else {
-                            map[y - 1][x] = '!';
-                        }
-                    } else if (sect == SECT_CITY) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x] = '1';
-                        } else {
-                            map[y - 1][x] = '(';
-                        }
-                    } else if (sect == SECT_FOREST) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x] = '6';
-                        } else {
-                            map[y - 1][x] = 'f';
-                        }
-                    } else if (sect == SECT_MOUNTAIN) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x] = '5';
-                        } else {
-                            map[y - 1][x] = '^';
-                        }
-                    } else if (sect == SECT_HILLS) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x] = '3';
-                        } else {
-                            map[y - 1][x] = 'h';
-                        }
-                    } else if (sect == SECT_FLYING) {
-                        map[y - 1][x] = 's';
-                    } else if (sect == SECT_WATER_NOSWIM) {
-                        map[y - 1][x] = '`';
-                    } else if (sect == SECT_WATER_SWIM) {
-                        map[y - 1][x] = '+';
-                    } else if (sect == SECT_SHOP) {
-                        map[y - 1][x] = '&';
-                    } else if (sect == SECT_IMPORTANT) {
-                        map[y - 1][x] = '*';
-                    } else {
-                        map[y - 1][x] = '-';
-                    }
-                    break;
-                case EAST:
-                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
-                        map[y][x + 1] = '=';
-                    } else if (sect == SECT_INSIDE) {
-                        if (dest->geffect >= 1) {
-                            map[y][x + 1] = '2';
-                        } else {
-                            map[y][x + 1] = 'i';
-                        }
-                    } else if (sect == SECT_FIELD) {
-                        if (dest->geffect >= 1) {
-                            map[y][x + 1] = '2';
-                        } else {
-                            map[y][x + 1] = 'p';
-                        }
-                    } else if (sect == SECT_DESERT) {
-                        if (dest->geffect >= 1) {
-                            map[y][x + 1] = '7';
-                        } else {
-                            map[y][x + 1] = '!';
-                        }
-                    } else if (sect == SECT_CITY) {
-                        if (dest->geffect >= 1) {
-                            map[y][x + 1] = '1';
-                        } else {
-                            map[y][x + 1] = '(';
-                        }
-                    } else if (sect == SECT_FOREST) {
-                        if (dest->geffect >= 1) {
-                            map[y][x + 1] = '6';
-                        } else {
-                            map[y][x + 1] = 'f';
-                        }
-                    } else if (sect == SECT_MOUNTAIN) {
-                        if (dest->geffect >= 1) {
-                            map[y][x + 1] = '5';
-                        } else {
-                            map[y][x + 1] = '^';
-                        }
-                    } else if (sect == SECT_HILLS) {
-                        if (dest->geffect >= 1) {
-                            map[y][x + 1] = '3';
-                        } else {
-                            map[y][x + 1] = 'h';
-                        }
-                    } else if (sect == SECT_FLYING) {
-                        map[y][x + 1] = 's';
-                    } else if (sect == SECT_WATER_NOSWIM) {
-                        map[y][x + 1] = '`';
-                    } else if (sect == SECT_WATER_SWIM) {
-                        map[y][x + 1] = '+';
-                    } else if (sect == SECT_SHOP) {
-                        map[y][x + 1] = '&';
-                    } else if (sect == SECT_IMPORTANT) {
-                        map[y][x + 1] = '*';
-                    } else {
-                        map[y][x + 1] = '-';
-                    }
-                    break;
-                case SOUTH:
-                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
-                        map[y + 1][x] = '=';
-                    } else if (sect == SECT_INSIDE) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x] = '2';
-                        } else {
-                            map[y + 1][x] = 'i';
-                        }
-                    } else if (sect == SECT_FIELD) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x] = '2';
-                        } else {
-                            map[y + 1][x] = 'p';
-                        }
-                    } else if (sect == SECT_DESERT) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x] = '7';
-                        } else {
-                            map[y + 1][x] = '!';
-                        }
-                    } else if (sect == SECT_CITY) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x] = '1';
-                        } else {
-                            map[y + 1][x] = '(';
-                        }
-                    } else if (sect == SECT_FOREST) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x] = '6';
-                        } else {
-                            map[y + 1][x] = 'f';
-                        }
-                    } else if (sect == SECT_MOUNTAIN) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x] = '5';
-                        } else {
-                            map[y + 1][x] = '^';
-                        }
-                    } else if (sect == SECT_HILLS) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x] = '3';
-                        } else {
-                            map[y + 1][x] = 'h';
-                        }
-                    } else if (sect == SECT_FLYING) {
-                        map[y + 1][x] = 's';
-                    } else if (sect == SECT_WATER_NOSWIM) {
-                        map[y + 1][x] = '`';
-                    } else if (sect == SECT_WATER_SWIM) {
-                        map[y + 1][x] = '+';
-                    } else if (sect == SECT_SHOP) {
-                        map[y + 1][x] = '&';
-                    } else if (sect == SECT_IMPORTANT) {
-                        map[y + 1][x] = '*';
-                    } else {
-                        map[y + 1][x] = '-';
-                    }
-                    break;
-                case WEST:
-                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
-                        map[y][x - 1] = '=';
-                    } else if (sect == SECT_INSIDE) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x] = '2';
-                        } else {
-                            map[y][x - 1] = 'i';
-                        }
-                    } else if (sect == SECT_FIELD) {
-                        if (dest->geffect >= 1) {
-                            map[y][x - 1] = '2';
-                        } else {
-                            map[y][x - 1] = 'p';
-                        }
-                    } else if (sect == SECT_DESERT) {
-                        if (dest->geffect >= 1) {
-                            map[y][x - 1] = '7';
-                        } else {
-                            map[y][x - 1] = '!';
-                        }
-                    } else if (sect == SECT_CITY) {
-                        if (dest->geffect >= 1) {
-                            map[y][x - 1] = '1';
-                        } else {
-                            map[y][x - 1] = '(';
-                        }
-                    } else if (sect == SECT_FOREST) {
-                        if (dest->geffect >= 1) {
-                            map[y][x - 1] = '6';
-                        } else {
-                            map[y][x - 1] = 'f';
-                        }
-                    } else if (sect == SECT_MOUNTAIN) {
-                        if (dest->geffect >= 1) {
-                            map[y][x - 1] = '5';
-                        } else {
-                            map[y][x - 1] = '^';
-                        }
-                    } else if (sect == SECT_HILLS) {
-                        if (dest->geffect >= 1) {
-                            map[y][x - 1] = '3';
-                        } else {
-                            map[y][x - 1] = 'h';
-                        }
-                    } else if (sect == SECT_FLYING) {
-                        map[y][x - 1] = 's';
-                    } else if (sect == SECT_WATER_NOSWIM) {
-                        map[y][x - 1] = '`';
-                    } else if (sect == SECT_WATER_SWIM) {
-                        map[y][x - 1] = '+';
-                    } else if (sect == SECT_SHOP) {
-                        map[y][x - 1] = '&';
-                    } else if (sect == SECT_IMPORTANT) {
-                        map[y][x - 1] = '*';
-                    } else {
-                        map[y][x - 1] = '-';
-                    }
-                    break;
-                case NORTHEAST:
-                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
-                        map[y - 1][x + 1] = '=';
-                    } else if (sect == SECT_INSIDE) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x + 1] = '2';
-                        } else {
-                            map[y - 1][x + 1] = 'i';
-                        }
-                    } else if (sect == SECT_FIELD) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x + 1] = '2';
-                        } else {
-                            map[y - 1][x + 1] = 'p';
-                        }
-                    } else if (sect == SECT_DESERT) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x + 1] = '7';
-                        } else {
-                            map[y - 1][x + 1] = '!';
-                        }
-                    } else if (sect == SECT_CITY) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x + 1] = '1';
-                        } else {
-                            map[y - 1][x + 1] = '(';
-                        }
-                    } else if (sect == SECT_FOREST) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x + 1] = '6';
-                        } else {
-                            map[y - 1][x + 1] = 'f';
-                        }
-                    } else if (sect == SECT_MOUNTAIN) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x + 1] = '5';
-                        } else {
-                            map[y - 1][x + 1] = '^';
-                        }
-                    } else if (sect == SECT_HILLS) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x + 1] = '3';
-                        } else {
-                            map[y - 1][x + 1] = 'h';
-                        }
-                    } else if (sect == SECT_FLYING) {
-                        map[y - 1][x + 1] = 's';
-                    } else if (sect == SECT_WATER_NOSWIM) {
-                        map[y - 1][x + 1] = '`';
-                    } else if (sect == SECT_WATER_SWIM) {
-                        map[y - 1][x + 1] = '+';
-                    } else if (sect == SECT_SHOP) {
-                        map[y - 1][x + 1] = '&';
-                    } else if (sect == SECT_IMPORTANT) {
-                        map[y - 1][x + 1] = '*';
-                    } else {
-                        map[y - 1][x + 1] = '-';
-                    }
-                    break;
-                case NORTHWEST:
-                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
-                        map[y - 1][x - 1] = '=';
-                    } else if (sect == SECT_INSIDE) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x - 1] = '2';
-                        } else {
-                            map[y - 1][x - 1] = 'i';
-                        }
-                    } else if (sect == SECT_FIELD) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x - 1] = '2';
-                        } else {
-                            map[y - 1][x - 1] = 'p';
-                        }
-                    } else if (sect == SECT_DESERT) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x - 1] = '7';
-                        } else {
-                            map[y - 1][x - 1] = '!';
-                        }
-                    } else if (sect == SECT_CITY) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x - 1] = '1';
-                        } else {
-                            map[y - 1][x - 1] = '(';
-                        }
-                    } else if (sect == SECT_FOREST) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x - 1] = '6';
-                        } else {
-                            map[y - 1][x - 1] = 'f';
-                        }
-                    } else if (sect == SECT_MOUNTAIN) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x - 1] = '5';
-                        } else {
-                            map[y - 1][x - 1] = '^';
-                        }
-                    } else if (sect == SECT_HILLS) {
-                        if (dest->geffect >= 1) {
-                            map[y - 1][x - 1] = '3';
-                        } else {
-                            map[y - 1][x - 1] = 'h';
-                        }
-                    } else if (sect == SECT_FLYING) {
-                        map[y - 1][x - 1] = 's';
-                    } else if (sect == SECT_WATER_NOSWIM) {
-                        map[y - 1][x - 1] = '`';
-                    } else if (sect == SECT_WATER_SWIM) {
-                        map[y - 1][x - 1] = '+';
-                    } else if (sect == SECT_SHOP) {
-                        map[y - 1][x - 1] = '&';
-                    } else if (sect == SECT_IMPORTANT) {
-                        map[y - 1][x - 1] = '*';
-                    } else {
-                        map[y - 1][x - 1] = '-';
-                    }
-                    break;
-                case SOUTHEAST:
-                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
-                        map[y + 1][x + 1] = '=';
-                    } else if (sect == SECT_INSIDE) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x + 1] = '2';
-                        } else {
-                            map[y + 1][x + 1] = 'i';
-                        }
-                    } else if (sect == SECT_FIELD) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x + 1] = '2';
-                        } else {
-                            map[y + 1][x + 1] = 'p';
-                        }
-                    } else if (sect == SECT_DESERT) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x + 1] = '7';
-                        } else {
-                            map[y + 1][x + 1] = '!';
-                        }
-                    } else if (sect == SECT_CITY) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x + 1] = '1';
-                        } else {
-                            map[y + 1][x + 1] = '(';
-                        }
-                    } else if (sect == SECT_FOREST) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x + 1] = '6';
-                        } else {
-                            map[y + 1][x + 1] = 'f';
-                        }
-                    } else if (sect == SECT_MOUNTAIN) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x + 1] = '5';
-                        } else {
-                            map[y + 1][x + 1] = '^';
-                        }
-                    } else if (sect == SECT_HILLS) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x + 1] = '3';
-                        } else {
-                            map[y + 1][x + 1] = 'h';
-                        }
-                    } else if (sect == SECT_FLYING) {
-                        map[y + 1][x + 1] = 's';
-                    } else if (sect == SECT_WATER_NOSWIM) {
-                        map[y + 1][x + 1] = '`';
-                    } else if (sect == SECT_WATER_SWIM) {
-                        map[y + 1][x + 1] = '+';
-                    } else if (sect == SECT_SHOP) {
-                        map[y + 1][x + 1] = '&';
-                    } else if (sect == SECT_IMPORTANT) {
-                        map[y + 1][x + 1] = '*';
-                    } else {
-                        map[y + 1][x + 1] = '-';
-                    }
-                    break;
-                case SOUTHWEST:
-                    if (dest->getEnvironment(ENV_WATER) >= 100.0) {
-                        map[y + 1][x - 1] = '=';
-                    } else if (sect == SECT_INSIDE) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x - 1] = '2';
-                        } else {
-                            map[y + 1][x - 1] = 'i';
-                        }
-                    } else if (sect == SECT_FIELD) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x - 1] = '2';
-                        } else {
-                            map[y + 1][x - 1] = 'p';
-                        }
-                    } else if (sect == SECT_DESERT) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x - 1] = '7';
-                        } else {
-                            map[y + 1][x - 1] = '!';
-                        }
-                    } else if (sect == SECT_CITY) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x - 1] = '1';
-                        } else {
-                            map[y + 1][x - 1] = '(';
-                        }
-                    } else if (sect == SECT_FOREST) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x - 1] = '6';
-                        } else {
-                            map[y + 1][x - 1] = 'f';
-                        }
-                    } else if (sect == SECT_MOUNTAIN) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x - 1] = '5';
-                        } else {
-                            map[y + 1][x - 1] = '^';
-                        }
-                    } else if (sect == SECT_HILLS) {
-                        if (dest->geffect >= 1) {
-                            map[y + 1][x - 1] = '3';
-                        } else {
-                            map[y + 1][x - 1] = 'h';
-                        }
-                    } else if (sect == SECT_FLYING) {
-                        map[y + 1][x - 1] = 's';
-                    } else if (sect == SECT_WATER_NOSWIM) {
-                        map[y + 1][x - 1] = '`';
-                    } else if (sect == SECT_WATER_SWIM) {
-                        map[y + 1][x - 1] = '+';
-                    } else if (sect == SECT_SHOP) {
-                        map[y + 1][x - 1] = '&';
-                    } else if (sect == SECT_IMPORTANT) {
-                        map[y + 1][x - 1] = '*';
-                    } else {
-                        map[y + 1][x - 1] = '-';
-                    }
-                    break;
-            }
+            int sect = dest->sector_type;
+            double geffect = dest->geffect;
+            double waterEnv = dest->getEnvironment(ENV_WATER);
+            draw_open_exit(map, x, y, door, sect, geffect, waterEnv);
         }
     }
 }
@@ -1808,45 +1273,76 @@ ACMD(do_map) {
     gen_map(ch, 1);
 }
 
+static void print_map_key(struct char_data *ch) {
+    send_to_char(ch, "@W               @D-[@CArea Map@D]-\r\n");
+    send_to_char(ch, "@D-------------------------------------------@w\r\n");
+    send_to_char(ch, "@WC = City, @wI@W = Inside, @GP@W = Plain, @gF@W = Forest\r\n");
+    send_to_char(ch, "@DM@W = Mountain, @yH@W = Hills, @CS@W = Sky, @BW@W = Water\r\n");
+    send_to_char(ch, "@bU@W = Underwater, @m$@W = Shop, @m#@W = Important,\r\n");
+    send_to_char(ch, "@YD@W = Desert, @c~@W = Shallow Water, @4 @n@W = Lava,\r\n");
+    send_to_char(ch, "@WLastly @RX@W = You.\r\n");
+    send_to_char(ch, "@D-------------------------------------------\r\n");
+    send_to_char(ch, "@D                  @CNorth@w\r\n");
+    send_to_char(ch, "@D                    @c^@w\r\n");
+    send_to_char(ch, "@D             @CWest @c< O > @CEast@w\r\n");
+    send_to_char(ch, "@D                    @cv@w\r\n");
+    send_to_char(ch, "@D                  @CSouth@w\r\n");
+    send_to_char(ch, "@D                ---------@w\r\n");
+}
+
+static void initialize_map(char map[9][10]) {
+    for (int i = 0; i < 9; i++) {
+        strcpy(map[i], "         ");
+    }
+}
+
+static void replace_map_symbols(char *buf) {
+    const char *search_pairs[][2] = {
+        {"x", "@RX"}, {"&", "@m$"}, {"*", "@m#"}, {"+", "@c~"}, {"s", "@CS"},
+        {"i", "@wI"}, {"(", "@WC"}, {"^", "@DM"}, {"h", "@yH"}, {"`", "@BW"},
+        {"=", "@bU"}, {"p", "@GP"}, {"f", "@gF"}, {"!", "@YD"}, {"-", "@w:"},
+        {"1", "@4@YC@n"}, {"2", "@4@YP@n"}, {"3", "@4@YH@n"}, {"7", "@4@YD@n"},
+        {"5", "@4@YM@n"}, {"6", "@4@YF@n"}, {"8", "@1 @n"}
+    };
+
+    for (const auto &pair : search_pairs) {
+        search_replace(buf, pair[0], pair[1]);
+    }
+}
+
+static void print_map_line(struct char_data *ch, int key, const char *buf) {
+    const char *key_strings[] = {
+        "    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n",
+        "    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n",
+        "    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n",
+        "    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n",
+        "    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n"
+    };
+
+    if (key < 5) {
+        send_to_char(ch, "%s%s", buf, key_strings[key]);
+    } else {
+        send_to_char(ch, buf);
+    }
+}
+
 static void gen_map(struct char_data *ch, int num) {
-    int door, i;
-    char map[9][10] = {{'-'},
-                       {'-'}};
+    char map[9][10] = {{'-'}, {'-'}};
     char buf2[MAX_INPUT_LENGTH];
 
     if (num == 1) {
-        /* Map Key */
-        send_to_char(ch, "@W               @D-[@CArea Map@D]-\r\n");
-        send_to_char(ch, "@D-------------------------------------------@w\r\n");
-        send_to_char(ch, "@WC = City, @wI@W = Inside, @GP@W = Plain, @gF@W = Forest\r\n");
-        send_to_char(ch, "@DM@W = Mountain, @yH@W = Hills, @CS@W = Sky, @BW@W = Water\r\n");
-        send_to_char(ch, "@bU@W = Underwater, @m$@W = Shop, @m#@W = Important,\r\n");
-        send_to_char(ch, "@YD@W = Desert, @c~@W = Shallow Water, @4 @n@W = Lava,\r\n");
-        send_to_char(ch, "@WLastly @RX@W = You.\r\n");
-        send_to_char(ch, "@D-------------------------------------------\r\n");
-        send_to_char(ch, "@D                  @CNorth@w\r\n");
-        send_to_char(ch, "@D                    @c^@w\r\n");
-        send_to_char(ch, "@D             @CWest @c< O > @CEast@w\r\n");
-        send_to_char(ch, "@D                    @cv@w\r\n");
-        send_to_char(ch, "@D                  @CSouth@w\r\n");
-        send_to_char(ch, "@D                ---------@w\r\n");
+        print_map_key(ch);
     }
 
-    /* blank the map */
-    for (i = 0; i < 9; i++) {
-        strcpy(map[i], "         ");
-    }
-
+    initialize_map(map);
     auto room = ch->getRoom();
-    
-    /* print out exits */
     map_draw_room(map, 4, 4, ch->in_room, ch);
-    for (door = 0; door < NUM_OF_DIRS; door++) {
+
+    for (int door = 0; door < NUM_OF_DIRS; door++) {
         auto d = room->dir_option[door];
-        if(!d) continue;
-        if(EXIT_FLAGGED(d, EX_CLOSED)) continue;
+        if (!d || EXIT_FLAGGED(d, EX_CLOSED)) continue;
         auto dest = d->getDestination();
-        if(!dest) continue;
+        if (!dest) continue;
 
         switch (door) {
             case NORTH:
@@ -1876,148 +1372,69 @@ static void gen_map(struct char_data *ch, int num) {
         }
     }
 
-    /* make it obvious what room they are in */
     map[4][4] = 'x';
 
-    /* print out the map */
     int key = 0;
-    *buf2 = '\0';
-    for (i = 2; i < 9; i++) {
-        if (i > 6) {
-            continue;
-        }
-        if (num == 1) {
-            sprintf(buf2, "@w                %s\r\n", map[i]);
-        } else {
-            if (i == 2) {
+    for (int i = 2; i < 9; i++) {
+        if (i > 6) continue;
+
+        switch (i) {
+            case 2:
                 sprintf(buf2, "@w       @w|%s@w|           %s",
-                        (room->dir_option[0] && !EXIT_FLAGGED(room->dir_option[0], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[0],
-                                                                                                     EX_CLOSED)
-                                                                                             ? " @rN " : " @CN ")
-                                                                                          : "   ", map[i]);
-            }
-            if (i == 3) {
+                        room->dir_option[0] && !EXIT_FLAGGED(room->dir_option[0], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[0], EX_CLOSED) ? " @rN " : " @CN ") : "   ", map[i]);
+                break;
+            case 3:
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        (room->dir_option[6] && !EXIT_FLAGGED(room->dir_option[6], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[6],
-                                                                                                     EX_CLOSED)
-                                                                                             ? " @rNW" : " @CNW")
-                                                                                          : "   ",
-                        (room->dir_option[4] && !EXIT_FLAGGED(room->dir_option[4], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[4],
-                                                                                                     EX_CLOSED)
-                                                                                             ? " @yU " : " @YU ")
-                                                                                          : "   ",
-                        (room->dir_option[7] && !EXIT_FLAGGED(room->dir_option[7], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[7],
-                                                                                                     EX_SECRET)
-                                                                                             ? "@rNE " : "@CNE ")
-                                                                                          : "   ", map[i]);
-            }
-            if (i == 4) {
+                        room->dir_option[6] && !EXIT_FLAGGED(room->dir_option[6], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[6], EX_CLOSED) ? " @rNW" : " @CNW") : "   ",
+                        room->dir_option[4] && !EXIT_FLAGGED(room->dir_option[4], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[4], EX_CLOSED) ? " @yU " : " @YU ") : "   ",
+                        room->dir_option[7] && !EXIT_FLAGGED(room->dir_option[7], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[7], EX_CLOSED) ? "@rNE " : "@CNE ") : "   ", map[i]);
+                break;
+            case 4:
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        (room->dir_option[3] && !EXIT_FLAGGED(room->dir_option[3], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[3],
-                                                                                                     EX_CLOSED)
-                                                                                             ? "  @rW" : "  @CW")
-                                                                                          : "   ",
-                        (room->dir_option[10] && !EXIT_FLAGGED(room->dir_option[10], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                            room->dir_option[10],
-                                                                                                       EX_CLOSED)
-                                                                                               ? " @rI " : " @mI ")
-                                                                                            : ((room->dir_option[11] &&
-                                                                                                !EXIT_FLAGGED(
-                                                                                                        room->dir_option[11],
-                                                                                                        EX_SECRET))
-                                                                                               ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[11],
-                                                                                                          EX_CLOSED)
-                                                                                                  ? "@rOUT" : "@mOUT")
-                                                                                               : "@r{ }"),
-                        (room->dir_option[1] && !EXIT_FLAGGED(room->dir_option[1], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[1],
-                                                                                                     EX_CLOSED)
-                                                                                             ? "@rE  " : "@CE  ")
-                                                                                          : "   ", map[i]);
-            }
-            if (i == 5) {
+                        room->dir_option[3] && !EXIT_FLAGGED(room->dir_option[3], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[3], EX_CLOSED) ? "  @rW" : "  @CW") : "   ",
+                        room->dir_option[10] && !EXIT_FLAGGED(room->dir_option[10], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[10], EX_CLOSED) ? " @rI " : " @mI ") :
+                        (room->dir_option[11] && !EXIT_FLAGGED(room->dir_option[11], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[11], EX_CLOSED) ? "@rOUT" : "@mOUT") : "@r{ }"),
+                        room->dir_option[1] && !EXIT_FLAGGED(room->dir_option[1], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[1], EX_CLOSED) ? "@rE  " : "@CE  ") : "   ", map[i]);
+                break;
+            case 5:
                 sprintf(buf2, "@w @w|%s@w| |%s@w| |%s@w|     %s",
-                        (room->dir_option[9] && !EXIT_FLAGGED(room->dir_option[9], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[9],
-                                                                                                     EX_CLOSED)
-                                                                                             ? " @rSW" : " @CSW")
-                                                                                          : "   ",
-                        (room->dir_option[5] && !EXIT_FLAGGED(room->dir_option[5], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[5],
-                                                                                                     EX_CLOSED)
-                                                                                             ? " @yD " : " @YD ")
-                                                                                          : "   ",
-                        (room->dir_option[8] && !EXIT_FLAGGED(room->dir_option[8], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[8],
-                                                                                                     EX_SECRET)
-                                                                                             ? "@rSE " : "@CSE ")
-                                                                                          : "   ", map[i]);
-            }
-            if (i == 6) {
+                        room->dir_option[9] && !EXIT_FLAGGED(room->dir_option[9], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[9], EX_CLOSED) ? " @rSW" : " @CSW") : "   ",
+                        room->dir_option[5] && !EXIT_FLAGGED(room->dir_option[5], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[5], EX_CLOSED) ? " @yD " : " @YD ") : "   ",
+                        room->dir_option[8] && !EXIT_FLAGGED(room->dir_option[8], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[8], EX_CLOSED) ? "@rSE " : "@CSE ") : "   ", map[i]);
+                break;
+            case 6:
                 sprintf(buf2, "@w       @w|%s@w|           %s",
-                        (room->dir_option[2] && !EXIT_FLAGGED(room->dir_option[2], EX_SECRET)) ? (EXIT_FLAGGED(
-                                                                                                          room->dir_option[2],
-                                                                                                     EX_CLOSED)
-                                                                                             ? " @rS " : " @CS ")
-                                                                                          : "   ", map[i]);
-            }
+                        room->dir_option[2] && !EXIT_FLAGGED(room->dir_option[2], EX_SECRET) ?
+                        (EXIT_FLAGGED(room->dir_option[2], EX_CLOSED) ? " @rS " : " @CS ") : "   ", map[i]);
+                break;
         }
-        search_replace(buf2, "x", "@RX");
-        search_replace(buf2, "&", "@m$");
-        search_replace(buf2, "*", "@m#");
-        search_replace(buf2, "+", "@c~");
-        search_replace(buf2, "s", "@CS");
-        search_replace(buf2, "i", "@wI");
-        search_replace(buf2, "(", "@WC");
-        search_replace(buf2, "^", "@DM");
-        search_replace(buf2, "h", "@yH");
-        search_replace(buf2, "`", "@BW");
-        search_replace(buf2, "=", "@bU");
-        search_replace(buf2, "p", "@GP");
-        search_replace(buf2, "f", "@gF");
-        search_replace(buf2, "!", "@YD");
-        search_replace(buf2, "-", "@w:");
-        /* ------- Do Lava Rooms ------- */
-        search_replace(buf2, "1", "@4@YC@n");
-        search_replace(buf2, "2", "@4@YP@n");
-        search_replace(buf2, "3", "@4@YH@n");
-        search_replace(buf2, "7", "@4@YD@n");
-        search_replace(buf2, "5", "@4@YM@n");
-        search_replace(buf2, "6", "@4@YF@n");
-        /* ------- Do Closed Rooms------- */
-        search_replace(buf2, "8", "@1 @n");
+
+        replace_map_symbols(buf2);
 
         if (num != 1) {
-            if (key == 0) {
-                send_to_char(ch, "%s    @WC: City, @wI@W: Inside, @GP@W: Plain@n\r\n", buf2);
-            }
-            if (key == 1) {
-                send_to_char(ch, "%s    @gF@W: Forest, @DM@W: Mountain, @yH@W: Hills@n\r\n", buf2);
-            }
-            if (key == 2) {
-                send_to_char(ch, "%s    @CS@W: Sky, @BW@W: Water, @bU@W: Underwater@n\r\n", buf2);
-            }
-            if (key == 3) {
-                send_to_char(ch, "%s    @m$@W: Shop, @m#@W: Important, @YD@W: Desert@n\r\n", buf2);
-            }
-            if (key == 4) {
-                send_to_char(ch, "%s    @c~@W: Shallow Water, @4 @n@W: Lava, @RX@W: You@n\r\n", buf2);
-            }
-            key += 1;
+            print_map_line(ch, key, buf2);
+            key++;
         } else {
             send_to_char(ch, buf2);
         }
     }
+
     if (num == 1) {
         send_to_char(ch, "@D                ---------@w\r\n");
     }
 }
+
 
 
 static void display_spells(struct char_data *ch, struct obj_data *obj) {
@@ -2562,79 +1979,73 @@ static int show_obj_modifiers(struct obj_data *obj, struct char_data *ch) {
     return (found);
 }
 
+static bool can_stack_objects(struct obj_data *a, struct obj_data *b) {
+    if (strcasecmp(a->short_description, b->short_description) != 0 ||
+        strcasecmp(a->room_description, b->room_description) != 0 ||
+        a->vn != b->vn) return false;
+
+    if (OBJ_FLAGGED(a, ITEM_BROKEN) != OBJ_FLAGGED(b, ITEM_BROKEN)) return false;
+
+    if (SITTING(a) || SITTING(b)) return false;
+
+    if (GET_OBJ_POSTTYPE(a) != 0 || GET_OBJ_POSTTYPE(b) != 0) return false;
+
+    if (GET_FELLOW_WALL(a) || GET_FELLOW_WALL(b)) return false;
+
+    if (GET_OBJ_VAL(a, 6) != GET_OBJ_VAL(b, 6)) return false;
+
+    if ((GET_OBJ_TYPE(a) == ITEM_PLANT && GET_OBJ_TYPE(b) == ITEM_PLANT) &&
+        (GET_OBJ_VAL(a, VAL_MATURITY) != GET_OBJ_VAL(b, VAL_MATURITY) ||
+         GET_OBJ_VAL(a, VAL_WATERLEVEL) != GET_OBJ_VAL(b, VAL_WATERLEVEL)))
+        return false;
+
+    if ((OBJ_FLAGGED(a, ITEM_DUPLICATE) != OBJ_FLAGGED(b, ITEM_DUPLICATE))) return false;
+
+    if ((GET_OBJ_VNUM(a) == 255 && GET_OBJ_VNUM(b) == 255 &&
+         GET_OBJ_VAL(a, 0) != GET_OBJ_VAL(b, 0)) ||
+        (GET_OBJ_VNUM(a) != 255 && GET_OBJ_VNUM(b) != 255)) return true;
+
+    return false;
+}
+
 static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show) {
-    struct obj_data *i, *j, *d;
+    struct obj_data *i, *d;
     bool found = false;
     int num;
 
-    /* Loop through all objects in the list */
     for (i = list; i; i = i->next_content) {
-        if (i->room_description == nullptr)
+        if (i->room_description == nullptr || strcasecmp(i->room_description, "undefined") == 0)
             continue;
-        if (strcasecmp(i->room_description, "undefined") == 0)
-            continue;
+
         num = 0;
         d = i;
+
         if (CONFIG_STACK_OBJS) {
-            for (j = list; j != i; j = j->next_content)
-                if ((!strcasecmp(j->short_description, i->short_description) &&
-                     !strcasecmp(j->room_description, i->room_description)) &&
-                    (j->vn == i->vn) &&
-                    ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) ||
-                     (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
-                    if ((!SITTING(j) && !SITTING(i)))
-                        if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
-                            if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) ||
-                                (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT &&
-                                 GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) &&
-                                 GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
-                                if ((!OBJ_FLAGGED(j, ITEM_DUPLICATE) && !OBJ_FLAGGED(i, ITEM_DUPLICATE)) ||
-                                    (OBJ_FLAGGED(j, ITEM_DUPLICATE) && OBJ_FLAGGED(i, ITEM_DUPLICATE)))
-                                    if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
-                                        if (!GET_FELLOW_WALL(j) && !GET_FELLOW_WALL(i))
-                                            if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && GET_OBJ_VNUM(j) == 255 &&
-                                                 GET_OBJ_VNUM(i) == 255) ||
-                                                (GET_OBJ_VNUM(j) != 255 && GET_OBJ_VNUM(i) != 255))
-                                                break;
-            if (j != i)
-                continue;
-            for (d = j = i; j; j = j->next_content)
-                if ((!strcasecmp(j->short_description, i->short_description) &&
-                     !strcasecmp(j->room_description, i->room_description)) &&
-                    (j->vn == i->vn) &&
-                    ((OBJ_FLAGGED(j, ITEM_BROKEN) && OBJ_FLAGGED(i, ITEM_BROKEN)) ||
-                     (!OBJ_FLAGGED(j, ITEM_BROKEN) && !OBJ_FLAGGED(i, ITEM_BROKEN))))
-                    if ((!SITTING(j) && !SITTING(i)))
-                        if (GET_OBJ_POSTTYPE(j) == 0 && GET_OBJ_POSTTYPE(i) == 0)
-                            if (GET_OBJ_VAL(j, 6) == GET_OBJ_VAL(i, 6))
-                                if ((GET_OBJ_TYPE(j) != ITEM_PLANT && GET_OBJ_TYPE(i) != ITEM_PLANT) ||
-                                    (GET_OBJ_TYPE(j) == ITEM_PLANT && GET_OBJ_TYPE(i) == ITEM_PLANT &&
-                                     GET_OBJ_VAL(j, VAL_MATURITY) == GET_OBJ_VAL(i, VAL_MATURITY) &&
-                                     GET_OBJ_VAL(j, VAL_WATERLEVEL) == GET_OBJ_VAL(i, VAL_WATERLEVEL)))
-                                    if ((!OBJ_FLAGGED(j, ITEM_DUPLICATE) && !OBJ_FLAGGED(i, ITEM_DUPLICATE)) ||
-                                        (OBJ_FLAGGED(j, ITEM_DUPLICATE) && OBJ_FLAGGED(i, ITEM_DUPLICATE)))
-                                        if (!GET_FELLOW_WALL(j) && !GET_FELLOW_WALL(i))
-                                            if ((GET_OBJ_VAL(j, 0) == GET_OBJ_VAL(i, 0) && GET_OBJ_VNUM(i) == 255 &&
-                                                 GET_OBJ_VNUM(j) == 255) ||
-                                                (GET_OBJ_VNUM(j) != 255 && GET_OBJ_VNUM(i) != 255))
-                                                if (CAN_SEE_OBJ(ch, j)) {
-                                                    num++;
-                                                    if (d == i && !CAN_SEE_OBJ(ch, d))
-                                                        d = j;
-                                                }
-        }
-        if ((CAN_SEE_OBJ(ch, d) &&
-             ((*d->room_description != '.' && *d->short_description != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) ||
-            (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
-            if (num > 1)
+            for (auto j = list; j != i; j = j->next_content) {
+                if (can_stack_objects(j, i) && CAN_SEE_OBJ(ch, j)) {
+                    num++;
+                    if (d == i && !CAN_SEE_OBJ(ch, d))
+                        d = j;
+                }
+            }
+
+            if (num > 1) {
                 send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
+            }
+        }
+
+        if (CAN_SEE_OBJ(ch, d) &&
+            ((*d->room_description != '.' && *d->short_description != '.') || PRF_FLAGGED(ch, PRF_HOLYLIGHT)) ||
+            (GET_OBJ_TYPE(d) == ITEM_LIGHT)) {
             show_obj_to_char(d, ch, mode);
             found = true;
         }
     }
+
     if (!found && show)
         send_to_char(ch, " Nothing.\r\n");
 }
+
 
 static void diag_obj_to_char(struct obj_data *obj, struct char_data *ch) {
     struct {
@@ -3395,340 +2806,208 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
 
 }
 
+struct hide_node {
+    struct hide_node *next;
+    struct char_data *hidden;
+};
+
+static void add_hidden_char(struct hide_node **hideinfo, struct char_data *ch) {
+    struct hide_node *new_node = new hide_node{nullptr, ch};
+    if (!*hideinfo) {
+        *hideinfo = new_node;
+    } else {
+        struct hide_node *current = *hideinfo;
+        while (current->next) {
+            current = current->next;
+        }
+        current->next = new_node;
+    }
+}
+
+static bool can_stack_char(struct char_data *a, struct char_data *b) {
+    return (a->vn == b->vn) &&
+           (GET_POS(a) == GET_POS(b)) &&
+           (AFF_FLAGS(a) == AFF_FLAGS(b)) &&
+           (!FIGHTING(a) && !FIGHTING(b)) &&
+           (GET_HIT(a) == GET_MAX_HIT(a) && GET_HIT(b) == GET_MAX_HIT(b)) &&
+           !strcmp(GET_NAME(a), GET_NAME(b));
+}
+
+static bool is_hidden(struct hide_node *hideinfo, struct char_data *ch) {
+    for (auto node = hideinfo; node; node = node->next) {
+        if (node->hidden == ch) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void list_char_to_char(struct char_data *list, struct char_data *ch) {
     struct char_data *i, *j;
-    struct hide_node {
-        struct hide_node *next;
-        struct char_data *hidden;
-    } *hideinfo, *lasthide, *tmphide;
+    struct hide_node *hideinfo = nullptr;
     int num;
-
-    hideinfo = lasthide = nullptr;
 
     for (i = list; i; i = i->next_in_room) {
         if (AFF_FLAGGED(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
             if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
                 improve_skill(i, SKILL_HIDE, 1);
             }
-            CREATE(tmphide, struct hide_node, 1);
-            tmphide->next = nullptr;
-            tmphide->hidden = i;
-            if (!lasthide) {
-                hideinfo = lasthide = tmphide;
-            } else {
-                lasthide->next = tmphide;
-                lasthide = tmphide;
-            }
+            add_hidden_char(&hideinfo, i);
             continue;
         }
     }
 
     for (i = list; i; i = i->next_in_room) {
-        /* hide npcs whose description starts with a '.' from non-holylighted people
-    - Idea from Elaseth of TBA */
-        if ((ch == i) || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i)
-                          && i->room_description && *i->room_description == '.'))
+        if (ch == i || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i) &&
+                        i->room_description && *i->room_description == '.')) {
             continue;
+        }
 
-        for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-            if (tmphide->hidden == i)
-                break;
-        if (tmphide)
+        if (is_hidden(hideinfo, i)) {
             continue;
+        }
 
         if (CAN_SEE(ch, i)) {
             num = 0;
             if (CONFIG_STACK_MOBS) {
-                /* How many other occurences of this mob are there? */
-                for (j = list; j != i; j = j->next_in_room)
-                    if ((i->vn == j->vn) &&
-                        (GET_POS(i) == GET_POS(j)) &&
-                        (AFF_FLAGS(i)[0] == AFF_FLAGS(j)[0]) &&
-                        (AFF_FLAGS(i)[1] == AFF_FLAGS(j)[1]) &&
-                        (AFF_FLAGS(i)[2] == AFF_FLAGS(j)[2]) &&
-                        (AFF_FLAGS(i)[3] == AFF_FLAGS(j)[3]) &&
-                        (!FIGHTING(i) && !FIGHTING(j)) &&
-                        (GET_HIT(i) == (i->getMaxPL()) && GET_HIT(j) == (j->getMaxPL())) &&
-                        !strcmp(GET_NAME(i), GET_NAME(j))) {
-                        for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-                            if (tmphide->hidden == j)
-                                break;
-                        if (!tmphide)
-                            break;
+                for (j = list; j != i; j = j->next_in_room) {
+                    if (can_stack_char(i, j) && !is_hidden(hideinfo, j)) {
+                        num++;
                     }
-                if (j != i)
-                    /* This will be true where we have already found this
-	   * mob for an earlier "i".  The continue pops us out of
-	   * the main "i" for loop.
-	   */
-                    continue;
-                for (j = i; j; j = j->next_in_room)
-                    if ((i->vn == j->vn) &&
-                        (GET_POS(i) == GET_POS(j)) &&
-                        (AFF_FLAGS(i)[0] == AFF_FLAGS(j)[0]) &&
-                        (AFF_FLAGS(i)[1] == AFF_FLAGS(j)[1]) &&
-                        (AFF_FLAGS(i)[2] == AFF_FLAGS(j)[2]) &&
-                        (AFF_FLAGS(i)[3] == AFF_FLAGS(j)[3]) &&
-                        (!FIGHTING(i) && !FIGHTING(j)) &&
-                        (GET_HIT(i) == GET_MAX_HIT(i) && GET_HIT(j) == GET_MAX_HIT(j)) &&
-                        !strcmp(GET_NAME(i), GET_NAME(j))) {
-                        for (tmphide = hideinfo; tmphide; tmphide = tmphide->next)
-                            if (tmphide->hidden == j)
-                                break;
-                        if (!tmphide)
-                            num++;
-                    }
+                }
             }
-            /* Now show this mob's name and other stuff */
+
             send_to_char(ch, "@w");
-            if (num > 1)
+            if (num > 1) {
                 send_to_char(ch, "@D(@Rx@Y%2i@D)@n ", num);
+            }
             list_one_char(i, ch);
             send_to_char(ch, "@n");
-        } /* processed a character we can see */
-        else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) &&
-                 AFF_FLAGGED(i, AFF_INFRAVISION))
+
+        } else if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) &&
+                   AFF_FLAGGED(i, AFF_INFRAVISION)) {
             send_to_char(ch, "@wYou see a pair of glowing red eyes looking your way.@n\r\n");
-    } /* loop through all characters in room */
+        }
+    }
+
+    // cleanup
+    while (hideinfo) {
+        struct hide_node *temp = hideinfo;
+        hideinfo = hideinfo->next;
+        delete temp;
+    }
 }
 
 static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit_mode) {
-    int door, door_found = 0, has_light = false, i;
-    char dlist1[500];
-    char dlist2[500];
-    char dlist3[500];
-    char dlist4[500];
-    char dlist5[500];
-    char dlist6[500];
-    char dlist7[500];
-    char dlist8[500];
-    char dlist9[500];
-    char dlist10[500];
-    char dlist11[500];
-    char dlist12[500];
+    const int MAX_DIRS = 12;
+    const char *dirNames[MAX_DIRS] = {"Northwest", "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Up", "Down", "Inside", "Outside"};
+    const char *mapKey[MAX_DIRS] = {"dlist1", "dlist2", "dlist3", "dlist4", "dlist5", "dlist6", "dlist7", "dlist8", "dlist9", "dlist10", "dlist11", "dlist12"};
+    std::map<int, std::string> exitStrings;
 
-    *dlist1 = '\0';
-    *dlist2 = '\0';
-    *dlist3 = '\0';
-    *dlist4 = '\0';
-    *dlist5 = '\0';
-    *dlist6 = '\0';
-    *dlist7 = '\0';
-    *dlist8 = '\0';
-    *dlist9 = '\0';
-    *dlist10 = '\0';
-    *dlist11 = '\0';
-    *dlist12 = '\0';
+    bool space = (room->sector_type == SECT_SPACE && room->vn >= 20000);
+    bool has_light = ch->isProvidingLight();
+    bool admVision = ADM_FLAGGED(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4;
 
     if (exit_mode == EXIT_OFF) {
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     }
-    int space = false;
-    if (room->sector_type == SECT_SPACE && room->vn >= 20000) {
-        space = true;
-    }
-    if (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) == room->vn) {
-        /* Compass and Auto-map - Iovan 9-11-10 */
+
+    if (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) == room->vn) {
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
         send_to_char(ch, "@w      Compass           Auto-Map            Map Key\r\n");
         send_to_char(ch, "@R     ---------         ----------   -----------------------------\r\n");
         gen_map(ch, 0);
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     }
-    if (exit_mode == EXIT_NORMAL && space == true) {
-        /* printmap */
+
+    if (exit_mode == EXIT_NORMAL && space) {
         send_to_char(ch, "@D------------------------------[@CRadar@D]---------------------------------@n\r\n");
         printmap(room->vn, ch, 1, -1);
         send_to_char(ch, "     @D[@wTurn autoexit complete on for directions instead of radar@D]@n\r\n");
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
     }
-    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && space == false && IN_ROOM(ch) != room->vn)) {
+
+    if (exit_mode == EXIT_COMPLETE || (exit_mode == EXIT_NORMAL && !space && IN_ROOM(ch) != room->vn)) {
         send_to_char(ch, "@D----------------------------[@gObvious Exits@D]-----------------------------@n\r\n");
+
         if (IS_AFFECTED(ch, AFF_BLIND)) {
             send_to_char(ch, "You can't see a damned thing, you're blind!\r\n");
             return;
         }
+
         if (PLR_FLAGGED(ch, PLR_EYEC)) {
             send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
             return;
         }
 
-        /*
-        if (IS_DARK(IN_ROOM(ch)) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-            send_to_char(ch, "It is pitch black...\r\n");
-            return;
-        }
-        */
-
-        /* Is the character using a working light source? */
-        has_light = ch->isProvidingLight();
-
-        bool admVision = ADM_FLAGGED(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4;
-
-        std::map<int, char*> dlists = {
-                {0, dlist2},
-                {1, dlist4},
-                {2, dlist6},
-                {3, dlist8},
-                {4, dlist9},
-                {5, dlist10},
-                {6, dlist1},
-                {7, dlist3},
-                {8, dlist5},
-                {9, dlist7},
-                {10, dlist11},
-                {11, dlist12}
-        };
-
-        for (door = 0; door < NUM_OF_DIRS; door++) {
+        for (int door = 0; door < NUM_OF_DIRS; ++door) {
             auto d = room->dir_option[door];
-            if(!d) continue;
+            if (!d) continue;
             auto dest = d->getDestination();
-            if(!dest) continue;
-            auto dl = dlists[door];
+            if (!dest) continue;
 
-            if (admVision) {
-                /* Immortals see everything */
-                door_found++;
-                char blam[9];
-                sprintf(blam, "%s", dirs[door]);
-                *blam = toupper(*blam);
+            if (admVision || (!IS_SET(d->exit_info, EX_CLOSED))) {
+                std::string exitStr;
+                std::string direction = dirs[door];
+                direction[0] = toupper(direction[0]);
 
-                auto dirname = dirs[door];
-                auto rdirname = dirs[rev_dir[door]];
+                if (admVision) {
+                    exitStr = fmt::format("@c{} @D- [@Y{}@D]@w {}.\r\n", direction, dest->vn, dest->name);
+                } else {
+                    exitStr = fmt::format("@c{} @D-@w {}.\r\n", direction, (IS_DARK(dest->vn) && !CAN_SEE_IN_DARK(ch) && !has_light) ? "@bToo dark to tell.@w" : dest->name);
+                }
 
-
-                sprintf(dl, "@c%-9s @D- [@Y%5d@D]@w %s.\r\n", blam, dest->vn, dest->name);
                 if (IS_SET(d->exit_info, EX_ISDOOR) || IS_SET(d->exit_info, EX_SECRET)) {
-                    /* This exit has a door - tell all about it */
-                    char argh[100];
                     if (fname(d->keyword) == nullptr) {
-                        send_to_char(ch, "@RREPORT THIS ERROR IMMEADIATELY FOR DIRECTION %s@n\r\n", dirname);
-                        basic_mud_log("ERROR: %s found error direction %s at room %d", dirname, GET_NAME(ch),
-                                      ch->getRoomVnum());
+                        send_to_char(ch, "@RREPORT THIS ERROR IMMEDIATELY FOR DIRECTION %s@n\r\n", direction.c_str());
+                        basic_mud_log("ERROR: %s found error direction %s at room %d", direction.c_str(), GET_NAME(ch), ch->getRoomVnum());
                         return;
                     }
-                    sprintf(argh, "%s ",
-                            strcasecmp(fname(d->keyword), "undefined") ? fname(
-                                    d->keyword) : "opening");
-                    sprintf(dl + strlen(dl), "                    The %s%s %s %s %s%s.\r\n",
-                            IS_SET(d->exit_info, EX_SECRET) ?
-                            "@rsecret@w " : "",
-                            (d->keyword && strcasecmp(fname(d->keyword), "undefined")) ?
-                            fname(d->keyword) : "opening",
-                            strstr(argh, "s ") != nullptr ? "are" : "is",
-                            IS_SET(d->exit_info, EX_CLOSED) ?
-                            "closed" : "open",
-                            IS_SET(d->exit_info, EX_LOCKED) ?
-                            "and locked" : "and unlocked",
-                            IS_SET(d->exit_info, EX_PICKPROOF) ?
-                            " (pickproof)" : "");
+                    exitStr += fmt::format("The {}{} {} {} {}{}.\r\n",
+                                           IS_SET(d->exit_info, EX_SECRET) ? "@rsecret@w " : "",
+                                           (d->keyword && strcasecmp(fname(d->keyword), "undefined")) ? fname(d->keyword) : "opening",
+                                           strstr(fname(d->keyword), "s ") != nullptr ? "are" : "is",
+                                           IS_SET(d->exit_info, EX_CLOSED) ? "closed" : "open",
+                                           IS_SET(d->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
+                                           IS_SET(d->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
                 }
-            }
-            else { /* This is what mortal characters see */
-                if (!IS_SET(d->exit_info, EX_CLOSED)) {
-                    /* And the door is open */
-                    door_found++;
-                    char blam[9];
-                    sprintf(blam, "%s", dirs[door]);
-                    *blam = toupper(*blam);
 
-                    sprintf(dl, "@c%-9s @D-@w %s\r\n", blam,
-                            IS_DARK(dest->vn) && !CAN_SEE_IN_DARK(ch) && !has_light
-                            ? "@bToo dark to tell.@w" : dest->name);
-
-                } else if (CONFIG_DISP_CLOSED_DOORS && !d->exit_info, EX_SECRET) {
-                    /* But we tell them the door is closed */
-                    door_found++;
-                    char blam[9];
-                    sprintf(blam, "%s", dirs[door]);
-                    *blam = toupper(*blam);
-                    if (door == 6) {
-
-                    }
-                    sprintf(dl, "@c%-9s @D-@w The %s appears @rclosed.@n\r\n", blam,
-                            (d->keyword) ? fname(d->keyword)
-                                         : "opening");
-                }
+                exitStrings[door] = exitStr;
+            } else if (CONFIG_DISP_CLOSED_DOORS && !IS_SET(d->exit_info, EX_SECRET)) {
+                std::string direction = dirs[door];
+                direction[0] = toupper(direction[0]);
+                exitStrings[door] = fmt::format("@c{} @D-@w The {} appears @rclosed.@n\r\n",
+                                                direction,
+                                                (d->keyword) ? fname(d->keyword) : "opening");
             }
         }
 
-        if (!door_found)
+        if (exitStrings.empty()) {
             send_to_char(ch, " None.\r\n");
-        if (strstr(dlist1, "Northwest")) {
-            send_to_char(ch, "%s", dlist1);
-            *dlist1 = '\0';
+        } else {
+            for (const auto &entry : exitStrings) {
+                send_to_char(ch, "%s", entry.second.c_str());
+            }
         }
-        if (strstr(dlist2, "North")) {
-            send_to_char(ch, "%s", dlist2);
-            *dlist2 = '\0';
-        }
-        if (strstr(dlist3, "Northeast")) {
-            send_to_char(ch, "%s", dlist3);
-            *dlist3 = '\0';
-        }
-        if (strstr(dlist4, "East")) {
-            send_to_char(ch, "%s", dlist4);
-            *dlist4 = '\0';
-        }
-        if (strstr(dlist5, "Southeast")) {
-            send_to_char(ch, "%s", dlist5);
-            *dlist5 = '\0';
-        }
-        if (strstr(dlist6, "South")) {
-            send_to_char(ch, "%s", dlist6);
-            *dlist6 = '\0';
-        }
-        if (strstr(dlist7, "Southwest")) {
-            send_to_char(ch, "%s", dlist7);
-            *dlist7 = '\0';
-        }
-        if (strstr(dlist8, "West")) {
-            send_to_char(ch, "%s", dlist8);
-            *dlist8 = '\0';
-        }
-        if (strstr(dlist9, "Up")) {
-            send_to_char(ch, "%s", dlist9);
-            *dlist9 = '\0';
-        }
-        if (strstr(dlist10, "Down")) {
-            send_to_char(ch, "%s", dlist10);
-            *dlist10 = '\0';
-        }
-        if (strstr(dlist11, "Inside")) {
-            send_to_char(ch, "%s", dlist11);
-            *dlist11 = '\0';
-        }
-        if (strstr(dlist12, "Outside")) {
-            send_to_char(ch, "%s", dlist12);
-            *dlist12 = '\0';
-        }
-        
+
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
-        if (room->room_flags.test(ROOM_HOUSE) && !room->room_flags.test(ROOM_GARDEN1) &&
-            !room->room_flags.test(ROOM_GARDEN2)) {
-            send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
+
+        if (room->room_flags.test(ROOM_HOUSE)) {
+            if (!room->room_flags.test(ROOM_GARDEN1) && !room->room_flags.test(ROOM_GARDEN2)) {
+                send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
+            } else if (room->room_flags.test(ROOM_GARDEN1) && !room->room_flags.test(ROOM_GARDEN2)) {
+                send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
+            } else if (!room->room_flags.test(ROOM_GARDEN1) && room->room_flags.test(ROOM_GARDEN2)) {
+                send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
+            }
         }
-        if (room->room_flags.test(ROOM_HOUSE) && room->room_flags.test(ROOM_GARDEN1) &&
-            !room->room_flags.test(ROOM_GARDEN2)) {
-            send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
-        }
-        if (room->room_flags.test(ROOM_HOUSE) && !room->room_flags.test(ROOM_GARDEN1) &&
-                room->room_flags.test(ROOM_GARDEN2)) {
-            send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n",
-                         check_saveroom_count(ch, nullptr));
-        }
-        if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) == room->vn &&
-            GET_RADAR3(ch) != room->vn) {
+
+        if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) == room->vn && GET_RADAR3(ch) != room->vn) {
             send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) != room->vn &&
-                   GET_RADAR3(ch) == room->vn) {
+        } else if ((GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) != room->vn && GET_RADAR3(ch) == room->vn) ||
+                   (GET_RADAR1(ch) != room->vn && GET_RADAR2(ch) == room->vn && GET_RADAR3(ch) == room->vn)) {
             send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) != room->vn && GET_RADAR2(ch) == room->vn &&
-                   GET_RADAR3(ch) == room->vn) {
-            send_to_char(ch, "@CTwo of your buoys are floating here.@n\r\n");
-        } else if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) == room->vn &&
-                   GET_RADAR3(ch) == room->vn) {
+        } else if (GET_RADAR1(ch) == room->vn && GET_RADAR2(ch) == room->vn && GET_RADAR3(ch) == room->vn) {
             send_to_char(ch, "@CAll three of your buoys are floating here. Why?@n\r\n");
         } else if (GET_RADAR1(ch) == room->vn) {
             send_to_char(ch, "@CYour @cBuoy #1@C is floating here.@n\r\n");
@@ -3739,6 +3018,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
         }
     }
 }
+
 
 static void do_auto_exits2(struct room_data *room, struct char_data *ch) {
     int door, slen = 0;
@@ -3810,264 +3090,265 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
     look_at_room(rm, ch, ignore_brief);
 }
 
-void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) {
-    trig_data *t;
+static void display_room_info(struct room_data *rm, struct char_data *ch);
 
-    if (!ch->desc)
-        return;
-    
+static void display_dimension_info(struct room_data *rm, struct char_data *ch) {
+    if (rm->room_flags.test(ROOM_NEO)) {
+        send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
+    } else if (rm->room_flags.test(ROOM_AL)) {
+        send_to_char(ch, "@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
+    } else if (rm->room_flags.test(ROOM_HELL)) {
+        send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
+    } else if (rm->room_flags.test(ROOM_RHELL)) {
+        send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
+    }
+}
+
+static void display_special_room_descriptions(struct room_data *rm, struct char_data *ch) {
+    if (rm->room_flags.test(ROOM_REGEN)) {
+        send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
+    }
+    if (rm->room_flags.test(ROOM_AURA)) {
+        send_to_char(ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
+    }
+    if (rm->room_flags.test(ROOM_HBTC)) {
+        send_to_char(ch, "@rThis room feels like it operates in a different time frame.@n\r\n");
+    }
+}
+
+static void display_room_info(struct room_data *rm, struct char_data *ch) {
+    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+        send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
+    }
+
+    send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->name);
+
+    if (auto planet = ch->getMatchingArea(area_data::isPlanet); planet) {
+        auto &a = areas[planet.value()];
+        send_to_char(ch, "@wPlanet: @G%s@n\r\n", a.name.c_str());
+    } else {
+        display_dimension_info(rm, ch);
+    }
+
+    double grav = rm->getEnvironment(ENV_GRAVITY);
+    if (grav <= 1.0) {
+        send_to_char(ch, "@wGravity: @WNormal@n\r\n");
+    } else {
+        auto g = fmt::format("{}", grav);
+        send_to_char(ch, "@wGravity: @W%sx@n\r\n", g.c_str());
+    }
+
+    display_special_room_descriptions(rm, ch);
+
+    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+        send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
+    }
+}
+
+static void display_room_flags(struct room_data *rm, struct char_data *ch) {
+    char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
+
+    sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf);
+    sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
+
+    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+        send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
+    }
+
+    send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rm->name);
+
+    if (SCRIPT(rm)) {
+        send_to_char(ch, "@D[@GTriggers");
+        for (auto t = TRIGGERS(SCRIPT(rm)); t; t = t->next)
+            send_to_char(ch, " %d", GET_TRIG_VNUM(t));
+        send_to_char(ch, "@D] ");
+    }
+
+    if (rm->area) {
+        //display_area_info(rm, ch);
+    }
+
+    double grav = rm->getEnvironment(ENV_GRAVITY);
+    auto g = fmt::format("{}", grav);
+    sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, rm->vn, g.c_str());
+    send_to_char(ch, "@wFlags: %-70s@w\r\n", buf3);
+
+    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
+        send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
+    }
+}
+
+
+static void display_damage_description(struct char_data *ch, int dmg, const char *surface) {
+    if (dmg <= 2) {
+        send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the %s.@n", surface);
+    } else if (dmg <= 4) {
+        send_to_char(ch, "@wA couple small holes with chunks of debris that can be seen scarring the %s.@n", surface);
+    } else if (dmg <= 6) {
+        send_to_char(ch, "@wA few small holes with chunks of debris that can be seen scarring the %s.@n", surface);
+    } else if (dmg <= 10) {
+        send_to_char(ch, "@wThere are several small holes with chunks of debris that can be seen scarring the %s.@n", surface);
+    } else if (dmg <= 20) {
+        send_to_char(ch, "@wMany holes fill the %s of this area, many of which have burn marks.@n", surface);
+    } else if (dmg <= 30) {
+        send_to_char(ch, "@wThe %s is severely damaged with many large holes.@n", surface);
+    } else if (dmg <= 50) {
+        send_to_char(ch, "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have been waged here.@n");
+    } else if (dmg <= 75) {
+        send_to_char(ch, "@wThis entire area is falling apart, it has been damaged so badly.@n");
+    } else if (dmg <= 99) {
+        send_to_char(ch, "@wThis area cannot withstand much more damage. Everything has been damaged so badly it is hard to recognize any particular details about their former quality.@n");
+    } else if (dmg >= 100) {
+        send_to_char(ch, "@wThis area is completely destroyed. Nothing is recognizable. Chunks of debris litter the ground, filling up holes, and overflowing onto what is left of the ground. A haze of smoke is wafting through the air, creating a chilling atmosphere.@n");
+    }
+}
+
+static void display_damage_description_forest(struct char_data *ch, int dmg) {
+    if (dmg <= 2) {
+        send_to_char(ch, "@wA small tree sits in a little crater here.@n");
+    } else if (dmg <= 4) {
+        send_to_char(ch, "@wTrees have been uprooted by craters in the ground.@n");
+    } else if (dmg <= 6) {
+        send_to_char(ch, "@wSeveral trees have been reduced to chunks of debris and are laying in a few craters here.@n");
+    } else if (dmg <= 10) {
+        send_to_char(ch, "@wA large patch of trees have been destroyed and are laying in craters here.@n");
+    } else if (dmg <= 20) {
+        send_to_char(ch, "@wSeveral craters have merged into one large crater in one part of this forest.@n");
+    } else if (dmg <= 30) {
+        send_to_char(ch, "@wThe open sky can easily be seen through a hole of trees destroyed and resting at the bottom of several craters here.@n");
+    } else if (dmg <= 50) {
+        send_to_char(ch, "@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n");
+    } else if (dmg <= 75) {
+        send_to_char(ch, "@wVery few trees are left standing in this area, replaced instead by large craters.@n");
+    } else if (dmg <= 99) {
+        send_to_char(ch, "@wSingle solitary trees can be found still standing here or there in the area. The rest have been almost completely obliterated in recent conflicts.@n");
+    } else if (dmg >= 100) {
+        send_to_char(ch, "@wOne massive crater fills this area. This desolate crater leaves no evidence of what used to be found in the area. Smoke slowly wafts into the sky from the central point of the crater, creating an oppressive atmosphere.@n");
+    }
+}
+
+static void display_damage_description_mountain(struct char_data *ch, int dmg) {
+    if (dmg <= 2) {
+        send_to_char(ch, "@wA small crater has been burned into the side of this mountain.@n");
+    } else if (dmg <= 4) {
+        send_to_char(ch, "@wA couple craters have been burned into the side of this mountain.@n");
+    } else if (dmg <= 6) {
+        send_to_char(ch, "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n");
+    } else if (dmg <= 10) {
+        send_to_char(ch, "@wSeveral bad craters can be seen in the side of the mountain here.@n");
+    } else if (dmg <= 20) {
+        send_to_char(ch, "@wLarge boulders have rolled down the mountainside and collected in many nearby craters.@n");
+    } else if (dmg <= 30) {
+        send_to_char(ch, "@wMany craters are covering the mountainside here.@n");
+    } else if (dmg <= 50) {
+        send_to_char(ch, "@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n");
+    } else if (dmg <= 75) {
+        send_to_char(ch, "@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n");
+    } else if (dmg <= 99) {
+        send_to_char(ch, "@wThe mountainside here has completely collapsed, shedding dangerous rubble down to its base.@n");
+    } else if (dmg >= 100) {
+        send_to_char(ch, "@wHalf the mountain has been blown away, leaving a scarred and jagged rock in its place. Billowing smoke wafts up from several parts of the mountain, filling the nearby skies and blotting out the sun.@n");
+    }
+}
+
+
+static void display_room_damage_description(struct room_data *rm, struct char_data *ch) {
+    auto dmg = rm->getDamage();
     auto sect = rm->sector_type;
     auto sunk = rm->getEnvironment(ENV_WATER) >= 100.0;
 
-    if (IS_DARK(rm->vn) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-        send_to_char(ch, "It's too dark to make out much detail...\r\n");
-    } else if (AFF_FLAGGED(ch, AFF_BLIND)) {
-        send_to_char(ch, "You see nothing but infinite darkness...\r\n");
-        return;
-    } else if (PLR_FLAGGED(ch, PLR_EYEC)) {
-        send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
-        return;
-    }
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
-        char buf[MAX_STRING_LENGTH];
-        char buf2[MAX_STRING_LENGTH];
-        char buf3[MAX_STRING_LENGTH];
-
-        sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf);
-        sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
-        }
-
-        send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rm->name);
-        if (SCRIPT(rm)) {
-            send_to_char(ch, "@D[@GTriggers");
-            for (t = TRIGGERS(SCRIPT(rm)); t; t = t->next)
-                send_to_char(ch, " %d", GET_TRIG_VNUM(t));
-            send_to_char(ch, "@D] ");
-        }
-        if(rm->area) {
-            std::vector<std::string> ancestors;
-            auto parent = rm->area;
-            while(parent) {
-                auto &a = areas[parent.value()];
-                ancestors.emplace_back(fmt::format("[{}] {}@n", a.vn, a.name));
-                parent = a.parent;
-            }
-            // Reverse areas.
-            std::reverse(ancestors.begin(), ancestors.end());
-            auto joined = boost::join(ancestors, " -> ");
-            send_to_char(ch, "@wArea: @D[@n %s @D]@n\r\n", joined.c_str());
-        }
-        double grav = rm->getEnvironment(ENV_GRAVITY);
-        auto g = fmt::format("{}", grav);
-        sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2,
-                rm->vn, g.c_str());
-        send_to_char(ch, "@wFlags: %-70s@w\r\n", buf3);
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
-        }
-    } else {
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
-        }
-        send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->name);
-        if(auto planet = ch->getMatchingArea(area_data::isPlanet); planet) {
-            auto &a = areas[planet.value()];
-            send_to_char(ch, "@wPlanet: @G%s@n\r\n", a.name.c_str());
-        } else {
-            if (rm->room_flags.test(ROOM_NEO)) {
-                send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
-            } else if (rm->room_flags.test(ROOM_AL)) {
-                send_to_char(ch, "@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
-            } else if (rm->room_flags.test(ROOM_HELL)) {
-                send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
-            } else if (rm->room_flags.test(ROOM_RHELL)) {
-                send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
-            }
-        }
-
-        double grav = rm->getEnvironment(ENV_GRAVITY);
-        if(grav <= 1.0) {
-            send_to_char(ch, "@wGravity: @WNormal@n\r\n");
-        } else {
-            auto g = fmt::format("{}", grav);
-            send_to_char(ch, "@wGravity: @W%sx@n\r\n", g.c_str());
-        }
-        if (rm->room_flags.test(ROOM_REGEN)) {
-            send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
-        }
-        if (rm->room_flags.test(ROOM_AURA)) {
-            send_to_char(ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
-        }
-        if (rm->room_flags.test(ROOM_HBTC)) {
-            send_to_char(ch, "@rThis room feels like it opperates in a different time frame.@n\r\n");
-        }
-        if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
-            send_to_char(ch, "@wO----------------------------------------------------------------------O@n\r\n");
-        }
-    }
-    
-    auto dmg = rm->getDamage();
-
     if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->room_flags.test(ROOM_DEATH)) {
-        if (dmg <= 99) {
+        if (dmg <= 99 || (dmg == 100 && (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT))) {
             send_to_char(ch, "@w%s@n", rm->look_description);
         }
-        if (dmg == 100 &&
-            (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING ||
-             sect == SECT_SHOP || sect == SECT_IMPORTANT)) {
-            send_to_char(ch, "@w%s@n", rm->look_description);
-        }
-        if (sect == SECT_INSIDE && dmg > 0) {
+
+        if (dmg > 0) {
             send_to_char(ch, "\r\n");
-            if (dmg <= 2) {
-                send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the floor.@n");
-            } else if (dmg <= 4) {
-                send_to_char(ch, "@wA couple small holes with chunks of debris that can be seen scarring the floor.@n");
-            } else if (dmg <= 6) {
-                send_to_char(ch, "@wA few small holes with chunks of debris that can be seen scarring the floor.@n");
-            } else if (dmg <= 10) {
-                send_to_char(ch,
-                             "@wThere are several small holes with chunks of debris that can be seen scarring the floor.@n");
-            } else if (dmg <= 20) {
-                send_to_char(ch, "@wMany holes fill the floor of this area, many of which have burn marks.@n");
-            } else if (dmg <= 30) {
-                send_to_char(ch, "@wThe floor is severely damaged with many large holes.@n");
-            } else if (dmg <= 50) {
-                send_to_char(ch,
-                             "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
-            } else if (dmg <= 75) {
-                send_to_char(ch, "@wThis entire area is falling apart, it has been damaged so badly.@n");
-            } else if (dmg <= 99) {
-                send_to_char(ch,
-                             "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
-            } else if (dmg >= 100) {
-                send_to_char(ch,
-                             "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up holes, and overflowing onto what is left of the\r\nfloor. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
-            }
-            send_to_char(ch, "\r\n");
-        } else if (
-                (sect == SECT_CITY || sect == SECT_FIELD || sect == SECT_HILLS ||
-                 sect == SECT_IMPORTANT) && dmg > 0) {
-            send_to_char(ch, "\r\n");
-            if (dmg <= 2) {
-                send_to_char(ch, "@wA small hole with chunks of debris that can be seen scarring the ground.@n");
-            } else if (dmg <= 4) {
-                send_to_char(ch,
-                             "@wA couple small craters with chunks of debris that can be seen scarring the ground.@n");
-            } else if (dmg <= 6) {
-                send_to_char(ch, "@wA few small craters with chunks of debris that can be seen scarring the ground.@n");
-            } else if (dmg <= 10) {
-                send_to_char(ch,
-                             "@wThere are several small craters with chunks of debris that can be seen scarring the ground.@n");
-            } else if (dmg <= 20) {
-                send_to_char(ch, "@wMany craters fill the ground of this area, many of which have burn marks.@n");
-            } else if (dmg <= 30) {
-                send_to_char(ch, "@wThe ground is severely damaged with many large craters.@n");
-            } else if (dmg <= 50) {
-                send_to_char(ch,
-                             "@wBattle damage covers the entire area. Displayed as a tribute to the battles that have\r\nbeen waged here.@n");
-            } else if (dmg <= 75) {
-                send_to_char(ch, "@wThis entire area is falling apart, it has been damaged so badly.@n");
-            } else if (dmg <= 99) {
-                send_to_char(ch,
-                             "@wThis area can not withstand much more damage. Everything has been damaged so badly it\r\nis hard to recognise any particular details about their former quality.@n");
-            } else if (dmg >= 100) {
-                send_to_char(ch,
-                             "@wThis area is completely destroyed. Nothing is recognisable. Chunks of debris\r\nlitter the ground, filling up craters, and overflowing onto what is left of the\r\nground. A haze of smoke is wafting through the air, creating a chilling atmosphere..@n");
-            }
-            send_to_char(ch, "\r\n");
-        } else if (sect == SECT_FOREST && dmg > 0) {
-            send_to_char(ch, "\r\n");
-            if (dmg <= 2) {
-                send_to_char(ch, "@wA small tree sits in a little crater here.@n");
-            } else if (dmg <= 4) {
-                send_to_char(ch, "@wTrees have been uprooted by craters in the ground.@n");
-            } else if (dmg <= 6) {
-                send_to_char(ch,
-                             "@wSeveral trees have been reduced to chunks of debris and are\r\nlaying in a few craters here. @n");
-            } else if (dmg <= 10) {
-                send_to_char(ch, "@wA large patch of trees have been destroyed and are laying in craters here.@n");
-            } else if (dmg <= 20) {
-                send_to_char(ch, "@wSeveral craters have merged into one large crater in one part of this forest.@n");
-            } else if (dmg <= 30) {
-                send_to_char(ch,
-                             "@wThe open sky can easily be seen through a hole of trees destroyed\r\nand resting at the bottom of several craters here.@n");
-            } else if (dmg <= 50) {
-                send_to_char(ch,
-                             "@wA good deal of burning tree pieces can be found strewn across the cratered ground here.@n");
-            } else if (dmg <= 75) {
-                send_to_char(ch,
-                             "@wVery few trees are left standing in this area, replaced instead by large craters.@n");
-            } else if (dmg <= 99) {
-                send_to_char(ch,
-                             "@wSingle solitary trees can be found still standing here or there in the area.\r\nThe rest have been almost completely obliterated in recent conflicts.@n");
-            } else if (dmg >= 100) {
-                send_to_char(ch,
-                             "@w  One massive crater fills this area. This desolate crater leaves no\r\nevidence of what used to be found in the area. Smoke slowly wafts into\r\nthe sky from the central point of the crater, creating an oppressive\r\natmosphere.@n");
-            }
-            send_to_char(ch, "\r\n");
-        } else if (sect == SECT_MOUNTAIN && dmg > 0) {
-            send_to_char(ch, "\r\n");
-            
-            if (dmg <= 2) {
-                send_to_char(ch, "@wA small crater has been burned into the side of this mountain.@n");
-            } else if (dmg <= 4) {
-                send_to_char(ch, "@wA couple craters have been burned into the side of this mountain.@n");
-            } else if (dmg <= 6) {
-                send_to_char(ch,
-                             "@wBurned bits of boulders can be seen lying at the bottom of a few nearby craters.@n");
-            } else if (dmg <= 10) {
-                send_to_char(ch, "@wSeveral bad craters can be seen in the side of the mountain here.@n");
-            } else if (dmg <= 20) {
-                send_to_char(ch,
-                             "@wLarge boulders have rolled down the mountain side and collected in many nearby craters.@n");
-            } else if (dmg <= 30) {
-                send_to_char(ch, "@wMany craters are covering the mountainside here.@n");
-            } else if (dmg <= 50) {
-                send_to_char(ch,
-                             "@wThe mountain side has partially collapsed, shedding rubble down towards its base.@n");
-            } else if (dmg <= 75) {
-                send_to_char(ch, "@wA peak of the mountain has been blown off, leaving behind a smoldering tip.@n");
-            } else if (dmg <= 99) {
-                send_to_char(ch,
-                             "@wThe mountain side here has completely collapsed, shedding dangerous rubble down to its base.@n");
-            } else if (dmg >= 100) {
-                send_to_char(ch,
-                             "@w  Half the mountain has been blown away, leaving a scarred and jagged\r\nrock in its place. Billowing smoke wafts up from several parts of the\r\nmountain, filling the nearby skies and blotting out the sun.@n");
+            switch (sect) {
+                case SECT_INSIDE:
+                    display_damage_description(ch, dmg, "floor");
+                    break;
+                case SECT_CITY:
+                case SECT_FIELD:
+                case SECT_HILLS:
+                case SECT_IMPORTANT:
+                    display_damage_description(ch, dmg, "ground");
+                    break;
+                case SECT_FOREST:
+                    display_damage_description_forest(ch, dmg);
+                    break;
+                case SECT_MOUNTAIN:
+                    display_damage_description_mountain(ch, dmg);
+                    break;
+                default:
+                    break;
             }
             send_to_char(ch, "\r\n");
         }
+
         if (rm->geffect >= 1 && rm->geffect <= 5) {
-            send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
-        }
-        if (rm->geffect >= 6) {
+            send_to_char(ch, "@rLava@w is pooling in some places here...@n\r\n");
+        } else if (rm->geffect >= 6) {
             send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
-        }
-        if (rm->geffect < 0) {
+        } else if (rm->geffect < 0) {
             send_to_char(ch, "@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n\r\n");
         }
     }
-    /* autoexits */
-    if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_NODEC))
-        do_auto_exits2(rm, ch);
-    if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC))
-        do_auto_exits(rm, ch, EXIT_LEV(ch));
+}
 
-    /* now list characters & objects */
+
+
+static void display_garden_info(struct room_data *rm, struct char_data *ch) {
     if (rm->room_flags.test(ROOM_GARDEN1)) {
         send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
+    } else if (rm->room_flags.test(ROOM_GARDEN2)) {
+        send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
+    } else if (rm->room_flags.test(ROOM_HOUSE)) {
+        send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
+    }
+}
+
+void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) {
+    if (!ch->desc)
+        return;
+
+    if (IS_DARK(rm->vn) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+        send_to_char(ch, "It's too dark to make out much detail...\r\n");
+        return;
+    } 
+
+    if (AFF_FLAGGED(ch, AFF_BLIND)) {
+        send_to_char(ch, "You see nothing but infinite darkness...\r\n");
+        return;
+    } 
+
+    if (PLR_FLAGGED(ch, PLR_EYEC)) {
+        send_to_char(ch, "You can't see a damned thing, your eyes are closed!\r\n");
+        return;
+    }
+
+    if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
+        display_room_flags(rm, ch);
     } else {
-        if (rm->room_flags.test(ROOM_GARDEN2)) {
-            send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
-        } else if (rm->room_flags.test(ROOM_HOUSE)) {
-            send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
+        display_room_info(rm, ch);
+    }
+
+    display_room_damage_description(rm, ch);
+
+    /* autoexits */
+    if (!IS_NPC(ch)) {
+        if (PRF_FLAGGED(ch, PRF_NODEC)) {
+            do_auto_exits2(rm, ch);
+        } else {
+            do_auto_exits(rm, ch, EXIT_LEV(ch));
         }
     }
+
+    display_garden_info(rm, ch);
     list_obj_to_char(rm->contents, ch, SHOW_OBJ_LONG, false);
     list_char_to_char(rm->people, ch);
 }
+
 
 static void look_in_direction(struct char_data *ch, int dir) {
     auto r = ch->getRoom();
@@ -4109,120 +3390,158 @@ static void look_in_direction(struct char_data *ch, int dir) {
     }
 }
 
-static void look_in_obj(struct char_data *ch, char *arg) {
-    struct obj_data *obj = nullptr;
-    struct char_data *dummy = nullptr;
-    int amt, bits;
+static void handle_portal(struct char_data *ch, struct obj_data *obj) {
+    if (!OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) {
+        int portal_appear = GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR);
+        room_rnum portal_dest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
 
-    if (!*arg)
-        send_to_char(ch, "Look in what?\r\n");
-    else if (!(bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj))) {
-        send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
-    } else if (find_exdesc(arg, obj->ex_description) != nullptr && !bits)
-        send_to_char(ch, "There's nothing inside that!\r\n");
-    else if ((GET_OBJ_TYPE(obj) == ITEM_PORTAL) && !OBJVAL_FLAGGED(obj, CONT_CLOSEABLE)) {
-        if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < 0) {
-            /* You can look through the portal to the destination */
-            /* where does this lead to? */
-            room_rnum portal_dest = real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
-            if (portal_dest == NOWHERE) {
-                send_to_char(ch, "You see nothing but infinite darkness...\r\n");
-            } else if (IS_DARK(portal_dest) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+        if (portal_appear < 0) {
+            if (portal_dest == NOWHERE || (IS_DARK(portal_dest) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT))) {
                 send_to_char(ch, "You see nothing but infinite darkness...\r\n");
             } else {
-                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n",
-                             world[portal_dest].name);
+                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", world[portal_dest].name);
             }
-        } else if (GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR) < MAX_PORTAL_TYPES) {
-            /* display the appropriate description from the list of descriptions
-*/
-            send_to_char(ch, "%s\r\n", portal_appearance[GET_OBJ_VAL(obj, VAL_PORTAL_APPEAR)]);
+        } else if (portal_appear < MAX_PORTAL_TYPES) {
+            send_to_char(ch, "%s\r\n", portal_appearance[portal_appear]);
         } else {
-            /* We shouldn't really get here, so give a default message */
             send_to_char(ch, "All you can see is the glow of the portal.\r\n");
-        }
-    } else if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
-        if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
-            send_to_char(ch, "It is closed.\r\n");
-        else if (GET_OBJ_VAL(obj, VAL_VEHICLE_APPEAR) < 0) {
-            /* You can look inside the vehicle */
-            /* where does this lead to? */
-            room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM));
-            if (vehicle_inside == NOWHERE) {
-                send_to_char(ch, "You cannot see inside that.\r\n");
-            } else if (IS_DARK(vehicle_inside) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
-                send_to_char(ch, "It is pitch black...\r\n");
-            } else {
-                send_to_char(ch, "You look inside and see:\r\n");
-                look_at_room(vehicle_inside, ch, 0);
-            }
-        } else {
-            send_to_char(ch, "You cannot see inside that.\r\n");
-        }
-    } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
-        look_out_window(ch, arg);
-    } else if ((GET_OBJ_TYPE(obj) != ITEM_DRINKCON) &&
-               (GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN) &&
-               (GET_OBJ_TYPE(obj) != ITEM_CONTAINER) &&
-               (GET_OBJ_TYPE(obj) != ITEM_PORTAL)) {
-        send_to_char(ch, "There's nothing inside that!\r\n");
-    } else if ((GET_OBJ_TYPE(obj) == ITEM_CONTAINER) ||
-               (GET_OBJ_TYPE(obj) == ITEM_PORTAL)) {
-        if (OBJVAL_FLAGGED(obj, CONT_CLOSED))
-            send_to_char(ch, "It is closed.\r\n");
-        else {
-            send_to_char(ch, "%s", obj->short_description);
-            if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER &&
-                (GET_OBJ_VNUM(obj) == 697 || GET_OBJ_VNUM(obj) == 698 || GET_OBJ_VNUM(obj) == 682 ||
-                 GET_OBJ_VNUM(obj) == 683 || GET_OBJ_VNUM(obj) == 684)) {
-                act("$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
-            }
-            switch (bits) {
-                case FIND_OBJ_INV:
-                    send_to_char(ch, " (carried): \r\n");
-                    break;
-                case FIND_OBJ_ROOM:
-                    send_to_char(ch, " (here): \r\n");
-                    break;
-                case FIND_OBJ_EQUIP:
-                    send_to_char(ch, " (used): \r\n");
-                    break;
-            }
-
-            list_obj_to_char(obj->contents, ch, SHOW_OBJ_SHORT, true);
-        }
-    } else {        /* item must be a fountain or drink container */
-        if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) <= 0 && (!GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) == 1))
-            send_to_char(ch, "It is empty.\r\n");
-        else {
-            if (GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) < 0) {
-                char buf2[MAX_STRING_LENGTH];
-                sprinttype(GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
-                send_to_char(ch, "It's full of a %s liquid.\r\n", buf2);
-            } else if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) > GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY)) {
-                send_to_char(ch, "Its contents seem somewhat murky.\r\n"); /* BUG */
-            } else {
-                char buf2[MAX_STRING_LENGTH];
-                amt = GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY);
-                int leftin = GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL);
-                sprinttype(GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
-                if (leftin == amt) {
-                    send_to_char(ch, "It's full of a %s liquid.\r\n", buf2);
-                } else if (leftin >= amt * .8) {
-                    send_to_char(ch, "It's almost full of a %s liquid.\r\n", buf2);
-                } else if (leftin >= amt * .5) {
-                    send_to_char(ch, "It's about half full of a %s liquid.\r\n", buf2);
-                } else if (leftin >= amt * .2) {
-                    send_to_char(ch, "It's less than half full of a %s liquid.\r\n", buf2);
-                } else if (leftin > 0) {
-                    send_to_char(ch, "It's barely filled with a %s liquid.\r\n", buf2);
-                } else {
-                    send_to_char(ch, "It's empty.\r\n");
-                }
-            }
         }
     }
 }
+
+static void handle_vehicle(struct char_data *ch, struct obj_data *obj) {
+    if (OBJVAL_FLAGGED(obj, CONT_CLOSED)) {
+        send_to_char(ch, "It is closed.\r\n");
+        return;
+    }
+
+    room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM));
+    if (vehicle_inside == NOWHERE) {
+        send_to_char(ch, "You cannot see inside that.\r\n");
+    } else if (IS_DARK(vehicle_inside) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {
+        send_to_char(ch, "It is pitch black...\r\n");
+    } else {
+        send_to_char(ch, "You look inside and see:\r\n");
+        look_at_room(vehicle_inside, ch, 0);
+    }
+}
+
+static void handle_container(struct char_data *ch, struct obj_data *obj, int bits) {
+    if (OBJVAL_FLAGGED(obj, CONT_CLOSED)) {
+        send_to_char(ch, "It is closed.\r\n");
+    } else {
+        send_to_char(ch, "%s", obj->short_description);
+        switch (bits) {
+            case FIND_OBJ_INV:
+                send_to_char(ch, " (carried): \r\n");
+                break;
+            case FIND_OBJ_ROOM:
+                send_to_char(ch, " (here): \r\n");
+                break;
+            case FIND_OBJ_EQUIP:
+                send_to_char(ch, " (used): \r\n");
+                break;
+        }
+
+        if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && 
+            (GET_OBJ_VNUM(obj) == 697 || GET_OBJ_VNUM(obj) == 698 || GET_OBJ_VNUM(obj) == 682 ||
+             GET_OBJ_VNUM(obj) == 683 || GET_OBJ_VNUM(obj) == 684)) {
+            act("$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
+        }
+
+        list_obj_to_char(obj->contents, ch, SHOW_OBJ_SHORT, true);
+    }
+}
+
+static void describe_drink_level(struct char_data *ch, const char *liquid, int howfull, int capacity) {
+    if (howfull == capacity) {
+        send_to_char(ch, "It's full of a %s liquid.\r\n", liquid);
+    } else if (howfull >= capacity * .8) {
+        send_to_char(ch, "It's almost full of a %s liquid.\r\n", liquid);
+    } else if (howfull >= capacity * .5) {
+        send_to_char(ch, "It's about half full of a %s liquid.\r\n", liquid);
+    } else if (howfull >= capacity * .2) {
+        send_to_char(ch, "It's less than half full of a %s liquid.\r\n", liquid);
+    } else if (howfull > 0) {
+        send_to_char(ch, "It's barely filled with a %s liquid.\r\n", liquid);
+    } else {
+        send_to_char(ch, "It's empty.\r\n");
+    }
+}
+
+static void handle_drinkcon(struct char_data *ch, struct obj_data *obj) {
+    int capacity = GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY);
+    int howfull = GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL);
+
+    if (howfull <= 0 && capacity == 1) {
+        send_to_char(ch, "It is empty.\r\n");
+    } else if (capacity < 0) {
+        char buf2[MAX_STRING_LENGTH];
+        sprinttype(GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
+        send_to_char(ch, "It's full of a %s liquid.\r\n", buf2);
+    } else if (howfull > capacity) {
+        send_to_char(ch, "Its contents seem somewhat murky.\r\n"); /* BUG */
+    } else {
+        char buf2[MAX_STRING_LENGTH];
+        sprinttype(GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID), color_liquid, buf2, sizeof(buf2));
+        describe_drink_level(ch, buf2, howfull, capacity);
+    }
+}
+
+
+
+static void look_in_obj(struct char_data *ch, char *arg) {
+    struct obj_data *obj = nullptr;
+    struct char_data *dummy = nullptr;
+
+    if (!*arg) {
+        send_to_char(ch, "Look in what?\r\n");
+        return;
+    }
+
+    int bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP, ch, &dummy, &obj);
+    if (!bits) {
+        send_to_char(ch, "There doesn't seem to be %s %s here.\r\n", AN(arg), arg);
+        return;
+    }
+
+    if (find_exdesc(arg, obj->ex_description) != nullptr && !bits) {
+        send_to_char(ch, "There's nothing inside that!\r\n");
+        return;
+    }
+
+    auto otype = GET_OBJ_TYPE(obj);
+    auto ovn = GET_OBJ_VNUM(obj);
+
+    switch (otype) {
+        case ITEM_PORTAL:
+            handle_portal(ch, obj);
+            break;
+
+        case ITEM_VEHICLE:
+            handle_vehicle(ch, obj);
+            break;
+
+        case ITEM_WINDOW:
+            look_out_window(ch, arg);
+            break;
+
+        case ITEM_CONTAINER:
+            handle_container(ch, obj, bits);
+            break;
+
+        case ITEM_DRINKCON:
+        case ITEM_FOUNTAIN:
+            handle_drinkcon(ch, obj);
+            break;
+
+        default:
+            send_to_char(ch, "There's nothing inside that!\r\n");
+            break;
+    }
+}
+
+
 
 char *find_exdesc(char *word, struct extra_descr_data *list) {
     struct extra_descr_data *i;
@@ -4244,184 +3563,176 @@ char *find_exdesc(char *word, struct extra_descr_data *list) {
  * Thanks to Angus Mezick <angus@EDGIL.CCMAIL.COMPUSERVE.COM> for the
  * suggested fix to this problem.
  */
-static void look_at_target(struct char_data *ch, char *arg, int cmread) {
-    int bits, found = false, j, fnum, i = 0, msg = 1;
-    struct char_data *found_char = nullptr;
-    struct obj_data *obj, *found_obj = nullptr;
-    char *desc;
-    char number[MAX_STRING_LENGTH];
+static void examine_equipped_item(struct char_data *ch, struct obj_data *obj, const char *arg) {
+    if (isname(arg, obj->name)) {
+        if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
+            send_to_char(ch, "The weapon type of %s is a %s.\r\n",
+                         GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj, VAL_WEAPON_SKILL)]);
+        }
+        if (GET_OBJ_TYPE(obj) == ITEM_SPELLBOOK) {
+            display_spells(ch, obj);
+        }
+        if (GET_OBJ_TYPE(obj) == ITEM_SCROLL) {
+            display_scroll(ch, obj);
+        }
+        diag_obj_to_char(obj, ch);
+        send_to_char(ch, "It appears to be made of %s",
+                     material_names[GET_OBJ_MATERIAL(obj)]);
+    }
+}
 
-    if (!ch->desc)
+static void examine_item(struct char_data *ch, struct obj_data *obj, const char *arg) {
+    if (isname(arg, obj->name)) {
+        if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
+            send_to_char(ch, "The weapon type of %s is a %s.\r\n",
+                         GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj, VAL_WEAPON_SKILL)]);
+        }
+        if (GET_OBJ_TYPE(obj) == ITEM_SPELLBOOK) {
+            display_spells(ch, obj);
+        }
+        if (GET_OBJ_TYPE(obj) == ITEM_SCROLL) {
+            display_scroll(ch, obj);
+        }
+        if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
+            send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
+            send_to_char(ch, "@YSyntax@D: @COpen hatch\r\n");
+            send_to_char(ch, "@YSyntax@D: @CClose hatch\r\n");
+            send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
+            send_to_char(ch, "@YSyntax@D: @CEnter hatch\r\n");
+        } else if (GET_OBJ_TYPE(obj) == ITEM_HATCH) {
+            send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
+            send_to_char(ch, "@YSyntax@D: @COpen hatch\r\n");
+            send_to_char(ch, "@YSyntax@D: @CClose hatch\r\n");
+            send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
+            send_to_char(ch, "@YSyntax@D: @CLeave@n\r\n");
+        } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
+            look_out_window(ch, obj->name);
+        }
+        if (GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
+            send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
+                         GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y" : "@r",
+                         add_commas(GET_FUEL(obj)).c_str());
+        }
+        diag_obj_to_char(obj, ch);
+        send_to_char(ch, "It appears to be made of %s, and weighs %s",
+                     material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
+    }
+}
+
+static void handle_board_read(struct char_data *ch, char *arg) {
+    struct obj_data *obj = ch->findObject([](const auto &o) { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
+    if (!obj) obj = ch->getRoom()->findObject([](const auto &o) { return GET_OBJ_TYPE(o) == ITEM_BOARD; });
+
+    if (!obj) {
+        send_to_char(ch, "Read what?\r\n");
         return;
+    }
+
+    char number[MAX_STRING_LENGTH];
+    arg = one_argument(arg, number);
+
+    if (!*number) {
+        send_to_char(ch, "Read what?\r\n");
+    } else if (isname(number, obj->name)) {
+        show_board(GET_OBJ_VNUM(obj), ch);
+    } else if (!isdigit(*number) || strchr(number, '.')) {
+        char new_arg[MAX_STRING_LENGTH];
+        sprintf(new_arg, "%s %s", number, arg);
+        look_at_target(ch, new_arg, 0);
+    } else {
+        int msg = atoi(number);
+        board_display_msg(GET_OBJ_VNUM(obj), ch, msg);
+    }
+}
+
+static bool handle_exdesc_look(struct char_data *ch, char *arg, struct extra_descr_data *ex_desc_list, struct obj_data *obj) {
+    char *desc;
+    int fnum = get_number(&arg);
+    int i = 0;
+
+    while (ex_desc_list) {
+        if ((desc = find_exdesc(arg, ex_desc_list)) != nullptr && ++i == fnum) {
+            write_to_output(ch->desc, desc);
+            return true;
+        }
+        ex_desc_list = ex_desc_list->next;
+    }
+    return false;
+}
+
+static void handle_look_in_inventory(struct char_data *ch, char *arg) {
+    if (handle_exdesc_look(ch, arg, nullptr, nullptr)) return;
+
+    for (int j = 0; j < NUM_WEARS; j++) {
+        struct obj_data *eq = GET_EQ(ch, j);
+        if (eq && CAN_SEE_OBJ(ch, eq) && handle_exdesc_look(ch, arg, eq->ex_description, eq)) {
+            examine_equipped_item(ch, eq, arg);
+            return;
+        }
+    }
+
+    for (struct obj_data *obj = ch->contents; obj; obj = obj->next_content) {
+        if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->ex_description, obj)) {
+            examine_item(ch, obj, arg);
+            return;
+        }
+    }
+
+    for (struct obj_data *obj = ch->getRoom()->contents; obj; obj = obj->next_content) {
+        if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->ex_description, obj)) {
+            examine_item(ch, obj, arg);
+            return;
+        }
+    }
+}
+
+static void handle_look(struct char_data *ch, char *arg) {
+    struct char_data *found_char = nullptr;
+    struct obj_data *found_obj = nullptr;
+    int bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP | FIND_CHAR_ROOM, ch, &found_char, &found_obj);
+
+    if (found_char) {
+        look_at_char(found_char, ch);
+        if (ch != found_char && !AFF_FLAGGED(ch, AFF_HIDE)) {
+            act("$n looks at you.", true, ch, nullptr, found_char, TO_VICT);
+            act("$n looks at $N.", true, ch, nullptr, found_char, TO_NOTVICT);
+        }
+        return;
+    }
+
+    if (!handle_exdesc_look(ch, arg, ch->getRoom()->ex_description, nullptr)) {
+        handle_look_in_inventory(ch, arg);
+    }
+
+    if (bits && !found_obj) {
+        show_obj_to_char(found_obj, ch, SHOW_OBJ_ACTION);
+        if (show_obj_modifiers(found_obj, ch)) {
+            send_to_char(ch, "\r\n");
+        }
+    } else if (!found_obj) {
+        send_to_char(ch, "You do not see that here.\r\n");
+    }
+}
+
+
+
+
+
+static void look_at_target(struct char_data *ch, char *arg, int cmread) {
+    if (!ch->desc) return;
 
     if (!*arg) {
         send_to_char(ch, "Look at what?\r\n");
         return;
     }
 
-     auto isBoard = [](const auto &o) {
-        return GET_OBJ_TYPE(o) == ITEM_BOARD;};
-
     if (cmread) {
-
-        obj = ch->findObject(isBoard);
-        if(!obj) obj = ch->getRoom()->findObject(isBoard);
-
-        if (obj) {
-            arg = one_argument(arg, number);
-            if (!*number) {
-                send_to_char(ch, "Read what?\r\n");
-                return;
-            }
-
-            /* Okay, here i'm faced with the fact that the person could be
-	 entering in something like 'read 5' or 'read 4.mail' .. so, whats the
-	 difference between the two?  Well, there's a period in the second,
-	 so, we'll just stick with that basic difference */
-
-            if (isname(number, obj->name)) {
-                show_board(GET_OBJ_VNUM(obj), ch);
-            } else if ((!isdigit(*number) || (!(msg = atoi(number)))) ||
-                       (strchr(number, '.'))) {
-                sprintf(arg, "%s %s", number, arg);
-                look_at_target(ch, arg, 0);
-            } else {
-                board_display_msg(GET_OBJ_VNUM(obj), ch, msg);
-            }
-        }
+        handle_board_read(ch, arg);
     } else {
-        bits = generic_find(arg, FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP |
-                                 FIND_CHAR_ROOM, ch, &found_char, &found_obj);
-
-        /* Is the target a character? */
-        if (found_char != nullptr) {
-            look_at_char(found_char, ch);
-            if (ch != found_char) {
-                if (!AFF_FLAGGED(ch, AFF_HIDE)) {
-                    act("$n looks at you.", true, ch, nullptr, found_char, TO_VICT);
-                    act("$n looks at $N.", true, ch, nullptr, found_char, TO_NOTVICT);
-                }
-            }
-            return;
-        }
-
-        /* Strip off "number." from 2.foo and friends. */
-        if (!(fnum = get_number(&arg))) {
-            send_to_char(ch, "Look at what?\r\n");
-            return;
-        }
-
-        /* Does the argument match an extra desc in the room? */
-        if ((desc = find_exdesc(arg, ch->getRoom()->ex_description)) != nullptr && ++i == fnum) {
-            write_to_output(ch->desc, desc);
-            return;
-        }
-
-        /* Does the argument match an extra desc in the char's equipment? */
-        for (j = 0; j < NUM_WEARS && !found; j++)
-            if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)))
-                if ((desc = find_exdesc(arg, GET_EQ(ch, j)->ex_description)) != nullptr && ++i == fnum) {
-                    send_to_char(ch, "%s", desc);
-                    if (isname(arg, GET_EQ(ch, j)->name)) {
-                        if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_WEAPON) {
-                            send_to_char(ch, "The weapon type of %s is a %s.\r\n",
-                                         GET_OBJ_SHORT(GET_EQ(ch, j)),
-                                         weapon_type[(int) GET_OBJ_VAL(GET_EQ(ch, j), VAL_WEAPON_SKILL)]);
-                        }
-                        if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_SPELLBOOK) {
-                            display_spells(ch, GET_EQ(ch, j));
-                        }
-                        if (GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_SCROLL) {
-                            display_scroll(ch, GET_EQ(ch, j));
-                        }
-                        diag_obj_to_char(GET_EQ(ch, j), ch);
-                        send_to_char(ch, "It appears to be made of %s",
-                                     material_names[GET_OBJ_MATERIAL(GET_EQ(ch, j))]);
-                    }
-                    found = true;
-                }
-
-        /* Does the argument match an extra desc in the char's inventory? */
-        for (obj = ch->contents; obj && !found; obj = obj->next_content) {
-            if (CAN_SEE_OBJ(ch, obj))
-                if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
-                    if (isBoard(obj)) {
-                        show_board(GET_OBJ_VNUM(obj), ch);
-                    } else {
-                        send_to_char(ch, "%s", desc);
-                        if (isname(arg, obj->name)) {
-                            if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-                                send_to_char(ch, "The weapon type of %s is a %s.\r\n",
-                                             GET_OBJ_SHORT(obj), weapon_type[(int) GET_OBJ_VAL(obj,
-                                                                                               VAL_WEAPON_SKILL)]);
-                            }
-                            if (GET_OBJ_TYPE(obj) == ITEM_SPELLBOOK) {
-                                display_spells(ch, obj);
-                            }
-                            if (GET_OBJ_TYPE(obj) == ITEM_SCROLL) {
-                                display_scroll(ch, obj);
-                            }
-                            diag_obj_to_char(obj, ch);
-                            send_to_char(ch, "It appears to be made of %s, and weights %s",
-                                         material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
-                        }
-                    }
-                    found = true;
-                }
-        }
-
-        /* Does the argument match an extra desc of an object in the room? */
-        for (obj = ch->getRoom()->contents; obj && !found; obj = obj->next_content)
-            if (CAN_SEE_OBJ(ch, obj))
-                if ((desc = find_exdesc(arg, obj->ex_description)) != nullptr && ++i == fnum) {
-                    if (isBoard(obj)) {
-                        show_board(GET_OBJ_VNUM(obj), ch);
-                    } else {
-                        send_to_char(ch, "%s", desc);
-                        if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE) {
-                            send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
-                            send_to_char(ch, "@YSyntax@D: @COpen hatch\r\n");
-                            send_to_char(ch, "@YSyntax@D: @CClose hatch\r\n");
-                            send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
-                            send_to_char(ch, "@YSyntax@D: @CEnter hatch\r\n");
-                        } else if (GET_OBJ_TYPE(obj) == ITEM_HATCH) {
-                            send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
-                            send_to_char(ch, "@YSyntax@D: @COpen hatch\r\n");
-                            send_to_char(ch, "@YSyntax@D: @CClose hatch\r\n");
-                            send_to_char(ch, "@YSyntax@D: @CUnlock hatch\r\n");
-                            send_to_char(ch, "@YSyntax@D: @CLeave@n\r\n");
-                        } else if (GET_OBJ_TYPE(obj) == ITEM_WINDOW) {
-                            look_out_window(ch, obj->name);
-                        }
-
-                        if (GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
-                            send_to_char(ch, "@RFUEL@D: %s%s@n\r\n",
-                                         GET_FUEL(obj) >= 200 ? "@G" : GET_FUEL(obj) >= 100 ? "@Y" : "@r",
-                                         add_commas(GET_FUEL(obj)).c_str());
-                        }
-                        if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
-                            send_to_char(ch, "The weapon type of %s is a %s.\r\n", GET_OBJ_SHORT(obj),
-                                         weapon_type[(int) GET_OBJ_VAL(obj, VAL_WEAPON_SKILL)]);
-                        }
-                        diag_obj_to_char(obj, ch);
-                        send_to_char(ch, "It appears to be made of %s, and weights %s",
-                                     material_names[GET_OBJ_MATERIAL(obj)], add_commas(GET_OBJ_WEIGHT(obj)).c_str());
-                    }
-                    found = true;
-                }
-
-        /* If an object was found back in generic_find */
-        if (bits) {
-            if (!found)
-                show_obj_to_char(found_obj, ch, SHOW_OBJ_ACTION);
-            else {
-                if (show_obj_modifiers(found_obj, ch))
-                    send_to_char(ch, "\r\n");
-            }
-        } else if (!found)
-            send_to_char(ch, "You do not see that here.\r\n");
+        handle_look(ch, arg);
     }
 }
+
 
 static void look_out_window(struct char_data *ch, char *arg) {
     struct obj_data *i, *viewport = nullptr, *vehicle = nullptr;
@@ -5733,55 +5044,44 @@ ACMD(do_inventory) {
     send_to_char(ch, "\n");
 }
 
+static void show_equipment(struct char_data *ch, struct obj_data *equipment, const char *wear_location, int wear_pos) {
+    send_to_char(ch, "%s", wear_location);
+    show_obj_to_char(equipment, ch, SHOW_OBJ_SHORT);
+
+    if (OBJ_FLAGGED(equipment, ITEM_SHEATH)) {
+        for (struct obj_data *obj2 = equipment->contents; obj2; obj2 = obj2->next_content) {
+            if (!obj2) continue;
+            send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
+            show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
+        }
+    }
+}
+
 ACMD(do_equipment) {
-    int i;
-
     send_to_char(ch, "        @YEquipment Being Worn\r\n@D-------------------------------------@w\r\n");
-    for (i = 1; i < NUM_WEARS; i++) {
-        if (GET_EQ(ch, i)) {
-            if (CAN_SEE_OBJ(ch, GET_EQ(ch, i)) && (i != WEAR_WIELD1 && i != WEAR_WIELD2)) {
-                send_to_char(ch, "%s", wear_where[i]);
-                show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
 
-                if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_SHEATH)) {
-                    struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = GET_EQ(ch, i);
-                    for (obj2 = sheath->contents; obj2; obj2 = next_obj) {
-                        next_obj = obj2->next_content;
-                        if(!obj2) continue;
-                        send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
-                        show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
-                    }
-                    obj2 = nullptr;
+    for (int i = 1; i < NUM_WEARS; i++) {
+        if (auto equipment = GET_EQ(ch, i); equipment) {
+            if (CAN_SEE_OBJ(ch, equipment)) {
+                if (i != WEAR_WIELD1 && i != WEAR_WIELD2) {
+                    show_equipment(ch, equipment, wear_where[i], i);
+                } else if (PLR_FLAGGED(ch, PLR_THANDW)) {
+                    send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
+                    show_obj_to_char(equipment, ch, SHOW_OBJ_SHORT);
+                } else {
+                    show_equipment(ch, equipment, wear_where[i], i);
                 }
-            } else if (CAN_SEE_OBJ(ch, GET_EQ(ch, i)) && (!PLR_FLAGGED(ch, PLR_THANDW))) {
-                send_to_char(ch, "%s", wear_where[i]);
-                show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
-                if (OBJ_FLAGGED(GET_EQ(ch, i), ITEM_SHEATH)) {
-                    struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = GET_EQ(ch, i);
-                    for (obj2 = sheath->contents; obj2; obj2 = next_obj) {
-                        next_obj = obj2->next_content;
-                        if (!obj2) continue;
-                        send_to_char(ch, "@D  ---- @YSheathed@D ----> @n");
-                        show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
-                    }
-                    obj2 = nullptr;
-                }
-            } else if (CAN_SEE_OBJ(ch, GET_EQ(ch, i)) && (PLR_FLAGGED(ch, PLR_THANDW))) {
-                send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
-                show_obj_to_char(GET_EQ(ch, i), ch, SHOW_OBJ_SHORT);
             } else {
-                send_to_char(ch, "%s", wear_where[i]);
-                send_to_char(ch, "Something.\r\n");
+                send_to_char(ch, "%sSomething.\r\n", wear_where[i]);
             }
         } else {
-            if (BODY_FLAGGED(ch, i) && (i != WEAR_WIELD2)) {
-                send_to_char(ch, "%s@wNothing.@n\r\n", wear_where[i]);
-            } else if (BODY_FLAGGED(ch, i) && (i == WEAR_WIELD2 && !PLR_FLAGGED(ch, PLR_THANDW))) {
+            if (BODY_FLAGGED(ch, i) && (i != WEAR_WIELD2 || !PLR_FLAGGED(ch, PLR_THANDW))) {
                 send_to_char(ch, "%s@wNothing.@n\r\n", wear_where[i]);
             }
         }
     }
 }
+
 
 ACMD(do_time) {
     const char *suf;
@@ -6617,146 +5917,93 @@ static const char *ctypes[] = {
 
 char *cchoice_to_str(char *col) {
     static char buf[READ_SIZE];
-    char *s = nullptr;
     int i = 0;
-    int fg = 0;
-    int needfg = 0;
-    int bold = 0;
+    bool fg = false, bold = false, needfg = false;
 
     if (!col) {
-        buf[0] = 0;
+        buf[0] = '\0';
         return buf;
     }
+
+    auto append_to_buf = [&](const char *text) {
+        if (needfg && !fg) {
+            i += snprintf(buf + i, sizeof(buf) - i, "%snormal", i ? " " : "");
+            fg = true;
+        }
+        if (i)
+            i += snprintf(buf + i, sizeof(buf) - i, " ");
+        if (bold) {
+            i += snprintf(buf + i, sizeof(buf) - i, "bright ");
+            bold = false;
+        }
+        i += snprintf(buf + i, sizeof(buf) - i, "%s", text);
+    };
+
     while (*col) {
         if (strchr(ANSISTART, *col)) {
             col++;
-        } else {
-            switch (*col) {
-                case ANSISEP:
-                case ANSIEND:
-                    s = nullptr;
-                    break;
-                case '0':
-                    s = nullptr;
-                    break;
-                case '1':
-                    bold = 1;
-                    s = nullptr;
-                    break;
-                case '5':
-                    s = "blinking";
-                    break;
-                case '7':
-                    s = "reverse";
-                    break;
-                case '8':
-                    s = "invisible";
-                    break;
-                case '3':
-                    col++;
-                    fg = 1;
-                    switch (*col) {
-                        case '0':
-                            s = bold ? "grey" : "black";
-                            bold = 0;
-                            fg = 1;
-                            break;
-                        case '1':
-                            s = "red";
-                            fg = 1;
-                            break;
-                        case '2':
-                            s = "green";
-                            fg = 1;
-                            break;
-                        case '3':
-                            s = "yellow";
-                            fg = 1;
-                            break;
-                        case '4':
-                            s = "blue";
-                            fg = 1;
-                            break;
-                        case '5':
-                            s = "magenta";
-                            fg = 1;
-                            break;
-                        case '6':
-                            s = "cyan";
-                            fg = 1;
-                            break;
-                        case '7':
-                            s = "white";
-                            fg = 1;
-                            break;
-                        case 0:
-                            s = nullptr;
-                            break;
-                    }
-                    break;
-                case '4':
-                    col++;
-                    switch (*col) {
-                        case '0':
-                            s = "on black";
-                            needfg = 1;
-                            bold = 0;
-                        case '1':
-                            s = "on red";
-                            needfg = 1;
-                            bold = 0;
-                        case '2':
-                            s = "on green";
-                            needfg = 1;
-                            bold = 0;
-                        case '3':
-                            s = "on yellow";
-                            needfg = 1;
-                            bold = 0;
-                        case '4':
-                            s = "on blue";
-                            needfg = 1;
-                            bold = 0;
-                        case '5':
-                            s = "on magenta";
-                            needfg = 1;
-                            bold = 0;
-                        case '6':
-                            s = "on cyan";
-                            needfg = 1;
-                            bold = 0;
-                        case '7':
-                            s = "on white";
-                            needfg = 1;
-                            bold = 0;
-                        default:
-                            s = "underlined";
-                            break;
-                    }
-                    break;
-                default:
-                    s = nullptr;
-                    break;
-            }
-            if (s) {
-                if (needfg && !fg) {
-                    i += snprintf(buf + i, sizeof(buf) - i, "%snormal", i ? " " : "");
-                    fg = 1;
-                }
-                if (i)
-                    i += snprintf(buf + i, sizeof(buf) - i, " ");
-                if (bold) {
-                    i += snprintf(buf + i, sizeof(buf) - i, "bright ");
-                    bold = 0;
-                }
-                i += snprintf(buf + i, sizeof(buf) - i, "%s", s ? s : "null 1");
-                s = nullptr;
-            }
-            col++;
+            continue;
         }
+
+        switch (*col) {
+            case ANSISEP:
+            case ANSIEND:
+            case '0':
+                // Reset all states
+                fg = bold = needfg = false;
+                break;
+            case '1':
+                bold = true;
+                break;
+            case '5':
+                append_to_buf("blinking");
+                break;
+            case '7':
+                append_to_buf("reverse");
+                break;
+            case '8':
+                append_to_buf("invisible");
+                break;
+            case '3':
+                col++;
+                switch (*col) {
+                    case '0': append_to_buf(bold ? "grey" : "black"); break;
+                    case '1': append_to_buf("red"); break;
+                    case '2': append_to_buf("green"); break;
+                    case '3': append_to_buf("yellow"); break;
+                    case '4': append_to_buf("blue"); break;
+                    case '5': append_to_buf("magenta"); break;
+                    case '6': append_to_buf("cyan"); break;
+                    case '7': append_to_buf("white"); break;
+                    default: break;
+                }
+                fg = true;
+                break;
+            case '4':
+                col++;
+                switch (*col) {
+                    case '0': append_to_buf("on black"); break;
+                    case '1': append_to_buf("on red"); break;
+                    case '2': append_to_buf("on green"); break;
+                    case '3': append_to_buf("on yellow"); break;
+                    case '4': append_to_buf("on blue"); break;
+                    case '5': append_to_buf("on magenta"); break;
+                    case '6': append_to_buf("on cyan"); break;
+                    case '7': append_to_buf("on white"); break;
+                    default: append_to_buf("underlined"); break;
+                }
+                needfg = true;
+                break;
+            default:
+                break;
+        }
+        col++;
     }
-    if (!fg)
-        i += snprintf(buf + i, sizeof(buf) - i, "%snormal", i ? " " : "");
+
+    if (!fg) {
+        append_to_buf("normal");
+    }
+
     return buf;
 }
 
