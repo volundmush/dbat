@@ -1622,10 +1622,8 @@ bool spar_friendly(struct char_data *ch, struct char_data *npc) {
         return true;
     }
 
-    for (auto names = MEMORY(npc); names; names = names->next) {
-        if (names->id != GET_IDNUM(ch))
-            return false;
-    }
+    if (npc->mob_specials.memory.contains(ch->ref()))
+        return false;
 
     for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->mobFlags.test(f)) return false;
 

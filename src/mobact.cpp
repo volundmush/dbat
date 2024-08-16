@@ -59,7 +59,6 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
     struct char_data *vict;
     struct obj_data *obj, *best_obj;
     int door, found, max;
-    memory_rec *names;
 
     std::unordered_map<std::string, double> mobTimings;
 
@@ -381,7 +380,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
             start = std::chrono::high_resolution_clock::now();
             /* Mob Memory */
-            if (IS_HUMANOID(ch) && MEMORY(ch) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
+            if (IS_HUMANOID(ch) && !(ch->mob_specials.memory.empty()) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
                 found = false;
                 for (vict = ch->getRoom()->people; vict && !found; vict = vict->next_in_room) {
                     if (IS_NPC(vict) || !CAN_SEE(ch, vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
@@ -391,17 +390,17 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     if (GET_HIT(ch) <= GET_MAX_HIT(ch) / 100)
                         continue;
 
-                    for (names = MEMORY(ch); names && !found; names = names->next) {
-                        if (names->id != GET_IDNUM(vict))
+                    for (const auto& ref : ch->mob_specials.memory) {
+                        if (ref.get() != vict)
                             continue;
 
-                        found = true;
                         act("'Hey!  You're the fiend that attacked me!!!', exclaims $n.", false, ch, nullptr, nullptr,
                             TO_ROOM);
                         char tar[MAX_INPUT_LENGTH];
 
                         sprintf(tar, "%s", GET_NAME(vict));
                         do_punch(ch, tar, 0, 0);
+                        break;
                     }
                 }
             }
@@ -526,64 +525,3 @@ void mob_taunt(struct char_data *ch) {
     }
 }
 
-/* Mob Memory Routines */
-
-/* make ch remember victim */
-void remember(struct char_data *ch, struct char_data *victim) {
-    memory_rec *tmp;
-    bool present = false;
-
-    if (!IS_NPC(ch) || IS_NPC(victim) || PRF_FLAGGED(victim, PRF_NOHASSLE))
-        return;
-
-    for (tmp = MEMORY(ch); tmp && !present; tmp = tmp->next)
-        if (tmp->id == GET_IDNUM(victim))
-            present = true;
-
-    if (!present && !MOB_FLAGGED(ch, MOB_SPAR) && !PLR_FLAGGED(victim, PLR_SPAR)) {
-        CREATE(tmp, memory_rec, 1);
-        tmp->next = MEMORY(ch);
-        tmp->id = GET_IDNUM(victim);
-        MEMORY(ch) = tmp;
-    }
-}
-
-
-/* make ch forget victim */
-void forget(struct char_data *ch, struct char_data *victim) {
-    memory_rec *curr, *prev = nullptr;
-
-    if (!(curr = MEMORY(ch)))
-        return;
-
-    while (curr && curr->id != GET_IDNUM(victim)) {
-        prev = curr;
-        curr = curr->next;
-    }
-
-    if (!curr)
-        return;            /* person wasn't there at all. */
-
-    if (curr == MEMORY(ch))
-        MEMORY(ch) = curr->next;
-    else
-        prev->next = curr->next;
-
-    free(curr);
-}
-
-
-/* erase ch's memory */
-void clearMemory(struct char_data *ch) {
-    memory_rec *curr, *next;
-
-    curr = MEMORY(ch);
-
-    while (curr) {
-        next = curr->next;
-        free(curr);
-        curr = next;
-    }
-
-    MEMORY(ch) = nullptr;
-}

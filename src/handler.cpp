@@ -1124,7 +1124,7 @@ void extract_char_final(struct char_data *ch) {
     if (IS_NPC(ch)) {
         if (GET_MOB_RNUM(ch) != NOTHING)    /* prototyped */
             erase_vnum(characterVnumIndex, ch);
-        clearMemory(ch);
+
         if (SCRIPT(ch))
             extract_script(ch, MOB_TRIGGER);
         if (SCRIPT_MEM(ch))

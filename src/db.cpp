@@ -1334,7 +1334,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         }
     }
     if (IS_SAIYAN(mob)) {
-        setNumsTo[CharAppearance::HairColor] = rand_number(1, 2);
+        setNumsTo[CharAppearance::HairColor] = HAIRC_BLACK;
         setNumsTo[CharAppearance::EyeColor] = 1;
     }
 

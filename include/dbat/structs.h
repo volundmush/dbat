@@ -271,13 +271,13 @@ struct unit_data {
     char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */
     char *short_description{};     /* when displayed in list or action message. */
-    bool exists{true}; // used for deleted objects. invalid ones are !exists
+
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
     std::vector<trig_vnum> proto_script; /* list of default triggers  */
     struct script_data *script{};  /* script info for the object */
 
-    ObjRef contents{};     /* Contains objects  */
+    struct obj_data* contents{};     /* Contains objects  */
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
@@ -408,12 +408,12 @@ struct obj_data : public thing_data {
 
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
 
-    ObjRef in_obj{};       /* In what object nullptr when none    */
+    struct obj_data *in_obj{};       /* In what object nullptr when none    */
     struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
     struct char_data *worn_by{};      /* Worn by? */
     int16_t worn_on{-1};          /* Worn where?		      */
 
-    ObjRef next_content{}; /* For 'contains' lists             */
+    struct obj_data *next_content{}; /* For 'contains' lists             */
 
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
     struct char_data *sitting{};       /* Who is sitting on me? */
@@ -432,8 +432,8 @@ struct obj_data : public thing_data {
     int startbid{};
     char *auctname{};
     int posttype{};
-    ObjRef posted_to{};
-    ObjRef fellow_wall{};
+    struct obj_data *posted_to{};
+    struct obj_data *fellow_wall{};
 
     std::optional<double> gravity;
 
@@ -473,12 +473,6 @@ struct room_direction_data {
     nlohmann::json serialize();
 };
 
-enum class MoonCheck : uint8_t {
-    NoMoon = 0,
-    NotFull = 1,
-    Full = 2
-};
-
 
 /* ================== Memory Structure for room ======================= */
 struct room_data : public unit_data {
@@ -494,8 +488,6 @@ struct room_data : public unit_data {
     int dmg{};                     /* How damaged the room is            */
     int geffect{};            /* Effect of ground destruction       */
     std::optional<vnum> area;      /* Area number; empty for unassigned     */
-
-    std::optional<double> gravity;
 
     void activate();
     void deactivate();
@@ -533,15 +525,6 @@ extern std::map<room_vnum, room_data> world;
 
 
 /* char-related structures ************************************************/
-
-
-/* memory structure for characters */
-struct memory_rec_struct {
-    int32_t id;
-    struct memory_rec_struct *next;
-};
-
-typedef struct memory_rec_struct memory_rec;
 
 
 /* This structure is purely intended to be an easy way to transfer */
@@ -618,15 +601,13 @@ struct mob_special_data {
     explicit mob_special_data(const nlohmann::json& j);
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
-    memory_rec *memory{};        /* List of attackers to remember	       */
+    std::unordered_set<CharRef> memory{};        /* List of attackers to remember	       */
     int attack_type{};        /* The Attack Type Bitvector for NPC's     */
     int default_pos{POS_STANDING};        /* Default position for NPC                */
     int damnodice{};          /* The number of damage dice's	       */
     int damsizedice{};        /* The size of the damage dice's           */
     bool newitem{};             /* Check if mob has new inv item       */
 };
-
-
 
 /* Queued spell entry */
 struct queued_act {
@@ -899,7 +880,7 @@ struct char_data : public thing_data {
 
     int timer{};            /* Timer for update			*/
 
-    ObjRef sits{};      /* What am I sitting on? */
+    struct obj_data *sits{};      /* What am I sitting on? */
     struct char_data *blocks{};    /* Who am I blocking?    */
     struct char_data *blocked{};   /* Who is blocking me?    */
     struct char_data *absorbing{}; /* Who am I absorbing */
@@ -1405,8 +1386,8 @@ struct descriptor_data {
     std::list<std::string> raw_input_queue, input_queue;
     std::string output;        /* ptr to the current output buffer	*/
     std::list<std::string> history;        /* History of commands, for ! mostly.	*/
-    CharRef character{};    /* linked to char			*/
-    CharRef original{};    /* original char if switched		*/
+    struct char_data *character{};    /* linked to char			*/
+    struct char_data *original{};    /* original char if switched		*/
     struct descriptor_data *snooping{}; /* Who is this char snooping	*/
     struct descriptor_data *snoop_by{}; /* And who is snooping this char	*/
     struct descriptor_data *next{}; /* link to next descriptor		*/
@@ -1423,7 +1404,7 @@ struct descriptor_data {
     char *obj_long{};
     int obj_type{};
     int obj_weapon{};
-    ObjRef obj_point{};
+    struct obj_data *obj_point{};
     char *title{};
     double timeoutCounter{0};
     void handle_input();

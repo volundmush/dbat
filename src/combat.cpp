@@ -4645,7 +4645,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
         if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
-            remember(vict, ch);
+            vict->mob_specials.memory.insert(ch->ref());
         }
         if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getMaxPL())) / 4) {
             LASTHIT(vict) = GET_IDNUM(ch);
