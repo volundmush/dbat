@@ -267,6 +267,7 @@ struct unit_data {
     virtual ~unit_data() = default;
     vnum vn{NOTHING}; /* Where in database */
     zone_vnum zone{NOTHING};
+    
     char *name{};
     char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */
@@ -1133,7 +1134,6 @@ struct char_data : public thing_data {
     double setCurVitalDam(CharVital type, double dam);
     double getCurVitalDam(CharVital type);
 
-
     int64_t getCurHealth();
 
     int64_t getMaxHealth();
@@ -1269,7 +1269,6 @@ struct char_data : public thing_data {
     int64_t decCurLFPercent(double amt, int64_t floor = 0);
 
     void restoreLF(bool announce = true);
-
 
     bool isFullVitals();
 
