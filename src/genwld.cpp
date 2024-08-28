@@ -488,6 +488,33 @@ void room_data::clearEnvironment(int type) {
     environment.erase(type);
 }
 
+static const std::vector<std::pair<int, double>> gravityFlags = {
+    {ROOM_VEGETA, 10.0},
+};
+
+static const std::vector<std::pair<std::pair<room_vnum, room_vnum>, double>> gravityRanges = {
+    // North Kai's Planet
+    {{6100, 6138}, 10.0},
+    
+    // Personal Pocket Dimensions
+    {{18900, 19899}, 1000.0}, 
+
+    // HBTC / Room of Spirit and Time - various ranges
+    {{64000, 64006}, 100.0},  
+    {{64007, 64016}, 300.0},
+    {{64017, 64030}, 500.0},
+    {{64031, 64048}, 1000.0},
+    {{64049, 64070}, 5000.0},
+    {{64071, 64096}, 10000.0},
+    {{64097, 64097}, 1000.0},
+};
+
+static const std::unordered_set<int> moonFlags = {
+    {ROOM_EARTH, ROOM_VEGETA, ROOM_AETHER, ROOM_FRIGID}
+};
+
+
+
 double room_data::getEnvironment(int type) {
     switch(type) {
         case ENV_GRAVITY: {
@@ -496,35 +523,20 @@ double room_data::getEnvironment(int type) {
                 if(c->gravity) return c->gravity.value();
             }
 
-            // what about area rules?
-            if(std::optional<vnum> gravArea = getMatchingArea(checkGravity); gravArea) {
-                auto &a = areas[gravArea.value()];
-                return a.gravity.value();
+            // what about room flags?
+            for (const auto& [flag, grav] : gravityFlags) {
+                if(room_flags.test(flag)) return grav;
             }
 
-            // special cases here..
-            if (vn >= 64000 && vn <= 64006) {
-                return 100.0;
-            }
-            if (vn >= 64007 && vn <= 64016) {
-                return 300.0;
-            }
-            if (vn >= 64017 && vn <= 64030) {
-                return 500.0;
-            }
-            if (vn >= 64031 && vn <= 64048) {
-                return 1000.0;
-            }
-            if (vn >= 64049 && vn <= 64070) {
-                return 5000.0;
-            }
-            if (vn >= 64071 && vn <= 64096) {
-                return 10000.0;
-            }
-            if (vn == 64097) {
-                return 1000.0;
+            // check gravityRanges
+            for(const auto& [range, grav] : gravityRanges) {
+                if(vn >= range.first && vn <= range.second) {
+                    return grav;
+                }
             }
 
+            if(environment.contains(type))
+                return environment[type];
             return 1.0;
         }
 
@@ -543,10 +555,9 @@ double room_data::getEnvironment(int type) {
         case ENV_MOONLIGHT: {
             for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return -1;
             if(inside_sectors.contains(sector_type)) return -1;
-            auto check_planet = getMatchingArea(area_data::isPlanet);
-            if(!check_planet) return -1;
-            auto &area = areas[*check_planet];
-            if(!area.flags.test(AREA_MOON)) return -1;
+            bool hasMoon = false;
+            for(auto f : moonFlags) if(room_flags.test(f)) {hasMoon = true; break;}
+            if(!hasMoon) return -1;
 
             return MOON_TIMECHECK() ? 100.0 : 0.0;
         }

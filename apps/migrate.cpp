@@ -3551,7 +3551,6 @@ void migrate_grid() {
         m.children.insert(vn);
     }
 
-
     AreaDef ucdef;
     ucdef.name = "Underground Cavern";
     ucdef.parent = moon_zenith;
