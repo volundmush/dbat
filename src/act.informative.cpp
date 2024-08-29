@@ -98,7 +98,6 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum,
                           struct char_data *ch);
 // definitions
 ACMD(do_evolve) {
-
     if (!IS_ARLIAN(ch) || IS_NPC(ch)) {
         send_to_char(ch, "You are not an arlian!\r\n");
         return;
@@ -107,110 +106,66 @@ ACMD(do_evolve) {
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
-    int64_t plcost = GET_LEVEL(ch), stcost = GET_LEVEL(ch), kicost = GET_LEVEL(ch);
+    struct EvolutionCost {
+        int64_t cost;
+        const char *name;
+        CharVital vital;
+        int stat;
+    };
 
-    plcost += (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15);
-    kicost += (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22);
-    stcost += (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15);
+    // Define evolution costs
+    std::vector<EvolutionCost> evolutionCosts = {
+        {GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15), "powerlevel", CharVital::PowerLevel, GET_CON(ch)},
+        {GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22), "ki", CharVital::Ki, GET_WIS(ch)},
+        {GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15), "stamina", CharVital::Stamina, GET_CON(ch)},
+    };
 
     if (!*arg) {
         send_to_char(ch, "@D-=@YConvert Evolution Points To What?@D=-@n\r\n");
         send_to_char(ch, "@D-------------------------------------@n\r\n");
-        send_to_char(ch, "@CPowerlevel  @D: @Y%s @Wpts\r\n", add_commas(plcost).c_str());
-        send_to_char(ch, "@CKi          @D: @Y%s @Wpts\r\n", add_commas(kicost).c_str());
-        send_to_char(ch, "@CStamina     @D: @Y%s @Wpts\r\n", add_commas(stcost).c_str());
+        for (const auto& cost : evolutionCosts) {
+            send_to_char(ch, "@C%s  @D: @Y%s @Wpts\r\n", cost.name, add_commas(cost.cost).c_str());
+        }
         send_to_char(ch, "@D[@Y%s @Wpts currently@D]@n\r\n", add_commas(GET_MOLT_EXP(ch)).c_str());
         return;
-    } else if (!strcasecmp(arg, "powerlevel") || !strcasecmp(arg, "pl")) {
-        if (plcost > molt_threshold(ch)) {
-            send_to_char(ch, "You need a few more evolution levels before you can start upgrading powerlevel.\r\n");
-            return;
-        } else if (GET_MOLT_EXP(ch) < plcost) {
-            send_to_char(ch, "You do not have enough evolution experience.\r\n");
-            return;
-        } else {
-            double baseHl = ch->getBasePL();
-            double attrBonus = (1 + (GET_CON(ch) / 20));
-
-            int64_t bonusHl = 0;
-            double start_bonusHl = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
-            double soft_cap = (double)ch->calc_soft_cap();
-            double diminishing_returnsHl = (soft_cap - baseHl) / soft_cap;
-            if (diminishing_returnsHl > 0.0)
-                diminishing_returnsHl = std::max<double>(diminishing_returnsHl, 0.05);
-            else
-                diminishing_returnsHl = 0;
-
-            bonusHl = start_bonusHl * diminishing_returnsHl * 20;
-
-            if(bonusHl > (ch->getBaseST() / 10)) bonusHl = ch->getBaseST() / 10;
-
-            bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::PowerLevel)));
-            ch->gainBasePL(bonusHl);
-            GET_MOLT_EXP(ch) -= plcost;
-            send_to_char(ch,
-                         "Your body evolves to make better use of the way it is now, and you feel that your body has strengthened. @D[@RPL@D: @Y+%s@D]@n\r\n",
-                         add_commas(bonusHl).c_str());
-        }
-    } else if (!strcasecmp(arg, "ki")) {
-        if (kicost > molt_threshold(ch)) {
-            send_to_char(ch, "You need a few more evolution levels before you can start upgrading ki.\r\n");
-            return;
-        } else if (GET_MOLT_EXP(ch) < kicost) {
-            send_to_char(ch, "You do not have enough evolution experience.\r\n");
-            return;
-        } else {
-            double baseKi = ch->getBaseKI();
-            double attrBonus = (1 + (GET_WIS(ch) / 20));
-
-            int64_t bonusKi = 0;
-            double start_bonusKi = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
-            double soft_cap = (double)ch->calc_soft_cap();
-            double diminishing_returnsKi = (soft_cap - baseKi) / soft_cap;
-            if (diminishing_returnsKi > 0.0)
-                diminishing_returnsKi = std::max<double>(diminishing_returnsKi, 0.05);
-            else
-                diminishing_returnsKi = 0;
-
-            bonusKi = start_bonusKi * diminishing_returnsKi * 20;
-            bonusKi *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Ki)));
-            if(bonusKi > (ch->getBaseST() / 10)) bonusKi = ch->getBaseST() / 10;
-            ch->gainBaseKI(bonusKi);
-            GET_MOLT_EXP(ch) -= kicost;
-            send_to_char(ch,
-                         "Your body evolves to make better use of the way it is now, and you feel that your spirit has strengthened. @D[@CKi@D: @Y+%s@D]@n\r\n",
-                         add_commas(bonusKi).c_str());
-        }
-    } else if (!strcasecmp(arg, "stamina") || !strcasecmp(arg, "st")) {
-        if (stcost > molt_threshold(ch)) {
-            send_to_char(ch, "You need a few more evolution levels before you can start upgrading stamina.\r\n");
-            return;
-        } else if (GET_MOLT_EXP(ch) < stcost) {
-            send_to_char(ch, "You do not have enough evolution experience.\r\n");
-            return;
-        } else {
-            double baseSt = ch->getBaseST();
-            double attrBonus = (1 + (GET_CON(ch) / 20));
-
-            int64_t bonusSt = 0;
-            double start_bonusSt = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
-            double soft_cap = (double)ch->calc_soft_cap();
-            double diminishing_returnsSt = (soft_cap - baseSt) / soft_cap;
-            if (diminishing_returnsSt > 0.0)
-                diminishing_returnsSt = std::max<double>(diminishing_returnsSt, 0.05);
-            else
-                diminishing_returnsSt = 0;
-
-            bonusSt = start_bonusSt * diminishing_returnsSt * 20;
-            bonusSt *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Stamina)));
-            if(bonusSt > (ch->getBaseST() / 10)) bonusSt = ch->getBaseST() / 10;
-            ch->gainBaseST(bonusSt);
-            GET_MOLT_EXP(ch) -= stcost;
-            send_to_char(ch,
-                         "Your body evolves to make better use of the way it is now, and you feel that your body has more stamina. @D[@GST@D: @Y+%s@D]@n\r\n",
-                         add_commas(bonusSt).c_str());
-        }
     }
+
+    auto findCost = [&arg](const EvolutionCost& cost) {
+        return !strcasecmp(arg, cost.name) || (!strcasecmp(arg, "pl") && !strcasecmp(cost.name, "powerlevel")) || 
+               (!strcasecmp(arg, "st") && !strcasecmp(cost.name, "stamina"));
+    };
+
+    auto it = std::find_if(evolutionCosts.begin(), evolutionCosts.end(), findCost);
+
+    if(it == evolutionCosts.end()) {
+        send_to_char(ch, "Invalid evolution type. Try powerlevel, ki, or stamina.\r\n");
+        return;
+    }
+
+    if (it->cost > molt_threshold(ch)) {
+        send_to_char(ch, "You need a few more evolution levels before you can start upgrading %s.\r\n", it->name);
+        return;
+    }
+    
+    if (GET_MOLT_EXP(ch) < it->cost) {
+        send_to_char(ch, "You do not have enough evolution experience.\r\n");
+        return;
+    }
+
+    double baseVal = ch->get(it->vital, true);
+    double attrBonus = 1 + (it->stat / 20.0);
+    double startBonus = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
+    double softCap = ch->calc_soft_cap();
+    double diminishingReturns = std::max<double>((softCap - baseVal) / softCap, 0.05);
+    int64_t bonusVal = static_cast<int64_t>(startBonus * diminishingReturns * 20);
+
+    bonusVal = std::min(bonusVal, ch->getBaseST() / 10);
+    bonusVal *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(it->vital)));
+    ch->mod(it->vital, bonusVal);
+    GET_MOLT_EXP(ch) -= it->cost;
+    send_to_char(ch,
+                    "Your body evolves to make better use of the way it is now, and you feel that your %s has strengthened. @D[@C%s@D: @Y+%s@D]@n\r\n",
+                    it->name, it->name, add_commas(bonusVal).c_str());
 }
 
 static void see_plant(struct obj_data *obj, struct char_data *ch) {

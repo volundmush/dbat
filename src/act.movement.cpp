@@ -2095,7 +2095,7 @@ static void handle_fly_space(char_data *ch) {
     }
 
     if (!IS_ANDROID(ch)) {
-        ch->decCurKI(ch->getMaxKI() / 10);
+        ch->modCurVitalDam(CharVital::Ki, 0.1);
     }
     WAIT_STATE(ch, PULSE_3SEC);
     return;
