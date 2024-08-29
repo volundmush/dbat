@@ -150,11 +150,11 @@ Iterator partialMatch(
 
     for (const auto& pair : sorted_map)
     {
-        if (iequals(pair.first, match_text))
+        if (boost::iequals(pair.first, match_text))
         {
             return std::find(begin, end, pair.second);
         }
-        else if (!exact && istarts_with(pair.first, match_text))
+        else if (!exact && boost::istarts_with(pair.first, match_text))
         {
             return std::find(begin, end, pair.second);
         }

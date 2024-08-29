@@ -399,13 +399,6 @@ obj_data::obj_data(const nlohmann::json &j) : obj_data() {
     
 }
 
-std::optional<vnum> obj_data::getMatchingArea(const std::function<bool(const area_data &)>& f) {
-    if(auto room = getAbsoluteRoom(); room) {
-        return room->getMatchingArea(f);
-    }
-    return std::nullopt;
-}
-
 ObjRef obj_data::ref() {
     return ObjRef(this);
 }

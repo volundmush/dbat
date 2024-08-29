@@ -8,7 +8,6 @@
 namespace net {
     using namespace std::chrono_literals;
 
-    extern void init_epoll();
     extern void init_listeners();
     extern void prepareForCopyover();
 
@@ -69,9 +68,8 @@ namespace net {
 
     extern std::unordered_map<int, std::shared_ptr<Connection>> connections;
     extern std::unordered_map<int, DisconnectReason> deadConnections;
-    extern std::unordered_set<int> pendingOutData, pendingReads, pendingWrites;
 
-    extern int server_fd, epoll_fd;
+    extern int server_fd;
     extern void update(double deltaTime);
     extern void acceptAllIncomingConnections();
     extern void prepareForCopyover();
@@ -111,8 +109,9 @@ namespace net {
 
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
-        explicit Connection(int connId);
-        Connection(int connId, const nlohmann::json& j);
+
+        explicit Connection(const nlohmann::json& j);
+        Connection(int connID, int socket);
         ~Connection();
         void sendText(const std::string &messg, int bitflags = 0);
         void sendGMCP(const std::string &cmd, const nlohmann::json& j, int bitflags = 0);
@@ -128,6 +127,7 @@ namespace net {
         void setParser(ConnectionParser *p);
 
         int connId{};
+        int socket;
         account_data *account{};
         int64_t adminLevel{0};
 
@@ -145,11 +145,10 @@ namespace net {
         std::deque<std::string> pendingCommands;
 
         std::unique_ptr<ConnectionParser> parser;
+        bool fdClosed{false};
 
         ConnectionState state{ConnectionState::Pending};
 
-        void epollRegister();
-        void epollUnregister();
         void readFromSocket();
         void writeToSocket();
         void handleTelnet(telnet_event_t *event);

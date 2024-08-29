@@ -25,7 +25,8 @@
 #include "dbat/act.informative.h"
 #include "dbat/screen.h"
 #include "dbat/players.h"
-#include <dbat/act.other.h>
+#include "dbat/act.other.h"
+#include "dbat/area.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -1953,28 +1954,15 @@ int64_t gear_exp(struct char_data *ch, int64_t exp) {
 }
 
 int planet_check(struct char_data *ch, struct char_data *vict) {
-
-    if (ch == nullptr) {
+    if (!ch) {
         basic_mud_log("ERROR: planet_check called without ch!");
         return false;
-    } else if (vict == nullptr) {
+    } else if (!vict) {
         basic_mud_log("ERROR: planet_check called without vict!");
         return false;
-    } else {
-        if (GET_ADMLEVEL(vict) <= 0) {
-            auto chPlanet = ch->getMatchingArea(area_data::isPlanet);
-            auto victPlanet = vict->getMatchingArea(area_data::isPlanet);
-            if(chPlanet && chPlanet == victPlanet) return true;
-            else if (ch->getRoomFlag(ROOM_AL) && vict->getRoomFlag(ROOM_AL)) {
-                return true;
-            } else if (ch->getRoomFlag(ROOM_HELL) && vict->getRoomFlag(ROOM_HELL)) {
-                return true;
-            } else if (ch->getRoomFlag(ROOM_NEO) && vict->getRoomFlag(ROOM_NEO)) {
-                return true;
-            }
-        }
-        return false;
     }
+
+    return getPlanet(ch->in_room) == getPlanet(vict->in_room);
 }
 
 void purge_homing(struct char_data *ch) {
@@ -3156,20 +3144,10 @@ bool AFF_FLAGGED(struct char_data *ch, int flag) {
     return false;
 }
 
-bool PLANET_FLAGGED(struct char_data *ch, int flag) {
-    auto planet = ch->getMatchingArea(area_data::isPlanet);
-    if(!planet) return false;
-    auto &a = areas[*planet];
-    return a.flags.test(flag);
-}
-
 bool ETHER_STREAM(struct char_data *ch) {
-    return PLANET_FLAGGED(ch, AREA_ETHER);
+    return ch->getLocationEnvironment(ENV_ETHER_STREAM) > 0;
 }
 
-bool HAS_MOON(struct char_data *ch) {
-    return PLANET_FLAGGED(ch, AREA_MOON);
-}
 
 int GET_SPEEDI(struct char_data *ch) {
     return (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch) + GET_MUTBOOST(ch));

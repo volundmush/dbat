@@ -1067,12 +1067,6 @@ void char_data::remove_kaioken(int8_t announce) {
     }
 }
 
-std::optional<vnum> char_data::getMatchingArea(std::function<bool(const area_data &)> f) {
-    if(auto room = getRoom(); room) {
-        return room->getMatchingArea(f);
-    }
-    return std::nullopt;
-}
 
 int char_data::getRPP() {
     if(IS_NPC(this)) {

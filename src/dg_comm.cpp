@@ -21,6 +21,7 @@
 #include "dbat/graph.h"
 #include "dbat/spells.h"
 #include "dbat/handler.h"
+#include "dbat/area.h"
 
 /* local functions */
 void sub_write_to_char(struct char_data *ch, char *tokens[], void *otokens[], char type[]);
@@ -204,23 +205,13 @@ void send_to_zone(char *messg, zone_rnum zone) {
             write_to_output(i, "%s", messg);
 }
 
-static bool isPlanet(const area_data& a) {
-    return a.type == AreaType::CelestialBody;
-}
-
 void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
-    vnum areaVnum = NOWHERE;
-    {
-        auto &r = world[roomVnum];
-        if(auto found = r.getMatchingArea(area_data::isPlanet); found) {
-            areaVnum = *found;
-        }
-    }
+    auto planet = getPlanet(ch->in_room);
 
-    if(areaVnum == NOWHERE) {
+    if(!planet) {
         return;
     }
 
@@ -231,9 +222,8 @@ void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
         if(IN_ROOM(i->character) == NOWHERE) continue;
         if(!OUTSIDE(i->character)) continue;
 
-        auto found = i->character->getMatchingArea(area_data::isPlanet);
-        if(!found) continue;
-        if(*found != areaVnum) continue;
+        if(planet != getPlanet(i->character->in_room)) continue;
+
         if (PLR_FLAGGED(i->character, PLR_DISGUISED)) {
             write_to_output(i, "A disguised figure %s", messg);
         } else {
@@ -266,7 +256,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
-    auto planet = ch->getMatchingArea(area_data::isPlanet);
+    auto planet = getPlanet(ch->in_room);
     if(!planet && type == 0) {
         return;
     }
@@ -285,11 +275,8 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
         if (!GET_SKILL(tch, SKILL_SENSE)) {
             continue;
         }
-        if(auto p = tch->getMatchingArea(area_data::isPlanet); type == 0) {
+        if(auto p = getPlanet(tch->in_room); type == 0) {
             if (!p) {
-                continue;
-            }
-            if (*p != *planet) {
                 continue;
             }
         }
@@ -300,17 +287,21 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
             continue;
         }
 
-        if (GET_HIT(ch) < (GET_HIT(tch) * 0.001) + 1)
+        auto hitch = GET_HIT(ch);
+        auto thitch = GET_HIT(tch);
+        if (hitch < (thitch * 0.001) + 1)
             continue;
 
         if (type == 0) {
-            if (GET_MAX_HIT(ch) > GET_MAX_HIT(tch)) {
+            auto maxch = GET_MAX_HIT(ch);
+            auto maxtch = GET_MAX_HIT(tch);
+            if (maxch > maxtch) {
                 write_to_output(i, "%s who is stronger than you. They are nearby.\r\n", messg);
-            } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(tch) * .9) {
+            } else if (maxch >= maxtch * .9) {
                 write_to_output(i, "%s who is near your strength. They are nearby.\r\n", messg);
-            } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(tch) * .6) {
+            } else if (maxch >= maxtch * .6) {
                 write_to_output(i, "%s who is a good bit weaker than you. They are nearby.\r\n", messg);
-            } else if (GET_MAX_HIT(ch) >= GET_MAX_HIT(tch) * .4) {
+            } else if (maxch >= maxtch * .4) {
                 write_to_output(i, "%s who is a lot weaker than you. They are nearby.\r\n", messg);
             }
             if (readIntro(tch, ch) == 1) {
@@ -319,54 +310,48 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
                 write_to_output(i, "@YYou recognise this signal, but don't seem to know their name.@n\r\n");
             }
         } else if (planet_check(ch, tch)) {
-            std::string blah = "UNKNOWN";
-            {
-                auto av = tch->getMatchingArea([&](auto &a) {return true;});
-                if(av) {
-                    blah = areas[av.value()].name;
-                }
-            }
             char power[MAX_INPUT_LENGTH];
             char align[MAX_INPUT_LENGTH];
-            if (GET_HIT(ch) > GET_HIT(tch) * 10) {
+            if (hitch > thitch * 10) {
                 sprintf(power, ", who is @Runbelievably stronger@Y than you");
-            } else if (GET_HIT(ch) > GET_HIT(tch) * 5) {
+            } else if (hitch > thitch * 5) {
                 sprintf(power, ", who is much @Rstronger@Y than you");
-            } else if (GET_HIT(ch) > GET_HIT(tch) * 2) {
+            } else if (hitch > thitch * 2) {
                 sprintf(power, ", who is more than twice as @Rstrong@Y as you");
-            } else if (GET_HIT(ch) > GET_HIT(tch)) {
+            } else if (hitch > thitch) {
                 sprintf(power, ", who is somewhat @mstronger@Y than you");
-            } else if (GET_HIT(ch) * 10 < GET_HIT(tch)) {
+            } else if (hitch * 10 < thitch) {
                 sprintf(power, ", who is @Munbelievably weaker@Y than you");
-            } else if (GET_HIT(ch) * 5 < GET_HIT(tch)) {
+            } else if (hitch * 5 < thitch) {
                 sprintf(power, ", who is much @Mweaker@Y than you");
-            } else if (GET_HIT(ch) * 2 < GET_HIT(tch)) {
+            } else if (hitch * 2 < thitch) {
                 sprintf(power, ", who is more than twice as @Mweak@Y as you");
-            } else if (GET_HIT(ch) < GET_HIT(tch)) {
+            } else if (hitch < thitch) {
                 sprintf(power, ", who is somewhat @Wweaker@Y than you");
             } else {
                 sprintf(power, ", who is close to @Cequal@Y with you");
             }
-            if (GET_ALIGNMENT(ch) >= 1000) {
+            auto al = GET_ALIGNMENT(ch);
+            if (al >= 1000) {
                 sprintf(align, ", with a @wsaintly@Y aura,");
-            } else if (GET_ALIGNMENT(ch) >= 500) {
+            } else if (al >= 500) {
                 sprintf(align, ", with a very @Cgood@Y aura,");
-            } else if (GET_ALIGNMENT(ch) >= 200) {
+            } else if (al >= 200) {
                 sprintf(align, ", with a @cgood@Y aura,");
-            } else if (GET_ALIGNMENT(ch) > -100) {
+            } else if (al > -100) {
                 sprintf(align, ", with a near @Wneutral@Y aura,");
-            } else if (GET_ALIGNMENT(ch) > -200) {
+            } else if (al > -200) {
                 sprintf(align, ", with a sorta @revil@Y aura,");
-            } else if (GET_ALIGNMENT(ch) > -500) {
+            } else if (al > -500) {
                 sprintf(align, ", with an @revil@Y aura,");
-            } else if (GET_ALIGNMENT(ch) > -900) {
+            } else if (al > -900) {
                 sprintf(align, ", with a @rvery evil@Y aura,");
             } else {
                 sprintf(align, ", with a @rd@De@Wv@wil@Wi@Ds@rh@Y aura,");
             }
             if (strstr(messg, "land"))
                 write_to_output(i, "@YYou sense %s%s%s %s! They appear to have landed at...@G%s@n\r\n",
-                                readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, blah.c_str());
+                                readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg, sense_location(ch));
             else
                 write_to_output(i, "@YYou sense %s%s%s %s!@n\r\n",
                                 readIntro(tch, ch) == 1 ? get_i_name(tch, ch) : "someone", power, align, messg);
@@ -378,11 +363,14 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
     if (!messg || !*messg)
         return;
 
-    auto planet = ch->getMatchingArea(area_data::isPlanet);
+    auto planet = getPlanet(ch->in_room);
     if(!planet && type == 0) {
         return;
     }
 
+    auto pl = ch->getPL();
+    auto senseLoc = sense_location(ch);
+    
     for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
@@ -392,11 +380,8 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
         if (tch == ch) continue;
         if(!AWAKE(tch)) continue;
 
-        if(auto p = tch->getMatchingArea(area_data::isPlanet); type == 0) {
+        if(auto p = getPlanet(tch->in_room); type == 0) {
             if (!p) {
-                continue;
-            }
-            if (*p != *planet) {
                 continue;
             }
         }
@@ -409,40 +394,33 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
         if (!obj) continue;
         if (IN_ROOM(ch) == IN_ROOM(tch)) continue;
 
+        auto scoutVal = obj->value[VAL_WORN_SCOUTER];
         if (type == 0) {
             if (num == 1) {
-                auto obj = GET_EQ(tch, WEAR_EYE);
-                if (ch->getPL() >= obj->value[VAL_WORN_SCOUTER]) {
+                if (pl >= scoutVal) {
                     write_to_output(i, "@D[@GBlip@D]@r Rising Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
                     write_to_output(i, "%s@n", messg);
                 }
             } else {
-                if (ch->getPL() >= obj->value[VAL_WORN_SCOUTER]) {
+                if (pl >= scoutVal) {
                     write_to_output(i, "@D[@GBlip@D]@r Nearby Powerlevel Detected@D:@Y ??????????\r\n");
                 } else {
                     write_to_output(i, "%s\r\n", messg);
                 }
             }
         } else if (type == 1 && GET_SKILL(tch, SKILL_SENSE) < 20) {
-            if (ch->getPL() >= obj->value[VAL_WORN_SCOUTER]) {
+            if (pl >= scoutVal) {
                 write_to_output(i, "@D[@GBlip@D]@w %s. @RPL@D:@Y ??????????\r\n", messg);
             } else {
-                write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(ch->getPL()).c_str());
+                write_to_output(i, "@D[Blip@D]@w %s. @RPL@D:@Y %s@n\r\n\r\n", messg, add_commas(pl).c_str());
             }
         } else if (type == 2 && GET_SKILL(tch, SKILL_SENSE) < 20) {
-            std::string blah = "UNKNOWN";
-            {
-                auto av = tch->getMatchingArea([&](auto &a) {return true;});
-                if(av) {
-                    blah = areas[av.value()].name;
-                }
-            }
-            if (ch->getPL() >= obj->value[VAL_WORN_SCOUTER]) {
-                write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, blah.c_str());
+            if (pl >= scoutVal) {
+                write_to_output(i, "@D[@GBlip@D]@w %s at... @G%s. @RPL@D:@Y ??????????\r\n", messg, senseLoc);
             } else {
-                write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, blah.c_str(),
-                                add_commas(ch->getPL()).c_str());
+                write_to_output(i, "@D[Blip@D]@w %s at... @G%s. @RPL@D:@Y %s@n\r\n\r\n", messg, senseLoc,
+                                add_commas(pl).c_str());
             }
         }
     }
@@ -451,30 +429,30 @@ void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
 void send_to_worlds(struct char_data *ch) {
     char message[MAX_INPUT_LENGTH];
 
-    if (GET_MAX_HIT(ch) > 2000000000) {
+    auto maxh = GET_MAX_HIT(ch);
+
+    if (maxh > 2000000000) {
         sprintf(message, "@RThe whole planet begins to quake violently as if the world is ending!@n\r\n");
-    } else if (GET_MAX_HIT(ch) > 1000000000) {
+    } else if (maxh > 1000000000) {
         sprintf(message, "@RThe whole planet begins to quake violently with a thunderous roar!@n\r\n");
-    } else if (GET_MAX_HIT(ch) > 500000000) {
+    } else if (maxh > 500000000) {
         sprintf(message, "@RThe whole planet begins to quake violently!@n\r\n");
-    } else if (GET_MAX_HIT(ch) > 100000000) {
+    } else if (maxh > 100000000) {
         sprintf(message, "@RThe whole planet rumbles and shakes!@n\r\n");
-    } else if (GET_MAX_HIT(ch) > 50000000) {
+    } else if (maxh > 50000000) {
         sprintf(message, "@RThe whole planet rumbles faintly!@n\r\n");
     } else {
         return;
     }
 
-    auto p = ch->getMatchingArea(area_data::isPlanet);
+    auto p = getPlanet(ch->in_room);
     if(!p) return;
 
     for (auto i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING) {
             continue;
         }
-        auto op = i->character->getMatchingArea(area_data::isPlanet);
-        if(!op) continue;
-        if(op.value() != p.value()) continue;
+        if(p != getPlanet(i->character->in_room)) continue;
         send_to_char(i->character, "%s", message);
     }
 }

@@ -13,6 +13,7 @@
 #include "dbat/shop.h"
 #include "dbat/dg_olc.h"
 #include "dbat/constants.h"
+#include "dbat/area.h"
 
 
 /*
@@ -329,30 +330,6 @@ room_data::~room_data() {
     }
 }
 
-std::optional<vnum> room_data::getMatchingArea(std::function<bool(const area_data &)> f) {
-    std::optional<vnum> parent = area;
-    while(parent) {
-        auto &a = areas[parent.value()];
-        if(f(a)) return parent;
-        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.extraVn) {
-            // we need to find the a.objectVnum in the world by scanning object_list...
-            if (auto obj = get_obj_num(a.extraVn.value()); obj) {
-                if(world.contains(obj->in_room)) {
-                    auto &r = world[obj->in_room];
-                    return r.getMatchingArea(f);
-                }
-            }
-        }
-        parent = a.parent;
-    }
-    return std::nullopt;
-}
-
-static bool checkGravity(const area_data &a) {
-    return a.gravity.has_value();
-}
-
-
 std::string room_data::getUID(bool active) {
     return fmt::format("#R{}:{}{}", vn, generation, active ? "" : "!");
 }
@@ -402,14 +379,6 @@ struct room_data* room_direction_data::getDestination() {
     auto found = world.find(to_room);
     if(found != world.end()) return &found->second;
     return nullptr;
-}
-
-
-std::optional<room_vnum> room_data::getLaunchDestination() {
-    if(!area) return NOWHERE;
-    if(!areas.contains(area.value())) return NOWHERE;
-    auto &a = areas[area.value()];
-    return a.getLaunchDestination();
 }
 
 std::vector<CharRef> room_data::getPeople() {
@@ -488,10 +457,6 @@ void room_data::clearEnvironment(int type) {
     environment.erase(type);
 }
 
-static const std::vector<std::pair<int, double>> gravityFlags = {
-    {ROOM_VEGETA, 10.0},
-};
-
 static const std::vector<std::pair<std::pair<room_vnum, room_vnum>, double>> gravityRanges = {
     // North Kai's Planet
     {{6100, 6138}, 10.0},
@@ -509,23 +474,13 @@ static const std::vector<std::pair<std::pair<room_vnum, room_vnum>, double>> gra
     {{64097, 64097}, 1000.0},
 };
 
-static const std::unordered_set<int> moonFlags = {
-    {ROOM_EARTH, ROOM_VEGETA, ROOM_AETHER, ROOM_FRIGID}
-};
-
-
-
 double room_data::getEnvironment(int type) {
+    auto planet = getPlanet(vn);
     switch(type) {
         case ENV_GRAVITY: {
             // check for a gravity generator...
             for(auto c = contents; c; c = c->next_content) {
                 if(c->gravity) return c->gravity.value();
-            }
-
-            // what about room flags?
-            for (const auto& [flag, grav] : gravityFlags) {
-                if(room_flags.test(flag)) return grav;
             }
 
             // check gravityRanges
@@ -537,6 +492,13 @@ double room_data::getEnvironment(int type) {
 
             if(environment.contains(type))
                 return environment[type];
+
+            if(planet) {
+                if(auto a = getPlanetEnvironment(planet, type); a) {
+                    return a.value();
+                }
+            }
+            
             return 1.0;
         }
 
@@ -553,13 +515,14 @@ double room_data::getEnvironment(int type) {
             }
             break;
         case ENV_MOONLIGHT: {
+            if(!planet) return -1;
             for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return -1;
             if(inside_sectors.contains(sector_type)) return -1;
-            bool hasMoon = false;
-            for(auto f : moonFlags) if(room_flags.test(f)) {hasMoon = true; break;}
-            if(!hasMoon) return -1;
-
-            return MOON_TIMECHECK() ? 100.0 : 0.0;
+            return getPlanetEnvironment(planet, type).value();
+        }
+        case ENV_ETHER_STREAM: {
+            if(!planet) return 0.0;
+            return getPlanetEnvironment(planet, type).value();
         }
     }
     if(environment.contains(type)) return environment[type];

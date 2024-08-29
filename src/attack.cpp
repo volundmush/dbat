@@ -1066,6 +1066,7 @@ namespace atk {
             handle_cooldown(user, 7);
         else
             handle_cooldown(user, 9);
+        return {};
     }
 
     void Slam::announceObject() {

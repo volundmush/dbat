@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <memory>
 #include <regex>
-#include <sys/epoll.h>
 #include <cppcodec/base64_rfc4648.hpp>
 
 #include "dbat/net.h"
@@ -27,10 +26,16 @@
 namespace net {
     std::unordered_map<int, std::shared_ptr<Connection>> connections;
     std::unordered_map<int, DisconnectReason> deadConnections;
-    std::unordered_set<int> pendingOutData, pendingReads, pendingWrites;
+
+    static int nextConnID() {
+        int checking = 1;
+        while(connections.contains(checking)) {
+            checking++;
+        }
+        return checking;
+    };
 
     int server_fd = -1;
-    int epoll_fd = -1;
 
     using base64 = cppcodec::base64_rfc4648;
 
@@ -235,6 +240,10 @@ namespace net {
     void Connection::onNetworkDisconnected() {
         state = ConnectionState::Dead;
         deadConnections[connId] = DisconnectReason::ConnectionLost;
+        if(!fdClosed) {
+            ::close(socket);
+            fdClosed = true;
+        }
     }
 
     static const telnet_telopt_t my_telopts[] = {
@@ -466,7 +475,6 @@ namespace net {
                 break;
             case TELNET_EV_SEND: {
                 outbuf.emplace_back(std::string(event->data.buffer, event->data.size));
-                pendingOutData.insert(connId);
             }
                 break;
             case TELNET_EV_IAC:
@@ -512,18 +520,19 @@ namespace net {
         }
     }
 
-    Connection::Connection(int connId) : connId(connId) {
+    Connection::Connection(int connId, int socket) : connId(connId), socket(socket) {
         teldata = telnet_init(my_telopts, &telnet_handler, TELNET_FLAG_ROLE_SERVER, this);
     }
 
-    Connection::Connection(int connId, const nlohmann::json &j) : Connection(connId) {
+    Connection::Connection(const nlohmann::json &j) {
+        teldata = telnet_init(my_telopts, &telnet_handler, TELNET_FLAG_ROLE_SERVER, this);
         deserialize(j);
-        epollRegister();
     }
 
     nlohmann::json Connection::serialize() {
         nlohmann::json j;
 
+        j["socket"] = socket;
         j["connId"] = connId;
         j["capabilities"] = capabilities.serialize();
         if(account) j["account"] = account->vn;
@@ -580,6 +589,7 @@ namespace net {
 
     void Connection::deserialize(const nlohmann::json &j) {
         connId = j.at("connId").get<int>();
+        socket = j.at("socket").get<int>();
         capabilities.deserialize(j.at("capabilities"));
         if (j.contains("account")) {
             auto &acc = accounts[j.at("account").get<int>()];
@@ -676,7 +686,8 @@ namespace net {
         // Free the telnet data.
         telnet_free(teldata);
         // Close the descriptor.
-        ::close(connId);
+        if(!fdClosed)
+            ::close(socket);
     }
 
     void Connection::cleanup(DisconnectReason reason) {
@@ -794,14 +805,6 @@ namespace net {
         return listen_fd;
     }
 
-    void init_epoll() {
-        // Let's initialize the epoll
-        epoll_fd = epoll_create1(0);
-        if (epoll_fd == -1) {
-            perror("epoll_create1");
-            exit(EXIT_FAILURE);
-        }
-    }
 
     void init_listeners() {
         // server_fd might already be set to a proper port by the copyover process.
@@ -812,72 +815,65 @@ namespace net {
         }
     }
 
-    void Connection::epollRegister() {
-        epoll_event ev{};
-        ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
-        ev.data.fd = connId;
-
-        if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, connId, &ev) == -1) {
-            perror("epoll_ctl: connection fd");
-            exit(EXIT_FAILURE);
-        }
-    }
-
-    void Connection::epollUnregister() {
-        if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, connId, NULL) == -1) {
-            perror("epoll_ctl: EPOLL_CTL_DEL");
-        }
-    }
-
     void Connection::readFromSocket() {
-        if(state == ConnectionState::Dead) {
+        if(state == ConnectionState::Dead || fdClosed) {
             return;
         }
 
         std::vector<char> buffer(4096);
 
         while (true) {
-            ssize_t bytesRead = read(connId, buffer.data(), buffer.size());
+            ssize_t bytesRead = read(socket, buffer.data(), buffer.size());
             if (bytesRead > 0) {
                 // Successfully read data, process it
                 telnet_recv(teldata, buffer.data(), bytesRead);
             } else if (bytesRead == 0) {
                 // Connection closed by the client
-                void onNetworkDisconnected();
+                basic_mud_log("Connection %d fd %d closed by client.", connId, socket);
+                onNetworkDisconnected();
                 break;
             } else {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
                     // No more data available right now, would block
                     break;
                 } else if(errno == ETIMEDOUT) {
-                    void onNetworkTimedOut();
+                    // Connection timed out
+                    basic_mud_log("Connection %d fd %d timed out.", connId, socket);
+                    onNetworkDisconnected();
+                    break;
                 } else {
                     // An error occurred, log or handle it
-                    std::cerr << "Read error: " << strerror(errno) << std::endl;
-                    // Handle error if needed
+                    basic_mud_log("Connection %d fd %d read error: %s", connId, socket, strerror(errno));
+                    onNetworkDisconnected();
                     break;
                 }
             }
         }
     }
 
+
     void Connection::writeToSocket() {
+        if (state == ConnectionState::Dead || fdClosed) {
+            return;
+        }
+
         // Iterate over the buffer's data sequence and attempt to send it
         while (!outbuf.empty()) {
             // Access the front data sequence in the buffer.
             auto &sbuf = outbuf.front();
             int remaining = sbuf.data.size() - sbuf.sent;
 
-            if(remaining > 0) {
+            if (remaining > 0) {
                 // Attempt to send the data
-                ssize_t bytesSent = send(connId, sbuf.data.c_str() + sbuf.sent, remaining, 0);
+                ssize_t bytesSent = send(socket, sbuf.data.c_str() + sbuf.sent, remaining, 0);
 
                 if (bytesSent == -1) {
-                    if(errno == EAGAIN || errno == EWOULDBLOCK) {
+                    if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         // Socket is not ready to send more data; stop and wait for EPOLLOUT
-                        pendingWrites.erase(connId);
                         break;
                     } else {
+                        // An error occurred, log or handle it
+                        std::cerr << "Send error: " << strerror(errno) << std::endl;
                         onNetworkDisconnected();
                         break;
                     }
@@ -888,18 +884,14 @@ namespace net {
                 remaining -= bytesSent;
             }
 
-            if(remaining == 0) {
-                if(sbuf.bitflags & SendBuffer::BF_CLOSE_AFTER_SEND) {
+            if (remaining == 0) {
+                if (sbuf.bitflags & SendBuffer::BF_CLOSE_AFTER_SEND) {
                     outbuf.clear();
                     close();
                 } else {
                     outbuf.pop_front();
                 }
             }
-        }
-
-        if (outbuf.empty()) {
-            pendingOutData.erase(connId);
         }
     }
 
@@ -943,8 +935,9 @@ namespace net {
         }
 
         // Create a new Connection object and add it to the map
-        auto conn = std::make_shared<Connection>(conn_fd);
-        connections[conn_fd] = conn;
+        auto id = nextConnID();
+        auto conn = std::make_shared<Connection>(id, conn_fd);
+        connections[id] = conn;
 
         char ip_str[INET6_ADDRSTRLEN]; // Enough space to hold both IPv4 and IPv6 addresses
 
@@ -960,7 +953,6 @@ namespace net {
         }
         conn->capabilities.hostAddress = ip_str;
 
-        conn->epollRegister();
         conn->state = ConnectionState::Pending;
         conn->sendTelnetNegotiations();
     }
@@ -984,45 +976,7 @@ namespace net {
     }
 
     void update(double deltaTime) {
-        if(connections.empty()) return;
-
-        std::vector<epoll_event> events(connections.size());
-
-        int nfds = epoll_wait(epoll_fd, events.data(), events.size(), 0);
-        if (nfds == -1) {
-            perror("epoll_wait");
-            exit(EXIT_FAILURE);
-        }
-
-        for(int i = 0; i < nfds; i++) {
-            auto &ev = events[i];
-            int fd = ev.data.fd;
-
-            if(ev.events & EPOLLERR) {
-                // Handle error condition
-                int err = 0;
-                socklen_t len = sizeof(err);
-                if (getsockopt(ev.data.fd, SOL_SOCKET, SO_ERROR, &err, &len) == 0) {
-                    basic_mud_log("Error on fd %d: %s\n", fd, strerror(err));
-                } else {
-                    basic_mud_log("getsockopt failed on fd %d", fd);
-                }
-
-                // Close the file descriptor and remove it from your connections
-                deadConnections[ev.data.fd] = DisconnectReason::ConnectionLost;
-
-                // Skip further processing for this fd
-                continue;
-            }
-
-            if(ev.events & EPOLLIN) {
-                pendingReads.insert(fd);
-            }
-
-            if(ev.events & EPOLLOUT) {
-                pendingWrites.insert(fd);
-            }
-        }
+        
     }
 
     void prepareForCopyover() {
@@ -1044,14 +998,17 @@ namespace net {
         }
 
         // Ensure all pending data is sent out.
-        while(!pendingOutData.empty()) {
-            auto pending = pendingOutData;
-            for(auto &connId : pending) {
-                auto conn = connections.at(connId);
+        auto start = std::chrono::steady_clock::now();
+    
+        while(true) {
+            for(auto &[id, conn] : connections) {
                 conn->writeToSocket();
             }
-            if(!pendingOutData.empty())
-                std::this_thread::sleep_for(std::chrono::milliseconds(15));
+
+            // Check if 200 milliseconds have passed
+            if (std::chrono::steady_clock::now() - start > std::chrono::milliseconds(200)) {
+                break;
+            }
         }
 
         // Close the pending and any remaining connections.

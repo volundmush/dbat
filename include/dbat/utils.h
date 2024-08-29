@@ -943,9 +943,7 @@ extern void WAIT_STATE(struct char_data *ch, double timeToWait);
 #define MOON_TIME               (time_info.hours >= 21 || time_info.hours <= 4)
 #define MOON_DATE               (time_info.day >= 20 && time_info.day <= 23)
 extern bool MOON_TIMECHECK();
-bool PLANET_FLAGGED(struct char_data *ch, int flag);
 bool ETHER_STREAM(struct char_data *ch);
-bool HAS_MOON(struct char_data *ch);
 #define HAS_ARMS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LARM) || \
                                  MOB_FLAGGED(ch, MOB_RARM))) || GET_LIMBCOND(ch, 0) > 0 || \
                                  GET_LIMBCOND(ch, 1) > 0 || \
@@ -1234,7 +1232,7 @@ void send_to_moon(fmt::string_view format, Args&&... args) {
 
         for(auto i = descriptor_list; i; i = i->next) {
             if(STATE(i) != CON_PLAYING || !(i->character)) continue;
-            if (!AWAKE(i->character) || !HAS_MOON(i->character)) continue;
+            if (!AWAKE(i->character) || i->character->getLocationEnvironment(ENV_MOONLIGHT) <= 0.0) continue;
             i->output += formatted_string;
         }
     }

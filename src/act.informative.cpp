@@ -31,6 +31,7 @@
 #include "dbat/account.h"
 #include "dbat/improved-edit.h"
 #include "dbat/transformation.h"
+#include "dbat/area.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
@@ -3123,9 +3124,8 @@ static void display_room_info(struct room_data *rm, struct char_data *ch) {
 
     send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->name);
 
-    if (auto planet = ch->getMatchingArea(area_data::isPlanet); planet) {
-        auto &a = areas[planet.value()];
-        send_to_char(ch, "@wPlanet: @G%s@n\r\n", a.name.c_str());
+    if (auto planet = getPlanet(ch->in_room); planet) {
+        send_to_char(ch, "@wPlanet: @G%s@n\r\n", getPlanetColorName(planet).c_str());
     } else {
         display_dimension_info(rm, ch);
     }
@@ -3162,10 +3162,6 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch) {
         for (auto t = TRIGGERS(SCRIPT(rm)); t; t = t->next)
             send_to_char(ch, " %d", GET_TRIG_VNUM(t));
         send_to_char(ch, "@D] ");
-    }
-
-    if (rm->area) {
-        //display_area_info(rm, ch);
     }
 
     double grav = rm->getEnvironment(ENV_GRAVITY);
@@ -5746,7 +5742,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
     struct obj_data *k;
     struct descriptor_data *d;
     int num = 0, num2 = 0, found = 0;
-    std::optional<vnum> planet;
+    int planet;
 
     if (!*arg) {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
@@ -5756,9 +5752,9 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
         for (d = descriptor_list; d; d = d->next)
             if (IS_PLAYING(d)) {
                 if (IN_ROOM(d->character) != NOWHERE) {
-                    planet = d->character->getMatchingArea(area_data::isPlanet);
+                    planet = getPlanet(d->character->in_room);
                 } else {
-                    planet.reset();
+                    planet = 0;
                 }
                 i = (d->original ? d->original : d->character);
                 if (i && CAN_SEE(ch, i) && (IN_ROOM(i) != NOWHERE)) {
@@ -5767,11 +5763,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                                      GET_NAME(i), d->character->getRoomVnum(),
                                      d->character->getRoom()->name, GET_NAME(d->character));
                     else {
-                        std::string locName = "UNKNOWN";
-                        if(planet) {
-                            auto &a = areas[planet.value()];
-                            locName = a.name;
-                        }
+                        std::string locName = getPlanetName(planet);
                         send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->getRoomVnum(),
                                      locName.c_str(), i->getRoom()->name);
                     }

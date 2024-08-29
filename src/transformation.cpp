@@ -711,10 +711,10 @@ namespace trans {
 
         // Lycanthrope
         {FormID::Lycanthrope, [](struct char_data *ch) {
-            return (ch->race == RaceID::Konatsu && MOON_DATE && HAS_MOON(ch) && (time_info.hours >= 21 || time_info.hours >= 4) && OUTSIDE(ch));
+            return (ch->race == RaceID::Konatsu && ch->getLocationEnvironment(ENV_MOONLIGHT));
             }},
         {FormID::AlphaLycanthrope, [](struct char_data *ch) {
-            return (MOON_DATE && HAS_MOON(ch) && (time_info.hours >= 21 || time_info.hours >= 4) && OUTSIDE(ch) && getMasteryTier(ch, FormID::Lycanthrope) >=4);
+            return (ch->getLocationEnvironment(ENV_MOONLIGHT) && getMasteryTier(ch, FormID::Lycanthrope) >=4);
             }},
 
         // Techniques

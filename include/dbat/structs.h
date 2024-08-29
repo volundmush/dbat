@@ -16,34 +16,6 @@
 * Structures                                                          *
 **********************************************************************/
 
-
-enum class AreaType {
-    Dimension = 0,
-    CelestialBody = 1,
-    Region = 2,
-    Structure = 3,
-    Vehicle = 4
-};
-
-struct area_data {
-    area_data() = default;
-    explicit area_data(const nlohmann::json &j);
-    vnum vn{NOTHING}; /* virtual number of this area		*/
-    std::string name; /* name of this area			*/
-    std::unordered_set<room_vnum> rooms; /* rooms in this area			*/
-    std::unordered_set<vnum> children; /* child areas				*/
-    std::optional<double> gravity; /* gravity in this area			*/
-    std::optional<vnum> parent; /* parent area				*/
-    AreaType type{AreaType::Dimension}; /* type of area				*/
-    std::optional<vnum> extraVn; /* vehicle or house outer object vnum, orbit for CelBody */
-    bool ether{false}; /* is this area etheric?			*/
-    std::bitset<NUM_AREA_FLAGS> flags; /* area flags				*/
-    nlohmann::json serialize();
-    static vnum getNextID();
-    static bool isPlanet(const area_data &area);
-    std::optional<room_vnum> getLaunchDestination();
-};
-
 /* Extra description: used in objects, mobiles, and rooms */
 struct extra_descr_data {
     char *keyword;                 /* Keyword in look/examine          */
@@ -438,8 +410,6 @@ struct obj_data : public thing_data {
 
     std::optional<double> gravity;
 
-    std::optional<vnum> getMatchingArea(const std::function<bool(const area_data&)>& f);
-
     bool isProvidingLight();
     double currentGravity();
 };
@@ -488,8 +458,7 @@ struct room_data : public unit_data {
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
     int geffect{};            /* Effect of ground destruction       */
-    std::optional<vnum> area;      /* Area number; empty for unassigned     */
-
+    
     void activate();
     void deactivate();
 
@@ -500,7 +469,6 @@ struct room_data : public unit_data {
     nlohmann::json serialize();
     void deserializeContents(const nlohmann::json& j, bool isActive);
 
-    std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
     std::string getUID(bool active = true) override;
     bool isActive() override;
 
@@ -741,7 +709,7 @@ struct char_data : public thing_data {
     void deserializePlayer(const nlohmann::json& j, bool isActive);
     void activate();
     void deactivate();
-    std::optional<vnum> getMatchingArea(std::function<bool(const area_data&)> f);
+
     void login();
 
     nlohmann::json serializeLocation();

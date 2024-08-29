@@ -54,7 +54,6 @@ std::shared_ptr<spdlog::logger> logger;
 struct config_data config_info; /* Game configuration list.    */
 
 std::map<room_vnum, room_data> world;    /* array of rooms		 */
-std::map<vnum, area_data> areas;    /* area information		 */
 
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
@@ -489,30 +488,6 @@ static void db_load_npc_prototypes(const std::filesystem::path& loc) {
     }
 }
 
-static void db_load_areas(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "areas.json")) {
-        auto id = j["vn"].get<int64_t>();
-        auto a = areas.emplace(id, j);
-
-        for(auto &r : a.first->second.rooms) {
-            auto room = world.find(r);
-            if(room != world.end()) {
-                room->second.area = id;
-            }
-        }
-    }
-
-
-    for(auto &[vn, a] : areas) {
-        if(a.parent) {
-            auto parent = areas.find(a.parent.value());
-            if(parent != areas.end()) {
-                parent->second.children.insert(vn);
-            }
-        }
-    }
-}
-
 static std::vector<std::filesystem::path> getDumpFiles() {
     std::filesystem::path dir = "dumps"; // Change to your directory
     std::vector<std::filesystem::path> directories;
@@ -563,9 +538,6 @@ void boot_db_world() {
 
     basic_mud_log("Loading exits.");
     db_load_exits(latest);
-
-    basic_mud_log("Loading areas.");
-    db_load_areas(latest);
 
     basic_mud_log("Loading global data...");
     db_load_globaldata(latest);

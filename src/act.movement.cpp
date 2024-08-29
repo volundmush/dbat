@@ -23,6 +23,7 @@
 #include "dbat/local_limits.h"
 #include "dbat/constants.h"
 #include "dbat/act.informative.h"
+#include "dbat/area.h"
 
 /* local functions */
 static void handle_fall(struct char_data *ch);
@@ -148,56 +149,55 @@ ACMD(do_carry) {
             carry_drop(ch, 1);
         }
         return;
-    } else { /* So not carrying already. */
-        one_argument(argument, arg);
+    }
 
-        if (!*arg) {
-            send_to_char(ch, "You want to carry who?\r\n");
-            return;
+    one_argument(argument, arg);
+
+    if (!*arg) {
+        send_to_char(ch, "You want to carry who?\r\n");
+        return;
+    }
+
+    if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
+        send_to_char(ch, "That person isn't here.\r\n");
+        return;
+    }
+
+    if (IS_NPC(vict)) {
+        send_to_char(ch, "There's no point in carrying them.\r\n");
+        return;
+    }
+
+    if (CARRIED_BY(vict) != nullptr) {
+        send_to_char(ch, "Someone is already carrying them!\r\n");
+        return;
+    }
+
+    if (GET_POS(vict) > POS_SLEEPING) {
+        send_to_char(ch, "They are not unconcious.\r\n");
+        return;
+    }
+
+    if (vict->getTotalWeight() > CAN_CARRY_W(ch)) {
+        act("@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n",
+            true, ch, nullptr, vict, TO_CHAR);
+        act("@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", true, ch,
+            nullptr, vict, TO_NOTVICT);
+        WAIT_STATE(ch, PULSE_1SEC);
+        return;
+    } else { /* Let's carry that mofo! */
+        act("@WYou pick up @C$N@W and put $M over your shoulder.@n", true, ch, nullptr, vict, TO_CHAR);
+        act("@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true, ch, nullptr, vict, TO_NOTVICT);
+        if (SITS(vict)) {
+            struct obj_data *chair = SITS(vict);
+            SITTING(chair) = nullptr;
+            SITS(vict) = nullptr;
         }
-
-        if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_ROOM))) {
-            send_to_char(ch, "That person isn't here.\r\n");
-            return;
-        }
-
-        if (IS_NPC(vict)) {
-            send_to_char(ch, "There's no point in carrying them.\r\n");
-            return;
-        }
-
-        if (CARRIED_BY(vict) != nullptr) {
-            send_to_char(ch, "Someone is already carrying them!\r\n");
-            return;
-        }
-
-        if (GET_POS(vict) > POS_SLEEPING) {
-            send_to_char(ch, "They are not unconcious.\r\n");
-            return;
-        }
-
-        if (vict->getTotalWeight() > CAN_CARRY_W(ch)) {
-            act("@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n",
-                true, ch, nullptr, vict, TO_CHAR);
-            act("@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", true, ch,
-                nullptr, vict, TO_NOTVICT);
-            WAIT_STATE(ch, PULSE_1SEC);
-            return;
-        } else { /* Let's carry that mofo! */
-            act("@WYou pick up @C$N@W and put $M over your shoulder.@n", true, ch, nullptr, vict, TO_CHAR);
-            act("@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true, ch, nullptr, vict, TO_NOTVICT);
-            if (SITS(vict)) {
-                struct obj_data *chair = SITS(vict);
-                SITTING(chair) = nullptr;
-                SITS(vict) = nullptr;
-            }
-            CARRYING(ch) = vict;
-            CARRIED_BY(vict) = ch;
-            WAIT_STATE(ch, PULSE_1SEC);
-            return;
-        }
-
-    } /* End new carry target. */
+        CARRYING(ch) = vict;
+        CARRIED_BY(vict) = ch;
+        WAIT_STATE(ch, PULSE_1SEC);
+        return;
+    }
 }
 
 /* Handles dropping someone you are carrying. */
@@ -234,118 +234,13 @@ void carry_drop(struct char_data *ch, int type) {
     CARRIED_BY(vict) = nullptr;
 }
 
-std::optional<room_vnum> land_location(char *arg, std::unordered_set<room_vnum>& rooms) {
-    std::vector<std::pair<room_vnum, std::string>> names;
-    for(auto r : rooms) {
-        auto room = world.find(r);
-        if(room == world.end()) continue;
-        names.emplace_back(r, processColors(room->second.name, false, nullptr));
-    }
-
-    std::sort(names.begin(), names.end(), [](const std::pair<room_vnum, std::string>& a, const std::pair<room_vnum, std::string>& b) {
-        return a.second < b.second;
-    });
-
-    for(auto& name : names) {
-        if(boost::istarts_with(name.second, arg)) {
-            return name.first;
-        }
-    }
-    return std::nullopt;
-
-}
-
-std::optional<vnum> governingAreaTypeFor(struct room_data *rd, std::function<bool(area_data&)>& func) {
-    if(!rd->area) return std::nullopt;
-    auto &a = areas[rd->area.value()];
-    while(true) {
-        if (func(a)) return a.vn;
-        if ((a.type == AreaType::Structure || a.type == AreaType::Vehicle) && a.extraVn) {
-            // we need to find the a.objectVnum in the world by scanning object_list...
-            if (auto obj = get_obj_num(a.extraVn.value()); obj) {
-                return governingAreaTypeFor(obj, func);
-            }
-        }
-        if (!a.parent) return std::nullopt;
-        a = areas[a.parent.value()];
-    }
-}
-
-std::optional<vnum> governingAreaTypeFor(struct char_data *ch, std::function<bool(area_data&)>& func) {
-    auto room = ch->getRoom();
-    if(!room) return std::nullopt;
-    return governingAreaTypeFor(room, func);
-}
-
-std::optional<vnum> governingAreaTypeFor(struct obj_data *obj, std::function<bool(area_data&)>& func) {
-	auto room = obj->getAbsoluteRoom();
-    if(!room) return std::nullopt;
-    return governingAreaTypeFor(room, func);
-}
-
-static std::unordered_set<vnum> _areaRecurseGuard;
-
-std::size_t recurseScanRooms(area_data &start, std::unordered_set<room_vnum>& fill, std::function<bool(room_data&)>& func) {
-    std::size_t count = 0;
-    for(auto r : start.rooms) {
-        if(auto room = world.find(r); room != world.end() && func(room->second)) {
-            if(fill.contains(r)) {
-                auto message = fmt::format("ERROR: While recursing area: {}, asked to re-add room {}", start.vn, r);
-                throw std::runtime_error(message);
-            }
-            fill.insert(r);
-            count++;
-        }
-    }
-    for(auto &child : start.children) {
-        if(_areaRecurseGuard.contains(child)) {
-            auto message = fmt::format("ERROR: While recursing area: {}, asked to re-scan area {}", start.vn, child);
-            throw std::runtime_error(message);
-        }
-        _areaRecurseGuard.insert(child);
-        count += recurseScanRooms(areas[child], fill, func);
-    }
-    return count;
-}
-
-/* This shows the player what locations the planet has to land at. */
-static void disp_locations(struct char_data *ch, vnum areaVnum, std::unordered_set<room_vnum>& rooms) {
-	auto &a = areas[areaVnum];
-    if(rooms.empty()) {
-        send_to_char(ch, "There are no landing locations on this planet.\r\n");
-        return;
-    }
-
-    std::vector<std::string> names;
-    for(auto r : rooms) {
-        auto room = world.find(r);
-        if(room == world.end()) continue;
-        names.emplace_back(room->second.name);
-    }
-    // Sort the names vector...
-    std::sort(names.begin(), names.end());
-    send_to_char(ch, "@D------------------[ %s ]@D------------------\n", a.name.c_str());
-    for(auto &name : names) {
-        send_to_char(ch, "%s\n", name.c_str());
-    }
-}
-
 ACMD(do_land) {
 
-    int above_planet = true, inroom = ch->getRoomVnum();
+    auto inroom = ch->getRoomVnum();
     skip_spaces(&argument);
-    std::function<bool(area_data&)> governingCelestial = [&](area_data& area) {
-        return area.type == AreaType::CelestialBody;
-    };
-    auto onPlanet = governingAreaTypeFor(ch, governingCelestial);
+    auto planet = getPlanet(inroom);
 
-    std::unordered_set<room_vnum> rooms;
-    std::function<bool(room_data&)> scan = [&](room_data &r) {
-        return r.room_flags.test(ROOM_LANDING);
-    };
-    std::size_t count = 0;
-
-    if(above_planet == false && !*argument) {
+    if(!planet && !*argument) {
         if(ch->affected_by.test(AFF_FLYING)) {
             act("@WYou land.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n@W lands nearby.@n", true, ch, nullptr, nullptr, TO_ROOM);
@@ -356,19 +251,16 @@ ACMD(do_land) {
         return;
     }
 
-    if(onPlanet) {
-        auto &a = areas[onPlanet.value()];
-        count = recurseScanRooms(a, rooms, scan);
-        _areaRecurseGuard.clear();
-        above_planet = (a.extraVn && inroom == a.extraVn.value());
-    } else {
-        above_planet = false;
-    }
+    std::vector<std::pair<std::string, room_vnum>> landLocations;
+
+    if(planet) {
+        landLocations = getPlanetLandspots(planet);
+    } 
 
     if (!*argument) {
-        if (above_planet == true) {
+        if (planet && !landLocations.empty()) {
             send_to_char(ch, "Land where?\n");
-            disp_locations(ch, onPlanet.value(), rooms);
+            displayLandSpots(ch, getPlanetColorName(planet), landLocations);
             return;
         } else {
             send_to_char(ch, "You are not even in the lower atmosphere of a planet!\r\n");
@@ -376,35 +268,32 @@ ACMD(do_land) {
         }
     }
 
-    auto checkLanding = land_location(argument, rooms);
-    if(!checkLanding) {
+    room_vnum landing = NOWHERE;
+    std::string landName = "UNKNOWN";
+
+    if(auto matched = partialMatch(argument, landLocations.begin(), landLocations.end(), false, [](const auto& p) {return p.first;}); matched != landLocations.end()) {
+        landing = matched->second;
+        landName = matched->first;
+    }
+
+    if(!world.count(landing)) {
         send_to_char(ch, "You can't land there.\r\n");
         return;
     }
-    auto landing = checkLanding.value();
-
-    if (landing != NOWHERE) {
-        auto was_in = ch->getRoomVnum();
-        auto &r = world[landing];
-        send_to_char(ch,
-                     "You descend through the upper atmosphere, and coming down through the clouds you land quickly on the ground below.\r\n");
-        std::string landName = "UNKNOWN";
-        if(r.area) {
-            auto &a = areas[r.area.value()];
-            landName = a.name;
-        }
-        char sendback[MAX_INPUT_LENGTH];
-        sprintf(sendback, "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", landName.c_str());
-        act(sendback, true, ch, nullptr, nullptr, TO_ROOM);
-        char_from_room(ch);
-        char_to_room(ch, real_room(landing));
-        fly_planet(landing, "can be seen landing from space nearby!@n\r\n", ch);
-        send_to_sense(1, "landing on the planet", ch);
-        send_to_scouter("A powerlevel signal has been detected landing on the planet", ch, 0, 1);
-        act("$n comes down from high above in the sky and quickly lands on the ground.", true, ch, nullptr, nullptr,
-            TO_ROOM);
-        return;
-    }
+    
+    send_to_char(ch,
+                    "You descend through the upper atmosphere, and coming down through the clouds you land quickly on the ground below.\r\n");
+    
+    char sendback[MAX_INPUT_LENGTH];
+    sprintf(sendback, "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", landName.c_str());
+    act(sendback, true, ch, nullptr, nullptr, TO_ROOM);
+    char_from_room(ch);
+    char_to_room(ch, landing);
+    fly_planet(landing, "can be seen landing from space nearby!@n\r\n", ch);
+    send_to_sense(1, "landing on the planet", ch);
+    send_to_scouter("A powerlevel signal has been detected landing on the planet", ch, 0, 1);
+    act("$n comes down from high above in the sky and quickly lands on the ground.", true, ch, nullptr, nullptr,
+        TO_ROOM);
 }
 
 
@@ -2147,9 +2036,71 @@ static int check_swim(struct char_data *ch) {
     }
 }
 
-static bool isPlanet(const area_data& a) {
-    return a.type == AreaType::CelestialBody;
+
+static void handle_fly_space(char_data *ch) {
+    if (!OUTSIDE(ch)) {
+        send_to_char(ch, "You are not outside!");
+        return;
+    }
+
+    if (ch->getCurVitalDam(CharVital::Ki) > 0.9 && !IS_ANDROID(ch)) {
+        send_to_char(ch, "You do not have the ki to fly to space.");
+        return;
+    }
+
+    if (FIGHTING(ch)) {
+        send_to_char(ch, "You are too busy fighting!");
+        return;
+    }
+
+    auto planet = getPlanet(ch->in_room);
+    if(!planet) {
+        send_to_char(ch, "You can't fly to space from here!");
+        return;
+    }
+
+    auto dest = getPlanetOrbit(planet);
+
+    if(dest == NOWHERE) {
+        send_to_char(ch, "You can't fly to space from here!");
+        return;
+    }
+
+    reveal_hiding(ch, 0);
+    GET_ALT(ch) = 2;
+    ch->affected_by.set(AFF_FLYING);
+    if (!block_calc(ch)) {
+        return;
+    }
+    GET_ALT(ch) = 0;
+    ch->affected_by.reset(AFF_FLYING);
+
+    if(planet) {
+        fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
+        send_to_sense(1, "leaving the planet", ch);
+        send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
+    }
+
+
+    act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
+        true, ch, nullptr, nullptr, TO_ROOM);
+    char_from_room(ch);
+    char_to_room(ch, dest);
+    if(planet) {
+        act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
+        TO_ROOM);
+        send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
+    }
+
+    if (!IS_ANDROID(ch)) {
+        ch->decCurKI(ch->getMaxKI() / 10);
+    }
+    WAIT_STATE(ch, PULSE_3SEC);
+    return;
 }
+
 
 ACMD(do_fly) {
     char arg[MAX_INPUT_LENGTH];
@@ -2246,61 +2197,7 @@ ACMD(do_fly) {
         }
     }
     if (!strcasecmp("space", arg)) {
-        if (!OUTSIDE(ch)) {
-            send_to_char(ch, "You are not outside!");
-            return;
-        }
-        if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 10 && !IS_ANDROID(ch)) {
-            send_to_char(ch, "You do not have the ki to fly to space.");
-            return;
-        }
-        if (FIGHTING(ch)) {
-            send_to_char(ch, "You are too busy fighting!");
-            return;
-        }
-
-        auto r = ch->getRoom();
-        auto dest = r->getLaunchDestination();
-
-        auto planet = ch->getMatchingArea(area_data::isPlanet);
-        if(!dest) {
-            send_to_char(ch, "You can't fly to space from here!");
-            return;
-        }
-
-        reveal_hiding(ch, 0);
-        GET_ALT(ch) = 2;
-        ch->affected_by.set(AFF_FLYING);
-        if (!block_calc(ch)) {
-            return;
-        }
-        GET_ALT(ch) = 0;
-        ch->affected_by.reset(AFF_FLYING);
-
-        if(planet) {
-            fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
-            send_to_sense(1, "leaving the planet", ch);
-            send_to_scouter("A powerlevel signal has left the planet", ch, 0, 2);
-        }
-
-
-        act("@CYou blast off from the ground and rocket through the air. Your speed increases until you manage to reach the brink of space!@n",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@C$n blasts off from the ground and rockets through the air. You quickly lose sight of $m as $e continues upward!@n",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        char_from_room(ch);
-        char_to_room(ch, dest.value());
-        if(planet) {
-            act("@C$n blasts up from the atmosphere below and then comes to a stop.@n", true, ch, nullptr, nullptr,
-            TO_ROOM);
-            send_to_char(ch, "@mOOC: Use the command 'land' to return to the planet from here.@n\r\n");
-        }
-
-        if (!IS_ANDROID(ch)) {
-            ch->decCurKI(ch->getMaxKI() / 10);
-        }
-        WAIT_STATE(ch, PULSE_3SEC);
-        return;
+        handle_fly_space(ch);
     }
 }
 

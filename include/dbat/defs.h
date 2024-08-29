@@ -586,10 +586,11 @@ constexpr int ROOM_FERTILE2 = 62;
 constexpr int ROOM_FISHING = 63;
 constexpr int ROOM_FISHFRESH = 64;
 constexpr int ROOM_CANREMODEL = 65;
-constexpr int ROOM_LANDING = 66;
+constexpr int ROOM_ZENITH = 66;
 constexpr int ROOM_SAVE = 67; /* room saves contents */
+constexpr int ROOM_ZORBIT = 68; // zenith orbit
 
-constexpr int NUM_ROOM_FLAGS = 68;
+constexpr int NUM_ROOM_FLAGS = 69;
 
 // I'm thinking that rooms with lava might automatically have a considerable heat value.
 // They might also generate light. Molten lava glows.

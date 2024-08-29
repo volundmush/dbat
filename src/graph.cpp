@@ -437,11 +437,8 @@ ACMD(do_track) {
     }
 
     if(GET_SKILL_BASE(ch, SKILL_SENSE) == 100) {
-        auto chPlanet = ch->getMatchingArea(area_data::isPlanet);
-        auto vPlanet = vict->getMatchingArea(area_data::isPlanet);
-        if(chPlanet && chPlanet == vPlanet) {
-            auto &a = areas[world[vict->in_room].area.value()];
-            send_to_char(ch, "@WSense@D: %s@n\r\n", a.name.c_str());
+        if(planet_check(ch, vict)) {
+            send_to_char(ch, "@WSense@D: %s@n\r\n", sense_location(vict));
         }
     } else {
 
@@ -483,13 +480,9 @@ ACMD(do_track) {
                 send_to_char(ch, "You can't sense %s from here.\r\n", HMHR(vict));
                 break;
             default:    /* Success! */
-                if ((GET_SKILL_BASE(ch, SKILL_SENSE) >= 75)) {
-                    auto &a = areas[world[vict->in_room].area.value()];
-                    send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
-                    send_to_char(ch, "@WSense@D: @Y%s@n\r\n", a.name.c_str());
-                } else {
-                    send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
-                    break;
+                send_to_char(ch, "You sense them %s from here!\r\n", dirs[dir]);
+                if (GET_SKILL_BASE(ch, SKILL_SENSE) >= 75) {
+                    send_to_char(ch, "@WSense@D: @Y%s@n\r\n", sense_location(vict));
                 }
                 WAIT_STATE(ch, PULSE_2SEC);
                 improve_skill(ch, SKILL_SENSE, 1);

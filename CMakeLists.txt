@@ -23,9 +23,6 @@ CPMAddPackage("gh:ilqvya/random#v1.5.0")
 CPMAddPackage("gh:Neargye/magic_enum#v0.9.6")
 CPMAddPackage("gh:tplgy/cppcodec#v0.2")
 
-find_package(ZLIB REQUIRED)
-add_definitions(-DHAVE_ZLIB)
-
 find_package(Boost REQUIRED COMPONENTS system program_options regex)
 
 set(CIRCLE_INCLUDE_DIRS
@@ -50,6 +47,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "-fpermissive -w")
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
+set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=mold")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=mold")
+
+set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+set(CMAKE_C_COMPILER_LAUNCHER ccache)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
 set(BUILD_TESTING OFF)
 
