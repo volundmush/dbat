@@ -169,53 +169,38 @@ ACMD(do_evolve) {
 }
 
 static void see_plant(struct obj_data *obj, struct char_data *ch) {
-
     int water = GET_OBJ_VAL(obj, VAL_WATERLEVEL);
+    const char* description = obj->short_description;
 
     if (water >= 0) {
-        switch (GET_OBJ_VAL(obj, VAL_MATURITY)) {
-            case 0:
-                send_to_char(ch, "@wA @G%s@y seed@w has been planted here. @D(@C%d Water Hours@D)@n\r\n",
-                             obj->short_description, water);
-                break;
-            case 1:
-                send_to_char(ch, "@wA very young @G%s@w has sprouted from a planter here. @D(@C%d Water Hours@D)@n\r\n",
-                             obj->short_description, water);
-                break;
-            case 2:
-                send_to_char(ch, "@wA half grown @G%s@w is in a planter here. @D(@C%d Water Hours@D)@n\r\n",
-                             obj->short_description, water);
-                break;
-            case 3:
-                send_to_char(ch, "@wA mature @G%s@w is growing in a planter here. @D(@C%d Water Hours@D)@n\r\n",
-                             obj->short_description, water);
-                break;
-            case 4:
-                send_to_char(ch, "@wA mature @G%s@w is flowering in a planter here. @D(@C%d Water Hours@D)@n\r\n",
-                             obj->short_description, water);
-                break;
-            case 5:
-                send_to_char(ch, "@wA mature @G%s@w that is close to harvestable is here. @D(@C%d Water Hours@D)@n\r\n",
-                             obj->short_description, water);
-                break;
-            case 6:
-                send_to_char(ch, "@wA @Rharvestable @G%s@w is in the planter here. @D(@C%d Water Hours@D)@n\r\n",
-                             obj->short_description, water);
-                break;
-            default:
-                break;
-        }
-    } else {
-        if (water > -4) {
-            send_to_char(ch, "@yA @G%s@y that is looking a bit @rdry@y, is here.@n\r\n", obj->short_description);
-        } else if (water > -10) {
-            send_to_char(ch, "@yA @G%s@y that is looking extremely @rdry@y, is here.@n\r\n", obj->short_description);
-        } else if (water <= -10) {
-            send_to_char(ch, "@yA @G%s@y that is completely @rdead@y and @rwithered@y, is here.@n\r\n",
-                         obj->short_description);
-        }
-    }
+        const char* maturity_stage;
 
+        switch (GET_OBJ_VAL(obj, VAL_MATURITY)) {
+            case 0: maturity_stage = "seed"; break;
+            case 1: maturity_stage = "very young"; break;
+            case 2: maturity_stage = "half grown"; break;
+            case 3: maturity_stage = "mature"; break;
+            case 4: maturity_stage = "flowering"; break;
+            case 5: maturity_stage = "close to harvestable"; break;
+            case 6: maturity_stage = "harvestable"; break;
+            default: return; // If the maturity level is unknown, do nothing.
+        }
+
+        send_to_char(ch, "@wA %s @G%s@w is here. @D(@C%d Water Hours@D)@n\r\n",
+                     maturity_stage, description, water);
+    } else {
+        const char* dryness_level;
+
+        if (water > -4) {
+            dryness_level = "looking a bit @rdry";
+        } else if (water > -10) {
+            dryness_level = "looking extremely @rdry";
+        } else {
+            dryness_level = "@rdead@y and @rwithered";
+        }
+
+        send_to_char(ch, "@yA @G%s@y that is %s, is here.@n\r\n", description, dryness_level);
+    }
 }
 
 /* This is used to determine the terrain bonus for search_room - Iovan 12/16/2012*/
@@ -669,29 +654,32 @@ ACMD(do_post) {
         obj_to_room(obj, IN_ROOM(ch));
         GET_OBJ_POSTTYPE(obj) = 1;
         return;
-    } else {
-        if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, ch->getRoom()->contents))) {
-            send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
-            return;
-        } else if (GET_OBJ_POSTED(obj2)) {
-            send_to_char(ch, "It already has something posted on it. Get that first if you want to post.\r\n");
-            return;
-        } else if (GET_OBJ_TYPE(obj2) == ITEM_BOARD) {
-            send_to_char(ch, "Boards come with their own means of posting messages.\r\n");
-            return;
-        } else {
-            char buf[MAX_STRING_LENGTH];
-            sprintf(buf, "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
-            send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
-            act(buf, true, ch, nullptr, nullptr, TO_ROOM);
-            obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
-            GET_OBJ_POSTTYPE(obj) = 2;
-            GET_OBJ_POSTED(obj) = obj2;
-            GET_OBJ_POSTED(obj2) = obj;
-            return;
-        }
     }
+
+    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, ch->getRoom()->contents))) {
+        send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
+        return;
+    }
+
+    if (GET_OBJ_POSTED(obj2)) {
+        send_to_char(ch, "It already has something posted on it. Get that first if you want to post.\r\n");
+        return;
+    }
+
+    if (GET_OBJ_TYPE(obj2) == ITEM_BOARD) {
+        send_to_char(ch, "Boards come with their own means of posting messages.\r\n");
+        return;
+    }
+
+    char buf[MAX_STRING_LENGTH];
+    sprintf(buf, "@C$n@W posts %s@W on %s@W.@n", obj->short_description, obj2->short_description);
+    send_to_char(ch, "@WYou post %s@W on %s@W.@n\r\n", obj->short_description, obj2->short_description);
+    act(buf, true, ch, nullptr, nullptr, TO_ROOM);
+    obj_from_char(obj);
+    obj_to_room(obj, IN_ROOM(ch));
+    GET_OBJ_POSTTYPE(obj) = 2;
+    GET_OBJ_POSTED(obj) = obj2;
+    GET_OBJ_POSTED(obj2) = obj;
 
 }
 
@@ -800,18 +788,19 @@ ACMD(do_nickname) {
     if (strstr(obj->short_description, "nicknamed")) {
         send_to_char(ch, "%s@w has already been nicknamed.@n\r\n", obj->short_description);
         return;
-    } else if (strstr(obj->name, "corpse")) {
+    }
+    
+    if (strstr(obj->name, "corpse")) {
         send_to_char(ch, "%s@w is a corpse!@n\r\n", obj->short_description);
         return;
-    } else {
-        send_to_char(ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj->short_description, arg2);
-        char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
-        sprintf(nick, "%s @wnicknamed @D(@C%s@D)@n", obj->short_description, CAP(arg2));
-        sprintf(nick2, "%s %s", obj->name, arg2);
-        obj->short_description = strdup(nick);
-        obj->name = strdup(nick2);
-        return;
     }
+    
+    send_to_char(ch, "@wYou nickname %s@w as '@C%s@w'.@n\r\n", obj->short_description, arg2);
+    char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH];
+    sprintf(nick, "%s @wnicknamed @D(@C%s@D)@n", obj->short_description, CAP(arg2));
+    sprintf(nick2, "%s %s", obj->name, arg2);
+    obj->short_description = strdup(nick);
+    obj->name = strdup(nick2);
 }
 
 
@@ -848,16 +837,18 @@ ACMD(do_showoff) {
     if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
         send_to_char(ch, "You don't seem to have that.\r\n");
         return;
-    } else if (!(vict = get_player_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
+    }
+    
+    if (!(vict = get_player_vis(ch, arg2, nullptr, FIND_CHAR_ROOM))) {
         send_to_char(ch, "There is no such person around.\r\n");
         return;
-    } else { /* Ok show that target the object! */
-        act("@WYou hold up $p@W for @C$N@W to see:@n", true, ch, obj, vict, TO_CHAR);
-        act("@C$n@W holds up $p@W for you to see:@n", true, ch, obj, vict, TO_VICT);
-        act("@C$n@W holds up $p@W for @c$N@W to see.@n", true, ch, obj, vict, TO_NOTVICT);
-        show_obj_to_char(obj, vict, SHOW_OBJ_ACTION);
-        return;
     }
+
+    /* Ok show that target the object! */
+    act("@WYou hold up $p@W for @C$N@W to see:@n", true, ch, obj, vict, TO_CHAR);
+    act("@C$n@W holds up $p@W for you to see:@n", true, ch, obj, vict, TO_VICT);
+    act("@C$n@W holds up $p@W for @c$N@W to see.@n", true, ch, obj, vict, TO_NOTVICT);
+    show_obj_to_char(obj, vict, SHOW_OBJ_ACTION);
 }
 
 int readIntro(struct char_data *ch, struct char_data *vict) {
@@ -933,17 +924,18 @@ ACMD(do_intro) {
     if (readIntro(vict, ch) == 2) {
         send_to_char(ch, "There seems to have been an error, report this to Iovan.\r\n");
         return;
-    } else if (readIntro(ch, vict) == 1 && strstr(RACE(vict), arg)) {
+    }
+    
+    if (readIntro(ch, vict) == 1 && strstr(RACE(vict), arg)) {
         send_to_char(ch,
                      "You have already dubbed them a name. If you want to redub them target the name you know them by.\r\n");
         return;
-    } else {
-        introWrite(ch, vict, arg2);
-        act("You decide to call $M, $N.", true, ch, nullptr, vict, TO_CHAR);
-        act("$n seems to decide something about you.", true, ch, nullptr, vict, TO_VICT);
-        act("$n seems to decide something about $N.", true, ch, nullptr, vict, TO_NOTVICT);
-        return;
     }
+
+    introWrite(ch, vict, arg2);
+    act("You decide to call $M, $N.", true, ch, nullptr, vict, TO_CHAR);
+    act("$n seems to decide something about you.", true, ch, nullptr, vict, TO_VICT);
+    act("$n seems to decide something about $N.", true, ch, nullptr, vict, TO_NOTVICT);
 }
 
 /* Used when checking status or looking at a character */
@@ -1403,7 +1395,7 @@ static void display_spells(struct char_data *ch, struct obj_data *obj) {
         return;
     }
     for (i = 0; i < SPELLBOOK_SIZE; i++) {
-        if (obj->sbinfo[i].spellname != 0) {
+        if (obj->sbinfo[i].spellname) {
             if (obj->sbinfo[i].spellname > MAX_SPELLS) {
                 continue;
             }
@@ -1755,49 +1747,35 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
 
                 default:
                     if (!IS_CORPSE(obj)) {
-                        send_to_char(ch, "You see nothing special..\r\n");
+                        send_to_char(ch, "You see nothing special.\r\n");
                     } else {
-                        int mention = false;
                         send_to_char(ch, "This corpse has ");
+                        bool mention = false;
 
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_HEAD) == 0) {
-                            send_to_char(ch, "no head,");
-                            mention = true;
+                        const struct {
+                            int value;
+                            const char* no_part;
+                            const char* broken_part;
+                        } corpse_parts[] = {
+                            {VAL_CORPSE_HEAD, "no head,", nullptr},
+                            {VAL_CORPSE_RARM, "no right arm, ", "a broken right arm, "},
+                            {VAL_CORPSE_LARM, "no left arm, ", "a broken left arm, "},
+                            {VAL_CORPSE_RLEG, "no right leg, ", "a broken right leg, "},
+                            {VAL_CORPSE_LLEG, "no left leg, ", "a broken left leg, "}
+                        };
+
+                        for (const auto& part : corpse_parts) {
+                            int part_status = GET_OBJ_VAL(obj, part.value);
+                            if (part_status == 0) {
+                                send_to_char(ch, part.no_part);
+                                mention = true;
+                            } else if (part_status == 2 && part.broken_part) {
+                                send_to_char(ch, part.broken_part);
+                                mention = true;
+                            }
                         }
 
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_RARM) == 0) {
-                            send_to_char(ch, "no right arm, ");
-                            mention = true;
-                        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_RARM) == 2) {
-                            send_to_char(ch, "a broken right arm, ");
-                            mention = true;
-                        }
-
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_LARM) == 0) {
-                            send_to_char(ch, "no left arm, ");
-                            mention = true;
-                        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_LARM) == 2) {
-                            send_to_char(ch, "a broken left arm, ");
-                            mention = true;
-                        }
-
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_RLEG) == 0) {
-                            send_to_char(ch, "no right leg, ");
-                            mention = true;
-                        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_RLEG) == 2) {
-                            send_to_char(ch, "a broken right leg, ");
-                            mention = true;
-                        }
-
-                        if (GET_OBJ_VAL(obj, VAL_CORPSE_LLEG) == 0) {
-                            send_to_char(ch, "no left leg, ");
-                            mention = true;
-                        } else if (GET_OBJ_VAL(obj, VAL_CORPSE_LLEG) == 2) {
-                            send_to_char(ch, "a broken left leg, ");
-                            mention = true;
-                        }
-
-                        if (mention == false) {
+                        if (!mention) {
                             send_to_char(ch, "nothing missing from it but life.");
                         } else {
                             send_to_char(ch, "and is dead.");
@@ -3709,51 +3687,53 @@ static void look_out_window(struct char_data *ch, char *arg) {
         /* yeah, sure stupid */
         send_to_char(ch, "But you are already outside.\r\n");
         return;
-    } else {
-        /* Look for any old window in the room */
-        viewport = ch->getRoom()->findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->name);});
     }
+    /* Look for any old window in the room */
+    viewport = ch->getRoom()->findObject([&](auto obj) {return GET_OBJ_TYPE(obj) == ITEM_WINDOW && isname("window", obj->name);});
+
     if (!viewport) {
         /* Nothing suitable to look through */
         send_to_char(ch, "You don't seem to be able to see outside.\r\n");
-    } else if (OBJVAL_FLAGGED(viewport, CONT_CLOSEABLE) &&
+        return;
+    }
+    if (OBJVAL_FLAGGED(viewport, CONT_CLOSEABLE) &&
                OBJVAL_FLAGGED(viewport, CONT_CLOSED)) {
         /* The window is closed */
         send_to_char(ch, "It is closed.\r\n");
-    } else {
-        if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1) < 0) {
-            /* We are looking out of the room */
-            if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4) < 0) {
-                /* Look for the default "outside" room */
-                for (door = 0; door < NUM_OF_DIRS; door++) {
-                    auto e = r->dir_option[door];
-                    if(!e) continue;
-                    auto dest = e->getDestination();
-                    if(!dest) continue;
-                    if(!dest->room_flags.test(ROOM_INDOORS)) {
-                        target_room = dest->vn;
-                        break;
-                    }
+        return;
+    }
+    if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1) < 0) {
+        /* We are looking out of the room */
+        if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4) < 0) {
+            /* Look for the default "outside" room */
+            for (door = 0; door < NUM_OF_DIRS; door++) {
+                auto e = r->dir_option[door];
+                if(!e) continue;
+                auto dest = e->getDestination();
+                if(!dest) continue;
+                if(!dest->room_flags.test(ROOM_INDOORS)) {
+                    target_room = dest->vn;
+                    break;
                 }
-            } else {
-                target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4));
             }
         } else {
-            /* We are looking out of a vehicle */
-            if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1))))
-                target_room = IN_ROOM(vehicle);
+            target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4));
         }
-        if (target_room == NOWHERE) {
-            send_to_char(ch, "You don't seem to be able to see outside.\r\n");
-        } else {
-            if (viewport->look_description)
-                act(viewport->look_description, true, ch, viewport, nullptr, TO_CHAR);
-            else
-                act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
-            send_to_char(ch, "You look outside and see:\r\n");
-            look_at_room(target_room, ch, 0);
-        }
+    } else {
+        /* We are looking out of a vehicle */
+        if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1))))
+            target_room = IN_ROOM(vehicle);
     }
+    if (target_room == NOWHERE) {
+        send_to_char(ch, "You don't seem to be able to see outside.\r\n");
+        return;
+    }
+    if (viewport->look_description)
+        act(viewport->look_description, true, ch, viewport, nullptr, TO_CHAR);
+    else
+        act("$n looks out the window.", true, ch, nullptr, nullptr, TO_ROOM);
+    send_to_char(ch, "You look outside and see:\r\n");
+    look_at_room(target_room, ch, 0);
 }
 
 ACMD(do_finger) {
@@ -3928,25 +3908,25 @@ ACMD(do_perf) {
         send_to_char(ch, "@WType @G3@D: @wEfficient@n\r\n");
         send_to_char(ch, "@RType must be a number between 1 and 3.@n\r\n");
         return;
-    } else {
-        type = atoi(arg2);
-        switch (type) {
-            case 1:
-                send_to_char(ch, "You perfect the skill %s so that you can over charge it!\r\n",
-                             spell_info[skill].name);
-                SET_SKILL_PERF(ch, skill, 1);
-                break;
-            case 2:
-                send_to_char(ch, "You perfect the skill %s so that you have supreme accuracy with it!\r\n",
-                             spell_info[skill].name);
-                SET_SKILL_PERF(ch, skill, 2);
-                break;
-            case 3:
-                send_to_char(ch, "You perfect the skill %s so that you require a lower minimum charge for it!\r\n",
-                             spell_info[skill].name);
-                SET_SKILL_PERF(ch, skill, 3);
-                break;
-        }
+    }
+
+    type = atoi(arg2);
+    switch (type) {
+        case 1:
+            send_to_char(ch, "You perfect the skill %s so that you can over charge it!\r\n",
+                            spell_info[skill].name);
+            SET_SKILL_PERF(ch, skill, 1);
+            break;
+        case 2:
+            send_to_char(ch, "You perfect the skill %s so that you have supreme accuracy with it!\r\n",
+                            spell_info[skill].name);
+            SET_SKILL_PERF(ch, skill, 2);
+            break;
+        case 3:
+            send_to_char(ch, "You perfect the skill %s so that you require a lower minimum charge for it!\r\n",
+                            spell_info[skill].name);
+            SET_SKILL_PERF(ch, skill, 3);
+            break;
     }
 }
 
@@ -3991,8 +3971,10 @@ ACMD(do_look) {
             look_at_target(ch, arg, 1);
         return;
     }
+
     argument = any_one_arg(argument, arg);
     one_argument(argument, arg2);
+
     if (!*arg) {
         if (subcmd == SCMD_SEARCH) {
             search_room(ch);
@@ -4002,7 +3984,10 @@ ACMD(do_look) {
                 //act("@w$n@w looks around the room.@n", TRUE, ch, 0, 0, TO_ROOM);
             }
         }
-    } else if(is_abbrev(arg, "moon")) {
+        return;
+    }
+    
+    if(is_abbrev(arg, "moon")) {
         auto moonlight = ch->getLocationEnvironment(ENV_MOONLIGHT);
         if(moonlight < 0) {
             send_to_char(ch, "It's kinda hard to see any moons from here.\r\n");
@@ -4017,44 +4002,61 @@ ACMD(do_look) {
             ch->gazeAtMoon();
             return;
         }
+        return;
     }
-    else if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
+    
+    if (is_abbrev(arg, "inside") && room->dir_option[INDIR] && !*arg2) {
         if (subcmd == SCMD_SEARCH)
             search_in_direction(ch, INDIR);
         else
             look_in_direction(ch, INDIR);
-    } else if (is_abbrev(arg, "inside") && (subcmd == SCMD_SEARCH) && !*arg2) {
+        return;
+    }
+    
+    if (is_abbrev(arg, "inside") && (subcmd == SCMD_SEARCH) && !*arg2) {
         search_in_direction(ch, INDIR);
-    } else if (is_abbrev(arg, "inside") ||
-               is_abbrev(arg, "into") || is_abbrev(arg, "onto")) {
+        return;
+    }
+    
+    if (is_abbrev(arg, "inside") || is_abbrev(arg, "into") || is_abbrev(arg, "onto")) {
         look_in_obj(ch, arg2);
-    } else if ((is_abbrev(arg, "outside") ||
-                is_abbrev(arg, "through") ||
-                is_abbrev(arg, "thru")) &&
-               (subcmd == SCMD_LOOK) && *arg2) {
+        return;
+    }
+    if ((is_abbrev(arg, "outside") || is_abbrev(arg, "through") || is_abbrev(arg, "thru")) && (subcmd == SCMD_LOOK) && *arg2) {
         look_out_window(ch, arg2);
-    } else if (is_abbrev(arg, "outside") &&
-               (subcmd == SCMD_LOOK) && !room->dir_option[OUTDIR]) {
+        return;
+    }
+    
+    if (is_abbrev(arg, "outside") && (subcmd == SCMD_LOOK) && !room->dir_option[OUTDIR]) {
         look_out_window(ch, arg2);
-    } else if ((look_type = search_block(arg, dirs, false)) >= 0 ||
-               (look_type = search_block(arg, abbr_dirs, false)) >= 0) {
+        return;
+    }
+    
+    if ((look_type = search_block(arg, dirs, false)) >= 0 || (look_type = search_block(arg, abbr_dirs, false)) >= 0) {
         if (subcmd == SCMD_SEARCH)
             search_in_direction(ch, look_type);
         else
             look_in_direction(ch, look_type);
-    } else if ((is_abbrev(arg, "towards")) &&
-               ((look_type = search_block(arg2, dirs, false)) >= 0 ||
-                (look_type = search_block(arg2, abbr_dirs, false)) >= 0)) {
+        return;
+    }
+    
+    if ((is_abbrev(arg, "towards")) && ((look_type = search_block(arg2, dirs, false)) >= 0 || (look_type = search_block(arg2, abbr_dirs, false)) >= 0)) {
         if (subcmd == SCMD_SEARCH)
             search_in_direction(ch, look_type);
         else
             look_in_direction(ch, look_type);
-    } else if (is_abbrev(arg, "at")) {
+        return;
+    }
+    
+    if (is_abbrev(arg, "at")) {
         if (subcmd == SCMD_SEARCH)
             send_to_char(ch, "That is not a direction!\r\n");
         else
             look_at_target(ch, arg2, 0);
-    } else if (is_abbrev(arg, "around")) {
+        return;
+    }
+    
+    if (is_abbrev(arg, "around")) {
         struct extra_descr_data *i;
         int found = 0;
 
@@ -4067,14 +4069,18 @@ ACMD(do_look) {
         }
         if (!found)
             send_to_char(ch, "You couldn't find anything noticeable.\r\n");
-    } else if (find_exdesc(arg, ch->getRoom()->ex_description) != nullptr) {
-        look_at_target(ch, arg, 0);
-    } else {
-        if (subcmd == SCMD_SEARCH)
-            send_to_char(ch, "That is not a direction!\r\n");
-        else
-            look_at_target(ch, arg, 0);
+        return;
     }
+    
+    if (find_exdesc(arg, ch->getRoom()->ex_description) != nullptr) {
+        look_at_target(ch, arg, 0);
+        return;
+    }
+
+     if (subcmd == SCMD_SEARCH)
+        send_to_char(ch, "That is not a direction!\r\n");
+    else
+        look_at_target(ch, arg, 0);
 
 }
 
@@ -5836,26 +5842,27 @@ ACMD(do_consider) {
 
 ACMD(do_diagnose) {
     char buf[MAX_INPUT_LENGTH];
-    struct char_data *vict;
-
+    
     one_argument(argument, buf);
 
+    struct char_data *vict = FIGHTING(ch);
+
     if (*buf) {
-        if (!(vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM)))
+        vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_ROOM);
+        if (!vict) {
             send_to_char(ch, "%s", CONFIG_NOPERSON);
-        else {
-            send_to_char(ch, "%s", HSSH(ch));
-            diag_char_to_char(vict, ch);
-        }
-    } else {
-        if (FIGHTING(ch)) {
-            send_to_char(ch, "%s",
-                         HSSH(ch));
-            diag_char_to_char(FIGHTING(ch), ch);
-        } else {
-            send_to_char(ch, "Diagnose who?\r\n");
+            return;
         }
     }
+
+    if(!vict) {
+        send_to_char(ch, "Diagnose who?\r\n");
+        return;
+    }
+
+    send_to_char(ch, "%s", HSSH(ch));
+    diag_char_to_char(vict, ch);
+    
 }
 
 static const char *ctypes[] = {
@@ -6222,7 +6229,7 @@ void sort_commands() {
 ACMD(do_commands) {
     int no, i, cmd_num;
     int wizhelp = 0, socials = 0;
-    struct char_data *vict;
+    struct char_data *vict = ch;
     char arg[MAX_INPUT_LENGTH];
 
     one_argument(argument, arg);
@@ -6236,8 +6243,7 @@ ACMD(do_commands) {
             send_to_char(ch, "You can't see the commands of people above your level.\r\n");
             return;
         }
-    } else
-        vict = ch;
+    }
 
     if (subcmd == SCMD_SOCIALS)
         socials = 1;
@@ -6315,10 +6321,6 @@ ACMD(do_history) {
         struct txt_block *tmp;
         for (tmp = p.comm_hist[type]; tmp; tmp = tmp->next)
             send_to_char(ch, "%s", tmp->text);
-/* Make this a 1 if you want history to cear after viewing */
-#if 0
-        free_history(ch, type);
-#endif
     } else
         send_to_char(ch, "You have no history in that channel.\r\n");
 }
@@ -6470,10 +6472,13 @@ ACMD(do_toplist) {
     if (!get_filename(fname, sizeof(fname), INTRO_FILE, "toplist")) {
         send_to_char(ch, "The toplist file does not exist.");
         return;
-    } else if (!(file = fopen(fname, "r"))) {
+    }
+    
+    if (!(file = fopen(fname, "r"))) {
         send_to_char(ch, "The toplist file does not exist.");
         return;
     }
+
     while (!feof(file) || count < 25) {
         get_line(file, line);
         switch (count) {
@@ -6487,6 +6492,7 @@ ACMD(do_toplist) {
         count++;
         *filler = '\0';
     }
+    
     send_to_char(ch, "@D-=[@BDBAT Top Lists for @REra@C %d@D]=-@n\r\n", CURRENT_ERA);
     while (x <= count) {
         switch (x) {
