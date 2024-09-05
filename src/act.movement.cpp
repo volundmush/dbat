@@ -185,19 +185,19 @@ ACMD(do_carry) {
             nullptr, vict, TO_NOTVICT);
         WAIT_STATE(ch, PULSE_1SEC);
         return;
-    } else { /* Let's carry that mofo! */
-        act("@WYou pick up @C$N@W and put $M over your shoulder.@n", true, ch, nullptr, vict, TO_CHAR);
-        act("@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true, ch, nullptr, vict, TO_NOTVICT);
-        if (SITS(vict)) {
-            struct obj_data *chair = SITS(vict);
-            SITTING(chair) = nullptr;
-            SITS(vict) = nullptr;
-        }
-        CARRYING(ch) = vict;
-        CARRIED_BY(vict) = ch;
-        WAIT_STATE(ch, PULSE_1SEC);
-        return;
     }
+
+    /* Let's carry that mofo! */
+    act("@WYou pick up @C$N@W and put $M over your shoulder.@n", true, ch, nullptr, vict, TO_CHAR);
+    act("@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true, ch, nullptr, vict, TO_NOTVICT);
+    if (SITS(vict)) {
+        struct obj_data *chair = SITS(vict);
+        SITTING(chair) = nullptr;
+        SITS(vict) = nullptr;
+    }
+    CARRYING(ch) = vict;
+    CARRIED_BY(vict) = ch;
+    WAIT_STATE(ch, PULSE_1SEC);
 }
 
 /* Handles dropping someone you are carrying. */
@@ -302,11 +302,6 @@ static int has_boat(struct char_data *ch) {
     struct obj_data *obj;
     int i;
 
-/*
-  if (ROOM_IDENTITY(IN_ROOM(ch)) == DEAD_SEA)
-    return (1);
-*/
-
     if (ADM_FLAGGED(ch, ADM_WALKANYWHERE) || GET_ADMLEVEL(ch) > 4)
         return (1);
 
@@ -322,33 +317,28 @@ static int has_boat(struct char_data *ch) {
 
 /* simple function to determine if char can fly */
 static int has_flight(struct char_data *ch) {
-    struct obj_data *obj;
-
     if (ADM_FLAGGED(ch, ADM_WALKANYWHERE))
-        return (1);
+        return 1;
 
-    if (AFF_FLAGGED(ch, AFF_FLYING) &&
-        (ch->getCurKI()) >= (GET_MAX_MANA(ch) / (GET_WIS(ch) * 30)) && !IS_ANDROID(ch) &&
-        !IS_NPC(ch)) {
-        return (1);
-    }
-    if (AFF_FLAGGED(ch, AFF_FLYING) && (ch->getCurKI()) < (GET_MAX_MANA(ch) / (GET_WIS(ch) * 30)) &&
-        !IS_ANDROID(ch) && !IS_NPC(ch)) {
+    if (AFF_FLAGGED(ch, AFF_FLYING)) {
+        // Separate check for NPCs and Androids
+        if (IS_NPC(ch) || IS_ANDROID(ch))
+            return 1;
+
+        // Check if the character has enough KI to keep flying
+        if (ch->getCurKI() >= (GET_MAX_MANA(ch) / (GET_WIS(ch) * 30)))
+            return 1;
+
+        // If out of KI, crash to the ground
         act("@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
         ch->affected_by.reset(AFF_FLYING);
         handle_fall(ch);
-        return (0);
-    }
-    if (AFF_FLAGGED(ch, AFF_FLYING) && IS_ANDROID(ch)) {
-        return (1);
-    }
-    if (AFF_FLAGGED(ch, AFF_FLYING) && IS_NPC(ch)) {
-        return (1);
+        return 0;
     }
 
-    /* flying items in inventory will do it */
-    auto givesFlight = [](const auto&o) {return OBJAFF_FLAGGED(o, AFF_FLYING);};
+    // Check for flying items in inventory
+    auto givesFlight = [](const auto&o) { return OBJAFF_FLAGGED(o, AFF_FLYING); };
     return ch->findObject(givesFlight) != nullptr;
 }
 
@@ -1115,9 +1105,9 @@ static int find_door(struct char_data *ch, const char *type, char *dir, const ch
             send_to_char(ch, "That's not a direction.\r\n");
             return (-1);
         }
-        if (EXIT(ch, door)) {    /* Braces added according to indent. -gg */
-            if (EXIT(ch, door)->keyword) {
-                if (is_name(type, EXIT(ch, door)->keyword))
+        if (auto ex = EXIT(ch, door); ex) {    /* Braces added according to indent. -gg */
+            if (ex->keyword) {
+                if (is_name(type, ex->keyword))
                     return (door);
                 else {
                     send_to_char(ch, "I see no %s there.\r\n", type);
@@ -1135,9 +1125,9 @@ static int find_door(struct char_data *ch, const char *type, char *dir, const ch
             return (-1);
         }
         for (door = 0; door < NUM_OF_DIRS; door++)
-            if (EXIT(ch, door))
-                if (EXIT(ch, door)->keyword)
-                    if (is_name(type, EXIT(ch, door)->keyword))
+            if (auto ex = EXIT(ch, door); ex)
+                if (ex->keyword)
+                    if (is_name(type, ex->keyword))
                         return (door);
 
         send_to_char(ch, "There doesn't seem to be %s %s that could be manipulated in that way here.\r\n", AN(type),
@@ -1683,8 +1673,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
         return (0);
     }
 
-    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE ||
-        GET_OBJ_TYPE(obj) == ITEM_PORTAL) {
+    if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE || GET_OBJ_TYPE(obj) == ITEM_PORTAL) {
         if (OBJVAL_FLAGGED(obj, CONT_CLOSED)) {
             send_to_char(ch, "But it's closed!\r\n");
         } else if ((GET_OBJ_VAL(obj, VAL_PORTAL_DEST) != NOWHERE) &&
@@ -2021,19 +2010,17 @@ static int check_swim(struct char_data *ch) {
 
     if (ch->getRoomFlag(ROOM_SPACE)) {
         auto space_cost = (GET_MAX_MANA(ch) / 1000) + ((ch->getCarriedWeight()) / 2);
-        if (ch->getCurKI() >= space_cost)
-            can = true;
+        can = ch->getCurKI() >= space_cost;
         ch->decCurKI(space_cost);
         if (!can) send_to_char(ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
         return can;
-    } else {
-        auto swim_cost = (ch->getCarriedWeight()) - 1;
-        if (ch->getCurST() >= swim_cost)
-            can = true;
-        ch->decCurST(swim_cost);
-        if (!can) send_to_char(ch, "You are too tired to swim!\r\n");
-        return can;
     }
+
+    auto swim_cost = (ch->getCarriedWeight()) - 1;
+    can = ch->getCurST() >= swim_cost;
+    ch->decCurST(swim_cost);
+    if (!can) send_to_char(ch, "You are too tired to swim!\r\n");
+    return can;
 }
 
 
@@ -2104,101 +2091,106 @@ static void handle_fly_space(char_data *ch) {
 
 ACMD(do_fly) {
     char arg[MAX_INPUT_LENGTH];
-
     one_argument(argument, arg);
 
-    if (ABSORBING(ch) || ABSORBBY(ch)) {
-        send_to_char(ch, "You can't fly, you are struggling with someone right now!");
-        return;
-    }
-    if (GRAPPLING(ch) || GRAPPLED(ch)) {
-        send_to_char(ch, "You can't fly, you are struggling with someone right now!");
-        return;
-    }
-    if (!IS_NPC(ch)) {
-        if (PLR_FLAGGED(ch, PLR_HEALT)) {
-            send_to_char(ch, "You are inside a healing tank!\r\n");
-            return;
+    // Common checks for flying restrictions
+    auto cannot_fly = [](struct char_data *ch) {
+        if (ABSORBING(ch) || ABSORBBY(ch)) {
+            send_to_char(ch, "You can't fly, you are struggling with someone right now!\r\n");
+            return true;
         }
-        if (PLR_FLAGGED(ch, PLR_PILOTING)) {
-            send_to_char(ch, "You are busy piloting a ship!\r\n");
-            return;
+        if (GRAPPLING(ch) || GRAPPLED(ch)) {
+            send_to_char(ch, "You can't fly, you are struggling with someone right now!\r\n");
+            return true;
         }
-    }
-
-    if (!IS_NPC(ch) && GET_SKILL(ch, SKILL_FOCUS) < 30 && !IS_ANDROID(ch)) {
-        send_to_char(ch, "You do not have enough focus to hold yourself aloft.\r\n");
-        send_to_char(ch, "@wOOC@D: @WYou need the skill Focus at @m30@W.@n\r\n");
-        return;
-    }
-
-    if (!*arg) {
-        auto tile = ch->getLocationTileType();
-        if (AFF_FLAGGED(ch, AFF_FLYING) && tile != SECT_FLYING && tile != SECT_SPACE) {
-            act("@WYou slowly settle down to the ground.@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@W$n slowly settles down to the ground.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_FLYING);
-            GET_ALT(ch) = 0;
-            return;
+        if (!IS_NPC(ch)) {
+            if (PLR_FLAGGED(ch, PLR_HEALT)) {
+                send_to_char(ch, "You are inside a healing tank!\r\n");
+                return true;
+            }
+            if (PLR_FLAGGED(ch, PLR_PILOTING)) {
+                send_to_char(ch, "You are busy piloting a ship!\r\n");
+                return true;
+            }
+            if (GET_SKILL(ch, SKILL_FOCUS) < 30 && !IS_ANDROID(ch)) {
+                send_to_char(ch, "You do not have enough focus to hold yourself aloft.\r\n");
+                send_to_char(ch, "@wOOC@D: @WYou need the skill Focus at @m30@W.@n\r\n");
+                return true;
+            }
         }
 
-        if (AFF_FLAGGED(ch, AFF_FLYING) && tile == SECT_FLYING) {
-            act("@WYou begin to plummet to the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@W$n starts to pummet to the ground below!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_FLYING);
-            GET_ALT(ch) = 0;
-            handle_fall(ch);
-            return;
-        }
-        if (AFF_FLAGGED(ch, AFF_FLYING) && tile == SECT_SPACE) {
-            act("@WYou let yourself drift aimlessly through space.@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@W$n starts to drift slowly.!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_FLYING);
-            GET_ALT(ch) = 0;
-            return;
-        }
-        if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 100 && !IS_ANDROID(ch)) {
-            send_to_char(ch, "You do not have the ki to fly.");
-            return;
-        } else {
-            reveal_hiding(ch, 0);
-            act("@WYou slowly take off into the sky.@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@W$n slowly takes off into the sky.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (SITS(ch)) {
-                SITTING(SITS(ch)) = nullptr;
-                SITS(ch) = nullptr;
-            }
-            if (GET_POS(ch) < POS_STANDING) {
-                GET_POS(ch) = POS_STANDING;
-            }
-            ch->affected_by.set(AFF_FLYING);
-            GET_ALT(ch) = 1;
-            ch->decCurKI(ch->getMaxKI() / 100);
-        }
-    }
-    if (!strcasecmp("high", arg)) {
-        if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 100 && !IS_ANDROID(ch)) {
-            send_to_char(ch, "You do not have the ki to fly.");
-            return;
-        } else {
-            reveal_hiding(ch, 0);
-            act("@WYou rocket high into the sky.@n", true, ch, nullptr, nullptr, TO_CHAR);
-            act("@W$n rockets high into the sky.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            if (SITS(ch)) {
-                SITTING(SITS(ch)) = nullptr;
-                SITS(ch) = nullptr;
-            }
-            if (GET_POS(ch) < POS_STANDING) {
-                GET_POS(ch) = POS_STANDING;
-            }
-            ch->affected_by.set(AFF_FLYING);
-            GET_ALT(ch) = 2;
-            ch->decCurKI(ch->getMaxKI() / 100);
-        }
-    }
+        return false;
+    };
+
+    if (cannot_fly(ch)) return;
+
+    // Handle specific flight commands
     if (!strcasecmp("space", arg)) {
         handle_fly_space(ch);
+        return;
     }
+
+    auto set_flying = [&](int alt) {
+        reveal_hiding(ch, 0);
+        GET_ALT(ch) = alt;
+        ch->affected_by.set(AFF_FLYING);
+        if (SITS(ch)) {
+            SITTING(SITS(ch)) = nullptr;
+            SITS(ch) = nullptr;
+        }
+        GET_POS(ch) = POS_STANDING;
+        if(!IS_ANDROID(ch))
+            ch->modCurVitalDam(CharVital::Ki, 0.01);
+    };
+
+    auto ki_check = [ch](const char *msg) {
+        if (!IS_ANDROID(ch) && ch->getCurVitalDam(CharVital::Ki) < 0.01) {
+            send_to_char(ch, "You do not have the ki to %s.\r\n", msg);
+            return false;
+        }
+        return true;
+    };
+
+    if (!strcasecmp("high", arg)) {
+        if(!ki_check("fly high")) return;
+        reveal_hiding(ch, 0);
+        act("@WYou rocket high into the sky.@n", true, ch, nullptr, nullptr, TO_CHAR);
+        act("@W$n rockets high into the sky.@n", true, ch, nullptr, nullptr, TO_ROOM);
+        set_flying(2);
+        return;
+    }
+
+    if (*arg) {
+        send_to_char(ch, "Fly where?\r\n");
+        return;
+    }
+
+    // Handle landing and taking off based on current status and environment
+    auto tile = ch->getLocationTileType();
+    if (AFF_FLAGGED(ch, AFF_FLYING)) {
+        if (tile != SECT_FLYING && tile != SECT_SPACE) {
+            act("@WYou slowly settle down to the ground.@n", true, ch, nullptr, nullptr, TO_CHAR);
+            act("@W$n slowly settles down to the ground.@n", true, ch, nullptr, nullptr, TO_ROOM);
+        } else if (tile == SECT_FLYING) {
+            act("@WYou begin to plummet to the ground!@n", true, ch, nullptr, nullptr, TO_CHAR);
+            act("@W$n starts to plummet to the ground below!@n", true, ch, nullptr, nullptr, TO_ROOM);
+            handle_fall(ch);
+        } else if (tile == SECT_SPACE) {
+            act("@WYou let yourself drift aimlessly through space.@n", true, ch, nullptr, nullptr, TO_CHAR);
+            act("@W$n starts to drift slowly!@n", true, ch, nullptr, nullptr, TO_ROOM);
+        }
+        ch->affected_by.reset(AFF_FLYING);
+        GET_ALT(ch) = 0;
+        return;
+    }
+
+    if(!ki_check("fly")) return;
+
+    // Taking off if not already flying
+    reveal_hiding(ch, 0);
+    act("@WYou slowly take off into the sky.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act("@W$n slowly takes off into the sky.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    set_flying(1);
 }
 
 static void autochair(struct char_data *ch, struct obj_data *chair) {
@@ -2315,58 +2307,59 @@ ACMD(do_sit) {
                 GET_POS(ch) = POS_SITTING;
                 break;
         }
-    } else {
-        if (SITS(ch)) {
-            send_to_char(ch, "You are already on something!\r\n");
-            return;
-        }
-        if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
-            send_to_char(ch, "That isn't here.\r\n");
-            return;
-        }
-        if (GET_OBJ_VNUM(chair) == 65) {
-            send_to_char(ch, "You can't get on that!\r\n");
-            return;
-        }
-        if (SITTING(chair)) {
-            send_to_char(ch, "Someone is already on that one!\r\n");
-            return;
-        }
-        if (GET_OBJ_TYPE(chair) != ITEM_CHAIR && GET_OBJ_TYPE(chair) != ITEM_BED) {
-            send_to_char(ch, "You can't sit on that!\r\n");
-            return;
-        }
-        if (GET_OBJ_SIZE(chair) + 1 < get_size(ch)) {
-            send_to_char(ch, "You are too large for it!\r\n");
-            return;
-        }
-        switch (GET_POS(ch)) {
-            case POS_STANDING:
-                reveal_hiding(ch, 0);
-                act("You sit down on $p.", false, ch, chair, nullptr, TO_CHAR);
-                act("$n sits down on $p.", false, ch, chair, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_SITTING;
-                SITS(ch) = chair;
-                SITTING(chair) = ch;
-                break;
-            case POS_SITTING:
-                send_to_char(ch, "You should stand up first.\r\n");
-                break;
-            case POS_RESTING:
-                send_to_char(ch, "You should stand up first.\r\n");
-                break;
-            case POS_SLEEPING:
-                send_to_char(ch, "You have to wake up first.\r\n");
-                break;
-            case POS_FIGHTING:
-                send_to_char(ch, "Sit down while fighting? Are you MAD?\r\n");
-                break;
-            default:
-                send_to_char(ch, "You stop floating around, and sit down.\r\n");
-                act("$n stops floating around, and sits down.", true, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_SITTING;
-                break;
-        }
+        return;
+    }
+
+    if (SITS(ch)) {
+        send_to_char(ch, "You are already on something!\r\n");
+        return;
+    }
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+        send_to_char(ch, "That isn't here.\r\n");
+        return;
+    }
+    if (GET_OBJ_VNUM(chair) == 65) {
+        send_to_char(ch, "You can't get on that!\r\n");
+        return;
+    }
+    if (SITTING(chair)) {
+        send_to_char(ch, "Someone is already on that one!\r\n");
+        return;
+    }
+    if (GET_OBJ_TYPE(chair) != ITEM_CHAIR && GET_OBJ_TYPE(chair) != ITEM_BED) {
+        send_to_char(ch, "You can't sit on that!\r\n");
+        return;
+    }
+    if (GET_OBJ_SIZE(chair) + 1 < get_size(ch)) {
+        send_to_char(ch, "You are too large for it!\r\n");
+        return;
+    }
+    switch (GET_POS(ch)) {
+        case POS_STANDING:
+            reveal_hiding(ch, 0);
+            act("You sit down on $p.", false, ch, chair, nullptr, TO_CHAR);
+            act("$n sits down on $p.", false, ch, chair, nullptr, TO_ROOM);
+            GET_POS(ch) = POS_SITTING;
+            SITS(ch) = chair;
+            SITTING(chair) = ch;
+            break;
+        case POS_SITTING:
+            send_to_char(ch, "You should stand up first.\r\n");
+            break;
+        case POS_RESTING:
+            send_to_char(ch, "You should stand up first.\r\n");
+            break;
+        case POS_SLEEPING:
+            send_to_char(ch, "You have to wake up first.\r\n");
+            break;
+        case POS_FIGHTING:
+            send_to_char(ch, "Sit down while fighting? Are you MAD?\r\n");
+            break;
+        default:
+            send_to_char(ch, "You stop floating around, and sit down.\r\n");
+            act("$n stops floating around, and sits down.", true, ch, nullptr, nullptr, TO_ROOM);
+            GET_POS(ch) = POS_SITTING;
+            break;
     }
 }
 
@@ -2457,60 +2450,60 @@ ACMD(do_rest) {
                 GET_POS(ch) = POS_RESTING;
                 break;
         }
-    } else {
-        if (SITS(ch)) {
-            send_to_char(ch, "You are already on something!\r\n");
-            return;
-        }
-        if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
-            send_to_char(ch, "That isn't here.\r\n");
-            return;
-        }
-        if (GET_OBJ_VNUM(chair) == 65) {
-            send_to_char(ch, "You can't get on that!\r\n");
-            return;
-        }
-        if (SITTING(chair)) {
-            send_to_char(ch, "Someone is already on that one!\r\n");
-            return;
-        }
-        if (GET_OBJ_TYPE(chair) != ITEM_BED) {
-            send_to_char(ch, "You can't lay on that!\r\n");
-            return;
-        }
-        if (GET_OBJ_SIZE(chair) + 1 < get_size(ch)) {
-            send_to_char(ch, "You are too large for it!\r\n");
-            return;
-        }
-        switch (GET_POS(ch)) {
-            case POS_STANDING:
-                reveal_hiding(ch, 0);
-                act("You lay down and rest on $p.", true, ch, chair, nullptr, TO_CHAR);
-                act("$n lays down and rests on $p.", true, ch, chair, nullptr, TO_ROOM);
-                SITS(ch) = chair;
-                SITTING(chair) = ch;
-                GET_POS(ch) = POS_RESTING;
-                ch->removeLimitBreak();
-                break;
-            case POS_SITTING:
-                send_to_char(ch, "You should get up first.\r\n");
-                break;
-            case POS_RESTING:
-                send_to_char(ch, "You are already resting.\r\n");
-                break;
-            case POS_SLEEPING:
-                send_to_char(ch, "You have to wake up first.\r\n");
-                break;
-            case POS_FIGHTING:
-                send_to_char(ch, "Rest while fighting?  Are you MAD?\r\n");
-                break;
-            default:
-                send_to_char(ch, "You stop floating around, and stop to rest your tired bones.\r\n");
-                act("$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_RESTING;
-                ch->removeLimitBreak();
-                break;
-        }
+        return;
+    }
+    if (SITS(ch)) {
+        send_to_char(ch, "You are already on something!\r\n");
+        return;
+    }
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+        send_to_char(ch, "That isn't here.\r\n");
+        return;
+    }
+    if (GET_OBJ_VNUM(chair) == 65) {
+        send_to_char(ch, "You can't get on that!\r\n");
+        return;
+    }
+    if (SITTING(chair)) {
+        send_to_char(ch, "Someone is already on that one!\r\n");
+        return;
+    }
+    if (GET_OBJ_TYPE(chair) != ITEM_BED) {
+        send_to_char(ch, "You can't lay on that!\r\n");
+        return;
+    }
+    if (GET_OBJ_SIZE(chair) + 1 < get_size(ch)) {
+        send_to_char(ch, "You are too large for it!\r\n");
+        return;
+    }
+    switch (GET_POS(ch)) {
+        case POS_STANDING:
+            reveal_hiding(ch, 0);
+            act("You lay down and rest on $p.", true, ch, chair, nullptr, TO_CHAR);
+            act("$n lays down and rests on $p.", true, ch, chair, nullptr, TO_ROOM);
+            SITS(ch) = chair;
+            SITTING(chair) = ch;
+            GET_POS(ch) = POS_RESTING;
+            ch->removeLimitBreak();
+            break;
+        case POS_SITTING:
+            send_to_char(ch, "You should get up first.\r\n");
+            break;
+        case POS_RESTING:
+            send_to_char(ch, "You are already resting.\r\n");
+            break;
+        case POS_SLEEPING:
+            send_to_char(ch, "You have to wake up first.\r\n");
+            break;
+        case POS_FIGHTING:
+            send_to_char(ch, "Rest while fighting?  Are you MAD?\r\n");
+            break;
+        default:
+            send_to_char(ch, "You stop floating around, and stop to rest your tired bones.\r\n");
+            act("$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
+            GET_POS(ch) = POS_RESTING;
+            ch->removeLimitBreak();
+            break;
     }
 }
 
@@ -2631,73 +2624,73 @@ ACMD(do_sleep) {
                 ch->removeLimitBreak();
                 break;
         }
-    } else {
-        if (SITS(ch)) {
-            send_to_char(ch, "You are already on something!\r\n");
-            return;
-        }
-        if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
-            send_to_char(ch, "That isn't here.\r\n");
-            return;
-        }
-        if (GET_OBJ_VNUM(chair) == 65) {
-            send_to_char(ch, "You can't get on that!\r\n");
-            return;
-        }
-        if (SITTING(chair)) {
-            send_to_char(ch, "Someone is already on that one!\r\n");
-            return;
-        }
-        if (GET_OBJ_TYPE(chair) != ITEM_BED) {
-            send_to_char(ch, "You can't sleep on that!\r\n");
-            return;
-        }
-        if (GET_OBJ_SIZE(chair) + 1 < get_size(ch)) {
-            send_to_char(ch, "You are too large for it!\r\n");
-            return;
-        }
-        switch (GET_POS(ch)) {
-            case POS_RESTING:
-            case POS_SITTING:
-                send_to_char(ch, "You need to get up first!\r\n");
-                break;
-            case POS_STANDING:
-                reveal_hiding(ch, 0);
-                act("You lay down on $p and sleep.", false, ch, chair, nullptr, TO_CHAR);
-                act("$n lays down on $p and sleeps.", false, ch, chair, nullptr, TO_ROOM);
-                ch->removeLimitBreak();
-                /* Fury Mode Loss for halfbreeds */
+        return;
+    }
+    if (SITS(ch)) {
+        send_to_char(ch, "You are already on something!\r\n");
+        return;
+    }
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+        send_to_char(ch, "That isn't here.\r\n");
+        return;
+    }
+    if (GET_OBJ_VNUM(chair) == 65) {
+        send_to_char(ch, "You can't get on that!\r\n");
+        return;
+    }
+    if (SITTING(chair)) {
+        send_to_char(ch, "Someone is already on that one!\r\n");
+        return;
+    }
+    if (GET_OBJ_TYPE(chair) != ITEM_BED) {
+        send_to_char(ch, "You can't sleep on that!\r\n");
+        return;
+    }
+    if (GET_OBJ_SIZE(chair) + 1 < get_size(ch)) {
+        send_to_char(ch, "You are too large for it!\r\n");
+        return;
+    }
+    switch (GET_POS(ch)) {
+        case POS_RESTING:
+        case POS_SITTING:
+            send_to_char(ch, "You need to get up first!\r\n");
+            break;
+        case POS_STANDING:
+            reveal_hiding(ch, 0);
+            act("You lay down on $p and sleep.", false, ch, chair, nullptr, TO_CHAR);
+            act("$n lays down on $p and sleeps.", false, ch, chair, nullptr, TO_ROOM);
+            ch->removeLimitBreak();
+            /* Fury Mode Loss for halfbreeds */
 
-                if (PLR_FLAGGED(ch, PLR_FURY)) {
-                    send_to_char(ch,
-                                 "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-                    ch->playerFlags.reset(PLR_FURY);
-                }
+            if (PLR_FLAGGED(ch, PLR_FURY)) {
+                send_to_char(ch,
+                                "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
+                ch->playerFlags.reset(PLR_FURY);
+            }
 
-                /* Fury Mode Loss for halfbreeds */
+            /* Fury Mode Loss for halfbreeds */
 
-                if (GET_STUPIDKISS(ch) > 0) {
-                    GET_STUPIDKISS(ch) = 0;
-                    send_to_char(ch, "You forget about that stupid kiss.\r\n");
-                }
-                SITS(ch) = chair;
-                SITTING(chair) = ch;
-                GET_POS(ch) = POS_SLEEPING;
-                break;
-            case POS_SLEEPING:
-                send_to_char(ch, "You are already sound asleep.\r\n");
-                break;
-            case POS_FIGHTING:
-                send_to_char(ch, "Sleep while fighting?  Are you MAD?\r\n");
-                break;
-            default:
-                send_to_char(ch, "You stop floating around, and lie down to sleep.\r\n");
-                act("$n stops floating around, and lie down to sleep.",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_SLEEPING;
-                ch->removeLimitBreak();
-                break;
-        }
+            if (GET_STUPIDKISS(ch) > 0) {
+                GET_STUPIDKISS(ch) = 0;
+                send_to_char(ch, "You forget about that stupid kiss.\r\n");
+            }
+            SITS(ch) = chair;
+            SITTING(chair) = ch;
+            GET_POS(ch) = POS_SLEEPING;
+            break;
+        case POS_SLEEPING:
+            send_to_char(ch, "You are already sound asleep.\r\n");
+            break;
+        case POS_FIGHTING:
+            send_to_char(ch, "Sleep while fighting?  Are you MAD?\r\n");
+            break;
+        default:
+            send_to_char(ch, "You stop floating around, and lie down to sleep.\r\n");
+            act("$n stops floating around, and lie down to sleep.",
+                true, ch, nullptr, nullptr, TO_ROOM);
+            GET_POS(ch) = POS_SLEEPING;
+            ch->removeLimitBreak();
+            break;
     }
 }
 
@@ -2808,23 +2801,25 @@ ACMD(do_follow) {
     }
     if (AFF_FLAGGED(ch, AFF_CHARM) && (ch->master)) {
         act("But you only feel like following $N!", false, ch, nullptr, ch->master, TO_CHAR);
-    } else {            /* Not Charmed follow person */
-        if (leader == ch) {
-            if (!ch->master) {
-                send_to_char(ch, "You are already following yourself.\r\n");
-                return;
-            }
-            stop_follower(ch);
-        } else {
-            if (circle_follow(ch, leader)) {
-                send_to_char(ch, "Sorry, but following in loops is not allowed.\r\n");
-                return;
-            }
-            if (ch->master)
-                stop_follower(ch);
-            ch->affected_by.reset(AFF_GROUP);
-            reveal_hiding(ch, 0);
-            add_follower(ch, leader);
-        }
+        return;
     }
+    
+    /* Not Charmed follow person */
+    if (leader == ch) {
+        if (!ch->master) {
+            send_to_char(ch, "You are already following yourself.\r\n");
+            return;
+        }
+        stop_follower(ch);
+        return;
+    }
+    if (circle_follow(ch, leader)) {
+        send_to_char(ch, "Sorry, but following in loops is not allowed.\r\n");
+        return;
+    }
+    if (ch->master)
+        stop_follower(ch);
+    ch->affected_by.reset(AFF_GROUP);
+    reveal_hiding(ch, 0);
+    add_follower(ch, leader);
 }

@@ -922,7 +922,7 @@ const char *item_types[NUM_ITEM_TYPES + 1] = {
         "BOARD",
         "CHAIR",
         "BED",
-        "YUM",
+        "UNUSED",
         "PLANT",
         "FISHINGPOLE",
         "FISHBAIT",

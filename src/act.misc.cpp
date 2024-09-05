@@ -47,107 +47,99 @@ ACMD(do_spiritcontrol) {
     if (!GET_SKILL(ch, SKILL_SPIRITCONTROL)) {
         send_to_char(ch, "You do not know how to perform that technique.\r\n");
         return;
-    } else {
-        if (AFF_FLAGGED(ch, AFF_SPIRITCONTROL)) {
-            send_to_char(ch, "You have already concentrated and have full control of your spirit.\r\n");
-            return;
-        } else {
-            int64_t cost = GET_MAX_MANA(ch) * 0.2;
-            if ((ch->getCurST()) < cost) {
-                send_to_char(ch, "You need at least 20%s of your max ki in stamina to prepare this skill.\r\n", "%");
-                return;
-            } else {
-                ch->decCurST(cost);
-                act("@YYou concentrate and quantify every last bit of your spiritual and mental energies. You have full control of them and can bring them forth in an instant.@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@y$n@Y seems to concentrate hard for a moment.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                int duration = rand_number(2, 4);
-                assign_affect(ch, AFF_SPIRITCONTROL, SKILL_SPIRITCONTROL, duration, 0, 0, 0, 0, 0, 0);
-            }
-        }
     }
+    if (AFF_FLAGGED(ch, AFF_SPIRITCONTROL)) {
+        send_to_char(ch, "You have already concentrated and have full control of your spirit.\r\n");
+        return;
+    }
+
+    if (ch->getCurVitalDam(CharVital::Ki) >= 0.8) {
+        send_to_char(ch, "You need at least 20%s of your max ki in stamina to prepare this skill.\r\n", "%");
+        return;
+    }
+    ch->modCurVitalDam(CharVital::Ki, 0.2);
+
+    act("@YYou concentrate and quantify every last bit of your spiritual and mental energies. You have full control of them and can bring them forth in an instant.@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@y$n@Y seems to concentrate hard for a moment.@n", true, ch, nullptr, nullptr, TO_ROOM);
+    int duration = rand_number(2, 4);
+    assign_affect(ch, AFF_SPIRITCONTROL, SKILL_SPIRITCONTROL, duration, 0, 0, 0, 0, 0, 0);
 }
 
 ACMD(do_tailhide) {
 
-    if (IS_NPC(ch))
-        return;
-
-    if (!(IS_SAIYAN(ch)) && !(IS_HALFBREED(ch))) {
+    if (!(IS_SAIYAN(ch)) || (IS_HALFBREED(ch))) {
         send_to_char(ch, "You have no need to hide your tail!\r\n");
+        return;
     }
-    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !(PLR_FLAGGED(ch, PLR_TAILHIDE))) {
-        ch->playerFlags.set(PLR_TAILHIDE);
-        send_to_char(ch, "You have decided to hide your tail!\r\n");
-    } else if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_TAILHIDE)) {
-        ch->playerFlags.reset(PLR_TAILHIDE);
-        send_to_char(ch, "You have decided to display your tail for all to see!\r\n");
-    }
+
+    const char *message = ch->playerFlags.flip(PLR_TAILHIDE).test(PLR_TAILHIDE) ? "display your tail for all to see!" : "hide your tail!";
+
+    send_to_char(ch, "You have decided to %s\r\n", message);
 }
 
 ACMD(do_nogrow) {
 
-    if (IS_NPC(ch))
-        return;
-
-    if (!(IS_SAIYAN(ch)) && !(IS_HALFBREED(ch))) {
+    if (!(IS_SAIYAN(ch)) || (IS_HALFBREED(ch))) {
         send_to_char(ch, "What do you mean?\r\n");
+        return;
     }
-    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && !(PLR_FLAGGED(ch, PLR_NOGROW))) {
-        ch->playerFlags.set(PLR_NOGROW);
-        send_to_char(ch, "You have decided to halt your tail growth!\r\n");
-    } else if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && PLR_FLAGGED(ch, PLR_NOGROW)) {
-        ch->playerFlags.reset(PLR_NOGROW);
-        send_to_char(ch, "You have decided to regrow your tail!\r\n");
-    }
+
+    const char *message = ch->playerFlags.flip(PLR_NOGROW).test(PLR_NOGROW) ? "halt your tail growth" : "regrow your tail";
+
+    send_to_char(ch, "You have decided to %s\r\n", message);
 }
 
 ACMD(do_restring) {
 
     char arg[MAX_INPUT_LENGTH];
     struct obj_data *obj;
-    int pay = 0;
+    int pay = 5000;
 
     one_argument(argument, arg);
 
-    if (ch->getRoomVnum() >= 178 && ch->getRoomVnum() <= 184) {
-        pay = 5000;
-        if (GET_GOLD(ch) < pay) {
-            send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
-            return;
-        } else if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
-            send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
-            send_to_char(ch, "Syntax: restring (obj name)\r\n");
-            return;
-        } else if (OBJ_FLAGGED(obj, ITEM_CUSTOM)) {
-            send_to_char(ch,
-                         "You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
-            return;
-        } else {
-            STATE(ch->desc) = CON_POBJ;
-            char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
-
-            *thename = '\0';
-            *theshort = '\0';
-            *thelong = '\0';
-
-            sprintf(thename, "%s", obj->name);
-            sprintf(theshort, "%s", obj->short_description);
-            sprintf(thelong, "%s", obj->room_description);
-
-            ch->desc->obj_name = strdup(thename);
-            ch->desc->obj_was = strdup(theshort);
-            ch->desc->obj_short = strdup(theshort);
-            ch->desc->obj_long = strdup(thelong);
-            ch->desc->obj_point = obj;
-            ch->desc->obj_type = 1;
-            ch->desc->obj_weapon = 0;
-            disp_restring_menu(ch->desc);
-            ch->desc->obj_editflag = EDIT_RESTRING;
-            ch->desc->obj_editval = EDIT_RESTRING_MAIN;
-            return;
-        }
+    if (auto rvn = ch->getRoomVnum(); rvn < 178 && rvn > 184) {
+        return;
     }
+
+    if (GET_GOLD(ch) < pay) {
+        send_to_char(ch, "You need at least 5,000 zenni to initiate an equipment restring.\r\n");
+        return;
+    }
+    
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+        send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
+        send_to_char(ch, "Syntax: restring (obj name)\r\n");
+        return;
+    }
+
+    if (OBJ_FLAGGED(obj, ITEM_CUSTOM)) {
+        send_to_char(ch, "You can not restring a custom piece. Why? Because you already restrung it you dummy.\r\n");
+        return;
+    }
+
+    STATE(ch->desc) = CON_POBJ;
+    char thename[MAX_INPUT_LENGTH], theshort[MAX_INPUT_LENGTH], thelong[MAX_INPUT_LENGTH];
+
+    *thename = '\0';
+    *theshort = '\0';
+    *thelong = '\0';
+
+    sprintf(thename, "%s", obj->name);
+    sprintf(theshort, "%s", obj->short_description);
+    sprintf(thelong, "%s", obj->room_description);
+
+    ch->desc->obj_name = strdup(thename);
+    ch->desc->obj_was = strdup(theshort);
+    ch->desc->obj_short = strdup(theshort);
+    ch->desc->obj_long = strdup(thelong);
+    ch->desc->obj_point = obj;
+    ch->desc->obj_type = 1;
+    ch->desc->obj_weapon = 0;
+    disp_restring_menu(ch->desc);
+    ch->desc->obj_editflag = EDIT_RESTRING;
+    ch->desc->obj_editval = EDIT_RESTRING_MAIN;
+    
 }
 
 ACMD(do_multiform) {
@@ -184,48 +176,47 @@ ACMD(do_multiform) {
         return;
     }
 
-    if (!strcasecmp(arg, "split")) {
-        int64_t cost = (GET_MAX_MANA(ch) * 0.005) + (GET_MAX_MOVE(ch) * 0.005) + 2;
-        int penalty = 0;
-
-        if (FIGHTING(ch)) {
-            penalty = rand_number(8, 15);
-        }
-
-        int roll = axion_dice(penalty);
-
-        cost *= (GET_SKILL(ch, SKILL_MULTIFORM) * 0.2);
-
-        if ((ch->getCurKI()) < cost) {
-            send_to_char(ch, "You do not have enough ki to split!\r\n");
-            return;
-        }
-        if ((ch->getCurST()) < cost) {
-            send_to_char(ch, "You do not have enough stamina to split!\r\n");
-            return;
-        }
-        improve_skill(ch, SKILL_MULTIFORM, 1);
-
-
-        if (GET_SKILL(ch, SKILL_MULTIFORM) < roll) {
-            act("@YYou focus your ki into your body while concentrating on the image of your body splitting into two. @yYou lose your concentration and fail to split though...@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@y$n@Y seems to concentrate really hard for a moment, before relaxing.@n", true, ch, nullptr, nullptr,
-                TO_ROOM);
-            ch->decCurST(cost);
-            ch->decCurKI(cost);
-            return;
-        }
-        act("@YYou focus your ki into your body while concentrating on the image of your body splitting into two. Another you splits out of your body!@n",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@YSuddenly @y$n@Y seems to concentrates really and after a brief moment splits into two copies of $mself!@n",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        generate_multiform(ch, 1);
-        return;
-    } else {
+    if (strcasecmp(arg, "split")) {
         send_to_char(ch, "Huh? Try help multiform\r\n");
         return;
     }
+
+    int64_t cost = (GET_MAX_MANA(ch) * 0.005) + (GET_MAX_MOVE(ch) * 0.005) + 2;
+    int penalty = 0;
+
+    if (FIGHTING(ch)) {
+        penalty = rand_number(8, 15);
+    }
+
+    int roll = axion_dice(penalty);
+
+    cost *= (GET_SKILL(ch, SKILL_MULTIFORM) * 0.2);
+
+    if ((ch->getCurKI()) < cost) {
+        send_to_char(ch, "You do not have enough ki to split!\r\n");
+        return;
+    }
+    if ((ch->getCurST()) < cost) {
+        send_to_char(ch, "You do not have enough stamina to split!\r\n");
+        return;
+    }
+    improve_skill(ch, SKILL_MULTIFORM, 1);
+
+
+    if (GET_SKILL(ch, SKILL_MULTIFORM) < roll) {
+        act("@YYou focus your ki into your body while concentrating on the image of your body splitting into two. @yYou lose your concentration and fail to split though...@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@y$n@Y seems to concentrate really hard for a moment, before relaxing.@n", true, ch, nullptr, nullptr,
+            TO_ROOM);
+        ch->decCurST(cost);
+        ch->decCurKI(cost);
+        return;
+    }
+    act("@YYou focus your ki into your body while concentrating on the image of your body splitting into two. Another you splits out of your body!@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@YSuddenly @y$n@Y seems to concentrates really and after a brief moment splits into two copies of $mself!@n",
+        true, ch, nullptr, nullptr, TO_ROOM);
+    generate_multiform(ch, 1);
 
 }
 
@@ -348,20 +339,20 @@ static void resolve_song(struct char_data *ch) {
         return;
     }
 
-    if (skill > diceroll) {
-        sprintf(buf, "@c$n@C continues playing @y'@Y%s@y'@C.@n",
-                GET_SONG(ch) == SONG_SAFETY ? "Song of Safety" : (GET_SONG(ch) == SONG_SHIELDING ? "Song of Shielding"
-                                                                                                 : (GET_SONG(ch) ==
-                                                                                                    SONG_SHADOW_STITCH
-                                                                                                    ? "Shadow Stitch Minuet"
-                                                                                                    : "Teleportation Melody")));
-        act("@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
-        act(buf, true, ch, nullptr, nullptr, TO_ROOM);
-    } else {
+    if(skill <= diceroll) {
         act("@CYou mess up a portion of the song, but continue playing.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C messes up a portion of $s song, but continues to play.@n", true, ch, nullptr, nullptr, TO_ROOM);
         return;
     }
+
+    sprintf(buf, "@c$n@C continues playing @y'@Y%s@y'@C.@n",
+            GET_SONG(ch) == SONG_SAFETY ? "Song of Safety" : (GET_SONG(ch) == SONG_SHIELDING ? "Song of Shielding"
+                                                                                                : (GET_SONG(ch) ==
+                                                                                                SONG_SHADOW_STITCH
+                                                                                                ? "Shadow Stitch Minuet"
+                                                                                                : "Teleportation Melody")));
+    act("@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
+    act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
     for (vict = ch->getRoom()->people; vict; vict = next_v) {
         next_v = vict->next_in_room;
@@ -747,126 +738,141 @@ ACMD(do_song) {
         act("@c$n stops playing their ocarina.@n", true, ch, nullptr, nullptr, TO_ROOM);
         ch->set(CharNum::MysticMelody, 0);
         return;
-    } else {
+    }
+    char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+    int skill = GET_SKILL(ch, SKILL_MYSTICMUSIC);
 
-        char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-        int skill = GET_SKILL(ch, SKILL_MYSTICMUSIC);
+    two_arguments(argument, arg, arg2);
+    if (!*arg) {
+        send_to_char(ch, "@YSongs Known\n@c-------------------@n\r\n");
+        send_to_char(ch, "@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "",
+                        skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
+        send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+        return;
+    }
+    int64_t cost = GET_MAX_MANA(ch) * 0.01;
+    int modifier = 1;
+    if (!strcasecmp(arg, "shielding")) {
+        modifier = 20;
+        cost *= modifier;
+    } else if (!strcasecmp(arg, "teleport")) {
+        modifier = 50;
+        cost *= modifier;
+    } else if (!strcasecmp(arg, "shadow")) {
+        modifier = 8;
+        cost *= modifier;
+    } else if (!strcasecmp(arg, "safety")) {
+        modifier = 3;
+        cost *= modifier;
+    }
 
-        two_arguments(argument, arg, arg2);
-        if (!*arg) {
-            send_to_char(ch, "@YSongs Known\n@c-------------------@n\r\n");
-            send_to_char(ch, "@W%s%s%sSong of Safety\r\n", skill > 99 ? "Song of Shielding\n" : "",
-                         skill > 80 ? "Melody of Teleportation\n" : "", skill > 50 ? "Shadow Stitch Minuet\n" : "");
-            send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+    if (instrument == 8802) {
+        cost -= cost * 0.5;
+    }
+
+    if (modifier == 0) {
+        send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
+        return;
+    }
+    
+    if (modifier == 3 && (ch->getCurKI()) < cost) {
+        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+        return;
+    }
+    
+    if (modifier == 3) {
+        act("@CYou begin to play the Song of Safety! Your fingers lightly glide over the ocarina and as you blow into it sweet music similar to a lullaby issues forth from the intrument.@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", true,
+            ch, nullptr, nullptr, TO_ROOM);
+        ch->set(CharNum::MysticMelody, SONG_SAFETY);
+        ch->decCurKI(cost);
+        return;
+    }
+    if (modifier == 8 && (ch->getCurKI()) < cost) {
+        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+        return;
+    }
+    if (modifier == 8 && skill <= 49) {
+        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+        return;
+    }
+
+    if (modifier == 8) {
+        act("@CYou begin to play the Shadow Stitch Minuet! Your fingers lightly glide over the ocarina and as you blow into it forboding low toned music issues forth.@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        ch->set(CharNum::MysticMelody, SONG_SHADOW_STITCH);
+        ch->decCurKI(cost);
+        return;
+    }
+    
+    if (modifier == 50 && (ch->getCurKI()) < cost) {
+        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+        return;
+    }
+    
+    if (modifier == 50 && skill <= 79) {
+        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+        return;
+    }
+    
+    if (modifier == 50) {
+        if (!*arg2) {
+            send_to_char(ch,
+                            "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
             return;
-        } else {
-            int64_t cost = GET_MAX_MANA(ch) * 0.01;
-            int modifier = 1;
-            if (!strcasecmp(arg, "shielding")) {
-                modifier = 20;
-                cost *= modifier;
-            } else if (!strcasecmp(arg, "teleport")) {
-                modifier = 50;
-                cost *= modifier;
-            } else if (!strcasecmp(arg, "shadow")) {
-                modifier = 8;
-                cost *= modifier;
-            } else if (!strcasecmp(arg, "safety")) {
-                modifier = 3;
-                cost *= modifier;
-            }
-
-            if (instrument == 8802) {
-                cost -= cost * 0.5;
-            }
-
-            if (modifier == 0) {
-                send_to_char(ch, "@wSyntax: song (shielding | safety | teleport | shadow )\r\n");
-                return;
-            } else if (modifier == 3 && (ch->getCurKI()) < cost) {
-                send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
-                return;
-            } else if (modifier == 3) {
-                act("@CYou begin to play the Song of Safety! Your fingers lightly glide over the ocarina and as you blow into it sweet music similar to a lullaby issues forth from the intrument.@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", true,
-                    ch, nullptr, nullptr, TO_ROOM);
-                ch->set(CharNum::MysticMelody, SONG_SAFETY);
-                ch->decCurKI(cost);
-                return;
-            } else if (modifier == 8 && (ch->getCurKI()) < cost) {
-                send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
-                return;
-            } else if (modifier == 8 && skill <= 49) {
-                send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
-                return;
-            } else if (modifier == 8) {
-                act("@CYou begin to play the Shadow Stitch Minuet! Your fingers lightly glide over the ocarina and as you blow into it forboding low toned music issues forth.@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                ch->set(CharNum::MysticMelody, SONG_SHADOW_STITCH);
-                ch->decCurKI(cost);
-                return;
-            } else if (modifier == 50 && (ch->getCurKI()) < cost) {
-                send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
-                return;
-            } else if (modifier == 50 && skill <= 79) {
-                send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
-                return;
-            } else if (modifier == 50) {
-                if (!*arg2) {
-                    send_to_char(ch,
-                                 "Where would you like to teleport to?\nSyntax: song teleport (earth | vegeta | kanassa | arlia | aether | namek | konack| frigid)\r\n");
-                    return;
-                } else if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
-                    send_to_char(ch, "Not while you're dead!\r\n");
-                    return;
-                } else if (!strcasecmp(arg2, "earth")) {
-                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_EARTH);
-                } else if (!strcasecmp(arg2, "frigid")) {
-                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_FRIGID);
-                } else if (!strcasecmp(arg2, "vegeta")) {
-                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_VEGETA);
-                } else if (!strcasecmp(arg2, "namek")) {
-                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_NAMEK);
-                } else if (!strcasecmp(arg2, "arlia")) {
-                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_ARLIA);
-                } else if (!strcasecmp(arg2, "kanassa")) {
-                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_KANASSA);
-                } else if (!strcasecmp(arg2, "konack")) {
-                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_KONACK);
-                } else if (!strcasecmp(arg2, "aether")) {
-                    ch->set(CharNum::MysticMelody, SONG_TELEPORT_AETHER);
-                } else {
-                    send_to_char(ch,
-                                 "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
-                    return;
-                }
-                act("@CYou begin to play the Melody of Teleportation! Your fingers lightly glide over the ocarina and as you blow into it a repeating light hearted melody issues forth.@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@c$n@C begins to play a song on $s ocarina. A light hearted melody can be heard sounding from the ocarina as it is played.@n",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                ch->decCurKI(cost);
-                return;
-            } else if (modifier == 20 && (ch->getCurKI()) < cost) {
-                send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
-                return;
-            } else if (modifier == 20 && skill <= 98) {
-                send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
-                return;
-            } else if (modifier == 20) {
-                act("@CYou begin to play the Song of Shielding! Your fingers lightly glide over the ocarina and as you blow into it a triumphant series of notes issues forth.@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                ch->set(CharNum::MysticMelody, SONG_SHIELDING);
-                ch->decCurKI(cost);
-                return;
-            }
-
         }
-
+        if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
+            send_to_char(ch, "Not while you're dead!\r\n");
+            return;
+        }
+        
+        if (!strcasecmp(arg2, "earth")) {
+            ch->set(CharNum::MysticMelody, SONG_TELEPORT_EARTH);
+        } else if (!strcasecmp(arg2, "frigid")) {
+            ch->set(CharNum::MysticMelody, SONG_TELEPORT_FRIGID);
+        } else if (!strcasecmp(arg2, "vegeta")) {
+            ch->set(CharNum::MysticMelody, SONG_TELEPORT_VEGETA);
+        } else if (!strcasecmp(arg2, "namek")) {
+            ch->set(CharNum::MysticMelody, SONG_TELEPORT_NAMEK);
+        } else if (!strcasecmp(arg2, "arlia")) {
+            ch->set(CharNum::MysticMelody, SONG_TELEPORT_ARLIA);
+        } else if (!strcasecmp(arg2, "kanassa")) {
+            ch->set(CharNum::MysticMelody, SONG_TELEPORT_KANASSA);
+        } else if (!strcasecmp(arg2, "konack")) {
+            ch->set(CharNum::MysticMelody, SONG_TELEPORT_KONACK);
+        } else if (!strcasecmp(arg2, "aether")) {
+            ch->set(CharNum::MysticMelody, SONG_TELEPORT_AETHER);
+        } else {
+            send_to_char(ch,
+                            "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
+            return;
+        }
+        act("@CYou begin to play the Melody of Teleportation! Your fingers lightly glide over the ocarina and as you blow into it a repeating light hearted melody issues forth.@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@c$n@C begins to play a song on $s ocarina. A light hearted melody can be heard sounding from the ocarina as it is played.@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        ch->decCurKI(cost);
+        return;
+    }
+    if (modifier == 20 && (ch->getCurKI()) < cost) {
+        send_to_char(ch, "@wYou do not have enough ki to power the instrument for that song!@n\r\n");
+        return;
+    }
+    if (modifier == 20 && skill <= 98) {
+        send_to_char(ch, "You do not posess the skill to play such a song!\r\n");
+        return;
+    }
+    if (modifier == 20) {
+        act("@CYou begin to play the Song of Shielding! Your fingers lightly glide over the ocarina and as you blow into it a triumphant series of notes issues forth.@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        ch->set(CharNum::MysticMelody, SONG_SHIELDING);
+        ch->decCurKI(cost);
+        return;
     }
 }
 
@@ -1009,21 +1015,21 @@ ACMD(do_shell) {
     if ((ch->getCurST()) < GET_MAX_MOVE(ch) * 0.2) {
         send_to_char(ch, "You do not have enough stamina to grow your armored carapace.@n\r\n");
         return;
-    } else if (axion_dice(0) > GET_CON(ch) + rand_number(1, 10)) {
+    }
+    
+    if (axion_dice(0) > GET_CON(ch) + rand_number(1, 10)) {
         act("@mYou crouch down and begin to focus on your body's carapace cells encouraging them to multiply! However your control is lacking and you ultimately fail to grow your armor very much.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@M$n@m crouches down and seems to strain for a moment before giving up and resuming $s normal stance.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         return;
-    } else {
-        act("@mYou crouch down and begin to focus on your body's carapace cells, encouraging them to multiply! Very quickly millions of new carapace cells have been born and your armored carapace extends over all parts of your body!@n",
-            true, ch, nullptr, nullptr, TO_CHAR);
-        act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n",
-            true, ch, nullptr, nullptr, TO_ROOM);
-        ch->decCurSTPercent(.2);
-        ch->affected_by.set(AFF_SHELL);
-        return;
     }
+    act("@mYou crouch down and begin to focus on your body's carapace cells, encouraging them to multiply! Very quickly millions of new carapace cells have been born and your armored carapace extends over all parts of your body!@n",
+        true, ch, nullptr, nullptr, TO_CHAR);
+    act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n",
+        true, ch, nullptr, nullptr, TO_ROOM);
+    ch->decCurSTPercent(.2);
+    ch->affected_by.set(AFF_SHELL);
 }
 
 ACMD(do_liquefy) {
@@ -1083,16 +1089,15 @@ ACMD(do_liquefy) {
             ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
 
             return;
-        } else {
-            act("@MYour body starts to become loose and sag. It continues to droop down until it begins to run down like a river of goo flowing from where your body was.@n",
-                true, ch, nullptr, nullptr, TO_CHAR);
-            act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n",
-                true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
-            ch->affected_by.set(AFF_LIQUEFIED);
-            ch->affected_by.set(AFF_HIDE);
-            return;
         }
+        act("@MYour body starts to become loose and sag. It continues to droop down until it begins to run down like a river of goo flowing from where your body was.@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
+        ch->affected_by.set(AFF_LIQUEFIED);
+        ch->affected_by.set(AFF_HIDE);
+        return;
     } else if (!strcasecmp(arg, "explode")) {
         struct char_data *vict;
         if (GRAPPLED(ch)) {
@@ -1198,16 +1203,16 @@ ACMD(do_lifeforce) {
     if (setting > 99) {
         send_to_char(ch, "Syntax: life (1 - 99)\n%s isn't an acceptable percent.\r\n", add_commas(setting).c_str());
         return;
-    } else if (setting <= 0) {
+    }
+    
+    if (setting <= 0) {
         send_to_char(ch,
                      "Your will just isn't in the fight, huh?\nYou will not use up life force to maintain your PL period.\r\n");
         GET_LIFEPERC(ch) = 0;
         return;
-    } else {
-        send_to_char(ch, "Your life force will automatically kick in at %d%s of your optimal PL.\r\n", setting, "%");
-        GET_LIFEPERC(ch) = setting;
-        return;
     }
+    send_to_char(ch, "Your life force will automatically kick in at %d%s of your optimal PL.\r\n", setting, "%");
+    GET_LIFEPERC(ch) = setting;
 }
 
 ACMD(do_defend) {

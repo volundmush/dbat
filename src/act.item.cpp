@@ -3235,9 +3235,6 @@ ACMD(do_eat) {
     if (GET_FOODR(ch) == 0 && subcmd != SCMD_TASTE) {
         ch->incCurST((ch->getMaxST() / 100) * amount);
         GET_FOODR(ch) = 2;
-        if (OBJ_FLAGGED(food, ITEM_YUM)) {
-            ch->incCurSTPercent(.25);
-        }
         send_to_char(ch, "You feel rejuvinated by it.\r\n");
     }
 
@@ -3303,9 +3300,6 @@ ACMD(do_eat) {
                 ch->incCurHealthPercent(.05);
             } else {
                 ch->incCurHealthPercent(.1);
-            }
-            if (OBJ_FLAGGED(food, ITEM_YUM)) {
-                ch->incCurHealthPercent(.2);
             }
 
             send_to_char(ch, "@MYou feel some of your strength return!@n\r\n");
