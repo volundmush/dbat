@@ -15,12 +15,12 @@ include(${CPM_DOWNLOAD_LOCATION})
 
 project(circle)
 
-CPMAddPackage("gh:fmtlib/fmt#10.2.1")
+CPMAddPackage("gh:fmtlib/fmt#11.1.3")
 CPMAddPackage("gh:nlohmann/json#v3.11.3")
-CPMAddPackage("gh:gabime/spdlog#v1.14.1")
+CPMAddPackage("gh:gabime/spdlog#v1.15.0")
 CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 CPMAddPackage("gh:ilqvya/random#v1.5.0")
-CPMAddPackage("gh:Neargye/magic_enum#v0.9.6")
+CPMAddPackage("gh:Neargye/magic_enum#v0.9.7")
 CPMAddPackage("gh:tplgy/cppcodec#v0.2")
 
 find_package(Boost CONFIG REQUIRED COMPONENTS system program_options regex)
