@@ -16,6 +16,27 @@ static const std::unordered_map<int, int> planetFlags = {
     {ROOM_ARLIA, PLANET_ARLIA},
 };
 
+static const std::unordered_map<room_vnum, int> planetOrbits = {
+    {ORBIT_EARTH, PLANET_EARTH},
+    {ORBIT_VEGETA, PLANET_VEGETA},
+    {ORBIT_FRIGID, PLANET_FRIGID},
+    {ORBIT_NAMEK, PLANET_NAMEK},
+    {ORBIT_KONACK, PLANET_KONACK},
+    {ORBIT_AETHER, PLANET_AETHER},
+    {ORBIT_YARDRAT, PLANET_YARDRAT},
+    {ORBIT_KANASSA, PLANET_KANASSA},
+    {ORBIT_CERRIA, PLANET_CERRIA},
+    {ORBIT_ARLIA, PLANET_ARLIA},
+    {ORBIT_ZENITH, PLANET_ZENITH},
+};
+
+int checkOrbit(const room_vnum room) {
+    if(auto find = planetOrbits.find(room); find != planetOrbits.end()) {
+        return find->second;
+    }
+    return 0;
+}
+
 int getPlanet(const room_vnum room) {
     auto find = world.find(room);
     if(find == world.end()) return 0;
@@ -118,7 +139,10 @@ std::optional<double> getPlanetEnvironment(const int planet, const int environme
     return {};
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_earth = {
+using land_spots = std::vector<std::pair<std::string, room_vnum>>;
+
+
+static const land_spots land_earth = {
     {"Nexus City", 300},
     {"South Ocean", 800},
     {"Nexus Field", 1150},
@@ -134,7 +158,7 @@ static const std::vector<std::pair<std::string, room_vnum>> land_earth = {
     {"Satan City", 13020},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_frigid = {
+static const land_spots land_frigid = {
     {"Ice Crown City", 4264},
     {"Ice Highway", 4300},
     {"Topica Snowfield", 4351},
@@ -149,7 +173,7 @@ static const std::vector<std::pair<std::string, room_vnum>> land_frigid = {
     {"Koltoan Mine", 4944},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_konack = {
+static const land_spots land_konack = {
     {"Tiranoc City", 8006},
     {"Great Oroist Temple", 8300},
     {"Elzthuan Forest", 8400},
@@ -168,7 +192,7 @@ static const std::vector<std::pair<std::string, room_vnum>> land_konack = {
     {"Furian Citadel", 9949},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_vegeta = {
+static const land_spots land_vegeta = {
     {"Vegetos City", 2226},
     {"Blood Dunes", 2600},
     {"Ancestral Mountains", 2616},
@@ -178,7 +202,7 @@ static const std::vector<std::pair<std::string, room_vnum>> land_vegeta = {
     {"Ruby Cave", 2615},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_namek = {
+static const land_spots land_namek = {
     {"Senzu Village", 11600},
     {"Guru's House", 10182},
     {"Crystalline Cave", 10474},
@@ -187,7 +211,7 @@ static const std::vector<std::pair<std::string, room_vnum>> land_namek = {
     {"Kakureta Village", 10922},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_aether = {
+static const land_spots land_aether = {
     {"Haven City", 12010},
     {"Serenity Lake", 12103},
     {"Kaiju Forest", 12300},
@@ -195,54 +219,54 @@ static const std::vector<std::pair<std::string, room_vnum>> land_aether = {
     {"Silent Glade", 12480},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_yardrat = {
+static const land_spots land_yardrat = {
     {"Yardra City", 14008},
     {"Jade Forest", 14100},
     {"Jade Cliffs", 14200},
     {"Mount Valaria", 14300},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_kanassa = {
+static const land_spots land_kanassa = {
     {"Aquis City", 14904},
     {"Yunkai Pirate Base", 15655},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_cerria = {
+static const land_spots land_cerria = {
     {"Cerria Colony", 17531},
     {"Crystalline Forest", 7950},
     {"Fistarl Volcano", 17420},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_arlia = {
+static const land_spots land_arlia = {
     {"Janacre", 16009},
     {"Arlian Wasteland", 16544},
     {"Arlia Mine", 16600},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> land_zenith = {
+static const land_spots land_zenith = {
     {"Utatlan City", 3412},
     {"Zenith Jungle", 3520},
     {"Ancient Castle", 19600},
 };
 
-std::vector<std::pair<std::string, room_vnum>> getPlanetLandspots(const room_vnum orbit) {
+land_spots getPlanetLandspots(const room_vnum orbit) {
     switch(orbit) {
-        case ORBIT_EARTH: return land_earth;
-        case ORBIT_VEGETA: return land_vegeta;
-        case ORBIT_FRIGID: return land_frigid;
-        case ORBIT_NAMEK: return land_namek;
-        case ORBIT_KONACK: return land_konack;
-        case ORBIT_AETHER: return land_aether;
-        case ORBIT_YARDRAT: return land_yardrat;
-        case ORBIT_KANASSA: return land_kanassa;
-        case ORBIT_CERRIA: return land_cerria;
-        case ORBIT_ARLIA: return land_arlia;
-        case ORBIT_ZENITH: return land_zenith;
+        case PLANET_EARTH: return land_earth;
+        case PLANET_VEGETA: return land_vegeta;
+        case PLANET_FRIGID: return land_frigid;
+        case PLANET_NAMEK: return land_namek;
+        case PLANET_KONACK: return land_konack;
+        case PLANET_AETHER: return land_aether;
+        case PLANET_YARDRAT: return land_yardrat;
+        case PLANET_KANASSA: return land_kanassa;
+        case PLANET_CERRIA: return land_cerria;
+        case PLANET_ARLIA: return land_arlia;
+        case PLANET_ZENITH: return land_zenith;
         default: return {};
     }
 }
 
-void displayLandSpots(struct char_data *ch, const std::string& planet_name, const std::vector<std::pair<std::string, room_vnum>>& locations) {
+void displayLandSpots(struct char_data *ch, const std::string& planet_name, const land_spots& locations) {
     const int line_length = 60;  // Adjust the max line length as needed
     int current_length = 0;
 
@@ -272,7 +296,7 @@ void displayLandSpots(struct char_data *ch, const std::string& planet_name, cons
     send_to_char(ch, "@D---------------------------------------------@n\n");
 }
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_earth = {
+static const land_spots dock_earth = {
     {"1", 409},
     {"2", 411},
     {"3", 412},
@@ -292,7 +316,7 @@ static const std::vector<std::pair<std::string, room_vnum>> dock_earth = {
     {"Satan City", 13020},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_frigid = {
+static const land_spots dock_frigid = {
     {"1", 4264},
     {"2", 4263},
     {"3", 4261},
@@ -311,7 +335,7 @@ static const std::vector<std::pair<std::string, room_vnum>> dock_frigid = {
     {"Koltoan Mine", 4944},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_konack = {
+static const land_spots dock_konack = {
     {"1", 8195},
     {"2", 8196},
     {"3", 8197},
@@ -334,7 +358,7 @@ static const std::vector<std::pair<std::string, room_vnum>> dock_konack = {
     {"Furian Citadel", 9949},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_vegeta = {
+static const land_spots dock_vegeta = {
     {"1", 2319},
     {"2", 2318},
     {"3", 2320},
@@ -348,7 +372,7 @@ static const std::vector<std::pair<std::string, room_vnum>> dock_vegeta = {
     {"Ruby Cave", 2615},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_namek = {
+static const land_spots dock_namek = {
     {"1", 11628},
     {"2", 11629},
     {"3", 11630},
@@ -361,7 +385,7 @@ static const std::vector<std::pair<std::string, room_vnum>> dock_namek = {
     {"Kakureta Village", 10922},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_aether = {
+static const land_spots dock_aether = {
     {"1", 12003},
     {"2", 12004},
     {"3", 12006},
@@ -373,7 +397,7 @@ static const std::vector<std::pair<std::string, room_vnum>> dock_aether = {
     {"Silent Glade", 12480},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_yardrat = {
+static const land_spots dock_yardrat = {
     {"1", 14003},
     {"2", 14004},
     {"3", 14005},
@@ -384,18 +408,18 @@ static const std::vector<std::pair<std::string, room_vnum>> dock_yardrat = {
     {"Mount Valaria", 14300},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_kanassa = {
+static const land_spots dock_kanassa = {
     {"Aquis City", 14904},
     {"Yunkai Pirate Base", 15655},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_cerria = {
+static const land_spots dock_cerria = {
     {"Cerria Colony", 17531},
     {"Crystalline Forest", 7950},
     {"Fistarl Volcano", 17420},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_arlia = {
+static const land_spots dock_arlia = {
     {"1", 16065},
     {"2", 16066},
     {"3", 16067},
@@ -406,25 +430,25 @@ static const std::vector<std::pair<std::string, room_vnum>> dock_arlia = {
     {"Kemabra Wastes", 16816},
 };
 
-static const std::vector<std::pair<std::string, room_vnum>> dock_zenith = {
+static const land_spots dock_zenith = {
     {"Utatlan City", 3412},
     {"Zenith Jungle", 3520},
     {"Ancient Castle", 19600},
 };
 
-std::pair<int, std::vector<std::pair<std::string, room_vnum>>> getPlanetSpacepads(const room_vnum orbit) {
+land_spots getPlanetSpacepads(const room_vnum orbit) {
     switch(orbit) {
-        case ORBIT_EARTH: return {PLANET_EARTH, dock_earth};
-        case ORBIT_VEGETA: return {PLANET_VEGETA, dock_vegeta};
-        case ORBIT_FRIGID: return {PLANET_FRIGID, dock_frigid};
-        case ORBIT_NAMEK: return {PLANET_NAMEK, dock_namek};
-        case ORBIT_KONACK: return {PLANET_KONACK, dock_konack};
-        case ORBIT_AETHER: return {PLANET_AETHER, dock_aether};
-        case ORBIT_YARDRAT: return {PLANET_YARDRAT, dock_yardrat};
-        case ORBIT_KANASSA: return {PLANET_KANASSA, dock_kanassa};
-        case ORBIT_CERRIA: return {PLANET_CERRIA, dock_cerria};
-        case ORBIT_ARLIA: return {PLANET_ARLIA, dock_arlia};
-        case ORBIT_ZENITH: return {PLANET_ZENITH, dock_zenith};
+        case PLANET_EARTH: return dock_earth;
+        case PLANET_VEGETA: return dock_vegeta;
+        case PLANET_FRIGID: return dock_frigid;
+        case PLANET_NAMEK: return dock_namek;
+        case PLANET_KONACK: return dock_konack;
+        case PLANET_AETHER: return dock_aether;
+        case PLANET_YARDRAT: return dock_yardrat;
+        case PLANET_KANASSA: return dock_kanassa;
+        case PLANET_CERRIA: return dock_cerria;
+        case PLANET_ARLIA: return dock_arlia;
+        case PLANET_ZENITH: return dock_zenith;
         default: return {};
     }
 }

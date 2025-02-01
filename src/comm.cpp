@@ -182,8 +182,10 @@ void copyover_recover() {
     if(j.contains("connections"))
         for(auto &jc : j.at("connections")) {
             auto connId = jc[0].get<int>();
-            auto conn = std::make_shared<net::Connection>(jc[1]);
+            auto socket = jc[1]["socket"].get<int>();
+            auto conn = std::make_shared<net::Connection>(connId, socket);
             net::connections[connId] = conn;
+            conn->deserialize(jc[1]);
         }
 
     // rebuild descriptor data...
@@ -331,27 +333,27 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
     static int mins_since_crashsave = 0;
 
     for(auto &s : gameSystems) {
-        if(s.interval > 0.0)
-            s.countdown -= deltaTime;
-        if(s.countdown <= 0.0) {
-            auto start = std::chrono::high_resolution_clock::now();
-            auto miniDelta = (s.interval > 0.0) ? std::abs<double>(s.countdown + s.interval) : deltaTime;
-            try {
-                s.func(heart_pulse, miniDelta);
-            }
-            catch(const std::exception &e) {
-                basic_mud_log("Exception while running GameService '%s': %s", s.name.c_str(), e.what());
-                shutdown_game(1);
-            }
-            catch(...) {
-                basic_mud_log("Unknown exception while running GameService '%s'", s.name.c_str());
-                shutdown_game(1);
-            }
-            auto end = std::chrono::high_resolution_clock::now();
-            timings.emplace_back(fmt::format("heartbeat system: {}", s.name), std::chrono::duration<double>(end - start).count());
-            if(s.interval > 0.0)
-                s.countdown += s.interval;
+        if(s.interval > 0.0) s.countdown -= deltaTime;
+        if(s.countdown > 0.0) continue;
+
+        auto start = std::chrono::high_resolution_clock::now();
+        auto miniDelta = (s.interval > 0.0) ? std::abs<double>(s.countdown + s.interval) : deltaTime;
+        try {
+            s.func(heart_pulse, miniDelta);
         }
+        catch(const std::exception &e) {
+            basic_mud_log("Exception while running GameService '%s': %s", s.name.c_str(), e.what());
+            shutdown_game(1);
+        }
+        catch(...) {
+            basic_mud_log("Unknown exception while running GameService '%s'", s.name.c_str());
+            shutdown_game(1);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        timings.emplace_back(fmt::format("heartbeat system: {}", s.name), std::chrono::duration<double>(end - start).count());
+
+        if(s.interval > 0.0)
+            s.countdown += s.interval;
     }
 }
 

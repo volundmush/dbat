@@ -712,7 +712,6 @@ static int Crash_load(struct char_data *ch) {
                 if (GET_OBJ_TYPE(temp) == ITEM_SPELLBOOK) {
                     if (!temp->sbinfo) {
                         CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                        memset((char *) temp->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
                     }
                     for (j = 0; j < SPELLBOOK_SIZE; j++) {
                         temp->sbinfo[j].spellname = 0;
@@ -771,7 +770,6 @@ static int Crash_load(struct char_data *ch) {
 
                             if (!temp->sbinfo) {
                                 CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                                memset((char *) temp->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
                             }
                             temp->sbinfo[j].spellname = t[0];
                             temp->sbinfo[j].pages = t[1];
@@ -2992,7 +2990,6 @@ int House_load(room_vnum rvnum) {
 
                             if (!temp->sbinfo) {
                                 CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
-                                memset((char *) temp->sbinfo, 0, SPELLBOOK_SIZE * sizeof(struct obj_spellbook_spell));
                             }
                             temp->sbinfo[j].spellname = t[0];
                             temp->sbinfo[j].pages = t[1];

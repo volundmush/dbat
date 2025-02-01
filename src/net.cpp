@@ -524,11 +524,6 @@ namespace net {
         teldata = telnet_init(my_telopts, &telnet_handler, TELNET_FLAG_ROLE_SERVER, this);
     }
 
-    Connection::Connection(const nlohmann::json &j) {
-        teldata = telnet_init(my_telopts, &telnet_handler, TELNET_FLAG_ROLE_SERVER, this);
-        deserialize(j);
-    }
-
     nlohmann::json Connection::serialize() {
         nlohmann::json j;
 
@@ -588,8 +583,6 @@ namespace net {
     }
 
     void Connection::deserialize(const nlohmann::json &j) {
-        connId = j.at("connId").get<int>();
-        socket = j.at("socket").get<int>();
         capabilities.deserialize(j.at("capabilities"));
         if (j.contains("account")) {
             auto &acc = accounts[j.at("account").get<int>()];

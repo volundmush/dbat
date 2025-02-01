@@ -110,7 +110,6 @@ namespace net {
     class Connection : public std::enable_shared_from_this<Connection> {
     public:
 
-        explicit Connection(const nlohmann::json& j);
         Connection(int connID, int socket);
         ~Connection();
         void sendText(const std::string &messg, int bitflags = 0);

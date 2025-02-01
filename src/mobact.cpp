@@ -80,7 +80,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
             /* Examine call for special procedure */
             if (MOB_FLAGGED(ch, MOB_SPEC) && !no_specials) {
-                if (mob_index[GET_MOB_RNUM(ch)].func == nullptr) {
+                auto func = mob_index[GET_MOB_RNUM(ch)].func;
+                if (func == nullptr) {
                     basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
                                   GET_NAME(ch), GET_MOB_VNUM(ch));
                     ch->mobFlags.reset(MOB_SPEC);
@@ -88,7 +89,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     mp.mobFlags.reset(MOB_SPEC);
                 } else {
                     char actbuf[MAX_INPUT_LENGTH] = "";
-                    if ((mob_index[GET_MOB_RNUM(ch)].func)(ch, ch, 0, actbuf))
+                    if (func(ch, ch, 0, actbuf))
                         continue;        /* go to next char */
                 }
             }
@@ -103,22 +104,22 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
             /* Scavenger (picking up objects) */
             start = std::chrono::high_resolution_clock::now();
-            if (IS_HUMANOID(ch) && !FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118))
-                if (ch->getRoom()->contents && rand_number(1, 100) >= 95) {
+            if (IS_HUMANOID(ch) && !FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118)) {
+                if (auto contents = ch->getRoom()->contents; contents && rand_number(1, 100) >= 95) {
                     max = 1;
                     best_obj = nullptr;
-                    for (obj = ch->getRoom()->contents; obj; obj = obj->next_content)
+                    for (obj = contents; obj; obj = obj->next_content)
                         if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {
                             best_obj = obj;
                             max = GET_OBJ_COST(obj);
                         }
-                    if (best_obj != nullptr && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED &&
-                        !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
+                    if (best_obj != nullptr && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED && !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
                         auto line = Random::get(scavengerTalk);
                         act(line->c_str(), true, ch, nullptr, nullptr, TO_ROOM);
                         perform_get_from_room(ch, best_obj);
                     }
                 }
+            }
             end = std::chrono::high_resolution_clock::now();
             mobTimings["mob_scavenger"] += std::chrono::duration<double>(end - start).count();
 
@@ -350,8 +351,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     if (vict == ch)
                         continue;
                     if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
-                        if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 &&
-                            axion_dice(0) >= 70) {
+                        if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 && axion_dice(0) >= 70) {
                             act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
                             char buf[MAX_INPUT_LENGTH];
                             sprintf(buf, "%s", GET_NAME(vict));

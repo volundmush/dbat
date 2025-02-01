@@ -521,13 +521,14 @@ static void handle_drive_direction(struct char_data *ch, struct obj_data *vehicl
 
 static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, const std::string& pad) {
     auto rvn = vehicle->getRoomVnum();
-
-    auto [planet, pads] = getPlanetSpacepads(rvn);
+    auto planet = checkOrbit(rvn);
 
     if(!planet) {
         send_to_char(ch, "@wYou are not orbiting a planet.\r\n");
         return;
     }
+
+    auto pads = getPlanetSpacepads(planet);
 
     if(pads.empty()) {
         send_to_char(ch, "@wThere are no landing destinations here.\r\n");
@@ -537,6 +538,7 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
     if(pad.empty()) {
         send_to_char(ch, "Land where?\r\n");
         displayLandSpots(ch, getPlanetColorName(planet), pads);
+        return;
     }
 
     room_vnum landing = NOWHERE;

@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.28)
 
-set(CPM_DOWNLOAD_VERSION 0.38.7)
+set(CPM_DOWNLOAD_VERSION 0.40.5)
 set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -23,7 +23,7 @@ CPMAddPackage("gh:ilqvya/random#v1.5.0")
 CPMAddPackage("gh:Neargye/magic_enum#v0.9.6")
 CPMAddPackage("gh:tplgy/cppcodec#v0.2")
 
-find_package(Boost REQUIRED COMPONENTS system program_options regex)
+find_package(Boost CONFIG REQUIRED COMPONENTS system program_options regex)
 
 set(CIRCLE_INCLUDE_DIRS
         include
@@ -36,7 +36,7 @@ set(CIRCLE_INCLUDE_DIRS
         ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         ${effolkronium_random_SOURCE_DIR}/include
         ${magic_enum_SOURCE_DIR}/include
-        )
+)
 
 
 file(GLOB_RECURSE CIRCLE_INCLUDE include/dbat/*.h)

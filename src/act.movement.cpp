@@ -238,7 +238,7 @@ ACMD(do_land) {
 
     auto inroom = ch->getRoomVnum();
     skip_spaces(&argument);
-    auto planet = getPlanet(inroom);
+    auto planet = checkOrbit(inroom);
 
     if(!planet && !*argument) {
         if(ch->affected_by.test(AFF_FLYING)) {
