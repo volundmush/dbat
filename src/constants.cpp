@@ -886,6 +886,33 @@ const char *equipment_types[NUM_WEARS + 1] = {
         "\n"
 };
 
+const char *equipment_types_simple[NUM_WEARS + 1] = {
+        "light",
+        "right_finger",
+        "left_finger",
+        "neck_1",
+        "neck_2",
+        "body",
+        "head",
+        "legs",
+        "feet",
+        "hands",
+        "arms",
+        "shield",
+        "about",
+        "waist",
+        "right_wrist",
+        "left_wrist",
+        "wield",
+        "hold",
+        "back",
+        "right_ear",
+        "left_ear",
+        "shoulders",
+        "eye",
+        "\n"
+};
+
 
 /* ITEM_x (ordinal object types) */
 const char *item_types[NUM_ITEM_TYPES + 1] = {
@@ -1041,26 +1068,25 @@ const char *container_bits[NUM_CONT_FLAGS + 1] = {
 
 
 /* LIQ_x */
-const char *drinks[NUM_LIQ_TYPES + 1] =
-        {
-                "water",
-                "beer",
-                "wine",
-                "ale",
-                "dark ale",
-                "whisky",
-                "lemonade",
-                "firebreather",
-                "local speciality",
-                "juice",
-                "milk",
-                "tea",
-                "coffee",
-                "blood",
-                "salt water",
-                "clear water",
-                "\n"
-        };
+const char *drinks[NUM_LIQ_TYPES + 1] = {
+        "water",
+        "beer",
+        "wine",
+        "ale",
+        "dark ale",
+        "whisky",
+        "lemonade",
+        "firebreather",
+        "local speciality",
+        "juice",
+        "milk",
+        "tea",
+        "coffee",
+        "blood",
+        "salt water",
+        "clear water",
+        "\n"
+};
 
 /* MATERIAL_ */
 const char *material_names[NUM_MATERIALS + 1] = {
@@ -1615,6 +1641,13 @@ const char *admin_flags[NUM_ADMFLAGS + 1] = {
         "You may use any shop",
         "You may use cedit",
         "\n"
+};
+
+const char *limb_names[4] = {
+         "right arm",
+        "left arm",
+        "right leg",
+        "left leg"
 };
 
 const char *list_bonus[] = {

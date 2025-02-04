@@ -19,6 +19,7 @@
 #include "dbat/spells.h"
 #include "dbat/players.h"
 #include "dbat/account.h"
+#include "dbat/constants.h"
 
 /* From db.c */
 int update_mobile_strings(struct char_data *t, struct char_data *f);
@@ -317,60 +318,123 @@ nlohmann::json char_data::serializeBase() {
     auto j = serializeUnit();
 
     for(auto &[id, train] : trains) {
-        if(train) j["trains"].push_back(std::make_pair(id, train));
+        if(train) {
+            j["trains"].push_back(std::make_pair(id, train));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["trains_name"][boost::algorithm::to_lower_copy(key)] = train;
+        }
     }
 
     for(auto &[id, attr] : attributes) {
-        if(attr) j["attributes"].push_back(std::make_pair(id, attr));
+        if(attr) {
+            j["attributes"].push_back(std::make_pair(id, attr));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["attributes_name"][boost::algorithm::to_lower_copy(key)] = attr;
+        }
     }
 
     for(auto &[id, mon] : moneys) {
-        if(mon) j["moneys"].push_back(std::make_pair(id, mon));
+        if(mon) {
+            j["moneys"].push_back(std::make_pair(id, mon));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["moneys_name"][boost::algorithm::to_lower_copy(key)] = mon;
+        }
     }
 
     for(auto &[id, align] : aligns) {
-        if(align) j["aligns"].push_back(std::make_pair(id, align));
+        if(align) {
+            j["aligns"].push_back(std::make_pair(id, align));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["aligns_name"][boost::algorithm::to_lower_copy(key)] = align;
+        }
     }
 
     for(auto &[id, app] : appearances) {
-        if(app) j["appearances"].push_back(std::make_pair(id, app));
+        if(app) {
+            j["appearances"].push_back(std::make_pair(id, app));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["appearances_name"][boost::algorithm::to_lower_copy(key)] = app;
+        }
     }
 
     for(auto &[id, app] : vitals) {
-        if(app) j["vitals"].push_back(std::make_pair(id, app));
+        if(app) {
+            j["vitals"].push_back(std::make_pair(id, app));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["vitals_name"][boost::algorithm::to_lower_copy(key)] = app;
+        }
     }
 
     for(auto &[id, app] : nums) {
-        if(app) j["nums"].push_back(std::make_pair(id, app));
+        if(app) {
+            j["nums"].push_back(std::make_pair(id, app));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["nums_name"][boost::algorithm::to_lower_copy(key)] = app;
+        }
     }
 
     for(auto &[id, app] : stats) {
-        if(app) j["stats"].push_back(std::make_pair(id, app));
+        if(app) {
+            j["stats"].push_back(std::make_pair(id, app));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["stats_name"][boost::algorithm::to_lower_copy(key)] = app;
+        }
     }
 
     for(auto &[id, app] : dims) {
-        if(app) j["dims"].push_back(std::make_pair(id, app));
+        if(app) {
+            j["dims"].push_back(std::make_pair(id, app));
+            auto key = std::string(magic_enum::enum_name(id));
+            j["dims_name"][boost::algorithm::to_lower_copy(key)] = app;
+        }
     }
 
     for(auto i = 0; i < mobFlags.size(); i++)
-        if(mobFlags.test(i)) j["mobFlags"].push_back(i);
+        if(mobFlags.test(i)) {
+            j["mobFlags"].push_back(i);
+            auto key = std::string(action_bits[i]);
+            boost::algorithm::to_lower(key);
+            j["mobFlags_name"].push_back(key);
+        }
 
     for(auto i = 0; i < playerFlags.size(); i++)
-        if(playerFlags.test(i)) j["playerFlags"].push_back(i);
+        if(playerFlags.test(i)) {
+            j["playerFlags"].push_back(i);
+            auto key = std::string(player_bits[i]);
+            boost::algorithm::to_lower(key);
+            j["playerFlags_name"].push_back(key);
+        }
 
     for(auto i = 0; i < pref.size(); i++)
-        if(pref.test(i)) j["pref"].push_back(i);
+        if(pref.test(i)) {
+            j["pref"].push_back(i);
+            auto key = std::string(preference_bits[i]);
+            boost::algorithm::to_lower(key);
+            j["pref_name"].push_back(key);
+        }
 
     for(auto i = 0; i < bodyparts.size(); i++)
-        if(bodyparts.test(i)) j["bodyparts"].push_back(i);
+        if(bodyparts.test(i)) {
+            j["bodyparts"].push_back(i);
+            auto key = std::string(equipment_types_simple[i]);
+            boost::algorithm::to_lower(key);
+            j["bodyparts_name"].push_back(key);
+        }
 
     if(title && strlen(title)) j["title"] = title;
     j["race"] = race;
+    j["race_name"] = boost::algorithm::to_lower_copy(race::getName(race));
 
     j["chclass"] = chclass;
+    j["sensei_name"] = boost::algorithm::to_lower_copy(sensei::getName(chclass));
 
     for(auto i = 0; i < affected_by.size(); i++)
-        if(affected_by.test(i)) j["affected_by"].push_back(i);
+        if(affected_by.test(i)) {
+            j["affected_by"].push_back(i);
+            auto key = std::string(affected_bits[i]);
+            boost::algorithm::to_lower(key);
+            j["affected_by_name"].push_back(key);
+        }
 
 
     if(armor) j["armor"] = armor;
@@ -483,7 +547,12 @@ nlohmann::json char_data::serializeInstance() {
     if(generation) j["generation"] = generation;
 
     for(auto i = 0; i < NUM_ADMFLAGS; i++)
-        if(admflags.test(i)) j["admflags"].push_back(i);
+        if(admflags.test(i)) {
+            j["admflags"].push_back(i);
+            auto key = std::string(admin_flag_names[i]);
+            boost::algorithm::to_lower(key);
+            j["admflags_name"].push_back(key);
+        }
 
 
     if(was_in_room != NOWHERE) j["was_in_room"] = was_in_room;
@@ -491,11 +560,21 @@ nlohmann::json char_data::serializeInstance() {
     if(!td.empty()) j["time"] = td;
 
     for(auto i = 0; i < 4; i++) {
-        if(limb_condition[i]) j["limb_condition"].push_back(std::make_pair(i, limb_condition[i]));
+        if(limb_condition[i]) {
+            j["limb_condition"].push_back(std::make_pair(i, limb_condition[i]));
+            auto key = std::string(limb_names[i]);
+            boost::algorithm::to_lower(key);
+            j["limb_condition_name"][key] = limb_condition[i];
+        }
     }
 
     for(auto &[type, dam] : damages) {
-        if(dam > 0.0) j["damages"].push_back(std::make_pair(type, dam));
+        if(dam > 0.0) {
+            j["damages"].push_back(std::make_pair(type, dam));
+            auto key = std::string(magic_enum::enum_name(type));
+            boost::algorithm::to_lower(key);
+            j["damages_name"][key] = dam;
+        }
     }
 
     for(auto i = 0; i < NUM_CONDITIONS; i++) {

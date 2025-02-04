@@ -8,6 +8,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/guild.h"
 #include "dbat/shop.h"
+#include "dbat/constants.h"
 
 #include <fstream>
 #include <thread>
@@ -127,6 +128,7 @@ static void process_dirty_exits(const std::filesystem::path &loc) {
                 nlohmann::json j2;
                 j2["room"] = v;
                 j2["direction"] = i;
+                j2["direction_name"] = dirs[i];
                 j2["data"] = ex->serialize();
                 exits.push_back(j2);
             }

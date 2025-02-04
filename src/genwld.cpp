@@ -14,6 +14,7 @@
 #include "dbat/dg_olc.h"
 #include "dbat/constants.h"
 #include "dbat/area.h"
+#include "dbat/constants.h"
 
 
 /*
@@ -236,7 +237,16 @@ nlohmann::json room_direction_data::serialize() {
 
     if(general_description && strlen(general_description)) j["general_description"] = general_description;
     if(keyword && strlen(keyword)) j["keyword"] = keyword;
-    if(exit_info) j["exit_info"] = exit_info;
+    if(exit_info) {
+        j["exit_info"] = exit_info;
+        for(auto i = 0; i < NUM_EXIT_FLAGS; i++) {
+            if(IS_SET(exit_info, 1 << i)) {
+                auto key = std::string(exit_bits[i]);
+                boost::to_lower(key);
+                j["exit_flags"].push_back(key);
+            }
+        }
+    }
     if(key > 0) j["key"] = key;
 	if(to_room != NOWHERE) j["to_room"] = to_room;
     if(dclock) j["dclock"] = dclock;
@@ -278,10 +288,16 @@ nlohmann::json room_data::serialize() {
     auto j = serializeUnit();
 
     if(sector_type) j["sector_type"] = sector_type;
+    auto sect_key = std::string(sector_types[sector_type]);
+    boost::to_lower(sect_key);
+    j["sector_type_name"] = sect_key;
 
     for (size_t i = 0; i < room_flags.size(); ++i) {
         if (room_flags[i]) {
             j["room_flags"].push_back(i);
+            auto key = std::string(room_bits[i]);
+            boost::to_lower(key);
+            j["room_flags_names"].push_back(key);
         }
     }
 

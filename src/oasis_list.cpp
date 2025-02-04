@@ -378,24 +378,24 @@ void print_zone(struct char_data *ch, zone_vnum vnum) {
     /** Display all of the zone information at once.                           **/
     /****************************************************************************/
     send_to_char(ch,
-                 "@gVirtual Number = @c%d\r\n"
+                 "@gVirtual Number = @c%ld\r\n"
                  "@gName of zone   = @c%s\r\n"
                  "@gBuilders       = @c%s\r\n"
-                 "@gLifespan       = @c%d\r\n"
-                 "@gAge            = @c%d\r\n"
-                 "@gBottom of Zone = @c%d\r\n"
-                 "@gTop of Zone    = @c%d\r\n"
+                 "@gLifespan       = @c%ld\r\n"
+                 "@gAge            = @c%f\r\n"
+                 "@gBottom of Zone = @c%ld\r\n"
+                 "@gTop of Zone    = @c%ld\r\n"
                  "@gReset Mode     = @c%s\r\n"
-                 "@gMin Level      = @c%d\r\n"
-                 "@gMax Level      = @c%d\r\n"
+                 "@gMin Level      = @c%ld\r\n"
+                 "@gMax Level      = @c%ld\r\n"
                  "@gZone Flags     = @c%s\r\n"
                  "@gSize\r\n"
-                 "@g   Rooms       = @c%d\r\n"
-                 "@g   Objects     = @c%d\r\n"
-                 "@g   Mobiles     = @c%d\r\n"
-                 "@g   Shops       = @c%d\r\n"
-                 "@g   Triggers    = @c%d\r\n"
-                 "@g   Guilds      = @c%d@n\r\n",
+                 "@g   Rooms       = @c%ld\r\n"
+                 "@g   Objects     = @c%ld\r\n"
+                 "@g   Mobiles     = @c%ld\r\n"
+                 "@g   Shops       = @c%ld\r\n"
+                 "@g   Triggers    = @c%ld\r\n"
+                 "@g   Guilds      = @c%ld@n\r\n",
                  z.number, z.name,
                  z.builders, z.lifespan,
                  z.age, z.bot, z.top,
