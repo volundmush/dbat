@@ -12,6 +12,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/shop.h"
 #include "dbat/guild.h"
+#include "dbat/constants.h"
 
 /* real zone of room/mobile/object/shop given */
 zone_rnum real_zone_by_thing(room_vnum vznum) {
@@ -27,10 +28,11 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     char buf[MAX_STRING_LENGTH];
 
 #if CIRCLE_UNSIGNED_INDEX
-    if (vzone_num == NOWHERE) {
+    if (vzone_num == NOWHERE)
 #else
-        if (vzone_num < 0) {
+        if (vzone_num < 0)
 #endif
+    {
         *error = "You can't make negative zones.\r\n";
         return NOWHERE;
     } else if (bottom > top) {
@@ -398,7 +400,12 @@ nlohmann::json zone_data::serialize() {
     if(reset_mode) j["reset_mode"] = reset_mode;
     if(min_level) j["min_level"] = min_level;
     if(max_level) j["max_level"] = max_level;
-    for(auto i = 0; i < NUM_ZONE_FLAGS; i++) if(IS_SET_AR(zone_flags, i)) j["zone_flags"].push_back(i);
+    for(auto i = 0; i < NUM_ZONE_FLAGS; i++) if(IS_SET_AR(zone_flags, i)) {
+        j["zone_flags"].push_back(i);
+        auto key = std::string(zone_bits[i]);
+        boost::to_lower(key);
+        j["zone_flags_name"].push_back(key);
+    }
 
     for(auto &c : cmd) j["cmd"].push_back(c.serialize());
 
@@ -417,7 +424,7 @@ zone_data::zone_data(const nlohmann::json &j) : zone_data() {
     if(j.contains("min_level")) min_level = j["min_level"];
     if(j.contains("max_level")) max_level = j["max_level"];
     if(j.contains("zone_flags")) {
-        for(auto &f : j["zone_flags"]) SET_BIT_AR(zone_flags, f.get<int>());
+        for(auto &f : j["flags"]) SET_BIT_AR(zone_flags, f.get<int>());
     }
 
     if(j.contains("cmd")) {

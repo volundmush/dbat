@@ -375,6 +375,8 @@ static int check_object(struct obj_data *obj) {
     char objname[MAX_INPUT_LENGTH + 32];
     int error = false, y;
 
+    obj->zone = real_zone_by_thing(GET_OBJ_VNUM(obj));
+
     if (GET_OBJ_WEIGHT(obj) < 0 && (error = true))
         basic_mud_log("SYSERR: Object #%d (%s) has negative weight (%" I64T ").",
             GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_WEIGHT(obj));
@@ -1501,6 +1503,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
     mob_vnum nr = ch->vn;
     auto &z = zone_table[real_zone_by_thing(nr)];
     z.mobiles.insert(nr);
+    ch->zone = z.number;
 
     /*
    * Mobiles should NEVER use anything in the 'player_specials' structure.

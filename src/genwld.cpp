@@ -297,7 +297,7 @@ nlohmann::json room_data::serialize() {
             j["room_flags"].push_back(i);
             auto key = std::string(room_bits[i]);
             boost::to_lower(key);
-            j["room_flags_names"].push_back(key);
+            j["flags"].push_back(key);
         }
     }
 

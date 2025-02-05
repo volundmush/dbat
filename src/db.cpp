@@ -2162,7 +2162,6 @@ static void do_reset_cmds(zone_data &z) {
                     room != world.end() && (rand_number(1, 100) >= c.arg5))
                 {
                     int room_max = 0;
-                    struct obj_data *k;
 
                     /* First find out how many obj of VNUM are in the mud with this rooms */
                     /* VNUM as a load point for max from room checks. */
