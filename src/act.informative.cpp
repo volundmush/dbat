@@ -526,10 +526,10 @@ ACMD(do_shuffle) {
     for (obj2 = obj->contents; obj2; obj2 = next_obj) {
         next_obj = obj2->next_content;
         obj_from_obj(obj2);
-        obj_to_room(obj2, real_room(48));
+        obj_to_room(obj2, 48);
     }
     while (count > 0) {
-        for (obj2 = world[real_room(48)].contents; obj2; obj2 = next_obj) {
+        for (obj2 = world[48].contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
                 continue;

@@ -36,6 +36,7 @@ set(CIRCLE_INCLUDE_DIRS
         ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         ${effolkronium_random_SOURCE_DIR}/include
         ${magic_enum_SOURCE_DIR}/include
+        CACHE INTERNAL "Include directories for CIRCLE"
 )
 
 
@@ -63,6 +64,7 @@ set(CIRCLE_LINK_LIBRARIES
         #Luau.VM Luau.Common Luau.Compiler
         sodium
         effolkronium_random
+        CACHE INTERNAL "Include libraries for CIRCLE"
         )
 
 # this is the core library we're making.

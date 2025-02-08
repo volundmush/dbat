@@ -1197,7 +1197,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
             char_from_room(ch);
             char_to_room(ch, real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)));
         }
-        for (obj2 = world[IN_ROOM(ch)].contents; obj2; obj2 = next_obj) {
+        for (obj2 = ch->getRoom()->contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (GET_OBJ_TYPE(obj2) == ITEM_HATCH) {
                 hatch = obj2;

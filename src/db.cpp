@@ -779,7 +779,7 @@ void auc_save() {
     else {
         struct obj_data *obj, *next_obj;
 
-        for (obj = world[real_room(80)].contents; obj; obj = next_obj) {
+        for (obj = world[80].contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),

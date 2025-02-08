@@ -151,18 +151,15 @@ room_rnum find_obj_target_room(obj_data *obj, char *rawroomstr) {
 /* Object commands */
 
 OCMD(do_oecho) {
-    int room;
 
     skip_spaces(&argument);
 
     if (!*argument)
         obj_log(obj, "oecho called with no args");
 
-    else if ((room = obj_room(obj)) != NOWHERE) {
-        if (world[room].people) {
-            sub_write(argument, world[room].people, true, TO_ROOM);
-            sub_write(argument, world[room].people, true, TO_CHAR);
-        }
+    else if (auto room = obj->getRoom(); room && room->people) {
+        sub_write(argument, room->people, true, TO_ROOM);
+        sub_write(argument, room->people, true, TO_CHAR);
     } else
         obj_log(obj, "oecho called by object in NOWHERE");
 }
