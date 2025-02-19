@@ -11,6 +11,8 @@ struct descriptor_data;
 struct account_data;
 struct player_data;
 
+typedef unit_data script_data;
+
 namespace race {
     class Race;
 

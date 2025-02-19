@@ -130,7 +130,16 @@ struct unit_data {
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
     std::vector<trig_vnum> proto_script; /* list of default triggers  */
-    struct script_data *script{};  /* script info for the object */
+    script_data *script{};  /* script info for the object */
+
+    // for DGscripts data.
+    long trigger_types{};                /* bitvector of trigger types */
+    struct trig_data *trig_list{};            /* list of triggers           */
+    struct trig_var_data *global_vars{};    /* list of global variables   */
+    long script_context{};                /* current context for statics */
+
+    void activateScripts();
+    void deactivateScripts();
 
     struct obj_data* contents{};     /* Contains objects  */
     weight_t getInventoryWeight();
@@ -149,7 +158,7 @@ struct unit_data {
     void deserializeUnit(const nlohmann::json& j);
     std::string scriptString();
 
-    virtual std::string getUID(bool active = true) = 0;
+    std::string getUID(bool active = true);
     virtual bool isActive() = 0;
 
     nlohmann::json serializeScripts();
@@ -228,7 +237,6 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
 
     double getAffectModifier(uint64_t location, uint64_t specific);
 
-    std::string getUID(bool active = true) override;
     bool active{false};
     bool isActive() override;
 
@@ -351,7 +359,6 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     nlohmann::json serialize();
     void deserializeContents(const nlohmann::json& j, bool isActive);
 
-    std::string getUID(bool active = true) override;
     bool isActive() override;
 
     std::shared_ptr<room_data> shared();
@@ -602,8 +609,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     void deserializeLocation(const nlohmann::json& j);
     void deserializeRelations(const nlohmann::json& j);
-
-    std::string getUID(bool active = true) override;
 
     bool active{false};
     bool isActive() override;
@@ -1541,6 +1546,30 @@ public:
             return out;
         }
         return {};
+    }
+
+    // Return a lazy range of shared_ptr<T> for live subscriptions
+    auto all_shared(const std::string &service) const {
+        static const std::list<std::weak_ptr<T>> empty;
+        auto it = subscriptions.find(service);
+        if (it == subscriptions.end()) {
+            // Return an empty range of shared_ptr<T>
+            return filter_shared(empty);
+        }
+        // `it->second` is a std::list<std::weak_ptr<T>>
+        // so we just pass that to filter_shared.
+        return filter_shared(it->second);
+    }
+
+    // Return a lazy range of T* (non-null) for live subscriptions
+    auto all_raw(const std::string &service) const {
+        static const std::list<std::weak_ptr<T>> empty;
+        auto it = subscriptions.find(service);
+        if (it == subscriptions.end()) {
+            // Return an empty range of T*
+            return filter_raw(empty);
+        }
+        return filter_raw(it->second);
     }
 
     // Check if an entity is subscribed to a particular service

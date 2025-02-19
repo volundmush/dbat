@@ -236,7 +236,7 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 /* sets str to be the value of var.field */
 void
-find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield,
+find_replacement(void *go, script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield,
                  char *str, size_t slen) {
     struct trig_var_data *vd = nullptr;
     char_data *ch, *c = nullptr, *rndm;
@@ -259,7 +259,7 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
     if (!vd && sc)
         for (vd = sc->global_vars; vd; vd = vd->next)
             if (!strcasecmp(vd->name, var) &&
-                (vd->context == 0 || vd->context == sc->context))
+                (vd->context == 0 || vd->context == sc->script_context))
                 break;
 
     if (!*field) {
@@ -359,7 +359,7 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
                         break;
                 }
             } else if (!strcasecmp(var, "global")) {
-                struct script_data *thescript = SCRIPT(get_room(0));
+                script_data *thescript = SCRIPT(get_room(0));
                 *str = '\0';
                 if (!thescript) {
                     script_log("Attempt to find global var. Apparently the void has no script.");
@@ -529,8 +529,8 @@ in the vault (vnum: 453) now and then. you can just use
         if (c) {
             
             if (!strcasecmp(field, "global")) { /* get global of something else */
-                if (IS_NPC(c) && c->script) {
-                    find_replacement(go, c->script, nullptr, MOB_TRIGGER,
+                if (IS_NPC(c)) {
+                    find_replacement(go, c, nullptr, MOB_TRIGGER,
                                      subfield, nullptr, nullptr, str, slen);
                 }
             }
@@ -1305,7 +1305,7 @@ in the vault (vnum: 453) now and then. you can just use
  */
 
 /* substitutes any variables into line and returns it as buf */
-void var_subst(void *go, struct script_data *sc, trig_data *trig,
+void var_subst(void *go, script_data *sc, trig_data *trig,
                int type, char *line, char *buf) {
     char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
     char *var = nullptr, *field = nullptr, *p = nullptr;

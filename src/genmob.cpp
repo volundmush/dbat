@@ -681,8 +681,8 @@ nlohmann::json char_data::serializeInstance() {
     if(upgrade) j["upgrade"] = upgrade;
     if(voice && strlen(voice)) j["voice"] = voice;
 
-    if(script && script->global_vars) {
-        j["dgvariables"] = serializeVars(script->global_vars);
+    if(global_vars) {
+        j["dgvariables"] = serializeVars(global_vars);
     }
 
     if(relax_count) j["relax_count"] = relax_count;
@@ -859,8 +859,7 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     }
 
     if(j.contains("dgvariables")) {
-        if(!script) script = new script_data(shared_from_this());
-        deserializeVars(&script->global_vars, j["dgvariables"]);
+        deserializeVars(&global_vars, j["dgvariables"]);
     }
 
     auto proto = mob_proto.find(vn);
@@ -1053,8 +1052,8 @@ void char_data::activate() {
         insert_vnum(characterVnumIndex, this);
     }
 
-    if(script) {
-        script->activate();
+    if(trig_list) {
+        activateScripts();
 
         if(SCRIPT_TYPES(SCRIPT(this)) & MTRIG_RANDOM)
             characterSubscriptions.subscribe("randomTriggers", this);
@@ -1165,10 +1164,6 @@ dim_t char_data::modHeight(dim_t val) {
 
 double char_data::getTotalWeight() {
     return getWeight() + getCarriedWeight();
-}
-
-std::string char_data::getUID(bool active) {
-    return fmt::format("#C{}:{}{}", id, generation, active ? "" : "!");
 }
 
 bool char_data::isActive() {

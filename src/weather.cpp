@@ -23,9 +23,7 @@ static void phase_powerup(struct char_data *ch, int type, int phase);
 
 static void grow_plants() {
 
-    for (const auto& r : objectSubscriptions.all("growingPlants")) {
-        auto k = r.lock();
-        if(!k) continue;
+    for (auto k : objectSubscriptions.all_raw("growingPlants")) {
 
         if (k->getRoomFlag(ROOM_GARDEN1) || k->getRoomFlag(ROOM_GARDEN2)) {
             if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {

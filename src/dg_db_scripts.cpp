@@ -191,24 +191,6 @@ void dg_obj_trigger(char *line, struct obj_data *obj) {
 
 void assign_triggers(struct unit_data *i, int type) {
 
-    if(!SCRIPT(i)) {
-        switch (type) {
-            case MOB_TRIGGER:
-                i->script = new script_data(((char_data*)i)->shared());
-                break;
-            case OBJ_TRIGGER:
-                i->script = new script_data(((obj_data*)i)->shared());
-                break;
-            case WLD_TRIGGER:
-                i->script = new script_data(((room_data*)i)->shared());
-                break;
-            default:
-                mudlog(BRF, ADMLVL_BUILDER, true,
-                       "SYSERR: unknown type for assign_triggers()");
-                return;
-        }
-    }
-
     // remove all duplicates from i->proto_script but do not change its order otherwise.
     std::unordered_set<trig_vnum> alreadySeen;
     auto it = i->proto_script.begin();
@@ -222,12 +204,12 @@ void assign_triggers(struct unit_data *i, int type) {
     }
 
     std::unordered_set<trig_vnum> existVnums;
-    for(auto t = SCRIPT(i)->trig_list; t; t = t->next) existVnums.insert(t->vn);
+    for(auto t = i->trig_list; t; t = t->next) existVnums.insert(t->vn);
 
     for(auto p : i->proto_script) {
         // only add if they don't already have one...
         if(!existVnums.contains(p)) {
-            add_trigger(SCRIPT(i), read_trigger(p), -1);
+            add_trigger(i, read_trigger(p), -1);
             existVnums.insert(p);
         }
     }

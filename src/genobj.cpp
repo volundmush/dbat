@@ -294,8 +294,8 @@ nlohmann::json obj_data::serializeInstance() {
 
     if(generation) j["generation"] = generation;
 
-    if(script && script->global_vars) {
-        j["dgvariables"] = serializeVars(script->global_vars);
+    if(global_vars) {
+        j["dgvariables"] = serializeVars(global_vars);
     }
 
     if(get_room(room_loaded)) j["room_loaded"] = room_loaded;
@@ -417,8 +417,8 @@ void obj_data::activate() {
         insert_vnum(objectVnumIndex, this);
     }
 
-    if(script) {
-        script->activate();
+    if(trig_list) {
+        activateScripts();
         if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
             objectSubscriptions.subscribe("randomTriggers", this);
         if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
@@ -443,13 +443,13 @@ void obj_data::deactivate() {
         erase_vnum(objectVnumIndex, this);
     }
 
-    if(script && script->trig_list) {
+    if(trig_list) {
         struct trig_data *next_trig;
-        for (auto trig = TRIGGERS(script); trig; trig = next_trig) {
+        for (auto trig = trig_list; trig; trig = next_trig) {
             next_trig = trig->next;
             extract_trigger(trig);
         }
-        TRIGGERS(script) = nullptr;
+        trig_list = nullptr;
     }
     auto shared = shared_from_this();
     activeObjects.remove_if([shared](const std::weak_ptr<obj_data>& obj) {
@@ -465,8 +465,7 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     if(j.contains("generation")) generation = j["generation"];
 
     if(j.contains("dgvariables")) {
-        if(!script) script = new script_data(shared_from_this());
-        deserializeVars(&script->global_vars, j["dgvariables"]);
+        deserializeVars(&global_vars, j["dgvariables"]);
     }
 
     if(j.contains("room_loaded")) room_loaded = j["room_loaded"];
@@ -497,10 +496,6 @@ weight_t obj_data::getWeight() {
 
 weight_t obj_data::getTotalWeight() {
     return getWeight() + getInventoryWeight() + (sitting ? sitting->getTotalWeight() : 0);
-}
-
-std::string obj_data::getUID(bool active) {
-    return fmt::format("#O{}:{}{}", id, generation, active ? "" : "!");
 }
 
 bool obj_data::isActive() {

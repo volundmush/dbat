@@ -97,8 +97,8 @@ void dump_state_globalData(const std::filesystem::path &loc) {
     j["era_uptime"] = era_uptime.serialize();
     j["weather"] = weather_info.serialize();
     if(auto gRoom = get_room(0); gRoom) {
-        if(gRoom->script && gRoom->script->global_vars) {
-            j["dgGlobals"] = serializeVars(gRoom->script->global_vars);
+        if(gRoom->global_vars) {
+            j["dgGlobals"] = serializeVars(gRoom->global_vars);
         }
     }
 

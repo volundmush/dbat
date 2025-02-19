@@ -1128,10 +1128,8 @@ void extract_char_final(struct char_data *ch) {
     if (FIGHTING(ch))
         stop_fighting(ch);
 
-    for (const auto &r : characterSubscriptions.all("combatSystem")) {
-        auto k2 = r.lock();
-        k = k2.get();
-        if (k && FIGHTING(k) == ch)
+    for (auto k : characterSubscriptions.all_raw("combatSystem")) {
+        if (FIGHTING(k) == ch)
             stop_fighting(k);
     }
 

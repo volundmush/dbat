@@ -273,7 +273,7 @@ static void generate_multiform(struct char_data *ch, int count) {
             clone->limb_condition[l] = ch->limb_condition[l];
         }
 
-        ch->clones.push_back(std::weak_ptr<char_data>(clone->shared()));
+        ch->clones.push_back(clone->shared());
 
         GET_ORIGINAL(clone) = ch;
         char_to_room(clone, IN_ROOM(ch));
@@ -1420,10 +1420,8 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
     struct char_data *i, *next_char, *ch = nullptr;
     int quality = 0;
 
-    for (const auto &r : characterSubscriptions.all("goneFishing")) {
-        auto i2 = r.lock();
-        if(!i2) continue;
-        i = i2.get();
+    for (auto i2 : characterSubscriptions.all_raw("goneFishing")) {
+        i = i2;
 
         if(!i->getRoomFlag(ROOM_FISHING)) {
             i->playerFlags.reset(PLR_FISHING);

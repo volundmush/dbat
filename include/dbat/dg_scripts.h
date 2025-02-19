@@ -208,24 +208,6 @@ struct trig_data : std::enable_shared_from_this<trig_data> {
 };
 
 
-/* a complete script (composed of several triggers) */
-struct script_data {
-    script_data() = default;
-    explicit script_data(std::shared_ptr<unit_data> uid) : script_data() {
-        owner = uid;
-    };
-    long types{};                /* bitvector of trigger types */
-    struct trig_data *trig_list{};            /* list of triggers           */
-    struct trig_var_data *global_vars{};    /* list of global variables   */
-    bool purged{};                /* script is set to be purged */
-    long context{};                /* current context for statics */
-    std::shared_ptr<unit_data> owner{};
-
-    struct script_data *next{};        /* used for purged_scripts    */
-    void activate();
-    void deactivate();
-    void refreshTypes();
-};
 
 /* The event data for the wait command */
 struct wait_event_data {
@@ -393,7 +375,7 @@ extern void find_uid_name(char *uid, char *name, size_t nlen);
 
 extern void do_sstat(struct char_data *ch, struct unit_data *ud);
 
-extern void add_trigger(struct script_data *sc, trig_data *t, int loc);
+extern void add_trigger(script_data *sc, trig_data *t, int loc);
 
 extern void script_vlog(const char *format, va_list args);
 
@@ -409,7 +391,7 @@ extern int script_driver(void *go_adress, trig_data *trig, int type, int mode);
 
 extern trig_rnum real_trigger(trig_vnum vnum);
 
-extern void process_eval(void *go, struct script_data *sc, trig_data *trig,
+extern void process_eval(void *go, script_data *sc, trig_data *trig,
                          int type, char *cmd);
 
 extern void read_saved_vars(struct char_data *ch);
@@ -443,13 +425,13 @@ extern char *skill_percent(struct char_data *ch, char *skill);
 
 extern int char_has_item(char *item, struct char_data *ch);
 
-extern void var_subst(void *go, struct script_data *sc, trig_data *trig,
+extern void var_subst(void *go, script_data *sc, trig_data *trig,
                       int type, char *line, char *buf);
 
 extern int text_processed(char *field, char *subfield, struct trig_var_data *vd,
                           char *str, size_t slen);
 
-extern void find_replacement(void *go, struct script_data *sc, trig_data *trig,
+extern void find_replacement(void *go, script_data *sc, trig_data *trig,
                              int type, char *var, char *field, char *subfield, char *str, size_t slen);
 
 
@@ -480,10 +462,10 @@ extern void sub_write(char *arg, char_data *ch, int8_t find_invis, int targets);
 extern void send_to_zone(char *messg, zone_rnum zone);
 
 /* from dg_misc.c */
-extern void do_dg_cast(void *go, struct script_data *sc, trig_data *trig,
+extern void do_dg_cast(void *go, script_data *sc, trig_data *trig,
                        int type, char *cmd);
 
-extern void do_dg_affect(void *go, struct script_data *sc, trig_data *trig,
+extern void do_dg_affect(void *go, script_data *sc, trig_data *trig,
                          int type, char *cmd);
 
 extern void send_char_pos(struct char_data *ch, int dam);
@@ -522,10 +504,10 @@ constexpr int MOB_ID_BASE = 50000;  /* 50000 player IDNUMS should suffice */
 constexpr int ROOM_ID_BASE = 1050000; /* 1000000 Mobs */
 constexpr int OBJ_ID_BASE = 1300000; /* 250000 Rooms */
 
-#define SCRIPT(o)          ((o)->script)
+#define SCRIPT(o)          ((o))
 #define SCRIPT_MEM(c)             ((c)->memory)
 
-#define SCRIPT_TYPES(s)          ((s)->types)
+#define SCRIPT_TYPES(s)          ((s)->trigger_types)
 #define TRIGGERS(s)          ((s)->trig_list)
 
 #define GET_SHORT(ch)    ((ch)->short_description)

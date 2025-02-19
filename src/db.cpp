@@ -346,7 +346,7 @@ static void db_load_items_finish(const std::filesystem::path& loc) {
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
     for(auto &[id, r] : world) {
-        if(r->script) r->script->activate();
+        if(r->trig_list) r->activateScripts();
         assign_triggers(r, WLD_TRIGGER);
         r->activateContents();
         for(auto c = r->people; c; c = c->next_in_room) {
@@ -381,10 +381,8 @@ void db_load_dgscripts_finish(const std::filesystem::path& loc) {
             if (auto t = cf->second) {
                 t->deserializeLocation(location);
                 if(!t->owner) continue;
-                if(!t->owner->script)
-                    t->owner->script = new script_data(t->owner);
-                t->owner->script->trig_list = t.get();
-                t->owner->script->types |= GET_TRIG_TYPE(t);
+                t->owner->trig_list = t.get();
+                t->owner->trigger_types |= GET_TRIG_TYPE(t);
             }
         }
     }
@@ -403,8 +401,7 @@ static void db_load_globaldata(const std::filesystem::path& loc) {
     }
     if(j.contains("dgGlobals")) {
         if(auto room = get_room(0); room) {
-            if(!room->script) room->script = new script_data(room->shared());
-            deserializeVars(&(room->script->global_vars), j["dgGlobals"]);
+            deserializeVars(&(room->global_vars), j["dgGlobals"]);
         }
     }
 }
@@ -2245,15 +2242,11 @@ static void do_reset_cmds(zone_data &z) {
             case 'T': /* trigger command */
                 if (c.arg1 == MOB_TRIGGER && tmob)
                 {
-                    if (!SCRIPT(tmob))
-                        tmob->script = new script_data(tmob->shared());
                     add_trigger(SCRIPT(tmob), read_trigger(c.arg2), -1);
                     last_cmd = 1;
                 }
                 else if (c.arg1 == OBJ_TRIGGER && tobj)
                 {
-                    if (!SCRIPT(tobj))
-                        tobj->script = new script_data(tobj->shared());
                     add_trigger(SCRIPT(tobj), read_trigger(c.arg2), -1);
                     last_cmd = 1;
                 }
@@ -2264,9 +2257,7 @@ static void do_reset_cmds(zone_data &z) {
                     {
                         ZONE_ERROR("Invalid room number in trigger assignment");
                     }
-                    if (room->script)
-                        room->script = new script_data(room->shared());
-                    add_trigger(room->script, read_trigger(c.arg2), -1);
+                    add_trigger(room, read_trigger(c.arg2), -1);
                     last_cmd = 1;
                 }
 
@@ -2303,12 +2294,7 @@ static void do_reset_cmds(zone_data &z) {
                     }
                     else
                     {
-                        if (!(get_room(c.arg3)->script))
-                        {
-                            ZONE_ERROR("Attempt to give variable to scriptless object");
-                        }
-                        else
-                            add_var(&(get_room(c.arg3)->script->global_vars),
+                        add_var(&(get_room(c.arg3)->global_vars),
                                     (char *)c.sarg1.c_str(), (char *)c.sarg2.c_str(), c.arg2);
                         last_cmd = 1;
                     }
@@ -2391,9 +2377,7 @@ void reset_zone(zone_rnum zone)
 }
 
 void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
-    for(auto ref : roomSubscriptions.all("repairRoomDamage")) {
-        auto room = ref.lock();
-        if(!room) continue;
+    for(auto room : roomSubscriptions.all_raw("repairRoomDamage")) {
 
         if(auto dmg = room->getDamage(); dmg > 0) {
             int toRepair = 0;
@@ -2402,7 +2386,7 @@ void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
             else if(dmg > 1) toRepair = rand_number(1, dmg);
             else toRepair = 1;
             room->modDamage(-toRepair);
-            send_to_room(room.get(), "The area gets rebuilt a little.\r\n");
+            send_to_room(room, "The area gets rebuilt a little.\r\n");
         }
     }
 }

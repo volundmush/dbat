@@ -50,6 +50,7 @@
 #include <bitset>
 #include <variant>
 #include <functional>
+#include <ranges>
 
 #define FMT_HEADER_ONLY
 #include "fmt/core.h"
@@ -210,3 +211,28 @@ std::list<std::weak_ptr<T>> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
 }
 
 extern bool isMigrating;
+
+template <class Range>
+auto filter_shared(Range&& container) {
+    using std::views::transform;
+    using std::views::filter;
+
+    // 1) transform weak_ptr -> shared_ptr
+    // 2) filter out null (expired)
+    return std::forward<Range>(container)
+           | transform([](auto& w) { return w.lock(); })
+           | filter([](auto sp) { return (bool)sp; });
+}
+
+// For a container of weak_ptr<T>, yields T* (non-null)
+template <class Range>
+auto filter_raw(Range&& container) {
+    using std::views::transform;
+    using std::views::filter;
+
+    // 1) transform weak_ptr -> T*
+    // 2) filter out null (expired)
+    return std::forward<Range>(container)
+           | transform([](auto& w) { return w.lock().get(); })
+           | filter([](auto ptr) { return ptr != nullptr; });
+}

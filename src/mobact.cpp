@@ -382,8 +382,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 if (GET_HIT(ch) <= GET_MAX_HIT(ch) / 100)
                     continue;
 
-                for (const auto& ref : ch->mob_specials.memory) {
-                    if (ref.lock().get() != vict)
+                for (auto ref : filter_raw(ch->mob_specials.memory)) {
+                    if (ref != vict)
                         continue;
 
                     act("'Hey!  You're the fiend that attacked me!!!', exclaims $n.", false, ch, nullptr, nullptr,

@@ -3425,13 +3425,10 @@ void migrate_characters() {
             if(pos2 == std::string::npos) continue;
             auto context = line.substr(pos + 1, pos2 - pos - 1);
             auto data = line.substr(pos2 + 1);
-            if(!ch->script) {
-                ch->script = new script_data(ch->shared());
-            }
 
             try {
                 auto ctx = std::stoi(context);
-                add_var(&ch->script->global_vars, (char*)varname.c_str(), data.c_str(), ctx);
+                add_var(&ch->global_vars, (char*)varname.c_str(), data.c_str(), ctx);
             } catch(...) {
                 basic_mud_log("Error parsing %s for variable migration.", line.c_str());
             }

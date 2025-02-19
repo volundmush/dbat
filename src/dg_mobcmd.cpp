@@ -1011,7 +1011,6 @@ ACMD(do_mtransform) {
         tmpmob.affected = ch->affected;
         tmpmob.contents = ch->contents;
         tmpmob.proto_script = ch->proto_script;
-        tmpmob.script = ch->script;
         tmpmob.memory = ch->memory;
         tmpmob.next_in_room = ch->next_in_room;
         tmpmob.followers = ch->followers;

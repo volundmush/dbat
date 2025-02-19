@@ -793,10 +793,7 @@ static const std::map<vital_t, std::pair<std::string, std::string>> powerupMessa
 
 void powerupService(uint64_t heartPulse, double deltaTime) {
     char buf3[MAX_STRING_LENGTH];
-    for(const auto& r : characterSubscriptions.all("powerupService")) {
-        auto ch2 = r.lock();
-        if (!ch2) continue;
-        auto ch = ch2.get();
+    for(auto ch : characterSubscriptions.all_raw("powerupService")) {
 
         if(!PLR_FLAGGED(ch, PLR_POWERUP)) {
             characterSubscriptions.unsubscribe("powerupService", ch);
@@ -874,10 +871,7 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
 }
 
 void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
-    for(const auto& r : characterSubscriptions.all("lifeforceSystem")) {
-        auto ch2 = r.lock();
-        if (!ch2) continue;
-        auto ch = ch2.get();
+    for(auto ch : characterSubscriptions.all_raw("lifeforceSystem")) {
 
         if (rand_number(1, 15) < 14) continue;
         auto threshold = (AFF_FLAGGED(ch, AFF_HEALGLOW) || IS_KANASSAN(ch)) ? 0.03 : 0.05;
@@ -921,10 +915,7 @@ void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
 void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
 
-    for (const auto& r : characterSubscriptions.all("combatSystem")) {
-        auto ch2 = r.lock();
-        if(!ch2) continue;
-        auto ch = ch2.get();
+    for (auto ch : characterSubscriptions.all_raw("combatSystem")) {
 
         if (GET_POS(ch) == POS_FIGHTING) {
             GET_POS(ch) = POS_STANDING;
@@ -1145,10 +1136,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
 
 void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
 
-    for(const auto& r : characterSubscriptions.all("chargeMoreKi")) {
-        auto ch2 = r.lock();
-        if (!ch2) continue;
-        auto ch = ch2.get();
+    for(auto ch : characterSubscriptions.all_raw("chargeMoreKi")) {
 
         if(!PLR_FLAGGED(ch, PLR_CHARGE)) {
             characterSubscriptions.unsubscribe("chargeMoreKi", ch);
@@ -1265,10 +1253,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
     }
 
-    for(const auto& r : characterSubscriptions.all("kiLeakingSystem")) {
-        auto ch2 = r.lock();
-        if (!ch2) continue;
-        auto ch = ch2.get();
+    for(auto ch : characterSubscriptions.all_raw("kiLeakingSystem")) {
 
         if(GET_CHARGE(ch) <= 0) {
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
@@ -1352,7 +1337,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
 
         if(GET_CHARGE(ch) <= 0)
-            characterSubscriptions.unsubscribe("kiLeakingSystem", ch2);
+            characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
     }
 }
 
@@ -1839,10 +1824,8 @@ static void final_combat_resolve(struct char_data *ch) {
     }
     if (!IS_NPC(ch) && !ch->clones.empty()) {
         auto clones = ch->clones;
-        for(auto &c : clones) {
-            auto cl = c.lock().get();
-            if(!cl) continue;
-            handle_multi_merge(cl);
+        for(auto c : filter_raw(clones)) {
+            handle_multi_merge(c);
         }
     }
     if (CARRYING(ch)) {
@@ -2075,10 +2058,8 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         if (FIGHTING(ch))
             stop_fighting(ch);
 
-        for (const auto& r : characterSubscriptions.all("combatSystem")) {
-            auto c2 = r.lock();
-            auto c = c2.get();
-            if (c && FIGHTING(c) == ch)
+        for (auto c : characterSubscriptions.all_raw("combatSystem")) {
+            if (FIGHTING(c) == ch)
                 stop_fighting(c);
         }
 

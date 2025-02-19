@@ -8,6 +8,21 @@ std::vector<std::weak_ptr<obj_data>> unit_data::getContents() {
     return out;
 }
 
+std::string unit_data::getUID(bool active) {
+    return fmt::format("#{}:{}{}", id, generation, active ? "!" : "");
+}
+
+void unit_data::activateScripts() {
+    for(auto t = trig_list; t; t = t->next) {
+        t->activate();
+    }
+}
+
+void unit_data::deactivateScripts() {
+    for(auto t = trig_list; t; t = t->next) {
+        t->deactivate();
+    }
+}
 
 nlohmann::json unit_data::serializeUnit() {
     nlohmann::json j;
@@ -83,7 +98,6 @@ void unit_data::deactivateContents() {
 }
 
 std::string unit_data::scriptString() {
-    if(!script) return "";
     std::vector<std::string> vnums;
     for(auto p : proto_script) vnums.emplace_back(std::move(std::to_string(p)));
 

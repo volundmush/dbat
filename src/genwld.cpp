@@ -280,8 +280,8 @@ room_direction_data::room_direction_data(const nlohmann::json &j) : room_directi
 }
 
 nlohmann::json room_data::serializeDgVars() {
-    if(script && script->global_vars)
-        return serializeVars(script->global_vars);
+    if(global_vars)
+        return serializeVars(global_vars);
     return nlohmann::json::array();
 }
 
@@ -334,7 +334,7 @@ room_data::room_data(const nlohmann::json &j) {
     }
 
     if(!proto_script.empty() || vn == 0) {
-        if(!script) script = new script_data(shared_from_this());
+
     }
 
 
@@ -346,10 +346,6 @@ room_data::~room_data() {
     for(auto d : dir_option) {
         delete d;
     }
-}
-
-std::string room_data::getUID(bool active) {
-    return fmt::format("#R{}:{}{}", vn, generation, active ? "" : "!");
 }
 
 bool room_data::isActive() {

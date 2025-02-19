@@ -1670,10 +1670,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
     struct char_data *ch, *vict, *next_v;
 
     /* Checking the object list for any huge ki attacks */
-    for (const auto& r : objectSubscriptions.all("hugeKiAttacks")) {
-        auto k2 = r.lock();
-        if(!k2) continue;
-        auto k = k2.get();
+    for (auto k : objectSubscriptions.all_raw("hugeKiAttacks")) {
 
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
             if (IN_ROOM(k) && k->getRoomVnum() == 80) {
@@ -2061,10 +2058,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
 /* For handling homing attacks */
 void homing_update(uint64_t heartPulse, double deltaTime) {
 
-    for (const auto& r : objectSubscriptions.all("homingKiAttacks")) {
-        auto k2 = r.lock();
-        if (!k2) continue;
-        auto k = k2.get();
+    for (auto k : objectSubscriptions.all_raw("homingKiAttacks")) {
 
         if (KICHARGE(k) <= 0) {
             continue;

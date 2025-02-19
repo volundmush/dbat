@@ -320,7 +320,6 @@ OCMD(do_otransform) {
         tmpobj.contents = obj->contents;
         tmpobj.id = obj->id;
         tmpobj.proto_script = obj->proto_script;
-        tmpobj.script = obj->script;
         tmpobj.next_content = obj->next_content;
         memcpy(obj, &tmpobj, sizeof(*obj));
 

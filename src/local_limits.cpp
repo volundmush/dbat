@@ -1113,10 +1113,7 @@ static void heal_limb(struct char_data *ch) {
 }
 
 void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
-    for(const auto& r : characterSubscriptions.all("androidAbsorbSystem")) {
-        auto ch2 = r.lock();
-        if (!ch2) continue;
-        auto ch = ch2.get();
+    for(auto ch : characterSubscriptions.all_raw("androidAbsorbSystem")) {
         
         bool unsubscribe = false;
         
@@ -1319,17 +1316,14 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
         }
 
         if(!ABSORBING(ch)) {
-            characterSubscriptions.unsubscribe("androidAbsorbSystem", ch2);
+            characterSubscriptions.unsubscribe("androidAbsorbSystem", ch);
         }
 
     }
 }
 
 void goopTimeService(uint64_t heartPulse, double deltaTime) {
-    for(const auto& r : characterSubscriptions.all("goopTimeService")) {
-        auto ch2 = r.lock();
-        if (!ch2) continue;
-        auto ch = ch2.get();
+    for(auto ch : characterSubscriptions.all_raw("goopTimeService")) {
 
         if(!PLR_FLAGGED(ch, PLR_GOOP)) {
             characterSubscriptions.unsubscribe("goopTimeService", ch);
@@ -1416,7 +1410,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
                     true, ch, nullptr, nullptr, TO_ROOM);
             }
             ch->playerFlags.reset(PLR_GOOP);
-            characterSubscriptions.unsubscribe("goopTimeService", ch2);
+            characterSubscriptions.unsubscribe("goopTimeService", ch);
         } else {
             ch->gooptime -= 1;
         }
@@ -1426,10 +1420,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
 
 void corpseRotService(uint64_t heartPulse, double deltaTime) {
     obj_data *jj, *next_thing2;
-    for(const auto& ref : objectSubscriptions.all("corpseRotService")) {
-        auto j2 = ref.lock();
-        if (!j2) continue;
-        auto j = j2.get();
+    for(auto j : objectSubscriptions.all_raw("corpseRotService")) {
 
         // how the fuck did this happen? TODO add a warning.
         if(!IS_CORPSE(j)) continue;
@@ -1513,10 +1504,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
 
 void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
 
-    for(const auto& r : characterSubscriptions.all("characterVitalsRecovery")) {
-        auto ch2 = r.lock();
-        if(!ch2) continue;
-        auto ch = ch2.get();
+    for(auto ch : characterSubscriptions.all_raw("characterVitalsRecovery")) {
 
         if(AFF_FLAGGED(ch, AFF_POISON) || ch->task != Task::nothing) {
             // Poison stops all healing. So does having a task.
@@ -1567,9 +1555,7 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
 
 
 void healTankService(uint64_t heartPulse, double deltaTime) {
-    for(const auto& ref : objectSubscriptions.all("healTankService")) {
-        auto o = ref.lock();
-        if(!o) continue;
+    for(auto o : objectSubscriptions.all_raw("healTankService")) {
 
         auto en = o->dvalue["energy"];
 
