@@ -481,7 +481,8 @@ void null_affect(struct char_data *ch, int aff_flag) {
 
     if(aff_flag == AFF_POISON) {
         if(ch->poisonby) {
-            ch->poisonby->poisoned.erase(ch->ref());
+            auto shared = ch->shared();
+            ch->poisonby->poisoned.remove_if([shared](auto &p) { return p.expired() || p.lock() == shared; });
             ch->poisonby = nullptr;
         }
     }
@@ -1632,8 +1633,13 @@ bool spar_friendly(struct char_data *ch, struct char_data *npc) {
     if (npc->original == ch) {
         return true;
     }
+    
+    auto shared = ch->shared();
+    auto find = std::find_if(npc->mob_specials.memory.begin(), npc->mob_specials.memory.end(), [shared](const auto &mem) {
+        return mem.lock() == shared;
+    });
 
-    if (npc->mob_specials.memory.contains(ch->ref()))
+    if (find != npc->mob_specials.memory.end())
         return false;
 
     for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->mobFlags.test(f)) return false;

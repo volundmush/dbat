@@ -1687,15 +1687,16 @@ bool shop_data::isProducing(obj_vnum vn) {
 
 void shop_data::runPurge() {
     struct obj_data *next_obj;
-    for(auto keeper : getKeepers()) {
-        for (auto sobj = keeper->contents; sobj; sobj = next_obj) {
-            next_obj = sobj->next_content;
-            if(!sobj) continue;
-            if(isProducing(sobj->vn)) {
-                keeper->mod(CharMoney::Carried, GET_OBJ_COST(sobj));
-                extract_obj(sobj);
+    for(auto keeper2 : getKeepers()) {
+        if(auto keeper = keeper2.lock(); keeper)
+            for (auto sobj = keeper->contents; sobj; sobj = next_obj) {
+                next_obj = sobj->next_content;
+                if(!sobj) continue;
+                if(isProducing(sobj->vn)) {
+                    keeper->mod(CharMoney::Carried, GET_OBJ_COST(sobj));
+                    extract_obj(sobj);
+                }
             }
-        }
     }
 }
 

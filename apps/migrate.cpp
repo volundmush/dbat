@@ -795,8 +795,10 @@ static int Crash_load(struct char_data *ch) {
             }   /* exit our xap loop */
             if (temp != nullptr) {
                 num_objs++;
-                check_unique_id(temp);
-                add_unique_id(temp);
+                if(temp->id == NOTHING) {
+                    temp->id = nextID();
+                    temp->generation = time(nullptr);
+                }
                 temp->activate();
 
                 if (GET_OBJ_TYPE(temp) == ITEM_DRINKCON) {
@@ -3017,8 +3019,10 @@ int House_load(room_vnum rvnum) {
                 }      /* exit our for loop */
             }   /* exit our xap loop */
             if (temp != nullptr) {
-                check_unique_id(temp);
-                add_unique_id(temp);
+                if(temp->id == NOTHING) {
+                    temp->id = nextID();
+                    temp->generation = time(nullptr);
+                }
                 temp->activate();
                 num_objs++;
                 obj_to_room(temp, rrnum);
@@ -3311,7 +3315,7 @@ void migrate_characters() {
         auto &a = accounts[accID];
         p.account = &a;
         a.adminLevel = std::max(a.adminLevel, GET_ADMLEVEL(ch));
-        a.characters.emplace_back(ch);
+        a.characters.emplace_back(ch->id);
         ch->in_room = ch->load_room;
         ch->was_in_room = ch->load_room;
         uniqueCharacters.emplace(id, ch);
@@ -3422,7 +3426,7 @@ void migrate_characters() {
             auto context = line.substr(pos + 1, pos2 - pos - 1);
             auto data = line.substr(pos2 + 1);
             if(!ch->script) {
-                ch->script = new script_data(ch);
+                ch->script = new script_data(ch->shared());
             }
 
             try {

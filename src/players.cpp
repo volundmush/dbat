@@ -131,7 +131,7 @@ void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
 
     // Remove the character from the account's list. That means we'll need to remove the matching ch->id from the vector.
     acc->characters.erase(std::remove_if(acc->characters.begin(), acc->characters.end(), [ch](const auto &c) {
-        return c.lock() == ch;
+        return c == ch->id;
     }), acc->characters.end());
 
     // Let the destructor take it from here, and pray.

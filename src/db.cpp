@@ -297,7 +297,6 @@ static void db_load_characters_initial(const std::filesystem::path& loc) {
         if(auto isPlayer = players.find(id); isPlayer != players.end()) {
             c->deserializePlayer(data, false);
             isPlayer->second.character = c.get();
-            isPlayer->second.account->characters.emplace_back(c);
         } else {
             c->deserializeInstance(data, true);
         }

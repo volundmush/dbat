@@ -439,7 +439,7 @@ static void yearChanged() {
 
 static void ageAllCharacters(double addedTime) {
     for(const auto &[id, p] : uniqueCharacters) {
-        p.second->ageBy(addedTime);
+        p->ageBy(addedTime);
     }
 }
 

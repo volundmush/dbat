@@ -463,8 +463,6 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     deserializeBase(j);
 
     if(j.contains("generation")) generation = j["generation"];
-    check_unique_id(this);
-    add_unique_id(this);
 
     if(j.contains("dgvariables")) {
         if(!script) script = new script_data(shared_from_this());

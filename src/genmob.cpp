@@ -710,8 +710,6 @@ void char_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     deserializeBase(j);
 
     if(j.contains("generation")) generation = j["generation"];
-    check_unique_id(this);
-    add_unique_id(this);
 
     if(j.contains("admflags"))
         for(auto &i : j["admflags"])
