@@ -257,8 +257,8 @@ static void search_room(struct char_data *ch) {
     act("@y$n@Y begins searching the room carefully.@n", true, ch, nullptr, nullptr, TO_ROOM);
     WAIT_STATE(ch, PULSE_1SEC);
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto t : filter_raw(ch->getLocationPeople())) {
+        vict = t;
         if (AFF_FLAGGED(vict, AFF_HIDE) && vict != ch) {
             if (GET_SUPPRESS(vict) >= 1) {
                 perc *= (GET_SUPPRESS(vict) * 0.01);

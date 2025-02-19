@@ -1272,7 +1272,7 @@ void send_to_room(struct room_data *room, fmt::string_view format, Args&&... arg
         std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
         if(formatted_string.empty()) return;
 
-        for(auto i = room->people; i; i = i->next_in_room) {
+        for(auto i : filter_raw(room->getPeople())) {
             if(!i->desc) continue;
             i->desc->output += formatted_string;
         }

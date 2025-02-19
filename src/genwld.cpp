@@ -97,8 +97,7 @@ int delete_room(room_rnum rnum) {
         obj_to_room(obj, 0);
     }
 
-    for (ppl = get_room(rnum)->people; ppl; ppl = next_ppl) {
-        next_ppl = ppl->next_in_room;
+    for (auto ppl : filter_raw(get_room(rnum)->getPeople())) {
         char_from_room(ppl);
         char_to_room(ppl, 0);
     }

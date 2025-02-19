@@ -29,21 +29,16 @@
 
 /* local functions */
 static int player_present(struct char_data *ch) {
-
-    struct char_data *vict, *next_v;
-    int found = false;
-
     if (IN_ROOM(ch) == NOWHERE)
         return 0;
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto vict : filter_raw(ch->getLocationPeople())) {
         if (!IS_NPC(vict)) {
-            found = true;
+            return true;
         }
     }
 
-    return (found);
+    return false;
 }
 
 static const std::vector<std::string> scavengerTalk = {
@@ -195,8 +190,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         /* Aggressive Mobs */
         if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
             int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
-            found = false;
-            for (vict = ch->getRoom()->people; vict && !found; vict = vict->next_in_room) {
+            for (auto blah : filter_raw(ch->getLocationPeople())) {
+                vict = blah;
                 if (vict == ch)
                     continue;
                 else if (FIGHTING(ch))
@@ -268,7 +263,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                         do_bite(ch, tar, 0, 0);
                     }
                     /*hit(ch, vict, TYPE_UNDEFINED);*/
-                    found = true;
+                    break;
                 }
             }
         }
@@ -299,13 +294,10 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
         /* Be helpful */ /* - temporarily disabled by the first false check */
         if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-            struct char_data *vict, *next_v;
-            int done = false;
-            for (vict = ch->getRoom()->people; vict; vict = next_v) {
-                next_v = vict->next_in_room;
+            for (auto vict : filter_raw(ch->getLocationPeople())) {
                 if (vict == ch)
                     continue;
-                if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
+                if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict)) {
                     if (!is_sparring(vict) && !is_sparring(ch) && GET_HIT(vict) < GET_HIT(ch) * 0.6 &&
                         axion_dice(0) >= 90) {
                         act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
@@ -329,6 +321,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                                 do_punch(ch, tar, 0, 0);
                             }
                         }
+                        break;
                     }
                 }
             } /* End of for */
@@ -336,10 +329,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
         /* Help those under attack! */ /* - temporarily disabled by the first false check */
         if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-            struct char_data *vict, *next_v;
             int done = false;
-            for (vict = ch->getRoom()->people; vict; vict = next_v) {
-                next_v = vict->next_in_room;
+            for (auto vict : filter_raw(ch->getLocationPeople())) {
                 if (vict == ch)
                     continue;
                 if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
@@ -374,7 +365,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         /* Mob Memory */
         if (IS_HUMANOID(ch) && !(ch->mob_specials.memory.empty()) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
             found = false;
-            for (vict = ch->getRoom()->people; vict && !found; vict = vict->next_in_room) {
+            for (auto blah : filter_raw(ch->getLocationPeople())) {
+                vict = blah;
                 if (IS_NPC(vict) || !CAN_SEE(ch, vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
                     continue;
                 if (FIGHTING(ch))
@@ -409,8 +401,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         start = std::chrono::high_resolution_clock::now();
         /* Helper Mobs */
         if (MOB_FLAGGED(ch, MOB_HELPER) && !AFF_FLAGGED(ch, AFF_BLIND) && !AFF_FLAGGED(ch, AFF_CHARM)) {
-            found = false;
-            for (vict = ch->getRoom()->people; vict && !found; vict = vict->next_in_room) {
+            for (auto blah : filter_raw(ch->getLocationPeople())) {
+                vict = blah;
                 if (ch == vict || !IS_NPC(vict) || !FIGHTING(vict))
                     continue;
                 if (IS_NPC(FIGHTING(vict)) || ch == FIGHTING(vict))
@@ -422,7 +414,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
                     sprintf(tar, "%s", GET_NAME(FIGHTING(vict)));
                     do_punch(ch, tar, 0, 0);
-                    found = true;
+                    break;
                 }
             }
         }

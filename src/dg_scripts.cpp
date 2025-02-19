@@ -30,35 +30,35 @@ int remove_trigger(script_data *sc, char *name);
 
 bool is_num(const std::string &arg);
 
-void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
+void eval_op(char *op, char *lhs, char *rhs, char *result, unit_data *go,
              script_data *sc, trig_data *trig);
 
 char *matching_paren(char *p);
 
-void eval_expr(char *line, char *result, void *go, script_data *sc,
+void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
                trig_data *trig, int type);
 
-int eval_lhs_op_rhs(char *expr, char *result, void *go, script_data *sc,
+int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
                     trig_data *trig, int type);
 
-int process_if(char *cond, void *go, script_data *sc,
+int process_if(char *cond, unit_data *go, script_data *sc,
                trig_data *trig, int type);
 
 struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl);
 
 struct cmdlist_element *find_else_end(trig_data *trig,
-                                      struct cmdlist_element *cl, void *go,
+                                      struct cmdlist_element *cl, unit_data *go,
                                       script_data *sc, int type);
 
-void process_wait(void *go, trig_data *trig, int type, char *cmd,
+void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
                   struct cmdlist_element *cl);
 
 void process_set(script_data *sc, trig_data *trig, char *cmd);
 
-void process_attach(void *go, script_data *sc, trig_data *trig,
+void process_attach(unit_data *go, script_data *sc, trig_data *trig,
                     int type, char *cmd);
 
-void process_detach(void *go, script_data *sc, trig_data *trig,
+void process_detach(unit_data *go, script_data *sc, trig_data *trig,
                     int type, char *cmd);
 
 int process_return(trig_data *trig, char *cmd);
@@ -79,7 +79,7 @@ void dg_letter_value(script_data *sc, trig_data *trig, char *cmd);
 
 struct cmdlist_element *
 find_case(struct trig_data *trig, struct cmdlist_element *cl,
-          void *go, script_data *sc, int type, char *cond);
+    unit_data *go, script_data *sc, int type, char *cond);
 
 struct cmdlist_element *find_done(struct cmdlist_element *cl);
 
@@ -132,10 +132,7 @@ int trgvar_in_room(room_vnum vnum) {
         return (-1);
     }
 
-    for (ch = get_room(rnum)->people; ch != nullptr; ch = ch->next_in_room)
-        i++;
-
-    return i;
+    return get_room(rnum)->getPeople().size();
 }
 
 obj_data *get_obj_in_list(char *name, obj_data *list) {
@@ -333,7 +330,7 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
     } else {
         room_rnum num;
         if ((num = obj_room(obj)) != NOWHERE)
-            for (ch = get_room(num)->people; ch; ch = ch->next_in_room)
+            for (auto ch : filter_raw(get_room(num)->getPeople()))
                 if (isname(name, ch->name) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
@@ -358,7 +355,7 @@ char_data *get_char_in_room(room_data *room, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        for (ch = room->people; ch; ch = ch->next_in_room)
+        for (auto ch : filter_raw(room->getPeople()))
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
@@ -405,7 +402,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
             return i;
 
         /* check peoples' inventory */
-        for (ch = get_room(rm)->people; ch; ch = ch->next_in_room)
+        for (auto ch : filter_raw(get_room(rm)->getPeople()))
             if ((i = get_object_in_equip(ch, name)))
                 return i;
     }
@@ -497,14 +494,13 @@ char_data *get_char_by_room(room_data *room, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        for (ch = room->people; ch; ch = ch->next_in_room)
+        for (auto ch : filter_raw(room->getPeople()))
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
 
-        for (auto &r : activeCharacters) {
-            ch = r.lock().get();
-            if (ch && isname(name, ch->name) &&
+        for (auto ch : filter_raw(activeCharacters)) {
+            if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
         }
@@ -903,9 +899,12 @@ ACMD(do_attach) {
     if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
         victim = get_char_vis(ch, targ_name, nullptr, FIND_CHAR_WORLD);
         if (!victim) { /* search room for one with this vnum */
-            for (victim = ch->getRoom()->people; victim; victim = victim->next_in_room)
-                if (GET_MOB_VNUM(victim) == num_arg)
+            for (auto t : filter_raw(ch->getLocationPeople())) {
+                if (GET_MOB_VNUM(t) == num_arg) {
+                    victim = t;
                     break;
+                }
+            }
 
             if (!victim) {
                 send_to_char(ch, "That mob does not exist.\r\n");
@@ -1110,9 +1109,11 @@ ACMD(do_detach) {
         if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
             victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
             if (!victim) { /* search room for one with this vnum */
-                for (victim = ch->getRoom()->people; victim; victim = victim->next_in_room)
+                for (auto v : filter_raw(ch->getLocationPeople())) {
+                    victim = v;
                     if (GET_MOB_VNUM(victim) == num_arg)
                         break;
+                }
 
                 if (!victim) {
                     send_to_char(ch, "No such mobile around.\r\n");
@@ -1321,7 +1322,7 @@ static bool check_truthy(const char *txt) {
 
 
 /* evaluates 'lhs op rhs', and copies to result */
-void eval_op(char *op, char *lhs, char *rhs, char *result, void *go,
+void eval_op(char *op, char *lhs, char *rhs, char *result, unit_data *go,
              script_data *sc, trig_data *trig) {
     unsigned char *p;
     int n;
@@ -1411,7 +1412,7 @@ char *matching_paren(char *p) {
 
 
 /* evaluates line, and returns answer in result */
-void eval_expr(char *line, char *result, void *go, script_data *sc,
+void eval_expr(char *line, char *result, unit_data *go, script_data *sc,
                trig_data *trig, int type) {
     char expr[MAX_INPUT_LENGTH], *p;
 
@@ -1433,7 +1434,7 @@ void eval_expr(char *line, char *result, void *go, script_data *sc,
  * evaluates expr if it is in the form lhs op rhs, and copies
  * answer in result.  returns 1 if expr is evaluated, else 0
  */
-int eval_lhs_op_rhs(char *expr, char *result, void *go, script_data *sc,
+int eval_lhs_op_rhs(char *expr, char *result, unit_data *go, script_data *sc,
                     trig_data *trig, int type)
 {
     char *p, *tokens[MAX_INPUT_LENGTH];
@@ -1503,7 +1504,7 @@ int eval_lhs_op_rhs(char *expr, char *result, void *go, script_data *sc,
 
 
 /* returns 1 if cond is true, else 0 */
-int process_if(char *cond, void *go, script_data *sc,
+int process_if(char *cond, unit_data *go, script_data *sc,
                trig_data *trig, int type) {
     char result[MAX_INPUT_LENGTH], *p;
 
@@ -1559,7 +1560,7 @@ struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl) {
  * returns line of elseif, else, or end if found, or last line of trigger.
  */
 struct cmdlist_element *find_else_end(trig_data *trig,
-                                      struct cmdlist_element *cl, void *go,
+                                      struct cmdlist_element *cl, unit_data *go,
                                       script_data *sc, int type) {
     struct cmdlist_element *c;
     char *p;
@@ -1600,7 +1601,7 @@ struct cmdlist_element *find_else_end(trig_data *trig,
 
 
 /* processes any 'wait' commands in a trigger */
-void process_wait(void *go, trig_data *trig, int type, char *cmd,
+void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
                   struct cmdlist_element *cl) {
     char buf[MAX_INPUT_LENGTH], *arg;
     struct wait_event_data *wait_event_obj;
@@ -1683,7 +1684,7 @@ void process_set(script_data *sc, trig_data *trig, char *cmd) {
 }
 
 /* processes a script eval command */
-void process_eval(void *go, script_data *sc, trig_data *trig,
+void process_eval(unit_data *go, script_data *sc, trig_data *trig,
                   int type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *expr;
@@ -1709,7 +1710,7 @@ void process_eval(void *go, script_data *sc, trig_data *trig,
 
 
 /* script attaching a trigger to something */
-void process_attach(void *go, script_data *sc, trig_data *trig,
+void process_attach(unit_data *go, script_data *sc, trig_data *trig,
                     int type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
@@ -1783,7 +1784,7 @@ void process_attach(void *go, script_data *sc, trig_data *trig,
 
 
 /* script detaching a trigger from something */
-void process_detach(void *go, script_data *sc, trig_data *trig,
+void process_detach(unit_data *go, script_data *sc, trig_data *trig,
                     int type, char *cmd) {
     char arg[MAX_INPUT_LENGTH], trignum_s[MAX_INPUT_LENGTH];
     char result[MAX_INPUT_LENGTH], *id_p;
@@ -2275,33 +2276,19 @@ void dg_letter_value(script_data *sc, trig_data *trig, char *cmd) {
 
 
 
-static int true_script_driver(void *go_adress, trig_data *trig, int type, int mode) {
+static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, int mode) {
     static int depth = 0;
     int ret_val = 1;
     struct cmdlist_element *cl;
     char cmd[MAX_INPUT_LENGTH], *p;
-    script_data *sc = nullptr;
+    script_data *sc = go_adress;
     struct cmdlist_element *temp;
     unsigned long loops = 0;
-    void *go = nullptr;
+    unit_data *go = go_adress;
 
     void obj_command_interpreter(obj_data *obj, char *argument);
     void wld_command_interpreter(struct room_data *room, char *argument);
 
-    switch (type) {
-        case MOB_TRIGGER:
-            go = *(char_data **) go_adress;
-            sc = SCRIPT((char_data *) go);
-            break;
-        case OBJ_TRIGGER:
-            go = *(obj_data **) go_adress;
-            sc = SCRIPT((obj_data *) go);
-            break;
-        case WLD_TRIGGER:
-            go = *(room_data **) go_adress;
-            sc = SCRIPT((room_data *) go);
-            break;
-    }
 
     if (depth > MAX_SCRIPT_DEPTH) {
         script_log("Trigger %d recursed beyond maximum allowed depth.", GET_TRIG_VNUM(trig));
@@ -2524,7 +2511,7 @@ static int true_script_driver(void *go_adress, trig_data *trig, int type, int mo
     return ret_val;
 }
 
-int script_driver(void *go_adress, trig_data *trig, int type, int mode) {
+int script_driver(unit_data *go_adress, trig_data *trig, int type, int mode) {
     auto result = true_script_driver(go_adress, trig, type, mode);
     return result;
 }
@@ -2558,7 +2545,7 @@ ACMD(do_tstat) {
 */
 struct cmdlist_element *
 find_case(struct trig_data *trig, struct cmdlist_element *cl,
-          void *go, script_data *sc, int type, char *cond) {
+    unit_data *go, script_data *sc, int type, char *cond) {
     char result[MAX_INPUT_LENGTH];
     struct cmdlist_element *c;
     char *p, *buf;

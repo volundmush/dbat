@@ -1583,32 +1583,27 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
 }
 
 void demon_refill_lf(struct char_data *ch, int64_t num) {
-    struct char_data *tch = nullptr;
-
-    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
+    for (auto tch : filter_raw(ch->getLocationPeople())) {
         if (!IS_DEMON(tch))
             continue;
         if ((tch->getCurLF()) >= (tch->getMaxLF()))
             continue;
-        else {
-            tch->incCurLF(num);
-            act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", true,
-                tch, nullptr, ch, TO_CHAR);
-        }
+        tch->incCurLF(num);
+        act("@CYou feel the life energy from @c$N@C's cursed body flow out and you draw it into yourself!@n", true,
+            tch, nullptr, ch, TO_CHAR);
     }
 }
 
 
 void mob_talk(struct char_data *ch, const char *speech) {
 
-    struct char_data *tch = nullptr, *vict = nullptr;
     int stop = 1;
 
     if (IS_NPC(ch)) {
         return;
     }
 
-    for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
+    for (auto tch : filter_raw(ch->getLocationPeople())) {
         if (!IS_NPC(tch))
             continue;
         if (!IS_HUMANOID(tch))
@@ -1616,7 +1611,7 @@ void mob_talk(struct char_data *ch, const char *speech) {
         if (stop == 0)
             continue;
         else {
-            vict = tch;
+            auto vict = tch;
             stop = mob_respond(ch, vict, speech);
             if (rand_number(1, 2) == 2) {
                 stop = 0;
@@ -2690,9 +2685,8 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
 
 int num_pc_in_room(struct room_data *room) {
     int i = 0;
-    struct char_data *ch;
 
-    for (ch = room->people; ch != nullptr; ch = ch->next_in_room)
+    for (auto ch : filter_raw(room->getPeople()))
         if (!IS_NPC(ch))
             i++;
 
@@ -2720,7 +2714,7 @@ void core_dump_real(const char *who, int line) {
 /* Is there a campfire in the room? */
 int cook_element(room_rnum room) {
     int found = 0;
-    for(auto obj = get_room(room)->contents; obj; obj = obj->next_content) {
+    for(auto obj : filter_raw(get_room(room)->getContents())) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
         } else if(obj->vn == 19093) return 2;
@@ -2846,7 +2840,7 @@ int room_is_dark(room_rnum room) {
 
     auto r = get_room(room);
 
-    for(auto c = r->people; c; c = c->next_in_room) {
+    for(auto c : filter_raw(r->getPeople())) {
         if(c->isProvidingLight()) return false;
     }
 

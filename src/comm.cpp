@@ -2097,7 +2097,8 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
         }
     }
 
-    for (; to; to = to->next_in_room) {
+    for (auto target : filter_raw(to->getLocationPeople())) {
+        to = target;
         if (!SENDOK(to) || (to == ch))
             continue;
         if (hide_invisible && ch && !CAN_SEE(to, ch))

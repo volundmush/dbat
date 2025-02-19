@@ -457,7 +457,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                     if (type == MOB_TRIGGER) {
                         ch = (char_data *) go;
-                        for (c = ch->getRoom()->people; c; c = c->next_in_room)
+                        for (auto c : filter_raw(ch->getLocationPeople()))
                             if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
                                 CAN_SEE(ch, c)) {
                                 if (!rand_number(0, count))
@@ -465,16 +465,14 @@ in the vault (vnum: 453) now and then. you can just use
                                 count++;
                             }
                     } else if (type == OBJ_TRIGGER) {
-                        for (c = get_room(obj_room((obj_data*)go))->people; c;
-                             c = c->next_in_room)
+                        for (auto c : filter_raw(get_room(obj_room((obj_data*)go))->getPeople()))
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
                                 if (!rand_number(0, count))
                                     rndm = c;
                                 count++;
                             }
                     } else if (type == WLD_TRIGGER) {
-                        for (c = ((struct room_data *) go)->people; c;
-                             c = c->next_in_room)
+                        for (auto c : filter_raw(((struct room_data *) go)->getPeople()))
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
 
                                 if (!rand_number(0, count))

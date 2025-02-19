@@ -1710,8 +1710,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         dmg /= 2;
 
                         /* Hit those in the current room. */
-                        for (vict = k->getRoom()->people; vict; vict = next_v) {
-                            next_v = vict->next_in_room;
+                        for (auto it : filter_raw(k->getLocationPeople())) {
+                            vict = it;
 
                             if (vict == ch) {
                                 continue;
@@ -1812,8 +1812,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     dmg /= 2;
 
                     /* Hit those in the current room. */
-                    for (vict = k->getRoom()->people; vict; vict = next_v) {
-                        next_v = vict->next_in_room;
+                    for (auto it : filter_raw(k->getLocationPeople())) {
+                        vict = it;
 
                         if (vict == ch) {
                             continue;
@@ -1891,8 +1891,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         dmg /= 2;
 
                         /* Hit those in the current room. */
-                        for (vict = k->getRoom()->people; vict; vict = next_v) {
-                            next_v = vict->next_in_room;
+                        for (auto it : filter_raw(k->getLocationPeople())) {
+                            vict = it;
 
                             if (vict == ch) {
                                 continue;
@@ -1991,8 +1991,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     dmg /= 2;
 
                     /* Hit those in the current room. */
-                    for (vict = k->getRoom()->people; vict; vict = next_v) {
-                        next_v = vict->next_in_room;
+                    for (auto it : filter_raw(k->getLocationPeople())) {
+                        vict = it;
 
                         if (vict == ch) {
                             continue;
@@ -2551,8 +2551,8 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
     struct obj_data *tob, *next_obj;
     struct char_data *tch, *next_v;
 
-    for (tch = ch->getRoom()->people; tch; tch = next_v) {
-        next_v = tch->next_in_room;
+    for (auto target : filter_raw(ch->getLocationPeople())) {
+        tch = target;
 
         if (tch == ch)
             continue;

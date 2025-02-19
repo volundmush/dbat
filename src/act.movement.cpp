@@ -1683,11 +1683,9 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
             if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099) {
                 struct char_data *tch, *next_v;
                 int filled = false;
-                for (tch = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->people; tch; tch = next_v) {
-                    next_v = tch->next_in_room;
-                    if (tch) {
-                        filled = true;
-                    }
+                for (auto tch : filter_raw(get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->getPeople())) {
+                    filled = true;
+                    break;
                 }
                 if (filled == true) {
                     send_to_char(ch, "Only one person can fit in there at a time.\r\n");

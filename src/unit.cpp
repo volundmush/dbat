@@ -5,6 +5,7 @@
 std::vector<std::weak_ptr<obj_data>> unit_data::getContents() {
     std::vector<std::weak_ptr<obj_data>> out;
     for(auto o = contents; o; o = o->next_content) out.emplace_back(o->shared());
+    out.shrink_to_fit();
     return out;
 }
 
@@ -86,13 +87,13 @@ void unit_data::deserializeUnit(const nlohmann::json& j) {
 }
 
 void unit_data::activateContents() {
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : filter_raw(getContents())) {
         obj->activate();
     }
 }
 
 void unit_data::deactivateContents() {
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : filter_raw(getContents())) {
         obj->deactivate();
     }
 }
@@ -106,22 +107,18 @@ std::string unit_data::scriptString() {
 
 double unit_data::getInventoryWeight() {
     double weight = 0;
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : filter_raw(getContents())) {
         weight += obj->getTotalWeight();
     }
     return weight;
 }
 
 int64_t unit_data::getInventoryCount() {
-    int64_t total = 0;
-    for(auto obj = contents; obj; obj = obj->next_content) {
-        total++;
-    }
-    return total;
+    return getContents().size();
 }
 
 struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : filter_raw(getContents())) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
             return obj;
@@ -137,7 +134,7 @@ struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
 
 std::unordered_set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     std::unordered_set<struct obj_data*> out;
-    for(auto obj = contents; obj; obj = obj->next_content) {
+    for(auto obj : filter_raw(getContents())) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
             out.insert(obj);

@@ -652,14 +652,15 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
     }
 
     if (*number == 0)
-        return (nullptr);
+        return nullptr;
 
-    for (i = get_room(room)->people; i && *number; i = i->next_in_room)
+    for (auto i : filter_raw(get_room(room)->getPeople())) {
         if (isname(name, i->name))
             if (--(*number) == 0)
                 return (i);
+    }
 
-    return (nullptr);
+    return nullptr;
 }
 
 
@@ -877,8 +878,7 @@ void extract_obj(struct obj_data *obj) {
 
     /* Get rid of the contents of the object, as well. */
     if (GET_FELLOW_WALL(obj) && GET_OBJ_VNUM(obj) == 79) {
-        struct obj_data *trash;
-        trash = GET_FELLOW_WALL(obj);
+        auto trash = GET_FELLOW_WALL(obj);
         GET_FELLOW_WALL(obj) = nullptr;
         GET_FELLOW_WALL(trash) = nullptr;
         extract_obj(trash);
@@ -911,14 +911,6 @@ void extract_obj(struct obj_data *obj) {
 
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
-
-    if(auto found = units.find(obj->id); found != units.end()) {
-        units.erase(found);
-    }
-    
-    if (auto found = uniqueObjects.find(obj->id); found != uniqueObjects.end()) {
-        uniqueObjects.erase(found);
-    }
 
     free_obj(obj);
 }
@@ -1152,10 +1144,6 @@ void extract_char_final(struct char_data *ch) {
 
     ch->deactivate();
     if (IS_NPC(ch)) {
-        auto found = uniqueCharacters.find(ch->id);
-        if (found != uniqueCharacters.end()) {
-            uniqueCharacters.erase(found);
-        }
         free_char(ch);
     }
 }
@@ -1300,7 +1288,7 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
     if (*number == 0)
         return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
 
-    for (i = ch->getRoom()->people; i && *number; i = i->next_in_room) {
+    for (auto i : filter_raw(ch->getLocationPeople())) {
         if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)

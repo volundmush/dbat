@@ -6567,23 +6567,19 @@ ACMD(do_solar) {
     act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
-
+    for (auto vict : filter_raw(ch->getLocationPeople())) {
         if (vict == ch)
             continue;
-        else if (AFF_FLAGGED(vict, AFF_BLIND))
+        if (AFF_FLAGGED(vict, AFF_BLIND))
             continue;
-        else if (GET_POS(vict) == POS_SLEEPING)
+        if (GET_POS(vict) == POS_SLEEPING)
             continue;
-        else {
-            if(prob > (GET_DEX(vict) * (axion_dice(0) / 100)) + (perc / 2)) {
-                int duration = 1;
-                assign_affect(vict, AFF_BLIND, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
-                act("@W$N@W is @YBLINDED@W!@n", true, ch, nullptr, vict, TO_CHAR);
-                act("@RYou are @YBLINDED@R!@n", true, ch, nullptr, vict, TO_VICT);
-                act("@W$N@W is @YBLINDED@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
-            }
+        if(prob > (GET_DEX(vict) * (axion_dice(0) / 100)) + (perc / 2)) {
+            int duration = 1;
+            assign_affect(vict, AFF_BLIND, SKILL_SOLARF, duration, 0, 0, 0, 0, 0, 0);
+            act("@W$N@W is @YBLINDED@W!@n", true, ch, nullptr, vict, TO_CHAR);
+            act("@RYou are @YBLINDED@R!@n", true, ch, nullptr, vict, TO_VICT);
+            act("@W$N@W is @YBLINDED@W!@n", true, ch, nullptr, vict, TO_NOTVICT);
         }
     }
     improve_skill(ch, SKILL_SOLARF, 0);

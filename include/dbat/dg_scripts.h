@@ -387,11 +387,11 @@ struct room_data *dg_room_of_obj(struct obj_data *obj);
 
 /* To maintain strict-aliasing we'll have to do this trick with a union */
 /* Thanks to Chris Gilbert for reminding me that there are other options. */
-extern int script_driver(void *go_adress, trig_data *trig, int type, int mode);
+extern int script_driver(unit_data *go_adress, trig_data *trig, int type, int mode);
 
 extern trig_rnum real_trigger(trig_vnum vnum);
 
-extern void process_eval(void *go, script_data *sc, trig_data *trig,
+extern void process_eval(unit_data *go, script_data *sc, trig_data *trig,
                          int type, char *cmd);
 
 extern void read_saved_vars(struct char_data *ch);

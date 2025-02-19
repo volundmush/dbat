@@ -348,7 +348,6 @@ WCMD(do_wdoor) {
 
 
 WCMD(do_wteleport) {
-    char_data *ch, *next_ch;
     room_rnum target, nr;
     char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
@@ -371,8 +370,7 @@ WCMD(do_wteleport) {
             return;
         }
 
-        for (ch = room->people; ch; ch = next_ch) {
-            next_ch = ch->next_in_room;
+        for (auto ch : filter_raw(room->getPeople())) {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
             char_from_room(ch);
@@ -380,7 +378,7 @@ WCMD(do_wteleport) {
             enter_wtrigger(ch->getRoom(), ch, -1);
         }
     } else {
-        if ((ch = get_char_by_room(room, arg1))) {
+        if (auto ch = get_char_by_room(room, arg1); ch) {
             if (valid_dg_target(ch, DG_ALLOW_GODS)) {
                 char_from_room(ch);
                 char_to_room(ch, target);
@@ -393,7 +391,6 @@ WCMD(do_wteleport) {
 
 
 WCMD(do_wforce) {
-    char_data *ch, *next_ch;
     char arg1[MAX_INPUT_LENGTH], *line;
 
     line = one_argument(argument, arg1);
@@ -404,15 +401,14 @@ WCMD(do_wforce) {
     }
 
     if (!strcasecmp(arg1, "all")) {
-        for (ch = room->people; ch; ch = next_ch) {
-            next_ch = ch->next_in_room;
+        for (auto ch : filter_raw(room->getPeople())) {
 
             if (valid_dg_target(ch, 0)) {
                 command_interpreter(ch, line);
             }
         }
     } else {
-        if ((ch = get_char_by_room(room, arg1))) {
+        if (auto ch = get_char_by_room(room, arg1); ch) {
             if (valid_dg_target(ch, 0)) {
                 command_interpreter(ch, line);
             }
@@ -424,16 +420,15 @@ WCMD(do_wforce) {
 
 /* purge all objects an npcs in room, or specified object or mob */
 WCMD(do_wpurge) {
+    struct char_data *ch;
     char arg[MAX_INPUT_LENGTH];
-    char_data *ch, *next_ch;
     obj_data *obj, *next_obj;
 
     one_argument(argument, arg);
 
     if (!*arg) {
         /* purge all */
-        for (ch = room->people; ch; ch = next_ch) {
-            next_ch = ch->next_in_room;
+        for (auto ch : filter_raw(room->getPeople())) {
             if (IS_NPC(ch))
                 extract_char(ch);
         }

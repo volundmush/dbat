@@ -349,7 +349,7 @@ static void db_load_activate_entities() {
         if(r->trig_list) r->activateScripts();
         assign_triggers(r, WLD_TRIGGER);
         r->activateContents();
-        for(auto c = r->people; c; c = c->next_in_room) {
+        for(auto c : filter_raw(r->getPeople())) {
             if(IS_NPC(c)) {
                 c->activate();
             }
@@ -2461,7 +2461,6 @@ void free_followers(struct follow_type *k) {
 /* release memory allocated for a char struct */
 void free_char(struct char_data *ch) {
     int i;
-    uniqueCharacters.erase(ch->id);
 
     if(ch->vn == NOBODY) {
         if (GET_NAME(ch))
@@ -2511,8 +2510,10 @@ void free_char(struct char_data *ch) {
   * when free_char is called with a blank character struct, ID is set
   * to 0, and has not yet been added to the lookup table.
   */
-
-    delete ch;
+    if(ch->id != NOTHING) {
+        units.erase(ch->id);
+        uniqueCharacters.erase(ch->id);
+    }
 }
 
 
@@ -2531,13 +2532,18 @@ void free_obj(struct obj_data *obj) {
     }
 
     /* free any assigned scripts */
-    if (SCRIPT(obj))
+    if (obj->trig_list)
         extract_script(obj, OBJ_TRIGGER);
 
     if (obj->sbinfo)
         free(obj->sbinfo);
 
-    delete obj;
+    if(obj->id != NOTHING) {
+        units.erase(obj->id);
+        uniqueObjects.erase(obj->id);
+    }
+
+    // the shared pointer in uniqueObjects should be the last one, so the destructor is now called.
 }
 
 /*

@@ -152,8 +152,7 @@ ACMD(do_multiform) {
     std::vector<char_data *> multis;
     struct char_data *tch = nullptr, *next_v = nullptr;
 
-    for (tch = ch->getRoom()->people; tch; tch = next_v) {
-        next_v = tch->next_in_room;
+    for (auto tch : filter_raw(ch->getLocationPeople())) {
         if (tch == ch || !IS_NPC(tch)) {
             continue;
         }
@@ -354,8 +353,8 @@ static void resolve_song(struct char_data *ch) {
     act("@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto t : filter_raw(ch->getLocationPeople())) {
+        vict = t;
         switch ((int)GET_SONG(ch)) {
             case SONG_SAFETY:
                 if ((ch->master == vict->master || ch == vict->master || vict == ch->master) || vict == ch) {
@@ -975,8 +974,8 @@ ACMD(do_moondust) {
 
     struct char_data *vict = nullptr, *next_v = nullptr;
 
-    for (vict = ch->getRoom()->people; vict; vict = next_v) {
-        next_v = vict->next_in_room;
+    for (auto t : filter_raw(ch->getLocationPeople())) {
+        vict = t;
         if (vict == ch) {
             continue;
         }
@@ -2947,8 +2946,8 @@ ACMD(do_hydromancy) {
             act(bun, true, ch, nullptr, nullptr, TO_CHAR);
             act(bunn, true, ch, nullptr, nullptr, TO_ROOM);
 
-            for (vict = r->people; vict; vict = next_v) {
-                next_v = vict->next_in_room;
+            for (auto t : filter_raw(r->getPeople())) {
+                vict = t;
                 if (vict == ch)
                     continue;
                 if (!can_kill(ch, vict, nullptr, 1)) {
