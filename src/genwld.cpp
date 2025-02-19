@@ -21,8 +21,8 @@
  * This function will copy the strings so be sure you free your own
  * copies of the description, title, and such.
  */
-RoomRef room_data::ref() {
-    return RoomRef(this);
+std::shared_ptr<room_data> room_data::shared() {
+    return shared_from_this();
 }
 
 room_rnum add_room(struct room_data *room) {
@@ -35,20 +35,20 @@ room_rnum add_room(struct room_data *room) {
         return NOWHERE;
 
     if (world.contains(room->vn)) {
-        auto &ro = world[room->vn];
-        if (SCRIPT(&ro))
+        auto ro = world.at(room->vn);
+        if (SCRIPT(ro))
             extract_script(&ro, WLD_TRIGGER);
-        tch = ro.people;
-        tobj = ro.contents;
-        copy_room(&ro, room);
-        ro.people = tch;
-        ro.contents = tobj;
+        tch = ro->people;
+        tobj = ro->contents;
+        copy_room(ro, room);
+        ro->people = tch;
+        ro->contents = tobj;
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
 
-    auto &r = world[room->vn];
-    r = *room;
+    world[room->vn] = room;
+    units[room->vn] = std::shared_ptr<room_data>(room);
     basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
 
     /*
@@ -69,7 +69,7 @@ int delete_room(room_rnum rnum) {
     if (!world.count(rnum))    /* Can't delete void yet. */
         return false;
 
-    room = &world[rnum];
+    room = get_room(rnum);
 
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_room: Deleting room #%d (%s).", room->vn, room->name);
@@ -91,12 +91,13 @@ int delete_room(room_rnum rnum) {
      * Dump the contents of this room into the Void.  We could also just
      * extract the people, mobs, and objects here.
      */
-    for (obj = world[rnum].contents; obj; obj = next_obj) {
+    for (obj = get_room(rnum)->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         obj_from_room(obj);
         obj_to_room(obj, 0);
     }
-    for (ppl = world[rnum].people; ppl; ppl = next_ppl) {
+
+    for (ppl = get_room(rnum)->people; ppl; ppl = next_ppl) {
         next_ppl = ppl->next_in_room;
         char_from_room(ppl);
         char_to_room(ppl, 0);
@@ -111,9 +112,9 @@ int delete_room(room_rnum rnum) {
      * Also fix all the exits pointing to rooms above this.
      */
 
-    for(auto &r : world) {
+    for(auto &[vn, r] : world) {
         for (j = 0; j < NUM_OF_DIRS; j++) {
-            auto &e = r.second.dir_option[j];
+            auto &e = r->dir_option[j];
             if (!e || e->to_room != rnum)
                 continue;
             if ((!e->keyword || !*e->keyword) &&
@@ -140,6 +141,7 @@ int delete_room(room_rnum rnum) {
         sh.in_room.erase(rnum);
     }
 
+    units.erase(rnum);
     world.erase(rnum);
     return true;
 }
@@ -332,7 +334,7 @@ room_data::room_data(const nlohmann::json &j) {
     }
 
     if(!proto_script.empty() || vn == 0) {
-        if(!script) script = new script_data(this);
+        if(!script) script = new script_data(shared_from_this());
     }
 
 
@@ -360,19 +362,18 @@ int room_data::getDamage() {
 }
 
 void room_data::activate() {
-    auto r = ref();
     if(script) {
         if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
-            roomSubscriptions.subscribe("randomTriggers", r);
+            roomSubscriptions.subscribe("randomTriggers", shared_from_this());
         if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
-            roomSubscriptions.subscribe("timeTriggers", r);
+            roomSubscriptions.subscribe("timeTriggers", shared_from_this());
     }
     if(dmg != 0)
-        roomSubscriptions.subscribe("roomRepairDamage", r);
+        roomSubscriptions.subscribe("roomRepairDamage", shared_from_this());
 }
 
 void room_data::deactivate() {
-    roomSubscriptions.unsubscribeFromAll(ref());
+    roomSubscriptions.unsubscribeFromAll(shared_from_this());
 }
 
 int room_data::setDamage(int amount) {
@@ -380,9 +381,9 @@ int room_data::setDamage(int amount) {
     dmg = std::clamp<int>(amount, 0, 100);
     // if(dmg != before) save();
     if(dmg == 0) {
-        roomSubscriptions.unsubscribe("roomRepairDamage", ref());
+        roomSubscriptions.unsubscribe("roomRepairDamage", shared_from_this());
     } else {
-        roomSubscriptions.subscribe("roomRepairDamage", ref());
+        roomSubscriptions.subscribe("roomRepairDamage", shared_from_this());
     }
     return dmg;
 }
@@ -392,15 +393,13 @@ int room_data::modDamage(int amount) {
 }
 
 struct room_data* room_direction_data::getDestination() {
-    auto found = world.find(to_room);
-    if(found != world.end()) return &found->second;
-    return nullptr;
+    return get_room(to_room);
 }
 
-std::vector<CharRef> room_data::getPeople() {
-    std::vector<CharRef> out;
+std::vector<std::weak_ptr<char_data>> room_data::getPeople() {
+    std::vector<std::weak_ptr<char_data>> out;
     for(auto c = people; c; c = c->next_in_room) {
-        out.emplace_back(c);
+        out.emplace_back(c->shared());
     }
     return out;
 }
@@ -444,8 +443,8 @@ std::optional<std::string> room_data::dgCallMember(const std::string& member, co
                 return bitholder;
             }
             else if (!strcasecmp(arg.c_str(), "room")) {
-                if (auto roomFound = world.find(ex->to_room); roomFound != world.end())
-                    return fmt::format("{}", roomFound->second.getUID(false));
+                if (auto roomFound = get_room(ex->to_room); roomFound)
+                    return fmt::format("{}", roomFound->getUID(false));
                 else
                     return "";
             }

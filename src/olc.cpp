@@ -123,7 +123,7 @@ ACMD(do_olc) {
 	 send_to_char(ch, "That room is not modifyable.\r\n");
      else
 */
-            olc_targ = (void *) &(world[rnum]);
+            olc_targ = (void *)get_room(rnum);
             break;
         case OLC_MOB:
             argument = one_argument(argument, arg);

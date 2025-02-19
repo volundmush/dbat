@@ -68,7 +68,7 @@ ASPELL(spell_recall) {
     char_from_room(victim);
     char_to_room(victim, real_room(CONFIG_MORTAL_START));
     act("$n appears in the middle of the room.", true, victim, nullptr, nullptr, TO_ROOM);
-    look_at_room(IN_ROOM(victim), victim, 0);
+    look_at_room(victim->getRoom(), victim, 0);
     entry_memory_mtrigger(victim);
     greet_mtrigger(victim, -1);
     greet_memory_mtrigger(victim);
@@ -82,7 +82,7 @@ ASPELL(spell_teleport) {
         return;
 
     do {
-        to_room = rand_number(0, world.size());
+        to_room = Random::get(world)->first;
     } while (ROOM_FLAGGED(to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
 
     act("$n slowly fades out of existence and is gone.",
@@ -90,7 +90,7 @@ ASPELL(spell_teleport) {
     char_from_room(victim);
     char_to_room(victim, to_room);
     act("$n slowly fades into existence.", false, victim, nullptr, nullptr, TO_ROOM);
-    look_at_room(IN_ROOM(victim), victim, 0);
+    look_at_room(victim->getRoom(), victim, 0);
     entry_memory_mtrigger(victim);
     greet_mtrigger(victim, -1);
     greet_memory_mtrigger(victim);
@@ -172,8 +172,9 @@ ASPELL(spell_locate_object) {
     j = level / 2;
 
     for (auto &r : activeObjects) {
-        i = r.get();
-        if(!i) continue;
+        auto i2 = r.lock();
+        if(!i2) continue;
+        i = i2.get();
         if (!isname(name, i->name))
             continue;
 

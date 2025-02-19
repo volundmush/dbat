@@ -194,13 +194,13 @@ void assign_triggers(struct unit_data *i, int type) {
     if(!SCRIPT(i)) {
         switch (type) {
             case MOB_TRIGGER:
-                i->script = new script_data((char_data*)i);
+                i->script = new script_data(((char_data*)i)->shared());
                 break;
             case OBJ_TRIGGER:
-                i->script = new script_data((obj_data*)i);
+                i->script = new script_data(((obj_data*)i)->shared());
                 break;
             case WLD_TRIGGER:
-                i->script = new script_data((room_data*)i);
+                i->script = new script_data(((room_data*)i)->shared());
                 break;
             default:
                 mudlog(BRF, ADMLVL_BUILDER, true,

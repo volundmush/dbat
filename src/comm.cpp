@@ -2180,7 +2180,7 @@ void descriptor_data::handle_input() {
                 character->setTask(Task::nothing);
                 write_to_output(this, "You stop focussing on your task.\r\n");
             }
-            characterSubscriptions.unsubscribe("commandWaitQueue", character->ref());
+            characterSubscriptions.unsubscribe("commandWaitQueue", character);
         } else {
             perform_alias(this, (char*)command.c_str());
         }

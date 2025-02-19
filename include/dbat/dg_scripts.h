@@ -20,10 +20,6 @@
 #define __attribute__(a)
 #endif
 
-using DgUID = UID;
-
-std::string toDgUID(const DgUID& uid);
-
 #define DG_SCRIPT_VERSION "DG Scripts 1.0.14"
 
 #define    MOB_TRIGGER   0
@@ -173,7 +169,7 @@ struct trig_var_data {
 };
 
 /* structure for triggers */
-struct trig_data {
+struct trig_data : std::enable_shared_from_this<trig_data> {
     trig_data() = default;
     explicit trig_data(const nlohmann::json& j);
     nlohmann::json serializeProto();
@@ -193,7 +189,7 @@ struct trig_data {
     double waiting{0.0};    /* event to pause the trigger      */
     bool purged{};            /* trigger is set to be purged     */
     struct trig_var_data *var_list{};    /* list of local vars for trigger  */
-    DgUID owner{};
+    std::shared_ptr<unit_data> owner{};
     int order{0};
     int countLine(struct cmdlist_element *c);
 
@@ -208,13 +204,14 @@ struct trig_data {
     struct trig_data *next_in_world{};    /* next in the global trigger list */
     void deserializeInstance(const nlohmann::json& j);
     void deserializeLocation(const std::string& txt);
+    std::shared_ptr<trig_data> shared();
 };
 
 
 /* a complete script (composed of several triggers) */
 struct script_data {
     script_data() = default;
-    explicit script_data(DgUID uid) : script_data() {
+    explicit script_data(std::shared_ptr<unit_data> uid) : script_data() {
         owner = uid;
     };
     long types{};                /* bitvector of trigger types */
@@ -222,7 +219,7 @@ struct script_data {
     struct trig_var_data *global_vars{};    /* list of global variables   */
     bool purged{};                /* script is set to be purged */
     long context{};                /* current context for statics */
-    DgUID owner{};
+    std::shared_ptr<unit_data> owner{};
 
     struct script_data *next{};        /* used for purged_scripts    */
     void activate();

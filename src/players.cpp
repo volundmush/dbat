@@ -81,12 +81,12 @@ OpResult<> validate_pc_name(const std::string& name) {
     return {true, n};
 }
 
-bool canDeleteCharacter(CharRef ref) {
-    auto ch = ref.get();
+bool canDeleteCharacter(std::weak_ptr<char_data> ref) {
+    auto ch = ref.lock();
     if(!ch) return false;
 
     // We don't want to delete NPCs...
-    if(IS_NPC(ch)) return false;
+    if(IS_NPC(ch.get())) return false;
 
     // The character must not be logged in!
     if(ch->desc) return false;
@@ -95,10 +95,10 @@ bool canDeleteCharacter(CharRef ref) {
     return true;
 }
 
-void deletePlayerCharacter(CharRef ref) {
+void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
     if(!canDeleteCharacter(ref)) return;
 
-    auto ch = ref.get();
+    auto ch = ref.lock();
     if(!ch) return;
 
     // Okay the coast is clear.
@@ -112,7 +112,7 @@ void deletePlayerCharacter(CharRef ref) {
         if(i) extract_obj(i);
 
     // unsubscribe from everything, just in case.
-    characterSubscriptions.unsubscribeFromAll(ref);
+    characterSubscriptions.unsubscribeFromAll(ch);
 
     // Get a copy of player_data
     player_data pdata = players.at(ch->id);
@@ -129,17 +129,25 @@ void deletePlayerCharacter(CharRef ref) {
     // Now we'll deal with the account.
     auto acc = pdata.account;
 
-    // Remove the character from the account's list.
-    auto find = std::find(acc->characters.begin(), acc->characters.end(), ref);
-    if(find != acc->characters.end()) acc->characters.erase(find);
+    // Remove the character from the account's list. That means we'll need to remove the matching ch->id from the vector.
+    acc->characters.erase(std::remove_if(acc->characters.begin(), acc->characters.end(), [ch](const auto &c) {
+        return c.lock() == ch;
+    }), acc->characters.end());
 
     // Let the destructor take it from here, and pray.
-    free_char(ch);
+    free_char(ch.get());
 }
 
 bool account_data::canBeDeleted() {
     if(!descriptors.empty()) return false;
-    for(auto ref : characters) if(!canDeleteCharacter(ref)) return false;
+    for(auto ref : characters) {
+        auto find = players.find(ref);
+        if(find == players.end()) continue;
+        auto ch = find->second.character;
+        if(!ch) continue;
+        auto shared = ch->shared();
+        if(!canDeleteCharacter(shared)) return false;
+    }
     return true;
 }
 
@@ -156,13 +164,20 @@ bool deleteUserAccount(vnum id) {
     auto cha = acc.characters;
 
     for(const auto &ref : cha) {
-        if(auto ch = ref.get(); ch) {
-            if(canDeleteCharacter(ref)) return false;
+        auto found = players.find(ref);
+        if(found == players.end()) continue;
+        if(auto ch = found->second.character; ch) {
+            if(canDeleteCharacter(ch->shared())) return false;
         }
     }
 
-    for(auto c : cha)
-        deletePlayerCharacter(c);
+    for(auto c : cha) {
+        auto found = players.find(c);
+        if(found == players.end()) continue;
+        if(auto ch = found->second.character; ch) {
+            deletePlayerCharacter(ch->shared());
+        }
+    }
 
     accounts.erase(id);
 

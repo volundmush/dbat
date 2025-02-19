@@ -445,19 +445,19 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 
 
 #define SECT(room)    (VALID_ROOM_RNUM(room) ? \
-                world[(room)].sector_type : SECT_INSIDE)
-#define ROOM_DAMAGE(room)   (world[(room)].getDamage())
-#define ROOM_EFFECT(room)   (world[(room)].geffect)
-#define ROOM_GRAVITY(room)  (world[(room)].getGravity())
+                get_room((room))->sector_type : SECT_INSIDE)
+#define ROOM_DAMAGE(room)   (get_room((room))->getDamage())
+#define ROOM_EFFECT(room)   (get_room((room))->geffect)
+#define ROOM_GRAVITY(room)  (get_room((room))->getGravity())
 #define SUNKEN(room)    (ROOM_EFFECT(room) < 0 || SECT(room) == SECT_UNDERWATER)
 
 #define IS_DARK(room)    room_is_dark((room))
 #define IS_LIGHT(room)  (!IS_DARK(room))
 
 #define VALID_ROOM_RNUM(rnum)    (world.count(rnum) > 0 && rnum != NOWHERE)
-#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? world[(rnum)].vn : NOWHERE)
+#define GET_ROOM_VNUM(rnum) (VALID_ROOM_RNUM(rnum) ? get_room((rnum))->vn : NOWHERE)
 #define GET_ROOM_SPEC(room) \
-    (VALID_ROOM_RNUM(room) ? world[(room)].func : nullptr)
+    (VALID_ROOM_RNUM(room) ? get_room((room))->func : nullptr)
 
 /* Minor Planet Defines */
 #define PLANET_ZENITH(room) ((GET_ROOM_VNUM(room) >= 3400 && GET_ROOM_VNUM(room) <= 3599) || (GET_ROOM_VNUM(room) >= 62900 && GET_ROOM_VNUM(room) <= 62999) || \
@@ -467,7 +467,7 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 
 
 #define IN_ROOM(ch)    ((ch)->in_room)
-#define IN_ZONE(ch)   (zone_table[(world[(IN_ROOM(ch))].zone)].number)
+#define IN_ZONE(ch)   (zone_table[((ch)->getRoom()->zone)].number)
 #define GET_WAS_IN(ch)    ((ch)->was_in_room)
 #define GET_AGE(ch)     ((ch)->time.currentAge())
 
@@ -884,10 +884,10 @@ extern void WAIT_STATE(struct char_data *ch, double timeToWait);
     fname((obj)->name) : "something")
 
 
-#define EXIT(ch, door)  (world[IN_ROOM(ch)].dir_option[door])
+#define EXIT(ch, door)  ((ch)->getRoom()->dir_option[door])
 #define SECOND_EXIT(ch, door) (world[EXIT(ch, door)->to_room].dir_option[door])
 #define THIRD_EXIT(ch, door) (world[_2ND_EXIT(ch, door)->to_room].dir_option[door])
-#define W_EXIT(room, num)     (world[(room)].dir_option[(num)])
+#define W_EXIT(room, num)     (get_room((room))->dir_option[(num)])
 #define R_EXIT(room, num)     ((room)->dir_option[(num)])
 
 #define CAN_GO(ch, door) (EXIT(ch,door) && \
@@ -1305,9 +1305,9 @@ void send_to_room(struct room_data *room, fmt::string_view format, Args&&... arg
 
 template<typename... Args>
 void send_to_room(room_rnum room, fmt::string_view format, Args&&... args) {
-    if(!world.contains(room)) return;
-    auto r = &world[room];
-    send_to_room(r, format, std::forward<Args>(args)...);
+    if(auto r = get_room(room); r) {
+        send_to_room(r, format, std::forward<Args>(args)...);
+    }   
 }
 
 template<typename... Args>

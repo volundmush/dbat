@@ -2239,8 +2239,8 @@ void cedit_parse(struct descriptor_data *d, char *arg) {
 void reassign_rooms() {
 
     /* remove old funcs */
-    for (auto &r : world)
-        r.second.func = nullptr;
+    for (auto &[vn, r] : world)
+        r->func = nullptr;
 
     /* reassign spec_procs */
     assign_rooms();

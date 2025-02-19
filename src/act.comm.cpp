@@ -954,8 +954,8 @@ ACMD(do_reply) {
         if(find == uniqueCharacters.end()) {
             send_to_char(ch, "They are no longer playing.\r\n");
         }
-        else if (is_tell_ok(ch, find->second.second))
-            perform_tell(ch, find->second.second, argument);
+        else if (is_tell_ok(ch, find->second.get()))
+            perform_tell(ch, find->second.get(), argument);
     }
 }
 

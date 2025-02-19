@@ -114,7 +114,7 @@ constexpr int DB_BOOT_GLD = 7;
 // global variables
 
 bool isUID(const std::string& uid);
-std::optional<UID> resolveUID(const std::string& uid);
+std::shared_ptr<unit_data> resolveUID(const std::string& uid);
 
 extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infomation about the time    */
 extern struct time_info_data time_info;/* the infomation about the time    */
@@ -266,6 +266,8 @@ extern int vnum_armortype(char *searchname, struct char_data *ch);
 
 extern void migrate_db();
 
+extern room_data* get_room(room_vnum vn);
+
 constexpr int REAL = 0;
 constexpr int VIRTUAL = 1;
 
@@ -341,9 +343,9 @@ struct zone_data {
     std::unordered_set<trig_vnum> triggers;
     std::unordered_set<guild_vnum> guilds;
 
-    std::unordered_set<CharRef> npcsInZone;
-    std::unordered_set<CharRef> playersInZone;
-    std::unordered_set<ObjRef> objectsInZone;
+    std::list<std::weak_ptr<char_data>> npcsInZone;
+    std::list<std::weak_ptr<char_data>> playersInZone;
+    std::list<std::weak_ptr<obj_data>> objectsInZone;
 };
 
 
@@ -383,7 +385,9 @@ extern struct config_data config_info;
 extern std::vector<obj_vnum> dbVnums;
 
 // world data...
-extern std::map<room_vnum, room_data> world;
+extern std::unordered_map<int, std::shared_ptr<struct unit_data>> units;
+
+extern std::map<room_vnum, room_data*> world;
 extern std::map<zone_vnum, struct zone_data> zone_table;
 
 extern struct descriptor_data *descriptor_list;
@@ -395,10 +399,10 @@ extern struct char_data *affectv_list;
 extern std::map<mob_vnum, struct index_data> mob_index;
 extern std::map<mob_vnum, struct char_data> mob_proto;
 
-extern std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
-extern std::unordered_set<CharRef> activeCharacters;
-extern std::vector<CharRef> getAllCharacters();
-int64_t nextCharID();
+extern std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
+extern std::list<std::weak_ptr<char_data>> activeCharacters;
+extern std::vector<std::weak_ptr<char_data>> getAllCharacters();
+int nextID();
 
 extern VnumIndex<obj_data> objectVnumIndex;
 extern VnumIndex<char_data> characterVnumIndex;
@@ -407,21 +411,20 @@ extern VnumIndex<trig_data> scriptVnumIndex;
 extern std::map<obj_vnum, struct index_data> obj_index;
 extern std::map<obj_vnum, struct obj_data> obj_proto;
 
-extern std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
-extern std::unordered_set<ObjRef> activeObjects;
-extern std::vector<ObjRef> getAllObjects();
-int64_t nextObjID();
+extern std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
+extern std::list<std::weak_ptr<obj_data>> activeObjects;
+extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
 
-extern SubscriptionManager<CharRef> characterSubscriptions;
-extern SubscriptionManager<ObjRef> objectSubscriptions;
-extern SubscriptionManager<RoomRef> roomSubscriptions;
+extern SubscriptionManager<char_data> characterSubscriptions;
+extern SubscriptionManager<obj_data> objectSubscriptions;
+extern SubscriptionManager<room_data> roomSubscriptions;
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
 extern std::map<trig_vnum, struct index_data> trig_index;
 
 extern struct trig_data *trigger_list;
-extern std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueScripts;
+extern std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
 
 extern int dg_owner_purged;
 

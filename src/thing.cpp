@@ -4,9 +4,7 @@
 #include "dbat/utils.h"
 
 struct room_data* thing_data::getRoom() const {
-    if(auto find = world.find(in_room); find != world.end())   
-        return &find->second;
-    return nullptr;
+    return room;
 }
 
 room_vnum thing_data::getRoomVnum() const {
@@ -82,13 +80,13 @@ void thing_data::broadcastAtLocation(const std::string& message) const {
         send_to_room(room, message);
 }
 
-std::vector<ObjRef> thing_data::getLocationObjects() const {
+std::vector<std::weak_ptr<obj_data>> thing_data::getLocationObjects() const {
     if(room)
         return room->getContents();
     return {};
 }
 
-std::vector<CharRef> thing_data::getLocationPeople() const {
+std::vector<std::weak_ptr<char_data>> thing_data::getLocationPeople() const {
     if(room)
         return room->getPeople();
     return {};

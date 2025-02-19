@@ -273,7 +273,7 @@ static void generate_multiform(struct char_data *ch, int count) {
             clone->limb_condition[l] = ch->limb_condition[l];
         }
 
-        ch->clones.insert(clone->ref());
+        ch->clones.push_back(std::weak_ptr<char_data>(clone->shared()));
 
         GET_ORIGINAL(clone) = ch;
         char_to_room(clone, IN_ROOM(ch));
@@ -1421,14 +1421,15 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
     int quality = 0;
 
     for (const auto &r : characterSubscriptions.all("goneFishing")) {
-        i = r.get();
-        if(!i) continue;
+        auto i2 = r.lock();
+        if(!i2) continue;
+        i = i2.get();
 
         if(!i->getRoomFlag(ROOM_FISHING)) {
             i->playerFlags.reset(PLR_FISHING);
             GET_FISHD(i) = 0;
             GET_FISHSTATE(i) = FISH_NOFISH;
-            characterSubscriptions.unsubscribe("goneFishing", r);
+            characterSubscriptions.unsubscribe("goneFishing", i);
             continue;
         }
 
@@ -1467,7 +1468,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     GET_FISHD(ch) = 0;
                     GET_FISHSTATE(ch) = FISH_NOFISH;
                     ch->playerFlags.reset(PLR_FISHING);
-                    characterSubscriptions.unsubscribe("goneFishing", r);
+                    characterSubscriptions.unsubscribe("goneFishing", i);
                     if (has_pole(ch) == true) {
                         struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
                         GET_OBJ_VAL(pole, 0) = 0;
@@ -1479,7 +1480,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     GET_FISHD(ch) = 0;
                     GET_FISHSTATE(ch) = FISH_NOFISH;
                     ch->playerFlags.reset(PLR_FISHING);
-                    characterSubscriptions.unsubscribe("goneFishing", r);
+                    characterSubscriptions.unsubscribe("goneFishing", i);
                 } else if (GET_FISHSTATE(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
                     act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
                     GET_FISHSTATE(ch) = FISH_NOFISH;
@@ -1493,7 +1494,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
             } /* End reel section */
         } else if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == false) { /* End of, Is Fishing */
             i->playerFlags.reset(PLR_FISHING);
-            characterSubscriptions.unsubscribe("goneFishing", r);
+            characterSubscriptions.unsubscribe("goneFishing", i);
             GET_FISHD(i) = 0;
             GET_FISHSTATE(i) = FISH_NOFISH;
         }
@@ -1653,7 +1654,7 @@ static void catch_fish(struct char_data *ch, int quality) {
     do_get(ch, "fish", 0, 0);
     send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
     ch->playerFlags.reset(PLR_FISHING);
-    characterSubscriptions.unsubscribe("goneFishing", ch->ref());
+    characterSubscriptions.unsubscribe("goneFishing", ch);
     GET_FISHD(ch) = 0;
     GET_FISHSTATE(ch) = FISH_NOFISH;
 }

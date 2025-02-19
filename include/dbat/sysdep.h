@@ -163,19 +163,22 @@ Iterator partialMatch(
 }
 
 template<typename T>
-using VnumIndex = std::map<vnum, std::list<T*>>;
+using VnumIndex = std::map<vnum, std::list<std::weak_ptr<T>>>;
 
 template <typename T>
 void insert_vnum(VnumIndex<T>& index, T* item) {
     auto &idx = index[item->vn];
-    idx.push_back(item);
+    idx.push_back(std::weak_ptr<T>(item->shared()));
 }
 
 template <typename T>
 void erase_vnum(VnumIndex<T>& index, T* item) {
     auto find = index.find(item->vn);
     if(find == index.end()) return;
-    find->second.remove(item);
+    auto shared = item->shared();
+    find->second.remove_if([shared](const auto& ptr) {
+        return ptr.lock() == shared || ptr.expired();
+    });
     if(find->second.empty()) index.erase(find);
 }
 
@@ -183,7 +186,7 @@ template <typename T>
 T* get_last_inserted(const VnumIndex<T>& index, vnum vn) {
     auto it = index.find(vn);
     if (it != index.end() && !it->second.empty()) {
-        return it->second.back();
+        return it->second.back().lock().get();
     }
     return nullptr;
 }
@@ -198,15 +201,12 @@ std::size_t get_vnum_count(const VnumIndex<T>& index, vnum vn) {
 }
 
 template <typename T>
-std::list<T*> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
+std::list<std::weak_ptr<T>> get_vnum_list(const VnumIndex<T>& index, vnum vn) {
     auto it = index.find(vn);
     if (it != index.end()) {
         return it->second;
     }
     return {};
 }
-
-
-using UID = std::variant<struct room_data*, struct obj_data*, struct char_data*>;
 
 extern bool isMigrating;

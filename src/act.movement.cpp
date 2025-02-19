@@ -276,7 +276,9 @@ ACMD(do_land) {
         landName = matched->first;
     }
 
-    if(!world.count(landing)) {
+    auto landroom = get_room(landing);
+
+    if(!landroom) {
         send_to_char(ch, "You can't land there.\r\n");
         return;
     }
@@ -288,7 +290,7 @@ ACMD(do_land) {
     sprintf(sendback, "@C$n@Y flies down through the atmosphere toward @G%s@Y!@n", landName.c_str());
     act(sendback, true, ch, nullptr, nullptr, TO_ROOM);
     char_from_room(ch);
-    char_to_room(ch, landing);
+    char_to_room(ch, landroom);
     fly_planet(landing, "can be seen landing from space nearby!@n\r\n", ch);
     send_to_sense(1, "landing on the planet", ch);
     send_to_scouter("A powerlevel signal has been detected landing on the planet", ch, 0, 1);
@@ -628,7 +630,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     ch->affected_by.set(AFF_PURSUIT);
     char_from_room(ch);
     char_to_room(ch, dest->vn);
-    if ((ch->getRoom()->zone != world[was_in].zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
+    if ((ch->getRoom()->zone != get_room(was_in)->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
         send_to_sense(0, "You sense someone", ch);
         sprintf(buf3, "@D[@GBlip@D]@Y %s\r\n@RSomeone has entered your scouter detection range@n.",
                 add_commas(ch->getPL()).c_str());
@@ -650,7 +652,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     act("$n arrives from $T.", true, ch, nullptr, buf2, TO_ROOM | TO_SNEAKRESIST);
     if (FIGHTING(ch)) {
         auto to_room = oldRoom->dir_option[dir]->to_room;
-        auto r = &world.at(to_room);
+        auto r = get_room(to_room);
         if (r->sector_type != SECT_FLYING && r->sector_type != SECT_WATER_NOSWIM && r->geffect == 0) {
             roll_pursue(FIGHTING(ch), ch);
         }
@@ -1164,7 +1166,7 @@ static const int flags_door[] =
         };
 
 
-#define EXITN(room, door)        (world[room].dir_option[door])
+#define EXITN(room, door)        (get_room(room)->dir_option[door])
 #define OPEN_DOOR(room, obj, door)    ((obj) ?\
         (REMOVE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_CLOSED)) :\
         (REMOVE_BIT(EXITN(room, door)->exit_info, EX_CLOSED)))
@@ -1214,7 +1216,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
 
     len = snprintf(buf, sizeof(buf), "$n %ss ", cmd_door[scmd]);
     if (!obj && ((other_room = EXIT(ch, door)->to_room) != NOWHERE)) {
-        if ((back = world[other_room].dir_option[rev_dir[door]]) != nullptr)
+        if ((back = get_room(other_room)->dir_option[rev_dir[door]]) != nullptr)
             if (back->to_room != IN_ROOM(ch))
                 back = nullptr;
     }
@@ -1551,7 +1553,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     room_rnum was_in = IN_ROOM(ch);
     int need_movement = 0;
 
-    auto r = &world.at(dest_room);
+    auto r = get_room(dest_room);
 
     /* charmed? */
     if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master &&
@@ -1681,7 +1683,7 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
             if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099) {
                 struct char_data *tch, *next_v;
                 int filled = false;
-                for (tch = world[real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))].people; tch; tch = next_v) {
+                for (tch = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->people; tch; tch = next_v) {
                     next_v = tch->next_in_room;
                     if (tch) {
                         filled = true;
@@ -1802,7 +1804,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     /* move points needed is avg. move loss for src and destination sect type */
     need_movement = calcNeedMovementGravity(ch);
 
-    if ((ch->getCurST()) < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
+    if (ch->getCurST() < need_movement && !AFF_FLAGGED(ch, AFF_FLYING) && !IS_NPC(ch)) {
         if (need_specials_check && ch->master)
             send_to_char(ch, "You are too exhausted to follow.\r\n");
         else
@@ -1812,7 +1814,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
     }
 
     if (ROOM_FLAGGED(dest_room, ROOM_TUNNEL) &&
-        num_pc_in_room(&(world[dest_room])) >= CONFIG_TUNNEL_SIZE) {
+        num_pc_in_room(get_room(dest_room)) >= CONFIG_TUNNEL_SIZE) {
         if (CONFIG_TUNNEL_SIZE > 1)
             send_to_char(ch, "There isn't enough room for you to go there!\r\n");
         else

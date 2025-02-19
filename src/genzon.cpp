@@ -424,7 +424,7 @@ zone_data::zone_data(const nlohmann::json &j) : zone_data() {
     if(j.contains("min_level")) min_level = j["min_level"];
     if(j.contains("max_level")) max_level = j["max_level"];
     if(j.contains("zone_flags")) {
-        for(auto &f : j["flags"]) SET_BIT_AR(zone_flags, f.get<int>());
+        for(auto &f : j["zone_flags"]) SET_BIT_AR(zone_flags, f.get<int>());
     }
 
     if(j.contains("cmd")) {

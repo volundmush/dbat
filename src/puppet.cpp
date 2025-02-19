@@ -19,7 +19,7 @@ namespace net {
     void PuppetParser::deserialize(const nlohmann::json& j) {
         if(j.contains("ch")) {
             auto id = j["ch"].get<int>();
-            ch = uniqueCharacters.at(id).second;
+            ch = uniqueCharacters.at(id).get();
         }
     }
 

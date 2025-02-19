@@ -370,7 +370,7 @@ double char_data::modCurVitalDam(CharVital type, double dam) {
 double char_data::setCurVitalDam(CharVital type, double dam) {
     if(dam <= 0.0) damages.erase(type);
     else damages[type] = std::min(dam, 1.0);
-    auto r = ref();
+    auto r = shared_from_this();
     if(damages.empty()) {
         characterSubscriptions.unsubscribe("characterVitalsRecovery", r);
         characterSubscriptions.unsubscribe("lifeforceSystem", r);
@@ -1479,9 +1479,8 @@ bool char_data::canCarryWeight(struct char_data *obj) {
 
 weight_t char_data::getCurrentBurden() {
     auto total = getTotalWeight();
-    auto room = world.find(in_room);
-    if(room != world.end()) {
-        total *= room->second.getEnvironment(ENV_GRAVITY);
+    if(auto room = getRoom(); room) {
+        total *= room->getEnvironment(ENV_GRAVITY);
     }
     return total;
 }
@@ -1544,7 +1543,7 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
     }
 
     // if lroom is valid, save it... else... emergency fallback to mud school.
-    if(world.contains(lroom)) return lroom;
+    if(auto r = get_room(lroom); r) return lroom;
     return CONFIG_MORTAL_START;
 
 }
@@ -1871,8 +1870,8 @@ std::optional<std::string> char_data::dgCallMember(const std::string& member, co
 void char_data::setTask(Task t) {
     task = t;
     if(task == Task::nothing) {
-        if(wait_input_queue.empty()) characterSubscriptions.unsubscribe("commandWaitQueue", ref());
+        if(wait_input_queue.empty()) characterSubscriptions.unsubscribe("commandWaitQueue", this);
     } else {
-        characterSubscriptions.subscribe("commandWaitQueue", ref());
+        characterSubscriptions.subscribe("commandWaitQueue", this);
     }
 }

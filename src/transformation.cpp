@@ -1617,89 +1617,80 @@ namespace trans {
     };
 
     void gamesys_transform(uint64_t heartPulse, double deltaTime) {
-        std::unordered_set<CharRef> processed;
-        for(auto &[zvn, z] : zone_table) {
-            if(z.playersInZone.empty()) continue;
+        // TODO: replace this with a subscription for anyone who's not in base form.
+        for(auto charId : activeCharacters) {
+            auto ch2 = charId.lock();
+            if(!ch2) continue;
+            auto ch = ch2.get();
 
-            std::unordered_set<CharRef> characters;
-            for(auto &r : z.npcsInZone) characters.insert(r);
-            for(auto &r : z.playersInZone) characters.insert(r);
+            // check transform logic...
+            auto form = ch->form;
+            auto technique = ch->technique;
+            auto &data = ch->transforms[form];
+            double timeBefore = data.timeSpentInForm;
+            data.timeSpentInForm += deltaTime;
+            double timeAfter = data.timeSpentInForm;
 
-            for(auto charId : characters) {
-                if(processed.contains(charId)) continue;
-                auto ch = charId.get();
-                if(!ch) continue;
-                processed.insert(charId);
+            auto &techdata = ch->transforms[technique];
+            double techTimeBefore = data.timeSpentInForm;
+            techdata.timeSpentInForm += deltaTime;
+            double techTimeAfter = data.timeSpentInForm;
 
-                // check transform logic...
-                auto form = ch->form;
-                auto technique = ch->technique;
-                auto &data = ch->transforms[form];
-                double timeBefore = data.timeSpentInForm;
-                data.timeSpentInForm += deltaTime;
-                double timeAfter = data.timeSpentInForm;
-
-                auto &techdata = ch->transforms[technique];
-                double techTimeBefore = data.timeSpentInForm;
-                techdata.timeSpentInForm += deltaTime;
-                double techTimeAfter = data.timeSpentInForm;
-
-                if(moonForms.contains(ch->form)) {
-                    if(auto moonlight = ch->getLocationEnvironment(ENV_MOONLIGHT); moonlight >= 100.0) {
-                        // Top off the blutz.
-                        data.blutz = 60.0 * 30;
-                    }
-                    data.blutz -= deltaTime;
-                    if(data.blutz <= 0 || !ch->playerFlags.test(PLR_TAIL)) {
-                        data.blutz = 0.0;
-                        oozaru_revert(ch);
-                    }
+            if(moonForms.contains(ch->form)) {
+                if(auto moonlight = ch->getLocationEnvironment(ENV_MOONLIGHT); moonlight >= 100.0) {
+                    // Top off the blutz.
+                    data.blutz = 60.0 * 30;
                 }
-
-                double kigain = getModifierHelper(ch, form, APPLY_CVIT_REGEN_MULT,
-                                                  static_cast<int>(CharVital::Ki));
-                double plgain = getModifierHelper(ch, form, APPLY_CVIT_REGEN_MULT,
-                                                  -static_cast<int>(CharVital::PowerLevel));
-                ch->incCurHealthPercent(plgain);
-                ch->incCurKIPercent(kigain);
-
-                // Notify at thresholds
-                if(form != FormID::Base) {
-                    if(timeBefore < MASTERY_THRESHOLD && timeAfter >= MASTERY_THRESHOLD)
-                        send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, form) + "\r\n");
-
-                    if(timeBefore < LIMIT_THRESHOLD && timeAfter >= LIMIT_THRESHOLD)
-                        send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, form) + "\r\n");
-
-                    if(timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limitBroken == true)
-                        send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n\r\n");
-                }
-                if(technique != FormID::Base) {
-                    if(techTimeBefore < MASTERY_THRESHOLD && techTimeAfter >= MASTERY_THRESHOLD)
-                        send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, technique) + "\r\n");
-
-                    if(techTimeBefore < LIMIT_THRESHOLD && techTimeAfter >= LIMIT_THRESHOLD)
-                        send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, technique) + "\r\n");
-
-                    if(techTimeBefore < LIMITBREAK_THRESHOLD && techTimeAfter >= LIMITBREAK_THRESHOLD && techdata.limitBroken == true)
-                        send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, technique) + " @mhas evolved.@n\r\n");
-                }
-
-
-                // Check stamina drain.
-                if (auto drain = (getStaminaDrain(ch, ch->form, true) + getStaminaDrain(ch, ch->technique, true)) * deltaTime; drain > 0) {
-                    if(ch->decCurSTPercent(drain) == 0) {
-                        act("@mExhausted of stamina, your body forcibly reverts from its form.@n\r\n", true, ch, nullptr,
-                            nullptr, TO_CHAR);
-                        act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n\r\n", true, ch, nullptr,
-                            nullptr, TO_ROOM);
-                        revert(ch);
-
-                    }
+                data.blutz -= deltaTime;
+                if(data.blutz <= 0 || !ch->playerFlags.test(PLR_TAIL)) {
+                    data.blutz = 0.0;
+                    oozaru_revert(ch);
                 }
             }
 
+            double kigain = getModifierHelper(ch, form, APPLY_CVIT_REGEN_MULT,
+                                              static_cast<int>(CharVital::Ki));
+            double plgain = getModifierHelper(ch, form, APPLY_CVIT_REGEN_MULT,
+                                              -static_cast<int>(CharVital::PowerLevel));
+            ch->incCurHealthPercent(plgain);
+            ch->incCurKIPercent(kigain);
+
+            // Notify at thresholds
+            if(form != FormID::Base) {
+                if(timeBefore < MASTERY_THRESHOLD && timeAfter >= MASTERY_THRESHOLD)
+                    send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, form) + "\r\n");
+
+                if(timeBefore < LIMIT_THRESHOLD && timeAfter >= LIMIT_THRESHOLD)
+                    send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, form) + "\r\n");
+
+                if(timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limitBroken == true)
+                    send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n\r\n");
+            }
+            if(technique != FormID::Base) {
+                if(techTimeBefore < MASTERY_THRESHOLD && techTimeAfter >= MASTERY_THRESHOLD)
+                    send_to_char(ch, "@mSomething settles in your core, you feel more comfortable using @n" + getName(ch, technique) + "\r\n");
+
+                if(techTimeBefore < LIMIT_THRESHOLD && techTimeAfter >= LIMIT_THRESHOLD)
+                    send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, technique) + "\r\n");
+
+                if(techTimeBefore < LIMITBREAK_THRESHOLD && techTimeAfter >= LIMITBREAK_THRESHOLD && techdata.limitBroken == true)
+                    send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, technique) + " @mhas evolved.@n\r\n");
+            }
+
+
+            // Check stamina drain.
+            if (auto drain = (getStaminaDrain(ch, ch->form, true) + getStaminaDrain(ch, ch->technique, true)) * deltaTime; drain > 0) {
+                if(ch->decCurSTPercent(drain) == 0) {
+                    act("@mExhausted of stamina, your body forcibly reverts from its form.@n\r\n", true, ch, nullptr,
+                        nullptr, TO_CHAR);
+                    act("@C$n @wbreathing heavily, reverts from $s form, returning to normal.@n\r\n", true, ch, nullptr,
+                        nullptr, TO_ROOM);
+                    revert(ch);
+
+                }
+            }
         }
+
     }
 
     struct trans_echo {

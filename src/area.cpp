@@ -38,14 +38,12 @@ int checkOrbit(const room_vnum room) {
 }
 
 int getPlanet(const room_vnum room) {
-    auto find = world.find(room);
-    if(find == world.end()) return 0;
-
-    auto &r = find->second;
+    auto r = get_room(room);
+    if(!r) return 0;
 
     // this approach covers most, but not all, planets.
     for(const auto& [flag, planet] : planetFlags) {
-        if(r.room_flags.test(flag)) return planet;
+        if(r->room_flags.test(flag)) return planet;
     }
 
     if((room >= 3400 && room <= 3599) || (room >= 62900 && room <= 62999) || room == 19600)

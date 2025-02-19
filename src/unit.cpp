@@ -2,9 +2,9 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
 
-std::vector<ObjRef> unit_data::getContents() {
-    std::vector<ObjRef> out;
-    for(auto o = contents; o; o = o->next_content) out.emplace_back(o);
+std::vector<std::weak_ptr<obj_data>> unit_data::getContents() {
+    std::vector<std::weak_ptr<obj_data>> out;
+    for(auto o = contents; o; o = o->next_content) out.emplace_back(o->shared());
     return out;
 }
 

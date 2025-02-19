@@ -1446,8 +1446,9 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
             send_to_char(ch, ", ");
             column += 2;
         }
-        if(world.contains(r)) {
-            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", world[r].name, r);
+        auto room = get_room(r);
+        if(room) {
+            linelen = snprintf(buf1, sizeof(buf1), "%s (#%d)", room->name, r);
         } else {
             linelen = snprintf(buf1, sizeof(buf1), "<UNKNOWN> (#%d)", r);
         }
@@ -1673,7 +1674,7 @@ shop_data::shop_data(const nlohmann::json &j) : shop_data() {
     if(j.contains("lastsort")) lastsort = j["lastsort"];
 }
 
-std::list<char_data*> shop_data::getKeepers() {
+std::list<std::weak_ptr<char_data>> shop_data::getKeepers() {
     return get_vnum_list(characterVnumIndex, keeper);
 }
 

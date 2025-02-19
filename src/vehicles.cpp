@@ -21,7 +21,7 @@
 #include "dbat/area.h"
 
 #ifndef EXITN
-#  define EXITN(room, door)        (world[room].dir_option[door])
+#  define EXITN(room, door)        (get_room(room)->dir_option[door])
 #endif
 
 
@@ -92,7 +92,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
     }
 
     is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, 0));
-    if (!ROOM_FLAGS(is_going_to).test(ROOM_VEHICLE)) {
+    if (!ROOM_FLAGGED(is_going_to, ROOM_VEHICLE)) {
         send_to_char(ch, "@wThat ship can't carry other ships.");
         return;
     }
@@ -212,7 +212,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
     struct obj_data *hatch = nullptr;
 
-    for (hatch = world[real_room(GET_OBJ_VAL(vehicle, 0))].contents; hatch; hatch = hatch->next_content) {
+    for (hatch = get_room(GET_OBJ_VAL(vehicle, 0))->contents; hatch; hatch = hatch->next_content) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             GET_OBJ_VAL(hatch, 3) = vehicle->getRoomVnum();
         }
@@ -549,7 +549,9 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
         landName = matched->first;
     }
 
-    if(!world.count(landing)) {
+    auto landroom = get_room(landing);
+
+    if(!landroom) {
         send_to_char(ch, "You can't land there.\r\n");
         return;
     }
@@ -562,12 +564,12 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
     act("@wThe ship has landed.@n", false, ch, 0, 0, TO_ROOM);
 
     obj_from_room(vehicle);
-    obj_to_room(vehicle, landing);
+    obj_to_room(vehicle, landroom);
 
     char buf3[MAX_INPUT_LENGTH];
     sprintf(buf3, "%s @wcomes in from above and slowly settles on the ground.@n\r\n", vehicle->short_description);
-    look_at_room(IN_ROOM(vehicle), ch, 0);
-    send_to_room(IN_ROOM(vehicle), buf3);
+    look_at_room(landroom, ch, 0);
+    send_to_room(landroom, buf3);
 
 }
 

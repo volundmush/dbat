@@ -62,7 +62,7 @@ int find_first_step(struct room_data *src, struct room_data *target) {
 
     /* clear marks first, some OLC systems will save the mark. */
     for (auto &[vn, r] : world) {
-        r.room_flags.reset(ROOM_BFS_MARK);
+        r->room_flags.reset(ROOM_BFS_MARK);
     }
     src->room_flags.set(ROOM_BFS_MARK);
 
@@ -174,29 +174,29 @@ ACMD(do_sradar) {
 
     auto find = planetLocations.find(argstr);
     if(find != planetLocations.end()) {
-        dir = find_first_step(startRoom, &world[find->second]);
+        dir = find_first_step(startRoom, get_room(find->second));
         sprintf(planet, "%s", argstr.c_str());
     } else {
         if(!strcasecmp(arg, "buoy1")) {
-            auto room = world.find(GET_RADAR1(ch));
-            if(room != world.end()) {
-                dir = find_first_step(startRoom, &room->second);
+            auto room = get_room(GET_RADAR1(ch));
+            if(room) {
+                dir = find_first_step(startRoom, room);
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;
             }
         } else if(!strcasecmp(arg, "buoy2")) {
-            auto room = world.find(GET_RADAR2(ch));
-            if(room != world.end()) {
-                dir = find_first_step(startRoom, &room->second);
+            auto room = get_room(GET_RADAR2(ch));
+            if(room) {
+                dir = find_first_step(startRoom, room);
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;
             }
         } else if(!strcasecmp(arg, "buoy3")) {
-            auto room = world.find(GET_RADAR3(ch));
-            if(room != world.end()) {
-                dir = find_first_step(startRoom, &room->second);
+            auto room = get_room(GET_RADAR3(ch));
+            if(room) {
+                dir = find_first_step(startRoom, room);
             } else {
                 send_to_char(ch, "@wYou haven't launched that buoy.\r\n");
                 return;

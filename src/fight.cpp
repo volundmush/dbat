@@ -794,11 +794,12 @@ static const std::map<vital_t, std::pair<std::string, std::string>> powerupMessa
 void powerupService(uint64_t heartPulse, double deltaTime) {
     char buf3[MAX_STRING_LENGTH];
     for(const auto& r : characterSubscriptions.all("powerupService")) {
-        auto ch = r.get();
-        if (!ch) continue;
+        auto ch2 = r.lock();
+        if (!ch2) continue;
+        auto ch = ch2.get();
 
         if(!PLR_FLAGGED(ch, PLR_POWERUP)) {
-            characterSubscriptions.unsubscribe("powerupService", r);
+            characterSubscriptions.unsubscribe("powerupService", ch);
             continue;
         }
 
@@ -838,7 +839,7 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
                 send_to_scouter(buf3, ch, 1, 0);
             }
             ch->playerFlags.reset(PLR_POWERUP);
-            characterSubscriptions.unsubscribe("powerupService", r);
+            characterSubscriptions.unsubscribe("powerupService", ch);
             continue;
         }
 
@@ -874,8 +875,9 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
 
 void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
     for(const auto& r : characterSubscriptions.all("lifeforceSystem")) {
-        auto ch = r.get();
-        if (!ch) continue;
+        auto ch2 = r.lock();
+        if (!ch2) continue;
+        auto ch = ch2.get();
 
         if (rand_number(1, 15) < 14) continue;
         auto threshold = (AFF_FLAGGED(ch, AFF_HEALGLOW) || IS_KANASSAN(ch)) ? 0.03 : 0.05;
@@ -920,8 +922,9 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
 
     for (const auto& r : characterSubscriptions.all("combatSystem")) {
-        auto ch = r.get();
-        if(!ch) continue;
+        auto ch2 = r.lock();
+        if(!ch2) continue;
+        auto ch = ch2.get();
 
         if (GET_POS(ch) == POS_FIGHTING) {
             GET_POS(ch) = POS_STANDING;
@@ -1143,11 +1146,12 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
 void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
 
     for(const auto& r : characterSubscriptions.all("chargeMoreKi")) {
-        auto ch = r.get();
-        if (!ch) continue;
+        auto ch2 = r.lock();
+        if (!ch2) continue;
+        auto ch = ch2.get();
 
         if(!PLR_FLAGGED(ch, PLR_CHARGE)) {
-            characterSubscriptions.unsubscribe("chargeMoreKi", r);
+            characterSubscriptions.unsubscribe("chargeMoreKi", ch);
             continue;
         }
 
@@ -1257,16 +1261,17 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             ch->playerFlags.reset(PLR_CHARGE);
         }
         if(GET_CHARGE(ch) > 0) {
-            characterSubscriptions.subscribe("kiLeakingSystem", r);
+            characterSubscriptions.subscribe("kiLeakingSystem", ch);
         }
     }
 
     for(const auto& r : characterSubscriptions.all("kiLeakingSystem")) {
-        auto ch = r.get();
-        if (!ch) continue;
+        auto ch2 = r.lock();
+        if (!ch2) continue;
+        auto ch = ch2.get();
 
         if(GET_CHARGE(ch) <= 0) {
-            characterSubscriptions.unsubscribe("kiLeakingSystem", r);
+            characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
             continue;
         }
 
@@ -1347,7 +1352,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
 
         if(GET_CHARGE(ch) <= 0)
-            characterSubscriptions.unsubscribe("kiLeakingSystem", r);
+            characterSubscriptions.unsubscribe("kiLeakingSystem", ch2);
     }
 }
 
@@ -1411,7 +1416,7 @@ void set_fighting(struct char_data *ch, struct char_data *vict) {
     }
 
     for(auto c : {ch, vict}) {
-        characterSubscriptions.subscribe("combatSystem", c->ref());
+        characterSubscriptions.subscribe("combatSystem", c);
     }
 
     if (!CONFIG_PK_ALLOWED)
@@ -1430,7 +1435,7 @@ void stop_fighting(struct char_data *ch) {
 
     FIGHTING(ch) = nullptr;
     ch->affected_by.reset(AFF_POSITION);
-    characterSubscriptions.unsubscribe("combatSystem", ch->ref());
+    characterSubscriptions.unsubscribe("combatSystem", ch);
     update_pos(ch);
 }
 
@@ -1445,7 +1450,7 @@ static void make_pcorpse(struct char_data *ch) {
 
     corpse->vn = NOTHING;
     IN_ROOM(corpse) = NOWHERE;
-    objectSubscriptions.subscribe("corpseRotService", corpse->ref());
+    objectSubscriptions.subscribe("corpseRotService", corpse);
 
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
@@ -1646,7 +1651,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
     corpse->vn = NOTHING;
     IN_ROOM(corpse) = NOWHERE;
-    objectSubscriptions.subscribe("corpseRotService", corpse->ref());
+    objectSubscriptions.subscribe("corpseRotService", corpse);
 
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
@@ -1835,7 +1840,9 @@ static void final_combat_resolve(struct char_data *ch) {
     if (!IS_NPC(ch) && !ch->clones.empty()) {
         auto clones = ch->clones;
         for(auto &c : clones) {
-            handle_multi_merge(c);
+            auto cl = c.lock().get();
+            if(!cl) continue;
+            handle_multi_merge(cl);
         }
     }
     if (CARRYING(ch)) {
@@ -2069,7 +2076,8 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             stop_fighting(ch);
 
         for (const auto& r : characterSubscriptions.all("combatSystem")) {
-            auto c = r.get();
+            auto c2 = r.lock();
+            auto c = c2.get();
             if (c && FIGHTING(c) == ch)
                 stop_fighting(c);
         }
@@ -2140,7 +2148,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             ch->decCurLFPercent(2, -1);
             ch->decCurHealthPercent(1, 1);
             ch->playerFlags.set(PLR_GOOP);
-            characterSubscriptions.subscribe("goopTimeService", ch->ref());
+            characterSubscriptions.subscribe("goopTimeService", ch);
             ch->gooptime = 32;
             return;
         }

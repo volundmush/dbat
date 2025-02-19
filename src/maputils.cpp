@@ -27,7 +27,8 @@ void ping_ship(int vnum, int vnum2) {
     }
 
     for (auto &r : activeCharacters) {
-        tch = r.get();
+        auto tch2 = r.lock();
+        tch = tch2.get();
         if(!tch) continue;
         if (found == false) {
             if (!(obj = find_control(tch))) {
@@ -50,7 +51,7 @@ int checkship(int rnum, int vnum) {
     struct obj_data *i = nullptr;
     int there = false;
 
-    for (i = world[rnum].contents; i; i = i->next_content) {
+    for (i = get_room(rnum)->contents; i; i = i->next_content) {
         if (!ROOM_FLAGGED(rnum, ROOM_NEBULA)) {
             if (GET_OBJ_TYPE(i) == ITEM_VEHICLE && there != true) {
                 there = true;

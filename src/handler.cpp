@@ -400,10 +400,11 @@ void char_from_room(struct char_data *ch) {
         ch->affected_by.reset(AFF_PURSUIT);
 
     auto &z = zone_table[r->zone];
+    auto shared = ch->shared();
     if(IS_NPC(ch)) {
-        z.npcsInZone.erase(ch->ref());
+        z.npcsInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
     } else {
-        z.playersInZone.erase(ch->ref());
+        z.playersInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
     }
 
     REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
@@ -426,9 +427,9 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
 
     auto &z = zone_table[room->zone];
     if(IS_NPC(ch)) {
-        z.npcsInZone.insert(ch->ref());
+        z.npcsInZone.push_back(ch->shared());
     } else {
-        z.playersInZone.insert(ch->ref());
+        z.playersInZone.push_back(ch->shared());
     }
 
     /* Stop fighting now, if we left. */
@@ -448,8 +449,9 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
 /* place a character in a room */
 void char_to_room(struct char_data *ch, room_rnum room) {
     if(!ch) return;
-    if(!world.count(room)) return;
-    char_to_room(ch, &world[room]);
+    auto r = get_room(room);
+    if(!r) return;
+    char_to_room(ch, r);
 }
 
 
@@ -652,7 +654,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
     if (*number == 0)
         return (nullptr);
 
-    for (i = world[room].people; i && *number; i = i->next_in_room)
+    for (i = get_room(room)->people; i && *number; i = i->next_in_room)
         if (isname(name, i->name))
             if (--(*number) == 0)
                 return (i);
@@ -663,7 +665,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
 
 /* search all over the world for a char num, and return a pointer if found */
 struct char_data *get_char_num(mob_rnum nr) {
-    for(auto v : get_vnum_list(characterVnumIndex, nr)) return v;
+    for(auto v : get_vnum_list(characterVnumIndex, nr)) return v.lock().get();
     return (nullptr);
 }
 
@@ -679,7 +681,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
             extract_obj(object);
             return;
         } else {
-            objectSubscriptions.subscribe("growingPlants", object->ref());
+            objectSubscriptions.subscribe("growingPlants", object);
         }
     }
     if (room->vn == real_room(80)) {
@@ -694,7 +696,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     GET_LAST_LOAD(object) = time(nullptr);
 
     auto &z = zone_table[room->zone];
-    z.objectsInZone.insert(object->ref());
+    z.objectsInZone.push_back(object->shared());
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
@@ -778,8 +780,9 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
 /* put an object in a room */
 void obj_to_room(struct obj_data *object, room_rnum room) {
     if(!object) return;
-    if(!world.count(room)) return;
-    obj_to_room(object, &world[room]);
+    auto r = get_room(room);
+    if(!r) return;
+    obj_to_room(object, r);
 }
 
 
@@ -794,7 +797,7 @@ void obj_from_room(struct obj_data *object) {
         return;
     }
 
-    if(object->type_flag == ITEM_PLANT) objectSubscriptions.unsubscribe("growingPlants", object->ref());
+    if(object->type_flag == ITEM_PLANT) objectSubscriptions.unsubscribe("growingPlants", object);
 
     if (GET_OBJ_POSTED(object) && object->in_obj == nullptr) {
         struct obj_data *obj = GET_OBJ_POSTED(object);
@@ -812,7 +815,8 @@ void obj_from_room(struct obj_data *object) {
     }
 
     auto &z = zone_table[r->zone];
-    z.objectsInZone.erase(object->ref());
+    auto shared = object->shared();
+    z.objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
     REMOVE_FROM_LIST(object, object->getRoom()->contents, next_content, temp);
 
@@ -908,8 +912,11 @@ void extract_obj(struct obj_data *obj) {
     if (SCRIPT(obj))
         extract_script(obj, OBJ_TRIGGER);
 
-    auto found = uniqueObjects.find(obj->id);
-    if (found != uniqueObjects.end()) {
+    if(auto found = units.find(obj->id); found != units.end()) {
+        units.erase(found);
+    }
+    
+    if (auto found = uniqueObjects.find(obj->id); found != uniqueObjects.end()) {
         uniqueObjects.erase(found);
     }
 
@@ -1007,12 +1014,17 @@ void extract_char_final(struct char_data *ch) {
     }
 
     if (auto original = GET_ORIGINAL(ch); original) {
-        original->clones.erase(ch->ref());
+        auto shared = ch->shared();
+        original->clones.remove_if([shared](auto& c) { return c.expired() || c.lock() == shared; });
     }
 
     if (!ch->clones.empty()) {
         auto clones = ch->clones;
-        for(auto &c : clones) handle_multi_merge(c);
+        for(auto &c : clones) {
+            auto cl = c.lock();
+            if(!cl) continue;
+            handle_multi_merge(cl.get());
+        }
     }
 
     purge_homing(ch);
@@ -1047,12 +1059,15 @@ void extract_char_final(struct char_data *ch) {
     }
 
     if (ch->poisonby) {
-        ch->poisonby->poisoned.erase(ch->ref());
+        auto shared = ch->shared();
+        ch->poisonby->poisoned.remove_if([shared](auto& c) { return c.expired() || c.lock() == shared; });
         ch->poisonby = nullptr;
     }
 
     for(auto c : ch->poisoned) {
-        c->poisonby = nullptr;
+        if(auto c2 = c.lock(); c2) {
+            c2->poisonby = nullptr;
+        }
     }
     ch->poisoned.clear();
 
@@ -1114,7 +1129,8 @@ void extract_char_final(struct char_data *ch) {
         stop_fighting(ch);
 
     for (const auto &r : characterSubscriptions.all("combatSystem")) {
-        k = r.get();
+        auto k2 = r.lock();
+        k = k2.get();
         if (k && FIGHTING(k) == ch)
             stop_fighting(k);
     }
@@ -1227,7 +1243,8 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
     }
 
     for (auto &r : activeCharacters) {
-        i = r.get();
+        auto i2 = r.lock();
+        i = i2.get();
         if(!i) continue;
         if (IS_NPC(i))
             continue;
@@ -1345,7 +1362,8 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
         return get_player_vis(ch, name, nullptr, 0);
 
     for (auto &r : activeCharacters) {
-        i = r.get();
+        auto i2 = r.lock();
+        i = i2.get();
         if(!i) continue;
         if (IN_ROOM(ch) == IN_ROOM(i))
             continue;
@@ -1439,7 +1457,8 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
 
     /* ok.. no luck yet. scan the entire obj list   */
     for (auto &r : activeObjects) {
-        i = r.get();
+        auto i2 = r.lock();
+        i = i2.get();
         if (i && isname(name, i->name))
             if (CAN_SEE_OBJ(ch, i))
                 if (--(*number) == 0)

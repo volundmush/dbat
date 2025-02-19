@@ -274,9 +274,10 @@ void sedit_rooms_menu(struct descriptor_data *d) {
     clear_screen(d);
     write_to_output(d, "##     VNUM     Room\r\n\r\n");
     for (auto r : shop->in_room) {
-        if (world.contains(r)) {
+        auto room = get_room(r);
+        if (room) {
             write_to_output(d, "%2d - [@c%5d@n] - @y%s@n\r\n", i++, r,
-                            world[r].name);
+                            room->name);
         } else {
             write_to_output(d, "%2d - [@R!Removed Room!@n]\r\n", i);
         }

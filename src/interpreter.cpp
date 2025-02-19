@@ -151,7 +151,7 @@ void command_interpreter(struct char_data *ch, char *argument) {
             std::string ln = line;
             std::pair<int, std::string> pair = {cmd, ln};
             ch->wait_input_queue.emplace_back(pair);
-            characterSubscriptions.subscribe("commandWaitQueue", ch->ref());
+            characterSubscriptions.subscribe("commandWaitQueue", ch);
         }
         return;
     }
@@ -163,8 +163,9 @@ void command_interpreter(struct char_data *ch, char *argument) {
 void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
 
     for(const auto& r : characterSubscriptions.all("commandWaitQueue")) {
-        auto ch = r.get();
-        if(!ch) continue;
+        auto ch2 = r.lock();
+        if(!ch2) continue;
+        auto ch = ch2.get();
         ch->waitTime = std::max<double>(0.0, ch->waitTime - deltaTime);
         if(ch->waitTime == 0.0) {
             if(ch->task != Task::nothing) doContinuedTask(ch);
@@ -174,7 +175,7 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
                 processCommand(ch, command.first, command.second);
             }
             if(ch->waitTime <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty()) {
-                characterSubscriptions.unsubscribe("commandWaitQueue", r);
+                characterSubscriptions.unsubscribe("commandWaitQueue", ch2);
             }
         }
     }
@@ -1040,23 +1041,31 @@ int special(struct char_data *ch, int cmd, char *arg) {
     }
 
     /* special in inventory? */
-    for (auto obj : ch->getContents())
-        if (auto func = GET_OBJ_SPEC(obj))
-            if (func(ch, obj, cmd, arg))
-                return 1;
+    for (auto obj2 : ch->getContents()) {
+        if(auto obj = obj2.lock(); obj)
+            if (auto func = GET_OBJ_SPEC(obj))
+                if (func(ch, obj.get(), cmd, arg))
+                    return 1;
+    }
 
     /* special in mobile present? */
     if(room) {
-        for (auto mob : room->getPeople())
-            if (IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_NOTDEADYET))
-                if (auto func = GET_MOB_SPEC(mob); func)
-                    if(func(ch, mob, cmd, arg))
-                        return 1;
+        for (auto mob2 : room->getPeople())
+            if(auto mob3 = mob2.lock(); mob3) {
+                auto mob = mob3.get();
+                if (IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_NOTDEADYET))
+                    if (auto func = GET_MOB_SPEC(mob); func)
+                        if(func(ch, mob, cmd, arg))
+                            return 1;
+            }
 
-        for (auto obj : room->getContents())
+        for (auto obj2 : room->getContents()) {
+            auto obj = obj2.lock();
+            if(!obj) continue;
             if(auto func = GET_OBJ_SPEC(obj); func)
-                if (func(ch, obj, cmd, arg))
+                if (func(ch, obj.get(), cmd, arg))
                     return 1;
+        }
     }
 
     return 0;
@@ -1156,7 +1165,8 @@ int perform_dupe_check(struct descriptor_data *d) {
   */
 
     for (auto &r : activeCharacters) {
-        ch = r.get();
+        auto ch2 = r.lock();
+        ch = ch2.get();
         if(!ch) continue;
 
         if (IS_NPC(ch))
@@ -1312,7 +1322,7 @@ void enter_player_game(struct descriptor_data *d) {
 
     d->character->timer = 0;
     reset_char(d->character);
-    if(!d->character->script) d->character->script = new script_data(d->character);
+    if(!d->character->script) d->character->script = new script_data(d->character->shared());
 
     racial_body_parts(d->character);
 
@@ -1343,7 +1353,8 @@ void enter_player_game(struct descriptor_data *d) {
 
     /*load_char_pets(d->character);*/
     for (auto &r : activeCharacters) {
-        check = r.get();
+        auto check2 = r.lock();
+        check = check2.get();
         if (check && !check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
             add_follower(check, d->character);
@@ -1581,9 +1592,9 @@ void fingerUser(struct char_data *ch, struct account_data *account) {
     if (GET_ADMLEVEL(ch) > 0) {
         int counter = 0;
         for(auto ref : account->characters) {
-            auto p = ref.get();
-            if(!p) continue;
-            send_to_char(ch, "@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->name);
+            auto p = players.find(ref);
+            if(p == players.end()) continue;
+            send_to_char(ch, "@D[@gCh. Slot %d @D: @w%-30s@D]@n\r\n", ++counter, p->second.character->name);
         }
         send_to_char(ch, "\n");
     }

@@ -260,7 +260,10 @@ void oedit_save_internally(struct descriptor_data *d) {
     obj_proto[robj_num].proto_script = OLC_SCRIPT(d);
 
     /* this takes care of the objects currently in-game */
-    for (auto obj : get_vnum_list(objectVnumIndex, robj_num)) {
+    for (auto obj3 : get_vnum_list(objectVnumIndex, robj_num)) {
+        auto obj2 = obj3.lock();
+        if(!obj2) continue;
+        obj = obj2.get();
 
         /* remove any old scripts */
         if (SCRIPT(obj))
@@ -1050,7 +1053,6 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                         send_to_char(d->character, "\r\nCommitting iedit changes.\r\n");
                         obj = OLC_IOBJ(d);
                         *obj = *(OLC_OBJ(d));
-                        ((obj)->id) = nextObjID();
                         /* find_obj helper */
                         if (GET_OBJ_VNUM(obj) != NOTHING) {
                             /* remove any old scripts */

@@ -9,6 +9,6 @@ struct char_data *findPlayer(const std::string& name);
 
 OpResult<> validate_pc_name(const std::string& name);
 
-extern bool canDeleteCharacter(CharRef ref);
+extern bool canDeleteCharacter(std::weak_ptr<char_data> ref);
 extern bool deleteUserAccount(vnum id);
-extern void deletePlayerCharacter(CharRef ref);
+extern void deletePlayerCharacter(std::weak_ptr<char_data> ref);

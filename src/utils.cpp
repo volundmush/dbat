@@ -769,7 +769,12 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
 
     // Gravity generators
-    for (auto k : get_vnum_list(objectVnumIndex, 11)) {
+    for (auto k3 : get_vnum_list(objectVnumIndex, 11)) {
+        auto k2 = k3.lock();
+        if (!k2) {
+            continue;
+        }
+        k = k2.get();
         if (k->carried_by) {
             continue;
         }
@@ -799,7 +804,12 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     }
 
     // ATMS
-    for(auto k : get_vnum_list(objectVnumIndex, 3034)) {
+    for(auto k3 : get_vnum_list(objectVnumIndex, 3034)) {
+        auto k2 = k3.lock();
+        if (!k2) {
+            continue;
+        }
+        k = k2.get();
         if (k->carried_by) {
             continue;
         }
@@ -2704,7 +2714,7 @@ void core_dump_real(const char *who, int line) {
 /* Is there a campfire in the room? */
 int cook_element(room_rnum room) {
     int found = 0;
-    for(auto obj = world[room].contents; obj; obj = obj->next_content) {
+    for(auto obj = get_room(room)->contents; obj; obj = obj->next_content) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
         } else if(obj->vn == 19093) return 2;
@@ -2828,7 +2838,7 @@ int room_is_dark(room_rnum room) {
         return (false);
     }
 
-    auto r = &world.at(room);
+    auto r = get_room(room);
 
     for(auto c = r->people; c; c = c->next_in_room) {
         if(c->isProvidingLight()) return false;
@@ -3108,9 +3118,8 @@ bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
 }
 
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
-    auto room = world.find(loc);
-    if (room != world.end()) {
-        return room->second.room_flags.test(flag);
+    if (auto room = get_room(loc); room) {
+        return room->room_flags.test(flag);
     }
     return false;
 }
@@ -3238,7 +3247,7 @@ void doContinuedTask(char_data* ch) {
 
 void WAIT_STATE(struct char_data *ch, double timeToWait) {
     ch->waitTime = std::max<double>(0.0, timeToWait);
-    characterSubscriptions.subscribe("commandWaitQueue", ch->ref());
+    characterSubscriptions.subscribe("commandWaitQueue", ch);
 }
 
 std::string format_double(double value) {

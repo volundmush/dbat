@@ -24,7 +24,7 @@ static void phase_powerup(struct char_data *ch, int type, int phase);
 static void grow_plants() {
 
     for (const auto& r : objectSubscriptions.all("growingPlants")) {
-        auto k = r.get();
+        auto k = r.lock();
         if(!k) continue;
 
         if (k->getRoomFlag(ROOM_GARDEN1) || k->getRoomFlag(ROOM_GARDEN2)) {

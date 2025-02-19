@@ -74,41 +74,30 @@ SPECIAL(dump) {
 ******************************************************************** */
 
 int num_players_in_room(room_vnum room) {
-    struct descriptor_data *i;
+    auto r = get_room(room);
+    if(!r) return 0;
+
     int num_players = 0;
-
-    for (i = descriptor_list; i; i = i->next) {
-        if (STATE(i) != CON_PLAYING)
-            continue;
-        if (!(i->character))
-            continue;
-        if (!world.count(IN_ROOM(i->character)))
-            continue;
-        if (i->character->getRoom()->vn != room)
-            continue;
-        if ((GET_ADMLEVEL(i->character) >= ADMLVL_IMMORT) &&
-            (PRF_FLAGGED(i->character, PRF_NOHASSLE))) /* Ignore Imms */
-            continue;
-
+    for(auto ch = r->people; ch; ch = ch->next_in_room) {
+        if(IS_NPC(ch)) continue;
+        if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) && (PRF_FLAGGED(ch, PRF_NOHASSLE)))
         num_players++;
     }
-
+    
     return num_players;
 }
 
 bool check_mob_in_room(mob_vnum mob, room_vnum room) {
-    if(auto rfind = world.find(room); rfind != world.end()) {
-        auto &r = rfind->second;
-        for(auto ch = r.people; ch; ch = ch->next_in_room)
+    if(auto r = get_room(room); r) {
+        for(auto ch = r->people; ch; ch = ch->next_in_room)
             if(ch->vn == mob) return true;
     }
     return false;
 }
 
 bool check_obj_in_room(obj_vnum obj, room_vnum room) {
-    if(auto rfind = world.find(room); rfind != world.end()) {
-        auto &r = rfind->second;
-        for(auto o = r.contents; o; o = o->next_content)
+    if(auto r = get_room(room); r) {
+        for(auto o = r->contents; o; o = o->next_content)
             if(o->vn == obj) return true;
     }
     return false;
@@ -230,10 +219,10 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
       }
     } */
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[ch->in_room].vn == gauntlet_info[i][1]) {
+        if (ch->getRoomVnum() == gauntlet_info[i][1]) {
             if (cmd == gauntlet_info[i][2]) {
                 //don't let him proceed if mob is still alive
-                for (tch = world[ch->in_room].people; tch; tch = tch->next_in_room) {
+                for (tch = ch->getRoom()->people; tch; tch = tch->next_in_room) {
                     if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */
                     {
                         proceed = 0;
@@ -246,7 +235,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
                     nomob = true;
 
                     /* Check the next room for players and ensure mob is waiting */
-                    for (tch = world[real_room(gauntlet_info[i + 1][1])].people; tch; tch = tch->next_in_room) {
+                    for (tch = get_room(real_room(gauntlet_info[i + 1][1]))->people; tch; tch = tch->next_in_room) {
                         if (!IS_NPC(tch)) {
                             proceed = 0;  /* There is a player there */
                             sprintf(buf, "%s is in the next room.  You must wait for them to finish.\r\n",
@@ -316,7 +305,7 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
         return false;
 
     for (i = 0; gauntlet_info[i][0] != -1; i++) {
-        if (world[EXIT(ch, (cmd - 1))->to_room].vn == gauntlet_info[i][1]) {
+        if (EXIT(ch, (cmd - 1))->to_room == gauntlet_info[i][1]) {
             send_to_char(ch, "You have completed the gauntlet, you cannot go backwards!\r\n");
             return true;
         }
@@ -364,11 +353,11 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
             if (EXIT_FLAGGED(EXIT(ch, door), EX_CLOSED))
                 continue;
 
-            if ((world[EXIT(ch, door)->to_room].vn == gauntlet_info[i][1]) && (door == (cmd - 1))) {
+            if ((EXIT(ch, door)->to_room == gauntlet_info[i][1]) && (door == (cmd - 1))) {
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
-                for (tch = world[real_room(gauntlet_info[i][1])].people; tch; tch = tch->next_in_room) {
+                for (tch = get_room(real_room(gauntlet_info[i][1]))->people; tch; tch = tch->next_in_room) {
                     if (!IS_NPC(tch)) {
                         proceed = 0;  /* There is a player there */
                         sprintf(buf, "%s has moved into the next room.  You must wait for them to finish.\r\n",
@@ -436,7 +425,7 @@ SPECIAL(pet_shops) {
 
     if (CMD_IS("list")) {
         send_to_char(ch, "Available pets are:\r\n");
-        for (pet = world[pet_room].people; pet; pet = pet->next_in_room) {
+        for (pet = get_room(pet_room)->people; pet; pet = pet->next_in_room) {
             /* No, you can't have the Implementor as a pet if he's in there. */
             if (!IS_NPC(pet))
                 continue;
@@ -494,7 +483,7 @@ SPECIAL(auction) {
 
     if (CMD_IS("cancel")) {
 
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = get_room(auct_room)->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj && GET_AUCTER(obj) == ((ch)->id)) {
                 obj2 = obj;
@@ -543,7 +532,7 @@ SPECIAL(auction) {
         struct descriptor_data *d;
         int founded = false;
 
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = get_room(auct_room)->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj && GET_CURBID(obj) == ((ch)->id)) {
                 obj2 = obj;
@@ -752,7 +741,7 @@ SPECIAL(healtank) {
             ch->playerFlags.set(PLR_HEALT);
             SITS(ch) = htank;
             SITTING(htank) = ch;
-            objectSubscriptions.subscribe("healTankService", htank->ref());
+            objectSubscriptions.subscribe("healTankService", htank);
             return (true);
 
         } // End of Enter argument
@@ -1081,8 +1070,8 @@ SPECIAL(bank) {
                 send_to_char(ch, "There is an error. Report to staff.");
                 return (true);
             }
-            auto id = vict->ref();
-            auto &p = players[vict->id];
+            auto id = vict->id;
+            auto &p = players.at(id);
             auto &c = p.account->characters;
             auto found = std::find_if(c.begin(), c.end(), [&](auto i) {return i == id;});
             if(found != c.end()) {

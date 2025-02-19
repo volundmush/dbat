@@ -181,7 +181,7 @@ OCMD(do_oforce) {
         if ((room = obj_room(obj)) == NOWHERE)
             obj_log(obj, "oforce called by object in NOWHERE");
         else {
-            for (ch = world[room].people; ch; ch = next_ch) {
+            for (ch = get_room(room)->people; ch; ch = next_ch) {
                 next_ch = ch->next_in_room;
                 if (valid_dg_target(ch, 0)) {
                     command_interpreter(ch, line);
@@ -349,13 +349,13 @@ OCMD(do_opurge) {
     if (!*arg) {
         /* purge all */
         if ((rm = obj_room(obj)) != NOWHERE) {
-            for (ch = world[rm].people; ch; ch = next_ch) {
+            for (ch = get_room(rm)->people; ch; ch = next_ch) {
                 next_ch = ch->next_in_room;
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
 
-            for (o = world[rm].contents; o; o = next_obj) {
+            for (o = get_room(rm)->contents; o; o = next_obj) {
                 next_obj = o->next_content;
                 if (o != obj)
                     extract_obj(o);
@@ -434,7 +434,7 @@ OCMD(do_oteleport) {
         if (target == rm)
             obj_log(obj, "oteleport target is itself");
 
-        for (ch = world[rm].people; ch; ch = next_ch) {
+        for (ch = get_room(rm)->people; ch; ch = next_ch) {
             next_ch = ch->next_in_room;
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
@@ -586,14 +586,16 @@ OCMD(do_oasound) {
         return;
     }
 
+    auto r = get_room(room);
     for (door = 0; door < NUM_OF_DIRS; door++) {
-        if (world[room].dir_option[door] != nullptr &&
-            (world[room].dir_option[door])->to_room != NOWHERE &&
-            (world[room].dir_option[door])->to_room != room &&
-            world[(world[room].dir_option[door])->to_room].people) {
-            sub_write(argument, world[(world[room].dir_option[door])->to_room].people, true, TO_ROOM);
-            sub_write(argument, world[(world[room].dir_option[door])->to_room].people, true, TO_CHAR);
+        auto ex = r->dir_option[door];
+        if(!ex) continue;
+        if (ex->to_room == room) continue;
+        if(auto dest = get_room(ex->to_room); dest) {
+            sub_write(argument, dest->people, true, TO_ROOM);
+            sub_write(argument, dest->people, true, TO_CHAR);
         }
+        
     }
 }
 

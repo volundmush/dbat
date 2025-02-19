@@ -24,7 +24,7 @@ namespace net {
         if(j.contains("state")) state = j.at("state").get<int>();
         if(j.contains("ch")) {
             auto id = j["ch"].get<int>();
-            ch = uniqueCharacters.at(id).second;
+            ch = uniqueCharacters.at(id).get();
         }
 
     }
@@ -66,13 +66,13 @@ namespace net {
             default:
                 if(txt.starts_with("delete ")) {
                     if(txt.ends_with(fmt::format(" {}", ch->name))) {
-                        if(!canDeleteCharacter(ch->ref())) {
+                        if(!canDeleteCharacter(ch->shared())) {
                             sendText("Having trouble deleting that character. Make sure they're fully logged off.\r\n");
                             break;
                         }
                         sendText(fmt::format("Good bye, {}!\r\n", ch->name));
                         basic_mud_log("%s deleted their character: %s", conn->account->name, ch->name);
-                        deletePlayerCharacter(ch->ref());
+                        deletePlayerCharacter(ch->shared());
                         conn->setParser(new AccountMenu(conn));
                         break;
                     } else {

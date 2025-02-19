@@ -132,7 +132,7 @@ int trgvar_in_room(room_vnum vnum) {
         return (-1);
     }
 
-    for (ch = world[rnum].people; ch != nullptr; ch = ch->next_in_room)
+    for (ch = get_room(rnum)->people; ch != nullptr; ch = ch->next_in_room)
         i++;
 
     return i;
@@ -143,12 +143,11 @@ obj_data *get_obj_in_list(char *name, obj_data *list) {
     int32_t id;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
+        auto uidResult = resolveUID(name);;
         if(!uidResult) return nullptr;
-        if(uidResult->index() != 1) return nullptr;
-        auto obj = std::get<1>(*uidResult);
+        auto obj2 = std::dynamic_pointer_cast<obj_data>(uidResult);
+        if(!obj2) return nullptr;
+        auto obj = obj2.get();
 
         for (i = list; i; i = i->next_content)
             if(i == obj) return obj;
@@ -169,12 +168,11 @@ obj_data *get_object_in_equip(char_data *ch, char *name) {
     int32_t id;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
+        auto uidResult = resolveUID(name);
         if(!uidResult) return nullptr;
-        if(uidResult->index() != 1) return nullptr;
-        auto o = std::get<1>(*uidResult);
+        auto obj2 = std::dynamic_pointer_cast<obj_data>(uidResult);
+        if(!obj2) return nullptr;
+        auto o = obj2.get();
 
         for (j = 0; j < NUM_WEARS; j++)
             if ((obj = GET_EQ(ch, j)))
@@ -300,18 +298,16 @@ char_data *get_char(char *name) {
     char_data *i;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 2) return nullptr;
-        i = std::get<2>(*uidResult);
+        auto uidResult = resolveUID(name);
+        i = std::dynamic_pointer_cast<char_data>(uidResult).get();
+        if(!i) return nullptr;
 
         if (i && valid_dg_target(i, DG_ALLOW_GODS))
             return i;
     } else {
         for (const auto& r : getAllCharacters()) {
-            i = r.get();
+            i = r.lock().get();
+            if(!i) continue;
             if (isname(name, i->name) &&
                 valid_dg_target(i, DG_ALLOW_GODS))
                 return i;
@@ -328,19 +324,16 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
     char_data *ch;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 2) return nullptr;
-        ch = std::get<2>(*uidResult);
+        auto uidResult = resolveUID(name);
+        ch = std::dynamic_pointer_cast<char_data>(uidResult).get();
+        if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
         room_rnum num;
         if ((num = obj_room(obj)) != NOWHERE)
-            for (ch = world[num].people; ch; ch = ch->next_in_room)
+            for (ch = get_room(num)->people; ch; ch = ch->next_in_room)
                 if (isname(name, ch->name) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
@@ -358,12 +351,9 @@ char_data *get_char_in_room(room_data *room, char *name) {
     char_data *ch;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 2) return nullptr;
-        ch = std::get<2>(*uidResult);
+        auto uidResult = resolveUID(name);
+        ch = std::dynamic_pointer_cast<char_data>(uidResult).get();
+        if(!ch) return nullptr;
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
@@ -395,12 +385,9 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
     /* or outside ? */
     if (obj->in_obj) {
         if (*name == UID_CHAR) {
-            std::optional<DgUID> result;
-            result = resolveUID(name);
-            auto uidResult = result;
-            if(!uidResult) return nullptr;
-            if(uidResult->index() != 1) return nullptr;
-            auto o = std::get<1>(*uidResult);
+            auto uidResult = resolveUID(name);
+            auto o = std::dynamic_pointer_cast<obj_data>(uidResult).get();
+            if(!o) return nullptr;
             if(o == obj->in_obj) return o;
         } else if (isname(name, obj->in_obj->name))
             return obj->in_obj;
@@ -414,11 +401,11 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return i;
     else if ((rm = obj_room(obj)) != NOWHERE) {
         /* check the floor */
-        if ((i = get_obj_in_list(name, world[rm].contents)))
+        if ((i = get_obj_in_list(name, get_room(rm)->contents)))
             return i;
 
         /* check peoples' inventory */
-        for (ch = world[rm].people; ch; ch = ch->next_in_room)
+        for (ch = get_room(rm)->people; ch; ch = ch->next_in_room)
             if ((i = get_object_in_equip(ch, name)))
                 return i;
     }
@@ -430,16 +417,12 @@ obj_data *get_obj(char *name) {
     obj_data *obj;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 1) return nullptr;
-        return std::get<1>(*uidResult);
+        auto uidResult = resolveUID(name);
+        return std::dynamic_pointer_cast<obj_data>(uidResult).get();
     }
     else {
         for (auto &r : activeObjects) {
-            obj = r.get();
+            obj = r.lock().get();
             if(!obj) continue;
             if (isname(name, obj->name))
                 return obj;
@@ -455,18 +438,13 @@ room_data *get_room(char *name) {
     room_rnum nr;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 0) return nullptr;
-        auto r = std::get<0>(*uidResult);
-        return r;
+        auto uidResult = resolveUID(name);
+        return std::dynamic_pointer_cast<room_data>(uidResult).get();
     }
     else if ((nr = real_room(atoi(name))) == NOWHERE)
         return nullptr;
     else
-        return &world[nr];
+        return get_room(nr);
 }
 
 
@@ -478,13 +456,8 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
     char_data *ch;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 2) return nullptr;
-        ch = std::get<2>(*uidResult);
-
+        auto uidResult = resolveUID(name);
+        ch = std::dynamic_pointer_cast<char_data>(uidResult).get();
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
@@ -499,7 +472,7 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
             return obj->worn_by;
 
         for (auto &r : activeCharacters) {
-            ch = r.get();
+            ch = r.lock().get();
             if (ch && isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
@@ -518,12 +491,8 @@ char_data *get_char_by_room(room_data *room, char *name) {
     char_data *ch;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 2) return nullptr;
-        ch = std::get<2>(*uidResult);
+        auto uidResult = resolveUID(name);
+        ch = std::dynamic_pointer_cast<char_data>(uidResult).get();
 
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
@@ -534,7 +503,7 @@ char_data *get_char_by_room(room_data *room, char *name) {
                 return ch;
 
         for (auto &r : activeCharacters) {
-            ch = r.get();
+            ch = r.lock().get();
             if (ch && isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
@@ -554,12 +523,8 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     room_vnum rm;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 1) return nullptr;
-        return std::get<1>(*uidResult);
+        auto uidResult = resolveUID(name);
+        return std::dynamic_pointer_cast<obj_data>(uidResult).get();
     }
 
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
@@ -579,7 +544,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
-        (i = get_obj_in_list(name, world[rm].contents)))
+        (i = get_obj_in_list(name, get_room(rm)->contents)))
         return i;
 
     return get_obj(name);
@@ -591,12 +556,9 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
     int32_t id;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 1) return nullptr;
-        auto o = std::get<1>(*uidResult);
+        auto uidResult = resolveUID(name);
+        auto o = std::dynamic_pointer_cast<obj_data>(uidResult).get();
+        if(!o) return nullptr;
         for (obj = room->contents; obj; obj = obj->next_content)
             if (o == obj)
                 return obj;
@@ -614,12 +576,8 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
     obj_data *obj;
 
     if (*name == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(name);
-        auto uidResult = result;
-        if(!uidResult) return nullptr;
-        if(uidResult->index() != 1) return nullptr;
-        return std::get<1>(*uidResult);
+        auto uidResult = resolveUID(name);
+        return std::dynamic_pointer_cast<obj_data>(uidResult).get();
     }
 
     for (obj = room->contents; obj; obj = obj->next_content)
@@ -627,7 +585,7 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
             return obj;
 
     for (auto &r : activeObjects) {
-        obj = r.get();
+        obj = r.lock().get();
         if (obj && isname(name, obj->name))
             return obj;
     }
@@ -637,36 +595,33 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
 
 /* checks every PULSE_SCRIPT for random triggers */
 void script_trigger_check(uint64_t heartPulse, double deltaTime) {
-    char_data *ch;
-    obj_data *obj;
-    struct room_data *room = nullptr;
     int nr;
     struct script_data *sc;
 
     for (const auto &r : characterSubscriptions.all("randomTriggers")) {
-        ch = r.get();
+        auto ch = r.lock();
         if (ch && SCRIPT(ch)) {
             sc = SCRIPT(ch);
 
             if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
                 (!is_empty(ch->getRoom()->zone) ||
                  IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                random_mtrigger(ch);
+                random_mtrigger(ch.get());
         }
     }
 
     for (const auto &r : objectSubscriptions.all("randomTriggers")) {
-        obj = r.get();
+        auto obj = r.lock();
         if (obj && SCRIPT(obj)) {
             sc = SCRIPT(obj);
 
             if (IS_SET(SCRIPT_TYPES(sc), OTRIG_RANDOM))
-                random_otrigger(obj);
+                random_otrigger(obj.get());
         }
     }
 
     for (const auto &re : roomSubscriptions.all("randomTriggers")) {
-        auto room = re.get();
+        auto room = re.lock();
         if(!room) continue;
         if (SCRIPT(room)) {
             sc = SCRIPT(room);
@@ -674,49 +629,46 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
             if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
                 (!is_empty(room->zone) ||
                  IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                random_wtrigger(room);
+                random_wtrigger(room.get());
         }
     }
 }
 
 void check_time_triggers() {
-    char_data *ch;
-    obj_data *obj;
-    struct room_data *room = nullptr;
     int nr;
     struct script_data *sc;
 
     for (auto &r : characterSubscriptions.all("timeTriggers")) {
-        ch = r.get();
+        auto ch = r.lock();
         if (ch && SCRIPT(ch)) {
             sc = SCRIPT(ch);
 
             if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) &&
                 (!is_empty(ch->getRoom()->zone) ||
                  IS_SET(SCRIPT_TYPES(sc), MTRIG_GLOBAL)))
-                time_mtrigger(ch);
+                time_mtrigger(ch.get());
         }
     }
 
     for (auto &r : objectSubscriptions.all("timeTriggers")) {
-        obj = r.get();
+        auto obj = r.lock();
         if (obj && SCRIPT(obj)) {
             sc = SCRIPT(obj);
 
             if (IS_SET(SCRIPT_TYPES(sc), OTRIG_TIME))
-                time_otrigger(obj);
+                time_otrigger(obj.get());
         }
     }
 
     for (const auto &re : roomSubscriptions.all("timeTriggers")) {
-        room = re.get();
+        auto room = re.lock();
         if (room && SCRIPT(room)) {
             sc = SCRIPT(room);
 
             if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
                 (!is_empty(room->zone) ||
                  IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                time_wtrigger(room);
+                time_wtrigger(room.get());
         }
     }
 }
@@ -724,7 +676,7 @@ void check_time_triggers() {
 void check_interval_triggers(int trigFlag) {
     auto ac = activeCharacters;
     for (auto &r : ac) {
-        auto ch = r.get();
+        auto ch = r.lock().get();
         if (ch && SCRIPT(ch)) {
             auto sc = SCRIPT(ch);
 
@@ -737,7 +689,7 @@ void check_interval_triggers(int trigFlag) {
 
     auto ao = activeObjects;
     for (auto &r : ao) {
-        auto obj = r.get();
+        auto obj = r.lock().get();
         if (obj && SCRIPT(obj)) {
             auto sc = SCRIPT(obj);
 
@@ -747,13 +699,13 @@ void check_interval_triggers(int trigFlag) {
     }
 
     for (auto &[vn, r] : world) {
-        if (SCRIPT(&r)) {
-            auto sc = SCRIPT(&r);
+        if (SCRIPT(r)) {
+            auto sc = SCRIPT(r);
 
             if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
-                (!is_empty(r.zone) ||
+                (!is_empty(r->zone) ||
                  IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-                interval_wtrigger(&r, trigFlag);
+                interval_wtrigger(r, trigFlag);
         }
     }
 }
@@ -834,25 +786,9 @@ void script_stat(char_data *ch, struct script_data *sc) {
     for (tv = sc->global_vars; tv; tv = tv->next) {
         snprintf(namebuf, sizeof(namebuf), "%s:%ld", tv->name, tv->context);
         if (*(tv->value) == UID_CHAR) {
-            std::optional<DgUID> result;
-            result = resolveUID(tv->value);
-            auto uidResult = result;
+            auto uidResult = resolveUID(tv->value);
             if(uidResult) {
-				auto idx = uidResult->index();
-                std::string n;
-                if(idx == 0) {
-                    // Room.
-                    auto thing = std::get<0>(*uidResult);
-                    n = thing->name;
-                } else if(idx == 1) {
-                    // object
-                    auto thing = std::get<1>(*uidResult);
-                    n = thing->name;
-                } else if(idx == 2) {
-                    // character or player...
-                    auto thing = std::get<2>(*uidResult);
-                    n = thing->name;
-                }
+                std::string n = uidResult->name;
                 send_to_char(ch, "    %15s:  %s\r\n", tv->context ? namebuf : tv->name, n.c_str());
             } else {
                 send_to_char(ch, "   -BAD UID: %s", tv->value);
@@ -889,25 +825,9 @@ void script_stat(char_data *ch, struct script_data *sc) {
 
             for (tv = GET_TRIG_VARS(t); tv; tv = tv->next) {
                 if (*(tv->value) == UID_CHAR) {
-                    std::optional<DgUID> result;
-                    result = resolveUID(tv->value);
-                    auto uidResult = result;
+                    auto uidResult = resolveUID(tv->value);
                     if(uidResult) {
-                        auto idx = uidResult->index();
-                        std::string n;
-                        if(idx == 0) {
-                            // Room.
-                            auto thing = std::get<0>(*uidResult);
-                            n = thing->name;
-                        } else if(idx == 1) {
-                            // object
-                            auto thing = std::get<1>(*uidResult);
-                            n = thing->name;
-                        } else if(idx == 2) {
-                            // character or player...
-                            auto thing = std::get<2>(*uidResult);
-                            n = thing->name;
-                        }
+                        std::string n = uidResult->name;
                         send_to_char(ch, "    %15s:  %s\r\n", tv->name, n.c_str());
                     } else {
                         send_to_char(ch, "   -BAD UID: %s", tv->value);
@@ -975,7 +895,7 @@ void add_trigger(struct script_data *sc, trig_data *t, int loc) {
     t->id = nextTrigID();
     t->generation = time(nullptr);
 
-    uniqueScripts[t->id] = std::make_pair(t->generation, t);
+    uniqueScripts.emplace(t->id, t);
 
     int order = 0;
     for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
@@ -1034,7 +954,7 @@ ACMD(do_attach) {
             return;
         }
 
-        if (!SCRIPT(victim)) victim->script = new script_data(victim);
+        if (!SCRIPT(victim)) victim->script = new script_data(victim->shared());
         add_trigger(SCRIPT(victim), trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
@@ -1069,7 +989,7 @@ ACMD(do_attach) {
             return;
         }
 
-        if (!SCRIPT(object)) object->script = new script_data(object);
+        if (!SCRIPT(object)) object->script = new script_data(object->shared());
         add_trigger(SCRIPT(object), trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to %s [%d].\r\n",
@@ -1090,7 +1010,7 @@ ACMD(do_attach) {
             return;
         }
 
-        if (!can_edit_zone(ch, world[rnum].zone)) {
+        if (!can_edit_zone(ch, get_room(rnum)->zone)) {
             send_to_char(ch, "You can only attach triggers in your own zone\r\n");
             return;
         }
@@ -1101,13 +1021,13 @@ ACMD(do_attach) {
             return;
         }
 
-        room = &world[rnum];
+        room = get_room(rnum);
 
-        if (!SCRIPT(room)) room->script = new script_data(room);
+        if (!SCRIPT(room)) room->script = new script_data(room->shared());
         add_trigger(SCRIPT(room), trig, loc);
 
         send_to_char(ch, "Trigger %d (%s) attached to room %d.\r\n",
-                     tn, GET_TRIG_NAME(trig), world[rnum].vn);
+                     tn, GET_TRIG_NAME(trig), get_room(rnum)->vn);
     } else
         send_to_char(ch, "Please specify 'mob', 'obj', or 'room'.\r\n");
 }
@@ -1846,24 +1766,19 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
     }
 
     /* parse and locate the id specified */
-    std::optional<DgUID> result1 = resolveUID(result);
-    auto uidResult = result1;
+    auto uidResult = resolveUID(result);
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. attach invalid id arg: '%s'",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
         return;
     }
 
-    switch(uidResult->index()) {
-        case 0:
-            r = std::get<0>(*uidResult);
-            break;
-        case 1:
-            o = std::get<1>(*uidResult);
-            break;
-        case 2:
-            c = std::get<2>(*uidResult);
-            break;
+    if(auto room = std::dynamic_pointer_cast<room_data>(uidResult); room) {
+        r = room.get();
+    } else if(auto ch = std::dynamic_pointer_cast<char_data>(uidResult); ch) {
+        c = ch.get();
+    } else if(auto obj = std::dynamic_pointer_cast<obj_data>(uidResult); obj) {
+        o = obj.get();
     }
 
     /* locate and load the trigger specified */
@@ -1880,19 +1795,19 @@ void process_attach(void *go, struct script_data *sc, trig_data *trig,
                        GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), GET_NAME(c));
             return;
         }
-        if (!SCRIPT(c)) c->script = new script_data(c);
+        if (!SCRIPT(c)) c->script = new script_data(c->shared());
         add_trigger(SCRIPT(c), newtrig, -1);
         return;
     }
 
     if (o) {
-        if (!SCRIPT(o)) o->script = new script_data(o);
+        if (!SCRIPT(o)) o->script = new script_data(o->shared());
         add_trigger(SCRIPT(o), newtrig, -1);
         return;
     }
 
     if (r) {
-        if (!SCRIPT(r)) r->script = new script_data(r);
+        if (!SCRIPT(r)) r->script = new script_data(r->shared());
         add_trigger(SCRIPT(r), newtrig, -1);
         return;
     }
@@ -1927,25 +1842,19 @@ void process_detach(void *go, struct script_data *sc, trig_data *trig,
     }
 
     /* parse and locate the id specified */
-    std::optional<DgUID> result1 = resolveUID(result);
-
-    auto uidResult = result1;
+    auto uidResult = resolveUID(result);
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. detach invalid id arg: '%s'",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), cmd);
         return;
     }
 
-    switch(uidResult->index()) {
-        case 0:
-            r = std::get<0>(*uidResult);
-            break;
-        case 1:
-            o = std::get<1>(*uidResult);
-            break;
-        case 2:
-            c = std::get<2>(*uidResult);
-            break;
+    if(auto room = std::dynamic_pointer_cast<room_data>(uidResult); room) {
+        r = room.get();
+    } else if(auto ch = std::dynamic_pointer_cast<char_data>(uidResult); ch) {
+        c = ch.get();
+    } else if(auto obj = std::dynamic_pointer_cast<obj_data>(uidResult); obj) {
+        o = obj.get();
     }
 
     if (c && SCRIPT(c)) {
@@ -2081,9 +1990,7 @@ void process_remote(struct script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
     /* find the target script from the uid number */
-    std::optional<DgUID> result;
-    result = resolveUID(buf2);
-    auto uidResult = result;
+    auto uidResult = resolveUID(buf2);
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. remote: illegal uid '%s'",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), buf2);
@@ -2094,18 +2001,7 @@ void process_remote(struct script_data *sc, trig_data *trig, char *cmd) {
     /* for PC's, context is 0 (global) */
     context = vd->context;
 
-
-    switch(uidResult->index()) {
-        case 0:
-            sc_remote = SCRIPT(std::get<0>(*uidResult));
-            break;
-        case 1:
-            sc_remote = SCRIPT(std::get<1>(*uidResult));
-            break;
-        case 2:
-            sc_remote = SCRIPT(std::get<2>(*uidResult));
-            break;
-    }
+    sc_remote = uidResult->script;
 
     if (sc_remote == nullptr) return; /* no script to assign */
 
@@ -2139,24 +2035,12 @@ ACMD(do_vdelete) {
         return;
     }
 
-    std::optional<DgUID> result;
-    result = resolveUID(buf2);
-    auto uidResult = result;
+    auto uidResult = resolveUID(buf2);
     if(!uidResult) {
         send_to_char(ch, "vdelete: illegal id specified.\r\n");
         return;
     }
-    switch(uidResult->index()) {
-        case 0:
-            sc_remote = SCRIPT(std::get<0>(*uidResult));
-            break;
-        case 1:
-            sc_remote = SCRIPT(std::get<1>(*uidResult));
-            break;
-        case 2:
-            sc_remote = SCRIPT(std::get<2>(*uidResult));
-            break;
-    }
+    sc_remote = uidResult->script;
 
     if(!sc_remote) {
         send_to_char(ch, "vdelete: cannot resolve specified id.\r\n");
@@ -2216,7 +2100,7 @@ int perform_set_dg_var(struct char_data *ch, struct char_data *vict, char *val_a
         send_to_char(ch, "Usage: set <char> <varname> <value>\r\n");
         return 0;
     }
-    if (!SCRIPT(vict)) vict->script = new script_data(vict);
+    if (!SCRIPT(vict)) vict->script = new script_data(vict->shared());
 
     add_var(&(SCRIPT(vict)->global_vars), var_name, var_value, 0);
     return 1;
@@ -2250,26 +2134,13 @@ void process_rdelete(struct script_data *sc, trig_data *trig, char *cmd) {
         return;
     }
 
-    std::optional<DgUID> result;
-    result = resolveUID(buf2);
-    auto uidResult = result;
+    auto uidResult = resolveUID(buf2);
     if(!uidResult) {
         script_log("Trigger: %s, VNum %d. rdelete: illegal uid '%s'",
                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), buf2);
         return;
     }
-
-    switch(uidResult->index()) {
-        case 0:
-            sc_remote = SCRIPT(std::get<0>(*uidResult));
-            break;
-        case 1:
-            sc_remote = SCRIPT(std::get<1>(*uidResult));
-            break;
-        case 2:
-            sc_remote = SCRIPT(std::get<2>(*uidResult));
-            break;
-    }
+    sc_remote = uidResult->script;
 
     if (sc_remote == nullptr) return; /* no script to delete a trigger from */
     if (sc_remote->global_vars == nullptr) return; /* no script globals */
@@ -2815,7 +2686,7 @@ void read_saved_vars(struct char_data *ch) {
     /* create the space for the script structure which holds the vars */
     /* We need to do this first, because later calls to 'remote' will need */
     /* a script already assigned. */
-    ch->script = new script_data(ch);
+    ch->script = new script_data(ch->shared());
 
     /* find the file that holds the saved variables and open it*/
     get_filename(fn, sizeof(fn), SCRIPT_VARS_FILE, GET_NAME(ch));
@@ -2900,7 +2771,7 @@ void read_saved_vars_ascii(FILE *file, struct char_data *ch, int count) {
     /* create the space for the script structure which holds the vars */
     /* We need to do this first, because later calls to 'remote' will need */
     /* a script already assigned. */
-    ch->script = new script_data(ch);
+    ch->script = new script_data(ch->shared());
 
     /* walk through each line in the file parsing variables */
     for (i = 0; i < count; i++) {
@@ -3086,40 +2957,19 @@ void trig_data::deserializeInstance(const nlohmann::json &j) {
 }
 
 std::string trig_data::serializeLocation() {
-    switch(owner.index()) {
-        case 0:
-            return std::get<0>(owner)->getUID();
-            break;
-        case 1:
-            return std::get<1>(owner)->getUID();
-            break;
-        case 2:
-            return std::get<2>(owner)->getUID();
-            break;
-    }
+    return owner->getUID();
+}
+
+std::shared_ptr<trig_data> trig_data::shared() {
+    return shared_from_this();
 }
 
 void trig_data::deserializeLocation(const std::string &txt) {
     auto uid = resolveUID(txt);
     if(!uid) return;
-    owner = *uid;
-    struct room_data *r;
-    struct obj_data *o;
-    struct char_data *c;
-    switch(owner.index()) {
-        case 0:
-            r = std::get<0>(owner);
-            if(!SCRIPT(r)) r->script = new script_data(r);
-            break;
-        case 1:
-            o = std::get<1>(owner);
-            if(!SCRIPT(o)) o->script = new script_data(o);
-            break;
-        case 2:
-            c = std::get<2>(owner);
-            if(!SCRIPT(c)) c->script = new script_data(c);
-            break;
-    }
+
+    if(!uid->script) uid->script = new script_data(uid);
+
 }
 
 trig_data::trig_data(const nlohmann::json &j) : trig_data() {

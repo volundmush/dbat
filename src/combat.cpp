@@ -1671,8 +1671,9 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
 
     /* Checking the object list for any huge ki attacks */
     for (const auto& r : objectSubscriptions.all("hugeKiAttacks")) {
-        auto k = r.get();
-        if(!k) continue;
+        auto k2 = r.lock();
+        if(!k2) continue;
+        auto k = k2.get();
 
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
             if (IN_ROOM(k) && k->getRoomVnum() == 80) {
@@ -1783,7 +1784,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 continue;
                             }
                         }
-                        world.at(IN_ROOM(k)).setDamage(100);
+                        k->getRoom()->setDamage(100);
                         int zone = 0;
                         if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -1858,7 +1859,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             continue;
                         }
                     }
-                    world.at(IN_ROOM(k)).setDamage(100);
+                    k->getRoom()->setDamage(100);
                     int zone = 0;
                     if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -1963,7 +1964,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 continue;
                             }
                         }
-                        world.at(IN_ROOM(k)).setDamage(100);
+                        k->getRoom()->setDamage(100);
                         int zone = 0;
                         if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
                             send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -2036,7 +2037,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             continue;
                         }
                     }
-                    world.at(IN_ROOM(k)).setDamage(100);
+                    k->getRoom()->setDamage(100);
                     int zone = 0;
                     if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
                         send_to_zone("A MASSIVE explosion shakes the entire area!\r\n", zone);
@@ -2061,9 +2062,9 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
 void homing_update(uint64_t heartPulse, double deltaTime) {
 
     for (const auto& r : objectSubscriptions.all("homingKiAttacks")) {
-        auto k = r.get();
-
-        if (!k) continue;
+        auto k2 = r.lock();
+        if (!k2) continue;
+        auto k = k2.get();
 
         if (KICHARGE(k) <= 0) {
             continue;
@@ -2119,8 +2120,8 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         true, vict, k, nullptr, TO_CHAR);
                     act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
                         true, vict, k, nullptr, TO_ROOM);
-                    if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
-                        world.at(IN_ROOM(vict)).modDamage(5);
+                    if (auto victroom = vict->getRoom(); victroom && victroom->getDamage() <= 95) {
+                        victroom->modDamage(5);
                     }
                     extract_obj(k);
                     continue;
@@ -2233,9 +2234,9 @@ void homing_update(uint64_t heartPulse, double deltaTime) {
                         true, vict, k, nullptr, TO_CHAR);
                     act("@C$n @wmanages to deflect the $p@w sending it flying away into the nearby surroundings!@n",
                         true, vict, k, nullptr, TO_ROOM);
-                    if (ROOM_DAMAGE(IN_ROOM(vict)) <= 95) {
-                        world.at(IN_ROOM(vict)).modDamage(5);
-                    }
+                        if (auto victroom = vict->getRoom(); victroom && victroom->getDamage() <= 95) {
+                            victroom->modDamage(5);
+                        }
                     extract_obj(k);
                     continue;
                 }
@@ -2739,8 +2740,8 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
                     break;
             }
         }
-        if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-            world.at(IN_ROOM(ch)).modDamage(5);
+        if (auto chroom = ch->getRoom(); chroom && chroom->getDamage() <= 95) {
+            chroom->modDamage(5);
         }
         int zone = 0;
         if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
@@ -2866,8 +2867,8 @@ void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2,
                     break;
             }
         }
-        if (ROOM_DAMAGE(IN_ROOM(ch)) <= 95) {
-            world.at(IN_ROOM(ch)).modDamage(5);
+        if (auto chroom = ch->getRoom(); chroom && chroom->getDamage() <= 95) {
+            chroom->modDamage(5);
         }
         int zone = 0;
         if ((zone = real_zone_by_thing(ch->getRoomVnum())) != NOWHERE) {
@@ -4645,7 +4646,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
         if (IS_HUMANOID(vict) && !IS_NPC(ch) && IS_NPC(vict) && (!is_sparring(ch) || !is_sparring(vict))) {
-            vict->mob_specials.memory.insert(ch->ref());
+            vict->mob_specials.memory.push_back(ch->shared());
         }
         if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getMaxPL())) / 4) {
             LASTHIT(vict) = GET_IDNUM(ch);

@@ -53,7 +53,7 @@ std::shared_ptr<spdlog::logger> logger;
 
 struct config_data config_info; /* Game configuration list.    */
 
-std::map<room_vnum, room_data> world;    /* array of rooms		 */
+std::map<room_vnum, room_data*> world;    /* array of rooms		 */
 
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
@@ -67,38 +67,45 @@ VnumIndex<trig_data> scriptVnumIndex;
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
 
-std::unordered_map<int64_t, std::pair<time_t, struct char_data*>> uniqueCharacters;
-std::unordered_set<CharRef> activeCharacters;
+std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
+std::list<std::weak_ptr<char_data>> activeCharacters;
 /* hash tree for fast obj lookup */
-std::unordered_map<int64_t, std::pair<time_t, struct obj_data*>> uniqueObjects;
-std::unordered_set<ObjRef> activeObjects;
+std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
+std::list<std::weak_ptr<obj_data>> activeObjects;
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
-std::map<int64_t, std::pair<time_t, struct trig_data*>> uniqueScripts;
+std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
 
-std::vector<CharRef> getAllCharacters() {
-    std::vector<CharRef> out;
+std::unordered_map<int, std::shared_ptr<unit_data>> units;
+
+std::vector<std::weak_ptr<char_data>> getAllCharacters() {
+    std::vector<std::weak_ptr<char_data>> out;
     out.reserve(uniqueCharacters.size());
 
     for(const auto&[id, ent] : uniqueCharacters)
-        out.emplace_back(id, ent.first);
+        out.emplace_back(ent);
 
     return out;
 }
 
-std::vector<ObjRef> getAllObjects() {
-    std::vector<ObjRef> out;
+std::vector<std::weak_ptr<obj_data>> getAllObjects() {
+    std::vector<std::weak_ptr<obj_data>> out;
     out.reserve(uniqueObjects.size());
 
     for(const auto&[id, ent] : uniqueObjects)
-        out.emplace_back(id, ent.first);
+        out.emplace_back(ent);
 
     return out;
 }
 
+room_data* get_room(room_vnum vn) {
+    if(auto it = world.find(vn); it != world.end())
+        return it->second;
+    return nullptr;
+}
 
 int dg_owner_purged;            /* For control of scripts */
 
@@ -148,9 +155,9 @@ std::unordered_set<zone_vnum> zone_reset_queue;
 
 std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
 
-SubscriptionManager<CharRef> characterSubscriptions;
-SubscriptionManager<ObjRef> objectSubscriptions;
-SubscriptionManager<RoomRef> roomSubscriptions;
+SubscriptionManager<char_data> characterSubscriptions;
+SubscriptionManager<obj_data> objectSubscriptions;
+SubscriptionManager<room_data> roomSubscriptions;
 
 /* local functions */
 static void dragon_level(struct char_data *ch);
@@ -286,14 +293,16 @@ static void db_load_characters_initial(const std::filesystem::path& loc) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
         auto data = j["data"];
-        auto c = new char_data();
+        auto c = std::make_shared<char_data>();
         if(auto isPlayer = players.find(id); isPlayer != players.end()) {
             c->deserializePlayer(data, false);
-            isPlayer->second.character = c;
+            isPlayer->second.character = c.get();
+            isPlayer->second.account->characters.emplace_back(c);
         } else {
             c->deserializeInstance(data, true);
         }
-        uniqueCharacters[id] = std::make_pair(generation, c);
+        uniqueCharacters.emplace(id, c);
+        units.emplace(id, c);
     }
 }
 
@@ -302,7 +311,7 @@ static void db_load_characters_finish(const std::filesystem::path& loc) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
         if(auto cf = uniqueCharacters.find(id); cf != uniqueCharacters.end()) {
-            if(auto c = cf->second.second) {
+            if(auto c = cf->second) {
                 c->deserializeRelations(j["relations"]);
                 c->deserializeLocation(j["location"]);
             }
@@ -317,7 +326,8 @@ static void db_load_items_initial(const std::filesystem::path& loc) {
         auto data = j["data"];
         auto i = new obj_data();
         i->deserializeInstance(data, false);
-        uniqueObjects[id] = std::make_pair(generation, i);
+        uniqueObjects.emplace(id, i);
+        units.emplace(id, i);
     }
 }
 
@@ -326,7 +336,7 @@ static void db_load_items_finish(const std::filesystem::path& loc) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
         if(auto cf = uniqueObjects.find(id); cf != uniqueObjects.end()) {
-            if(auto i = cf->second.second) {
+            if(auto i = cf->second) {
                 i->deserializeRelations(j["relations"]);
                 i->deserializeLocation(j["location"], j["slot"].get<int>());
             }
@@ -337,10 +347,10 @@ static void db_load_items_finish(const std::filesystem::path& loc) {
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
     for(auto &[id, r] : world) {
-        if(r.script) r.script->activate();
-        assign_triggers(&r, WLD_TRIGGER);
-        r.activateContents();
-        for(auto c = r.people; c; c = c->next_in_room) {
+        if(r->script) r->script->activate();
+        assign_triggers(r, WLD_TRIGGER);
+        r->activateContents();
+        for(auto c = r->people; c; c = c->next_in_room) {
             if(IS_NPC(c)) {
                 c->activate();
             }
@@ -352,9 +362,9 @@ static void db_load_dgscripts_initial(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "dgscripts.json")) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
-        auto t = new trig_data();
+        auto t = std::make_shared<trig_data>();
         t->deserializeInstance(j["data"]);
-        uniqueScripts[id] = std::make_pair(generation, t);
+        uniqueScripts.emplace(id, t);
     }
 }
 
@@ -369,32 +379,13 @@ void db_load_dgscripts_finish(const std::filesystem::path& loc) {
         auto location = j["location"].get<std::string>();
 
         if (auto cf = uniqueScripts.find(id); cf != uniqueScripts.end()) {
-            if (auto t = cf->second.second) {
+            if (auto t = cf->second) {
                 t->deserializeLocation(location);
-                struct room_data* r;
-                struct obj_data* o;
-                struct char_data* c;
-
-                switch (t->owner.index()) {
-                    case 0:
-                        r = std::get<0>(t->owner);
-                        t->next = r->script->trig_list;
-                        r->script->trig_list = t;
-                        r->script->types |= GET_TRIG_TYPE(t);
-                        break;
-                    case 1:
-                        o = std::get<1>(t->owner);
-                        t->next = o->script->trig_list;
-                        o->script->trig_list = t;
-                        o->script->types |= GET_TRIG_TYPE(t);
-                        break;
-                    case 2:
-                        c = std::get<2>(t->owner);
-                        t->next = c->script->trig_list;
-                        c->script->trig_list = t;
-                        c->script->types |= GET_TRIG_TYPE(t);
-                        break;
-                }
+                if(!t->owner) continue;
+                if(!t->owner->script)
+                    t->owner->script = new script_data(t->owner);
+                t->owner->script->trig_list = t.get();
+                t->owner->script->types |= GET_TRIG_TYPE(t);
             }
         }
     }
@@ -412,9 +403,9 @@ static void db_load_globaldata(const std::filesystem::path& loc) {
         weather_info.deserialize(j["weather"]);
     }
     if(j.contains("dgGlobals")) {
-        if(auto room = world.find(0); room != world.end()) {
-            if(!room->second.script) room->second.script = new script_data(&(room->second));
-            deserializeVars(&(room->second.script->global_vars), j["dgGlobals"]);
+        if(auto room = get_room(0); room) {
+            if(!room->script) room->script = new script_data(room->shared());
+            deserializeVars(&(room->script->global_vars), j["dgGlobals"]);
         }
     }
 }
@@ -442,12 +433,14 @@ static void db_load_dgscript_prototypes(const std::filesystem::path& loc) {
 static void db_load_rooms(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "rooms.json")) {
         auto id = j["vn"].get<int64_t>();
-        auto r = world.emplace(id, j);
+        auto r = std::make_shared<room_data>(j);
+        units.emplace(id, r);
+        world.emplace(id, r.get());
         auto zone = real_zone_by_thing(id);
         auto &z = zone_table[zone];
         z.rooms.insert(id);
-        r.first->second.zone = zone;
-        r.first->second.activate();
+        r->zone = zone;
+        r->activate();
     }
 }
 
@@ -455,8 +448,8 @@ static void db_load_exits(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "exits.json")) {
         auto id = j["room"].get<int64_t>();
         auto dir = j["direction"].get<int64_t>();
-        auto &r = world[id];
-        r.dir_option[dir] = new room_direction_data(j["data"]);
+        auto r = get_room(id);
+        r->dir_option[dir] = new room_direction_data(j["data"]);
     }
 }
 
@@ -779,7 +772,7 @@ void auc_save() {
     else {
         struct obj_data *obj, *next_obj;
 
-        for (obj = world[80].contents; obj; obj = next_obj) {
+        for (obj = get_room(80)->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
@@ -1259,10 +1252,8 @@ struct char_data *create_char(bool activate) {
     auto ch = new char_data();
 
     if(activate) {
-        ch->id = nextCharID();
+        ch->id = nextID();
         ch->generation = time(nullptr);
-        check_unique_id(ch);
-        add_unique_id(ch);
         ch->activate();
     }
 
@@ -1286,10 +1277,10 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob = new char_data();
 
     *mob = proto->second;
-    mob->id = nextCharID();
+    mob->id = nextID();
     mob->generation = time(nullptr);
-    check_unique_id(mob);
-    add_unique_id(mob);
+    uniqueCharacters.emplace(mob->id, mob);
+    units.emplace(mob->id, mob);
     mob->activate();
 
     std::map<CharAppearance, int> setNumsTo;
@@ -1834,93 +1825,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     return mob;
 }
 
-void add_unique_id(struct obj_data *obj) {
-    if(obj->id == -1) {
-        obj->id = nextObjID();
-        obj->generation = time(nullptr);
-        basic_mud_log("Object Found with ID -1. Automatically fixed to ID {}", obj->id);
-    }
-
-    auto &o = uniqueObjects[obj->id];
-    o.first = obj->generation;
-    o.second = obj;
-}
-
-void remove_unique_id(struct obj_data *obj) {
-    uniqueObjects.erase(obj->id);
-}
-
-void log_dupe_objects(struct obj_data *obj1, struct obj_data *obj2) {
-    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Dupe object found: %s [%d] [%" TMT ":%" I64T "]",
-           obj1->short_description ? obj1->short_description : "<No name>",
-           GET_OBJ_VNUM(obj1), obj1->generation, obj1->id);
-    mudlog(BRF, ADMLVL_GOD, true, "DUPE: First: In room: %d (%s), "
-                                  "In object: %s, Carried by: %s, Worn by: %s",
-           obj1->getRoomVnum(),
-           IN_ROOM(obj1) == NOWHERE ? "Nowhere" : obj1->getRoom()->name,
-           obj1->in_obj ? obj1->in_obj->short_description : "None",
-           obj1->carried_by ? GET_NAME(obj1->carried_by) : "Nobody",
-           obj1->worn_by ? GET_NAME(obj1->worn_by) : "Nobody");
-    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Newer: In room: %d (%s), "
-                                  "In object: %s, Carried by: %s, Worn by: %s",
-           obj2->getRoomVnum(),
-           IN_ROOM(obj2) == NOWHERE ? "Nowhere" : obj2->getRoom()->name,
-           obj2->in_obj ? obj2->in_obj->short_description : "None",
-           obj2->carried_by ? GET_NAME(obj2->carried_by) : "Nobody",
-           obj2->worn_by ? GET_NAME(obj2->worn_by) : "Nobody");
-
-    // assign a new unique ID to obj2.
-    obj2->id = nextObjID();
-    mudlog(BRF, ADMLVL_GOD, true, "Conflicting object assigned new id: %d", obj2->id);
-}
-
-void check_unique_id(struct obj_data *obj) {
-    if(obj->id == -1) {
-        obj->id = nextObjID();
-        obj->generation = time(nullptr);
-        basic_mud_log("Object Found with ID -1. Automatically fixed to ID %d", obj->id);
-    }
-    auto find = uniqueObjects.find(obj->id);
-
-    if(find != uniqueObjects.end() && find->second.first == obj->generation) {
-        log_dupe_objects(find->second.second, obj);
-    }
-}
-
-static void log_dupe_characters(struct char_data *ch1, struct char_data *ch2) {
-    mudlog(BRF, ADMLVL_GOD, true, "DUPE: Dupe character found: %s [%d] [%" TMT ":%" I64T "]",
-           ch1->short_description ? ch1->short_description : "<No name>",
-           ch1->vn, ch1->generation, ch1->id);
-
-    // assign a new unique ID to obj2.
-    ch2->id = nextCharID();
-    mudlog(BRF, ADMLVL_GOD, true, "Conflicting character assigned new id: %d", ch2->id);
-}
-
-void check_unique_id(struct char_data *ch) {
-    if(ch->id == -1) {
-        ch->id = nextCharID();
-        ch->generation = time(nullptr);
-        basic_mud_log("Character Found with ID -1. Automatically fixed to ID %d", ch->id);
-    }
-    auto find = uniqueCharacters.find(ch->id);
-
-    if(find != uniqueCharacters.end() && find->second.first == ch->generation) {
-        log_dupe_characters(find->second.second, ch);
-    }
-}
-
-void add_unique_id(struct char_data *ch) {
-    if(ch->id == -1) {
-        ch->id = nextCharID();
-        ch->generation = time(nullptr);
-        basic_mud_log("Character Found with ID -1. Automatically fixed to ID %d", ch->id);
-    }
-    auto &o = uniqueCharacters[ch->id];
-    o.first = ch->generation;
-    o.second = ch;
-}
-
 char *sprintuniques(int low, int high) {
     return strdup("Temporarily disabled.");
 }
@@ -1931,11 +1835,11 @@ struct obj_data *create_obj(bool activate) {
     auto obj = new obj_data();
 
     if(activate) {
-        obj->id = nextObjID();
+        obj->id = nextID();
         obj->generation = time(nullptr);
+        uniqueObjects.emplace(obj->id, obj);
+        units.emplace(obj->id, obj);
         obj->activate();
-        check_unique_id(obj);
-        add_unique_id(obj);
     }
 
     assign_triggers(obj, OBJ_TRIGGER);
@@ -1961,10 +1865,10 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
     *obj = proto->second;
     OBJ_LOADROOM(obj) = NOWHERE;
     if(activate) {
-        obj->id = nextObjID();
+        obj->id = nextID();
         obj->generation = time(nullptr);
-        check_unique_id(obj);
-        add_unique_id(obj);
+        uniqueObjects.emplace(obj->id, obj);
+        units.emplace(obj->id, obj);
         obj->activate();
     }
 
@@ -2064,7 +1968,7 @@ static void do_reset_cmds(zone_data &z) {
     int obj_load = false;             /* ### */
     auto oproto = obj_proto.find(-1);
     auto mproto = mob_proto.find(-1);
-    auto room = world.find(-1);
+    struct room_data* room = nullptr;
     auto zone = z.number;
 
     for (auto &c : z.cmd)
@@ -2095,8 +1999,8 @@ static void do_reset_cmds(zone_data &z) {
                 break;
 
             case 'M': /* read a mobile */
-                room = world.find(c.arg3);
-                if (mob_proto.contains(c.arg1) && (get_vnum_count(characterVnumIndex, c.arg1) < c.arg2) && room != world.end() &&
+                room = get_room(c.arg3);
+                if (mob_proto.contains(c.arg1) && (get_vnum_count(characterVnumIndex, c.arg1) < c.arg2) && room &&
                     (rand_number(1, 100) >= c.arg5))
                 {
                     int room_max = 0;
@@ -2108,8 +2012,11 @@ static void do_reset_cmds(zone_data &z) {
 
                     if (c.arg4 > 0)
                     {
-                        for (auto i : get_vnum_list(characterVnumIndex, c.arg1))
+                        for (auto i3 : get_vnum_list(characterVnumIndex, c.arg1))
                         {
+                            auto i2 = i3.lock();
+                            if(!i2) continue;
+                            auto i = i2.get();
                             if (MOB_LOADROOM(i) == c.arg3)
                             {
                                 if (++room_max >= c.arg4)
@@ -2147,7 +2054,7 @@ static void do_reset_cmds(zone_data &z) {
                 break;
 
             case 'O': /* read an object */
-                room = world.find(c.arg3);
+                room = get_room(c.arg3);
                 oproto = obj_proto.find(c.arg1);
                 if (oproto != obj_proto.end())
                 {
@@ -2159,7 +2066,7 @@ static void do_reset_cmds(zone_data &z) {
                 }
 
                 if (obj_proto.contains(c.arg1) && get_vnum_count(objectVnumIndex, c.arg1) < c.arg2 &&
-                    room != world.end() && (rand_number(1, 100) >= c.arg5))
+                    room && (rand_number(1, 100) >= c.arg5))
                 {
                     int room_max = 0;
 
@@ -2169,8 +2076,11 @@ static void do_reset_cmds(zone_data &z) {
 
                     if (c.arg4 > 0)
                     {
-                        for (auto k : get_vnum_list(objectVnumIndex, c.arg1))
+                        for (auto k3 : get_vnum_list(objectVnumIndex, c.arg1))
                         {
+                            auto k2 = k3.lock();
+                            if(!k2) continue;
+                            auto k = k2.get();
                             if (OBJ_LOADROOM(k) == c.arg3 && (IN_ROOM(k) == c.arg3))
                             {
                                 if (++room_max >= c.arg4)
@@ -2291,7 +2201,7 @@ static void do_reset_cmds(zone_data &z) {
                 break;
 
             case 'R': /* rem obj from room */
-                if ((obj = get_obj_in_list_num(c.arg2, world[c.arg1].contents)) != nullptr)
+                if ((obj = get_obj_in_list_num(c.arg2, get_room(c.arg1)->contents)) != nullptr)
                     extract_obj(obj);
                 last_cmd = 1;
                 tmob = nullptr;
@@ -2299,9 +2209,9 @@ static void do_reset_cmds(zone_data &z) {
                 break;
 
             case 'D': /* set state of door */
-                room = world.find(c.arg1);
-                if (room == world.end() || c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
-                    (room->second.dir_option[c.arg2] == nullptr))
+                room = get_room(c.arg1);
+                if (!room || c.arg2 < 0 || c.arg2 >= NUM_OF_DIRS ||
+                    (room->dir_option[c.arg2] == nullptr))
                 {
                     ZONE_ERROR("room or door does not exist, command disabled");
                     c.command = '*';
@@ -2310,21 +2220,21 @@ static void do_reset_cmds(zone_data &z) {
                     switch (c.arg3)
                     {
                     case 0:
-                        REMOVE_BIT(room->second.dir_option[c.arg2]->exit_info,
+                        REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
                                    EX_LOCKED);
-                        REMOVE_BIT(room->second.dir_option[c.arg2]->exit_info,
+                        REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
                                    EX_CLOSED);
                         break;
                     case 1:
-                        SET_BIT(room->second.dir_option[c.arg2]->exit_info,
+                        SET_BIT(room->dir_option[c.arg2]->exit_info,
                                 EX_CLOSED);
-                        REMOVE_BIT(room->second.dir_option[c.arg2]->exit_info,
+                        REMOVE_BIT(room->dir_option[c.arg2]->exit_info,
                                    EX_LOCKED);
                         break;
                     case 2:
-                        SET_BIT(room->second.dir_option[c.arg2]->exit_info,
+                        SET_BIT(room->dir_option[c.arg2]->exit_info,
                                 EX_LOCKED);
-                        SET_BIT(room->second.dir_option[c.arg2]->exit_info,
+                        SET_BIT(room->dir_option[c.arg2]->exit_info,
                                 EX_CLOSED);
                         break;
                     }
@@ -2337,27 +2247,27 @@ static void do_reset_cmds(zone_data &z) {
                 if (c.arg1 == MOB_TRIGGER && tmob)
                 {
                     if (!SCRIPT(tmob))
-                        tmob->script = new script_data(tmob);
+                        tmob->script = new script_data(tmob->shared());
                     add_trigger(SCRIPT(tmob), read_trigger(c.arg2), -1);
                     last_cmd = 1;
                 }
                 else if (c.arg1 == OBJ_TRIGGER && tobj)
                 {
                     if (!SCRIPT(tobj))
-                        tobj->script = new script_data(tobj);
+                        tobj->script = new script_data(tobj->shared());
                     add_trigger(SCRIPT(tobj), read_trigger(c.arg2), -1);
                     last_cmd = 1;
                 }
                 else if (c.arg1 == WLD_TRIGGER)
                 {
-                    room = world.find(c.arg3);
-                    if (room == world.end())
+                    room = get_room(c.arg3);
+                    if (!room)
                     {
                         ZONE_ERROR("Invalid room number in trigger assignment");
                     }
-                    if (room->second.script)
-                        room->second.script = new script_data(&room->second);
-                    add_trigger(room->second.script, read_trigger(c.arg2), -1);
+                    if (room->script)
+                        room->script = new script_data(room->shared());
+                    add_trigger(room->script, read_trigger(c.arg2), -1);
                     last_cmd = 1;
                 }
 
@@ -2388,18 +2298,18 @@ static void do_reset_cmds(zone_data &z) {
                 }
                 else if (c.arg1 == WLD_TRIGGER)
                 {
-                    if (!world.count(c.arg3))
+                    if (!get_room(c.arg3))
                     {
                         ZONE_ERROR("Invalid room number in variable assignment");
                     }
                     else
                     {
-                        if (!(world[c.arg3].script))
+                        if (!(get_room(c.arg3)->script))
                         {
                             ZONE_ERROR("Attempt to give variable to scriptless object");
                         }
                         else
-                            add_var(&(world[c.arg3].script->global_vars),
+                            add_var(&(get_room(c.arg3)->script->global_vars),
                                     (char *)c.sarg1.c_str(), (char *)c.sarg2.c_str(), c.arg2);
                         last_cmd = 1;
                     }
@@ -2422,15 +2332,8 @@ static void do_reset_cmds(zone_data &z) {
 
 static void do_reset_rooms(zone_data &z) {
     for (auto &rvnum : z.rooms)
-    {
-        auto room = world.find(rvnum);
-        if (room == world.end())
-            continue;
-
-        auto r = &room->second;
-
-        reset_wtrigger(&room->second);
-    }
+        if(auto room = get_room(rvnum); room)
+            reset_wtrigger(room);
 }
 
 /* execute the reset command table of a given zone */
@@ -2448,11 +2351,8 @@ void reset_zone(zone_rnum zone)
     // TODO: Split this off into subscriptions.
     for (auto &rrnum : z.rooms)
     {
-        auto room = world.find(rrnum);
-        if (room == world.end())
-            continue;
-
-        auto r = &room->second;
+        auto r = get_room(rrnum);
+        if(!r) continue;
 
         if (r->room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4)
         {
@@ -2493,7 +2393,7 @@ void reset_zone(zone_rnum zone)
 
 void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
     for(auto ref : roomSubscriptions.all("repairRoomDamage")) {
-        auto room = ref.get();
+        auto room = ref.lock();
         if(!room) continue;
 
         if(auto dmg = room->getDamage(); dmg > 0) {
@@ -2503,7 +2403,7 @@ void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
             else if(dmg > 1) toRepair = rand_number(1, dmg);
             else toRepair = 1;
             room->modDamage(-toRepair);
-            send_to_room(room, "The area gets rebuilt a little.\r\n");
+            send_to_room(room.get(), "The area gets rebuilt a little.\r\n");
         }
     }
 }
@@ -2635,12 +2535,11 @@ void free_char(struct char_data *ch) {
 
 /* release memory allocated for an obj struct */
 void free_obj(struct obj_data *obj) {
-    remove_unique_id(obj);
+
     if (GET_OBJ_RNUM(obj) == NOWHERE) {
         free_object_strings(obj);
     } else {
         free_object_strings_proto(obj);
-
     }
 
     /* Let's make sure that we free up this memory */
@@ -3318,52 +3217,42 @@ void load_config() {
 }
 
 
-int64_t nextObjID() {
-    int64_t id = 0;
-    while(uniqueObjects.contains(id)) id++;
+int nextID() {
+    int id = 0;
+    while(units.contains(id)) id++;
     return id;
 }
 
-int64_t nextCharID() {
-    int64_t id = 0;
-    while(uniqueCharacters.contains(id)) id++;
-    return id;
-}
-// ^#(?<type>[ROC])(?<id>\d+)(?::(?<generation>\d+)?)?
-static std::regex uid_regex(R"(^#([ROC])(\d+)(?::(\d+)?)?(!)?)", std::regex::icase);
+// ^#(?<id>\d+)(?::(?<generation>\d+)?)?
+static std::regex uid_regex(R"(^#(\d+)(?::(\d+)?)?(!)?)", std::regex::icase);
 
 bool isUID(const std::string& uid) {
     return std::regex_match(uid, uid_regex);
 }
 
-std::optional<UID> resolveUID(const std::string& uid) {
+std::shared_ptr<unit_data> resolveUID(const std::string& uid) {
     // First we need to check if it matches or not.
     std::smatch match;
+    std::optional<time_t> generation = std::nullopt;
 
     if(!std::regex_search(uid, match, uid_regex)) {
-        return std::nullopt;
+        return nullptr;
     }
 
-    char type = toupper(match[1].str()[0]); // First capture group
-    int64_t id = std::stoll(match[2].str()); // Second capture group
-    bool active = match[4].matched; // Fourth capture group
-    time_t generation = 0;
-    if(match[3].matched) { // Third capture group
-        generation = std::stoll(match[3].str());
+    int64_t id = std::stoll(match[1].str()); // First capture group
+    if(match[2].matched) { // Second capture group
+        generation = std::stoll(match[2].str());
     }
 
-    if(type == 'R') {
-        if(world.contains(id)) return &world[id];
-    } else if(type == 'O') {
-        ObjRef ref{id, generation};
-        auto o = ref.get(active);
-        if(o) return o;
-    } else if(type == 'C') {
-        CharRef ref{id, generation};
-        auto c = ref.get(active);
-        if(c) return c;
+    bool active = match[3].matched; // Third capture group
+    
+    if(auto find = units.find(id); find != units.end()) {
+        if(generation && find->second->generation != *generation) return nullptr;
+        if(active && !find->second->isActive()) return nullptr;
+        return find->second;
     }
-    return std::nullopt;
+
+    return nullptr;
 }
 
 

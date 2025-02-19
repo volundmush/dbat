@@ -745,8 +745,9 @@ ACMD(do_pack) {
                     }
                     money = 65000;
                     while (count < 4) {
-                        while (world[rnum].contents)
-                            extract_obj(world[rnum].contents);
+                        auto r = get_room(rnum);
+                        while (r->contents)
+                            extract_obj(r->contents);
                         count++;
                         rnum++;
                     }
@@ -754,8 +755,9 @@ ACMD(do_pack) {
                     rnum = rnum - 1;
                     money = 150000;
                     while (count < 4) {
-                        while (world[rnum].contents)
-                            extract_obj(world[rnum].contents);
+                        auto r = get_room(rnum);
+                        while (r->contents)
+                            extract_obj(r->contents);
                         count++;
                         rnum++;
                     }
@@ -763,8 +765,9 @@ ACMD(do_pack) {
                     rnum = rnum - 1;
                     money = 1000000;
                     while (count < 4) {
-                        while (world[rnum].contents)
-                            extract_obj(world[rnum].contents);
+                        auto r = get_room(rnum);
+                        while (r->contents)
+                            extract_obj(r->contents);
                         count++;
                         rnum++;
                     }
@@ -942,7 +945,7 @@ ACMD(do_deploy) {
     int final = rnum + 99;
 
     while (giveup == false && cont == false) {
-        for (obj3 = world[rnum].contents; obj3; obj3 = next_obj) {
+        for (obj3 = get_room(rnum)->contents; obj3; obj3 = next_obj) {
             next_obj = obj3->next_content;
             if (GET_OBJ_VNUM(obj3) == 18801) {
                 found = true;
@@ -1228,7 +1231,8 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
 
         WISHTIME = 0;
         for (auto &r : activeObjects) {
-            k = r.get();
+            auto k2 = r.lock();
+            k = k2.get();
             if (!k || OBJ_FLAGGED(k, ITEM_FORGED)) continue;
 
             int vnum = GET_OBJ_VNUM(k);
@@ -1357,7 +1361,7 @@ ACMD(do_bid) {
         send_to_char(ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
         return;
     }
-    for (obj = world[auct_room].contents; obj; obj = next_obj) {
+    for (obj = get_room(auct_room)->contents; obj; obj = next_obj) {
         next_obj = obj->next_content;
         if (obj) {
             list++;
@@ -1369,7 +1373,7 @@ ACMD(do_bid) {
     if (!strcasecmp(arg, "list")) {
         send_to_char(ch, "@Y                                   Auction@n\r\n");
         send_to_char(ch, "@c------------------------------------------------------------------------------@n\r\n");
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = get_room(auct_room)->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {
@@ -1423,7 +1427,7 @@ ACMD(do_bid) {
             return;
         }
 
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = get_room(auct_room)->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {
@@ -1526,7 +1530,7 @@ ACMD(do_bid) {
             return;
         }
 
-        for (obj = world[auct_room].contents; obj; obj = next_obj) {
+        for (obj = get_room(auct_room)->contents; obj; obj = next_obj) {
             next_obj = obj->next_content;
             if (obj) {
                 if (GET_AUCTER(obj) <= 0) {

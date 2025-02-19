@@ -480,8 +480,9 @@ ACMD(do_rpp) {
             } else {
                 int found = false;
                 for (auto &r : activeObjects) {
-                    auto k = r.get();
-                    if(!k) continue;
+                    auto k2 = r.lock();
+                    if(!k2) continue;
+                    auto k = k2.get();
                     if (OBJ_FLAGGED(k, ITEM_FORGED)) {
                         continue;
                     }
@@ -4445,7 +4446,7 @@ ACMD(do_absorb) {
         }
         ABSORBBY(ABSORBING(ch)) = nullptr;
         ABSORBING(ch) = nullptr;
-        characterSubscriptions.unsubscribe("androidAbsorbSystem", ch->ref());
+        characterSubscriptions.unsubscribe("androidAbsorbSystem", ch);
     }
 
     if (!*arg && IS_ANDROID(ch)) {
@@ -4528,7 +4529,7 @@ ACMD(do_absorb) {
             improve_skill(ch, SKILL_ABSORB, 1);
             ABSORBING(ch) = vict;
             ABSORBBY(vict) = ch;
-            characterSubscriptions.subscribe("androidAbsorbSystem", ch->ref());
+            characterSubscriptions.subscribe("androidAbsorbSystem", ch);
             WAIT_STATE(ch, PULSE_3SEC);
             return;
         }
@@ -5988,7 +5989,7 @@ ACMD(do_focus) {
                     act("However $N seems unaffected by the poison.", true, ch, nullptr, vict, TO_NOTVICT);
                 } else {
                     vict->poisonby = ch;
-                    ch->poisoned.insert(vict->ref());
+                    ch->poisoned.push_back(vict->shared());
                     if (GET_CHARGE(ch) > 0) {
                         send_to_char(ch, "You lose your concentration and release your charged ki!\r\n");
                         do_charge(ch, "release", 0, 0);

@@ -63,124 +63,6 @@ struct obj_spellbook_spell {
     int pages;        /* How many pages does it take up */
 };
 
-class ObjRef {
-public:
-    // Constructors
-    ObjRef() = default;
-    ObjRef(int64_t id, time_t generation);
-    explicit ObjRef(const nlohmann::json& j);
-    explicit ObjRef(obj_data* obj);
-
-    // Destructor
-    ~ObjRef() = default;
-
-    // Public methods
-    int64_t getID() const;
-    time_t getGeneration() const;
-    nlohmann::json serialize() const;
-    void deserialize(const nlohmann::json& j);
-    obj_data* get(bool checkActive = false) const;
-
-    // Operators
-    bool operator==(const ObjRef& other) const;
-    bool operator!=(const ObjRef& other) const;
-    obj_data* operator->();
-    operator obj_data*();
-    ObjRef& operator=(const obj_data* obj);
-    ObjRef& operator=(const obj_data& obj);
-
-private:
-    int64_t id{0};
-    time_t generation{0};
-};
-
-
-class CharRef {
-public:
-    // Constructors
-    CharRef() = default;
-    CharRef(int64_t id, time_t generation);
-    explicit CharRef(const nlohmann::json& j);
-    explicit CharRef(char_data* obj);
-
-    // Destructor
-    ~CharRef() = default;
-
-    // Public methods
-    int64_t getID() const;
-    time_t getGeneration() const;
-    nlohmann::json serialize() const;
-    void deserialize(const nlohmann::json& j);
-    char_data* get(bool checkActive = false) const;
-
-    // Operators
-    bool operator==(const CharRef& other) const;
-    bool operator!=(const CharRef& other) const;
-    char_data* operator->();
-    operator char_data*();
-    CharRef& operator=(const char_data* obj);
-    CharRef& operator=(const char_data& obj);
-
-private:
-    int64_t id{0};
-    time_t generation{0};
-};
-
-class RoomRef {
-public:
-    // Constructors
-    RoomRef() = default;
-    RoomRef(int64_t id, time_t generation);
-    explicit RoomRef(const nlohmann::json& j);
-    explicit RoomRef(room_data* obj);
-
-    // Destructor
-    ~RoomRef() = default;
-
-    // Public methods
-    int64_t getID() const;
-    time_t getGeneration() const;
-    nlohmann::json serialize() const;
-    void deserialize(const nlohmann::json& j);
-    room_data* get(bool checkActive = false) const;
-
-    // Operators
-    bool operator==(const RoomRef& other) const;
-    bool operator!=(const RoomRef& other) const;
-    room_data* operator->();
-    operator room_data*();
-    RoomRef& operator=(const room_data* obj);
-    RoomRef& operator=(const room_data& obj);
-
-private:
-    int64_t id{0};
-    time_t generation{0};
-};
-
-// Define a hash specialization for RefBase
-namespace std {
-    template <>
-    struct hash<ObjRef> {
-        std::size_t operator()(const ObjRef& ref) const {
-            return std::hash<int64_t>()(ref.getID()) ^ std::hash<time_t>()(ref.getGeneration());
-        }
-    };
-
-    template <>
-    struct hash<CharRef> {
-        std::size_t operator()(const CharRef& ref) const {
-            return std::hash<int64_t>()(ref.getID()) ^ std::hash<time_t>()(ref.getGeneration());
-        }
-    };
-
-    template <>
-    struct hash<RoomRef> {
-        std::size_t operator()(const RoomRef& ref) const {
-            return std::hash<int64_t>()(ref.getID()) ^ std::hash<time_t>()(ref.getGeneration());
-        }
-    };
-}
-
 struct account_data {
     account_data() = default;
     explicit account_data(const nlohmann::json& j);
@@ -199,7 +81,7 @@ struct account_data {
     int rpp{};
     int slots{3};
     std::vector<std::string> customs;
-    std::vector<CharRef> characters;
+    std::vector<int> characters;
     std::unordered_set<descriptor_data*> descriptors;
     std::unordered_set<net::Connection*> connections;
 
@@ -220,14 +102,14 @@ struct account_data {
 struct player_data {
     player_data() = default;
     explicit player_data(const nlohmann::json& j);
-    int64_t id{NOTHING};
+    int id{NOTHING};
     std::string name;
     struct account_data *account{};
     struct char_data *character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
-    std::unordered_set<int64_t> sensePlayer;
+    std::unordered_set<int> sensePlayer;
     std::unordered_set<mob_vnum> senseMemory;
-    std::map<int64_t, std::string> dubNames;
+    std::map<int, std::string> dubNames;
     char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
 
@@ -237,7 +119,7 @@ struct player_data {
 struct unit_data {
     unit_data() = default;
     virtual ~unit_data() = default;
-    vnum vn{NOTHING}; /* Where in database */
+    vnum vn{NOTHING}; /* Where in database? Not used by all things. */
     zone_vnum zone{NOTHING};
     
     char *name{};
@@ -254,10 +136,10 @@ struct unit_data {
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
-    std::vector<ObjRef> getContents();
+    std::vector<std::weak_ptr<obj_data>> getContents();
 
-    int64_t id{NOTHING}; /* used by DG triggers	*/
-    time_t generation{};             /* creation time for dupe check     */
+    int id{NOTHING}; /* the unique ID of this entity */
+    time_t generation{}; /* creation time for dupe check     */
 
     nlohmann::json serializeUnit();
 
@@ -303,8 +185,8 @@ struct thing_data : public unit_data {
 
     void broadcastAtLocation(const std::string& message) const;
 
-    std::vector<ObjRef> getLocationObjects() const;
-    std::vector<CharRef> getLocationPeople() const;
+    std::vector<std::weak_ptr<obj_data>> getLocationObjects() const;
+    std::vector<std::weak_ptr<char_data>> getLocationPeople() const;
 
     int getLocationDamage() const;
     int setLocationDamage(int amount) const;
@@ -321,7 +203,7 @@ struct thing_data : public unit_data {
 };
 
 /* ================== Memory Structure for Objects ================== */
-struct obj_data : public thing_data {
+struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     obj_data() = default;
     explicit obj_data(const nlohmann::json& j);
 
@@ -354,7 +236,7 @@ struct obj_data : public thing_data {
     bool isWorking();
     void clearLocation();
 
-    ObjRef ref();
+    std::shared_ptr<obj_data> shared();
 
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
@@ -446,7 +328,7 @@ struct room_direction_data {
 
 
 /* ================== Memory Structure for room ======================= */
-struct room_data : public unit_data {
+struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     room_data() = default;
     ~room_data() override;
     explicit room_data(const nlohmann::json &j);
@@ -472,11 +354,12 @@ struct room_data : public unit_data {
     std::string getUID(bool active = true) override;
     bool isActive() override;
 
-    RoomRef ref();
+    std::shared_ptr<room_data> shared();
+
 
     std::optional<room_vnum> getLaunchDestination();
 
-    std::vector<CharRef> getPeople();
+    std::vector<std::weak_ptr<char_data>> getPeople();
 
     nlohmann::json serializeDgVars();
 
@@ -489,7 +372,7 @@ struct room_data : public unit_data {
     std::unordered_map<int, double> environment;
 
 };
-extern std::map<room_vnum, room_data> world;
+extern std::map<room_vnum, room_data*> world;
 /* ====================================================================== */
 
 
@@ -570,7 +453,7 @@ struct mob_special_data {
     explicit mob_special_data(const nlohmann::json& j);
     nlohmann::json serialize();
     void deserialize(const nlohmann::json& j);
-    std::unordered_set<CharRef> memory{};        /* List of attackers to remember	       */
+    std::list<std::weak_ptr<char_data>> memory{};        /* List of attackers to remember	       */
     int attack_type{};        /* The Attack Type Bitvector for NPC's     */
     int default_pos{POS_STANDING};        /* Default position for NPC                */
     int damnodice{};          /* The number of damage dice's	       */
@@ -693,7 +576,7 @@ struct craftTask {
 
 
 /* ================== Structure for player/non-player ===================== */
-struct char_data : public thing_data {
+struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     char_data() = default;
     // this constructor below is to be used only for the mob_proto map.
     explicit char_data(const nlohmann::json& j);
@@ -736,7 +619,7 @@ struct char_data : public thing_data {
     struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
     std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true) override;
 
-    CharRef ref();
+    std::shared_ptr<char_data> shared();
 
     char *title{};
     RaceID race{RaceID::Spirit};
@@ -994,7 +877,7 @@ struct char_data : public thing_data {
     int gooptime{};
     int blesslvl{};
     struct char_data *poisonby{};
-    std::unordered_set<char_data*> poisoned;
+    std::list<std::weak_ptr<char_data>> poisoned;
 
     int mobcharge{};
     int preference{};
@@ -1011,7 +894,7 @@ struct char_data : public thing_data {
 
     struct char_data *original{};
 
-    std::unordered_set<CharRef> clones{};
+    std::list<std::weak_ptr<char_data>> clones{};
     int relax_count{};
     int ingestLearned{};
 
@@ -1620,42 +1503,65 @@ class SubscriptionManager {
 
 public:
     // Subscribe an entity to a particular service
-    void subscribe(const std::string& service, const T& ref) {
-        subscriptions[service].insert(ref);
+    void subscribe(const std::string& service, const std::shared_ptr<T>& thing) {
+        subscriptions[service].push_back(std::weak_ptr<T>(thing));
+    }
+
+    void subscribe(const std::string& service, T* thing) {
+        subscribe(service, thing->shared());
     }
 
     // Unsubscribe an entity from a particular service
-    void unsubscribe(const std::string& service, const T& ref) {
+    void unsubscribe(const std::string& service, const std::shared_ptr<T>& thing) {
         auto it = subscriptions.find(service);
         if (it != subscriptions.end()) {
-            it->second.erase(ref);
+            it->second.remove_if([thing](const std::weak_ptr<T>& weak) {
+                return weak.expired() || weak.lock() == thing;
+            });
             if (it->second.empty()) {
                 subscriptions.erase(it);
             }
         }
     }
 
+    void unsubscribe(const std::string& service, T* thing) {
+        unsubscribe(service, thing->shared());
+    }
+
     // Get all entities subscribed to a particular service
-    std::unordered_set<T> all(const std::string& service) const {
+    std::vector<std::weak_ptr<T>> all(const std::string& service) const {
         auto it = subscriptions.find(service);
         if (it != subscriptions.end()) {
-            return it->second;
+            std::vector<std::weak_ptr<T>> out;
+            out.reserve(it->second.size());
+            std::copy_if(it->second.begin(), it->second.end(), std::back_inserter(out), [](const std::weak_ptr<T>& weak) {
+                return !weak.expired();
+            });
+            out.shrink_to_fit();
+            return out;
         }
         return {};
     }
 
     // Check if an entity is subscribed to a particular service
-    bool isSubscribed(const std::string& service, const T& ref) const {
+    bool isSubscribed(const std::string& service, const std::shared_ptr<T>& thing) const {
         auto it = subscriptions.find(service);
         if (it != subscriptions.end()) {
-            return it->second.find(ref) != it->second.end();
+            auto weak = std::weak_ptr<T>(thing);
+            return it->second.find(weak) != it->second.end();
         }
         return false;
     }
 
-    void unsubscribeFromAll(const T& ref) {
+    bool isSubscribed(const std::string& service, T* thing) const {
+        return isSubscribed(service, thing->shared());
+    }
+
+    void unsubscribeFromAll(const std::shared_ptr<T>& thing) {
         for (auto it = subscriptions.begin(); it != subscriptions.end(); ) {
-            it->second.erase(ref);
+            it->second.remove_if([thing](const std::weak_ptr<T>& weak) {
+                return weak.expired() || weak.lock() == thing;
+            });
             if (it->second.empty()) {
                 it = subscriptions.erase(it); // Erase and get the next iterator
             } else {
@@ -1664,6 +1570,10 @@ public:
         }
     }
 
+    void unsubscribeFromAll(T* thing) {
+        unsubscribeFromAll(thing->shared());
+    }
+
 private:
-    std::unordered_map<std::string, std::unordered_set<T>> subscriptions;
+    std::unordered_map<std::string, std::list<std::weak_ptr<T>>> subscriptions;
 };

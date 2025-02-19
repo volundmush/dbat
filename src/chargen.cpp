@@ -864,20 +864,19 @@ namespace net {
 
     void ChargenParser::finish() {
         // CREATE PLAYER ENTRY
-        auto ch = new char_data();
+        auto ch = std::make_shared<char_data>();
         ch->name = strdup(cg.name.c_str());
-        ch->id = nextCharID();
+        ch->id = nextID();
         ch->generation = time(nullptr);
         ch->pref.set(PRF_COLOR);
-        check_unique_id(ch);
-        add_unique_id(ch);
         auto &p = players[ch->id];
         p.name = cg.name;
         p.id = ch->id;
         p.account = conn->account;
-        conn->account->characters.emplace_back(ch);
-        p.character = ch;
-        uniqueCharacters[ch->id] = std::make_pair(ch->generation, ch);
+        conn->account->characters.emplace_back(ch->id);
+        p.character = ch.get();
+        units.emplace(ch->id, ch);
+        uniqueCharacters.emplace(ch->id, ch);
 
         ch->chclass = cg.sensei;
         ch->race = cg.race;
@@ -890,9 +889,9 @@ namespace net {
             ch->genome = cg.genome;
         }
 
-        init_char(ch);
+        init_char(ch.get());
         // set state to -1 to prevent accidental freeing of cg...
         send_to_imm("New Character '%s' created by Account: %s", cg.name, p.account->name.c_str());
-        conn->setParser(new CharacterMenu(conn, ch));
+        conn->setParser(new CharacterMenu(conn, ch.get()));
     }
 }

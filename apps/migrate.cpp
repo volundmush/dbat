@@ -52,8 +52,8 @@
 
 #define HOUSE_NUM_FLAGS 7
 
-#define TOROOM(room, dir) (world[room].dir_option[dir] ? \
-world[room].dir_option[dir]->to_room : NOWHERE)
+#define TOROOM(room, dir) (get_room(room)->dir_option[dir] ? \
+get_room(room)->dir_option[dir]->to_room : NOWHERE)
 
 
 static bool converting = false;
@@ -944,11 +944,11 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
 
-    auto &r = world[room];
+    auto r = get_room(room);
 
-    CREATE(r.dir_option[dir], struct room_direction_data, 1);
+    CREATE(r->dir_option[dir], struct room_direction_data, 1);
 
-    auto d = r.dir_option[dir];
+    auto d = r->dir_option[dir];
 
     d->general_description = fread_string(fl, buf2);
     d->keyword = fread_string(fl, buf2);
@@ -1051,13 +1051,15 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
     auto &z = zone_table[zone];
-    auto &r = world[virtual_nr];
+    auto r = new room_data();
+    units[virtual_nr] = std::shared_ptr<room_data>(r);
+    world.emplace(virtual_nr, r);
     z.rooms.insert(virtual_nr);
 
-    r.zone = zone;
-    r.vn = virtual_nr;
-    r.name = fread_string(fl, buf2);
-    r.look_description = fread_string(fl, buf2);
+    r->zone = zone;
+    r->vn = virtual_nr;
+    r->name = fread_string(fl, buf2);
+    r->look_description = fread_string(fl, buf2);
 
     if (!get_line(fl, line)) {
         basic_mud_log("SYSERR: Expecting roomflags/sector type of room #%d but file ended!",
@@ -1072,9 +1074,9 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         roomFlagsHolder[2] = asciiflag_conv(flags3);
         roomFlagsHolder[3] = asciiflag_conv(flags4);
 
-        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r.room_flags.set(i);
+        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->room_flags.set(i);
 
-        r.sector_type = t[2];
+        r->sector_type = t[2];
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
         //check_bitvector_names(r.room_flags, room_bits_count, flags, "room");
     } else {
@@ -1082,15 +1084,15 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
 
-    r.func = nullptr;
-    r.contents = nullptr;
-    r.people = nullptr;
-    r.timed = -1;
+    r->func = nullptr;
+    r->contents = nullptr;
+    r->people = nullptr;
+    r->timed = -1;
 
     for (i = 0; i < NUM_OF_DIRS; i++)
-        r.dir_option[i] = nullptr;
+        r->dir_option[i] = nullptr;
 
-    r.ex_description = nullptr;
+    r->ex_description = nullptr;
 
     snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
 
@@ -1120,15 +1122,15 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
                         new_descr->description = tmp;
                     }
                 }
-                new_descr->next = r.ex_description;
-                r.ex_description = new_descr;
+                new_descr->next = r->ex_description;
+                r->ex_description = new_descr;
                 break;
             case 'S':            /* end of room */
                 /* DG triggers -- script is defined after the end of the room */
                 letter = fread_letter(fl);
                 ungetc(letter, fl);
                 while (letter == 'T') {
-                    dg_read_trigger(fl, &world[virtual_nr], WLD_TRIGGER);
+                    dg_read_trigger(fl, get_room(virtual_nr), WLD_TRIGGER);
                     letter = fread_letter(fl);
                     ungetc(letter, fl);
                 }
@@ -3312,7 +3314,8 @@ void migrate_characters() {
         a.characters.emplace_back(ch);
         ch->in_room = ch->load_room;
         ch->was_in_room = ch->load_room;
-        uniqueCharacters[id] = std::make_pair(ch->generation, ch);
+        uniqueCharacters.emplace(id, ch);
+        units.emplace(id, ch);
     }
 
     // migrate sense files...
@@ -3844,7 +3847,7 @@ void migrate_data() {
     basic_mud_log("Converting Item Instances...");
 
     for(auto &[id, ent] : uniqueObjects) {
-        migrate_obj_data(ent.second);
+        migrate_obj_data(ent.get());
     }
 
     for(auto &[id, ent] : mob_proto) {
@@ -3852,7 +3855,7 @@ void migrate_data() {
     }
 
     for(auto &[id, ent] : uniqueCharacters) {
-        migrate_char_data(ent.second);
+        migrate_char_data(ent.get());
     }
 
 }

@@ -56,7 +56,7 @@ struct shop_data {
     int lastsort{};        /* How many items are sorted in inven?	*/
     SpecialFunc func{};        /* Secondary spec_proc for shopkeeper	*/
     
-    std::list<char_data*> getKeepers();
+    std::list<std::weak_ptr<char_data>> getKeepers();
     bool isProducing(obj_vnum vn);
     void runPurge();
 };

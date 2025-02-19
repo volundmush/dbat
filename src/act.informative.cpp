@@ -529,7 +529,7 @@ ACMD(do_shuffle) {
         obj_to_room(obj2, 48);
     }
     while (count > 0) {
-        for (obj2 = world[48].contents; obj2; obj2 = next_obj) {
+        for (obj2 = get_room(48)->contents; obj2; obj2 = next_obj) {
             next_obj = obj2->next_content;
             if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
                 continue;
@@ -774,11 +774,13 @@ ACMD(do_nickname) {
                 char nick[MAX_INPUT_LENGTH];
                 sprintf(nick, "%s", CAP(arg2));
                 ship2->look_description = strdup(nick);
-                for (auto k : get_vnum_list(objectVnumIndex, GET_OBJ_VNUM(ship2) + 1000)) {
-                    extract_obj(k);
-                    int was_in = ship2->getRoomVnum();
-                    obj_from_room(ship2);
-                    obj_to_room(ship2, real_room(was_in));
+                for (auto k2 : get_vnum_list(objectVnumIndex, GET_OBJ_VNUM(ship2) + 1000)) {
+                    if(auto k = k2.lock(); k) {
+                        extract_obj(k.get());
+                        int was_in = ship2->getRoomVnum();
+                        obj_from_room(ship2);
+                        obj_to_room(ship2, real_room(was_in));
+                    }
                 }
             }
         }
@@ -1196,9 +1198,9 @@ static void draw_open_exit(char map[9][10], int x, int y, int door, int sect, do
 }
 
 static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum, struct char_data *ch) {
-    auto &room = world[rnum];
+    auto room = get_room(rnum);
     for (int door = 0; door < NUM_OF_DIRS; door++) {
-        auto d = room.dir_option[door];
+        auto d = room->dir_option[door];
         if (!d) continue;
         auto dest = d->getDestination();
         if (!dest) continue;
@@ -3020,7 +3022,7 @@ ACMD(do_autoexit) {
 }
 
 void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief) {
-    struct room_data *rm = &world[target_room];
+    struct room_data *rm = get_room(target_room);
     look_at_room(rm, ch, ignore_brief);
 }
 
@@ -3328,7 +3330,7 @@ static void handle_portal(struct char_data *ch, struct obj_data *obj) {
             if (portal_dest == NOWHERE || (IS_DARK(portal_dest) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT))) {
                 send_to_char(ch, "You see nothing but infinite darkness...\r\n");
             } else {
-                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", world[portal_dest].name);
+                send_to_char(ch, "After seconds of concentration you see the image of %s.\r\n", get_room(portal_dest)->name);
             }
         } else if (portal_appear < MAX_PORTAL_TYPES) {
             send_to_char(ch, "%s\r\n", portal_appearance[portal_appear]);
@@ -4252,9 +4254,9 @@ ACMD(do_score) {
                      add_commas(GET_GOLD(ch)).c_str(), add_commas(
                         (ch->getCarriedWeight())).c_str());
         double gravity = 1.0;
-        auto room = world.find(ch->in_room);
-        if(room != world.end()) {
-            gravity = room->second.getEnvironment(ENV_GRAVITY);
+        
+        if(auto room = ch->getRoom(); room) {
+            gravity = room->getEnvironment(ENV_GRAVITY);
         }
         std::string grav = gravity > 1.0 ? fmt::format("(Gravity:", gravity) : "";
         send_to_char(ch, "      @D[      @CBank@D| @W%-15s@D] [ @CMax Carry@D| @W%-15s@D]@n %s\n",
@@ -5658,8 +5660,9 @@ static void perform_mortal_where(struct char_data *ch, char *arg) {
         }
     } else {            /* print only FIRST char, not all. */
         for (auto &r : activeCharacters) {
-            i = r.get();
-            if(!i) continue;
+            auto i2 = r.lock();
+            if(!i2) continue;
+            i = i2.get();
             if (IN_ROOM(i) == NOWHERE || i == ch)
                 continue;
             if (!CAN_SEE(ch, i) || i->getRoom()->zone != ch->getRoom()->zone)
@@ -5735,8 +5738,9 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
         for (auto &r : activeCharacters) {
-            i = r.get();
-            if(!i) continue;
+            auto i2 = r.lock();
+            if(!i2) continue;
+            i = i2.get();
             if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
@@ -5749,7 +5753,8 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
             }
         }
         for (auto &r : activeObjects) {
-            k = r.get();
+            auto k2 = r.lock();
+            k = k2.get();
             if (k && CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
                 found = 1;
                 print_object_location(++num, k, ch, true);

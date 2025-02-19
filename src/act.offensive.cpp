@@ -182,7 +182,7 @@ ACMD(do_geno) {
 
     obj = read_object(83, VIRTUAL);
     obj_to_room(obj, IN_ROOM(vict));
-    objectSubscriptions.subscribe("hugeKiAttacks", obj->ref());
+    objectSubscriptions.subscribe("hugeKiAttacks", obj);
 
     GET_CHARGE(ch) += GET_MAX_HIT(ch) / 10;
     TARGET(obj) = vict;
@@ -304,7 +304,7 @@ ACMD(do_genki) {
     KITYPE(obj) = SKILL_GENKIDAMA;
     USER(obj) = ch;
     KIDIST(obj) = dista;
-    objectSubscriptions.subscribe("hugeKiAttacks", obj->ref());
+    objectSubscriptions.subscribe("hugeKiAttacks", obj);
     pcost(ch, attperc, 0);
     act("@WYou raise both your arms upwards and begin to pool your charged ki there. You also start calling on the ki of all living beings in the vicinity who are willing to help. A large @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W forms above your hands, when it is finished you lob it toward @c$N@W!@n",
         true, ch, nullptr, vict, TO_CHAR);
@@ -831,9 +831,8 @@ ACMD(do_charge) {
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
         ch->playerFlags.reset(PLR_CHARGE);
-        auto r = ch->ref();
-        characterSubscriptions.unsubscribe("chargeMoreKi", r);
-        characterSubscriptions.unsubscribe("kiLeakingSystem", r);
+        characterSubscriptions.unsubscribe("chargeMoreKi", ch);
+        characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
         return;
     } else if (!strcasecmp("release", arg) && GET_CHARGE(ch) > 0) {
         send_to_char(ch, "You release your pent up energy.\r\n");
@@ -854,9 +853,8 @@ ACMD(do_charge) {
         ch->incCurKI(GET_CHARGE(ch));
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
-        auto r = ch->ref();
-        characterSubscriptions.unsubscribe("chargeMoreKi", r);
-        characterSubscriptions.unsubscribe("kiLeakingSystem", r);
+        characterSubscriptions.unsubscribe("chargeMoreKi", ch);
+        characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
         return;
     } else if (!strcasecmp("cancel", arg) && PLR_FLAGGED(ch, PLR_CHARGE)) {
         send_to_char(ch, "You stop charging.\r\n");
@@ -876,7 +874,7 @@ ACMD(do_charge) {
         }
         ch->playerFlags.reset(PLR_CHARGE);
         GET_CHARGETO(ch) = 0;
-        characterSubscriptions.unsubscribe("chargeMoreKi", ch->ref());
+        characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         return;
     } else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
         send_to_char(ch, "You are not even charging!\r\n");
@@ -918,7 +916,7 @@ ACMD(do_charge) {
                 char bloom[MAX_INPUT_LENGTH];
                 sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
                 act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
-                characterSubscriptions.unsubscribe("kiLeakingSystem", ch->ref());
+                characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
                 GET_CHARGE(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff;
                 ch->decCurKI((((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost);
             }
@@ -931,7 +929,7 @@ ACMD(do_charge) {
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
             GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
             GET_CHARGE(ch) += 1;
-            characterSubscriptions.unsubscribe("kiLeakingSystem", ch->ref());
+            characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
             ch->playerFlags.set(PLR_CHARGE);
         }
     } else if (amt < 1 && ch->getRoomVnum() != 1562) {
@@ -969,7 +967,7 @@ ACMD(do_powerup) {
     if (PLR_FLAGGED(ch, PLR_POWERUP)) {
         send_to_char(ch, "@WYou stop powering up.@n");
         ch->playerFlags.reset(PLR_POWERUP);
-        characterSubscriptions.unsubscribe("powerupService", ch->ref());
+        characterSubscriptions.unsubscribe("powerupService", ch);
         return;
     }
     if (GET_HIT(ch) >= GET_MAX_HIT(ch)) {
@@ -993,7 +991,7 @@ ACMD(do_powerup) {
             break;
         }
     }
-    characterSubscriptions.subscribe("powerupService", ch->ref());
+    characterSubscriptions.subscribe("powerupService", ch);
     ch->playerFlags.set(PLR_POWERUP);
 }
 

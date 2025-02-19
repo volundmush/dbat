@@ -48,13 +48,12 @@ static void dump_state_characters(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, r] : uniqueCharacters) {
-        if(v != r.second->id) r.second->id = v;
         nlohmann::json j2;
         j2["id"] = v;
-        j2["generation"] = static_cast<int32_t>(r.first);
-        j2["data"] = r.second->serializeInstance();
-        j2["location"] = r.second->serializeLocation();
-        j2["relations"] = r.second->serializeRelations();
+        j2["generation"] = r->generation;
+        j2["data"] = r->serializeInstance();
+        j2["location"] = r->serializeLocation();
+        j2["relations"] = r->serializeRelations();
         j.push_back(j2);
     }
     dump_to_file(loc, "characters.json", j);
@@ -65,14 +64,13 @@ static void dump_state_items(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, r] : uniqueObjects) {
-        if(v != r.second->id) r.second->id = v;
         nlohmann::json j2;
         j2["id"] = v;
-        j2["generation"] = static_cast<int32_t>(r.first);
-        j2["data"] = r.second->serializeInstance();
-        j2["location"] = r.second->serializeLocation();
-        j2["slot"] = r.second->worn_on;
-        j2["relations"] = r.second->serializeRelations();
+        j2["generation"] = static_cast<int32_t>(v);
+        j2["data"] = r->serializeInstance();
+        j2["location"] = r->serializeLocation();
+        j2["slot"] = r->worn_on;
+        j2["relations"] = r->serializeRelations();
         j.push_back(j2);
     }
     dump_to_file(loc, "items.json", j);
@@ -82,13 +80,11 @@ static void dump_state_dgscripts(const std::filesystem::path &loc) {
     nlohmann::json j;
 
     for(auto &[v, r] : uniqueScripts) {
-        if(v != r.second->id) r.second->id = v;
         nlohmann::json j2;
         j2["id"] = v;
-        j2["generation"] = static_cast<int32_t>(r.first);
-        j2["data"] = r.second->serializeInstance();
-        j2["location"] = r.second->serializeLocation();
-        j2["order"] = r.second->order;
+        j2["data"] = r->serializeInstance();
+        j2["location"] = r->serializeLocation();
+        j2["order"] = r->order;
         j.push_back(j2);
     }
     dump_to_file(loc, "dgscripts.json", j);
@@ -100,9 +96,9 @@ void dump_state_globalData(const std::filesystem::path &loc) {
     j["time"] = time_info.serialize();
     j["era_uptime"] = era_uptime.serialize();
     j["weather"] = weather_info.serialize();
-    if(auto gRoom = world.find(0); gRoom != world.end()) {
-        if(gRoom->second.script && gRoom->second.script->global_vars) {
-            j["dgGlobals"] = serializeVars(gRoom->second.script->global_vars);
+    if(auto gRoom = get_room(0); gRoom) {
+        if(gRoom->script && gRoom->script->global_vars) {
+            j["dgGlobals"] = serializeVars(gRoom->script->global_vars);
         }
     }
 
@@ -113,7 +109,7 @@ static void process_dirty_rooms(const std::filesystem::path &loc) {
     nlohmann::json rooms;
 
     for(auto &[v, r] : world) {
-        rooms.push_back(r.serialize());
+        rooms.push_back(r->serialize());
     }
     dump_to_file(loc, "rooms.json", rooms);
 }
@@ -124,7 +120,7 @@ static void process_dirty_exits(const std::filesystem::path &loc) {
     for(auto &[v, r] : world) {
 
         for(auto i = 0; i < NUM_OF_DIRS; i++) {
-            if(auto ex = r.dir_option[i]; ex) {
+            if(auto ex = r->dir_option[i]; ex) {
                 nlohmann::json j2;
                 j2["room"] = v;
                 j2["direction"] = i;

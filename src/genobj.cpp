@@ -51,8 +51,10 @@ int update_objects(struct obj_data *refobj) {
     struct obj_data *obj, swap;
     int count = 0;
 
-    for (auto obj : get_vnum_list(objectVnumIndex, refobj->vn)) {
-
+    for (auto obj3 : get_vnum_list(objectVnumIndex, refobj->vn)) {
+        auto obj2 = obj3.lock();
+        if(!obj2) continue;
+        obj = obj2.get();
         count++;
 
         /* Update the existing object but save a copy for private information. */
@@ -193,7 +195,10 @@ int delete_object(obj_rnum rnum) {
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
 
-    for (auto tmp : get_vnum_list(objectVnumIndex, obj->vn)) {
+    for (auto tmp3 : get_vnum_list(objectVnumIndex, obj->vn)) {
+        auto tmp2 = tmp3.lock();
+        if(!tmp2) continue;
+        tmp = tmp2.get();
         if (tmp->vn != obj->vn)
             continue;
 
@@ -283,10 +288,8 @@ nlohmann::json obj_data::serializeBase() {
 nlohmann::json obj_data::serializeInstance() {
     auto j = serializeBase();
     if(id == -1) {
-        id = nextObjID();
+        id = nextID();
         generation = time(nullptr);
-        check_unique_id(this);
-        add_unique_id(this);
     }
 
     if(generation) j["generation"] = generation;
@@ -295,7 +298,7 @@ nlohmann::json obj_data::serializeInstance() {
         j["dgvariables"] = serializeVars(script->global_vars);
     }
 
-    if(world.contains(room_loaded)) j["room_loaded"] = room_loaded;
+    if(get_room(room_loaded)) j["room_loaded"] = room_loaded;
 
     return j;
 }
@@ -399,8 +402,8 @@ obj_data::obj_data(const nlohmann::json &j) : obj_data() {
     
 }
 
-ObjRef obj_data::ref() {
-    return ObjRef(this);
+std::shared_ptr<obj_data> obj_data::shared() {
+    return shared_from_this();
 }
 
 void obj_data::activate() {
@@ -414,21 +417,20 @@ void obj_data::activate() {
         insert_vnum(objectVnumIndex, this);
     }
 
-    auto r = ref();
     if(script) {
         script->activate();
         if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
-            objectSubscriptions.subscribe("randomTriggers", r);
+            objectSubscriptions.subscribe("randomTriggers", this);
         if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
-            objectSubscriptions.subscribe("timeTriggers", r);
+            objectSubscriptions.subscribe("timeTriggers", this);
     }
-    activeObjects.insert(r);
+    activeObjects.push_back(shared_from_this());
     if(IS_CORPSE(this))
-        objectSubscriptions.subscribe("corpseRotService", r);
+        objectSubscriptions.subscribe("corpseRotService", this);
     if(script && SCRIPT_TYPES(SCRIPT(this)) && OTRIG_RANDOM)
-        objectSubscriptions.subscribe("randomTriggers", r);
+        objectSubscriptions.subscribe("randomTriggers", this);
     if(vn == 65)
-        objectSubscriptions.subscribe("healTankService", r);
+        objectSubscriptions.subscribe("healTankService", this);
 
     if(contents) activateContents();
 }
@@ -449,7 +451,11 @@ void obj_data::deactivate() {
         }
         TRIGGERS(script) = nullptr;
     }
-    objectSubscriptions.unsubscribeFromAll(ref());
+    auto shared = shared_from_this();
+    activeObjects.remove_if([shared](const std::weak_ptr<obj_data>& obj) {
+        return obj.expired() || obj.lock() == shared;
+    });
+    objectSubscriptions.unsubscribeFromAll(shared_from_this());
     if(contents) deactivateContents();
 }
 
@@ -461,7 +467,7 @@ void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
     add_unique_id(this);
 
     if(j.contains("dgvariables")) {
-        if(!script) script = new script_data(this);
+        if(!script) script = new script_data(shared_from_this());
         deserializeVars(&script->global_vars, j["dgvariables"]);
     }
 
@@ -621,8 +627,8 @@ std::string obj_data::serializeLocation() {
         return carried_by->getUID();
     } else if(worn_by) {
         return worn_by->getUID();
-    } else if(world.contains(in_room)) {
-        return world[in_room].getUID();
+    } else if(room) {
+        return room->getUID();
     } else {
         return ""; // this should NEVER happen!
     }
@@ -640,26 +646,23 @@ nlohmann::json obj_data::serializeRelations() {
 void obj_data::deserializeLocation(const std::string& txt, int16_t slot) {
     auto check = resolveUID(txt);
     if(!check) return;
-    auto idx = check->index();
-    if(idx == 0) {
-        auto &r = std::get<0>(*check);
-        obj_to_room(this, r->vn);
-    } else if(idx == 1) {
-        obj_to_obj(this, std::get<1>(*check));
-    } else if(idx == 2) {
-        auto &c = std::get<2>(*check);
-        auto_equip(c, this, slot+1);
+    if(auto r = std::dynamic_pointer_cast<room_data>(check); r) {
+        obj_to_room(this, r.get());
+    } else if(auto o = std::dynamic_pointer_cast<obj_data>(check); o) {
+        obj_to_obj(this, o.get());
+    } else if(auto c = std::dynamic_pointer_cast<char_data>(check); c) {
+        auto_equip(c.get(), this, slot+1);
     }
 }
 
 void obj_data::deserializeRelations(const nlohmann::json& j) {
     if(j.contains("posted_to")) {
         auto check = resolveUID(j["posted_to"]);
-        if(check) posted_to = std::get<1>(*check);
+        if(check) posted_to = std::dynamic_pointer_cast<obj_data>(check).get();
     }
     if(j.contains("fellow_wall")) {
         auto check = resolveUID(j["fellow_wall"]);
-        if(check) fellow_wall = std::get<1>(*check);
+        if(check) fellow_wall = std::dynamic_pointer_cast<obj_data>(check).get();
     }
 }
 
@@ -692,5 +695,5 @@ void obj_data::clearLocation() {
     if(in_obj) obj_from_obj(this);
     else if(carried_by) obj_from_char(this);
     else if(worn_by) unequip_char(worn_by, worn_on);
-    else if(world.contains(in_room)) obj_from_room(this);
+    else if(room) obj_from_room(this);
 }

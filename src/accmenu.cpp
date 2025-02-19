@@ -48,8 +48,10 @@ namespace net {
         sendText("@D=============================================@n\r\n\r\n");
         sendText("      @D[@y------@YAvailable Characters@y------@D]@n\n");
         int counter = 0;
-        for(auto ref : a->characters) {
-            auto ch = ref.get();
+        for(auto charID : a->characters) {
+            auto found = players.find(charID);
+            if(found == players.end()) continue;
+            auto ch = found->second.character;
             if(!ch) continue;
             std::string line = fmt::format("                @B(@W{}@B) @C{}@n", ++counter, ch->name);
             if(ch->desc) {
@@ -96,13 +98,14 @@ namespace net {
             }
 
             auto ref = conn->account->characters[slot];
-            auto p = players.find(ref.getID());
-            if(p == players.end()) {
-                sendText(fmt::format("ERROR: Player ID {} not found. Please alert staff.\r\n", ref.getID()));
+            auto found = players.find(ref);
+            if(found == players.end()) {
+                sendText("ERROR: Character not found. Please alert staff.\r\n");
                 return;
             }
+            auto c = found->second.character;
 
-            conn->setParser(new CharacterMenu(conn, p->second.character));
+            conn->setParser(new CharacterMenu(conn, c));
             return;
         }
 

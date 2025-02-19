@@ -90,12 +90,10 @@ int item_in_list(char *item, obj_data *list) {
         return 0;
 
     if (*item == UID_CHAR) {
-        std::optional<DgUID> result;
-        result = resolveUID(item);
-        auto uidResult = result;
+        auto uidResult = resolveUID(item);
         if(!uidResult) return 0;
-        if(uidResult->index() != 1) return 0;
-        auto obj = std::get<1>(*uidResult);
+        auto obj = std::dynamic_pointer_cast<obj_data>(uidResult).get();
+        if(!obj) return 0;
 
         for (i = list; i; i = i->next_content) {
             if (i == obj)
@@ -273,7 +271,7 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
                 snprintf(str, slen, "%s", uid.c_str());
             } else if (!strcasecmp(var, "global")) {
                 /* so "remote varname %global%" will work */
-                snprintf(str, slen, "%d", world[0].getUID(false).c_str());
+                snprintf(str, slen, "%d", get_room(0)->getUID(false).c_str());
                 return;
             } else if (!strcasecmp(var, "ctime"))
                 snprintf(str, slen, "%ld", time(nullptr));
@@ -361,7 +359,7 @@ find_replacement(void *go, struct script_data *sc, trig_data *trig, int type, ch
                         break;
                 }
             } else if (!strcasecmp(var, "global")) {
-                struct script_data *thescript = SCRIPT(&world[0]);
+                struct script_data *thescript = SCRIPT(get_room(0));
                 *str = '\0';
                 if (!thescript) {
                     script_log("Attempt to find global var. Apparently the void has no script.");
@@ -428,7 +426,7 @@ in the vault (vnum: 453) now and then. you can just use
                         script_log("findmob.vnum(ovnum): No room with vnum %d", atof(field));
                         strcpy(str, "0");
                     } else {
-                        for (i = 0, ch = world[rrnum].people; ch; ch = ch->next_in_room)
+                        for (i = 0, ch = get_room(rrnum)->people; ch; ch = ch->next_in_room)
                             if (GET_MOB_VNUM(ch) == mvnum)
                                 i++;
 
@@ -449,7 +447,7 @@ in the vault (vnum: 453) now and then. you can just use
                         strcpy(str, "0");
                     } else {
                         /* item_in_list looks within containers as well. */
-                        snprintf(str, slen, "%d", item_in_list(subfield, world[rrnum].contents));
+                        snprintf(str, slen, "%d", item_in_list(subfield, get_room(rrnum)->contents));
                     }
                 }
             } else if (!strcasecmp(var, "random")) {
@@ -467,7 +465,7 @@ in the vault (vnum: 453) now and then. you can just use
                                 count++;
                             }
                     } else if (type == OBJ_TRIGGER) {
-                        for (c = world[obj_room((obj_data *) go)].people; c;
+                        for (c = get_room(obj_room((obj_data*)go))->people; c;
                              c = c->next_in_room)
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
                                 if (!rand_number(0, count))
@@ -507,7 +505,7 @@ in the vault (vnum: 453) now and then. you can just use
                         *str = '\0';
                     } else {
                         std::vector<int> available;
-                        room = &world[in_room];
+                        room = get_room(in_room);
                         for (i = 0; i < NUM_OF_DIRS; i++)
                             if (R_EXIT(room, i))
                                 available.push_back(i);
@@ -809,8 +807,8 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "room")) {  /* in NOWHERE, return the void */
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
-						if(auto roomFound = world.find(IN_ROOM(c)); roomFound != world.end()) {
-                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
+						if(auto roomFound = c->getRoom(); roomFound) {
+                            snprintf(str, slen, "%s", roomFound->getUID(false).c_str());
                         }
 #else
                         snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? c->getRoom()->number : 0);
@@ -1008,8 +1006,8 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%s", o->getUID(false).c_str());
 
                     else if (!strcasecmp(field, "is_inroom")) {
-                        if (auto roomFound = world.find(IN_ROOM(o)); roomFound != world.end())
-                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
+                        if (auto roomFound = o->getRoom(); roomFound)
+                            snprintf(str, slen, "%s", roomFound->getUID(false).c_str());
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "is_pc")) {
@@ -1048,8 +1046,8 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'r':
                     if (!strcasecmp(field, "room")) {
-                        if (auto roomFound = world.find(obj_room(o)); roomFound != world.end())
-                            snprintf(str, slen, "%s", roomFound->second.getUID(false).c_str());
+                        if (auto roomFound = get_room(obj_room(o)); roomFound)
+                            snprintf(str, slen, "%s", roomFound->getUID(false).c_str());
                         else
                             *str = '\0';
                     }
