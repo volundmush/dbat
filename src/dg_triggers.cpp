@@ -724,24 +724,22 @@ int cmd_otrig(obj_data *obj, char_data *actor, char *cmd,
 
 
 int command_otrigger(char_data *actor, char *cmd, char *argument) {
-    obj_data *obj;
-    int i;
 
     /* prevent people we like from becoming trapped :P */
     if (!valid_dg_target(actor, 0))
         return 0;
 
-    for (i = 0; i < NUM_WEARS; i++)
+    for (auto i = 0; i < NUM_WEARS; i++)
         if (GET_EQ(actor, i))
             if (cmd_otrig(GET_EQ(actor, i), actor, cmd, argument, OCMD_EQUIP) &&
                 !OBJ_FLAGGED(GET_EQ(actor, i), ITEM_FORGED))
                 return 1;
 
-    for (obj = actor->contents; obj; obj = obj->next_content)
+    for (auto obj : filter_raw(actor->getContents()))
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
 
-    for (obj = actor->getRoom()->contents; obj; obj = obj->next_content)
+    for (auto obj : filter_raw(actor->getLocationObjects()))
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
 
@@ -905,22 +903,18 @@ int cast_otrigger(char_data *actor, obj_data *obj, int spellnum) {
 }
 
 int leave_otrigger(room_data *room, char_data *actor, int dir) {
-    trig_data *t;
     char buf[MAX_INPUT_LENGTH];
     int temp, final = 1;
-    obj_data *obj, *obj_next;
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
 
-    for (obj = room->contents; obj; obj = obj_next) {
-        obj_next = obj->next_content;
+    for (auto obj : filter_raw(room->getContents())) {
         if (!SCRIPT_CHECK(obj, OTRIG_LEAVE))
             continue;
 
-        for (t = TRIGGERS(SCRIPT(obj)); t; t = t->next) {
-            if (TRIGGER_CHECK(t, OTRIG_LEAVE) &&
-                (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
+        for (auto t = TRIGGERS(SCRIPT(obj)); t; t = t->next) {
+            if (TRIGGER_CHECK(t, OTRIG_LEAVE) && (rand_number(1, 100) <= GET_TRIG_NARG(t))) {
                 if (dir >= 0 && dir < NUM_OF_DIRS)
                     add_var(&GET_TRIG_VARS(t), "direction", (const char *) dirs[dir], 0);
                 else

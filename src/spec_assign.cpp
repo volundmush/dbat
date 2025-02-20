@@ -90,6 +90,6 @@ void assign_rooms() {
 
     if (CONFIG_DTS_ARE_DUMPS)
         for (auto &[vn, r] : world)
-            if (ROOM_FLAGGED(r, ROOM_DEATH))
+            if (ROOM_FLAGGED(r.get(), ROOM_DEATH))
                 r->func = dump;
 }

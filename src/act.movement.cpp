@@ -787,14 +787,9 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
         return 0;
     }
 
-    struct obj_data *wall;
-    for (wall = ch->getRoom()->contents; wall; wall = wall->next_content) {
-        if (GET_OBJ_VNUM(wall) == 79) {
-            if (GET_OBJ_COST(wall) == dir) {
-                send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
-                return 0;
-            }
-        }
+    if (auto wall = ch->getRoom()->findObjectVnum(79); wall && (GET_OBJ_COST(wall) == dir)) {
+        send_to_char(ch, "That direction has a glacial wall blocking it.\r\n");
+        return 0;
     }
 
     if (!ch->followers)
@@ -931,14 +926,13 @@ ACMD(do_move) {
     }
     if (!IS_NPC(ch)) {
         int fail = false;
-        struct obj_data *obj, *next_obj;
-        for (obj = ch->getRoom()->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
-            if (KICHARGE(obj) > 0 && USER(obj) == ch) {
-                fail = true;
-            }
+        auto shouldfail = [ch](const auto& o) {
+            return KICHARGE(o) > 0 && USER(o) == ch;
+        };
+        if(auto obj = ch->getRoom()->findObject(shouldfail)) {
+            fail = true;
         }
-        if (fail == true) {
+        if (fail) {
             send_to_char(ch, "You are too busy controlling your attack!\r\n");
             return;
         }
@@ -1199,12 +1193,10 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
             char_from_room(ch);
             char_to_room(ch, real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)));
         }
-        for (obj2 = ch->getRoom()->contents; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
-            if (GET_OBJ_TYPE(obj2) == ITEM_HATCH) {
-                hatch = obj2;
-            }
-        }
+        auto ishatch = [](const auto& o) {
+            return GET_OBJ_TYPE(o) == ITEM_HATCH;
+        };
+        hatch = ch->getRoom()->findObject(ishatch);
         obj2 = nullptr;
     }
 
@@ -1937,13 +1929,14 @@ ACMD(do_leave) {
     }
 
     auto r = ch->getRoom();
+    auto leave_obj = [ch](const auto& o) {
+        return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_HATCH || GET_OBJ_TYPE(o) == ITEM_PORTAL;
+    };
 
-    for (obj = r->contents; obj; obj = obj->next_content)
-        if (CAN_SEE_OBJ(ch, obj))
-            if (GET_OBJ_TYPE(obj) == ITEM_HATCH || GET_OBJ_TYPE(obj) == ITEM_PORTAL) {
-                perform_leave_obj(ch, obj, 0);
-                return;
-            }
+    if (auto obj = r->findObject(leave_obj)) {
+        perform_leave_obj(ch, obj, 0);
+        return;
+    }
 
     if (OUTSIDE(ch)) {
         send_to_char(ch, "You are outside.. where do you want to go?\r\n");

@@ -136,9 +136,6 @@ int trgvar_in_room(room_vnum vnum) {
 }
 
 obj_data *get_obj_in_list(char *name, obj_data *list) {
-    obj_data *i;
-    int32_t id;
-
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);;
         if(!uidResult) return nullptr;
@@ -146,10 +143,10 @@ obj_data *get_obj_in_list(char *name, obj_data *list) {
         if(!obj2) return nullptr;
         auto obj = obj2.get();
 
-        for (i = list; i; i = i->next_content)
+        for (auto i = list; i; i = i->next_content)
             if(i == obj) return obj;
     } else {
-        for (i = list; i; i = i->next_content)
+        for (auto i = list; i; i = i->next_content)
             if (isname(name, i->name))
                 return i;
     }
@@ -555,11 +552,11 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
         auto uidResult = resolveUID(name);
         auto o = std::dynamic_pointer_cast<obj_data>(uidResult).get();
         if(!o) return nullptr;
-        for (obj = room->contents; obj; obj = obj->next_content)
+        for (auto obj : filter_raw(room->getContents()))
             if (o == obj)
                 return obj;
     } else {
-        for (obj = room->contents; obj; obj = obj->next_content)
+        for (auto obj : filter_raw(room->getContents()))
             if (isname(name, obj->name))
                 return obj;
     }
@@ -569,20 +566,18 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
 
 /* returns obj with name - searches room, then world */
 obj_data *get_obj_by_room(room_data *room, char *name) {
-    obj_data *obj;
 
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);
         return std::dynamic_pointer_cast<obj_data>(uidResult).get();
     }
 
-    for (obj = room->contents; obj; obj = obj->next_content)
+    for (auto obj : filter_raw(room->getContents()))
         if (isname(name, obj->name))
             return obj;
 
-    for (auto &r : activeObjects) {
-        obj = r.lock().get();
-        if (obj && isname(name, obj->name))
+    for (auto obj : filter_raw(activeObjects)) {
+        if (isname(name, obj->name))
             return obj;
     }
 
@@ -675,7 +670,7 @@ void check_interval_triggers(int trigFlag) {
         if (IS_SET(SCRIPT_TYPES(sc), trigFlag) &&
             (!is_empty(r->zone) ||
                 IS_SET(SCRIPT_TYPES(sc), WTRIG_GLOBAL)))
-            interval_wtrigger(r, trigFlag);
+            interval_wtrigger(r.get(), trigFlag);
     }
 }
 
@@ -821,11 +816,7 @@ void do_sstat(struct char_data *ch, struct unit_data *ud) {
     script_stat(ch, SCRIPT(ud));
 }
 
-int64_t nextTrigID() {
-    int64_t id = 0;
-    while(uniqueScripts.contains(id)) id++;
-    return id;
-}
+
 
 /*
  * adds the trigger t to script sc in in location loc.  loc = -1 means
@@ -860,11 +851,9 @@ void add_trigger(script_data *sc, trig_data *t, int loc) {
 
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
     t->activate();
-    t->owner = std::shared_ptr<unit_data>(sc);
-    t->id = nextTrigID();
-    t->generation = time(nullptr);
+    t->owner = units.at(sc->id);
 
-    uniqueScripts.emplace(t->id, t);
+    insert_vnum(scriptVnumIndex, t);
 
     int order = 0;
     for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
@@ -932,21 +921,11 @@ ACMD(do_attach) {
                      tn, GET_TRIG_NAME(trig), GET_SHORT(victim), GET_MOB_VNUM(victim));
     } else if (is_abbrev(arg, "object") || is_abbrev(arg, "otr")) {
         object = get_obj_vis(ch, targ_name, nullptr);
-        if (!object) { /* search room for one with this vnum */
-            for (object = ch->getRoom()->contents; object; object = object->next_content)
-                if (GET_OBJ_VNUM(object) == num_arg)
-                    break;
-
-            if (!object) { /* search inventory for one with this vnum */
-                for (object = ch->contents; object; object = object->next_content)
-                    if (GET_OBJ_VNUM(object) == num_arg)
-                        break;
-
-                if (!object) {
-                    send_to_char(ch, "That object does not exist.\r\n");
-                    return;
-                }
-            }
+        if(!object) ch->getRoom()->findObjectVnum(num_arg);
+        if(!object) ch->findObjectVnum(num_arg);
+        if(!object) {
+            send_to_char(ch, "That object does not exist.\r\n");
+            return;
         }
 
         if (!can_edit_zone(ch, ch->getRoom()->zone)) {
@@ -1127,21 +1106,11 @@ ACMD(do_detach) {
                 trigger = arg3;
         } else if (is_abbrev(arg1, "object") || !strcasecmp(arg1, "otr")) {
             object = get_obj_vis(ch, arg2, nullptr);
-            if (!object) { /* search room for one with this vnum */
-                for (object = ch->getRoom()->contents; object; object = object->next_content)
-                    if (GET_OBJ_VNUM(object) == num_arg)
-                        break;
-
-                if (!object) { /* search inventory for one with this vnum */
-                    for (object = ch->contents; object; object = object->next_content)
-                        if (GET_OBJ_VNUM(object) == num_arg)
-                            break;
-
-                    if (!object) { /* give up */
-                        send_to_char(ch, "No such object around.\r\n");
-                        return;
-                    }
-                }
+            if (!object) object = ch->getRoom()->findObjectVnum(num_arg);
+            if (!object) object = ch->findObjectVnum(num_arg);
+            if (!object) { /* give up */
+                send_to_char(ch, "No such object around.\r\n");
+                return;
             }
 
             if (arg3 == nullptr || !*arg3)
@@ -2869,7 +2838,7 @@ void trig_data::deserializeInstance(const nlohmann::json &j) {
     curr_state = p->cmdlist;
 
     if(j.contains("id")) id = j["id"].get<long>();
-    if(j.contains("generation")) generation = j["generation"].get<long>();
+    if(j.contains("generation")) generation = j["generation"].get<time_t>();
     if(j.contains("order")) order = j["order"].get<long>();
 
     if(j.contains("waiting")) waiting = j["waiting"].get<double>();

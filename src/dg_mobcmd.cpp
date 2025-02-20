@@ -291,8 +291,7 @@ ACMD(do_mjunk) {
             extract_obj(obj);
         return;
     } else {
-        for (obj = ch->contents; obj != nullptr; obj = obj_next) {
-            obj_next = obj->next_content;
+        for (auto obj : filter_raw(ch->getContents())) {
             if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
                 extract_obj(obj);
             }
@@ -559,8 +558,7 @@ ACMD(do_mpurge) {
                 extract_char(victim);
         }
 
-        for (obj = ch->getRoom()->contents; obj; obj = obj_next) {
-            obj_next = obj->next_content;
+        for (auto obj : filter_raw(ch->getLocationObjects())) {
             extract_obj(obj);
         }
 

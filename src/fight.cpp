@@ -195,22 +195,18 @@ void mutant_limb_regen(struct char_data *ch) {
 }
 
 static int pick_n_throw(struct char_data *ch, char *buf) {
-    struct obj_data *cont;
     char buf2[MAX_INPUT_LENGTH], buf3[MAX_INPUT_LENGTH];;
 
     if (rand_number(1, 20) < 18) {
         return (false);
     }
 
-
-    for (cont = ch->getRoom()->contents; cont; cont = cont->next_content) {
-        if (ch->canCarryWeight(cont)) {
-            sprintf(buf2, "%s", cont->name);
-            do_get(ch, buf2, 0, 0);
-            sprintf(buf3, "%s %s", buf2, buf);
-            do_throw(ch, buf3, 0, 0);
-            return (true);
-        }
+    if (auto cont = ch->getRoom()->findObject([ch](const auto& o) { return ch->canCarryWeight(o);}); cont) {
+        sprintf(buf2, "%s", cont->name);
+        do_get(ch, buf2, 0, 0);
+        sprintf(buf3, "%s %s", buf2, buf);
+        do_throw(ch, buf3, 0, 0);
+        return (true);
     }
 
     return (false);
@@ -1440,24 +1436,13 @@ static void make_pcorpse(struct char_data *ch) {
     /* This handles how the corpse is viewed - Iovan */
     handle_corpse_condition(corpse, ch);
 
+    auto r = ch->getRoom();
     if (AFF_FLAGGED(ch, AFF_ASHED)) {
         act("@WSome ashes fall off the corpse.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        struct obj_data *ashes;
-        if (rand_number(1, 3) == 2) {
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-        } else if (rand_number(1, 2) == 2) {
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
-        } else {
-            ashes = read_object(1305, VIRTUAL);
-            obj_to_room(ashes, IN_ROOM(ch));
+        int ashcount = rand_number(1, 3);
+        while(ashcount--) {
+            auto ashes = read_object(1305, VIRTUAL);
+            obj_to_room(ashes, r);
         }
     }
 
@@ -1480,22 +1465,13 @@ static void make_pcorpse(struct char_data *ch) {
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
 
 
-    struct obj_data *obj, *next_obj;
 
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-
-        if (obj && GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998) {
-            if ((GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) ||
-                (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199)) {
-                continue;
-            } else {
+    for (auto obj : filter_raw(ch->getContents())) {
+        if (GET_OBJ_VNUM(obj) < 19900 && GET_OBJ_VNUM(obj) != 17998) {
+            if (!((GET_OBJ_VNUM(obj) >= 18800 && GET_OBJ_VNUM(obj) <= 18999) || (GET_OBJ_VNUM(obj) >= 19100 && GET_OBJ_VNUM(obj) <= 19199))) {
                 obj_from_char(obj);
                 obj_to_obj(obj, corpse);
-                continue;
             }
-        } else {
-            continue;
         }
     }
 
@@ -1736,20 +1712,16 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         GET_OBJ_TIMER(corpse) = rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME);
 
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
-        for (obj = ch->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+        for (auto obj : filter_raw(ch->getContents())) {
             obj_from_char(obj);
             extract_obj(obj);
         }
-    }
-
-    if (!MOB_FLAGGED(ch, MOB_HUSK)) {
+    } else {
         /* transfer character's inventory to the corpse */
-        corpse->contents = ch->contents;
-        for (o = corpse->contents; o != nullptr; o = o->next_content) {
-            o->in_obj = corpse;
+        for(auto o : filter_raw(ch->getContents())) {
+            obj_from_char(o);
+            obj_to_obj(o, corpse);
         }
-        object_list_new_owner(corpse, nullptr);
 
         /* transfer character's equipment to the corpse */
         int eqdrop = false;
@@ -1760,6 +1732,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
                 eqdrop = true;
             }
     }
+
     /* transfer gold */
     if (GET_GOLD(ch) > 0 && !MOB_FLAGGED(ch, MOB_HUSK)) {
         /*

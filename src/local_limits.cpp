@@ -1483,8 +1483,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
                     }
                 }
             }
-            for (jj = j->contents; jj; jj = next_thing2) {
-                next_thing2 = jj->next_content;    /* Next in inventory */
+            for (auto jj : filter_raw(j->getContents())) {
                 obj_from_obj(jj);
 
                 if (j->in_obj)

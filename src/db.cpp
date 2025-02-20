@@ -53,7 +53,7 @@ std::shared_ptr<spdlog::logger> logger;
 
 struct config_data config_info; /* Game configuration list.    */
 
-std::map<room_vnum, room_data*> world;    /* array of rooms		 */
+std::map<room_vnum, std::shared_ptr<room_data>> world;    /* array of rooms		 */
 
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
@@ -103,7 +103,7 @@ std::vector<std::weak_ptr<obj_data>> getAllObjects() {
 
 room_data* get_room(room_vnum vn) {
     if(auto it = world.find(vn); it != world.end())
-        return it->second;
+        return it->second.get();
     return nullptr;
 }
 
@@ -323,10 +323,10 @@ static void db_load_items_initial(const std::filesystem::path& loc) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
         auto data = j["data"];
-        auto i = new obj_data();
-        i->deserializeInstance(data, false);
-        uniqueObjects.emplace(id, i);
-        units.emplace(id, i);
+        auto sh = std::make_shared<obj_data>();
+        sh->deserializeInstance(data, false);
+        uniqueObjects.emplace(id, sh);
+        units.emplace(id, sh);
     }
 }
 
@@ -347,7 +347,7 @@ static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
     for(auto &[id, r] : world) {
         if(r->trig_list) r->activateScripts();
-        assign_triggers(r, WLD_TRIGGER);
+        assign_triggers(r.get(), WLD_TRIGGER);
         r->activateContents();
         for(auto c : filter_raw(r->getPeople())) {
             if(IS_NPC(c)) {
@@ -430,8 +430,9 @@ static void db_load_rooms(const std::filesystem::path& loc) {
     for(auto j : load_from_file(loc, "rooms.json")) {
         auto id = j["vn"].get<int64_t>();
         auto r = std::make_shared<room_data>(j);
+        r->id = id;
         units.emplace(id, r);
-        world.emplace(id, r.get());
+        world.emplace(id, r);
         auto zone = real_zone_by_thing(id);
         auto &z = zone_table[zone];
         z.rooms.insert(id);
@@ -766,14 +767,9 @@ void auc_save() {
     if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
         basic_mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
     else {
-        struct obj_data *obj, *next_obj;
-
-        for (obj = get_room(80)->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
-            if (obj) {
-                fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
+        for (auto obj : filter_raw(get_room(80)->getContents())) {
+            fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
-            }
         }
         fprintf(fl, "~END~\n");
         fclose(fl);
@@ -1243,40 +1239,24 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
     return (found);
 }
 
-/* create a character, and add it to the char list */
-struct char_data *create_char(bool activate) {
-    auto ch = new char_data();
-
-    if(activate) {
-        ch->id = nextID();
-        ch->generation = time(nullptr);
-        ch->activate();
-    }
-
-
-    return ch;
-}
-
 
 /* create a new mobile from a prototype */
 struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 {
-    struct char_data *mob;
-
     auto proto = mob_proto.find(nr);
 
     if(proto == mob_proto.end()) {
         basic_mud_log("WARNING: Mobile vnum %d does not exist in database.", nr);
         return (nullptr);
     }
-
-    mob = new char_data();
+    auto sh = std::make_shared<char_data>();
+    auto mob = sh.get();
 
     *mob = proto->second;
     mob->id = nextID();
     mob->generation = time(nullptr);
-    uniqueCharacters.emplace(mob->id, mob);
-    units.emplace(mob->id, mob);
+    uniqueCharacters.emplace(mob->id, sh);
+    units.emplace(mob->id, sh);
     mob->activate();
 
     std::map<CharAppearance, int> setNumsTo;
@@ -1827,25 +1807,20 @@ char *sprintuniques(int low, int high) {
 
 
 /* create an object, and add it to the object list */
-struct obj_data *create_obj(bool activate) {
-    auto obj = new obj_data();
-
-    if(activate) {
-        obj->id = nextID();
-        obj->generation = time(nullptr);
-        uniqueObjects.emplace(obj->id, obj);
-        units.emplace(obj->id, obj);
-        obj->activate();
-    }
-
-    assign_triggers(obj, OBJ_TRIGGER);
-
-    return (obj);
+struct obj_data *create_obj() {
+    auto sh = std::make_shared<obj_data>();
+    sh->id = nextID();
+    sh->generation = time(nullptr);
+    uniqueObjects.emplace(sh->id, sh);
+    units.emplace(sh->id, sh);
+    sh->activate();
+    assign_triggers(sh.get(), OBJ_TRIGGER);
+    return sh.get();
 }
 
 
 /* create a new object from a prototype */
-struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rnum */
+struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
 {
     auto i = nr;
     int j;
@@ -1856,17 +1831,14 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
         basic_mud_log("Object (%c) %d does not exist in database.", type == VIRTUAL ? 'V' : 'R', nr);
         return (nullptr);
     }
-    
-    auto obj = new obj_data();
+    auto sh = std::make_shared<obj_data>();
+    auto obj = sh.get();
     *obj = proto->second;
     OBJ_LOADROOM(obj) = NOWHERE;
-    if(activate) {
-        obj->id = nextID();
-        obj->generation = time(nullptr);
-        uniqueObjects.emplace(obj->id, obj);
-        units.emplace(obj->id, obj);
-        obj->activate();
-    }
+    obj->id = nextID();
+    obj->generation = time(nullptr);
+    uniqueObjects.emplace(obj->id, sh);
+    units.emplace(obj->id, sh);
 
     if (proto->second.sbinfo) {
         CREATE(obj->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);
@@ -1886,6 +1858,9 @@ struct obj_data *read_object(obj_vnum nr, int type, bool activate) /* and obj_rn
         }
         FOOB(obj) = GET_OBJ_VAL(obj, 1);
     }
+
+    obj->activate();
+
     return (obj);
 }
 
@@ -2197,7 +2172,7 @@ static void do_reset_cmds(zone_data &z) {
                 break;
 
             case 'R': /* rem obj from room */
-                if ((obj = get_obj_in_list_num(c.arg2, get_room(c.arg1)->contents)) != nullptr)
+                if (obj = get_room(c.arg1)->findObjectVnum(c.arg2))
                     extract_obj(obj);
                 last_cmd = 1;
                 tmob = nullptr;

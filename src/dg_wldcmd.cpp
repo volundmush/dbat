@@ -433,8 +433,7 @@ WCMD(do_wpurge) {
                 extract_char(ch);
         }
 
-        for (obj = room->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+        for (auto obj : filter_raw(room->getContents())) {
             extract_obj(obj);
         }
 

@@ -286,9 +286,7 @@ static void search_room(struct char_data *ch) {
         }
     }
 
-    struct obj_data *obj = nullptr;
-
-    for (obj = ch->getRoom()->contents; obj; obj = obj->next_content) {
+    for (auto obj : filter_raw(ch->getLocationObjects())) {
         if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
             act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
             act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
@@ -471,14 +469,12 @@ ACMD(do_draw) {
         send_to_char(ch, "You don't have a case.\r\n");
         return;
     }
-    for (obj2 = obj->contents; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
-        if (drawn == false) {
-            obj_from_obj(obj2);
-            obj_to_char(obj2, ch);
-            obj3 = obj2;
-            drawn = true;
-        }
+    for (auto obj2 : filter_raw(obj->getContents())) {
+        obj_from_obj(obj2);
+        obj_to_char(obj2, ch);
+        obj3 = obj2;
+        drawn = true;
+        break;
     }
     if (drawn == false) {
         send_to_char(ch, "You don't have any cards in the case!\r\n");
@@ -511,8 +507,7 @@ ACMD(do_shuffle) {
         return;
     }
 
-    for (obj2 = obj->contents; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
+    for (auto obj2 : filter_raw(obj->getContents())) {
         if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
             continue;
         }
@@ -523,22 +518,20 @@ ACMD(do_shuffle) {
         return;
     }
     int total = count;
-    for (obj2 = obj->contents; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
+    for (auto obj2 : filter_raw(obj->getContents())) {
         obj_from_obj(obj2);
         obj_to_room(obj2, 48);
     }
     while (count > 0) {
-        for (obj2 = get_room(48)->contents; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
+        for (auto obj2 : filter_raw(get_room(48)->getContents())) {
             if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
                 continue;
             }
-            if (obj2 && count > 1 && rand_number(1, 4) == 3) {
+            if (count > 1 && rand_number(1, 4) == 3) {
                 count -= 1;
                 obj_from_room(obj2);
                 obj_to_obj(obj2, obj);
-            } else if (obj2 && count == 1) {
+            } else if (count == 1) {
                 count -= 1;
                 obj_from_room(obj2);
                 obj_to_obj(obj2, obj);
@@ -565,8 +558,7 @@ ACMD(do_hand) {
 
     if (!strcasecmp("look", arg)) {
         send_to_char(ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
-        for (obj = ch->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+        for (auto obj : filter_raw(ch->getContents())) {
             if (obj && !OBJ_FLAGGED(obj, ITEM_CARD)) {
                 continue;
             }
@@ -590,8 +582,7 @@ ACMD(do_hand) {
     } else if (!strcasecmp("show", arg)) {
         send_to_char(ch, "You show off your hand to the room.\r\n");
         act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
-        for (obj = ch->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
+        for (auto obj : filter_raw(ch->getContents())) {
             if (obj && !OBJ_FLAGGED(obj, ITEM_CARD)) {
                 continue;
             }
@@ -714,12 +705,8 @@ ACMD(do_play) {
         return;
     }
 
-    for (obj3 = ch->getRoom()->contents; obj3; obj3 = next_obj) {
-        next_obj = obj3->next_content;
-        if (GET_OBJ_VNUM(obj3) == GET_OBJ_VNUM(SITS(ch)) - 4) {
-            obj2 = obj3;
-        }
-    }
+    auto sitting = [ch](const auto& o) { return GET_OBJ_VNUM(o) == GET_OBJ_VNUM(SITS(ch)) - 4;};
+    obj2 = ch->getRoom()->findObject(sitting);
 
     if (obj2 == nullptr) {
         send_to_char(ch, "Your table is missing. Inform an immortal of this problem.\r\n");
@@ -759,12 +746,9 @@ ACMD(do_nickname) {
     if (!strcasecmp(arg, "ship")) {
         struct obj_data *ship = nullptr, *next_obj = nullptr, *ship2 = nullptr;
         int found = false;
-        for (ship = ch->getRoom()->contents; ship; ship = next_obj) {
-            next_obj = ship->next_content;
-            if (GET_OBJ_VNUM(ship) >= 45000 && GET_OBJ_VNUM(ship) <= 45999 && found == false) {
-                found = true;
-                ship2 = ship;
-            }
+        auto is_ship = [](const auto& o) { return GET_OBJ_VNUM(o) >= 45000 && GET_OBJ_VNUM(o) <= 45999;};
+        if(ship2 = ch->getRoom()->findObject(is_ship)) {
+            found = true;
         }
         if (found == true) {
             if (strstr(arg2, "@")) {
@@ -774,13 +758,11 @@ ACMD(do_nickname) {
                 char nick[MAX_INPUT_LENGTH];
                 sprintf(nick, "%s", CAP(arg2));
                 ship2->look_description = strdup(nick);
-                for (auto k2 : get_vnum_list(objectVnumIndex, GET_OBJ_VNUM(ship2) + 1000)) {
-                    if(auto k = k2.lock(); k) {
-                        extract_obj(k.get());
-                        int was_in = ship2->getRoomVnum();
-                        obj_from_room(ship2);
-                        obj_to_room(ship2, real_room(was_in));
-                    }
+                for (auto k : filter_raw(get_vnum_list(objectVnumIndex, GET_OBJ_VNUM(ship2) + 1000))) {
+                    extract_obj(k);
+                    int was_in = ship2->getRoomVnum();
+                    obj_from_room(ship2);
+                    obj_to_room(ship2, real_room(was_in));
                 }
             }
         }
@@ -2249,30 +2231,22 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
                 send_to_char(ch, "%s", wear_where[j]);
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
                 if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
-                    struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = GET_EQ(i, j);
-                    for (obj2 = sheath->contents; obj2; obj2 = next_obj) {
-                        next_obj = obj2->next_content;
-                        if (obj2) {
-                            send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
-                            show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
-                        }
+                    auto sheath = GET_EQ(i, j);
+                    for (auto obj2 : filter_raw(sheath->getContents())) {
+                        send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
+                        show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
                     }
-                    obj2 = nullptr;
                 }
             } else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (!PLR_FLAGGED(i, PLR_THANDW))) {
                 send_to_char(ch, "%s", wear_where[j]);
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
                 if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
-                    struct obj_data *obj2 = nullptr, *next_obj = nullptr, *sheath = GET_EQ(i, j);
-                    for (obj2 = sheath->contents; obj2; obj2 = next_obj) {
-                        next_obj = obj2->next_content;
-                        if (obj2) {
-                            send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
-                            show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
-                        }
+                    auto sheath = GET_EQ(i, j);
+                    for (auto obj2 : filter_raw(sheath->getContents())) {
+                        send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
+                        show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
 
                     }
-                    obj2 = nullptr;
                 }
             } else if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j)) && (PLR_FLAGGED(i, PLR_THANDW))) {
                 send_to_char(ch, "@c<@CWielded by B. Hands@c>@n ");
@@ -2285,9 +2259,8 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         if (CAN_SEE(i, ch))
             act("$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
         if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
-            for (tmp_obj = i->contents; tmp_obj; tmp_obj = tmp_obj->next_content) {
-                if (CAN_SEE_OBJ(ch, tmp_obj) &&
-                    (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_WIS(ch)))) {
+            for (auto tmp_obj : filter_raw(i->getContents())) {
+                if (CAN_SEE_OBJ(ch, tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_WIS(ch)))) {
                     show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
                     found = true;
                 }
@@ -3602,14 +3575,14 @@ static void handle_look_in_inventory(struct char_data *ch, char *arg) {
         }
     }
 
-    for (struct obj_data *obj = ch->contents; obj; obj = obj->next_content) {
+    for (auto obj : filter_raw(ch->getContents())) {
         if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->ex_description, obj)) {
             examine_item(ch, obj, arg);
             return;
         }
     }
 
-    for (struct obj_data *obj = ch->getRoom()->contents; obj; obj = obj->next_content) {
+    for (auto obj : filter_raw(ch->getLocationObjects())) {
         if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->ex_description, obj)) {
             examine_item(ch, obj, arg);
             return;
@@ -5008,8 +4981,7 @@ static void show_equipment(struct char_data *ch, struct obj_data *equipment, con
     show_obj_to_char(equipment, ch, SHOW_OBJ_SHORT);
 
     if (OBJ_FLAGGED(equipment, ITEM_SHEATH)) {
-        for (struct obj_data *obj2 = equipment->contents; obj2; obj2 = obj2->next_content) {
-            if (!obj2) continue;
+        for (auto obj2 : filter_raw(equipment->getContents())) {
             send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
             show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
         }

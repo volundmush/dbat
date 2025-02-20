@@ -2591,8 +2591,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
         }
     }
 
-    for (tob = ch->getRoom()->contents; tob; tob = next_obj) {
-        next_obj = tob->next_content;
+    for (auto tob : filter_raw(ch->getLocationObjects())) {
         if (OBJ_FLAGGED(tob, ITEM_UNBREAKABLE))
             continue;
         if (foundo == true)
@@ -4745,15 +4744,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("@c$N@w admits defeat to $n, stops sparring, and stumbles away.@n", true, ch, nullptr, vict,
                     TO_NOTVICT);
                 solo_gain(ch, vict);
-                struct obj_data *rew, *next_rew;
                 int founded = 0;
-                for (rew = vict->contents; rew; rew = next_rew) {
-                    next_rew = rew->next_content;
-                    if (rew) {
-                        obj_from_char(rew);
-                        obj_to_room(rew, IN_ROOM(vict));
-                        founded = 1;
-                    }
+                for (auto rew : filter_raw(vict->getContents())) {
+                    obj_from_char(rew);
+                    obj_to_room(rew, IN_ROOM(vict));
+                    founded = 1;
                 }
                 if (founded == 1) {
                     act("@c$N@w leaves a reward behind out of respect.@n", true, ch, nullptr, vict, TO_CHAR);

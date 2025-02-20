@@ -619,7 +619,7 @@ static int Crash_load(struct char_data *ch) {
             }
             /* we have the number, check it, load obj. */
             if (nr == NOTHING) {   /* then it is unique */
-                temp = create_obj(false);
+                temp = create_obj();
                 temp->vn = NOTHING;
                 GET_OBJ_SIZE(temp) = SIZE_MEDIUM;
             } else if (nr < 0) {
@@ -627,7 +627,7 @@ static int Crash_load(struct char_data *ch) {
             } else {
                 if (nr >= 999999)
                     continue;
-                temp = read_object(nr, VIRTUAL, false);
+                temp = read_object(nr, VIRTUAL);
                 if (!temp) {
                     get_line(fl, line);
                     continue;
@@ -795,11 +795,6 @@ static int Crash_load(struct char_data *ch) {
             }   /* exit our xap loop */
             if (temp != nullptr) {
                 num_objs++;
-                if(temp->id == NOTHING) {
-                    temp->id = nextID();
-                    temp->generation = time(nullptr);
-                }
-                temp->activate();
 
                 if (GET_OBJ_TYPE(temp) == ITEM_DRINKCON) {
                     name_from_drinkcon(temp);
@@ -1053,9 +1048,10 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         exit(1);
     }
     auto &z = zone_table[zone];
-    auto r = new room_data();
-    units[virtual_nr] = std::shared_ptr<room_data>(r);
-    world.emplace(virtual_nr, r);
+    auto sh = std::make_shared<room_data>();
+    auto r = sh.get();
+    units.emplace(virtual_nr, sh);
+    world.emplace(virtual_nr, sh);
     z.rooms.insert(virtual_nr);
 
     r->zone = zone;
@@ -2856,14 +2852,14 @@ int House_load(room_vnum rvnum) {
             }
             /* we have the number, check it, load obj. */
             if (nr == NOTHING) {   /* then it is unique */
-                temp = create_obj(false);
+                temp = create_obj();
                 temp->vn = NOTHING;
             } else if (nr < 0) {
                 continue;
             } else {
                 if (nr >= 999999)
                     continue;
-                temp = read_object(nr, VIRTUAL, false);
+                temp = read_object(nr, VIRTUAL);
                 if (!temp) {
                     get_line(fl, line);
                     continue;
@@ -2953,10 +2949,11 @@ int House_load(room_vnum rvnum) {
                 temp->ex_description = nullptr;
 
                 get_line(fl, line);
+                int64_t fakeid;
                 for (k = j = zwei = 0; !zwei && !feof(fl);) {
                     switch (*line) {
                         case 'E':
-                            CREATE(new_descr, struct extra_descr_data, 1);
+                            new_descr = new extra_descr_data();
                             new_descr->keyword = fread_string(fl, buf2);
                             new_descr->description = fread_string(fl, buf2);
                             new_descr->next = temp->ex_description;
@@ -2984,7 +2981,7 @@ int House_load(room_vnum rvnum) {
                             break;
                         case 'U':
                             get_line(fl, line);
-                            sscanf(line, "%" I64T, &temp->id);
+                            sscanf(line, "%" I64T, &fakeid);
                             get_line(fl, line);
                             break;
                         case 'S':
@@ -3019,11 +3016,6 @@ int House_load(room_vnum rvnum) {
                 }      /* exit our for loop */
             }   /* exit our xap loop */
             if (temp != nullptr) {
-                if(temp->id == NOTHING) {
-                    temp->id = nextID();
-                    temp->generation = time(nullptr);
-                }
-                temp->activate();
                 num_objs++;
                 obj_to_room(temp, rrnum);
             }
@@ -3300,15 +3292,17 @@ void migrate_characters() {
     // if we can load them, we'll convert them and bind them to the appropriate account.
 
     for(auto &[cname, accID] : characterToAccount) {
-        auto ch = new char_data();
-        if(load_char(cname.c_str(), ch) < 0) {
+        auto sh = std::make_shared<char_data>();
+        if(load_char(cname.c_str(), sh.get()) < 0) {
             basic_mud_log("Error loading %s for account migration.", cname.c_str());
-            delete ch;
+            sh.reset();
             continue;
         }
-        auto id = ch->id;
+        auto ch = sh.get();
+        auto id = nextID();
         auto &p = players[id];
         p.id = id;
+        ch->id = id;
         if(!ch->generation) ch->generation = time(nullptr);
         p.character = ch;
         p.name = ch->name;
@@ -3318,8 +3312,8 @@ void migrate_characters() {
         a.characters.emplace_back(ch->id);
         ch->in_room = ch->load_room;
         ch->was_in_room = ch->load_room;
-        uniqueCharacters.emplace(id, ch);
-        units.emplace(id, ch);
+        uniqueCharacters.emplace(id, sh);
+        units.emplace(id, sh);
     }
 
     // migrate sense files...
@@ -3339,7 +3333,7 @@ void migrate_characters() {
             basic_mud_log("Error loading %s for sense migration.", name.c_str());
             continue;
         }
-        auto &pa = players[ch->id];
+        auto pa = players.at(ch->id);
         // The file contains a sequence of lines, with each line containing a number.
 		// The number is the vnum of a mobile the player's sensed.
         // We will read each line and insert the vnum into the player's sensed list.
@@ -3373,7 +3367,7 @@ void migrate_characters() {
             continue;
         }
 
-        auto &pa = players[ch->id];
+        auto pa = players.at(ch->id);
 
 		// The file contains a series of lines.
         // Each line looks like: <name> <dub>
@@ -3428,7 +3422,7 @@ void migrate_characters() {
 
             try {
                 auto ctx = std::stoi(context);
-                add_var(&ch->global_vars, (char*)varname.c_str(), data.c_str(), ctx);
+                add_var(&(ch->global_vars), (char*)varname.c_str(), data.c_str(), ctx);
             } catch(...) {
                 basic_mud_log("Error parsing %s for variable migration.", line.c_str());
             }

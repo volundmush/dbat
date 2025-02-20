@@ -379,7 +379,7 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     std::unordered_map<int, double> environment;
 
 };
-extern std::map<room_vnum, room_data*> world;
+extern std::map<room_vnum, std::shared_ptr<room_data>> world;
 /* ====================================================================== */
 
 

@@ -61,12 +61,10 @@ void affect_update(uint64_t heartPulse, double deltaTime) {
  * it to implement your own spells which require ingredients (i.e., some
  * heal spell which requires a rare herb or some such.)
  */
-int mag_materials(struct char_data *ch, int item0, int item1, int item2,
-                  int extract, int verbose) {
-    struct obj_data *tobj;
+int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose) {
     struct obj_data *obj0 = nullptr, *obj1 = nullptr, *obj2 = nullptr;
 
-    for (tobj = ch->contents; tobj; tobj = tobj->next_content) {
+    for (auto tobj : filter_raw(ch->getContents())) {
         if ((item0 > 0) && (GET_OBJ_VNUM(tobj) == item0)) {
             obj0 = tobj;
             item0 = -1;
@@ -853,7 +851,6 @@ constexpr int MOB_AERIALSERVANT = 19;
 
 void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spellnum, char *arg) {
     struct char_data *mob = nullptr;
-    struct obj_data *tobj, *next_obj;
     int msg = 0, num = 1, handle_corpse = false, affs = 0, affvs = 0, assist = 0, i, j, count;
     char *buf = nullptr;
     char buf2[MAX_INPUT_LENGTH];
@@ -971,8 +968,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
         mob->master_id = GET_IDNUM(ch);
     }
     if (handle_corpse) {
-        for (tobj = obj->contents; tobj; tobj = next_obj) {
-            next_obj = tobj->next_content;
+        for (auto tobj : filter_raw(obj->getContents())) {
             obj_from_obj(tobj);
             obj_to_char(tobj, mob);
         }

@@ -324,10 +324,10 @@ static void resolve_song(struct char_data *ch) {
         return;
     }
 
-    for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
+    for (auto obj2 : filter_raw(ch->getContents())) {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
+            break;
         }
     }
 
@@ -720,10 +720,10 @@ ACMD(do_song) {
     struct obj_data *obj2 = nullptr, *next_obj;
     int instrument = 0;
 
-    for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-        next_obj = obj2->next_content;
+    for (auto obj2 : filter_raw(ch->getContents())) {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
+            break;
         }
     }
 
@@ -1733,13 +1733,8 @@ ACMD(do_extract) {
             }
             struct obj_data *bottle = nullptr, *next_obj, *obj2;
             int found = false;
-
-            for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-                next_obj = obj2->next_content;
-                if (GET_OBJ_VNUM(obj2) == 3423) {
-                    bottle = obj2;
-                    found = true;
-                }
+            if(bottle = ch->findObjectVnum(3423)) {
+                found = true;
             }
 
             int64_t cost = ((GET_MAX_MANA(ch) * 0.35) + 500);
@@ -1829,24 +1824,11 @@ ACMD(do_runic) {
 
     struct obj_data *obj, *next_obj, *bottle = nullptr;
     int found = false, amount = 0, brush = false;
-
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (GET_OBJ_VNUM(obj) == 3424) {
-            if (GET_OBJ_VAL(obj, 6) > amount) {
-                bottle = obj;
-                found = true;
-                amount = GET_OBJ_VAL(bottle, 6);
-            }
-        }
+    if(bottle = ch->findObjectVnum(3424)) {
+        found = true;
+        amount = GET_OBJ_VAL(bottle, 6);
     }
-
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (GET_OBJ_VNUM(obj) == 3427) {
-            brush = true;
-        }
-    }
+    brush = ch->findObjectVnum(3427) ? true : false;
 
     if (found == false) {
         send_to_char(ch, "You do not have a bottle with enough ink in it.\r\n");
@@ -2769,15 +2751,9 @@ ACMD(do_channel) {
 
     struct obj_data *obj, *next_obj = nullptr, *ruby = nullptr;
     int found = false;
-
-    for (obj = ch->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
-        if (found == false && GET_OBJ_VNUM(obj) == 6600) {
-            if (!OBJ_FLAGGED(obj, ITEM_HOT)) {
-                found = true;
-                ruby = obj;
-            }
-        }
+    auto coldruby = [](const auto& o) {return GET_OBJ_VNUM(o) == 6600 && !OBJ_FLAGGED(o, ITEM_HOT);};
+    if(ruby = ch->findObject(coldruby)) {
+        found = true;
     }
 
     if (found == false) {
@@ -3348,13 +3324,7 @@ ACMD(do_bury) {
     }
 
     struct obj_data *obj = nullptr, *buried = nullptr, *fobj = nullptr, *next_obj;
-
-    for (buried = ch->getRoom()->contents; buried; buried = next_obj) {
-        next_obj = buried->next_content;
-        if (OBJ_FLAGGED(buried, ITEM_BURIED)) {
-            fobj = buried;
-        }
-    }
+    fobj = ch->getRoom()->findObject([&](const auto obj) { return OBJ_FLAGGED(obj, ITEM_BURIED); });
 
     if (!strcasecmp(arg, "bury")) {
         if (!*arg2) {
@@ -3506,13 +3476,9 @@ ACMD(do_ensnare) {
 
     struct obj_data *weave, *obj = nullptr, *next_obj;
     int found = false;
-
-    for (weave = ch->contents; weave; weave = next_obj) {
-        next_obj = weave->next_content;
-        if (found == false && valid_silk(weave) && !OBJ_FLAGGED(weave, ITEM_FORGED)) {
-            found = true;
-            obj = weave;
-        }
+    auto valid_weave = [](const auto& o) {return valid_silk(o) && !OBJ_FLAGGED(o, ITEM_FORGED);};
+    if(obj = ch->findObject(valid_weave)) {
+        found = true;
     }
 
     if (found == false) {
@@ -3666,13 +3632,9 @@ ACMD(do_silk) {
 
         int found = false, armor = 500, str = 0, intel = 0, olevel = 0;
         double price = 1;
-
-        for (weave = ch->contents; weave; weave = next_obj) {
-            next_obj = weave->next_content;
-            if (found == false && valid_silk(weave) && !OBJ_FLAGGED(weave, ITEM_FORGED)) {
-                found = true;
-                obj = weave;
-            }
+        auto valid_weave = [](const auto& o) {return valid_silk(o) && !OBJ_FLAGGED(o, ITEM_FORGED);};
+        if(obj = ch->findObject(valid_weave)) {
+            found = true;
         }
 
         if (found == false) {
@@ -4325,8 +4287,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
 
     if (type == 0) {
         /* Check for ingredients in inventory */
-        for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
+        for (auto obj2 : filter_raw(ch->getContents())) {
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
                     if (tomato > 0) {
@@ -4443,8 +4404,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
             }
         }
     } else { /* We know the ingredients are there, remove and exit. */
-        for (obj2 = ch->contents; obj2; obj2 = next_obj) {
-            next_obj = obj2->next_content;
+        for (auto obj2 : filter_raw(ch->getContents())) {
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
                     if (tomato > 0) {
@@ -5364,7 +5324,8 @@ ACMD(do_obstruct) {
         return;
     }
 
-    for (obj = dest->contents; obj; obj = obj->next_content) {
+    for (auto o : filter_raw(dest->getContents())) {
+        obj = o;
         if (GET_OBJ_VNUM(obj) == 79) {
             if (GET_OBJ_COST(obj) == dir2) {
                 if (skill < prob) {

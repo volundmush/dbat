@@ -97,8 +97,7 @@ bool check_mob_in_room(mob_vnum mob, room_vnum room) {
 
 bool check_obj_in_room(obj_vnum obj, room_vnum room) {
     if(auto r = get_room(room); r) {
-        for(auto o = r->contents; o; o = o->next_content)
-            if(o->vn == obj) return true;
+        if(r->findObjectVnum(obj)) return true;
     }
     return false;
 }
@@ -482,9 +481,8 @@ SPECIAL(auction) {
 
     if (CMD_IS("cancel")) {
 
-        for (obj = get_room(auct_room)->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
-            if (obj && GET_AUCTER(obj) == ((ch)->id)) {
+        for (auto obj : filter_raw(get_room(auct_room)->getContents())) {
+            if (GET_AUCTER(obj) == ((ch)->id)) {
                 obj2 = obj;
                 found = true;
 
@@ -531,9 +529,8 @@ SPECIAL(auction) {
         struct descriptor_data *d;
         int founded = false;
 
-        for (obj = get_room(auct_room)->contents; obj; obj = next_obj) {
-            next_obj = obj->next_content;
-            if (obj && GET_CURBID(obj) == ((ch)->id)) {
+        for (auto obj : filter_raw(get_room(auct_room)->getContents())) {
+            if (GET_CURBID(obj) == ((ch)->id)) {
                 obj2 = obj;
                 found = true;
 
@@ -676,17 +673,11 @@ SPECIAL(auction) {
 ******************************************************************** */
 
 SPECIAL(healtank) {
-    struct obj_data *htank = nullptr, *i;
+    struct obj_data *i;
     char arg[MAX_INPUT_LENGTH];
     one_argument(argument, arg);
 
-    for (i = ch->getRoom()->contents; i; i = i->next_content) {
-        if (GET_OBJ_VNUM(i) == 65) {
-            htank = i;
-        } else {
-            continue;
-        }
-    }
+    auto htank = ch->getRoom()->findObjectVnum(65);
 
     if (CMD_IS("htank")) {
         if (!htank) {
@@ -926,18 +917,13 @@ static std::map<std::string, double> gravMap = {
 
 /* This controls gravity generator functions */
 SPECIAL(gravity) {
-    struct obj_data *i, *obj = nullptr;
+    struct obj_data *i;
     char arg[MAX_INPUT_LENGTH];
     int match = false;
 
     one_argument(argument, arg);
-    for (i = ch->getRoom()->contents; i; i = i->next_content) {
-        if (GET_OBJ_VNUM(i) == 11) {
-            obj = i;
-        } else {
-            continue;
-        }
-    }
+    auto obj = ch->getRoom()->findObjectVnum(11);
+
     if (CMD_IS("gravity") || CMD_IS("generator")) {
 
         if (!*arg) {
@@ -1009,15 +995,7 @@ SPECIAL(gravity) {
 SPECIAL(bank) {
     int amount, num = 0;
 
-    struct obj_data *i, *obj = nullptr;
-
-    for (i = ch->getRoom()->contents; i; i = i->next_content) {
-        if (GET_OBJ_VNUM(i) == 3034) {
-            obj = i;
-        } else {
-            continue;
-        }
-    }
+    auto obj = ch->getRoom()->findObjectVnum(3034);
 
     if (CMD_IS("balance")) {
         if (OBJ_FLAGGED(obj, ITEM_BROKEN)) {

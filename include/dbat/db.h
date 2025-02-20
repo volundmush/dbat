@@ -218,8 +218,6 @@ extern obj_rnum real_object(obj_vnum vnum);
 
 extern void init_char(struct char_data *ch);
 
-struct char_data *create_char(bool activate = true);
-
 struct char_data *read_mobile(mob_vnum nr, int type);
 
 extern int vnum_mobile(char *searchname, struct char_data *ch);
@@ -238,11 +236,11 @@ extern void write_level_data(struct char_data *ch, FILE *fl);
 
 extern int parse_mobile_from_file(FILE *mob_f, struct char_data *ch);
 
-struct obj_data *create_obj(bool activate = true);
+struct obj_data *create_obj();
 
 extern void free_obj(struct obj_data *obj);
 
-struct obj_data *read_object(obj_vnum nr, int type, bool activate = true);
+struct obj_data *read_object(obj_vnum nr, int type);
 
 extern int vnum_object(char *searchname, struct char_data *ch);
 
@@ -387,7 +385,7 @@ extern std::vector<obj_vnum> dbVnums;
 // world data...
 extern std::unordered_map<int, std::shared_ptr<struct unit_data>> units;
 
-extern std::map<room_vnum, room_data*> world;
+extern std::map<room_vnum, std::shared_ptr<room_data>> world;
 extern std::map<zone_vnum, struct zone_data> zone_table;
 
 extern struct descriptor_data *descriptor_list;

@@ -68,22 +68,30 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
     free(cmds);
 }
 
+int64_t nextTrigID() {
+    int64_t id = 0;
+    while(uniqueScripts.contains(id)) id++;
+    return id;
+}
 
 /*
  * create a new trigger from a prototype.
  * nr is the real number of the trigger.
  */
-trig_data *read_trigger(int nr) {
+trig_data* read_trigger(int nr) {
 
     auto idx = trig_index.find(nr);
     if(idx == trig_index.end()) return nullptr;
 
-    auto trig = new trig_data();
+    auto sh = std::make_shared<trig_data>();
 
-    trig_data_copy(trig, idx->second.proto);
-    insert_vnum(scriptVnumIndex, trig);
+    sh->id = nextTrigID();
+    sh->generation = time(nullptr);
+    uniqueScripts.emplace(sh->id, sh);
 
-    return trig;
+    trig_data_copy(sh.get(), idx->second.proto);
+
+    return sh.get();
 }
 
 

@@ -37,35 +37,24 @@ struct obj_data *find_hatch_by_vnum(int vnum) {
     return nullptr;
 }
 
-/* Search the given list for an object type, and return a ptr to that obj*/
-struct obj_data *get_obj_in_list_type(int type, struct obj_data *list) {
-    struct obj_data *i;
 
-    for (i = list; i; i = i->next_content)
-        if (GET_OBJ_TYPE(i) == type)
-            return i;
-
-    return nullptr;
-}
 
 /* Search the player's room, inventory and equipment for a control */
 struct obj_data *find_control(struct char_data *ch) {
     struct obj_data *controls, *obj;
     int j;
+    auto iscontrol = [&](obj_data *o) { return CAN_SEE_OBJ(ch, obj) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
 
-    controls = get_obj_in_list_type(ITEM_CONTROL, ch->getRoom()->contents);
-    if (!controls)
-        for (auto obj : filter_raw(ch->getContents()))
-            if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_TYPE(obj) == ITEM_CONTROL) {
-                controls = obj;
-                break;
-            }
-                
+    controls = ch->getRoom()->findObject(iscontrol);
+    if (!controls) controls = ch->findObject(iscontrol);
+
     if (!controls)
         for (j = 0; j < NUM_WEARS && !controls; j++)
             if (GET_EQ(ch, j) && CAN_SEE_OBJ(ch, GET_EQ(ch, j)) &&
-                GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_CONTROL)
-                controls = GET_EQ(ch, j);
+                GET_OBJ_TYPE(GET_EQ(ch, j)) == ITEM_CONTROL) {
+                    controls = GET_EQ(ch, j);
+                    break;
+                }
     return controls;
 }
 
@@ -119,12 +108,13 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
 
 /* Drive our vehicle out of another vehicle */
 static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) {
-    struct obj_data *hatch, *vehicle_in_out;
+    struct obj_data *vehicle_in_out;
     char buf[MAX_INPUT_LENGTH];
 
     auto room = vehicle->getRoom();
+    auto hatch = room->findObject([&](obj_data *o) { return GET_OBJ_TYPE(o) == ITEM_HATCH; });
 
-    if (!(hatch = get_obj_in_list_type(ITEM_HATCH, room->contents))) {
+    if (!hatch) {
         send_to_char(ch, "@wNowhere to pilot out of.\r\n");
         return;
     }

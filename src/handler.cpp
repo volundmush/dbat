@@ -623,17 +623,6 @@ int get_number(char **name) {
 }
 
 
-/* Search a given list for an object number, and return a ptr to that obj */
-struct obj_data *get_obj_in_list_num(int num, struct obj_data *list) {
-    struct obj_data *i;
-
-    for (i = list; i; i = i->next_content)
-        if (GET_OBJ_RNUM(i) == num)
-            return (i);
-
-    return (nullptr);
-}
-
 
 /* search the entire world for an object number, and return a pointer  */
 struct obj_data *get_obj_num(obj_rnum nr) {
@@ -901,8 +890,8 @@ void extract_obj(struct obj_data *obj) {
         USER(obj) = nullptr;
     }
 
-    while (obj->contents)
-        extract_obj(obj->contents);
+    for (auto o : filter_raw(obj->getContents()))
+        extract_obj(o);
 
     obj->deactivate();
 
@@ -922,10 +911,9 @@ static void update_object(struct obj_data *obj, int use) {
     /* dont update objects with a timer trigger */
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (GET_OBJ_TIMER(obj) > 0))
         GET_OBJ_TIMER(obj) -= use;
-    if (obj->contents)
-        update_object(obj->contents, use);
-    if (obj->next_content)
-        update_object(obj->next_content, use);
+    for(auto o : filter_raw(obj->getContents())) {
+        update_object(o, use);
+    }
 }
 
 
@@ -951,8 +939,8 @@ void update_char_objects(struct char_data *ch) {
             update_object(GET_EQ(ch, i), 2);
         }
 
-    if (ch->contents)
-        update_object(ch->contents, 1);
+    for(auto o : filter_raw(ch->getContents()))
+        update_object(o, 1);
 }
 
 

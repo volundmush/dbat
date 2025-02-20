@@ -1001,8 +1001,7 @@ static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr) {
     while (list) {
         temp = list;
         list = list->next_content;
-        if (shop_producing(temp, shop_nr) &&
-            !get_obj_in_list_num(GET_OBJ_RNUM(temp), keeper->contents)) {
+        if (shop_producing(temp, shop_nr) && !keeper->findObjectVnum(temp->vn)) {
             obj_to_char(temp, keeper);
             SHOP_SORT(shop_nr)++;
         } else

@@ -219,7 +219,7 @@ void oedit_setup_new(struct descriptor_data *d) {
 /*------------------------------------------------------------------------*/
 
 void oedit_setup_existing(struct descriptor_data *d, int real_num) {
-    struct obj_data *obj = new obj_data();
+    auto obj = new obj_data();
     copy_object(obj, &obj_proto[real_num]);
 
     /*
@@ -1724,13 +1724,11 @@ void iedit_setup_existing(struct descriptor_data *d, struct obj_data *real_num) 
 
     OLC_IOBJ(d) = real_num;
 
-    obj = create_obj();
+    obj = new obj_data();
     copy_object(obj, real_num);
 
     /* free any assigned scripts */
-    if (SCRIPT(obj))
-        extract_script(obj, OBJ_TRIGGER);
-    SCRIPT(obj) = nullptr;
+    extract_script(obj, OBJ_TRIGGER);
 
     OLC_OBJ(d) = obj;
     OLC_IOBJ(d) = real_num;

@@ -1318,17 +1318,22 @@ static void do_stat_room(struct char_data *ch) {
         }
     }
 
-    if (rm->contents) {
+    auto con = rm->getContents();
+    sz = con.size();
+    
+    if (sz) {
         send_to_char(ch, "Contents:@g");
         column = 9;    /* ^^^ strlen ^^^ */
-
-        for (found = 0, j = rm->contents; j; j = j->next_content) {
+        i2 = 0;
+        found = false;
+        for (auto j : filter_raw(con)) {
+            i2++;
             if (!CAN_SEE_OBJ(ch, j))
                 continue;
 
             column += send_to_char(ch, "%s %s", found++ ? "," : "", j->short_description);
             if (column >= 62) {
-                send_to_char(ch, "%s\r\n", j->next_content ? "," : "");
+                send_to_char(ch, "%s\r\n", i2 < sz ? "," : "");
                 found = false;
                 column = 0;
             }
@@ -1531,14 +1536,19 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
 
         send_to_char(ch, "\r\nContents:@g");
         column = 9;    /* ^^^ strlen ^^^ */
-
-        for (found = 0, j2 = j->contents; j2; j2 = j2->next_content) {
+        found = false;
+        auto con = j->getContents();
+        auto sz = con.size();
+        auto count = 0;
+        for (auto j2 : filter_raw(j->getContents())) {
             column += send_to_char(ch, "%s %s", found++ ? "," : "", j2->short_description);
+            count++;
             if (column >= 62) {
-                send_to_char(ch, "%s\r\n", j2->next_content ? "," : "");
+                send_to_char(ch, "%s\r\n", count < sz ? "," : "");
                 found = false;
                 column = 0;
             }
+            
         }
         send_to_char(ch, "@n");
     }
@@ -1695,9 +1705,11 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     }
 
     int counts = 0, total = 0;
-    for (i = 0, j = k->contents; j; j = j->next_content, i++) {
+    i = 0;
+    for (auto j : filter_raw(k->getContents())) {
         counts += check_insidebag(j, 0.5);
         counts++;
+        i++;
     }
     total = counts;
     total += i;
@@ -3467,7 +3479,7 @@ ACMD(do_show) {
             j = 0;
             len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
             for (auto &[vn, r] : world)
-                if (ROOM_FLAGGED(r, ROOM_DEATH)) {
+                if (ROOM_FLAGGED(r.get(), ROOM_DEATH)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
                                     r->name);
                     if (len + nlen >= sizeof(buf) || nlen < 0)
@@ -3482,7 +3494,7 @@ ACMD(do_show) {
             j = 0;
             len = strlcpy(buf, "Godrooms\r\n--------------------------\r\n", sizeof(buf));
             for (auto &[vn, r] : world)
-                if (ROOM_FLAGGED(r, ROOM_GODROOM)) {
+                if (ROOM_FLAGGED(r.get(), ROOM_GODROOM)) {
                     nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
                                     r->name);
                     if (len + nlen >= sizeof(buf) || nlen < 0)

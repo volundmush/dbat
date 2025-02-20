@@ -677,7 +677,7 @@ in the vault (vnum: 453) now and then. you can just use
                         strcpy(str, IS_NPC(c) ? "1" : "0");
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
-                            for (obj = c->contents; obj; obj = obj->next_content) {
+                            for (auto obj : filter_raw(ch->getContents())) {
                                 if (GET_OBJ_VNUM(obj) == atof(subfield)) {
                                     snprintf(str, slen, "%s", ((obj)->getUID(false).c_str())); /* arg given, found */
                                     return;
@@ -1210,7 +1210,7 @@ in the vault (vnum: 453) now and then. you can just use
                 }
             } else if (!strcasecmp(field, "contents")) {
                 if (subfield && *subfield) {
-                    for (obj = r->contents; obj; obj = obj->next_content) {
+                    for (auto obj : filter_raw(r->getContents())) {
                         if (GET_OBJ_VNUM(obj) == atof(subfield)) {
                             /* arg given, found */
                             snprintf(str, slen, "%s", ((obj)->getUID(false).c_str()));

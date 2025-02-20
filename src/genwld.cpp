@@ -35,9 +35,9 @@ room_rnum add_room(struct room_data *room) {
         return NOWHERE;
 
     if (world.contains(room->vn)) {
-        auto ro = world.at(room->vn);
+        auto ro = world.at(room->vn).get();
         if (SCRIPT(ro))
-            extract_script(&ro, WLD_TRIGGER);
+            extract_script(ro, WLD_TRIGGER);
         tch = ro->people;
         tobj = ro->contents;
         copy_room(ro, room);
@@ -46,9 +46,9 @@ room_rnum add_room(struct room_data *room) {
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
-
-    world[room->vn] = room;
-    units[room->vn] = std::shared_ptr<room_data>(room);
+    auto sh = std::shared_ptr<room_data>(room);
+    world[room->vn] = sh;
+    units[room->vn] = sh;
     basic_mud_log("GenOLC: add_room: Added room %d.", room->vn);
 
     /*
@@ -91,8 +91,7 @@ int delete_room(room_rnum rnum) {
      * Dump the contents of this room into the Void.  We could also just
      * extract the people, mobs, and objects here.
      */
-    for (obj = get_room(rnum)->contents; obj; obj = next_obj) {
-        next_obj = obj->next_content;
+    for (auto obj : filter_raw(get_room(rnum)->getContents())) {
         obj_from_room(obj);
         obj_to_room(obj, 0);
     }
@@ -489,7 +488,7 @@ double room_data::getEnvironment(int type) {
     switch(type) {
         case ENV_GRAVITY: {
             // check for a gravity generator...
-            for(auto c = contents; c; c = c->next_content) {
+            for(auto c : filter_raw(getContents())) {
                 if(c->gravity) return c->gravity.value();
             }
 

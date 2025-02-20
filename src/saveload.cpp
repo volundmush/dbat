@@ -82,6 +82,7 @@ static void dump_state_dgscripts(const std::filesystem::path &loc) {
     for(auto &[v, r] : uniqueScripts) {
         nlohmann::json j2;
         j2["id"] = v;
+        j2["generation"] = r->generation;
         j2["data"] = r->serializeInstance();
         j2["location"] = r->serializeLocation();
         j2["order"] = r->order;

@@ -48,21 +48,15 @@ void ping_ship(int vnum, int vnum2) {
 }
 
 int checkship(int rnum, int vnum) {
-    struct obj_data *i = nullptr;
-    int there = false;
+    if(ROOM_FLAGGED(rnum, ROOM_NEBULA)) return false;
 
-    for (i = get_room(rnum)->contents; i; i = i->next_content) {
-        if (!ROOM_FLAGGED(rnum, ROOM_NEBULA)) {
-            if (GET_OBJ_TYPE(i) == ITEM_VEHICLE && there != true) {
-                there = true;
-                ping_ship(GET_OBJ_VNUM(i), vnum);
-            }
-        }
+    auto check = [](const auto& o) { return GET_OBJ_TYPE(o) == ITEM_VEHICLE;};
+    if(auto found = get_room(rnum)->findObject(check); found) {
+        ping_ship(GET_OBJ_VNUM(found), vnum);
+        return true;
     }
 
-    i = nullptr;
-
-    return there;
+    return false;
 }
 
 struct RoomType {

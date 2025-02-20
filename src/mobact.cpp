@@ -91,20 +91,18 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
         /* Scavenger (picking up objects) */
         start = std::chrono::high_resolution_clock::now();
-        if (IS_HUMANOID(ch) && !FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118)) {
-            if (auto contents = ch->getRoom()->contents; contents && rand_number(1, 100) >= 95) {
-                max = 1;
-                best_obj = nullptr;
-                for (obj = contents; obj; obj = obj->next_content)
-                    if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {
-                        best_obj = obj;
-                        max = GET_OBJ_COST(obj);
-                    }
-                if (best_obj != nullptr && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED && !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
-                    auto line = Random::get(scavengerTalk);
-                    act(line->c_str(), true, ch, nullptr, nullptr, TO_ROOM);
-                    perform_get_from_room(ch, best_obj);
+        if (IS_HUMANOID(ch) && !FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118) && rand_number(1, 100) >= 95) {
+            max = 1;
+            best_obj = nullptr;
+            for (auto obj : filter_raw(ch->getLocationObjects()))
+                if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {
+                    best_obj = obj;
+                    max = GET_OBJ_COST(obj);
                 }
+            if (best_obj && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED && !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
+                auto line = Random::get(scavengerTalk);
+                act(line->c_str(), true, ch, nullptr, nullptr, TO_ROOM);
+                perform_get_from_room(ch, best_obj);
             }
         }
         end = std::chrono::high_resolution_clock::now();
@@ -158,31 +156,28 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
         /* RESPOND TO A HUGE ATTACK */
         start = std::chrono::high_resolution_clock::now();
-        struct obj_data *hugeatk = nullptr, *next_huge = nullptr;
-        for (hugeatk = ch->getRoom()->contents; hugeatk; hugeatk = next_huge) {
-            next_huge = hugeatk->next_content;
-            if (FIGHTING(ch)) {
-                continue;
-            }
-            if (MOB_FLAGGED(ch, MOB_NOKILL)) {
-                continue;
-            }
-            if (GET_OBJ_VNUM(hugeatk) == 82 || GET_OBJ_VNUM(hugeatk) == 83) {
-                if (USER(hugeatk) != nullptr) {
-                    act("@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, USER(hugeatk), TO_ROOM);
-                    act("@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, USER(hugeatk), TO_VICT);
-                    if (IS_HUMANOID(ch)) {
-                        char tar[MAX_INPUT_LENGTH];
-                        sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
-                        do_punch(ch, tar, 0, 0);
-                    } else {
-                        char tar[MAX_INPUT_LENGTH];
-                        sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
-                        do_bite(ch, tar, 0, 0);
+
+        if(!FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
+            for (auto hugeatk : filter_raw(ch->getLocationObjects())) {
+                if (GET_OBJ_VNUM(hugeatk) == 82 || GET_OBJ_VNUM(hugeatk) == 83) {
+                    if (USER(hugeatk) != nullptr) {
+                        act("@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, USER(hugeatk), TO_ROOM);
+                        act("@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, USER(hugeatk), TO_VICT);
+                        if (IS_HUMANOID(ch)) {
+                            char tar[MAX_INPUT_LENGTH];
+                            sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
+                            do_punch(ch, tar, 0, 0);
+                        } else {
+                            char tar[MAX_INPUT_LENGTH];
+                            sprintf(tar, "%s", GET_NAME(USER(hugeatk)));
+                            do_bite(ch, tar, 0, 0);
+                        }
+                        break;
                     }
                 }
             }
         }
+
         end = std::chrono::high_resolution_clock::now();
         mobTimings["mob_huge_attack"] += std::chrono::duration<double>(end - start).count();
 

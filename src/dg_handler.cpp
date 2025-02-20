@@ -114,30 +114,9 @@ void extract_trigger(struct trig_data *trig) {
 }
 
 /* remove all triggers from a mob/obj/room */
-void extract_script(void *thing, int type) {
-    script_data *sc = nullptr;
+void extract_script(unit_data *thing, int type) {
+    script_data *sc = thing;
     struct trig_data *trig, *next_trig;
-    char_data *mob;
-    obj_data *obj;
-    room_data *room;
-
-    switch (type) {
-        case MOB_TRIGGER:
-            mob = (struct char_data *) thing;
-            sc = SCRIPT(mob);
-            SCRIPT(mob) = nullptr;
-            break;
-        case OBJ_TRIGGER:
-            obj = (struct obj_data *) thing;
-            sc = SCRIPT(obj);
-            SCRIPT(obj) = nullptr;
-            break;
-        case WLD_TRIGGER:
-            room = (struct room_data *) thing;
-            sc = SCRIPT(room);
-            SCRIPT(room) = nullptr;
-            break;
-    }
 
     for (trig = TRIGGERS(sc); trig; trig = next_trig) {
         next_trig = trig->next;
@@ -147,8 +126,6 @@ void extract_script(void *thing, int type) {
 
     /* Thanks to James Long for tracking down this memory leak */
     free_varlist(sc->global_vars);
-
-    delete sc;
 }
 
 /* erase the script memory of a mob */

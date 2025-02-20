@@ -204,9 +204,7 @@ int delete_object(obj_rnum rnum) {
 
         /* extract_obj() will just axe contents. */
         if (tmp->contents) {
-            struct obj_data *this_content, *next_content;
-            for (this_content = tmp->contents; this_content; this_content = next_content) {
-                next_content = this_content->next_content;
+            for (auto this_content : filter_raw(tmp->getContents())) {
                 if (IN_ROOM(tmp)) {
                     /* Transfer stuff from object to room. */
                     obj_from_obj(this_content);
