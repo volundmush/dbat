@@ -381,7 +381,11 @@ void db_load_dgscripts_finish(const std::filesystem::path& loc) {
         if (auto cf = uniqueScripts.find(id); cf != uniqueScripts.end()) {
             if (auto t = cf->second) {
                 t->deserializeLocation(location);
-                if(!t->owner) continue;
+                if(!t->owner) {
+                    basic_mud_log("Script %d: '%s' has no owner.", id, t->name);
+                    uniqueScripts.erase(cf);
+                    continue;
+                }
                 t->owner->trig_list = t.get();
                 t->owner->trigger_types |= GET_TRIG_TYPE(t);
             }

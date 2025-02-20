@@ -868,7 +868,10 @@ void add_trigger(script_data *sc, trig_data *t, int loc) {
 
     SCRIPT_TYPES(sc) |= GET_TRIG_TYPE(t);
     t->activate();
-    t->owner = units.at(sc->id);
+
+    auto ow = units.at(sc->id);
+
+    t->owner = ow;
 
     insert_vnum(scriptVnumIndex, t);
 
@@ -2922,7 +2925,7 @@ trig_data::trig_data(const nlohmann::json &j) : trig_data() {
 }
 
 void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context) {
-	auto uid = thing->getUID(false);
+	auto uid = thing->getUID(true);
     add_var(&GET_TRIG_VARS(trig), name, (char*)uid.c_str(), context);
 }
 

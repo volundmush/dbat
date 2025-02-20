@@ -1618,10 +1618,8 @@ namespace trans {
 
     void gamesys_transform(uint64_t heartPulse, double deltaTime) {
         // TODO: replace this with a subscription for anyone who's not in base form.
-        for(auto charId : activeCharacters) {
-            auto ch2 = charId.lock();
-            if(!ch2) continue;
-            auto ch = ch2.get();
+        auto subs = characterSubscriptions.all("transforms");
+        for(auto ch : filter_raw(subs)) {
 
             // check transform logic...
             auto form = ch->form;
@@ -2614,10 +2612,12 @@ namespace trans {
         if(ch->form != FormID::Base) {
             onRevert(ch, ch->form);
             ch->form = FormID::Base;
+            if(ch->technique == FormID::Base) characterSubscriptions.unsubscribe("transforms", ch);
         }
         if(ch->technique != FormID::Base) {
             onRevert(ch, ch->technique);
             ch->technique = FormID::Base;
+            if(ch->form == FormID::Base) characterSubscriptions.unsubscribe("transforms", ch);
         }
         int64_t afterKi = ch->getMaxKI();
 
@@ -2655,6 +2655,7 @@ namespace trans {
             ch->technique = form;
         ch->transforms[form].grade = grade;
         
+        characterSubscriptions.subscribe("transforms", ch);
         onTransform(ch, form);
 
         int64_t afterKi = ch->getMaxKI();
@@ -2674,6 +2675,7 @@ namespace trans {
                 send_to_zone("An explosion of power ripples through the surrounding area!\r\n", zone);
             };
         }
+        
 
 
         char buf3[MAX_INPUT_LENGTH];

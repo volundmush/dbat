@@ -438,7 +438,7 @@ std::optional<std::string> room_data::dgCallMember(const std::string& member, co
             }
             else if (!strcasecmp(arg.c_str(), "room")) {
                 if (auto roomFound = get_room(ex->to_room); roomFound)
-                    return fmt::format("{}", roomFound->getUID(false));
+                    return fmt::format("{}", roomFound->getUID(true));
                 else
                     return "";
             }

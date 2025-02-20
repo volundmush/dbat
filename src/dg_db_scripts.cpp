@@ -69,7 +69,7 @@ void parse_trigger(FILE *trig_f, trig_vnum nr) {
 }
 
 int64_t nextTrigID() {
-    int64_t id = 0;
+    static int64_t id = 0;
     while(uniqueScripts.contains(id)) id++;
     return id;
 }

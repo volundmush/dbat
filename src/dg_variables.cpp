@@ -267,11 +267,11 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
             snprintf(str, slen, "%s", vd->value);
         else {
             if (!strcasecmp(var, "self")) {
-                auto uid = unit->getUID(false);
+                auto uid = unit->getUID(true);
                 snprintf(str, slen, "%s", uid.c_str());
             } else if (!strcasecmp(var, "global")) {
                 /* so "remote varname %global%" will work */
-                snprintf(str, slen, "%d", get_room(0)->getUID(false).c_str());
+                snprintf(str, slen, "%d", get_room(0)->getUID(true).c_str());
                 return;
             } else if (!strcasecmp(var, "ctime"))
                 snprintf(str, slen, "%ld", time(nullptr));
@@ -485,7 +485,7 @@ in the vault (vnum: 453) now and then. you can just use
                     }
 
                     if (rndm)
-                        snprintf(str, slen, "%s", ((rndm)->getUID(false).c_str()));
+                        snprintf(str, slen, "%s", ((rndm)->getUID(true).c_str()));
                     else
                         *str = '\0';
                 } else if (!strcasecmp(field, "dir")) {
@@ -618,7 +618,7 @@ in the vault (vnum: 453) now and then. you can just use
                         } else if ((pos = find_eq_pos_script(subfield)) < 0 || !GET_EQ(c, pos))
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%s", ((((c)->equipment[pos]))->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((((c)->equipment[pos]))->getUID(true).c_str()));
                     }
                     if (!strcasecmp(field, "exp")) {
                         if (subfield && *subfield) {
@@ -632,14 +632,14 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'f':
                     if (!strcasecmp(field, "fighting")) {
                         if (FIGHTING(c))
-                            snprintf(str, slen, "%s", ((((c)->fighting))->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((((c)->fighting))->getUID(true).c_str()));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "follower")) {
                         if (!c->followers || !c->followers->follower)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%s", ((c->followers->follower)->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((c->followers->follower)->getUID(true).c_str()));
                     }
                     break;
                 case 'h':
@@ -673,7 +673,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'i':
                     if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%s", c->getUID(false).c_str());
+                        snprintf(str, slen, "%s", c->getUID(true).c_str());
 
                         /* new check for pc/npc status */
                     else if (!strcasecmp(field, "is_pc")) {
@@ -684,13 +684,13 @@ in the vault (vnum: 453) now and then. you can just use
                             auto oid = atof(subfield);
                             for (auto obj : filter_raw(con)) {
                                 if (GET_OBJ_VNUM(obj) == oid) {
-                                    snprintf(str, slen, "%s", ((obj)->getUID(false).c_str())); /* arg given, found */
+                                    snprintf(str, slen, "%s", ((obj)->getUID(true).c_str())); /* arg given, found */
                                     return;
                                 }
                             }
                         } else { /* no arg given */
                             if (c->contents) {
-                                snprintf(str, slen, "%s", ((c->contents)->getUID(false).c_str()));
+                                snprintf(str, slen, "%s", ((c->contents)->getUID(true).c_str()));
                                 return;
                             }
                         }
@@ -746,7 +746,7 @@ in the vault (vnum: 453) now and then. you can just use
                         if (!c->master)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%s", ((c->master)->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((c->master)->getUID(true).c_str()));
                     }
                     break;
                 case 'n':
@@ -754,7 +754,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%s", GET_NAME(c));
                     } else if (!strcasecmp(field, "next_in_room")) {
                         if (c->next_in_room)
-                            snprintf(str, slen, "%s", ((c->next_in_room)->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((c->next_in_room)->getUID(true).c_str()));
                         else
                             *str = '\0';
                     }
@@ -810,7 +810,7 @@ in the vault (vnum: 453) now and then. you can just use
 /* see note in dg_scripts.h */
 #ifdef ACTOR_ROOM_IS_UID
 						if(auto roomFound = c->getRoom(); roomFound) {
-                            snprintf(str, slen, "%s", roomFound->getUID(false).c_str());
+                            snprintf(str, slen, "%s", roomFound->getUID(true).c_str());
                         }
 #else
                         snprintf(str, slen, "%d", (IN_ROOM(c)!= NOWHERE) ? c->getRoom()->number : 0);
@@ -947,12 +947,12 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%d", GET_OBJ_RENT(o));
                     } else if (!strcasecmp(field, "carried_by")) {
                         if (o->carried_by)
-                            snprintf(str, slen, "%s", ((o->carried_by)->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((o->carried_by)->getUID(true).c_str()));
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "contents")) {
                         if (o->contents)
-                            snprintf(str, slen, "%s", ((o->contents)->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((o->contents)->getUID(true).c_str()));
                         else
                             *str = '\0';
                     }
@@ -997,11 +997,11 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'i':
                     if (!strcasecmp(field, "id"))
-                        snprintf(str, slen, "%s", o->getUID(false).c_str());
+                        snprintf(str, slen, "%s", o->getUID(true).c_str());
 
                     else if (!strcasecmp(field, "is_inroom")) {
                         if (auto roomFound = o->getRoom(); roomFound)
-                            snprintf(str, slen, "%s", roomFound->getUID(false).c_str());
+                            snprintf(str, slen, "%s", roomFound->getUID(true).c_str());
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "is_pc")) {
@@ -1033,7 +1033,7 @@ in the vault (vnum: 453) now and then. you can just use
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
                         if (o->next_content)
-                            snprintf(str, slen, "%s", ((o->next_content)->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((o->next_content)->getUID(true).c_str()));
                         else
                             *str = '\0';
                     }
@@ -1041,7 +1041,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'r':
                     if (!strcasecmp(field, "room")) {
                         if (auto roomFound = get_room(obj_room(o)); roomFound)
-                            snprintf(str, slen, "%s", roomFound->getUID(false).c_str());
+                            snprintf(str, slen, "%s", roomFound->getUID(true).c_str());
                         else
                             *str = '\0';
                     }
@@ -1134,7 +1134,7 @@ in the vault (vnum: 453) now and then. you can just use
                         snprintf(str, slen, "%s", fmt::format("{}", GET_OBJ_WEIGHT(o)).c_str());
                     } else if (!strcasecmp(field, "worn_by")) {
                         if (o->worn_by)
-                            snprintf(str, slen, "%s", ((o->worn_by)->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((o->worn_by)->getUID(true).c_str()));
                         else
                             *str = '\0';
                     }
@@ -1195,7 +1195,7 @@ in the vault (vnum: 453) now and then. you can just use
                     for (auto obj : filter_raw(con)) {
                         if (GET_OBJ_VNUM(obj) == atof(subfield)) {
                             /* arg given, found */
-                            snprintf(str, slen, "%s", ((obj)->getUID(false).c_str()));
+                            snprintf(str, slen, "%s", ((obj)->getUID(true).c_str()));
                             return;
                         }
                     }
@@ -1203,19 +1203,19 @@ in the vault (vnum: 453) now and then. you can just use
                         *str = '\0'; /* arg given, not found */
                 } else { /* no arg given */
                     if (r->contents) {
-                        snprintf(str, slen, "%s", ((r->contents)->getUID(false).c_str()));
+                        snprintf(str, slen, "%s", ((r->contents)->getUID(true).c_str()));
                     } else {
                         *str = '\0';
                     }
                 }
             } else if (!strcasecmp(field, "people")) {
                 if (r->people)
-                    snprintf(str, slen, "%s", ((r->people)->getUID(false).c_str()));
+                    snprintf(str, slen, "%s", ((r->people)->getUID(true).c_str()));
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "id")) {
                 if (r->vn != NOWHERE)
-                    snprintf(str, slen, "%s", r->getUID(false).c_str());
+                    snprintf(str, slen, "%s", r->getUID(true).c_str());
                 else
                     *str = '\0';
             } else if (!strcasecmp(field, "weather")) {

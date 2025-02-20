@@ -726,6 +726,7 @@ static int Crash_load(struct char_data *ch) {
                 temp->ex_description = nullptr;
 
                 get_line(fl, line);
+                int64_t fakeid;
                 for (k = j = zwei = 0; !zwei && !feof(fl);) {
                     switch (*line) {
                         case 'E':
@@ -759,7 +760,7 @@ static int Crash_load(struct char_data *ch) {
                             break;
                         case 'U':
                             get_line(fl, line);
-                            sscanf(line, "%" I64T, &temp->id);
+                            sscanf(line, "%" I64T, &fakeid);
                             get_line(fl, line);
                             break;
                         case 'S':
@@ -1056,6 +1057,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
 
     r->zone = zone;
     r->vn = virtual_nr;
+    r->id = virtual_nr;
     r->name = fread_string(fl, buf2);
     r->look_description = fread_string(fl, buf2);
 
@@ -1254,7 +1256,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
  */
 
 #define CASE(test)    \
-    if (value && !matched && !strcasecmp(keyword, test) && (matched = false))
+    if (value && !matched && !strcasecmp(keyword, test) && (matched = true))
 
 #define BOOL_CASE(test)    \
     if (!value && !matched && !strcasecmp(keyword, test) && (matched = true))

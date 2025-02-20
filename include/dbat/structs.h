@@ -158,7 +158,7 @@ struct unit_data {
     void deserializeUnit(const nlohmann::json& j);
     std::string scriptString();
 
-    std::string getUID(bool active = true);
+    std::string getUID(bool active = false);
     virtual bool isActive() = 0;
 
     nlohmann::json serializeScripts();
