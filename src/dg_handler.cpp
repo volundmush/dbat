@@ -113,6 +113,8 @@ void extract_script(unit_data *thing, int type) {
     script_data *sc = thing;
     struct trig_data *trig, *next_trig;
 
+    if(!thing->trig_list) return;
+
     for (trig = TRIGGERS(sc); trig; trig = next_trig) {
         next_trig = trig->next;
         extract_trigger(trig);

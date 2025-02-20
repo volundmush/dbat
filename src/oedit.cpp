@@ -266,8 +266,7 @@ void oedit_save_internally(struct descriptor_data *d) {
         obj = obj2.get();
 
         /* remove any old scripts */
-        if (SCRIPT(obj))
-            extract_script(obj, OBJ_TRIGGER);
+        extract_script(obj, OBJ_TRIGGER);
 
         free_proto_script(obj, OBJ_TRIGGER);
         copy_proto_script(&obj_proto[robj_num], obj, OBJ_TRIGGER);
@@ -1056,10 +1055,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                         /* find_obj helper */
                         if (GET_OBJ_VNUM(obj) != NOTHING) {
                             /* remove any old scripts */
-                            if (SCRIPT(obj)) {
-                                extract_script(obj, OBJ_TRIGGER);
-                                SCRIPT(obj) = nullptr;
-                            }
+                            extract_script(obj, OBJ_TRIGGER);
 
                             free_proto_script(obj, OBJ_TRIGGER);
                             robj = real_object(GET_OBJ_VNUM(obj));

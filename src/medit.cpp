@@ -286,8 +286,7 @@ void medit_save_internally(struct descriptor_data *d) {
         mob = mob2.get();
 
         /* remove any old scripts */
-        if (SCRIPT(mob))
-            extract_script(mob, MOB_TRIGGER);
+        extract_script(mob, MOB_TRIGGER);
 
         free_proto_script(mob, MOB_TRIGGER);
         copy_proto_script(&mob_proto[new_rnum], mob, MOB_TRIGGER);

@@ -21,12 +21,11 @@ void event_process(uint64_t heart_pulse, double deltaTime) {
     while(toProcess > 0 && !triggers_queued.empty()) {
         auto trig = triggers_queued.front();
         triggers_queued.pop_front();
-        auto owner = trig->owner;
-        if(auto r = std::dynamic_pointer_cast<room_data>(owner); r) {
+        if(auto r = std::dynamic_pointer_cast<room_data>(trig->owner); r) {
             script_driver(r.get(), trig, WLD_TRIGGER, TRIG_RESTART);
-        } else if(auto o = std::dynamic_pointer_cast<obj_data>(owner); o) {
+        } else if(auto o = std::dynamic_pointer_cast<obj_data>(trig->owner); o) {
             script_driver(o.get(), trig, OBJ_TRIGGER, TRIG_RESTART);
-        } else if(auto c = std::dynamic_pointer_cast<char_data>(owner); c) {
+        } else if(auto c = std::dynamic_pointer_cast<char_data>(trig->owner); c) {
             script_driver(c.get(), trig, MOB_TRIGGER, TRIG_RESTART);
         }
         toProcess--;

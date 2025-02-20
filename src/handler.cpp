@@ -900,8 +900,7 @@ void extract_obj(struct obj_data *obj) {
     if (GET_OBJ_RNUM(obj) != NOTHING)
         (obj_index[GET_OBJ_RNUM(obj)].vn)--;
 
-    if (SCRIPT(obj))
-        extract_script(obj, OBJ_TRIGGER);
+    extract_script(obj, OBJ_TRIGGER);
 
     free_obj(obj);
 }
@@ -1122,8 +1121,7 @@ void extract_char_final(struct char_data *ch) {
         if (GET_MOB_RNUM(ch) != NOTHING)    /* prototyped */
             erase_vnum(characterVnumIndex, ch);
 
-        if (SCRIPT(ch))
-            extract_script(ch, MOB_TRIGGER);
+        extract_script(ch, MOB_TRIGGER);
         if (SCRIPT_MEM(ch))
             extract_script_mem(SCRIPT_MEM(ch));
     }

@@ -157,9 +157,11 @@ OCMD(do_oecho) {
     if (!*argument)
         obj_log(obj, "oecho called with no args");
 
-    else if (auto room = obj->getRoom(); room && room->people) {
-        sub_write(argument, room->people, true, TO_ROOM);
-        sub_write(argument, room->people, true, TO_CHAR);
+    else if (auto room = obj->getRoom(); room) {
+        if(room->people) {
+            sub_write(argument, room->people, true, TO_ROOM);
+            sub_write(argument, room->people, true, TO_CHAR);
+        }
     } else
         obj_log(obj, "oecho called by object in NOWHERE");
 }
@@ -579,7 +581,7 @@ OCMD(do_oasound) {
     }
 
     if ((room = obj_room(obj)) == NOWHERE) {
-        obj_log(obj, "oecho called by object in NOWHERE");
+        obj_log(obj, "oasound called by object in NOWHERE");
         return;
     }
 

@@ -236,7 +236,7 @@ static char *recho[] = {"mrecho ", "orecho ", "wrecho "};
 
 /* sets str to be the value of var.field */
 void
-find_replacement(void *go, script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield,
+find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char *var, char *field, char *subfield,
                  char *str, size_t slen) {
     struct trig_var_data *vd = nullptr;
     char_data *ch, *c = nullptr, *rndm;
@@ -681,21 +681,21 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
                             auto con = ch->getContents();
+                            auto oid = atof(subfield);
                             for (auto obj : filter_raw(con)) {
-                                if (GET_OBJ_VNUM(obj) == atof(subfield)) {
+                                if (GET_OBJ_VNUM(obj) == oid) {
                                     snprintf(str, slen, "%s", ((obj)->getUID(false).c_str())); /* arg given, found */
                                     return;
                                 }
                             }
-                            if (!obj)
-                                *str = '\0'; /* arg given, not found */
                         } else { /* no arg given */
                             if (c->contents) {
                                 snprintf(str, slen, "%s", ((c->contents)->getUID(false).c_str()));
-                            } else {
-                                *str = '\0';
+                                return;
                             }
                         }
+                        *str = '\0'; /* arg given, not found */
+                        return;
                     }
                     break;
                 case 'l':
@@ -885,12 +885,10 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "varexists")) {
                         struct trig_var_data *remote_vd;
                         int found = 0;
-                        if (SCRIPT(c)) {
-                            for (remote_vd = SCRIPT(c)->global_vars; remote_vd; remote_vd = remote_vd->next) {
-                                if (!strcasecmp(remote_vd->name, subfield)) {
-                                    found = 1;
-                                    break;
-                                }
+                        for (remote_vd = c->global_vars; remote_vd; remote_vd = remote_vd->next) {
+                            if (!strcasecmp(remote_vd->name, subfield)) {
+                                found = 1;
+                                break;
                             }
                         }
                         snprintf(str, slen, "%d", found);
@@ -905,21 +903,15 @@ in the vault (vnum: 453) now and then. you can just use
             } /* switch *field */
 
             if (*str == '\x1') { /* no match found in switch */
-                if (SCRIPT(c)) {
-                    for (vd = (SCRIPT(c))->global_vars; vd; vd = vd->next)
-                        if (!strcasecmp(vd->name, field))
-                            break;
-                    if (vd)
-                        snprintf(str, slen, "%s", vd->value);
-                    else {
-                        *str = '\0';
-                        script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
-                    }
-                } else {
+                for (vd = c->global_vars; vd; vd = vd->next)
+                    if (!strcasecmp(vd->name, field))
+                        break;
+                if (vd)
+                    snprintf(str, slen, "%s", vd->value);
+                else {
                     *str = '\0';
                     script_log("Trigger: %s, VNum %d. unknown char field: '%s'",
-                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
+                                GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
                 }
             }
 
@@ -1151,24 +1143,16 @@ in the vault (vnum: 453) now and then. you can just use
 
 
             if (*str == '\x1') { /* no match in switch */
-                if (SCRIPT(o)) { /* check for global var */
-                    for (vd = (SCRIPT(o))->global_vars; vd; vd = vd->next)
-                        if (!strcasecmp(vd->name, field))
-                            break;
-                    if (vd)
-                        snprintf(str, slen, "%s", vd->value);
-                    else {
-                        *str = '\0';
-                        if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
-                            script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                                       GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
-                        }
-                    }
-                } else {
+                for (vd = o->global_vars; vd; vd = vd->next)
+                    if (!strcasecmp(vd->name, field))
+                        break;
+                if (vd)
+                    snprintf(str, slen, "%s", vd->value);
+                else {
                     *str = '\0';
                     if (strcasecmp(GET_TRIG_NAME(trig), "Rename Object")) {
                         script_log("Trigger: %s, VNum %d, type: %d. unknown object field: '%s'",
-                                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
+                                    GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
                     }
                 }
             }
@@ -1183,20 +1167,13 @@ in the vault (vnum: 453) now and then. you can just use
 
             /* special handling of the void, as it stores all 'full global' variables */
             if (r->vn == 0) {
-                if (!SCRIPT(r)) {
-                    *str = '\0';
-                    script_log(
-                            "Trigger: %s, Vnum %d, type %d. Trying to access Global var list of void. Apparently this has not been set up!",
-                            GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type);
-                } else {
-                    for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
+                for (vd = r->global_vars; vd; vd = vd->next)
                         if (!strcasecmp(vd->name, field))
                             break;
                     if (vd)
                         snprintf(str, slen, "%s", vd->value);
                     else
                         *str = '\0';
-                }
             } else if (!strcasecmp(field, "name"))
                 snprintf(str, slen, "%s", r->name);
 
@@ -1271,21 +1248,15 @@ in the vault (vnum: 453) now and then. you can just use
                 } else
                     snprintf(str, slen, "0");
             } else {
-                if (SCRIPT(r)) { /* check for global var */
-                    for (vd = (SCRIPT(r))->global_vars; vd; vd = vd->next)
-                        if (!strcasecmp(vd->name, field))
-                            break;
-                    if (vd)
-                        snprintf(str, slen, "%s", vd->value);
-                    else {
-                        *str = '\0';
-                        script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                                   GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
-                    }
-                } else {
+                for (vd = r->global_vars; vd; vd = vd->next)
+                    if (!strcasecmp(vd->name, field))
+                        break;
+                if (vd)
+                    snprintf(str, slen, "%s", vd->value);
+                else {
                     *str = '\0';
                     script_log("Trigger: %s, VNum %d, type: %d. unknown room field: '%s'",
-                               GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
+                                GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), type, field);
                 }
             }
         } /* if (r).. */
@@ -1308,7 +1279,7 @@ in the vault (vnum: 453) now and then. you can just use
  */
 
 /* substitutes any variables into line and returns it as buf */
-void var_subst(void *go, script_data *sc, trig_data *trig,
+void var_subst(unit_data *go, script_data *sc, trig_data *trig,
                int type, char *line, char *buf) {
     char tmp[MAX_INPUT_LENGTH], repl_str[MAX_INPUT_LENGTH];
     char *var = nullptr, *field = nullptr, *p = nullptr;

@@ -36,8 +36,7 @@ room_rnum add_room(struct room_data *room) {
 
     if (world.contains(room->vn)) {
         auto ro = world.at(room->vn).get();
-        if (SCRIPT(ro))
-            extract_script(ro, WLD_TRIGGER);
+        extract_script(ro, WLD_TRIGGER);
         tch = ro->people;
         tobj = ro->contents;
         copy_room(ro, room);

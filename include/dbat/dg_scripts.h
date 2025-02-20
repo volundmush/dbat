@@ -425,13 +425,13 @@ extern char *skill_percent(struct char_data *ch, char *skill);
 
 extern int char_has_item(char *item, struct char_data *ch);
 
-extern void var_subst(void *go, script_data *sc, trig_data *trig,
+extern void var_subst(unit_data *go, script_data *sc, trig_data *trig,
                       int type, char *line, char *buf);
 
 extern int text_processed(char *field, char *subfield, struct trig_var_data *vd,
                           char *str, size_t slen);
 
-extern void find_replacement(void *go, script_data *sc, trig_data *trig,
+extern void find_replacement(unit_data *go, script_data *sc, trig_data *trig,
                              int type, char *var, char *field, char *subfield, char *str, size_t slen);
 
 

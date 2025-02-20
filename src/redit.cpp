@@ -338,8 +338,7 @@ void free_room(struct room_data *room) {
     /* Free the strings (Mythran). */
     free_room_strings(room);
 
-    if (SCRIPT(room))
-        extract_script(room, WLD_TRIGGER);
+    extract_script(room, WLD_TRIGGER);
     free_proto_script(room, WLD_TRIGGER);
 
     /* Free the room. */

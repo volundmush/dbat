@@ -2474,8 +2474,8 @@ void free_char(struct char_data *ch) {
         affect_remove(ch, ch->affected);
 
     /* free any assigned scripts */
-    if (SCRIPT(ch))
-        extract_script(ch, MOB_TRIGGER);
+
+    extract_script(ch, MOB_TRIGGER);
 
     /* new version of free_followers take the followers pointer as arg */
     free_followers(ch->followers);
@@ -2510,8 +2510,7 @@ void free_obj(struct obj_data *obj) {
     }
 
     /* free any assigned scripts */
-    if (obj->trig_list)
-        extract_script(obj, OBJ_TRIGGER);
+    extract_script(obj, OBJ_TRIGGER);
 
     if (obj->sbinfo)
         free(obj->sbinfo);
@@ -3185,7 +3184,7 @@ void load_config() {
 
 
 int nextID() {
-    int id = 0;
+    static int id = 0;
     while(units.contains(id)) id++;
     return id;
 }
