@@ -221,7 +221,7 @@ void runSave() {
     std::tm tm_now = *std::localtime(&time_t_now);
 
     auto tempPath = path / "temp";
-    std::filesystem::remove(tempPath);
+    std::filesystem::remove_all(tempPath);
     std::filesystem::create_directories(tempPath);
 
     auto newPath = path / fmt::format("dump-{:04}{:02}{:02}{:02}{:02}{:02}",

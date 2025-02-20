@@ -789,7 +789,8 @@ static const std::map<vital_t, std::pair<std::string, std::string>> powerupMessa
 
 void powerupService(uint64_t heartPulse, double deltaTime) {
     char buf3[MAX_STRING_LENGTH];
-    for(auto ch : characterSubscriptions.all_raw("powerupService")) {
+    auto subs = characterSubscriptions.all("powerupService");
+    for(auto ch : filter_raw(subs)) {
 
         if(!PLR_FLAGGED(ch, PLR_POWERUP)) {
             characterSubscriptions.unsubscribe("powerupService", ch);
@@ -867,7 +868,8 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
 }
 
 void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
-    for(auto ch : characterSubscriptions.all_raw("lifeforceSystem")) {
+    auto subs = characterSubscriptions.all("lifeforceSystem");
+    for(auto ch : filter_raw(subs)) {
 
         if (rand_number(1, 15) < 14) continue;
         auto threshold = (AFF_FLAGGED(ch, AFF_HEALGLOW) || IS_KANASSAN(ch)) ? 0.03 : 0.05;
@@ -910,8 +912,8 @@ void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
 /* The Fight related routines */
 void fight_stack(uint64_t heartPulse, double deltaTime) {
     int perc = 0;
-
-    for (auto ch : characterSubscriptions.all_raw("combatSystem")) {
+    auto subs = characterSubscriptions.all("fight_stack");
+    for (auto ch : filter_raw(subs)) {
 
         if (GET_POS(ch) == POS_FIGHTING) {
             GET_POS(ch) = POS_STANDING;
@@ -1131,8 +1133,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
 }
 
 void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
-
-    for(auto ch : characterSubscriptions.all_raw("chargeMoreKi")) {
+    auto subs = characterSubscriptions.all("kiChargeSystem");
+    for(auto ch : filter_raw(subs)) {
 
         if(!PLR_FLAGGED(ch, PLR_CHARGE)) {
             characterSubscriptions.unsubscribe("chargeMoreKi", ch);
@@ -1249,7 +1251,8 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
     }
 
-    for(auto ch : characterSubscriptions.all_raw("kiLeakingSystem")) {
+    auto subs2 = characterSubscriptions.all("kiLeakingSystem");
+    for(auto ch : filter_raw(subs2)) {
 
         if(GET_CHARGE(ch) <= 0) {
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
@@ -1712,13 +1715,15 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         GET_OBJ_TIMER(corpse) = rand_number(CONFIG_MAX_PC_CORPSE_TIME / 2, CONFIG_MAX_PC_CORPSE_TIME);
 
     if (MOB_FLAGGED(ch, MOB_HUSK)) {
-        for (auto obj : filter_raw(ch->getContents())) {
+        auto con = ch->getContents();
+        for (auto obj : filter_raw(con)) {
             obj_from_char(obj);
             extract_obj(obj);
         }
     } else {
         /* transfer character's inventory to the corpse */
-        for(auto o : filter_raw(ch->getContents())) {
+        auto con = ch->getContents();
+        for(auto o : filter_raw(con)) {
             obj_from_char(o);
             obj_to_obj(o, corpse);
         }
@@ -2030,8 +2035,8 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         final_combat_resolve(ch);
         if (FIGHTING(ch))
             stop_fighting(ch);
-
-        for (auto c : characterSubscriptions.all_raw("combatSystem")) {
+        auto subs = characterSubscriptions.all("combatSystem");
+        for (auto c : filter_raw(subs)) {
             if (FIGHTING(c) == ch)
                 stop_fighting(c);
         }

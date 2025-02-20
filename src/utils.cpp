@@ -1583,7 +1583,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
 }
 
 void demon_refill_lf(struct char_data *ch, int64_t num) {
-    for (auto tch : filter_raw(ch->getLocationPeople())) {
+    auto pe = ch->getLocationPeople();
+    for (auto tch : filter_raw(pe)) {
         if (!IS_DEMON(tch))
             continue;
         if ((tch->getCurLF()) >= (tch->getMaxLF()))
@@ -1602,8 +1603,8 @@ void mob_talk(struct char_data *ch, const char *speech) {
     if (IS_NPC(ch)) {
         return;
     }
-
-    for (auto tch : filter_raw(ch->getLocationPeople())) {
+    auto pe = ch->getLocationPeople();
+    for (auto tch : filter_raw(pe)) {
         if (!IS_NPC(tch))
             continue;
         if (!IS_HUMANOID(tch))
@@ -2686,7 +2687,8 @@ int get_filename(char *filename, size_t fbufsize, int mode, const char *orig_nam
 int num_pc_in_room(struct room_data *room) {
     int i = 0;
 
-    for (auto ch : filter_raw(room->getPeople()))
+    auto pe = room->getPeople();
+    for (auto ch : filter_raw(pe))
         if (!IS_NPC(ch))
             i++;
 
@@ -2714,7 +2716,8 @@ void core_dump_real(const char *who, int line) {
 /* Is there a campfire in the room? */
 int cook_element(room_rnum room) {
     int found = 0;
-    for(auto obj : filter_raw(get_room(room)->getContents())) {
+    auto con = get_room(room)->getContents();
+    for(auto obj : filter_raw(con)) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;
         } else if(obj->vn == 19093) return 2;
@@ -2839,8 +2842,8 @@ int room_is_dark(room_rnum room) {
     }
 
     auto r = get_room(room);
-
-    for(auto c : filter_raw(r->getPeople())) {
+    auto pe = r->getPeople();
+    for(auto c : filter_raw(pe)) {
         if(c->isProvidingLight()) return false;
     }
 

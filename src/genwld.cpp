@@ -91,18 +91,19 @@ int delete_room(room_rnum rnum) {
      * Dump the contents of this room into the Void.  We could also just
      * extract the people, mobs, and objects here.
      */
-    for (auto obj : filter_raw(get_room(rnum)->getContents())) {
+
+    auto con = room->getContents();
+    for (auto obj : filter_raw(con)) {
         obj_from_room(obj);
         obj_to_room(obj, 0);
     }
-
-    for (auto ppl : filter_raw(get_room(rnum)->getPeople())) {
+    auto people = room->getPeople();
+    for (auto ppl : filter_raw(people)) {
         char_from_room(ppl);
         char_to_room(ppl, 0);
     }
 
-    if (SCRIPT(room))
-        extract_script(room, WLD_TRIGGER);
+    extract_script(room, WLD_TRIGGER);
     free_proto_script(room, WLD_TRIGGER);
 
     /*
@@ -488,7 +489,8 @@ double room_data::getEnvironment(int type) {
     switch(type) {
         case ENV_GRAVITY: {
             // check for a gravity generator...
-            for(auto c : filter_raw(getContents())) {
+            auto con = getContents();
+            for(auto c : filter_raw(con)) {
                 if(c->gravity) return c->gravity.value();
             }
 

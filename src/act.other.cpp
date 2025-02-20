@@ -6566,8 +6566,9 @@ ACMD(do_solar) {
         true, ch, nullptr, nullptr, TO_CHAR);
     act("@C$n@W raises both $s hands to either side of $s face, while closing $s eyes, and shouts '@YSolar Flare@W' as a blinding light fills the area!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
-
-    for (auto vict : filter_raw(ch->getLocationPeople())) {
+    
+    auto people = ch->getLocationPeople();
+    for (auto vict : filter_raw(people)) {
         if (vict == ch)
             continue;
         if (AFF_FLAGGED(vict, AFF_BLIND))

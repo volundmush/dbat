@@ -88,7 +88,7 @@ void free_trigger(struct trig_data *trig) {
     if(find != triggers_queued.end())
         triggers_queued.erase(find);
 
-    delete trig;
+    uniqueScripts.erase(trig->id);
 }
 
 
@@ -104,11 +104,6 @@ void extract_trigger(struct trig_data *trig) {
 
     /* walk the trigger list and remove this one */
     REMOVE_FROM_LIST(trig, trigger_list, next_in_world, temp);
-
-    auto found = uniqueScripts.find(trig->id);
-    if (found != uniqueScripts.end()) {
-        uniqueScripts.erase(found);
-    }
 
     free_trigger(trig);
 }

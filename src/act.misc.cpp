@@ -152,7 +152,8 @@ ACMD(do_multiform) {
     std::vector<char_data *> multis;
     struct char_data *tch = nullptr, *next_v = nullptr;
 
-    for (auto tch : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto tch : filter_raw(people)) {
         if (tch == ch || !IS_NPC(tch)) {
             continue;
         }
@@ -324,7 +325,8 @@ static void resolve_song(struct char_data *ch) {
         return;
     }
 
-    for (auto obj2 : filter_raw(ch->getContents())) {
+    auto con = ch->getContents();
+    for (auto obj2 : filter_raw(con)) {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
             break;
@@ -352,8 +354,8 @@ static void resolve_song(struct char_data *ch) {
                                                                                                 : "Teleportation Melody")));
     act("@CYou continue playing your song.@n", true, ch, nullptr, nullptr, TO_CHAR);
     act(buf, true, ch, nullptr, nullptr, TO_ROOM);
-
-    for (auto t : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto t : filter_raw(people)) {
         vict = t;
         switch ((int)GET_SONG(ch)) {
             case SONG_SAFETY:
@@ -720,7 +722,8 @@ ACMD(do_song) {
     struct obj_data *obj2 = nullptr, *next_obj;
     int instrument = 0;
 
-    for (auto obj2 : filter_raw(ch->getContents())) {
+    auto con = ch->getContents();
+    for (auto obj2 : filter_raw(con)) {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
             break;
@@ -973,8 +976,8 @@ ACMD(do_moondust) {
     send_to_char(ch, "@RHeal@Y: @C%s@n\r\n", add_commas(heal).c_str());
 
     struct char_data *vict = nullptr, *next_v = nullptr;
-
-    for (auto t : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto t : filter_raw(people)) {
         vict = t;
         if (vict == ch) {
             continue;
@@ -1418,8 +1421,8 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
 
     struct char_data *i, *next_char, *ch = nullptr;
     int quality = 0;
-
-    for (auto i2 : characterSubscriptions.all_raw("goneFishing")) {
+    auto subs = characterSubscriptions.all("goneFishing");
+    for (auto i2 : filter_raw(subs)) {
         i = i2;
 
         if(!i->getRoomFlag(ROOM_FISHING)) {
@@ -2921,8 +2924,8 @@ ACMD(do_hydromancy) {
                     dirs[attempt]);
             act(bun, true, ch, nullptr, nullptr, TO_CHAR);
             act(bunn, true, ch, nullptr, nullptr, TO_ROOM);
-
-            for (auto t : filter_raw(r->getPeople())) {
+            auto people = r->getPeople();
+            for (auto t : filter_raw(people)) {
                 vict = t;
                 if (vict == ch)
                     continue;
@@ -4287,7 +4290,8 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
 
     if (type == 0) {
         /* Check for ingredients in inventory */
-        for (auto obj2 : filter_raw(ch->getContents())) {
+        auto con = ch->getContents();
+        for (auto obj2 : filter_raw(con)) {
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
                     if (tomato > 0) {
@@ -4404,7 +4408,8 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
             }
         }
     } else { /* We know the ingredients are there, remove and exit. */
-        for (auto obj2 : filter_raw(ch->getContents())) {
+        auto con = ch->getContents();
+        for (auto obj2 : filter_raw(con)) {
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
                     if (tomato > 0) {
@@ -5323,8 +5328,8 @@ ACMD(do_obstruct) {
         send_to_char(ch, "You can not block off a peaceful area.\r\n");
         return;
     }
-
-    for (auto o : filter_raw(dest->getContents())) {
+    auto con = dest->getContents();
+    for (auto o : filter_raw(con)) {
         obj = o;
         if (GET_OBJ_VNUM(obj) == 79) {
             if (GET_OBJ_COST(obj) == dir2) {

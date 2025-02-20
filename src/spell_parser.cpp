@@ -174,8 +174,9 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
 
     snprintf(buf1, sizeof(buf1), format, skill_name(spellnum));
     snprintf(buf2, sizeof(buf2), format, buf);
-
-    for (auto i : filter_raw(ch->getLocationPeople())) {
+    
+    auto loci = ch->getLocationPeople();
+    for (auto i : filter_raw(loci)) {
         if (i == ch || i == tch || !i->desc || !AWAKE(i))
             continue;
         /* This should really check spell type vs. target ranks */
@@ -394,7 +395,8 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                     while (i-- > 0)
                         call_magic(ch, nullptr, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);
                 } else {
-                    for (auto blah : filter_raw(ch->getLocationPeople())) {
+                    auto locp = ch->getLocationPeople();
+                    for (auto blah : filter_raw(locp)) {
                         tch = blah;
                         if (ch != tch)
                             call_magic(ch, tch, nullptr, GET_OBJ_VAL(obj, VAL_STAFF_SPELL), k, CAST_STAFF, nullptr);

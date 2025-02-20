@@ -772,7 +772,8 @@ ACMD(do_pack) {
                         rnum++;
                     }
                 }
-                for (auto obj2 : filter_raw(ch->getContents())) {
+                auto con = ch->getContents();
+                for (auto obj2 : filter_raw(con)) {
                     if (GET_OBJ_VNUM(obj) == 18802) {
                         if (GET_OBJ_VNUM(obj2) == 18800) {
                             extract_obj(obj2);
@@ -799,7 +800,8 @@ ACMD(do_pack) {
 int check_insidebag(struct obj_data *cont, double mult) {
     int count = 0, containers = 0;
 
-    for (auto inside : filter_raw(cont->getContents())) {
+    auto con = cont->getContents();
+    for (auto inside : filter_raw(con)) {
         if (GET_OBJ_TYPE(inside) == ITEM_CONTAINER) {
             count++;
             count += check_insidebag(inside, mult);
@@ -822,8 +824,8 @@ int check_saveroom_count(struct char_data *ch, struct obj_data *cont) {
         return 0;
     else if (!ch->getRoomFlag(ROOM_HOUSE))
         return 0;
-
-    for (auto obj : filter_raw(ch->getLocationObjects())) {
+    auto loco = ch->getLocationObjects();
+    for (auto obj : filter_raw(loco)) {
         count++;
         if (!OBJ_FLAGGED(obj, ITEM_CARDCASE)) {
             count += check_insidebag(obj, 0.5);
@@ -1348,7 +1350,8 @@ ACMD(do_bid) {
         send_to_char(ch, "Syntax: bid [ list | # ] (amt)\r\nOr...\r\nSyntax: bid appraise (list number)\r\n");
         return;
     }
-    for (auto obj : filter_raw(get_room(auct_room)->getContents())) {
+    auto con = get_room(auct_room)->getContents();
+    for (auto obj : filter_raw(con)) {
         list++;
     }
     masterList = list;
@@ -1357,7 +1360,8 @@ ACMD(do_bid) {
     if (!strcasecmp(arg, "list")) {
         send_to_char(ch, "@Y                                   Auction@n\r\n");
         send_to_char(ch, "@c------------------------------------------------------------------------------@n\r\n");
-        for (auto obj : filter_raw(get_room(auct_room)->getContents())) {
+        auto con = get_room(auct_room)->getContents();
+        for (auto obj : filter_raw(con)) {
             if (GET_AUCTER(obj) <= 0) {
                 continue;
             }
@@ -1408,7 +1412,8 @@ ACMD(do_bid) {
             return;
         }
 
-        for (auto obj : filter_raw(get_room(auct_room)->getContents())) {
+        auto con = get_room(auct_room)->getContents();
+        for (auto obj : filter_raw(con)) {
             if (GET_AUCTER(obj) <= 0) {
                 continue;
             }
@@ -1507,8 +1512,8 @@ ACMD(do_bid) {
             send_to_char(ch, "That item number is not found.\r\n");
             return;
         }
-
-        for (auto obj : filter_raw(get_room(auct_room)->getContents())) {
+        auto con = get_room(auct_room)->getContents();
+        for (auto obj : filter_raw(con)) {
             if (GET_AUCTER(obj) <= 0) {
                 continue;
             }
@@ -1806,7 +1811,8 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
     if (OBJ_FLAGGED(cont, ITEM_SHEATH)) {
         struct obj_data *obj2 = nullptr, *next_obj = nullptr;
         int count = 0, minus = 0;
-        for (auto obj2 : filter_raw(cont->getContents())) {
+        auto con = cont->getContents();
+        for (auto obj2 : filter_raw(con)) {
             minus += GET_OBJ_WEIGHT(obj2);
             count++;
         }
@@ -1942,7 +1948,8 @@ ACMD(do_put) {
                     }
                 }
             } else {
-                for (auto obj : filter_raw(ch->getContents())) {
+                auto con = ch->getContents();
+                for (auto obj : filter_raw(con)) {
                     if (obj != cont && CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(theobj, obj->name))) {
                         found = 1;
                         perform_put(ch, obj, cont);
@@ -2077,7 +2084,8 @@ static void get_from_container(struct char_data *ch, struct obj_data *cont,
             send_to_char(ch, "Get all of what?\r\n");
             return;
         }
-        for (auto obj : filter_raw(cont->getContents())) {
+        auto con = cont->getContents();
+        for (auto obj : filter_raw(con)) {
             if (CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(arg, obj->name))) {
                 found = 1;
                 perform_get_from_container(ch, obj, cont, mode);
@@ -2180,7 +2188,8 @@ static void get_from_room(struct char_data *ch, char *arg, int howmany) {
             send_to_char(ch, "Get all of what?\r\n");
             return;
         }
-        for (auto obj : filter_raw(ch->getLocationObjects())) {
+        auto loco = ch->getLocationObjects();
+        for (auto obj : filter_raw(loco)) {
             if (CAN_SEE_OBJ(ch, obj) && (dotmode == FIND_ALL || isname(arg, obj->name))) {
                 found = 1;
                 perform_get_from_room(ch, obj);
@@ -2241,7 +2250,8 @@ ACMD(do_get) {
                 send_to_char(ch, "Get from all of what?\r\n");
                 return;
             }
-            for (auto cont : filter_raw(ch->getContents()))
+            auto con = ch->getContents();
+            for (auto cont : filter_raw(con))
                 if (CAN_SEE_OBJ(ch, cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->name))) {
                     if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER) {
@@ -2252,7 +2262,8 @@ ACMD(do_get) {
                         act("$p is not a container.", false, ch, cont, nullptr, TO_CHAR);
                     }
                 }
-            for (auto cont : filter_raw(ch->getLocationObjects()))
+            auto loco = ch->getLocationObjects();
+            for (auto cont : filter_raw(loco))
                 if (CAN_SEE_OBJ(ch, cont) &&
                     (cont_dotmode == FIND_ALL || isname(arg2, cont->name))) {
                     if (GET_OBJ_TYPE(cont) == ITEM_CONTAINER) {
@@ -2550,7 +2561,8 @@ ACMD(do_drop) {
             if (!ch->contents)
                 send_to_char(ch, "You don't seem to be carrying anything.\r\n");
             else {
-                for (auto obj : filter_raw(ch->getContents())) {
+                auto con = ch->getContents();
+                for (auto obj : filter_raw(con)) {
                     if (check_saveroom_count(ch, obj) > 150) {
                         fail = true;
                     } else {
@@ -2802,8 +2814,9 @@ ACMD(do_give) {
             }
             if (!ch->contents)
                 send_to_char(ch, "You don't seem to be holding anything.\r\n");
-            else
-                for (auto obj : filter_raw(ch->getContents())) {
+            else {
+                auto con = ch->getContents();
+                for (auto obj : filter_raw(con)) {
                     if (CAN_SEE_OBJ(ch, obj) &&
                         ((dotmode == FIND_ALL || isname(arg, obj->name)))) {
                         perform_give(ch, vict, obj);
@@ -2815,6 +2828,7 @@ ACMD(do_give) {
                         }
                     }
                 }
+            }
         }
     }
 }
@@ -3801,7 +3815,8 @@ ACMD(do_wear) {
         return;
     }
     if (dotmode == FIND_ALL) {
-        for (auto obj : filter_raw(ch->getContents())) {
+        auto con = ch->getContents();
+        for (auto obj : filter_raw(con)) {
             if (CAN_SEE_OBJ(ch, obj) && (where = find_eq_pos(ch, obj, nullptr)) >= 0) {
                 if (GET_WIS(ch) < GET_OBJ_LEVEL(obj)) {
                     act("$p: you are not experienced enough to use that.",

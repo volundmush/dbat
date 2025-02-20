@@ -1113,7 +1113,8 @@ static void heal_limb(struct char_data *ch) {
 }
 
 void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
-    for(auto ch : characterSubscriptions.all_raw("androidAbsorbSystem")) {
+    auto sub = characterSubscriptions.all("androidAbsorbSystem");
+    for(auto ch : filter_raw(sub)) {
         
         bool unsubscribe = false;
         
@@ -1323,7 +1324,8 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
 }
 
 void goopTimeService(uint64_t heartPulse, double deltaTime) {
-    for(auto ch : characterSubscriptions.all_raw("goopTimeService")) {
+    auto sub = characterSubscriptions.all("goopTimeService");
+    for(auto ch : filter_raw(sub)) {
 
         if(!PLR_FLAGGED(ch, PLR_GOOP)) {
             characterSubscriptions.unsubscribe("goopTimeService", ch);
@@ -1420,7 +1422,8 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
 
 void corpseRotService(uint64_t heartPulse, double deltaTime) {
     obj_data *jj, *next_thing2;
-    for(auto j : objectSubscriptions.all_raw("corpseRotService")) {
+    auto subs = objectSubscriptions.all("corpseRotService");
+    for(auto j : filter_raw(subs)) {
 
         // how the fuck did this happen? TODO add a warning.
         if(!IS_CORPSE(j)) continue;
@@ -1483,7 +1486,8 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
                     }
                 }
             }
-            for (auto jj : filter_raw(j->getContents())) {
+            auto con = j->getContents();
+            for (auto jj : filter_raw(con)) {
                 obj_from_obj(jj);
 
                 if (j->in_obj)
@@ -1502,8 +1506,8 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
 }
 
 void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
-
-    for(auto ch : characterSubscriptions.all_raw("characterVitalsRecovery")) {
+    auto subs = characterSubscriptions.all("characterVitalsRecovery");
+    for(auto ch : filter_raw(subs)) {
 
         if(AFF_FLAGGED(ch, AFF_POISON) || ch->task != Task::nothing) {
             // Poison stops all healing. So does having a task.
@@ -1554,7 +1558,8 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
 
 
 void healTankService(uint64_t heartPulse, double deltaTime) {
-    for(auto o : objectSubscriptions.all_raw("healTankService")) {
+    auto subs = objectSubscriptions.all("healTankService");
+    for(auto o : filter_raw(subs)) {
 
         auto en = o->dvalue["energy"];
 
@@ -1966,7 +1971,8 @@ void timed_dt(struct char_data *ch) {
     *
     */
     if (ch->getRoom()->timed == 0) {
-        for (auto vict : filter_raw(ch->getLocationPeople())) {
+        auto people = ch->getLocationPeople();
+        for (auto vict : filter_raw(people)) {
             if (IS_NPC(vict))
                 continue;
             if (GET_ADMLEVEL(vict) >= ADMLVL_IMMORT)

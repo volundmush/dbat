@@ -457,7 +457,8 @@ in the vault (vnum: 453) now and then. you can just use
 
                     if (type == MOB_TRIGGER) {
                         ch = (char_data *) go;
-                        for (auto c : filter_raw(ch->getLocationPeople()))
+                        auto people = ch->getLocationPeople();
+                        for (auto c : filter_raw(people))
                             if ((c != ch) && valid_dg_target(c, DG_ALLOW_GODS) &&
                                 CAN_SEE(ch, c)) {
                                 if (!rand_number(0, count))
@@ -465,14 +466,16 @@ in the vault (vnum: 453) now and then. you can just use
                                 count++;
                             }
                     } else if (type == OBJ_TRIGGER) {
-                        for (auto c : filter_raw(get_room(obj_room((obj_data*)go))->getPeople()))
+                        auto people = get_room(obj_room((obj_data*)go))->getPeople();
+                        for (auto c : filter_raw(people))
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
                                 if (!rand_number(0, count))
                                     rndm = c;
                                 count++;
                             }
                     } else if (type == WLD_TRIGGER) {
-                        for (auto c : filter_raw(((struct room_data *) go)->getPeople()))
+                        auto people = ((struct room_data *) go)->getPeople();
+                        for (auto c : filter_raw(people))
                             if (valid_dg_target(c, DG_ALLOW_GODS)) {
 
                                 if (!rand_number(0, count))
@@ -677,7 +680,8 @@ in the vault (vnum: 453) now and then. you can just use
                         strcpy(str, IS_NPC(c) ? "1" : "0");
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
-                            for (auto obj : filter_raw(ch->getContents())) {
+                            auto con = ch->getContents();
+                            for (auto obj : filter_raw(con)) {
                                 if (GET_OBJ_VNUM(obj) == atof(subfield)) {
                                     snprintf(str, slen, "%s", ((obj)->getUID(false).c_str())); /* arg given, found */
                                     return;
@@ -1210,7 +1214,8 @@ in the vault (vnum: 453) now and then. you can just use
                 }
             } else if (!strcasecmp(field, "contents")) {
                 if (subfield && *subfield) {
-                    for (auto obj : filter_raw(r->getContents())) {
+                    auto con = r->getContents();
+                    for (auto obj : filter_raw(con)) {
                         if (GET_OBJ_VNUM(obj) == atof(subfield)) {
                             /* arg given, found */
                             snprintf(str, slen, "%s", ((obj)->getUID(false).c_str()));

@@ -326,11 +326,14 @@ char_data *get_char_near_obj(obj_data *obj, char *name) {
             return ch;
     } else {
         room_rnum num;
-        if ((num = obj_room(obj)) != NOWHERE)
-            for (auto ch : filter_raw(get_room(num)->getPeople()))
+        if ((num = obj_room(obj)) != NOWHERE) {
+            auto people = get_room(num)->getPeople();
+            for (auto ch : filter_raw(people))
                 if (isname(name, ch->name) &&
                     valid_dg_target(ch, DG_ALLOW_GODS))
                     return ch;
+        }
+            
     }
 
     return nullptr;
@@ -352,7 +355,8 @@ char_data *get_char_in_room(room_data *room, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        for (auto ch : filter_raw(room->getPeople()))
+        auto people = room->getPeople();
+        for (auto ch : filter_raw(people))
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
@@ -399,7 +403,8 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
             return i;
 
         /* check peoples' inventory */
-        for (auto ch : filter_raw(get_room(rm)->getPeople()))
+        auto people = get_room(rm)->getPeople();
+        for (auto ch : filter_raw(people))
             if ((i = get_object_in_equip(ch, name)))
                 return i;
     }
@@ -491,12 +496,14 @@ char_data *get_char_by_room(room_data *room, char *name) {
         if (ch && valid_dg_target(ch, DG_ALLOW_GODS))
             return ch;
     } else {
-        for (auto ch : filter_raw(room->getPeople()))
+        auto people = room->getPeople();
+        for (auto ch : filter_raw(people))
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
 
-        for (auto ch : filter_raw(activeCharacters)) {
+        auto ac = activeCharacters;
+        for (auto ch : filter_raw(ac)) {
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
@@ -552,11 +559,13 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
         auto uidResult = resolveUID(name);
         auto o = std::dynamic_pointer_cast<obj_data>(uidResult).get();
         if(!o) return nullptr;
-        for (auto obj : filter_raw(room->getContents()))
+        auto con = room->getContents();
+        for (auto obj : filter_raw(con))
             if (o == obj)
                 return obj;
     } else {
-        for (auto obj : filter_raw(room->getContents()))
+        auto con = room->getContents();
+        for (auto obj : filter_raw(con))
             if (isname(name, obj->name))
                 return obj;
     }
@@ -572,11 +581,13 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
         return std::dynamic_pointer_cast<obj_data>(uidResult).get();
     }
 
-    for (auto obj : filter_raw(room->getContents()))
+    auto con = room->getContents();
+    for (auto obj : filter_raw(con))
         if (isname(name, obj->name))
             return obj;
 
-    for (auto obj : filter_raw(activeObjects)) {
+    auto ao = activeObjects;
+    for (auto obj : filter_raw(ao)) {
         if (isname(name, obj->name))
             return obj;
     }
@@ -589,7 +600,8 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
     int nr;
     script_data *sc;
 
-    for (auto ch : characterSubscriptions.all_raw("randomTriggers")) {
+    auto crandsubs = characterSubscriptions.all("randomTriggers");
+    for (auto ch : filter_raw(crandsubs)) {
         sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
@@ -598,14 +610,16 @@ void script_trigger_check(uint64_t heartPulse, double deltaTime) {
             random_mtrigger(ch);
     }
 
-    for (auto obj : objectSubscriptions.all_raw("randomTriggers")) {
+    auto orandsubs = objectSubscriptions.all("randomTriggers");
+    for (auto obj : filter_raw(orandsubs)) {
         sc = SCRIPT(obj);
 
         if (IS_SET(SCRIPT_TYPES(sc), OTRIG_RANDOM))
             random_otrigger(obj);
     }
 
-    for (auto room : roomSubscriptions.all_raw("randomTriggers")) {
+    auto rrandsubs = roomSubscriptions.all("randomTriggers");
+    for (auto room : filter_raw(rrandsubs)) {
         sc = SCRIPT(room);
 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_RANDOM) &&
@@ -619,7 +633,8 @@ void check_time_triggers() {
     int nr;
     script_data *sc;
 
-    for (auto ch : characterSubscriptions.all_raw("timeTriggers")) {
+    auto ctimesubs = characterSubscriptions.all("timeTriggers");
+    for (auto ch : filter_raw(ctimesubs)) {
         sc = SCRIPT(ch);
 
         if (IS_SET(SCRIPT_TYPES(sc), MTRIG_TIME) &&
@@ -628,14 +643,16 @@ void check_time_triggers() {
             time_mtrigger(ch);
     }
 
-    for (auto obj : objectSubscriptions.all_raw("timeTriggers")) {
+    auto otimesubs = objectSubscriptions.all("timeTriggers");
+    for (auto obj : filter_raw(otimesubs)) {
         sc = SCRIPT(obj);
 
         if (IS_SET(SCRIPT_TYPES(sc), OTRIG_TIME))
             time_otrigger(obj);
     }
 
-    for (auto room : roomSubscriptions.all_raw("timeTriggers")) {
+    auto rtimesubs = roomSubscriptions.all("timeTriggers");
+    for (auto room : filter_raw(rtimesubs)) {
         sc = SCRIPT(room);
 
         if (IS_SET(SCRIPT_TYPES(sc), WTRIG_TIME) &&
@@ -888,7 +905,8 @@ ACMD(do_attach) {
     if (is_abbrev(arg, "mobile") || is_abbrev(arg, "mtr")) {
         victim = get_char_vis(ch, targ_name, nullptr, FIND_CHAR_WORLD);
         if (!victim) { /* search room for one with this vnum */
-            for (auto t : filter_raw(ch->getLocationPeople())) {
+            auto people = ch->getLocationPeople();
+            for (auto t : filter_raw(people)) {
                 if (GET_MOB_VNUM(t) == num_arg) {
                     victim = t;
                     break;
@@ -1088,7 +1106,8 @@ ACMD(do_detach) {
         if (is_abbrev(arg1, "mobile") || !strcasecmp(arg1, "mtr")) {
             victim = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD);
             if (!victim) { /* search room for one with this vnum */
-                for (auto v : filter_raw(ch->getLocationPeople())) {
+                auto people = ch->getLocationPeople();
+                for (auto v : filter_raw(people)) {
                     victim = v;
                     if (GET_MOB_VNUM(victim) == num_arg)
                         break;
@@ -2878,8 +2897,7 @@ std::shared_ptr<trig_data> trig_data::shared() {
 }
 
 void trig_data::deserializeLocation(const std::string &txt) {
-    auto uid = resolveUID(txt);
-    if(!uid) return;
+    owner = resolveUID(txt);
 
 }
 

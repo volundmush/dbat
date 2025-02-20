@@ -369,8 +369,8 @@ WCMD(do_wteleport) {
             wld_log(room, "wteleport all target is itself");
             return;
         }
-
-        for (auto ch : filter_raw(room->getPeople())) {
+        auto people = room->getPeople();
+        for (auto ch : filter_raw(people)) {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
             char_from_room(ch);
@@ -401,7 +401,8 @@ WCMD(do_wforce) {
     }
 
     if (!strcasecmp(arg1, "all")) {
-        for (auto ch : filter_raw(room->getPeople())) {
+        auto people = room->getPeople();
+        for (auto ch : filter_raw(people)) {
 
             if (valid_dg_target(ch, 0)) {
                 command_interpreter(ch, line);
@@ -428,12 +429,14 @@ WCMD(do_wpurge) {
 
     if (!*arg) {
         /* purge all */
-        for (auto ch : filter_raw(room->getPeople())) {
+        auto people = room->getPeople();
+        for (auto ch : filter_raw(people)) {
             if (IS_NPC(ch))
                 extract_char(ch);
         }
 
-        for (auto obj : filter_raw(room->getContents())) {
+        auto con = room->getContents();
+        for (auto obj : filter_raw(con)) {
             extract_obj(obj);
         }
 

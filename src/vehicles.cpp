@@ -204,8 +204,8 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     }
 
     struct obj_data *hatch = nullptr;
-
-    for (auto h : filter_raw(get_room(GET_OBJ_VAL(vehicle, 0))->getContents())) {
+    auto con = get_room(GET_OBJ_VAL(vehicle, 0))->getContents();
+    for (auto h : filter_raw(con)) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             GET_OBJ_VAL(hatch, 3) = vehicle->getRoomVnum();
             hatch = h;
@@ -684,8 +684,8 @@ ACMD(do_ship_fire) {
 
     struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int shot = false;
-
-    for (auto obj : filter_raw(ch->getLocationObjects())) {
+    auto loco = ch->getLocationObjects();
+    for (auto obj : filter_raw(loco)) {
         if (shot == false) {
             if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && obj != vehicle) {
                 if (!strcasecmp(arg1, obj->name)) {

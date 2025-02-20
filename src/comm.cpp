@@ -1967,7 +1967,7 @@ void perform_act(const char *orig, struct char_data *ch, struct obj_data *obj, c
 
 char *act(const char *str, int hide_invisible, struct char_data *ch,
           struct obj_data *obj, const void *vict_obj, int type) {
-    struct char_data *to;
+    std::vector<std::weak_ptr<char_data>> to;
     int to_sleeping, res_sneak, res_hide, dcval = 0, resskill = 0;
 
     if (!str || !*str)
@@ -2020,7 +2020,8 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     }
 
     if (type == TO_VICT) {
-        if ((to = (struct char_data *) vict_obj) != nullptr && SENDOK(to) &&
+        auto to = (struct char_data *) vict_obj;
+        if (to != nullptr && SENDOK(to) &&
             (!resskill || (roll_skill(to, resskill) >= dcval))) {
             perform_act(str, ch, obj, vict_obj, to);
             return last_act_message;
@@ -2050,9 +2051,9 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     /* ASSUMPTION: at this point we know type must be TO_NOTVICT or TO_ROOM */
 
     if (ch && IN_ROOM(ch) != NOWHERE)
-        to = ch->getRoom()->people;
+        to = ch->getLocationPeople();
     else if (obj && IN_ROOM(obj) != NOWHERE)
-        to = obj->getRoom()->people;
+        to = obj->getLocationPeople();
     else {
         return nullptr;
     }
@@ -2096,18 +2097,16 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             }
         }
     }
-
-    for (auto target : filter_raw(to->getLocationPeople())) {
-        to = target;
-        if (!SENDOK(to) || (to == ch))
+    for (auto target : filter_raw(to)) {
+        if (!SENDOK(target) || (target == ch))
             continue;
-        if (hide_invisible && ch && !CAN_SEE(to, ch))
+        if (hide_invisible && ch && !CAN_SEE(target, ch))
             continue;
-        if (type != TO_ROOM && to == vict_obj)
+        if (type != TO_ROOM && target == vict_obj)
             continue;
-        if (resskill && roll_skill(to, resskill) < dcval)
+        if (resskill && roll_skill(target, resskill) < dcval)
             continue;
-        perform_act(str, ch, obj, vict_obj, to);
+        perform_act(str, ch, obj, vict_obj, target);
     }
     return last_act_message;
 }

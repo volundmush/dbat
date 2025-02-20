@@ -184,10 +184,12 @@ void sub_write(char *arg, struct char_data *ch, int8_t find_invis, int targets) 
     if (IS_SET(targets, TO_CHAR) && SENDOK(ch))
         sub_write_to_char(ch, tokens, otokens, type);
 
-    if (IS_SET(targets, TO_ROOM))
-        for (auto to : filter_raw(ch->getLocationPeople()))
+    if (IS_SET(targets, TO_ROOM)) {
+        auto people = ch->getLocationPeople();
+        for (auto to : filter_raw(people))
             if (to != ch && SENDOK(to))
                 sub_write_to_char(to, tokens, otokens, type);
+    }
 }
 
 

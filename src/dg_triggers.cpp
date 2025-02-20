@@ -157,7 +157,8 @@ void greet_memory_mtrigger(char_data *actor) {
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return;
 
-    for (auto ch : filter_raw(actor->getLocationPeople())) {
+    auto people = actor->getLocationPeople();
+    for (auto ch : filter_raw(people)) {
         if (!SCRIPT_MEM(ch) || !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
             continue;
@@ -207,7 +208,8 @@ int greet_mtrigger(char_data *actor, int dir) {
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return true;
 
-    for (auto ch : filter_raw(actor->getLocationPeople())) {
+    auto people = actor->getLocationPeople();
+    for (auto ch : filter_raw(people)) {
         if (!SCRIPT_CHECK(ch, MTRIG_GREET | MTRIG_GREET_ALL) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
@@ -241,7 +243,8 @@ void entry_memory_mtrigger(char_data *ch) {
     if (!SCRIPT_MEM(ch) || AFF_FLAGGED(ch, AFF_CHARM))
         return;
 
-    for (auto actor : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto actor : filter_raw(people)) {
         if (actor != ch && SCRIPT_MEM(ch)) {
             for (mem = SCRIPT_MEM(ch); mem && SCRIPT_MEM(ch); mem = mem->next) {
                 if (((actor)->id) == mem->id) {
@@ -296,7 +299,8 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument) {
     if (!valid_dg_target(actor, 0))
         return 0;
 
-    for (auto ch : filter_raw(actor->getLocationPeople())) {
+    auto people = actor->getLocationPeople();
+    for (auto ch : filter_raw(people)) {
 
         if (SCRIPT_CHECK(ch, MTRIG_COMMAND) && !AFF_FLAGGED(ch, AFF_CHARM) &&
             (actor != ch)) {
@@ -332,7 +336,8 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument) {
 void speech_mtrigger(char_data *actor, char *str) {
     char buf[MAX_INPUT_LENGTH];
 
-    for (auto ch : filter_raw(actor->getLocationPeople())) {
+    auto people = actor->getLocationPeople();
+    for (auto ch : filter_raw(people)) {
 
         if (SCRIPT_CHECK(ch, MTRIG_SPEECH) && AWAKE(ch) &&
             !AFF_FLAGGED(ch, AFF_CHARM) && (actor != ch))
@@ -544,8 +549,8 @@ int leave_mtrigger(char_data *actor, int dir) {
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
-
-    for (auto ch : filter_raw(actor->getLocationPeople())) {
+    auto people = actor->getLocationPeople();
+    for (auto ch : filter_raw(people)) {
         if (!SCRIPT_CHECK(ch, MTRIG_LEAVE) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
@@ -568,8 +573,8 @@ int leave_mtrigger(char_data *actor, int dir) {
 
 int door_mtrigger(char_data *actor, int subcmd, int dir) {
     char buf[MAX_INPUT_LENGTH];
-
-    for (auto ch : filter_raw(actor->getLocationPeople())) {
+    auto people = actor->getLocationPeople();
+    for (auto ch : filter_raw(people)) {
         if (!SCRIPT_CHECK(ch, MTRIG_DOOR) ||
             !AWAKE(ch) || FIGHTING(ch) || (ch == actor) ||
             AFF_FLAGGED(ch, AFF_CHARM))
@@ -734,12 +739,12 @@ int command_otrigger(char_data *actor, char *cmd, char *argument) {
             if (cmd_otrig(GET_EQ(actor, i), actor, cmd, argument, OCMD_EQUIP) &&
                 !OBJ_FLAGGED(GET_EQ(actor, i), ITEM_FORGED))
                 return 1;
-
-    for (auto obj : filter_raw(actor->getContents()))
+    auto con = actor->getContents();
+    for (auto obj : filter_raw(con))
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
-
-    for (auto obj : filter_raw(actor->getLocationObjects()))
+    auto loco = actor->getLocationObjects();
+    for (auto obj : filter_raw(loco))
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_ROOM) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
 
@@ -908,8 +913,8 @@ int leave_otrigger(room_data *room, char_data *actor, int dir) {
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
-
-    for (auto obj : filter_raw(room->getContents())) {
+    auto con = room->getContents();
+    for (auto obj : filter_raw(con)) {
         if (!SCRIPT_CHECK(obj, OTRIG_LEAVE))
             continue;
 

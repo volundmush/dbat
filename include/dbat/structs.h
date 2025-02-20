@@ -1509,7 +1509,7 @@ class SubscriptionManager {
 public:
     // Subscribe an entity to a particular service
     void subscribe(const std::string& service, const std::shared_ptr<T>& thing) {
-        subscriptions[service].push_back(std::weak_ptr<T>(thing));
+        subscriptions[service].push_back(thing);
     }
 
     void subscribe(const std::string& service, T* thing) {
@@ -1520,7 +1520,7 @@ public:
     void unsubscribe(const std::string& service, const std::shared_ptr<T>& thing) {
         auto it = subscriptions.find(service);
         if (it != subscriptions.end()) {
-            it->second.remove_if([thing](const std::weak_ptr<T>& weak) {
+            it->second.remove_if([thing](const auto& weak) {
                 return weak.expired() || weak.lock() == thing;
             });
             if (it->second.empty()) {
@@ -1546,30 +1546,6 @@ public:
             return out;
         }
         return {};
-    }
-
-    // Return a lazy range of shared_ptr<T> for live subscriptions
-    auto all_shared(const std::string &service) const {
-        static const std::list<std::weak_ptr<T>> empty;
-        auto it = subscriptions.find(service);
-        if (it == subscriptions.end()) {
-            // Return an empty range of shared_ptr<T>
-            return filter_shared(empty);
-        }
-        // `it->second` is a std::list<std::weak_ptr<T>>
-        // so we just pass that to filter_shared.
-        return filter_shared(it->second);
-    }
-
-    // Return a lazy range of T* (non-null) for live subscriptions
-    auto all_raw(const std::string &service) const {
-        static const std::list<std::weak_ptr<T>> empty;
-        auto it = subscriptions.find(service);
-        if (it == subscriptions.end()) {
-            // Return an empty range of T*
-            return filter_raw(empty);
-        }
-        return filter_raw(it->second);
     }
 
     // Check if an entity is subscribed to a particular service

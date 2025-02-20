@@ -78,7 +78,8 @@ int num_players_in_room(room_vnum room) {
     if(!r) return 0;
 
     int num_players = 0;
-    for(auto ch : filter_raw(r->getPeople())) {
+    auto p = r->getPeople();
+    for(auto ch : filter_raw(p)) {
         if(IS_NPC(ch)) continue;
         if ((GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) && (PRF_FLAGGED(ch, PRF_NOHASSLE)))
         num_players++;
@@ -89,7 +90,8 @@ int num_players_in_room(room_vnum room) {
 
 bool check_mob_in_room(mob_vnum mob, room_vnum room) {
     if(auto r = get_room(room); r) {
-        for(auto ch : filter_raw(r->getPeople()))
+        auto p = r->getPeople();
+        for(auto ch : filter_raw(p))
             if(ch->vn == mob) return true;
     }
     return false;
@@ -221,7 +223,8 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
         if (ch->getRoomVnum() == gauntlet_info[i][1]) {
             if (cmd == gauntlet_info[i][2]) {
                 //don't let him proceed if mob is still alive
-                for (auto tch : filter_raw(ch->getLocationPeople())) {
+                auto loco = ch->getLocationPeople();
+                for (auto tch : filter_raw(loco)) {
                     if (IS_NPC(tch) && i > 0)  /* Ignore mobs in the waiting room */
                     {
                         proceed = 0;
@@ -234,7 +237,8 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
                     nomob = true;
 
                     /* Check the next room for players and ensure mob is waiting */
-                    for (auto tch : filter_raw(get_room(real_room(gauntlet_info[i + 1][1]))->getPeople())) {
+                    auto pg = get_room(real_room(gauntlet_info[i + 1][1]))->getPeople();
+                    for (auto tch : filter_raw(pg)) {
                         if (!IS_NPC(tch)) {
                             proceed = 0;  /* There is a player there */
                             sprintf(buf, "%s is in the next room.  You must wait for them to finish.\r\n",
@@ -356,7 +360,8 @@ SPECIAL(gauntlet_rest)  /* Jamdog - 20th Feb 2007 */
                 nomob = true;
 
                 /* Check the next room for players and ensure mob is waiting */
-                for (auto tch : filter_raw(get_room(real_room(gauntlet_info[i][1]))->getPeople())) {
+                auto pg = get_room(real_room(gauntlet_info[i][1]))->getPeople();
+                for (auto tch : filter_raw(pg)) {
                     if (!IS_NPC(tch)) {
                         proceed = 0;  /* There is a player there */
                         sprintf(buf, "%s has moved into the next room.  You must wait for them to finish.\r\n",
@@ -423,7 +428,8 @@ SPECIAL(pet_shops) {
 
     if (CMD_IS("list")) {
         send_to_char(ch, "Available pets are:\r\n");
-        for (auto pet : filter_raw(get_room(pet_room)->getPeople())) {
+        auto pcon = get_room(pet_room)->getPeople();
+        for (auto pet : filter_raw(pcon)) {
             /* No, you can't have the Implementor as a pet if he's in there. */
             if (!IS_NPC(pet))
                 continue;
@@ -480,8 +486,8 @@ SPECIAL(auction) {
     auct_room = real_room(80);
 
     if (CMD_IS("cancel")) {
-
-        for (auto obj : filter_raw(get_room(auct_room)->getContents())) {
+        auto con = get_room(auct_room)->getContents();
+        for (auto obj : filter_raw(con)) {
             if (GET_AUCTER(obj) == ((ch)->id)) {
                 obj2 = obj;
                 found = true;
@@ -528,8 +534,8 @@ SPECIAL(auction) {
     } else if (CMD_IS("pickup")) {
         struct descriptor_data *d;
         int founded = false;
-
-        for (auto obj : filter_raw(get_room(auct_room)->getContents())) {
+        auto con = get_room(auct_room)->getContents();
+        for (auto obj : filter_raw(con)) {
             if (GET_CURBID(obj) == ((ch)->id)) {
                 obj2 = obj;
                 found = true;

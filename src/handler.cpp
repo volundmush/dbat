@@ -643,7 +643,8 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
     if (*number == 0)
         return nullptr;
 
-    for (auto i : filter_raw(get_room(room)->getPeople())) {
+    auto people = get_room(room)->getPeople();
+    for (auto i : filter_raw(people)) {
         if (isname(name, i->name))
             if (--(*number) == 0)
                 return (i);
@@ -890,7 +891,8 @@ void extract_obj(struct obj_data *obj) {
         USER(obj) = nullptr;
     }
 
-    for (auto o : filter_raw(obj->getContents()))
+    auto con = obj->getContents();
+    for (auto o : filter_raw(con))
         extract_obj(o);
 
     obj->deactivate();
@@ -911,7 +913,8 @@ static void update_object(struct obj_data *obj, int use) {
     /* dont update objects with a timer trigger */
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (GET_OBJ_TIMER(obj) > 0))
         GET_OBJ_TIMER(obj) -= use;
-    for(auto o : filter_raw(obj->getContents())) {
+    auto con = obj->getContents();
+    for(auto o : filter_raw(con)) {
         update_object(o, use);
     }
 }
@@ -938,8 +941,8 @@ void update_char_objects(struct char_data *ch) {
             }
             update_object(GET_EQ(ch, i), 2);
         }
-
-    for(auto o : filter_raw(ch->getContents()))
+    auto con = ch->getContents();
+    for(auto o : filter_raw(con))
         update_object(o, 1);
 }
 
@@ -1107,8 +1110,8 @@ void extract_char_final(struct char_data *ch) {
 
     if (FIGHTING(ch))
         stop_fighting(ch);
-
-    for (auto k : characterSubscriptions.all_raw("combatSystem")) {
+    auto subs = characterSubscriptions.all("combatSystem");
+    for (auto k : filter_raw(subs)) {
         if (FIGHTING(k) == ch)
             stop_fighting(k);
     }
@@ -1275,8 +1278,8 @@ struct char_data *get_char_room_vis(struct char_data *ch, char *name, int *numbe
     /* 0.<name> means PC with name */
     if (*number == 0)
         return (get_player_vis(ch, name, nullptr, FIND_CHAR_ROOM));
-
-    for (auto i : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto i : filter_raw(people)) {
         if (!strcasecmp(name, "last") && LASTHIT(i) != 0 && LASTHIT(i) == GET_IDNUM(ch)) {
             if (CAN_SEE(ch, i))
                 if (--(*number) == 0)

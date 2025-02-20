@@ -31,8 +31,8 @@
 static int player_present(struct char_data *ch) {
     if (IN_ROOM(ch) == NOWHERE)
         return 0;
-
-    for (auto vict : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto vict : filter_raw(people)) {
         if (!IS_NPC(vict)) {
             return true;
         }
@@ -94,7 +94,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         if (IS_HUMANOID(ch) && !FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118) && rand_number(1, 100) >= 95) {
             max = 1;
             best_obj = nullptr;
-            for (auto obj : filter_raw(ch->getLocationObjects()))
+            auto objects = ch->getLocationObjects();
+            for (auto obj : filter_raw(objects))
                 if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {
                     best_obj = obj;
                     max = GET_OBJ_COST(obj);
@@ -158,7 +159,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         start = std::chrono::high_resolution_clock::now();
 
         if(!FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-            for (auto hugeatk : filter_raw(ch->getLocationObjects())) {
+            auto objects = ch->getLocationObjects();
+            for (auto hugeatk : filter_raw(objects)) {
                 if (GET_OBJ_VNUM(hugeatk) == 82 || GET_OBJ_VNUM(hugeatk) == 83) {
                     if (USER(hugeatk) != nullptr) {
                         act("@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, USER(hugeatk), TO_ROOM);
@@ -185,7 +187,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         /* Aggressive Mobs */
         if (MOB_FLAGGED(ch, MOB_AGGRESSIVE) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
             int spot_roll = rand_number(1, GET_LEVEL(ch) + 10);
-            for (auto blah : filter_raw(ch->getLocationPeople())) {
+            auto people = ch->getLocationPeople();
+            for (auto blah : filter_raw(people)) {
                 vict = blah;
                 if (vict == ch)
                     continue;
@@ -289,7 +292,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
         /* Be helpful */ /* - temporarily disabled by the first false check */
         if (false && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
-            for (auto vict : filter_raw(ch->getLocationPeople())) {
+            auto people = ch->getLocationPeople();
+            for (auto vict : filter_raw(people)) {
                 if (vict == ch)
                     continue;
                 if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict)) {
@@ -325,7 +329,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         /* Help those under attack! */ /* - temporarily disabled by the first false check */
         if (false && !FIGHTING(ch) && rand_number(1, 20) >= 14 && IS_HUMANOID(ch) && !MOB_FLAGGED(ch, MOB_NOKILL)) {
             int done = false;
-            for (auto vict : filter_raw(ch->getLocationPeople())) {
+            auto people = ch->getLocationPeople();
+            for (auto vict : filter_raw(people)) {
                 if (vict == ch)
                     continue;
                 if (IS_NPC(vict) && race::isPeople(vict->race) && FIGHTING(vict) && done == false) {
@@ -360,7 +365,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         /* Mob Memory */
         if (IS_HUMANOID(ch) && !(ch->mob_specials.memory.empty()) && !MOB_FLAGGED(ch, MOB_DUMMY) && !IS_AFFECTED(ch, AFF_PARALYZE)) {
             found = false;
-            for (auto blah : filter_raw(ch->getLocationPeople())) {
+            auto people = ch->getLocationPeople();
+            for (auto blah : filter_raw(people)) {
                 vict = blah;
                 if (IS_NPC(vict) || !CAN_SEE(ch, vict) || PRF_FLAGGED(vict, PRF_NOHASSLE))
                     continue;
@@ -396,7 +402,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
         start = std::chrono::high_resolution_clock::now();
         /* Helper Mobs */
         if (MOB_FLAGGED(ch, MOB_HELPER) && !AFF_FLAGGED(ch, AFF_BLIND) && !AFF_FLAGGED(ch, AFF_CHARM)) {
-            for (auto blah : filter_raw(ch->getLocationPeople())) {
+            auto people = ch->getLocationPeople();
+            for (auto blah : filter_raw(people)) {
                 vict = blah;
                 if (ch == vict || !IS_NPC(vict) || !FIGHTING(vict))
                     continue;

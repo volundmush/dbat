@@ -291,7 +291,8 @@ ACMD(do_mjunk) {
             extract_obj(obj);
         return;
     } else {
-        for (auto obj : filter_raw(ch->getContents())) {
+        auto con = ch->getContents();
+        for (auto obj : filter_raw(con)) {
             if (arg[3] == '\0' || isname(arg + 4, obj->name)) {
                 extract_obj(obj);
             }
@@ -552,13 +553,14 @@ ACMD(do_mpurge) {
         char_data *vnext;
         obj_data *obj_next;
 
-        for (victim = ch->getRoom()->people; victim; victim = vnext) {
-            vnext = victim->next_in_room;
+        auto people = ch->getLocationPeople();
+        for (auto victim : filter_raw(people)) {
             if (IS_NPC(victim) && victim != ch)
                 extract_char(victim);
         }
 
-        for (auto obj : filter_raw(ch->getLocationObjects())) {
+        auto locobjs = ch->getLocationObjects();
+        for (auto obj : filter_raw(locobjs)) {
             extract_obj(obj);
         }
 

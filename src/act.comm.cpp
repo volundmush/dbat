@@ -218,8 +218,8 @@ ACMD(do_say) {
         } else {
             strcpy(verb, "say");
         }
-
-        for (auto tch : filter_raw(ch->getLocationPeople())) {
+        auto people = ch->getLocationPeople();
+        for (auto tch : filter_raw(people)) {
             if (tch != ch && tch->desc) {
                 char sayto[100];
                 sprintf(sayto, "to %s ", GET_NAME(tch));
@@ -1030,8 +1030,8 @@ ACMD(do_spec_comm) {
 }
 
 static void handle_whisper(char *buf, struct char_data *ch, struct char_data *vict) {
-
-    for (auto tch : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto tch : filter_raw(people)) {
         if (IS_NPC(tch)) {
             continue;
         }

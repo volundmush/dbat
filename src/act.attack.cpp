@@ -818,7 +818,8 @@ ACMD(do_selfd) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        for (auto tch : filter_raw(ch->getLocationPeople())) {
+        auto people = ch->getLocationPeople();
+        for (auto tch : filter_raw(people)) {
             if (tch == ch) {
                 continue;
             }

@@ -1670,7 +1670,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
     struct char_data *ch, *vict, *next_v;
 
     /* Checking the object list for any huge ki attacks */
-    for (auto k : objectSubscriptions.all_raw("hugeKiAttacks")) {
+    auto subs = objectSubscriptions.all("hugeKiAttacks");
+    for (auto k : filter_raw(subs)) {
 
         if (GET_AUCTER(k) > 0 && GET_AUCTIME(k) + 604800 <= time(nullptr)) {
             if (IN_ROOM(k) && k->getRoomVnum() == 80) {
@@ -1710,7 +1711,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         dmg /= 2;
 
                         /* Hit those in the current room. */
-                        for (auto it : filter_raw(k->getLocationPeople())) {
+                        auto people = k->getLocationPeople();
+                        for (auto it : filter_raw(people)) {
                             vict = it;
 
                             if (vict == ch) {
@@ -1812,7 +1814,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     dmg /= 2;
 
                     /* Hit those in the current room. */
-                    for (auto it : filter_raw(k->getLocationPeople())) {
+                    auto people = k->getLocationPeople();
+                    for (auto it : filter_raw(people)) {
                         vict = it;
 
                         if (vict == ch) {
@@ -1891,7 +1894,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                         dmg /= 2;
 
                         /* Hit those in the current room. */
-                        for (auto it : filter_raw(k->getLocationPeople())) {
+                        auto people = k->getLocationPeople();
+                        for (auto it : filter_raw(people)) {
                             vict = it;
 
                             if (vict == ch) {
@@ -1991,7 +1995,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                     dmg /= 2;
 
                     /* Hit those in the current room. */
-                    for (auto it : filter_raw(k->getLocationPeople())) {
+                    auto people = k->getLocationPeople();
+                    for (auto it : filter_raw(people)) {
                         vict = it;
 
                         if (vict == ch) {
@@ -2057,8 +2062,8 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
 
 /* For handling homing attacks */
 void homing_update(uint64_t heartPulse, double deltaTime) {
-
-    for (auto k : objectSubscriptions.all_raw("homingKiAttacks")) {
+    auto subs = objectSubscriptions.all("homingKiAttacks");
+    for (auto k : filter_raw(subs)) {
 
         if (KICHARGE(k) <= 0) {
             continue;
@@ -2550,8 +2555,8 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
     int64_t dmg = 0;
     struct obj_data *tob, *next_obj;
     struct char_data *tch, *next_v;
-
-    for (auto target : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto target : filter_raw(people)) {
         tch = target;
 
         if (tch == ch)
@@ -2590,8 +2595,8 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
             }
         }
     }
-
-    for (auto tob : filter_raw(ch->getLocationObjects())) {
+    auto loco = ch->getLocationObjects();
+    for (auto tob : filter_raw(loco)) {
         if (OBJ_FLAGGED(tob, ITEM_UNBREAKABLE))
             continue;
         if (foundo == true)
@@ -4745,7 +4750,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     TO_NOTVICT);
                 solo_gain(ch, vict);
                 int founded = 0;
-                for (auto rew : filter_raw(vict->getContents())) {
+                auto con = vict->getContents();
+                for (auto rew : filter_raw(con)) {
                     obj_from_char(rew);
                     obj_to_room(rew, IN_ROOM(vict));
                     founded = 1;

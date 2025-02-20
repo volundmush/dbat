@@ -162,7 +162,9 @@ void command_interpreter(struct char_data *ch, char *argument) {
 
 void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
 
-    for(auto ch : characterSubscriptions.all_raw("commandWaitQueue")) {
+    auto sub = characterSubscriptions.all("commandWaitQueue");
+
+    for(auto ch : filter_raw(sub)) {
 
         ch->waitTime = std::max<double>(0.0, ch->waitTime - deltaTime);
         if(ch->waitTime == 0.0) {
@@ -1039,7 +1041,8 @@ int special(struct char_data *ch, int cmd, char *arg) {
     }
 
     /* special in inventory? */
-    for (auto obj : filter_raw(ch->getContents())) {
+    auto con = ch->getContents();
+    for (auto obj : filter_raw(con)) {
         if (auto func = GET_OBJ_SPEC(obj))
             if (func(ch, obj, cmd, arg))
                 return 1;
@@ -1047,13 +1050,15 @@ int special(struct char_data *ch, int cmd, char *arg) {
 
     /* special in mobile present? */
     if(room) {
-        for (auto mob : filter_raw(room->getPeople()))
+        auto people = room->getPeople();
+        for (auto mob : filter_raw(people))
         if (IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_NOTDEADYET))
             if (auto func = GET_MOB_SPEC(mob); func)
                 if(func(ch, mob, cmd, arg))
                     return 1;
-
-        for (auto obj : filter_raw(room->getContents())) {
+        
+        auto con = room->getContents();
+        for (auto obj : filter_raw(con)) {
             if(auto func = GET_OBJ_SPEC(obj); func)
                 if (func(ch, obj, cmd, arg))
                     return 1;

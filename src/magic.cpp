@@ -63,8 +63,8 @@ void affect_update(uint64_t heartPulse, double deltaTime) {
  */
 int mag_materials(struct char_data *ch, int item0, int item1, int item2, int extract, int verbose) {
     struct obj_data *obj0 = nullptr, *obj1 = nullptr, *obj2 = nullptr;
-
-    for (auto tobj : filter_raw(ch->getContents())) {
+    auto con = ch->getContents();
+    for (auto tobj : filter_raw(con)) {
         if ((item0 > 0) && (GET_OBJ_VNUM(tobj) == item0)) {
             obj0 = tobj;
             item0 = -1;
@@ -645,7 +645,8 @@ void mag_groups(int level, struct char_data *ch, int spellnum) {
  * No spells of this class currently implemented.
  */
 void mag_masses(int level, struct char_data *ch, int spellnum) {
-    for (auto tch : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto tch : filter_raw(people)) {
         if (tch == ch)
             continue;
 
@@ -685,8 +686,8 @@ void mag_areas(int level, struct char_data *ch, int spellnum) {
     if (to_room != nullptr)
         act(to_room, false, ch, nullptr, nullptr, TO_ROOM);
 
-
-    for (auto tch : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto tch : filter_raw(people)) {
 
 
         /*
@@ -968,7 +969,8 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
         mob->master_id = GET_IDNUM(ch);
     }
     if (handle_corpse) {
-        for (auto tobj : filter_raw(obj->getContents())) {
+        auto con = obj->getContents();
+        for (auto tobj : filter_raw(con)) {
             obj_from_obj(tobj);
             obj_to_char(tobj, mob);
         }

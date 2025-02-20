@@ -1673,9 +1673,10 @@ static int perform_enter_obj(struct char_data *ch, struct obj_data *obj, int nee
         } else if ((GET_OBJ_VAL(obj, VAL_PORTAL_DEST) != NOWHERE) &&
                    (real_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST)) != NOWHERE)) {
             if (GET_OBJ_VAL(obj, VAL_PORTAL_DEST) >= 45000 && GET_OBJ_VAL(obj, VAL_PORTAL_DEST) <= 45099) {
-                struct char_data *tch, *next_v;
                 int filled = false;
-                for (auto tch : filter_raw(get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST))->getPeople())) {
+                auto dest = get_room(GET_OBJ_VAL(obj, VAL_PORTAL_DEST));
+                auto people = dest->getPeople();
+                for (auto tch : filter_raw(people)) {
                     filled = true;
                     break;
                 }

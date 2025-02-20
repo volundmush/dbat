@@ -349,7 +349,8 @@ static void db_load_activate_entities() {
         if(r->trig_list) r->activateScripts();
         assign_triggers(r.get(), WLD_TRIGGER);
         r->activateContents();
-        for(auto c : filter_raw(r->getPeople())) {
+        auto people = r->getPeople();
+        for(auto c : filter_raw(people)) {
             if(IS_NPC(c)) {
                 c->activate();
             }
@@ -767,7 +768,8 @@ void auc_save() {
     if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
         basic_mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
     else {
-        for (auto obj : filter_raw(get_room(80)->getContents())) {
+        auto con = get_room(80)->getContents();
+        for (auto obj : filter_raw(con)) {
             fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
         }
@@ -2302,7 +2304,7 @@ void reset_zone(zone_rnum zone)
     auto &z = zone_table[zone];
     z.age = 0;
 
-    if (!pre_reset(z.number) == false)
+    if (!pre_reset(z.number))
     {
         do_reset_cmds(z);
         do_reset_rooms(z);
@@ -2352,7 +2354,8 @@ void reset_zone(zone_rnum zone)
 }
 
 void repairRoomDamage(uint64_t heartPulse, double deltaTime) {
-    for(auto room : roomSubscriptions.all_raw("repairRoomDamage")) {
+    auto subs = roomSubscriptions.all("repairRoomDamage");
+    for(auto room : filter_raw(subs)) {
 
         if(auto dmg = room->getDamage(); dmg > 0) {
             int toRepair = 0;

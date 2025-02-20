@@ -271,8 +271,8 @@ ACMD(do_genki) {
         improve_skill(ch, SKILL_GENKIDAMA, 2);
         return;
     }
-
-    for (auto f : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto f : filter_raw(people)) {
         friend_char = f;
         if (friend_char == ch) {
             continue;
@@ -1060,13 +1060,15 @@ ACMD(do_assist) {
      */
         if (FIGHTING(helpee))
             opponent = FIGHTING(helpee);
-        else
-            for (auto opp : filter_raw(ch->getLocationPeople())) {
+        else {
+            auto people = ch->getLocationPeople();
+            for (auto opp : filter_raw(people)) {
                 if(FIGHTING(opp) == helpee) {
                     opponent = opp;
                     break;
                 }
             }
+        }
 
         if (!opponent)
             act("But nobody is fighting $M!", true, ch, nullptr, helpee, TO_CHAR);

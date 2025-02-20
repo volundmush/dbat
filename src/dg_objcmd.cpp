@@ -180,7 +180,8 @@ OCMD(do_oforce) {
         if ((room = obj_room(obj)) == NOWHERE)
             obj_log(obj, "oforce called by object in NOWHERE");
         else {
-            for (auto ch : filter_raw(get_room(room)->getPeople())) {
+            auto people = get_room(room)->getPeople();
+            for (auto ch : filter_raw(people)) {
                 if (valid_dg_target(ch, 0)) {
                     command_interpreter(ch, line);
                 }
@@ -346,12 +347,14 @@ OCMD(do_opurge) {
     if (!*arg) {
         /* purge all */
         if ((rm = obj_room(obj)) != NOWHERE) {
-            for (auto ch : filter_raw(get_room(rm)->getPeople())) {
+            auto room = get_room(rm);
+            auto people = room->getPeople();
+            for (auto ch : filter_raw(people)) {
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
-
-            for (auto o : filter_raw(get_room(rm)->getContents())) {
+            auto con = room->getContents();
+            for (auto o : filter_raw(con)) {
                 if (o != obj)
                     extract_obj(o);
             }
@@ -428,8 +431,8 @@ OCMD(do_oteleport) {
         rm = obj_room(obj);
         if (target == rm)
             obj_log(obj, "oteleport target is itself");
-
-        for (auto ch : filter_raw(get_room(rm)->getPeople())) {
+        auto people = get_room(rm)->getPeople();
+        for (auto ch : filter_raw(people)) {
             if (!valid_dg_target(ch, DG_ALLOW_GODS))
                 continue;
             char_from_room(ch);

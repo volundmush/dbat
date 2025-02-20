@@ -802,8 +802,8 @@ ACMD(do_echo) {
             argument[strlen(argument) - trunc] = '\0';
             sprintf(argument, "%s\n@D(@gMessage truncated to %d characters@D)@n\n", argument, truncAt);
         }
-
-        for (auto vict : filter_raw(ch->getLocationPeople())) {
+        auto people = ch->getLocationPeople();
+        for (auto vict : filter_raw(people)) {
             if (vict == ch)
                 continue;
             if (found == false) {
@@ -1540,7 +1540,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         auto con = j->getContents();
         auto sz = con.size();
         auto count = 0;
-        for (auto j2 : filter_raw(j->getContents())) {
+        for (auto j2 : filter_raw(con)) {
             column += send_to_char(ch, "%s %s", found++ ? "," : "", j2->short_description);
             count++;
             if (column >= 62) {
@@ -1706,7 +1706,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
     int counts = 0, total = 0;
     i = 0;
-    for (auto j : filter_raw(k->getContents())) {
+    auto con = k->getContents();
+    for (auto j : filter_raw(con)) {
         counts += check_insidebag(j, 0.5);
         counts++;
         i++;
@@ -2466,8 +2467,9 @@ ACMD(do_purge) {
         act("$n gestures... You are surrounded by scorching flames!",
             false, ch, nullptr, nullptr, TO_ROOM);
         send_to_room(IN_ROOM(ch), "The world seems a little cleaner.\r\n");
-
-        for (auto it : filter_raw(ch->getLocationPeople())) {
+        
+        auto people = ch->getLocationPeople();
+        for (auto it : filter_raw(people)) {
             vict = it;
             if (!IS_NPC(vict))
                 continue;
@@ -2722,7 +2724,8 @@ void perform_immort_vis(struct char_data *ch) {
 }
 
 static void perform_immort_invis(struct char_data *ch, int level) {
-    for (auto tch : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto tch : filter_raw(people)) {
         if (tch == ch)
             continue;
         if (GET_ADMLEVEL(tch) >= GET_INVIS_LEV(ch) && GET_ADMLEVEL(tch) < level)
@@ -2971,8 +2974,8 @@ ACMD(do_force) {
         send_to_char(ch, "%s", CONFIG_OK);
         mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s forced room %d to %s",
                GET_NAME(ch), ch->getRoomVnum(), to_force);
-
-        for (auto target : filter_raw(ch->getLocationPeople())) {
+        auto people = ch->getLocationPeople();
+        for (auto target : filter_raw(people)) {
             vict = target;
             if (!IS_NPC(vict) && GET_ADMLEVEL(vict) >= GET_ADMLEVEL(ch))
                 continue;
@@ -4359,8 +4362,8 @@ ACMD(do_plist) {
 
 ACMD(do_peace) {
     send_to_room(IN_ROOM(ch), "Everything is quite peaceful now.\r\n");
-
-    for (auto vict : filter_raw(ch->getLocationPeople())) {
+    auto people = ch->getLocationPeople();
+    for (auto vict : filter_raw(people)) {
         if (GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch))
             continue;
         stop_fighting(vict);
@@ -4477,14 +4480,15 @@ ACMD(do_zpurge) {
     auto &z = zone_table[zone];
 
     for (auto room = z.bot; room <= z.top; room++) {
-        if ((i = real_room(room)) != NOWHERE) {
-            for (auto mob : filter_raw(get_room(i)->getPeople())) {
+        if (auto rm = get_room(room); rm) {
+            auto people = rm->getPeople();
+            for (auto mob : filter_raw(people)) {
                 if (IS_NPC(mob)) {
                     extract_char(mob);
                 }
             }
-
-            for (auto obj : filter_raw(get_room(i)->getContents())) {
+            auto con = rm->getContents();
+            for (auto obj : filter_raw(con)) {
                 extract_obj(obj);
             }
         }

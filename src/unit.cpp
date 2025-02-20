@@ -87,13 +87,15 @@ void unit_data::deserializeUnit(const nlohmann::json& j) {
 }
 
 void unit_data::activateContents() {
-    for(auto obj : filter_raw(getContents())) {
+    auto con = getContents();
+    for(auto obj : filter_raw(con)) {
         obj->activate();
     }
 }
 
 void unit_data::deactivateContents() {
-    for(auto obj : filter_raw(getContents())) {
+    auto con = getContents();
+    for(auto obj : filter_raw(con)) {
         obj->deactivate();
     }
 }
@@ -118,7 +120,8 @@ int64_t unit_data::getInventoryCount() {
 }
 
 struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
-    for(auto obj : filter_raw(getContents())) {
+    auto con = getContents();
+    for(auto obj : filter_raw(con)) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
             return obj;
@@ -134,7 +137,8 @@ struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
 
 std::unordered_set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     std::unordered_set<struct obj_data*> out;
-    for(auto obj : filter_raw(getContents())) {
+    auto con = getContents();
+    for(auto obj : filter_raw(con)) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
             out.insert(obj);
