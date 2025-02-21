@@ -1612,11 +1612,8 @@ void point_update(uint64_t heartPulse, double deltaTime) {
     int change = false;
     /* characters */
 
-    
-    for (auto charId: activeCharacters) {
-        auto i2 = charId.lock();
-        if(!i2) continue;
-        auto i = i2.get();
+    auto ac = activeCharacters;
+    for (auto i: filter_raw(ac)) {
 
         if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE) {
             if (i->getRoomFlag(ROOM_HOUSE)) {
@@ -1823,10 +1820,8 @@ void point_update(uint64_t heartPulse, double deltaTime) {
         }
     }
 
-    for (auto objId: activeObjects) {
-        auto j2 = objId.lock();
-        if(!j2) continue;
-        auto j = j2.get();
+    auto ao = activeObjects;
+    for (auto j: filter_raw(ao)) {
 
         /* Let's get rid of dropped norent items. */
         if (OBJ_FLAGGED(j, ITEM_NORENT) && j->worn_by == nullptr && j->carried_by == nullptr && obj_selling != j &&

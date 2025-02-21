@@ -1160,11 +1160,8 @@ int perform_dupe_check(struct descriptor_data *d) {
   * choose one if one is available (while still deleting the other
   * duplicates, though theoretically none should be able to exist).
   */
-
-    for (auto &r : activeCharacters) {
-        auto ch2 = r.lock();
-        ch = ch2.get();
-        if(!ch) continue;
+    auto ac = activeCharacters;
+    for (auto ch : filter_raw(ac)) {
 
         if (IS_NPC(ch))
             continue;
@@ -1348,10 +1345,9 @@ void enter_player_game(struct descriptor_data *d) {
     char_to_room(d->character, load_room);
 
     /*load_char_pets(d->character);*/
-    for (auto &r : activeCharacters) {
-        auto check2 = r.lock();
-        check = check2.get();
-        if (check && !check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
+    auto ac = activeCharacters;
+    for (auto check : filter_raw(ac)) {
+        if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
             add_follower(check, d->character);
     }

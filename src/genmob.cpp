@@ -1074,6 +1074,8 @@ void char_data::activate() {
         characterSubscriptions.subscribe("kiChargeSystem", this);
     if(PLR_FLAGGED(this, PLR_FISHING))
         characterSubscriptions.subscribe("goneFishing", this);
+    if(form != FormID::Base || technique != FormID::Base)
+        characterSubscriptions.subscribe("transforms", this);
 
     activeCharacters.push_back(shared_from_this());
 

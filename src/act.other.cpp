@@ -479,10 +479,8 @@ ACMD(do_rpp) {
                 return;
             } else {
                 int found = false;
-                for (auto &r : activeObjects) {
-                    auto k2 = r.lock();
-                    if(!k2) continue;
-                    auto k = k2.get();
+                auto ao = activeObjects;
+                for (auto k : filter_raw(ao)) {
                     if (OBJ_FLAGGED(k, ITEM_FORGED)) {
                         continue;
                     }

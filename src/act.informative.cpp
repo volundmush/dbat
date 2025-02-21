@@ -5635,24 +5635,24 @@ static void perform_mortal_where(struct char_data *ch, char *arg) {
                 continue;
             if ((i = (d->original ? d->original : d->character)) == nullptr)
                 continue;
-            if (IN_ROOM(i) == NOWHERE || !CAN_SEE(ch, i))
+            auto room = i->getRoom();
+            if (!room || !CAN_SEE(ch, i))
                 continue;
-            if (ch->getRoom()->zone != i->getRoom()->zone)
+            if (ch->getRoom()->zone != room->zone)
                 continue;
-            send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), i->getRoom()->name);
+            send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), room->name);
         }
     } else {            /* print only FIRST char, not all. */
-        for (auto &r : activeCharacters) {
-            auto i2 = r.lock();
-            if(!i2) continue;
-            i = i2.get();
-            if (IN_ROOM(i) == NOWHERE || i == ch)
+        auto ac = activeCharacters;
+        for (auto i : filter_raw(ac)) {
+            auto room = i->getRoom();
+            if (!room || i == ch)
                 continue;
-            if (!CAN_SEE(ch, i) || i->getRoom()->zone != ch->getRoom()->zone)
+            if (!CAN_SEE(ch, i) || room->zone != ch->getRoom()->zone)
                 continue;
             if (!isname(arg, i->name))
                 continue;
-            send_to_char(ch, "%-25s - %s\r\n", GET_NAME(i), i->getRoom()->name);
+            send_to_char(ch, "%-25s - %s\r\n", GET_NAME(i), room->name);
             return;
         }
         send_to_char(ch, "Nobody around by that name.\r\n");
@@ -5720,10 +5720,8 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
     } else {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
-        for (auto &r : activeCharacters) {
-            auto i2 = r.lock();
-            if(!i2) continue;
-            i = i2.get();
+        auto ac = activeCharacters;
+        for (auto i : filter_raw(ac)) {
             if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
                 found = 1;
                 send_to_char(ch, "M%3d. %-25s - [%5d] %-25s", ++num, GET_NAME(i),
@@ -5735,10 +5733,9 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                 send_to_char(ch, "\r\n");
             }
         }
-        for (auto &r : activeObjects) {
-            auto k2 = r.lock();
-            k = k2.get();
-            if (k && CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
+        auto ao = activeObjects;
+        for (auto k : filter_raw(ao)) {
+            if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
                 found = 1;
                 print_object_location(++num, k, ch, true);
             }

@@ -240,31 +240,30 @@ void zedit_setup(struct descriptor_data *d, int room_num) {
     /*
    * Add all entries in zone_table that relate to this room.
    */
-    
-    /*auto filterFunc = [&](struct reset_com& c) {
+   
+   for(const auto &c : z.cmd) {
+        if(c.command == 'S') {
+            break;
+        }
         switch(c.command) {
             case 'M':
             case 'O':
             case 'T':
             case 'V':
-                return room_num == c.arg3;
+                cmd_room = c.arg3;
+                break;
             case 'D':
             case 'R':
-                return room_num == c.arg1;
-            case 'G':
-            case 'E':
-                return true;
+                cmd_room = c.arg1;
+                break;
             default:
-                return false;
+                break;
         }
-    };*/
-    
-    // Copy all elements of z.cmd that pass filterFunc to zd->cmd.
-    //std::copy_if(z.cmd.begin(), z.cmd.end(), std::back_inserter(zd->cmd), filterFunc);
-    zd->cmd = z.cmd;
-    
+        if(cmd_room == room_num) {
+            zd->cmd.emplace_back(c);
+        }
+   }
 
-    
     /*
      * Display main menu.
      */
@@ -346,44 +345,39 @@ void zedit_save_internally(struct descriptor_data *d) {
     
     auto zd = OLC_ZONE(d);
 
-    //remove_room_zone_commands(OLC_ZNUM(d), room_num);
     auto &z = zone_table[OLC_ZNUM(d)];
-
-    std::vector<reset_com> newCmds = {};
+    z.remove_room_commands(room_num);
 
     for (auto cm : zd->cmd) {
         switch (cm.command) {
             /* Possible fail cases. */
             case 'G':
             case 'E':
-                if (mobloaded)
-                    newCmds.push_back(cm);
-                else
+                if (!mobloaded) {
                     write_to_output(d, "Equip/Give command not saved since no mob was loaded first.\r\n");
+                    continue;
+                }
                 break;
             case 'P':
-                if (objloaded)
-                    newCmds.push_back(cm);
-                else
+                if (!objloaded) {
                     write_to_output(d, "Put command not saved since another object was not loaded first.\r\n");
+                    continue;
+                }
                 break;
                 /* Pass cases. */
             case 'M':
                 mobloaded = true;
-                newCmds.push_back(cm);
                 break;
             case 'O':
                 objloaded = true;
-                newCmds.push_back(cm);
                 break;
             default:
                 mobloaded = objloaded = false;
-                newCmds.push_back(cm);
                 break;
         }
+        z.cmd.emplace_back(cm);
     }
 
-    z.cmd = newCmds;    
     int line = 1;
     // reorder the lines.
     for(auto c : z.cmd) c.line = line++;

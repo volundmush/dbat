@@ -171,10 +171,8 @@ ASPELL(spell_locate_object) {
     strlcpy(name, fname(obj->name), sizeof(name));
     j = level / 2;
 
-    for (auto &r : activeObjects) {
-        auto i2 = r.lock();
-        if(!i2) continue;
-        i = i2.get();
+    auto ao = activeObjects;
+    for (auto i : filter_raw(ao)) {
         if (!isname(name, i->name))
             continue;
 

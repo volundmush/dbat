@@ -25,24 +25,19 @@ void ping_ship(int vnum, int vnum2) {
     if (vnum2 == -1) {
         return;
     }
-
-    for (auto &r : activeCharacters) {
-        auto tch2 = r.lock();
-        tch = tch2.get();
-        if(!tch) continue;
-        if (found == false) {
-            if (!(obj = find_control(tch))) {
-                continue;
-            } else {
-                if (GET_OBJ_VAL(obj, 0) == vnum && vnum != vnum2) {
-                    controls = obj;
-                    found = true;
-                }
-            }
+    
+    auto ac = activeCharacters;
+    for (auto tch : filter_raw(ac)) {
+        if (!(obj = find_control(tch))) {
+            continue;
+        }
+        if (GET_OBJ_VAL(obj, 0) == vnum && vnum != vnum2) {
+            controls = obj;
+            break;
         }
     }
 
-    if (found == true) {
+    if (controls) {
         send_to_room(IN_ROOM(controls), "@D[@RALERT@D: @YAn unknown radar signal has been detected!@D]@n");
     }
 }

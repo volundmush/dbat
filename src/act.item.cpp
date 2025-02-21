@@ -1219,10 +1219,9 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
         struct obj_data *k = nullptr;
 
         WISHTIME = 0;
-        for (auto &r : activeObjects) {
-            auto k2 = r.lock();
-            k = k2.get();
-            if (!k || OBJ_FLAGGED(k, ITEM_FORGED)) continue;
+        auto ao = activeObjects;
+        for (auto k : filter_raw(ao)) {
+            if (OBJ_FLAGGED(k, ITEM_FORGED)) continue;
 
             int vnum = GET_OBJ_VNUM(k);
             if (vnum >= 20 && vnum <= 26) {

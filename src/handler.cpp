@@ -1216,11 +1216,9 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
         number = &num;
         num = get_number(&name);
     }
-
-    for (auto &r : activeCharacters) {
-        auto i2 = r.lock();
-        i = i2.get();
-        if(!i) continue;
+    
+    auto ac = activeCharacters;
+    for (auto i : filter_raw(ac)) {
         if (IS_NPC(i))
             continue;
         if (inroom == FIND_CHAR_ROOM && IN_ROOM(i) != IN_ROOM(ch))
@@ -1335,11 +1333,9 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
 
     if (*number == 0)
         return get_player_vis(ch, name, nullptr, 0);
-
-    for (auto &r : activeCharacters) {
-        auto i2 = r.lock();
-        i = i2.get();
-        if(!i) continue;
+    
+    auto ac = activeCharacters;
+    for (auto i : filter_raw(ac)) {
         if (IN_ROOM(ch) == IN_ROOM(i))
             continue;
         if (GET_ADMLEVEL(ch) < 1 && GET_ADMLEVEL(i) < 1 && !IS_NPC(ch) && !IS_NPC(i)) {
@@ -1431,10 +1427,9 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
-    for (auto &r : activeObjects) {
-        auto i2 = r.lock();
-        i = i2.get();
-        if (i && isname(name, i->name))
+    auto ao = activeObjects;
+    for (auto i : filter_raw(ao)) {
+        if (isname(name, i->name))
             if (CAN_SEE_OBJ(ch, i))
                 if (--(*number) == 0)
                     return (i);

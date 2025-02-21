@@ -493,9 +493,6 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
             }
         }
 
-
-        
-
         if(secondChangedCheck) secondChanged();
         if(minuteChangedCheck) minuteChanged();
         if(hourChangedCheck) hourChanged();
@@ -548,7 +545,7 @@ void advanceClock(uint64_t heartPulse, double deltaTime) {
         }
     }
 
-    ageAllCharacters(addedTime);
+    //ageAllCharacters(addedTime);
 
 }
 

@@ -327,6 +327,7 @@ struct zone_data {
     bitvector_t zone_flags[ZF_ARRAY_MAX]{};          /* Flags for the zone.                */
 
     nlohmann::json serialize();
+    void remove_room_commands(room_vnum rv);
 
     /*
      * Reset mode:

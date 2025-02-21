@@ -265,28 +265,7 @@ void create_world_index(int znum, const char *type) {
     rename(new_name, old_name);
 }
 
-/*-------------------------------------------------------------------*/
 
-void remove_room_zone_commands(zone_rnum zone, room_rnum room_num) {
-    auto &z = zone_table[zone];
-    z.cmd.erase(std::remove_if(z.cmd.begin(), z.cmd.end(), [&](reset_com &c) {
-        switch(c.command) {
-            case 'M':
-            case 'O':
-            case 'T':
-            case 'V':
-                return room_num == c.arg3;
-            case 'D':
-            case 'R':
-                return room_num == c.arg1;
-            case 'G':
-            case 'E':
-                return true;
-            default:
-                return false;
-        }
-    }), z.cmd.end());
-}
 
 /*-------------------------------------------------------------------*/
 
@@ -435,4 +414,28 @@ zone_data::zone_data(const nlohmann::json &j) : zone_data() {
            cm.line = line++;
         }
     }
+}
+
+void zone_data::remove_room_commands(room_vnum rv) {
+    room_vnum cmd_room = NOTHING;
+    for(auto &c : cmd) {
+        if(c.command == 'S') break;
+        switch(c.command) {
+            case 'M':
+            case 'O':
+            case 'T':
+            case 'V':
+                cmd_room = c.arg3;
+                break;
+            case 'D':
+            case 'R':
+                cmd_room = c.arg1;
+                break;
+            default:
+                break;
+        }
+        if(cmd_room == rv) c.command = 'X';
+    }
+    // now filter out any where c.command == 'X'
+    cmd.erase(std::remove_if(cmd.begin(), cmd.end(), [](const reset_com &c) { return c.command == 'X'; }), cmd.end());
 }

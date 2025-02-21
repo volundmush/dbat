@@ -420,9 +420,8 @@ obj_data *get_obj(char *name) {
         return std::dynamic_pointer_cast<obj_data>(uidResult).get();
     }
     else {
-        for (auto &r : activeObjects) {
-            obj = r.lock().get();
-            if(!obj) continue;
+        auto ao = activeObjects;
+        for (auto obj : filter_raw(ao)) {
             if (isname(name, obj->name))
                 return obj;
         }
@@ -469,10 +468,10 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
             isname(name, obj->worn_by->name) &&
             valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
             return obj->worn_by;
-
-        for (auto &r : activeCharacters) {
-            ch = r.lock().get();
-            if (ch && isname(name, ch->name) &&
+        
+        auto ac = activeCharacters;
+        for (auto ch : filter_raw(ac)) {
+            if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
         }
