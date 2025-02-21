@@ -772,7 +772,7 @@ void auc_save() {
     if ((fl = fopen(AUCTION_FILE, "w")) == nullptr)
         basic_mud_log("SYSERR: Can't write to '%s' auction file.", AUCTION_FILE);
     else {
-        auto con = get_room(80)->getContents();
+        auto con = get_room(80)->getObjects();
         for (auto obj : filter_raw(con)) {
             fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));

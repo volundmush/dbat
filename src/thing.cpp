@@ -82,7 +82,7 @@ void thing_data::broadcastAtLocation(const std::string& message) const {
 
 std::vector<std::weak_ptr<obj_data>> thing_data::getLocationObjects() const {
     if(room)
-        return room->getContents();
+        return room->getObjects();
     return {};
 }
 

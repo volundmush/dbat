@@ -104,8 +104,9 @@ void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
     // Okay the coast is clear.
 
     // erase their inventory.
-    while(ch->contents)
-        extract_obj(ch->contents);
+    auto con = ch->getObjects();
+    for(auto o : filter_raw(con))
+        extract_obj(o);
 
     // delete their gear.
     for(auto & i : ch->equipment)

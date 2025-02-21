@@ -35,10 +35,10 @@
 ******************************************************************** */
 
 SPECIAL(dump) {
-    struct obj_data *k;
     int value = 0;
 
-    for (k = ch->getRoom()->contents; k; k = ch->getRoom()->contents) {
+    auto con = ch->getLocationObjects();
+    for (auto k : filter_raw(con)) {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         extract_obj(k);
     }
@@ -48,7 +48,8 @@ SPECIAL(dump) {
 
     do_drop(ch, argument, cmd, SCMD_DROP);
 
-    for (k = ch->getRoom()->contents; k; k = ch->getRoom()->contents) {
+    con = ch->getLocationObjects();
+    for (auto k : filter_raw(con)) {
         act("$p vanishes in a puff of smoke!", false, nullptr, k, nullptr, TO_ROOM);
         value += MAX(1, MIN(50, GET_OBJ_COST(k) / 10));
         extract_obj(k);
@@ -486,7 +487,7 @@ SPECIAL(auction) {
     auct_room = real_room(80);
 
     if (CMD_IS("cancel")) {
-        auto con = get_room(auct_room)->getContents();
+        auto con = get_room(auct_room)->getObjects();
         for (auto obj : filter_raw(con)) {
             if (GET_AUCTER(obj) == ((ch)->id)) {
                 obj2 = obj;
@@ -534,7 +535,7 @@ SPECIAL(auction) {
     } else if (CMD_IS("pickup")) {
         struct descriptor_data *d;
         int founded = false;
-        auto con = get_room(auct_room)->getContents();
+        auto con = get_room(auct_room)->getObjects();
         for (auto obj : filter_raw(con)) {
             if (GET_CURBID(obj) == ((ch)->id)) {
                 obj2 = obj;
@@ -616,7 +617,7 @@ SPECIAL(auction) {
 
         value = atoi(arg2);
 
-        if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+        if (!(obj2 = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
             send_to_char(ch, "You don't have that item to auction.\r\n");
             return (true);
         }

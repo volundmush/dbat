@@ -739,7 +739,7 @@ int command_otrigger(char_data *actor, char *cmd, char *argument) {
             if (cmd_otrig(GET_EQ(actor, i), actor, cmd, argument, OCMD_EQUIP) &&
                 !OBJ_FLAGGED(GET_EQ(actor, i), ITEM_FORGED))
                 return 1;
-    auto con = actor->getContents();
+    auto con = actor->getObjects();
     for (auto obj : filter_raw(con))
         if (cmd_otrig(obj, actor, cmd, argument, OCMD_INVEN) && !OBJ_FLAGGED(obj, ITEM_FORGED))
             return 1;
@@ -913,7 +913,7 @@ int leave_otrigger(room_data *room, char_data *actor, int dir) {
 
     if (!valid_dg_target(actor, DG_ALLOW_GODS))
         return 1;
-    auto con = room->getContents();
+    auto con = room->getObjects();
     for (auto obj : filter_raw(con)) {
         if (!SCRIPT_CHECK(obj, OTRIG_LEAVE))
             continue;

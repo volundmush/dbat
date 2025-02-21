@@ -1041,7 +1041,7 @@ int special(struct char_data *ch, int cmd, char *arg) {
     }
 
     /* special in inventory? */
-    auto con = ch->getContents();
+    auto con = ch->getObjects();
     for (auto obj : filter_raw(con)) {
         if (auto func = GET_OBJ_SPEC(obj))
             if (func(ch, obj, cmd, arg))
@@ -1057,7 +1057,7 @@ int special(struct char_data *ch, int cmd, char *arg) {
                 if(func(ch, mob, cmd, arg))
                     return 1;
         
-        auto con = room->getContents();
+        auto con = room->getObjects();
         for (auto obj : filter_raw(con)) {
             if(auto func = GET_OBJ_SPEC(obj); func)
                 if (func(ch, obj, cmd, arg))

@@ -1712,10 +1712,10 @@ ACMD(do_enter) {
 
     if (*buf) { /* an argument was supplied, search for door keyword */
         /* Is the object in the room? */
-        obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getRoom()->contents);
+        obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getLocationObjects());
         /* Is the object in the character's inventory? */
         if (!obj)
-            obj = get_obj_in_list_vis(ch, buf, nullptr, ch->contents);
+            obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getObjects());
         /* Is the character carrying the object? */
         if (!obj)
             obj = get_obj_in_equip_vis(ch, buf, nullptr, ch->equipment);
@@ -2308,7 +2308,7 @@ ACMD(do_sit) {
         send_to_char(ch, "You are already on something!\r\n");
         return;
     }
-    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
         send_to_char(ch, "That isn't here.\r\n");
         return;
     }
@@ -2450,7 +2450,7 @@ ACMD(do_rest) {
         send_to_char(ch, "You are already on something!\r\n");
         return;
     }
-    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
         send_to_char(ch, "That isn't here.\r\n");
         return;
     }
@@ -2624,7 +2624,7 @@ ACMD(do_sleep) {
         send_to_char(ch, "You are already on something!\r\n");
         return;
     }
-    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+    if (!(chair = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
         send_to_char(ch, "That isn't here.\r\n");
         return;
     }

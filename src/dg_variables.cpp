@@ -98,7 +98,7 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list) {
             if (i == obj)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->getContents());
+                count += item_in_list(item, i->getObjects());
         }
     } else if (is_number(item) > -1) { /* check for vnum */
         obj_vnum ovnum = atof(item);
@@ -107,14 +107,14 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list) {
             if (GET_OBJ_VNUM(i) == ovnum)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->getContents());
+                count += item_in_list(item, i->getObjects());
         }
     } else {
         for (auto i : filter_raw(list)) {
             if (isname(item, i->name))
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->getContents());
+                count += item_in_list(item, i->getObjects());
         }
     }
     return count;
@@ -136,7 +136,7 @@ int char_has_item(char *item, struct char_data *ch) {
     if (get_object_in_equip(ch, item) != nullptr)
         return 1;
 
-    if (item_in_list(item, ch->getContents()) == 0)
+    if (item_in_list(item, ch->getObjects()) == 0)
         return 0;
     else
         return 1;
@@ -316,7 +316,7 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
                     ch = (char_data *) go;
 
                     if ((o = get_object_in_equip(ch, name)));
-                    else if ((o = get_obj_in_list(name, ch->getContents())));
+                    else if ((o = get_obj_in_list(name, ch->getObjects())));
                     else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(ch->getRoom(), name)));
                     else if ((o = get_obj_in_list(name, ch->getLocationObjects())));
                     else if ((c = get_char(name)));
@@ -425,7 +425,9 @@ in the vault (vnum: 453) now and then. you can just use
                         script_log("findmob.vnum(ovnum): No room with vnum %d", atof(field));
                         strcpy(str, "0");
                     } else {
-                        for (i = 0, ch = get_room(rrnum)->people; ch; ch = ch->next_in_room)
+                        i = 0;
+                        auto people = get_room(rrnum)->getPeople();
+                        for (auto ch : filter_raw(people))
                             if (GET_MOB_VNUM(ch) == mvnum)
                                 i++;
 
@@ -446,7 +448,7 @@ in the vault (vnum: 453) now and then. you can just use
                         strcpy(str, "0");
                     } else {
                         /* item_in_list looks within containers as well. */
-                        snprintf(str, slen, "%d", item_in_list(subfield, get_room(rrnum)->getContents()));
+                        snprintf(str, slen, "%d", item_in_list(subfield, get_room(rrnum)->getObjects()));
                     }
                 }
             } else if (!strcasecmp(var, "random")) {
@@ -679,7 +681,7 @@ in the vault (vnum: 453) now and then. you can just use
                         strcpy(str, IS_NPC(c) ? "1" : "0");
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
-                            auto con = ch->getContents();
+                            auto con = ch->getObjects();
                             auto oid = atof(subfield);
                             for (auto obj : filter_raw(con)) {
                                 if (GET_OBJ_VNUM(obj) == oid) {
@@ -688,9 +690,11 @@ in the vault (vnum: 453) now and then. you can just use
                                 }
                             }
                         } else { /* no arg given */
-                            if (c->contents) {
-                                snprintf(str, slen, "%s", ((c->contents)->getUID(true).c_str()));
-                                return;
+                            if (auto con = c->getObjects(); !con.empty()) {
+                                for(auto o : filter_raw(con)) {
+                                    snprintf(str, slen, "%s", o->getUID(true).c_str());
+                                    return;
+                                }
                             }
                         }
                         *str = '\0'; /* arg given, not found */
@@ -745,17 +749,27 @@ in the vault (vnum: 453) now and then. you can just use
                         if (!c->master)
                             *str = '\0';
                         else
-                            snprintf(str, slen, "%s", ((c->master)->getUID(true).c_str()));
+                            snprintf(str, slen, "%s", (c->master->getUID(true).c_str()));
                     }
                     break;
                 case 'n':
                     if (!strcasecmp(field, "name")) {
                         snprintf(str, slen, "%s", GET_NAME(c));
                     } else if (!strcasecmp(field, "next_in_room")) {
-                        if (c->next_in_room)
-                            snprintf(str, slen, "%s", ((c->next_in_room)->getUID(true).c_str()));
-                        else
-                            *str = '\0';
+                        if (auto people = c->getLocationPeople(); !people.empty()) {
+                            auto found = false;
+                            for(auto p : filter_raw(people)) {
+                                if(found) {
+                                    snprintf(str, slen, "%s", p->getUID(true).c_str());
+                                    return;
+                                }
+                                if(p == c) {
+                                    found = true;
+                                }
+                            }
+                        }
+                        *str = '\0';
+                        return;
                     }
                     break;
                 case 'p':
@@ -950,15 +964,19 @@ in the vault (vnum: 453) now and then. you can just use
                         else
                             *str = '\0';
                     } else if (!strcasecmp(field, "contents")) {
-                        if (o->contents)
-                            snprintf(str, slen, "%s", ((o->contents)->getUID(true).c_str()));
+                        if (auto con = o->getObjects(); !con.empty()) {
+                            for(auto obj : filter_raw(con)) {
+                                snprintf(str, slen, "%s", obj->getUID(true).c_str());
+                                return;
+                            }
+                        }
                         else
                             *str = '\0';
                     }
                         /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
                     else if (!strcasecmp(field, "count")) {
                         if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                            snprintf(str, slen, "%d", item_in_list(subfield, o->getContents()));
+                            snprintf(str, slen, "%d", item_in_list(subfield, o->getObjects()));
                         else
                             strcpy(str, "0");
                     }
@@ -980,7 +998,7 @@ in the vault (vnum: 453) now and then. you can just use
                     /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
                     if (!strcasecmp(field, "has_in")) {
                         if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                            snprintf(str, slen, "%s", (item_in_list(subfield, o->getContents()) ? "1" : "0"));
+                            snprintf(str, slen, "%s", (item_in_list(subfield, o->getObjects()) ? "1" : "0"));
                         else
                             strcpy(str, "0");
                     }
@@ -1031,10 +1049,22 @@ in the vault (vnum: 453) now and then. you can just use
                             o->name = strdup(blah);
                         }
                     } else if (!strcasecmp(field, "next_in_list")) {
-                        if (o->next_content)
-                            snprintf(str, slen, "%s", ((o->next_content)->getUID(true).c_str()));
-                        else
-                            *str = '\0';
+                        if (auto con = o->holder->getObjects(); !con.empty()) {
+                            auto found = false;
+                            for(auto ob : filter_raw(con)) {
+                                if(ob == o) {
+                                    found = true;
+                                    continue;
+                                }
+                                if(found) {
+                                    snprintf(str, slen, "%s", ob->getUID(true).c_str());
+                                    return;
+                                }
+                            }
+                        }
+
+                        *str = '\0';
+                        return;
                     }
                     break;
                 case 'r':
@@ -1190,7 +1220,7 @@ in the vault (vnum: 453) now and then. you can just use
                 }
             } else if (!strcasecmp(field, "contents")) {
                 if (subfield && *subfield) {
-                    auto con = r->getContents();
+                    auto con = r->getObjects();
                     for (auto obj : filter_raw(con)) {
                         if (GET_OBJ_VNUM(obj) == atof(subfield)) {
                             /* arg given, found */
@@ -1201,8 +1231,11 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!obj)
                         *str = '\0'; /* arg given, not found */
                 } else { /* no arg given */
-                    if (r->contents) {
-                        snprintf(str, slen, "%s", ((r->contents)->getUID(true).c_str()));
+                    if (auto con = r->getObjects(); !con.empty()) {
+                        for(auto obj : filter_raw(con)) {
+                            snprintf(str, slen, "%s", obj->getUID(true).c_str());
+                            return;
+                        }
                     } else {
                         *str = '\0';
                     }

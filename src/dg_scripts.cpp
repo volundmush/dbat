@@ -377,7 +377,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return obj;
 
     /* is it inside ? */
-    if (obj->contents && (i = get_obj_in_list(name, obj->getContents())))
+    if ((i = get_obj_in_list(name, obj->getObjects())))
         return i;
 
     /* or outside ? */
@@ -395,11 +395,11 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return i;
         /* or carried ? */
     else if (obj->carried_by &&
-             (i = get_obj_in_list(name, obj->carried_by->getContents())))
+             (i = get_obj_in_list(name, obj->carried_by->getObjects())))
         return i;
     else if ((rm = obj_room(obj)) != NOWHERE) {
         /* check the floor */
-        if ((i = get_obj_in_list(name, get_room(rm)->getContents())))
+        if ((i = get_obj_in_list(name, get_room(rm)->getObjects())))
             return i;
 
         /* check peoples' inventory */
@@ -529,7 +529,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
         return obj;
 
-    if (i = get_obj_in_list(name, obj->getContents()))
+    if (i = get_obj_in_list(name, obj->getObjects()))
         return i;
 
     if (obj->in_obj && isname(name, obj->in_obj->name))
@@ -539,11 +539,11 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
         return i;
 
     if (obj->carried_by &&
-        (i = get_obj_in_list(name, obj->carried_by->getContents())))
+        (i = get_obj_in_list(name, obj->carried_by->getObjects())))
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
-        (i = get_obj_in_list(name, get_room(rm)->getContents())))
+        (i = get_obj_in_list(name, get_room(rm)->getObjects())))
         return i;
 
     return get_obj(name);
@@ -558,12 +558,12 @@ obj_data *get_obj_in_room(room_data *room, char *name) {
         auto uidResult = resolveUID(name);
         auto o = std::dynamic_pointer_cast<obj_data>(uidResult).get();
         if(!o) return nullptr;
-        auto con = room->getContents();
+        auto con = room->getObjects();
         for (auto obj : filter_raw(con))
             if (o == obj)
                 return obj;
     } else {
-        auto con = room->getContents();
+        auto con = room->getObjects();
         for (auto obj : filter_raw(con))
             if (isname(name, obj->name))
                 return obj;
@@ -580,7 +580,7 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
         return std::dynamic_pointer_cast<obj_data>(uidResult).get();
     }
 
-    auto con = room->getContents();
+    auto con = room->getObjects();
     for (auto obj : filter_raw(con))
         if (isname(name, obj->name))
             return obj;
@@ -1141,9 +1141,9 @@ ACMD(do_detach) {
         } else {
             /* Thanks to Carlos Myers for fixing the line below */
             if ((object = get_obj_in_equip_vis(ch, arg1, nullptr, ch->equipment)));
-            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->contents)));
+            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getObjects())));
             else if ((victim = get_char_room_vis(ch, arg1, nullptr)));
-            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getRoom()->contents)));
+            else if ((object = get_obj_in_list_vis(ch, arg1, nullptr, ch->getLocationObjects())));
             else if ((victim = get_char_vis(ch, arg1, nullptr, FIND_CHAR_WORLD)));
             else if ((object = get_obj_vis(ch, arg1, nullptr)));
             else

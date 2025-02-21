@@ -2716,7 +2716,7 @@ void core_dump_real(const char *who, int line) {
 /* Is there a campfire in the room? */
 int cook_element(room_rnum room) {
     int found = 0;
-    auto con = get_room(room)->getContents();
+    auto con = get_room(room)->getObjects();
     for(auto obj : filter_raw(con)) {
         if(GET_OBJ_TYPE(obj) == ITEM_CAMPFIRE) {
             found = 1;

@@ -1486,7 +1486,7 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
                     }
                 }
             }
-            auto con = j->getContents();
+            auto con = j->getObjects();
             for (auto jj : filter_raw(con)) {
                 obj_from_obj(jj);
 

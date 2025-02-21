@@ -435,7 +435,7 @@ WCMD(do_wpurge) {
                 extract_char(ch);
         }
 
-        auto con = room->getContents();
+        auto con = room->getObjects();
         for (auto obj : filter_raw(con)) {
             extract_obj(obj);
         }

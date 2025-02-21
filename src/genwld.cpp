@@ -91,7 +91,7 @@ int delete_room(room_rnum rnum) {
      * extract the people, mobs, and objects here.
      */
 
-    auto con = room->getContents();
+    auto con = room->getObjects();
     for (auto obj : filter_raw(con)) {
         obj_from_room(obj);
         obj_to_room(obj, 0);
@@ -395,6 +395,7 @@ std::vector<std::weak_ptr<char_data>> room_data::getPeople() {
     for(auto c = people; c; c = c->next_in_room) {
         out.emplace_back(c->shared());
     }
+    out.shrink_to_fit();
     return out;
 }
 
@@ -488,7 +489,7 @@ double room_data::getEnvironment(int type) {
     switch(type) {
         case ENV_GRAVITY: {
             // check for a gravity generator...
-            auto con = getContents();
+            auto con = getObjects();
             for(auto c : filter_raw(con)) {
                 if(c->gravity) return c->gravity.value();
             }

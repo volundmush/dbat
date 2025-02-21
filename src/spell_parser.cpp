@@ -681,7 +681,7 @@ ACMD(do_cast) {
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_INV))
-            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->contents)) != nullptr)
+            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->getObjects())) != nullptr)
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_EQUIP)) {
@@ -692,7 +692,7 @@ ACMD(do_cast) {
                 }
         }
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_ROOM))
-            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->getRoom()->contents)) != nullptr)
+            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->getLocationObjects())) != nullptr)
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_WORLD))

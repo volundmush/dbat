@@ -2,7 +2,7 @@
 #include "dbat/dg_scripts.h"
 #include "dbat/utils.h"
 
-std::vector<std::weak_ptr<obj_data>> unit_data::getContents() {
+std::vector<std::weak_ptr<obj_data>> unit_data::getObjects() {
     std::vector<std::weak_ptr<obj_data>> out;
     for(auto o = contents; o; o = o->next_content) out.emplace_back(o->shared());
     out.shrink_to_fit();
@@ -87,14 +87,14 @@ void unit_data::deserializeUnit(const nlohmann::json& j) {
 }
 
 void unit_data::activateContents() {
-    auto con = getContents();
+    auto con = getObjects();
     for(auto obj : filter_raw(con)) {
         obj->activate();
     }
 }
 
 void unit_data::deactivateContents() {
-    auto con = getContents();
+    auto con = getObjects();
     for(auto obj : filter_raw(con)) {
         obj->deactivate();
     }
@@ -109,18 +109,18 @@ std::string unit_data::scriptString() {
 
 double unit_data::getInventoryWeight() {
     double weight = 0;
-    for(auto obj : filter_raw(getContents())) {
+    for(auto obj : filter_raw(getObjects())) {
         weight += obj->getTotalWeight();
     }
     return weight;
 }
 
 int64_t unit_data::getInventoryCount() {
-    return getContents().size();
+    return getObjects().size();
 }
 
 struct obj_data* unit_data::findObject(const std::function<bool(struct obj_data*)> &func, bool working) {
-    auto con = getContents();
+    auto con = getObjects();
     for(auto obj : filter_raw(con)) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;
@@ -137,7 +137,7 @@ struct obj_data* unit_data::findObjectVnum(obj_vnum objVnum, bool working) {
 
 std::unordered_set<struct obj_data*> unit_data::gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working) {
     std::unordered_set<struct obj_data*> out;
-    auto con = getContents();
+    auto con = getObjects();
     for(auto obj : filter_raw(con)) {
         if(func(obj)) {
             if(working && !obj->isWorking()) continue;

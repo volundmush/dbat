@@ -78,8 +78,6 @@ extern void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to);
 
 extern void obj_from_obj(struct obj_data *obj);
 
-extern void object_list_new_owner(struct obj_data *list, struct char_data *ch);
-
 extern void extract_obj(struct obj_data *obj);
 
 /* ******* characters ********* */

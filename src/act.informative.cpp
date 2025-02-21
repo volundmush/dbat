@@ -435,12 +435,12 @@ ACMD(do_table) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
         send_to_char(ch, "You don't see that table here.\r\n");
         return;
     }
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, obj->contents))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, obj->getObjects()))) {
         send_to_char(ch, "That card doesn't seem to be on that table.\r\n");
         return;
     }
@@ -465,11 +465,11 @@ ACMD(do_draw) {
     struct obj_data *obj = nullptr, *obj2 = nullptr, *obj3 = nullptr, *next_obj = nullptr;
     int drawn = false;
 
-    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->getObjects()))) {
         send_to_char(ch, "You don't have a case.\r\n");
         return;
     }
-    auto con = obj->getContents();
+    auto con = obj->getObjects();
     for (auto obj2 : filter_raw(con)) {
         obj_from_obj(obj2);
         obj_to_char(obj2, ch);
@@ -503,12 +503,12 @@ ACMD(do_shuffle) {
     struct obj_data *obj = nullptr, *obj2 = nullptr, *next_obj = nullptr;
     int count = 0;
 
-    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, "case", nullptr, ch->getObjects()))) {
         send_to_char(ch, "You don't have a case.\r\n");
         return;
     }
 
-    auto con = obj->getContents();
+    auto con = obj->getObjects();
     for (auto obj2 : filter_raw(con)) {
         if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
             continue;
@@ -520,13 +520,13 @@ ACMD(do_shuffle) {
         return;
     }
     int total = count;
-    auto con2 = obj->getContents();
+    auto con2 = obj->getObjects();
     for (auto obj2 : filter_raw(con2)) {
         obj_from_obj(obj2);
         obj_to_room(obj2, 48);
     }
     while (count > 0) {
-        auto con = get_room(48)->getContents();
+        auto con = get_room(48)->getObjects();
         for (auto obj2 : filter_raw(con)) {
             if (!OBJ_FLAGGED(obj2, ITEM_CARD)) {
                 continue;
@@ -562,7 +562,7 @@ ACMD(do_hand) {
 
     if (!strcasecmp("look", arg)) {
         send_to_char(ch, "@CYour hand contains:\r\n@D---------------------------@n\r\n");
-        auto con = ch->getContents();
+        auto con = ch->getObjects();
         for (auto obj : filter_raw(con)) {
             if (obj && !OBJ_FLAGGED(obj, ITEM_CARD)) {
                 continue;
@@ -587,7 +587,7 @@ ACMD(do_hand) {
     } else if (!strcasecmp("show", arg)) {
         send_to_char(ch, "You show off your hand to the room.\r\n");
         act("@C$n's hand contains:\r\n@D---------------------------@n", true, ch, nullptr, nullptr, TO_ROOM);
-        auto con = ch->getContents();
+        auto con = ch->getObjects();
         for (auto obj : filter_raw(con)) {
             if (obj && !OBJ_FLAGGED(obj, ITEM_CARD)) {
                 continue;
@@ -624,7 +624,7 @@ ACMD(do_post) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         send_to_char(ch, "You don't seem to have that.\r\n");
         return;
     }
@@ -653,7 +653,7 @@ ACMD(do_post) {
         return;
     }
 
-    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, ch->getRoom()->contents))) {
+    if (!(obj2 = get_obj_in_list_vis(ch, arg2, nullptr, ch->getLocationObjects()))) {
         send_to_char(ch, "You can't seem to find the thing you want to post it on.\r\n");
         return;
     }
@@ -706,7 +706,7 @@ ACMD(do_play) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         send_to_char(ch, "You don't have that card to play.\r\n");
         return;
     }
@@ -739,7 +739,7 @@ ACMD(do_nickname) {
     }
 
     if (strcasecmp(arg, "ship")) {
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
             send_to_char(ch, "You don't have that item to nickname.\r\n");
             return;
         }
@@ -825,7 +825,7 @@ ACMD(do_showoff) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         send_to_char(ch, "You don't seem to have that.\r\n");
         return;
     }
@@ -2241,7 +2241,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
                 if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
                     auto sheath = GET_EQ(i, j);
-                    auto con = sheath->getContents();
+                    auto con = sheath->getObjects();
                     for (auto obj2 : filter_raw(con)) {
                         send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
                         show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -2252,7 +2252,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
                 show_obj_to_char(GET_EQ(i, j), ch, SHOW_OBJ_SHORT);
                 if (OBJ_FLAGGED(GET_EQ(i, j), ITEM_SHEATH)) {
                     auto sheath = GET_EQ(i, j);
-                    auto con = sheath->getContents();
+                    auto con = sheath->getObjects();
                     for (auto obj2 : filter_raw(con)) {
                         send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
                         show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -2270,7 +2270,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         if (CAN_SEE(i, ch))
             act("$n tries to evaluate what you have in your inventory.", true, ch, nullptr, i, TO_VICT);
         if (GET_SKILL(ch, SKILL_KEEN) > axion_dice(0) && (!IS_NPC(i) || GET_ADMLEVEL(ch) > 1)) {
-            auto con = i->getContents();
+            auto con = i->getObjects();
             for (auto tmp_obj : filter_raw(con)) {
                 if (CAN_SEE_OBJ(ch, tmp_obj) && (ADM_FLAGGED(ch, ADM_SEEINV) || (rand_number(0, 20) < GET_WIS(ch)))) {
                     show_obj_to_char(tmp_obj, ch, SHOW_OBJ_SHORT);
@@ -3261,7 +3261,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
     }
 
     display_garden_info(rm, ch);
-    list_obj_to_char(rm->getContents(), ch, SHOW_OBJ_LONG, false);
+    list_obj_to_char(rm->getObjects(), ch, SHOW_OBJ_LONG, false);
     list_char_to_char(rm->people, ch);
 }
 
@@ -3365,7 +3365,7 @@ static void handle_container(struct char_data *ch, struct obj_data *obj, int bit
             act("$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
         }
 
-        list_obj_to_char(obj->getContents(), ch, SHOW_OBJ_SHORT, true);
+        list_obj_to_char(obj->getObjects(), ch, SHOW_OBJ_SHORT, true);
     }
 }
 
@@ -3586,7 +3586,7 @@ static void handle_look_in_inventory(struct char_data *ch, char *arg) {
             return;
         }
     }
-    auto con = ch->getContents();
+    auto con = ch->getObjects();
     for (auto obj : filter_raw(con)) {
         if (CAN_SEE_OBJ(ch, obj) && handle_exdesc_look(ch, arg, obj->ex_description, obj)) {
             examine_item(ch, obj, arg);
@@ -4984,7 +4984,7 @@ ACMD(do_inventory) {
             return;
         }
     }
-    list_obj_to_char(ch->getContents(), ch, SHOW_OBJ_SHORT, true);
+    list_obj_to_char(ch->getObjects(), ch, SHOW_OBJ_SHORT, true);
     send_to_char(ch, "\n");
 }
 
@@ -4993,7 +4993,7 @@ static void show_equipment(struct char_data *ch, struct obj_data *equipment, con
     show_obj_to_char(equipment, ch, SHOW_OBJ_SHORT);
 
     if (OBJ_FLAGGED(equipment, ITEM_SHEATH)) {
-        auto con = equipment->getContents();
+        auto con = equipment->getObjects();
         for (auto obj2 : filter_raw(con)) {
             send_to_char(ch, "@D  ---- @YSheathed@D ----@c> @n");
             show_obj_to_char(obj2, ch, SHOW_OBJ_SHORT);
@@ -6404,7 +6404,7 @@ ACMD(do_scan) {
                      CCNRM(ch, C_NRM));
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
-        list_obj_to_char(dest->getContents(), ch, SHOW_OBJ_LONG, false);
+        list_obj_to_char(dest->getObjects(), ch, SHOW_OBJ_LONG, false);
         list_char_to_char(dest->people, ch);
         if (dest->geffect >= 1 && dest->geffect <= 5) {
             send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
@@ -6428,7 +6428,7 @@ ACMD(do_scan) {
                          CCNRM(ch, C_NRM));
             send_to_char(ch, "@W          -----------------          @n\r\n");
 
-            list_obj_to_char(dest2->getContents(), ch, SHOW_OBJ_LONG, false);
+            list_obj_to_char(dest2->getObjects(), ch, SHOW_OBJ_LONG, false);
             list_char_to_char(dest2->people, ch);
             if (dest2->geffect >= 1 && dest2->geffect <= 5) {
                 send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");

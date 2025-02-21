@@ -461,6 +461,7 @@ void obj_to_char(struct obj_data *object, struct char_data *ch) {
         object->next_content = ch->contents;
         ch->contents = object;
         object->carried_by = ch;
+        object->holder = ch;
         IN_ROOM(object) = NOWHERE;
 
         /* set flag for crash-save system, but not on mobs! */
@@ -500,6 +501,7 @@ void obj_from_char(struct obj_data *object) {
 
     object->carried_by = nullptr;
     object->next_content = nullptr;
+    object->holder = nullptr;
 }
 
 
@@ -684,6 +686,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
     IN_ROOM(object) = room->vn;
     object->room = room;
     object->carried_by = nullptr;
+    object->holder = room;
     GET_LAST_LOAD(object) = time(nullptr);
 
     auto &z = zone_table[room->zone];
@@ -814,6 +817,7 @@ void obj_from_room(struct obj_data *object) {
     IN_ROOM(object) = NOWHERE;
     object->room = nullptr;
     object->next_content = nullptr;
+    object->holder = nullptr;
 
 }
 
@@ -830,6 +834,7 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
     obj_to->contents = obj;
     obj->in_obj = obj_to;
     tmp_obj = obj->in_obj;
+    obj->holder = obj_to;
 }
 
 
@@ -847,16 +852,7 @@ void obj_from_obj(struct obj_data *obj) {
 
     obj->in_obj = nullptr;
     obj->next_content = nullptr;
-}
-
-
-/* Set all carried_by to point to new owner */
-void object_list_new_owner(struct obj_data *list, struct char_data *ch) {
-    if (list) {
-        object_list_new_owner(list->contents, ch);
-        object_list_new_owner(list->next_content, ch);
-        list->carried_by = ch;
-    }
+    obj->holder = nullptr;
 }
 
 
@@ -891,7 +887,7 @@ void extract_obj(struct obj_data *obj) {
         USER(obj) = nullptr;
     }
 
-    auto con = obj->getContents();
+    auto con = obj->getObjects();
     for (auto o : filter_raw(con))
         extract_obj(o);
 
@@ -912,7 +908,7 @@ static void update_object(struct obj_data *obj, int use) {
     /* dont update objects with a timer trigger */
     if (!SCRIPT_CHECK(obj, OTRIG_TIMER) && (GET_OBJ_TIMER(obj) > 0))
         GET_OBJ_TIMER(obj) -= use;
-    auto con = obj->getContents();
+    auto con = obj->getObjects();
     for(auto o : filter_raw(con)) {
         update_object(o, use);
     }
@@ -940,7 +936,7 @@ void update_char_objects(struct char_data *ch) {
             }
             update_object(GET_EQ(ch, i), 2);
         }
-    auto con = ch->getContents();
+    auto con = ch->getObjects();
     for(auto o : filter_raw(con))
         update_object(o, 1);
 }
@@ -1095,16 +1091,17 @@ void extract_char_final(struct char_data *ch) {
 
     /* transfer objects to room, if any */
     if(IS_NPC(ch)) {
-        while (ch->contents) {
-            obj = ch->contents;
+        auto con = ch->getObjects();
+        auto room = ch->getRoom();
+        for (auto obj : filter_raw(con)) {
             obj_from_char(obj);
-            obj_to_room(obj, IN_ROOM(ch));
+            obj_to_room(obj, room);
         }
 
         /* transfer equipment to room, if any */
         for (i = 0; i < NUM_WEARS; i++)
             if (GET_EQ(ch, i))
-                obj_to_room(unequip_char(ch, i), IN_ROOM(ch));
+                obj_to_room(unequip_char(ch, i), room);
     }
 
     if (FIGHTING(ch))
@@ -1163,8 +1160,8 @@ void extract_char(struct char_data *ch) {
         if (IS_NPC(foll->follower) && AFF_FLAGGED(foll->follower, AFF_CHARM) &&
             (IN_ROOM(foll->follower) == IN_ROOM(ch) || IN_ROOM(ch) == 1)) {
             /* transfer objects to char, if any */
-            while (foll->follower->contents) {
-                auto obj = foll->follower->contents;
+            auto con = foll->follower->getObjects();
+            for (auto obj : filter_raw(con)) {
                 obj_from_char(obj);
                 obj_to_char(obj, ch);
             }
@@ -1440,11 +1437,11 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (nullptr);
 
     /* scan items carried */
-    if ((i = get_obj_in_list_vis(ch, name, number, ch->contents)) != nullptr)
+    if ((i = get_obj_in_list_vis(ch, name, number, ch->getObjects())) != nullptr)
         return (i);
 
     /* scan room */
-    if ((i = get_obj_in_list_vis(ch, name, number, ch->getRoom()->contents)) != nullptr)
+    if ((i = get_obj_in_list_vis(ch, name, number, ch->getLocationObjects())) != nullptr)
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
@@ -1647,12 +1644,12 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
     }
 
     if (IS_SET(bitvector, FIND_OBJ_INV)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->contents)) != nullptr)
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getObjects())) != nullptr)
             return (FIND_OBJ_INV);
     }
 
     if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getRoom()->contents)) != nullptr)
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getLocationObjects())) != nullptr)
             return (FIND_OBJ_ROOM);
     }
 

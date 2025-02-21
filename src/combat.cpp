@@ -4750,7 +4750,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     TO_NOTVICT);
                 solo_gain(ch, vict);
                 int founded = 0;
-                auto con = vict->getContents();
+                auto con = vict->getObjects();
                 for (auto rew : filter_raw(con)) {
                     obj_from_char(rew);
                     obj_to_room(rew, IN_ROOM(vict));

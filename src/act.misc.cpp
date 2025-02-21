@@ -107,7 +107,7 @@ ACMD(do_restring) {
         return;
     }
     
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         send_to_char(ch, "You don't have a that equipment to restring in your inventory.\r\n");
         send_to_char(ch, "Syntax: restring (obj name)\r\n");
         return;
@@ -325,7 +325,7 @@ static void resolve_song(struct char_data *ch) {
         return;
     }
 
-    auto con = ch->getContents();
+    auto con = ch->getObjects();
     for (auto obj2 : filter_raw(con)) {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
@@ -722,7 +722,7 @@ ACMD(do_song) {
     struct obj_data *obj2 = nullptr, *next_obj;
     int instrument = 0;
 
-    auto con = ch->getContents();
+    auto con = ch->getObjects();
     for (auto obj2 : filter_raw(con)) {
         if (GET_OBJ_VNUM(obj2) == 8802 || GET_OBJ_VNUM(obj2) == 8807) {
             instrument = GET_OBJ_VNUM(obj2);
@@ -1370,7 +1370,7 @@ ACMD(do_fish) {
                     send_to_char(ch, "Syntax: fish apply (bait)\r\n");
                     return;
                 }
-                if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
+                if (!(bait = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
                     send_to_char(ch, "You don't have that bait.\r\n");
                     return;
                 } else if (GET_OBJ_TYPE(bait) != ITEM_FISHBAIT) {
@@ -1680,11 +1680,11 @@ ACMD(do_extract) {
     }
 
     if (!strcasecmp(arg, "combine")) {
-        if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
             send_to_char(ch, "You do not have the first bottle that you were wanting to combine.\r\n");
             return;
         }
-        if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->contents))) {
+        if (!(obj2 = get_obj_in_list_vis(ch, arg3, nullptr, ch->getObjects()))) {
             send_to_char(ch, "You do not have the second bottle that you were wanting to combine.\r\n");
             return;
         }
@@ -1724,7 +1724,7 @@ ACMD(do_extract) {
         }
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         send_to_char(ch, "You do not have that item.\r\n");
         return;
     } else {
@@ -2429,7 +2429,7 @@ ACMD(do_resize) {
             send_to_char(ch, "Syntax: resize (obj) (small | medium)\r\n");
             return;
         }
-        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+        if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
             send_to_char(ch, "You don't have that object!\r\n");
             return;
         } else {
@@ -3134,12 +3134,12 @@ ACMD(do_instill) {
         return;
     }
 
-    if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(token = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         send_to_char(ch, "Syntax: instill (token) (target)\r\n");
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
         send_to_char(ch, "Syntax: instill (token) (target)\r\n");
         return;
     }
@@ -3333,7 +3333,7 @@ ACMD(do_bury) {
         if (!*arg2) {
             send_to_char(ch, "Bury what?\r\n");
             return;
-        } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
+        } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
             send_to_char(ch, "You don't have that object to bury.\r\n");
             return;
         } else if (fobj != nullptr) {
@@ -4290,7 +4290,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
 
     if (type == 0) {
         /* Check for ingredients in inventory */
-        auto con = ch->getContents();
+        auto con = ch->getObjects();
         for (auto obj2 : filter_raw(con)) {
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
@@ -4408,7 +4408,7 @@ static int valid_recipe(struct char_data *ch, int recipe, int type) {
             }
         }
     } else { /* We know the ingredients are there, remove and exit. */
-        auto con = ch->getContents();
+        auto con = ch->getObjects();
         for (auto obj2 : filter_raw(con)) {
             switch (GET_OBJ_VNUM(obj2)) {
                 case RCP_TOMATO:
@@ -5328,7 +5328,7 @@ ACMD(do_obstruct) {
         send_to_char(ch, "You can not block off a peaceful area.\r\n");
         return;
     }
-    auto con = dest->getContents();
+    auto con = dest->getObjects();
     for (auto o : filter_raw(con)) {
         obj = o;
         if (GET_OBJ_VNUM(obj) == 79) {
@@ -5489,7 +5489,7 @@ ACMD(do_feed) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
         send_to_char(ch, "You need to give them a senzu.\r\n");
         return;
     }
@@ -5547,7 +5547,7 @@ ACMD(do_spoil) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getRoom()->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getLocationObjects()))) {
         send_to_char(ch, "No corpse around here by that name.\r\n");
         return;
     }

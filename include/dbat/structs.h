@@ -145,7 +145,7 @@ struct unit_data {
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
-    std::vector<std::weak_ptr<obj_data>> getContents();
+    std::vector<std::weak_ptr<obj_data>> getObjects();
 
     int id{NOTHING}; /* the unique ID of this entity */
     time_t generation{}; /* creation time for dupe check     */
@@ -275,6 +275,8 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     struct char_data *carried_by{};  /* Carried by :nullptr in room/conta   */
     struct char_data *worn_by{};      /* Worn by? */
     int16_t worn_on{-1};          /* Worn where?		      */
+
+    unit_data *holder{};
 
     struct obj_data *next_content{}; /* For 'contains' lists             */
 

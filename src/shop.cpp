@@ -60,9 +60,10 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
 static struct obj_data *
 get_purchase_obj(struct char_data *ch, char *arg, struct char_data *keeper, vnum shop_nr, int msg);
 
-static struct obj_data *get_hash_obj_vis(struct char_data *ch, char *name, struct obj_data *list);
+static struct obj_data *get_hash_obj_vis(struct char_data *ch, char *name,
+    const std::vector<std::weak_ptr<obj_data>>& list);
 
-static struct obj_data *get_slide_obj_vis(struct char_data *ch, char *name, struct obj_data *list);
+static struct obj_data *get_slide_obj_vis(struct char_data *ch, char *name, const std::vector<std::weak_ptr<obj_data>>& list);
 
 static char *customer_string(vnum shop_nr, int detailed);
 
@@ -512,8 +513,8 @@ static char *times_message(struct obj_data *obj, char *name, int num) {
 }
 
 static struct obj_data *get_slide_obj_vis(struct char_data *ch, char *name,
-                                          struct obj_data *list) {
-    struct obj_data *i, *last_match = nullptr;
+                                          const std::vector<std::weak_ptr<obj_data>>& list) {
+    struct obj_data *last_match = nullptr;
     int j, number;
     char tmpname[MAX_INPUT_LENGTH];
     char *tmp;
@@ -523,20 +524,22 @@ static struct obj_data *get_slide_obj_vis(struct char_data *ch, char *name,
     if (!(number = get_number(&tmp)))
         return (nullptr);
 
-    for (i = list, j = 1; i && (j <= number); i = i->next_content)
+    for (auto i : filter_raw(list))
         if (isname(tmp, i->name))
             if (CAN_SEE_OBJ(ch, i) && !same_obj(last_match, i)) {
                 if (j == number)
                     return (i);
                 last_match = i;
                 j++;
+                if(j > number)
+                    break;
             }
     return (nullptr);
 }
 
+
 static struct obj_data *get_hash_obj_vis(struct char_data *ch, char *name,
-                                         struct obj_data *list) {
-    struct obj_data *loop, *last_obj = nullptr;
+                                         const std::vector<std::weak_ptr<obj_data>>& list) {
     int qindex;
 
     if (is_number(name))
@@ -545,8 +548,9 @@ static struct obj_data *get_hash_obj_vis(struct char_data *ch, char *name,
         qindex = atoi(name + 1);
     else
         return (nullptr);
-
-    for (loop = list; loop; loop = loop->next_content)
+    
+    struct obj_data *last_obj = nullptr;
+    for (auto loop : filter_raw(list))
         if (CAN_SEE_OBJ(ch, loop) && GET_OBJ_COST(loop) > 0)
             if (!same_obj(last_obj, loop)) {
                 if (--qindex == 0)
@@ -564,9 +568,9 @@ static struct obj_data *get_purchase_obj(struct char_data *ch, char *arg,
     one_argument(arg, name);
     do {
         if (*name == '#' || is_number(name))
-            obj = get_hash_obj_vis(ch, name, keeper->contents);
+            obj = get_hash_obj_vis(ch, name, keeper->getObjects());
         else
-            obj = get_slide_obj_vis(ch, name, keeper->contents);
+            obj = get_slide_obj_vis(ch, name, keeper->getObjects());
         if (!obj) {
             if (msg) {
                 char buf[MAX_INPUT_LENGTH];
@@ -914,7 +918,7 @@ get_selling_obj(struct char_data *ch, char *name, struct char_data *keeper, vnum
     struct obj_data *obj;
     int result;
 
-    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, name, nullptr, ch->getObjects()))) {
         if (msg) {
             char tbuf[MAX_INPUT_LENGTH];
 
@@ -1189,8 +1193,8 @@ static void shopping_list(char *arg, struct char_data *ch, struct char_data *kee
 
     len = strlcpy(buf, " ##   Available   Item                             Min. Lvl       Cost\r\n"
                        "----------------------------------------------------------------------\r\n", sizeof(buf));
-    if (keeper->contents)
-        for (obj = keeper->contents; obj; obj = obj->next_content)
+    if (auto con = keeper->getObjects(); !con.empty())
+        for (auto obj : filter_raw(con))
             if (CAN_SEE_OBJ(ch, obj) && GET_OBJ_COST(obj) > 0) {
                 if (!last_obj) {
                     last_obj = obj;
@@ -1685,17 +1689,15 @@ bool shop_data::isProducing(obj_vnum vn) {
 }
 
 void shop_data::runPurge() {
-    struct obj_data *next_obj;
-    for(auto keeper2 : getKeepers()) {
-        if(auto keeper = keeper2.lock(); keeper)
-            for (auto sobj = keeper->contents; sobj; sobj = next_obj) {
-                next_obj = sobj->next_content;
-                if(!sobj) continue;
-                if(isProducing(sobj->vn)) {
-                    keeper->mod(CharMoney::Carried, GET_OBJ_COST(sobj));
-                    extract_obj(sobj);
-                }
+    auto keepers = getKeepers();
+    for(auto keeper : filter_raw(keepers)) {
+        auto con = keeper->getObjects();
+        for (auto sobj : filter_raw(con)) {
+            if(isProducing(sobj->vn)) {
+                keeper->mod(CharMoney::Carried, GET_OBJ_COST(sobj));
+                extract_obj(sobj);
             }
+        }
     }
 }
 

@@ -594,7 +594,7 @@ ACMD(do_transobj) {
         return;
     }
 
-    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->contents))) {
+    if (!(obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects()))) {
         send_to_char(ch, "You want to send what?\r\n");
         return;
     } else if (!strcasecmp("all", arg2)) {
@@ -1318,7 +1318,7 @@ static void do_stat_room(struct char_data *ch) {
         }
     }
 
-    auto con = rm->getContents();
+    auto con = rm->getObjects();
     sz = con.size();
     
     if (sz) {
@@ -1531,13 +1531,12 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
    * more or less useless and just takes up valuable screen space.
    */
 
-    if (j->contents) {
+    if (auto con = j->getObjects(); !con.empty()) {
         int column;
 
         send_to_char(ch, "\r\nContents:@g");
         column = 9;    /* ^^^ strlen ^^^ */
         found = false;
-        auto con = j->getContents();
         auto sz = con.size();
         auto count = 0;
         for (auto j2 : filter_raw(con)) {
@@ -1706,7 +1705,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
     int counts = 0, total = 0;
     i = 0;
-    auto con = k->getContents();
+    auto con = k->getObjects();
     for (auto j : filter_raw(con)) {
         counts += check_insidebag(j, 0.5);
         counts++;
@@ -1940,11 +1939,11 @@ ACMD(do_stat) {
 
         if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != nullptr)
             do_stat_object(ch, object);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->contents)) != nullptr)
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getObjects())) != nullptr)
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
             do_stat_character(ch, victim);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getRoom()->contents)) != nullptr)
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getLocationObjects())) != nullptr)
             do_stat_object(ch, object);
         else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)) != nullptr)
             do_stat_character(ch, victim);
@@ -2452,7 +2451,7 @@ ACMD(do_purge) {
                 }
             }
             extract_char(vict);
-        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getRoom()->contents)) != nullptr) {
+        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getLocationObjects())) != nullptr) {
             act("$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
             extract_obj(obj);
         } else {
@@ -2475,8 +2474,9 @@ ACMD(do_purge) {
                 continue;
 
             /* Dump inventory. */
-            while (vict->contents)
-                extract_obj(vict->contents);
+            auto con = vict->getObjects();
+            for (auto o : filter_raw(con))
+                extract_obj(o);
 
             /* Dump equipment. */
             for (i = 0; i < NUM_WEARS; i++)
@@ -2488,8 +2488,9 @@ ACMD(do_purge) {
         }
 
         /* Clear the ground. */
-        while (ch->getRoom()->contents)
-            extract_obj(ch->getRoom()->contents);
+        auto con = ch->getLocationObjects();
+        for (auto o :filter_raw(con))
+            extract_obj(o);
     }
 }
 
@@ -4446,8 +4447,8 @@ ACMD(do_chown) {
             }
         }
 
-        if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->contents))) {
-            if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->contents))) {
+        if (!(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->getObjects()))) {
+            if (!k && !(obj = get_obj_in_list_vis(victim, buf2, nullptr, victim->getObjects()))) {
                 send_to_char(ch, "%s does not appear to have the %s.\r\n", GET_NAME(victim), buf2);
                 return;
             }
@@ -4487,7 +4488,7 @@ ACMD(do_zpurge) {
                     extract_char(mob);
                 }
             }
-            auto con = rm->getContents();
+            auto con = rm->getObjects();
             for (auto obj : filter_raw(con)) {
                 extract_obj(obj);
             }

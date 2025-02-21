@@ -204,7 +204,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     }
 
     struct obj_data *hatch = nullptr;
-    auto con = get_room(GET_OBJ_VAL(vehicle, 0))->getContents();
+    auto con = get_room(GET_OBJ_VAL(vehicle, 0))->getObjects();
     for (auto h : filter_raw(con)) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             GET_OBJ_VAL(hatch, 3) = vehicle->getRoomVnum();

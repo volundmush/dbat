@@ -355,7 +355,7 @@ OCMD(do_opurge) {
                 if (IS_NPC(ch))
                     extract_char(ch);
             }
-            auto con = room->getContents();
+            auto con = room->getObjects();
             for (auto o : filter_raw(con)) {
                 if (o != obj)
                     extract_obj(o);
