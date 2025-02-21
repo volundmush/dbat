@@ -52,7 +52,7 @@ static void print_object_location(int num, struct obj_data *obj, struct char_dat
 
 static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mode);
 
-static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show);
+static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>>& list, struct char_data *ch, int mode, int show);
 
 static void trans_check(struct char_data *ch, struct char_data *vict);
 
@@ -1933,12 +1933,13 @@ static bool can_stack_objects(struct obj_data *a, struct obj_data *b) {
     return false;
 }
 
-static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mode, int show) {
-    struct obj_data *i, *d;
+
+static void list_obj_to_char(const std::vector<std::weak_ptr<obj_data>>& list, struct char_data *ch, int mode, int show) {
+    struct obj_data *d;
     bool found = false;
     int num;
 
-    for (i = list; i; i = i->next_content) {
+    for (auto i : filter_raw(list)) {
         if (i->room_description == nullptr || strcasecmp(i->room_description, "undefined") == 0)
             continue;
 
@@ -1946,7 +1947,8 @@ static void list_obj_to_char(struct obj_data *list, struct char_data *ch, int mo
         d = i;
 
         if (CONFIG_STACK_OBJS) {
-            for (auto j = list; j != i; j = j->next_content) {
+            for (auto j : filter_raw(list)) {
+                if(j == i) break;
                 if (can_stack_objects(j, i) && CAN_SEE_OBJ(ch, j)) {
                     num++;
                     if (d == i && !CAN_SEE_OBJ(ch, d))
@@ -3259,7 +3261,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
     }
 
     display_garden_info(rm, ch);
-    list_obj_to_char(rm->contents, ch, SHOW_OBJ_LONG, false);
+    list_obj_to_char(rm->getContents(), ch, SHOW_OBJ_LONG, false);
     list_char_to_char(rm->people, ch);
 }
 
@@ -3363,7 +3365,7 @@ static void handle_container(struct char_data *ch, struct obj_data *obj, int bit
             act("$n looks in $p.", true, ch, obj, nullptr, TO_ROOM);
         }
 
-        list_obj_to_char(obj->contents, ch, SHOW_OBJ_SHORT, true);
+        list_obj_to_char(obj->getContents(), ch, SHOW_OBJ_SHORT, true);
     }
 }
 
@@ -4982,7 +4984,7 @@ ACMD(do_inventory) {
             return;
         }
     }
-    list_obj_to_char(ch->contents, ch, SHOW_OBJ_SHORT, true);
+    list_obj_to_char(ch->getContents(), ch, SHOW_OBJ_SHORT, true);
     send_to_char(ch, "\n");
 }
 
@@ -6402,7 +6404,7 @@ ACMD(do_scan) {
                      CCNRM(ch, C_NRM));
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
-        list_obj_to_char(dest->contents, ch, SHOW_OBJ_LONG, false);
+        list_obj_to_char(dest->getContents(), ch, SHOW_OBJ_LONG, false);
         list_char_to_char(dest->people, ch);
         if (dest->geffect >= 1 && dest->geffect <= 5) {
             send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
@@ -6426,7 +6428,7 @@ ACMD(do_scan) {
                          CCNRM(ch, C_NRM));
             send_to_char(ch, "@W          -----------------          @n\r\n");
 
-            list_obj_to_char(dest2->contents, ch, SHOW_OBJ_LONG, false);
+            list_obj_to_char(dest2->getContents(), ch, SHOW_OBJ_LONG, false);
             list_char_to_char(dest2->people, ch);
             if (dest2->geffect >= 1 && dest2->geffect <= 5) {
                 send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");

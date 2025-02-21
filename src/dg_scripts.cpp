@@ -135,7 +135,7 @@ int trgvar_in_room(room_vnum vnum) {
     return get_room(rnum)->getPeople().size();
 }
 
-obj_data *get_obj_in_list(char *name, obj_data *list) {
+obj_data *get_obj_in_list(char *name, const std::vector<std::weak_ptr<obj_data>>& list) {
     if (*name == UID_CHAR) {
         auto uidResult = resolveUID(name);;
         if(!uidResult) return nullptr;
@@ -143,10 +143,10 @@ obj_data *get_obj_in_list(char *name, obj_data *list) {
         if(!obj2) return nullptr;
         auto obj = obj2.get();
 
-        for (auto i = list; i; i = i->next_content)
+        for (auto i : filter_raw(list))
             if(i == obj) return obj;
     } else {
-        for (auto i = list; i; i = i->next_content)
+        for (auto i : filter_raw(list))
             if (isname(name, i->name))
                 return i;
     }
@@ -377,7 +377,7 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return obj;
 
     /* is it inside ? */
-    if (obj->contents && (i = get_obj_in_list(name, obj->contents)))
+    if (obj->contents && (i = get_obj_in_list(name, obj->getContents())))
         return i;
 
     /* or outside ? */
@@ -395,11 +395,11 @@ obj_data *get_obj_near_obj(obj_data *obj, char *name) {
         return i;
         /* or carried ? */
     else if (obj->carried_by &&
-             (i = get_obj_in_list(name, obj->carried_by->contents)))
+             (i = get_obj_in_list(name, obj->carried_by->getContents())))
         return i;
     else if ((rm = obj_room(obj)) != NOWHERE) {
         /* check the floor */
-        if ((i = get_obj_in_list(name, get_room(rm)->contents)))
+        if ((i = get_obj_in_list(name, get_room(rm)->getContents())))
             return i;
 
         /* check peoples' inventory */
@@ -529,7 +529,7 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
     if (!strcasecmp(name, "self") || !strcasecmp(name, "me"))
         return obj;
 
-    if (obj->contents && (i = get_obj_in_list(name, obj->contents)))
+    if (i = get_obj_in_list(name, obj->getContents()))
         return i;
 
     if (obj->in_obj && isname(name, obj->in_obj->name))
@@ -539,11 +539,11 @@ obj_data *get_obj_by_obj(obj_data *obj, char *name) {
         return i;
 
     if (obj->carried_by &&
-        (i = get_obj_in_list(name, obj->carried_by->contents)))
+        (i = get_obj_in_list(name, obj->carried_by->getContents())))
         return i;
 
     if (((rm = obj_room(obj)) != NOWHERE) &&
-        (i = get_obj_in_list(name, get_room(rm)->contents)))
+        (i = get_obj_in_list(name, get_room(rm)->getContents())))
         return i;
 
     return get_obj(name);

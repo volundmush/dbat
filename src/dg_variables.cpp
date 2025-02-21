@@ -82,11 +82,10 @@ char *skill_percent(struct char_data *ch, char *skill) {
    Now returns the number of matching objects -- Welcor 02/04
 */
 
-int item_in_list(char *item, obj_data *list) {
-    obj_data *i;
+int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list) {
     int count = 0;
 
-    if (!item || !*item)
+    if (list.empty())
         return 0;
 
     if (*item == UID_CHAR) {
@@ -95,27 +94,27 @@ int item_in_list(char *item, obj_data *list) {
         auto obj = std::dynamic_pointer_cast<obj_data>(uidResult).get();
         if(!obj) return 0;
 
-        for (i = list; i; i = i->next_content) {
+        for (auto i : filter_raw(list)) {
             if (i == obj)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->contents);
+                count += item_in_list(item, i->getContents());
         }
     } else if (is_number(item) > -1) { /* check for vnum */
         obj_vnum ovnum = atof(item);
 
-        for (i = list; i; i = i->next_content) {
+        for (auto i : filter_raw(list)) {
             if (GET_OBJ_VNUM(i) == ovnum)
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->contents);
+                count += item_in_list(item, i->getContents());
         }
     } else {
-        for (i = list; i; i = i->next_content) {
+        for (auto i : filter_raw(list)) {
             if (isname(item, i->name))
                 count++;
             if (GET_OBJ_TYPE(i) == ITEM_CONTAINER)
-                count += item_in_list(item, i->contents);
+                count += item_in_list(item, i->getContents());
         }
     }
     return count;
@@ -137,7 +136,7 @@ int char_has_item(char *item, struct char_data *ch) {
     if (get_object_in_equip(ch, item) != nullptr)
         return 1;
 
-    if (item_in_list(item, ch->contents) == 0)
+    if (item_in_list(item, ch->getContents()) == 0)
         return 0;
     else
         return 1;
@@ -317,9 +316,9 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
                     ch = (char_data *) go;
 
                     if ((o = get_object_in_equip(ch, name)));
-                    else if ((o = get_obj_in_list(name, ch->contents)));
+                    else if ((o = get_obj_in_list(name, ch->getContents())));
                     else if (IN_ROOM(ch) != NOWHERE && (c = get_char_in_room(ch->getRoom(), name)));
-                    else if ((o = get_obj_in_list(name, ch->getRoom()->contents)));
+                    else if ((o = get_obj_in_list(name, ch->getLocationObjects())));
                     else if ((c = get_char(name)));
                     else if ((o = get_obj(name)));
                     else if ((r = get_room(name))) {}
@@ -447,7 +446,7 @@ in the vault (vnum: 453) now and then. you can just use
                         strcpy(str, "0");
                     } else {
                         /* item_in_list looks within containers as well. */
-                        snprintf(str, slen, "%d", item_in_list(subfield, get_room(rrnum)->contents));
+                        snprintf(str, slen, "%d", item_in_list(subfield, get_room(rrnum)->getContents()));
                     }
                 }
             } else if (!strcasecmp(var, "random")) {
@@ -959,7 +958,7 @@ in the vault (vnum: 453) now and then. you can just use
                         /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
                     else if (!strcasecmp(field, "count")) {
                         if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                            snprintf(str, slen, "%d", item_in_list(subfield, o->contents));
+                            snprintf(str, slen, "%d", item_in_list(subfield, o->getContents()));
                         else
                             strcpy(str, "0");
                     }
@@ -981,7 +980,7 @@ in the vault (vnum: 453) now and then. you can just use
                     /* thanks to Jamie Nelson (Mordecai of 4 Dimensions MUD) */
                     if (!strcasecmp(field, "has_in")) {
                         if (GET_OBJ_TYPE(o) == ITEM_CONTAINER)
-                            snprintf(str, slen, "%s", (item_in_list(subfield, o->contents) ? "1" : "0"));
+                            snprintf(str, slen, "%s", (item_in_list(subfield, o->getContents()) ? "1" : "0"));
                         else
                             strcpy(str, "0");
                     }

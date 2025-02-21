@@ -57,14 +57,7 @@ ACMD(do_oasis_redit) {
     struct obj_data *capsule = nullptr, *next_obj = nullptr, *remove = nullptr;
     int remodeling = false;
 
-    for (capsule = ch->contents; capsule; capsule = next_obj) {
-        next_obj = capsule->next_content;
-        if (remove != nullptr) {
-            continue;
-        } else if (GET_OBJ_VNUM(capsule) == 19094) {
-            remove = capsule;
-        }
-    }
+    remove = ch->findObjectVnum(19094);
 
     if (remove == nullptr && GET_ADMLEVEL(ch) < 1) {
         send_to_char(ch, "You do not have a R.A.D. Remodeling Assistance Droid.\r\n");

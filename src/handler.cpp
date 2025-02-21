@@ -1404,6 +1404,27 @@ struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *numb
     return (nullptr);
 }
 
+struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, const std::vector<std::weak_ptr<obj_data>>& list) {
+    int num;
+
+    if (!number) {
+        number = &num;
+        num = get_number(&name);
+    }
+
+    if (*number == 0)
+        return nullptr;
+
+    for (auto i : filter_raw(list)) {
+        if (isname(name, i->name))
+            if (CAN_SEE_OBJ(ch, i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
+                if (--(*number) == 0)
+                    return i;
+    }
+
+    return nullptr;
+}
+
 
 /* search the entire world for an object, and return a pointer  */
 struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {

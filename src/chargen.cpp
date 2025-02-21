@@ -756,15 +756,7 @@ namespace net {
         }
         cg.appearances[CharAppearance::Aura] = auraTo;
 
-        return ChargenState::Skills;
-    }
-
-    void ChargenParser::cgDisplaySkills() {
-
-    }
-
-    ChargenState ChargenParser::cgHandleSkills(const std::string& arg) {
-        return ChargenState::Finish;
+        return ChargenState::Alignment;
     }
 
     void ChargenParser::cgDisplayAlignment() {
@@ -794,6 +786,14 @@ namespace net {
         }
         //cg.alignment = alignTo;
 
+        return ChargenState::Finish;
+    }
+
+    void ChargenParser::cgDisplaySkills() {
+
+    }
+
+    ChargenState ChargenParser::cgHandleSkills(const std::string& arg) {
         return ChargenState::Finish;
     }
 

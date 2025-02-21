@@ -98,10 +98,11 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
             /* Scavenger (picking up objects) */
             start = std::chrono::high_resolution_clock::now();
             if (IS_HUMANOID(ch) && !FIGHTING(ch) && !MOB_FLAGGED(ch, MOB_NOSCAVENGER) && !MOB_FLAGGED(ch, MOB_NOKILL) && (!player_present(ch) || axion_dice(0) > 118)) {
-                if (auto contents = ch->getRoom()->contents; contents && rand_number(1, 100) >= 95) {
+                auto con = ch->getLocationObjects();
+                if (!con.empty() && rand_number(1, 100) >= 95) {
                     max = 1;
                     best_obj = nullptr;
-                    for (obj = contents; obj; obj = obj->next_content)
+                    for (auto obj : filter_raw(con))
                         if (CAN_GET_OBJ(ch, obj) && GET_OBJ_COST(obj) > max) {
                             best_obj = obj;
                             max = GET_OBJ_COST(obj);
@@ -164,9 +165,8 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
 
             /* RESPOND TO A HUGE ATTACK */
             start = std::chrono::high_resolution_clock::now();
-            struct obj_data *hugeatk = nullptr, *next_huge = nullptr;
-            for (hugeatk = ch->getRoom()->contents; hugeatk; hugeatk = next_huge) {
-                next_huge = hugeatk->next_content;
+            auto con = ch->getLocationObjects();
+            for (auto hugeatk : filter_raw(con)) {
                 if (FIGHTING(ch)) {
                     continue;
                 }

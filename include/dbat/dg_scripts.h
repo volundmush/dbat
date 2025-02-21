@@ -361,7 +361,7 @@ extern obj_data *get_obj_by_room(room_data *room, char *name);
 
 extern int trgvar_in_room(room_vnum vnum);
 
-extern obj_data *get_obj_in_list(char *name, obj_data *list);
+extern obj_data *get_obj_in_list(char *name, const std::vector<std::weak_ptr<obj_data>>& list);
 
 extern obj_data *get_object_in_equip(char_data *ch, char *name);
 
@@ -419,7 +419,7 @@ extern void assign_triggers(struct unit_data *i, int type);
 /* From dg_variables.c */
 extern void add_var(struct trig_var_data **var_list, char *name, const char *value, long id);
 
-extern int item_in_list(char *item, obj_data *list);
+extern int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list);
 
 extern char *skill_percent(struct char_data *ch, char *skill);
 

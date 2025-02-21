@@ -68,7 +68,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
         send_to_char(ch, "@wDrive into what?\r\n");
         return;
     }
-    if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, nullptr, vehicle->getRoom()->contents))) {
+    if (!(vehicle_in_out = get_obj_in_list_vis(ch, arg, nullptr, vehicle->getLocationObjects()))) {
         send_to_char(ch, "@wNothing here by that name!\r\n");
         return;
     }
