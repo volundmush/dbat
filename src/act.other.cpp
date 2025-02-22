@@ -479,7 +479,7 @@ ACMD(do_rpp) {
                 return;
             } else {
                 int found = false;
-                auto ao = activeObjects;
+                auto ao = objectSubscriptions.all("active");
                 for (auto k : filter_raw(ao)) {
                     if (OBJ_FLAGGED(k, ITEM_FORGED)) {
                         continue;
@@ -8171,8 +8171,8 @@ void base_update(uint64_t heartPulse, double deltaTime) {
         if (SITS(d->character)) {
             if (IN_ROOM(d->character) != IN_ROOM(SITS(d->character))) {
                 struct obj_data *chair = SITS(d->character);
-                SITTING(chair) = nullptr;
-                SITS(d->character) = nullptr;
+                chair->sitting.reset();
+                d->character->sits.reset();
             }
         }
         if (GET_PING(d->character) >= 1) {

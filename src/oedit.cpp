@@ -260,10 +260,8 @@ void oedit_save_internally(struct descriptor_data *d) {
     obj_proto[robj_num].proto_script = OLC_SCRIPT(d);
 
     /* this takes care of the objects currently in-game */
-    for (auto obj3 : get_vnum_list(objectVnumIndex, robj_num)) {
-        auto obj2 = obj3.lock();
-        if(!obj2) continue;
-        obj = obj2.get();
+    auto objects = objectSubscriptions.all(fmt::format("vnum_{}", robj_num));
+    for (auto obj : filter_raw(objects)) {
 
         /* remove any old scripts */
         extract_script(obj, OBJ_TRIGGER);

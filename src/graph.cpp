@@ -245,7 +245,7 @@ ACMD(do_radar) {
     WAIT_STATE(ch, PULSE_2SEC);
     act("$n holds up a dragon radar and pushes its button.", false, ch, nullptr, nullptr, TO_ROOM);
     for(auto vn : dbVnums) {
-        auto o = get_last_inserted(objectVnumIndex, vn);
+        auto o = objectSubscriptions.first(fmt::format("vnum_{}", vn));
         if(!o) continue;
         auto r = o->getAbsoluteRoom();
         if(!r) continue;

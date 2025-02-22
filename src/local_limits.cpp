@@ -1566,8 +1566,8 @@ void healTankService(uint64_t heartPulse, double deltaTime) {
                 act("@C$n@w steps out of the healing tank.@n", true, ch, nullptr, nullptr,
                     TO_ROOM);
                 ch->playerFlags.reset(PLR_HEALT);
-                SITTING(o) = nullptr;
-                SITS(ch) = nullptr;
+                o->sitting.reset();
+                ch->sits.reset();
             }
 
         } else {
@@ -1589,7 +1589,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
     int change = false;
     /* characters */
 
-    auto ac = activeCharacters;
+    auto ac = characterSubscriptions.all("active");
     for (auto i: filter_raw(ac)) {
 
         if (!IS_NPC(i) && IN_ROOM(i) != NOWHERE) {
@@ -1797,7 +1797,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
         }
     }
 
-    auto ao = activeObjects;
+    auto ao = objectSubscriptions.all("active");
     for (auto j: filter_raw(ao)) {
 
         /* Let's get rid of dropped norent items. */

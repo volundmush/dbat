@@ -26,13 +26,13 @@
 
 
 struct obj_data *find_vehicle_by_vnum(int vnum) {
-    auto o = get_last_inserted(objectVnumIndex, vnum);
+    auto o = objectSubscriptions.first(fmt::format("vnum_{}", vnum));
     if(o && GET_OBJ_TYPE(o) == ITEM_VEHICLE) return o;
     return nullptr;
 }
 
 struct obj_data *find_hatch_by_vnum(int vnum) {
-    auto o = get_last_inserted(objectVnumIndex, vnum);
+    auto o = objectSubscriptions.first(fmt::format("vnum_{}", vnum));
     if(o && GET_OBJ_TYPE(o) == ITEM_HATCH) return o;
     return nullptr;
 }

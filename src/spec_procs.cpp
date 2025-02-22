@@ -736,8 +736,8 @@ SPECIAL(healtank) {
             act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->playerFlags.set(PLR_HEALT);
-            SITS(ch) = htank;
-            SITTING(htank) = ch;
+            ch->sits = htank->shared();
+            htank->sitting = ch->shared();
             objectSubscriptions.subscribe("healTankService", htank);
             return (true);
 
@@ -751,8 +751,8 @@ SPECIAL(healtank) {
             act("@wThe healing tank drains and you exit it shortly after.", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w exits the healing tank after letting it drain.@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->playerFlags.reset(PLR_HEALT);
-            SITTING(htank) = nullptr;
-            SITS(ch) = nullptr;
+            htank->sitting.reset();
+            ch->sits.reset();
             return (true);
         } // End of Exit argument
 

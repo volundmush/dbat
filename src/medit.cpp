@@ -280,11 +280,8 @@ void medit_save_internally(struct descriptor_data *d) {
     mob_proto[new_rnum].proto_script = OLC_SCRIPT(d);
 
     /* this takes care of the mobs currently in-game */
-    for (auto mob3 : get_vnum_list(characterVnumIndex, new_rnum)) {
-        auto mob2 = mob3.lock();
-        if(!mob2) continue;
-        mob = mob2.get();
-
+    auto mobs = characterSubscriptions.all(fmt::format("vnum_{}", new_rnum));
+    for (auto mob : filter_raw(mobs)) {
         /* remove any old scripts */
         extract_script(mob, MOB_TRIGGER);
 

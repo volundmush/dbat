@@ -171,7 +171,7 @@ ASPELL(spell_locate_object) {
     strlcpy(name, fname(obj->name), sizeof(name));
     j = level / 2;
 
-    auto ao = activeObjects;
+    auto ao = objectSubscriptions.all("active");
     for (auto i : filter_raw(ao)) {
         if (!isname(name, i->name))
             continue;

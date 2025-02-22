@@ -764,7 +764,7 @@ ACMD(do_nickname) {
                 char nick[MAX_INPUT_LENGTH];
                 sprintf(nick, "%s", CAP(arg2));
                 ship2->look_description = strdup(nick);
-                auto objs = get_vnum_list(objectVnumIndex, GET_OBJ_VNUM(ship2) + 1000);
+                auto objs = objectSubscriptions.all(fmt::format("vnum_{}", GET_OBJ_VNUM(ship2) + 1000));
                 for (auto k : filter_raw(objs)) {
                     extract_obj(k);
                     int was_in = ship2->getRoomVnum();
@@ -5649,7 +5649,7 @@ static void perform_mortal_where(struct char_data *ch, char *arg) {
             send_to_char(ch, "%-20s - %s\r\n", GET_NAME(i), room->name);
         }
     } else {            /* print only FIRST char, not all. */
-        auto ac = activeCharacters;
+        auto ac = characterSubscriptions.all("active");
         for (auto i : filter_raw(ac)) {
             auto room = i->getRoom();
             if (!room || i == ch)
@@ -5726,7 +5726,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
     } else {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true, "GODCMD: %s has checked where for the location of %s",
                GET_NAME(ch), arg);
-        auto ac = activeCharacters;
+        auto ac = characterSubscriptions.all("active");
         for (auto i : filter_raw(ac)) {
             if (CAN_SEE(ch, i) && IN_ROOM(i) != NOWHERE && isname(arg, i->name)) {
                 found = 1;
@@ -5739,7 +5739,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                 send_to_char(ch, "\r\n");
             }
         }
-        auto ao = activeObjects;
+        auto ao = objectSubscriptions.all("active");
         for (auto k : filter_raw(ao)) {
             if (CAN_SEE_OBJ(ch, k) && isname(arg, k->name)) {
                 found = 1;

@@ -964,70 +964,76 @@ ACMD(do_mtransform) {
 
     one_argument(argument, arg);
 
-    if (!*arg)
+    if (!*arg) {
         mob_log(ch, "mtransform: missing argument");
-    else if (!isdigit(*arg) && *arg != '-')
-        mob_log(ch, "mtransform: bad argument");
-    else {
-        if (isdigit(*arg))
-            m = read_mobile(atoi(arg), VIRTUAL);
-        else {
-            m = read_mobile(atoi(arg + 1), VIRTUAL);
-        }
-        if (m == nullptr) {
-            mob_log(ch, "mtransform: bad mobile vnum");
-            return;
-        }
-
-        /* move new obj info over to old object and delete new obj */
-
-        for (pos = 0; pos < NUM_WEARS; pos++) {
-            if (GET_EQ(ch, pos))
-                obj[pos] = unequip_char(ch, pos);
-            else
-                obj[pos] = nullptr;
-        }
-
-        /* put the mob in the same room as ch so extract will work */
-        char_to_room(m, IN_ROOM(ch));
-
-        memcpy(&tmpmob, m, sizeof(*m));
-
-        /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
-           the strings so we don't end up free'ing the prototypes later */
-        if (m->name)
-            tmpmob.name = strdup(m->name);
-        if (m->title)
-            tmpmob.title = strdup(m->title);
-        if (m->short_description)
-            tmpmob.short_description = strdup(m->short_description);
-        if (m->room_description)
-            tmpmob.room_description = strdup(m->room_description);
-        if (m->look_description)
-            tmpmob.look_description = strdup(m->look_description);
-
-        // TODO: fix this
-        tmpmob.id = ch->id;
-        tmpmob.affected = ch->affected;
-        tmpmob.proto_script = ch->proto_script;
-        tmpmob.memory = ch->memory;
-        tmpmob.followers = ch->followers;
-        tmpmob.master = ch->master;
-
-        GET_WAS_IN(&tmpmob) = GET_WAS_IN(ch);
-        tmpmob.set(CharMoney::Carried, GET_GOLD(ch));
-        GET_POS(&tmpmob) = GET_POS(ch);
-        FIGHTING(&tmpmob) = FIGHTING(ch);
-        memcpy(ch, &tmpmob, sizeof(*ch));
-
-        for (pos = 0; pos < NUM_WEARS; pos++) {
-            if (obj[pos])
-                equip_char(ch, obj[pos], pos);
-        }
-
-        ch->vn = this_rnum;
-        extract_char(m);
+        return;
     }
+    if (!isdigit(*arg) && *arg != '-') {
+        mob_log(ch, "mtransform: bad argument");
+        return;
+    }
+
+    if (isdigit(*arg))
+        m = read_mobile(atoi(arg), VIRTUAL);
+    else {
+        m = read_mobile(atoi(arg + 1), VIRTUAL);
+    }
+    if (!m) {
+        mob_log(ch, "mtransform: bad mobile vnum");
+        return;
+    }
+
+    // deactivate ch to deal with vnum indexes and such.
+    ch->deactivate();
+
+    // We're changing the process to copy from m onto ch...
+
+    /* Thanks to Russell Ryan for this fix. RRfon we need to copy the
+    the strings so we don't end up free'ing the prototypes later */
+    ch->vn = m->vn;
+    if (m->name) {
+        if(ch->name) free(ch->name);
+        ch->name = strdup(m->name);
+    }
+    if (m->title) {
+        if(ch->title) free(ch->title);
+        ch->title = strdup(m->title);
+    }
+    if (m->short_description) {
+        if(ch->short_description) free(ch->short_description);
+        ch->short_description = strdup(m->short_description);
+    }
+    if (m->room_description) {
+        if(ch->room_description) free(ch->room_description);
+        ch->room_description = strdup(m->room_description);
+    }
+    if (m->look_description) {
+        if(ch->look_description) free(ch->look_description);
+        ch->look_description = strdup(m->look_description);
+    }
+    ch->proto_script = m->proto_script;
+    ch->appearances = m->appearances;
+    ch->mob_specials = m->mob_specials;
+    ch->attributes = m->attributes;
+    ch->aligns = m->aligns;
+    ch->nums = m->nums;
+    ch->stats = m->stats;
+    ch->dims = m->dims;
+    ch->mobFlags = m->mobFlags;
+    ch->bodyparts = m->bodyparts;
+    ch->chclass = m->chclass;
+    ch->race = m->race;
+    ch->affected_by = m->affected_by;
+    ch->armor = m->armor;
+    ch->damage_mod = m->damage_mod;
+    ch->vitals = m->vitals;
+    ch->zone = m->zone;
+    ch->ex_description = m->ex_description;
+
+    extract_char(m);
+
+    // Reactivate the character to deal with the changed vnum.
+    ch->activate();
 }
 
 

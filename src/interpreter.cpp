@@ -1160,7 +1160,7 @@ int perform_dupe_check(struct descriptor_data *d) {
   * choose one if one is available (while still deleting the other
   * duplicates, though theoretically none should be able to exist).
   */
-    auto ac = activeCharacters;
+    auto ac = characterSubscriptions.all("active");
     for (auto ch : filter_raw(ac)) {
 
         if (IS_NPC(ch))
@@ -1345,7 +1345,7 @@ void enter_player_game(struct descriptor_data *d) {
     char_to_room(d->character, load_room);
 
     /*load_char_pets(d->character);*/
-    auto ac = activeCharacters;
+    auto ac = characterSubscriptions.all("active");
     for (auto check : filter_raw(ac)) {
         if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
@@ -1370,7 +1370,7 @@ void enter_player_game(struct descriptor_data *d) {
 
     ABSORBING(d->character) = nullptr;
     ABSORBBY(d->character) = nullptr;
-    SITS(d->character) = nullptr;
+    d->character->sits.reset();
     BLOCKED(d->character) = nullptr;
     BLOCKS(d->character) = nullptr;
     GET_OVERFLOW(d->character) = false;

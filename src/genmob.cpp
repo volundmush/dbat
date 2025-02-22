@@ -46,10 +46,9 @@ int add_mobile(struct char_data *mob, mob_vnum vnum) {
         copy_mobile(&mob_proto[rnum], mob);
 
         /* Now re-point all existing mobile strings to here. */
-        for (auto live_mob2 : get_vnum_list(characterVnumIndex, vnum)) {
-            auto live_mob = live_mob2.lock();
-            if (!live_mob) continue;
-            update_mobile_strings(live_mob.get(), &mob_proto[rnum]);
+        auto mobs = characterSubscriptions.all(fmt::format("vnum_{}", vnum));
+        for (auto live_mob : filter_raw(mobs)) {
+            update_mobile_strings(live_mob, &mob_proto[rnum]);
         }
 
         basic_mud_log("GenOLC: add_mobile: Updated existing mobile #%d.", vnum);
@@ -90,11 +89,9 @@ int copy_mobile(struct char_data *to, struct char_data *from) {
 }
 
 void extract_mobile_all(mob_vnum vnum) {
-
-    for (auto ch2 : get_vnum_list(characterVnumIndex, vnum)) {
-        auto ch = ch2.lock();
-        if (!ch) continue;
-        extract_char(ch.get());
+    auto mobs = characterSubscriptions.all(fmt::format("vnum_{}", vnum));
+    for (auto ch : filter_raw(mobs)) {
+        extract_char(ch);
     }
 }
 
@@ -1046,38 +1043,49 @@ void char_data::activate() {
         return;
     }
     active = true;
+    std::unordered_set<std::string> services;
+    auto sh = shared_from_this();
 
     if(mob_proto.contains(vn)) {
-        insert_vnum(characterVnumIndex, this);
+        services.insert(fmt::format("vnum_{}", vn));
     }
 
     if(trig_list) {
         activateScripts();
 
-        if(SCRIPT_TYPES(SCRIPT(this)) & MTRIG_RANDOM)
-            characterSubscriptions.subscribe("randomTriggers", this);
-        if(SCRIPT_TYPES(SCRIPT(this)) & MTRIG_TIME)
-            characterSubscriptions.subscribe("timeTriggers", this);
+        if(SCRIPT_TYPES(this) & MTRIG_RANDOM)
+            services.insert("randomTriggers");
+        if(SCRIPT_TYPES(this) & MTRIG_TIME)
+            services.insert("timeTriggers");
     }
 
     if(PLR_FLAGGED(this, PLR_GOOP))
-        characterSubscriptions.subscribe("goopTimeService", this);
+        services.insert("goopTimeService");
     if(ABSORBING(this))
-        characterSubscriptions.subscribe("androidAbsorbSystem", this);
+        services.insert("androidAbsorbSystem");
     if(PLR_FLAGGED(this, PLR_POWERUP))
-        characterSubscriptions.subscribe("powerupService", this);
+        services.insert("powerupService");
     if(!damages.empty())
-        characterSubscriptions.subscribe("characterVitalsRecovery", this);
+        services.insert("characterVitalsRecovery");
     if(!IS_ANDROID(this) && GET_LIFEPERC(this) > 0 && getCurHealthPercent() < GET_LIFEPERC(this))
-        characterSubscriptions.subscribe("lifeforceSystem", this);
+        services.insert("lifeforceSystem");
     if(GET_CHARGE(this) || PLR_FLAGGED(this, PLR_CHARGE))
-        characterSubscriptions.subscribe("kiChargeSystem", this);
+        services.insert("kiChargeSystem");
     if(PLR_FLAGGED(this, PLR_FISHING))
-        characterSubscriptions.subscribe("goneFishing", this);
+        services.insert("goneFishing");
     if(form != FormID::Base || technique != FormID::Base)
-        characterSubscriptions.subscribe("transforms", this);
+        services.insert("transforms");
+    services.insert("active");
 
-    activeCharacters.push_back(shared_from_this());
+    if(affected) {
+        services.insert("affected");
+    }
+
+    if(affectedv) {
+        services.insert("affectedv");
+    }
+
+    for(const auto& s : services) characterSubscriptions.subscribe(s, sh);
 
     activateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
@@ -1086,15 +1094,6 @@ void char_data::activate() {
             obj->activate();
         }
     }
-
-    if(affected) {
-        characterSubscriptions.subscribe("affected", shared_from_this());
-    }
-
-    if(affectedv) {
-        characterSubscriptions.subscribe("affectedv", shared_from_this());
-    }
-
 }
 
 
@@ -1103,21 +1102,8 @@ void char_data::deactivate() {
     active = false;
     char_data *temp = nullptr;
 
-    if(vn != NOTHING) {
-        erase_vnum(characterVnumIndex, this);
-    }
-
-    if(affected) {
-        REMOVE_FROM_LIST(this, affect_list, next_affect, temp);
-    }
-    if(affectedv) {
-        REMOVE_FROM_LIST(this, affectv_list, next_affectv, temp);
-    }
-    auto shared = shared_from_this();
-    characterSubscriptions.unsubscribeFromAll(shared_from_this());
-    activeCharacters.remove_if([shared](const std::weak_ptr<char_data> &c) {
-        return c.expired() || c.lock() == shared;
-    });
+    auto sh = shared_from_this();
+    characterSubscriptions.unsubscribeFromAll(sh);
     deactivateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(GET_EQ(this, i)) {

@@ -769,12 +769,8 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     int dice = rand_number(2, 12), grav_roll = 0, grav_change = false, health = 0;
 
     // Gravity generators
-    for (auto k3 : get_vnum_list(objectVnumIndex, 11)) {
-        auto k2 = k3.lock();
-        if (!k2) {
-            continue;
-        }
-        k = k2.get();
+    auto gens = objectSubscriptions.all("vnum_11");
+    for (auto k : filter_raw(gens)) {
         if (k->carried_by) {
             continue;
         }
@@ -804,12 +800,8 @@ void broken_update(uint64_t heartPulse, double deltaTime) {
     }
 
     // ATMS
-    for(auto k3 : get_vnum_list(objectVnumIndex, 3034)) {
-        auto k2 = k3.lock();
-        if (!k2) {
-            continue;
-        }
-        k = k2.get();
+    auto atms = objectSubscriptions.all("vnum_3034");
+    for(auto k : filter_raw(atms)) {
         if (k->carried_by) {
             continue;
         }

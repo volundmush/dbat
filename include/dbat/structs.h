@@ -279,7 +279,7 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     unit_data *holder{};
 
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
-    struct char_data *sitting{};       /* Who is sitting on me? */
+    std::weak_ptr<char_data> sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
     time_t lload{};
     int64_t kicharge{};
@@ -736,7 +736,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     int timer{};            /* Timer for update			*/
 
-    struct obj_data *sits{};      /* What am I sitting on? */
+    std::weak_ptr<obj_data> sits{};      /* What am I sitting on? */
 
     struct char_data *fighting;    /* Opponent				*/
     struct char_data *master{};    /* Who is char following?		*/
@@ -1515,11 +1515,33 @@ class SubscriptionManager {
 public:
     // Subscribe an entity to a particular service
     void subscribe(const std::string& service, const std::shared_ptr<T>& thing) {
-        subscriptions[service].push_back(thing);
+        subscriptions[service].push_front(thing);
     }
 
     void subscribe(const std::string& service, T* thing) {
         subscribe(service, thing->shared());
+    }
+
+    T* first(const std::string& service) {
+        auto it = subscriptions.find(service);
+        if (it != subscriptions.end()) {
+            for (const auto& weak : it->second) {
+                if (auto shared = weak.lock()) {
+                    return shared.get();
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    size_t count(const std::string& service) const {
+        auto it = subscriptions.find(service);
+        if (it != subscriptions.end()) {
+            return std::count_if(it->second.begin(), it->second.end(), [](const std::weak_ptr<T>& weak) {
+                return !weak.expired();
+            });
+        }
+        return 0;
     }
 
     // Unsubscribe an entity from a particular service

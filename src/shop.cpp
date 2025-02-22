@@ -614,7 +614,7 @@ static int buy_price(struct obj_data *obj, vnum shop_nr, struct char_data *keepe
 
     double adjust = 1.0;
 
-    adjust -= 0.00025 * get_vnum_count(objectVnumIndex, GET_OBJ_VNUM(obj));
+    adjust -= 0.00025 * objectSubscriptions.count(fmt::format("vnum_{}", obj->vn));
 
     if (adjust < 0.015) {
         adjust = 0.5;
@@ -651,7 +651,7 @@ static int sell_price(struct obj_data *obj, vnum shop_nr, struct char_data *keep
         sell_cost_modifier = buy_cost_modifier;
 
     double adjust = 1.0;
-    adjust -= 0.00025 * get_vnum_count(objectVnumIndex, GET_OBJ_VNUM(obj));
+    adjust -= 0.00025 * objectSubscriptions.count(fmt::format("vnum_{}", obj->vn));
 
     if (adjust < 0.15) {
         adjust = 0.15;
@@ -1738,8 +1738,8 @@ shop_data::shop_data(const nlohmann::json &j) : shop_data() {
     if(j.contains("lastsort")) lastsort = j["lastsort"];
 }
 
-std::list<std::weak_ptr<char_data>> shop_data::getKeepers() {
-    return get_vnum_list(characterVnumIndex, keeper);
+std::vector<std::weak_ptr<char_data>> shop_data::getKeepers() {
+    return characterSubscriptions.all(fmt::format("vnum_{}", keeper));
 }
 
 bool shop_data::isProducing(obj_vnum vn) {

@@ -1198,7 +1198,7 @@ void dball_load(uint64_t heartPulse, double deltaTime) {
         struct obj_data *k = nullptr;
 
         WISHTIME = 0;
-        auto ao = activeObjects;
+        auto ao = objectSubscriptions.all("active");
         for (auto k : filter_raw(ao)) {
             if (OBJ_FLAGGED(k, ITEM_FORGED)) continue;
 

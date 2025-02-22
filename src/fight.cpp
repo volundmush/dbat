@@ -1794,10 +1794,9 @@ void death_cry(struct char_data *ch) {
 static void final_combat_resolve(struct char_data *ch) {
     struct obj_data *chair;
 
-    if (SITS(ch)) {
-        chair = SITS(ch);
-        SITS(ch) = nullptr;
-        SITTING(chair) = nullptr;
+    if (auto chair = SITS(ch); chair) {
+        ch->sits.reset();
+        chair->sitting.reset();
     }
     if (!IS_NPC(ch) && !ch->clones.empty()) {
         auto clones = ch->clones;

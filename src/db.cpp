@@ -60,18 +60,15 @@ struct char_data *affectv_list = nullptr; /* global linked list of chars with ro
 std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
 std::map<mob_vnum, struct char_data> mob_proto;    /* prototypes for mobs		 */
 
-VnumIndex<obj_data> objectVnumIndex;
-VnumIndex<char_data> characterVnumIndex;
 VnumIndex<trig_data> scriptVnumIndex;
 
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
 
 std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
-std::list<std::weak_ptr<char_data>> activeCharacters;
+
 /* hash tree for fast obj lookup */
 std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
-std::list<std::weak_ptr<obj_data>> activeObjects;
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
@@ -1275,13 +1272,6 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
     setNumsTo[CharAppearance::EyeColor] = rand_number(0, 11);
 
-    GET_ABSORBS(mob) = 0;
-    ABSORBING(mob) = nullptr;
-    ABSORBBY(mob) = nullptr;
-    SITS(mob) = nullptr;
-    BLOCKED(mob) = nullptr;
-    BLOCKS(mob) = nullptr;
-
     if (!IS_HUMAN(mob) && !IS_SAIYAN(mob) && !IS_HALFBREED(mob) && !IS_NAMEK(mob)) {
         setNumsTo[CharAppearance::SkinColor] = rand_number(0, 11);
     }
@@ -1934,7 +1924,7 @@ static void log_zone_error(zone_rnum zone, int cmd_no, const char *message) {
 
 
 static void do_reset_cmds(zone_data &z) {
-    int cmd_no, last_cmd = 0;
+    int cmd_no = 0, last_cmd = 0;
     struct char_data *mob = nullptr;
     struct obj_data *obj, *obj_to;
     room_vnum rvnum;
@@ -1950,6 +1940,7 @@ static void do_reset_cmds(zone_data &z) {
 
     for (auto &c : z.cmd)
     {
+        cmd_no = c.line;
         if (c.command == 'S')
             break;
 
@@ -1977,7 +1968,7 @@ static void do_reset_cmds(zone_data &z) {
 
             case 'M': /* read a mobile */
                 room = get_room(c.arg3);
-                if (mob_proto.contains(c.arg1) && (get_vnum_count(characterVnumIndex, c.arg1) < c.arg2) && room &&
+                if (mob_proto.contains(c.arg1) && (characterSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2) && room &&
                     (rand_number(1, 100) >= c.arg5))
                 {
                     int room_max = 0;
@@ -1989,11 +1980,9 @@ static void do_reset_cmds(zone_data &z) {
 
                     if (c.arg4 > 0)
                     {
-                        for (auto i3 : get_vnum_list(characterVnumIndex, c.arg1))
+                        auto chars = characterSubscriptions.all(fmt::format("vnum_{}", c.arg1));
+                        for (auto i : filter_raw(chars))
                         {
-                            auto i2 = i3.lock();
-                            if(!i2) continue;
-                            auto i = i2.get();
                             if (MOB_LOADROOM(i) == c.arg3)
                             {
                                 if (++room_max >= c.arg4)
@@ -2042,7 +2031,7 @@ static void do_reset_cmds(zone_data &z) {
                     }
                 }
 
-                if (obj_proto.contains(c.arg1) && get_vnum_count(objectVnumIndex, c.arg1) < c.arg2 &&
+                if (obj_proto.contains(c.arg1) && objectSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2 &&
                     room && (rand_number(1, 100) >= c.arg5))
                 {
                     int room_max = 0;
@@ -2052,12 +2041,10 @@ static void do_reset_cmds(zone_data &z) {
                     /* Let's only count if room_max is in use.  If left at zero, max_in_mud will handle*/
 
                     if (c.arg4 > 0)
-                    {
-                        for (auto k3 : get_vnum_list(objectVnumIndex, c.arg1))
+                    {   
+                        auto objects = objectSubscriptions.all(fmt::format("vnum_{}", c.arg1));
+                        for (auto k : filter_raw(objects))
                         {
-                            auto k2 = k3.lock();
-                            if(!k2) continue;
-                            auto k = k2.get();
                             if (OBJ_LOADROOM(k) == c.arg3 && (IN_ROOM(k) == c.arg3))
                             {
                                 if (++room_max >= c.arg4)
@@ -2096,7 +2083,7 @@ static void do_reset_cmds(zone_data &z) {
                 break;
 
             case 'P': /* object to object */
-                if (obj_proto.contains(c.arg1) && (get_vnum_count(objectVnumIndex, c.arg1) < c.arg2) &&
+                if (obj_proto.contains(c.arg1) && (objectSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2) &&
                     obj_load && (rand_number(1, 100) >= c.arg5))
                 {
 
@@ -2120,11 +2107,11 @@ static void do_reset_cmds(zone_data &z) {
             case 'G': /* obj_to_char */
                 if (!mob)
                 {
-                    ZONE_ERROR("attempt to give obj to non-existant mob, command disabled");
+                    ZONE_ERROR("attempt to give obj to non-existent mob, command disabled");
                     c.command = '*';
                     break;
                 }
-                if (obj_proto.contains(c.arg1) && (get_vnum_count(objectVnumIndex, c.arg1) < c.arg2) &&
+                if (obj_proto.contains(c.arg1) && (objectSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2) &&
                     mob_load && (rand_number(1, 100) >= c.arg5))
                 {
                     obj = read_object(c.arg1, REAL);
@@ -2149,7 +2136,7 @@ static void do_reset_cmds(zone_data &z) {
                     c.command = '*';
                     break;
                 }
-                if (obj_proto.contains(c.arg1) && (get_vnum_count(objectVnumIndex, c.arg1) < c.arg2) &&
+                if (obj_proto.contains(c.arg1) && (objectSubscriptions.count(fmt::format("vnum_{}", c.arg1)) < c.arg2) &&
                     mob_load && (rand_number(1, 100) >= c.arg5))
                 {
                     if (c.arg3 < 0 || c.arg3 >= NUM_WEARS)

@@ -606,7 +606,7 @@ int get_number(char **name) {
 
 /* search the entire world for an object number, and return a pointer  */
 struct obj_data *get_obj_num(obj_rnum nr) {
-    return get_last_inserted(objectVnumIndex, nr);
+    return objectSubscriptions.first(fmt::format("vnum_{}", nr));
 }
 
 
@@ -636,8 +636,7 @@ struct char_data *get_char_room(char *name, int *number, room_rnum room) {
 
 /* search all over the world for a char num, and return a pointer if found */
 struct char_data *get_char_num(mob_rnum nr) {
-    for(auto v : get_vnum_list(characterVnumIndex, nr)) return v.lock().get();
-    return (nullptr);
+    return characterSubscriptions.first(fmt::format("vnum_{}", nr));
 }
 
 
@@ -842,11 +841,6 @@ void extract_obj(struct obj_data *obj) {
         GET_FELLOW_WALL(trash) = nullptr;
         extract_obj(trash);
     }
-    if (SITTING(obj)) {
-        ch = SITTING(obj);
-        SITTING(obj) = nullptr;
-        SITS(ch) = nullptr;
-    }
     if (GET_OBJ_POSTED(obj) && obj->in_obj == nullptr) {
         struct obj_data *obj2 = GET_OBJ_POSTED(obj);
         GET_OBJ_POSTED(obj2) = nullptr;
@@ -958,23 +952,14 @@ void extract_char_final(struct char_data *ch) {
     if (ch->followers || ch->master)
         die_follower(ch);
 
-    if (SITS(ch)) {
-        chair = SITS(ch);
-        SITTING(chair) = nullptr;
-        SITS(ch) = nullptr;
-    }
-
     if (auto original = GET_ORIGINAL(ch); original) {
         auto shared = ch->shared();
         original->clones.remove_if([shared](auto& c) { return c.expired() || c.lock() == shared; });
     }
 
-    if (!ch->clones.empty()) {
-        auto clones = ch->clones;
-        for(auto &c : clones) {
-            auto cl = c.lock();
-            if(!cl) continue;
-            handle_multi_merge(cl.get());
+    if (auto clones = ch->clones; !clones.empty()) {
+        for(auto c : filter_raw(clones)) {
+            handle_multi_merge(c);
         }
     }
 
@@ -1005,6 +990,7 @@ void extract_char_final(struct char_data *ch) {
     if (CARRYING(ch)) {
         carry_drop(ch, 3);
     }
+
     if (CARRIED_BY(ch)) {
         carry_drop(CARRIED_BY(ch), 3);
     }
@@ -1088,9 +1074,6 @@ void extract_char_final(struct char_data *ch) {
     char_from_room(ch);
 
     if (IS_NPC(ch)) {
-        if (GET_MOB_RNUM(ch) != NOTHING)    /* prototyped */
-            erase_vnum(characterVnumIndex, ch);
-
         extract_script(ch, MOB_TRIGGER);
         if (SCRIPT_MEM(ch))
             extract_script_mem(SCRIPT_MEM(ch));
@@ -1187,7 +1170,7 @@ struct char_data *get_player_vis(struct char_data *ch, char *name, int *number, 
         num = get_number(&name);
     }
     
-    auto ac = activeCharacters;
+    auto ac = characterSubscriptions.all("active");
     for (auto i : filter_raw(ac)) {
         if (IS_NPC(i))
             continue;
@@ -1304,7 +1287,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
     if (*number == 0)
         return get_player_vis(ch, name, nullptr, 0);
     
-    auto ac = activeCharacters;
+    auto ac = characterSubscriptions.all("active");
     for (auto i : filter_raw(ac)) {
         if (IN_ROOM(ch) == IN_ROOM(i))
             continue;
@@ -1398,7 +1381,7 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
-    auto ao = activeObjects;
+    auto ao = objectSubscriptions.all("active");
     for (auto i : filter_raw(ao)) {
         if (isname(name, i->name))
             if (CAN_SEE_OBJ(ch, i))

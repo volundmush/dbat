@@ -420,7 +420,7 @@ obj_data *get_obj(char *name) {
         return std::dynamic_pointer_cast<obj_data>(uidResult).get();
     }
     else {
-        auto ao = activeObjects;
+        auto ao = objectSubscriptions.all("active");
         for (auto obj : filter_raw(ao)) {
             if (isname(name, obj->name))
                 return obj;
@@ -469,7 +469,7 @@ char_data *get_char_by_obj(obj_data *obj, char *name) {
             valid_dg_target(obj->worn_by, DG_ALLOW_GODS))
             return obj->worn_by;
         
-        auto ac = activeCharacters;
+        auto ac = characterSubscriptions.all("active");
         for (auto ch : filter_raw(ac)) {
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
@@ -501,7 +501,7 @@ char_data *get_char_by_room(room_data *room, char *name) {
                 valid_dg_target(ch, DG_ALLOW_GODS))
                 return ch;
 
-        auto ac = activeCharacters;
+        auto ac = characterSubscriptions.all("active");
         for (auto ch : filter_raw(ac)) {
             if (isname(name, ch->name) &&
                 valid_dg_target(ch, DG_ALLOW_GODS))
@@ -585,7 +585,7 @@ obj_data *get_obj_by_room(room_data *room, char *name) {
         if (isname(name, obj->name))
             return obj;
 
-    auto ao = activeObjects;
+    auto ao = objectSubscriptions.all("active");
     for (auto obj : filter_raw(ao)) {
         if (isname(name, obj->name))
             return obj;
@@ -662,7 +662,7 @@ void check_time_triggers() {
 }
 
 void check_interval_triggers(int trigFlag) {
-    auto ac = activeCharacters;
+    auto ac = characterSubscriptions.all("active");
     for (auto ch : filter_raw(ac)) {
         auto sc = SCRIPT(ch);
 
@@ -672,7 +672,7 @@ void check_interval_triggers(int trigFlag) {
             interval_mtrigger(ch, trigFlag);
     }
 
-    auto ao = activeObjects;
+    auto ao = objectSubscriptions.all("active");
     for (auto obj : filter_raw(ao)) {
         auto sc = SCRIPT(obj);
 

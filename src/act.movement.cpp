@@ -192,8 +192,8 @@ ACMD(do_carry) {
     act("@C$n@W picks up $c$N@W and puts $M over $s shoulder.@n", true, ch, nullptr, vict, TO_NOTVICT);
     if (SITS(vict)) {
         struct obj_data *chair = SITS(vict);
-        SITTING(chair) = nullptr;
-        SITS(vict) = nullptr;
+        chair->sitting.reset();
+        vict->sits.reset();
     }
     CARRYING(ch) = vict;
     CARRIED_BY(vict) = ch;
@@ -1066,8 +1066,8 @@ ACMD(do_move) {
             act("@C$n@w crawls on $s hands and knees.@n", true, ch, nullptr, nullptr, TO_ROOM);
             if (SITS(ch)) {
                 struct obj_data *chair = SITS(ch);
-                SITTING(chair) = nullptr;
-                SITS(ch) = nullptr;
+                chair->sitting.reset();
+                ch->sits.reset();
             }
             WAIT_STATE(ch, PULSE_3SEC);
         } else if (GET_POS(ch) == POS_SITTING) {
@@ -1075,8 +1075,8 @@ ACMD(do_move) {
             act("@C$n@w shuffles on $s hands and knees.@n", true, ch, nullptr, nullptr, TO_ROOM);
             if (SITS(ch)) {
                 struct obj_data *chair = SITS(ch);
-                SITTING(chair) = nullptr;
-                SITS(ch) = nullptr;
+                chair->sitting.reset();
+                ch->sits.reset();
             }
             WAIT_STATE(ch, PULSE_2SEC);
         } else if (GET_POS(ch) < POS_RESTING) {
@@ -2128,9 +2128,9 @@ ACMD(do_fly) {
         reveal_hiding(ch, 0);
         GET_ALT(ch) = alt;
         ch->affected_by.set(AFF_FLYING);
-        if (SITS(ch)) {
-            SITTING(SITS(ch)) = nullptr;
-            SITS(ch) = nullptr;
+        if (auto chair = SITS(ch); chair) {
+            chair->sitting.reset();
+            ch->sits.reset();
         }
         GET_POS(ch) = POS_STANDING;
         if(!IS_ANDROID(ch))
@@ -2189,8 +2189,8 @@ ACMD(do_fly) {
 
 static void autochair(struct char_data *ch, struct obj_data *chair) {
     // TODO: Make this configurable.
-    SITTING(chair) = nullptr;
-    SITS(ch) = nullptr;
+    chair->sitting.reset();
+    ch->sits.reset();
     if (CAN_WEAR(chair, ITEM_WEAR_TAKE) && GET_OBJ_TYPE(chair) != ITEM_CHAIR && ch->canCarryWeight(chair)) {
         obj_from_room(chair);
         obj_to_char(chair, ch);
@@ -2334,8 +2334,8 @@ ACMD(do_sit) {
             act("You sit down on $p.", false, ch, chair, nullptr, TO_CHAR);
             act("$n sits down on $p.", false, ch, chair, nullptr, TO_ROOM);
             GET_POS(ch) = POS_SITTING;
-            SITS(ch) = chair;
-            SITTING(chair) = ch;
+            ch->sits = chair->shared();
+            chair->sitting = ch->shared();
             break;
         case POS_SITTING:
             send_to_char(ch, "You should stand up first.\r\n");
@@ -2475,8 +2475,8 @@ ACMD(do_rest) {
             reveal_hiding(ch, 0);
             act("You lay down and rest on $p.", true, ch, chair, nullptr, TO_CHAR);
             act("$n lays down and rests on $p.", true, ch, chair, nullptr, TO_ROOM);
-            SITS(ch) = chair;
-            SITTING(chair) = ch;
+            ch->sits = chair->shared();
+            chair->sitting = ch->shared();
             GET_POS(ch) = POS_RESTING;
             ch->removeLimitBreak();
             break;
@@ -2668,8 +2668,8 @@ ACMD(do_sleep) {
                 GET_STUPIDKISS(ch) = 0;
                 send_to_char(ch, "You forget about that stupid kiss.\r\n");
             }
-            SITS(ch) = chair;
-            SITTING(chair) = ch;
+            ch->sits = chair->shared();
+            chair->sitting = ch->shared();
             GET_POS(ch) = POS_SLEEPING;
             break;
         case POS_SLEEPING:

@@ -399,19 +399,15 @@ extern std::map<mob_vnum, struct index_data> mob_index;
 extern std::map<mob_vnum, struct char_data> mob_proto;
 
 extern std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
-extern std::list<std::weak_ptr<char_data>> activeCharacters;
 extern std::vector<std::weak_ptr<char_data>> getAllCharacters();
 int nextID();
 
-extern VnumIndex<obj_data> objectVnumIndex;
-extern VnumIndex<char_data> characterVnumIndex;
 extern VnumIndex<trig_data> scriptVnumIndex;
 
 extern std::map<obj_vnum, struct index_data> obj_index;
 extern std::map<obj_vnum, struct obj_data> obj_proto;
 
 extern std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
-extern std::list<std::weak_ptr<obj_data>> activeObjects;
 extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
 
 extern SubscriptionManager<char_data> characterSubscriptions;

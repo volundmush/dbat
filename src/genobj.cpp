@@ -50,7 +50,7 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
 int update_objects(struct obj_data *refobj) {
     int count = 0;
 
-    auto objects = get_vnum_list(objectVnumIndex, refobj->vn);
+    auto objects = objectSubscriptions.all(fmt::format("vnum_{}", refobj->vn));
     for (auto obj : filter_raw(objects)) {
         count++;
         // TODO: Reimplement this.
@@ -179,13 +179,8 @@ int delete_object(obj_rnum rnum) {
 
     /* This is something you might want to read about in the logs. */
     basic_mud_log("GenOLC: delete_object: Deleting object #%d (%s).", GET_OBJ_VNUM(obj), obj->short_description);
-
-    for (auto tmp3 : get_vnum_list(objectVnumIndex, obj->vn)) {
-        auto tmp2 = tmp3.lock();
-        if(!tmp2) continue;
-        tmp = tmp2.get();
-        if (tmp->vn != obj->vn)
-            continue;
+    auto allobj = objectSubscriptions.all(fmt::format("vnum_{}", obj->vn));
+    for (auto tmp : filter_raw(allobj)) {
 
         /* extract_obj() will just axe contents. */
         if (auto con = tmp->getObjects(); !con.empty()) {
@@ -212,7 +207,7 @@ int delete_object(obj_rnum rnum) {
 
     /* Make sure all are removed. */
 
-    assert(get_vnum_count(objectVnumIndex, rnum) == 0);
+    assert(objectSubscriptions.count(fmt::format("vnum_{}", rnum)) == 0);
     obj_proto.erase(rnum);
     obj_index.erase(rnum);
     save_objects(zrnum);
@@ -396,25 +391,31 @@ void obj_data::activate() {
         return;
     }
     active = true;
+    std::unordered_set<std::string> services;
 
     if(obj_proto.contains(vn)) {
-        insert_vnum(objectVnumIndex, this);
+        services.insert(fmt::format("vnum_{}", vn));
     }
 
     if(trig_list) {
         activateScripts();
-        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
-            objectSubscriptions.subscribe("randomTriggers", this);
-        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
-            objectSubscriptions.subscribe("timeTriggers", this);
+        if(SCRIPT_TYPES(this) & OTRIG_RANDOM)
+            services.insert("randomTriggers");
+        if(SCRIPT_TYPES(this) & OTRIG_TIME)
+            services.insert("timeTriggers");
     }
-    activeObjects.push_back(shared_from_this());
+    auto sh = shared_from_this();
+    services.insert("active");
     if(IS_CORPSE(this))
-        objectSubscriptions.subscribe("corpseRotService", this);
-    if(script && SCRIPT_TYPES(SCRIPT(this)) && OTRIG_RANDOM)
-        objectSubscriptions.subscribe("randomTriggers", this);
+        services.insert("corpseRotService");
+    if(SCRIPT_TYPES(this) && OTRIG_RANDOM)
+        services.insert("randomTriggers");
     if(vn == 65)
-        objectSubscriptions.subscribe("healTankService", this);
+        services.insert("healTankService");
+
+    for(const auto& s : services) {
+        objectSubscriptions.subscribe(s, sh);
+    }
 
     activateContents();
 }
@@ -422,10 +423,6 @@ void obj_data::activate() {
 void obj_data::deactivate() {
     if(!active) return;
     active = false;
-
-    if(obj_proto.contains(vn)) {
-        erase_vnum(objectVnumIndex, this);
-    }
 
     if(trig_list) {
         struct trig_data *next_trig;
@@ -435,11 +432,8 @@ void obj_data::deactivate() {
         }
         trig_list = nullptr;
     }
-    auto shared = shared_from_this();
-    activeObjects.remove_if([shared](const std::weak_ptr<obj_data>& obj) {
-        return obj.expired() || obj.lock() == shared;
-    });
-    objectSubscriptions.unsubscribeFromAll(shared_from_this());
+    auto sh = shared_from_this();
+    objectSubscriptions.unsubscribeFromAll(sh);
     deactivateContents();
 }
 
@@ -479,7 +473,8 @@ weight_t obj_data::getWeight() {
 }
 
 weight_t obj_data::getTotalWeight() {
-    return getWeight() + getInventoryWeight() + (sitting ? sitting->getTotalWeight() : 0);
+    auto s = sitting.lock();
+    return getWeight() + getInventoryWeight() + (s ? s->getTotalWeight() : 0);
 }
 
 bool obj_data::isActive() {

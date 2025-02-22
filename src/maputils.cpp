@@ -26,7 +26,7 @@ void ping_ship(int vnum, int vnum2) {
         return;
     }
     
-    auto ac = activeCharacters;
+    auto ac = characterSubscriptions.all("active");
     for (auto tch : filter_raw(ac)) {
         if (!(obj = find_control(tch))) {
             continue;
