@@ -1255,6 +1255,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     auto mob = sh.get();
 
     *mob = proto->second;
+    mob->proto = &(proto->second);
     mob->id = nextID();
     mob->generation = time(nullptr);
     uniqueCharacters.emplace(mob->id, sh);
@@ -1829,6 +1830,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     auto sh = std::make_shared<obj_data>();
     auto obj = sh.get();
     *obj = proto->second;
+    obj->proto = &(proto->second);
     OBJ_LOADROOM(obj) = NOWHERE;
     obj->id = nextID();
     obj->generation = time(nullptr);

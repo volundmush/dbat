@@ -124,6 +124,8 @@ struct unit_data {
     
     virtual int getType() const = 0; // 0 is room, 1 is object, 2 is character.
 
+    struct unit_data *proto{};
+
     char *name{};
     char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */

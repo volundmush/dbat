@@ -30,23 +30,28 @@ nlohmann::json unit_data::serializeUnit() {
     nlohmann::json j;
 
     if(vn != NOTHING) j["vn"] = vn;
-
-    if(name && strlen(name)) j["name"] = name;
-    if(room_description && strlen(room_description)) j["room_description"] = room_description;
-    if(look_description && strlen(look_description)) j["look_description"] = look_description;
-    if(short_description && strlen(short_description)) j["short_description"] = short_description;
-
-    for(auto ex = ex_description; ex; ex = ex->next) {
-        if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
-            nlohmann::json p;
-            p.push_back(ex->keyword);
-            p.push_back(ex->description);
-            j["ex_description"].push_back(p);
-        }
-    }
-
     if(id != NOTHING) j["id"] = id;
     if(zone != NOTHING) j["zone"] = zone;
+
+    if(proto) {
+        if(name && name != proto->name) j["name"] = name;
+        if(room_description && room_description != proto->room_description) j["room_description"] = room_description;
+        if(look_description && look_description != proto->look_description) j["look_description"] = look_description;
+        if(short_description && short_description != proto->short_description) j["short_description"] = short_description;
+    } else {
+        if(name && strlen(name)) j["name"] = name;
+        if(room_description && strlen(room_description)) j["room_description"] = room_description;
+        if(look_description && strlen(look_description)) j["look_description"] = look_description;
+        if(short_description && strlen(short_description)) j["short_description"] = short_description;
+        for(auto ex = ex_description; ex; ex = ex->next) {
+            if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
+                nlohmann::json p;
+                p.push_back(ex->keyword);
+                p.push_back(ex->description);
+                j["ex_description"].push_back(p);
+            }
+        }
+    }
 
     return j;
 }
@@ -54,20 +59,39 @@ nlohmann::json unit_data::serializeUnit() {
 
 void unit_data::deserializeUnit(const nlohmann::json& j) {
     if(j.contains("vn")) vn = j["vn"];
+    if(j.contains("id")) id = j["id"];
+    if(j.contains("zone")) zone = j["zone"];
+
+    if(vn != NOTHING && id != NOTHING)
+        switch(getType()) {
+            case 0:
+                break;
+            case 1:
+                proto = &(obj_proto.at(vn));
+                break;
+            case 2:
+                proto = &(mob_proto.at(vn));
+                break;
+        }
+
+    if(proto) {
+        name = proto->name;
+        room_description = proto->room_description;
+        look_description = proto->look_description;
+        short_description = proto->short_description;
+        ex_description = proto->ex_description;
+    }
+
     if(j.contains("name")) {
-        if(name) free(name);
         name = strdup(j["name"].get<std::string>().c_str());
     }
     if(j.contains("room_description")) {
-        if(room_description) free(room_description);
         room_description = strdup(j["room_description"].get<std::string>().c_str());
     }
     if(j.contains("look_description")) {
-        if(look_description) free(look_description);
         look_description = strdup(j["look_description"].get<std::string>().c_str());
     }
     if(j.contains("short_description")) {
-        if(short_description) free(short_description);
         short_description = strdup(j["short_description"].get<std::string>().c_str());
     }
 
@@ -81,9 +105,6 @@ void unit_data::deserializeUnit(const nlohmann::json& j) {
             ex_description = new_ex;
         }
     }
-
-    if(j.contains("id")) id = j["id"];
-    if(j.contains("zone")) zone = j["zone"];
 
 }
 
