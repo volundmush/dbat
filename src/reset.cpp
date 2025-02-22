@@ -94,7 +94,7 @@ bool prereset_gauntlet_zone() {
                 /* Yep - no players, reset this room only */
                 if ((real_mobile(gauntlet_mobs[i].vmob)) && (real_room(gauntlet_mobs[i].vroom))) {
                     /* Load the correct mob */
-                    if ((mob = read_mobile(gauntlet_mobs[i].vmob, VIRTUAL)) != nullptr) {
+                    if ((mob = read_mobile(gauntlet_mobs[i].vmob, VIRTUAL))) {
                         /* And put it in the room */
                         char_to_room(mob, real_room(gauntlet_mobs[i].vroom));
                         basic_mud_log("Special Reset: zone %d: Gauntlet mob reset (%d, %s)", RESET_GAUNTLET,

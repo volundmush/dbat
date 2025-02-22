@@ -722,7 +722,7 @@ ACMD(do_grapple) {
         return;
     }
 
-    if (GRAPPLING(ch) != nullptr) {
+    if (GRAPPLING(ch)) {
         act("@RYou stop grappling with @r$N@R!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
         act("@r$n@R stops grappling with @rYOU!!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
         act("@r$n@R stops grappling with @r$N@R!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
@@ -733,7 +733,7 @@ ACMD(do_grapple) {
         return;
     }
 
-    if (GRAPPLED(ch) != nullptr) {
+    if (GRAPPLED(ch)) {
         send_to_char(ch, "You are currently a victim of grappling! Try 'escape' to break free!\r\n");
         return;
     }
@@ -1003,7 +1003,7 @@ ACMD(do_trip) {
         return;
     }
 
-    if (vict != nullptr) {
+    if (vict) {
         if (AFF_FLAGGED(vict, AFF_FLYING)) {
             send_to_char(ch, "They are flying and are not on their feet!\r\n");
             return;
@@ -6952,7 +6952,7 @@ ACMD(do_instant) {
     }
 
     if (skill < perc || (FIGHTING(ch) && rand_number(1, 2) <= 1)) {
-        if (tar != nullptr) {
+        if (tar) {
             if (tar != ch) {
                 send_to_char(ch,
                              "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
@@ -6976,7 +6976,7 @@ ACMD(do_instant) {
 
     reveal_hiding(ch, 0);
     WAIT_STATE(ch, PULSE_2SEC);
-    if (tar != nullptr) {
+    if (tar) {
         if (tar == ch) {
             send_to_char(ch,
                          "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
@@ -8273,7 +8273,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
 }
 
 static int has_scanner(struct char_data *ch) {
-    return ch->findObjectVnum(13600) != nullptr;
+    return ch->findObjectVnum(13600);
 }
 
 ACMD(do_snet) {
@@ -8359,7 +8359,7 @@ ACMD(do_snet) {
         if (!strcasecmp(arg, "*") && call <= -1) {
             global = true;
         }
-        if (GET_VOICE(ch) != nullptr) {
+        if (GET_VOICE(ch)) {
             sprintf(voice, "%s", GET_VOICE(ch));
         }
         if (GET_VOICE(ch) == nullptr) {
@@ -10672,13 +10672,13 @@ ACMD(do_clan) {
             show_clan_info(ch);
         else if (!isClan(arg2))
             send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
-        else if (GET_CLAN(ch) != nullptr && clanIsMember(GET_CLAN(ch), ch))
+        else if (GET_CLAN(ch) && clanIsMember(GET_CLAN(ch), ch))
             send_to_char(ch, "You are already a member of %s.\r\n", GET_CLAN(ch));
         else if (clanOpenJoin(arg2)) {
             send_to_char(ch, "You can just join %s, it is open.\r\n", arg2);
             return;
         } else {
-            if (GET_CLAN(ch) != nullptr && checkCLAN(ch) == true) {
+            if (GET_CLAN(ch) && checkCLAN(ch) == true) {
                 checkAPP(ch);
                 send_to_char(ch, "You stop applying to %s\r\n", GET_CLAN(ch));
                 clanDecline(GET_CLAN(ch), ch);
@@ -10700,10 +10700,10 @@ ACMD(do_clan) {
             send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
         else if (clanIsMember(arg2, ch))
             send_to_char(ch, "You are already a member of %s.\r\n", arg2);
-        else if (GET_CLAN(ch) != nullptr && checkCLAN(ch) == true && strstr(GET_CLAN(ch), "Applying") == false)
+        else if (GET_CLAN(ch) && checkCLAN(ch) == true && strstr(GET_CLAN(ch), "Applying") == false)
             send_to_char(ch, "You are already a member of %s, you need to leave it first.\r\n", GET_CLAN(ch));
         else if (clanOpenJoin(arg2)) {
-            if (GET_CLAN(ch) != nullptr && checkCLAN(ch) == true) {
+            if (GET_CLAN(ch) && checkCLAN(ch) == true) {
                 checkAPP(ch);
                 send_to_char(ch, "You stop applying to %s\r\n", GET_CLAN(ch));
                 clanDecline(GET_CLAN(ch), ch);

@@ -4,7 +4,8 @@
 
 std::vector<std::weak_ptr<obj_data>> unit_data::getObjects() {
     std::vector<std::weak_ptr<obj_data>> out;
-    for(auto o = contents; o; o = o->next_content) out.emplace_back(o->shared());
+    out.reserve(objects.size());
+    std::copy(objects.begin(), objects.end(), std::back_inserter(out));
     out.shrink_to_fit();
     return out;
 }

@@ -110,7 +110,7 @@ struct clan_data {
 //
 struct clan_member *clanMemberFromList(const int id, struct clan_member *list) {
 
-    for (; list != nullptr; list = list->next)
+    for (; list; list = list->next)
         if (id == list->id)
             return list;
 
@@ -349,15 +349,15 @@ bool clanSave(const struct clan_data *S, const char *filename) {
     fprintf(fl, "%s\n", S->highrank);
     fprintf(fl, "%s\n", S->midrank);
 
-    for (list = S->moderators; list != nullptr; list = list->next)
+    for (list = S->moderators; list; list = list->next)
         fprintf(fl, "%d\n", list->id);
     fprintf(fl, "~\n");
 
-    for (list = S->members; list != nullptr; list = list->next)
+    for (list = S->members; list; list = list->next)
         fprintf(fl, "%d\n", list->id);
     fprintf(fl, "~\n");
 
-    for (list = S->applicants; list != nullptr; list = list->next)
+    for (list = S->applicants; list; list = list->next)
         fprintf(fl, "%d\n", list->id);
     fprintf(fl, "~\n");
 
@@ -376,19 +376,19 @@ void clanDelete(struct clan_data *S) {
     struct clan_member *next, *member;
 
     if (S->moderators)
-        for (member = S->moderators; member != nullptr; member = next) {
+        for (member = S->moderators; member; member = next) {
             next = member->next;
             free(member);
         }
 
     if (S->members)
-        for (member = S->members; member != nullptr; member = next) {
+        for (member = S->members; member; member = next) {
             next = member->next;
             free(member);
         }
 
     if (S->applicants)
-        for (member = S->applicants; member != nullptr; member = next) {
+        for (member = S->applicants; member; member = next) {
             next = member->next;
             free(member);
         }
@@ -545,7 +545,7 @@ void clanBoot() {
 
 
 bool isClan(const char *name) {
-    return (clanGet(name) != nullptr);
+    return (clanGet(name));
 }
 
 
@@ -800,14 +800,14 @@ bool clanInduct(const char *name, struct char_data *ch) {
 }
 
 void set_clan(struct char_data *ch, char *clan) {
-    if (GET_CLAN(ch) != nullptr)
+    if (GET_CLAN(ch))
         free(GET_CLAN(ch));
     GET_CLAN(ch) = strdup(clan);
     GET_CRANK(ch) = 0;
 }
 
 void remove_clan(struct char_data *ch) {
-    if (GET_CLAN(ch) != nullptr)
+    if (GET_CLAN(ch))
         free(GET_CLAN(ch));
     GET_CLAN(ch) = strdup("None.");
 }
@@ -922,7 +922,7 @@ bool clanIsModerator(const char *name, const struct char_data *ch) {
     if (S == nullptr || IS_NPC(ch))
         return false;
 
-    return (clanMemberFromList(GET_IDNUM(ch), S->moderators) != nullptr);
+    return (clanMemberFromList(GET_IDNUM(ch), S->moderators));
 }
 
 
@@ -933,21 +933,21 @@ bool clanIsApplicant(const char *name, const struct char_data *ch) {
     if (S == nullptr || IS_NPC(ch))
         return false;
 
-    return (clanMemberFromList(GET_IDNUM(ch), S->applicants) != nullptr);
+    return (clanMemberFromList(GET_IDNUM(ch), S->applicants));
 }
 
 
 bool clanOpenJoin(const char *name) {
 
     struct clan_data *S = clanGet(name);
-    return (S != nullptr && S->open_join == true);
+    return (S && S->open_join == true);
 }
 
 
 bool clanOpenLeave(const char *name) {
 
     struct clan_data *S = clanGet(name);
-    return (S != nullptr && S->open_leave == true);
+    return (S && S->open_leave == true);
 }
 
 

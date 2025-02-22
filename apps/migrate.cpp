@@ -689,8 +689,6 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     }
 
     r->func = nullptr;
-    r->contents = nullptr;
-    r->people = nullptr;
     r->timed = -1;
 
     for (i = 0; i < NUM_OF_DIRS; i++)
@@ -2626,47 +2624,6 @@ int House_load(room_vnum rvnum) {
                 obj_to_room(temp, rrnum);
             }
 
-/*No need to check if its equipped since rooms can't equip things --firebird_223*/
-            for (j = MAX_BAG_ROWS - 1; j > -locate; j--)
-                if (cont_row[j]) { /* no container -> back to ch's inventory */
-                    for (; cont_row[j]; cont_row[j] = obj1) {
-                        obj1 = cont_row[j]->next_content;
-                        obj_to_room(cont_row[j], rrnum);
-                    }
-                    cont_row[j] = nullptr;
-                }
-
-            if (j == -locate && cont_row[j]) { /* content list existing */
-                if (GET_OBJ_TYPE(temp) == ITEM_CONTAINER) {
-                    /* take item ; fill ; give to char again */
-                    obj_from_room(temp);
-                    temp->contents = nullptr;
-                    for (; cont_row[j]; cont_row[j] = obj1) {
-                        obj1 = cont_row[j]->next_content;
-                        obj_to_obj(cont_row[j], temp);
-                    }
-                    obj_to_room(temp, rrnum); /* add to inv first ... */
-                } else { /* object isn't container -> empty content list */
-                    for (; cont_row[j]; cont_row[j] = obj1) {
-                        obj1 = cont_row[j]->next_content;
-                        obj_to_room(cont_row[j], rrnum);
-                    }
-                    cont_row[j] = nullptr;
-                }
-            }
-
-            if (locate < 0 && locate >= -MAX_BAG_ROWS) {
-                /* let obj be part of content list
-                   but put it at the list's end thus having the items
-                   in the same order as before renting */
-                obj_from_room(temp);
-                if ((obj1 = cont_row[-locate - 1])) {
-                    while (obj1->next_content)
-                        obj1 = obj1->next_content;
-                    obj1->next_content = temp;
-                } else
-                    cont_row[-locate - 1] = temp;
-            }
         } else {
             get_line(fl, line);
         }

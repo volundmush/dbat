@@ -38,12 +38,11 @@ struct obj_data *find_hatch_by_vnum(int vnum) {
 }
 
 
-
 /* Search the player's room, inventory and equipment for a control */
 struct obj_data *find_control(struct char_data *ch) {
     struct obj_data *controls, *obj;
     int j;
-    auto iscontrol = [&](obj_data *o) { return CAN_SEE_OBJ(ch, obj) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
+    auto iscontrol = [ch](obj_data *o) { return CAN_SEE_OBJ(ch, o) && GET_OBJ_TYPE(o) == ITEM_CONTROL; };
 
     controls = ch->getRoom()->findObject(iscontrol);
     if (!controls) controls = ch->findObject(iscontrol);
@@ -97,7 +96,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
     obj_from_room(vehicle);
     obj_to_room(vehicle, is_going_to);
     is_in = IN_ROOM(vehicle);
-    if (ch->desc != nullptr)
+    if (ch->desc)
         act("", true, ch, nullptr, nullptr, TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
     look_at_room(IN_ROOM(vehicle), ch, 0);
@@ -133,7 +132,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
 
     room = vehicle->getRoom();
 
-    if (ch->desc != nullptr)
+    if (ch->desc)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");
@@ -215,7 +214,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
 
     is_in = IN_ROOM(vehicle);
 
-    if (ch->desc != nullptr)
+    if (ch->desc)
         act("@wThe @De@Wn@wg@Di@wn@We@Ds@w of the ship @rr@Ro@ra@Rr@w as it moves.", true, ch, nullptr, nullptr,
             TO_ROOM);
     send_to_char(ch, "@wThe ship flies onward:\r\n");

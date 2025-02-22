@@ -283,7 +283,7 @@ void olc_string(char **string, size_t maxlen, char *arg) {
         if (strlen(arg) > maxlen) {
             send_to_char(olc_ch, "String too long (cannot be more than %d chars).\r\n", (int) maxlen);
         } else {
-            if (*string != nullptr)
+            if (*string)
                 free(*string);
             *string = strdup(arg);
             send_to_char(olc_ch, "%s", CONFIG_OK);

@@ -30,9 +30,8 @@ void perform_mag_groups(int level, struct char_data *ch, struct char_data *tch, 
 /* affect_update: called from comm.c (causes spells to wear off) */
 void affect_update(uint64_t heartPulse, double deltaTime) {
     struct affected_type *af, *next;
-    struct char_data *i;
-
-    for (i = affect_list; i; i = i->next_affect) {
+    auto subs = characterSubscriptions.all("affected");
+    for (auto i : filter_raw(subs)) {
         for (af = i->affected; af; af = next) {
             next = af->next;
             if (af->duration >= 1)
@@ -570,9 +569,9 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
         if (af[i].bitvector || (af[i].location != APPLY_NONE))
             affect_join(victim, af + i, accum_duration, false, accum_affect, false);
 
-    if (to_vict != nullptr)
+    if (to_vict)
         act(to_vict, false, victim, nullptr, ch, TO_CHAR);
-    if (to_room != nullptr)
+    if (to_room)
         act(to_room, true, victim, nullptr, ch, TO_ROOM);
 }
 
@@ -617,7 +616,7 @@ void mag_groups(int level, struct char_data *ch, int spellnum) {
 
     if (!AFF_FLAGGED(ch, AFF_GROUP))
         return;
-    if (ch->master != nullptr)
+    if (ch->master)
         k = ch->master;
     else
         k = ch;
@@ -681,9 +680,9 @@ void mag_areas(int level, struct char_data *ch, int spellnum) {
             break;
     }
 
-    if (to_char != nullptr)
+    if (to_char)
         act(to_char, false, ch, nullptr, nullptr, TO_CHAR);
-    if (to_room != nullptr)
+    if (to_room)
         act(to_room, false, ch, nullptr, nullptr, TO_ROOM);
 
     auto people = ch->getLocationPeople();
@@ -1067,9 +1066,9 @@ void mag_unaffects(int level, struct char_data *ch, struct char_data *victim,
     }
 
     affect_from_char(victim, spell);
-    if (to_vict != nullptr)
+    if (to_vict)
         act(to_vict, false, victim, nullptr, ch, TO_CHAR);
-    if (to_room != nullptr)
+    if (to_room)
         act(to_room, true, victim, nullptr, ch, TO_ROOM);
 
 }
@@ -1127,9 +1126,9 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
     else
         act(to_char, true, ch, obj, nullptr, TO_CHAR);
 
-    if (to_room != nullptr)
+    if (to_room)
         act(to_room, true, ch, obj, nullptr, TO_ROOM);
-    else if (to_char != nullptr)
+    else if (to_char)
         act(to_char, true, ch, obj, nullptr, TO_ROOM);
 
 }
@@ -1341,9 +1340,9 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
         if (af[i].bitvector || (af[i].location != APPLY_NONE))
             affectv_join(victim, af + i, accum_duration, false, accum_affect, false);
 
-    if (to_vict != nullptr)
+    if (to_vict)
         act(to_vict, false, victim, nullptr, ch, TO_CHAR);
-    if (to_room != nullptr)
+    if (to_room)
         act(to_room, true, victim, nullptr, ch, TO_ROOM);
 }
 

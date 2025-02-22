@@ -315,7 +315,7 @@ static int64_t mana_gain(struct char_data *ch) {
         gain *= 2;
     }
 
-    if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != nullptr) {
+    if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch)) {
         gain *= 20;
     }
     if (AFF_FLAGGED(ch, AFF_POSE) && axion_dice(0) > GET_SKILL(ch, SKILL_POSE)) {
@@ -472,7 +472,7 @@ int64_t hit_gain(struct char_data *ch) {
     if (IS_HOSHIJIN(ch) && GET_PHASE(ch) > 0) {
         gain *= 2;
     }
-    if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != nullptr) {
+    if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch)) {
         gain *= 20;
     }
 
@@ -608,7 +608,7 @@ static int64_t move_gain(struct char_data *ch) {
     if (IS_HOSHIJIN(ch) && GET_PHASE(ch) > 0) {
         gain *= 2;
     }
-    if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch) != nullptr) {
+    if (PLR_FLAGGED(ch, PLR_HEALT) && SITS(ch)) {
         gain *= 20;
     }
 
@@ -753,7 +753,7 @@ void set_title(struct char_data *ch, char *title) {
      if (strlen(title) > MAX_TITLE_LENGTH)
        title[MAX_TITLE_LENGTH] = '\0';
 
-     if (GET_TITLE(ch) != nullptr)
+     if (GET_TITLE(ch))
        free(GET_TITLE(ch));
 
      GET_TITLE(ch) = strdup(title);
@@ -1431,37 +1431,26 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
         /* timer count down */
         if (GET_OBJ_TIMER(j) > 0)
             GET_OBJ_TIMER(j)--;
+        auto room = j->getRoom();
         if (!strstr(j->name, "android") && !strstr(j->name, "Android") && !OBJ_FLAGGED(j, ITEM_BURIED)) {
             if (GET_OBJ_TIMER(j) == 5) {
-                if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                    act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                        TO_CHAR);
-                    act("@DFlies start to gather around $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                        TO_ROOM);
+                if (room) {
+                    send_to_room(room, "@DFlies start to gather around $p@D.@n\r\n", j->short_description);
                 }
             }
             if (GET_OBJ_TIMER(j) == 3) {
-                if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                    act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                        TO_CHAR);
-                    act("@DA cloud of flies has formed over $p@D.@n", true, j->getRoom()->people, j, nullptr,
-                        TO_ROOM);
+                if (room) {
+                    send_to_room(room, "@DA cloud of flies has formed over %s@D.@n\r\n", j->short_description);
                 }
             }
             if (GET_OBJ_TIMER(j) == 2) {
-                if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                    act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
-                        nullptr, TO_CHAR);
-                    act("@DMaggots can be seen crawling all over $p@D.@n", true, j->getRoom()->people, j,
-                        nullptr, TO_ROOM);
+                if (room) {
+                    send_to_room(room, "@DMaggots can be seen crawling all over %s@D.@n\r\n", j->short_description);
                 }
             }
             if (GET_OBJ_TIMER(j) == 1) {
-                if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                    act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
-                        j, nullptr, TO_CHAR);
-                    act("@DMaggots have nearly stripped $p of all its flesh@D.@n", true, j->getRoom()->people,
-                        j, nullptr, TO_ROOM);
+                if (room) {
+                    send_to_room(room, "@DMaggots have nearly stripped %s of all its flesh@D.@n\r\n", j->short_description);
                 }
             }
         }
@@ -1470,20 +1459,8 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
             if (j->carried_by) {
                 if (!strstr(j->name, "android")) {
                     act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("A quivering horde of maggots consumes $p.",
-                            true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                        act("A quivering horde of maggots consumes $p.",
-                            true, j->getRoom()->people, j, nullptr, TO_CHAR);
-                    }
                 } else {
                     act("$p decays in your hands.", false, j->carried_by, j, nullptr, TO_CHAR);
-                    if ((IN_ROOM(j) != NOWHERE) && (j->getRoom()->people)) {
-                        act("$p breaks down completely into a pile of junk.",
-                            true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                        act("$p breaks down completely into a pile of junk.",
-                            true, j->getRoom()->people, j, nullptr, TO_CHAR);
-                    }
                 }
             }
             auto con = j->getObjects();
@@ -1494,8 +1471,8 @@ void corpseRotService(uint64_t heartPulse, double deltaTime) {
                     obj_to_obj(jj, j->in_obj);
                 else if (j->carried_by)
                     obj_to_room(jj, IN_ROOM(j->carried_by));
-                else if (IN_ROOM(j) != NOWHERE)
-                    obj_to_room(jj, IN_ROOM(j));
+                else if (room)
+                    obj_to_room(jj, room);
                 else
                     core_dump();
             }
@@ -1847,10 +1824,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 GET_OBJ_TIMER(j)--;
 
             if (GET_OBJ_TIMER(j) == 0) {
-                act("A glowing portal fades from existence.",
-                    true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                act("A glowing portal fades from existence.",
-                    true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                send_to_room(j->getRoom(), "A glowing portal fades from existence.\r\n");
                 extract_obj(j);
             }
         } else if (GET_OBJ_VNUM(j) == 1306) {
@@ -1858,10 +1832,7 @@ void point_update(uint64_t heartPulse, double deltaTime) {
                 GET_OBJ_TIMER(j)--;
 
             if (GET_OBJ_TIMER(j) == 0) {
-                act("The $p@n settles to the ground and goes out.",
-                    true, j->getRoom()->people, j, nullptr, TO_ROOM);
-                act("A $p@n settles to the ground and goes out.",
-                    true, j->getRoom()->people, j, nullptr, TO_CHAR);
+                send_to_room(j->getRoom(), "The %s@n settles to the ground and goes out.\r\n", j->short_description);
                 extract_obj(j);
             }
         } else if (OBJ_FLAGGED(j, ITEM_ICE)) {

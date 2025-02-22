@@ -764,7 +764,7 @@ ACMD(do_selfd) {
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->playerFlags.reset(PLR_SELFD);
         return;
-    } else if (GRAPPLING(ch) != nullptr && !can_kill(ch, GRAPPLING(ch), nullptr, 3)) {
+    } else if (GRAPPLING(ch) && !can_kill(ch, GRAPPLING(ch), nullptr, 3)) {
         act("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n",
@@ -772,7 +772,7 @@ ACMD(do_selfd) {
         send_to_char(ch, "You can't kill them, the immortals won't allow it!\r\n");
         ch->playerFlags.reset(PLR_SELFD);
         return;
-    } else if (GRAPPLING(ch) != nullptr) {
+    } else if (GRAPPLING(ch)) {
         tch = GRAPPLING(ch);
         dmg += GET_CHARGE(ch);
         GET_CHARGE(ch) = 0;

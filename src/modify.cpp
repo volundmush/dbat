@@ -74,7 +74,7 @@ void smash_tilde(char *str) {
      * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
      * his tildes thank you very much.), -gg 2/20/98
      */
-    while ((str = strchr(str, '~')) != nullptr)
+    while ((str = strchr(str, '~')))
         *str = ' ';
 #endif
 }
@@ -97,7 +97,7 @@ static void smash_numb(char *str) {
      * Derived from an idea by Sammy <samedi@dhc.net> (who happens to like
      * his tildes thank you very much.), -gg 2/20/98
      */
-    while ((str = strchr(str, '#')) != nullptr)
+    while ((str = strchr(str, '#')))
         *str = ' ';
 #endif
 }
@@ -276,7 +276,7 @@ static void playing_string_cleanup(struct descriptor_data *d, int action) {
                     aft = MESG_NEXT(cur);
                     if (cur->data == *d->str) {
                         if (BOARD_MESSAGES(board) == cur) {
-                            if (MESG_NEXT(cur) != nullptr) {
+                            if (MESG_NEXT(cur)) {
                                 BOARD_MESSAGES(board) = MESG_NEXT(cur);
                             } else {
                                 BOARD_MESSAGES(board) = nullptr;

@@ -26,8 +26,6 @@
 
 void wld_log(room_data *room, const char *format, ...);
 
-void act_to_room(char *str, room_data *room);
-
 WCMD(do_wasound);
 
 WCMD(do_wecho);
@@ -84,20 +82,7 @@ void wld_log(room_data *room, const char *format, ...) {
     va_end(args);
 }
 
-/* sends str to room */
-void act_to_room(char *str, room_data *room) {
-    /* no one is in the room */
-    if (!room->people)
-        return;
 
-    /*
-     * since you can't use act(..., TO_ROOM) for an room, send it
-     * TO_ROOM and TO_CHAR for some char in the room.
-     * (just dont use $n or you might get strange results)
-     */
-    act(str, false, room->people, nullptr, nullptr, TO_ROOM);
-    act(str, false, room->people, nullptr, nullptr, TO_CHAR);
-}
 
 
 
@@ -174,7 +159,7 @@ WCMD(do_wasound) {
         if(ex->to_room == room->vn) continue;
         auto dest = get_room(ex->to_room);
         if(!dest) continue;
-        act_to_room(argument, dest);
+        send_to_room(dest, "%s", argument);
     }
 }
 
@@ -186,7 +171,7 @@ WCMD(do_wecho) {
         wld_log(room, "wecho called with no args");
 
     else
-        act_to_room(argument, room);
+        send_to_room(room, "%s", argument);
 }
 
 
@@ -527,7 +512,7 @@ WCMD(do_wload) {
         two_arguments(target, arg1, arg2); /* recycling ... */
         tch = get_char_in_room(room, arg1);
         if (tch) {
-            if (arg2 != nullptr && *arg2 &&
+            if (arg2 && *arg2 &&
                 (pos = find_eq_pos_script(arg2)) >= 0 &&
                 !GET_EQ(tch, pos) &&
                 can_wear_on_pos(object, pos)) {

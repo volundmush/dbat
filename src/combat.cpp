@@ -3757,7 +3757,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         bool isLethal = !(is_sparring(ch) && is_sparring(vict));
 
 		//Check if victim is NPC or Player, both have different logic here.
-        if (vict != nullptr && IS_NPC(vict)) {
+        if (vict && IS_NPC(vict)) {
 			//Work out how challenging of an npc to fight this is, if the victim is stronger we want to give more xp. This doesn't affect attributes.
 			float plRatio = (float) vict->getMaxPLTrans() / (float) ch->getMaxPLTrans();
             float plGain = 1;
@@ -3788,7 +3788,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 
             gaincalc *= deadlyBonus;
             type = 3;
-        } else if (vict != nullptr && !IS_NPC(vict)) {
+        } else if (vict && !IS_NPC(vict)) {
 			//Fighting against players has randomised gains. Does not get a bonus for higher power level in spars
 
 			//Rewarded if your opponent is fighting for the kill
@@ -3797,7 +3797,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
             gaincalc = large_rand(deadlyBonus, 1.4 * deadlyBonus);
             gaincalc = gear_exp(ch, gaincalc);
         }
-        if (vict != nullptr) {
+        if (vict) {
 			//You are penalized for level difference in sparring? Remove this perhaps as it disincentivises oldbies teaching newbies. And it's against the lore, that happens a lot.
 
             if (!IS_NPC(vict) && !IS_NPC(ch)) {
@@ -3995,7 +3995,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
             send_to_char(ch, "You can not harm your servant.\r\n");
             return 0;
         } else if ((GRAPPLING(ch) && GRAPTYPE(ch) != 3) || (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4))) {
-            send_to_char(ch, "You are too busy grappling!%s\r\n", GRAPPLED(ch) != nullptr ? " Try 'escape'!" : "");
+            send_to_char(ch, "You are too busy grappling!%s\r\n", GRAPPLED(ch) ? " Try 'escape'!" : "");
             return 0;
         } else if (GRAPPLING(ch) && GRAPPLING(ch) != vict) {
             send_to_char(ch, "You can't reach that far in your current position!\r\n");
@@ -4571,7 +4571,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             dmg += (dmg / 100) * 20;
         }
 
-        if (GET_CLAN(vict) != nullptr && !strcasecmp(GET_CLAN(vict), "Heavenly Kaios")) {
+        if (GET_CLAN(vict) && !strcasecmp(GET_CLAN(vict), "Heavenly Kaios")) {
             if ((vict->getCurKI()) >= GET_MAX_MANA(vict) / 2) {
                 dmg -= (dmg / 100) * 20;
                 act("@wYou are covered in a pristine @Cglow@w.@n", true, vict, nullptr, nullptr, TO_CHAR);

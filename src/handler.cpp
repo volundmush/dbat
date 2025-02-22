@@ -263,8 +263,7 @@ void affect_to_char(struct char_data *ch, struct affected_type *af) {
     auto affected_alloc = new affected_type();
 
     if (!ch->affected) {
-        ch->next_affect = affect_list;
-        affect_list = ch;
+        characterSubscriptions.subscribe("affected", ch->shared());
     }
     *affected_alloc = *af;
     affected_alloc->next = ch->affected;
@@ -293,9 +292,7 @@ void affect_remove(struct char_data *ch, struct affected_type *af) {
     delete af;
     affect_total(ch);
     if (!ch->affected) {
-        struct char_data *temp;
-        REMOVE_FROM_LIST(ch, affect_list, next_affect, temp);
-        ch->next_affect = nullptr;
+        characterSubscriptions.unsubscribe("affected", ch->shared());
     }
 }
 
@@ -380,6 +377,7 @@ void affect_join(struct char_data *ch, struct affected_type *af,
     }
     if (!found)
         affect_to_char(ch, af);
+    characterSubscriptions.subscribe("affected", ch->shared());
 }
 
 
@@ -394,7 +392,7 @@ void char_from_room(struct char_data *ch) {
         return;
     }
 
-    if (FIGHTING(ch) != nullptr && !AFF_FLAGGED(ch, AFF_PURSUIT))
+    if (FIGHTING(ch) && !AFF_FLAGGED(ch, AFF_PURSUIT))
         stop_fighting(ch);
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
         ch->affected_by.reset(AFF_PURSUIT);
@@ -406,13 +404,10 @@ void char_from_room(struct char_data *ch) {
     } else {
         z.playersInZone.remove_if([shared](auto& npc) { return npc.expired() || npc.lock() == shared; });
     }
-
-    REMOVE_FROM_LIST(ch, r->people, next_in_room, temp);
+    auto sh = ch->shared();
+    r->characters.remove_if([sh](auto& c) { return c.expired() || c.lock() == sh; });
     IN_ROOM(ch) = NOWHERE;
     ch->room = nullptr;
-    ch->next_in_room = nullptr;
-
-
 
 }
 
@@ -420,8 +415,7 @@ void char_from_room(struct char_data *ch) {
 void char_to_room(struct char_data *ch, struct room_data* room) {
     int i;
 
-    ch->next_in_room = room->people;
-    room->people = ch;
+    room->characters.push_front(ch->shared());
     IN_ROOM(ch) = room->vn;
     ch->room = room;
 
@@ -457,50 +451,34 @@ void char_to_room(struct char_data *ch, room_rnum room) {
 
 /* give an object to a char   */
 void obj_to_char(struct obj_data *object, struct char_data *ch) {
-    if (object && ch) {
-        object->next_content = ch->contents;
-        ch->contents = object;
-        object->carried_by = ch;
-        object->holder = ch;
-        IN_ROOM(object) = NOWHERE;
-
-        /* set flag for crash-save system, but not on mobs! */
-        if (GET_OBJ_VAL(object, 0) != 0) {
-            if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {
-                object->level = GET_OBJ_VAL(object, 0);
-            }
-        }
-        if (!IS_NPC(ch))
-            ch->playerFlags.set(PLR_CRASH);
-    } else
+    if(!(object && ch)) {
         basic_mud_log("SYSERR: nullptr obj or char passed to obj_to_char.");
+        return;
+    }
+    ch->objects.push_front(object->shared());
+    object->carried_by = ch;
+    object->holder = ch;
+    object->room = nullptr;
+    IN_ROOM(object) = NOWHERE;
+
 }
 
 
 /* take an object from a char */
 void obj_from_char(struct obj_data *object) {
-    struct obj_data *temp;
 
     if (object == nullptr) {
         basic_mud_log("SYSERR: nullptr object passed to obj_from_char.");
         return;
     }
-    REMOVE_FROM_LIST(object, object->carried_by->contents, next_content, temp);
-
-    /* set flag for crash-save system, but not on mobs! */
-    if (!IS_NPC(object->carried_by))
-        object->carried_by->playerFlags.set(PLR_CRASH);
-
-    int64_t previous = (object->carried_by->getMaxPL());
-
-    if (GET_OBJ_VAL(object, 0) != 0) {
-        if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {
-            object->level = GET_OBJ_VAL(object, 0);
-        }
+    if(!object->carried_by) {
+        basic_mud_log("SYSERR: nullptr object->carried_by passed to obj_from_char.");
+        return;
     }
+    auto sh = object->shared();
+    object->carried_by->objects.remove_if([sh](auto& o) { return o.expired() || o.lock() == sh; });
 
     object->carried_by = nullptr;
-    object->next_content = nullptr;
     object->holder = nullptr;
 }
 
@@ -610,7 +588,7 @@ int get_number(char **name) {
 
     *number = '\0';
 
-    if ((ppos = strchr(*name, '.')) != nullptr) {
+    if ((ppos = strchr(*name, '.'))) {
         *ppos++ = '\0';
         strlcpy(number, *name, sizeof(number));
         strcpy(*name, ppos);    /* strcpy: OK (always smaller) */
@@ -681,8 +659,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
         auc_load(object);
     }
 
-    object->next_content = room->contents;
-    room->contents = object;
+    room->objects.push_front(object->shared());
     IN_ROOM(object) = room->vn;
     object->room = room;
     object->carried_by = nullptr;
@@ -811,12 +788,10 @@ void obj_from_room(struct obj_data *object) {
     auto &z = zone_table[r->zone];
     auto shared = object->shared();
     z.objectsInZone.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
-
-    REMOVE_FROM_LIST(object, object->getRoom()->contents, next_content, temp);
+    object->room->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
     IN_ROOM(object) = NOWHERE;
     object->room = nullptr;
-    object->next_content = nullptr;
     object->holder = nullptr;
 
 }
@@ -829,9 +804,7 @@ void obj_to_obj(struct obj_data *obj, struct obj_data *obj_to) {
     if (!obj || !obj_to || obj == obj_to) {
         return;
     }
-
-    obj->next_content = obj_to->contents;
-    obj_to->contents = obj;
+    obj_to->objects.push_front(obj->shared());
     obj->in_obj = obj_to;
     tmp_obj = obj->in_obj;
     obj->holder = obj_to;
@@ -848,10 +821,10 @@ void obj_from_obj(struct obj_data *obj) {
     }
     obj_from = obj->in_obj;
     temp = obj->in_obj;
-    REMOVE_FROM_LIST(obj, obj_from->contents, next_content, temp);
+    auto shared = obj->shared();
+    obj_from->objects.remove_if([shared](auto& obj) { return obj.expired() || obj.lock() == shared; });
 
     obj->in_obj = nullptr;
-    obj->next_content = nullptr;
     obj->holder = nullptr;
 }
 
@@ -1325,7 +1298,7 @@ struct char_data *get_char_world_vis(struct char_data *ch, char *name, int *numb
         num = get_number(&name);
     }
 
-    if ((i = get_char_room_vis(ch, name, number)) != nullptr)
+    if ((i = get_char_room_vis(ch, name, number)))
         return (i);
 
     if (*number == 0)
@@ -1380,26 +1353,6 @@ struct char_data *get_char_vis(struct char_data *ch, char *name, int *number, in
 }
 
 
-struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, struct obj_data *list) {
-    struct obj_data *i;
-    int num;
-
-    if (!number) {
-        number = &num;
-        num = get_number(&name);
-    }
-
-    if (*number == 0)
-        return (nullptr);
-
-    for (i = list; i && *number; i = i->next_content)
-        if (isname(name, i->name))
-            if (CAN_SEE_OBJ(ch, i) || (GET_OBJ_TYPE(i) == ITEM_LIGHT))
-                if (--(*number) == 0)
-                    return (i);
-
-    return (nullptr);
-}
 
 struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, const std::vector<std::weak_ptr<obj_data>>& list) {
     int num;
@@ -1437,11 +1390,11 @@ struct obj_data *get_obj_vis(struct char_data *ch, char *name, int *number) {
         return (nullptr);
 
     /* scan items carried */
-    if ((i = get_obj_in_list_vis(ch, name, number, ch->getObjects())) != nullptr)
+    if ((i = get_obj_in_list_vis(ch, name, number, ch->getObjects())))
         return (i);
 
     /* scan room */
-    if ((i = get_obj_in_list_vis(ch, name, number, ch->getLocationObjects())) != nullptr)
+    if ((i = get_obj_in_list_vis(ch, name, number, ch->getLocationObjects())))
         return (i);
 
     /* ok.. no luck yet. scan the entire obj list   */
@@ -1624,12 +1577,12 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
         return (0);
 
     if (IS_SET(bitvector, FIND_CHAR_ROOM)) {    /* Find person in room */
-        if ((*tar_ch = get_char_room_vis(ch, name, &number)) != nullptr)
+        if ((*tar_ch = get_char_room_vis(ch, name, &number)))
             return (FIND_CHAR_ROOM);
     }
 
     if (IS_SET(bitvector, FIND_CHAR_WORLD)) {
-        if ((*tar_ch = get_char_world_vis(ch, name, &number)) != nullptr)
+        if ((*tar_ch = get_char_world_vis(ch, name, &number)))
             return (FIND_CHAR_WORLD);
     }
 
@@ -1644,12 +1597,12 @@ int generic_find(char *arg, bitvector_t bitvector, struct char_data *ch,
     }
 
     if (IS_SET(bitvector, FIND_OBJ_INV)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getObjects())) != nullptr)
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getObjects())))
             return (FIND_OBJ_INV);
     }
 
     if (IS_SET(bitvector, FIND_OBJ_ROOM)) {
-        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getLocationObjects())) != nullptr)
+        if ((*tar_obj = get_obj_in_list_vis(ch, name, &number, ch->getLocationObjects())))
             return (FIND_OBJ_ROOM);
     }
 
@@ -1703,9 +1656,7 @@ void affectv_remove(struct char_data *ch, struct affected_type *af) {
     free(af);
     affect_total(ch);
     if (!ch->affectedv) {
-        struct char_data *temp;
-        REMOVE_FROM_LIST(ch, affectv_list, next_affectv, temp);
-        ch->next_affectv = nullptr;
+        characterSubscriptions.unsubscribe("affectedv", ch);
     }
 }
 
@@ -1735,6 +1686,7 @@ void affectv_join(struct char_data *ch, struct affected_type *af,
     }
     if (!found)
         affectv_to_char(ch, af);
+    characterSubscriptions.subscribe("affectedv", ch);
 }
 
 int is_better(struct obj_data *object, struct obj_data *object2) {

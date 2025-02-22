@@ -133,7 +133,7 @@ int item_in_list(char *item, const std::vector<std::weak_ptr<obj_data>>& list) {
 int char_has_item(char *item, struct char_data *ch) {
 
     /* If this works, no more searching needed */
-    if (get_object_in_equip(ch, item) != nullptr)
+    if (get_object_in_equip(ch, item))
         return 1;
 
     if (item_in_list(item, ch->getObjects()) == 0)
@@ -580,7 +580,7 @@ in the vault (vnum: 453) now and then. you can just use
                         else
                             strcpy(str, "0");
                     } else if (!strcasecmp(field, "clan")) {
-                        if (GET_CLAN(c) != nullptr && strstr(GET_CLAN(c), subfield))
+                        if (GET_CLAN(c) && strstr(GET_CLAN(c), subfield))
                             strcpy(str, "1");
                         else
                             strcpy(str, "0");
@@ -1241,10 +1241,14 @@ in the vault (vnum: 453) now and then. you can just use
                     }
                 }
             } else if (!strcasecmp(field, "people")) {
-                if (r->people)
-                    snprintf(str, slen, "%s", ((r->people)->getUID(true).c_str()));
-                else
-                    *str = '\0';
+                if (auto people = r->getPeople(); !people.empty()) {
+                    for(auto p : filter_raw(people)) {
+                        snprintf(str, slen, "%s", p->getUID(true).c_str());
+                        return;
+                    }
+                }
+                *str = '\0';
+                return;
             } else if (!strcasecmp(field, "id")) {
                 if (r->vn != NOWHERE)
                     snprintf(str, slen, "%s", r->getUID(true).c_str());

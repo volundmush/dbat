@@ -70,7 +70,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch);
 
 static void list_one_char(struct char_data *i, struct char_data *ch);
 
-static void list_char_to_char(struct char_data *list, struct char_data *ch);
+static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list, struct char_data *ch);
 
 static void look_in_direction(struct char_data *ch, int dir);
 
@@ -2142,7 +2142,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         }
     }
     send_to_char(ch, "\r\n");
-    if (GET_CLAN(i) != nullptr && strstr(GET_CLAN(i), "None") == false) {
+    if (GET_CLAN(i) && strstr(GET_CLAN(i), "None") == false) {
         sprintf(buf, "%s", GET_CLAN(i));
         clan = true;
     }
@@ -2763,12 +2763,11 @@ static bool is_hidden(struct hide_node *hideinfo, struct char_data *ch) {
     return false;
 }
 
-static void list_char_to_char(struct char_data *list, struct char_data *ch) {
-    struct char_data *i, *j;
+static void list_char_to_char(const std::vector<std::weak_ptr<char_data>>& list, struct char_data *ch) {
     struct hide_node *hideinfo = nullptr;
     int num;
 
-    for (i = list; i; i = i->next_in_room) {
+    for (auto i :filter_raw(list)) {
         if (AFF_FLAGGED(i, AFF_HIDE) && roll_resisted(i, SKILL_HIDE, ch, SKILL_SPOT)) {
             if (GET_SKILL(i, SKILL_HIDE) && !IS_NPC(ch) && i != ch) {
                 improve_skill(i, SKILL_HIDE, 1);
@@ -2778,7 +2777,7 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
         }
     }
 
-    for (i = list; i; i = i->next_in_room) {
+    for (auto i :filter_raw(list)) {
         if (ch == i || (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT) && IS_NPC(i) &&
                         i->room_description && *i->room_description == '.')) {
             continue;
@@ -2791,7 +2790,8 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
         if (CAN_SEE(ch, i)) {
             num = 0;
             if (CONFIG_STACK_MOBS) {
-                for (j = list; j != i; j = j->next_in_room) {
+                for (auto j : filter_raw(list)) {
+                    if(j == i) break;
                     if (can_stack_char(i, j) && !is_hidden(hideinfo, j)) {
                         num++;
                     }
@@ -2818,6 +2818,8 @@ static void list_char_to_char(struct char_data *list, struct char_data *ch) {
         delete temp;
     }
 }
+
+
 
 static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit_mode) {
     const int MAX_DIRS = 12;
@@ -2887,7 +2889,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
                     exitStr += fmt::format("The {}{} {} {} {}{}.\r\n",
                                            IS_SET(d->exit_info, EX_SECRET) ? "@rsecret@w " : "",
                                            (d->keyword && strcasecmp(fname(d->keyword), "undefined")) ? fname(d->keyword) : "opening",
-                                           strstr(fname(d->keyword), "s ") != nullptr ? "are" : "is",
+                                           strstr(fname(d->keyword), "s ") ? "are" : "is",
                                            IS_SET(d->exit_info, EX_CLOSED) ? "closed" : "open",
                                            IS_SET(d->exit_info, EX_LOCKED) ? "and locked" : "and unlocked",
                                            IS_SET(d->exit_info, EX_PICKPROOF) ? " (pickproof)" : "");
@@ -2914,12 +2916,13 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
 
         if (room->room_flags.test(ROOM_HOUSE)) {
+            auto con = room->getInventoryCount();
             if (!room->room_flags.test(ROOM_GARDEN1) && !room->room_flags.test(ROOM_GARDEN2)) {
-                send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
+                send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", con);
             } else if (room->room_flags.test(ROOM_GARDEN1) && !room->room_flags.test(ROOM_GARDEN2)) {
-                send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
+                send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con);
             } else if (!room->room_flags.test(ROOM_GARDEN1) && room->room_flags.test(ROOM_GARDEN2)) {
-                send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
+                send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con);
             }
         }
 
@@ -3215,12 +3218,13 @@ static void display_room_damage_description(struct room_data *rm, struct char_da
 
 
 static void display_garden_info(struct room_data *rm, struct char_data *ch) {
+    auto con = rm->getObjects();
     if (rm->room_flags.test(ROOM_GARDEN1)) {
-        send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", check_saveroom_count(ch, nullptr));
+        send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con.size());
     } else if (rm->room_flags.test(ROOM_GARDEN2)) {
-        send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", check_saveroom_count(ch, nullptr));
+        send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con.size());
     } else if (rm->room_flags.test(ROOM_HOUSE)) {
-        send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", check_saveroom_count(ch, nullptr));
+        send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", con.size());
     }
 }
 
@@ -3262,7 +3266,7 @@ void look_at_room(struct room_data *rm, struct char_data *ch, int ignore_brief) 
 
     display_garden_info(rm, ch);
     list_obj_to_char(rm->getObjects(), ch, SHOW_OBJ_LONG, false);
-    list_char_to_char(rm->people, ch);
+    list_char_to_char(rm->getPeople(), ch);
 }
 
 
@@ -3421,7 +3425,7 @@ static void look_in_obj(struct char_data *ch, char *arg) {
         return;
     }
 
-    if (find_exdesc(arg, obj->ex_description) != nullptr && !bits) {
+    if (find_exdesc(arg, obj->ex_description) && !bits) {
         send_to_char(ch, "There's nothing inside that!\r\n");
         return;
     }
@@ -3567,7 +3571,7 @@ static bool handle_exdesc_look(struct char_data *ch, char *arg, struct extra_des
     int i = 0;
 
     while (ex_desc_list) {
-        if ((desc = find_exdesc(arg, ex_desc_list)) != nullptr && ++i == fnum) {
+        if ((desc = find_exdesc(arg, ex_desc_list)) && ++i == fnum) {
             write_to_output(ch->desc, desc);
             return true;
         }
@@ -3944,7 +3948,7 @@ ACMD(do_look) {
 
     if(IS_DARK(room->vn) && !CAN_SEE_IN_DARK(ch)) {
         send_to_char(ch, "It is pitch black...\r\n");
-        list_char_to_char(room->people, ch);    /* glowing red eyes */
+        list_char_to_char(room->getPeople(), ch);    /* glowing red eyes */
         return;
     }
 
@@ -4059,7 +4063,7 @@ ACMD(do_look) {
         return;
     }
     
-    if (find_exdesc(arg, ch->getRoom()->ex_description) != nullptr) {
+    if (find_exdesc(arg, ch->getRoom()->ex_description)) {
         look_at_target(ch, arg, 0);
         return;
     }
@@ -4177,7 +4181,7 @@ ACMD(do_score) {
             send_to_char(ch, "  @D| @CModel@D: %15s@D,    @CUGP@D: @G%15s@D,  @CVersion@D: @r%-12s@D|@n\n", model,
                          absorb > 0 ? "@RN/A" : add_commas(GET_UP(ch)).c_str(), version);
         }
-        if (GET_CLAN(ch) != nullptr) {
+        if (GET_CLAN(ch)) {
             send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
         }
         send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race),
@@ -4440,7 +4444,7 @@ ACMD(do_status) {
         if (PRF_FLAGGED(ch, PRF_HIDE)) {
             send_to_char(ch, "         You are hidden from who and ooc.\r\n");
         }
-        if (GET_VOICE(ch) != nullptr) {
+        if (GET_VOICE(ch)) {
             send_to_char(ch, "         Your voice desc: '%s'\r\n", GET_VOICE(ch));
         }
         if (GET_DISTFEA(ch) == DISTFEA_EYE) {
@@ -5094,7 +5098,7 @@ ACMD(do_weather) {
 
 /* puts -'s instead of spaces */
 static void space_to_minus(char *str) {
-    while ((str = strchr(str, ' ')) != nullptr)
+    while ((str = strchr(str, ' ')))
         *str = '-';
 }
 
@@ -6405,7 +6409,7 @@ ACMD(do_scan) {
         send_to_char(ch, "@W          -----------------          @n\r\n");
 
         list_obj_to_char(dest->getObjects(), ch, SHOW_OBJ_LONG, false);
-        list_char_to_char(dest->people, ch);
+        list_char_to_char(dest->getPeople(), ch);
         if (dest->geffect >= 1 && dest->geffect <= 5) {
             send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
         }
@@ -6429,7 +6433,7 @@ ACMD(do_scan) {
             send_to_char(ch, "@W          -----------------          @n\r\n");
 
             list_obj_to_char(dest2->getObjects(), ch, SHOW_OBJ_LONG, false);
-            list_char_to_char(dest2->people, ch);
+            list_char_to_char(dest2->getPeople(), ch);
             if (dest2->geffect >= 1 && dest2->geffect <= 5) {
                 send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
             }
@@ -6625,7 +6629,7 @@ ACMD(do_whois) {
         return;
     }
 
-    if (GET_CLAN(victim) != nullptr) {
+    if (GET_CLAN(victim)) {
         if (!strstr(GET_CLAN(victim), "None")) {
             sprintf(buf, "%s", GET_CLAN(victim));
             clan = true;

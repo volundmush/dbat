@@ -66,7 +66,7 @@ void handle_teleport(struct char_data *ch, struct char_data *tar, int location) 
         char_from_room(ch);
         char_to_room(ch, real_room(location));
         success = true;
-    } else if (tar != nullptr) { /* Teleport to a particular character */
+    } else if (tar) { /* Teleport to a particular character */
         char_from_room(ch);
         char_to_room(ch, IN_ROOM(tar));
         success = true;
@@ -168,7 +168,7 @@ ACMD(do_carry) {
         return;
     }
 
-    if (CARRIED_BY(vict) != nullptr) {
+    if (CARRIED_BY(vict)) {
         send_to_char(ch, "Someone is already carrying them!\r\n");
         return;
     }
@@ -341,7 +341,7 @@ static int has_flight(struct char_data *ch) {
 
     // Check for flying items in inventory
     auto givesFlight = [](const auto&o) { return OBJAFF_FLAGGED(o, AFF_FLYING); };
-    return ch->findObject(givesFlight) != nullptr;
+    return ch->findObject(givesFlight);
 }
 
 /* simple function to determine if char can breathe non-o2 */
@@ -684,7 +684,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (ch->desc != nullptr) {
+    if (ch->desc) {
         look_at_room(IN_ROOM(ch), ch, 0);
         if (AFF_FLAGGED(ch, AFF_SNEAK) && !IS_NPC(ch) && GET_SKILL(ch, SKILL_MOVE_SILENTLY) &&
             GET_SKILL(ch, SKILL_MOVE_SILENTLY) < rand_number(1, 101)) {
@@ -903,7 +903,7 @@ ACMD(do_move) {
         if (noship == true) {
             send_to_char(ch, "Your ship controls are not here or your ship was not found, report to Iovan!\r\n");
             return;
-        } else if (controls != nullptr && vehicle != nullptr) {
+        } else if (controls && vehicle) {
             if (GET_FUEL(controls) <= 0) {
                 send_to_char(ch, "The ship is out of fuel!\r\n");
                 return;
@@ -1133,7 +1133,7 @@ static int find_door(struct char_data *ch, const char *type, char *dir, const ch
 }
 
 static int has_key(struct char_data *ch, obj_vnum key) {
-    return ch->findObjectVnum(key) != nullptr;
+    return ch->findObjectVnum(key);
 }
 
 #define NEED_OPEN    (1 << 0)
@@ -1208,7 +1208,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
 
     len = snprintf(buf, sizeof(buf), "$n %ss ", cmd_door[scmd]);
     if (!obj && ((other_room = EXIT(ch, door)->to_room) != NOWHERE)) {
-        if ((back = get_room(other_room)->dir_option[rev_dir[door]]) != nullptr)
+        if ((back = get_room(other_room)->dir_option[rev_dir[door]]))
             if (back->to_room != IN_ROOM(ch))
                 back = nullptr;
     }
@@ -1416,7 +1416,7 @@ static int ok_pick(struct char_data *ch, obj_vnum keynum, int pickproof, int dcl
         send_to_char(ch, "You need a lock picking kit.\r\n");
         return (0);
     }
-    if (hatch != nullptr && (GET_OBJ_TYPE(hatch) == ITEM_HATCH || GET_OBJ_TYPE(hatch) == ITEM_VEHICLE)) {
+    if (hatch && (GET_OBJ_TYPE(hatch) == ITEM_HATCH || GET_OBJ_TYPE(hatch) == ITEM_VEHICLE)) {
         send_to_char(ch, "No picking ship hatches.\r\n");
         hatch = nullptr;
         return (0);
@@ -1641,7 +1641,7 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
         }
     }
 
-    if (ch->desc != nullptr)
+    if (ch->desc)
         look_at_room(IN_ROOM(ch), ch, 0);
 
     if (ch->getRoomFlag(ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
@@ -1771,7 +1771,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
         return 0;
     }
 
-    if (vehicle != nullptr) {
+    if (vehicle) {
         if ((dest_room = IN_ROOM(vehicle)) == NOWHERE) {
             send_to_char(ch, "That doesn't appear to lead anywhere.\r\n");
             return 0;
@@ -1876,7 +1876,7 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
             add_commas(ch->getPL()).c_str());
     send_to_scouter(buf3, ch, 0, 0);
 
-    if (ch->desc != nullptr) {
+    if (ch->desc) {
         act(obj->look_description, true, ch, obj, nullptr, TO_CHAR);
         look_at_room(IN_ROOM(ch), ch, 0);
     }

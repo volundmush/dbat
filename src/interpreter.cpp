@@ -366,7 +366,7 @@ static void perform_complex_alias(struct descriptor_data *d, char *orig, struct 
     /* First, parse the original string */
     strcpy(buf2, orig);    /* strcpy: OK (orig:MAX_INPUT_LENGTH < buf2:MAX_RAW_INPUT_LENGTH) */
     temp = strtok(buf2, " ");
-    while (temp != nullptr && num_of_tokens < NUM_TOKENS) {
+    while (temp && num_of_tokens < NUM_TOKENS) {
         tokens[num_of_tokens++] = temp;
         temp = strtok(nullptr, " ");
     }
@@ -1391,7 +1391,7 @@ void enter_player_game(struct descriptor_data *d) {
         d->level = 1;
     }
 
-    if (GET_CLAN(d->character) != nullptr && !strstr(GET_CLAN(d->character), "None")) {
+    if (GET_CLAN(d->character) && !strstr(GET_CLAN(d->character), "None")) {
         if (!clanIsMember(GET_CLAN(d->character), d->character)) {
             if (!clanIsModerator(GET_CLAN(d->character), d->character)) {
                 if (!checkCLAN(d->character)) {

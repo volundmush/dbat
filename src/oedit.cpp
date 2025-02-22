@@ -986,7 +986,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                     } else
                         write_to_output(d, "Object saved to memory.\r\n");
                     if (GET_OBJ_TYPE(OLC_OBJ(d)) == ITEM_BOARD) {
-                        if ((tmp = locate_board(GET_OBJ_VNUM(OLC_OBJ(d)))) != nullptr) {
+                        if ((tmp = locate_board(GET_OBJ_VNUM(OLC_OBJ(d))))) {
                             save_board(tmp);
                         } else {
                             tmp = create_new_board(GET_OBJ_VNUM(OLC_OBJ(d)));

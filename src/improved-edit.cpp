@@ -223,7 +223,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
                 return;
             } else if (line_low > 0) {
                 while (s && i < line_low)
-                    if ((s = strchr(s, '\n')) != nullptr) {
+                    if ((s = strchr(s, '\n'))) {
                         i++;
                         s++;
                     }
@@ -233,12 +233,12 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
                 }
                 t = s;
                 while (s && i < line_high)
-                    if ((s = strchr(s, '\n')) != nullptr) {
+                    if ((s = strchr(s, '\n'))) {
                         i++;
                         total_len++;
                         s++;
                     }
-                if (s && (s = strchr(s, '\n')) != nullptr) {
+                if (s && (s = strchr(s, '\n'))) {
                     while (*(++s))
                         *(t++) = *s;
                 } else
@@ -287,7 +287,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
             total_len = 0;
             s = *d->str;
             while (s && (i < line_low))
-                if ((s = strchr(s, '\n')) != nullptr) {
+                if ((s = strchr(s, '\n'))) {
                     i++;
                     s++;
                 }
@@ -297,7 +297,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
             }
             t = s;
             while (s && i <= line_high)
-                if ((s = strchr(s, '\n')) != nullptr) {
+                if ((s = strchr(s, '\n'))) {
                     i++;
                     total_len++;
                     s++;
@@ -349,7 +349,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
             total_len = 0;
             s = *d->str;
             while (s && i < line_low)
-                if ((s = strchr(s, '\n')) != nullptr) {
+                if ((s = strchr(s, '\n'))) {
                     i++;
                     s++;
                 }
@@ -359,7 +359,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
             }
             t = s;
             while (s && i <= line_high)
-                if ((s = strchr(s, '\n')) != nullptr) {
+                if ((s = strchr(s, '\n'))) {
                     i++;
                     total_len++;
                     s++;
@@ -398,7 +398,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
             }
             if (line_low > 0) {
                 while (s && (i < line_low))
-                    if ((s = strchr(s, '\n')) != nullptr) {
+                    if ((s = strchr(s, '\n'))) {
                         i++;
                         s++;
                     }
@@ -449,7 +449,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
                  * Loop through the text counting \n characters until we get to the line.
                  */
                 while (s && i < line_low)
-                    if ((s = strchr(s, '\n')) != nullptr) {
+                    if ((s = strchr(s, '\n'))) {
                         i++;
                         s++;
                     }
@@ -480,7 +480,7 @@ void parse_edit_action(int command, char *string, struct descriptor_data *d) {
                  * Put the new 'good' line into place.
                  */
                 strcat(buf, buf2);
-                if ((s = strchr(s, '\n')) != nullptr) {
+                if ((s = strchr(s, '\n'))) {
                     /*
                      * This means that we are at the END of the line, we want out of
                      * there, but we want s to point to the beginning of the line
@@ -690,7 +690,7 @@ int replace_str(char **string, char *pattern, char *replacement, int rep_all, un
     *replace_buffer = '\0';
 
     if (rep_all) {
-        while ((flow = (char *) strstr(flow, pattern)) != nullptr) {
+        while ((flow = (char *) strstr(flow, pattern))) {
             i++;
             temp = *flow;
             *flow = '\0';
@@ -706,7 +706,7 @@ int replace_str(char **string, char *pattern, char *replacement, int rep_all, un
         }
         strcat(replace_buffer, jetsam);
     } else {
-        if ((flow = (char *) strstr(*string, pattern)) != nullptr) {
+        if ((flow = (char *) strstr(*string, pattern))) {
             i++;
             flow += strlen(pattern);
             len = ((char *) flow - (char *) *string) - strlen(pattern);

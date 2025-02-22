@@ -53,7 +53,7 @@ ACMD(do_oasis_list) {
     two_arguments(argument, smin, smax);
 
     if (subcmd == SCMD_OASIS_ZLIST) { /* special case */
-        if (smin != nullptr && *smin && is_number(smin))
+        if (smin && *smin && is_number(smin))
             print_zone(ch, atoi(smin));
         else
             list_zones(ch);

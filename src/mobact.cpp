@@ -107,7 +107,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                             best_obj = obj;
                             max = GET_OBJ_COST(obj);
                         }
-                    if (best_obj != nullptr && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED && !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
+                    if (best_obj && CAN_GET_OBJ(ch, best_obj) && GET_OBJ_TYPE(best_obj) != ITEM_BED && !GET_OBJ_POSTED(best_obj) && !OBJ_FLAGGED(best_obj, ITEM_NOPICKUP)) {
                         auto line = Random::get(scavengerTalk);
                         act(line->c_str(), true, ch, nullptr, nullptr, TO_ROOM);
                         perform_get_from_room(ch, best_obj);
@@ -174,7 +174,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     continue;
                 }
                 if (GET_OBJ_VNUM(hugeatk) == 82 || GET_OBJ_VNUM(hugeatk) == 83) {
-                    if (USER(hugeatk) != nullptr) {
+                    if (USER(hugeatk)) {
                         act("@W$n@R leaps at @C$N@R desperately!@n", true, ch, nullptr, USER(hugeatk), TO_ROOM);
                         act("@W$n@R leaps at YOU desperately!@n", true, ch, nullptr, USER(hugeatk), TO_VICT);
                         if (IS_HUMANOID(ch)) {

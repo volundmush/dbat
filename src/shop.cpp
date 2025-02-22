@@ -895,7 +895,14 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
     if (!ADM_FLAGGED(ch, ADM_MONEY))
         keeper->mod(CharMoney::Carried, goldamt);
 
-    strlcpy(tempstr, times_message(ch->contents, nullptr, bought), sizeof(tempstr));
+    {
+        auto contents = ch->getObjects();
+        for (auto i : filter_raw(contents)) {
+            strlcpy(tempstr, times_message(i, nullptr, bought), sizeof(tempstr));
+            break;
+        }
+    }
+    
 
     snprintf(tempbuf, sizeof(tempbuf), "$n buys %s.", tempstr);
     act(tempbuf, false, ch, obj, nullptr, TO_ROOM);
@@ -953,63 +960,117 @@ get_selling_obj(struct char_data *ch, char *name, struct char_data *keeper, vnum
     return (nullptr);
 }
 
-static struct obj_data *slide_obj(struct obj_data *obj, struct char_data *keeper,
-                                  vnum shop_nr)
-/*
-   This function is a slight hack!  To make sure that duplicate items are
-   only listed once on the "list", this function groups "identical"
-   objects together on the shopkeeper's inventory list.  The hack involves
-   knowing how the list is put together, and manipulating the order of
-   the objects on the list.  (But since most of DIKU is not encapsulated,
-   and information hiding is almost never used, it isn't that big a deal) -JF
-*/
+static obj_data* slide_obj(obj_data* obj, char_data* keeper, int shop_nr)
 {
-    struct obj_data *loop;
-    int temp;
-
-    if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper))
+    // step 1: possibly sort
+    if (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper)) {
         sort_keeper_objs(keeper, shop_nr);
+    }
 
-    /* Extract the object if it is identical to one produced */
+    // step 2: if shop produces it, remove and return proto
     if (shop_producing(obj, shop_nr)) {
-        temp = GET_OBJ_RNUM(obj);
+        int temp = GET_OBJ_RNUM(obj);
         extract_obj(obj);
-        return (&obj_proto[temp]);
+        return &obj_proto[temp];
     }
+
+    // step 3: increment sort
     SHOP_SORT(shop_nr)++;
-    loop = keeper->contents;
+
+    // step 4: put object into keeper's list
+    // (which pushes a weak_ptr<obj_data> into keeper->objects)
     obj_to_char(obj, keeper);
-    keeper->contents = loop;
-    while (loop) {
-        if (same_obj(obj, loop)) {
-            obj->next_content = loop->next_content;
-            loop->next_content = obj;
-            return (obj);
-        }
-        loop = loop->next_content;
+
+    // We want to find that newly inserted item
+    // (the newly inserted weak_ptr referencing 'obj').
+    // We'll get 'obj->shared()' and find it.
+    auto newSP = obj->shared();  // the newly inserted shared_ptr
+    if (!newSP) {
+        // if something's very wrong (obj had no shared control?), just bail
+        return obj;
     }
-    keeper->contents = obj;
-    return (obj);
+
+    // Let's locate the iterator for newSP in keeper->objects.
+    // We'll do a reverse search or find_if from the end:
+    auto insertedIt = keeper->objects.end();
+    for (auto it = keeper->objects.begin(); it != keeper->objects.end(); ++it) {
+        if (auto sp = it->lock()) {
+            if (sp == newSP) {
+                insertedIt = it;
+                break;
+            }
+        }
+    }
+    // If we didn't find it, something's off, but let's proceed
+    if (insertedIt == keeper->objects.end()) {
+        return obj;  // no repositioning needed
+    }
+
+    // step 6: look for a "duplicate" to group with
+    // We'll do a separate loop for the "existing items" in the list
+    // If we find same_obj(sp.get(), obj), we want to splice insertedIt after that element.
+    for (auto it = keeper->objects.begin(); it != keeper->objects.end(); ++it) {
+        // skip expired or newly inserted itself
+        if (it == insertedIt) 
+            continue;
+
+        if (auto sp = it->lock()) {
+            if (same_obj(sp.get(), obj)) {
+                // We want to move the newly inserted item after 'it' in the list
+                // In a std::list, we can do:
+                auto nextIt = std::next(it);
+                // splice 'insertedIt' out of the entire list, and reinsert after 'it'
+                keeper->objects.splice(nextIt, keeper->objects, insertedIt);
+                // Once spliced, we can break or return
+                return obj;
+            }
+        }
+    }
+
+    // step 7: if no duplicates found, we do nothing
+    // The item remains at its insertion position (likely the end).
+    return obj;
 }
 
-static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr) {
-    struct obj_data *list = nullptr, *temp;
+static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr)
+{
+    // This local list will hold the "un-sorted" items we temporarily remove from keeper->objects
+    std::list<std::shared_ptr<obj_data>> tempList;
 
+    // While the shop says "not sorted yet" < inventory count, peel off an item from keeper->objects
     while (SHOP_SORT(shop_nr) < IS_CARRYING_N(keeper)) {
-        temp = keeper->contents;
-        obj_from_char(temp);
-        temp->next_content = list;
-        list = temp;
+        // 1) remove front item from keeper->objects
+        //    in the old code, it was always the front: keeper->contents
+        //    We'll assume we define some function pop_front_object(keeper) returning shared_ptr
+        auto sp = keeper->objects.front().lock(); 
+        if (!sp) {
+            // if there's nothing to remove, break
+            break;
+        }
+        // accumulate it in tempList
+        tempList.push_front(sp);
     }
 
-    while (list) {
-        temp = list;
-        list = list->next_content;
-        if (shop_producing(temp, shop_nr) && !keeper->findObjectVnum(temp->vn)) {
-            obj_to_char(temp, keeper);
+    // Now we process each item from tempList
+    // replicating the old code's "while (list)"
+    while (!tempList.empty()) {
+        auto sp = tempList.front();
+        tempList.pop_front();
+        if (!sp) {
+            continue; // skip null
+        }
+
+        // Check if shop_producing(sp.get(), shop_nr) and keeper doesn't have sp->vn
+        // We'll rely on sp->vn or sp->obj_vnum or similar
+        if (shop_producing(sp.get(), shop_nr) && !keeper->findObjectVnum(sp->vn)) {
+            // The old code does obj_to_char(temp, keeper)
+            // We'll store sp in keeper->objects
+            obj_to_char(sp.get(), keeper);
             SHOP_SORT(shop_nr)++;
-        } else
-            slide_obj(temp, keeper, shop_nr);
+        } else {
+            // "slide_obj" now expects a raw pointer, but uses shared internally
+            slide_obj(sp.get(), keeper, shop_nr);
+        }
     }
 }
 

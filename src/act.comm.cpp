@@ -85,10 +85,10 @@ ACMD(do_voice) {
     } else if (strstr(argument, "@")) {
         send_to_char(ch, "You can not use colorcode in voice descriptions.\r\n");
         return;
-    } else if (GET_VOICE(ch) != nullptr && GET_RP(ch) < 1) {
+    } else if (GET_VOICE(ch) && GET_RP(ch) < 1) {
         send_to_char(ch, "Your voice has already been set. You will need at least 1 RPP to be able to change it.\r\n");
         return;
-    } else if (GET_VOICE(ch) != nullptr) {
+    } else if (GET_VOICE(ch)) {
         send_to_char(ch, "Your voice has now been set to: %s\r\n", argument);
         if (GET_VOICE(ch)) {
             free(GET_VOICE(ch));
@@ -292,7 +292,7 @@ ACMD(do_say) {
                         }
 
                         if (granted == false && strstr(argument, "knowledge")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s now has more knowledge!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -306,7 +306,7 @@ ACMD(do_say) {
                         } /* end knowledge wish if */
 
                         if (granted == false && strstr(argument, "speed")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now faster!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -320,7 +320,7 @@ ACMD(do_say) {
                         } /* end speed wish if */
 
                         if (granted == false && strstr(argument, "tough")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now tougher!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -334,7 +334,7 @@ ACMD(do_say) {
                         } /* end tough wish if */
 
                         if (granted == false && strstr(argument, "strength")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s has more strength!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -348,7 +348,7 @@ ACMD(do_say) {
                         } /* end strength wish if */
 
                         if (granted == false && strstr(argument, "intelligence")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now smarter!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -362,7 +362,7 @@ ACMD(do_say) {
                         } /* end intelligence wish if */
 
                         if (granted == false && strstr(argument, "wisdom")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now wiser!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -376,7 +376,7 @@ ACMD(do_say) {
                         } /* end wisdom wish if */
 
                         if (granted == false && strstr(argument, "agility")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now more agile!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -390,7 +390,7 @@ ACMD(do_say) {
                         } /* end agility wish if */
 
                         if (granted == false && strstr(argument, "constitution")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s has more guts!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -404,7 +404,7 @@ ACMD(do_say) {
                         } /* end constitution wish if */
 
                         if (granted == false && strstr(argument, "skill")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s has more skill!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -421,7 +421,7 @@ ACMD(do_say) {
                         } /* end skill wish if */
 /* Rillao: transloc, add new transes here */
                         if (granted == false && strstr(argument, "power")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!@w'@n\r\n");
                                 WAIT_STATE(ch, PULSE_4SEC);
@@ -429,7 +429,7 @@ ACMD(do_say) {
                         } /* end power wish if */
 
                         if (granted == false && strstr(argument, "money")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s now has become richer!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -443,7 +443,7 @@ ACMD(do_say) {
                         } /* end money wish if */
 
                         if (granted == false && strstr(argument, "immunity")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s now has immunity to Burn, Freezing, Mind Break, Poison, Blindness, Yoikominminken, and Paralysis!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -457,7 +457,7 @@ ACMD(do_say) {
                         } /* end money wish if */
 
                         if (granted == false && strstr(argument, "vitality")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish cannot be granted, You might want to try something else instead, mortal!%s@w'@n\r\n");
                                 /*send_to_room(real_room(DRAGONR), "@wShenron says, '@CYour wish has been granted, %s now will never hunger or thirst again!%s@w'@n\r\n", GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -472,13 +472,13 @@ ACMD(do_say) {
 
                         if (granted == false && strstr(argument, "revive")) {
                             int count = 0;
-                            if (wch != nullptr) {
+                            if (wch) {
                                 count += 1;
                             }
-                            if (wch2 != nullptr) {
+                            if (wch2) {
                                 count += 1;
                             }
-                            if (wch3 != nullptr) {
+                            if (wch3) {
                                 count += 1;
                             }
                             if (count == 1) {
@@ -620,7 +620,7 @@ ACMD(do_say) {
                         } /* end revival if */
 
                         if (granted == false && strstr(argument, "immortal") && WISH[0] == 0) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now immortal!@w'@n\r\n",
                                              GET_NAME(wch));
@@ -636,14 +636,14 @@ ACMD(do_say) {
                         } /* end immortal wish if */
 
                         if (granted == false && strstr(argument, "immortal") && WISH[0] == 1) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CI can not grant that wish, there is not enough remaining power in this summoning!@w'@n\r\n");
                             } /* is there a target for the wish? */
                         }
 
                         if (granted == false && strstr(argument, " mortal")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now mortal!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -657,7 +657,7 @@ ACMD(do_say) {
                         } /* end mortal wish if */
 
                         if (granted == false && strstr(argument, "senzu")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 obj = read_object(1, VIRTUAL);
                                 obj_to_char(obj, ch);
                                 obj = read_object(1, VIRTUAL);
@@ -688,7 +688,7 @@ ACMD(do_say) {
                         } /* end senzu wish if */
 
                         if (granted == false && strstr(argument, "roleplay")) {
-                            if (wch != nullptr) {
+                            if (wch) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
@@ -1332,7 +1332,7 @@ ACMD(do_page) {
                 send_to_char(ch, "You will never be godly enough to do that!\r\n");
             return;
         }
-        if ((vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD)) != nullptr) {
+        if ((vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
             act(buf, false, ch, nullptr, vict, TO_VICT);
             if (PRF_FLAGGED(ch, PRF_NOREPEAT))
                 send_to_char(ch, "%s", CONFIG_OK);

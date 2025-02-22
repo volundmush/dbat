@@ -4678,7 +4678,7 @@ namespace atk {
             } else {
                 improve_skill(user, SKILL_DUALWIELD, 0);
             }
-            if (victim != nullptr && GET_HIT(victim) > 1 && axion_dice(0) < (GET_SKILL(user, SKILL_DUALWIELD)) &&
+            if (victim && GET_HIT(victim) > 1 && axion_dice(0) < (GET_SKILL(user, SKILL_DUALWIELD)) &&
                 GET_EQ(user, WEAR_WIELD1)) {
                 chooseSecondAttack();
             }
@@ -4689,7 +4689,7 @@ namespace atk {
     // Stab
     void Stab::attackPreprocess() {
         if (!FIGHTING(user) && backstab(user, victim, wlvl, calcDamage)) {
-            if (!secondAttack && victim != nullptr && GET_HIT(victim) > 1 && axion_dice(0) < (GET_SKILL(user, SKILL_DUALWIELD)) &&
+            if (!secondAttack && victim && GET_HIT(victim) > 1 && axion_dice(0) < (GET_SKILL(user, SKILL_DUALWIELD)) &&
                 GET_EQ(user, WEAR_WIELD1) && GET_EQ(user, WEAR_WIELD2)) {
                 chooseSecondAttack();
             }

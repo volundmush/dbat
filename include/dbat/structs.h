@@ -141,10 +141,10 @@ struct unit_data {
     void activateScripts();
     void deactivateScripts();
 
-    struct obj_data* contents{};     /* Contains objects  */
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
+    std::list<std::weak_ptr<obj_data>> objects;
     std::vector<std::weak_ptr<obj_data>> getObjects();
 
     int id{NOTHING}; /* the unique ID of this entity */
@@ -278,8 +278,6 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
 
     unit_data *holder{};
 
-    struct obj_data *next_content{}; /* For 'contains' lists             */
-
     struct obj_spellbook_spell *sbinfo{};  /* For spellbook info */
     struct char_data *sitting{};       /* Who is sitting on me? */
     int scoutfreq{};
@@ -346,7 +344,9 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     std::bitset<NUM_ROOM_FLAGS> room_flags{};   /* DEATH,DARK ... etc */
     SpecialFunc func{};
-    struct char_data *people{};    /* List of NPC / PC in room */
+
+    std::list<std::weak_ptr<char_data>> characters;    /* List of characters in room          */
+
     int timed{};                   /* For timed Dt's                     */
     int dmg{};                     /* How damaged the room is            */
     int geffect{};            /* Effect of ground destruction       */
@@ -720,32 +720,45 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     struct script_memory *memory{};    /* for mob memory triggers		*/
 
-    struct char_data *next_in_room{};
     /* For fighting list			*/
     struct char_data *next_affect{};/* For affect wearoff			*/
     struct char_data *next_affectv{};
     /* For round based affect wearoff	*/
 
     struct follow_type *followers{};/* List of chars followers		*/
-    struct char_data *master{};    /* Who is char following?		*/
+    
     int64_t master_id{};
 
     struct memorize_node *memorized{};
     struct innate_node *innate{};
-
-    struct char_data *fighting;    /* Opponent				*/
 
     int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
 
     int timer{};            /* Timer for update			*/
 
     struct obj_data *sits{};      /* What am I sitting on? */
+
+    struct char_data *fighting;    /* Opponent				*/
+    struct char_data *master{};    /* Who is char following?		*/
+    
     struct char_data *blocks{};    /* Who am I blocking?    */
     struct char_data *blocked{};   /* Who is blocking me?    */
     struct char_data *absorbing{}; /* Who am I absorbing */
     struct char_data *absorbby{};  /* Who is absorbing me */
     struct char_data *carrying{};
     struct char_data *carried_by{};
+    
+    struct char_data *drag{};
+    struct char_data *dragged{};
+    struct char_data *mindlink{};
+    struct char_data *grappling{};
+    struct char_data *grappled{};
+    struct char_data *defender{};
+    struct char_data *defending{};
+    struct char_data *poisonby{};
+    std::list<std::weak_ptr<char_data>> poisoned;
+    struct char_data *original{};
+    std::list<std::weak_ptr<char_data>> clones{};
 
     int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
     int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
@@ -828,16 +841,13 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     time_t deathtime{};
 
     int64_t suppression{};
-    struct char_data *drag{};
-    struct char_data *dragged{};
-    struct char_data *mindlink{};
+    
     int lasthit{};
     int dcount{};
     char *voice{};                  /* PC's snet voice */
     int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
     time_t rewtime{};
-    struct char_data *grappling{};
-    struct char_data *grappled{};
+    
     std::array<int, 6> gravAcclim;
     int grap{};
     std::unordered_set<uint8_t> genome{};                /* Bio racial bonus, Genome */
@@ -877,14 +887,10 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int fishstate{};
     int throws{};
 
-    struct char_data *defender{};
-    struct char_data *defending{};
-
     int lifeperc{};
     int gooptime{};
     int blesslvl{};
-    struct char_data *poisonby{};
-    std::list<std::weak_ptr<char_data>> poisoned;
+    
 
     int mobcharge{};
     int preference{};
@@ -899,9 +905,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     char *rdisplay{};
 
-    struct char_data *original{};
-
-    std::list<std::weak_ptr<char_data>> clones{};
+    
     int relax_count{};
     int ingestLearned{};
 

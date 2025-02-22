@@ -1079,7 +1079,7 @@ void char_data::activate() {
 
     activeCharacters.push_back(shared_from_this());
 
-    if(contents) activateContents();
+    activateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(GET_EQ(this, i)) {
             auto obj = GET_EQ(this, i);
@@ -1088,13 +1088,11 @@ void char_data::activate() {
     }
 
     if(affected) {
-        next_affect = affect_list;
-        affect_list = this;
+        characterSubscriptions.subscribe("affected", shared_from_this());
     }
 
     if(affectedv) {
-        next_affectv = affectv_list;
-        affectv_list = this;
+        characterSubscriptions.subscribe("affectedv", shared_from_this());
     }
 
 }
@@ -1120,7 +1118,7 @@ void char_data::deactivate() {
     activeCharacters.remove_if([shared](const std::weak_ptr<char_data> &c) {
         return c.expired() || c.lock() == shared;
     });
-    if(contents) deactivateContents();
+    deactivateContents();
     for(auto i = 0; i < NUM_WEARS; i++) {
         if(GET_EQ(this, i)) {
             auto obj = GET_EQ(this, i);

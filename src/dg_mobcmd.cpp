@@ -139,7 +139,7 @@ ACMD(do_masound) {
     for (door = 0; door < NUM_OF_DIRS; door++) {
         struct room_direction_data *newexit;
 
-        if (((newexit = get_room(was_in_room)->dir_option[door]) != nullptr) &&
+        if (((newexit = get_room(was_in_room)->dir_option[door])) &&
             newexit->to_room != NOWHERE && newexit->to_room != was_in_room) {
             IN_ROOM(ch) = newexit->to_room;
             sub_write(argument, ch, true, TO_ROOM);
@@ -287,7 +287,7 @@ ACMD(do_mjunk) {
             extract_obj(unequip_char(ch, pos));
             return;
         }
-        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())) != nullptr)
+        if ((obj = get_obj_in_list_vis(ch, arg, nullptr, ch->getObjects())))
             extract_obj(obj);
         return;
     } else {
@@ -496,9 +496,9 @@ ACMD(do_mload) {
             return;
         }
         two_arguments(target, arg1, arg2); /* recycling ... */
-        tch = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, nullptr);
+        tch = (arg1 && *arg1 == UID_CHAR) ? get_char(arg1) : get_char_room_vis(ch, arg1, nullptr);
         if (tch) {
-            if (arg2 != nullptr && *arg2 &&
+            if (arg2 && *arg2 &&
                 (pos = find_eq_pos_script(arg2)) >= 0 &&
                 !GET_EQ(tch, pos) &&
                 can_wear_on_pos(object, pos)) {
@@ -510,7 +510,7 @@ ACMD(do_mload) {
             load_otrigger(object);
             return;
         }
-        cnt = (arg1 != nullptr && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
+        cnt = (arg1 && *arg1 == UID_CHAR) ? get_obj(arg1) : get_obj_vis(ch, arg1, nullptr);
         if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
             obj_to_obj(object, cnt);
             load_otrigger(object);
@@ -708,8 +708,8 @@ ACMD(do_mteleport) {
             return;
         }
 
-        for (vict = ch->getRoom()->people; vict; vict = next_ch) {
-            next_ch = vict->next_in_room;
+        auto people = ch->getLocationPeople();
+        for (auto vict : filter_raw(people)) {
 
             if (valid_dg_target(vict, DG_ALLOW_GODS)) {
                 char_from_room(vict);
@@ -1006,13 +1006,11 @@ ACMD(do_mtransform) {
         if (m->look_description)
             tmpmob.look_description = strdup(m->look_description);
 
-
+        // TODO: fix this
         tmpmob.id = ch->id;
         tmpmob.affected = ch->affected;
-        tmpmob.contents = ch->contents;
         tmpmob.proto_script = ch->proto_script;
         tmpmob.memory = ch->memory;
-        tmpmob.next_in_room = ch->next_in_room;
         tmpmob.followers = ch->followers;
         tmpmob.master = ch->master;
 

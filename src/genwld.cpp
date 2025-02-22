@@ -37,11 +37,7 @@ room_rnum add_room(struct room_data *room) {
     if (world.contains(room->vn)) {
         auto ro = world.at(room->vn).get();
         extract_script(ro, WLD_TRIGGER);
-        tch = ro->people;
-        tobj = ro->contents;
         copy_room(ro, room);
-        ro->people = tch;
-        ro->contents = tobj;
         basic_mud_log("GenOLC: add_room: Updated existing room #%d.", room->vn);
         return i;
     }
@@ -150,14 +146,13 @@ int save_rooms(zone_rnum zone_num) {
 }
 
 int copy_room(struct room_data *to, struct room_data *from) {
+    // TODO: Fix this.
     free_room_strings(to);
     *to = *from;
     copy_room_strings(to, from);
 
     /* Don't put people and objects in two locations.
        Am thinking this shouldn't be done here... */
-    from->people = nullptr;
-    from->contents = nullptr;
 
     return true;
 }
@@ -392,9 +387,8 @@ struct room_data* room_direction_data::getDestination() {
 
 std::vector<std::weak_ptr<char_data>> room_data::getPeople() {
     std::vector<std::weak_ptr<char_data>> out;
-    for(auto c = people; c; c = c->next_in_room) {
-        out.emplace_back(c->shared());
-    }
+    out.reserve(characters.size());
+    std::copy(characters.begin(), characters.end(), std::back_inserter(out));
     out.shrink_to_fit();
     return out;
 }

@@ -333,7 +333,7 @@ bool assemblyDestroy(long lVnum) {
     }
 
     /* Deallocate component array. */
-    if (g_pAssemblyTable[lIndex].pComponents != nullptr)
+    if (g_pAssemblyTable[lIndex].pComponents)
         free(g_pAssemblyTable[lIndex].pComponents);
 
     if (g_lNumAssemblies > 1) {
@@ -387,7 +387,7 @@ bool assemblyRemoveComponent(long lVnum, long lComponentVnum) {
         return (false);
     }
 
-    if (pAssembly->pComponents != nullptr && pAssembly->lNumComponents > 1) {
+    if (pAssembly->pComponents && pAssembly->lNumComponents > 1) {
         CREATE(pNewComponents, COMPONENT, pAssembly->lNumComponents - 1);
 
         if (lIndex > 0)

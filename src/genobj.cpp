@@ -48,27 +48,12 @@ obj_rnum add_object(struct obj_data *newobj, obj_vnum ovnum) {
  * with the new one.
  */
 int update_objects(struct obj_data *refobj) {
-    struct obj_data *obj, swap;
     int count = 0;
 
-    for (auto obj3 : get_vnum_list(objectVnumIndex, refobj->vn)) {
-        auto obj2 = obj3.lock();
-        if(!obj2) continue;
-        obj = obj2.get();
+    auto objects = get_vnum_list(objectVnumIndex, refobj->vn);
+    for (auto obj : filter_raw(objects)) {
         count++;
-
-        /* Update the existing object but save a copy for private information. */
-        swap = *obj;
-        *obj = *refobj;
-
-        /* Copy game-time dependent variables over. */
-        IN_ROOM(obj) = swap.in_room;
-        obj->carried_by = swap.carried_by;
-        obj->worn_by = swap.worn_by;
-        obj->worn_on = swap.worn_on;
-        obj->in_obj = swap.in_obj;
-        obj->contents = swap.contents;
-        obj->next_content = swap.next_content;
+        // TODO: Reimplement this.
     }
 
     return count;
@@ -431,7 +416,7 @@ void obj_data::activate() {
     if(vn == 65)
         objectSubscriptions.subscribe("healTankService", this);
 
-    if(contents) activateContents();
+    activateContents();
 }
 
 void obj_data::deactivate() {
@@ -455,7 +440,7 @@ void obj_data::deactivate() {
         return obj.expired() || obj.lock() == shared;
     });
     objectSubscriptions.unsubscribeFromAll(shared_from_this());
-    if(contents) deactivateContents();
+    deactivateContents();
 }
 
 void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {

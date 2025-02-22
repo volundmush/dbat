@@ -1644,7 +1644,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     }
 
     /* Let's have a chance to give animals meat */
-    if (tch != nullptr) {
+    if (tch) {
         if (!IS_NPC(tch) && GET_SKILL(tch, SKILL_SURVIVAL)) {
             int skill = GET_SKILL(tch, SKILL_SURVIVAL);
             if (!IS_HUMANOID(ch) && PRF_FLAGGED(tch, PRF_CARVE) && axion_dice(0) < skill) {
@@ -1754,9 +1754,6 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
             obj_to_obj(money, corpse);
         }
         ch->set(CharMoney::Carried, 0);
-    }
-    if (!MOB_FLAGGED(ch, MOB_HUSK)) {
-        ch->contents = nullptr;
     }
     obj_to_room(corpse, IN_ROOM(ch));
 
@@ -2057,7 +2054,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             case Afterlife:
                 purge_homing(ch);
                 if (GET_LEVEL(ch) > 0 && has_group(ch)) {
-                    if (ch->master != nullptr) {
+                    if (ch->master) {
                         group_bonus(ch, 1);
                     } else {
                         group_bonus(ch, 0);
@@ -2144,7 +2141,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                 send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
             } else if (IN_ARENA(ch)) {
                 cleanup_arena_watch(ch);
-                if (killer != nullptr) {
+                if (killer) {
                     cleanup_arena_watch(killer);
                     send_to_all("@R%s@r manages to defeat @R%s@r in the Arena!@n\r\n", GET_NAME(killer), GET_NAME(ch));
                     final_combat_resolve(killer);
@@ -2160,10 +2157,10 @@ void die(struct char_data *ch, struct char_data *killer) {
                 final_combat_resolve(ch);
                 return;
             } else {
-                if (killer != nullptr && IS_NPC(killer)) {
+                if (killer && IS_NPC(killer)) {
                     GET_DTIME(ch) = time(nullptr) + 28800;
                     GET_DCOUNT(ch) += 1;
-                } else if (killer != nullptr && !IS_NPC(killer)) {
+                } else if (killer && !IS_NPC(killer)) {
                     GET_DTIME(ch) = time(nullptr) + 28800;
                     ch->playerFlags.set(PLR_PDEATH);
                     GET_DCOUNT(ch) += 1;
@@ -2225,10 +2222,10 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
                 checkit = true;
             }
         }
-        if (checkit == false && ch->master != nullptr && GET_IDNUM(ch->master) == LASTHIT(victim)) {
+        if (checkit == false && ch->master && GET_IDNUM(ch->master) == LASTHIT(victim)) {
             checkit = true;
         }
-        if (checkit == false && ch->master != nullptr) {
+        if (checkit == false && ch->master) {
             struct char_data *master = ch->master;
             for (f = master->followers; f; f = f->next) {
                 if (f->follower != ch) {
@@ -2258,10 +2255,10 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     if (IS_ICER(ch)) {
         share = share - (share * .20);
     }
-    if (GET_BONUS(ch, BONUS_LOYAL) > 0 && ch->master != nullptr) {
+    if (GET_BONUS(ch, BONUS_LOYAL) > 0 && ch->master) {
         share += share * 0.2;
     }
-    if (ch->master != nullptr && ch->master != ch) {
+    if (ch->master && ch->master != ch) {
         share += share * 0.15;
     }
     if (MOB_FLAGGED(victim, MOB_KNOWKAIO)) {

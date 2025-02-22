@@ -161,12 +161,12 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
         }
     }
 
-    if (tch != nullptr && IN_ROOM(tch) == IN_ROOM(ch)) {
+    if (tch && IN_ROOM(tch) == IN_ROOM(ch)) {
         if (tch == ch)
             format = "$n closes $s eyes and utters the words, '%s'.";
         else
             format = "$n stares at $N and utters the words, '%s'.";
-    } else if (tobj != nullptr &&
+    } else if (tobj &&
                ((IN_ROOM(tobj) == IN_ROOM(ch)) || (tobj->carried_by == ch)))
         format = "$n stares at $p and utters the words, '%s'.";
     else
@@ -183,7 +183,7 @@ void say_spell(struct char_data *ch, int spellnum, struct char_data *tch,
         perform_act(buf1, ch, tobj, tch, i);
     }
 
-    if (tch != nullptr && tch != ch && IN_ROOM(tch) == IN_ROOM(ch)) {
+    if (tch && tch != ch && IN_ROOM(tch) == IN_ROOM(ch)) {
         snprintf(buf1, sizeof(buf1), "$n stares at you and utters the words, '%s'.",
                  GET_LEVEL(ch) ? skill_name(spellnum) : buf);
         act(buf1, false, ch, nullptr, tch, TO_VICT);
@@ -416,7 +416,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                     else
                         act("$n points $p at $N.", true, ch, obj, tch, TO_ROOM);
                 }
-            } else if (tobj != nullptr) {
+            } else if (tobj) {
                 act("You point $p at $P.", false, ch, obj, tobj, TO_CHAR);
                 if (obj->look_description)
                     act(obj->look_description, false, ch, obj, tobj, TO_ROOM);
@@ -467,7 +467,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                                GET_OBJ_VAL(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, nullptr) <= 0)
                     break;
 
-            if (obj != nullptr)
+            if (obj)
                 extract_obj(obj);
             break;
         case ITEM_POTION:
@@ -488,7 +488,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                                GET_OBJ_VAL(obj, VAL_POTION_LEVEL), CAST_POTION, nullptr) <= 0)
                     break;
 
-            if (obj != nullptr)
+            if (obj)
                 extract_obj(obj);
             break;
         default:
@@ -662,7 +662,7 @@ ACMD(do_cast) {
     }
 
     /* Find the target */
-    if (t != nullptr) {
+    if (t) {
         char arg[MAX_INPUT_LENGTH];
 
         strlcpy(arg, t, sizeof(arg));
@@ -671,17 +671,17 @@ ACMD(do_cast) {
     }
     if (IS_SET(SINFO.targets, TAR_IGNORE)) {
         target = true;
-    } else if (t != nullptr && *t) {
+    } else if (t && *t) {
         if (!target && (IS_SET(SINFO.targets, TAR_CHAR_ROOM))) {
-            if ((tch = get_char_vis(ch, t, nullptr, FIND_CHAR_ROOM)) != nullptr)
+            if ((tch = get_char_vis(ch, t, nullptr, FIND_CHAR_ROOM)))
                 target = true;
         }
         if (!target && IS_SET(SINFO.targets, TAR_CHAR_WORLD))
-            if ((tch = get_char_vis(ch, t, nullptr, FIND_CHAR_WORLD)) != nullptr)
+            if ((tch = get_char_vis(ch, t, nullptr, FIND_CHAR_WORLD)))
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_INV))
-            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->getObjects())) != nullptr)
+            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->getObjects())))
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_EQUIP)) {
@@ -692,21 +692,21 @@ ACMD(do_cast) {
                 }
         }
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_ROOM))
-            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->getLocationObjects())) != nullptr)
+            if ((tobj = get_obj_in_list_vis(ch, t, nullptr, ch->getLocationObjects())))
                 target = true;
 
         if (!target && IS_SET(SINFO.targets, TAR_OBJ_WORLD))
-            if ((tobj = get_obj_vis(ch, t, nullptr)) != nullptr)
+            if ((tobj = get_obj_vis(ch, t, nullptr)))
                 target = true;
 
     } else {            /* if target string is empty */
         if (!target && IS_SET(SINFO.targets, TAR_FIGHT_SELF))
-            if (FIGHTING(ch) != nullptr) {
+            if (FIGHTING(ch)) {
                 tch = ch;
                 target = true;
             }
         if (!target && IS_SET(SINFO.targets, TAR_FIGHT_VICT))
-            if (FIGHTING(ch) != nullptr) {
+            if (FIGHTING(ch)) {
                 tch = FIGHTING(ch);
                 target = true;
             }

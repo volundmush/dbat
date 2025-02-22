@@ -158,10 +158,7 @@ OCMD(do_oecho) {
         obj_log(obj, "oecho called with no args");
 
     else if (auto room = obj->getRoom(); room) {
-        if(room->people) {
-            sub_write(argument, room->people, true, TO_ROOM);
-            sub_write(argument, room->people, true, TO_CHAR);
-        }
+        send_to_room(room, "%s", argument);
     } else
         obj_log(obj, "oecho called by object in NOWHERE");
 }
@@ -318,10 +315,8 @@ OCMD(do_otransform) {
         tmpobj.worn_by = obj->worn_by;
         tmpobj.worn_on = obj->worn_on;
         tmpobj.in_obj = obj->in_obj;
-        tmpobj.contents = obj->contents;
         tmpobj.id = obj->id;
         tmpobj.proto_script = obj->proto_script;
-        tmpobj.next_content = obj->next_content;
         memcpy(obj, &tmpobj, sizeof(*obj));
 
         if (wearer) {
@@ -518,7 +513,7 @@ OCMD(do_dgoload) {
         two_arguments(target, arg1, arg2); /* recycling ... */
         tch = get_char_near_obj(obj, arg1);
         if (tch) {
-            if (arg2 != nullptr && *arg2 &&
+            if (arg2 && *arg2 &&
                 (pos = find_eq_pos_script(arg2)) >= 0 &&
                 !GET_EQ(tch, pos) &&
                 can_wear_on_pos(object, pos)) {
@@ -591,8 +586,7 @@ OCMD(do_oasound) {
         if(!ex) continue;
         if (ex->to_room == room) continue;
         if(auto dest = get_room(ex->to_room); dest) {
-            sub_write(argument, dest->people, true, TO_ROOM);
-            sub_write(argument, dest->people, true, TO_CHAR);
+            send_to_room(dest, "%s", argument);
         }
         
     }

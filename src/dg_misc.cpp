@@ -86,17 +86,17 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
     }
 
     /* Find the target */
-    if (t != nullptr) {
+    if (t) {
         one_argument(strcpy(buf2, t), t);
         skip_spaces(&t);
     }
     if (IS_SET(SINFO.targets, TAR_IGNORE)) {
         target = true;
-    } else if (t != nullptr && *t) {
+    } else if (t && *t) {
         if (!target &&
             (IS_SET(SINFO.targets, TAR_CHAR_ROOM) ||
              IS_SET(SINFO.targets, TAR_CHAR_WORLD))) {
-            if ((tch = get_char(t)) != nullptr)
+            if ((tch = get_char(t)))
                 target = true;
         }
 
@@ -105,7 +105,7 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
              IS_SET(SINFO.targets, TAR_OBJ_EQUIP) ||
              IS_SET(SINFO.targets, TAR_OBJ_ROOM) ||
              IS_SET(SINFO.targets, TAR_OBJ_WORLD))) {
-            if ((tobj = get_obj(t)) != nullptr)
+            if ((tobj = get_obj(t)))
                 target = true;
         }
 
@@ -134,8 +134,7 @@ void do_dg_cast(void *go, script_data *sc, trig_data *trig,
                     strdup(((struct obj_data *) go)->short_description);
         else if (type == WLD_TRIGGER)
             caster->short_description = strdup("The gods");
-        caster->next_in_room = caster_room->people;
-        caster_room->people = caster;
+        char_to_room(caster, caster_room);
         IN_ROOM(caster) = real_room(caster_room->vn);
         call_magic(caster, tch, tobj, spellnum, DG_SPELL_LEVEL, CAST_SPELL, t);
         extract_char(caster);

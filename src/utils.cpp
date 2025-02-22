@@ -751,11 +751,10 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
         return (true);
     } else {
         send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
-        if (FIGHTING(ch)) {
-            stop_fighting(ch);
-        }
-        if (FIGHTING(vict)) {
-            stop_fighting(vict);
+        for(auto c : {ch, vict}) {
+            if (FIGHTING(c)) {
+                stop_fighting(c);
+            }
         }
         return (false);
     }
@@ -1645,7 +1644,7 @@ bool spar_friendly(struct char_data *ch, struct char_data *npc) {
 }
 
 int mob_respond(struct char_data *ch, struct char_data *vict, const char *speech) {
-    if (ch != nullptr && vict != nullptr) {
+    if (ch && vict) {
         if (!IS_NPC(ch) && IS_NPC(vict)) {
             if ((strstr(speech, "hello") || strstr(speech, "greet") || strstr(speech, "Hello") ||
                  strstr(speech, "Greet")) && !FIGHTING(vict)) {
@@ -2044,7 +2043,7 @@ void improve_skill(struct char_data *ch, int skill, int num) {
         }
     }
 
-    if (FIGHTING(ch) != nullptr && IS_NPC(FIGHTING(ch)) && MOB_FLAGGED(FIGHTING(ch), MOB_DUMMY)) {
+    if (FIGHTING(ch) && IS_NPC(FIGHTING(ch)) && MOB_FLAGGED(FIGHTING(ch), MOB_DUMMY)) {
         roll -= 100;
     }
 
@@ -2062,7 +2061,7 @@ void improve_skill(struct char_data *ch, int skill, int num) {
         roll = roll * 0.30;
     }
 
-    if (FIGHTING(ch) != nullptr && IS_NPC(FIGHTING(ch)) && MOB_FLAGGED(FIGHTING(ch), MOB_DUMMY)) {
+    if (FIGHTING(ch) && IS_NPC(FIGHTING(ch)) && MOB_FLAGGED(FIGHTING(ch), MOB_DUMMY)) {
         roll -= 100;
     }
 
@@ -2242,7 +2241,7 @@ char *CAP(char *txt) {
 
 
 char *strlwr(char *s) {
-    if (s != nullptr) {
+    if (s) {
         char *p;
 
         for (p = s; *p; ++p)

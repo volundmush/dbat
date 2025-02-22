@@ -283,7 +283,7 @@ int scan_file() {
  * A simple little function which tells you if the guy has mail or not.
  */
 int has_mail(long recipient) {
-    return (find_char_in_index(recipient) != nullptr);
+    return (find_char_in_index(recipient));
 }
 
 
@@ -586,7 +586,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
     int y;
     char *from;
 
-    if (!has_mail(GET_IDNUM(ch)) && mailman != nullptr) {
+    if (!has_mail(GET_IDNUM(ch)) && mailman) {
         snprintf(buf, sizeof(buf), "$n tells you, 'Sorry, you don't have any mail waiting.'");
         act(buf, false, mailman, nullptr, ch, TO_VICT);
         return;
@@ -625,7 +625,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         /* so it saves */
         obj->extra_flags.set(ITEM_UNIQUE_SAVE);
 
-        if (IS_PLAYING(ch->desc) && mailman != nullptr) {
+        if (IS_PLAYING(ch->desc) && mailman) {
             obj_to_char(obj, ch);
             act("$n gives you a piece of mail.", false, mailman, nullptr, ch, TO_VICT);
             act("$N gives $n a piece of mail.", false, ch, nullptr, mailman, TO_ROOM);

@@ -632,7 +632,7 @@ void search_replace(char *string, const char *find, const char *replace) {
     char final[MAX_STRING_LENGTH], temp[2];
     size_t start, end, i;
 
-    while (strstr(string, find) != nullptr) {
+    while (strstr(string, find)) {
 
         final[0] = '\0';
         start = strstr(string, find) - string;
@@ -924,12 +924,12 @@ room_rnum find_target_room(struct char_data *ch, char *rawroomstr) {
         int num;
 
         num = get_number(&mobobjstr);
-        if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD)) != nullptr) {
+        if ((target_mob = get_char_vis(ch, mobobjstr, &num, FIND_CHAR_WORLD))) {
             if ((location = IN_ROOM(target_mob)) == NOWHERE) {
                 send_to_char(ch, "That character is currently lost.\r\n");
                 return (NOWHERE);
             }
-        } else if ((target_obj = get_obj_vis(ch, mobobjstr, &num)) != nullptr) {
+        } else if ((target_obj = get_obj_vis(ch, mobobjstr, &num))) {
             if (IN_ROOM(target_obj) != NOWHERE)
                 location = IN_ROOM(target_obj);
             else if (target_obj->carried_by && IN_ROOM(target_obj->carried_by) != NOWHERE)
@@ -1623,7 +1623,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
                      buf1, cmbuf2, (int) k->time.played / 3600,
                      (int) (((int64_t)k->time.played % 3600) / 60), 0);
 
-        if (k->desc != nullptr) {
+        if (k->desc) {
             send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_USER(k));
         } else {
             send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_LOG_USER(k));
@@ -1886,7 +1886,7 @@ ACMD(do_stat) {
         if (!*buf2)
             send_to_char(ch, "Stats on which mobile?\r\n");
         else {
-            if ((victim = get_char_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
+            if ((victim = get_char_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)))
                 do_stat_character(ch, victim);
             else
                 send_to_char(ch, "No such mobile around.\r\n");
@@ -1895,7 +1895,7 @@ ACMD(do_stat) {
         if (!*buf2) {
             send_to_char(ch, "Stats on which player?\r\n");
         } else {
-            if ((victim = findPlayer(buf2)) != nullptr)
+            if ((victim = findPlayer(buf2)))
                 do_stat_character(ch, victim);
             else
                 send_to_char(ch, "No such player around.\r\n");
@@ -1903,7 +1903,7 @@ ACMD(do_stat) {
     } else if (is_abbrev(buf1, "file")) {
         if (!*buf2)
             send_to_char(ch, "Stats on which player?\r\n");
-        else if ((victim = get_player_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)) != nullptr)
+        else if ((victim = get_player_vis(ch, buf2, nullptr, FIND_CHAR_WORLD)))
             do_stat_character(ch, victim);
         else {
             victim = findPlayer(buf2);
@@ -1920,7 +1920,7 @@ ACMD(do_stat) {
         if (!*buf2)
             send_to_char(ch, "Stats on which object?\r\n");
         else {
-            if ((object = get_obj_vis(ch, buf2, nullptr)) != nullptr)
+            if ((object = get_obj_vis(ch, buf2, nullptr)))
                 do_stat_object(ch, object);
             else
                 send_to_char(ch, "No such object around.\r\n");
@@ -1937,17 +1937,17 @@ ACMD(do_stat) {
         char *name = buf1;
         int number = get_number(&name);
 
-        if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)) != nullptr)
+        if ((object = get_obj_in_equip_vis(ch, name, &number, ch->equipment)))
             do_stat_object(ch, object);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getObjects())) != nullptr)
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getObjects())))
             do_stat_object(ch, object);
-        else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)) != nullptr)
+        else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_ROOM)))
             do_stat_character(ch, victim);
-        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getLocationObjects())) != nullptr)
+        else if ((object = get_obj_in_list_vis(ch, name, &number, ch->getLocationObjects())))
             do_stat_object(ch, object);
-        else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)) != nullptr)
+        else if ((victim = get_char_vis(ch, name, &number, FIND_CHAR_WORLD)))
             do_stat_character(ch, victim);
-        else if ((object = get_obj_vis(ch, name, &number)) != nullptr)
+        else if ((object = get_obj_vis(ch, name, &number)))
             do_stat_object(ch, object);
         else
             send_to_char(ch, "Nothing around by that name.\r\n");
@@ -2429,7 +2429,7 @@ ACMD(do_purge) {
 
     /* argument supplied. destroy single object or char */
     if (*buf) {
-        if ((vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_WORLD)) != nullptr) {
+        if ((vict = get_char_vis(ch, buf, nullptr, FIND_CHAR_WORLD))) {
             if (!IS_NPC(vict) && (GET_ADMLEVEL(ch) <= GET_ADMLEVEL(vict))) {
                 send_to_char(ch, "Fuuuuuuuuu!\r\n");
                 return;
@@ -2451,7 +2451,7 @@ ACMD(do_purge) {
                 }
             }
             extract_char(vict);
-        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getLocationObjects())) != nullptr) {
+        } else if ((obj = get_obj_in_list_vis(ch, buf, nullptr, ch->getLocationObjects()))) {
             act("$n destroys $p.", false, ch, obj, nullptr, TO_ROOM);
             extract_obj(obj);
         } else {
@@ -3550,7 +3550,7 @@ ACMD(do_show) {
             break;
 
         case 14:
-            if (value != nullptr && *value) {
+            if (value && *value) {
                 if (sscanf(value, "%d-%d", &low, &high) != 2) {
                     if (sscanf(value, "%d", &low) != 1) {
                         send_to_char(ch, "Usage: show uniques, show uniques [vnum], or show uniques [low-high]\r\n");
@@ -4252,7 +4252,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             send_to_char(ch, "No.");
             break;
         case 76:
-            if (vict->desc != nullptr) {
+            if (vict->desc) {
                 star_phase(vict, RANGE(0, 2));
             } else {
                 send_to_char(ch, "They aren't even in the game!\r\n");

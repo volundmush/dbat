@@ -2665,7 +2665,7 @@ ACMD(do_shimmer) {
     }
 
     if (skill < perc || (FIGHTING(ch) && rand_number(1, 2) <= 1)) {
-        if (tar != nullptr) {
+        if (tar) {
             if (tar != ch) {
                 send_to_char(ch,
                              "You prepare to move instantly but mess up the process and waste some of your ki!\r\n");
@@ -2687,7 +2687,7 @@ ACMD(do_shimmer) {
 
     reveal_hiding(ch, 0);
     WAIT_STATE(ch, PULSE_2SEC);
-    if (tar != nullptr) {
+    if (tar) {
         if (tar == ch) {
             send_to_char(ch,
                          "Moving to yourself would be kinda impossible wouldn't it? If not that then it would at least be pointless.\r\n");
@@ -3336,7 +3336,7 @@ ACMD(do_bury) {
         } else if (!(obj = get_obj_in_list_vis(ch, arg2, nullptr, ch->getObjects()))) {
             send_to_char(ch, "You don't have that object to bury.\r\n");
             return;
-        } else if (fobj != nullptr) {
+        } else if (fobj) {
             send_to_char(ch, "There is already something buried near here.\r\n");
             return;
         } else {

@@ -275,7 +275,7 @@ void star_phase(struct char_data *ch, int type) {
             } // End of is HOSHIJIN
         } // End of descriptor_list for
         return;
-    } else if (ch != nullptr && !IS_NPC(ch)) {
+    } else if (ch && !IS_NPC(ch)) {
         if (IS_HOSHIJIN(ch)) {
             switch (type) {
                 case 0:

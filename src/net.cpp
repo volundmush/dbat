@@ -744,7 +744,7 @@ namespace net {
         }
 
         // Loop through the results and bind to the first valid address
-        for (p = res; p != nullptr; p = p->ai_next) {
+        for (p = res; p; p = p->ai_next) {
             // Create a socket
             if ((listen_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
                 perror("Socket creation failed");

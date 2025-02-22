@@ -8,8 +8,6 @@ extern struct obj_data *obj_selling;
 extern struct char_data *ch_selling, *ch_buying;
 
 // functions
-extern int check_saveroom_count(struct char_data *ch, struct obj_data *cont);
-
 extern void dball_load(uint64_t heartPulse, double deltaTime);
 
 extern int check_insidebag(struct obj_data *cont, double mult);

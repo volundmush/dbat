@@ -78,7 +78,7 @@ void init_boards() {
                 continue;
             }
 
-            if ((tmp_board = load_board(board_vnum)) != nullptr) {
+            if ((tmp_board = load_board(board_vnum))) {
                 tmp_board->next = bboards;
                 bboards = tmp_board;
             }
@@ -488,7 +488,7 @@ void show_board(obj_vnum board_vnum, struct char_data *ch) {
         bnum = GET_OBJ_VNUM(obj);
         char clan[120];
         if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-            if (GET_CLAN(ch) != nullptr) {
+            if (GET_CLAN(ch)) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
             if (!strstr(obj->look_description, clan)) {
@@ -608,7 +608,7 @@ void board_display_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
         bnum = GET_OBJ_VNUM(obj);
         char clan[200];
         if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-            if (GET_CLAN(ch) != nullptr) {
+            if (GET_CLAN(ch)) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
             if (!strstr(obj->look_description, clan)) {
@@ -1015,7 +1015,7 @@ void remove_board_msg(obj_vnum board_vnum, struct char_data *ch, int arg) {
         char clan[120];
         obj = read_object(board_vnum, REAL);
         if (OBJ_FLAGGED(obj, ITEM_CBOARD)) {
-            if (GET_CLAN(ch) != nullptr) {
+            if (GET_CLAN(ch)) {
                 sprintf(clan, "%s", GET_CLAN(ch));
             }
             if (clanIsModerator(clan, ch) && strstr(obj->look_description, clan)) {

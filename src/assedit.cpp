@@ -292,7 +292,7 @@ void assedit_parse(struct descriptor_data *d, char *arg) {
 
                 CREATE(pTComponents, COMPONENT, OLC_ASSEDIT(d)->lNumComponents + 1);
 
-                if (OLC_ASSEDIT(d)->pComponents != nullptr) {          /* Copy from olc to temp */
+                if (OLC_ASSEDIT(d)->pComponents) {          /* Copy from olc to temp */
                     memmove(pTComponents, OLC_ASSEDIT(d)->pComponents,
                             OLC_ASSEDIT(d)->lNumComponents * sizeof(COMPONENT));
 /*        free(OLC_ASSEDIT(d)->pComponents); */
