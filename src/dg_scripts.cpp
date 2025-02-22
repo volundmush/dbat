@@ -871,8 +871,7 @@ void add_trigger(script_data *sc, trig_data *t, int loc) {
     auto ow = units.at(sc->id);
 
     t->owner = ow;
-
-    insert_vnum(scriptVnumIndex, t);
+    
 
     int order = 0;
     for(auto t2 = TRIGGERS(sc); t2; t2 = t2->next) {
@@ -1649,7 +1648,7 @@ void process_wait(unit_data *go, trig_data *trig, int type, char *cmd,
 
     // we're replacing the old wait_event_obj.
 
-    triggers_waiting.insert(trig);
+    triggerSubscriptions.subscribe("waiting", trig);
 
     trig->curr_state = cl->next;
 }
@@ -2481,18 +2480,7 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
         }
     }
 
-    switch (type) { /* the script may have been detached */
-        case MOB_TRIGGER:
-            sc = SCRIPT((char_data *) go);
-            break;
-        case OBJ_TRIGGER:
-            sc = SCRIPT((obj_data *) go);
-            break;
-        case WLD_TRIGGER:
-            sc = SCRIPT((room_data *) go);
-            break;
-    }
-    if (sc)
+    if (!trig->owner)
         free_varlist(GET_TRIG_VARS(trig));
     GET_TRIG_VARS(trig) = nullptr;
     GET_TRIG_DEPTH(trig) = 0;
@@ -2935,9 +2923,18 @@ void trig_data::activate() {
         return;
     }
     active = true;
+    auto sh = shared_from_this();
+    std::unordered_set<std::string> services;
+    services.insert("active");
+    services.insert(fmt::format("vnum_{}", vn));
     next_in_world = trigger_list;
     trigger_list = this;
-    if(waiting != 0.0) triggers_waiting.insert(this);
+    if(waiting != 0.0) {
+        services.insert("waiting");
+    }
+    for(const auto& s : services) {
+        triggerSubscriptions.subscribe(s, sh);
+    }
 }
 
 void trig_data::deactivate() {
@@ -2946,10 +2943,8 @@ void trig_data::deactivate() {
     }
     active = false;
     struct trig_data *temp;
-    triggers_waiting.erase(this);
-    auto find = std::find(triggers_queued.begin(), triggers_queued.end(), this);
-    if(find != triggers_queued.end())
-        triggers_queued.erase(find);
+    auto sh = shared_from_this();
+    triggerSubscriptions.unsubscribeFromAll(sh);
     REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);
 
 }

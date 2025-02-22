@@ -2376,7 +2376,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     }
 
     if (IS_NPC(i) && !FIGHTING(i) && GET_POS(i) != POS_SITTING && GET_POS(i) != POS_SLEEPING)
-        send_to_char(ch, "@w%c%s", UPPER(*i->short_description), i->short_description + 1);
+            send_to_char(ch, "@w%c%s", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) == ch)
         send_to_char(ch, "@w%c%s is being grappled with by YOU!", UPPER(*i->short_description), i->short_description + 1);
     else if (IS_NPC(i) && GRAPPLED(i) && GRAPPLED(i) != ch)

@@ -351,10 +351,10 @@ int room_data::getDamage() {
 }
 
 void room_data::activate() {
-    if(script) {
-        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_RANDOM)
+    if(trig_list) {
+        if(SCRIPT_TYPES(this) & OTRIG_RANDOM)
             roomSubscriptions.subscribe("randomTriggers", shared_from_this());
-        if(SCRIPT_TYPES(SCRIPT(this)) & OTRIG_TIME)
+        if(SCRIPT_TYPES(this) & OTRIG_TIME)
             roomSubscriptions.subscribe("timeTriggers", shared_from_this());
     }
     if(dmg != 0)

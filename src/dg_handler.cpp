@@ -83,10 +83,6 @@ void free_trigger(struct trig_data *trig) {
         free_varlist(trig->var_list);
         trig->var_list = nullptr;
     }
-    triggers_waiting.erase(trig);
-    auto find = std::find(triggers_queued.begin(), triggers_queued.end(), trig);
-    if(find != triggers_queued.end())
-        triggers_queued.erase(find);
 
     uniqueScripts.erase(trig->id);
 }
@@ -94,16 +90,8 @@ void free_trigger(struct trig_data *trig) {
 
 /* remove a single trigger from a mob/obj/room */
 void extract_trigger(struct trig_data *trig) {
-    struct trig_data *temp;
 
-    triggers_waiting.erase(trig);
-    auto find = std::find(triggers_queued.begin(), triggers_queued.end(), trig);
-    if(find != triggers_queued.end())
-        triggers_queued.erase(find);
-    erase_vnum(scriptVnumIndex, trig);
-
-    /* walk the trigger list and remove this one */
-    REMOVE_FROM_LIST(trig, trigger_list, next_in_world, temp);
+    trig->deactivate();
 
     free_trigger(trig);
 }

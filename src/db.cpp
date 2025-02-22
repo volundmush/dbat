@@ -53,30 +53,27 @@ std::shared_ptr<spdlog::logger> logger;
 
 struct config_data config_info; /* Game configuration list.    */
 
-std::map<room_vnum, std::shared_ptr<room_data>> world;    /* array of rooms		 */
+// The global database of entities.
+std::unordered_map<int, std::shared_ptr<unit_data>> units;
+std::map<room_vnum, std::shared_ptr<room_data>> world;
+std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
+std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
+std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
 
 struct char_data *affect_list = nullptr; /* global linked list of chars with affects */
 struct char_data *affectv_list = nullptr; /* global linked list of chars with round-based affects */
 std::map<mob_vnum, struct index_data> mob_index;    /* index table for mobile file	 */
 std::map<mob_vnum, struct char_data> mob_proto;    /* prototypes for mobs		 */
 
-VnumIndex<trig_data> scriptVnumIndex;
-
 std::map<obj_vnum, struct index_data> obj_index;    /* index table for object file	 */
 std::map<obj_vnum, struct obj_data> obj_proto;    /* prototypes for objs		 */
-
-std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
-
-/* hash tree for fast obj lookup */
-std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
 
 std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
-std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
 
-std::unordered_map<int, std::shared_ptr<unit_data>> units;
+
 
 std::vector<std::weak_ptr<char_data>> getAllCharacters() {
     std::vector<std::weak_ptr<char_data>> out;
@@ -155,6 +152,7 @@ std::vector<obj_vnum> dbVnums = {20, 21, 22, 23, 24, 25, 26};
 SubscriptionManager<char_data> characterSubscriptions;
 SubscriptionManager<obj_data> objectSubscriptions;
 SubscriptionManager<room_data> roomSubscriptions;
+SubscriptionManager<trig_data> triggerSubscriptions;
 
 /* local functions */
 static void dragon_level(struct char_data *ch);
@@ -316,7 +314,7 @@ static void db_load_characters_finish(const std::filesystem::path& loc) {
 }
 
 static void db_load_items_initial(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "items.json")) {
+    for(const auto j : load_from_file(loc, "items.json")) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
         auto data = j["data"];
@@ -325,6 +323,7 @@ static void db_load_items_initial(const std::filesystem::path& loc) {
         uniqueObjects.emplace(id, sh);
         units.emplace(id, sh);
     }
+    logger->info("Loaded {} items", uniqueObjects.size());
 }
 
 static void db_load_items_finish(const std::filesystem::path& loc) {

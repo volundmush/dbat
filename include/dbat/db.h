@@ -402,8 +402,6 @@ extern std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
 extern std::vector<std::weak_ptr<char_data>> getAllCharacters();
 int nextID();
 
-extern VnumIndex<trig_data> scriptVnumIndex;
-
 extern std::map<obj_vnum, struct index_data> obj_index;
 extern std::map<obj_vnum, struct obj_data> obj_proto;
 
@@ -413,6 +411,7 @@ extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
 extern SubscriptionManager<char_data> characterSubscriptions;
 extern SubscriptionManager<obj_data> objectSubscriptions;
 extern SubscriptionManager<room_data> roomSubscriptions;
+extern SubscriptionManager<trig_data> triggerSubscriptions;
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;

@@ -808,14 +808,14 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if (d->snooping && d->snooping->character && len < sizeof(prompt)) {
+            if (d->snooping && d->snooping->character != nullptr && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "Snooping: (%s) - ",
                                  GET_NAME(d->snooping->character));
                 flagged = true;
                 if (count >= 0)
                     len += count;
             }
-            if (DRAGGING(d->character) && DRAGGING(d->character) && len < sizeof(prompt)) {
+            if (DRAGGING(d->character) && DRAGGING(d->character) != nullptr && len < sizeof(prompt)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "Dragging: (%s) - ",
                                  GET_NAME(DRAGGING(d->character)));
                 flagged = true;
@@ -2021,7 +2021,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
 
     if (type == TO_VICT) {
         auto to = (struct char_data *) vict_obj;
-        if (to && SENDOK(to) &&
+        if (to != nullptr && SENDOK(to) &&
             (!resskill || (roll_skill(to, resskill) >= dcval))) {
             perform_act(str, ch, obj, vict_obj, to);
             return last_act_message;
@@ -2065,7 +2065,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             if (STATE(d) != CON_PLAYING)
                 continue;
 
-            if (ch) {
+            if (ch != nullptr) {
                 if (IN_ARENA(ch)) {
                     if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
                         if (arena_watch(d->character) == ch->getRoomVnum()) {
@@ -2080,13 +2080,13 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             if (GET_EAVESDROP(d->character) > 0) {
                 int roll = rand_number(1, 101);
                 if (!resskill || (roll_skill(d->character, resskill) >= dcval)) {
-                    if (ch && GET_EAVESDROP(d->character) == ch->getRoomVnum() &&
+                    if (ch != nullptr && GET_EAVESDROP(d->character) == ch->getRoomVnum() &&
                         GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                         char buf3[1000];
                         *buf3 = '\0';
                         sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
                         perform_act(buf3, ch, obj, vict_obj, d->character);
-                    } else if (obj && GET_EAVESDROP(d->character) == obj->getRoomVnum() &&
+                    } else if (obj != nullptr && GET_EAVESDROP(d->character) == obj->getRoomVnum() &&
                                GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                         char buf3[1000];
                         *buf3 = '\0';

@@ -122,6 +122,8 @@ struct unit_data {
     vnum vn{NOTHING}; /* Where in database? Not used by all things. */
     zone_vnum zone{NOTHING};
     
+    virtual int getType() const = 0; // 0 is room, 1 is object, 2 is character.
+
     char *name{};
     char *room_description{};      /* When thing is listed in room */
     char *look_description{};      /* what to show when looked at */
@@ -129,10 +131,8 @@ struct unit_data {
 
     struct extra_descr_data *ex_description{}; /* extra descriptions     */
 
-    std::vector<trig_vnum> proto_script; /* list of default triggers  */
-    script_data *script{};  /* script info for the object */
-
     // for DGscripts data.
+    std::vector<trig_vnum> proto_script; /* list of default triggers  */
     long trigger_types{};                /* bitvector of trigger types */
     struct trig_data *trig_list{};            /* list of triggers           */
     struct trig_var_data *global_vars{};    /* list of global variables   */
@@ -215,6 +215,7 @@ struct thing_data : public unit_data {
 struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     obj_data() = default;
     explicit obj_data(const nlohmann::json& j);
+    int getType() const override { return 1; }
 
     nlohmann::json serializeBase();
     nlohmann::json serializeInstance();
@@ -340,6 +341,7 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     room_data() = default;
     ~room_data() override;
     explicit room_data(const nlohmann::json &j);
+    int getType() const override { return 0; }
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     std::bitset<NUM_ROOM_FLAGS> room_flags{};   /* DEATH,DARK ... etc */
@@ -589,6 +591,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     char_data() = default;
     // this constructor below is to be used only for the mob_proto map.
     explicit char_data(const nlohmann::json& j);
+    int getType() const override { return 2; }
     nlohmann::json serializeBase();
     nlohmann::json serializeInstance();
 
