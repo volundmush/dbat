@@ -377,12 +377,9 @@ void db_load_dgscripts_finish(const std::filesystem::path& loc) {
         if (auto cf = uniqueScripts.find(id); cf != uniqueScripts.end()) {
             if (auto t = cf->second) {
                 t->deserializeLocation(location);
-                if(!t->owner) {
-                    basic_mud_log("Script %d: '%s' has no owner.", id, t->name);
-                    uniqueScripts.erase(cf);
-                    continue;
-                }
-                t->owner->trig_list = t.get();
+                auto o = t->owner;
+                t->next = o->trig_list;
+                o->trig_list = t.get();
                 t->owner->trigger_types |= GET_TRIG_TYPE(t);
             }
         }
@@ -1781,6 +1778,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->time.played = 0.0;
     mob->time.logon = time(nullptr);
     MOB_LOADROOM(mob) = NOWHERE;
+    mob->position = mob->mob_specials.default_pos;
 
     if (IS_HUMANOID(mob)) {
         for(auto f : {MOB_RARM, MOB_LARM, MOB_RLEG, MOB_LLEG}) mob->mobFlags.set(f);

@@ -523,7 +523,10 @@ void char_data::deserializeBase(const nlohmann::json &j) {
     if(j.contains("armor")) armor = j["armor"];
     if(j.contains("damage_mod")) damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) mob_specials.deserialize(j["mob_specials"]);
-    if(j.contains("mobFlags")) for(auto &i : j["mobFlags"]) mobFlags.set(i.get<int>());
+    if(j.contains("mobFlags")) {
+        for(auto &i : j["mobFlags"])
+            mobFlags.set(i.get<int>());
+    }
     if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) playerFlags.set(i.get<int>());
     if(j.contains("pref")) for(auto &i : j["pref"]) pref.set(i.get<int>());
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) bodyparts.set(i.get<int>());

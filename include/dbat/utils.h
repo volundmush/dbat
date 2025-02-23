@@ -1151,20 +1151,19 @@ template<size_t N>
 void sprintbitarray(const std::bitset<N>& bitvector, const char *names[], int maxar, char *result) {
     *result = '\0';
 
-    for (size_t i = 0; i < bitvector.size() && i < static_cast<size_t>(maxar); i++) {
-        if (!bitvector[i]) continue;
-        if (names[i] == nullptr || *names[i] == '\n') break; // Check for nullptr or sentinel value
+    std::vector<std::string> found;
 
-        if (*names[i] == '\0') {
-            strcat(result, "UNDEFINED ");
-        } else {
-            strcat(result, names[i]);
-            strcat(result, " ");
-        }
+    for (size_t i = 0; i < bitvector.size(); i++) {
+        if (!bitvector[i]) continue;
+        found.emplace_back(names[i]);
     }
 
-    if (!*result)
+    if (found.empty())
         strcpy(result, "None ");
+    else {
+        auto joined = boost::algorithm::join(found, " ");
+        strcpy(result, joined.c_str());
+    }
 }
 
 template<size_t N>

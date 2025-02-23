@@ -3071,7 +3071,7 @@ static void display_room_info(struct room_data *rm, struct char_data *ch) {
 static void display_room_flags(struct room_data *rm, struct char_data *ch) {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
 
-    sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf);
+    sprintbitarray(rm->room_flags, room_bits, sizeof(room_bits), buf);
     sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
 
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
@@ -3080,9 +3080,9 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch) {
 
     send_to_char(ch, "@wLocation: @G%-70s@w\r\n", rm->name);
 
-    if (SCRIPT(rm)) {
+    if (rm->trig_list) {
         send_to_char(ch, "@D[@GTriggers");
-        for (auto t = TRIGGERS(SCRIPT(rm)); t; t = t->next)
+        for (auto t = rm->trig_list; t; t = t->next)
             send_to_char(ch, " %d", GET_TRIG_VNUM(t));
         send_to_char(ch, "@D] ");
     }

@@ -678,7 +678,7 @@ in the vault (vnum: 453) now and then. you can just use
 
                         /* new check for pc/npc status */
                     else if (!strcasecmp(field, "is_pc")) {
-                        strcpy(str, IS_NPC(c) ? "1" : "0");
+                        strcpy(str, !IS_NPC(c) ? "1" : "0");
                     } else if (!strcasecmp(field, "inventory")) {
                         if (subfield && *subfield) {
                             auto con = ch->getObjects();

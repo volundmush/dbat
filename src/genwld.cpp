@@ -326,11 +326,6 @@ room_data::room_data(const nlohmann::json &j) {
         for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
     }
 
-    if(!proto_script.empty() || vn == 0) {
-
-    }
-
-
 }
 
 room_data::~room_data() {
