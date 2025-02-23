@@ -104,6 +104,7 @@ void free_ex_descriptions(struct extra_descr_data *head) {
 
 int remove_from_save_list(zone_vnum zone, int type) {
     int counter = 0;
+    // This is not an error, the static analysis doesn't understand what to do with the return in the lambda.
     auto check = [&](save_list_data &d) {if(d.zone == zone && d.type == type) {counter++; return true;}};
 
     save_list.erase(std::remove_if(save_list.begin(), save_list.end(), check), save_list.end());

@@ -210,8 +210,8 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     while (!done) {
         buf = fread_string(shop_f, buf2);
         if (*buf == '#') {        /* New shop */
-            sscanf(buf, "#%ld\n", &temp);
-            snprintf(buf2, sizeof(buf2)-1, "shop #%ld in shop file %s", temp, filename);
+            sscanf(buf, "#%d\n", &temp);
+            snprintf(buf2, sizeof(buf2)-1, "shop #%d in shop file %s", temp, filename);
             auto &sh = shop_index[temp];
             free(buf);        /* Plug memory leak! */
             sh.vnum = temp;
@@ -437,7 +437,7 @@ int load_inv_backup(struct char_data *ch) {
     FILE *source, *target;
     char source_file[20480], target_file[20480], buf2[20480];
     char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+    sprintf(name, "%s", GET_NAME(ch));
 
     if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' ||
         name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
@@ -491,7 +491,7 @@ static int inv_backup(struct char_data *ch) {
     char buf[20480];
 
     char alpha[MAX_INPUT_LENGTH], name[MAX_INPUT_LENGTH];
-    sprintf(name, GET_NAME(ch));
+    sprintf(name, "%s", GET_NAME(ch));
 
     if (name[0] == 'a' || name[0] == 'A' || name[0] == 'b' || name[0] == 'B' || name[0] == 'c' || name[0] == 'C' ||
         name[0] == 'd' || name[0] == 'D' || name[0] == 'e' || name[0] == 'E') {
@@ -559,7 +559,7 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
         basic_mud_log("SYSERR: Format error, %s", buf2);
         exit(1);
     }
-    if (((retval = sscanf(line, " %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld %ld", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7,
+    if (((retval = sscanf(line, " %d %d %d %d %d %d %d %d %d %d %d", t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7,
                           t + 8, t + 9, t + 10)) == 3) && (bitwarning == true)) {
         basic_mud_log("SYSERR: Format error, %s", buf2);
         exit(1);
@@ -769,7 +769,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    if (sscanf(line, " %ld %ld %ld %ldd%ld+%ld %ldd%ld+%ld ",
+    if (sscanf(line, " %d %d %d %dd%d+%d %dd%d+%d ",
                t, t + 1, t + 2, t + 3, t + 4, t + 5, t + 6, t + 7, t + 8) != 9) {
         basic_mud_log("SYSERR: Format error in mob #%d, first line after S flag\n"
             "...expecting line of form '# # # #d#+# #d#+#'", nr);
@@ -793,7 +793,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    if (sscanf(line, " %ld %ld %ld %ld", t, t + 1, t + 2, t + 3) != 4) {
+    if (sscanf(line, " %d %d %d %d", t, t + 1, t + 2, t + 3) != 4) {
         basic_mud_log("SYSERR: Format error in mob #%d, second line after S flag\n"
             "...expecting line of form '# # # #'", nr);
         return 0;
@@ -823,7 +823,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    if (sscanf(line, " %ld %ld %ld ", t, t + 1, t + 2) != 3) {
+    if (sscanf(line, " %d %d %d ", t, t + 1, t + 2) != 3) {
         basic_mud_log("SYSERR: Format error in last line of mob #%d\n"
             "...expecting line of form '# # #'", nr);
         return 0;
@@ -1273,7 +1273,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         basic_mud_log("SYSERR: Expecting first numeric line of %s, but file ended!", buf2);
         exit(1);
     }
-    if ((retval = sscanf(line, " %d %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
+    if ((retval = sscanf(line, " %ld %s %s %s %s %s %s %s %s %s %s %s %s", t, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10,
                                 f11, f12)) == 13) {
         bitvector_t extraFlags[4], wearFlags[4], permFlags[4];
 
@@ -1434,7 +1434,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                     exit(1);
                 }
 
-                if ((retval = sscanf(line, " %d %d ", t, t + 1)) != 2) {
+                if ((retval = sscanf(line, " %ld %ld ", t, t + 1)) != 2) {
                     basic_mud_log("SYSERR: Format error in 'S' field, %s\n"
                         "...expecting 2 numeric arguments, got %d\n"
                         "...offending line: '%s'", buf2, retval, line);
@@ -1456,7 +1456,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...expecting numeric constant but file ended!", buf2);
                     exit(1);
                 }
-                if (sscanf(line, "%d", t) != 1) {
+                if (sscanf(line, "%ld", t) != 1) {
                     basic_mud_log("SYSERR: Format error in 'Z' field, %s\n"
                         "...expecting numeric argument\n"
                         "...offending line: '%s'", buf2, line);
@@ -1553,7 +1553,7 @@ static void load_zones(FILE *fl, char *zonename) {
     }
     zone_vnum v;
 
-    if (sscanf(buf, "#%hd", &v) != 1) {
+    if (sscanf(buf, "#%d", &v) != 1) {
         basic_mud_log("SYSERR: FFFFFF Format error in %s, line %d", zname, line_num);
         exit(1);
     }
@@ -1580,7 +1580,7 @@ static void load_zones(FILE *fl, char *zonename) {
         char zbuf3[MAX_STRING_LENGTH];
         char zbuf4[MAX_STRING_LENGTH];
 
-        if (sscanf(buf, " %hd %hd %d %d %s %s %s %s %d %d", &z.bot, &z.top, &z.lifespan,
+        if (sscanf(buf, " %d %d %d %d %s %s %s %s %d %d", &z.bot, &z.top, &z.lifespan,
                    &z.reset_mode, zbuf1, zbuf2, zbuf3, zbuf4, &z.min_level, &z.max_level) != 10) {
             basic_mud_log("SYSERR: Format error in 10-constant line of %s", zname);
             exit(1);
@@ -1591,14 +1591,14 @@ static void load_zones(FILE *fl, char *zonename) {
         z.zone_flags[2] = asciiflag_conv(zbuf3);
         z.zone_flags[3] = asciiflag_conv(zbuf4);
 
-    } else if (sscanf(buf, " %hd %hd %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
+    } else if (sscanf(buf, " %d %d %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
         /*
      * This may be due to the fact that the zone has no builder.  So, we just attempt
      * to fix this by copying the previous 2 last reads into this variable and the
      * last one.
      */
         basic_mud_log("SYSERR: Format error in numeric constant line of %s, attempting to fix.", zname);
-        if (sscanf(z.name, " %hd %hd %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
+        if (sscanf(z.name, " %d %d %d %d ", &z.bot, &z.top, &z.lifespan, &z.reset_mode) != 4) {
             basic_mud_log("SYSERR: Could not fix previous error, aborting game.");
             exit(1);
         } else {
@@ -2439,7 +2439,7 @@ int House_load(room_vnum rvnum) {
 
     if (!(fl = fopen(cmfname, "r+b"))) {
         if (errno != ENOENT) {  /* if it fails, NOT because of no file */
-            sprintf(buf1, "SYSERR: READING HOUSE FILE %s (5)", cmfname);
+            snprintf(buf1, sizeof(buf1), "SYSERR: READING HOUSE FILE %s (5)", cmfname);
             perror(buf1);
         }
         return 0;
@@ -2597,7 +2597,7 @@ int House_load(room_vnum rvnum) {
                                 danger = 1;
                             }
                             get_line(fl, line);
-                            sscanf(line, "%d %d", t, t + 1);
+                            sscanf(line, "%ld %ld", t, t + 1);
 
                             if (!temp->sbinfo) {
                                 CREATE(temp->sbinfo, struct obj_spellbook_spell, SPELLBOOK_SIZE);

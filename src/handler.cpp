@@ -698,16 +698,16 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                         if (strlen(object->look_description)) {
                             char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
                             if (GET_OBJ_VNUM(vehicle) <= 46099 && GET_OBJ_VNUM(vehicle) >= 46000) {
-                                sprintf(nick, "Saiyan Pod %s", object->look_description);
-                                sprintf(nick2, "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
+                                snprintf(nick, sizeof(nick), "Saiyan Pod %s", object->look_description);
+                                snprintf(nick2, sizeof(nick2), "@wA @Ys@ya@Yi@yy@Ya@yn @Dp@Wo@Dd@w named @D(@C%s@D)@w",
                                         object->look_description);
                             } else if (GET_OBJ_VNUM(vehicle) >= 46100 && GET_OBJ_VNUM(vehicle) <= 46199) {
-                                sprintf(nick, "EDI Xenofighter MK. II %s", object->look_description);
-                                sprintf(nick2,
+                                snprintf(nick, sizeof(nick), "EDI Xenofighter MK. II %s", object->look_description);
+                                snprintf(nick2, sizeof(nick2), 
                                         "@wAn @YE@yD@YI @CX@ce@Wn@Do@Cf@ci@Wg@Dh@Wt@ce@Cr @RMK. II @wnamed @D(@C%s@D)@w",
                                         object->look_description);
                             }
-                            sprintf(nick3, "%s is resting here@w", nick2);
+                            snprintf(nick3, sizeof(nick3), "%s is resting here@w", nick2);
                             vehicle->name = strdup(nick);
                             vehicle->short_description = strdup(nick2);
                             vehicle->room_description = strdup(nick3);

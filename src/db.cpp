@@ -788,7 +788,7 @@ void auc_save() {
     else {
         auto con = get_room(80)->getObjects();
         for (auto obj : filter_raw(con)) {
-            fprintf(fl, "%" I64T " %s %d %d %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
+            fprintf(fl, "%d %s %ld %ld %d %d %ld\n", obj->id, GET_AUCTERN(obj), GET_AUCTER(obj),
                         GET_CURBID(obj), GET_STARTBID(obj), GET_BID(obj), GET_AUCTIME(obj));
         }
         fprintf(fl, "~END~\n");
@@ -2678,95 +2678,6 @@ zone_rnum real_zone(zone_vnum vnum) {
  * TODO: Add checks for unknown bitvectors.
  */
 
-
-int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate) {
-    int counter2, i;
-    struct extra_descr_data *ex_desc;
-    char buf1[MAX_STRING_LENGTH + 1];
-    char ebuf0[MAX_STRING_LENGTH], ebuf1[MAX_STRING_LENGTH];
-    char ebuf2[MAX_STRING_LENGTH], ebuf3[MAX_STRING_LENGTH];
-
-
-    if (obj->look_description) {
-        strcpy(buf1, obj->look_description);
-        strip_string(buf1);
-    } else
-        *buf1 = 0;
-
-    sprintascii(ebuf0, GET_OBJ_EXTRA(obj)[0]);
-    sprintascii(ebuf1, GET_OBJ_EXTRA(obj)[1]);
-    sprintascii(ebuf2, GET_OBJ_EXTRA(obj)[2]);
-    sprintascii(ebuf3, GET_OBJ_EXTRA(obj)[3]);
-
-    fprintf(fp,
-            "#%d\n"
-            "%ld %ld %ld %ld %ld %ld %ld %ld %ld %s %s %s %s %ld %ld %ld %ld %ld %ld %d %d\n",
-            GET_OBJ_VNUM(obj), locate, GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
-            GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4),
-            GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),
-            ebuf0, ebuf1, ebuf2, ebuf3,
-            GET_OBJ_VAL(obj, 8), GET_OBJ_VAL(obj, 9),
-            GET_OBJ_VAL(obj, 10), GET_OBJ_VAL(obj, 11), GET_OBJ_VAL(obj, 12),
-            GET_OBJ_VAL(obj, 13), GET_OBJ_VAL(obj, 14), GET_OBJ_VAL(obj, 15));
-
-    if (!(OBJ_FLAGGED(obj, ITEM_UNIQUE_SAVE)) && !GET_OBJ_TYPE(obj) == ITEM_SPELLBOOK) {
-        return 1;
-    }
-
-    fprintf(fp,
-            "XAP\n"
-            "%s~\n"
-            "%s~\n"
-            "%s~\n"
-            "%s~\n"
-            "%d %d %d %d %d %" I64T " %d %d\n", obj->name ? obj->name : "undefined",
-            obj->short_description ? obj->short_description : "undefined",
-            obj->room_description ? obj->room_description : "undefined",
-            buf1, GET_OBJ_TYPE(obj), GET_OBJ_WEAR(obj)[0],
-            GET_OBJ_WEAR(obj)[1], GET_OBJ_WEAR(obj)[2], GET_OBJ_WEAR(obj)[3],
-            GET_OBJ_WEIGHT(obj), GET_OBJ_COST(obj), GET_OBJ_RENT(obj));
-
-    fprintf(fp, "G\n%ld\n", obj->generation);
-    fprintf(fp, "U\n%" I64T "\n", obj->id);
-
-    fprintf(fp, "Z\n%d\n", GET_OBJ_SIZE(obj));
-
-    /* Do we have affects? */
-    for (counter2 = 0; counter2 < MAX_OBJ_AFFECT; counter2++)
-        if (obj->affected[counter2].location != APPLY_NONE)
-            fprintf(fp, "A\n"
-                        "%d %d %d\n",
-                    obj->affected[counter2].location, obj->affected[counter2].modifier,
-                    obj->affected[counter2].specific);
-
-    /* Do we have extra descriptions? */
-    if (obj->ex_description) {        /*. Yep, save them too . */
-        for (ex_desc = obj->ex_description; ex_desc; ex_desc = ex_desc->next) {
-            /*. Sanity check to prevent nasty protection faults . */
-            if (!*ex_desc->keyword || !*ex_desc->description) {
-                continue;
-            }
-            strcpy(buf1, ex_desc->description);
-            strip_string(buf1);
-            fprintf(fp, "E\n"
-                        "%s~\n"
-                        "%s~\n",
-                    ex_desc->keyword,
-                    buf1);
-        }
-    }
-
-    /* Do we have spells? */
-    if (obj->sbinfo) {        /*. Yep, save them too . */
-        for (i = 0; i < SPELLBOOK_SIZE; i++) {
-            if (obj->sbinfo[i].spellname == 0) {
-                break;
-            }
-            fprintf(fp, "S\n" "%d %d\n", obj->sbinfo[i].spellname, obj->sbinfo[i].pages);
-        }
-    }
-    return 1;
-}
 
 /* This procedure removes the '\r\n' from a string so that it may be
    saved to a file.  Use it only on buffers, not on the orginal

@@ -1317,22 +1317,22 @@ void list_detailed_guild(struct char_data *ch, int gm_nr) {
     if (GM_TRAINER(gm_nr) < NOBODY)
         strcpy(buf1, "<NONE>");
     else
-        sprintf(buf1, "%6d   ", mob_index[GM_TRAINER(gm_nr)].vn);
+        snprintf(buf1, sizeof(buf1), "%6d   ", mob_index[GM_TRAINER(gm_nr)].vn);
 
-    sprintf(buf, " Guild Master: %s\r\n", buf1);
-    sprintf(buf, "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
-            GM_OPEN(gm_nr), GM_CLOSE(gm_nr), GM_CHARGE(gm_nr));
-    sprintf(buf, "%s Min Level will train: %d\r\n", buf, GM_MINLVL(gm_nr));
-    sprintf(buf, "%s Whom will train: %s\r\n", buf, guild_customer_string(gm_nr, true));
+    snprintf(buf, sizeof(buf), " Guild Master: %s\r\n", buf1);
+    snprintf(buf, sizeof(buf), "%s Hours: %4d to %4d,  Surcharge: %5.2f\r\n", buf,
+        GM_OPEN(gm_nr), GM_CLOSE(gm_nr), GM_CHARGE(gm_nr));
+    snprintf(buf, sizeof(buf), "%s Min Level will train: %d\r\n", buf, GM_MINLVL(gm_nr));
+    snprintf(buf, sizeof(buf), "%s Whom will train: %s\r\n", buf, guild_customer_string(gm_nr, true));
 
     /* now for the REAL reason why someone would want to see a Guild :) */
 
-    sprintf(buf, "%s The GM can teach the following:\r\n", buf);
+    snprintf(buf, sizeof(buf), "%s The GM can teach the following:\r\n", buf);
 
     *buf2 = '\0';
     for (i = 0; i < SKILL_TABLE_SIZE; i++) {
         if (does_guild_know(gm_nr, i))
-            sprintf(buf2, "%s %s \r\n", buf2, spell_info[i].name);
+        snprintf(buf2, sizeof(buf2), "%s %s \r\n", buf2, spell_info[i].name);
     }
 
     strcat(buf, buf2);

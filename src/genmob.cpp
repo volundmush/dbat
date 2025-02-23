@@ -258,8 +258,8 @@ void check_mobile_strings(struct char_data *mob) {
 void check_mobile_string(mob_vnum i, char **string, const char *dscr) {
     if (*string == nullptr || **string == '\0') {
         char smbuf[128];
-        sprintf(smbuf, "GenOLC: Mob #%d has an invalid %s.", i, dscr);
-        mudlog(BRF, ADMLVL_GOD, true, smbuf);
+        snprintf(smbuf, sizeof(smbuf), "GenOLC: Mob #%d has an invalid %s.", i, dscr);
+        mudlog(BRF, ADMLVL_GOD, true, "%s", smbuf);
         if (*string)
             free(*string);
         *string = strdup("An undefined string.");

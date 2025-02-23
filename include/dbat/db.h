@@ -151,7 +151,6 @@ extern void boot_world();
 
 extern int is_empty(zone_rnum zone_nr);
 
-extern void index_boot(int mode);
 extern void check_start_rooms();
 extern void index_boot_help();
 extern void boot_db_textfiles();
@@ -173,7 +172,6 @@ extern void boot_db_houses();
 extern void boot_db_shadow();
 extern void boot_db_spacemap();
 
-extern void boot_db_legacy();
 extern void boot_db_new();
 
 
@@ -234,8 +232,6 @@ extern void read_level_data(struct char_data *ch, FILE *fl);
 
 extern void write_level_data(struct char_data *ch, FILE *fl);
 
-extern int parse_mobile_from_file(FILE *mob_f, struct char_data *ch);
-
 struct obj_data *create_obj();
 
 extern void free_obj(struct obj_data *obj);
@@ -243,8 +239,6 @@ extern void free_obj(struct obj_data *obj);
 struct obj_data *read_object(obj_vnum nr, int type);
 
 extern int vnum_object(char *searchname, struct char_data *ch);
-
-extern int my_obj_save_to_disk(FILE *fp, struct obj_data *obj, int locate);
 
 extern void add_unique_id(struct obj_data *obj);
 

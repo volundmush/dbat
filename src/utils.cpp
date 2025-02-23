@@ -255,23 +255,23 @@ const char *report_party_health(struct char_data *ch) {
                 }
             }
         }
-        sprintf(result1,
+        snprintf(result1, sizeof(result1),
                 "@D[@BG@D]-------@mF@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D] <@RV@Y%s@R>@n\n",
                 add_commas(GET_GROUPKILLS(ch)).c_str());
-        sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty",
+        snprintf(result2, sizeof(result2), "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty",
                 party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty",
                 party4 ? get_i_name(ch, party4) : "Empty");
-        sprintf(result3,
+        snprintf(result3, sizeof(result3),
                 "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n",
                 plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4,
                 "%");
-        sprintf(result4,
+        snprintf(result4, sizeof(result4),
                 "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n",
                 kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
-        sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1],
+        snprintf(result5, sizeof(result5), "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1],
                 exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4],
                 exhaust[stam4]);
-        sprintf(result_party_health, "%s%s%s%s%s\n", result1, result2, result3, result4, result5);
+        snprintf(result_party_health, sizeof(result_party_health), "%s%s%s%s%s\n", result1, result2, result3, result4, result5);
         ch->temp_prompt = strdup(result_party_health);
         return (ch->temp_prompt);
     } else if (ch->master && AFF_FLAGGED(ch->master, AFF_GROUP)) {
@@ -410,22 +410,22 @@ const char *report_party_health(struct char_data *ch) {
             } /* Is follower */
         } /* End for */
 
-        sprintf(result1,
+        snprintf(result1, sizeof(result1),
                 "@D[@BG@D]-------@YL@D------- -------@mF@D------- -------@mF@D------- -------@mF@D-------[@BG@D]@n\n");
-        sprintf(result2, "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty",
+        snprintf(result2, sizeof(result2), "@D[@BR@D]@C%-15s %-15s %-15s %-15s@D[@BR@D]@n\n", party1 ? get_i_name(ch, party1) : "Empty",
                 party2 ? get_i_name(ch, party2) : "Empty", party3 ? get_i_name(ch, party3) : "Empty",
                 party4 ? get_i_name(ch, party4) : "Empty");
-        sprintf(result3,
+        snprintf(result3, sizeof(result3),
                 "@D[@BO@D]@RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s @RPL@D:%s%11" I64T "@w%s@D[@BO@D]@n\n",
                 plcol[plc1], plperc1, "%", plcol[plc2], plperc2, "%", plcol[plc3], plperc3, "%", plcol[plc4], plperc4,
                 "%");
-        sprintf(result4,
+        snprintf(result4, sizeof(result4),
                 "@D[@BU@D]@cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s @cCharge@D:@B%7" I64T "@w%s@D[@BU@D]@n\n",
                 kiperc1, "%", kiperc2, "%", kiperc3, "%", kiperc4, "%");
-        sprintf(result5, "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1],
+        snprintf(result5, sizeof(result5), "@D[@BP@D]@gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s @gSt@D:%s%12s@D[@BP@D]@n", excol[stam1],
                 exhaust[stam1], excol[stam2], exhaust[stam2], excol[stam3], exhaust[stam3], excol[stam4],
                 exhaust[stam4]);
-        sprintf(result_party_health, "%s%s%s%s%s\n", result1, result2, result3, result4, result5);
+        snprintf(result_party_health, sizeof(result_party_health), "%s%s%s%s%s\n", result1, result2, result3, result4, result5);
         ch->temp_prompt = strdup(result_party_health);
         return (ch->temp_prompt);
     } else {

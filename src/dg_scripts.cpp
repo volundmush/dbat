@@ -1349,9 +1349,9 @@ void eval_op(char *op, char *lhs, char *rhs, char *result, unit_data *go,
     } else if (!strcmp("!=", op)) {
         sprintf(result, "%d", strcasecmp(lhs, rhs));
     } else if (!strcmp("<=", op)) {
-        sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
+        sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
     } else if (!strcmp(">=", op)) {
-        sprintf(result, "%lld", strcasecmp(lhs, rhs) <= 0);
+        sprintf(result, "%d", strcasecmp(lhs, rhs) <= 0);
     } else if (!strcmp("<", op)) {
         sprintf(result, "%d", strcasecmp(lhs, rhs) < 0);
     } else if (!strcmp(">", op)) {
@@ -1519,7 +1519,7 @@ struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl) {
     char *p;
 
     if (!(cl->next)) { /* rryan: if this is the last line, theres no end. */
-        script_log("Trigger VNum %lld has 'if' without 'end'. (error 1)", GET_TRIG_VNUM(trig));
+        script_log("Trigger VNum %d has 'if' without 'end'. (error 1)", GET_TRIG_VNUM(trig));
         return cl;
     }
 
@@ -1533,13 +1533,13 @@ struct cmdlist_element *find_end(trig_data *trig, struct cmdlist_element *cl) {
 
         /* thanks to Russell Ryan for this fix */
         if (!c->next) { /* rryan: this is the last line, we didn't find an end. */
-            script_log("Trigger VNum %lld has 'if' without 'end'. (error 2)", GET_TRIG_VNUM(trig));
+            script_log("Trigger VNum %d has 'if' without 'end'. (error 2)", GET_TRIG_VNUM(trig));
             return c;
         }
     }
 
     /* rryan: we didn't find an end. */
-    script_log("Trigger VNum %lld has 'if' without 'end'. (error 3)", GET_TRIG_VNUM(trig));
+    script_log("Trigger VNum %d has 'if' without 'end'. (error 3)", GET_TRIG_VNUM(trig));
     return c;
 }
 
@@ -1576,7 +1576,7 @@ struct cmdlist_element *find_else_end(trig_data *trig,
 
         /* thanks to Russell Ryan for this fix */
         if (!c->next) { /* rryan: this is the last line, return. */
-            script_log("Trigger VNum %lld has 'if' without 'end'. (error 4)", GET_TRIG_VNUM(trig));
+            script_log("Trigger VNum %d has 'if' without 'end'. (error 4)", GET_TRIG_VNUM(trig));
             return c;
         }
     }
@@ -1584,7 +1584,7 @@ struct cmdlist_element *find_else_end(trig_data *trig,
     /* rryan: if we got here, it's the last line, if its not an end, script_log it. */
     for (p = c->cmd; *p && isspace(*p); p++); /* skip spaces */
     if (strncasecmp("end", p, 3))
-        script_log("Trigger VNum %lld has 'if' without 'end'. (error 5)", GET_TRIG_VNUM(trig));
+        script_log("Trigger VNum %d has 'if' without 'end'. (error 5)", GET_TRIG_VNUM(trig));
     return c;
 }
 
@@ -2340,7 +2340,7 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
              * if not in an if-block, ignore the extra 'else[if]' and warn about it
              */
             if (GET_TRIG_DEPTH(trig) == 1) {
-                script_log("Trigger VNum %lld has 'else' without 'if'.",
+                script_log("Trigger VNum %d has 'else' without 'if'.",
                            GET_TRIG_VNUM(trig));
                 continue;
             }
@@ -2349,7 +2349,7 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
         } else if (!strncasecmp("while ", p, 6)) {
             temp = find_done(cl);
             if (!temp) {
-                script_log("Trigger VNum %lld has 'while' without 'done'.",
+                script_log("Trigger VNum %d has 'while' without 'done'.",
                            GET_TRIG_VNUM(trig));
                 return ret_val;
             }
@@ -2366,7 +2366,7 @@ static int true_script_driver(unit_data *go_adress, trig_data *trig, int type, i
              * if not in an if-block, ignore the extra 'end' and warn about it.
              */
             if (GET_TRIG_DEPTH(trig) == 1) {
-                script_log("Trigger VNum %lld has 'end' without 'if'.",
+                script_log("Trigger VNum %d has 'end' without 'if'.",
                            GET_TRIG_VNUM(trig));
                 continue;
             }
