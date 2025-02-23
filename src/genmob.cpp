@@ -1062,8 +1062,14 @@ void char_data::activate() {
             services.insert("timeTriggers");
     }
 
+    if(!IS_NPC(this)) services.insert("players");
+
     if(PLR_FLAGGED(this, PLR_GOOP))
         services.insert("goopTimeService");
+    if(AFF_FLAGGED(this, AFF_POISON)) 
+        services.insert("poisoned");
+    if(PLR_FLAGGED(this, PLR_AURALIGHT))
+        services.insert("auralight");
     if(ABSORBING(this))
         services.insert("androidAbsorbSystem");
     if(PLR_FLAGGED(this, PLR_POWERUP))

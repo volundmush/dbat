@@ -1534,7 +1534,7 @@ static int count_hash_records(FILE *fl) {
 
 /* load the zone table and command tables */
 static void load_zones(FILE *fl, char *zonename) {
-    int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error, arg_num, version = 1;
+    int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error = 0, arg_num, version = 1;
     char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
     int zone_fix = false;
     char t1[80], t2[80], line[MAX_STRING_LENGTH];
@@ -1626,16 +1626,17 @@ static void load_zones(FILE *fl, char *zonename) {
         zc.command = buf[0];
 
         if(zc.command == 'V') { /* a string-arg command */
-            if (sscanf(&buf[1], " %d %d %d %d %d %d %79s %79[^\f\r\n\t\v]", &tmp,&zc.arg1, &zc.arg2, &zc.arg3,
-                       &zc.arg4, &zc.arg5, t1, t2) != 8)
+            arg_num = sscanf(&buf[1], " %d %d %d %d %d %d %79s %79[^\f\r\n\t\v]", &tmp,&zc.arg1, &zc.arg2, &zc.arg3, &zc.arg4, &zc.arg5, t1, t2);
+            if (arg_num != 8)
                 error = 1;
             else {
                 zc.sarg1 = t1;
                 zc.sarg2 = t2;
             }
         } else {
-            if ((arg_num = sscanf(&buf[1], " %d %d %d %d %d %d ", &tmp, &zc.arg1, &zc.arg2, &zc.arg3, &zc.arg4,
-                                  &zc.arg5)) != 6) {
+            arg_num = sscanf(&buf[1], " %d %d %d %d %d %d ", &tmp, &zc.arg1, &zc.arg2, &zc.arg3, &zc.arg4, &zc.arg5);
+            if (arg_num != 6) {
+                basic_mud_log("SYSERR: WRONG NUMBER OF ARGUMENTS? %d Format error in %s, line %d: '%s'", arg_num, zname, c, buf);
                 if (arg_num != 5) {
                     error = 1;
                 } else {

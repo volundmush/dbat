@@ -41,6 +41,9 @@
 #include "dbat/account.h"
 #include "dbat/maputils.h"
 
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
 **************************************************************************/
@@ -252,19 +255,37 @@ ACMD(do_reboot) {
     send_to_char(ch, "Not a thing anymore.\r\n");
 }
 
-static nlohmann::json load_from_file(const std::filesystem::path& loc, const std::string& name) {
-    auto path = loc / name;
-    if(!std::filesystem::exists(path)) {
+static nlohmann::json load_from_file(const std::filesystem::path& loc, const std::string& name)
+{
+    // We'll automatically append ".gz"
+    auto path = loc / (name + ".gz");
+    if (!std::filesystem::exists(path)) {
         basic_mud_log("File %s does not exist", path.c_str());
         return {};
     }
-    std::ifstream file(path);
-    if(!file.is_open()) {
+
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open()) {
         basic_mud_log("Error opening file %s", path.c_str());
         return {};
     }
+
+    // Setup a Boost filtering stream for GZIP *de*compression
+    boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
+    inbuf.push(boost::iostreams::gzip_decompressor());
+    inbuf.push(file);
+
+    // Construct an istream on top of that filtering streambuf
+    std::istream instream(&inbuf);
+
+    // Parse the JSON
     nlohmann::json j;
-    file >> j;
+    try {
+        instream >> j;
+    } catch (const std::exception &e) {
+        basic_mud_log("JSON parse error reading %s: %s", path.c_str(), e.what());
+        return {};
+    }
     return j;
 }
 

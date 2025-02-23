@@ -10,15 +10,21 @@
 #include "dbat/shop.h"
 #include "dbat/constants.h"
 
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 #include <fstream>
 #include <thread>
 
 static void dump_to_file(const std::filesystem::path &loc, const std::string &name, const nlohmann::json &data) {
     if(data.empty()) return;
     //auto startTime = std::chrono::high_resolution_clock::now();
-    std::ofstream out(loc / name);
-    out << jdump(data);
-    out.close();
+    std::ofstream file(loc / (name + ".gz"));
+    boost::iostreams::filtering_streambuf<boost::iostreams::output> out;
+    out.push(boost::iostreams::gzip_compressor());
+    out.push(file);
+    std::ostream outStream(&out);
+    outStream << jdump(data);
+
     //auto endTime = std::chrono::high_resolution_clock::now();
     //auto duration = std::chrono::duration<double>(endTime - startTime).count();
     //basic_mud_log("Dumping %s to disk took %f seconds.", name, duration);
@@ -204,8 +210,8 @@ static void cleanup_state() {
     auto vecFiles = getDumpFiles();
     std::list<std::filesystem::path> files(vecFiles.begin(), vecFiles.end());
 
-    // If we have more than 20 state files, we want to purge the oldest one(s) until we have just 20.
-    while(files.size() > 20) {
+    // If we have more than x state files, we want to purge the oldest one(s) until we have just x.
+    while(files.size() > 200) {
         std::filesystem::remove_all(files.back());
         files.pop_back();
     }

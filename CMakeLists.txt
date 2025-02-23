@@ -23,7 +23,7 @@ CPMAddPackage("gh:ilqvya/random#v1.5.0")
 CPMAddPackage("gh:Neargye/magic_enum#v0.9.6")
 CPMAddPackage("gh:tplgy/cppcodec#v0.2")
 
-find_package(Boost CONFIG REQUIRED COMPONENTS system program_options regex)
+find_package(Boost CONFIG REQUIRED COMPONENTS system program_options regex iostreams)
 
 set(CIRCLE_INCLUDE_DIRS
         include

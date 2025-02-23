@@ -220,7 +220,12 @@ extern void set_title(struct char_data *ch, char *title);
 extern void gain_condition(struct char_data *ch, int condition, int value);
 
 extern void point_update(uint64_t heartPulse, double deltaTime);
-
+extern void hunger_update(uint64_t heartPulse, double deltaTime);
+extern void relax_update(uint64_t heartPulse, double deltaTime);
+extern void auralight_update(uint64_t heartPulse, double deltaTime);
+extern void player_misc_update(uint64_t heartPulse, double deltaTime);
+extern void kaioken_update(uint64_t heartPulse, double deltaTime);
+extern void poison_update(uint64_t heartPulse, double deltaTime);
 extern void update_pos(struct char_data *victim);
 
 /* in class.c */

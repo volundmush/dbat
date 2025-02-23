@@ -5994,6 +5994,7 @@ ACMD(do_focus) {
                     }
                     int duration = GET_INT(ch) / 20;
                     assign_affect(vict, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
+                    characterSubscriptions.subscribe("poisoned", vict);
                 }
                 return;
             }
@@ -11340,6 +11341,7 @@ ACMD(do_aura) {
             send_to_char(ch, "Your aura fades as you stop shining light.\r\n");
             act("$n's aura fades as they stop shining light on the area.", true, ch, nullptr, nullptr, TO_ROOM);
             ch->playerFlags.reset(PLR_AURALIGHT);
+            characterSubscriptions.unsubscribe("auralight", ch);
 
         } else if ((ch->getCurKI()) > GET_MAX_MANA(ch) * 0.12) {
             reveal_hiding(ch, 0);
@@ -11352,6 +11354,7 @@ ACMD(do_aura) {
                     aura_types[GET_AURA(ch)]);
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
             ch->playerFlags.set(PLR_AURALIGHT);
+            characterSubscriptions.subscribe("auralight", ch);
 
         } else {
             send_to_char(ch, "You don't have enough KI to do that.\r\n");
