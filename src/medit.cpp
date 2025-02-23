@@ -412,7 +412,7 @@ void medit_disp_class(struct descriptor_data *d) {
     auto check = [](SenseiID id) {return true;};
 
     for (const auto cl: sensei::filterSenseis(check)) {
-        sprintf(buf, "@g%2d@n) %s\r\n", cl, sensei::getName(cl).c_str());
+        sprintf(buf, "@g%2d@n) %s\r\n", static_cast<int>(cl), sensei::getName(cl).c_str());
         write_to_output(d, buf);
     }
     write_to_output(d, "Enter class number : ");
@@ -428,7 +428,7 @@ void medit_disp_race(struct descriptor_data *d) {
     clear_screen(d);
     auto check = [](RaceID id) {return true;};
     for (const auto &r: race::filterRaces(check)) {
-        sprintf(buf, "@g%2d@n) %-20.20s  %s", r, race::getName(r).c_str(),
+        sprintf(buf, "@g%2d@n) %-20.20s  %s", static_cast<int>(r), race::getName(r).c_str(),
                 !(++columns % 2) ? "\r\n" : "");
         write_to_output(d, buf);
     }

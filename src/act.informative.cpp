@@ -115,9 +115,9 @@ ACMD(do_evolve) {
 
     // Define evolution costs
     std::vector<EvolutionCost> evolutionCosts = {
-        {GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15), "powerlevel", CharVital::PowerLevel, GET_CON(ch)},
-        {GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22), "ki", CharVital::Ki, GET_WIS(ch)},
-        {GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15), "stamina", CharVital::Stamina, GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15)), "powerlevel", CharVital::PowerLevel, GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22)), "ki", CharVital::Ki, GET_WIS(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15)), "stamina", CharVital::Stamina, GET_CON(ch)},
     };
 
     if (!*arg) {
@@ -2142,7 +2142,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         }
     }
     send_to_char(ch, "\r\n");
-    if (GET_CLAN(i) && strstr(GET_CLAN(i), "None") == false) {
+    if (GET_CLAN(i) && !strstr(GET_CLAN(i), "None")) {
         sprintf(buf, "%s", GET_CLAN(i));
         clan = true;
     }
@@ -2718,11 +2718,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     }
 
     if (GET_RDISPLAY(i)) {
-        if (GET_RDISPLAY(i) != "Empty") {
-            char rdis[MAX_STRING_LENGTH];
-            sprintf(rdis, "...%s", GET_RDISPLAY(i));
-            act(rdis, false, i, nullptr, ch, TO_VICT);
-        }
+        char rdis[MAX_STRING_LENGTH];
+        sprintf(rdis, "...%s", GET_RDISPLAY(i));
+        act(rdis, false, i, nullptr, ch, TO_VICT);
     }
 
 }
@@ -3089,7 +3087,7 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch) {
 
     double grav = rm->getEnvironment(ENV_GRAVITY);
     auto g = fmt::format("{}", grav);
-    sprintf(buf3, "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, rm->vn, g.c_str());
+    snprintf(buf3, sizeof(buf3), "@D[ @G%s@D] @wSector: @D[ @G%s @D] @wVnum: @D[@G%5d@D]@n Gravity: @D[@G%sx@D]@n", buf, buf2, rm->vn, g.c_str());
     send_to_char(ch, "@wFlags: %-70s@w\r\n", buf3);
 
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
@@ -3557,7 +3555,7 @@ static void handle_board_read(struct char_data *ch, char *arg) {
         show_board(GET_OBJ_VNUM(obj), ch);
     } else if (!isdigit(*number) || strchr(number, '.')) {
         char new_arg[MAX_STRING_LENGTH];
-        sprintf(new_arg, "%s %s", number, arg);
+        snprintf(new_arg, sizeof(new_arg), "%s %s", number, arg);
         look_at_target(ch, new_arg, 0);
     } else {
         int msg = atoi(number);
@@ -3808,13 +3806,17 @@ ACMD(do_rdisplay) {
 
     if (!*argument) {
         send_to_char(ch, "Clearing room display.\r\n");
-        GET_RDISPLAY(ch) = "Empty";
+        if(GET_RDISPLAY(ch))
+            free(GET_RDISPLAY(ch));
+        GET_RDISPLAY(ch) = nullptr;
     } else {
         char derp[MAX_STRING_LENGTH];
 
         strcpy(derp, argument);
 
         send_to_char(ch, "You set your display to; %s\r\n", derp);
+        if(GET_RDISPLAY(ch))
+            free(GET_RDISPLAY(ch));
         GET_RDISPLAY(ch) = strdup(derp);
     }
 }
@@ -3861,7 +3863,7 @@ ACMD(do_perf) {
         send_to_char(ch, "The skill name should be longer than 3 characters...\r\n");
         return;
     }
-    for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
+    for (i = 1; i < SKILL_TABLE_SIZE; i++) {
         if (spell_info[i].skilltype != SKTYPE_SKILL)
             continue;
 
@@ -4547,9 +4549,7 @@ ACMD(do_status) {
         }
 
         if (GET_RDISPLAY(ch)) {
-            if (GET_RDISPLAY(ch) != "Empty") {
-                send_to_char(ch, "         Room Display: @C...%s@n\r\n", GET_RDISPLAY(ch));
-            }
+            send_to_char(ch, "         Room Display: @C...%s@n\r\n", GET_RDISPLAY(ch));
         }
 
         send_to_char(ch, "\r\n@D<@b-------------------------@D[@BCondition@D]@b--------------------------@D>@n\r\n");
@@ -5205,14 +5205,14 @@ ACMD(do_who) {
     int low = 0, high = CONFIG_LEVEL_CAP, localwho = 0, questwho = 0, hide = 0;
     int showclass = 0, short_list = 0, outlaws = 0;
     int who_room = 0, showgroup = 0, showleader = 0;
-    char *line_color = "@n";
+    const char *line_color = "@n";
 
     skip_spaces(&argument);
     strcpy(buf, argument);    /* strcpy: OK (sizeof: argument == buf) */
     name_search[0] = '\0';
 
     struct {
-        char *disp;
+        const char *disp;
         int min_level;
         int max_level;
         int count; /* must always start as 0 */

@@ -83,8 +83,8 @@ using Random = effolkronium::random_static;
 #define NOBODY    NOWHERE
 #define NOFLAG  NOWHERE
 
-#define I64T "lld"
-#define SZT "lld"
+#define I64T "ld"
+#define SZT "ld"
 #define TMT "ld"
 
 /* Various virtual (human-reference) number types. */

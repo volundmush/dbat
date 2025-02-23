@@ -201,7 +201,7 @@ void read_from_file(void *buf, int size, long filepos) {
     }
 
     fseek(mail_file, filepos, SEEK_SET);
-    fread(buf, size, 1, mail_file);
+    auto bytes = fread(buf, size, 1, mail_file);
     fclose(mail_file);
     return;
 }
@@ -283,7 +283,7 @@ int scan_file() {
  * A simple little function which tells you if the guy has mail or not.
  */
 int has_mail(long recipient) {
-    return (find_char_in_index(recipient));
+    return (find_char_in_index(recipient)) ? true : false;
 }
 
 

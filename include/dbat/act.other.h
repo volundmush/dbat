@@ -6,7 +6,7 @@
 extern const room_vnum freeres[NUM_ALIGNS];
 
 // functions
-extern void log_imm_action(char *messg, ...);
+extern void log_imm_action(const char *messg, ...);
 
 extern void hint_system(struct char_data *ch, int num);
 

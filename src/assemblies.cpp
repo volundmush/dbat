@@ -110,7 +110,7 @@ void assemblySaveAssemblies() {
     fclose(pFile);
 }
 
-void assemblyListToChar(struct char_data *pCharacter, int type = 0) {
+void assemblyListToChar(struct char_data *pCharacter, int type) {
     char szBuffer[MAX_STRING_LENGTH] = {'\0'};
     char szAssmType[MAX_INPUT_LENGTH] = {'\0'};
     long i = 0;                  // Outer iterator.

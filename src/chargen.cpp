@@ -26,6 +26,7 @@ namespace net {
         }
         if(mimic) j["mimic"] = static_cast<int>(mimic.value());
 
+        return j;
     }
 
     void ChargenData::deserialize(const nlohmann::json& j) {
@@ -344,7 +345,7 @@ namespace net {
     ChargenState ChargenParser::cgHandleSex(const std::string &arg) {
         if(arg.empty()) {
             cgDisplaySex();
-            return;
+            return state;
         }
 
         switch(toupper(arg[0])) {
@@ -359,7 +360,7 @@ namespace net {
                 break;
             default:
                 sendText("That is not an option!\r\n");
-                return;
+                return state;
         }
         
         return ChargenState::Racial;

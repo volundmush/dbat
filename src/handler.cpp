@@ -588,10 +588,10 @@ int get_number(char **name) {
 
     *number = '\0';
 
-    if ((ppos = strchr(*name, '.'))) {
+    if ((ppos = strchr((char*)*name, '.'))) {
         *ppos++ = '\0';
         strlcpy(number, *name, sizeof(number));
-        strcpy(*name, ppos);    /* strcpy: OK (always smaller) */
+        strcpy((char*)*name, ppos);    /* strcpy: OK (always smaller) */
 
         for (i = 0; *(number + i); i++)
             if (!isdigit(*(number + i)))
@@ -1337,7 +1337,7 @@ struct char_data *get_char_vis(struct char_data *ch, char *name, int *number, in
 
 
 
-struct obj_data *get_obj_in_list_vis(struct char_data *ch, char *name, int *number, const std::vector<std::weak_ptr<obj_data>>& list) {
+struct obj_data *get_obj_in_list_vis(struct char_data *ch, const char *name, int *number, const std::vector<std::weak_ptr<obj_data>>& list) {
     int num;
 
     if (!number) {

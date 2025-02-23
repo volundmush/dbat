@@ -188,7 +188,7 @@ static void hedit_disp_menu(struct descriptor_data *d) {
 }
 
 void hedit_parse(struct descriptor_data *d, char *arg) {
-    char *oldtext = '\0';
+    std::string oldtext{};
     int number, change = true;
 
 
@@ -316,7 +316,7 @@ void hedit_parse(struct descriptor_data *d, char *arg) {
                         write_to_output(d, "%s", OLC_HELP(d)->entry);
                         oldtext = strdup(OLC_HELP(d)->entry);
                     }
-                    string_write(d, &OLC_HELP(d)->entry, MAX_MESSAGE_LENGTH, 0, oldtext);
+                    string_write(d, &OLC_HELP(d)->entry, MAX_MESSAGE_LENGTH, 0, (char*)oldtext.c_str());
                     OLC_VAL(d) = 1;
                     break;
                 case '3':

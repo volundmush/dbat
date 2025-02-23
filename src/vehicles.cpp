@@ -330,6 +330,8 @@ static int get_warp_destination(const char *arg, struct char_data *ch) {
 }
 
 ACMD(do_warp) {
+    send_to_char(ch, "Command temporarily disabled.\r\n");
+    return;
     char arg[MAX_INPUT_LENGTH];
     struct obj_data *vehicle = nullptr;
 
@@ -344,7 +346,7 @@ ACMD(do_warp) {
         return;
     }
 
-    warp_ship_to_location(ch, vehicle, destination);
+    //warp_ship_to_location(ch, vehicle, destination);
 }
 
 static void handle_pilot_ready(struct char_data *ch);

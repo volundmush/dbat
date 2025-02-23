@@ -206,7 +206,7 @@ void send_to_zone(char *messg, zone_rnum zone) {
             write_to_output(i, "%s", messg);
 }
 
-void fly_planet(room_vnum roomVnum, char *messg, struct char_data *ch) {
+void fly_planet(room_vnum roomVnum, const char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
@@ -253,7 +253,7 @@ void fly_zone(zone_rnum zone, char *messg, struct char_data *ch) {
     }
 }
 
-void send_to_sense(int type, char *messg, struct char_data *ch) {
+void send_to_sense(int type, const char *messg, struct char_data *ch) {
     if (!messg || !*messg)
         return;
 
@@ -360,7 +360,7 @@ void send_to_sense(int type, char *messg, struct char_data *ch) {
     }
 }
 
-void send_to_scouter(char *messg, struct char_data *ch, int num, int type) {
+void send_to_scouter(const char *messg, struct char_data *ch, int num, int type) {
     if (!messg || !*messg)
         return;
 

@@ -341,7 +341,7 @@ static int has_flight(struct char_data *ch) {
 
     // Check for flying items in inventory
     auto givesFlight = [](const auto&o) { return OBJAFF_FLAGGED(o, AFF_FLYING); };
-    return ch->findObject(givesFlight);
+    return ch->findObject(givesFlight) ? true : false;
 }
 
 /* simple function to determine if char can breathe non-o2 */
@@ -1085,11 +1085,6 @@ ACMD(do_move) {
         }
     }
     perform_move(ch, subcmd - 1, 0);
-    if (GET_RDISPLAY(ch)) {
-        if (GET_RDISPLAY(ch) != "Empty") {
-            GET_RDISPLAY(ch) = "Empty";
-        }
-    }
 }
 
 static int find_door(struct char_data *ch, const char *type, char *dir, const char *cmdname) {
@@ -1133,7 +1128,7 @@ static int find_door(struct char_data *ch, const char *type, char *dir, const ch
 }
 
 static int has_key(struct char_data *ch, obj_vnum key) {
-    return ch->findObjectVnum(key);
+    return ch->findObjectVnum(key) ? true : false;
 }
 
 #define NEED_OPEN    (1 << 0)

@@ -20,8 +20,8 @@ namespace atk {
             SKILL_SLAM, SKILL_HEELDROP, SKILL_BASH, SKILL_HEADBUTT, SKILL_TAILWHIP
     };
 
-    Attack::Attack(struct char_data *ch, char *arg) : user(ch) {
-        if(arg && strlen(arg)) input = arg;
+    Attack::Attack(struct char_data *ch, const std::string& arg) : user(ch) {
+        input = arg;
         boost::trim(input);
         boost::split(args, input, boost::is_space());
     }
@@ -122,7 +122,7 @@ namespace atk {
         if(args.empty()) {
             victim = FIGHTING(user);
         } else {
-            if(!tech_handle_targeting(user, (char*)args[0].c_str(), &victim, &obj)) return;
+            if(!tech_handle_targeting(user, (char*)args[0].c_str(), &victim, &obj)) return false;
         }
         return true;
     }
@@ -287,7 +287,10 @@ namespace atk {
         if(result == DefenseResult::Perfect_Dodged) return handlePerfectDodge();
         if(result == DefenseResult::Failed) return handleCleanHit();
         if(result == DefenseResult::Missed) return handleMiss();
-
+        
+        // This shouldn't happen. But we need to ensure we handle all cases.
+        basic_mud_log("Unhandled defense result in attackCharacter.");
+        return Result::Canceled;
     }
 
     Result Attack::handleCleanHit() {
@@ -996,6 +999,8 @@ namespace atk {
             handle_cooldown(user, 5);
         else
             handle_cooldown(user, 7);
+        // TODO: Validate this. Doesn't seem right.
+        return 0;
     }
 
     void Uppercut::announceObject() {
@@ -4558,9 +4563,9 @@ namespace atk {
     }
 
     void WeaponAttack::chooseSecondAttack() {
-        char *victim = "";
+        std::string victim;
         if(!args.empty()) {
-            victim = (char*)args[0].c_str();
+            victim = args[0];
         }
 
         if (GET_OBJ_VAL(GET_EQ(user, WEAR_WIELD2), VAL_WEAPON_DAMTYPE) == TYPE_PIERCE - TYPE_HIT) {

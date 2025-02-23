@@ -28,7 +28,7 @@ namespace atk {
     };
 
     struct Attack {
-        Attack(struct char_data *ch, char *arg);
+        Attack(struct char_data *ch, const std::string& arg);
         virtual int getSkillID() = 0;
         virtual int getAtkID() = 0; // used for damtype and roll_hitloc
         virtual std::string getName() = 0;

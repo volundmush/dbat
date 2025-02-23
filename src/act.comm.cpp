@@ -1016,7 +1016,7 @@ ACMD(do_spec_comm) {
             send_to_char(ch, "%s", CONFIG_OK);
         } else {
             char blum[MAX_INPUT_LENGTH];
-            sprintf(blum, "@WYou %s @C$N@W, '@m%s@W'@n\r\n", action_sing, buf2);
+            snprintf(blum, sizeof(blum), "@WYou %s @C$N@W, '@m%s@W'@n\r\n", action_sing, buf2);
             act(blum, true, ch, nullptr, vict, TO_CHAR);
         }
 

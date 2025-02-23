@@ -8,7 +8,10 @@
             "program": "${workspaceFolder}/bin/circle",
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "environment": [{
+                "name": "LSAN_OPTIONS",
+                "value": "verbosity=1:log_threads=1"
+            }],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [
@@ -27,7 +30,11 @@
             "program": "${workspaceFolder}/bin/migrate",
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "environment": [{
+                "name": "LSAN_OPTIONS",
+                "value": "verbosity=1:log_threads=1"
+            }],
+            // You can also set ASAN_OPTIONS here if needed],
             "externalConsole": false,
             "MIMode": "gdb",
             "setupCommands": [

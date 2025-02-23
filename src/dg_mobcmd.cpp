@@ -339,7 +339,7 @@ ACMD(do_mechoaround) {
 
     char buf[MAX_STRING_LENGTH];
 
-    sprintf(buf, p);
+    sprintf(buf, "%s", p);
     search_replace(buf, GET_NAME(victim), "$n");
     act(buf, true, victim, nullptr, nullptr, TO_ROOM);
     /*sub_write(p, victim, TRUE, TO_ROOM);*/

@@ -422,7 +422,7 @@ void deck::shuffleDeck() {
         return;
     }
 
-    random_shuffle(std::begin(deck) , std::end(deck));
+    Random::shuffle(deck);
 }
 
 void deck::discardCard(std::string cardName) {
@@ -472,11 +472,11 @@ bool deck::playTopCard(char_data* ch) {
 
 }
 
-void deck::addCardToDeck(std::string cardName, int num = 1) {
+void deck::addCardToDeck(std::string cardName, int num) {
     addCardToDeck(findCard(cardName), num);
 }
 
-void deck::addCardToDeck(card toAdd, int num = 1) {
+void deck::addCardToDeck(card toAdd, int num) {
     for(int i = 0; i < num; i++) {
         deck.push_back(toAdd);
     }
@@ -503,7 +503,7 @@ void deck::removeCard(card toRem) {
 }
 
 void deck::initDeck(char_data* ch) {
-    deck.empty();
+    deck.clear();
 
     int skill = GET_SKILL(ch, SKILL_BUILD);
     if(skill < 40) {

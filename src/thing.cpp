@@ -1,5 +1,3 @@
-#pragma once
-
 #include "dbat/structs.h"
 #include "dbat/utils.h"
 

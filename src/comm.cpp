@@ -2043,10 +2043,10 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
                 !PLR_FLAGGED(i->character, PLR_WRITING) &&
                 !i->character->getRoom()->room_flags.test(ROOM_SOUNDPROOF)) {
 
-                sprintf(buf, "@y%s@n", str);
+                snprintf(buf, sizeof(buf), "@y%s@n", str);
                 perform_act(buf, ch, obj, vict_obj, i->character);
                 char buf2[MAX_STRING_LENGTH];
-                sprintf(buf2, "%s\r\n", buf);
+                snprintf(buf2, sizeof(buf2), "%s\r\n", buf);
                 add_history(i->character, buf2, HIST_GOSSIP);
             }
         }

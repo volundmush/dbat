@@ -67,8 +67,6 @@ static void obj_checkload(struct char_data *ch, obj_vnum ovnum);
 
 static void trg_checkload(struct char_data *ch, trig_vnum tvnum);
 
-static void lockWrite(struct char_data *ch, char *name);
-
 // definitions
 ACMD(do_lag) {
 
@@ -136,7 +134,7 @@ void update_space() {
 
     for (rowcounter = 0; rowcounter <= MAP_ROWS; rowcounter++) {
         for (colcounter = 0; colcounter <= MAP_COLS; colcounter++) {
-            fscanf(mapfile, "%d", &vnum_read);
+            auto res = fscanf(mapfile, "%d", &vnum_read);
             mapnums[rowcounter][colcounter] = real_room(vnum_read);
         }
     }
@@ -314,7 +312,7 @@ ACMD(do_newsedit) {
 
     /* Time to write the entry */
     struct {
-        char *cmd;
+        const char *cmd;
         char level;
         char **buffer;
         int size;
@@ -428,67 +426,6 @@ ACMD(do_approve) {
         send_to_char(ch, "They have now been approved.\r\n");
         return;
     }
-}
-
-static void lockWrite(struct char_data *ch, char *name) {
-    FILE *file;
-    char fname[40], filler[50], line[256];
-    char *names[500] = {""};
-    FILE *fl;
-    int count = 0, x = 0, found = false;
-
-    /* Read Introduction File */
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout")) {
-        send_to_char(ch, "The lockout file does not exist.");
-        return;
-    } else if (!(file = fopen(fname, "r"))) {
-        send_to_char(ch, "The lockout file does not exist.");
-        return;
-    }
-    while (!feof(file) || count < 498) {
-        get_line(file, line);
-        sscanf(line, "%s\n", filler);
-        names[count] = strdup(filler);
-        count++;
-        *filler = '\0';
-    }
-    fclose(file);
-
-    /* Write Introduction File */
-
-    if (!get_filename(fname, sizeof(fname), INTRO_FILE, "lockout"))
-        return;
-
-    if (!(fl = fopen(fname, "w"))) {
-        basic_mud_log("ERROR: could not save Lockout File, %s.", fname);
-        return;
-    }
-
-    while (x < count) {
-        if (x == 0 || strcasecmp(names[x - 1], names[x])) {
-            if (strcasecmp(names[x], CAP(name))) {
-                fprintf(fl, "%s\n", CAP(names[x]));
-            } else {
-                found = true;
-            }
-        }
-        x++;
-    }
-    if (found == false) {
-        fprintf(fl, "%s\n", CAP(name));
-        send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, was locked out of the MUD by @c%s@W.@n\r\n", CAP(name),
-                    GET_NAME(ch));
-        basic_mud_log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
-        log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
-    } else {
-        send_to_all("@rLOCKOUT@D: @WThe character, @C%s@W, has had lockout removed by @c%s@W.@n\r\n", CAP(name),
-                    GET_NAME(ch));
-        basic_mud_log("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
-        log_imm_action("LOCKOUT: %s sentenced by %s.", CAP(name), GET_NAME(ch));
-    }
-
-    fclose(fl);
-    return;
 }
 
 ACMD(do_reward) {
@@ -649,7 +586,7 @@ void search_replace(char *string, const char *find, const char *replace) {
             strcat(final, temp);
         }
 
-        sprintf(string, final);
+        sprintf(string, "%s", final);
 
     }
     return;
@@ -767,13 +704,15 @@ ACMD(do_hell) {
         return;
     }
 
+    // TODO: Fix this command.
+
     if (!(vict = get_char_vis(ch, arg, nullptr, FIND_CHAR_WORLD))) {
-        lockWrite(ch, arg);
+        //lockWrite(ch, arg);
         return;
     } else {
         struct descriptor_data *d = vict->desc;
         extract_char(vict);
-        lockWrite(ch, GET_NAME(vict));
+        //lockWrite(ch, GET_NAME(vict));
         if (d && STATE(d) != CON_PLAYING) {
             STATE(d) = CON_CLOSE;
             vict->desc->character = nullptr;
@@ -3248,7 +3187,7 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
     if (listall) {
 
         tmp = snprintf(bufptr, left,
-                       "%3d %-30.30s By: %-10.10s Age: %3d; Reset: %3d (%1d); Range: %5d-%5d\r\n",
+                       "%3d %-30.30s By: %-10.10s Age: %3f; Reset: %3d (%1d); Range: %5d-%5d\r\n",
                        z.number, z.name, z.builders,
                        z.age, z.lifespan,
                        z.reset_mode,
@@ -3264,12 +3203,12 @@ static size_t print_zone_to_buf(char *bufptr, size_t left, zone_rnum zone, int l
         tmp += snprintf(bufptr + tmp, left - tmp,
                         "       Zone stats:\r\n"
                         "       ---------------\r\n"
-                        "         Rooms:    %2d\r\n"
-                        "         Objects:  %2d\r\n"
-                        "         Mobiles:  %2d\r\n"
-                        "         Shops:    %2d\r\n"
-                        "         Triggers: %2d\r\n"
-                        "         Guilds:   %2d\r\n",
+                        "         Rooms:    %2lu\r\n"
+                        "         Objects:  %2lu\r\n"
+                        "         Mobiles:  %2lu\r\n"
+                        "         Shops:    %2lu\r\n"
+                        "         Triggers: %2lu\r\n"
+                        "         Guilds:   %2lu\r\n",
                         j, k, l, m, n, o);
 
         return tmp;
@@ -3602,7 +3541,7 @@ ACMD(do_show) {
                                   (l == 15) ? "hr" : "rd", skill_name(aff->type));
 
                     if (aff->modifier)
-                        j += snprintf(strp + j, k - j, "%+d to %s", aff->modifier,
+                        j += snprintf(strp + j, k - j, "%+.2f to %s", aff->modifier,
                                       apply_types[(int) aff->location]);
 
                     if (aff->bitvector) {
@@ -4270,7 +4209,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 79:
-            GET_FEATURE(vict) = '\0';
+            GET_FEATURE(vict) = nullptr;
             break;
 
         case 80:
@@ -4623,7 +4562,7 @@ ACMD (do_zcheck) {
 
             if (GET_DAMAGE_MOD(mob) > MAX_DAMAGE_MOD_ALLOWED && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
-                                "- Damage mod of %d is too high (limit: %d)\r\n",
+                                "- Damage mod of %d is too high (limit: %ld)\r\n",
                                 GET_DAMAGE_MOD(mob), MAX_DAMAGE_MOD_ALLOWED);
 
             /* avg. dam including damroll per round of combat */
@@ -4647,7 +4586,7 @@ ACMD (do_zcheck) {
 
             if ((GET_GOLD(mob) > MAX_GOLD_ALLOWED) && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,
-                                "- Set to %d Gold (limit : %d).\r\n",
+                                "- Set to %lu Gold (limit : %d).\r\n",
                                 GET_GOLD(mob),
                                 MAX_GOLD_ALLOWED);
 
@@ -4701,7 +4640,7 @@ ACMD (do_zcheck) {
                 case ITEM_WEAPON:
                     if (GET_OBJ_VAL(obj, 3) >= NUM_ATTACK_TYPES && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
-                                        "- has out of range attack type %d.\r\n",
+                                        "- has out of range attack type %ld.\r\n",
                                         GET_OBJ_VAL(obj, 3));
 
                     if (GET_OBJ_AVG_DAM(obj) > MAX_DAM_ALLOWED && (found = 1))
@@ -4725,7 +4664,7 @@ ACMD (do_zcheck) {
                 if ((GET_OBJ_COST(obj) || (GET_OBJ_WEIGHT(obj) && GET_OBJ_TYPE(obj) != ITEM_FOUNTAIN) ||
                      GET_OBJ_RENT(obj)) && (found = 1))
                     len += snprintf(buf + len, sizeof(buf) - len,
-                                    "- is NO_TAKE, but has cost (%d) weight (%" I64T ") or rent (%d) set.\r\n",
+                                    "- is NO_TAKE, but has cost (%d) weight (%.2f) or rent (%d) set.\r\n",
                                     GET_OBJ_COST(obj), GET_OBJ_WEIGHT(obj), GET_OBJ_RENT(obj));
             } else {
                 if (GET_OBJ_COST(obj) == 0 && (found = 1))
@@ -4738,7 +4677,7 @@ ACMD (do_zcheck) {
 
                 if (GET_OBJ_WEIGHT(obj) > MAX_OBJ_WEIGHT && (found = 1))
                     len += snprintf(buf + len, sizeof(buf) - len,
-                                    "  Weight is too high: %" I64T " (limit  %d).\r\n",
+                                    "  Weight is too high: %.2f (limit  %ld).\r\n",
                                     GET_OBJ_WEIGHT(obj), MAX_OBJ_WEIGHT);
 
 

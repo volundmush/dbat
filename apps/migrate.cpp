@@ -541,7 +541,7 @@ static void get_one_line(FILE *fl, char *buf) {
 
 /* read direction data */
 static void setup_dir(FILE *fl, room_vnum room, int dir) {
-    int t[11], retval;
+    int t[11] = {0}, retval = 0;
     char line[READ_SIZE], buf2[128];
 
     snprintf(buf2, sizeof(buf2), "room #%d, direction D%d", room, dir);
@@ -632,12 +632,12 @@ static void setup_dir(FILE *fl, room_vnum room, int dir) {
 
 /* load the rooms */
 static void parse_room(FILE *fl, room_vnum virtual_nr) {
-    int t[10], i, retval;
-    char line[READ_SIZE], flags[128], flags2[128], flags3[128];
-    char flags4[128], buf2[MAX_STRING_LENGTH], buf[128];
-    bitvector_t roomFlagsHolder[4];
-    struct extra_descr_data *new_descr;
-    char letter;
+    int t[3] = {0}, i = 0, retval = 0;
+    char line[READ_SIZE] = {0}, flags[128] = {0}, flags2[128] = {0}, flags3[128] = {0};
+    char flags4[128] = {0}, buf2[MAX_STRING_LENGTH] = {0}, buf[128] = {0};
+    bitvector_t roomFlagsHolder[4] = {0};
+    struct extra_descr_data *new_descr = nullptr;
+    char letter = 0;
 
     /* This really had better fit or there are other problems. */
     snprintf(buf2, sizeof(buf2), "room #%d", virtual_nr);
@@ -1534,10 +1534,10 @@ static int count_hash_records(FILE *fl) {
 
 /* load the zone table and command tables */
 static void load_zones(FILE *fl, char *zonename) {
-    int cmd_no, num_of_cmds = 0, line_num = 0, tmp, error = 0, arg_num, version = 1;
-    char *ptr, buf[READ_SIZE], zname[READ_SIZE], buf2[MAX_STRING_LENGTH];
+    int cmd_no = 0, num_of_cmds = 0, line_num = 0, tmp = 0, error = 0, arg_num = 0, version = 1;
+    char *ptr = nullptr, buf[READ_SIZE] = {0}, zname[READ_SIZE] = {0}, buf2[MAX_STRING_LENGTH] = {0};
     int zone_fix = false;
-    char t1[80], t2[80], line[MAX_STRING_LENGTH];
+    char t1[80] = {0}, t2[80] = {0}, line[MAX_STRING_LENGTH] = {0};
 
     strlcpy(zname, zonename, sizeof(zname));
 
@@ -1626,17 +1626,16 @@ static void load_zones(FILE *fl, char *zonename) {
         zc.command = buf[0];
 
         if(zc.command == 'V') { /* a string-arg command */
-            arg_num = sscanf(&buf[1], " %d %d %d %d %d %d %79s %79[^\f\r\n\t\v]", &tmp,&zc.arg1, &zc.arg2, &zc.arg3, &zc.arg4, &zc.arg5, t1, t2);
-            if (arg_num != 8)
+            if (sscanf(&buf[1], " %d %d %d %d %d %d %79s %79[^\f\r\n\t\v]", &tmp,&zc.arg1, &zc.arg2, &zc.arg3,
+                       &zc.arg4, &zc.arg5, t1, t2) != 8)
                 error = 1;
             else {
                 zc.sarg1 = t1;
                 zc.sarg2 = t2;
             }
         } else {
-            arg_num = sscanf(&buf[1], " %d %d %d %d %d %d ", &tmp, &zc.arg1, &zc.arg2, &zc.arg3, &zc.arg4, &zc.arg5);
-            if (arg_num != 6) {
-                basic_mud_log("SYSERR: WRONG NUMBER OF ARGUMENTS? %d Format error in %s, line %d: '%s'", arg_num, zname, c, buf);
+            if ((arg_num = sscanf(&buf[1], " %d %d %d %d %d %d ", &tmp, &zc.arg1, &zc.arg2, &zc.arg3, &zc.arg4,
+                                  &zc.arg5)) != 6) {
                 if (arg_num != 5) {
                     error = 1;
                 } else {
@@ -2283,7 +2282,10 @@ static int load_char(const char *name, struct char_data *ch) {
                         ch->race = static_cast<RaceID>(race);
                     }
                     else if (!strcmp(tag, "Raci")) ch->set(CharNum::RacialPref, atoi(line));
-                    else if (!strcmp(tag, "rDis")) GET_RDISPLAY(ch) = strdup(line);
+                    else if (!strcmp(tag, "rDis")) {
+                        if(!boost::iequals(line, "Empty"))
+                            GET_RDISPLAY(ch) = strdup(line);
+                    }
                     else if (!strcmp(tag, "Rela")) GET_RELAXCOUNT(ch) = atoi(line);
                     else if (!strcmp(tag, "Rtim")) GET_RTIME(ch) = atoi(line);
                     else if (!strcmp(tag, "Rad1")) GET_RADAR1(ch) = atoi(line);

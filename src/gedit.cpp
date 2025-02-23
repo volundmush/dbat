@@ -237,7 +237,7 @@ void gedit_select_spells_menu(struct descriptor_data *d) {
 
     write_to_output(d, "Spells known:\r\n");
 
-    for (i = 0; i <= SKILL_TABLE_SIZE; i++) {
+    for (i = 0; i < SKILL_TABLE_SIZE; i++) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_SPELL) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",

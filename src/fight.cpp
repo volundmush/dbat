@@ -674,7 +674,7 @@ static void shadow_dragons_live() {
 }
 
 /* For announcing the sounds of battle to nearby rooms */
-void impact_sound(struct char_data *ch, char *mssg) {
+void impact_sound(struct char_data *ch, const char *mssg) {
     int door;
     for (door = 0; door < NUM_OF_DIRS; door++)
         if (CAN_GO(ch, door))

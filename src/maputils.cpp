@@ -103,7 +103,7 @@ char* getmapchar(int rnum, struct char_data* ch, int start, int vnum) {
         bool handled = false;
         for (const auto& roomType : roomTypes) {
             if (ROOM_FLAGGED(rnum, roomType.flag)) {
-                sprintf(mapchar, getMapCharForRoomType(there, enemy, roomType));
+                sprintf(mapchar, "%s", getMapCharForRoomType(there, enemy, roomType));
                 handled = true;
                 break;
             }

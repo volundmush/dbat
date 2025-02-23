@@ -239,7 +239,7 @@ OCMD(do_osend) {
         else if (subcmd == SCMD_OECHOAROUND) {
             char buf[MAX_STRING_LENGTH];
 
-            sprintf(buf, msg);
+            sprintf(buf, "%s", msg);
             search_replace(buf, GET_NAME(ch), "$n");
             act(buf, true, ch, nullptr, nullptr, TO_ROOM);
             /*sub_write(msg, ch, TRUE, TO_ROOM);*/

@@ -1,4 +1,3 @@
-#pragma once
 #include "dbat/accmenu.h"
 #include "dbat/charmenu.h"
 #include "dbat/db.h"

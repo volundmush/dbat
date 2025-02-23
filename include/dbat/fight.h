@@ -18,7 +18,7 @@ extern void die(struct char_data *ch, struct char_data *killer);
 
 extern void remove_limb(struct char_data *vict, int num);
 
-extern void impact_sound(struct char_data *ch, char *mssg);
+extern void impact_sound(struct char_data *ch, const char *mssg);
 
 extern void fight_stack(uint64_t heartPulse, double deltaTime);
 

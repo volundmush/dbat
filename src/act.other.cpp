@@ -57,7 +57,7 @@ static int spell_in_domain(struct char_data *ch, int spellnum);
 static void show_clan_info(struct char_data *ch);
 
 // definitions
-void log_imm_action(char *messg, ...) {
+void log_imm_action(const char *messg, ...) {
 
     FILE *fl;
     const char *filename;
@@ -1206,7 +1206,7 @@ ACMD(do_train) {
 
     CharAttribute attr;
     CharTrain train;
-    char *stat_name = nullptr;
+    std::string stat_name{};
     int bonus_trait = -1;
     int nega_trait = -1;
     int needed = 0;
@@ -1402,7 +1402,7 @@ void trainProgress(char_data* ch) {
 
     CharAttribute attr;
     CharTrain train;
-    char *stat_name = nullptr;
+    std::string stat_name{};
     int bonus_trait = -1;
     int nega_trait = -1;
     int needed = 0;
@@ -8274,7 +8274,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
 }
 
 static int has_scanner(struct char_data *ch) {
-    return ch->findObjectVnum(13600);
+    return ch->findObjectVnum(13600) ? true : false;
 }
 
 ACMD(do_snet) {
@@ -8406,7 +8406,7 @@ ACMD(do_snet) {
                                  voice, readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown",
                                  SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
                     *hist = '\0';
-                    sprintf(hist, "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice,
+                    snprintf(hist, sizeof(hist), "@C%s is heard @W(@c%s@W), @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice,
                             readIntro(i->character, ch) == 1 ? get_i_name(i->character, ch) : "Unknown", SFREQ(obj),
                             CAP(arg), !*arg2 ? "" : arg2);
                     add_history(i->character, hist, HIST_SNET);
@@ -8448,7 +8448,7 @@ ACMD(do_snet) {
                 send_to_char(i->character, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice,
                              GET_NAME(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
                 *hist = '\0';
-                sprintf(hist, "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice,
+                snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", voice,
                              GET_NAME(ch), SFREQ(obj), CAP(arg), !*arg2 ? "" : arg2);
                 add_history(i->character, hist, HIST_SNET);
                 continue;
@@ -8456,7 +8456,7 @@ ACMD(do_snet) {
                 send_to_char(i->character, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice,
                              GET_NAME(ch), call, !*arg2 ? "" : CAP(arg2));
                 *hist = '\0';
-                sprintf(hist, "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice,
+                snprintf(hist, sizeof(hist), "@C%s (%s) is heard, @D[@WCall to @R#@Y%d@D] @G%s@n\r\n", voice,
                              GET_NAME(ch), call, !*arg2 ? "" : CAP(arg2));
                 add_history(i->character, hist, HIST_SNET);
                 continue;
@@ -8467,10 +8467,10 @@ ACMD(do_snet) {
                 reveal_hiding(ch, 3);
                 send_to_char(ch, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", SFREQ(obj), arg, !*arg2 ? "" : arg2);
                 *hist = '\0';
-                sprintf(hist, "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", SFREQ(obj), arg, !*arg2 ? "" : arg2);
+                snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d@D] @G%s %s@n\r\n", SFREQ(obj), arg, !*arg2 ? "" : arg2);
                 add_history(ch, hist, HIST_SNET);
                 char over[MAX_STRING_LENGTH];
-                sprintf(over, "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
+                snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
                 act(over, true, ch, nullptr, nullptr, TO_ROOM);
                 if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL)) {
                     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
@@ -8481,11 +8481,11 @@ ACMD(do_snet) {
                 send_to_char(ch, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", SFREQ(obj),
                              !*arg2 ? "" : CAP(arg2));
                 *hist = '\0';
-                sprintf(hist, "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", SFREQ(obj),
+                snprintf(hist, sizeof(hist), "@CYou @D[@WSNET FREQ@D: @Y%d @mBroadcast@D] @G%s@n\r\n", SFREQ(obj),
                         !*arg2 ? "" : CAP(arg2));
                 add_history(ch, hist, HIST_SNET);
                 char over[MAX_STRING_LENGTH];
-                sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
+                snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
                 act(over, true, ch, nullptr, nullptr, TO_ROOM);
                 if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL)) {
                     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
@@ -8495,10 +8495,10 @@ ACMD(do_snet) {
             reveal_hiding(ch, 3);
             send_to_char(ch, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
             *hist = '\0';
-            sprintf(hist, "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
+            snprintf(hist, sizeof(hist), "@CYou call @D[@R#@W%d@D] @G%s@n\r\n", call, !*arg2 ? "" : CAP(arg2));
             add_history(ch, hist, HIST_SNET);
             char over[MAX_STRING_LENGTH];
-            sprintf(over, "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
+            snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
             act(over, true, ch, nullptr, nullptr, TO_ROOM);
             if (reached == false) {
                 send_to_char(ch, "@mThe transmission didn't reach them.@n\r\n");
@@ -10163,9 +10163,9 @@ ACMD(do_file) {
     char buf[MAX_STRING_LENGTH];
 
     struct file_struct {
-        char *cmd;
+        const char *cmd;
         char level;
-        char *file;
+        const char *file;
     } fields[] = {
             {"none",     6,            "Does Nothing"},
             {"bug",     ADMLVL_IMMORT, "../lib/misc/bugs"},
@@ -10260,7 +10260,7 @@ ACMD(do_compare) {
     struct obj_data *obj1, *obj2;
     struct char_data *tchar;
     int value1 = 0, value2 = 0, o1, o2;
-    char *msg = nullptr;
+    const char *msg = nullptr;
 
     two_arguments(argument, arg1, arg2);
 
@@ -10701,10 +10701,10 @@ ACMD(do_clan) {
             send_to_char(ch, "%s is not a valid clan.\r\n", arg2);
         else if (clanIsMember(arg2, ch))
             send_to_char(ch, "You are already a member of %s.\r\n", arg2);
-        else if (GET_CLAN(ch) && checkCLAN(ch) == true && strstr(GET_CLAN(ch), "Applying") == false)
+        else if (GET_CLAN(ch) && checkCLAN(ch) && !strstr(GET_CLAN(ch), "Applying"))
             send_to_char(ch, "You are already a member of %s, you need to leave it first.\r\n", GET_CLAN(ch));
         else if (clanOpenJoin(arg2)) {
-            if (GET_CLAN(ch) && checkCLAN(ch) == true) {
+            if (GET_CLAN(ch) && checkCLAN(ch)) {
                 checkAPP(ch);
                 send_to_char(ch, "You stop applying to %s\r\n", GET_CLAN(ch));
                 clanDecline(GET_CLAN(ch), ch);

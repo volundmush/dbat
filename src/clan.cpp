@@ -131,7 +131,7 @@ void writeClanMasterlist() {
 
 
     sprintf(buf, "%d\n", num_clans);
-    fprintf(fl, buf);
+    fprintf(fl, "%s", buf);
     for (i = 0; i < num_clans; i++) {
         fprintf(fl, "%s%d.cla\n", LIB_CLAN, i);
     }

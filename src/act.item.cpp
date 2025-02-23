@@ -88,7 +88,7 @@ bid);
 
 static void auc_stat(struct char_data *ch, struct obj_data *obj);
 
-static void auc_send_to_all(char *messg, bool buyer);
+static void auc_send_to_all(const char *messg, bool buyer);
 
 static bool has_housekey(struct char_data *ch, struct obj_data *obj);
 
@@ -1567,19 +1567,19 @@ void stop_auction(int type, struct char_data *ch) {
 
         case AUC_NORMAL_CANCEL: {
 
-            sprintf(buf, auctioneer[AUC_NORMAL_CANCEL]);
+            snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_NORMAL_CANCEL]);
             auc_send_to_all(buf, false);
             break;
         }
         case AUC_QUIT_CANCEL: {
 
-            sprintf(buf, auctioneer[AUC_QUIT_CANCEL]);
+            snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_QUIT_CANCEL]);
             auc_send_to_all(buf, false);
             break;
         }
         case AUC_WIZ_CANCEL: {
 
-            sprintf(buf, auctioneer[AUC_WIZ_CANCEL]);
+            snprintf(buf, sizeof(buf), "%s", auctioneer[AUC_WIZ_CANCEL]);
             auc_send_to_all(buf, false);
             break;
         }
@@ -1636,7 +1636,7 @@ static void auc_stat(struct char_data *ch, struct obj_data *obj) {
     }
 }
 
-static void auc_send_to_all(char *messg, bool buyer) {
+static void auc_send_to_all(const char *messg, bool buyer) {
     struct descriptor_data *i;
 
     if (messg == nullptr)

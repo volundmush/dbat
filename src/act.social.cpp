@@ -162,7 +162,7 @@ void boot_social_messages() {
         /* count socials */
         *next_soc = '\0';
         while (!feof(fl)) {
-            fgets(next_soc, MAX_STRING_LENGTH, fl);
+            auto ret = fgets(next_soc, MAX_STRING_LENGTH, fl);
             if (*next_soc == '~') top_of_socialt++;
         }
     } else { /* old style */
@@ -174,7 +174,7 @@ void boot_social_messages() {
         }
         /* count socials */
         while (!feof(fl)) {
-            fgets(next_soc, MAX_STRING_LENGTH, fl);
+            auto ret = fgets(next_soc, MAX_STRING_LENGTH, fl);
             if (*next_soc == '\n' || *next_soc == '\r') top_of_socialt++; /* all socials are followed by a blank line */
         }
     }
@@ -186,7 +186,7 @@ void boot_social_messages() {
 
     /* now read 'em */
     for (;;) {
-        fscanf(fl, " %s ", next_soc);
+        auto ret = fscanf(fl, " %s ", next_soc);
         if (*next_soc == '$') break;
 
         if (CONFIG_NEW_SOCIALS == true) {
@@ -332,7 +332,7 @@ void free_command_list() {
 char *fread_action(FILE *fl, int nr) {
     char buf[MAX_STRING_LENGTH];
 
-    fgets(buf, MAX_STRING_LENGTH, fl);
+    auto res = fgets(buf, MAX_STRING_LENGTH, fl);
     if (feof(fl)) {
         basic_mud_log("SYSERR: fread_action: unexpected EOF near action #%d", nr);
         /*  SYSERR_DESC:

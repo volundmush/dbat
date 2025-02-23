@@ -270,7 +270,7 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
                 snprintf(str, slen, "%s", uid.c_str());
             } else if (!strcasecmp(var, "global")) {
                 /* so "remote varname %global%" will work */
-                snprintf(str, slen, "%d", get_room(0)->getUID(true).c_str());
+                snprintf(str, slen, "%s", get_room(0)->getUID(true).c_str());
                 return;
             } else if (!strcasecmp(var, "ctime"))
                 snprintf(str, slen, "%ld", time(nullptr));
@@ -387,7 +387,7 @@ find_replacement(unit_data *go, script_data *sc, trig_data *trig, int type, char
                 else if (!strcasecmp(field, "month"))
                     snprintf(str, slen, "%d", time_info.month + 1);
                 else if (!strcasecmp(field, "year"))
-                    snprintf(str, slen, "%d", time_info.year);
+                    snprintf(str, slen, "%ld", time_info.year);
                 else *str = '\0';
                 return;
             }
@@ -418,11 +418,12 @@ in the vault (vnum: 453) now and then. you can just use
                     script_log("findmob.vnum(mvnum) - illegal syntax");
                     strcpy(str, "0");
                 } else {
-                    room_rnum rrnum = real_room(atof(field));
-                    mob_vnum mvnum = atof(subfield);
+                    auto fi = atoi(field);
+                    room_rnum rrnum = real_room(fi);
+                    mob_vnum mvnum = atoi(subfield);
 
                     if (rrnum == NOWHERE) {
-                        script_log("findmob.vnum(ovnum): No room with vnum %d", atof(field));
+                        script_log("findmob.vnum(ovnum): No room with vnum %d", fi);
                         strcpy(str, "0");
                     } else {
                         i = 0;
@@ -441,10 +442,11 @@ in the vault (vnum: 453) now and then. you can just use
                     script_log("findobj.vnum(ovnum) - illegal syntax");
                     strcpy(str, "0");
                 } else {
-                    room_rnum rrnum = real_room(atof(field));
+                    auto fi = atoi(field);
+                    room_rnum rrnum = real_room(fi);
 
                     if (rrnum == NOWHERE) {
-                        script_log("findobj.vnum(ovnum): No room with vnum %d", atof(field));
+                        script_log("findobj.vnum(ovnum): No room with vnum %d", fi);
                         strcpy(str, "0");
                     } else {
                         /* item_in_list looks within containers as well. */
@@ -877,7 +879,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 't':
                     if (!strcasecmp(field, "tnl")) {
-                        snprintf(str, slen, "%d", level_exp(c, GET_LEVEL(c) + 1));
+                        snprintf(str, slen, "%ld", level_exp(c, GET_LEVEL(c) + 1));
                     }
                     break;
                 case 'v':
@@ -1004,12 +1006,12 @@ in the vault (vnum: 453) now and then. you can just use
                     }
                     if (!strcasecmp(field, "health")) {
                         if (subfield && *subfield) {
-                            int addition = atof(subfield);
+                            int addition = atoi(subfield);
                             GET_OBJ_VAL(o, VAL_ALL_HEALTH) = std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH));
                             if (OBJ_FLAGGED(o, ITEM_BROKEN) && GET_OBJ_VAL(o, VAL_ALL_HEALTH) >= 100)
                                 o->extra_flags.reset(ITEM_BROKEN);
                         }
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, VAL_ALL_HEALTH));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, VAL_ALL_HEALTH));
                     }
                     break;
                 case 'i':
@@ -1127,28 +1129,28 @@ in the vault (vnum: 453) now and then. you can just use
                             snprintf(str, slen, "%d", GET_OBJ_VNUM(o));
                         }
                     else if (!strcasecmp(field, "val0"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 0));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 0));
 
                     else if (!strcasecmp(field, "val1"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 1));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 1));
 
                     else if (!strcasecmp(field, "val2"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 2));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 2));
 
                     else if (!strcasecmp(field, "val3"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 3));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 3));
 
                     else if (!strcasecmp(field, "val4"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 4));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 4));
 
                     else if (!strcasecmp(field, "val5"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 5));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 5));
 
                     else if (!strcasecmp(field, "val6"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 6));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 6));
 
                     else if (!strcasecmp(field, "val7"))
-                        snprintf(str, slen, "%d", GET_OBJ_VAL(o, 7));
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 7));
                     break;
                 case 'w':
                     if (!strcasecmp(field, "weight")) {

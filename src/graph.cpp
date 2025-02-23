@@ -293,7 +293,8 @@ static std::string sense_align(struct char_data *vict) {
         return "You sense an extremely evil ki from them.\r\n";
     } else if (align > -50 && align < 50) {
         return "You sense slightly mild indefinable ki from them.\r\n";
-    }
+    } else
+        return "You sense an uncertain quality of ki from them.\r\n";
 }
 
 static std::string sense_compare(struct char_data *ch, struct char_data *vict) {
@@ -325,7 +326,8 @@ static std::string sense_compare(struct char_data *ch, struct char_data *vict) {
         return "Their power is less than a tenth of your own.\n";
     } else if (hitv < hitc * 0.01) {
         return "Their power is less than 1 percent of your own. What a weakling...\n";
-    }
+    } else
+        return "You sense an uncertain quality of ki from them.\n";
 }
 
 ACMD(do_track) {

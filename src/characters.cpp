@@ -1446,7 +1446,8 @@ vital_t char_data::get(CharVital type, bool base) {
 }
 
 double char_data::getRegen(CharVital type) {
-
+    // TODO: What was this supposed to be?
+    return 0.0;
 }
 
 
