@@ -78,6 +78,6 @@ config.status
 utils/Makefile
 bin/
 build
-thermite/
 circle/*.cpp
 game/secret_settings.py
+dbat_ext/*.cpp

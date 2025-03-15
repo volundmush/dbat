@@ -1,0 +1,12 @@
+dynaconf_merge = true
+
+[mssp]
+NAME = "Dragon Ball: Advent Truth"
+CODEBASE = "CircleMUD"
+FAMILY = "DikuMUD"
+
+[portal.networking]
+telnet = 1280
+telnets = 1281
+ssh = 1282
+game_url = "https://dbat.mushhaven.com:8000"

@@ -1,0 +1,9 @@
+dynaconf_merge = true
+
+[tls]
+certificate = "localhost.pem"
+key = "localhost-key.pem"
+
+[portal.networking]
+game_url = "https://127.0.0.1:8000"
+

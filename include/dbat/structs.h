@@ -1713,37 +1713,3 @@ struct disabled_data {
     int16_t level;                       /* level of disabler             */
     int subcmd;                         /* the subcmd, if any            */
 };
-
-// declarations of stuff below moved here for help with cython.
-extern std::map<room_vnum, std::shared_ptr<room_data>> world;
-extern struct time_info_data time_info;/* the infomation about the time    */
-extern struct time_info_data era_uptime;/* the infomation about the time    */
-extern struct weather_data weather_info;    /* the infomation about the weather */
-
-extern std::unordered_map<int, std::shared_ptr<struct unit_data>> units;
-
-extern std::map<room_vnum, std::shared_ptr<room_data>> world;
-extern std::map<zone_vnum, struct zone_data> zone_table;
-
-extern struct descriptor_data *descriptor_list;
-extern std::map<int64_t, struct descriptor_data*> sessions;
-
-extern std::map<mob_vnum, struct index_data> mob_index;
-extern std::map<mob_vnum, struct char_data> mob_proto;
-
-extern std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
-extern std::vector<std::weak_ptr<char_data>> getAllCharacters();
-
-
-extern std::map<obj_vnum, struct index_data> obj_index;
-extern std::map<obj_vnum, struct obj_data> obj_proto;
-
-extern std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
-extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
-
-extern std::map<trig_vnum, struct index_data> trig_index;
-extern std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
-
-int nextID();
-bool isUID(const std::string& uid);
-std::shared_ptr<unit_data> resolveUID(const std::string& uid);

@@ -105,8 +105,6 @@
 #define NOTRAIN_KOBOLD(i)    (IS_SET_AR((GM_WITH_WHO(i)), TRADE_NOKOBOLD))
 #define NOTRAIN_LIZARDFOLK(i)    (IS_SET_AR((GM_WITH_WHO(i)), TRADE_NOLIZARDFOLK))
 
-
-extern std::map<guild_vnum, struct guild_data> guild_index;
 extern guild_vnum top_guild;
 extern int spell_sort_info[SKILL_TABLE_SIZE + 1];
 

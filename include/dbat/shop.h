@@ -226,7 +226,6 @@ constexpr int MAX_OUTSIDE_BANK = 15000;
 // global variables
 extern const char *trade_letters[NUM_TRADERS + 1];
 extern const char *shop_bits[];
-extern std::map<shop_vnum, struct shop_data> shop_index;
 extern int cmd_say, cmd_tell, cmd_emote, cmd_slap, cmd_puke;
 extern shop_vnum top_shop;
 

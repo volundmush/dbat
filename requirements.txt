@@ -1,0 +1,3 @@
+mudforge @ git+https://github.com/volundmush/mudforge@main
+cython
+setuptools
