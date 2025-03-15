@@ -569,7 +569,7 @@ void load_dgscripts_initial(const std::filesystem::path& loc) {
         auto id = j["id"].get<int64_t>();
         auto generation = j["generation"].get<int>();
         auto t = std::make_shared<trig_data>();
-        j.get_to(*t);
+        j["data"].get_to(*t);
         uniqueScripts.emplace(id, t);
     }
 }
