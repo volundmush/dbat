@@ -44,9 +44,7 @@
 /****************************************************************************/
 /****************************************************************************/
 namespace config {
-    using namespace std::chrono_literals;
-
-    std::chrono::milliseconds heartbeatInterval{35ms};
+    int heartbeatIntervalMillis{35};
     std::string hostAddress{"0.0.0.0"};
     uint16_t port{1280};
     std::string logFile = "logs/dbat.log";

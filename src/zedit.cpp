@@ -7,7 +7,7 @@
 #include "dbat/structs.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/db.h"
 #include "dbat/constants.h"
 #include "dbat/genolc.h"

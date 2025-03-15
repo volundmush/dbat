@@ -113,13 +113,8 @@ constexpr int DB_BOOT_GLD = 7;
 
 // global variables
 
-bool isUID(const std::string& uid);
-std::shared_ptr<unit_data> resolveUID(const std::string& uid);
-
 extern struct time_info_data old_time_info; /* UNUSED (to be removed) the infomation about the time    */
-extern struct time_info_data time_info;/* the infomation about the time    */
-extern struct time_info_data era_uptime;/* the infomation about the time    */
-extern struct weather_data weather_info;    /* the infomation about the weather */
+
 extern std::unordered_set<zone_vnum> zone_reset_queue;
 
 extern bool gameIsLoading;
@@ -263,144 +258,23 @@ extern room_data* get_room(room_vnum vn);
 constexpr int REAL = 0;
 constexpr int VIRTUAL = 1;
 
-/* structure for the reset commands */
-struct reset_com {
-    reset_com() = default;
-    explicit reset_com(const nlohmann::json& j);
-    char command{};   /* current command                      */
-
-    bool if_flag{};    /* if TRUE: exe only if preceding exe'd */
-    int arg1{};        /*                                      */
-    int arg2{};        /* Arguments to the command             */
-    int arg3{};        /*                                      */
-    int arg4{};        /* room_max  default 0			*/
-    int arg5{};           /* percentages variable                 */
-    int line{};        /* line number this command appears on  */
-    std::string sarg1;        /* string argument                      */
-    std::string sarg2;        /* string argument                      */
-
-    nlohmann::json serialize();
-
-    /*
-     *  Commands:              *
-     *  'M': Read a mobile     *
-     *  'O': Read an object    *
-     *  'G': Give obj to mob   *
-     *  'P': Put obj in obj    *
-     *  'G': Obj to char       *
-     *  'E': Obj to char equip *
-     *  'D': Set state of door *
-     *  'T': Trigger command   *
-         *  'V': Assign a variable *
-    */
-};
-
-
-
-/* zone definition structure. for the 'zone-table'   */
-constexpr int CUR_WORLD_VERSION = 1;
-constexpr int CUR_ZONE_VERSION = 2;
-
-struct zone_data {
-    zone_data() = default;
-    explicit zone_data(const nlohmann::json& j);
-    ~zone_data();
-    char *name{};            /* name of this zone                  */
-    char *builders{};          /* namelist of builders allowed to    */
-    /* modify this zone.		  */
-    int lifespan{};           /* how long between resets (minutes)  */
-    double age{};                /* current age of this zone (minutes) */
-    vnum bot{};           /* starting room number for this zone */
-    vnum top{};           /* upper limit for rooms in this zone */
-
-    int reset_mode{};         /* conditions for reset (see below)   */
-    zone_vnum number{};        /* virtual number of this zone	  */
-    std::vector<struct reset_com> cmd;   /* command table for reset	          */
-    int min_level{};           /* Minimum level to enter zone        */
-    int max_level{};           /* Max Mortal level to enter zone     */
-    bitvector_t zone_flags[ZF_ARRAY_MAX]{};          /* Flags for the zone.                */
-
-    nlohmann::json serialize();
-    void remove_room_commands(room_vnum rv);
-
-    /*
-     * Reset mode:
-     *   0: Don't reset, and don't update age.
-     *   1: Reset if no PC's are located in zone.
-     *   2: Just reset.
-     */
-    std::unordered_set<room_vnum> rooms;
-    std::unordered_set<mob_vnum> mobiles;
-    std::unordered_set<obj_vnum> objects;
-    std::unordered_set<shop_vnum> shops;
-    std::unordered_set<trig_vnum> triggers;
-    std::unordered_set<guild_vnum> guilds;
-
-    std::list<std::weak_ptr<char_data>> npcsInZone;
-    std::list<std::weak_ptr<char_data>> playersInZone;
-    std::list<std::weak_ptr<obj_data>> objectsInZone;
-};
-
-
-struct help_index_element {
-    char *index;      /*Future Use */
-    char *keywords;   /*Keyword Place holder and sorter */
-    char *entry;      /*Entries for help files with Keywords at very top*/
-    int duplicate;    /*Duplicate entries for multple keywords*/
-    int min_level;    /*Min Level to read help entry*/
-};
-
-
-
-
 /* don't change these */
 constexpr int BAN_NOT = 0;
 constexpr int BAN_NEW = 1;
 constexpr int BAN_SELECT = 2;
 constexpr int BAN_ALL = 3;
 
-constexpr int BANNED_SITE_LENGTH = 50;
-struct ban_list_element {
-    char site[BANNED_SITE_LENGTH + 1];
-    int type;
-    time_t date;
-    char name[MAX_NAME_LENGTH + 1];
-    struct ban_list_element *next;
-};
-
+extern std::vector<obj_vnum> dbVnums;
 
 /* global buffering system */
 extern time_t boot_time;
 
 extern struct config_data config_info;
 
-// dirty sets...
-extern std::vector<obj_vnum> dbVnums;
 
 // world data...
-extern std::unordered_map<int, std::shared_ptr<struct unit_data>> units;
-
-extern std::map<room_vnum, std::shared_ptr<room_data>> world;
-extern std::map<zone_vnum, struct zone_data> zone_table;
-
-extern struct descriptor_data *descriptor_list;
-extern std::map<int64_t, struct descriptor_data*> sessions;
-
 extern struct char_data *affect_list;
 extern struct char_data *affectv_list;
-
-extern std::map<mob_vnum, struct index_data> mob_index;
-extern std::map<mob_vnum, struct char_data> mob_proto;
-
-extern std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
-extern std::vector<std::weak_ptr<char_data>> getAllCharacters();
-int nextID();
-
-extern std::map<obj_vnum, struct index_data> obj_index;
-extern std::map<obj_vnum, struct obj_data> obj_proto;
-
-extern std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
-extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
 
 extern SubscriptionManager<char_data> characterSubscriptions;
 extern SubscriptionManager<obj_data> objectSubscriptions;
@@ -409,10 +283,8 @@ extern SubscriptionManager<trig_data> triggerSubscriptions;
 
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
-extern std::map<trig_vnum, struct index_data> trig_index;
 
 extern struct trig_data *trigger_list;
-extern std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
 
 extern int dg_owner_purged;
 
@@ -427,19 +299,6 @@ extern void reset_zone(zone_rnum zone);
 
 #define DISABLED_FILE    "disabled.cmds"  /* disabled commands */
 #define END_MARKER    "END" /* for load_disabled() and save_disabled() */
-
-typedef struct disabled_data DISABLED_DATA;
-
-extern DISABLED_DATA *disabled_first; /* interpreter.c */
-
-/* one disabled command */
-struct disabled_data {
-    DISABLED_DATA *next;                /* pointer to next node          */
-    struct command_info const *command; /* pointer to the command struct */
-    char *disabled_by;                  /* name of disabler              */
-    int16_t level;                       /* level of disabler             */
-    int subcmd;                         /* the subcmd, if any            */
-};
 
 // commands
 extern ACMD(do_reboot);

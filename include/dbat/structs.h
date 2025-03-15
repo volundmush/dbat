@@ -9,8 +9,11 @@
 ************************************************************************ */
 #pragma once
 
-#include "net.h"
-#include "dbat/attack.h"
+#include "dbat/defs.h"
+
+// IMPORTANT: Do not use data structures/fields that are not part of the
+// C++ standard library. This allows us to keep things neat and clean for
+// cross-compatability.
 
 /**********************************************************************
 * Structures                                                          *
@@ -26,7 +29,6 @@ struct extra_descr_data {
 struct affect_t {
     // DO NOT CHANGE THE ORDER OF THESE FIELDS.
     explicit affect_t() = default;
-    explicit affect_t(const nlohmann::json& j);
     affect_t(int loc, double mod, int spec) : location(loc), modifier(mod), specific(spec) {};
     uint64_t location{0};
     double modifier{0.0};
@@ -36,8 +38,6 @@ struct affect_t {
     bool isBitwise();
     bool match(int loc, int spec);
     bool isPercent();
-    virtual void deserialize(const nlohmann::json& j);
-    virtual nlohmann::json serialize();
 };
 
 struct character_affect_type : affect_t {
@@ -53,8 +53,6 @@ struct affected_type : affect_t {
     int16_t type{};          /* The type of spell that caused this      */
     int16_t duration{};      /* For how long its effects will last      */
     bitvector_t bitvector{}; /* Tells which bits to set (AFF_XXX) */
-    nlohmann::json serialize() override;
-    void deserialize(const nlohmann::json& j) override;
     struct affected_type *next{};
 };
 
@@ -65,7 +63,6 @@ struct obj_spellbook_spell {
 
 struct account_data {
     account_data() = default;
-    explicit account_data(const nlohmann::json& j);
     vnum vn{NOTHING};
     std::string name;
     std::string passHash;
@@ -85,9 +82,6 @@ struct account_data {
     std::unordered_set<descriptor_data*> descriptors;
     std::unordered_set<net::Connection*> connections;
 
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json& j);
-
     void modRPP(int amt);
 
     bool checkPassword(const std::string& password);
@@ -100,8 +94,6 @@ struct account_data {
 };
 
 struct player_data {
-    player_data() = default;
-    explicit player_data(const nlohmann::json& j);
     int id{NOTHING};
     std::string name;
     struct account_data *account{};
@@ -112,12 +104,42 @@ struct player_data {
     std::map<int, std::string> dubNames;
     char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
+};
 
-    nlohmann::json serialize();
+/* structure for triggers */
+struct trig_data : std::enable_shared_from_this<trig_data> {
+    trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
+    int8_t attach_type{};            /* mob/obj/wld intentions          */
+    int8_t data_type{};                /* type of game_data for trig      */
+    char *name{};                    /* name of trigger                 */
+    long trigger_type{};            /* type of trigger (for bitvector) */
+    struct cmdlist_element *cmdlist{};    /* top of command list             */
+    struct cmdlist_element *curr_state{};    /* ptr to current line of trigger  */
+    int narg{};                /* numerical argument              */
+    char *arglist{};            /* argument list                   */
+    int depth{};                /* depth into nest ifs/whiles/etc  */
+    int loops{};                /* loop iteration counter          */
+    double waiting{0.0};    /* event to pause the trigger      */
+    bool purged{};            /* trigger is set to be purged     */
+    struct trig_var_data *var_list{};    /* list of local vars for trigger  */
+    std::shared_ptr<unit_data> owner{};
+    int order{0};
+    int countLine(struct cmdlist_element *c) const;
+
+    bool active{false};
+    void activate();
+    void deactivate();
+
+    int64_t id{NOTHING};
+    time_t generation{};
+
+    struct trig_data *next{};
+    struct trig_data *next_in_world{};    /* next in the global trigger list */
+    
+    std::shared_ptr<trig_data> shared();
 };
 
 struct unit_data {
-    unit_data() = default;
     virtual ~unit_data() = default;
     vnum vn{NOTHING}; /* Where in database? Not used by all things. */
     zone_vnum zone{NOTHING};
@@ -152,19 +174,14 @@ struct unit_data {
     int id{NOTHING}; /* the unique ID of this entity */
     time_t generation{}; /* creation time for dupe check     */
 
-    nlohmann::json serializeUnit();
 
     void activateContents();
     void deactivateContents();
 
-    void deserializeUnit(const nlohmann::json& j);
     std::string scriptString();
 
     std::string getUID(bool active = false);
     virtual bool isActive() = 0;
-
-    nlohmann::json serializeScripts();
-    void deserializeScripts();
 
     struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
     virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
@@ -215,24 +232,11 @@ struct thing_data : public unit_data {
 
 /* ================== Memory Structure for Objects ================== */
 struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
-    obj_data() = default;
-    explicit obj_data(const nlohmann::json& j);
     int getType() const override { return 1; }
 
-    nlohmann::json serializeBase();
-    nlohmann::json serializeInstance();
-    nlohmann::json serializeProto();
-
     std::string serializeLocation();
-    nlohmann::json serializeRelations();
 
     void deserializeLocation(const std::string& txt, int16_t slot);
-    void deserializeRelations(const nlohmann::json& j);
-
-    void deserializeBase(const nlohmann::json& j);
-    void deserializeProto(const nlohmann::json& j);
-    void deserializeInstance(const nlohmann::json& j, bool isActive);
-    void deserializeContents(const nlohmann::json& j, bool isActive);
 
     void activate();
 
@@ -314,8 +318,6 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
 
 
 struct room_direction_data {
-    room_direction_data() = default;
-    explicit room_direction_data(const nlohmann::json &j);
     ~room_direction_data();
     char *general_description{};       /* When look DIR.			*/
     char *keyword{};        /* for open/close			*/
@@ -333,16 +335,12 @@ struct room_direction_data {
     room_vnum totalfailroom{NOWHERE};        /* Room # if char fails save < 5	*/
 
     struct room_data* getDestination();
-
-    nlohmann::json serialize();
 };
 
 
 /* ================== Memory Structure for room ======================= */
 struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
-    room_data() = default;
     ~room_data() override;
-    explicit room_data(const nlohmann::json &j);
     int getType() const override { return 0; }
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
@@ -362,9 +360,6 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     int setDamage(int amount);
     int modDamage(int amount);
 
-    nlohmann::json serialize();
-    void deserializeContents(const nlohmann::json& j, bool isActive);
-
     bool isActive() override;
 
     std::shared_ptr<room_data> shared();
@@ -373,8 +368,6 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     std::optional<room_vnum> getLaunchDestination();
 
     std::vector<std::weak_ptr<char_data>> getPeople();
-
-    nlohmann::json serializeDgVars();
 
     std::optional<std::string> dgCallMember(const std::string& member, const std::string& arg);
 
@@ -385,7 +378,7 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     std::unordered_map<int, double> environment;
 
 };
-extern std::map<room_vnum, std::shared_ptr<room_data>> world;
+
 /* ====================================================================== */
 
 
@@ -396,12 +389,10 @@ extern std::map<room_vnum, std::shared_ptr<room_data>> world;
 /* and return information about time (real or mudwise).            */
 struct time_info_data {
     time_info_data() = default;
-    explicit time_info_data(int64_t timestamp);
+    time_info_data(int64_t timestamp);
     double remainder{};
     int seconds{}, minutes{}, hours{}, day{}, month{};
     int64_t year{};
-    void deserialize(const nlohmann::json& j);
-    nlohmann::json serialize();
     // The number of seconds since year 0. Can be negative.
     int64_t current();
 };
@@ -410,8 +401,6 @@ struct time_info_data {
 /* These data contain information about a players time data */
 struct time_data {
     time_data() = default;
-    explicit time_data(const nlohmann::json &j);
-    void deserialize(const nlohmann::json& j);
     int64_t birth{};    /* NO LONGER USED This represents the characters current IC age        */
     time_t created{};    /* This does not change                              */
     int64_t maxage{};    /* This represents death by natural causes (UNUSED) */
@@ -419,7 +408,6 @@ struct time_data {
     double played{};    /* This is the total accumulated time played in secs */
     double secondsAged{}; // The player's current IC age, in seconds.
     int currentAge();
-    nlohmann::json serialize();
 };
 
 
@@ -439,12 +427,9 @@ struct pclean_criteria_data {
  * can be changed freely.
  */
 struct alias_data {
-    alias_data() = default;
-    explicit alias_data(const nlohmann::json &j);
     std::string name;
     std::string replacement;
     int type{};
-    nlohmann::json serialize();
 };
 
 /* this can be used for skills that can be used per-day */
@@ -462,10 +447,6 @@ struct innate_node {
 
 /* Specials used by NPCs, not PCs */
 struct mob_special_data {
-    mob_special_data() = default;
-    explicit mob_special_data(const nlohmann::json& j);
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json& j);
     std::list<std::weak_ptr<char_data>> memory{};        /* List of attackers to remember	       */
     int attack_type{};        /* The Attack Type Bitvector for NPC's     */
     int default_pos{POS_STANDING};        /* Default position for NPC                */
@@ -494,18 +475,12 @@ enum ResurrectionMode : uint8_t {
 };
 
 struct skill_data {
-    skill_data() = default;
-    explicit skill_data(const nlohmann::json& j);
     int16_t level{0};
     int16_t perfs{0};
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json& j);
 };
 
 struct trans_data {
-    trans_data() = default;
     ~trans_data();
-    explicit trans_data(const nlohmann::json& j);
 
     char *description{nullptr};
     double timeSpentInForm{0.0};
@@ -517,9 +492,6 @@ struct trans_data {
     double vars[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
-
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json& j);
 };
 
 enum Task 
@@ -592,30 +564,12 @@ struct craftTask {
 struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     char_data() = default;
     // this constructor below is to be used only for the mob_proto map.
-    explicit char_data(const nlohmann::json& j);
     int getType() const override { return 2; }
-    nlohmann::json serializeBase();
-    nlohmann::json serializeInstance();
 
-    nlohmann::json serializeProto();
-
-    void deserializeBase(const nlohmann::json& j);
-    void deserializeProto(const nlohmann::json& j);
-    void deserializeInstance(const nlohmann::json& j, bool isActive);
-    void deserializeMobile(const nlohmann::json& j);
-    void deserializePlayer(const nlohmann::json& j, bool isActive);
     void activate();
     void deactivate();
 
     void login();
-
-    nlohmann::json serializeLocation();
-    nlohmann::json serializeRelations();
-
-    void sendGMCP(const std::string &cmd, const nlohmann::json &j);
-
-    void deserializeLocation(const nlohmann::json& j);
-    void deserializeRelations(const nlohmann::json& j);
 
     bool active{false};
     bool isActive() override;
@@ -1277,7 +1231,6 @@ struct descriptor_data {
     void start();
     void handleLostLastConnection(bool graceful);
     void sendText(const std::string &txt);
-    void sendGMCP(const std::string &cmd, const nlohmann::json &j);
 };
 
 /* used in the socials */
@@ -1323,8 +1276,6 @@ struct weather_data {
     int change{};    /* How fast and what way does it change. */
     int sky{};    /* How is the sky. */
     int sunlight{};    /* And how much sun. */
-    nlohmann::json serialize();
-    void deserialize(const nlohmann::json &j);
 };
 
 
@@ -1339,7 +1290,6 @@ struct index_data {
 
     char *farg;         /* string argument for special function     */
     struct trig_data *proto;     /* for triggers... the trigger     */
-    nlohmann::json serializeProto();
 };
 
 /* linked list for mob/object prototype trigger lists */
@@ -1615,3 +1565,185 @@ public:
 private:
     std::unordered_map<std::string, std::list<std::weak_ptr<T>>> subscriptions;
 };
+
+struct shop_buy_data {
+    int type{};
+    std::string keywords{};
+};
+
+struct shop_data {
+    ~shop_data();
+    void add_product(obj_vnum v);
+    void remove_product(obj_vnum v);
+    shop_vnum vnum{};        /* Virtual number of this shop		*/
+    std::vector<obj_vnum> producing{};        /* Which item to produce (virtual)	*/
+    float profit_buy{};        /* Factor to multiply cost with		*/
+    float profit_sell{};        /* Factor to multiply cost with		*/
+    std::vector<shop_buy_data> type{};    /* Which items to trade			*/
+    char *no_such_item1{};        /* Message if keeper hasn't got an item	*/
+    char *no_such_item2{};        /* Message if player hasn't got an item	*/
+    char *missing_cash1{};        /* Message if keeper hasn't got cash	*/
+    char *missing_cash2{};        /* Message if player hasn't got cash	*/
+    char *do_not_buy{};        /* If keeper dosn't buy such things	*/
+    char *message_buy{};        /* Message when player buys item	*/
+    char *message_sell{};        /* Message when player sells item	*/
+    int temper1{};        /* How does keeper react if no money	*/
+    bitvector_t bitvector{};    /* Can attack? Use bank? Cast here?	*/
+    mob_vnum keeper{NOBODY};    /* The mobile who owns the shop (rnum)	*/
+    bitvector_t with_who[SW_ARRAY_MAX]{};/* Who does the shop trade with?	*/
+    std::unordered_set<room_vnum> in_room;        /* Where is the shop?			*/
+    int open1{}, open2{};        /* When does the shop open?		*/
+    int close1{}, close2{};    /* When does the shop close?		*/
+    int bankAccount{};        /* Store all gold over 15000 (disabled)	*/
+    int lastsort{};        /* How many items are sorted in inven?	*/
+    SpecialFunc func{};        /* Secondary spec_proc for shopkeeper	*/
+    
+    std::vector<std::weak_ptr<char_data>> getKeepers();
+    bool isProducing(obj_vnum vn);
+    void runPurge();
+};
+
+struct guild_data {
+    room_vnum vnum{NOBODY};                /* number of the guild */
+    void toggle_skill(uint16_t skill_id);
+    void toggle_feat(uint16_t skill_id);
+    std::unordered_set<uint16_t> skills;  /* array to keep track of which feats things we'll train */
+    float charge{1.0};                  /* charge * skill level = how much we'll charge */
+    std::string no_such_skill{};           /* message when we don't teach that skill */
+    std::string not_enough_gold{};         /* message when the student doesn't have enough gold */
+    int minlvl{0};                    /* Minumum level guildmaster will train */
+    mob_vnum gm{NOBODY};                   /* GM's vnum */
+    bitvector_t with_who[GW_ARRAY_MAX]{};    /* whom we dislike */
+    int open{0}, close{28};               /* when we will train */
+    SpecialFunc func{};                /* secondary spec_proc for the GM */
+    std::unordered_set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
+};
+
+
+struct ban_list_element {
+    char site[BANNED_SITE_LENGTH + 1];
+    int type;
+    time_t date;
+    char name[MAX_NAME_LENGTH + 1];
+    struct ban_list_element *next;
+};
+
+struct help_index_element {
+    char *index;      /*Future Use */
+    char *keywords;   /*Keyword Place holder and sorter */
+    char *entry;      /*Entries for help files with Keywords at very top*/
+    int duplicate;    /*Duplicate entries for multple keywords*/
+    int min_level;    /*Min Level to read help entry*/
+};
+
+/* structure for the reset commands */
+struct reset_com {
+    char command{};   /* current command                      */
+
+    bool if_flag{};    /* if TRUE: exe only if preceding exe'd */
+    int arg1{};        /*                                      */
+    int arg2{};        /* Arguments to the command             */
+    int arg3{};        /*                                      */
+    int arg4{};        /* room_max  default 0			*/
+    int arg5{};           /* percentages variable                 */
+    int line{};        /* line number this command appears on  */
+    std::string sarg1;        /* string argument                      */
+    std::string sarg2;        /* string argument                      */
+
+    /*
+     *  Commands:              *
+     *  'M': Read a mobile     *
+     *  'O': Read an object    *
+     *  'G': Give obj to mob   *
+     *  'P': Put obj in obj    *
+     *  'G': Obj to char       *
+     *  'E': Obj to char equip *
+     *  'D': Set state of door *
+     *  'T': Trigger command   *
+     *  'V': Assign a variable *
+    */
+};
+
+struct zone_data {
+    ~zone_data();
+    char *name{};            /* name of this zone                  */
+    char *builders{};          /* namelist of builders allowed to    */
+    /* modify this zone.		  */
+    int lifespan{};           /* how long between resets (minutes)  */
+    double age{};                /* current age of this zone (minutes) */
+    vnum bot{};           /* starting room number for this zone */
+    vnum top{};           /* upper limit for rooms in this zone */
+
+    int reset_mode{};         /* conditions for reset (see below)   */
+    zone_vnum number{};        /* virtual number of this zone	  */
+    std::vector<struct reset_com> cmd;   /* command table for reset	          */
+    int min_level{};           /* Minimum level to enter zone        */
+    int max_level{};           /* Max Mortal level to enter zone     */
+    bitvector_t zone_flags[ZF_ARRAY_MAX]{};          /* Flags for the zone.                */
+
+    void remove_room_commands(room_vnum rv);
+
+    /*
+     * Reset mode:
+     *   0: Don't reset, and don't update age.
+     *   1: Reset if no PC's are located in zone.
+     *   2: Just reset.
+     */
+    std::unordered_set<room_vnum> rooms;
+    std::unordered_set<mob_vnum> mobiles;
+    std::unordered_set<obj_vnum> objects;
+    std::unordered_set<shop_vnum> shops;
+    std::unordered_set<trig_vnum> triggers;
+    std::unordered_set<guild_vnum> guilds;
+
+    std::list<std::weak_ptr<char_data>> npcsInZone;
+    std::list<std::weak_ptr<char_data>> playersInZone;
+    std::list<std::weak_ptr<obj_data>> objectsInZone;
+};
+
+typedef struct disabled_data DISABLED_DATA;
+
+extern DISABLED_DATA *disabled_first; /* interpreter.c */
+
+/* one disabled command */
+struct disabled_data {
+    DISABLED_DATA *next;                /* pointer to next node          */
+    struct command_info const *command; /* pointer to the command struct */
+    char *disabled_by;                  /* name of disabler              */
+    int16_t level;                       /* level of disabler             */
+    int subcmd;                         /* the subcmd, if any            */
+};
+
+// declarations of stuff below moved here for help with cython.
+extern std::map<room_vnum, std::shared_ptr<room_data>> world;
+extern struct time_info_data time_info;/* the infomation about the time    */
+extern struct time_info_data era_uptime;/* the infomation about the time    */
+extern struct weather_data weather_info;    /* the infomation about the weather */
+
+extern std::unordered_map<int, std::shared_ptr<struct unit_data>> units;
+
+extern std::map<room_vnum, std::shared_ptr<room_data>> world;
+extern std::map<zone_vnum, struct zone_data> zone_table;
+
+extern struct descriptor_data *descriptor_list;
+extern std::map<int64_t, struct descriptor_data*> sessions;
+
+extern std::map<mob_vnum, struct index_data> mob_index;
+extern std::map<mob_vnum, struct char_data> mob_proto;
+
+extern std::unordered_map<int, std::shared_ptr<char_data>> uniqueCharacters;
+extern std::vector<std::weak_ptr<char_data>> getAllCharacters();
+
+
+extern std::map<obj_vnum, struct index_data> obj_index;
+extern std::map<obj_vnum, struct obj_data> obj_proto;
+
+extern std::unordered_map<int, std::shared_ptr<obj_data>> uniqueObjects;
+extern std::vector<std::weak_ptr<obj_data>> getAllObjects();
+
+extern std::map<trig_vnum, struct index_data> trig_index;
+extern std::unordered_map<int, std::shared_ptr<trig_data>> uniqueScripts;
+
+int nextID();
+bool isUID(const std::string& uid);
+std::shared_ptr<unit_data> resolveUID(const std::string& uid);

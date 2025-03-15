@@ -1,5 +1,8 @@
+#include "magic_enum/magic_enum_all.hpp"
+
 #include "dbat/structs.h"
 #include "dbat/constants.h"
+#include "dbat/spells.h"
 
 extern std::unordered_map<int, std::vector<character_affect_type>> pos_affects;
 
@@ -195,25 +198,6 @@ bool affect_t::isPercent() {
     }
 }
 
-nlohmann::json affect_t::serialize() {
-    auto j = nlohmann::json();
-
-    if(location) j["location"] = location;
-    if(modifier != 0.0) j["modifier"] = modifier;
-    if(specific) j["specific"] = specific;
-
-    return j;
-}
-
-void affect_t::deserialize(const nlohmann::json &j) {
-    if(j.contains("location")) location = j["location"];
-    if(j.contains("modifier")) modifier = j["modifier"];
-    if(j.contains("specific")) specific = j["specific"];
-}
-
-affect_t::affect_t(const nlohmann::json &j) {
-    deserialize(j);
-}
 
 std::unordered_map<int, std::vector<character_affect_type>> pos_affects = {
         {POS_DEAD, {}},

@@ -1,9 +1,12 @@
 //
 // Created by basti on 10/24/2021.
 //
+#include <boost/algorithm/string.hpp>
+
+
 #include "dbat/structs.h"
 #include "dbat/races.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
 #include "dbat/class.h"
@@ -1770,9 +1773,6 @@ void char_data::gazeAtMoon() {
     trans::handleEchoTransform(this, form);
 }
 
-void char_data::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-    if(desc) desc->sendGMCP(cmd, j);
-}
 
 static const std::map<std::string, CharAttribute> _attr_names = {
     {"str", CharAttribute::Strength},

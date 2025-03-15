@@ -11,7 +11,7 @@
 #include <fstream>
 #include "dbat/act.wizard.h"
 #include "dbat/interpreter.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/config.h"
 #include "dbat/act.other.h"
 #include "dbat/maputils.h"
@@ -38,6 +38,7 @@
 #include "dbat/guild.h"
 #include "dbat/spell_parser.h"
 #include "dbat/transformation.h"
+#include "dbat/bitarray.h"
 
 /* local variables */
 static int copyover_timer = 0; /* for timed copyovers */

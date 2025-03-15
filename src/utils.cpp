@@ -7,11 +7,11 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include <unordered_set>
-
 #include <exception>
 #include <iostream>
+
+#include <boost/algorithm/string.hpp>
+
 #include "dbat/utils.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
@@ -27,6 +27,8 @@
 #include "dbat/players.h"
 #include "dbat/act.other.h"
 #include "dbat/area.h"
+#include "dbat/random.h"
+#include "dbat/send.h"
 
 /* local functions */
 char commastring[MAX_STRING_LENGTH];
@@ -3168,19 +3170,6 @@ bool MOON_TIMECHECK() {
     }
     return false;
 }
-
-std::string jdump(const nlohmann::json& j) {
-    return j.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);
-}
-
-std::string jdump_pretty(const nlohmann::json& j) {
-    return j.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
-}
-
-nlohmann::json jparse(const std::string& s) {
-    return nlohmann::json::parse(s);
-}
-
 
 bool is_numeric(const std::string& str) {
     return boost::algorithm::all(str, [](unsigned char c) {

@@ -16,7 +16,7 @@
 #include "dbat/handler.h"
 #include "dbat/db.h"
 #include "dbat/interpreter.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/constants.h"
 #include "dbat/spells.h"
 #include "dbat/feats.h"
@@ -28,6 +28,8 @@
 #include "dbat/class.h"
 #include "dbat/genzon.h"
 #include "dbat/genshp.h"
+#include "dbat/bitarray.h"
+#include "dbat/filter.h"
 
 /* Forward/External function declarations */
 static void sort_keeper_objs(struct char_data *keeper, vnum shop_nr);
@@ -1664,78 +1666,6 @@ void shop_data::add_product(obj_vnum v) {
 
 void shop_data::remove_product(obj_vnum v) {
     std::remove_if(producing.begin(), producing.end(), [&](obj_vnum &o) {return o == v;});
-}
-
-nlohmann::json shop_buy_data::serialize() {
-    nlohmann::json j;
-
-    if(type) j["type"] = type;
-    if(!keywords.empty()) j["keywords"] = keywords;
-
-    return j;
-}
-
-
-shop_buy_data::shop_buy_data(const nlohmann::json &j) : shop_buy_data() {
-    if(j.contains("type")) type = j["type"];
-    if(j.contains("keywords")) keywords = j["keywords"];
-}
-
-nlohmann::json shop_data::serialize() {
-    nlohmann::json j;
-
-    j["vnum"] = vnum;
-    for(auto i : producing) j["producing"].push_back(i);
-    if(profit_buy) j["profit_buy"] = profit_buy;
-    if(profit_sell) j["profit_sell"] = profit_sell;
-    for(auto &t : type) j["type"].push_back(t.serialize());
-    if(no_such_item1 && strlen(no_such_item1)) j["no_such_item1"] = no_such_item1;
-    if(no_such_item2 && strlen(no_such_item2)) j["no_such_item2"] = no_such_item2;
-    if(missing_cash1 && strlen(missing_cash1)) j["missing_cash1"] = missing_cash1;
-    if(missing_cash2 && strlen(missing_cash2)) j["missing_cash2"] = missing_cash2;
-    if(do_not_buy && strlen(do_not_buy)) j["do_not_buy"] = do_not_buy;
-    if(message_buy && strlen(message_buy)) j["message_buy"] = message_buy;
-    if(message_sell && strlen(message_sell)) j["message_sell"] = message_sell;
-    if(temper1) j["temper1"] = temper1;
-    if(bitvector) j["bitvector"] = bitvector;
-    if(keeper != NOBODY) j["keeper"] = keeper;
-    for(auto i = 0; i < 79; i++) if(IS_SET_AR(with_who, i)) j["with_who"].push_back(i);
-    for(auto r : in_room) j["in_room"].push_back(r);
-    if(open1) j["open1"] = open1;
-    if(close1) j["close1"] = close1;
-    if(open2) j["open2"] = open2;
-    if(close2) j["close2"] = close2;
-    if(bankAccount) j["bankAccount"] = bankAccount;
-    if(lastsort) j["lastsort"] = lastsort;
-
-    return j;
-}
-
-
-shop_data::shop_data(const nlohmann::json &j) : shop_data() {
-    if(j.contains("vnum")) vnum = j["vnum"];
-    if(j.contains("producing")) for(const auto& i : j["producing"]) producing.emplace_back(i);
-    if(j.contains("profit_buy")) profit_buy = j["profit_buy"];
-    if(j.contains("profit_sell")) profit_sell = j["profit_sell"];
-    if(j.contains("type")) for(const auto& i : j["type"]) type.emplace_back(i);
-    if(j.contains("no_such_item1")) no_such_item1 = strdup(j["no_such_item1"].get<std::string>().c_str());
-    if(j.contains("no_such_item2")) no_such_item2 = strdup(j["no_such_item2"].get<std::string>().c_str());
-    if(j.contains("missing_cash1")) missing_cash1 = strdup(j["missing_cash1"].get<std::string>().c_str());
-    if(j.contains("missing_cash2")) missing_cash2 = strdup(j["missing_cash2"].get<std::string>().c_str());
-    if(j.contains("do_not_buy")) do_not_buy = strdup(j["do_not_buy"].get<std::string>().c_str());
-    if(j.contains("message_buy")) message_buy = strdup(j["message_buy"].get<std::string>().c_str());
-    if(j.contains("message_sell")) message_sell = strdup(j["message_sell"].get<std::string>().c_str());
-    if(j.contains("temper1")) temper1 = j["temper1"];
-    if(j.contains("bitvector")) bitvector = j["bitvector"];
-    if(j.contains("keeper")) keeper = j["keeper"];
-    if(j.contains("with_who")) for(const auto& i : j["with_who"]) SET_BIT_AR(with_who, i.get<int>());
-    if(j.contains("in_room")) for(const auto& i : j["in_room"]) in_room.insert(i.get<int>());
-    if(j.contains("open1")) open1 = j["open1"];
-    if(j.contains("close1")) close1 = j["close1"];
-    if(j.contains("open2")) open2 = j["open2"];
-    if(j.contains("close2")) close2 = j["close2"];
-    if(j.contains("bankAccount")) bankAccount = j["bankAccount"];
-    if(j.contains("lastsort")) lastsort = j["lastsort"];
 }
 
 std::vector<std::weak_ptr<char_data>> shop_data::getKeepers() {

@@ -7,7 +7,7 @@
  * ******************************************************************** */
 
 #include "dbat/assedit.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/db.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"

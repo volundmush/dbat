@@ -1,8 +1,8 @@
-
+#include <algorithm>
 
 #include "dbat/structs.h"
-#include <algorithm>
-#include <dbat/utils.h>
+#include <dbat/send.h>
+#include "dbat/random.h"
 
 int findItemApplySlot(obj_data *pObject, int location) {
     for (int i = 0; i < MAX_OBJ_AFFECT ; i++) {

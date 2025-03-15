@@ -7,7 +7,7 @@
 #include "dbat/medit.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/db.h"
 #include "dbat/genolc.h"
 #include "dbat/genmob.h"
@@ -21,6 +21,7 @@
 #include "dbat/class.h"
 #include "dbat/act.wizard.h"
 #include "dbat/modify.h"
+#include "dbat/bitarray.h"
 /*-------------------------------------------------------------------*/
 
 /*

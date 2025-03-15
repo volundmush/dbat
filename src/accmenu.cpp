@@ -1,3 +1,7 @@
+#include <boost/algorithm/string.hpp>
+#include "magic_enum/magic_enum_all.hpp"
+#include "fmt/core.h"
+
 #include "dbat/accmenu.h"
 #include "dbat/charmenu.h"
 #include "dbat/db.h"

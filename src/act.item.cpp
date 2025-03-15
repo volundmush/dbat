@@ -7,6 +7,8 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <algorithm>
+
 #include "dbat/act.item.h"
 #include "dbat/vehicles.h"
 #include "dbat/dg_comm.h"
@@ -16,7 +18,7 @@
 #include "dbat/act.informative.h"
 #include "dbat/config.h"
 #include "dbat/assemblies.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/spells.h"
@@ -28,7 +30,9 @@
 #include "dbat/genzon.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/boards.h"
-#include <algorithm>
+#include "dbat/bitarray.h"
+#include "dbat/random.h"
+
 
 /* global variables */
 struct obj_data *obj_selling = nullptr;    /* current object for sale */

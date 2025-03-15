@@ -7,6 +7,7 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <boost/algorithm/string.hpp>
 
 #include "dbat/players.h"
 #include "dbat/utils.h"
@@ -16,6 +17,8 @@
 #include "dbat/class.h"
 #include "dbat/ban.h"
 #include "dbat/account.h"
+#include "dbat/net.h"
+#include "dbat/filter.h"
 
 
 std::map<int64_t, player_data> players;

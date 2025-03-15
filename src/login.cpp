@@ -1,8 +1,10 @@
+#include <boost/algorithm/string.hpp>
+
 #include "dbat/login.h"
 #include "dbat/db.h"
 #include "dbat/config.h"
 #include "dbat/dg_comm.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/ban.h"
 #include "fmt/format.h"
 #include "dbat/account.h"

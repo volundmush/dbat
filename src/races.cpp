@@ -1,6 +1,8 @@
-#include "dbat/races.h"
-
 #include <utility>
+
+#include <boost/algorithm/string.hpp>
+
+#include "dbat/races.h"
 #include "dbat/utils.h"
 #include "dbat/interpreter.h"
 #include "dbat/spells.h"

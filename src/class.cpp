@@ -14,12 +14,12 @@
  * you should go through this entire file from beginning to end and add
  * the appropriate new special cases for your new class.
  */
+#include <utility>
+#include <boost/algorithm/string.hpp>
 
 #include "dbat/class.h"
-
-#include <utility>
 #include "dbat/db.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/spells.h"
 #include "dbat/commands.h"
@@ -30,6 +30,7 @@
 #include "dbat/act.wizard.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.other.h"
+#include "dbat/random.h"
 
 
 /*

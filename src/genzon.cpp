@@ -331,90 +331,12 @@ void delete_zone_command(struct zone_data *zone, int pos) {
 
 /*-------------------------------------------------------------------*/
 
-reset_com::reset_com(const nlohmann::json &j) {
-    if(j.contains("command")) command = j["command"].get<std::string>()[0];
-    if(j.contains("if_flag")) if_flag = j["if_flag"];
-    if(j.contains("arg1")) arg1 = j["arg1"];
-    if(j.contains("arg2")) arg2 = j["arg2"];
-    if(j.contains("arg3")) arg3 = j["arg3"];
-    if(j.contains("arg4")) arg4 = j["arg4"];
-    if(j.contains("arg5")) arg5 = j["arg5"];
-    if(j.contains("sarg1")) sarg1 = j["sarg1"];
-    if(j.contains("sarg2")) sarg2 = j["sarg2"];
-}
-
-nlohmann::json reset_com::serialize() {
-    nlohmann::json j;
-
-    std::string cmd;
-    cmd.push_back(command);
-    j["command"] = cmd;
-    if(if_flag) j["if_flag"] = if_flag;
-    if(arg1) j["arg1"] = arg1;
-    if(arg2) j["arg2"] = arg2;
-    if(arg3) j["arg3"] = arg3;
-    if(arg4) j["arg4"] = arg4;
-    if(arg5) j["arg5"] = arg5;
-    if(!sarg1.empty()) j["sarg1"] = sarg1;
-    if(!sarg2.empty()) j["sarg2"] = sarg2;
-
-    return j;
-}
-
 
 zone_data::~zone_data() {
     if(name) free(name);
     if(builders) free(builders);
 }
 
-nlohmann::json zone_data::serialize() {
-    nlohmann::json j;
-
-    j["number"] = number;
-    if(name && strlen(name)) j["name"] = name;
-    if(builders && strlen(builders)) j["builders"] = builders;
-    if(lifespan) j["lifespan"] = lifespan;
-    j["bot"] = bot;
-    j["top"] = top;
-    if(reset_mode) j["reset_mode"] = reset_mode;
-    if(min_level) j["min_level"] = min_level;
-    if(max_level) j["max_level"] = max_level;
-    for(auto i = 0; i < NUM_ZONE_FLAGS; i++) if(IS_SET_AR(zone_flags, i)) {
-        j["zone_flags"].push_back(i);
-        auto key = std::string(zone_bits[i]);
-        boost::to_lower(key);
-        j["zone_flags_name"].push_back(key);
-    }
-
-    for(auto &c : cmd) j["cmd"].push_back(c.serialize());
-
-    return j;
-}
-
-
-zone_data::zone_data(const nlohmann::json &j) : zone_data() {
-    if(j.contains("number")) number = j["number"];
-    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
-    if(j.contains("builders")) builders = strdup(j["builders"].get<std::string>().c_str());
-    if(j.contains("lifespan")) lifespan = j["lifespan"];
-    if(j.contains("bot")) bot = j["bot"];
-    if(j.contains("top")) top = j["top"];
-    if(j.contains("reset_mode")) reset_mode = j["reset_mode"];
-    if(j.contains("min_level")) min_level = j["min_level"];
-    if(j.contains("max_level")) max_level = j["max_level"];
-    if(j.contains("zone_flags")) {
-        for(auto &f : j["zone_flags"]) SET_BIT_AR(zone_flags, f.get<int>());
-    }
-
-    if(j.contains("cmd")) {
-        int line = 1;
-        cmd.reserve(j["cmd"].size());
-        for(auto &c : j["cmd"]) {
-           auto &cm = cmd.emplace_back(c);
-           cm.line = line++;
-        }
-    }
-}
 
 void zone_data::remove_room_commands(room_vnum rv) {
     room_vnum cmd_room = NOTHING;

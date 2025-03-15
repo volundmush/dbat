@@ -1,3 +1,13 @@
+#include <filesystem>
+#include <memory>
+#include <iostream>
+#include <vector>
+#include <tuple>
+#include <fstream>
+#include <thread>
+
+#include <boost/algorithm/string.hpp>
+
 #include "dbat/comm.h"
 #include "dbat/utils.h"
 #include "dbat/dg_scripts.h"
@@ -5,12 +15,6 @@
 #include "dbat/genolc.h"
 #include "dbat/maputils.h"
 #include "dbat/config.h"
-#include <filesystem>
-#include <memory>
-#include <iostream>
-#include <vector>
-#include <tuple>
-#include <fstream>
 #include "dbat/class.h"
 #include "dbat/players.h"
 #include "dbat/account.h"
@@ -21,6 +25,7 @@
 #include "dbat/guild.h"
 #include "dbat/genobj.h"
 #include "dbat/saveload.h"
+#include "dbat/random.h"
 
 #define RENT_FACTOR    1
 #define CRYO_FACTOR    4

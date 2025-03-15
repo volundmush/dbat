@@ -7,11 +7,12 @@
 *  $Date: 2004/10/11 12:07:00$                                            *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <filesystem>
 
 #include "dbat/dg_scripts.h"
 #include "dbat/act.wizard.h"
 #include "dbat/dg_event.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/constants.h"
@@ -2763,42 +2764,9 @@ int check_flags_by_name_ar(bitvector_t *array, int numflags, char *search, const
     return false;
 }
 
-nlohmann::json trig_var_data::serialize() {
-    nlohmann::json j;
-
-    if(name && strlen(name)) j["name"] = name;
-    if(value && strlen(value)) j["value"] = value;
-    if(context) j["context"] = context;
-
-    return j;
-}
-
-trig_var_data::trig_var_data(const nlohmann::json& j) : trig_var_data() {
-    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
-    if(j.contains("value")) value = strdup(j["value"].get<std::string>().c_str());
-    if(j.contains("context")) context = j["context"].get<long>();
-}
-
-nlohmann::json trig_data::serializeProto() {
-    auto j = nlohmann::json::object();
-
-    if(vn != NOTHING) j["vn"] = vn;
-    if(name && strlen(name)) j["name"] = name;
-    if(attach_type) j["attach_type"] = attach_type;
-    if(data_type) j["data_type"] = data_type;
-    if(trigger_type) j["trigger_type"] = trigger_type;
-    if(narg) j["narg"] = narg;
-    if(arglist && strlen(arglist)) j["arglist"] = arglist;
-
-    for(auto c = cmdlist; c; c = c->next) {
-        j["cmdlist"].push_back(c->cmd);
-    }
-
-    return j;
-}
 
 
-int trig_data::countLine(struct cmdlist_element *c) {
+int trig_data::countLine(struct cmdlist_element *c) const {
     int count = 0;
     for(auto cl = cmdlist; cl; cl = cl->next) {
         if(cl == c) return count;
@@ -2808,108 +2776,10 @@ int trig_data::countLine(struct cmdlist_element *c) {
     return -1;
 }
 
-nlohmann::json trig_data::serializeInstance() {
-    auto j = nlohmann::json::object();
-
-    j["vn"] = vn;
-
-    j["id"] = id;
-    j["generation"] = generation;
-    j["order"] = order;
-
-    if(depth) j["depth"] = depth;
-    if(loops) j["loops"] = loops;
-    if(waiting != 0.0) j["waiting"] = waiting;
-
-    if(!(curr_state == cmdlist || !curr_state)) {
-        j["curr_state"] = countLine(curr_state);
-        if(curr_state->original) j["curr_state_original"] = countLine(curr_state->original);
-    }
-
-    if(var_list) j["var_list"] = serializeVars(var_list);
-
-    return j;
-}
-
-
-void trig_data::deserializeInstance(const nlohmann::json &j) {
-    if(j.contains("vn")) vn = j["vn"].get<int>();
-    auto &t = trig_index[vn];
-    auto p = t.proto;
-    if(p->name && strlen(p->name)) name = strdup(p->name);
-    attach_type = p->attach_type;
-    data_type = p->data_type;
-    trigger_type = p->trigger_type;
-    narg = p->narg;
-    if(p->arglist && strlen(p->arglist)) arglist = strdup(p->arglist);
-
-    cmdlist = p->cmdlist;
-    curr_state = p->cmdlist;
-
-    if(j.contains("id")) id = j["id"].get<long>();
-    if(j.contains("generation")) generation = j["generation"].get<time_t>();
-    if(j.contains("order")) order = j["order"].get<long>();
-
-    if(j.contains("waiting")) waiting = j["waiting"].get<double>();
-    if(j.contains("depth")) depth = j["depth"].get<int>();
-    if(j.contains("loops")) loops = j["loops"].get<int>();
-
-    if(j.contains("curr_state")) {
-        int curr_state_num = j["curr_state"].get<int>();
-        if(curr_state_num > 0) {
-            for(int i = 0; i < curr_state_num; i++) {
-                curr_state = curr_state->next;
-            }
-        }
-    }
-
-    if(j.contains("curr_state_original")) {
-        int curr_state_num = j["curr_state_original"].get<int>();
-        curr_state->original = cmdlist;
-        if(curr_state_num > 0) {
-            for(int i = 0; i < curr_state_num; i++) {
-                curr_state->original = curr_state->original->next;
-            }
-        }
-    }
-
-    if(j.contains("var_list")) {
-        deserializeVars(&var_list, j["var_list"]);
-    }
-}
-
-std::string trig_data::serializeLocation() {
-    return owner->getUID();
-}
-
 std::shared_ptr<trig_data> trig_data::shared() {
     return shared_from_this();
 }
 
-void trig_data::deserializeLocation(const std::string &txt) {
-    owner = resolveUID(txt);
-
-}
-
-trig_data::trig_data(const nlohmann::json &j) : trig_data() {
-    if(j.contains("vn")) vn = j["vn"].get<int>();
-    if(j.contains("name")) name = strdup(j["name"].get<std::string>().c_str());
-    if(j.contains("attach_type")) attach_type = j["attach_type"].get<int>();
-    if(j.contains("data_type")) data_type = j["data_type"].get<int>();
-    if(j.contains("trigger_type")) trigger_type = j["trigger_type"].get<int>();
-    if(j.contains("narg")) narg = j["narg"].get<int>();
-    if(j.contains("arglist")) arglist = strdup(j["arglist"].get<std::string>().c_str());
-
-    if(j.contains("cmdlist")) {
-        auto &cl = j["cmdlist"];
-        for(auto c = cl.rbegin(); c != cl.rend(); c++) {
-            auto cle = new cmdlist_element();
-            cle->cmd = strdup(c->get<std::string>().c_str());
-            cle->next = cmdlist;
-            cmdlist = cle;
-        }
-    }
-}
 
 void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context) {
 	auto uid = thing->getUID(true);
@@ -2947,26 +2817,4 @@ void trig_data::deactivate() {
     triggerSubscriptions.unsubscribeFromAll(sh);
     REMOVE_FROM_LIST(this, trigger_list, next_in_world, temp);
 
-}
-
-nlohmann::json serializeVars(struct trig_var_data *vd) {
-    auto j = nlohmann::json::array();;
-    for(auto v = vd; v; v = v->next) {
-        j.push_back(v->serialize());
-    }
-    return j;
-}
-
-
-void deserializeVars(struct trig_var_data **vd, const nlohmann::json &j) {
-    for(auto it = j.rbegin(); it != j.rend(); ++it) {
-        auto v = new trig_var_data(*it);
-        v->next = *vd;
-        *vd = v;
-    }
-}
-
-
-nlohmann::json index_data::serializeProto() {
-    return proto->serializeProto();
 }

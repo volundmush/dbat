@@ -1,6 +1,8 @@
+#include <boost/algorithm/string.hpp>
+
 #include "dbat/chargen.h"
 #include "dbat/structs.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/spells.h"

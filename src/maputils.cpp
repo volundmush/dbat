@@ -7,7 +7,7 @@
 * Paolo Libardi - pinkpallin@libero.it		     * 
 *****************************************************/
 #include "dbat/maputils.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"

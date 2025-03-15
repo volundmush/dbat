@@ -15,7 +15,7 @@
 #include "dbat/dg_comm.h"
 #include "dbat/act.wizard.h"
 #include "dbat/act.movement.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"

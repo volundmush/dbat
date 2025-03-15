@@ -12,7 +12,7 @@
 #include "dbat/vehicles.h"
 #include "dbat/oasis_copy.h"
 #include "dbat/handler.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/fight.h"
@@ -24,6 +24,7 @@
 #include "dbat/constants.h"
 #include "dbat/act.informative.h"
 #include "dbat/area.h"
+#include "dbat/partial.h"
 
 /* local functions */
 static void handle_fall(struct char_data *ch);

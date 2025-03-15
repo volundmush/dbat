@@ -1,9 +1,12 @@
 #pragma once
-#include "sysdep.h"
-#include "defs.h"
-#include <mutex>
+
+#include <deque>
 #include <boost/beast/core.hpp>
-#include "libtelnet.h"
+
+#include "dbat/sysdep.h"
+#include "dbat/defs.h"
+#include "dbat/libtelnet.h"
+#include "dbat/json.h"
 
 namespace net {
     using namespace std::chrono_literals;

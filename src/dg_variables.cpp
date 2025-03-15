@@ -7,10 +7,11 @@
 *  $Date: 2004/10/11 12:07:00 $                                           *
 *  $Revision: 1.0.14 $                                                    *
 **************************************************************************/
+#include <boost/algorithm/string.hpp>
 
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
@@ -22,6 +23,8 @@
 #include "dbat/oasis.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
+#include "dbat/random.h"
+#include "dbat/bitarray.h"
 
 /* Utility functions */
 

@@ -1,7 +1,10 @@
-#include "dbat/transformation.h"
+#include <iostream>
+#include <iomanip>
+#include <boost/algorithm/string.hpp>
 
+#include "dbat/transformation.h"
 #include "dbat/comm.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/weather.h"
 #include "dbat/genzon.h"
 #include "dbat/dg_comm.h"
@@ -2688,35 +2691,7 @@ namespace trans {
 
 }
 
-trans_data::trans_data(const nlohmann::json &j) : trans_data() {
-    deserialize(j);
-}
 
 trans_data::~trans_data() {
     if(description) free(description);
-}
-
-void trans_data::deserialize(const nlohmann::json &j) {
-    if(j.contains("timeSpentInForm")) timeSpentInForm = j["timeSpentInForm"];
-    if(j.contains("visible")) visible = j["visible"];
-    if(j.contains("limitBroken")) limitBroken = j["limitBroken"];
-    if(j.contains("unlocked")) unlocked = j["unlocked"];
-    if(j.contains("grade")) grade = j["grade"];
-    if(j.contains("blutz")) blutz = j["blutz"];
-    if(j.contains("description")) {
-        if(description) free(description);
-        description = strdup(j["description"].get<std::string>().c_str());
-    }
-}
-
-nlohmann::json trans_data::serialize() {
-    nlohmann::json j;
-    if(timeSpentInForm != 0.0) j["timeSpentInForm"] = timeSpentInForm;
-    j["visible"] = visible;
-    j["limitBroken"] = limitBroken;
-    j["unlocked"] = unlocked;
-    j["grade"] = grade;
-    if(blutz != 0.0) j["blutz"] = blutz;
-    if(description && strlen(description)) j["description"] = description;
-    return j;
 }

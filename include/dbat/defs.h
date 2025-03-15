@@ -41,6 +41,12 @@ constexpr int USE_AUTOEQ = 1;    /* TRUE/FALSE aren't defined yet. */
  * NOTE: This will likely be unconditionally unsigned later.
  */
 
+/* zone definition structure. for the 'zone-table'   */
+constexpr int CUR_WORLD_VERSION = 1;
+constexpr int CUR_ZONE_VERSION = 2;
+
+constexpr int BANNED_SITE_LENGTH = 50;
+
 enum class RaceID : uint8_t {
     Spirit = 0,
     Human = 1,
@@ -1704,6 +1710,8 @@ constexpr int EF_ARRAY_MAX = 4;
 constexpr int AD_ARRAY_MAX = 4;
 constexpr int FT_ARRAY_MAX = 4;
 constexpr int ZF_ARRAY_MAX = 4;
+constexpr int SW_ARRAY_MAX = 4;
+constexpr int GW_ARRAY_MAX = 4;
 
 
 /* History */

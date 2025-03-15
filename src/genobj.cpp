@@ -14,6 +14,7 @@
 #include "dbat/handler.h"
 #include "dbat/dg_olc.h"
 #include "dbat/shop.h"
+#include "dbat/filter.h"
 
 static int copy_object_main(struct obj_data *to, struct obj_data *from, int free_object);
 
@@ -215,171 +216,6 @@ int delete_object(obj_rnum rnum) {
     return rnum;
 }
 
-nlohmann::json obj_data::serializeBase() {
-    auto j = serializeUnit();
-
-    for(auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++) {
-        if(value[i]) j["value"].push_back(std::make_pair(i, value[i]));
-    }
-
-    if(type_flag) j["type_flag"] = type_flag;
-    if(level) j["level"] = level;
-
-    for(auto i = 0; i < wear_flags.size(); i++)
-        if(wear_flags.test(i)) j["wear_flags"].push_back(i);
-
-    for(auto i = 0; i < extra_flags.size(); i++)
-        if(extra_flags.test(i)) j["extra_flags"].push_back(i);
-
-    for(auto i = 0; i < onlyAlignLawChaos.size(); i++)
-        if(onlyAlignLawChaos.test(i)) j["onlyAlignLawChaos"].push_back(i);
-    for(auto i = 0; i < antiAlignLawChaos.size(); i++)
-        if(antiAlignLawChaos.test(i)) j["antiAlignLawChaos"].push_back(i);
-    for(auto i = 0; i < onlyAlignGoodEvil.size(); i++)
-        if(onlyAlignGoodEvil.test(i)) j["onlyAlignGoodEvil"].push_back(i);
-    for(auto i = 0; i < antiAlignGoodEvil.size(); i++)
-        if(antiAlignGoodEvil.test(i)) j["antiAlignGoodEvil"].push_back(i);
-    for(auto i = 0; i < onlyClass.size(); i++)
-        if(onlyClass.test(i)) j["onlyClass"].push_back(i);
-    for(auto i = 0; i < antiClass.size(); i++)
-        if(antiClass.test(i)) j["antiClass"].push_back(i);
-    for(auto i = 0; i < onlyRace.size(); i++)
-        if(onlyRace.test(i)) j["onlyRace"].push_back(i);
-    for(auto i = 0; i < antiRace.size(); i++)
-        if(antiRace.test(i)) j["antiRace"].push_back(i);
-
-    if(weight != 0.0) j["weight"] = weight;
-    if(cost) j["cost"] = cost;
-    if(cost_per_day) j["cost_per_day"] = cost_per_day;
-
-    for(auto i = 0; i < bitvector.size(); i++)
-        if(bitvector.test(i)) j["bitvector"].push_back(i);
-
-    for(auto & i : affected) {
-        if(i.location == APPLY_NONE) continue;
-        j["affected"].push_back(i.serialize());
-    }
-
-    return j;
-}
-
-
-nlohmann::json obj_data::serializeInstance() {
-    auto j = serializeBase();
-    if(id == -1) {
-        id = nextID();
-        generation = time(nullptr);
-    }
-
-    if(generation) j["generation"] = generation;
-
-    if(global_vars) {
-        j["dgvariables"] = serializeVars(global_vars);
-    }
-
-    if(get_room(room_loaded)) j["room_loaded"] = room_loaded;
-
-    return j;
-}
-
-
-nlohmann::json obj_data::serializeProto() {
-    auto j = serializeBase();
-
-    for(auto p : proto_script) {
-        if(trig_index.contains(p)) j["proto_script"].push_back(p);
-    }
-
-    return j;
-}
-
-
-
-void obj_data::deserializeBase(const nlohmann::json &j) {
-    deserializeUnit(j);
-
-    if(j.contains("value")) {
-        for(auto & i : j["value"]) {
-            value[i[0].get<int>()] = i[1];
-        }
-    }
-
-    if(j.contains("type_flag")) type_flag = j["type_flag"];
-    if(j.contains("level")) level = j["level"];
-
-    if(j.contains("wear_flags")) {
-        for(auto & i : j["wear_flags"]) {
-            wear_flags.set(i.get<int>());
-        }
-    }
-
-    if(j.contains("extra_flags")) for(auto & i : j["extra_flags"]) extra_flags.set(i.get<int>());
-
-    if(j.contains("onlyAlignLawChaos")) for(auto & i : j["onlyAlignLawChaos"]) onlyAlignLawChaos.set(i.get<int>());
-    if(j.contains("antiAlignLawChaos")) for(auto & i : j["antiAlignLawChaos"]) antiAlignLawChaos.set(i.get<int>());
-    if(j.contains("onlyAlignGoodEvil")) for(auto & i : j["onlyAlignGoodEvil"]) onlyAlignGoodEvil.set(i.get<int>());
-    if(j.contains("antiAlignGoodEvil")) for(auto & i : j["antiAlignGoodEvil"]) antiAlignGoodEvil.set(i.get<int>());
-
-    if(j.contains("onlyClass")) for(auto & i : j["onlyClass"]) onlyClass.set(i.get<int>());
-    if(j.contains("antiClass")) for(auto & i : j["antiClass"]) antiClass.set(i.get<int>());
-    if(j.contains("onlyRace")) for(auto & i : j["onlyRace"]) onlyRace.set(i.get<int>());
-    if(j.contains("tiRace")) for(auto & i : j["tiRace"]) antiAlignGoodEvil.set(i.get<int>());
-
-    if(j.contains("weight")) weight = j["weight"];
-    if(j.contains("cost")) cost = j["cost"];
-    if(j.contains("cost_per_day")) cost_per_day = j["cost_per_day"];
-
-    if(j.contains("bitvector")) {
-        for(auto & i : j["bitvector"]) {
-            bitvector.set(i.get<int>());
-        }
-    }
-
-    if(j.contains("affected")) {
-        int counter = 0;
-        for(auto & i : j["affected"]) {
-            affected[counter].deserialize(i);
-            counter++;
-        }
-    }
-
-}
-
-
-void obj_data::deserializeProto(const nlohmann::json& j) {
-    deserializeBase(j);
-
-    if(j.contains("proto_script")) {
-        for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
-    }
-}
-
-
-obj_data::obj_data(const nlohmann::json &j) : obj_data() {
-    deserializeProto(j);
-
-    if ((GET_OBJ_TYPE(this) == ITEM_PORTAL || \
-       GET_OBJ_TYPE(this) == ITEM_HATCH) && \
-       (!GET_OBJ_VAL(this, VAL_DOOR_DCLOCK) || \
-        !GET_OBJ_VAL(this, VAL_DOOR_DCHIDE))) {
-        GET_OBJ_VAL(this, VAL_DOOR_DCLOCK) = 20;
-        GET_OBJ_VAL(this, VAL_DOOR_DCHIDE) = 20;
-    }
-
-    GET_OBJ_SIZE(this) = SIZE_MEDIUM;
-
-/* check to make sure that weight of containers exceeds curr. quantity */
-    if (GET_OBJ_TYPE(this) == ITEM_DRINKCON ||
-        GET_OBJ_TYPE(this) == ITEM_FOUNTAIN) {
-        if (GET_OBJ_WEIGHT(this) < GET_OBJ_VAL(this, 1))
-            GET_OBJ_WEIGHT(this) = GET_OBJ_VAL(this, 1) + 5;
-    }
-    /* *** make sure portal objects have their timer set correctly *** */
-    if (GET_OBJ_TYPE(this) == ITEM_PORTAL) {
-        GET_OBJ_TIMER(this) = -1;
-    }
-    
-}
 
 std::shared_ptr<obj_data> obj_data::shared() {
     return shared_from_this();
@@ -435,26 +271,6 @@ void obj_data::deactivate() {
     auto sh = shared_from_this();
     objectSubscriptions.unsubscribeFromAll(sh);
     deactivateContents();
-}
-
-void obj_data::deserializeInstance(const nlohmann::json &j, bool isActive) {
-    deserializeBase(j);
-
-    if(j.contains("generation")) generation = j["generation"];
-
-    if(j.contains("dgvariables")) {
-        deserializeVars(&global_vars, j["dgvariables"]);
-    }
-
-    if(j.contains("room_loaded")) room_loaded = j["room_loaded"];
-
-    auto proto = obj_proto.find(vn);
-    if(proto != obj_proto.end()) {
-        proto_script = proto->second.proto_script;
-    }
-
-    if(isActive) activate();
-
 }
 
 
@@ -606,15 +422,6 @@ std::string obj_data::serializeLocation() {
     }
 }
 
-nlohmann::json obj_data::serializeRelations() {
-    auto j = nlohmann::json::object();
-
-    if(posted_to) j["posted_to"] = posted_to->getUID();
-    if(fellow_wall) j["fellow_wall"] = fellow_wall->getUID();
-
-    return j;
-}
-
 void obj_data::deserializeLocation(const std::string& txt, int16_t slot) {
     auto check = resolveUID(txt);
     if(!check) return;
@@ -624,17 +431,6 @@ void obj_data::deserializeLocation(const std::string& txt, int16_t slot) {
         obj_to_obj(this, o.get());
     } else if(auto c = std::dynamic_pointer_cast<char_data>(check); c) {
         auto_equip(c.get(), this, slot+1);
-    }
-}
-
-void obj_data::deserializeRelations(const nlohmann::json& j) {
-    if(j.contains("posted_to")) {
-        auto check = resolveUID(j["posted_to"]);
-        if(check) posted_to = std::dynamic_pointer_cast<obj_data>(check).get();
-    }
-    if(j.contains("fellow_wall")) {
-        auto check = resolveUID(j["fellow_wall"]);
-        if(check) fellow_wall = std::dynamic_pointer_cast<obj_data>(check).get();
     }
 }
 

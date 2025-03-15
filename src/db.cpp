@@ -12,8 +12,18 @@
 #include <regex>
 #include <thread>
 
+#include "fmt/core.h"
+#include "spdlog/spdlog.h"
+#include <filesystem>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+
+#include "magic_enum/magic_enum_all.hpp"
+
 #include "dbat/db.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/feats.h"
 #include "dbat/config.h"
 #include "dbat/players.h"
@@ -40,9 +50,8 @@
 #include "dbat/genobj.h"
 #include "dbat/account.h"
 #include "dbat/maputils.h"
+#include "dbat/saveload.h"
 
-#include <boost/iostreams/filtering_streambuf.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
 
 /**************************************************************************
 *  declarations of most of the 'global' variables                         *
@@ -52,7 +61,6 @@ bool gameIsLoading = true;
 bool saveAll = false;
 bool isMigrating = false;
 
-std::shared_ptr<spdlog::logger> logger;
 
 struct config_data config_info; /* Game configuration list.    */
 
@@ -255,110 +263,6 @@ ACMD(do_reboot) {
     send_to_char(ch, "Not a thing anymore.\r\n");
 }
 
-static nlohmann::json load_from_file(const std::filesystem::path& loc, const std::string& name)
-{
-    // We'll automatically append ".gz"
-    auto path = loc / (name + ".gz");
-    if (!std::filesystem::exists(path)) {
-        basic_mud_log("File %s does not exist", path.c_str());
-        return {};
-    }
-
-    std::ifstream file(path, std::ios::binary);
-    if (!file.is_open()) {
-        basic_mud_log("Error opening file %s", path.c_str());
-        return {};
-    }
-
-    // Setup a Boost filtering stream for GZIP *de*compression
-    boost::iostreams::filtering_streambuf<boost::iostreams::input> inbuf;
-    inbuf.push(boost::iostreams::gzip_decompressor());
-    inbuf.push(file);
-
-    // Construct an istream on top of that filtering streambuf
-    std::istream instream(&inbuf);
-
-    // Parse the JSON
-    nlohmann::json j;
-    try {
-        instream >> j;
-    } catch (const std::exception &e) {
-        basic_mud_log("JSON parse error reading %s: %s", path.c_str(), e.what());
-        return {};
-    }
-    return j;
-}
-
-static void db_load_accounts(const std::filesystem::path& loc) {
-    for(auto acc : load_from_file(loc, "accounts.json")) {
-        auto vn = acc["vn"].get<int64_t>();
-        accounts.emplace(vn, acc);
-    }
-
-}
-
-static void db_load_players(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "players.json")) {
-        auto id = j["id"].get<int64_t>();
-        players.emplace(id, j);
-    }
-}
-
-static void db_load_characters_initial(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "characters.json")) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        auto data = j["data"];
-        auto c = std::make_shared<char_data>();
-        if(auto isPlayer = players.find(id); isPlayer != players.end()) {
-            c->deserializePlayer(data, false);
-            isPlayer->second.character = c.get();
-        } else {
-            c->deserializeInstance(data, true);
-        }
-        uniqueCharacters.emplace(id, c);
-        units.emplace(id, c);
-    }
-}
-
-static void db_load_characters_finish(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "characters.json")) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        if(auto cf = uniqueCharacters.find(id); cf != uniqueCharacters.end()) {
-            if(auto c = cf->second) {
-                c->deserializeRelations(j["relations"]);
-                c->deserializeLocation(j["location"]);
-            }
-        }
-    }
-}
-
-static void db_load_items_initial(const std::filesystem::path& loc) {
-    for(const auto j : load_from_file(loc, "items.json")) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        auto data = j["data"];
-        auto sh = std::make_shared<obj_data>();
-        sh->deserializeInstance(data, false);
-        uniqueObjects.emplace(id, sh);
-        units.emplace(id, sh);
-    }
-    logger->info("Loaded {} items", uniqueObjects.size());
-}
-
-static void db_load_items_finish(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "items.json")) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        if(auto cf = uniqueObjects.find(id); cf != uniqueObjects.end()) {
-            if(auto i = cf->second) {
-                i->deserializeRelations(j["relations"]);
-                i->deserializeLocation(j["location"], j["slot"].get<int>());
-            }
-        }
-    }
-}
 
 static void db_load_activate_entities() {
     // activate all items which ended up "in the world".
@@ -375,146 +279,6 @@ static void db_load_activate_entities() {
     }
 }
 
-static void db_load_dgscripts_initial(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "dgscripts.json")) {
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        auto t = std::make_shared<trig_data>();
-        t->deserializeInstance(j["data"]);
-        uniqueScripts.emplace(id, t);
-    }
-}
-
-void db_load_dgscripts_finish(const std::filesystem::path& loc) {
-    // Iterating through DgSCripts in reverse to ensure they're added in proper order.
-    auto json_array = load_from_file(loc, "dgscripts.json");
-
-    for (auto it = json_array.rbegin(); it != json_array.rend(); ++it) {
-        auto& j = *it;
-        auto id = j["id"].get<int64_t>();
-        auto generation = j["generation"].get<int>();
-        auto location = j["location"].get<std::string>();
-
-        if (auto cf = uniqueScripts.find(id); cf != uniqueScripts.end()) {
-            if (auto t = cf->second) {
-                t->deserializeLocation(location);
-                auto o = t->owner;
-                t->next = o->trig_list;
-                o->trig_list = t.get();
-                t->owner->trigger_types |= GET_TRIG_TYPE(t);
-            }
-        }
-    }
-}
-
-static void db_load_globaldata(const std::filesystem::path& loc) {
-    auto j = load_from_file(loc, "globaldata.json");
-
-    if(j.contains("time")) {
-        time_info.deserialize(j["time"]);
-    }
-    if(j.contains("era_uptime"))
-        era_uptime.deserialize(j["era_uptime"]);
-    if(j.contains("weather")) {
-        weather_info.deserialize(j["weather"]);
-    }
-    if(j.contains("dgGlobals")) {
-        if(auto room = get_room(0); room) {
-            deserializeVars(&(room->global_vars), j["dgGlobals"]);
-        }
-    }
-}
-
-
-static void db_load_zones(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "zones.json")) {
-        auto id = j["number"].get<int64_t>();
-        zone_table.emplace(id, j);
-    }
-}
-
-static void db_load_dgscript_prototypes(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "dgScriptPrototypes.json")) {
-        auto id = j["vn"].get<int64_t>();
-        auto &t = trig_index[id];
-        t.vn = id;
-        t.proto = new trig_data(j);
-        auto zone = real_zone_by_thing(id);
-        auto &z = zone_table[zone];
-        z.triggers.insert(id);
-    }
-}
-
-static void db_load_rooms(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "rooms.json")) {
-        auto id = j["vn"].get<int64_t>();
-        auto r = std::make_shared<room_data>(j);
-        r->id = id;
-        units.emplace(id, r);
-        world.emplace(id, r);
-        auto zone = real_zone_by_thing(id);
-        auto &z = zone_table[zone];
-        z.rooms.insert(id);
-        r->zone = zone;
-        r->activate();
-    }
-}
-
-static void db_load_exits(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "exits.json")) {
-        auto id = j["room"].get<int64_t>();
-        auto dir = j["direction"].get<int64_t>();
-        auto r = get_room(id);
-        r->dir_option[dir] = new room_direction_data(j["data"]);
-    }
-}
-
-static void db_load_shops(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "shops.json")) {
-        auto id = j["vnum"].get<int64_t>();
-        shop_index.emplace(id, j);
-        auto zone = real_zone_by_thing(id);
-        auto &z = zone_table[zone];
-        z.shops.insert(id);
-    }
-}
-
-static void db_load_guilds(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "guilds.json")) {
-        auto id = j["vnum"].get<int64_t>();
-        guild_index.emplace(id, j);
-        auto zone = real_zone_by_thing(id);
-        auto &z = zone_table[zone];
-        z.guilds.insert(id);
-    }
-}
-
-static void db_load_item_prototypes(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "itemPrototypes.json")) {
-        auto id = j["vn"].get<int64_t>();
-        auto p = obj_proto.emplace(id, j);
-        auto zone = real_zone_by_thing(id);
-        p.first->second.zone = zone;
-        auto &i = obj_index[id];
-        i.vn = id;
-
-        auto &z = zone_table[zone];
-        z.objects.insert(id);
-    }
-}
-
-static void db_load_npc_prototypes(const std::filesystem::path& loc) {
-    for(auto j : load_from_file(loc, "npcPrototypes.json")) {
-        auto id = j["vn"].get<int64_t>();
-        auto p = mob_proto.emplace(id, j);
-        auto zone = real_zone_by_thing(id);
-        p.first->second.zone = zone;
-        auto &i = mob_index[id];
-        i.vn = id;
-        auto &z = zone_table[zone];
-        z.mobiles.insert(id);
-    }
-}
 
 static std::vector<std::filesystem::path> getDumpFiles() {
     std::filesystem::path dir = "dumps"; // Change to your directory
@@ -544,58 +308,58 @@ void boot_db_world() {
     auto latest = dumps.front();
 
     basic_mud_log("Loading Zones...");
-    db_load_zones(latest);
+    load_zones(latest);
 
     basic_mud_log("Loading DgScripts and generating index.");
-    db_load_dgscript_prototypes(latest);
+    load_dgscript_prototypes(latest);
 
     basic_mud_log("Loading mobs and generating index.");
-    db_load_npc_prototypes(latest);
+    load_npc_prototypes(latest);
 
     basic_mud_log("Loading objs and generating index.");
-    db_load_item_prototypes(latest);
+    load_item_prototypes(latest);
 
     basic_mud_log("Loading rooms.");
-    db_load_rooms(latest);
+    load_rooms(latest);
 
     basic_mud_log("Loading shops.");
-    db_load_shops(latest);
+    load_shops(latest);
 
     basic_mud_log("Loading guild masters.");
-    db_load_guilds(latest);
+    load_guilds(latest);
 
     basic_mud_log("Loading exits.");
-    db_load_exits(latest);
+    load_exits(latest);
 
     basic_mud_log("Loading global data...");
-    db_load_globaldata(latest);
+    load_globaldata(latest);
 
     basic_mud_log("Loading accounts.");
-    db_load_accounts(latest);
+    load_accounts(latest);
 
     basic_mud_log("Loading players.");
-    db_load_players(latest);
+    load_players(latest);
 
     basic_mud_log("Loading characters initial...");
-    db_load_characters_initial(latest);
+    load_characters_initial(latest);
 
     basic_mud_log("Loading items initial...");
-    db_load_items_initial(latest);
+    load_items_initial(latest);
 
     basic_mud_log("Loading dgscript initial...");
-    db_load_dgscripts_initial(latest);
+    load_dgscripts_initial(latest);
 
     // Now that all of the game entities have been spawned, we can finish loading
     // relations between them.
 
     basic_mud_log("Loading characters finish...");
-    db_load_characters_finish(latest);
+    load_characters_finish(latest);
 
     basic_mud_log("Loading items finish...");
-    db_load_items_finish(latest);
+    load_items_finish(latest);
 
     basic_mud_log("Loading dgscript finish...");
-    db_load_dgscripts_finish(latest);
+    load_dgscripts_finish(latest);
 
     basic_mud_log("Running activation of entities...");
     db_load_activate_entities();

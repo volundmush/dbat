@@ -3,8 +3,10 @@
  * Copyright 1996 Harvey Gilpin						*
  * Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include <iostream>
+
 #include "dbat/sedit.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"

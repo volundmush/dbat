@@ -9,7 +9,7 @@
 ************************************************************************ */
 
 #include "dbat/weather.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
@@ -53,47 +53,6 @@ static void grow_plants() {
     }
 
 }
-
-nlohmann::json weather_data::serialize() {
-    auto j = nlohmann::json::object();
-    j["pressure"] = pressure;
-    j["change"] = change;
-    j["sky"] = sky;
-    j["sunlight"] = sunlight;
-    return j;
-}
-
-void weather_data::deserialize(const nlohmann::json &j) {
-    if(j.contains("pressure")) pressure = j["pressure"];
-    if(j.contains("change")) change = j["change"];
-    if(j.contains("sky")) sky = j["sky"];
-    if(j.contains("sunlight")) sunlight = j["sunlight"];
-}
-
-void time_info_data::deserialize(const nlohmann::json &j) {
-    if(j.contains("remainder")) remainder = j["remainder"];
-    if(j.contains("seconds")) seconds = j["seconds"];
-    if(j.contains("minutes")) minutes = j["minutes"];
-    if(j.contains("hours")) hours = j["hours"];
-    if(j.contains("day")) day = j["day"];
-    if(j.contains("month")) month = j["month"];
-    if(j.contains("year")) year = j["year"];
-}
-
-nlohmann::json time_info_data::serialize() {
-    auto j = nlohmann::json::object();
-    j["remainder"] = remainder;
-    j["seconds"] = seconds;
-    j["minutes"] = minutes;
-    j["hours"] = hours;
-    j["day"] = day;
-    j["month"] = month;
-    j["year"] = year;
-    return j;
-}
-
-
-
 
 
 static void weather_change() {

@@ -7,8 +7,21 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+#include <filesystem>
+#include <fstream>
+#include <thread>
+#include <locale>
+#include <chrono>
+#include <iostream>
+
+#include "sodium.h"
+
+#include "spdlog/spdlog.h"
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/rotating_file_sink.h>
+
 #include "dbat/comm.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/config.h"
 #include "dbat/maputils.h"
 #include "dbat/ban.h"
@@ -34,20 +47,17 @@
 #include "dbat/mail.h"
 #include "dbat/constants.h"
 #include "dbat/screen.h"
-#include <fstream>
-#include <thread>
+
 #include "dbat/players.h"
 #include "dbat/account.h"
 #include "dbat/charmenu.h"
 #include "dbat/puppet.h"
 #include "dbat/transformation.h"
 #include "dbat/db.h"
-#include <locale>
+
 #include "dbat/transformation.h"
 #include "dbat/shop.h"
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-#include "sodium.h"
+
 #include "dbat/saveload.h"
 
 /* local globals */
@@ -76,6 +86,9 @@ std::string original_cwd;
 /***********************************************************************
 *  main game loop and related stuff                                    *
 ***********************************************************************/
+
+std::shared_ptr<spdlog::logger> logger;
+
 
 void setup_log() {
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
@@ -620,7 +633,7 @@ namespace game {
         broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
 
         double saveTimer = 60.0 * 5.0;
-        const std::chrono::milliseconds heartbeatInterval(config::heartbeatInterval);
+        const std::chrono::milliseconds heartbeatInterval(config::heartbeatIntervalMillis);
         gameIsLoading = false;
 
         while (!circle_shutdown) {
@@ -1643,9 +1656,6 @@ void descriptor_data::sendText(const std::string& txt) {
     output += txt;
 }
 
-void descriptor_data::sendGMCP(const std::string &cmd, const nlohmann::json &j) {
-
-}
 
 void free_bufpool() {
     struct txt_block *tmp;

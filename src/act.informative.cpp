@@ -14,7 +14,7 @@
 #include "dbat/act.social.h"
 #include "dbat/maputils.h"
 #include "dbat/config.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/spells.h"
 #include "dbat/races.h"
@@ -32,6 +32,8 @@
 #include "dbat/improved-edit.h"
 #include "dbat/transformation.h"
 #include "dbat/area.h"
+#include "dbat/random.h"
+#include "dbat/bitarray.h"
 
 /* local functions */
 static void gen_map(struct char_data *ch, int num);

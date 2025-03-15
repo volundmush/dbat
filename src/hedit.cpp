@@ -14,7 +14,7 @@
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/commands.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/db.h"
 #include "dbat/boards.h"
 #include "dbat/oasis.h"

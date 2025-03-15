@@ -5,10 +5,8 @@
  * -------------------------------------------------------------------- *
  * 1999 MAY 07 gdavis/azrael@laker.net Initial implementation.         *
  * ******************************************************************** */
-#define __ASSEMBLIES_C__
-
 #include "dbat/assemblies.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
 #include "dbat/constants.h"

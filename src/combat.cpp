@@ -17,7 +17,7 @@
 #include "dbat/fight.h"
 #include "dbat/act.attack.h"
 #include "dbat/dg_comm.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/act.item.h"
 #include "dbat/handler.h"
@@ -27,6 +27,7 @@
 #include "dbat/class.h"
 #include "dbat/techniques.h"
 #include "dbat/act.informative.h"
+#include "dbat/random.h"
 
 /* local functions */
 void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data *vict) {

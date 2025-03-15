@@ -9,7 +9,7 @@
 ************************************************************************ */
 
 #include "dbat/modify.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
 #include "dbat/db.h"

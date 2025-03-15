@@ -14,6 +14,7 @@
 #include <cerrno>
 #include <ctime>
 #include <cstddef>
+#include <cassert>
 #include <sys/stat.h>
 
 #ifndef _WIN32
@@ -36,31 +37,21 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-#include <memory>
-#include <algorithm>
 #include <set>
 #include <unordered_set>
-#include <random>
-#include <chrono>
+#include <memory>
 #include <optional>
-#include <filesystem>
 #include <array>
-#include <iostream>
-#include <mutex>
+//#include <iostream>
 #include <bitset>
-#include <variant>
 #include <functional>
-#include <ranges>
+
 
 #define FMT_HEADER_ONLY
-#include "fmt/core.h"
-#include "fmt/printf.h"
-#include "spdlog/spdlog.h"
-#include "effolkronium/random.hpp"
-using Random = effolkronium::random_static;
-#include <boost/algorithm/string.hpp>
-#include "nlohmann/json.hpp"
-#include "magic_enum/magic_enum_all.hpp"
+//#include "fmt/core.h"
+//
+
+//#include "magic_enum/magic_enum_all.hpp"
 
 /* Basic system dependencies *******************************************/
 #if CIRCLE_GNU_LIBC_MEMORY_TRACK && !defined(HAVE_MCHECK_H)
@@ -118,78 +109,7 @@ typedef int(*SpecialFunc)(struct char_data *ch, void *me, int cmd, char *argumen
 #define ACMD(name) void (name)(struct char_data *ch, char *argument, int cmd, int subcmd)
 #define SPECIAL(name) int (name)(struct char_data *ch, void *me, int cmd, char *argument)
 
-template <typename Key, typename T>
-class DebugMap : public std::map<Key, T> {
-public:
-    T& operator[](const Key& key) {
-        if (key < 0) {
-            throw std::runtime_error("Invalid key");
-        }
-        return std::map<Key, T>::operator[](key);
-    }
-};
-
 template<typename T = bool>
 using OpResult = std::pair<T, std::optional<std::string>>;
 
-extern std::shared_ptr<spdlog::logger> logger;
-
-
-template <typename Iterator, typename Key = std::function<std::string(typename std::iterator_traits<Iterator>::value_type)>>
-Iterator partialMatch(
-        const std::string& match_text,
-        Iterator begin, Iterator end,
-        bool exact = false,
-        Key key = [](const auto& val){ return std::to_string(val); }
-)
-{
-    // Use a multimap to automatically sort by the transformed key.
-    using ValueType = typename std::iterator_traits<Iterator>::value_type;
-    std::multimap<std::string, ValueType> sorted_map;
-    std::for_each(begin, end, [&](const auto& val) {
-        sorted_map.insert({key(val), val});
-    });
-
-    for (const auto& pair : sorted_map)
-    {
-        if (boost::iequals(pair.first, match_text))
-        {
-            return std::find(begin, end, pair.second);
-        }
-        else if (!exact && boost::istarts_with(pair.first, match_text))
-        {
-            return std::find(begin, end, pair.second);
-        }
-    }
-    return end;
-}
-
 extern bool isMigrating;
-
-template <class Range>
-auto filter_shared(Range&& container) {
-    using std::views::transform;
-    using std::views::filter;
-
-    // 1) transform weak_ptr -> shared_ptr
-    // 2) filter out null (expired)
-    return std::forward<Range>(container)
-           | filter([](auto& w) { return !w.expired(); })
-           | transform([](auto& w) { return w.lock(); });
-}
-
-// For a container of weak_ptr<T>, yields T* (non-null)
-// Note: only call on a container that exists outside of the range.
-// example: auto loco = ch->getLocationObjects(); for (auto obj : filter_raw(loco)) { ... }
-// Do not just for(auto obj : filter_raw(ch->getLocationObjects())) you won't like the results.
-template <class Range>
-auto filter_raw(Range&& container) {
-    using std::views::transform;
-    using std::views::filter;
-
-    // 1) transform weak_ptr -> T*
-    // 2) filter out null (expired)
-    return std::forward<Range>(container)
-           | filter([](auto& w) { return !w.expired(); })
-           | transform([](auto& w) { return w.lock().get(); });
-}

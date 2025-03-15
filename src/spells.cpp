@@ -9,7 +9,7 @@
 ************************************************************************ */
 
 #include "dbat/structs.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/spells.h"
 #include "dbat/handler.h"
@@ -25,6 +25,8 @@
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 #include "dbat/class.h"
+#include "dbat/bitarray.h"
+#include "dbat/random.h"
 
 /* external variables */
 

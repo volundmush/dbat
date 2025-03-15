@@ -158,56 +158,11 @@ struct cmdlist_element {
 };
 
 struct trig_var_data {
-    trig_var_data() = default;
-    explicit trig_var_data(const nlohmann::json& j);
-    nlohmann::json serialize();
     char *name{};                /* name of variable  */
     char *value{};                /* value of variable */
     long context{};                /* 0: global context */
-
     struct trig_var_data *next{};
 };
-
-/* structure for triggers */
-struct trig_data : std::enable_shared_from_this<trig_data> {
-    trig_data() = default;
-    explicit trig_data(const nlohmann::json& j);
-    nlohmann::json serializeProto();
-    nlohmann::json serializeInstance();
-    std::string serializeLocation();
-    trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
-    int8_t attach_type{};            /* mob/obj/wld intentions          */
-    int8_t data_type{};                /* type of game_data for trig      */
-    char *name{};                    /* name of trigger                 */
-    long trigger_type{};            /* type of trigger (for bitvector) */
-    struct cmdlist_element *cmdlist{};    /* top of command list             */
-    struct cmdlist_element *curr_state{};    /* ptr to current line of trigger  */
-    int narg{};                /* numerical argument              */
-    char *arglist{};            /* argument list                   */
-    int depth{};                /* depth into nest ifs/whiles/etc  */
-    int loops{};                /* loop iteration counter          */
-    double waiting{0.0};    /* event to pause the trigger      */
-    bool purged{};            /* trigger is set to be purged     */
-    struct trig_var_data *var_list{};    /* list of local vars for trigger  */
-    std::shared_ptr<unit_data> owner{};
-    int order{0};
-    int countLine(struct cmdlist_element *c);
-
-    bool active{false};
-    void activate();
-    void deactivate();
-
-    int64_t id{};
-    time_t generation{};
-
-    struct trig_data *next{};
-    struct trig_data *next_in_world{};    /* next in the global trigger list */
-    void deserializeInstance(const nlohmann::json& j);
-    void deserializeLocation(const std::string& txt);
-    std::shared_ptr<trig_data> shared();
-};
-
-
 
 /* The event data for the wait command */
 struct wait_event_data {
@@ -520,6 +475,6 @@ constexpr int OBJ_ID_BASE = 1300000; /* 250000 Rooms */
 
 extern void ADD_UID_VAR(char *buf, struct trig_data *trig, struct unit_data *thing, char *name, long context);
 
-extern nlohmann::json serializeVars(struct trig_var_data *vd);
+//extern nlohmann::json serializeVars(struct trig_var_data *vd);
 
-extern void deserializeVars(struct trig_var_data **vd, const nlohmann::json& j);
+//extern void deserializeVars(struct trig_var_data **vd, const nlohmann::json& j);

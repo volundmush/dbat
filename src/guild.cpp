@@ -8,7 +8,7 @@
  ************************************************************************ */
 
 #include "dbat/guild.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
@@ -1424,37 +1424,4 @@ void guild_data::toggle_feat(uint16_t skill_id) {
     } else {
         feats.insert(skill_id);
     }
-}
-
-nlohmann::json guild_data::serialize() {
-    nlohmann::json j;
-
-    j["vnum"] = vnum;
-    for(auto s : skills) j["skills"].push_back(s);
-    for(auto f : feats) j["feats"].push_back(f);
-    if(charge != 1.0) j["charge"] = charge;
-    if(!no_such_skill.empty()) j["no_such_skill"] = no_such_skill;
-    if(!not_enough_gold.empty()) j["not_enough_gold"] = not_enough_gold;
-    if(minlvl) j["minlvl"] = minlvl;
-    if(gm != NOBODY) j["gm"] = gm;
-    for(auto i = 0; i < 79; i++) if(IS_SET_AR(with_who, i)) j["with_who"].push_back(i);
-    if(open) j["open"] = open;
-    if(close) j["close"] = close;
-
-    return j;
-}
-
-
-guild_data::guild_data(const nlohmann::json &j) : guild_data() {
-    if(j.contains("vnum")) vnum = j["vnum"];
-    if(j.contains("skills")) for(const auto& s : j["skills"]) skills.insert(s.get<int>());
-    if(j.contains("feats")) for(const auto& f : j["feats"]) feats.insert(f.get<int>());
-    if(j.count("charge")) charge = j["charge"];
-    if(j.count("no_such_skill")) no_such_skill = strdup(j["no_such_skill"].get<std::string>().c_str());
-    if(j.count("not_enough_gold")) not_enough_gold = strdup(j["not_enough_gold"].get<std::string>().c_str());
-    if(j.count("minlvl")) minlvl = j["minlvl"];
-    if(j.count("gm")) gm = j["gm"];
-    if(j.contains("with_who")) for(const auto& i : j["with_who"]) SET_BIT_AR(with_who, i.get<int>());
-    if(j.count("open")) open = j["open"];
-    if(j.count("close")) close = j["close"];
 }

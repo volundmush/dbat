@@ -10,7 +10,7 @@
 
 
 #include "dbat/magic.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/spells.h"
 #include "dbat/handler.h"

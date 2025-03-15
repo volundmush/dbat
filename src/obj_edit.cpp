@@ -8,7 +8,7 @@
 #define __OBJ_EDIT_C__
 
 #include "dbat/obj_edit.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"

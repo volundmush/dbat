@@ -12,7 +12,7 @@
 #include "dbat/interpreter.h"
 #include "dbat/commands.h"
 #include "dbat/comm.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/oasis.h"
 #include "dbat/genolc.h"
 #include "dbat/constants.h"

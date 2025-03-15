@@ -4,7 +4,7 @@ improved-edit.c		Routines specific to the improved editor.
 
 */
 #include "dbat/improved-edit.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 

@@ -4,9 +4,10 @@
  *  Copyright 1996 Harvey Gilpin					*
  *  Copyright 1997-2001 George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include <iostream>
 
 #include "dbat/structs.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/db.h"
@@ -23,6 +24,7 @@
 #include "dbat/races.h"
 #include "dbat/act.wizard.h"
 #include "dbat/act.informative.h"
+#include "dbat/bitarray.h"
 
 /*------------------------------------------------------------------------*/
 

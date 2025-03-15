@@ -4,6 +4,7 @@
  * Copyright 1996 by Harvey Gilpin					*
  * Copyright 1997-2001 by George Greer (greerga@circlemud.org)		*
  ************************************************************************/
+#include <boost/algorithm/string.hpp>
 
 #include "dbat/genwld.h"
 #include "dbat/utils.h"
@@ -15,6 +16,7 @@
 #include "dbat/constants.h"
 #include "dbat/area.h"
 #include "dbat/constants.h"
+#include "dbat/filter.h"
 
 
 /*
@@ -227,106 +229,13 @@ room_direction_data::~room_direction_data() {
         free(keyword);
 }
 
-nlohmann::json room_direction_data::serialize() {
-    nlohmann::json j;
-
-    if(general_description && strlen(general_description)) j["general_description"] = general_description;
-    if(keyword && strlen(keyword)) j["keyword"] = keyword;
-    if(exit_info) {
-        j["exit_info"] = exit_info;
-        for(auto i = 0; i < NUM_EXIT_FLAGS; i++) {
-            if(IS_SET(exit_info, 1 << i)) {
-                auto key = std::string(exit_bits[i]);
-                boost::to_lower(key);
-                j["exit_flags"].push_back(key);
-            }
-        }
-    }
-    if(key > 0) j["key"] = key;
-	if(to_room != NOWHERE) j["to_room"] = to_room;
-    if(dclock) j["dclock"] = dclock;
-    if(dchide) j["dchide"] = dchide;
-    if(dcskill) j["dcskill"] = dcskill;
-    if(dcmove) j["dcmove"] = dcmove;
-    if(failsavetype) j["failsavetype"] = failsavetype;
-    if(dcfailsave) j["dcfailsave"] = dcfailsave;
-    if(failroom > 0) j["failroom"] = failroom;
-    if(totalfailroom > 0) j["totalfailroom"] = totalfailroom;
-
-    return j;
-}
-
-room_direction_data::room_direction_data(const nlohmann::json &j) : room_direction_data() {
-    if(j.contains("general_description")) general_description = strdup(j["general_description"].get<std::string>().c_str());
-    if(j.contains("keyword")) keyword = strdup(j["keyword"].get<std::string>().c_str());
-    if(j.contains("exit_info")) exit_info = j["exit_info"].get<int16_t>();
-    if(j.contains("key")) key = j["key"];
-    if(j.contains("to_room")) to_room = j["to_room"];
-    if(j.contains("dclock")) dclock = j["dclock"];
-    if(j.contains("dchide")) dchide = j["dchide"];
-    if(j.contains("dcskill")) dcskill = j["dcskill"];
-    if(j.contains("dcmove")) dcmove = j["dcmove"];
-    if(j.contains("failsavetype")) failsavetype = j["failsavetype"];
-    if(j.contains("dcfailsave")) dcfailsave = j["dcfailsave"];
-    if(j.contains("failroom")) failroom = j["failroom"];
-    if(j.contains("totalfailroom")) totalfailroom = j["totalfailroom"];
-}
-
+/*
 nlohmann::json room_data::serializeDgVars() {
     if(global_vars)
         return serializeVars(global_vars);
     return nlohmann::json::array();
 }
-
-
-nlohmann::json room_data::serialize() {
-    auto j = serializeUnit();
-
-    if(sector_type) j["sector_type"] = sector_type;
-    auto sect_key = std::string(sector_types[sector_type]);
-    boost::to_lower(sect_key);
-    j["sector_type_name"] = sect_key;
-
-    for (size_t i = 0; i < room_flags.size(); ++i) {
-        if (room_flags[i]) {
-            j["room_flags"].push_back(i);
-            auto key = std::string(room_bits[i]);
-            boost::to_lower(key);
-            j["flags"].push_back(key);
-        }
-    }
-
-    for(auto p :proto_script) {
-        if(trig_index.contains(p)) j["proto_script"].push_back(p);
-    }
-
-    return j;
-}
-
-room_data::room_data(const nlohmann::json &j) {
-    deserializeUnit(j);
-
-    if(j.contains("sector_type")) sector_type = j["sector_type"];
-
-    if(j.contains("dir_option")) {
-        // this is an array of (<number>, <json>) pairs, with number matching the dir_option array index.
-        // Thankfully we can pass the json straight into the room_direction_data constructor...
-        for(auto &d : j["dir_option"]) {
-            dir_option[d[0]] = new room_direction_data(d[1]);
-        }
-    }
-
-    if(j.contains("room_flags")) {
-        for(auto &f : j["room_flags"]) {
-            room_flags.set(f.get<int>());
-        }
-    }
-
-    if(j.contains("proto_script")) {
-        for(auto p : j["proto_script"]) proto_script.emplace_back(p.get<trig_vnum>());
-    }
-
-}
+*/
 
 room_data::~room_data() {
     // fields like name are handled by the base destructor...

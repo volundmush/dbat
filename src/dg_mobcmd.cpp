@@ -38,7 +38,7 @@
 #include "dbat/structs.h"
 #include "dbat/dg_scripts.h"
 #include "dbat/db.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/handler.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"

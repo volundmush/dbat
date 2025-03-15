@@ -1,6 +1,6 @@
 #include "dbat/dg_event.h"
 #include "dbat/dg_scripts.h"
-
+#include "dbat/filter.h"
 
 /* Process any events whose time has come. */
 void event_process(uint64_t heart_pulse, double deltaTime) {

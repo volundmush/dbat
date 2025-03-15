@@ -16,7 +16,7 @@
 #include "dbat/modify.h"
 #include "dbat/genzon.h"
 #include "dbat/oasis.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 
 /* List of zones to be saved.  */
@@ -105,7 +105,7 @@ void free_ex_descriptions(struct extra_descr_data *head) {
 int remove_from_save_list(zone_vnum zone, int type) {
     int counter = 0;
     // This is not an error, the static analysis doesn't understand what to do with the return in the lambda.
-    auto check = [&](save_list_data &d) {if(d.zone == zone && d.type == type) {counter++; return true;}};
+    auto check = [&](save_list_data &d) {if(d.zone == zone && d.type == type) {counter++; return true;} return false;};
 
     save_list.erase(std::remove_if(save_list.begin(), save_list.end(), check), save_list.end());
     return counter;

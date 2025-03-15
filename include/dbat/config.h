@@ -2,8 +2,9 @@
 
 #include "structs.h"
 
+
 namespace config {
-    extern std::chrono::milliseconds heartbeatInterval;
+    extern int heartbeatIntervalMillis;
     extern std::string hostAddress;
     extern uint16_t port;
 

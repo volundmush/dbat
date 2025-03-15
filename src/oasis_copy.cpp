@@ -10,7 +10,7 @@
 #include "dbat/dg_comm.h"
 #include "dbat/dg_olc.h"
 #include "dbat/act.wizard.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/interpreter.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"

@@ -7,8 +7,10 @@
 *  Copyright (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 **************************************************************************/
+#include <boost/algorithm/string.hpp>
+
 #include "dbat/act.other.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/handler.h"
 #include "dbat/dg_comm.h"
@@ -35,6 +37,8 @@
 #include "dbat/mail.h"
 #include "dbat/clan.h"
 #include "dbat/players.h"
+#include "dbat/random.h"
+#include "dbat/bitarray.h"
 
 /* local functions */
 static int has_scanner(struct char_data *ch);

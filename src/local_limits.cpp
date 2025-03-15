@@ -9,7 +9,7 @@
 ************************************************************************ */
 
 #include "dbat/local_limits.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/spells.h"
 #include "dbat/comm.h"
 #include "dbat/dg_comm.h"

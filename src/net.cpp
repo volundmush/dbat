@@ -7,7 +7,9 @@
 #include <unistd.h>
 #include <memory>
 #include <regex>
+
 #include <cppcodec/base64_rfc4648.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "dbat/net.h"
 #include "dbat/utils.h"

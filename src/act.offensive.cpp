@@ -14,7 +14,7 @@
 #include "dbat/combat.h"
 #include "dbat/comm.h"
 #include "dbat/spells.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/handler.h"
 #include "dbat/constants.h"
 #include "dbat/fight.h"

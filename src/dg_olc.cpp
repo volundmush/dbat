@@ -13,7 +13,7 @@
 **************************************************************************/
 
 #include "dbat/dg_olc.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/db.h"
 #include "dbat/genolc.h"

@@ -33,7 +33,7 @@
 #include "dbat/db.h"             // for LIB_ETC
 #include "dbat/comm.h"           // for send_to_char
 #include "dbat/interpreter.h"    // for ACMD()
-#include "dbat/utils.h"          // for CREATE() and IDNUM()
+#include "dbat/send.h"          // for CREATE() and IDNUM()
 #include "dbat/improved-edit.h"
 
 /* Local variables */

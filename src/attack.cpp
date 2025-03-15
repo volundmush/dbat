@@ -1,12 +1,15 @@
+#include <boost/algorithm/string.hpp>
+
 #include "dbat/attack.h"
 #include "dbat/combat.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/techniques.h"
 #include "dbat/class.h"
 #include "dbat/races.h"
 #include "dbat/fight.h"
 #include "dbat/guild.h"
+#include "dbat/random.h"
 
 namespace atk {
     std::map<int, std::vector<std::pair<int, int>>> minimumSkillRequired;

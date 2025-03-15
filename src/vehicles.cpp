@@ -9,7 +9,7 @@
 *  Vehicle.c written by Chris Jacobson <fear@athenet.net>		 *
 *************************************************************************/
 #include "dbat/vehicles.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/comm.h"
 #include "dbat/interpreter.h"
 #include "dbat/handler.h"
@@ -19,6 +19,7 @@
 #include "dbat/races.h"
 #include "dbat/act.informative.h"
 #include "dbat/area.h"
+#include "dbat/partial.h"
 
 #ifndef EXITN
 #  define EXITN(room, door)        (get_room(room)->dir_option[door])

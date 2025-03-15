@@ -9,7 +9,7 @@
 ************************************************************************ */
 
 #include "dbat/spell_parser.h"
-#include "dbat/utils.h"
+#include "dbat/send.h"
 #include "dbat/interpreter.h"
 #include "dbat/spells.h"
 #include "dbat/handler.h"
