@@ -20,3 +20,6 @@ users = "dbat.rest.users"
 characters = "dbat.rest.characters"
 # Disabled
 system = ""
+
+[events]
+circle = "dbat.events.circle"

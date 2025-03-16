@@ -320,6 +320,8 @@ extern SubscriptionManager<obj_data> objectSubscriptions;
 extern SubscriptionManager<room_data> roomSubscriptions;
 extern SubscriptionManager<trig_data> triggerSubscriptions;
 
+extern int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string& ip);
+
 extern struct social_messg *soc_mess_list;
 extern int top_of_socialt;
 

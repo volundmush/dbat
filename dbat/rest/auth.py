@@ -15,7 +15,6 @@ from mudforge.rest.utils import oauth2_scheme, get_real_ip
 
 router = APIRouter()
 
-
 async def handle_login(request: Request, username: str, password: str) -> TokenResponse:
     ip = get_real_ip(request)
     user_agent = request.headers.get("User-Agent", None)

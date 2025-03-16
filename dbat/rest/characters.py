@@ -10,6 +10,7 @@ from fastapi.responses import StreamingResponse
 from mudforge.rest.utils import streaming_list
 from mudforge.models import fields
 
+from mudforge.rest.utils import get_real_ip
 from .utils import get_current_user
 
 from dbat.models.game import AccountData, PlayerData
@@ -37,33 +38,40 @@ async def get_characters(user: Annotated[AccountData, Depends(get_current_user)]
 async def get_character(
     user: Annotated[AccountData, Depends(get_current_user)], character_id: int
 ):
-    character = await characters_db.get_character(character_id)
+    character = characters_db.get_character(character_id)
     if character.id not in user.characters and user.adminLevel == 0:
         raise HTTPException(status_code=403, detail="Character does not belong to you.")
     return character
 
 
+
 @router.get("/{character_id}/events")
 async def stream_character_events(
+    request: Request,
     user: Annotated[AccountData, Depends(get_current_user)], character_id: int
 ):
-    queue = mudforge.EVENT_HUB.subscribe(character_id)
+    
+    ip = get_real_ip(request)
 
-    # We don't use it; but this verifies that user can control character.
+    # this verifies that user can control character.
     if character_id not in user.characters:
         raise HTTPException(
             status_code=403, detail="You do not have permission to use this character."
         )
 
     async def event_generator():
-        conn_id = next(conn_id_counter)
         try:
-            while True:
-                item = await queue.get()  # blocks until a new event
+            queue = mudforge.EVENT_HUB.subscribe(character_id)
+            # run until we get a None or False or something stupid like that.
+            while item := await queue.get():
                 yield f"event: {item.__class__.__name__}\ndata: {item.model_dump_json()}\n\n"
         finally:
             mudforge.EVENT_HUB.unsubscribe(character_id, queue)
 
+    conn_id = next(conn_id_counter)
+    # This might raise an HTTPException!
+    dbat_ext.create_join_session(user.vn, character_id, conn_id, ip)
+    
     return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
@@ -95,5 +103,5 @@ async def create_character(
     user: Annotated[AccountData, Depends(get_current_user)],
     char_data: Annotated[CharacterCreate, Body()],
 ):
-    result = await characters_db.create_character(user, char_data.name)
+    result = characters_db.create_character(user, char_data.name)
     return result

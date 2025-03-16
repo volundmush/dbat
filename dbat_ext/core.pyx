@@ -23,7 +23,7 @@ def load_db():
     """
     cur_path = Path().absolute()
     os.chdir("lib")
-    db.boot_db_new()
+    db.init()
     os.chdir(cur_path)
 
 
@@ -272,31 +272,37 @@ def submit_command(character_id: int, command: str):
     """
     Submit a command to the game.
     """
-    sess = db.sessions.find(character_id)
-    if sess == db.sessions.end():
+    sess_found = db.sessions.find(character_id)
+    if sess_found == db.sessions.end():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character session not found.")
-    sess = deref(sess)
-    sess.raw_input_queue.push_back(command)
+    sess = deref(sess_found)
+    sess.second.raw_input_queue.push_back(command)
 
 def connection_lost(character_id: int, connection_id: int):
     """
     Notify the game that a connection has been lost in the FastAPI.
     """
-    passsess = db.sessions.find(character_id)
-    if sess == db.sessions.end():
+    sess_found = db.sessions.find(character_id)
+    if sess_found == db.sessions.end():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character session not found.")
-    sess = deref(sess)
-    sess.onConnectionLost(connection_id)
+    sess = deref(sess_found)
+    sess.second.onConnectionLost(connection_id)
 
-def create_join_session(account_id: int, character_id: int, connection_id: int)
+def create_join_session(account_id: int, character_id: int, connection_id: int, ip: str):
     """
     Creates or joins a session for a character. This is called by FastAPI
     when it opens an SSE stream. This will simply wrap a C++ function
     that does the heavy lifting to K.I.S.S.
     """
-    pass
+    ip_bytes = ip.encode("utf-8")
+    res = db.create_join_session(account_id, character_id, connection_id, ip_bytes)
+    if res < 0:
+        if res == -1:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character not found.")
+        elif res == -2:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This account already has another character in play.")
 
-async def distribute_output():
+cdef void distribute_output():
     """
     Iterate through all connected sessions and shove their output out to the
     EventHub as CircleText events and clear the buffer.
@@ -307,5 +313,5 @@ async def distribute_output():
         if desc.output.empty():
             continue
         event = CircleText(text=desc.output)
-        await hub.send(sess.first, event)
+        hub.send_nowait(sess.first, event)
         desc.output.clear()

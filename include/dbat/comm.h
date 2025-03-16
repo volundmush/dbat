@@ -77,8 +77,6 @@ extern char *ANSI[];
 extern std::string original_cwd;
 
 // functions
-extern void init_game();
-
 extern int process_output(struct descriptor_data *t);
 
 extern void record_usage(uint64_t heartPulse, double deltaTime);
@@ -97,9 +95,6 @@ void shutdown_game(int code);
 namespace game {
     void init();
     void init_locale();
-    void init_sodium();
-    void init_epoll();
-    void init_listeners();
     void init_database();
     void init_zones();
     void init_copyover();

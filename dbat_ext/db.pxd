@@ -37,3 +37,14 @@ cdef extern from "dbat/db.h":
     map[int, structs.index_data] trig_index
     map[int64_t, structs.player_data] players
     map[int64_t, structs.descriptor_data*] sessions
+
+    int create_join_session(int account_id, int character_id, int64_t connection_id, const string& ip)
+
+cdef extern from "dbat/comm.h" namespace "game":
+    void init();
+    void init_locale();
+    void init_database();
+    void init_zones();
+    void init_copyover();
+    void run_game();
+    void run_loop();

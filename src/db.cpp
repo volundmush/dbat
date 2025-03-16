@@ -2907,4 +2907,52 @@ std::shared_ptr<unit_data> resolveUID(const std::string& uid) {
     return nullptr;
 }
 
+int create_join_session(int account_id, int character_id, int64_t connection_id, const std::string& ip) {
+    auto acc_found = accounts.find(account_id);
+    if(acc_found == accounts.end()) return -1;
+    auto &acc = acc_found->second;
+    auto ch_found = uniqueCharacters.find(character_id);
+    if(ch_found == uniqueCharacters.end()) return -1;
+    auto &ch = ch_found->second;
+    ch->playerFlags.reset(PLR_NOTDEADYET);
+    auto exist_sess = sessions.find(character_id);
+    if(exist_sess != sessions.end()) {
+        // a session already exists. we'll be joining it.
+        auto &sess = exist_sess->second;
+        if(sess->conns.empty()) {
+            // the character is currently active, but link dead.
+            sess->timeoutCounter = 0.0;
+            send_to_char(ch.get(), "You have reconnected to %s from %s.\r\n", ch->name, ip);
+        } else {
+            send_to_char(ch.get(), "Another connection is now linked to %s, from %s.\r\n", ch->name, ip);
+        }
+        sess->conns.emplace(connection_id, ip);
+        acc.descriptors.insert(sess);
+        return sess->conns.size();
+    } else {
+        // no session exists. We'll have to create one.
+        if(acc.adminLevel < 1) {
+            // non-admins can only have one character active at once.
+            // Scan acc.descriptors for any with a character that isn't
+            // this character_id.
+            for(auto desc : acc.descriptors) {
+                if(desc->id != character_id) {
+                    return -2;
+                }
+            }
+        }
 
+        auto desc = new descriptor_data();
+        STATE(desc) = CON_LOGIN;
+        desc->character = ch.get();
+        desc->account = &acc;
+        desc->id = character_id;
+        desc->conns.emplace(connection_id, ip);
+        acc.descriptors.insert(desc);
+        sessions.emplace(character_id, desc);
+        desc->next = descriptor_list;
+        descriptor_list = desc;
+        send_to_char(ch.get(), "You have connected to %s from %s.\r\n", ch->name, ip);
+        return 1;
+    }
+}
