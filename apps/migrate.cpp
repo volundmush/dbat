@@ -2786,7 +2786,7 @@ void migrate_accounts() {
         // Line 3: password (clear text, will hash...)
         std::string pass;
         std::getline(file, pass);
-        pendingPasswords.emplace(&a, pass);
+        a.passHash = pass;
         
         // Line 4: slots (int)
         std::string slots;
@@ -2842,17 +2842,6 @@ void migrate_accounts() {
         file.close();
         a.vn = id;
     }
-
-    // Now we hash all the passwords... in a parallelized fashion because it's very CPU intensive.
-    std::vector<std::thread> threads;
-    for(auto &[acc, pass] : pendingPasswords) {
-        threads.emplace_back([acc, pass]() {
-            if(!acc->setPassword(pass)) basic_mud_log("Error hashing %s's password: %s", acc->name.c_str(), pass.c_str());
-        });
-    }
-    // join all threads.
-    for(auto &t : threads) t.join();
-    threads.clear();
 }
 
 void migrate_characters() {
@@ -3442,9 +3431,7 @@ void migrate_db() {
 void run_migration() {
     isMigrating = true;
     load_config();
-    setup_log();
     game::init_locale();
-    game::init_sodium();
     chdir("lib");
     migrate_db();
     runSave();

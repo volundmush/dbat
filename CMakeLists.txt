@@ -17,23 +17,17 @@ project(circle)
 
 CPMAddPackage("gh:fmtlib/fmt#10.2.1")
 CPMAddPackage("gh:nlohmann/json#v3.11.3")
-CPMAddPackage("gh:gabime/spdlog#v1.14.1")
-CPMAddPackage("gh:robinlinden/libsodium-cmake#master")
 CPMAddPackage("gh:ilqvya/random#v1.5.0")
 CPMAddPackage("gh:Neargye/magic_enum#v0.9.6")
-CPMAddPackage("gh:tplgy/cppcodec#v0.2")
 
 find_package(Boost CONFIG REQUIRED COMPONENTS system program_options regex iostreams)
 
 set(CIRCLE_INCLUDE_DIRS
         include
         ${ZLIB_INCLUDE_DIRS}
-        ${cppcodec_SOURCE_DIR}
         ${Boost_INCLUDE_DIRS}
         ${fmt_SOURCE_DIR}/include
         ${nlohmann_json_SOURCE_DIR}/single_include
-        ${spdlog_SOURCE_DIR}/include
-        ${sodium_SOURCE_DIR}/libsodium/src/libsodium/include
         ${effolkronium_random_SOURCE_DIR}/include
         ${magic_enum_SOURCE_DIR}/include
         CACHE INTERNAL "Include directories for CIRCLE"
@@ -65,7 +59,6 @@ set(BUILD_TESTING OFF)
 
 set(CIRCLE_LINK_LIBRARIES
         fmt::fmt ${Boost_LIBRARIES} ${ZLIB_LIBRARIES}
-        sodium
         effolkronium_random
         CACHE INTERNAL "Include libraries for CIRCLE"
         )

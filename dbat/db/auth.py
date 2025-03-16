@@ -34,9 +34,17 @@ async def authenticate_user(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="User not found."
         )
-    if not crypt_context.verify(password, retrieved.passHash):
+    plain_text = False
+    if password == retrieved.passHash:
+        plain_text = True
+    if not plain_text and not crypt_context.verify(password, retrieved.passHash):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid credentials."
         )
+    if plain_text:
+        # rehash the password if it was plain text
+        hashed = crypt_context.hash(password)
+        retrieved.passHash = hashed
+        # TODO: actually save it.
     return retrieved
 

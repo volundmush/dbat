@@ -11,7 +11,6 @@
 
 #include "dbat/saveload.h"
 #include "dbat/config.h"
-#include "dbat/net.h"
 #include "dbat/send.h"
 #include "dbat/players.h"
 #include "dbat/db.h"

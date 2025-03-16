@@ -17,12 +17,7 @@
 #include "dbat/class.h"
 #include "dbat/ban.h"
 #include "dbat/account.h"
-#include "dbat/net.h"
 #include "dbat/filter.h"
-
-
-
-
 
 long get_id_by_name(const char *name) {
     auto find = findPlayer(name);
@@ -161,9 +156,6 @@ bool deleteUserAccount(vnum id) {
 
     auto descs = acc.descriptors;
     for(auto d : descs) close_socket(d);
-
-    auto conn = acc.connections;
-    for(auto c : conn) c->close();
 
     auto cha = acc.characters;
 

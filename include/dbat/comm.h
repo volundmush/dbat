@@ -63,9 +63,6 @@ extern void string_write(struct descriptor_data *d, char **txt, size_t len, long
 constexpr int PAGE_LENGTH = 22;
 constexpr int PAGE_WIDTH = 79;
 
-
-extern void show_help(std::shared_ptr<net::Connection>& co, const char *entry);
-
 /* variables */
 extern uint64_t pulse;
 extern FILE *logfile;

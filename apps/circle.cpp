@@ -142,16 +142,6 @@ int main(int argc, char **argv)
         }
     }
 
-    try {
-        /* All arguments have been parsed, try to open log file. */
-        setup_log();
-    }
-    catch(std::exception& e) {
-        std::cerr << "Cannot start logger: " << e.what() << std::endl;
-        exit(1);
-    }
-
-
     /*
      * Moved here to distinguish command line options and to show up
      * in the log if stderr is redirected to a file.

@@ -124,6 +124,20 @@ void basic_mud_log(fmt::string_view format, Args&&... args) {
     }
 }
 
+template<typename... Args>
+void template_mud_log(fmt::string_view format, Args&&... args) {
+    try {
+        std::string formatted_string = fmt::format(fmt::runtime(format), std::forward<Args>(args)...);
+        if(formatted_string.empty()) return;
+
+        std::cout << formatted_string << std::endl;
+    }
+    catch(const std::exception &e) {
+        std::cout << "SYSERR: Format error in template_mud_log: " << e.what() << std::endl;
+        std::cout << "Template was: " << format.data() << std::endl;
+    }
+}
+
 extern void basic_mud_vlog(const char *format, va_list args);
 
 extern int touch(const char *path);

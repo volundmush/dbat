@@ -2,10 +2,15 @@ import os
 import orjson
 from pathlib import Path
 from dbat.models import game as game_models
+from fastapi import HTTPException, status
+import mudforge
+
+from dbat.events.circle import CircleText
 
 from cython.operator cimport dereference as deref, preincrement as inc
 from libcpp.memory cimport shared_ptr
 from libcpp.string cimport string
+
 
 cimport structs
 cimport db
@@ -261,3 +266,46 @@ cdef class PlayerDB:
             yield vn.first
 
 player_db = PlayerDB()
+
+
+def submit_command(character_id: int, command: str):
+    """
+    Submit a command to the game.
+    """
+    sess = db.sessions.find(character_id)
+    if sess == db.sessions.end():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character session not found.")
+    sess = deref(sess)
+    sess.raw_input_queue.push_back(command)
+
+def connection_lost(character_id: int, connection_id: int):
+    """
+    Notify the game that a connection has been lost in the FastAPI.
+    """
+    passsess = db.sessions.find(character_id)
+    if sess == db.sessions.end():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character session not found.")
+    sess = deref(sess)
+    sess.onConnectionLost(connection_id)
+
+def create_join_session(account_id: int, character_id: int, connection_id: int)
+    """
+    Creates or joins a session for a character. This is called by FastAPI
+    when it opens an SSE stream. This will simply wrap a C++ function
+    that does the heavy lifting to K.I.S.S.
+    """
+    pass
+
+async def distribute_output():
+    """
+    Iterate through all connected sessions and shove their output out to the
+    EventHub as CircleText events and clear the buffer.
+    """
+    hub = mudforge.EVENT_HUB
+    for sess in db.sessions:
+        desc = sess.second
+        if desc.output.empty():
+            continue
+        event = CircleText(text=desc.output)
+        await hub.send(sess.first, event)
+        desc.output.clear()

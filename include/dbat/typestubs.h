@@ -23,10 +23,6 @@ namespace sensei {
     class Sensei;
 }
 
-namespace net {
-    class Connection;
-}
-
 namespace atk {
     class Attack;
 }

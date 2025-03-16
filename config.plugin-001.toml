@@ -17,6 +17,6 @@ application = "dbat.game.application.Application"
 [fastapi.routers]
 auth = "dbat.rest.auth"
 users = "dbat.rest.users"
+characters = "dbat.rest.characters"
 # Disabled
-characters = ""
 system = ""

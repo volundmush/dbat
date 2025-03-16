@@ -5,6 +5,17 @@ import dbat_ext
 
 class Application(_OldApp):
     
+    async def setup_asyncpg(self):
+        """
+        We don't actually need asyncpg.
+        So we'll just pass. This prevents
+        the connection error.
+        """
+        pass
+    
+    async def postgre_listener(self):
+        pass
+    
     async def setup_dbat(self):
         dbat_ext.load_db()
     

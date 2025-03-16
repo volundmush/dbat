@@ -80,12 +80,9 @@ struct account_data {
     std::vector<std::string> customs;
     std::vector<int> characters;
     std::unordered_set<descriptor_data*> descriptors;
-    std::unordered_set<net::Connection*> connections;
+    std::unordered_map<int64_t, std::string> connections;
 
     void modRPP(int amt);
-
-    bool checkPassword(const std::string& password);
-    bool setPassword(const std::string& password);
 
     bool canBeDeleted();
 
@@ -1209,7 +1206,7 @@ struct txt_q {
 
 struct descriptor_data {
     int64_t id{NOTHING};
-    std::unordered_map<int64_t, std::shared_ptr<net::Connection>> conns;
+    std::unordered_map<int64_t, std::string> conns;
     void onConnectionLost(int64_t connId);
     void onConnectionClosed(int64_t connId);
 

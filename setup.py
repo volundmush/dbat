@@ -40,7 +40,6 @@ LIBRARIES = [
     "boost_iostreams",
     "boost_program_options",
     "boost_regex",
-    "sodium",
     "z"
 ]
 

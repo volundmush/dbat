@@ -14,12 +14,6 @@
 #include <chrono>
 #include <iostream>
 
-#include "sodium.h"
-
-#include "spdlog/spdlog.h"
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/rotating_file_sink.h>
-
 #include "dbat/comm.h"
 #include "dbat/send.h"
 #include "dbat/config.h"
@@ -50,8 +44,6 @@
 
 #include "dbat/players.h"
 #include "dbat/account.h"
-#include "dbat/charmenu.h"
-#include "dbat/puppet.h"
 #include "dbat/transformation.h"
 #include "dbat/db.h"
 
@@ -62,7 +54,7 @@
 
 /* local globals */
 struct descriptor_data *descriptor_list = nullptr;        /* master desc list */
-std::map<int64_t, struct descriptor_data*> sessions;
+
 struct txt_block *bufpool = nullptr;    /* pool of large output buffers */
 int buf_largecount = 0;        /* # of large buffers which exist */
 int buf_overflows = 0;        /* # of overflows of output */
@@ -87,29 +79,8 @@ std::string original_cwd;
 *  main game loop and related stuff                                    *
 ***********************************************************************/
 
-std::shared_ptr<spdlog::logger> logger;
-
-
-void setup_log() {
-    auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    console_sink->set_level(spdlog::level::info); // Set the console to output info level and above messages
-    console_sink->set_pattern("[%^%l%$] %v"); // Example pattern: [INFO] some message
-
-    auto file_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(config::logFile, 1024 * 1024 * 5, 3);
-    file_sink->set_level(spdlog::level::trace); // Set the file to output all levels of messages
-
-    std::vector<spdlog::sink_ptr> sinks {console_sink, file_sink};
-
-    logger = std::make_shared<spdlog::logger>("logger", begin(sinks), end(sinks));
-    logger->set_level(spdlog::level::trace); // Set the logger to trace level
-    spdlog::register_logger(logger);
-}
-
 void broadcast(const std::string& txt) {
-    basic_mud_log("Broadcasting: %s", txt.c_str());
-    for(auto &[cid, c] : net::connections) {
-        c->sendText(txt);
-    }
+
 }
 
 void signal_handler(int signal) {
@@ -189,18 +160,6 @@ void copyover_recover() {
     // erase the file.
     std::filesystem::remove(COPYOVER_FILE);
 
-    // restore the server_fd.
-    if(j.contains("server_fd")) net::server_fd = j.at("server_fd").get<int>();
-
-    if(j.contains("connections"))
-        for(auto &jc : j.at("connections")) {
-            auto connId = jc[0].get<int>();
-            auto socket = jc[1]["socket"].get<int>();
-            auto conn = std::make_shared<net::Connection>(connId, socket);
-            net::connections[connId] = conn;
-            conn->deserialize(jc[1]);
-        }
-
     // rebuild descriptor data...
     if(j.contains("descriptors")) {
         for(const auto &jd : j["descriptors"]) {
@@ -213,9 +172,7 @@ void copyover_recover() {
             if(jd.contains("connections")) {
                 {
                     for(const auto& jc : jd["connections"]) {
-                        auto c = net::connections.at(jc.get<int64_t>());
-                        c->desc = d;
-                        d->conns[c->connId] = c;
+
                     }
                 }
             }
@@ -241,17 +198,10 @@ static void performReboot(int mode) {
 
     broadcast("\t@RThe universe stops for a moment as space and time fold.@n\r\n");
     // Flush all pending output and otherwise get connections ready for a copyover.
-    net::prepareForCopyover();
 
     nlohmann::json j;
 
-    // save the server_fd...
-    j["server_fd"] = net::server_fd;
 
-    // Serialize all connections.
-    for(auto &[id, conn] : net::connections) {
-        j["connections"].push_back(std::make_pair(id, conn->serialize()));
-    }
 
     /* For each descriptor/connection, halt them and save state. */
     for (auto &[cid, d] : sessions) {
@@ -259,7 +209,7 @@ static void performReboot(int mode) {
         if(d->conns.empty()) continue;
 
         for(auto &[cid, c] : d->conns) {
-            jd["connections"].push_back(c->connId);
+            //jd["connections"].push_back(c->connId);
         }
         auto och = d->character;
 
@@ -355,7 +305,7 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
         if(s.countdown > 0.0) continue;
 
         auto start = std::chrono::high_resolution_clock::now();
-        auto miniDelta = (s.interval > 0.0) ? std::abs<double>(s.countdown + s.interval) : deltaTime;
+        auto miniDelta = (s.interval > 0.0) ? std::abs(s.countdown + s.interval) : deltaTime;
         try {
             s.func(heart_pulse, miniDelta);
         }
@@ -375,78 +325,12 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
     }
 }
 
-void processConnections(double deltaTime) {
-    // net::update does an epoll_wait and updates our data structures.
-    net::update(deltaTime);
 
-    std::unordered_set<int> toErase;
-    // First, handle any disconnected connections caused by a TCP issue.
-    for(auto &[id, reason] : net::deadConnections) {
-        // We don't want to purge those in the GameLogoff state until their buffers are cleaned.
-        if(reason == net::DisconnectReason::GameLogoff) continue;
-
-        auto it = net::connections.find(id);
-        // This shouldn't happen, but whatever.
-        if(it == net::connections.end()) continue;
-        it->second->cleanup(reason);
-        toErase.insert(id);
-    }
-    for(auto &id : toErase) {
-        net::connections.erase(id);
-        net::deadConnections.erase(id);
-    }
-
-    // Second, welcome any new connections!
-    net::acceptAllIncomingConnections();
-
-    for(auto &[id, conn] : net::connections) {
-        conn->readFromSocket();
-    }
-
-    auto now = std::chrono::system_clock::now();
-
-    // Any connections which have finished negotiation can be welcomed.
-    for(const auto&[id, conn] : net::connections) {
-        if((conn->state == net::ConnectionState::Pending)
-        && ((now - conn->connected) > std::chrono::milliseconds(500))) {
-            conn->onWelcome();
-        }
-    }
-
-    // Next, we must handle the heartbeat routine for each connection.
-    for(auto& [id, c] : net::connections) {
-        c->update(deltaTime);
-    }
-}
-
-void processDisconnects() {
-    auto dead = net::deadConnections;
-    // First, handle any disconnected connections caused by a TCP issue.
-    for(auto &[id, reason] : dead) {
-        // We don't want to purge those in the GameLogoff state until their buffers are cleaned.
-        if(reason != net::DisconnectReason::GameLogoff) continue;
-        net::connections.erase(id);
-        net::deadConnections.erase(id);
-    }
-}
-
-void processOutputs() {
-
-    for(auto &[id, conn] : net::connections) {
-        conn->writeToSocket();
-    }
-}
 
 void runOneLoop(double deltaTime) {
     static bool sleeping = false;
     struct descriptor_data* next_d;
     // Clear profile data.
-
-
-    auto start = std::chrono::high_resolution_clock::now();
-    processConnections(deltaTime);
-    auto end = std::chrono::high_resolution_clock::now();
-    timings.emplace_back("processConnections", std::chrono::duration<double>(end - start).count());
 
     if(sleeping && descriptor_list) {
         basic_mud_log("Waking up.");
@@ -459,6 +343,9 @@ void runOneLoop(double deltaTime) {
             sleeping = true;
         }
     }
+
+    auto start = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
 
     {
         std::unordered_set<struct descriptor_data*> toLook;
@@ -535,7 +422,6 @@ void runOneLoop(double deltaTime) {
                 d->has_prompt = true;
             }
         }
-        processOutputs();
         end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("process output", std::chrono::duration<double>(end - start).count());
     }
@@ -568,7 +454,6 @@ void runOneLoop(double deltaTime) {
             if (STATE(d) == CON_CLOSE || STATE(d) == CON_DISCONNECT || STATE(d) == CON_QUITGAME)
                 close_socket(d);
         }
-        processDisconnects();
         end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("close sockets", std::chrono::duration<double>(end - start).count());
     }
@@ -593,18 +478,9 @@ namespace game {
 
     void init() {
         game::init_locale();
-        game::init_sodium();
         game::init_database();
         game::init_zones();
         game::init_copyover();
-        net::init_listeners();
-    }
-
-    void init_sodium() {
-        if (sodium_init() != 0) {
-            basic_mud_log("Could not initialize libsodium!");
-            shutdown_game(EXIT_FAILURE);
-        }
     }
 
     void init_copyover() {
@@ -666,11 +542,11 @@ namespace game {
                 std::this_thread::sleep_for(heartbeatInterval - elapsedTime);
             } else {
                 printTimings = true;
-                logger->warn("Main loop is taking up too much time: {}s", std::chrono::duration<double>(elapsedTime).count());
+                template_mud_log("Main loop is taking up too much time: {}s", std::chrono::duration<double>(elapsedTime).count());
             }
             if(printTimings) {
                 for(const auto &[name, time] : timings) {
-                    logger->warn("{}: {:.10f}s", name, time);
+                    template_mud_log("{}: {:.10f}s", name, time);
                 }
             }
         }
@@ -682,16 +558,12 @@ namespace game {
     }
 
     void run_game() {
-        basic_mud_log("Signal trapping.");
-        signal(SIGUSR1, signal_handler);
-        signal(SIGUSR2, signal_handler);
-        signal(SIGPIPE, SIG_IGN);
 
-        logger->info("Entering main loop...");
+        basic_mud_log("Entering main loop...");
 
         run_loop();
 
-        logger->info("run_loop() has finished. Stopping...");
+        basic_mud_log("run_loop() has finished. Stopping...");
 
         if (circle_reboot) {
             basic_mud_log("Rebooting.");
@@ -1717,10 +1589,8 @@ int process_output(struct descriptor_data *t) {
      */
     if (t->has_prompt) {
         t->has_prompt = false;
-        for(auto &[cid, c] : t->conns) c->sendText(out);
     } else {
         auto o = out.substr(2, out.length() - 2);
-        for(auto &[cid, c] : t->conns) c->sendText(o);
     }
 
     /* Handle snooping: prepend "% " and send to snooper. */
@@ -1728,7 +1598,7 @@ int process_output(struct descriptor_data *t) {
         write_to_output(t->snoop_by, "\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n%s\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n",
                         t->output.c_str());
 
-    t->output.clear();
+    t->output += out;
 
     return (result);
 }
@@ -1803,14 +1673,6 @@ void close_socket(struct descriptor_data *d) {
     }
 
     if(c) c->desc = nullptr;
-    for(auto &[cid, conn] : d->conns) {
-        conn->desc = nullptr;
-        if(d->connected == CON_QUITGAME) {
-            conn->setParser(new net::CharacterMenu(conn, c));
-        } else {
-            conn->close();
-        }
-    }
 
     sessions.erase(d->id);
     delete d;
@@ -2148,35 +2010,6 @@ int open_logfile(const char *filename, FILE *stderr_fp) {
 /*
  * This may not be pretty but it keeps game_loop() neater than if it was inline.
  */
-
-
-void show_help(std::shared_ptr<net::Connection>& co, const char *entry) {
-    int chk, bot, top, mid, minlen;
-    char buf[MAX_STRING_LENGTH];
-
-    if (!help_table) return;
-
-    bot = 0;
-    top = top_of_helpt;
-    minlen = strlen(entry);
-
-    for (;;) {
-        mid = (bot + top) / 2;
-
-        if (bot > top) {
-            return;
-        } else if (!(chk = strncasecmp(entry, help_table[mid].keywords, minlen))) {
-            while ((mid > 0) &&
-                   (!(chk = strncasecmp(entry, help_table[mid - 1].keywords, minlen))))
-                mid--;
-            co->sendText(help_table[mid].entry);
-            return;
-        } else {
-            if (chk > 0) bot = mid + 1;
-            else top = mid - 1;
-        }
-    }
-}
 
 
 void descriptor_data::handle_input() {
