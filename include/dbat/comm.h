@@ -42,6 +42,17 @@ extern void perform_act(const char *orig, struct char_data *ch, struct obj_data 
 extern char *act(const char *str, int hide_invisible, struct char_data *ch, struct obj_data *obj, const void *vict_obj, int type);
 
 extern void close_socket(struct descriptor_data *d);
+extern void runOneLoop(double deltaTime);
+
+// Define a function pointer type for a function with no arguments.
+typedef void (*distribute_output_t)();
+
+// Define a function pointer type for a function that takes an int.
+typedef void (*send_close_t)(int character_id);
+
+// Global variables to hold the function pointers.
+extern distribute_output_t g_distribute_output;
+extern send_close_t g_send_close;
 
 constexpr int TO_ROOM = 1;
 constexpr int TO_VICT = 2;
@@ -98,6 +109,4 @@ namespace game {
     void init_database();
     void init_zones();
     void init_copyover();
-    void run_game();
-    void run_loop();
 }

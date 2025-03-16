@@ -46,5 +46,15 @@ cdef extern from "dbat/comm.h" namespace "game":
     void init_database();
     void init_zones();
     void init_copyover();
-    void run_game();
-    void run_loop();
+
+cdef extern from "dbat/comm.h":
+    void runOneLoop(double deltaTime)
+
+    ctypedef void (*distribute_output_t)()
+    ctypedef void (*send_close_t)(int)
+
+    cdef distribute_output_t g_distribute_output
+    cdef send_close_t g_send_close
+
+cdef extern from "dbat/utils.h":
+    string processColors(const string &txt, int parse, char **choices)

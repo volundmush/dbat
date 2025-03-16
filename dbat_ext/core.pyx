@@ -1,5 +1,7 @@
 import os
 import orjson
+import asyncio
+import time
 from pathlib import Path
 from dbat.models import game as game_models
 from fastapi import HTTPException, status
@@ -15,7 +17,7 @@ from libcpp.string cimport string
 cimport structs
 cimport db
 from structs cimport unit_data, thing_data, room_data, char_data, obj_data, account_data
-from saveload cimport jdumps, jloads, jobject, to_json, from_json
+from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave
 
 def load_db():
     """
@@ -24,7 +26,7 @@ def load_db():
     cur_path = Path().absolute()
     os.chdir("lib")
     db.init()
-    os.chdir(cur_path)
+    #os.chdir(cur_path)
 
 
 cdef class RoomDB:
@@ -267,6 +269,13 @@ cdef class PlayerDB:
 
 player_db = PlayerDB()
 
+def process_colors(text: str, parse: bool = True) -> str:
+    """
+    Wraps the C++ processColors function.
+    """
+    t = text.encode("utf-8")
+    out = db.processColors(t, parse, NULL)
+    return out.decode("utf-8")
 
 def submit_command(character_id: int, command: str):
     """
@@ -276,7 +285,8 @@ def submit_command(character_id: int, command: str):
     if sess_found == db.sessions.end():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character session not found.")
     sess = deref(sess_found)
-    sess.second.raw_input_queue.push_back(command)
+    cmd = command.encode("utf-8")
+    sess.second.raw_input_queue.push_back(cmd)
 
 def connection_lost(character_id: int, connection_id: int):
     """
@@ -302,7 +312,7 @@ def create_join_session(account_id: int, character_id: int, connection_id: int, 
         elif res == -2:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This account already has another character in play.")
 
-cdef void distribute_output():
+cdef void distribute_output() noexcept:
     """
     Iterate through all connected sessions and shove their output out to the
     EventHub as CircleText events and clear the buffer.
@@ -315,3 +325,50 @@ cdef void distribute_output():
         event = CircleText(text=desc.output)
         hub.send_nowait(sess.first, event)
         desc.output.clear()
+
+cdef void send_close(int character_id) noexcept:
+    """
+    Send a close event to the EventHub for a character.
+    """
+    hub = mudforge.EVENT_HUB
+    event = CircleText(text="Connection closed.")
+    hub.send_nowait(character_id, event)
+    hub.send_nowait(character_id, None)
+
+RUNNING = True
+
+async def run_game(heartbeat_interval: float, save_interval: float):
+    # hook up the C++ functions to the Python functions
+    db.g_distribute_output = distribute_output
+    db.g_send_close = send_close
+
+    save_timer = save_interval
+    try:
+        while RUNNING:
+            start = time.perf_counter()
+            db.runOneLoop(heartbeat_interval)
+            end = time.perf_counter()
+            distribute_output()
+
+            save_timer -= heartbeat_interval
+            if save_timer <= 0:
+                save_timer = save_interval
+                # save the game state
+                runSave()
+                
+            elapsed = end - start
+            if elapsed < heartbeat_interval:
+                await asyncio.sleep(heartbeat_interval - elapsed)
+            else:
+                # we still await in order to prevent blocking.
+                await asyncio.sleep(0)
+        # If we reached here, the while loop terminated
+        # gracefully and we should do a final save dump.
+        runSave()
+    except asyncio.CancelledError:
+        pass
+    except Exception as e:
+        print(f"Game loop error: {e}")
+        raise e
+    finally:
+        print("Game loop stopped.")

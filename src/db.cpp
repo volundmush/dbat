@@ -2945,6 +2945,7 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         auto desc = new descriptor_data();
         STATE(desc) = CON_LOGIN;
         desc->character = ch.get();
+        ch->desc = desc;
         desc->account = &acc;
         desc->id = character_id;
         desc->conns.emplace(connection_id, ip);

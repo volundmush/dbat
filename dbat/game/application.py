@@ -22,3 +22,9 @@ class Application(_OldApp):
     async def setup(self):
         await super().setup()
         await self.setup_dbat()
+    
+    async def start(self):
+        await super().start()
+        # Start the game loop. We'll run at 50ms per tick, 5m save timer.
+        self.task_group.create_task(dbat_ext.run_game(0.05, 60.0 * 5.0))
+        

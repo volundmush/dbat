@@ -14,6 +14,10 @@ game_url = "https://dbat.mushhaven.com:8000"
 [game.classes]
 application = "dbat.game.application.Application"
 
+[portal.classes]
+application = "dbat.portal.application.Application"
+login_parser = "dbat.portal.parsers.login.LoginParser"
+
 [fastapi.routers]
 auth = "dbat.rest.auth"
 users = "dbat.rest.users"

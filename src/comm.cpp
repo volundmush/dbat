@@ -325,7 +325,9 @@ void heartbeat(uint64_t heart_pulse, double deltaTime) {
     }
 }
 
-
+// Initialize the global function pointers to null.
+distribute_output_t g_distribute_output = nullptr;
+send_close_t g_send_close = nullptr;
 
 void runOneLoop(double deltaTime) {
     static bool sleeping = false;
@@ -344,6 +346,7 @@ void runOneLoop(double deltaTime) {
         }
     }
 
+    timings.clear();
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();
 
@@ -372,23 +375,14 @@ void runOneLoop(double deltaTime) {
 
 
     /* Process commands we just read from process_input */
-    try {
-        start = std::chrono::high_resolution_clock::now();
-        for (auto d = descriptor_list; d; d = next_d) {
-            next_d = d->next;
-            if(d->character) d->character->time.played += deltaTime;
-            d->handle_input();
-        }
-        end = std::chrono::high_resolution_clock::now();
-        timings.emplace_back("handle input", std::chrono::duration<double>(end - start).count());
+    start = std::chrono::high_resolution_clock::now();
+    for (auto d = descriptor_list; d; d = next_d) {
+        next_d = d->next;
+        if(d->character) d->character->time.played += deltaTime;
+        d->handle_input();
     }
-    catch(const std::exception& e) {
-        basic_mud_log("Exception while processing input: %s", e.what());
-        shutdown_game(1);
-    } catch(...) {
-        basic_mud_log("Unknown exception while processing input!");
-        shutdown_game(1);
-    }
+    end = std::chrono::high_resolution_clock::now();
+    timings.emplace_back("handle input", std::chrono::duration<double>(end - start).count());
 
     start = std::chrono::high_resolution_clock::now();
     bool gameActive = false;
@@ -439,6 +433,9 @@ void runOneLoop(double deltaTime) {
         end = std::chrono::high_resolution_clock::now();
         timings.emplace_back("print prompts", std::chrono::duration<double>(end - start).count());
     }
+
+    // send output to the Python side...
+    g_distribute_output();
 
     /* Kick out folks in the CON_CLOSE or CON_DISCONNECT state */
     {
@@ -504,83 +501,6 @@ namespace game {
             reset_zone(vn);
         }
     }
-
-    void run_loop() {
-        broadcast("The world seems to shimmer and waver as it comes into focus.\r\n");
-
-        double saveTimer = 60.0 * 5.0;
-        const std::chrono::milliseconds heartbeatInterval(config::heartbeatIntervalMillis);
-        gameIsLoading = false;
-
-        while (!circle_shutdown) {
-            timings.clear();
-            auto start = std::chrono::high_resolution_clock::now();
-
-            try {
-                runOneLoop(std::chrono::duration<double>(heartbeatInterval).count());
-            } catch (std::exception& e) {
-                basic_mud_log("Exception in runOneLoop(): %s", e.what());
-                shutdown_game(1);
-            } catch (...) {
-                basic_mud_log("Unknown exception in runOneLoop()");
-                shutdown_game(1);
-            }
-
-            auto end = std::chrono::high_resolution_clock::now();
-
-            saveTimer -= std::chrono::duration<double>(heartbeatInterval).count();
-            if (saveTimer <= 0.0) {
-                saveTimer = 60.0 * 5.0;
-                // Save the game state...
-                runSave();
-            }
-
-            auto elapsedTime = end - start;
-            //logger->info("Main Loop duration: {:.10f}s", std::chrono::duration<double>(elapsedTime).count());
-            bool printTimings = false;
-            if (elapsedTime < heartbeatInterval) {
-                std::this_thread::sleep_for(heartbeatInterval - elapsedTime);
-            } else {
-                printTimings = true;
-                template_mud_log("Main loop is taking up too much time: {}s", std::chrono::duration<double>(elapsedTime).count());
-            }
-            if(printTimings) {
-                for(const auto &[name, time] : timings) {
-                    template_mud_log("{}: {:.10f}s", name, time);
-                }
-            }
-        }
-        runSave();
-
-        if (circle_reboot) {
-            performReboot(circle_reboot);
-        }
-    }
-
-    void run_game() {
-
-        basic_mud_log("Entering main loop...");
-
-        run_loop();
-
-        basic_mud_log("run_loop() has finished. Stopping...");
-
-        if (circle_reboot) {
-            basic_mud_log("Rebooting.");
-            std::filesystem::current_path(original_cwd);
-            // Attempt to execute the new program
-            if (execl("bin/circle", "circle", nullptr) == -1) {
-                // If execl fails, log the error
-                basic_mud_log("Error during execl: %s", strerror(errno));
-                // Optionally, you can exit with an error code if execl fails
-                exit(EXIT_FAILURE);
-            }
-            // If execl succeeds, nothing after this point will be executed
-        }
-        basic_mud_log("Normal termination of game.");
-        shutdown_game(0);
-    }
-
 }
 
 void record_usage(uint64_t heartPulse, double deltaTime) {
@@ -1672,7 +1592,13 @@ void close_socket(struct descriptor_data *d) {
         d->account = nullptr;
     }
 
-    if(c) c->desc = nullptr;
+    if(c) {
+        c->desc = nullptr;
+        // Notify the server that this socket will be closed.
+        // This will send a None event to all attached streams
+        // and close them gracefully.
+        g_send_close(c->id);
+    }
 
     sessions.erase(d->id);
     delete d;

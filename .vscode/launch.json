@@ -2,26 +2,44 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "DBAT: (GDB) Server",
+            "name": "DBAT: (GDB) server",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/circle",
+            "program": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-m", "mudforge.game"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [{
-                "name": "LSAN_OPTIONS",
-                "value": "verbosity=1:log_threads=1"
-            }],
+            "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb",
             "setupCommands": [
                 {
-                    "description": "Enable pretty-printing for gdb",
+                    "description": "Enable pretty printing",
                     "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
-            ],
+            ]
+        },
+        {
+            "name": "DBAT: (GDB) portal",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-m", "mudforge.portal"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
             "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         },
         {
             "name": "DBAT: (GDB) Migrate",
