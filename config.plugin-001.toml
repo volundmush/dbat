@@ -10,3 +10,13 @@ telnet = 1280
 telnets = 1281
 ssh = 1282
 game_url = "https://dbat.mushhaven.com:8000"
+
+[game.classes]
+application = "dbat.game.application.Application"
+
+[fastapi.routers]
+auth = "dbat.rest.auth"
+users = "dbat.rest.users"
+# Disabled
+characters = ""
+system = ""

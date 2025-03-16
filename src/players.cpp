@@ -21,7 +21,7 @@
 #include "dbat/filter.h"
 
 
-std::map<int64_t, player_data> players;
+
 
 
 long get_id_by_name(const char *name) {

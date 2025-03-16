@@ -3,6 +3,7 @@
 
 using json = nlohmann::json;
 
-std::string jdump(const nlohmann::json& j);
-nlohmann::json jparse(const std::string& s);
-std::string jdump_pretty(const nlohmann::json& j);
+std::string jdumps(const json& j);
+json jloads(const std::string& s);
+std::string jdumps_pretty(const json& j);
+json jobject();

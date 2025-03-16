@@ -151,25 +151,7 @@ constexpr int MAX_SCRIPT_DEPTH = 10;          /* maximum depth triggers can
 constexpr int SCRIPT_ERROR_CODE = -9999999;   /* this shouldn't happen too often */
 
 /* one line of the trigger */
-struct cmdlist_element {
-    char *cmd{};                /* one line of a trigger */
-    struct cmdlist_element *original{};
-    struct cmdlist_element *next{};
-};
 
-struct trig_var_data {
-    char *name{};                /* name of variable  */
-    char *value{};                /* value of variable */
-    long context{};                /* 0: global context */
-    struct trig_var_data *next{};
-};
-
-/* The event data for the wait command */
-struct wait_event_data {
-    struct trig_data *trigger{};
-    void *go{};
-    int type{};
-};
 
 /* typedefs that the dg functions rely on */
 typedef struct index_data index_data;

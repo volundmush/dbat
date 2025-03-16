@@ -306,6 +306,8 @@ extern std::map<vnum, account_data> accounts;
 extern std::map<shop_vnum, struct shop_data> shop_index;
 extern std::map<guild_vnum, struct guild_data> guild_index;
 
+extern std::map<int64_t, player_data> players;
+
 int nextID();
 bool isUID(const std::string& uid);
 std::shared_ptr<unit_data> resolveUID(const std::string& uid);

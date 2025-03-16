@@ -84,7 +84,7 @@ std::map<zone_vnum, struct zone_data> zone_table;    /* zone table			 */
 std::map<trig_vnum, struct index_data> trig_index; /* index table for triggers      */
 struct trig_data *trigger_list = nullptr;  /* all attached triggers */
 
-
+std::map<int64_t, player_data> players;
 
 std::vector<std::weak_ptr<char_data>> getAllCharacters() {
     std::vector<std::weak_ptr<char_data>> out;

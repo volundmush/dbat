@@ -94,5 +94,6 @@
         "expected": "cpp",
         "format": "cpp",
         "stdfloat": "cpp"
-    }
+    },
+    "terminal.integrated.sendKeybindingsToShell": true
 }

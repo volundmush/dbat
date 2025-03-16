@@ -1,13 +1,17 @@
 #include "dbat/json.h"
 
-std::string jdump(const nlohmann::json& j) {
-    return j.dump(-1, ' ', false, nlohmann::json::error_handler_t::ignore);
+std::string jdumps(const json& j) {
+    return j.dump(-1, ' ', false, json::error_handler_t::ignore);
 }
 
-std::string jdump_pretty(const nlohmann::json& j) {
-    return j.dump(4, ' ', false, nlohmann::json::error_handler_t::ignore);
+std::string jdumps_pretty(const json& j) {
+    return j.dump(4, ' ', false, json::error_handler_t::ignore);
 }
 
-nlohmann::json jparse(const std::string& s) {
-    return nlohmann::json::parse(s);
+json jloads(const std::string& s) {
+    return json::parse(s);
+}
+
+json jobject() {
+    return json::object();
 }

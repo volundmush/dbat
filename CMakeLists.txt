@@ -65,7 +65,6 @@ set(BUILD_TESTING OFF)
 
 set(CIRCLE_LINK_LIBRARIES
         fmt::fmt ${Boost_LIBRARIES} ${ZLIB_LIBRARIES}
-        #Luau.VM Luau.Common Luau.Compiler
         sodium
         effolkronium_random
         CACHE INTERNAL "Include libraries for CIRCLE"

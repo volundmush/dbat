@@ -277,7 +277,7 @@ static void performReboot(int mode) {
         j["descriptors"].push_back(jd);
     }
 
-    fp << jdump(j) << std::endl;
+    fp << jdumps(j) << std::endl;
     fp.close();
 }
 

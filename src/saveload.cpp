@@ -33,7 +33,7 @@ static void dump_to_file(const std::filesystem::path &loc, const std::string &na
     out.push(boost::iostreams::gzip_compressor());
     out.push(file);
     std::ostream outStream(&out);
-    outStream << jdump(data);
+    outStream << jdumps(data);
 
     //auto endTime = std::chrono::high_resolution_clock::now();
     //auto duration = std::chrono::duration<double>(endTime - startTime).count();
@@ -99,21 +99,21 @@ void from_json(const json& j, std::bitset<N>& bs) {
     }
 }
 
-static void to_json(json& j, const mob_special_data& m) {
+void to_json(json& j, const mob_special_data& m) {
     if(m.attack_type) j["attack_type"] = m.attack_type;
     if(m.default_pos != POS_STANDING) j["default_pos"] = m.default_pos;
     if(m.damnodice) j["damnodice"] = m.damnodice;
     if(m.damsizedice) j["damsizedice"] = m.damsizedice;
 }
 
-static void from_json(const json& j, mob_special_data& m) {
+void from_json(const json& j, mob_special_data& m) {
     if(j.contains("attack_type")) m.attack_type = j["attack_type"];
     if(j.contains("default_pos")) m.default_pos = j["default_pos"];
     if(j.contains("damnodice")) m.damnodice = j["damnodice"];
     if(j.contains("damsizedice")) m.damsizedice = j["damsizedice"];
 }
 
-static void to_json(json& j, const time_data &t) {
+void to_json(json& j, const time_data &t) {
     if(t.birth) j["birth"] = t.birth;
     if(t.created) j["created"] = t.created;
     if(t.maxage) j["maxage"] = t.maxage;
@@ -122,7 +122,7 @@ static void to_json(json& j, const time_data &t) {
     if(t.secondsAged != 0.0) j["secondsAged"] = t.secondsAged;
 }
 
-static void from_json(const json& j, time_data &t) {
+void from_json(const json& j, time_data &t) {
     if(j.contains("birth")) t.birth = j["birth"];
     if(j.contains("created")) t.created = j["created"];
     if(j.contains("maxage")) t.maxage = j["maxage"];
@@ -132,7 +132,7 @@ static void from_json(const json& j, time_data &t) {
 }
 
 
-static void to_json(json& j, const time_info_data &t) {
+void to_json(json& j, const time_info_data &t) {
     j["remainder"] = t.remainder;
     j["seconds"] = t.seconds;
     j["minutes"] = t.minutes;
@@ -142,7 +142,7 @@ static void to_json(json& j, const time_info_data &t) {
     j["year"] = t.year;
 }
 
-static void from_json(const json& j, time_info_data &t) {
+void from_json(const json& j, time_info_data &t) {
     if(j.contains("remainder")) t.remainder = j["remainder"];
     if(j.contains("seconds")) t.seconds = j["seconds"];
     if(j.contains("minutes")) t.minutes = j["minutes"];
@@ -152,14 +152,14 @@ static void from_json(const json& j, time_info_data &t) {
     if(j.contains("year")) t.year = j["year"];
 }
 
-static void to_json(json& j, const weather_data &w) {
+void to_json(json& j, const weather_data &w) {
     j["pressure"] = w.pressure;
     j["change"] = w.change;
     j["sky"] = w.sky;
     j["sunlight"] = w.sunlight;
 }
 
-static void from_json(const json& j, weather_data &w) {
+void from_json(const json& j, weather_data &w) {
     if(j.contains("pressure")) w.pressure = j["pressure"];
     if(j.contains("change")) w.change = j["change"];
     if(j.contains("sky")) w.sky = j["sky"];
@@ -168,7 +168,7 @@ static void from_json(const json& j, weather_data &w) {
 
 
 // zone_data and reset_com serialize/deserialize...
-static void to_json(json& j, const reset_com& r) {
+void to_json(json& j, const reset_com& r) {
     std::string cmd;
     cmd.push_back(r.command);
     j["command"] = cmd;
@@ -191,7 +191,7 @@ static void to_json(json& j, const reset_com& r) {
         j["sarg2"] = r.sarg2;
 }
 
-static void from_json(const json& j, reset_com& r) {
+void from_json(const json& j, reset_com& r) {
     if(j.contains("command"))
         r.command = j["command"].get<std::string>()[0];
     if(j.contains("if_flag"))
@@ -212,7 +212,7 @@ static void from_json(const json& j, reset_com& r) {
         r.sarg2 = j["sarg2"];
 }
 
-static void to_json(json& j, const zone_data& z) {
+void to_json(json& j, const zone_data& z) {
     j["number"] = z.number;
     if(z.name && std::strlen(z.name))
         j["name"] = z.name;
@@ -245,7 +245,7 @@ static void to_json(json& j, const zone_data& z) {
     }
 }
 
-static void from_json(const json& j, zone_data& z) {
+void from_json(const json& j, zone_data& z) {
     if(j.contains("number"))
         z.number = j["number"];
     if(j.contains("name"))
@@ -300,13 +300,13 @@ static void dump_zones(const std::filesystem::path &loc) {
 
 // affect_t serialize/deserialize...
 
-static void to_json(json& j, const affect_t& a) {
+void to_json(json& j, const affect_t& a) {
     if(a.location) j["location"] = a.location;
     if(a.modifier != 0.0) j["modifier"] = a.modifier;
     if(a.specific) j["specific"] = a.specific;
 }
 
-static void from_json(const json& j, affect_t& a) {
+void from_json(const json& j, affect_t& a) {
     if(j.contains("location")) a.location = j.at("location");
     if(j.contains("modifier")) a.modifier = j.at("modifier");
     if(j.contains("specific")) a.specific = j.at("specific");
@@ -314,7 +314,7 @@ static void from_json(const json& j, affect_t& a) {
 
 
 // account_data serialize/deserialize...
-static void to_json(json& j, const account_data& a) {
+void to_json(json& j, const account_data& a) {
     if(a.vn != NOTHING)
         j["vn"] = a.vn;
     if(!a.name.empty())
@@ -348,7 +348,7 @@ static void to_json(json& j, const account_data& a) {
     j["characters"] = a.characters;
 }
 
-static void from_json(const json& j, account_data& a) {
+void from_json(const json& j, account_data& a) {
     if(j.contains("vn"))
         a.vn = j["vn"];
     if(j.contains("name"))
@@ -403,7 +403,7 @@ void load_accounts(const std::filesystem::path& loc) {
 }
 
 // Triggers serialize/deserialize...
-static void to_json(json& j, const trig_var_data& t) {
+void to_json(json& j, const trig_var_data& t) {
     if(t.name && std::strlen(t.name))
         j["name"] = t.name;
     if(t.value && std::strlen(t.value))
@@ -412,7 +412,7 @@ static void to_json(json& j, const trig_var_data& t) {
         j["context"] = t.context;
 }
 
-static void from_json(const json& j, trig_var_data& t) {
+void from_json(const json& j, trig_var_data& t) {
     if(j.contains("name"))
         t.name = strdup(j["name"].get<std::string>().c_str());
     if(j.contains("value"))
@@ -439,7 +439,7 @@ void deserializeVars(struct trig_var_data **vd, const json &j) {
     }
 }
 
-static void to_json(json& j, const trig_data& t) {
+void to_json(json& j, const trig_data& t) {
     if(t.id != NOTHING) {
         // we're serializing an instance.
         j["vn"] = t.vn;
@@ -474,7 +474,7 @@ static void to_json(json& j, const trig_data& t) {
     }
 }
 
-static void from_json(const json& j, trig_data& t) {
+void from_json(const json& j, trig_data& t) {
     if(j.contains("id")) {
         // we're deserializing an instance.
         t.vn = j["vn"].get<int>();
@@ -611,17 +611,17 @@ static void dump_dgscripts(const std::filesystem::path &loc) {
 }
 
 // shops serialize/deserialize...
-static void to_json(json& j, const shop_buy_data& b) {
+void to_json(json& j, const shop_buy_data& b) {
     if(b.type) j["type"] = b.type;
     if(!b.keywords.empty()) j["keywords"] = b.keywords;
 }
 
-static void from_json(const json& j, shop_buy_data& b) {
+void from_json(const json& j, shop_buy_data& b) {
     if(j.contains("type")) b.type = j["type"];
     if(j.contains("keywords")) b.keywords = j["keywords"];
 }
 
-static void to_json(json&j, const shop_data& s) {
+void to_json(json&j, const shop_data& s) {
     j["vnum"] = s.vnum;
     if(!s.producing.empty()) j["producing"] = s.producing;
     if(s.profit_buy) j["profit_buy"] = s.profit_buy;
@@ -647,7 +647,7 @@ static void to_json(json&j, const shop_data& s) {
     if(s.lastsort) j["lastsort"] = s.lastsort;
 }
 
-static void from_json(const json& j, shop_data& s) {
+void from_json(const json& j, shop_data& s) {
     if(j.contains("vnum")) s.vnum = j["vnum"];
     if(j.contains("producing")) s.producing = j["producing"].get<std::vector<int>>();
     if(j.contains("profit_buy")) s.profit_buy = j["profit_buy"];
@@ -700,7 +700,7 @@ static void dump_shops(const std::filesystem::path &loc) {
 }
 
 // guilds serialize/deserialize...
-static void to_json(json& j, const guild_data& g) {
+void to_json(json& j, const guild_data& g) {
     j["vnum"] = g.vnum;
     if(!g.skills.empty()) j["skills"] = g.skills;
     if(!g.feats.empty()) j["feats"] = g.feats;
@@ -714,7 +714,7 @@ static void to_json(json& j, const guild_data& g) {
     if(g.close) j["close"] = g.close;
 }
 
-static void from_json(const json& j, guild_data& g) {
+void from_json(const json& j, guild_data& g) {
     if(j.contains("vnum")) g.vnum = j["vnum"];
     if(j.contains("skills")) {
         auto skills = j["skills"].get<std::vector<int>>();
@@ -794,8 +794,18 @@ void dump_globaldata(const std::filesystem::path &loc) {
     dump_to_file(loc, "globaldata.json", j);
 }
 
+void to_json(json& j, const struct extra_descr_data& e) {
+    if(e.keyword && strlen(e.keyword)) j["keyword"] = e.keyword;
+    if(e.description && strlen(e.description)) j["description"] = e.description;
+}
+
+void from_json(const json& j, struct extra_descr_data& e) {
+    if(j.contains("keyword")) e.keyword = strdup(j["keyword"].get<std::string>().c_str());
+    if(j.contains("description")) e.description = strdup(j["description"].get<std::string>().c_str());
+}
+
 // unit_data serialize/deserialize...
-static void to_json(json& j, const unit_data& u) {
+void to_json(json& j, const unit_data& u) {
     if(u.vn != NOTHING) j["vn"] = u.vn;
     if(u.id != NOTHING) {
         // an instance or room.
@@ -816,16 +826,13 @@ static void to_json(json& j, const unit_data& u) {
         if(u.short_description && strlen(u.short_description)) j["short_description"] = u.short_description;
         for(auto ex = u.ex_description; ex; ex = ex->next) {
             if(ex->keyword && strlen(ex->keyword) && ex->description && strlen(ex->description)) {
-                json p;
-                p.push_back(ex->keyword);
-                p.push_back(ex->description);
-                j["ex_description"].push_back(p);
+                j["ex_description"].push_back(*ex);
             }
         }
     }
 }
 
-static void from_json(const json& j, unit_data& u) {
+void from_json(const json& j, unit_data& u) {
     if(j.contains("vn")) u.vn = j["vn"];
     if(j.contains("id")) u.id = j["id"];
     if(j.contains("generation")) u.generation = j["generation"];
@@ -868,15 +875,14 @@ static void from_json(const json& j, unit_data& u) {
         auto &e = j["ex_description"];
         for(auto ex = e.rbegin(); ex != e.rend(); ex++) {
             auto new_ex = new extra_descr_data();
-            new_ex->keyword = strdup((*ex)[0].get<std::string>().c_str());
-            new_ex->description = strdup((*ex)[1].get<std::string>().c_str());
+            ex->get_to(*new_ex);
             new_ex->next = u.ex_description;
             u.ex_description = new_ex;
         }
     }
 }
 
-static void to_json(json& j, const room_direction_data &e) {
+void to_json(json& j, const room_direction_data &e) {
     if(e.general_description && strlen(e.general_description)) j["general_description"] = e.general_description;
     if(e.keyword && strlen(e.keyword)) j["keyword"] = e.keyword;
     if(e.exit_info) {
@@ -901,7 +907,7 @@ static void to_json(json& j, const room_direction_data &e) {
     if(e.totalfailroom > 0) j["totalfailroom"] = e.totalfailroom;
 }
 
-static void from_json(const json& j, room_direction_data &e) {
+void from_json(const json& j, room_direction_data &e) {
     if(j.contains("general_description")) e.general_description = strdup(j["general_description"].get<std::string>().c_str());
     if(j.contains("keyword")) e.keyword = strdup(j["keyword"].get<std::string>().c_str());
     if(j.contains("exit_info")) e.exit_info = j["exit_info"].get<int16_t>();
@@ -917,7 +923,7 @@ static void from_json(const json& j, room_direction_data &e) {
     if(j.contains("totalfailroom")) e.totalfailroom = j["totalfailroom"];
 }
 
-static void to_json(json& j, const room_data& r) {
+void to_json(json& j, const room_data& r) {
     // we need to call the to_json for unit_data...
     to_json(j, static_cast<const unit_data&>(r));
     
@@ -940,7 +946,7 @@ static void to_json(json& j, const room_data& r) {
     }
 }
 
-static void from_json(const json& j, room_data& r) {
+void from_json(const json& j, room_data& r) {
     // call the from_json of unit_data...
     from_json(j, static_cast<unit_data&>(r));
 
@@ -1026,7 +1032,7 @@ static void dump_rooms(const std::filesystem::path &loc) {
 
 // obj_data serialize/deserialize...
 
-static void to_json(json& j, const obj_data& o) {
+void to_json(json& j, const obj_data& o) {
     to_json(j, static_cast<const unit_data&>(o));
 
     for(auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++) {
@@ -1087,7 +1093,7 @@ static void to_json(json& j, const obj_data& o) {
     }
 }
 
-static void from_json(const json& j, obj_data& o) {
+void from_json(const json& j, obj_data& o) {
     from_json(j, static_cast<unit_data&>(o));
 
     if(j.contains("value")) {
@@ -1265,29 +1271,29 @@ static void dump_item_prototypes(const std::filesystem::path &loc) {
 }
 
 // char_data serialize/deserialize...
-static void to_json(json& j, const skill_data& s) {
+void to_json(json& j, const skill_data& s) {
     if(s.level) j["level"] = s.level;
     if(s.perfs) j["perfs"] = s.perfs;
 }
 
-static void from_json(const json& j, skill_data& s) {
+void from_json(const json& j, skill_data& s) {
     if(j.contains("level")) s.level = j["level"];
     if(j.contains("perfs")) s.perfs = j["perfs"];
 }
 
-static void to_json(json& j, const alias_data& a) {
+void to_json(json& j, const alias_data& a) {
     if(!a.name.empty()) j["name"] = a.name;
     if(!a.replacement.empty()) j["replacement"] = a.replacement;
     if(a.type) j["type"] = a.type;
 }
 
-static void from_json(const json& j, alias_data& a) {
+void from_json(const json& j, alias_data& a) {
     if(j.contains("name")) a.name = j["name"];
     if(j.contains("replacement")) a.replacement = j["replacement"];
     if(j.contains("type")) a.type = j["type"];
 }
 
-static void to_json(json& j, const trans_data& t) {
+void to_json(json& j, const trans_data& t) {
     if(t.timeSpentInForm != 0.0) j["timeSpentInForm"] = t.timeSpentInForm;
     j["visible"] = t.visible;
     j["limitBroken"] = t.limitBroken;
@@ -1297,7 +1303,7 @@ static void to_json(json& j, const trans_data& t) {
     if(t.description && strlen(t.description)) j["description"] = t.description;
 }
 
-static void from_json(const json& j, trans_data& t) {
+void from_json(const json& j, trans_data& t) {
     if(j.contains("timeSpentInForm")) t.timeSpentInForm = j["timeSpentInForm"];
     if(j.contains("visible")) t.visible = j["visible"];
     if(j.contains("limitBroken")) t.limitBroken = j["limitBroken"];
@@ -1310,21 +1316,21 @@ static void from_json(const json& j, trans_data& t) {
     }
 }
 
-static void to_json(json& j, const affected_type& a) {
+void to_json(json& j, const affected_type& a) {
     to_json(j, static_cast<const affect_t&>(a));
     if(a.type) j["type"] = a.type;
     if(a.duration) j["duration"] = a.duration;
     if(a.bitvector) j["bitvector"] = a.bitvector;
 }
 
-static void from_json(const json& j, affected_type& a) {
+void from_json(const json& j, affected_type& a) {
     from_json(j, static_cast<affect_t&>(a));
     if(j.contains("type")) a.type = j["type"];
     if(j.contains("duration")) a.duration = j["duration"];
     if(j.contains("bitvector")) a.bitvector = j["bitvector"];
 }
 
-static void to_json(json& j, const char_data& c) {
+void to_json(json& j, const char_data& c) {
     to_json(j, static_cast<const unit_data&>(c));
 
     for(auto &[id, train] : c.trains) {
@@ -1616,7 +1622,7 @@ static void to_json(json& j, const char_data& c) {
 
 }
 
-static void from_json(const json& j, char_data& c) {
+void from_json(const json& j, char_data& c) {
     from_json(j, static_cast<unit_data&>(c));
 
     if(j.contains("trains")) {
@@ -1992,7 +1998,7 @@ void load_npc_prototypes(const std::filesystem::path& loc) {
 }
 
 // players data serialize/deserialize...
-static void to_json(json& j, const player_data& p) {
+void to_json(json& j, const player_data& p) {
     j["id"] = p.id;
     j["name"] = p.name;
     if(p.account) j["account"] = p.account->vn;
@@ -2018,7 +2024,7 @@ static void to_json(json& j, const player_data& p) {
     }
 }
 
-static void from_json(const json& j, player_data& p) {
+void from_json(const json& j, player_data& p) {
     p.id = j["id"];
     p.name = j["name"].get<std::string>();
     if(j.contains("account")) {

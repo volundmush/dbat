@@ -106,6 +106,26 @@ struct player_data {
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
 };
 
+struct cmdlist_element {
+    char *cmd{};                /* one line of a trigger */
+    struct cmdlist_element *original{};
+    struct cmdlist_element *next{};
+};
+
+struct trig_var_data {
+    char *name{};                /* name of variable  */
+    char *value{};                /* value of variable */
+    long context{};                /* 0: global context */
+    struct trig_var_data *next{};
+};
+
+/* The event data for the wait command */
+struct wait_event_data {
+    struct trig_data *trigger{};
+    void *go{};
+    int type{};
+};
+
 /* structure for triggers */
 struct trig_data : std::enable_shared_from_this<trig_data> {
     trig_vnum vn{NOTHING};                    /* trigger's rnum                  */
