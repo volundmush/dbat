@@ -16,9 +16,8 @@ from libcpp.optional cimport optional
 cdef extern from "dbat/structs.h":
     cdef cppclass descriptor_data:
         int64_t id
-        string output
+        string processed_output
         list[string] raw_input_queue
-        list[string] input_queue
         void onConnectionLost(int64_t connID)
         void onConnectionClosed(int64_t connID)
 

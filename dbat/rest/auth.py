@@ -69,6 +69,6 @@ async def refresh_token(ref: Annotated[RefreshTokenModel, Body()]):
         )
 
     # Verify user exists. This will raise if not.
-    user = await users_db.find_user(sub)
+    user = users_db.find_user(sub)
 
     return TokenResponse.from_str(sub)

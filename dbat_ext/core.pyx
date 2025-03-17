@@ -23,6 +23,7 @@ def load_db():
     """
     Wraps the C++ boot_db_new() function.
     """
+    db.load_config()
     cur_path = Path().absolute()
     os.chdir("lib")
     db.init()
@@ -320,11 +321,11 @@ cdef void distribute_output() noexcept:
     hub = mudforge.EVENT_HUB
     for sess in db.sessions:
         desc = sess.second
-        if desc.output.empty():
+        if desc.processed_output.empty():
             continue
-        event = CircleText(text=desc.output)
+        event = CircleText(text=desc.processed_output.decode("utf-8"))
         hub.send_nowait(sess.first, event)
-        desc.output.clear()
+        desc.processed_output.clear()
 
 cdef void send_close(int character_id) noexcept:
     """

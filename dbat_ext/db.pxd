@@ -15,6 +15,7 @@ from libcpp.optional cimport optional
 cimport structs
 
 cdef extern from "dbat/db.h":
+    void load_config()
     map[int, shared_ptr[structs.room_data]] world
     structs.room_data* get_room(int vn)
 

@@ -85,6 +85,14 @@ class AccountData(BaseModel):
     slots: int = 3
     customs: typing.List[str] = Field(default_factory=list)
     characters: typing.List[int] = Field(default_factory=list)
+    
+    @property
+    def admin_level(self) -> int:
+        return self.adminLevel
+
+    @property
+    def id(self):
+        return self.vn
 
 class AliasData(BaseModel):
     name: str = ""

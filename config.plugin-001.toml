@@ -17,6 +17,9 @@ application = "dbat.game.application.Application"
 [portal.classes]
 application = "dbat.portal.application.Application"
 login_parser = "dbat.portal.parsers.login.LoginParser"
+user_parser = "dbat.portal.parsers.user.UserParser"
+character_parser = "dbat.portal.parsers.character.CharacterParser"
+admin_parser = "dbat.portal.parsers.admin.AdminParser"
 
 [fastapi.routers]
 auth = "dbat.rest.auth"

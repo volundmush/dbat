@@ -1518,7 +1518,8 @@ int process_output(struct descriptor_data *t) {
         write_to_output(t->snoop_by, "\nvvvvvvvvvvvvv[Snoop]vvvvvvvvvvvvv\n%s\n^^^^^^^^^^^^^[Snoop]^^^^^^^^^^^^^\n",
                         t->output.c_str());
 
-    t->output += out;
+    t->processed_output += out;
+    t->output.clear();
 
     return (result);
 }

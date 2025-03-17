@@ -10,8 +10,8 @@ from mudforge.rest.utils import (
 )
 
 from dbat.rest.utils import get_current_user
-from dbat.models.game import AccountData
-from dbat.db import users as users_db
+from dbat.models.game import AccountData, PlayerData
+from dbat.db import users as users_db, characters as character_db
 
 router = APIRouter()
 
@@ -36,6 +36,33 @@ async def get_user(
             status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
         )
 
-    found = await users_db.get_user(user_id)
+    found = users_db.get_user(user_id)
     return found
 
+@router.get("/name/{user_name}", response_model=AccountData)
+async def get_user(
+    user_name: str, user: Annotated[AccountData, Depends(get_current_user)]
+):
+    if user.adminLevel < 1 and user.name.upper() != user_name.upper():
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
+        )
+
+    found = users_db.find_user(user_name)
+    return found
+
+
+@router.get("/{user_id}/characters", response_model=typing.List[PlayerData])
+async def get_user_characters(
+    user_id: int, user: Annotated[AccountData, Depends(get_current_user)]
+):
+    if user.adminLevel < 1 and user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
+        )
+    
+    if user_id != user.id:
+        user = users_db.get_user(user_id)
+
+    found = character_db.for_user(user)
+    return streaming_list(found)

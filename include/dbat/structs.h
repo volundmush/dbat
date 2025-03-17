@@ -1222,6 +1222,7 @@ struct descriptor_data {
     std::string last_input;        /* the last input			*/
     std::list<std::string> raw_input_queue, input_queue;
     std::string output;        /* ptr to the current output buffer	*/
+    std::string processed_output;
     std::list<std::string> history;        /* History of commands, for ! mostly.	*/
     struct char_data *character{};    /* linked to char			*/
     struct char_data *original{};    /* original char if switched		*/
