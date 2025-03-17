@@ -320,7 +320,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_CHILL_TOUCH:
             af[0].location = APPLY_CATTR_BASE;
-            af[0].specific = static_cast<int>(CharAttribute::Strength);
+            af[0].specific = static_cast<int>(CharAttribute::strength);
             af[0].duration = 24;
             af[0].modifier = -1;
             accum_duration = true;
@@ -329,7 +329,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_MAGE_ARMOR:
             af[0].location = APPLY_COMBAT_BASE;
-            af[0].specific = static_cast<int>(ComStat::Armor);
+            af[0].specific = static_cast<int>(ComStat::armor);
             af[0].modifier = 40;
             af[0].duration = 1 * GET_LEVEL(ch);
             accum_duration = false;
@@ -338,7 +338,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_BLESS:
             af[0].location = APPLY_COMBAT_MULT;
-            af[0].specific = static_cast<int>(ComStat::Accuracy);
+            af[0].specific = static_cast<int>(ComStat::accuracy);
             af[0].modifier = 2;
             af[0].duration = 6;
 
@@ -353,13 +353,13 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
             }
 
             af[0].location = APPLY_COMBAT_MULT;
-            af[0].specific = static_cast<int>(ComStat::Accuracy);
+            af[0].specific = static_cast<int>(ComStat::accuracy);
             af[0].modifier = -4;
             af[0].duration = 2;
             af[0].bitvector = AFF_BLIND;
 
             af[1].location = APPLY_COMBAT_BASE;
-            af[1].specific = static_cast<int>(ComStat::Armor);
+            af[1].specific = static_cast<int>(ComStat::armor);
             af[1].modifier = -4;
             af[1].duration = 2;
             af[1].bitvector = AFF_BLIND;
@@ -370,7 +370,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_BANE:
             af[0].location = APPLY_COMBAT_MULT;
-            af[0].specific = static_cast<int>(ComStat::Accuracy);
+            af[0].specific = static_cast<int>(ComStat::accuracy);
             af[0].duration = 1 + (level / 2);
             af[0].modifier = -1;
             af[0].bitvector = AFF_CURSE;
@@ -383,13 +383,13 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_BESTOW_CURSE:
             af[0].location = APPLY_CATTR_BASE;
-            af[0].specific = static_cast<int>(CharAttribute::Strength);
+            af[0].specific = static_cast<int>(CharAttribute::strength);
             af[0].duration = -1;
             af[0].modifier = -6;
             af[0].bitvector = AFF_CURSE;
 
             af[1].location = APPLY_COMBAT_MULT;
-            af[1].specific = static_cast<int>(ComStat::Accuracy);
+            af[1].specific = static_cast<int>(ComStat::accuracy);
             af[1].duration = -1;
             af[1].modifier = -4;
             af[1].bitvector = AFF_CURSE;
@@ -423,7 +423,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_FAERIE_FIRE:
             af[0].location = APPLY_COMBAT_BASE;
-            af[0].specific = static_cast<int>(ComStat::Armor);
+            af[0].specific = static_cast<int>(ComStat::armor);
             af[0].modifier = -1; /*should make target easier to hit */
             af[0].duration = 3;
             accum_duration = false;
@@ -446,7 +446,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
             af[0].duration = 12 + (level / 4);
             af[0].modifier = 4;
             af[0].location = APPLY_COMBAT_BASE;
-            af[0].specific = static_cast<int>(ComStat::Armor);
+            af[0].specific = static_cast<int>(ComStat::armor);
             af[0].bitvector = AFF_INVISIBLE;
             accum_duration = true;
             to_vict = "You vanish.";
@@ -456,7 +456,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
         case SPELL_POISON:
 
             af[0].location = APPLY_CATTR_BASE;
-            af[0].specific = static_cast<int>(CharAttribute::Strength);
+            af[0].specific = static_cast<int>(CharAttribute::strength);
             af[0].duration = level;
             af[0].modifier = -2;
             af[0].bitvector = AFF_POISON;
@@ -514,7 +514,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
 
         case SPELL_BULL_STRENGTH:
             af[0].location = APPLY_CATTR_BASE;
-            af[0].specific = static_cast<int>(CharAttribute::Strength);
+            af[0].specific = static_cast<int>(CharAttribute::strength);
             af[0].duration = level;
             af[0].modifier = 1 + (rand_number(1, 4));
             accum_duration = false;
@@ -1298,7 +1298,7 @@ void mag_affectsv(int level, struct char_data *ch, struct char_data *victim,
                 return;
             }
             af[0].location = APPLY_COMBAT_MULT;
-            af[0].specific = static_cast<int>(ComStat::Accuracy);
+            af[0].specific = static_cast<int>(ComStat::accuracy);
             af[0].modifier = -1;
             af[0].duration = 2;
             af[0].bitvector = AFF_BLIND;

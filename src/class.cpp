@@ -235,7 +235,7 @@ void do_start(struct char_data *ch) {
     int punch;
     struct obj_data *obj;
 
-    ch->set(CharNum::Level, 1);
+    ch->set(CharNum::level, 1);
     ch->setExperience(1);
 
     if (IS_ANDROID(ch)) {
@@ -400,7 +400,7 @@ void do_start(struct char_data *ch) {
     }
     /* roll_real_abils(ch); */
     if (GET_GOLD(ch) <= 0) {
-        ch->set(CharMoney::Carried, dice(3, 6) * 10);
+        ch->set(CharMoney::carried, dice(3, 6) * 10);
     }
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
@@ -478,7 +478,7 @@ void do_start(struct char_data *ch) {
     advance_level(ch);
     /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
-    for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
+    for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
         if(ch->get(c) < 90) ch->set(c, 100);
     }
 
@@ -489,8 +489,8 @@ void do_start(struct char_data *ch) {
         ch->gainBaseKI(rand_number(400, 500));
     }
 
-    for(auto attr : {CharAttribute::Strength, CharAttribute::Agility, CharAttribute::Constitution,
-        CharAttribute::Intelligence, CharAttribute::Wisdom, CharAttribute::Speed}) {
+    for(auto attr : {CharAttribute::strength, CharAttribute::agility, CharAttribute::constitution,
+        CharAttribute::intelligence, CharAttribute::wisdom, CharAttribute::speed}) {
         auto val = ch->get(attr);
         ch->set(attr, std::clamp<attribute_t>(val, 8, 20));
     }
@@ -867,7 +867,7 @@ void advance_level(struct char_data *ch) {
     } else {
         ch->gainBasePL(rand_number(1, 20));
 
-        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
+        for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
             if(ch->get(c) < 250) ch->set(c, 250);
         }
 
@@ -960,17 +960,17 @@ void advance_level(struct char_data *ch) {
         int raise = false, stat_fail = 0;
         if (IS_KONATSU(ch)) {
             while (raise == false) {
-                if (auto agi = ch->get(CharAttribute::Agility, true); agi < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                if (auto agi = ch->get(CharAttribute::agility, true); agi < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (agi < 45 || GET_BONUS(ch, BONUS_CLUMSY) <= 0) {
-                        ch->mod(CharAttribute::Agility, 1);
+                        ch->mod(CharAttribute::agility, 1);
                         send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (auto speed = ch->get(CharAttribute::Speed, true); speed < 100 && raise == false && stat_fail < 2) {
+                } else if (auto speed = ch->get(CharAttribute::speed, true); speed < 100 && raise == false && stat_fail < 2) {
                     if (speed < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->mod(CharAttribute::Speed, 1);
+                        ch->mod(CharAttribute::speed, 1);
                         send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
                         raise = true;
                     } else {
@@ -985,17 +985,17 @@ void advance_level(struct char_data *ch) {
 
         else if (IS_MUTANT(ch)) {
             while (raise == false) {
-                if (auto con = ch->get(CharAttribute::Constitution, true); con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                if (auto con = ch->get(CharAttribute::constitution, true); con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (con < 45 || GET_BONUS(ch, BONUS_FRAIL) <= 0) {
-                        ch->mod(CharAttribute::Constitution, 1);
+                        ch->mod(CharAttribute::constitution, 1);
                         send_to_char(ch, "@GYou feel your constitution increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (auto speed = ch->get(CharAttribute::Speed, true); speed < 100 && raise == false && stat_fail < 2) {
+                } else if (auto speed = ch->get(CharAttribute::speed, true); speed < 100 && raise == false && stat_fail < 2) {
                     if (speed < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->mod(CharAttribute::Speed, 1);
+                        ch->mod(CharAttribute::speed, 1);
                         send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
                         raise = true;
                     } else {
@@ -1010,17 +1010,17 @@ void advance_level(struct char_data *ch) {
 
         else if (IS_HOSHIJIN(ch)) {
             while (raise == false) {
-                if (auto str = ch->get(CharAttribute::Strength, true) ; str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                if (auto str = ch->get(CharAttribute::strength, true) ; str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (str < 45 || GET_BONUS(ch, BONUS_WIMP) <= 0) {
-                        ch->mod(CharAttribute::Strength, 1);
+                        ch->mod(CharAttribute::strength, 1);
                         send_to_char(ch, "@GYou feel your strength increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (auto agi = ch->get(CharAttribute::Agility, true) ; agi < 100 && raise == false && stat_fail < 2) {
+                } else if (auto agi = ch->get(CharAttribute::agility, true) ; agi < 100 && raise == false && stat_fail < 2) {
                     if (agi < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->mod(CharAttribute::Agility, 1);
+                        ch->mod(CharAttribute::agility, 1);
                         send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
                         raise = true;
                     } else {
@@ -1050,12 +1050,12 @@ void advance_level(struct char_data *ch) {
     if ((GET_LEVEL(ch) % 10) == 0) {
         // every 10 levels...
         const std::map<int, std::pair<CharAttribute, std::string>> checks = {
-            {BONUS_BRAWNY, {CharAttribute::Strength, "@GYour muscles have grown stronger!@n"}},
-            {BONUS_SCHOLARLY, {CharAttribute::Intelligence, "@GYour mind has grown sharper!@n"}},
-            {BONUS_SAGE, {CharAttribute::Wisdom, "@GYour understanding about life has improved!@n"}},
-            {BONUS_AGILE, {CharAttribute::Agility, "@GYour body has grown more agile!@n"}},
-            {BONUS_QUICK, {CharAttribute::Speed, "@GYou feel like your speed has improved!@n"}},
-            {BONUS_STURDY, {CharAttribute::Constitution, "@GYour body feels tougher now!@n"}},
+            {BONUS_BRAWNY, {CharAttribute::strength, "@GYour muscles have grown stronger!@n"}},
+            {BONUS_SCHOLARLY, {CharAttribute::intelligence, "@GYour mind has grown sharper!@n"}},
+            {BONUS_SAGE, {CharAttribute::wisdom, "@GYour understanding about life has improved!@n"}},
+            {BONUS_AGILE, {CharAttribute::agility, "@GYour body has grown more agile!@n"}},
+            {BONUS_QUICK, {CharAttribute::speed, "@GYou feel like your speed has improved!@n"}},
+            {BONUS_STURDY, {CharAttribute::constitution, "@GYour body feels tougher now!@n"}},
         };
         for (auto& [trait, res]: checks) {
             if (GET_BONUS(ch, trait)) {
@@ -1498,27 +1498,27 @@ namespace sensei {
 
     bool isValidSenseiForRace(SenseiID id, RaceID race) {
         switch (id) {
-            case SenseiID::Sixteen:
-                return race == RaceID::Android;
-            case SenseiID::Dabura:
-                return race == RaceID::Demon;
-            case SenseiID::Tsuna:
-                return race == RaceID::Kanassan;
-            case SenseiID::Kurzak:
-                return race == RaceID::Arlian;
-            case SenseiID::Jinto:
-                return race == RaceID::Hoshijin;
+            case SenseiID::sixteen:
+                return race == RaceID::android;
+            case SenseiID::dabura:
+                return race == RaceID::demon;
+            case SenseiID::tsuna:
+                return race == RaceID::kanassan;
+            case SenseiID::kurzak:
+                return race == RaceID::arlian;
+            case SenseiID::jinto:
+                return race == RaceID::hoshijin;
             default:
-                return race != RaceID::Android;
+                return race != RaceID::android;
         }
     }
 
     static const std::vector<SenseiID> all_senseis = {
-            SenseiID::Roshi, SenseiID::Piccolo, SenseiID::Krane,
-            SenseiID::Nail, SenseiID::Bardock, SenseiID::Ginyu,
-            SenseiID::Frieza, SenseiID::Tapion, SenseiID::Sixteen,
-            SenseiID::Dabura, SenseiID::Kibito, SenseiID::Jinto,
-            SenseiID::Tsuna, SenseiID::Kurzak, SenseiID::Commoner
+            SenseiID::roshi, SenseiID::piccolo, SenseiID::krane,
+            SenseiID::nail, SenseiID::bardock, SenseiID::ginyu,
+            SenseiID::frieza, SenseiID::tapion, SenseiID::sixteen,
+            SenseiID::dabura, SenseiID::kibito, SenseiID::jinto,
+            SenseiID::tsuna, SenseiID::kurzak, SenseiID::commoner
     };
 
     bool exists(SenseiID id) {
@@ -1542,21 +1542,21 @@ namespace sensei {
     }
 
     static const std::unordered_map<SenseiID, room_vnum> sensei_start = {
-            {SenseiID::Roshi, 1130},
-            {SenseiID::Kibito, 12098},
-            {SenseiID::Nail, 11683},
-            {SenseiID::Bardock, 2268},
-            {SenseiID::Krane, 13009},
-            {SenseiID::Tapion, 8231},
-            {SenseiID::Piccolo, 1659},
-            {SenseiID::Sixteen, 1713},
-            {SenseiID::Dabura, 6486},
-            {SenseiID::Frieza, 4282},
-            {SenseiID::Ginyu, 4289},
-            {SenseiID::Jinto, 3499},
-            {SenseiID::Kurzak, 16100},
-            {SenseiID::Tsuna, 15009},
-            {SenseiID::Commoner, 300}
+            {SenseiID::roshi, 1130},
+            {SenseiID::kibito, 12098},
+            {SenseiID::nail, 11683},
+            {SenseiID::bardock, 2268},
+            {SenseiID::krane, 13009},
+            {SenseiID::tapion, 8231},
+            {SenseiID::piccolo, 1659},
+            {SenseiID::sixteen, 1713},
+            {SenseiID::dabura, 6486},
+            {SenseiID::frieza, 4282},
+            {SenseiID::ginyu, 4289},
+            {SenseiID::jinto, 3499},
+            {SenseiID::kurzak, 16100},
+            {SenseiID::tsuna, 15009},
+            {SenseiID::commoner, 300}
     };
 
     room_vnum getStartRoom(SenseiID id) {
@@ -1567,21 +1567,21 @@ namespace sensei {
     }
 
     static const std::unordered_map<SenseiID, room_vnum> sensei_location = {
-            {SenseiID::Roshi, 1131},
-            {SenseiID::Kibito, 12098},
-            {SenseiID::Nail, 11683},
-            {SenseiID::Bardock, 2267},
-            {SenseiID::Krane, 13012},
-            {SenseiID::Tapion, 8233},
-            {SenseiID::Piccolo, 1662},
-            {SenseiID::Sixteen, 1714},
-            {SenseiID::Dabura, 6487},
-            {SenseiID::Frieza, 4283},
-            {SenseiID::Ginyu, 4290},
-            {SenseiID::Jinto, 3499},
-            {SenseiID::Kurzak, 16100},
-            {SenseiID::Tsuna, 15009},
-            {SenseiID::Commoner, 300}
+            {SenseiID::roshi, 1131},
+            {SenseiID::kibito, 12098},
+            {SenseiID::nail, 11683},
+            {SenseiID::bardock, 2267},
+            {SenseiID::krane, 13012},
+            {SenseiID::tapion, 8233},
+            {SenseiID::piccolo, 1662},
+            {SenseiID::sixteen, 1714},
+            {SenseiID::dabura, 6487},
+            {SenseiID::frieza, 4283},
+            {SenseiID::ginyu, 4290},
+            {SenseiID::jinto, 3499},
+            {SenseiID::kurzak, 16100},
+            {SenseiID::tsuna, 15009},
+            {SenseiID::commoner, 300}
     };
 
     room_vnum getLocation(SenseiID id) {
@@ -1592,57 +1592,57 @@ namespace sensei {
     }
 
     static const std::unordered_map<SenseiID, std::string> sensei_name = {
-            {SenseiID::Roshi, "Roshi"},
-            {SenseiID::Piccolo, "Piccolo"},
-            {SenseiID::Krane, "Krane"},
-            {SenseiID::Nail, "Nail"},
-            {SenseiID::Bardock, "Bardock"},
-            {SenseiID::Ginyu, "Ginyu"},
-            {SenseiID::Frieza, "Frieza"},
-            {SenseiID::Tapion, "Tapion"},
-            {SenseiID::Sixteen, "Android 16"},
-            {SenseiID::Dabura, "Dabura"},
-            {SenseiID::Kibito, "Kibito"},
-            {SenseiID::Jinto, "Jinto"},
-            {SenseiID::Tsuna, "Tsuna"},
-            {SenseiID::Kurzak, "Kurzak"},
-            {SenseiID::Commoner, "Commoner"}
+            {SenseiID::roshi, "Roshi"},
+            {SenseiID::piccolo, "Piccolo"},
+            {SenseiID::krane, "Krane"},
+            {SenseiID::nail, "Nail"},
+            {SenseiID::bardock, "Bardock"},
+            {SenseiID::ginyu, "Ginyu"},
+            {SenseiID::frieza, "Frieza"},
+            {SenseiID::tapion, "Tapion"},
+            {SenseiID::sixteen, "Android 16"},
+            {SenseiID::dabura, "Dabura"},
+            {SenseiID::kibito, "Kibito"},
+            {SenseiID::jinto, "Jinto"},
+            {SenseiID::tsuna, "Tsuna"},
+            {SenseiID::kurzak, "Kurzak"},
+            {SenseiID::commoner, "Commoner"}
     };
 
     static const std::unordered_map<SenseiID, std::string> sensei_abbr = {
-            {SenseiID::Roshi, "Ro"},
-            {SenseiID::Piccolo, "Pi"},
-            {SenseiID::Krane, "Kr"},
-            {SenseiID::Nail, "Na"},
-            {SenseiID::Bardock, "Ba"},
-            {SenseiID::Ginyu, "Gi"},
-            {SenseiID::Frieza, "Fr"},
-            {SenseiID::Tapion, "Ta"},
-            {SenseiID::Sixteen, "16"},
-            {SenseiID::Dabura, "Da"},
-            {SenseiID::Kibito, "Ki"},
-            {SenseiID::Jinto, "Ji"},
-            {SenseiID::Tsuna, "Ts"},
-            {SenseiID::Kurzak, "Ku"},
-            {SenseiID::Commoner, "--"}
+            {SenseiID::roshi, "Ro"},
+            {SenseiID::piccolo, "Pi"},
+            {SenseiID::krane, "Kr"},
+            {SenseiID::nail, "Na"},
+            {SenseiID::bardock, "Ba"},
+            {SenseiID::ginyu, "Gi"},
+            {SenseiID::frieza, "Fr"},
+            {SenseiID::tapion, "Ta"},
+            {SenseiID::sixteen, "16"},
+            {SenseiID::dabura, "Da"},
+            {SenseiID::kibito, "Ki"},
+            {SenseiID::jinto, "Ji"},
+            {SenseiID::tsuna, "Ts"},
+            {SenseiID::kurzak, "Ku"},
+            {SenseiID::commoner, "--"}
     };
 
     static const std::unordered_map<SenseiID, std::string> sensei_arts = {
-            {SenseiID::Roshi, "Kame Arts"},
-            {SenseiID::Piccolo, "Demon Taijutsu"},
-            {SenseiID::Krane, "Crane Arts"},
-            {SenseiID::Nail, "Tranquil Palm"},
-            {SenseiID::Bardock, "Brutal Beast"},
-            {SenseiID::Ginyu, "Flaunted Style"},
-            {SenseiID::Frieza, "Frozen Fist"},
-            {SenseiID::Tapion, "Shadow Grappling"},
-            {SenseiID::Sixteen, "Iron Hand"},
-            {SenseiID::Dabura, "Devil Dance"},
-            {SenseiID::Kibito, "Gentle Fist"},
-            {SenseiID::Jinto, "Star's Radiance"},
-            {SenseiID::Tsuna, "Sacred Tsunami"},
-            {SenseiID::Kurzak, "Adaptive Taijutsu"},
-            {SenseiID::Commoner, "Like a Bum"}
+            {SenseiID::roshi, "Kame Arts"},
+            {SenseiID::piccolo, "Demon Taijutsu"},
+            {SenseiID::krane, "Crane Arts"},
+            {SenseiID::nail, "Tranquil Palm"},
+            {SenseiID::bardock, "Brutal Beast"},
+            {SenseiID::ginyu, "Flaunted Style"},
+            {SenseiID::frieza, "Frozen Fist"},
+            {SenseiID::tapion, "Shadow Grappling"},
+            {SenseiID::sixteen, "Iron Hand"},
+            {SenseiID::dabura, "Devil Dance"},
+            {SenseiID::kibito, "Gentle Fist"},
+            {SenseiID::jinto, "Star's Radiance"},
+            {SenseiID::tsuna, "Sacred Tsunami"},
+            {SenseiID::kurzak, "Adaptive Taijutsu"},
+            {SenseiID::commoner, "Like a Bum"}
     };
 
     std::string getName(SenseiID id) {
@@ -1667,7 +1667,7 @@ namespace sensei {
     }
 
     bool isPlayable(SenseiID id) {
-        return id != SenseiID::Commoner;
+        return id != SenseiID::commoner;
     }
 
     struct sen_affect_type {

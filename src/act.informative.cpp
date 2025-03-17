@@ -117,9 +117,9 @@ ACMD(do_evolve) {
 
     // Define evolution costs
     std::vector<EvolutionCost> evolutionCosts = {
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15)), "powerlevel", CharVital::PowerLevel, GET_CON(ch)},
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22)), "ki", CharVital::Ki, GET_WIS(ch)},
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15)), "stamina", CharVital::Stamina, GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15)), "powerlevel", CharVital::powerlevel, GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22)), "ki", CharVital::ki, GET_WIS(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15)), "stamina", CharVital::stamina, GET_CON(ch)},
     };
 
     if (!*arg) {
@@ -1047,25 +1047,25 @@ static void bringdesc(struct char_data *ch, struct char_data *tch) {
             send_attribute_desc(ch, "Hair Color", get_hair_color_desc(GET_HAIRC(tch)));
         } else if (IS_SAIYAN(tch) || IS_HALFBREED(tch)) {
             switch (tch->form) {
-                case FormID::SuperSaiyan:
+                case FormID::super_saiyan_1:
                     send_attribute_desc(ch, "Hair Length", get_hair_length_desc(GET_HAIRL(tch)));
                     send_attribute_desc(ch, "Hair Style", "Spiky");
                     send_attribute_desc(ch, "Hair Color", "Golden");
                     send_attribute_desc(ch, "Eye Color", "Emerald");
                     break;
-                case FormID::SuperSaiyan2:
+                case FormID::super_saiyan_2:
                     send_attribute_desc(ch, "Hair Length", get_hair_length_desc(GET_HAIRL(tch)));
                     send_attribute_desc(ch, "Hair Style", "Sharp Spikes");
                     send_attribute_desc(ch, "Hair Color", "Golden");
                     send_attribute_desc(ch, "Eye Color", "Emerald");
                     break;
-                case FormID::SuperSaiyan3:
+                case FormID::super_saiyan_3:
                     send_attribute_desc(ch, "Hair Length", "Really Long");
                     send_attribute_desc(ch, "Hair Style", "Spiky");
                     send_attribute_desc(ch, "Hair Color", "Golden");
                     send_attribute_desc(ch, "Eye Color", "Aqua Green");
                     break;
-                case FormID::SuperSaiyan4:
+                case FormID::super_saiyan_4:
                     send_attribute_desc(ch, "Hair Length", "Long");
                     send_attribute_desc(ch, "Hair Style", "Soft Spikes");
                     send_attribute_desc(ch, "Hair Color", "Black");
@@ -2070,7 +2070,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
     if (!ch->desc) {
         return;
     }
-    if(i->form == FormID::Base || i->transforms[i->form].description == nullptr || i->transforms[i->form].description == "") {
+    if(i->form == FormID::base || i->transforms[i->form].description == nullptr || i->transforms[i->form].description == "") {
         if (i->look_description) {
             send_to_char(ch, "%s", i->look_description);
         }
@@ -2670,7 +2670,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         act(bloom, true, i, nullptr, ch, TO_VICT);
     }
 
-    auto is_oozaru = (i->form == FormID::Oozaru || i->form == FormID::GoldenOozaru);
+    auto is_oozaru = (i->form == FormID::oozaru || i->form == FormID::golden_oozaru);
 
     if (AFF_FLAGGED(i, AFF_SANCTUARY) && !GET_SKILL(i, SKILL_AQUA_BARRIER))
         act("@w...$e has a @bbarrier@w around $s body!", true, i, nullptr, ch, TO_VICT);
@@ -2700,7 +2700,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
         act(aura, true, i, nullptr, ch, TO_VICT);
     }
-    if (i->form != FormID::Oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
+    if (i->form != FormID::oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
         act("@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
     if (AFF_FLAGGED(ch, AFF_KYODAIKA))
         act("@w...$e has expanded $s body size@w!", true, i, nullptr, ch, TO_VICT);
@@ -2709,9 +2709,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     if (AFF_FLAGGED(i, AFF_LIMIT_BREAKING))
         act("@w...$e has an overflowing aura around $s body!", false, i, nullptr, ch, TO_VICT);
 
-    if(i->form != FormID::Base)
+    if(i->form != FormID::base)
         act(trans::getExtra(i, i->form).c_str(), true, i, nullptr, ch, TO_VICT);
-    if(i->technique != FormID::Base)
+    if(i->technique != FormID::base)
         act(trans::getExtra(i, i->technique).c_str(), true, i, nullptr, ch, TO_VICT);
     if (GET_FEATURE(i)) {
         char woo[MAX_STRING_LENGTH];
@@ -4157,25 +4157,25 @@ ACMD(do_score) {
             }
 
             switch(ch->form) {
-                case FormID::Base:
+                case FormID::base:
                     sprintf(version, "Alpha 0.5");
                     break;
-                case FormID::Android10:
+                case FormID::android_1:
                     sprintf(version, "Beta 1.0");
                     break;
-                case FormID::Android20:
+                case FormID::android_2:
                     sprintf(version, "ANS 2.0");
                     break;
-                case FormID::Android30:
+                case FormID::android_3:
                     sprintf(version, "ANS 3.0");
                     break;
-                case FormID::Android40:
+                case FormID::android_4:
                     sprintf(version, "ANS 4.0");
                     break;
-                case FormID::Android50:
+                case FormID::android_5:
                     sprintf(version, "ANS 5.0");
                     break;
-                case FormID::Android60:
+                case FormID::android_6:
                     sprintf(version, "ANS 6.0");
                     break;
                 default:
@@ -4234,9 +4234,9 @@ ACMD(do_score) {
         send_to_char(ch, "                   @D<@wGravity Acclim@D: @w" + grav + "@D> <@wRPP@D: @w%-3d@D>@n\n", GET_RP(ch));
         send_to_char(ch, "               @D<@wSpeed Index@D: @w%-8s@D> <@wArmor Index@D: @w%-8s@D>@n\n", add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
         send_to_char(ch, "  @D[@RStrength     @D|@G%2d (%3d)@D] [@YAgility      @D|@G%2d (%3d)@D] [@BSpeed        @D|@G%2d (%3d)@D]@n\n",
-                     ch->get(CharAttribute::Strength, true), GET_STR(ch), ch->get(CharAttribute::Agility, true), GET_DEX(ch), ch->get(CharAttribute::Speed, true), GET_CHA(ch));
+                     ch->get(CharAttribute::strength, true), GET_STR(ch), ch->get(CharAttribute::agility, true), GET_DEX(ch), ch->get(CharAttribute::speed, true), GET_CHA(ch));
         send_to_char(ch, "  @D[@gConstitution @D|@G%2d (%3d)@D] [@CIntelligence @D|@G%2d (%3d)@D] [@MWisdom       @D|@G%2d (%3d)@D]@n\n",
-                     ch->get(CharAttribute::Constitution, true), GET_CON(ch), ch->get(CharAttribute::Intelligence, true), GET_INT(ch), ch->get(CharAttribute::Wisdom, true),
+                     ch->get(CharAttribute::constitution, true), GET_CON(ch), ch->get(CharAttribute::intelligence, true), GET_INT(ch), ch->get(CharAttribute::wisdom, true),
                      GET_WIS(ch));
     }
     if (view == full || view == other) {
@@ -4289,7 +4289,7 @@ ACMD(do_score) {
 
 static void trans_check(struct char_data *ch, struct char_data *vict) {
 /* Rillao: transloc, add new transes here */
-    if(vict->form == FormID::Base || (vict->mimic && vict != ch)) {
+    if(vict->form == FormID::base || (vict->mimic && vict != ch)) {
         send_to_char(ch, "         @cCurrent Transformation@D: @wNone@n\r\n");
         return;
     }
@@ -6760,7 +6760,7 @@ ACMD(do_desc) {
     if(!d) {
         return;
     }
-    if(ch->form == FormID::Base) {
+    if(ch->form == FormID::base) {
         write_to_output(d, "Current description:\r\n%s\r\n", ch->look_description);
         write_to_output(d, "Enter the new text you'd like others to see when they look at you.\r\n");
         string_write(d, &ch->look_description, EXDSCR_LENGTH, 0, nullptr);

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "sysdep.h"
+#include "magic_enum/magic_enum_all.hpp"
 
 /*
  * Intended use of this macro is to allow external packages to work with
@@ -48,342 +49,351 @@ constexpr int CUR_ZONE_VERSION = 2;
 constexpr int BANNED_SITE_LENGTH = 50;
 
 enum class RaceID : uint8_t {
-    Spirit = 0,
-    Human = 1,
-    Saiyan = 2,
-    Icer = 3,
-    Konatsu = 4,
-    Namekian = 5,
-    Mutant = 6,
-    Kanassan = 7,
-    Halfbreed = 8,
-    BioAndroid = 9,
-    Android = 10,
-    Demon = 11,
-    Majin = 12,
-    Kai = 13,
-    Tuffle = 14,
-    Hoshijin = 15,
-    Animal = 16,
-    Saiba = 17,
-    Serpent = 18,
-    Ogre = 19,
-    Yardratian = 20,
-    Arlian = 21,
-    Dragon = 22,
-    Mechanical = 23,
+    spirit = 0,
+    human = 1,
+    saiyan = 2,
+    icer = 3,
+    konatsu = 4,
+    namekian = 5,
+    mutant = 6,
+    kanassan = 7,
+    halfbreed = 8,
+    bio_android = 9,
+    android = 10,
+    demon = 11,
+    majin = 12,
+    kai = 13,
+    tuffle = 14,
+    hoshijin = 15,
+    animal = 16,
+    saiba = 17,
+    serpent = 18,
+    ogre = 19,
+    yardratian = 20,
+    arlian = 21,
+    dragon = 22,
+    mechanical = 23,
 };
 
 enum class SenseiID : uint8_t {
-    Commoner = 0,
-    Roshi = 1,
-    Piccolo = 2,
-    Krane = 3,
-    Nail = 4,
-    Bardock = 5,
-    Ginyu = 6,
-    Frieza = 7,
-    Tapion = 8,
-    Sixteen = 9,
-    Dabura = 10,
-    Kibito = 11,
-    Jinto = 12,
-    Tsuna = 13,
-    Kurzak = 14
+    commoner = 0,
+    roshi = 1,
+    piccolo = 2,
+    krane = 3,
+    nail = 4,
+    bardock = 5,
+    ginyu = 6,
+    frieza = 7,
+    tapion = 8,
+    sixteen = 9,
+    dabura = 10,
+    kibito = 11,
+    jinto = 12,
+    tsuna = 13,
+    kurzak = 14
 };
 
 enum class FormID : uint16_t {
     // Universal,
-    Base = 0,
-    Custom1 = 1,
-    Custom2 = 2,
-    Custom3 = 3,
-    Custom4 = 4,
-    Custom5 = 5,
-    Custom6 = 6,
-    Custom7 = 7,
-    Custom8 = 8,
-    Custom9 = 9,
+    base = 0,
+    custom_1 = 1,
+    custom_2 = 2,
+    custom_3 = 3,
+    custom_4 = 4,
+    custom_5 = 5,
+    custom_6 = 6,
+    custom_7 = 7,
+    custom_8 = 8,
+    custom_9 = 9,
 
     // Saiyan'y forms.
-    Oozaru = 10,
-    GoldenOozaru = 11,
-    SuperSaiyan = 12,
-    SuperSaiyan2 = 13,
-    SuperSaiyan3 = 14,
-    SuperSaiyan4 = 15,
-    SuperSaiyanGod = 16,
-    SuperSaiyanBlue = 17,
+    oozaru = 10,
+    golden_oozaru = 11,
+    super_saiyan_1 = 12,
+    super_saiyan_2 = 13,
+    super_saiyan_3 = 14,
+    super_saiyan_4 = 15,
+    super_saiyan_god = 16,
+    super_saiyan_blue = 17,
 
     // LSSJ
-    Ikari = 20,
-    LegendarySaiyan = 21,
+    ikari = 20,
+    legendary_saiyan = 21,
 
     // Human'y Forms
-    SuperHuman = 30,
-    SuperHuman2 = 31,
-    SuperHuman3 = 32,
-    SuperHuman4 = 33,
+    super_human_1 = 30,
+    super_human_2 = 31,
+    super_human_3 = 32,
+    super_human_4 = 33,
 
 
     // Icer'y Forms
-    IcerFirst = 40,
-    IcerSecond = 41,
-    IcerThird = 42,
-    IcerFourth = 43,
-    IcerMetal = 44,
-    IcerGolden = 45,
-    IcerBlack = 46,
+    icer_1 = 40,
+    icer_2 = 41,
+    icer_3 = 42,
+    icer_4 = 43,
+    icer_metal = 44,
+    icer_golden = 45,
+    icer_black = 46,
 
     // Konatsu
-    ShadowFirst = 50,
-    ShadowSecond = 51,
-    ShadowThird = 52,
+    shadow_first = 50,
+    shadow_second = 51,
+    shadow_third = 52,
 
     // Lycanthrope
-    LesserLycanthrope = 60,
-    Lycanthrope = 61,
-    AlphaLycanthrope = 62,
+    lesser_lycanthrope = 60,
+    lycanthrope = 61,
+    alpha_lycanthrope = 62,
 
     // Namekian
-    SuperNamekian = 70,
-    SuperNamekian2 = 71,
-    SuperNamekian3 = 72,
-    SuperNamekian4 = 73,
+    super_namekian_1 = 70,
+    super_namekian_2 = 71,
+    super_namekian_3 = 72,
+    super_namekian_4 = 73,
 
     // Mutant
-    MutateFirst = 80,
-    MutateSecond = 81,
-    MutateThird = 82,
+    mutate_1 = 80,
+    mutate_2 = 81,
+    mutate_3 = 82,
 
     // BioAndroid
-    BioMature = 90,
-    BioSemiPerfect = 91,
-    BioPerfect = 92,
-    BioSuperPerfect = 93,
+    bio_mature = 90,
+    bio_semi_perfect = 91,
+    bio_perfect = 92,
+    bio_super_perfect = 93,
 
     // Android
-    Android10 = 100,
-    Android20 = 101,
-    Android30 = 102,
-    Android40 = 103,
-    Android50 = 104,
-    Android60 = 105,
+    android_1 = 100,
+    android_2 = 101,
+    android_3 = 102,
+    android_4 = 103,
+    android_5 = 104,
+    android_6 = 105,
 
     // Majin
-    MajAffinity = 110,
-    MajSuper = 111,
-    MajTrue = 112,
+    maj_affinity = 110,
+    maj_super = 111,
+    maj_true = 112,
 
 
     // Kai
-    MysticFirst = 120,
-    MysticSecond = 121,
-    MysticThird = 123,
+    mystic_1 = 120,
+    mystic_2 = 121,
+    mystic_3 = 123,
 
     // Kai Alt
-    DivineHalo = 126,
+    divine_halo = 126,
 
     // Tuffle
-    AscendFirst = 130,
-    AscendSecond = 131,
-    AscendThird = 132,
+    ascend_1 = 130,
+    ascend_2 = 131,
+    ascend_3 = 132,
 
     // Demon
-    DarkKing = 140,
+    dark_king = 140,
 
     // Alternate Unbound Forms
-    PotentialUnleashed = 180,
-    EvilAura = 181,
-    UltraInstinct = 182,
+    potential_unleashed = 180,
+    evil_aura = 181,
+    ultra_instinct = 182,
 
      // Unbound Perm Forms
-    PotentialUnlocked = 210,
-    PotentialUnlockedMax = 211,
-    Majinized = 212,
-    DivineWater = 213,
+    potential_unlocked = 210,
+    potential_unlocked_max = 211,
+    majinized = 212,
+    divine_water = 213,
 
 
     // Techniques
-    Kaioken = 300,
-    DarkMeta = 301,
+    kaioken = 300,
+    dark_metamorphosis = 301,
 
-    TigerStance = 302,
-    EagleStance = 303,
-    OxStance = 304,
+    tiger_stance = 302,
+    eagle_stance = 303,
+    ox_stance = 304,
 
-    SpiritAbsorption = 305,
+    spirit_absorption = 305,
 
     // Hoshijin Shit
-    DeathPhase = 306,
-    BirthPhase = 307,
-    LifePhase = 308
+    death_phase = 306,
+    birth_phase = 307,
+    life_phase = 308
 
 };
 
 
 enum class SkillID : uint16_t {
-    Flex = 400,
-    Genius = 401,
-    SolarFlare = 402,
-    Might = 403,
-    Balance = 404,
-    Build = 405,
-    ToughSkin = 406,
-    Concentration = 407,
-    Kaioken = 408,
-    Spot = 409,
-    FirstAid = 410,
-    Disguise = 411,
-    EscapeArtist = 412,
-    Appraise = 413,
-    Heal = 414,
-    Forgery = 415,
-    Hide = 416,
-    Bless = 417,
-    Curse = 418,
-    Listen = 419,
-    Eavesdrop = 420,
-    Poison = 421,
-    CurePoison = 422,
-    OpenLock = 423,
-    Vigor = 424,
-    Regenerate = 425,
-    KeenSight = 426,
-    Search = 427,
-    MoveSilently = 428,
-    Absorb = 429,
-    SleightOfHand = 430,
-    Ingest = 431,
-    Repair = 432,
-    Sense = 433,
-    Survival = 434,
-    Yoikominminken = 435,
-    Create = 436,
-    StoneSpit = 437,
-    PotentialRelease = 438,
-    Telepathy = 439,
-    RenzokouEnergyDan = 440,
-    Masenko = 441,
-    Dodonpa = 442,
-    Barrier = 443,
-    GalikGun = 444,
-    Throw = 445,
-    Dodge = 446,
-    Parry = 447,
-    Block = 448,
-    Punch = 449,
-    Kick = 450,
-    Elbow = 451,
-    Knee = 452,
-    Roundhouse = 453,
-    Uppercut = 454,
-    Slam = 455,
-    Heeldrop = 456,
-    Focus = 457,
-    KiBall = 458,
-    KiBlast = 459,
-    Beam = 460,
-    Tsuihidan = 461,
-    Shogekiha = 462,
-    Zanzoken = 463,
-    KameHameHa = 464,
-    Dagger = 465,
-    Sword = 466,
-    Club = 467,
-    Spear = 468,
-    Gun = 469,
-    Brawl = 470,
-    InstantTransmission = 471,
-    Deathbeam = 472,
-    Eraser = 473,
-    TwinSlash = 474,
-    Psyblast = 475,
-    Honoo = 476,
-    Dualbeam = 477,
-    Rogafufuken = 478,
-    SpecialPose = 479,
-    Bakuhatsuha = 480,
-    Kienzan = 481,
-    Tribeam = 482,
-    SpecialBeamCannon = 483,
-    FinalFlash = 484,
-    Crusher = 485,
-    DarknessDragonSlash = 486,
-    PsychicBarrage = 487,
-    Hellflash = 488,
-    HellSpearBlast = 489,
-    Kakusanha = 490,
-    Hasshuken = 491,
-    Scatter = 492,
-    BigBang = 493,
-    PhoenixSlash = 494,
-    Deathball = 495,
-    SpiritBall = 496,
-    Genkidama = 497,
-    Genocide = 498,
-    Dualwield = 499,
-    KuraiiroSeiki = 500,
-    Tailwhip = 501,
-    Kousengan = 502,
-    TaishaReiki = 503,
-    Paralyze = 505,
-    Infuse = 506,
-    Roll = 507,
-    Trip = 508,
-    Grapple = 509,
-    WaterSpike = 510,
-    SelfDestruct = 511,
-    SpiralComet = 512,
-    StarBreaker = 513,
-    Enlighten = 514,
-    Commune = 515,
-    Mimic = 516,
-    WaterRazor = 517,
-    KoteiruBakuha = 518,
-    DimizuToride = 519,
-    HyogaKabe = 520,
-    Wellspring = 521,
-    AquaBarrier = 522,
-    WarpPool = 523,
-    HellSpiral = 524,
-    NaniteArmor = 525,
-    Fireshield = 526,
-    Cooking = 527,
-    SeishouEnko = 528,
-    Silk = 529,
-    Bash = 530,
-    Headbutt = 531,
-    Ensnare = 532,
-    Starnova = 533,
-    Pursuit = 534,
-    ZenBladeStrike = 535,
-    SunderingForce = 536,
-    Wither = 537,
-    Twohand = 538,
-    FightingArts = 539,
-    Metamorph = 540,
-    HealingGlow = 541,
-    Runic = 542,
-    Extract = 543,
-    Gardening = 544,
-    EnergizeThrowing = 545,
-    MaliceBreaker = 549,
-    Hayasa = 550,
-    Handling = 551,
-    MysticMusic = 552,
-    LightGrenade = 553,
-    Multiform = 554,
-    SpiritControl = 555,
-    Balefire = 556,
-    BlessedHammer = 557,
+    flex = 400,
+    genius = 401,
+    solar_flare = 402,
+    might = 403,
+    balance = 404,
+    build = 405,
+    tough_skin = 406,
+    concentration = 407,
+    kaioken = 408,
+    spot = 409,
+    first_aid = 410,
+    disguise = 411,
+    escape_artist = 412,
+    appraise = 413,
+    heal = 414,
+    forgery = 415,
+    hide = 416,
+    bless = 417,
+    curse = 418,
+    listen = 419,
+    eavesdrop = 420,
+    poison = 421,
+    cure_poison = 422,
+    open_lock = 423,
+    vigor = 424,
+    regenerate = 425,
+    keen_sight = 426,
+    search = 427,
+    move_silently = 428,
+    absorb = 429,
+    sleight_of_hand = 430,
+    ingest = 431,
+    repair = 432,
+    sense = 433,
+    survival = 434,
+    yoikominminken = 435,
+    create = 436,
+    stone_spit = 437,
+    potential_release = 438,
+    telepathy = 439,
+    renzokou_energy_dan = 440,
+    masenko = 441,
+    dodonpa = 442,
+    barrier = 443,
+    galik_gun = 444,
+    throw_object = 445,
+    dodge = 446,
+    parry = 447,
+    block = 448,
+    punch = 449,
+    kick = 450,
+    elbow = 451,
+    knee = 452,
+    roundhouse = 453,
+    uppercut = 454,
+    slam = 455,
+    heeldrop = 456,
+    focus = 457,
+    ki_ball = 458,
+    ki_blast = 459,
+    beam = 460,
+    tsuihidan = 461,
+    shogekiha = 462,
+    zanzoken = 463,
+    kamehameha = 464,
+    dagger = 465,
+    sword = 466,
+    club = 467,
+    spear = 468,
+    gun = 469,
+    brawl = 470,
+    instant_transmission = 471,
+    deathbeam = 472,
+    eraser = 473,
+    twin_slash = 474,
+    psyblast = 475,
+    honoo = 476,
+    dualbeam = 477,
+    rogafufuken = 478,
+    special_pose = 479,
+    bakuhatsuha = 480,
+    kienzan = 481,
+    tribeam = 482,
+    special_beam_cannon = 483,
+    final_flash = 484,
+    crusher = 485,
+    darkness_dragon_slash = 486,
+    psychic_barrage = 487,
+    hellflash = 488,
+    hell_spear_blast = 489,
+    kakusanha = 490,
+    hasshuken = 491,
+    scatter = 492,
+    big_bang = 493,
+    phoenix_slash = 494,
+    deathball = 495,
+    spirit_ball = 496,
+    genkidama = 497,
+    genocide = 498,
+    dualwield = 499,
+    kuraiiro_seiki = 500,
+    tailwhip = 501,
+    kousengan = 502,
+    taisha_reiki = 503,
+    paralyze = 505,
+    infuse = 506,
+    roll = 507,
+    trip = 508,
+    grapple = 509,
+    water_spike = 510,
+    self_destruct = 511,
+    spiral_comet = 512,
+    star_breaker = 513,
+    enlighten = 514,
+    commune = 515,
+    mimic = 516,
+    water_razor = 517,
+    koteiru_bakuha = 518,
+    dimizu_toride = 519,
+    hyogaKabe = 520,
+    wellspring = 521,
+    aquaBarrier = 522,
+    warp_pool = 523,
+    hellSpiral = 524,
+    nanite_armor = 525,
+    fireshield = 526,
+    cooking = 527,
+    seishou_enko = 528,
+    silk = 529,
+    bash = 530,
+    headbutt = 531,
+    ensnare = 532,
+    starnova = 533,
+    pursuit = 534,
+    zen_blade_strike = 535,
+    sundering_force = 536,
+    wither = 537,
+    twohand = 538,
+    fighting_arts = 539,
+    dark_metamorphosis = 540,
+    healing_glow = 541,
+    runic = 542,
+    extract = 543,
+    gardening = 544,
+    energize_throwing = 545,
+    malice_breaker = 549,
+    hayasa = 550,
+    handling = 551,
+    mystic_music = 552,
+    light_grenade = 553,
+    multiform = 554,
+    spirit_control = 555,
+    balefire = 556,
+    blessed_hammer = 557,
 
-    DivineHalo = 558,
-    InstinctualCombat = 559,
+    divine_halo = 558,
+    instinctual_combat = 559,
 
-    TigerStance = 560,
-    EagleStance = 561,
-    OxStance = 562,
+    tiger_stance = 560,
+    eagle_stance = 561,
+    ox_stance = 562,
+
+
+};
+
+template <>
+struct magic_enum::customize::enum_range<SkillID> {
+  static constexpr int min = 400;
+  static constexpr int max = 562;
+  // (max - min) must be less than UINT16_MAX.
 };
 
 
@@ -840,30 +850,30 @@ constexpr int PHASE_LOVE = 5;
 constexpr int PHASE_STRENGTH = 6;
 
 /* Races */
-constexpr RaceID RACE_HUMAN        = RaceID::Human;
-constexpr RaceID RACE_SAIYAN       = RaceID::Saiyan;
-constexpr RaceID RACE_ICER         = RaceID::Icer;
-constexpr RaceID RACE_KONATSU      = RaceID::Konatsu;
-constexpr RaceID RACE_NAMEK        = RaceID::Namekian;
-constexpr RaceID RACE_MUTANT       = RaceID::Mutant;
-constexpr RaceID RACE_KANASSAN     = RaceID::Kanassan;
-constexpr RaceID RACE_HALFBREED    = RaceID::Halfbreed;
-constexpr RaceID RACE_BIO          = RaceID::BioAndroid;
-constexpr RaceID RACE_ANDROID      = RaceID::Android;
-constexpr RaceID RACE_DEMON        = RaceID::Demon;
-constexpr RaceID RACE_MAJIN        = RaceID::Majin;
-constexpr RaceID RACE_KAI          = RaceID::Kai;
-constexpr RaceID RACE_TRUFFLE      = RaceID::Tuffle;
-constexpr RaceID RACE_GOBLIN       = RaceID::Hoshijin;
-constexpr RaceID RACE_ANIMAL       = RaceID::Animal;
-constexpr RaceID RACE_SAIBA        = RaceID::Saiba;
-constexpr RaceID RACE_SERPENT      = RaceID::Serpent;
-constexpr RaceID RACE_OGRE         = RaceID::Ogre;
-constexpr RaceID RACE_YARDRATIAN   = RaceID::Yardratian;
-constexpr RaceID RACE_ARLIAN       = RaceID::Arlian;
-constexpr RaceID RACE_DRAGON       = RaceID::Dragon;
-constexpr RaceID RACE_MECHANICAL   = RaceID::Mechanical;
-constexpr RaceID RACE_FAERIE       = RaceID::Spirit;
+constexpr RaceID RACE_HUMAN        = RaceID::human;
+constexpr RaceID RACE_SAIYAN       = RaceID::saiyan;
+constexpr RaceID RACE_ICER         = RaceID::icer;
+constexpr RaceID RACE_KONATSU      = RaceID::konatsu;
+constexpr RaceID RACE_NAMEK        = RaceID::namekian;
+constexpr RaceID RACE_MUTANT       = RaceID::mutant;
+constexpr RaceID RACE_KANASSAN     = RaceID::kanassan;
+constexpr RaceID RACE_HALFBREED    = RaceID::halfbreed;
+constexpr RaceID RACE_BIO          = RaceID::bio_android;
+constexpr RaceID RACE_ANDROID      = RaceID::android;
+constexpr RaceID RACE_DEMON        = RaceID::demon;
+constexpr RaceID RACE_MAJIN        = RaceID::majin;
+constexpr RaceID RACE_KAI          = RaceID::kai;
+constexpr RaceID RACE_TRUFFLE      = RaceID::tuffle;
+constexpr RaceID RACE_GOBLIN       = RaceID::hoshijin;
+constexpr RaceID RACE_ANIMAL       = RaceID::animal;
+constexpr RaceID RACE_SAIBA        = RaceID::saiba;
+constexpr RaceID RACE_SERPENT      = RaceID::serpent;
+constexpr RaceID RACE_OGRE         = RaceID::ogre;
+constexpr RaceID RACE_YARDRATIAN   = RaceID::yardratian;
+constexpr RaceID RACE_ARLIAN       = RaceID::arlian;
+constexpr RaceID RACE_DRAGON       = RaceID::dragon;
+constexpr RaceID RACE_MECHANICAL   = RaceID::mechanical;
+constexpr RaceID RACE_FAERIE       = RaceID::spirit;
 
 constexpr int NUM_RACES = 24;
 
@@ -2172,106 +2182,111 @@ constexpr int LIMITBREAK_THRESHOLD = 5000000;
 
 using attribute_t = uint8_t;
 enum class CharAttribute : uint8_t {
-    Strength      = 1 << 0, // 1
-    Agility       = 1 << 1, // 2
-    Intelligence  = 1 << 2, // 4
-    Wisdom        = 1 << 3, // 8
-    Constitution  = 1 << 4, // 16
-    Speed         = 1 << 5  // 32
+    strength      = 1 << 0, // 1
+    agility       = 1 << 1, // 2
+    intelligence  = 1 << 2, // 4
+    wisdom        = 1 << 3, // 8
+    constitution  = 1 << 4, // 16
+    speed         = 1 << 5  // 32
+};
+
+template <>
+struct magic_enum::customize::enum_range<CharAttribute> {
+  static constexpr bool is_flags = true;
 };
 
 using attribute_train_t = uint32_t;
 enum class CharTrain : uint8_t {
-    Strength      = 1 << 0, // 1
-    Agility       = 1 << 1, // 2
-    Intelligence  = 1 << 2, // 4
-    Wisdom        = 1 << 3, // 8
-    Constitution  = 1 << 4, // 16
-    Speed         = 1 << 5  // 32
+    strength      = 1 << 0, // 1
+    agility       = 1 << 1, // 2
+    intelligence  = 1 << 2, // 4
+    wisdom        = 1 << 3, // 8
+    constitution  = 1 << 4, // 16
+    speed         = 1 << 5  // 32
 };
 
 using appearance_t = uint8_t;
 enum class CharAppearance : uint8_t {
- Sex = 0,
- HairLength = 1,
- HairStyle = 2,
- HairColor = 3,
- SkinColor = 4,
- EyeColor = 5,
- DistinguishingFeature = 6,
- Aura = 7
+ sex = 0,
+ hair_length = 1,
+ hair_style = 2,
+ hair_color = 3,
+ skin_color = 4,
+ eye_color = 5,
+ distinguishing_feature = 6,
+ aura = 7
 };
 
 using align_t = int16_t;
 enum class CharAlign : uint8_t {
- GoodEvil = 1 << 0,
- LawChaos = 1 << 1,
+ good_evil = 1 << 0,
+ law_chaos = 1 << 1,
 };
 
 using money_t = uint64_t;
 enum class CharMoney : uint8_t {
- Carried = 1 << 0,
- Bank = 1 << 0
+ carried = 1 << 0,
+ bank = 1 << 0
 };
 
 using vital_t = int64_t;
 enum class CharVital : uint8_t {
- PowerLevel = 1 << 0,
- Ki = 1 << 1,
- Stamina = 1 << 2,
- LifeForce = 1 << 3
+ powerlevel = 1 << 0,
+ ki = 1 << 1,
+ stamina = 1 << 2,
+ lifeforce = 1 << 3
 };
 
 using num_t = int;
 enum class CharNum : uint8_t {
- Level = 0,
- Wait = 1,
- AdmLevel = 2,
- RacialPref = 4,
- MysticMelody = 5,
- GroupKills = 6,
- ArmorWishes = 7
+ level = 0,
+ wait = 1,
+ admin_level = 2,
+ racial_preference = 4,
+ mystic_melody = 5,
+ group_kills = 6,
+ armor_wishes = 7
 };
 
 using stat_t = int64_t;
 enum class CharStat : uint8_t {
-    Exp = 1 << 0,
-    SkillTrain = 1 << 1,
-    PS = 1 << 2,
-    UpgradePoints = 1 << 3
+    experience = 1 << 0,
+    skill_train = 1 << 1,
+    practices = 1 << 2,
+    upgrade_points = 1 << 3
 };
 
 
 using dim_t = double;
 enum class CharDim : uint8_t {
-    Height = 1 << 0,
-    Weight = 1 << 1,
+    height = 1 << 0,
+    weight = 1 << 1,
 };
 using weight_t = dim_t;
 using effect_t = uint16_t;
 
 enum class ComStat : uint8_t {
-    Accuracy = 1 << 0,
-    Damage = 1 << 1,
-    Armor = 1 << 2,
-    Parry = 1 << 3,
-    Dodge = 1 << 4,
-    Block = 1 << 5,
-    PerfectDodge = 1 << 6,
-    Defense = 1 << 7,
+    accuracy = 1 << 0,
+    damage = 1 << 1,
+    armor = 1 << 2,
+    parry = 1 << 3,
+    dodge = 1 << 4,
+    block = 1 << 5,
+    perfect_dodge = 1 << 6,
+    defense = 1 << 7,
 };
 
 
 enum class AtkTier : uint8_t {
-    One = 1 << 0,
-    Two = 1 << 1,
-    Three = 1 << 2,
-    Four = 1 << 3,
-    Five = 1 << 4,
-    Six = 1 << 5
+    one = 1 << 0,
+    two = 1 << 1,
+    three = 1 << 2,
+    four = 1 << 3,
+    five = 1 << 4,
+    six = 1 << 5
 };
 
 enum class DamType : uint8_t {
-    Physical = 1 << 0,
-    Ki = 1 << 1,
+    physical = 1 << 0,
+    ki = 1 << 1,
 };

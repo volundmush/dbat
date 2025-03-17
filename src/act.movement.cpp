@@ -2020,7 +2020,7 @@ static void handle_fly_space(char_data *ch) {
         return;
     }
 
-    if (ch->getCurVitalDam(CharVital::Ki) > 0.9 && !IS_ANDROID(ch)) {
+    if (ch->getCurVitalDam(CharVital::ki) > 0.9 && !IS_ANDROID(ch)) {
         send_to_char(ch, "You do not have the ki to fly to space.");
         return;
     }
@@ -2072,7 +2072,7 @@ static void handle_fly_space(char_data *ch) {
     }
 
     if (!IS_ANDROID(ch)) {
-        ch->modCurVitalDam(CharVital::Ki, 0.1);
+        ch->modCurVitalDam(CharVital::ki, 0.1);
     }
     WAIT_STATE(ch, PULSE_3SEC);
     return;
@@ -2130,11 +2130,11 @@ ACMD(do_fly) {
         }
         GET_POS(ch) = POS_STANDING;
         if(!IS_ANDROID(ch))
-            ch->modCurVitalDam(CharVital::Ki, 0.01);
+            ch->modCurVitalDam(CharVital::ki, 0.01);
     };
 
     auto ki_check = [ch](const char *msg) {
-        if (!IS_ANDROID(ch) && ch->getCurVitalDam(CharVital::Ki) < 0.01) {
+        if (!IS_ANDROID(ch) && ch->getCurVitalDam(CharVital::ki) < 0.01) {
             send_to_char(ch, "You do not have the ki to %s.\r\n", msg);
             return false;
         }

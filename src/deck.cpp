@@ -28,7 +28,7 @@ static card refine = {"Refine",
         }
 
         task->pObject->affected[slot].modifier += mod;
-        task->pObject->affected[slot].specific = static_cast<int>(ComStat::Armor);
+        task->pObject->affected[slot].specific = static_cast<int>(ComStat::armor);
         task->pObject->affected[slot].location = bonus;
 
         task->pObject->cost *= 1.2; 
@@ -57,8 +57,8 @@ static card basicAttr = {"Basic Enhancement (Attributes)",
     [](struct char_data *ch) {
         craftTask* task = &ch->craftingTask;
 
-        std::vector<CharAttribute> possibles = {CharAttribute::Strength, CharAttribute::Agility, CharAttribute::Intelligence,
-                                                CharAttribute::Wisdom, CharAttribute::Constitution, CharAttribute::Speed};
+        std::vector<CharAttribute> possibles = {CharAttribute::strength, CharAttribute::agility, CharAttribute::intelligence,
+                                                CharAttribute::wisdom, CharAttribute::constitution, CharAttribute::speed};
 
         auto bonus = static_cast<int>(*Random::get(possibles));
 
@@ -87,11 +87,11 @@ static card basicTrain = {"Basic Enhancement (Training)",
         switch(rand) {
             case 0:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::PowerLevel);
+                specific = static_cast<int>(CharVital::powerlevel);
                 break;
             case 1:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::Ki);
+                specific = static_cast<int>(CharVital::ki);
                 break;
             case 2:
                 bonus = APPLY_CVIT_GAIN_MULT;
@@ -119,8 +119,8 @@ static card improvedAttr = {"Improved Enhancement (Attributes)",
     [](struct char_data *ch) {
         craftTask* task = &ch->craftingTask;
 
-        std::vector<CharAttribute> possibles = {CharAttribute::Strength, CharAttribute::Agility, CharAttribute::Intelligence,
-                                                CharAttribute::Wisdom, CharAttribute::Constitution, CharAttribute::Speed};
+        std::vector<CharAttribute> possibles = {CharAttribute::strength, CharAttribute::agility, CharAttribute::intelligence,
+                                                CharAttribute::wisdom, CharAttribute::constitution, CharAttribute::speed};
 
         auto bonus = static_cast<int>(*Random::get(possibles));
         int rand = 2;
@@ -148,11 +148,11 @@ static card improvedTrain = {"Improved Enhancement (Training)",
         switch(rand) {
             case 0:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::PowerLevel);
+                specific = static_cast<int>(CharVital::powerlevel);
                 break;
             case 1:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::Ki);
+                specific = static_cast<int>(CharVital::ki);
                 break;
             case 2:
                 bonus = APPLY_CVIT_GAIN_MULT;
@@ -179,8 +179,8 @@ static card expertAttr = {"Expert Enhancement (Attributes)",
     [](struct char_data *ch) {
         craftTask* task = &ch->craftingTask;
 
-        std::vector<CharAttribute> possibles = {CharAttribute::Strength, CharAttribute::Agility, CharAttribute::Intelligence,
-                                                CharAttribute::Wisdom, CharAttribute::Constitution, CharAttribute::Speed};
+        std::vector<CharAttribute> possibles = {CharAttribute::strength, CharAttribute::agility, CharAttribute::intelligence,
+                                                CharAttribute::wisdom, CharAttribute::constitution, CharAttribute::speed};
 
         auto bonus = static_cast<int>(*Random::get(possibles));
 
@@ -208,11 +208,11 @@ static card expertTrain = {"Expert Enhancement (Training)",
         switch(rand) {
             case 0:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::PowerLevel);
+                specific = static_cast<int>(CharVital::powerlevel);
                 break;
             case 1:
                 bonus = APPLY_CVIT_GAIN_MULT;
-                specific = static_cast<int>(CharVital::Ki);
+                specific = static_cast<int>(CharVital::ki);
                 break;
             case 2:
                 bonus = APPLY_CVIT_GAIN_MULT;
@@ -243,27 +243,27 @@ static card tuffleArtisany = {"Tuffle Artisany",
         switch(rand) {
             case 0:
                 bonus = APPLY_DTYPE_BON;
-                specific = static_cast<int>(DamType::Physical);
+                specific = static_cast<int>(DamType::physical);
                 break;
             case 1:
                 bonus = APPLY_DTYPE_BON;
-                specific = static_cast<int>(DamType::Ki);
+                specific = static_cast<int>(DamType::ki);
                 break;
             case 2:
                 bonus = APPLY_COMBAT_MULT;
-                specific = static_cast<int>(ComStat::Defense);
+                specific = static_cast<int>(ComStat::defense);
                 break;
             case 3:
                 bonus = APPLY_CVIT_MULT;
-                specific = static_cast<int>(CharVital::PowerLevel);
+                specific = static_cast<int>(CharVital::powerlevel);
                 break;
             case 4:
                 bonus = APPLY_CVIT_MULT;
-                specific = static_cast<int>(CharVital::Ki);
+                specific = static_cast<int>(CharVital::ki);
                 break;
             case 5:
                 bonus = APPLY_CVIT_MULT;
-                specific = static_cast<int>(CharVital::LifeForce);
+                specific = static_cast<int>(CharVital::lifeforce);
                 break;
             
         }
@@ -295,27 +295,27 @@ static card tuffleIngenuity = {"Tuffle Ingenuity",
         switch(rand) {
             case 0:
                 bonus = APPLY_DTYPE_BON;
-                specific = static_cast<int>(DamType::Physical);
+                specific = static_cast<int>(DamType::physical);
                 break;
             case 1:
                 bonus = APPLY_DTYPE_BON;
-                specific = static_cast<int>(DamType::Ki);
+                specific = static_cast<int>(DamType::ki);
                 break;
             case 2:
                 bonus = APPLY_COMBAT_MULT;
-                specific = static_cast<int>(ComStat::Defense);
+                specific = static_cast<int>(ComStat::defense);
                 break;
             case 3:
                 bonus = APPLY_CVIT_MULT;
-                specific = static_cast<int>(CharVital::PowerLevel);
+                specific = static_cast<int>(CharVital::powerlevel);
                 break;
             case 4:
                 bonus = APPLY_CVIT_MULT;
-                specific = static_cast<int>(CharVital::Ki);
+                specific = static_cast<int>(CharVital::ki);
                 break;
             case 5:
                 bonus = APPLY_CVIT_MULT;
-                specific = static_cast<int>(CharVital::LifeForce);
+                specific = static_cast<int>(CharVital::lifeforce);
                 break;
             
         }
@@ -370,9 +370,9 @@ static card comprehension = {   "Comprehension",
         int64_t ki = (GET_WIS(ch) / 2) * Random::get<double>(0.8, 1.2) * ch->getPotential();
         int64_t st = (GET_CON(ch) / 2) * Random::get<double>(0.8, 1.2) * ch->getPotential();
 
-        pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::PowerLevel)));
-        ki *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Ki)));
-        st *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::Stamina)));
+        pl *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::powerlevel)));
+        ki *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::ki)));
+        st *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::stamina)));
 
         if(pl > (ch->getBasePL() / 10)) pl = ch->getBasePL() / 10;
         if(ki > (ch->getBaseKI() / 10)) ki = ch->getBaseKI() / 10;
@@ -532,10 +532,10 @@ void deck::initDeck(char_data* ch) {
         addCardToDeck(tranquility);
     }
 
-    if(ch->get(CharAttribute::Wisdom) >= 70)
+    if(ch->get(CharAttribute::wisdom) >= 70)
         addCardToDeck(reflection);
 
-    if(ch->get(CharAttribute::Intelligence) >= 50)
+    if(ch->get(CharAttribute::intelligence) >= 50)
         removeCard(timePasses);
 
 
@@ -544,17 +544,17 @@ void deck::initDeck(char_data* ch) {
         addCardToDeck(comprehension);
     }
 
-    if(ch->transforms.contains(FormID::AscendFirst)) {
+    if(ch->transforms.contains(FormID::ascend_1)) {
         removeCard(timePasses);
         removeCard(timePasses);
     }
 
-    if(ch->transforms.contains(FormID::AscendSecond)) {
+    if(ch->transforms.contains(FormID::ascend_2)) {
         addCardToDeck(tuffleIngenuity);
         addCardToDeck(tuffleArtisany);
     }
 
-    if(ch->transforms.contains(FormID::AscendThird)) {
+    if(ch->transforms.contains(FormID::ascend_3)) {
         removeCard(improvedAttr);
         addCardToDeck(tuffleIngenuity);
         addCardToDeck(reflection);

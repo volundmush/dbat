@@ -146,7 +146,7 @@ void set_height_and_weight_by_race(struct char_data *ch) {
     ch->setHeight( hw_info[race].height[sex] + mod);
     mod *= hw_info[race].weightfac;
     mod /= 100;
-    ch->set(CharDim::Weight, hw_info[race].weight[sex] + mod);
+    ch->set(CharDim::weight, hw_info[race].weight[sex] + mod);
 }
 
 
@@ -270,11 +270,11 @@ void racial_body_parts(struct char_data *ch) {
 namespace race {
 
     static std::unordered_map<RaceID, int> race_sizes = {
-        {RaceID::Tuffle, SIZE_SMALL},
-        {RaceID::Animal, SIZE_FINE},
-        {RaceID::Saiba, SIZE_LARGE},
-        {RaceID::Ogre, SIZE_LARGE},
-        {RaceID::Spirit, SIZE_TINY}
+        {RaceID::tuffle, SIZE_SMALL},
+        {RaceID::animal, SIZE_FINE},
+        {RaceID::saiba, SIZE_LARGE},
+        {RaceID::ogre, SIZE_LARGE},
+        {RaceID::spirit, SIZE_TINY}
     };
 
     int getSize(RaceID id) {
@@ -282,19 +282,19 @@ namespace race {
         return SIZE_MEDIUM;
     }
 
-    static std::unordered_set<RaceID> playable = {RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian,
-    RaceID::Mutant, RaceID::Kanassan, RaceID::Halfbreed, RaceID::BioAndroid, RaceID::Android, RaceID::Demon, RaceID::Majin,
-    RaceID::Kai, RaceID::Tuffle};
+    static std::unordered_set<RaceID> playable = {RaceID::human, RaceID::saiyan, RaceID::icer, RaceID::konatsu, RaceID::namekian,
+    RaceID::mutant, RaceID::kanassan, RaceID::halfbreed, RaceID::bio_android, RaceID::android, RaceID::demon, RaceID::majin,
+    RaceID::kai, RaceID::tuffle};
 
     bool isPlayable(RaceID id) {
         return playable.contains(id);
     }
 
     static std::vector<RaceID> all_races = {
-        RaceID::Human, RaceID::Saiyan, RaceID::Icer, RaceID::Konatsu, RaceID::Namekian, RaceID::Mutant,
-        RaceID::Kanassan, RaceID::Halfbreed, RaceID::BioAndroid, RaceID::Android, RaceID::Demon, RaceID::Majin,
-        RaceID::Kai, RaceID::Tuffle, RaceID::Hoshijin, RaceID::Animal, RaceID::Saiba, RaceID::Serpent, RaceID::Ogre,
-        RaceID::Yardratian, RaceID::Arlian, RaceID::Dragon, RaceID::Mechanical, RaceID::Spirit
+        RaceID::human, RaceID::saiyan, RaceID::icer, RaceID::konatsu, RaceID::namekian, RaceID::mutant,
+        RaceID::kanassan, RaceID::halfbreed, RaceID::bio_android, RaceID::android, RaceID::demon, RaceID::majin,
+        RaceID::kai, RaceID::tuffle, RaceID::hoshijin, RaceID::animal, RaceID::saiba, RaceID::serpent, RaceID::ogre,
+        RaceID::yardratian, RaceID::arlian, RaceID::dragon, RaceID::mechanical, RaceID::spirit
     };
 
     bool exists(RaceID id) {
@@ -305,7 +305,7 @@ namespace race {
 
     std::unordered_set<int> getValidSexes(RaceID id) {
         switch(id) {
-            case RaceID::Namekian:
+            case RaceID::namekian:
                 return {SEX_NEUTRAL};
             default:
                 return {SEX_NEUTRAL, SEX_MALE, SEX_FEMALE};
@@ -313,30 +313,30 @@ namespace race {
     }
 
     static std::map<RaceID, std::string> race_names = {
-        {RaceID::Human, "Human"},
-        {RaceID::Saiyan, "Saiyan"},
-        {RaceID::Icer, "Icer"},
-        {RaceID::Konatsu, "Konatsu"},
-        {RaceID::Namekian, "Namekian"},
-        {RaceID::Mutant, "Mutant"},
-        {RaceID::Kanassan, "Kanassan"},
-        {RaceID::Halfbreed, "Halfbreed"},
-        {RaceID::BioAndroid, "BioAndroid"},
-        {RaceID::Android, "Android"},
-        {RaceID::Demon, "Demon"},
-        {RaceID::Majin, "Majin"},
-        {RaceID::Kai, "Kai"},
-        {RaceID::Tuffle, "Tuffle"},
-        {RaceID::Hoshijin, "Hoshijin"},
-        {RaceID::Animal, "Animal"},
-        {RaceID::Saiba, "Saiba"},
-        {RaceID::Serpent, "Serpent"},
-        {RaceID::Ogre, "Ogre"},
-        {RaceID::Yardratian, "Yardratian"},
-        {RaceID::Arlian, "Arlian"},
-        {RaceID::Dragon, "Dragon"},
-        {RaceID::Mechanical, "Mechanical"},
-        {RaceID::Spirit, "Spirit"}
+        {RaceID::human, "Human"},
+        {RaceID::saiyan, "Saiyan"},
+        {RaceID::icer, "Icer"},
+        {RaceID::konatsu, "Konatsu"},
+        {RaceID::namekian, "Namekian"},
+        {RaceID::mutant, "Mutant"},
+        {RaceID::kanassan, "Kanassan"},
+        {RaceID::halfbreed, "Halfbreed"},
+        {RaceID::bio_android, "BioAndroid"},
+        {RaceID::android, "Android"},
+        {RaceID::demon, "Demon"},
+        {RaceID::majin, "Majin"},
+        {RaceID::kai, "Kai"},
+        {RaceID::tuffle, "Tuffle"},
+        {RaceID::hoshijin, "Hoshijin"},
+        {RaceID::animal, "Animal"},
+        {RaceID::saiba, "Saiba"},
+        {RaceID::serpent, "Serpent"},
+        {RaceID::ogre, "Ogre"},
+        {RaceID::yardratian, "Yardratian"},
+        {RaceID::arlian, "Arlian"},
+        {RaceID::dragon, "Dragon"},
+        {RaceID::mechanical, "Mechanical"},
+        {RaceID::spirit, "Spirit"}
     };
 
     std::string getName(RaceID id) {
@@ -345,30 +345,30 @@ namespace race {
     }
 
     static std::map<RaceID, std::string> race_abbr = {
-        {RaceID::Human, "Hum"},
-        {RaceID::Saiyan, "Sai"},
-        {RaceID::Icer, "Ice"},
-        {RaceID::Konatsu, "kon"},
-        {RaceID::Namekian, "Nam"},
-        {RaceID::Mutant, "Mut"},
-        {RaceID::Kanassan, "Kan"},
-        {RaceID::Halfbreed, "H-B"},
-        {RaceID::BioAndroid, "Bio"},
-        {RaceID::Android, "And"},
-        {RaceID::Demon, "Dem"},
-        {RaceID::Majin, "Maj"},
-        {RaceID::Kai, "Kai"},
-        {RaceID::Tuffle, "Tru"},
-        {RaceID::Hoshijin, "Hos"},
-        {RaceID::Animal, "Ict"},
-        {RaceID::Saiba, "Sab"},
-        {RaceID::Serpent, "Ser"},
-        {RaceID::Ogre, "Ogr"},
-        {RaceID::Yardratian, "Yar"},
-        {RaceID::Arlian, "Arl"},
-        {RaceID::Dragon, "Drg"},
-        {RaceID::Mechanical, "Mec"},
-        {RaceID::Spirit, "Spi"}
+        {RaceID::human, "Hum"},
+        {RaceID::saiyan, "Sai"},
+        {RaceID::icer, "Ice"},
+        {RaceID::konatsu, "kon"},
+        {RaceID::namekian, "Nam"},
+        {RaceID::mutant, "Mut"},
+        {RaceID::kanassan, "Kan"},
+        {RaceID::halfbreed, "H-B"},
+        {RaceID::bio_android, "Bio"},
+        {RaceID::android, "And"},
+        {RaceID::demon, "Dem"},
+        {RaceID::majin, "Maj"},
+        {RaceID::kai, "Kai"},
+        {RaceID::tuffle, "Tru"},
+        {RaceID::hoshijin, "Hos"},
+        {RaceID::animal, "Ict"},
+        {RaceID::saiba, "Sab"},
+        {RaceID::serpent, "Ser"},
+        {RaceID::ogre, "Ogr"},
+        {RaceID::yardratian, "Yar"},
+        {RaceID::arlian, "Arl"},
+        {RaceID::dragon, "Drg"},
+        {RaceID::mechanical, "Mec"},
+        {RaceID::spirit, "Spi"}
     };
 
     std::string getAbbr(RaceID id) {
@@ -378,10 +378,10 @@ namespace race {
 
     bool isPeople(RaceID id) {
         switch (id) {
-            case RaceID::Animal:
-            case RaceID::Saiba:
-            case RaceID::Mechanical:
-            case RaceID::Spirit:
+            case RaceID::animal:
+            case RaceID::saiba:
+            case RaceID::mechanical:
+            case RaceID::spirit:
                 return false;
             default:
                 return true;
@@ -390,10 +390,10 @@ namespace race {
 
     bool hasTail(RaceID id) {
         switch (id) {
-            case RaceID::Icer:
-            case RaceID::BioAndroid:
-            case RaceID::Saiyan:
-            case RaceID::Halfbreed:
+            case RaceID::icer:
+            case RaceID::bio_android:
+            case RaceID::saiyan:
+            case RaceID::halfbreed:
                 return true;
             default:
                 return false;
@@ -402,12 +402,12 @@ namespace race {
 
     bool isValidMimic(RaceID id) {
         switch (id) {
-            case RaceID::Icer:
-            case RaceID::Namekian:
-            case RaceID::Demon:
-            case RaceID::Majin:
-            case RaceID::Hoshijin:
-            case RaceID::Arlian:
+            case RaceID::icer:
+            case RaceID::namekian:
+            case RaceID::demon:
+            case RaceID::majin:
+            case RaceID::hoshijin:
+            case RaceID::arlian:
                 return false;
             default:
                 return isPlayable(id);
@@ -416,8 +416,8 @@ namespace race {
 
     int64_t getSoftCap(RaceID id, int level) {
         switch(id) {
-            case RaceID::Kanassan:
-            case RaceID::Demon:
+            case RaceID::kanassan:
+            case RaceID::demon:
                 return 500 * pow(1.1390, level);
             default:
                 return 500 * pow(1.1357, level);
@@ -425,23 +425,23 @@ namespace race {
     }
 
     bool isSenseable(RaceID id) {
-        return id != RaceID::Android;
+        return id != RaceID::android;
     }
 
     static std::unordered_map<RaceID, std::vector<character_affect_type>> race_affects = {
-            {RaceID::Human, {
+            {RaceID::human, {
                                     {APPLY_CVIT_REGEN_MULT, -0.5, ~0},
             }},
-            {RaceID::Namekian, {
+            {RaceID::namekian, {
                                     {APPLY_CVIT_REGEN_MULT, 0.5, ~0},
                             }},
-            {RaceID::Mutant, {
+            {RaceID::mutant, {
                                        {APPLY_CVIT_REGEN_MULT,  -0.1, ~0},
                                }},
-            {RaceID::Arlian, {
+            {RaceID::arlian, {
                                      {APPLY_CVIT_REGEN_MULT,  -0.7, ~0, [](auto ch) {return (IS_FEMALE(ch) && OUTSIDE(ch)) ? 4.0 : 0.0;}},
                              }},
-            {RaceID::Kanassan, {
+            {RaceID::kanassan, {
                                      {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {
                                          double out = 0.0;
                                          if(weather_info.sky == SKY_RAINING && OUTSIDE(ch)) out += 0.1;
@@ -449,32 +449,32 @@ namespace race {
                                          return out;
                                      }},
                              }},
-            {RaceID::Android, {
+            {RaceID::android, {
                                      {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {return PLR_FLAGGED(ch, PLR_ABSORB) ? -0.66 : 0.0;}},
                              }},
-            {RaceID::Saiyan, {
-                                     {APPLY_CSTAT_GAIN_MULT, 0.3,  static_cast<int>(CharStat::Exp)},
+            {RaceID::saiyan, {
+                                     {APPLY_CSTAT_GAIN_MULT, 0.3,  static_cast<int>(CharStat::experience)},
                                      //{APPLY_PHYS_DAM_PERC, 0.0, 0, [](struct char_data *ch) {return PLR_FLAGGED(ch, PLR_TAIL) ? 0.15 : 0;}},
                                      //{APPLY_DAM_ATK_TIER, 0.2, 3},
                                      //{APPLY_SKILL_SLOTS, -1},
                                      //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](struct char_data *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
                              }},
 
-            {RaceID::Halfbreed, {
-                                     {APPLY_CSTAT_GAIN_MULT, 0.2,  static_cast<int>(CharStat::Exp)},
+            {RaceID::halfbreed, {
+                                     {APPLY_CSTAT_GAIN_MULT, 0.2,  static_cast<int>(CharStat::experience)},
                                      //{APPLY_SKILL_SLOTS, 1},
                                      //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Intelligence},
                                      //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Strength},
                                      //{APPLY_PS_GAIN_MULT, -0.4}
                              }},
 
-            {RaceID::Icer, {
-                                     {APPLY_CSTAT_GAIN_MULT, -0.1, static_cast<int>(CharStat::Exp)},
+            {RaceID::icer, {
+                                     {APPLY_CSTAT_GAIN_MULT, -0.1, static_cast<int>(CharStat::experience)},
 
                              }},
 
-            {RaceID::Kai, {
-                                     {APPLY_CSTAT_GAIN_MULT, -0.1, static_cast<int>(CharStat::Exp)},
+            {RaceID::kai, {
+                                     {APPLY_CSTAT_GAIN_MULT, -0.1, static_cast<int>(CharStat::experience)},
 
                              }}
     };

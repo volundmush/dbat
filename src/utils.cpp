@@ -515,7 +515,7 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].duration = dur;
         af[num].modifier = str;
         af[num].location = APPLY_CATTR_BASE;
-        af[num].specific = static_cast<int>(CharAttribute::Strength);
+        af[num].specific = static_cast<int>(CharAttribute::strength);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -525,7 +525,7 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].duration = dur;
         af[num].modifier = con;
         af[num].location = APPLY_CATTR_BASE;
-        af[num].specific = static_cast<int>(CharAttribute::Constitution);
+        af[num].specific = static_cast<int>(CharAttribute::constitution);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -535,7 +535,7 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].duration = dur;
         af[num].modifier = intel;
         af[num].location = APPLY_CATTR_BASE;
-        af[num].specific = static_cast<int>(CharAttribute::Intelligence);
+        af[num].specific = static_cast<int>(CharAttribute::intelligence);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -545,7 +545,7 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].duration = dur;
         af[num].modifier = agl;
         af[num].location = APPLY_CATTR_BASE;
-        af[num].specific = static_cast<int>(CharAttribute::Agility);
+        af[num].specific = static_cast<int>(CharAttribute::agility);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -555,7 +555,7 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].duration = dur;
         af[num].modifier = spd;
         af[num].location = APPLY_CATTR_BASE;
-        af[num].specific = static_cast<int>(CharAttribute::Speed);
+        af[num].specific = static_cast<int>(CharAttribute::speed);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -565,7 +565,7 @@ assign_affect(struct char_data *ch, int aff_flag, int skill, int dur, int str, i
         af[num].duration = dur;
         af[num].modifier = wis;
         af[num].location = APPLY_CATTR_BASE;
-        af[num].specific = static_cast<int>(CharAttribute::Wisdom);
+        af[num].specific = static_cast<int>(CharAttribute::wisdom);
         af[num].bitvector = aff_flag;
         affect_join(ch, &af[num], false, false, false, false);
         num += 1;
@@ -1557,8 +1557,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
             if(bonusHl > (ch->getBasePL() / 10)) bonusHl = ch->getBasePL() / 10;
             if(bonusSt > (ch->getBaseST() / 10)) bonusSt = ch->getBaseST() / 10;
 
-            bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::PowerLevel)));
-            bonusSt *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::Stamina)));
+            bonusHl *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::powerlevel)));
+            bonusSt *= (1 + ch->getAffectModifier(APPLY_CVIT_GAIN_MULT, static_cast<int>(CharVital::stamina)));
 
             act("@gYour @De@Wx@wo@Ds@Wk@we@Dl@We@wt@Do@Wn@g begins to crack. You quickly shed it and reveal a stronger version that was growing beneath it! At the same time you feel your adrenal sacs to be more efficient@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
@@ -2447,7 +2447,7 @@ void stop_follower(struct char_data *ch) {
         act("$n stops following you.", true, ch, nullptr, ch->master, TO_VICT);
 
     if (has_group(ch))
-        ch->set(CharNum::GroupKills, 0);
+        ch->set(CharNum::group_kills, 0);
 
     if (ch->master->followers->follower == ch) {  /* Head of follower-list? */
         k = ch->master->followers;
@@ -2944,7 +2944,7 @@ void admin_set(struct char_data *ch, int value) {
                "%s promoted from %s to %s", GET_NAME(ch), admin_level_names[GET_ADMLEVEL(ch)],
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) < value) {
-            ch->mod(CharNum::AdmLevel, 1);
+            ch->mod(CharNum::admin_level, 1);
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
                 ch->admflags.set(default_admin_flags[GET_ADMLEVEL(ch)][i]);
         }
@@ -2967,7 +2967,7 @@ void admin_set(struct char_data *ch, int value) {
         while (GET_ADMLEVEL(ch) > value) {
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
                 ch->admflags.reset(default_admin_flags[GET_ADMLEVEL(ch)][i]);
-            ch->mod(CharNum::AdmLevel, -1);
+            ch->mod(CharNum::admin_level, -1);
         }
         run_autowiz();
         if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {

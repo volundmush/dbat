@@ -189,7 +189,7 @@ void medit_setup_new(struct descriptor_data *d) {
     GET_SDESC(mob) = strdup("the unfinished mob");
     GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
     GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
-    mob->race = RaceID::Human;
+    mob->race = RaceID::human;
     SCRIPT(mob) = nullptr;
     mob->proto_script.clear();
     OLC_SCRIPT(d).clear();
@@ -234,19 +234,19 @@ void init_mobile(struct char_data *mob) {
     //GET_HIT(mob) = 0;
     //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
-    mob->set(CharAppearance::Sex, SEX_MALE);
-    mob->chclass = SenseiID::Commoner;
+    mob->set(CharAppearance::sex, SEX_MALE);
+    mob->chclass = SenseiID::commoner;
 
-    mob->set(CharDim::Weight, rand_number(100, 200));
+    mob->set(CharDim::weight, rand_number(100, 200));
     mob->setHeight(rand_number(100, 200));
 
     auto base1 = rand_number(8, 16);
     auto base2 = rand_number(8, 16);
-    for(auto attr : {CharAttribute::Strength, CharAttribute::Intelligence, CharAttribute::Wisdom}) {
+    for(auto attr : {CharAttribute::strength, CharAttribute::intelligence, CharAttribute::wisdom}) {
         mob->set(attr, base1);
     }
 
-    for(auto attr : {CharAttribute::Agility, CharAttribute::Constitution, CharAttribute::Speed}) {
+    for(auto attr : {CharAttribute::agility, CharAttribute::constitution, CharAttribute::speed}) {
         mob->set(attr, base2);
     }
 
@@ -808,7 +808,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
  */
 
         case MEDIT_SEX:
-            OLC_MOB(d)->set(CharAppearance::Sex, LIMIT(i, 0, NUM_GENDERS - 1));
+            OLC_MOB(d)->set(CharAppearance::sex, LIMIT(i, 0, NUM_GENDERS - 1));
             break;
 
         case MEDIT_ACCURACY:
@@ -856,7 +856,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_GOLD:
-            OLC_MOB(d)->set(CharMoney::Carried, i);
+            OLC_MOB(d)->set(CharMoney::carried, i);
             break;
 
         case MEDIT_POS:
@@ -872,12 +872,12 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_LEVEL:
-            OLC_MOB(d)->set(CharNum::Level, i);
+            OLC_MOB(d)->set(CharNum::level, i);
             /* Try to add some baseline defaults based on level choice. */
             break;
 
         case MEDIT_ALIGNMENT:
-            OLC_MOB(d)->set(CharAlign::GoodEvil, LIMIT(i, -1000, 1000));
+            OLC_MOB(d)->set(CharAlign::good_evil, LIMIT(i, -1000, 1000));
             break;
 
         case MEDIT_CLASS: {

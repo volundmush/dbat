@@ -1762,46 +1762,46 @@ const int list_bonus_cost[] = {
 };
 
 const std::unordered_map<std::string, CharAttribute> CharAttributeNames = {
-        {"Strength", CharAttribute::Strength},
-        {"Agility", CharAttribute::Agility},
-        {"Constitution", CharAttribute::Constitution},
-        {"Intelligence", CharAttribute::Intelligence},
-        {"Speed", CharAttribute::Speed},
-        {"Wisdom", CharAttribute::Wisdom}
+        {"Strength", CharAttribute::strength},
+        {"Agility", CharAttribute::agility},
+        {"Constitution", CharAttribute::constitution},
+        {"Intelligence", CharAttribute::intelligence},
+        {"Speed", CharAttribute::speed},
+        {"Wisdom", CharAttribute::wisdom}
 };
 
 const std::unordered_map<std::string, CharTrain> CharTrainNames = {
-        {"Strength", CharTrain::Strength},
-        {"Agility", CharTrain::Agility},
-        {"Constitution", CharTrain::Constitution},
-        {"Intelligence", CharTrain::Intelligence},
-        {"Speed", CharTrain::Speed},
-        {"Wisdom", CharTrain::Wisdom}
+        {"Strength", CharTrain::strength},
+        {"Agility", CharTrain::agility},
+        {"Constitution", CharTrain::constitution},
+        {"Intelligence", CharTrain::intelligence},
+        {"Speed", CharTrain::speed},
+        {"Wisdom", CharTrain::wisdom}
 };
 
 const std::unordered_map<std::string, CharAppearance> CharAppearanceNames = {
-        {"Sex", CharAppearance::Sex},
-        {"HairLength", CharAppearance::HairLength},
-        {"HairStyle", CharAppearance::HairStyle},
-        {"HairColor", CharAppearance::HairColor},
-        {"SkinColor", CharAppearance::SkinColor},
-        {"EyeColor", CharAppearance::EyeColor},
-        {"DistinguishingFeature", CharAppearance::DistinguishingFeature},
-        {"Aura", CharAppearance::Aura}
+        {"Sex", CharAppearance::sex},
+        {"HairLength", CharAppearance::hair_length},
+        {"HairStyle", CharAppearance::hair_style},
+        {"HairColor", CharAppearance::hair_color},
+        {"SkinColor", CharAppearance::skin_color},
+        {"EyeColor", CharAppearance::eye_color},
+        {"DistinguishingFeature", CharAppearance::distinguishing_feature},
+        {"Aura", CharAppearance::aura}
 };
 
 const std::unordered_map<std::string, CharAlign> CharAlignNames = {
-        {"GoodEvil", CharAlign::GoodEvil},
-        {"LawChaos", CharAlign::LawChaos}
+        {"GoodEvil", CharAlign::good_evil},
+        {"LawChaos", CharAlign::law_chaos}
 };
 
 const std::unordered_map<std::string, CharMoney> CharMoneyNames = {
-        {"Carried", CharMoney::Carried},
-        {"Bank", CharMoney::Bank}
+        {"Carried", CharMoney::carried},
+        {"Bank", CharMoney::bank}
 };
 
 const std::unordered_map<std::string, CharVital> CharStatNames = {
-        {"PowerLevel", CharVital::PowerLevel},
-        {"Ki",         CharVital::Ki},
-        {"Stamina",    CharVital::Stamina}
+        {"PowerLevel", CharVital::powerlevel},
+        {"Ki",         CharVital::ki},
+        {"Stamina",    CharVital::stamina}
 };

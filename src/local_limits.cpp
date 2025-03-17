@@ -670,7 +670,7 @@ static void update_flags(struct char_data *ch) {
         ch->affected_by.reset(AFF_ENSNARED);
     }
 
-    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == FormID::SuperSaiyan) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
+    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == FormID::super_saiyan_1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
         GET_ABSORBS(ch) += 1;
         if (GET_ABSORBS(ch) >= 300) {
             send_to_char(ch,
@@ -1097,9 +1097,9 @@ static void heal_limb(struct char_data *ch) {
 
         if (!PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
             if (axion_dice(-10) > GET_CON(ch)) {
-                ch->mod(CharAttribute::Strength, -1);
-                ch->mod(CharAttribute::Speed, -1);
-                ch->mod(CharAttribute::Agility, -1);
+                ch->mod(CharAttribute::strength, -1);
+                ch->mod(CharAttribute::speed, -1);
+                ch->mod(CharAttribute::agility, -1);
                 send_to_char(ch, "@RYou lose 1 Strength, Agility, and Speed!\r\n");
             }
         }
@@ -1514,10 +1514,10 @@ void characterVitalsRecovery(uint64_t heartPulse, double deltaTime) {
                 universalPerc += 2.0;
         }
 
-        for(auto v : {CharVital::PowerLevel, CharVital::Stamina, CharVital::Ki, CharVital::LifeForce}) {
+        for(auto v : {CharVital::powerlevel, CharVital::stamina, CharVital::ki, CharVital::lifeforce}) {
 
             // Androids don't have Lifeforce.
-            if(IS_ANDROID(ch) && v == CharVital::LifeForce) continue;
+            if(IS_ANDROID(ch) && v == CharVital::lifeforce) continue;
 
             // This will loop through most possible modifiers...
             double perc = 1.0 + universalPerc + ch->getAffectModifier(APPLY_CVIT_REGEN_MULT, static_cast<int>(v));
@@ -1790,7 +1790,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
 
                     if (!has_o2(i) && (i->getLocationEnvironment(ENV_WATER) >= 100.0 || i->getRoomFlag(ROOM_SPACE)))
                     {
-                        if (auto remKi = i->modCurVitalDam(CharVital::Ki, .005); remKi < 1.0)
+                        if (auto remKi = i->modCurVitalDam(CharVital::ki, .005); remKi < 1.0)
                         {
                             send_to_char(i, "Your ki holds an atmosphere around you.\r\n");
                         }

@@ -222,7 +222,7 @@ static void dragon_level(struct char_data *ch) {
         level = rand_number(40, 60);
     }
 
-    ch->set(CharNum::Level, level + rand_number(5, 20));
+    ch->set(CharNum::level, level + rand_number(5, 20));
 }
 
 
@@ -1048,31 +1048,31 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     std::map<CharAppearance, int> setNumsTo;
 
     if (!(IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE)) {
-        setNumsTo[CharAppearance::HairLength] = rand_number(0, 4);
-        setNumsTo[CharAppearance::HairColor] = rand_number(1, 13);
-        setNumsTo[CharAppearance::HairStyle] = rand_number(1, 11);
+        setNumsTo[CharAppearance::hair_length] = rand_number(0, 4);
+        setNumsTo[CharAppearance::hair_color] = rand_number(1, 13);
+        setNumsTo[CharAppearance::hair_style] = rand_number(1, 11);
     }
 
-    setNumsTo[CharAppearance::EyeColor] = rand_number(0, 11);
+    setNumsTo[CharAppearance::eye_color] = rand_number(0, 11);
 
     if (!IS_HUMAN(mob) && !IS_SAIYAN(mob) && !IS_HALFBREED(mob) && !IS_NAMEK(mob)) {
-        setNumsTo[CharAppearance::SkinColor] = rand_number(0, 11);
+        setNumsTo[CharAppearance::skin_color] = rand_number(0, 11);
     }
     if (IS_NAMEK(mob)) {
-        setNumsTo[CharAppearance::SkinColor] = 2;
+        setNumsTo[CharAppearance::skin_color] = 2;
     }
     if (IS_HUMAN(mob) || IS_SAIYAN(mob) || IS_HALFBREED(mob)) {
         if (rand_number(1, 5) <= 2) {
-            setNumsTo[CharAppearance::SkinColor] = rand_number(0, 1);
+            setNumsTo[CharAppearance::skin_color] = rand_number(0, 1);
         } else if (rand_number(1, 5) <= 4) {
-            setNumsTo[CharAppearance::SkinColor] = rand_number(4, 5);
+            setNumsTo[CharAppearance::skin_color] = rand_number(4, 5);
         } else if (rand_number(1, 5) <= 5) {
-            setNumsTo[CharAppearance::SkinColor] = rand_number(9, 10);
+            setNumsTo[CharAppearance::skin_color] = rand_number(9, 10);
         }
     }
     if (IS_SAIYAN(mob)) {
-        setNumsTo[CharAppearance::HairColor] = HAIRC_BLACK;
-        setNumsTo[CharAppearance::EyeColor] = 1;
+        setNumsTo[CharAppearance::hair_color] = HAIRC_BLACK;
+        setNumsTo[CharAppearance::eye_color] = 1;
     }
 
     for(auto &[cint, val] : setNumsTo) {
@@ -1286,9 +1286,9 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     GET_LPLAY(mob) = time(nullptr);
-    bool autoset = mob->get(CharVital::PowerLevel) <= 1;
+    bool autoset = mob->get(CharVital::powerlevel) <= 1;
     if(autoset) {
-        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
+        for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
             vital_t base = GET_LEVEL(mob) * mult;
             if (GET_LEVEL(mob) > 140) {
                 base *= 8;
@@ -1304,7 +1304,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     if (GET_MOB_VNUM(mob) == 2245) {
-        for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
+        for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
             mob->set(c, rand_number(1, 4));
         }
     }
@@ -1511,7 +1511,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
             if (GET_GOLD(mob) <= 0)
                 money = 1;
         }
-        mob->set(CharMoney::Carried, money);
+        mob->set(CharMoney::carried, money);
     }
 
     
@@ -1533,7 +1533,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         } else if (IS_DEMON(mob)) {
             mexp *= 1.1;
         }
-        if (GET_CLASS(mob) == SenseiID::Commoner && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
+        if (GET_CLASS(mob) == SenseiID::commoner && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
             if (!IS_ANDROID(mob) && !IS_SAIYAN(mob) && !IS_BIO(mob) && !IS_MAJIN(mob)) {
                 mexp *= 0.75;
             }
@@ -2372,14 +2372,14 @@ void reset_char(struct char_data *ch) {
 void init_char(struct char_data *ch) {
     int i;
 
-    for(auto c : {CharVital::PowerLevel, CharVital::Ki, CharVital::Stamina}) {
+    for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
         ch->set(c, 800);
     }
     magic_enum::enum_for_each<CharAttribute>([&] (auto val) {
                 constexpr CharAttribute v = val;
                 ch->set(v, 15);
                 });
-    ch->set(CharMoney::Carried, 1500);
+    ch->set(CharMoney::carried, 1500);
     GET_CLAN(ch) = strdup("None.");
     ch->practice_points = 600;
 

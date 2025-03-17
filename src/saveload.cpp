@@ -98,7 +98,6 @@ void from_json(const json& j, std::bitset<N>& bs) {
     }
 }
 
-
 // zone_data and reset_com serialize/deserialize...
 void to_json(json& j, const reset_com& r) {
     std::string cmd;
@@ -1233,77 +1232,15 @@ void from_json(const json& j, affected_type& a) {
 void to_json(json& j, const char_data& c) {
     to_json(j, static_cast<const unit_data&>(c));
 
-    for(auto &[id, train] : c.trains) {
-        if(train) {
-            j["trains"].push_back(std::make_pair(id, train));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["trains_name"][boost::algorithm::to_lower_copy(key)] = train;
-        }
-    }
-
-    for(auto &[id, attr] : c.attributes) {
-        if(attr) {
-            j["attributes"].push_back(std::make_pair(id, attr));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["attributes_name"][boost::algorithm::to_lower_copy(key)] = attr;
-        }
-    }
-
-    for(auto &[id, mon] : c.moneys) {
-        if(mon) {
-            j["moneys"].push_back(std::make_pair(id, mon));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["moneys_name"][boost::algorithm::to_lower_copy(key)] = mon;
-        }
-    }
-
-    for(auto &[id, align] : c.aligns) {
-        if(align) {
-            j["aligns"].push_back(std::make_pair(id, align));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["aligns_name"][boost::algorithm::to_lower_copy(key)] = align;
-        }
-    }
-
-    for(auto &[id, app] : c.appearances) {
-        if(app) {
-            j["appearances"].push_back(std::make_pair(id, app));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["appearances_name"][boost::algorithm::to_lower_copy(key)] = app;
-        }
-    }
-
-    for(auto &[id, app] : c.vitals) {
-        if(app) {
-            j["vitals"].push_back(std::make_pair(id, app));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["vitals_name"][boost::algorithm::to_lower_copy(key)] = app;
-        }
-    }
-
-    for(auto &[id, app] : c.nums) {
-        if(app) {
-            j["nums"].push_back(std::make_pair(id, app));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["nums_name"][boost::algorithm::to_lower_copy(key)] = app;
-        }
-    }
-
-    for(auto &[id, app] : c.stats) {
-        if(app) {
-            j["stats"].push_back(std::make_pair(id, app));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["stats_name"][boost::algorithm::to_lower_copy(key)] = app;
-        }
-    }
-
-    for(auto &[id, app] : c.dims) {
-        if(app) {
-            j["dims"].push_back(std::make_pair(id, app));
-            auto key = std::string(magic_enum::enum_name(id));
-            j["dims_name"][boost::algorithm::to_lower_copy(key)] = app;
-        }
-    }
+    if(!c.trains.empty()) j["trains"] = c.trains;
+    if(!c.attributes.empty()) j["attributes"] = c.attributes;
+    if(!c.moneys.empty()) j["moneys"] = c.moneys;
+    if(!c.aligns.empty()) j["aligns"] = c.aligns;
+    if(!c.appearances.empty()) j["appearances"] = c.appearances;
+    if(!c.vitals.empty()) j["vitals"] = c.vitals;
+    if(!c.nums.empty()) j["nums"] = c.nums;
+    if(!c.stats.empty()) j["stats"] = c.stats;
+    if(!c.dims.empty()) j["dims"] = c.dims;
 
     for(auto i = 0; i < c.mobFlags.size(); i++)
         if(c.mobFlags.test(i)) {
@@ -1339,10 +1276,7 @@ void to_json(json& j, const char_data& c) {
 
     if(c.title && strlen(c.title)) j["title"] = c.title;
     j["race"] = c.race;
-    j["race_name"] = boost::algorithm::to_lower_copy(race::getName(c.race));
-
     j["chclass"] = c.chclass;
-    j["sensei_name"] = boost::algorithm::to_lower_copy(sensei::getName(c.chclass));
 
     for(auto i = 0; i < c.affected_by.size(); i++)
         if(c.affected_by.test(i)) {
@@ -1381,14 +1315,7 @@ void to_json(json& j, const char_data& c) {
             }
         }
 
-        for(auto &[type, dam] : c.damages) {
-            if(dam > 0.0) {
-                j["damages"].push_back(std::make_pair(type, dam));
-                auto key = std::string(magic_enum::enum_name(type));
-                boost::algorithm::to_lower(key);
-                j["damages_name"][key] = dam;
-            }
-        }
+        if(!c.damages.empty()) j["damages"] = c.damages;
 
         for(auto i = 0; i < NUM_CONDITIONS; i++) {
             if(c.conditions[i]) j["conditions"].push_back(std::make_pair(i, c.conditions[i]));
@@ -1460,7 +1387,7 @@ void to_json(json& j, const char_data& c) {
         if(c.majinize) j["majinize"] = c.majinize;
         if(c.majinizer) j["majinizer"] = c.majinizer;
         if(c.mimic) j["mimic"] = c.mimic.value();
-        if(c.form != FormID::Base) j["form"] = c.form;
+        j["form"] = c.form;
         if(c.olc_zone) j["olc_zone"] = c.olc_zone;
         if(c.starphase) j["starphase"] = c.starphase;
         if(c.accuracy) j["accuracy"] = c.accuracy;
@@ -1501,13 +1428,9 @@ void to_json(json& j, const char_data& c) {
         if(players.contains(c.last_tell)) j["last_tell"] = c.last_tell;
 
         j["transBonus"] = c.transBonus;
-        for(auto &[frm, tra] : c.transforms) {
-            j["transforms"].push_back(std::make_pair(static_cast<int>(frm), tra));
-        }
+        if(!c.transforms.empty()) j["transforms"] = c.transforms;
 
-        for(auto form : c.permForms) {
-            j["permForms"].push_back(form);
-        }
+        if(!c.permForms.empty()) j["permForms"] = c.permForms;
 
     } else {
         // this is a prototype...
@@ -1515,9 +1438,7 @@ void to_json(json& j, const char_data& c) {
         to_json(ms, c.mob_specials);
         if(!ms.empty()) j["mob_specials"] = ms;
 
-        for(auto p : c.proto_script) {
-            if(trig_index.contains(p)) j["proto_script"].push_back(p);
-        }
+        if(!c.proto_script.empty()) j["proto_script"] = c.proto_script;
     }
 
 }
@@ -1525,73 +1446,28 @@ void to_json(json& j, const char_data& c) {
 void from_json(const json& j, char_data& c) {
     from_json(j, static_cast<unit_data&>(c));
 
-    if(j.contains("trains")) {
-        for(auto j2 : j["trains"]) {
-            auto id = j2[0].get<CharTrain>();
-            c.trains[id] = j2[1].get<attribute_train_t>();
-        }
-    }
+    if(j.contains("trains")) c.trains = j["trains"];
 
-    if(j.contains("attributes")) {
-        for(auto j2 : j["attributes"]) {
-            auto id = j2[0].get<CharAttribute>();
-            c.attributes[id] = j2[1].get<attribute_t>();
-        }
-    }
+    if(j.contains("attributes")) c.attributes = j["attributes"];
 
-    if(j.contains("moneys")) {
-        for(auto j2 : j["moneys"]) {
-            auto id = j2[0].get<CharMoney>();
-            c.moneys[id] = j2[1].get<money_t>();
-        }
-    }
+    if(j.contains("moneys")) c.moneys = j["moneys"];
 
-    if(j.contains("aligns")) {
-        for(auto j2 : j["aligns"]) {
-            auto id = j2[0].get<CharAlign>();
-            c.aligns[id] = j2[1].get<align_t>();
-        }
-    }
+    if(j.contains("aligns")) c.aligns = j["aligns"];
 
-    if(j.contains("appearances")) {
-        for(auto j2 : j["appearances"]) {
-            auto id = j2[0].get<CharAppearance>();
-            c.appearances[id] = j2[1].get<appearance_t>();
-        }
-    }
+    if(j.contains("appearances")) c.appearances = j["appearances"];
 
-    if(j.contains("vitals")) {
-        for(auto j2 : j["vitals"]) {
-            auto id = j2[0].get<CharVital>();
-            c.vitals[id] = j2[1].get<vital_t>();
-        }
-    }
+    if(j.contains("vitals")) c.vitals = j["vitals"];
 
-    if(j.contains("nums")) {
-        for(auto j2 : j["nums"]) {
-            auto id = j2[0].get<CharNum>();
-            c.nums[id] = j2[1].get<num_t>();
-        }
-    }
+    if(j.contains("nums")) c.nums = j["nums"];
 
-    if(j.contains("dims")) {
-        for(auto j2 : j["dims"]) {
-            auto id = j2[0].get<CharDim>();
-            c.dims[id] = j2[1].get<dim_t>();
-        }
-    }
+    if(j.contains("dims")) c.dims = j["dims"];
 
-    if(j.contains("stats")) {
-        for(auto j2 : j["stats"]) {
-            auto id = j2[0].get<CharStat>();
-            c.stats[id] = j2[1].get<stat_t>();
-        }
-    }
+    if(j.contains("stats")) c.stats = j["stats"];
 
     if(j.contains("title")) c.title = strdup(j["title"].get<std::string>().c_str());
-    if(j.contains("race")) c.race = j["race"].get<RaceID>();
+    if(j.contains("race")) c.race = j["race"];
 
-    if(j.contains("chclass")) c.chclass = static_cast<SenseiID>(std::min(14, j["chclass"].get<int>()));
+    if(j.contains("chclass")) c.chclass = j["chclass"];
 
     if(j.contains("affected_by"))
         for(auto &i : j["affected_by"])
@@ -1626,12 +1502,7 @@ void from_json(const json& j, char_data& c) {
             }
         }
 
-        if(j.contains("damages")) {
-            for(auto j2 : j["damages"]) {
-                auto id = j2[0].get<CharVital>();
-                c.damages[id] = j2[1].get<vital_t>();
-            }
-        }
+        if(j.contains("damages")) c.damages = j["damages"];
 
         if(j.contains("was_in_room")) c.was_in_room = j["was_in_room"];
 
@@ -1769,19 +1640,9 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("load_room")) c.load_room = j["load_room"];
 
         if(j.contains("transBonus")) c.transBonus = j["transBonus"];
-        if(j.contains("form")) c.form = j["form"].get<FormID>();
-        if(j.contains("transforms")) {
-            // it is a list of pairs that fills up the transforms map.
-            for(const auto &j2 : j["transforms"]) {
-                c.transforms.emplace(j2[0].get<FormID>(), j2[1]);
-            }
-        }
-
-        if(j.contains("permForms")) {
-            for(auto form : j["permForms"]) {
-                c.permForms.insert(form.get<FormID>());
-            }
-        }
+        if(j.contains("form")) c.form = j["form"];
+        if(j.contains("transforms")) c.transforms = j["transforms"];
+        if(j.contains("permForms")) c.permForms = j["permForms"].get<std::unordered_set<FormID>>();
         
 
         if(j.contains("preference")) c.preference = j["preference"];
@@ -1790,9 +1651,7 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("speaking")) c.speaking = j["speaking"];
     } else {
         // this is a prototype.
-        if(j.contains("proto_script")) {
-            for(const auto& p : j["proto_script"]) c.proto_script.emplace_back(p.get<trig_vnum>());
-        }
+        if(j.contains("proto_script")) c.proto_script = j["proto_script"].get<std::vector<trig_vnum>>();
 
         if (!IS_HUMAN(&c))
             c.affected_by.set(AFF_INFRAVISION);

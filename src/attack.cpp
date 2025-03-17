@@ -182,7 +182,7 @@ namespace atk {
         initStats();
 
         currentHitProbability = roll_accuracy(user, init_skill(user, skillID), kiAttack);
-        currentChanceToHit = chance_to_hit(user) * (1 + user->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Accuracy)));
+        currentChanceToHit = chance_to_hit(user) * (1 + user->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::accuracy)));
 
         if(isPhysical() && !usesWeapon()) {
             if (IS_KABITO(user) && !IS_NPC(user)) {
@@ -234,7 +234,7 @@ namespace atk {
         } else {
             // it was a clean hit! Or should be...
 
-            if(victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::PerfectDodge)) != 0) {
+            if(victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::perfect_dodge)) != 0) {
                 return DefenseResult::Perfect_Dodged;
             }
 
@@ -259,8 +259,8 @@ namespace atk {
     }
 
     DefenseResult Attack::calculateDefense() {
-        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Dodge)));
-        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Block)));
+        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::dodge)));
+        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::block)));
 
         if(canZanzoken() && AFF_FLAGGED(user, AFF_ZANZOKEN) && canZanzoken())
             dodgeChance *= (2.0 * GET_SKILL(user, SKILL_ZANZOKEN)); 
@@ -352,7 +352,7 @@ namespace atk {
     }
 
     bool Attack::calculateDeflect() {
-        double parryChance = ((double) currentParryCheck / 6.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Parry)));
+        double parryChance = ((double) currentParryCheck / 6.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::parry)));
         double overcomeParry = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
 
         return ((!IS_NPC(victim) || !MOB_FLAGGED(victim, MOB_DUMMY)) && parryChance > overcomeParry);
@@ -383,8 +383,8 @@ namespace atk {
             }
             if(calcDamage < 1) calcDamage = 1;
 
-            int divine = GET_SKILL(user, (int16_t) SkillID::DivineHalo);
-            int vicDivine = GET_SKILL(victim, (int16_t) SkillID::DivineHalo);
+            int divine = GET_SKILL(user, (int16_t) SkillID::divine_halo);
+            int vicDivine = GET_SKILL(victim, (int16_t) SkillID::divine_halo);
             if(isKiAttack() && divine > 0 && divine >= axion_dice(0)) {
                 send_to_char(user, "You feel your Halo intensify, purging the impurity of your attack.\n");
                 send_to_room(user->getRoom(), "%s's halo flares, leaving their attack shimmering as it moves.\n", user->name);
@@ -578,7 +578,7 @@ namespace atk {
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
 
-        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::PerfectDodge)));
+        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::perfect_dodge)));
 
 
         if(victim->getCurKI() > 0) {
@@ -590,7 +590,7 @@ namespace atk {
             
             victim->decCurKI(incomingDamage);
 
-            int instinct = GET_SKILL(user, (int16_t) SkillID::InstinctualCombat);
+            int instinct = GET_SKILL(user, (int16_t) SkillID::instinctual_combat);
             if(instinct >= axion_dice(20)) {
                 actVictim("@C$n@W, without even thinking about it you lash out towards $N, using their own momentum against them.@n");
                 actUser("@C$n@W, without breaking for a moment, lashes out, catching you offguard.@n");
@@ -1541,7 +1541,7 @@ namespace atk {
         actUser("@WYou move quickly and yet @C$N@W simply sidesteps you!@n");
         actOthers("@C$n@W moves quickly and yet @c$N@W dodges with ease!@n");
 
-        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::PerfectDodge)));
+        double incomingDamage = calcDamage * (1 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::perfect_dodge)));
 
 
         if(victim->getCurKI() > 0) {
@@ -1553,7 +1553,7 @@ namespace atk {
             
             victim->decCurKI(incomingDamage);
 
-            int instinct = GET_SKILL(user, (int16_t) SkillID::InstinctualCombat);
+            int instinct = GET_SKILL(user, (int16_t) SkillID::instinctual_combat);
             if(instinct >= axion_dice(20)) {
                 actVictim("@C$n@W, without even thinking about it you lash out towards $N, using their own momentum against them.@n");
                 actUser("@C$n@W, without breaking for a moment, lashes out, catching you offguard.@n");
@@ -1907,8 +1907,8 @@ namespace atk {
 
 
 
-        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Dodge)));
-        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::Block)));
+        double dodgeChance = ((double) currentDodgeCheck / 5.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::dodge)));
+        double blockChance = ((double) currentBlockCheck / 3.0) * ((double) axion_dice(0) / 120.0) * (1.0 + victim->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::block)));
 
         double overcomeDodge = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
         double overcomeBlock = (double) currentChanceToHit * ((double) axion_dice(0) / 120.0);
@@ -4083,9 +4083,9 @@ namespace atk {
                 assign_affect(victim, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
             }
         }
-        if((user->form == FormID::Lycanthrope && victim->getCurHealthPercent() <= 0.2) || user->form == FormID::AlphaLycanthrope) {
-            if(!victim->transforms.contains(FormID::Lycanthrope) && axion_dice(0) <= 30) {
-                victim->addTransform(FormID::Lycanthrope);
+        if((user->form == FormID::lycanthrope && victim->getCurHealthPercent() <= 0.2) || user->form == FormID::alpha_lycanthrope) {
+            if(!victim->transforms.contains(FormID::lycanthrope) && axion_dice(0) <= 30) {
+                victim->addTransform(FormID::lycanthrope);
                 send_to_char(victim, "@rYour heart races, you feel like something is about to tear free of you.@n\n");
             }
         }
@@ -4928,7 +4928,7 @@ namespace atk {
                          guncost);
             return false;
         } else {
-            user->mod(CharMoney::Carried, -guncost);
+            user->mod(CharMoney::carried, -guncost);
         }
         return true;
 

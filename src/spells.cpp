@@ -368,7 +368,7 @@ ASPELL(spell_enchant_weapon) {
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location == APPLY_NONE) {
             obj->affected[i].location = APPLY_COMBAT_MULT;
-            obj->affected[i].specific = static_cast<int>(ComStat::Accuracy);
+            obj->affected[i].specific = static_cast<int>(ComStat::accuracy);
             obj->affected[i].modifier = 1 + (level >= 18);
             break;
         }
@@ -377,7 +377,7 @@ ASPELL(spell_enchant_weapon) {
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location == APPLY_NONE) {
             obj->affected[i].location = APPLY_COMBAT_BASE;
-            obj->affected[i].specific = static_cast<int>(ComStat::Damage);
+            obj->affected[i].specific = static_cast<int>(ComStat::damage);
             obj->affected[i].modifier = 1 + (level >= 20);
             break;
         }

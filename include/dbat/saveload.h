@@ -1,7 +1,17 @@
 #pragma once
 #include <filesystem>
+#include <cxxabi.h>
 #include "dbat/structs.h"
 #include "dbat/json.h"
+#include "magic_enum/magic_enum_all.hpp"
+
+inline std::string demangle(const char* mangled_name) {
+    int status = -1;
+    char* demangled = abi::__cxa_demangle(mangled_name, nullptr, nullptr, &status);
+    std::string result = (status == 0 && demangled != nullptr) ? demangled : mangled_name;
+    std::free(demangled);
+    return result;
+}
 
 void runSave();
 void load_zones(const std::filesystem::path& loc);
@@ -26,6 +36,78 @@ void load_characters_finish(const std::filesystem::path& loc);
 void load_characters_initial(const std::filesystem::path& loc);
 
 void load_players(const std::filesystem::path& loc);
+
+template<typename T>
+requires std::is_enum_v<T>
+void to_json(json& j, const T& a) {
+    j = magic_enum::enum_name(a);
+}
+
+template<typename T>
+requires std::is_enum_v<T>
+void from_json(const json& j, T& a) {
+    auto name = j.get<std::string>();
+    auto op = magic_enum::enum_cast<T>(name);
+    if(op.has_value())
+        a = op.value();
+    else
+        throw std::invalid_argument("Invalid enum value: " + name +
+            " for enum type: " + demangle(typeid(T).name()));
+}
+
+template <typename Enum, typename Value>
+requires std::is_enum_v<Enum>
+void to_json(json& j, const std::map<Enum, Value>& m)
+{
+    j = json::object();
+    for (auto const& [key, val] : m) {
+        // Convert Enum -> string via magic_enum
+        std::string key_str = std::string(magic_enum::enum_name(key));
+        j[key_str] = val; // This calls to_json on 'val' if it’s a type with a known converter
+    }
+}
+
+template <typename Enum, typename Value>
+requires std::is_enum_v<Enum>
+void from_json(const json& j, std::map<Enum, Value>& m)
+{
+    m.clear();
+    for (auto const& [key_str, value_json] : j.items()) {
+        // Convert string -> Enum
+        auto maybe = magic_enum::enum_cast<Enum>(key_str);
+        if (!maybe.has_value()) {
+            throw std::invalid_argument("Invalid enum key: " + key_str);
+        }
+        m[maybe.value()] = value_json.get<Value>();
+    }
+}
+
+template <typename Enum, typename Value>
+requires std::is_enum_v<Enum>
+void to_json(json& j, const std::unordered_map<Enum, Value>& m)
+{
+    j = json::object();
+    for (auto const& [key, val] : m) {
+        // Convert Enum -> string via magic_enum
+        std::string key_str = std::string(magic_enum::enum_name(key));
+        j[key_str] = val; // This calls to_json on 'val' if it’s a type with a known converter
+    }
+}
+
+template <typename Enum, typename Value>
+requires std::is_enum_v<Enum>
+void from_json(const json& j, std::unordered_map<Enum, Value>& m)
+{
+    m.clear();
+    for (auto const& [key_str, value_json] : j.items()) {
+        // Convert string -> Enum
+        auto maybe = magic_enum::enum_cast<Enum>(key_str);
+        if (!maybe.has_value()) {
+            throw std::invalid_argument("Invalid enum key: " + key_str);
+        }
+        m[maybe.value()] = value_json.get<Value>();
+    }
+}
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(mob_special_data, attack_type, default_pos, damnodice, damsizedice)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, secondsAged)

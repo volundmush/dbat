@@ -792,8 +792,8 @@ ACMD(do_selfd) {
         if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
             GET_SDCOOLDOWN(ch) = 600;
         }
-        if ((IS_MAJIN(ch) || IS_BIO(ch)) && ch->getCurVitalDam(CharVital::LifeForce) < 0.5) {
-            ch->modCurVitalDam(CharVital::LifeForce, -2.0);
+        if ((IS_MAJIN(ch) || IS_BIO(ch)) && ch->getCurVitalDam(CharVital::lifeforce) < 0.5) {
+            ch->modCurVitalDam(CharVital::lifeforce, -2.0);
             ch->playerFlags.set(PLR_GOOP);
             ch->gooptime = 70;
         } else {

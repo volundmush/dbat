@@ -1129,10 +1129,10 @@ void check_auction(uint64_t heartPulse, double deltaTime) {
                                  "You couldn't hold all the zenni, so some of it was deposited for you.\r\n");
                     int diff = 0;
                     diff = (GET_GOLD(ch_selling) + curbid) - GOLD_CARRY(ch_selling);
-                    ch_selling->set(CharMoney::Carried, GOLD_CARRY(ch_selling));
-                    ch_selling->mod(CharMoney::Bank, diff);
+                    ch_selling->set(CharMoney::carried, GOLD_CARRY(ch_selling));
+                    ch_selling->mod(CharMoney::bank, diff);
                 } else if (GET_GOLD(ch_selling) + curbid <= GOLD_CARRY(ch_selling)) {
-                    ch_selling->mod(CharMoney::Carried, curbid);
+                    ch_selling->mod(CharMoney::carried, curbid);
                 }
                 /* Reset auctioning values */
                 obj_selling = nullptr;
@@ -1608,7 +1608,7 @@ void stop_auction(int type, struct char_data *ch) {
 
 
     if (!(ch_buying == nullptr))
-        ch_buying->mod(CharMoney::Carried, curbid);
+        ch_buying->mod(CharMoney::carried, curbid);
 
     obj_selling = nullptr;
     ch_selling = nullptr;
@@ -1634,7 +1634,7 @@ static void auc_stat(struct char_data *ch, struct obj_data *obj) {
         /* auctioneer tells the character the auction details */
         sprintf(buf, auctioneer[AUC_STAT], curbid);
         act(buf, true, ch_selling, obj, ch, TO_VICT | TO_SLEEP);
-        ch->mod(CharMoney::Carried, -500);
+        ch->mod(CharMoney::carried, -500);
 
         /*call_magic(ch, nullptr, obj_selling, SPELL_IDENTIFY, 30, CAST_SPELL);*/
     }
@@ -1977,12 +1977,12 @@ static void get_check_money(struct char_data *ch, struct obj_data *obj) {
         diff = (GET_GOLD(ch) + value) - GOLD_CARRY(ch);
         obj = create_money(diff);
         obj_to_room(obj, IN_ROOM(ch));
-        ch->set(CharMoney::Carried, GOLD_CARRY(ch));
+        ch->set(CharMoney::carried, GOLD_CARRY(ch));
         return;
     }
 
 
-    ch->mod(CharMoney::Carried, value);
+    ch->mod(CharMoney::carried, value);
     extract_obj(obj);
 
     if (value == 1) {
@@ -2328,7 +2328,7 @@ static void perform_drop_gold(struct char_data *ch, int amount,
 
             send_to_char(ch, "You drop some zenni which disappears in a puff of smoke!\r\n");
         }
-        ch->mod(CharMoney::Carried, -amount);
+        ch->mod(CharMoney::carried, -amount);
     }
 }
 
@@ -2701,8 +2701,8 @@ static void perform_give_gold(struct char_data *ch, struct char_data *vict,
     act(buf, true, ch, nullptr, vict, TO_NOTVICT);
 
     if (IS_NPC(ch) || !ADM_FLAGGED(ch, ADM_MONEY))
-        ch->mod(CharMoney::Carried, -amount);
-    vict->mod(CharMoney::Carried, amount);
+        ch->mod(CharMoney::carried, -amount);
+    vict->mod(CharMoney::carried, amount);
 
     bribe_mtrigger(vict, ch, amount);
 }
@@ -3215,27 +3215,27 @@ ACMD(do_eat) {
             if(axion_dice(0) < attrChance) {
                 switch(attr) {
                     case 1:
-                        ch->mod(CharAttribute::Strength, 1);
+                        ch->mod(CharAttribute::strength, 1);
                         send_to_char(ch, "@mThat was a hearty meal!@n\r\n");
                         break;
                     case 2:
-                        ch->mod(CharAttribute::Agility, 1);
+                        ch->mod(CharAttribute::agility, 1);
                         send_to_char(ch, "@mDiced to perfection.@n\r\n");
                         break;
                     case 3:
-                        ch->mod(CharAttribute::Constitution, 1);
+                        ch->mod(CharAttribute::constitution, 1);
                         send_to_char(ch, "@mWhat a fortifying meal!@n\r\n");
                         break;
                     case 4:
-                        ch->mod(CharAttribute::Intelligence, 1);
+                        ch->mod(CharAttribute::intelligence, 1);
                         send_to_char(ch, "@mA splendid dish!@n\r\n");
                         break;
                     case 5:
-                        ch->mod(CharAttribute::Speed, 1);
+                        ch->mod(CharAttribute::speed, 1);
                         send_to_char(ch, "@mWhere did it all go?@n\r\n");
                         break;
                     case 6:
-                        ch->mod(CharAttribute::Wisdom, 1);
+                        ch->mod(CharAttribute::wisdom, 1);
                         send_to_char(ch, "@mYou feel sated. Content.@n\r\n");
                         break;
                 }
@@ -4063,7 +4063,7 @@ ACMD(do_sac) {
             case 0:
                 send_to_char(ch, "You sacrifice %s to the Gods.\r\nYou receive one zenni for your humility.\r\n",
                              GET_OBJ_SHORT(j));
-                ch->mod(CharMoney::Carried, 1);
+                ch->mod(CharMoney::carried, 1);
                 break;
             case 1:
                 send_to_char(ch, "You sacrifice %s to the Gods.\r\nThe Gods ignore your sacrifice.\r\n",
@@ -4081,16 +4081,16 @@ ACMD(do_sac) {
                 break;
             case 4:
                 send_to_char(ch, "Your sacrifice to the Gods is rewarded with %d zenni.\r\n", GET_OBJ_COST(j));
-                ch->mod(CharMoney::Carried, GET_OBJ_COST(j));
+                ch->mod(CharMoney::carried, GET_OBJ_COST(j));
                 break;
             case 5:
                 send_to_char(ch, "Your sacrifice to the Gods is rewarded with %d zenni\r\n", (2 * GET_OBJ_COST(j)));
-                ch->mod(CharMoney::Carried, (2 * GET_OBJ_COST(j)));
+                ch->mod(CharMoney::carried, (2 * GET_OBJ_COST(j)));
                 break;
             default:
                 send_to_char(ch, "You sacrifice %s to the Gods.\r\nYou receive one zenni for your humility.\r\n",
                              GET_OBJ_SHORT(j));
-                ch->mod(CharMoney::Carried, 1);
+                ch->mod(CharMoney::carried, 1);
                 break;
         }
     } else {

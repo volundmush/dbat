@@ -995,20 +995,20 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                                              spell_info[GET_FORGETING(ch)].name);
                                 GET_FORGETING(ch) = 0;
                                 GET_FORGET_COUNT(ch) = 0;
-                                if(skill_num == (int)SkillID::Kaioken) {
-                                    ch->transforms.erase(FormID::Kaioken);
+                                if(skill_num == (int)SkillID::kaioken) {
+                                    ch->transforms.erase(FormID::kaioken);
                                 }
-                                if(skill_num == (int)SkillID::Metamorph) {
-                                    ch->transforms.erase(FormID::DarkMeta);
+                                if(skill_num == (int)SkillID::dark_metamorphosis) {
+                                    ch->transforms.erase(FormID::dark_metamorphosis);
                                 }
-                                if(skill_num == (int)SkillID::TigerStance) {
-                                    ch->transforms.erase(FormID::TigerStance);
+                                if(skill_num == (int)SkillID::tiger_stance) {
+                                    ch->transforms.erase(FormID::tiger_stance);
                                 }
-                                if(skill_num == (int)SkillID::EagleStance) {
-                                    ch->transforms.erase(FormID::EagleStance);
+                                if(skill_num == (int)SkillID::eagle_stance) {
+                                    ch->transforms.erase(FormID::eagle_stance);
                                 }
-                                if(skill_num == (int)SkillID::OxStance) {
-                                    ch->transforms.erase(FormID::OxStance);
+                                if(skill_num == (int)SkillID::ox_stance) {
+                                    ch->transforms.erase(FormID::ox_stance);
                                 }
                             }
                         } else if (GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
@@ -1157,7 +1157,7 @@ void handle_study(struct char_data *keeper, int guild_nr, struct char_data *ch, 
         return;
 
     ch->modExperience(-expcost);
-    ch->mod(CharMoney::Carried, -goldcost);
+    ch->mod(CharMoney::carried, -goldcost);
     ch->modPractices(25);
 
     act("@c$N@W spends time lecturing you on various subjects.@n", true, ch, nullptr, keeper, TO_CHAR);

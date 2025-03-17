@@ -314,7 +314,7 @@ void char_data::activate() {
         services.insert("kiChargeSystem");
     if(PLR_FLAGGED(this, PLR_FISHING))
         services.insert("goneFishing");
-    if(form != FormID::Base || technique != FormID::Base)
+    if(form != FormID::base || technique != FormID::base)
         services.insert("transforms");
     services.insert("active");
 
@@ -356,15 +356,15 @@ void char_data::deactivate() {
 
 
 weight_t char_data::getWeight(bool base) {
-    return get(CharDim::Weight, base);
+    return get(CharDim::weight, base);
 }
 
 dim_t char_data::getHeight(bool base) {
-    return get(CharDim::Height, base);
+    return get(CharDim::height, base);
 }
 
 dim_t char_data::setHeight(dim_t val) {
-    return set(CharDim::Height, std::max(0.0, val));
+    return set(CharDim::height, std::max(0.0, val));
 }
 
 dim_t char_data::modHeight(dim_t val) {

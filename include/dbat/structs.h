@@ -605,8 +605,8 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     std::shared_ptr<char_data> shared();
 
     char *title{};
-    RaceID race{RaceID::Spirit};
-    SenseiID chclass{SenseiID::Commoner};
+    RaceID race{RaceID::spirit};
+    SenseiID chclass{SenseiID::commoner};
 
     std::list<std::pair<int, std::string>> wait_input_queue;
     Task task = Task::nothing;
@@ -765,8 +765,8 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int accuracy_mod{};        /* Any bonus or penalty to the accuracy	*/
     int damage_mod{};        /* Any bonus or penalty to the damage	*/
 
-    FormID form{FormID::Base};        /* Current form of the character		*/
-    FormID technique{FormID::Base};        /* Current technique form of the character		*/
+    FormID form{FormID::base};        /* Current form of the character		*/
+    FormID technique{FormID::base};        /* Current technique form of the character		*/
     std::unordered_set<FormID> permForms;    /* Permanent forms of the character	*/
     double transBonus{0.0};   // Varies from -0.3 to 0.3
     double internalGrowth{0.0};

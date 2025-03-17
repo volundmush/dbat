@@ -155,27 +155,27 @@ static void weather_change() {
 }
 
 void oozaru_revert(char_data *ch) {
-    if (!(ch->form == FormID::Oozaru || ch->form == FormID::GoldenOozaru || ch->form == FormID::Lycanthrope || ch->form == FormID::AlphaLycanthrope))
+    if (!(ch->form == FormID::oozaru || ch->form == FormID::golden_oozaru || ch->form == FormID::lycanthrope || ch->form == FormID::alpha_lycanthrope))
         return;
 
     auto &data = ch->transforms[ch->form];
     data.blutz = 0.0;
 
-    if(ch->form == FormID::Oozaru || ch->form == FormID::GoldenOozaru ) {
+    if(ch->form == FormID::oozaru || ch->form == FormID::golden_oozaru ) {
         act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C's body begins to shrink and return to normal. Their giant ape features fading back into humanoid features until $e is left normal.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
 
-        ch->form = FormID::Base;
+        ch->form = FormID::base;
     } else {
         act("@CYour body begins to shrink back to its lesser form as the power of the moon subsides!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C's body begins to shrink to a lesser form. Their animalistic features fading back and becoming less pronounced.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        if(!ch->transforms.contains(FormID::LesserLycanthrope))
-            ch->addTransform(FormID::LesserLycanthrope);
-        ch->form = FormID::LesserLycanthrope;
+        if(!ch->transforms.contains(FormID::lesser_lycanthrope))
+            ch->addTransform(FormID::lesser_lycanthrope);
+        ch->form = FormID::lesser_lycanthrope;
     }
 
 }
