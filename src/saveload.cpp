@@ -98,73 +98,6 @@ void from_json(const json& j, std::bitset<N>& bs) {
     }
 }
 
-void to_json(json& j, const mob_special_data& m) {
-    if(m.attack_type) j["attack_type"] = m.attack_type;
-    if(m.default_pos != POS_STANDING) j["default_pos"] = m.default_pos;
-    if(m.damnodice) j["damnodice"] = m.damnodice;
-    if(m.damsizedice) j["damsizedice"] = m.damsizedice;
-}
-
-void from_json(const json& j, mob_special_data& m) {
-    if(j.contains("attack_type")) m.attack_type = j["attack_type"];
-    if(j.contains("default_pos")) m.default_pos = j["default_pos"];
-    if(j.contains("damnodice")) m.damnodice = j["damnodice"];
-    if(j.contains("damsizedice")) m.damsizedice = j["damsizedice"];
-}
-
-void to_json(json& j, const time_data &t) {
-    if(t.birth) j["birth"] = t.birth;
-    if(t.created) j["created"] = t.created;
-    if(t.maxage) j["maxage"] = t.maxage;
-    if(t.logon) j["logon"] = t.logon;
-    if(t.played != 0.0) j["played"] = t.played;
-    if(t.secondsAged != 0.0) j["secondsAged"] = t.secondsAged;
-}
-
-void from_json(const json& j, time_data &t) {
-    if(j.contains("birth")) t.birth = j["birth"];
-    if(j.contains("created")) t.created = j["created"];
-    if(j.contains("maxage")) t.maxage = j["maxage"];
-    if(j.contains("logon")) t.logon = j["logon"];
-    if(j.contains("played")) t.played = j["played"];
-    if(j.contains("secondsAged")) t.secondsAged = j["secondsAged"];
-}
-
-
-void to_json(json& j, const time_info_data &t) {
-    j["remainder"] = t.remainder;
-    j["seconds"] = t.seconds;
-    j["minutes"] = t.minutes;
-    j["hours"] = t.hours;
-    j["day"] = t.day;
-    j["month"] = t.month;
-    j["year"] = t.year;
-}
-
-void from_json(const json& j, time_info_data &t) {
-    if(j.contains("remainder")) t.remainder = j["remainder"];
-    if(j.contains("seconds")) t.seconds = j["seconds"];
-    if(j.contains("minutes")) t.minutes = j["minutes"];
-    if(j.contains("hours")) t.hours = j["hours"];
-    if(j.contains("day")) t.day = j["day"];
-    if(j.contains("month")) t.month = j["month"];
-    if(j.contains("year")) t.year = j["year"];
-}
-
-void to_json(json& j, const weather_data &w) {
-    j["pressure"] = w.pressure;
-    j["change"] = w.change;
-    j["sky"] = w.sky;
-    j["sunlight"] = w.sunlight;
-}
-
-void from_json(const json& j, weather_data &w) {
-    if(j.contains("pressure")) w.pressure = j["pressure"];
-    if(j.contains("change")) w.change = j["change"];
-    if(j.contains("sky")) w.sky = j["sky"];
-    if(j.contains("sunlight")) w.sunlight = j["sunlight"];
-}
-
 
 // zone_data and reset_com serialize/deserialize...
 void to_json(json& j, const reset_com& r) {
@@ -610,16 +543,6 @@ static void dump_dgscripts(const std::filesystem::path &loc) {
 }
 
 // shops serialize/deserialize...
-void to_json(json& j, const shop_buy_data& b) {
-    if(b.type) j["type"] = b.type;
-    if(!b.keywords.empty()) j["keywords"] = b.keywords;
-}
-
-void from_json(const json& j, shop_buy_data& b) {
-    if(j.contains("type")) b.type = j["type"];
-    if(j.contains("keywords")) b.keywords = j["keywords"];
-}
-
 void to_json(json&j, const shop_data& s) {
     j["vnum"] = s.vnum;
     if(!s.producing.empty()) j["producing"] = s.producing;
@@ -1270,28 +1193,6 @@ static void dump_item_prototypes(const std::filesystem::path &loc) {
 }
 
 // char_data serialize/deserialize...
-void to_json(json& j, const skill_data& s) {
-    if(s.level) j["level"] = s.level;
-    if(s.perfs) j["perfs"] = s.perfs;
-}
-
-void from_json(const json& j, skill_data& s) {
-    if(j.contains("level")) s.level = j["level"];
-    if(j.contains("perfs")) s.perfs = j["perfs"];
-}
-
-void to_json(json& j, const alias_data& a) {
-    if(!a.name.empty()) j["name"] = a.name;
-    if(!a.replacement.empty()) j["replacement"] = a.replacement;
-    if(a.type) j["type"] = a.type;
-}
-
-void from_json(const json& j, alias_data& a) {
-    if(j.contains("name")) a.name = j["name"];
-    if(j.contains("replacement")) a.replacement = j["replacement"];
-    if(j.contains("type")) a.type = j["type"];
-}
-
 void to_json(json& j, const trans_data& t) {
     if(t.timeSpentInForm != 0.0) j["timeSpentInForm"] = t.timeSpentInForm;
     j["visible"] = t.visible;

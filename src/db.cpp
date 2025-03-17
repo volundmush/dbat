@@ -1039,7 +1039,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
 
     *mob = proto->second;
     mob->proto = &(proto->second);
-    mob->id = nextID();
+    mob->id = getNextUnitID();
     mob->generation = time(nullptr);
     uniqueCharacters.emplace(mob->id, sh);
     units.emplace(mob->id, sh);
@@ -1589,7 +1589,7 @@ char *sprintuniques(int low, int high) {
 /* create an object, and add it to the object list */
 struct obj_data *create_obj() {
     auto sh = std::make_shared<obj_data>();
-    sh->id = nextID();
+    sh->id = getNextUnitID();
     sh->generation = time(nullptr);
     uniqueObjects.emplace(sh->id, sh);
     units.emplace(sh->id, sh);
@@ -1616,7 +1616,7 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     *obj = proto->second;
     obj->proto = &(proto->second);
     OBJ_LOADROOM(obj) = NOWHERE;
-    obj->id = nextID();
+    obj->id = getNextUnitID();
     obj->generation = time(nullptr);
     uniqueObjects.emplace(obj->id, sh);
     units.emplace(obj->id, sh);
@@ -2869,9 +2869,15 @@ void load_config() {
 }
 
 
-int nextID() {
+int getNextUnitID() {
     static int id = 0;
     while(units.contains(id)) id++;
+    return id;
+}
+
+int getNextAccountID() {
+    static int id = 0;
+    while(accounts.contains(id)) id++;
     return id;
 }
 

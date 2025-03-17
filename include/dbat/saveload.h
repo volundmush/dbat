@@ -27,17 +27,11 @@ void load_characters_initial(const std::filesystem::path& loc);
 
 void load_players(const std::filesystem::path& loc);
 
-void to_json(json& j, const mob_special_data& m);
-void from_json(const json& j, mob_special_data& m);
-
-void to_json(json& j, const time_data &t);
-void from_json(const json& j, time_data &t);
-
-void to_json(json& j, const time_info_data &t);
-void from_json(const json& j, time_info_data &t);
-
-void to_json(json& j, const weather_data &w);
-void from_json(const json& j, weather_data &w);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(mob_special_data, attack_type, default_pos, damnodice, damsizedice)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, secondsAged)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_info_data, remainder, seconds, minutes, hours, day, month, year)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(weather_data, pressure, change, sky, sunlight)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(shop_buy_data, type, keywords)
 
 void to_json(json& j, const reset_com& r);
 void from_json(const json& j, reset_com& r);
@@ -57,9 +51,6 @@ void from_json(const json& j, trig_var_data& t);
 void to_json(json& j, const trig_data& t);
 void from_json(const json& j, trig_data& t);
 
-void to_json(json& j, const shop_buy_data& b);
-void from_json(const json& j, shop_buy_data& b);
-
 void to_json(json&j, const shop_data& s);
 void from_json(const json& j, shop_data& s);
 
@@ -78,11 +69,8 @@ void from_json(const json& j, room_data& r);
 void to_json(json& j, const obj_data& o);
 void from_json(const json& j, obj_data& o);
 
-void to_json(json& j, const skill_data& s);
-void from_json(const json& j, skill_data& s);
-
-void to_json(json& j, const alias_data& a);
-void from_json(const json& j, alias_data& a);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(skill_data, level, perfs)
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(alias_data, name, replacement, type)
 
 void to_json(json& j, const trans_data& t);
 void from_json(const json& j, trans_data& t);

@@ -66,3 +66,20 @@ async def get_user_characters(
 
     found = character_db.for_user(user)
     return streaming_list(found)
+
+@router.delete("/{user_id}", response_model=AccountData)
+async def delete_user(
+    user_id: int, user: Annotated[AccountData, Depends(get_current_user)]
+):
+    if user.adminLevel < 5 and user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
+        )
+
+    found = users_db.get_user(user_id)
+    if found.adminLevel > user.adminLevel:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
+        )
+    users_db.delete_user(user_id)
+    return found

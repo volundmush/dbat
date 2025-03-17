@@ -1,4 +1,5 @@
 import typing
+import pydantic
 from pydantic import BaseModel, Field
 
 class MobSpecialData(BaseModel):
@@ -71,7 +72,7 @@ class AffectedTypeData(AffectData):
 class AccountData(BaseModel):
     vn: int = -1
     name: str = ""
-    passHash: str = ""
+    passHash: pydantic.SecretStr = ""
     email: str = ""
     created: int = 0
     lastLogin: int = 0

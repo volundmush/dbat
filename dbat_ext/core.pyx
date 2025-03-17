@@ -237,6 +237,31 @@ cdef class AccountDB:
     def keys(self) -> typing.AsyncGenerator[int, None]:
         for vn in db.accounts:
             yield vn.first
+    
+    def create(self, data: dict):
+        # the dict should only contain name, passHash, and adminLevel.
+        # we'll add the ID here.
+        id = db.getNextAccountID()
+        data["vn"] = id
+        serialized = orjson.dumps(data)
+        # now we'll turn it into a nlohmann::json...
+        j = jloads(serialized)
+        # and insert into the accounts map.
+        a = db.accounts[id]
+        from_json(j, a)
+        db.accounts[id] = a
+        return game_models.AccountData.model_validate_json(self._dump(a))
+    
+    def update(self, id: int, data: dict):
+        found = db.accounts.find(id)
+        if found == db.accounts.end():
+            raise ValueError(f"Account {id} not found.")
+        a = deref(found).second
+        serialized = orjson.dumps(data)
+        j = jloads(serialized)
+        from_json(j, a)
+        return game_models.AccountData.model_validate_json(self._dump(a))
+
 
 account_db = AccountDB()
 

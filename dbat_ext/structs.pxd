@@ -46,7 +46,7 @@ cdef extern from "dbat/structs.h":
         int spellname
         int pages
     
-    cdef struct account_data:
+    cdef cppclass account_data:
         int vn
         string name
         string passHash

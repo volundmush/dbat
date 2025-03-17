@@ -20,9 +20,14 @@ async def register_user(
         adminLevel=adminLevel
     )
     
-    # TODO: actually save it.
+    # this will have handled validation so now we just need to do something about the SecretStr
+    data = user.model_dump(exclude_unset=True)
+    # deal with the secretstr.
+    data["passHash"] = hashed_password
     
-    return user
+    new_user = account_db.create(data)
+    
+    return new_user
 
 
 async def authenticate_user(
@@ -35,16 +40,17 @@ async def authenticate_user(
             status_code=status.HTTP_400_BAD_REQUEST, detail="User not found."
         )
     plain_text = False
-    if password == retrieved.passHash:
+    retrieved_password = retrieved.passHash.get_secret_value()
+    if password == retrieved_password:
         plain_text = True
-    if not plain_text and not crypt_context.verify(password, retrieved.passHash):
+    if not plain_text and not crypt_context.verify(password, retrieved_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid credentials."
         )
     if plain_text:
-        # rehash the password if it was plain text
+        # hash the password if it was plain text
         hashed = crypt_context.hash(password)
         retrieved.passHash = hashed
-        # TODO: actually save it.
+        account_db.update(retrieved.id, {"passHash": hashed})
     return retrieved
 

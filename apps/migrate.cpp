@@ -2769,7 +2769,7 @@ void migrate_accounts() {
         std::ifstream file(p.path());
 
         // Step 1: create an ID for this account...
-        auto id = account_data::getNextID();
+        auto id = getNextAccountID();
 
         // Now let's get a new account_data...
         auto &a = accounts[id];
@@ -2859,7 +2859,7 @@ void migrate_characters() {
             continue;
         }
         auto ch = sh.get();
-        auto id = nextID();
+        auto id = getNextUnitID();
         auto &p = players[id];
         p.id = id;
         ch->id = id;
