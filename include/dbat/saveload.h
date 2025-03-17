@@ -63,6 +63,7 @@ void to_json(json& j, const std::map<Enum, Value>& m)
     for (auto const& [key, val] : m) {
         // Convert Enum -> string via magic_enum
         std::string key_str = std::string(magic_enum::enum_name(key));
+        if(key_str.empty()) continue;
         j[key_str] = val; // This calls to_json on 'val' if it’s a type with a known converter
     }
 }
@@ -76,7 +77,9 @@ void from_json(const json& j, std::map<Enum, Value>& m)
         // Convert string -> Enum
         auto maybe = magic_enum::enum_cast<Enum>(key_str);
         if (!maybe.has_value()) {
-            throw std::invalid_argument("Invalid enum key: " + key_str);
+            if(typeid(Enum) == typeid(SkillID)) continue;
+            throw std::invalid_argument("Invalid enum key: " + key_str
+            + " for enum type: " + demangle(typeid(Enum).name()));
         }
         m[maybe.value()] = value_json.get<Value>();
     }
@@ -90,6 +93,7 @@ void to_json(json& j, const std::unordered_map<Enum, Value>& m)
     for (auto const& [key, val] : m) {
         // Convert Enum -> string via magic_enum
         std::string key_str = std::string(magic_enum::enum_name(key));
+        if(key_str.empty()) continue;
         j[key_str] = val; // This calls to_json on 'val' if it’s a type with a known converter
     }
 }
@@ -103,7 +107,9 @@ void from_json(const json& j, std::unordered_map<Enum, Value>& m)
         // Convert string -> Enum
         auto maybe = magic_enum::enum_cast<Enum>(key_str);
         if (!maybe.has_value()) {
-            throw std::invalid_argument("Invalid enum key: " + key_str);
+            if(typeid(Enum) == typeid(SkillID)) continue;
+            throw std::invalid_argument("Invalid enum key: " + key_str
+                + " for enum type: " + demangle(typeid(Enum).name()));
         }
         m[maybe.value()] = value_json.get<Value>();
     }

@@ -103,11 +103,11 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict) {
     int i = 1;
     send_to_char(ch, "@YAll your current skills improve somewhat!@n\r\n");
 
-    for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
+    for (auto &[skid, s] : ch->skill) {
+        auto i = static_cast<int>(skid);
 
         if (GET_SKILL_BASE(ch, i) > 0 && GET_SKILL_BASE(vict, i) > 0 && i != 141) {
             send_to_char(ch, "@YYou gained a lot of new knowledge about @y%s@Y!@n\r\n", spell_info[i].name);
-			auto &s = ch->skill[i];
             if(s.level + 10 < 100) s.level += 10;
             else if(s.level > 0 && s.level < 100) s.level += 1;
             else s.level = 100;
@@ -121,8 +121,6 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict) {
             GET_INGESTLEARNED(ch) = 1;
 
         }
-
-
     }
 }
 
@@ -261,7 +259,8 @@ int print_skills_by_type(struct char_data *ch, char *buf, int maxsz, int sktype,
 
     one_argument(argument, arg);
 
-    for (auto &[i, sk] : ch->skill) {
+    for (auto &[skid, sk] : ch->skill) {
+        auto i = static_cast<int>(skid);
         t = spell_info[i].skilltype;
 
         if (t != sktype)

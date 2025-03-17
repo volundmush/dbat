@@ -3068,7 +3068,7 @@ int16_t GET_SKILL_BONUS(struct char_data *ch, uint16_t skill) {
 }
 
 int16_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
-    auto found = ch->skill.find(skill);
+    auto found = ch->skill.find(static_cast<SkillID>(skill));
     if (found != ch->skill.end()) {
         return found->second.perfs;
     }
@@ -3076,7 +3076,7 @@ int16_t GET_SKILL_PERF(struct char_data *ch, uint16_t skill) {
 }
 
 int16_t GET_SKILL_BASE(struct char_data *ch, uint16_t skill) {
-    auto found = ch->skill.find(skill);
+    auto found = ch->skill.find(static_cast<SkillID>(skill));
     if (found != ch->skill.end()) {
         return found->second.level;
     }
@@ -3088,7 +3088,7 @@ int16_t GET_SKILL(struct char_data *ch, uint16_t skill) {
 }
 
 void SET_SKILL(struct char_data *ch, uint16_t skill, int16_t val) {
-    auto &s = ch->skill[skill];
+    auto &s = ch->skill[static_cast<SkillID>(skill)];
     s.level = val;
 }
 
@@ -3097,7 +3097,7 @@ void SET_SKILL_BONUS(struct char_data *ch, uint16_t skill, int16_t val) {
 }
 
 void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
-    auto &s = ch->skill[skill];
+    auto &s = ch->skill[static_cast<SkillID>(skill)];
     s.perfs = val;
 }
 

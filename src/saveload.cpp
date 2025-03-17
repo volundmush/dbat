@@ -1333,11 +1333,7 @@ void to_json(json& j, const char_data& c) {
         if(get_room(c.load_room)) j["load_room"] = c.load_room;
         if(get_room(c.hometown)) j["hometown"] = c.hometown;
 
-        for(auto &[skill_id, s] : c.skill) {
-            json sk;
-            to_json(sk, s);
-            if(!sk.empty()) j["skill"].push_back(std::make_pair(skill_id, sk));
-        }
+        if(!c.skill.empty()) j["skill"] = c.skill;
 
         if(c.speaking) j["speaking"] = c.speaking;
         if(c.preference) j["preference"] = c.preference;
@@ -1506,12 +1502,7 @@ void from_json(const json& j, char_data& c) {
 
         if(j.contains("was_in_room")) c.was_in_room = j["was_in_room"];
 
-        if(j.contains("skill")) {
-            for(auto &i : j["skill"]) {
-                auto id = i[0].get<uint16_t>();
-                c.skill.emplace(id, i[1]);
-            }
-        }
+        if(j.contains("skill")) c.skill = j["skill"].get<std::map<SkillID, skill_data>>();
 
         if(j.contains("affected")) {
             auto ja = j["affected"];

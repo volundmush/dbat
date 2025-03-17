@@ -741,7 +741,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     /* One bitvector array per CFEAT_ type	*/
     int school_feats[SFEAT_MAX + 1]{};/* One bitvector array per CFEAT_ type	*/
 
-    std::map<uint16_t, skill_data> skill;
+    std::map<SkillID, skill_data> skill;
 
     std::bitset<NUM_PLR_FLAGS> playerFlags{}; /* act flag for NPC's; player flag for PC's */
     std::bitset<NUM_MOB_FLAGS> mobFlags{};
