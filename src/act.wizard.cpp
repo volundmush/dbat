@@ -423,7 +423,7 @@ ACMD(do_approve) {
         send_to_char(ch, "They have already been approved. If this was made in error inform Iovan.\r\n");
         return;
     } else {
-        vict->playerFlags.set(PLR_BIOGR);
+        vict->setPlayerFlag(PLR_BIOGR, true);
         send_to_char(ch, "They have now been approved.\r\n");
         return;
     }
@@ -2452,9 +2452,9 @@ ACMD(do_syslog) {
         send_to_char(ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
         return;
     }
-    for(auto f : {PRF_LOG1, PRF_LOG2}) ch->pref.reset(f);
-    if (tp & 1) ch->pref.set(PRF_LOG1);
-    if (tp & 2) ch->pref.set(PRF_LOG2);
+    for(auto f : {PRF_LOG1, PRF_LOG2}) ch->setPrefFlag(f, false);
+    if (tp & 1) ch->setPrefFlag(PRF_LOG1, true);
+    if (tp & 2) ch->setPrefFlag(PRF_LOG2, true);
 
     send_to_char(ch, "Your syslog is now %s.\r\n", logtypes[tp]);
 }
@@ -3103,20 +3103,20 @@ ACMD(do_wizutil) {
                     send_to_char(ch, "Your victim is not flagged.\r\n");
                     return;
                 }
-            for(auto f : {PLR_THIEF, PLR_KILLER}) vict->playerFlags.reset(f);
+            for(auto f : {PLR_THIEF, PLR_KILLER}) vict->setPlayerFlag(f, false);
                 send_to_char(ch, "Pardoned.\r\n");
                 send_to_char(vict, "You have been pardoned by the Gods!\r\n");
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s pardoned by %s", GET_NAME(vict),
                        GET_NAME(ch));
                 break;
             case SCMD_NOTITLE:
-                result = vict->playerFlags.flip(PLR_NOTITLE).test(PLR_NOTITLE);
+                result = vict->togglePlayerFlag(PLR_NOTITLE);
                 mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Notitle %s for %s by %s.",
                        ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 send_to_char(ch, "(GC) Notitle %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 break;
             case SCMD_SQUELCH:
-                result = vict->playerFlags.flip(PLR_NOSHOUT).test(PLR_NOSHOUT);
+                result = vict->togglePlayerFlag(PLR_NOSHOUT);
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Squelch %s for %s by %s.",
                        ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 send_to_char(ch, "(GC) Mute turned %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
@@ -3136,7 +3136,7 @@ ACMD(do_wizutil) {
                     send_to_char(ch, "Your victim is already pretty cold.\r\n");
                     return;
                 }
-                vict->playerFlags.set(PLR_FROZEN);
+                vict->setPlayerFlag(PLR_FROZEN, true);
                 GET_FREEZE_LEV(vict) = GET_ADMLEVEL(ch);
                 send_to_char(vict,
                              "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
@@ -3157,7 +3157,7 @@ ACMD(do_wizutil) {
                 }
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s un-frozen by %s.", GET_NAME(vict),
                        GET_NAME(ch));
-                vict->playerFlags.reset(PLR_FROZEN);
+                vict->setPlayerFlag(PLR_FROZEN, false);
                 send_to_char(vict,
                              "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
                 send_to_char(ch, "Thawed.\r\n");
@@ -3729,15 +3729,16 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         send_to_char(ch, "%s", CONFIG_OK);
 
     switch (mode) {
-        case 0: SET_OR_REMOVE(vict->pref, PRF_BRIEF);
+        case 0: vict->togglePrefFlag(PRF_BRIEF);
             break;
-        case 1: SET_OR_REMOVE(vict->playerFlags, PLR_INVSTART);
+        case 1: 
+            vict->togglePlayerFlag(PLR_INVSTART);
             break;
         case 2:
             set_title(vict, val_arg);
             send_to_char(ch, "%s's title is now: %s\r\n", GET_NAME(vict), GET_TITLE(vict));
             break;
-        case 3: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_SUMMONABLE);
+        case 3: vict->togglePrefFlag(PRF_SUMMONABLE);
             send_to_char(ch, "Nosummon %s for %s.\r\n", ONOFF(!on), GET_NAME(vict));
             break;
         case 4:
@@ -3877,14 +3878,14 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "You aren't godly enough for that!\r\n");
                 return (0);
             }
-            SET_OR_REMOVE(PRF_FLAGS(vict), PRF_NOHASSLE);
+            vict->togglePrefFlag(PRF_NOHASSLE);
             break;
         case 26:
             if (ch == vict && on) {
                 send_to_char(ch, "Better not -- could be a long winter!\r\n");
                 return (0);
             }
-            SET_OR_REMOVE(PLR_FLAGS(vict), PLR_FROZEN);
+            vict->togglePlayerFlag(PLR_FROZEN);
             break;
         case 27:
         case 28:
@@ -3909,9 +3910,9 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 32: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_KILLER);
+        case 32: vict->togglePlayerFlag(PLR_KILLER);
             break;
-        case 33: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_THIEF);
+        case 33: vict->togglePlayerFlag(PLR_THIEF);
             break;
         case 34:
             if (!IS_NPC(vict) && value > 100) {
@@ -3930,11 +3931,11 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 char_from_room(vict);
             char_to_room(vict, rnum);
             break;
-        case 36: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_ROOMFLAGS);
+        case 36: vict->togglePrefFlag(PRF_ROOMFLAGS);
             break;
-        case 37: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_SITEOK);
+        case 37: vict->togglePlayerFlag(PLR_SITEOK);
             break;
-        case 38: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_DELETED);
+        case 38: vict->togglePlayerFlag(PLR_DELETED);
             break;
         case 39: {
             auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, vict->race);};
@@ -3946,18 +3947,18 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             vict->chclass = chosen_sensei.value();
         }
             break;
-        case 40: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NOWIZLIST);
+        case 40: vict->togglePlayerFlag(PLR_NOWIZLIST);
             break;
-        case 41: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_QUEST);
+        case 41: vict->togglePrefFlag(PRF_QUEST);
             break;
         case 42:
             if (!strcasecmp(val_arg, "off")) {
-                vict->playerFlags.reset(PLR_LOADROOM);
+                vict->setPlayerFlag(PLR_LOADROOM, false);
                 GET_LOADROOM(vict) = NOWHERE;
             } else if (is_number(val_arg)) {
                 rvnum = atoi(val_arg);
                 if (real_room(rvnum) != NOWHERE) {
-                    vict->playerFlags.set(PLR_LOADROOM);
+                    vict->setPlayerFlag(PLR_LOADROOM, true);
                     GET_LOADROOM(vict) = rvnum;
                     send_to_char(ch, "%s will enter at room #%d.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
                 } else {
@@ -3969,7 +3970,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 43: SET_OR_REMOVE(PRF_FLAGS(vict), PRF_COLOR);
+        case 43: vict->togglePrefFlag(PRF_COLOR);
             break;
         case 44:
             if (GET_IDNUM(ch) == 0 || IS_NPC(vict))
@@ -3986,7 +3987,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 46: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_NODELETE);
+        case 46: vict->togglePlayerFlag(PLR_NODELETE);
             break;
         case 47:
             if ((i = search_block(val_arg, genders, false)) < 0) {
@@ -4180,7 +4181,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         case 72:
             GET_BOOSTS(vict) = RANGE(-1000, 1000);
             break;
-        case 73: SET_OR_REMOVE(PLR_FLAGS(vict), PLR_MULTP);
+        case 73: vict->togglePlayerFlag(PLR_MULTP);
             break;
         case 74:
             GET_DCOUNT(vict) = RANGE(-1000, 1000);

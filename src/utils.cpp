@@ -1647,7 +1647,7 @@ bool spar_friendly(struct char_data *ch, struct char_data *npc) {
     if (find != npc->mob_specials.memory.end())
         return false;
 
-    for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->mobFlags.test(f)) return false;
+    for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->getMobFlag(f)) return false;
 
     return true;
 
@@ -1907,10 +1907,10 @@ bool is_sparring(struct char_data *ch) {
     if(IS_NPC(ch)) {
         auto opponent = ch->fighting;
         if(!opponent) return false;
-        return IS_NPC(opponent) ? false : opponent->playerFlags.test(PLR_SPAR) && spar_friendly(opponent, ch);
+        return IS_NPC(opponent) ? false : opponent->getPlayerFlag(PLR_SPAR) && spar_friendly(opponent, ch);
     }
 
-    return ch->playerFlags.test(PLR_SPAR);
+    return ch->getPlayerFlag(PLR_SPAR);
 }
 
 char *introd_calc(struct char_data *ch) {
@@ -2962,17 +2962,17 @@ void admin_set(struct char_data *ch, int value) {
         while (GET_ADMLEVEL(ch) < value) {
             ch->mod(CharNum::admin_level, 1);
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                ch->admflags.set(default_admin_flags[GET_ADMLEVEL(ch)][i]);
+                ch->setAdminFlag(default_admin_flags[GET_ADMLEVEL(ch)][i], true);
         }
         run_autowiz();
         if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
-            for(auto f : {PRF_LOG2, PRF_HOLYLIGHT, PRF_ROOMFLAGS, PRF_AUTOEXIT}) ch->pref.set(f);
+            for(auto f : {PRF_LOG2, PRF_HOLYLIGHT, PRF_ROOMFLAGS, PRF_AUTOEXIT}) ch->setPrefFlag(f, true);
 
         }
         if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
             for (i = 0; i < 3; i++)
                 GET_COND(ch, i) = (char) -1;
-            ch->pref.set(PRF_HOLYLIGHT);
+            ch->setPrefFlag(PRF_HOLYLIGHT, true);
         }
         return;
     }
@@ -2982,12 +2982,12 @@ void admin_set(struct char_data *ch, int value) {
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) > value) {
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                ch->admflags.reset(default_admin_flags[GET_ADMLEVEL(ch)][i]);
+                ch->setAdminFlag(default_admin_flags[GET_ADMLEVEL(ch)][i], false);
             ch->mod(CharNum::admin_level, -1);
         }
         run_autowiz();
         if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {
-            for(auto f : {PRF_LOG1, PRF_LOG2, PRF_NOHASSLE, PRF_HOLYLIGHT, PRF_ROOMFLAGS}) ch->pref.reset(f);
+            for(auto f : {PRF_LOG1, PRF_LOG2, PRF_NOHASSLE, PRF_HOLYLIGHT, PRF_ROOMFLAGS}) ch->setPrefFlag(f, false);
         }
         return;
     }
@@ -3142,19 +3142,19 @@ bool ROOM_FLAGGED(struct room_data *loc, int flag) {
 }
 
 bool ADM_FLAGGED(struct char_data *ch, int flag) {
-    return ch->admflags.test(flag);
+    return ch->getAdminFlag(flag);
 }
 
 bool PRF_FLAGGED(struct char_data *ch, int flag) {
-    return ch->pref.test(flag);
+    return ch->getPrefFlag(flag);
 }
 
 bool MOB_FLAGGED(const struct char_data *ch, int flag) {
-    return ch->mobFlags.test(flag);
+    return ch->getMobFlag(flag);
 }
 
 bool PLR_FLAGGED(struct char_data *ch, int flag) {
-    return ch->playerFlags.test(flag);
+    return ch->getPlayerFlag(flag);
 }
 
 bool AFF_FLAGGED(struct char_data *ch, int flag) {

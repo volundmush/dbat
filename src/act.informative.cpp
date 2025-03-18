@@ -2996,14 +2996,14 @@ ACMD(do_autoexit) {
     }
     switch (tp) {
         case EXIT_OFF:
-            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->pref.reset(f);
+            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->setPrefFlag(f, false);
             break;
         case EXIT_NORMAL:
-            ch->pref.set(PRF_AUTOEXIT);
-            ch->pref.reset(PRF_FULL_EXIT);
+            ch->setPrefFlag(PRF_AUTOEXIT, true);
+            ch->setPrefFlag(PRF_FULL_EXIT, false);
             break;
         case EXIT_COMPLETE:
-            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->pref.set(f);
+            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->setPrefFlag(f, true);
             break;
     }
     send_to_char(ch, "Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
@@ -4983,7 +4983,7 @@ ACMD(do_inventory) {
     send_to_char(ch, "@w              @YInventory\r\n@D-------------------------------------@w\r\n");
     if (!IS_NPC(ch)) {
         if (PLR_FLAGGED(ch, PLR_STOLEN)) {
-            ch->playerFlags.reset(PLR_STOLEN);
+            ch->setPlayerFlag(PLR_STOLEN, false);
             send_to_char(ch, "@r   --------------------------------------------------@n\n");
             send_to_char(ch, "@R    You notice that you have been robbed sometime recently!\n");
             send_to_char(ch, "@r   --------------------------------------------------@n\n");
@@ -6090,10 +6090,10 @@ ACMD(do_color) {
     }
     switch (tp) {
         case C_OFF:
-            ch->pref.reset(PRF_COLOR);
+            ch->setPrefFlag(PRF_COLOR, false);
             break;
         case C_ON:
-            ch->pref.set(PRF_COLOR);
+            ch->setPrefFlag(PRF_COLOR, true);
             break;
     }
     send_to_char(ch, "Your color is now @o%s@n.\r\n", ctypes[tp]);

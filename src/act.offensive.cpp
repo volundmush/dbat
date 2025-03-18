@@ -830,7 +830,7 @@ ACMD(do_charge) {
         ch->incCurKI(GET_CHARGE(ch));
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
-        ch->playerFlags.reset(PLR_CHARGE);
+        ch->setPlayerFlag(PLR_CHARGE, false);
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
         return;
@@ -872,7 +872,7 @@ ACMD(do_charge) {
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 break;
         }
-        ch->playerFlags.reset(PLR_CHARGE);
+        ch->setPlayerFlag(PLR_CHARGE, false);
         GET_CHARGETO(ch) = 0;
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         return;
@@ -930,7 +930,7 @@ ACMD(do_charge) {
             GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
             GET_CHARGE(ch) += 1;
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
-            ch->playerFlags.set(PLR_CHARGE);
+            ch->setPlayerFlag(PLR_CHARGE, true);
         }
     } else if (amt < 1 && ch->getRoomVnum() != 1562) {
         send_to_char(ch, "You have set it too low!\r\n");
@@ -966,7 +966,7 @@ ACMD(do_powerup) {
     }
     if (PLR_FLAGGED(ch, PLR_POWERUP)) {
         send_to_char(ch, "@WYou stop powering up.@n");
-        ch->playerFlags.reset(PLR_POWERUP);
+        ch->setPlayerFlag(PLR_POWERUP, false);
         characterSubscriptions.unsubscribe("powerupService", ch);
         return;
     }
@@ -992,7 +992,7 @@ ACMD(do_powerup) {
         }
     }
     characterSubscriptions.subscribe("powerupService", ch);
-    ch->playerFlags.set(PLR_POWERUP);
+    ch->setPlayerFlag(PLR_POWERUP, true);
 }
 
 ACMD(do_rescue) {

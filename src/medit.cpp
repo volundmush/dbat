@@ -167,7 +167,7 @@ ACMD(do_oasis_medit) {
     /** builder and also log it.                                               **/
     /****************************************************************************/
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    ch->playerFlags.set(PLR_WRITING);
+    ch->setPlayerFlag(PLR_WRITING, true);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
            GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -250,7 +250,7 @@ void init_mobile(struct char_data *mob) {
         mob->set(attr, base2);
     }
 
-    mob->mobFlags.set(MOB_ISNPC);
+    mob->setMobFlag(MOB_ISNPC, true);
 }
 
 /*-------------------------------------------------------------------*/
@@ -535,7 +535,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             /*
              * Ensure mob has MOB_ISNPC set or things will go pear shaped.
              */
-            OLC_MOB(d)->mobFlags.set(MOB_ISNPC);
+            OLC_MOB(d)->setMobFlag(MOB_ISNPC, true);
             switch (*arg) {
                 case 'y':
                 case 'Y':
@@ -780,7 +780,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             if ((i = atoi(arg)) <= 0)
                 break;
             else if (i <= NUM_MOB_FLAGS)
-                OLC_MOB(d)->mobFlags.flip(i-1);
+                OLC_MOB(d)->toggleMobFlag(i-1);
             medit_disp_mob_flags(d);
             return;
 /*-------------------------------------------------------------------*/
@@ -813,46 +813,46 @@ void medit_parse(struct descriptor_data *d, char *arg) {
 
         case MEDIT_ACCURACY:
             GET_FISHD(OLC_MOB(d)) = LIMIT(i, 0, 50);
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_DAMAGE:
             GET_DAMAGE_MOD(OLC_MOB(d)) = LIMIT(i, 0, 50);
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_NDD:
             GET_NDD(OLC_MOB(d)) = LIMIT(i, 0, 30);
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_SDD:
             GET_SDD(OLC_MOB(d)) = LIMIT(i, 0, 127);
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_NUM_HP_DICE:
             //GET_HIT(OLC_MOB(d)) = LIMIT(i, 0, CONFIG_LEVEL_CAP);
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_SIZE_HP_DICE:
             //GET_MANA(OLC_MOB(d)) = LIMIT(i, 0, 1000);
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_ADD_HP:
             //GET_MOVE(OLC_MOB(d)) = LIMIT(i, 0, 30000);
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_AC:
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_EXP:
             OLC_MOB(d)->setExperience(LIMIT(i, 0, MAX_MOB_EXP));
-            OLC_MOB(d)->mobFlags.reset(MOB_AUTOBALANCE);
+            OLC_MOB(d)->setMobFlag(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_GOLD:

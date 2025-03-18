@@ -1203,7 +1203,7 @@ int perform_dupe_check(struct descriptor_data *d) {
     d->character->desc = d;
     d->original = nullptr;
     d->character->timer = 0;
-    for(auto f : {PLR_MAILING, PLR_WRITING}) d->character->pref.reset(f);
+    for(auto f : {PLR_MAILING, PLR_WRITING}) d->character->setPrefFlag(f, false);
     d->character->affected_by.reset(AFF_GROUP);
     STATE(d) = CON_PLAYING;
 
@@ -1365,7 +1365,7 @@ void enter_player_game(struct descriptor_data *d) {
     }
 
     for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->affected_by.reset(f);
-    d->character->playerFlags.reset(PLR_KNOCKED);
+    d->character->setPlayerFlag(PLR_KNOCKED, false);
 
     if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION)) {
         d->character->affected_by.set(AFF_INFRAVISION);
@@ -1388,7 +1388,7 @@ void enter_player_game(struct descriptor_data *d) {
         GET_SPEEDBOOST(d->character) = 0;
     }
 
-    d->character->playerFlags.reset(PLR_HEALT);
+    d->character->setPlayerFlag(PLR_HEALT, false);
 
     if (GET_ADMLEVEL(d->character) > 0) {
         d->level = 1;

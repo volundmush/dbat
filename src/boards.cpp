@@ -820,7 +820,7 @@ void write_board_message(obj_vnum board_vnum, struct char_data *ch, char *arg) {
     BOARD_MESSAGES(thisboard) = message;
     send_to_char(ch, "Write your message.  (/s saves /h for help)\r\n");
 
-    ch->playerFlags.set(PLR_WRITING);
+    ch->setPlayerFlag(PLR_WRITING, true);
     string_write(ch->desc, &(MESG_DATA(message)), MAX_MESSAGE_LENGTH, board_vnum + BOARD_MAGIC, nullptr);
     if (board_vnum == 3092) {
         BOARDNEWMORT = time(nullptr);
@@ -911,7 +911,7 @@ void board_respond(long board_vnum, struct char_data *ch, int mnum) {
     act("@C$n@w starts writing on the board.@n", true, ch, nullptr, nullptr, TO_ROOM);
 
     if (!IS_NPC(ch)) {
-        ch->playerFlags.set(PLR_WRITING);
+        ch->setPlayerFlag(PLR_WRITING, true);
     }
 
     /* don't need number anymore, so we'll reuse it. */

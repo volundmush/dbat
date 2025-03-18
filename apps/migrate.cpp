@@ -1148,9 +1148,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         mf[1] = asciiflag_conv(f2);
         mf[2] = asciiflag_conv(f3);
         mf[3] = asciiflag_conv(f4);
-        for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-            check_bitvector_names(MOB_FLAGS(ch)[taeller], action_bits_count, buf2, "mobile");
-        for(auto i = 0; i < ch->mobFlags.size(); i++) ch->mobFlags.set(i, IS_SET_AR(mf, i));
+        for(auto i = 0; i < NUM_MOB_FLAGS; i++) ch->setMobFlag(i, IS_SET_AR(mf, i));
 
         aff[0] = asciiflag_conv(f5);
         aff[1] = asciiflag_conv(f6);
@@ -1160,19 +1158,17 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
 
         ch->set(CharAlign::good_evil, t[2]);
 
-        for (taeller = 0; taeller < AF_ARRAY_MAX; taeller++)
-            check_bitvector_names(AFF_FLAGS(ch)[taeller], affected_bits_count, buf2, "mobile affect");
     } else {
         basic_mud_log("SYSERR: Format error after string section of mob #%d\n"
             "...expecting line of form '# # # {S | E}'", nr);
         exit(1);
     }
 
-    ch->mobFlags.set(MOB_ISNPC);
+    ch->setMobFlag(MOB_ISNPC, true);
     if (MOB_FLAGGED(ch, MOB_NOTDEADYET)) {
         /* Rather bad to load mobiles with this bit already set. */
         basic_mud_log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
-        ch->mobFlags.reset(MOB_NOTDEADYET);
+        ch->setMobFlag(MOB_NOTDEADYET, false);
     }
 
     /* AGGR_TO_ALIGN is ignored if the mob is AGGRESSIVE.
@@ -2247,7 +2243,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
                         for(auto f = 0; f < ch->playerFlags.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->playerFlags.set(f);
+                            if(IS_SET_AR(flags, f)) ch->setPlayerFlag(f, true);
                         }
                     } else if (!strcmp(tag, "Aff ")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
@@ -2269,7 +2265,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
                         for(auto f = 0; f < ch->admflags.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->admflags.set(f);
+                            if(IS_SET_AR(flags, f)) ch->setAdminFlag(f, true);
                         }
                     } else if (!strcmp(tag, "Alin")) ch->set(CharAlign::good_evil, atoi(line));
                     else if (!strcmp(tag, "Aura")) ch->set(CharAppearance::aura, atoi(line));
@@ -2417,7 +2413,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
                         for(auto f = 0; f < ch->pref.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->pref.set(f);
+                            if(IS_SET_AR(flags, f)) ch->setPrefFlag(f, true);
                         }
                     } else if (!strcmp(tag, "Prff")) GET_PREFERENCE(ch) = atoi(line);
                     break;

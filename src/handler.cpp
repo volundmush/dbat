@@ -433,7 +433,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     }
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref.reset(PRF_ARENAWATCH);
+            ch->setPrefFlag(PRF_ARENAWATCH, false);
             ARENA_IDNUM(ch) = -1;
         }
     }

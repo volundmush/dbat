@@ -988,12 +988,12 @@ ACMD(do_twohand) {
     } else if (PLR_FLAGGED(ch, PLR_THANDW)) {
         send_to_char(ch, "You stop wielding your weapon with both hands.\r\n");
         act("$n stops wielding $s weapon with both hands.", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->playerFlags.reset(PLR_THANDW);
+        ch->setPlayerFlag(PLR_THANDW, false);
         return;
     } else {
         send_to_char(ch, "You grab your weapon with both hands.\r\n");
         act("$n starts wielding $s weapon with both hands.", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->playerFlags.set(PLR_THANDW);
+        ch->setPlayerFlag(PLR_THANDW, true);
         return;
     }
 }
@@ -3947,7 +3947,7 @@ void perform_remove(struct char_data *ch, int pos) {
             return;
 
         if (pos == WEAR_WIELD1 && PLR_FLAGGED(ch, PLR_THANDW)) {
-            ch->playerFlags.reset(PLR_THANDW);
+            ch->setPlayerFlag(PLR_THANDW, false);
         }
         obj_to_char(unequip_char(ch, pos), ch);
         act("You stop using $p.", false, ch, obj, nullptr, TO_CHAR);

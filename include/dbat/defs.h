@@ -608,7 +608,7 @@ constexpr int ROOM_ZORBIT = 68; // zenith orbit
 
 constexpr int NUM_ROOM_FLAGS = 69;
 
-enum class RoomFlag {
+enum class RoomFlag : uint8_t {
     dark = 0,             // Dark
     death = 1,            // Death trap
     nomob = 2,            // MOBs not allowed
@@ -1027,6 +1027,89 @@ constexpr int AUC_WIZ_CANCEL = 8;    /* auction cancelled by a god */
 constexpr int AUC_STAT = 9;
 constexpr int AUC_BID = 10;
 
+enum class PlayerFlag : uint8_t {
+    killer       = 0,   // Player is a player-killer
+    thief        = 1,   // Player is a player-thief
+    frozen       = 2,   // Player is frozen
+    dont_set      = 3,   // Don't EVER set (ISNPC bit)
+    writing      = 4,   // Player writing (board/mail/olc)
+    mailing      = 5,   // Player is writing mail
+    crash        = 6,   // Player needs to be crash-saved
+    site_ok       = 7,   // Player has been site-cleared
+    no_shout      = 8,   // Player not allowed to shout/goss
+    no_title      = 9,   // Player not allowed to set title
+    deleted      = 10,  // Player deleted - space reusable
+    loadroom     = 11,  // Player uses nonstandard loadroom
+    no_wizlist    = 12,  // Player shouldn't be on wizlist
+    no_delete     = 13,  // Player shouldn't be deleted
+    wizinvis_start     = 14,  // Player should enter game wizinvis
+    cryo         = 15,  // Player is cryo-saved (purge prog)
+    not_dead_yet   = 16,  // (R) Player being extracted.
+    agemid_g     = 17,  // Player has had pos of middle age
+    agemid_b     = 18,  // Player has had neg of middle age
+    ageold_g     = 19,  // Player has had pos of old age
+    ageold_b     = 20,  // Player has had neg of old age
+    ageven_g     = 21,  // Player has had pos of venerable age
+    ageven_b     = 22,  // Player has had neg of venerable age
+    old_age       = 23,  // Player is dead of old age
+    right_arm         = 24,  // Player has a right arm
+    left_arm         = 25,  // Player has a left arm
+    right_leg         = 26,  // Player has a right leg
+    left_leg         = 27,  // Player has a left leg
+    head         = 28,  // Player has a head
+    unused_0     = 29,  // UNUSED
+    tail         = 30,  // Player has a tail
+    piloting     = 31,  // Player is sitting in the pilots chair
+    skillp       = 32,  // Player made a good choice in CC
+    spar         = 33,  // Player is in a spar stance
+    charge       = 34,  // Player is charging
+    trans1       = 35,  // UNUSED
+    trans2       = 36,  // UNUSED
+    trans3       = 37,  // UNUSED
+    trans4       = 38,  // UNUSED
+    trans5       = 39,  // UNUSED
+    trans6       = 40,  // UNUSED
+    absorb       = 41,  // Absorb model
+    repair       = 42,  // Repair model
+    sensem       = 43,  // Sense-Powersense model
+    powerup      = 44,  // Powering Up
+    knocked      = 45,  // Knocked OUT
+    cyber_right_arm        = 46,  // Cybernetic Right Arm
+    cyber_left_arm        = 47,  // Cybernetic Left Arm
+    cyber_right_leg        = 48,  // Cybernetic Right Leg
+    cyber_left_leg        = 49,  // Cybernetic Left Leg
+    fpssj        = 50,  // Full Power Super Saiyan (unused)
+    immortal     = 51,  // The player is immortal
+    eyec         = 52,  // The player has their eyes closed
+    disguised    = 53,  // The player is disguised
+    bandaged     = 54,  // The player has been bandaged
+    potential_released           = 55,  // Has had their potential released
+    healing_tank        = 56,  // Is inside a healing tank
+    fury         = 57,  // Is in fury mode
+    pose         = 58,  // Ginyu Pose Effect
+    unused_1     = 59,  // UNUSED. was oozaru
+    absorbed     = 60,
+    multp        = 61,
+    pdeath       = 62,
+    thandw       = 63,
+    self_destruct_1        = 64,
+    self_dextruct_2       = 65,
+    spiral       = 66,
+    biogr        = 67,
+    lssj         = 68,
+    replearn     = 69,
+    forget       = 70,
+    transmission = 71,
+    fishing      = 72,
+    goop         = 73,
+    multihit     = 74,
+    auralight    = 75,
+    rdisplay     = 76,
+    stolen       = 77,
+    tail_hide     = 78,  // Hides tail for S & HB
+    no_grow       = 79   // Halt Growth for S & HB
+};
+
 /* Player flags: used by char_data.act */
 constexpr int PLR_KILLER = 0;   /* Player is a player-killer        */
 constexpr int PLR_THIEF = 1;   /* Player is a player-thief         */
@@ -1114,6 +1197,44 @@ constexpr int NUM_PLR_FLAGS = 80;
 /* Mob Personalty */
 constexpr int MAX_PERSONALITIES = 5;
 
+enum class MobFlag : uint8_t {
+    special_proc    = 0,  // Mob has a callable spec-proc
+    sentinel        = 1,  // Mob should not move
+    no_scavenger     = 2,  // Mob won't pick up items from rooms
+    is_npc           = 3,  // (R) Automatically set on all Mobs
+    aware           = 4,  // Mob can't be backstabbed
+    aggressive      = 5,  // Mob auto-attacks everybody nearby
+    stay_zone       = 6,  // Mob shouldn't wander out of zone
+    wimpy           = 7,  // Mob flees if severely injured
+    aggressive_evil       = 8,  // Auto-attack any evil PC's
+    aggressive_good       = 9,  // Auto-attack any good PC's
+    aggressive_neutral    = 10, // Auto-attack any neutral PC's
+    memory          = 11, // remember attackers if attacked
+    helper          = 12, // attack PCs fighting other NPCs
+    no_charm         = 13, // Mob can't be charmed
+    no_summon        = 14, // Mob can't be summoned
+    no_sleep         = 15, // Mob can't be slept
+    autobalance     = 16, // Mob stats autobalance
+    no_blind         = 17, // Mob can't be blinded
+    no_kill          = 18, // Mob can't be killed
+    not_dead_yet      = 19, // (R) Mob being extracted.
+    mountable       = 20, // Mob is mountable.
+    right_arm            = 21, // Player has a right arm
+    left_arm            = 22, // Player has a left arm
+    right_leg            = 23, // Player has a right leg
+    left_leg            = 24, // Player has a left leg
+    head            = 25, // Player has a head
+    justdesc        = 26, // Mob doesn't use auto desc
+    husk            = 27, // Is an extracted Husk
+    spar            = 28, // This is mob sparring
+    dummy           = 29, // This mob will not fight back
+    absorb          = 30, // Absorb type android
+    repair          = 31, // Repair type android
+    no_poison        = 32, // No poison
+    know_kaioken        = 33, // Knows kaioken
+    powerup         = 34  // Is powering up
+};
+
 /* Mobile flags: used by char_data.act */
 constexpr int MOB_SPEC = 0;  /* Mob has a callable spec-proc   	*/
 constexpr int MOB_SENTINEL = 1;  /* Mob should not move            	*/
@@ -1152,6 +1273,71 @@ constexpr int MOB_KNOWKAIO = 33; /* Knows kaioken                     */
 constexpr int MOB_POWERUP = 34; /* Is powering up                    */
 
 constexpr int NUM_MOB_FLAGS = 35;
+
+enum class PrefFlag {
+    brief         = 0,  // Room descs won't normally be shown
+    compact       = 1,  // No extra CRLF pair before prompts
+    deaf          = 2,  // Can't hear shouts
+    notell        = 3,  // Can't receive tells
+    disphp        = 4,  // Display hit points in prompt
+    dispmana      = 5,  // Display mana points in prompt
+    dispmove      = 6,  // Display move points in prompt
+    autoexit      = 7,  // Display exits in a room
+    nohassle      = 8,  // Aggr mobs won't attack
+    quest         = 9,  // On quest
+    summonable    = 10, // Can be summoned
+    norepeat      = 11, // No repetition of comm commands
+    holylight     = 12, // Can see in dark
+    color         = 13, // Color
+    spare         = 14, // Used to be second color bit
+    nowiz         = 15, // Can't hear wizline
+    log1          = 16, // On-line System Log (low bit)
+    log2          = 17, // On-line System Log (high bit)
+    noauct        = 18, // Can't hear auction channel
+    nogoss        = 19, // Can't hear gossip channel
+    nogratz       = 20, // Can't hear grats channel
+    roomflags     = 21, // Can see room flags (ROOM_x)
+    dispauto      = 22, // Show prompt HP, MP, MV when < 30%.
+    cls           = 23, // Clear screen in OasisOLC
+    buildwalk     = 24, // Build new rooms when walking
+    afk           = 25, // Player is AFK
+    autoloot      = 26, // Loot everything from a corpse
+    autogold      = 27, // Loot gold from a corpse
+    autosplit     = 28, // Split gold with group
+    full_exit     = 29, // Shows full autoexit details
+    autosac       = 30, // Sacrifice a corpse
+    automem       = 31, // Memorize spells
+    vieworder     = 32, // If you want to see the newest first
+    nocompress    = 33, // If you want to force MCCP2 off
+    autoassist    = 34, // Auto-assist toggle
+    dispki        = 35, // Display ki points in prompt
+    dispexp       = 36, // Display exp points in prompt
+    disptnl       = 37, // Display TNL exp points in prompt
+    test          = 38, // Sets triggers safety off for imms
+    hide          = 39, // Hide on who from other mortals
+    nmwarn        = 40, // No mail warning
+    hints         = 41, // Receives hints
+    fury          = 42, // Sees fury meter
+    nodec         = 43,
+    noeqsee       = 44,
+    nomusic       = 45,
+    lkeep         = 46,
+    distime       = 47, // Part of Prompt Options
+    disgold       = 48, // Part of Prompt Options
+    disprac       = 49, // Part of Prompt Options
+    noparry       = 50,
+    dishuth       = 51, // Part of Prompt Options
+    disperc       = 52, // Part of Prompt Options
+    carve         = 53,
+    arenawatch    = 54,
+    nogive        = 55,
+    instruct      = 56,
+    ghealth       = 57,
+    ihealth       = 58,
+    energize      = 59,
+    form          = 60,
+    tech          = 61
+};
 
 /*  flags: used by char_data.player_specials.pref */
 constexpr int PRF_BRIEF = 0;  /* Room descs won't normally be shown	*/
@@ -1826,6 +2012,28 @@ constexpr int ADMLVL_IMPL = 6;
 
 /* First character level that forces epic levels */
 constexpr int LVL_EPICSTART = 101;
+
+enum class AdminFlag : uint8_t {
+    tell_all         = 0,  // Can use 'tell all' to broadcast GOD
+    see_invisible          = 1,  // Sees other chars inventory IMM
+    see_secret       = 2,  // Sees secret doors IMM
+    know_weather     = 3,  // Knows details of weather GOD
+    full_where       = 4,  // Full output of 'where' command IMM
+    money           = 5,  // Char has a bottomless wallet GOD
+    eat_anything     = 6,  // Char can eat anything GOD
+    no_poison        = 7,  // Char can't be poisoned IMM
+    walk_anywhere    = 8,  // Char has unrestricted walking IMM
+    no_keys          = 9,  // Char needs no keys for locks GOD
+    instant_kill     = 10, // "kill" command is instant IMPL
+    no_steal         = 11, // Char cannot be stolen from IMM
+    trans_all        = 12, // Can use 'trans all' GRGOD
+    switch_mortal    = 13, // Can 'switch' to a mortal PC body IMPL
+    force_mass       = 14, // Can force rooms or all GRGOD
+    all_houses       = 15, // Can enter any house GRGOD
+    no_damage        = 16, // Cannot be damaged IMM
+    all_shops        = 17, // Can use all shops GOD
+    cedit           = 18  // Can use cedit IMPL
+};
 
 /*
  * ADM flags - define admin privs for chars

@@ -681,7 +681,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     // Instance-relevant fields below...
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
 
-    std::bitset<NUM_ADMFLAGS> admflags{};    /* Bitvector for admin privs		*/
+    std::unordered_set<AdminFlag> admflags{};    /* Bitvector for admin privs		*/
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
     struct affected_type *affected{};
@@ -747,8 +747,24 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     std::map<SkillID, skill_data> skill;
 
-    std::bitset<NUM_PLR_FLAGS> playerFlags{}; /* act flag for NPC's; player flag for PC's */
-    std::bitset<NUM_MOB_FLAGS> mobFlags{};
+    std::unordered_set<PlayerFlag> playerFlags{}; /* act flag for NPC's; player flag for PC's */
+    std::unordered_set<MobFlag> mobFlags{};
+
+    bool getMobFlag(int flag);
+    bool toggleMobFlag(int flag);
+    void setMobFlag(int flag, bool value);
+
+    bool getPlayerFlag(int flag);
+    bool togglePlayerFlag(int flag);
+    void setPlayerFlag(int flag, bool value);
+
+    bool getAdminFlag(int flag);
+    bool toggleAdminFlag(int flag);
+    void setAdminFlag(int flag, bool value);
+
+    bool getPrefFlag(int flag);
+    bool togglePrefFlag(int flag);
+    void setPrefFlag(int flag, bool value);
 
     std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */
     int16_t saving_throw[3]{};    /* Saving throw				*/
@@ -905,7 +921,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int8_t freeze_level{};        /* Level of god who froze char, if any	*/
     int16_t invis_level{};        /* level of invisibility		*/
     room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
-    std::bitset<NUM_PRF_FLAGS> pref{};    /* preference flags for PC's.		*/
+    std::unordered_set<PrefFlag> pref{};    /* preference flags for PC's.		*/
 
     room_vnum normalizeLoadRoom(room_vnum in);
 

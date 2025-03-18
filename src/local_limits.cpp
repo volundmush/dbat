@@ -487,7 +487,7 @@ int64_t hit_gain(struct char_data *ch) {
 
     if (PLR_FLAGGED(ch, PLR_FURY)) {
         send_to_char(ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-        ch->playerFlags.reset(PLR_FURY);
+        ch->setPlayerFlag(PLR_FURY, false);
     }
 
     /* Fury Mode Loss for halfbreeds */
@@ -675,7 +675,7 @@ static void update_flags(struct char_data *ch) {
         if (GET_ABSORBS(ch) >= 300) {
             send_to_char(ch,
                          "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
-            ch->playerFlags.set(PLR_FPSSJ);
+            ch->setPlayerFlag(PLR_FPSSJ, true);
             GET_ABSORBS(ch) = 0;
         }
     }
@@ -1106,7 +1106,7 @@ static void heal_limb(struct char_data *ch) {
     }
 
     if (PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
-        ch->playerFlags.reset(PLR_BANDAGED);
+        ch->setPlayerFlag(PLR_BANDAGED, false);
         send_to_char(ch, "You remove your bandages.\r\n");
         return;
     }
@@ -1411,7 +1411,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
                 act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!",
                     true, ch, nullptr, nullptr, TO_ROOM);
             }
-            ch->playerFlags.reset(PLR_GOOP);
+            ch->setPlayerFlag(PLR_GOOP, false);
             characterSubscriptions.unsubscribe("goopTimeService", ch);
         } else {
             ch->gooptime -= 1;
@@ -1544,7 +1544,7 @@ void healTankService(uint64_t heartPulse, double deltaTime) {
             // the heal tank is occupied.
 
             // set this, just in case it wasn't.
-            ch->playerFlags.set(PLR_HEALT);
+            ch->setPlayerFlag(PLR_HEALT, true);
 
             bool mustLeave = false;
 
@@ -1565,7 +1565,7 @@ void healTankService(uint64_t heartPulse, double deltaTime) {
                 act("You step out of the healing tank.", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@w steps out of the healing tank.@n", true, ch, nullptr, nullptr,
                     TO_ROOM);
-                ch->playerFlags.reset(PLR_HEALT);
+                ch->setPlayerFlag(PLR_HEALT, false);
                 o->sitting.reset();
                 ch->sits.reset();
             }
@@ -1630,7 +1630,7 @@ void auralight_update(uint64_t heartPulse, double deltaTime) {
             } else {
                 send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
                 act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
-                i->playerFlags.reset(PLR_AURALIGHT);
+                i->setPlayerFlag(PLR_AURALIGHT, false);
             }
         } else {
             characterSubscriptions.unsubscribe("auralight", i);

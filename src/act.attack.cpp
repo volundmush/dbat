@@ -54,8 +54,8 @@ ACMD(do_energize) {
             return;
         }
     } else {
-        ch->pref.flip(PRF_ENERGIZE);
-        if (ch->pref.test(PRF_ENERGIZE)) {
+        ch->togglePrefFlag(PRF_ENERGIZE);
+        if (ch->getPrefFlag(PRF_ENERGIZE)) {
             send_to_char(ch, "You start focusing your latent ki into your fingertips.\r\n");
         } else {
             send_to_char(ch, "You stop focusing ki into your fingertips.\r\n");
@@ -755,14 +755,14 @@ ACMD(do_selfd) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@R$n's body starts to glow @wwhite@R and flash. The flashes start out slowly but steadilly increase in speed. $n's aura begins to burn around $s body at the same time in a violent fashion!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->playerFlags.set(PLR_SELFD);
+        ch->setPlayerFlag(PLR_SELFD, true);
         return;
     } else if (!PLR_FLAGGED(ch, PLR_SELFD2)) {
         act("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->playerFlags.reset(PLR_SELFD);
+        ch->setPlayerFlag(PLR_SELFD, false);
         return;
     } else if (GRAPPLING(ch) && !can_kill(ch, GRAPPLING(ch), nullptr, 3)) {
         act("@wYour body slowly stops flashing. Steam rises from your skin as you slowly let off the energy you built up in a safe manner.@n",
@@ -770,7 +770,7 @@ ACMD(do_selfd) {
         act("@w$n's body slowly stops flashing. Steam rises from $s skin as $e slowly lets off the energy $e built up in a safe manner.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "You can't kill them, the immortals won't allow it!\r\n");
-        ch->playerFlags.reset(PLR_SELFD);
+        ch->setPlayerFlag(PLR_SELFD, false);
         return;
     } else if (GRAPPLING(ch)) {
         tch = GRAPPLING(ch);
@@ -787,14 +787,14 @@ ACMD(do_selfd) {
         act("@R$n EXPLODES! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true,
             ch, nullptr, tch, TO_NOTVICT);
         hurt(0, 0, ch, tch, nullptr, dmg, 1);
-        ch->playerFlags.reset(PLR_SELFD);
-        ch->playerFlags.reset(PLR_SELFD2);
+        ch->setPlayerFlag(PLR_SELFD, false);
+        ch->setPlayerFlag(PLR_SELFD2, false);
         if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
             GET_SDCOOLDOWN(ch) = 600;
         }
         if ((IS_MAJIN(ch) || IS_BIO(ch)) && ch->getCurVitalDam(CharVital::lifeforce) < 0.5) {
             ch->modCurVitalDam(CharVital::lifeforce, -2.0);
-            ch->playerFlags.set(PLR_GOOP);
+            ch->setPlayerFlag(PLR_GOOP, true);
             ch->gooptime = 70;
         } else {
             die(ch, nullptr);
@@ -839,8 +839,8 @@ ACMD(do_selfd) {
             GET_SDCOOLDOWN(ch) = 600;
         }
         die(ch, nullptr);
-        ch->playerFlags.reset(PLR_SELFD);
-        ch->playerFlags.reset(PLR_SELFD2);
+        ch->setPlayerFlag(PLR_SELFD, false);
+        ch->setPlayerFlag(PLR_SELFD2, false);
         int num = rand_number(10, 20) + GET_SKILL(ch, SKILL_SELFD);
         if (GET_SKILL(ch, SKILL_SELFD) + num <= 100) {
             SET_SKILL(ch, SKILL_SELFD, num);
@@ -924,7 +924,7 @@ ACMD(do_spiral) {
         vict = def;
     }
 
-    ch->playerFlags.set(PLR_SPIRAL);
+    ch->setPlayerFlag(PLR_SPIRAL, true);
     improve_skill(ch, SKILL_SPIRAL, 0);
     act("@mFlying to a spot above your intended target you begin to move so fast all that can be seen of you are trails of color. You focus your movements into a vortex and prepare to attack!@n",
         true, ch, nullptr, nullptr, TO_CHAR);

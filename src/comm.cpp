@@ -133,7 +133,7 @@ void copyover_recover_final() {
         c->desc = d;
 
 		GET_LOADROOM(c) = room;
-        for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->playerFlags.reset(f);
+        for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->setPlayerFlag(f, false);
 
         write_to_output(d, "@rThe world comes back into focus... has something changed?@n\r\n");
 
@@ -1630,7 +1630,7 @@ int arena_watch(struct char_data *ch) {
     }
 
     if (found == false) {
-        ch->pref.reset(PRF_ARENAWATCH);
+        ch->setPrefFlag(PRF_ARENAWATCH, false);
         ARENA_IDNUM(ch) = -1;
         return (NOWHERE);
     } else {

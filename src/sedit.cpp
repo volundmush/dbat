@@ -165,7 +165,7 @@ ACMD(do_oasis_sedit) {
     STATE(d) = CON_SEDIT;
 
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    ch->playerFlags.set(PLR_WRITING);
+    ch->setPlayerFlag(PLR_WRITING, true);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
            GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));

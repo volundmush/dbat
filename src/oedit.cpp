@@ -189,7 +189,7 @@ ACMD(do_oasis_oedit) {
     /** Send the OLC message to the players in the same room as the builder.   **/
     /****************************************************************************/
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    ch->playerFlags.set(PLR_WRITING);
+    ch->setPlayerFlag(PLR_WRITING, true);
 
     /****************************************************************************/
     /** Log the OLC message.                                                   **/
@@ -1069,7 +1069,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                                "OLC: %s iedit a unique #%d", GET_NAME(d->character), GET_OBJ_VNUM(obj));
                         if (d->character) {
-                            d->character->playerFlags.reset(PLR_WRITING);
+                            d->character->setPlayerFlag(PLR_WRITING, false);
                             STATE(d) = CON_PLAYING;
                             act("$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
                         }
@@ -1775,7 +1775,7 @@ ACMD(do_iedit) {
     CREATE(OLC(ch->desc), struct oasis_olc_data, 1);
     k->extra_flags.set(ITEM_UNIQUE_SAVE);
 
-    ch->playerFlags.set(PLR_WRITING);
+    ch->setPlayerFlag(PLR_WRITING, true);
     iedit_setup_existing(ch->desc, k);
     OLC_VAL(ch->desc) = 0;
 

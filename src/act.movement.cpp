@@ -975,7 +975,7 @@ ACMD(do_move) {
     }
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref.reset(PRF_ARENAWATCH);
+            ch->setPrefFlag(PRF_ARENAWATCH, false);
             ARENA_IDNUM(ch) = -1;
         }
         if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
@@ -2539,7 +2539,7 @@ ACMD(do_sleep) {
 
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->pref.reset(PRF_ARENAWATCH);
+            ch->setPrefFlag(PRF_ARENAWATCH, false);
             ARENA_IDNUM(ch) = -1;
             send_to_char(ch, "You stop watching the arena action.\r\n");
         }
@@ -2625,7 +2625,7 @@ ACMD(do_sleep) {
                 if (PLR_FLAGGED(ch, PLR_FURY)) {
                     send_to_char(ch,
                                  "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-                    ch->playerFlags.reset(PLR_FURY);
+                    ch->setPlayerFlag(PLR_FURY, false);
                 }
 
                 /* Fury Mode Loss for halfbreeds */
@@ -2690,7 +2690,7 @@ ACMD(do_sleep) {
             if (PLR_FLAGGED(ch, PLR_FURY)) {
                 send_to_char(ch,
                                 "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-                ch->playerFlags.reset(PLR_FURY);
+                ch->setPlayerFlag(PLR_FURY, false);
             }
 
             /* Fury Mode Loss for halfbreeds */

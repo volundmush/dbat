@@ -249,13 +249,13 @@ void do_start(struct char_data *ch) {
     }
 
     for(auto f : {PRF_VIEWORDER, PRF_DISPMOVE, PRF_AUTOEXIT, PRF_HINTS, PRF_NOMUSIC, PRF_DISPHP,
-    PRF_DISPKI, PRF_DISPEXP, PRF_DISPTNL}) ch->pref.set(f);
+    PRF_DISPKI, PRF_DISPEXP, PRF_DISPTNL}) ch->setPrefFlag(f, true);
 
     GET_LIMBCOND(ch, 0) = 100;
     GET_LIMBCOND(ch, 1) = 100;
     GET_LIMBCOND(ch, 2) = 100;
     GET_LIMBCOND(ch, 3) = 100;
-    ch->playerFlags.set(PLR_HEAD);
+    ch->setPlayerFlag(PLR_HEAD, true);
 
     GET_SLOTS(ch) = 30;
 
@@ -361,7 +361,7 @@ void do_start(struct char_data *ch) {
         SET_SKILL(ch, SKILL_PUNCH, GET_SKILL_BASE(ch, SKILL_PUNCH) + punch);
     } /* End CC skills */
     else {
-        ch->playerFlags.reset(PLR_FORGET);
+        ch->setPlayerFlag(PLR_FORGET, false);
     }
 
     if (IS_KAI(ch) || IS_KANASSAN(ch)) {
@@ -498,7 +498,7 @@ void do_start(struct char_data *ch) {
     ch->transBonus = Random::get<double>(-0.3, 0.3);
 
     if (CONFIG_SITEOK_ALL)
-        ch->playerFlags.set(PLR_SITEOK);
+        ch->setPlayerFlag(PLR_SITEOK, true);
         
     ch->restoreVitals();
 
@@ -873,7 +873,7 @@ void advance_level(struct char_data *ch) {
 
         add_prac = 5;
         if (PLR_FLAGGED(ch, PLR_SKILLP)) {
-            ch->playerFlags.reset(PLR_SKILLP);
+            ch->setPlayerFlag(PLR_SKILLP, false);
             add_prac *= 5;
         } else {
             add_prac *= 2;
@@ -919,7 +919,7 @@ void advance_level(struct char_data *ch) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
         for (i = 0; i < 3; i++)
             GET_COND(ch, i) = (char) -1;
-        ch->pref.set(PRF_HOLYLIGHT);
+        ch->setPrefFlag(PRF_HOLYLIGHT, true);
     }
 
     sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp).c_str(),

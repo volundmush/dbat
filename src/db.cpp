@@ -1567,7 +1567,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->position = mob->mob_specials.default_pos;
 
     if (IS_HUMANOID(mob)) {
-        for(auto f : {MOB_RARM, MOB_LARM, MOB_RLEG, MOB_LLEG}) mob->mobFlags.set(f);
+        for(auto f : {MOB_RARM, MOB_LARM, MOB_RLEG, MOB_LLEG}) mob->setMobFlag(f, true);
     }
 
     copy_proto_script(&proto->second, mob, MOB_TRIGGER);
@@ -2920,7 +2920,7 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
     auto ch_found = uniqueCharacters.find(character_id);
     if(ch_found == uniqueCharacters.end()) return -1;
     auto &ch = ch_found->second;
-    ch->playerFlags.reset(PLR_NOTDEADYET);
+    ch->setPlayerFlag(PLR_NOTDEADYET, false);
     auto exist_sess = sessions.find(character_id);
     if(exist_sess != sessions.end()) {
         // a session already exists. we'll be joining it.

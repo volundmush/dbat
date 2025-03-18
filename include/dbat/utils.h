@@ -454,9 +454,9 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 /* IS_AFFECTED for backwards compatibility */
 #define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))
 
-#define PLR_TOG_CHK(ch, flag) ((ch)->playerFlags.flip(flag).test(flag))
-#define PRF_TOG_CHK(ch, flag) ((ch)->pref.flip(flag).test(flag))
-#define ADM_TOG_CHK(ch, flag) ((ch)->admflags.flip(flag).test(flag))
+#define PLR_TOG_CHK(ch, flag) ((ch)->togglePlayerFlag(flag))
+#define PRF_TOG_CHK(ch, flag) ((ch)->togglePrefFlag(flag))
+#define ADM_TOG_CHK(ch, flag) ((ch)->toggleAdminFlag(flag))
 #define AFF_TOG_CHK(ch, flag) ((ch)->affected_by.flip(flag).test(flag))
 
 /* new define for quick check */

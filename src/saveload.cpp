@@ -1226,29 +1226,10 @@ void to_json(json& j, const char_data& c) {
     if(!c.stats.empty()) j["stats"] = c.stats;
     if(!c.dims.empty()) j["dims"] = c.dims;
 
-    for(auto i = 0; i < c.mobFlags.size(); i++)
-        if(c.mobFlags.test(i)) {
-            j["mobFlags"].push_back(i);
-            auto key = std::string(action_bits[i]);
-            boost::algorithm::to_lower(key);
-            j["mobFlags_name"].push_back(key);
-        }
+    if(!c.mobFlags.empty()) j["mobFlags"] = c.mobFlags;
+    if(!c.playerFlags.empty()) j["playerFlags"] = c.playerFlags;
 
-    for(auto i = 0; i < c.playerFlags.size(); i++)
-        if(c.playerFlags.test(i)) {
-            j["playerFlags"].push_back(i);
-            auto key = std::string(player_bits[i]);
-            boost::algorithm::to_lower(key);
-            j["playerFlags_name"].push_back(key);
-        }
-
-    for(auto i = 0; i < c.pref.size(); i++)
-        if(c.pref.test(i)) {
-            j["pref"].push_back(i);
-            auto key = std::string(preference_bits[i]);
-            boost::algorithm::to_lower(key);
-            j["pref_name"].push_back(key);
-        }
+    if(!c.pref.empty()) j["pref"] = c.pref;
 
     for(auto i = 0; i < c.bodyparts.size(); i++)
         if(c.bodyparts.test(i)) {
@@ -1276,14 +1257,7 @@ void to_json(json& j, const char_data& c) {
 
     if(c.id != NOTHING) {
         // this is an instance...
-        for(auto i = 0; i < NUM_ADMFLAGS; i++)
-        if(c.admflags.test(i)) {
-            j["admflags"].push_back(i);
-            auto key = std::string(admin_flag_names[i]);
-            boost::algorithm::to_lower(key);
-            j["admflags_name"].push_back(key);
-        }
-
+        if(!c.admflags.empty()) j["admflags"] = c.admflags;
 
         if(c.was_in_room != NOWHERE) j["was_in_room"] = c.was_in_room;
         json td;
@@ -1456,19 +1430,16 @@ void from_json(const json& j, char_data& c) {
     if(j.contains("armor")) c.armor = j["armor"];
     if(j.contains("damage_mod")) c.damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) j["mob_specials"].get_to(c.mob_specials);
-    if(j.contains("mobFlags")) {
-        for(auto &i : j["mobFlags"])
-        c.mobFlags.set(i.get<int>());
-    }
-    if(j.contains("playerFlags")) for(auto &i : j["playerFlags"]) c.playerFlags.set(i.get<int>());
-    if(j.contains("pref")) for(auto &i : j["pref"]) c.pref.set(i.get<int>());
+
+    if(j.contains("mobFlags")) c.mobFlags = j["mobFlags"].get<std::unordered_set<MobFlag>>();
+    if(j.contains("playerFlags")) c.playerFlags = j["playerFlags"].get<std::unordered_set<PlayerFlag>>();
+
+    if(j.contains("pref")) c.pref = j["pref"].get<std::unordered_set<PrefFlag>>();
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) c.bodyparts.set(i.get<int>());
 
     if(c.id != NOTHING) {
         // this is an instance.
-        if(j.contains("admflags"))
-            for(auto &i : j["admflags"])
-                c.admflags.set(i.get<int>());
+        if(j.contains("admflags")) c.admflags = j["admflags"].get<std::unordered_set<AdminFlag>>();;
 
         if(j.contains("hometown")) c.hometown = j["hometown"];
 
@@ -1634,10 +1605,10 @@ void from_json(const json& j, char_data& c) {
         SPEAKING(&c) = SKILL_LANG_COMMON;
         set_height_and_weight_by_race(&c);
 
-        c.mobFlags.set(MOB_ISNPC);
-        c.mobFlags.reset(MOB_NOTDEADYET);
+        c.setMobFlag(MOB_ISNPC, true);
+        c.setMobFlag(MOB_NOTDEADYET, false);
 
-        c.playerFlags.reset(PLR_NOTDEADYET);
+        c.setPlayerFlag(PLR_NOTDEADYET, false);
     }
 }
 

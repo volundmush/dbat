@@ -430,3 +430,91 @@ void char_data::ageBy(double addedTime) {
 void char_data::setAge(double newAge) {
     this->time.secondsAged = newAge * SECS_PER_GAME_YEAR;
 }
+
+bool char_data::toggleMobFlag(int flag) {
+    if(getMobFlag(flag)) {
+        setMobFlag(flag, false);
+        return false;
+    } else {
+        setMobFlag(flag, true);
+        return true;
+    }
+}
+
+bool char_data::getMobFlag(int flag) {
+    return mobFlags.contains(static_cast<MobFlag>(flag));
+}
+
+void char_data::setMobFlag(int flag, bool value) {
+    if(value) {
+        mobFlags.insert(static_cast<MobFlag>(flag));
+    } else {
+        mobFlags.erase(static_cast<MobFlag>(flag));
+    }
+}
+
+bool char_data::togglePlayerFlag(int flag) {
+    if(getPlayerFlag(flag)) {
+        setPlayerFlag(flag, false);
+        return false;
+    } else {
+        setPlayerFlag(flag, true);
+        return true;
+    }
+}
+
+bool char_data::getPlayerFlag(int flag) {
+    return playerFlags.contains(static_cast<PlayerFlag>(flag));
+}
+
+void char_data::setPlayerFlag(int flag, bool value) {
+    if(value) {
+        playerFlags.insert(static_cast<PlayerFlag>(flag));
+    } else {
+        playerFlags.erase(static_cast<PlayerFlag>(flag));
+    }
+}
+
+bool char_data::toggleAdminFlag(int flag) {
+    if(getAdminFlag(flag)) {
+        setAdminFlag(flag, false);
+        return false;
+    } else {
+        setAdminFlag(flag, true);
+        return true;
+    }
+}
+
+bool char_data::getAdminFlag(int flag) {
+    return admflags.contains(static_cast<AdminFlag>(flag));
+}
+
+void char_data::setAdminFlag(int flag, bool value) {
+    if(value) {
+        admflags.insert(static_cast<AdminFlag>(flag));
+    } else {
+        admflags.erase(static_cast<AdminFlag>(flag));
+    }
+}
+
+bool char_data::togglePrefFlag(int flag) {
+    if(getPrefFlag(flag)) {
+        setPrefFlag(flag, false);
+        return false;
+    } else {
+        setPrefFlag(flag, true);
+        return true;
+    }
+}
+
+bool char_data::getPrefFlag(int flag) {
+    return pref.contains(static_cast<PrefFlag>(flag));
+}
+
+void char_data::setPrefFlag(int flag, bool value) {
+    if(value) {
+        pref.insert(static_cast<PrefFlag>(flag));
+    } else {
+        pref.erase(static_cast<PrefFlag>(flag));
+    }
+}

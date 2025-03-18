@@ -246,7 +246,7 @@ ASPELL(spell_charm) {
 
         act("Isn't $n just such a nice fellow?", false, ch, nullptr, victim, TO_VICT);
         if (IS_NPC(victim))
-            victim->mobFlags.reset(MOB_SPEC);
+            victim->setMobFlag(MOB_SPEC, false);
 
     }
 }

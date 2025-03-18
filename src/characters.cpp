@@ -94,7 +94,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
     restore(true);
     for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) affected_by.reset(f);
-    playerFlags.reset(PLR_PDEATH);
+    setPlayerFlag(PLR_PDEATH, false);
     // Send them to their starting room and have them 'look'.
     char_from_room(this);
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
@@ -170,7 +170,7 @@ void char_data::ghostify() {
     // upon death, ghost-bodies gain new natural limbs... unless they're a
     // cyborg and want to keep their implants.
     if (!PRF_FLAGGED(this, PRF_LKEEP)) {
-        for(auto f : {PLR_CLLEG, PLR_CRLEG, PLR_CLARM, PLR_CRARM}) playerFlags.reset(f);
+        for(auto f : {PLR_CLLEG, PLR_CRLEG, PLR_CLARM, PLR_CRARM}) setPlayerFlag(f, false);
     }
 
 }
@@ -846,8 +846,8 @@ void char_data::restoreLimbs(bool announce) {
 
 void char_data::gainTail(bool announce) {
     if (!race::hasTail(race)) return;
-    if(playerFlags.test(PLR_TAIL)) return;
-    playerFlags.set(PLR_TAIL);
+    if(getPlayerFlag(PLR_TAIL)) return;
+    setPlayerFlag(PLR_TAIL, true);
     if(announce) {
         send_to_char(this, "@wYour tail grows back.@n\r\n");
         act("$n@w's tail grows back.@n", true, this, nullptr, nullptr, TO_ROOM);
@@ -855,15 +855,15 @@ void char_data::gainTail(bool announce) {
 }
 
 void char_data::loseTail() {
-    if (!playerFlags.test(PLR_TAIL)) return;
-    playerFlags.reset(PLR_TAIL);
+    if (!getPlayerFlag(PLR_TAIL)) return;
+    setPlayerFlag(PLR_TAIL, false);
     remove_limb(this, 6);
     GET_TGROWTH(this) = 0;
     oozaru_revert(this);
 }
 
 bool char_data::hasTail() {
-    return playerFlags.test(PLR_TAIL);
+    return getPlayerFlag(PLR_TAIL);
 }
 
 void char_data::addTransform(FormID form) {
@@ -1042,7 +1042,7 @@ int64_t char_data::getPL() {
 
 void char_data::apply_kaioken(int times, bool announce) {
     GET_KAIOKEN(this) = times;
-    playerFlags.reset(PLR_POWERUP);
+    setPlayerFlag(PLR_POWERUP, false);
 
     if (announce) {
         send_to_char(this, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
@@ -1227,9 +1227,9 @@ void char_data::login() {
 
     desc->has_prompt = 0;
     /* We've updated to 3.1 - some bits might be set wrongly: */
-    pref.reset(PRF_BUILDWALK);
+    setPrefFlag(PRF_BUILDWALK, false);
     if (!GET_EQ(this, WEAR_WIELD1) && PLR_FLAGGED(this, PLR_THANDW)) {
-        playerFlags.reset(PLR_THANDW);
+        setPlayerFlag(PLR_THANDW, false);
     }
 
 }
@@ -1753,7 +1753,7 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
 }
 
 void char_data::gazeAtMoon() {
-    if(OOZARU_RACE(this) && playerFlags.test(PLR_TAIL)) {
+    if(OOZARU_RACE(this) && getPlayerFlag(PLR_TAIL)) {
         if(form == FormID::oozaru || form == FormID::golden_oozaru) return;
         FormID toForm = FormID::oozaru;
         if(transforms.contains(FormID::super_saiyan_1)
@@ -1854,11 +1854,11 @@ std::optional<std::string> char_data::dgCallMember(const std::string& member, co
     if(auto pf = _pflags.find(lmember); pf != _pflags.end()) {
         if (!arg.empty()) {
             if (!strcasecmp("on", arg.c_str()))
-                playerFlags.set(pf->second);
+                setPlayerFlag(pf->second, true);
             else if (!strcasecmp("off", arg.c_str()))
-                playerFlags.reset(pf->second);
+                setPlayerFlag(pf->second, false);
         }
-        return playerFlags.test(pf->second) ? "1" : "0";
+        return getPlayerFlag(pf->second) ? "1" : "0";
     }
 
     if(auto af = _aflags.find(lmember); af != _aflags.end()) {

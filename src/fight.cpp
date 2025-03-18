@@ -653,7 +653,7 @@ static void cleanup_arena_watch(struct char_data *ch) {
 
         if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
             if (ARENA_IDNUM(d->character) == GET_IDNUM(ch)) {
-                d->character->pref.reset(PRF_ARENAWATCH);
+                d->character->setPrefFlag(PRF_ARENAWATCH, false);
                 ARENA_IDNUM(d->character) = -1;
             }
         }
@@ -702,22 +702,22 @@ void remove_limb(struct char_data *vict, int num) {
         case 1:
             snprintf(part, sizeof(part), "@w%s right arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right arm");
-        vict->pref.reset(PLR_CRARM);
+        vict->setPrefFlag(PLR_CRARM, false);
             break;
         case 2:
             snprintf(part, sizeof(part), "@w%s left arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left arm");
-            vict->pref.reset(PLR_CLARM);
+            vict->setPrefFlag(PLR_CLARM, false);
             break;
         case 3:
             snprintf(part, sizeof(part), "@w%s right leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right leg");
-            vict->pref.reset(PLR_CRLEG);
+            vict->setPrefFlag(PLR_CRLEG, false);
             break;
         case 4:
             snprintf(part, sizeof(part), "@w%s left leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left leg");
-            vict->pref.reset(PLR_CLLEG);
+            vict->setPrefFlag(PLR_CLLEG, false);
             break;
         case 5:
             snprintf(part, sizeof(part), "@wA %s tail@n", race::getName(vict->race).c_str());
@@ -829,7 +829,7 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
             }
-            ch->playerFlags.reset(PLR_POWERUP);
+            ch->setPlayerFlag(PLR_POWERUP, false);
             characterSubscriptions.unsubscribe("powerupService", ch);
             continue;
         }
@@ -1022,7 +1022,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
         if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
             send_to_char(ch, "Your disguise comes off because of your swift movements!\r\n");
-            ch->playerFlags.reset(PLR_DISGUISED);
+            ch->setPlayerFlag(PLR_DISGUISED, false);
             act("@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
         }
         if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
@@ -1122,7 +1122,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (GET_POS(ch) <= POS_RESTING && PLR_FLAGGED(ch, PLR_POWERUP)) {
-            ch->playerFlags.reset(PLR_POWERUP);
+            ch->setPlayerFlag(PLR_POWERUP, false);
         }
 
         if (GET_BARRIER(ch) > 0) {
@@ -1243,7 +1243,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
         if(stopCharge) {
             GET_CHARGETO(ch) = 0;
-            ch->playerFlags.reset(PLR_CHARGE);
+            ch->setPlayerFlag(PLR_CHARGE, false);
         }
         if(GET_CHARGE(ch) > 0) {
             characterSubscriptions.subscribe("kiLeakingSystem", ch);
@@ -1274,7 +1274,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
-            ch->playerFlags.reset(PLR_CHARGE);
+            ch->setPlayerFlag(PLR_CHARGE, false);
             ch->incCurKI(GET_CHARGE(ch));
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
@@ -1297,7 +1297,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
-            ch->playerFlags.reset(PLR_CHARGE);
+            ch->setPlayerFlag(PLR_CHARGE, false);
             ch->incCurKI(GET_CHARGE(ch));
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
@@ -2021,7 +2021,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 make_pcorpse(ch);
                 loadmap(ch);
             } else {
-                ch->playerFlags.reset(PLR_ABSORBED);
+                ch->setPlayerFlag(PLR_ABSORBED, false);
             }
         }
         final_combat_resolve(ch);
@@ -2092,13 +2092,13 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
 
 void die(struct char_data *ch, struct char_data *killer) {
     if (!IS_NPC(ch)) {
-        ch->playerFlags.reset(PLR_HEALT);
+        ch->setPlayerFlag(PLR_HEALT, false);
         if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
             ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
                                                              (ch->getCurLF()) >= (ch->getMaxLF()) * 0.5))) {
             ch->decCurLFPercent(2, -1);
             ch->decCurHealthPercent(1, 1);
-            ch->playerFlags.set(PLR_GOOP);
+            ch->setPlayerFlag(PLR_GOOP, true);
             characterSubscriptions.subscribe("goopTimeService", ch);
             ch->gooptime = 32;
             return;
@@ -2125,7 +2125,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             ch->teleport_to(sensei::getStartRoom(ch->chclass));
             return;
         }
-        for(auto f : {PLR_KILLER, PLR_THIEF}) ch->playerFlags.reset(f);
+        for(auto f : {PLR_KILLER, PLR_THIEF}) ch->setPlayerFlag(f, false);
         for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affected_by.reset(f);
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getRoomFlag(ROOM_PAST) && !ch->is_newbie()) {
             if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
@@ -2155,7 +2155,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                     GET_DCOUNT(ch) += 1;
                 } else if (killer && !IS_NPC(killer)) {
                     GET_DTIME(ch) = time(nullptr) + 28800;
-                    ch->playerFlags.set(PLR_PDEATH);
+                    ch->setPlayerFlag(PLR_PDEATH, true);
                     GET_DCOUNT(ch) += 1;
                 } else {
                     GET_DTIME(ch) = time(nullptr) + 28800;

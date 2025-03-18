@@ -79,9 +79,9 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 if (func == nullptr) {
                     basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
                                   GET_NAME(ch), GET_MOB_VNUM(ch));
-                    ch->mobFlags.reset(MOB_SPEC);
+                    ch->setMobFlag(MOB_SPEC, false);
                     auto &mp = mob_proto[ch->vn];
-                    mp.mobFlags.reset(MOB_SPEC);
+                    mp.setMobFlag(MOB_SPEC, false);
                 } else {
                     char actbuf[MAX_INPUT_LENGTH] = "";
                     if (func(ch, ch, 0, actbuf))
