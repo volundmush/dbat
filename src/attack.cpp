@@ -2476,7 +2476,7 @@ namespace atk {
         if (!AFF_FLAGGED(victim, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
             act("@MYour mind has been shocked!@n", true, victim, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, victim, nullptr, nullptr, TO_ROOM);
-            victim->affected_by.set(AFF_SHOCKED);
+            victim->setAffectFlag(AFF_SHOCKED, true);
         }
     }
 
@@ -2515,7 +2515,7 @@ namespace atk {
                 calcDamage += calcDamage * 0.4;
             }
 
-            victim->affected_by.set(AFF_ASHED);
+            victim->setAffectFlag(AFF_ASHED, true);
     }
 
     void Honoo::attackPostprocess() {
@@ -2523,13 +2523,13 @@ namespace atk {
                 !GET_BONUS(victim, BONUS_FIREPROOF)) {
                 send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-                victim->affected_by.set(AFF_BURNED);
+                victim->setAffectFlag(AFF_BURNED, true);
             } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
                 send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
             } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
                 send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
                 send_to_char(user, "@RThey are easily burned!@n\r\n");
-                victim->affected_by.set(AFF_BURNED);
+                victim->setAffectFlag(AFF_BURNED, true);
             }
             if (GET_SKILL_PERF(user, SKILL_HONOO) == 3 && attPerc > 0.1) {
                 pcost(user, attPerc - 0.05, 0);
@@ -2543,7 +2543,7 @@ namespace atk {
                 send_to_room(IN_ROOM(user), "The water surrounding the area evaporates completely away!\r\n");
                 user->setLocationGroundEffect(0);
             }
-            victim->affected_by.reset(AFF_ASHED);
+            victim->setAffectFlag(AFF_ASHED, false);
     }
 
     void Honoo::postProcess() {
@@ -2842,11 +2842,11 @@ namespace atk {
                 nullptr, nullptr,
                 TO_CHAR);
             act("@M$n@m's mind has been damaged by the attack!@n", true, victim, nullptr, nullptr, TO_ROOM);
-            victim->affected_by.set(AFF_MBREAK);
+            victim->setAffectFlag(AFF_MBREAK, true);
         } else if (!AFF_FLAGGED(victim, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(victim, AFF_SANCTUARY)) {
             act("@MYour mind has been shocked!@n", true, victim, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, victim, nullptr, nullptr, TO_ROOM);
-            victim->affected_by.set(AFF_SHOCKED);
+            victim->setAffectFlag(AFF_SHOCKED, true);
         }
     }
 
@@ -2952,7 +2952,7 @@ namespace atk {
         } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
             calcDamage += calcDamage * 0.4;
         }
-        victim->affected_by.set(AFF_ASHED);
+        victim->setAffectFlag(AFF_ASHED, true);
     }
 
     void PhoenixSlash::attackPostprocess() {
@@ -2960,15 +2960,15 @@ namespace atk {
             !GET_BONUS(victim, BONUS_FIREPROOF)) {
             send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setAffectFlag(AFF_BURNED, true);
         } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
             send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
             send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are easily burned!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setAffectFlag(AFF_BURNED, true);
         }
-        victim->affected_by.reset(AFF_ASHED);
+        victim->setAffectFlag(AFF_ASHED, false);
     }
 
     int PhoenixSlash::limbhurtChance() {
@@ -3323,7 +3323,7 @@ namespace atk {
         if (!AFF_FLAGGED(victim, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(victim)) {
             send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setAffectFlag(AFF_BURNED, true);
         }
     }
 
@@ -3745,7 +3745,7 @@ namespace atk {
                 if (rand_number(1, 4) == 1 && !AFF_FLAGGED(victim, AFF_FROZEN) && !IS_DEMON(victim)) {
                     act("@CYour body completely freezes!@n", true, victim, nullptr, nullptr, TO_CHAR);
                     act("@c$n's@C body completely freezes!@n", true, victim, nullptr, nullptr, TO_ROOM);
-                    victim->affected_by.set(AFF_FROZEN);
+                    victim->setAffectFlag(AFF_FROZEN, true);
                 }
             }
         }
@@ -3899,13 +3899,13 @@ namespace atk {
                 !GET_BONUS(victim, BONUS_FIREPROOF)) {
             send_to_char(victim, "@RYou are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are burned by the attack!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setAffectFlag(AFF_BURNED, true);
         } else if (GET_BONUS(victim, BONUS_FIREPROOF) || IS_DEMON(victim)) {
             send_to_char(user, "@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(victim, BONUS_FIREPRONE)) {
             send_to_char(victim, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(user, "@RThey are easily burned!@n\r\n");
-            victim->affected_by.set(AFF_BURNED);
+            victim->setAffectFlag(AFF_BURNED, true);
         }
     } 
 

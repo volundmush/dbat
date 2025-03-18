@@ -117,11 +117,11 @@ static void healthy_check(struct char_data *ch) {
     int chance = 70, roll = rand_number(1, 100), change = false;
 
     if (AFF_FLAGGED(ch, AFF_SHOCKED) && roll >= chance) {
-        ch->affected_by.reset(AFF_SHOCKED);
+        ch->setAffectFlag(AFF_SHOCKED, false);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_MBREAK) && roll >= chance) {
-        ch->affected_by.reset(AFF_MBREAK);
+        ch->setAffectFlag(AFF_MBREAK, false);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_WITHER) && roll >= chance) {
@@ -129,7 +129,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_CURSE) && roll >= chance) {
-        ch->affected_by.reset(AFF_CURSE);
+        ch->setAffectFlag(AFF_CURSE, false);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_POISON) && roll >= chance) {
@@ -153,7 +153,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_KNOCKED) && roll >= chance) {
-        ch->affected_by.reset(AFF_KNOCKED);
+        ch->setAffectFlag(AFF_KNOCKED, false);
         GET_POS(ch) = POS_SITTING;
         change = true;
     }
@@ -659,15 +659,15 @@ static void update_flags(struct char_data *ch) {
 
     if (AFF_FLAGGED(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && rand_number(1, 101) > GET_SKILL(ch, SKILL_FIRESHIELD)) {
         send_to_char(ch, "Your fireshield disappears.\r\n");
-        ch->affected_by.reset(AFF_FIRESHIELD);
+        ch->setAffectFlag(AFF_FIRESHIELD, false);
     }
     if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && rand_number(1, 3) == 2) {
         send_to_char(ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
-        ch->affected_by.reset(AFF_ZANZOKEN);
+        ch->setAffectFlag(AFF_ZANZOKEN, false);
     }
     if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 3) == 2) {
         send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
-        ch->affected_by.reset(AFF_ENSNARED);
+        ch->setAffectFlag(AFF_ENSNARED, false);
     }
 
     if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == FormID::super_saiyan_1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
@@ -695,7 +695,7 @@ static void update_flags(struct char_data *ch) {
 
     if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
         send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
-        ch->affected_by.reset(AFF_MBREAK);
+        ch->setAffectFlag(AFF_MBREAK, false);
         if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0) {
             bool condition1 = rand_number(1, 2) == 2;
             bool condition2 = rand_number(1, 20) == 1;
@@ -719,12 +719,12 @@ static void update_flags(struct char_data *ch) {
             if (skill < GET_SKILL(ch, SKILL_TELEPATHY))
                 send_to_char(ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
         }
-        ch->affected_by.reset(AFF_SHOCKED);
+        ch->setAffectFlag(AFF_SHOCKED, false);
     }
     if (AFF_FLAGGED(ch, AFF_FROZEN) && rand_number(1, 2) == 2) {
         send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
         act("$n@W breaks out of the ice holding $m prisoner!", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->affected_by.reset(AFF_FROZEN);
+        ch->setAffectFlag(AFF_FROZEN, false);
     }
     if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2) {
         send_to_char(ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
@@ -732,7 +732,7 @@ static void update_flags(struct char_data *ch) {
         null_affect(ch, AFF_WITHER);
     }
     if (wearing_stardust(ch) == 1) {
-        ch->affected_by.set(AFF_ZANZOKEN);
+        ch->setAffectFlag(AFF_ZANZOKEN, true);
         send_to_char(ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
     }
 
@@ -1759,7 +1759,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         {
                             send_to_char(i, "Your burns are healed now.\r\n");
                             act("$n@w's burns are now healed.@n", true, i, nullptr, nullptr, TO_ROOM);
-                            i->affected_by.reset(AFF_BURNED);
+                            i->setAffectFlag(AFF_BURNED, false);
                         }
                     }
 

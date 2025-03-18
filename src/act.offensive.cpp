@@ -626,7 +626,7 @@ ACMD(do_blessedhammer) {
             if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict)) {
                 send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                vict->affected_by.set(AFF_BURNED);
+                vict->setAffectFlag(AFF_BURNED, true);
             }
             pcost(ch, attperc, 0);
 

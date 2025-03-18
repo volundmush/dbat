@@ -813,7 +813,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
 
     if (!IS_HUMAN(ch))
-        ch->affected_by.set(AFF_INFRAVISION);
+        ch->setAffectFlag(AFF_INFRAVISION);
 
     SPEAKING(ch) = SKILL_LANG_COMMON;
 
@@ -1149,7 +1149,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         aff[1] = asciiflag_conv(f6);
         aff[2] = asciiflag_conv(f7);
         aff[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < ch->affected_by.size(); i++) ch->affected_by.set(i, IS_SET_AR(aff, i));
+        for(auto i = 0; i < 128; i++) ch->setAffectFlag(i, IS_SET_AR(aff, i));
 
         ch->set(CharAlign::good_evil, t[2]);
 
@@ -1432,7 +1432,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         permFlags[1] = asciiflag_conv(f10);
         permFlags[2] = asciiflag_conv(f11);
         permFlags[3] = asciiflag_conv(f12);
-        for(auto i = 0; i < o.bitvector.size(); i++) if(IS_SET_AR(permFlags, i)) o.bitvector.set(i);
+        for(auto i = 0; i < 128; i++) if(IS_SET_AR(permFlags, i)) o.setAffectFlag(i, true);
 
     } else {
         basic_mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -1606,7 +1606,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                 /* Objects that set CHARM on players are bad. */
                 if (OBJAFF_FLAGGED(&o, AFF_CHARM)) {
                     basic_mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-                    o.bitvector.reset(AFF_CHARM);
+                    o.setAffectFlag(AFF_CHARM, false);
                 }
                 check_object(&o);
                 return (line);
@@ -2245,8 +2245,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->affected_by.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->affected_by.set(f);
+                        for(auto f = 0; f < 128; f++) {
+                            if(IS_SET_AR(flags, f)) ch->setAffectFlag(f);
                         }
                     } else if (!strcmp(tag, "Affs")) load_affects(fl, ch, 0);
                     else if (!strcmp(tag, "Affv")) load_affects(fl, ch, 1);

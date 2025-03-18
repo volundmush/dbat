@@ -94,7 +94,8 @@
         "expected": "cpp",
         "format": "cpp",
         "stdfloat": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "*.def": "cpp"
     },
     "terminal.integrated.sendKeybindingsToShell": true
 }

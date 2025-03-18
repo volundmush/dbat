@@ -1313,7 +1313,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             if (number > 0 && number <= NUM_AFF_FLAGS) {
                 /* Setting AFF_CHARM on objects like this is dangerous. */
                 if (number != AFF_CHARM) {
-                    OLC_OBJ(d)->bitvector.flip(number);
+                    OLC_OBJ(d)->toggleAffectFlag(number);
                 }
             }
             oedit_disp_perm_menu(d);

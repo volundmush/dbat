@@ -189,7 +189,7 @@ int get_size_bonus(int sz) {
 }
 
 
-int wield_type(int chsize, const struct obj_data *weap) {
+int wield_type(int chsize, struct obj_data *weap) {
     if (GET_OBJ_TYPE(weap) != ITEM_WEAPON) {
         return OBJ_FLAGGED(weap, ITEM_2H) ? WIELD_TWOHAND : WIELD_ONEHAND;
     } else if (chsize > GET_OBJ_SIZE(weap)) {

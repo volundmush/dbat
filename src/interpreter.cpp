@@ -1204,7 +1204,7 @@ int perform_dupe_check(struct descriptor_data *d) {
     d->original = nullptr;
     d->character->timer = 0;
     for(auto f : {PLR_MAILING, PLR_WRITING}) d->character->setPrefFlag(f, false);
-    d->character->affected_by.reset(AFF_GROUP);
+    d->character->setAffectFlag(AFF_GROUP, false);
     STATE(d) = CON_PLAYING;
 
     switch (mode) {
@@ -1364,11 +1364,11 @@ void enter_player_game(struct descriptor_data *d) {
         GET_ALT(d->character) = 0;
     }
 
-    for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->affected_by.reset(f);
+    for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->setAffectFlag(f, false);
     d->character->setPlayerFlag(PLR_KNOCKED, false);
 
     if (IS_ANDROID(d->character) && !AFF_FLAGGED(d->character, AFF_INFRAVISION)) {
-        d->character->affected_by.set(AFF_INFRAVISION);
+        d->character->setAffectFlag(AFF_INFRAVISION, true);
     }
 
     ABSORBING(d->character) = nullptr;
@@ -1380,7 +1380,7 @@ void enter_player_game(struct descriptor_data *d) {
     GET_SPAM(d->character) = 0;
     GET_RMETER(d->character) = 0;
     if (!d->character->affected) {
-        d->character->affected_by.reset(AFF_HEALGLOW);
+        d->character->setAffectFlag(AFF_HEALGLOW, false);
     }
     if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
         GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;

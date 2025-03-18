@@ -939,11 +939,23 @@ static void dump_rooms(const std::filesystem::path &loc) {
     dump_to_file(loc, "rooms.json", rooms);
 }
 
+// thing_data serialize/deserialize...
+void to_json(json& j, const thing_data& t) {
+    to_json(j, static_cast<const unit_data&>(t));
+
+    if(!t.affect_flags.empty()) j["affect_flags"] = t.affect_flags;
+}
+
+void from_json(const json& j, thing_data& t) {
+    from_json(j, static_cast<unit_data&>(t));
+
+    if(j.contains("affect_flags")) t.affect_flags = j["affect_flags"].get<std::unordered_set<AffectFlag>>();
+}
 
 // obj_data serialize/deserialize...
 
 void to_json(json& j, const obj_data& o) {
-    to_json(j, static_cast<const unit_data&>(o));
+    to_json(j, static_cast<const thing_data&>(o));
 
     if(!o.value.empty()) j["value"] = o.value;
 
@@ -951,6 +963,7 @@ void to_json(json& j, const obj_data& o) {
     if(o.level) j["level"] = o.level;
     if(!o.wear_flags.empty()) j["wear_flags"] = o.wear_flags;
     if(!o.item_flags.empty()) j["item_flags"] = o.item_flags;
+    
     if(!o.onlyAlignGoodEvil.empty()) j["onlyAlignGoodEvil"] = o.onlyAlignGoodEvil;
     if(!o.antiAlignGoodEvil.empty()) j["antiAlignGoodEvil"] = o.antiAlignGoodEvil;
     
@@ -962,9 +975,6 @@ void to_json(json& j, const obj_data& o) {
     if(o.weight != 0.0) j["weight"] = o.weight;
     if(o.cost) j["cost"] = o.cost;
     if(o.cost_per_day) j["cost_per_day"] = o.cost_per_day;
-
-    for(auto i = 0; i < o.bitvector.size(); i++)
-        if(o.bitvector.test(i)) j["bitvector"].push_back(i);
 
     for(auto & i : o.affected) {
         if(i.location == APPLY_NONE) continue;
@@ -988,7 +998,7 @@ void to_json(json& j, const obj_data& o) {
 }
 
 void from_json(const json& j, obj_data& o) {
-    from_json(j, static_cast<unit_data&>(o));
+    from_json(j, static_cast<thing_data&>(o));
 
     if(j.contains("value")) o.value = j["value"].get<std::unordered_map<std::string, int64_t>>();
 
@@ -1010,12 +1020,6 @@ void from_json(const json& j, obj_data& o) {
     if(j.contains("weight")) o.weight = j["weight"];
     if(j.contains("cost")) o.cost = j["cost"];
     if(j.contains("cost_per_day")) o.cost_per_day = j["cost_per_day"];
-
-    if(j.contains("bitvector")) {
-        for(auto & i : j["bitvector"]) {
-            o.bitvector.set(i.get<int>());
-        }
-    }
 
     if(j.contains("affected")) {
         int counter = 0;
@@ -1193,7 +1197,7 @@ void from_json(const json& j, affected_type& a) {
 }
 
 void to_json(json& j, const char_data& c) {
-    to_json(j, static_cast<const unit_data&>(c));
+    to_json(j, static_cast<const thing_data&>(c));
 
     if(!c.trains.empty()) j["trains"] = c.trains;
     if(!c.attributes.empty()) j["attributes"] = c.attributes;
@@ -1221,15 +1225,6 @@ void to_json(json& j, const char_data& c) {
     if(c.title && strlen(c.title)) j["title"] = c.title;
     j["race"] = c.race;
     j["chclass"] = c.chclass;
-
-    for(auto i = 0; i < c.affected_by.size(); i++)
-        if(c.affected_by.test(i)) {
-            j["affected_by"].push_back(i);
-            auto key = std::string(affected_bits[i]);
-            boost::algorithm::to_lower(key);
-            j["affected_by_name"].push_back(key);
-        }
-
 
     if(c.armor) j["armor"] = c.armor;
     if(c.damage_mod) j["damage_mod"] = c.damage_mod;
@@ -1377,7 +1372,7 @@ void to_json(json& j, const char_data& c) {
 }
 
 void from_json(const json& j, char_data& c) {
-    from_json(j, static_cast<unit_data&>(c));
+    from_json(j, static_cast<thing_data&>(c));
 
     if(j.contains("trains")) c.trains = j["trains"];
     if(j.contains("attributes")) c.attributes = j["attributes"];
@@ -1393,10 +1388,6 @@ void from_json(const json& j, char_data& c) {
     if(j.contains("race")) c.race = j["race"];
 
     if(j.contains("chclass")) c.chclass = j["chclass"];
-
-    if(j.contains("affected_by"))
-        for(auto &i : j["affected_by"])
-        c.affected_by.set(i.get<int>());
 
     if(j.contains("armor")) c.armor = j["armor"];
     if(j.contains("damage_mod")) c.damage_mod = j["damage_mod"];
@@ -1571,7 +1562,7 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("proto_script")) c.proto_script = j["proto_script"].get<std::vector<trig_vnum>>();
 
         if (!IS_HUMAN(&c))
-            c.affected_by.set(AFF_INFRAVISION);
+            c.setAffectFlag(AFF_INFRAVISION, true);
 
         SPEAKING(&c) = SKILL_LANG_COMMON;
         set_height_and_weight_by_race(&c);

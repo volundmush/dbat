@@ -2023,7 +2023,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
                     if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
                         ch->decCurHealthPercent(1, 1);
 
-                    ch->affected_by.set(AFF_BURNED);
+                    ch->setAffectFlag(AFF_BURNED, true);
                     act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@R$n@R is burned by it!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
@@ -2117,7 +2117,7 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj) {
                 if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
                     ch->decCurHealthPercent(1, 1);
 
-                ch->affected_by.set(AFF_BURNED);
+                ch->setAffectFlag(AFF_BURNED, true);
                 act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@R is burned by it!@n", true, ch, nullptr, nullptr, TO_ROOM);
             }
@@ -2647,7 +2647,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
                 ch->decCurHealthPercent(1, 1);
 
 
-            vict->affected_by.set(AFF_BURNED);
+            vict->setAffectFlag(AFF_BURNED, true);
             act("@RYou are burned by it!@n", true, vict, nullptr, nullptr, TO_CHAR);
             act("@R$n@R is burned by it!@n", true, vict, nullptr, nullptr, TO_ROOM);
         }

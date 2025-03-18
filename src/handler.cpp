@@ -181,11 +181,11 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
 void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add) {
     if (add) {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-            ch->affected_by.set(bitv);
+            ch->setAffectFlag(bitv, true);
         }
     } else {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-            ch->affected_by.reset(bitv);
+            ch->setAffectFlag(bitv, false);
             mod = -mod;
         }
     }
@@ -197,9 +197,21 @@ void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, 
 void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS>& bitv, bool add) {
     int i, j;
 
-    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affected_by.set(i);
+    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->setAffectFlag(i, true);
     else {
-        for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affected_by.reset(i);
+        for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->setAffectFlag(i, false);
+        mod = -mod;
+    }
+
+    aff_apply_modify(ch, loc, mod, spec, "affect_modify_ar");
+}
+
+void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const std::unordered_set<AffectFlag>& bitv, bool add) {
+    int i, j;
+
+    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.contains(static_cast<AffectFlag>(i))) ch->setAffectFlag(i, true);
+    else {
+        for (i = 0; i < bitv.size(); i++) if(bitv.contains(static_cast<AffectFlag>(i))) ch->setAffectFlag(i, false);
         mod = -mod;
     }
 
@@ -395,7 +407,7 @@ void char_from_room(struct char_data *ch) {
     if (FIGHTING(ch) && !AFF_FLAGGED(ch, AFF_PURSUIT))
         stop_fighting(ch);
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
-        ch->affected_by.reset(AFF_PURSUIT);
+        ch->setAffectFlag(AFF_PURSUIT, false);
 
     auto &z = zone_table[r->zone];
     auto shared = ch->shared();

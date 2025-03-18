@@ -1536,7 +1536,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
     send_to_char(ch, "DROOM: [%5d]\r\n", GET_DROOM(k));
     if (IS_MOB(k)) {
-        if (k->master_id > -1)
+        if (k->master_id != NOTHING)
             sprintf(buf, ", Master: %s", get_name_by_id(k->master_id));
         else
             buf[0] = 0;

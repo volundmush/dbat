@@ -1023,7 +1023,7 @@ ACMD(do_mtransform) {
     ch->bodyparts = m->bodyparts;
     ch->chclass = m->chclass;
     ch->race = m->race;
-    ch->affected_by = m->affected_by;
+    ch->affect_flags = m->affect_flags;
     ch->armor = m->armor;
     ch->damage_mod = m->damage_mod;
     ch->vitals = m->vitals;

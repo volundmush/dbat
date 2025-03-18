@@ -1094,7 +1094,7 @@ in the vault (vnum: 453) now and then. you can just use
                             int ns;
                             if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o), NUM_AFF_FLAGS, subfield, affected_bits)) >
                                 0) {
-                                o->bitvector.flip(ns);
+                                o->toggleAffectFlag(ns);
                                 snprintf(str, slen, "1");
                             }
                         }

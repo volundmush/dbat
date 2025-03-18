@@ -602,20 +602,20 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
             !GET_BONUS(vict, BONUS_FIREPROOF)) {
             send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
             send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-            vict->affected_by.set(AFF_BURNED);
+            vict->setAffectFlag(AFF_BURNED, true);
         } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
             send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
             send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(ch, "@RThey are easily burned!@n\r\n");
-            vict->affected_by.set(AFF_BURNED);
+            vict->setAffectFlag(AFF_BURNED, true);
         }
     }
     if (shocked == true) {
         if (!AFF_FLAGGED(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
             act("@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, TO_ROOM);
-            vict->affected_by.set(AFF_SHOCKED);
+            vict->setAffectFlag(AFF_SHOCKED, true);
         }
     }
     hurt(0, 0, ch, vict, nullptr, totki, 1);
@@ -1748,7 +1748,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                                 act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict,
                                     TO_NOTVICT);
-                                vict->affected_by.reset(AFF_ZANZOKEN);
+                                vict->setAffectFlag(AFF_ZANZOKEN, false);
                                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                                 hurt(0, 0, ch, vict, nullptr, 0, 1);
                                 continue;
@@ -1841,7 +1841,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
                             act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
-                            vict->affected_by.reset(AFF_ZANZOKEN);
+                            vict->setAffectFlag(AFF_ZANZOKEN, false);
                             pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                             hurt(0, 0, ch, vict, nullptr, 0, 1);
                             continue;
@@ -1931,7 +1931,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                                 act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict,
                                     TO_NOTVICT);
-                                vict->affected_by.reset(AFF_ZANZOKEN);
+                                vict->setAffectFlag(AFF_ZANZOKEN, false);
                                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                                 continue;
                             } else if (dge + rand_number(-10, 5) > skill) {
@@ -2022,7 +2022,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
                             act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
-                            vict->affected_by.reset(AFF_ZANZOKEN);
+                            vict->setAffectFlag(AFF_ZANZOKEN, false);
                             pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                             continue;
                         } else if (dge + rand_number(-10, 5) > skill) {
@@ -2280,7 +2280,7 @@ int limb_ok(struct char_data *ch, int type) {
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
             act("You manage to break the silk ensnaring your arms!", true, ch, nullptr, nullptr, TO_CHAR);
             act("$n manages to break the silk ensnaring $s arms!", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_ENSNARED);
+            ch->setAffectFlag(AFF_ENSNARED, false);
         }
         if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
             send_to_char(ch, "Your hands are full!\r\n");
@@ -3578,14 +3578,14 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
             TO_ROOM);
         if (rand_number(1, 10) >= 7) {
             send_to_char(ch, "You feel less angry.\r\n");
-            ch->affected_by.reset(PLR_FURY);
+            ch->setAffectFlag(PLR_FURY, false);
         }
     } else if (PLR_FLAGGED(ch, PLR_FURY)) {
         dam *= 2;
         act("Your rage magnifies your attack power!", true, ch, nullptr, nullptr, TO_CHAR);
         act("Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, nullptr, nullptr,
             TO_ROOM);
-        ch->affected_by.reset(PLR_FURY);
+        ch->setAffectFlag(PLR_FURY, false);
     }
     /* End of Fury Mode for halfbreeds */
 
@@ -4315,7 +4315,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             } else {
                 act("@wYou can no longer infuse ki into your attacks!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@c$n@w can no longer infuse ki into $s attacks!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->affected_by.reset(AFF_INFUSE);
+                ch->setAffectFlag(AFF_INFUSE, false);
             }
         }
     }
@@ -4440,7 +4440,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("@c$N's@C barrier bursts!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@CYour barrier bursts!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$N's@C barrier bursts!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                vict->affected_by.reset(AFF_SANCTUARY);
+                vict->setAffectFlag(AFF_SANCTUARY, false);
             }
         }
         if (AFF_FLAGGED(vict, AFF_FIRESHIELD) && rand_number(1, 200) < GET_SKILL(vict, SKILL_FIRESHIELD)) {
@@ -4451,7 +4451,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("@c$N's@C fireshield disappears...@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@CYour fireshield disappears...@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$N's@C fireshield disappears...@n", true, ch, nullptr, vict, TO_NOTVICT);
-                vict->affected_by.reset(AFF_FIRESHIELD);
+                vict->setAffectFlag(AFF_FIRESHIELD, false);
             }
             dmg = 0;
         }
@@ -4742,7 +4742,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 }
                 GET_POS(vict) = POS_SLEEPING;
                 if (!IS_NPC(ch)) {
-                    vict->affected_by.set(AFF_KNOCKED);
+                    vict->setAffectFlag(AFF_KNOCKED, true);
                 }
             } else {
                 act("@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", true, ch, nullptr, vict,
@@ -4777,7 +4777,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             }
             GET_POS(vict) = POS_SLEEPING;
             if (!IS_NPC(ch)) {
-                vict->affected_by.set(AFF_KNOCKED);
+                vict->setAffectFlag(AFF_KNOCKED, true);
             }
         } else if (is_sparring(ch) && !is_sparring(vict) && IS_NPC(ch)) {
             act("@w$n@w stops sparring!@n", true, ch, nullptr, vict, TO_ROOM);
@@ -4939,7 +4939,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     solo_gain(ch, vict);
                 }
                 if (IS_DEMON(ch) && type == 1) {
-                    vict->affected_by.set(AFF_ASHED);
+                    vict->setAffectFlag(AFF_ASHED, true);
                 }
                 die(vict, ch);
                 dead = true;

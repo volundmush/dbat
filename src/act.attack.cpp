@@ -426,7 +426,7 @@ ACMD(do_throw) {
                 COMBO(ch) = -1;
                 COMBHITS(ch) = 0;
                 int stcost = ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj));
-                vict->affected_by.reset(AFF_ZANZOKEN);
+                vict->setAffectFlag(AFF_ZANZOKEN, false);
                 pcost(ch, 0, stcost / 2);
                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                 obj_from_char(obj);
@@ -565,7 +565,7 @@ ACMD(do_throw) {
                     act("@R$N@R is burned by it!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@RYou are burned by it!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@R is burned by it!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    vict->affected_by.set(AFF_BURNED);
+                    vict->setAffectFlag(AFF_BURNED, true);
                     damage += damage * 0.4;
                 }
             }

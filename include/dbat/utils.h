@@ -259,7 +259,7 @@ extern int get_size(struct char_data *ch);
 
 extern int get_size_bonus(int sz);
 
-extern int wield_type(int chsize, const struct obj_data *weap);
+extern int wield_type(int chsize, struct obj_data *weap);
 
 
 /* various constants *****************************************************/
@@ -417,7 +417,7 @@ constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
 #define MOB_FLAGS(ch)    ((ch)->mobFlags)
 #define PLR_FLAGS(ch)    ((ch)->playerFlags)
 #define PRF_FLAGS(ch)    ((ch)->pref)
-#define AFF_FLAGS(ch)    ((ch)->affected_by)
+#define AFF_FLAGS(ch)    ((ch)->affect_flags)
 #define ADM_FLAGS(ch)    ((ch)->admflags)
 #define ROOM_FLAGS(loc)    (world[(loc)].room_flags)
 #define SPELL_ROUTINES(spl)    (spell_info[spl].routines)
@@ -446,7 +446,7 @@ bool ROOM_FLAGGED(struct room_data *loc, int flag);
 extern bool OBJAFF_FLAGGED(struct obj_data *obj, int flag);
 #define OBJVAL_FLAGGED(obj, flag) (IS_SET(GET_OBJ_VAL((obj), VAL_CONTAINER_FLAGS), (flag)))
 extern bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag);
-extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
+extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define BODY_FLAGGED(ch, flag) ((ch)->bodyparts.test(flag))
 #define ZONE_FLAGGED(rnum, flag)   (IS_SET_AR(zone_table[(rnum)].zone_flags, flag))
 #define HAS_SPELL_ROUTINE(spl, flag) (IS_SET(SPELL_ROUTINES(spl), (flag)))
@@ -457,7 +457,7 @@ extern bool OBJ_FLAGGED(const obj_data *obj, int flag);
 #define PLR_TOG_CHK(ch, flag) ((ch)->togglePlayerFlag(flag))
 #define PRF_TOG_CHK(ch, flag) ((ch)->togglePrefFlag(flag))
 #define ADM_TOG_CHK(ch, flag) ((ch)->toggleAdminFlag(flag))
-#define AFF_TOG_CHK(ch, flag) ((ch)->affected_by.flip(flag).test(flag))
+#define AFF_TOG_CHK(ch, flag) ((ch)->toggleAffectFlag(flag))
 
 /* new define for quick check */
 #define DEAD(ch) (PLR_FLAGGED((ch), PLR_NOTDEADYET) || MOB_FLAGGED((ch), MOB_NOTDEADYET))
@@ -782,7 +782,7 @@ int64_t SET_OBJ_VAL(struct obj_data* obj, const std::string& val, int newval);
 int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
-#define GET_OBJ_PERM(obj)       ((obj)->bitvector)
+#define GET_OBJ_PERM(obj)       ((obj)->affect_flags)
 #define GET_OBJ_TYPE(obj)    (static_cast<int>((obj)->type_flag))
 #define GET_OBJ_COST(obj)    ((obj)->cost)
 #define GET_OBJ_RENT(obj)    ((obj)->cost_per_day)

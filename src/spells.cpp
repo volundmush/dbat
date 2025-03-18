@@ -263,7 +263,7 @@ ASPELL(spell_identify) {
         sprinttype(GET_OBJ_TYPE(obj), item_types, bitbuf, sizeof(bitbuf));
         send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->short_description, bitbuf);
 
-        if (obj->bitvector.any()) {
+        if (!obj->affect_flags.empty()) {
             sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, bitbuf);
             send_to_char(ch, "Item will give you following abilities:  %s\r\n", bitbuf);
         }

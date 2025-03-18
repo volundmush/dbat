@@ -541,3 +541,4 @@ bool obj_data::toggleItemFlag(int flag) {
 bool obj_data::getItemFlag(int flag) {
     return getFlag(static_cast<ItemFlag>(flag));
 }
+

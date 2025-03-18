@@ -93,7 +93,7 @@ void char_data::restore(bool announce) {
 void char_data::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
     restore(true);
-    for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) affected_by.reset(f);
+    for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) setAffectFlag(f, false);
     setPlayerFlag(PLR_PDEATH, false);
     // Send them to their starting room and have them 'look'.
     char_from_room(this);
@@ -165,7 +165,7 @@ void char_data::resurrect(ResurrectionMode mode) {
 
 void char_data::ghostify() {
     restore(true);
-    for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) affected_by.reset(f);
+    for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) setAffectFlag(f, false);
 
     // upon death, ghost-bodies gain new natural limbs... unless they're a
     // cyborg and want to keep their implants.
@@ -776,8 +776,8 @@ void char_data::restoreStatus(bool announce) {
 }
 
 void char_data::setStatusKnockedOut() {
-    affected_by.set(AFF_KNOCKED);
-    affected_by.reset(AFF_FLYING);
+    setAffectFlag(AFF_KNOCKED, true);
+    setAffectFlag(AFF_FLYING, false);
     altitude = 0;
     GET_POS(this) = POS_SLEEPING;
 }
@@ -797,7 +797,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
             }
         }
 
-        affected_by.reset(AFF_KNOCKED);
+        setAffectFlag(AFF_KNOCKED, false);
         GET_POS(this) = POS_SITTING;
     }
 }
@@ -808,7 +808,7 @@ void char_data::cureStatusBurn(bool announce) {
             send_to_char(this, "Your burns are healed now.\r\n");
             ::act("$n@w's burns are now healed.@n", true, this, nullptr, nullptr, TO_ROOM);
         }
-        affected_by.reset(AFF_BURNED);
+        setAffectFlag(AFF_BURNED, false);
     }
 }
 
@@ -895,13 +895,13 @@ void char_data::attemptLimitBreak() {
         incCurSTPercent(0.35);
         send_to_char(this, "@mA rush of energy bursts through your system as you defy your limits.@n\r\n");
         
-        affected_by.set(AFF_LIMIT_BREAKING);         
+        setAffectFlag(AFF_LIMIT_BREAKING, true);         
     }
 }
 
 void char_data::removeLimitBreak() {
     if (AFF_FLAGGED(this, AFF_LIMIT_BREAKING)) {
-        this->affected_by.set(AFF_LIMIT_BREAKING, false);
+        this->setAffectFlag(AFF_LIMIT_BREAKING, false);
         send_to_char(this, "@mYou feel your body finally calm down.@n\r\n");
     }
 }
@@ -1294,12 +1294,12 @@ appearance_t char_data::mod(CharAppearance type, appearance_t val) {
 }
 
 int char_data::setSize(int val) {
-    this->size = val;
-    return this->size;
+    this->size = static_cast<Size>(val);
+    return static_cast<int>(this->size);
 }
 
 int char_data::getSize() {
-    return size != SIZE_UNDEFINED ? size : race::getSize(race);
+    return static_cast<int>(size) != SIZE_UNDEFINED ? static_cast<int>(size) : race::getSize(race);
 }
 
 double getDaysPassed() {

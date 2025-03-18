@@ -218,6 +218,16 @@ struct thing_data : public unit_data {
     room_direction_data* getLocationExit(int dir) const;
     std::map<int, room_direction_data*> getLocationExits() const;
 
+    std::unordered_set<AffectFlag> affect_flags{}; /* To set chars bits          */
+
+    void setAffectFlag(int flag, bool value = true);
+    bool toggleAffectFlag(int flag);
+    bool getAffectFlag(int flag);
+
+    void setFlag(AffectFlag flag, bool value = true);
+    bool toggleFlag(AffectFlag flag);
+    bool getFlag(AffectFlag flag);
+
     double getLocationEnvironment(int type) const;
     double setLocationEnvironment(int type, double value) const;
     double modLocationEnvironment(int type, double value) const;
@@ -284,8 +294,7 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     
     std::unordered_set<WearFlag> wear_flags{}; /* Where you can wear it     */
     std::unordered_set<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
-    std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
-
+    
     void setWearFlag(int flag, bool value = true);
     bool toggleWearFlag(int flag);
     bool getWearFlag(int flag);
@@ -301,6 +310,8 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     void setFlag(ItemFlag flag, bool value = true);
     bool toggleFlag(ItemFlag flag);
     bool getFlag(ItemFlag flag);
+
+
 
     weight_t weight{};         /* Weight what else                     */
     weight_t getWeight();
@@ -349,8 +360,6 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
 
 
 /* room-related structures ************************************************/
-
-
 
 struct room_direction_data {
     ~room_direction_data();
@@ -664,7 +673,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     struct mob_special_data mob_specials{};
 
-    int size{SIZE_UNDEFINED};
+    Size size{Size::undefined};
     int getSize();
     int setSize(int val);
 
@@ -687,8 +696,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     appearance_t get(CharAppearance type);
     appearance_t set(CharAppearance type, appearance_t val);
     appearance_t mod(CharAppearance type, appearance_t val);
-
-    std::bitset<NUM_AFF_FLAGS> affected_by{};/* Bitvector for current affects	*/
 
     std::unordered_map<CharVital, vital_t> vitals;
     vital_t get(CharVital type, bool base = true);
@@ -725,7 +732,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     struct follow_type *followers{};/* List of chars followers		*/
     
-    int64_t master_id{};
+    int master_id{NOTHING};
 
     struct memorize_node *memorized{};
     struct innate_node *innate{};

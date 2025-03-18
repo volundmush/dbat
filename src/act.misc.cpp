@@ -634,7 +634,7 @@ static void resolve_song(struct char_data *ch) {
                             if (GET_BARRIER(vict) >= GET_MAX_MANA(vict) * 0.75) {
                                 GET_BARRIER(vict) = GET_MAX_MANA(vict) * 0.75;
                             }
-                            vict->affected_by.set(AFF_SANCTUARY);
+                            vict->setAffectFlag(AFF_SANCTUARY, true);
                             ch->incCurKI(ch->getPercentOfMaxKI(.02) + skill);
                         }
                     }
@@ -1010,7 +1010,7 @@ ACMD(do_shell) {
         act("@mYou quickly absorb the armor carapace covering your body back inside.@n", true, ch, nullptr, nullptr,
             TO_CHAR);
         act("@M$n's@m armored carapce retreats back to its original size.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->affected_by.reset(AFF_SHELL);
+        ch->setAffectFlag(AFF_SHELL, false);
         return;
     }
 
@@ -1031,7 +1031,7 @@ ACMD(do_shell) {
     act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
     ch->decCurSTPercent(.2);
-    ch->affected_by.set(AFF_SHELL);
+    ch->setAffectFlag(AFF_SHELL, true);
 }
 
 ACMD(do_liquefy) {
@@ -1047,7 +1047,7 @@ ACMD(do_liquefy) {
             true, ch, nullptr, nullptr, TO_ROOM);
         act("@MYou begin to pull the liquid chunks of your body together. Those chunks hover upward and merge into each other until a large ball of goo is formed. Slowly your body emerges as the pieces of your body take on their old form!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
-        ch->affected_by.reset(AFF_LIQUEFIED);
+        ch->setAffectFlag(AFF_LIQUEFIED, false);
         WAIT_STATE(ch, PULSE_3SEC);
         WAIT_STATE(ch, PULSE_3SEC);
         WAIT_STATE(ch, PULSE_3SEC);
@@ -1097,8 +1097,8 @@ ACMD(do_liquefy) {
         act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
-        ch->affected_by.set(AFF_LIQUEFIED);
-        ch->affected_by.set(AFF_HIDE);
+        ch->setAffectFlag(AFF_LIQUEFIED, true);
+        ch->setAffectFlag(AFF_HIDE, true);
         return;
     } else if (!strcasecmp(arg, "explode")) {
         struct char_data *vict;
@@ -1177,7 +1177,7 @@ ACMD(do_liquefy) {
                 solo_gain(ch, vict);
             }
             die(vict, ch);
-            ch->affected_by.set(AFF_LIQUEFIED);
+            ch->setAffectFlag(AFF_LIQUEFIED, true);
             WAIT_STATE(ch, PULSE_3SEC);
             handle_cooldown(ch, 9);
             return;
@@ -2503,7 +2503,7 @@ ACMD(do_healglow) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C places $s hands on $s body. Slowly a strong blue glow glistens and shines across $s skin!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            vict->affected_by.set(AFF_HEALGLOW);
+            vict->setAffectFlag(AFF_HEALGLOW, true);
             int duration = (GET_SKILL(ch, SKILL_HEALGLOW) * 0.1);
             if (duration <= 0)
                 duration = 1;
@@ -3514,7 +3514,7 @@ ACMD(do_ensnare) {
             extract_obj(obj);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
-            vict->affected_by.reset(AFF_ZANZOKEN);
+            vict->setAffectFlag(AFF_ZANZOKEN, false);
         } else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
             if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100)) {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! You both zanzoken! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
@@ -3526,7 +3526,7 @@ ACMD(do_ensnare) {
                 extract_obj(obj);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
-                for(auto c : {vict, ch}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {vict, ch}) c->setAffectFlag(AFF_ZANZOKEN, false);
             } else {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! You both zanzoken! Quickly you spin around $M and ensnare $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_CHAR);
@@ -3535,10 +3535,10 @@ ACMD(do_ensnare) {
                 act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! They both zanzoken! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_NOTVICT);
                 extract_obj(obj);
-                vict->affected_by.set(AFF_ENSNARED);
+                vict->setAffectFlag(AFF_ENSNARED, true);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
-                for(auto c : {vict, ch}) c->affected_by.reset(AFF_ZANZOKEN);
+                for(auto c : {vict, ch}) c->setAffectFlag(AFF_ZANZOKEN, false);
             }
         } else if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you zanzoken and spin around $M and ensnare $S arms with the silk!@n",
@@ -3548,10 +3548,10 @@ ACMD(do_ensnare) {
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e zanzokens and spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             extract_obj(obj);
-            vict->affected_by.set(AFF_ENSNARED);
+            vict->setAffectFlag(AFF_ENSNARED, true);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
-            ch->affected_by.reset(AFF_ZANZOKEN);
+            ch->setAffectFlag(AFF_ZANZOKEN, false);
         } else if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100)) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
                 true, ch, nullptr, vict, TO_CHAR);
@@ -3570,7 +3570,7 @@ ACMD(do_ensnare) {
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             extract_obj(obj);
-            vict->affected_by.set(AFF_ENSNARED);
+            vict->setAffectFlag(AFF_ENSNARED, true);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
         }
@@ -5047,7 +5047,7 @@ ACMD(do_fireshield) {
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_FIRESHIELD, 0);
         ch->decCurKI(cost);
-        ch->affected_by.set(AFF_FIRESHIELD);
+        ch->setAffectFlag(AFF_FIRESHIELD, true);
         return;
     }
 

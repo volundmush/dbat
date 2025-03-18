@@ -749,7 +749,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
                 }
             }
         }
-        vict->affected_by.reset(AFF_PURSUIT);
+        vict->setAffectFlag(AFF_PURSUIT, false);
         return (true);
     } else {
         send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
@@ -1314,13 +1314,13 @@ void reveal_hiding(struct char_data *ch, int type) {
         act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("@M$n moves a little and you notice them!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->affected_by.reset(AFF_HIDE);
+        ch->setAffectFlag(AFF_HIDE, false);
     } else if (type == 1) { /* Their skill at hiding failed, reveal */
         if (GET_SKILL(ch, SKILL_HIDE) + bonus < axion_dice(0)) {
             act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, nullptr,
                 nullptr, TO_CHAR);
             act("@M$n moves a little and you notice them!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_HIDE);
+            ch->setAffectFlag(AFF_HIDE, false);
         }
     } else if (type == 2) { /* They were spotted */
         struct descriptor_data *d;
@@ -1337,7 +1337,7 @@ void reveal_hiding(struct char_data *ch, int type) {
                 continue;
 
             if (GET_SKILL(tch, SKILL_SPOT) + rand1 >= GET_SKILL(ch, SKILL_HIDE) + rand2) {
-                ch->affected_by.reset(AFF_HIDE);
+                ch->setAffectFlag(AFF_HIDE, false);
                 act("@M$N seems to notice you!@n", true, ch, nullptr, tch, TO_CHAR);
                 act("@MYou notice $n's movements reveal $s hiding spot!@n", true, ch, nullptr, tch, TO_VICT);
                 act("@MYou notice $N look keenly somewhere nearby. At that spot you see $n hiding!@n", true, ch,
@@ -1376,7 +1376,7 @@ void reveal_hiding(struct char_data *ch, int type) {
             }
         }
     } else if (type == 4) { /* You were found from search! */
-        ch->affected_by.reset(AFF_HIDE);
+        ch->setAffectFlag(AFF_HIDE, false);
     }
 }
 
@@ -1404,11 +1404,11 @@ int block_calc(struct char_data *ch) {
                 if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 1) {
                     send_to_char(blocker, "You're now floating in the air.\r\n");
 
-                    blocker->affected_by.set(AFF_FLYING);
+                    blocker->setAffectFlag(AFF_FLYING, true);
                     GET_ALT(blocker) = GET_ALT(ch);
                 } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 2) {
                     send_to_char(blocker, "You're now floating high in the sky.\r\n");
-                    blocker->affected_by.set(AFF_FLYING);
+                    blocker->setAffectFlag(AFF_FLYING, true);
                     GET_ALT(blocker) = GET_ALT(ch);
                 }
                 return (0);
@@ -3121,12 +3121,12 @@ bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag) {
     return obj->wear_flags.contains(static_cast<WearFlag>(flag));
 }
 
-bool OBJ_FLAGGED(const obj_data *obj, int flag) {
+bool OBJ_FLAGGED(struct obj_data *obj, int flag) {
     return obj->getItemFlag(flag);
 }
 
 bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
-    return obj->bitvector.test(flag);
+    return obj->getAffectFlag(flag);
 }
 
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
@@ -3158,10 +3158,10 @@ bool PLR_FLAGGED(struct char_data *ch, int flag) {
 }
 
 bool AFF_FLAGGED(struct char_data *ch, int flag) {
-    if(ch->affected_by.test(flag)) return true;
+    if(ch->getAffectFlag(flag)) return true;
     for(auto i = 0; i < NUM_WEARS; i++)
         if(auto eq = GET_EQ(ch, i); eq)
-            if(eq->bitvector.test(flag)) return true;
+            if(eq->getAffectFlag(flag)) return true;
     return false;
 }
 

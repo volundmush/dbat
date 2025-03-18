@@ -958,7 +958,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
             mag_affects(level, ch, mob, spellnum);
         if (affvs)
             mag_affectsv(level, ch, mob, spellnum);
-        mob->affected_by.set(AFF_CHARM);
+        mob->setAffectFlag(AFF_CHARM, true);
         act(mag_summon_msgs[msg], false, ch, nullptr, mob, TO_ROOM);
         load_mtrigger(mob);
         add_follower(mob, ch);

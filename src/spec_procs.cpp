@@ -453,7 +453,7 @@ SPECIAL(pet_shops) {
         ch->mod(CharMoney::carried, -PET_PRICE(pet));
 
         pet = read_mobile(GET_MOB_RNUM(pet), REAL);
-        pet->affected_by.set(AFF_CHARM);
+        pet->setAffectFlag(AFF_CHARM, true);
 
         if (*pet_name) {
             snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);

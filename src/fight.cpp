@@ -946,7 +946,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                             TO_CHAR);
                         act("@y$n@Y manages to move into an advantageous position!@n", true, ch, nullptr, nullptr,
                             TO_ROOM);
-                        ch->affected_by.set(AFF_POSITION);
+                        ch->setAffectFlag(AFF_POSITION, true);
                     } else {
                         struct char_data *vict = FIGHTING(ch);
                         if (roll_balance(ch) > roll_balance(vict)) {
@@ -956,8 +956,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                                 nullptr, vict, TO_VICT);
                             act("@y$n@Y struggles to gain a better position than @y$N@Y and succeeds!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            vict->affected_by.reset(AFF_POSITION);
-                            ch->affected_by.set(AFF_POSITION);
+                            vict->setAffectFlag(AFF_POSITION, false);
+                            ch->setAffectFlag(AFF_POSITION, true);
                         }
                     }
                 }
@@ -966,7 +966,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             if (roll_balance(ch) < axion_dice(-30) || GET_POS(ch) < POS_STANDING) {
                 act("@YYou are moved out of your position!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@y$n@Y is moved out of $s position!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->affected_by.reset(AFF_POSITION);
+                ch->setAffectFlag(AFF_POSITION, false);
             }
         }
         if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8) {
@@ -979,7 +979,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
-                ch->affected_by.set(AFF_KNOCKED);
+                ch->setAffectFlag(AFF_KNOCKED, true);
                 GET_POS(GRAPPLING(ch)) = POS_SLEEPING;
                 GRAPTYPE(GRAPPLING(ch)) = -1;
                 GRAPPLED(GRAPPLING(ch)) = nullptr;
@@ -1027,7 +1027,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
         if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
             act("@W$n@W is no longer blind.@n", false, ch, nullptr, nullptr, TO_ROOM);
-            ch->affected_by.reset(AFF_BLIND);
+            ch->setAffectFlag(AFF_BLIND, false);
         }
 
         if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
@@ -1343,7 +1343,7 @@ void appear(struct char_data *ch) {
     if (affected_by_spell(ch, SPELL_INVISIBLE))
         affect_from_char(ch, SPELL_INVISIBLE);
 
-    for(auto f : {AFF_INVISIBLE, AFF_HIDE}) ch->affected_by.reset(f);
+    for(auto f : {AFF_INVISIBLE, AFF_HIDE}) ch->setAffectFlag(f, false);
 
     act("$n slowly fades into existence.", false, ch, nullptr, nullptr, TO_ROOM);
 }
@@ -1417,7 +1417,7 @@ void stop_fighting(struct char_data *ch) {
     }
 
     FIGHTING(ch) = nullptr;
-    ch->affected_by.reset(AFF_POSITION);
+    ch->setAffectFlag(AFF_POSITION, false);
     characterSubscriptions.unsubscribe("combatSystem", ch);
     update_pos(ch);
 }
@@ -2114,7 +2114,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             return;
         }
         for(auto f : {PLR_KILLER, PLR_THIEF}) ch->setPlayerFlag(f, false);
-        for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affected_by.reset(f);
+        for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->setAffectFlag(f, false);
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getRoomFlag(ROOM_PAST) && !ch->is_newbie()) {
             if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
                 GET_DTIME(ch) = time(nullptr);
