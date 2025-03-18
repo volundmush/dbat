@@ -154,10 +154,10 @@ int invalid_race(struct char_data *ch, struct obj_data *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
-    if(obj->onlyRace.any() && !obj->onlyRace.test(static_cast<int>(ch->race)))
+    if(!obj->onlyRace.empty() && !obj->onlyRace.contains(ch->race))
         return true;
 
-    if(obj->antiRace.test(static_cast<int>(ch->race)))
+    if(obj->antiRace.contains(ch->race))
         return true;
 
     return false;

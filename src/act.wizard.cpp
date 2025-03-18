@@ -1333,7 +1333,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
     }
     send_to_char(ch, "Name: '%s', Keywords: %s, Size: %s\r\n",
                  j->short_description ? j->short_description : "<None>", j->name,
-                 size_names[GET_OBJ_SIZE(j)]);
+                 size_names[static_cast<int>(GET_OBJ_SIZE(j))]);
 
     sprinttype(GET_OBJ_TYPE(j), item_types, buf, sizeof(buf));
     send_to_char(ch, "VNum: [@g%5d@n], RNum: [%5d], Idnum: [%5d], Type: %s, SpecProc: %s\r\n",

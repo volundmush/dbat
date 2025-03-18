@@ -219,7 +219,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                     d->obj_editflag = EDIT_NONE;
                     d->obj_editval = EDIT_NONE;
                     d->character->mod(CharMoney::carried,  -5000);
-                    obj->extra_flags.set(ITEM_RESTRING);
+                    obj->setItemFlag(ITEM_RESTRING, true);
                     write_to_output(d, "Purchase complete.");
                     send_to_imm("Restring Eq: %s has bought: %s, which was %s.", GET_NAME(d->character),
                                 obj->short_description, d->obj_was);
@@ -432,49 +432,49 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         obj_to_char(obj, d->character);
                         switch (d->obj_type) {
                             case 1:
-                                obj->wear_flags.set(ITEM_WEAR_BODY);
+                                obj->setWearFlag(ITEM_WEAR_BODY, true);
                                 break;
                             case 2:
-                                obj->wear_flags.set(ITEM_WEAR_ABOUT);
+                                obj->setWearFlag(ITEM_WEAR_ABOUT, true);
                                 break;
                             case 3:
-                                obj->wear_flags.set(ITEM_WEAR_WRIST);
+                                obj->setWearFlag(ITEM_WEAR_WRIST, true);
                                 break;
                             case 4:
-                                obj->wear_flags.set(ITEM_WEAR_EAR);
+                                obj->setWearFlag(ITEM_WEAR_EAR, true);
                                 break;
                             case 5:
-                                obj->wear_flags.set(ITEM_WEAR_FINGER);
+                                obj->setWearFlag(ITEM_WEAR_FINGER, true);
                                 break;
                             case 6:
-                                obj->wear_flags.set(ITEM_WEAR_EYE);
+                                obj->setWearFlag(ITEM_WEAR_EYE, true);
                                 break;
                             case 7:
-                                obj->wear_flags.set(ITEM_WEAR_HANDS);
+                                obj->setWearFlag(ITEM_WEAR_HANDS, true);
                                 break;
                             case 8:
-                                obj->wear_flags.set(ITEM_WEAR_FEET);
+                                obj->setWearFlag(ITEM_WEAR_FEET, true);
                                 break;
                             case 9:
-                                obj->wear_flags.set(ITEM_WEAR_WAIST);
+                                obj->setWearFlag(ITEM_WEAR_WAIST, true);
                                 break;
                             case 10:
-                                obj->wear_flags.set(ITEM_WEAR_LEGS);
+                                obj->setWearFlag(ITEM_WEAR_LEGS, true);
                                 break;
                             case 11:
-                                obj->wear_flags.set(ITEM_WEAR_ARMS);
+                                obj->setWearFlag(ITEM_WEAR_ARMS, true);
                                 break;
                             case 12:
-                                obj->wear_flags.set(ITEM_WEAR_HEAD);
+                                obj->setWearFlag(ITEM_WEAR_HEAD, true);
                                 break;
                             case 13:
-                                obj->wear_flags.set(ITEM_WEAR_NECK);
+                                obj->setWearFlag(ITEM_WEAR_NECK, true);
                                 break;
                             case 14:
-                                obj->wear_flags.set(ITEM_WEAR_PACK);
+                                obj->setWearFlag(ITEM_WEAR_PACK, true);
                                 break;
                             case 15:
-                                obj->wear_flags.set(ITEM_WEAR_SH);
+                                obj->setWearFlag(ITEM_WEAR_SH, true);
                                 break;
                         }
                         *buf = '\0';
@@ -520,11 +520,11 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         }
                         GET_OBJ_LEVEL(obj) = 20;
                     }
-                    for(auto f : {ITEM_SLOT2, ITEM_CUSTOM}) obj->extra_flags.set(f);
+                    for(auto f : {ITEM_SLOT2, ITEM_CUSTOM}) obj->setItemFlag(f, true);
                     d->obj_editflag = EDIT_NONE;
                     d->obj_editval = EDIT_NONE;
                     d->character->modRPP(-20);
-                    GET_OBJ_SIZE(obj) = get_size(d->character);
+                    obj->size = static_cast<Size>(get_size(d->character));
                     send_to_imm("Custom Eq: %s has bought: %s.", GET_NAME(d->character), obj->short_description);
                     d->account->customs.emplace_back(obj->short_description);
                     log_custom(d, obj);

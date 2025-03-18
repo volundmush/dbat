@@ -962,6 +962,19 @@ constexpr int ALIGN_HORRIBLE = 8;
 constexpr int NUM_ALIGNS = 9;
 
 /* Taken from the SRD under OGL, see ../doc/srd.txt for information */
+enum class Size : int8_t {
+    undefined = -1,
+    fine = 0,
+    diminutive = 1,
+    tiny = 2,
+    small = 3,
+    medium = 4,
+    large = 5,
+    huge = 6,
+    gargantuan = 7,
+    colossal = 8
+};
+
 constexpr int SIZE_UNDEFINED = -1;
 constexpr int SIZE_FINE = 0;
 constexpr int SIZE_DIMINUTIVE = 1;
@@ -1722,6 +1735,45 @@ constexpr int SFEAT_MAX = 1;
 
 /* object-related defines ********************************************/
 
+enum class ItemType : uint8_t {
+    unknown    = 0,   // Item type not defined
+    light      = 1,   // Item is a light source
+    scroll     = 2,   // Item is a scroll
+    wand       = 3,   // Item is a wand
+    staff      = 4,   // Item is a staff
+    weapon     = 5,   // Item is a weapon
+    fireweapon = 6,   // Unimplemented
+    campfire   = 7,   // Burn things for fun!
+    treasure   = 8,   // Item is a treasure, not gold
+    armor      = 9,   // Item is armor
+    potion     = 10,  // Item is a potion
+    worn       = 11,  // Unimplemented
+    other      = 12,  // Misc object
+    trash      = 13,  // Trash - shopkeeps won't buy
+    trap       = 14,  // Unimplemented
+    container  = 15,  // Item is a container
+    note       = 16,  // Item is note
+    drink_container   = 17,  // Item is a drink container
+    key        = 18,  // Item is a key
+    food       = 19,  // Item is food
+    money      = 20,  // Item is money (gold)
+    pen        = 21,  // Item is a pen
+    boat       = 22,  // Item is a boat
+    fountain   = 23,  // Item is a fountain
+    vehicle    = 24,  // Item is a vehicle
+    hatch      = 25,  // Item is a vehicle hatch
+    window     = 26,  // Item is a vehicle window
+    control    = 27,  // Item is a vehicle control
+    portal     = 28,  // Item is a portal
+    spell_book  = 29,  // Item is a spellbook
+    board      = 30,  // Item is a message board
+    chair      = 31,  // Is a chair
+    bed        = 32,  // Is a bed
+    yum        = 33,  // This was good food
+    plant      = 34,  // This will grow!
+    fishing_pole   = 35,  // FOR FISHING
+    fishing_bait   = 36   // DITTO
+};
 
 /* Item types: used by obj_data.type_flag */
 constexpr int ITEM_LIGHT = 1;        /* Item is a light source	*/
@@ -1763,6 +1815,28 @@ constexpr int ITEM_FISHBAIT = 36;               /* DITTO                        
 
 constexpr int NUM_ITEM_TYPES = 37;
 
+enum class WearFlag {
+    take      = 0,  // Item can be taken
+    finger    = 1,  // Can be worn on finger
+    neck      = 2,  // Can be worn around neck
+    body      = 3,  // Can be worn on body
+    head      = 4,  // Can be worn on head
+    legs      = 5,  // Can be worn on legs
+    feet      = 6,  // Can be worn on feet
+    hands     = 7,  // Can be worn on hands
+    arms      = 8,  // Can be worn on arms
+    shield    = 9,  // Can be used as a shield
+    about     = 10, // Can be worn about body
+    waist     = 11, // Can be worn around waist
+    wrist     = 12, // Can be worn on wrist
+    wield     = 13, // Can be wielded
+    hold      = 14, // Can be held
+    back      = 15, // Can be worn as a backpack
+    ear       = 16, // Can be worn as an earring
+    shoulders = 17, // Can be worn as wings (originally ITEM_WEAR_SH)
+    eyes      = 18  // Can be worn as a mask
+};
+
 /* Take/Wear flags: used by obj_data.wear_flags */
 constexpr int ITEM_WEAR_TAKE = 0;  /* Item can be taken         */
 constexpr int ITEM_WEAR_FINGER = 1;  /* Can be worn on finger     */
@@ -1785,6 +1859,47 @@ constexpr int ITEM_WEAR_SH = 17; /* Can be worn as wings      */
 constexpr int ITEM_WEAR_EYE = 18; /* Can be worn as a mask     */
 
 constexpr int NUM_ITEM_WEARS = 19;
+
+enum class ItemFlag {
+    glow         = 0,  // Item is glowing
+    hum          = 1,  // Item is humming
+    no_rent       = 2,  // Item cannot be rented
+    no_donate     = 3,  // Item cannot be donated
+    no_invisible      = 4,  // Item cannot be made invis
+    invisible    = 5,  // Item is invisible
+    magic        = 6,  // Item is magical
+    nodrop       = 7,  // Item is cursed: can't drop
+    bless        = 8,  // Item is blessed
+    nosell       = 9,  // Shopkeepers won't touch it
+    two_hands          = 10, // Requires two free hands
+    unique_save  = 11, // unique object save
+    broken       = 12, // Item is broken
+    unbreakable  = 13, // Item is unbreakable
+    double_weapon      = 14, // Double weapon
+    card         = 15, // Item is a card
+    cboard       = 16,
+    forged       = 17,
+    sheath       = 18,
+    buried       = 19,
+    slot_1        = 20,
+    slot_2        = 21,
+    token        = 22,
+    slot_one     = 23,
+    slots_filled = 24,
+    restring     = 25,
+    custom       = 26,
+    protected_item   = 27,
+    norandom     = 28,
+    throwable       = 29, // "throw" is not reserved, but renamed to avoid confusion
+    hot          = 30,
+    purge        = 31,
+    ice          = 32,
+    duplicate    = 33,
+    mature       = 34,
+    cardcase     = 35,
+    no_pickup     = 36,
+    no_steal      = 37
+};
 
 /* Extra object flags: used by obj_data.extra_flags */
 constexpr int ITEM_GLOW = 0;  /* Item is glowing              */
@@ -2191,7 +2306,7 @@ constexpr int MAX_CMD_LENGTH = 16384; /* 16k should be plenty and then some */
  */
 
 /* object-related structures ******************************************/
-constexpr int NUM_OBJ_VAL_POSITIONS = 16;
+
 constexpr const char* VAL_ALL_HEALTH = "health"; // 4
 constexpr const char* VAL_ALL_MAXHEALTH = "max_health"; // 5;
 constexpr const char* VAL_ALL_MATERIAL = "material"; // 7;
@@ -2436,6 +2551,12 @@ using align_t = int16_t;
 enum class CharAlign : uint8_t {
  good_evil = 1 << 0,
  law_chaos = 1 << 1,
+};
+
+enum class MoralAlign : uint8_t {
+    evil = 0,
+    neutral = 1,
+    good = 2
 };
 
 using money_t = uint64_t;

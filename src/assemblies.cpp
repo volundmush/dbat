@@ -134,7 +134,7 @@ void assemblyListToChar(struct char_data *pCharacter, int type) {
             send_to_char(pCharacter, "[-----] ***RESERVED***\r\n");
             basic_mud_log("SYSERR: assemblyListToChar(): Invalid vnum #%ld in assembly table.", g_pAssemblyTable[i].lVnum);
         } else {
-            if(type == 0 || type == obj_proto[lRnum].type_flag) {
+            if(type == 0 || type == static_cast<int>(obj_proto[lRnum].type_flag)) {
                 sprinttype(g_pAssemblyTable[i].uchAssemblyType, AssemblyTypes, szAssmType, sizeof(szAssmType));
                 sprintf(szBuffer, "[%5ld] %s (%s)\r\n", g_pAssemblyTable[i].lVnum,
                         obj_proto[lRnum].short_description, szAssmType);

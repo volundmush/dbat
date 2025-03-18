@@ -363,7 +363,7 @@ ASPELL(spell_enchant_weapon) {
         if (obj->affected[i].location != APPLY_NONE)
             return;
 
-    obj->extra_flags.set(ITEM_MAGIC);
+    obj->setItemFlag(ITEM_MAGIC, true);
 
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location == APPLY_NONE) {
@@ -384,10 +384,10 @@ ASPELL(spell_enchant_weapon) {
     }
 
     if (IS_GOOD(ch)) {
-        obj->antiAlignGoodEvil.set(0);
+        obj->antiAlignGoodEvil.insert(MoralAlign::evil);
         act("$p glows blue.", false, ch, obj, nullptr, TO_CHAR);
     } else if (IS_EVIL(ch)) {
-        obj->antiAlignGoodEvil.set(2);
+        obj->antiAlignGoodEvil.insert(MoralAlign::good);
         act("$p glows red.", false, ch, obj, nullptr, TO_CHAR);
     } else
         act("$p glows yellow.", false, ch, obj, nullptr, TO_CHAR);

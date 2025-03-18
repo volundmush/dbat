@@ -783,11 +783,11 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
 #define GET_OBJ_PERM(obj)       ((obj)->bitvector)
-#define GET_OBJ_TYPE(obj)    ((obj)->type_flag)
+#define GET_OBJ_TYPE(obj)    (static_cast<int>((obj)->type_flag))
 #define GET_OBJ_COST(obj)    ((obj)->cost)
 #define GET_OBJ_RENT(obj)    ((obj)->cost_per_day)
-#define GET_OBJ_EXTRA(obj)    ((obj)->extra_flags)
-#define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->extra_flags[(i)])
+#define GET_OBJ_EXTRA(obj)    ((obj)->item_flags)
+#define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->getItemFlag((i)))
 #define GET_OBJ_WEAR(obj)    ((obj)->wear_flags)
 #define GET_OBJ_WEIGHT(obj)    ((obj)->weight)
 #define GET_OBJ_TIMER(obj)    ((obj)->timer)
@@ -812,7 +812,7 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 #define SFREQ(obj)              ((obj)->scoutfreq)
 #define HCHARGE(obj)            (GET_OBJ_VAL((obj), VAL_BED_HTANK_CHARGE))
 #define GET_LAST_LOAD(obj)      ((obj)->lload)
-#define GET_OBJ_SIZE(obj)    ((obj)->size)
+#define GET_OBJ_SIZE(obj)    (static_cast<int>((obj)->size))
 #define GET_OBJ_RNUM(obj)    ((obj)->vn)
 #define GET_OBJ_VNUM(obj)    (VALID_OBJ_RNUM(obj) ? \
                 GET_OBJ_RNUM(obj) : NOTHING)

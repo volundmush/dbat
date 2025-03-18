@@ -391,11 +391,6 @@ static int check_object(struct obj_data *obj) {
             GET_OBJ_VNUM(obj), obj->short_description, GET_OBJ_RENT(obj));
 
     snprintf(objname, sizeof(objname), "Object #%d (%s)", GET_OBJ_VNUM(obj), obj->short_description);
-    for (y = 0; y < TW_ARRAY_MAX; y++) {
-        error |= check_bitvector_names(GET_OBJ_WEAR(obj)[y], wear_bits_count, objname, "object wear");
-        error |= check_bitvector_names(GET_OBJ_EXTRA(obj)[y], extra_bits_count, objname, "object extra");
-        error |= check_bitvector_names(GET_OBJ_PERM(obj)[y], affected_bits_count, objname, "object affect");
-    }
 
     switch (GET_OBJ_TYPE(obj)) {
         case ITEM_DRINKCON: {
@@ -1238,7 +1233,7 @@ static void obj_values(obj_data* obj, int64_t old_value[]) {
     if(old_value[5]) obj->value[VAL_ALL_MAXHEALTH] = old_value[5];
     if(old_value[7]) obj->value[VAL_ALL_MATERIAL] = old_value[7];
 
-    switch(obj->type_flag) {
+    switch(static_cast<int>(obj->type_flag)) {
         case ITEM_LIGHT:
             if(old_value[0]) obj->value[VAL_LIGHT_TIME] = old_value[0];
             if(old_value[2]) obj->value[VAL_LIGHT_HOURS] = old_value[2];
@@ -1374,7 +1369,7 @@ static void obj_values(obj_data* obj, int64_t old_value[]) {
     }
 
 }
-
+constexpr int NUM_OBJ_VAL_POSITIONS = 16;
 
 /* read all objects from obj file; generate index and prototypes */
 static char *parse_object(FILE *obj_f, obj_vnum nr) {
@@ -1425,13 +1420,13 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         extraFlags[1] = asciiflag_conv(f2);
         extraFlags[2] = asciiflag_conv(f3);
         extraFlags[3] = asciiflag_conv(f4);
-        for(auto i = 0; i < o.extra_flags.size(); i++) if(IS_SET_AR(extraFlags, i)) o.extra_flags.set(i);
+        for(auto i = 0; i < 128; i++) if(IS_SET_AR(extraFlags, i)) o.setItemFlag(i);
 
         wearFlags[0] = asciiflag_conv(f5);
         wearFlags[1] = asciiflag_conv(f6);
         wearFlags[2] = asciiflag_conv(f7);
         wearFlags[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < o.wear_flags.size(); i++) if(IS_SET_AR(wearFlags, i)) o.wear_flags.set(i);
+        for(auto i = 0; i < NUM_ITEM_WEARS; i++) if(IS_SET_AR(wearFlags, i)) o.setWearFlag(i, true);
 
         permFlags[0] = asciiflag_conv(f9);
         permFlags[1] = asciiflag_conv(f10);
@@ -1445,7 +1440,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     }
 
     /* Object flags checked in check_object(). */
-    GET_OBJ_TYPE(&o) = t[0];
+    o.type_flag = static_cast<ItemType>(t[0]);
 
     if (!get_line(obj_f, line)) {
         basic_mud_log("SYSERR: Expecting second numeric line of %s, but file ended!", buf2);
@@ -1502,7 +1497,6 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     GET_OBJ_COST(&o) = t[1];
     GET_OBJ_RENT(&o) = t[2];
     GET_OBJ_LEVEL(&o) = t[3];
-    GET_OBJ_SIZE(&o) = SIZE_MEDIUM;
 
     /* check to make sure that weight of containers exceeds curr. quantity */
     if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
@@ -1605,7 +1599,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                         "...offending line: '%s'", buf2, line);
                     exit(1);
                 }
-                GET_OBJ_SIZE(&o) = t[0];
+                o.size = static_cast<Size>(t[0]);
                 break;
             case '$':
             case '#':
@@ -2631,7 +2625,7 @@ int House_load(room_vnum rvnum) {
             ex[1] = asciiflag_conv(f2);
             ex[2] = asciiflag_conv(f3);
             ex[3] = asciiflag_conv(f4);
-            for(auto i = 0; i < temp->extra_flags.size(); i++) temp->extra_flags.set(i, IS_SET_AR(ex, i));
+            for(auto i = 0; i < 128; i++) temp->setItemFlag(i, IS_SET_AR(ex, i));
 
             GET_OBJ_POSTED(temp) = nullptr;
             GET_OBJ_POSTTYPE(temp) = 0;
@@ -2663,13 +2657,13 @@ int House_load(room_vnum rvnum) {
                     fprintf(stderr, "Format error in first numeric line (expecting _x_ args)");
                     return 0;
                 }
-                temp->type_flag = t[0];
+                temp->type_flag = static_cast<ItemType>(t[0]);
                 bitvector_t wear[4];
                 wear[0] = t[1];
                 wear[1] = t[2];
                 wear[2] = t[3];
                 wear[3] = t[4];
-                for(auto i = 0; i < temp->wear_flags.size(); i++) temp->wear_flags.set(i, IS_SET_AR(wear, i));
+                for(auto i = 0; i < NUM_ITEM_WEARS; i++) temp->setWearFlag(i, IS_SET_AR(wear, i));
                 temp->weight = t[5];
                 temp->cost = t[6];
                 temp->cost_per_day = t[7];
@@ -2740,10 +2734,13 @@ int House_load(room_vnum rvnum) {
                             j++;
                             get_line(fl, line);
                             break;
-                        case 'Z':
+                        case 'Z': {
                             get_line(fl, line);
-                            sscanf(line, "%d", &GET_OBJ_SIZE(temp));
+                            int size;
+                            sscanf(line, "%d", &size);
+                            temp->size = static_cast<Size>(size);
                             get_line(fl, line);
+                        }
                             break;
                         case '$':
                         case '#':
@@ -3333,96 +3330,95 @@ static void migrate_obj_data(obj_data *o) {
     // First let's cconvert all relevant flags to new data structures.
     for(auto i = 0; i < 96; i++) {
         // Skip if it's not set.
-        if(!o->extra_flags.test(i)) continue;
+        if(!o->getItemFlag(i)) continue;
 
         bool resetFlag = true;
 
         // Convert it.
         switch(i) {
             case 9: // ITEM_ANTI_GOOD
-                o->antiAlignGoodEvil.set(2);
+                o->antiAlignGoodEvil.insert(MoralAlign::good);
                 break;
             case 10: // ITEM_ANTI_EVIL
-                o->antiAlignGoodEvil.set(0);
+                o->antiAlignGoodEvil.insert(MoralAlign::evil);
                 break;
             case 11: // ITEM_ANTI_NEUTRAL
-                o->antiAlignLawChaos.set(1);
-                o->antiAlignGoodEvil.set(1);
+                o->antiAlignGoodEvil.insert(MoralAlign::neutral);
                 break;
             case 12: // ITEM_ANTI_ROSHI
-                o->antiClass.set(static_cast<int>(SenseiID::roshi));
+                o->antiClass.insert(SenseiID::roshi);
                 break;
             case 13:
-                o->antiClass.set(static_cast<int>(SenseiID::piccolo));
+                o->antiClass.insert(SenseiID::piccolo);
                 break;
             case 14:
-                o->antiClass.set(static_cast<int>(SenseiID::krane));
+                o->antiClass.insert(SenseiID::krane);
                 break;
             case 15:
-                o->antiClass.set(static_cast<int>(SenseiID::nail));
+                o->antiClass.insert(SenseiID::nail);
                 break;
             case 17:
-                o->antiClass.set(static_cast<int>(SenseiID::tapion));
+                o->antiClass.insert(SenseiID::tapion);
                 break;
             case 19:
-                o->antiClass.set(static_cast<int>(SenseiID::sixteen));
+                o->antiClass.insert(SenseiID::sixteen);
                 break;
             case 20:
-                o->antiClass.set(static_cast<int>(SenseiID::dabura));
+                o->antiClass.insert(SenseiID::dabura);
                 break;
             case 21:
-                o->antiClass.set(static_cast<int>(SenseiID::ginyu));
+                o->antiClass.insert(SenseiID::ginyu);
                 break;
             case 22: // ITEM_ANTI_HUMAN
-                o->antiRace.set(static_cast<int>(RaceID::human));
+                o->antiRace.insert(RaceID::human);
                 break;
             case 23: // ITEM_ANTI_ICER
-                o->antiRace.set(static_cast<int>(RaceID::icer));
+                o->antiRace.insert(RaceID::icer);
                 break;
             case 24: // ITEM_ANTI_SAIYAN
-                o->antiRace.set(static_cast<int>(RaceID::saiyan));
+                o->antiRace.insert(RaceID::saiyan);
                 break;
             case 25: // ITEM_ANTI_KONATSU
-                o->antiRace.set(static_cast<int>(RaceID::konatsu));
+                o->antiRace.insert(RaceID::konatsu);
                 break;
             case 29:
-                o->antiClass.set(static_cast<int>(SenseiID::bardock));
+                o->antiClass.insert(SenseiID::bardock);
                 break;
             case 30:
-                o->antiClass.set(static_cast<int>(SenseiID::kibito));
+                o->antiClass.insert(SenseiID::kibito);
                 break;
             case 31:
-                o->antiClass.set(static_cast<int>(SenseiID::frieza));
+                o->antiClass.insert(SenseiID::frieza);
                 break;
             case 41: // ITEM_ONLY_HUMAN
-                o->onlyRace.set(static_cast<int>(RaceID::human));
+                o->onlyRace.insert(RaceID::human);
                 break;
             case 42: // ITEM_ONLY_ICER
-                o->onlyRace.set(static_cast<int>(RaceID::icer));
+                o->onlyRace.insert(RaceID::icer);
                 break;
             case 43: // ITEM_ONLY_SAIYAN
-                o->onlyRace.set(static_cast<int>(RaceID::saiyan));
+                o->onlyRace.insert(RaceID::saiyan);
                 break;
             case 44: // ITEM_ONLY_KONATSU
-                o->onlyRace.set(static_cast<int>(RaceID::konatsu));
+                o->onlyRace.insert(RaceID::konatsu);
                 break;
             case 45:
-                o->onlyClass.set(static_cast<int>(SenseiID::bardock));
+                o->onlyClass.insert(SenseiID::bardock);
                 break;
             case 46:
-                o->onlyClass.set(static_cast<int>(SenseiID::kibito));
+                o->onlyClass.insert(SenseiID::kibito);
                 break;
             case 47:
-                o->onlyClass.set(static_cast<int>(SenseiID::frieza));
+                o->onlyClass.insert(SenseiID::frieza);
                 break;
             case 50:
-                o->antiClass.set(static_cast<int>(SenseiID::kurzak));
+                o->antiClass.insert(SenseiID::kurzak);
                 break;
             case 51:
-                o->onlyClass.set(static_cast<int>(SenseiID::kurzak));
+                o->onlyClass.insert(SenseiID::kurzak);
                 break;
             case 75:
-                o->onlyClass.set(static_cast<int>(SenseiID::jinto));
+                o->onlyClass.insert(SenseiID::jinto);
                 break;
             case 33:
             case 34:
@@ -3470,41 +3466,41 @@ static void migrate_obj_data(obj_data *o) {
         }
 
         if(resetFlag) {
-            o->extra_flags.reset(i);
+            o->setItemFlag(i, false);
         }
 
     }
 
     // now we'll compress the remaining flag space.
     for(auto i = 0; i < 96; i++) {
-        if(!o->extra_flags.test(i)) continue;
+        if(!o->getItemFlag(i)) continue;
 
         switch(i) {
             case 16:
-                o->extra_flags.set(9);
+                o->setItemFlag(9, true);
                 break;
             case 18:
-                o->extra_flags.set(10);
+                o->setItemFlag(10, true);
                 break;
             case 26:
             case 27:
             case 28:
-                o->extra_flags.set(i - 15);
+                o->setItemFlag(i - 15, true);
                 break;
             case 32:
-                o->extra_flags.set(14);
+                o->setItemFlag(14, true);
                 break;
             case 57:
-                o->extra_flags.set(15);
+                o->setItemFlag(15, true);
                 break;
             case 72:
             case 73:
             case 74:
-                o->extra_flags.set(i - 56);
+                o->setItemFlag(i - 56, true);
                 break;
             default:
                 if(i >= 76 && i <= 94) {
-                    o->extra_flags.set(i - 57);
+                    o->setItemFlag(i - 57, true);
                 }
 
                 break;

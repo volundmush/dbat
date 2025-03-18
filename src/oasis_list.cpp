@@ -277,7 +277,7 @@ void list_objects(struct char_data *ch, zone_rnum rnum, room_vnum vmin, room_vnu
             auto sString = !o.proto_script.empty() ? fmt::format(" {}", o.scriptString()) : "";
             send_to_char(ch, "@g%4d@n) [@g%-5d@n] @[2]%-*s @y[%s]@n%s\r\n",
                          vn, objectSubscriptions.count(fmt::format("vnum_{}", vn)), count_color_chars(o.short_description) + 44,
-                         o.short_description, item_types[o.type_flag],
+                         o.short_description, magic_enum::enum_name(o.type_flag).data(),
                          sString.c_str());
         }
     }

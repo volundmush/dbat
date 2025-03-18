@@ -125,7 +125,7 @@ void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data 
             act("@RYour @C$p@R shatters on @r$N's@R body!@n", true, ch, obj, vict, TO_CHAR);
             act("@r$n's@R @C$p@R shatters on YOUR body!@n", true, ch, obj, vict, TO_VICT);
             act("@r$n's@R @C$p@R shatters on @r$N's@R body!@n", true, ch, obj, vict, TO_NOTVICT);
-            obj->extra_flags.set(ITEM_BROKEN);
+            obj->setItemFlag(ITEM_BROKEN, true);
             perform_remove(vict, 16);
             perform_remove(vict, 17);
         } else if (result >= 8) {
@@ -1630,7 +1630,7 @@ void damage_eq(struct char_data *vict, int location) {
         ;
         if (MOD_OBJ_VAL(eq, VAL_ALL_HEALTH, -loss) <= 0) {
             SET_OBJ_VAL(eq, VAL_ALL_HEALTH, 0);
-            eq->extra_flags.set(ITEM_BROKEN);
+            eq->setItemFlag(ITEM_BROKEN, true);
             act("@WYour $p@W completely breaks!@n", false, nullptr, eq, vict, TO_VICT);
             act("@C$N's@W $p@W completely breaks!@n", false, nullptr, eq, vict, TO_NOTVICT);
             perform_remove(vict, location);
@@ -5144,7 +5144,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("$p@w shatters apart!@n", true, ch, obj, nullptr, TO_CHAR);
                 act("$p@w shatters apart!@n", true, ch, obj, nullptr, TO_ROOM);
                 SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 0);
-                obj->extra_flags.set(ITEM_BROKEN);
+                obj->setItemFlag(ITEM_BROKEN, true);
                 if (GET_OBJ_TYPE(obj) == ITEM_DRINKCON && GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) {
                     SET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL, 0);
                 }

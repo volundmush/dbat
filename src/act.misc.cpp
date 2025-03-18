@@ -2433,7 +2433,7 @@ ACMD(do_resize) {
                     } else {
                         act("@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, nullptr, TO_CHAR);
                         act("@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, nullptr, TO_ROOM);
-                        GET_OBJ_SIZE(obj) = SIZE_SMALL;
+                        obj->size = Size::small;
                         ch->decCurST(GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40));
                     }
                 } else if (!strcasecmp(arg2, "medium")) {
@@ -2443,7 +2443,7 @@ ACMD(do_resize) {
                     } else {
                         act("@WYou carefully adjust the size of @c$p@W.@n", true, ch, obj, nullptr, TO_CHAR);
                         act("@C$n@W carefully adjusts the size of @c$p@W.@n", true, ch, obj, nullptr, TO_ROOM);
-                        GET_OBJ_SIZE(obj) = SIZE_MEDIUM;
+                        obj->size = Size::medium;
                         ch->decCurST(GET_OBJ_WEIGHT(obj) + (GET_MAX_MOVE(ch) / 40));
                     }
                 } else {
@@ -2768,7 +2768,7 @@ ACMD(do_channel) {
             act("@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->setLocationGroundEffect(0);
-            ruby->extra_flags.set(ITEM_HOT);
+            ruby->setItemFlag(ITEM_HOT, true);
         }
         ch->decCurKI(cost);
         WAIT_STATE(ch, PULSE_1SEC);
@@ -3175,11 +3175,11 @@ ACMD(do_instill) {
         extract_obj(token);
 
         if (OBJ_FLAGGED(obj, ITEM_SLOT1))
-            obj->extra_flags.set(ITEM_SLOTS_FILLED);
+            obj->setItemFlag(ITEM_SLOTS_FILLED, true);
         else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && !OBJ_FLAGGED(obj, ITEM_SLOT_ONE))
-            obj->extra_flags.set(ITEM_SLOT_ONE);
+            obj->setItemFlag(ITEM_SLOT_ONE, true);
         else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && OBJ_FLAGGED(obj, ITEM_SLOT_ONE))
-            obj->extra_flags.set(ITEM_SLOTS_FILLED);
+            obj->setItemFlag(ITEM_SLOTS_FILLED, true);
 
         /* Check it's slots for the appropriate stat and add to it if possible */
         if (obj->affected[0].location == stat) {
@@ -3339,7 +3339,7 @@ ACMD(do_bury) {
             }
             obj_from_char(obj);
             obj_to_room(obj, IN_ROOM(ch));
-            obj->extra_flags.set(ITEM_BURIED);
+            obj->setItemFlag(ITEM_BURIED, true);
         }
     } else if (!strcasecmp(arg, "uncover")) {
         if (fobj == nullptr) {
@@ -3357,7 +3357,7 @@ ACMD(do_bury) {
                 act("@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n",
                     true, ch, fobj, nullptr, TO_ROOM);
             }
-            fobj->extra_flags.reset(ITEM_BURIED);
+            fobj->setItemFlag(ITEM_BURIED, false);
         }
     } else {
         send_to_char(ch, "Syntax: dig [bury (item) | uncover]\r\n");
@@ -4037,16 +4037,16 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                         if (objnum <= 1116) {
                             obj = read_object(objnum, VIRTUAL);
                             obj_to_char(obj, ch);
-                            GET_OBJ_SIZE(obj) = get_size(ch);
+                            obj->size = static_cast<Size>(get_size(ch));
                             obj = nullptr;
                         } else {
                             obj = read_object(objnum, VIRTUAL);
                             obj_to_char(obj, ch);
-                            GET_OBJ_SIZE(obj) = get_size(ch);
+                            obj->size = static_cast<Size>(get_size(ch));
                             obj = nullptr;
                             obj = read_object(objnum, VIRTUAL);
                             obj_to_char(obj, ch);
-                            GET_OBJ_SIZE(obj) = get_size(ch);
+                            obj->size = static_cast<Size>(get_size(ch));
                         }
                     }
                     ch->modRPP(-cost);
@@ -4064,7 +4064,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 } else {
                     obj = read_object(1120, VIRTUAL);
                     obj_to_char(obj, ch);
-                    GET_OBJ_SIZE(obj) = get_size(ch);
+                    obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
                     send_to_char(ch, "@R%d@W RPP from your Bank paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4080,7 +4080,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 } else {
                     obj = read_object(1121, VIRTUAL);
                     obj_to_char(obj, ch);
-                    GET_OBJ_SIZE(obj) = get_size(ch);
+                    obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4096,7 +4096,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 } else {
                     obj = read_object(1122, VIRTUAL);
                     obj_to_char(obj, ch);
-                    GET_OBJ_SIZE(obj) = get_size(ch);
+                    obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4112,7 +4112,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 } else {
                     obj = read_object(1123, VIRTUAL);
                     obj_to_char(obj, ch);
-                    GET_OBJ_SIZE(obj) = get_size(ch);
+                    obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4128,7 +4128,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 } else {
                     obj = read_object(1124, VIRTUAL);
                     obj_to_char(obj, ch);
-                    GET_OBJ_SIZE(obj) = get_size(ch);
+                    obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4144,7 +4144,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 } else {
                     obj = read_object(1125, VIRTUAL);
                     obj_to_char(obj, ch);
-                    GET_OBJ_SIZE(obj) = get_size(ch);
+                    obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4159,7 +4159,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 } else {
                     obj = read_object(1126, VIRTUAL);
                     obj_to_char(obj, ch);
-                    GET_OBJ_SIZE(obj) = get_size(ch);
+                    obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -4174,7 +4174,7 @@ void handle_rpp_store(struct char_data *ch, int choice) {
                 } else {
                     obj = read_object(1127, VIRTUAL);
                     obj_to_char(obj, ch);
-                    GET_OBJ_SIZE(obj) = get_size(ch);
+                    obj->size = static_cast<Size>(get_size(ch));
                     ch->modRPP(-cost);
                     send_to_char(ch, "@R%d@W RPP paid for your selection. Enjoy!@n\r\n", cost);
                     send_to_imm("RPP Purchase: %s %d", GET_NAME(ch), cost);
@@ -5605,9 +5605,9 @@ ACMD(do_spoil) {
     body_part->room_description = strdup(buf2);
     body_part->short_description = strdup(buf3);
 
-    GET_OBJ_TYPE(body_part) = ITEM_OTHER;
-    body_part->wear_flags.set(ITEM_WEAR_TAKE);
-    body_part->extra_flags.set(ITEM_UNIQUE_SAVE);
+    body_part->type_flag = ItemType::other;
+    body_part->setWearFlag(ITEM_WEAR_TAKE, true);
+    body_part->setItemFlag(ITEM_UNIQUE_SAVE, true);
     SET_OBJ_VAL(body_part, VAL_ALL_HEALTH, 1);
     SET_OBJ_VAL(body_part, VAL_ALL_MAXHEALTH, 1);
     GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);

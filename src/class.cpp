@@ -1076,10 +1076,10 @@ int invalid_class(struct char_data *ch, struct obj_data *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
-    if(obj->onlyClass.any() && !obj->onlyClass.test(static_cast<int>(ch->chclass)))
+    if(!obj->onlyClass.empty() && !obj->onlyClass.contains(ch->chclass))
         return true;
 
-    if(obj->antiClass.test(static_cast<int>(ch->chclass)))
+    if(obj->antiClass.contains(ch->chclass))
         return true;
 
     return false;

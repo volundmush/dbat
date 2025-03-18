@@ -329,7 +329,7 @@ OCMD(do_otransform) {
 
 OCMD(do_dupe) {
 
-    obj->extra_flags.set(ITEM_DUPLICATE);
+    obj->setItemFlag(ITEM_DUPLICATE, true);
 }
 
 /* purge all objects an npcs in room, or specified object or mob */

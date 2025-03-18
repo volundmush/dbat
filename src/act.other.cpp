@@ -3605,7 +3605,7 @@ ACMD(do_form) {
                 return;
             }
             obj_to_char(obj, ch);
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3644,23 +3644,23 @@ ACMD(do_form) {
             obj = read_object(92, VIRTUAL); /* gi */
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
-            GET_OBJ_SIZE(obj) = get_size(vict);
+            obj->size = static_cast<Size>(get_size(vict));
             obj = read_object(91, VIRTUAL); /* pants */
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
-            GET_OBJ_SIZE(obj) = get_size(vict);
+            obj->size = static_cast<Size>(get_size(vict));
             obj = read_object(1528, VIRTUAL); /* wrist */
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
-            GET_OBJ_SIZE(obj) = get_size(vict);
+            obj->size = static_cast<Size>(get_size(vict));
             obj = read_object(1528, VIRTUAL); /* wrist */
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
-            GET_OBJ_SIZE(obj) = get_size(vict);
+            obj->size = static_cast<Size>(get_size(vict));
             obj = read_object(1532, VIRTUAL); /* boots */
             boost_obj(obj, ch, 0);
             obj_to_char(obj, vict);
-            GET_OBJ_SIZE(obj) = get_size(vict);
+            obj->size = static_cast<Size>(get_size(vict));
             do_wear(vict, "all", 0, 0);
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
@@ -3683,7 +3683,7 @@ ACMD(do_form) {
             obj = read_object(92, VIRTUAL);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, ch);
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3705,8 +3705,8 @@ ACMD(do_form) {
         } else {
             obj = read_object(19053, VIRTUAL);
             obj_to_char(obj, ch);
-            for(auto f : {ITEM_NORENT, ITEM_NOSELL}) obj->extra_flags.set(f);
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            for(auto f : {ITEM_NORENT, ITEM_NOSELL}) obj->setItemFlag(f, true);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3729,7 +3729,7 @@ ACMD(do_form) {
             obj = read_object(91, VIRTUAL);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, ch);
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3752,7 +3752,7 @@ ACMD(do_form) {
             obj = read_object(1528, VIRTUAL);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, ch);
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3775,7 +3775,7 @@ ACMD(do_form) {
             obj = read_object(1532, VIRTUAL);
             boost_obj(obj, ch, 0);
             obj_to_char(obj, ch);
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3797,7 +3797,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(72, VIRTUAL);
             obj_to_char(obj, ch);
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3819,7 +3819,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(87, VIRTUAL);
             obj_to_room(obj, IN_ROOM(ch));
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3848,7 +3848,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(86, VIRTUAL);
             obj_to_room(obj, IN_ROOM(ch));
-            GET_OBJ_SIZE(obj) = get_size(ch);
+            obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
             GET_COOLDOWN(ch) = 10;
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
@@ -3984,7 +3984,7 @@ ACMD(do_srepair) {
                         if (MOD_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH, 20) > 100) {
                             SET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH, 100);
                         }
-                        GET_EQ(ch, i)->extra_flags.reset(ITEM_BROKEN);
+                        GET_EQ(ch, i)->setItemFlag(ITEM_BROKEN, false);
                         repaired = true;
                     }
                 }
@@ -6191,7 +6191,7 @@ ACMD(do_forgery) {
     obj_to_char(obj3, ch);
 
     /* Set Object Variables */
-    obj3->extra_flags.set(ITEM_FORGED);
+    obj3->setItemFlag(ITEM_FORGED, true);
     GET_OBJ_WEIGHT(obj3) = rand_number(GET_OBJ_WEIGHT(obj3) / 2, GET_OBJ_WEIGHT(obj3));
 
     obj_from_char(obj4);
@@ -6282,7 +6282,7 @@ ACMD(do_appraise) {
             send_to_char(ch, "Weapon Level: %d\nDamage Bonus: %d%s\r\n", wlvl, dambon, "%");
         }
     }
-    send_to_char(ch, "Size: %s\r\n", size_names[GET_OBJ_SIZE(obj)]);
+    send_to_char(ch, "Size: %s\r\n", size_names[static_cast<int>(GET_OBJ_SIZE(obj))]);
     if (OBJ_FLAGGED(obj, ITEM_SLOT1) && !OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
         send_to_char(ch, "Token Slots  : @m0/1@n\n");
     } else if (OBJ_FLAGGED(obj, ITEM_SLOT1) && OBJ_FLAGGED(obj, ITEM_SLOTS_FILLED)) {
@@ -10338,7 +10338,7 @@ ACMD(do_break) {
     send_to_char(ch, "You ruin %s.\r\n", obj->short_description);
     act("$n ruins $p.", false, ch, obj, nullptr, TO_ROOM);
     SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 0);
-    obj->extra_flags.set(ITEM_BROKEN);
+    obj->setItemFlag(ITEM_BROKEN, true);
 
     return;
 }
@@ -10427,12 +10427,12 @@ ACMD(do_fix) {
             send_to_char(ch, "You repair %s a bit.\r\n", obj->short_description);
             act("$n repairs $p a bit.", false, ch, obj, nullptr, TO_ROOM);
             MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, GET_SKILL(ch, SKILL_REPAIR));
-            obj->extra_flags.reset(ITEM_BROKEN);
+            obj->setItemFlag(ITEM_BROKEN, false);
         } else {
             send_to_char(ch, "You repair %s completely.\r\n", obj->short_description);
             act("$n repairs $p completely.", false, ch, obj, nullptr, TO_ROOM);
             SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 100);
-            obj->extra_flags.reset(ITEM_BROKEN);
+            obj->setItemFlag(ITEM_BROKEN, false);
         }
         if (obj->carried_by == nullptr && !PLR_FLAGGED(ch, PLR_REPLEARN) &&
             (level_exp(ch, GET_LEVEL(ch) + 1) - GET_EXP(ch) > 0 || GET_LEVEL(ch) >= 100)) {

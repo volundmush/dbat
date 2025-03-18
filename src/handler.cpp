@@ -518,11 +518,11 @@ static int apply_ac(struct char_data *ch, int eq_pos) {
 }
 
 int invalid_align(struct char_data *ch, struct obj_data *obj) {
-    if (obj->antiAlignGoodEvil.test(0) && IS_EVIL(ch))
+    if (obj->antiAlignGoodEvil.contains(MoralAlign::evil) && IS_EVIL(ch))
         return true;
-    if (obj->antiAlignGoodEvil.test(2) && IS_GOOD(ch))
+    if (obj->antiAlignGoodEvil.contains(MoralAlign::good) && IS_GOOD(ch))
         return true;
-    if (obj->antiAlignGoodEvil.test(1) && IS_NEUTRAL(ch))
+    if (obj->antiAlignGoodEvil.contains(MoralAlign::neutral) && IS_NEUTRAL(ch))
         return true;
     return false;
 }
@@ -670,7 +670,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
-        object->extra_flags.set(ITEM_UNBREAKABLE);
+        object->setItemFlag(ITEM_UNBREAKABLE, true);
     }
 
     // This section is now only going to be called during migrations.
@@ -762,7 +762,7 @@ void obj_from_room(struct obj_data *object) {
         return;
     }
 
-    if(object->type_flag == ITEM_PLANT) objectSubscriptions.unsubscribe("growingPlants", object);
+    if(object->type_flag == ItemType::plant) objectSubscriptions.unsubscribe("growingPlants", object);
 
     if (GET_OBJ_POSTED(object) && object->in_obj == nullptr) {
         struct obj_data *obj = GET_OBJ_POSTED(object);
@@ -1507,13 +1507,11 @@ struct obj_data *create_money(int amount) {
     new_descr->next = nullptr;
     obj->ex_description = new_descr;
 
-    GET_OBJ_TYPE(obj) = ITEM_MONEY;
+    obj->type_flag = ItemType::money;
     SET_OBJ_VAL(obj, VAL_ALL_MATERIAL, MATERIAL_GOLD);
     SET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH, 100);
     SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 100);
-    for (y = 0; y < TW_ARRAY_MAX; y++)
-        obj->wear_flags[y] = 0;
-    obj->wear_flags.set(ITEM_WEAR_TAKE);
+    obj->setWearFlag(ITEM_WEAR_TAKE, true);
     SET_OBJ_VAL(obj, VAL_MONEY_SIZE, amount);
     GET_OBJ_COST(obj) = amount;
     obj->vn = NOTHING;

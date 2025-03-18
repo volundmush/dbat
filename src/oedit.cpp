@@ -204,14 +204,14 @@ void oedit_setup_new(struct descriptor_data *d) {
     OLC_OBJ(d)->name = strdup("unfinished object");
     OLC_OBJ(d)->room_description = strdup("An unfinished object is lying here.");
     OLC_OBJ(d)->short_description = strdup("an unfinished object");
-    OLC_OBJ(d)->wear_flags.set(ITEM_WEAR_TAKE);
+    OLC_OBJ(d)->setWearFlag(ITEM_WEAR_TAKE, true);
     OLC_VAL(d) = 0;
     OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
-    GET_OBJ_TYPE(OLC_OBJ(d)) = ITEM_WORN;
+    OLC_OBJ(d)->type_flag = ItemType::worn;
     SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_HEALTH, 100);
     SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MAXHEALTH, 100);
     SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
-    GET_OBJ_SIZE(OLC_OBJ(d)) = SIZE_MEDIUM;
+    OLC_OBJ(d)->size = Size::medium;
 
     SCRIPT(OLC_OBJ(d)) = nullptr;
     OLC_OBJ(d)->proto_script.clear();
@@ -954,10 +954,10 @@ void oedit_disp_menu(struct descriptor_data *d) {
                     "Enter choice : ",
 
                     tbitbuf, add_commas(GET_OBJ_WEIGHT(obj)).c_str(), GET_OBJ_COST(obj), GET_OBJ_RENT(obj),
-                    GET_OBJ_TIMER(obj), joined.c_str(), obj->extra_flags.any() ? "Set." : "Not Set.",
+                    GET_OBJ_TIMER(obj), joined.c_str(), !obj->item_flags.empty() ? "Set." : "Not Set.",
                     GET_OBJ_LEVEL(obj), material_names[(int) GET_OBJ_MATERIAL(obj)],
                     ebitbuf, !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.",
-                    size_names[GET_OBJ_SIZE(obj)]
+                    size_names[static_cast<int>(GET_OBJ_SIZE(obj))]
     );
     OLC_MODE(d) = OEDIT_MAIN_MENU;
 }
@@ -1064,7 +1064,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                             copy_proto_script(&obj_proto[robj], obj, OBJ_TRIGGER);
                             assign_triggers(obj, OBJ_TRIGGER);
                         }
-                        obj->extra_flags.set(ITEM_UNIQUE_SAVE);
+                        obj->setItemFlag(ITEM_UNIQUE_SAVE, true);
                         /* Xap - ought to save the old pointer, free after assignment I suppose */
                         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                                "OLC: %s iedit a unique #%d", GET_NAME(d->character), GET_OBJ_VNUM(obj));
@@ -1245,7 +1245,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                 write_to_output(d, "Invalid choice, try again : ");
                 return;
             } else
-                GET_OBJ_TYPE(OLC_OBJ(d)) = number;
+            OLC_OBJ(d)->type_flag = static_cast<ItemType>(number);
             break;
 
         case OEDIT_EXTRAS:
@@ -1256,7 +1256,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             } else if (number == 0)
                 break;
             else {
-                OLC_OBJ(d)->extra_flags.flip(number-1);
+                OLC_OBJ(d)->toggleItemFlag(number-1);
                 oedit_disp_extra_menu(d);
                 return;
             }
@@ -1270,7 +1270,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             } else if (number == 0)    /* Quit. */
                 break;
             else {
-                OLC_OBJ(d)->wear_flags.flip(number-1);
+                OLC_OBJ(d)->toggleWearFlag(number-1);
                 oedit_disp_wear_menu(d);
                 return;
             }
@@ -1321,7 +1321,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
 
         case OEDIT_SIZE:
             number = atoi(arg) - 1;
-            GET_OBJ_SIZE(OLC_OBJ(d)) = LIMIT(number, 0, NUM_SIZES - 1);
+            OLC_OBJ(d)->size = static_cast<Size>(LIMIT(number, 0, NUM_SIZES - 1));
             break;
 
         case OEDIT_VALUE_1:
@@ -1773,7 +1773,7 @@ ACMD(do_iedit) {
 
     /* set up here */
     CREATE(OLC(ch->desc), struct oasis_olc_data, 1);
-    k->extra_flags.set(ITEM_UNIQUE_SAVE);
+    k->setItemFlag(ITEM_UNIQUE_SAVE, true);
 
     ch->setPlayerFlag(PLR_WRITING, true);
     iedit_setup_existing(ch->desc, k);

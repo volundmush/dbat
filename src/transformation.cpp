@@ -2679,8 +2679,6 @@ namespace trans {
             };
         }
         
-
-
         char buf3[MAX_INPUT_LENGTH];
         send_to_sense(0, "You sense a nearby power grow unbelievably!", ch);
         sprintf(buf3, "@D[@GBlip@D]@r Transformed Powerlevel@D: [@Y%s@D]", add_commas(ch->getPL()).c_str());

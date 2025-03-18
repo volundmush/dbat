@@ -594,11 +594,8 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
     while (has_mail(GET_IDNUM(ch))) {
         obj = create_obj();
         obj->vn = NOTHING;
-
-        GET_OBJ_TYPE(obj) = ITEM_NOTE;
-        for (y = 0; y < TW_ARRAY_MAX; y++)
-            obj->wear_flags[y] = 0;
-        for(auto f : {ITEM_WEAR_TAKE, ITEM_WEAR_HOLD}) obj->wear_flags.set(f);
+        obj->type_flag = ItemType::note;
+        for(auto f : {ITEM_WEAR_TAKE, ITEM_WEAR_HOLD}) obj->setWearFlag(f);
         GET_OBJ_WEIGHT(obj) = 1;
         GET_OBJ_COST(obj) = 30;
         GET_OBJ_RENT(obj) = 10;
@@ -612,7 +609,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         obj->name = strdup(bla);
         *bla = '\0';
         *blm = '\0';
-        obj->extra_flags.set(ITEM_UNIQUE_SAVE);
+        obj->setItemFlag(ITEM_UNIQUE_SAVE, true);
 
         SET_OBJ_VAL(obj, VAL_ALL_MATERIAL, MATERIAL_PAPER);
         SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 100);
@@ -623,7 +620,7 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
                     strdup("Mail system error - please report.  Error #11.\r\n");
 
         /* so it saves */
-        obj->extra_flags.set(ITEM_UNIQUE_SAVE);
+        obj->setItemFlag(ITEM_UNIQUE_SAVE, true);
 
         if (IS_PLAYING(ch->desc) && mailman) {
             obj_to_char(obj, ch);

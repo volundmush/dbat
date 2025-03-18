@@ -741,9 +741,9 @@ void remove_limb(struct char_data *vict, int num) {
     body_part->room_description = strdup(buf2);
     body_part->short_description = strdup(part);
 
-    GET_OBJ_TYPE(body_part) = ITEM_OTHER;
-    body_part->wear_flags.set(ITEM_WEAR_TAKE);
-    body_part->extra_flags.set(ITEM_UNIQUE_SAVE);
+    body_part->type_flag = ItemType::other;
+    body_part->setWearFlag(ITEM_WEAR_TAKE, true);
+    body_part->setItemFlag(ITEM_UNIQUE_SAVE, true);
     for(const auto &v : {VAL_ALL_HEALTH, VAL_ALL_MAXHEALTH}) {
         SET_OBJ_VAL(body_part, v, 100);
     }
@@ -1448,17 +1448,11 @@ static void make_pcorpse(struct char_data *ch) {
         }
     }
 
-    GET_OBJ_TYPE(corpse) = ITEM_CONTAINER;
-    GET_OBJ_SIZE(corpse) = get_size(ch);
-    for (x = y = 0; x < EF_ARRAY_MAX || y < TW_ARRAY_MAX; x++, y++) {
-        if (x < EF_ARRAY_MAX)
-            GET_OBJ_EXTRA_AR(corpse, x) = 0;
-        if (y < TW_ARRAY_MAX)
-            corpse->wear_flags[y] = 0;
-    }
+    corpse->type_flag = ItemType::container;
+    corpse->size = static_cast<Size>(get_size(ch));
 
-    corpse->wear_flags.set(ITEM_WEAR_TAKE);
-    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->extra_flags.set(f);
+    corpse->setWearFlag(ITEM_WEAR_TAKE, true);
+    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->setItemFlag(f, true);
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);      /* You can't store stuff in a corpse */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);        /* corpse identifier */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, ch->id);  /* corpse identifier */
@@ -1689,17 +1683,11 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
         }
     }
 
-    GET_OBJ_TYPE(corpse) = ITEM_CONTAINER;
-    GET_OBJ_SIZE(corpse) = get_size(ch);
-    for (x = y = 0; x < EF_ARRAY_MAX || y < TW_ARRAY_MAX; x++, y++) {
-        if (x < EF_ARRAY_MAX)
-            GET_OBJ_EXTRA_AR(corpse, x) = 0;
-        if (y < TW_ARRAY_MAX)
-            corpse->wear_flags[y] = 0;
-    }
+    corpse->type_flag = ItemType::container;
+    corpse->size = static_cast<Size>(get_size(ch));
 
-    corpse->wear_flags.set(ITEM_WEAR_TAKE);
-    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->extra_flags.set(f);
+    corpse->setWearFlag(ITEM_WEAR_TAKE, true);
+    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->setItemFlag(f, true);
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);    /* You can't store stuff in a corpse */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);    /* corpse identifier */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, -1);    /* corpse identifier */

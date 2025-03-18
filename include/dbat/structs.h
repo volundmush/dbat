@@ -191,7 +191,6 @@ struct unit_data {
     int id{NOTHING}; /* the unique ID of this entity */
     time_t generation{}; /* creation time for dupe check     */
 
-
     void activateContents();
     void deactivateContents();
 
@@ -277,21 +276,40 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
 
     /* arbitrary named doubles */
     std::unordered_map<std::string, double> dvalue;
-    int8_t type_flag{};      /* Type of item                        */
+    ItemType type_flag{ItemType::unknown};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
-    std::bitset<3> onlyAlignLawChaos, antiAlignLawChaos, onlyAlignGoodEvil, antiAlignGoodEvil;
-    std::bitset<NUM_CLASSES> onlyClass, antiClass;
-    std::bitset<NUM_RACES> onlyRace, antiRace;
-    std::bitset<NUM_ITEM_WEARS> wear_flags{}; /* Where you can wear it     */
-    std::bitset<NUM_ITEM_FLAGS> extra_flags{}; /* If it hums, glows, etc.  */
+    std::unordered_set<MoralAlign> onlyAlignGoodEvil, antiAlignGoodEvil;
+    std::unordered_set<SenseiID> onlyClass, antiClass;
+    std::unordered_set<RaceID> onlyRace, antiRace;
+    
+    std::unordered_set<WearFlag> wear_flags{}; /* Where you can wear it     */
+    std::unordered_set<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
+    std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
+
+    void setWearFlag(int flag, bool value = true);
+    bool toggleWearFlag(int flag);
+    bool getWearFlag(int flag);
+
+    void setItemFlag(int flag, bool value = true);
+    bool toggleItemFlag(int flag);
+    bool getItemFlag(int flag);
+
+    void setFlag(WearFlag flag, bool value = true);
+    bool toggleFlag(WearFlag flag);
+    bool getFlag(WearFlag flag);
+
+    void setFlag(ItemFlag flag, bool value = true);
+    bool toggleFlag(ItemFlag flag);
+    bool getFlag(ItemFlag flag);
+
     weight_t weight{};         /* Weight what else                     */
     weight_t getWeight();
     weight_t getTotalWeight();
     int cost{};           /* Value when sold (gp.)               */
     int cost_per_day{};   /* Cost to keep pr. real day           */
     int timer{};          /* Timer for object                    */
-    std::bitset<NUM_AFF_FLAGS> bitvector{}; /* To set chars bits          */
-    int size{SIZE_MEDIUM};           /* Size class of object                */
+    
+    Size size{Size::medium};           /* Size class of object                */
 
     std::array<affected_type, MAX_OBJ_AFFECT> affected;  /* affects */
 

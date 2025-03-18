@@ -997,7 +997,7 @@ int vnum_weapontype(char *searchname, struct char_data *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (o.second.type_flag == ITEM_WEAPON) {
+        if (o.second.type_flag == ItemType::weapon) {
             if (isname(searchname, weapon_type[o.second.value[VAL_WEAPON_SKILL]])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                              ++found, o.first, o.second.short_description,
@@ -1013,7 +1013,7 @@ int vnum_armortype(char *searchname, struct char_data *ch) {
     int found = 0;
 
     for (auto &o : obj_proto)
-        if (o.second.type_flag == ITEM_ARMOR) {
+        if (o.second.type_flag == ItemType::armor) {
             if (isname(searchname, armor_type[o.second.value[VAL_ARMOR_SKILL]])) {
                 send_to_char(ch, "%3d. [%5d] %-40s %s\r\n",
                              ++found, o.first, o.second.short_description,
@@ -1809,7 +1809,7 @@ static void do_reset_cmds(zone_data &z) {
                 oproto = obj_proto.find(c.arg1);
                 if (oproto != obj_proto.end())
                 {
-                    if (oproto->second.type_flag == ITEM_HATCH || oproto->second.type_flag == ITEM_CONTROL || oproto->second.type_flag == ITEM_WINDOW || oproto->second.type_flag == ITEM_VEHICLE)
+                    if (oproto->second.type_flag == ItemType::hatch || oproto->second.type_flag == ItemType::control || oproto->second.type_flag == ItemType::window || oproto->second.type_flag == ItemType::vehicle)
                     {
                         c.arg2 = 1;
                         c.arg4 = 1;

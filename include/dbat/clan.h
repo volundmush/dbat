@@ -104,24 +104,24 @@ extern bool clanInduct(const char *name, struct char_data *ch);
 // These handle clan ranks
 //
 
-extern bool clanHIGHRANK(const char *name, const struct char_data *ch, const char *rank);
+extern bool clanHIGHRANK(const char *name, struct char_data *ch, const char *rank);
 
-extern bool clanMIDRANK(const char *name, const struct char_data *ch, const char *rank);
+extern bool clanMIDRANK(const char *name, struct char_data *ch, const char *rank);
 
-extern bool clanRANK(const char *name, const struct char_data *ch, struct char_data *vict, int num);
+extern bool clanRANK(const char *name, struct char_data *ch, struct char_data *vict, int num);
 
 extern bool clanRANKD(const char *name, struct char_data *ch, struct char_data *vict);
 
 //
 // This handles deposit, withdraw, and checking the clan bank
 //
-extern bool clanBANKADD(const char *name, const struct char_data *ch, long amt);
+extern bool clanBANKADD(const char *name, struct char_data *ch, long amt);
 
-extern bool clanBANKSUB(const char *name, const struct char_data *ch, long amt);
+extern bool clanBANKSUB(const char *name, struct char_data *ch, long amt);
 
-extern long clanBANK(const char *name, const struct char_data *ch);
+extern long clanBANK(const char *name, struct char_data *ch);
 
-extern bool clanBANY(const char *name, const struct char_data *ch);
+extern bool clanBANY(const char *name, struct char_data *ch);
 
 extern bool clanBSET(const char *name, struct char_data *ch);
 
@@ -140,14 +140,14 @@ extern void clanExpel(const char *name, struct char_data *ch);
 //
 // Decline a character's application to the clan.
 //
-extern void clanDecline(const char *name, const struct char_data *ch);
+extern void clanDecline(const char *name, struct char_data *ch);
 
 
 //
 // returns true if the character is a member of the clan
 // return false otherwise
 //
-extern bool clanIsMember(const char *name, const struct char_data *ch);
+extern bool clanIsMember(const char *name, struct char_data *ch);
 
 //
 // returns clan mod, member, and applicant lists
@@ -158,14 +158,14 @@ extern void handle_clan_member_list(struct char_data *ch);
 // returns true if the character is a moderator for the clan
 // (i.e. can induct and expell other members)
 //
-extern bool clanIsModerator(const char *name, const struct char_data *ch);
+extern bool clanIsModerator(const char *name, struct char_data *ch);
 
 
 //
 // returns true if the character is applying for the given
 // clan. returns false otherwise, or if the char is an NPC
 //
-extern bool clanIsApplicant(const char *name, const struct char_data *ch);
+extern bool clanIsApplicant(const char *name, struct char_data *ch);
 
 
 //
@@ -226,4 +226,4 @@ extern int num_clans;
 //
 // List all of the clans vict belongs to, to char
 //
-extern void listClansOfVictToChar(const struct char_data *vict, struct char_data *ch);
+extern void listClansOfVictToChar(struct char_data *vict, struct char_data *ch);

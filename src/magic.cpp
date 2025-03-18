@@ -1085,13 +1085,13 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
         case SPELL_BLESS:
             if (!OBJ_FLAGGED(obj, ITEM_BLESS) &&
                 (GET_OBJ_WEIGHT(obj) <= 5 * level)) {
-                obj->extra_flags.set(ITEM_BLESS);
+                obj->setItemFlag(ITEM_BLESS, true);
                 to_char = "$p glows briefly.";
             }
             break;
         case SPELL_INVISIBLE:
             if (!OBJ_FLAGGED(obj, ITEM_NOINVIS | ITEM_INVISIBLE)) {
-                obj->extra_flags.set(ITEM_INVISIBLE);
+                obj->setItemFlag(ITEM_INVISIBLE, true);
                 to_char = "$p vanishes.";
             }
             break;
@@ -1105,7 +1105,7 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
             break;
         case SPELL_REMOVE_CURSE:
             if (OBJ_FLAGGED(obj, ITEM_NODROP)) {
-                obj->extra_flags.reset(ITEM_NODROP);
+                obj->setItemFlag(ITEM_NODROP, false);
                 if (GET_OBJ_TYPE(obj) == ITEM_WEAPON)
                     MOD_OBJ_VAL(obj, VAL_WEAPON_DAMSIZE, 1);
                 to_char = "$p briefly glows blue.";

@@ -947,31 +947,17 @@ void to_json(json& j, const obj_data& o) {
 
     if(!o.value.empty()) j["value"] = o.value;
 
-    if(o.type_flag) j["type_flag"] = o.type_flag;
+    j["type_flag"] = o.type_flag;
     if(o.level) j["level"] = o.level;
-
-    for(auto i = 0; i < o.wear_flags.size(); i++)
-        if(o.wear_flags.test(i)) j["wear_flags"].push_back(i);
-
-    for(auto i = 0; i < o.extra_flags.size(); i++)
-        if(o.extra_flags.test(i)) j["extra_flags"].push_back(i);
-
-    for(auto i = 0; i < o.onlyAlignLawChaos.size(); i++)
-        if(o.onlyAlignLawChaos.test(i)) j["onlyAlignLawChaos"].push_back(i);
-    for(auto i = 0; i < o.antiAlignLawChaos.size(); i++)
-        if(o.antiAlignLawChaos.test(i)) j["antiAlignLawChaos"].push_back(i);
-    for(auto i = 0; i < o.onlyAlignGoodEvil.size(); i++)
-        if(o.onlyAlignGoodEvil.test(i)) j["onlyAlignGoodEvil"].push_back(i);
-    for(auto i = 0; i < o.antiAlignGoodEvil.size(); i++)
-        if(o.antiAlignGoodEvil.test(i)) j["antiAlignGoodEvil"].push_back(i);
-    for(auto i = 0; i < o.onlyClass.size(); i++)
-        if(o.onlyClass.test(i)) j["onlyClass"].push_back(i);
-    for(auto i = 0; i < o.antiClass.size(); i++)
-        if(o.antiClass.test(i)) j["antiClass"].push_back(i);
-    for(auto i = 0; i < o.onlyRace.size(); i++)
-        if(o.onlyRace.test(i)) j["onlyRace"].push_back(i);
-    for(auto i = 0; i < o.antiRace.size(); i++)
-        if(o.antiRace.test(i)) j["antiRace"].push_back(i);
+    if(!o.wear_flags.empty()) j["wear_flags"] = o.wear_flags;
+    if(!o.item_flags.empty()) j["item_flags"] = o.item_flags;
+    if(!o.onlyAlignGoodEvil.empty()) j["onlyAlignGoodEvil"] = o.onlyAlignGoodEvil;
+    if(!o.antiAlignGoodEvil.empty()) j["antiAlignGoodEvil"] = o.antiAlignGoodEvil;
+    
+    if(!o.onlyClass.empty()) j["onlyClass"] = o.onlyClass;
+    if(!o.antiClass.empty()) j["antiClass"] = o.antiClass;
+    if(!o.onlyRace.empty()) j["onlyRace"] = o.onlyRace;
+    if(!o.antiRace.empty()) j["antiRace"] = o.antiRace;
 
     if(o.weight != 0.0) j["weight"] = o.weight;
     if(o.cost) j["cost"] = o.cost;
@@ -1009,23 +995,17 @@ void from_json(const json& j, obj_data& o) {
     if(j.contains("type_flag")) o.type_flag = j["type_flag"];
     if(j.contains("level")) o.level = j["level"];
 
-    if(j.contains("wear_flags")) {
-        for(auto & i : j["wear_flags"]) {
-            o.wear_flags.set(i.get<int>());
-        }
-    }
+    if(j.contains("wear_flags")) o.wear_flags = j["wear_flags"].get<std::unordered_set<WearFlag>>();
 
-    if(j.contains("extra_flags")) for(auto & i : j["extra_flags"]) o.extra_flags.set(i.get<int>());
+    if(j.contains("item_flags")) o.item_flags = j["item_flags"].get<std::unordered_set<ItemFlag>>();
 
-    if(j.contains("onlyAlignLawChaos")) for(auto & i : j["onlyAlignLawChaos"]) o.onlyAlignLawChaos.set(i.get<int>());
-    if(j.contains("antiAlignLawChaos")) for(auto & i : j["antiAlignLawChaos"]) o.antiAlignLawChaos.set(i.get<int>());
-    if(j.contains("onlyAlignGoodEvil")) for(auto & i : j["onlyAlignGoodEvil"]) o.onlyAlignGoodEvil.set(i.get<int>());
-    if(j.contains("antiAlignGoodEvil")) for(auto & i : j["antiAlignGoodEvil"]) o.antiAlignGoodEvil.set(i.get<int>());
+    if(j.contains("onlyAlignGoodEvil")) o.onlyAlignGoodEvil = j["onlyAlignGoodEvil"].get<std::unordered_set<MoralAlign>>();
+    if(j.contains("antiAlignGoodEvil")) o.antiAlignGoodEvil = j["antiAlignGoodEvil"].get<std::unordered_set<MoralAlign>>();
 
-    if(j.contains("onlyClass")) for(auto & i : j["onlyClass"]) o.onlyClass.set(i.get<int>());
-    if(j.contains("antiClass")) for(auto & i : j["antiClass"]) o.antiClass.set(i.get<int>());
-    if(j.contains("onlyRace")) for(auto & i : j["onlyRace"]) o.onlyRace.set(i.get<int>());
-    if(j.contains("tiRace")) for(auto & i : j["tiRace"]) o.antiAlignGoodEvil.set(i.get<int>());
+    if(j.contains("onlyClass")) o.onlyClass = j["onlyClass"].get<std::unordered_set<SenseiID>>();
+    if(j.contains("antiClass")) o.antiClass = j["antiClass"].get<std::unordered_set<SenseiID>>();
+    if(j.contains("onlyRace")) o.onlyRace = j["onlyRace"].get<std::unordered_set<RaceID>>();
+    if(j.contains("antiRace")) o.antiRace = j["antiRace"].get<std::unordered_set<RaceID>>();
 
     if(j.contains("weight")) o.weight = j["weight"];
     if(j.contains("cost")) o.cost = j["cost"];
@@ -1074,7 +1054,7 @@ void from_json(const json& j, obj_data& o) {
                 }
         }
 
-        GET_OBJ_SIZE(&o) = SIZE_MEDIUM;
+        o.size = Size::medium;
 
     /* check to make sure that weight of containers exceeds curr. quantity */
         if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
@@ -1087,7 +1067,6 @@ void from_json(const json& j, obj_data& o) {
             GET_OBJ_TIMER(&o) = -1;
         }
     }
-
 }
 
 void load_item_prototypes(const std::filesystem::path& loc) {
@@ -1401,21 +1380,13 @@ void from_json(const json& j, char_data& c) {
     from_json(j, static_cast<unit_data&>(c));
 
     if(j.contains("trains")) c.trains = j["trains"];
-
     if(j.contains("attributes")) c.attributes = j["attributes"];
-
     if(j.contains("moneys")) c.moneys = j["moneys"];
-
     if(j.contains("aligns")) c.aligns = j["aligns"];
-
     if(j.contains("appearances")) c.appearances = j["appearances"];
-
     if(j.contains("vitals")) c.vitals = j["vitals"];
-
     if(j.contains("nums")) c.nums = j["nums"];
-
     if(j.contains("dims")) c.dims = j["dims"];
-
     if(j.contains("stats")) c.stats = j["stats"];
 
     if(j.contains("title")) c.title = strdup(j["title"].get<std::string>().c_str());

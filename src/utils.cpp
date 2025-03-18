@@ -898,9 +898,9 @@ void randomize_eq(struct obj_data *obj) {
 
     int dice = rand_number(2, 12);
     if (dice >= 10) {
-        obj->extra_flags.set(ITEM_SLOT2);
+        obj->setItemFlag(ITEM_SLOT2, true);
     } else if (dice >= 7) {
-        obj->extra_flags.set(ITEM_SLOT1);
+        obj->setItemFlag(ITEM_SLOT1, true);
     }
 }
 
@@ -3118,11 +3118,11 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
 }
 
 bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag) {
-    return obj->wear_flags.test(flag);
+    return obj->wear_flags.contains(static_cast<WearFlag>(flag));
 }
 
 bool OBJ_FLAGGED(const obj_data *obj, int flag) {
-    return obj->extra_flags.test(flag);
+    return obj->getItemFlag(flag);
 }
 
 bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {

@@ -1012,7 +1012,7 @@ in the vault (vnum: 453) now and then. you can just use
                             int addition = atoi(subfield);
                             SET_OBJ_VAL(o, VAL_ALL_HEALTH, std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH)));
                             if (OBJ_FLAGGED(o, ITEM_BROKEN) && GET_OBJ_VAL(o, VAL_ALL_HEALTH) >= 100)
-                                o->extra_flags.reset(ITEM_BROKEN);
+                                o->setItemFlag(ITEM_BROKEN, false);
                         }
                         snprintf(str, slen, "%ld", GET_OBJ_VAL(o, VAL_ALL_HEALTH));
                     }
@@ -1103,7 +1103,7 @@ in the vault (vnum: 453) now and then. you can just use
                             int ns;
                             if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o), NUM_ITEM_FLAGS, subfield, extra_bits)) >
                                 0) {
-                                o->extra_flags.flip(ns);
+                                o->toggleItemFlag(ns);
                                 snprintf(str, slen, "1");
                             }
                         }
@@ -1111,10 +1111,10 @@ in the vault (vnum: 453) now and then. you can just use
                         if (subfield && *subfield) {
                             int ns;
                             if ((ns = search_block(subfield, size_names, false)) > -1) {
-                                (o)->size = ns;
+                                (o)->size = static_cast<Size>(ns);
                             }
                         }
-                        sprinttype(GET_OBJ_SIZE(o), size_names, str, slen);
+                        sprinttype(static_cast<int>(GET_OBJ_SIZE(o)), size_names, str, slen);
                     }
                     break;
                 case 't':
