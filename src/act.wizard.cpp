@@ -1220,7 +1220,7 @@ static void do_stat_room(struct char_data *ch) {
 
     send_to_char(ch, "Room name: @c%s@n\r\n", rm->name);
 
-    sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
+    sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
     send_to_char(ch, "Zone: [%3d], VNum: [@g%5d@n], RNum: [%5d], IDNum: [%5ld], Type: %s\r\n",
                  zone_table[rm->zone].number, rm->vn, IN_ROOM(ch),
                  (long) rm->vn, buf2);

@@ -848,10 +848,7 @@ void to_json(json& j, const room_data& r) {
     // we need to call the to_json for unit_data...
     to_json(j, static_cast<const unit_data&>(r));
     
-    if(r.sector_type) j["sector_type"] = r.sector_type;
-    auto sect_key = std::string(sector_types[r.sector_type]);
-    boost::to_lower(sect_key);
-    j["sector_type_name"] = sect_key;
+    j["sector_type"] = r.sector_type;
 
     if(!r.room_flags.empty()) j["room_flags"] = r.room_flags;
 
@@ -1264,7 +1261,9 @@ void to_json(json& j, const char_data& c) {
         if(c.wimp_level) j["wimp_level"] = c.wimp_level;
         if(get_room(c.load_room)) j["load_room"] = c.load_room;
         if(get_room(c.hometown)) j["hometown"] = c.hometown;
-
+        auto ch = (char_data*)&c;
+        
+        std::erase_if(ch->skill, [](const auto &s) { return s.second.level == 0 && s.second.perfs == 0; });
         if(!c.skill.empty()) j["skill"] = c.skill;
 
         if(c.speaking) j["speaking"] = c.speaking;

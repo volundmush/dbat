@@ -723,6 +723,24 @@ constexpr int EX_SECRET = (1 << 4);   /* The door is hidden        */
 
 constexpr int NUM_EXIT_FLAGS = 5;
 
+enum class SectorType {
+    inside      = 0,  // Indoors
+    city        = 1,  // In a city
+    field       = 2,  // In a field
+    forest      = 3,  // In a forest
+    hills       = 4,  // In the hills
+    mountain    = 5,  // On a mountain
+    water_swim  = 6,  // Swimmable water
+    water_noswim= 7,  // Water - need a boat
+    flying      = 8,  // Wheee!
+    underwater  = 9,  // Underwater
+    shop        = 10, // Shop
+    important   = 11, // Important Rooms
+    desert      = 12, // A desert
+    space       = 13, // This is a space room
+    lava        = 14  // This room always has lava
+};
+
 /* Sector types: used in room_data.sector_type */
 constexpr int SECT_INSIDE = 0;           /* Indoors			*/
 constexpr int SECT_CITY = 1;           /* In a city			*/

@@ -1191,7 +1191,7 @@ in the vault (vnum: 453) now and then. you can just use
                 snprintf(str, slen, "%s", r->name);
 
             else if (!strcasecmp(field, "sector"))
-                sprinttype(r->sector_type, sector_types, str, slen);
+                sprinttype(static_cast<int>(r->sector_type), sector_types, str, slen);
 
             else if (!strcasecmp(field, "gravity"))
                 snprintf(str, slen, "%d", (int)r->getEnvironment(ENV_GRAVITY));

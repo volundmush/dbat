@@ -403,7 +403,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
 
     int willfall = false;
     /* if this room or the one we're going to needs flight, check for it */
-    if ((r->sector_type == SECT_FLYING) || (dest->sector_type == SECT_FLYING)) {
+    if ((r->sector_type == SectorType::flying) || (dest->sector_type == SectorType::flying)) {
         if (!has_flight(ch)) {
             if (dir != 4) {
                 willfall = true;
@@ -414,7 +414,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (((r->sector_type == SECT_WATER_NOSWIM) || (dest->sector_type == SECT_WATER_NOSWIM)) &&
+    if (((r->sector_type == SectorType::water_noswim) || (dest->sector_type == SectorType::water_noswim)) &&
         IS_HUMANOID(ch)) {
         if (IS_KANASSAN(ch) && !has_flight(ch)) {
             act("@CYou swim swiftly.@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -654,7 +654,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     if (FIGHTING(ch)) {
         auto to_room = oldRoom->dir_option[dir]->to_room;
         auto r = get_room(to_room);
-        if (r->sector_type != SECT_FLYING && r->sector_type != SECT_WATER_NOSWIM && r->geffect == 0) {
+        if (r->sector_type != SectorType::flying && r->sector_type != SectorType::water_noswim && r->geffect == 0) {
             roll_pursue(FIGHTING(ch), ch);
         }
         ch->setAffectFlag(AFF_PURSUIT, false);

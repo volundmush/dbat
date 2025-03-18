@@ -476,7 +476,7 @@ void redit_disp_menu(struct descriptor_data *d) {
     room = OLC_ROOM(d);
 
     sprintbitarray(room->room_flags, room_bits, RF_ARRAY_MAX, buf1);
-    sprinttype(room->sector_type, sector_types, buf2, sizeof(buf2));
+    sprinttype(static_cast<int>(room->sector_type), sector_types, buf2, sizeof(buf2));
     if (GET_ADMLEVEL(d->character) > 0) {
         write_to_output(d,
                         "-- Room number : [@c%d@n]  	Room zone: [@c%d@n]\r\n"
@@ -847,7 +847,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                 redit_disp_sector_menu(d);
                 return;
             }
-            OLC_ROOM(d)->sector_type = number;
+            OLC_ROOM(d)->sector_type = static_cast<SectorType>(number);
             break;
 
         case REDIT_EXIT_MENU:

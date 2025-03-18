@@ -680,7 +680,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
 
         for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->getRoomFlag(i);
 
-        r->sector_type = t[2];
+        r->sector_type = static_cast<SectorType>(t[2]);
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
         //check_bitvector_names(r.room_flags, room_bits_count, flags, "room");
     } else {

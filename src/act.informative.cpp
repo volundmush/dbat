@@ -1202,7 +1202,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum, struct 
         if (isClosed && !isSecret) {
             draw_closed_exit(map, x, y, door);
         } else if (!isClosed) {
-            int sect = dest->sector_type;
+            auto sect = static_cast<int>(dest->sector_type);
             double geffect = dest->geffect;
             double waterEnv = dest->getEnvironment(ENV_WATER);
             draw_open_exit(map, x, y, door, sect, geffect, waterEnv);
@@ -2827,7 +2827,7 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
     const char *mapKey[MAX_DIRS] = {"dlist1", "dlist2", "dlist3", "dlist4", "dlist5", "dlist6", "dlist7", "dlist8", "dlist9", "dlist10", "dlist11", "dlist12"};
     std::map<int, std::string> exitStrings;
 
-    bool space = (room->sector_type == SECT_SPACE && room->vn >= 20000);
+    bool space = (room->sector_type == SectorType::space && room->vn >= 20000);
     bool has_light = ch->isProvidingLight();
     bool admVision = ADM_FLAGGED(ch, ADM_SEESECRET) || GET_ADMLEVEL(ch) > 4;
 
@@ -3072,7 +3072,7 @@ static void display_room_flags(struct room_data *rm, struct char_data *ch) {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
 
     sprintbitarray(rm->room_flags, room_bits, sizeof(room_bits), buf);
-    sprinttype(rm->sector_type, sector_types, buf2, sizeof(buf2));
+    sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
 
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
         send_to_char(ch, "\r\n@wO----------------------------------------------------------------------O@n\r\n");
@@ -3173,7 +3173,7 @@ static void display_damage_description_mountain(struct char_data *ch, int dmg) {
 
 static void display_room_damage_description(struct room_data *rm, struct char_data *ch) {
     auto dmg = rm->getDamage();
-    auto sect = rm->sector_type;
+    auto sect = static_cast<int>(rm->sector_type);
     auto sunk = rm->getEnvironment(ENV_WATER) >= 100.0;
 
     if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->getRoomFlag(ROOM_DEATH)) {

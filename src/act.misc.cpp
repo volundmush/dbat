@@ -2353,7 +2353,7 @@ ACMD(do_ashcloud) {
         return;
     }
 
-    if (room->sector_type == SECT_SPACE) {
+    if (room->sector_type == SectorType::space) {
         send_to_char(ch, "You can not create an ashcloud in space.\r\n");
         return;
     }
@@ -2786,8 +2786,8 @@ ACMD(do_hydromancy) {
     int skill = GET_SKILL_BASE(ch, SKILL_STYLE), chance = axion_dice(0);
     int64_t cost = (GET_MAX_MANA(ch) / 12) - (GET_INT(ch) * GET_WIS(ch));
 
-    if (r->geffect >= 0 && r->sector_type != SECT_WATER_SWIM && r->sector_type != SECT_WATER_NOSWIM) {
-        if (r->sector_type != SECT_UNDERWATER) {
+    if (r->geffect >= 0 && r->sector_type != SectorType::water_swim && r->sector_type != SectorType::water_noswim) {
+        if (r->sector_type != SectorType::underwater) {
             send_to_char(ch, "There is not sufficient water here.\r\n");
             return;
         } else {
@@ -5252,12 +5252,12 @@ ACMD(do_obstruct) {
         return;
     }
 
-    if (r->sector_type == SECT_SPACE || r->getRoomFlag(ROOM_SPACE)) {
+    if (r->sector_type == SectorType::space || r->getRoomFlag(ROOM_SPACE)) {
         send_to_char(ch, "You can not wall off the vastness of space.\r\n");
         return;
     }
 
-    if (r->sector_type == SECT_FLYING) {
+    if (r->sector_type == SectorType::flying) {
         send_to_char(ch, "You can not create gravity defying glacial walls.\r\n");
         return;
     }

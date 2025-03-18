@@ -109,7 +109,7 @@ int thing_data::modLocationDamage(int value) const {
 
 int thing_data::getLocationTileType() const {
     if(room)
-        return room->sector_type;
+        return static_cast<int>(room->sector_type);
     return 0;
 }
 

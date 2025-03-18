@@ -2872,7 +2872,7 @@ int room_is_dark(room_rnum room) {
     if (ROOM_FLAGGED(r, ROOM_INDOORS))
         return (false);
 
-    const auto tile = r->sector_type;
+    const auto tile = static_cast<int>(r->sector_type);
 
     if (tile == SECT_INSIDE || tile == SECT_CITY || tile == SECT_IMPORTANT || tile == SECT_SHOP)
         return (false);

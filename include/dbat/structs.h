@@ -386,7 +386,7 @@ struct room_direction_data {
 struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     ~room_data() override;
     int getType() const override { return 0; }
-    int sector_type{};            /* sector type (move/hide)            */
+    SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     std::unordered_set<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
     SpecialFunc func{};

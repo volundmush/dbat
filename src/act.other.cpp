@@ -7220,7 +7220,7 @@ ACMD(do_summon) {
         send_to_char(ch, "You can not summon shenron in this protected area!\r\n");
         return;
     }
-    if (room->sector_type == SECT_INSIDE) {
+    if (room->sector_type == SectorType::inside) {
         send_to_char(ch, "Go outside to summon Shenron! He won't fit in here!\r\n");
         return;
     }

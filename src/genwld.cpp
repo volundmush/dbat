@@ -414,7 +414,7 @@ double room_data::getEnvironment(int type) {
         case ENV_WATER:
             if(geffect < 0) 
                 return 100.0;
-            switch(sector_type) {
+            switch(static_cast<int>(sector_type)) {
                 case SECT_WATER_SWIM:
                     return 50.0;
                 case SECT_WATER_NOSWIM:
@@ -426,7 +426,7 @@ double room_data::getEnvironment(int type) {
         case ENV_MOONLIGHT: {
             if(!planet) return -1;
             for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(getRoomFlag(f)) return -1;
-            if(inside_sectors.contains(sector_type)) return -1;
+            if(inside_sectors.contains(static_cast<int>(sector_type))) return -1;
             return getPlanetEnvironment(planet, type).value();
         }
         case ENV_ETHER_STREAM: {
