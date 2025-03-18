@@ -2124,7 +2124,6 @@ constexpr const char* VAL_VEHICLE_FUEL = "fuel"; // 2
 constexpr const char* VAL_VEHICLE_FUELCOUNT = "fuelcount"; // 3
 
 
-
 // ITEM_HATCH type (25)
 // VAL_HATCH_DEST is also the room ID of the external house object.
 constexpr const char* VAL_HATCH_DEST = VAL_VEHICLE_DEST; // 0

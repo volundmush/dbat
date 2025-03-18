@@ -300,7 +300,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     }
 }
 
-static int check_object_spell_number(struct obj_data *obj, int val) {
+static int check_object_spell_number(struct obj_data *obj, const char* val) {
     int error = false;
     const char *spellname;
 
@@ -348,7 +348,7 @@ static int check_object_spell_number(struct obj_data *obj, int val) {
     return (error);
 }
 
-static int check_object_level(struct obj_data *obj, int val) {
+static int check_object_level(struct obj_data *obj, const char* val) {
     int error = false;
 
     if ((GET_OBJ_VAL(obj, val) < 0) && (error = true))
@@ -408,26 +408,26 @@ static int check_object(struct obj_data *obj) {
         }
             /* Fall through. */
         case ITEM_FOUNTAIN:
-            if ((GET_OBJ_VAL(obj, 0) > 0) && (GET_OBJ_VAL(obj, 1) > GET_OBJ_VAL(obj, 0) && (error = true)))
+            if ((GET_OBJ_VAL(obj, VAL_FOUNTAIN_CAPACITY) > 0) && (GET_OBJ_VAL(obj, VAL_FOUNTAIN_HOWFULL) > GET_OBJ_VAL(obj, VAL_FOUNTAIN_CAPACITY) && (error = true)))
                 basic_mud_log("SYSERR: Object #%d (%s) contains (%d) more than maximum (%d).",
                     GET_OBJ_VNUM(obj), obj->short_description,
-                    GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 0));
+                    GET_OBJ_VAL(obj, VAL_FOUNTAIN_HOWFULL), GET_OBJ_VAL(obj, VAL_FOUNTAIN_CAPACITY));
             break;
         case ITEM_SCROLL:
         case ITEM_POTION:
-            error |= check_object_level(obj, 0);
-            error |= check_object_spell_number(obj, 1);
-            error |= check_object_spell_number(obj, 2);
-            error |= check_object_spell_number(obj, 3);
+            error |= check_object_level(obj, VAL_SCROLL_LEVEL);
+            error |= check_object_spell_number(obj, VAL_SCROLL_SPELL1);
+            error |= check_object_spell_number(obj, VAL_SCROLL_SPELL2);
+            error |= check_object_spell_number(obj, VAL_SCROLL_SPELL3);
             break;
         case ITEM_WAND:
         case ITEM_STAFF:
-            error |= check_object_level(obj, 0);
-            error |= check_object_spell_number(obj, 3);
-            if (GET_OBJ_VAL(obj, 2) > GET_OBJ_VAL(obj, 1) && (error = true))
+            error |= check_object_level(obj, VAL_SCROLL_LEVEL);
+            error |= check_object_spell_number(obj, VAL_STAFF_SPELL);
+            if (GET_OBJ_VAL(obj, VAL_WAND_CHARGES) > GET_OBJ_VAL(obj, VAL_WAND_MAXCHARGES) && (error = true))
                 basic_mud_log("SYSERR: Object #%d (%s) has more charges (%d) than maximum (%d).",
                     GET_OBJ_VNUM(obj), obj->short_description,
-                    GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 1));
+                    GET_OBJ_VAL(obj, VAL_WAND_CHARGES), GET_OBJ_VAL(obj, VAL_WAND_MAXCHARGES));
             break;
     }
 
@@ -1236,6 +1236,149 @@ static void parse_mobile(FILE *mob_f, mob_vnum nr) {
     }
 }
 
+static void obj_values(obj_data* obj, int64_t old_value[]) {
+    // the basic shared values...
+    if(old_value[4]) obj->value[VAL_ALL_HEALTH] = old_value[4];
+    if(old_value[5]) obj->value[VAL_ALL_MAXHEALTH] = old_value[5];
+    if(old_value[7]) obj->value[VAL_ALL_MATERIAL] = old_value[7];
+
+    switch(obj->type_flag) {
+        case ITEM_LIGHT:
+            if(old_value[0]) obj->value[VAL_LIGHT_TIME] = old_value[0];
+            if(old_value[2]) obj->value[VAL_LIGHT_HOURS] = old_value[2];
+            break;
+        case ITEM_SCROLL:
+        case ITEM_WAND:
+        case ITEM_POTION:
+            if(old_value[0]) obj->value[VAL_SCROLL_LEVEL] = old_value[0];
+            if(old_value[1]) obj->value[VAL_SCROLL_SPELL1] = old_value[1];
+            if(old_value[2]) obj->value[VAL_SCROLL_SPELL2] = old_value[2];
+            if(old_value[3]) obj->value[VAL_SCROLL_SPELL3] = old_value[3];
+            break;
+        case ITEM_STAFF:
+            if(old_value[0]) obj->value[VAL_STAFF_LEVEL] = old_value[0];
+            if(old_value[1]) obj->value[VAL_STAFF_MAXCHARGES] = old_value[1];
+            if(old_value[2]) obj->value[VAL_STAFF_CHARGES] = old_value[2];
+            if(old_value[3]) obj->value[VAL_STAFF_SPELL] = old_value[3];
+            break;
+        case ITEM_WEAPON:
+            if(old_value[0]) obj->value[VAL_WEAPON_SKILL] = old_value[0];
+            if(old_value[1]) obj->value[VAL_WEAPON_DAMDICE] = old_value[1];
+            if(old_value[2]) obj->value[VAL_WEAPON_DAMSIZE] = old_value[2];
+            if(old_value[3]) obj->value[VAL_WEAPON_DAMTYPE] = old_value[3];
+            if(old_value[6]) obj->value[VAL_WEAPON_CRITTYPE] = old_value[6];
+            if(old_value[8]) obj->value[VAL_WEAPON_CRITRANGE] = old_value[8];
+            if(old_value[9]) obj->value[VAL_WEAPON_LEVEL] = old_value[9];
+            break;
+        case ITEM_ARMOR:
+            if(old_value[0]) obj->value[VAL_ARMOR_APPLYAC] = old_value[0];
+            if(old_value[1]) obj->value[VAL_ARMOR_SKILL] = old_value[1];
+            if(old_value[2]) obj->value[VAL_ARMOR_MAXDEXMOD] = old_value[2];
+            if(old_value[3]) obj->value[VAL_ARMOR_CHECK] = old_value[3];
+            if(old_value[6]) obj->value[VAL_ARMOR_SPELLFAIL] = old_value[6];
+        case ITEM_WORN:
+            if(old_value[15]) obj->value[VAL_WORN_SCOUTER] = old_value[15];
+            break;
+        case ITEM_OTHER:
+            if(old_value[6]) obj->value[VAL_OTHER_SERAF] = old_value[6];
+            if(old_value[8]) obj->value[VAL_OTHER_SOILQUALITY] = old_value[8];
+            break;
+        case ITEM_TRAP:
+            if(old_value[0]) obj->value[VAL_TRAP_SPELL] = old_value[0];
+            if(old_value[1]) obj->value[VAL_TRAP_HITPOINTS] = old_value[1];
+            break;
+        case ITEM_CONTAINER:
+            if(old_value[0]) obj->value[VAL_CONTAINER_CAPACITY] = old_value[0];
+            if(old_value[1]) obj->value[VAL_CONTAINER_FLAGS] = old_value[1];
+            if(old_value[2]) obj->value[VAL_CONTAINER_KEY] = old_value[2];
+            if(old_value[3]) obj->value[VAL_CONTAINER_CORPSE] = old_value[3];
+            if(old_value[8]) obj->value[VAL_CONTAINER_OWNER] = old_value[8];
+            break;
+        case ITEM_NOTE:
+            if(old_value[0]) obj->value[VAL_NOTE_LANGUAGE] = old_value[0];
+            break;
+        case ITEM_DRINKCON:
+        case ITEM_FOUNTAIN:
+            if(old_value[0]) obj->value[VAL_DRINKCON_CAPACITY] = old_value[0];
+            if(old_value[1]) obj->value[VAL_DRINKCON_HOWFULL] = old_value[1];
+            if(old_value[2]) obj->value[VAL_DRINKCON_LIQUID] = old_value[2];
+            if(old_value[3]) obj->value[VAL_DRINKCON_POISON] = old_value[3];
+            break;
+        case ITEM_KEY:
+            if(old_value[2]) obj->value[VAL_KEY_KEYCODE] = old_value[2];
+            break;
+        case ITEM_FOOD:
+            if(old_value[0]) obj->value[VAL_FOOD_FOODVAL] = old_value[0];
+            if(old_value[1]) obj->value[VAL_FOOD_MAXFOODVAL] = old_value[1];
+            if(old_value[2]) obj->value[VAL_FOOD_PSBONUS] = old_value[2];
+            if(old_value[3]) obj->value[VAL_FOOD_POISON] = old_value[3];
+            if(old_value[6]) obj->value[VAL_FOOD_EXPBONUS] = old_value[6];
+            if(old_value[8]) obj->value[VAL_FOOD_CANDY_PL] = old_value[8];
+            if(old_value[9]) obj->value[VAL_FOOD_CANDY_KI] = old_value[9];
+            if(old_value[10]) obj->value[VAL_FOOD_CANDY_ST] = old_value[10];
+            if(old_value[11]) obj->value[VAL_FOOD_WHICHATTR] = old_value[11];
+            if(old_value[12]) obj->value[VAL_FOOD_ATTRCHANCE] = old_value[12];
+            break;
+        case ITEM_MONEY:
+            if(old_value[0]) obj->value[VAL_MONEY_SIZE] = old_value[0];
+            break;
+        case ITEM_VEHICLE:
+            if(old_value[0]) obj->value[VAL_VEHICLE_DEST] = old_value[0];
+            if(old_value[1]) obj->value[VAL_VEHICLE_FLAGS] = old_value[1];
+            if(old_value[2]) obj->value[VAL_VEHICLE_FUEL] = old_value[2];
+            if(old_value[3]) obj->value[VAL_VEHICLE_FUELCOUNT] = old_value[3];
+            break;
+        case ITEM_HATCH:
+            if(old_value[0]) obj->value[VAL_HATCH_DEST] = old_value[0];
+            if(old_value[1]) obj->value[VAL_HATCH_FLAGS] = old_value[1];
+            if(old_value[2]) obj->value[VAL_HATCH_DCSKILL] = old_value[2];
+            if(old_value[3]) obj->value[VAL_HATCH_EXTROOM] = old_value[3];
+            if(old_value[6]) obj->value[VAL_HATCH_LOCATION] = old_value[6];
+            if(old_value[8]) obj->value[VAL_HATCH_DCLOCK] = old_value[8];
+            if(old_value[9]) obj->value[VAL_HATCH_DCHIDE] = old_value[9];
+            break;
+        case ITEM_WINDOW:
+            if(old_value[0]) obj->value[VAL_WINDOW_VIEWPORT] = old_value[0];
+            if(old_value[1]) obj->value[VAL_WINDOW_FLAGS] = old_value[1];
+            if(old_value[3]) obj->value[VAL_WINDOW_DEFAULT_ROOM] = old_value[3];
+            break;
+        case ITEM_CONTROL:
+            if(old_value[0]) obj->value[VAL_CONTROL_VEHICLE_VNUM] = old_value[0];
+            if(old_value[1]) obj->value[VAL_CONTROL_SPEED] = old_value[1];
+            if(old_value[2]) obj->value[VAL_CONTROL_FUEL] = old_value[2];
+            if(old_value[3]) obj->value[VAL_CONTROL_FUELCOUNT] = old_value[3];
+            break;
+        case ITEM_PORTAL:
+            if(old_value[0]) obj->value[VAL_PORTAL_DEST] = old_value[0];
+            if(old_value[1]) obj->value[VAL_PORTAL_FLAGS] = old_value[1];
+            if(old_value[2]) obj->value[VAL_PORTAL_DCMOVE] = old_value[2];
+            if(old_value[3]) obj->value[VAL_PORTAL_APPEAR] = old_value[3];
+            if(old_value[8]) obj->value[VAL_PORTAL_DCLOCK] = old_value[8];
+            if(old_value[9]) obj->value[VAL_PORTAL_DCHIDE] = old_value[9];
+            break;
+        case ITEM_BOARD:
+            if(old_value[0]) obj->value[VAL_BOARD_READ] = old_value[0];
+            if(old_value[1]) obj->value[VAL_BOARD_WRITE] = old_value[1];
+            if(old_value[2]) obj->value[VAL_BOARD_ERASE] = old_value[2];
+            break;
+        case ITEM_BED:
+            if(old_value[8]) obj->value[VAL_BED_LEVEL] = old_value[8];
+            if(old_value[9]) obj->value[VAL_BED_HTANK_CHARGE] = old_value[9];
+            break;
+        case ITEM_PLANT:
+            if(old_value[0]) obj->value[VAL_PLANT_SOILQUALITY] = old_value[0];
+            if(old_value[1]) obj->value[VAL_PLANT_MATGOAL] = old_value[1];
+            if(old_value[2]) obj->value[VAL_PLANT_MATURITY] = old_value[2];
+            if(old_value[3]) obj->value[VAL_PLANT_MAXMATURE] = old_value[3];
+            if(old_value[6]) obj->value[VAL_PLANT_WATERLEVEL] = old_value[6];
+            break;
+        case ITEM_FISHPOLE:
+            if(old_value[0]) obj->value[VAL_FISHPOLE_BAIT] = old_value[0];
+            break;
+    }
+
+}
+
 
 /* read all objects from obj file; generate index and prototypes */
 static char *parse_object(FILE *obj_f, obj_vnum nr) {
@@ -1324,15 +1467,14 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         exit(1);
     }
 
-    for (j = 0; j < NUM_OBJ_VAL_POSITIONS; j++)
-        GET_OBJ_VAL(&o, j) = t[j];
+    obj_values(&o, t);
 
     if ((GET_OBJ_TYPE(&o) == ITEM_PORTAL || \
        GET_OBJ_TYPE(&o) == ITEM_HATCH) && \
        (!GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) || \
         !GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE))) {
-        GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) = 20;
-        GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE) = 20;
+        SET_OBJ_VAL(&o, VAL_DOOR_DCLOCK, 20);
+        SET_OBJ_VAL(&o, VAL_DOOR_DCHIDE, 20);
         if (bitsavetodisk) {
             converting = true;
         }
@@ -1369,8 +1511,8 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
     /* check to make sure that weight of containers exceeds curr. quantity */
     if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
         GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN) {
-        if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, 1))
-            GET_OBJ_WEIGHT(&o) = GET_OBJ_VAL(&o, 1) + 5;
+        if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, VAL_CONTAINER_FLAGS))
+            GET_OBJ_WEIGHT(&o) = GET_OBJ_VAL(&o, VAL_CONTAINER_FLAGS) + 5;
     }
     /* *** make sure portal objects have their timer set correctly *** */
     if (GET_OBJ_TYPE(&o) == ITEM_PORTAL) {
@@ -2483,28 +2625,18 @@ int House_load(room_vnum rvnum) {
                    t + 4, t + 5, t + 6, t + 7, t + 8, f1, f2, f3, f4, t + 13, t + 14, t + 15, t + 16, t + 17, t + 18,
                    t + 19, t + 20);
             locate = t[0];
-            GET_OBJ_VAL(temp, 0) = t[1];
-            GET_OBJ_VAL(temp, 1) = t[2];
-            GET_OBJ_VAL(temp, 2) = t[3];
-            GET_OBJ_VAL(temp, 3) = t[4];
-            GET_OBJ_VAL(temp, 4) = t[5];
-            GET_OBJ_VAL(temp, 5) = t[6];
-            GET_OBJ_VAL(temp, 6) = t[7];
-            GET_OBJ_VAL(temp, 7) = t[8];
+            int64_t old_values[NUM_OBJ_VAL_POSITIONS];
+            for(auto n = 0; n < 7; n++) old_values[n] = t[n + 1];
+            for(auto n = 8; n < 15; n++) old_values[n] = t[n + 5];
+            obj_values(temp, old_values);
+
             bitvector_t ex[4];
             ex[0] = asciiflag_conv(f1);
             ex[1] = asciiflag_conv(f2);
             ex[2] = asciiflag_conv(f3);
             ex[3] = asciiflag_conv(f4);
             for(auto i = 0; i < temp->extra_flags.size(); i++) temp->extra_flags.set(i, IS_SET_AR(ex, i));
-            GET_OBJ_VAL(temp, 8) = t[13];
-            GET_OBJ_VAL(temp, 9) = t[14];
-            GET_OBJ_VAL(temp, 10) = t[15];
-            GET_OBJ_VAL(temp, 11) = t[16];
-            GET_OBJ_VAL(temp, 12) = t[17];
-            GET_OBJ_VAL(temp, 13) = t[18];
-            GET_OBJ_VAL(temp, 14) = t[19];
-            GET_OBJ_VAL(temp, 15) = t[20];
+
             GET_OBJ_POSTED(temp) = nullptr;
             GET_OBJ_POSTTYPE(temp) = 0;
 
