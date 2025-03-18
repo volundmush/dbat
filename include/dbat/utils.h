@@ -434,7 +434,7 @@ constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
 #define IS_NPC(ch)    (MOB_FLAGGED((ch), MOB_ISNPC))
 #define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
 
-extern bool MOB_FLAGGED(const struct char_data *ch, int flag);
+extern bool MOB_FLAGGED(struct char_data *ch, int flag);
 extern bool PLR_FLAGGED(struct char_data *ch, int flag);
 extern bool AFF_FLAGGED(struct char_data *ch, int flag);
 extern bool PRF_FLAGGED(struct char_data *ch, int flag);

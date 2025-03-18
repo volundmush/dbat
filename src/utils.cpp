@@ -3149,7 +3149,7 @@ bool PRF_FLAGGED(struct char_data *ch, int flag) {
     return ch->getPrefFlag(flag);
 }
 
-bool MOB_FLAGGED(const struct char_data *ch, int flag) {
+bool MOB_FLAGGED(struct char_data *ch, int flag) {
     return ch->getMobFlag(flag);
 }
 

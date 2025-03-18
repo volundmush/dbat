@@ -1069,9 +1069,9 @@ enum class PlayerFlag : uint8_t {
     trans4       = 38,  // UNUSED
     trans5       = 39,  // UNUSED
     trans6       = 40,  // UNUSED
-    absorb       = 41,  // Absorb model
-    repair       = 42,  // Repair model
-    sensem       = 43,  // Sense-Powersense model
+    absorb_model       = 41,  // Absorb model
+    repair_model       = 42,  // Repair model
+    sense_model       = 43,  // Sense-Powersense model
     powerup      = 44,  // Powering Up
     knocked      = 45,  // Knocked OUT
     cyber_right_arm        = 46,  // Cybernetic Right Arm
@@ -1228,11 +1228,12 @@ enum class MobFlag : uint8_t {
     husk            = 27, // Is an extracted Husk
     spar            = 28, // This is mob sparring
     dummy           = 29, // This mob will not fight back
-    absorb          = 30, // Absorb type android
-    repair          = 31, // Repair type android
+    absorb_model          = 30, // Absorb type android
+    repair_model          = 31, // Repair type android
     no_poison        = 32, // No poison
     know_kaioken        = 33, // Knows kaioken
-    powerup         = 34  // Is powering up
+    powerup         = 34,  // Is powering up,
+    sense_model    = 35
 };
 
 /* Mobile flags: used by char_data.act */
