@@ -1099,7 +1099,7 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
             if (((GET_OBJ_TYPE(obj) == ITEM_DRINKCON) ||
                  (GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) ||
                  (GET_OBJ_TYPE(obj) == ITEM_FOOD)) && !GET_OBJ_VAL(obj, VAL_FOOD_POISON)) {
-                GET_OBJ_VAL(obj, VAL_FOOD_POISON) = 1;
+                SET_OBJ_VAL(obj, VAL_FOOD_POISON, 1);
                 to_char = "$p steams briefly.";
             }
             break;
@@ -1107,7 +1107,7 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
             if (OBJ_FLAGGED(obj, ITEM_NODROP)) {
                 obj->extra_flags.reset(ITEM_NODROP);
                 if (GET_OBJ_TYPE(obj) == ITEM_WEAPON)
-                    GET_OBJ_VAL(obj, VAL_WEAPON_DAMSIZE)++;
+                    MOD_OBJ_VAL(obj, VAL_WEAPON_DAMSIZE, 1);
                 to_char = "$p briefly glows blue.";
             }
             break;
@@ -1115,7 +1115,7 @@ void mag_alter_objs(int level, struct char_data *ch, struct obj_data *obj,
             if (((GET_OBJ_TYPE(obj) == ITEM_DRINKCON) ||
                  (GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) ||
                  (GET_OBJ_TYPE(obj) == ITEM_FOOD)) && GET_OBJ_VAL(obj, VAL_FOOD_POISON)) {
-                GET_OBJ_VAL(obj, VAL_FOOD_POISON) = 0;
+                SET_OBJ_VAL(obj, VAL_FOOD_POISON, 0);
                 to_char = "$p steams briefly.";
             }
             break;

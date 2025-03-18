@@ -454,7 +454,7 @@ ACMD(do_throw) {
                 }
                 ch->decCurST(((GET_MAX_HIT(ch) / 100) + GET_OBJ_WEIGHT(obj)));
                 if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
-                    GET_OBJ_VAL(obj, VAL_ALL_HEALTH) -= odam / 2;
+                    MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, -odam / 2);
                 }
                 LASTATK(ch) = -50;
                 hurt(0, 0, ch, vict, nullptr, 0, 0);
@@ -528,7 +528,7 @@ ACMD(do_throw) {
                     vict, TO_VICT);
             }
             if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
-                GET_OBJ_VAL(obj, VAL_ALL_HEALTH) -= odam;
+                MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, -odam);
             }
             LASTATK(ch) = -50;
             if ((GET_OBJ_VAL(obj, VAL_ALL_HEALTH) - odam) <= 0 && !OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {

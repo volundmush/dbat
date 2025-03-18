@@ -1855,6 +1855,21 @@ constexpr int NUM_ADMFLAGS = 19;
 /* Level of the 'freeze' command */
 constexpr int ADMLVL_FREEZE =  ADMLVL_GRGOD;
 
+enum class Direction : uint8_t {
+    north = 0,
+    east = 1,
+    south = 2,
+    west = 3,
+    up = 4,
+    down = 5,
+    northwest = 6,
+    northeast = 7,
+    southeast = 8,
+    southwest = 9,
+    inside = 10,
+    outside = 11
+};
+
 constexpr int NUM_OF_DIRS = 12;    /* number of directions in a room (nsewud) */
 
 /*
@@ -1968,281 +1983,335 @@ constexpr int MAX_CMD_LENGTH = 16384; /* 16k should be plenty and then some */
 
 /* object-related structures ******************************************/
 constexpr int NUM_OBJ_VAL_POSITIONS = 16;
-
-constexpr int VAL_ALL_HEALTH = 4;
-constexpr int VAL_ALL_MAXHEALTH = 5;
-constexpr int VAL_ALL_MATERIAL = 7;
+constexpr const char* VAL_ALL_UNUSED1 = "unused1"; // 0
+constexpr const char* VAL_ALL_UNUSED2 = "unused2"; // 1
+constexpr const char* VAL_ALL_UNUSED3 = "unused3"; // 2
+constexpr const char* VAL_ALL_UNUSED4 = "unused4"; // 3
+constexpr const char* VAL_ALL_HEALTH = "health"; // 4
+constexpr const char* VAL_ALL_MAXHEALTH = "max_health"; // 5;
+constexpr const char* VAL_ALL_UNUSED7 = "unused7"; // 6;
+constexpr const char* VAL_ALL_MATERIAL = "material"; // 7;
 /*
  * Uses for generic object values on specific object types
  * Please use these instead of numbers to prevent overlaps.
  */
 
-constexpr int VAL_BED_UNUSED1 = 0;
-constexpr int VAL_BED_UNUSED2 = 1;
-constexpr int VAL_BED_UNUSED3 = 2;
-constexpr int VAL_BED_UNUSED4 = 3;
-constexpr int VAL_BED_HEALTH = 4;
-constexpr int VAL_BED_MAXHEALTH = 5;
-constexpr int VAL_BED_MATERIAL = 7;
-constexpr int VAL_BED_LEVEL = 8;
-constexpr int VAL_BED_HTANK_CHARGE = 9;
-constexpr int VAL_LIGHT_TIME = 0;
-constexpr int VAL_LIGHT_UNUSED2 = 1;
-constexpr int VAL_LIGHT_HOURS = 2;
-constexpr int VAL_LIGHT_UNUSED4 = 3;
-constexpr int VAL_LIGHT_HEALTH = 4;
-constexpr int VAL_LIGHT_MAXHEALTH = 5;
-constexpr int VAL_LIGHT_UNUSED7 = 6;
-constexpr int VAL_LIGHT_MATERIAL = 7;
-constexpr int VAL_SCROLL_LEVEL = 0;
-constexpr int VAL_SCROLL_SPELL1 = 1;
-constexpr int VAL_SCROLL_SPELL2 = 2;
-constexpr int VAL_SCROLL_SPELL3 = 3;
-constexpr int VAL_SCROLL_HEALTH = 4;
-constexpr int VAL_SCROLL_MAXHEALTH = 5;
-constexpr int VAL_SCROLL_UNUSED7 = 6;
-constexpr int VAL_SCROLL_MATERIAL = 7;
-constexpr int VAL_WAND_LEVEL = 0;
-constexpr int VAL_WAND_MAXCHARGES = 1;
-constexpr int VAL_WAND_CHARGES = 2;
-constexpr int VAL_WAND_SPELL = 3;
-constexpr int VAL_WAND_HEALTH = 4;
-constexpr int VAL_WAND_MAXHEALTH = 5;
-constexpr int VAL_WAND_UNUSED7 = 6;
-constexpr int VAL_WAND_MATERIAL = 7;
-constexpr int VAL_STAFF_LEVEL = 0;
-constexpr int VAL_STAFF_MAXCHARGES = 1;
-constexpr int VAL_STAFF_CHARGES = 2;
-constexpr int VAL_STAFF_SPELL = 3;
-constexpr int VAL_STAFF_HEALTH = 4;
-constexpr int VAL_STAFF_MAXHEALTH = 5;
-constexpr int VAL_STAFF_UNUSED7 = 6;
-constexpr int VAL_STAFF_MATERIAL = 7;
-constexpr int VAL_WEAPON_SKILL = 0;
-constexpr int VAL_WEAPON_DAMDICE = 1;
-constexpr int VAL_WEAPON_DAMSIZE = 2;
-constexpr int VAL_WEAPON_DAMTYPE = 3;
-constexpr int VAL_WEAPON_HEALTH = 4;
-constexpr int VAL_WEAPON_MAXHEALTH = 5;
-constexpr int VAL_WEAPON_CRITTYPE = 6;
-constexpr int VAL_WEAPON_MATERIAL = 7;
-constexpr int VAL_WEAPON_CRITRANGE = 8;
-constexpr int VAL_WEAPON_LEVEL = 9;
-constexpr int VAL_FIREWEAPON_UNUSED1 = 0;
-constexpr int VAL_FIREWEAPON_UNUSED2 = 1;
-constexpr int VAL_FIREWEAPON_UNUSED3 = 2;
-constexpr int VAL_FIREWEAPON_UNUSED4 = 3;
-constexpr int VAL_FIREWEAPON_HEALTH = 4;
-constexpr int VAL_FIREWEAPON_MAXHEALTH = 5;
-constexpr int VAL_FIREWEAPON_UNUSED7 = 6;
-constexpr int VAL_FIREWEAPON_MATERIAL = 7;
-constexpr int VAL_MISSILE_UNUSED1 = 0;
-constexpr int VAL_MISSILE_UNUSED2 = 1;
-constexpr int VAL_MISSILE_UNUSED3 = 2;
-constexpr int VAL_MISSILE_UNUSED4 = 3;
-constexpr int VAL_MISSILE_HEALTH = 4;
-constexpr int VAL_MISSILE_MAXHEALTH = 5;
-constexpr int VAL_MISSILE_UNUSED7 = 6;
-constexpr int VAL_MISSILE_MATERIAL = 7;
-constexpr int VAL_TREASURE_UNUSED1 = 0;
-constexpr int VAL_TREASURE_UNUSED2 = 1;
-constexpr int VAL_TREASURE_UNUSED3 = 2;
-constexpr int VAL_TREASURE_UNUSED4 = 3;
-constexpr int VAL_TREASURE_HEALTH = 4;
-constexpr int VAL_TREASURE_MAXHEALTH = 5;
-constexpr int VAL_TREASURE_UNUSED7 = 6;
-constexpr int VAL_TREASURE_MATERIAL = 7;
-constexpr int VAL_ARMOR_APPLYAC = 0;
-constexpr int VAL_ARMOR_SKILL = 1;
-constexpr int VAL_ARMOR_MAXDEXMOD = 2;
-constexpr int VAL_ARMOR_CHECK = 3;
-constexpr int VAL_ARMOR_HEALTH = 4;
-constexpr int VAL_ARMOR_MAXHEALTH = 5;
-constexpr int VAL_ARMOR_SPELLFAIL = 6;
-constexpr int VAL_ARMOR_MATERIAL = 7;
-constexpr int VAL_POTION_LEVEL = 0;
-constexpr int VAL_POTION_SPELL1 = 1;
-constexpr int VAL_POTION_SPELL2 = 2;
-constexpr int VAL_POTION_SPELL3 = 3;
-constexpr int VAL_POTION_HEALTH = 4;
-constexpr int VAL_POTION_MAXHEALTH = 5;
-constexpr int VAL_POTION_UNUSED7 = 6;
-constexpr int VAL_POTION_MATERIAL = 7;
-constexpr int VAL_WORN_UNUSED1 = 0;
-constexpr int VAL_WORN_UNUSED2 = 1;
-constexpr int VAL_WORN_UNUSED3 = 2;
-constexpr int VAL_WORN_UNUSED4 = 3;
-constexpr int VAL_WORN_HEALTH = 4;
-constexpr int VAL_WORN_MAXHEALTH = 5;
-constexpr int VAL_WORN_UNUSED7 = 6;
-constexpr int VAL_WORN_MATERIAL = 7;
-constexpr int VAL_WORN_SCOUTER = 15;
-constexpr int VAL_OTHER_UNUSED1 = 0;
-constexpr int VAL_OTHER_UNUSED2 = 1;
-constexpr int VAL_OTHER_UNUSED3 = 2;
-constexpr int VAL_OTHER_UNUSED4 = 3;
-constexpr int VAL_OTHER_HEALTH = 4;
-constexpr int VAL_OTHER_MAXHEALTH = 5;
-constexpr int VAL_OTHER_UNUSED7 = 6;
-constexpr int VAL_OTHER_MATERIAL = 7;
-constexpr int VAL_TRASH_UNUSED1 = 0;
-constexpr int VAL_TRASH_UNUSED2 = 1;
-constexpr int VAL_TRASH_UNUSED3 = 2;
-constexpr int VAL_TRASH_UNUSED4 = 3;
-constexpr int VAL_TRASH_HEALTH = 4;
-constexpr int VAL_TRASH_MAXHEALTH = 5;
-constexpr int VAL_TRASH_UNUSED7 = 6;
-constexpr int VAL_TRASH_MATERIAL = 7;
-constexpr int VAL_TRAP_SPELL = 0;
-constexpr int VAL_TRAP_HITPOINTS = 1;
-constexpr int VAL_TRAP_UNUSED3 = 2;
-constexpr int VAL_TRAP_UNUSED4 = 3;
-constexpr int VAL_TRAP_HEALTH = 4;
-constexpr int VAL_TRAP_MAXHEALTH = 5;
-constexpr int VAL_TRAP_UNUSED7 = 6;
-constexpr int VAL_TRAP_MATERIAL = 7;
-constexpr int VAL_CONTAINER_CAPACITY = 0;
-constexpr int VAL_CONTAINER_FLAGS = 1;
-constexpr int VAL_CONTAINER_KEY = 2;
-constexpr int VAL_CONTAINER_CORPSE = 3;
-constexpr int VAL_CONTAINER_HEALTH = 4;
-constexpr int VAL_CONTAINER_MAXHEALTH = 5;
-constexpr int VAL_CONTAINER_UNUSED7 = 6;
-constexpr int VAL_CONTAINER_MATERIAL = 7;
-constexpr int VAL_CONTAINER_OWNER = 8;
-constexpr int VAL_NOTE_LANGUAGE = 0;
-constexpr int VAL_NOTE_UNUSED2 = 1;
-constexpr int VAL_NOTE_UNUSED3 = 2;
-constexpr int VAL_NOTE_UNUSED4 = 3;
-constexpr int VAL_NOTE_HEALTH = 4;
-constexpr int VAL_NOTE_MAXHEALTH = 5;
-constexpr int VAL_NOTE_UNUSED7 = 6;
-constexpr int VAL_NOTE_MATERIAL = 7;
-constexpr int VAL_DRINKCON_CAPACITY = 0;
-constexpr int VAL_DRINKCON_HOWFULL = 1;
-constexpr int VAL_DRINKCON_LIQUID = 2;
-constexpr int VAL_DRINKCON_POISON = 3;
-constexpr int VAL_DRINKCON_HEALTH = 4;
-constexpr int VAL_DRINKCON_MAXHEALTH = 5;
-constexpr int VAL_DRINKCON_UNUSED7 = 6;
-constexpr int VAL_DRINKCON_MATERIAL = 7;
-constexpr int VAL_KEY_UNUSED1 = 0;
-constexpr int VAL_KEY_UNUSED2 = 1;
-constexpr int VAL_KEY_KEYCODE = 2;
-constexpr int VAL_KEY_UNUSED4 = 3;
-constexpr int VAL_KEY_HEALTH = 4;
-constexpr int VAL_KEY_MAXHEALTH = 5;
-constexpr int VAL_KEY_UNUSED7 = 6;
-constexpr int VAL_KEY_MATERIAL = 7;
-constexpr int VAL_FOOD_FOODVAL = 0;
-constexpr int VAL_FOOD_UNUSED2 = 1;
-constexpr int VAL_FOOD_UNUSED3 = 2;
-constexpr int VAL_FOOD_POISON = 3;
-constexpr int VAL_FOOD_HEALTH = 4;
-constexpr int VAL_FOOD_MAXHEALTH = 5;
-constexpr int VAL_FOOD_UNUSED7 = 6;
-constexpr int VAL_FOOD_MATERIAL = 7;
-constexpr int VAL_FOOD_CANDY_PL = 8;
-constexpr int VAL_FOOD_CANDY_KI = 9;
-constexpr int VAL_FOOD_CANDY_ST = 10;
-constexpr int VAL_MONEY_SIZE = 0;
-constexpr int VAL_MONEY_UNUSED2 = 1;
-constexpr int VAL_MONEY_UNUSED3 = 2;
-constexpr int VAL_MONEY_UNUSED4 = 3;
-constexpr int VAL_MONEY_HEALTH = 4;
-constexpr int VAL_MONEY_MAXHEALTH = 5;
-constexpr int VAL_MONEY_UNUSED7 = 6;
-constexpr int VAL_MONEY_MATERIAL = 7;
-constexpr int VAL_PEN_UNUSED1 = 0;
-constexpr int VAL_PEN_UNUSED2 = 1;
-constexpr int VAL_PEN_UNUSED3 = 2;
-constexpr int VAL_PEN_UNUSED4 = 3;
-constexpr int VAL_PEN_HEALTH = 4;
-constexpr int VAL_PEN_MAXHEALTH = 5;
-constexpr int VAL_PEN_UNUSED7 = 6;
-constexpr int VAL_PEN_MATERIAL = 7;
-constexpr int VAL_BOAT_UNUSED1 = 0;
-constexpr int VAL_BOAT_UNUSED2 = 1;
-constexpr int VAL_BOAT_UNUSED3 = 2;
-constexpr int VAL_BOAT_UNUSED4 = 3;
-constexpr int VAL_BOAT_HEALTH = 4;
-constexpr int VAL_BOAT_MAXHEALTH = 5;
-constexpr int VAL_BOAT_UNUSED7 = 6;
-constexpr int VAL_BOAT_MATERIAL = 7;
-constexpr int VAL_FOUNTAIN_CAPACITY = 0;
-constexpr int VAL_FOUNTAIN_HOWFULL = 1;
-constexpr int VAL_FOUNTAIN_LIQUID = 2;
-constexpr int VAL_FOUNTAIN_POISON = 3;
-constexpr int VAL_FOUNTAIN_HEALTH = 4;
-constexpr int VAL_FOUNTAIN_MAXHEALTH = 5;
-constexpr int VAL_FOUNTAIN_UNUSED7 = 6;
-constexpr int VAL_FOUNTAIN_MATERIAL = 7;
-constexpr int VAL_VEHICLE_ROOM = 0;
-constexpr int VAL_VEHICLE_UNUSED2 = 1;
-constexpr int VAL_VEHICLE_UNUSED3 = 2;
-constexpr int VAL_VEHICLE_APPEAR = 3;
-constexpr int VAL_VEHICLE_HEALTH = 4;
-constexpr int VAL_VEHICLE_MAXHEALTH = 5;
-constexpr int VAL_VEHICLE_UNUSED7 = 6;
-constexpr int VAL_VEHICLE_MATERIAL = 7;
-constexpr int VAL_HATCH_DEST = 0;
-constexpr int VAL_HATCH_FLAGS = 1;
-constexpr int VAL_HATCH_DCSKILL = 2;
-constexpr int VAL_HATCH_DCMOVE = 3;
-constexpr int VAL_HATCH_HEALTH = 4;
-constexpr int VAL_HATCH_MAXHEALTH = 5;
-constexpr int VAL_HATCH_UNUSED7 = 6;
-constexpr int VAL_HATCH_MATERIAL = 7;
-constexpr int VAL_HATCH_DCLOCK = 8;
-constexpr int VAL_HATCH_DCHIDE = 9;
-constexpr int VAL_WINDOW_UNUSED1 = 0;
-constexpr int VAL_WINDOW_UNUSED2 = 1;
-constexpr int VAL_WINDOW_UNUSED3 = 2;
-constexpr int VAL_WINDOW_UNUSED4 = 3;
-constexpr int VAL_WINDOW_HEALTH = 4;
-constexpr int VAL_WINDOW_MAXHEALTH = 5;
-constexpr int VAL_WINDOW_UNUSED7 = 6;
-constexpr int VAL_WINDOW_MATERIAL = 7;
-constexpr int VAL_CONTROL_UNUSED1 = 0;
-constexpr int VAL_CONTROL_UNUSED2 = 1;
-constexpr int VAL_CONTROL_UNUSED3 = 2;
-constexpr int VAL_CONTROL_UNUSED4 = 3;
-constexpr int VAL_CONTROL_HEALTH = 4;
-constexpr int VAL_CONTROL_MAXHEALTH = 5;
-constexpr int VAL_CONTROL_UNUSED7 = 6;
-constexpr int VAL_CONTROL_MATERIAL = 7;
-constexpr int VAL_PORTAL_DEST = 0;
-constexpr int VAL_PORTAL_DCSKILL = 1;
-constexpr int VAL_PORTAL_DCMOVE = 2;
-constexpr int VAL_PORTAL_APPEAR = 3;
-constexpr int VAL_PORTAL_HEALTH = 4;
-constexpr int VAL_PORTAL_MAXHEALTH = 5;
-constexpr int VAL_PORTAL_UNUSED7 = 6;
-constexpr int VAL_PORTAL_MATERIAL = 7;
-constexpr int VAL_PORTAL_DCLOCK = 8;
-constexpr int VAL_PORTAL_DCHIDE = 9;
-constexpr int VAL_BOARD_READ = 0;
-constexpr int VAL_BOARD_WRITE = 1;
-constexpr int VAL_BOARD_ERASE = 2;
-constexpr int VAL_BOARD_UNUSED4 = 3;
-constexpr int VAL_BOARD_HEALTH = 4;
-constexpr int VAL_BOARD_MAXHEALTH = 5;
-constexpr int VAL_BOARD_UNUSED7 = 6;
-constexpr int VAL_BOARD_MATERIAL = 7;
-constexpr int VAL_DOOR_DCLOCK = 8;
-constexpr int VAL_DOOR_DCHIDE = 9;
-constexpr int VAL_CORPSE_HEAD = 8;
-constexpr int VAL_CORPSE_RARM = 9;
-constexpr int VAL_CORPSE_LARM = 10;
-constexpr int VAL_CORPSE_RLEG = 11;
-constexpr int VAL_CORPSE_LLEG = 12;
-constexpr int VAL_GROWTH = 0;
-constexpr int VAL_MATGOAL = 1;
-constexpr int VAL_MATURITY = 2;
-constexpr int VAL_MAXMATURE = 3;
-constexpr int VAL_WATERLEVEL = 6;
-constexpr int VAL_SOILQ = 8;
+constexpr const char* VAL_BED_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_BED_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_BED_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_BED_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_BED_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_BED_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_BED_MATERIAL = VAL_ALL_MATERIAL; // 7
+constexpr const char* VAL_BED_LEVEL = "level"; // 8
+constexpr const char* VAL_BED_HTANK_CHARGE = "htank_charge"; // 9
 
+constexpr const char* VAL_LIGHT_TIME = "time";
+constexpr const char* VAL_LIGHT_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_LIGHT_HOURS = "hours";
+constexpr const char* VAL_LIGHT_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_LIGHT_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_LIGHT_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_LIGHT_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_LIGHT_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_SCROLL_LEVEL = "level";
+constexpr const char* VAL_SCROLL_SPELL1 = "spell1";
+constexpr const char* VAL_SCROLL_SPELL2 = "spell2";
+constexpr const char* VAL_SCROLL_SPELL3 = "spell3";
+constexpr const char* VAL_SCROLL_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_SCROLL_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_SCROLL_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_SCROLL_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_WAND_LEVEL = "level";
+constexpr const char* VAL_WAND_MAXCHARGES = "max_charges";
+constexpr const char* VAL_WAND_CHARGES = "charges";
+constexpr const char* VAL_WAND_SPELL = "spell";
+constexpr const char* VAL_WAND_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_WAND_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_WAND_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_WAND_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_STAFF_LEVEL = VAL_WAND_LEVEL;
+constexpr const char* VAL_STAFF_MAXCHARGES = VAL_WAND_MAXCHARGES;
+constexpr const char* VAL_STAFF_CHARGES = VAL_WAND_CHARGES;
+constexpr const char* VAL_STAFF_SPELL = VAL_WAND_SPELL;
+constexpr const char* VAL_STAFF_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_STAFF_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_STAFF_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_STAFF_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_WEAPON_SKILL = "skill"; // 0
+constexpr const char* VAL_WEAPON_DAMDICE = "damage_dice"; // 1
+constexpr const char* VAL_WEAPON_DAMSIZE = "damage_size"; // 2
+constexpr const char* VAL_WEAPON_DAMTYPE = "damage_type"; // 3
+constexpr const char* VAL_WEAPON_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_WEAPON_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_WEAPON_CRITTYPE = "critical_type"; // 6
+constexpr const char* VAL_WEAPON_MATERIAL = VAL_ALL_MATERIAL; // 7
+constexpr const char* VAL_WEAPON_CRITRANGE = "critical_range"; // 8
+constexpr const char* VAL_WEAPON_LEVEL = "level"; // 9
+
+constexpr const char* VAL_FIREWEAPON_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_FIREWEAPON_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_FIREWEAPON_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_FIREWEAPON_UNUSED4 = VAL_ALL_UNUSED4; // 3
+constexpr const char* VAL_FIREWEAPON_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_FIREWEAPON_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_FIREWEAPON_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_FIREWEAPON_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_MISSILE_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_MISSILE_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_MISSILE_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_MISSILE_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_MISSILE_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_MISSILE_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_MISSILE_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_MISSILE_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_TREASURE_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_TREASURE_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_TREASURE_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_TREASURE_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_TREASURE_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_TREASURE_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_TREASURE_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_TREASURE_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_ARMOR_APPLYAC = "apply_ac"; // 0
+constexpr const char* VAL_ARMOR_SKILL = "skill"; // 1
+constexpr const char* VAL_ARMOR_MAXDEXMOD = "max_dex_mod"; // 2
+constexpr const char* VAL_ARMOR_CHECK = "check"; // 3
+constexpr const char* VAL_ARMOR_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_ARMOR_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_ARMOR_SPELLFAIL = "spell_fail"; // 6
+constexpr const char* VAL_ARMOR_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_POTION_LEVEL = VAL_SCROLL_LEVEL; // 0
+constexpr const char* VAL_POTION_SPELL1 = VAL_SCROLL_SPELL1; // 1
+constexpr const char* VAL_POTION_SPELL2 = VAL_SCROLL_SPELL2; // 2
+constexpr const char* VAL_POTION_SPELL3 = VAL_SCROLL_SPELL3; // 3
+constexpr const char* VAL_POTION_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_POTION_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_POTION_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_POTION_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_WORN_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_WORN_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_WORN_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_WORN_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_WORN_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_WORN_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_WORN_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_WORN_MATERIAL = VAL_ALL_MATERIAL; // 7
+constexpr const char* VAL_WORN_SCOUTER = "scouter_level"; // 15
+
+// used by soil - OTHER
+constexpr const char* VAL_GROWTH = "growth"; // 0
+
+
+// ITEM_OTHER
+constexpr const char* VAL_OTHER_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_OTHER_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_OTHER_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_OTHER_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_OTHER_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_OTHER_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+// used by seraf ink bottle, object vnum 3424 - OTHER
+constexpr const char* VAL_OTHER_SERAF = "seraf_ink"; // 6
+constexpr const char* VAL_OTHER_MATERIAL = VAL_ALL_MATERIAL; // 7
+constexpr const char* VAL_OTHER_SOILQUALITY = "soil_quality"; // 8
+
+constexpr const char* VAL_TRASH_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_TRASH_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_TRASH_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_TRASH_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_TRASH_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_TRASH_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_TRASH_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_TRASH_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_TRAP_SPELL = "spell"; // 0
+constexpr const char* VAL_TRAP_HITPOINTS = "hit_points"; // 1 -- why not use health?
+constexpr const char* VAL_TRAP_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_TRAP_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_TRAP_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_TRAP_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_TRAP_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_TRAP_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_CONTAINER_CAPACITY = "capacity"; // 0
+constexpr const char* VAL_CONTAINER_FLAGS = "flags"; // 1
+constexpr const char* VAL_CONTAINER_KEY = "key"; // 2
+constexpr const char* VAL_CONTAINER_CORPSE = "corpse"; // 3
+constexpr const char* VAL_CONTAINER_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_CONTAINER_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_CONTAINER_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_CONTAINER_MATERIAL = VAL_ALL_MATERIAL; // 7
+constexpr const char* VAL_CONTAINER_OWNER = "owner"; // 8
+
+constexpr const char* VAL_NOTE_LANGUAGE = "language"; // 0
+constexpr const char* VAL_NOTE_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_NOTE_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_NOTE_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_NOTE_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_NOTE_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_NOTE_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_NOTE_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_DRINKCON_CAPACITY = "capacity"; // 0
+constexpr const char* VAL_DRINKCON_HOWFULL = "how_full"; // 1
+constexpr const char* VAL_DRINKCON_LIQUID = "liquid"; // 2
+constexpr const char* VAL_DRINKCON_POISON = "poison"; // 3
+constexpr const char* VAL_DRINKCON_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_DRINKCON_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_DRINKCON_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_DRINKCON_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_KEY_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_KEY_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_KEY_KEYCODE = "keycode"; // 2
+constexpr const char* VAL_KEY_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_KEY_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_KEY_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_KEY_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_KEY_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_FOOD_FOODVAL = "foodval"; // 0
+constexpr const char* VAL_FOOD_MAXFOODVAL = "max_foodval"; // 1
+constexpr const char* VAL_FOOD_PSBONUS = "psbonus"; // 2
+constexpr const char* VAL_FOOD_POISON = "poison"; // 3
+constexpr const char* VAL_FOOD_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_FOOD_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_FOOD_EXPBONUS = "expbonus"; // 6
+constexpr const char* VAL_FOOD_MATERIAL = VAL_ALL_MATERIAL; // 7
+constexpr const char* VAL_FOOD_CANDY_PL = "candy_pl"; // 8
+constexpr const char* VAL_FOOD_CANDY_KI = "candy_ki"; // 9
+constexpr const char* VAL_FOOD_CANDY_ST = "candy_st"; // 10
+constexpr const char* VAL_FOOD_WHICHATTR = "whichattr"; // 11
+constexpr const char* VAL_FOOD_ATTRCHANCE = "attrchance"; // 12
+
+constexpr const char* VAL_MONEY_SIZE = "size"; // 0
+constexpr const char* VAL_MONEY_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_MONEY_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_MONEY_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_MONEY_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_MONEY_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_MONEY_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_MONEY_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_PEN_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_PEN_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_PEN_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_PEN_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_PEN_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_PEN_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_PEN_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_PEN_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_BOAT_UNUSED1 = VAL_ALL_UNUSED1; // 0
+constexpr const char* VAL_BOAT_UNUSED2 = VAL_ALL_UNUSED2; // 1
+constexpr const char* VAL_BOAT_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_BOAT_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_BOAT_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_BOAT_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_BOAT_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_BOAT_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_FOUNTAIN_CAPACITY = VAL_DRINKCON_CAPACITY; // 0
+constexpr const char* VAL_FOUNTAIN_HOWFULL = VAL_DRINKCON_HOWFULL; // 1
+constexpr const char* VAL_FOUNTAIN_LIQUID = VAL_DRINKCON_LIQUID; // 2
+constexpr const char* VAL_FOUNTAIN_POISON = VAL_DRINKCON_POISON; // 3
+constexpr const char* VAL_FOUNTAIN_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_FOUNTAIN_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_FOUNTAIN_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_FOUNTAIN_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+// ITEM_VEHICLE
+// vehicles are also houses apparently?
+constexpr const char* VAL_VEHICLE_ROOM = "room"; // 0
+constexpr const char* VAL_VEHICLE_FLAGS = VAL_CONTAINER_FLAGS; // 1
+constexpr const char* VAL_VEHICLE_FUEL = "fuel"; // 2
+constexpr const char* VAL_VEHICLE_FUELCOUNT = "fuelcount"; // 3
+constexpr const char* VAL_VEHICLE_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_VEHICLE_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_VEHICLE_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_VEHICLE_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+// ITEM_HATCH
+// VAL_HATCH_DEST is also the room ID of the external house object.
+constexpr const char* VAL_HATCH_DEST = "dest"; // 0
+constexpr const char* VAL_HATCH_FLAGS = VAL_CONTAINER_FLAGS; // 1
+constexpr const char* VAL_HATCH_DCSKILL = "dc_skill"; // 2
+constexpr const char* VAL_HATCH_EXTROOM = "external_room"; // 3
+constexpr const char* VAL_HATCH_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_HATCH_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_HATCH_LOCATION = "location"; // 6
+constexpr const char* VAL_HATCH_MATERIAL = VAL_ALL_MATERIAL; // 7
+constexpr const char* VAL_HATCH_DCLOCK = "dc_lock"; // 8
+constexpr const char* VAL_HATCH_DCHIDE = "dc_hide"; // 9
+
+constexpr const char* VAL_WINDOW_VIEWPORT = "viewport"; // 0
+constexpr const char* VAL_WINDOW_FLAGS = VAL_CONTAINER_FLAGS; // 1
+constexpr const char* VAL_WINDOW_UNUSED3 = VAL_ALL_UNUSED3; // 2
+constexpr const char* VAL_WINDOW_DEFAULT_ROOM = "default_room"; // 3
+constexpr const char* VAL_WINDOW_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_WINDOW_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_WINDOW_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_WINDOW_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_CONTROL_VEHICLE_VNUM = "vehicle_vnum"; // 0
+constexpr const char* VAL_CONTROL_SPEED = "speed"; // 1
+constexpr const char* VAL_CONTROL_FUEL = VAL_VEHICLE_FUEL; // 2
+constexpr const char* VAL_CONTROL_FUELCOUNT = VAL_VEHICLE_FUELCOUNT; // 3
+constexpr const char* VAL_CONTROL_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_CONTROL_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_CONTROL_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_CONTROL_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_PORTAL_DEST = "dest"; // 0
+constexpr const char* VAL_PORTAL_FLAGS = VAL_CONTAINER_FLAGS; // 1
+constexpr const char* VAL_PORTAL_DCMOVE = "dc_move"; // 2
+constexpr const char* VAL_PORTAL_APPEAR = "appear"; // 3
+constexpr const char* VAL_PORTAL_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_PORTAL_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_PORTAL_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_PORTAL_MATERIAL = VAL_ALL_MATERIAL; // 7
+constexpr const char* VAL_PORTAL_DCLOCK = "dc_lock"; // 8
+constexpr const char* VAL_PORTAL_DCHIDE = "dc_hide"; // 9
+
+constexpr const char* VAL_BOARD_READ = "read"; // 0
+constexpr const char* VAL_BOARD_WRITE = "write"; // 1
+constexpr const char* VAL_BOARD_ERASE = "erase"; // 2
+constexpr const char* VAL_BOARD_UNUSED4 = VAL_ALL_UNUSED3; // 3
+constexpr const char* VAL_BOARD_HEALTH = VAL_ALL_HEALTH; // 4
+constexpr const char* VAL_BOARD_MAXHEALTH = VAL_ALL_MAXHEALTH; // 5
+constexpr const char* VAL_BOARD_UNUSED7 = VAL_ALL_UNUSED7; // 6
+constexpr const char* VAL_BOARD_MATERIAL = VAL_ALL_MATERIAL; // 7
+
+constexpr const char* VAL_DOOR_DCLOCK = "dc_lock"; // 0
+constexpr const char* VAL_DOOR_DCHIDE = "dc_hide"; // 1
+
+constexpr const char* VAL_CORPSE_HEAD = "head"; // 8
+constexpr const char* VAL_CORPSE_RARM = "right_arm"; // 9
+constexpr const char* VAL_CORPSE_LARM = "left_arm"; // 10
+constexpr const char* VAL_CORPSE_RLEG = "right_leg"; // 11
+constexpr const char* VAL_CORPSE_LLEG = "left_leg"; // 12
+
+
+
+// ITEM_PLANT type.
+constexpr const char* VAL_PLANT_SOILQUALITY = "soil_quality"; // 0
+constexpr const char* VAL_PLANT_MATGOAL = "mat_goal"; // 1
+constexpr const char* VAL_PLANT_MATURITY = "maturity"; // 2
+constexpr const char* VAL_PLANT_MAXMATURE = "max_mature"; // 3
+constexpr const char* VAL_PLANT_WATERLEVEL = "water_level"; // 6
+
+
+ // ITEM_FISHPOLE type.
+constexpr const char* VAL_POLE_BAIT = "bait"; // 0
 
 constexpr int LEVELTYPE_CLASS = 1;
 constexpr int LEVELTYPE_RACE = 2;

@@ -1010,7 +1010,7 @@ in the vault (vnum: 453) now and then. you can just use
                     if (!strcasecmp(field, "health")) {
                         if (subfield && *subfield) {
                             int addition = atoi(subfield);
-                            GET_OBJ_VAL(o, VAL_ALL_HEALTH) = std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH));
+                            SET_OBJ_VAL(o, VAL_ALL_HEALTH, std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH)));
                             if (OBJ_FLAGGED(o, ITEM_BROKEN) && GET_OBJ_VAL(o, VAL_ALL_HEALTH) >= 100)
                                 o->extra_flags.reset(ITEM_BROKEN);
                         }
@@ -1131,29 +1131,8 @@ in the vault (vnum: 453) now and then. you can just use
                         } else {
                             snprintf(str, slen, "%d", GET_OBJ_VNUM(o));
                         }
-                    else if (!strcasecmp(field, "val0"))
-                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 0));
-
-                    else if (!strcasecmp(field, "val1"))
-                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 1));
-
-                    else if (!strcasecmp(field, "val2"))
-                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 2));
-
-                    else if (!strcasecmp(field, "val3"))
-                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 3));
-
-                    else if (!strcasecmp(field, "val4"))
-                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 4));
-
-                    else if (!strcasecmp(field, "val5"))
-                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 5));
-
-                    else if (!strcasecmp(field, "val6"))
-                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 6));
-
-                    else if (!strcasecmp(field, "val7"))
-                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, 7));
+                    else if (!strcasecmp(field, "value") && subfield && *subfield)
+                        snprintf(str, slen, "%ld", GET_OBJ_VAL(o, subfield));
                     break;
                 case 'w':
                     if (!strcasecmp(field, "weight")) {

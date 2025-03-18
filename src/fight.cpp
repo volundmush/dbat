@@ -744,12 +744,9 @@ void remove_limb(struct char_data *vict, int num) {
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;
     body_part->wear_flags.set(ITEM_WEAR_TAKE);
     body_part->extra_flags.set(ITEM_UNIQUE_SAVE);
-    GET_OBJ_VAL(body_part, 0) = 0;
-    GET_OBJ_VAL(body_part, 1) = 0;
-    GET_OBJ_VAL(body_part, 2) = 0;
-    GET_OBJ_VAL(body_part, 3) = 0;
-    GET_OBJ_VAL(body_part, 4) = 1;
-    GET_OBJ_VAL(body_part, 5) = 1;
+    for(const auto &v : {VAL_ALL_HEALTH, VAL_ALL_MAXHEALTH}) {
+        SET_OBJ_VAL(body_part, v, 100);
+    }
     GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
     GET_OBJ_RENT(body_part) = 0;
     obj_to_room(body_part, IN_ROOM(vict));
@@ -1462,9 +1459,9 @@ static void make_pcorpse(struct char_data *ch) {
 
     corpse->wear_flags.set(ITEM_WEAR_TAKE);
     for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->extra_flags.set(f);
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;      /* You can't store stuff in a corpse */
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;        /* corpse identifier */
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = ch->id;  /* corpse identifier */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);      /* You can't store stuff in a corpse */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);        /* corpse identifier */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, ch->id);  /* corpse identifier */
     GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
     GET_OBJ_RENT(corpse) = 100000;
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
@@ -1505,12 +1502,9 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
     char buf2[MAX_NAME_LENGTH + 128];
     char descBuf[512];
-
-    GET_OBJ_VAL(corpse, VAL_CORPSE_HEAD) = 1;
-    GET_OBJ_VAL(corpse, VAL_CORPSE_RARM) = 1;
-    GET_OBJ_VAL(corpse, VAL_CORPSE_LARM) = 1;
-    GET_OBJ_VAL(corpse, VAL_CORPSE_RLEG) = 1;
-    GET_OBJ_VAL(corpse, VAL_CORPSE_LLEG) = 1;
+    for(const auto& v : {VAL_CORPSE_HEAD, VAL_CORPSE_RARM, VAL_CORPSE_LARM, VAL_CORPSE_RLEG, VAL_CORPSE_LLEG}) {
+        SET_OBJ_VAL(corpse, v, 1);
+    }
 
     switch (GET_DEATH_TYPE(ch)) {
         case DTYPE_HEAD:
@@ -1525,7 +1519,7 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
             *descBuf = '\0';
             snprintf(descBuf, sizeof(descBuf), "The headless remains of %s's corpse", GET_NAME(ch));
             corpse->short_description = strdup(descBuf);
-            GET_OBJ_VAL(corpse, VAL_CORPSE_HEAD) = 0;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_HEAD, 0);
             break;
         case DTYPE_HALF:
             *buf2 = '\0';
@@ -1582,24 +1576,24 @@ static void handle_corpse_condition(struct obj_data *corpse, struct char_data *c
 
     if (!IS_NPC(ch)) { /* Let's set the corpse's limbs */
         if (GET_LIMBCOND(ch, 0) <= 0) {
-            GET_OBJ_VAL(corpse, VAL_CORPSE_RARM) = 0;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_RARM, 0);
         } else if (GET_LIMBCOND(ch, 0) > 0 && GET_LIMBCOND(ch, 0) < 50) {
-            GET_OBJ_VAL(corpse, VAL_CORPSE_RARM) = 2;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_RARM, 2);
         }
         if (GET_LIMBCOND(ch, 1) <= 0) {
-            GET_OBJ_VAL(corpse, VAL_CORPSE_LARM) = 0;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_LARM, 0);
         } else if (GET_LIMBCOND(ch, 1) > 0 && GET_LIMBCOND(ch, 1) < 50) {
-            GET_OBJ_VAL(corpse, VAL_CORPSE_LARM) = 2;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_LARM, 2);
         }
         if (GET_LIMBCOND(ch, 2) <= 0) {
-            GET_OBJ_VAL(corpse, VAL_CORPSE_RLEG) = 0;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_RLEG, 0);
         } else if (GET_LIMBCOND(ch, 2) > 0 && GET_LIMBCOND(ch, 2) < 50) {
-            GET_OBJ_VAL(corpse, VAL_CORPSE_RLEG) = 2;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_RLEG, 2);
         }
         if (GET_LIMBCOND(ch, 3) <= 0) {
-            GET_OBJ_VAL(corpse, VAL_CORPSE_LLEG) = 0;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_LLEG, 0);
         } else if (GET_LIMBCOND(ch, 3) > 0 && GET_LIMBCOND(ch, 3) < 50) {
-            GET_OBJ_VAL(corpse, VAL_CORPSE_LLEG) = 2;
+            SET_OBJ_VAL(corpse, VAL_CORPSE_LLEG, 2);
         }
         return;
     } else { /* Do nothing else! */
@@ -1688,7 +1682,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
                     meat->short_description = strdup(nick);
                     meat->name = strdup(nick2);
                     meat->room_description = strdup(nick3);
-                    GET_OBJ_MATERIAL(meat) = 14;
+                    SET_OBJ_VAL(meat, VAL_ALL_MATERIAL, 14);
                 }
 
             }
@@ -1706,9 +1700,9 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
 
     corpse->wear_flags.set(ITEM_WEAR_TAKE);
     for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->extra_flags.set(f);
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY) = 0;    /* You can't store stuff in a corpse */
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE) = 1;    /* corpse identifier */
-    GET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER) = -1;    /* corpse identifier */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);    /* You can't store stuff in a corpse */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);    /* corpse identifier */
+    SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, -1);    /* corpse identifier */
     GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
     GET_OBJ_RENT(corpse) = 100000;
     if (IS_NPC(ch))

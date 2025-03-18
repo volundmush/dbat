@@ -1287,7 +1287,7 @@ ACMD(do_fish) {
             if (GET_OBJ_TYPE(pole) != ITEM_FISHPOLE) {
                 send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
                 return;
-            } else if (GET_OBJ_VAL(pole, 0) == 0) {
+            } else if (GET_OBJ_VAL(pole, VAL_POLE_BAIT) == 0) {
                 send_to_char(ch, "There is no bait on your line!\r\n");
                 return;
             }
@@ -1360,7 +1360,7 @@ ACMD(do_fish) {
             if (GET_OBJ_TYPE(pole) != ITEM_FISHPOLE) {
                 send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
                 return;
-            } else if (GET_OBJ_VAL(pole, 0) != 0) {
+            } else if (GET_OBJ_VAL(pole, VAL_POLE_BAIT) != 0) {
                 send_to_char(ch, "Your fishing pole already has bait on its hook.\r\n");
                 return;
             } else {
@@ -1380,7 +1380,7 @@ ACMD(do_fish) {
                     reveal_hiding(ch, 0);
                     act("@CYou carefully apply the $p@C to your hook.@n", true, ch, bait, nullptr, TO_CHAR);
                     act("@c$n@C carefully applies $p@C to $s fishing pole's hook.@n", true, ch, bait, nullptr, TO_ROOM);
-                    GET_OBJ_VAL(pole, 0) = GET_OBJ_COST(bait);
+                    SET_OBJ_VAL(pole, VAL_POLE_BAIT, GET_OBJ_COST(bait));
                     extract_obj(bait);
                     return;
                 } /* End we applied bait */
@@ -1471,7 +1471,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     characterSubscriptions.unsubscribe("goneFishing", i);
                     if (has_pole(ch) == true) {
                         struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
-                        GET_OBJ_VAL(pole, 0) = 0;
+                        SET_OBJ_VAL(pole, VAL_POLE_BAIT, 0);
                     }
                 } else if (GET_FISHSTATE(ch) == FISH_HOOKED && rand_number(1, 20) >= 12) {
                     act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
@@ -1616,9 +1616,9 @@ static void catch_fish(struct char_data *ch, int quality) {
 
     struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
 
-    if (GET_OBJ_VAL(pole, 0) * 2 >= axion_dice(0)) {
+    if (GET_OBJ_VAL(pole, VAL_FOOD_FOODVAL) * 2 >= axion_dice(0)) {
         quality += 2;
-    } else if (GET_OBJ_VAL(pole, 0) >= axion_dice(0)) {
+    } else if (GET_OBJ_VAL(pole, VAL_FOOD_FOODVAL) >= axion_dice(0)) {
         quality += 1;
     }
 
@@ -1631,25 +1631,25 @@ static void catch_fish(struct char_data *ch, int quality) {
         case 3:
             weight = rand_number(3, 4);
             GET_OBJ_COST(fish) += GET_OBJ_COST(fish) * 0.20;
-            GET_OBJ_VAL(fish, 0) += 1;
+            MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 1);
             break;
         case 4:
         case 5:
         case 6:
             weight = rand_number(5, 9);
             GET_OBJ_COST(fish) += GET_OBJ_COST(fish) * 0.5;
-            GET_OBJ_VAL(fish, 0) += 3;
+            MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 3);
             break;
         default:
             weight = rand_number(10, 15);
             GET_OBJ_COST(fish) += GET_OBJ_COST(fish) * 2;
-            GET_OBJ_VAL(fish, 0) += 5;
+            MOD_OBJ_VAL(fish, VAL_FOOD_FOODVAL, 5);
             break;
     }
 
     GET_OBJ_WEIGHT(fish) += weight;
 
-    GET_OBJ_VAL(pole, 0) = 0;
+    SET_OBJ_VAL(pole, VAL_POLE_BAIT, 0);
     obj_to_room(fish, IN_ROOM(ch));
     do_get(ch, "fish", 0, 0);
     send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
@@ -1695,25 +1695,25 @@ ACMD(do_extract) {
             } else if (GET_OBJ_VNUM(obj2) != 3424) {
                 send_to_char(ch, "That is not an ink bottle!\r\n");
                 return;
-            } else if (GET_OBJ_VAL(obj, 6) <= 0) {
+            } else if (GET_OBJ_VAL(obj, VAL_OTHER_SERAF) <= 0) {
                 send_to_char(ch, "There isn't any ink in the first bottle!\r\n");
                 return;
-            } else if (GET_OBJ_VAL(obj2, 6) <= 0) {
+            } else if (GET_OBJ_VAL(obj2, VAL_OTHER_SERAF) <= 0) {
                 send_to_char(ch, "There isn't any ink in the second bottle!\r\n");
                 return;
             } else {
-                if (GET_OBJ_VAL(obj, 6) >= GET_OBJ_VAL(obj2, 6)) {
-                    GET_OBJ_VAL(obj, 6) += GET_OBJ_VAL(obj2, 6);
-                    if (GET_OBJ_VAL(obj, 6) > 24) {
-                        GET_OBJ_VAL(obj, 6) = 24;
+                if (GET_OBJ_VAL(obj, VAL_OTHER_SERAF) >= GET_OBJ_VAL(obj2, VAL_OTHER_SERAF)) {
+                    MOD_OBJ_VAL(obj, VAL_OTHER_SERAF, GET_OBJ_VAL(obj2, VAL_OTHER_SERAF));
+                    if (GET_OBJ_VAL(obj, VAL_OTHER_SERAF) > 24) {
+                        SET_OBJ_VAL(obj, VAL_OTHER_SERAF, 24);
                     }
                     send_to_char(ch,
                                  "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
                     extract_obj(obj2);
-                } else if (GET_OBJ_VAL(obj2, 6) > GET_OBJ_VAL(obj, 6)) {
-                    GET_OBJ_VAL(obj2, 6) += GET_OBJ_VAL(obj, 6);
-                    if (GET_OBJ_VAL(obj2, 6) > 24) {
-                        GET_OBJ_VAL(obj2, 6) = 24;
+                } else if (GET_OBJ_VAL(obj2, VAL_OTHER_SERAF) > GET_OBJ_VAL(obj, VAL_OTHER_SERAF)) {
+                    MOD_OBJ_VAL(obj2, VAL_OTHER_SERAF, GET_OBJ_VAL(obj, VAL_OTHER_SERAF));
+                    if (GET_OBJ_VAL(obj2, VAL_OTHER_SERAF) > 24) {
+                        SET_OBJ_VAL(obj2, VAL_OTHER_SERAF, 24);
                     }
                     send_to_char(ch,
                                  "You combine the ink of the two bottles into one bottle, and discard the leftovers.\r\n");
@@ -1729,8 +1729,8 @@ ACMD(do_extract) {
         return;
     } else {
         if (GET_OBJ_VNUM(obj) == 3425) {
-            if (GET_OBJ_VAL(obj, VAL_MAXMATURE) != 0 &&
-                GET_OBJ_VAL(obj, VAL_MATURITY) < GET_OBJ_VAL(obj, VAL_MAXMATURE)) {
+            if (GET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE) != 0 &&
+                GET_OBJ_VAL(obj, VAL_PLANT_MATURITY) < GET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE)) {
                 send_to_char(ch, "It's not mature enough to extract from!\r\n");
                 return;
             }
@@ -1749,7 +1749,7 @@ ACMD(do_extract) {
 
             int64_t extra = 0;
 
-            if (GET_OBJ_VAL(bottle, 6) + 4 >= 24)
+            if (GET_OBJ_VAL(bottle, VAL_OTHER_SERAF) + 4 >= 24)
                 extra = GET_MAX_MANA(ch) * 0.5;
 
             cost += extra;
@@ -1774,11 +1774,11 @@ ACMD(do_extract) {
                 act("@C$n@W takes a hold of the @G$p@W and begins to strip it of its leaves. Once it has been stripped $e bundles up the leaves in $s hands and begins to squeeze ink carefully from the leaves into a bottle.@n",
                     true, ch, obj, nullptr, TO_ROOM);
                 extract_obj(obj);
-                GET_OBJ_VAL(bottle, 6) += rand_number(4, 6);
-                if (GET_OBJ_VAL(bottle, 6) >= 24) {
+                MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, rand_number(4, 6));
+                if (GET_OBJ_VAL(bottle, VAL_OTHER_SERAF) >= 24) {
                     struct obj_data *filled = read_object(3424, VIRTUAL);
                     extract_obj(bottle);
-                    GET_OBJ_VAL(filled, 6) = 24;
+                    SET_OBJ_VAL(filled, VAL_OTHER_SERAF, 24);
                     obj_to_char(filled, ch);
                     ch->decCurKI(0);
                     act("@GAs the last of the ink fills the bottle you infuse a final burst of ki into the bottle.@n",
@@ -1829,7 +1829,7 @@ ACMD(do_runic) {
     int found = false, amount = 0, brush = false;
     if(bottle = ch->findObjectVnum(3424)) {
         found = true;
-        amount = GET_OBJ_VAL(bottle, 6);
+        amount = GET_OBJ_VAL(bottle, VAL_OTHER_SERAF);
     }
     brush = ch->findObjectVnum(3427) ? true : false;
 
@@ -1874,9 +1874,8 @@ ACMD(do_runic) {
         act("@b$n@B dips $s runic brush into a bottle filled with shimmering ink. @b$n@B appears to concentrate for a moment before some ink evaporates. Strange...@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_RUNIC, 1);
-        GET_OBJ_VAL(bottle, 6) -= rand_number(1, 3);
-        if (GET_OBJ_VAL(bottle, 6) < 0)
-            GET_OBJ_VAL(bottle, 6) = 0;
+        if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -rand_number(1, 3)) < 0)
+            SET_OBJ_VAL(bottle, VAL_OTHER_SERAF, 0);
         WAIT_STATE(ch, PULSE_3SEC);
         return;
     } else if (!strcasecmp(arg2, "kenaz") || !strcasecmp(arg2, "Kenaz")) {
@@ -1893,8 +1892,7 @@ ACMD(do_runic) {
                 duration = 1;
             send_to_char(vict, "@GYou can now see in the dark! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_INFRAVISION, SKILL_RUNIC, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -1913,8 +1911,7 @@ ACMD(do_runic) {
                 duration = 1;
             send_to_char(vict, "@GYou can now see in the dark! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_INFRAVISION, SKILL_RUNIC, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -1940,8 +1937,7 @@ ACMD(do_runic) {
                 duration = 1;
             send_to_char(vict, "@GYou now have Ethereal Armor! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_EARMOR, SKILL_PUNCH, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -1960,8 +1956,7 @@ ACMD(do_runic) {
                 duration = 1;
             send_to_char(vict, "@GYou now have Ethereal Armor! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_EARMOR, SKILL_PUNCH, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -1987,8 +1982,7 @@ ACMD(do_runic) {
                 duration = 1;
             send_to_char(vict, "@GYou now are protected by Ethereal Chains! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_ECHAINS, SKILL_KNEE, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -2011,8 +2005,7 @@ ACMD(do_runic) {
                 duration = 1;
             send_to_char(vict, "@GYou now have water breathing! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_WATERBREATH, SKILL_SBC, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -2031,8 +2024,7 @@ ACMD(do_runic) {
                 duration = 1;
             send_to_char(vict, "@GYou now are protected by Ethereal Chains! @D(@WLasts@D: @w%d@D)@n\r\n", duration);
             assign_affect(vict, AFF_ECHAINS, SKILL_KNEE, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -2060,8 +2052,7 @@ ACMD(do_runic) {
                          "@GYou are now blessed with a deeper understanding of things you experience! @D(@WLasts@D: @w%d@D)@n\r\n",
                          duration);
             assign_affect(vict, AFF_WUNJO, SKILL_SLAM, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -2082,8 +2073,7 @@ ACMD(do_runic) {
                          "@GYou are now blessed with a deeper understanding of things you experience! @D(@WLasts@D: @w%d@D)@n\r\n",
                          duration);
             assign_affect(vict, AFF_WUNJO, SKILL_SLAM, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -2110,8 +2100,7 @@ ACMD(do_runic) {
             send_to_char(vict, "@GYou feel as if your inner energy is more potent! @D(@WLasts@D: @w%d@D)@n\r\n",
                          duration);
             assign_affect(vict, AFF_POTENT, SKILL_HEELDROP, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -2131,8 +2120,7 @@ ACMD(do_runic) {
             if (duration < 1)
                 duration = 1;
             assign_affect(vict, AFF_POTENT, SKILL_HEELDROP, duration, 0, 0, 0, 0, 0, 0);
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -2156,8 +2144,7 @@ ACMD(do_runic) {
             vict->modPractices(125);
             send_to_char(vict,
                          "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -2174,8 +2161,7 @@ ACMD(do_runic) {
             vict->modPractices(125);
             send_to_char(vict,
                          "@GYou feel like you've just gained a lot of knowledge. Now if only you could apply it. @D[@m+125 PS@D]@n\r\n");
-            GET_OBJ_VAL(bottle, 6) -= inkcost;
-            if (GET_OBJ_VAL(bottle, 6) <= 0) {
+            if (MOD_OBJ_VAL(bottle, VAL_OTHER_SERAF, -inkcost) <= 0) {
                 extract_obj(bottle);
                 struct obj_data *empty = read_object(3423, VIRTUAL);
                 obj_to_char(empty, ch);
@@ -3690,7 +3676,7 @@ ACMD(do_silk) {
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
                     GET_OBJ_COST(weaved) *= price;
-                    GET_OBJ_VAL(weaved, 0) = olevel;
+                    SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
                         weaved->affected[1].location = 1;
@@ -3754,7 +3740,7 @@ ACMD(do_silk) {
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
                     GET_OBJ_COST(weaved) *= price;
-                    GET_OBJ_VAL(weaved, 0) = olevel;
+                    SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
                         weaved->affected[1].location = 1;
@@ -3818,7 +3804,7 @@ ACMD(do_silk) {
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
                     GET_OBJ_COST(weaved) *= price;
-                    GET_OBJ_VAL(weaved, 0) = olevel;
+                    SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
                         weaved->affected[1].location = 1;
@@ -5004,11 +4990,11 @@ ACMD(do_cook) {
                 expbonus = skill * expbonus * masterBonus;
             }
 
-            GET_OBJ_VAL(meal, 1) = psbonus;
-            GET_OBJ_VAL(meal, 2) = expbonus;
+            SET_OBJ_VAL(meal, VAL_FOOD_PSBONUS, psbonus);
+            SET_OBJ_VAL(meal, VAL_FOOD_EXPBONUS, expbonus);
             // 3 is poison!
-            GET_OBJ_VAL(meal, 4) = attr;
-            GET_OBJ_VAL(meal, 5) = attrChance * masterBonus;
+            SET_OBJ_VAL(meal, VAL_FOOD_WHICHATTR, attr);
+            SET_OBJ_VAL(meal, VAL_FOOD_ATTRCHANCE, attrChance * masterBonus);
 
             WAIT_STATE(ch, PULSE_2SEC);
         } /* End has ingredients */
@@ -5586,7 +5572,7 @@ ACMD(do_spoil) {
         act("@WYou reach down and @rcut@W the head off of @R$p@W!@n", true, ch, obj, nullptr, TO_CHAR);
     }
 
-    GET_OBJ_VAL(obj, VAL_CORPSE_HEAD) = 0;
+    SET_OBJ_VAL(obj, VAL_CORPSE_HEAD, 0);
 
     struct obj_data *body_part;
     char part[1000];
@@ -5622,12 +5608,8 @@ ACMD(do_spoil) {
     GET_OBJ_TYPE(body_part) = ITEM_OTHER;
     body_part->wear_flags.set(ITEM_WEAR_TAKE);
     body_part->extra_flags.set(ITEM_UNIQUE_SAVE);
-    GET_OBJ_VAL(body_part, 0) = 0;
-    GET_OBJ_VAL(body_part, 1) = 0;
-    GET_OBJ_VAL(body_part, 2) = 0;
-    GET_OBJ_VAL(body_part, 3) = 0;
-    GET_OBJ_VAL(body_part, 4) = 1;
-    GET_OBJ_VAL(body_part, 5) = 1;
+    SET_OBJ_VAL(body_part, VAL_ALL_HEALTH, 1);
+    SET_OBJ_VAL(body_part, VAL_ALL_MAXHEALTH, 1);
     GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);
     GET_OBJ_RENT(body_part) = 0;
     obj_to_room(body_part, IN_ROOM(ch));

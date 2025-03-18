@@ -273,7 +273,7 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     room_vnum room_loaded{NOWHERE};    /* Room loaded in, for room_max checks	*/
 
     /* legacy Values of the item (see VAL_ list in defs.h)    */
-    std::array<int64_t, NUM_OBJ_VAL_POSITIONS> value;
+    std::unordered_map<std::string, int64_t> value;
 
     /* arbitrary named doubles */
     std::unordered_map<std::string, double> dvalue;

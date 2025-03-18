@@ -3981,14 +3981,11 @@ ACMD(do_srepair) {
             if (!IS_NPC(ch)) {
                 for (i = 0; i < NUM_WEARS; i++) {
                     if (GET_EQ(ch, i)) {
-                        if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) < 100) {
-                            GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) += 20;
-                            if (GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) > 100) {
-                                GET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH) = 100;
-                            }
-                            GET_EQ(ch, i)->extra_flags.reset(ITEM_BROKEN);
-                            repaired = true;
+                        if (MOD_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH, 20) > 100) {
+                            SET_OBJ_VAL(GET_EQ(ch, i), VAL_ALL_HEALTH, 100);
                         }
+                        GET_EQ(ch, i)->extra_flags.reset(ITEM_BROKEN);
+                        repaired = true;
                     }
                 }
             }
@@ -10340,7 +10337,7 @@ ACMD(do_break) {
     /* Ok, break it! */
     send_to_char(ch, "You ruin %s.\r\n", obj->short_description);
     act("$n ruins $p.", false, ch, obj, nullptr, TO_ROOM);
-    GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 0;
+    SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 0);
     obj->extra_flags.set(ITEM_BROKEN);
 
     return;
@@ -10429,12 +10426,12 @@ ACMD(do_fix) {
         if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) + GET_SKILL(ch, SKILL_REPAIR) < 100) {
             send_to_char(ch, "You repair %s a bit.\r\n", obj->short_description);
             act("$n repairs $p a bit.", false, ch, obj, nullptr, TO_ROOM);
-            GET_OBJ_VAL(obj, VAL_ALL_HEALTH) += GET_SKILL(ch, SKILL_REPAIR);
+            MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, GET_SKILL(ch, SKILL_REPAIR));
             obj->extra_flags.reset(ITEM_BROKEN);
         } else {
             send_to_char(ch, "You repair %s completely.\r\n", obj->short_description);
             act("$n repairs $p completely.", false, ch, obj, nullptr, TO_ROOM);
-            GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
+            SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 100);
             obj->extra_flags.reset(ITEM_BROKEN);
         }
         if (obj->carried_by == nullptr && !PLR_FLAGGED(ch, PLR_REPLEARN) &&

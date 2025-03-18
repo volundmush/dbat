@@ -685,22 +685,7 @@ OCMD(do_odoor) {
 
 
 OCMD(do_osetval) {
-    char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-    int position, new_value;
-
-    two_arguments(argument, arg1, arg2);
-    if (arg1 == nullptr || !*arg1 || arg2 == nullptr || !*arg2 ||
-        !is_number(arg1) || !is_number(arg2)) {
-        obj_log(obj, "osetval: bad syntax");
-        return;
-    }
-
-    position = atoi(arg1);
-    new_value = atoi(arg2);
-    if (position >= 0 && position < NUM_OBJ_VAL_POSITIONS)
-        GET_OBJ_VAL(obj, position) = new_value;
-    else
-        obj_log(obj, "osetval: position out of bounds!");
+    obj_log(obj, "osetval: this command is disabled");
 }
 
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/

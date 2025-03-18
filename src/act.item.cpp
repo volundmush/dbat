@@ -140,9 +140,9 @@ ACMD(do_refuel) {
     } else {
 
         if (GET_FUEL(controls) + (GET_OBJ_WEIGHT(fuel) * 4) > max) {
-            GET_FUEL(controls) = max;
+            MOD_OBJ_VAL(controls, VAL_VEHICLE_FUEL, max);
         } else {
-            GET_FUEL(controls) += (GET_OBJ_WEIGHT(fuel) * 4);
+            MOD_OBJ_VAL(controls, VAL_VEHICLE_FUEL, (GET_OBJ_WEIGHT(fuel) * 4));
         }
 
         extract_obj(fuel);
@@ -179,16 +179,16 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
     int extract = false, reward = rand_number(5, 15), count = reward;
     struct obj_data *fruit = nullptr;
 
-    if (GET_OBJ_VAL(plant, VAL_SOILQ) > 7) {
+    if (GET_OBJ_VAL(plant, VAL_PLANT_SOILQUALITY) > 7) {
         reward += 10;
         send_to_char(ch, "@GThe soil seems to have made the plant exteremely bountiful");
-    } else if (GET_OBJ_VAL(plant, VAL_SOILQ) >= 5) {
+    } else if (GET_OBJ_VAL(plant, VAL_PLANT_SOILQUALITY) >= 5) {
         reward += 6;
         send_to_char(ch, "@GThe soil seems to have made the plant very bountiful");
-    } else if (GET_OBJ_VAL(plant, VAL_SOILQ) >= 3) {
+    } else if (GET_OBJ_VAL(plant, VAL_PLANT_SOILQUALITY) >= 3) {
         reward += 4;
         send_to_char(ch, "@GThe soil seems to have made the plant bountiful");
-    } else if (GET_OBJ_VAL(plant, VAL_SOILQ) > 0) {
+    } else if (GET_OBJ_VAL(plant, VAL_PLANT_SOILQUALITY) > 0) {
         reward += 2;
         send_to_char(ch, "@GThe soil seems to have made the plant a bit more bountiful");
     }
@@ -364,8 +364,8 @@ static void harvest_plant(struct char_data *ch, struct obj_data *plant) {
                      "@wThe harvesting process has killed the plant. Do not worry, this is normal for that type.@n\r\n");
         extract_obj(plant);
     } else {
-        GET_OBJ_VAL(plant, VAL_MATURITY) = 3;
-        GET_OBJ_VAL(plant, VAL_GROWTH) = 0;
+        SET_OBJ_VAL(plant, VAL_PLANT_MATURITY, 3);
+        SET_OBJ_VAL(plant, VAL_PLANT_SOILQUALITY, 0);
     }
 
 }
@@ -408,7 +408,7 @@ ACMD(do_garden) {
                     ch, nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of fertile soil!@n", true,
                     ch, nullptr, nullptr, TO_ROOM);
-                GET_OBJ_VAL(soil, 0) = 8;
+                SET_OBJ_VAL(soil, VAL_OTHER_SOILQUALITY, 8);
                 WAIT_STATE(ch, PULSE_4SEC);
                 return;
             } else if (ch->getRoomFlag(ROOM_FERTILE2)) {
@@ -418,7 +418,7 @@ ACMD(do_garden) {
                     nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of good soil!@n", true,
                     ch, nullptr, nullptr, TO_ROOM);
-                GET_OBJ_VAL(soil, 0) = rand_number(5, 7);
+                SET_OBJ_VAL(soil, VAL_OTHER_SOILQUALITY, rand_number(5, 7));
                 WAIT_STATE(ch, PULSE_4SEC);
                 return;
             } else {
@@ -428,7 +428,7 @@ ACMD(do_garden) {
                     nullptr, nullptr, TO_CHAR);
                 act("@w$n@y sinks $s shovel into the soft ground and manages to dig up a pile of soil!@n", true, ch,
                     nullptr, nullptr, TO_ROOM);
-                GET_OBJ_VAL(soil, 0) = rand_number(0, 4);
+                SET_OBJ_VAL(soil, VAL_OTHER_SOILQUALITY, rand_number(0, 4));
                 WAIT_STATE(ch, PULSE_4SEC);
                 return;
             }
@@ -478,10 +478,10 @@ ACMD(do_garden) {
             if (!water) {
                 send_to_char(ch, "You do not have any grow water!\r\n");
                 return;
-            } else if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) >= 500) {
+            } else if (GET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL) >= 500) {
                 send_to_char(ch, "You stop as you realize that the plant already has enough water.\r\n");
                 return;
-            } else if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) <= -10) {
+            } else if (GET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL) <= -10) {
                 send_to_char(ch, "The plant is dead!\r\n");
                 return;
             } else if (skill < axion_dice(0)) {
@@ -491,9 +491,8 @@ ACMD(do_garden) {
                     TO_ROOM);
 
                 ch->decCurST(cost);
-                GET_OBJ_VAL(obj, VAL_WATERLEVEL) += 40;
-                if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) > 500) {
-                    GET_OBJ_VAL(obj, VAL_WATERLEVEL) = 500;
+                if (MOD_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL, 40) > 500) {
+                    SET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL, 500);
                     send_to_char(ch, "@YThe plant is now at full water level.@n\r\n");
                 }
                 extract_obj(water);
@@ -504,9 +503,8 @@ ACMD(do_garden) {
                 act("@GYou calmly and expertly pour the grow water on @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
                 act("@g$n@G calmly and expertly pours some grow water on @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
                 ch->decCurST(cost);
-                GET_OBJ_VAL(obj, VAL_WATERLEVEL) += 225;
-                if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) >= 500) {
-                    GET_OBJ_VAL(obj, VAL_WATERLEVEL) = 500;
+                if (MOD_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL, 225) >= 500) {
+                    SET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL, 500);
                     send_to_char(ch, "@YThe plant is now at full water level.@n\r\n");
                 }
                 extract_obj(water);
@@ -524,10 +522,10 @@ ACMD(do_garden) {
             } else if (can_harvest(obj) == false) {
                 send_to_char(ch, "You can not harvest that plant. Instead, Syntax: garden (plant) (pick)\r\n");
                 return;
-            } else if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) <= -10) {
+            } else if (GET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL) <= -10) {
                 send_to_char(ch, "That plant is dead!\r\n");
                 return;
-            } else if (GET_OBJ_VAL(obj, VAL_MATURITY) < GET_OBJ_VAL(obj, VAL_MAXMATURE)) {
+            } else if (GET_OBJ_VAL(obj, VAL_PLANT_MATURITY) < GET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE)) {
                 send_to_char(ch, "You stop as you realize that the plant isn't mature enough to harvest.\r\n");
                 return;
             } else if (skill < axion_dice(-5)) {
@@ -544,8 +542,7 @@ ACMD(do_garden) {
                 act("@GYou calmly and expertly harvest @g$p@G.@n", true, ch, obj, nullptr, TO_CHAR);
                 act("@g$n@G calmly and expertly harvests @g$p@G.@n", true, ch, obj, nullptr, TO_ROOM);
                 ch->decCurST(cost);
-                GET_OBJ_VAL(clippers, VAL_ALL_HEALTH) -= 1;
-                if (GET_OBJ_VAL(clippers, VAL_ALL_HEALTH) <= 0) {
+                if (MOD_OBJ_VAL(clippers, VAL_ALL_HEALTH, -1) <= 0) {
                     send_to_char(ch, "The clippers are now too dull to use.\r\n");
                     return;
                 }
@@ -567,7 +564,7 @@ ACMD(do_garden) {
                 ch->decCurST(cost);
                 obj_from_room(obj);
                 obj_to_char(obj, ch);
-                GET_OBJ_VAL(obj, VAL_SOILQ) = 0;
+                SET_OBJ_VAL(obj, VAL_OTHER_SOILQUALITY, 0);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
                 return;
@@ -611,35 +608,37 @@ ACMD(do_garden) {
                 obj_from_char(obj);
                 obj_to_room(obj, IN_ROOM(ch));
                 ch->decCurST(cost);
-                GET_OBJ_VAL(obj, VAL_MAXMATURE) = 6;
-                GET_OBJ_VAL(obj, VAL_MATGOAL) = 200;
-                GET_OBJ_VAL(obj, VAL_SOILQ) = GET_OBJ_VAL(soil, 0);
-                switch (GET_OBJ_VAL(obj, VAL_SOILQ)) {
+                SET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE, 6);
+                SET_OBJ_VAL(obj, VAL_PLANT_MATGOAL, 200);
+                SET_OBJ_VAL(obj, VAL_OTHER_SOILQUALITY, GET_OBJ_VAL(soil, VAL_PLANT_SOILQUALITY));
+                auto toreduce = 0;
+                switch (GET_OBJ_VAL(obj, VAL_OTHER_SOILQUALITY)) {
                     case 1:
-                        GET_OBJ_VAL(obj, VAL_MATGOAL) -= 10;
+                        toreduce -= 10;
                         break;
                     case 2:
-                        GET_OBJ_VAL(obj, VAL_MATGOAL) -= 15;
+                        toreduce -= 15;
                         break;
                     case 3:
-                        GET_OBJ_VAL(obj, VAL_MATGOAL) -= 20;
+                        toreduce -= 20;
                         break;
                     case 4:
-                        GET_OBJ_VAL(obj, VAL_MATGOAL) -= 25;
+                        toreduce -= 25;
                         break;
                     case 5:
-                        GET_OBJ_VAL(obj, VAL_MATGOAL) -= 50;
+                        toreduce -= 50;
                         break;
                     case 6:
-                        GET_OBJ_VAL(obj, VAL_MATGOAL) -= 60;
+                        toreduce -= 60;
                         break;
                     case 7:
-                        GET_OBJ_VAL(obj, VAL_MATGOAL) -= 70;
+                        toreduce -= 70;
                         break;
                     default:
-                        GET_OBJ_VAL(obj, VAL_MATGOAL) -= 80;
+                        toreduce -= 80;
                         break;
                 }
+                MOD_OBJ_VAL(obj, VAL_PLANT_MATGOAL, toreduce);
                 extract_obj(soil);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_GARDENING, 0);
@@ -648,7 +647,7 @@ ACMD(do_garden) {
             if (!OBJ_FLAGGED(obj, ITEM_MATURE)) {
                 send_to_char(ch, "You can't pick that type of plant. Syntax: garden (plant) harvest\r\n");
                 return;
-            } else if (GET_OBJ_VAL(obj, VAL_MATURITY) < GET_OBJ_VAL(obj, VAL_MAXMATURE)) {
+            } else if (GET_OBJ_VAL(obj, VAL_PLANT_MATURITY) < GET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE)) {
                 send_to_char(ch, "That plant is not mature enough yet.\r\n");
                 return;
             } else if (skill < axion_dice(-5)) {
@@ -941,12 +940,12 @@ ACMD(do_deploy) {
         int hnum = ch->getRoomVnum();
         struct obj_data *door = read_object(18801, VIRTUAL);
 
-        GET_OBJ_VAL(door, 6) = ch->getRoomVnum();
+        SET_OBJ_VAL(door, VAL_HATCH_LOCATION, ch->getRoomVnum());
         if (rnum != 18800)
-            GET_OBJ_VAL(door, 0) = rnum + 1;
+            SET_OBJ_VAL(door, VAL_HATCH_DEST, rnum + 1);
         else
-            GET_OBJ_VAL(door, 0) = 18802;
-        GET_OBJ_VAL(door, 2) = rnum;
+            SET_OBJ_VAL(door, VAL_HATCH_DEST, 18802);
+        SET_OBJ_VAL(door, VAL_HATCH_DCSKILL, rnum);
         obj_to_room(door, real_room(rnum));
         struct obj_data *key = read_object(rnum, VIRTUAL);
         obj_to_char(key, ch);
@@ -3099,10 +3098,9 @@ ACMD(do_drink) {
     /* empty the container, and no longer poison.
      Only remove if it's max capacity > 0, not eternal */
     if (GET_OBJ_VAL(temp, VAL_DRINKCON_CAPACITY) > 0) {
-        GET_OBJ_VAL(temp, VAL_DRINKCON_HOWFULL) -= amount;
-        if (!GET_OBJ_VAL(temp, VAL_DRINKCON_HOWFULL)) {    /* The last bit */
+        if (MOD_OBJ_VAL(temp, VAL_DRINKCON_HOWFULL, -amount) <= 0) {    /* The last bit */
             name_from_drinkcon(temp);
-            GET_OBJ_VAL(temp, VAL_DRINKCON_POISON) = 0;
+            SET_OBJ_VAL(temp, VAL_DRINKCON_POISON, 0);
         }
     }
     return;
@@ -3195,10 +3193,10 @@ ACMD(do_eat) {
     if (GET_OBJ_VNUM(food) >= MEAL_START && GET_OBJ_VNUM(food) <= MEAL_LAST && 
         (!ch->getRoomFlag(ROOM_AL) && !ch->getRoomFlag(ROOM_RHELL))) {
         if (subcmd != SCMD_TASTE) {
-            int psbonus = GET_OBJ_VAL(food, 1);
-            int expbonus = GET_OBJ_VAL(food, 2) * ((GET_LEVEL(ch) * 0.4) + 1);
-            int attr = GET_OBJ_VAL(food, 4);
-            int attrChance = GET_OBJ_VAL(food, 5);
+            int psbonus = GET_OBJ_VAL(food, VAL_FOOD_PSBONUS);
+            int expbonus = GET_OBJ_VAL(food, VAL_FOOD_EXPBONUS) * ((GET_LEVEL(ch) * 0.4) + 1);
+            int attr = GET_OBJ_VAL(food, VAL_FOOD_WHICHATTR);
+            int attrChance = GET_OBJ_VAL(food, VAL_FOOD_ATTRCHANCE);
             int pscapped = false;
             if (level_exp(ch, GET_LEVEL(ch) + 1) - (GET_EXP(ch)) <= 0 && GET_LEVEL(ch) < 100) {
                 expbonus = 1;
@@ -3284,10 +3282,10 @@ ACMD(do_eat) {
             send_to_char(ch, "You finish the last bite.\r\n");
             extract_obj(food);
         } else {
-            GET_OBJ_VAL(food, VAL_FOOD_FOODVAL) -= foob;
+            MOD_OBJ_VAL(food, VAL_FOOD_FOODVAL, -foob);
         }
     } else {
-        if (!(--GET_OBJ_VAL(food, VAL_FOOD_FOODVAL))) {
+        if (!(MOD_OBJ_VAL(food, VAL_FOOD_FOODVAL, -1))) {
             send_to_char(ch, "There's nothing left now.\r\n");
             extract_obj(food);
         }
@@ -3434,9 +3432,9 @@ ACMD(do_pour) {
                 weight_change_object(from_obj, -GET_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL)); /* Empty */
 
                 name_from_drinkcon(from_obj);
-                GET_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL) = 0;
-                GET_OBJ_VAL(from_obj, VAL_DRINKCON_LIQUID) = 0;
-                GET_OBJ_VAL(from_obj, VAL_DRINKCON_POISON) = 0;
+                for(const auto& val : {VAL_DRINKCON_HOWFULL, VAL_DRINKCON_LIQUID, VAL_DRINKCON_POISON}) {
+                    SET_OBJ_VAL(from_obj, val, 0);
+                }
             } else {
                 send_to_char(ch, "You can't possibly pour that container out!\r\n");
             }
@@ -3479,31 +3477,30 @@ ACMD(do_pour) {
         name_to_drinkcon(to_obj, GET_OBJ_VAL(from_obj, VAL_DRINKCON_LIQUID));
 
     /* First same type liq. */
-    GET_OBJ_VAL(to_obj, VAL_DRINKCON_LIQUID) = GET_OBJ_VAL(from_obj, VAL_DRINKCON_LIQUID);
+    SET_OBJ_VAL(to_obj, VAL_DRINKCON_LIQUID, GET_OBJ_VAL(from_obj, VAL_DRINKCON_LIQUID));
 
     /* Then how much to pour */
     if (GET_OBJ_VAL(from_obj, VAL_DRINKCON_CAPACITY) > 0) {
-        GET_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL) -= (amount =
-                                                                (GET_OBJ_VAL(to_obj, VAL_DRINKCON_CAPACITY) -
-                                                                 GET_OBJ_VAL(to_obj, VAL_DRINKCON_HOWFULL)));
+        MOD_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL, -(amount =
+            (GET_OBJ_VAL(to_obj, VAL_DRINKCON_CAPACITY) -
+             GET_OBJ_VAL(to_obj, VAL_DRINKCON_HOWFULL))));
 
-        GET_OBJ_VAL(to_obj, VAL_DRINKCON_HOWFULL) = GET_OBJ_VAL(to_obj, VAL_DRINKCON_CAPACITY);
+        SET_OBJ_VAL(to_obj, VAL_DRINKCON_HOWFULL, GET_OBJ_VAL(to_obj, VAL_DRINKCON_CAPACITY));
 
         if (GET_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL) < 0) {    /* There was too little */
-            GET_OBJ_VAL(to_obj, VAL_DRINKCON_HOWFULL) += GET_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL);
+            MOD_OBJ_VAL(to_obj, VAL_DRINKCON_HOWFULL, GET_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL));
             amount += GET_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL);
             name_from_drinkcon(from_obj);
-            GET_OBJ_VAL(from_obj, VAL_DRINKCON_HOWFULL) = 0;
-            GET_OBJ_VAL(from_obj, VAL_DRINKCON_LIQUID) = 0;
-            GET_OBJ_VAL(from_obj, VAL_DRINKCON_POISON) = 0;
+            for(const auto& val : {VAL_DRINKCON_HOWFULL, VAL_DRINKCON_LIQUID, VAL_DRINKCON_POISON}) {
+                SET_OBJ_VAL(from_obj, val, 0);
+            }
         }
     } else {
-        GET_OBJ_VAL(to_obj, VAL_DRINKCON_HOWFULL) = GET_OBJ_VAL(to_obj, VAL_DRINKCON_CAPACITY);
+        SET_OBJ_VAL(to_obj, VAL_DRINKCON_HOWFULL, GET_OBJ_VAL(to_obj, VAL_DRINKCON_CAPACITY));
     }
 
     /* Then the poison boogie */
-    GET_OBJ_VAL(to_obj, VAL_DRINKCON_POISON) =
-            (GET_OBJ_VAL(to_obj, VAL_DRINKCON_POISON) || GET_OBJ_VAL(from_obj, VAL_DRINKCON_POISON));
+    SET_OBJ_VAL(to_obj, VAL_DRINKCON_POISON, (GET_OBJ_VAL(to_obj, VAL_DRINKCON_POISON) || GET_OBJ_VAL(from_obj, VAL_DRINKCON_POISON)));
 
     /* And the weight boogie for non-eternal from_objects */
     if (GET_OBJ_VAL(from_obj, VAL_DRINKCON_CAPACITY) > 0) {

@@ -128,7 +128,7 @@ ACMD(do_sradar) {
 
     if (!PLR_FLAGGED(ch, PLR_PILOTING) && GET_ADMLEVEL(ch) >= 1) {
         noship = true;
-    } else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0)))) {
+    } else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM)))) {
         send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
         return;
     }

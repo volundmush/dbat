@@ -678,22 +678,22 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
         if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VNUM(object) <= 19199) {
             if ((GET_OBJ_VNUM(object) <= 18999 && GET_OBJ_VNUM(object) >= 18800) ||
                 (GET_OBJ_VNUM(object) <= 19199 && GET_OBJ_VNUM(object) >= 19100)) {
-                int hnum = GET_OBJ_VAL(object, 0);
+                int hnum = GET_OBJ_VAL(object, VAL_HATCH_DEST);
                 struct obj_data *house = read_object(hnum, VIRTUAL);
-                obj_to_room(house, real_room(GET_OBJ_VAL(object, 6)));
-                SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
-                SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
+                obj_to_room(house, real_room(GET_OBJ_VAL(object, VAL_HATCH_LOCATION)));
+                int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
+                SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
             }
         }
 
-        if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, 0) > 1 && GET_OBJ_VNUM(object) > 19199) {
+        if (GET_OBJ_TYPE(object) == ITEM_HATCH && GET_OBJ_VAL(object, VAL_HATCH_DEST) > 1 && GET_OBJ_VNUM(object) > 19199) {
             if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(object, VAL_HATCH_DEST)))) {
-                if (real_room(GET_OBJ_VAL(object, 3)) != NOWHERE) {
-                    vehicle = read_object(GET_OBJ_VAL(object, 0), VIRTUAL);
+                if (real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)) != NOWHERE) {
+                    vehicle = read_object(GET_OBJ_VAL(object, VAL_HATCH_DEST), VIRTUAL);
                     if(!vehicle) {
-                        basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, 0), GET_OBJ_VNUM(object));
+                        basic_mud_log("SYSERR: Vehicle %d not found for hatch %d", GET_OBJ_VAL(object, VAL_HATCH_DEST), GET_OBJ_VNUM(object));
                     }
-                    obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, 3)));
+                    obj_to_room(vehicle, real_room(GET_OBJ_VAL(object, VAL_HATCH_EXTROOM)));
                     if (object->look_description) {
                         if (strlen(object->look_description)) {
                             char nick[MAX_INPUT_LENGTH], nick2[MAX_INPUT_LENGTH], nick3[MAX_INPUT_LENGTH];
@@ -713,8 +713,8 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
                             vehicle->room_description = strdup(nick3);
                         }
                     }
-                    SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_CLOSED);
-                    SET_BIT(GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS), CONT_LOCKED);
+                    int newval = GET_OBJ_VAL(object, VAL_CONTAINER_FLAGS) | CONT_CLOSED | CONT_LOCKED;
+                    SET_OBJ_VAL(object, VAL_CONTAINER_FLAGS, newval);
                 } else {
                     basic_mud_log("Hatch load: Hatch with no vehicle load room: #%d!", GET_OBJ_VNUM(object));
                 }
@@ -737,11 +737,6 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
         obj_to_room(object, real_room(numb));
         if (object->getLocationTileType() != SECT_FLYING) {
             act("$p @Cfalls down and smacks the ground.@n", true, nullptr, object, nullptr, TO_ROOM);
-        }
-    }
-    if (GET_OBJ_VAL(object, 0) != 0) {
-        if (GET_OBJ_VNUM(object) == 16705 || GET_OBJ_VNUM(object) == 16706 || GET_OBJ_VNUM(object) == 16707) {
-            object->level = GET_OBJ_VAL(object, 0);
         }
     }
 }
@@ -889,8 +884,8 @@ void update_char_objects(struct char_data *ch) {
         if (GET_EQ(ch, i)) {
             if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0 &&
                 GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) <= 0) {
-                j = --GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS);
-                GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) = 3;
+                j = MOD_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS, -1);
+                SET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME, 3);
                 if (j == 1) {
                     send_to_char(ch, "Your light begins to flicker and fade.\r\n");
                     act("$n's light begins to flicker and fade.", false, ch, nullptr, nullptr, TO_ROOM);
@@ -899,7 +894,7 @@ void update_char_objects(struct char_data *ch) {
                     act("$n's light sputters out and dies.", false, ch, nullptr, nullptr, TO_ROOM);
                 }
             } else if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_LIGHT && GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_HOURS) > 0) {
-                GET_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME) -= 1;
+                MOD_OBJ_VAL(GET_EQ(ch, i), VAL_LIGHT_TIME, -1);
             }
             update_object(GET_EQ(ch, i), 2);
         }
@@ -1513,13 +1508,13 @@ struct obj_data *create_money(int amount) {
     obj->ex_description = new_descr;
 
     GET_OBJ_TYPE(obj) = ITEM_MONEY;
-    GET_OBJ_MATERIAL(obj) = MATERIAL_GOLD;
-    GET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH) = 100;
-    GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 100;
+    SET_OBJ_VAL(obj, VAL_ALL_MATERIAL, MATERIAL_GOLD);
+    SET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH, 100);
+    SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 100);
     for (y = 0; y < TW_ARRAY_MAX; y++)
         obj->wear_flags[y] = 0;
     obj->wear_flags.set(ITEM_WEAR_TAKE);
-    GET_OBJ_VAL(obj, VAL_MONEY_SIZE) = amount;
+    SET_OBJ_VAL(obj, VAL_MONEY_SIZE, amount);
     GET_OBJ_COST(obj) = amount;
     obj->vn = NOTHING;
 

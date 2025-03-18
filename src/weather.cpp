@@ -28,30 +28,28 @@ static void grow_plants() {
     for (auto k : filter_raw(sub)) {
 
         if (k->getRoomFlag(ROOM_GARDEN1) || k->getRoomFlag(ROOM_GARDEN2)) {
-            if (GET_OBJ_VAL(k, VAL_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
-                GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
-                if (GET_OBJ_VAL(k, VAL_WATERLEVEL) > -10) {
+            if (GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) < 0 && GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) > -10) {
+                if (MOD_OBJ_VAL(k, VAL_PLANT_WATERLEVEL, -1) > -10) {
                     k->broadcastAtLocation(fmt::format("{}@y withers a bit.\r\n", k->short_description));
                 } else {
                     k->broadcastAtLocation(fmt::format("{}@y has withered to a dried up dead husk.\r\n", k->short_description));
                 }
-            } else if (GET_OBJ_VAL(k, VAL_WATERLEVEL) >= 0) {
-                GET_OBJ_VAL(k, VAL_WATERLEVEL) -= 1;
-                if (GET_OBJ_VAL(k, VAL_GROWTH) < GET_OBJ_VAL(k, VAL_MATGOAL) &&
-                    GET_OBJ_VAL(k, VAL_MATURITY) < GET_OBJ_VAL(k, VAL_MAXMATURE)) {
-                    GET_OBJ_VAL(k, VAL_GROWTH) += 1;
-                    if (GET_OBJ_VAL(k, VAL_GROWTH) >= GET_OBJ_VAL(k, VAL_MATGOAL)) {
-                        GET_OBJ_VAL(k, VAL_GROWTH) = 0;
-                        GET_OBJ_VAL(k, VAL_MATURITY) += 1;
+            } else if (GET_OBJ_VAL(k, VAL_PLANT_WATERLEVEL) >= 0) {
+                
+                if (MOD_OBJ_VAL(k, VAL_PLANT_WATERLEVEL, -1) < GET_OBJ_VAL(k, VAL_PLANT_MATGOAL) &&
+                    GET_OBJ_VAL(k, VAL_PLANT_MATURITY) < GET_OBJ_VAL(k, VAL_PLANT_MAXMATURE)) {
+                    
+                    if (MOD_OBJ_VAL(k, VAL_PLANT_SOILQUALITY, 1) >= GET_OBJ_VAL(k, VAL_PLANT_MATGOAL)) {
+                        SET_OBJ_VAL(k, VAL_PLANT_SOILQUALITY, 0);
+                        MOD_OBJ_VAL(k, VAL_PLANT_MATURITY, 1);
                     }
-                    if (GET_OBJ_VAL(k, VAL_MATURITY) >= GET_OBJ_VAL(k, VAL_MAXMATURE)) {
+                    if (GET_OBJ_VAL(k, VAL_PLANT_MATURITY) >= GET_OBJ_VAL(k, VAL_PLANT_MAXMATURE)) {
                         k->broadcastAtLocation(fmt::format("{}@G is now fully grown!@n\r\n", k->short_description));
                     }
                 }
             }
         }
     }
-
 }
 
 

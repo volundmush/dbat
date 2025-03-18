@@ -898,7 +898,7 @@ ACMD(do_move) {
         int noship = false;
         if (!(controls = find_control(ch)) && GET_ADMLEVEL(ch) < 1) {
             noship = true;
-        } else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0)))) {
+        } else if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM)))) {
             noship = true;
         }
         if (noship == true) {
@@ -910,9 +910,9 @@ ACMD(do_move) {
                 return;
             }
             drive_in_direction(ch, vehicle, subcmd - 1);
-            if (GET_OBJ_VAL(controls, 1) == 1) {
+            if (GET_OBJ_VAL(controls, VAL_CONTROL_SPEED) == 1) {
                 WAIT_STATE(ch, PULSE_2SEC);
-            } else if (GET_OBJ_VAL(controls, 1) == 2) {
+            } else if (GET_OBJ_VAL(controls, VAL_CONTROL_SPEED) == 2) {
                 WAIT_STATE(ch, PULSE_1SEC);
             }
             controls = nullptr;
@@ -1157,21 +1157,56 @@ static const int flags_door[] =
 
 
 #define EXITN(room, door)        (get_room(room)->dir_option[door])
-#define OPEN_DOOR(room, obj, door)    ((obj) ?\
-        (REMOVE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_CLOSED)) :\
-        (REMOVE_BIT(EXITN(room, door)->exit_info, EX_CLOSED)))
-#define CLOSE_DOOR(room, obj, door)    ((obj) ?\
-        (SET_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_CLOSED)) :\
-        (SET_BIT(EXITN(room, door)->exit_info, EX_CLOSED)))
-#define LOCK_DOOR(room, obj, door)    ((obj) ?\
-        (SET_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_LOCKED)) :\
-        (SET_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
-#define UNLOCK_DOOR(room, obj, door)    ((obj) ?\
-        (REMOVE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_LOCKED)) :\
-        (REMOVE_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
-#define TOGGLE_LOCK(room, obj, door)    ((obj) ?\
-        (TOGGLE_BIT(GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS), CONT_LOCKED)) :\
-        (TOGGLE_BIT(EXITN(room, door)->exit_info, EX_LOCKED)))
+
+static void OPEN_DOOR(room_vnum room, struct obj_data* obj, int door) {
+    if (obj) {
+        int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
+        val &= ~CONT_CLOSED;
+        SET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS, val);
+    } else {
+        REMOVE_BIT(EXITN(room, door)->exit_info, EX_CLOSED);
+    }
+}
+
+static void CLOSE_DOOR(room_vnum room, struct obj_data* obj, int door) {
+    if (obj) {
+        int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
+        val |= CONT_CLOSED;
+        SET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS, val);
+    } else {
+        SET_BIT(EXITN(room, door)->exit_info, EX_CLOSED);
+    }
+}
+
+static void LOCK_DOOR(room_vnum room, struct obj_data* obj, int door) {
+    if (obj) {
+        int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
+        val |= CONT_LOCKED;
+        SET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS, val);
+    } else {
+        SET_BIT(EXITN(room, door)->exit_info, EX_LOCKED);
+    }
+}
+
+static void UNLOCK_DOOR(room_vnum room, struct obj_data* obj, int door) {
+    if (obj) {
+        int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
+        val &= ~CONT_LOCKED;
+        SET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS, val);
+    } else {
+        REMOVE_BIT(EXITN(room, door)->exit_info, EX_LOCKED);
+    }
+}
+
+static void TOGGLE_LOCK(room_vnum room, struct obj_data* obj, int door) {
+    if (obj) {
+        int val = GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS);
+        val ^= CONT_LOCKED;
+        SET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS, val);
+    } else {
+        TOGGLE_BIT(EXITN(room, door)->exit_info, EX_LOCKED);
+    }
+}
 
 static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int scmd) {
     char buf[MAX_STRING_LENGTH];
@@ -1506,7 +1541,7 @@ ACMD(do_gen_door) {
         keynum = DOOR_KEY(ch, obj, door);
         if (!DOOR_DCLOCK(ch, obj, door)) {
             if (obj) {
-                GET_OBJ_VAL(obj, VAL_DOOR_DCLOCK) = 20;
+                SET_OBJ_VAL(obj, VAL_DOOR_DCLOCK, 20);
             } else {
                 r->dir_option[door]->dclock = 20;
             }

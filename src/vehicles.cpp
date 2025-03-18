@@ -83,7 +83,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
         return;
     }
 
-    is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, 0));
+    is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, VAL_VEHICLE_ROOM));
     if (!ROOM_FLAGGED(is_going_to, ROOM_VEHICLE)) {
         send_to_char(ch, "@wThat ship can't carry other ships.");
         return;
@@ -119,7 +119,7 @@ static void drive_outof_vehicle(struct char_data *ch, struct obj_data *vehicle) 
         return;
     }
 
-    if (!(vehicle_in_out = find_vehicle_by_vnum(GET_OBJ_VAL(hatch, 0)))) {
+    if (!(vehicle_in_out = find_vehicle_by_vnum(GET_OBJ_VAL(hatch, VAL_HATCH_DEST)))) {
         send_to_char(ch, "@wYou can't pilot out anywhere!\r\n");
         return;
     }
@@ -193,21 +193,21 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     struct obj_data *controls;
     if ((controls = find_control(ch))) {
         if (GET_FUELCOUNT(controls) < 5) {
-            GET_FUELCOUNT(controls) += 1;
+            MOD_OBJ_VAL(controls, VAL_CONTROL_FUEL, 1);
         } else {
-            GET_FUELCOUNT(controls) = 0;
-            GET_FUEL(controls) -= 1;
+            SET_OBJ_VAL(controls, VAL_CONTROL_FUEL, 0);
+            MOD_OBJ_VAL(controls, VAL_CONTROL_FUEL, -1);
             if (GET_FUEL(controls) < 0) {
-                GET_FUEL(controls) = 0;
+                SET_OBJ_VAL(controls, VAL_CONTROL_FUEL, 0);
             }
         }
     }
 
     struct obj_data *hatch = nullptr;
-    auto con = get_room(GET_OBJ_VAL(vehicle, 0))->getObjects();
+    auto con = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_ROOM))->getObjects();
     for (auto h : filter_raw(con)) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
-            GET_OBJ_VAL(hatch, 3) = vehicle->getRoomVnum();
+            SET_OBJ_VAL(hatch, VAL_HATCH_EXTROOM, vehicle->getRoomVnum());
             hatch = h;
             break;
         }
@@ -282,7 +282,7 @@ static bool validate_warp_conditions(struct char_data *ch, struct obj_data *vehi
         return false;
     }
 
-    vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0));
+    vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM));
     if (!vehicle) {
         send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
         return false;
@@ -429,7 +429,7 @@ static bool validate_drive_conditions(struct char_data *ch, struct obj_data *&ve
         return false;
     }
 
-    vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0));
+    vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM));
     if (!vehicle) {
         send_to_char(ch, "@wYou can't find anything to pilot.\r\n");
         return false;
@@ -473,7 +473,7 @@ static void handle_drive_command(struct char_data *ch, struct obj_data *vehicle,
         auto it = directions.find(arg);
         if (it != directions.end()) {
             int dir = it->second;
-            handle_drive_direction(ch, vehicle, dir, GET_OBJ_VAL(controls, 1));
+            handle_drive_direction(ch, vehicle, dir, GET_OBJ_VAL(controls, VAL_CONTROL_SPEED));
         } else if (is_abbrev(arg.c_str(), "land")) {
             handle_drive_land(ch, vehicle, arg2);
         } else if (is_abbrev(arg.c_str(), "launch")) {
@@ -593,12 +593,12 @@ static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, 
                  vehicle->short_description);
 
     if (GET_FUELCOUNT(controls) < 5) {
-        GET_FUELCOUNT(controls) += 1;
+        MOD_OBJ_VAL(controls, VAL_CONTROL_FUELCOUNT, 1);
     } else {
-        GET_FUELCOUNT(controls) = 0;
-        GET_FUEL(controls) -= 1;
+        SET_OBJ_VAL(controls, VAL_CONTROL_FUELCOUNT, 0);
+        MOD_OBJ_VAL(controls, VAL_CONTROL_FUEL, -1);
         if (GET_FUEL(controls) < 0) {
-            GET_FUEL(controls) = 0;
+            SET_OBJ_VAL(controls, VAL_CONTROL_FUEL, 0);
         }
     }
 
@@ -679,7 +679,7 @@ ACMD(do_ship_fire) {
         return;
     }
 
-    if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, 0)))) {
+    if (!(vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(controls, VAL_CONTROL_VEHICLE_VNUM)))) {
         send_to_char(ch, "@wSomething cosmic is jamming your signal! Quick call Iovan to repair it!\r\n");
         return;
     }

@@ -120,8 +120,8 @@ void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data 
     }
 
     if (result > 0) {
-        GET_OBJ_VAL(obj, VAL_ALL_HEALTH) -= result;
-        if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) <= 0) {
+        
+        if (MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, -result) <= 0) {
             act("@RYour @C$p@R shatters on @r$N's@R body!@n", true, ch, obj, vict, TO_CHAR);
             act("@r$n's@R @C$p@R shatters on YOUR body!@n", true, ch, obj, vict, TO_VICT);
             act("@r$n's@R @C$p@R shatters on @r$N's@R body!@n", true, ch, obj, vict, TO_NOTVICT);
@@ -1627,9 +1627,9 @@ void damage_eq(struct char_data *vict, int location) {
         }
 
 
-        GET_OBJ_VAL(eq, VAL_ALL_HEALTH) -= loss;
-        if (GET_OBJ_VAL(eq, VAL_ALL_HEALTH) <= 0) {
-            GET_OBJ_VAL(eq, VAL_ALL_HEALTH) = 0;
+        ;
+        if (MOD_OBJ_VAL(eq, VAL_ALL_HEALTH, -loss) <= 0) {
+            SET_OBJ_VAL(eq, VAL_ALL_HEALTH, 0);
             eq->extra_flags.set(ITEM_BROKEN);
             act("@WYour $p@W completely breaks!@n", false, nullptr, eq, vict, TO_VICT);
             act("@C$N's@W $p@W completely breaks!@n", false, nullptr, eq, vict, TO_NOTVICT);
@@ -5138,15 +5138,15 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         } else if (GET_OBJ_VAL(obj, VAL_ALL_HEALTH) - dmg > 0) {
             act("$p@w cracks some.@n", true, ch, obj, nullptr, TO_CHAR);
             act("$p@w cracks some.@n", true, ch, obj, nullptr, TO_ROOM);
-            GET_OBJ_VAL(obj, VAL_ALL_HEALTH) -= dmg;
+            MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, -dmg);
         } else {
             if (type <= 0) {
                 act("$p@w shatters apart!@n", true, ch, obj, nullptr, TO_CHAR);
                 act("$p@w shatters apart!@n", true, ch, obj, nullptr, TO_ROOM);
-                GET_OBJ_VAL(obj, VAL_ALL_HEALTH) = 0;
+                SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 0);
                 obj->extra_flags.set(ITEM_BROKEN);
                 if (GET_OBJ_TYPE(obj) == ITEM_DRINKCON && GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) {
-                    GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) = 0;
+                    SET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL, 0);
                 }
             } else if (type != 0) {
                 act("$p@w is disintegrated!@n", true, ch, obj, nullptr, TO_CHAR);

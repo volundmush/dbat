@@ -861,7 +861,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         }
         obj_to_char(obj, ch);
         if (OBJ_FLAGGED(obj, ITEM_MATURE)) {
-            GET_OBJ_VAL(obj, VAL_MAXMATURE) = 6;
+            SET_OBJ_VAL(obj, VAL_PLANT_MAXMATURE, 6);
         }
 
         charged = buy_price(obj, shop_nr, keeper, ch);
@@ -1102,7 +1102,7 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
     if (!(obj = get_selling_obj(ch, name, keeper, shop_nr, true)))
         return;
 
-    if (GET_OBJ_TYPE(obj) == ITEM_PLANT && GET_OBJ_VAL(obj, VAL_WATERLEVEL) <= -10) {
+    if (GET_OBJ_TYPE(obj) == ITEM_PLANT && GET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL) <= -10) {
         char buf[MAX_INPUT_LENGTH];
         snprintf(buf, sizeof(buf), "%s That thing is dead!", GET_NAME(ch));
         do_tell(keeper, buf, cmd_tell, 0);

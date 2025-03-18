@@ -500,22 +500,22 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
                         obj->room_description = strdup(buf3);
                         switch (d->obj_weapon) {
                             case 1:
-                                GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_SLASH - TYPE_HIT;
+                                SET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE, TYPE_SLASH - TYPE_HIT);
                                 break;
                             case 2:
-                                GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_PIERCE - TYPE_HIT;
+                                SET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE, TYPE_PIERCE - TYPE_HIT);
                                 break;
                             case 3:
-                                GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_STAB - TYPE_HIT;
+                                SET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE, TYPE_STAB - TYPE_HIT);
                                 break;
                             case 4:
-                                GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_CRUSH - TYPE_HIT;
+                                SET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE, TYPE_CRUSH - TYPE_HIT);
                                 break;
                             case 5:
-                                GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_BLAST - TYPE_HIT;
+                                SET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE, TYPE_BLAST - TYPE_HIT);
                                 break;
                             case 6:
-                                GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) = TYPE_POUND - TYPE_HIT;
+                                SET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE, TYPE_POUND - TYPE_HIT);
                                 break;
                         }
                         GET_OBJ_LEVEL(obj) = 20;

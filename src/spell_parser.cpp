@@ -379,7 +379,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                 send_to_char(ch, "It seems powerless.\r\n");
                 act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
             } else {
-                GET_OBJ_VAL(obj, VAL_STAFF_CHARGES)--;
+                MOD_OBJ_VAL(obj, VAL_STAFF_CHARGES, 1);
                 ch->affected_by.set(AFF_NEXTNOACTION);
                 /* Level to cast spell at. */
                 k = GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) ? GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) : DEFAULT_STAFF_LVL;
@@ -436,7 +436,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                 act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
                 return;
             }
-            GET_OBJ_VAL(obj, VAL_WAND_CHARGES)--;
+            MOD_OBJ_VAL(obj, VAL_WAND_CHARGES, -1);
             ch->affected_by.set(AFF_NEXTNOACTION);
             if (GET_OBJ_VAL(obj, VAL_WAND_LEVEL))
                 call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, VAL_WAND_SPELL),
@@ -463,7 +463,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
 
             ch->affected_by.set(AFF_NEXTNOACTION);
             for (i = 1; i <= 3; i++)
-                if (call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, i),
+                if (call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, fmt::format("spell{}", i)),
                                GET_OBJ_VAL(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, nullptr) <= 0)
                     break;
 
@@ -484,7 +484,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
 
             ch->affected_by.set(AFF_NEXTNOACTION);
             for (i = 1; i <= 3; i++)
-                if (call_magic(ch, ch, nullptr, GET_OBJ_VAL(obj, i),
+                if (call_magic(ch, ch, nullptr, GET_OBJ_VAL(obj, fmt::format("spell{}", i)),
                                GET_OBJ_VAL(obj, VAL_POTION_LEVEL), CAST_POTION, nullptr) <= 0)
                     break;
 

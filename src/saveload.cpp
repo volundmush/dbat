@@ -945,9 +945,7 @@ static void dump_rooms(const std::filesystem::path &loc) {
 void to_json(json& j, const obj_data& o) {
     to_json(j, static_cast<const unit_data&>(o));
 
-    for(auto i = 0; i < NUM_OBJ_VAL_POSITIONS; i++) {
-        if(o.value[i]) j["value"].push_back(std::make_pair(i, o.value[i]));
-    }
+    if(!o.value.empty()) j["value"] = o.value;
 
     if(o.type_flag) j["type_flag"] = o.type_flag;
     if(o.level) j["level"] = o.level;
@@ -1006,11 +1004,7 @@ void to_json(json& j, const obj_data& o) {
 void from_json(const json& j, obj_data& o) {
     from_json(j, static_cast<unit_data&>(o));
 
-    if(j.contains("value")) {
-        for(auto & i : j["value"]) {
-            o.value[i[0].get<int>()] = i[1];
-        }
-    }
+    if(j.contains("value")) o.value = j["value"].get<std::unordered_map<std::string, int64_t>>();
 
     if(j.contains("type_flag")) o.type_flag = j["type_flag"];
     if(j.contains("level")) o.level = j["level"];
@@ -1075,8 +1069,9 @@ void from_json(const json& j, obj_data& o) {
         GET_OBJ_TYPE(&o) == ITEM_HATCH) && \
         (!GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) || \
             !GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE))) {
-            GET_OBJ_VAL(&o, VAL_DOOR_DCLOCK) = 20;
-            GET_OBJ_VAL(&o, VAL_DOOR_DCHIDE) = 20;
+                for(const auto v : {VAL_DOOR_DCLOCK, VAL_DOOR_DCHIDE}) {
+                    SET_OBJ_VAL(&o, v, 20);
+                }
         }
 
         GET_OBJ_SIZE(&o) = SIZE_MEDIUM;
@@ -1084,8 +1079,8 @@ void from_json(const json& j, obj_data& o) {
     /* check to make sure that weight of containers exceeds curr. quantity */
         if (GET_OBJ_TYPE(&o) == ITEM_DRINKCON ||
             GET_OBJ_TYPE(&o) == ITEM_FOUNTAIN) {
-            if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, 1))
-                GET_OBJ_WEIGHT(&o) = GET_OBJ_VAL(&o, 1) + 5;
+            if (GET_OBJ_WEIGHT(&o) < GET_OBJ_VAL(&o, VAL_FOUNTAIN_HOWFULL))
+                GET_OBJ_WEIGHT(&o) = GET_OBJ_VAL(&o, VAL_FOUNTAIN_HOWFULL) + 5;
         }
         /* *** make sure portal objects have their timer set correctly *** */
         if (GET_OBJ_TYPE(&o) == ITEM_PORTAL) {

@@ -763,6 +763,22 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
 
 }
 
+int64_t GET_OBJ_VAL(struct obj_data* obj, const std::string& val) {
+    if(auto find = obj->value.find(val); find != obj->value.end()) {
+        return find->second;
+    }
+    return 0;
+}
+
+int64_t SET_OBJ_VAL(struct obj_data* obj, const std::string& val, int value) {
+    obj->value[val] = value;
+    return value;
+}
+
+int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int value) {
+    return SET_OBJ_VAL(obj, val, GET_OBJ_VAL(obj, val) + value);
+}
+
 /* This updates the malfunctioning of certain objects that are damaged. */
 void broken_update(uint64_t heartPulse, double deltaTime) {
     struct obj_data *k, *money;

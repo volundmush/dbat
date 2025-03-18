@@ -31,7 +31,7 @@ void ping_ship(int vnum, int vnum2) {
         if (!(obj = find_control(tch))) {
             continue;
         }
-        if (GET_OBJ_VAL(obj, 0) == vnum && vnum != vnum2) {
+        if (GET_OBJ_VAL(obj, VAL_CONTROL_VEHICLE_VNUM) == vnum && vnum != vnum2) {
             controls = obj;
             break;
         }

@@ -614,9 +614,9 @@ void postmaster_receive_mail(struct char_data *ch, struct char_data *mailman,
         *blm = '\0';
         obj->extra_flags.set(ITEM_UNIQUE_SAVE);
 
-        GET_OBJ_MATERIAL(obj) = MATERIAL_PAPER;
-        GET_OBJ_VAL(obj, VAL_NOTE_HEALTH) = 100;
-        GET_OBJ_VAL(obj, VAL_NOTE_MAXHEALTH) = 100;
+        SET_OBJ_VAL(obj, VAL_ALL_MATERIAL, MATERIAL_PAPER);
+        SET_OBJ_VAL(obj, VAL_NOTE_HEALTH, 100);
+        SET_OBJ_VAL(obj, VAL_NOTE_MAXHEALTH, 100);
 
         if (obj->look_description == nullptr)
             obj->look_description =

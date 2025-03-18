@@ -1631,13 +1631,13 @@ struct obj_data *read_object(obj_vnum nr, int type) /* and obj_rnum */
     copy_proto_script(&proto->second, obj, OBJ_TRIGGER);
     assign_triggers(obj, OBJ_TRIGGER);
     if (GET_OBJ_VNUM(obj) == 65) {
-        HCHARGE(obj) = 20;
+        SET_OBJ_VAL(obj, VAL_BED_HTANK_CHARGE, 20);
     }
     if (GET_OBJ_TYPE(obj) == ITEM_FOOD) {
-        if (GET_OBJ_VAL(obj, 1) == 0) {
-            GET_OBJ_VAL(obj, 1) = GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL);
+        if (GET_OBJ_VAL(obj, VAL_FOOD_MAXFOODVAL) == 0) {
+            SET_OBJ_VAL(obj, VAL_FOOD_MAXFOODVAL, GET_OBJ_VAL(obj, VAL_FOOD_FOODVAL));
         }
-        FOOB(obj) = GET_OBJ_VAL(obj, 1);
+        FOOB(obj) = GET_OBJ_VAL(obj, VAL_FOOD_MAXFOODVAL);
     }
 
     obj->activate();

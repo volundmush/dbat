@@ -777,6 +777,10 @@ extern void WAIT_STATE(struct char_data *ch, double timeToWait);
  */
 #define VALID_OBJ_RNUM(obj)    (obj_proto.contains(GET_OBJ_RNUM(obj)))
 
+int64_t GET_OBJ_VAL(struct obj_data* obj, const std::string& val);
+int64_t SET_OBJ_VAL(struct obj_data* obj, const std::string& val, int newval);
+int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
+
 #define GET_OBJ_LEVEL(obj)      ((obj)->level)
 #define GET_OBJ_PERM(obj)       ((obj)->bitvector)
 #define GET_OBJ_TYPE(obj)    ((obj)->type_flag)
@@ -785,7 +789,6 @@ extern void WAIT_STATE(struct char_data *ch, double timeToWait);
 #define GET_OBJ_EXTRA(obj)    ((obj)->extra_flags)
 #define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->extra_flags[(i)])
 #define GET_OBJ_WEAR(obj)    ((obj)->wear_flags)
-#define GET_OBJ_VAL(obj, val)    ((obj)->value[(val)])
 #define GET_OBJ_WEIGHT(obj)    ((obj)->weight)
 #define GET_OBJ_TIMER(obj)    ((obj)->timer)
 #define SITTING(obj)            ((obj)->sitting.lock().get())
@@ -815,14 +818,14 @@ extern void WAIT_STATE(struct char_data *ch, double timeToWait);
                 GET_OBJ_RNUM(obj) : NOTHING)
 #define GET_OBJ_SPEC(obj)    (VALID_OBJ_RNUM(obj) ? \
                 obj_index[GET_OBJ_RNUM(obj)].func : 0)
-#define GET_FUEL(obj)           (GET_OBJ_VAL((obj), 2))
-#define GET_FUELCOUNT(obj)      (GET_OBJ_VAL((obj), 3))
+#define GET_FUEL(obj)           (GET_OBJ_VAL((obj), VAL_VEHICLE_FUEL))
+#define GET_FUELCOUNT(obj)      (GET_OBJ_VAL((obj), VAL_VEHICLE_FUELCOUNT))
 
 #define IS_CORPSE(obj)        (GET_OBJ_TYPE(obj) == ITEM_CONTAINER && \
                     GET_OBJ_VAL((obj), VAL_CONTAINER_CORPSE) == 1)
 
 #define CAN_WEAR(obj, part)    OBJWEAR_FLAGGED((obj), (part))
-#define GET_OBJ_MATERIAL(obj)   ((obj)->value[7])
+#define GET_OBJ_MATERIAL(obj)   (GET_OBJ_VAL((obj), VAL_ALL_MATERIAL))
 #define GET_OBJ_SHORT(obj)    ((obj)->short_description)
 
 /* compound utilities and other macros **********************************/

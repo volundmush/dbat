@@ -208,9 +208,9 @@ void oedit_setup_new(struct descriptor_data *d) {
     OLC_VAL(d) = 0;
     OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
     GET_OBJ_TYPE(OLC_OBJ(d)) = ITEM_WORN;
-    GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_HEALTH) = 100;
-    GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MAXHEALTH) = 100;
-    GET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL) = MATERIAL_STEEL;
+    SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_HEALTH, 100);
+    SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MAXHEALTH, 100);
+    SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL, MATERIAL_STEEL);
     GET_OBJ_SIZE(OLC_OBJ(d)) = SIZE_MEDIUM;
 
     SCRIPT(OLC_OBJ(d)) = nullptr;
@@ -315,7 +315,7 @@ void oedit_disp_container_flags_menu(struct descriptor_data *d) {
     char bits[MAX_STRING_LENGTH];
     clear_screen(d);
 
-    sprintbit(GET_OBJ_VAL(OLC_OBJ(d), 1), container_bits, bits, sizeof(bits));
+    sprintbit(GET_OBJ_VAL(OLC_OBJ(d), VAL_CONTAINER_FLAGS), container_bits, bits, sizeof(bits));
     write_to_output(d,
                     "@g1@n) CLOSEABLE\r\n"
                     "@g2@n) PICKPROOF\r\n"
@@ -741,7 +741,7 @@ void oedit_disp_val4_menu(struct descriptor_data *d) {
             write_to_output(d, "What is the portal's appearance? (-1 for transparent) : ");
             break;
         case ITEM_WINDOW:
-            if (GET_OBJ_VAL(OLC_OBJ(d), 0) < 0)
+            if (GET_OBJ_VAL(OLC_OBJ(d), VAL_WINDOW_VIEWPORT) < 0)
                 write_to_output(d, "What is the viewport room vnum (-1 for default location) : ");
             else
                 oedit_disp_menu(d);
@@ -928,11 +928,18 @@ void oedit_disp_menu(struct descriptor_data *d) {
     sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, EF_ARRAY_MAX, tbitbuf);
     sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, ebitbuf);
 
+    std::vector<std::string> values;
+    for(const auto &[name, val] : obj->value) {
+        values.push_back(fmt::format("%s: %d", name, val));
+    }
+    auto joined = boost::join(values, ", ");
+    
+
     write_to_output(d,
                     "@g7@n) Wear flags  : @c%s@n\r\n"
                     "@g8@n) Weight      : @c%s@n, 	@g9@n) Cost        : @c%-4d@n\r\n"
                     "@gA@n) Cost/Day    : @c%-4d@n, 	@gB@n) Timer       : @c%-4d@n\r\n"
-                    "@gC@n) Values      : @c%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d@n\r\n"
+                    "@gC@n) Values      : @c%s@n\r\n"
                     "@gD@n) Applies menu@n\r\n"
                     "@gE@n) Extra descriptions menu %s\r\n"
                     "@gM@n) Min Level   : @c%d@n\r\n"
@@ -947,12 +954,7 @@ void oedit_disp_menu(struct descriptor_data *d) {
                     "Enter choice : ",
 
                     tbitbuf, add_commas(GET_OBJ_WEIGHT(obj)).c_str(), GET_OBJ_COST(obj), GET_OBJ_RENT(obj),
-                    GET_OBJ_TIMER(obj), GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1),
-                    GET_OBJ_VAL(obj, 2), GET_OBJ_VAL(obj, 3), GET_OBJ_VAL(obj, 4),
-                    GET_OBJ_VAL(obj, 5), GET_OBJ_VAL(obj, 6), GET_OBJ_VAL(obj, 7),
-                    GET_OBJ_VAL(obj, 8), GET_OBJ_VAL(obj, 9), GET_OBJ_VAL(obj, 10),
-                    GET_OBJ_VAL(obj, 11), GET_OBJ_VAL(obj, 12), GET_OBJ_VAL(obj, 13),
-                    GET_OBJ_VAL(obj, 14), GET_OBJ_VAL(obj, 15), obj->extra_flags.any() ? "Set." : "Not Set.",
+                    GET_OBJ_TIMER(obj), joined.c_str(), obj->extra_flags.any() ? "Set." : "Not Set.",
                     GET_OBJ_LEVEL(obj), material_names[(int) GET_OBJ_MATERIAL(obj)],
                     ebitbuf, !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.",
                     size_names[GET_OBJ_SIZE(obj)]
@@ -1133,13 +1135,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                     /*
                      * Clear any old values
                      */
-                    GET_OBJ_VAL(OLC_OBJ(d), 0) = 0;
-                    GET_OBJ_VAL(OLC_OBJ(d), 1) = 0;
-                    GET_OBJ_VAL(OLC_OBJ(d), 2) = 0;
-                    GET_OBJ_VAL(OLC_OBJ(d), 3) = 0;
-                    GET_OBJ_VAL(OLC_OBJ(d), 4) = 0;
-                    GET_OBJ_VAL(OLC_OBJ(d), 5) = 0;
-                    GET_OBJ_VAL(OLC_OBJ(d), 6) = 0;
+                    OLC_OBJ(d)->value.clear();
                     OLC_VAL(d) = 1;
                     oedit_disp_val1_menu(d);
                     break;
@@ -1250,9 +1246,6 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                 return;
             } else
                 GET_OBJ_TYPE(OLC_OBJ(d)) = number;
-            /* what's the boundschecking worth if we don't do this ? -- Welcor */
-            GET_OBJ_VAL(OLC_OBJ(d), 0) = GET_OBJ_VAL(OLC_OBJ(d), 1) =
-            GET_OBJ_VAL(OLC_OBJ(d), 2) = GET_OBJ_VAL(OLC_OBJ(d), 3) = 0;
             break;
 
         case OEDIT_EXTRAS:
@@ -1311,7 +1304,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case OEDIT_MATERIAL:
-            GET_OBJ_MATERIAL(OLC_OBJ(d)) = LIMIT(atoi(arg), 0, NUM_MATERIALS);
+            SET_OBJ_VAL(OLC_OBJ(d), VAL_ALL_MATERIAL, LIMIT(atoi(arg), 0, NUM_MATERIALS));
             break;
 
         case OEDIT_PERM:
@@ -1338,13 +1331,13 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
              */
             switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
                 case ITEM_WEAPON:
-                    GET_OBJ_VAL(OLC_OBJ(d), 0) = LIMIT(atoi(arg), WEAPON_TYPE_UNARMED, MAX_WEAPON_TYPES);
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WEAPON_SKILL, LIMIT(atoi(arg), WEAPON_TYPE_UNARMED, MAX_WEAPON_TYPES));
                     break;
                 case ITEM_CONTAINER:
-                    GET_OBJ_VAL(OLC_OBJ(d), 0) = std::clamp<int64_t>(atoll(arg), -1, MAX_CONTAINER_SIZE);
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WEAPON_SKILL, std::clamp<int64_t>(atoll(arg), -1, MAX_CONTAINER_SIZE));
                     break;
                 default:
-                    GET_OBJ_VAL(OLC_OBJ(d), 0) = atoi(arg);
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WEAPON_SKILL, atoi(arg));
             }
             /*
              * proceed to menu 2
@@ -1360,18 +1353,18 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                 case ITEM_SCROLL:
                 case ITEM_POTION:
                     if (number == 0 || number == -1)
-                        GET_OBJ_VAL(OLC_OBJ(d), 1) = -1;
+                        SET_OBJ_VAL(OLC_OBJ(d), VAL_POTION_SPELL1, -1);
                     else
-                        GET_OBJ_VAL(OLC_OBJ(d), 1) = LIMIT(number, 1, SKILL_TABLE_SIZE);
+                        SET_OBJ_VAL(OLC_OBJ(d), VAL_POTION_SPELL1, LIMIT(number, 1, SKILL_TABLE_SIZE));
                     oedit_disp_val3_menu(d);
                     break;
                 case ITEM_CONTROL:
                     if (number <= 0)
-                        GET_OBJ_VAL(OLC_OBJ(d), 1) = 1;
+                        SET_OBJ_VAL(OLC_OBJ(d), VAL_CONTROL_SPEED, 1);
                     else if (number > 3)
-                        GET_OBJ_VAL(OLC_OBJ(d), 1) = 3;
+                        SET_OBJ_VAL(OLC_OBJ(d), VAL_CONTROL_SPEED, 3);
                     else
-                        GET_OBJ_VAL(OLC_OBJ(d), 1) = number;
+                        SET_OBJ_VAL(OLC_OBJ(d), VAL_CONTROL_SPEED, number);
                     oedit_disp_val5_menu(d);
                     break;
                 case ITEM_CONTAINER:
@@ -1386,19 +1379,20 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                     if (number < 0 || number > 4)
                         oedit_disp_container_flags_menu(d);
                     else if (number != 0) {
-                        TOGGLE_BIT(GET_OBJ_VAL(OLC_OBJ(d), 1), 1 << (number - 1));
+                        SET_OBJ_VAL(OLC_OBJ(d), VAL_CONTAINER_FLAGS, GET_OBJ_VAL(OLC_OBJ(d), VAL_CONTAINER_FLAGS) ^ (1 << (number - 1)));
                         OLC_VAL(d) = 1;
                         oedit_disp_val2_menu(d);
                     } else
                         oedit_disp_val3_menu(d);
                     break;
                 case ITEM_WEAPON:
-                    GET_OBJ_VAL(OLC_OBJ(d), 1) = LIMIT(number, 1, MAX_WEAPON_NDICE);
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WEAPON_SKILL, LIMIT(number, 1, MAX_WEAPON_NDICE));
                     oedit_disp_val3_menu(d);
                     break;
 
                 default:
-                    GET_OBJ_VAL(OLC_OBJ(d), 1) = number;
+                    write_to_output(d, "Invalid Option. Staff must define values.");
+                    //GET_OBJ_VAL(OLC_OBJ(d), 1) = number;
                     oedit_disp_val3_menu(d);
             }
             return;
@@ -1412,29 +1406,37 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                 case ITEM_WEAPON:
                     min_val = 1;
                     max_val = MAX_WEAPON_SDICE;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WEAPON_DAMSIZE, LIMIT(number, min_val, max_val));
                     break;
                 case ITEM_ARMOR:
                     min_val = 0;
                     max_val = 100;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_ARMOR_MAXDEXMOD, LIMIT(number, min_val, max_val));
+                    break;
                 case ITEM_WAND:
                 case ITEM_STAFF:
                     min_val = 0;
                     max_val = 20;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WAND_CHARGES, LIMIT(number, min_val, max_val));
                     break;
                 case ITEM_DRINKCON:
                 case ITEM_FOUNTAIN:
                     min_val = 0;
                     max_val = NUM_LIQ_TYPES - 1;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_DRINKCON_LIQUID, LIMIT(number, min_val, max_val));
                     break;
                 case ITEM_KEY:
                     min_val = 0;
                     max_val = 60000;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_KEY_KEYCODE, LIMIT(number, min_val, max_val));
                     break;
                 default:
                     min_val = -32000;
                     max_val = 60000;
+                    write_to_output(d, "Invalid Option. Staff must define values.");
+                    break;
             }
-            GET_OBJ_VAL(OLC_OBJ(d), 2) = LIMIT(number, min_val, max_val);
+            //GET_OBJ_VAL(OLC_OBJ(d), 2) = LIMIT(number, min_val, max_val);
             oedit_disp_val4_menu(d);
             return;
 
@@ -1443,37 +1445,43 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             switch (GET_OBJ_TYPE(OLC_OBJ(d))) {
                 case ITEM_HATCH:
                     min_val = 1;
-                    max_val = 60000;
+                    max_val = 600000;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_HATCH_EXTROOM, LIMIT(number, min_val, max_val));
                     break;
                 case ITEM_WAND:
                 case ITEM_STAFF:
                     min_val = 1;
                     max_val = SKILL_TABLE_SIZE - 1;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WAND_SPELL, LIMIT(number, min_val, max_val));
                     break;
                 case ITEM_WEAPON:
                     min_val = 0;
                     max_val = NUM_ATTACK_TYPES - 1;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WEAPON_DAMTYPE, LIMIT(number, min_val, max_val));
                     break;
                 case ITEM_ARMOR:
                     if (number < 0) /* We're storing armor checks as positive numbers */
                         number = 0 - number;
                     min_val = 0;
                     max_val = 20;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_ARMOR_CHECK, LIMIT(number, min_val, max_val));
                     break;
                 default:
                     min_val = -32000;
                     max_val = 32000;
+                    write_to_output(d, "Invalid Option. Staff must define values.");
                     break;
             }
-            GET_OBJ_VAL(OLC_OBJ(d), 3) = LIMIT(number, min_val, max_val);
+            //GET_OBJ_VAL(OLC_OBJ(d), 3) = LIMIT(number, min_val, max_val);
             oedit_disp_val5_menu(d);
             return;
 
         case OEDIT_VALUE_5:
             min_val = 1;
             max_val = 100;
-            GET_OBJ_VAL(OLC_OBJ(d), 4) = LIMIT(atoi(arg), min_val, max_val);
-            GET_OBJ_VAL(OLC_OBJ(d), 5) = max_val;
+            write_to_output(d, "Invalid Option. Staff must define values.");
+            //GET_OBJ_VAL(OLC_OBJ(d), 4) = LIMIT(atoi(arg), min_val, max_val);
+            //GET_OBJ_VAL(OLC_OBJ(d), 5) = max_val;
             oedit_disp_val7_menu(d);
             return;
 
@@ -1483,17 +1491,20 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                 case ITEM_WEAPON:
                     min_val = 0;
                     max_val = MAX_CRIT_TYPE;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WEAPON_CRITTYPE, LIMIT(number, min_val, max_val));
                     break;
                 case ITEM_ARMOR:
                     min_val = -100; /* Want to allow weird armor that improves casting */
                     max_val = 100;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_ARMOR_SPELLFAIL, LIMIT(number, min_val, max_val));
                     break;
                 default:
                     min_val = -32000;
                     max_val = 32000;
+                    write_to_output(d, "Invalid Option. Staff must define values.");
                     break;
             }
-            GET_OBJ_VAL(OLC_OBJ(d), 6) = LIMIT(atoi(arg), min_val, max_val);
+            //GET_OBJ_VAL(OLC_OBJ(d), 6) = LIMIT(atoi(arg), min_val, max_val);
             oedit_disp_val9_menu(d);
             return;
 
@@ -1503,13 +1514,15 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                 case ITEM_WEAPON:
                     min_val = 0;
                     max_val = 19;
+                    SET_OBJ_VAL(OLC_OBJ(d), VAL_WEAPON_CRITRANGE, LIMIT(number, min_val, max_val));
                     break;
                 default:
                     min_val = -32000;
                     max_val = 32000;
+                    write_to_output(d, "Invalid Option. Staff must define values.");
                     break;
             }
-            GET_OBJ_VAL(OLC_OBJ(d), 8) = LIMIT(atoi(arg), min_val, max_val);
+            //GET_OBJ_VAL(OLC_OBJ(d), 8) = LIMIT(atoi(arg), min_val, max_val);
             break;
 
         case OEDIT_PROMPT_APPLY:

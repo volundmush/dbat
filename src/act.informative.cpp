@@ -171,13 +171,13 @@ ACMD(do_evolve) {
 }
 
 static void see_plant(struct obj_data *obj, struct char_data *ch) {
-    int water = GET_OBJ_VAL(obj, VAL_WATERLEVEL);
+    int water = GET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL);
     const char* description = obj->short_description;
 
     if (water >= 0) {
         const char* maturity_stage;
 
-        switch (GET_OBJ_VAL(obj, VAL_MATURITY)) {
+        switch (GET_OBJ_VAL(obj, VAL_PLANT_MATURITY)) {
             case 0: maturity_stage = "seed"; break;
             case 1: maturity_stage = "very young"; break;
             case 2: maturity_stage = "half grown"; break;
@@ -1433,7 +1433,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      */
             if (*obj->room_description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
                 return;
-            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && ch->getRoomVnum() == GET_OBJ_VAL(obj, 0)) {
+            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && ch->getRoomVnum() == GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM)) {
                 return;
             }
             if (SITTING(obj) && GET_ADMLEVEL(ch) < 1) {
@@ -1561,7 +1561,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                 }
             }
             if (GET_OBJ_VNUM(obj) == 255) {
-                switch (GET_OBJ_VAL(obj, 0)) {
+                switch (GET_OBJ_VAL(obj, VAL_OTHER_SOILQUALITY)) {
                     case 0:
                     case 1:
                         send_to_char(ch, " @D[@wQuality @RC@D]@n");
@@ -1591,19 +1591,19 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
             }
 
             if (GET_OBJ_VNUM(obj) == 3424) {
-                send_to_char(ch, " @D[@bInk Remaining@D: @w%d@D]@n", GET_OBJ_VAL(obj, 6));
+                send_to_char(ch, " @D[@bInk Remaining@D: @w%d@D]@n", GET_OBJ_VAL(obj, VAL_OTHER_SERAF));
             }
             if (GET_OBJ_VNUM(obj) == 3423) {
-                send_to_char(ch, " @D[@B%d@D/@B24 Inks@D]@n", GET_OBJ_VAL(obj, 6));
+                send_to_char(ch, " @D[@B%d@D/@B24 Inks@D]@n", GET_OBJ_VAL(obj, VAL_OTHER_SERAF));
             }
             if (OBJ_FLAGGED(obj, ITEM_THROW)) {
                 send_to_char(ch, " @D[@RThrow Only@D]@n");
             }
             if (GET_OBJ_TYPE(obj) == ITEM_PLANT && !OBJ_FLAGGED(obj, ITEM_MATURE)) {
-                if (GET_OBJ_VAL(obj, VAL_WATERLEVEL) < -9) {
+                if (GET_OBJ_VAL(obj, VAL_PLANT_WATERLEVEL) < -9) {
                     send_to_char(ch, "@D[@RDead@D]@n");
                 } else {
-                    switch (GET_OBJ_VAL(obj, VAL_MATURITY)) {
+                    switch (GET_OBJ_VAL(obj, VAL_PLANT_MATURITY)) {
                         case 0:
                             send_to_char(ch, " @D[@ySeed@D]@n");
                             break;
@@ -1746,7 +1746,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
                         bool mention = false;
 
                         const struct {
-                            int value;
+                            const char* value;
                             const char* no_part;
                             const char* broken_part;
                         } corpse_parts[] = {
@@ -1919,17 +1919,17 @@ static bool can_stack_objects(struct obj_data *a, struct obj_data *b) {
 
     if (GET_FELLOW_WALL(a) || GET_FELLOW_WALL(b)) return false;
 
-    if (GET_OBJ_VAL(a, 6) != GET_OBJ_VAL(b, 6)) return false;
+    if (GET_OBJ_VAL(a, VAL_OTHER_SERAF) != GET_OBJ_VAL(b, VAL_OTHER_SERAF)) return false;
 
     if ((GET_OBJ_TYPE(a) == ITEM_PLANT && GET_OBJ_TYPE(b) == ITEM_PLANT) &&
-        (GET_OBJ_VAL(a, VAL_MATURITY) != GET_OBJ_VAL(b, VAL_MATURITY) ||
-         GET_OBJ_VAL(a, VAL_WATERLEVEL) != GET_OBJ_VAL(b, VAL_WATERLEVEL)))
+        (GET_OBJ_VAL(a, VAL_PLANT_MATURITY) != GET_OBJ_VAL(b, VAL_PLANT_MATURITY) ||
+         GET_OBJ_VAL(a, VAL_PLANT_WATERLEVEL) != GET_OBJ_VAL(b, VAL_PLANT_WATERLEVEL)))
         return false;
 
     if ((OBJ_FLAGGED(a, ITEM_DUPLICATE) != OBJ_FLAGGED(b, ITEM_DUPLICATE))) return false;
 
     if ((GET_OBJ_VNUM(a) == 255 && GET_OBJ_VNUM(b) == 255 &&
-         GET_OBJ_VAL(a, 0) != GET_OBJ_VAL(b, 0)) ||
+         GET_OBJ_VAL(a, VAL_OTHER_SOILQUALITY) != GET_OBJ_VAL(b, VAL_OTHER_SOILQUALITY)) ||
         (GET_OBJ_VNUM(a) != 255 && GET_OBJ_VNUM(b) != 255)) return true;
 
     return false;
@@ -3693,9 +3693,9 @@ static void look_out_window(struct char_data *ch, char *arg) {
         send_to_char(ch, "It is closed.\r\n");
         return;
     }
-    if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1) < 0) {
+    if (GET_OBJ_VAL(viewport, VAL_WINDOW_VIEWPORT) < 0) {
         /* We are looking out of the room */
-        if (GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4) < 0) {
+        if (GET_OBJ_VAL(viewport, VAL_WINDOW_DEFAULT_ROOM) < 0) {
             /* Look for the default "outside" room */
             for (door = 0; door < NUM_OF_DIRS; door++) {
                 auto e = r->dir_option[door];
@@ -3708,11 +3708,11 @@ static void look_out_window(struct char_data *ch, char *arg) {
                 }
             }
         } else {
-            target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED4));
+            target_room = real_room(GET_OBJ_VAL(viewport, VAL_WINDOW_DEFAULT_ROOM));
         }
     } else {
         /* We are looking out of a vehicle */
-        if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_UNUSED1))))
+        if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(viewport, VAL_WINDOW_VIEWPORT))))
             target_room = IN_ROOM(vehicle);
     }
     if (target_room == NOWHERE) {

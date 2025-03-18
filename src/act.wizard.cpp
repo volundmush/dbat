@@ -1419,7 +1419,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
             send_to_char(ch, "Average damage per round %.1f\r\n",
                          ((GET_OBJ_VAL(j, VAL_WEAPON_DAMSIZE) + 1) / 2.0) * GET_OBJ_VAL (j, VAL_WEAPON_DAMDICE));
             send_to_char(ch, "Crit type: %s, Crit range: %d-20\r\n",
-                         crit_type[GET_OBJ_VAL(j, 6)], 20 - GET_OBJ_VAL(j, 8));
+                         crit_type[GET_OBJ_VAL(j, VAL_WEAPON_CRITTYPE)], 20 - GET_OBJ_VAL(j, VAL_WEAPON_CRITRANGE));
             break;
         case ITEM_ARMOR:
             send_to_char(ch, "Armor Type: %s, AC-apply: [%d]\r\n", armor_type[GET_OBJ_VAL(j, VAL_ARMOR_SKILL)],
@@ -1460,7 +1460,7 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
             break;
         default: {
             std::vector<std::string> value(j->value.size());
-            for(auto &v : j->value) value.emplace_back(fmt::format("[{}]", v));
+            for(auto &[nm, val] : j->value) value.emplace_back(fmt::format("[{}:{}]", nm, val));
             send_to_char(ch, "%s", fmt::format("Values 0-{}:\r\n{}\r\n", j->value.size()-1, fmt::join(value, " ")));
         }
             break;
@@ -4448,7 +4448,7 @@ ACMD(do_zpurge) {
 #define MAX_GOLD_ALLOWED         GET_LEVEL(mob)*3000
 #define MAX_EXP_ALLOWED          GET_LEVEL(mob)*GET_LEVEL(mob) * 120
 constexpr int MAX_LEVEL_ALLOWED = 100;
-#define GET_OBJ_AVG_DAM(obj)     (((GET_OBJ_VAL(obj, 2) + 1) / 2.0) * GET_OBJ_VAL(obj, 1))
+#define GET_OBJ_AVG_DAM(obj)     (((GET_OBJ_VAL(obj, VAL_WEAPON_DAMSIZE) + 1) / 2.0) * GET_OBJ_VAL(obj, VAL_WEAPON_DAMDICE))
 /* arbitrary limit for per round dam */
 constexpr int MAX_MOB_DAM_ALLOWED = 500;
 
@@ -4632,17 +4632,11 @@ ACMD (do_zcheck) {
         if (real_zone_by_thing(o.first) == zrnum) { /*is object in this zone?*/
             obj = &o.second;
             switch (GET_OBJ_TYPE(obj)) {
-                case ITEM_MONEY:
-                    if ((value = GET_OBJ_VAL(obj, 1)) > MAX_GOLD_ALLOWED && (found = 1))
-                        len += snprintf(buf + len, sizeof(buf) - len,
-                                        "- Is worth %d (money limit %d coins).\r\n",
-                                        value, MAX_GOLD_ALLOWED);
-                    break;
                 case ITEM_WEAPON:
-                    if (GET_OBJ_VAL(obj, 3) >= NUM_ATTACK_TYPES && (found = 1))
+                    if (GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE) >= NUM_ATTACK_TYPES && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
                                         "- has out of range attack type %ld.\r\n",
-                                        GET_OBJ_VAL(obj, 3));
+                                        GET_OBJ_VAL(obj, VAL_WEAPON_DAMTYPE));
 
                     if (GET_OBJ_AVG_DAM(obj) > MAX_DAM_ALLOWED && (found = 1))
                         len += snprintf(buf + len, sizeof(buf) - len,
@@ -4650,7 +4644,7 @@ ACMD (do_zcheck) {
                                         GET_OBJ_AVG_DAM(obj), MAX_DAM_ALLOWED);
                     break;
                 case ITEM_ARMOR:
-                    ac = GET_OBJ_VAL(obj, 0);
+                    ac = GET_OBJ_VAL(obj, VAL_ARMOR_APPLYAC);
                     for (j = 0; j < TOTAL_WEAR_CHECKS; j++) {
                         if (CAN_WEAR(obj, zarmor[j].bitvector) && (ac > zarmor[j].ac_allowed) && (found = 1))
                             len += snprintf(buf + len, sizeof(buf) - len,

@@ -44,15 +44,15 @@ ASPELL(spell_create_water) {
     if (GET_OBJ_TYPE(obj) == ITEM_DRINKCON) {
         if ((GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID) != LIQ_WATER) && (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) != 0)) {
             name_from_drinkcon(obj);
-            GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID) = LIQ_SLIME;
+            SET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID, LIQ_SLIME);
             name_to_drinkcon(obj, LIQ_SLIME);
         } else {
             water = MAX(GET_OBJ_VAL(obj, VAL_DRINKCON_CAPACITY) - GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL), 0);
             if (water > 0) {
                 if (GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) >= 0)
                     name_from_drinkcon(obj);
-                GET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID) = LIQ_WATER;
-                GET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL) += water;
+                SET_OBJ_VAL(obj, VAL_DRINKCON_LIQUID, LIQ_WATER);
+                MOD_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL, water);
                 name_to_drinkcon(obj, LIQ_WATER);
                 weight_change_object(obj, water);
                 act("$p is filled.", false, ch, obj, nullptr, TO_CHAR);
@@ -451,9 +451,9 @@ ASPELL(spell_portal) {
 
     /* create the portal */
     portal = read_object(portal_object, VIRTUAL);
-    GET_OBJ_VAL(portal, VAL_PORTAL_DEST) = victim->getRoomVnum();
-    GET_OBJ_VAL(portal, VAL_PORTAL_HEALTH) = 100;
-    GET_OBJ_VAL(portal, VAL_PORTAL_MAXHEALTH) = 100;
+    SET_OBJ_VAL(portal, VAL_PORTAL_DEST, victim->getRoomVnum());
+    SET_OBJ_VAL(portal, VAL_PORTAL_HEALTH, 100);
+    SET_OBJ_VAL(portal, VAL_PORTAL_MAXHEALTH, 100);
     GET_OBJ_TIMER(portal) = (int) (level / 10);
     obj_to_room(portal, IN_ROOM(ch));
     act("$n opens a portal in thin air.",
@@ -462,9 +462,9 @@ ASPELL(spell_portal) {
         true, ch, nullptr, nullptr, TO_CHAR);
     /* create the portal at the other end */
     tportal = read_object(portal_object, VIRTUAL);
-    GET_OBJ_VAL(tportal, VAL_PORTAL_DEST) = ch->getRoomVnum();
-    GET_OBJ_VAL(tportal, VAL_PORTAL_HEALTH) = 100;
-    GET_OBJ_VAL(tportal, VAL_PORTAL_MAXHEALTH) = 100;
+    SET_OBJ_VAL(tportal, VAL_PORTAL_DEST, ch->getRoomVnum());
+    SET_OBJ_VAL(tportal, VAL_PORTAL_HEALTH, 100);
+    SET_OBJ_VAL(tportal, VAL_PORTAL_MAXHEALTH, 100);
     GET_OBJ_TIMER(tportal) = (int) (level / 10);
     obj_to_room(tportal, IN_ROOM(victim));
     act("A shimmering portal appears out of thin air.",

@@ -1890,7 +1890,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                 {
                     if ((vehicle = find_vehicle_by_vnum(GET_OBJ_VAL(j, VAL_HATCH_DEST))))
                     {
-                        GET_OBJ_VAL(j, 3) = vehicle->getRoomVnum();
+                        SET_OBJ_VAL(j, VAL_HATCH_EXTROOM, vehicle->getRoomVnum());
                     }
                 }
 
