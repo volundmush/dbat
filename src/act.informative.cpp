@@ -1433,7 +1433,7 @@ static void show_obj_to_char(struct obj_data *obj, struct char_data *ch, int mod
      */
             if (*obj->room_description == '.' && (IS_NPC(ch) || !PRF_FLAGGED(ch, PRF_HOLYLIGHT)))
                 return;
-            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && ch->getRoomVnum() == GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM)) {
+            if (GET_OBJ_TYPE(obj) == ITEM_VEHICLE && ch->getRoomVnum() == GET_OBJ_VAL(obj, VAL_VEHICLE_DEST)) {
                 return;
             }
             if (SITTING(obj) && GET_ADMLEVEL(ch) < 1) {
@@ -3335,7 +3335,7 @@ static void handle_vehicle(struct char_data *ch, struct obj_data *obj) {
         return;
     }
 
-    room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_ROOM));
+    room_rnum vehicle_inside = real_room(GET_OBJ_VAL(obj, VAL_VEHICLE_DEST));
     if (vehicle_inside == NOWHERE) {
         send_to_char(ch, "You cannot see inside that.\r\n");
     } else if (IS_DARK(vehicle_inside) && !CAN_SEE_IN_DARK(ch) && !PLR_FLAGGED(ch, PLR_AURALIGHT)) {

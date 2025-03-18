@@ -83,7 +83,7 @@ static void drive_into_vehicle(struct char_data *ch, struct obj_data *vehicle, c
         return;
     }
 
-    is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, VAL_VEHICLE_ROOM));
+    is_going_to = real_room(GET_OBJ_VAL(vehicle_in_out, VAL_VEHICLE_DEST));
     if (!ROOM_FLAGGED(is_going_to, ROOM_VEHICLE)) {
         send_to_char(ch, "@wThat ship can't carry other ships.");
         return;
@@ -204,7 +204,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
     }
 
     struct obj_data *hatch = nullptr;
-    auto con = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_ROOM))->getObjects();
+    auto con = get_room(GET_OBJ_VAL(vehicle, VAL_VEHICLE_DEST))->getObjects();
     for (auto h : filter_raw(con)) {
         if (GET_OBJ_TYPE(hatch) == ITEM_HATCH) {
             SET_OBJ_VAL(hatch, VAL_HATCH_EXTROOM, vehicle->getRoomVnum());

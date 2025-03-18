@@ -1287,7 +1287,7 @@ ACMD(do_fish) {
             if (GET_OBJ_TYPE(pole) != ITEM_FISHPOLE) {
                 send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
                 return;
-            } else if (GET_OBJ_VAL(pole, VAL_POLE_BAIT) == 0) {
+            } else if (GET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT) == 0) {
                 send_to_char(ch, "There is no bait on your line!\r\n");
                 return;
             }
@@ -1360,7 +1360,7 @@ ACMD(do_fish) {
             if (GET_OBJ_TYPE(pole) != ITEM_FISHPOLE) {
                 send_to_char(ch, "You do not have a fishing pole in your hand!\r\n");
                 return;
-            } else if (GET_OBJ_VAL(pole, VAL_POLE_BAIT) != 0) {
+            } else if (GET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT) != 0) {
                 send_to_char(ch, "Your fishing pole already has bait on its hook.\r\n");
                 return;
             } else {
@@ -1380,7 +1380,7 @@ ACMD(do_fish) {
                     reveal_hiding(ch, 0);
                     act("@CYou carefully apply the $p@C to your hook.@n", true, ch, bait, nullptr, TO_CHAR);
                     act("@c$n@C carefully applies $p@C to $s fishing pole's hook.@n", true, ch, bait, nullptr, TO_ROOM);
-                    SET_OBJ_VAL(pole, VAL_POLE_BAIT, GET_OBJ_COST(bait));
+                    SET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT, GET_OBJ_COST(bait));
                     extract_obj(bait);
                     return;
                 } /* End we applied bait */
@@ -1471,7 +1471,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     characterSubscriptions.unsubscribe("goneFishing", i);
                     if (has_pole(ch) == true) {
                         struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
-                        SET_OBJ_VAL(pole, VAL_POLE_BAIT, 0);
+                        SET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT, 0);
                     }
                 } else if (GET_FISHSTATE(ch) == FISH_HOOKED && rand_number(1, 20) >= 12) {
                     act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
@@ -1649,7 +1649,7 @@ static void catch_fish(struct char_data *ch, int quality) {
 
     GET_OBJ_WEIGHT(fish) += weight;
 
-    SET_OBJ_VAL(pole, VAL_POLE_BAIT, 0);
+    SET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT, 0);
     obj_to_room(fish, IN_ROOM(ch));
     do_get(ch, "fish", 0, 0);
     send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
@@ -3676,7 +3676,7 @@ ACMD(do_silk) {
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
                     GET_OBJ_COST(weaved) *= price;
-                    SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
+                    //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
                         weaved->affected[1].location = 1;
@@ -3740,7 +3740,7 @@ ACMD(do_silk) {
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
                     GET_OBJ_COST(weaved) *= price;
-                    SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
+                    //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
                         weaved->affected[1].location = 1;
@@ -3804,7 +3804,7 @@ ACMD(do_silk) {
                     weaved->affected[0].location = 17;
                     weaved->affected[0].modifier = armor;
                     GET_OBJ_COST(weaved) *= price;
-                    SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
+                    //SET_OBJ_VAL(weaved, VAL_WORN_UNUSED1, olevel);
                     weaved->level = olevel;
                     if (str > 0) {
                         weaved->affected[1].location = 1;
