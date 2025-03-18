@@ -5261,12 +5261,12 @@ ACMD(do_obstruct) {
 
     auto r = ch->getRoom();
 
-    if (r->room_flags.test(ROOM_PEACEFUL)) {
+    if (r->getRoomFlag(ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not use this in such a peaceful area.\r\n");
         return;
     }
 
-    if (r->sector_type == SECT_SPACE || r->room_flags.test(ROOM_SPACE)) {
+    if (r->sector_type == SECT_SPACE || r->getRoomFlag(ROOM_SPACE)) {
         send_to_char(ch, "You can not wall off the vastness of space.\r\n");
         return;
     }

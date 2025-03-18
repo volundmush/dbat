@@ -2915,13 +2915,13 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
 
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
 
-        if (room->room_flags.test(ROOM_HOUSE)) {
+        if (room->getRoomFlag(ROOM_HOUSE)) {
             auto con = room->getInventoryCount();
-            if (!room->room_flags.test(ROOM_GARDEN1) && !room->room_flags.test(ROOM_GARDEN2)) {
+            if (!room->getRoomFlag(ROOM_GARDEN1) && !room->getRoomFlag(ROOM_GARDEN2)) {
                 send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", con);
-            } else if (room->room_flags.test(ROOM_GARDEN1) && !room->room_flags.test(ROOM_GARDEN2)) {
+            } else if (room->getRoomFlag(ROOM_GARDEN1) && !room->getRoomFlag(ROOM_GARDEN2)) {
                 send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con);
-            } else if (!room->room_flags.test(ROOM_GARDEN1) && room->room_flags.test(ROOM_GARDEN2)) {
+            } else if (!room->getRoomFlag(ROOM_GARDEN1) && room->getRoomFlag(ROOM_GARDEN2)) {
                 send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con);
             }
         }
@@ -3017,25 +3017,25 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 static void display_room_info(struct room_data *rm, struct char_data *ch);
 
 static void display_dimension_info(struct room_data *rm, struct char_data *ch) {
-    if (rm->room_flags.test(ROOM_NEO)) {
+    if (rm->getRoomFlag(ROOM_NEO)) {
         send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
-    } else if (rm->room_flags.test(ROOM_AL)) {
+    } else if (rm->getRoomFlag(ROOM_AL)) {
         send_to_char(ch, "@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
-    } else if (rm->room_flags.test(ROOM_HELL)) {
+    } else if (rm->getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
-    } else if (rm->room_flags.test(ROOM_RHELL)) {
+    } else if (rm->getRoomFlag(ROOM_RHELL)) {
         send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
     }
 }
 
 static void display_special_room_descriptions(struct room_data *rm, struct char_data *ch) {
-    if (rm->room_flags.test(ROOM_REGEN)) {
+    if (rm->getRoomFlag(ROOM_REGEN)) {
         send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
     }
-    if (rm->room_flags.test(ROOM_AURA)) {
+    if (rm->getRoomFlag(ROOM_AURA)) {
         send_to_char(ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
     }
-    if (rm->room_flags.test(ROOM_HBTC)) {
+    if (rm->getRoomFlag(ROOM_HBTC)) {
         send_to_char(ch, "@rThis room feels like it operates in a different time frame.@n\r\n");
     }
 }
@@ -3176,7 +3176,7 @@ static void display_room_damage_description(struct room_data *rm, struct char_da
     auto sect = rm->sector_type;
     auto sunk = rm->getEnvironment(ENV_WATER) >= 100.0;
 
-    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->room_flags.test(ROOM_DEATH)) {
+    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->getRoomFlag(ROOM_DEATH)) {
         if (dmg <= 99 || (dmg == 100 && (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT))) {
             send_to_char(ch, "@w%s@n", rm->look_description);
         }
@@ -3219,11 +3219,11 @@ static void display_room_damage_description(struct room_data *rm, struct char_da
 
 static void display_garden_info(struct room_data *rm, struct char_data *ch) {
     auto con = rm->getObjects();
-    if (rm->room_flags.test(ROOM_GARDEN1)) {
+    if (rm->getRoomFlag(ROOM_GARDEN1)) {
         send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con.size());
-    } else if (rm->room_flags.test(ROOM_GARDEN2)) {
+    } else if (rm->getRoomFlag(ROOM_GARDEN2)) {
         send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con.size());
-    } else if (rm->room_flags.test(ROOM_HOUSE)) {
+    } else if (rm->getRoomFlag(ROOM_HOUSE)) {
         send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", con.size());
     }
 }
@@ -3702,7 +3702,7 @@ static void look_out_window(struct char_data *ch, char *arg) {
                 if(!e) continue;
                 auto dest = e->getDestination();
                 if(!dest) continue;
-                if(!dest->room_flags.test(ROOM_INDOORS)) {
+                if(!dest->getRoomFlag(ROOM_INDOORS)) {
                     target_room = dest->vn;
                     break;
                 }

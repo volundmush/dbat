@@ -981,8 +981,7 @@ SPECIAL(gravity) {
                 send_to_char(ch, msg.c_str());
                 obj->gravity = grav;
                 auto room = ch->getRoom();
-                if (room->room_flags.test(ROOM_AURA)) {
-                    room->room_flags.reset(ROOM_AURA);
+                if (room->toggleRoomFlag(ROOM_AURA)) {
                     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
                 }
             } else {

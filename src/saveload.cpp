@@ -853,14 +853,7 @@ void to_json(json& j, const room_data& r) {
     boost::to_lower(sect_key);
     j["sector_type_name"] = sect_key;
 
-    for (size_t i = 0; i < r.room_flags.size(); ++i) {
-        if (r.room_flags[i]) {
-            j["room_flags"].push_back(i);
-            auto key = std::string(room_bits[i]);
-            boost::to_lower(key);
-            j["flags"].push_back(key);
-        }
-    }
+    if(!r.room_flags.empty()) j["room_flags"] = r.room_flags;
 
     for(auto p : r.proto_script) {
         if(trig_index.contains(p)) j["proto_script"].push_back(p);
@@ -883,11 +876,7 @@ void from_json(const json& j, room_data& r) {
         }
     }
 
-    if(j.contains("room_flags")) {
-        for(auto &f : j["room_flags"]) {
-            r.room_flags.set(f.get<int>());
-        }
-    }
+    if(j.contains("room_flags")) r.room_flags = j["room_flags"].get<std::unordered_set<RoomFlag>>();
 
     if(j.contains("proto_script")) {
         for(auto p : j["proto_script"]) r.proto_script.emplace_back(p.get<trig_vnum>());

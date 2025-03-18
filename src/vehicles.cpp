@@ -177,7 +177,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         return;
     }
 
-    if (!dest->room_flags.test(ROOM_VEHICLE) && !dest->room_flags.test(ROOM_SPACE)) {
+    if (!dest->room_flags.contains(RoomFlag::vehicle) && !dest->room_flags.contains(RoomFlag::space)) {
         /* But the vehicle can't go that way*/
         send_to_char(ch, "@wThe ship can't fit there!\r\n");
         return;

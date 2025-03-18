@@ -3115,14 +3115,14 @@ bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
 
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
     if (auto room = get_room(loc); room) {
-        return room->room_flags.test(flag);
+        return room->room_flags.contains(static_cast<RoomFlag>(flag));
     }
     return false;
 }
 
 bool ROOM_FLAGGED(struct room_data *loc, int flag) {
     if(!loc) return false;
-    return loc->room_flags.test(flag);
+    return loc->room_flags.contains(static_cast<RoomFlag>(flag));
 }
 
 bool ADM_FLAGGED(struct char_data *ch, int flag) {

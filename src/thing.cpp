@@ -57,19 +57,18 @@ void thing_data::clearLocationEnvironment(int type) const {
 
 void thing_data::setRoomFlag(int flag, bool value) const {
     if(room)
-        room->room_flags.set(flag, value);
+        room->setRoomFlag(flag, value);
 }
 
 bool thing_data::toggleRoomFlag(int flag) const {
     if(room)
-        room->room_flags.flip(flag);
-        return room->room_flags.test(flag);
+        return room->toggleRoomFlag(flag);
     return false;
 }
 
 bool thing_data::getRoomFlag(int flag) const {
     if(room)
-        return room->room_flags.test(flag);
+        return room->getRoomFlag(flag);
     return false;
 }
 

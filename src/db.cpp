@@ -2092,10 +2092,10 @@ void reset_zone(zone_rnum zone)
         auto r = get_room(rrnum);
         if(!r) continue;
 
-        if (r->room_flags.test(ROOM_AURA) && rand_number(1, 5) >= 4)
+        if (r->getRoomFlag(ROOM_AURA) && rand_number(1, 5) >= 4)
         {
             send_to_room(r, "The aura of regeneration covering the surrounding area disappears.\r\n");
-            r->room_flags.reset(ROOM_AURA);
+            r->setRoomFlag(ROOM_AURA, false);
         }
 
         if (r->sector_type == SECT_LAVA)

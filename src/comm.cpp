@@ -1840,7 +1840,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             if (!i->connected && i->character &&
                 !PRF_FLAGGED(i->character, PRF_NOGOSS) &&
                 !PLR_FLAGGED(i->character, PLR_WRITING) &&
-                !i->character->getRoom()->room_flags.test(ROOM_SOUNDPROOF)) {
+                !i->character->getRoom()->getRoomFlag(ROOM_SOUNDPROOF)) {
 
                 snprintf(buf, sizeof(buf), "@y%s@n", str);
                 perform_act(buf, ch, obj, vict_obj, i->character);

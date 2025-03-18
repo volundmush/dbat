@@ -361,7 +361,7 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     int getType() const override { return 0; }
     int sector_type{};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
-    std::bitset<NUM_ROOM_FLAGS> room_flags{};   /* DEATH,DARK ... etc */
+    std::unordered_set<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
     SpecialFunc func{};
 
     std::list<std::weak_ptr<char_data>> characters;    /* List of characters in room          */
@@ -393,6 +393,10 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     double modEnvironment(int type, double value);
     void clearEnvironment(int type);
     std::unordered_map<int, double> environment;
+
+    bool toggleRoomFlag(int flag);
+    bool getRoomFlag(int flag);
+    void setRoomFlag(int flag, bool value);
 
 };
 

@@ -425,7 +425,7 @@ double room_data::getEnvironment(int type) {
             break;
         case ENV_MOONLIGHT: {
             if(!planet) return -1;
-            for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.test(f)) return -1;
+            for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(getRoomFlag(f)) return -1;
             if(inside_sectors.contains(sector_type)) return -1;
             return getPlanetEnvironment(planet, type).value();
         }
@@ -436,4 +436,26 @@ double room_data::getEnvironment(int type) {
     }
     if(environment.contains(type)) return environment[type];
     return 0.0;
+}
+
+bool room_data::toggleRoomFlag(int flag) {
+    if(getRoomFlag(flag)) {
+        setRoomFlag(flag, false);
+        return false;
+    } else {
+        setRoomFlag(flag, true);
+        return true;
+    }
+}
+
+bool room_data::getRoomFlag(int flag) {
+    return room_flags.contains(static_cast<RoomFlag>(flag));
+}
+
+void room_data::setRoomFlag(int flag, bool value) {
+    if(value) {
+        room_flags.insert(static_cast<RoomFlag>(flag));
+    } else {
+        room_flags.erase(static_cast<RoomFlag>(flag));
+    }
 }

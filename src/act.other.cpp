@@ -1905,7 +1905,7 @@ ACMD(do_taisha) {
 
     auto room = ch->getRoom();
 
-    if (room->room_flags.test(ROOM_AURA)) {
+    if (room->getRoomFlag(ROOM_AURA)) {
         send_to_char(ch, "This area already has an aura of regeneration around it.\r\n");
         return;
     }
@@ -1938,7 +1938,7 @@ ACMD(do_taisha) {
         act("@g$n holds up $s hands while channeling ki. Suddenly a @wburst@W of calming @Cblue@W light covers the surrounding area!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_TAISHA, 1);
-        room->room_flags.set(ROOM_AURA);
+        room->setRoomFlag(ROOM_AURA, true);
         return;
     }
 }
@@ -7214,12 +7214,12 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
 ACMD(do_summon) {
     auto room = ch->getRoom();
 
-    if (!room->room_flags.test(ROOM_EARTH)) {
+    if (!room->getRoomFlag(ROOM_EARTH)) {
         send_to_char(ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
         return;
     }
 
-    if (room->room_flags.test(ROOM_NOINSTANT) || room->room_flags.test(ROOM_PEACEFUL)) {
+    if (room->getRoomFlag(ROOM_NOINSTANT) || room->getRoomFlag(ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not summon shenron in this protected area!\r\n");
         return;
     }

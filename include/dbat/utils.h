@@ -1176,18 +1176,22 @@ int check_flags_by_name_ar(const std::bitset<N>& bitvector, int numflags, char *
 
     for (i = 0; i < bitvector.size() && item < 0; i++)
         if (!strcmp(search, namelist[i]))
-            item = i;
-
-    if (item < 0)
-        return false;
-
-    if (bitvector.test(item))
-        return item;
+            return bitvector.test(i);
 
     return false;
 }
 
-
+template<typename Container>
+int check_flags_by_name_ar(const Container& container, int numflags, char *search, const char *namelist[]) {
+    static_assert(std::is_enum<typename Container::value_type>::value, 
+        "Container must contain enum values");
+    
+    auto casted = magic_enum::enum_cast<typename Container::value_type>(search);
+    if (!casted.has_value()) {
+        return false;
+    }
+    return container.contains(casted.value());
+}
 
 
 extern bool spar_friendly(struct char_data *ch, struct char_data *npc);

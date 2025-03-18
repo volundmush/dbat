@@ -1267,7 +1267,7 @@ in the vault (vnum: 453) now and then. you can just use
                         "lightning"
                 };
 
-                if (!r->room_flags.test(ROOM_INDOORS))
+                if (!r->getRoomFlag(ROOM_INDOORS))
                     snprintf(str, slen, "%s", sky_look[weather_info.sky]);
                 else
                     *str = '\0';

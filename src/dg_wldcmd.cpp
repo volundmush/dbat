@@ -124,7 +124,7 @@ WCMD(do_weffect) {
             wld_log(room, "weffect target is NOWHERE.");
             return;
         } else {
-            room->room_flags.flip(ROOM_INDOORS);
+            room->toggleRoomFlag(ROOM_INDOORS);
         }
     } else if (!strcasecmp(arg, "lava")) {
         if (target == NOWHERE) {

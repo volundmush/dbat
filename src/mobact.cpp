@@ -151,7 +151,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     auto dest_room_flags = dest->room_flags;
                     auto dest_zone = dest->zone;
 
-                    if (dest_room_flags.test(ROOM_NOMOB) || dest_room_flags.test(ROOM_DEATH)) continue;
+                    if (dest->getRoomFlag(ROOM_NOMOB) || dest->getRoomFlag(ROOM_DEATH)) continue;
                     if (MOB_FLAGGED(ch, MOB_STAY_ZONE) && dest_zone != r->zone) continue;
 
                     availableDirections.push_back(i);

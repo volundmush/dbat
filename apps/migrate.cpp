@@ -683,7 +683,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         roomFlagsHolder[2] = asciiflag_conv(flags3);
         roomFlagsHolder[3] = asciiflag_conv(flags4);
 
-        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->room_flags.set(i);
+        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->getRoomFlag(i);
 
         r->sector_type = t[2];
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
