@@ -252,7 +252,7 @@ namespace trans {
                 return "@w...$e is hunkered down, yet $s presence appears larger.";
 
             case FormID::spirit_absorption:
-                energy = ch->transforms[FormID::spirit_absorption].vars[0];
+                energy = ch->transforms[FormID::spirit_absorption].vars["energy"];
                 if(energy > 1000000000) {
                     tag = "@Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n";
                 } else if(energy > 100000000) {
@@ -311,9 +311,9 @@ namespace trans {
 
     int getMasteryTier(char_data* ch, FormID form) {
         if(ch->transforms.contains(form)) {
-            double timeSpent = ch->transforms[form].timeSpentInForm;
+            double timeSpent = ch->transforms[form].time_spent_in_form;
             int mastery = 0;
-            if(ch->transforms[form].limitBroken && timeSpent > LIMITBREAK_THRESHOLD)
+            if(ch->transforms[form].limit_broken && timeSpent > LIMITBREAK_THRESHOLD)
                 mastery = 4;
             else if (timeSpent > LIMIT_THRESHOLD)
                 mastery = 3;
@@ -321,7 +321,7 @@ namespace trans {
                 mastery = 2;
             else mastery = 1;
 
-            if(IS_AFFECTED(ch, AFF_LIMIT_BREAKING) && ch->transforms[form].limitBroken)
+            if(IS_AFFECTED(ch, AFF_LIMIT_BREAKING) && ch->transforms[form].limit_broken)
                 mastery += 2;
 
             return mastery;
@@ -1438,9 +1438,9 @@ namespace trans {
         {
             FormID::spirit_absorption, {
                 {APPLY_COMBAT_BASE, 0.0, static_cast<int>(ComStat::armor), [](struct char_data *ch) {
-                    return sqrt(ch->transforms[FormID::spirit_absorption].vars[0]) * 10;}},
+                    return sqrt(ch->transforms[FormID::spirit_absorption].vars["energy"]) * 10;}},
                 {APPLY_CVIT_BASE,        0.0, ~0,                    [](struct char_data *ch) {
-                    return (ch->transforms[FormID::spirit_absorption].vars[0] / 5) * 1 + (0.1 * ch->transforms[FormID::spirit_absorption].grade);}},
+                    return (ch->transforms[FormID::spirit_absorption].vars["energy"] / 5) * 1 + (0.1 * ch->transforms[FormID::spirit_absorption].grade);}},
             }
         },
         {
@@ -1628,23 +1628,23 @@ namespace trans {
             auto form = ch->form;
             auto technique = ch->technique;
             auto &data = ch->transforms[form];
-            double timeBefore = data.timeSpentInForm;
-            data.timeSpentInForm += deltaTime;
-            double timeAfter = data.timeSpentInForm;
+            double timeBefore = data.time_spent_in_form;
+            data.time_spent_in_form += deltaTime;
+            double timeAfter = data.time_spent_in_form;
 
             auto &techdata = ch->transforms[technique];
-            double techTimeBefore = data.timeSpentInForm;
-            techdata.timeSpentInForm += deltaTime;
-            double techTimeAfter = data.timeSpentInForm;
+            double techTimeBefore = data.time_spent_in_form;
+            techdata.time_spent_in_form += deltaTime;
+            double techTimeAfter = data.time_spent_in_form;
 
             if(moonForms.contains(ch->form)) {
                 if(auto moonlight = ch->getLocationEnvironment(ENV_MOONLIGHT); moonlight >= 100.0) {
                     // Top off the blutz.
-                    data.blutz = 60.0 * 30;
+                    data.vars["blutz"] = 60.0 * 30;
                 }
-                data.blutz -= deltaTime;
-                if(data.blutz <= 0 || !ch->getPlayerFlag(PLR_TAIL)) {
-                    data.blutz = 0.0;
+                data.vars["blutz"] -= deltaTime;
+                if(data.vars["blutz"] <= 0 || !ch->character_flags.get(CharacterFlag::tail)) {
+                    data.vars["blutz"] = 0.0;
                     oozaru_revert(ch);
                 }
             }
@@ -1664,7 +1664,7 @@ namespace trans {
                 if(timeBefore < LIMIT_THRESHOLD && timeAfter >= LIMIT_THRESHOLD)
                     send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, form) + "\r\n");
 
-                if(timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limitBroken == true)
+                if(timeBefore < LIMITBREAK_THRESHOLD && timeAfter >= LIMITBREAK_THRESHOLD && data.limit_broken == true)
                     send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, form) + " @mhas evolved.@n\r\n");
             }
             if(technique != FormID::base) {
@@ -1674,7 +1674,7 @@ namespace trans {
                 if(techTimeBefore < LIMIT_THRESHOLD && techTimeAfter >= LIMIT_THRESHOLD)
                     send_to_char(ch, "@mYou feel power overwhelming emanate from your core, you instinctively know you've hit the limit of @n" + getName(ch, technique) + "\r\n");
 
-                if(techTimeBefore < LIMITBREAK_THRESHOLD && techTimeAfter >= LIMITBREAK_THRESHOLD && techdata.limitBroken == true)
+                if(techTimeBefore < LIMITBREAK_THRESHOLD && techTimeAfter >= LIMITBREAK_THRESHOLD && techdata.limit_broken == true)
                     send_to_char(ch, "@mThere's a snap as a tide of power rushes throughout your veins,@n " + getName(ch, technique) + " @mhas evolved.@n\r\n");
             }
 
@@ -2516,9 +2516,9 @@ namespace trans {
                 act("@W$n jumps directly into the @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W as it descends! It completely obscures $n from view before starting to be absorbed by them!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
                 hurt(0, 0, loc->user, ch, nullptr, loc->kicharge * 1.25, 1);
-                ch->transforms[FormID::spirit_absorption].vars[0] = loc->kicharge * 0.9 + (0.1 * getMasteryTier(ch, FormID::spirit_absorption));
-                ch->transforms[FormID::spirit_absorption].vars[1] = loc->kicharge * 0.9 + (0.1 * getMasteryTier(ch, FormID::spirit_absorption));
-                send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::spirit_absorption].vars[0]).c_str());
+                ch->transforms[FormID::spirit_absorption].vars["energy"] = loc->kicharge * 0.9 + (0.1 * getMasteryTier(ch, FormID::spirit_absorption));
+                ch->transforms[FormID::spirit_absorption].vars["absorbed"] = loc->kicharge * 0.9 + (0.1 * getMasteryTier(ch, FormID::spirit_absorption));
+                send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::spirit_absorption].vars["energy"]).c_str());
                 extract_obj(loc);
                 act("@WThe @cS@Cp@wi@cr@Ci@wt @cB@Co@wm@cb@W completely vanishes as it's absorbed, imploding inwards!@n",
                     true, nullptr, nullptr, nullptr, TO_ROOM);
@@ -2542,18 +2542,18 @@ namespace trans {
             act("@W$n's @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura infuses the attack with cataclysmic energy.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
             
-            double empower = ch->transforms[FormID::spirit_absorption].vars[1] / 50;
+            double empower = ch->transforms[FormID::spirit_absorption].vars["absorbed"] / 50;
             empower *= ch->transforms[FormID::spirit_absorption].grade;
             if(outgoing.isKiAttack())
                 empower *= 4;
-            if(empower > ch->transforms[FormID::spirit_absorption].vars[0])
-                empower = ch->transforms[FormID::spirit_absorption].vars[0];
-            ch->transforms[FormID::spirit_absorption].vars[0] -= empower;
+            if(empower > ch->transforms[FormID::spirit_absorption].vars["energy"])
+                empower = ch->transforms[FormID::spirit_absorption].vars["energy"];
+            ch->transforms[FormID::spirit_absorption].vars["energy"] -= empower;
             outgoing.calcDamage += empower * 2;
 
-            if(ch->transforms[FormID::spirit_absorption].vars[0] <= 0)
+            if(ch->transforms[FormID::spirit_absorption].vars["energy"] <= 0)
                 revert(ch);
-            send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::spirit_absorption].vars[0]).c_str());
+            send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::spirit_absorption].vars["energy"]).c_str());
             }},
     };
 
@@ -2563,16 +2563,16 @@ namespace trans {
             act("@W$n's @Ci@cn@Cc@ca@Cn@cd@Ce@cs@Cc@ce@Cn@ct@n aura burns away some of the incoming attack.@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
             
-            double disempower = ch->transforms[FormID::spirit_absorption].vars[1] / 50;
+            double disempower = ch->transforms[FormID::spirit_absorption].vars["absorbed"] / 50;
             disempower *= ch->transforms[FormID::spirit_absorption].grade;
-            if(disempower > ch->transforms[FormID::spirit_absorption].vars[0])
-                disempower = ch->transforms[FormID::spirit_absorption].vars[0];
-            ch->transforms[FormID::spirit_absorption].vars[0] -= disempower;
+            if(disempower > ch->transforms[FormID::spirit_absorption].vars["energy"])
+                disempower = ch->transforms[FormID::spirit_absorption].vars["energy"];
+            ch->transforms[FormID::spirit_absorption].vars["energy"] -= disempower;
             incoming.calcDamage -= disempower * 2;
 
-            if(ch->transforms[FormID::spirit_absorption].vars[0] <= 0)
+            if(ch->transforms[FormID::spirit_absorption].vars["energy"] <= 0)
                 revert(ch);
-            send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::spirit_absorption].vars[0]).c_str());
+            send_to_char(ch, "@W[@cSpirit Force: @C%s@W]@n\r\n", add_commas((int64_t)ch->transforms[FormID::spirit_absorption].vars["energy"]).c_str());
             }},
     };
 
@@ -2594,8 +2594,6 @@ namespace trans {
         ch->removeLimitBreak();
         reveal_hiding(ch, 0);
         handleEchoTransform(ch, form);
-        for (double var : ch->transforms[form].vars)
-                var = 0.0;
         
         if(trans_on_transform.contains(form)) {
             auto on_trans = trans_on_transform.at(form);
@@ -2606,8 +2604,6 @@ namespace trans {
     void onRevert(char_data *ch, FormID form) {
         handleEchoRevert(ch, ch->form);
         ch->removeLimitBreak();
-        for (double var : ch->transforms[form].vars)
-                var = 0.0;
     }
 
     void revert(char_data *ch) {

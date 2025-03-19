@@ -165,7 +165,7 @@ ACMD(do_oasis_sedit) {
     STATE(d) = CON_SEDIT;
 
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    ch->setPlayerFlag(PLR_WRITING, true);
+    ch->player_flags.set(PLR_WRITING, true);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
            GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -197,7 +197,7 @@ void sedit_setup_new(struct descriptor_data *d) {
     shop_buy_data* buy_data = new shop_buy_data();
     shop->type.push_back(*buy_data);
     S_BUYTYPE(shop, 0) = NOTHING;
-    shop->shop_flags.insert(ShopFlag::no_broken);
+    shop->shop_flags.set(ShopFlag::no_broken);
 
     /*
      * Presto! A shop.

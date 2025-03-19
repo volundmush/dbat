@@ -91,3 +91,4 @@ cdef extern from "dbat/constants.h":
     vector[string] getDimNames()
     vector[string] getComStatNames()
     vector[string] getShopFlagNames()
+    vector[string] getCharacterFlagNames()

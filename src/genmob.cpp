@@ -304,7 +304,7 @@ void char_data::activate() {
         services.insert("auralight");
     if(ABSORBING(this))
         services.insert("androidAbsorbSystem");
-    if(PLR_FLAGGED(this, PLR_POWERUP))
+    if(character_flags.get(CharacterFlag::powering_up))
         services.insert("powerupService");
     if(!damages.empty())
         services.insert("characterVitalsRecovery");
@@ -429,92 +429,4 @@ void char_data::ageBy(double addedTime) {
 
 void char_data::setAge(double newAge) {
     this->time.seconds_aged = newAge * SECS_PER_GAME_YEAR;
-}
-
-bool char_data::toggleMobFlag(int flag) {
-    if(getMobFlag(flag)) {
-        setMobFlag(flag, false);
-        return false;
-    } else {
-        setMobFlag(flag, true);
-        return true;
-    }
-}
-
-bool char_data::getMobFlag(int flag) {
-    return mob_flags.contains(static_cast<MobFlag>(flag));
-}
-
-void char_data::setMobFlag(int flag, bool value) {
-    if(value) {
-        mob_flags.insert(static_cast<MobFlag>(flag));
-    } else {
-        mob_flags.erase(static_cast<MobFlag>(flag));
-    }
-}
-
-bool char_data::togglePlayerFlag(int flag) {
-    if(getPlayerFlag(flag)) {
-        setPlayerFlag(flag, false);
-        return false;
-    } else {
-        setPlayerFlag(flag, true);
-        return true;
-    }
-}
-
-bool char_data::getPlayerFlag(int flag) {
-    return player_flags.contains(static_cast<PlayerFlag>(flag));
-}
-
-void char_data::setPlayerFlag(int flag, bool value) {
-    if(value) {
-        player_flags.insert(static_cast<PlayerFlag>(flag));
-    } else {
-        player_flags.erase(static_cast<PlayerFlag>(flag));
-    }
-}
-
-bool char_data::toggleAdminFlag(int flag) {
-    if(getAdminFlag(flag)) {
-        setAdminFlag(flag, false);
-        return false;
-    } else {
-        setAdminFlag(flag, true);
-        return true;
-    }
-}
-
-bool char_data::getAdminFlag(int flag) {
-    return admin_flags.contains(static_cast<AdminFlag>(flag));
-}
-
-void char_data::setAdminFlag(int flag, bool value) {
-    if(value) {
-        admin_flags.insert(static_cast<AdminFlag>(flag));
-    } else {
-        admin_flags.erase(static_cast<AdminFlag>(flag));
-    }
-}
-
-bool char_data::togglePrefFlag(int flag) {
-    if(getPrefFlag(flag)) {
-        setPrefFlag(flag, false);
-        return false;
-    } else {
-        setPrefFlag(flag, true);
-        return true;
-    }
-}
-
-bool char_data::getPrefFlag(int flag) {
-    return pref_flags.contains(static_cast<PrefFlag>(flag));
-}
-
-void char_data::setPrefFlag(int flag, bool value) {
-    if(value) {
-        pref_flags.insert(static_cast<PrefFlag>(flag));
-    } else {
-        pref_flags.erase(static_cast<PrefFlag>(flag));
-    }
 }

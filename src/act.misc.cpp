@@ -73,7 +73,7 @@ ACMD(do_tailhide) {
         return;
     }
 
-    const char *message = ch->togglePlayerFlag(PLR_TAILHIDE) ? "display your tail for all to see!" : "hide your tail!";
+    const char *message = ch->player_flags.toggle(PLR_TAILHIDE) ? "display your tail for all to see!" : "hide your tail!";
 
     send_to_char(ch, "You have decided to %s\r\n", message);
 }
@@ -85,7 +85,7 @@ ACMD(do_nogrow) {
         return;
     }
 
-    const char *message = ch->togglePlayerFlag(PLR_NOGROW) ? "halt your tail growth" : "regrow your tail";
+    const char *message = ch->player_flags.toggle(PLR_NOGROW) ? "halt your tail growth" : "regrow your tail";
 
     send_to_char(ch, "You have decided to %s\r\n", message);
 }
@@ -634,7 +634,7 @@ static void resolve_song(struct char_data *ch) {
                             if (GET_BARRIER(vict) >= GET_MAX_MANA(vict) * 0.75) {
                                 GET_BARRIER(vict) = GET_MAX_MANA(vict) * 0.75;
                             }
-                            vict->setAffectFlag(AFF_SANCTUARY, true);
+                            vict->affect_flags.set(AFF_SANCTUARY, true);
                             ch->incCurKI(ch->getPercentOfMaxKI(.02) + skill);
                         }
                     }
@@ -1010,7 +1010,7 @@ ACMD(do_shell) {
         act("@mYou quickly absorb the armor carapace covering your body back inside.@n", true, ch, nullptr, nullptr,
             TO_CHAR);
         act("@M$n's@m armored carapce retreats back to its original size.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setAffectFlag(AFF_SHELL, false);
+        ch->affect_flags.set(AFF_SHELL, false);
         return;
     }
 
@@ -1031,7 +1031,7 @@ ACMD(do_shell) {
     act("@M$n@m crouches down and after a few moments of straining $s body's carapace armor starts to grow thicker and extends to cover all parts of $s body!@n",
         true, ch, nullptr, nullptr, TO_ROOM);
     ch->decCurSTPercent(.2);
-    ch->setAffectFlag(AFF_SHELL, true);
+    ch->affect_flags.set(AFF_SHELL, true);
 }
 
 ACMD(do_liquefy) {
@@ -1047,7 +1047,7 @@ ACMD(do_liquefy) {
             true, ch, nullptr, nullptr, TO_ROOM);
         act("@MYou begin to pull the liquid chunks of your body together. Those chunks hover upward and merge into each other until a large ball of goo is formed. Slowly your body emerges as the pieces of your body take on their old form!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
-        ch->setAffectFlag(AFF_LIQUEFIED, false);
+        ch->affect_flags.set(AFF_LIQUEFIED, false);
         WAIT_STATE(ch, PULSE_3SEC);
         WAIT_STATE(ch, PULSE_3SEC);
         WAIT_STATE(ch, PULSE_3SEC);
@@ -1097,8 +1097,8 @@ ACMD(do_liquefy) {
         act("@m$n@M's body starts to become loose and sag. Much of $s body begins to pour down and scatter around as pools of goo.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
         ch->decCurKI((GET_MAX_MANA(ch) * .002) + 150);
-        ch->setAffectFlag(AFF_LIQUEFIED, true);
-        ch->setAffectFlag(AFF_HIDE, true);
+        ch->affect_flags.set(AFF_LIQUEFIED, true);
+        ch->affect_flags.set(AFF_HIDE, true);
         return;
     } else if (!strcasecmp(arg, "explode")) {
         struct char_data *vict;
@@ -1177,7 +1177,7 @@ ACMD(do_liquefy) {
                 solo_gain(ch, vict);
             }
             die(vict, ch);
-            ch->setAffectFlag(AFF_LIQUEFIED, true);
+            ch->affect_flags.set(AFF_LIQUEFIED, true);
             WAIT_STATE(ch, PULSE_3SEC);
             handle_cooldown(ch, 9);
             return;
@@ -1297,7 +1297,7 @@ ACMD(do_fish) {
             act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             GET_FISHD(ch) = rand_number(30, 80);
-            ch->setPlayerFlag(PLR_FISHING, true);
+            ch->player_flags.set(PLR_FISHING, true);
             send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch));
             return;
         }
@@ -1394,7 +1394,7 @@ ACMD(do_fish) {
             reveal_hiding(ch, 0);
             act("@CYou reel in your line and stop fishing.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reels in $s fishing line and stops fishing.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->setPlayerFlag(PLR_FISHING, false);
+            ch->player_flags.set(PLR_FISHING, false);
             GET_FISHSTATE(ch) = FISH_NOFISH;
             GET_FISHD(ch) = 0;
             return;
@@ -1426,7 +1426,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
         i = i2;
 
         if(!i->getRoomFlag(ROOM_FISHING)) {
-            i->setPlayerFlag(PLR_FISHING, false);
+            i->player_flags.set(PLR_FISHING, false);
             GET_FISHD(i) = 0;
             GET_FISHSTATE(i) = FISH_NOFISH;
             characterSubscriptions.unsubscribe("goneFishing", i);
@@ -1467,7 +1467,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     GET_FISHD(ch) = 0;
                     GET_FISHSTATE(ch) = FISH_NOFISH;
-                    ch->setPlayerFlag(PLR_FISHING, false);
+                    ch->player_flags.set(PLR_FISHING, false);
                     characterSubscriptions.unsubscribe("goneFishing", i);
                     if (has_pole(ch) == true) {
                         struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
@@ -1479,7 +1479,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                     act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     GET_FISHD(ch) = 0;
                     GET_FISHSTATE(ch) = FISH_NOFISH;
-                    ch->setPlayerFlag(PLR_FISHING, false);
+                    ch->player_flags.set(PLR_FISHING, false);
                     characterSubscriptions.unsubscribe("goneFishing", i);
                 } else if (GET_FISHSTATE(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
                     act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
@@ -1493,7 +1493,7 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                 }
             } /* End reel section */
         } else if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == false) { /* End of, Is Fishing */
-            i->setPlayerFlag(PLR_FISHING, false);
+            i->player_flags.set(PLR_FISHING, false);
             characterSubscriptions.unsubscribe("goneFishing", i);
             GET_FISHD(i) = 0;
             GET_FISHSTATE(i) = FISH_NOFISH;
@@ -1653,7 +1653,7 @@ static void catch_fish(struct char_data *ch, int quality) {
     obj_to_room(fish, IN_ROOM(ch));
     do_get(ch, "fish", 0, 0);
     send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
-    ch->setPlayerFlag(PLR_FISHING, false);
+    ch->player_flags.set(PLR_FISHING, false);
     characterSubscriptions.unsubscribe("goneFishing", ch);
     GET_FISHD(ch) = 0;
     GET_FISHSTATE(ch) = FISH_NOFISH;
@@ -2503,7 +2503,7 @@ ACMD(do_healglow) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C places $s hands on $s body. Slowly a strong blue glow glistens and shines across $s skin!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            vict->setAffectFlag(AFF_HEALGLOW, true);
+            vict->affect_flags.set(AFF_HEALGLOW, true);
             int duration = (GET_SKILL(ch, SKILL_HEALGLOW) * 0.1);
             if (duration <= 0)
                 duration = 1;
@@ -2596,7 +2596,7 @@ ACMD(do_shimmer) {
 
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->setPrefFlag(PRF_ARENAWATCH, true);
+            ch->pref_flags.set(PRF_ARENAWATCH, true);
             ARENA_IDNUM(ch) = -1;
             send_to_char(ch, "You stop watching the arena action.\r\n");
         }
@@ -2704,7 +2704,7 @@ ACMD(do_shimmer) {
         act("@w$n@w appears in an instant out of nowhere right next to you!@n", true, ch, nullptr, tar, TO_VICT);
         act("@w$n@w body begins to fade away almost appearing ghost like, before a ripple passes through $s image and $e is gone in an instant!@n",
             true, ch, nullptr, tar, TO_NOTVICT);
-        ch->setPlayerFlag(PLR_TRANSMISSION, true);
+        ch->player_flags.set(PLR_TRANSMISSION, true);
         handle_teleport(ch, tar, 0);
     } else {
         ch->decCurKI(cost);
@@ -2768,7 +2768,7 @@ ACMD(do_channel) {
             act("@RAs $n@R moves $s ki through the lava $e begins to draw heat away from it into a blood ruby. The ruby glows red hot as $e finishes the process of channeling the heat!@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
             ch->setLocationGroundEffect(0);
-            ruby->setItemFlag(ITEM_HOT, true);
+            ruby->item_flags.set(ITEM_HOT, true);
         }
         ch->decCurKI(cost);
         WAIT_STATE(ch, PULSE_1SEC);
@@ -3175,11 +3175,11 @@ ACMD(do_instill) {
         extract_obj(token);
 
         if (OBJ_FLAGGED(obj, ITEM_SLOT1))
-            obj->setItemFlag(ITEM_SLOTS_FILLED, true);
+            obj->item_flags.set(ITEM_SLOTS_FILLED, true);
         else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && !OBJ_FLAGGED(obj, ITEM_SLOT_ONE))
-            obj->setItemFlag(ITEM_SLOT_ONE, true);
+            obj->item_flags.set(ITEM_SLOT_ONE, true);
         else if (OBJ_FLAGGED(obj, ITEM_SLOT2) && OBJ_FLAGGED(obj, ITEM_SLOT_ONE))
-            obj->setItemFlag(ITEM_SLOTS_FILLED, true);
+            obj->item_flags.set(ITEM_SLOTS_FILLED, true);
 
         /* Check it's slots for the appropriate stat and add to it if possible */
         if (obj->affected[0].location == stat) {
@@ -3339,7 +3339,7 @@ ACMD(do_bury) {
             }
             obj_from_char(obj);
             obj_to_room(obj, IN_ROOM(ch));
-            obj->setItemFlag(ITEM_BURIED, true);
+            obj->item_flags.set(ITEM_BURIED, true);
         }
     } else if (!strcasecmp(arg, "uncover")) {
         if (fobj == nullptr) {
@@ -3357,7 +3357,7 @@ ACMD(do_bury) {
                 act("@C$n@Y starts digging and shortly reveals @G$p@Y buried in the sand! Quickly $e pulls it out and sets it on the ground before covering the hole back up.@n",
                     true, ch, fobj, nullptr, TO_ROOM);
             }
-            fobj->setItemFlag(ITEM_BURIED, false);
+            fobj->item_flags.set(ITEM_BURIED, false);
         }
     } else {
         send_to_char(ch, "Syntax: dig [bury (item) | uncover]\r\n");
@@ -3383,7 +3383,7 @@ ACMD(do_arena) {
         return;
     } else if (!strcasecmp(arg, "stop")) {
         send_to_char(ch, "You stop viewing what's going on in the arena.\r\n");
-        ch->setPrefFlag(PRF_ARENAWATCH, false);
+        ch->pref_flags.set(PRF_ARENAWATCH, false);
         ARENA_IDNUM(ch) = -1;
         return;
     } else if (ch->getRoomVnum() != 17875) {
@@ -3447,7 +3447,7 @@ ACMD(do_arena) {
                 act("@wYou start watching the action surrounding that particular fighter in the arena.@n", true, ch,
                     nullptr, nullptr, TO_CHAR);
                 act("@C$n@w starts watching the action in the arena.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->setPrefFlag(PRF_ARENAWATCH, true);
+                ch->pref_flags.set(PRF_ARENAWATCH, true);
                 ARENA_IDNUM(ch) = num;
             } else {
                 send_to_char(ch, "A fighter with such a number was not found in the arena.\r\n");
@@ -3514,7 +3514,7 @@ ACMD(do_ensnare) {
             extract_obj(obj);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
-            vict->setAffectFlag(AFF_ZANZOKEN, false);
+            vict->affect_flags.set(AFF_ZANZOKEN, false);
         } else if (AFF_FLAGGED(vict, AFF_ZANZOKEN) && AFF_FLAGGED(ch, AFF_ZANZOKEN)) {
             if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100)) {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! You both zanzoken! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
@@ -3526,7 +3526,7 @@ ACMD(do_ensnare) {
                 extract_obj(obj);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
-                for(auto c : {vict, ch}) c->setAffectFlag(AFF_ZANZOKEN, false);
+                for(auto c : {vict, ch}) c->affect_flags.set(AFF_ZANZOKEN, false);
             } else {
                 act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! You both zanzoken! Quickly you spin around $M and ensnare $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_CHAR);
@@ -3535,10 +3535,10 @@ ACMD(do_ensnare) {
                 act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! They both zanzoken! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                     true, ch, nullptr, vict, TO_NOTVICT);
                 extract_obj(obj);
-                vict->setAffectFlag(AFF_ENSNARED, true);
+                vict->affect_flags.set(AFF_ENSNARED, true);
                 WAIT_STATE(ch, PULSE_3SEC);
                 improve_skill(ch, SKILL_ENSNARE, 0);
-                for(auto c : {vict, ch}) c->setAffectFlag(AFF_ZANZOKEN, false);
+                for(auto c : {vict, ch}) c->affect_flags.set(AFF_ZANZOKEN, false);
             }
         } else if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !AFF_FLAGGED(vict, AFF_ZANZOKEN)) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Fortunately you manage to hit $M! Quickly you zanzoken and spin around $M and ensnare $S arms with the silk!@n",
@@ -3548,10 +3548,10 @@ ACMD(do_ensnare) {
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e zanzokens and spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             extract_obj(obj);
-            vict->setAffectFlag(AFF_ENSNARED, true);
+            vict->affect_flags.set(AFF_ENSNARED, true);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
-            ch->setAffectFlag(AFF_ZANZOKEN, false);
+            ch->affect_flags.set(AFF_ZANZOKEN, false);
         } else if (GET_SPEEDI(ch) + rand_number(1, 100) < GET_SPEEDI(vict) + rand_number(1, 100)) {
             act("@WYou unwind your bundle of silk and grab a loose end of it. Splitting that end to reveal the sticky innards of the strand you swing the strand at @c$N@W! Unfortunately @c$N@W manages to avoid it and you lose the bundle...@n",
                 true, ch, nullptr, vict, TO_CHAR);
@@ -3570,7 +3570,7 @@ ACMD(do_ensnare) {
             act("@C$n@W unwinds a bundle of silk and grabs a loose end of it. Splitting that end to reveal the sticky innards of the strand $e swings the strand at @c$N@W! Unfortunately $e manages to hit $M! Quickly $e spins around @c$N@W and ensnares $S arms with the silk!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
             extract_obj(obj);
-            vict->setAffectFlag(AFF_ENSNARED, true);
+            vict->affect_flags.set(AFF_ENSNARED, true);
             WAIT_STATE(ch, PULSE_3SEC);
             improve_skill(ch, SKILL_ENSNARE, 0);
         }
@@ -5047,7 +5047,7 @@ ACMD(do_fireshield) {
             true, ch, nullptr, nullptr, TO_ROOM);
         improve_skill(ch, SKILL_FIRESHIELD, 0);
         ch->decCurKI(cost);
-        ch->setAffectFlag(AFF_FIRESHIELD, true);
+        ch->affect_flags.set(AFF_FIRESHIELD, true);
         return;
     }
 
@@ -5247,12 +5247,12 @@ ACMD(do_obstruct) {
 
     auto r = ch->getRoom();
 
-    if (r->getRoomFlag(ROOM_PEACEFUL)) {
+    if (r->room_flags.get(ROOM_PEACEFUL)) {
         send_to_char(ch, "You can not use this in such a peaceful area.\r\n");
         return;
     }
 
-    if (r->sector_type == SectorType::space || r->getRoomFlag(ROOM_SPACE)) {
+    if (r->sector_type == SectorType::space || r->room_flags.get(ROOM_SPACE)) {
         send_to_char(ch, "You can not wall off the vastness of space.\r\n");
         return;
     }
@@ -5606,8 +5606,8 @@ ACMD(do_spoil) {
     body_part->short_description = strdup(buf3);
 
     body_part->type_flag = ItemType::other;
-    body_part->setWearFlag(ITEM_WEAR_TAKE, true);
-    body_part->setItemFlag(ITEM_UNIQUE_SAVE, true);
+    body_part->wear_flags.set(ITEM_WEAR_TAKE, true);
+    body_part->item_flags.set(ITEM_UNIQUE_SAVE, true);
     SET_OBJ_VAL(body_part, VAL_ALL_HEALTH, 1);
     SET_OBJ_VAL(body_part, VAL_ALL_MAXHEALTH, 1);
     GET_OBJ_WEIGHT(body_part) = rand_number(4, 10);

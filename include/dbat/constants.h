@@ -123,3 +123,4 @@ std::vector<std::string> getStatNames();
 std::vector<std::string> getDimNames();
 std::vector<std::string> getComStatNames();
 std::vector<std::string> getShopFlagNames();
+std::vector<std::string> getCharacterFlagNames();

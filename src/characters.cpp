@@ -93,8 +93,8 @@ void char_data::restore(bool announce) {
 void char_data::resurrect(ResurrectionMode mode) {
     // First, fully heal the character.
     restore(true);
-    for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) setAffectFlag(f, false);
-    setPlayerFlag(PLR_PDEATH, false);
+    for(auto f : {AFF_ETHEREAL, AFF_SPIRIT}) affect_flags.set(f, false);
+    player_flags.set(PLR_PDEATH, false);
     // Send them to their starting room and have them 'look'.
     char_from_room(this);
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
@@ -165,12 +165,12 @@ void char_data::resurrect(ResurrectionMode mode) {
 
 void char_data::ghostify() {
     restore(true);
-    for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) setAffectFlag(f, false);
+    for(auto f : {AFF_SPIRIT, AFF_ETHEREAL, AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) affect_flags.set(f, false);
 
     // upon death, ghost-bodies gain new natural limbs... unless they're a
     // cyborg and want to keep their implants.
     if (!PRF_FLAGGED(this, PRF_LKEEP)) {
-        for(auto f : {PLR_CLLEG, PLR_CRLEG, PLR_CLARM, PLR_CRARM}) setPlayerFlag(f, false);
+        for(auto f : {CharacterFlag::cyber_left_arm, CharacterFlag::cyber_right_arm, CharacterFlag::cyber_left_leg, CharacterFlag::cyber_right_leg}) character_flags.set(f, false);
     }
 
 }
@@ -776,8 +776,8 @@ void char_data::restoreStatus(bool announce) {
 }
 
 void char_data::setStatusKnockedOut() {
-    setAffectFlag(AFF_KNOCKED, true);
-    setAffectFlag(AFF_FLYING, false);
+    affect_flags.set(AFF_KNOCKED, true);
+    affect_flags.set(AFF_FLYING, false);
     altitude = 0;
     GET_POS(this) = POS_SLEEPING;
 }
@@ -797,7 +797,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
             }
         }
 
-        setAffectFlag(AFF_KNOCKED, false);
+        affect_flags.set(AFF_KNOCKED, false);
         GET_POS(this) = POS_SITTING;
     }
 }
@@ -808,7 +808,7 @@ void char_data::cureStatusBurn(bool announce) {
             send_to_char(this, "Your burns are healed now.\r\n");
             ::act("$n@w's burns are now healed.@n", true, this, nullptr, nullptr, TO_ROOM);
         }
-        setAffectFlag(AFF_BURNED, false);
+        affect_flags.set(AFF_BURNED, false);
     }
 }
 
@@ -846,8 +846,8 @@ void char_data::restoreLimbs(bool announce) {
 
 void char_data::gainTail(bool announce) {
     if (!race::hasTail(race)) return;
-    if(getPlayerFlag(PLR_TAIL)) return;
-    setPlayerFlag(PLR_TAIL, true);
+    if(character_flags.get(CharacterFlag::tail)) return;
+    character_flags.set(CharacterFlag::tail, true);
     if(announce) {
         send_to_char(this, "@wYour tail grows back.@n\r\n");
         act("$n@w's tail grows back.@n", true, this, nullptr, nullptr, TO_ROOM);
@@ -855,15 +855,15 @@ void char_data::gainTail(bool announce) {
 }
 
 void char_data::loseTail() {
-    if (!getPlayerFlag(PLR_TAIL)) return;
-    setPlayerFlag(PLR_TAIL, false);
+    if (!character_flags.get(CharacterFlag::tail)) return;
+    character_flags.set(CharacterFlag::tail, false);
     remove_limb(this, 6);
     GET_TGROWTH(this) = 0;
     oozaru_revert(this);
 }
 
 bool char_data::hasTail() {
-    return getPlayerFlag(PLR_TAIL);
+    return character_flags.get(CharacterFlag::tail);
 }
 
 void char_data::addTransform(FormID form) {
@@ -888,20 +888,20 @@ bool char_data::removeTransform(FormID form) {
 void char_data::attemptLimitBreak() {
     if(form == FormID::base)
         return;
-    if(transforms[form].timeSpentInForm > 50000 && rand_number(0, 1000) == 1000) {
-        transforms[form].limitBroken = true;
+    if(transforms[form].time_spent_in_form > 50000 && rand_number(0, 1000) == 1000) {
+        transforms[form].limit_broken = true;
         incCurHealthPercent(0.35);
         incCurKIPercent(0.35);
         incCurSTPercent(0.35);
         send_to_char(this, "@mA rush of energy bursts through your system as you defy your limits.@n\r\n");
         
-        setAffectFlag(AFF_LIMIT_BREAKING, true);         
+        affect_flags.set(AFF_LIMIT_BREAKING, true);         
     }
 }
 
 void char_data::removeLimitBreak() {
     if (AFF_FLAGGED(this, AFF_LIMIT_BREAKING)) {
-        this->setAffectFlag(AFF_LIMIT_BREAKING, false);
+        this->affect_flags.set(AFF_LIMIT_BREAKING, false);
         send_to_char(this, "@mYou feel your body finally calm down.@n\r\n");
     }
 }
@@ -1042,7 +1042,7 @@ int64_t char_data::getPL() {
 
 void char_data::apply_kaioken(int times, bool announce) {
     GET_KAIOKEN(this) = times;
-    setPlayerFlag(PLR_POWERUP, false);
+    character_flags.set(CharacterFlag::powering_up, false);
 
     if (announce) {
         send_to_char(this, "@rA dark red aura bursts up around your body as you achieve Kaioken x %d!@n\r\n", times);
@@ -1227,9 +1227,9 @@ void char_data::login() {
 
     desc->has_prompt = 0;
     /* We've updated to 3.1 - some bits might be set wrongly: */
-    setPrefFlag(PRF_BUILDWALK, false);
+    pref_flags.set(PRF_BUILDWALK, false);
     if (!GET_EQ(this, WEAR_WIELD1) && PLR_FLAGGED(this, PLR_THANDW)) {
-        setPlayerFlag(PLR_THANDW, false);
+        player_flags.set(PLR_THANDW, false);
     }
 
 }
@@ -1753,7 +1753,7 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
 }
 
 void char_data::gazeAtMoon() {
-    if(OOZARU_RACE(this) && getPlayerFlag(PLR_TAIL)) {
+    if(OOZARU_RACE(this) && character_flags.get(CharacterFlag::tail)) {
         if(form == FormID::oozaru || form == FormID::golden_oozaru) return;
         FormID toForm = FormID::oozaru;
         if(transforms.contains(FormID::super_saiyan_1)
@@ -1854,11 +1854,11 @@ std::optional<std::string> char_data::dgCallMember(const std::string& member, co
     if(auto pf = _pflags.find(lmember); pf != _pflags.end()) {
         if (!arg.empty()) {
             if (!strcasecmp("on", arg.c_str()))
-                setPlayerFlag(pf->second, true);
+                player_flags.set(pf->second, true);
             else if (!strcasecmp("off", arg.c_str()))
-                setPlayerFlag(pf->second, false);
+                player_flags.set(pf->second, false);
         }
-        return getPlayerFlag(pf->second) ? "1" : "0";
+        return player_flags.get(pf->second) ? "1" : "0";
     }
 
     if(auto af = _aflags.find(lmember); af != _aflags.end()) {

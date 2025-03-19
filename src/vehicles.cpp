@@ -177,7 +177,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         return;
     }
 
-    if (!dest->room_flags.contains(RoomFlag::vehicle) && !dest->room_flags.contains(RoomFlag::space)) {
+    if (!dest->room_flags.get(RoomFlag::vehicle) && !dest->room_flags.get(RoomFlag::space)) {
         /* But the vehicle can't go that way*/
         send_to_char(ch, "@wThe ship can't fit there!\r\n");
         return;
@@ -374,7 +374,7 @@ static void handle_pilot_ready(struct char_data *ch) {
         }
     }
 
-    ch->setPlayerFlag(PLR_PILOTING, true);
+    ch->player_flags.set(PLR_PILOTING, true);
     act("@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
     GET_POS(ch) = POS_SITTING;
     send_to_char(ch, "@wYou take a seat in the pilot's chair.\r\n");
@@ -385,7 +385,7 @@ static void handle_pilot_unready(struct char_data *ch) {
         act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "@wYou stand up from the pilot's seat.\r\n");
         GET_POS(ch) = POS_STANDING;
-        ch->setPlayerFlag(PLR_PILOTING, false);
+        ch->player_flags.set(PLR_PILOTING, false);
     } else {
         send_to_char(ch, "You are already not flying the ship!\r\n");
     }

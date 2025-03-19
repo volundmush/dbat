@@ -431,7 +431,7 @@ constexpr double SECS_PER_GAME_YEAR = (SECS_PER_MONTH*MONTHS_PER_YEAR);
  * See http://www.circlemud.org/~greerga/todo/todo.009 to eliminate MOB_ISNPC.
  * IS_MOB() acts as a VALID_MOB_RNUM()-like function.
  */
-#define IS_NPC(ch)    (MOB_FLAGGED((ch), MOB_ISNPC))
+#define IS_NPC(ch)    ((ch)->character_flags.get(CharacterFlag::is_npc))
 #define IS_MOB(ch)    (IS_NPC(ch) && mob_proto.count(GET_MOB_RNUM(ch)))
 
 extern bool MOB_FLAGGED(struct char_data *ch, int flag);
@@ -454,10 +454,10 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 /* IS_AFFECTED for backwards compatibility */
 #define IS_AFFECTED(ch, skill) (AFF_FLAGGED((ch), (skill)))
 
-#define PLR_TOG_CHK(ch, flag) ((ch)->togglePlayerFlag(flag))
-#define PRF_TOG_CHK(ch, flag) ((ch)->togglePrefFlag(flag))
-#define ADM_TOG_CHK(ch, flag) ((ch)->toggleAdminFlag(flag))
-#define AFF_TOG_CHK(ch, flag) ((ch)->toggleAffectFlag(flag))
+#define PLR_TOG_CHK(ch, flag) ((ch)->player_flags.toggle(flag))
+#define PRF_TOG_CHK(ch, flag) ((ch)->pref_flags.toggle(flag))
+#define ADM_TOG_CHK(ch, flag) ((ch)->admin_flags.toggle(flag))
+#define AFF_TOG_CHK(ch, flag) ((ch)->affect_flags.toggle(flag))
 
 /* new define for quick check */
 #define DEAD(ch) (PLR_FLAGGED((ch), PLR_NOTDEADYET) || MOB_FLAGGED((ch), MOB_NOTDEADYET))
@@ -787,7 +787,7 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 #define GET_OBJ_COST(obj)    ((obj)->cost)
 #define GET_OBJ_RENT(obj)    ((obj)->cost_per_day)
 #define GET_OBJ_EXTRA(obj)    ((obj)->item_flags)
-#define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->getItemFlag((i)))
+#define GET_OBJ_EXTRA_AR(obj, i)   ((obj)->item_flags.get((i)))
 #define GET_OBJ_WEAR(obj)    ((obj)->wear_flags)
 #define GET_OBJ_WEIGHT(obj)    ((obj)->weight)
 #define GET_OBJ_TIMER(obj)    ((obj)->timer)
@@ -953,8 +953,8 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 #define IS_ROBOT(ch)            (IS_ANDROID(ch) || IS_MECHANICAL(ch))
 #define RESTRICTED_RACE(ch)     (IS_MAJIN(ch) || IS_SAIYAN(ch) || IS_BIO(ch) || IS_HOSHIJIN(ch))
 #define CHEAP_RACE(ch)          (IS_TRUFFLE(ch) || IS_MUTANT(ch) || IS_KONATSU(ch) || IS_DEMON(ch) || IS_KANASSAN(ch))
-#define SPAR_TRAIN(ch)          (FIGHTING(ch) && !IS_NPC(ch) && PLR_FLAGGED(ch, PLR_SPAR) &&\
-                                 !IS_NPC(FIGHTING(ch)) && PLR_FLAGGED(FIGHTING(ch), PLR_SPAR))
+#define SPAR_TRAIN(ch)          (FIGHTING(ch) && !IS_NPC(ch) && (ch)->character_flags.get(CharacterFlag::sparring) &&\
+                                 !IS_NPC(FIGHTING(ch)) && FIGHTING(ch)->character_flags.get(CharacterFlag::sparring))
 #define IS_PTRANS(ch)           (IS_ANDROID(ch) || IS_TRUFFLE(ch) || IS_BIO(ch) || IS_MAJIN(ch))
 #define IS_NONPTRANS(ch)        (!IS_PTRANS(ch))
 #define OOZARU_RACE(ch)         (IS_SAIYAN(ch) || IS_HALFBREED(ch))
@@ -968,19 +968,13 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 #define MOON_DATE               (time_info.day >= 20 && time_info.day <= 23)
 extern bool MOON_TIMECHECK();
 bool ETHER_STREAM(struct char_data *ch);
-#define HAS_ARMS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LARM) || \
-                                 MOB_FLAGGED(ch, MOB_RARM))) || GET_LIMBCOND(ch, 0) > 0 || \
-                                 GET_LIMBCOND(ch, 1) > 0 || \
-                                 PLR_FLAGGED(ch, PLR_CRARM) || \
-                                 PLR_FLAGGED(ch, PLR_CLARM)) && \
+#define _HAS_LIMB(ch, num, flag) (GET_LIMBCOND((ch), (num)) > 0 || (ch)->character_flags.get((flag)))
+
+#define HAS_ARMS(ch)            ((_HAS_LIMB((ch), 0, CharacterFlag::cyber_right_arm)) || _HAS_LIMB((ch), 1, CharacterFlag::cyber_left_arm) && \
                                  ((!GRAPPLING(ch) && !GRAPPLED(ch)) || \
                                  (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || \
                                  (GRAPPLED(ch) && GRAPTYPE(ch) != 1 && GRAPTYPE(ch) != 4)))
-#define HAS_LEGS(ch)            (((IS_NPC(ch) && (MOB_FLAGGED(ch, MOB_LLEG) || \
-                                 MOB_FLAGGED(ch, MOB_RLEG))) || GET_LIMBCOND(ch, 2) > 0 || \
-                                 GET_LIMBCOND(ch, 3) > 0 || \
-                                 PLR_FLAGGED(ch, PLR_CRLEG) || \
-                                 PLR_FLAGGED(ch, PLR_CLLEG)) && \
+#define HAS_LEGS(ch)            ((_HAS_LIMB((ch), 2, CharacterFlag::cyber_right_leg)) || _HAS_LIMB((ch), 3, CharacterFlag::cyber_left_leg) && \
                                  ((!GRAPPLING(ch) && !GRAPPLED(ch)) || \
                                  (GRAPPLING(ch) && GRAPTYPE(ch) == 3) || \
                                  (GRAPPLED(ch) && GRAPTYPE(ch) != 1)))

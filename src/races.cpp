@@ -450,7 +450,7 @@ namespace race {
                                      }},
                              }},
             {RaceID::android, {
-                                     {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {return PLR_FLAGGED(ch, PLR_ABSORB) ? -0.66 : 0.0;}},
+                                     {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {return ch->character_flags.get(CharacterFlag::android_model_absorb) ? -0.66 : 0.0;}},
                              }},
             {RaceID::saiyan, {
                                      {APPLY_CSTAT_GAIN_MULT, 0.3,  static_cast<int>(CharStat::experience)},

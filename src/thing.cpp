@@ -57,18 +57,18 @@ void thing_data::clearLocationEnvironment(int type) const {
 
 void thing_data::setRoomFlag(int flag, bool value) const {
     if(room)
-        room->setRoomFlag(flag, value);
+        room->room_flags.set(flag, value);
 }
 
 bool thing_data::toggleRoomFlag(int flag) const {
     if(room)
-        return room->toggleRoomFlag(flag);
+        return room->room_flags.toggle(flag);
     return false;
 }
 
 bool thing_data::getRoomFlag(int flag) const {
     if(room)
-        return room->getRoomFlag(flag);
+        return room->room_flags.get(flag);
     return false;
 }
 
@@ -135,42 +135,4 @@ SpecialFunc thing_data::getLocationSpecialFunc() const {
     if(room)
         return room->func;
     return nullptr;
-}
-
-void thing_data::setFlag(AffectFlag flag, bool value) {
-    if(value) {
-        if(!getFlag(flag)) {
-            affect_flags.insert(flag);
-        }
-    } else {
-        if(getFlag(flag)) {
-            affect_flags.erase(flag);
-        }
-    }
-}
-
-bool thing_data::toggleFlag(AffectFlag flag) {
-    if(getFlag(flag)) {
-        affect_flags.erase(flag);
-        return false;
-    } else {
-        affect_flags.insert(flag);
-        return true;
-    }
-}
-
-bool thing_data::getFlag(AffectFlag flag) {
-    return affect_flags.count(flag);
-}
-
-void thing_data::setAffectFlag(int flag, bool value) {
-    setFlag(static_cast<AffectFlag>(flag), value);
-}
-
-bool thing_data::toggleAffectFlag(int flag) {
-    return toggleFlag(static_cast<AffectFlag>(flag));
-}
-
-bool thing_data::getAffectFlag(int flag) {
-    return getFlag(static_cast<AffectFlag>(flag));
 }

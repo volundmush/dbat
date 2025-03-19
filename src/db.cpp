@@ -1565,10 +1565,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->time.logon = time(nullptr);
     MOB_LOADROOM(mob) = NOWHERE;
     mob->position = mob->mob_specials.default_pos;
-
-    if (IS_HUMANOID(mob)) {
-        for(auto f : {MOB_RARM, MOB_LARM, MOB_RLEG, MOB_LLEG}) mob->setMobFlag(f, true);
-    }
+    for(const auto& i : {0, 1, 2, 3}) mob->limb_condition[i] = 100;
 
     copy_proto_script(&proto->second, mob, MOB_TRIGGER);
     assign_triggers(mob, MOB_TRIGGER);
@@ -2092,10 +2089,10 @@ void reset_zone(zone_rnum zone)
         auto r = get_room(rrnum);
         if(!r) continue;
 
-        if (r->getRoomFlag(ROOM_AURA) && rand_number(1, 5) >= 4)
+        if (r->room_flags.get(ROOM_AURA) && rand_number(1, 5) >= 4)
         {
             send_to_room(r, "The aura of regeneration covering the surrounding area disappears.\r\n");
-            r->setRoomFlag(ROOM_AURA, false);
+            r->room_flags.set(ROOM_AURA, false);
         }
 
         if (r->sector_type == SectorType::lava)
@@ -2920,7 +2917,7 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
     auto ch_found = uniqueCharacters.find(character_id);
     if(ch_found == uniqueCharacters.end()) return -1;
     auto &ch = ch_found->second;
-    ch->setPlayerFlag(PLR_NOTDEADYET, false);
+    ch->player_flags.set(PLR_NOTDEADYET, false);
     auto exist_sess = sessions.find(character_id);
     if(exist_sess != sessions.end()) {
         // a session already exists. we'll be joining it.

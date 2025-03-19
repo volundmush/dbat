@@ -380,7 +380,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                 act("Nothing seems to happen.", false, ch, obj, nullptr, TO_ROOM);
             } else {
                 MOD_OBJ_VAL(obj, VAL_STAFF_CHARGES, 1);
-                ch->setAffectFlag(AFF_NEXTNOACTION, true);
+                ch->affect_flags.set(AFF_NEXTNOACTION, true);
                 /* Level to cast spell at. */
                 k = GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) ? GET_OBJ_VAL(obj, VAL_STAFF_LEVEL) : DEFAULT_STAFF_LVL;
 
@@ -437,7 +437,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
                 return;
             }
             MOD_OBJ_VAL(obj, VAL_WAND_CHARGES, -1);
-            ch->setAffectFlag(AFF_NEXTNOACTION, true);
+            ch->affect_flags.set(AFF_NEXTNOACTION, true);
             if (GET_OBJ_VAL(obj, VAL_WAND_LEVEL))
                 call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, VAL_WAND_SPELL),
                            GET_OBJ_VAL(obj, VAL_WAND_LEVEL), CAST_WAND, nullptr);
@@ -461,7 +461,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
             else
                 act("$n recites $p.", false, ch, obj, nullptr, TO_ROOM);
 
-            ch->setAffectFlag(AFF_NEXTNOACTION, true);
+            ch->affect_flags.set(AFF_NEXTNOACTION, true);
             for (i = 1; i <= 3; i++)
                 if (call_magic(ch, tch, tobj, GET_OBJ_VAL(obj, fmt::format("spell{}", i)),
                                GET_OBJ_VAL(obj, VAL_SCROLL_LEVEL), CAST_SCROLL, nullptr) <= 0)
@@ -482,7 +482,7 @@ void mag_objectmagic(struct char_data *ch, struct obj_data *obj,
             else
                 act("$n swallows $p.", true, ch, obj, nullptr, TO_ROOM);
 
-            ch->setAffectFlag(AFF_NEXTNOACTION, true);
+            ch->affect_flags.set(AFF_NEXTNOACTION, true);
             for (i = 1; i <= 3; i++)
                 if (call_magic(ch, ch, nullptr, GET_OBJ_VAL(obj, fmt::format("spell{}", i)),
                                GET_OBJ_VAL(obj, VAL_POTION_LEVEL), CAST_POTION, nullptr) <= 0)
@@ -744,16 +744,16 @@ ACMD(do_cast) {
 
     if (IS_SET(SINFO.comp_flags, MAGCOMP_SOMATIC) && rand_number(1, 100) <= GET_SPELLFAIL(ch)) {
         if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_PARTIAL))
-            ch->setAffectFlag(AFF_NEXTPARTIAL, true);
+            ch->affect_flags.set(AFF_NEXTPARTIAL, true);
         else if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_FULL))
-            ch->setAffectFlag(AFF_NEXTNOACTION, true);
+            ch->affect_flags.set(AFF_NEXTNOACTION, true);
         send_to_char(ch, "Your armor interferes with your casting, and you fail!\r\n");
     } else {
         if (cast_spell(ch, tch, tobj, spellnum, t) && GET_ADMLEVEL(ch) < ADMLVL_IMMORT) {
             if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_PARTIAL))
-                ch->setAffectFlag(AFF_NEXTPARTIAL, true);
+                ch->affect_flags.set(AFF_NEXTPARTIAL, true);
             else if (IS_SET(SINFO.routines, MAG_ACTION_FULL | MAG_ACTION_FULL))
-                ch->setAffectFlag(AFF_NEXTNOACTION, true);
+                ch->affect_flags.set(AFF_NEXTNOACTION, true);
             if (subcmd == SCMD_CAST) {
                 send_to_char(ch, "The magical energy from the spell leaves your mind.\r\n");
                 if (PRF_FLAGGED(ch, PRF_AUTOMEM)) {

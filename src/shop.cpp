@@ -273,7 +273,7 @@ static int is_ok_obj(struct char_data *keeper, struct char_data *ch, struct obj_
 
     auto &sh = shop_index[shop_nr];
 
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN) && sh.shop_flags.contains(ShopFlag::no_broken)) {
+    if (OBJ_FLAGGED(obj, ITEM_BROKEN) && sh.shop_flags.get(ShopFlag::no_broken)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_BUY_BROKEN);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
@@ -754,7 +754,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
             send_to_char(ch, "GToken Slots  @W: @m2/2@n\n");
         }
         char bits[MAX_STRING_LENGTH];
-        sprintbitarray(GET_OBJ_WEAR(obj), wear_bits, TW_ARRAY_MAX, bits);
+        sprintbitarray(GET_OBJ_WEAR(obj).getAll(), wear_bits, TW_ARRAY_MAX, bits);
         search_replace(bits, "TAKE", "");
         send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
         if (GET_OBJ_TYPE(obj) == ITEM_WEAPON) {
@@ -788,7 +788,7 @@ static void shopping_app(char *arg, struct char_data *ch, struct char_data *keep
         else
             send_to_char(ch, "@n");
         char buf2[MAX_STRING_LENGTH];
-        sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, buf2);
+        sprintbitarray(GET_OBJ_PERM(obj).getAll(), affected_bits, AF_ARRAY_MAX, buf2);
         send_to_char(ch, "\n@GSpecial     @W:@w %s", buf2);
         send_to_char(ch, "\n@c---------------------------------------------------------------@n\n");
     }
@@ -919,7 +919,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
 
     send_to_char(ch, "You now have %s.\r\n", tempstr);
     auto &sh = shop_index[shop_nr];
-    if (sh.shop_flags.contains(ShopFlag::bank_money))
+    if (sh.shop_flags.get(ShopFlag::bank_money))
         if (GET_GOLD(keeper) > MAX_OUTSIDE_BANK) {
             SHOP_BANK(shop_nr) += (GET_GOLD(keeper) - MAX_OUTSIDE_BANK);
             keeper->set(CharMoney::carried, MAX_OUTSIDE_BANK);
@@ -1345,7 +1345,7 @@ SPECIAL(shop_keeper) {
     if (CMD_IS("steal")) {
         char argm[MAX_INPUT_LENGTH];
 
-        if (!sh.shop_flags.contains(ShopFlag::allow_steal)) {
+        if (!sh.shop_flags.get(ShopFlag::allow_steal)) {
             snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
             act(argm, false, ch, nullptr, keeper, TO_CHAR);
             act(argm, false, ch, nullptr, keeper, TO_ROOM);
@@ -1387,7 +1387,7 @@ int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim) {
         return (true);
 
     for (auto &[sindex, sh] : shop_index) {
-        if (GET_MOB_RNUM(victim) == SHOP_KEEPER(sindex) && !sh.shop_flags.contains(ShopFlag::start_fight)) {
+        if (GET_MOB_RNUM(victim) == SHOP_KEEPER(sindex) && !sh.shop_flags.get(ShopFlag::start_fight)) {
             char buf[MAX_INPUT_LENGTH];
 
             snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_CANT_KILL_KEEPER);
@@ -1658,7 +1658,7 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
     /* Need a local buffer. */
     {
         char buf1[MAX_STRING_LENGTH];
-        sprintbitarray(shop_index[shop_nr].shop_flags, shop_bits, 4, buf1);
+        sprintbitarray(shop_index[shop_nr].shop_flags.getAll(), shop_bits, 4, buf1);
         send_to_char(ch, "Bits:       %s\r\n", buf1);
     }
 }

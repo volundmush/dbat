@@ -613,7 +613,7 @@ void from_json(const json& j, shop_data& s) {
     if(j.contains("message_sell")) s.message_sell = strdup(j["message_sell"].get<std::string>().c_str());
     if(j.contains("temper1")) s.temper1 = j["temper1"];
     
-    if(j.contains("shop_flags")) s.shop_flags = j["shop_flags"].get<std::unordered_set<ShopFlag>>();
+    if(j.contains("shop_flags")) s.shop_flags = j["shop_flags"].get<FlagHandler<ShopFlag>>();
 
     if(j.contains("in_room")) {
         for(auto &r : j["in_room"]) {
@@ -858,7 +858,7 @@ void to_json(json& j, const room_data& r) {
     
     j["sector_type"] = r.sector_type;
 
-    if(!r.room_flags.empty()) j["room_flags"] = r.room_flags;
+    if(r.room_flags) j["room_flags"] = r.room_flags;
 
     for(auto p : r.proto_script) {
         if(trig_index.contains(p)) j["proto_script"].push_back(p);
@@ -881,7 +881,7 @@ void from_json(const json& j, room_data& r) {
         }
     }
 
-    if(j.contains("room_flags")) r.room_flags = j["room_flags"].get<std::unordered_set<RoomFlag>>();
+    if(j.contains("room_flags")) r.room_flags = j["room_flags"].get<FlagHandler<RoomFlag>>();
 
     if(j.contains("proto_script")) {
         for(auto p : j["proto_script"]) r.proto_script.emplace_back(p.get<trig_vnum>());
@@ -948,13 +948,13 @@ static void dump_rooms(const std::filesystem::path &loc) {
 void to_json(json& j, const thing_data& t) {
     to_json(j, static_cast<const unit_data&>(t));
 
-    if(!t.affect_flags.empty()) j["affect_flags"] = t.affect_flags;
+    if(t.affect_flags) j["affect_flags"] = t.affect_flags;
 }
 
 void from_json(const json& j, thing_data& t) {
     from_json(j, static_cast<unit_data&>(t));
 
-    if(j.contains("affect_flags")) t.affect_flags = j["affect_flags"].get<std::unordered_set<AffectFlag>>();
+    if(j.contains("affect_flags")) t.affect_flags = j["affect_flags"].get<FlagHandler<AffectFlag>>();
 }
 
 // obj_data serialize/deserialize...
@@ -967,8 +967,8 @@ void to_json(json& j, const obj_data& o) {
 
     j["type_flag"] = o.type_flag;
     if(o.level) j["level"] = o.level;
-    if(!o.wear_flags.empty()) j["wear_flags"] = o.wear_flags;
-    if(!o.item_flags.empty()) j["item_flags"] = o.item_flags;
+    if(o.wear_flags) j["wear_flags"] = o.wear_flags;
+    if(o.item_flags) j["item_flags"] = o.item_flags;
     
     if(!o.only_race.empty()) j["onlyRace"] = o.only_race;
     if(!o.not_race.empty()) j["antiRace"] = o.not_race;
@@ -1007,9 +1007,9 @@ void from_json(const json& j, obj_data& o) {
     if(j.contains("type_flag")) o.type_flag = j["type_flag"];
     if(j.contains("level")) o.level = j["level"];
 
-    if(j.contains("wear_flags")) o.wear_flags = j["wear_flags"].get<std::unordered_set<WearFlag>>();
+    if(j.contains("wear_flags")) o.wear_flags = j["wear_flags"].get<FlagHandler<WearFlag>>();
 
-    if(j.contains("item_flags")) o.item_flags = j["item_flags"].get<std::unordered_set<ItemFlag>>();
+    if(j.contains("item_flags")) o.item_flags = j["item_flags"].get<FlagHandler<ItemFlag>>();
 
     if(j.contains("weight")) o.weight = j["weight"];
     if(j.contains("cost")) o.cost = j["cost"];
@@ -1154,22 +1154,22 @@ static void dump_item_prototypes(const std::filesystem::path &loc) {
 
 // char_data serialize/deserialize...
 void to_json(json& j, const trans_data& t) {
-    if(t.timeSpentInForm != 0.0) j["timeSpentInForm"] = t.timeSpentInForm;
+    if(t.time_spent_in_form != 0.0) j["time_spent_in_form"] = t.time_spent_in_form;
     j["visible"] = t.visible;
-    j["limitBroken"] = t.limitBroken;
+    j["limit_broken"] = t.limit_broken;
     j["unlocked"] = t.unlocked;
     j["grade"] = t.grade;
-    if(t.blutz != 0.0) j["blutz"] = t.blutz;
+    if(!t.vars.empty()) j["vars"] = t.vars;
     if(t.description && strlen(t.description)) j["description"] = t.description;
 }
 
 void from_json(const json& j, trans_data& t) {
-    if(j.contains("timeSpentInForm")) t.timeSpentInForm = j["timeSpentInForm"];
+    if(j.contains("time_spent_in_form")) t.time_spent_in_form = j["time_spent_in_form"];
     if(j.contains("visible")) t.visible = j["visible"];
-    if(j.contains("limitBroken")) t.limitBroken = j["limitBroken"];
+    if(j.contains("limit_broken")) t.limit_broken = j["limit_broken"];
     if(j.contains("unlocked")) t.unlocked = j["unlocked"];
     if(j.contains("grade")) t.grade = j["grade"];
-    if(j.contains("blutz")) t.blutz = j["blutz"];
+    if(j.contains("vars")) t.vars = j["vars"];
     if(j.contains("description")) {
         if(t.description) free(t.description);
         t.description = strdup(j["description"].get<std::string>().c_str());
@@ -1203,10 +1203,11 @@ void to_json(json& j, const char_data& c) {
     if(!c.stats.empty()) j["stats"] = c.stats;
     if(!c.dims.empty()) j["dims"] = c.dims;
 
-    if(!c.mob_flags.empty()) j["mob_flags"] = c.mob_flags;
-    if(!c.player_flags.empty()) j["player_flags"] = c.player_flags;
+    if(c.character_flags) j["character_flags"] = c.character_flags;
+    if(c.mob_flags) j["mob_flags"] = c.mob_flags;
+    if(c.player_flags) j["player_flags"] = c.player_flags;
 
-    if(!c.pref_flags.empty()) j["pref_flags"] = c.pref_flags;
+    if(c.pref_flags) j["pref_flags"] = c.pref_flags;
 
     for(auto i = 0; i < c.bodyparts.size(); i++)
         if(c.bodyparts.test(i)) {
@@ -1225,7 +1226,7 @@ void to_json(json& j, const char_data& c) {
 
     if(c.id != NOTHING) {
         // this is an instance...
-        if(!c.admin_flags.empty()) j["admin_flags"] = c.admin_flags;
+        if(c.admin_flags) j["admin_flags"] = c.admin_flags;
 
         if(c.was_in_room != NOWHERE) j["was_in_room"] = c.was_in_room;
         json td;
@@ -1389,15 +1390,16 @@ void from_json(const json& j, char_data& c) {
     if(j.contains("damage_mod")) c.damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) j["mob_specials"].get_to(c.mob_specials);
 
-    if(j.contains("mob_flags")) c.mob_flags = j["mob_flags"].get<std::unordered_set<MobFlag>>();
-    if(j.contains("player_flags")) c.player_flags = j["player_flags"].get<std::unordered_set<PlayerFlag>>();
+    if(j.contains("character_flags")) c.character_flags = j["character_flags"].get<FlagHandler<CharacterFlag>>();
+    if(j.contains("mob_flags")) c.mob_flags = j["mob_flags"].get<FlagHandler<MobFlag>>();
+    if(j.contains("player_flags")) c.player_flags = j["player_flags"].get<FlagHandler<PlayerFlag>>();
 
-    if(j.contains("pref_flags")) c.pref_flags = j["pref_flags"].get<std::unordered_set<PrefFlag>>();
+    if(j.contains("pref_flags")) c.pref_flags = j["pref_flags"].get<FlagHandler<PrefFlag>>();
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) c.bodyparts.set(i.get<int>());
 
     if(c.id != NOTHING) {
         // this is an instance.
-        if(j.contains("admin_flags")) c.admin_flags = j["admin_flags"].get<std::unordered_set<AdminFlag>>();;
+        if(j.contains("admin_flags")) c.admin_flags = j["admin_flags"].get<FlagHandler<AdminFlag>>();;
 
         if(j.contains("hometown")) c.hometown = j["hometown"];
 
@@ -1558,15 +1560,14 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("proto_script")) c.proto_script = j["proto_script"].get<std::vector<trig_vnum>>();
 
         if (!IS_HUMAN(&c))
-            c.setAffectFlag(AFF_INFRAVISION, true);
+            c.affect_flags.set(AFF_INFRAVISION, true);
 
         SPEAKING(&c) = SKILL_LANG_COMMON;
         set_height_and_weight_by_race(&c);
 
-        c.setMobFlag(MOB_ISNPC, true);
-        c.setMobFlag(MOB_NOTDEADYET, false);
+        c.mob_flags.set(MOB_NOTDEADYET, false);
 
-        c.setPlayerFlag(PLR_NOTDEADYET, false);
+        c.player_flags.set(PLR_NOTDEADYET, false);
     }
 }
 

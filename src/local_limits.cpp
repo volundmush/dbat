@@ -117,11 +117,11 @@ static void healthy_check(struct char_data *ch) {
     int chance = 70, roll = rand_number(1, 100), change = false;
 
     if (AFF_FLAGGED(ch, AFF_SHOCKED) && roll >= chance) {
-        ch->setAffectFlag(AFF_SHOCKED, false);
+        ch->affect_flags.set(AFF_SHOCKED, false);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_MBREAK) && roll >= chance) {
-        ch->setAffectFlag(AFF_MBREAK, false);
+        ch->affect_flags.set(AFF_MBREAK, false);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_WITHER) && roll >= chance) {
@@ -129,7 +129,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_CURSE) && roll >= chance) {
-        ch->setAffectFlag(AFF_CURSE, false);
+        ch->affect_flags.set(AFF_CURSE, false);
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_POISON) && roll >= chance) {
@@ -153,7 +153,7 @@ static void healthy_check(struct char_data *ch) {
         change = true;
     }
     if (AFF_FLAGGED(ch, AFF_KNOCKED) && roll >= chance) {
-        ch->setAffectFlag(AFF_KNOCKED, false);
+        ch->affect_flags.set(AFF_KNOCKED, false);
         GET_POS(ch) = POS_SITTING;
         change = true;
     }
@@ -412,7 +412,7 @@ int64_t hit_gain(struct char_data *ch) {
             case POS_STANDING:
                 if (IS_HOSHIJIN(ch) && GET_PHASE(ch) <= 0) {
                     gain = gain / 4;
-                } else if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) {
+                } else if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) {
                     gain = gain / 3;
                 } else {
                     gain += (gain / 2);
@@ -436,7 +436,7 @@ int64_t hit_gain(struct char_data *ch) {
             case POS_RESTING:
                 if (!SITS(ch)) {
                     gain += (gain / 2);
-                } else if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) {
+                } else if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) {
                     gain = gain * 1.5;
                 } else if (GET_OBJ_VNUM(SITS(ch)) == 19090 && !IS_ARLIAN(ch)) {
                     gain += gain * 1.1;
@@ -447,7 +447,7 @@ int64_t hit_gain(struct char_data *ch) {
             case POS_SITTING:
                 if (!SITS(ch)) {
                     gain += (gain / 4);
-                } else if (IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) {
+                } else if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) {
                     gain = gain * 0.5;
                 } else if (GET_OBJ_VNUM(SITS(ch)) == 19090 && !IS_ARLIAN(ch)) {
                     gain += gain * 0.6;
@@ -487,7 +487,7 @@ int64_t hit_gain(struct char_data *ch) {
 
     if (PLR_FLAGGED(ch, PLR_FURY)) {
         send_to_char(ch, "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-        ch->setPlayerFlag(PLR_FURY, false);
+        ch->player_flags.set(PLR_FURY, false);
     }
 
     /* Fury Mode Loss for halfbreeds */
@@ -497,10 +497,8 @@ int64_t hit_gain(struct char_data *ch) {
     if (cook_element(IN_ROOM(ch)) == 1)
         gain *= 2;
 
-    if (!IS_NPC(ch)) {
-        if (PLR_FLAGGED(ch, PLR_ABSORB)) {
-            gain = gain / 8;
-        }
+    if (ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+        gain = gain / 8;
     }
 
     if (GET_REGEN(ch) > 0) {
@@ -659,15 +657,15 @@ static void update_flags(struct char_data *ch) {
 
     if (AFF_FLAGGED(ch, AFF_FIRESHIELD) && !FIGHTING(ch) && rand_number(1, 101) > GET_SKILL(ch, SKILL_FIRESHIELD)) {
         send_to_char(ch, "Your fireshield disappears.\r\n");
-        ch->setAffectFlag(AFF_FIRESHIELD, false);
+        ch->affect_flags.set(AFF_FIRESHIELD, false);
     }
     if (AFF_FLAGGED(ch, AFF_ZANZOKEN) && !FIGHTING(ch) && rand_number(1, 3) == 2) {
         send_to_char(ch, "You lose concentration and no longer are ready to zanzoken.\r\n");
-        ch->setAffectFlag(AFF_ZANZOKEN, false);
+        ch->affect_flags.set(AFF_ZANZOKEN, false);
     }
     if (AFF_FLAGGED(ch, AFF_ENSNARED) && rand_number(1, 3) == 2) {
         send_to_char(ch, "The silk ensnaring your arms disolves enough for you to break it!\r\n");
-        ch->setAffectFlag(AFF_ENSNARED, false);
+        ch->affect_flags.set(AFF_ENSNARED, false);
     }
 
     if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == FormID::super_saiyan_1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
@@ -675,12 +673,12 @@ static void update_flags(struct char_data *ch) {
         if (GET_ABSORBS(ch) >= 300) {
             send_to_char(ch,
                          "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
-            ch->setPlayerFlag(PLR_FPSSJ, true);
+            ch->player_flags.set(PLR_FPSSJ, true);
             GET_ABSORBS(ch) = 0;
         }
     }
 
-    if(race::hasTail(ch->race) && !PLR_FLAGGED(ch, PLR_TAIL) && !PLR_FLAGGED(ch, PLR_NOGROW)) {
+    if(race::hasTail(ch->race) && !ch->character_flags.get(CharacterFlag::tail) && !PLR_FLAGGED(ch, PLR_NOGROW)) {
         int growth = 0;
         if(IS_HALFBREED(ch) && RACIAL_PREF(ch) == 1)
             growth = 1 ? rand_number(1, 50) >= 40 : 0;
@@ -695,7 +693,7 @@ static void update_flags(struct char_data *ch) {
 
     if (AFF_FLAGGED(ch, AFF_MBREAK) && rand_number(1, 3 + sick_fail) == 2) {
         send_to_char(ch, "@wYour mind is no longer in turmoil, you can charge ki again.@n\r\n");
-        ch->setAffectFlag(AFF_MBREAK, false);
+        ch->affect_flags.set(AFF_MBREAK, false);
         if (GET_SKILL(ch, SKILL_TELEPATHY) <= 0) {
             bool condition1 = rand_number(1, 2) == 2;
             bool condition2 = rand_number(1, 20) == 1;
@@ -719,12 +717,12 @@ static void update_flags(struct char_data *ch) {
             if (skill < GET_SKILL(ch, SKILL_TELEPATHY))
                 send_to_char(ch, "Your mental damage and recovery has taught you things about your own mind.\r\n");
         }
-        ch->setAffectFlag(AFF_SHOCKED, false);
+        ch->affect_flags.set(AFF_SHOCKED, false);
     }
     if (AFF_FLAGGED(ch, AFF_FROZEN) && rand_number(1, 2) == 2) {
         send_to_char(ch, "@wYou realize you have thawed enough and break out of the ice holding you prisoner!\r\n");
         act("$n@W breaks out of the ice holding $m prisoner!", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setAffectFlag(AFF_FROZEN, false);
+        ch->affect_flags.set(AFF_FROZEN, false);
     }
     if (AFF_FLAGGED(ch, AFF_WITHER) && rand_number(1, 6 + sick_fail) == 2) {
         send_to_char(ch, "@wYour body returns to normal and you beat the withering that plagued you.\r\n");
@@ -732,7 +730,7 @@ static void update_flags(struct char_data *ch) {
         null_affect(ch, AFF_WITHER);
     }
     if (wearing_stardust(ch) == 1) {
-        ch->setAffectFlag(AFF_ZANZOKEN, true);
+        ch->affect_flags.set(AFF_ZANZOKEN, true);
         send_to_char(ch, "The stardust armor blesses you with a free zanzoken when you next need it.\r\n");
     }
 
@@ -1106,7 +1104,7 @@ static void heal_limb(struct char_data *ch) {
     }
 
     if (PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
-        ch->setPlayerFlag(PLR_BANDAGED, false);
+        ch->player_flags.set(PLR_BANDAGED, false);
         send_to_char(ch, "You remove your bandages.\r\n");
         return;
     }
@@ -1218,7 +1216,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         }
                         send_to_char(ch, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
                         if (group_bonus(ch, 2) == 7) {
-                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+                            if (leader->character_flags.get(CharacterFlag::android_model_sense)) {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;
                                 send_to_char(ch,
@@ -1248,7 +1246,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         }
                         send_to_char(ch, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
                         if (group_bonus(ch, 2) == 7) {
-                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+                            if (leader->character_flags.get(CharacterFlag::android_model_sense)) {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;
                                 send_to_char(ch,
@@ -1278,7 +1276,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         }
                         send_to_char(ch, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
                         if (ch->master && group_bonus(ch, 2) == 7) {
-                            if (PLR_FLAGGED(leader, PLR_SENSEM)) {
+                            if (leader->character_flags.get(CharacterFlag::android_model_sense)) {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;
                                 send_to_char(ch,
@@ -1411,7 +1409,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
                 act("@m$n@M's body has fully regenerated! Suddenly $e screams out in gleeful triumph and short gust of steam erupts from $s skin pores!",
                     true, ch, nullptr, nullptr, TO_ROOM);
             }
-            ch->setPlayerFlag(PLR_GOOP, false);
+            ch->player_flags.set(PLR_GOOP, false);
             characterSubscriptions.unsubscribe("goopTimeService", ch);
         } else {
             ch->gooptime -= 1;
@@ -1544,7 +1542,7 @@ void healTankService(uint64_t heartPulse, double deltaTime) {
             // the heal tank is occupied.
 
             // set this, just in case it wasn't.
-            ch->setPlayerFlag(PLR_HEALT, true);
+            ch->player_flags.set(PLR_HEALT, true);
 
             bool mustLeave = false;
 
@@ -1565,7 +1563,7 @@ void healTankService(uint64_t heartPulse, double deltaTime) {
                 act("You step out of the healing tank.", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@w steps out of the healing tank.@n", true, ch, nullptr, nullptr,
                     TO_ROOM);
-                ch->setPlayerFlag(PLR_HEALT, false);
+                ch->player_flags.set(PLR_HEALT, false);
                 o->sitting.reset();
                 ch->sits.reset();
             }
@@ -1630,7 +1628,7 @@ void auralight_update(uint64_t heartPulse, double deltaTime) {
             } else {
                 send_to_char(i, "You don't have enough energy to keep the aura active.\r\n");
                 act("$n's aura slowly stops shining and fades.\r\n", true, i, nullptr, nullptr, TO_ROOM);
-                i->setPlayerFlag(PLR_AURALIGHT, false);
+                i->player_flags.set(PLR_AURALIGHT, false);
             }
         } else {
             characterSubscriptions.unsubscribe("auralight", i);
@@ -1759,7 +1757,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         {
                             send_to_char(i, "Your burns are healed now.\r\n");
                             act("$n@w's burns are now healed.@n", true, i, nullptr, nullptr, TO_ROOM);
-                            i->setAffectFlag(AFF_BURNED, false);
+                            i->affect_flags.set(AFF_BURNED, false);
                         }
                     }
 

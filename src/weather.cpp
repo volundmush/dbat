@@ -157,7 +157,7 @@ void oozaru_revert(char_data *ch) {
         return;
 
     auto &data = ch->transforms[ch->form];
-    data.blutz = 0.0;
+    data.vars["blutz"] = 0.0;
 
     if(ch->form == FormID::oozaru || ch->form == FormID::golden_oozaru ) {
         act("@CYour body begins to shrink back to its normal form as the power of the Oozaru leaves you. You fall asleep shortly after returning to normal!@n",

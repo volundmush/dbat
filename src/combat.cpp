@@ -125,7 +125,7 @@ void damage_weapon(struct char_data *ch, struct obj_data *obj, struct char_data 
             act("@RYour @C$p@R shatters on @r$N's@R body!@n", true, ch, obj, vict, TO_CHAR);
             act("@r$n's@R @C$p@R shatters on YOUR body!@n", true, ch, obj, vict, TO_VICT);
             act("@r$n's@R @C$p@R shatters on @r$N's@R body!@n", true, ch, obj, vict, TO_NOTVICT);
-            obj->setItemFlag(ITEM_BROKEN, true);
+            obj->item_flags.set(ITEM_BROKEN, true);
             perform_remove(vict, 16);
             perform_remove(vict, 17);
         } else if (result >= 8) {
@@ -207,7 +207,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
         act("@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", true, ch, nullptr, vict, TO_VICT);
         act("@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", true, ch, nullptr, vict, TO_NOTVICT);
         ch->throws += 1;
-        ch->setPlayerFlag(PLR_MULTIHIT, true);
+        ch->player_flags.set(PLR_MULTIHIT, true);
         if (COMBO(ch) > -1) {
             switch (COMBO(ch)) {
                 case 0:
@@ -602,20 +602,20 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
             !GET_BONUS(vict, BONUS_FIREPROOF)) {
             send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
             send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-            vict->setAffectFlag(AFF_BURNED, true);
+            vict->affect_flags.set(AFF_BURNED, true);
         } else if (GET_BONUS(vict, BONUS_FIREPROOF) || IS_DEMON(vict)) {
             send_to_char(ch, "@RThey appear to be fireproof!@n\r\n");
         } else if (GET_BONUS(vict, BONUS_FIREPRONE)) {
             send_to_char(vict, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
             send_to_char(ch, "@RThey are easily burned!@n\r\n");
-            vict->setAffectFlag(AFF_BURNED, true);
+            vict->affect_flags.set(AFF_BURNED, true);
         }
     }
     if (shocked == true) {
         if (!AFF_FLAGGED(vict, AFF_SHOCKED) && rand_number(1, 4) == 4 && !AFF_FLAGGED(vict, AFF_SANCTUARY)) {
             act("@MYour mind has been shocked!@n", true, vict, nullptr, nullptr, TO_CHAR);
             act("@M$n@m's mind has been shocked!@n", true, vict, nullptr, nullptr, TO_ROOM);
-            vict->setAffectFlag(AFF_SHOCKED, true);
+            vict->affect_flags.set(AFF_SHOCKED, true);
         }
     }
     hurt(0, 0, ch, vict, nullptr, totki, 1);
@@ -944,69 +944,37 @@ void cut_limb(struct char_data *ch, struct char_data *vict, int wlvl, int hitspo
         }
         return;
     } else { /* We've only succeeded in removing a limb. */
-        if (!IS_NPC(vict)) {
-            if (HAS_ARMS(vict) && rand_number(1, 2) == 2) {
-                if (GET_LIMBCOND(vict, 1) > 0) {
-                    GET_LIMBCOND(vict, 1) = 0;
-                    vict->setPlayerFlag(PLR_CLARM, false);
-                    act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@RYOU lose your left arm!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    remove_limb(vict, 2);
-                } else if (GET_LIMBCOND(vict, 0) > 0) {
-                    GET_LIMBCOND(vict, 0) = 100;
-                    vict->setPlayerFlag(PLR_CRARM, false);
-                    act("@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@RYOU lose your right arm!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    remove_limb(vict, 1);
-                }
-            } else { /* It's a leg */
-                if (GET_LIMBCOND(vict, 3) > 0) {
-                    GET_LIMBCOND(vict, 3) = 100;
-                    vict->setPlayerFlag(PLR_CLLEG, false);
-                    act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@RYOU lose your left leg!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    remove_limb(vict, 4);
-                } else if (GET_LIMBCOND(vict, 2) > 0) {
-                    GET_LIMBCOND(vict, 2) = 100;
-                    vict->setPlayerFlag(PLR_CRLEG, false);
-                    act("@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@RYOU lose your right leg!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    remove_limb(vict, 3);
-                }
+        if (HAS_ARMS(vict) && rand_number(1, 2) == 2) {
+            if (GET_LIMBCOND(vict, 1) > 0) {
+                GET_LIMBCOND(vict, 1) = 0;
+                vict->character_flags.set(CharacterFlag::cyber_left_arm, false);
+                act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_CHAR);
+                act("@RYOU lose your left arm!@n", true, ch, nullptr, vict, TO_VICT);
+                act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                remove_limb(vict, 2);
+            } else if (GET_LIMBCOND(vict, 0) > 0) {
+                GET_LIMBCOND(vict, 0) = 100;
+                vict->character_flags.set(CharacterFlag::cyber_right_arm, false);
+                act("@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_CHAR);
+                act("@RYOU lose your right arm!@n", true, ch, nullptr, vict, TO_VICT);
+                act("@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                remove_limb(vict, 1);
             }
-        } else { /* It's a npc */
-            if (HAS_ARMS(vict) && rand_number(1, 2) == 2) {
-                if (MOB_FLAGGED(vict, MOB_LARM)) {
-                    vict->setMobFlag(MOB_LARM, false);
-                    remove_limb(vict, 2);
-                    act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@RYOU lose your left arm!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@R$N@r loses $s left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                } else if (MOB_FLAGGED(vict, MOB_RARM)) {
-                    vict->setMobFlag(MOB_RARM, false);
-                    remove_limb(vict, 1);
-                    act("@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@RYOU lose your right arm!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@R$N@r loses $s right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                }
-            } else {
-                if (MOB_FLAGGED(vict, MOB_LLEG)) {
-                    vict->setMobFlag(MOB_LLEG, false);
-                    remove_limb(vict, 4);
-                    act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@RYOU lose your left leg!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                } else if (MOB_FLAGGED(vict, MOB_RLEG)) {
-                    vict->setMobFlag(MOB_RLEG, false);
-                    remove_limb(vict, 3);
-                    act("@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_CHAR);
-                    act("@RYOU lose your right leg!@n", true, ch, nullptr, vict, TO_VICT);
-                    act("@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                }
+        } else { /* It's a leg */
+            if (GET_LIMBCOND(vict, 3) > 0) {
+                GET_LIMBCOND(vict, 3) = 100;
+                vict->character_flags.set(CharacterFlag::cyber_left_leg, false);
+                act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_CHAR);
+                act("@RYOU lose your left leg!@n", true, ch, nullptr, vict, TO_VICT);
+                act("@R$N@r loses $s left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                remove_limb(vict, 4);
+            } else if (GET_LIMBCOND(vict, 2) > 0) {
+                GET_LIMBCOND(vict, 2) = 100;
+                vict->character_flags.set(CharacterFlag::cyber_right_leg, false);
+                act("@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_CHAR);
+                act("@RYOU lose your right leg!@n", true, ch, nullptr, vict, TO_VICT);
+                act("@R$N@r loses $s right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
+                remove_limb(vict, 3);
             }
         }
     }
@@ -1233,29 +1201,16 @@ int roll_hitloc(struct char_data *ch, struct char_data *vict, int skill) {
         location = rand_number(4, 5);
     }
 
-    if (!IS_NPC(vict)) {
-        if (location == 4 && GET_LIMBCOND(vict, 0) <= 0 && GET_LIMBCOND(vict, 1) <= 0) { /* No arms */
-            location = 5;
-        }
-
-        if (location == 5 && GET_LIMBCOND(vict, 2) <= 0 && GET_LIMBCOND(vict, 3) <= 0) { /* No legs */
-            location = 4;
-        }
-
-        if (location == 4 && GET_LIMBCOND(vict, 0) <= 0 && GET_LIMBCOND(vict, 1) <= 0) { /* Both failed, make body */
-            location = 1;
-        }
+    if (location == 4 && GET_LIMBCOND(vict, 0) <= 0 && GET_LIMBCOND(vict, 1) <= 0) { /* No arms */
+        location = 5;
     }
 
-    if (IS_NPC(vict)) {
-        if (location == 4 && !MOB_FLAGGED(vict, MOB_RARM) && !MOB_FLAGGED(vict, MOB_LARM))
-            location = 5;
+    if (location == 5 && GET_LIMBCOND(vict, 2) <= 0 && GET_LIMBCOND(vict, 3) <= 0) { /* No legs */
+        location = 4;
+    }
 
-        if (location == 5 && !MOB_FLAGGED(vict, MOB_RLEG) && !MOB_FLAGGED(vict, MOB_LLEG))
-            location = 4;
-
-        if (location == 5 && !MOB_FLAGGED(vict, MOB_RARM) && !MOB_FLAGGED(vict, MOB_LARM))
-            location = 1;
+    if (location == 4 && GET_LIMBCOND(vict, 0) <= 0 && GET_LIMBCOND(vict, 1) <= 0) { /* Both failed, make body */
+        location = 1;
     }
 
     return (location);
@@ -1458,7 +1413,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 act("@r$n's@R attack @YDESTROYS@R YOUR left arm!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R left arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 1) = 0;
-                for(auto f : {PLR_THANDW, PLR_CLARM}) vict->setPlayerFlag(f, false);
+                for(auto f : {PLR_THANDW}) vict->player_flags.set(f, false);
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 1) > 0) {
                 GET_LIMBCOND(vict, 1) -= dmg;
@@ -1470,7 +1425,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 act("@r$n's@R attack @YDESTROYS@R YOUR right arm!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R right arm!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 0) = 0;
-                for(auto f : {PLR_THANDW, PLR_CRARM}) vict->setPlayerFlag(f, false);
+                for(auto f : {PLR_THANDW}) vict->player_flags.set(f, false);
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 0) > 0) {
                 GET_LIMBCOND(vict, 0) -= dmg;
@@ -1484,7 +1439,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 act("@r$n's@R attack @YDESTROYS@R YOUR left leg!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R left leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 3) = 0;
-                for(auto f : {PLR_THANDW, PLR_CLLEG}) vict->setPlayerFlag(f, false);
+                for(auto f : {PLR_THANDW}) vict->player_flags.set(f, false);
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 3) > 0) {
                 GET_LIMBCOND(vict, 3) -= dmg;
@@ -1496,7 +1451,7 @@ void hurt_limb(struct char_data *ch, struct char_data *vict, int chance, int are
                 act("@r$n's@R attack @YDESTROYS@R YOUR right leg!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@r$n's@R attack @YDESTROYS @r$N's@R right leg!@n", true, ch, nullptr, vict, TO_NOTVICT);
                 GET_LIMBCOND(vict, 2) = 0;
-                for(auto f : {PLR_THANDW, PLR_CRLEG}) vict->setPlayerFlag(f, false);
+                for(auto f : {PLR_THANDW}) vict->player_flags.set(f, false);
                 remove_limb(vict, 2);
             } else if (GET_LIMBCOND(vict, 2) > 0) {
                 GET_LIMBCOND(vict, 2) -= dmg;
@@ -1630,7 +1585,7 @@ void damage_eq(struct char_data *vict, int location) {
         ;
         if (MOD_OBJ_VAL(eq, VAL_ALL_HEALTH, -loss) <= 0) {
             SET_OBJ_VAL(eq, VAL_ALL_HEALTH, 0);
-            eq->setItemFlag(ITEM_BROKEN, true);
+            eq->item_flags.set(ITEM_BROKEN, true);
             act("@WYour $p@W completely breaks!@n", false, nullptr, eq, vict, TO_VICT);
             act("@C$N's@W $p@W completely breaks!@n", false, nullptr, eq, vict, TO_NOTVICT);
             perform_remove(vict, location);
@@ -1748,7 +1703,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                                 act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict,
                                     TO_NOTVICT);
-                                vict->setAffectFlag(AFF_ZANZOKEN, false);
+                                vict->affect_flags.set(AFF_ZANZOKEN, false);
                                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                                 hurt(0, 0, ch, vict, nullptr, 0, 1);
                                 continue;
@@ -1841,7 +1796,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
                             act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
-                            vict->setAffectFlag(AFF_ZANZOKEN, false);
+                            vict->affect_flags.set(AFF_ZANZOKEN, false);
                             pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                             hurt(0, 0, ch, vict, nullptr, 0, 1);
                             continue;
@@ -1931,7 +1886,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                                 act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                                 act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict,
                                     TO_NOTVICT);
-                                vict->setAffectFlag(AFF_ZANZOKEN, false);
+                                vict->affect_flags.set(AFF_ZANZOKEN, false);
                                 pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                                 continue;
                             } else if (dge + rand_number(-10, 5) > skill) {
@@ -2022,7 +1977,7 @@ void huge_update(uint64_t heartPulse, double deltaTime) {
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_CHAR);
                             act("@cYou disappear, avoiding the explosion!@n", false, ch, nullptr, vict, TO_VICT);
                             act("@C$N@c disappears, avoiding the explosion!@n", false, ch, nullptr, vict, TO_NOTVICT);
-                            vict->setAffectFlag(AFF_ZANZOKEN, false);
+                            vict->affect_flags.set(AFF_ZANZOKEN, false);
                             pcost(vict, 0, GET_MAX_HIT(vict) / 200);
                             continue;
                         } else if (dge + rand_number(-10, 5) > skill) {
@@ -2280,7 +2235,7 @@ int limb_ok(struct char_data *ch, int type) {
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
             act("You manage to break the silk ensnaring your arms!", true, ch, nullptr, nullptr, TO_CHAR);
             act("$n manages to break the silk ensnaring $s arms!", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->setAffectFlag(AFF_ENSNARED, false);
+            ch->affect_flags.set(AFF_ENSNARED, false);
         }
         if (GET_EQ(ch, WEAR_WIELD1) && GET_EQ(ch, WEAR_WIELD2)) {
             send_to_char(ch, "Your hands are full!\r\n");
@@ -3578,14 +3533,14 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
             TO_ROOM);
         if (rand_number(1, 10) >= 7) {
             send_to_char(ch, "You feel less angry.\r\n");
-            ch->setAffectFlag(PLR_FURY, false);
+            ch->affect_flags.set(PLR_FURY, false);
         }
     } else if (PLR_FLAGGED(ch, PLR_FURY)) {
         dam *= 2;
         act("Your rage magnifies your attack power!", true, ch, nullptr, nullptr, TO_CHAR);
         act("Swirling energy flows around $n as $e releases $s rage in the attack!", true, ch, nullptr, nullptr,
             TO_ROOM);
-        ch->setAffectFlag(PLR_FURY, false);
+        ch->affect_flags.set(PLR_FURY, false);
     }
     /* End of Fury Mode for halfbreeds */
 
@@ -4275,10 +4230,10 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         return;
     }
 
-    /* If a character is trageted */
+    /* If a character is targeted */
 
     if (type <= 0) {
-        if (IS_SAIYAN(ch) && PLR_FLAGGED(ch, PLR_TAIL)) {
+        if (IS_SAIYAN(ch) && ch->character_flags.get(CharacterFlag::tail)) {
             dmg += dmg * .15;
         }
         if (IS_NAMEK(ch) && !GET_EQ(ch, WEAR_HEAD)) {
@@ -4315,7 +4270,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             } else {
                 act("@wYou can no longer infuse ki into your attacks!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@c$n@w can no longer infuse ki into $s attacks!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->setAffectFlag(AFF_INFUSE, false);
+                ch->affect_flags.set(AFF_INFUSE, false);
             }
         }
     }
@@ -4440,7 +4395,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("@c$N's@C barrier bursts!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@CYour barrier bursts!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$N's@C barrier bursts!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                vict->setAffectFlag(AFF_SANCTUARY, false);
+                vict->affect_flags.set(AFF_SANCTUARY, false);
             }
         }
         if (AFF_FLAGGED(vict, AFF_FIRESHIELD) && rand_number(1, 200) < GET_SKILL(vict, SKILL_FIRESHIELD)) {
@@ -4451,7 +4406,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("@c$N's@C fireshield disappears...@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@CYour fireshield disappears...@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$N's@C fireshield disappears...@n", true, ch, nullptr, vict, TO_NOTVICT);
-                vict->setAffectFlag(AFF_FIRESHIELD, false);
+                vict->affect_flags.set(AFF_FIRESHIELD, false);
             }
             dmg = 0;
         }
@@ -4582,7 +4537,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
         if (!IS_NPC(vict) && GET_SKILL(vict, SKILL_ARMOR)) {
             int nanite = GET_SKILL(vict, SKILL_ARMOR), perc = rand_number(1, 220);
-            if (PLR_FLAGGED(vict, PLR_SENSEM)) {
+            if (vict->character_flags.get(CharacterFlag::android_model_sense)) {
                 perc = rand_number(1, 176);
             }
             if (nanite >= perc) {
@@ -4742,7 +4697,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 }
                 GET_POS(vict) = POS_SLEEPING;
                 if (!IS_NPC(ch)) {
-                    vict->setAffectFlag(AFF_KNOCKED, true);
+                    vict->affect_flags.set(AFF_KNOCKED, true);
                 }
             } else {
                 act("@c$N@w admits defeat to you, stops sparring, and stumbles away.@n", true, ch, nullptr, vict,
@@ -4777,14 +4732,14 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             }
             GET_POS(vict) = POS_SLEEPING;
             if (!IS_NPC(ch)) {
-                vict->setAffectFlag(AFF_KNOCKED, true);
+                vict->affect_flags.set(AFF_KNOCKED, true);
             }
         } else if (is_sparring(ch) && !is_sparring(vict) && IS_NPC(ch)) {
             act("@w$n@w stops sparring!@n", true, ch, nullptr, vict, TO_ROOM);
-            ch->setMobFlag(MOB_SPAR, false);
+            ch->character_flags.set(CharacterFlag::sparring, false);
         } else if (!is_sparring(ch) && is_sparring(vict) && IS_NPC(vict)) {
             act("@w$n@w stops sparring!@n", true, ch, nullptr, vict, TO_ROOM);
-            vict->setMobFlag(MOB_SPAR, false);
+            vict->character_flags.set(CharacterFlag::sparring, false);
         }
 
         if (PLR_FLAGGED(vict, PLR_IMMORTAL) && !is_sparring(ch) && vict->getCurHealth() - dmg <= 0) {
@@ -4939,7 +4894,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     solo_gain(ch, vict);
                 }
                 if (IS_DEMON(ch) && type == 1) {
-                    vict->setAffectFlag(AFF_ASHED, true);
+                    vict->affect_flags.set(AFF_ASHED, true);
                 }
                 die(vict, ch);
                 dead = true;
@@ -5144,7 +5099,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("$p@w shatters apart!@n", true, ch, obj, nullptr, TO_CHAR);
                 act("$p@w shatters apart!@n", true, ch, obj, nullptr, TO_ROOM);
                 SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 0);
-                obj->setItemFlag(ITEM_BROKEN, true);
+                obj->item_flags.set(ITEM_BROKEN, true);
                 if (GET_OBJ_TYPE(obj) == ITEM_DRINKCON && GET_OBJ_TYPE(obj) == ITEM_FOUNTAIN) {
                     SET_OBJ_VAL(obj, VAL_DRINKCON_HOWFULL, 0);
                 }
@@ -5170,7 +5125,7 @@ void handle_cooldown(struct char_data *ch, int cooldown) {
 
     if (!IS_NPC(ch)) {
         if (PLR_FLAGGED(ch, PLR_MULTIHIT)) {
-            ch->setPlayerFlag(PLR_MULTIHIT, false);
+            ch->player_flags.set(PLR_MULTIHIT, false);
             return;
         }
     }
@@ -5959,7 +5914,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
         act("@WHaving lost your target you slow down until your vortex disappears, and end your attack.@n", true, ch,
             nullptr, nullptr, TO_CHAR);
         act("@C$n@W slows down until $s vortex disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setPlayerFlag(PLR_SPIRAL, false);
+        ch->player_flags.set(PLR_SPIRAL, false);
         return;
     }
 
@@ -5967,7 +5922,7 @@ void handle_spiral(struct char_data *ch, struct char_data *vict, int skill, int 
         act("@WHaving no more charged ki you slow down until your vortex disappears, and end your attack.@n", true, ch,
             nullptr, nullptr, TO_CHAR);
         act("@C$n@W slows down until $s vortex disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setPlayerFlag(PLR_SPIRAL, false);
+        ch->player_flags.set(PLR_SPIRAL, false);
         return;
     }
 

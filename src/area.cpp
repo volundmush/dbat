@@ -43,7 +43,7 @@ int getPlanet(const room_vnum room) {
 
     // this approach covers most, but not all, planets.
     for(const auto& [flag, planet] : planetFlags) {
-        if(r->getRoomFlag(flag)) return planet;
+        if(r->room_flags.get(flag)) return planet;
     }
 
     if((room >= 3400 && room <= 3599) || (room >= 62900 && room <= 62999) || room == 19600)

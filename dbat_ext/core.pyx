@@ -457,6 +457,8 @@ def get_names(category: str) -> list[str]:
         names = db.getComStatNames()
     elif category == "shop_flags":
         names = db.getShopFlagNames()
+    elif category == "character_flags":
+        names = db.getCharacterFlagNames()
     else:
         return out
     

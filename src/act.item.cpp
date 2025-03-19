@@ -988,12 +988,12 @@ ACMD(do_twohand) {
     } else if (PLR_FLAGGED(ch, PLR_THANDW)) {
         send_to_char(ch, "You stop wielding your weapon with both hands.\r\n");
         act("$n stops wielding $s weapon with both hands.", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setPlayerFlag(PLR_THANDW, false);
+        ch->player_flags.set(PLR_THANDW, false);
         return;
     } else {
         send_to_char(ch, "You grab your weapon with both hands.\r\n");
         act("$n starts wielding $s weapon with both hands.", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setPlayerFlag(PLR_THANDW, true);
+        ch->player_flags.set(PLR_THANDW, true);
         return;
     }
 }
@@ -1441,7 +1441,7 @@ ACMD(do_bid) {
                 }
                 send_to_char(ch, "@GItem Weight @W: @w%s@n\n", add_commas(GET_OBJ_WEIGHT(obj2)).c_str());
                 char bits[MAX_STRING_LENGTH];
-                sprintbitarray(GET_OBJ_WEAR(obj2), wear_bits, TW_ARRAY_MAX, bits);
+                sprintbitarray(GET_OBJ_WEAR(obj2).getAll(), wear_bits, TW_ARRAY_MAX, bits);
                 search_replace(bits, "TAKE", "");
                 send_to_char(ch, "@GWear Loc.   @W:@w%s\n", bits);
                 if (GET_OBJ_TYPE(obj2) == ITEM_WEAPON) {
@@ -1477,7 +1477,7 @@ ACMD(do_bid) {
                 else
                     send_to_char(ch, "@n");
                 char buf2[MAX_STRING_LENGTH];
-                sprintbitarray(GET_OBJ_PERM(obj2), affected_bits, AF_ARRAY_MAX, buf2);
+                sprintbitarray(GET_OBJ_PERM(obj2).getAll(), affected_bits, AF_ARRAY_MAX, buf2);
                 send_to_char(ch, "\n@GSpecial     @W:@w %s\n", buf2);
                 send_to_char(ch, "@c------------------------------------------------------------------------\n");
                 return;
@@ -1835,7 +1835,7 @@ static void perform_put(struct char_data *ch, struct obj_data *obj,
 
         /* Yes, I realize this is strange until we have auto-equip on rent. -gg */
         if (OBJ_FLAGGED(obj, ITEM_NODROP) && !OBJ_FLAGGED(cont, ITEM_NODROP)) {
-            cont->setItemFlag(ITEM_NODROP, true);
+            cont->item_flags.set(ITEM_NODROP, true);
             act("You get a strange feeling as you put $p in $P.", false,
                 ch, obj, cont, TO_CHAR);
         } else
@@ -2023,7 +2023,7 @@ static void perform_get_from_container(struct char_data *ch, struct obj_data *ob
                     if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
                         ch->decCurHealthPercent(1, 1);
 
-                    ch->setAffectFlag(AFF_BURNED, true);
+                    ch->affect_flags.set(AFF_BURNED, true);
                     act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@R$n@R is burned by it!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 }
@@ -2117,7 +2117,7 @@ int perform_get_from_room(struct char_data *ch, struct obj_data *obj) {
                 if (GET_BONUS(ch, BONUS_FIREPRONE) > 0)
                     ch->decCurHealthPercent(1, 1);
 
-                ch->setAffectFlag(AFF_BURNED, true);
+                ch->affect_flags.set(AFF_BURNED, true);
                 act("@RYou are burned by it!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@R$n@R is burned by it!@n", true, ch, nullptr, nullptr, TO_ROOM);
             }
@@ -2647,7 +2647,7 @@ static void perform_give(struct char_data *ch, struct char_data *vict,
                 ch->decCurHealthPercent(1, 1);
 
 
-            vict->setAffectFlag(AFF_BURNED, true);
+            vict->affect_flags.set(AFF_BURNED, true);
             act("@RYou are burned by it!@n", true, vict, nullptr, nullptr, TO_CHAR);
             act("@R$n@R is burned by it!@n", true, vict, nullptr, nullptr, TO_ROOM);
         }
@@ -3947,7 +3947,7 @@ void perform_remove(struct char_data *ch, int pos) {
             return;
 
         if (pos == WEAR_WIELD1 && PLR_FLAGGED(ch, PLR_THANDW)) {
-            ch->setPlayerFlag(PLR_THANDW, false);
+            ch->player_flags.set(PLR_THANDW, false);
         }
         obj_to_char(unequip_char(ch, pos), ch);
         act("You stop using $p.", false, ch, obj, nullptr, TO_CHAR);

@@ -242,7 +242,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
         }
     }
 
-    if (axion_dice(-10) > 90 && ch->getCurHealthPercent() <= .5 && !PLR_FLAGGED(ch, PLR_POWERUP) &&
+    if (axion_dice(-10) > 90 && ch->getCurHealthPercent() <= .5 && !ch->character_flags.get(CharacterFlag::powering_up) &&
         GET_MOB_VNUM(ch) != 25 &&
         !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->sensei == SenseiID::commoner)) {
         do_powerup(ch, nullptr, 0, 0);
@@ -275,10 +275,10 @@ static void mob_attack(struct char_data *ch, char *buf) {
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
             return;
         } else if (special < 100) { /* Normal physical attack */
-            if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_REPAIR) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
+            if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_repair) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
                        rand_number(1, 20) >= 16) {
                 do_srepair(ch, nullptr, 0, 0);
-            } else if (IS_ANDROID(ch) && MOB_FLAGGED(ch, MOB_ABSORB) && rand_number(1, 20) >= 19) {
+            } else if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb) && rand_number(1, 20) >= 19) {
                 do_absorb(ch, buf2, 0, 0);
             } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
                        rand_number(1, 20) >= 17) {
@@ -653,7 +653,7 @@ static void cleanup_arena_watch(struct char_data *ch) {
 
         if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
             if (ARENA_IDNUM(d->character) == GET_IDNUM(ch)) {
-                d->character->setPrefFlag(PRF_ARENAWATCH, false);
+                d->character->pref_flags.set(PRF_ARENAWATCH, false);
                 ARENA_IDNUM(d->character) = -1;
             }
         }
@@ -693,6 +693,15 @@ void remove_limb(struct char_data *vict, int num) {
     body_part = create_obj();
     body_part->vn = NOTHING;
     IN_ROOM(body_part) = NOWHERE;
+    
+    switch(num) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            vict->limb_condition[num-1] = 0;
+            break;
+    }
 
     switch (num) {
         case 0:
@@ -702,22 +711,22 @@ void remove_limb(struct char_data *vict, int num) {
         case 1:
             snprintf(part, sizeof(part), "@w%s right arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right arm");
-        vict->setPrefFlag(PLR_CRARM, false);
+            vict->character_flags.set(CharacterFlag::cyber_right_arm, false);
             break;
         case 2:
             snprintf(part, sizeof(part), "@w%s left arm@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left arm");
-            vict->setPrefFlag(PLR_CLARM, false);
+            vict->character_flags.set(CharacterFlag::cyber_left_arm, false);
             break;
         case 3:
             snprintf(part, sizeof(part), "@w%s right leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "right leg");
-            vict->setPrefFlag(PLR_CRLEG, false);
+            vict->character_flags.set(CharacterFlag::cyber_right_leg, false);
             break;
         case 4:
             snprintf(part, sizeof(part), "@w%s left leg@n", race::getName(vict->race).c_str());
             snprintf(buf, sizeof(buf), "left leg");
-            vict->setPrefFlag(PLR_CLLEG, false);
+            vict->character_flags.set(CharacterFlag::cyber_left_leg, false);
             break;
         case 5:
             snprintf(part, sizeof(part), "@wA %s tail@n", race::getName(vict->race).c_str());
@@ -742,8 +751,8 @@ void remove_limb(struct char_data *vict, int num) {
     body_part->short_description = strdup(part);
 
     body_part->type_flag = ItemType::other;
-    body_part->setWearFlag(ITEM_WEAR_TAKE, true);
-    body_part->setItemFlag(ITEM_UNIQUE_SAVE, true);
+    body_part->wear_flags.set(ITEM_WEAR_TAKE, true);
+    body_part->item_flags.set(ITEM_UNIQUE_SAVE, true);
     for(const auto &v : {VAL_ALL_HEALTH, VAL_ALL_MAXHEALTH}) {
         SET_OBJ_VAL(body_part, v, 100);
     }
@@ -789,7 +798,7 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
     auto subs = characterSubscriptions.all("powerupService");
     for(auto ch : filter_raw(subs)) {
 
-        if(!PLR_FLAGGED(ch, PLR_POWERUP)) {
+        if(!ch->character_flags.get(CharacterFlag::powering_up)) {
             characterSubscriptions.unsubscribe("powerupService", ch);
             continue;
         }
@@ -829,7 +838,7 @@ void powerupService(uint64_t heartPulse, double deltaTime) {
                 sprintf(buf3, "@D[@GBlip@D]@r Rising Powerlevel Final@D: [@Y%s@D]", add_commas(GET_HIT(ch)).c_str());
                 send_to_scouter(buf3, ch, 1, 0);
             }
-            ch->setPlayerFlag(PLR_POWERUP, false);
+            ch->character_flags.set(CharacterFlag::powering_up, false);
             characterSubscriptions.unsubscribe("powerupService", ch);
             continue;
         }
@@ -946,7 +955,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                             TO_CHAR);
                         act("@y$n@Y manages to move into an advantageous position!@n", true, ch, nullptr, nullptr,
                             TO_ROOM);
-                        ch->setAffectFlag(AFF_POSITION, true);
+                        ch->affect_flags.set(AFF_POSITION, true);
                     } else {
                         struct char_data *vict = FIGHTING(ch);
                         if (roll_balance(ch) > roll_balance(vict)) {
@@ -956,8 +965,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                                 nullptr, vict, TO_VICT);
                             act("@y$n@Y struggles to gain a better position than @y$N@Y and succeeds!@n", true, ch,
                                 nullptr, vict, TO_NOTVICT);
-                            vict->setAffectFlag(AFF_POSITION, false);
-                            ch->setAffectFlag(AFF_POSITION, true);
+                            vict->affect_flags.set(AFF_POSITION, false);
+                            ch->affect_flags.set(AFF_POSITION, true);
                         }
                     }
                 }
@@ -966,7 +975,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             if (roll_balance(ch) < axion_dice(-30) || GET_POS(ch) < POS_STANDING) {
                 act("@YYou are moved out of your position!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@y$n@Y is moved out of $s position!@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->setAffectFlag(AFF_POSITION, false);
+                ch->affect_flags.set(AFF_POSITION, false);
             }
         }
         if (GRAPPLING(ch) && GRAPTYPE(ch) == 2 && rand_number(1, 11) >= 8) {
@@ -979,7 +988,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@WYou choke @C$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
-                ch->setAffectFlag(AFF_KNOCKED, true);
+                ch->affect_flags.set(AFF_KNOCKED, true);
                 GET_POS(GRAPPLING(ch)) = POS_SLEEPING;
                 GRAPTYPE(GRAPPLING(ch)) = -1;
                 GRAPPLED(GRAPPLING(ch)) = nullptr;
@@ -1022,12 +1031,12 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
         }
         if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
             send_to_char(ch, "Your disguise comes off because of your swift movements!\r\n");
-            ch->setPlayerFlag(PLR_DISGUISED, false);
+            ch->player_flags.set(PLR_DISGUISED, false);
             act("@W$n's@W disguise comes off because of $s swift movements!@n", false, ch, nullptr, nullptr, TO_ROOM);
         }
         if (IS_NPC(ch) && AFF_FLAGGED(ch, AFF_BLIND) && rand_number(1, 200) >= 190) {
             act("@W$n@W is no longer blind.@n", false, ch, nullptr, nullptr, TO_ROOM);
-            ch->setAffectFlag(AFF_BLIND, false);
+            ch->affect_flags.set(AFF_BLIND, false);
         }
 
         if (AFF_FLAGGED(ch, AFF_KNOCKED) && rand_number(1, 200) >= 195) {
@@ -1121,8 +1130,8 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 continue;
             }
         }
-        if (GET_POS(ch) <= POS_RESTING && PLR_FLAGGED(ch, PLR_POWERUP)) {
-            ch->setPlayerFlag(PLR_POWERUP, false);
+        if (GET_POS(ch) <= POS_RESTING && ch->character_flags.get(CharacterFlag::powering_up)) {
+            ch->character_flags.set(CharacterFlag::powering_up, false);
         }
 
         if (GET_BARRIER(ch) > 0) {
@@ -1243,7 +1252,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
         if(stopCharge) {
             GET_CHARGETO(ch) = 0;
-            ch->setPlayerFlag(PLR_CHARGE, false);
+            ch->player_flags.set(PLR_CHARGE, false);
         }
         if(GET_CHARGE(ch) > 0) {
             characterSubscriptions.subscribe("kiLeakingSystem", ch);
@@ -1274,7 +1283,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
-            ch->setPlayerFlag(PLR_CHARGE, false);
+            ch->player_flags.set(PLR_CHARGE, false);
             ch->incCurKI(GET_CHARGE(ch));
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
@@ -1297,7 +1306,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                     act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     break;
             }
-            ch->setPlayerFlag(PLR_CHARGE, false);
+            ch->player_flags.set(PLR_CHARGE, false);
             ch->incCurKI(GET_CHARGE(ch));
             GET_CHARGE(ch) = 0;
             GET_CHARGETO(ch) = 0;
@@ -1343,7 +1352,7 @@ void appear(struct char_data *ch) {
     if (affected_by_spell(ch, SPELL_INVISIBLE))
         affect_from_char(ch, SPELL_INVISIBLE);
 
-    for(auto f : {AFF_INVISIBLE, AFF_HIDE}) ch->setAffectFlag(f, false);
+    for(auto f : {AFF_INVISIBLE, AFF_HIDE}) ch->affect_flags.set(f, false);
 
     act("$n slowly fades into existence.", false, ch, nullptr, nullptr, TO_ROOM);
 }
@@ -1417,7 +1426,7 @@ void stop_fighting(struct char_data *ch) {
     }
 
     FIGHTING(ch) = nullptr;
-    ch->setAffectFlag(AFF_POSITION, false);
+    ch->affect_flags.set(AFF_POSITION, false);
     characterSubscriptions.unsubscribe("combatSystem", ch);
     update_pos(ch);
 }
@@ -1451,8 +1460,8 @@ static void make_pcorpse(struct char_data *ch) {
     corpse->type_flag = ItemType::container;
     corpse->size = static_cast<Size>(get_size(ch));
 
-    corpse->setWearFlag(ITEM_WEAR_TAKE, true);
-    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->setItemFlag(f, true);
+    corpse->wear_flags.set(ITEM_WEAR_TAKE, true);
+    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->item_flags.set(f, true);
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);      /* You can't store stuff in a corpse */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);        /* corpse identifier */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, ch->id);  /* corpse identifier */
@@ -1686,8 +1695,8 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     corpse->type_flag = ItemType::container;
     corpse->size = static_cast<Size>(get_size(ch));
 
-    corpse->setWearFlag(ITEM_WEAR_TAKE, true);
-    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->setItemFlag(f, true);
+    corpse->wear_flags.set(ITEM_WEAR_TAKE, true);
+    for(auto f : {ITEM_NODONATE, ITEM_UNIQUE_SAVE}) corpse->item_flags.set(f, true);
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);    /* You can't store stuff in a corpse */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);    /* corpse identifier */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, -1);    /* corpse identifier */
@@ -1885,8 +1894,8 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 }
             }
         }
-        if (IS_ANDROID(killer) && !IS_NPC(killer) && !PLR_FLAGGED(killer, PLR_ABSORB)) {
-            if (PLR_FLAGGED(killer, PLR_REPAIR)) {
+        if (IS_ANDROID(killer) && !IS_NPC(killer) && !killer->character_flags.get(CharacterFlag::android_model_absorb)) {
+            if (killer->character_flags.get(CharacterFlag::android_model_repair)) {
                 if (GET_LEVEL(killer) > GET_LEVEL(ch) + 15) {
                     send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 10) {
@@ -2009,7 +2018,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 make_pcorpse(ch);
                 loadmap(ch);
             } else {
-                ch->setPlayerFlag(PLR_ABSORBED, false);
+                ch->player_flags.set(PLR_ABSORBED, false);
             }
         }
         final_combat_resolve(ch);
@@ -2068,7 +2077,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         }
 
         if (!IS_NPC(ch)) {
-            if (IS_ANDROID(ch) && !PLR_FLAGGED(ch, PLR_ABSORB) && android_lose && GET_UP(ch) > 5) {
+            if (IS_ANDROID(ch) && !ch->character_flags.get(CharacterFlag::android_model_absorb) && android_lose && GET_UP(ch) > 5) {
                 int loss = GET_UP(ch) / 5;
                 GET_UP(ch) -= loss;
                 send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
@@ -2080,13 +2089,13 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
 
 void die(struct char_data *ch, struct char_data *killer) {
     if (!IS_NPC(ch)) {
-        ch->setPlayerFlag(PLR_HEALT, false);
+        ch->player_flags.set(PLR_HEALT, false);
         if ((IS_MAJIN(ch) || IS_BIO(ch)) &&
             ((ch->getCurLF()) >= (ch->getMaxLF()) * 0.75 || (PLR_FLAGGED(ch, PLR_SELFD2) &&
                                                              (ch->getCurLF()) >= (ch->getMaxLF()) * 0.5))) {
             ch->decCurLFPercent(2, -1);
             ch->decCurHealthPercent(1, 1);
-            ch->setPlayerFlag(PLR_GOOP, true);
+            ch->player_flags.set(PLR_GOOP, true);
             characterSubscriptions.subscribe("goopTimeService", ch);
             ch->gooptime = 32;
             return;
@@ -2113,8 +2122,8 @@ void die(struct char_data *ch, struct char_data *killer) {
             ch->teleport_to(sensei::getStartRoom(ch->sensei));
             return;
         }
-        for(auto f : {PLR_KILLER, PLR_THIEF}) ch->setPlayerFlag(f, false);
-        for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->setAffectFlag(f, false);
+        for(auto f : {PLR_KILLER, PLR_THIEF}) ch->player_flags.set(f, false);
+        for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affect_flags.set(f, false);
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getRoomFlag(ROOM_PAST) && !ch->is_newbie()) {
             if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
                 GET_DTIME(ch) = time(nullptr);
@@ -2143,7 +2152,7 @@ void die(struct char_data *ch, struct char_data *killer) {
                     GET_DCOUNT(ch) += 1;
                 } else if (killer && !IS_NPC(killer)) {
                     GET_DTIME(ch) = time(nullptr) + 28800;
-                    ch->setPlayerFlag(PLR_PDEATH, true);
+                    ch->player_flags.set(PLR_PDEATH, true);
                     GET_DCOUNT(ch) += 1;
                 } else {
                     GET_DTIME(ch) = time(nullptr) + 28800;
@@ -2267,15 +2276,15 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 7) {
         if (IS_ANDROID(ch)) {
-            if (PLR_FLAGGED(leader, PLR_ABSORB)) {
+            if (leader->character_flags.get(CharacterFlag::android_model_absorb)) {
                 ch->incCurKIPercent(.02);
                 ch->incCurSTPercent(.02);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n",
                              "%");
-            } else if (PLR_FLAGGED(leader, PLR_REPAIR)) {
+            } else if (leader->character_flags.get(CharacterFlag::android_model_repair)) {
                 ch->incCurHealthPercent(.02);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
-            } else if (PLR_FLAGGED(leader, PLR_SENSEM) && !PLR_FLAGGED(ch, PLR_ABSORB)) {
+            } else if (leader->character_flags.get(CharacterFlag::android_model_sense) && !ch->character_flags.get(CharacterFlag::android_model_absorb)) {
                 GET_UP(ch) += 5;
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
             }

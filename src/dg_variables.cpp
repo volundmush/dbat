@@ -942,7 +942,7 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'a':
                     if (!strcasecmp(field, "affects")) {
                         if (subfield && *subfield) {
-                            if (check_flags_by_name_ar(GET_OBJ_PERM(o), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
+                            if (check_flags_by_name_ar(GET_OBJ_PERM(o).getAll(), NUM_AFF_FLAGS, subfield, affected_bits) > 0)
                                 snprintf(str, slen, "1");
                             else
                                 snprintf(str, slen, "0");
@@ -989,14 +989,14 @@ in the vault (vnum: 453) now and then. you can just use
                 case 'e':
                     if (!strcasecmp(field, "extra")) {
                         if (subfield && *subfield) {
-                            if (check_flags_by_name_ar(GET_OBJ_EXTRA(o), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
+                            if (check_flags_by_name_ar(GET_OBJ_EXTRA(o).getAll(), NUM_ITEM_FLAGS, subfield, extra_bits) > 0)
                                 snprintf(str, slen, "1");
                             else
                                 snprintf(str, slen, "0");
                         } else
                             snprintf(str, slen, "0");
                     } else {
-                        sprintbitarray(GET_OBJ_EXTRA(o), extra_bits, EF_ARRAY_MAX, str);
+                        sprintbitarray(GET_OBJ_EXTRA(o).getAll(), extra_bits, EF_ARRAY_MAX, str);
                     }
                     break;
                 case 'h':
@@ -1012,7 +1012,7 @@ in the vault (vnum: 453) now and then. you can just use
                             int addition = atoi(subfield);
                             SET_OBJ_VAL(o, VAL_ALL_HEALTH, std::max<int>(1, addition + GET_OBJ_VAL(o, VAL_ALL_HEALTH)));
                             if (OBJ_FLAGGED(o, ITEM_BROKEN) && GET_OBJ_VAL(o, VAL_ALL_HEALTH) >= 100)
-                                o->setItemFlag(ITEM_BROKEN, false);
+                                o->item_flags.set(ITEM_BROKEN, false);
                         }
                         snprintf(str, slen, "%ld", GET_OBJ_VAL(o, VAL_ALL_HEALTH));
                     }
@@ -1092,18 +1092,18 @@ in the vault (vnum: 453) now and then. you can just use
                     } else if (!strcasecmp(field, "setaffects")) {
                         if (subfield && *subfield) {
                             int ns;
-                            if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o), NUM_AFF_FLAGS, subfield, affected_bits)) >
+                            if ((ns = check_flags_by_name_ar(GET_OBJ_PERM(o).getAll(), NUM_AFF_FLAGS, subfield, affected_bits)) >
                                 0) {
-                                o->toggleAffectFlag(ns);
+                                o->affect_flags.toggle(ns);
                                 snprintf(str, slen, "1");
                             }
                         }
                     } else if (!strcasecmp(field, "setextra")) {
                         if (subfield && *subfield) {
                             int ns;
-                            if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o), NUM_ITEM_FLAGS, subfield, extra_bits)) >
+                            if ((ns = check_flags_by_name_ar(GET_OBJ_EXTRA(o).getAll(), NUM_ITEM_FLAGS, subfield, extra_bits)) >
                                 0) {
-                                o->toggleItemFlag(ns);
+                                o->item_flags.toggle(ns);
                                 snprintf(str, slen, "1");
                             }
                         }
@@ -1246,7 +1246,7 @@ in the vault (vnum: 453) now and then. you can just use
                         "lightning"
                 };
 
-                if (!r->getRoomFlag(ROOM_INDOORS))
+                if (!r->room_flags.get(ROOM_INDOORS))
                     snprintf(str, slen, "%s", sky_look[weather_info.sky]);
                 else
                     *str = '\0';
@@ -1261,7 +1261,7 @@ in the vault (vnum: 453) now and then. you can just use
                 snprintf(str, slen, "%s", zone_table[r->zone].name);
             else if (!strcasecmp(field, "roomflag")) {
                 if (subfield && *subfield) {
-                    if (check_flags_by_name_ar(r->room_flags, NUM_ROOM_FLAGS, subfield, room_bits) > 0)
+                    if (check_flags_by_name_ar(r->room_flags.getAll(), NUM_ROOM_FLAGS, subfield, room_bits) > 0)
                         snprintf(str, slen, "1");
                     else
                         snprintf(str, slen, "0");

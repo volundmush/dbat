@@ -749,7 +749,7 @@ int roll_pursue(struct char_data *ch, struct char_data *vict) {
                 }
             }
         }
-        vict->setAffectFlag(AFF_PURSUIT, false);
+        vict->affect_flags.set(AFF_PURSUIT, false);
         return (true);
     } else {
         send_to_char(ch, "@RYou fail to pursue after them!@n\r\n");
@@ -898,9 +898,9 @@ void randomize_eq(struct obj_data *obj) {
 
     int dice = rand_number(2, 12);
     if (dice >= 10) {
-        obj->setItemFlag(ITEM_SLOT2, true);
+        obj->item_flags.set(ITEM_SLOT2, true);
     } else if (dice >= 7) {
-        obj->setItemFlag(ITEM_SLOT1, true);
+        obj->item_flags.set(ITEM_SLOT1, true);
     }
 }
 
@@ -1314,13 +1314,13 @@ void reveal_hiding(struct char_data *ch, int type) {
         act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, nullptr,
             nullptr, TO_CHAR);
         act("@M$n moves a little and you notice them!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setAffectFlag(AFF_HIDE, false);
+        ch->affect_flags.set(AFF_HIDE, false);
     } else if (type == 1) { /* Their skill at hiding failed, reveal */
         if (GET_SKILL(ch, SKILL_HIDE) + bonus < axion_dice(0)) {
             act("@MYou feel as though what you just did may have revealed your hiding spot...@n", true, ch, nullptr,
                 nullptr, TO_CHAR);
             act("@M$n moves a little and you notice them!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->setAffectFlag(AFF_HIDE, false);
+            ch->affect_flags.set(AFF_HIDE, false);
         }
     } else if (type == 2) { /* They were spotted */
         struct descriptor_data *d;
@@ -1337,7 +1337,7 @@ void reveal_hiding(struct char_data *ch, int type) {
                 continue;
 
             if (GET_SKILL(tch, SKILL_SPOT) + rand1 >= GET_SKILL(ch, SKILL_HIDE) + rand2) {
-                ch->setAffectFlag(AFF_HIDE, false);
+                ch->affect_flags.set(AFF_HIDE, false);
                 act("@M$N seems to notice you!@n", true, ch, nullptr, tch, TO_CHAR);
                 act("@MYou notice $n's movements reveal $s hiding spot!@n", true, ch, nullptr, tch, TO_VICT);
                 act("@MYou notice $N look keenly somewhere nearby. At that spot you see $n hiding!@n", true, ch,
@@ -1376,7 +1376,7 @@ void reveal_hiding(struct char_data *ch, int type) {
             }
         }
     } else if (type == 4) { /* You were found from search! */
-        ch->setAffectFlag(AFF_HIDE, false);
+        ch->affect_flags.set(AFF_HIDE, false);
     }
 }
 
@@ -1404,11 +1404,11 @@ int block_calc(struct char_data *ch) {
                 if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 1) {
                     send_to_char(blocker, "You're now floating in the air.\r\n");
 
-                    blocker->setAffectFlag(AFF_FLYING, true);
+                    blocker->affect_flags.set(AFF_FLYING, true);
                     GET_ALT(blocker) = GET_ALT(ch);
                 } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 2) {
                     send_to_char(blocker, "You're now floating high in the sky.\r\n");
-                    blocker->setAffectFlag(AFF_FLYING, true);
+                    blocker->affect_flags.set(AFF_FLYING, true);
                     GET_ALT(blocker) = GET_ALT(ch);
                 }
                 return (0);
@@ -1647,7 +1647,7 @@ bool spar_friendly(struct char_data *ch, struct char_data *npc) {
     if (find != npc->mob_specials.memory.end())
         return false;
 
-    for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->getMobFlag(f)) return false;
+    for(auto f : {MOB_AGGRESSIVE, MOB_DUMMY}) if(npc->mob_flags.get(f)) return false;
 
     return true;
 
@@ -1907,10 +1907,10 @@ bool is_sparring(struct char_data *ch) {
     if(IS_NPC(ch)) {
         auto opponent = ch->fighting;
         if(!opponent) return false;
-        return IS_NPC(opponent) ? false : opponent->getPlayerFlag(PLR_SPAR) && spar_friendly(opponent, ch);
+        return IS_NPC(opponent) ? false : opponent->character_flags.get(CharacterFlag::sparring) && spar_friendly(opponent, ch);
     }
 
-    return ch->getPlayerFlag(PLR_SPAR);
+    return ch->character_flags.get(CharacterFlag::sparring);
 }
 
 char *introd_calc(struct char_data *ch) {
@@ -2962,17 +2962,17 @@ void admin_set(struct char_data *ch, int value) {
         while (GET_ADMLEVEL(ch) < value) {
             ch->mod(CharNum::admin_level, 1);
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                ch->setAdminFlag(default_admin_flags[GET_ADMLEVEL(ch)][i], true);
+                ch->admin_flags.set(default_admin_flags[GET_ADMLEVEL(ch)][i], true);
         }
         run_autowiz();
         if (orig < ADMLVL_IMMORT && value >= ADMLVL_IMMORT) {
-            for(auto f : {PRF_LOG2, PRF_HOLYLIGHT, PRF_ROOMFLAGS, PRF_AUTOEXIT}) ch->setPrefFlag(f, true);
+            for(auto f : {PRF_LOG2, PRF_HOLYLIGHT, PRF_ROOMFLAGS, PRF_AUTOEXIT}) ch->pref_flags.set(f, true);
 
         }
         if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT) {
             for (i = 0; i < 3; i++)
                 GET_COND(ch, i) = (char) -1;
-            ch->setPrefFlag(PRF_HOLYLIGHT, true);
+            ch->pref_flags.set(PRF_HOLYLIGHT, true);
         }
         return;
     }
@@ -2982,12 +2982,12 @@ void admin_set(struct char_data *ch, int value) {
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) > value) {
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
-                ch->setAdminFlag(default_admin_flags[GET_ADMLEVEL(ch)][i], false);
+                ch->admin_flags.set(default_admin_flags[GET_ADMLEVEL(ch)][i], false);
             ch->mod(CharNum::admin_level, -1);
         }
         run_autowiz();
         if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {
-            for(auto f : {PRF_LOG1, PRF_LOG2, PRF_NOHASSLE, PRF_HOLYLIGHT, PRF_ROOMFLAGS}) ch->setPrefFlag(f, false);
+            for(auto f : {PRF_LOG1, PRF_LOG2, PRF_NOHASSLE, PRF_HOLYLIGHT, PRF_ROOMFLAGS}) ch->pref_flags.set(f, false);
         }
         return;
     }
@@ -3118,50 +3118,50 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val) {
 }
 
 bool OBJWEAR_FLAGGED(struct obj_data *obj, int flag) {
-    return obj->wear_flags.contains(static_cast<WearFlag>(flag));
+    return obj->wear_flags.get(static_cast<WearFlag>(flag));
 }
 
 bool OBJ_FLAGGED(struct obj_data *obj, int flag) {
-    return obj->getItemFlag(flag);
+    return obj->item_flags.get(flag);
 }
 
 bool OBJAFF_FLAGGED(struct obj_data *obj, int flag) {
-    return obj->getAffectFlag(flag);
+    return obj->affect_flags.get(flag);
 }
 
 bool ROOM_FLAGGED(room_vnum loc, int flag) {
     if (auto room = get_room(loc); room) {
-        return room->room_flags.contains(static_cast<RoomFlag>(flag));
+        return room->room_flags.get(static_cast<RoomFlag>(flag));
     }
     return false;
 }
 
 bool ROOM_FLAGGED(struct room_data *loc, int flag) {
     if(!loc) return false;
-    return loc->room_flags.contains(static_cast<RoomFlag>(flag));
+    return loc->room_flags.get(flag);
 }
 
 bool ADM_FLAGGED(struct char_data *ch, int flag) {
-    return ch->getAdminFlag(flag);
+    return ch->admin_flags.get(flag);
 }
 
 bool PRF_FLAGGED(struct char_data *ch, int flag) {
-    return ch->getPrefFlag(flag);
+    return ch->pref_flags.get(flag);
 }
 
 bool MOB_FLAGGED(struct char_data *ch, int flag) {
-    return ch->getMobFlag(flag);
+    return ch->mob_flags.get(flag);
 }
 
 bool PLR_FLAGGED(struct char_data *ch, int flag) {
-    return ch->getPlayerFlag(flag);
+    return ch->player_flags.get(flag);
 }
 
 bool AFF_FLAGGED(struct char_data *ch, int flag) {
-    if(ch->getAffectFlag(flag)) return true;
+    if(ch->affect_flags.get(flag)) return true;
     for(auto i = 0; i < NUM_WEARS; i++)
         if(auto eq = GET_EQ(ch, i); eq)
-            if(eq->getAffectFlag(flag)) return true;
+            if(eq->affect_flags.get(flag)) return true;
     return false;
 }
 

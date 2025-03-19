@@ -423,7 +423,7 @@ ACMD(do_approve) {
         send_to_char(ch, "They have already been approved. If this was made in error inform Iovan.\r\n");
         return;
     } else {
-        vict->setPlayerFlag(PLR_BIOGR, true);
+        vict->player_flags.set(PLR_BIOGR, true);
         send_to_char(ch, "They have now been approved.\r\n");
         return;
     }
@@ -1225,7 +1225,7 @@ static void do_stat_room(struct char_data *ch) {
                  zone_table[rm->zone].number, rm->vn, IN_ROOM(ch),
                  (long) rm->vn, buf2);
 
-    sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
+    sprintbitarray(rm->room_flags.getAll(), room_bits, RF_ARRAY_MAX, buf2);
     send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->ground_effect);
     send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
@@ -1363,13 +1363,13 @@ static void do_stat_object(struct char_data *ch, struct obj_data *j) {
         send_to_char(ch, "\r\n");
     }
 
-    sprintbitarray(GET_OBJ_WEAR(j), wear_bits, TW_ARRAY_MAX, buf);
+    sprintbitarray(GET_OBJ_WEAR(j).getAll(), wear_bits, TW_ARRAY_MAX, buf);
     send_to_char(ch, "Can be worn on: %s\r\n", buf);
 
-    sprintbitarray(GET_OBJ_PERM(j), affected_bits, AF_ARRAY_MAX, buf);
+    sprintbitarray(GET_OBJ_PERM(j).getAll(), affected_bits, AF_ARRAY_MAX, buf);
     send_to_char(ch, "Set char bits : %s\r\n", buf);
 
-    sprintbitarray(GET_OBJ_EXTRA(j), extra_bits, EF_ARRAY_MAX, buf);
+    sprintbitarray(GET_OBJ_EXTRA(j).getAll(), extra_bits, EF_ARRAY_MAX, buf);
     send_to_char(ch, "Extra flags   : %s\r\n", buf);
 
     auto wString = fmt::format("{}", GET_OBJ_WEIGHT(j));
@@ -1623,11 +1623,13 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
     send_to_char(ch, ", Default position: %s", buf);
     send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
-    sprintbitarray(k->mob_flags, action_bits, PM_ARRAY_MAX, buf);
+    sprintbitarray(k->character_flags.getAll(), action_bits, PM_ARRAY_MAX, buf);
+    send_to_char(ch, "Character flags: @c%s@n\r\n", buf);
+    sprintbitarray(k->mob_flags.getAll(), action_bits, PM_ARRAY_MAX, buf);
     send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
-    sprintbitarray(k->player_flags, player_bits, PM_ARRAY_MAX, buf);
+    sprintbitarray(k->player_flags.getAll(), player_bits, PM_ARRAY_MAX, buf);
     send_to_char(ch, "PLR: @c%s@n\r\n", buf);
-    sprintbitarray(k->pref_flags, preference_bits, PR_ARRAY_MAX, buf);
+    sprintbitarray(k->pref_flags.getAll(), preference_bits, PR_ARRAY_MAX, buf);
     send_to_char(ch, "PRF: @g%s@n\r\n", buf);
 
     send_to_char(ch, "Form: %s\r\n", trans::getName(k, k->form));
@@ -1688,7 +1690,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     }
 
     /* Showing the bitvector */
-    sprintbitarray(AFF_FLAGS(k), affected_bits, AF_ARRAY_MAX, buf);
+    sprintbitarray(AFF_FLAGS(k).getAll(), affected_bits, AF_ARRAY_MAX, buf);
     send_to_char(ch, "AFF: @y%s@n\r\n", buf);
 
     /* Routine to show what spells a char is affected by */
@@ -2452,9 +2454,9 @@ ACMD(do_syslog) {
         send_to_char(ch, "Usage: syslog { Off | Brief | Normal | Complete }\r\n");
         return;
     }
-    for(auto f : {PRF_LOG1, PRF_LOG2}) ch->setPrefFlag(f, false);
-    if (tp & 1) ch->setPrefFlag(PRF_LOG1, true);
-    if (tp & 2) ch->setPrefFlag(PRF_LOG2, true);
+    for(auto f : {PRF_LOG1, PRF_LOG2}) ch->pref_flags.set(f, false);
+    if (tp & 1) ch->pref_flags.set(PRF_LOG1, true);
+    if (tp & 2) ch->pref_flags.set(PRF_LOG2, true);
 
     send_to_char(ch, "Your syslog is now %s.\r\n", logtypes[tp]);
 }
@@ -3103,20 +3105,20 @@ ACMD(do_wizutil) {
                     send_to_char(ch, "Your victim is not flagged.\r\n");
                     return;
                 }
-            for(auto f : {PLR_THIEF, PLR_KILLER}) vict->setPlayerFlag(f, false);
+            for(auto f : {PLR_THIEF, PLR_KILLER}) vict->player_flags.set(f, false);
                 send_to_char(ch, "Pardoned.\r\n");
                 send_to_char(vict, "You have been pardoned by the Gods!\r\n");
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s pardoned by %s", GET_NAME(vict),
                        GET_NAME(ch));
                 break;
             case SCMD_NOTITLE:
-                result = vict->togglePlayerFlag(PLR_NOTITLE);
+                result = vict->player_flags.toggle(PLR_NOTITLE);
                 mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Notitle %s for %s by %s.",
                        ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 send_to_char(ch, "(GC) Notitle %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 break;
             case SCMD_SQUELCH:
-                result = vict->togglePlayerFlag(PLR_NOSHOUT);
+                result = vict->player_flags.toggle(PLR_NOSHOUT);
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) Squelch %s for %s by %s.",
                        ONOFF(result), GET_NAME(vict), GET_NAME(ch));
                 send_to_char(ch, "(GC) Mute turned %s for %s by %s.\r\n", ONOFF(result), GET_NAME(vict), GET_NAME(ch));
@@ -3136,7 +3138,7 @@ ACMD(do_wizutil) {
                     send_to_char(ch, "Your victim is already pretty cold.\r\n");
                     return;
                 }
-                vict->setPlayerFlag(PLR_FROZEN, true);
+                vict->player_flags.set(PLR_FROZEN, true);
                 GET_FREEZE_LEV(vict) = GET_ADMLEVEL(ch);
                 send_to_char(vict,
                              "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
@@ -3157,7 +3159,7 @@ ACMD(do_wizutil) {
                 }
                 mudlog(BRF, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "(GC) %s un-frozen by %s.", GET_NAME(vict),
                        GET_NAME(ch));
-                vict->setPlayerFlag(PLR_FROZEN, false);
+                vict->player_flags.set(PLR_FROZEN, false);
                 send_to_char(vict,
                              "A fireball suddenly explodes in front of you, melting the ice!\r\nYou feel thawed.\r\n");
                 send_to_char(ch, "Thawed.\r\n");
@@ -3729,16 +3731,16 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         send_to_char(ch, "%s", CONFIG_OK);
 
     switch (mode) {
-        case 0: vict->togglePrefFlag(PRF_BRIEF);
+        case 0: vict->pref_flags.toggle(PRF_BRIEF);
             break;
         case 1: 
-            vict->togglePlayerFlag(PLR_INVSTART);
+            vict->player_flags.toggle(PLR_INVSTART);
             break;
         case 2:
             set_title(vict, val_arg);
             send_to_char(ch, "%s's title is now: %s\r\n", GET_NAME(vict), GET_TITLE(vict));
             break;
-        case 3: vict->togglePrefFlag(PRF_SUMMONABLE);
+        case 3: vict->pref_flags.toggle(PRF_SUMMONABLE);
             send_to_char(ch, "Nosummon %s for %s.\r\n", ONOFF(!on), GET_NAME(vict));
             break;
         case 4:
@@ -3878,14 +3880,14 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "You aren't godly enough for that!\r\n");
                 return (0);
             }
-            vict->togglePrefFlag(PRF_NOHASSLE);
+            vict->pref_flags.toggle(PRF_NOHASSLE);
             break;
         case 26:
             if (ch == vict && on) {
                 send_to_char(ch, "Better not -- could be a long winter!\r\n");
                 return (0);
             }
-            vict->togglePlayerFlag(PLR_FROZEN);
+            vict->player_flags.toggle(PLR_FROZEN);
             break;
         case 27:
         case 28:
@@ -3910,9 +3912,9 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 32: vict->togglePlayerFlag(PLR_KILLER);
+        case 32: vict->player_flags.toggle(PLR_KILLER);
             break;
-        case 33: vict->togglePlayerFlag(PLR_THIEF);
+        case 33: vict->player_flags.toggle(PLR_THIEF);
             break;
         case 34:
             if (!IS_NPC(vict) && value > 100) {
@@ -3931,11 +3933,9 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 char_from_room(vict);
             char_to_room(vict, rnum);
             break;
-        case 36: vict->togglePrefFlag(PRF_ROOMFLAGS);
+        case 36: vict->pref_flags.toggle(PRF_ROOMFLAGS);
             break;
-        case 37: vict->togglePlayerFlag(PLR_SITEOK);
-            break;
-        case 38: vict->togglePlayerFlag(PLR_DELETED);
+        case 38: vict->player_flags.toggle(PLR_DELETED);
             break;
         case 39: {
             auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, vict->race);};
@@ -3947,18 +3947,18 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             vict->sensei = chosen_sensei.value();
         }
             break;
-        case 40: vict->togglePlayerFlag(PLR_NOWIZLIST);
+        case 40: vict->player_flags.toggle(PLR_NOWIZLIST);
             break;
-        case 41: vict->togglePrefFlag(PRF_QUEST);
+        case 41: vict->pref_flags.toggle(PRF_QUEST);
             break;
         case 42:
             if (!strcasecmp(val_arg, "off")) {
-                vict->setPlayerFlag(PLR_LOADROOM, false);
+                vict->player_flags.set(PLR_LOADROOM, false);
                 GET_LOADROOM(vict) = NOWHERE;
             } else if (is_number(val_arg)) {
                 rvnum = atoi(val_arg);
                 if (real_room(rvnum) != NOWHERE) {
-                    vict->setPlayerFlag(PLR_LOADROOM, true);
+                    vict->player_flags.set(PLR_LOADROOM, true);
                     GET_LOADROOM(vict) = rvnum;
                     send_to_char(ch, "%s will enter at room #%d.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
                 } else {
@@ -3970,7 +3970,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 43: vict->togglePrefFlag(PRF_COLOR);
+        case 43: vict->pref_flags.toggle(PRF_COLOR);
             break;
         case 44:
             if (GET_IDNUM(ch) == 0 || IS_NPC(vict))
@@ -3987,7 +3987,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             break;
-        case 46: vict->togglePlayerFlag(PLR_NODELETE);
+        case 46: vict->player_flags.toggle(PLR_NODELETE);
             break;
         case 47:
             if ((i = search_block(val_arg, genders, false)) < 0) {
@@ -4180,8 +4180,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
         case 72:
             GET_BOOSTS(vict) = RANGE(-1000, 1000);
-            break;
-        case 73: vict->togglePlayerFlag(PLR_MULTP);
             break;
         case 74:
             GET_DCOUNT(vict) = RANGE(-1000, 1000);
@@ -4760,14 +4758,12 @@ ACMD (do_zcheck) {
                 } /* for (k.. */
             } /* cycle directions */
 
-            if (ROOM_FLAGGED(i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_HOUSE_CRASH | ROOM_OLC | ROOM_BFS_MARK))
+            if (ROOM_FLAGGED(i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_OLC))
                 len += snprintf(buf + len, sizeof(buf) - len,
                                 "- Has illegal affection bits set (%s %s %s %s %s)\r\n",
                                 ROOM_FLAGGED(i, ROOM_ATRIUM) ? "ATRIUM" : "",
                                 ROOM_FLAGGED(i, ROOM_HOUSE) ? "HOUSE" : "",
-                                ROOM_FLAGGED(i, ROOM_HOUSE_CRASH) ? "HCRSH" : "",
-                                ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "",
-                                ROOM_FLAGGED(i, ROOM_BFS_MARK) ? "*" : "");
+                                ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "");
 
             if ((MIN_ROOM_DESC_LENGTH) && strlen(r->look_description) < MIN_ROOM_DESC_LENGTH && (found = 1))
                 len += snprintf(buf + len, sizeof(buf) - len,

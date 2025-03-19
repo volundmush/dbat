@@ -170,7 +170,7 @@ ACMD(do_oasis_redit) {
     redit_disp_menu(d);
     STATE(d) = CON_REDIT;
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    ch->setPlayerFlag(PLR_WRITING, true);
+    ch->player_flags.set(PLR_WRITING, true);
 
     mudlog(BRF, ADMLVL_IMMORT, true, "OLC: %s starts editing zone %d allowed zone %d",
            GET_NAME(ch), zone_table[OLC_ZNUM(d)].number, GET_OLC_ZONE(ch));
@@ -443,7 +443,7 @@ void redit_disp_flag_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s%s", counter + 1,
                         room_bits[counter], !(++columns % 2) ? "\r\n" : "");
     }
-    sprintbitarray(OLC_ROOM(d)->room_flags, room_bits, RF_ARRAY_MAX, bits);
+    sprintbitarray(OLC_ROOM(d)->room_flags.getAll(), room_bits, RF_ARRAY_MAX, bits);
     write_to_output(d, "\r\nRoom flags: @c%s@n\r\n"
                        "Enter room flags, 0 to quit : ", bits);
     OLC_MODE(d) = REDIT_FLAGS;
@@ -475,7 +475,7 @@ void redit_disp_menu(struct descriptor_data *d) {
     clear_screen(d);
     room = OLC_ROOM(d);
 
-    sprintbitarray(room->room_flags, room_bits, RF_ARRAY_MAX, buf1);
+    sprintbitarray(room->room_flags.getAll(), room_bits, RF_ARRAY_MAX, buf1);
     sprinttype(static_cast<int>(room->sector_type), sector_types, buf2, sizeof(buf2));
     if (GET_ADMLEVEL(d->character) > 0) {
         write_to_output(d,
@@ -835,7 +835,7 @@ void redit_parse(struct descriptor_data *d, char *arg) {
                 /*
                  * Toggle the bit.
                  */
-                OLC_ROOM(d)->toggleRoomFlag(number-1);
+                OLC_ROOM(d)->room_flags.toggle(number-1);
                 redit_disp_flag_menu(d);
             }
             return;

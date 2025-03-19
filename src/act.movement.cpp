@@ -242,10 +242,10 @@ ACMD(do_land) {
     auto planet = checkOrbit(inroom);
 
     if(!planet && !*argument) {
-        if(ch->getAffectFlag(AFF_FLYING)) {
+        if(ch->affect_flags.get(AFF_FLYING)) {
             act("@WYou land.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n@W lands nearby.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->setAffectFlag(AFF_FLYING, false);
+            ch->affect_flags.set(AFF_FLYING, false);
             return;
         }
         send_to_char(ch, "You are not even in the lower atmosphere of a planet!\r\n");
@@ -335,7 +335,7 @@ static int has_flight(struct char_data *ch) {
         // If out of KI, crash to the ground
         act("@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setAffectFlag(AFF_FLYING, false);
+        ch->affect_flags.set(AFF_FLYING, false);
         handle_fall(ch);
         return 0;
     }
@@ -433,7 +433,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (r->getRoomFlag(ROOM_SPACE)) {
+    if (r->room_flags.get(ROOM_SPACE)) {
         if (!IS_ANDROID(ch)) {
             if (!check_swim(ch)) {
                 return (0);
@@ -445,7 +445,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         return (0);
     }
 
-    if (IS_NPC(ch) && dest->getRoomFlag(ROOM_NOMOB) && !ch->master) {
+    if (IS_NPC(ch) && dest->room_flags.get(ROOM_NOMOB) && !ch->master) {
         return (0);
     }
 
@@ -511,7 +511,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         ch->decCurKI(flight_cost);
         act("@WYou crash to the ground, too tired to fly anymore!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@W crashes to the ground!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->setAffectFlag(AFF_FLYING, false);
+        ch->affect_flags.set(AFF_FLYING, false);
     } else if (AFF_FLAGGED(ch, AFF_FLYING) && !IS_ANDROID(ch)) {
         ch->decCurKI(flight_cost);
     }
@@ -541,7 +541,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     }
 
 
-    if (dest->getRoomFlag(ROOM_TUNNEL) && (num_pc_in_room(dest) >= CONFIG_TUNNEL_SIZE)) {
+    if (dest->room_flags.get(ROOM_TUNNEL) && (num_pc_in_room(dest) >= CONFIG_TUNNEL_SIZE)) {
         if (CONFIG_TUNNEL_SIZE > 1)
             send_to_char(ch, "There isn't enough room for you to go there!\r\n");
         else
@@ -549,7 +549,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         return (0);
     }
     /* Mortals and low level gods cannot enter greater god rooms. */
-    if (dest->getRoomFlag(ROOM_GODROOM) &&
+    if (dest->room_flags.get(ROOM_GODROOM) &&
         GET_ADMLEVEL(ch) < ADMLVL_GRGOD) {
         send_to_char(ch, "You aren't godly enough to use that room!\r\n");
         return (0);
@@ -600,7 +600,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             improve_skill(ch, SKILL_MOVE_SILENTLY, 0);
         } else if (slot_count(ch) + 1 > GET_SLOTS(ch)) {
             send_to_char(ch, "@RYour skill slots are full. You can not learn Move Silently.\r\n");
-            ch->setAffectFlag(AFF_SNEAK, false);
+            ch->affect_flags.set(AFF_SNEAK, false);
         } else {
             send_to_char(ch, "@GYou learn the very basics of moving silently.@n\r\n");
             SET_SKILL(ch, SKILL_MOVE_SILENTLY, rand_number(5, 10));
@@ -628,7 +628,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     if (CARRYING(ch)) {
         act("@C$n@w carries @c$N@w with $m.@n", true, ch, nullptr, CARRYING(ch), TO_ROOM);
     }
-    ch->setAffectFlag(AFF_PURSUIT, true);
+    ch->affect_flags.set(AFF_PURSUIT, true);
     char_from_room(ch);
     char_to_room(ch, dest->vn);
     if ((ch->getRoom()->zone != get_room(was_in)->zone) && !IS_NPC(ch) && !IS_ANDROID(ch)) {
@@ -642,7 +642,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     if (!entry_mtrigger(ch) || !enter_wtrigger(ch->getRoom(), ch, dir)) {
         char_from_room(ch);
         char_to_room(ch, was_in);
-        ch->setAffectFlag(AFF_PURSUIT, false);
+        ch->affect_flags.set(AFF_PURSUIT, false);
         return 0;
     }
 
@@ -657,7 +657,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         if (r->sector_type != SectorType::flying && r->sector_type != SectorType::water_noswim && r->ground_effect == 0) {
             roll_pursue(FIGHTING(ch), ch);
         }
-        ch->setAffectFlag(AFF_PURSUIT, false);
+        ch->affect_flags.set(AFF_PURSUIT, false);
     }
     if (DRAGGING(ch)) {
         act("@wYou drag @C$N@w with you.@n", true, ch, nullptr, DRAGGING(ch), TO_CHAR);
@@ -692,7 +692,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
             send_to_char(ch, "@wYou make a noise as you arrive and are no longer sneaking!@n\r\n");
             act("@c$n@w makes a noise revealing $s sneaking!@n", true, ch, nullptr, nullptr, TO_ROOM | TO_SNEAKRESIST);
             reveal_hiding(ch, 0);
-            ch->setAffectFlag(AFF_SNEAK, false);
+            ch->affect_flags.set(AFF_SNEAK, false);
         }
     }
 
@@ -818,7 +818,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
                 ch, TO_NOTVICT);
             act("You zanzoken to try and escape, but $n's zanzoken matches yours!\r\n", false, k->follower, nullptr,
                 ch, TO_VICT);
-            for(auto c : {ch, k->follower}) c->setAffectFlag(AFF_ZANZOKEN, false);
+            for(auto c : {ch, k->follower}) c->affect_flags.set(AFF_ZANZOKEN, false);
             perform_move(k->follower, dir, 1);
         } else if ((IN_ROOM(k->follower) == was_in) &&
                    (GET_POS(k->follower) >= POS_STANDING) &&
@@ -829,7 +829,7 @@ int perform_move(struct char_data *ch, int dir, int need_specials_check) {
                 ch, TO_NOTVICT);
             act("$n tries to follow you, but you manage to zanzoken away!\r\n", false, k->follower, nullptr, ch,
                 TO_VICT);
-            ch->setAffectFlag(AFF_ZANZOKEN, false);
+            ch->affect_flags.set(AFF_ZANZOKEN, false);
         }
     }
     return 1;
@@ -975,7 +975,7 @@ ACMD(do_move) {
     }
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->setPrefFlag(PRF_ARENAWATCH, false);
+            ch->pref_flags.set(PRF_ARENAWATCH, false);
             ARENA_IDNUM(ch) = -1;
         }
         if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
@@ -1980,7 +1980,7 @@ ACMD(do_leave) {
         if(!e) continue;
         auto dest = e->getDestination();
         if(!dest) continue;
-        if (!EXIT_FLAGGED(e, EX_CLOSED) && !dest->getRoomFlag(ROOM_INDOORS)) {
+        if (!EXIT_FLAGGED(e, EX_CLOSED) && !dest->room_flags.get(ROOM_INDOORS)) {
             perform_move(ch, door, 1);
             return;
         }
@@ -2080,12 +2080,12 @@ static void handle_fly_space(char_data *ch) {
 
     reveal_hiding(ch, 0);
     GET_ALT(ch) = 2;
-    ch->setAffectFlag(AFF_FLYING, true);
+    ch->affect_flags.set(AFF_FLYING, true);
     if (!block_calc(ch)) {
         return;
     }
     GET_ALT(ch) = 0;
-    ch->setAffectFlag(AFF_FLYING, false);
+    ch->affect_flags.set(AFF_FLYING, false);
 
     if(planet) {
         fly_planet(IN_ROOM(ch), "can be seen blasting off into space!@n\r\n", ch);
@@ -2158,7 +2158,7 @@ ACMD(do_fly) {
     auto set_flying = [&](int alt) {
         reveal_hiding(ch, 0);
         GET_ALT(ch) = alt;
-        ch->setAffectFlag(AFF_FLYING, true);
+        ch->affect_flags.set(AFF_FLYING, true);
         if (auto chair = SITS(ch); chair) {
             chair->sitting.reset();
             ch->sits.reset();
@@ -2204,7 +2204,7 @@ ACMD(do_fly) {
             act("@WYou let yourself drift aimlessly through space.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@W$n starts to drift slowly!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
-        ch->setAffectFlag(AFF_FLYING, false);
+        ch->affect_flags.set(AFF_FLYING, false);
         GET_ALT(ch) = 0;
         return;
     }
@@ -2412,7 +2412,7 @@ ACMD(do_rest) {
             return;
         } else {
             GET_BARRIER(ch) = 0;
-            ch->setAffectFlag(AFF_SANCTUARY, false);
+            ch->affect_flags.set(AFF_SANCTUARY, false);
         }
     }
     if (FIGHTING(ch)) {
@@ -2539,7 +2539,7 @@ ACMD(do_sleep) {
 
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->setPrefFlag(PRF_ARENAWATCH, false);
+            ch->pref_flags.set(PRF_ARENAWATCH, false);
             ARENA_IDNUM(ch) = -1;
             send_to_char(ch, "You stop watching the arena action.\r\n");
         }
@@ -2567,7 +2567,7 @@ ACMD(do_sleep) {
         send_to_char(ch, "You are inside a healing tank!\r\n");
         return;
     }
-    if (PLR_FLAGGED(ch, PLR_POWERUP)) {
+    if (ch->character_flags.get(CharacterFlag::powering_up)) {
         send_to_char(ch, "You are busy powering up!\r\n");
         return;
     }
@@ -2577,7 +2577,7 @@ ACMD(do_sleep) {
             return;
         } else {
             GET_BARRIER(ch) = 0;
-            ch->setAffectFlag(AFF_SANCTUARY, false);
+            ch->affect_flags.set(AFF_SANCTUARY, false);
         }
     }
     if (GET_KAIOKEN(ch) > 0) {
@@ -2625,7 +2625,7 @@ ACMD(do_sleep) {
                 if (PLR_FLAGGED(ch, PLR_FURY)) {
                     send_to_char(ch,
                                  "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-                    ch->setPlayerFlag(PLR_FURY, false);
+                    ch->player_flags.set(PLR_FURY, false);
                 }
 
                 /* Fury Mode Loss for halfbreeds */
@@ -2690,7 +2690,7 @@ ACMD(do_sleep) {
             if (PLR_FLAGGED(ch, PLR_FURY)) {
                 send_to_char(ch,
                                 "Your fury subsides for now. Next time try to take advantage of it before you calm down.\r\n");
-                ch->setPlayerFlag(PLR_FURY, false);
+                ch->player_flags.set(PLR_FURY, false);
             }
 
             /* Fury Mode Loss for halfbreeds */
@@ -2844,7 +2844,7 @@ ACMD(do_follow) {
     }
     if (ch->master)
         stop_follower(ch);
-    ch->setAffectFlag(AFF_GROUP, false);
+    ch->affect_flags.set(AFF_GROUP, false);
     reveal_hiding(ch, 0);
     add_follower(ch, leader);
 }

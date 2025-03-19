@@ -626,7 +626,7 @@ ACMD(do_blessedhammer) {
             if (!AFF_FLAGGED(vict, AFF_BURNED) && rand_number(1, 4) == 3 && !IS_DEMON(vict)) {
                 send_to_char(vict, "@RYou are burned by the attack!@n\r\n");
                 send_to_char(ch, "@RThey are burned by the attack!@n\r\n");
-                vict->setAffectFlag(AFF_BURNED, true);
+                vict->affect_flags.set(AFF_BURNED, true);
             }
             pcost(ch, attperc, 0);
 
@@ -830,7 +830,7 @@ ACMD(do_charge) {
         ch->incCurKI(GET_CHARGE(ch));
         GET_CHARGE(ch) = 0;
         GET_CHARGETO(ch) = 0;
-        ch->setPlayerFlag(PLR_CHARGE, false);
+        ch->player_flags.set(PLR_CHARGE, false);
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
         return;
@@ -872,7 +872,7 @@ ACMD(do_charge) {
                 act("$n@w's aura disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 break;
         }
-        ch->setPlayerFlag(PLR_CHARGE, false);
+        ch->player_flags.set(PLR_CHARGE, false);
         GET_CHARGETO(ch) = 0;
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         return;
@@ -930,7 +930,7 @@ ACMD(do_charge) {
             GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
             GET_CHARGE(ch) += 1;
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
-            ch->setPlayerFlag(PLR_CHARGE, true);
+            ch->player_flags.set(PLR_CHARGE, true);
         }
     } else if (amt < 1 && ch->getRoomVnum() != 1562) {
         send_to_char(ch, "You have set it too low!\r\n");
@@ -964,9 +964,9 @@ ACMD(do_powerup) {
         send_to_char(ch, "@WYou currently have your powerlevel suppressed to %" I64T " percent.@n", GET_SUPPRESS(ch));
         return;
     }
-    if (PLR_FLAGGED(ch, PLR_POWERUP)) {
+    if (ch->character_flags.get(CharacterFlag::powering_up)) {
         send_to_char(ch, "@WYou stop powering up.@n");
-        ch->setPlayerFlag(PLR_POWERUP, false);
+        ch->character_flags.set(CharacterFlag::powering_up, false);
         characterSubscriptions.unsubscribe("powerupService", ch);
         return;
     }
@@ -992,7 +992,7 @@ ACMD(do_powerup) {
         }
     }
     characterSubscriptions.subscribe("powerupService", ch);
-    ch->setPlayerFlag(PLR_POWERUP, true);
+    ch->character_flags.set(CharacterFlag::powering_up, true);
 }
 
 ACMD(do_rescue) {

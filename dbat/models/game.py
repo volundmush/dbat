@@ -249,10 +249,10 @@ class SkillData(BaseModel):
 
 class TransData(BaseModel):
     description: str = ""
-    timeSpentInForm: float = 0.0
+    time_spent_in_form: float = 0.0
     grade: int = 1
     visible: bool = True
-    limitBroken: bool = True
+    limit_broken: bool = True
     unlocked: bool = False
     vars: typing.List[typing.Tuple[int, float]] = Field(default_factory=list)
     blutz: float = 0.0
@@ -272,6 +272,7 @@ class CharData(ThingData):
     nums: typing.Dict[names.Num, int] = Field(default_factory=dict)
     stats: typing.Dict[names.Stat, int] = Field(default_factory=dict)
     dims: typing.Dict[names.Dim, float] = Field(default_factory=dict)
+    character_flags: typing.Set[names.CharacterFlag] = Field(default_factory=set)
     mob_flags: typing.Set[names.MobFlag] = Field(default_factory=set)
     player_flags: typing.Set[names.PlayerFlag] = Field(default_factory=set)
     pref_flags: typing.Set[names.PrefFlag] = Field(default_factory=set)

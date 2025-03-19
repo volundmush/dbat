@@ -79,9 +79,9 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                 if (func == nullptr) {
                     basic_mud_log("SYSERR: %s (#%d): Attempting to call non-existing mob function.",
                                   GET_NAME(ch), GET_MOB_VNUM(ch));
-                    ch->setMobFlag(MOB_SPEC, false);
+                    ch->mob_flags.set(MOB_SPEC, false);
                     auto &mp = mob_proto[ch->vn];
-                    mp.setMobFlag(MOB_SPEC, false);
+                    mp.mob_flags.set(MOB_SPEC, false);
                 } else {
                     char actbuf[MAX_INPUT_LENGTH] = "";
                     if (func(ch, ch, 0, actbuf))
@@ -151,7 +151,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                     auto dest_room_flags = dest->room_flags;
                     auto dest_zone = dest->zone;
 
-                    if (dest->getRoomFlag(ROOM_NOMOB) || dest->getRoomFlag(ROOM_DEATH)) continue;
+                    if (dest->room_flags.get(ROOM_NOMOB) || dest->room_flags.get(ROOM_DEATH)) continue;
                     if (MOB_FLAGGED(ch, MOB_STAY_ZONE) && dest_zone != r->zone) continue;
 
                     availableDirections.push_back(i);

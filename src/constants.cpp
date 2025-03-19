@@ -1869,3 +1869,7 @@ std::vector<std::string> getComStatNames() {
 std::vector<std::string> getShopFlagNames() {
         return getEnumNames<ShopFlag>();
 }
+
+std::vector<std::string> getCharacterFlagNames() {
+        return getEnumNames<CharacterFlag>();
+}

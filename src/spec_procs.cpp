@@ -453,7 +453,7 @@ SPECIAL(pet_shops) {
         ch->mod(CharMoney::carried, -PET_PRICE(pet));
 
         pet = read_mobile(GET_MOB_RNUM(pet), REAL);
-        pet->setAffectFlag(AFF_CHARM, true);
+        pet->affect_flags.set(AFF_CHARM, true);
 
         if (*pet_name) {
             snprintf(buf, sizeof(buf), "%s %s", pet->name, pet_name);
@@ -729,14 +729,14 @@ SPECIAL(healtank) {
                 return (true);
             }
             GET_CHARGE(ch) = 0;
-            ch->setPlayerFlag(PLR_CHARGE, false);
+            ch->player_flags.set(PLR_CHARGE, false);
             GET_CHARGETO(ch) = 0;
             GET_BARRIER(ch) = 0;
             act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            ch->setPlayerFlag(PLR_HEALT, true);
+            ch->player_flags.set(PLR_HEALT, true);
             ch->sits = htank->shared();
             htank->sitting = ch->shared();
             objectSubscriptions.subscribe("healTankService", htank);
@@ -751,7 +751,7 @@ SPECIAL(healtank) {
             }
             act("@wThe healing tank drains and you exit it shortly after.", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w exits the healing tank after letting it drain.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->setPlayerFlag(PLR_HEALT, false);
+            ch->player_flags.set(PLR_HEALT, false);
             htank->sitting.reset();
             ch->sits.reset();
             return (true);
@@ -981,7 +981,7 @@ SPECIAL(gravity) {
                 send_to_char(ch, msg.c_str());
                 obj->gravity = grav;
                 auto room = ch->getRoom();
-                if (room->toggleRoomFlag(ROOM_AURA)) {
+                if (room->room_flags.toggle(ROOM_AURA)) {
                     send_to_room(IN_ROOM(ch), "The increased gravity forces the aura to disappear.\r\n");
                 }
             } else {

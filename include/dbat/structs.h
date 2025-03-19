@@ -9,7 +9,78 @@
 ************************************************************************ */
 #pragma once
 
+#include <type_traits>
 #include "dbat/defs.h"
+
+// Generic helper to get a flag.
+template<typename FlagEnum>
+requires std::is_enum_v<FlagEnum>
+class FlagHandler {
+    
+private:
+    std::unordered_set<FlagEnum> flags;
+
+public:
+    // Returns true if the flag is set.
+    bool get(FlagEnum flag) const {
+        return flags.find(flag) != flags.end();
+    }
+
+    bool get(int flag) const {
+        return get(static_cast<FlagEnum>(flag));
+    }
+
+    // Sets the flag if value is true, or removes it if false.
+    void set(FlagEnum flag, bool value = true) {
+        if (value)
+            flags.insert(flag);
+        else
+            flags.erase(flag);
+    }
+
+    void set(int flag, bool value = true) {
+        set(static_cast<FlagEnum>(flag), value);
+    }
+
+    // Toggles the flag: if set, removes it and returns false; if not set, inserts it and returns true.
+    bool toggle(FlagEnum flag) {
+        if (get(flag)) {
+            flags.erase(flag);
+            return false;
+        } else {
+            flags.insert(flag);
+            return true;
+        }
+    }
+
+    bool toggle(int flag) {
+        return toggle(static_cast<FlagEnum>(flag));
+    }
+
+    // Clears all flags.
+    void clear() {
+        flags.clear();
+    }
+
+    // Optionally, expose the underlying container (read-only)
+    const std::unordered_set<FlagEnum>& getAll() const {
+        return flags;
+    }
+
+    // bool operator is true if any flags are set.
+    operator bool() const {
+        return !flags.empty();
+    }
+
+    // operator[] with either int or FlagEnum returns bool if flag set...
+    bool operator[](FlagEnum flag) const {
+        return get(flag);
+    }
+
+    bool operator[](int flag) const {
+        return get(static_cast<FlagEnum>(flag));
+    }
+};
 
 // IMPORTANT: Do not use data structures/fields that are not part of the
 // C++ standard library. This allows us to keep things neat and clean for
@@ -225,15 +296,7 @@ struct thing_data : public unit_data {
     room_direction_data* getLocationExit(int dir) const;
     std::map<int, room_direction_data*> getLocationExits() const;
 
-    std::unordered_set<AffectFlag> affect_flags{}; /* To set chars bits          */
-
-    void setAffectFlag(int flag, bool value = true);
-    bool toggleAffectFlag(int flag);
-    bool getAffectFlag(int flag);
-
-    void setFlag(AffectFlag flag, bool value = true);
-    bool toggleFlag(AffectFlag flag);
-    bool getFlag(AffectFlag flag);
+    FlagHandler<AffectFlag> affect_flags{}; /* To set chars bits          */
 
     double getLocationEnvironment(int type) const;
     double setLocationEnvironment(int type, double value) const;
@@ -297,25 +360,8 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
     
-    std::unordered_set<WearFlag> wear_flags{}; /* Where you can wear it     */
-    std::unordered_set<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
-    
-    void setWearFlag(int flag, bool value = true);
-    bool toggleWearFlag(int flag);
-    bool getWearFlag(int flag);
-
-    void setItemFlag(int flag, bool value = true);
-    bool toggleItemFlag(int flag);
-    bool getItemFlag(int flag);
-
-    void setFlag(WearFlag flag, bool value = true);
-    bool toggleFlag(WearFlag flag);
-    bool getFlag(WearFlag flag);
-
-    void setFlag(ItemFlag flag, bool value = true);
-    bool toggleFlag(ItemFlag flag);
-    bool getFlag(ItemFlag flag);
-
+    FlagHandler<WearFlag> wear_flags{}; /* Where you can wear it     */
+    FlagHandler<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
 
     weight_t weight{};         /* Weight what else                     */
     weight_t getWeight();
@@ -392,7 +438,7 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     int getType() const override { return 0; }
     SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
-    std::unordered_set<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
+    FlagHandler<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
     SpecialFunc func{};
 
     std::list<std::weak_ptr<char_data>> characters;    /* List of characters in room          */
@@ -424,11 +470,6 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     double modEnvironment(int type, double value);
     void clearEnvironment(int type);
     std::unordered_map<int, double> environment;
-
-    bool toggleRoomFlag(int flag);
-    bool getRoomFlag(int flag);
-    void setRoomFlag(int flag, bool value);
-
 };
 
 /* ====================================================================== */
@@ -535,13 +576,13 @@ struct trans_data {
     ~trans_data();
 
     char *description{nullptr};
-    double timeSpentInForm{0.0};
+    double time_spent_in_form{0.0};
     int grade = 1;
     bool visible = true;
-    bool limitBroken = false;
+    bool limit_broken = false;
     bool unlocked = false;
 
-    double vars[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
+    std::unordered_map<std::string, double> vars;
 
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
 };
@@ -710,7 +751,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     // Instance-relevant fields below...
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
 
-    std::unordered_set<AdminFlag> admin_flags{};    /* Bitvector for admin privs		*/
+    
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
     struct affected_type *affected{};
@@ -776,24 +817,11 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     std::map<SkillID, skill_data> skill;
 
-    std::unordered_set<PlayerFlag> player_flags{}; /* act flag for NPC's; player flag for PC's */
-    std::unordered_set<MobFlag> mob_flags{};
-
-    bool getMobFlag(int flag);
-    bool toggleMobFlag(int flag);
-    void setMobFlag(int flag, bool value);
-
-    bool getPlayerFlag(int flag);
-    bool togglePlayerFlag(int flag);
-    void setPlayerFlag(int flag, bool value);
-
-    bool getAdminFlag(int flag);
-    bool toggleAdminFlag(int flag);
-    void setAdminFlag(int flag, bool value);
-
-    bool getPrefFlag(int flag);
-    bool togglePrefFlag(int flag);
-    void setPrefFlag(int flag, bool value);
+    FlagHandler<CharacterFlag> character_flags{};
+    FlagHandler<PlayerFlag> player_flags{}; /* act flag for NPC's; player flag for PC's */
+    FlagHandler<MobFlag> mob_flags{};
+    FlagHandler<AdminFlag> admin_flags{};    /* Bitvector for admin privs		*/
+    FlagHandler<PrefFlag> pref_flags{};    /* preference flags for PC's.		*/
 
     std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */
     int16_t saving_throw[3]{};    /* Saving throw				*/
@@ -950,7 +978,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int8_t freeze_level{};        /* Level of god who froze char, if any	*/
     int16_t invis_level{};        /* level of invisibility		*/
     room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
-    std::unordered_set<PrefFlag> pref_flags{};    /* preference flags for PC's.		*/
+    
 
     room_vnum normalizeLoadRoom(room_vnum in);
 
@@ -1663,7 +1691,8 @@ struct shop_data : public org_data {
     char *message_buy{};        /* Message when player buys item	*/
     char *message_sell{};        /* Message when player sells item	*/
     int temper1{};        /* How does keeper react if no money	*/
-    std::unordered_set<ShopFlag> shop_flags{};    /* Can attack? Use bank? Cast here?	*/
+    FlagHandler<ShopFlag> shop_flags{};    /* Can attack? Use bank? Cast here?	*/
+
     std::unordered_set<room_vnum> in_room;        /* Where is the shop?			*/
     int open1{}, open2{};        /* When does the shop open?		*/
     int close1{}, close2{};    /* When does the shop close?		*/

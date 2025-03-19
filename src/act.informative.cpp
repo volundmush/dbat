@@ -292,7 +292,7 @@ static void search_room(struct char_data *ch) {
         if (OBJ_FLAGGED(obj, ITEM_BURIED) && perc * bonus > rand_number(50, 200)) {
             act("@YYou uncover @y$p@Y, which had been burried here.@n", true, ch, obj, nullptr, TO_CHAR);
             act("@y$n@Y uncovers @y$p@Y, which had burried here.@n", true, ch, obj, nullptr, TO_ROOM);
-            obj->setItemFlag(ITEM_BURIED, false);
+            obj->item_flags.set(ITEM_BURIED, false);
             found++;
         }
     }
@@ -2062,6 +2062,24 @@ static void diag_char_to_char(struct char_data *i, struct char_data *ch) {
     send_to_char(ch, "%s\r\n", diagnosis[ar_index].text);
 }
 
+void display_limb(char_data* ch, char_data* i, int limb_index, const char* limb_display, CharacterFlag cyber_flag) {
+    int cond = GET_LIMBCOND(i, limb_index);
+    bool isCyber = i->character_flags.get(cyber_flag);
+    if (cond >= 50 && !isCyber) {
+    send_to_char(ch, "            @D[@c%-12s@D: @G%2d%%@D/@g100%%        @D]@n\r\n",
+        limb_display, cond);
+    } else if (cond > 0 && !isCyber) {
+    send_to_char(ch, "            @D[@c%-12s@D: @rBroken @y%2d%%@D/@g100%% @D]@n\r\n",
+        limb_display, cond);
+    } else if (cond > 0 && isCyber) {
+    send_to_char(ch, "            @D[@c%-12s@D: @cCybernetic @G%2d%%@D/@G100%%@D]@n\r\n",
+        limb_display, cond);
+    } else {  // cond <= 0
+    send_to_char(ch, "            @D[@c%-12s@D: @rMissing.            @D]@n\r\n",
+        limb_display);
+    }
+}
+
 static void look_at_char(struct char_data *i, struct char_data *ch) {
     int j, found, clan = false;
     char buf[100];
@@ -2082,62 +2100,12 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
     }
     send_to_char(ch, "\r\n");
     if (!IS_NPC(i)) {
-        if (GET_LIMBCOND(i, 0) >= 50 && !PLR_FLAGGED(i, PLR_CRARM)) {
-            send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 0),
-                         "%", "%");
-        } else if (GET_LIMBCOND(i, 0) > 0 && !PLR_FLAGGED(i, PLR_CRARM)) {
-            send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
-                         GET_LIMBCOND(i, 0), "%", "%");
-        } else if (GET_LIMBCOND(i, 0) > 0 && PLR_FLAGGED(i, PLR_CRARM)) {
-            send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
-                         GET_LIMBCOND(i, 0), "%", "%");
-        } else if (GET_LIMBCOND(i, 0) <= 0) {
-            send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.            @D]@n\r\n");
-        }
-        if (GET_LIMBCOND(i, 1) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
-            send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 1),
-                         "%", "%");
-        } else if (GET_LIMBCOND(i, 1) > 0 && !PLR_FLAGGED(i, PLR_CLARM)) {
-            send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
-                         GET_LIMBCOND(i, 1), "%", "%");
-        } else if (GET_LIMBCOND(i, 1) > 0 && PLR_FLAGGED(i, PLR_CLARM)) {
-            send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
-                         GET_LIMBCOND(i, 1), "%", "%");
-        } else if (GET_LIMBCOND(i, 1) <= 0) {
-            send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.            @D]@n\r\n");
-        }
-        if (GET_LIMBCOND(i, 2) >= 50 && !PLR_FLAGGED(i, PLR_CLARM)) {
-            send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 2),
-                         "%", "%");
-        } else if (GET_LIMBCOND(i, 2) > 0 && !PLR_FLAGGED(i, PLR_CRLEG)) {
-            send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
-                         GET_LIMBCOND(i, 2), "%", "%");
-        } else if (GET_LIMBCOND(i, 2) > 0 && PLR_FLAGGED(i, PLR_CRLEG)) {
-            send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
-                         GET_LIMBCOND(i, 2), "%", "%");
-        } else if (GET_LIMBCOND(i, 2) <= 0) {
-            send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.            @D]@n\r\n");
-        }
-        if (GET_LIMBCOND(i, 3) >= 50 && !PLR_FLAGGED(i, PLR_CLLEG)) {
-            send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(i, 3),
-                         "%", "%");
-        } else if (GET_LIMBCOND(i, 3) > 0 && !PLR_FLAGGED(i, PLR_CLLEG)) {
-            send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
-                         GET_LIMBCOND(i, 3), "%", "%");
-        } else if (GET_LIMBCOND(i, 3) > 0 && PLR_FLAGGED(i, PLR_CLLEG)) {
-            send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
-                         GET_LIMBCOND(i, 3), "%", "%");
-        } else if (GET_LIMBCOND(i, 3) <= 0) {
-            send_to_char(ch, "            @D[@cLeft Leg    @D: @rMissing.             @D]@n\r\n");
-        }
-        if (PLR_FLAGGED(i, PLR_HEAD)) {
-            send_to_char(ch, "            @D[@cHead        @D: @GHas.                 @D]@n\r\n");
-        }
-        if (!PLR_FLAGGED(i, PLR_HEAD)) {
-            send_to_char(ch, "            @D[@cHead        @D: @rMissing.             @D]@n\r\n");
-        }
+        display_limb(ch, i, 0, "Right Arm", CharacterFlag::cyber_right_arm);
+        display_limb(ch, i, 1, "Left Arm", CharacterFlag::cyber_left_arm);
+        display_limb(ch, i, 2, "Right Leg", CharacterFlag::cyber_right_leg);
+        display_limb(ch, i, 3, "Left Leg", CharacterFlag::cyber_left_leg);
         if (race::hasTail(i->race) && !PLR_FLAGGED(i, PLR_TAILHIDE)) {
-            if(PLR_FLAGGED(i, PLR_TAIL))
+            if(i->character_flags.get(CharacterFlag::tail))
                 send_to_char(ch, "            @D[@cTail        @D: @GHas.                 @D]@n\r\n");
             else
                 send_to_char(ch, "            @D[@cTail        @D: @rMissing.             @D]@n\r\n");
@@ -2577,11 +2545,11 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
             count = true;
         }
         if (!IS_NPC(ch) && !IS_NPC(i) && FIGHTING(i)) {
-            if (!PLR_FLAGGED(i, PLR_SPAR) ||
-                (PLR_FLAGGED(i, PLR_SPAR) && (!PLR_FLAGGED(FIGHTING(i), PLR_SPAR) || IS_NPC(FIGHTING(i))))) {
+            if (!i->character_flags.get(CharacterFlag::sparring) ||
+                (i->character_flags.get(CharacterFlag::sparring) && (!FIGHTING(i)->character_flags.get(CharacterFlag::sparring) || IS_NPC(FIGHTING(i))))) {
                 send_to_char(ch, ", is here fighting ");
             }
-            if (PLR_FLAGGED(i, PLR_SPAR) && PLR_FLAGGED(FIGHTING(i), PLR_SPAR)) {
+            if (i->character_flags.get(CharacterFlag::sparring) && FIGHTING(i)->character_flags.get(CharacterFlag::sparring)) {
                 send_to_char(ch, ", is here sparring ");
             }
             if (FIGHTING(i) == ch) {
@@ -2620,10 +2588,10 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     } else {
 
         if (FIGHTING(i) && !IS_NPC(ch) && !IS_NPC(i)) {
-            if (!PLR_FLAGGED(i, PLR_SPAR)) {
+            if (!i->character_flags.get(CharacterFlag::sparring)) {
                 send_to_char(ch, ", is here fighting ");
             }
-            if (PLR_FLAGGED(i, PLR_SPAR)) {
+            if (i->character_flags.get(CharacterFlag::sparring)) {
                 send_to_char(ch, ", is here sparring ");
             }
             if (FIGHTING(i) == ch)
@@ -2915,13 +2883,13 @@ static void do_auto_exits(struct room_data *room, struct char_data *ch, int exit
 
         send_to_char(ch, "@D------------------------------------------------------------------------@n\r\n");
 
-        if (room->getRoomFlag(ROOM_HOUSE)) {
+        if (room->room_flags.get(ROOM_HOUSE)) {
             auto con = room->getInventoryCount();
-            if (!room->getRoomFlag(ROOM_GARDEN1) && !room->getRoomFlag(ROOM_GARDEN2)) {
+            if (!room->room_flags.get(ROOM_GARDEN1) && !room->room_flags.get(ROOM_GARDEN2)) {
                 send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", con);
-            } else if (room->getRoomFlag(ROOM_GARDEN1) && !room->getRoomFlag(ROOM_GARDEN2)) {
+            } else if (room->room_flags.get(ROOM_GARDEN1) && !room->room_flags.get(ROOM_GARDEN2)) {
                 send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con);
-            } else if (!room->getRoomFlag(ROOM_GARDEN1) && room->getRoomFlag(ROOM_GARDEN2)) {
+            } else if (!room->room_flags.get(ROOM_GARDEN1) && room->room_flags.get(ROOM_GARDEN2)) {
                 send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con);
             }
         }
@@ -2996,14 +2964,14 @@ ACMD(do_autoexit) {
     }
     switch (tp) {
         case EXIT_OFF:
-            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->setPrefFlag(f, false);
+            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->pref_flags.set(f, false);
             break;
         case EXIT_NORMAL:
-            ch->setPrefFlag(PRF_AUTOEXIT, true);
-            ch->setPrefFlag(PRF_FULL_EXIT, false);
+            ch->pref_flags.set(PRF_AUTOEXIT, true);
+            ch->pref_flags.set(PRF_FULL_EXIT, false);
             break;
         case EXIT_COMPLETE:
-            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->setPrefFlag(f, true);
+            for(auto f : {PRF_AUTOEXIT, PRF_FULL_EXIT}) ch->pref_flags.set(f, true);
             break;
     }
     send_to_char(ch, "Your @rautoexit level@n is now %s.\r\n", exitlevels[EXIT_LEV(ch)]);
@@ -3017,25 +2985,25 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 static void display_room_info(struct room_data *rm, struct char_data *ch);
 
 static void display_dimension_info(struct room_data *rm, struct char_data *ch) {
-    if (rm->getRoomFlag(ROOM_NEO)) {
+    if (rm->room_flags.get(ROOM_NEO)) {
         send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
-    } else if (rm->getRoomFlag(ROOM_AL)) {
+    } else if (rm->room_flags.get(ROOM_AL)) {
         send_to_char(ch, "@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
-    } else if (rm->getRoomFlag(ROOM_HELL)) {
+    } else if (rm->room_flags.get(ROOM_HELL)) {
         send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
-    } else if (rm->getRoomFlag(ROOM_RHELL)) {
+    } else if (rm->room_flags.get(ROOM_RHELL)) {
         send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
     }
 }
 
 static void display_special_room_descriptions(struct room_data *rm, struct char_data *ch) {
-    if (rm->getRoomFlag(ROOM_REGEN)) {
+    if (rm->room_flags.get(ROOM_REGEN)) {
         send_to_char(ch, "@CA feeling of calm and relaxation fills this room.@n\r\n");
     }
-    if (rm->getRoomFlag(ROOM_AURA)) {
+    if (rm->room_flags.get(ROOM_AURA)) {
         send_to_char(ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
     }
-    if (rm->getRoomFlag(ROOM_HBTC)) {
+    if (rm->room_flags.get(ROOM_HBTC)) {
         send_to_char(ch, "@rThis room feels like it operates in a different time frame.@n\r\n");
     }
 }
@@ -3071,7 +3039,7 @@ static void display_room_info(struct room_data *rm, struct char_data *ch) {
 static void display_room_flags(struct room_data *rm, struct char_data *ch) {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], buf3[MAX_STRING_LENGTH];
 
-    sprintbitarray(rm->room_flags, room_bits, sizeof(room_bits), buf);
+    sprintbitarray(rm->room_flags.getAll(), room_bits, sizeof(room_bits), buf);
     sprinttype(static_cast<int>(rm->sector_type), sector_types, buf2, sizeof(buf2));
 
     if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NODEC)) {
@@ -3176,7 +3144,7 @@ static void display_room_damage_description(struct room_data *rm, struct char_da
     auto sect = static_cast<int>(rm->sector_type);
     auto sunk = rm->getEnvironment(ENV_WATER) >= 100.0;
 
-    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->getRoomFlag(ROOM_DEATH)) {
+    if ((!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_BRIEF)) || rm->room_flags.get(ROOM_DEATH)) {
         if (dmg <= 99 || (dmg == 100 && (sect == SECT_WATER_SWIM || sunk || sect == SECT_FLYING || sect == SECT_SHOP || sect == SECT_IMPORTANT))) {
             send_to_char(ch, "@w%s@n", rm->look_description);
         }
@@ -3219,11 +3187,11 @@ static void display_room_damage_description(struct room_data *rm, struct char_da
 
 static void display_garden_info(struct room_data *rm, struct char_data *ch) {
     auto con = rm->getObjects();
-    if (rm->getRoomFlag(ROOM_GARDEN1)) {
+    if (rm->room_flags.get(ROOM_GARDEN1)) {
         send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R8@D]@n\r\n", con.size());
-    } else if (rm->getRoomFlag(ROOM_GARDEN2)) {
+    } else if (rm->room_flags.get(ROOM_GARDEN2)) {
         send_to_char(ch, "@D[@GPlants Planted@D: @g%d@W, @GMAX@D: @R20@D]@n\r\n", con.size());
-    } else if (rm->getRoomFlag(ROOM_HOUSE)) {
+    } else if (rm->room_flags.get(ROOM_HOUSE)) {
         send_to_char(ch, "@D[@GItems Stored@D: @g%d@D]@n\r\n", con.size());
     }
 }
@@ -3702,7 +3670,7 @@ static void look_out_window(struct char_data *ch, char *arg) {
                 if(!e) continue;
                 auto dest = e->getDestination();
                 if(!dest) continue;
-                if(!dest->getRoomFlag(ROOM_INDOORS)) {
+                if(!dest->room_flags.get(ROOM_INDOORS)) {
                     target_room = dest->vn;
                     break;
                 }
@@ -4148,11 +4116,11 @@ ACMD(do_score) {
         if (IS_ANDROID(ch)) {
             char model[100], version[100];
             int absorb = 0;
-            if (PLR_FLAGGED(ch, PLR_ABSORB)) {
+            if (ch->character_flags.get(CharacterFlag::android_model_absorb)) {
                 sprintf(model, "@CAbsorption");
-            } else if (PLR_FLAGGED(ch, PLR_REPAIR)) {
+            } else if (ch->character_flags.get(CharacterFlag::android_model_repair)) {
                 sprintf(model, "@GSelf Repairing");
-            } else if (PLR_FLAGGED(ch, PLR_SENSEM)) {
+            } else if (ch->character_flags.get(CharacterFlag::android_model_sense)) {
                 sprintf(model, "@RSensor Equiped");
             }
 
@@ -4320,55 +4288,49 @@ ACMD(do_status) {
         bringdesc(ch, ch);
         send_to_char(ch, "            @D---------------@RAppendages@D---------------\n");
 
-        if (PLR_FLAGGED(ch, PLR_HEAD)) {
-            send_to_char(ch, "            @D[@cHead        @D: @GHave.          @D]@n\r\n");
-        }
-        if (!PLR_FLAGGED(ch, PLR_HEAD)) {
-            send_to_char(ch, "            @D[@cHead        @D: @rMissing.         @D]@n\r\n");
-        }
-        if (GET_LIMBCOND(ch, 0) >= 50 && !PLR_FLAGGED(ch, PLR_CRARM)) {
+        if (GET_LIMBCOND(ch, 0) >= 50 && !ch->character_flags.get(CharacterFlag::cyber_right_arm)) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 0),
                          "%", "%");
-        } else if (GET_LIMBCOND(ch, 0) > 0 && !PLR_FLAGGED(ch, PLR_CRARM)) {
+        } else if (GET_LIMBCOND(ch, 0) > 0 && !ch->character_flags.get(CharacterFlag::cyber_right_arm)) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
                          GET_LIMBCOND(ch, 0), "%", "%");
-        } else if (GET_LIMBCOND(ch, 0) > 0 && PLR_FLAGGED(ch, PLR_CRARM)) {
+        } else if (GET_LIMBCOND(ch, 0) > 0 && ch->character_flags.get(CharacterFlag::cyber_right_arm)) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
                          GET_LIMBCOND(ch, 0), "%", "%");
         } else if (GET_LIMBCOND(ch, 0) <= 0) {
             send_to_char(ch, "            @D[@cRight Arm   @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 1) >= 50 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+        if (GET_LIMBCOND(ch, 1) >= 50 && !ch->character_flags.get(CharacterFlag::cyber_left_arm)) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 1),
                          "%", "%");
-        } else if (GET_LIMBCOND(ch, 1) > 0 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+        } else if (GET_LIMBCOND(ch, 1) > 0 && !ch->character_flags.get(CharacterFlag::cyber_left_arm)) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
                          GET_LIMBCOND(ch, 1), "%", "%");
-        } else if (GET_LIMBCOND(ch, 1) > 0 && PLR_FLAGGED(ch, PLR_CLARM)) {
+        } else if (GET_LIMBCOND(ch, 1) > 0 && ch->character_flags.get(CharacterFlag::cyber_left_arm)) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
                          GET_LIMBCOND(ch, 1), "%", "%");
         } else if (GET_LIMBCOND(ch, 1) <= 0) {
             send_to_char(ch, "            @D[@cLeft Arm    @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 2) >= 50 && !PLR_FLAGGED(ch, PLR_CLARM)) {
+        if (GET_LIMBCOND(ch, 2) >= 50 && !ch->character_flags.get(CharacterFlag::cyber_left_arm)) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 2),
                          "%", "%");
-        } else if (GET_LIMBCOND(ch, 2) > 0 && !PLR_FLAGGED(ch, PLR_CRLEG)) {
+        } else if (GET_LIMBCOND(ch, 2) > 0 && !ch->character_flags.get(CharacterFlag::cyber_right_leg)) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
                          GET_LIMBCOND(ch, 2), "%", "%");
-        } else if (GET_LIMBCOND(ch, 2) > 0 && PLR_FLAGGED(ch, PLR_CRLEG)) {
+        } else if (GET_LIMBCOND(ch, 2) > 0 && ch->character_flags.get(CharacterFlag::cyber_right_leg)) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
                          GET_LIMBCOND(ch, 2), "%", "%");
         } else if (GET_LIMBCOND(ch, 2) <= 0) {
             send_to_char(ch, "            @D[@cRight Leg   @D: @rMissing.         @D]@n\r\n");
         }
-        if (GET_LIMBCOND(ch, 3) >= 50 && !PLR_FLAGGED(ch, PLR_CLLEG)) {
+        if (GET_LIMBCOND(ch, 3) >= 50 && !ch->character_flags.get(CharacterFlag::cyber_left_leg)) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @G%2d%s@D/@g100%s        @D]@n\r\n", GET_LIMBCOND(ch, 3),
                          "%", "%");
-        } else if (GET_LIMBCOND(ch, 3) > 0 && !PLR_FLAGGED(ch, PLR_CLLEG)) {
+        } else if (GET_LIMBCOND(ch, 3) > 0 && !ch->character_flags.get(CharacterFlag::cyber_left_leg)) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @rBroken @y%2d%s@D/@g100%s @D]@n\r\n",
                          GET_LIMBCOND(ch, 3), "%", "%");
-        } else if (GET_LIMBCOND(ch, 3) > 0 && PLR_FLAGGED(ch, PLR_CLLEG)) {
+        } else if (GET_LIMBCOND(ch, 3) > 0 && ch->character_flags.get(CharacterFlag::cyber_left_leg)) {
             send_to_char(ch, "            @D[@cLeft Leg    @D: @cCybernetic @G%2d%s@D/@G100%s@D]@n\r\n",
                          GET_LIMBCOND(ch, 3), "%", "%");
         } else if (GET_LIMBCOND(ch, 3) <= 0) {
@@ -4376,7 +4338,7 @@ ACMD(do_status) {
         }
 
         if(race::hasTail(ch->race) && !PLR_FLAGGED(ch, PLR_TAILHIDE)) {
-            if(PLR_FLAGGED(ch, PLR_TAIL))
+            if(ch->character_flags.get(CharacterFlag::tail))
                 send_to_char(ch, "            @D[@cTail        @D: @GHave.            @D]@n\r\n");
             else
                 send_to_char(ch, "            @D[@cTail        @D: @rMissing.         @D]@n\r\n");
@@ -4521,7 +4483,7 @@ ACMD(do_status) {
         send_to_char(ch, "         You have %s colored aura.\r\n", aura_types[GET_AURA(ch)]);
 
         if (GET_LEVEL(ch) < 100) {
-            if ((IS_ANDROID(ch) && PLR_FLAGGED(ch, PLR_ABSORB)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
+            if ((IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
                 send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(ch->calc_soft_cap()).c_str());
             } else {
                 send_to_char(ch, "         @R%s@n in PL/KI/ST combined to SC this level.\r\n",
@@ -4983,7 +4945,7 @@ ACMD(do_inventory) {
     send_to_char(ch, "@w              @YInventory\r\n@D-------------------------------------@w\r\n");
     if (!IS_NPC(ch)) {
         if (PLR_FLAGGED(ch, PLR_STOLEN)) {
-            ch->setPlayerFlag(PLR_STOLEN, false);
+            ch->player_flags.set(PLR_STOLEN, false);
             send_to_char(ch, "@r   --------------------------------------------------@n\n");
             send_to_char(ch, "@R    You notice that you have been robbed sometime recently!\n");
             send_to_char(ch, "@r   --------------------------------------------------@n\n");
@@ -6090,10 +6052,10 @@ ACMD(do_color) {
     }
     switch (tp) {
         case C_OFF:
-            ch->setPrefFlag(PRF_COLOR, false);
+            ch->pref_flags.set(PRF_COLOR, false);
             break;
         case C_ON:
-            ch->setPrefFlag(PRF_COLOR, true);
+            ch->pref_flags.set(PRF_COLOR, true);
             break;
     }
     send_to_char(ch, "Your color is now @o%s@n.\r\n", ctypes[tp]);

@@ -246,7 +246,7 @@ ASPELL(spell_charm) {
 
         act("Isn't $n just such a nice fellow?", false, ch, nullptr, victim, TO_VICT);
         if (IS_NPC(victim))
-            victim->setMobFlag(MOB_SPEC, false);
+            victim->mob_flags.set(MOB_SPEC, false);
 
     }
 }
@@ -263,12 +263,12 @@ ASPELL(spell_identify) {
         sprinttype(GET_OBJ_TYPE(obj), item_types, bitbuf, sizeof(bitbuf));
         send_to_char(ch, "You feel informed:\r\nObject '%s', Item type: %s\r\n", obj->short_description, bitbuf);
 
-        if (!obj->affect_flags.empty()) {
-            sprintbitarray(GET_OBJ_PERM(obj), affected_bits, AF_ARRAY_MAX, bitbuf);
+        if (obj->affect_flags) {
+            sprintbitarray(obj->affect_flags.getAll(), affected_bits, AF_ARRAY_MAX, bitbuf);
             send_to_char(ch, "Item will give you following abilities:  %s\r\n", bitbuf);
         }
 
-        sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, bitbuf);
+        sprintbitarray(obj->item_flags.getAll(), extra_bits, EF_ARRAY_MAX, bitbuf);
         send_to_char(ch, "Item is: %s\r\n", bitbuf);
 
         send_to_char(ch, "Weight: %" I64T ", Value: %d, Rent: %d, Min Level: %d\r\n", GET_OBJ_WEIGHT(obj),
@@ -363,7 +363,7 @@ ASPELL(spell_enchant_weapon) {
         if (obj->affected[i].location != APPLY_NONE)
             return;
 
-    obj->setItemFlag(ITEM_MAGIC, true);
+    obj->item_flags.set(ITEM_MAGIC, true);
 
     for (i = 0; i < MAX_OBJ_AFFECT; i++) {
         if (obj->affected[i].location == APPLY_NONE) {

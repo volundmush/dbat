@@ -189,7 +189,7 @@ ACMD(do_oasis_oedit) {
     /** Send the OLC message to the players in the same room as the builder.   **/
     /****************************************************************************/
     act("$n starts using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
-    ch->setPlayerFlag(PLR_WRITING, true);
+    ch->player_flags.set(PLR_WRITING, true);
 
     /****************************************************************************/
     /** Log the OLC message.                                                   **/
@@ -204,7 +204,7 @@ void oedit_setup_new(struct descriptor_data *d) {
     OLC_OBJ(d)->name = strdup("unfinished object");
     OLC_OBJ(d)->room_description = strdup("An unfinished object is lying here.");
     OLC_OBJ(d)->short_description = strdup("an unfinished object");
-    OLC_OBJ(d)->setWearFlag(ITEM_WEAR_TAKE, true);
+    OLC_OBJ(d)->wear_flags.set(ITEM_WEAR_TAKE, true);
     OLC_VAL(d) = 0;
     OLC_ITEM_TYPE(d) = OBJ_TRIGGER;
     OLC_OBJ(d)->type_flag = ItemType::worn;
@@ -822,7 +822,7 @@ void oedit_disp_extra_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
                         extra_bits[counter], !(++columns % 3) ? "\r\n" : "");
     }
-    sprintbitarray(GET_OBJ_EXTRA(OLC_OBJ(d)), extra_bits, EF_ARRAY_MAX, bits);
+    sprintbitarray(GET_OBJ_EXTRA(OLC_OBJ(d)).getAll(), extra_bits, EF_ARRAY_MAX, bits);
     write_to_output(d, "\r\nObject flags: @c%s@n\r\n"
                        "Enter object extra flag (0 to quit) : ",
                     bits);
@@ -844,7 +844,7 @@ void oedit_disp_perm_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s%s", counter,
                         affected_bits[counter], !(++columns % 3) ? "\r\n" : "");
     }
-    sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, bitbuf);
+    sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)).getAll(), affected_bits, EF_ARRAY_MAX, bitbuf);
     write_to_output(d, "\r\nObject permanent flags: @c%s@n\r\n"
                        "Enter object perm flag (0 to quit) : ", bitbuf);
 }
@@ -877,7 +877,7 @@ void oedit_disp_wear_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s %s", counter + 1,
                         wear_bits[counter], !(++columns % 3) ? "\r\n" : "");
     }
-    sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, TW_ARRAY_MAX, bits);
+    sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)).getAll(), wear_bits, TW_ARRAY_MAX, bits);
     write_to_output(d, "\r\nWear flags: @c%s@n\r\n"
                        "Enter wear flag, 0 to quit : ", bits);
 }
@@ -896,7 +896,7 @@ void oedit_disp_menu(struct descriptor_data *d) {
      * Build buffers for first part of menu.
      */
     sprinttype(GET_OBJ_TYPE(obj), item_types, tbitbuf, sizeof(tbitbuf));
-    sprintbitarray(GET_OBJ_EXTRA(obj), extra_bits, EF_ARRAY_MAX, ebitbuf);
+    sprintbitarray(GET_OBJ_EXTRA(obj).getAll(), extra_bits, EF_ARRAY_MAX, ebitbuf);
 
     /*
      * Build first half of menu.
@@ -925,8 +925,8 @@ void oedit_disp_menu(struct descriptor_data *d) {
     /*
      * Build second half of menu.
      */
-    sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)), wear_bits, EF_ARRAY_MAX, tbitbuf);
-    sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)), affected_bits, EF_ARRAY_MAX, ebitbuf);
+    sprintbitarray(GET_OBJ_WEAR(OLC_OBJ(d)).getAll(), wear_bits, EF_ARRAY_MAX, tbitbuf);
+    sprintbitarray(GET_OBJ_PERM(OLC_OBJ(d)).getAll(), affected_bits, EF_ARRAY_MAX, ebitbuf);
 
     std::vector<std::string> values;
     for(const auto &[name, val] : obj->value) {
@@ -954,7 +954,7 @@ void oedit_disp_menu(struct descriptor_data *d) {
                     "Enter choice : ",
 
                     tbitbuf, add_commas(GET_OBJ_WEIGHT(obj)).c_str(), GET_OBJ_COST(obj), GET_OBJ_RENT(obj),
-                    GET_OBJ_TIMER(obj), joined.c_str(), !obj->item_flags.empty() ? "Set." : "Not Set.",
+                    GET_OBJ_TIMER(obj), joined.c_str(), obj->item_flags ? "Set." : "Not Set.",
                     GET_OBJ_LEVEL(obj), material_names[(int) GET_OBJ_MATERIAL(obj)],
                     ebitbuf, !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.",
                     size_names[static_cast<int>(GET_OBJ_SIZE(obj))]
@@ -1064,12 +1064,12 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
                             copy_proto_script(&obj_proto[robj], obj, OBJ_TRIGGER);
                             assign_triggers(obj, OBJ_TRIGGER);
                         }
-                        obj->setItemFlag(ITEM_UNIQUE_SAVE, true);
+                        obj->item_flags.set(ITEM_UNIQUE_SAVE, true);
                         /* Xap - ought to save the old pointer, free after assignment I suppose */
                         mudlog(CMP, MAX(ADMLVL_BUILDER, GET_INVIS_LEV(d->character)), true,
                                "OLC: %s iedit a unique #%d", GET_NAME(d->character), GET_OBJ_VNUM(obj));
                         if (d->character) {
-                            d->character->setPlayerFlag(PLR_WRITING, false);
+                            d->character->player_flags.set(PLR_WRITING, false);
                             STATE(d) = CON_PLAYING;
                             act("$n stops using OLC.", true, d->character, nullptr, nullptr, TO_ROOM);
                         }
@@ -1256,7 +1256,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             } else if (number == 0)
                 break;
             else {
-                OLC_OBJ(d)->toggleItemFlag(number-1);
+                OLC_OBJ(d)->item_flags.toggle(number-1);
                 oedit_disp_extra_menu(d);
                 return;
             }
@@ -1270,7 +1270,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             } else if (number == 0)    /* Quit. */
                 break;
             else {
-                OLC_OBJ(d)->toggleWearFlag(number-1);
+                OLC_OBJ(d)->wear_flags.toggle(number-1);
                 oedit_disp_wear_menu(d);
                 return;
             }
@@ -1313,7 +1313,7 @@ void oedit_parse(struct descriptor_data *d, char *arg) {
             if (number > 0 && number <= NUM_AFF_FLAGS) {
                 /* Setting AFF_CHARM on objects like this is dangerous. */
                 if (number != AFF_CHARM) {
-                    OLC_OBJ(d)->toggleAffectFlag(number);
+                    OLC_OBJ(d)->affect_flags.toggle(number);
                 }
             }
             oedit_disp_perm_menu(d);
@@ -1773,9 +1773,9 @@ ACMD(do_iedit) {
 
     /* set up here */
     CREATE(OLC(ch->desc), struct oasis_olc_data, 1);
-    k->setItemFlag(ITEM_UNIQUE_SAVE, true);
+    k->item_flags.set(ITEM_UNIQUE_SAVE, true);
 
-    ch->setPlayerFlag(PLR_WRITING, true);
+    ch->player_flags.set(PLR_WRITING, true);
     iedit_setup_existing(ch->desc, k);
     OLC_VAL(ch->desc) = 0;
 

@@ -447,7 +447,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s now has immunity to Burn, Freezing, Mind Break, Poison, Blindness, Yoikominminken, and Paralysis!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->setAffectFlag(AFF_IMMUNITY, true);
+                                wch->affect_flags.set(AFF_IMMUNITY, true);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a immunity wish on %s.",
@@ -503,8 +503,8 @@ ACMD(do_say) {
                                         look_at_room(IN_ROOM(wch), wch, 0);
                                         send_to_char(wch,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        wch->setAffectFlag(AFF_SPIRIT, false);
-                                        wch->setAffectFlag(AFF_ETHEREAL, false);
+                                        wch->affect_flags.set(AFF_SPIRIT, false);
+                                        wch->affect_flags.set(AFF_ETHEREAL, false);
                                     }
                                     granted = true;
                                     SELFISHMETER -= 2;
@@ -536,7 +536,7 @@ ACMD(do_say) {
                                         look_at_room(IN_ROOM(wch), wch, 0);
                                         send_to_char(wch,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->setAffectFlag(f, false);
+                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->affect_flags.set(f, false);
                                     }
                                     if (real_room(GET_DROOM(wch2)) == NOWHERE) {
                                         GET_DROOM(wch2) = 300;
@@ -547,7 +547,7 @@ ACMD(do_say) {
                                         look_at_room(IN_ROOM(wch2), wch2, 0);
                                         send_to_char(wch2,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->setAffectFlag(f, false);
+                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->affect_flags.set(f, false);
                                     }
                                     granted = true;
                                     SELFISHMETER -= 3;
@@ -586,7 +586,7 @@ ACMD(do_say) {
                                         look_at_room(IN_ROOM(wch), wch, 0);
                                         send_to_char(wch,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->setAffectFlag(f, false);
+                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->affect_flags.set(f, false);
                                     }
                                     if (real_room(GET_DROOM(wch2)) == NOWHERE) {
                                         GET_DROOM(wch2) = 300;
@@ -597,7 +597,7 @@ ACMD(do_say) {
                                         look_at_room(IN_ROOM(wch2), wch2, 0);
                                         send_to_char(wch2,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->setAffectFlag(f, false);
+                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->affect_flags.set(f, false);
                                     }
                                     if (real_room(GET_DROOM(wch3)) == NOWHERE) {
                                         GET_DROOM(wch3) = 300;
@@ -608,7 +608,7 @@ ACMD(do_say) {
                                         look_at_room(IN_ROOM(wch3), wch3, 0);
                                         send_to_char(wch3,
                                                      "@wYou smile as the golden halo above your head disappears! You have returned to life where you had last died!@n\r\n");
-                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch3->setAffectFlag(f, false);
+                                        for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch3->affect_flags.set(f, false);
                                     }
                                     granted = true;
                                     SELFISHMETER -= 3;
@@ -624,7 +624,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now immortal!@w'@n\r\n",
                                              GET_NAME(wch));
-                                wch->setPlayerFlag(PLR_IMMORTAL, true);
+                                wch->player_flags.set(PLR_IMMORTAL, true);
                                 WISH[0] = 1;
                                 WISH[1] = 1;
                                 granted = true;
@@ -647,7 +647,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now mortal!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->setPlayerFlag(PLR_IMMORTAL, false);
+                                wch->player_flags.set(PLR_IMMORTAL, false);
                                 granted = true;
                                 SELFISHMETER += 4;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a mortal wish on %s.", GET_NAME(ch),
@@ -1302,7 +1302,7 @@ ACMD(do_write) {
 
         /* we can write - hooray! */
         act("$n begins to jot down a note.", true, ch, nullptr, nullptr, TO_ROOM);
-        paper->setItemFlag(ITEM_UNIQUE_SAVE, true);
+        paper->item_flags.set(ITEM_UNIQUE_SAVE, true);
         send_editor_help(ch->desc);
         string_write(ch->desc, &paper->look_description, MAX_NOTE_LENGTH, 0, backstr);
     }
@@ -1526,7 +1526,7 @@ ACMD(do_gen_comm) {
         send_to_imm("SPAMMING: %s has been frozen for spamming!\r\n", GET_NAME(ch));
         send_to_all("@rSPAMMING@D: @C%s@w has been frozen for spamming, let that be a lesson to 'em.@n\r\n",
                     GET_NAME(ch));
-        ch->setPlayerFlag(PLR_FROZEN, true);
+        ch->player_flags.set(PLR_FROZEN, true);
         GET_FREEZE_LEV(ch) = 1;
     } else if (GET_SPAM(ch) < 3) {
         GET_SPAM(ch) += 1;

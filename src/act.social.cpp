@@ -436,7 +436,7 @@ ACMD(do_gmote) {
         return;
     }
 
-    if (ch->getRoomFlag(ROOM_SOUNDPROOF)) {
+    if (ch->getRoom()->room_flags.get(ROOM_SOUNDPROOF)) {
         send_to_char(ch, "The walls seem to absorb your actions.\r\n");
         return;
     }

@@ -63,6 +63,29 @@ get_room(room)->dir_option[dir]->to_room : NOWHERE)
 
 static bool converting = false;
 
+static void convert_character(char_data *c) {
+    auto npc = c->mob_flags.get(static_cast<MobFlag>(3)) || c->character_flags.get(CharacterFlag::is_npc);
+    if(npc) {
+        c->character_flags.set(CharacterFlag::is_npc, true);
+        c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
+
+        c->character_flags.set(CharacterFlag::android_model_absorb, c->mob_flags.get(31));
+        c->character_flags.set(CharacterFlag::android_model_repair, c->mob_flags.get(32));
+        
+    } else {
+        c->character_flags.set(CharacterFlag::tail, c->player_flags.get(30));
+        c->character_flags.set(CharacterFlag::cyber_right_arm, c->player_flags.get(46));
+        c->character_flags.set(CharacterFlag::cyber_left_arm, c->player_flags.get(47));
+        c->character_flags.set(CharacterFlag::cyber_right_leg, c->player_flags.get(48));
+        c->character_flags.set(CharacterFlag::cyber_left_leg, c->player_flags.get(49));
+
+        c->character_flags.set(CharacterFlag::android_model_absorb, c->player_flags.get(41));
+        c->character_flags.set(CharacterFlag::android_model_repair, c->player_flags.get(42));
+        c->character_flags.set(CharacterFlag::android_model_sense, c->player_flags.get(43));
+
+    }
+}
+
 
 static void read_line(FILE *shop_f, const char *string, void *data) {
     char buf[READ_SIZE];
@@ -449,7 +472,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             read_line(shop_f, "%ld", &bitvector);
             for(auto i = 0; i < 2; i++) {
                 if(IS_SET(bitvector, 1 << i)) {
-                    sh.shop_flags.insert(static_cast<ShopFlag>(i));
+                    sh.shop_flags.set(static_cast<ShopFlag>(i));
                 }
             }
 
@@ -884,7 +907,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         roomFlagsHolder[2] = asciiflag_conv(flags3);
         roomFlagsHolder[3] = asciiflag_conv(flags4);
 
-        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->setRoomFlag(i, true);
+        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->room_flags.set(i);
 
         r->sector_type = static_cast<SectorType>(t[2]);
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
@@ -1019,7 +1042,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
 
     if (!IS_HUMAN(ch))
-        ch->setAffectFlag(AFF_INFRAVISION);
+        ch->affect_flags.set(AFF_INFRAVISION);
 
     SPEAKING(ch) = SKILL_LANG_COMMON;
 
@@ -1349,13 +1372,13 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         mf[1] = asciiflag_conv(f2);
         mf[2] = asciiflag_conv(f3);
         mf[3] = asciiflag_conv(f4);
-        for(auto i = 0; i < NUM_MOB_FLAGS; i++) ch->setMobFlag(i, IS_SET_AR(mf, i));
+        for(auto i = 0; i < NUM_MOB_FLAGS; i++) ch->mob_flags.set(i, IS_SET_AR(mf, i));
 
         aff[0] = asciiflag_conv(f5);
         aff[1] = asciiflag_conv(f6);
         aff[2] = asciiflag_conv(f7);
         aff[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < 128; i++) ch->setAffectFlag(i, IS_SET_AR(aff, i));
+        for(auto i = 0; i < 128; i++) ch->affect_flags.set(i, IS_SET_AR(aff, i));
 
         ch->set(CharAlign::good_evil, t[2]);
 
@@ -1365,11 +1388,11 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         exit(1);
     }
 
-    ch->setMobFlag(MOB_ISNPC, true);
+    ch->character_flags.set(CharacterFlag::is_npc, true);
     if (MOB_FLAGGED(ch, MOB_NOTDEADYET)) {
         /* Rather bad to load mobiles with this bit already set. */
         basic_mud_log("SYSERR: Mob #%d has reserved bit MOB_NOTDEADYET set.", nr);
-        ch->setMobFlag(MOB_NOTDEADYET, false);
+        ch->mob_flags.set(MOB_NOTDEADYET, false);
     }
 
     /* AGGR_TO_ALIGN is ignored if the mob is AGGRESSIVE.
@@ -1412,6 +1435,8 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
    *   add_to_save_list(zone_table[real_zone_by_thing(nr)].number, 0);
    *   converting = TRUE;
    * } */
+
+    convert_character(ch);
 
     return 1;
 }
@@ -1626,19 +1651,19 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
         extraFlags[1] = asciiflag_conv(f2);
         extraFlags[2] = asciiflag_conv(f3);
         extraFlags[3] = asciiflag_conv(f4);
-        for(auto i = 0; i < 128; i++) if(IS_SET_AR(extraFlags, i)) o.setItemFlag(i);
+        for(auto i = 0; i < 128; i++) if(IS_SET_AR(extraFlags, i)) o.item_flags.set(i);
 
         wearFlags[0] = asciiflag_conv(f5);
         wearFlags[1] = asciiflag_conv(f6);
         wearFlags[2] = asciiflag_conv(f7);
         wearFlags[3] = asciiflag_conv(f8);
-        for(auto i = 0; i < NUM_ITEM_WEARS; i++) if(IS_SET_AR(wearFlags, i)) o.setWearFlag(i, true);
+        for(auto i = 0; i < NUM_ITEM_WEARS; i++) if(IS_SET_AR(wearFlags, i)) o.wear_flags.set(i);
 
         permFlags[0] = asciiflag_conv(f9);
         permFlags[1] = asciiflag_conv(f10);
         permFlags[2] = asciiflag_conv(f11);
         permFlags[3] = asciiflag_conv(f12);
-        for(auto i = 0; i < 128; i++) if(IS_SET_AR(permFlags, i)) o.setAffectFlag(i, true);
+        for(auto i = 0; i < 128; i++) if(IS_SET_AR(permFlags, i)) o.affect_flags.set(i);
 
     } else {
         basic_mud_log("SYSERR: Format error in first numeric line (expecting 13 args, got %d), %s", retval, buf2);
@@ -1812,7 +1837,7 @@ static char *parse_object(FILE *obj_f, obj_vnum nr) {
                 /* Objects that set CHARM on players are bad. */
                 if (OBJAFF_FLAGGED(&o, AFF_CHARM)) {
                     basic_mud_log("SYSERR: Object #%d has reserved bit AFF_CHARM set.", nr);
-                    o.setAffectFlag(AFF_CHARM, false);
+                    o.affect_flags.set(AFF_CHARM, false);
                 }
                 check_object(&o);
                 return (line);
@@ -2442,8 +2467,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->player_flags.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->setPlayerFlag(f, true);
+                        for(auto f = 0; f < 128; f++) {
+                            if(IS_SET_AR(flags, f)) ch->player_flags.set(f);
                         }
                     } else if (!strcmp(tag, "Aff ")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
@@ -2452,7 +2477,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
                         for(auto f = 0; f < 128; f++) {
-                            if(IS_SET_AR(flags, f)) ch->setAffectFlag(f);
+                            if(IS_SET_AR(flags, f)) ch->affect_flags.set(f);
                         }
                     } else if (!strcmp(tag, "Affs")) load_affects(fl, ch, 0);
                     else if (!strcmp(tag, "Affv")) load_affects(fl, ch, 1);
@@ -2464,8 +2489,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->admin_flags.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->setAdminFlag(f, true);
+                        for(auto f = 0; f < 128; f++) {
+                            if(IS_SET_AR(flags, f)) ch->admin_flags.set(f);
                         }
                     } else if (!strcmp(tag, "Alin")) ch->set(CharAlign::good_evil, atoi(line));
                     else if (!strcmp(tag, "Aura")) ch->set(CharAppearance::aura, atoi(line));
@@ -2612,8 +2637,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->pref_flags.size(); f++) {
-                            if(IS_SET_AR(flags, f)) ch->setPrefFlag(f, true);
+                        for(auto f = 0; f < 128; f++) {
+                            if(IS_SET_AR(flags, f)) ch->pref_flags.set(f, true);
                         }
                     } else if (!strcmp(tag, "Prff")) GET_PREFERENCE(ch) = atoi(line);
                     break;
@@ -2831,7 +2856,7 @@ int House_load(room_vnum rvnum) {
             ex[1] = asciiflag_conv(f2);
             ex[2] = asciiflag_conv(f3);
             ex[3] = asciiflag_conv(f4);
-            for(auto i = 0; i < 128; i++) temp->setItemFlag(i, IS_SET_AR(ex, i));
+            for(auto i = 0; i < 128; i++) temp->item_flags.set(i, IS_SET_AR(ex, i));
 
             GET_OBJ_POSTED(temp) = nullptr;
             GET_OBJ_POSTTYPE(temp) = 0;
@@ -2869,7 +2894,7 @@ int House_load(room_vnum rvnum) {
                 wear[1] = t[2];
                 wear[2] = t[3];
                 wear[3] = t[4];
-                for(auto i = 0; i < NUM_ITEM_WEARS; i++) temp->setWearFlag(i, IS_SET_AR(wear, i));
+                for(auto i = 0; i < NUM_ITEM_WEARS; i++) temp->wear_flags.set(i, IS_SET_AR(wear, i));
                 temp->weight = t[5];
                 temp->cost = t[6];
                 temp->cost_per_day = t[7];
@@ -3190,6 +3215,7 @@ void migrate_characters() {
             continue;
         }
         auto ch = sh.get();
+        convert_character(ch);
         auto id = getNextUnitID();
         auto &p = players[id];
         p.id = id;
@@ -3536,7 +3562,7 @@ static void migrate_obj_data(obj_data *o) {
     // First let's cconvert all relevant flags to new data structures.
     for(auto i = 0; i < 96; i++) {
         // Skip if it's not set.
-        if(!o->getItemFlag(i)) continue;
+        if(!o->item_flags.get(i)) continue;
 
         bool resetFlag = true;
 
@@ -3672,41 +3698,41 @@ static void migrate_obj_data(obj_data *o) {
         }
 
         if(resetFlag) {
-            o->setItemFlag(i, false);
+            o->item_flags.set(i, false);
         }
 
     }
 
     // now we'll compress the remaining flag space.
     for(auto i = 0; i < 96; i++) {
-        if(!o->getItemFlag(i)) continue;
+        if(!o->item_flags.get(i)) continue;
 
         switch(i) {
             case 16:
-                o->setItemFlag(9, true);
+                o->item_flags.set(9, true);
                 break;
             case 18:
-                o->setItemFlag(10, true);
+                o->item_flags.set(10, true);
                 break;
             case 26:
             case 27:
             case 28:
-                o->setItemFlag(i - 15, true);
+                o->item_flags.set(i - 15, true);
                 break;
             case 32:
-                o->setItemFlag(14, true);
+                o->item_flags.set(14, true);
                 break;
             case 57:
-                o->setItemFlag(15, true);
+                o->item_flags.set(15, true);
                 break;
             case 72:
             case 73:
             case 74:
-                o->setItemFlag(i - 56, true);
+                o->item_flags.set(i - 56, true);
                 break;
             default:
                 if(i >= 76 && i <= 94) {
-                    o->setItemFlag(i - 57, true);
+                    o->item_flags.set(i - 57, true);
                 }
 
                 break;

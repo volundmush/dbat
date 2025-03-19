@@ -117,10 +117,10 @@ void from_json(const json& j, std::unordered_map<Enum, Value>& m)
 
 template <typename Enum>
 requires std::is_enum_v<Enum>
-void to_json(json& j, const std::unordered_set<Enum>& m)
+void to_json(json& j, const FlagHandler<Enum>& m)
 {
     j = json::array();
-    for (auto const& key : m) {
+    for (auto const& key : m.getAll()) {
         // Convert Enum -> string via magic_enum
         std::string key_str = std::string(magic_enum::enum_name(key));
         if(key_str.empty()) continue;
@@ -130,7 +130,7 @@ void to_json(json& j, const std::unordered_set<Enum>& m)
 
 template <typename Enum>
 requires std::is_enum_v<Enum>
-void from_json(const json& j, std::unordered_set<Enum>& m)
+void from_json(const json& j, FlagHandler<Enum>& m)
 {
     m.clear();
     for (auto const& key_str : j) {
@@ -141,7 +141,7 @@ void from_json(const json& j, std::unordered_set<Enum>& m)
             throw std::invalid_argument("Invalid enum key: " + key
                 + " for enum type: " + demangle(typeid(Enum).name()));
         }
-        m.insert(maybe.value());
+        m.set(maybe.value());
     }
 }
 

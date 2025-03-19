@@ -133,7 +133,7 @@ void copyover_recover_final() {
         c->desc = d;
 
 		GET_LOADROOM(c) = room;
-        for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->setPlayerFlag(f, false);
+        for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->player_flags.set(f, false);
 
         write_to_output(d, "@rThe world comes back into focus... has something changed?@n\r\n");
 
@@ -651,7 +651,7 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if (PLR_FLAGGED(d->character, PLR_SPAR) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
+            if (d->character->character_flags.get(CharacterFlag::sparring) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "SPARRING - ");
                 flagged = true;
                 if (count >= 0)
@@ -1630,7 +1630,7 @@ int arena_watch(struct char_data *ch) {
     }
 
     if (found == false) {
-        ch->setPrefFlag(PRF_ARENAWATCH, false);
+        ch->pref_flags.set(PRF_ARENAWATCH, false);
         ARENA_IDNUM(ch) = -1;
         return (NOWHERE);
     } else {
@@ -1840,7 +1840,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
             if (!i->connected && i->character &&
                 !PRF_FLAGGED(i->character, PRF_NOGOSS) &&
                 !PLR_FLAGGED(i->character, PLR_WRITING) &&
-                !i->character->getRoom()->getRoomFlag(ROOM_SOUNDPROOF)) {
+                !i->character->getRoom()->room_flags.get(ROOM_SOUNDPROOF)) {
 
                 snprintf(buf, sizeof(buf), "@y%s@n", str);
                 perform_act(buf, ch, obj, vict_obj, i->character);

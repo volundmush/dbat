@@ -181,11 +181,11 @@ void aff_apply_modify(struct char_data *ch, int loc, int mod, int spec, char *ms
 void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, bool add) {
     if (add) {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-            ch->setAffectFlag(bitv, true);
+            ch->affect_flags.set(bitv, true);
         }
     } else {
         if (bitv != AFF_INFRAVISION || !IS_ANDROID(ch)) {
-            ch->setAffectFlag(bitv, false);
+            ch->affect_flags.set(bitv, false);
             mod = -mod;
         }
     }
@@ -197,9 +197,9 @@ void affect_modify(struct char_data *ch, int loc, int mod, int spec, long bitv, 
 void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const std::bitset<NUM_AFF_FLAGS>& bitv, bool add) {
     int i, j;
 
-    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->setAffectFlag(i, true);
+    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affect_flags.set(i, true);
     else {
-        for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->setAffectFlag(i, false);
+        for (i = 0; i < bitv.size(); i++) if(bitv.test(i)) ch->affect_flags.set(i, false);
         mod = -mod;
     }
 
@@ -209,9 +209,9 @@ void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const st
 void affect_modify_ar(struct char_data *ch, int loc, int mod, int spec, const std::unordered_set<AffectFlag>& bitv, bool add) {
     int i, j;
 
-    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.contains(static_cast<AffectFlag>(i))) ch->setAffectFlag(i, true);
+    if (add) for (i = 0; i < bitv.size(); i++) if(bitv.contains(static_cast<AffectFlag>(i))) ch->affect_flags.set(i, true);
     else {
-        for (i = 0; i < bitv.size(); i++) if(bitv.contains(static_cast<AffectFlag>(i))) ch->setAffectFlag(i, false);
+        for (i = 0; i < bitv.size(); i++) if(bitv.contains(static_cast<AffectFlag>(i))) ch->affect_flags.set(i, false);
         mod = -mod;
     }
 
@@ -233,7 +233,7 @@ void affect_total(struct char_data *ch) {
                 affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
                                  GET_EQ(ch, i)->affected[j].modifier,
                                  GET_EQ(ch, i)->affected[j].specific,
-                                 GET_OBJ_PERM(GET_EQ(ch, i)), false);
+                                 GET_OBJ_PERM(GET_EQ(ch, i)).getAll(), false);
     }
 
 
@@ -257,7 +257,7 @@ void affect_total(struct char_data *ch) {
                 affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,
                                  GET_EQ(ch, i)->affected[j].modifier,
                                  GET_EQ(ch, i)->affected[j].specific,
-                                 GET_OBJ_PERM(GET_EQ(ch, i)), true);
+                                 GET_OBJ_PERM(GET_EQ(ch, i)).getAll(), true);
         }
     }
 
@@ -407,7 +407,7 @@ void char_from_room(struct char_data *ch) {
     if (FIGHTING(ch) && !AFF_FLAGGED(ch, AFF_PURSUIT))
         stop_fighting(ch);
     if (AFF_FLAGGED(ch, AFF_PURSUIT) && FIGHTING(ch) == nullptr)
-        ch->setAffectFlag(AFF_PURSUIT, false);
+        ch->affect_flags.set(AFF_PURSUIT, false);
 
     auto &z = zone_table[r->zone];
     auto shared = ch->shared();
@@ -445,7 +445,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     }
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
-            ch->setPrefFlag(PRF_ARENAWATCH, false);
+            ch->pref_flags.set(PRF_ARENAWATCH, false);
             ARENA_IDNUM(ch) = -1;
         }
     }
@@ -682,7 +682,7 @@ void obj_to_room(struct obj_data *object, struct room_data *room) {
 
     if (GET_OBJ_TYPE(object) == ITEM_VEHICLE && !OBJ_FLAGGED(object, ITEM_UNBREAKABLE) &&
         GET_OBJ_VNUM(object) > 19199) {
-        object->setItemFlag(ITEM_UNBREAKABLE, true);
+        object->item_flags.set(ITEM_UNBREAKABLE, true);
     }
 
     // This section is now only going to be called during migrations.
@@ -1523,7 +1523,7 @@ struct obj_data *create_money(int amount) {
     SET_OBJ_VAL(obj, VAL_ALL_MATERIAL, MATERIAL_GOLD);
     SET_OBJ_VAL(obj, VAL_ALL_MAXHEALTH, 100);
     SET_OBJ_VAL(obj, VAL_ALL_HEALTH, 100);
-    obj->setWearFlag(ITEM_WEAR_TAKE, true);
+    obj->wear_flags.set(ITEM_WEAR_TAKE, true);
     SET_OBJ_VAL(obj, VAL_MONEY_SIZE, amount);
     GET_OBJ_COST(obj) = amount;
     obj->vn = NOTHING;
