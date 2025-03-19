@@ -121,8 +121,8 @@ void deletePlayerCharacter(std::weak_ptr<char_data> ref) {
 
     for(auto &[id, pd] : players) {
         // cleanups....
-        pd.sensePlayer.erase(ch->id);
-        pd.dubNames.erase(ch->id);
+        pd.sense_player.erase(ch->id);
+        pd.dub_names.erase(ch->id);
     }
 
     // Now we'll deal with the account.

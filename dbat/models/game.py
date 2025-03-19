@@ -15,7 +15,7 @@ class TimeData(BaseModel):
     maxage: int = 0
     logon: int = 0
     played: float = 0.0
-    secondsAged: float = 0.0
+    seconds_aged: float = 0.0
 
 
 class TimeInfoData(BaseModel):
@@ -70,30 +70,22 @@ class AffectedTypeData(AffectData):
     bitvector: int = 0
 
 class AccountData(BaseModel):
-    vn: int = -1
-    name: str = ""
-    passHash: pydantic.SecretStr = ""
+    id: int
+    name: str
+    password: pydantic.SecretStr
     email: str = ""
     created: int = 0
-    lastLogin: int = 0
-    lastLogout: int = 0
-    lastPasswordChanged: int = 0
-    totalPlayTime: float = 0.0
-    disabledReason: str = ""
-    disabledUntil: int = 0
-    adminLevel: int = 0
+    last_login: int = 0
+    last_logout: int = 0
+    last_change_password: int = 0
+    playtime: float = 0.0
+    disabled_reason: str = ""
+    disabled_until: int = 0
+    admin_level: int = 0
     rpp: int = 0
     slots: int = 3
     customs: typing.List[str] = Field(default_factory=list)
     characters: typing.List[int] = Field(default_factory=list)
-    
-    @property
-    def admin_level(self) -> int:
-        return self.adminLevel
-
-    @property
-    def id(self):
-        return self.vn
 
 class AliasData(BaseModel):
     name: str = ""
@@ -104,9 +96,9 @@ class PlayerData(BaseModel):
     id: int
     name: str
     aliases: typing.List[AliasData] = Field(default_factory=list)
-    sensePlayer: typing.Set[int] = Field(default_factory=set)
-    senseMemory: typing.Set[int] = Field(default_factory=set)
-    dubNames: typing.Dict[int, str] = Field(default_factory=dict)
+    sense_player: typing.Set[int] = Field(default_factory=set)
+    sense_memory: typing.Set[int] = Field(default_factory=set)
+    dub_names: typing.Dict[int, str] = Field(default_factory=dict)
     color_choices: typing.List[str] = Field(default_factory=list)
 
 
@@ -137,8 +129,16 @@ class ShopBuyData(BaseModel):
     type: int
     keywords: str
 
-class ShopData(BaseModel):
+class _Org(BaseModel):
     vnum: int = -1
+    only_class: typing.Set[str] = Field(default_factory=set)
+    not_class: typing.Set[str] = Field(default_factory=set)
+    only_race: typing.Set[str] = Field(default_factory=set)
+    not_race: typing.Set[str] = Field(default_factory=set)
+    keeper: int = -1
+    
+
+class ShopData(_Org):
     producing: typing.List[int] = Field(default_factory=list)
     profit_buy: float = 1.0
     profit_sell: float = 1.0
@@ -151,9 +151,8 @@ class ShopData(BaseModel):
     message_buy: str = ""
     message_sell: str = ""
     temper1: int = 0
-    keeper: int = -1
-    bitvector: int = 0
-    with_who: typing.Set[int] = Field(default_factory=set)
+    shop_flags: typing.Set[str] = Field(default_factory=set)
+    no_alignment: typing.Set[str] = Field(default_factory=set)
     in_room: typing.Set[int] = Field(default_factory=set)
     open1: int = 0
     close1: int = 0
@@ -162,16 +161,12 @@ class ShopData(BaseModel):
     bankAccount: int = 0
     lastsort: int = 0
 
-class GuildData(BaseModel):
-    vnum: int = -1
-    skills: typing.Set[int] = Field(default_factory=set)
-    feats: typing.Set[int] = Field(default_factory=set)
+class GuildData(_Org):
+    skills: typing.Set[str] = Field(default_factory=set)
     charge: float = 1.0
     no_such_skill: str = ""
     not_enough_gold: str = ""
     minlvl: int = 0
-    gm: int = -1
-    with_who: typing.Set[int] = Field(default_factory=set)
     open: int = 0
     close: int = 0
 

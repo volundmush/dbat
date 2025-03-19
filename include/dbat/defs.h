@@ -2728,3 +2728,10 @@ enum class DamType : uint8_t {
     physical = 1 << 0,
     ki = 1 << 1,
 };
+
+enum class ShopFlag : uint8_t {
+    start_fight = 0,
+    bank_money = 1,
+    allow_steal = 2,
+    no_broken = 3
+};

@@ -246,28 +246,28 @@ void from_json(const json& j, affect_t& a) {
 
 // account_data serialize/deserialize...
 void to_json(json& j, const account_data& a) {
-    if(a.vn != NOTHING)
-        j["vn"] = a.vn;
+    if(a.id != NOTHING)
+        j["vn"] = a.id;
     if(!a.name.empty())
         j["name"] = a.name;
-    if(!a.passHash.empty())
-        j["passHash"] = a.passHash;
+    if(!a.password.empty())
+        j["passHash"] = a.password;
     if(!a.email.empty())
         j["email"] = a.email;
     if(a.created)
         j["created"] = a.created;
-    if(a.lastLogin)
-        j["lastLogin"] = a.lastLogin;
-    if(a.lastLogout)
-        j["lastLogout"] = a.lastLogout;
-    if(a.lastPasswordChanged)
-        j["lastPasswordChanged"] = a.lastPasswordChanged;
-    if(a.totalPlayTime != 0.0)
-        j["totalPlayTime"] = a.totalPlayTime;
-    if(!a.disabledReason.empty())
-        j["disabledReason"] = a.disabledReason;
-    if(a.disabledUntil)
-        j["disabledUntil"] = a.disabledUntil;
+    if(a.last_login)
+        j["lastLogin"] = a.last_login;
+    if(a.last_logout)
+        j["lastLogout"] = a.last_logout;
+    if(a.last_change_password)
+        j["lastPasswordChanged"] = a.last_change_password;
+    if(a.playtime != 0.0)
+        j["totalPlayTime"] = a.playtime;
+    if(!a.disabled_reason.empty())
+        j["disabledReason"] = a.disabled_reason;
+    if(a.disabled_until)
+        j["disabledUntil"] = a.disabled_until;
     if(a.rpp)
         j["rpp"] = a.rpp;
     if(a.slots != 3)
@@ -281,27 +281,27 @@ void to_json(json& j, const account_data& a) {
 
 void from_json(const json& j, account_data& a) {
     if(j.contains("vn"))
-        a.vn = j["vn"];
+        a.id = j["vn"];
     if(j.contains("name"))
         a.name = j["name"];
     if(j.contains("passHash"))
-        a.passHash = j["passHash"];
+        a.password = j["passHash"];
     if(j.contains("email"))
         a.email = j["email"];
     if(j.contains("created"))
         a.created = j["created"];
     if(j.contains("lastLogin"))
-        a.lastLogin = j["lastLogin"];
+        a.last_login = j["lastLogin"];
     if(j.contains("lastLogout"))
-        a.lastLogout = j["lastLogout"];
+        a.last_logout = j["lastLogout"];
     if(j.contains("lastPasswordChanged"))
-        a.lastPasswordChanged = j["lastPasswordChanged"];
+        a.last_change_password = j["lastPasswordChanged"];
     if(j.contains("totalPlayTime"))
-        a.totalPlayTime = j["totalPlayTime"];
+        a.playtime = j["totalPlayTime"];
     if(j.contains("disabledReason"))
-        a.disabledReason = j["disabledReason"];
+        a.disabled_reason = j["disabledReason"];
     if(j.contains("disabledUntil"))
-        a.disabledUntil = j["disabledUntil"];
+        a.disabled_until = j["disabledUntil"];
     if(j.contains("rpp"))
         a.rpp = j["rpp"];
     if(j.contains("slots"))
@@ -541,9 +541,31 @@ static void dump_dgscripts(const std::filesystem::path &loc) {
     dump_to_file(loc, "dgscripts.json", j);
 }
 
+// org_data...
+void to_json(json& j, const org_data& o) {
+    j["vnum"] = o.vnum;
+    if(!o.not_alignment.empty()) j["not_alignment"] = o.not_alignment;
+    if(!o.not_race.empty()) j["not_race"] = o.not_race;
+    if(!o.only_race.empty()) j["only_race"] = o.only_race;
+    if(!o.not_class.empty()) j["not_class"] = o.not_class;
+    if(!o.only_class.empty()) j["only_class"] = o.only_class;
+    if(o.keeper != NOTHING) j["keeper"] = o.keeper;
+}
+
+void from_json(const json& j, org_data& o) {
+    if(j.contains("vnum")) o.vnum = j["vnum"];
+    if(j.contains("not_alignment")) o.not_alignment = j["not_alignment"].get<std::unordered_set<MoralAlign>>();
+    if(j.contains("not_race")) o.not_race = j["not_race"].get<std::unordered_set<RaceID>>();
+    if(j.contains("only_race")) o.only_race = j["only_race"].get<std::unordered_set<RaceID>>();
+    if(j.contains("not_class")) o.not_class = j["not_class"].get<std::unordered_set<SenseiID>>();
+    if(j.contains("only_class")) o.only_class = j["only_class"].get<std::unordered_set<SenseiID>>();
+    if(j.contains("keeper")) o.keeper = j["keeper"];
+}
+
 // shops serialize/deserialize...
 void to_json(json&j, const shop_data& s) {
-    j["vnum"] = s.vnum;
+    to_json(j, static_cast<org_data>(s));
+    
     if(!s.producing.empty()) j["producing"] = s.producing;
     if(s.profit_buy) j["profit_buy"] = s.profit_buy;
     if(s.profit_sell) j["profit_sell"] = s.profit_sell;
@@ -556,9 +578,7 @@ void to_json(json&j, const shop_data& s) {
     if(s.message_buy && strlen(s.message_buy)) j["message_buy"] = s.message_buy;
     if(s.message_sell && strlen(s.message_sell)) j["message_sell"] = s.message_sell;
     if(s.temper1) j["temper1"] = s.temper1;
-    if(s.bitvector) j["bitvector"] = s.bitvector;
-    if(s.keeper != NOBODY) j["keeper"] = s.keeper;
-    for(auto i = 0; i < 79; i++) if(IS_SET_AR(s.with_who, i)) j["with_who"].push_back(i);
+    j["shop_flags"] = s.shop_flags;
     for(auto r : s.in_room) j["in_room"].push_back(r);
     if(s.open1) j["open1"] = s.open1;
     if(s.close1) j["close1"] = s.close1;
@@ -569,7 +589,7 @@ void to_json(json&j, const shop_data& s) {
 }
 
 void from_json(const json& j, shop_data& s) {
-    if(j.contains("vnum")) s.vnum = j["vnum"];
+    from_json(j, static_cast<org_data&>(s));
     if(j.contains("producing")) s.producing = j["producing"].get<std::vector<int>>();
     if(j.contains("profit_buy")) s.profit_buy = j["profit_buy"];
     if(j.contains("profit_sell")) s.profit_sell = j["profit_sell"];
@@ -582,13 +602,9 @@ void from_json(const json& j, shop_data& s) {
     if(j.contains("message_buy")) s.message_buy = strdup(j["message_buy"].get<std::string>().c_str());
     if(j.contains("message_sell")) s.message_sell = strdup(j["message_sell"].get<std::string>().c_str());
     if(j.contains("temper1")) s.temper1 = j["temper1"];
-    if(j.contains("bitvector")) s.bitvector = j["bitvector"];
-    if(j.contains("keeper")) s.keeper = j["keeper"];
-    if(j.contains("with_who")) {
-        for(auto &w : j["with_who"]) {
-            SET_BIT_AR(s.with_who, w.get<int>());
-        }
-    }
+    
+    if(j.contains("shop_flags")) s.shop_flags = j["shop_flags"].get<std::unordered_set<ShopFlag>>();
+
     if(j.contains("in_room")) {
         for(auto &r : j["in_room"]) {
             s.in_room.insert(r.get<int>());
@@ -622,43 +638,25 @@ static void dump_shops(const std::filesystem::path &loc) {
 
 // guilds serialize/deserialize...
 void to_json(json& j, const guild_data& g) {
-    j["vnum"] = g.vnum;
+    to_json(j, static_cast<org_data>(g));
     if(!g.skills.empty()) j["skills"] = g.skills;
     if(!g.feats.empty()) j["feats"] = g.feats;
     if(g.charge != 1.0) j["charge"] = g.charge;
     if(!g.no_such_skill.empty()) j["no_such_skill"] = g.no_such_skill;
     if(!g.not_enough_gold.empty()) j["not_enough_gold"] = g.not_enough_gold;
     if(g.minlvl) j["minlvl"] = g.minlvl;
-    if(g.gm != NOBODY) j["gm"] = g.gm;
-    for(auto i = 0; i < 79; i++) if(IS_SET_AR(g.with_who, i)) j["with_who"].push_back(i);
     if(g.open) j["open"] = g.open;
     if(g.close) j["close"] = g.close;
 }
 
 void from_json(const json& j, guild_data& g) {
-    if(j.contains("vnum")) g.vnum = j["vnum"];
-    if(j.contains("skills")) {
-        auto skills = j["skills"].get<std::vector<int>>();
-        for(auto s : skills) {
-            g.skills.insert(s);
-        }
-    }
-    if(j.contains("feats")) {
-        auto feats = j["feats"].get<std::vector<int>>();
-        for(auto f : feats) {
-            g.feats.insert(f);
-        }
-    }
+    from_json(j, static_cast<org_data&>(g));
+    if(j.contains("skills")) g.skills = j["skills"].get<std::unordered_set<SkillID>>();
+    if(j.contains("feats")) g.feats = j["feats"].get<std::unordered_set<uint8_t>>();
     if(j.contains("charge")) g.charge = j["charge"];
     if(j.contains("no_such_skill")) g.no_such_skill = j["no_such_skill"];
     if(j.contains("not_enough_gold")) g.not_enough_gold = j["not_enough_gold"];
     if(j.contains("minlvl")) g.minlvl = j["minlvl"];
-    if(j.contains("gm")) g.gm = j["gm"];
-    if(j.contains("with_who")) {
-        for(auto &w : j["with_who"]) {
-            SET_BIT_AR(g.with_who, w.get<int>());
-        }
-    }
     if(j.contains("open")) g.open = j["open"];
     if(j.contains("close")) g.close = j["close"];
 }
@@ -1667,21 +1665,21 @@ void load_npc_prototypes(const std::filesystem::path& loc) {
 void to_json(json& j, const player_data& p) {
     j["id"] = p.id;
     j["name"] = p.name;
-    if(p.account) j["account"] = p.account->vn;
+    if(p.account) j["account"] = p.account->id;
 
     for(auto &a : p.aliases) {
         j["aliases"].push_back(a);
     }
 
-    for(auto &i : p.sensePlayer) {
+    for(auto &i : p.sense_player) {
         j["sensePlayer"].push_back(i);
     }
 
-    for(auto &i : p.senseMemory) {
+    for(auto &i : p.sense_memory) {
         j["senseMemory"].push_back(i);
     }
 
-    for(auto &i : p.dubNames) {
+    for(auto &i : p.dub_names) {
         j["dubNames"].push_back(i);
     }
 
@@ -1707,19 +1705,19 @@ void from_json(const json& j, player_data& p) {
 
     if(j.contains("sensePlayer")) {
         for(auto &i : j["sensePlayer"]) {
-            p.sensePlayer.insert(i.get<int64_t>());
+            p.sense_player.insert(i.get<int64_t>());
         }
     }
 
     if(j.contains("senseMemory")) {
         for(auto &i : j["senseMemory"]) {
-            p.senseMemory.insert(i.get<vnum>());
+            p.sense_memory.insert(i.get<vnum>());
         }
     }
 
     if(j.contains("dubNames")) {
         for(auto &i : j["dubNames"]) {
-            p.dubNames.emplace(i[0].get<int64_t>(), i[1].get<std::string>());
+            p.dub_names.emplace(i[0].get<int64_t>(), i[1].get<std::string>());
         }
     }
 

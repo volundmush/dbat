@@ -130,8 +130,8 @@ int delete_mobile(mob_rnum refpt) {
     for (auto &g : guild_index) {
         /* Find the guild for this trainer and reset it's trainer to
          * -1 to keep the guild so it could be assigned to someone else */
-        if (g.second.gm == refpt) {
-            g.second.gm = NOBODY;
+        if (g.second.keeper == refpt) {
+            g.second.keeper = NOBODY;
         }
     }
 
@@ -424,11 +424,11 @@ std::unordered_set<struct obj_data*> char_data::gatherObjects(const std::functio
 }
 
 void char_data::ageBy(double addedTime) {
-    this->time.secondsAged += addedTime;
+    this->time.seconds_aged += addedTime;
 }
 
 void char_data::setAge(double newAge) {
-    this->time.secondsAged = newAge * SECS_PER_GAME_YEAR;
+    this->time.seconds_aged = newAge * SECS_PER_GAME_YEAR;
 }
 
 bool char_data::toggleMobFlag(int flag) {

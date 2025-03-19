@@ -31,13 +31,12 @@ extern guild_rnum real_guild(guild_vnum vnum);
  */
 
 #define G_NUM(i)        ((i)->vnum)
-#define G_TRAINER(i)    ((i)->gm)
+#define G_TRAINER(i)    ((i)->keeper)
 #define G_OPEN(i)        ((i)->open)
 #define G_CLOSE(i)        ((i)->close)
 #define G_FUNC(i)        ((i)->func)
 #define G_CHARGE(i)        ((i)->charge)
 #define G_MINLVL(i)        ((i)->minlvl)
-#define G_WITH_WHO(i)    ((i)->with_who)
 #define G_NO_SKILL(i)     ((i)->no_such_skill)
 #define G_NO_GOLD(i)     ((i)->not_enough_gold)
 

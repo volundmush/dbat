@@ -536,5 +536,5 @@ time_info_data::time_info_data(int64_t timestamp) {
 }
 
 int time_data::currentAge() {
-    return secondsAged / SECS_PER_GAME_YEAR;
+    return seconds_aged / SECS_PER_GAME_YEAR;
 }

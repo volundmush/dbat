@@ -63,17 +63,17 @@ struct obj_spellbook_spell {
 
 struct account_data {
     account_data() = default;
-    vnum vn{NOTHING};
+    int id{NOTHING};
     std::string name;
-    std::string passHash;
+    std::string password;
     std::string email;
     time_t created{};
-    time_t lastLogin{};
-    time_t lastLogout{};
-    time_t lastPasswordChanged{};
-    double totalPlayTime{};
-    std::string disabledReason;
-    time_t disabledUntil{0};
+    time_t last_login{};
+    time_t last_logout{};
+    time_t last_change_password{};
+    double playtime{};
+    std::string disabled_reason;
+    time_t disabled_until{0};
     int adminLevel{};
     int rpp{};
     int slots{3};
@@ -96,9 +96,9 @@ struct player_data {
     struct account_data *account{};
     struct char_data *character{};
     std::vector<struct alias_data> aliases;    /* Character's aliases                  */
-    std::unordered_set<int> sensePlayer;
-    std::unordered_set<mob_vnum> senseMemory;
-    std::map<int, std::string> dubNames;
+    std::unordered_set<int> sense_player;
+    std::unordered_set<mob_vnum> sense_memory;
+    std::map<int, std::string> dub_names;
     char *color_choices[NUM_COLOR]{}; /* Choices for custom colors		*/
     struct txt_block *comm_hist[NUM_HIST]{}; /* Player's communications history     */
 };
@@ -454,7 +454,7 @@ struct time_data {
     int64_t maxage{};    /* This represents death by natural causes (UNUSED) */
     time_t logon{};    /* Time of the last logon (used to calculate played) */
     double played{};    /* This is the total accumulated time played in secs */
-    double secondsAged{}; // The player's current IC age, in seconds.
+    double seconds_aged{}; // The player's current IC age, in seconds.
     int currentAge();
 };
 
@@ -1634,11 +1634,21 @@ struct shop_buy_data {
     std::string keywords{};
 };
 
-struct shop_data {
+struct org_data {
+    int vnum{NOTHING};        /* Virtual number of this shop		*/
+    std::unordered_set<MoralAlign> not_alignment;    /* Neutral, lawful, etc.		*/
+    std::unordered_set<SenseiID> only_class, not_class;    /* Only these classes can shop here	*/
+    std::unordered_set<RaceID> only_race, not_race;    /* Only these races can shop here	*/
+    mob_vnum keeper{NOBODY};                   /* GM's vnum */
+    std::vector<std::weak_ptr<char_data>> getKeepers();
+    SpecialFunc func{};        /* Secondary spec_proc for keeper	*/
+    std::string customerString();
+};
+
+struct shop_data : public org_data {
     ~shop_data();
     void add_product(obj_vnum v);
     void remove_product(obj_vnum v);
-    shop_vnum vnum{};        /* Virtual number of this shop		*/
     std::vector<obj_vnum> producing{};        /* Which item to produce (virtual)	*/
     float profit_buy{};        /* Factor to multiply cost with		*/
     float profit_sell{};        /* Factor to multiply cost with		*/
@@ -1651,34 +1661,26 @@ struct shop_data {
     char *message_buy{};        /* Message when player buys item	*/
     char *message_sell{};        /* Message when player sells item	*/
     int temper1{};        /* How does keeper react if no money	*/
-    bitvector_t bitvector{};    /* Can attack? Use bank? Cast here?	*/
-    mob_vnum keeper{NOBODY};    /* The mobile who owns the shop (rnum)	*/
-    bitvector_t with_who[SW_ARRAY_MAX]{};/* Who does the shop trade with?	*/
+    std::unordered_set<ShopFlag> shop_flags{};    /* Can attack? Use bank? Cast here?	*/
     std::unordered_set<room_vnum> in_room;        /* Where is the shop?			*/
     int open1{}, open2{};        /* When does the shop open?		*/
     int close1{}, close2{};    /* When does the shop close?		*/
     int bankAccount{};        /* Store all gold over 15000 (disabled)	*/
     int lastsort{};        /* How many items are sorted in inven?	*/
-    SpecialFunc func{};        /* Secondary spec_proc for shopkeeper	*/
-    
-    std::vector<std::weak_ptr<char_data>> getKeepers();
+
     bool isProducing(obj_vnum vn);
     void runPurge();
 };
 
-struct guild_data {
-    room_vnum vnum{NOBODY};                /* number of the guild */
+struct guild_data : public org_data {
     void toggle_skill(uint16_t skill_id);
     void toggle_feat(uint16_t skill_id);
-    std::unordered_set<uint16_t> skills;  /* array to keep track of which feats things we'll train */
+    std::unordered_set<SkillID> skills;  /* array to keep track of which feats things we'll train */
     float charge{1.0};                  /* charge * skill level = how much we'll charge */
     std::string no_such_skill{};           /* message when we don't teach that skill */
     std::string not_enough_gold{};         /* message when the student doesn't have enough gold */
     int minlvl{0};                    /* Minumum level guildmaster will train */
-    mob_vnum gm{NOBODY};                   /* GM's vnum */
-    bitvector_t with_who[GW_ARRAY_MAX]{};    /* whom we dislike */
     int open{0}, close{28};               /* when we will train */
-    SpecialFunc func{};                /* secondary spec_proc for the GM */
     std::unordered_set<uint8_t> feats;  /* array to keep track of which feats things we'll train */
 };
 

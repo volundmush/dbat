@@ -197,7 +197,7 @@ void sedit_setup_new(struct descriptor_data *d) {
     shop_buy_data* buy_data = new shop_buy_data();
     shop->type.push_back(*buy_data);
     S_BUYTYPE(shop, 0) = NOTHING;
-    SET_BIT_AR(S_NOTRADE(shop), TRADE_NOBROKEN);
+    shop->shop_flags.insert(ShopFlag::no_broken);
 
     /*
      * Presto! A shop.
@@ -329,7 +329,7 @@ void sedit_shop_flags_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s   %s", i + 1, shop_bits[i],
                         !(++count % 2) ? "\r\n" : "");
     }
-    sprintbit(S_BITVECTOR(OLC_SHOP(d)), shop_bits, bits, sizeof(bits));
+    //sprintbit(S_BITVECTOR(OLC_SHOP(d)), shop_bits, bits, sizeof(bits));
     write_to_output(d, "\r\nCurrent Shop Flags : @c%s@n\r\nEnter choice : ", bits);
     OLC_MODE(d) = SEDIT_SHOP_FLAGS;
 }
@@ -345,7 +345,7 @@ void sedit_no_trade_menu(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s   %s", i + 1, trade_letters[i],
                         !(++count % 2) ? "\r\n" : "");
     }
-    sprintbitarray(S_NOTRADE(OLC_SHOP(d)), trade_letters, sizeof(bits), bits);
+    //sprintbitarray(S_NOTRADE(OLC_SHOP(d)), trade_letters, sizeof(bits), bits);
     write_to_output(d, "\r\nCurrently won't trade with: @c%s@n\r\n"
                        "Enter choice : ", bits);
     OLC_MODE(d) = SEDIT_NOTRADE;
@@ -381,8 +381,8 @@ void sedit_disp_menu(struct descriptor_data *d) {
     shop = OLC_SHOP(d);
 
     clear_screen(d);
-    sprintbitarray(S_NOTRADE(shop), trade_letters, sizeof(buf1), buf1);
-    sprintbit(S_BITVECTOR(shop), shop_bits, buf2, sizeof(buf2));
+    //sprintbitarray(S_NOTRADE(shop), trade_letters, sizeof(buf1), buf1);
+    //sprintbit(S_BITVECTOR(shop), shop_bits, buf2, sizeof(buf2));
     write_to_output(d,
                     "-- Shop Number : [@c%d@n]\r\n"
                     "@g0@n) Keeper      : [@c%d@n] @y%s\r\n"
@@ -758,14 +758,14 @@ void sedit_parse(struct descriptor_data *d, char *arg) {
             return;
         case SEDIT_SHOP_FLAGS:
             if ((i = LIMIT(atoi(arg), 0, NUM_SHOP_FLAGS)) > 0) {
-                TOGGLE_BIT(S_BITVECTOR(OLC_SHOP(d)), 1 << (i - 1));
+                //TOGGLE_BIT(S_BITVECTOR(OLC_SHOP(d)), 1 << (i - 1));
                 sedit_shop_flags_menu(d);
                 return;
             }
             break;
         case SEDIT_NOTRADE:
             if ((i = LIMIT(atoi(arg), 0, NUM_TRADERS)) > 0) {
-                TOGGLE_BIT_AR(S_NOTRADE(OLC_SHOP(d)), i - 1);
+                //TOGGLE_BIT_AR(S_NOTRADE(OLC_SHOP(d)), i - 1);
                 sedit_no_trade_menu(d);
                 return;
             }

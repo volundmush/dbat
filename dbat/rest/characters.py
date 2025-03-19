@@ -24,7 +24,7 @@ conn_id_counter = count(start=1)
 
 @router.get("/", response_model=typing.List[PlayerData])
 async def get_characters(user: Annotated[AccountData, Depends(get_current_user)]):
-    if not user.adminLevel > 0:
+    if not user.admin_level > 0:
         raise HTTPException(
             status_code=403, detail="You do not have permission to view all characters."
         )
@@ -39,7 +39,7 @@ async def get_character(
     user: Annotated[AccountData, Depends(get_current_user)], character_id: int
 ):
     character = characters_db.get_character(character_id)
-    if character.id not in user.characters and user.adminLevel == 0:
+    if character.id not in user.characters and user.admin_level == 0:
         raise HTTPException(status_code=403, detail="Character does not belong to you.")
     return character
 
@@ -48,7 +48,7 @@ async def get_character(
     user: Annotated[AccountData, Depends(get_current_user)], character_name: str
 ):
     character = characters_db.find_character(character_name)
-    if character.id not in user.characters and user.adminLevel == 0:
+    if character.id not in user.characters and user.admin_level == 0:
         raise HTTPException(status_code=403, detail="Character does not belong to you.")
     return character
 
@@ -81,7 +81,7 @@ async def stream_character_events(
 
     conn_id = next(conn_id_counter)
     # This might raise an HTTPException!
-    dbat_ext.create_join_session(user.vn, character_id, conn_id, ip)
+    dbat_ext.create_join_session(user.id, character_id, conn_id, ip)
     
     return StreamingResponse(event_generator(conn_id), media_type="text/event-stream")
 

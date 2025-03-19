@@ -206,10 +206,10 @@ const char *trade_letters[NUM_TRADERS + 1] = {
 
 
 const char *shop_bits[] = {
-        "WILL_FIGHT",
-        "USES_BANK",
-        "ALLOW_STEAL",
-        "\n"
+    "WILL_FIGHT",
+    "USES_BANK",
+    "ALLOW_STEAL",
+    "\n"
 };
 
 static int is_ok_char(struct char_data *keeper, struct char_data *ch, vnum shop_nr) {
@@ -222,41 +222,44 @@ static int is_ok_char(struct char_data *keeper, struct char_data *ch, vnum shop_
     }
     if (ADM_FLAGGED(ch, ADM_ALLSHOPS))
         return (true);
+    
+    auto &sh = shop_index[shop_nr];
 
-    if ((GET_ALIGNMENT(ch) > 0 && NOTRADE_GOOD(shop_nr)) ||
-        (GET_ALIGNMENT(ch) < 0 && NOTRADE_EVIL(shop_nr)) ||
-        (GET_ALIGNMENT(ch) == 0 && NOTRADE_NEUTRAL(shop_nr))) {
+    auto align = GET_ALIGNMENT(ch);
+    if(align == 0 && sh.not_alignment.contains(MoralAlign::neutral)
+       || align > 0 && sh.not_alignment.contains(MoralAlign::good)
+       || align < 0 && sh.not_alignment.contains(MoralAlign::evil)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_ALIGN);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
     }
+
     if (IS_NPC(ch))
         return (true);
 
-    if ((IS_ROSHI(ch) && NOTRADE_WIZARD(shop_nr)) ||
-        (IS_PICCOLO(ch) && NOTRADE_CLERIC(shop_nr)) ||
-        (IS_KRANE(ch) && NOTRADE_ROGUE(shop_nr)) ||
-        (IS_BARDOCK(ch) && NOTRADE_MONK(shop_nr)) ||
-        (IS_GINYU(ch) && NOTRADE_PALADIN(shop_nr)) ||
-        (IS_NAIL(ch) && NOTRADE_FIGHTER(shop_nr)) ||
-        (IS_KABITO(ch) && NOTRADE_BARBARIAN(shop_nr)) ||
-        (IS_FRIEZA(ch) && NOTRADE_SORCERER(shop_nr)) ||
-        (IS_ANDSIX(ch) && NOTRADE_BARD(shop_nr)) ||
-        (IS_DABURA(ch) && NOTRADE_RANGER(shop_nr)) ||
-        (IS_TAPION(ch) && NOTRADE_DRUID(shop_nr)) ||
-        (IS_NAIL(ch) && NOTRADE_FIGHTER(shop_nr)) ||
-        (IS_JINTO(ch) && NOTRADE_ARCANE_ARCHER(shop_nr)) ||
-        (IS_TSUNA(ch) && NOTRADE_ARCANE_TRICKSTER(shop_nr)) ||
-        (IS_KURZAK(ch) && NOTRADE_ARCHMAGE(shop_nr))) {
-
+    if (sh.not_class.contains(ch->chclass)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
     }
-    if ((IS_HUMAN(ch) && NOTRADE_HUMAN(shop_nr)) ||
-        (IS_ICER(ch) && NOTRADE_ICER(shop_nr)) ||
-        (IS_SAIYAN(ch) && NOTRADE_SAIYAN(shop_nr)) ||
-        (IS_KONATSU(ch) && NOTRADE_KONATSU(shop_nr))) {
+
+    for(auto &cl : sh.only_class) {
+        if(cl != ch->chclass) {
+            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
+            do_tell(keeper, buf, cmd_tell, 0);
+            return (false);
+        }
+    }
+
+    for(auto &race : sh.only_race) {
+        if(race != ch->race) {
+            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_RACE);
+            do_tell(keeper, buf, cmd_tell, 0);
+            return (false);
+        }
+    }
+
+    if (sh.not_race.contains(ch->race)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_RACE);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
@@ -268,7 +271,9 @@ static int is_ok_char(struct char_data *keeper, struct char_data *ch, vnum shop_
 static int is_ok_obj(struct char_data *keeper, struct char_data *ch, struct obj_data *obj, vnum shop_nr) {
     char buf[MAX_INPUT_LENGTH];
 
-    if (OBJ_FLAGGED(obj, ITEM_BROKEN) && NOTRADE_BROKEN(shop_nr)) {
+    auto &sh = shop_index[shop_nr];
+
+    if (OBJ_FLAGGED(obj, ITEM_BROKEN) && sh.shop_flags.contains(ShopFlag::no_broken)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_BUY_BROKEN);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
@@ -913,8 +918,8 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
     do_tell(keeper, tempbuf, cmd_tell, 0);
 
     send_to_char(ch, "You now have %s.\r\n", tempstr);
-
-    if (SHOP_USES_BANK(shop_nr))
+    auto &sh = shop_index[shop_nr];
+    if (sh.shop_flags.contains(ShopFlag::bank_money))
         if (GET_GOLD(keeper) > MAX_OUTSIDE_BANK) {
             SHOP_BANK(shop_nr) += (GET_GOLD(keeper) - MAX_OUTSIDE_BANK);
             keeper->set(CharMoney::carried, MAX_OUTSIDE_BANK);
@@ -1340,7 +1345,7 @@ SPECIAL(shop_keeper) {
     if (CMD_IS("steal")) {
         char argm[MAX_INPUT_LENGTH];
 
-        if (!SHOP_ALLOW_STEAL(shop_nr)) {
+        if (!sh.shop_flags.contains(ShopFlag::allow_steal)) {
             snprintf(argm, sizeof(argm), "$N shouts '%s'", MSG_NO_STEAL_HERE);
             act(argm, false, ch, nullptr, keeper, TO_CHAR);
             act(argm, false, ch, nullptr, keeper, TO_ROOM);
@@ -1381,9 +1386,8 @@ int ok_damage_shopkeeper(struct char_data *ch, struct char_data *victim) {
     if (AFF_FLAGGED(victim, AFF_CHARM))
         return (true);
 
-    for (auto &sh : shop_index) {
-        sindex = sh.first;
-        if (GET_MOB_RNUM(victim) == SHOP_KEEPER(sindex) && !SHOP_KILL_CHARS(sindex)) {
+    for (auto &[sindex, sh] : shop_index) {
+        if (GET_MOB_RNUM(victim) == SHOP_KEEPER(sindex) && !sh.shop_flags.contains(ShopFlag::start_fight)) {
             char buf[MAX_INPUT_LENGTH];
 
             snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_CANT_KILL_KEEPER);
@@ -1418,35 +1422,70 @@ void assign_the_shopkeepers() {
     }
 }
 
-static char *customer_string(vnum shop_nr, int detailed) {
-    int sindex = 0, flag = 0, nlen;
-    size_t len = 0;
-    static char buf[256];
+std::string org_data::customerString() {
+    std::vector<std::string> sections;
 
-    while (*trade_letters[sindex] != '\n' && len + 1 < sizeof(buf)) {
-        if (detailed) {
-            if (!IS_SET_AR(SHOP_TRADE_WITH(shop_nr), flag)) {
-                nlen = snprintf(buf + len, sizeof(buf) - len, ", %s", trade_letters[sindex]);
-
-                if (len + nlen >= sizeof(buf) || nlen < 0)
-                    break;
-
-                len += nlen;
-            }
-        } else {
-            buf[len++] = (IS_SET_AR(SHOP_TRADE_WITH(shop_nr), flag) ? '_' : *trade_letters[sindex]);
-            buf[len] = '\0';
-
-            if (len >= sizeof(buf))
-                break;
+    if(!not_alignment.empty()) {
+        std::vector<std::string> aligns;
+        for(auto align : not_alignment) {
+            auto name = magic_enum::enum_name(align);
+            aligns.emplace_back(name);
         }
-
-        sindex++;
-        flag += 1;
+        std::string section = "no: " + boost::join(aligns, ", ");
+        sections.emplace_back(section);
     }
 
-    buf[sizeof(buf) - 1] = '\0';
-    return (buf);
+    if(!not_race.empty()) {
+        std::vector<std::string> races;
+        for(auto &race : not_race) {
+            auto name = magic_enum::enum_name(race);
+            races.emplace_back(name);
+        }
+        std::string section = "no: " + boost::join(races, ", ");
+        sections.emplace_back(section);
+    }
+
+    if(!not_class.empty()) {
+        std::vector<std::string> classes;
+        for(auto &cls : not_class) {
+            auto name = magic_enum::enum_name(cls);
+            classes.emplace_back(name);
+        }
+        std::string section = "no: " + boost::join(classes, ", ");
+        sections.emplace_back(section);
+    }
+
+    if(!only_race.empty()) {
+        std::vector<std::string> races;
+        for(auto &race : only_race) {
+            auto name = magic_enum::enum_name(race);
+            races.emplace_back(name);
+        }
+        std::string section = "only: " + boost::join(races, ", ");
+        sections.emplace_back(section);
+    }
+
+    if(!only_class.empty()) {
+        std::vector<std::string> classes;
+        for(auto &cls : only_class) {
+            auto name = magic_enum::enum_name(cls);
+            classes.emplace_back(name);
+        }
+        std::string section = "only: " + boost::join(classes, ", ");
+        sections.emplace_back(section);
+    }
+
+    return boost::join(sections, "\r\n");
+}
+
+static char *customer_string(vnum shop_nr, int detailed) {
+    static char buf[MAX_STRING_LENGTH];
+    auto &sh = shop_index[shop_nr];
+    
+
+    snprintf(buf, sizeof(buf), "%s", sh.customerString().c_str());
+
+    return buf;
 }
 
 /* END_OF inefficient */
@@ -1618,8 +1657,8 @@ static void list_detailed_shop(struct char_data *ch, vnum shop_nr) {
 
     /* Need a local buffer. */
     {
-        char buf1[128];
-        sprintbit(SHOP_BITVECTOR(shop_nr), shop_bits, buf1, sizeof(buf1));
+        char buf1[MAX_STRING_LENGTH];
+        sprintbitarray(shop_index[shop_nr].shop_flags, shop_bits, 4, buf1);
         send_to_char(ch, "Bits:       %s\r\n", buf1);
     }
 }
@@ -1668,7 +1707,7 @@ void shop_data::remove_product(obj_vnum v) {
     std::remove_if(producing.begin(), producing.end(), [&](obj_vnum &o) {return o == v;});
 }
 
-std::vector<std::weak_ptr<char_data>> shop_data::getKeepers() {
+std::vector<std::weak_ptr<char_data>> org_data::getKeepers() {
     return characterSubscriptions.all(fmt::format("vnum_{}", keeper));
 }
 

@@ -33,10 +33,10 @@ account_data *createAccount(const std::string &name, const std::string &password
     auto nextId = account_data::getNextID();
     auto a = accounts[nextId];
     a.name = name;
-    a.vn = nextId;
-    a.passHash = password;
+    a.id = nextId;
+    a.password = password;
     a.created = time(nullptr);
-    a.lastLogin = time(nullptr);
+    a.last_login = time(nullptr);
 
     return findAccount(name);
 }

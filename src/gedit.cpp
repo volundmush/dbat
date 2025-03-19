@@ -212,7 +212,7 @@ void gedit_select_skills_menu(struct descriptor_data *d) {
         if (spell_info[i].skilltype == SKTYPE_SKILL &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.count(i)), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(static_cast<SkillID>(i))), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -241,7 +241,7 @@ void gedit_select_spells_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_SPELL) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.count(i)), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(static_cast<SkillID>(i))), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -294,7 +294,7 @@ void gedit_select_lang_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_LANG) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.count(i)), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(static_cast<SkillID>(i))), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -321,7 +321,7 @@ void gedit_select_wp_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_WEAPON) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.count(i)), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(static_cast<SkillID>(i))), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -350,7 +350,7 @@ void gedit_no_train_menu(struct descriptor_data *d) {
                         !(++count % 2) ? "\r\n" : "");
     }
 
-    sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(bits), bits);
+    //sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(bits), bits);
     write_to_output(d, "\r\nCurrent train flags: @c%s@n\r\n"
                        "Enter choice, 0 to quit : ", bits);
     OLC_MODE(d) = GEDIT_NO_TRAIN;
@@ -367,7 +367,7 @@ void gedit_disp_menu(struct descriptor_data *d) {
 
     clear_screen(d);
 
-    sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(buf1), buf1);
+    //sprintbitarray(G_WITH_WHO(guilddata), trade_letters, sizeof(buf1), buf1);
 
     write_to_output(d,
                     "-- Guild Number: [@c%d@n]\r\n"
@@ -561,7 +561,7 @@ void gedit_parse(struct descriptor_data *d, char *arg) {
             break;
         case GEDIT_NO_TRAIN:
             if ((i = LIMIT(atoi(arg), 0, NUM_TRADERS - 1)) > 0) {
-                TOGGLE_BIT_AR(G_WITH_WHO(OLC_GUILD(d)), i - 1);
+                //TOGGLE_BIT_AR(G_WITH_WHO(OLC_GUILD(d)), i - 1);
                 gedit_no_train_menu(d);
                 return;
             }

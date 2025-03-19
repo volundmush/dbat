@@ -33,9 +33,12 @@ void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_st
     S_CLOSE2(tshop) = S_CLOSE2(fshop);
     S_BANK(tshop) = S_BANK(fshop);
     S_BROKE_TEMPER(tshop) = S_BROKE_TEMPER(fshop);
-    S_BITVECTOR(tshop) = S_BITVECTOR(fshop);
-    for (i = 0; i < SW_ARRAY_MAX; i++)
-        S_NOTRADE(tshop)[i] = S_NOTRADE(fshop)[i];
+    tshop->shop_flags = fshop->shop_flags;
+    tshop->not_alignment = fshop->not_alignment;
+    tshop->only_race = fshop->only_race;
+    tshop->only_class = fshop->only_class;
+    tshop->not_race = fshop->not_race;
+    tshop->not_class = fshop->not_class;
     S_SORT(tshop) = S_SORT(fshop);
     S_BUYPROFIT(tshop) = S_BUYPROFIT(fshop);
     S_SELLPROFIT(tshop) = S_SELLPROFIT(fshop);

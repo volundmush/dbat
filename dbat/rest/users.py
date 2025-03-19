@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/", response_model=typing.List[AccountData])
 async def get_users(user: Annotated[AccountData, Depends(get_current_user)]):
-    if user.adminLevel < 1:
+    if user.admin_level < 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
         )
@@ -31,7 +31,7 @@ async def get_users(user: Annotated[AccountData, Depends(get_current_user)]):
 async def get_user(
     user_id: int, user: Annotated[AccountData, Depends(get_current_user)]
 ):
-    if user.adminLevel < 1 and user.id != user_id:
+    if user.admin_level < 1 and user.id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
         )
@@ -43,7 +43,7 @@ async def get_user(
 async def get_user(
     user_name: str, user: Annotated[AccountData, Depends(get_current_user)]
 ):
-    if user.adminLevel < 1 and user.name.upper() != user_name.upper():
+    if user.admin_level < 1 and user.name.upper() != user_name.upper():
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
         )
@@ -56,7 +56,7 @@ async def get_user(
 async def get_user_characters(
     user_id: int, user: Annotated[AccountData, Depends(get_current_user)]
 ):
-    if user.adminLevel < 1 and user.id != user_id:
+    if user.admin_level < 1 and user.id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
         )
@@ -71,13 +71,13 @@ async def get_user_characters(
 async def delete_user(
     user_id: int, user: Annotated[AccountData, Depends(get_current_user)]
 ):
-    if user.adminLevel < 5 and user.id != user_id:
+    if user.admin_level < 5 and user.id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
         )
 
     found = users_db.get_user(user_id)
-    if found.adminLevel > user.adminLevel:
+    if found.admin_level > user.admin_level:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions."
         )

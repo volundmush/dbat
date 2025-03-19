@@ -855,13 +855,13 @@ int readIntro(struct char_data *ch, struct char_data *vict) {
 
     auto &p = players[ch->id];
 
-    return p.dubNames.contains(vict->id);
+    return p.dub_names.contains(vict->id);
 }
 
 void introWrite(struct char_data *ch, struct char_data *vict, char *name) {
     std::string n(name);
     auto &p = players[ch->id];
-    p.dubNames[vict->id] = n;
+    p.dub_names[vict->id] = n;
 }
 
 ACMD(do_intro) {

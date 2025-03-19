@@ -213,7 +213,7 @@ static void performReboot(int mode) {
         }
         auto och = d->character;
 
-        jd["user"] = d->account->vn;
+        jd["user"] = d->account->id;
         jd["character"] = och->id;
 
         auto r = IN_ROOM(och);

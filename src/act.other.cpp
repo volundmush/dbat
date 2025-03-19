@@ -12226,7 +12226,7 @@ void genFinish(char_data* ch) {
     if(ch->get(CharAppearance::skin_color) == 100) finished = false;
     if(ch->getWeight() == 0) finished = false;
     if(ch->getHeight() == 0) finished = false;
-    if(ch->time.secondsAged < (8 * SECS_PER_GAME_YEAR)) finished = false;
+    if(ch->time.seconds_aged < (8 * SECS_PER_GAME_YEAR)) finished = false;
 
     if(ch->get(CharAppearance::aura) == 100) finished = false;
     if(ch->get(CharAppearance::hair_length) == 100) finished = false;
@@ -12585,7 +12585,7 @@ ACMD(do_gen) {
 
 
 
-    send_to_char(ch, "[Age] Age: %s\r\n", ch->time.secondsAged < 8 * SECS_PER_GAME_YEAR ? "@RUnset@n" :  std::to_string((int)ch->time.secondsAged / SECS_PER_GAME_YEAR));
+    send_to_char(ch, "[Age] Age: %s\r\n", ch->time.seconds_aged < 8 * SECS_PER_GAME_YEAR ? "@RUnset@n" :  std::to_string((int)ch->time.seconds_aged / SECS_PER_GAME_YEAR));
     send_to_char(ch, "[Weight] Weight: %s\r\n", ch->getWeight() == 0 ? "@RUnset@n" : std::to_string(ch->getWeight()));
     send_to_char(ch, "[Height] Height: %s\r\n", ch->getHeight() == 0 ? "@RUnset@n" : std::to_string(ch->getHeight()));
     

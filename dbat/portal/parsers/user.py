@@ -47,7 +47,7 @@ class UserParser(BaseParser):
         user_name = self.connection.payload.get("sub")
         user_data = await self.api_call("GET", f"/users/name/{user_name}")
         user = AccountData(**user_data)
-        character_data = await self.api_call("GET", f"/users/{user.vn}/characters")
+        character_data = await self.api_call("GET", f"/users/{user.id}/characters")
         characters = [PlayerData(**c) for c in character_data]
 
         if not (character := partial_match(args, characters, key=lambda c: c.name)):
@@ -75,7 +75,7 @@ class UserParser(BaseParser):
         user_name = self.connection.payload.get("sub")
         user_data = await self.api_call("GET", f"/users/name/{user_name}")
         user = AccountData(**user_data)
-        character_data = await self.api_call("GET", f"/users/{user.vn}/characters")
+        character_data = await self.api_call("GET", f"/users/{user.id}/characters")
 
         characters = [PlayerData(**c) for c in character_data]
 

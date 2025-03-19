@@ -119,6 +119,198 @@ static char *read_shop_message(int mnum, room_vnum shr, FILE *shop_f, const char
     return (tbuf);
 }
 
+/* Whom will we not trade with (bitvector for SHOP_TRADE_WITH()) */
+constexpr int TRADE_NOGOOD = 0;
+constexpr int TRADE_NOEVIL = 1;
+constexpr int TRADE_NONEUTRAL = 2;
+
+constexpr int TRADE_NOWIZARD = 3; // roshi
+constexpr int TRADE_NOCLERIC = 4; // piccolo
+constexpr int TRADE_NOROGUE = 5; // krane
+constexpr int TRADE_NOFIGHTER = 6; // nail
+constexpr int TRADE_NOHUMAN = 7; // human
+constexpr int TRADE_NOICER = 8; // icer
+constexpr int TRADE_NOSAIYAN = 9; // saiyan
+constexpr int TRADE_NOKONATSU = 10; // konatsu
+constexpr int TRADE_NONAMEK = 11; // namek
+constexpr int TRADE_NOMUTANT = 12; // mutant
+constexpr int TRADE_NOKANASSAN = 13; // kanassan
+constexpr int TRADE_NOBIO = 14; // bio-android
+constexpr int TRADE_NOANDROID = 15; // android
+constexpr int TRADE_NODEMON = 16; // demon
+constexpr int TRADE_NOMAJIN = 17; // majin
+constexpr int TRADE_NOKAI = 18; // kai
+constexpr int TRADE_NOTRUFFLE = 19; // truffle
+constexpr int TRADE_NOMONK = 29; // bardock
+constexpr int TRADE_NOPALADIN = 30; //ginyu
+constexpr int TRADE_ONLYWIZARD = 32; // roshi
+constexpr int TRADE_ONLYCLERIC = 33; // piccolo
+constexpr int TRADE_ONLYROGUE = 34; // krane
+constexpr int TRADE_ONLYFIGHTER = 35; // nail
+constexpr int TRADE_ONLYMONK = 36; // bardock
+constexpr int TRADE_ONLYPALADIN = 37; // ginyu
+constexpr int TRADE_NOSORCERER = 38; // frieza
+constexpr int TRADE_NODRUID = 39; //tapion
+constexpr int TRADE_NOBARD = 40; //sixteen
+constexpr int TRADE_NORANGER = 41; //dabura
+constexpr int TRADE_NOBARBARIAN = 42; //kabito
+constexpr int TRADE_ONLYSORCERER = 43; // sorcerer
+constexpr int TRADE_ONLYDRUID = 44; // tapion
+constexpr int TRADE_ONLYBARD = 45; //sixteen
+constexpr int TRADE_ONLYRANGER = 46; //dabura
+constexpr int TRADE_ONLYBARBARIAN = 47; //kabito
+constexpr int TRADE_ONLYARCANE_ARCHER = 48; // jinto
+constexpr int TRADE_ONLYARCANE_TRICKSTER = 49; // tsuna
+constexpr int TRADE_ONLYARCHMAGE = 50; //kurzak
+
+constexpr int TRADE_NOARCANE_ARCHER = 63; //jinto
+constexpr int TRADE_NOARCANE_TRICKSTER = 64; // tsuna
+constexpr int TRADE_NOARCHMAGE = 65; // kurzak
+
+constexpr int TRADE_NOBROKEN = 78;
+
+static void handle_org_who(org_data &g, bitvector_t with_who[]) {
+    for(auto i = 0; i < 178; i++) {
+        if(IS_SET_AR(with_who, i)) {
+            switch(i) {
+                case TRADE_NOGOOD:
+                    g.not_alignment.insert(MoralAlign::good);
+                    break;
+                case TRADE_NOEVIL:
+                    g.not_alignment.insert(MoralAlign::evil);
+                    break;
+                case TRADE_NONEUTRAL:
+                    g.not_alignment.insert(MoralAlign::neutral);
+                    break;
+                case TRADE_NOWIZARD:
+                    g.not_class.insert(SenseiID::roshi);
+                    break;
+                case TRADE_ONLYWIZARD:
+                    g.only_class.insert(SenseiID::roshi);
+                    break;
+                case TRADE_NOCLERIC:
+                    g.not_class.insert(SenseiID::piccolo);
+                    break;
+                case TRADE_ONLYCLERIC:
+                    g.only_class.insert(SenseiID::piccolo);
+                    break;
+                case TRADE_NOROGUE:
+                    g.not_class.insert(SenseiID::krane);
+                    break;
+                case TRADE_ONLYROGUE:
+                    g.only_class.insert(SenseiID::krane);
+                    break;
+                case TRADE_NOFIGHTER:
+                    g.not_class.insert(SenseiID::nail);
+                    break;
+                case TRADE_ONLYFIGHTER:
+                    g.only_class.insert(SenseiID::nail);
+                    break;
+                case TRADE_NOHUMAN:
+                    g.not_race.insert(RaceID::human);
+                    break;
+                case TRADE_NOICER:
+                    g.not_race.insert(RaceID::icer);
+                    break;
+                case TRADE_NOSAIYAN:
+                    g.not_race.insert(RaceID::saiyan);
+                    break;
+                case TRADE_NOKONATSU:
+                    g.not_race.insert(RaceID::konatsu);
+                    break;
+                case TRADE_NONAMEK:
+                    g.not_race.insert(RaceID::namekian);
+                    break;
+                case TRADE_NOMUTANT:
+                    g.not_race.insert(RaceID::mutant);
+                    break;
+                case TRADE_NOKANASSAN:
+                    g.not_race.insert(RaceID::kanassan);
+                    break;
+                case TRADE_NOBIO:
+                    g.not_race.insert(RaceID::bio_android);
+                    break;
+                case TRADE_NOANDROID:
+                    g.not_race.insert(RaceID::android);
+                    break;
+                case TRADE_NODEMON:
+                    g.not_race.insert(RaceID::demon);
+                    break;
+                case TRADE_NOMAJIN:
+                    g.not_race.insert(RaceID::majin);
+                    break;
+                case TRADE_NOKAI:
+                    g.not_race.insert(RaceID::kai);
+                    break;
+                case TRADE_NOTRUFFLE:
+                    g.not_race.insert(RaceID::tuffle);
+                    break;
+                case TRADE_NOMONK:
+                    g.not_class.insert(SenseiID::bardock);
+                    break;
+                case TRADE_ONLYMONK:
+                    g.only_class.insert(SenseiID::bardock);
+                    break;
+                case TRADE_NOPALADIN:
+                    g.not_class.insert(SenseiID::ginyu);
+                    break;
+                case TRADE_ONLYPALADIN:
+                    g.only_class.insert(SenseiID::ginyu);
+                    break;
+                case TRADE_NOSORCERER:
+                    g.not_class.insert(SenseiID::frieza);
+                    break;
+                case TRADE_ONLYSORCERER:
+                    g.only_class.insert(SenseiID::frieza);
+                    break;
+                case TRADE_NODRUID:
+                    g.not_class.insert(SenseiID::tapion);
+                    break;
+                case TRADE_ONLYDRUID:
+                    g.only_class.insert(SenseiID::tapion);
+                    break;
+                case TRADE_NOBARD:
+                    g.not_class.insert(SenseiID::sixteen);
+                    break;
+                case TRADE_ONLYBARD:
+                    g.only_class.insert(SenseiID::sixteen);
+                    break;
+                case TRADE_NORANGER:
+                    g.not_class.insert(SenseiID::dabura);
+                    break;
+                case TRADE_ONLYRANGER:
+                    g.only_class.insert(SenseiID::dabura);
+                    break;
+                case TRADE_NOBARBARIAN:
+                    g.not_class.insert(SenseiID::kibito);
+                    break;
+                case TRADE_ONLYBARBARIAN:
+                    g.only_class.insert(SenseiID::kibito);
+                    break;
+                case TRADE_ONLYARCANE_ARCHER:
+                    g.only_class.insert(SenseiID::jinto);
+                    break;
+                case TRADE_NOARCANE_ARCHER:
+                    g.not_class.insert(SenseiID::jinto);
+                    break;
+                case TRADE_ONLYARCANE_TRICKSTER:
+                    g.only_class.insert(SenseiID::tsuna);
+                    break;
+                case TRADE_NOARCANE_TRICKSTER:
+                    g.not_class.insert(SenseiID::tsuna);
+                    break;
+                case TRADE_ONLYARCHMAGE:
+                    g.only_class.insert(SenseiID::kurzak);
+                    break;
+                case TRADE_NOARCHMAGE:
+                    g.not_class.insert(SenseiID::kurzak);
+                    break;
+                
+            }
+        }
+    }
+}
+
 static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
     char *buf, buf2[256], *p, buf3[READ_SIZE];
     int temp, val, t1, t2, rv;
@@ -143,10 +335,10 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             rv = sscanf(buf3, "%d %d", &t1, &t2);
             while (t1 > -1) {
                 if (rv == 1) { /* old style guilds, only skills */
-                    g.skills.insert(t1);
+                    g.skills.insert(static_cast<SkillID>(t1));
                 } else if (rv == 2) { /* new style guilds, skills and feats */
                     if (t2 == 1) {
-                        g.skills.insert(t1);
+                        g.skills.insert(static_cast<SkillID>(t1));
                     } else if (t2 == 2) {
                         g.feats.insert(t1);
                     } else {
@@ -165,10 +357,11 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             g.not_enough_gold = fread_string(gm_f, buf2);
 
             read_guild_line(gm_f, "%d", &g.minlvl, "GM_MINLVL");
-            read_guild_line(gm_f, "%d", &g.gm, "GM_TRAINER");
+            read_guild_line(gm_f, "%d", &g.keeper, "GM_TRAINER");
 
-            g.gm = real_mobile(g.gm);
-            read_guild_line(gm_f, "%d", &g.with_who[0], "GM_WITH_WHO");
+            g.keeper = real_mobile(g.keeper);
+            bitvector_t with_who[4];
+            read_guild_line(gm_f, "%d", &with_who[0], "GM_WITH_WHO");
 
             read_guild_line(gm_f, "%d", &g.open, "GM_OPEN");
             read_guild_line(gm_f, "%d", &g.close, "GM_CLOSE");
@@ -184,7 +377,7 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                         basic_mud_log("SYSERR: Can't parse GM_WITH_WHO line in %s: '%s'", buf2, buf);
                         break;
                     }
-                    g.with_who[temp] = val;
+                    with_who[temp] = val;
                     while (isdigit(*p) || *p == '-') {
                         p++;
                     }
@@ -195,6 +388,7 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
                 free(buf);
                 buf = fread_string(gm_f, buf2);
             }
+        handle_org_who(g, with_who);
         } else {
             if (*buf == '$')        /* EOF */
                 done = true;
@@ -202,6 +396,8 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
         }
     }
 }
+
+
 
 static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
     char *buf, buf2[256], *p;
@@ -248,8 +444,19 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
             sh.message_buy = read_shop_message(5, SHOP_NUM(top_shop), shop_f, buf2);
             sh.message_sell = read_shop_message(6, SHOP_NUM(top_shop), shop_f, buf2);
             read_line(shop_f, "%d", &SHOP_BROKE_TEMPER(top_shop));
-            read_line(shop_f, "%ld", &SHOP_BITVECTOR(top_shop));
+            
+            bitvector_t bitvector;
+            read_line(shop_f, "%ld", &bitvector);
+            for(auto i = 0; i < 2; i++) {
+                if(IS_SET(bitvector, 1 << i)) {
+                    sh.shop_flags.insert(static_cast<ShopFlag>(i));
+                }
+            }
+
+
             read_line(shop_f, "%hd", &SHOP_KEEPER(top_shop));
+
+            bitvector_t with_who[SW_ARRAY_MAX];
 
             SHOP_KEEPER(top_shop) = real_mobile(SHOP_KEEPER(top_shop));
             CREATE(buf, char, READ_SIZE);
@@ -262,7 +469,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                     basic_mud_log("SYSERR: Can't parse TRADE_WITH line in %s: '%s'", buf2, buf);
                     break;
                 }
-                SHOP_TRADE_WITH(top_shop)[temp] = count;
+                with_who[temp] = count;
                 while (isdigit(*p) || *p == '-') {
                     p++;
                 }
@@ -271,8 +478,7 @@ static void boot_the_shops(FILE *shop_f, char *filename, int rec_count) {
                 }
             }
             free(buf);
-            while (temp < SW_ARRAY_MAX)
-                SHOP_TRADE_WITH(top_shop)[temp++] = 0;
+            handle_org_who(sh, with_who);
 
             while(true) {
                 read_line(shop_f, "%ld", &shop_temp);
@@ -2911,7 +3117,7 @@ void migrate_accounts() {
         // Line 3: password (clear text, will hash...)
         std::string pass;
         std::getline(file, pass);
-        a.passHash = pass;
+        a.password = pass;
         
         // Line 4: slots (int)
         std::string slots;
@@ -2965,7 +3171,7 @@ void migrate_accounts() {
         std::getline(file, rppBank);
         auto bank = std::stoi(rppBank);
         file.close();
-        a.vn = id;
+        a.id = id;
     }
 }
 
@@ -3027,7 +3233,7 @@ void migrate_characters() {
         while(std::getline(file, line)) {
             try {
                 auto vnum = std::stoi(line);
-                if(mob_proto.contains(vnum)) pa.senseMemory.insert(vnum);
+                if(mob_proto.contains(vnum)) pa.sense_memory.insert(vnum);
             } catch(...) {
                 basic_mud_log("Error parsing %s for sense migration.", line.c_str());
             }
@@ -3069,7 +3275,7 @@ void migrate_characters() {
             if(name == "Gibbles") continue;
             auto pc = findPlayer(name);
             if(!pc) continue;
-            pa.dubNames[pc->id] = dub;
+            pa.dub_names[pc->id] = dub;
         }
     }
 

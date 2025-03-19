@@ -455,10 +455,12 @@ int is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_n
         return (false);
     }
 
+    auto &g = guild_index[guild_nr];
 
-    if ((IS_GOOD(ch) && NOTRAIN_GOOD(guild_nr)) ||
-        (IS_EVIL(ch) && NOTRAIN_EVIL(guild_nr)) ||
-        (IS_NEUTRAL(ch) && NOTRAIN_NEUTRAL(guild_nr))) {
+    
+    if ((IS_GOOD(ch) && g.not_alignment.contains(MoralAlign::good)) ||
+        (IS_EVIL(ch) && g.not_alignment.contains(MoralAlign::evil)) ||
+        (IS_NEUTRAL(ch) && g.not_alignment.contains(MoralAlign::neutral))) {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_ALIGN);
         do_tell(keeper, buf, cmd_tell, 0);
@@ -468,73 +470,36 @@ int is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_n
     if (IS_NPC(ch))
         return (false);
 
-    if ((IS_ROSHI(ch) && NOTRAIN_WIZARD(guild_nr)) ||
-        (IS_PICCOLO(ch) && NOTRAIN_CLERIC(guild_nr)) ||
-        (IS_KRANE(ch) && NOTRAIN_ROGUE(guild_nr)) ||
-        (IS_NAIL(ch) && NOTRAIN_FIGHTER(guild_nr)) ||
-        (IS_GINYU(ch) && NOTRAIN_PALADIN(guild_nr)) ||
-        (IS_FRIEZA(ch) && NOTRAIN_SORCERER(guild_nr)) ||
-        (IS_TAPION(ch) && NOTRAIN_DRUID(guild_nr)) ||
-        (IS_ANDSIX(ch) && NOTRAIN_BARD(guild_nr)) ||
-        (IS_DABURA(ch) && NOTRAIN_RANGER(guild_nr)) ||
-        (IS_BARDOCK(ch) && NOTRAIN_MONK(guild_nr)) ||
-        (IS_KABITO(ch) && NOTRAIN_BARBARIAN(guild_nr)) ||
-        (IS_JINTO(ch) && NOTRAIN_ARCANE_ARCHER(guild_nr)) ||
-        (IS_TSUNA(ch) && NOTRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-        (IS_KURZAK(ch) && NOTRAIN_ARCHMAGE(guild_nr))) {
-
+    if (g.not_class.contains(ch->chclass)) {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
     }
 
-    if ((!IS_ROSHI(ch) && TRAIN_WIZARD(guild_nr)) ||
-        (!IS_PICCOLO(ch) && TRAIN_CLERIC(guild_nr)) ||
-        (!IS_KRANE(ch) && TRAIN_ROGUE(guild_nr)) ||
-        (!IS_BARDOCK(ch) && TRAIN_MONK(guild_nr)) ||
-        (!IS_GINYU(ch) && TRAIN_PALADIN(guild_nr)) ||
-        (!IS_NAIL(ch) && TRAIN_FIGHTER(guild_nr)) ||
-        (!IS_FRIEZA(ch) && TRAIN_SORCERER(guild_nr)) ||
-        (!IS_TAPION(ch) && TRAIN_DRUID(guild_nr)) ||
-        (!IS_ANDSIX(ch) && TRAIN_BARD(guild_nr)) ||
-        (!IS_DABURA(ch) && TRAIN_RANGER(guild_nr)) ||
-        (!IS_KABITO(ch) && TRAIN_BARBARIAN(guild_nr)) ||
-        (!IS_JINTO(ch) && TRAIN_ARCANE_ARCHER(guild_nr)) ||
-        (!IS_TSUNA(ch) && TRAIN_ARCANE_TRICKSTER(guild_nr)) ||
-        (!IS_KURZAK(ch) && TRAIN_ARCHMAGE(guild_nr))) {
-        snprintf(buf, sizeof(buf), "%s %s",
-                 GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
-        do_tell(keeper, buf, cmd_tell, 0);
-        return (false);
+    for(auto &cl : g.only_class) {
+        if(cl != ch->chclass) {
+            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
+            do_tell(keeper, buf, cmd_tell, 0);
+            return (false);
+        }
     }
 
-    if ((IS_HUMAN(ch) && NOTRAIN_HUMAN(guild_nr)) ||
-        (IS_SAIYAN(ch) && NOTRAIN_SAIYAN(guild_nr)) ||
-        (IS_ICER(ch) && NOTRAIN_ICER(guild_nr)) ||
-        (IS_KONATSU(ch) && NOTRAIN_KONATSU(guild_nr)) ||
-        (IS_NAMEK(ch) && NOTRAIN_NAMEK(guild_nr)) ||
-        (IS_MUTANT(ch) && NOTRAIN_MUTANT(guild_nr)) ||
-        (IS_KANASSAN(ch) && NOTRAIN_KANASSAN(guild_nr)) ||
-        (IS_ANDROID(ch) && NOTRAIN_ANDROID(guild_nr)) ||
-        (IS_BIO(ch) && NOTRAIN_BIO(guild_nr)) ||
-        (IS_DEMON(ch) && NOTRAIN_DEMON(guild_nr)) ||
-        (IS_MAJIN(ch) && NOTRAIN_MAJIN(guild_nr)) ||
-        (IS_KAI(ch) && NOTRAIN_KAI(guild_nr)) ||
-        (IS_TRUFFLE(ch) && NOTRAIN_TRUFFLE(guild_nr)) ||
-        (IS_HOSHIJIN(ch) && NOTRAIN_GOBLIN(guild_nr)) ||
-        (IS_ANIMAL(ch) && NOTRAIN_ANIMAL(guild_nr)) ||
-        (IS_SAIBA(ch) && NOTRAIN_ORC(guild_nr)) ||
-        (IS_SERPENT(ch) && NOTRAIN_SNAKE(guild_nr)) ||
-        (IS_OGRE(ch) && NOTRAIN_TROLL(guild_nr)) ||
-        (IS_HALFBREED(ch) && NOTRAIN_HALFBREED(guild_nr)) ||
-        (IS_YARDRATIAN(ch) && NOTRAIN_MINOTAUR(guild_nr)) ||
-        (IS_ARLIAN(ch) && NOTRAIN_KOBOLD(guild_nr))) {
+    if (g.not_race.contains(ch->race)) {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
     }
+
+    for(auto &r : g.only_race) {
+        if(r != ch->race) {
+            snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_TRAINER_DISLIKE_RACE);
+            do_tell(keeper, buf, cmd_tell, 0);
+            return (false);
+        }
+    }
+
     return (true);
 }
 
@@ -548,7 +513,7 @@ int is_guild_ok(struct char_data *keeper, struct char_data *ch, int guild_nr) {
 
 
 int does_guild_know(int guild_nr, int i) {
-    return guild_index[guild_nr].skills.count(i);
+    return guild_index[guild_nr].skills.count(static_cast<SkillID>(i));
 }
 
 int does_guild_know_feat(int guild_nr, int i) {
@@ -1184,7 +1149,7 @@ SPECIAL(guild) {
     };
 
     for (auto &[vn, g] : guild_index)
-        if (g.gm == keeper->vn) {
+        if (g.keeper == keeper->vn) {
             guild_nr = vn;
             break;
         }
@@ -1228,11 +1193,11 @@ void assign_the_guilds() {
     cmd_tell = find_command("tell");
 
     for (auto &[vn, g] : guild_index) {
-        if (g.gm == NOBODY)
+        if (g.keeper == NOBODY)
             continue;
 
-        auto &gm = mob_index[g.gm];
-        auto &p = mob_proto[g.gm];
+        auto &gm = mob_index[g.keeper];
+        auto &p = mob_proto[g.keeper];
 
         if (gm.func && gm.func != guild)
             g.func = gm.func;
@@ -1242,34 +1207,13 @@ void assign_the_guilds() {
 }
 
 char *guild_customer_string(int guild_nr, int detailed) {
-    int gindex = 0, flag = 0, nlen;
-    size_t len = 0;
     static char buf[MAX_STRING_LENGTH];
+    auto &sh = guild_index[guild_nr];
+    
 
-    while (*trade_letters[gindex] != '\n' && len + 1 < sizeof(buf)) {
-        if (detailed) {
-            if (!IS_SET_AR(GM_WITH_WHO(guild_nr), flag)) {
-                nlen = snprintf(buf + len, sizeof(buf) - len, ", %s", trade_letters[gindex]);
+    snprintf(buf, sizeof(buf), "%s", sh.customerString().c_str());
 
-                if (len + nlen >= sizeof(buf) || nlen < 0)
-                    break;
-
-                len += nlen;
-            }
-        } else {
-            buf[len++] = (IS_SET_AR(GM_WITH_WHO(guild_nr), flag) ? '_' : *trade_letters[gindex]);
-            buf[len] = '\0';
-
-            if (len >= sizeof(buf))
-                break;
-        }
-
-        gindex++;
-        flag += 1;
-    }
-
-    buf[sizeof(buf) - 1] = '\0';
-    return (buf);
+    return buf;
 }
 
 void list_all_guilds(struct char_data *ch) {
@@ -1295,10 +1239,10 @@ void list_all_guilds(struct char_data *ch) {
             len += headerlen;
         }
 
-        if (g.gm == NOBODY)
+        if (g.keeper == NOBODY)
             strcpy(buf1, "<NONE>");  /* strcpy: OK (for 'buf1 >= 7') */
         else
-            sprintf(buf1, "%6d", g.gm);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
+            sprintf(buf1, "%6d", g.keeper);  /* sprintf: OK (for 'buf1 >= 11', 32-bit int) */
 
         len += snprintf(buf + len, sizeof(buf) - len, "%6d	%s		%5.2f	%s\r\n",
                         gm_nr, buf1, g.charge, guild_customer_string(gm_nr, false));
@@ -1374,10 +1318,10 @@ void list_guilds(struct char_data *ch, zone_rnum rnum, guild_vnum vmin, guild_vn
         /************************************************************************/
 
         send_to_char(ch, " @c[@y%d@c]@y %s@n",
-                     (g.gm == NOBODY) ?
-                     -1 : g.gm,
-                     (g.gm == NOBODY) ?
-                     "" : mob_proto[g.gm].short_description);
+                     (g.keeper == NOBODY) ?
+                     -1 : g.keeper,
+                     (g.keeper == NOBODY) ?
+                     "" : mob_proto[g.keeper].short_description);
 
         send_to_char(ch, "\r\n");
     };
@@ -1410,10 +1354,11 @@ void levelup_parse(struct descriptor_data *d, char *arg) {
 
 
 void guild_data::toggle_skill(uint16_t skill_id) {
-    if(skills.count(skill_id)) {
-        skills.erase(skill_id);
+    auto sk = static_cast<SkillID>(skill_id);
+    if(skills.count(sk)) {
+        skills.erase(sk);
     } else {
-        skills.insert(skill_id);
+        skills.insert(sk);
     }
 }
 
