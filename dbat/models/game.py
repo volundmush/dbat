@@ -1,6 +1,8 @@
 import typing
 import pydantic
+from enum import IntFlag
 from pydantic import BaseModel, Field
+from . import names
 
 class MobSpecialData(BaseModel):
     attack_type: int = 0
@@ -129,12 +131,16 @@ class ShopBuyData(BaseModel):
     type: int
     keywords: str
 
-class _Org(BaseModel):
+class _Picky(BaseModel):
+    not_alignment: typing.Set[names.Align] = Field(default_factory=set)
+    only_alignment: typing.Set[names.Align] = Field(default_factory=set)
+    only_sensei: typing.Set[names.Sensei] = Field(default_factory=set)
+    not_sensei: typing.Set[names.Sensei] = Field(default_factory=set)
+    only_race: typing.Set[names.Race] = Field(default_factory=set)
+    not_race: typing.Set[names.Race] = Field(default_factory=set)
+    
+class _Org(_Picky):
     vnum: int = -1
-    only_class: typing.Set[str] = Field(default_factory=set)
-    not_class: typing.Set[str] = Field(default_factory=set)
-    only_race: typing.Set[str] = Field(default_factory=set)
-    not_race: typing.Set[str] = Field(default_factory=set)
     keeper: int = -1
     
 
@@ -151,8 +157,7 @@ class ShopData(_Org):
     message_buy: str = ""
     message_sell: str = ""
     temper1: int = 0
-    shop_flags: typing.Set[str] = Field(default_factory=set)
-    no_alignment: typing.Set[str] = Field(default_factory=set)
+    shop_flags: typing.Set[names.ShopFlag] = Field(default_factory=set)
     in_room: typing.Set[int] = Field(default_factory=set)
     open1: int = 0
     close1: int = 0
@@ -162,7 +167,7 @@ class ShopData(_Org):
     lastsort: int = 0
 
 class GuildData(_Org):
-    skills: typing.Set[str] = Field(default_factory=set)
+    skills: typing.Set[names.Skill] = Field(default_factory=set)
     charge: float = 1.0
     no_such_skill: str = ""
     not_enough_gold: str = ""
@@ -187,11 +192,18 @@ class UnitData(BaseModel):
     proto_script: typing.List[int] = Field(default_factory=list)
 
 
+class ExitInfo(IntFlag):
+    is_door = 1
+    closed = 2
+    locked = 4
+    pickproof = 8
+    secret = 16
+
 
 class RoomDirectionData(BaseModel):
     keyword: str = ""
     general_description: str = ""
-    exit_info: typing.Set[int] = Field(default_factory=set)
+    exit_info: ExitInfo = Field(default_factory=lambda: ExitInfo(0))
     key: int = -1
     to_room: int = -1
     dclock: int = 0
@@ -203,43 +215,32 @@ class RoomDirectionData(BaseModel):
     failroom: int = -1
     totalfailroom: int = -1
 
-
 class RoomData(UnitData):
-    sector_type: int = 0
-    room_flags: typing.Set[int] = Field(default_factory=set)
+    sector_type: names.SectorType = names.SectorType.inside
+    room_flags: typing.Set[names.RoomFlag] = Field(default_factory=set)
     dir_option: typing.List[typing.Tuple[int, RoomDirectionData]] = Field(default_factory=list)
     timed: int = 0
     dmg: int = 0
     geffect: int = 0
     
-
 class ThingData(UnitData):
     in_room: int = -1
+    affect_flags: typing.Set[names.AffectFlag] = Field(default_factory=set)
 
-
-class ObjectData(ThingData):
+class ObjectData(ThingData, _Picky):
     room_loaded: int = -1
-    value: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    dvalue: typing.List[typing.Tuple[int, float]] = Field(default_factory=list)
-    type_flag: int = 0
+    value: typing.Dict[str, int] = Field(default_factory=dict)
+    dvalue: typing.Dict[int, float] = Field(default_factory=dict)
+    type_flag: names.ItemType = names.ItemType.unknown
     level: int = 0
-    onlyAlignLawChaos: typing.Set[int] = Field(default_factory=set)
-    onlyAlignGoodEvil: typing.Set[int] = Field(default_factory=set)
-    antiAlignLawChaos: typing.Set[int] = Field(default_factory=set)
-    antiAlignGoodEvil: typing.Set[int] = Field(default_factory=set)
-    onlyClass: typing.Set[int] = Field(default_factory=set)
-    antiClass: typing.Set[int] = Field(default_factory=set)
-    onlyRace: typing.Set[int] = Field(default_factory=set)
-    antiRace: typing.Set[int] = Field(default_factory=set)
-    wear_flags: typing.Set[int] = Field(default_factory=set)
-    extra_flags: typing.Set[int] = Field(default_factory=set)
+    wear_flags: typing.Set[names.WearFlag] = Field(default_factory=set)
+    item_flags: typing.Set[names.ItemFlag] = Field(default_factory=set)
     weight: float = 0.0
-    bitvector: typing.Set[int] = Field(default_factory=set)
     cost: int = 0
     cost_per_day: int = 0
     timer: int = 0
     size: int = 4
-    affected: typing.Set[int] = Field(default_factory=set)
+    affected: typing.List[AffectedTypeData] = Field(default_factory=set)
 
 
 class SkillData(BaseModel):
@@ -259,24 +260,24 @@ class TransData(BaseModel):
 
 class CharData(ThingData):
     title: str = ""
-    race: int = 0
-    chclass: int = 0
+    race: names.Race = names.Race.spirit
+    sensei: names.Sensei = names.Sensei.commoner
     
-    trains: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    attributes: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    moneys: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    aligns: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    appearances: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    vitals: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    nums: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    stats: typing.List[typing.Tuple[int, int]] = Field(default_factory=list)
-    dims: typing.List[typing.Tuple[int, float]] = Field(default_factory=list)
-    mobFlags: typing.Set[int] = Field(default_factory=set)
-    playerFlags: typing.Set[int] = Field(default_factory=set)
-    pref: typing.Set[int] = Field(default_factory=set)
+    trains: typing.Dict[names.AttributeTrain, int] = Field(default_factory=dict)
+    attributes: typing.Dict[names.Attribute, int] = Field(default_factory=dict)
+    moneys: typing.Dict[names.Money, int] = Field(default_factory=dict)
+    aligns: typing.Dict[names.Align, int] = Field(default_factory=dict)
+    appearances: typing.Dict[names.Appearance, int] = Field(default_factory=dict)
+    vitals: typing.Dict[names.Vital, int] = Field(default_factory=dict)
+    nums: typing.Dict[names.Num, int] = Field(default_factory=dict)
+    stats: typing.Dict[names.Stat, int] = Field(default_factory=dict)
+    dims: typing.Dict[names.Dim, float] = Field(default_factory=dict)
+    mob_flags: typing.Set[names.MobFlag] = Field(default_factory=set)
+    player_flags: typing.Set[names.PlayerFlag] = Field(default_factory=set)
+    pref_flags: typing.Set[names.PrefFlag] = Field(default_factory=set)
     bodyparts: typing.Set[int] = Field(default_factory=set)
-    affected_by: typing.Set[int] = Field(default_factory=set)
     armor: int = 0
     damage_mod: int = 0
-    admFlags: typing.Set[int] = Field(default_factory=set)
+    admin_flags: typing.Set[names.AdminFlag] = Field(default_factory=set)
     mob_specials: MobSpecialData = Field(default_factory=MobSpecialData)
+    transforms: typing.Dict[names.Form, TransData] = Field(default_factory=dict)

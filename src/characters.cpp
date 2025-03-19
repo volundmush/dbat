@@ -100,7 +100,7 @@ void char_data::resurrect(ResurrectionMode mode) {
     if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
         char_to_room(this, real_room(GET_DROOM(this)));
     } else {
-        char_to_room(this, real_room(sensei::getStartRoom(chclass)));
+        char_to_room(this, real_room(sensei::getStartRoom(sensei)));
     }
     look_at_room(in_room, this, 0);
 
@@ -1538,7 +1538,7 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
             lroom = 100;
             setExperience(0);
         } else {
-            lroom = sensei::getStartRoom(chclass);
+            lroom = sensei::getStartRoom(sensei);
         }
     }
     else {

@@ -509,7 +509,7 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define GET_ADMLEVEL(ch)    ((ch)->get(CharNum::admin_level))
 #define GET_LEVEL(ch)    ((ch)->get(CharNum::level))
 
-#define GET_CLASS(ch)   ((ch)->chclass)
+#define GET_CLASS(ch)   ((ch)->sensei)
 
 #define GET_RACE(ch)    ((ch)->race)
 #define GET_HAIRL(ch)   ((ch)->get(CharAppearance::hair_length))
@@ -922,7 +922,7 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 #define LRACE(ch)     ((ch)->juggleRaceName(false).c_str())
 #define TRUE_RACE(ch) (race::getName((ch)->race).c_str())
 
-#define CLASS_ABBR(ch) (sensei::getAbbr((ch)->chclass).c_str())
+#define CLASS_ABBR(ch) (sensei::getAbbr((ch)->sensei).c_str())
 #define RACE_ABBR(ch) ((ch)->race->getAbbr().c_str())
 
 #define IS_ROSHI(ch)            (GET_CLASS(ch) == SenseiID::roshi)

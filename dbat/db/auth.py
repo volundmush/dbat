@@ -23,11 +23,11 @@ async def register_user(
     # this will have handled validation so now we just need to do something about the SecretStr
     data = user.model_dump(exclude_unset=True)
     # deal with the secretstr.
-    data["passHash"] = hashed_password
+    data["password"] = hashed_password
     
     new_user = account_db.create(data)
     
-    return new_user
+    return AccountData(**new_user)
 
 
 async def authenticate_user(
@@ -51,6 +51,6 @@ async def authenticate_user(
         # hash the password if it was plain text
         hashed = crypt_context.hash(password)
         retrieved.password = hashed
-        account_db.update(retrieved.id, {"passHash": hashed})
+        account_db.update(retrieved.id, {"password": hashed})
     return retrieved
 

@@ -591,7 +591,7 @@ in the vault (vnum: 453) now and then. you can just use
                             strcpy(str, "0");
                     } else if (!strcasecmp(field, "class")) {
                         if (!IS_NPC(c))
-                            snprintf(str, slen, "%s", sensei::getName(c->chclass).c_str());
+                            snprintf(str, slen, "%s", sensei::getName(c->sensei).c_str());
                         else
                             snprintf(str, slen, "blank");
                     }

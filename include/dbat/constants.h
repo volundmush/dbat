@@ -86,3 +86,40 @@ extern const char *npc_personality[MAX_PERSONALITIES + 1];
 extern const char *song_types[];
 extern const char *list_bonus[];
 extern const int list_bonus_cost[];
+
+template<typename T>
+std::vector<std::string> getEnumNames() {
+    std::vector<std::string> names;
+    for (auto val : magic_enum::enum_values<T>()) {
+        names.emplace_back(magic_enum::enum_name(val));
+    }
+    return names;
+}
+
+std::vector<std::string> getRaceNames();
+std::vector<std::string> getSenseiNames();
+std::vector<std::string> getFormNames();
+std::vector<std::string> getSkillNames();
+std::vector<std::string> getRoomFlagNames();
+std::vector<std::string> getSectorTypeNames();
+std::vector<std::string> getSizeNames();
+std::vector<std::string> getPlayerFlagNames();
+std::vector<std::string> getMobFlagNames();
+std::vector<std::string> getPrefFlagNames();
+std::vector<std::string> getAffectFlagNames();
+std::vector<std::string> getItemTypeNames();
+std::vector<std::string> getWearFlagNames();
+std::vector<std::string> getItemFlagNames();
+std::vector<std::string> getAdminFlagNames();
+std::vector<std::string> getDirectionNames();
+std::vector<std::string> getAttributeNames();
+std::vector<std::string> getAttributeTrainNames();
+std::vector<std::string> getAppearanceNames();
+std::vector<std::string> getAlignNames();
+std::vector<std::string> getMoneyNames();
+std::vector<std::string> getVitalNames();
+std::vector<std::string> getNumNames();
+std::vector<std::string> getStatNames();
+std::vector<std::string> getDimNames();
+std::vector<std::string> getComStatNames();
+std::vector<std::string> getShopFlagNames();

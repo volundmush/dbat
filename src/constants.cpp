@@ -1760,3 +1760,112 @@ const int list_bonus_cost[] = {
         2, /* Negative 50 */
         6, /* Negative 51 */
 };
+
+
+std::vector<std::string> getRaceNames() {
+        return getEnumNames<RaceID>();
+}
+
+std::vector<std::string> getSenseiNames() {
+        return getEnumNames<SenseiID>();
+}
+
+std::vector<std::string> getFormNames() {
+        return getEnumNames<FormID>();
+}
+
+std::vector<std::string> getSkillNames() {
+        return getEnumNames<SkillID>();
+}
+
+std::vector<std::string> getRoomFlagNames() {
+        return getEnumNames<RoomFlag>();
+}
+
+std::vector<std::string> getSectorTypeNames() {
+        return getEnumNames<SectorType>();
+}
+
+std::vector<std::string> getSizeNames() {
+        return getEnumNames<Size>();
+}
+
+std::vector<std::string> getPlayerFlagNames() {
+        return getEnumNames<PlayerFlag>();
+}
+
+std::vector<std::string> getMobFlagNames() {
+        return getEnumNames<MobFlag>();
+}
+
+std::vector<std::string> getPrefFlagNames() {
+        return getEnumNames<PrefFlag>();
+}
+
+std::vector<std::string> getAffectFlagNames() {
+        return getEnumNames<AffectFlag>();
+}
+
+std::vector<std::string> getItemTypeNames() {
+        return getEnumNames<ItemType>();
+}
+
+std::vector<std::string> getWearFlagNames() {
+        return getEnumNames<WearFlag>();
+}
+
+std::vector<std::string> getItemFlagNames() {
+        return getEnumNames<ItemFlag>();
+}
+
+std::vector<std::string> getAdminFlagNames() {
+        return getEnumNames<AdminFlag>();
+}
+
+std::vector<std::string> getDirectionNames() {
+        return getEnumNames<Direction>();
+}
+
+std::vector<std::string> getAttributeNames() {
+        return getEnumNames<CharAttribute>();
+}
+
+std::vector<std::string> getAttributeTrainNames() {
+        return getEnumNames<CharTrain>();
+}
+
+std::vector<std::string> getAppearanceNames() {
+        return getEnumNames<CharAppearance>();
+}
+
+std::vector<std::string> getAlignNames() {
+        return getEnumNames<CharAlign>();
+}
+
+std::vector<std::string> getMoneyNames() {
+        return getEnumNames<CharMoney>();
+}
+
+std::vector<std::string> getVitalNames() {
+        return getEnumNames<CharVital>();
+}
+
+std::vector<std::string> getNumNames() {
+        return getEnumNames<CharNum>();
+}
+
+std::vector<std::string> getStatNames() {
+        return getEnumNames<CharStat>();
+}
+
+std::vector<std::string> getDimNames() {
+        return getEnumNames<CharDim>();
+}
+
+std::vector<std::string> getComStatNames() {
+        return getEnumNames<ComStat>();
+}
+
+std::vector<std::string> getShopFlagNames() {
+        return getEnumNames<ShopFlag>();
+}

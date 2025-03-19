@@ -384,10 +384,10 @@ ASPELL(spell_enchant_weapon) {
     }
 
     if (IS_GOOD(ch)) {
-        obj->antiAlignGoodEvil.insert(MoralAlign::evil);
+        obj->not_alignment.insert(MoralAlign::evil);
         act("$p glows blue.", false, ch, obj, nullptr, TO_CHAR);
     } else if (IS_EVIL(ch)) {
-        obj->antiAlignGoodEvil.insert(MoralAlign::good);
+        obj->not_alignment.insert(MoralAlign::good);
         act("$p glows red.", false, ch, obj, nullptr, TO_CHAR);
     } else
         act("$p glows yellow.", false, ch, obj, nullptr, TO_CHAR);

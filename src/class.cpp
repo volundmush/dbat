@@ -1076,10 +1076,10 @@ int invalid_class(struct char_data *ch, struct obj_data *obj) {
     if (GET_ADMLEVEL(ch) >= ADMLVL_IMMORT)
         return false;
 
-    if(!obj->onlyClass.empty() && !obj->onlyClass.contains(ch->chclass))
+    if(!obj->only_sensei.empty() && !obj->only_sensei.contains(ch->sensei))
         return true;
 
-    if(obj->antiClass.contains(ch->chclass))
+    if(obj->not_sensei.contains(ch->sensei))
         return true;
 
     return false;
@@ -1681,7 +1681,7 @@ namespace sensei {
 
     double getModifier(char_data* ch, int location, int specific) {
         double out = 0.0;
-        if(auto found = sensei_affects.find(ch->chclass); found != sensei_affects.end()) {
+        if(auto found = sensei_affects.find(ch->sensei); found != sensei_affects.end()) {
 
             for(auto& affect : found->second) {
                 if(affect.location == location) {

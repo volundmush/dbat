@@ -183,28 +183,28 @@ static void handle_org_who(org_data &g, bitvector_t with_who[]) {
                     g.not_alignment.insert(MoralAlign::neutral);
                     break;
                 case TRADE_NOWIZARD:
-                    g.not_class.insert(SenseiID::roshi);
+                    g.not_sensei.insert(SenseiID::roshi);
                     break;
                 case TRADE_ONLYWIZARD:
-                    g.only_class.insert(SenseiID::roshi);
+                    g.only_sensei.insert(SenseiID::roshi);
                     break;
                 case TRADE_NOCLERIC:
-                    g.not_class.insert(SenseiID::piccolo);
+                    g.not_sensei.insert(SenseiID::piccolo);
                     break;
                 case TRADE_ONLYCLERIC:
-                    g.only_class.insert(SenseiID::piccolo);
+                    g.only_sensei.insert(SenseiID::piccolo);
                     break;
                 case TRADE_NOROGUE:
-                    g.not_class.insert(SenseiID::krane);
+                    g.not_sensei.insert(SenseiID::krane);
                     break;
                 case TRADE_ONLYROGUE:
-                    g.only_class.insert(SenseiID::krane);
+                    g.only_sensei.insert(SenseiID::krane);
                     break;
                 case TRADE_NOFIGHTER:
-                    g.not_class.insert(SenseiID::nail);
+                    g.not_sensei.insert(SenseiID::nail);
                     break;
                 case TRADE_ONLYFIGHTER:
-                    g.only_class.insert(SenseiID::nail);
+                    g.only_sensei.insert(SenseiID::nail);
                     break;
                 case TRADE_NOHUMAN:
                     g.not_race.insert(RaceID::human);
@@ -246,64 +246,64 @@ static void handle_org_who(org_data &g, bitvector_t with_who[]) {
                     g.not_race.insert(RaceID::tuffle);
                     break;
                 case TRADE_NOMONK:
-                    g.not_class.insert(SenseiID::bardock);
+                    g.not_sensei.insert(SenseiID::bardock);
                     break;
                 case TRADE_ONLYMONK:
-                    g.only_class.insert(SenseiID::bardock);
+                    g.only_sensei.insert(SenseiID::bardock);
                     break;
                 case TRADE_NOPALADIN:
-                    g.not_class.insert(SenseiID::ginyu);
+                    g.not_sensei.insert(SenseiID::ginyu);
                     break;
                 case TRADE_ONLYPALADIN:
-                    g.only_class.insert(SenseiID::ginyu);
+                    g.only_sensei.insert(SenseiID::ginyu);
                     break;
                 case TRADE_NOSORCERER:
-                    g.not_class.insert(SenseiID::frieza);
+                    g.not_sensei.insert(SenseiID::frieza);
                     break;
                 case TRADE_ONLYSORCERER:
-                    g.only_class.insert(SenseiID::frieza);
+                    g.only_sensei.insert(SenseiID::frieza);
                     break;
                 case TRADE_NODRUID:
-                    g.not_class.insert(SenseiID::tapion);
+                    g.not_sensei.insert(SenseiID::tapion);
                     break;
                 case TRADE_ONLYDRUID:
-                    g.only_class.insert(SenseiID::tapion);
+                    g.only_sensei.insert(SenseiID::tapion);
                     break;
                 case TRADE_NOBARD:
-                    g.not_class.insert(SenseiID::sixteen);
+                    g.not_sensei.insert(SenseiID::sixteen);
                     break;
                 case TRADE_ONLYBARD:
-                    g.only_class.insert(SenseiID::sixteen);
+                    g.only_sensei.insert(SenseiID::sixteen);
                     break;
                 case TRADE_NORANGER:
-                    g.not_class.insert(SenseiID::dabura);
+                    g.not_sensei.insert(SenseiID::dabura);
                     break;
                 case TRADE_ONLYRANGER:
-                    g.only_class.insert(SenseiID::dabura);
+                    g.only_sensei.insert(SenseiID::dabura);
                     break;
                 case TRADE_NOBARBARIAN:
-                    g.not_class.insert(SenseiID::kibito);
+                    g.not_sensei.insert(SenseiID::kibito);
                     break;
                 case TRADE_ONLYBARBARIAN:
-                    g.only_class.insert(SenseiID::kibito);
+                    g.only_sensei.insert(SenseiID::kibito);
                     break;
                 case TRADE_ONLYARCANE_ARCHER:
-                    g.only_class.insert(SenseiID::jinto);
+                    g.only_sensei.insert(SenseiID::jinto);
                     break;
                 case TRADE_NOARCANE_ARCHER:
-                    g.not_class.insert(SenseiID::jinto);
+                    g.not_sensei.insert(SenseiID::jinto);
                     break;
                 case TRADE_ONLYARCANE_TRICKSTER:
-                    g.only_class.insert(SenseiID::tsuna);
+                    g.only_sensei.insert(SenseiID::tsuna);
                     break;
                 case TRADE_NOARCANE_TRICKSTER:
-                    g.not_class.insert(SenseiID::tsuna);
+                    g.not_sensei.insert(SenseiID::tsuna);
                     break;
                 case TRADE_ONLYARCHMAGE:
-                    g.only_class.insert(SenseiID::kurzak);
+                    g.only_sensei.insert(SenseiID::kurzak);
                     break;
                 case TRADE_NOARCHMAGE:
-                    g.not_class.insert(SenseiID::kurzak);
+                    g.not_sensei.insert(SenseiID::kurzak);
                     break;
                 
             }
@@ -884,7 +884,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
         roomFlagsHolder[2] = asciiflag_conv(flags3);
         roomFlagsHolder[3] = asciiflag_conv(flags4);
 
-        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->getRoomFlag(i);
+        for(auto i = 0; i < NUM_ROOM_FLAGS; i++) if(IS_SET_AR(roomFlagsHolder, i)) r->setRoomFlag(i, true);
 
         r->sector_type = static_cast<SectorType>(t[2]);
         sprintf(flags, "object #%d", virtual_nr);    /* sprintf: OK (until 399-bit integers) */
@@ -1011,7 +1011,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     ch->race = static_cast<RaceID>(race);
     auto sen = t[3]+1;
     if(sen > 14) sen = 0;
-    ch->chclass = static_cast<SenseiID>(sen);
+    ch->sensei = static_cast<SenseiID>(sen);
     GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
     GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
     GET_SAVE_BASE(ch, SAVING_WILL) = 0;
@@ -2442,7 +2442,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->playerFlags.size(); f++) {
+                        for(auto f = 0; f < ch->player_flags.size(); f++) {
                             if(IS_SET_AR(flags, f)) ch->setPlayerFlag(f, true);
                         }
                     } else if (!strcmp(tag, "Aff ")) {
@@ -2464,7 +2464,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->admflags.size(); f++) {
+                        for(auto f = 0; f < ch->admin_flags.size(); f++) {
                             if(IS_SET_AR(flags, f)) ch->setAdminFlag(f, true);
                         }
                     } else if (!strcmp(tag, "Alin")) ch->set(CharAlign::good_evil, atoi(line));
@@ -2494,7 +2494,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Clas")) {
                         auto sen = atoi(line)+1;
                         if(sen > 14) sen = 0;
-                        ch->chclass = static_cast<SenseiID>(sen);
+                        ch->sensei = static_cast<SenseiID>(sen);
                     }
                     else if (!strcmp(tag, "Colr")) {
                         sscanf(line, "%d %s", &num, buf2);
@@ -2612,7 +2612,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         flags[1] = asciiflag_conv(f2);
                         flags[2] = asciiflag_conv(f3);
                         flags[3] = asciiflag_conv(f4);
-                        for(auto f = 0; f < ch->pref.size(); f++) {
+                        for(auto f = 0; f < ch->pref_flags.size(); f++) {
                             if(IS_SET_AR(flags, f)) ch->setPrefFlag(f, true);
                         }
                     } else if (!strcmp(tag, "Prff")) GET_PREFERENCE(ch) = atoi(line);
@@ -3543,88 +3543,88 @@ static void migrate_obj_data(obj_data *o) {
         // Convert it.
         switch(i) {
             case 9: // ITEM_ANTI_GOOD
-                o->antiAlignGoodEvil.insert(MoralAlign::good);
+                o->not_alignment.insert(MoralAlign::good);
                 break;
             case 10: // ITEM_ANTI_EVIL
-                o->antiAlignGoodEvil.insert(MoralAlign::evil);
+                o->not_alignment.insert(MoralAlign::evil);
                 break;
             case 11: // ITEM_ANTI_NEUTRAL
-                o->antiAlignGoodEvil.insert(MoralAlign::neutral);
+                o->not_alignment.insert(MoralAlign::neutral);
                 break;
             case 12: // ITEM_ANTI_ROSHI
-                o->antiClass.insert(SenseiID::roshi);
+                o->not_sensei.insert(SenseiID::roshi);
                 break;
             case 13:
-                o->antiClass.insert(SenseiID::piccolo);
+                o->not_sensei.insert(SenseiID::piccolo);
                 break;
             case 14:
-                o->antiClass.insert(SenseiID::krane);
+                o->not_sensei.insert(SenseiID::krane);
                 break;
             case 15:
-                o->antiClass.insert(SenseiID::nail);
+                o->not_sensei.insert(SenseiID::nail);
                 break;
             case 17:
-                o->antiClass.insert(SenseiID::tapion);
+                o->not_sensei.insert(SenseiID::tapion);
                 break;
             case 19:
-                o->antiClass.insert(SenseiID::sixteen);
+                o->not_sensei.insert(SenseiID::sixteen);
                 break;
             case 20:
-                o->antiClass.insert(SenseiID::dabura);
+                o->not_sensei.insert(SenseiID::dabura);
                 break;
             case 21:
-                o->antiClass.insert(SenseiID::ginyu);
+                o->not_sensei.insert(SenseiID::ginyu);
                 break;
             case 22: // ITEM_ANTI_HUMAN
-                o->antiRace.insert(RaceID::human);
+                o->not_race.insert(RaceID::human);
                 break;
             case 23: // ITEM_ANTI_ICER
-                o->antiRace.insert(RaceID::icer);
+                o->not_race.insert(RaceID::icer);
                 break;
             case 24: // ITEM_ANTI_SAIYAN
-                o->antiRace.insert(RaceID::saiyan);
+                o->not_race.insert(RaceID::saiyan);
                 break;
             case 25: // ITEM_ANTI_KONATSU
-                o->antiRace.insert(RaceID::konatsu);
+                o->not_race.insert(RaceID::konatsu);
                 break;
             case 29:
-                o->antiClass.insert(SenseiID::bardock);
+                o->not_sensei.insert(SenseiID::bardock);
                 break;
             case 30:
-                o->antiClass.insert(SenseiID::kibito);
+                o->not_sensei.insert(SenseiID::kibito);
                 break;
             case 31:
-                o->antiClass.insert(SenseiID::frieza);
+                o->not_sensei.insert(SenseiID::frieza);
                 break;
             case 41: // ITEM_ONLY_HUMAN
-                o->onlyRace.insert(RaceID::human);
+                o->only_race.insert(RaceID::human);
                 break;
             case 42: // ITEM_ONLY_ICER
-                o->onlyRace.insert(RaceID::icer);
+                o->only_race.insert(RaceID::icer);
                 break;
             case 43: // ITEM_ONLY_SAIYAN
-                o->onlyRace.insert(RaceID::saiyan);
+                o->only_race.insert(RaceID::saiyan);
                 break;
             case 44: // ITEM_ONLY_KONATSU
-                o->onlyRace.insert(RaceID::konatsu);
+                o->only_race.insert(RaceID::konatsu);
                 break;
             case 45:
-                o->onlyClass.insert(SenseiID::bardock);
+                o->only_sensei.insert(SenseiID::bardock);
                 break;
             case 46:
-                o->onlyClass.insert(SenseiID::kibito);
+                o->only_sensei.insert(SenseiID::kibito);
                 break;
             case 47:
-                o->onlyClass.insert(SenseiID::frieza);
+                o->only_sensei.insert(SenseiID::frieza);
                 break;
             case 50:
-                o->antiClass.insert(SenseiID::kurzak);
+                o->not_sensei.insert(SenseiID::kurzak);
                 break;
             case 51:
-                o->onlyClass.insert(SenseiID::kurzak);
+                o->only_sensei.insert(SenseiID::kurzak);
                 break;
             case 75:
-                o->onlyClass.insert(SenseiID::jinto);
+                o->only_sensei.insert(SenseiID::jinto);
                 break;
             case 33:
             case 34:

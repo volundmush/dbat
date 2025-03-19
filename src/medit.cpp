@@ -235,7 +235,7 @@ void init_mobile(struct char_data *mob) {
     //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
     mob->set(CharAppearance::sex, SEX_MALE);
-    mob->chclass = SenseiID::commoner;
+    mob->sensei = SenseiID::commoner;
 
     mob->set(CharDim::weight, rand_number(100, 200));
     mob->setHeight(rand_number(100, 200));
@@ -365,7 +365,7 @@ void medit_disp_mob_flags(struct descriptor_data *d) {
         write_to_output(d, "@g%2d@n) %-20.20s  %s", i + 1, action_bits[i],
                         !(++columns % 2) ? "\r\n" : "");
     }
-    sprintbitarray(OLC_MOB(d)->mobFlags, action_bits, AF_ARRAY_MAX, flags);
+    sprintbitarray(OLC_MOB(d)->mob_flags, action_bits, AF_ARRAY_MAX, flags);
     write_to_output(d, "\r\nCurrent flags : @c%s@n\r\nEnter mob flags (0 to quit) : ",
                     flags);
 }
@@ -484,7 +484,7 @@ void medit_disp_menu(struct descriptor_data *d) {
                     GET_NDD(mob), GET_SDD(mob), GET_HIT(mob), (mob->getCurKI()),
                     (mob->getCurST()), GET_ARMOR(mob), GET_EXP(mob), GET_GOLD(mob)
     );
-    sprintbitarray(mob->mobFlags, action_bits, AF_ARRAY_MAX, flags);
+    sprintbitarray(mob->mob_flags, action_bits, AF_ARRAY_MAX, flags);
     sprintbitarray(mob->affect_flags, affected_bits, AF_ARRAY_MAX, flag2);
     write_to_output(d,
                     "@gI@n) Position   : @y%-10s@n,	 @gJ@n) Default   : @y%-10s\r\n"
@@ -502,7 +502,7 @@ void medit_disp_menu(struct descriptor_data *d) {
                     position_types[(int) GET_POS(mob)],
                     position_types[(int) GET_DEFAULT_POS(mob)],
                     npc_personality[GET_PERSONALITY(mob)],
-                    flags, flag2, sensei::getName(mob->chclass).c_str(),
+                    flags, flag2, sensei::getName(mob->sensei).c_str(),
                     race::getName(mob->race).c_str(),
                     !OLC_SCRIPT(d).empty() ? "Set." : "Not Set.", size_names[get_size(mob)]
     );
@@ -885,7 +885,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             //Check if the sensei requested exists
             if (sensei::exists(sensei)) {
                 //Set the mob's Sensei to the chosen sensei
-                OLC_MOB(d)->chclass = sensei;
+                OLC_MOB(d)->sensei = sensei;
             }
             else {
                 write_to_output(d, "Couldn't find the requested Sensei!\r\n");

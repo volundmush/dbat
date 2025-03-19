@@ -1153,7 +1153,7 @@ ACMD(do_train) {
         total += total * 0.15;
     }
 
-    auto sensei = ch->chclass;
+    auto sensei = ch->sensei;
     bool senseiPresent = false;
 
     if (ch->getRoomVnum() == sensei::getLocation(sensei)) {
@@ -1349,7 +1349,7 @@ void trainProgress(char_data* ch) {
         total += total * 0.15;
     }
 
-    auto sensei = ch->chclass;
+    auto sensei = ch->sensei;
     bool senseiPresent = false;
 
     if (ch->getRoomVnum() == sensei::getLocation(sensei)) {
@@ -2873,7 +2873,7 @@ ACMD(do_telepathy) {
                 ch->decCurKI(ch->getMaxKI() / 40);
                 send_to_char(ch, "@GName      @D: @W%s@n\r\n", GET_NAME(vict));
                 send_to_char(ch, "@GRace      @D: @W%s@n\r\n", race::getName(vict->race).c_str());
-                send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", sensei::getName(vict->chclass).c_str());
+                send_to_char(ch, "@GSensei    @D: @W%s@n\r\n", sensei::getName(vict->sensei).c_str());
                 send_to_char(ch, "@GStr       @D: @W%d@n\r\n", GET_STR(vict));
                 send_to_char(ch, "@GCon       @D: @W%d@n\r\n", GET_CON(vict));
                 send_to_char(ch, "@GInt       @D: @W%d@n\r\n", GET_INT(vict));
@@ -11426,9 +11426,9 @@ void genRace(char_data* ch, std::string suggestedRace) {
     ch->race = chosen_race.value();
     send_to_char(ch, "Race set.\r\n");
 
-    bool prevSensei = sensei::isValidSenseiForRace(ch->chclass, ch->race);
+    bool prevSensei = sensei::isValidSenseiForRace(ch->sensei, ch->race);
     if (!prevSensei) {
-        ch->chclass = SenseiID::commoner;
+        ch->sensei = SenseiID::commoner;
     }
 
     ch->set(CharAppearance::hair_style , -1);
@@ -11664,7 +11664,7 @@ void genSensei(char_data* ch, std::string suggestedSensei) {
             return;
         }
 
-        ch->chclass = chosen_sensei.value();
+        ch->sensei = chosen_sensei.value();
         send_to_char(ch, "\r\nSensei set.\r\n");
     } else {
         int i = 0;
@@ -12220,7 +12220,7 @@ void genFinish(char_data* ch) {
     if(ch->race == RaceID::mutant || ch->race == RaceID::bio_android) 
         if(ch->genome.size() != 2) finished = false;
 
-    if(ch->chclass == SenseiID::commoner) finished = false;
+    if(ch->sensei == SenseiID::commoner) finished = false;
     if(ch->genBonus == 0) finished = false;
     if(ch->get(CharAppearance::eye_color) == 100) finished = false;
     if(ch->get(CharAppearance::skin_color) == 100) finished = false;
@@ -12405,7 +12405,7 @@ void genFinish(char_data* ch) {
 
     do_start(ch);
 
-    ch->teleport_to(sensei::getStartRoom(ch->chclass));
+    ch->teleport_to(sensei::getStartRoom(ch->sensei));
 
 }
 
@@ -12590,7 +12590,7 @@ ACMD(do_gen) {
     send_to_char(ch, "[Height] Height: %s\r\n", ch->getHeight() == 0 ? "@RUnset@n" : std::to_string(ch->getHeight()));
     
 
-    send_to_char(ch, "[Sensei] Sensei: %s\r\n", ch->chclass == SenseiID::commoner ? "@RUnset@n" : sensei::getName(ch->chclass));
+    send_to_char(ch, "[Sensei] Sensei: %s\r\n", ch->sensei == SenseiID::commoner ? "@RUnset@n" : sensei::getName(ch->sensei));
     send_to_char(ch, "[Bonus] Bonus: %s\r\n", ch->genBonus == 0 ? "@RUnset@n" : start_bonus[ch->genBonus]);
     send_to_char(ch, "\n\r@WUse the name in the square brackets after 'chargen' to see and choose options of your selection.@n\r\n");
     send_to_char(ch, "@WWhen everything is set, use 'chargen finish' to be transported into the game!@n\r\n");

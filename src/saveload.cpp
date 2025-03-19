@@ -542,23 +542,33 @@ static void dump_dgscripts(const std::filesystem::path &loc) {
 }
 
 // org_data...
+void to_json(json& j, const picky_data& p) {
+    if(!p.not_alignment.empty()) j["not_alignment"] = p.not_alignment;
+    if(!p.not_race.empty()) j["not_race"] = p.not_race;
+    if(!p.only_race.empty()) j["only_race"] = p.only_race;
+    if(!p.not_sensei.empty()) j["not_sensei"] = p.not_sensei;
+    if(!p.only_sensei.empty()) j["only_sensei"] = p.only_sensei;
+}
+
+void from_json(const json& j, picky_data& p) {
+    if(j.contains("not_alignment")) p.not_alignment = j["not_alignment"].get<std::unordered_set<MoralAlign>>();
+    if(j.contains("not_race")) p.not_race = j["not_race"].get<std::unordered_set<RaceID>>();
+    if(j.contains("only_race")) p.only_race = j["only_race"].get<std::unordered_set<RaceID>>();
+    if(j.contains("not_sensei")) p.not_sensei = j["not_sensei"].get<std::unordered_set<SenseiID>>();
+    if(j.contains("only_sensei")) p.only_sensei = j["only_sensei"].get<std::unordered_set<SenseiID>>();
+}
+
 void to_json(json& j, const org_data& o) {
+    to_json(j, static_cast<picky_data>(o));
     j["vnum"] = o.vnum;
-    if(!o.not_alignment.empty()) j["not_alignment"] = o.not_alignment;
-    if(!o.not_race.empty()) j["not_race"] = o.not_race;
-    if(!o.only_race.empty()) j["only_race"] = o.only_race;
-    if(!o.not_class.empty()) j["not_class"] = o.not_class;
-    if(!o.only_class.empty()) j["only_class"] = o.only_class;
+
     if(o.keeper != NOTHING) j["keeper"] = o.keeper;
 }
 
 void from_json(const json& j, org_data& o) {
+    from_json(j, static_cast<picky_data&>(o));
     if(j.contains("vnum")) o.vnum = j["vnum"];
-    if(j.contains("not_alignment")) o.not_alignment = j["not_alignment"].get<std::unordered_set<MoralAlign>>();
-    if(j.contains("not_race")) o.not_race = j["not_race"].get<std::unordered_set<RaceID>>();
-    if(j.contains("only_race")) o.only_race = j["only_race"].get<std::unordered_set<RaceID>>();
-    if(j.contains("not_class")) o.not_class = j["not_class"].get<std::unordered_set<SenseiID>>();
-    if(j.contains("only_class")) o.only_class = j["only_class"].get<std::unordered_set<SenseiID>>();
+    
     if(j.contains("keeper")) o.keeper = j["keeper"];
 }
 
@@ -950,6 +960,7 @@ void from_json(const json& j, thing_data& t) {
 // obj_data serialize/deserialize...
 
 void to_json(json& j, const obj_data& o) {
+    to_json(j, static_cast<const picky_data&>(o));
     to_json(j, static_cast<const thing_data&>(o));
 
     if(!o.value.empty()) j["value"] = o.value;
@@ -959,13 +970,8 @@ void to_json(json& j, const obj_data& o) {
     if(!o.wear_flags.empty()) j["wear_flags"] = o.wear_flags;
     if(!o.item_flags.empty()) j["item_flags"] = o.item_flags;
     
-    if(!o.onlyAlignGoodEvil.empty()) j["onlyAlignGoodEvil"] = o.onlyAlignGoodEvil;
-    if(!o.antiAlignGoodEvil.empty()) j["antiAlignGoodEvil"] = o.antiAlignGoodEvil;
-    
-    if(!o.onlyClass.empty()) j["onlyClass"] = o.onlyClass;
-    if(!o.antiClass.empty()) j["antiClass"] = o.antiClass;
-    if(!o.onlyRace.empty()) j["onlyRace"] = o.onlyRace;
-    if(!o.antiRace.empty()) j["antiRace"] = o.antiRace;
+    if(!o.only_race.empty()) j["onlyRace"] = o.only_race;
+    if(!o.not_race.empty()) j["antiRace"] = o.not_race;
 
     if(o.weight != 0.0) j["weight"] = o.weight;
     if(o.cost) j["cost"] = o.cost;
@@ -993,6 +999,7 @@ void to_json(json& j, const obj_data& o) {
 }
 
 void from_json(const json& j, obj_data& o) {
+    from_json(j, static_cast<picky_data&>(o));
     from_json(j, static_cast<thing_data&>(o));
 
     if(j.contains("value")) o.value = j["value"].get<std::unordered_map<std::string, int64_t>>();
@@ -1003,14 +1010,6 @@ void from_json(const json& j, obj_data& o) {
     if(j.contains("wear_flags")) o.wear_flags = j["wear_flags"].get<std::unordered_set<WearFlag>>();
 
     if(j.contains("item_flags")) o.item_flags = j["item_flags"].get<std::unordered_set<ItemFlag>>();
-
-    if(j.contains("onlyAlignGoodEvil")) o.onlyAlignGoodEvil = j["onlyAlignGoodEvil"].get<std::unordered_set<MoralAlign>>();
-    if(j.contains("antiAlignGoodEvil")) o.antiAlignGoodEvil = j["antiAlignGoodEvil"].get<std::unordered_set<MoralAlign>>();
-
-    if(j.contains("onlyClass")) o.onlyClass = j["onlyClass"].get<std::unordered_set<SenseiID>>();
-    if(j.contains("antiClass")) o.antiClass = j["antiClass"].get<std::unordered_set<SenseiID>>();
-    if(j.contains("onlyRace")) o.onlyRace = j["onlyRace"].get<std::unordered_set<RaceID>>();
-    if(j.contains("antiRace")) o.antiRace = j["antiRace"].get<std::unordered_set<RaceID>>();
 
     if(j.contains("weight")) o.weight = j["weight"];
     if(j.contains("cost")) o.cost = j["cost"];
@@ -1204,10 +1203,10 @@ void to_json(json& j, const char_data& c) {
     if(!c.stats.empty()) j["stats"] = c.stats;
     if(!c.dims.empty()) j["dims"] = c.dims;
 
-    if(!c.mobFlags.empty()) j["mobFlags"] = c.mobFlags;
-    if(!c.playerFlags.empty()) j["playerFlags"] = c.playerFlags;
+    if(!c.mob_flags.empty()) j["mob_flags"] = c.mob_flags;
+    if(!c.player_flags.empty()) j["player_flags"] = c.player_flags;
 
-    if(!c.pref.empty()) j["pref"] = c.pref;
+    if(!c.pref_flags.empty()) j["pref_flags"] = c.pref_flags;
 
     for(auto i = 0; i < c.bodyparts.size(); i++)
         if(c.bodyparts.test(i)) {
@@ -1219,14 +1218,14 @@ void to_json(json& j, const char_data& c) {
 
     if(c.title && strlen(c.title)) j["title"] = c.title;
     j["race"] = c.race;
-    j["chclass"] = c.chclass;
+    j["sensei"] = c.sensei;
 
     if(c.armor) j["armor"] = c.armor;
     if(c.damage_mod) j["damage_mod"] = c.damage_mod;
 
     if(c.id != NOTHING) {
         // this is an instance...
-        if(!c.admflags.empty()) j["admflags"] = c.admflags;
+        if(!c.admin_flags.empty()) j["admin_flags"] = c.admin_flags;
 
         if(c.was_in_room != NOWHERE) j["was_in_room"] = c.was_in_room;
         json td;
@@ -1265,7 +1264,7 @@ void to_json(json& j, const char_data& c) {
         if(!c.skill.empty()) j["skill"] = c.skill;
 
         if(c.speaking) j["speaking"] = c.speaking;
-        if(c.preference) j["preference"] = c.preference;
+        if(c.preference) j["pref_flagserence"] = c.preference;
 
         if(c.practice_points) j["practice_points"] = c.practice_points;
 
@@ -1384,21 +1383,21 @@ void from_json(const json& j, char_data& c) {
     if(j.contains("title")) c.title = strdup(j["title"].get<std::string>().c_str());
     if(j.contains("race")) c.race = j["race"];
 
-    if(j.contains("chclass")) c.chclass = j["chclass"];
+    if(j.contains("sensei")) c.sensei = j["sensei"];
 
     if(j.contains("armor")) c.armor = j["armor"];
     if(j.contains("damage_mod")) c.damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) j["mob_specials"].get_to(c.mob_specials);
 
-    if(j.contains("mobFlags")) c.mobFlags = j["mobFlags"].get<std::unordered_set<MobFlag>>();
-    if(j.contains("playerFlags")) c.playerFlags = j["playerFlags"].get<std::unordered_set<PlayerFlag>>();
+    if(j.contains("mob_flags")) c.mob_flags = j["mob_flags"].get<std::unordered_set<MobFlag>>();
+    if(j.contains("player_flags")) c.player_flags = j["player_flags"].get<std::unordered_set<PlayerFlag>>();
 
-    if(j.contains("pref")) c.pref = j["pref"].get<std::unordered_set<PrefFlag>>();
+    if(j.contains("pref_flags")) c.pref_flags = j["pref_flags"].get<std::unordered_set<PrefFlag>>();
     if(j.contains("bodyparts")) for(auto &i : j["bodyparts"]) c.bodyparts.set(i.get<int>());
 
     if(c.id != NOTHING) {
         // this is an instance.
-        if(j.contains("admflags")) c.admflags = j["admflags"].get<std::unordered_set<AdminFlag>>();;
+        if(j.contains("admin_flags")) c.admin_flags = j["admin_flags"].get<std::unordered_set<AdminFlag>>();;
 
         if(j.contains("hometown")) c.hometown = j["hometown"];
 
@@ -1550,7 +1549,7 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("permForms")) c.permForms = j["permForms"].get<std::unordered_set<FormID>>();
         
 
-        if(j.contains("preference")) c.preference = j["preference"];
+        if(j.contains("pref_flagserence")) c.preference = j["pref_flagserence"];
         if(j.contains("freeze_level")) c.freeze_level = j["freeze_level"];
         if(j.contains("practice_points")) c.practice_points = j["practice_points"];
         if(j.contains("speaking")) c.speaking = j["speaking"];

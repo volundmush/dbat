@@ -115,6 +115,36 @@ void from_json(const json& j, std::unordered_map<Enum, Value>& m)
     }
 }
 
+template <typename Enum>
+requires std::is_enum_v<Enum>
+void to_json(json& j, const std::unordered_set<Enum>& m)
+{
+    j = json::array();
+    for (auto const& key : m) {
+        // Convert Enum -> string via magic_enum
+        std::string key_str = std::string(magic_enum::enum_name(key));
+        if(key_str.empty()) continue;
+        j.push_back(key_str); // This calls to_json on 'val' if it’s a type with a known converter
+    }
+}
+
+template <typename Enum>
+requires std::is_enum_v<Enum>
+void from_json(const json& j, std::unordered_set<Enum>& m)
+{
+    m.clear();
+    for (auto const& key_str : j) {
+        // Convert string -> Enum
+        auto key = key_str.get<std::string>();
+        auto maybe = magic_enum::enum_cast<Enum>(key);
+        if (!maybe.has_value()) {
+            throw std::invalid_argument("Invalid enum key: " + key
+                + " for enum type: " + demangle(typeid(Enum).name()));
+        }
+        m.insert(maybe.value());
+    }
+}
+
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(mob_special_data, attack_type, default_pos, damnodice, damsizedice)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxage, logon, played, seconds_aged)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_info_data, remainder, seconds, minutes, hours, day, month, year)

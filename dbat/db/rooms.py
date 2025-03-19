@@ -3,7 +3,8 @@ from dbat.models.game import RoomData, RoomDirectionData
 from dbat_ext import room_db
 
 def list_rooms() -> typing.Generator[RoomData, None]:
-    return room_db.list_rooms()
+    for room in room_db.list_rooms():
+        yield RoomData(**room)
 
 def get_room(room_id: int) -> RoomData:
-    return room_db.get_room(room_id)
+    return RoomData(**room_db.get_room(room_id))

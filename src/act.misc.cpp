@@ -244,7 +244,7 @@ static void generate_multiform(struct char_data *ch, int count) {
         if (ch->look_description)
             clone->look_description = strdup(ch->look_description);
         clone->race = ch->race;
-        clone->chclass = ch->chclass;
+        clone->sensei = ch->sensei;
         clone->vitals = ch->vitals;
         clone->nums = ch->nums;
 

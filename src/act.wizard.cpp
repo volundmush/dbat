@@ -1547,7 +1547,7 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
         send_to_char(ch, "Title: %s\r\n", k->title ? k->title : "<None>");
 
     send_to_char(ch, "L-Des: %s@n", k->room_description ? k->room_description : "<None>\r\n");
-    snprintf(buf, sizeof(buf), "%s", sensei::getName(k->chclass).c_str());
+    snprintf(buf, sizeof(buf), "%s", sensei::getName(k->sensei).c_str());
     snprintf(buf2, sizeof(buf2), "%s", race::getName(k->race).c_str());
     send_to_char(ch, "Class: %s, Race: %s, Lev: [@y%2d@n], XP: [@y%" I64T "@n]\r\n",
                  buf, buf2, GET_LEVEL(k), GET_EXP(k));
@@ -1623,11 +1623,11 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     sprinttype(k->mob_specials.default_pos, position_types, buf, sizeof(buf));
     send_to_char(ch, ", Default position: %s", buf);
     send_to_char(ch, ", Idle Timer (in tics) [%d]\r\n", k->timer);
-    sprintbitarray(k->mobFlags, action_bits, PM_ARRAY_MAX, buf);
+    sprintbitarray(k->mob_flags, action_bits, PM_ARRAY_MAX, buf);
     send_to_char(ch, "NPC flags: @c%s@n\r\n", buf);
-    sprintbitarray(k->playerFlags, player_bits, PM_ARRAY_MAX, buf);
+    sprintbitarray(k->player_flags, player_bits, PM_ARRAY_MAX, buf);
     send_to_char(ch, "PLR: @c%s@n\r\n", buf);
-    sprintbitarray(k->pref, preference_bits, PR_ARRAY_MAX, buf);
+    sprintbitarray(k->pref_flags, preference_bits, PR_ARRAY_MAX, buf);
     send_to_char(ch, "PRF: @g%s@n\r\n", buf);
 
     send_to_char(ch, "Form: %s\r\n", trans::getName(k, k->form));
@@ -3944,7 +3944,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "That is not a sensei. Or, it is invalid for the target's race.\r\n");
                 return (0);
             }
-            vict->chclass = chosen_sensei.value();
+            vict->sensei = chosen_sensei.value();
         }
             break;
         case 40: vict->togglePlayerFlag(PLR_NOWIZLIST);

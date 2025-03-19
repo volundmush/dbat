@@ -8,11 +8,11 @@ async def list_characters() -> typing.AsyncGenerator[PlayerData, None]:
     # of models in order to prevent concurrency issues.
     data = list(player_db)
     for player in data:
-        yield player
+        yield PlayerData(**player)
 
 def get_character(character_id: int) -> PlayerData:
     try:
-        return player_db[character_id]
+        return PlayerData(**player_db[character_id])
     except KeyError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Player Character not found."
@@ -21,8 +21,8 @@ def get_character(character_id: int) -> PlayerData:
 def find_character(username: str) -> PlayerData:
     provided = username.upper()
     for player in player_db:
-        if player.name.upper() == provided:
-            return player
+        if player["name"].upper() == provided:
+            return PlayerData(**player)
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST, detail="Player Character not found."
     )

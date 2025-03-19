@@ -470,15 +470,15 @@ int is_guild_ok_char(struct char_data *keeper, struct char_data *ch, int guild_n
     if (IS_NPC(ch))
         return (false);
 
-    if (g.not_class.contains(ch->chclass)) {
+    if (g.not_sensei.contains(ch->sensei)) {
         snprintf(buf, sizeof(buf), "%s %s",
                  GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
     }
 
-    for(auto &cl : g.only_class) {
-        if(cl != ch->chclass) {
+    for(auto &cl : g.only_sensei) {
+        if(cl != ch->sensei) {
             snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_TRAINER_DISLIKE_CLASS);
             do_tell(keeper, buf, cmd_tell, 0);
             return (false);
@@ -851,7 +851,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
 
     skill_num = find_skill_num(argument, SKTYPE_SKILL);
 
-    if (strstr(sensei::getStyle(ch->chclass).c_str(), argument)) {
+    if (strstr(sensei::getStyle(ch->sensei).c_str(), argument)) {
         skill_num = 539;
     }
 
@@ -948,7 +948,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         if (skill_num != 539)
                             send_to_char(ch, "You practice and master the basics!\r\n");
                         else
-                            send_to_char(ch, "You practice the basics of %s\r\n", sensei::getStyle(ch->chclass));
+                            send_to_char(ch, "You practice the basics of %s\r\n", sensei::getStyle(ch->sensei));
                         SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + rand_number(10, 25));
                         ch->modPractices(-pointcost);
                         if (GET_FORGETING(ch) != 0 && GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
@@ -988,7 +988,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         send_to_char(ch, "You practice for a while and manage to advance your technique. +1 (%d/%d)\r\n",
                                      GET_SKILL_BASE(ch, skill_num) + 1, highest);
                     else
-                        send_to_char(ch, "You practice the basics of %s. +1 (%d/%d)\r\n", sensei::getStyle(ch->chclass),
+                        send_to_char(ch, "You practice the basics of %s. +1 (%d/%d)\r\n", sensei::getStyle(ch->sensei),
                                      GET_SKILL_BASE(ch, skill_num) + 1, highest);
                     SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + 1);
                     ch->modPractices(-pointcost);

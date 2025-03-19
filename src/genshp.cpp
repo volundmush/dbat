@@ -36,9 +36,9 @@ void copy_shop(struct shop_data *tshop, struct shop_data *fshop, int free_old_st
     tshop->shop_flags = fshop->shop_flags;
     tshop->not_alignment = fshop->not_alignment;
     tshop->only_race = fshop->only_race;
-    tshop->only_class = fshop->only_class;
+    tshop->only_sensei = fshop->only_sensei;
     tshop->not_race = fshop->not_race;
-    tshop->not_class = fshop->not_class;
+    tshop->not_sensei = fshop->not_sensei;
     S_SORT(tshop) = S_SORT(fshop);
     S_BUYPROFIT(tshop) = S_BUYPROFIT(fshop);
     S_SELLPROFIT(tshop) = S_SELLPROFIT(fshop);

@@ -237,14 +237,14 @@ static int is_ok_char(struct char_data *keeper, struct char_data *ch, vnum shop_
     if (IS_NPC(ch))
         return (true);
 
-    if (sh.not_class.contains(ch->chclass)) {
+    if (sh.not_sensei.contains(ch->sensei)) {
         snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
         do_tell(keeper, buf, cmd_tell, 0);
         return (false);
     }
 
-    for(auto &cl : sh.only_class) {
-        if(cl != ch->chclass) {
+    for(auto &cl : sh.only_sensei) {
+        if(cl != ch->sensei) {
             snprintf(buf, sizeof(buf), "%s %s", GET_NAME(ch), MSG_NO_SELL_CLASS);
             do_tell(keeper, buf, cmd_tell, 0);
             return (false);
@@ -1445,9 +1445,9 @@ std::string org_data::customerString() {
         sections.emplace_back(section);
     }
 
-    if(!not_class.empty()) {
+    if(!not_sensei.empty()) {
         std::vector<std::string> classes;
-        for(auto &cls : not_class) {
+        for(auto &cls : not_sensei) {
             auto name = magic_enum::enum_name(cls);
             classes.emplace_back(name);
         }
@@ -1465,9 +1465,9 @@ std::string org_data::customerString() {
         sections.emplace_back(section);
     }
 
-    if(!only_class.empty()) {
+    if(!only_sensei.empty()) {
         std::vector<std::string> classes;
-        for(auto &cls : only_class) {
+        for(auto &cls : only_sensei) {
             auto name = magic_enum::enum_name(cls);
             classes.emplace_back(name);
         }

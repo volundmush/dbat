@@ -4823,7 +4823,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 }
                 GET_POS(vict) = POS_SITTING;
                 char_from_room(vict);
-                char_to_room(vict, real_room(sensei::getStartRoom(vict->chclass)));
+                char_to_room(vict, real_room(sensei::getStartRoom(vict->sensei)));
             }
             return;
         }

@@ -156,6 +156,13 @@ struct trig_data : std::enable_shared_from_this<trig_data> {
     std::shared_ptr<trig_data> shared();
 };
 
+
+struct picky_data {
+    std::unordered_set<MoralAlign> only_alignment, not_alignment;    /* Neutral, lawful, etc.		*/
+    std::unordered_set<SenseiID> only_sensei, not_sensei;    /* Only these classes can shop here	*/
+    std::unordered_set<RaceID> only_race, not_race;    /* Only these races can shop here	*/
+};
+
 struct unit_data {
     virtual ~unit_data() = default;
     vnum vn{NOTHING}; /* Where in database? Not used by all things. */
@@ -257,7 +264,8 @@ struct thing_data : public unit_data {
 };
 
 /* ================== Memory Structure for Objects ================== */
-struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
+struct obj_data : public thing_data, public picky_data, std::enable_shared_from_this<obj_data> {
+    //~obj_data() override = default;
     int getType() const override { return 1; }
 
     std::string serializeLocation();
@@ -288,9 +296,6 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     std::unordered_map<std::string, double> dvalue;
     ItemType type_flag{ItemType::unknown};      /* Type of item                        */
     int level{}; /* Minimum level of object.            */
-    std::unordered_set<MoralAlign> onlyAlignGoodEvil, antiAlignGoodEvil;
-    std::unordered_set<SenseiID> onlyClass, antiClass;
-    std::unordered_set<RaceID> onlyRace, antiRace;
     
     std::unordered_set<WearFlag> wear_flags{}; /* Where you can wear it     */
     std::unordered_set<ItemFlag> item_flags{}; /* If it hums, glows, etc.  */
@@ -310,7 +315,6 @@ struct obj_data : public thing_data, std::enable_shared_from_this<obj_data> {
     void setFlag(ItemFlag flag, bool value = true);
     bool toggleFlag(ItemFlag flag);
     bool getFlag(ItemFlag flag);
-
 
 
     weight_t weight{};         /* Weight what else                     */
@@ -637,7 +641,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     char *title{};
     RaceID race{RaceID::spirit};
-    SenseiID chclass{SenseiID::commoner};
+    SenseiID sensei{SenseiID::commoner};
 
     std::list<std::pair<int, std::string>> wait_input_queue;
     Task task = Task::nothing;
@@ -706,7 +710,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     // Instance-relevant fields below...
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
 
-    std::unordered_set<AdminFlag> admflags{};    /* Bitvector for admin privs		*/
+    std::unordered_set<AdminFlag> admin_flags{};    /* Bitvector for admin privs		*/
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
     struct affected_type *affected{};
@@ -772,8 +776,8 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     std::map<SkillID, skill_data> skill;
 
-    std::unordered_set<PlayerFlag> playerFlags{}; /* act flag for NPC's; player flag for PC's */
-    std::unordered_set<MobFlag> mobFlags{};
+    std::unordered_set<PlayerFlag> player_flags{}; /* act flag for NPC's; player flag for PC's */
+    std::unordered_set<MobFlag> mob_flags{};
 
     bool getMobFlag(int flag);
     bool toggleMobFlag(int flag);
@@ -946,7 +950,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int8_t freeze_level{};        /* Level of god who froze char, if any	*/
     int16_t invis_level{};        /* level of invisibility		*/
     room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
-    std::unordered_set<PrefFlag> pref{};    /* preference flags for PC's.		*/
+    std::unordered_set<PrefFlag> pref_flags{};    /* preference flags for PC's.		*/
 
     room_vnum normalizeLoadRoom(room_vnum in);
 
@@ -1634,11 +1638,9 @@ struct shop_buy_data {
     std::string keywords{};
 };
 
-struct org_data {
+struct org_data : public picky_data {
     int vnum{NOTHING};        /* Virtual number of this shop		*/
-    std::unordered_set<MoralAlign> not_alignment;    /* Neutral, lawful, etc.		*/
-    std::unordered_set<SenseiID> only_class, not_class;    /* Only these classes can shop here	*/
-    std::unordered_set<RaceID> only_race, not_race;    /* Only these races can shop here	*/
+
     mob_vnum keeper{NOBODY};                   /* GM's vnum */
     std::vector<std::weak_ptr<char_data>> getKeepers();
     SpecialFunc func{};        /* Secondary spec_proc for keeper	*/

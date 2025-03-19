@@ -4189,7 +4189,7 @@ ACMD(do_score) {
             send_to_char(ch, "  @D|  @CClan@D: @W%-64s@D|@n\n", GET_CLAN(ch));
         }
         send_to_char(ch, "  @D|  @CRace@D: @W%10s@D,  @CSensei@D: @W%15s@D,     @CArt@D: @W%-17s@D|@n\n", race::getName(ch->race),
-                     sensei::getName(ch->chclass).c_str(), sensei::getStyle(ch->chclass).c_str());
+                     sensei::getName(ch->sensei).c_str(), sensei::getStyle(ch->sensei).c_str());
         send_to_char(ch, "  @D|@CGender@D: @W%10s@D,  @C  Size@D: @W%15s@D,  @C Align@D: @W%-17s@D|@n\n",
                      genders[static_cast<int>(GET_SEX(ch))], size_names[get_size(ch)], disp_align(ch));
     }
@@ -5318,7 +5318,7 @@ ACMD(do_who) {
 
             if (short_list) {
                 send_to_char(ch, "               @B[@W%3d @Y%s @C%s@B]@W %-12.12s@n%s@n",
-                             GET_LEVEL(tch), race::getAbbr(tch->race), sensei::getAbbr(tch->chclass).c_str(), GET_NAME(tch),
+                             GET_LEVEL(tch), race::getAbbr(tch->race), sensei::getAbbr(tch->sensei).c_str(), GET_NAME(tch),
                              ((!(++num_can_see % 4)) ? "\r\n" : ""));
             } else {
                 num_can_see++;
@@ -6652,7 +6652,7 @@ ACMD(do_whois) {
     } else {
         send_to_char(ch,
                      "@cName  @D: @w%s\r\n@cSensei@D: @w%s\r\n@cRace  @D: @w%s\r\n@cTitle @D: @w%s@n\r\n@cClan  @D: @w%s@n\r\n",
-                     GET_NAME(victim), sensei::getName(victim->chclass), race::getName(victim->race),
+                     GET_NAME(victim), sensei::getName(victim->sensei), race::getName(victim->race),
                      GET_TITLE(victim), clan ? buf : "None.");
         if (clan == true && !strstr(GET_CLAN(victim), "Applying")) {
             if (checkCLAN(victim) == true) {

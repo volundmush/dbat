@@ -530,11 +530,11 @@ static int apply_ac(struct char_data *ch, int eq_pos) {
 }
 
 int invalid_align(struct char_data *ch, struct obj_data *obj) {
-    if (obj->antiAlignGoodEvil.contains(MoralAlign::evil) && IS_EVIL(ch))
+    if (obj->not_alignment.contains(MoralAlign::evil) && IS_EVIL(ch))
         return true;
-    if (obj->antiAlignGoodEvil.contains(MoralAlign::good) && IS_GOOD(ch))
+    if (obj->not_alignment.contains(MoralAlign::good) && IS_GOOD(ch))
         return true;
-    if (obj->antiAlignGoodEvil.contains(MoralAlign::neutral) && IS_NEUTRAL(ch))
+    if (obj->not_alignment.contains(MoralAlign::neutral) && IS_NEUTRAL(ch))
         return true;
     return false;
 }

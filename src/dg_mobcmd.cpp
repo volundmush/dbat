@@ -1019,9 +1019,9 @@ ACMD(do_mtransform) {
     ch->nums = m->nums;
     ch->stats = m->stats;
     ch->dims = m->dims;
-    ch->mobFlags = m->mobFlags;
+    ch->mob_flags = m->mob_flags;
     ch->bodyparts = m->bodyparts;
-    ch->chclass = m->chclass;
+    ch->sensei = m->sensei;
     ch->race = m->race;
     ch->affect_flags = m->affect_flags;
     ch->armor = m->armor;

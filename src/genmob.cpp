@@ -442,14 +442,14 @@ bool char_data::toggleMobFlag(int flag) {
 }
 
 bool char_data::getMobFlag(int flag) {
-    return mobFlags.contains(static_cast<MobFlag>(flag));
+    return mob_flags.contains(static_cast<MobFlag>(flag));
 }
 
 void char_data::setMobFlag(int flag, bool value) {
     if(value) {
-        mobFlags.insert(static_cast<MobFlag>(flag));
+        mob_flags.insert(static_cast<MobFlag>(flag));
     } else {
-        mobFlags.erase(static_cast<MobFlag>(flag));
+        mob_flags.erase(static_cast<MobFlag>(flag));
     }
 }
 
@@ -464,14 +464,14 @@ bool char_data::togglePlayerFlag(int flag) {
 }
 
 bool char_data::getPlayerFlag(int flag) {
-    return playerFlags.contains(static_cast<PlayerFlag>(flag));
+    return player_flags.contains(static_cast<PlayerFlag>(flag));
 }
 
 void char_data::setPlayerFlag(int flag, bool value) {
     if(value) {
-        playerFlags.insert(static_cast<PlayerFlag>(flag));
+        player_flags.insert(static_cast<PlayerFlag>(flag));
     } else {
-        playerFlags.erase(static_cast<PlayerFlag>(flag));
+        player_flags.erase(static_cast<PlayerFlag>(flag));
     }
 }
 
@@ -486,14 +486,14 @@ bool char_data::toggleAdminFlag(int flag) {
 }
 
 bool char_data::getAdminFlag(int flag) {
-    return admflags.contains(static_cast<AdminFlag>(flag));
+    return admin_flags.contains(static_cast<AdminFlag>(flag));
 }
 
 void char_data::setAdminFlag(int flag, bool value) {
     if(value) {
-        admflags.insert(static_cast<AdminFlag>(flag));
+        admin_flags.insert(static_cast<AdminFlag>(flag));
     } else {
-        admflags.erase(static_cast<AdminFlag>(flag));
+        admin_flags.erase(static_cast<AdminFlag>(flag));
     }
 }
 
@@ -508,13 +508,13 @@ bool char_data::togglePrefFlag(int flag) {
 }
 
 bool char_data::getPrefFlag(int flag) {
-    return pref.contains(static_cast<PrefFlag>(flag));
+    return pref_flags.contains(static_cast<PrefFlag>(flag));
 }
 
 void char_data::setPrefFlag(int flag, bool value) {
     if(value) {
-        pref.insert(static_cast<PrefFlag>(flag));
+        pref_flags.insert(static_cast<PrefFlag>(flag));
     } else {
-        pref.erase(static_cast<PrefFlag>(flag));
+        pref_flags.erase(static_cast<PrefFlag>(flag));
     }
 }
