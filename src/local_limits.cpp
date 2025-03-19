@@ -2011,7 +2011,7 @@ void timed_dt(struct char_data * ch)
               */
 
             for (auto &[vn, r] : world)
-                r->timed -= (r->timed != -1);
+                r->deathtrap_timer -= (r->deathtrap_timer != -1);
 
             for (auto d = descriptor_list; d; d = d->next)
             {
@@ -2039,16 +2039,16 @@ void timed_dt(struct char_data * ch)
           and return again.
         */
 
-        if (ch->getRoom()->timed < 0)
+        if (ch->getRoom()->deathtrap_timer < 0)
         {
-            ch->getRoom()->timed = rand_number(2, 5);
+            ch->getRoom()->deathtrap_timer = rand_number(2, 5);
             return;
         }
 
         /* We know ch is in a dt room with timed >= 0 - see if its the end.
          *
          */
-        if (ch->getRoom()->timed == 0)
+        if (ch->getRoom()->deathtrap_timer == 0)
         {
             auto people = ch->getLocationPeople();
             for (auto vict : filter_raw(people))

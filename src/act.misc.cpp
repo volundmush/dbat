@@ -2786,7 +2786,7 @@ ACMD(do_hydromancy) {
     int skill = GET_SKILL_BASE(ch, SKILL_STYLE), chance = axion_dice(0);
     int64_t cost = (GET_MAX_MANA(ch) / 12) - (GET_INT(ch) * GET_WIS(ch));
 
-    if (r->geffect >= 0 && r->sector_type != SectorType::water_swim && r->sector_type != SectorType::water_noswim) {
+    if (r->ground_effect >= 0 && r->sector_type != SectorType::water_swim && r->sector_type != SectorType::water_noswim) {
         if (r->sector_type != SectorType::underwater) {
             send_to_char(ch, "There is not sufficient water here.\r\n");
             return;
@@ -2940,7 +2940,7 @@ ACMD(do_hydromancy) {
                     hurt(0, 0, ch, vict, nullptr, cost * 4, 1);
                 }
             }
-            dest->geffect = -3;
+            dest->ground_effect = -3;
             LASTATK(ch) = last;
             WAIT_STATE(ch, PULSE_2SEC);
             GET_COOLDOWN(ch) = 15;

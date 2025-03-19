@@ -131,8 +131,8 @@ WCMD(do_weffect) {
             wld_log(room, "weffect target is NOWHERE.");
             return;
         } else {
-            if (room->geffect != 0) {
-                room->geffect = 5;
+            if (room->ground_effect != 0) {
+                room->ground_effect = 5;
             } else {
                 wld_log(room, "weffect target already has lava.");
                 return;

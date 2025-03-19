@@ -251,7 +251,7 @@ bool room_data::isActive() {
 
 
 int room_data::getDamage() {
-    return dmg;
+    return damage;
 }
 
 void room_data::activate() {
@@ -261,7 +261,7 @@ void room_data::activate() {
         if(SCRIPT_TYPES(this) & OTRIG_TIME)
             roomSubscriptions.subscribe("timeTriggers", shared_from_this());
     }
-    if(dmg != 0)
+    if(damage != 0)
         roomSubscriptions.subscribe("roomRepairDamage", shared_from_this());
 }
 
@@ -270,19 +270,19 @@ void room_data::deactivate() {
 }
 
 int room_data::setDamage(int amount) {
-    auto before = dmg;
-    dmg = std::clamp<int>(amount, 0, 100);
+    auto before = damage;
+    damage = std::clamp<int>(amount, 0, 100);
     // if(dmg != before) save();
-    if(dmg == 0) {
+    if(damage == 0) {
         roomSubscriptions.unsubscribe("roomRepairDamage", shared_from_this());
     } else {
         roomSubscriptions.subscribe("roomRepairDamage", shared_from_this());
     }
-    return dmg;
+    return damage;
 }
 
 int room_data::modDamage(int amount) {
-    return setDamage(dmg + amount);
+    return setDamage(damage + amount);
 }
 
 struct room_data* room_direction_data::getDestination() {
@@ -412,7 +412,7 @@ double room_data::getEnvironment(int type) {
         }
 
         case ENV_WATER:
-            if(geffect < 0) 
+            if(ground_effect < 0) 
                 return 100.0;
             switch(static_cast<int>(sector_type)) {
                 case SECT_WATER_SWIM:

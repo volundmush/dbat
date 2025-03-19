@@ -1203,7 +1203,7 @@ static void map_draw_room(char map[9][10], int x, int y, room_rnum rnum, struct 
             draw_closed_exit(map, x, y, door);
         } else if (!isClosed) {
             auto sect = static_cast<int>(dest->sector_type);
-            double geffect = dest->geffect;
+            double geffect = dest->ground_effect;
             double waterEnv = dest->getEnvironment(ENV_WATER);
             draw_open_exit(map, x, y, door, sect, geffect, waterEnv);
         }
@@ -3205,11 +3205,11 @@ static void display_room_damage_description(struct room_data *rm, struct char_da
             send_to_char(ch, "\r\n");
         }
 
-        if (rm->geffect >= 1 && rm->geffect <= 5) {
+        if (rm->ground_effect >= 1 && rm->ground_effect <= 5) {
             send_to_char(ch, "@rLava@w is pooling in some places here...@n\r\n");
-        } else if (rm->geffect >= 6) {
+        } else if (rm->ground_effect >= 6) {
             send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
-        } else if (rm->geffect < 0) {
+        } else if (rm->ground_effect < 0) {
             send_to_char(ch, "@cThe entire area is flooded with a @Cmystical@c cube of @Bwater!@n\r\n");
         }
     }
@@ -6412,10 +6412,10 @@ ACMD(do_scan) {
 
         list_obj_to_char(dest->getObjects(), ch, SHOW_OBJ_LONG, false);
         list_char_to_char(dest->getPeople(), ch);
-        if (dest->geffect >= 1 && dest->geffect <= 5) {
+        if (dest->ground_effect >= 1 && dest->ground_effect <= 5) {
             send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
         }
-        if (dest->geffect >= 6) {
+        if (dest->ground_effect >= 6) {
             send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
         }
         /* Check 2nd room away */
@@ -6436,10 +6436,10 @@ ACMD(do_scan) {
 
             list_obj_to_char(dest2->getObjects(), ch, SHOW_OBJ_LONG, false);
             list_char_to_char(dest2->getPeople(), ch);
-            if (dest2->geffect >= 1 && dest2->geffect <= 5) {
+            if (dest2->ground_effect >= 1 && dest2->ground_effect <= 5) {
                 send_to_char(ch, "@rLava@w is pooling in someplaces here...@n\r\n");
             }
-            if (dest2->geffect >= 6) {
+            if (dest2->ground_effect >= 6) {
                 send_to_char(ch, "@RLava@r covers pretty much the entire area!@n\r\n");
             }
         } else {

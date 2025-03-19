@@ -91,19 +91,19 @@ std::vector<std::weak_ptr<char_data>> thing_data::getLocationPeople() const {
 
 int thing_data::getLocationDamage() const {
     if(room)
-        return room->dmg;
+        return room->damage;
     return 0;
 }
 
 int thing_data::setLocationDamage(int value) const {
     if(room)
-        return room->dmg = value;
+        return room->damage = value;
     return 0;
 }
 
 int thing_data::modLocationDamage(int value) const {
     if(room)
-        return room->dmg += value;
+        return room->damage += value;
     return 0;
 }
 
@@ -115,19 +115,19 @@ int thing_data::getLocationTileType() const {
 
 int thing_data::getLocationGroundEffect() const {
     if(room)
-        return room->geffect;
+        return room->ground_effect;
     return 0;
 }
 
 int thing_data::setLocationGroundEffect(int value) const {
     if(room)
-        return room->geffect = value;
+        return room->ground_effect = value;
     return 0;
 }
 
 int thing_data::modLocationGroundEffect(int value) const {
     if(room)
-        return room->geffect += value;
+        return room->ground_effect += value;
     return 0;
 }
 

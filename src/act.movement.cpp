@@ -441,7 +441,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (dest->geffect == 6 && !IS_HUMANOID(ch) && IS_NPC(ch)) {
+    if (dest->ground_effect == 6 && !IS_HUMANOID(ch) && IS_NPC(ch)) {
         return (0);
     }
 
@@ -654,7 +654,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     if (FIGHTING(ch)) {
         auto to_room = oldRoom->dir_option[dir]->to_room;
         auto r = get_room(to_room);
-        if (r->sector_type != SectorType::flying && r->sector_type != SectorType::water_noswim && r->geffect == 0) {
+        if (r->sector_type != SectorType::flying && r->sector_type != SectorType::water_noswim && r->ground_effect == 0) {
             roll_pursue(FIGHTING(ch), ch);
         }
         ch->setAffectFlag(AFF_PURSUIT, false);
@@ -696,7 +696,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (ch->getLocationGroundEffect() == 6 || oldRoom->geffect == 6) {
+    if (ch->getLocationGroundEffect() == 6 || oldRoom->ground_effect == 6) {
         if (!IS_DEMON(ch) && !AFF_FLAGGED(ch, AFF_FLYING) && group_bonus(ch, 2) != 14) {
             act("@rYour legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@R$n@r's legs are burned by the lava!@n", true, ch, nullptr, nullptr, TO_ROOM);

@@ -25,6 +25,7 @@ admin_parser = "dbat.portal.parsers.admin.AdminParser"
 auth = "dbat.rest.auth"
 users = "dbat.rest.users"
 characters = "dbat.rest.characters"
+rooms = "dbat.rest.rooms"
 # Disabled
 system = ""
 

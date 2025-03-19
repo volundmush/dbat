@@ -397,9 +397,9 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
 
     std::list<std::weak_ptr<char_data>> characters;    /* List of characters in room          */
 
-    int timed{};                   /* For timed Dt's                     */
-    int dmg{};                     /* How damaged the room is            */
-    int geffect{};            /* Effect of ground destruction       */
+    int deathtrap_timer{};                   /* For timed Dt's                     */
+    int damage{};                     /* How damaged the room is            */
+    int ground_effect{};            /* Effect of ground destruction       */
     
     void activate();
     void deactivate();

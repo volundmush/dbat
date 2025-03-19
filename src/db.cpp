@@ -2100,30 +2100,30 @@ void reset_zone(zone_rnum zone)
 
         if (r->sector_type == SectorType::lava)
         {
-            r->geffect = 5;
+            r->ground_effect = 5;
         }
 
-        if (r->geffect < -1)
+        if (r->ground_effect < -1)
         {
             send_to_room(r, "The area loses some of the water flooding it.\r\n");
-            r->geffect += 1;
+            r->ground_effect += 1;
         }
-        else if (r->geffect == -1)
+        else if (r->ground_effect == -1)
         {
             send_to_room(r, "The area loses the last of the water flooding it in one large rush.\r\n");
-            r->geffect = 0;
+            r->ground_effect = 0;
         }
 
-        if (r->geffect >= 1 && rand_number(1, 4) == 4 && !r->getEnvironment(ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
+        if (r->ground_effect >= 1 && rand_number(1, 4) == 4 && !r->getEnvironment(ENV_WATER) >= 100.0 && r->sector_type != SectorType::lava)
         {
             send_to_room(r, "The lava has cooled and become solid rock.\r\n");
-            r->geffect = 0;
+            r->ground_effect = 0;
         }
-        else if (r->geffect >= 1 && rand_number(1, 2) == 2 && r->getEnvironment(ENV_WATER) >= 100.0 &&
+        else if (r->ground_effect >= 1 && rand_number(1, 2) == 2 && r->getEnvironment(ENV_WATER) >= 100.0 &&
                  r->sector_type != SectorType::lava)
         {
             send_to_room(r, "The water has cooled the lava and it has become solid rock.\r\n");
-            r->geffect = 0;
+            r->ground_effect = 0;
         }
     }
     post_reset(z.number);

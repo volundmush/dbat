@@ -895,7 +895,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     }
 
     r->func = nullptr;
-    r->timed = -1;
+    r->deathtrap_timer = -1;
 
     for (i = 0; i < NUM_OF_DIRS; i++)
         r->dir_option[i] = nullptr;

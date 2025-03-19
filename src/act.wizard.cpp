@@ -1226,7 +1226,7 @@ static void do_stat_room(struct char_data *ch) {
                  (long) rm->vn, buf2);
 
     sprintbitarray(rm->room_flags, room_bits, RF_ARRAY_MAX, buf2);
-    send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->geffect);
+    send_to_char(ch, "Room Damage: %d, Room Effect: %d\r\n", rm->getDamage(), rm->ground_effect);
     send_to_char(ch, "SpecProc: %s, Flags: %s\r\n", rm->func == nullptr ? "None" : "Exists", buf2);
 
     send_to_char(ch, "Description:\r\n%s", rm->look_description ? rm->look_description : "  None.\r\n");
