@@ -1533,7 +1533,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         } else if (IS_DEMON(mob)) {
             mexp *= 1.1;
         }
-        if (GET_CLASS(mob) == SenseiID::commoner && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
+        if (GET_CLASS(mob) == Sensei::commoner && IS_HUMANOID(mob) && !IS_DRAGON(mob)) {
             if (!IS_ANDROID(mob) && !IS_SAIYAN(mob) && !IS_BIO(mob) && !IS_MAJIN(mob)) {
                 mexp *= 0.75;
             }

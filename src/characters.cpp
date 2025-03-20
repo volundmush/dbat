@@ -32,26 +32,26 @@ std::string char_data::juggleRaceName(bool capitalized) {
     auto apparent = race;
 
     switch (apparent) {
-        case RaceID::hoshijin:
+        case Race::hoshijin:
             if (mimic) apparent = *mimic;
             break;
-        case RaceID::halfbreed:
+        case Race::halfbreed:
             switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = RaceID::human;
+                    apparent = Race::human;
                     break;
                 case 2:
-                    apparent = RaceID::saiyan;
+                    apparent = Race::saiyan;
                     break;
             }
             break;
-        case RaceID::android:
+        case Race::android:
             switch (RACIAL_PREF(this)) {
                 case 1:
-                    apparent = RaceID::android;
+                    apparent = Race::android;
                     break;
                 case 2:
-                    apparent = RaceID::human;
+                    apparent = Race::human;
                     break;
                 case 3:
                     if (capitalized) {
@@ -61,9 +61,9 @@ std::string char_data::juggleRaceName(bool capitalized) {
                     }
             }
             break;
-        case RaceID::saiyan:
+        case Race::saiyan:
             if (PLR_FLAGGED(this, PLR_TAILHIDE)) {
-                apparent = RaceID::human;
+                apparent = Race::human;
             }
             break;
     }
@@ -866,16 +866,16 @@ bool char_data::hasTail() {
     return character_flags.get(CharacterFlag::tail);
 }
 
-void char_data::addTransform(FormID form) {
+void char_data::addTransform(Form form) {
     transforms.insert({form, trans_data()});
 }
 
-void char_data::hideTransform(FormID form, bool hide) {
+void char_data::hideTransform(Form form, bool hide) {
     auto foundForm = transforms.find(form);
     foundForm->second.visible = !hide;
 }
 
-bool char_data::removeTransform(FormID form) {
+bool char_data::removeTransform(Form form) {
     if (transforms.contains(form))
     {
         transforms.erase(form);
@@ -886,7 +886,7 @@ bool char_data::removeTransform(FormID form) {
 }
 
 void char_data::attemptLimitBreak() {
-    if(form == FormID::base)
+    if(form == Form::base)
         return;
     if(transforms[form].time_spent_in_form > 50000 && rand_number(0, 1000) == 1000) {
         transforms[form].limit_broken = true;
@@ -1583,16 +1583,16 @@ int char_data::getArmor() {
 }
 
 void char_data::onAttack(atk::Attack& outgoing) {
-    if(form != FormID::base)
+    if(form != Form::base)
         trans::onAttack(this, outgoing, form);
-    if(technique != FormID::base)
+    if(technique != Form::base)
         trans::onAttack(this, outgoing, technique);
 }
 
 void char_data::onAttacked(atk::Attack& incoming) {
-    if(form != FormID::base)
+    if(form != Form::base)
         trans::onAttacked(this, incoming, form);
-    if(technique != FormID::base)
+    if(technique != Form::base)
         trans::onAttacked(this, incoming, technique);
 }
 
@@ -1754,20 +1754,20 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
 
 void char_data::gazeAtMoon() {
     if(OOZARU_RACE(this) && character_flags.get(CharacterFlag::tail)) {
-        if(form == FormID::oozaru || form == FormID::golden_oozaru) return;
-        FormID toForm = FormID::oozaru;
-        if(transforms.contains(FormID::super_saiyan_1)
-        || transforms.contains(FormID::super_saiyan_2)
-        || transforms.contains(FormID::super_saiyan_3)
-        || transforms.contains(FormID::super_saiyan_4))
-            toForm = FormID::golden_oozaru;
+        if(form == Form::oozaru || form == Form::golden_oozaru) return;
+        Form toForm = Form::oozaru;
+        if(transforms.contains(Form::super_saiyan_1)
+        || transforms.contains(Form::super_saiyan_2)
+        || transforms.contains(Form::super_saiyan_3)
+        || transforms.contains(Form::super_saiyan_4))
+            toForm = Form::golden_oozaru;
 
         form = toForm;
-    } else if (transforms.contains(FormID::lycanthrope)) {
-        if (transforms.contains(FormID::alpha_lycanthrope)) {
-            form = FormID::alpha_lycanthrope;
+    } else if (transforms.contains(Form::lycanthrope)) {
+        if (transforms.contains(Form::alpha_lycanthrope)) {
+            form = Form::alpha_lycanthrope;
         } else { 
-            form = FormID::lycanthrope;
+            form = Form::lycanthrope;
         }
     }
     trans::handleEchoTransform(this, form);

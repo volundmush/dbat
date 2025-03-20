@@ -2983,7 +2983,7 @@ ACMD(do_potential) {
         send_to_char(ch, "You have no potential releases to perform.\r\n");
         return;
     }
-    if (vict->transforms.contains(FormID::potential_unlocked)) {
+    if (vict->transforms.contains(Form::potential_unlocked)) {
         send_to_char(ch, "Their potential has already been released\r\n");
         return;
     }
@@ -3001,9 +3001,9 @@ ACMD(do_potential) {
     }
         /* Rillao: transloc, add new transes here */
     else {
-        vict->addTransform(FormID::potential_unlocked);
+        vict->addTransform(Form::potential_unlocked);
         if(GET_SKILL(ch, SKILL_POTENTIAL) >= 100)
-            vict->addTransform(FormID::potential_unlocked_max);
+            vict->addTransform(Form::potential_unlocked_max);
         reveal_hiding(ch, 0);
         act("You place your hand on top of $N's head. After a moment of concentrating you release their hidden potential.",
             true, ch, nullptr, vict, TO_CHAR);
@@ -3050,7 +3050,7 @@ ACMD(do_majinize) {
         send_to_char(ch, "You can't majinize yourself.\r\n");
         return;
     }
-    if (vict->transforms.contains(FormID::potential_unlocked)) {
+    if (vict->transforms.contains(Form::potential_unlocked)) {
         send_to_char(ch, "You can't majinize them their potential has been released!\r\n");
         return;
     }
@@ -3070,7 +3070,7 @@ ACMD(do_majinize) {
         return;
     }
         /* Rillao: transloc, add new transes here */
-    else if (vict->permForms.contains(FormID::majinized) && MAJINIZED(vict) == ((ch)->id)) {
+    else if (vict->permForms.contains(Form::majinized) && MAJINIZED(vict) == ((ch)->id)) {
         reveal_hiding(ch, 0);
         act("You remove $N's majinization, freeing them from your influence, but also weakening them.", true, ch,
             nullptr, vict, TO_CHAR);
@@ -3084,7 +3084,7 @@ ACMD(do_majinize) {
         if (GET_MAJINIZED(vict) == 0) {
             GET_MAJINIZED(vict) = ((vict->getBasePL()) * .4);
         }
-        vict->permForms.erase(FormID::majinized);
+        vict->permForms.erase(Form::majinized);
         return;
     } else if (GET_BOOSTS(ch) == 0) {
         auto chInt = GET_INT(ch);
@@ -3111,7 +3111,7 @@ ACMD(do_majinize) {
         GET_BOOSTS(ch) -= 1;
 
         GET_MAJINIZED(vict) = (vict->getBasePL()) * .4;
-        vict->addTransform(FormID::majinized);
+        vict->addTransform(Form::majinized);
         return;
     }
 
@@ -7279,7 +7279,7 @@ ACMD(do_transform) {
     auto cur_tech = ch->technique;
 
     // If we are in kaioken or something weird like that, prevent transforming.
-    if (ch->form == FormID::golden_oozaru || ch->form == FormID::oozaru) {
+    if (ch->form == Form::golden_oozaru || ch->form == Form::oozaru) {
         send_to_char(ch, "You are the great Oozaru right now and can't transform!\r\n");
         return;
     }
@@ -7294,7 +7294,7 @@ ACMD(do_transform) {
     // check for revert.
     if (!strcasecmp("revert", arg)) {
         // Check if we can revert.
-        if (ch->form == FormID::base && ch->technique == FormID::base) {
+        if (ch->form == Form::base && ch->technique == Form::base) {
             send_to_char(ch, "You are not transformed.\r\n");
             return;
         }
@@ -7304,10 +7304,10 @@ ACMD(do_transform) {
             do_charge(ch, "release", 0, 0);
         }
 
-        if(ch->form != FormID::base) {
+        if(ch->form != Form::base) {
             trans::revert(ch);
         }
-        if(ch->technique != FormID::base) {
+        if(ch->technique != Form::base) {
             trans::revert(ch);
         }
         return;
@@ -11387,7 +11387,7 @@ void genGender(char_data* ch, std::string suggestedGender) {
 
 void genRace(char_data* ch, std::string suggestedRace) {
     auto currentRace = ch->race;
-    auto check = [&](RaceID id) {return race::isPlayable(id);};
+    auto check = [&](Race id) {return race::isPlayable(id);};
     auto chosen_race = race::findRace(suggestedRace, check);
     if(suggestedRace == "") {
         send_to_char(ch, "The races you can choose are:\r\n");
@@ -11414,9 +11414,9 @@ void genRace(char_data* ch, std::string suggestedRace) {
     if (!chosen_race) {
         send_to_char(ch,"\r\nThat's not a race.\r\n");
         return;
-    } else if(currentRace == RaceID::bio_android || currentRace == RaceID::mutant) {
+    } else if(currentRace == Race::bio_android || currentRace == Race::mutant) {
         ch->genome.clear();
-    } else if(currentRace == RaceID::halfbreed || currentRace == RaceID::android) {
+    } else if(currentRace == Race::halfbreed || currentRace == Race::android) {
         ch->set(CharNum::racial_preference, 0);
     }
 
@@ -11425,7 +11425,7 @@ void genRace(char_data* ch, std::string suggestedRace) {
 
     bool prevSensei = sensei::isValidSenseiForRace(ch->sensei, ch->race);
     if (!prevSensei) {
-        ch->sensei = SenseiID::commoner;
+        ch->sensei = Sensei::commoner;
     }
 
     ch->set(CharAppearance::hair_style , -1);
@@ -11434,12 +11434,12 @@ void genRace(char_data* ch, std::string suggestedRace) {
 }
 
 void genRaceExtra(char_data* ch, std::string arg){
-    if(!(ch->race == RaceID::halfbreed || ch->race == RaceID::android || ch->race == RaceID::bio_android || ch->race == RaceID::mutant)) {
+    if(!(ch->race == Race::halfbreed || ch->race == Race::android || ch->race == Race::bio_android || ch->race == Race::mutant)) {
         send_to_char(ch,"\r\nYou don't need to do this step.\r\n");
         return;
     }
 
-    if(ch->race == RaceID::halfbreed) {
+    if(ch->race == Race::halfbreed) {
         if(is_abbrev(arg.c_str(), "human") || arg == "1") {
             send_to_char(ch,"\r\nSet to Human.\r\n");
             ch->set(CharNum::racial_preference, 1);
@@ -11459,7 +11459,7 @@ void genRaceExtra(char_data* ch, std::string arg){
     }
 
 
-    if(ch->race == RaceID::android) {
+    if(ch->race == Race::android) {
         if(is_abbrev(arg.c_str(), "android") || arg == "1") {
             send_to_char(ch,"\r\nSet to Android.\r\n");
             ch->set(CharNum::racial_preference, 1);
@@ -11486,7 +11486,7 @@ void genRaceExtra(char_data* ch, std::string arg){
     }
 
 
-    if(ch->race == RaceID::bio_android) {
+    if(ch->race == Race::bio_android) {
         bool second = false;
         if(!ch->genome.empty()) second = true;
         if(second && ch->genome.contains(atoi(arg.c_str()))) {
@@ -11560,7 +11560,7 @@ void genRaceExtra(char_data* ch, std::string arg){
     }
 
 
-    if(ch->race == RaceID::mutant) {
+    if(ch->race == Race::mutant) {
         bool second = false;
         if(!ch->genome.empty() > 0) second = true;
         if(second && ch->genome.contains(atoi(arg.c_str()))) {
@@ -11647,14 +11647,14 @@ void genRaceExtra(char_data* ch, std::string arg){
 
 }
 
-std::vector<SenseiID> valid_classes(char_data* ch) {
-    auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
+std::vector<Sensei> valid_classes(char_data* ch) {
+    auto check = [&](Sensei id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
     return sensei::filterSenseis(check);
 }
 
 void genSensei(char_data* ch, std::string suggestedSensei) {
     if(suggestedSensei != "") {
-        auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
+        auto check = [&](Sensei id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
         auto chosen_sensei = sensei::findSensei(suggestedSensei, check);
         if (!chosen_sensei) {
             send_to_char(ch, "\r\nThat's not a sensei.\r\n");
@@ -11701,13 +11701,13 @@ void genHairLength(char_data* ch, std::string suggestedHair){
         return;
     }
 
-    if(ch->race == RaceID::namekian || ch->race == RaceID::arlian) { 
+    if(ch->race == Race::namekian || ch->race == Race::arlian) { 
         send_to_char(ch, "@YAntenae Length SELECTION menu:\r\n");
         send_to_char(ch, "@B1@W)@C Tiny  @B2@W)@C Short  @B3@W)@C Medium\r\n");
-    } else if(ch->race == RaceID::majin) {
+    } else if(ch->race == Race::majin) {
         send_to_char(ch, "@YForelock Length SELECTION menu:\r\n\n");
         send_to_char(ch, "@B1@W)@C Tiny  @B2@W)@C Short  @B3@W)@C Medium\r\n");
-    } else if(ch->race == RaceID::icer) {
+    } else if(ch->race == Race::icer) {
         send_to_char(ch, "@YHorn Length SELECTION menu:\r\n\n");
         send_to_char(ch, "@B1@W)@C None  @B2@W)@C Short  @B3@W)@C Medium\r\n");
     } else {
@@ -11788,7 +11788,7 @@ void genHairStyle(char_data* ch, std::string suggestedHair){
 }
 
 void genHairColour(char_data* ch, std::string suggestedHair){
-    if(ch->get(CharAppearance::hair_length) == HAIRL_BALD && !(ch->race == RaceID::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)) {
+    if(ch->get(CharAppearance::hair_length) == HAIRL_BALD && !(ch->race == Race::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)) {
         send_to_char(ch, "You have no hair to colour.\r\n");
         return;
     }
@@ -11861,7 +11861,7 @@ void genHairColour(char_data* ch, std::string suggestedHair){
 
 
 
-    if (ch->race == RaceID::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE) {
+    if (ch->race == Race::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE) {
         send_to_char(ch, "@YWing color SELECTION menu:\r\n\n");
     } else {
         send_to_char(ch, "@YHair color SELECTION menu:\r\n\n");
@@ -11872,7 +11872,7 @@ void genHairColour(char_data* ch, std::string suggestedHair){
     send_to_char(ch, "@B10@W)@C Purple @B11@W)@C Silver @B12@W)@C Crimson@n\r\n");
     send_to_char(ch, "@B13@W)@C White@n\r\n");
 
-    if (ch->race == RaceID::saiyan) {
+    if (ch->race == Race::saiyan) {
         send_to_char(ch, "@RPlease remember that Saiyans naturally only have Black hair. It must be dyed to be otherwise.@n\r\n");
     } 
 }
@@ -12146,7 +12146,7 @@ void genHeight(char_data* ch, std::string suggestedHeight) {
     int height = atoi(suggestedHeight.c_str());
 
 
-    if (ch->race == RaceID::tuffle && (height >= 20 && height <= 150)) {
+    if (ch->race == Race::tuffle && (height >= 20 && height <= 150)) {
         ch->setHeight(height);
         send_to_char(ch, "Height set.\r\n");
         return;
@@ -12157,7 +12157,7 @@ void genHeight(char_data* ch, std::string suggestedHeight) {
         return;
     }
     else {
-        if(ch->race == RaceID::tuffle) {
+        if(ch->race == Race::tuffle) {
             send_to_char(ch, "For Tuffles, please keep height above 20(cm), and below 150(cm).\r\n");
         } else {
             send_to_char(ch, "Please keep height above 80(cm), and below 300(cm).\r\n");
@@ -12169,7 +12169,7 @@ void genHeight(char_data* ch, std::string suggestedHeight) {
 void genWeight(char_data* ch, std::string suggestedWeight) {
     int weight = atoi(suggestedWeight.c_str());
 
-    if (ch->race == RaceID::tuffle && (weight >= 3 && weight <= 40)) {
+    if (ch->race == Race::tuffle && (weight >= 3 && weight <= 40)) {
         ch->set(CharDim::weight, weight);
         send_to_char(ch, "Weight set.\r\n");
         return;
@@ -12180,7 +12180,7 @@ void genWeight(char_data* ch, std::string suggestedWeight) {
         return;
     }
     else {
-        if(ch->race == RaceID::tuffle) {
+        if(ch->race == Race::tuffle) {
             send_to_char(ch, "For Tuffles, please keep weight above 3(kg), and below 40(kg).\r\n");
         } else {
             send_to_char(ch, "Please keep weight above 25(kg), and below 150(kg).\r\n");
@@ -12211,13 +12211,13 @@ void genFinish(char_data* ch) {
     if(ch->get(CharAppearance::sex) == -1) finished = false;
     if(!race::isPlayable(ch->race)) finished = false;
 
-    if(ch->race == RaceID::halfbreed || ch->race == RaceID::android)
+    if(ch->race == Race::halfbreed || ch->race == Race::android)
         if(ch->get(CharNum::racial_preference) == 0) finished = false;
 
-    if(ch->race == RaceID::mutant || ch->race == RaceID::bio_android) 
+    if(ch->race == Race::mutant || ch->race == Race::bio_android) 
         if(ch->genome.size() != 2) finished = false;
 
-    if(ch->sensei == SenseiID::commoner) finished = false;
+    if(ch->sensei == Sensei::commoner) finished = false;
     if(ch->genBonus == 0) finished = false;
     if(ch->get(CharAppearance::eye_color) == 100) finished = false;
     if(ch->get(CharAppearance::skin_color) == 100) finished = false;
@@ -12228,11 +12228,11 @@ void genFinish(char_data* ch) {
     if(ch->get(CharAppearance::aura) == 100) finished = false;
     if(ch->get(CharAppearance::hair_length) == 100) finished = false;
 
-    if(ch->get(CharAppearance::hair_length) != HAIRL_BALD && !(ch->race == RaceID::majin) && !(ch->race == RaceID::icer) && !(ch->race == RaceID::namekian) && !(ch->race == RaceID::arlian)) {
+    if(ch->get(CharAppearance::hair_length) != HAIRL_BALD && !(ch->race == Race::majin) && !(ch->race == Race::icer) && !(ch->race == Race::namekian) && !(ch->race == Race::arlian)) {
         if(ch->get(CharAppearance::hair_style) == 100) finished = false;
         if(ch->get(CharAppearance::hair_color) == 100) finished = false;
     }
-    if(ch->race == RaceID::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)
+    if(ch->race == Race::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)
         if(ch->get(CharAppearance::hair_color) == 100) finished = false;
 
 
@@ -12379,14 +12379,14 @@ void genFinish(char_data* ch) {
     }
 
 
-    if (ch->race == RaceID::bio_android && (ch->genome.contains(7))) {
+    if (ch->race == Race::bio_android && (ch->genome.contains(7))) {
         SET_SKILL(ch, SKILL_TELEPATHY, 30);
         SET_SKILL(ch, SKILL_FOCUS, 30);
     }
-    if (ch->race == RaceID::mutant && (ch->genome.contains(3))) {
+    if (ch->race == Race::mutant && (ch->genome.contains(3))) {
         ch->mod(CharAttribute::agility, 10);
     }
-    if (ch->race == RaceID::mutant && (ch->genome.contains(9))) {
+    if (ch->race == Race::mutant && (ch->genome.contains(9))) {
         SET_SKILL(ch, SKILL_TELEPATHY, 50);
     }
 
@@ -12530,20 +12530,20 @@ ACMD(do_gen) {
     send_to_char(ch, "[Gender] Gender: %s\r\n", ch->get(CharAppearance::sex) == 100 ? "@RUnset@n" : gender);
     send_to_char(ch, "[Race] Race: %s\r\n", !race::isPlayable(ch->race) ? "@RUnset@n" : race::getName(ch->race));
 
-    if(ch->race == RaceID::halfbreed)
+    if(ch->race == Race::halfbreed)
         send_to_char(ch, "[RaceExtra] Likeness: %s\r\n", ch->get(CharNum::racial_preference) == 0 ? "@RUnset@n" : std::to_string(ch->get(CharNum::racial_preference)));
 
-    if(ch->race == RaceID::android)
+    if(ch->race == Race::android)
         send_to_char(ch, "[RaceExtra] Type: %s\r\n", ch->get(CharNum::racial_preference) == 0 ? "@@RUnset@n" : std::to_string(ch->get(CharNum::racial_preference)));
 
-    if(ch->race == RaceID::bio_android) {
+    if(ch->race == Race::bio_android) {
         std::vector<std::string> genomes;
         for(auto g : ch->genome) genomes.push_back(std::to_string(g));
         std::string joined = boost::algorithm::join(genomes, ", ");
         send_to_char(ch, "[RaceExtra] Genomes: %s\r\n", genomes.empty() ? "@RUnset@n" : joined.c_str());
     }
         
-    if(ch->race == RaceID::mutant) {
+    if(ch->race == Race::mutant) {
         std::vector<std::string> genomes;
         for(auto g : ch->genome) genomes.push_back(std::to_string(g));
         std::string joined = boost::algorithm::join(genomes, ", ");
@@ -12556,28 +12556,28 @@ ACMD(do_gen) {
 
     std::string hairlength = "";
     if(ch->get(CharAppearance::hair_length) == 0) {
-        if(ch->race == RaceID::majin || ch->race == RaceID::namekian || ch->race == RaceID::arlian)
+        if(ch->race == Race::majin || ch->race == Race::namekian || ch->race == Race::arlian)
             hairlength = "Tiny";
-        if(ch->race == RaceID::icer)
+        if(ch->race == Race::icer)
             hairlength = "None";
     } else if (ch->get(CharAppearance::hair_length) != 100) {
         hairlength = hair_length[ch->get(CharAppearance::hair_length)];
     }
 
-    if(ch->race == RaceID::majin)
+    if(ch->race == Race::majin)
         send_to_char(ch, "[ForelockLength] Forelock Length: %s\r\n", ch->get(CharAppearance::hair_length) == 100 ? "@RUnset@n" : hairlength);
-    else if(ch->race == RaceID::icer)
+    else if(ch->race == Race::icer)
         send_to_char(ch, "[HornLength] Horn Length: %s\r\n", ch->get(CharAppearance::hair_length) == 100 ? "@RUnset@n" : hairlength);
-    else if(ch->race == RaceID::namekian || ch->race == RaceID::arlian)
+    else if(ch->race == Race::namekian || ch->race == Race::arlian)
         send_to_char(ch, "[AntennaeLength] Antennae Length: %s\r\n", ch->get(CharAppearance::hair_length) == 100 ? "@RUnset@n" : hairlength);
     else
         send_to_char(ch, "[HairLength] Hair Length: %s\r\n", ch->get(CharAppearance::hair_length) == 100 ? "@RUnset@n" : hairlength);
 
-    if(ch->get(CharAppearance::hair_length) != HAIRL_BALD && !(ch->race == RaceID::majin) && !(ch->race == RaceID::icer) && !(ch->race == RaceID::namekian) && !(ch->race == RaceID::arlian)) {
+    if(ch->get(CharAppearance::hair_length) != HAIRL_BALD && !(ch->race == Race::majin) && !(ch->race == Race::icer) && !(ch->race == Race::namekian) && !(ch->race == Race::arlian)) {
         send_to_char(ch, "[HairStyle] Hair Style: %s\r\n", ch->get(CharAppearance::hair_style) == 100 ? "@RUnset@n" : hair_style[ch->get(CharAppearance::hair_style)]);
         send_to_char(ch, "[HairColour] Hair Colour: %s\r\n", ch->get(CharAppearance::hair_color) == 100 ? "@RUnset@n" : hair_colour[ch->get(CharAppearance::hair_color)]);
     }
-    if(ch->race == RaceID::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)
+    if(ch->race == Race::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)
         send_to_char(ch, "[WingColour] Wing Colour: %s\r\n", ch->get(CharAppearance::hair_color) == 100 ? "@RUnset@n" : hair_colour[ch->get(CharAppearance::hair_color)]);
 
 
@@ -12587,7 +12587,7 @@ ACMD(do_gen) {
     send_to_char(ch, "[Height] Height: %s\r\n", ch->getHeight() == 0 ? "@RUnset@n" : std::to_string(ch->getHeight()));
     
 
-    send_to_char(ch, "[Sensei] Sensei: %s\r\n", ch->sensei == SenseiID::commoner ? "@RUnset@n" : sensei::getName(ch->sensei));
+    send_to_char(ch, "[Sensei] Sensei: %s\r\n", ch->sensei == Sensei::commoner ? "@RUnset@n" : sensei::getName(ch->sensei));
     send_to_char(ch, "[Bonus] Bonus: %s\r\n", ch->genBonus == 0 ? "@RUnset@n" : start_bonus[ch->genBonus]);
     send_to_char(ch, "\n\r@WUse the name in the square brackets after 'chargen' to see and choose options of your selection.@n\r\n");
     send_to_char(ch, "@WWhen everything is set, use 'chargen finish' to be transported into the game!@n\r\n");

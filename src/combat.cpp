@@ -3434,22 +3434,22 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
             case 49: /* Hell Spiral */
                 damtype_focus(ch, &dam, focus, 200);
                 switch(ch->form) {
-                    case FormID::android_1:
+                    case Form::android_1:
                         dam += (dam * 0.01) * 5;
                         break;
-                    case FormID::android_2:
+                    case Form::android_2:
                         dam += (dam * 0.01) * 15;
                         break;
-                    case FormID::android_3:
+                    case Form::android_3:
                         dam += (dam * 0.01) * 25;
                         break;
-                    case FormID::android_4:
+                    case Form::android_4:
                         dam += (dam * 0.01) * 50;
                         break;
-                    case FormID::android_5:
+                    case Form::android_5:
                         dam += (dam * 0.01) * 75;
                         break;
-                    case FormID::android_6:
+                    case Form::android_6:
                         dam += dam;
                         break;
                     default:
@@ -3517,7 +3517,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
             dam = dam * 0.60;
         }
 
-        if (GET_CLASS(ch) != SenseiID::commoner) {
+        if (GET_CLASS(ch) != Sensei::commoner) {
             dam += dam * 0.3;
         }
     }
@@ -3585,9 +3585,9 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
             stats.push_back((int) stat);
     }
 
-    if(ch->technique == FormID::tiger_stance) stats.push_back((int) CharVital::powerlevel);
-    if(ch->technique == FormID::eagle_stance) stats.push_back((int) CharVital::ki);
-    if(ch->technique == FormID::ox_stance) stats.push_back((int) CharVital::stamina);
+    if(ch->technique == Form::tiger_stance) stats.push_back((int) CharVital::powerlevel);
+    if(ch->technique == Form::eagle_stance) stats.push_back((int) CharVital::ki);
+    if(ch->technique == Form::ox_stance) stats.push_back((int) CharVital::stamina);
 
     auto itr = Random::get(stats);
 
@@ -3814,9 +3814,9 @@ void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attr
             stats.push_back((int) stat);
     }
 
-    if(ch->technique == FormID::tiger_stance) stats.push_back((int) CharVital::powerlevel);
-    if(ch->technique == FormID::eagle_stance) stats.push_back((int) CharVital::ki);
-    if(ch->technique == FormID::ox_stance) stats.push_back((int) CharVital::stamina);
+    if(ch->technique == Form::tiger_stance) stats.push_back((int) CharVital::powerlevel);
+    if(ch->technique == Form::eagle_stance) stats.push_back((int) CharVital::ki);
+    if(ch->technique == Form::ox_stance) stats.push_back((int) CharVital::stamina);
 
     if(!stats.empty()) {
 
@@ -4094,16 +4094,16 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
 
     if (IS_ICER(ch)) {
         switch(ch->form) {
-            case FormID::icer_1:
+            case Form::icer_1:
                 st *= 1.05;
                 break;
-            case FormID::icer_2:
+            case Form::icer_2:
                 st *= 1.1;
                 break;
-            case FormID::icer_3:
+            case Form::icer_3:
                 st *= 1.15;
                 break;
-            case FormID::icer_4:
+            case Form::icer_4:
                 st *= 1.20;
                 break;
             default:
@@ -4180,16 +4180,16 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
 
         if (IS_ICER(ch)) {
             switch(ch->form) {
-                case FormID::icer_1:
+                case Form::icer_1:
                     st *= 1.05;
                     break;
-                case FormID::icer_2:
+                case Form::icer_2:
                     st *= 1.1;
                     break;
-                case FormID::icer_3:
+                case Form::icer_3:
                     st *= 1.15;
                     break;
-                case FormID::icer_4:
+                case Form::icer_4:
                     st *= 1.20;
                     break;
                 default:
@@ -4544,31 +4544,31 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 std::string amount = "none";
                 int mult = 0;
                 switch(vict->form) {
-                    case FormID::base:
+                    case Form::base:
                         mult = 5;
                         amount = "a tiny bit";
                         break;
-                    case FormID::android_1:
+                    case Form::android_1:
                         mult = 10;
                         amount = "a bit";
                         break;
-                    case FormID::android_2:
+                    case Form::android_2:
                         mult = 20;
                         amount = "some";
                         break;
-                    case FormID::android_3:
+                    case Form::android_3:
                         mult = 25;
                         amount = "a good deal";
                         break;
-                    case FormID::android_4:
+                    case Form::android_4:
                         mult = 30;
                         amount = "a lot";
                         break;
-                    case FormID::android_5:
+                    case Form::android_5:
                         mult = 40;
                         amount = "a great deal";
                         break;
-                    case FormID::android_6:
+                    case Form::android_6:
                         mult = 50;
                         amount = "MOST";
                         break;
@@ -4843,7 +4843,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     send_to_char(vict, "@D[@rDamage@W: @R%s@D]@n\r\n", add_commas(dmg).c_str());
                     int64_t healhp = (long double) (GET_MAX_HIT(vict)) * 0.12;
-                    if (ch->technique == FormID::dark_metamorphosis ) {
+                    if (ch->technique == Form::dark_metamorphosis ) {
                         act("@RYour dark aura saps some of @r$N's@R life energy!@n", true, ch, nullptr, vict, TO_CHAR);
                         act("@r$n@R's dark aura saps some of your life energy!@n", true, ch, nullptr, vict, TO_VICT);
                         if (GET_HIT(ch) <= GET_MAX_HIT(ch)) {

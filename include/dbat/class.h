@@ -31,16 +31,16 @@ extern time_t birth_age(struct char_data *ch);
 
 namespace sensei {
 
-    extern std::string getName(SenseiID id);
-    extern std::string getAbbr(SenseiID id);
-    extern std::string getStyle(SenseiID id);
-    extern bool isValidSenseiForRace(SenseiID id, RaceID race);
-    extern bool isPlayable(SenseiID id);
-    extern room_vnum getStartRoom(SenseiID id);
-    extern room_vnum getLocation(SenseiID id);
+    extern std::string getName(Sensei id);
+    extern std::string getAbbr(Sensei id);
+    extern std::string getStyle(Sensei id);
+    extern bool isValidSenseiForRace(Sensei id, Race race);
+    extern bool isPlayable(Sensei id);
+    extern room_vnum getStartRoom(Sensei id);
+    extern room_vnum getLocation(Sensei id);
 
     extern double getModifier(struct char_data *ch, int location, int specific = 0);
-    extern std::vector<SenseiID> filterSenseis(std::function<bool(SenseiID)> func);
-    extern std::optional<SenseiID> findSensei(const std::string& arg, const std::function<bool(SenseiID)>& func);
-    extern bool exists(SenseiID id);
+    extern std::vector<Sensei> filterSenseis(std::function<bool(Sensei)> func);
+    extern std::optional<Sensei> findSensei(const std::string& arg, const std::function<bool(Sensei)>& func);
+    extern bool exists(Sensei id);
 }

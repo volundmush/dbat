@@ -227,7 +227,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
     if (power > 20)
         power = 20;
 
-    if (GET_CLASS(ch) == SenseiID::commoner)
+    if (GET_CLASS(ch) == Sensei::commoner)
         special = 0;
 
     int dragonpass = true;
@@ -244,7 +244,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
 
     if (axion_dice(-10) > 90 && ch->getCurHealthPercent() <= .5 && !ch->character_flags.get(CharacterFlag::powering_up) &&
         GET_MOB_VNUM(ch) != 25 &&
-        !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->sensei == SenseiID::commoner)) {
+        !(IS_ANDROID(ch) || IS_ANIMAL(ch) || ch->sensei == Sensei::commoner)) {
         do_powerup(ch, nullptr, 0, 0);
         return;
     }
@@ -289,17 +289,17 @@ static void mob_attack(struct char_data *ch, char *buf) {
                 /* This determines if they throw and also handles it */
             } else if (MOB_FLAGGED(ch, MOB_KNOWKAIO) && rand_number(1, 50) >= 46) {
                 if (rand_number(1, 10) == 10) {
-                    ch->addTransform(FormID::kaioken);
-                    ch->technique = FormID::kaioken;
-                    ch->transforms[FormID::kaioken].grade = 5;
+                    ch->addTransform(Form::kaioken);
+                    ch->technique = Form::kaioken;
+                    ch->transforms[Form::kaioken].grade = 5;
                 } else if (rand_number(1, 10) >= 8) {
-                    ch->addTransform(FormID::kaioken);
-                    ch->technique = FormID::kaioken;
-                    ch->transforms[FormID::kaioken].grade = 10;
+                    ch->addTransform(Form::kaioken);
+                    ch->technique = Form::kaioken;
+                    ch->transforms[Form::kaioken].grade = 10;
                 } else {
-                    ch->addTransform(FormID::kaioken);
-                    ch->technique = FormID::kaioken;
-                    ch->transforms[FormID::kaioken].grade = 20;
+                    ch->addTransform(Form::kaioken);
+                    ch->technique = Form::kaioken;
+                    ch->transforms[Form::kaioken].grade = 20;
                 }
             } else {
                 switch (power) {
@@ -464,7 +464,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                     if (ch->mobcharge == 7) {
                         ch->mobcharge = 0;
                         switch (GET_CLASS(ch)) {
-                            case SenseiID::roshi:
+                            case Sensei::roshi:
                                 if (special >= 100)
                                     do_kakusanha(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -476,7 +476,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case SenseiID::frieza:
+                            case Sensei::frieza:
                                 if (special >= 100)
                                     do_deathball(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -488,7 +488,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case SenseiID::krane:
+                            case Sensei::krane:
                                 if (special >= 100)
                                     do_tribeam(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -500,7 +500,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case SenseiID::piccolo:
+                            case Sensei::piccolo:
                                 if (special >= 100)
                                     do_scatter(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -514,7 +514,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case SenseiID::bardock:
+                            case Sensei::bardock:
                                 if (special >= 100)
                                     do_final(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -526,7 +526,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case SenseiID::sixteen:
+                            case Sensei::sixteen:
                                 if (special >= 100)
                                     do_hellflash(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -538,7 +538,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case SenseiID::nail:
+                            case Sensei::nail:
                                 if (special >= 100)
                                     do_regenerate(ch, "50", 0, 0);
                                 else if (special >= 80)
@@ -548,7 +548,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, nullptr, 0, 0);
                                 break;
-                            case SenseiID::kurzak:
+                            case Sensei::kurzak:
                                 if (special >= 100)
                                     do_ensnare(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -560,7 +560,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case SenseiID::jinto:
+                            case Sensei::jinto:
                                 if (special >= 100)
                                     do_nova(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -570,7 +570,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, "40", 0, 0);
                                 break;
-                            case SenseiID::tsuna:
+                            case Sensei::tsuna:
                                 if (special >= 100)
                                     do_koteiru(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -580,7 +580,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "20", 0, 0);
                                 break;
-                            case SenseiID::tapion:
+                            case Sensei::tapion:
                                 if (special >= 100)
                                     do_pslash(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -590,7 +590,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, "40", 0, 0);
                                 break;
-                            case SenseiID::kibito:
+                            case Sensei::kibito:
                                 if (special >= 100)
                                     do_pbarrage(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -600,7 +600,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, "40", 0, 0);
                                 break;
-                            case SenseiID::dabura:
+                            case Sensei::dabura:
                                 if (special >= 100)
                                     do_hellspear(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -610,7 +610,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_zanzoken(ch, "40", 0, 0);
                                 break;
-                            case SenseiID::ginyu:
+                            case Sensei::ginyu:
                                 if (special >= 100)
                                     do_spiral(ch, buf, 0, 0);
                                 else if (special >= 80)

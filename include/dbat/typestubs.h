@@ -14,13 +14,8 @@ struct player_data;
 typedef unit_data script_data;
 
 namespace race {
-    class Race;
 
     struct transform_bonus;
-}
-
-namespace sensei {
-    class Sensei;
 }
 
 namespace atk {

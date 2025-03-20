@@ -212,7 +212,7 @@ void gedit_select_skills_menu(struct descriptor_data *d) {
         if (spell_info[i].skilltype == SKTYPE_SKILL &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.count(static_cast<SkillID>(i))), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(static_cast<Skill>(i))), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -241,7 +241,7 @@ void gedit_select_spells_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_SPELL) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.count(static_cast<SkillID>(i))), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(static_cast<Skill>(i))), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -294,7 +294,7 @@ void gedit_select_lang_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_LANG) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.count(static_cast<SkillID>(i))), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(static_cast<Skill>(i))), i, spell_info[i].name);
             j++;
             found = 1;
         }
@@ -321,7 +321,7 @@ void gedit_select_wp_menu(struct descriptor_data *d) {
         if (IS_SET(spell_info[i].skilltype, SKTYPE_WEAPON) &&
             strcmp(spell_info[i].name, "!UNUSED!")) {
             write_to_output(d, "@n[@c%-3s@n] %-3d %-20.20s  ",
-                            YESNO(guilddata->skills.count(static_cast<SkillID>(i))), i, spell_info[i].name);
+                            YESNO(guilddata->skills.count(static_cast<Skill>(i))), i, spell_info[i].name);
             j++;
             found = 1;
         }

@@ -161,14 +161,7 @@ void to_json(json& j, const zone_data& z) {
         j["max_level"] = z.max_level;
 
     // Serialize zone flags
-    for(auto i = 0; i < NUM_ZONE_FLAGS; i++) {
-        if(IS_SET_AR(z.zone_flags, i)) {
-            j["zone_flags"].push_back(i);
-            std::string key(zone_bits[i]);
-            boost::to_lower(key);
-            j["zone_flags_name"].push_back(key);
-        }
-    }
+    if(z.zone_flags) j["zone_flags"] = z.zone_flags;
 
     // Serialize command vector (assuming each element in 'cmd' is of type reset_com)
     for(const auto &c : z.cmd) {
@@ -196,11 +189,7 @@ void from_json(const json& j, zone_data& z) {
     if(j.contains("max_level"))
         z.max_level = j["max_level"];
 
-    if(j.contains("zone_flags")) {
-        for(auto &f : j["zone_flags"]) {
-            SET_BIT_AR(z.zone_flags, f.get<int>());
-        }
-    }
+    if(j.contains("zone_flags")) z.zone_flags = j["zone_flags"].get<FlagHandler<ZoneFlag>>();
 
     if(j.contains("cmd")) {
         int line = 1;
@@ -552,10 +541,10 @@ void to_json(json& j, const picky_data& p) {
 
 void from_json(const json& j, picky_data& p) {
     if(j.contains("not_alignment")) p.not_alignment = j["not_alignment"].get<std::unordered_set<MoralAlign>>();
-    if(j.contains("not_race")) p.not_race = j["not_race"].get<std::unordered_set<RaceID>>();
-    if(j.contains("only_race")) p.only_race = j["only_race"].get<std::unordered_set<RaceID>>();
-    if(j.contains("not_sensei")) p.not_sensei = j["not_sensei"].get<std::unordered_set<SenseiID>>();
-    if(j.contains("only_sensei")) p.only_sensei = j["only_sensei"].get<std::unordered_set<SenseiID>>();
+    if(j.contains("not_race")) p.not_race = j["not_race"].get<std::unordered_set<Race>>();
+    if(j.contains("only_race")) p.only_race = j["only_race"].get<std::unordered_set<Race>>();
+    if(j.contains("not_sensei")) p.not_sensei = j["not_sensei"].get<std::unordered_set<Sensei>>();
+    if(j.contains("only_sensei")) p.only_sensei = j["only_sensei"].get<std::unordered_set<Sensei>>();
 }
 
 void to_json(json& j, const org_data& o) {
@@ -661,7 +650,7 @@ void to_json(json& j, const guild_data& g) {
 
 void from_json(const json& j, guild_data& g) {
     from_json(j, static_cast<org_data&>(g));
-    if(j.contains("skills")) g.skills = j["skills"].get<std::unordered_set<SkillID>>();
+    if(j.contains("skills")) g.skills = j["skills"].get<std::unordered_set<Skill>>();
     if(j.contains("feats")) g.feats = j["feats"].get<std::unordered_set<uint8_t>>();
     if(j.contains("charge")) g.charge = j["charge"];
     if(j.contains("no_such_skill")) g.no_such_skill = j["no_such_skill"];
@@ -1417,7 +1406,7 @@ void from_json(const json& j, char_data& c) {
 
         if(j.contains("was_in_room")) c.was_in_room = j["was_in_room"];
 
-        if(j.contains("skill")) c.skill = j["skill"].get<std::map<SkillID, skill_data>>();
+        if(j.contains("skill")) c.skill = j["skill"].get<std::map<Skill, skill_data>>();
 
         if(j.contains("affected")) {
             auto ja = j["affected"];
@@ -1496,7 +1485,7 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("moltlevel")) c.moltlevel = j["moltlevel"];
         if(j.contains("majinize")) c.majinize = j["majinize"];
         if(j.contains("majinizer")) c.majinizer = j["majinizer"];
-        if(j.contains("mimic")) c.mimic = j["mimic"].get<RaceID>();
+        if(j.contains("mimic")) c.mimic = j["mimic"].get<Race>();
         if(j.contains("olc_zone")) c.olc_zone = j["olc_zone"];
         if(j.contains("starphase")) c.starphase = j["starphase"];
         if(j.contains("accuracy")) c.accuracy = j["accuracy"];
@@ -1548,7 +1537,7 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("transBonus")) c.transBonus = j["transBonus"];
         if(j.contains("form")) c.form = j["form"];
         if(j.contains("transforms")) c.transforms = j["transforms"];
-        if(j.contains("permForms")) c.permForms = j["permForms"].get<std::unordered_set<FormID>>();
+        if(j.contains("permForms")) c.permForms = j["permForms"].get<std::unordered_set<Form>>();
         
 
         if(j.contains("pref_flagserence")) c.preference = j["pref_flagserence"];

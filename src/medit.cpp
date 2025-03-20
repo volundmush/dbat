@@ -189,7 +189,7 @@ void medit_setup_new(struct descriptor_data *d) {
     GET_SDESC(mob) = strdup("the unfinished mob");
     GET_LDESC(mob) = strdup("An unfinished mob stands here.\r\n");
     GET_DDESC(mob) = strdup("It looks unfinished.\r\n");
-    mob->race = RaceID::human;
+    mob->race = Race::human;
     SCRIPT(mob) = nullptr;
     mob->proto_script.clear();
     OLC_SCRIPT(d).clear();
@@ -235,7 +235,7 @@ void init_mobile(struct char_data *mob) {
     //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
     mob->set(CharAppearance::sex, SEX_MALE);
-    mob->sensei = SenseiID::commoner;
+    mob->sensei = Sensei::commoner;
 
     mob->set(CharDim::weight, rand_number(100, 200));
     mob->setHeight(rand_number(100, 200));
@@ -410,7 +410,7 @@ void medit_disp_class(struct descriptor_data *d) {
     int i;
     char buf[MAX_INPUT_LENGTH];
     clear_screen(d);
-    auto check = [](SenseiID id) {return true;};
+    auto check = [](Sensei id) {return true;};
 
     for (const auto cl: sensei::filterSenseis(check)) {
         sprintf(buf, "@g%2d@n) %s\r\n", static_cast<int>(cl), sensei::getName(cl).c_str());
@@ -427,7 +427,7 @@ void medit_disp_race(struct descriptor_data *d) {
     char buf[MAX_INPUT_LENGTH];
 
     clear_screen(d);
-    auto check = [](RaceID id) {return true;};
+    auto check = [](Race id) {return true;};
     for (const auto &r: race::filterRaces(check)) {
         sprintf(buf, "@g%2d@n) %-20.20s  %s", static_cast<int>(r), race::getName(r).c_str(),
                 !(++columns % 2) ? "\r\n" : "");
@@ -881,7 +881,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_CLASS: {
-            auto sensei = static_cast<SenseiID>(i);
+            auto sensei = static_cast<Sensei>(i);
             //Check if the sensei requested exists
             if (sensei::exists(sensei)) {
                 //Set the mob's Sensei to the chosen sensei
@@ -918,7 +918,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_RACE: {
-            auto chosen_race = static_cast<RaceID>(i);
+            auto chosen_race = static_cast<Race>(i);
             if (!race::exists(chosen_race)) {
                 write_to_output(d, "That's not a race!");
                 break;

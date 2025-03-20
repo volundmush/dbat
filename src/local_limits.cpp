@@ -668,7 +668,7 @@ static void update_flags(struct char_data *ch) {
         ch->affect_flags.set(AFF_ENSNARED, false);
     }
 
-    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == FormID::super_saiyan_1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
+    if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == Form::super_saiyan_1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
         GET_ABSORBS(ch) += 1;
         if (GET_ABSORBS(ch) >= 300) {
             send_to_char(ch,

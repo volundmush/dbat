@@ -48,7 +48,7 @@ constexpr int CUR_ZONE_VERSION = 2;
 
 constexpr int BANNED_SITE_LENGTH = 50;
 
-enum class RaceID : uint8_t {
+enum class Race : uint8_t {
     spirit = 0,
     human = 1,
     saiyan = 2,
@@ -75,7 +75,7 @@ enum class RaceID : uint8_t {
     mechanical = 23,
 };
 
-enum class SenseiID : uint8_t {
+enum class Sensei : uint8_t {
     commoner = 0,
     roshi = 1,
     piccolo = 2,
@@ -93,7 +93,7 @@ enum class SenseiID : uint8_t {
     kurzak = 14
 };
 
-enum class FormID : uint16_t {
+enum class Form : uint16_t {
     // Universal,
     base = 0,
     custom_1 = 1,
@@ -223,7 +223,7 @@ enum class FormID : uint16_t {
 };
 
 
-enum class SkillID : uint16_t {
+enum class Skill : uint16_t {
     flex = 400,
     genius = 401,
     solar_flare = 402,
@@ -390,7 +390,7 @@ enum class SkillID : uint16_t {
 };
 
 template <>
-struct magic_enum::customize::enum_range<SkillID> {
+struct magic_enum::customize::enum_range<Skill> {
   static constexpr int min = 400;
   static constexpr int max = 562;
   // (max - min) must be less than UINT16_MAX.
@@ -713,6 +713,13 @@ constexpr int ZONE_NOIMMORT = 1;
 constexpr int ZONE_QUEST = 2;
 constexpr int ZONE_DBALLS = 3;
 
+enum class ZoneFlag : uint8_t {
+    closed = 0,
+    no_immortal = 1,
+    quest = 2,
+    dragon_balls = 3
+};
+
 
 /* Exit info: used in room_data.dir_option.exit_info */
 constexpr int EX_ISDOOR = (1 << 0);   /* Exit is a door		*/
@@ -940,30 +947,30 @@ constexpr int PHASE_LOVE = 5;
 constexpr int PHASE_STRENGTH = 6;
 
 /* Races */
-constexpr RaceID RACE_HUMAN        = RaceID::human;
-constexpr RaceID RACE_SAIYAN       = RaceID::saiyan;
-constexpr RaceID RACE_ICER         = RaceID::icer;
-constexpr RaceID RACE_KONATSU      = RaceID::konatsu;
-constexpr RaceID RACE_NAMEK        = RaceID::namekian;
-constexpr RaceID RACE_MUTANT       = RaceID::mutant;
-constexpr RaceID RACE_KANASSAN     = RaceID::kanassan;
-constexpr RaceID RACE_HALFBREED    = RaceID::halfbreed;
-constexpr RaceID RACE_BIO          = RaceID::bio_android;
-constexpr RaceID RACE_ANDROID      = RaceID::android;
-constexpr RaceID RACE_DEMON        = RaceID::demon;
-constexpr RaceID RACE_MAJIN        = RaceID::majin;
-constexpr RaceID RACE_KAI          = RaceID::kai;
-constexpr RaceID RACE_TRUFFLE      = RaceID::tuffle;
-constexpr RaceID RACE_GOBLIN       = RaceID::hoshijin;
-constexpr RaceID RACE_ANIMAL       = RaceID::animal;
-constexpr RaceID RACE_SAIBA        = RaceID::saiba;
-constexpr RaceID RACE_SERPENT      = RaceID::serpent;
-constexpr RaceID RACE_OGRE         = RaceID::ogre;
-constexpr RaceID RACE_YARDRATIAN   = RaceID::yardratian;
-constexpr RaceID RACE_ARLIAN       = RaceID::arlian;
-constexpr RaceID RACE_DRAGON       = RaceID::dragon;
-constexpr RaceID RACE_MECHANICAL   = RaceID::mechanical;
-constexpr RaceID RACE_FAERIE       = RaceID::spirit;
+constexpr Race RACE_HUMAN        = Race::human;
+constexpr Race RACE_SAIYAN       = Race::saiyan;
+constexpr Race RACE_ICER         = Race::icer;
+constexpr Race RACE_KONATSU      = Race::konatsu;
+constexpr Race RACE_NAMEK        = Race::namekian;
+constexpr Race RACE_MUTANT       = Race::mutant;
+constexpr Race RACE_KANASSAN     = Race::kanassan;
+constexpr Race RACE_HALFBREED    = Race::halfbreed;
+constexpr Race RACE_BIO          = Race::bio_android;
+constexpr Race RACE_ANDROID      = Race::android;
+constexpr Race RACE_DEMON        = Race::demon;
+constexpr Race RACE_MAJIN        = Race::majin;
+constexpr Race RACE_KAI          = Race::kai;
+constexpr Race RACE_TRUFFLE      = Race::tuffle;
+constexpr Race RACE_GOBLIN       = Race::hoshijin;
+constexpr Race RACE_ANIMAL       = Race::animal;
+constexpr Race RACE_SAIBA        = Race::saiba;
+constexpr Race RACE_SERPENT      = Race::serpent;
+constexpr Race RACE_OGRE         = Race::ogre;
+constexpr Race RACE_YARDRATIAN   = Race::yardratian;
+constexpr Race RACE_ARLIAN       = Race::arlian;
+constexpr Race RACE_DRAGON       = Race::dragon;
+constexpr Race RACE_MECHANICAL   = Race::mechanical;
+constexpr Race RACE_FAERIE       = Race::spirit;
 
 constexpr int NUM_RACES = 24;
 

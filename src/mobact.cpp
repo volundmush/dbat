@@ -318,7 +318,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                             act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
                             char buf[MAX_INPUT_LENGTH];
                             sprintf(buf, "%s", GET_NAME(vict));
-                            if (GET_CLASS(ch) == SenseiID::kibito || GET_CLASS(ch) == SenseiID::nail) {
+                            if (GET_CLASS(ch) == Sensei::kibito || GET_CLASS(ch) == Sensei::nail) {
                                 do_heal(ch, buf, 0, 0);
                             } else {
                                 do_rescue(ch, buf, 0, 0);
@@ -356,7 +356,7 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                             act("@c$n@C rushes to @c$N's@C aid!@n", true, ch, nullptr, vict, TO_ROOM);
                             char buf[MAX_INPUT_LENGTH];
                             sprintf(buf, "%s", GET_NAME(vict));
-                            if (GET_CLASS(ch) == SenseiID::kibito || GET_CLASS(ch) == SenseiID::nail) {
+                            if (GET_CLASS(ch) == Sensei::kibito || GET_CLASS(ch) == Sensei::nail) {
                                 do_heal(ch, buf, 0, 0);
                                 done = true;
                             } else {

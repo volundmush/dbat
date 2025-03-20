@@ -314,7 +314,7 @@ void char_data::activate() {
         services.insert("kiChargeSystem");
     if(PLR_FLAGGED(this, PLR_FISHING))
         services.insert("goneFishing");
-    if(form != FormID::base || technique != FormID::base)
+    if(form != Form::base || technique != Form::base)
         services.insert("transforms");
     services.insert("active");
 

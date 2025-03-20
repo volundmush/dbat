@@ -513,7 +513,7 @@ int is_guild_ok(struct char_data *keeper, struct char_data *ch, int guild_nr) {
 
 
 int does_guild_know(int guild_nr, int i) {
-    return guild_index[guild_nr].skills.count(static_cast<SkillID>(i));
+    return guild_index[guild_nr].skills.count(static_cast<Skill>(i));
 }
 
 int does_guild_know_feat(int guild_nr, int i) {
@@ -959,20 +959,20 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                                              spell_info[GET_FORGETING(ch)].name);
                                 GET_FORGETING(ch) = 0;
                                 GET_FORGET_COUNT(ch) = 0;
-                                if(skill_num == (int)SkillID::kaioken) {
-                                    ch->transforms.erase(FormID::kaioken);
+                                if(skill_num == (int)Skill::kaioken) {
+                                    ch->transforms.erase(Form::kaioken);
                                 }
-                                if(skill_num == (int)SkillID::dark_metamorphosis) {
-                                    ch->transforms.erase(FormID::dark_metamorphosis);
+                                if(skill_num == (int)Skill::dark_metamorphosis) {
+                                    ch->transforms.erase(Form::dark_metamorphosis);
                                 }
-                                if(skill_num == (int)SkillID::tiger_stance) {
-                                    ch->transforms.erase(FormID::tiger_stance);
+                                if(skill_num == (int)Skill::tiger_stance) {
+                                    ch->transforms.erase(Form::tiger_stance);
                                 }
-                                if(skill_num == (int)SkillID::eagle_stance) {
-                                    ch->transforms.erase(FormID::eagle_stance);
+                                if(skill_num == (int)Skill::eagle_stance) {
+                                    ch->transforms.erase(Form::eagle_stance);
                                 }
-                                if(skill_num == (int)SkillID::ox_stance) {
-                                    ch->transforms.erase(FormID::ox_stance);
+                                if(skill_num == (int)Skill::ox_stance) {
+                                    ch->transforms.erase(Form::ox_stance);
                                 }
                             }
                         } else if (GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
@@ -1354,7 +1354,7 @@ void levelup_parse(struct descriptor_data *d, char *arg) {
 
 
 void guild_data::toggle_skill(uint16_t skill_id) {
-    auto sk = static_cast<SkillID>(skill_id);
+    auto sk = static_cast<Skill>(skill_id);
     if(skills.count(sk)) {
         skills.erase(sk);
     } else {

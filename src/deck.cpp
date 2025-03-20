@@ -544,17 +544,17 @@ void deck::initDeck(char_data* ch) {
         addCardToDeck(comprehension);
     }
 
-    if(ch->transforms.contains(FormID::ascend_1)) {
+    if(ch->transforms.contains(Form::ascend_1)) {
         removeCard(timePasses);
         removeCard(timePasses);
     }
 
-    if(ch->transforms.contains(FormID::ascend_2)) {
+    if(ch->transforms.contains(Form::ascend_2)) {
         addCardToDeck(tuffleIngenuity);
         addCardToDeck(tuffleArtisany);
     }
 
-    if(ch->transforms.contains(FormID::ascend_3)) {
+    if(ch->transforms.contains(Form::ascend_3)) {
         removeCard(improvedAttr);
         addCardToDeck(tuffleIngenuity);
         addCardToDeck(reflection);

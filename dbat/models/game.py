@@ -59,7 +59,7 @@ class ZoneData(BaseModel):
     cmd: typing.List[ResetCommandData] = Field(default_factory=list)
     min_level: int = 0
     max_level: int = 0
-    zone_flags: typing.Set[int] = Field(default_factory=set)
+    zone_flags: typing.Set[names.ZoneFlag] = Field(default_factory=set)
 
 class AffectData(BaseModel):
     location: int = 0

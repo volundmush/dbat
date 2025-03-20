@@ -4,9 +4,9 @@
 
 namespace skill {
 
-    std::string getName(SkillID skill) {
-        if(skill == SkillID::throw_object) return "throw";
-        if(skill == SkillID::kamehameha) return "KameHameHa";
+    std::string getName(Skill skill) {
+        if(skill == Skill::throw_object) return "throw";
+        if(skill == Skill::kamehameha) return "KameHameHa";
         auto ename = magic_enum::enum_name(skill);
         std::string name(ename);
         // replace underscores with spaces
@@ -27,9 +27,9 @@ namespace skill {
         std::function<double(struct char_data *ch)> func{};
     };
 
-    std::unordered_map<SkillID, std::vector<skill_affect_type>> skillAffects = {};
+    std::unordered_map<Skill, std::vector<skill_affect_type>> skillAffects = {};
 
-    double getModifier(char_data* ch, SkillID skill, int location, int specific) {
+    double getModifier(char_data* ch, Skill skill, int location, int specific) {
         double out = 0.0;
         if (auto found = skillAffects.find(skill); found != skillAffects.end()) {
             for (auto& affect: found->second) {
@@ -50,7 +50,7 @@ namespace skill {
         double out = 0.0;
         for(auto &[id, data] : ch->skill) {
             if(data.level > 0)
-                out += getModifier(ch, static_cast<SkillID>(id), location, specific);
+                out += getModifier(ch, static_cast<Skill>(id), location, specific);
         }
         return out;
     }

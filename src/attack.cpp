@@ -46,14 +46,14 @@ namespace atk {
     }
 
     bool Attack::checkSkills() {
-        auto needed = minimumSkillRequired.find(getSkillID());
+        auto needed = minimumSkillRequired.find(getSkill());
         if(needed == minimumSkillRequired.end()) return true;
 
         for(auto &s : needed->second) {
-            auto skillID = s.first;
+            auto Skill = s.first;
             auto required = s.second;
-            if(GET_SKILL(user, skillID) < required) {
-                send_to_char(user, "You need %d in %s to use this attack.\r\n", required, spell_info[skillID].name);
+            if(GET_SKILL(user, Skill) < required) {
+                send_to_char(user, "You need %d in %s to use this attack.\r\n", required, spell_info[Skill].name);
                 return false;
             }
         }
@@ -142,7 +142,7 @@ namespace atk {
 
         if(!checkCosts()) return;
 
-        initSkill = init_skill(user, getSkillID());
+        initSkill = init_skill(user, getSkill());
 
         processAttack();
     }
@@ -178,10 +178,10 @@ namespace atk {
         return 0;
     }
 
-    DefenseResult Attack::attackOutcome(char_data* user, char_data* victim, int skillID, bool kiAttack) {
+    DefenseResult Attack::attackOutcome(char_data* user, char_data* victim, int Skill, bool kiAttack) {
         initStats();
 
-        currentHitProbability = roll_accuracy(user, init_skill(user, skillID), kiAttack);
+        currentHitProbability = roll_accuracy(user, init_skill(user, Skill), kiAttack);
         currentChanceToHit = chance_to_hit(user) * (1 + user->getAffectModifier(APPLY_COMBAT_MULT, static_cast<int>(ComStat::accuracy)));
 
         if(isPhysical() && !usesWeapon()) {
@@ -204,7 +204,7 @@ namespace atk {
                 actUser("@C$N@c disappears, avoiding the attack before reappearing elsewhere!@n");
                 actVictim("@cYou disappear, avoiding the attack before reappearing elsewhere!@n");
                 actRoom("@C$N@c disappears, avoiding the attack before reappearing elsewhere!@n");
-                dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, skillID); /* Effects on the room from dodging a ki attack
+                dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, Skill); /* Effects on the room from dodging a ki attack
                             Num 1: [ 0 for non-homing, 1 for homing ki attacks, 2 for guided ]
                             Num 2: [ Number of attack for damtype ]*/
                 pcost(victim, 0, GET_MAX_HIT(victim) / 150);
@@ -216,13 +216,13 @@ namespace atk {
         handleAccuracyModifiers();
 
 
-        if (GET_SKILL_PERF(user, getSkillID()) == 1) {
+        if (GET_SKILL_PERF(user, getSkill()) == 1) {
             attPerc += 0.05;
         }
-        if (GET_SKILL_PERF(user, getSkillID()) == 2) {
+        if (GET_SKILL_PERF(user, getSkill()) == 2) {
             currentHitProbability += 5;
         }
-        if (GET_SKILL_PERF(user, getSkillID()) == 3) {
+        if (GET_SKILL_PERF(user, getSkill()) == 3) {
             currentKiCost -= currentKiCost * 0.05;
         }
 
@@ -283,7 +283,7 @@ namespace atk {
             // should I do can_kill again here???
         }
 
-        DefenseResult result = attackOutcome(user, victim, getSkillID(), isKiAttack());
+        DefenseResult result = attackOutcome(user, victim, getSkill(), isKiAttack());
         if(result == DefenseResult::Blocked) return handleBlock();
         if(result == DefenseResult::Parried) return handleParry();
         if(result == DefenseResult::Dodged) return handleDodge();
@@ -383,8 +383,8 @@ namespace atk {
             }
             if(calcDamage < 1) calcDamage = 1;
 
-            int divine = GET_SKILL(user, (int16_t) SkillID::divine_halo);
-            int vicDivine = GET_SKILL(victim, (int16_t) SkillID::divine_halo);
+            int divine = GET_SKILL(user, (int16_t) Skill::divine_halo);
+            int vicDivine = GET_SKILL(victim, (int16_t) Skill::divine_halo);
             if(isKiAttack() && divine > 0 && divine >= axion_dice(0)) {
                 send_to_char(user, "You feel your Halo intensify, purging the impurity of your attack.\n");
                 send_to_room(user->getRoom(), "%s's halo flares, leaving their attack shimmering as it moves.\n", user->name);
@@ -443,9 +443,9 @@ namespace atk {
     }
 
     void Attack::onLandedOrMissed() {
-        auto atrain = autoTrainSkillID();
+        auto atrain = autoTrainSkill();
         if(atrain != -1) {
-            improve_skill(user, getSkillID(), atrain);
+            improve_skill(user, getSkill(), atrain);
         }
         if(cooldownOverride != -1)  {
             WAIT_STATE(user, cooldownOverride);
@@ -590,7 +590,7 @@ namespace atk {
             
             victim->decCurKI(incomingDamage);
 
-            int instinct = GET_SKILL(user, (int16_t) SkillID::instinctual_combat);
+            int instinct = GET_SKILL(user, (int16_t) Skill::instinctual_combat);
             if(instinct >= axion_dice(20)) {
                 actVictim("@C$n@W, without even thinking about it you lash out towards $N, using their own momentum against them.@n");
                 actUser("@C$n@W, without breaking for a moment, lashes out, catching you offguard.@n");
@@ -616,7 +616,7 @@ namespace atk {
     }
 
     int64_t MeleeAttack::calculateStaminaCost() {
-        return physical_cost(user, getSkillID());
+        return physical_cost(user, getSkill());
     }
 
     void MeleeAttack::handleHitspot() {
@@ -1516,7 +1516,7 @@ namespace atk {
         defenseResult = DefenseResult::Parried;
         pcost(victim, 0, GET_MAX_HIT(victim) / 500);
         improve_skill(victim, SKILL_PARRY, 0);
-        parry_ki(attPerc, user, victim, (char*)getName().c_str(), 0, 0, getSkillID(), getAtkID());
+        parry_ki(attPerc, user, victim, (char*)getName().c_str(), 0, 0, getSkill(), getAtkID());
         user->getRoom()->modDamage(5);
         return Result::Missed;
 
@@ -1530,7 +1530,7 @@ namespace atk {
         if(AFF_FLAGGED(user, AFF_ZANZOKEN))
             pcost(victim, GET_MAX_MANA(victim) * 0.05, 0);
 
-        dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, getSkillID());
+        dodge_ki(user, victim, getHoming(), getAtkID(), initSkill, getSkill());
         user->getRoom()->modDamage(5 * getTier());
         return Result::Missed;
 
@@ -1553,7 +1553,7 @@ namespace atk {
             
             victim->decCurKI(incomingDamage);
 
-            int instinct = GET_SKILL(user, (int16_t) SkillID::instinctual_combat);
+            int instinct = GET_SKILL(user, (int16_t) Skill::instinctual_combat);
             if(instinct >= axion_dice(20)) {
                 actVictim("@C$n@W, without even thinking about it you lash out towards $N, using their own momentum against them.@n");
                 actUser("@C$n@W, without breaking for a moment, lashes out, catching you offguard.@n");
@@ -2096,16 +2096,16 @@ namespace atk {
 
     //Kahamehameha
     std::optional<int> Kamehameha::hasCooldown() {
-        if (GET_SKILL_PERF(user, getSkillID()) == 3) return 3;
+        if (GET_SKILL_PERF(user, getSkill()) == 3) return 3;
         return 6;
     }
 
     void Kamehameha::postProcess() {
-        if (GET_SKILL(user, getSkillID()) >= 100) {
+        if (GET_SKILL(user, getSkill()) >= 100) {
             user->incCurKI((GET_MAX_MANA(user) * attPerc) * 0.25);
-        } else if (GET_SKILL(user, getSkillID()) >= 60) {
+        } else if (GET_SKILL(user, getSkill()) >= 60) {
             user->incCurKI((GET_MAX_MANA(user) * attPerc) * 0.1);
-        } else if (GET_SKILL(user, getSkillID()) >= 40) {
+        } else if (GET_SKILL(user, getSkill()) >= 40) {
             user->incCurKI((GET_MAX_MANA(user) * attPerc) * 0.05);
         }
     }
@@ -2260,7 +2260,7 @@ namespace atk {
 
     // DeathBeam
     std::optional<int> DeathBeam::hasCooldown() {
-        if (GET_SKILL_PERF(user, getSkillID()) == 3) return 3;
+        if (GET_SKILL_PERF(user, getSkill()) == 3) return 3;
         return 6;
     }
 
@@ -4083,9 +4083,9 @@ namespace atk {
                 assign_affect(victim, AFF_POISON, SKILL_POISON, duration, 0, 0, 0, 0, 0, 0);
             }
         }
-        if((user->form == FormID::lycanthrope && victim->getCurHealthPercent() <= 0.2) || user->form == FormID::alpha_lycanthrope) {
-            if(!victim->transforms.contains(FormID::lycanthrope) && axion_dice(0) <= 30) {
-                victim->addTransform(FormID::lycanthrope);
+        if((user->form == Form::lycanthrope && victim->getCurHealthPercent() <= 0.2) || user->form == Form::alpha_lycanthrope) {
+            if(!victim->transforms.contains(Form::lycanthrope) && axion_dice(0) <= 30) {
+                victim->addTransform(Form::lycanthrope);
                 send_to_char(victim, "@rYour heart races, you feel like something is about to tear free of you.@n\n");
             }
         }
@@ -4560,7 +4560,7 @@ namespace atk {
 
         if(!checkCosts()) return;
 
-        initSkill = init_skill(user, getSkillID());
+        initSkill = init_skill(user, getSkill());
 
         processAttack();
     }

@@ -3938,7 +3938,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         case 38: vict->player_flags.toggle(PLR_DELETED);
             break;
         case 39: {
-            auto check = [&](SenseiID id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, vict->race);};
+            auto check = [&](Sensei id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, vict->race);};
             auto chosen_sensei = sensei::findSensei(val_arg, check);
             if (!chosen_sensei) {
                 send_to_char(ch, "That is not a sensei. Or, it is invalid for the target's race.\r\n");
@@ -4034,13 +4034,13 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 52: {
-            std::optional<RaceID> chosen_race;
+            std::optional<Race> chosen_race;
 
             if (IS_NPC(vict)) {
-                auto check = [ch](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch));};
+                auto check = [ch](Race id) {return race::getValidSexes(id).contains(GET_SEX(ch));};
                 chosen_race = race::findRace(val_arg, check);
             } else {
-                auto check = [ch](RaceID id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isPlayable(id);};
+                auto check = [ch](Race id) {return race::getValidSexes(id).contains(GET_SEX(ch)) && race::isPlayable(id);};
                 chosen_race = chosen_race = race::findRace(val_arg, check);
             }
             if (!chosen_race) {

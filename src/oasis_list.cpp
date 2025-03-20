@@ -18,6 +18,7 @@
 #include "dbat/guild.h"
 #include "dbat/races.h"
 #include "dbat/class.h"
+#include "dbat/bitarray.h"
 
 
 /******************************************************************************/
@@ -365,7 +366,7 @@ void print_zone(struct char_data *ch, zone_vnum vnum) {
         return;
     }
     auto &z = zone_table[vnum];
-    sprintbitarray(z.zone_flags, zone_bits, ZF_ARRAY_MAX, bits);
+    sprintbitarray(z.zone_flags.getAll(), zone_bits, ZF_ARRAY_MAX, bits);
     size_rooms = z.rooms.size();
     size_objects = z.objects.size();
     size_mobiles = z.mobiles.size();

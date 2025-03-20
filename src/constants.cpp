@@ -1763,19 +1763,19 @@ const int list_bonus_cost[] = {
 
 
 std::vector<std::string> getRaceNames() {
-        return getEnumNames<RaceID>();
+        return getEnumNames<Race>();
 }
 
 std::vector<std::string> getSenseiNames() {
-        return getEnumNames<SenseiID>();
+        return getEnumNames<Sensei>();
 }
 
 std::vector<std::string> getFormNames() {
-        return getEnumNames<FormID>();
+        return getEnumNames<Form>();
 }
 
 std::vector<std::string> getSkillNames() {
-        return getEnumNames<SkillID>();
+        return getEnumNames<Skill>();
 }
 
 std::vector<std::string> getRoomFlagNames() {
@@ -1872,4 +1872,8 @@ std::vector<std::string> getShopFlagNames() {
 
 std::vector<std::string> getCharacterFlagNames() {
         return getEnumNames<CharacterFlag>();
+}
+
+std::vector<std::string> getZoneFlagNames() {
+        return getEnumNames<ZoneFlag>();
 }

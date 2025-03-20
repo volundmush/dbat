@@ -658,7 +658,7 @@ char *make_prompt(struct descriptor_data *d) {
                     len += count;
             }
             if (PRF_FLAGGED(d->character, PRF_FORM) && len < sizeof(prompt)) {
-                FormID form = d->character->form;
+                Form form = d->character->form;
                 
                 if(d->character->transforms[form].grade > 1)
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s - %s@D]@n",
@@ -672,7 +672,7 @@ char *make_prompt(struct descriptor_data *d) {
                     len += count;
             }
             if (PRF_FLAGGED(d->character, PRF_TECH) && len < sizeof(prompt)) {
-                FormID form = d->character->technique;
+                Form form = d->character->technique;
 
                 if(d->character->transforms[form].grade > 1)
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mTech@y: @W%s - %s@D]@n",

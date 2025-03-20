@@ -16,26 +16,26 @@ extern int invalid_race(struct char_data *ch, struct obj_data *obj);
 
 namespace race {
 
-    extern std::string getName(RaceID id);
-    extern std::string getAbbr(RaceID id);
-    extern bool isPlayable(RaceID id);
-    extern std::vector<RaceID> getAll();
-    extern std::vector<RaceID> getPlayable();
-    extern std::unordered_set<int> getValidSexes(RaceID id);
-    extern bool isValidMimic(RaceID id);
-    extern bool isPeople(RaceID id);
-    extern bool hasTail(RaceID id);
-    extern int getRPPCost(RaceID id);
-    extern int getRPPRefund(RaceID id);
-    extern int64_t getSoftCap(RaceID id, int level);
-    extern bool isSenseable(RaceID id);
-    extern int getSize(RaceID id);
-    extern bool exists(RaceID id);
+    extern std::string getName(Race id);
+    extern std::string getAbbr(Race id);
+    extern bool isPlayable(Race id);
+    extern std::vector<Race> getAll();
+    extern std::vector<Race> getPlayable();
+    extern std::unordered_set<int> getValidSexes(Race id);
+    extern bool isValidMimic(Race id);
+    extern bool isPeople(Race id);
+    extern bool hasTail(Race id);
+    extern int getRPPCost(Race id);
+    extern int getRPPRefund(Race id);
+    extern int64_t getSoftCap(Race id, int level);
+    extern bool isSenseable(Race id);
+    extern int getSize(Race id);
+    extern bool exists(Race id);
 
     extern double getModifier(struct char_data *ch, int location, int specific);
     extern double getModifierExact(struct char_data *ch, int location, int specific);
 
-    extern std::vector<RaceID> filterRaces(std::function<bool(RaceID)> func);
-    extern std::optional<RaceID> findRace(const std::string& arg, std::function<bool(RaceID)> func);
+    extern std::vector<Race> filterRaces(std::function<bool(Race)> func);
+    extern std::optional<Race> findRace(const std::string& arg, std::function<bool(Race)> func);
 
 }

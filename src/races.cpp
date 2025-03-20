@@ -269,179 +269,179 @@ void racial_body_parts(struct char_data *ch) {
 
 namespace race {
 
-    static std::unordered_map<RaceID, int> race_sizes = {
-        {RaceID::tuffle, SIZE_SMALL},
-        {RaceID::animal, SIZE_FINE},
-        {RaceID::saiba, SIZE_LARGE},
-        {RaceID::ogre, SIZE_LARGE},
-        {RaceID::spirit, SIZE_TINY}
+    static std::unordered_map<Race, int> race_sizes = {
+        {Race::tuffle, SIZE_SMALL},
+        {Race::animal, SIZE_FINE},
+        {Race::saiba, SIZE_LARGE},
+        {Race::ogre, SIZE_LARGE},
+        {Race::spirit, SIZE_TINY}
     };
 
-    int getSize(RaceID id) {
+    int getSize(Race id) {
         if(const auto found = race_sizes.find(id); found != race_sizes.end()) return found->second;
         return SIZE_MEDIUM;
     }
 
-    static std::unordered_set<RaceID> playable = {RaceID::human, RaceID::saiyan, RaceID::icer, RaceID::konatsu, RaceID::namekian,
-    RaceID::mutant, RaceID::kanassan, RaceID::halfbreed, RaceID::bio_android, RaceID::android, RaceID::demon, RaceID::majin,
-    RaceID::kai, RaceID::tuffle};
+    static std::unordered_set<Race> playable = {Race::human, Race::saiyan, Race::icer, Race::konatsu, Race::namekian,
+    Race::mutant, Race::kanassan, Race::halfbreed, Race::bio_android, Race::android, Race::demon, Race::majin,
+    Race::kai, Race::tuffle};
 
-    bool isPlayable(RaceID id) {
+    bool isPlayable(Race id) {
         return playable.contains(id);
     }
 
-    static std::vector<RaceID> all_races = {
-        RaceID::human, RaceID::saiyan, RaceID::icer, RaceID::konatsu, RaceID::namekian, RaceID::mutant,
-        RaceID::kanassan, RaceID::halfbreed, RaceID::bio_android, RaceID::android, RaceID::demon, RaceID::majin,
-        RaceID::kai, RaceID::tuffle, RaceID::hoshijin, RaceID::animal, RaceID::saiba, RaceID::serpent, RaceID::ogre,
-        RaceID::yardratian, RaceID::arlian, RaceID::dragon, RaceID::mechanical, RaceID::spirit
+    static std::vector<Race> all_races = {
+        Race::human, Race::saiyan, Race::icer, Race::konatsu, Race::namekian, Race::mutant,
+        Race::kanassan, Race::halfbreed, Race::bio_android, Race::android, Race::demon, Race::majin,
+        Race::kai, Race::tuffle, Race::hoshijin, Race::animal, Race::saiba, Race::serpent, Race::ogre,
+        Race::yardratian, Race::arlian, Race::dragon, Race::mechanical, Race::spirit
     };
 
-    bool exists(RaceID id) {
+    bool exists(Race id) {
         auto find = std::find(all_races.begin(), all_races.end(), id);
         return find != all_races.end();
     }
 
 
-    std::unordered_set<int> getValidSexes(RaceID id) {
+    std::unordered_set<int> getValidSexes(Race id) {
         switch(id) {
-            case RaceID::namekian:
+            case Race::namekian:
                 return {SEX_NEUTRAL};
             default:
                 return {SEX_NEUTRAL, SEX_MALE, SEX_FEMALE};
         }
     }
 
-    static std::map<RaceID, std::string> race_names = {
-        {RaceID::human, "Human"},
-        {RaceID::saiyan, "Saiyan"},
-        {RaceID::icer, "Icer"},
-        {RaceID::konatsu, "Konatsu"},
-        {RaceID::namekian, "Namekian"},
-        {RaceID::mutant, "Mutant"},
-        {RaceID::kanassan, "Kanassan"},
-        {RaceID::halfbreed, "Halfbreed"},
-        {RaceID::bio_android, "BioAndroid"},
-        {RaceID::android, "Android"},
-        {RaceID::demon, "Demon"},
-        {RaceID::majin, "Majin"},
-        {RaceID::kai, "Kai"},
-        {RaceID::tuffle, "Tuffle"},
-        {RaceID::hoshijin, "Hoshijin"},
-        {RaceID::animal, "Animal"},
-        {RaceID::saiba, "Saiba"},
-        {RaceID::serpent, "Serpent"},
-        {RaceID::ogre, "Ogre"},
-        {RaceID::yardratian, "Yardratian"},
-        {RaceID::arlian, "Arlian"},
-        {RaceID::dragon, "Dragon"},
-        {RaceID::mechanical, "Mechanical"},
-        {RaceID::spirit, "Spirit"}
+    static std::map<Race, std::string> race_names = {
+        {Race::human, "Human"},
+        {Race::saiyan, "Saiyan"},
+        {Race::icer, "Icer"},
+        {Race::konatsu, "Konatsu"},
+        {Race::namekian, "Namekian"},
+        {Race::mutant, "Mutant"},
+        {Race::kanassan, "Kanassan"},
+        {Race::halfbreed, "Halfbreed"},
+        {Race::bio_android, "BioAndroid"},
+        {Race::android, "Android"},
+        {Race::demon, "Demon"},
+        {Race::majin, "Majin"},
+        {Race::kai, "Kai"},
+        {Race::tuffle, "Tuffle"},
+        {Race::hoshijin, "Hoshijin"},
+        {Race::animal, "Animal"},
+        {Race::saiba, "Saiba"},
+        {Race::serpent, "Serpent"},
+        {Race::ogre, "Ogre"},
+        {Race::yardratian, "Yardratian"},
+        {Race::arlian, "Arlian"},
+        {Race::dragon, "Dragon"},
+        {Race::mechanical, "Mechanical"},
+        {Race::spirit, "Spirit"}
     };
 
-    std::string getName(RaceID id) {
+    std::string getName(Race id) {
         if(const auto found = race_names.find(id); found != race_names.end()) return found->second;
         return "Unknown";
     }
 
-    static std::map<RaceID, std::string> race_abbr = {
-        {RaceID::human, "Hum"},
-        {RaceID::saiyan, "Sai"},
-        {RaceID::icer, "Ice"},
-        {RaceID::konatsu, "kon"},
-        {RaceID::namekian, "Nam"},
-        {RaceID::mutant, "Mut"},
-        {RaceID::kanassan, "Kan"},
-        {RaceID::halfbreed, "H-B"},
-        {RaceID::bio_android, "Bio"},
-        {RaceID::android, "And"},
-        {RaceID::demon, "Dem"},
-        {RaceID::majin, "Maj"},
-        {RaceID::kai, "Kai"},
-        {RaceID::tuffle, "Tru"},
-        {RaceID::hoshijin, "Hos"},
-        {RaceID::animal, "Ict"},
-        {RaceID::saiba, "Sab"},
-        {RaceID::serpent, "Ser"},
-        {RaceID::ogre, "Ogr"},
-        {RaceID::yardratian, "Yar"},
-        {RaceID::arlian, "Arl"},
-        {RaceID::dragon, "Drg"},
-        {RaceID::mechanical, "Mec"},
-        {RaceID::spirit, "Spi"}
+    static std::map<Race, std::string> race_abbr = {
+        {Race::human, "Hum"},
+        {Race::saiyan, "Sai"},
+        {Race::icer, "Ice"},
+        {Race::konatsu, "kon"},
+        {Race::namekian, "Nam"},
+        {Race::mutant, "Mut"},
+        {Race::kanassan, "Kan"},
+        {Race::halfbreed, "H-B"},
+        {Race::bio_android, "Bio"},
+        {Race::android, "And"},
+        {Race::demon, "Dem"},
+        {Race::majin, "Maj"},
+        {Race::kai, "Kai"},
+        {Race::tuffle, "Tru"},
+        {Race::hoshijin, "Hos"},
+        {Race::animal, "Ict"},
+        {Race::saiba, "Sab"},
+        {Race::serpent, "Ser"},
+        {Race::ogre, "Ogr"},
+        {Race::yardratian, "Yar"},
+        {Race::arlian, "Arl"},
+        {Race::dragon, "Drg"},
+        {Race::mechanical, "Mec"},
+        {Race::spirit, "Spi"}
     };
 
-    std::string getAbbr(RaceID id) {
+    std::string getAbbr(Race id) {
         if(const auto found = race_abbr.find(id); found != race_abbr.end()) return found->second;
         return "N/A";
     }
 
-    bool isPeople(RaceID id) {
+    bool isPeople(Race id) {
         switch (id) {
-            case RaceID::animal:
-            case RaceID::saiba:
-            case RaceID::mechanical:
-            case RaceID::spirit:
+            case Race::animal:
+            case Race::saiba:
+            case Race::mechanical:
+            case Race::spirit:
                 return false;
             default:
                 return true;
         }
     }
 
-    bool hasTail(RaceID id) {
+    bool hasTail(Race id) {
         switch (id) {
-            case RaceID::icer:
-            case RaceID::bio_android:
-            case RaceID::saiyan:
-            case RaceID::halfbreed:
+            case Race::icer:
+            case Race::bio_android:
+            case Race::saiyan:
+            case Race::halfbreed:
                 return true;
             default:
                 return false;
         }
     }
 
-    bool isValidMimic(RaceID id) {
+    bool isValidMimic(Race id) {
         switch (id) {
-            case RaceID::icer:
-            case RaceID::namekian:
-            case RaceID::demon:
-            case RaceID::majin:
-            case RaceID::hoshijin:
-            case RaceID::arlian:
+            case Race::icer:
+            case Race::namekian:
+            case Race::demon:
+            case Race::majin:
+            case Race::hoshijin:
+            case Race::arlian:
                 return false;
             default:
                 return isPlayable(id);
         }
     }
 
-    int64_t getSoftCap(RaceID id, int level) {
+    int64_t getSoftCap(Race id, int level) {
         switch(id) {
-            case RaceID::kanassan:
-            case RaceID::demon:
+            case Race::kanassan:
+            case Race::demon:
                 return 500 * pow(1.1390, level);
             default:
                 return 500 * pow(1.1357, level);
         }
     }
 
-    bool isSenseable(RaceID id) {
-        return id != RaceID::android;
+    bool isSenseable(Race id) {
+        return id != Race::android;
     }
 
-    static std::unordered_map<RaceID, std::vector<character_affect_type>> race_affects = {
-            {RaceID::human, {
+    static std::unordered_map<Race, std::vector<character_affect_type>> race_affects = {
+            {Race::human, {
                                     {APPLY_CVIT_REGEN_MULT, -0.5, ~0},
             }},
-            {RaceID::namekian, {
+            {Race::namekian, {
                                     {APPLY_CVIT_REGEN_MULT, 0.5, ~0},
                             }},
-            {RaceID::mutant, {
+            {Race::mutant, {
                                        {APPLY_CVIT_REGEN_MULT,  -0.1, ~0},
                                }},
-            {RaceID::arlian, {
+            {Race::arlian, {
                                      {APPLY_CVIT_REGEN_MULT,  -0.7, ~0, [](auto ch) {return (IS_FEMALE(ch) && OUTSIDE(ch)) ? 4.0 : 0.0;}},
                              }},
-            {RaceID::kanassan, {
+            {Race::kanassan, {
                                      {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {
                                          double out = 0.0;
                                          if(weather_info.sky == SKY_RAINING && OUTSIDE(ch)) out += 0.1;
@@ -449,10 +449,10 @@ namespace race {
                                          return out;
                                      }},
                              }},
-            {RaceID::android, {
+            {Race::android, {
                                      {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {return ch->character_flags.get(CharacterFlag::android_model_absorb) ? -0.66 : 0.0;}},
                              }},
-            {RaceID::saiyan, {
+            {Race::saiyan, {
                                      {APPLY_CSTAT_GAIN_MULT, 0.3,  static_cast<int>(CharStat::experience)},
                                      //{APPLY_PHYS_DAM_PERC, 0.0, 0, [](struct char_data *ch) {return PLR_FLAGGED(ch, PLR_TAIL) ? 0.15 : 0;}},
                                      //{APPLY_DAM_ATK_TIER, 0.2, 3},
@@ -460,7 +460,7 @@ namespace race {
                                      //{APPLY_TRANS_ST_UPKEEP, 0.0, 0, [](struct char_data *ch) {return ch->getCurLFPercent() > 0.7 ? -0.25 : 0.0}}
                              }},
 
-            {RaceID::halfbreed, {
+            {Race::halfbreed, {
                                      {APPLY_CSTAT_GAIN_MULT, 0.2,  static_cast<int>(CharStat::experience)},
                                      //{APPLY_SKILL_SLOTS, 1},
                                      //{APPLY_ATTR_TRAIN_COST, -0.25, (int)CharTrain::Intelligence},
@@ -468,12 +468,12 @@ namespace race {
                                      //{APPLY_PS_GAIN_MULT, -0.4}
                              }},
 
-            {RaceID::icer, {
+            {Race::icer, {
                                      {APPLY_CSTAT_GAIN_MULT, -0.1, static_cast<int>(CharStat::experience)},
 
                              }},
 
-            {RaceID::kai, {
+            {Race::kai, {
                                      {APPLY_CSTAT_GAIN_MULT, -0.1, static_cast<int>(CharStat::experience)},
 
                              }}
@@ -496,14 +496,14 @@ namespace race {
         return out;
     }
 
-    std::vector<RaceID> filterRaces(std::function<bool(RaceID)> func) {
-        std::vector<RaceID> out;
+    std::vector<Race> filterRaces(std::function<bool(Race)> func) {
+        std::vector<Race> out;
         std::copy_if(all_races.begin(), all_races.end(), std::back_inserter(out), func);
 
         return out;
     };
 
-    std::optional<RaceID> findRace(const std::string& arg, std::function<bool(RaceID)> func) {
+    std::optional<Race> findRace(const std::string& arg, std::function<bool(Race)> func) {
         for(auto r : all_races) {
             if(!func(r)) continue;
             if(boost::iequals(arg, getName(r))) return r;

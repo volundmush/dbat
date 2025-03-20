@@ -17,6 +17,7 @@
 #include "dbat/act.informative.h"
 #include "dbat/act.wizard.h"
 #include "dbat/handler.h"
+#include "dbat/bitarray.h"
 
 /*
  * Nasty internal macros to clean up the code.
@@ -225,10 +226,7 @@ void zedit_setup(struct descriptor_data *d, int room_num) {
     zd->bot = z.bot;
     zd->top = z.top;
     zd->reset_mode = z.reset_mode;
-    zd->zone_flags[0] = z.zone_flags[0];
-    zd->zone_flags[1] = z.zone_flags[1];
-    zd->zone_flags[2] = z.zone_flags[2];
-    zd->zone_flags[3] = z.zone_flags[3];
+    zd->zone_flags = z.zone_flags;
     zd->min_level = z.min_level;
     zd->max_level = z.max_level;
     /*
@@ -281,7 +279,7 @@ void zedit_disp_flag_menu(struct descriptor_data *d) {
                         zone_bits[counter], !(++columns % 2) ? "\r\n" : "");
     }
 
-    sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX, bits);
+    sprintbitarray(OLC_ZONE(d)->zone_flags.getAll(), zone_bits, ZF_ARRAY_MAX, bits);
     write_to_output(d, "\r\nZone flags: @c%s@n\r\n"
                        "Enter Zone flags, 0 to quit : ", bits);
     OLC_MODE(d) = ZEDIT_ZONE_FLAGS;
@@ -396,10 +394,7 @@ void zedit_save_internally(struct descriptor_data *d) {
         z.top = zd->top;
         z.reset_mode = zd->reset_mode;
         z.lifespan = zd->lifespan;
-        z.zone_flags[0] = zd->zone_flags[0];
-        z.zone_flags[1] = zd->zone_flags[1];
-        z.zone_flags[2] = zd->zone_flags[2];
-        z.zone_flags[3] = zd->zone_flags[3];
+        z.zone_flags = zd->zone_flags;
         z.min_level = zd->min_level;
         z.max_level = zd->max_level;
     }
@@ -441,7 +436,7 @@ void zedit_disp_menu(struct descriptor_data *d) {
 
     clear_screen(d);
     room = real_room(OLC_NUM(d));
-    sprintbitarray(OLC_ZONE(d)->zone_flags, zone_bits, ZF_ARRAY_MAX, buf1);
+    sprintbitarray(OLC_ZONE(d)->zone_flags.getAll(), zone_bits, ZF_ARRAY_MAX, buf1);
     auto &z = zone_table[OLC_ZNUM(d)];
     /*
      * Menu header
@@ -1437,7 +1432,7 @@ void zedit_parse(struct descriptor_data *d, char *arg) {
                 /*
                  * Toggle the bit.
                  */
-                TOGGLE_BIT_AR(OLC_ZONE(d)->zone_flags, number - 1);
+                OLC_ZONE(d)->zone_flags.toggle(number - 1);
                 OLC_ZONE(d)->number = 1;
                 zedit_disp_flag_menu(d);
             }

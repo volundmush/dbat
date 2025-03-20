@@ -116,7 +116,7 @@ int mag_manacost(struct char_data *ch, int spellnum) {
 
 int mag_kicost(struct char_data *ch, int spellnum) {
     int i, min, tval;
-    SenseiID whichclass;
+    Sensei whichclass;
     return MAX(SINFO.ki_max - (SINFO.ki_change *
                                (GET_LEVEL(ch) - SINFO.min_level[(int) GET_CLASS(ch)])),
                SINFO.ki_min);

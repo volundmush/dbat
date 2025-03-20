@@ -167,10 +167,6 @@ zone_rnum create_new_zone(zone_vnum vzone_num, room_vnum bottom, room_vnum top, 
     z.lifespan = 30;
     z.age = 0;
     z.reset_mode = 2;
-    z.zone_flags[0] = 0;
-    z.zone_flags[1] = 0;
-    z.zone_flags[2] = 0;
-    z.zone_flags[3] = 0;
     z.min_level = 0;
     z.max_level = ADMLVL_IMPL;
     /*

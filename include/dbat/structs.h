@@ -230,8 +230,8 @@ struct trig_data : std::enable_shared_from_this<trig_data> {
 
 struct picky_data {
     std::unordered_set<MoralAlign> only_alignment, not_alignment;    /* Neutral, lawful, etc.		*/
-    std::unordered_set<SenseiID> only_sensei, not_sensei;    /* Only these classes can shop here	*/
-    std::unordered_set<RaceID> only_race, not_race;    /* Only these races can shop here	*/
+    std::unordered_set<Sensei> only_sensei, not_sensei;    /* Only these classes can shop here	*/
+    std::unordered_set<Race> only_race, not_race;    /* Only these races can shop here	*/
 };
 
 struct unit_data {
@@ -681,8 +681,8 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     std::shared_ptr<char_data> shared();
 
     char *title{};
-    RaceID race{RaceID::spirit};
-    SenseiID sensei{SenseiID::commoner};
+    Race race{Race::spirit};
+    Sensei sensei{Sensei::commoner};
 
     std::list<std::pair<int, std::string>> wait_input_queue;
     Task task = Task::nothing;
@@ -815,7 +815,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     /* One bitvector array per CFEAT_ type	*/
     int school_feats[SFEAT_MAX + 1]{};/* One bitvector array per CFEAT_ type	*/
 
-    std::map<SkillID, skill_data> skill;
+    std::map<Skill, skill_data> skill;
 
     FlagHandler<CharacterFlag> character_flags{};
     FlagHandler<PlayerFlag> player_flags{}; /* act flag for NPC's; player flag for PC's */
@@ -842,9 +842,9 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int accuracy_mod{};        /* Any bonus or penalty to the accuracy	*/
     int damage_mod{};        /* Any bonus or penalty to the damage	*/
 
-    FormID form{FormID::base};        /* Current form of the character		*/
-    FormID technique{FormID::base};        /* Current technique form of the character		*/
-    std::unordered_set<FormID> permForms;    /* Permanent forms of the character	*/
+    Form form{Form::base};        /* Current form of the character		*/
+    Form technique{Form::base};        /* Current technique form of the character		*/
+    std::unordered_set<Form> permForms;    /* Permanent forms of the character	*/
     double transBonus{0.0};   // Varies from -0.3 to 0.3
     double internalGrowth{0.0};
     double lifetimeGrowth{0.0};
@@ -852,7 +852,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     void gazeAtMoon();
 
     // Data stored about different forms.
-    std::unordered_map<FormID, trans_data> transforms;
+    std::unordered_map<Form, trans_data> transforms;
 
     int genBonus = 0;
     int16_t spellfail{};        /* Total spell failure %                 */
@@ -909,7 +909,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int combhits{};
     int ping{};
     int starphase{};
-    std::optional<RaceID> mimic{};
+    std::optional<Race> mimic{};
     std::bitset<MAX_BONUSES> bonuses{};
 
     int death_type{};
@@ -1007,9 +1007,9 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     void loseTail();
     bool hasTail();
 
-    void hideTransform(FormID form, bool hide);
-    void addTransform(FormID form);
-    bool removeTransform(FormID form);
+    void hideTransform(Form form, bool hide);
+    void addTransform(Form form);
+    bool removeTransform(Form form);
     void attemptLimitBreak();
     void removeLimitBreak();
 
@@ -1706,7 +1706,7 @@ struct shop_data : public org_data {
 struct guild_data : public org_data {
     void toggle_skill(uint16_t skill_id);
     void toggle_feat(uint16_t skill_id);
-    std::unordered_set<SkillID> skills;  /* array to keep track of which feats things we'll train */
+    std::unordered_set<Skill> skills;  /* array to keep track of which feats things we'll train */
     float charge{1.0};                  /* charge * skill level = how much we'll charge */
     std::string no_such_skill{};           /* message when we don't teach that skill */
     std::string not_enough_gold{};         /* message when the student doesn't have enough gold */
@@ -1775,7 +1775,7 @@ struct zone_data {
     std::vector<struct reset_com> cmd;   /* command table for reset	          */
     int min_level{};           /* Minimum level to enter zone        */
     int max_level{};           /* Max Mortal level to enter zone     */
-    bitvector_t zone_flags[ZF_ARRAY_MAX]{};          /* Flags for the zone.                */
+    FlagHandler<ZoneFlag> zone_flags{};          /* Flags for the zone.                */
 
     void remove_room_commands(room_vnum rv);
 
