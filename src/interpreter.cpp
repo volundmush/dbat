@@ -1422,12 +1422,12 @@ void enter_player_game(struct descriptor_data *d) {
         SET_SKILL(d->character, SKILL_TAILWHIP, 0);
     }
 
-    if (IS_MUTANT(d->character) && (d->character->genome.contains(9)) &&
+    if (d->character->mutations.get(Mutation::innate_telepathy) &&
         !GET_SKILL(d->character, SKILL_TELEPATHY)) {
         SET_SKILL(d->character, SKILL_TELEPATHY, 50);
     }
 
-    if (IS_BIO(d->character) && (d->character->genome.contains(7)) &&
+    if (d->character->bio_genomes.get(Race::kai) &&
         !GET_SKILL(d->character, SKILL_TELEPATHY) && !GET_SKILL(d->character, SKILL_FOCUS)) {
         SET_SKILL(d->character, SKILL_TELEPATHY, 30);
         SET_SKILL(d->character, SKILL_FOCUS, 30);

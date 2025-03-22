@@ -1045,23 +1045,24 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     units.emplace(mob->id, sh);
     mob->activate();
 
-    std::map<CharAppearance, int> setNumsTo;
+
 
     if (!(IS_HOSHIJIN(mob) && GET_SEX(mob) == SEX_MALE)) {
-        setNumsTo[CharAppearance::hair_length] = rand_number(0, 4);
-        setNumsTo[CharAppearance::hair_color] = rand_number(1, 13);
-        setNumsTo[CharAppearance::hair_style] = rand_number(1, 11);
+        //setNumsTo[CharAppearance::hair_length] = rand_number(0, 4);
+        //setNumsTo[CharAppearance::hair_color] = rand_number(1, 13);
+        //setNumsTo[CharAppearance::hair_style] = rand_number(1, 11);
     }
 
-    setNumsTo[CharAppearance::eye_color] = rand_number(0, 11);
+    //setNumsTo[CharAppearance::eye_color] = rand_number(0, 11);
 
     if (!IS_HUMAN(mob) && !IS_SAIYAN(mob) && !IS_HALFBREED(mob) && !IS_NAMEK(mob)) {
-        setNumsTo[CharAppearance::skin_color] = rand_number(0, 11);
+        //setNumsTo[CharAppearance::skin_color] = rand_number(0, 11);
     }
     if (IS_NAMEK(mob)) {
-        setNumsTo[CharAppearance::skin_color] = 2;
+        //setNumsTo[CharAppearance::skin_color] = 2;
     }
     if (IS_HUMAN(mob) || IS_SAIYAN(mob) || IS_HALFBREED(mob)) {
+        /*
         if (rand_number(1, 5) <= 2) {
             setNumsTo[CharAppearance::skin_color] = rand_number(0, 1);
         } else if (rand_number(1, 5) <= 4) {
@@ -1069,14 +1070,11 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
         } else if (rand_number(1, 5) <= 5) {
             setNumsTo[CharAppearance::skin_color] = rand_number(9, 10);
         }
+            */
     }
     if (IS_SAIYAN(mob)) {
-        setNumsTo[CharAppearance::hair_color] = HAIRC_BLACK;
-        setNumsTo[CharAppearance::eye_color] = 1;
-    }
-
-    for(auto &[cint, val] : setNumsTo) {
-        mob->set(cint, val);
+        //setNumsTo[CharAppearance::hair_color] = HAIRC_BLACK;
+        //setNumsTo[CharAppearance::eye_color] = 1;
     }
 
     if (GET_MOB_VNUM(mob) >= 81 && GET_MOB_VNUM(mob) <= 87) {

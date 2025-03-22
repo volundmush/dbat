@@ -168,7 +168,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
     if (IS_KONATSU(ch)) {
         perc *= 1.5;
     }
-    if (IS_BIO(ch) && (ch->genome.contains(8))) {
+    if (ch->bio_genomes.get(Race::konatsu)) {
         perc *= 1.4;
     }
 
@@ -2314,7 +2314,7 @@ int handle_block(struct char_data *ch) {
             return (0);
         } else {
             int num = GET_SKILL(ch, SKILL_BLOCK);
-            if (IS_MUTANT(ch) && (ch->genome.contains(3))) {
+            if (ch->mutations.get(Mutation::extreme_reflexes)) {
                 num += 10;
             }
             if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {
@@ -2370,7 +2370,7 @@ int handle_dodge(struct char_data *ch) {
             return (0);
         } else {
             int num = GET_SKILL(ch, SKILL_DODGE);
-            if (IS_MUTANT(ch) && (ch->genome.contains(3))) {
+            if (ch->mutations.get(Mutation::extreme_reflexes)) {
                 num += 10;
             }
             if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {
@@ -2572,7 +2572,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
         }
     }
 
-    if ((foundo == false || foundv == false) && !vict->getRoomFlag(ROOM_SPACE)) {
+    if ((foundo == false || foundv == false) && !vict->getWhereFlag(WhereFlag::space)) {
         sprintf(buf,
                 "@WYou watch as the deflected %s slams into the ground, exploding with a roar of blinding light!@n",
                 sname);
@@ -2706,7 +2706,7 @@ parry_ki(double attperc, struct char_data *ch, struct char_data *vict, char snam
 }
 
 void dodge_ki(struct char_data *ch, struct char_data *vict, int type, int type2, int skill, int skill2) {
-    if (type == 0 && !vict->getRoomFlag(ROOM_SPACE)) {
+    if (type == 0 && !vict->getWhereFlag(WhereFlag::space)) {
         const auto tile = ch->getLocationTileType();
         if (tile != SECT_INSIDE) {
             impact_sound(ch, "@wA loud roar is heard nearby!@n\r\n");
@@ -3040,7 +3040,7 @@ static void damtype_kai_ki(char_data *ch, int64_t *dam, int bon) {
 }
 
 static void damtype_icer_ki(char_data *ch, int64_t *dam, int bon) {
-    if (IS_ICER(ch) || (IS_BIO(ch) && (ch->genome.contains(4)))) {
+    if (IS_ICER(ch) || ch->bio_genomes.get(Race::icer)) {
         *dam += (*dam / 100) * bon;
     }
 }
@@ -3623,7 +3623,7 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
         diminishing_returns = 0;
     bonus = (start_bonus) * diminishing_returns;
     
-    if (IS_BIO(ch) && (ch->genome.contains(2))) {
+    if (ch->bio_genomes.get(Race::saiyan)) {
         bonus /= 2;
     }
     
@@ -3689,7 +3689,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
     }
 
 	//Bonuses by room to vital gains
-    if (ch->getRoomFlag(ROOM_WORKOUT) || (ch->getRoomFlag(ROOM_HBTC))) {
+    if (ch->getRoomFlag(ROOM_WORKOUT) || (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber))) {
         if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
             gmult *= 1.75;
             pscost += 2;
@@ -3777,11 +3777,11 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
         if (IS_HALFBREED(ch)) {
             gaincalc = gaincalc * 1.2;
         }
-        if (IS_ICER(ch) || (IS_BIO(ch) && (ch->genome.contains(4)))) {
+        if (IS_ICER(ch) || ch->bio_genomes.get(Race::icer)) {
             gaincalc = gaincalc * 0.9;
         }
 		//Room bonuses to xp gain
-        if (ch->getRoomFlag(ROOM_WORKOUT) || (ch->getRoomFlag(ROOM_HBTC))) {
+        if (ch->getRoomFlag(ROOM_WORKOUT) || (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber))) {
             if (ch->getRoomVnum() >= 19100 && ch->getRoomVnum() <= 19199) {
                 gaincalc *= 1.5;
             } else {
@@ -3979,7 +3979,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         } else if (ABSORBBY(ch)) {
             send_to_char(ch, "You are too busy being absorbed by %s!\r\n", GET_NAME(ABSORBBY(ch)));
             return 0;
-        } else if ((std::abs(GET_ALT(vict) - GET_ALT(ch)) == 1) && (IS_NAMEK(ch) || (IS_BIO(ch) && (ch->genome.contains(3))))) {
+        } else if ((std::abs(GET_ALT(vict) - GET_ALT(ch)) == 1) && (IS_NAMEK(ch) || ch->bio_genomes.get(Race::namekian))) {
             act("@GYou stretch your limbs toward @g$N@G in an attempt to hit $M!@n", true, ch, nullptr, vict, TO_CHAR);
             act("@g$n@G stretches $s limbs toward @RYOU@G in an attempt to land a hit!@n", true, ch, nullptr, vict,
                 TO_VICT);
@@ -4289,7 +4289,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
 
-        if (IS_MUTANT(vict) && (vict->genome.contains(8)) && type == 0) {
+        if (vict->mutations.get(Mutation::rubbery_body) && type == 0) {
             int64_t drain = dmg * 0.1;
             dmg -= drain;
             ch->decCurST(drain, 1);
@@ -4537,7 +4537,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
         if (!IS_NPC(vict) && GET_SKILL(vict, SKILL_ARMOR)) {
             int nanite = GET_SKILL(vict, SKILL_ARMOR), perc = rand_number(1, 220);
-            if (vict->character_flags.get(CharacterFlag::android_model_sense)) {
+            if (vict->subrace == SubRace::android_model_sense) {
                 perc = rand_number(1, 176);
             }
             if (nanite >= perc) {
@@ -4852,7 +4852,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         GET_CHARGE(ch) = GET_CHARGE(ch) + (GET_MAX_MANA(vict) * 0.12);
                         
                     }
-                    if (IS_MUTANT(ch) && (ch->genome.contains(10))) {
+                    if (ch->mutations.get(Mutation::natural_energy)) {
                         ch->incCurKI(dmg * .05);
                     }
                     if (!is_sparring(ch) && IS_NPC(vict)) {
@@ -4918,7 +4918,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     int64_t raise = (GET_MAX_MANA(ch) * 0.005) + 1;
                     ch->incCurKI(raise);
                 }
-                if (IS_MUTANT(ch) && (ch->genome.contains(10))) {
+                if (ch->mutations.get(Mutation::natural_energy)) {
                     ch->incCurKI(dmg * .05);
                 }
                 send_to_char(ch, "@D[@GDamage@W: @R%s@D]@n", add_commas(dmg).c_str());
@@ -5003,7 +5003,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         }
 
         if(dmg > 0 && !IS_NPC(ch)) {
-            if((IS_SAIYAN(ch) || (IS_BIO(ch) && (ch->genome.contains(2))))) {
+            if((IS_SAIYAN(ch) || ch->bio_genomes.get(Race::saiyan))) {
                 if (GET_POS(ch) != POS_RESTING && GET_POS(vict) != POS_RESTING) {
                     saiyan_gain(ch, vict);
                 }
@@ -5236,7 +5236,7 @@ int handle_parry(struct char_data *ch) {
         return (-2);
     } else {
         int num = GET_SKILL(ch, SKILL_PARRY);
-        if (IS_MUTANT(ch) && (ch->genome.contains(3))) {
+        if (ch->mutations.get(Mutation::extreme_reflexes)) {
             num += 10;
         }
         if (GET_SKILL_BASE(ch, SKILL_STYLE) >= 100) {
@@ -6076,7 +6076,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
     const auto tile = vict->getLocationTileType();
     if (type == 0) {
         if (vict->getLocationEnvironment(ENV_WATER) < 100.0 && tile != SECT_WATER_SWIM &&
-            tile != SECT_WATER_NOSWIM && !vict->getRoomFlag(ROOM_SPACE) &&
+            tile != SECT_WATER_NOSWIM && !vict->getWhereFlag(WhereFlag::space) &&
             tile != SECT_FLYING) {
             switch (rand_number(1, 5)) {
                 case 1:
@@ -6165,7 +6165,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     }
                     break;
             }
-        } else if (vict->getRoomFlag(ROOM_SPACE)) {
+        } else if (vict->getWhereFlag(WhereFlag::space)) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r coughs up blood and dies. The blood freezes and floats freely through space...@n", true,
@@ -6306,7 +6306,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
         }
     } else {
         if (vict->getLocationEnvironment(ENV_WATER) < 100.0 && tile != SECT_WATER_SWIM &&
-            tile != SECT_WATER_NOSWIM && !vict->getRoomFlag(ROOM_SPACE) &&
+            tile != SECT_WATER_NOSWIM && !vict->getWhereFlag(WhereFlag::space) &&
             tile != SECT_FLYING) {
             switch (rand_number(1, 5)) {
                 case 1:
@@ -6383,7 +6383,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_NOTVICT);
                     break;
             }
-        } else if (vict->getRoomFlag(ROOM_SPACE)) {
+        } else if (vict->getWhereFlag(WhereFlag::space)) {
             switch (rand_number(1, 5)) {
                 case 1:
                     act("@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch,

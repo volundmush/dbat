@@ -23,58 +23,28 @@
 #include "dbat/weather.h"
 #include "dbat/attack.h"
 #include "dbat/modifiers.h"
-
-static std::string robot = "Robotic-Humanoid", robot_lower = "robotic-humanoid", unknown = "UNKNOWN";
+#include "dbat/bitarray.h"
 
 
 std::string char_data::juggleRaceName(bool capitalized) {
 
-    auto apparent = race;
+    std::string apparent = fmt::format("{}", race);
 
-    switch (apparent) {
+    switch (race) {
         case Race::hoshijin:
-            if (mimic) apparent = *mimic;
+            if (mimic) apparent = fmt::format("{}", *mimic);
             break;
         case Race::halfbreed:
-            switch (RACIAL_PREF(this)) {
-                case 1:
-                    apparent = Race::human;
-                    break;
-                case 2:
-                    apparent = Race::saiyan;
-                    break;
-            }
-            break;
         case Race::android:
-            switch (RACIAL_PREF(this)) {
-                case 1:
-                    apparent = Race::android;
-                    break;
-                case 2:
-                    apparent = Race::human;
-                    break;
-                case 3:
-                    if (capitalized) {
-                        return robot;
-                    } else {
-                        return robot_lower;
-                    }
-            }
-            break;
         case Race::saiyan:
-            if (PLR_FLAGGED(this, PLR_TAILHIDE)) {
-                apparent = Race::human;
-            }
+            apparent = getAppearance(Appearance::seeming);
             break;
     }
 
     if (capitalized) {
-        return race::getName(apparent);
-    } else {
-        auto out = race::getName(apparent);
-        boost::to_lower(out);
-        return out;
+        apparent[0] = std::toupper(apparent[0]);
     }
+    return apparent;
 }
 
 void char_data::restore_by(char_data *ch) {
@@ -187,7 +157,7 @@ bool char_data::in_room_range(IDXTYPE low_rnum, IDXTYPE high_rnum) {
 }
 
 bool char_data::in_past() {
-    return this->getRoomFlag(ROOM_PAST);
+    return this->getWhereFlag(WhereFlag::pendulum_past);
 }
 
 bool char_data::is_newbie() {
@@ -1278,21 +1248,6 @@ align_t char_data::mod(CharAlign type, align_t val) {
     return set(type, get(type) + val);
 }
 
-appearance_t char_data::get(CharAppearance type) {
-    if(auto find = appearances.find(type); find != appearances.end()) {
-        return find->second;
-    }
-    return 0;
-}
-
-appearance_t char_data::set(CharAppearance type, appearance_t val) {
-    return appearances[type] = std::clamp<appearance_t>(val, 0, 100);
-}
-
-appearance_t char_data::mod(CharAppearance type, appearance_t val) {
-    return set(type, get(type) + val);
-}
-
 int char_data::setSize(int val) {
     this->size = static_cast<Size>(val);
     return static_cast<int>(this->size);
@@ -1324,7 +1279,7 @@ double char_data::getPotential() {
 void char_data::gainGrowth() {
     double modifier = 1;
     auto r = getRoom();
-    if (ROOM_FLAGGED(r, ROOM_RHELL) || ROOM_FLAGGED(r, ROOM_AL)) {
+    if (r->where_flags[WhereFlag::afterlife_hell] || r->where_flags[WhereFlag::afterlife]) {
         modifier = 1.5;
     }
 
@@ -1512,7 +1467,7 @@ room_vnum char_data::normalizeLoadRoom(room_vnum in) {
         //lroom = room;
     //}
         // those stuck in the pendulum room past get returned to Kami's Lookout.
-    if (ROOM_FLAGGED(room, ROOM_PAST)) {
+    if (WHERE_FLAGGED(room, WhereFlag::pendulum_past)) {
         lroom = 1561;
     }
         // the WMAT arena also is not a good place to log off.
@@ -1875,4 +1830,23 @@ void char_data::setTask(Task t) {
     } else {
         characterSubscriptions.subscribe("commandWaitQueue", this);
     }
+}
+
+std::string char_data::getAppearance(Appearance type, bool withTransform) {
+    if(withTransform && form != Form::base) {
+        if(auto override = trans::getAppearance(this, form, type); override) {
+            return override.value();
+        }
+    }
+    
+    if(auto find = appearances.find(type); find != appearances.end()) {
+        return find->second;
+    }
+    return race::defaultAppearance(this, type);
+}
+
+const char* char_data::getAppearanceStr(Appearance type) {
+    static char buf[MAX_STRING_LENGTH];
+    snprintf(buf, MAX_STRING_LENGTH, "%s", getAppearance(type).c_str());
+    return buf;
 }

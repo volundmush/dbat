@@ -38,8 +38,6 @@
 /* local functions */
 static void gen_map(struct char_data *ch, int num);
 
-static void bringdesc(struct char_data *ch, struct char_data *tch);
-
 static void see_plant(struct obj_data *obj, struct char_data *ch);
 
 static double terrain_bonus(struct char_data *ch);
@@ -228,7 +226,7 @@ static double terrain_bonus(struct char_data *ch) {
             break;
     }
 
-    if (ch->getRoomFlag(ROOM_SPACE)) {
+    if (ch->getWhereFlag(WhereFlag::space)) {
         bonus += -0.5;
     }
 
@@ -271,10 +269,10 @@ static void search_room(struct char_data *ch) {
             if (AFF_FLAGGED(vict, AFF_LIQUEFIED)) {
                 prob *= 1.5;
             }
-            if (IS_MUTANT(ch) && (ch->genome.contains(4))) {
+            if (ch->mutations.get(Mutation::infravision)) {
                 perc += 5;
             }
-            if (IS_MUTANT(vict) && (vict->genome.contains(5))) {
+            if (vict->mutations.get(Mutation::natural_camouflage)) {
                 prob += 10;
             }
             terrain += terrain_bonus(vict);
@@ -936,167 +934,6 @@ static void send_attribute_desc(struct char_data *ch, const char *label, const c
     send_to_char(ch, "            @D[@c%-12s@D: @W%-12s@D]@n\r\n", label, value);
 }
 
-static const char* get_skin_color_desc(int skin_color) {
-    switch (skin_color) {
-        case SKIN_WHITE: return "White";
-        case SKIN_TAN: return "Tan";
-        case SKIN_BLACK: return "Black";
-        case SKIN_GREEN: return "Green";
-        case SKIN_ORANGE: return "Orange";
-        case SKIN_YELLOW: return "Yellow";
-        case SKIN_RED: return "Red";
-        case SKIN_GREY: return "Grey";
-        case SKIN_BLUE: return "Blue";
-        case SKIN_AQUA: return "Aqua";
-        case SKIN_PINK: return "Pink";
-        case SKIN_PURPLE: return "Purple";
-        default: return "Unknown";
-    }
-}
-
-static const char* get_hair_length_desc(int hair_length) {
-    switch (hair_length) {
-        case HAIRL_LONG: return "Long";
-        case HAIRL_BALD: return "Bald";
-        case HAIRL_SHORT: return "Short";
-        case HAIRL_MEDIUM: return "Medium";
-        case HAIRL_RLONG: return "Really Long";
-        default: return "Unknown";
-    }
-}
-
-static const char* get_hair_style_desc(int hair_style) {
-    switch (hair_style) {
-        case HAIRS_PLAIN: return "Plain";
-        case HAIRS_MOHAWK: return "Mohawk";
-        case HAIRS_SPIKY: return "Spiky";
-        case HAIRS_CURLY: return "Curly";
-        case HAIRS_UNEVEN: return "Uneven";
-        case HAIRS_PONYTAIL: return "Pony Tail";
-        case HAIRS_AFRO: return "Afro";
-        case HAIRS_FADE: return "Fade";
-        case HAIRS_CREW: return "Crew Cut";
-        case HAIRS_FEATHERED: return "Feathered";
-        case HAIRS_DRED: return "Dread Locks";
-        default: return "Unknown";
-    }
-}
-
-static const char* get_hair_color_desc(int hair_color) {
-    switch (hair_color) {
-        case HAIRC_BLACK: return "Black";
-        case HAIRC_BROWN: return "Brown";
-        case HAIRC_BLONDE: return "Blonde";
-        case HAIRC_GREY: return "Grey";
-        case HAIRC_RED: return "Red";
-        case HAIRC_ORANGE: return "Orange";
-        case HAIRC_GREEN: return "Green";
-        case HAIRC_BLUE: return "Blue";
-        case HAIRC_PINK: return "Pink";
-        case HAIRC_PURPLE: return "Purple";
-        case HAIRC_SILVER: return "Silver";
-        case HAIRC_CRIMSON: return "Crimson";
-        case HAIRC_WHITE: return "White";
-        default: return "Unknown";
-    }
-}
-
-static const char* get_eye_color_desc(int eye_color) {
-    switch (eye_color) {
-        case EYE_BLUE: return "Blue";
-        case EYE_BLACK: return "Black";
-        case EYE_GREEN: return "Green";
-        case EYE_BROWN: return "Brown";
-        case EYE_RED: return "Red";
-        case EYE_AQUA: return "Aqua";
-        case EYE_PINK: return "Pink";
-        case EYE_PURPLE: return "Purple";
-        case EYE_CRIMSON: return "Crimson";
-        case EYE_GOLD: return "Gold";
-        case EYE_AMBER: return "Amber";
-        case EYE_EMERALD: return "Emerald";
-        default: return "Unknown";
-    }
-}
-
-static void bringdesc(struct char_data *ch, struct char_data *tch) {
-    if (!ch || !tch) {
-        send_to_char(ch, "Error in bring-desc, please report.\r\n");
-        return;
-    }
-
-    if (!IS_HUMANOID(tch)) {
-        return; // No description for non-humanoid characters
-    }
-
-    if (ch != tch && PLR_FLAGGED(tch, PLR_DISGUISED)) {
-        send_attribute_desc(ch, "Hair Length", "Hidden.");
-        send_attribute_desc(ch, "Hair Color", "Hidden.");
-        send_attribute_desc(ch, "Hair Style", "Hidden.");
-        send_attribute_desc(ch, "Eye Color", "Hidden.");
-        send_attribute_desc(ch, "Skin Color", get_skin_color_desc(GET_SKIN(tch)));
-        return;
-    }
-
-    if (IS_HUMAN(tch) || IS_SAIYAN(tch) || IS_KONATSU(tch) || IS_MUTANT(tch) || IS_ANDROID(tch) ||
-        IS_KAI(tch) || IS_HALFBREED(tch) || IS_TRUFFLE(tch) || IS_HOSHIJIN(tch)) {
-
-        if (!IS_TRANSFORMED(tch)) {
-            send_attribute_desc(ch, "Hair Length", get_hair_length_desc(GET_HAIRL(tch)));
-            send_attribute_desc(ch, "Hair Style", get_hair_style_desc(GET_HAIRS(tch)));
-            send_attribute_desc(ch, "Hair Color", get_hair_color_desc(GET_HAIRC(tch)));
-        } else if (IS_SAIYAN(tch) || IS_HALFBREED(tch)) {
-            switch (tch->form) {
-                case Form::super_saiyan_1:
-                    send_attribute_desc(ch, "Hair Length", get_hair_length_desc(GET_HAIRL(tch)));
-                    send_attribute_desc(ch, "Hair Style", "Spiky");
-                    send_attribute_desc(ch, "Hair Color", "Golden");
-                    send_attribute_desc(ch, "Eye Color", "Emerald");
-                    break;
-                case Form::super_saiyan_2:
-                    send_attribute_desc(ch, "Hair Length", get_hair_length_desc(GET_HAIRL(tch)));
-                    send_attribute_desc(ch, "Hair Style", "Sharp Spikes");
-                    send_attribute_desc(ch, "Hair Color", "Golden");
-                    send_attribute_desc(ch, "Eye Color", "Emerald");
-                    break;
-                case Form::super_saiyan_3:
-                    send_attribute_desc(ch, "Hair Length", "Really Long");
-                    send_attribute_desc(ch, "Hair Style", "Spiky");
-                    send_attribute_desc(ch, "Hair Color", "Golden");
-                    send_attribute_desc(ch, "Eye Color", "Aqua Green");
-                    break;
-                case Form::super_saiyan_4:
-                    send_attribute_desc(ch, "Hair Length", "Long");
-                    send_attribute_desc(ch, "Hair Style", "Soft Spikes");
-                    send_attribute_desc(ch, "Hair Color", "Black");
-                    send_attribute_desc(ch, "Eye Color", "Amber");
-                    break;
-                default:
-                    break;
-            }
-        }
-    } else if (IS_DEMON(tch) || IS_ICER(tch)) {
-        send_attribute_desc(ch, "Horn Length", get_hair_length_desc(GET_HAIRL(tch)));
-    } else if (IS_NAMEK(tch) || IS_ARLIAN(tch)) {
-        send_attribute_desc(ch, "Ant. Length", get_hair_length_desc(GET_HAIRL(tch)));
-    } else if (IS_ARLIAN(tch) && IS_FEMALE(tch)) {
-        send_attribute_desc(ch, "Wing Color", get_hair_color_desc(GET_HAIRC(tch)));
-    } else if (IS_ARLIAN(tch) && !IS_FEMALE(tch)) {
-        send_attribute_desc(ch, "Wing Color", "White");
-    } else if (IS_MAJIN(tch)) {
-        send_attribute_desc(ch, "For. Length", get_hair_length_desc(GET_HAIRL(tch)));
-    }
-
-    if ((!IS_SAIYAN(tch) && !IS_HALFBREED(tch)) || !IS_TRANSFORMED(tch)) {
-        send_attribute_desc(ch, "Eye Color", get_eye_color_desc(GET_EYE(tch)));
-    }
-
-    send_attribute_desc(ch, "Skin Color", get_skin_color_desc(GET_SKIN(tch)));
-
-    if (MAJINIZED(tch) != 0 && MAJINIZED(tch) != 3) {
-        send_attribute_desc(ch, "Forehead", "Majin Symbol");
-    }
-}
 
 static void draw_closed_exit(char map[9][10], int x, int y, int door) {
     switch (door) {
@@ -2095,9 +1932,7 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
     } else {
         send_to_char(ch, "%s", i->transforms[i->form].description);
     }
-    if (!MOB_FLAGGED(i, MOB_JUSTDESC)) {
-        bringdesc(ch, i);
-    }
+
     send_to_char(ch, "\r\n");
     if (!IS_NPC(i)) {
         display_limb(ch, i, 0, "Right Arm", CharacterFlag::cyber_right_arm);
@@ -2383,7 +2218,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         send_to_char(ch, "@w%c%s", UPPER(*i->short_description), i->short_description + 1);
     else if (!IS_NPC(i)) {
         if (IS_MAJIN(i) && AFF_FLAGGED(i, AFF_LIQUEFIED)) {
-            send_to_char(ch, "@wSeveral blobs of %s colored goo spread out here.@n\n", skin_types[(int) GET_SKIN(i)]);
+            send_to_char(ch, "@wSeveral blobs of %s colored goo spread out here.@n\n", GET_SKIN(i));
             return;
         }
         if ((GET_ADMLEVEL(ch) > 0 || GET_ADMLEVEL(i) > 0) || IS_NPC(ch)) {
@@ -2391,86 +2226,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         } else if ((!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) == 1)) {
             send_to_char(ch, "@w%s", get_i_name(ch, i));
         } else if (!PLR_FLAGGED(i, PLR_DISGUISED) && readIntro(ch, i) != 1) {
-            if (GET_DISTFEA(i) == DISTFEA_EYE) {
-                send_to_char(ch, "@wA %s eyed %s %s", eye_types[(int) GET_EYE(i)], MAFE(i), LRACE(i));
-            } else if (GET_DISTFEA(i) == DISTFEA_HAIR) {
-                if (IS_MAJIN(i)) {
-                    send_to_char(ch, "@wA %s majin, with a %s forelock,", MAFE(i), FHA_types[(int) GET_HAIRL(i)]);
-                } else if (IS_NAMEK(i)) {
-                    send_to_char(ch, "@wA namek, with %s antennae,", FHA_types[(int) GET_HAIRL(i)]);
-                } else if (IS_ARLIAN(i)) {
-                    send_to_char(ch, "@wA arlian, with %s antennae,", FHA_types[(int) GET_HAIRL(i)]);
-                } else if (IS_ICER(i) || IS_DEMON(i)) {
-                    send_to_char(ch, "@wA %s %s, with %s horns", MAFE(i), LRACE(i), FHA_types[(int) GET_HAIRL(i)]);
-                } else {
-                    char blarg[MAX_INPUT_LENGTH];
-                    sprintf(blarg, "%s %s hair %s", hairl_types[(int) GET_HAIRL(i)], hairc_types[(int) GET_HAIRC(i)],
-                            hairs_types[(int) GET_HAIRS(i)]);
-                    send_to_char(ch, "@wA %s %s, with %s", MAFE(i), LRACE(i),
-                                 GET_HAIRL(i) == 0 ? "a bald head" : (blarg));
-                }
-            } else if (GET_DISTFEA(i) == DISTFEA_SKIN) {
-                send_to_char(ch, "@wA %s skinned %s %s", skin_types[(int) GET_SKIN(i)], MAFE(i), LRACE(i));
-            } else if (GET_DISTFEA(i) == DISTFEA_HEIGHT) {
-                char *height;
-                if (IS_TRUFFLE(i)) {
-                    if (GET_PC_HEIGHT(i) > 70) {
-                        height = strdup("very tall");
-                    } else if (GET_PC_HEIGHT(i) > 55) {
-                        height = strdup("tall");
-                    } else if (GET_PC_HEIGHT(i) > 35) {
-                        height = strdup("average height");
-                    } else {
-                        height = strdup("short");
-                    }
-                } else {
-                    if (GET_PC_HEIGHT(i) > 200) {
-                        height = strdup("very tall");
-                    } else if (GET_PC_HEIGHT(i) > 180) {
-                        height = strdup("tall");
-                    } else if (GET_PC_HEIGHT(i) > 150) {
-                        height = strdup("average height");
-                    } else if (GET_PC_HEIGHT(i) > 120) {
-                        height = strdup("short");
-                    } else {
-                        height = strdup("very short");
-                    }
-                }
-                send_to_char(ch, "@wA %s %s %s", height, MAFE(i), LRACE(i));
-                if (height) {
-                    free(height);
-                }
-            } else if (GET_DISTFEA(i) == DISTFEA_WEIGHT) {
-                char *height;
-                auto w = i->getWeight();
-                if (IS_TRUFFLE(i)) {
-                    if (w > 35) {
-                        height = strdup("very heavy");
-                    } else if (w > 25) {
-                        height = strdup("heavy");
-                    } else if (w > 15) {
-                        height = strdup("average weight");
-                    } else {
-                        height = strdup("welterweight");
-                    }
-                } else {
-                    if (w > 120) {
-                        height = strdup("very heavy");
-                    } else if (w > 100) {
-                        height = strdup("heavy");
-                    } else if (w > 80) {
-                        height = strdup("average weight");
-                    } else if (w > 60) {
-                        height = strdup("lightweight");
-                    } else {
-                        height = strdup("welterweight");
-                    }
-                }
-                send_to_char(ch, "@wA %s %s %s", height, MAFE(i), LRACE(i));
-                if (height) {
-                    free(height);
-                }
-            }
+            send_to_char(ch, "@wA %s %s", MAFE(i), LRACE(i));
         } else {
             send_to_char(ch, "@wA disguised %s %s", MAFE(i), LRACE(i));
         }
@@ -2634,7 +2390,7 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
     }
     if (PLR_FLAGGED(i, PLR_AURALIGHT)) {
         char bloom[MAX_INPUT_LENGTH];
-        sprintf(bloom, "...is surrounded by a bright %s aura.@n", aura_types[GET_AURA(i)]);
+        sprintf(bloom, "...is surrounded by a bright %s aura.@n", GET_AURA(i));
         act(bloom, true, i, nullptr, ch, TO_VICT);
     }
 
@@ -2660,12 +2416,12 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         act("@w...$e has energy crackling around $s body!", true, i, nullptr, ch, TO_VICT);
     if (GET_CHARGE(i) && !IS_SAIYAN(i) && !IS_HALFBREED(i)) {
         char aura[MAX_INPUT_LENGTH];
-        sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
+        sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", GET_AURA(i));
         act(aura, true, i, nullptr, ch, TO_VICT);
     }
     if (!is_oozaru && GET_CHARGE(i) && !IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i))) {
         char aura[MAX_INPUT_LENGTH];
-        sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", aura_types[GET_AURA(i)]);
+        sprintf(aura, "@w...$e has a @Ybright@w %s aura around $s body!", GET_AURA(i));
         act(aura, true, i, nullptr, ch, TO_VICT);
     }
     if (i->form != Form::oozaru && !GET_CHARGE(i) && IS_TRANSFORMED(i) && (IS_SAIYAN(i) || IS_HALFBREED(i)))
@@ -2985,13 +2741,13 @@ void look_at_room(room_rnum target_room, struct char_data *ch, int ignore_brief)
 static void display_room_info(struct room_data *rm, struct char_data *ch);
 
 static void display_dimension_info(struct room_data *rm, struct char_data *ch) {
-    if (rm->room_flags.get(ROOM_NEO)) {
+    if (rm->where_flags.get(WhereFlag::neo_nirvana)) {
         send_to_char(ch, "@wPlanet: @WNeo Nirvana@n\r\n");
-    } else if (rm->room_flags.get(ROOM_AL)) {
+    } else if (rm->where_flags.get(WhereFlag::afterlife)) {
         send_to_char(ch, "@wDimension: @yA@Yf@yt@Ye@yr@Yl@yi@Yf@ye@n\r\n");
     } else if (rm->room_flags.get(ROOM_HELL)) {
         send_to_char(ch, "@wDimension: @RPunishment Hell@n\r\n");
-    } else if (rm->room_flags.get(ROOM_RHELL)) {
+    } else if (rm->where_flags.get(WhereFlag::afterlife_hell)) {
         send_to_char(ch, "@wDimension: @RH@re@Dl@Rl@n\r\n");
     }
 }
@@ -3003,7 +2759,7 @@ static void display_special_room_descriptions(struct room_data *rm, struct char_
     if (rm->room_flags.get(ROOM_AURA)) {
         send_to_char(ch, "@GAn aura of @gregeneration@G surrounds this area.@n\r\n");
     }
-    if (rm->room_flags.get(ROOM_HBTC)) {
+    if (rm->where_flags.get(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "@rThis room feels like it operates in a different time frame.@n\r\n");
     }
 }
@@ -3016,7 +2772,7 @@ static void display_room_info(struct room_data *rm, struct char_data *ch) {
     send_to_char(ch, "@wLocation: %-70s@n\r\n", rm->name);
 
     if (auto planet = getPlanet(ch->in_room); planet) {
-        send_to_char(ch, "@wPlanet: @G%s@n\r\n", getPlanetColorName(planet).c_str());
+        send_to_char(ch, "@wPlanet: @G%s@n\r\n", getPlanetColorName(planet.value()).c_str());
     } else {
         display_dimension_info(rm, ch);
     }
@@ -4116,11 +3872,11 @@ ACMD(do_score) {
         if (IS_ANDROID(ch)) {
             char model[100], version[100];
             int absorb = 0;
-            if (ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+            if (ch->subrace == SubRace::android_model_absorb) {
                 sprintf(model, "@CAbsorption");
-            } else if (ch->character_flags.get(CharacterFlag::android_model_repair)) {
+            } else if (ch->subrace == SubRace::android_model_repair) {
                 sprintf(model, "@GSelf Repairing");
-            } else if (ch->character_flags.get(CharacterFlag::android_model_sense)) {
+            } else if (ch->subrace == SubRace::android_model_sense) {
                 sprintf(model, "@RSensor Equiped");
             }
 
@@ -4284,8 +4040,6 @@ ACMD(do_status) {
 
     if (!*arg) {
         send_to_char(ch, "@D<@b------------------------@D[@YYour Status@D]@b-------------------------@D>@n\r\n\r\n");
-        send_to_char(ch, "            @D---------------@CAppearance@D---------------\n");
-        bringdesc(ch, ch);
         send_to_char(ch, "            @D---------------@RAppendages@D---------------\n");
 
         if (GET_LIMBCOND(ch, 0) >= 50 && !ch->character_flags.get(CharacterFlag::cyber_right_arm)) {
@@ -4413,9 +4167,7 @@ ACMD(do_status) {
         if (GET_VOICE(ch)) {
             send_to_char(ch, "         Your voice desc: '%s'\r\n", GET_VOICE(ch));
         }
-        if (GET_DISTFEA(ch) == DISTFEA_EYE) {
-            send_to_char(ch, "         Your eyes are your most distinctive feature.\r\n");
-        }
+
 
         if (GET_PREFERENCE(ch) == 0) {
             send_to_char(ch, "         You preferred a balanced form of fighting.\r\n");
@@ -4427,28 +4179,6 @@ ACMD(do_status) {
             send_to_char(ch, "         You preferred a body dominate form of fighting.\r\n");
         } else if (GET_PREFERENCE(ch) == PREFERENCE_THROWING) {
             send_to_char(ch, "         You preferred a throwing dominate form of fighting.\r\n");
-        }
-
-        if (GET_DISTFEA(ch) == DISTFEA_HAIR && !IS_DEMON(ch) && !IS_MAJIN(ch) && !IS_ICER(ch) && !IS_NAMEK(ch)) {
-            send_to_char(ch, "         Your hair is your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_DEMON(ch)) {
-            send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_MAJIN(ch)) {
-            send_to_char(ch, "         Your forelock is your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_ICER(ch)) {
-            send_to_char(ch, "         Your horns are your most distinctive feature.\r\n");
-        } else if (GET_DISTFEA(ch) == DISTFEA_HAIR && IS_NAMEK(ch)) {
-            send_to_char(ch, "         Your antennae are your most distinctive feature.\r\n");
-        }
-
-        if (GET_DISTFEA(ch) == DISTFEA_SKIN) {
-            send_to_char(ch, "         Your skin is your most distinctive feature.\r\n");
-        }
-        if (GET_DISTFEA(ch) == DISTFEA_HEIGHT) {
-            send_to_char(ch, "         Your height is your most distinctive feature.\r\n");
-        }
-        if (GET_DISTFEA(ch) == DISTFEA_WEIGHT) {
-            send_to_char(ch, "         Your weight is your most distinctive feature.\r\n");
         }
 
         if (GET_EQ(ch, WEAR_EYE)) {
@@ -4480,10 +4210,10 @@ ACMD(do_status) {
         if (IS_BIO(ch)) {
             send_to_char(ch, "         You have %d absorbs left.\r\n", GET_ABSORBS(ch));
         }
-        send_to_char(ch, "         You have %s colored aura.\r\n", aura_types[GET_AURA(ch)]);
+        send_to_char(ch, "         You have %s colored aura.\r\n", GET_AURA(ch));
 
         if (GET_LEVEL(ch) < 100) {
-            if ((IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
+            if ((IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb) || (!IS_ANDROID(ch) && !IS_BIO(ch) && !IS_MAJIN(ch))) {
                 send_to_char(ch, "         @R%s@n to SC a stat this level.\r\n", add_commas(ch->calc_soft_cap()).c_str());
             } else {
                 send_to_char(ch, "         @R%s@n in PL/KI/ST combined to SC this level.\r\n",
@@ -4549,48 +4279,18 @@ ACMD(do_status) {
             send_to_char(ch, "You are mimicing the general appearance of %s %s\r\n", AN(LRACE(ch)), LRACE(ch));
         }
         if (IS_MUTANT(ch)) {
-            send_to_char(ch, "Your Mutations:\r\n");
+            auto mutations = fmt::format("Your Mutations: {}\r\n", fmt::join(ch->mutations.getAll(), ", "));
+            // replace underscore with space
+            std::replace(mutations.begin(), mutations.end(), '_', ' ');
+            send_to_char(ch, "%s", mutations.c_str());
 
-            const char* mutations[] = {
-                "  Extreme Speed.\r\n",
-                "  Increased Cell Regeneration.\r\n",
-                "  Extreme Reflexes.\r\n",
-                "  Infravision.\r\n",
-                "  Natural Camo.\r\n",
-                "  Limb Regen.\r\n",
-                "  Poisonous (you can use the bite attack).\r\n",
-                "  Rubbery Body.\r\n",
-                "  Innate Telepathy.\r\n",
-                "  Natural Energy.\r\n"
-            };
-
-            for (auto g : ch->genome) {
-                if (g >= 1 && g <= 10) {
-                    send_to_char(ch, mutations[g - 1]);
-                }
-            }
         }
         if (IS_BIO(ch)) {
-            send_to_char(ch, "Your genes carry:\r\n");
-
-            const char* races[] = {
-                "Human",
-                "Saiyan",
-                "Namek",
-                "Icer",
-                "Tuffle",
-                "Arlian",
-                "Kai",
-                "Konatsu",
-                "???"
-            };
-
-            for (auto g : ch->genome) {
-                const char* race = (g >= 1 && g <= 8) ? races[g - 1] : races[8];
-                send_to_char(ch, "  %s DNA.\r\n", race);
-            }
+            
+            auto genes = fmt::format("Your genes carry: {} DNA.\r\n", fmt::join(ch->bio_genomes.getAll(), ","));
+            send_to_char(ch, "%s", genes.c_str());
         }
-        if (ch->genome.contains(11)) {
+        if (AFF_FLAGGED(ch, AFF_KYODAIKA)) {
             send_to_char(ch, "You have used kyodaika.\r\n");
         }
         if (PRF_FLAGGED(ch, PRF_NOPARRY)) {
@@ -5659,7 +5359,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
     struct obj_data *k;
     struct descriptor_data *d;
     int num = 0, num2 = 0, found = 0;
-    int planet;
+    std::optional<WhereFlag> planet;
 
     if (!*arg) {
         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
@@ -5671,7 +5371,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                 if (IN_ROOM(d->character) != NOWHERE) {
                     planet = getPlanet(d->character->in_room);
                 } else {
-                    planet = 0;
+                    planet = {};
                 }
                 i = (d->original ? d->original : d->character);
                 if (i && CAN_SEE(ch, i) && (IN_ROOM(i) != NOWHERE)) {
@@ -5680,7 +5380,7 @@ static void perform_immort_where(struct char_data *ch, char *arg) {
                                      GET_NAME(i), d->character->getRoomVnum(),
                                      d->character->getRoom()->name, GET_NAME(d->character));
                     else {
-                        std::string locName = getPlanetName(planet);
+                        std::string locName = getPlanetName(planet.value());
                         send_to_char(ch, "%-20s - [%5d]   %-14s %s\r\n", GET_NAME(i), i->getRoomVnum(),
                                      locName.c_str(), i->getRoom()->name);
                     }

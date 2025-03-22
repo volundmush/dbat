@@ -371,7 +371,7 @@ void do_start(struct char_data *ch) {
         punch = rand_number(10, 16);
         SET_SKILL(ch, SKILL_REGENERATE, punch);
     }
-    if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+    if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb) {
         punch = rand_number(25, 35);
         SET_SKILL(ch, SKILL_ABSORB, punch);
     }
@@ -481,7 +481,7 @@ void do_start(struct char_data *ch) {
         if(ch->get(c) < 90) ch->set(c, 100);
     }
 
-    if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_sense)) {
+    if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_sense) {
         SET_SKILL(ch, SKILL_SENSE, 100);
         ch->gainBasePL(rand_number(400, 500));
         ch->gainBaseST(rand_number(400, 500));

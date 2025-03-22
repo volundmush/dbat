@@ -21,7 +21,7 @@ namespace race {
     extern bool isPlayable(Race id);
     extern std::vector<Race> getAll();
     extern std::vector<Race> getPlayable();
-    extern std::unordered_set<int> getValidSexes(Race id);
+    extern std::unordered_set<Sex> getValidSexes(Race id);
     extern bool isValidMimic(Race id);
     extern bool isPeople(Race id);
     extern bool hasTail(Race id);
@@ -31,6 +31,7 @@ namespace race {
     extern bool isSenseable(Race id);
     extern int getSize(Race id);
     extern bool exists(Race id);
+    extern std::string defaultAppearance(char_data *ch, Appearance type);
 
     extern double getModifier(struct char_data *ch, int location, int specific);
     extern double getModifierExact(struct char_data *ch, int location, int specific);

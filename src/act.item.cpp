@@ -1157,10 +1157,10 @@ void loadDragonball(int vnum, int &foundFlag, bool &hunter1, bool &hunter2) {
 
         while (!load) {
             if (real_room(num) != NOWHERE) {
-                if (ROOM_FLAGGED(real_room(num), ROOM_EARTH) || ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                    ROOM_FLAGGED(real_room(num), ROOM_FRIGID) || ROOM_FLAGGED(real_room(num), ROOM_AETHER) ||
-                    ROOM_FLAGGED(real_room(num), ROOM_NAMEK) || ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                    ROOM_FLAGGED(real_room(num), ROOM_YARDRAT)) {
+                if (WHERE_FLAGGED(real_room(num), WhereFlag::planet_earth) || WHERE_FLAGGED(real_room(num), WhereFlag::planet_vegeta) ||
+                    WHERE_FLAGGED(real_room(num), WhereFlag::planet_frigid) || WHERE_FLAGGED(real_room(num), WhereFlag::planet_aether) ||
+                    WHERE_FLAGGED(real_room(num), WhereFlag::planet_namek) || WHERE_FLAGGED(real_room(num), WhereFlag::planet_konack) ||
+                    WHERE_FLAGGED(real_room(num), WhereFlag::planet_yardrat)) {
                     room = num;
                     load = true;
                 }
@@ -1241,11 +1241,11 @@ ACMD(do_auction) {
 
     two_arguments(argument, arg1, arg2);
 
-    if (ch->getRoomFlag(ROOM_HBTC)) {
+    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
-    if (ch->getRoomFlag(ROOM_PAST)) {
+    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "You are in the past!\r\n");
         return;
     }
@@ -1316,11 +1316,11 @@ ACMD(do_bid) {
         return;
     }
 
-    if (ch->getRoomFlag(ROOM_HBTC)) {
+    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
-    if (ch->getRoomFlag(ROOM_PAST)) {
+    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "This is the past, nothing is being auctioned!\r\n");
         return;
     }
@@ -1648,9 +1648,9 @@ static void auc_send_to_all(const char *messg, bool buyer) {
     for (i = descriptor_list; i; i = i->next) {
         if (STATE(i) != CON_PLAYING)
             continue;
-        if (i->character->getRoomFlag(ROOM_HBTC))
+        if (i->character->getWhereFlag(WhereFlag::hyperbolic_time_chamber))
             continue;
-        if (i->character->getRoomFlag(ROOM_PAST))
+        if (i->character->getWhereFlag(WhereFlag::pendulum_past))
             continue;
         if (buyer)
             act(messg, true, ch_buying, obj_selling, i->character, TO_VICT | TO_SLEEP);
@@ -1714,7 +1714,7 @@ ACMD(do_assemble) {
     } else if (!assemblyCheckComponents(lVnum, ch, false)) {
         send_to_char(ch, "You haven't got all the things you need.\r\n");
         return;
-    } else if (ch->getRoomFlag(ROOM_SPACE)) {
+    } else if (ch->getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "You can't do that in space.");
         return;
     } else if (!GET_SKILL(ch, SKILL_SURVIVAL) && !strcasecmp(arg2, "campfire")) {
@@ -1730,7 +1730,7 @@ ACMD(do_assemble) {
     }
 
     if (strcasecmp(arg2, "campfire")) {
-        if (ch->getRoomFlag(ROOM_SPACE) || ch->getLocationTileType() == SECT_WATER_NOSWIM || ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
+        if (ch->getWhereFlag(WhereFlag::space) || ch->getLocationTileType() == SECT_WATER_NOSWIM || ch->getLocationEnvironment(ENV_WATER) >= 100.0) {
             send_to_char(ch, "This area will not allow a fire to burn properly.\r\n");
             return;
         }
@@ -2352,7 +2352,7 @@ static int perform_drop(struct char_data *ch, struct obj_data *obj,
     }
     if (GET_OBJ_VNUM(obj) == 20 || GET_OBJ_VNUM(obj) == 21 || GET_OBJ_VNUM(obj) == 22 || GET_OBJ_VNUM(obj) == 23 ||
         GET_OBJ_VNUM(obj) == 24 || GET_OBJ_VNUM(obj) == 25 || GET_OBJ_VNUM(obj) == 26) {
-        if (ch->getRoomFlag(ROOM_SPACE)) {
+        if (ch->getWhereFlag(WhereFlag::space)) {
             snprintf(buf, sizeof(buf), "You can't %s $p in space!", sname);
             act(buf, false, ch, obj, nullptr, TO_CHAR);
             return (0);
@@ -2908,7 +2908,7 @@ ACMD(do_drink) {
         send_to_char(ch, "You are inside a healing tank!\r\n");
         return;
     }
-    if (GET_COND(ch, HUNGER) <= 1 && GET_COND(ch, THIRST) >= 2 && !IS_NAMEK(ch) && !ch->genome.contains(3)) {
+    if (GET_COND(ch, HUNGER) <= 1 && GET_COND(ch, THIRST) >= 2 && !IS_NAMEK(ch) && !ch->bio_genomes.get(Race::namekian)) {
         send_to_char(ch, "You need to eat first!\r\n");
         return;
     }
@@ -3083,7 +3083,7 @@ ACMD(do_drink) {
         send_to_char(ch, "You don't feel thirsty anymore.\r\n");
 
     if (GET_OBJ_VAL(temp, VAL_DRINKCON_POISON) &&
-        (!IS_MUTANT(ch) || (!ch->genome.contains(7)))) {    /* The crap was poisoned
+        !ch->mutations.get(Mutation::venomous)) {    /* The crap was poisoned
 ! */
         send_to_char(ch, "Oops, it tasted rather strange!\r\n");
         act("$n chokes and utters some strange sounds.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -3191,7 +3191,7 @@ ACMD(do_eat) {
 
     //Logic for food that will give PS or Exp
     if (GET_OBJ_VNUM(food) >= MEAL_START && GET_OBJ_VNUM(food) <= MEAL_LAST && 
-        (!ch->getRoomFlag(ROOM_AL) && !ch->getRoomFlag(ROOM_RHELL))) {
+        (!ch->getWhereFlag(WhereFlag::afterlife) && !ch->getWhereFlag(WhereFlag::afterlife_hell))) {
         if (subcmd != SCMD_TASTE) {
             int psbonus = GET_OBJ_VAL(food, VAL_FOOD_PSBONUS);
             int expbonus = GET_OBJ_VAL(food, VAL_FOOD_EXPBONUS) * ((GET_LEVEL(ch) * 0.4) + 1);

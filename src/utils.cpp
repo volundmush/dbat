@@ -1914,7 +1914,6 @@ bool is_sparring(struct char_data *ch) {
 }
 
 char *introd_calc(struct char_data *ch) {
-    char *sex, *race;
     static char intro[100];
 
     *intro = '\0';
@@ -1923,30 +1922,9 @@ char *introd_calc(struct char_data *ch) {
         return ("IAMERROR");
     }
 
-    if (IS_HALFBREED(ch)) {
-        if (RACIAL_PREF(ch) == 1) {
-            race = strdup("human");
-        } else if (RACIAL_PREF(ch) == 2) {
-            race = strdup("saiyan");
-        } else {
-            race = strdup(RACE(ch));
-        }
-        sex = strdup(MAFE(ch));
-    } else if (IS_ANDROID(ch)) {
-        if (RACIAL_PREF(ch) == 1) {
-            race = strdup("android");
-        } else if (RACIAL_PREF(ch) == 2) {
-            race = strdup("human");
-        } else if (RACIAL_PREF(ch) == 3) {
-            race = strdup("robotic-humanoid");
-        } else {
-            race = strdup(RACE(ch));
-        }
-        sex = strdup(MAFE(ch));
-    } else {
-        sex = strdup(MAFE(ch));
-        race = strdup(RACE(ch));
-    }
+    auto race = strdup(ch->getAppearanceStr(Appearance::seeming));
+    auto sex = strdup(MAFE(ch));
+
     sprintf(intro, "%s %s %s", AN(sex), sex, race);
     if (sex) {
         free(sex);
@@ -2057,7 +2035,7 @@ void improve_skill(struct char_data *ch, int skill, int num) {
         roll -= 100;
     }
 
-    if (IS_TRUFFLE(ch) || (IS_BIO(ch) && (ch->genome.contains(6)))) {
+    if (IS_TRUFFLE(ch) || ch->bio_genomes.get(Race::tuffle)) {
         roll *= 0.5;
     } else if (IS_MAJIN(ch)) {
         roll += roll * .3;
@@ -2261,21 +2239,6 @@ char *strlwr(char *s) {
 }
 
 
-/* Strips \r\n from end of string.  */
-void prune_crlf(char *txt) {
-    int i = strlen(txt) - 1;
-
-    while (txt[i] == '\n' || txt[i] == '\r')
-        txt[i--] = '\0';
-}
-
-/* log a death trap hit */
-void log_death_trap(struct char_data *ch) {
-    mudlog(BRF, ADMLVL_IMMORT, true, "%s hit death trap #%d (%s)", GET_NAME(ch), ch->getRoomVnum(),
-           ch->getRoom()->name);
-}
-
-
 /* New variable argument log() function.  Works the same as the old for
  * previously written code but is very nice for new code.  */
 void basic_mud_vlog(const char *format, va_list args) {
@@ -2392,34 +2355,6 @@ size_t sprinttype(int type, const char *names[], char *result, size_t reslen) {
     return strlcpy(result, *names[nr] != '\n' ? names[nr] : "UNDEFINED", reslen);
 }
 
-
-void sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, char *result) {
-    int nr, teller, found = false;
-
-    *result = '\0';
-
-    for (teller = 0; teller < maxar && !found; teller++)
-        for (nr = 0; nr < 32 && !found; nr++) {
-            if (IS_SET_AR(bitvector, (teller * 32) + nr)) {
-                if (*names[(teller * 32) + nr] != '\n') {
-                    if (*names[(teller * 32) + nr] != '\0') {
-
-                        strcat(result, names[(teller * 32) + nr]);
-
-                        strcat(result, " ");
-                    }
-                } else {
-
-                    strcat(result, "UNDEFINED ");
-                }
-            }
-            if (*names[(teller * 32) + nr] == '\n')
-                found = true;
-        }
-
-    if (!*result)
-        strcpy(result, "None ");
-}
 
 time_t mud_time_to_secs(struct time_info_data *now) {
     time_t when = 0;
@@ -3042,29 +2977,6 @@ int count_color_chars(char *string) {
     return num;
 }
 
-/* Trims leading and trailing spaces from string */
-void trim(char *s) {
-    // Trim spaces and tabs from beginning:
-    int i = 0, j;
-    while ((s[i] == ' ') || (s[i] == '\t')) {
-        i++;
-    }
-    if (i > 0) {
-        for (j = 0; j < strlen(s); j++) {
-            s[j] = s[j + i];
-        }
-        s[j] = '\0';
-    }
-
-    // Trim spaces and tabs from end:
-    i = strlen(s) - 1;
-    while ((s[i] == ' ') || (s[i] == '\t')) {
-        i--;
-    }
-    if (i < (strlen(s) - 1)) {
-        s[i + 1] = '\0';
-    }
-}
 
 /* Turns number into string and adds commas to it. */
 std::string add_commas(double X) {
@@ -3134,6 +3046,18 @@ bool ROOM_FLAGGED(room_vnum loc, int flag) {
         return room->room_flags.get(static_cast<RoomFlag>(flag));
     }
     return false;
+}
+
+bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag) {
+    if (auto room = get_room(loc); room) {
+        return room->where_flags.get(static_cast<WhereFlag>(flag));
+    }
+    return false;
+}
+
+bool WHERE_FLAGGED(struct room_data *loc, WhereFlag flag) {
+    if(!loc) return false;
+    return loc->where_flags.get(flag);
 }
 
 bool ROOM_FLAGGED(struct room_data *loc, int flag) {

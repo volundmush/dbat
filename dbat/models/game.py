@@ -282,3 +282,32 @@ class CharData(ThingData):
     admin_flags: typing.Set[names.AdminFlag] = Field(default_factory=set)
     mob_specials: MobSpecialData = Field(default_factory=MobSpecialData)
     transforms: typing.Dict[names.Form, TransData] = Field(default_factory=dict)
+
+class ChargenData(BaseModel):
+    name: str | None = None
+    race: names.Race | None = None
+    subrace: names.Subrace | None = None
+    sex: names.Sex | None = None
+    sensei: names.Sensei | None = None
+    mutations: typing.Set[names.Mutation] | None = None
+    bio_genomes: typing.Set[names.BioGenome] | None = None
+    keep_skills: bool | None = None
+    
+    def check(self) -> bool:
+        if self.name is None:
+            raise ValueError("Name is required.")
+        if self.race is None:
+            raise ValueError("Race is required.")
+        if self.race == "android" and self.subrace is None:
+            raise ValueError("Subrace is required.")
+        if self.sex is None:
+            raise ValueError("Sex is required.")
+        if self.sensei is None:
+            raise ValueError("Sensei is required.")
+        if self.race == "mutant" and (self.mutations is None or len(self.mutations) != 2):
+            raise ValueError("Mutations is required.")
+        if self.race == "bio_android" and (self.bio_genomes is None or len(self.bio_genomes) != 2):
+            raise ValueError("Bio Genomes is required.")
+        if self.keep_skills is None:
+            raise ValueError("Keep Skills is required.")
+        return True

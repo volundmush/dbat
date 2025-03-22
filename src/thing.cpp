@@ -72,6 +72,23 @@ bool thing_data::getRoomFlag(int flag) const {
     return false;
 }
 
+void thing_data::setWhereFlag(WhereFlag flag, bool value) const {
+    if(room)
+        room->where_flags.set(flag, value);
+}
+
+bool thing_data::toggleWhereFlag(WhereFlag flag) const {
+    if(room)
+        return room->where_flags.toggle(flag);
+    return false;
+}
+
+bool thing_data::getWhereFlag(WhereFlag flag) const {
+    if(room)
+        return room->where_flags.get(flag);
+    return false;
+}
+
 void thing_data::broadcastAtLocation(const std::string& message) const {
     if(room)
         send_to_room(room, message);

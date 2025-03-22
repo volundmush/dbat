@@ -1150,6 +1150,7 @@ void to_json(json& j, const trans_data& t) {
     j["grade"] = t.grade;
     if(!t.vars.empty()) j["vars"] = t.vars;
     if(t.description && strlen(t.description)) j["description"] = t.description;
+    if(!t.appearances.empty()) j["appearances"] = t.appearances;
 }
 
 void from_json(const json& j, trans_data& t) {
@@ -1163,6 +1164,7 @@ void from_json(const json& j, trans_data& t) {
         if(t.description) free(t.description);
         t.description = strdup(j["description"].get<std::string>().c_str());
     }
+    if(j.contains("appearances")) t.appearances = j["appearances"];
 }
 
 void to_json(json& j, const affected_type& a) {
@@ -1182,6 +1184,7 @@ void from_json(const json& j, affected_type& a) {
 void to_json(json& j, const char_data& c) {
     to_json(j, static_cast<const thing_data&>(c));
 
+    j["sex"] = c.sex;
     if(!c.trains.empty()) j["trains"] = c.trains;
     if(!c.attributes.empty()) j["attributes"] = c.attributes;
     if(!c.moneys.empty()) j["moneys"] = c.moneys;
@@ -1289,7 +1292,8 @@ void to_json(json& j, const char_data& c) {
         if(c.damage_mod) j["damage_mod"] = c.damage_mod;
         if(c.droom) j["droom"] = c.droom;
         if(c.accuracy_mod) j["accuracy_mod"] = c.accuracy_mod;
-        for(auto i : c.genome) j["genome"].push_back(i);
+        if(c.mutations) j["mutations"] = c.mutations;
+        if(c.bio_genomes) j["bio_genomes"] = c.bio_genomes;
         if(c.gauntlet) j["gauntlet"] = c.gauntlet;
         if(c.ingestLearned) j["ingestLearned"] = c.ingestLearned;
         if(c.kaioken) j["kaioken"] = c.kaioken;
@@ -1360,6 +1364,7 @@ void to_json(json& j, const char_data& c) {
 void from_json(const json& j, char_data& c) {
     from_json(j, static_cast<thing_data&>(c));
 
+    if(j.contains("sex")) c.sex = j["sex"];
     if(j.contains("trains")) c.trains = j["trains"];
     if(j.contains("attributes")) c.attributes = j["attributes"];
     if(j.contains("moneys")) c.moneys = j["moneys"];
@@ -1470,11 +1475,8 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("damage_mod")) c.damage_mod = j["damage_mod"];
         if(j.contains("droom")) c.droom = j["droom"];
         if(j.contains("accuracy_mod")) c.accuracy_mod = j["accuracy_mod"];
-        if(j.contains("genome")) {
-            for(auto &i : j["genome"]) {
-                c.genome.insert(i.get<int>());
-            }
-        }
+        if(j.contains("bio_genomes")) c.bio_genomes = j["bio_genomes"];
+        if(j.contains("mutations")) c.mutations = j["mutations"];
         if(j.contains("gauntlet")) c.gauntlet = j["gauntlet"];
         if(j.contains("ingestLearned")) c.ingestLearned = j["ingestLearned"];
         if(j.contains("kaioken")) c.kaioken = j["kaioken"];

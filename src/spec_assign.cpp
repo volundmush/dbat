@@ -87,9 +87,4 @@ void assign_rooms() {
     ASSIGNROOM(85, auction);
     ASSIGNROOM(86, auction);
     /* Gauntlet rooms track how far a player progressed into zone  Jamdog - 13th Feb 2006 */
-
-    if (CONFIG_DTS_ARE_DUMPS)
-        for (auto &[vn, r] : world)
-            if (ROOM_FLAGGED(r.get(), ROOM_DEATH))
-                r->func = dump;
 }

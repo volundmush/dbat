@@ -366,6 +366,7 @@ ACMD(do_rpp) {
                                  "Change your aura to what? (white, blue, red, green, pink, purple, yellow, black, orange)");
                     return;
                 }
+                /*
                 appearance_t newAura = 0;
                 if (!strcasecmp(arg2, "white")) {
                     newAura = 0;
@@ -398,7 +399,8 @@ ACMD(do_rpp) {
                     send_to_char(ch, "That is not an acceptable option for changing alignment.\r\n");
                     return;
                 }
-                ch->set(CharAppearance::aura, newAura);
+                //ch->set(CharAppearance::aura, newAura);
+                */
 
             } /* Can pay for it */
         } /* End Simple Aura Change */
@@ -1641,7 +1643,7 @@ void trainProgress(char_data* ch) {
     if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         plus *= 4;
     }
-    if (ch->getRoomFlag(ROOM_HBTC)) {
+    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         plus *= 3;
     }
     if (GET_BONUS(ch, BONUS_HARDWORKER)) {
@@ -3910,7 +3912,7 @@ ACMD(do_recharge) {
         return;
     }
 
-    if (!ch->character_flags.get(CharacterFlag::android_model_repair)) {
+    if (ch->subrace != SubRace::android_model_repair) {
         send_to_char(ch, "You are not a repair model android.\r\n");
         return;
     } else {
@@ -3955,7 +3957,7 @@ ACMD(do_srepair) {
         return;
     }
 
-    if (!IS_NPC(ch) && !ch->character_flags.get(CharacterFlag::android_model_repair)) {
+    if (!IS_NPC(ch) && ch->subrace != SubRace::android_model_repair) {
         send_to_char(ch, "You are not a repair model android.\r\n");
         return;
     } else {
@@ -4026,7 +4028,7 @@ ACMD(do_upgrade) {
     }
 
     if (!*arg) {
-        if (!ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+        if (ch->subrace != SubRace::android_model_absorb) {
             send_to_char(ch, "@c--------@D[@rUpgrade Menu@D]@c--------\r\n"
                              "@cUpgrade @RPowerlevel@D: @Y75 @WPoints\r\n"
                              "@cUpgrade @CKi        @D: @Y40 @WPoints\r\n"
@@ -4118,7 +4120,7 @@ ACMD(do_upgrade) {
         }
     }
 
-    if (ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+    if (ch->subrace == SubRace::android_model_absorb) {
         send_to_char(ch, "You are an absorb model and can only upgrade with augmentation kits.\r\n");
         return;
     }
@@ -4356,7 +4358,7 @@ ACMD(do_ingest) {
                          add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
             if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "You get %s's eye color.\r\n", GET_NAME(vict));
-                ch->set(CharAppearance::eye_color, GET_EYE(vict));
+                //ch->set(CharAppearance::eye_color, GET_EYE(vict));
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your height.\r\n", GET_NAME(vict));
                 if (GET_PC_HEIGHT(ch) > GET_PC_HEIGHT(vict)) {
@@ -4379,7 +4381,7 @@ ACMD(do_ingest) {
                 }
             } else {
                 send_to_char(ch, "Your forelock length changes because of %s.\r\n", GET_NAME(vict));
-                ch->set(CharAppearance::hair_length, GET_HAIRL(vict));
+                //ch->set(CharAppearance::hair_length, GET_HAIRL(vict));
             }
             handle_ingest_learn(ch, vict);
             die(vict, nullptr);
@@ -4475,7 +4477,7 @@ ACMD(do_absorb) {
 
     if (IS_ANDROID(ch)) {
         if (!IS_NPC(ch)) {
-            if (!ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+            if (ch->subrace != SubRace::android_model_absorb) {
                 send_to_char(ch, "You are not an absorbtion model.\r\n");
                 return;
             }
@@ -5981,7 +5983,7 @@ ACMD(do_focus) {
                 if (IS_NPC(vict)) {
                     set_fighting(vict, ch);
                 }
-                if (IS_MUTANT(vict) && vict->genome.contains(7)) {
+                if (vict->mutations.get(Mutation::venomous)) {
                     act("However $N seems unaffected by the poison.", true, ch, nullptr, vict, TO_CHAR);
                     act("Your natural immunity to poison prevents it from affecting you.", true, ch, nullptr, vict,
                         TO_VICT);
@@ -6893,7 +6895,7 @@ ACMD(do_instant) {
     }
     if (!know_skill(ch, SKILL_INSTANTT)) {
         return;
-    } else if (!GET_SKILL(ch, SKILL_SENSE) && !ch->character_flags.get(CharacterFlag::android_model_sense)) {
+    } else if (!GET_SKILL(ch, SKILL_SENSE) && ch->subrace != SubRace::android_model_sense) {
         send_to_char(ch, "You can't sense them to go to there!\r\n");
         return;
     } else if (PLR_FLAGGED(ch, PLR_PILOTING)) {
@@ -6905,7 +6907,7 @@ ACMD(do_instant) {
     } else if (ch->getRoomVnum() >= 19800 && ch->getRoomVnum() <= 19899) {
         send_to_char(ch, "@rYou are in a pocket dimension!@n\r\n");
         return;
-    } else if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL) ||
+    } else if (ch->getWhereFlag(WhereFlag::afterlife_hell) || ch->getWhereFlag(WhereFlag::afterlife) ||
                ch->getRoomFlag(ROOM_HELL)) {
         send_to_char(ch, "You can not leave where you are at!\r\n");
         return;
@@ -6996,10 +6998,10 @@ ACMD(do_instant) {
         } else if (IS_ANDROID(tar) || GET_HIT(tar) < (GET_HIT(ch) * 0.001) + 1) {
             send_to_char(ch, "You can't sense them well enough.\r\n");
             return;
-        } else if (!ch->getRoomFlag(ROOM_AL) && tar->getRoomFlag(ROOM_AL)) {
+        } else if (!ch->getWhereFlag(WhereFlag::afterlife) && tar->getWhereFlag(WhereFlag::afterlife)) {
             send_to_char(ch, "They are dead and can't be reached.\r\n");
             return;
-        } else if (!ch->getRoomFlag(ROOM_RHELL) && tar->getRoomFlag(ROOM_RHELL)) {
+        } else if (!ch->getWhereFlag(WhereFlag::afterlife_hell) && tar->getWhereFlag(WhereFlag::afterlife_hell)) {
             send_to_char(ch, "They are dead and can't be reached.\r\n");
             return;
         } else if (tar->getRoomFlag(ROOM_NOINSTANT)) {
@@ -7087,11 +7089,11 @@ void handleShenronAppearance(int &DRAGONC) {
     switch (DRAGONC) {
         case 300:
             send_to_room(real_room(DRAGONR), "@WThe dragon balls on the ground begin to glow yellow in slow pulses.@n\r\n");
-            send_to_planet(0, ROOM_EARTH, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
+            send_to_planet(0, WhereFlag::planet_earth, "@DThe sky begins to grow dark and cloudy suddenly.@n\r\n");
             break;
         case 295:
             send_to_room(real_room(DRAGONR), "@WSuddenly lightning shoots into the sky, twisting about as a roar can be heard for miles!@n\r\n");
-            send_to_planet(0, ROOM_EARTH, "@DThe sky flashes with lightning.@n\r\n");
+            send_to_planet(0, WhereFlag::planet_earth, "@DThe sky flashes with lightning.@n\r\n");
             break;
         case 290:
             send_to_room(real_room(DRAGONR), "@WThe lightning takes shape and slowly the Eternal Dragon, Shenron, can be made out from the glow!@n\r\n");
@@ -7099,7 +7101,7 @@ void handleShenronAppearance(int &DRAGONC) {
             char_to_room(EDRAGON, real_room(DRAGONR));
             break;
         case 285:
-            send_to_planet(0, ROOM_EARTH, "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
+            send_to_planet(0, WhereFlag::planet_earth, "@DThe lightning stops suddenly, but the sky remains mostly dark.@n\r\n");
             break;
         case 280:
             send_to_room(real_room(DRAGONR), "@WThe glow around Shenron becomes subdued as the Eternal Dragon coils so that his head is looking down on the dragon balls!@n\r\n");
@@ -7118,7 +7120,7 @@ void handleShenronAppearance(int &DRAGONC) {
             break;
         case 0:
             send_to_room(real_room(DRAGONR), "Shenron growls and disappears with a blinding flash that is absorbed into the dragon balls. The glowing dragon balls then float high into the sky, splitting into several directions and streaking across the sky!@n\r\n");
-            send_to_planet(0, ROOM_EARTH, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
+            send_to_planet(0, WhereFlag::planet_earth, "@DThe sky grows brighter again as the clouds disappear magicly.@n\r\n");
             extract_char(EDRAGON);
             SHENRON = false;
             save_mud_time(&time_info);
@@ -7129,13 +7131,13 @@ void handleShenronAppearance(int &DRAGONC) {
 
 bool placeShadowDragon(int &location) {
     int num = rand_number(200, 20000);
-    while (real_room(num) == NOWHERE || !(ROOM_FLAGGED(real_room(num), ROOM_EARTH) ||
-                                          ROOM_FLAGGED(real_room(num), ROOM_VEGETA) ||
-                                          ROOM_FLAGGED(real_room(num), ROOM_FRIGID) ||
-                                          ROOM_FLAGGED(real_room(num), ROOM_AETHER) ||
-                                          ROOM_FLAGGED(real_room(num), ROOM_NAMEK) ||
-                                          ROOM_FLAGGED(real_room(num), ROOM_KONACK) ||
-                                          ROOM_FLAGGED(real_room(num), ROOM_YARDRAT))) {
+    while (real_room(num) == NOWHERE || !(WHERE_FLAGGED(real_room(num), WhereFlag::planet_earth) ||
+                                            WHERE_FLAGGED(real_room(num), WhereFlag::planet_vegeta) ||
+                                            WHERE_FLAGGED(real_room(num), WhereFlag::planet_frigid) ||
+                                            WHERE_FLAGGED(real_room(num), WhereFlag::planet_aether) ||
+                                            WHERE_FLAGGED(real_room(num), WhereFlag::planet_namek) ||
+                                            WHERE_FLAGGED(real_room(num), WhereFlag::planet_konack) ||
+                                            WHERE_FLAGGED(real_room(num), WhereFlag::planet_yardrat))) {
         num = rand_number(200, 20000);
     }
     location = num;
@@ -7211,7 +7213,7 @@ void wishSYS(uint64_t heartPulse, double deltaTime) {
 ACMD(do_summon) {
     auto room = ch->getRoom();
 
-    if (!room->room_flags.get(ROOM_EARTH)) {
+    if (!room->where_flags.get(WhereFlag::planet_earth)) {
         send_to_char(ch, "@wYou can not summon Shenron when you are not on earth.@n\r\n");
         return;
     }
@@ -7528,7 +7530,7 @@ void situpProgress(char_data* ch) {
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
-    if (ch->getRoomFlag(ROOM_HBTC)) {
+    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 8;
         if(bonus <= 10) bonus = 10;
@@ -7789,7 +7791,7 @@ void meditateProgress(char_data* ch) {
     if(bonus <= 0) bonus = 0;
 
 
-    if (ch->getRoomFlag(ROOM_HBTC)) {
+    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         if(bonus <= 0) bonus = 10;
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 5;
@@ -7807,7 +7809,7 @@ void meditateProgress(char_data* ch) {
     } else {
         if(bonus <= 0) bonus = 1;
     }
-    if (bonus <= 0 && !ch->getRoomFlag(ROOM_HBTC)) {
+    if (bonus <= 0 && !ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         bonus = 1;
     }
     if (bonus <= 1 && ch->getRoomFlag(ROOM_WORKOUT)) {
@@ -8003,7 +8005,7 @@ void pushupProgress(char_data* ch) {
     bonus = (start_bonus * ratio_bonus) * diminishing_returns;
     if(bonus <= 0) bonus = 0;
 
-    if (ch->getRoomFlag(ROOM_HBTC)) {
+    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "@rThis place feels like it operates on a different time frame, it feels great...@n\r\n");
         bonus *= 5;
         if(bonus <= 6) bonus = 6;
@@ -8286,7 +8288,7 @@ ACMD(do_snet) {
     struct obj_data *obj = nullptr;
     struct obj_data *obj2 = nullptr;
 
-    if (ch->getRoomFlag(ROOM_HBTC)) {
+    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
@@ -8294,7 +8296,7 @@ ACMD(do_snet) {
         send_to_char(ch, "Lol, no.\r\n");
         return;
     }
-    if (ch->getRoomFlag(ROOM_PAST)) {
+    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "This is the past, you can't talk on scouter net!\r\n");
         return;
     }
@@ -8374,18 +8376,18 @@ ACMD(do_snet) {
             if (IN_ROOM(i->character) == IN_ROOM(ch)) {
                 continue;
             }
-            if (i->character->getRoomFlag(ROOM_HBTC)) {
+            if (i->character->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
                 continue;
             }
-            if (i->character->getRoomFlag(ROOM_PAST)) {
+            if (i->character->getWhereFlag(WhereFlag::pendulum_past)) {
                 continue;
             }
-            if ((i->character->getRoomFlag(ROOM_RHELL) && !ch->getRoomFlag(ROOM_RHELL)) ||
-                (i->character->getRoomFlag(ROOM_AL) && !ch->getRoomFlag(ROOM_AL))) {
+            if ((i->character->getWhereFlag(WhereFlag::afterlife_hell) && !ch->getWhereFlag(WhereFlag::afterlife_hell)) ||
+                (i->character->getWhereFlag(WhereFlag::afterlife) && !ch->getWhereFlag(WhereFlag::afterlife))) {
                 continue;
             }
-            if ((!i->character->getRoomFlag(ROOM_RHELL) && ch->getRoomFlag(ROOM_RHELL)) ||
-                (!i->character->getRoomFlag(ROOM_AL) && ch->getRoomFlag(ROOM_AL))) {
+            if ((!i->character->getWhereFlag(WhereFlag::afterlife_hell) && ch->getWhereFlag(WhereFlag::afterlife_hell)) ||
+                (!i->character->getWhereFlag(WhereFlag::afterlife) && ch->getWhereFlag(WhereFlag::afterlife))) {
                 continue;
             }
             if (GET_POS(i->character) == POS_SLEEPING) {
@@ -8470,7 +8472,7 @@ ACMD(do_snet) {
                 char over[MAX_STRING_LENGTH];
                 snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s %s@W'@n\r\n", CAP(arg), !*arg2 ? "" : arg2);
                 act(over, true, ch, nullptr, nullptr, TO_ROOM);
-                if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL)) {
+                if (ch->getWhereFlag(WhereFlag::afterlife_hell) || ch->getWhereFlag(WhereFlag::afterlife)) {
                     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
                 }
             }
@@ -8485,7 +8487,7 @@ ACMD(do_snet) {
                 char over[MAX_STRING_LENGTH];
                 snprintf(over, sizeof(over), "@C$n@W says into $s scouter, '@G@G%s@W'@n\r\n", !*arg2 ? "" : CAP(arg2));
                 act(over, true, ch, nullptr, nullptr, TO_ROOM);
-                if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL)) {
+                if (ch->getWhereFlag(WhereFlag::afterlife_hell) || ch->getWhereFlag(WhereFlag::afterlife)) {
                     send_to_char(ch, "@mThe transmission only reaches those who are in the afterlife.@n\r\n");
                 }
             }
@@ -8695,7 +8697,7 @@ ACMD(do_quit) {
     if (IS_NPC(ch) || !ch->desc)
         return;
 
-    if (ch->getRoomFlag(ROOM_PAST)) {
+    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "This is the past, you can't quit here!\r\n");
         return;
     }
@@ -8755,14 +8757,14 @@ ACMD(do_quit) {
      */
 
         /* If someone is quitting in their house, let them load back here. */
-        if (!ch->getRoomFlag(ROOM_PAST) &&
+        if (!ch->getWhereFlag(WhereFlag::pendulum_past) &&
             (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899)) {
             if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
                 ch->getRoomVnum() != 1) {
                 GET_LOADROOM(ch) = ch->getRoomVnum();
             }
         }
-        if (ch->getRoomFlag(ROOM_PAST)) {
+        if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
             if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
                 ch->getRoomVnum() != 1) {
                 GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1561));
@@ -11346,10 +11348,10 @@ ACMD(do_aura) {
             ch->decCurKIPercent(.12);
             send_to_char(ch,
                          "A bright %s aura begins to burn around you as you provide light to the surrounding area!\r\n",
-                         aura_types[GET_AURA(ch)]);
+                         GET_AURA(ch));
             char bloom[MAX_INPUT_LENGTH];
             sprintf(bloom, "@wA %s aura flashes up brightly around $n@w as they provide light to the area.@n",
-                    aura_types[GET_AURA(ch)]);
+                GET_AURA(ch));
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
             ch->player_flags.set(PLR_AURALIGHT, true);
             characterSubscriptions.subscribe("auralight", ch);
@@ -11364,19 +11366,19 @@ ACMD(do_aura) {
 
 void genGender(char_data* ch, std::string suggestedGender) {
     if(is_abbrev(suggestedGender.c_str(), "male")) {
-        ch->set(CharAppearance::sex, SEX_MALE);
+        ch->sex = Sex::male;
         send_to_char(ch, "Gender set to Male.\r\n");
         return;
     }
 
     if(is_abbrev(suggestedGender.c_str(), "female")) {
-        ch->set(CharAppearance::sex, SEX_FEMALE);
+        ch->sex = Sex::female;
         send_to_char(ch, "Gender set to Female.\r\n");
         return;
     }
 
     if(is_abbrev(suggestedGender.c_str(), "neutral") || is_abbrev(suggestedGender.c_str(), "androgynous")) {
-        ch->set(CharAppearance::sex, SEX_NEUTRAL);
+        ch->sex = Sex::neutral;
         send_to_char(ch, "Gender set to Androgynous.\r\n");
         return;
     }
@@ -11414,10 +11416,6 @@ void genRace(char_data* ch, std::string suggestedRace) {
     if (!chosen_race) {
         send_to_char(ch,"\r\nThat's not a race.\r\n");
         return;
-    } else if(currentRace == Race::bio_android || currentRace == Race::mutant) {
-        ch->genome.clear();
-    } else if(currentRace == Race::halfbreed || currentRace == Race::android) {
-        ch->set(CharNum::racial_preference, 0);
     }
 
     ch->race = chosen_race.value();
@@ -11428,652 +11426,9 @@ void genRace(char_data* ch, std::string suggestedRace) {
         ch->sensei = Sensei::commoner;
     }
 
-    ch->set(CharAppearance::hair_style , -1);
-    ch->set(CharAppearance::hair_color, -1);
 
 }
 
-void genRaceExtra(char_data* ch, std::string arg){
-    if(!(ch->race == Race::halfbreed || ch->race == Race::android || ch->race == Race::bio_android || ch->race == Race::mutant)) {
-        send_to_char(ch,"\r\nYou don't need to do this step.\r\n");
-        return;
-    }
-
-    if(ch->race == Race::halfbreed) {
-        if(is_abbrev(arg.c_str(), "human") || arg == "1") {
-            send_to_char(ch,"\r\nSet to Human.\r\n");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-
-        if(is_abbrev(arg.c_str(), "saiyan") || arg == "2") {
-            send_to_char(ch,"\r\nSet to Saiyan.\r\n");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        
-        send_to_char(ch,"\r\nWhat do you prefer to present yourself as?\r\n");
-        send_to_char(ch,"1 - Human\r\n");
-        send_to_char(ch,"2 - Saiyan\r\n");
-        return;
-    }
-
-
-    if(ch->race == Race::android) {
-        if(is_abbrev(arg.c_str(), "android") || arg == "1") {
-            send_to_char(ch,"\r\nSet to Android.\r\n");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-
-        if(is_abbrev(arg.c_str(), "human") || arg == "2") {
-            send_to_char(ch,"\r\nSet to Human.\r\n");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-
-        if(is_abbrev(arg.c_str(), "robotic humanoid") || arg == "3") {
-            send_to_char(ch,"\r\nSet to Robotic Humanoid.\r\n");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        
-        send_to_char(ch,"\r\nWhat type would you rather be?\r\n");
-        send_to_char(ch,"1 - Android\r\n");
-        send_to_char(ch,"2 - Human\r\n");
-        send_to_char(ch,"2 - Robotic Humanoid\r\n");
-        return;
-    }
-
-
-    if(ch->race == Race::bio_android) {
-        bool second = false;
-        if(!ch->genome.empty()) second = true;
-        if(second && ch->genome.contains(atoi(arg.c_str()))) {
-            send_to_char(ch, "You can't choose the same thing for both genomes!\r\n");
-            return;
-        }
-
-        if(is_abbrev(arg.c_str(), "human") || arg == "1") {
-            send_to_char(ch,"\r\nSet %s genome to Human.\r\n", second ? "second" : "first");
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "saiyan") || arg == "2") {
-            send_to_char(ch,"\r\nSet %s genome to Saiyan.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "namekian") || arg == "3") {
-            send_to_char(ch,"\r\nSet %s genome to Namekian.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "icer") || arg == "4") {
-            send_to_char(ch,"\r\nSet %s genome to Icer.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "tuffle") || arg == "5") {
-            send_to_char(ch,"\r\nSet %s genome to Tuffle.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "arlian") || arg == "6") {
-            send_to_char(ch,"\r\nSet %s genome to Arlian.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "kai") || arg == "7") {
-            send_to_char(ch,"\r\nSet %s genome to Kai.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "konatsu") || arg == "8") {
-            send_to_char(ch,"\r\nSet %s genome to Konatsu.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "clear") || arg == "8") {
-            send_to_char(ch,"\r\nChoices reset.\r\n");
-            ch->genome.clear();
-            return;
-        }
-        
-        
-        send_to_char(ch, "\n@RSelect two genomes to be your primary DNA strains.\n\n");
-        send_to_char(ch, "@B1@W) @CHuman   @c- @CHigher PS gains from fighting@n\n");
-        send_to_char(ch, "@B2@W) @CSaiyan  @c- @CSaiyan fight gains (halved)@n\n");
-        send_to_char(ch, "@B3@W) @CNamek   @c- @CStretchy arms that allow greater reach@n\n");
-        send_to_char(ch, "@B4@W) @CIcer    @c- @C+20%% damage for Tier 4 attacks@n\n");
-        send_to_char(ch, "@B5@W) @CTuffle  @c- @CGrant Tuffle Auto-train bonus@n\n");
-        send_to_char(ch, "@B6@W) @CArlian  @c- @CGrants Arlian Adrenaline ability@n\n\n");
-        send_to_char(ch, "@B7@W) @CKai     @c- @CStart with SLVL 30 Telepathy and SLVL 30 Focus.\r\n");
-        send_to_char(ch, "@B8@w) @CKonatsu @c- @C40%% higher chance to multihit on physical attacks.\r\n");
-        send_to_char(ch, "(Use 'chargen raceextra <num>' twice, or 'chargen raceextra clear' to reset your choices)\r\n");
-
-        if (ch->genome.size() > 0) {
-            std::vector<std::string> genomes;
-            for(auto g : ch->genome) genomes.push_back(std::to_string(g));
-            send_to_char(ch, fmt::format("\r\nYour current choices are: {}\r\n", fmt::join(genomes, " and ")));
-        }
-        return;
-    }
-
-
-    if(ch->race == Race::mutant) {
-        bool second = false;
-        if(!ch->genome.empty() > 0) second = true;
-        if(second && ch->genome.contains(atoi(arg.c_str()))) {
-            send_to_char(ch, "You can't choose the same thing for both genomes!\r\n");
-            return;
-        }
-
-        if(is_abbrev(arg.c_str(), "extreme speed") || arg == "1") {
-            send_to_char(ch,"\r\nSet %s mutation to Extreme Speed.\r\n", second ? "second" : "first");
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "inc. cell regen") || arg == "2") {
-            send_to_char(ch,"\r\nSet %s mutation to Inc. Cell Regen.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "extreme reflexes") || arg == "3") {
-            send_to_char(ch,"\r\nSet %s mutation to Extreme Reflexes.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "infravision") || arg == "4") {
-            send_to_char(ch,"\r\nSet %s mutation to Infravision.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "natural camo") || arg == "5") {
-            send_to_char(ch,"\r\nSet %s mutation to Natural Camo.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "limb regen") || arg == "6") {
-            send_to_char(ch,"\r\nSet %s mutation to Limb Regen.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "poisonous") || arg == "7") {
-            send_to_char(ch,"\r\nSet %s mutation to Poisonous.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "rubbery body") || arg == "8") {
-            send_to_char(ch,"\r\nSet %s mutation to Rubbery Body.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "telepathy") || arg == "9") {
-            send_to_char(ch,"\r\nSet %s mutation to Innate Telepathy.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "natural energy") || arg == "10") {
-            send_to_char(ch,"\r\nSet %s mutation to Natural Energy.\r\n", second ? "second" : "first");
-            ch->set(CharNum::racial_preference, 1);
-            return;
-        }
-        if(is_abbrev(arg.c_str(), "clear") || arg == "8") {
-            send_to_char(ch,"\r\nChoices reset.\r\n");
-            ch->genome.clear();
-            return;
-        }
-        
-        
-        send_to_char(ch, "\n@RSelect two mutations:@n\n\n");
-        send_to_char(ch, "@B 1@W) @CExtreme Speed       @c-+30%% to Speed Index @C@n\n");
-        send_to_char(ch, "@B 2@W) @CInc. Cell Regen     @c-LF regen refills 12%% instead of 5%%@C@n\n");
-        send_to_char(ch, "@B 3@W) @CExtreme Reflexes    @c-+10 to parry, block, and dodge. +10 agility at creation.@C@n\n");
-        send_to_char(ch, "@B 4@W) @CInfravision         @c-+5 to spot hiding, can see in dark @C@n\n");
-        send_to_char(ch, "@B 5@W) @CNatural Camo        @c-+10 to hide/sneak rolls@C@n\n");
-        send_to_char(ch, "@B 6@W) @CLimb Regen          @c-Limbs regen almost instantly.@C@n\n");
-        send_to_char(ch, "@B 7@W) @CPoisonous           @c-Immune to poison, poison bite attack.@C@n\n");
-        send_to_char(ch, "@B 8@W) @CRubbery Body        @c-10%% of physical dmg to you is reduced and attacker takes that much loss in stamina.@C@n\n");
-        send_to_char(ch, "@B 9@w) @CInnate Telepathy    @c-Start with telepathy at SLVL 50@n\n");
-        send_to_char(ch, "@B10@w) @CNatural Energy      @c-Get 5%% of your ki damage refunded back into your current ki total.@n\n");
-        send_to_char(ch, "(Use 'chargen raceextra <num>' twice, or 'chargen raceextra clear' to reset your choices)\r\n");
-
-        if (!ch->genome.empty()) {
-            std::vector<std::string> genomes;
-            for(auto g : ch->genome) genomes.push_back(std::to_string(g));
-            send_to_char(ch, fmt::format("\r\nYour current choice is: %s\r\n", fmt::join(genomes, " and ")));
-        }
-        return;
-    }
-
-}
-
-std::vector<Sensei> valid_classes(char_data* ch) {
-    auto check = [&](Sensei id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
-    return sensei::filterSenseis(check);
-}
-
-void genSensei(char_data* ch, std::string suggestedSensei) {
-    if(suggestedSensei != "") {
-        auto check = [&](Sensei id) {return sensei::isPlayable(id) && sensei::isValidSenseiForRace(id, ch->race);};
-        auto chosen_sensei = sensei::findSensei(suggestedSensei, check);
-        if (!chosen_sensei) {
-            send_to_char(ch, "\r\nThat's not a sensei.\r\n");
-            return;
-        }
-
-        ch->sensei = chosen_sensei.value();
-        send_to_char(ch, "\r\nSensei set.\r\n");
-    } else {
-        int i = 0;
-        send_to_char(ch, "\r\n@YSensei's available:@n\r\n");
-        for (const auto &s: valid_classes(ch))
-            send_to_char(ch, fmt::format("@C{}@n{}", sensei::getName(s).c_str(), !(++i % 2) ? "\r\n" : "	"));
-    }
-}
-
-void genHairLength(char_data* ch, std::string suggestedHair){
-    if(is_abbrev(suggestedHair.c_str(), "bald") || is_abbrev(suggestedHair.c_str(), "tiny") 
-        || is_abbrev(suggestedHair.c_str(), "none") || suggestedHair == "1") {
-        ch->set(CharAppearance::hair_length, HAIRL_BALD);
-        ch->set(CharAppearance::hair_color, HAIRC_NONE);
-        ch->set(CharAppearance::hair_style, HAIRS_NONE);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "short") || suggestedHair == "2") {
-        ch->set(CharAppearance::hair_length, HAIRL_SHORT);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "medium") || suggestedHair == "3") {
-        ch->set(CharAppearance::hair_length, HAIRL_MEDIUM);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "long") || suggestedHair == "4") {
-        ch->set(CharAppearance::hair_length, HAIRL_LONG);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "really long") || suggestedHair == "5") {
-        ch->set(CharAppearance::hair_length, HAIRL_RLONG);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-
-    if(ch->race == Race::namekian || ch->race == Race::arlian) { 
-        send_to_char(ch, "@YAntenae Length SELECTION menu:\r\n");
-        send_to_char(ch, "@B1@W)@C Tiny  @B2@W)@C Short  @B3@W)@C Medium\r\n");
-    } else if(ch->race == Race::majin) {
-        send_to_char(ch, "@YForelock Length SELECTION menu:\r\n\n");
-        send_to_char(ch, "@B1@W)@C Tiny  @B2@W)@C Short  @B3@W)@C Medium\r\n");
-    } else if(ch->race == Race::icer) {
-        send_to_char(ch, "@YHorn Length SELECTION menu:\r\n\n");
-        send_to_char(ch, "@B1@W)@C None  @B2@W)@C Short  @B3@W)@C Medium\r\n");
-    } else {
-        send_to_char(ch, "@YHair Length SELECTION menu:\r\n\n");
-        send_to_char(ch, "@B1@W)@C Bald  @B2@W)@C Short  @B3@W)@C Medium\r\n");
-    }
-    send_to_char(ch, "@B4@W)@C Long  @B5@W)@C Really Long@n\r\n");
-}
-
-void genHairStyle(char_data* ch, std::string suggestedHair){
-    if(ch->get(CharAppearance::hair_length) == HAIRL_BALD) {
-        send_to_char(ch, "You have no hair to style.\r\n");
-        return;
-    }
-
-    if(is_abbrev(suggestedHair.c_str(), "plain") || suggestedHair == "1") {
-        ch->set(CharAppearance::hair_style, HAIRS_PLAIN);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "mohawk") || suggestedHair == "2") {
-        ch->set(CharAppearance::hair_style, HAIRS_MOHAWK);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "spiky") || suggestedHair == "3") {
-        ch->set(CharAppearance::hair_style, HAIRS_SPIKY);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "curly") || suggestedHair == "4") {
-        ch->set(CharAppearance::hair_style, HAIRS_CURLY);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "uneven") || suggestedHair == "5") {
-        ch->set(CharAppearance::hair_style, HAIRS_UNEVEN);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "ponytail") || suggestedHair == "6") {
-        ch->set(CharAppearance::hair_style, HAIRS_PONYTAIL);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "afro") || suggestedHair == "7") {
-        ch->set(CharAppearance::hair_style, HAIRS_AFRO);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "fade") || suggestedHair == "8") {
-        ch->set(CharAppearance::hair_style, HAIRS_FADE);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "crew cut") || suggestedHair == "9") {
-        ch->set(CharAppearance::hair_style, HAIRS_CREW);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "feathered") || suggestedHair == "10") {
-        ch->set(CharAppearance::hair_style, HAIRS_FEATHERED);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "dread locks") || suggestedHair == "11") {
-        ch->set(CharAppearance::hair_style, HAIRS_DRED);
-        send_to_char(ch,"\r\nSet Hairstyle.\r\n");
-        return;
-    }
-
-    send_to_char(ch, "@YHair style SELECTION menu:\r\n\n");
-    send_to_char(ch, "@B1@W)@C Plain     @B2@W)@C Mohawk    @B3@W)@C Spiky\r\n");
-    send_to_char(ch, "@B4@W)@C Curly     @B5@W)@C Uneven    @B6@W)@C Ponytail@n\r\n");
-    send_to_char(ch, "@B7@W)@C Afro      @B8@W)@C Fade      @B9@W)@C Crew Cut\r\n");
-    send_to_char(ch, "@B11@W)@C Feathered @B12@W)@C Dread Locks@n\r\n");
-
-}
-
-void genHairColour(char_data* ch, std::string suggestedHair){
-    if(ch->get(CharAppearance::hair_length) == HAIRL_BALD && !(ch->race == Race::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)) {
-        send_to_char(ch, "You have no hair to colour.\r\n");
-        return;
-    }
-
-    if(is_abbrev(suggestedHair.c_str(), "black") || suggestedHair == "1") {
-        ch->set(CharAppearance::hair_color, HAIRC_BLACK);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "brown") || suggestedHair == "2") {
-        ch->set(CharAppearance::hair_color, HAIRC_BLONDE);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "blonde") || suggestedHair == "3") {
-        ch->set(CharAppearance::hair_color, HAIRC_BLONDE);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "grey") || suggestedHair == "4") {
-        ch->set(CharAppearance::hair_color, HAIRC_GREY);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "red") || suggestedHair == "5") {
-        ch->set(CharAppearance::hair_color, HAIRC_RED);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "orange") || suggestedHair == "6") {
-        ch->set(CharAppearance::hair_color, HAIRC_ORANGE);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "green") || suggestedHair == "7") {
-        ch->set(CharAppearance::hair_color, HAIRC_GREEN);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "blue") || suggestedHair == "8") {
-        ch->set(CharAppearance::hair_color, HAIRC_BLUE);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "pink") || suggestedHair == "9") {
-        ch->set(CharAppearance::hair_color, HAIRC_PINK);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "purple") || suggestedHair == "10") {
-        ch->set(CharAppearance::hair_color, HAIRC_PURPLE);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "silver") || suggestedHair == "11") {
-        ch->set(CharAppearance::hair_color, HAIRC_SILVER);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "crimson") || suggestedHair == "12") {
-        ch->set(CharAppearance::hair_color, HAIRC_CRIMSON);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-    if(is_abbrev(suggestedHair.c_str(), "white") || suggestedHair == "13") {
-        ch->set(CharAppearance::hair_color, HAIRC_WHITE);
-        send_to_char(ch,"\r\nSet.\r\n");
-        return;
-    }
-
-
-
-    if (ch->race == Race::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE) {
-        send_to_char(ch, "@YWing color SELECTION menu:\r\n\n");
-    } else {
-        send_to_char(ch, "@YHair color SELECTION menu:\r\n\n");
-    }
-    send_to_char(ch, "@B1@W)@C Black  @B2@W)@C Brown  @B3@W)@C Blonde\r\n");
-    send_to_char(ch, "@B4@W)@C Grey   @B5@W)@C Red    @B6@W)@C Orange@n\r\n");
-    send_to_char(ch, "@B7@W)@C Green  @B8@W)@C Blue   @B9@W)@C Pink\r\n");
-    send_to_char(ch, "@B10@W)@C Purple @B11@W)@C Silver @B12@W)@C Crimson@n\r\n");
-    send_to_char(ch, "@B13@W)@C White@n\r\n");
-
-    if (ch->race == Race::saiyan) {
-        send_to_char(ch, "@RPlease remember that Saiyans naturally only have Black hair. It must be dyed to be otherwise.@n\r\n");
-    } 
-}
-
-void genEyes(char_data* ch, std::string suggestedEyes){
-    if(is_abbrev(suggestedEyes.c_str(), "blue") || suggestedEyes == "1") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 0);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "black") || suggestedEyes == "2") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 1);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "green") || suggestedEyes == "3") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 2);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "brown") || suggestedEyes == "4") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 3);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "red") || suggestedEyes == "5") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 4);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "aqua") || suggestedEyes == "6") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 5);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "pink") || suggestedEyes == "7") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 6);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "purple") || suggestedEyes == "8") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 7);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "crimson") || suggestedEyes == "9") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 8);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "gold") || suggestedEyes == "10") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 9);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "amber") || suggestedEyes == "11") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 10);
-        return;
-    }
-    if(is_abbrev(suggestedEyes.c_str(), "emerald") || suggestedEyes == "12") {
-        send_to_char(ch,"\r\nEye Colour set.\r\n");
-        ch->set(CharAppearance::eye_color, 11);
-        return;
-    }
-
-    send_to_char(ch, "@YEye color SELECTION menu:\r\n\n");
-    send_to_char(ch, "@B1@W)@C Blue  @B2@W)@C Black  @B3@W)@C Green\r\n");
-    send_to_char(ch, "@B4@W)@C Brown @B5@W)@C Red    @B6@W)@C Aqua@n\r\n");
-    send_to_char(ch, "@B7@W)@C Pink  @B8@W)@C Purple @B9@W)@C Crimson\r\n");
-    send_to_char(ch, "@B10@W)@C Gold  @B11@W)@C Amber  @B12@W)@C Emerald@n\r\n");
-}
-
-void genSkin(char_data* ch, std::string suggestedTone){
-    if(is_abbrev(suggestedTone.c_str(), "white") || suggestedTone == "1") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 0);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "black") || suggestedTone == "2") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 1);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "green") || suggestedTone == "3") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 2);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "orange") || suggestedTone == "4") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 3);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "yellow") || suggestedTone == "5") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 4);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "red") || suggestedTone == "6") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 5);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "grey") || suggestedTone == "7") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 6);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "blue") || suggestedTone == "8") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 7);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "aqua") || suggestedTone == "9") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 8);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "pink") || suggestedTone == "10") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 9);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "purple") || suggestedTone == "11") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 10);
-        return;
-    }
-    if(is_abbrev(suggestedTone.c_str(), "tan") || suggestedTone == "12") {
-        send_to_char(ch,"\r\nSkin Tone set.\r\n");
-        ch->set(CharAppearance::skin_color, 11);
-        return;
-    }
-
-    send_to_char(ch, "@YSkin color SELECTION menu:\r\n\n");
-    send_to_char(ch, "@B1@W)@C White  @B2@W)@C Black  @B3@W)@C Green\r\n");
-    send_to_char(ch, "@B4@W)@C Orange @B5@W)@C Yellow @B6@W)@C Red@n\r\n");
-    send_to_char(ch, "@B7@W)@C Grey   @B8@W)@C Blue   @B9@W)@C Aqua\r\n");
-    send_to_char(ch, "@B11@W)@C Pink   @B12@W)@C Purple @B13@W)@C Tan@n\r\n");
-    
-}
-
-void genAura(char_data* ch, std::string suggestedAura){
-    if(is_abbrev(suggestedAura.c_str(), "white") || suggestedAura == "1") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 1);
-        return;
-    }
-    if(is_abbrev(suggestedAura.c_str(), "blue") || suggestedAura == "2") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 2);
-        return;
-    }
-    if(is_abbrev(suggestedAura.c_str(), "red") || suggestedAura == "3") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 3);
-        return;
-    }
-    if(is_abbrev(suggestedAura.c_str(), "green") || suggestedAura == "4") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 4);
-        return;
-    }
-    if(is_abbrev(suggestedAura.c_str(), "pink") || suggestedAura == "5") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 5);
-        return;
-    }
-    if(is_abbrev(suggestedAura.c_str(), "purple") || suggestedAura == "6") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 6);
-        return;
-    }
-    if(is_abbrev(suggestedAura.c_str(), "yellow") || suggestedAura == "7") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 7);
-        return;
-    }
-    if(is_abbrev(suggestedAura.c_str(), "black") || suggestedAura == "8") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 8);
-        return;
-    }
-    if(is_abbrev(suggestedAura.c_str(), "orange") || suggestedAura == "9") {
-        send_to_char(ch,"\r\nAura set.\r\n");
-        ch->set(CharAppearance::aura, 9);
-        return;
-    }
-
-    send_to_char(ch, "@YChoose your aura colour:@n\r\n\n");
-    send_to_char(ch, "@B1@W)@C White  @B2@W)@C Blue@n\r\n");
-    send_to_char(ch, "@B3@W)@C Red    @B4@W)@C Green@n\r\n");
-    send_to_char(ch, "@B5@W)@C Pink   @B6@W)@C Purple@n\r\n");
-    send_to_char(ch, "@B7@W)@C Yellow @B8@W)@C Black@n\r\n");
-    send_to_char(ch, "@B9@W)@C Orange@n\r\n");
-}
-
-void genAlignment(char_data* ch, std::string suggestedHair){
-    
-}
 
 void genBonus(char_data* ch, std::string bonus){
     if(is_abbrev(bonus.c_str(), "hand to hand") || bonus == "1") {
@@ -12205,42 +11560,6 @@ void genAge(char_data* ch, std::string suggestedAge) {
 }
 
 void genFinish(char_data* ch) {
-    bool finished = true;
-
-    if(ch->name == "") finished = false;
-    if(ch->get(CharAppearance::sex) == -1) finished = false;
-    if(!race::isPlayable(ch->race)) finished = false;
-
-    if(ch->race == Race::halfbreed || ch->race == Race::android)
-        if(ch->get(CharNum::racial_preference) == 0) finished = false;
-
-    if(ch->race == Race::mutant || ch->race == Race::bio_android) 
-        if(ch->genome.size() != 2) finished = false;
-
-    if(ch->sensei == Sensei::commoner) finished = false;
-    if(ch->genBonus == 0) finished = false;
-    if(ch->get(CharAppearance::eye_color) == 100) finished = false;
-    if(ch->get(CharAppearance::skin_color) == 100) finished = false;
-    if(ch->getWeight() == 0) finished = false;
-    if(ch->getHeight() == 0) finished = false;
-    if(ch->time.seconds_aged < (8 * SECS_PER_GAME_YEAR)) finished = false;
-
-    if(ch->get(CharAppearance::aura) == 100) finished = false;
-    if(ch->get(CharAppearance::hair_length) == 100) finished = false;
-
-    if(ch->get(CharAppearance::hair_length) != HAIRL_BALD && !(ch->race == Race::majin) && !(ch->race == Race::icer) && !(ch->race == Race::namekian) && !(ch->race == Race::arlian)) {
-        if(ch->get(CharAppearance::hair_style) == 100) finished = false;
-        if(ch->get(CharAppearance::hair_color) == 100) finished = false;
-    }
-    if(ch->race == Race::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)
-        if(ch->get(CharAppearance::hair_color) == 100) finished = false;
-
-
-
-    if(!finished) {
-        send_to_char(ch, "@WYour character is unfinished, use 'chargen' to see what's missing.@n\r\n");
-        return;
-    }
 
     if(ch->genBonus == 1) {
         ch->mod(CharVital::powerlevel, 200);
@@ -12379,14 +11698,14 @@ void genFinish(char_data* ch) {
     }
 
 
-    if (ch->race == Race::bio_android && (ch->genome.contains(7))) {
+    if (ch->bio_genomes.get(Race::kai)) {
         SET_SKILL(ch, SKILL_TELEPATHY, 30);
         SET_SKILL(ch, SKILL_FOCUS, 30);
     }
-    if (ch->race == Race::mutant && (ch->genome.contains(3))) {
+    if (ch->mutations.get(Mutation::extreme_reflexes)) {
         ch->mod(CharAttribute::agility, 10);
     }
-    if (ch->race == Race::mutant && (ch->genome.contains(9))) {
+    if (ch->mutations.get(Mutation::innate_telepathy)) {
         SET_SKILL(ch, SKILL_TELEPATHY, 50);
     }
 
@@ -12406,190 +11725,8 @@ void genFinish(char_data* ch) {
 
 }
 
-static std::vector<std::string> eye_colour = {
-    "Blue", "Black", "Green", "Brown", "Red", "Aqua", "Pink", "Purple", "Crimson", "Gold", "Amber", "Emerald"
-};
-
-static std::vector<std::string> aura_colour = {
-    "White", "Blue", "Red", "Green", "Pink", "Purple", "Yellow", "Black", "Orange"
-};
-
-static std::vector<std::string> skin_tone = {
-    "White", "Black", "Green", "Orange", "Yellow", "Red", "Grey", "Blue", "Aqua", "Pink", "Purple", "Tan"
-};
-
-static std::vector<std::string> hair_length = {
-    "Bald", "Short", "Medium", "Long", "Really Long"
-};
-
-static std::vector<std::string> hair_colour = {
-    "", "Black", "Brown", "Blonde", "Grey", "Red", "Orange", "Green", "Blue", "Pink", "Purple", "Silver", "Crimson", "White"
-};
-
-static std::vector<std::string> hair_style = {
-    "", "Plain", "Mohawk", "Spiky", "Curly", "Uneven", "Ponytail", "Afro", "Fade", "Crew Cut", "Feathered", "Dread Locks"
-};
-
 static std::vector<std::string> start_bonus = {
     "", "Hand to Hand", "Ki Attacks", "Find My Own Way", "Money", "Weaponry (Brawl)", "Weaponry (Gun)", "Weaponry (Spear)", 
     "Weaponry (Club)", "Weaponry (Sword)", "Weaponry (Dagger)"
 };
 
-
-ACMD(do_gen) {
-    char arg1[MAX_INPUT_LENGTH];
-    char arg2[MAX_INPUT_LENGTH];
-
-    two_arguments(argument, arg1, arg2);
-
-    if(is_abbrev(arg1, "gender")) {
-        genGender(ch, arg2);
-        return;
-    }
-    if(is_abbrev(arg1, "race")) {
-        genRace(ch, arg2);
-        return;
-    }
-    if(is_abbrev(arg1, "raceextra")) {
-        genRaceExtra(ch, arg2);
-        return;
-    }
-    if(is_abbrev(arg1, "sensei")) {
-        genSensei(ch, arg2);
-        return;
-    }
-
-
-    if(is_abbrev(arg1, "hairlength") || is_abbrev(arg1, "hornlength") || is_abbrev(arg1, "antennaelength") || is_abbrev(arg1, "forelock")) {
-        genHairLength(ch, arg2);
-        return;
-    }
-    if(is_abbrev(arg1, "hairstyle")) {
-        genHairStyle(ch, arg2);
-        return;
-    }
-    if(is_abbrev(arg1, "haircolor") || is_abbrev(arg1, "haircolour") || is_abbrev(arg1, "wingcolour") || is_abbrev(arg1, "wingcolor")) {
-        genHairColour(ch, arg2);
-        return;
-    }
-
-
-    if(is_abbrev(arg1, "eyes")) {
-        genEyes(ch, arg2);
-        return;
-    }
-    if(is_abbrev(arg1, "skin")) {
-        genSkin(ch, arg2);
-        return;
-    }
-    if(is_abbrev(arg1, "aura")) {
-        genAura(ch, arg2);
-        return;
-    }
-
-    if(is_abbrev(arg1, "alignment")) {
-        genAlignment(ch, arg2);
-        return;
-    }
-
-    if(is_abbrev(arg1, "age")) {
-        genAge(ch, arg2);
-        return;
-    }
-
-    if(is_abbrev(arg1, "weight")) {
-        genWeight(ch, arg2);
-        return;
-    }
-
-    if(is_abbrev(arg1, "height")) {
-        genHeight(ch, arg2);
-        return;
-    }
-
-    if(is_abbrev(arg1, "bonus")) {
-        genBonus(ch, arg2);
-        return;
-    }
-
-    if(is_abbrev(arg1, "finish")) {
-        genFinish(ch);
-        return;
-    }
-
-    send_to_char(ch, "@WProgress@n\r\n");
-    send_to_char(ch, "Name: %s\r\n", ch->name == "" ? "@RUnset@n" : ch->name);
-    std::string gender = "";
-    if(ch->get(CharAppearance::sex) == SEX_MALE)
-        gender = "Male";
-    else if(ch->get(CharAppearance::sex) == SEX_FEMALE)
-        gender = "Female";
-    else
-        gender = "Androgynous";
-
-    send_to_char(ch, "[Gender] Gender: %s\r\n", ch->get(CharAppearance::sex) == 100 ? "@RUnset@n" : gender);
-    send_to_char(ch, "[Race] Race: %s\r\n", !race::isPlayable(ch->race) ? "@RUnset@n" : race::getName(ch->race));
-
-    if(ch->race == Race::halfbreed)
-        send_to_char(ch, "[RaceExtra] Likeness: %s\r\n", ch->get(CharNum::racial_preference) == 0 ? "@RUnset@n" : std::to_string(ch->get(CharNum::racial_preference)));
-
-    if(ch->race == Race::android)
-        send_to_char(ch, "[RaceExtra] Type: %s\r\n", ch->get(CharNum::racial_preference) == 0 ? "@@RUnset@n" : std::to_string(ch->get(CharNum::racial_preference)));
-
-    if(ch->race == Race::bio_android) {
-        std::vector<std::string> genomes;
-        for(auto g : ch->genome) genomes.push_back(std::to_string(g));
-        std::string joined = boost::algorithm::join(genomes, ", ");
-        send_to_char(ch, "[RaceExtra] Genomes: %s\r\n", genomes.empty() ? "@RUnset@n" : joined.c_str());
-    }
-        
-    if(ch->race == Race::mutant) {
-        std::vector<std::string> genomes;
-        for(auto g : ch->genome) genomes.push_back(std::to_string(g));
-        std::string joined = boost::algorithm::join(genomes, ", ");
-        send_to_char(ch, "[RaceExtra] Mutations: %s\r\n", genomes.empty() ? "@RUnset@n" : joined.c_str());
-    }
-    
-    send_to_char(ch, "[Eyes] Eyes: %s\r\n", ch->get(CharAppearance::eye_color) == 100 ? "@RUnset@n" : eye_colour[ch->get(CharAppearance::eye_color)]);
-    send_to_char(ch, "[Skin] Skin: %s\r\n", ch->get(CharAppearance::skin_color) == 100 ? "@RUnset@n" : skin_tone[ch->get(CharAppearance::skin_color)]);
-    send_to_char(ch, "[Aura] Aura: %s\r\n", ch->get(CharAppearance::aura) == 100 ? "@RUnset@n" : aura_colour[ch->get(CharAppearance::aura)]);
-
-    std::string hairlength = "";
-    if(ch->get(CharAppearance::hair_length) == 0) {
-        if(ch->race == Race::majin || ch->race == Race::namekian || ch->race == Race::arlian)
-            hairlength = "Tiny";
-        if(ch->race == Race::icer)
-            hairlength = "None";
-    } else if (ch->get(CharAppearance::hair_length) != 100) {
-        hairlength = hair_length[ch->get(CharAppearance::hair_length)];
-    }
-
-    if(ch->race == Race::majin)
-        send_to_char(ch, "[ForelockLength] Forelock Length: %s\r\n", ch->get(CharAppearance::hair_length) == 100 ? "@RUnset@n" : hairlength);
-    else if(ch->race == Race::icer)
-        send_to_char(ch, "[HornLength] Horn Length: %s\r\n", ch->get(CharAppearance::hair_length) == 100 ? "@RUnset@n" : hairlength);
-    else if(ch->race == Race::namekian || ch->race == Race::arlian)
-        send_to_char(ch, "[AntennaeLength] Antennae Length: %s\r\n", ch->get(CharAppearance::hair_length) == 100 ? "@RUnset@n" : hairlength);
-    else
-        send_to_char(ch, "[HairLength] Hair Length: %s\r\n", ch->get(CharAppearance::hair_length) == 100 ? "@RUnset@n" : hairlength);
-
-    if(ch->get(CharAppearance::hair_length) != HAIRL_BALD && !(ch->race == Race::majin) && !(ch->race == Race::icer) && !(ch->race == Race::namekian) && !(ch->race == Race::arlian)) {
-        send_to_char(ch, "[HairStyle] Hair Style: %s\r\n", ch->get(CharAppearance::hair_style) == 100 ? "@RUnset@n" : hair_style[ch->get(CharAppearance::hair_style)]);
-        send_to_char(ch, "[HairColour] Hair Colour: %s\r\n", ch->get(CharAppearance::hair_color) == 100 ? "@RUnset@n" : hair_colour[ch->get(CharAppearance::hair_color)]);
-    }
-    if(ch->race == Race::arlian && ch->get(CharAppearance::sex) == SEX_FEMALE)
-        send_to_char(ch, "[WingColour] Wing Colour: %s\r\n", ch->get(CharAppearance::hair_color) == 100 ? "@RUnset@n" : hair_colour[ch->get(CharAppearance::hair_color)]);
-
-
-
-    send_to_char(ch, "[Age] Age: %s\r\n", ch->time.seconds_aged < 8 * SECS_PER_GAME_YEAR ? "@RUnset@n" :  std::to_string((int)ch->time.seconds_aged / SECS_PER_GAME_YEAR));
-    send_to_char(ch, "[Weight] Weight: %s\r\n", ch->getWeight() == 0 ? "@RUnset@n" : std::to_string(ch->getWeight()));
-    send_to_char(ch, "[Height] Height: %s\r\n", ch->getHeight() == 0 ? "@RUnset@n" : std::to_string(ch->getHeight()));
-    
-
-    send_to_char(ch, "[Sensei] Sensei: %s\r\n", ch->sensei == Sensei::commoner ? "@RUnset@n" : sensei::getName(ch->sensei));
-    send_to_char(ch, "[Bonus] Bonus: %s\r\n", ch->genBonus == 0 ? "@RUnset@n" : start_bonus[ch->genBonus]);
-    send_to_char(ch, "\n\r@WUse the name in the square brackets after 'chargen' to see and choose options of your selection.@n\r\n");
-    send_to_char(ch, "@WWhen everything is set, use 'chargen finish' to be transported into the game!@n\r\n");
-
-}

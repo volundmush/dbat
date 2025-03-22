@@ -15,8 +15,6 @@ namespace trans {
 
     extern double getStaminaDrain(struct char_data *ch, Form form, bool upkeep = false);
 
-    extern std::optional<int> getAppearanceMod(struct char_data *ch, Form form, CharAppearance mode);
-
     extern void handleEchoTransform(struct char_data *ch, Form form);
     extern void handleEchoRevert(struct char_data *ch, Form form);
 
@@ -39,4 +37,5 @@ namespace trans {
     extern void gamesys_transform(uint64_t heartPulse, double deltaTime);
     extern void gamesys_oozaru(uint64_t heartPulse, double deltaTime);
 
+    extern std::optional<std::string> getAppearance(char_data *ch, Form form, Appearance type);
 }

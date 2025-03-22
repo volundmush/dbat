@@ -275,10 +275,10 @@ static void mob_attack(struct char_data *ch, char *buf) {
         } else if (AFF_FLAGGED(ch, AFF_ENSNARED)) {
             return;
         } else if (special < 100) { /* Normal physical attack */
-            if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_repair) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
+            if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_repair && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
                        rand_number(1, 20) >= 16) {
                 do_srepair(ch, nullptr, 0, 0);
-            } else if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb) && rand_number(1, 20) >= 19) {
+            } else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb && rand_number(1, 20) >= 19) {
                 do_absorb(ch, buf2, 0, 0);
             } else if ((IS_BIO(ch) || IS_MAJIN(ch)) && GET_HIT(ch) <= (ch->getMaxPL()) * 0.5 &&
                        rand_number(1, 20) >= 17) {
@@ -885,7 +885,7 @@ void lifeforceSystem(uint64_t heartPulse, double deltaTime) {
             double refill = 0.05;
             double lfcost = 0.05;
 
-            bool mutantBonus = IS_MUTANT(ch) && (ch->genome.contains(2));
+            bool mutantBonus = ch->mutations.get(Mutation::increased_cell_regeneration);
 
             if (GET_BONUS(ch, BONUS_DIEHARD) > 0) {
                 if (mutantBonus) {
@@ -1026,7 +1026,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 do_flee(ch, nullptr, 0, 0);
             }
         }
-        if (IS_MUTANT(ch) && (ch->genome.contains(6)) && rand_number(1, 200) >= 175) {
+        if (ch->mutations.get(Mutation::limb_regeneration) && rand_number(1, 200) >= 175) {
             mutant_limb_regen(ch);
         }
         if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_DISGUISED) && GET_SKILL(ch, SKILL_DISGUISE) < rand_number(1, 125)) {
@@ -1877,8 +1877,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 2) {
                     psreward *= 0.5;
                 }
-                if (IS_HUMAN(killer) ||
-                    (IS_BIO(killer) && (killer->genome.contains(1)))) {
+                if (IS_HUMAN(killer) || killer->bio_genomes.get(Race::human)) {
                     psreward *= 1.25;
                 }
                 if (IS_HALFBREED(ch)) {
@@ -1894,8 +1893,8 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
                 }
             }
         }
-        if (IS_ANDROID(killer) && !IS_NPC(killer) && !killer->character_flags.get(CharacterFlag::android_model_absorb)) {
-            if (killer->character_flags.get(CharacterFlag::android_model_repair)) {
+        if (IS_ANDROID(killer) && !IS_NPC(killer) && !(killer->subrace == SubRace::android_model_absorb)) {
+            if (killer->subrace == SubRace::android_model_repair) {
                 if (GET_LEVEL(killer) > GET_LEVEL(ch) + 15) {
                     send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
                 } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 10) {
@@ -2012,7 +2011,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         ch->decCurHealthPercent(1);
         extract_char(ch);
     } else {
-        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getRoomFlag(ROOM_PAST) &&
+        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getWhereFlag(WhereFlag::pendulum_past) &&
             (ch->getRoomVnum() < 17900 || ch->getRoomVnum() > 17999)) {
             if (!PLR_FLAGGED(ch, PLR_ABSORBED)) {
                 make_pcorpse(ch);
@@ -2077,7 +2076,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         }
 
         if (!IS_NPC(ch)) {
-            if (IS_ANDROID(ch) && !ch->character_flags.get(CharacterFlag::android_model_absorb) && android_lose && GET_UP(ch) > 5) {
+            if (IS_ANDROID(ch) && ch->subrace != SubRace::android_model_absorb && android_lose && GET_UP(ch) > 5) {
                 int loss = GET_UP(ch) / 5;
                 GET_UP(ch) -= loss;
                 send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
@@ -2124,10 +2123,10 @@ void die(struct char_data *ch, struct char_data *killer) {
         }
         for(auto f : {PLR_KILLER, PLR_THIEF}) ch->player_flags.set(f, false);
         for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affect_flags.set(f, false);
-        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getRoomFlag(ROOM_PAST) && !ch->is_newbie()) {
+        if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getWhereFlag(WhereFlag::pendulum_past) && !ch->is_newbie()) {
             if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
                 GET_DTIME(ch) = time(nullptr);
-            } else if (ch->getRoomFlag(ROOM_AL) || ch->getRoomFlag(ROOM_HELL)) {
+            } else if (ch->getWhereFlag(WhereFlag::afterlife) || ch->getRoomFlag(ROOM_HELL)) {
                 send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
             } else if (IN_ARENA(ch)) {
                 cleanup_arena_watch(ch);
@@ -2276,15 +2275,15 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
         send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Regenerated!@D]@n\r\n", "%");
     } else if (group_bonus(ch, 2) == 7) {
         if (IS_ANDROID(ch)) {
-            if (leader->character_flags.get(CharacterFlag::android_model_absorb)) {
+            if (leader->subrace == SubRace::android_model_absorb) {
                 ch->incCurKIPercent(.02);
                 ch->incCurSTPercent(.02);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G2%s PL/ST/Ki Recovered!@D]@n\r\n",
                              "%");
-            } else if (leader->character_flags.get(CharacterFlag::android_model_repair)) {
+            } else if (leader->subrace == SubRace::android_model_repair) {
                 ch->incCurHealthPercent(.02);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
-            } else if (leader->character_flags.get(CharacterFlag::android_model_sense) && !ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+            } else if (leader->subrace == SubRace::android_model_sense && !(ch->subrace == SubRace::android_model_absorb)) {
                 GET_UP(ch) += 5;
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
             }

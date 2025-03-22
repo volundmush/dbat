@@ -13,11 +13,6 @@ struct player_data;
 
 typedef unit_data script_data;
 
-namespace race {
-
-    struct transform_bonus;
-}
-
 namespace atk {
     class Attack;
 }

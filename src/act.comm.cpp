@@ -921,11 +921,11 @@ ACMD(do_reply) {
     if (IS_NPC(ch))
         return;
 
-    if (ch->getRoomFlag(ROOM_HBTC)) {
+    if (ch->getWhereFlag(WhereFlag::hyperbolic_time_chamber)) {
         send_to_char(ch, "This is a different dimension!\r\n");
         return;
     }
-    if (ch->getRoomFlag(ROOM_PAST)) {
+    if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
         send_to_char(ch, "This is the past, you can't send tells!\r\n");
         return;
     }

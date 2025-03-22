@@ -911,10 +911,10 @@ ACMD(do_charge) {
                 reveal_hiding(ch, 0);
                 send_to_char(ch,
                              "Your %s colored aura flashes up around you as you instantly take control of the ki you needed!\r\n",
-                             aura_types[GET_AURA(ch)]);
+                             GET_AURA(ch));
                 send_to_char(ch, "@D[@RCost@D: @r%s@D]@n\r\n", add_commas(spiritcost));
                 char bloom[MAX_INPUT_LENGTH];
-                sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
+                sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", GET_AURA(ch));
                 act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
                 characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
                 GET_CHARGE(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff;
@@ -923,9 +923,9 @@ ACMD(do_charge) {
         } else {
             reveal_hiding(ch, 0);
             send_to_char(ch, "You begin to charge some energy, as a %s aura begins to burn around you!\r\n",
-                         aura_types[GET_AURA(ch)]);
+                GET_AURA(ch));
             char bloom[MAX_INPUT_LENGTH];
-            sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", aura_types[GET_AURA(ch)]);
+            sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", GET_AURA(ch));
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
             GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
             GET_CHARGE(ch) += 1;
@@ -1169,8 +1169,7 @@ ACMD(do_flee) {
         if (!*arg) {
             attempt = rand_number(0, NUM_OF_DIRS - 1);    /* Select a random direction */
         }
-        if (CAN_GO(ch, attempt) &&
-            !ROOM_FLAGGED(EXIT(ch, attempt)->to_room, ROOM_DEATH)) {
+        if (CAN_GO(ch, attempt)) {
             act("$n panics, and attempts to flee!", true, ch, nullptr, nullptr, TO_ROOM);
             if (IS_NPC(ch) && ROOM_FLAGGED(EXIT(ch, attempt)->to_room, ROOM_NOMOB)) {
                 return;

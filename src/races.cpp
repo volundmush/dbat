@@ -129,20 +129,14 @@ struct {
 
 
 void set_height_and_weight_by_race(struct char_data *ch) {
-    int race, sex, mod;
-
     if (!IS_NPC(ch)) {
         return;
     }
 
-    race = (int)GET_RACE(ch);
-    sex = GET_SEX(ch);
-    if (sex < SEX_NEUTRAL || sex >= NUM_SEX) {
-        basic_mud_log("Invalid gender in set_height_and_weight_by_race: %d", sex);
-        sex = SEX_NEUTRAL;
-    }
+    auto race = (int)GET_RACE(ch);
+    auto sex = static_cast<int>(GET_SEX(ch));
 
-    mod = dice(2, hw_info[race].heightdie);
+    auto mod = dice(2, hw_info[race].heightdie);
     ch->setHeight( hw_info[race].height[sex] + mod);
     mod *= hw_info[race].weightfac;
     mod /= 100;
@@ -303,7 +297,7 @@ namespace race {
     }
 
 
-    std::unordered_set<int> getValidSexes(Race id) {
+    std::unordered_set<Sex> getValidSexes(Race id) {
         switch(id) {
             case Race::namekian:
                 return {SEX_NEUTRAL};
@@ -450,7 +444,7 @@ namespace race {
                                      }},
                              }},
             {Race::android, {
-                                     {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {return ch->character_flags.get(CharacterFlag::android_model_absorb) ? -0.66 : 0.0;}},
+                                     {APPLY_CVIT_REGEN_MULT,  0.0, ~0, [](auto ch) {return ch->subrace == SubRace::android_model_absorb ? -0.66 : 0.0;}},
                              }},
             {Race::saiyan, {
                                      {APPLY_CSTAT_GAIN_MULT, 0.3,  static_cast<int>(CharStat::experience)},
@@ -510,6 +504,81 @@ namespace race {
         }
         return {};
 
+    }
+
+    std::string defaultAppearance(char_data* ch, Appearance type) {
+        switch(type) {
+            case Appearance::hair_style:
+                switch(ch->race) {
+                    case Race::saiyan:
+                        return "spiky";
+                    case Race::icer:
+                    case Race::namekian:
+                    case Race::majin:
+                    case Race::arlian:
+                    case Race::bio_android:
+                    case Race::kanassan:
+                        return "bald";
+                    case Race::hoshijin:
+                        // someone decided that male hoshijin are always bald.
+                        // ... it wasn't me.
+                        if(ch->sex == Sex::male)
+                            return "bald";
+                    default:
+                        return "plain";
+                }
+            case Appearance::hair_color:
+                if(ch->getAppearance(Appearance::hair_style) == "bald") return "none";
+                switch(ch->race) {
+                    case Race::kai:
+                        return "white";
+                    default:
+                        return "black";
+                }
+            case Appearance::skin_color:
+                switch(ch->race) {
+                    case Race::kai:  // basing this on Shin, Kibito, and Chronoa.
+                        return "mauve";
+                    case Race::majin:
+                        return "pink";
+                    case Race::namekian:
+                    case Race::yardratian:
+                        return "green";
+                    case Race::bio_android:
+                        return "mottled";
+                    case Race::kanassan:
+                        return "cyan";
+                    default: // I have no desire to start a flame war about what the 'normal'
+                            // skin color of human or equivalent races is. Do not read anything into
+                            // this besides needing a simple default.
+                        return "fair";
+                }
+            case Appearance::eye_color:
+                return "black";
+            case Appearance::aura_color:
+                return "clear";
+            case Appearance::build:
+                return "average";
+            case Appearance::posture:
+                return "at ease";
+            case Appearance::features:
+                // features aren't used for body parts that can be lost, hidden, or optional.
+                // like tails. they're for weird things like majin forelock or namekian antennae.
+                switch(ch->race) {
+                    case Race::namekian:
+                        return "antennae";
+                    case Race::majin:
+                        return "forelock";
+                    case Race::arlian:
+                        if(ch->sex == Sex::female) return "wings";
+                    default:
+                        return "nothing";
+                }
+            case Appearance::seeming:
+                return boost::to_lower_copy(getName(ch->race));
+            default:
+                return "unknown";
+        }
     }
 
 }

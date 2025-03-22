@@ -85,7 +85,7 @@ ASPELL(spell_teleport) {
 
     do {
         to_room = Random::get(world)->first;
-    } while (ROOM_FLAGGED(to_room, ROOM_PRIVATE | ROOM_DEATH | ROOM_GODROOM));
+    } while (ROOM_FLAGGED(to_room, ROOM_PRIVATE | ROOM_GODROOM));
 
     act("$n slowly fades out of existence and is gone.",
         false, victim, nullptr, nullptr, TO_ROOM);
@@ -548,13 +548,13 @@ int roll_skill(struct char_data *ch, int snum) {
     if (!IS_NPC(ch)) {
         skval = GET_SKILL(ch, snum);
         if (SKILL_SPOT == snum) {
-            if (IS_MUTANT(ch) && (ch->genome.contains(4))) {
+            if (ch->mutations.get(Mutation::infravision)) {
                 skval += 5;
             }
         } else if (SKILL_HIDE == snum) {
             if (AFF_FLAGGED(ch, AFF_LIQUEFIED)) {
                 skval += 5;
-            } else if (IS_MUTANT(ch) && (ch->genome.contains(5))) {
+            } else if (ch->mutations.get(Mutation::natural_camouflage)) {
                 skval += 10;
             }
         }

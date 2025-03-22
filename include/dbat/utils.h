@@ -31,15 +31,11 @@ constexpr int READ_SIZE = 256;
 extern FILE *player_fl;
 
 /* public functions in utils.c */
-extern int masadv(char *tmp, struct char_data *ch);
-
 extern void demon_refill_lf(struct char_data *ch, int64_t num);
 
 extern void dispel_ash(struct char_data *ch);
 
 extern char *strlwr(char *s);
-
-extern void prune_crlf(char *txt);
 
 extern int count_metamagic_feats(struct char_data *ch);
 
@@ -106,8 +102,6 @@ extern int get_flag_by_name(const char *flag_list[], char *flag_name);
 
 std::string add_commas(double X);
 
-extern void trim(char *s);
-
 extern char *introd_calc(struct char_data *ch);
 
 template<typename... Args>
@@ -144,8 +138,6 @@ extern int touch(const char *path);
 
 extern void mudlog(int type, int level, int file, const char *str, ...) __attribute__ ((format (printf, 4, 5)));
 
-extern void log_death_trap(struct char_data *ch);
-
 extern int rand_number(int from, int to);
 
 extern int64_t large_rand(int64_t from, int64_t to);
@@ -155,8 +147,6 @@ extern int dice(int number, int size);
 extern size_t sprintbit(bitvector_t vektor, const char *names[], char *result, size_t reslen);
 
 extern size_t sprinttype(int type, const char *names[], char *result, size_t reslen);
-
-extern void sprintbitarray(bitvector_t bitvector[], const char *names[], int maxar, char *result);
 
 extern int get_line(FILE *fl, char *buf);
 
@@ -439,6 +429,8 @@ extern bool PLR_FLAGGED(struct char_data *ch, int flag);
 extern bool AFF_FLAGGED(struct char_data *ch, int flag);
 extern bool PRF_FLAGGED(struct char_data *ch, int flag);
 extern bool ADM_FLAGGED(struct char_data *ch, int flag);
+bool WHERE_FLAGGED(room_vnum loc, WhereFlag flag);
+bool WHERE_FLAGGED(struct room_data *loc, WhereFlag flag);
 bool ROOM_FLAGGED(room_vnum loc, int flag);
 bool ROOM_FLAGGED(struct room_data *loc, int flag);
 
@@ -512,21 +504,19 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define GET_CLASS(ch)   ((ch)->sensei)
 
 #define GET_RACE(ch)    ((ch)->race)
-#define GET_HAIRL(ch)   ((ch)->get(CharAppearance::hair_length))
-#define GET_HAIRC(ch)   ((ch)->get(CharAppearance::hair_color))
-#define GET_HAIRS(ch)   ((ch)->get(CharAppearance::hair_style))
-#define GET_SKIN(ch)    ((ch)->get(CharAppearance::skin_color))
-#define GET_EYE(ch)     ((ch)->get(CharAppearance::eye_color))
-#define GET_DISTFEA(ch) ((ch)->get(CharAppearance::distinguishing_feature))
+#define GET_HAIRL(ch)   ((ch)->getAppearanceStr(Appearance::hair_length))
+#define GET_HAIRC(ch)   ((ch)->getAppearanceStr(Appearance::hair_color))
+#define GET_HAIRS(ch)   ((ch)->getAppearanceStr(Appearance::hair_style))
+#define GET_SKIN(ch)    ((ch)->getAppearanceStr(Appearance::skin_color))
+#define GET_EYE(ch)     ((ch)->getAppearanceStr(Appearance::eye_color))
 #define GET_HOME(ch)    ((ch)->hometown)
 #define GET_WEIGHT(ch)  ((ch)->weight)
 #define GET_HEIGHT(ch)  ((ch)->getHeight())
 #define GET_PC_HEIGHT(ch)    GET_HEIGHT(ch)
 #define GET_PC_WEIGHT(ch)    GET_WEIGHT(ch)
-#define GET_SEX(ch)    ((ch)->get(CharAppearance::sex))
+#define GET_SEX(ch)    ((ch)->sex)
 #define CARRYING(ch)    ((ch)->carrying)
 #define CARRIED_BY(ch)  ((ch)->carried_by)
-#define RACIAL_PREF(ch) ((ch)->get(CharNum::racial_preference))
 #define GET_RP(ch)      ((ch)->getRPP())
 #define GET_SUPPRESS(ch) ((ch)->suppression)
 #define GET_RDISPLAY(ch) ((ch)->rdisplay)
@@ -546,7 +536,7 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define GET_WIS(ch)     ((ch)->get(CharAttribute::wisdom))
 #define GET_CON(ch)     ((ch)->get(CharAttribute::constitution))
 #define GET_CHA(ch)     ((ch)->get(CharAttribute::speed))
-#define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? (((ch)->genome.contains(1)) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
+#define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? (((ch)->mutations.get(Mutation::extreme_speed)) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
 extern int GET_SPEEDI(struct char_data *ch);
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
 #define GET_SPEEDBONUS(ch) (IS_ARLIAN(ch) ? AFF_FLAGGED(ch, AFF_SHELL) ? GET_SPEEDVAR(ch) * -0.5 : (IS_MALE(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 0.5) : 0) : 0) : 0)
@@ -596,7 +586,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define COMBO(ch)         ((ch)->combo)
 #define LASTATK(ch)       ((ch)->lastattack)
 #define COMBHITS(ch)      ((ch)->combhits)
-#define GET_AURA(ch)      ((ch)->get(CharAppearance::aura))
+#define GET_AURA(ch)      ((ch)->getAppearanceStr(Appearance::aura_color))
 #define GET_RADAR1(ch)    ((ch)->radar1)
 #define GET_RADAR2(ch)    ((ch)->radar2)
 #define GET_RADAR3(ch)    ((ch)->radar3)
@@ -728,7 +718,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 #define CAN_CARRY_N(ch) (50)
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
 #define CAN_SEE_IN_DARK(ch) \
-   (AFF_FLAGGED(ch, AFF_INFRAVISION) || (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HOLYLIGHT)) || (IS_MUTANT(ch) && ((ch)->genome.contains(4))) || PLR_FLAGGED(ch, PLR_AURALIGHT))
+   (AFF_FLAGGED(ch, AFF_INFRAVISION) || PRF_FLAGGED(ch, PRF_HOLYLIGHT) || (ch)->mutations.get(Mutation::infravision) || PLR_FLAGGED(ch, PLR_AURALIGHT))
 
 #define IS_GOOD(ch)    (GET_ALIGNMENT(ch) >= 50)
 #define IS_EVIL(ch)    (GET_ALIGNMENT(ch) <= -50)
@@ -837,10 +827,10 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 #define CIRCLEMUD_VERSION(major, minor, patchlevel) \
     (((major) << 16) + ((minor) << 8) + (patchlevel))
 
-#define HSHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "his": (GET_SEX(ch)==SEX_FEMALE ? "her" : "their")) :"its")
-#define HSSH(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "he" : (GET_SEX(ch)==SEX_FEMALE ? "she" : "they")) : "it")
-#define HMHR(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "him": (GET_SEX(ch)==SEX_FEMALE ? "her" : "their")) : "it")
-#define MAFE(ch) (GET_SEX(ch) ? (GET_SEX(ch)==SEX_MALE ? "male": (GET_SEX(ch)==SEX_FEMALE ? "female" : "androgynous")) : "questionably gendered")
+#define HSHR(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "his": (GET_SEX(ch)==SEX_FEMALE ? "her" : "their")) :"its")
+#define HSSH(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "he" : (GET_SEX(ch)==SEX_FEMALE ? "she" : "they")) : "it")
+#define HMHR(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "him": (GET_SEX(ch)==SEX_FEMALE ? "her" : "their")) : "it")
+#define MAFE(ch) (GET_SEX(ch) != Sex::neutral ? (GET_SEX(ch)==SEX_MALE ? "male": (GET_SEX(ch)==SEX_FEMALE ? "female" : "androgynous")) : "questionably gendered")
 
 #define ANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "An" : "A")
 #define SANA(obj) (strchr("aeiouAEIOU", *(obj)->name) ? "an" : "a")
@@ -849,7 +839,7 @@ int64_t MOD_OBJ_VAL(struct obj_data* obj, const std::string& val, int mod);
 /* Various macros building up to CAN_SEE */
 
 #define LIGHT_OK(sub)    (!AFF_FLAGGED(sub, AFF_BLIND) && !PLR_FLAGGED(sub, PLR_EYEC) && \
-   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (IS_MUTANT(sub) && ((sub)->genome.contains(4))) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
+   (IS_LIGHT(IN_ROOM(sub)) || AFF_FLAGGED((sub), AFF_INFRAVISION) || (sub)->mutations.get(Mutation::infravision) || PLR_FLAGGED(sub, PLR_AURALIGHT)) )
 
 #define INVIS_OK(sub, obj) \
  (!AFF_FLAGGED((obj),AFF_INVISIBLE) || AFF_FLAGGED(sub,AFF_DETECT_INVIS))
@@ -1014,7 +1004,7 @@ bool ETHER_STREAM(struct char_data *ch);
 
 #define OUTSIDE_ROOMFLAG(ch)    (!ROOM_FLAGGED(IN_ROOM(ch), ROOM_INDOORS) && \
              !ROOM_FLAGGED(IN_ROOM(ch), ROOM_UNDERGROUND) && \
-                          !ROOM_FLAGGED(IN_ROOM(ch), ROOM_SPACE))
+                          !(ch)->getWhereFlag(WhereFlag::space))
 
 #define OUTSIDE_SECTTYPE(ch)    ((ch->getLocationTileType() != SECT_INSIDE) && \
                          (ch->getLocationTileType() != SECT_UNDERWATER) && \

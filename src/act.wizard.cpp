@@ -1528,7 +1528,9 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
         *(tmstr + strlen(tmstr) - 1) = '\0';
         send_to_char(ch, "LOADED AT: [%s]\r\n", tmstr);
     }
-    sprinttype(GET_SEX(k), genders, buf, sizeof(buf));
+    auto sex = fmt::format("{}", k->sex);
+
+    snprintf(buf, sizeof(buf), "%s", sex.c_str());
     send_to_char(ch, "%s %s '%s'  IDNum: [%5d], In room [%5d], Loadroom : [%5d]\r\n",
                  buf, (!IS_NPC(k) ? "PC" : (!IS_MOB(k) ? "NPC" : "MOB")),
                  GET_NAME(k), IS_NPC(k) ? ((k)->id) : GET_IDNUM(k), k->getRoomVnum(),
@@ -3420,21 +3422,6 @@ ACMD(do_show) {
             write_to_output(ch->desc, buf);
             break;
 
-            /* show death */
-        case 6:
-            j = 0;
-            len = strlcpy(buf, "Death Traps\r\n-----------\r\n", sizeof(buf));
-            for (auto &[vn, r] : world)
-                if (ROOM_FLAGGED(r.get(), ROOM_DEATH)) {
-                    nlen = snprintf(buf + len, sizeof(buf) - len, "%2d: [%5d] %s\r\n", ++j, vn,
-                                    r->name);
-                    if (len + nlen >= sizeof(buf) || nlen < 0)
-                        break;
-                    len += nlen;
-                }
-            write_to_output(ch->desc, buf);
-            break;
-
             /* show godrooms */
         case 7:
             j = 0;
@@ -3994,7 +3981,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "Must be 'male', 'female', or 'neutral'.\r\n");
                 return (0);
             }
-            vict->set(CharAppearance::sex, i);
+            vict->sex = static_cast<Sex>(i);
             break;
         case 48:    /* set age */
             if (value <= 0) {    /* Arbitrary limits. */
@@ -4085,50 +4072,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             admin_set(vict, value);
             break;
 
-        case 59:
-            if (value < 0 || value >= 6) {
-                send_to_char(ch, "You can't set it to that.\r\n");
-                return (0);
-            }
-            vict->set(CharAppearance::hair_length, value);
-            return (1);
-            break;
 
-        case 60:
-            if (value < 0 || value >= 13) {
-                send_to_char(ch, "You can't set it to that.\r\n");
-                return (0);
-            }
-            vict->set(CharAppearance::hair_style, value);
-            return (1);
-            break;
-
-        case 61:
-            if (value < 0 || value >= 15) {
-                send_to_char(ch, "You can't set it to that.\r\n");
-                return (0);
-            }
-            vict->set(CharAppearance::hair_color, value);
-            return (1);
-            break;
-
-        case 62:
-            if (value < 0 || value >= 12) {
-                send_to_char(ch, "You can't set it to that.\r\n");
-                return (0);
-            }
-            vict->set(CharAppearance::skin_color, value);
-            return (1);
-            break;
-
-        case 63:
-            if (value < 0 || value >= 13) {
-                send_to_char(ch, "You can't set it to that.\r\n");
-                return (0);
-            }
-            vict->set(CharAppearance::eye_color, value);
-            return (1);
-            break;
 
         case 64:
             vict->set(CharVital::powerlevel, value);
@@ -4168,13 +4112,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                    GET_NAME(ch), GET_NAME(vict));
             log_imm_action("SET: %s has set upgrade points for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
-
-        case 70:
-            vict->set(CharAppearance::aura, RANGE(0, 8));
-            mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set aura for %s.", GET_NAME(ch),
-                   GET_NAME(vict));
-            log_imm_action("SET: %s has set aura for %s.", GET_NAME(ch), GET_NAME(vict));
-            break;
         case 71:
             send_to_char(ch, "Use the reward command.\r\n");
             break;
@@ -4197,10 +4134,6 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "They aren't even in the game!\r\n");
             }
             break;
-        case 77:
-            vict->set(CharNum::racial_preference, RANGE(1, 3));
-            break;
-
         case 78:
             GET_SLOTS(vict) = RANGE(1, 1000);
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set skill slots for %s.", GET_NAME(ch),

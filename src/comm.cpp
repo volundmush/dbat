@@ -248,9 +248,6 @@ static void saveMudTimeWrapper(uint64_t heartBeat, double deltaTime) {
     save_mud_time(&time_info);
 }
 
-static void deathTrapWrapper(uint64_t heartBeat, double deltaTime) {
-    timed_dt(nullptr);
-}
 
 static std::vector<GameSystem> gameSystems = {
         GameSystem("commandWaitQueue", 0.0, commandWaitQueue),
@@ -293,7 +290,6 @@ static std::vector<GameSystem> gameSystems = {
         GameSystem("clan_update", 60.0, clan_update),
         GameSystem("record_usage", 5.0, record_usage),
         GameSystem("save_mud_time", 30.0, saveMudTimeWrapper),
-        GameSystem("timed_dt", 30.0, deathTrapWrapper),
         GameSystem("extract_pending_chars", 0.0, extract_pending_chars),
 };
 
@@ -1799,7 +1795,7 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
         dcval = roll_skill(ch, SKILL_MOVE_SILENTLY); /* How difficult to counter? */
         if (GET_SKILL(ch, SKILL_BALANCE))
             dcval += GET_SKILL(ch, SKILL_BALANCE) / 10;
-        if (IS_MUTANT(ch) && (ch->genome.contains(5))) {
+        if (ch->mutations.get(Mutation::natural_camouflage)) {
             dcval += 10;
         }
         resskill = SKILL_SPOT;             /* Skill used to resist      */
@@ -1914,29 +1910,6 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
     }
     return last_act_message;
 }
-
-
-/* Prefer the file over the descriptor. */
-
-int open_logfile(const char *filename, FILE *stderr_fp) {
-    if (stderr_fp)    /* freopen() the descriptor. */
-        logfile = freopen(filename, "w", stderr_fp);
-    else
-        logfile = fopen(filename, "w");
-
-    if (logfile) {
-        printf("Using log file '%s'%s.\n",
-               filename, stderr_fp ? " with redirection" : "");
-        return (true);
-    }
-
-    printf("SYSERR: Error opening file '%s': %s\n", filename, strerror(errno));
-    return (false);
-}
-
-/*
- * This may not be pretty but it keeps game_loop() neater than if it was inline.
- */
 
 
 void descriptor_data::handle_input() {

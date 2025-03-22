@@ -1599,7 +1599,7 @@ namespace trans {
 
         if(form == Form::super_saiyan_1 && PLR_FLAGGED(ch, PLR_FPSSJ)) drain *= 0.5;
 
-        if (ch->getRoomFlag(ROOM_RHELL) || ch->getRoomFlag(ROOM_AL)) 
+        if (ch->getWhereFlag(WhereFlag::afterlife_hell) || ch->getWhereFlag(WhereFlag::afterlife)) 
             drain *= 0.75;
 
         if(ch->form != Form::base && ch->technique != Form::base)
@@ -2681,7 +2681,66 @@ namespace trans {
         send_to_scouter(buf3, ch, 1, 0);
     }
 
-    
+    std::optional<std::string> getAppearance(char_data *ch, Form form, Appearance type) {
+        // first we'll check for a specific override
+        if(auto found = ch->transforms.find(form) ; found != ch->transforms.end()) {
+            auto& data = found->second;
+            if(auto appfound = data.appearances.find(type); appfound != data.appearances.end()) {
+                return appfound->second;
+            }
+        }
+
+        switch(type) {
+            case Appearance::hair_color:
+                switch(form) {
+                    case Form::oozaru:
+                        return "brown";
+                    case Form::golden_oozaru:
+                    case Form::super_saiyan_1:
+                    case Form::super_saiyan_2:
+                    case Form::super_saiyan_3:
+                        return "golden";
+                    case Form::super_saiyan_4:
+                        return "black";
+                    case Form::super_saiyan_god:
+                        return "red";
+                    case Form::super_saiyan_blue:
+                        return "blue";
+                    case Form::legendary_saiyan:
+                        return "greenish-golden";
+                }
+            case Appearance::aura_color:
+                switch(form) {
+                    case Form::golden_oozaru:
+                    case Form::super_saiyan_1:
+                    case Form::super_saiyan_2:
+                    case Form::super_saiyan_3:
+                    case Form::super_saiyan_4:
+                        return "golden";
+                    case Form::super_saiyan_god:
+                        return "red";
+                    case Form::super_saiyan_blue:
+                        return "blue";
+                    case Form::legendary_saiyan:
+                        return "greenish-golden";
+                    case Form::ultra_instinct:
+                        return "silver";
+                }
+            case Appearance::eye_color:
+                switch(form) {
+                    case Form::super_saiyan_1:
+                    case Form::super_saiyan_2:
+                    case Form::super_saiyan_3:
+                        return "green";
+                    case Form::super_saiyan_god:
+                        return "red";
+                    case Form::super_saiyan_blue:
+                        return "blue";
+                }
+        }
+
+        return {};
+    }
 
 }
 

@@ -3,131 +3,125 @@
 #include "dbat/comm.h"
 #include "dbat/send.h"
 
-static const std::unordered_map<int, int> planetFlags = {
-    {ROOM_EARTH, PLANET_EARTH},
-    {ROOM_VEGETA, PLANET_VEGETA},
-    {ROOM_FRIGID, PLANET_FRIGID},
-    {ROOM_NAMEK, PLANET_NAMEK},
-    {ROOM_KONACK, PLANET_KONACK},
-    {ROOM_AETHER, PLANET_AETHER},
-    {ROOM_YARDRAT, PLANET_YARDRAT},
-    {ROOM_KANASSA, PLANET_KANASSA},
-    {ROOM_CERRIA, PLANET_CERRIA},
-    {ROOM_ARLIA, PLANET_ARLIA},
+static const std::unordered_set<WhereFlag> planetFlags = {
+    {WhereFlag::planet_earth, WhereFlag::planet_vegeta, WhereFlag::planet_frigid, 
+        WhereFlag::planet_namek, WhereFlag::planet_konack, WhereFlag::planet_aether,
+         WhereFlag::planet_yardrat, WhereFlag::planet_kanassa, WhereFlag::planet_cerria,
+          WhereFlag::planet_arlia},
 };
 
-static const std::unordered_map<room_vnum, int> planetOrbits = {
-    {ORBIT_EARTH, PLANET_EARTH},
-    {ORBIT_VEGETA, PLANET_VEGETA},
-    {ORBIT_FRIGID, PLANET_FRIGID},
-    {ORBIT_NAMEK, PLANET_NAMEK},
-    {ORBIT_KONACK, PLANET_KONACK},
-    {ORBIT_AETHER, PLANET_AETHER},
-    {ORBIT_YARDRAT, PLANET_YARDRAT},
-    {ORBIT_KANASSA, PLANET_KANASSA},
-    {ORBIT_CERRIA, PLANET_CERRIA},
-    {ORBIT_ARLIA, PLANET_ARLIA},
-    {ORBIT_ZENITH, PLANET_ZENITH},
+static const std::unordered_map<room_vnum, WhereFlag> planetOrbits = {
+    {ORBIT_EARTH, WhereFlag::planet_earth},
+    {ORBIT_VEGETA, WhereFlag::planet_vegeta},
+    {ORBIT_FRIGID, WhereFlag::planet_frigid},
+    {ORBIT_NAMEK, WhereFlag::planet_namek},
+    {ORBIT_KONACK, WhereFlag::planet_konack},
+    {ORBIT_AETHER, WhereFlag::planet_aether},
+    {ORBIT_YARDRAT, WhereFlag::planet_yardrat},
+    {ORBIT_KANASSA, WhereFlag::planet_kanassa},
+    {ORBIT_CERRIA, WhereFlag::planet_cerria},
+    {ORBIT_ARLIA, WhereFlag::planet_arlia},
+    {ORBIT_ZENITH, WhereFlag::moon_zenith},
 };
 
-int checkOrbit(const room_vnum room) {
+std::optional<WhereFlag> checkOrbit(const room_vnum room) {
     if(auto find = planetOrbits.find(room); find != planetOrbits.end()) {
         return find->second;
     }
-    return 0;
+    return {};
 }
 
-int getPlanet(const room_vnum room) {
+std::optional<WhereFlag> getPlanet(const room_vnum room) {
     auto r = get_room(room);
-    if(!r) return 0;
+    if(!r) return {};
 
     // this approach covers most, but not all, planets.
-    for(const auto& [flag, planet] : planetFlags) {
-        if(r->room_flags.get(flag)) return planet;
+    for(const auto& planet : planetFlags) {
+        if(r->where_flags.get(planet)) return planet;
     }
 
     if((room >= 3400 && room <= 3599) || (room >= 62900 && room <= 62999) || room == 19600)
-        return PLANET_ZENITH;
+        return WhereFlag::moon_zenith;
 
-    return 0;
+    return {};
 
 };
 
-std::string getPlanetName(const int planet) {
+std::string getPlanetName(const WhereFlag planet) {
     switch(planet) {
-        case PLANET_EARTH: return "Earth";
-        case PLANET_VEGETA: return "Vegeta";
-        case PLANET_FRIGID: return "Frigid";
-        case PLANET_NAMEK: return "Namek";
-        case PLANET_KONACK: return "Konack";
-        case PLANET_AETHER: return "Aether";
-        case PLANET_YARDRAT: return "Yardrat";
-        case PLANET_KANASSA: return "Kanassa";
-        case PLANET_CERRIA: return "Cerria";
-        case PLANET_ARLIA: return "Arlia";
-        case PLANET_ZENITH: return "Zenith";
+        case WhereFlag::planet_earth: return "Earth";
+        case WhereFlag::planet_vegeta: return "Vegeta";
+        case WhereFlag::planet_frigid: return "Frigid";
+        case WhereFlag::planet_namek: return "Namek";
+        case WhereFlag::planet_konack: return "Konack";
+        case WhereFlag::planet_aether: return "Aether";
+        case WhereFlag::planet_yardrat: return "Yardrat";
+        case WhereFlag::planet_kanassa: return "Kanassa";
+        case WhereFlag::planet_cerria: return "Cerria";
+        case WhereFlag::planet_arlia: return "Arlia";
+        case WhereFlag::moon_zenith: return "Zenith";
         default: return "Unknown";
     }
 }
 
-std::string getPlanetColorName(const int planet) {
+std::string getPlanetColorName(const WhereFlag planet) {
     switch(planet) {
-        case PLANET_EARTH: return "@GEarth@n";
-        case PLANET_VEGETA: return "@YVegeta@n";
-        case PLANET_FRIGID: return "@CFrigid@n";
-        case PLANET_NAMEK: return "@gNamek@n";
-        case PLANET_KONACK: return "@MKonack@n";
-        case PLANET_AETHER: return "@MAether@n";
-        case PLANET_YARDRAT: return "@mYardrat@n";
-        case PLANET_KANASSA: return "@BKanassa@n";
-        case PLANET_CERRIA: return "@RCerria@n";
-        case PLANET_ARLIA: return "@GArlia@n";
-        case PLANET_ZENITH: return "@BZenith@n";
+        case WhereFlag::planet_earth: return "@GEarth@n";
+        case WhereFlag::planet_vegeta: return "@YVegeta@n";
+        case WhereFlag::planet_frigid: return "@CFrigid@n";
+        case WhereFlag::planet_namek: return "@gNamek@n";
+        case WhereFlag::planet_konack: return "@MKonack@n";
+        case WhereFlag::planet_aether: return "@MAether@n";
+        case WhereFlag::planet_yardrat: return "@mYardrat@n";
+        case WhereFlag::planet_kanassa: return "@BKanassa@n";
+        case WhereFlag::planet_cerria: return "@RCerria@n";
+        case WhereFlag::planet_arlia: return "@GArlia@n";
+        case WhereFlag::moon_zenith: return "@BZenith@n";
         default: return "Unknown";
     }
 }
 
-room_vnum getPlanetOrbit(const int planet) {
+room_vnum getPlanetOrbit(const WhereFlag planet) {
     switch(planet) {
-        case PLANET_EARTH: return ORBIT_EARTH;
-        case PLANET_VEGETA: return ORBIT_VEGETA;
-        case PLANET_FRIGID: return ORBIT_FRIGID;
-        case PLANET_NAMEK: return ORBIT_NAMEK;
-        case PLANET_KONACK: return ORBIT_KONACK;
-        case PLANET_AETHER: return ORBIT_AETHER;
-        case PLANET_YARDRAT: return ORBIT_YARDRAT;
-        case PLANET_KANASSA: return ORBIT_KANASSA;
-        case PLANET_CERRIA: return ORBIT_CERRIA;
-        case PLANET_ARLIA: return ORBIT_ARLIA;
-        case PLANET_ZENITH: return ORBIT_ZENITH;
+        case WhereFlag::planet_earth: return ORBIT_EARTH;
+        case WhereFlag::planet_vegeta: return ORBIT_VEGETA;
+        case WhereFlag::planet_frigid: return ORBIT_FRIGID;
+        case WhereFlag::planet_namek: return ORBIT_NAMEK;
+        case WhereFlag::planet_konack: return ORBIT_KONACK;
+        case WhereFlag::planet_aether: return ORBIT_AETHER;
+        case WhereFlag::planet_yardrat: return ORBIT_YARDRAT;
+        case WhereFlag::planet_kanassa: return ORBIT_KANASSA;
+        case WhereFlag::planet_cerria: return ORBIT_CERRIA;
+        case WhereFlag::planet_arlia: return ORBIT_ARLIA;
+        case WhereFlag::moon_zenith: return ORBIT_ZENITH;
         default: return NOWHERE;
     }
 }
 
-std::optional<double> getPlanetEnvironment(const int planet, const int environment) {
+std::optional<double> getPlanetEnvironment(const WhereFlag planet, const int environment) {
     switch(environment) {
         case ENV_GRAVITY:
             switch(planet) {
-                case PLANET_VEGETA:
+                case WhereFlag::planet_vegeta:
                     return 10.0;
             }
             break;
         case ENV_MOONLIGHT:
             switch(planet) {
-                case PLANET_EARTH:
-                case PLANET_AETHER:
-                case PLANET_VEGETA:
-                case PLANET_FRIGID:
+                case WhereFlag::planet_earth:
+                case WhereFlag::planet_aether:
+                case WhereFlag::planet_vegeta:
+                case WhereFlag::planet_frigid:
                     return MOON_TIMECHECK() ? 100.0 : 0.0;
                 default:
                     return -1;
             }
         case ENV_ETHER_STREAM:
             switch(planet) {
-                case PLANET_EARTH:
-                case PLANET_AETHER:
-                case PLANET_NAMEK:
-                case PLANET_ZENITH:
+                case WhereFlag::planet_earth:
+                case WhereFlag::planet_aether:
+                case WhereFlag::planet_namek:
+                case WhereFlag::moon_zenith:
                     return 100.0;
                 default: return 0.0;
             }
@@ -247,19 +241,19 @@ static const land_spots land_zenith = {
     {"Ancient Castle", 19600},
 };
 
-land_spots getPlanetLandspots(const room_vnum orbit) {
+land_spots getPlanetLandspots(const WhereFlag orbit) {
     switch(orbit) {
-        case PLANET_EARTH: return land_earth;
-        case PLANET_VEGETA: return land_vegeta;
-        case PLANET_FRIGID: return land_frigid;
-        case PLANET_NAMEK: return land_namek;
-        case PLANET_KONACK: return land_konack;
-        case PLANET_AETHER: return land_aether;
-        case PLANET_YARDRAT: return land_yardrat;
-        case PLANET_KANASSA: return land_kanassa;
-        case PLANET_CERRIA: return land_cerria;
-        case PLANET_ARLIA: return land_arlia;
-        case PLANET_ZENITH: return land_zenith;
+        case WhereFlag::planet_earth: return land_earth;
+        case WhereFlag::planet_vegeta: return land_vegeta;
+        case WhereFlag::planet_frigid: return land_frigid;
+        case WhereFlag::planet_namek: return land_namek;
+        case WhereFlag::planet_konack: return land_konack;
+        case WhereFlag::planet_aether: return land_aether;
+        case WhereFlag::planet_yardrat: return land_yardrat;
+        case WhereFlag::planet_kanassa: return land_kanassa;
+        case WhereFlag::planet_cerria: return land_cerria;
+        case WhereFlag::planet_arlia: return land_arlia;
+        case WhereFlag::moon_zenith: return land_zenith;
         default: return {};
     }
 }
@@ -434,19 +428,19 @@ static const land_spots dock_zenith = {
     {"Ancient Castle", 19600},
 };
 
-land_spots getPlanetSpacepads(const room_vnum orbit) {
+land_spots getPlanetSpacepads(const WhereFlag orbit) {
     switch(orbit) {
-        case PLANET_EARTH: return dock_earth;
-        case PLANET_VEGETA: return dock_vegeta;
-        case PLANET_FRIGID: return dock_frigid;
-        case PLANET_NAMEK: return dock_namek;
-        case PLANET_KONACK: return dock_konack;
-        case PLANET_AETHER: return dock_aether;
-        case PLANET_YARDRAT: return dock_yardrat;
-        case PLANET_KANASSA: return dock_kanassa;
-        case PLANET_CERRIA: return dock_cerria;
-        case PLANET_ARLIA: return dock_arlia;
-        case PLANET_ZENITH: return dock_zenith;
+        case WhereFlag::planet_earth: return dock_earth;
+        case WhereFlag::planet_vegeta: return dock_vegeta;
+        case WhereFlag::planet_frigid: return dock_frigid;
+        case WhereFlag::planet_namek: return dock_namek;
+        case WhereFlag::planet_konack: return dock_konack;
+        case WhereFlag::planet_aether: return dock_aether;
+        case WhereFlag::planet_yardrat: return dock_yardrat;
+        case WhereFlag::planet_kanassa: return dock_kanassa;
+        case WhereFlag::planet_cerria: return dock_cerria;
+        case WhereFlag::planet_arlia: return dock_arlia;
+        case WhereFlag::moon_zenith: return dock_zenith;
         default: return {};
     }
 }

@@ -177,7 +177,7 @@ void drive_in_direction(struct char_data *ch, struct obj_data *vehicle, int dir)
         return;
     }
 
-    if (!dest->room_flags.get(RoomFlag::vehicle) && !dest->room_flags.get(RoomFlag::space)) {
+    if (!dest->room_flags.get(RoomFlag::vehicle) && !dest->where_flags.get(WhereFlag::space)) {
         /* But the vehicle can't go that way*/
         send_to_char(ch, "@wThe ship can't fit there!\r\n");
         return;
@@ -288,7 +288,7 @@ static bool validate_warp_conditions(struct char_data *ch, struct obj_data *vehi
         return false;
     }
 
-    if (!vehicle->getRoomFlag(ROOM_SPACE)) {
+    if (!vehicle->getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "Your ship needs to be in space to utilize its Instant Travel Warp Accelerator.\r\n");
         return false;
     }
@@ -525,7 +525,7 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
         return;
     }
 
-    auto pads = getPlanetSpacepads(planet);
+    auto pads = getPlanetSpacepads(planet.value());
 
     if(pads.empty()) {
         send_to_char(ch, "@wThere are no landing destinations here.\r\n");
@@ -534,7 +534,7 @@ static void handle_drive_land(struct char_data *ch, struct obj_data *vehicle, co
 
     if(pad.empty()) {
         send_to_char(ch, "Land where?\r\n");
-        displayLandSpots(ch, getPlanetColorName(planet), pads);
+        displayLandSpots(ch, getPlanetColorName(planet.value()), pads);
         return;
     }
 
@@ -577,7 +577,7 @@ static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, 
         send_to_char(ch, "@wYou are not on a planet.@n\r\n");
         return;
     }
-    auto dest = getPlanetOrbit(planet);
+    auto dest = getPlanetOrbit(planet.value());
     if(dest == NOWHERE) {
         send_to_char(ch, "@wYou are not on a planet.@n\r\n");
         return;
@@ -611,7 +611,7 @@ static void handle_drive_launch(struct char_data *ch, struct obj_data *vehicle, 
 }
 
 static void handle_buoy_launch(struct char_data *ch, struct obj_data *vehicle, const std::string& marker) {
-    if (!vehicle->getRoomFlag(ROOM_SPACE)) {
+    if (!vehicle->getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "@wYou need to be in space to launch a marker buoy.\r\n");
         return;
     }

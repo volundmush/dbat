@@ -255,13 +255,13 @@ ACMD(do_land) {
     std::vector<std::pair<std::string, room_vnum>> landLocations;
 
     if(planet) {
-        landLocations = getPlanetLandspots(planet);
+        landLocations = getPlanetLandspots(planet.value());
     } 
 
     if (!*argument) {
         if (planet && !landLocations.empty()) {
             send_to_char(ch, "Land where?\n");
-            displayLandSpots(ch, getPlanetColorName(planet), landLocations);
+            displayLandSpots(ch, getPlanetColorName(planet.value()), landLocations);
             return;
         } else {
             send_to_char(ch, "You are not even in the lower atmosphere of a planet!\r\n");
@@ -433,7 +433,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (r->room_flags.get(ROOM_SPACE)) {
+    if (r->where_flags.get(WhereFlag::space)) {
         if (!IS_ANDROID(ch)) {
             if (!check_swim(ch)) {
                 return (0);
@@ -722,15 +722,6 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
         }
     }
 
-    if (ch->getRoomFlag(ROOM_TIMED_DT) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE))
-        timed_dt(nullptr);
-
-    if (ch->getRoomFlag(ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
-        log_death_trap(ch);
-        death_cry(ch);
-        extract_char(ch);
-        return (0);
-    }
 
     entry_memory_mtrigger(ch);
     if (!greet_mtrigger(ch, dir)) {
@@ -989,7 +980,7 @@ ACMD(do_move) {
             WAIT_STATE(ch, std::min<int>(PULSE_3SEC * ratio, PULSE_5SEC));
         }
 
-        if (ch->getRoomFlag(ROOM_SPACE) && GET_ADMLEVEL(ch) < 1) {
+        if (ch->getWhereFlag(WhereFlag::space) && GET_ADMLEVEL(ch) < 1) {
             send_to_char(ch, "You struggle to cross the vast distance.\r\n");
             WAIT_STATE(ch, PULSE_6SEC);
         } else if ((GET_LIMBCOND(ch, 2) <= 0 && GET_LIMBCOND(ch, 3) <= 0) && GET_LIMBCOND(ch, 0) <= 0 &&
@@ -1253,7 +1244,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                                      "@wThe ship hatch opens slowly and settles onto the ground outside.\r\n");
                         send_to_room(IN_ROOM(vehicle),
                                      "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
-                        if (vehicle->getRoomFlag(ROOM_SPACE)) {
+                        if (vehicle->getWhereFlag(WhereFlag::space)) {
                             send_to_room(IN_ROOM(ch),
                                          "@wA great vortex forms as air begins to get sucked out into the void!\r\n");
                         }
@@ -1272,7 +1263,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                     if (GET_OBJ_VNUM(obj) > 19199) {
                         send_to_room(num, "@wThe ship hatch opens slowly and settles onto the ground.\r\n");
                         send_to_room(IN_ROOM(hatch), "@wThe ship hatch opens slowly.\r\n");
-                        if (obj->getRoomFlag(ROOM_SPACE)) {
+                        if (obj->getWhereFlag(WhereFlag::space)) {
                             send_to_room(num, "@wThe air starts getting sucked out into space as the hatch opens!\r\n");
                         }
                     } else {
@@ -1303,7 +1294,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                         send_to_room(IN_ROOM(ch),
                                      "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
                         send_to_room(IN_ROOM(vehicle), "@wThe ship hatch slowly closes, sealing the ship.\r\n");
-                        if (vehicle->getRoomFlag(ROOM_SPACE)) {
+                        if (vehicle->getWhereFlag(WhereFlag::space)) {
                             send_to_room(IN_ROOM(ch),
                                          "@wThe air stops getting sucked out into space as the hatch seals!\r\n");
                         }
@@ -1323,7 +1314,7 @@ static void do_doorcmd(struct char_data *ch, struct obj_data *obj, int door, int
                         send_to_room(num, "@wThe ship hatch slowly closes, sealing the ship.\r\n");
                         send_to_room(IN_ROOM(hatch),
                                      "@wThe ship hatch slowly closes, sealing the ship from the outside.\r\n");
-                        if (obj->getRoomFlag(ROOM_SPACE)) {
+                        if (obj->getWhereFlag(WhereFlag::space)) {
                             send_to_room(num, "@wAir stops getting sucked out into space as the hatch seals!\r\n");
                         }
                     } else {
@@ -1675,13 +1666,6 @@ static int do_simple_enter(struct char_data *ch, struct obj_data *obj, int need_
     if (ch->desc)
         look_at_room(IN_ROOM(ch), ch, 0);
 
-    if (ch->getRoomFlag(ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
-        log_death_trap(ch);
-        death_cry(ch);
-        extract_char(ch);
-        return 0;
-    }
-
     entry_memory_mtrigger(ch);
     greet_memory_mtrigger(ch);
 
@@ -1912,13 +1896,6 @@ static int do_simple_leave(struct char_data *ch, struct obj_data *obj, int need_
         look_at_room(IN_ROOM(ch), ch, 0);
     }
 
-    if (ch->getRoomFlag(ROOM_DEATH) && !ADM_FLAGGED(ch, ADM_WALKANYWHERE)) {
-        log_death_trap(ch);
-        death_cry(ch);
-        extract_char(ch);
-        return 0;
-    }
-
     entry_memory_mtrigger(ch);
     greet_memory_mtrigger(ch);
 
@@ -2033,7 +2010,7 @@ static void handle_fall(struct char_data *ch) {
 static int check_swim(struct char_data *ch) {
     auto can = false;
 
-    if (ch->getRoomFlag(ROOM_SPACE)) {
+    if (ch->getWhereFlag(WhereFlag::space)) {
         auto space_cost = (GET_MAX_MANA(ch) / 1000) + ((ch->getCarriedWeight()) / 2);
         can = ch->getCurKI() >= space_cost;
         ch->decCurKI(space_cost);
@@ -2071,7 +2048,7 @@ static void handle_fly_space(char_data *ch) {
         return;
     }
 
-    auto dest = getPlanetOrbit(planet);
+    auto dest = getPlanetOrbit(planet.value());
 
     if(dest == NOWHERE) {
         send_to_char(ch, "You can't fly to space from here!");

@@ -412,7 +412,7 @@ int64_t hit_gain(struct char_data *ch) {
             case POS_STANDING:
                 if (IS_HOSHIJIN(ch) && GET_PHASE(ch) <= 0) {
                     gain = gain / 4;
-                } else if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+                } else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb) {
                     gain = gain / 3;
                 } else {
                     gain += (gain / 2);
@@ -436,7 +436,7 @@ int64_t hit_gain(struct char_data *ch) {
             case POS_RESTING:
                 if (!SITS(ch)) {
                     gain += (gain / 2);
-                } else if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+                } else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb) {
                     gain = gain * 1.5;
                 } else if (GET_OBJ_VNUM(SITS(ch)) == 19090 && !IS_ARLIAN(ch)) {
                     gain += gain * 1.1;
@@ -447,7 +447,7 @@ int64_t hit_gain(struct char_data *ch) {
             case POS_SITTING:
                 if (!SITS(ch)) {
                     gain += (gain / 4);
-                } else if (IS_ANDROID(ch) && ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+                } else if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_absorb) {
                     gain = gain * 0.5;
                 } else if (GET_OBJ_VNUM(SITS(ch)) == 19090 && !IS_ARLIAN(ch)) {
                     gain += gain * 0.6;
@@ -497,7 +497,7 @@ int64_t hit_gain(struct char_data *ch) {
     if (cook_element(IN_ROOM(ch)) == 1)
         gain *= 2;
 
-    if (ch->character_flags.get(CharacterFlag::android_model_absorb)) {
+    if (ch->subrace == SubRace::android_model_absorb) {
         gain = gain / 8;
     }
 
@@ -679,12 +679,7 @@ static void update_flags(struct char_data *ch) {
     }
 
     if(race::hasTail(ch->race) && !ch->character_flags.get(CharacterFlag::tail) && !PLR_FLAGGED(ch, PLR_NOGROW)) {
-        int growth = 0;
-        if(IS_HALFBREED(ch) && RACIAL_PREF(ch) == 1)
-            growth = 1 ? rand_number(1, 50) >= 40 : 0;
-        else
-            growth = 1;
-        ch->tail_growth += growth;
+        ch->tail_growth += 1;
         if(ch->tail_growth >= 10) {
             ch->gainTail(true);
             ch->tail_growth = 0;
@@ -786,7 +781,7 @@ void gain_condition(struct char_data *ch, int condition, int value) {
         return;
     } else if (GET_COND(ch, condition) < 0) {    /* No change */
         return;
-    } else if (ch->getRoomFlag(ROOM_RHELL)) {
+    } else if (ch->getWhereFlag(WhereFlag::afterlife_hell)) {
         return;
     } else if (ch->getRoomFlag(ROOM_HELL)) {
         return;
@@ -1216,7 +1211,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         }
                         send_to_char(ch, "@gYou gain +@G%d@g permanent powerlevel!@n\r\n", gain);
                         if (group_bonus(ch, 2) == 7) {
-                            if (leader->character_flags.get(CharacterFlag::android_model_sense)) {
+                            if (leader->subrace == SubRace::android_model_sense) {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;
                                 send_to_char(ch,
@@ -1246,7 +1241,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         }
                         send_to_char(ch, "@gYou gain +@G%d@g permanent stamina!@n\r\n", gain);
                         if (group_bonus(ch, 2) == 7) {
-                            if (leader->character_flags.get(CharacterFlag::android_model_sense)) {
+                            if (leader->subrace == SubRace::android_model_sense) {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;
                                 send_to_char(ch,
@@ -1276,7 +1271,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         }
                         send_to_char(ch, "@gYou gain +@G%d@g permanent ki!@n\r\n", gain);
                         if (ch->master && group_bonus(ch, 2) == 7) {
-                            if (leader->character_flags.get(CharacterFlag::android_model_sense)) {
+                            if (leader->subrace == SubRace::android_model_sense) {
                                 int gbonus = gain * 0.15;
                                 gain += gbonus;
                                 send_to_char(ch,
@@ -1746,7 +1741,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         change = !i->isFullVitals();
                     }
 
-                    if (IS_MUTANT(i) && i->genome.contains(6))
+                    if (i->mutations.get(Mutation::limb_regeneration))
                     {
                         mutant_limb_regen(i);
                     }
@@ -1786,7 +1781,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
                         }
                     }
 
-                    if (!has_o2(i) && (i->getLocationEnvironment(ENV_WATER) >= 100.0 || i->getRoomFlag(ROOM_SPACE)))
+                    if (!has_o2(i) && (i->getLocationEnvironment(ENV_WATER) >= 100.0 || i->getWhereFlag(WhereFlag::space)))
                     {
                         if (auto remKi = i->modCurVitalDam(CharVital::ki, .005); remKi < 1.0)
                         {
@@ -1996,74 +1991,3 @@ void point_update(uint64_t heartPulse, double deltaTime)
         }
     }
 }
-
-void timed_dt(struct char_data * ch)
-    {
-        room_rnum rrnum;
-
-        if (ch == nullptr)
-        {
-            /* BY -WELCOR
-              first make sure all rooms in the world have thier 'timed'
-              value decreased if its not -1.
-              */
-
-            for (auto &[vn, r] : world)
-                r->deathtrap_timer -= (r->deathtrap_timer != -1);
-
-            for (auto d = descriptor_list; d; d = d->next)
-            {
-                if (!d->character)
-                    continue;
-                auto vict = d->character;
-
-                if (IS_NPC(vict))
-                    continue;
-
-                if (IN_ROOM(vict) == NOWHERE)
-                    continue;
-
-                if (!vict->getRoomFlag(ROOM_TIMED_DT))
-                    continue;
-
-                timed_dt(vict);
-            }
-            return;
-        }
-
-        /*Called with a non-null ch. let's check the room. */
-
-        /*if the room wasn't triggered (i.e timed wasn't set), just set it
-          and return again.
-        */
-
-        if (ch->getRoom()->deathtrap_timer < 0)
-        {
-            ch->getRoom()->deathtrap_timer = rand_number(2, 5);
-            return;
-        }
-
-        /* We know ch is in a dt room with timed >= 0 - see if its the end.
-         *
-         */
-        if (ch->getRoom()->deathtrap_timer == 0)
-        {
-            auto people = ch->getLocationPeople();
-            for (auto vict : filter_raw(people))
-            {
-                if (IS_NPC(vict))
-                    continue;
-                if (GET_ADMLEVEL(vict) >= ADMLVL_IMMORT)
-                    continue;
-
-                /* Skip those alread dead people */
-                /* extract char() jest sets the bit*/
-                if (PLR_FLAGGED(vict, PLR_NOTDEADYET))
-                    continue;
-
-                log_death_trap(vict);
-                death_cry(vict);
-                extract_char(vict);
-            }
-        }
-    }

@@ -306,6 +306,9 @@ struct thing_data : public unit_data {
     void setRoomFlag(int flag, bool value = true) const;
     bool toggleRoomFlag(int flag) const;
     bool getRoomFlag(int flag) const;
+    void setWhereFlag(WhereFlag flag, bool value = true) const;
+    bool toggleWhereFlag(WhereFlag flag) const;
+    bool getWhereFlag(WhereFlag flag) const;
 
     void broadcastAtLocation(const std::string& message) const;
 
@@ -439,6 +442,7 @@ struct room_data : public unit_data, std::enable_shared_from_this<room_data> {
     SectorType sector_type{SectorType::inside};            /* sector type (move/hide)            */
     std::array<room_direction_data*, NUM_OF_DIRS> dir_option{}; /* Directions */
     FlagHandler<RoomFlag> room_flags{};   /* DEATH,DARK ... etc */
+    FlagHandler<WhereFlag> where_flags{};
     SpecialFunc func{};
 
     std::list<std::weak_ptr<char_data>> characters;    /* List of characters in room          */
@@ -582,6 +586,7 @@ struct trans_data {
     bool limit_broken = false;
     bool unlocked = false;
 
+    std::unordered_map<Appearance, std::string> appearances;
     std::unordered_map<std::string, double> vars;
 
     double blutz{0.0}; // The number of seconds you can spend in Oozaru.
@@ -682,7 +687,14 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     char *title{};
     Race race{Race::spirit};
+    std::optional<SubRace> subrace{};
     Sensei sensei{Sensei::commoner};
+    Sex sex{Sex::neutral};
+
+    std::unordered_map<Appearance, std::string> appearances;
+    std::string getAppearance(Appearance type, bool withTransform = true);
+    const char* getAppearanceStr(Appearance type);
+    std::string setAppearance(Appearance type, std::string val);
 
     std::list<std::pair<int, std::string>> wait_input_queue;
     Task task = Task::nothing;
@@ -736,11 +748,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     align_t get(CharAlign type);
     align_t set(CharAlign type, align_t val);
     align_t mod(CharAlign type, align_t val);
-
-    std::unordered_map<CharAppearance, appearance_t> appearances;
-    appearance_t get(CharAppearance type);
-    appearance_t set(CharAppearance type, appearance_t val);
-    appearance_t mod(CharAppearance type, appearance_t val);
 
     std::unordered_map<CharVital, vital_t> vitals;
     vital_t get(CharVital type, bool base = true);
@@ -903,7 +910,8 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     
     std::array<int, 6> gravAcclim;
     int grap{};
-    std::unordered_set<uint8_t> genome{};                /* Bio racial bonus, Genome */
+    FlagHandler<Race> bio_genomes{};
+    FlagHandler<Mutation> mutations{};
     int combo{};
     int lastattack{};
     int combhits{};

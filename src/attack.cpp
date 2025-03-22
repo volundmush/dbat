@@ -1094,7 +1094,7 @@ namespace atk {
                 actVictim("@C$n@W disappears, reappearing in front of you, and $e grabs you! Spinning quickly $e sends you flying into the ground!@n");
                 actOthers("@c$n@W disappears, reappearing in front of @C$N@W, and grabs $M! Spinning quickly $e sends $M flying into the ground!@n");
 
-                if (ROOM_DAMAGE(IN_ROOM(victim)) <= 95 && !victim->getRoomFlag(ROOM_SPACE)) {
+                if (ROOM_DAMAGE(IN_ROOM(victim)) <= 95 && !victim->getWhereFlag(WhereFlag::space)) {
                         act("@W$N@W slams into the ground forming a large crater with $S body!@n", true, user, nullptr,
                             victim,
                             TO_CHAR);
@@ -4326,7 +4326,7 @@ namespace atk {
 
     void Kakusanha::postProcess() {
         int count = targets.size();
-        if (count < 5 && !user->getRoomFlag(ROOM_SPACE)) {
+        if (count < 5 && !user->getWhereFlag(WhereFlag::space)) {
             send_to_room(IN_ROOM(user), "The rest of the beams slam into the ground!@n\r\n");
             send_to_room(IN_ROOM(user), "@wBright explosions erupt from the impacts!\r\n");
             const auto tile = user->getLocationTileType();

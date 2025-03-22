@@ -43,7 +43,7 @@ void ping_ship(int vnum, int vnum2) {
 }
 
 int checkship(int rnum, int vnum) {
-    if(ROOM_FLAGGED(rnum, ROOM_NEBULA)) return false;
+    if(WHERE_FLAGGED(rnum, WhereFlag::nebula)) return false;
 
     auto check = [](const auto& o) { return GET_OBJ_TYPE(o) == ITEM_VEHICLE;};
     if(auto found = get_room(rnum)->findObject(check); found) {
@@ -55,7 +55,7 @@ int checkship(int rnum, int vnum) {
 }
 
 struct RoomType {
-    int flag;
+    WhereFlag flag;
     const char* thereChar;
     const char* enemyChar;
     const char* defaultChar;
@@ -69,21 +69,21 @@ const char* getMapCharForRoomType(bool there, bool enemy, const RoomType& roomTy
 
 // Room type mapping
 static const RoomType roomTypes[] = {
-    {ROOM_EORBIT, "@GE@RX", "@GE@r#", "@GEE"},
-    {ROOM_CORBIT, "@MC@RX", "@MC@r#", "@MCC"},
-    {ROOM_FORBIT, "@CF@RX", "@CF@r#", "@CFF"},
-    {ROOM_KORBIT, "@mK@RX", "@mK@r#", "@mKK"},
-    {ROOM_NORBIT, "@gN@RX", "@gN@r#", "@gNN"},
-    {ROOM_VORBIT, "@YV@RX", "@YV@r#", "@YVV"},
-    {ROOM_AORBIT, "@BA@RX", "@BA@r#", "@BAA"},
-    {ROOM_YORBIT, "@MY@RX", "@MY@r#", "@MYY"},
-    {ROOM_KANORB, "@CK@RX", "@CK@r#", "@CKK"},
-    {ROOM_ARLORB, "@mA@RX", "@mA@r#", "@mAA"},
-    {ROOM_NEBULA, "@m&@RX", "@m&@r#", "@m&&"},
-    {ROOM_ASTERO, "@y:@RX", "@y:@r#", "@y::"},
-    {ROOM_WORMHO, "@b@1*@RX@n", "@b@1*@r#@n", "@b@1**@n"},
-    {ROOM_STATION, "@DS@RX", "@DS@r#", "@DSS"},
-    {ROOM_STAR, "@6 @RX@n", "@6 @r#@n", "@6  @n"},
+    {WhereFlag::earth_orbit, "@GE@RX", "@GE@r#", "@GEE"},
+    {WhereFlag::cerria_orbit, "@MC@RX", "@MC@r#", "@MCC"},
+    {WhereFlag::frigid_orbit, "@CF@RX", "@CF@r#", "@CFF"},
+    {WhereFlag::konack_orbit, "@mK@RX", "@mK@r#", "@mKK"},
+    {WhereFlag::namek_orbit, "@gN@RX", "@gN@r#", "@gNN"},
+    {WhereFlag::vegeta_orbit, "@YV@RX", "@YV@r#", "@YVV"},
+    {WhereFlag::aether_orbit, "@BA@RX", "@BA@r#", "@BAA"},
+    {WhereFlag::yardrat_orbit, "@MY@RX", "@MY@r#", "@MYY"},
+    {WhereFlag::kanassa_orbit, "@CK@RX", "@CK@r#", "@CKK"},
+    {WhereFlag::arlia_orbit, "@mA@RX", "@mA@r#", "@mAA"},
+    {WhereFlag::nebula, "@m&@RX", "@m&@r#", "@m&&"},
+    {WhereFlag::asteroid, "@y:@RX", "@y:@r#", "@y::"},
+    {WhereFlag::wormhole, "@b@1*@RX@n", "@b@1*@r#@n", "@b@1**@n"},
+    {WhereFlag::space_station, "@DS@RX", "@DS@r#", "@DSS"},
+    {WhereFlag::star, "@6 @RX@n", "@6 @r#@n", "@6  @n"},
 };
 
 char* getmapchar(int rnum, struct char_data* ch, int start, int vnum) {
@@ -102,7 +102,7 @@ char* getmapchar(int rnum, struct char_data* ch, int start, int vnum) {
         // Handle the room types
         bool handled = false;
         for (const auto& roomType : roomTypes) {
-            if (ROOM_FLAGGED(rnum, roomType.flag)) {
+            if (WHERE_FLAGGED(rnum, roomType.flag)) {
                 sprintf(mapchar, "%s", getMapCharForRoomType(there, enemy, roomType));
                 handled = true;
                 break;

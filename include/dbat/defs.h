@@ -75,6 +75,12 @@ enum class Race : uint8_t {
     mechanical = 23,
 };
 
+enum class SubRace : uint8_t {
+    android_model_absorb = 0,
+    android_model_repair = 1,
+    android_model_sense = 2
+};
+
 enum class Sensei : uint8_t {
     commoner = 0,
     roshi = 1,
@@ -548,51 +554,15 @@ constexpr int ROOM_TUNNEL = 8;   /* room for only 1 pers	*/
 constexpr int ROOM_PRIVATE = 9;   /* Can't teleport in		*/
 constexpr int ROOM_GODROOM = 10;  /* LVL_GOD+ only allowed	*/
 constexpr int ROOM_HOUSE = 11;  /* (R) Room is a house	*/
-constexpr int ROOM_HOUSE_CRASH = 12;  /* (R) House needs saving	*/
 constexpr int ROOM_ATRIUM = 13;  /* (R) The door to a house	*/
 constexpr int ROOM_OLC = 14;  /* (R) Modifyable/!compress	*/
-constexpr int ROOM_BFS_MARK = 15;  /* (R) breath-first srch mrk	*/
 constexpr int ROOM_VEHICLE = 16;  /* Requires a vehicle to pass       */
 constexpr int ROOM_UNDERGROUND = 17;  /* Room is below ground      */
-constexpr int ROOM_CURRENT = 18;  /* Room move with random currents	*/
-constexpr int ROOM_TIMED_DT = 19;  /* Room has a timed death trap  	*/
-constexpr int ROOM_EARTH = 20;  /* Room is on Earth */
-constexpr int ROOM_VEGETA = 21;  /* Room is on Vegeta */
-constexpr int ROOM_FRIGID = 22;  /* Room is on Frigid */
-constexpr int ROOM_KONACK = 23;  /* Room is on Konack */
-constexpr int ROOM_NAMEK = 24;  /* Room is on Namek */
-constexpr int ROOM_NEO = 25;  /* Room is on Neo */
-constexpr int ROOM_AL = 26;  /* Room is on AL */
-constexpr int ROOM_SPACE = 27;  /* Room is on Space */
 constexpr int ROOM_HELL = 28;  /* Room is Punishment Hell*/
 constexpr int ROOM_REGEN = 29;  /* Better regen */
-constexpr int ROOM_RHELL = 30;  /* Room is HELLLLLLL */
-constexpr int ROOM_GRAVITYX10 = 31;  /* For rooms that have 10x grav */
-constexpr int ROOM_AETHER = 32;  /* Room is on Aether */
-constexpr int ROOM_HBTC = 33;  /* Room is extra special training area */
-constexpr int ROOM_PAST = 34;  /* Inside the pendulum room */
 constexpr int ROOM_CBANK = 35;  /* This room is a clan bank */
 constexpr int ROOM_SHIP = 36;  /* This room is a private ship room */
-constexpr int ROOM_YARDRAT = 37;  /* This room is on planet Yardrat   */
-constexpr int ROOM_KANASSA = 38;  /* This room is on planet Kanassa   */
-constexpr int ROOM_ARLIA = 39;  /* This room is on planet Arlia     */
 constexpr int ROOM_AURA = 40;  /* This room has an aura around it  */
-constexpr int ROOM_EORBIT = 41;  /* Earth Orbit                      */
-constexpr int ROOM_FORBIT = 42;  /* Frigid Orbit                     */
-constexpr int ROOM_KORBIT = 43;  /* Konack Orbit                     */
-constexpr int ROOM_NORBIT = 44;  /* Namek  Orbit                     */
-constexpr int ROOM_VORBIT = 45;  /* Vegeta Orbit                     */
-constexpr int ROOM_AORBIT = 46;  /* Aether Orbit                     */
-constexpr int ROOM_YORBIT = 47;  /* Yardrat Orbit                    */
-constexpr int ROOM_KANORB = 48;  /* Kanassa Orbit                    */
-constexpr int ROOM_ARLORB = 49;  /* Arlia Orbit                      */
-constexpr int ROOM_NEBULA = 50;  /* Nebulae                          */
-constexpr int ROOM_ASTERO = 51;  /* Asteroid                         */
-constexpr int ROOM_WORMHO = 52;  /* Wormhole                         */
-constexpr int ROOM_STATION = 53;  /* Space Station                    */
-constexpr int ROOM_STAR = 54;  /* Is a star                        */
-constexpr int ROOM_CERRIA = 55;  /* This room is on planet Cerria    */
-constexpr int ROOM_CORBIT = 56;  /* This room is in Cerria's Orbit   */
 constexpr int ROOM_BEDROOM = 57;  /* +25% regen                       */
 constexpr int ROOM_WORKOUT = 58;  /* Workout Room                     */
 constexpr int ROOM_GARDEN1 = 59;  /* 8 plant garden                   */
@@ -602,11 +572,44 @@ constexpr int ROOM_FERTILE2 = 62;
 constexpr int ROOM_FISHING = 63;
 constexpr int ROOM_FISHFRESH = 64;
 constexpr int ROOM_CANREMODEL = 65;
-constexpr int ROOM_ZENITH = 66;
-constexpr int ROOM_SAVE = 67; /* room saves contents */
-constexpr int ROOM_ZORBIT = 68; // zenith orbit
 
 constexpr int NUM_ROOM_FLAGS = 69;
+
+enum class WhereFlag : uint8_t {
+    planet_earth = 0,           // Room is on Earth
+    earth_orbit = 1,          // Earth Orbit
+    planet_vegeta = 2,          // Room is on Vegeta
+    vegeta_orbit = 3,          // Vegeta Orbit
+    planet_frigid = 4,          // Room is on Frigid
+    frigid_orbit = 5,          // Frigid Orbit
+    planet_konack = 6,          // Room is on Konack
+    konack_orbit = 7,          // Konack Orbit
+    planet_namek = 8,           // Room is on Namek
+    namek_orbit = 9,          // Namek Orbit
+    planet_aether = 10,          // Room is on Aether
+    aether_orbit = 11,          // Aether Orbit
+    planet_yardrat = 12,         // This room is on planet Yardrat
+    yardrat_orbit = 13,          // Yardrat Orbit
+    planet_kanassa = 14,         // This room is on planet Kanassa
+    kanassa_orbit = 15,          // Kanassa Orbit
+    planet_arlia = 16,           // This room is on planet Arlia
+    arlia_orbit = 17,          // Arlia Orbit
+    planet_cerria = 18,          // This room is on planet Cerria
+    cerria_orbit = 19,          // This room is in Cerria's Orbit
+    moon_zenith = 20,          // (unspecified)
+    zenith_orbit = 21,           // zenith orbit
+    neo_nirvana = 22,             // Room is on Neo
+    afterlife = 23,              // Room is on AL
+    afterlife_hell = 24,           // Room is HELLLLLLL
+    hyperbolic_time_chamber = 25,            // Room is extra special training area
+    pendulum_past = 26,            // Inside the pendulum room
+    space = 27,           // Room is on Space
+    nebula = 28,          // Nebulae
+    asteroid = 29,          // Asteroid
+    wormhole = 30,          // Wormhole
+    space_station = 31,         // Space Station
+    star = 32            // Is a star
+};
 
 enum class RoomFlag : uint8_t {
     dark = 0,             // Dark
@@ -627,45 +630,12 @@ enum class RoomFlag : uint8_t {
     //bfs_mark = 15,        // (R) breath-first srch mrk
     vehicle = 16,         // Requires a vehicle to pass
     underground = 17,     // Room is below ground
-    currents = 18,         // Room move with random currents
     //timed_deathtrap = 19,        // Room has a timed death trap
-    planet_earth = 20,           // Room is on Earth
-    planet_vegeta = 21,          // Room is on Vegeta
-    planet_frigid = 22,          // Room is on Frigid
-    planet_konack = 23,          // Room is on Konack
-    planet_namek = 24,           // Room is on Namek
-    neo_nirvana = 25,             // Room is on Neo
-    afterlife = 26,              // Room is on AL
-    space = 27,           // Room is on Space
     punishment_hell = 28,            // Room is Punishment Hell
     regen = 29,           // Better regen
-    afterlife_hell = 30,           // Room is HELLLLLLL
-    gravityx10 = 31,      // For rooms that have 10x grav
-    planet_aether = 32,          // Room is on Aether
-    hyperbolic_time_chamber = 33,            // Room is extra special training area
-    pendulum_past = 34,            // Inside the pendulum room
     clan_bank = 35,           // This room is a clan bank
     ship = 36,            // This room is a private ship room
-    planet_yardrat = 37,         // This room is on planet Yardrat
-    planet_kanassa = 38,         // This room is on planet Kanassa
-    planet_arlia = 39,           // This room is on planet Arlia
     healing_aura = 40,            // This room has an aura around it
-    earth_orbit = 41,          // Earth Orbit
-    frigid_orbit = 42,          // Frigid Orbit
-    konack_orbit = 43,          // Konack Orbit
-    namek_orbit = 44,          // Namek Orbit
-    vegeta_orbit = 45,          // Vegeta Orbit
-    aether_orbit = 46,          // Aether Orbit
-    yardrat_orbit = 47,          // Yardrat Orbit
-    kanassa_orbit = 48,          // Kanassa Orbit
-    arlia_orbit = 49,          // Arlia Orbit
-    nebula = 50,          // Nebulae
-    asteroid = 51,          // Asteroid
-    wormhohole = 52,          // Wormhole
-    space_station = 53,         // Space Station
-    star = 54,            // Is a star
-    planet_cerria = 55,          // This room is on planet Cerria
-    cerria_orbit = 56,          // This room is in Cerria's Orbit
     bedroom = 57,         // +25% regen
     workout = 58,         // Workout Room
     garden_1 = 59,         // 8 plant garden
@@ -675,9 +645,7 @@ enum class RoomFlag : uint8_t {
     fishing = 63,         // (unspecified)
     fishfresh = 64,       // (unspecified)
     can_remodel = 65,      // (unspecified)
-    planet_zenith = 66,          // (unspecified)
     //save = 67,            // room saves contents
-    zenith_orbit = 68           // zenith orbit
 };
 
 // I'm thinking that rooms with lava might automatically have a considerable heat value.
@@ -698,14 +666,6 @@ constexpr int ENV_OXYGEN = 11; // Oxygen level. 0 is no oxygen, 100 is normal. M
 constexpr int ENV_TOXICITY = 12; // The environment is toxic. This can be used for all kinds of systems. 0.0 is no toxicity.
 constexpr int ENV_CORROSIVITY = 13; // The environment is corrosive. This might inflict injury or damage equipment over time. 0.0 is no corrosivity.
 constexpr int ENV_ETHER_STREAM = 14; // Ether Stream value for Hoshijin. 0 is no ether stream. 100 is maximum.
-
-constexpr int AREA_MOON = 0; /* FOR CelestialBody: Planet has Moon for Oozaru. */
-constexpr int AREA_ETHER = 1; /* FOR CelestialBody: Planet has Ether Stream for Hoshijin. */
-constexpr int AREA_EARTH_DBALL = 2; /* (Not Inherited): Earth DragonBalls may spawn here. */
-constexpr int AREA_NAMEK_DBALL = 3; /* (Not Inherited): Namek DragonBalls may spawn here. */
-constexpr int AREA_SHADOW_DRAGON = 4; /* (Not Inherited): The Shadow Dragons of Black Smoke Shenron may spawn here. */
-
-constexpr int NUM_AREA_FLAGS = 5;
 
 /* Zone info: Used in zone_data.zone_flags */
 constexpr int ZONE_CLOSED = 0;
@@ -846,105 +806,6 @@ constexpr int BONUS_BMEMORY = 51;
 
 constexpr int MAX_BONUSES = 52;
 
-/* Distinguishing Feature */
-constexpr int DISTFEA_EYE = 0;
-constexpr int DISTFEA_HAIR = 1;
-constexpr int DISTFEA_SKIN = 2;
-constexpr int DISTFEA_HEIGHT = 3;
-constexpr int DISTFEA_WEIGHT = 4;
-
-/* Custom Aura */
-constexpr int AURA_WHITE = 0;
-constexpr int AURA_BLUE = 1;
-constexpr int AURA_RED = 2;
-constexpr int AURA_GREEN = 3;
-constexpr int AURA_PINK = 4;
-constexpr int AURA_PURPLE = 5;
-constexpr int AURA_YELLOW = 6;
-constexpr int AURA_BLACK = 7;
-constexpr int AURA_ORANGE = 8;
-
-/* Eye Color */
-constexpr int EYE_UNDEFINED = -1;
-constexpr int EYE_BLUE = 0;
-constexpr int EYE_BLACK = 1;
-constexpr int EYE_GREEN = 2;
-constexpr int EYE_BROWN = 3;
-constexpr int EYE_RED = 4;
-constexpr int EYE_AQUA = 5;
-constexpr int EYE_PINK = 6;
-constexpr int EYE_PURPLE = 7;
-constexpr int EYE_CRIMSON = 8;
-constexpr int EYE_GOLD = 9;
-constexpr int EYE_AMBER = 10;
-constexpr int EYE_EMERALD = 11;
-
-/*Hair Length */
-constexpr int HAIRL_UNDEFINED = -1;
-constexpr int HAIRL_BALD = 0;
-constexpr int HAIRL_SHORT = 1;
-constexpr int HAIRL_MEDIUM = 2;
-constexpr int HAIRL_LONG = 3;
-constexpr int HAIRL_RLONG = 4;
-
-
-/*Hair Color */
-constexpr int HAIRC_UNDEFINED = -1;
-constexpr int HAIRC_NONE = 0;
-constexpr int HAIRC_BLACK = 1;
-constexpr int HAIRC_BROWN = 2;
-constexpr int HAIRC_BLONDE = 3;
-constexpr int HAIRC_GREY = 4;
-constexpr int HAIRC_RED = 5;
-constexpr int HAIRC_ORANGE = 6;
-constexpr int HAIRC_GREEN = 7;
-constexpr int HAIRC_BLUE = 8;
-constexpr int HAIRC_PINK = 9;
-constexpr int HAIRC_PURPLE = 10;
-constexpr int HAIRC_SILVER = 11;
-constexpr int HAIRC_CRIMSON = 12;
-constexpr int HAIRC_WHITE = 13;
-
-/* Hair Style */
-constexpr int HAIRS_UNDEFINED = -1;
-constexpr int HAIRS_NONE = 0;
-constexpr int HAIRS_PLAIN = 1;
-constexpr int HAIRS_MOHAWK = 2;
-constexpr int HAIRS_SPIKY = 3;
-constexpr int HAIRS_CURLY = 4;
-constexpr int HAIRS_UNEVEN = 5;
-constexpr int HAIRS_PONYTAIL = 6;
-constexpr int HAIRS_AFRO = 7;
-constexpr int HAIRS_FADE = 8;
-constexpr int HAIRS_CREW = 9;
-constexpr int HAIRS_FEATHERED = 10;
-constexpr int HAIRS_DRED = 11;
-
-
-/* Skin Color */
-constexpr int SKIN_UNDEFINED = -1;
-constexpr int SKIN_WHITE = 0;
-constexpr int SKIN_BLACK = 1;
-constexpr int SKIN_GREEN = 2;
-constexpr int SKIN_ORANGE = 3;
-constexpr int SKIN_YELLOW = 4;
-constexpr int SKIN_RED = 5;
-constexpr int SKIN_GREY = 6;
-constexpr int SKIN_BLUE = 7;
-constexpr int SKIN_AQUA = 8;
-constexpr int SKIN_PINK = 9;
-constexpr int SKIN_PURPLE = 10;
-constexpr int SKIN_TAN = 11;
-
-/* Annual Sign Phase */
-
-constexpr int PHASE_PURITY = 0;
-constexpr int PHASE_BRAVERY = 1;
-constexpr int PHASE_HATRED = 2;
-constexpr int PHASE_DOMINANCE = 3;
-constexpr int PHASE_GUARDIAN = 4;
-constexpr int PHASE_LOVE = 5;
-constexpr int PHASE_STRENGTH = 6;
 
 /* Races */
 constexpr Race RACE_HUMAN        = Race::human;
@@ -1030,9 +891,27 @@ constexpr int MAX_CRIT_TYPE = CRIT_X4;
 constexpr int NUM_CRIT_TYPES = 3;
 
 /* Sex */
-constexpr int SEX_NEUTRAL = 0;
-constexpr int SEX_MALE = 1;
-constexpr int SEX_FEMALE = 2;
+enum class Sex : uint8_t {
+    neutral = 0,
+    male = 1,
+    female = 2
+};
+
+enum class Appearance : uint8_t {
+    hair_style = 0,
+    hair_color = 1,
+    skin_color = 2,
+    eye_color = 3,
+    aura_color = 4,
+    build = 5,
+    posture = 6,
+    features = 7,
+    seeming = 8
+};
+
+constexpr Sex SEX_NEUTRAL = Sex::neutral;
+constexpr Sex SEX_MALE = Sex::male;
+constexpr Sex SEX_FEMALE = Sex::female;
 
 constexpr int NUM_SEX = 3;
 constexpr int NUM_GENDERS = NUM_SEX;
@@ -1075,10 +954,6 @@ enum class CharacterFlag : uint8_t {
 
     sparring            = 6, // This is mob sparring
     powering_up         = 7,  // Is powering up,
-
-    android_model_absorb          = 8, // Absorb type android
-    android_model_repair          = 9, // Repair type android
-    android_model_sense    = 10
 };
 
 enum class PlayerFlag : uint8_t {
@@ -2566,18 +2441,6 @@ enum class CharTrain : uint8_t {
     speed         = 1 << 5  // 32
 };
 
-using appearance_t = uint8_t;
-enum class CharAppearance : uint8_t {
- sex = 0,
- hair_length = 1,
- hair_style = 2,
- hair_color = 3,
- skin_color = 4,
- eye_color = 5,
- distinguishing_feature = 6,
- aura = 7
-};
-
 using align_t = int16_t;
 enum class CharAlign : uint8_t {
  good_evil = 1 << 0,
@@ -2609,7 +2472,6 @@ enum class CharNum : uint8_t {
  level = 0,
  wait = 1,
  admin_level = 2,
- racial_preference = 4,
  mystic_melody = 5,
  group_kills = 6,
  armor_wishes = 7
@@ -2663,4 +2525,17 @@ enum class ShopFlag : uint8_t {
     bank_money = 1,
     allow_steal = 2,
     no_broken = 3
+};
+
+enum class Mutation : uint8_t {
+    extreme_speed = 0,
+    increased_cell_regeneration = 1,
+    extreme_reflexes = 2,
+    infravision = 3,
+    natural_camouflage = 4,
+    limb_regeneration = 5,
+    venomous = 6,
+    rubbery_body = 7,
+    innate_telepathy = 8,
+    natural_energy = 9
 };

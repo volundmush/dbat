@@ -88,17 +88,6 @@ const char *alignments[NUM_ALIGNS + 1] = {
         "\n",
 };
 
-const char *aura_types[9] = {
-        "white",
-        "blue",
-        "red",
-        "green",
-        "pink",
-        "purple",
-        "yellow",
-        "black",
-        "orange"
-};
 
 /* Armor Types */
 const char *armor_type[MAX_ARMOR_TYPES + 1] = {
@@ -171,106 +160,24 @@ const char *dirs[NUM_OF_DIRS + 1] =
         };
 
 const char *abbr_dirs[NUM_OF_DIRS + 1] =
-        {
-                "n",
-                "e",
-                "s",
-                "w",
-                "u",
-                "d",
-                "nw",
-                "ne",
-                "se",
-                "sw",
-                "in",
-                "out",
-                "\n"
-        };
+{
+        "n",
+        "e",
+        "s",
+        "w",
+        "u",
+        "d",
+        "nw",
+        "ne",
+        "se",
+        "sw",
+        "in",
+        "out",
+        "\n"
+};
 
 /* For Distinguishing Features */
-const char *eye_types[13] = {
-        "blue",
-        "black",
-        "green",
-        "brown",
-        "red",
-        "aqua",
-        "pink",
-        "purple",
-        "crimson",
-        "gold",
-        "amber",
-        "emerald",
-        "\n"
-};
 
-const char *hairl_types[6] = {
-        "bald",
-        "short",
-        "medium",
-        "long",
-        "really long",
-        "\n"
-};
-
-const char *FHA_types[6] = {
-        "stubby",
-        "short",
-        "medium",
-        "long",
-        "really long",
-        "\n"
-};
-
-const char *hairc_types[15] = {
-        "headed",
-        "black",
-        "brown",
-        "blonde",
-        "grey",
-        "red",
-        "orange",
-        "green",
-        "blue",
-        "pink",
-        "purple",
-        "silver",
-        "crimson",
-        "white",
-        "\n"
-};
-
-const char *hairs_types[13] = {
-        "",
-        "with a plain look",
-        "in a mohawk",
-        "with a spiky look",
-        "with a curly look",
-        "with an uneven look",
-        "in a ponytail",
-        "in an afro",
-        "with a fade look",
-        "in a crew cut",
-        "with a feathered look",
-        "in dred locks",
-        "\n"
-};
-
-const char *skin_types[13] = {
-        "white",
-        "black",
-        "green",
-        "orange",
-        "yellow",
-        "red",
-        "grey",
-        "blue",
-        "aqua",
-        "pink",
-        "purple",
-        "tan",
-        "\n"
-};
 
 /* ZONE_x */
 const char *zone_bits[NUM_ZONE_FLAGS + 1] = {
@@ -1835,7 +1742,7 @@ std::vector<std::string> getAttributeTrainNames() {
 }
 
 std::vector<std::string> getAppearanceNames() {
-        return getEnumNames<CharAppearance>();
+        return getEnumNames<Appearance>();
 }
 
 std::vector<std::string> getAlignNames() {
@@ -1876,4 +1783,12 @@ std::vector<std::string> getCharacterFlagNames() {
 
 std::vector<std::string> getZoneFlagNames() {
         return getEnumNames<ZoneFlag>();
+}
+
+std::vector<std::string> getWhereFlagNames() {
+        return getEnumNames<WhereFlag>();
+}
+
+std::vector<std::string> getSexNames() {
+        return getEnumNames<Sex>();
 }

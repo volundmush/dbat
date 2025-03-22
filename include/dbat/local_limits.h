@@ -6,8 +6,6 @@
 #include "structs.h"
 
 // functions
-extern void timed_dt(struct char_data *ch);
-
 extern void run_autowiz();
 
 extern void reboot_wizlists();

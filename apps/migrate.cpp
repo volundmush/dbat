@@ -63,14 +63,63 @@ get_room(room)->dir_option[dir]->to_room : NOWHERE)
 
 static bool converting = false;
 
+static const std::unordered_map<int, WhereFlag> wheremap = {
+    {20, WhereFlag::planet_earth},
+    {21, WhereFlag::planet_vegeta},
+    {22, WhereFlag::planet_frigid},
+    {23, WhereFlag::planet_konack},
+    {24, WhereFlag::planet_namek},
+    {25, WhereFlag::neo_nirvana},
+    {26, WhereFlag::afterlife},
+    {27, WhereFlag::space},
+    {30, WhereFlag::afterlife_hell},
+    {32, WhereFlag::planet_aether},
+    {33, WhereFlag::hyperbolic_time_chamber},
+    {34, WhereFlag::pendulum_past},
+    {37, WhereFlag::planet_yardrat},
+    {38, WhereFlag::planet_kanassa},
+    {39, WhereFlag::planet_arlia},
+    {41, WhereFlag::earth_orbit},
+    {42, WhereFlag::frigid_orbit},
+    {43, WhereFlag::konack_orbit},
+    {44, WhereFlag::namek_orbit},
+    {45, WhereFlag::vegeta_orbit},
+    {46, WhereFlag::aether_orbit},
+    {47, WhereFlag::yardrat_orbit},
+    {48, WhereFlag::kanassa_orbit},
+    {49, WhereFlag::arlia_orbit},
+    {50, WhereFlag::nebula},
+    {51, WhereFlag::asteroid},
+    {52, WhereFlag::wormhole},
+    {53, WhereFlag::space_station},
+    {54, WhereFlag::star},
+    {55, WhereFlag::planet_cerria},
+    {56, WhereFlag::cerria_orbit},
+    {66, WhereFlag::moon_zenith},
+    {68, WhereFlag::zenith_orbit}
+};
+
+static void convert_room(room_data& r) {
+    for(const auto& [oldflag, newflag] : wheremap) {
+        if(r.room_flags[oldflag]) {
+            r.where_flags.set(newflag);
+            r.room_flags.set(oldflag, false);
+        }
+    }
+}
+
 static void convert_character(char_data *c) {
     auto npc = c->mob_flags.get(static_cast<MobFlag>(3)) || c->character_flags.get(CharacterFlag::is_npc);
     if(npc) {
         c->character_flags.set(CharacterFlag::is_npc, true);
         c->character_flags.set(CharacterFlag::tail, race::hasTail(c->race));
 
-        c->character_flags.set(CharacterFlag::android_model_absorb, c->mob_flags.get(31));
-        c->character_flags.set(CharacterFlag::android_model_repair, c->mob_flags.get(32));
+        if(c->mob_flags.get(31)) {
+            c->subrace = SubRace::android_model_absorb;
+        }
+        if(c->mob_flags.get(32)) {
+            c->subrace = SubRace::android_model_repair;
+        }
         
     } else {
         c->character_flags.set(CharacterFlag::tail, c->player_flags.get(30));
@@ -79,10 +128,15 @@ static void convert_character(char_data *c) {
         c->character_flags.set(CharacterFlag::cyber_right_leg, c->player_flags.get(48));
         c->character_flags.set(CharacterFlag::cyber_left_leg, c->player_flags.get(49));
 
-        c->character_flags.set(CharacterFlag::android_model_absorb, c->player_flags.get(41));
-        c->character_flags.set(CharacterFlag::android_model_repair, c->player_flags.get(42));
-        c->character_flags.set(CharacterFlag::android_model_sense, c->player_flags.get(43));
-
+        if(c->player_flags.get(41)) {
+            c->subrace = SubRace::android_model_absorb;
+        }
+        if(c->player_flags.get(42)) {
+            c->subrace = SubRace::android_model_repair;
+        }
+        if(c->player_flags.get(43)) {
+            c->subrace = SubRace::android_model_sense;
+        }
     }
 }
 
@@ -926,7 +980,7 @@ static void parse_room(FILE *fl, room_vnum virtual_nr) {
     r->ex_description = nullptr;
 
     snprintf(buf, sizeof(buf), "SYSERR: Format error in room #%d (expecting D/E/S)", virtual_nr);
-
+    convert_room(*r);
     while(true) {
         if (!get_line(fl, line)) {
             basic_mud_log("%s", buf);
@@ -1060,7 +1114,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
 
     GET_POS(ch) = t[0];
     GET_DEFAULT_POS(ch) = t[1];
-    ch->set(CharAppearance::sex, t[2]);
+    ch->sex = static_cast<Sex>(t[2]);
 
     SPEAKING(ch) = MIN_LANGUAGES;
     set_height_and_weight_by_race(ch);
@@ -2496,7 +2550,7 @@ static int load_char(const char *name, struct char_data *ch) {
                             if(IS_SET_AR(flags, f)) ch->admin_flags.set(f);
                         }
                     } else if (!strcmp(tag, "Alin")) ch->set(CharAlign::good_evil, atoi(line));
-                    else if (!strcmp(tag, "Aura")) ch->set(CharAppearance::aura, atoi(line));
+                    //else if (!strcmp(tag, "Aura")) ch->set(CharAppearance::aura, atoi(line));
                     break;
 
                 case 'B':
@@ -2546,7 +2600,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Eali")) ch->set(CharAlign::law_chaos, atoi(line));
                     else if (!strcmp(tag, "Ecls")) {
 
-                    } else if (!strcmp(tag, "Eye ")) ch->set(CharAppearance::eye_color, atoi(line));
+                    } //else if (!strcmp(tag, "Eye ")) ch->set(CharAppearance::eye_color, atoi(line));
                     break;
 
                 case 'F':
@@ -2560,8 +2614,8 @@ static int load_char(const char *name, struct char_data *ch) {
                 case 'G':
                     if (!strcmp(tag, "Gold")) ch->set(CharMoney::carried, atoi(line));
                     else if (!strcmp(tag, "Gaun")) GET_GAUNTLET(ch) = atoi(line);
-                    else if (!strcmp(tag, "Geno")) ch->genome.insert(atoi(line));
-                    else if (!strcmp(tag, "Gen1")) ch->genome.insert(atoi(line));
+                    //else if (!strcmp(tag, "Geno")) ch->genome.insert(atoi(line));
+                    //else if (!strcmp(tag, "Gen1")) ch->genome.insert(atoi(line));
                     break;
 
                 case 'H':
@@ -2569,9 +2623,9 @@ static int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Hite")) ch->setHeight(atoi(line));
                     else if (!strcmp(tag, "Home")) GET_HOME(ch) = atoi(line);
                     else if (!strcmp(tag, "Host")) {}
-                    else if (!strcmp(tag, "Hrc ")) ch->set(CharAppearance::hair_color, atoi(line));
-                    else if (!strcmp(tag, "Hrl ")) ch->set(CharAppearance::hair_length, atoi(line));
-                    else if (!strcmp(tag, "Hrs ")) ch->set(CharAppearance::hair_style, atoi(line));
+                    //else if (!strcmp(tag, "Hrc ")) ch->set(CharAppearance::hair_color, atoi(line));
+                    //else if (!strcmp(tag, "Hrl ")) ch->set(CharAppearance::hair_length, atoi(line));
+                    //else if (!strcmp(tag, "Hrs ")) ch->set(CharAppearance::hair_style, atoi(line));
                     else if (!strcmp(tag, "Hung")) GET_COND(ch, HUNGER) = atoi(line);
                     break;
 
@@ -2625,7 +2679,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'P':
-                    if (!strcmp(tag, "Phas")) ch->set(CharAppearance::distinguishing_feature, atoi(line));
+                    if (!strcmp(tag, "Phas")) ;//ch->set(CharAppearance::distinguishing_feature, atoi(line));
                     else if (!strcmp(tag, "Phse")) GET_PHASE(ch) = atoi(line);
                     else if (!strcmp(tag, "Plyd")) ch->time.played = atol(line);
 #ifdef ASCII_SAVE_POOFS
@@ -2652,7 +2706,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         if(race > 23) race = 0;
                         ch->race = static_cast<Race>(race);
                     }
-                    else if (!strcmp(tag, "Raci")) ch->set(CharNum::racial_preference, atoi(line));
+                    //else if (!strcmp(tag, "Raci")) ch->set(CharNum::racial_preference, atoi(line));
                     else if (!strcmp(tag, "rDis")) {
                         if(!boost::iequals(line, "Empty"))
                             GET_RDISPLAY(ch) = strdup(line);
@@ -2667,12 +2721,12 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'S':
-                    if (!strcmp(tag, "Sex ")) ch->set(CharAppearance::sex, atoi(line));
+                    if (!strcmp(tag, "Sex ")) ch->sex = static_cast<Sex>(atoi(line));
                     else if (!strcmp(tag, "Ship")) GET_SHIP(ch) = atoi(line);
                     else if (!strcmp(tag, "Scoo")) GET_SDCOOLDOWN(ch) = atoi(line);
                     else if (!strcmp(tag, "Shpr")) GET_SHIPROOM(ch) = atoi(line);
                     else if (!strcmp(tag, "Skil")) load_skills(fl, ch, false);
-                    else if (!strcmp(tag, "Skn ")) ch->set(CharAppearance::skin_color, atoi(line));
+                    //else if (!strcmp(tag, "Skn ")) ch->set(CharAppearance::skin_color, atoi(line));
                     else if (!strcmp(tag, "Size")) ch->setSize(atoi(line));
                     else if (!strcmp(tag, "SklB")) load_skills(fl, ch, true);
                     else if (!strcmp(tag, "SkRc")) ch->modPractices(atoi(line));

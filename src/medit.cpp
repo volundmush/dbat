@@ -234,7 +234,7 @@ void init_mobile(struct char_data *mob) {
     //GET_HIT(mob) = 0;
     //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
-    mob->set(CharAppearance::sex, SEX_MALE);
+    mob->sex = Sex::male;
     mob->sensei = Sensei::commoner;
 
     mob->set(CharDim::weight, rand_number(100, 200));
@@ -808,7 +808,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
  */
 
         case MEDIT_SEX:
-            OLC_MOB(d)->set(CharAppearance::sex, LIMIT(i, 0, NUM_GENDERS - 1));
+            OLC_MOB(d)->sex = static_cast<Sex>(LIMIT(i, 0, NUM_GENDERS - 1));
             break;
 
         case MEDIT_ACCURACY:

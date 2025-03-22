@@ -8,6 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #include <boost/algorithm/string.hpp>
+#include <queue>
 
 #include "dbat/graph.h"
 #include "dbat/send.h"
@@ -22,70 +23,105 @@
 #include "dbat/act.informative.h"
 
 /* local functions */
-static std::list<std::pair<struct room_data*, int>> bfs_queue;
 
-static int VALID_EDGE(struct room_data *x, int y) {
-    auto d = x->dir_option[y];
-    if(!d) return false;
-    auto dest = d->getDestination();
-    if(!dest) return false;
-    if(CONFIG_TRACK_T_DOORS == false && IS_SET(d->exit_info, EX_CLOSED)) return false;
-    if(dest->room_flags.get(ROOM_NOTRACK) || dest->room_flags.get(ROOM_BFS_MARK)) return false;
-    return true;
-}
+struct PathNode {
+    PathNode(room_data *src, int dir) {
+        this->dir = dir;
+        this->exit = src->dir_option[dir];
+        if(exit) {
+            this->room = exit->getDestination();
+        }
+    }
+    int dir;
+    room_direction_data* exit{nullptr};
+    room_data* room{nullptr};
+    operator bool() const {
+        if(!exit || !room) return false;
+        if(!CONFIG_TRACK_T_DOORS && IS_SET(exit->exit_info, EX_CLOSED)) return {};
+        if(room->room_flags.get(ROOM_NOTRACK)) return {};
+        return true;
+    }
+};
 
-static void bfs_enqueue(struct room_data *r, int dir) {
-    bfs_queue.emplace_back(r, dir);
-}
+// The searcher may or may not have a TraverseFunc. it's assumed to be true if not.
+// This is useful for seeing if a specific character can make the traversal.
+using TraverseFunc = std::function<bool(PathNode&)>;
 
 
-static void bfs_dequeue() {
-    if(!bfs_queue.empty()) bfs_queue.pop_front();
-}
-
-static void bfs_clear_queue() {
-    bfs_queue.clear();
-}
-
-
-/* 
- * find_first_step: given a source room and a target room, find the first
- * step on the shortest path from the source to the target.
- *
- * Intended usage: in mobile_activity, give a mob a dir to go if they're
- * tracking another mob or a PC.  Or, a 'track' skill for PCs.
- */
-int find_first_step(struct room_data *src, struct room_data *target) {
-    int curr_dir;
-
+// Now, find_first_step can be implemented by calling find_bfs_path and taking the first step.
+std::optional<std::vector<PathNode>> find_bfs_path(room_data* src, room_data* target, TraverseFunc is_valid) {
+    // If already at target, return an empty path.
     if (src == target)
-        return (BFS_ALREADY_THERE);
+        return {};
 
-    /* first, enqueue the first steps, saving which direction we're going. */
-    for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++) {
-        if (VALID_EDGE(src, curr_dir)) {
-            auto dest = src->dir_option[curr_dir]->getDestination();
-            bfs_enqueue(dest, curr_dir);
-        }
-    }
-    /* now, do the classic BFS. */
-    while (!bfs_queue.empty()) {
-        auto f = bfs_queue.front();
-        if (f.first == target) {
-            curr_dir = f.second;
-            bfs_clear_queue();
-            return (curr_dir);
-        } else {
-            for (curr_dir = 0; curr_dir < NUM_OF_DIRS; curr_dir++)
-                if (VALID_EDGE(f.first, curr_dir)) {
-                    auto dest = f.first->dir_option[curr_dir]->getDestination();
-                    bfs_enqueue(dest, f.second);
+    // Each queue element holds a current room and the path taken to reach it.
+    std::queue<std::pair<room_data*, std::vector<PathNode>>> frontier;
+    std::unordered_set<room_data*> visited;
+
+    visited.insert(src);
+
+    // Enqueue initial edges from src.
+    for (int d = 0; d < NUM_OF_DIRS; ++d) {
+        PathNode node(src, d);
+        if (node) {
+            // If a TraverseFunc is provided, check if this edge is allowed.
+            if (!is_valid || is_valid(node)) {
+                room_data* neighbor = node.room;
+                if (neighbor) {
+                    std::vector<PathNode> path;
+                    path.push_back(node);
+                    frontier.push({neighbor, path});
+                    visited.insert(neighbor);
                 }
-            bfs_dequeue();
+            }
         }
     }
 
-    return (BFS_NO_PATH);
+    // Standard BFS loop.
+    while (!frontier.empty()) {
+        auto [curr, path] = frontier.front();
+        frontier.pop();
+
+        // If we've reached the target, return the full path.
+        if (curr == target)
+            return path;
+
+        // Otherwise, enqueue all valid neighbors.
+        for (int d = 0; d < NUM_OF_DIRS; ++d) {
+            PathNode node(curr, d);
+            if (node) {
+                if (!is_valid || is_valid(node)) {
+                    room_data* neighbor = node.room;
+                    if (neighbor && visited.find(neighbor) == visited.end()) {
+                        std::vector<PathNode> new_path = path;  // copy current path
+                        new_path.push_back(node);
+                        frontier.push({neighbor, new_path});
+                        visited.insert(neighbor);
+                    }
+                }
+            }
+        }
+    }
+
+    // No path found.
+    return std::nullopt;
+}
+
+int find_first_step(room_data* src, room_data* target) {
+    // Assume these constants are defined:
+    constexpr int BFS_ALREADY_THERE = -1;
+    constexpr int BFS_NO_PATH = -2;
+
+    auto path_opt = find_bfs_path(src, target, {});
+    if (!path_opt.has_value()) {
+        return BFS_NO_PATH;
+    }
+    const auto& path = path_opt.value();
+    if (path.empty()) {
+        return BFS_ALREADY_THERE;
+    }
+    // The first step's direction is stored in the first pair.
+    return path.front().dir;
 }
 
 /********************************************************

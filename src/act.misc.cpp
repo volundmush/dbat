@@ -11,6 +11,8 @@
 *  original credits maintained where relevant for act.other.c as this is  *
 *  practically an act.other.c part two - Iovan 3/20/2011                  *
 ************************************************************************ */
+#include <boost/algorithm/string.hpp>
+
 #include "dbat/act.misc.h"
 #include "dbat/dg_comm.h"
 #include "dbat/act.wizard.h"
@@ -265,7 +267,8 @@ static void generate_multiform(struct char_data *ch, int count) {
 
 
         // Bioandroid Genome copy...
-        clone->genome = ch->genome;
+        clone->mutations = ch->mutations;
+        clone->bio_genomes = ch->bio_genomes;
 
         // Limb copy...
         for (int l = 0; l < 3; l++) {
@@ -1507,7 +1510,7 @@ static void catch_fish(struct char_data *ch, int quality) {
     int num = 1000;
 
     if (ch->getRoomFlag(ROOM_FISHFRESH)) {
-        if (ch->getRoomFlag(ROOM_EARTH)) {
+        if (ch->getWhereFlag(WhereFlag::planet_earth)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1528,7 +1531,7 @@ static void catch_fish(struct char_data *ch, int quality) {
                     num = 1003;
                     break;
             }
-        } else if (ch->getRoomFlag(ROOM_AETHER)) {
+        } else if (ch->getWhereFlag(WhereFlag::planet_aether)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1551,7 +1554,7 @@ static void catch_fish(struct char_data *ch, int quality) {
             }
         }
     } else {
-        if (ch->getRoomFlag(ROOM_EARTH)) {
+        if (ch->getWhereFlag(WhereFlag::planet_earth)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -1572,7 +1575,7 @@ static void catch_fish(struct char_data *ch, int quality) {
                     num = 1007;
                     break;
             }
-        } else if (ch->getRoomFlag(ROOM_NAMEK)) {
+        } else if (ch->getWhereFlag(WhereFlag::planet_namek)) {
             switch (rand_number(1, 10)) {
                 case 1:
                 case 2:
@@ -3921,7 +3924,7 @@ ACMD(do_silk) {
 /* Let's an Arlian trade Stamina for either PL or Ki*/
 ACMD(do_adrenaline) {
 
-    if (!IS_ARLIAN(ch) && (!IS_BIO(ch) || (IS_BIO(ch) && (!ch->genome.contains(6))))) {
+    if (!(IS_ARLIAN(ch) || ch->bio_genomes.get(Race::arlian))) {
         send_to_char(ch, "You are not an arlian and do not possess this ability\r\n");
         return;
     } else {
@@ -5102,7 +5105,7 @@ ACMD(do_warppool) {
         pass = true;
     } else if (ch->getRoomVnum() >= 13155 && ch->getRoomVnum() < 13199) {
         pass = true;
-    } else if (ch->getRoomFlag(ROOM_NAMEK) && ch->getLocationTileType() == SECT_WATER_NOSWIM) {
+    } else if (ch->getWhereFlag(WhereFlag::planet_namek) && ch->getLocationTileType() == SECT_WATER_NOSWIM) {
         pass = true;
     } else if (ch->getRoomVnum() >= 12103 && ch->getRoomVnum() < 12289) {
         pass = true;
@@ -5113,19 +5116,19 @@ ACMD(do_warppool) {
         return;
     }
 
-    if (!strcasecmp("earth", arg) && ch->getRoomFlag(ROOM_EARTH)) {
+    if (!strcasecmp("earth", arg) && ch->getWhereFlag(WhereFlag::planet_earth)) {
         send_to_char(ch, "You are already on Earth!\r\n");
         return;
-    } else if (!strcasecmp("frigid", arg) && ch->getRoomFlag(ROOM_FRIGID)) {
+    } else if (!strcasecmp("frigid", arg) && ch->getWhereFlag(WhereFlag::planet_frigid)) {
         send_to_char(ch, "You are already on Frigid!\r\n");
         return;
-    } else if (!strcasecmp("kanassa", arg) && ch->getRoomFlag(ROOM_KANASSA)) {
+    } else if (!strcasecmp("kanassa", arg) && ch->getWhereFlag(WhereFlag::planet_kanassa)) {
         send_to_char(ch, "You are already on Kanasssa!\r\n");
         return;
-    } else if (!strcasecmp("namek", arg) && ch->getRoomFlag(ROOM_NAMEK)) {
+    } else if (!strcasecmp("namek", arg) && ch->getWhereFlag(WhereFlag::planet_namek)) {
         send_to_char(ch, "You are already on Namek!\r\n");
         return;
-    } else if (!strcasecmp("aether", arg) && ch->getRoomFlag(ROOM_AETHER)) {
+    } else if (!strcasecmp("aether", arg) && ch->getWhereFlag(WhereFlag::planet_aether)) {
         send_to_char(ch, "You are already on Aether!\r\n");
         return;
     } else if (!strcasecmp("earth", arg)) {
@@ -5252,7 +5255,7 @@ ACMD(do_obstruct) {
         return;
     }
 
-    if (r->sector_type == SectorType::space || r->room_flags.get(ROOM_SPACE)) {
+    if (r->sector_type == SectorType::space || r->where_flags.get(WhereFlag::space)) {
         send_to_char(ch, "You can not wall off the vastness of space.\r\n");
         return;
     }
@@ -5401,7 +5404,7 @@ ACMD(do_dimizu) {
     } else if (tile == SECT_UNDERWATER) {
         send_to_char(ch, "The area is already underwater!\r\n");
         return;
-    } else if (tile == SECT_SPACE || ch->getRoomFlag(ROOM_SPACE)) {
+    } else if (tile == SECT_SPACE || ch->getWhereFlag(WhereFlag::space)) {
         send_to_char(ch, "You can't flood space!\r\n");
         return;
     } else if ((ch->getCurKI()) < GET_MAX_MANA(ch) / 12) {
@@ -5575,12 +5578,10 @@ ACMD(do_spoil) {
     SET_OBJ_VAL(obj, VAL_CORPSE_HEAD, 0);
 
     struct obj_data *body_part;
-    char part[1000];
     char buf[1000];
     char buf2[1000];
     char buf3[1000];
 
-    *part = '\0';
     *buf = '\0';
     *buf2 = '\0';
     *buf3 = '\0';
@@ -5588,18 +5589,16 @@ ACMD(do_spoil) {
     body_part = create_obj();
     body_part->vn = NOTHING;
     IN_ROOM(body_part) = NOWHERE;
-    snprintf(part, sizeof(part), "%s", obj->name);
-    search_replace(part, "headless", "");
-    search_replace(part, "corpse", "");
-    search_replace(part, "half", "");
-    search_replace(part, "burnt", "");
-    search_replace(part, "chunks", "");
-    search_replace(part, "beaten", "");
-    search_replace(part, "bloody", "");
-    trim(part);
-    snprintf(buf, sizeof(buf), "bloody head %s", part);
-    snprintf(buf2, sizeof(buf2), "@wThe bloody head of %s@w is lying here@n", part);
-    snprintf(buf3, sizeof(buf3), "@wThe bloody head of %s@w@n", part);
+
+    std::string part = obj->name;
+    for(const auto& word : {"headless", "corpse", "half", "burnt", "chunks", "beaten", "bloody"}) {
+        part.replace(part.find(word), strlen(word), "");
+    }
+    boost::trim(part);
+
+    snprintf(buf, sizeof(buf), "bloody head %s", part.c_str());
+    snprintf(buf2, sizeof(buf2), "@wThe bloody head of %s@w is lying here@n", part.c_str());
+    snprintf(buf3, sizeof(buf3), "@wThe bloody head of %s@w@n", part.c_str());
 
     body_part->name = strdup(buf);
     body_part->room_description = strdup(buf2);

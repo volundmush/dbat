@@ -403,7 +403,7 @@ double room_data::getEnvironment(int type) {
                 return environment[type];
 
             if(planet) {
-                if(auto a = getPlanetEnvironment(planet, type); a) {
+                if(auto a = getPlanetEnvironment(planet.value(), type); a) {
                     return a.value();
                 }
             }
@@ -425,13 +425,14 @@ double room_data::getEnvironment(int type) {
             break;
         case ENV_MOONLIGHT: {
             if(!planet) return -1;
-            for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND, ROOM_SPACE}) if(room_flags.get(f)) return -1;
+            if(where_flags[WhereFlag::space]) return -1;
+            for(auto f : {ROOM_INDOORS, ROOM_UNDERGROUND}) if(room_flags.get(f)) return -1;
             if(inside_sectors.contains(static_cast<int>(sector_type))) return -1;
-            return getPlanetEnvironment(planet, type).value();
+            return getPlanetEnvironment(planet.value(), type).value();
         }
         case ENV_ETHER_STREAM: {
             if(!planet) return 0.0;
-            return getPlanetEnvironment(planet, type).value();
+            return getPlanetEnvironment(planet.value(), type).value();
         }
     }
     if(environment.contains(type)) return environment[type];

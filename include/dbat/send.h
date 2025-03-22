@@ -60,14 +60,14 @@ void send_to_moon(fmt::string_view format, Args&&... args) {
 }
 
 template<typename... Args>
-void send_to_planet(int type, int planet, fmt::string_view format, Args&&... args) {
+void send_to_planet(int type, WhereFlag planet, fmt::string_view format, Args&&... args) {
     try {
         std::string formatted_string = fmt::sprintf(format, std::forward<Args>(args)...);
         if(formatted_string.empty()) return;
 
         for(auto i = descriptor_list; i; i = i->next) {
             if(STATE(i) != CON_PLAYING || !(i->character)) continue;
-            if (!AWAKE(i->character) || !ROOM_FLAGGED(IN_ROOM(i->character), planet)) continue;
+            if (!AWAKE(i->character) || !WHERE_FLAGGED(IN_ROOM(i->character), planet)) continue;
             if(type == 0) {
                 i->output += formatted_string;
             } else if (OUTSIDE(i->character) && GET_SKILL(i->character, SKILL_SPOT) >= axion_dice(-5)) {
