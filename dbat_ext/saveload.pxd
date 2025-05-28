@@ -93,8 +93,5 @@ cdef extern from "dbat/saveload.h":
     void to_json(json& j, const structs.char_data& c)
     void from_json(const json& j, structs.char_data& c)
 
-    void from_json(const json& j, structs.char_data& c)
-    void to_json(json& j, const structs.char_data& c)
-
     void to_json(json& j, const structs.player_data& p)
     void from_json(const json& j, structs.player_data& p)

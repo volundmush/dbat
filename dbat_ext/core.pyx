@@ -459,6 +459,16 @@ def get_names(category: str) -> list[str]:
         names = db.getShopFlagNames()
     elif category == "character_flags":
         names = db.getCharacterFlagNames()
+    elif category == "zone_flags":
+        names = db.getZoneFlagNames()
+    elif category == "subraces":
+        names = db.getSubRaceNames()
+    elif category == "sexes":
+        names = db.getSexNames()
+    elif category == "mutations":
+        names = db.getMutationNames()
+    elif category == "bio_genomes":
+        names = db.getBioGenomeNames()
     else:
         return out
     

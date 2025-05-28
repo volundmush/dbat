@@ -296,6 +296,21 @@ namespace race {
         return find != all_races.end();
     }
 
+    bool isValidGenome(Race id) {
+        switch(id) {
+            case Race::human:
+            case Race::saiyan:
+            case Race::namekian:
+            case Race::icer:
+            case Race::tuffle:
+            case Race::arlian:
+            case Race::kai:
+            case Race::konatsu:
+                return true;
+            default:
+            return false;
+        }
+    }
 
     std::unordered_set<Sex> getValidSexes(Race id) {
         switch(id) {

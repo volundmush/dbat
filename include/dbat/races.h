@@ -31,6 +31,7 @@ namespace race {
     extern bool isSenseable(Race id);
     extern int getSize(Race id);
     extern bool exists(Race id);
+    extern bool isValidGenome(Race id);
     extern std::string defaultAppearance(char_data *ch, Appearance type);
 
     extern double getModifier(struct char_data *ch, int location, int specific);

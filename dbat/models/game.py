@@ -286,7 +286,7 @@ class CharData(ThingData):
 class ChargenData(BaseModel):
     name: str | None = None
     race: names.Race | None = None
-    subrace: names.Subrace | None = None
+    subrace: names.SubRace | None = None
     sex: names.Sex | None = None
     sensei: names.Sensei | None = None
     mutations: typing.Set[names.Mutation] | None = None
@@ -299,7 +299,7 @@ class ChargenData(BaseModel):
         if self.race is None:
             raise ValueError("Race is required.")
         if self.race == "android" and self.subrace is None:
-            raise ValueError("Subrace is required.")
+            raise ValueError("SubRace is required.")
         if self.sex is None:
             raise ValueError("Sex is required.")
         if self.sensei is None:

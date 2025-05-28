@@ -120,4 +120,6 @@ std::vector<std::string> getCharacterFlagNames();
 std::vector<std::string> getZoneFlagNames();
 std::vector<std::string> getWhereFlagNames();
 std::vector<std::string> getSexNames();
-std::vector<std::string> getAppearanceNames();
+std::vector<std::string> getMutationNames();
+std::vector<std::string> getBioGenomeNames();
+std::vector<std::string> getSubRaceNames();

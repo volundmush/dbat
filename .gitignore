@@ -52,6 +52,7 @@ Mkfile.old
 dkms.conf
 
 # VS Code
+.venv
 .venv/
 __pycache__
 dependency_links.txt

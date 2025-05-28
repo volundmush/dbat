@@ -92,3 +92,8 @@ cdef extern from "dbat/constants.h":
     vector[string] getComStatNames()
     vector[string] getShopFlagNames()
     vector[string] getCharacterFlagNames()
+    vector[string] getZoneFlagNames()
+    vector[string] getBioGenomeNames()
+    vector[string] getMutationNames()
+    vector[string] getSexNames()
+    vector[string] getSubRaceNames()

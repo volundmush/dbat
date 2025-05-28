@@ -95,7 +95,9 @@
         "format": "cpp",
         "stdfloat": "cpp",
         "*.inc": "cpp",
-        "*.def": "cpp"
+        "*.def": "cpp",
+        "text_encoding": "cpp",
+        "__nullptr": "cpp"
     },
     "terminal.integrated.sendKeybindingsToShell": true
 }

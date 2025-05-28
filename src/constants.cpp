@@ -9,6 +9,7 @@
 ************************************************************************ */
 
 #include "dbat/constants.h"
+#include "dbat/races.h"
 
 const char *circlemud_version = "CircleMUD, version 3.1";
 
@@ -1791,4 +1792,23 @@ std::vector<std::string> getWhereFlagNames() {
 
 std::vector<std::string> getSexNames() {
         return getEnumNames<Sex>();
+}
+
+std::vector<std::string> getMutationNames() {
+        return getEnumNames<Mutation>();
+}
+
+std::vector<std::string> getSubRaceNames() {
+        return getEnumNames<SubRace>();
+}
+
+std::vector<std::string> getBioGenomeNames() {
+        std::vector<std::string> out;
+        for (auto val : magic_enum::enum_values<Race>()) {
+                if(race::isValidGenome(val)) {
+                        out.emplace_back(magic_enum::enum_name(val));
+                }
+        }
+        
+        return out;
 }
