@@ -47,9 +47,9 @@ cdef extern from "dbat/structs.h":
         int pages
     
     cdef cppclass account_data:
-        int vn
+        int id
         string name
-        string passHash
+        string password
         string email
         time_t created
         time_t lastLogin

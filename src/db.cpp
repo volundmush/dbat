@@ -2932,7 +2932,7 @@ int create_join_session(int account_id, int character_id, int64_t connection_id,
         return sess->conns.size();
     } else {
         // no session exists. We'll have to create one.
-        if(acc.adminLevel < 1) {
+        if(acc.admin_level < 1) {
             // non-admins can only have one character active at once.
             // Scan acc.descriptors for any with a character that isn't
             // this character_id.

@@ -412,10 +412,10 @@ static void boot_the_guilds(FILE *gm_f, char *filename, int rec_count) {
             rv = sscanf(buf3, "%d %d", &t1, &t2);
             while (t1 > -1) {
                 if (rv == 1) { /* old style guilds, only skills */
-                    g.skills.insert(static_cast<Skill>(t1));
+                    g.skills.set(t1);
                 } else if (rv == 2) { /* new style guilds, skills and feats */
                     if (t2 == 1) {
-                        g.skills.insert(static_cast<Skill>(t1));
+                        g.skills.set(t1);
                     } else if (t2 == 2) {
                         g.feats.insert(t1);
                     } else {
@@ -3227,7 +3227,7 @@ void migrate_accounts() {
         // Line 11: adminLevel (int)
         std::string adminLevel;
         std::getline(file, adminLevel);
-        a.adminLevel = std::stoi(adminLevel);
+        a.admin_level = std::stoi(adminLevel);
 
         // Line 12: customFile present (bool)
         std::string customFile;
@@ -3282,7 +3282,7 @@ void migrate_characters() {
         p.name = ch->name;
         auto &a = accounts[accID];
         p.account = &a;
-        a.adminLevel = std::max(a.adminLevel, GET_ADMLEVEL(ch));
+        a.admin_level = std::max(a.admin_level, GET_ADMLEVEL(ch));
         a.characters.emplace_back(ch->id);
         ch->in_room = ch->load_room;
         ch->was_in_room = ch->load_room;

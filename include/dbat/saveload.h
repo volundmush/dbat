@@ -138,6 +138,7 @@ void from_json(const json& j, FlagHandler<Enum>& m)
         auto key = key_str.get<std::string>();
         auto maybe = magic_enum::enum_cast<Enum>(key);
         if (!maybe.has_value()) {
+            if(typeid(Enum) == typeid(Skill)) continue;
             throw std::invalid_argument("Invalid enum key: " + key
                 + " for enum type: " + demangle(typeid(Enum).name()));
         }

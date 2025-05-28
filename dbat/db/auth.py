@@ -40,6 +40,10 @@ async def authenticate_user(
             status_code=status.HTTP_400_BAD_REQUEST, detail="User not found."
         )
     plain_text = False
+    if not retrieved.password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="User has no password."
+        )
     retrieved_password = retrieved.password.get_secret_value()
     if password == retrieved_password:
         plain_text = True

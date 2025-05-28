@@ -513,7 +513,7 @@ int is_guild_ok(struct char_data *keeper, struct char_data *ch, int guild_nr) {
 
 
 int does_guild_know(int guild_nr, int i) {
-    return guild_index[guild_nr].skills.count(static_cast<Skill>(i));
+    return guild_index[guild_nr].skills.get(i);
 }
 
 int does_guild_know_feat(int guild_nr, int i) {
@@ -1355,11 +1355,7 @@ void levelup_parse(struct descriptor_data *d, char *arg) {
 
 void guild_data::toggle_skill(uint16_t skill_id) {
     auto sk = static_cast<Skill>(skill_id);
-    if(skills.count(sk)) {
-        skills.erase(sk);
-    } else {
-        skills.insert(sk);
-    }
+    skills.toggle(skill_id);
 }
 
 void guild_data::toggle_feat(uint16_t skill_id) {

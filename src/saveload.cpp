@@ -236,45 +236,45 @@ void from_json(const json& j, affect_t& a) {
 // account_data serialize/deserialize...
 void to_json(json& j, const account_data& a) {
     if(a.id != NOTHING)
-        j["vn"] = a.id;
+        j["id"] = a.id;
     if(!a.name.empty())
         j["name"] = a.name;
     if(!a.password.empty())
-        j["passHash"] = a.password;
+        j["password"] = a.password;
     if(!a.email.empty())
         j["email"] = a.email;
     if(a.created)
         j["created"] = a.created;
     if(a.last_login)
-        j["lastLogin"] = a.last_login;
+        j["last_login"] = a.last_login;
     if(a.last_logout)
-        j["lastLogout"] = a.last_logout;
+        j["last_logout"] = a.last_logout;
     if(a.last_change_password)
-        j["lastPasswordChanged"] = a.last_change_password;
+        j["last_change_password"] = a.last_change_password;
     if(a.playtime != 0.0)
-        j["totalPlayTime"] = a.playtime;
+        j["playtime"] = a.playtime;
     if(!a.disabled_reason.empty())
-        j["disabledReason"] = a.disabled_reason;
+        j["disabled_reason"] = a.disabled_reason;
     if(a.disabled_until)
-        j["disabledUntil"] = a.disabled_until;
+        j["disabled_until"] = a.disabled_until;
     if(a.rpp)
         j["rpp"] = a.rpp;
     if(a.slots != 3)
         j["slots"] = a.slots;
-    if(a.adminLevel)
-        j["adminLevel"] = a.adminLevel;
+    if(a.admin_level)
+        j["admin_level"] = a.admin_level;
 
     // For the characters field (vector<int>), assign it directly.
     j["characters"] = a.characters;
 }
 
 void from_json(const json& j, account_data& a) {
-    if(j.contains("vn"))
-        a.id = j["vn"];
+    if(j.contains("id"))
+        a.id = j["id"];
     if(j.contains("name"))
         a.name = j["name"];
-    if(j.contains("passHash"))
-        a.password = j["passHash"];
+    if(j.contains("password"))
+        a.password = j["password"];
     if(j.contains("email"))
         a.email = j["email"];
     if(j.contains("created"))
@@ -283,20 +283,20 @@ void from_json(const json& j, account_data& a) {
         a.last_login = j["lastLogin"];
     if(j.contains("lastLogout"))
         a.last_logout = j["lastLogout"];
-    if(j.contains("lastPasswordChanged"))
-        a.last_change_password = j["lastPasswordChanged"];
-    if(j.contains("totalPlayTime"))
-        a.playtime = j["totalPlayTime"];
-    if(j.contains("disabledReason"))
-        a.disabled_reason = j["disabledReason"];
-    if(j.contains("disabledUntil"))
-        a.disabled_until = j["disabledUntil"];
+    if(j.contains("last_change_password"))
+        a.last_change_password = j["last_change_password"];
+    if(j.contains("playtime"))
+        a.playtime = j["playtime"];
+    if(j.contains("disabled_reason"))
+        a.disabled_reason = j["disabled_reason"];
+    if(j.contains("disabled_until"))
+        a.disabled_until = j["disabled_until"];
     if(j.contains("rpp"))
         a.rpp = j["rpp"];
     if(j.contains("slots"))
         a.slots = j["slots"];
-    if(j.contains("adminLevel"))
-        a.adminLevel = j["adminLevel"];
+    if(j.contains("admin_level"))
+        a.admin_level = j["admin_level"];
 
     // Directly deserialize the vector<int> field.
     if(j.contains("characters"))
@@ -316,7 +316,7 @@ static void dump_accounts(const std::filesystem::path &loc) {
 
 void load_accounts(const std::filesystem::path& loc) {
     for(auto acc : load_from_file(loc, "accounts.json")) {
-        auto vn = acc.at("vn").get<int64_t>();
+        auto vn = acc.at("id").get<int64_t>();
         accounts.emplace(vn, acc);
     }
 
@@ -638,7 +638,7 @@ static void dump_shops(const std::filesystem::path &loc) {
 // guilds serialize/deserialize...
 void to_json(json& j, const guild_data& g) {
     to_json(j, static_cast<org_data>(g));
-    if(!g.skills.empty()) j["skills"] = g.skills;
+    if(!g.skills.count()) j["skills"] = g.skills;
     if(!g.feats.empty()) j["feats"] = g.feats;
     if(g.charge != 1.0) j["charge"] = g.charge;
     if(!g.no_such_skill.empty()) j["no_such_skill"] = g.no_such_skill;
@@ -650,7 +650,7 @@ void to_json(json& j, const guild_data& g) {
 
 void from_json(const json& j, guild_data& g) {
     from_json(j, static_cast<org_data&>(g));
-    if(j.contains("skills")) g.skills = j["skills"].get<std::unordered_set<Skill>>();
+    if(j.contains("skills")) g.skills = j["skills"].get<FlagHandler<Skill>>();
     if(j.contains("feats")) g.feats = j["feats"].get<std::unordered_set<uint8_t>>();
     if(j.contains("charge")) g.charge = j["charge"];
     if(j.contains("no_such_skill")) g.no_such_skill = j["no_such_skill"];

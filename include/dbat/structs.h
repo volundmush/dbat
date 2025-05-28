@@ -80,6 +80,11 @@ public:
     bool operator[](int flag) const {
         return get(static_cast<FlagEnum>(flag));
     }
+
+    std::size_t count() const 
+    {
+        return flags.size();
+    }
 };
 
 // IMPORTANT: Do not use data structures/fields that are not part of the
@@ -145,7 +150,7 @@ struct account_data {
     double playtime{};
     std::string disabled_reason;
     time_t disabled_until{0};
-    int adminLevel{};
+    int admin_level{};
     int rpp{};
     int slots{3};
     std::vector<std::string> customs;
@@ -1714,7 +1719,7 @@ struct shop_data : public org_data {
 struct guild_data : public org_data {
     void toggle_skill(uint16_t skill_id);
     void toggle_feat(uint16_t skill_id);
-    std::unordered_set<Skill> skills;  /* array to keep track of which feats things we'll train */
+    FlagHandler<Skill> skills;  /* array to keep track of which feats things we'll train */
     float charge{1.0};                  /* charge * skill level = how much we'll charge */
     std::string no_such_skill{};           /* message when we don't teach that skill */
     std::string not_enough_gold{};         /* message when the student doesn't have enough gold */

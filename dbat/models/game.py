@@ -74,7 +74,7 @@ class AffectedTypeData(AffectData):
 class AccountData(BaseModel):
     id: int
     name: str
-    password: pydantic.SecretStr
+    password: pydantic.SecretStr = pydantic.SecretStr("")
     email: str = ""
     created: int = 0
     last_login: int = 0
