@@ -24,6 +24,6 @@ template<typename Container>
 requires std::is_enum_v<typename Container::value_type>
 void sprintbitarray(const Container& container, const char *names[], int maxar, char *result) {
 
-    auto joined = fmt::format("{}", fmt::join(container, " "));
+    auto joined = fmt::format("{}", fmt::join(container, ", "));
     std::strcpy(result, joined.c_str());
 }

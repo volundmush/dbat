@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-set(CPM_DOWNLOAD_VERSION 0.40.5)
+set(CPM_DOWNLOAD_VERSION 0.42.0)
 set(CPM_DOWNLOAD_LOCATION "${CMAKE_BINARY_DIR}/cmake/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -15,10 +15,10 @@ include(${CPM_DOWNLOAD_LOCATION})
 
 project(circle)
 
-CPMAddPackage("gh:fmtlib/fmt#10.2.1")
-CPMAddPackage("gh:nlohmann/json#v3.11.3")
+CPMAddPackage("gh:fmtlib/fmt#11.2.0")
+CPMAddPackage("gh:nlohmann/json#v3.12.0")
 CPMAddPackage("gh:ilqvya/random#v1.5.0")
-CPMAddPackage("gh:Neargye/magic_enum#v0.9.6")
+CPMAddPackage("gh:Neargye/magic_enum#v0.9.7")
 
 find_package(Boost CONFIG REQUIRED COMPONENTS system program_options regex iostreams)
 

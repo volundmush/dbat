@@ -4693,7 +4693,7 @@ ACMD (do_zcheck) {
 
             if (ROOM_FLAGGED(i, ROOM_ATRIUM | ROOM_HOUSE | ROOM_OLC))
                 len += snprintf(buf + len, sizeof(buf) - len,
-                                "- Has illegal affection bits set (%s %s %s %s %s)\r\n",
+                                "- Has illegal affection bits set (%s %s %s)\r\n",
                                 ROOM_FLAGGED(i, ROOM_ATRIUM) ? "ATRIUM" : "",
                                 ROOM_FLAGGED(i, ROOM_HOUSE) ? "HOUSE" : "",
                                 ROOM_FLAGGED(i, ROOM_OLC) ? "OLC" : "");

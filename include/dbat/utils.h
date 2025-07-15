@@ -10,6 +10,7 @@
 #pragma once
 #include <iostream>
 #include "fmt/printf.h"
+#include "fmt/ranges.h"
 #include "db.h"
 #include "races.h"
 #include "handler.h"
