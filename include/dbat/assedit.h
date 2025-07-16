@@ -2,6 +2,9 @@
 
 #include "structs.h"
 
+extern long g_lNumAssemblies;
+extern ASSEMBLY *g_pAssemblyTable;
+
 extern void assedit_setup(struct descriptor_data *d, int number);
 
 extern void assedit_disp_menu(struct descriptor_data *d);

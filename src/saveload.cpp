@@ -22,6 +22,8 @@
 #include "dbat/races.h"
 #include "dbat/class.h"
 #include "dbat/json.h"
+#include "dbat/assemblies.h"
+#include "dbat/assedit.h"
 
 // dump and load routines...
 static void dump_to_file(const std::filesystem::path &loc, const std::string &name, const json &data) {
@@ -1761,6 +1763,98 @@ static void cleanup_state() {
     }
 }
 
+void to_json(json& j, const struct help_index_element& r) {
+    if(r.index && strlen(r.index)) j["index"] = r.index;
+    if(r.keywords && strlen(r.keywords)) j["keywords"] = r.keywords;
+    if(r.entry && strlen(r.entry)) j["entry"] = r.entry;
+    if(r.duplicate) j["duplicate"] = r.duplicate;
+    if(r.min_level) j["min_level"] = r.min_level;
+}
+
+void from_json(const json& j, struct help_index_element& r) {
+    if(j.contains("index")) {
+        auto s = j["index"].get<std::string>();
+        if(r.index) free(r.index);
+        r.index = strdup(s.c_str());
+    }
+    if(j.contains("keywords")) {
+        auto s = j["keywords"].get<std::string>();
+        if(r.keywords) free(r.keywords);
+        r.keywords = strdup(s.c_str());
+    }
+    if(j.contains("entry")) {
+        auto s = j["entry"].get<std::string>();
+        if(r.entry) free(r.entry);
+        r.entry = strdup(s.c_str());
+    }
+    if(j.contains("duplicate")) r.duplicate = j["duplicate"].get<int>();
+    if(j.contains("min_level")) r.min_level = j["min_level"].get<int>();
+}
+
+static void dump_help(const std::filesystem::path& loc) {
+    auto j = json::array();
+    for(auto i = 0; i < top_of_helpt; i++) {
+        j.push_back(help_table[i]);
+    }
+    dump_to_file(loc, "help.json", j);
+}
+
+void load_help(const std::filesystem::path& loc) {
+    auto data = load_from_file(loc, "help.json");
+    top_of_helpt = data.size();
+
+    // allocate the help_table with the size of top_of_helpt
+    CREATE(help_table, struct help_index_element, top_of_helpt);
+    auto i = 0;
+    for(auto j : data) {
+        from_json(j, help_table[i++]);
+    }
+}
+
+static void dump_assemblies(const std::filesystem::path &loc) {
+    auto j = json::array();
+
+    if(g_pAssemblyTable) {
+        for(auto i = 0; i < g_lNumAssemblies; i++) {
+            auto a = json::object();
+            a["vnum"] = g_pAssemblyTable[i].lVnum;
+            a["assembly_type"] = g_pAssemblyTable[i].uchAssemblyType;
+
+            for(auto k = 0; k < g_pAssemblyTable[i].lNumComponents; k++) {
+                auto comp = json::object();
+                comp["bExtract"] = g_pAssemblyTable[i].pComponents[k].bExtract;
+                comp["bInRoom"] = g_pAssemblyTable[i].pComponents[k].bInRoom;
+                comp["lVnum"] = g_pAssemblyTable[i].pComponents[k].lVnum;
+                a["components"].push_back(comp);
+            }
+            j.push_back(a);
+        }
+    }
+
+
+    dump_to_file(loc, "assemblies.json", j);
+}
+
+void load_assemblies(const std::filesystem::path &loc) {
+    auto data = load_from_file(loc, "assemblies.json");
+
+    for(auto j : data) {
+        auto vn = j.at("vnum").get<vnum>();
+        auto atype = j.at("assembly_type").get<int>();
+        assemblyCreate(vn, atype);
+        if(j.contains("components")) {
+            // components are an array containing bExtract, bInRoom, and vnum lVnum...
+            for(auto comp : j.at("components")) {
+                auto bExtract = comp.at("bExtract").get<bool>();
+                auto bInRoom = comp.at("bInRoom").get<bool>();
+                auto lVnum = comp.at("lVnum").get<vnum>();
+                assemblyAddComponent(vn, lVnum, bExtract, bInRoom);
+            }
+        }
+    }
+
+}
+
 void runSave() {
     basic_mud_log("Beginning dump of state to disk.");
     // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.
@@ -1788,7 +1882,7 @@ void runSave() {
         auto startTime = std::chrono::high_resolution_clock::now();
         std::vector<std::thread> threads;
         for(const auto func : {dump_accounts, dump_characters,
-              dump_players, dump_dgscripts,
+              dump_players, dump_dgscripts, dump_help, dump_assemblies,
                           dump_items, dump_globaldata,
                           dump_rooms, dump_exits, dump_item_prototypes,
                           dump_npc_prototypes, dump_shops,

@@ -5,6 +5,7 @@
 #include <tuple>
 #include <fstream>
 #include <thread>
+#include <cstdlib>
 
 #include <boost/algorithm/string.hpp>
 
@@ -26,6 +27,8 @@
 #include "dbat/genobj.h"
 #include "dbat/saveload.h"
 #include "dbat/random.h"
+#include "dbat/assedit.h"
+#include "dbat/assemblies.h"
 
 #define RENT_FACTOR    1
 #define CRYO_FACTOR    4
@@ -62,6 +65,23 @@ get_room(room)->dir_option[dir]->to_room : NOWHERE)
 
 
 static bool converting = false;
+
+static char fread_letter(FILE *fp) {
+    char c;
+    do {
+        c = getc(fp);
+    } while (isspace(c));
+    return c;
+}
+
+static void get_one_line(FILE *fl, char *buf) {
+    if (fgets(buf, READ_SIZE, fl) == nullptr) {
+        basic_mud_log("SYSERR: error reading help file: not terminated with $?");
+        exit(1);
+    }
+
+    buf[strlen(buf) - 1] = '\0'; /* take off the trailing \n */
+}
 
 static const std::unordered_map<int, WhereFlag> wheremap = {
     {20, WhereFlag::planet_earth},
@@ -140,6 +160,66 @@ static void convert_character(char_data *c) {
     }
 }
 
+static void load_help(FILE *fl, char *name) {
+    char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
+    size_t entrylen;
+    char line[READ_SIZE + 1], hname[READ_SIZE + 1], *scan;
+    struct help_index_element el;
+
+    strlcpy(hname, name, sizeof(hname));
+
+    get_one_line(fl, key);
+    while (*key != '$') {
+        strcat(key, "\r\n"); /* strcat: OK (READ_SIZE - "\n"  "\r\n" == READ_SIZE  1) */
+        entrylen = strlcpy(entry, key, sizeof(entry));
+
+        /* Read in the corresponding help entry. */
+        get_one_line(fl, line);
+        while (*line != '#' && entrylen < sizeof(entry) - 1) {
+            entrylen += strlcpy(entry + entrylen, line, sizeof(entry) - entrylen);
+
+            if (entrylen + 2 < sizeof(entry) - 1) {
+                strcpy(entry + entrylen, "\r\n"); /* strcpy: OK (size checked above) */
+                entrylen += 2;
+            }
+            get_one_line(fl, line);
+        }
+
+        if (entrylen >= sizeof(entry) - 1) {
+            int keysize;
+            const char *truncmsg = "\r\n*TRUNCATED*\r\n";
+
+            strcpy(entry + sizeof(entry) - strlen(truncmsg) - 1,
+                   truncmsg); /* strcpy: OK (assuming sane 'entry' size) */
+
+            keysize = strlen(key) - 2;
+            basic_mud_log("SYSERR: Help entry exceeded buffer space: %.*s", keysize, key);
+
+            /* If we ran out of buffer space, eat the rest of the entry. */
+            while (*line != '#')
+                get_one_line(fl, line);
+        }
+
+        if (*line == '#') {
+            if (sscanf(line, "#%d", &el.min_level) != 1) {
+                basic_mud_log("SYSERR: Help entry does not have a min level. %s", key);
+                el.min_level = 0;
+            }
+        }
+
+        el.duplicate = 0;
+        el.entry = strdup(entry);
+        scan = one_word(key, next_key);
+
+        while (*next_key) {
+            el.keywords = strdup(next_key);
+            help_table[top_of_helpt++] = el;
+            el.duplicate++;
+            scan = one_word(scan, next_key);
+        }
+        get_one_line(fl, key);
+    }
+}
 
 static void read_line(FILE *shop_f, const char *string, void *data) {
     char buf[READ_SIZE];
@@ -805,22 +885,7 @@ static int inv_backup(struct char_data *ch) {
     return 1;
 }
 
-static char fread_letter(FILE *fp) {
-    char c;
-    do {
-        c = getc(fp);
-    } while (isspace(c));
-    return c;
-}
 
-static void get_one_line(FILE *fl, char *buf) {
-    if (fgets(buf, READ_SIZE, fl) == nullptr) {
-        basic_mud_log("SYSERR: error reading help file: not terminated with $?");
-        exit(1);
-    }
-
-    buf[strlen(buf) - 1] = '\0'; /* take off the trailing \n */
-}
 
 /* read direction data */
 static void setup_dir(FILE *fl, room_vnum room, int dir) {
@@ -3136,17 +3201,21 @@ void boot_db_world_legacy() {
     boot_db_shadow();
 }
 
+static void index_boot_help();
+static void assemblyBootAssemblies();
+
 static void boot_db_legacy() {
     boot_db_time();
     boot_db_textfiles();
     boot_db_spellfeats();
     boot_db_world_legacy();
+    index_boot_help();
     boot_db_mail();
     boot_db_socials();
     boot_db_clans();
     boot_db_commands();
     boot_db_specials();
-    boot_db_assemblies();
+    assemblyBootAssemblies();
     boot_db_sort();
     boot_db_boards();
     boot_db_banned();
@@ -3798,6 +3867,161 @@ static void migrate_obj_data(obj_data *o) {
     }
 
 
+}
+
+static int hsort(const void *a, const void *b) {
+    const struct help_index_element *a1, *b1;
+
+    a1 = (const struct help_index_element *) a;
+    b1 = (const struct help_index_element *) b;
+
+    return (strcasecmp(a1->keywords, b1->keywords));
+}
+
+static void index_boot_help() {
+    const char *index_filename, *prefix = nullptr;    /* nullptr or egcs 1.1 complains */
+    FILE *db_index, *db_file;
+    int rec_count = 0, size[2];
+    char buf2[PATH_MAX], buf1[MAX_STRING_LENGTH];
+    int mode = DB_BOOT_HLP;
+
+    switch (mode) {
+        case DB_BOOT_HLP:
+            prefix = HLP_PREFIX;
+            break;
+        default:
+            basic_mud_log("SYSERR: Unknown subcommand %d to index_boot!", mode);
+            exit(1);
+    }
+
+    if (mini_mud)
+        index_filename = MINDEX_FILE;
+    else
+        index_filename = INDEX_FILE;
+
+    snprintf(buf2, sizeof(buf2), "%s%s", prefix, index_filename);
+    if (!(db_index = fopen(buf2, "r"))) {
+        basic_mud_log("SYSERR: opening index file '%s': %s", buf2, strerror(errno));
+        exit(1);
+    }
+
+    /* first, count the number of records in the file so we can malloc */
+    fscanf(db_index, "%s\n", buf1);
+    while (*buf1 != '$') {
+        snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
+        if (!(db_file = fopen(buf2, "r"))) {
+            basic_mud_log("SYSERR: File '%s' listed in '%s%s': %s", buf2, prefix,
+                index_filename, strerror(errno));
+            fscanf(db_index, "%s\n", buf1);
+            continue;
+        } else {
+            rec_count += count_alias_records(db_file);
+        }
+
+        fclose(db_file);
+        fscanf(db_index, "%s\n", buf1);
+    }
+
+    /* Exit if 0 records, unless this is shops */
+    if (!rec_count) {
+        return;
+    }
+
+    /*
+   * NOTE: "bytes" does _not_ include strings or other later malloc'd things.
+   */
+    switch (mode) {
+        case DB_BOOT_HLP:
+            CREATE(help_table, struct help_index_element, rec_count);
+            size[0] = sizeof(struct help_index_element) * rec_count;
+            basic_mud_log("   %d entries, %d bytes.", rec_count, size[0]);
+            break;
+    }
+
+    rewind(db_index);
+    fscanf(db_index, "%s\n", buf1);
+    while (*buf1 != '$') {
+        snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
+        if (!(db_file = fopen(buf2, "r"))) {
+            basic_mud_log("SYSERR: %s: %s", buf2, strerror(errno));
+            exit(1);
+        }
+        switch (mode) {
+            case DB_BOOT_HLP:
+                load_help(db_file, buf2);
+                break;
+        }
+
+        fclose(db_file);
+        fscanf(db_index, "%s\n", buf1);
+    }
+    fclose(db_index);
+
+    /* Sort the help index. */
+    if (mode == DB_BOOT_HLP) {
+        qsort(help_table, top_of_helpt, sizeof(struct help_index_element), hsort);
+        top_of_helpt--;
+    }
+}
+
+static void assemblyBootAssemblies() {
+    char szLine[MAX_STRING_LENGTH] = {'\0'};
+    char szTag[MAX_STRING_LENGTH] = {'\0'};
+    char szType[MAX_STRING_LENGTH] = {'\0'};
+    int iExtract = 0;
+    int iInRoom = 0;
+    int iType = 0;
+    long lLineCount = 0;
+    long lPartVnum = NOTHING;
+    long lVnum = NOTHING;
+    FILE *pFile = nullptr;
+
+    if ((pFile = fopen(ASSEMBLIES_FILE, "rt")) == nullptr) {
+        basic_mud_log("SYSERR: assemblyBootAssemblies(): Couldn't open file '%s' for "
+            "reading.", ASSEMBLIES_FILE);
+        return;
+    }
+
+    while (!feof(pFile)) {
+        lLineCount += get_line(pFile, szLine);
+        half_chop(szLine, szTag, szLine);
+
+        if (*szTag == '\0')
+            continue;
+
+        if (strcasecmp(szTag, "Component") == 0) {
+            if (sscanf(szLine, "#%ld %d %d", &lPartVnum, &iExtract, &iInRoom) != 3
+                    ) {
+                basic_mud_log("SYSERR: bootAssemblies(): Invalid format in file %s, line %ld: "
+                    "szTag=%s, szLine=%s.", ASSEMBLIES_FILE, lLineCount, szTag, szLine);
+            } else if (!assemblyAddComponent(lVnum, lPartVnum, iExtract, iInRoom)) {
+                basic_mud_log("SYSERR: bootAssemblies(): Could not add component #%ld to "
+                    "assembly #%ld.", lPartVnum, lVnum);
+            }
+        } else if (strcasecmp(szTag, "Vnum") == 0) {
+            if (sscanf(szLine, "#%ld %s", &lVnum, szType) != 2) {
+                basic_mud_log("SYSERR: bootAssemblies(): Invalid format in file %s, "
+                    "line %ld.", ASSEMBLIES_FILE, lLineCount);
+                lVnum = NOTHING;
+            } else if ((iType = search_block(szType, AssemblyTypes, true)) < 0) {
+                basic_mud_log("SYSERR: bootAssemblies(): Invalid type '%s' for assembly "
+                    "vnum #%ld at line %ld.", szType, lVnum, lLineCount);
+                lVnum = NOTHING;
+            } else if (!assemblyCreate(lVnum, iType)) {
+                basic_mud_log("SYSERR: bootAssemblies(): Could not create assembly for vnum "
+                    "#%ld, type %s.", lVnum, szType);
+                lVnum = NOTHING;
+            }
+        } else {
+            basic_mud_log("SYSERR: Invalid tag '%s' in file %s, line #%ld.", szTag,
+                ASSEMBLIES_FILE, lLineCount);
+        }
+
+        *szLine = '\0';
+        *szTag = '\0';
+    }
+
+    fclose(pFile);
 }
 
 void migrate_data() {

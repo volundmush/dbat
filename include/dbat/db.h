@@ -147,7 +147,6 @@ extern void boot_world();
 extern int is_empty(zone_rnum zone_nr);
 
 extern void check_start_rooms();
-extern void index_boot_help();
 extern void boot_db_textfiles();
 extern void boot_db_time();
 extern void boot_db_spellfeats();
@@ -158,7 +157,6 @@ extern void boot_db_socials();
 extern void boot_db_clans();
 extern void boot_db_commands();
 extern void boot_db_specials();
-extern void boot_db_assemblies();
 extern void boot_db_sort();
 extern void boot_db_boards();
 extern void boot_db_banned();
@@ -166,6 +164,7 @@ extern void boot_db_rent();
 extern void boot_db_houses();
 extern void boot_db_shadow();
 extern void boot_db_spacemap();
+extern void boot_db_sort();
 
 extern void boot_db_new();
 
@@ -194,8 +193,6 @@ extern void save_disabled();
 extern void free_disabled();
 
 extern void free_help_table();
-
-extern void load_help(FILE *fl, char *name);
 
 extern void auc_save();
 

@@ -64,7 +64,6 @@ ACMD (do_assedit) {
             } else {
                 assemblyCreate(atoi(buf2), 0);
                 send_to_char(d->character, "Assembly Created.\r\n");
-                assemblySaveAssemblies();
                 return;
             }
         } else if (strncasecmp("delete", buf, 6) == 0) {
@@ -73,7 +72,6 @@ ACMD (do_assedit) {
             else {
                 assemblyDestroy(atoi(buf2));
                 send_to_char(d->character, "Assembly Deleted.\r\n");
-                assemblySaveAssemblies();
                 return;
             }
         } else {
@@ -213,8 +211,7 @@ void assedit_parse(struct descriptor_data *d, char *arg) {
                                              OLC_ASSEDIT(d)->pComponents[i].bInRoom
                         );
                     }
-                    send_to_char(d->character, "\r\nSaving all assemblies\r\n");
-                    assemblySaveAssemblies();
+                    send_to_char(d->character, "\r\nAssemblies will be saved on next dump.\r\n");
 
 /*       free(pTComponents);
        free(OLC_ASSEDIT(d));

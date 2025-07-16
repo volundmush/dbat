@@ -141,34 +141,7 @@ static void hedit_save_internally(struct descriptor_data *d) {
 }
 
 static void hedit_save_to_disk(struct descriptor_data *d) {
-    FILE *fp;
-    char buf1[MAX_STRING_LENGTH], index_name[READ_SIZE];
-    int i;
-
-    snprintf(index_name, sizeof(index_name), "%s%s", HLP_PREFIX, HELP_FILE);
-    if (!(fp = fopen(index_name, "w"))) {
-        basic_mud_log("SYSERR: Could not write help index file");
-        return;
-    }
-
-    for (i = 0; i < top_of_helpt; i++) {
-        if (help_table[i].duplicate)
-            continue;
-        strncpy(buf1, help_table[i].entry ? help_table[i].entry : "Empty\r\n", sizeof(buf1) - 1);
-        strip_cr(buf1);
-
-        /* Forget making a buffer, lets just write the thing now. */
-        fprintf(fp, "%s#%d\n", buf1, help_table[i].min_level);
-    }
-    /* Write final line and close. */
-    fprintf(fp, "$~\n");
-    fclose(fp);
-
-    remove_from_save_list(HEDIT_PERMISSION, SL_HLP);
-
-    /* Reboot the help files. */
-    free_help_table();
-    index_boot_help();
+    d->sendText("Help will be saved at next dump.\r\n");
 }
 
 /* The main menu. */

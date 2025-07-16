@@ -36,6 +36,9 @@ void load_characters_finish(const std::filesystem::path& loc);
 void load_characters_initial(const std::filesystem::path& loc);
 
 void load_players(const std::filesystem::path& loc);
+void load_help(const std::filesystem::path& loc);
+
+void load_assemblies(const std::filesystem::path& loc);
 
 template<typename T>
 requires std::is_enum_v<T>
@@ -151,6 +154,9 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_data, birth, created, maxag
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(time_info_data, remainder, seconds, minutes, hours, day, month, year)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(weather_data, pressure, change, sky, sunlight)
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(shop_buy_data, type, keywords)
+
+void to_json(json& j, const struct help_index_element& r);
+void from_json(const json& j, struct help_index_element& r);
 
 void to_json(json& j, const reset_com& r);
 void from_json(const json& j, reset_com& r);

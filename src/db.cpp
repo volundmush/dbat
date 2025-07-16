@@ -191,8 +191,6 @@ void load_banned();
 
 void Read_Invalid_List();
 
-int hsort(const void *a, const void *b);
-
 void memorize_add(struct char_data *ch, int spellnum, int timer);
 
 void free_feats();
@@ -371,6 +369,12 @@ void boot_db_world() {
     basic_mud_log("Loading disabled commands list...");
     load_disabled();
 
+    basic_mud_log("Loading help entries.");
+    load_help(latest);
+
+    basic_mud_log("Loading assemblies.");
+    load_assemblies(latest);
+
     boot_db_shadow();
 }
 
@@ -440,9 +444,6 @@ void boot_db_spellfeats() {
 }
 
 void boot_db_help() {
-    basic_mud_log("Loading help entries.");
-    index_boot_help();
-
     basic_mud_log("Setting up context sensitive help system for OLC");
     boot_context_help();
 }
@@ -483,10 +484,6 @@ void boot_db_specials() {
     assign_the_guilds();
 }
 
-void boot_db_assemblies() {
-    basic_mud_log("Booting assembled objects.");
-    assemblyBootAssemblies();
-}
 
 void boot_db_sort() {
     basic_mud_log("Sorting command list and spells.");
@@ -535,7 +532,6 @@ void boot_db_new() {
     boot_db_commands();
     boot_db_help();
     boot_db_specials();
-    boot_db_assemblies();
     boot_db_sort();
     boot_db_boards();
     boot_db_banned();
@@ -675,135 +671,6 @@ void save_mud_time(struct time_info_data *when) {
 }
 
 
-/*
- * Thanks to Andrey (andrey@alex-ua.com) for this bit of code, although I
- * did add the 'goto' and changed some "while()" into "do { } while()".
- *	-gg 6/24/98 (technically 6/25/98, but I care not.)
- */
-static int count_alias_records(FILE *fl) {
-    char key[READ_SIZE], next_key[READ_SIZE];
-    char line[READ_SIZE], *scan;
-    int total_keywords = 0;
-
-    /* get the first keyword line */
-    get_one_line(fl, key);
-
-    while (*key != '$') {
-        /* skip the text */
-        do {
-            get_one_line(fl, line);
-            if (feof(fl))
-                goto ackeof;
-        } while (*line != '#');
-
-        /* now count keywords */
-        scan = key;
-        do {
-            scan = one_word(scan, next_key);
-            if (*next_key)
-                ++total_keywords;
-        } while (*next_key);
-
-        /* get next keyword line (or $) */
-        get_one_line(fl, key);
-
-        if (feof(fl))
-            goto ackeof;
-    }
-
-    return (total_keywords);
-
-    /* No, they are not evil. -gg 6/24/98 */
-    ackeof:
-    basic_mud_log("SYSERR: Unexpected end of help file.");
-    exit(1);    /* Some day we hope to handle these things better... */
-}
-
-void index_boot_help() {
-    const char *index_filename, *prefix = nullptr;    /* nullptr or egcs 1.1 complains */
-    FILE *db_index, *db_file;
-    int rec_count = 0, size[2];
-    char buf2[PATH_MAX], buf1[MAX_STRING_LENGTH];
-    int mode = DB_BOOT_HLP;
-
-    switch (mode) {
-        case DB_BOOT_HLP:
-            prefix = HLP_PREFIX;
-            break;
-        default:
-            basic_mud_log("SYSERR: Unknown subcommand %d to index_boot!", mode);
-            exit(1);
-    }
-
-    if (mini_mud)
-        index_filename = MINDEX_FILE;
-    else
-        index_filename = INDEX_FILE;
-
-    snprintf(buf2, sizeof(buf2), "%s%s", prefix, index_filename);
-    if (!(db_index = fopen(buf2, "r"))) {
-        basic_mud_log("SYSERR: opening index file '%s': %s", buf2, strerror(errno));
-        exit(1);
-    }
-
-    /* first, count the number of records in the file so we can malloc */
-    fscanf(db_index, "%s\n", buf1);
-    while (*buf1 != '$') {
-        snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
-        if (!(db_file = fopen(buf2, "r"))) {
-            basic_mud_log("SYSERR: File '%s' listed in '%s%s': %s", buf2, prefix,
-                index_filename, strerror(errno));
-            fscanf(db_index, "%s\n", buf1);
-            continue;
-        } else {
-            rec_count += count_alias_records(db_file);
-        }
-
-        fclose(db_file);
-        fscanf(db_index, "%s\n", buf1);
-    }
-
-    /* Exit if 0 records, unless this is shops */
-    if (!rec_count) {
-        return;
-    }
-
-    /*
-   * NOTE: "bytes" does _not_ include strings or other later malloc'd things.
-   */
-    switch (mode) {
-        case DB_BOOT_HLP:
-            CREATE(help_table, struct help_index_element, rec_count);
-            size[0] = sizeof(struct help_index_element) * rec_count;
-            basic_mud_log("   %d entries, %d bytes.", rec_count, size[0]);
-            break;
-    }
-
-    rewind(db_index);
-    fscanf(db_index, "%s\n", buf1);
-    while (*buf1 != '$') {
-        snprintf(buf2, sizeof(buf2), "%s%s", prefix, buf1);
-        if (!(db_file = fopen(buf2, "r"))) {
-            basic_mud_log("SYSERR: %s: %s", buf2, strerror(errno));
-            exit(1);
-        }
-        switch (mode) {
-            case DB_BOOT_HLP:
-                load_help(db_file, buf2);
-                break;
-        }
-
-        fclose(db_file);
-        fscanf(db_index, "%s\n", buf1);
-    }
-    fclose(db_index);
-
-    /* Sort the help index. */
-    if (mode == DB_BOOT_HLP) {
-        qsort(help_table, top_of_helpt, sizeof(struct help_index_element), hsort);
-        top_of_helpt--;
-    }
-}
 
 bitvector_t asciiflag_conv(char *flag) {
     bitvector_t flags = 0;
@@ -845,15 +712,6 @@ void check_start_rooms() {
 }
 
 
-static void get_one_line(FILE *fl, char *buf) {
-    if (fgets(buf, READ_SIZE, fl) == nullptr) {
-        basic_mud_log("SYSERR: error reading help file: not terminated with $?");
-        exit(1);
-    }
-
-    buf[strlen(buf) - 1] = '\0'; /* take off the trailing \n */
-}
-
 void free_help(struct help_index_element *cmhelp) {
     if (cmhelp->keywords)
         free(cmhelp->keywords);
@@ -867,10 +725,7 @@ void free_help_table() {
     if (help_table) {
         int hp;
         for (hp = 0; hp < top_of_helpt; hp++) {
-            if (help_table[hp].keywords)
-                free(help_table[hp].keywords);
-            if (help_table[hp].entry && !help_table[hp].duplicate)
-                free(help_table[hp].entry);
+            free_help(&help_table[hp]);
         }
         free(help_table);
         help_table = nullptr;
@@ -878,80 +733,9 @@ void free_help_table() {
     top_of_helpt = 0;
 }
 
-void load_help(FILE *fl, char *name) {
-    char key[READ_SIZE + 1], next_key[READ_SIZE + 1], entry[32384];
-    size_t entrylen;
-    char line[READ_SIZE + 1], hname[READ_SIZE + 1], *scan;
-    struct help_index_element el;
-
-    strlcpy(hname, name, sizeof(hname));
-
-    get_one_line(fl, key);
-    while (*key != '$') {
-        strcat(key, "\r\n"); /* strcat: OK (READ_SIZE - "\n"  "\r\n" == READ_SIZE  1) */
-        entrylen = strlcpy(entry, key, sizeof(entry));
-
-        /* Read in the corresponding help entry. */
-        get_one_line(fl, line);
-        while (*line != '#' && entrylen < sizeof(entry) - 1) {
-            entrylen += strlcpy(entry + entrylen, line, sizeof(entry) - entrylen);
-
-            if (entrylen + 2 < sizeof(entry) - 1) {
-                strcpy(entry + entrylen, "\r\n"); /* strcpy: OK (size checked above) */
-                entrylen += 2;
-            }
-            get_one_line(fl, line);
-        }
-
-        if (entrylen >= sizeof(entry) - 1) {
-            int keysize;
-            const char *truncmsg = "\r\n*TRUNCATED*\r\n";
-
-            strcpy(entry + sizeof(entry) - strlen(truncmsg) - 1,
-                   truncmsg); /* strcpy: OK (assuming sane 'entry' size) */
-
-            keysize = strlen(key) - 2;
-            basic_mud_log("SYSERR: Help entry exceeded buffer space: %.*s", keysize, key);
-
-            /* If we ran out of buffer space, eat the rest of the entry. */
-            while (*line != '#')
-                get_one_line(fl, line);
-        }
-
-        if (*line == '#') {
-            if (sscanf(line, "#%d", &el.min_level) != 1) {
-                basic_mud_log("SYSERR: Help entry does not have a min level. %s", key);
-                el.min_level = 0;
-            }
-        }
-
-        el.duplicate = 0;
-        el.entry = strdup(entry);
-        scan = one_word(key, next_key);
-
-        while (*next_key) {
-            el.keywords = strdup(next_key);
-            help_table[top_of_helpt++] = el;
-            el.duplicate++;
-            scan = one_word(scan, next_key);
-        }
-        get_one_line(fl, key);
-    }
-}
-
-int hsort(const void *a, const void *b) {
-    const struct help_index_element *a1, *b1;
-
-    a1 = (const struct help_index_element *) a;
-    b1 = (const struct help_index_element *) b;
-
-    return (strcasecmp(a1->keywords, b1->keywords));
-}
-
 /*************************************************************************
 *  procedures for resetting, both play-time and boot-time	 	 *
 *************************************************************************/
-
 
 int vnum_mobile(char *searchname, struct char_data *ch) {
     int found = 0;
