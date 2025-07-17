@@ -6,52 +6,29 @@ Sort of. I have not yet included all of the game assets that it needs to run. Th
 
 # Using the Sucker
 
-This project is designed to be run on an Ubuntu 22.04 (or later) server, using GCC for the C++ compiler and CPython3.11 for running the Python. If you can get it to work in some other way, good on you, this is just what I know works.
+This project is designed to be run on an Ubuntu 24.04 (or later) server, using GCC for the C++ compiler and CPython3.12 or later for running the Python. If you can get it to work in some other way, good on you, this is just what I know works.
 
 The recommended IDE is VS Code due to the multi-language nature of the project. More on that later.
 
 ## Ubuntu Setup
 The following apt packages are needed:
 
-`sudo apt-get install cmake build-essential gdb git ninja-build`
+`sudo apt-get install cmake build-essential gdb git ninja-build ccache mold libboost-all-dev python3 python3-dev python3-virtualenv`
 
 Clone the directory.
 
 `git clone https://github.com/volundmush/dbat`
 The main project.
 
+`cd dbat` to enter the folder....
 
-`git clone https://github.com/volundmush/thermite`
-The networking library and webclient.
+Create a virtualenv:
+`python -m virtualenv .venv`
 
-## Installing Rust
-The Thermite project will require Rust.
-[The Official Rust website](https://www.rust-lang.org/tools/install) has the install instructions.
+Install Python dependencies:
+`pip install -r requirements.txt`
 
-## Installing Boost
-As of this writing, the project was written with Boost 1.84.0 in mind. Owing to its size and unique compilation requirements, it cannot be handled via CPM in the CMakeLists.txt, and must be installed as a system library.
-
-The latest .tar.gz can be found at [The Boost Downloads website](https://www.boost.org/users/download/). The quickest way to install, using the 1.84 variant as an example, is...
-
-`wget https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/boost_1_84_0.tar.gz`
-to download boost into your home directory.
-
-`tar zxvf boost_1_84_0.tar.gz`
-to decompress it into a folder...
-
-`cd boost_1_84_0`
-to enter the folder... then...
-
-`./bootstrap.sh --with-libraries=all --with-toolset=gcc`
-to configure,
-
-`./b2 toolset=gcc`
-to compile, and
-
-`sudo ./b2 install --prefix=/usr`
-to install.
-
-It does take a minute or two to configure and compile 'cuz boost is huge.
+(you can also allow Visual Studio Code to handle the Python stuff)
 
 ## Windows
 
@@ -89,26 +66,55 @@ Install the following Extensions:
 
 `C/C++ Extension Pack`
 
+And `Python` related extensions.
+
 Restart VS Code if needed.
 
 After Remote Development is installed, the toolbar on the left side has a "Remote Explorer" icon. Under that is a Dropdown which should have "WSL Targets" option. Select that from the dropdown and Ubuntu should be in thhe WSL Targets. You can use this to "connect" to the WSL2 instance. VS Code will install remote management tools to the Ubuntu instance so it can remote connect.
 
 From there, open the `dbat` folder (or whatever else you cloned it to) as your project folder.
 
-You will need to then go to Extensions again and tell VS Code to install your extensions in WSL.
+You will need to then go to Extensions again and tell VS Code to install your extensions in WSL2.
 
 # Project Breakdown
 The project relies on several major components to work properly.
 
-The first is `libcirclemud.a` which is compiled from the .h and .cpp files in `include/` and `src/`.
+## C++ Components
+The project is compiled using CMake via the provided CMakeLists.txt. It will download all of its dependencies using the CMake Package Manager.
 
-The second is the `circle` and `migrate` executables, which links to the above and is found in `apps/`
+ `libcirclemud.a` is compiled from the .h and .cpp files in `include/` and `src/`.
 
-In order for the game to work, the `lib` folder must be present in the project root. That is not (yet) included.
+Utility executables such as `migrate`, which links to the above and is found in `apps/`
 
-The Thermite project opens up an internal listening port which DBAT connects to so the two can exchange client activity data. Thermite is the program which handles telnet, webclient, and the website static files.
+## Python Components
+The Python module `dbat` depends on the `mudforge` package found at `https://github.com/volundmush/mudforge`.
 
-For compiling and running Thermite, simply use `cargo build` then `cargo run` in Thermite project directory.
+MudForge runs two processes: the telnet portal, and the server backend which is accessed through a FastAPI HTTP/2 + TLS REST connection.
+
+## Cython Bridge
+The `dbat_ext` folder contains Cython code as .pyx and .pxd files which creates the `dbat_ext` module used by the Python code above.
+
+## Data Directory
+In order for the game to work, the `lib` folder must be present in the project root. That is not (yet) included in the repository. This folder contains the MUD database.
+
+## Config Files
+The root directory contains `config.plugin-001.toml` and `config.user.toml`
+
+These use MudForge's default settings as a base and progressively override them.
+
+`config.plugin-001.toml` is meant to hold information specific to DBAT in general, while `config.user.toml` is for development overrides and customization for this specific instance.
+
+# How do you compile it?
+`./compile.sh <debug|release>`
+
+This will first compile the C++ code and then run setup.py to ensure the Cython extension is built.
+
+# How do you run it?
+A proper launcher is pending.
+
+However, make sure the cwd is the root `dbat` folder and the virtualenv is active, and then:
+`python -m mudforge.portal`
+`python -m mudforge.game`
 
 # Things to Watch Out For
 In my experiences, WSL2 can get screwy sometimes, though that was working with JetBrains IDEs. I'm not sure about VS Code. Still, if the WSL instance freezes or starts acting bizarre, you can use `wsl --shutdown` from the Windows Command Prompt and then re-open the WSL instance.

@@ -36,6 +36,8 @@ cdef extern from "dbat/db.h":
 
     void boot_db_new()
 
+    structs.help_index_element* get_help(const string& name, int)
+
     map[int, structs.shop_data] shop_index
     map[int, structs.guild_data] guild_index
     map[int, structs.index_data] trig_index

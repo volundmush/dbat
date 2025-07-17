@@ -13,7 +13,7 @@ from mudforge.models import fields
 from mudforge.rest.utils import get_real_ip
 from .utils import get_current_user
 
-from dbat.models.game import AccountData, PlayerData
+from dbat.models.game import AccountData, PlayerData, ChargenData
 from mudforge.models.characters import CharacterCreate
 from dbat.db import characters as characters_db
 
@@ -112,7 +112,7 @@ async def submit_command(
 @router.post("/", response_model=PlayerData)
 async def create_character(
     user: Annotated[AccountData, Depends(get_current_user)],
-    char_data: Annotated[CharacterCreate, Body()],
+    char_data: Annotated[ChargenData, Body()],
 ):
     result = await characters_db.create_character(user, char_data.name)
     return result

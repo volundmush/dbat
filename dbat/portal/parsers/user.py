@@ -18,15 +18,17 @@ class UserParser(BaseParser):
     async def handle_help(self, args: str):
         help_table = self.make_table("Command", "Description", title="User Commands")
         help_table.add_row("help", "Displays this help message.")
-        help_table.add_row("create <name>", "Creates a new character.")
+        help_table.add_row("create", "Enter character creation.")
         help_table.add_row("play <name>", "Selects a character to play.")
         help_table.add_row("terminate <username>=YES", "Deletes your user account. Beware!")
-        help_table.add_row("delete <name>", "Deletes a character.")
+        help_table.add_row("delete <name>=YES", "Deletes a character.")
         help_table.add_row("logout", "Logs out of the game.")
         help_table.add_row("look", "Lists all characters.")
         await self.send_rich(help_table)
 
     async def handle_create(self, args: str):
+        
+        
         if not args:
             await self.send_line("You must supply a name for your character.")
             return

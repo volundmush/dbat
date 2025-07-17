@@ -168,6 +168,7 @@ extern void boot_db_sort();
 
 extern void boot_db_new();
 
+extern help_index_element* get_help(const std::string& name, int level);
 
 extern void zone_update(uint64_t heartPulse, double deltaTime);
 extern void repairRoomDamage(uint64_t heartPulse, double deltaTime);

@@ -26,6 +26,9 @@ cdef extern from "dbat/json.h":
 
 cdef extern from "dbat/saveload.h":
     void runSave()
+
+    void to_json(json& j, const structs.help_index_element& h)
+    void from_json(const json& j, structs.help_index_element& m)
     
     void to_json(json& j, const structs.mob_special_data& m)
     void from_json(const json& j, structs.mob_special_data& m)

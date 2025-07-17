@@ -284,18 +284,25 @@ class CharData(ThingData):
     transforms: typing.Dict[names.Form, TransData] = Field(default_factory=dict)
 
 class ChargenData(BaseModel):
-    name: str | None = None
-    race: names.Race | None = None
+    name: str = ""
+    race: names.Race = names.Race.human
     subrace: names.SubRace | None = None
-    sex: names.Sex | None = None
-    sensei: names.Sensei | None = None
-    mutations: typing.Set[names.Mutation] | None = None
-    bio_genomes: typing.Set[names.BioGenome] | None = None
-    keep_skills: bool | None = None
+    sex: names.Sex = names.Sex.neutral
+    sensei: names.Sensei = names.Sensei.commoner
+    mutations: typing.Set[names.Mutation] = Field(default_factory=set)
+    bio_genomes: typing.Set[names.BioGenome] = Field(default_factory=set)
+    keep_skills: bool = True
+    align: int = 0
     
     def check(self) -> bool:
-        if self.name is None:
+        if not self.name:
             raise ValueError("Name is required.")
+        if len(self.name) < 3 or len(self.name) > 20:
+            raise ValueError("Name must be between 3 and 20 characters long.")
+        if not self.name.isalnum():
+            raise ValueError("Name must be alphanumeric.")
+        if " " in self.name:
+            raise ValueError("Name cannot contain spaces.")
         if self.race is None:
             raise ValueError("Race is required.")
         if self.race == "android" and self.subrace is None:
@@ -304,10 +311,23 @@ class ChargenData(BaseModel):
             raise ValueError("Sex is required.")
         if self.sensei is None:
             raise ValueError("Sensei is required.")
-        if self.race == "mutant" and (self.mutations is None or len(self.mutations) != 2):
-            raise ValueError("Mutations is required.")
-        if self.race == "bio_android" and (self.bio_genomes is None or len(self.bio_genomes) != 2):
-            raise ValueError("Bio Genomes is required.")
-        if self.keep_skills is None:
-            raise ValueError("Keep Skills is required.")
+        match self.race:
+            case names.Race.android:
+                if self.subrace is None:
+                    raise ValueError("SubRace is required for androids.")
+            case names.Race.mutant:
+                if len(self.mutations) != 2:
+                    raise ValueError("2 Mutations are required for mutants.")
+            case names.Race.bio_android:
+                if len(self.bio_genomes) != 2:
+                    raise ValueError("2 Bio Genomes are required for bio androids.")
+        if self.align < -1000 or self.align > 1000:
+            raise ValueError("Align must be between -1000 and 1000.")
         return True
+
+class HelpData(BaseModel):
+    index: str = ""
+    keywords: str = ""
+    entry: str = ""
+    duplicate: int = 0
+    min_level: int = 0

@@ -83,3 +83,5 @@ circle/*.cpp
 game/secret_settings.py
 dbat_ext/*.cpp
 
+localhost-key.pem
+localhost.pem

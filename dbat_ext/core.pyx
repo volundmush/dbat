@@ -16,7 +16,7 @@ from libcpp.vector cimport vector
 
 cimport structs
 cimport db
-from structs cimport unit_data, thing_data, room_data, char_data, obj_data, account_data
+from structs cimport unit_data, thing_data, room_data, char_data, obj_data, account_data, help_index_element
 from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave
 
 def load_db():
@@ -29,6 +29,13 @@ def load_db():
     db.init()
     #os.chdir(cur_path)
 
+def get_help(name, level):
+    data = db.get_help(name.encode("ascii", errors="ignore"), level)
+    if not data:
+        return None
+    j = jobject()
+    to_json(j, deref(data))
+    return orjson.loads(jdumps(j))
 
 cdef class RoomDB:
     

@@ -197,7 +197,22 @@ void free_feats();
 
 void free_assemblies();
 
+// sticking this here for a quick use of get_help...
+extern int search_help(const char *argument, int level);
+
 /* external vars */
+
+struct help_index_element *get_help(const std::string &name, int level) {
+    if (!help_table || name.empty())
+        return nullptr;
+
+    if(auto idx = search_help(name.c_str(), level); idx != NOTHING) {
+        return &help_table[idx];
+    }
+    
+    return nullptr;
+}
+
 
 static void dragon_level(struct char_data *ch) {
     struct descriptor_data *d;

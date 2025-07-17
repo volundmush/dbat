@@ -26,6 +26,7 @@ auth = "dbat.rest.auth"
 users = "dbat.rest.users"
 characters = "dbat.rest.characters"
 rooms = "dbat.rest.rooms"
+help = "dbat.rest.help"
 # Disabled
 system = ""
 

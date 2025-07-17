@@ -344,6 +344,13 @@ cdef extern from "dbat/structs.h":
     cdef cppclass guild_data:
         pass
     
+    cdef struct help_index_element:
+        char *index
+        char *keywords
+        char *entry
+        int duplicate
+        int min_level
+
     cdef cppclass reset_com:
         char command
         bool if_flag
