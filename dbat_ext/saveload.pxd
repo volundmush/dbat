@@ -27,6 +27,8 @@ cdef extern from "dbat/json.h":
 cdef extern from "dbat/saveload.h":
     void runSave()
 
+    structs.player_data* create_player_character(int account_id, const json& j)
+
     void to_json(json& j, const structs.help_index_element& h)
     void from_json(const json& j, structs.help_index_element& m)
     

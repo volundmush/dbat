@@ -27,20 +27,9 @@ class UserParser(BaseParser):
         await self.send_rich(help_table)
 
     async def handle_create(self, args: str):
-        
-        
-        if not args:
-            await self.send_line("You must supply a name for your character.")
-            return
-        js_data = {"name": args}
-        try:
-            character_data = await self.api_call("POST", "/characters", json=js_data)
-        except HTTPStatusError as e:
-            await self.send_line(f"Error creating character: {e.response.text}")
-            return
-        character = PlayerData(**character_data)
-        await self.handle_look()
-        await self.send_line(f"Character {character.name} created.")
+        parser_class = mudforge.CLASSES["create_parser"]
+        parser = parser_class()
+        await self.connection.push_parser(parser)
 
     async def handle_play(self, args: str):
         if not args:

@@ -13,17 +13,24 @@ The recommended IDE is VS Code due to the multi-language nature of the project. 
 ## Ubuntu Setup
 The following apt packages are needed:
 
-`sudo apt-get install cmake build-essential gdb git ninja-build ccache mold libboost-all-dev python3 python3-dev python3-virtualenv`
+`sudo apt-get install -y cmake build-essential gdb git ninja-build ccache mold libboost-all-dev python3 python3-virtualenv libpython3-dev`
 
 Clone the directory.
 
 `git clone https://github.com/volundmush/dbat`
 The main project.
 
+
 `cd dbat` to enter the folder....
+
 
 Create a virtualenv:
 `python -m virtualenv .venv`
+
+
+Activate the virtualenv...
+`source .venv/bin/activate`
+
 
 Install Python dependencies:
 `pip install -r requirements.txt`

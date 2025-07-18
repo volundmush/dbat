@@ -13,6 +13,8 @@ inline std::string demangle(const char* mangled_name) {
     return result;
 }
 
+extern player_data* create_player_character(int account_id, const json &j);
+
 void runSave();
 void load_zones(const std::filesystem::path& loc);
 void load_accounts(const std::filesystem::path& loc);

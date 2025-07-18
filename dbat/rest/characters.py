@@ -114,5 +114,5 @@ async def create_character(
     user: Annotated[AccountData, Depends(get_current_user)],
     char_data: Annotated[ChargenData, Body()],
 ):
-    result = await characters_db.create_character(user, char_data.name)
+    result = await characters_db.create_character(user, char_data)
     return result

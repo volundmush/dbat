@@ -1,7 +1,7 @@
 import typing
 import pydantic
 from enum import IntFlag
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
 from . import names
 
 class MobSpecialData(BaseModel):
@@ -284,16 +284,72 @@ class CharData(ThingData):
     transforms: typing.Dict[names.Form, TransData] = Field(default_factory=dict)
 
 class ChargenData(BaseModel):
-    name: str = ""
-    race: names.Race = names.Race.human
+    name: str | None = None
+    race: names.Race | None = None
     subrace: names.SubRace | None = None
-    sex: names.Sex = names.Sex.neutral
-    sensei: names.Sensei = names.Sensei.commoner
+    sex: names.Sex | None = None
+    sensei: names.Sensei | None = None
     mutations: typing.Set[names.Mutation] = Field(default_factory=set)
     bio_genomes: typing.Set[names.BioGenome] = Field(default_factory=set)
     keep_skills: bool = True
     align: int = 0
     
+    @field_serializer("race")
+    def serialize_race(self, value):
+        return value.name if value else None
+
+    @field_serializer("subrace")
+    def serialize_subrace(self, value):
+        return value.name if value else None
+    
+    @field_serializer("sex")
+    def serialize_sex(self, value):
+        return value.name if value else None
+    
+    @field_serializer("sensei")
+    def serialize_sensei(self, value):
+        return value.name if value else None
+    
+    @field_serializer("mutations")
+    def serialize_mutations(self, value):
+        return [mutation.name for mutation in value] if value else []
+    
+    @field_serializer("bio_genomes")
+    def serialize_bio_genomes(self, value):
+        return [genome.name for genome in value] if value else []
+
+    def available_races(self) -> list[names.Race]:
+        return [race for race in names.Race if race.name not in ("spirit", "animal", "saiba", "serpent", "ogre", "yardratian", "dragon", "mechanical")]
+
+    def available_subraces(self) -> list[names.SubRace]:
+        if self.race == names.Race.android:
+            return [s for s in names.SubRace]
+        return list()
+
+    def available_senseis(self) -> list[names.Sensei]:
+        senseis = [sen for sen in names.Sensei if sen.name not in ("commoner", "sixteen", "jinto", "tsuna", "kurzak", "dabura")]
+        match self.race:
+            case names.Race.android:
+                senseis = [names.Sensei.sixteen]
+            case names.Race.kanassan:
+                senseis.append(names.Sensei.tsuna)
+            case names.Race.hoshijin:
+                senseis.append(names.Sensei.jinto)
+            case names.Race.arlian:
+                senseis.append(names.Sensei.kurzak)
+            case names.Race.demon:
+                senseis.append(names.Sensei.dabura)
+        return senseis
+
+    def available_sexes(self) -> list[names.Sex]:
+        match self.race:
+            case names.Race.namekian:
+                return [names.Sex.neutral]
+            case names.Race.android | names.Race.bio_android:
+                return [e for e in names.Sex]
+            case _:
+                return [names.Sex.male, names.Sex.female]
+
     def check(self) -> bool:
         if not self.name:
             raise ValueError("Name is required.")

@@ -1855,6 +1855,42 @@ void load_assemblies(const std::filesystem::path &loc) {
 
 }
 
+// This is called by the Cython code to create a new player character.
+// Everything should be already validated several times over.
+player_data* create_player_character(int account_id, const json& j) {
+    auto &acc = accounts[account_id];
+    auto ch = std::make_shared<char_data>();
+    ch->id = getNextUnitID();
+    ch->generation = time(nullptr);
+    auto &p = players[ch->id];
+    p.id = ch->id;
+    p.account = &acc;
+    p.character = ch.get();
+    p.name = j.at("name").get<std::string>();
+    ch->name = strdup(p.name.c_str());
+
+    acc.characters.push_back(ch->id);
+
+    if(j.contains("sex")) ch->sex = j["sex"];
+    if(j.contains("race")) ch->race = j["race"];
+    if(j.contains("sensei")) ch->sensei = j["sensei"];
+    if(j.contains("bio_genomes")) ch->bio_genomes = j["bio_genomes"];
+    if(j.contains("mutations")) ch->mutations = j["mutations"];
+    if(j.contains("align")) ch->aligns[CharAlign::good_evil] = j["align"].get<int>();
+
+    if(j.contains("keep_skills") && !j.at("keep_skills").get<bool>()) {
+        ch->practice_points += 200;
+        ch->player_flags.set(PlayerFlag::forgetting_skill);
+    }
+
+    uniqueCharacters.emplace(ch->id, ch);
+    units.emplace(ch->id, ch);
+
+    init_char(ch.get());
+
+    return &p;
+}
+
 void runSave() {
     basic_mud_log("Beginning dump of state to disk.");
     // Open up a new database file as <cwd>/state/<timestamp>.sqlite3 and dump the state into it.

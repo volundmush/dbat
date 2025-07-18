@@ -41,4 +41,6 @@ __categories = {
 for enum_name, cat in __categories.items():
     names = get_names(cat)  # Returns a list[str] from the C++ side.
     # Create an enum where each member's name and value is the string from C++.
-    globals()[enum_name] = Enum(enum_name, {name: name for name in names})
+    g = globals()
+    new_enum = Enum(enum_name, {name: name for name in names})
+    g[enum_name] = new_enum

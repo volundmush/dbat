@@ -17,7 +17,7 @@ from libcpp.vector cimport vector
 cimport structs
 cimport db
 from structs cimport unit_data, thing_data, room_data, char_data, obj_data, account_data, help_index_element
-from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave
+from saveload cimport jdumps, jloads, jobject, to_json, from_json, runSave, create_player_character
 
 def load_db():
     """
@@ -299,6 +299,10 @@ cdef class PlayerDB:
     def keys(self) -> typing.AsyncGenerator[int, None]:
         for vn in db.players:
             yield vn.first
+    
+    def create_character(self, user, data):
+        result = create_player_character(user.id, jloads(data.model_dump_json().encode("utf-8")))
+        return orjson.loads(self._dump(deref(result)))
 
 player_db = PlayerDB()
 
