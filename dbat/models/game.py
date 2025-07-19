@@ -61,6 +61,10 @@ class ZoneData(BaseModel):
     max_level: int = 0
     zone_flags: typing.Set[names.ZoneFlag] = Field(default_factory=set)
 
+    @field_serializer("zone_flags")
+    def serialize_zone_flags(self, value):
+        return [value.name for value in value] if value else []
+
 class AffectData(BaseModel):
     location: int = 0
     modifier: int = 0
@@ -138,7 +142,31 @@ class _Picky(BaseModel):
     not_sensei: typing.Set[names.Sensei] = Field(default_factory=set)
     only_race: typing.Set[names.Race] = Field(default_factory=set)
     not_race: typing.Set[names.Race] = Field(default_factory=set)
+
+    @field_serializer("not_alignment")
+    def serialize_not_alignment(self, value):
+        return [value.name for value in value] if value else []
     
+    @field_serializer("only_alignment")
+    def serialize_only_alignment(self, value):
+        return [value.name for value in value] if value else []
+    
+    @field_serializer("only_sensei")
+    def serialize_only_sensei(self, value):
+        return [value.name for value in value] if value else []
+    
+    @field_serializer("not_sensei")
+    def serialize_not_sensei(self, value):
+        return [value.name for value in value] if value else []
+
+    @field_serializer("only_race")
+    def serialize_only_race(self, value):
+        return [value.name for value in value] if value else []
+
+    @field_serializer("not_race")
+    def serialize_not_race(self, value):
+        return [value.name for value in value] if value else []
+
 class _Org(_Picky):
     vnum: int = -1
     keeper: int = -1
@@ -166,6 +194,10 @@ class ShopData(_Org):
     bankAccount: int = 0
     lastsort: int = 0
 
+    @field_serializer("shop_flags")
+    def serialize_shop_flags(self, value):
+        return [value.name for value in value] if value else []
+
 class GuildData(_Org):
     skills: typing.Set[names.Skill] = Field(default_factory=set)
     charge: float = 1.0
@@ -174,6 +206,10 @@ class GuildData(_Org):
     minlvl: int = 0
     open: int = 0
     close: int = 0
+
+    @field_serializer("skills")
+    def serialize_skills(self, value):
+        return [skill.name for skill in value] if value else []
 
 class ExtraDescriptionData(BaseModel):
     keyword: str = ""
@@ -222,10 +258,22 @@ class RoomData(UnitData):
     timed: int = 0
     dmg: int = 0
     geffect: int = 0
+
+    @field_serializer("sector_type")
+    def serialize_sector_type(self, value):
+        return value.name if value else None
+
+    @field_serializer("room_flags")
+    def serialize_room_flags(self, value):
+        return [flag.name for flag in value] if value else []
     
 class ThingData(UnitData):
     in_room: int = -1
     affect_flags: typing.Set[names.AffectFlag] = Field(default_factory=set)
+
+    @field_serializer("affect_flags")
+    def serialize_affect_flags(self, value):
+        return [flag.name for flag in value] if value else []
 
 class ObjectData(ThingData, _Picky):
     room_loaded: int = -1
@@ -242,6 +290,17 @@ class ObjectData(ThingData, _Picky):
     size: int = 4
     affected: typing.List[AffectedTypeData] = Field(default_factory=set)
 
+    @field_serializer("type_flag")
+    def serialize_type_flag(self, value):
+        return value.name
+    
+    @field_serializer("wear_flags")
+    def serialize_wear_flags(self, value):
+        return [flag.name for flag in value] if value else []
+    
+    @field_serializer("item_flags")
+    def serialize_item_flags(self, value):
+        return [flag.name for flag in value] if value else []
 
 class SkillData(BaseModel):
     level: int = 0
@@ -282,6 +341,82 @@ class CharData(ThingData):
     admin_flags: typing.Set[names.AdminFlag] = Field(default_factory=set)
     mob_specials: MobSpecialData = Field(default_factory=MobSpecialData)
     transforms: typing.Dict[names.Form, TransData] = Field(default_factory=dict)
+
+    @field_serializer("race")
+    def serialize_race(self, value):
+        return value.name
+    
+    @field_serializer("sensei")
+    def serialize_sensei(self, value):
+        return value.name
+    
+    @field_serializer("trains")
+    def serialize_trains(self, value):
+        return {train.name: level for train, level in value.items()} if value else {}
+    
+    @field_serializer("attributes")
+    def serialize_attributes(self, value):
+        return {attr.name: level for attr, level in value.items()} if value else {}
+    
+    @field_serializer("moneys")
+    def serialize_moneys(self, value):
+        return {money.name: amount for money, amount in value.items()} if value else {}
+    
+    @field_serializer("aligns")
+    def serialize_aligns(self, value):
+        return {align.name: amount for align, amount in value.items()} if value else {}
+    
+    @field_serializer("appearances")
+    def serialize_appearances(self, value):
+        return {appearance.name: level for appearance, level in value.items()} if value else {}
+    
+    @field_serializer("vitals")
+    def serialize_vitals(self, value):
+        return {vital.name: level for vital, level in value.items()} if value else {}
+    
+    @field_serializer("nums")
+    def serialize_nums(self, value):
+        return {num.name: level for num, level in value.items()} if value else {}
+    
+    @field_serializer("stats")
+    def serialize_stats(self, value):
+        return {stat.name: level for stat, level in value.items()} if value else {}
+    
+    @field_serializer("dims")
+    def serialize_dims(self, value):
+        return {dim.name: level for dim, level in value.items()} if value else {}
+    
+    @field_serializer("character_flags")
+    def serialize_character_flags(self, value): 
+        return [flag.name for flag in value] if value else []
+    
+    @field_serializer("mob_flags")
+    def serialize_mob_flags(self, value):
+        return [flag.name for flag in value] if value else []
+    
+    @field_serializer("player_flags")
+    def serialize_player_flags(self, value):
+        return [flag.name for flag in value] if value else []
+    
+    @field_serializer("pref_flags")
+    def serialize_pref_flags(self, value):
+        return [flag.name for flag in value] if value else []
+    
+    @field_serializer("admin_flags")
+    def serialize_admin_flags(self, value):
+        return [flag.name for flag in value] if value else []
+    
+    @field_serializer("bodyparts")
+    def serialize_bodyparts(self, value):
+        return [part for part in value] if value else []
+    
+    @field_serializer("admin_flags")
+    def serialize_admin_flags(self, value):
+        return [flag.name for flag in value] if value else []
+
+    @field_serializer("transforms")
+    def serialize_transforms(self, value):
+        return {form.name: data for form, data in value.items()} if value else {}
 
 class ChargenData(BaseModel):
     name: str | None = None
