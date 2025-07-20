@@ -21,6 +21,7 @@
 #include "dbat/account.h"
 #include "dbat/constants.h"
 #include "dbat/filter.h"
+#include "dbat/stats.h"
 
 /* From db.c */
 int update_mobile_strings(struct char_data *t, struct char_data *f);
@@ -354,6 +355,20 @@ void char_data::deactivate() {
     }
 }
 
+double char_data::getBaseStat(const std::string& stat) {
+    return charStats.getBase(this, stat);
+}
+
+double char_data::setBaseStat(const std::string& stat, double val) {
+    return charStats.setBase(this, stat, val);
+}
+double char_data::modBaseStat(const std::string& stat, double val) {
+    return charStats.modBase(this, stat, val);
+}
+
+double char_data::getEffectiveStat(const std::string& stat) {
+    return charStats.getEffective(this, stat);
+}
 
 weight_t char_data::getWeight(bool base) {
     return get(CharDim::weight, base);

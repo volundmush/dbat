@@ -11,6 +11,7 @@ class MobSpecialData(BaseModel):
     newitem: bool = False
     default_pos: int = 8
 
+
 class TimeData(BaseModel):
     birth: int = 0
     created: int = 0

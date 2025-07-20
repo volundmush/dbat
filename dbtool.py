@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 import os
 import json
+import gzip
 
 def select_dump_folder(dump_directory: Path) -> Path:
     """
@@ -25,14 +26,21 @@ def select_dump_folder(dump_directory: Path) -> Path:
     return latest_dump
 
 def readJsonFile(dump_dir: Path, file_name: str):
-    with open(dump_dir / file_name) as f:
-        data = json.load(f)
+    true_name = f"{file_name}.json.gz"
+    file_path = dump_dir / true_name
+
+    # Directly open as gzip in text mode
+    with gzip.open(file_path, 'rt', encoding='utf-8') as gz_file:
+        data = json.load(gz_file)
+
+    if not data:
+        raise ValueError(f"No data found in {true_name} in {dump_dir}.")
     return data
 
 def tool_index_obj_apply(dump_dir: Path, args):
     location = int(args[0])
 
-    data = readJsonFile(dump_dir, "itemPrototypes.json")
+    data = readJsonFile(dump_dir, "itemPrototypes")
 
     print(f"Searching through {len(data)} prototypes for affected: {location}")
     total = 0
@@ -55,7 +63,7 @@ def tool_index_obj_apply(dump_dir: Path, args):
 def tool_index_obj_flag(dump_dir: Path, args):
     flag = int(args[0])
 
-    data = readJsonFile(dump_dir, "itemPrototypes.json")
+    data = readJsonFile(dump_dir, "itemPrototypes")
 
     print(f"Searching through {len(data)} prototypes for flag: {flag}")
     total = 0
@@ -67,10 +75,28 @@ def tool_index_obj_flag(dump_dir: Path, args):
 
     print(f"Total Found: {total}")
 
+def tool_index_room_scripts(dump_dir: Path, args):
+    from dbat_ext import process_colors
+    data = readJsonFile(dump_dir, "rooms")
+
+    print(f"Searching through {len(data)} rooms for script usage")
+    rooms = set()
+    scripts = set()
+    for room in data:
+        if (room_scripts := room.get("proto_script", list())):
+            vn = room.get("vn", "Unknown")
+            rooms.add(vn)
+            scripts.update(room_scripts)
+            print(f"Room: {vn} - {process_colors(room['name'], parse=False)} - Scripts: {', '.join([str(i) for i in room_scripts])}")
+    print(f"Total Rooms with Scripts: {len(rooms)}")
+    print(f"Total Scripts Used: {len(scripts)}")
+    print(f"Scripts: {', '.join([str(i) for i in scripts])}")
+
 tools = {
     # Provided an affect (and, optionally, a specific), lists everything with matching obj_affected_type
     "SearchObjApply": tool_index_obj_apply,
-    "SearchObjFlag": tool_index_obj_flag
+    "SearchObjFlag": tool_index_obj_flag,
+    "RoomScripts": tool_index_room_scripts
 }
 
 def main():

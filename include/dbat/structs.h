@@ -94,6 +94,8 @@ public:
 typedef struct assembly_data ASSEMBLY;
 typedef struct component_data COMPONENT;
 
+
+
 struct assembly_data {
     long lVnum;                  /* Vnum of the object assembled. */
     long lNumComponents;         /* Number of components. */
@@ -119,6 +121,8 @@ struct extra_descr_data {
     char *description;             /* What to see                      */
     struct extra_descr_data *next; /* Next in list                     */
 };
+
+
 
 struct affect_t {
     // DO NOT CHANGE THE ORDER OF THESE FIELDS.
@@ -283,6 +287,8 @@ struct unit_data {
     void activateScripts();
     void deactivateScripts();
 
+    std::unordered_map<std::string, double> base_stats; // Base stats for this unit.
+    
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 
@@ -734,6 +740,12 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     bool canCarryWeight(struct obj_data *obj);
     bool canCarryWeight(struct char_data *obj);
     bool canCarryWeight(weight_t val);
+
+    double getBaseStat(const std::string& stat);
+    double setBaseStat(const std::string& stat, double val);
+    double modBaseStat(const std::string& stat, double val);
+
+    double getEffectiveStat(const std::string& stat);
 
     dim_t getHeight(bool base = false);
     dim_t setHeight(dim_t val);

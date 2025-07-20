@@ -1852,30 +1852,38 @@ constexpr int NUM_ITEM_FLAGS = 96;
 
 /* Modifier constants used with obj affects ('A' fields) */
 constexpr int APPLY_NONE = 0;    /* No effect */
+
 constexpr int APPLY_CATTR_BASE = 1;    /* Bitwise: Flat Modifier applied to Attribute base */
 constexpr int APPLY_CATTR_MULT = 2;    /* Bitwise: Modifier for Attribute mult */
 constexpr int APPLY_CATTR_POST = 3;    /* Bitwise: Flat modifier added after mult.  */
 constexpr int APPLY_CATTR_GAIN_MULT = 4;    /* bitwise: other stats gain multiplier */
+
 constexpr int APPLY_CVIT_BASE = 5;    /* Bitwise: Flat modifier applied to vital base */
 constexpr int APPLY_CVIT_MULT = 6;    /* Bitwise: modifier for vitals mult */
 constexpr int APPLY_CVIT_POST = 7;    /* Bitwise: flat modifier applied after mult */
 constexpr int APPLY_CVIT_GAIN_MULT = 8;    /* Bitwise: base gains multiplier */
 constexpr int APPLY_CVIT_REGEN_MULT = 9;    /* Bitwise: regen multiplier */
 constexpr int APPLY_CVIT_DOT_MULT = 10;    /* Bitwise: damage over time multiplier */
+
 constexpr int APPLY_CSTAT_BASE = 11;    /* bitwise: other stats base */
 constexpr int APPLY_CSTAT_MULT = 12;    /* bitwise: other stats multiplier */
 constexpr int APPLY_CSTAT_POST = 13;    /* bitwise: flat modifier applied after mult */
 constexpr int APPLY_CSTAT_GAIN_MULT = 14;    /* bitwise: other stats gain multiplier */
+
 constexpr int APPLY_CDIM_BASE = 15;    /* bitwise: character dimension base */
 constexpr int APPLY_CDIM_MULT = 16;    /* bitwise: character dimension multiplier */
 constexpr int APPLY_CDIM_POST = 17;    /* bitwise: flat modifier applied after mult */
+
 constexpr int APPLY_COMBAT_BASE = 18;    /* bitwise: combat base bonuses */
 constexpr int APPLY_COMBAT_MULT = 19;    /* bitwise: combat multiplicative bonuses */
+
 constexpr int APPLY_DTYPE_RES = 20;    /* bitwise: damage type resistance */
 constexpr int APPLY_DTYPE_BON = 21;    /* bitwise: damage type bonuses */
+
 constexpr int APPLY_ATKTIER_RES = 22;    /* bitwise: attack tier resistance */
 constexpr int APPLY_ATKTIER_BON = 23;    /* bitwise: attack tier bonuses */
 constexpr int APPLY_TRANS_UPKEEP_CVIT = 24;    /* bitwise: cvitals cost modifier for transformations */
+
 constexpr int APPLY_SKILL = 25;     /* !bitwise: Apply to a specific skill    */
 
 constexpr int NUM_APPLIES = 26;
@@ -2456,7 +2464,7 @@ enum class MoralAlign : uint8_t {
 using money_t = uint64_t;
 enum class CharMoney : uint8_t {
  carried = 1 << 0,
- bank = 1 << 0
+ bank = 1 << 1
 };
 
 using vital_t = int64_t;
@@ -2491,6 +2499,7 @@ enum class CharDim : uint8_t {
     height = 1 << 0,
     weight = 1 << 1,
 };
+
 using weight_t = dim_t;
 using effect_t = uint16_t;
 
