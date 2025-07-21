@@ -1316,7 +1316,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
         }
         if (!docharge && rand_number(1, 40) >= 38 && !FIGHTING(ch) &&
             (!prefki || GET_CHARGE(ch) > GET_MAX_MANA(ch) * 0.1)) {
-            if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100 && axion_dice(-10) > ch->get(CharAttribute::intelligence, false)) {
+            if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) / 100 && axion_dice(-10) > ch->getEffectiveStat("intelligence")) {
                 int64_t loss = 0;
                 send_to_char(ch, "You lose some of your energy slowly.\r\n");
                 switch (rand_number(1, 3)) {
@@ -1465,7 +1465,7 @@ static void make_pcorpse(struct char_data *ch) {
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);      /* You can't store stuff in a corpse */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);        /* corpse identifier */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, ch->id);  /* corpse identifier */
-    GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
+    GET_OBJ_WEIGHT(corpse) = ch->getBaseStat("weight_total");
     GET_OBJ_RENT(corpse) = 100000;
     GET_OBJ_TIMER(corpse) = CONFIG_MAX_PC_CORPSE_TIME;
 
@@ -1493,7 +1493,7 @@ static void make_pcorpse(struct char_data *ch) {
             money = create_money(GET_GOLD(ch));
             obj_to_obj(money, corpse);
         }
-        ch->set(CharMoney::carried, 0);
+        ch->setBaseStat("money_carried", 0);
     }
 
     obj_to_room(corpse, IN_ROOM(ch));
@@ -1700,7 +1700,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CAPACITY, 0);    /* You can't store stuff in a corpse */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_CORPSE, 1);    /* corpse identifier */
     SET_OBJ_VAL(corpse, VAL_CONTAINER_OWNER, -1);    /* corpse identifier */
-    GET_OBJ_WEIGHT(corpse) = ch->getTotalWeight();
+    GET_OBJ_WEIGHT(corpse) = ch->getBaseStat("weight_total");
     GET_OBJ_RENT(corpse) = 100000;
     if (IS_NPC(ch))
         GET_OBJ_TIMER(corpse) = CONFIG_MAX_NPC_CORPSE_TIME;
@@ -1744,7 +1744,7 @@ static void make_corpse(struct char_data *ch, struct char_data *tch) {
             money = create_money(GET_GOLD(ch));
             obj_to_obj(money, corpse);
         }
-        ch->set(CharMoney::carried, 0);
+        ch->setBaseStat("money_carried", 0);
     }
     obj_to_room(corpse, IN_ROOM(ch));
 

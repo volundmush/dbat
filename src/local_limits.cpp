@@ -1090,9 +1090,9 @@ static void heal_limb(struct char_data *ch) {
 
         if (!PLR_FLAGGED(ch, PLR_BANDAGED) && recovered == true) {
             if (axion_dice(-10) > GET_CON(ch)) {
-                ch->mod(CharAttribute::strength, -1);
-                ch->mod(CharAttribute::speed, -1);
-                ch->mod(CharAttribute::agility, -1);
+                ch->modBaseStat("strength", -1);
+                ch->modBaseStat("speed", -1);
+                ch->modBaseStat("agility", -1);
                 send_to_char(ch, "@RYou lose 1 Strength, Agility, and Speed!\r\n");
             }
         }
@@ -1219,7 +1219,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                                              add_commas(gbonus).c_str());
                             }
                         }
-                        ch->gainBasePL(gain);
+                        ch->gainBaseStat("powerlevel", gain);
                     }
                 }
                 if (mum) {
@@ -1249,7 +1249,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                                              add_commas(gbonus).c_str());
                             }
                         }
-                        ch->gainBaseST(gain);
+                        ch->gainBaseStat("stamina", gain);
                     }
                 }
                 if (ium) {
@@ -1279,7 +1279,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                                              add_commas(gbonus).c_str());
                             }
                         }
-                        ch->gainBaseKI(gain);
+                        ch->gainBaseStat("ki", gain);
                     }
                 }
                 if (!sum) {
@@ -1287,7 +1287,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         int gain = 1;
                         send_to_char(ch,
                                      "@gYou gain +@G%d@g permanent powerlevel. You may need to level.@n\r\n", gain);
-                        ch->gainBasePL(gain);
+                        ch->gainBaseStat("powerlevel", gain);
                     }
                 }
                 if (!mum) {
@@ -1295,7 +1295,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         int gain = 1;
                         send_to_char(ch, "@gYou gain +@G%d@g permanent stamina. You may need to level.@n\r\n",
                                      gain);
-                        ch->gainBaseST(gain);
+                        ch->gainBaseStat("stamina", gain);
                     }
                 }
                 if (!ium) {
@@ -1303,7 +1303,7 @@ void androidAbsorbSystem(uint64_t heartPulse, double deltaTime) {
                         int gain = 1;
                         send_to_char(ch, "@gYou gain +@G%d@g permanent ki. You may need to level.@n\r\n",
                                      gain);
-                        ch->gainBaseKI(gain);
+                        ch->gainBaseStat("ki", gain);
                     }
                 }
             }
@@ -1384,9 +1384,9 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
 
 
                 if (!IN_ARENA(ch)) {
-                    ch->gainBasePL(zenkaiPL);
-                    ch->gainBaseKI(zenkaiKi);
-                    ch->gainBaseST(zenkaiSt);
+                    ch->gainBaseStat("powerlevel", zenkaiPL);
+                    ch->gainBaseStat("ki", zenkaiKi);
+                    ch->gainBaseStat("stamina", zenkaiSt);
 
                     send_to_char(ch,
                                  "@D[@YZ@ye@wn@Wk@Ya@yi @YB@yo@wo@Ws@Yt@D] @WYou feel much stronger!\r\n");
@@ -1758,7 +1758,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
 
                     if (i->getLocationTileType() == SECT_WATER_NOSWIM && !CARRIED_BY(i) && !IS_KANASSAN(i))
                     {
-                        auto carweight = i->getCarriedWeight();
+                        auto carweight = i->getEffectiveStat("weight_carried");
                         if (i->getCurST() >= carweight)
                         {
                             act("@bYou swim in place.@n", true, i, nullptr, nullptr, TO_CHAR);

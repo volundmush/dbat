@@ -137,10 +137,10 @@ void set_height_and_weight_by_race(struct char_data *ch) {
     auto sex = static_cast<int>(GET_SEX(ch));
 
     auto mod = dice(2, hw_info[race].heightdie);
-    ch->setHeight( hw_info[race].height[sex] + mod);
+    ch->setBaseStat("height",  hw_info[race].height[sex] + mod);
     mod *= hw_info[race].weightfac;
     mod /= 100;
-    ch->set(CharDim::weight, hw_info[race].weight[sex] + mod);
+    ch->setBaseStat("weight", hw_info[race].weight[sex] + mod);
 }
 
 

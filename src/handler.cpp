@@ -225,7 +225,9 @@ void affect_total(struct char_data *ch) {
     struct affected_type *af;
     int i, j;
 
-    GET_SPELLFAIL(ch) = GET_ARMORCHECK(ch) = GET_ARMORCHECKALL(ch) = 0;
+    for(const auto &s : {"spellfail", "armorcheck", "armorcheckall"}) {
+        ch->setBaseStat(s, 0.0);
+    }
 
     for (i = 0; i < NUM_WEARS; i++) {
         if (GET_EQ(ch, i))
@@ -248,10 +250,10 @@ void affect_total(struct char_data *ch) {
     for (i = 0; i < NUM_WEARS; i++) {
         if (GET_EQ(ch, i)) {
             if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_ARMOR) {
-                GET_SPELLFAIL(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SPELLFAIL);
-                GET_ARMORCHECKALL(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK);
+                ch->modBaseStat("spellfail", GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SPELLFAIL));
+                ch->modBaseStat("armorcheck", GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK));
                 if (!is_proficient_with_armor(ch, GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_SKILL)))
-                    GET_ARMORCHECK(ch) += GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK);
+                    ch->modBaseStat("armorcheck", GET_OBJ_VAL(GET_EQ(ch, i), VAL_ARMOR_CHECK));
             }
             for (j = 0; j < MAX_OBJ_AFFECT; j++)
                 affect_modify_ar(ch, GET_EQ(ch, i)->affected[j].location,

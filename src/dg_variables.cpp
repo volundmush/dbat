@@ -568,7 +568,7 @@ in the vault (vnum: 453) now and then. you can just use
                     else if (!strcasecmp(field, "align")) {
                         if (subfield && *subfield) {
                             int addition = atof(subfield);
-                            c->set(CharAlign::good_evil, std::clamp<int>(addition, -1000, 1000));
+                            c->setBaseStat("good_evil", std::clamp<int>(addition, -1000, 1000));
                         }
                         snprintf(str, slen, "%d", GET_ALIGNMENT(c));
                     }
@@ -915,7 +915,7 @@ in the vault (vnum: 453) now and then. you can just use
                     break;
                 case 'w':
                     if (!strcasecmp(field, "weight"))
-                        snprintf(str, slen, "%s", fmt::format("{}", c->get(CharDim::weight)).c_str());
+                        snprintf(str, slen, "%s", fmt::format("{}", c->getEffectiveStat("weight")).c_str());
             
                     break;
             } /* switch *field */

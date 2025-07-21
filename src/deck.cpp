@@ -379,11 +379,11 @@ static card comprehension = {   "Comprehension",
         if(st > (ch->getBaseST() / 10)) st = ch->getBaseST() / 10;
 
         send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
-        ch->gainBasePL(pl);
+        ch->gainBaseStat("powerlevel", pl);
         send_to_char(ch, "@D[@Y+ @B%s @bKI@D]@n\r\n", add_commas(ki).c_str());
-        ch->gainBasePL(ki);
+        ch->gainBaseStat("ki", ki);
         send_to_char(ch, "@D[@Y+ @G%s @gST@D]@n\r\n", add_commas(st).c_str());
-        ch->gainBasePL(st);
+        ch->gainBaseStat("stamina", st);
 
         task->improvementRounds++;
         
@@ -532,10 +532,10 @@ void deck::initDeck(char_data* ch) {
         addCardToDeck(tranquility);
     }
 
-    if(ch->get(CharAttribute::wisdom) >= 70)
+    if(ch->getEffectiveStat("wisdom") >= 70)
         addCardToDeck(reflection);
 
-    if(ch->get(CharAttribute::intelligence) >= 50)
+    if(ch->getEffectiveStat("intelligence") >= 50)
         removeCard(timePasses);
 
 

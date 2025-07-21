@@ -1283,7 +1283,7 @@ namespace trans {
         {
             Form::potential_unleashed, {
                 {APPLY_CVIT_MULT,   0.0, ~0,                    [](struct char_data *ch) {
-                    auto cl = ch->lifetimeGrowth;
+                    auto cl = ch->getBaseStat("lifetimeGrowth");
                     if(cl < 50) return 1.0 + (0.1 * getMasteryTier(ch, Form::potential_unleashed));
                     if(cl < 100) return 2.0 + (0.1 * getMasteryTier(ch, Form::potential_unleashed));
                     if(cl < 150) return 3.0 + (0.15 * getMasteryTier(ch, Form::potential_unleashed));
@@ -2268,7 +2268,7 @@ namespace trans {
 
         send_to_char(ch, "              @YForms@n\r\n");
         
-        auto ik = ch->internalGrowth;
+        auto ik = ch->getBaseStat("internalGrowth");
         std::vector<std::string> form_names;
         std::vector<Form> locked_forms;
         bool bannerDisplayed = false;
@@ -2337,17 +2337,19 @@ namespace trans {
 
         const double epsilon = 0.05;  // A small tolerance value for floating point comparison
 
-        if (ch->transBonus <= -0.3 + epsilon) {
+        auto tbonus = ch->getBaseStat("transBonus");
+
+        if (tbonus <= -0.3 + epsilon) {
             send_to_char(ch, "\r\n@WYou have @wGREAT@W transformation BPL Requirements.@n\r\n");
-        } else if (ch->transBonus <= -0.2 + epsilon) {
+        } else if (tbonus <= -0.2 + epsilon) {
             send_to_char(ch, "\r\n@MYou have @mabove average@M transformation BPL Requirements.@n\r\n");
-        } else if (ch->transBonus <= -0.1 + epsilon) {
+        } else if (tbonus <= -0.1 + epsilon) {
             send_to_char(ch, "\r\n@BYou have @bslightly above average@B transformation BPL Requirements.@n\r\n");
-        } else if (ch->transBonus < 0.1 - epsilon) {
+        } else if (tbonus < 0.1 - epsilon) {
             send_to_char(ch, "\r\n@GYou have @gaverage@G transformation BPL Requirements.@n\r\n");
-        } else if (ch->transBonus < 0.2 - epsilon) {
+        } else if (tbonus < 0.2 - epsilon) {
             send_to_char(ch, "\r\n@YYou have @yslightly below average@Y transformation BPL Requirements.@n\r\n");
-        } else if (ch->transBonus < 0.3 - epsilon) {
+        } else if (tbonus < 0.3 - epsilon) {
             send_to_char(ch, "\r\n@CYou have @cbelow average@C transformation BPL Requirements.@n\r\n");
         } else {
             send_to_char(ch, "\r\n@RYou have @rterrible@R transformation BPL Requirements.@n\r\n");
@@ -2489,8 +2491,8 @@ namespace trans {
         auto &data = ch->transforms[form];
 
         if(data.unlocked == false) {
-            if(ch->internalGrowth >= getRequiredPL(ch, form))
-                ch->internalGrowth -= getRequiredPL(ch, form);
+            if(ch->getBaseStat("internalGrowth") >= getRequiredPL(ch, form))
+                ch->modBaseStat("internalGrowth", -getRequiredPL(ch, form));
             else 
                 return false;
             data.unlocked = true;

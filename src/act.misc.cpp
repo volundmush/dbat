@@ -247,16 +247,13 @@ static void generate_multiform(struct char_data *ch, int count) {
             clone->look_description = strdup(ch->look_description);
         clone->race = ch->race;
         clone->sensei = ch->sensei;
-        clone->vitals = ch->vitals;
         clone->nums = ch->nums;
 
         clone->appearances = ch->appearances;
-        clone->aligns = ch->aligns;
+        clone->base_stats = ch->base_stats;
         clone->size = ch->size;
-        clone->attributes = ch->attributes;
         clone->trains = ch->trains;
 
-        clone->dims = ch->dims;
         clone->nums = ch->nums;
 
         clone->time = ch->time;
@@ -1299,9 +1296,9 @@ ACMD(do_fish) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C pulls $s arm back and then springs it foward, casting the line of $s fishing pole into the water.@n",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            GET_FISHD(ch) = rand_number(30, 80);
+            auto dis = ch->setBaseStat("fish_distance", rand_number(30, 80));
             ch->player_flags.set(PLR_FISHING, true);
-            send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch));
+            send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", dis);
             return;
         }
     } else if (!strcasecmp(arg, "hook")) {
@@ -1323,7 +1320,7 @@ ACMD(do_fish) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C pulls hard on $s fishing line, but a moment later $e frowns and returns to fishing.@n", true,
                 ch, nullptr, nullptr, TO_ROOM);
-            GET_FISHSTATE(ch) = FISH_NOFISH;
+            ch->setBaseStat("fish_state", FISH_NOFISH);
             return;
         } else {
             reveal_hiding(ch, 0);
@@ -1331,27 +1328,29 @@ ACMD(do_fish) {
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C pulls hard on $s fishing line and starts to struggle with the fish on the other end!@n", true,
                 ch, nullptr, nullptr, TO_ROOM);
-            GET_FISHSTATE(ch) = FISH_HOOKED;
+            ch->setBaseStat("fish_state", FISH_HOOKED);
             return;
         }
     } else if (!strcasecmp(arg, "reel")) {
         if (!PLR_FLAGGED(ch, PLR_FISHING)) {
             send_to_char(ch, "You are not even fishing!\r\n");
             return;
-        } else if (GET_FISHSTATE(ch) == FISH_NOFISH) {
+        }
+        auto fishs = ch->getBaseStat("fish_state");
+        if (fishs == FISH_NOFISH) {
             send_to_char(ch, "You do not have a fish biting on your line.\r\n");
             return;
-        } else if (GET_FISHSTATE(ch) == FISH_REELING) {
+        } else if (fishs == FISH_REELING) {
             send_to_char(ch, "You are already trying to reel the fish in!\r\n");
             return;
-        } else if (GET_FISHSTATE(ch) != FISH_HOOKED) {
+        } else if (fishs != FISH_HOOKED) {
             send_to_char(ch, "You don't have a fish hooked!\r\n");
             return;
         } else {
             reveal_hiding(ch, 0);
             act("@CYou begin reeling the fish in slowly.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C begins to reel the line on $s pole in.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            GET_FISHSTATE(ch) = FISH_REELING;
+            ch->setBaseStat("fish_state", FISH_REELING);
             return;
         }
     } else if (!strcasecmp(arg, "apply")) {
@@ -1398,8 +1397,8 @@ ACMD(do_fish) {
             act("@CYou reel in your line and stop fishing.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@c$n@C reels in $s fishing line and stops fishing.@n", true, ch, nullptr, nullptr, TO_ROOM);
             ch->player_flags.set(PLR_FISHING, false);
-            GET_FISHSTATE(ch) = FISH_NOFISH;
-            GET_FISHD(ch) = 0;
+            ch->setBaseStat("fish_state", FISH_NOFISH);
+            ch->setBaseStat("fish_distance", 0);
             return;
         }
     } else {
@@ -1430,8 +1429,8 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
 
         if(!i->getRoomFlag(ROOM_FISHING)) {
             i->player_flags.set(PLR_FISHING, false);
-            GET_FISHD(i) = 0;
-            GET_FISHSTATE(i) = FISH_NOFISH;
+            i->setBaseStat("fish_distance", 0);
+            i->setBaseStat("fish_state", FISH_NOFISH);
             characterSubscriptions.unsubscribe("goneFishing", i);
             continue;
         }
@@ -1448,58 +1447,61 @@ void fish_update(uint64_t heartPulse, double deltaTime) {
                 }
                 catch_fish(ch, quality);
             } else if (rand_number(1, 5) >= 3) { /* Reeling section */
-                if (GET_FISHSTATE(ch) == FISH_REELING && rand_number(1, 100) <= 80) {
+                auto fstate = GET_FISHSTATE(ch);
+                if (fstate == FISH_REELING && rand_number(1, 100) <= 80) {
+                    int reduceBy = 0;
                     if (GET_POLE_BONUS(ch) >= 80) {
-                        GET_FISHD(ch) -= rand_number(6, 10);
+                        reduceBy = rand_number(6, 10);
                     } else if (GET_POLE_BONUS(ch) >= 40) {
-                        GET_FISHD(ch) -= rand_number(5, 8);
+                        reduceBy = rand_number(5, 8);
                     } else {
-                        GET_FISHD(ch) -= rand_number(1, 4);
+                        reduceBy = rand_number(1, 4);
                     }
+                    ch->modBaseStat("fish_distance", -reduceBy);
                     act("@CYou reel the line on your pole some.@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@c$n@C reels the line on $s pole slowly.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     send_to_char(ch, "@D[@wDistance@D: @Y%d@D]@n\r\n", GET_FISHD(ch) > 0 ? GET_FISHD(ch) : 0);
-                } else if (GET_FISHSTATE(ch) == FISH_REELING && rand_number(1, 58) <= 55) {
+                } else if (fstate == FISH_REELING && rand_number(1, 58) <= 55) {
                     act("@CYou struggle as the fish fights against your attempts to reel it in!@n", true, ch,
                         nullptr, nullptr, TO_CHAR);
                     act("@c$n@C struggles with the fish on the end of $s pole!@n", true, ch, nullptr, nullptr,
                         TO_ROOM);
-                } else if (GET_FISHSTATE(ch) == FISH_REELING) { /* Lose the fish */
+                } else if (fstate == FISH_REELING) { /* Lose the fish */
                     act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
                         true, ch, nullptr, nullptr, TO_CHAR);
                     act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    GET_FISHD(ch) = 0;
-                    GET_FISHSTATE(ch) = FISH_NOFISH;
+                    ch->setBaseStat("fish_distance", 0);
+                    ch->setBaseStat("fish_state", FISH_NOFISH);
                     ch->player_flags.set(PLR_FISHING, false);
                     characterSubscriptions.unsubscribe("goneFishing", i);
                     if (has_pole(ch) == true) {
                         struct obj_data *pole = GET_EQ(ch, WEAR_WIELD2);
                         SET_OBJ_VAL(pole, VAL_FISHPOLE_BAIT, 0);
                     }
-                } else if (GET_FISHSTATE(ch) == FISH_HOOKED && rand_number(1, 20) >= 12) {
+                } else if (fstate == FISH_HOOKED && rand_number(1, 20) >= 12) {
                     act("@CYou feel the line go slack and realize you've lost the fish! You reel your line back in...@n",
                         true, ch, nullptr, nullptr, TO_CHAR);
                     act("@c$n@C frowns and then begins to reel in $s line.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    GET_FISHD(ch) = 0;
-                    GET_FISHSTATE(ch) = FISH_NOFISH;
+                    ch->setBaseStat("fish_distance", 0);
+                    ch->setBaseStat("fish_state", FISH_NOFISH);
                     ch->player_flags.set(PLR_FISHING, false);
                     characterSubscriptions.unsubscribe("goneFishing", i);
-                } else if (GET_FISHSTATE(ch) == FISH_BITE && rand_number(1, 20) >= 12) {
+                } else if (fstate == FISH_BITE && rand_number(1, 20) >= 12) {
                     act("@CYou feel as if the fish has stopped biting...@n", true, ch, nullptr, nullptr, TO_CHAR);
-                    GET_FISHSTATE(ch) = FISH_NOFISH;
-                } else if (GET_FISHSTATE(ch) != FISH_HOOKED && GET_FISHSTATE(ch) != FISH_BITE &&
+                    ch->setBaseStat("fish_state", FISH_NOFISH);
+                } else if (fstate != FISH_HOOKED && fstate != FISH_BITE &&
                            ((ch->getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 10) >= 8) ||
                             (!ch->getRoomFlag(ROOM_FISHFRESH) && rand_number(1, 20) >= 18))) {
                     act("@CYou feel a fish biting on your line! Better @Ghook@C it!@n", true, ch, nullptr, nullptr,
                         TO_CHAR);
-                    GET_FISHSTATE(ch) = FISH_BITE;
+                    ch->setBaseStat("fish_state", FISH_BITE);
                 }
             } /* End reel section */
         } else if (PLR_FLAGGED(i, PLR_FISHING) && has_pole(i) == false) { /* End of, Is Fishing */
             i->player_flags.set(PLR_FISHING, false);
             characterSubscriptions.unsubscribe("goneFishing", i);
-            GET_FISHD(i) = 0;
-            GET_FISHSTATE(i) = FISH_NOFISH;
+            ch->setBaseStat("fish_distance", 0);
+            ch->setBaseStat("fish_state", FISH_NOFISH);
         }
     } /* End of for */
 
@@ -1658,8 +1660,8 @@ static void catch_fish(struct char_data *ch, int quality) {
     send_to_char(ch, "@D[@cFish Weight@D: @G%" I64T "@D]@n\r\n", GET_OBJ_WEIGHT(fish));
     ch->player_flags.set(PLR_FISHING, false);
     characterSubscriptions.unsubscribe("goneFishing", ch);
-    GET_FISHD(ch) = 0;
-    GET_FISHSTATE(ch) = FISH_NOFISH;
+    ch->setBaseStat("fish_distance", 0);
+    ch->setBaseStat("fish_state", FISH_NOFISH);
 }
 
 ACMD(do_extract) {
@@ -2231,16 +2233,18 @@ ACMD(do_scry) {
             TO_NOTVICT);
         int64_t boost = GET_INT(ch) * 0.5;
 
-        vict->gainBasePL((vict->getBasePL() * .01) * boost);
-        vict->gainBaseKI((vict->getBaseKI() * .01) * boost);
-        vict->gainBaseST((vict->getBaseST() * .01) * boost);
+        vict->gainBaseStat("powerlevel", (vict->getBaseStat("powerlevel") * .01) * boost);
+        vict->gainBaseStat("ki", (vict->getBaseStat("ki") * .01) * boost);
+        vict->gainBaseStat("stamina", (vict->getBaseStat("stamina") * .01) * boost);
 
         send_to_char(vict,
                      "Your Powerlevel, Ki, and Stamina have improved drastically! On top of that your Intelligence and Wisdom have improved permanantly!\r\n");
-        vict->mod(CharAttribute::intelligence, 2);
-        vict->mod(CharAttribute::wisdom, 2);
+        vict->modBaseStat("intelligence", 2);
+        vict->modBaseStat("wisdom", 2);
         ch->modPractices(-2000);
-        ch->gainBaseAllPercent(.025, true);
+        for(const auto& s : { "powerlevel", "ki", "stamina" }) {
+            vict->gainBaseStatPercent(s, .025);
+        }
         send_to_char(ch, "Your Powerlevel, Ki, and Stamina have improved!\r\n");
     }
 
@@ -2859,7 +2863,7 @@ ACMD(do_hydromancy) {
             true, ch, obj, nullptr, TO_CHAR);
         act("@c$n@C presses $s palms together in front of $s body and water begins to flow up $s body and pools between $s palms. Slowly pulling them apart reveals a @c$p@C as it forms between them!@n",
             true, ch, obj, nullptr, TO_VICT);
-        if (GET_OBJ_WEIGHT(obj) + (ch->getCarriedWeight()) <= CAN_CARRY_W(ch))
+        if (GET_OBJ_WEIGHT(obj) + (ch->getEffectiveStat("weight_carried")) <= CAN_CARRY_W(ch))
             obj_to_char(obj, ch);
         else {
             send_to_char(ch, "You are unable to hold it and so let it go at your feet.\r\n");

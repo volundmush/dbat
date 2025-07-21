@@ -109,15 +109,14 @@ ACMD(do_evolve) {
     struct EvolutionCost {
         int64_t cost;
         const char *name;
-        CharVital vital;
         int stat;
     };
 
     // Define evolution costs
     std::vector<EvolutionCost> evolutionCosts = {
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15)), "powerlevel", CharVital::powerlevel, GET_CON(ch)},
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22)), "ki", CharVital::ki, GET_WIS(ch)},
-        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15)), "stamina", CharVital::stamina, GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.65) + (ch->getBasePL() * 0.15)), "powerlevel", GET_CON(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseKI() * 0.22)), "ki", GET_WIS(ch)},
+        {(int64_t)(GET_LEVEL(ch) + (molt_threshold(ch) * 0.50) + (ch->getBaseST() * 0.15)), "stamina", GET_CON(ch)},
     };
 
     if (!*arg) {
@@ -152,7 +151,7 @@ ACMD(do_evolve) {
         return;
     }
 
-    double baseVal = ch->get(it->vital, true);
+    double baseVal = ch->getBaseStat(it->name);
     double attrBonus = 1 + (it->stat / 20.0);
     double startBonus = Random::get<double>(0.8, 1.2) * attrBonus * ch->getPotential();
     double softCap = ch->calc_soft_cap();
@@ -160,8 +159,7 @@ ACMD(do_evolve) {
     int64_t bonusVal = static_cast<int64_t>(startBonus * diminishingReturns * 20);
 
     bonusVal = std::min(bonusVal, ch->getBaseST() / 10);
-    bonusVal *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(it->vital)));
-    ch->mod(it->vital, bonusVal);
+    ch->gainBaseStat(it->name, bonusVal);
     GET_MOLT_EXP(ch) -= it->cost;
     send_to_char(ch,
                     "Your body evolves to make better use of the way it is now, and you feel that your %s has strengthened. @D[@C%s@D: @Y+%s@D]@n\r\n",
@@ -1986,8 +1984,8 @@ static void look_at_char(struct char_data *i, struct char_data *ch) {
         send_to_char(ch, "is %s sized, and\r\n", size_names[get_size(i)]);
     }
     if (!IS_NPC(i)) {
-        auto w = i->getWeight();
-        int h = i->getHeight();
+        auto w = i->getEffectiveStat("weight");
+        int h = i->getEffectiveStat("height");
         auto wString = fmt::format("{}kg", w);
         send_to_char(ch, "is %s sized, about %dcm tall,\r\nabout %s heavy,", size_names[get_size(i)],
                      h, wString.c_str());
@@ -3958,9 +3956,9 @@ ACMD(do_score) {
         send_to_char(ch, "                   @D<@wGravity Acclim@D: @w" + grav + "@D> <@wRPP@D: @w%-3d@D>@n\n", GET_RP(ch));
         send_to_char(ch, "               @D<@wSpeed Index@D: @w%-8s@D> <@wArmor Index@D: @w%-8s@D>@n\n", add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
         send_to_char(ch, "  @D[@RStrength     @D|@G%2d (%3d)@D] [@YAgility      @D|@G%2d (%3d)@D] [@BSpeed        @D|@G%2d (%3d)@D]@n\n",
-                     ch->get(CharAttribute::strength, true), GET_STR(ch), ch->get(CharAttribute::agility, true), GET_DEX(ch), ch->get(CharAttribute::speed, true), GET_CHA(ch));
+                     ch->getBaseStat("strength"), GET_STR(ch), ch->getBaseStat("agility"), GET_DEX(ch), ch->getBaseStat("speed"), GET_CHA(ch));
         send_to_char(ch, "  @D[@gConstitution @D|@G%2d (%3d)@D] [@CIntelligence @D|@G%2d (%3d)@D] [@MWisdom       @D|@G%2d (%3d)@D]@n\n",
-                     ch->get(CharAttribute::constitution, true), GET_CON(ch), ch->get(CharAttribute::intelligence, true), GET_INT(ch), ch->get(CharAttribute::wisdom, true),
+                     ch->getBaseStat("constitution"), GET_CON(ch), ch->getBaseStat("intelligence"), GET_INT(ch), ch->getBaseStat("wisdom"),
                      GET_WIS(ch));
     }
     if (view == full || view == other) {
@@ -3969,7 +3967,7 @@ ACMD(do_score) {
         send_to_char(ch, "                @D<@YZenni@D>                    <@rInventory Weight@D>@n\n");
         send_to_char(ch, "      @D[   @CCarried@D| @W%-15s@D] [   @CCarried@D| @W%-15s@D]@n\n",
                      add_commas(GET_GOLD(ch)).c_str(), add_commas(
-                        (ch->getCarriedWeight())).c_str());
+                        (ch->getEffectiveStat("weight_carried"))).c_str());
         double gravity = 1.0;
         
         if(auto room = ch->getRoom(); room) {
@@ -3980,7 +3978,7 @@ ACMD(do_score) {
                      add_commas(GET_BANK_GOLD(ch)).c_str(), add_commas(CAN_CARRY_W(ch)).c_str(), grav.c_str());
 
         grav = gravity > 1.0 ? fmt::format("{}x)", add_commas(gravity)) : "";
-        send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D] [    @CBurden@D| @W%-15s@D]@n %s\n", add_commas(GOLD_CARRY(ch)).c_str(), add_commas(ch->getCurrentBurden()).c_str(), grav.c_str());
+        send_to_char(ch, "      @D[ @CMax Carry@D| @W%-15s@D] [    @CBurden@D| @W%-15s@D]@n %s\n", add_commas(GOLD_CARRY(ch)).c_str(), add_commas(ch->getBaseStat("burden_current")).c_str(), grav.c_str());
         int numb = 0;
         if (GET_BANK_GOLD(ch) > 99) {
             numb = (GET_BANK_GOLD(ch) / 100) * 2;
@@ -3992,7 +3990,7 @@ ACMD(do_score) {
         if (numb >= 7500) {
             numb = 7500;
         }
-        auto ratio = std::to_string(ch->getBurdenRatio() * 100.0) + "%";
+        auto ratio = std::to_string(ch->getBaseStat("burden_ratio") * 100.0) + "%";
         send_to_char(ch, "      @D[  @CInterest@D| @W%-15s@D] [     @CRatio@D| @W%-15s@D]@n\n", add_commas(numb).c_str(), ratio.c_str());
         if (IS_ARLIAN(ch)) {
             send_to_char(ch, "                             @D<@GEvolution @D>@n\n");

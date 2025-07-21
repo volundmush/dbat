@@ -1127,9 +1127,9 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     ch->set(CharNum::level, t[0]);
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
-    ch->set(CharVital::powerlevel, t[3]);
-    ch->set(CharVital::ki, t[4]);
-    ch->set(CharVital::stamina, t[5]);
+    ch->setBaseStat("powerlevel", t[3]);
+    ch->setBaseStat("ki", t[4]);
+    ch->setBaseStat("stamina", t[5]);
 
     ch->mob_specials.damnodice = t[6];
     ch->mob_specials.damsizedice = t[7];
@@ -1147,7 +1147,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    ch->set(CharMoney::carried, t[0]);
+    ch->setBaseStat("money_carried", t[0]);
     auto race = t[2]+1;
     if(race > 23) race = 0;
     ch->race = static_cast<Race>(race);
@@ -1238,7 +1238,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Str") {
         RANGE(0, 200);
-        ch->set(CharAttribute::strength, num_arg);
+        ch->setBaseStat("strength", num_arg);
     }
 
     CASE("StrAdd") {
@@ -1248,27 +1248,27 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Int") {
         RANGE(0, 200);
-        ch->set(CharAttribute::intelligence, num_arg);
+        ch->setBaseStat("intelligence", num_arg);
     }
 
     CASE("Wis") {
         RANGE(0, 200);
-        ch->set(CharAttribute::wisdom, num_arg);
+        ch->setBaseStat("wisdom", num_arg);
     }
 
     CASE("Dex") {
         RANGE(0, 200);
-        ch->set(CharAttribute::agility, num_arg);
+        ch->setBaseStat("agility", num_arg);
     }
 
     CASE("Con") {
         RANGE(0, 200);
-        ch->set(CharAttribute::constitution, num_arg);
+        ch->setBaseStat("constitution", num_arg);
     }
 
     CASE("Cha") {
         RANGE(0, 200);
-        ch->set(CharAttribute::speed, num_arg);
+        ch->setBaseStat("charisma", num_arg);
     }
 
     CASE("Hit") {
@@ -1356,65 +1356,65 @@ static void mob_stats(struct char_data *mob) {
     if (finish < 20)
         finish = 20;
 
-    std::unordered_map<CharAttribute, int> setTo;
+    std::unordered_map<std::string, int> setTo;
 
     if (!IS_HUMANOID(mob)) {
-        setTo[CharAttribute::strength] = rand_number(start, finish);
-        setTo[CharAttribute::intelligence] = rand_number(start, finish) - 30;
-        setTo[CharAttribute::wisdom] = rand_number(start, finish) - 30;
-        setTo[CharAttribute::agility] = rand_number(start + 5, finish);
-        setTo[CharAttribute::constitution] = rand_number(start + 5, finish);
-        setTo[CharAttribute::speed] = rand_number(start, finish);
+        setTo["strength"] = rand_number(start, finish);
+        setTo["intelligence"] = rand_number(start, finish) - 30;
+        setTo["wisdom"] = rand_number(start, finish) - 30;
+        setTo["agility"] = rand_number(start + 5, finish);
+        setTo["constitution"] = rand_number(start + 5, finish);
+        setTo["speed"] = rand_number(start, finish);
     } else {
         if (IS_SAIYAN(mob)) {
-            setTo[CharAttribute::strength] = rand_number(start + 10, finish);
-            setTo[CharAttribute::intelligence] = rand_number(start, finish - 10);
-            setTo[CharAttribute::wisdom] = rand_number(start, finish - 5);
-            setTo[CharAttribute::agility] = rand_number(start, finish);
-            setTo[CharAttribute::constitution] = rand_number(start + 5, finish);
-            setTo[CharAttribute::speed] = rand_number(start + 5, finish);
+            setTo["strength"] = rand_number(start + 10, finish);
+            setTo["intelligence"] = rand_number(start, finish - 10);
+            setTo["wisdom"] = rand_number(start, finish - 5);
+            setTo["agility"] = rand_number(start, finish);
+            setTo["constitution"] = rand_number(start + 5, finish);
+            setTo["speed"] = rand_number(start + 5, finish);
         } else if (IS_KONATSU(mob)) {
-            setTo[CharAttribute::strength] = rand_number(start, finish - 10);
-            setTo[CharAttribute::intelligence] = rand_number(start, finish);
-            setTo[CharAttribute::wisdom] = rand_number(start, finish);
-            setTo[CharAttribute::agility] = rand_number(start + 10, finish);
-            setTo[CharAttribute::constitution] = rand_number(start, finish);
-            setTo[CharAttribute::speed] = rand_number(start, finish);
+            setTo["strength"] = rand_number(start, finish - 10);
+            setTo["intelligence"] = rand_number(start, finish);
+            setTo["wisdom"] = rand_number(start, finish);
+            setTo["agility"] = rand_number(start + 10, finish);
+            setTo["constitution"] = rand_number(start, finish);
+            setTo["speed"] = rand_number(start, finish);
         } else if (IS_ANDROID(mob)) {
-            setTo[CharAttribute::strength] = rand_number(start, finish);
-            setTo[CharAttribute::intelligence] = rand_number(start, finish);
-            setTo[CharAttribute::wisdom] = rand_number(start, finish - 10);
-            setTo[CharAttribute::agility] = rand_number(start, finish);
-            setTo[CharAttribute::constitution] = rand_number(start, finish);
-            setTo[CharAttribute::speed] = rand_number(start, finish);
+            setTo["strength"] = rand_number(start, finish);
+            setTo["intelligence"] = rand_number(start, finish);
+            setTo["wisdom"] = rand_number(start, finish - 10);
+            setTo["agility"] = rand_number(start, finish);
+            setTo["constitution"] = rand_number(start, finish);
+            setTo["speed"] = rand_number(start, finish);
         } else if (IS_MAJIN(mob)) {
-            setTo[CharAttribute::strength] = rand_number(start, finish);
-            setTo[CharAttribute::intelligence] = rand_number(start, finish - 10);
-            setTo[CharAttribute::wisdom] = rand_number(start, finish - 5);
-            setTo[CharAttribute::agility] = rand_number(start, finish);
-            setTo[CharAttribute::constitution] = rand_number(start + 15, finish);
-            setTo[CharAttribute::speed] = rand_number(start, finish);
+            setTo["strength"] = rand_number(start, finish);
+            setTo["intelligence"] = rand_number(start, finish - 10);
+            setTo["wisdom"] = rand_number(start, finish - 5);
+            setTo["agility"] = rand_number(start, finish);
+            setTo["constitution"] = rand_number(start + 15, finish);
+            setTo["speed"] = rand_number(start, finish);
         } else if (IS_TRUFFLE(mob)) {
-            setTo[CharAttribute::strength] = rand_number(start, finish - 10);
-            setTo[CharAttribute::intelligence] = rand_number(start + 15, finish);
-            setTo[CharAttribute::wisdom] = rand_number(start, finish);
-            setTo[CharAttribute::agility] = rand_number(start, finish);
-            setTo[CharAttribute::constitution] = rand_number(start, finish);
-            setTo[CharAttribute::speed] = rand_number(start, finish);
+            setTo["strength"] = rand_number(start, finish - 10);
+            setTo["intelligence"] = rand_number(start + 15, finish);
+            setTo["wisdom"] = rand_number(start, finish);
+            setTo["agility"] = rand_number(start, finish);
+            setTo["constitution"] = rand_number(start, finish);
+            setTo["speed"] = rand_number(start, finish);
         } else if (IS_ICER(mob)) {
-            setTo[CharAttribute::strength] = rand_number(start + 5, finish);
-            setTo[CharAttribute::intelligence] = rand_number(start, finish);
-            setTo[CharAttribute::wisdom] = rand_number(start, finish);
-            setTo[CharAttribute::agility] = rand_number(start, finish);
-            setTo[CharAttribute::constitution] = rand_number(start, finish);
-            setTo[CharAttribute::speed] = rand_number(start + 10, finish);
+            setTo["strength"] = rand_number(start + 5, finish);
+            setTo["intelligence"] = rand_number(start, finish);
+            setTo["wisdom"] = rand_number(start, finish);
+            setTo["agility"] = rand_number(start, finish);
+            setTo["constitution"] = rand_number(start, finish);
+            setTo["speed"] = rand_number(start + 10, finish);
         } else {
-            setTo[CharAttribute::strength] = rand_number(start, finish);
-            setTo[CharAttribute::intelligence] = rand_number(start, finish);
-            setTo[CharAttribute::wisdom] = rand_number(start, finish);
-            setTo[CharAttribute::agility] = rand_number(start, finish);
-            setTo[CharAttribute::constitution] = rand_number(start, finish);
-            setTo[CharAttribute::speed] = rand_number(start, finish);
+            setTo["strength"] = rand_number(start, finish);
+            setTo["intelligence"] = rand_number(start, finish);
+            setTo["wisdom"] = rand_number(start, finish);
+            setTo["agility"] = rand_number(start, finish);
+            setTo["constitution"] = rand_number(start, finish);
+            setTo["speed"] = rand_number(start, finish);
         }
     }
 
@@ -1424,7 +1424,7 @@ static void mob_stats(struct char_data *mob) {
         } else if(val < 5) {
             val = rand_number(5, 8);
         }
-        mob->set(attr, val);
+        mob->setBaseStat(attr, val);
     }
 }
 
@@ -1499,7 +1499,7 @@ static int parse_mobile_from_file(FILE *mob_f, struct char_data *ch) {
         aff[3] = asciiflag_conv(f8);
         for(auto i = 0; i < 128; i++) ch->affect_flags.set(i, IS_SET_AR(aff, i));
 
-        ch->set(CharAlign::good_evil, t[2]);
+        ch->setBaseStat("good_evil", t[2]);
 
     } else {
         basic_mud_log("SYSERR: Format error after string section of mob #%d\n"
@@ -2490,15 +2490,15 @@ static void load_BASE(struct char_data *ch, const char *line, int mode) {
 
     switch (mode) {
         case LOAD_HIT:
-            ch->set(CharVital::powerlevel, num);
+            ch->setBaseStat("powerlevel", num);
             break;
 
         case LOAD_MANA:
-            ch->set(CharVital::ki, num);
+            ch->setBaseStat("ki", num);
             break;
 
         case LOAD_MOVE:
-            ch->set(CharVital::stamina, num);
+            ch->setBaseStat("stamina", num);
             break;
 
         case LOAD_LIFE:
@@ -2551,11 +2551,10 @@ static int load_char(const char *name, struct char_data *ch) {
         }
 
         GET_LOG_USER(ch) = strdup("NOUSER");
-        GET_SUPPRESS(ch) = PFDEF_SKIN;
         GET_FURY(ch) = PFDEF_HAIRL;
         GET_CLAN(ch) = strdup("None.");
         GET_HOME(ch) = PFDEF_HOMETOWN;
-        ch->set(CharDim::weight, PFDEF_WEIGHT);
+        ch->setBaseStat("weight", PFDEF_WEIGHT);
 
         GET_RELAXCOUNT(ch) = PFDEF_EYE;
         GET_BLESSLVL(ch) = PFDEF_HEIGHT;
@@ -2614,12 +2613,12 @@ static int load_char(const char *name, struct char_data *ch) {
                         for(auto f = 0; f < 128; f++) {
                             if(IS_SET_AR(flags, f)) ch->admin_flags.set(f);
                         }
-                    } else if (!strcmp(tag, "Alin")) ch->set(CharAlign::good_evil, atoi(line));
+                    } else if (!strcmp(tag, "Alin")) ch->setBaseStat("good_evil", atoi(line));
                     //else if (!strcmp(tag, "Aura")) ch->set(CharAppearance::aura, atoi(line));
                     break;
 
                 case 'B':
-                    if (!strcmp(tag, "Bank")) ch->set(CharMoney::bank, atoi(line));
+                    if (!strcmp(tag, "Bank")) ch->setBaseStat("money_bank", atoi(line));
                     else if (!strcmp(tag, "Bki ")) load_BASE(ch, line, LOAD_MANA);
                     else if (!strcmp(tag, "Blss")) GET_BLESSLVL(ch) = atoi(line);
                     else if (!strcmp(tag, "Boam")) GET_BOARD(ch, 0) = atoi(line);
@@ -2635,7 +2634,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'C':
-                    if (!strcmp(tag, "Cha ")) ch->set(CharAttribute::speed, atoi(line));
+                    if (!strcmp(tag, "Cha ")) ch->setBaseStat("speed", atoi(line));
                     else if (!strcmp(tag, "Clan")) GET_CLAN(ch) = strdup(line);
                     else if (!strcmp(tag, "Clar")) GET_CRANK(ch) = atoi(line);
                     else if (!strcmp(tag, "Clas")) {
@@ -2645,7 +2644,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     }
                     else if (!strcmp(tag, "Colr")) {
                         sscanf(line, "%d %s", &num, buf2);
-                    } else if (!strcmp(tag, "Con ")) ch->set(CharAttribute::constitution, atoi(line));
+                    } else if (!strcmp(tag, "Con ")) ch->setBaseStat("constitution", atoi(line));
                     else if (!strcmp(tag, "Cool")) GET_COOLDOWN(ch) = atoi(line);
                     else if (!strcmp(tag, "Crtd")) ch->time.created = atol(line);
                     break;
@@ -2654,7 +2653,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     if (!strcmp(tag, "Deat")) GET_DTIME(ch) = atoi(line);
                     else if (!strcmp(tag, "Deac")) GET_DCOUNT(ch) = atoi(line);
                     else if (!strcmp(tag, "Desc")) ch->look_description = fread_string(fl, buf2);
-                    else if (!strcmp(tag, "Dex ")) ch->set(CharAttribute::agility, atoi(line));
+                    else if (!strcmp(tag, "Dex ")) ch->setBaseStat("agility", atoi(line));
                     else if (!strcmp(tag, "Drnk")) GET_COND(ch, DRUNK) = atoi(line);
                     else if (!strcmp(tag, "Damg")) GET_DAMAGE_MOD(ch) = atoi(line);
                     else if (!strcmp(tag, "Droo")) GET_DROOM(ch) = atoi(line);
@@ -2662,7 +2661,7 @@ static int load_char(const char *name, struct char_data *ch) {
 
                 case 'E':
                     if (!strcmp(tag, "Exp ")) ch->setExperience(atoi(line));
-                    else if (!strcmp(tag, "Eali")) ch->set(CharAlign::law_chaos, atoi(line));
+                    else if (!strcmp(tag, "Eali")) ch->setBaseStat("law_chaos", atoi(line));
                     else if (!strcmp(tag, "Ecls")) {
 
                     } //else if (!strcmp(tag, "Eye ")) ch->set(CharAppearance::eye_color, atoi(line));
@@ -2677,7 +2676,7 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'G':
-                    if (!strcmp(tag, "Gold")) ch->set(CharMoney::carried, atoi(line));
+                    if (!strcmp(tag, "Gold")) ch->setBaseStat("money_carried", atoi(line));
                     else if (!strcmp(tag, "Gaun")) GET_GAUNTLET(ch) = atoi(line);
                     //else if (!strcmp(tag, "Geno")) ch->genome.insert(atoi(line));
                     //else if (!strcmp(tag, "Gen1")) ch->genome.insert(atoi(line));
@@ -2685,7 +2684,7 @@ static int load_char(const char *name, struct char_data *ch) {
 
                 case 'H':
                     if (!strcmp(tag, "Hit ")) load_HMVS(ch, line, LOAD_HIT);
-                    else if (!strcmp(tag, "Hite")) ch->setHeight(atoi(line));
+                    else if (!strcmp(tag, "Hite")) ch->setBaseStat("height", atoi(line));
                     else if (!strcmp(tag, "Home")) GET_HOME(ch) = atoi(line);
                     else if (!strcmp(tag, "Host")) {}
                     //else if (!strcmp(tag, "Hrc ")) ch->set(CharAppearance::hair_color, atoi(line));
@@ -2697,7 +2696,7 @@ static int load_char(const char *name, struct char_data *ch) {
                 case 'I':
                     if (!strcmp(tag, "Id  ")) GET_IDNUM(ch) = atol(line);
                     else if (!strcmp(tag, "INGl")) GET_INGESTLEARNED(ch) = atoi(line);
-                    else if (!strcmp(tag, "Int ")) ch->set(CharAttribute::intelligence, atoi(line));
+                    else if (!strcmp(tag, "Int ")) ch->setBaseStat("intelligence", atoi(line));
                     else if (!strcmp(tag, "Invs")) GET_INVIS_LEV(ch) = atoi(line);
                     break;
 
@@ -2778,9 +2777,9 @@ static int load_char(const char *name, struct char_data *ch) {
                     }
                     else if (!strcmp(tag, "Rela")) GET_RELAXCOUNT(ch) = atoi(line);
                     else if (!strcmp(tag, "Rtim")) GET_RTIME(ch) = atoi(line);
-                    else if (!strcmp(tag, "Rad1")) GET_RADAR1(ch) = atoi(line);
-                    else if (!strcmp(tag, "Rad2")) GET_RADAR2(ch) = atoi(line);
-                    else if (!strcmp(tag, "Rad3")) GET_RADAR3(ch) = atoi(line);
+                    else if (!strcmp(tag, "Rad1")) ch->setBaseStat("radar1", atoi(line));
+                    else if (!strcmp(tag, "Rad2")) ch->setBaseStat("radar2", atoi(line));
+                    else if (!strcmp(tag, "Rad3")) ch->setBaseStat("radar3", atoi(line));
                     else if (!strcmp(tag, "Room")) GET_LOADROOM(ch) = atoi(line);
                     else if (!strcmp(tag, "RPfe")) GET_FEATURE(ch) = strdup(line);
                     break;
@@ -2800,9 +2799,9 @@ static int load_char(const char *name, struct char_data *ch) {
                         ch->modPractices(num3);
                     } else if (!strcmp(tag, "Slot")) ch->skill_slots = atoi(line);
                     else if (!strcmp(tag, "Spek")) SPEAKING(ch) = atoi(line);
-                    else if (!strcmp(tag, "Str ")) ch->set(CharAttribute::strength, atoi(line));
+                    else if (!strcmp(tag, "Str ")) ch->setBaseStat("strength", atoi(line));
                     else if (!strcmp(tag, "Stuk")) ch->stupidkiss = atoi(line);
-                    else if (!strcmp(tag, "Supp")) GET_SUPPRESS(ch) = atoi(line);
+                    else if (!strcmp(tag, "Supp")) ch->setBaseStat("suppression", atoi(line));
                     break;
 
                 case 'T':
@@ -2810,16 +2809,16 @@ static int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Tcla")) {
                         switch(atoi(line)) {
                             case 1: // great requirements... range is 0.2 to 0.3.
-                                ch->transBonus = Random::get<double>(0.2, 0.3);
+                                ch->setBaseStat("transBonus", Random::get<double>(0.2, 0.3));
                             break;
                             case 2:
-                                ch->transBonus = Random::get<double>(-0.1, 0.1);
+                                ch->setBaseStat("transBonus", Random::get<double>(-0.1, 0.1));
                             break;
                             case 3:
-                                ch->transBonus = Random::get<double>(-0.3, -0.2);
+                                ch->setBaseStat("transBonus", Random::get<double>(-0.3, -0.2));
                             break;
                             default:
-                                ch->transBonus = Random::get<double>(-0.3, 0.3);
+                                ch->setBaseStat("transBonus", Random::get<double>(-0.3, 0.3));
                         }
 
                     }
@@ -2855,9 +2854,9 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'W':
-                    if (!strcmp(tag, "Wate")) ch->set(CharDim::weight, atoi(line));
+                    if (!strcmp(tag, "Wate")) ch->setBaseStat("weight", atoi(line));
                     else if (!strcmp(tag, "Wimp")) GET_WIMP_LEV(ch) = atoi(line);
-                    else if (!strcmp(tag, "Wis ")) ch->set(CharAttribute::wisdom, atoi(line));
+                    else if (!strcmp(tag, "Wis ")) ch->setBaseStat("wisdom", atoi(line));
                     break;
 
                 default:

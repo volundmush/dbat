@@ -1188,14 +1188,9 @@ void to_json(json& j, const char_data& c) {
 
     j["sex"] = c.sex;
     if(!c.trains.empty()) j["trains"] = c.trains;
-    if(!c.attributes.empty()) j["attributes"] = c.attributes;
-    if(!c.moneys.empty()) j["moneys"] = c.moneys;
-    if(!c.aligns.empty()) j["aligns"] = c.aligns;
     if(!c.appearances.empty()) j["appearances"] = c.appearances;
-    if(!c.vitals.empty()) j["vitals"] = c.vitals;
     if(!c.nums.empty()) j["nums"] = c.nums;
     if(!c.stats.empty()) j["stats"] = c.stats;
-    if(!c.dims.empty()) j["dims"] = c.dims;
 
     if(c.character_flags) j["character_flags"] = c.character_flags;
     if(c.mob_flags) j["mob_flags"] = c.mob_flags;
@@ -1214,9 +1209,6 @@ void to_json(json& j, const char_data& c) {
     if(c.title && strlen(c.title)) j["title"] = c.title;
     j["race"] = c.race;
     j["sensei"] = c.sensei;
-
-    if(c.armor) j["armor"] = c.armor;
-    if(c.damage_mod) j["damage_mod"] = c.damage_mod;
 
     if(c.id != NOTHING) {
         // this is an instance...
@@ -1246,8 +1238,6 @@ void to_json(json& j, const char_data& c) {
             if(c.gravAcclim[i]) j["gravAcclim"].push_back(std::make_pair(i, c.gravAcclim[i]));
         }
 
-        if(c.internalGrowth) j["internalGrowth"] = c.internalGrowth;
-        if(c.lifetimeGrowth) j["lifetimeGrowth"] = c.lifetimeGrowth;
         if(c.freeze_level) j["freeze_level"] = c.freeze_level;
         if(c.invis_level) j["invis_level"] = c.invis_level;
         if(c.wimp_level) j["wimp_level"] = c.wimp_level;
@@ -1291,9 +1281,7 @@ void to_json(json& j, const char_data& c) {
         if(c.deathtime) j["deathtime"] = c.deathtime;
         if(c.dcount) j["dcount"] = c.dcount;
         if(c.death_type) j["death_type"] = c.death_type;
-        if(c.damage_mod) j["damage_mod"] = c.damage_mod;
         if(c.droom) j["droom"] = c.droom;
-        if(c.accuracy_mod) j["accuracy_mod"] = c.accuracy_mod;
         if(c.mutations) j["mutations"] = c.mutations;
         if(c.bio_genomes) j["bio_genomes"] = c.bio_genomes;
         if(c.gauntlet) j["gauntlet"] = c.gauntlet;
@@ -1310,21 +1298,16 @@ void to_json(json& j, const char_data& c) {
         j["form"] = c.form;
         if(c.olc_zone) j["olc_zone"] = c.olc_zone;
         if(c.starphase) j["starphase"] = c.starphase;
-        if(c.accuracy) j["accuracy"] = c.accuracy;
         if(c.position) j["position"] = c.position;
 
         if(c.rdisplay) j["rdisplay"] = c.rdisplay;
         if(c.relax_count) j["relax_count"] = c.relax_count;
-        if(c.radar1) j["radar1"] = c.radar1;
-        if(c.radar2) j["radar2"] = c.radar2;
-        if(c.radar3) j["radar3"] = c.radar3;
         if(c.feature) j["feature"] = c.feature;
         if(c.ship) j["ship"] = c.ship;
         if(c.con_sdcooldown) j["con_sdcooldown"] = c.con_sdcooldown;
         if(c.shipr) j["shipr"] = c.shipr;
         if(c.skill_slots) j["skill_slots"] = c.skill_slots;
         if(c.stupidkiss) j["stupidkiss"] = c.stupidkiss;
-        if(c.suppression) j["suppression"] = c.suppression;
         if(c.tail_growth) j["tail_growth"] = c.tail_growth;
 
         for(auto i = 0; i < 3; i++) {
@@ -1347,7 +1330,6 @@ void to_json(json& j, const char_data& c) {
         if (c.poofout && strlen(c.poofout)) j["poofout"] = c.poofout;
         if(players.contains(c.last_tell)) j["last_tell"] = c.last_tell;
 
-        j["transBonus"] = c.transBonus;
         if(!c.transforms.empty()) j["transforms"] = c.transforms;
 
         if(!c.permForms.empty()) j["permForms"] = c.permForms;
@@ -1368,13 +1350,8 @@ void from_json(const json& j, char_data& c) {
 
     if(j.contains("sex")) c.sex = j["sex"];
     if(j.contains("trains")) c.trains = j["trains"];
-    if(j.contains("attributes")) c.attributes = j["attributes"];
-    if(j.contains("moneys")) c.moneys = j["moneys"];
-    if(j.contains("aligns")) c.aligns = j["aligns"];
     if(j.contains("appearances")) c.appearances = j["appearances"];
-    if(j.contains("vitals")) c.vitals = j["vitals"];
     if(j.contains("nums")) c.nums = j["nums"];
-    if(j.contains("dims")) c.dims = j["dims"];
     if(j.contains("stats")) c.stats = j["stats"];
 
     if(j.contains("title")) c.title = strdup(j["title"].get<std::string>().c_str());
@@ -1382,8 +1359,6 @@ void from_json(const json& j, char_data& c) {
 
     if(j.contains("sensei")) c.sensei = j["sensei"];
 
-    if(j.contains("armor")) c.armor = j["armor"];
-    if(j.contains("damage_mod")) c.damage_mod = j["damage_mod"];
     if(j.contains("mob_specials")) j["mob_specials"].get_to(c.mob_specials);
 
     if(j.contains("character_flags")) c.character_flags = j["character_flags"].get<FlagHandler<CharacterFlag>>();
@@ -1472,11 +1447,7 @@ void from_json(const json& j, char_data& c) {
             }
         }
 
-        if(j.contains("internalGrowth")) c.internalGrowth = j["internalGrowth"];
-        if(j.contains("lifetimeGrowth")) c.lifetimeGrowth = j["lifetimeGrowth"];
-        if(j.contains("damage_mod")) c.damage_mod = j["damage_mod"];
         if(j.contains("droom")) c.droom = j["droom"];
-        if(j.contains("accuracy_mod")) c.accuracy_mod = j["accuracy_mod"];
         if(j.contains("bio_genomes")) c.bio_genomes = j["bio_genomes"];
         if(j.contains("mutations")) c.mutations = j["mutations"];
         if(j.contains("gauntlet")) c.gauntlet = j["gauntlet"];
@@ -1492,21 +1463,16 @@ void from_json(const json& j, char_data& c) {
         if(j.contains("mimic")) c.mimic = j["mimic"].get<Race>();
         if(j.contains("olc_zone")) c.olc_zone = j["olc_zone"];
         if(j.contains("starphase")) c.starphase = j["starphase"];
-        if(j.contains("accuracy")) c.accuracy = j["accuracy"];
         if(j.contains("position")) c.position = j["position"];
 
         if(j.contains("rdisplay")) c.rdisplay = strdup(j["rdisplay"].get<std::string>().c_str());
         if(j.contains("relax_count")) c.relax_count = j["relax_count"];
-        if(j.contains("radar1")) c.radar1 = j["radar1"];
-        if(j.contains("radar2")) c.radar2 = j["radar2"];
-        if(j.contains("radar3")) c.radar3 = j["radar3"];
         if(j.contains("feature")) c.feature = strdup(j["feature"].get<std::string>().c_str());
         if(j.contains("ship")) c.ship = j["ship"];
         if(j.contains("con_sdcooldown")) c.con_sdcooldown = j["con_sdcooldown"];
         if(j.contains("shipr")) c.shipr = j["shipr"];
         if(j.contains("skill_slots")) c.skill_slots = j["skill_slots"];
         if(j.contains("stupidkiss")) c.stupidkiss = j["stupidkiss"];
-        if(j.contains("suppression")) c.suppression = j["suppression"];
         if(j.contains("tail_growth")) c.tail_growth = j["tail_growth"];
 
         if(j.contains("saving_throw")) {
@@ -1538,7 +1504,6 @@ void from_json(const json& j, char_data& c) {
 
         if(j.contains("load_room")) c.load_room = j["load_room"];
 
-        if(j.contains("transBonus")) c.transBonus = j["transBonus"];
         if(j.contains("form")) c.form = j["form"];
         if(j.contains("transforms")) c.transforms = j["transforms"];
         if(j.contains("permForms")) c.permForms = j["permForms"].get<std::unordered_set<Form>>();
@@ -1876,7 +1841,7 @@ player_data* create_player_character(int account_id, const json& j) {
     if(j.contains("sensei")) ch->sensei = j["sensei"];
     if(j.contains("bio_genomes")) ch->bio_genomes = j["bio_genomes"];
     if(j.contains("mutations")) ch->mutations = j["mutations"];
-    if(j.contains("align")) ch->aligns[CharAlign::good_evil] = j["align"].get<int>();
+    if(j.contains("align")) ch->setBaseStat("good_evil", j["align"].get<int>());
 
     if(j.contains("keep_skills") && !j.at("keep_skills").get<bool>()) {
         ch->practice_points += 200;

@@ -370,8 +370,10 @@ ACMD(do_track) {
         send_to_char(ch, "You have no idea how.\r\n");
         return;
     }
-    
-    if (GET_SUPPRESS(ch) <= 20 && GET_SUPPRESS(ch) > 0) {
+
+    auto sup = GET_SUPPRESS(ch);
+
+    if (sup <= 20 && sup > 0) {
         send_to_char(ch,
                      "You are concentrating too hard on suppressing your powerlevel at this level of suppression.\r\n");
         return;

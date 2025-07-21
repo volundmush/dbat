@@ -1886,7 +1886,14 @@ constexpr int APPLY_TRANS_UPKEEP_CVIT = 24;    /* bitwise: cvitals cost modifier
 
 constexpr int APPLY_SKILL = 25;     /* !bitwise: Apply to a specific skill    */
 
-constexpr int NUM_APPLIES = 26;
+constexpr int APPLY_CDER_BASE = 26;    /* bitwise: character derived base */
+constexpr int APPLY_CDER_MULT = 27;    /* bitwise: character derived multiplier */
+constexpr int APPLY_CDER_POST = 28;    /* bitwise: character derived post multiplier */
+
+constexpr int NUM_APPLIES = 29;
+
+// derived stat specifics
+constexpr int CDER_CARRY_CAPACITY = 1 << 0;
 
 /* Container flags - value[1] */
 constexpr int CONT_CLOSEABLE = (1 << 0);    /* Container can be closed	*/

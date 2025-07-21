@@ -3631,19 +3631,19 @@ void saiyan_gain(struct char_data *ch, struct char_data *vict) {
     switch (*itr) {
         case 0:
             bonus *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::powerlevel)));
-            ch->gainBasePL(bonus);
+            ch->gainBaseStat("powerlevel", bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly stronger. @D[@G+%s@D]@n\r\n",
                          add_commas(bonus).c_str());
             break;
         case 1:
             bonus *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::ki)));
-            ch->gainBaseKI(bonus);
+            ch->gainBaseStat("ki", bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel your spirit grow. @D[@G+%s@D]@n\r\n",
                          add_commas(bonus).c_str());
             break;
         case 2:
             bonus *= (1 + ch->getAffectModifier(APPLY_CVIT_MULT, static_cast<int>(CharVital::stamina)));
-            ch->gainBaseST(bonus);
+            ch->gainBaseStat("stamina", bonus);
             send_to_char(ch, "@D[@YSaiyan @RBlood@D] @WYou feel slightly more vigorous. @D[@G+%s@D]@n\r\n",
                          add_commas(bonus).c_str());
             break;
@@ -3732,7 +3732,7 @@ static void spar_helper(struct char_data *ch, struct char_data *vict, int type, 
 			float deadlyBonus = isLethal ? 1.2 : 1;
 
             //Average out the bonus to limit the exponential gain
-            float gearGain = 1.0 + (3.0 * ch->getBurdenRatio());
+            float gearGain = 1.0 + (3.0 * ch->getBaseStat("burden_ratio"));
             if (gearGain <= 0) {
                 gearGain = 0.1;
             }
@@ -3825,53 +3825,53 @@ void giveRandomVital(char_data* ch, int64_t pl, int64_t ki, int64_t st, int attr
             switch(*itr) {
                 case 0:
                     send_to_char(ch, "@D[@Y+ @R%s @rPL@D]@n\r\n", add_commas(pl).c_str());
-                    ch->gainBasePL(pl);
+                    ch->gainBaseStat("powerlevel", pl);
                     if(axion_dice(0) <= attrChance) {
                         int rand = rand_number(1, 2);
-                        CharAttribute val;
+                        std::string val;
                         if(rand == 1) {
-                            val = CharAttribute::agility;
+                            val = "agility";
                             send_to_char(ch, "@mYour body feels like it's light as a feather!@n\r\n");
                         } else {
-                            val = CharAttribute::speed;
+                            val = "speed";
                             send_to_char(ch, "@mThe world feels just a little slower.@n\r\n");
                         }
 
-                    ch->mod(val, 1);
+                    ch->modBaseStat(val, 1);
                 }
                 break;
                 case 1:
                     send_to_char(ch, "@D[@Y+ @C%s @cKI@D]@n\r\n", add_commas(ki).c_str());
-                    ch->gainBaseKI(ki);
+                    ch->gainBaseStat("ki", ki);
                     if(axion_dice(0) <= attrChance) {
                         int rand = rand_number(1, 2);
-                        CharAttribute val;
+                        std::string val;
                         if(rand == 1) {
-                            val = CharAttribute::intelligence;
+                            val = "intelligence";
                             send_to_char(ch, "@mYou begin to notice new ways to put together your attacks.@n\r\n");
                         } else {
-                            val = CharAttribute::wisdom;
+                            val = "wisdom";
                             send_to_char(ch, "@mYou notice a couple of flaws in your opponents technique.@n\r\n");
                         }
 
-                    ch->mod(val, 1);
+                    ch->modBaseStat(val, 1);
                 }
                 break;
                 case 2:
                     send_to_char(ch, "@D[@Y+ @C%s @cST@D]@n\r\n", add_commas(st).c_str());
-                    ch->gainBaseST(st);
+                    ch->gainBaseStat("stamina", st);
                     if(axion_dice(0) <= attrChance) {
                         int rand = rand_number(1, 2);
-                        CharAttribute val;
+                        std::string val;
                         if(rand == 1) {
-                            val = CharAttribute::constitution;
+                            val = "constitution";
                             send_to_char(ch, "@mThe pain of your wounds feel just a little bit less important.@n\r\n");
                         } else {
-                            val = CharAttribute::strength;
+                            val = "strength";
                             send_to_char(ch, "@mYour hits seem to be landing just a bit harder.@n\r\n");
                         }
 
-                    ch->mod(val, 1);
+                    ch->modBaseStat(val, 1);
                 }
                 break;
             }
@@ -3897,7 +3897,7 @@ void spar_gain(struct char_data *ch, struct char_data *vict, int type, int64_t d
 bool can_grav(struct char_data *ch) {
     if(IS_NPC(ch))
         return true;
-    auto result = ch->getBurdenRatio() <= 1.0;
+    auto result = ch->getBaseStat("burden_ratio") <= 1.0;
     if(!result) {
         send_to_char(ch, "You are too burdened to even think about it!\r\n");
     }
@@ -4127,7 +4127,7 @@ bool check_points(struct char_data *ch, int64_t ki, int64_t st) {
         }
     }
      */
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
     // increase the stamina costs by ratio. Ratio can be 0.0 to 1.0 or more.
     // If ratio is 0, then no change. If ratio is 1.0, then double the cost.
     st += st * ratio;
@@ -4213,7 +4213,7 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
          */
 
 
-        auto ratio = ch->getBurdenRatio();
+        auto ratio = ch->getBaseStat("burden_ratio");
         st += st * ratio;
         ch->decCurST(st);
     }
@@ -4677,8 +4677,9 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
         if (GET_POS(vict) == POS_SITTING && IS_NPC(vict) && vict->getCurHealth() >= ((vict->getMaxPL())) * .98) {
             do_stand(vict, nullptr, 0, 0);
         }
-        bool suppresso = (GET_SUPPRESS(vict) > 0);
-        if (is_sparring(ch) && is_sparring(vict) && (GET_SUPPRESS(vict) + vict->getCurHealth()) - dmg <= 0) {
+        auto sup = GET_SUPPRESS(vict);
+        bool suppresso = (sup > 0);
+        if (is_sparring(ch) && is_sparring(vict) && (sup + vict->getCurHealth()) - dmg <= 0) {
             if (!IS_NPC(vict)) {
                 act("@c$N@w falls down unconscious, and you stop sparring with $M.@n", true, ch, nullptr, vict,
                     TO_CHAR);
@@ -4686,9 +4687,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 act("@c$N@w falls down unconscious, and @C$n@w stops sparring with $M.@n", true, ch, nullptr, vict,
                     TO_NOTVICT);
                 vict->setCurHealth(1);
-                if (GET_SUPPRESS(vict)) {
-                    GET_SUPPRESS(vict) = 0;
-                }
+                vict->setBaseStat("suppression", 0);
                 if (FIGHTING(vict)) {
                     stop_fighting(vict);
                 }

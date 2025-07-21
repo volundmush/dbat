@@ -168,16 +168,14 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
     auto sub = characterSubscriptions.all("commandWaitQueue");
 
     for(auto ch : filter_raw(sub)) {
-
-        ch->waitTime = std::max<double>(0.0, ch->waitTime - deltaTime);
-        if(ch->waitTime == 0.0) {
+        if(auto res = ch->modBaseStat("waitTime", -deltaTime); res == 0.0) {
             if(ch->task != Task::nothing) doContinuedTask(ch);
             else if(!ch->wait_input_queue.empty()) {
                 auto command = ch->wait_input_queue.front();
                 ch->wait_input_queue.pop_front();
                 processCommand(ch, command.first, command.second);
             }
-            if(ch->waitTime <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty()) {
+            if(ch->getBaseStat("waitTime") <= 0.0 && ch->task == Task::nothing && ch->wait_input_queue.empty()) {
                 characterSubscriptions.unsubscribe("commandWaitQueue", ch);
             }
         }
@@ -1287,7 +1285,7 @@ int perform_dupe_check(struct descriptor_data *d) {
                         inc = 7500;
                     }
                     inc *= mult;
-                    d->character->mod(CharMoney::bank, inc);
+                    d->character->modBaseStat("money_bank", inc);
                     send_to_char(d->character, "Interest happened while you were away, %d times.\r\n"
                                                "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc).c_str());
                 }

@@ -561,7 +561,7 @@ void postmaster_send_mail(struct char_data *ch, struct char_data *mailman,
 
     act(buf, false, mailman, nullptr, ch, TO_VICT);
     act("@C$n@w starts writing a letter.@n", true, ch, nullptr, nullptr, TO_ROOM);
-    ch->mod(CharMoney::carried, -STAMP_PRICE);
+    ch->modBaseStat("money_carried", -STAMP_PRICE);
     ch->player_flags.set(PLR_MAILING, true);
 
     /* Start writing! */

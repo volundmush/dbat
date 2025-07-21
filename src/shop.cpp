@@ -872,7 +872,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         charged = buy_price(obj, shop_nr, keeper, ch);
         goldamt += charged;
         if (!ADM_FLAGGED(ch, ADM_MONEY))
-            ch->mod(CharMoney::carried, -charged);
+            ch->modBaseStat("money_carried", -charged);
         else {
             send_to_imm("IMM PURCHASE: %s has purchased %s for free.", GET_NAME(ch), obj->short_description);
             log_imm_action("IMM PURCHASE: %s has purchased %s for free.", GET_NAME(ch), obj->short_description);
@@ -900,7 +900,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
         do_tell(keeper, buf, cmd_tell, 0);
     }
     if (!ADM_FLAGGED(ch, ADM_MONEY))
-        keeper->mod(CharMoney::carried, goldamt);
+        keeper->modBaseStat("money_carried", goldamt);
 
     {
         auto contents = ch->getObjects();
@@ -922,7 +922,7 @@ static void shopping_buy(char *arg, struct char_data *ch, struct char_data *keep
     if (sh.shop_flags.get(ShopFlag::bank_money))
         if (GET_GOLD(keeper) > MAX_OUTSIDE_BANK) {
             SHOP_BANK(shop_nr) += (GET_GOLD(keeper) - MAX_OUTSIDE_BANK);
-            keeper->set(CharMoney::carried, MAX_OUTSIDE_BANK);
+            keeper->setBaseStat("money_carried", MAX_OUTSIDE_BANK);
         }
 }
 
@@ -1128,7 +1128,7 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
         int charged = sell_price(obj, shop_nr, keeper, ch);
 
         goldamt += charged;
-        keeper->mod(CharMoney::carried, -charged);
+        keeper->modBaseStat("money_carried", -charged);
 
         sold++;
         obj_from_char(obj);
@@ -1158,17 +1158,17 @@ static void shopping_sell(char *arg, struct char_data *ch, struct char_data *kee
     send_to_char(ch, "The shopkeeper gives you %s zenni.\r\n", add_commas(goldamt).c_str());
     if (GET_GOLD(ch) + goldamt > GOLD_CARRY(ch)) {
         goldamt = (GET_GOLD(ch) + goldamt) - GOLD_CARRY(ch);
-        ch->set(CharMoney::carried, GOLD_CARRY(ch));
-        ch->mod(CharMoney::bank, goldamt);
+        ch->setBaseStat("money_carried", GOLD_CARRY(ch));
+        ch->modBaseStat("money_bank", goldamt);
         send_to_char(ch, "You couldn't hold all of the money. The rest was deposited for you.\r\n");
     } else {
-        ch->mod(CharMoney::carried, goldamt);
+        ch->modBaseStat("money_carried", goldamt);
     }
 
     if (GET_GOLD(keeper) < MIN_OUTSIDE_BANK) {
         goldamt = MIN(MAX_OUTSIDE_BANK - GET_GOLD(keeper), SHOP_BANK(shop_nr));
         SHOP_BANK(shop_nr) -= goldamt;
-        keeper->mod(CharMoney::carried, goldamt);
+        keeper->modBaseStat("money_carried", goldamt);
     }
 }
 
@@ -1724,7 +1724,7 @@ void shop_data::runPurge() {
         auto con = keeper->getObjects();
         for (auto sobj : filter_raw(con)) {
             if(isProducing(sobj->vn)) {
-                keeper->mod(CharMoney::carried, GET_OBJ_COST(sobj));
+                keeper->modBaseStat("money_carried", GET_OBJ_COST(sobj));
                 extract_obj(sobj);
             }
         }

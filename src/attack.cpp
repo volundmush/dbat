@@ -4928,7 +4928,7 @@ namespace atk {
                          guncost);
             return false;
         } else {
-            user->mod(CharMoney::carried, -guncost);
+            user->modBaseStat("money_carried", -guncost);
         }
         return true;
 

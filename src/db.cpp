@@ -307,6 +307,8 @@ static std::vector<std::filesystem::path> getDumpFiles() {
     return directories;
 }
 
+extern void init_stat_handlers();
+
 void boot_db_world() {
 
     auto dumps = getDumpFiles();
@@ -318,6 +320,9 @@ void boot_db_world() {
     }
 
     auto latest = dumps.front();
+
+    basic_mud_log("Loading stat handlers...");
+    init_stat_handlers();
 
     basic_mud_log("Loading Zones...");
     load_zones(latest);
@@ -1081,9 +1086,9 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     }
 
     GET_LPLAY(mob) = time(nullptr);
-    bool autoset = mob->get(CharVital::powerlevel) <= 1;
+    bool autoset = mob->getBaseStat("powerlevel") <= 1;
     if(autoset) {
-        for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
+        for(auto c : {"powerlevel", "ki", "stamina"}) {
             vital_t base = GET_LEVEL(mob) * mult;
             if (GET_LEVEL(mob) > 140) {
                 base *= 8;
@@ -1094,13 +1099,13 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
             } else if (GET_LEVEL(mob) > 110) {
                 base *= 2;
             }
-            mob->set(c, base);
+            mob->setBaseStat(c, base);
         }
     }
 
     if (GET_MOB_VNUM(mob) == 2245) {
-        for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
-            mob->set(c, rand_number(1, 4));
+        for(auto c : {"powerlevel", "ki", "stamina"}) {
+            mob->setBaseStat(c, rand_number(1, 4));
         }
     }
 
@@ -1306,7 +1311,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
             if (GET_GOLD(mob) <= 0)
                 money = 1;
         }
-        mob->set(CharMoney::carried, money);
+        mob->setBaseStat("money_carried", money);
     }
 
     
@@ -2164,14 +2169,7 @@ void reset_char(struct char_data *ch) {
 void init_char(struct char_data *ch) {
     int i;
 
-    for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
-        ch->set(c, 800);
-    }
-    magic_enum::enum_for_each<CharAttribute>([&] (auto val) {
-                constexpr CharAttribute v = val;
-                ch->set(v, 15);
-                });
-    ch->set(CharMoney::carried, 1500);
+    ch->setBaseStat("money_carried", 1500);
     GET_CLAN(ch) = strdup("None.");
     ch->practice_points = 600;
 

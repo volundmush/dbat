@@ -148,9 +148,9 @@ void bring_to_cap(struct char_data *ch) {
 
     auto cap = ch->calc_soft_cap();
 
-    for(auto stat : {CharVital::powerlevel, CharVital::stamina, CharVital::ki}) {
-        if(auto diff = cap - ch->get(stat); diff > 0) {
-            ch->mod(stat, diff);
+    for(auto stat : {"powerlevel", "stamina", "ki"}) {
+        if(auto diff = cap - ch->getBaseStat(stat); diff > 0) {
+            ch->modBaseStat(stat, diff);
         }
     }
 }
@@ -250,19 +250,19 @@ ACMD(do_rpp) {
                 }
                 if (!strcasecmp(arg2, "evil")) {
                     send_to_char(ch, "You change your alignment to Evil.\r\n");
-                    ch->set(CharAlign::good_evil, -750);
+                    ch->setBaseStat("good_evil", -750);
                 } else if (!strcasecmp(arg2, "sorta-evil")) {
                     send_to_char(ch, "You change your alignment to Sorta Evil.\r\n");
-                    ch->set(CharAlign::good_evil, -50);
+                    ch->setBaseStat("good_evil", -50);
                 } else if (!strcasecmp(arg2, "neutral")) {
                     send_to_char(ch, "You change your alignment to Neutral.\r\n");
-                    ch->set(CharAlign::good_evil, 0);
+                    ch->setBaseStat("good_evil", 0);
                 } else if (!strcasecmp(arg2, "sorta-good")) {
                     send_to_char(ch, "You change your alignment to Sorta Good.\r\n");
-                    ch->set(CharAlign::good_evil, 51);
+                    ch->setBaseStat("good_evil", 51);
                 } else if (!strcasecmp(arg2, "good")) {
                     send_to_char(ch, "You change your alignment to Good.\r\n");
-                    ch->set(CharAlign::good_evil, 300);
+                    ch->setBaseStat("good_evil", 300);
                 } else {
                     send_to_char(ch, "That is not an acceptable option for changing alignment.\r\n");
                     return;
@@ -277,7 +277,7 @@ ACMD(do_rpp) {
                 send_to_char(ch, "You do not have enough RPP for that selection.\r\n");
                 return;
             } else {
-                ch->mod(CharMoney::bank, 7500);
+                ch->modBaseStat("money_bank", 7500);
                 send_to_char(ch, "Your bank zenni has been increased by 7,500\r\n");
             } /* Can pay for it */
         } /* End Simple Zenni Reward */
@@ -293,21 +293,21 @@ ACMD(do_rpp) {
                     return;
                 }
 
-                const std::map<std::string, std::tuple<CharAttribute, std::string, int>> stat_map = {
-                        {"str", {CharAttribute::strength, "strength", BONUS_WIMP}},
-                        {"con", {CharAttribute::constitution, "constitution", BONUS_FRAIL}},
-                        {"int", {CharAttribute::intelligence, "intelligence", BONUS_DULL}},
-                        {"wis", {CharAttribute::wisdom, "wisdom", BONUS_FOOLISH}},
-                        {"spd", {CharAttribute::speed, "speed", BONUS_SLOW}},
-                        {"agl", {CharAttribute::agility, "agility", BONUS_CLUMSY}}
+                const std::map<std::string, std::tuple<std::string, int>> stat_map = {
+                        {"str", {"strength", BONUS_WIMP}},
+                        {"con", {"constitution", BONUS_FRAIL}},
+                        {"int", {"intelligence", BONUS_DULL}},
+                        {"wis", {"wisdom", BONUS_FOOLISH}},
+                        {"spd", {"speed", BONUS_SLOW}},
+                        {"agl", {"agility", BONUS_CLUMSY}}
                 };
 
                 std::string entry(arg2);
                 boost::to_lower(entry);
                 if(auto stat_found = stat_map.find(entry); stat_found != stat_map.end()) {
-                    auto [attribute, name, flaw] = stat_found->second;
+                    auto [name, flaw] = stat_found->second;
 
-                    auto base = ch->get(attribute, true);
+                    auto base = ch->getBaseStat(name);
 
                     if (GET_BONUS(ch, flaw) > 0 && base >= 45) {
                         send_to_char(ch, "You can't because that stat maxes at 45 due to a trait negative.\r\n");
@@ -318,8 +318,8 @@ ACMD(do_rpp) {
                         return;
                     }
 
-                    ch->mod(attribute, 2);
-                    if(ch->get(attribute, true) < 80)
+                    
+                    if(ch->modBaseStat(name, 2) < 80)
                         pay--;
 
                 } else {
@@ -670,11 +670,12 @@ ACMD(do_willpower) {
         send_to_char(ch, "You are not majinized and have no need to reclaim full control of your own will.\r\n");
         return;
     } else {
-        if (ch->internalGrowth < 30 && GET_WIS(ch) < 100) {
+        auto itg = ch->getBaseStat("internalGrowth");
+        if (itg < 30 && GET_WIS(ch) < 100) {
             send_to_char(ch, "You do not have enough Growth to focus your attempt to break free.\r\n");
             fail = true;
         }
-        if (ch->internalGrowth < 60 && GET_WIS(ch) >= 100) {
+        if (itg < 60 && GET_WIS(ch) >= 100) {
             send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
             fail = true;
         }
@@ -692,7 +693,7 @@ ACMD(do_willpower) {
                 return;
             } else {
                 ch->setExperience(0);
-                ch->internalGrowth -= 30;
+                ch->modBaseStat("internalGrowth", -30);
                 reveal_hiding(ch, 0);
                 act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -1087,7 +1088,7 @@ ACMD(do_train) {
         return;
     }
 
-    if (ch->getBurdenRatio() >= 1.0) {
+    if (ch->getBaseStat("burden_ratio") >= 1.0) {
         send_to_char(ch, "You are weighted down too much!\r\n");
         return;
     }
@@ -1098,16 +1099,16 @@ ACMD(do_train) {
 
     one_argument(argument, arg);
 
-    weight = ch->getCarriedWeight();
+    weight = ch->getEffectiveStat("weight_carried");
 
     int strcap = 5000, spdcap = 5000, intcap = 5000, wiscap = 5000, concap = 5000, aglcap = 5000;
 
-    strcap += 500 * ch->get(CharAttribute::strength, true);
-    intcap += 500 * ch->get(CharAttribute::intelligence, true);
-    wiscap += 500 * ch->get(CharAttribute::wisdom, true);
-    spdcap += 500 * ch->get(CharAttribute::speed, true);
-    concap += 500 * ch->get(CharAttribute::constitution, true);
-    aglcap += 500 * ch->get(CharAttribute::agility, true);
+    strcap += 500 * ch->getBaseStat("strength");
+    intcap += 500 * ch->getBaseStat("intelligence");
+    wiscap += 500 * ch->getBaseStat("wisdom");
+    spdcap += 500 * ch->getBaseStat("speed");
+    concap += 500 * ch->getBaseStat("constitution");
+    aglcap += 500 * ch->getBaseStat("agility");
 
     if (IS_HUMAN(ch)) {
         intcap = intcap * 0.75;
@@ -1127,17 +1128,17 @@ ACMD(do_train) {
     if (!*arg) {
         send_to_char(ch, "@D-------------[ @GTraining Status @D]-------------@n\r\n");
         send_to_char(ch, "  @mStrength Progress    @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSTR(ch)).c_str(),
-                     ch->get(CharAttribute::strength, true) >= 80 ? "@rCAPPED" : add_commas(strcap).c_str());
+                     ch->getBaseStat("strength") >= 80 ? "@rCAPPED" : add_commas(strcap).c_str());
         send_to_char(ch, "  @mSpeed Progress       @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINSPD(ch)).c_str(),
-                     ch->get(CharAttribute::speed, true) >= 80 ? "@rCAPPED" : add_commas(spdcap).c_str());
+                     ch->getBaseStat("speed") >= 80 ? "@rCAPPED" : add_commas(spdcap).c_str());
         send_to_char(ch, "  @mConstitution Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINCON(ch)).c_str(),
-                     ch->get(CharAttribute::constitution, true) >= 80 ? "@rCAPPED" : add_commas(concap).c_str());
+                     ch->getBaseStat("constitution") >= 80 ? "@rCAPPED" : add_commas(concap).c_str());
         send_to_char(ch, "  @mIntelligence Progress@D: @R%6s/%6s@n\r\n", add_commas(GET_TRAININT(ch)).c_str(),
-                     ch->get(CharAttribute::intelligence, true) >= 80 ? "@rCAPPED" : add_commas(intcap).c_str());
+                     ch->getBaseStat("intelligence") >= 80 ? "@rCAPPED" : add_commas(intcap).c_str());
         send_to_char(ch, "  @mWisdom Progress      @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINWIS(ch)).c_str(),
-                     ch->get(CharAttribute::wisdom, true) >= 80 ? "@rCAPPED" : add_commas(wiscap).c_str());
+                     ch->getBaseStat("wisdom") >= 80 ? "@rCAPPED" : add_commas(wiscap).c_str());
         send_to_char(ch, "  @mAgility Progress     @D: @R%6s/%6s@n\r\n", add_commas(GET_TRAINAGL(ch)).c_str(),
-                     ch->get(CharAttribute::agility, true) >= 80 ? "@rCAPPED" : add_commas(aglcap).c_str());
+                     ch->getBaseStat("agility") >= 80 ? "@rCAPPED" : add_commas(aglcap).c_str());
         send_to_char(ch, "@D  -----------------------------------------  @n\r\n");
         send_to_char(ch, "  @CCurrent Weight Held  @D: @c%s@n\r\n", add_commas(weight).c_str());
         send_to_char(ch, "@D---------------------------------------------@n\r\n");
@@ -1146,7 +1147,7 @@ ACMD(do_train) {
     }
 
     /* Figure up the weight bonus */
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
     auto chCon = GET_CON(ch);
     total = chCon * 6;
     total += total * ratio;
@@ -1264,7 +1265,7 @@ ACMD(do_train) {
         return;
     }
 
-    auto stat_val = ch->get(attr, true);
+    auto stat_val = ch->getBaseStat(stat_name);
 
     if (stat_val == 80) {
         send_to_char(ch, "Your base %s is maxed!\r\n", stat_name);
@@ -1307,7 +1308,7 @@ ACMD(do_train) {
 }
 
 void trainProgress(char_data* ch) {
-    if (ch->getBurdenRatio() >= 1.0) {
+    if (ch->getBaseStat("burden_ratio") >= 1.0) {
         send_to_char(ch, "You are weighted down too much!\r\n");
         return;
     }
@@ -1315,16 +1316,16 @@ void trainProgress(char_data* ch) {
     int plus = 0;
     int64_t total = 0, weight = 0, bonus = 0, cost = 0;
 
-    weight = ch->getCarriedWeight();
+    weight = ch->getEffectiveStat("weight_carried");
 
     int strcap = 5000, spdcap = 5000, intcap = 5000, wiscap = 5000, concap = 5000, aglcap = 5000;
 
-    strcap += 500 * ch->get(CharAttribute::strength, true);
-    intcap += 500 * ch->get(CharAttribute::intelligence, true);
-    wiscap += 500 * ch->get(CharAttribute::wisdom, true);
-    spdcap += 500 * ch->get(CharAttribute::speed, true);
-    concap += 500 * ch->get(CharAttribute::constitution, true);
-    aglcap += 500 * ch->get(CharAttribute::agility, true);
+    strcap += 500 * ch->getBaseStat("strength");
+    intcap += 500 * ch->getBaseStat("intelligence");
+    wiscap += 500 * ch->getBaseStat("wisdom");
+    spdcap += 500 * ch->getBaseStat("speed");
+    concap += 500 * ch->getBaseStat("constitution");
+    aglcap += 500 * ch->getBaseStat("agility");
 
     if (IS_HUMAN(ch)) {
         intcap = intcap * 0.75;
@@ -1342,7 +1343,7 @@ void trainProgress(char_data* ch) {
     }
 
     /* Figure up the weight bonus */
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
     auto chCon = GET_CON(ch);
     total = chCon * 6;
     total += total * ratio;
@@ -1463,7 +1464,7 @@ void trainProgress(char_data* ch) {
         return;
     }
 
-    auto stat_val = ch->get(attr, true);
+    auto stat_val = ch->getBaseStat(stat_name);
 
     if (stat_val == 80) {
         send_to_char(ch, "Your base %s is maxed!\r\n", stat_name);
@@ -1696,7 +1697,7 @@ void trainProgress(char_data* ch) {
     WAIT_STATE(ch, PULSE_5SEC * 6);
 
     if (senseiPresent) {
-        ch->mod(CharMoney::carried, -8);
+        ch->modBaseStat("money_carried", -8);
         ch->modPractices(-1);
     }
 
@@ -1705,7 +1706,7 @@ void trainProgress(char_data* ch) {
     if (results >= needed) {
         ch->mod(train, -needed);
         send_to_char(ch, "You feel your %s improve!@n\r\n", stat_name);
-        ch->mod(attr, 1);
+        ch->modBaseStat(stat_name, 1);
         if (IS_PICCOLO(ch) && IS_NAMEK(ch)) {
             giveRandomVital(ch, ch->getMaxPL() / 5, ch->getMaxKI() / 5, ch->getMaxST() / 5, 30);
             send_to_char(ch, "You gained quite a bit of experience from that!\r\n");
@@ -2075,9 +2076,9 @@ ACMD(do_candy) {
     snprintf(newsh, MAX_STRING_LENGTH, "%s@n (of %s@n)", obj->short_description, vict->short_description);
     obj->short_description = strdup(newsh);
     obj_to_char(obj, ch);
-    obj->value[VAL_FOOD_CANDY_PL] = vict->get(CharVital::powerlevel);
-    obj->value[VAL_FOOD_CANDY_KI] = vict->get(CharVital::ki);
-    obj->value[VAL_FOOD_CANDY_ST] = vict->get(CharVital::stamina);
+    obj->value[VAL_FOOD_CANDY_PL] = vict->getBaseStat("powerlevel");
+    obj->value[VAL_FOOD_CANDY_KI] = vict->getBaseStat("ki");
+    obj->value[VAL_FOOD_CANDY_ST] = vict->getBaseStat("stamina");
 
     vict->mob_flags.set(MOB_HUSK, false);
     die(vict, ch);
@@ -2291,7 +2292,7 @@ ACMD(do_suppress) {
             reveal_hiding(ch, 0);
             act("@GYou stop suppressing your current powerlevel!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@G$n smiles as a rush of power erupts around $s body briefly.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            GET_SUPPRESS(ch) = 0;
+            ch->setBaseStat("suppression", 0);
             return;
         } else {
             send_to_char(ch, "You are not suppressing!\r\n");
@@ -2319,7 +2320,7 @@ ACMD(do_suppress) {
         act("@GYou suppress your current powerlevel!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@G$n seems to concentrate for a moment.@n", true, ch, nullptr, nullptr, TO_ROOM);
     }
-    GET_SUPPRESS(ch) = num;
+    ch->setBaseStat("suppression", num);
     return;
 }
 
@@ -4093,7 +4094,7 @@ ACMD(do_upgrade) {
                 act("@WYou install the circuits and upgrade your maximum powerlevel.@n", true, ch, nullptr, nullptr,
                     TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->gainBasePL(gain, true);
+                ch->gainBaseStat("powerlevel", gain);
                 send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             } else if (!strcasecmp("ki", arg2)) {
@@ -4101,7 +4102,7 @@ ACMD(do_upgrade) {
                 extract_obj(obj);
                 act("@WYou install the circuits and upgrade your maximum ki.@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->gainBaseKI(gain, true);
+                ch->gainBaseStat("ki", gain);
                 send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             } else if (!strcasecmp("stamina", arg2)) {
@@ -4110,7 +4111,7 @@ ACMD(do_upgrade) {
                 act("@WYou install the circuits and upgrade your maximum stamina.@n", true, ch, nullptr, nullptr,
                     TO_CHAR);
                 act("@C$n@W installs some circuits and upgrades $s systems.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                ch->gainBaseST(gain, true);
+                ch->gainBaseStat("stamina", gain);
                 send_to_char(ch, "@gGain @D[@G+%s@D]\r\n", add_commas(gain).c_str());
                 return;
             } else {
@@ -4180,7 +4181,7 @@ ACMD(do_upgrade) {
         } else {
             GET_UP(ch) -= cost;
             send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
-            ch->gainBasePL(bonus, true);
+            ch->gainBaseStat("powerlevel", bonus);
         }
     } else if (!strcasecmp("ki", arg)) {
         count = atoi(arg2);
@@ -4216,7 +4217,7 @@ ACMD(do_upgrade) {
         } else {
             GET_UP(ch) -= cost;
             send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
-            ch->gainBaseKI(bonus, true);
+            ch->gainBaseStat("ki", bonus);
         }
     } else if (!strcasecmp("stamina", arg)) {
         count = atoi(arg2);
@@ -4252,7 +4253,7 @@ ACMD(do_upgrade) {
         } else {
             GET_UP(ch) -= cost;
             send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
-            ch->gainBaseST(bonus, true);
+            ch->gainBaseStat("stamina", bonus);
         }
     } else {
         send_to_char(ch, "That is not a valid upgrade option.\r\n");
@@ -4346,9 +4347,9 @@ ACMD(do_ingest) {
             int64_t pl = (vict->getBasePL()) / 6;
             int64_t stam = (vict->getBaseST()) / 6;
             int64_t ki = (vict->getBaseKI()) / 6;
-            ch->gainBasePL(pl, true);
-            ch->gainBaseST(stam, true);
-            ch->gainBaseKI(ki, true);
+            ch->gainBaseStat("powerlevel", pl);
+            ch->gainBaseStat("stamina", stam);
+            ch->gainBaseStat("ki", ki);
             if (!IS_NPC(vict) && !IS_NPC(ch)) {
                 send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict),
                             vict->getRoomVnum());
@@ -4362,22 +4363,22 @@ ACMD(do_ingest) {
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your height.\r\n", GET_NAME(vict));
                 if (GET_PC_HEIGHT(ch) > GET_PC_HEIGHT(vict)) {
-                    ch->modHeight(-((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2));
+                    ch->modBaseStat("height", -((GET_PC_HEIGHT(ch) - GET_PC_HEIGHT(vict)) / 2));
                 } else if (GET_PC_HEIGHT(ch) < GET_PC_HEIGHT(vict)) {
-                    ch->modHeight(((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2));
+                    ch->modBaseStat("height", ((GET_PC_HEIGHT(vict) - GET_PC_HEIGHT(ch)) / 2));
                 } else {
-                    ch->setHeight(GET_PC_HEIGHT(vict));
+                    ch->setBaseStat("height", GET_PC_HEIGHT(vict));
                 }
             } else if (rand_number(1, 3) == 3) {
                 send_to_char(ch, "%s changes your weight.\r\n", GET_NAME(vict));
-                auto chw = ch->getWeight(true);
-                auto vw = vict->getWeight(true);
-                if (chw > vict->getWeight(true)) {
-                    ch->mod(CharDim::weight, -((chw - vict->getWeight(true)) / 2));
-                } else if (ch->getWeight(true) < vw) {
-                    ch->mod(CharDim::weight, ((vw - chw) / 2));
+                auto chw = ch->getBaseStat("weight");
+                auto vw = vict->getBaseStat("weight");
+                if (chw > vw) {
+                    ch->modBaseStat("weight", -((chw - vw) / 2));
+                } else if (chw < vw) {
+                    ch->modBaseStat("weight", ((vw - chw) / 2));
                 } else {
-                    ch->set(CharDim::weight, vict->getWeight(true));
+                    ch->setBaseStat("weight", vict->getBaseStat("weight"));
                 }
             } else {
                 send_to_char(ch, "Your forelock length changes because of %s.\r\n", GET_NAME(vict));
@@ -4581,9 +4582,9 @@ ACMD(do_absorb) {
             int64_t ki = (vict->getBaseKI()) / 5;
             int64_t pl = (vict->getBasePL()) / 5;
 
-            ch->gainBasePL(pl, true);
-            ch->gainBaseST(stam, true);
-            ch->gainBaseKI(ki, true);
+            ch->gainBaseStat("powerlevel", pl);
+            ch->gainBaseStat("stamina", stam);
+            ch->gainBaseStat("ki", ki);
 
             if (!IS_NPC(vict) && !IS_NPC(ch)) {
                 send_to_imm("[PK] %s killed %s at room [%d]\r\n", GET_NAME(ch), GET_NAME(vict),
@@ -4658,9 +4659,9 @@ ACMD(do_absorb) {
             ki = std::min<int64_t>(ki, 1500000L);
             pl = std::min<int64_t>(pl, 1500000L);
 
-            ch->gainBasePL(pl, true);
-            ch->gainBaseST(stam, true);
-            ch->gainBaseKI(ki, true);
+            ch->gainBaseStat("powerlevel", pl);
+            ch->gainBaseStat("stamina", stam);
+            ch->gainBaseStat("ki", ki);
             ch->incCurLFPercent(.05);
             send_to_char(ch, "@D[@gABSORB@D] @rPL@W: @D(@y%s@D) @cKi@W: @D(@y%s@D) @gSt@W: @D(@y%s@D)@n\r\n",
                          add_commas(pl).c_str(), add_commas(ki).c_str(), add_commas(stam).c_str());
@@ -6068,7 +6069,7 @@ ACMD(do_plant) {
             TO_CHAR);
         WAIT_STATE(ch, PULSE_2SEC);
         return;
-    } else if (GET_OBJ_WEIGHT(obj) + (vict->getCarriedWeight()) > CAN_CARRY_W(vict)) {
+    } else if (GET_OBJ_WEIGHT(obj) + (vict->getEffectiveStat("weight_carried")) > CAN_CARRY_W(vict)) {
         reveal_hiding(ch, 0);
         act("@C$n@w tries to plant $p@w on you!@n", true, ch, obj, vict, TO_VICT);
         act("@C$n@w tries to plant $p@w on @c$N@w!@n", true, ch, obj, vict, TO_NOTVICT);
@@ -7407,7 +7408,7 @@ ACMD(do_situp) {
         return;
     }
 
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
 
     if(ratio <= 0.1) {
         send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
@@ -7470,7 +7471,7 @@ void situpProgress(char_data* ch) {
         return;
     }
 
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
 
     if(ratio <= 0.1) {
         send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
@@ -7562,10 +7563,10 @@ void situpProgress(char_data* ch) {
     if(bonus <= 0) bonus = 1;
     // Bonus due to prolonging exercise
     bonus *= 2;
-    if(bonus > (ch->getBaseST() / 40)) bonus = ch->getBaseST() / 40;
+    if(bonus > (ch->getBaseStat("stamina") / 40)) bonus = ch->getBaseStat("stamina") / 40;
 
     send_to_char(ch, "You feel slightly more vigorous @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
-    ch->gainBaseST(bonus, true);
+    ch->gainBaseStat("stamina", bonus);
     WAIT_STATE(ch, 2.5);
     ch->decCurST(cost);
 }
@@ -7731,7 +7732,7 @@ void meditateProgress(char_data* ch) {
         return;
     }
 
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
 
     if(ratio <= 0.1) {
         send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
@@ -7822,7 +7823,7 @@ void meditateProgress(char_data* ch) {
     if (bonus > 0 && IS_DEMON(ch) && rand_number(1, 100) >= 80) {
         send_to_char(ch, "Your spirit magnifies the strength of your body! @D[@G+%s@D]@n\r\n",
                      add_commas(bonus / 2).c_str());
-        ch->gainBasePL(bonus / 2);
+        ch->gainBaseStat("powerlevel", bonus / 2);
     }
 
     bonus += GET_WIS(ch) / 20;
@@ -7838,7 +7839,7 @@ void meditateProgress(char_data* ch) {
     if(bonus > (ch->getBaseKI() / 40)) bonus = ch->getBaseKI() / 40;
 
     send_to_char(ch, "You feel your spirit grow stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
-    ch->gainBaseKI(bonus, true);
+    ch->gainBaseStat("ki", bonus);
     WAIT_STATE(ch, 2.5);
     ch->decCurKI(cost);
 
@@ -7886,7 +7887,7 @@ ACMD(do_pushup) {
         return;
     }
 
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
 
     if(ratio <= 0.1) {
         send_to_char(ch, "It would simply be too easy like this. Increase your weight or the gravity!\r\n");
@@ -7946,7 +7947,7 @@ void pushupProgress(char_data* ch) {
         return;
     }
 
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
 
     if(ratio <= 0.1) {
         ch->setTask(Task::nothing);
@@ -8043,9 +8044,9 @@ void pushupProgress(char_data* ch) {
     // Bonus for longer task
     bonus *= 2;
 
-    if(bonus > (ch->getBasePL() / 40)) bonus = ch->getBasePL() / 40;
+    if(bonus > (ch->getBaseStat("powerlevel") / 40)) bonus = ch->getBaseStat("powerlevel") / 40;
     send_to_char(ch, "You feel slightly stronger @D[@G+%s@D]@n.\r\n", add_commas(bonus).c_str());
-    ch->gainBasePL(bonus, true);
+    ch->gainBaseStat("powerlevel", bonus);
     WAIT_STATE(ch, 2.5);
     ch->decCurST(cost);
 }
@@ -8203,7 +8204,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             if (inc >= 25000) {
                 inc = 25000;
             }
-            d->character->mod(CharMoney::bank, inc);
+            d->character->modBaseStat("money_bank", inc);
             send_to_char(d->character, "@cBank Interest@D: @Y%s@n\r\n", add_commas(inc).c_str());
         }
         if (!IS_NPC(d->character)) {
@@ -8862,7 +8863,7 @@ ACMD(do_steal) {
         return;
     }
 
-    if ((ch->getCurST()) < (GET_MAX_MOVE(ch) / 40) + ch->getCarriedWeight()) {
+    if ((ch->getCurST()) < (GET_MAX_MOVE(ch) / 40) + ch->getEffectiveStat("weight_carried")) {
         send_to_char(ch, "You do not have enough stamina.\r\n");
         return;
     }
@@ -8922,8 +8923,8 @@ ACMD(do_steal) {
                         send_to_char(ch, "You can't hold that much more zenni on your person!\r\n");
                         return;
                     }
-                    vict->mod(CharMoney::carried, -gold);
-                    ch->mod(CharMoney::carried, gold);
+                    vict->modBaseStat("money_carried", -gold);
+                    ch->modBaseStat("money_carried", gold);
                     if (!IS_NPC(vict)) {
                         vict->player_flags.set(PLR_STOLEN, true);
                         mudlog(NRM, MAX(ADMLVL_GRGOD, GET_INVIS_LEV(ch)), true,
@@ -8996,7 +8997,7 @@ ACMD(do_steal) {
                 } else if (OBJ_FLAGGED(obj, ITEM_NOSTEAL)) {
                     send_to_char(ch, "You can't steal that!\r\n");
                     return;
-                } else if (GET_OBJ_WEIGHT(obj) + (ch->getCarriedWeight()) > CAN_CARRY_W(ch)) {
+                } else if (GET_OBJ_WEIGHT(obj) + (ch->getEffectiveStat("weight_carried")) > CAN_CARRY_W(ch)) {
                     send_to_char(ch, "You can't carry that much weight.\r\n");
                     return;
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
@@ -9044,7 +9045,7 @@ ACMD(do_steal) {
                 } else if (GET_OBJ_TYPE(obj) == ITEM_KEY) {
                     send_to_char(ch, "No stealing keys!\r\n");
                     return;
-                } else if (GET_OBJ_WEIGHT(obj) + (ch->getCarriedWeight()) > CAN_CARRY_W(ch)) {
+                } else if (GET_OBJ_WEIGHT(obj) + (ch->getEffectiveStat("weight_carried")) > CAN_CARRY_W(ch)) {
                     send_to_char(ch, "You can't carry that much weight.\r\n");
                     return;
                 } else if (IS_CARRYING_N(ch) + 1 > CAN_CARRY_N(ch)) {
@@ -9225,7 +9226,7 @@ static void print_group(struct char_data *ch) {
                          add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str(), GET_LEVEL(k),
                          CLASS_ABBR(k), race::getAbbr(k->race).c_str());
             }
-            if (GET_HIT(k) <= (GET_MAX_HIT(k) - (k->getCarriedWeight())) / 10) {
+            if (GET_HIT(k) <= (GET_MAX_HIT(k) - (k->getEffectiveStat("weight_carried"))) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gL@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]@n",
                          add_commas(GET_HIT(k)).c_str(), add_commas((k->getCurKI())).c_str(), add_commas((k->getCurST())).c_str(), GET_LEVEL(k),
@@ -9238,14 +9239,14 @@ static void print_group(struct char_data *ch) {
             if (!AFF_FLAGGED(f->follower, AFF_GROUP))
                 continue;
             send_to_char(ch, "@D----------------@n\r\n");
-            if (GET_HIT(f->follower) > (GET_MAX_HIT(f->follower) - (f->follower->getCarriedWeight())) / 10) {
+            if (GET_HIT(f->follower) > (GET_MAX_HIT(f->follower) - (f->follower->getEffectiveStat("weight_carried"))) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gF@D: @w$N @W- @D[@RPL@Y: @c%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
                          add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurKI())).c_str(), add_commas(
                                 (f->follower->getCurST())).c_str(),
                          GET_LEVEL(f->follower), CLASS_ABBR(f->follower), race::getAbbr(f->follower->race).c_str());
             }
-            if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (f->follower->getCarriedWeight())) / 10) {
+            if (GET_HIT(f->follower) <= (GET_MAX_HIT(f->follower) - (f->follower->getEffectiveStat("weight_carried"))) / 10) {
                 snprintf(buf, sizeof(buf),
                          "@gF@D: @w$N @W- @D[@RPL@Y: @r%s @CKi@Y: @c%s @GST@Y: @c%s@D] [@w%2d %s %s@D]",
                          add_commas(GET_HIT(f->follower)).c_str(), add_commas((f->follower->getCurKI())).c_str(), add_commas(
@@ -9443,7 +9444,7 @@ ACMD(do_split) {
             send_to_char(ch, "You don't seem to have that much gold to split.\r\n");
             return;
         }
-        ch->mod(CharMoney::carried, -amount);
+        ch->modBaseStat("money_carried", -amount);
         k = (ch->master ? ch->master : ch);
 
         if (AFF_FLAGGED(k, AFF_GROUP) && (IN_ROOM(k) == IN_ROOM(ch)))
@@ -9465,7 +9466,7 @@ ACMD(do_split) {
             return;
         }
 
-        ch->mod(CharMoney::carried, share);
+        ch->modBaseStat("money_carried", share);
 
         /* Abusing signed/unsigned to make sizeof work. */
         len = snprintf(buf, sizeof(buf), "%s splits %d zenni; you receive %d.\r\n",
@@ -9477,7 +9478,7 @@ ACMD(do_split) {
         }
         if (AFF_FLAGGED(k, AFF_GROUP) && IN_ROOM(k) == IN_ROOM(ch) &&
             !IS_NPC(k) && k != ch) {
-            k->mod(CharMoney::carried, share);
+            k->modBaseStat("money_carried", share);
             send_to_char(k, "%s", buf);
         }
 
@@ -9487,7 +9488,7 @@ ACMD(do_split) {
                 (IN_ROOM(f->follower) == IN_ROOM(ch)) &&
                 f->follower != ch) {
 
-                f->follower->mod(CharMoney::carried, share);
+                f->follower->modBaseStat("money_carried", share);
                 send_to_char(f->follower, "%s", buf);
             }
         }
@@ -9497,7 +9498,7 @@ ACMD(do_split) {
         if (rest) {
             send_to_char(ch, "%d zenni %s not splitable, so you keep the money.\r\n",
                          rest, (rest == 1) ? "was" : "were");
-            ch->mod(CharMoney::carried, rest);
+            ch->modBaseStat("money_carried", rest);
         }
     } else {
         send_to_char(ch, "How much zenni do you wish to split with your group?\r\n");
@@ -10773,7 +10774,7 @@ ACMD(do_clan) {
                 return;
             } else {
                 bank = atoi(arg2);
-                ch->mod(CharMoney::carried, -bank);
+                ch->modBaseStat("money_carried", -bank);
                 clanBANKADD(GET_CLAN(ch), ch, bank);
                 send_to_char(ch, "You have deposited %s into the clan bank.\r\n", add_commas(bank).c_str());
             }
@@ -10921,7 +10922,7 @@ ACMD(do_clan) {
                 bank = atoi(arg2);
                 if (clanBANKSUB(GET_CLAN(ch), ch, bank)) {
                     send_to_char(ch, "You have withdrawn %s from the clan bank.\r\n", add_commas(bank).c_str());
-                    ch->mod(CharMoney::carried, bank);
+                    ch->modBaseStat("money_carried", bank);
                 } else {
                     send_to_char(ch, "There isn't that much in the clan's bank!\r\n");
                 }
@@ -11431,54 +11432,42 @@ void genRace(char_data* ch, std::string suggestedRace) {
 
 
 void genBonus(char_data* ch, std::string bonus){
+    int toSet = NOTHING;
+    
     if(is_abbrev(bonus.c_str(), "hand to hand") || bonus == "1") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 1;
-        return;
+        toSet = 1;
     }
     if(is_abbrev(bonus.c_str(), "ki attacks") || bonus == "2") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 2;
-        return;
+        toSet = 2;
     }
     if(is_abbrev(bonus.c_str(), "find my own way") || bonus == "3") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 3;
-        return;
+        toSet = 3;
     }
     if(is_abbrev(bonus.c_str(), "money") || bonus == "4") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 4;
-        return;
+        toSet = 4;
     }
     if(is_abbrev(bonus.c_str(), "weaponry (brawl)") || bonus == "5") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 5;
-        return;
+        toSet = 5;
     }
     if(is_abbrev(bonus.c_str(), "weaponry (gun)") || bonus == "6") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 6;
-        return;
+        toSet = 6;
     }
     if(is_abbrev(bonus.c_str(), "weaponry (spear)") || bonus == "7") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 7;
-        return;
+        toSet = 7;
     }
     if(is_abbrev(bonus.c_str(), "weaponry (club)") || bonus == "8") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 8;
-        return;
+        toSet = 8;
     }
     if(is_abbrev(bonus.c_str(), "weaponry (sword)") || bonus == "9") {
-        send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 9;
-        return;
+        toSet = 9;
     }
     if(is_abbrev(bonus.c_str(), "weaponry (dagger)") || bonus == "10") {
+        toSet = 10;
+    }
+
+    if(toSet != NOTHING) {
+        ch->setBaseStat("genBonus", toSet);
         send_to_char(ch,"\r\nBonus set.\r\n");
-        ch->genBonus = 10;
         return;
     }
     
@@ -11502,12 +11491,12 @@ void genHeight(char_data* ch, std::string suggestedHeight) {
 
 
     if (ch->race == Race::tuffle && (height >= 20 && height <= 150)) {
-        ch->setHeight(height);
+        ch->setBaseStat("height", height);
         send_to_char(ch, "Height set.\r\n");
         return;
     }
     else if (height >= 80 && height <= 300) {
-        ch->setHeight(height);
+        ch->setBaseStat("height", height);
         send_to_char(ch, "Height set.\r\n");
         return;
     }
@@ -11525,12 +11514,12 @@ void genWeight(char_data* ch, std::string suggestedWeight) {
     int weight = atoi(suggestedWeight.c_str());
 
     if (ch->race == Race::tuffle && (weight >= 3 && weight <= 40)) {
-        ch->set(CharDim::weight, weight);
+        ch->setBaseStat("weight", weight);
         send_to_char(ch, "Weight set.\r\n");
         return;
     }
     else if (weight >= 25 && weight <= 150) {
-        ch->set(CharDim::weight, weight);
+        ch->setBaseStat("weight", weight);
         send_to_char(ch, "Weight set.\r\n");
         return;
     }
@@ -11561,136 +11550,138 @@ void genAge(char_data* ch, std::string suggestedAge) {
 
 void genFinish(char_data* ch) {
 
-    if(ch->genBonus == 1) {
-        ch->mod(CharVital::powerlevel, 200);
-        ch->mod(CharVital::ki, 50);
-        ch->mod(CharVital::stamina, 100);
-        ch->mod(CharMoney::carried, 200);
+    auto gb = ch->getBaseStat<int>("genBonus");
 
-        ch->mod(CharAttribute::strength, 2);
-        ch->mod(CharAttribute::constitution, 2);
+    if(gb == 1) {
+        ch->modBaseStat("powerlevel",200);
+        ch->modBaseStat("ki",50);
+        ch->modBaseStat("stamina",100);
+        ch->modBaseStat("money_carried", 200);
+
+        ch->modBaseStat("strength", 2);
+        ch->modBaseStat("constitution", 2);
 
         SET_SKILL(ch, SKILL_KICK, 30);
         SET_SKILL(ch, SKILL_KNEE, 30);
         SET_SKILL(ch, SKILL_ELBOW, 30);
 
     }
-    if(ch->genBonus == 2) {
-        ch->mod(CharVital::powerlevel, 50);
-        ch->mod(CharVital::ki, 200);
-        ch->mod(CharVital::stamina, 100);
-        ch->mod(CharMoney::carried, 200);
+    if(gb == 2) {
+        ch->modBaseStat("powerlevel",50);
+        ch->modBaseStat("ki",200);
+        ch->modBaseStat("stamina",100);
+        ch->modBaseStat("money_carried", 200);
 
-        ch->mod(CharAttribute::intelligence, 2);
-        ch->mod(CharAttribute::wisdom, 2);
+        ch->modBaseStat("intelligence", 2);
+        ch->modBaseStat("wisdom", 2);
 
         SET_SKILL(ch, SKILL_FOCUS, 30);
         SET_SKILL(ch, SKILL_KIBALL, 30);
         SET_SKILL(ch, SKILL_BEAM, 30);
         
     }
-    if(ch->genBonus == 3) {
-        ch->mod(CharVital::powerlevel, 200);
-        ch->mod(CharVital::ki, 200);
-        ch->mod(CharVital::stamina, 200);
-        ch->mod(CharMoney::carried, 10);
+    if(gb == 3) {
+        ch->modBaseStat("powerlevel",200);
+        ch->modBaseStat("ki",200);
+        ch->modBaseStat("stamina",200);
+        ch->modBaseStat("money_carried", 10);
 
-        ch->mod(CharAttribute::strength, 2);
-        ch->mod(CharAttribute::constitution, 2);
-        ch->mod(CharAttribute::speed, 2);
-        ch->mod(CharAttribute::agility, 2);
-        ch->mod(CharAttribute::intelligence, 2);
-        ch->mod(CharAttribute::wisdom, 2);
+        ch->modBaseStat("strength", 2);
+        ch->modBaseStat("constitution", 2);
+        ch->modBaseStat("speed", 2);
+        ch->modBaseStat("agility", 2);
+        ch->modBaseStat("intelligence", 2);
+        ch->modBaseStat("wisdom", 2);
 
         SET_SKILL(ch, SKILL_FOCUS, 30);
         
     }
-    if(ch->genBonus == 4) {
-        ch->mod(CharVital::powerlevel, 50);
-        ch->mod(CharVital::ki, 50);
-        ch->mod(CharVital::stamina, 50);
-        ch->mod(CharMoney::carried, 5000);
+    if(gb == 4) {
+        ch->modBaseStat("powerlevel",50);
+        ch->modBaseStat("ki",50);
+        ch->modBaseStat("stamina",50);
+        ch->modBaseStat("money_carried", 5000);
 
-        ch->mod(CharAttribute::intelligence, 2);
-        ch->mod(CharAttribute::constitution, 2);
+        ch->modBaseStat("intelligence", 2);
+        ch->modBaseStat("constitution", 2);
 
         SET_SKILL(ch, SKILL_APPRAISE, 30);
         SET_SKILL(ch, SKILL_CONCENTRATION, 30);
         
     }
-    if(ch->genBonus == 5) {
-        ch->mod(CharVital::powerlevel, 100);
-        ch->mod(CharVital::ki, 50);
-        ch->mod(CharVital::stamina, 200);
-        ch->mod(CharMoney::carried, 500);
+    if(gb == 5) {
+        ch->modBaseStat("powerlevel",100);
+        ch->modBaseStat("ki",50);
+        ch->modBaseStat("stamina",200);
+        ch->modBaseStat("money_carried", 500);
 
-        ch->mod(CharAttribute::wisdom, 3);
-        ch->mod(CharAttribute::speed, 2);
+        ch->modBaseStat("wisdom", 3);
+        ch->modBaseStat("speed", 2);
 
         SET_SKILL(ch, SKILL_PARRY, 30);
         SET_SKILL(ch, SKILL_BRAWL, 30);
         
     }
-    if(ch->genBonus == 6) {
-        ch->mod(CharVital::powerlevel, 100);
-        ch->mod(CharVital::ki, 50);
-        ch->mod(CharVital::stamina, 200);
-        ch->mod(CharMoney::carried, 500);
+    if(gb == 6) {
+        ch->modBaseStat("powerlevel",100);
+        ch->modBaseStat("ki",50);
+        ch->modBaseStat("stamina",200);
+        ch->modBaseStat("money_carried", 500);
 
-        ch->mod(CharAttribute::wisdom, 3);
-        ch->mod(CharAttribute::speed, 2);
+        ch->modBaseStat("wisdom", 3);
+        ch->modBaseStat("speed", 2);
 
         SET_SKILL(ch, SKILL_PARRY, 30);
         SET_SKILL(ch, SKILL_GUN, 30);
         
     }
-    if(ch->genBonus == 7) {
-        ch->mod(CharVital::powerlevel, 100);
-        ch->mod(CharVital::ki, 50);
-        ch->mod(CharVital::stamina, 200);
-        ch->mod(CharMoney::carried, 500);
+    if(gb == 7) {
+        ch->modBaseStat("powerlevel",100);
+        ch->modBaseStat("ki",50);
+        ch->modBaseStat("stamina",200);
+        ch->modBaseStat("money_carried", 500);
 
-        ch->mod(CharAttribute::wisdom, 3);
-        ch->mod(CharAttribute::speed, 2);
+        ch->modBaseStat("wisdom", 3);
+        ch->modBaseStat("speed", 2);
 
         SET_SKILL(ch, SKILL_PARRY, 30);
         SET_SKILL(ch, SKILL_SPEAR, 30);
         
     }
-    if(ch->genBonus == 8) {
-        ch->mod(CharVital::powerlevel, 100);
-        ch->mod(CharVital::ki, 50);
-        ch->mod(CharVital::stamina, 200);
-        ch->mod(CharMoney::carried, 500);
+    if(gb == 8) {
+        ch->modBaseStat("powerlevel",100);
+        ch->modBaseStat("ki",50);
+        ch->modBaseStat("stamina",200);
+        ch->modBaseStat("money_carried", 500);
 
-        ch->mod(CharAttribute::wisdom, 3);
-        ch->mod(CharAttribute::speed, 2);
+        ch->modBaseStat("wisdom", 3);
+        ch->modBaseStat("speed", 2);
 
         SET_SKILL(ch, SKILL_PARRY, 30);
         SET_SKILL(ch, SKILL_CLUB, 30);
         
     }
-    if(ch->genBonus == 9) {
-        ch->mod(CharVital::powerlevel, 100);
-        ch->mod(CharVital::ki, 50);
-        ch->mod(CharVital::stamina, 200);
-        ch->mod(CharMoney::carried, 500);
+    if(gb == 9) {
+        ch->modBaseStat("powerlevel",100);
+        ch->modBaseStat("ki",50);
+        ch->modBaseStat("stamina",200);
+        ch->modBaseStat("money_carried", 500);
 
-        ch->mod(CharAttribute::wisdom, 3);
-        ch->mod(CharAttribute::speed, 2);
+        ch->modBaseStat("wisdom", 3);
+        ch->modBaseStat("speed", 2);
 
         SET_SKILL(ch, SKILL_PARRY, 30);
         SET_SKILL(ch, SKILL_SWORD, 30);
         
     }
-    if(ch->genBonus == 10) {
-        ch->mod(CharVital::powerlevel, 100);
-        ch->mod(CharVital::ki, 50);
-        ch->mod(CharVital::stamina, 200);
-        ch->mod(CharMoney::carried, 500);
+    if(gb == 10) {
+        ch->modBaseStat("powerlevel",100);
+        ch->modBaseStat("ki",50);
+        ch->modBaseStat("stamina",200);
+        ch->modBaseStat("money_carried", 500);
 
-        ch->mod(CharAttribute::wisdom, 3);
-        ch->mod(CharAttribute::speed, 2);
+        ch->modBaseStat("wisdom", 3);
+        ch->modBaseStat("speed", 2);
 
         SET_SKILL(ch, SKILL_PARRY, 30);
         SET_SKILL(ch, SKILL_DAGGER, 30);
@@ -11703,7 +11694,7 @@ void genFinish(char_data* ch) {
         SET_SKILL(ch, SKILL_FOCUS, 30);
     }
     if (ch->mutations.get(Mutation::extreme_reflexes)) {
-        ch->mod(CharAttribute::agility, 10);
+        ch->modBaseStat("agility", 10);
     }
     if (ch->mutations.get(Mutation::innate_telepathy)) {
         SET_SKILL(ch, SKILL_TELEPATHY, 50);

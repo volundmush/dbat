@@ -1541,8 +1541,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
             GET_MOLT_LEVEL(ch) += 1;
             int armorgain = armor_evolve(ch);
 
-            if(ch->armor + armorgain < 500000)
-                ch->armor += armorgain;
+            if(ch->getBaseStat("armor_innate") + armorgain < 500000)
+                ch->modBaseStat("armor_innate", armorgain);
 
 
             double baseHl = ch->getBasePL();
@@ -1937,7 +1937,7 @@ char *introd_calc(struct char_data *ch) {
 }
 
 double speednar(struct char_data *ch) {
-    auto ratio = 1.0 - ch->getBurdenRatio();
+    auto ratio = 1.0 - ch->getBaseStat("burden_ratio");
     return std::clamp<double>(ratio, 0.01, 1.0);
 }
 
@@ -1947,7 +1947,7 @@ int64_t gear_exp(struct char_data *ch, int64_t exp) {
         return exp;
     }
 
-    auto ratio = ch->getBurdenRatio();
+    auto ratio = ch->getBaseStat("burden_ratio");
     exp += exp * ratio;
     return exp;
 }
@@ -3169,7 +3169,7 @@ void doContinuedTask(char_data* ch) {
 }
 
 void WAIT_STATE(struct char_data *ch, double timeToWait) {
-    ch->waitTime = std::max<double>(0.0, timeToWait);
+    ch->setBaseStat("waitTime", timeToWait);
     characterSubscriptions.subscribe("commandWaitQueue", ch);
 }
 

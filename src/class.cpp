@@ -399,7 +399,7 @@ void do_start(struct char_data *ch) {
     }
     /* roll_real_abils(ch); */
     if (GET_GOLD(ch) <= 0) {
-        ch->set(CharMoney::carried, dice(3, 6) * 10);
+        ch->setBaseStat("money_carried", dice(3, 6) * 10);
     }
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
@@ -477,25 +477,13 @@ void do_start(struct char_data *ch) {
     advance_level(ch);
     /*mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), TRUE, "%s advanced to level %d", GET_NAME(ch), GET_LEVEL(ch));*/
 
-    for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
-        if(ch->get(c) < 90) ch->set(c, 100);
-    }
-
     if (IS_ANDROID(ch) && ch->subrace == SubRace::android_model_sense) {
         SET_SKILL(ch, SKILL_SENSE, 100);
-        ch->gainBasePL(rand_number(400, 500));
-        ch->gainBaseST(rand_number(400, 500));
-        ch->gainBaseKI(rand_number(400, 500));
+        for(const auto& s : {"powerlevel", "ki", "stamina"}) {
+            ch->gainBaseStat(s, rand_number(400, 500));
+        }
     }
 
-    for(auto attr : {CharAttribute::strength, CharAttribute::agility, CharAttribute::constitution,
-        CharAttribute::intelligence, CharAttribute::wisdom, CharAttribute::speed}) {
-        auto val = ch->get(attr);
-        ch->set(attr, std::clamp<attribute_t>(val, 8, 20));
-    }
-
-    ch->transBonus = Random::get<double>(-0.3, 0.3);
-        
     ch->restoreVitals();
 
     GET_OLC_ZONE(ch) = NOWHERE;
@@ -861,10 +849,10 @@ void advance_level(struct char_data *ch) {
     if (GET_LEVEL(ch) > 1) {
         /* blah */
     } else {
-        ch->gainBasePL(rand_number(1, 20));
+        ch->gainBaseStat("powerlevel", rand_number(1, 20));
 
-        for(auto c : {CharVital::powerlevel, CharVital::ki, CharVital::stamina}) {
-            if(ch->get(c) < 250) ch->set(c, 250);
+        for(auto c : {"powerlevel", "ki", "stamina"}) {
+            if(ch->getBaseStat(c) < 250) ch->setBaseStat(c, 250);
         }
 
         add_prac = 5;
@@ -902,9 +890,9 @@ void advance_level(struct char_data *ch) {
         add_move *= 1.25;
     }
     ch->modPractices(add_prac);
-    ch->gainBasePL(add_hp, true);
-    ch->gainBaseKI(add_mana, true);
-    ch->gainBaseST(add_move, true);
+    ch->gainBaseStat("powerlevel", add_hp);
+    ch->gainBaseStat("ki", add_mana);
+    ch->gainBaseStat("stamina", add_move);
     int nhp = add_hp;
     int nma = add_mana;
     int nmo = add_move;
@@ -956,17 +944,17 @@ void advance_level(struct char_data *ch) {
         int raise = false, stat_fail = 0;
         if (IS_KONATSU(ch)) {
             while (raise == false) {
-                if (auto agi = ch->get(CharAttribute::agility, true); agi < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                if (auto agi = ch->getBaseStat("agility"); agi < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (agi < 45 || GET_BONUS(ch, BONUS_CLUMSY) <= 0) {
-                        ch->mod(CharAttribute::agility, 1);
+                        ch->modBaseStat("agility", 1);
                         send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (auto speed = ch->get(CharAttribute::speed, true); speed < 100 && raise == false && stat_fail < 2) {
+                } else if (auto speed = ch->getBaseStat("speed"); speed < 100 && raise == false && stat_fail < 2) {
                     if (speed < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->mod(CharAttribute::speed, 1);
+                        ch->modBaseStat("speed", 1);
                         send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
                         raise = true;
                     } else {
@@ -981,17 +969,17 @@ void advance_level(struct char_data *ch) {
 
         else if (IS_MUTANT(ch)) {
             while (raise == false) {
-                if (auto con = ch->get(CharAttribute::constitution, true); con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                if (auto con = ch->getBaseStat("constitution"); con < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (con < 45 || GET_BONUS(ch, BONUS_FRAIL) <= 0) {
-                        ch->mod(CharAttribute::constitution, 1);
+                        ch->modBaseStat("constitution", 1);
                         send_to_char(ch, "@GYou feel your constitution increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (auto speed = ch->get(CharAttribute::speed, true); speed < 100 && raise == false && stat_fail < 2) {
+                } else if (auto speed = ch->getBaseStat("speed"); speed < 100 && raise == false && stat_fail < 2) {
                     if (speed < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->mod(CharAttribute::speed, 1);
+                        ch->modBaseStat("speed", 1);
                         send_to_char(ch, "@GYou feel your speed increase!@n\r\n");
                         raise = true;
                     } else {
@@ -1006,17 +994,17 @@ void advance_level(struct char_data *ch) {
 
         else if (IS_HOSHIJIN(ch)) {
             while (raise == false) {
-                if (auto str = ch->get(CharAttribute::strength, true) ; str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
+                if (auto str = ch->getBaseStat("strength") ; str < 100 && rand_number(1, 2) == 2 && stat_fail != 1) {
                     if (str < 45 || GET_BONUS(ch, BONUS_WIMP) <= 0) {
-                        ch->mod(CharAttribute::strength, 1);
+                        ch->modBaseStat("strength", 1);
                         send_to_char(ch, "@GYou feel your strength increase!@n\r\n");
                         raise = true;
                     } else {
                         stat_fail += 1;
                     }
-                } else if (auto agi = ch->get(CharAttribute::agility, true) ; agi < 100 && raise == false && stat_fail < 2) {
+                } else if (auto agi = ch->getBaseStat("agility") ; agi < 100 && raise == false && stat_fail < 2) {
                     if (agi < 45 || GET_BONUS(ch, BONUS_SLOW) > 0) {
-                        ch->mod(CharAttribute::agility, 1);
+                        ch->modBaseStat("agility", 1);
                         send_to_char(ch, "@GYou feel your agility increase!@n\r\n");
                         raise = true;
                     } else {
@@ -1045,17 +1033,17 @@ void advance_level(struct char_data *ch) {
 
     if ((GET_LEVEL(ch) % 10) == 0) {
         // every 10 levels...
-        const std::map<int, std::pair<CharAttribute, std::string>> checks = {
-            {BONUS_BRAWNY, {CharAttribute::strength, "@GYour muscles have grown stronger!@n"}},
-            {BONUS_SCHOLARLY, {CharAttribute::intelligence, "@GYour mind has grown sharper!@n"}},
-            {BONUS_SAGE, {CharAttribute::wisdom, "@GYour understanding about life has improved!@n"}},
-            {BONUS_AGILE, {CharAttribute::agility, "@GYour body has grown more agile!@n"}},
-            {BONUS_QUICK, {CharAttribute::speed, "@GYou feel like your speed has improved!@n"}},
-            {BONUS_STURDY, {CharAttribute::constitution, "@GYour body feels tougher now!@n"}},
+        const std::map<int, std::pair<std::string, std::string>> checks = {
+            {BONUS_BRAWNY, {"strength", "@GYour muscles have grown stronger!@n"}},
+            {BONUS_SCHOLARLY, {"intelligence", "@GYour mind has grown sharper!@n"}},
+            {BONUS_SAGE, {"wisdom", "@GYour understanding about life has improved!@n"}},
+            {BONUS_AGILE, {"agility", "@GYour body has grown more agile!@n"}},
+            {BONUS_QUICK, {"speed", "@GYou feel like your speed has improved!@n"}},
+            {BONUS_STURDY, {"constitution", "@GYour body feels tougher now!@n"}},
         };
         for (auto& [trait, res]: checks) {
             if (GET_BONUS(ch, trait)) {
-                ch->mod(res.first, 2);
+                ch->modBaseStat(res.first, 2);
                 send_to_char(ch, "%s\r\n", res.second.c_str());
             }
         }
@@ -1673,7 +1661,11 @@ namespace sensei {
         std::function<double(struct char_data *ch)> func{};
     };
 
-    static std::unordered_map<Sensei, std::vector<sen_affect_type>> sensei_affects = {};
+    static std::unordered_map<Sensei, std::vector<sen_affect_type>> sensei_affects = {
+        {Sensei::bardock, {
+            {APPLY_CDER_BASE, 10000.0, CDER_CARRY_CAPACITY}
+        }}
+    };
 
     double getModifier(char_data* ch, int location, int specific) {
         double out = 0.0;

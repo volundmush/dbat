@@ -89,3 +89,7 @@ std::unordered_set<struct obj_data*> unit_data::gatherObjects(const std::functio
     }
     return out;
 }
+
+double unit_data::getAffectModifier(uint64_t location, uint64_t specific) {
+    return 0.0;
+}

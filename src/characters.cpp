@@ -100,28 +100,28 @@ void char_data::resurrect(ResurrectionMode mode) {
         int losschance = axion_dice(0);
         send_to_char(this,
                      "@RThe the strain of this type of revival has caused you to be in a weakened state for 100 hours (Game time)! Strength,itution, wisdom, intelligence, speed, and agility have been reduced by 8 points for the duration.@n\r\n");
-        std::map<CharAttribute, int> statReductions = {
-            {CharAttribute::strength, -8},
-            {CharAttribute::constitution, -8},
-            {CharAttribute::intelligence, -8},
-            {CharAttribute::wisdom, -8},
-            {CharAttribute::speed, -8},
-            {CharAttribute::agility, -8}
+        std::map<std::string, int> statReductions = {
+            {"strength", -8},
+            {"constitution", -8},
+            {"intelligence", -8},
+            {"wisdom", -8},
+            {"speed", -8},
+            {"agility", -8}
         };
 
         for (auto& [attr, reduction] : statReductions) {
-            int baseStat = this->get(attr, true);
+            int baseStat = this->getBaseStat(attr);
             int effectiveReduction = std::max(reduction, 15 - baseStat);
             statReductions[attr] = effectiveReduction;
         }
 
         assign_affect(this, AFF_WEAKENED_STATE, SKILL_WARP, dur,
-                      statReductions[CharAttribute::strength],
-                      statReductions[CharAttribute::constitution],
-                      statReductions[CharAttribute::intelligence],
-                      statReductions[CharAttribute::agility],
-                      statReductions[CharAttribute::wisdom],
-                      statReductions[CharAttribute::speed]);
+                      statReductions["strength"],
+                      statReductions["constitution"],
+                      statReductions["intelligence"],
+                      statReductions["agility"],
+                      statReductions["wisdom"],
+                      statReductions["speed"]);
 
         if (losschance >= 100) {
             int psloss = rand_number(100, 300);
@@ -248,7 +248,7 @@ bool char_data::hasGravAcclim(int grav) {
 }
 
 void char_data::raiseGravAcclim() {
-    if (rand_number(1, 140) >= get(CharAttribute::strength)) {
+    if (rand_number(1, 140) >= getEffectiveStat("strength")) {
         auto room = getRoom();
         if(!room) return;
         auto gravity = room->getEnvironment(ENV_GRAVITY);
@@ -375,10 +375,11 @@ int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
 int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
     auto fl = 0.0;
     auto dmg = (1.0 - getCurVitalDam(CharVital::powerlevel));
+    auto sup = getBaseStat<int>("suppression");
     if (floor > 0)
         fl = (double) floor / (double) getMaxPL();
-    if (suppression > 0)
-        dmg = std::max(fl, dmg - (double) std::abs(amt) / ((double) getMaxPL() * ((double) suppression / 100.0)));
+    if (sup > 0)
+        dmg = std::max(fl, dmg - (double) std::abs(amt) / ((double) getMaxPL() * ((double) sup / 100.0)));
     else
         dmg = std::max(fl, dmg - (double) std::abs(amt) / (double) getMaxPL());
     setCurVitalDam(CharVital::powerlevel, 1.0 - dmg);
@@ -430,8 +431,9 @@ int64_t char_data::getMaxPL() {
 
 int64_t char_data::getCurPL() {
     auto dmg = (1.0 - getCurVitalDam(CharVital::powerlevel));
-    if (!IS_NPC(this) && suppression > 0) {
-        return getMaxPL() * std::min(dmg, dmg * ((double) suppression / 100));
+    auto sup = getBaseStat<int>("suppression");
+    if (!IS_NPC(this) && sup > 0) {
+        return getMaxPL() * std::min(dmg, dmg * ((double) sup / 100));
     } else {
         return getMaxPL() * dmg;
     }
@@ -453,7 +455,7 @@ int64_t char_data::getEffBasePL() {
 }
 
 int64_t char_data::getBasePL() {
-    return get(CharVital::powerlevel);
+    return getBaseStat("powerlevel");
 }
 
 double char_data::getCurPLPercent() {
@@ -494,7 +496,7 @@ int64_t char_data::getEffBaseKI() {
 }
 
 int64_t char_data::getBaseKI() {
-    return get(CharVital::ki);
+    return getBaseStat("ki");
 }
 
 double char_data::getCurKIPercent() {
@@ -591,7 +593,7 @@ int64_t char_data::getEffBaseST() {
 }
 
 int64_t char_data::getBaseST() {
-    return get(CharVital::stamina);
+    return getBaseStat("stamina");
 }
 
 double char_data::getCurSTPercent() {
@@ -876,119 +878,15 @@ void char_data::removeLimitBreak() {
     }
 }
 
-int64_t char_data::gainBasePL(int64_t amt, bool trans_mult) {
-    raiseGravAcclim();
-    return mod(CharVital::powerlevel, amt);
-}
-
-int64_t char_data::gainBaseST(int64_t amt, bool trans_mult) {
-    raiseGravAcclim();
-    return mod(CharVital::stamina, amt);
-}
-
-int64_t char_data::gainBaseKI(int64_t amt, bool trans_mult) {
-    raiseGravAcclim();
-    return mod(CharVital::ki, amt);
-}
-
-void char_data::gainBaseAll(int64_t amt, bool trans_mult) {
-    gainBasePL(amt, trans_mult);
-    gainBaseKI(amt, trans_mult);
-    gainBaseST(amt, trans_mult);
-}
-
-int64_t char_data::loseBasePL(int64_t amt, bool trans_mult) {
-    return mod(CharVital::powerlevel, -amt);
-}
-
-int64_t char_data::loseBaseST(int64_t amt, bool trans_mult) {
-    return mod(CharVital::stamina, -amt);
-}
-
-int64_t char_data::loseBaseKI(int64_t amt, bool trans_mult) {
-    return mod(CharVital::ki, -amt);
-}
-
-void char_data::loseBaseAll(int64_t amt, bool trans_mult) {
-    loseBasePL(amt, trans_mult);
-    loseBaseKI(amt, trans_mult);
-    loseBaseST(amt, trans_mult);
-}
-
-int64_t char_data::gainBasePLPercent(double amt, bool trans_mult) {
-    return gainBasePL(get(CharVital::powerlevel) * amt, trans_mult);
-}
-
-int64_t char_data::gainBaseKIPercent(double amt, bool trans_mult) {
-    return gainBaseKI(get(CharVital::ki) * amt, trans_mult);
-}
-
-int64_t char_data::gainBaseSTPercent(double amt, bool trans_mult) {
-    return gainBaseST(get(CharVital::stamina) * amt, trans_mult);
-}
-
-int64_t char_data::loseBasePLPercent(double amt, bool trans_mult) {
-    return loseBasePL(get(CharVital::powerlevel) * amt, trans_mult);
-}
-
-int64_t char_data::loseBaseKIPercent(double amt, bool trans_mult) {
-    return loseBaseKI(get(CharVital::ki) * amt, trans_mult);
-}
-
-int64_t char_data::loseBaseSTPercent(double amt, bool trans_mult) {
-    return loseBaseST(get(CharVital::stamina) * amt, trans_mult);
-}
-
-void char_data::gainBaseAllPercent(double amt, bool trans_mult) {
-    gainBasePLPercent(amt, trans_mult);
-    gainBaseKIPercent(amt, trans_mult);
-    gainBaseSTPercent(amt, trans_mult);
-}
-
-void char_data::loseBaseAllPercent(double amt, bool trans_mult) {
-    loseBasePLPercent(amt, trans_mult);
-    loseBaseKIPercent(amt, trans_mult);
-    loseBaseSTPercent(amt, trans_mult);
-}
-
-
-double char_data::getMaxCarryWeight() {
-    return (getWeight() + 100.0) + (getMaxPL() / 200.0) + (GET_STR(this) * 50) + (IS_BARDOCK(this) ? 10000.0 : 0.0);
-}
-
-double char_data::getEquippedWeight() {
-    double total_weight = 0;
-
-    for (int i = 0; i < NUM_WEARS; i++) {
-        if (GET_EQ(this, i)) {
-            total_weight += GET_OBJ_WEIGHT(GET_EQ(this, i));
-        }
-    }
-    return total_weight;
-}
-
-double char_data::getCarriedWeight() {
-    return getEquippedWeight() + getInventoryWeight() + (carrying ? carrying->getTotalWeight() : 0);
-}
-
-double char_data::getAvailableCarryWeight() {
-    return getMaxCarryWeight() - getCarriedWeight();
-}
-
-double char_data::speednar() {
-    auto ratio = (double) getCarriedWeight() / (double) getMaxCarryWeight();
-    if (ratio >= .05)
-        return std::max(0.01, std::min(1.0, 1.0 - ratio));
-    return 1.0;
-}
-
 int64_t char_data::getPL() {
     int64_t vitalCalc = (getMaxPL() + getMaxKI()) / 4;
-    int attrCalc = (get(CharAttribute::agility) + get(CharAttribute::constitution, false) + get(CharAttribute::intelligence, false) + get(CharAttribute::speed, false)
-    + get(CharAttribute::strength, false) + get(CharAttribute::wisdom, false)) / 50;
+    int attrCalc = (getEffectiveStat("agility") + getEffectiveStat("constitution") + getEffectiveStat("intelligence") + getEffectiveStat("speed")
+    + getEffectiveStat("strength") + getEffectiveStat("wisdom")) / 50;
 
-    double suppressed = suppression > 0 ? ((double) suppression / 100.0) : 1;
-    double speed = speednar();
+    auto sup = getBaseStat<int>("suppression");
+
+    double suppressed = sup > 0 ? ((double) sup / 100.0) : 1;
+    double speed = getEffectiveStat("speednar");
 
     double pl = vitalCalc * attrCalc * speed * suppressed;
 
@@ -1180,7 +1078,7 @@ void char_data::login() {
                 inc = 7500;
             }
             inc *= mult;
-            set(CharMoney::bank, inc);
+            setBaseStat("money_bank", inc);
             send_to_char(this, "Interest happened while you were away, %d times.\r\n"
                                        "@cBank Interest@D: @Y%s@n\r\n", mult, add_commas(inc).c_str());
         }
@@ -1204,7 +1102,7 @@ void char_data::login() {
 
 }
 
-double char_data::getAffectModifier(int location, int specific) {
+double char_data::getAffectModifier(uint64_t location, uint64_t specific) {
     double total = 0;
     // Personal modifiers.
     for(auto a = affected; a; a = a->next) {
@@ -1231,21 +1129,6 @@ double char_data::getAffectModifier(int location, int specific) {
     }
 
     return total;
-}
-
-align_t char_data::get(CharAlign type) {
-    if(auto find = aligns.find(type); find != aligns.end()) {
-        return find->second;
-    }
-    return 0;
-}
-
-align_t char_data::set(CharAlign type, align_t val) {
-    return aligns[type] = std::clamp<align_t>(val, -1000, 1000);
-}
-
-align_t char_data::mod(CharAlign type, align_t val) {
-    return set(type, get(type) + val);
 }
 
 int char_data::setSize(int val) {
@@ -1297,64 +1180,22 @@ void char_data::gainGrowth(double gain) {
 
     gain *= timeMod;
     
-
-    if (lifetimeGrowth + gain < days) {
+    auto ltg = getBaseStat("lifetimeGrowth");
+    if (ltg + gain < days) {
         // If you have stored growth, we double the amount gained and reduce overgrowth by that amount
-        if (overGrowth >= gain && lifetimeGrowth + (gain * 2) < days) {
-            overGrowth -= gain;
+        if (getBaseStat("overGrowth") >= gain && ltg + (gain * 2) < days) {
+            modBaseStat("overGrowth", -gain);
             gain *= 2;
         }
-        internalGrowth += gain;
-        lifetimeGrowth += gain;
+        for(const auto &s : {"internalGrowth", "lifetimeGrowth"}) modBaseStat(s, gain);
     } else {
         // Any overflow is stored in overGrowth
-        double cangain = days - lifetimeGrowth;
-        internalGrowth += cangain;
-        lifetimeGrowth += cangain;
+        double cangain = days - ltg;
+        for(const auto &s : {"internalGrowth", "lifetimeGrowth"}) modBaseStat(s, cangain);
 
         cangain = gain - cangain;
-        overGrowth += cangain;
+        modBaseStat("overGrowth", cangain);
     }
-}
-
-
-money_t char_data::get(CharMoney mon) {
-    if(auto find = moneys.find(mon); find != moneys.end()) {
-        return find->second;
-    }
-    return 0;
-}
-
-money_t char_data::set(CharMoney mon, money_t val) {
-    return moneys[mon] = std::min<money_t>(val, 999999999999);
-}
-
-money_t char_data::mod(CharMoney mon, money_t val) {
-    return set(mon, get(mon) + val);
-}
-
-
-attribute_t char_data::get(CharAttribute attr, bool base) {
-    attribute_t val = 0;
-    if(auto stat = attributes.find(attr); stat != attributes.end()) {
-        val = stat->second;
-    }
-    if(!base) {
-        val += getAffectModifier(APPLY_CATTR_MULT,static_cast<int>(attr));
-        val *= (1.0 + getAffectModifier(APPLY_CATTR_MULT, static_cast<int>(attr)));
-        val += getAffectModifier(APPLY_CATTR_POST, static_cast<int>(attr));
-        return std::clamp<attribute_t>(val, 5, 150);
-    }
-    return val;
-
-}
-
-attribute_t char_data::set(CharAttribute attr, attribute_t val) {
-    return attributes[attr] = std::clamp<attribute_t>(val, 0, 80);
-}
-
-attribute_t char_data::mod(CharAttribute attr, attribute_t val) {
-    return set(attr, get(attr) + val);
 }
 
 attribute_train_t char_data::get(CharTrain attr) {
@@ -1388,26 +1229,6 @@ num_t char_data::mod(CharNum stat, num_t val) {
     return set(stat, get(stat) + val);
 }
 
-vital_t char_data::set(CharVital type, vital_t val) {
-    return vitals[type] = std::max<vital_t>(0, val);
-}
-
-vital_t char_data::mod(CharVital type, vital_t val) {
-    return set(type, get(type) + val);
-}
-
-vital_t char_data::get(CharVital type, bool base) {
-    if(auto st = vitals.find(type); st != vitals.end()) {
-        return st->second;
-    }
-    return 0;
-}
-
-double char_data::getRegen(CharVital type) {
-    // TODO: What was this supposed to be?
-    return 0.0;
-}
-
 
 bool char_data::canCarryWeight(weight_t val) {
     double gravity = 1.0;
@@ -1425,7 +1246,7 @@ bool char_data::canCarryWeight(weight_t val) {
     else if(gravity >= 2 && hasGravAcclim(0))
         gravity /= 2;
 
-    return getAvailableCarryWeight() >= (val * gravity);
+    return getEffectiveStat("carry_available") >= (val * gravity);
 }
 
 bool char_data::canCarryWeight(struct obj_data *obj) {
@@ -1433,22 +1254,7 @@ bool char_data::canCarryWeight(struct obj_data *obj) {
 }
 
 bool char_data::canCarryWeight(struct char_data *obj) {
-    return canCarryWeight(obj->getTotalWeight());
-}
-
-weight_t char_data::getCurrentBurden() {
-    auto total = getTotalWeight();
-    if(auto room = getRoom(); room) {
-        total *= room->getEnvironment(ENV_GRAVITY);
-    }
-    return total;
-}
-
-double char_data::getBurdenRatio() {
-    auto total = getCurrentBurden();
-    auto max = getMaxCarryWeight();
-    if(max == 0) return 0;
-    return total / max;
+    return canCarryWeight(obj->getBaseStat("weight_total"));
 }
 
 room_vnum char_data::normalizeLoadRoom(room_vnum in) {
@@ -1524,17 +1330,7 @@ obj_data* char_data::getEquipSlot(int slot) {
 
 
 int char_data::getArmor() {
-    int out = get(CharNum::armor_wishes) * 5000;
-    out += armor;
-    for(auto i = 0; i < NUM_WEARS; i++) {
-        if(auto obj = GET_EQ(this, i); obj)
-            out += obj->getAffectModifier(APPLY_COMBAT_BASE, static_cast<int>(ComStat::armor));
-    }
-
-    out += race::getModifier(this, APPLY_COMBAT_BASE, static_cast<int>(ComStat::armor));
-    out += trans::getModifier(this, APPLY_COMBAT_BASE, static_cast<int>(ComStat::armor));
-
-    return out;
+    return getEffectiveStat<int>("armor");
 }
 
 void char_data::onAttack(atk::Attack& outgoing) {
@@ -1566,35 +1362,12 @@ stat_t char_data::get(CharStat type) {
     return 0;
 }
 
-dim_t char_data::set(CharDim type, dim_t val) {
-    return dims[type] = val;
-}
-
-dim_t char_data::mod(CharDim type, dim_t val) {
-    return set(type, get(type) + val);
-}
-
-dim_t char_data::get(CharDim type, bool base) {
-    dim_t total = 0.0;
-
-    if(auto st = dims.find(type); st != dims.end()) {
-        total = st->second;
-    }
-
-    if(!base) {
-        total += getAffectModifier(APPLY_CDIM_BASE, static_cast<int>(type));
-        total *= (1.0 + getAffectModifier(APPLY_CDIM_MULT, static_cast<int>(type)));
-    }
-
-    return total;
-}
-
 int64_t char_data::getExperience() {
-    return get(CharStat::experience);
+    return getEffectiveStat("experience");
 }
 
 int64_t char_data::setExperience(int64_t value) {
-    return set(CharStat::experience, std::max<stat_t>(0, value));
+    return setBaseStat("experience", value);
 }
 
 // This returns the exact amount that was modified by.
@@ -1645,22 +1418,22 @@ int64_t char_data::modExperience(int64_t value, bool applyBonuses) {
 
                 if (rand_number(1, 5) >= 2) {
                     if (IS_HUMAN(this)) {
-                        this->gainBasePL(diff * 0.8);
+                        this->gainBaseStat("powerlevel", diff * 0.8);
                     } else {
-                        this->gainBasePL(diff);
+                        this->gainBaseStat("powerlevel", diff);
                     }
                     send_to_char(this, "@D[@G+@Y%s @RPL@D]@n ", add_commas(diff).c_str());
                 }
                 if (rand_number(1, 5) >= 2) {
                     if (IS_HALFBREED(this)) {
-                        this->gainBaseST(diff * 0.85);
+                        this->gainBaseStat("stamina", diff * 0.85);
                     } else {
-                        this->gainBaseST(diff);
+                        this->gainBaseStat("stamina", diff);
                     }
                     send_to_char(this, "@D[@G+@Y%s @gSTA@D]@n ", add_commas(diff).c_str());
                 }
                 if (rand_number(1, 5) >= 2) {
-                    this->gainBaseKI(diff);
+                    this->gainBaseStat("ki", diff);
                     send_to_char(this, "@D[@G+@Y%s @CKi@D]@n", add_commas(diff).c_str());
                 }
             }
@@ -1729,21 +1502,28 @@ void char_data::gazeAtMoon() {
 }
 
 
-static const std::map<std::string, CharAttribute> _attr_names = {
-    {"str", CharAttribute::strength},
-    {"wis", CharAttribute::wisdom},
-    {"con", CharAttribute::constitution},
-    {"cha", CharAttribute::speed},
-    {"spd", CharAttribute::speed},
-    {"dex", CharAttribute::agility},
-    {"agi", CharAttribute::agility},
-    {"int", CharAttribute::intelligence}
+static const std::map<std::string, std::string> _attr_names = {
+    {"str", "strength"},
+    {"wis", "wisdom"},
+    {"con", "constitution"},
+    {"cha", "speed"},
+    {"spd", "speed"},
+    {"dex", "agility"},
+    {"agi", "agility"},
+    {"int", "intelligence"},
+
+    {"strength", "strength"},
+    {"wisdom", "wisdom"},
+    {"constitution", "constitution"},
+    {"speed", "speed"},
+    {"agility", "agility"},
+    {"intelligence", "intelligence"}
 };
 
-static const std::map<std::string, CharMoney> _money_names = {
-    {"bank", CharMoney::bank},
-    {"gold", CharMoney::carried},
-    {"zenni", CharMoney::carried}
+static const std::map<std::string, std::string> _money_names = {
+    {"bank", "money_bank"},
+    {"gold", "money_carried"},
+    {"zenni", "money_carried"}
 };
 
 static const std::map<std::string, int> _cond_names = {
@@ -1777,17 +1557,17 @@ std::optional<std::string> char_data::dgCallMember(const std::string& member, co
     if(auto attr = _attr_names.find(lmember); attr != _attr_names.end()) {
         if (!arg.empty()) {
             attribute_t addition = atof(arg.c_str());
-            mod(attr->second, addition);
+            modBaseStat(attr->second, addition);
         }
-        return fmt::format("{}", get(attr->second));
+        return fmt::format("{}", getBaseStat(attr->second));
     }
 
     if(auto mon = _money_names.find(lmember); mon != _money_names.end()) {
         if (!arg.empty()) {
             money_t addition = atoll(arg.c_str());
-            mod(mon->second, addition);
+            modBaseStat(mon->second, addition);
         }
-        return fmt::format("{}", get(mon->second));
+        return fmt::format("{}", (money_t)getBaseStat(mon->second));
     }
 
     if(auto con = _cond_names.find(lmember); con != _cond_names.end()) {

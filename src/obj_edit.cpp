@@ -218,7 +218,7 @@ void pobj_edit_parse(struct descriptor_data *d, char *arg) {
 
                     d->obj_editflag = EDIT_NONE;
                     d->obj_editval = EDIT_NONE;
-                    d->character->mod(CharMoney::carried,  -5000);
+                    d->character->modBaseStat("money_carried",  -5000);
                     obj->item_flags.set(ITEM_RESTRING, true);
                     write_to_output(d, "Purchase complete.");
                     send_to_imm("Restring Eq: %s has bought: %s, which was %s.", GET_NAME(d->character),

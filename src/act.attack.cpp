@@ -613,7 +613,7 @@ ACMD(do_throw) {
             grab = true;
         }
 
-        if ((ch->getCurST()) < ((GET_MAX_HIT(ch) / 100) + tch->getTotalWeight())) {
+        if ((ch->getCurST()) < ((GET_MAX_HIT(ch) / 100) + tch->getBaseStat("weight_total"))) {
             send_to_char(ch, "You do not have enough stamina to do it...\r\n");
             return;
         }
@@ -630,12 +630,12 @@ ACMD(do_throw) {
                 nullptr, tch, TO_NOTVICT);
             hurt(0, 0, ch, tch, nullptr, 0, 0);
             handle_cooldown(ch, 5);
-            ch->decCurST((GET_MAX_HIT(ch) / 200) + tch->getWeight());
+            ch->decCurST((GET_MAX_HIT(ch) / 200) + tch->getEffectiveStat("weight"));
             return;
         } else {
             handle_cooldown(ch, 5);
             improve_skill(ch, SKILL_THROW, 0);
-            damage = ((tch->getWeight() * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) / 100);
+            damage = ((tch->getEffectiveStat("weight") * GET_STR(ch)) * (GET_CHA(ch) / 3)) + (GET_MAX_HIT(ch) / 100);
             damage += gravity * (gravity / 2);
             perc = init_skill(ch, SKILL_THROW);
             perc2 = init_skill(vict, SKILL_DODGE);
@@ -668,7 +668,7 @@ ACMD(do_throw) {
                     act("@WThrown through the air, @C$n@W flies at @c$N@W, but the throw is a miss! @C$n@W recovers $s bearingsa moment later!@n",
                         true, tch, nullptr, vict, TO_NOTVICT);
                 }
-                ch->decCurST(((GET_MAX_HIT(ch) / 100) + tch->getWeight()));
+                ch->decCurST(((GET_MAX_HIT(ch) / 100) + tch->getEffectiveStat("weight")));
                 act("@W--@R$N@W--@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@W--@R$N@W--@n", true, tch, nullptr, vict, TO_CHAR);
                 act("@W--@RYOU@W--@n", true, vict, nullptr, nullptr, TO_CHAR);
@@ -703,7 +703,7 @@ ACMD(do_throw) {
                 act("@W--@RYOU@W--@n", true, tch, nullptr, nullptr, TO_CHAR);
                 hurt(0, 0, ch, tch, nullptr, damage, 0);
             }
-            ch->decCurST(((GET_MAX_HIT(ch) / 200) + tch->getWeight()));
+            ch->decCurST(((GET_MAX_HIT(ch) / 200) + tch->getEffectiveStat("weight")));
             WAIT_STATE(ch, PULSE_3SEC);
         }
     } /* End throwing character. */
@@ -779,7 +779,7 @@ ACMD(do_selfd) {
         dmg += ch->getBasePL() * 0.6;
         dmg += ch->getBaseST();
         ch->decCurHealthPercent(1, 1);
-        GET_SUPPRESS(ch) = 0;
+        ch->setBaseStat("suppression", 0);
         act("@RYou EXPLODE! The explosion concentrates on @r$N@R, engulfing $M in a sphere of deadly energy!@n", true,
             ch, nullptr, tch, TO_CHAR);
         act("@R$n EXPLODES! The explosion concentrates on YOU, engulfing your body in a sphere of deadly energy!@n",
@@ -813,7 +813,7 @@ ACMD(do_selfd) {
         dmg += (ch->getBaseST());
         dmg *= 1.5;
         ch->decCurHealthPercent(1, 1);
-        GET_SUPPRESS(ch) = 0;
+        ch->setBaseStat("suppression", 0);
         act("@RYou EXPLODE! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with you at its center!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@R$n EXPLODES! The explosion expands outward burning up all surroundings for a large distance. The explosion takes on the shape of a large energy dome with $n at its center!@n",

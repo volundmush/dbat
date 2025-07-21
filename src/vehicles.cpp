@@ -616,10 +616,7 @@ static void handle_buoy_launch(struct char_data *ch, struct obj_data *vehicle, c
         return;
     }
 
-    int buoy_num = 0;
-    if (marker == "1") buoy_num = GET_RADAR1(ch);
-    if (marker == "2") buoy_num = GET_RADAR2(ch);
-    if (marker == "3") buoy_num = GET_RADAR3(ch);
+    int buoy_num = ch->getBaseStat(fmt::format("radar{}", marker));
 
     if (buoy_num > 0) {
         send_to_char(ch, "@wYou need to 'deactivate' that marker.\r\n");
@@ -627,21 +624,19 @@ static void handle_buoy_launch(struct char_data *ch, struct obj_data *vehicle, c
         act("@wYou enter a unique code and launch a marker buoy.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
 
-        if (marker == "1") GET_RADAR1(ch) = vehicle->getRoomVnum();
-        if (marker == "2") GET_RADAR2(ch) = vehicle->getRoomVnum();
-        if (marker == "3") GET_RADAR3(ch) = vehicle->getRoomVnum();
+        ch->setBaseStat(fmt::format("radar{}", marker), vehicle->getRoomVnum());
     }
 }
 
 static void handle_buoy_deactivate(struct char_data *ch, const std::string& marker) {
-    int &buoy_num = (marker == "1") ? GET_RADAR1(ch) : (marker == "2") ? GET_RADAR2(ch) : GET_RADAR3(ch);
+    auto buoy = ch->getBaseStat(fmt::format("radar{}", marker));
 
-    if (buoy_num <= 0) {
+    if (buoy <= 0) {
         send_to_char(ch, "@wYou haven't launched that buoy yet.\r\n");
     } else {
         act("@wYou enter buoy's code and command it to deactivate.@n\r\n", false, ch, nullptr, nullptr, TO_CHAR);
         act("@C$n@w manipulates the ship controls.@n\r\n", false, ch, nullptr, nullptr, TO_ROOM);
-        buoy_num = 0;
+        ch->setBaseStat(fmt::format("radar{}", marker), 0);
     }
 }
 

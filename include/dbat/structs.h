@@ -8,84 +8,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 #pragma once
-
-#include <type_traits>
-#include "dbat/defs.h"
-
-// Generic helper to get a flag.
-template<typename FlagEnum>
-requires std::is_enum_v<FlagEnum>
-class FlagHandler {
-    
-private:
-    std::unordered_set<FlagEnum> flags;
-
-public:
-    // Returns true if the flag is set.
-    bool get(FlagEnum flag) const {
-        return flags.find(flag) != flags.end();
-    }
-
-    bool get(int flag) const {
-        return get(static_cast<FlagEnum>(flag));
-    }
-
-    // Sets the flag if value is true, or removes it if false.
-    void set(FlagEnum flag, bool value = true) {
-        if (value)
-            flags.insert(flag);
-        else
-            flags.erase(flag);
-    }
-
-    void set(int flag, bool value = true) {
-        set(static_cast<FlagEnum>(flag), value);
-    }
-
-    // Toggles the flag: if set, removes it and returns false; if not set, inserts it and returns true.
-    bool toggle(FlagEnum flag) {
-        if (get(flag)) {
-            flags.erase(flag);
-            return false;
-        } else {
-            flags.insert(flag);
-            return true;
-        }
-    }
-
-    bool toggle(int flag) {
-        return toggle(static_cast<FlagEnum>(flag));
-    }
-
-    // Clears all flags.
-    void clear() {
-        flags.clear();
-    }
-
-    // Optionally, expose the underlying container (read-only)
-    const std::unordered_set<FlagEnum>& getAll() const {
-        return flags;
-    }
-
-    // bool operator is true if any flags are set.
-    operator bool() const {
-        return !flags.empty();
-    }
-
-    // operator[] with either int or FlagEnum returns bool if flag set...
-    bool operator[](FlagEnum flag) const {
-        return get(flag);
-    }
-
-    bool operator[](int flag) const {
-        return get(static_cast<FlagEnum>(flag));
-    }
-
-    std::size_t count() const 
-    {
-        return flags.size();
-    }
-};
+#include "dbat/templates.h"
 
 // IMPORTANT: Do not use data structures/fields that are not part of the
 // C++ standard library. This allows us to keep things neat and clean for
@@ -121,8 +44,6 @@ struct extra_descr_data {
     char *description;             /* What to see                      */
     struct extra_descr_data *next; /* Next in list                     */
 };
-
-
 
 struct affect_t {
     // DO NOT CHANGE THE ORDER OF THESE FIELDS.
@@ -287,7 +208,7 @@ struct unit_data {
     void activateScripts();
     void deactivateScripts();
 
-    std::unordered_map<std::string, double> base_stats; // Base stats for this unit.
+    
     
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
@@ -309,6 +230,8 @@ struct unit_data {
     struct obj_data* findObjectVnum(obj_vnum objVnum, bool working = true);
     virtual struct obj_data* findObject(const std::function<bool(struct obj_data*)> &func, bool working = true);
     virtual std::unordered_set<struct obj_data*> gatherObjects(const std::function<bool(struct obj_data*)> &func, bool working = true);
+
+    virtual double getAffectModifier(uint64_t location, uint64_t specific);
 
 };
 
@@ -371,7 +294,7 @@ struct obj_data : public thing_data, public picky_data, std::enable_shared_from_
 
     void deactivate();
 
-    double getAffectModifier(uint64_t location, uint64_t specific);
+    double getAffectModifier(uint64_t location, uint64_t specific) override;
 
     bool active{false};
     bool isActive() override;
@@ -718,43 +641,54 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     Race race{Race::spirit};
     std::optional<SubRace> subrace{};
     Sensei sensei{Sensei::commoner};
-    Sex sex{Sex::neutral};
+    Sex sex{Sex::male};
+
+    std::unordered_map<std::string, double> base_stats; // Base stats for this unit.
 
     std::unordered_map<Appearance, std::string> appearances;
     std::string getAppearance(Appearance type, bool withTransform = true);
     const char* getAppearanceStr(Appearance type);
-    std::string setAppearance(Appearance type, std::string val);
 
     std::list<std::pair<int, std::string>> wait_input_queue;
-    Task task = Task::nothing;
+    Task task{Task::nothing};
     void setTask(Task t);
     struct craftTask craftingTask;
     struct deck craftingDeck;
-    double waitTime{0.0};
 
     /* PC / NPC's weight                    */
-    weight_t getWeight(bool base = false);
-    weight_t getTotalWeight();
-    weight_t getCurrentBurden();
-    double getBurdenRatio();
     bool canCarryWeight(struct obj_data *obj);
     bool canCarryWeight(struct char_data *obj);
     bool canCarryWeight(weight_t val);
 
-    double getBaseStat(const std::string& stat);
-    double setBaseStat(const std::string& stat, double val);
-    double modBaseStat(const std::string& stat, double val);
+    template<typename R = double>
+    R getBaseStat(const std::string& stat) {
+        return charStats.getBase<R>(this, stat);
+    }
 
-    double getEffectiveStat(const std::string& stat);
+    template<typename R = double>
+    R setBaseStat(const std::string& stat, double val) {
+        return charStats.setBase<R>(this, stat, val);
+    }
 
-    dim_t getHeight(bool base = false);
-    dim_t setHeight(dim_t val);
-    dim_t modHeight(dim_t val);
+    template<typename R = double>
+    R modBaseStat(const std::string& stat, double val) {
+        return charStats.modBase<R>(this, stat, val);
+    }
 
-    std::unordered_map<CharDim, dim_t> dims{};
-    dim_t get(CharDim stat, bool base = false);
-    dim_t set(CharDim stat, dim_t val);
-    dim_t mod(CharDim stat, dim_t val);
+    template<typename R = double>
+    R gainBaseStat(const std::string& stat, double val) {
+        return charStats.gainBase<R>(this, stat, val);
+    }
+
+    template<typename R = double>
+    R gainBaseStatPercent(const std::string& stat, double percent) {
+        return charStats.gainBasePercent<R>(this, stat, percent);
+    }
+
+    template<typename R = double>
+    R getEffectiveStat(const std::string& stat) {
+        return charStats.getEffective<R>(this, stat);
+    }
 
     int getArmor();
 
@@ -774,26 +708,9 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     void gainGrowth();
     void gainGrowth(double);
 
-    std::unordered_map<CharMoney, money_t> moneys;
-    money_t get(CharMoney type);
-    money_t set(CharMoney type, money_t val);
-    money_t mod(CharMoney type, money_t val);
-
-    std::unordered_map<CharAlign, align_t> aligns;
-    align_t get(CharAlign type);
-    align_t set(CharAlign type, align_t val);
-    align_t mod(CharAlign type, align_t val);
-
-    std::unordered_map<CharVital, vital_t> vitals;
-    vital_t get(CharVital type, bool base = true);
-    vital_t set(CharVital type, vital_t val);
-    vital_t mod(CharVital type, vital_t val);
-    double getRegen(CharVital type);
-
     // Instance-relevant fields below...
     room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
 
-    
     room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
     struct affected_type *affected{};
@@ -864,12 +781,12 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     FlagHandler<MobFlag> mob_flags{};
     FlagHandler<AdminFlag> admin_flags{};    /* Bitvector for admin privs		*/
     FlagHandler<PrefFlag> pref_flags{};    /* preference flags for PC's.		*/
+    FlagHandler<Race> bio_genomes{};
+    FlagHandler<Mutation> mutations{};
 
     std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */
     int16_t saving_throw[3]{};    /* Saving throw				*/
     int16_t apply_saving_throw[3]{};    /* Saving throw bonuses			*/
-
-    int armor{0};        /* Internally stored *10		*/
 
     int64_t getExperience();
     int64_t setExperience(int64_t value);
@@ -880,31 +797,20 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     stat_t set(CharStat type, stat_t val);
     stat_t mod(CharStat type, stat_t val);
 
-    int accuracy{};            /* Base hit accuracy			*/
-    int accuracy_mod{};        /* Any bonus or penalty to the accuracy	*/
-    int damage_mod{};        /* Any bonus or penalty to the damage	*/
-
     Form form{Form::base};        /* Current form of the character		*/
     Form technique{Form::base};        /* Current technique form of the character		*/
     std::unordered_set<Form> permForms;    /* Permanent forms of the character	*/
-    double transBonus{0.0};   // Varies from -0.3 to 0.3
-    double internalGrowth{0.0};
-    double lifetimeGrowth{0.0};
-    double overGrowth{0.0};
+
     void gazeAtMoon();
 
     // Data stored about different forms.
     std::unordered_map<Form, trans_data> transforms;
 
-    int genBonus = 0;
-    int16_t spellfail{};        /* Total spell failure %                 */
-    int16_t armorcheck{};        /* Total armorcheck penalty with proficiency forgiveness */
-    int16_t armorcheckall{};    /* Total armorcheck penalty regardless of proficiency */
-
     /* All below added by Iovan for sure o.o */
     int64_t charge{};
     int64_t chargeto{};
     int64_t barrier{};
+
     char *clan{};
     room_vnum droom{};
     int choice{};
@@ -914,9 +820,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int overf{};
     int spam{};
 
-    room_vnum radar1{};
-    room_vnum radar2{};
-    room_vnum radar3{};
     int ship{};
     room_vnum shipr{};
     time_t lastpl{};
@@ -945,8 +848,7 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     
     std::array<int, 6> gravAcclim;
     int grap{};
-    FlagHandler<Race> bio_genomes{};
-    FlagHandler<Mutation> mutations{};
+    
     int combo{};
     int lastattack{};
     int combhits{};
@@ -987,7 +889,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int gooptime{};
     int blesslvl{};
     
-
     int mobcharge{};
     int preference{};
     int aggtimer{};
@@ -1001,7 +902,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     char *rdisplay{};
 
-    
     int relax_count{};
     int ingestLearned{};
 
@@ -1022,15 +922,9 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     int16_t invis_level{};        /* level of invisibility		*/
     room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
     
-
     room_vnum normalizeLoadRoom(room_vnum in);
 
-    double getAffectModifier(int location, int specific = -1);
-
-    std::unordered_map<CharAttribute, attribute_t> attributes;
-    attribute_t get(CharAttribute attr, bool base = false);
-    attribute_t set(CharAttribute attr, attribute_t val);
-    attribute_t mod(CharAttribute attr, attribute_t val);
+    double getAffectModifier(uint64_t location, uint64_t specific) override;
 
     std::unordered_map<CharTrain, attribute_train_t> trains;
     attribute_train_t get(CharTrain attr);
@@ -1236,38 +1130,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     void restoreLimbs(bool announce = true);
 
-    int64_t gainBasePL(int64_t amt, bool trans_mult = false);
-
-    int64_t gainBaseKI(int64_t amt, bool trans_mult = false);
-
-    int64_t gainBaseST(int64_t amt, bool trans_mult = false);
-
-    void gainBaseAll(int64_t amt, bool Ftrans_mult = false);
-
-    int64_t loseBasePL(int64_t amt, bool trans_mult = false);
-
-    int64_t loseBaseKI(int64_t amt, bool trans_mult = false);
-
-    int64_t loseBaseST(int64_t amt, bool trans_mult = false);
-
-    void loseBaseAll(int64_t amt, bool trans_mult = false);
-
-    int64_t gainBasePLPercent(double amt, bool trans_mult = false);
-
-    int64_t gainBaseKIPercent(double amt, bool trans_mult = false);
-
-    int64_t gainBaseSTPercent(double amt, bool trans_mult = false);
-
-    void gainBaseAllPercent(double amt, bool trans_mult = false);
-
-    int64_t loseBasePLPercent(double amt, bool trans_mult = false);
-
-    int64_t loseBaseKIPercent(double amt, bool trans_mult = false);
-
-    int64_t loseBaseSTPercent(double amt, bool trans_mult = false);
-
-    void loseBaseAllPercent(double amt, bool trans_mult = false);
-
     // status stuff
     void cureStatusKnockedOut(bool announce = true);
 
@@ -1278,16 +1140,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     void setStatusKnockedOut();
 
     // stats refactor stuff
-    weight_t getMaxCarryWeight();
-
-    weight_t getEquippedWeight();
-
-    weight_t getCarriedWeight();
-
-    weight_t getAvailableCarryWeight();
-
-    double speednar();
-
     int64_t getMaxPL();
 
     void apply_kaioken(int times, bool announce);

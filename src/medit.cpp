@@ -230,25 +230,10 @@ void medit_setup_existing(struct descriptor_data *d, int rmob_num) {
  * portability.
  */
 void init_mobile(struct char_data *mob) {
-
-    //GET_HIT(mob) = 0;
-    //GET_MAX_MANA(mob) = 0;
     GET_NDD(mob) = 0;
-    mob->sex = Sex::male;
-    mob->sensei = Sensei::commoner;
 
-    mob->set(CharDim::weight, rand_number(100, 200));
-    mob->setHeight(rand_number(100, 200));
-
-    auto base1 = rand_number(8, 16);
-    auto base2 = rand_number(8, 16);
-    for(auto attr : {CharAttribute::strength, CharAttribute::intelligence, CharAttribute::wisdom}) {
-        mob->set(attr, base1);
-    }
-
-    for(auto attr : {CharAttribute::agility, CharAttribute::constitution, CharAttribute::speed}) {
-        mob->set(attr, base2);
-    }
+    mob->setBaseStat("weight", rand_number(100, 200));
+    mob->setBaseStat("height", rand_number(100, 200));
 
     mob->character_flags.set(CharacterFlag::is_npc, true);
 }
@@ -812,12 +797,12 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_ACCURACY:
-            GET_FISHD(OLC_MOB(d)) = LIMIT(i, 0, 50);
+            OLC_MOB(d)->setBaseStat("fish_distance", LIMIT(i, 0, 50));
             OLC_MOB(d)->mob_flags.set(MOB_AUTOBALANCE, false);
             break;
 
         case MEDIT_DAMAGE:
-            GET_DAMAGE_MOD(OLC_MOB(d)) = LIMIT(i, 0, 50);
+            OLC_MOB(d)->setBaseStat("damage_mod", LIMIT(i, 0, 50));
             OLC_MOB(d)->mob_flags.set(MOB_AUTOBALANCE, false);
             break;
 
@@ -856,7 +841,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_GOLD:
-            OLC_MOB(d)->set(CharMoney::carried, i);
+            OLC_MOB(d)->setBaseStat("money_carried", i);
             break;
 
         case MEDIT_POS:
@@ -877,7 +862,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_ALIGNMENT:
-            OLC_MOB(d)->set(CharAlign::good_evil, LIMIT(i, -1000, 1000));
+            OLC_MOB(d)->setBaseStat("good_evil", LIMIT(i, -1000, 1000));
             break;
 
         case MEDIT_CLASS: {

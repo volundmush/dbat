@@ -1014,19 +1014,14 @@ ACMD(do_mtransform) {
     ch->proto_script = m->proto_script;
     ch->appearances = m->appearances;
     ch->mob_specials = m->mob_specials;
-    ch->attributes = m->attributes;
-    ch->aligns = m->aligns;
+    ch->base_stats = m->base_stats;
     ch->nums = m->nums;
     ch->stats = m->stats;
-    ch->dims = m->dims;
     ch->mob_flags = m->mob_flags;
     ch->bodyparts = m->bodyparts;
     ch->sensei = m->sensei;
     ch->race = m->race;
     ch->affect_flags = m->affect_flags;
-    ch->armor = m->armor;
-    ch->damage_mod = m->damage_mod;
-    ch->vitals = m->vitals;
     ch->zone = m->zone;
     ch->ex_description = m->ex_description;
 

@@ -511,18 +511,18 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
 #define GET_SKIN(ch)    ((ch)->getAppearanceStr(Appearance::skin_color))
 #define GET_EYE(ch)     ((ch)->getAppearanceStr(Appearance::eye_color))
 #define GET_HOME(ch)    ((ch)->hometown)
-#define GET_WEIGHT(ch)  ((ch)->weight)
-#define GET_HEIGHT(ch)  ((ch)->getHeight())
+#define GET_WEIGHT(ch)  ((ch)->getEffectiveStat("weight"))
+#define GET_HEIGHT(ch)  ((ch)->getEffectiveStat("height"))
 #define GET_PC_HEIGHT(ch)    GET_HEIGHT(ch)
 #define GET_PC_WEIGHT(ch)    GET_WEIGHT(ch)
 #define GET_SEX(ch)    ((ch)->sex)
 #define CARRYING(ch)    ((ch)->carrying)
 #define CARRIED_BY(ch)  ((ch)->carried_by)
 #define GET_RP(ch)      ((ch)->getRPP())
-#define GET_SUPPRESS(ch) ((ch)->suppression)
+#define GET_SUPPRESS(ch) ((ch)->getBaseStat<int>("suppression"))
 #define GET_RDISPLAY(ch) ((ch)->rdisplay)
 
-#define GET_STR(ch)     ((ch)->get(CharAttribute::strength))
+
 /*
  * We could define GET_ADD to be ((GET_STR(ch) > 18) ?
  *                                ((GET_STR(ch) - 18) * 10) : 0)
@@ -532,11 +532,12 @@ extern bool OBJ_FLAGGED(struct obj_data *obj, int flag);
  */
 /* The old define: */
 /* #define GET_ADD(ch)     ((ch)->aff_abils.str_add) */
-#define GET_DEX(ch)     ((ch)->get(CharAttribute::agility))
-#define GET_INT(ch)     ((ch)->get(CharAttribute::intelligence))
-#define GET_WIS(ch)     ((ch)->get(CharAttribute::wisdom))
-#define GET_CON(ch)     ((ch)->get(CharAttribute::constitution))
-#define GET_CHA(ch)     ((ch)->get(CharAttribute::speed))
+#define GET_STR(ch)     ((int)(ch)->getEffectiveStat("strength"))
+#define GET_DEX(ch)     ((int)(ch)->getEffectiveStat("agility"))
+#define GET_INT(ch)     ((int)(ch)->getEffectiveStat("intelligence"))
+#define GET_WIS(ch)     ((int)(ch)->getEffectiveStat("wisdom"))
+#define GET_CON(ch)     ((int)(ch)->getEffectiveStat("constitution"))
+#define GET_CHA(ch)     ((int)(ch)->getEffectiveStat("speed"))
 #define GET_MUTBOOST(ch) (IS_MUTANT(ch) ? (((ch)->mutations.get(Mutation::extreme_speed)) ? (GET_SPEEDCALC(ch) + GET_SPEEDBONUS(ch) + GET_SPEEDBOOST(ch)) * 0.3 : 0) : 0)
 extern int GET_SPEEDI(struct char_data *ch);
 #define GET_SPEEDCALC(ch) (IS_GRAP(ch) ? GET_CHA(ch) : (IS_INFERIOR(ch) ? (AFF_FLAGGED(ch, AFF_FLYING) ? (GET_SPEEDVAR(ch) * 1.25) : GET_SPEEDVAR(ch)) : GET_SPEEDVAR(ch)))
@@ -546,7 +547,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define IS_GRAP(ch)     (GRAPPLING(ch) || GRAPPLED(ch))
 #define GET_SPEEDINT(ch) (IS_BIO(ch) ? ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1200) / 1200) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)) : ((GET_CHA(ch) * GET_DEX(ch)) * (GET_MAX_HIT(ch) / 1000) / 1000) + (GET_CHA(ch) * (GET_KAIOKEN(ch) * 100)))
 #define IS_INFERIOR(ch) (IS_KONATSU(ch) || IS_DEMON(ch))
-#define IS_WEIGHTED(ch) ((ch)->speednar() < 1.0)
+#define IS_WEIGHTED(ch) ((ch)->getBaseStat("speednar") < 1.0)
 
 
 #define GET_EXP(ch)      ((ch)->getExperience())
@@ -562,7 +563,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_ALT(ch)       ((ch)->altitude)
 #define GET_CHARGE(ch)    ((ch)->charge)
 #define GET_CHARGETO(ch)  ((ch)->chargeto)
-#define GET_ARMOR(ch)     ((ch)->getArmor())
+#define GET_ARMOR(ch)     ((ch)->getEffectiveStat<int>("armor"))
 #define GET_ARMOR_LAST(ch) ((ch)->armor_last)
 #define GET_HIT(ch)      ((ch)->getCurPL())
 #define GET_MAX_HIT(ch)      ((ch)->getMaxPL())
@@ -588,9 +589,9 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define LASTATK(ch)       ((ch)->lastattack)
 #define COMBHITS(ch)      ((ch)->combhits)
 #define GET_AURA(ch)      ((ch)->getAppearanceStr(Appearance::aura_color))
-#define GET_RADAR1(ch)    ((ch)->radar1)
-#define GET_RADAR2(ch)    ((ch)->radar2)
-#define GET_RADAR3(ch)    ((ch)->radar3)
+#define GET_RADAR1(ch)    ((ch)->getBaseStat<room_vnum>("radar1"))
+#define GET_RADAR2(ch)    ((ch)->getBaseStat<room_vnum>("radar2"))
+#define GET_RADAR3(ch)    ((ch)->getBaseStat<room_vnum>("radar3"))
 #define GET_PING(ch)      ((ch)->ping)
 #define GET_SLOTS(ch)     ((ch)->skill_slots)
 #define GET_TGROWTH(ch)   ((ch)->tail_growth)
@@ -613,7 +614,7 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_BACKSTAB_COOL(ch) ((ch)->backstabcool)
 #define GET_COOLDOWN(ch)  ((ch)->con_cooldown)
 #define GET_BARRIER(ch)   ((ch)->barrier)
-#define GET_GOLD(ch)      ((ch)->get(CharMoney::carried))
+#define GET_GOLD(ch)      ((ch)->getBaseStat<money_t>("money_carried"))
 #define GET_KAIOKEN(ch)   ((ch)->kaioken)
 #define GET_BOOSTS(ch)    ((ch)->boosts)
 #define MAJINIZED(ch)     ((ch)->majinize)
@@ -623,21 +624,21 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_UP(ch)        ((ch)->upgrade)
 #define GET_FORGETING(ch) ((ch)->forgeting)
 #define GET_FORGET_COUNT(ch) ((ch)->forgetcount)
-#define GET_BANK_GOLD(ch) ((ch)->get(CharMoney::bank))
-#define GET_POLE_BONUS(ch) ((ch)->accuracy)
-#define GET_FISHSTATE(ch)  ((ch)->fishstate)
-#define GET_FISHD(ch)     ((ch)->accuracy_mod)
-#define GET_DAMAGE_MOD(ch) ((ch)->damage_mod)
-#define GET_SPELLFAIL(ch) ((ch)->spellfail)
-#define GET_ARMORCHECK(ch) ((ch)->armorcheck)
-#define GET_ARMORCHECKALL(ch) ((ch)->armorcheckall)
+#define GET_BANK_GOLD(ch) ((ch)->getBaseStat<money_t>("money_bank"))
+#define GET_POLE_BONUS(ch) ((ch)->getBaseStat<int>("pole_bonus"))
+#define GET_FISHSTATE(ch)  ((ch)->getBaseStat<int>("fish_state"))
+#define GET_FISHD(ch)     ((ch)->getBaseStat<int>("fish_distance"))
+#define GET_DAMAGE_MOD(ch) ((ch)->getBaseStat<int>("damage_mod"))
+#define GET_SPELLFAIL(ch) ((ch)->getBaseStat<int16_t>("spellfail"))
+#define GET_ARMORCHECK(ch) ((ch)->getBaseStat<int16_t>("armorcheck"))
+#define GET_ARMORCHECKALL(ch) ((ch)->getBaseStat<int16_t>("armorcheckall"))
 #define GET_MOLT_EXP(ch)  ((ch)->moltexp)
 #define GET_MOLT_LEVEL(ch) ((ch)->moltlevel)
 #define GET_SDCOOLDOWN(ch) ((ch)->con_sdcooldown)
 #define GET_INGESTLEARNED(ch) ((ch)->ingestLearned)
 #define GET_POS(ch)        ((ch)->position)
 #define GET_IDNUM(ch)        ((ch)->id)
-#define IS_CARRYING_W(ch)    ((ch)->getCarriedWeight())
+#define IS_CARRYING_W(ch)    ((ch)->getBaseStat("weight_carried"))
 #define IS_CARRYING_N(ch)    ((ch)->getInventoryCount())
 #define FIGHTING(ch)        ((ch)->fighting)
 #define GET_POWERATTACK(ch)    ((ch)->powerattack)
@@ -645,8 +646,8 @@ extern int GET_SPEEDI(struct char_data *ch);
 #define GET_SAVE_BASE(ch, i)    ((ch)->saving_throw[i])
 #define GET_SAVE_MOD(ch, i)    ((ch)->apply_saving_throw[i])
 #define GET_SAVE(ch, i)        (GET_SAVE_BASE(ch, i) + GET_SAVE_MOD(ch, i))
-#define GET_ALIGNMENT(ch)    ((ch)->get(CharAlign::good_evil))
-#define GET_ETHIC_ALIGNMENT(ch)    ((ch)->get(CharAlign::law_chaos))
+#define GET_ALIGNMENT(ch)    ((ch)->getBaseStat<int>("good_evil"))
+#define GET_ETHIC_ALIGNMENT(ch)    ((ch)->getBaseStat<int>("law_chaos"))
 #define SITS(ch)                ((ch)->sits.lock().get())
 #define MINDLINK(ch)            ((ch)->mindlink)
 #define LINKER(ch)              ((ch)->linker)
@@ -715,7 +716,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
           (GET_ADD(ch) <= 99) ? 29 :  30 ) ) )                   \
         ) */
 
-#define CAN_CARRY_W(ch) ((ch)->getMaxCarryWeight())
+#define CAN_CARRY_W(ch) ((ch)->getEffectiveStat("carry_capacity"))
 #define CAN_CARRY_N(ch) (50)
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
 #define CAN_SEE_IN_DARK(ch) \
@@ -735,7 +736,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
 
 /* These three deprecated. */
 extern void WAIT_STATE(struct char_data *ch, double timeToWait);
-#define GET_WAIT_STATE(ch)    ((ch)->waitTime)
+#define GET_WAIT_STATE(ch)    ((ch)->getBaseStat("waitTime"))
 #define CHECK_WAIT(ch)                (GET_WAIT_STATE(ch) > 0)
 #define GET_MOB_WAIT(ch)      GET_WAIT_STATE(ch)
 /* New, preferred macro. */

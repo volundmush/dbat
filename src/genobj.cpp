@@ -290,7 +290,7 @@ weight_t obj_data::getWeight() {
 
 weight_t obj_data::getTotalWeight() {
     auto s = sitting.lock();
-    return getWeight() + getInventoryWeight() + (s ? s->getTotalWeight() : 0);
+    return getWeight() + getInventoryWeight() + (s ? s->getBaseStat("weight_total") : 0);
 }
 
 bool obj_data::isActive() {

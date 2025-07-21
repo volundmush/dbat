@@ -56,7 +56,7 @@ static int perform_leave_obj(struct char_data *ch, struct obj_data *obj, int nee
 static int64_t calcNeedMovementGravity(struct char_data *ch) {
     if(IS_NPC(ch)) return 0.0;
     auto gravity = ch->currentGravity();
-    return (gravity * gravity) * ch->getBurdenRatio();
+    return (gravity * gravity) * ch->getBaseStat("burden_ratio");
 }
 
 /* This handles teleporting players with instant transmission or skills like it. */
@@ -179,7 +179,7 @@ ACMD(do_carry) {
         return;
     }
 
-    if (vict->getTotalWeight() > CAN_CARRY_W(ch)) {
+    if (vict->getBaseStat("weight_total") > CAN_CARRY_W(ch)) {
         act("@WYou try to pick up @C$N@W but have to put them down. They are too heavy for you at the moment.@n",
             true, ch, nullptr, vict, TO_CHAR);
         act("@C$n@W tries to pick up @c$N@W. After struggling for a moment $e has to put $M down.@n", true, ch,
@@ -479,7 +479,7 @@ int do_simple_move(struct char_data *ch, int dir, int need_specials_check) {
     /* move points needed is avg. move loss for src and destination sect type */
     if(!IS_NPC(ch)) {
         auto gravity = r->getEnvironment(ENV_GRAVITY);
-        need_movement = (gravity * gravity) * ch->getBurdenRatio();
+        need_movement = (gravity * gravity) * ch->getBaseStat("burden_ratio");
     }
 
     if (GET_LEVEL(ch) <= 1) {
@@ -974,7 +974,7 @@ ACMD(do_move) {
             GET_LOADROOM(ch) = ch->getRoomVnum();
         }
 
-        auto ratio = ch->getBurdenRatio();
+        auto ratio = ch->getBaseStat("burden_ratio");
         if(ratio >= 1.0) {
             send_to_char(ch, "Your immense burden hinders your progress.\r\n");
             WAIT_STATE(ch, std::min<int>(PULSE_3SEC * ratio, PULSE_5SEC));
@@ -1987,10 +1987,10 @@ static void handle_fall(struct char_data *ch) {
         }
     }
     if (ch->getLocationTileType() == SECT_WATER_NOSWIM && !CARRIED_BY(ch) && !IS_KANASSAN(ch)) {
-        if ((ch->getCurST()) >= (ch->getCarriedWeight())) {
+        if ((ch->getCurST()) >= (ch->getEffectiveStat("weight_carried"))) {
             act("@bYou swim in place.@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b swims in place.@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->decCurST(ch->getCarriedWeight());
+            ch->decCurST(ch->getEffectiveStat("weight_carried"));
             act("@RYou are drowning!@n", true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@b gulps water as $e struggles to stay above the water line.@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
@@ -2011,14 +2011,14 @@ static int check_swim(struct char_data *ch) {
     auto can = false;
 
     if (ch->getWhereFlag(WhereFlag::space)) {
-        auto space_cost = (GET_MAX_MANA(ch) / 1000) + ((ch->getCarriedWeight()) / 2);
+        auto space_cost = (GET_MAX_MANA(ch) / 1000) + ((ch->getEffectiveStat("weight_carried")) / 2);
         can = ch->getCurKI() >= space_cost;
         ch->decCurKI(space_cost);
         if (!can) send_to_char(ch, "You do not have enough ki to fly through space. You are drifting helplessly.\r\n");
         return can;
     }
 
-    auto swim_cost = (ch->getCarriedWeight()) - 1;
+    auto swim_cost = (ch->getEffectiveStat("weight_carried")) - 1;
     can = ch->getCurST() >= swim_cost;
     ch->decCurST(swim_cost);
     if (!can) send_to_char(ch, "You are too tired to swim!\r\n");
