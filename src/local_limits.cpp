@@ -88,10 +88,10 @@ static void barrier_shed(struct char_data *ch) {
         recharge = loss * 0.5;
     }
 
-    GET_BARRIER(ch) -= loss;
+    ch->modBaseStat<int64_t>("barrier", -loss);
 
     if (GET_BARRIER(ch) <= 0) {
-        GET_BARRIER(ch) = 0;
+        ch->setBaseStat<int64_t>("barrier", 0);
         act("@cYour barrier disappears.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@c's barrier disappears.@n", true, ch, nullptr, nullptr, TO_ROOM);
     } else {
@@ -154,7 +154,7 @@ static void healthy_check(struct char_data *ch) {
     }
     if (AFF_FLAGGED(ch, AFF_KNOCKED) && roll >= chance) {
         ch->affect_flags.set(AFF_KNOCKED, false);
-        GET_POS(ch) = POS_SITTING;
+        ch->setBaseStat<int>("position", POS_SITTING);
         change = true;
     }
     if (change == true) {
@@ -346,7 +346,7 @@ static int64_t mana_gain(struct char_data *ch) {
     }
 
     if (GET_FOODR(ch) > 0 && rand_number(1, 2) == 2) {
-        GET_FOODR(ch) -= 1;
+        ch->modBaseStat("food_rejuvenation", -1);
     }
 
     if (!IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HINTS) && rand_number(1, 5) == 5) {
@@ -501,8 +501,8 @@ int64_t hit_gain(struct char_data *ch) {
         gain = gain / 8;
     }
 
-    if (GET_REGEN(ch) > 0) {
-        gain += (gain * 0.01) * GET_REGEN(ch);
+    if (auto reg = GET_REGEN(ch); reg > 0) {
+        gain += (gain * 0.01) * reg;
     }
 
     return (gain);
@@ -627,8 +627,8 @@ static int64_t move_gain(struct char_data *ch) {
     if (cook_element(IN_ROOM(ch)) == 1)
         gain *= 2;
 
-    if (GET_REGEN(ch) > 0) {
-        gain += (gain * 0.01) * GET_REGEN(ch);
+    if (auto reg = GET_REGEN(ch); reg > 0) {
+        gain += (gain * 0.01) * reg;
     }
 
     return (gain);
@@ -645,7 +645,7 @@ static void update_flags(struct char_data *ch) {
             (ch->getCurKI()) >= GET_MAX_MANA(ch)) {
             send_to_char(ch, "You FINALLY wake up.\r\n");
             act("$n wakes up.", true, ch, nullptr, nullptr, TO_ROOM);
-            GET_POS(ch) = POS_SITTING;
+            ch->setBaseStat<int>("position", POS_SITTING);
         }
     }
 
@@ -669,20 +669,19 @@ static void update_flags(struct char_data *ch) {
     }
 
     if ((IS_SAIYAN(ch) || IS_HALFBREED(ch)) && (ch->form == Form::super_saiyan_1) && !PLR_FLAGGED(ch, PLR_FPSSJ)) {
-        GET_ABSORBS(ch) += 1;
+        ch->modBaseStat<int>("absorbs", 1);
         if (GET_ABSORBS(ch) >= 300) {
             send_to_char(ch,
                          "You have mastered the base Super Saiyan transformation and achieved Full Power Super Saiyan! Super Saiyan First can now be maintained effortlessly.\r\n");
             ch->player_flags.set(PLR_FPSSJ, true);
-            GET_ABSORBS(ch) = 0;
+            ch->setBaseStat<int>("absorbs", 0);
         }
     }
 
     if(race::hasTail(ch->race) && !ch->character_flags.get(CharacterFlag::tail) && !PLR_FLAGGED(ch, PLR_NOGROW)) {
-        ch->tail_growth += 1;
-        if(ch->tail_growth >= 10) {
+        if(auto tg = ch->modBaseStat<int>("tail_growth", 1); tg >= 10) {
             ch->gainTail(true);
-            ch->tail_growth = 0;
+            ch->setBaseStat<int>("tail_growth", 0);
         }
     }
 
@@ -757,7 +756,7 @@ void gain_level(struct char_data *ch) {
     send_to_char(ch, "Levelling no longer exists!\r\n");
     /*
     if (GET_LEVEL(ch) < 100 && GET_EXP(ch) >= level_exp(ch, GET_LEVEL(ch) + 1)) {
-        ch->mod(CharNum::Level, 1);
+        ch->modBaseStat<int>("Level", 1);
         advance_level(ch);
         mudlog(BRF, MAX(ADMLVL_IMMORT, GET_INVIS_LEV(ch)), true, "%s advanced level to level %d.",
                GET_NAME(ch), GET_LEVEL(ch));
@@ -1325,7 +1324,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
             continue;
         }
 
-        if (ch->gooptime == 60) {
+        if (ch->getBaseStat<int>("gooptime") == 60) {
             if (IS_BIO(ch)) {
                 act("@GConciousness slowly returns to you. You realize quickly that some of your cells have survived. You take control of your regenerative processes and focus on growing a new body!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -1335,8 +1334,8 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
                 act("@MYou think you notice the chunks of @m$n@M's moving slightly.@n", true, ch, nullptr,
                     nullptr, TO_ROOM);
             }
-            ch->gooptime -= 1;
-        } else if (ch->gooptime == 30) {
+            ch->modBaseStat<int>("gooptime", -1);
+        } else if (ch->getBaseStat<int>("gooptime") == 30) {
             if (IS_BIO(ch)) {
                 act("@GFrom the collection of cells growing a crude form of your body starts to take shape!@n", true,
                     ch, nullptr, nullptr, TO_CHAR);
@@ -1348,8 +1347,8 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
                 act("@MThe various chunks of @m$n@M's body start to fly into the largest chunk! As the chunks collide they begin to form a larger and still growing blob of goo!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
             }
-            ch->gooptime -= 1;
-        } else if (ch->gooptime == 15) {
+            ch->modBaseStat<int>("gooptime", -1);
+        } else if (ch->getBaseStat<int>("gooptime") == 15) {
             if (IS_BIO(ch)) {
                 act("@GYour body has almost reached its previous form! Only a little more regenerating is needed!@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -1361,8 +1360,8 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
                 act("@m$n@M's body has regenerated to half its previous size! Slowly $s limbs ooze out into their proper shape! It won't be long now till $e has fully regenerated!@n",
                     true, ch, nullptr, nullptr, TO_ROOM);
             }
-            ch->gooptime -= 1;
-        } else if (ch->gooptime == 0) {
+            ch->modBaseStat<int>("gooptime", -1);
+        } else if (ch->getBaseStat<int>("gooptime") == 0) {
             if (IS_BIO(ch)) {
                 ch->restoreHealth();
                 act("@GYour body has fully regenerated! You flex your arms and legs outward with a rush of renewed strength!@n",
@@ -1407,7 +1406,7 @@ void goopTimeService(uint64_t heartPulse, double deltaTime) {
             ch->player_flags.set(PLR_GOOP, false);
             characterSubscriptions.unsubscribe("goopTimeService", ch);
         } else {
-            ch->gooptime -= 1;
+            ch->modBaseStat<int>("gooptime", -1);
         }
     }
     
@@ -1597,19 +1596,19 @@ void relax_update(uint64_t heartPulse, double deltaTime) {
     auto ac = characterSubscriptions.all("players");
     for(auto i : filter_raw(ac)) {
         if (i->getRoomFlag(ROOM_HOUSE)) {
-            GET_RELAXCOUNT(i) += 1;
+            i->modBaseStat("relax_count", 1);
         } else if (GET_RELAXCOUNT(i) >= 464) {
-            GET_RELAXCOUNT(i) -= 4;
+            i->modBaseStat("relax_count", -4);
         } else if (GET_RELAXCOUNT(i) >= 232) {
-            GET_RELAXCOUNT(i) -= 3;
+            i->modBaseStat("relax_count", -3);
         } else if (GET_RELAXCOUNT(i) > 0 && rand_number(1, 3) == 3) {
-            GET_RELAXCOUNT(i) -= 2;
+            i->modBaseStat("relax_count", -2);
         } else {
-            GET_RELAXCOUNT(i) -= 1;
+            i->modBaseStat("relax_count", -1);
         }
 
         if (GET_RELAXCOUNT(i) < 0) {
-            GET_RELAXCOUNT(i) = 0;
+            i->setBaseStat("relax_count", 0);
         }
     }
 }
@@ -1641,19 +1640,17 @@ void player_misc_update(uint64_t heartPulse, double deltaTime) {
         else
             (i->timer)++;
 
-        if (GET_SLEEPT(i) > 0 && GET_POS(i) != POS_SLEEPING) {
-            GET_SLEEPT(i) -= 1;
+        auto sleeptime = GET_SLEEPT(i);
+        if (sleeptime > 0 && GET_POS(i) != POS_SLEEPING) {
+            i->modBaseStat("sleeptime", -1);
         }
-        if (GET_SLEEPT(i) < 8 && GET_POS(i) == POS_SLEEPING) {
-            GET_SLEEPT(i) += rand_number(2, 4);
-            if (GET_SLEEPT(i) > 8) {
-                GET_SLEEPT(i) = 8;
-            }
+        if (sleeptime < 8 && GET_POS(i) == POS_SLEEPING) {
+            i->modBaseStat("sleeptime", rand_number(2, 4));
         }
         heal_limb(i);
 
         if (i->getCurKI() >= GET_MAX_MANA(i) * 0.5 && GET_CHARGE(i) < GET_MAX_MANA(i) * 0.1 && GET_PREFERENCE(i) == PREFERENCE_KI && !PLR_FLAGGED(i, PLR_AURALIGHT)) {
-            GET_CHARGE(i) = GET_MAX_MANA(i) * 0.1;
+            i->setBaseStat<int64_t>("charge", GET_MAX_MANA(i) * 0.1);
         }
 
     }
@@ -1662,8 +1659,9 @@ void player_misc_update(uint64_t heartPulse, double deltaTime) {
 void kaioken_update(uint64_t heartPulse, double deltaTime) {
     auto ac = characterSubscriptions.all("players");
     for(auto i : filter_raw(ac)) {
-        int x = (GET_KAIOKEN(i) * 5) + 5;
-        if (GET_KAIOKEN(i) > 0) {
+        auto kaioken = GET_KAIOKEN(i);
+        int x = (kaioken * 5) + 5;
+        if (kaioken > 0) {
             improve_skill(i, SKILL_KAIOKEN, -1);
             if ((GET_SKILL(i, SKILL_KAIOKEN) < rand_number(1, x) || (i->getCurST()) <= GET_MAX_MOVE(i) / 10))
                 i->remove_kaioken(2);
@@ -1730,7 +1728,7 @@ void point_update(uint64_t heartPulse, double deltaTime)
 
                 if (IS_NPC(i))
                 {
-                    i->aggtimer = 0;
+                    i->setBaseStat("aggtimer", 0);
                 }
 
                 if (GET_POS(i) >= POS_STUNNED)

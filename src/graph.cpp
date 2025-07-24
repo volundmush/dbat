@@ -250,7 +250,7 @@ ACMD(do_sradar) {
             send_to_char(ch, "@wYour radar detects @C%s@w to the @G%s@n\r\n", planet, dirs[dir]);
             break;
     }
-    GET_PING(ch) = 5;
+    ch->setBaseStat<int>("ping", 5);
 
 }
 

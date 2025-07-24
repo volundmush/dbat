@@ -104,7 +104,7 @@ void command_interpreter(struct char_data *ch, char *argument) {
         case POS_INCAP:
         case POS_MORTALLYW:
         case POS_STUNNED:
-            GET_POS(ch) = POS_SITTING;
+            ch->setBaseStat<int>("position", POS_SITTING);
             break;
     }
 
@@ -189,7 +189,7 @@ void processCommand(char_data* ch, int cmd, std::string ln) {
 
     sprintf(blah, "%s", complete_cmd_info[cmd].command);
     if (!strcasecmp(blah, "throw"))
-        ch->throws = rand_number(1, 3);
+        ch->setBaseStat<int>("throws", rand_number(1, 3));
 
 
     if (*complete_cmd_info[cmd].command == '\n') {
@@ -1278,7 +1278,7 @@ int perform_dupe_check(struct descriptor_data *d) {
                 if (mult > 3) {
                     mult = 3;
                 }
-                GET_LINTEREST(d->character) = LASTINTEREST;
+                d->character->setBaseStat("last_interest", LASTINTEREST);
                 if (GET_BANK_GOLD(d->character) > 0) {
                     int inc = ((GET_BANK_GOLD(d->character) / 100) * 2);
                     if (inc >= 7500) {
@@ -1321,7 +1321,7 @@ void enter_player_game(struct descriptor_data *d) {
     racial_body_parts(d->character);
 
     if (PLR_FLAGGED(d->character, PLR_INVSTART))
-        GET_INVIS_LEV(d->character) = GET_LEVEL(d->character);
+    d->character->setBaseStat("invis_level", GET_LEVEL(d->character));
 
     /*
        * We have to place the character in a room before equipping them
@@ -1348,18 +1348,18 @@ void enter_player_game(struct descriptor_data *d) {
     /*load_char_pets(d->character);*/
     auto ac = characterSubscriptions.all("active");
     for (auto check : filter_raw(ac)) {
-        if (!check->master && IS_NPC(check) && check->master_id == GET_IDNUM(d->character) &&
+        if (!check->master && IS_NPC(check) && check->getBaseStat<int>("master_id") == GET_IDNUM(d->character) &&
             AFF_FLAGGED(check, AFF_CHARM) && !circle_follow(check, d->character))
             add_follower(check, d->character);
     }
 
-    GET_COMBINE(d->character) = -1;
-    GET_SLEEPT(d->character) = 8;
-    GET_FOODR(d->character) = 2;
+    d->character->setBaseStat("combine", -1);
+    d->character->setBaseStat("sleeptime", 8);
+    d->character->setBaseStat("food_rejuvenation", 2);
     if (AFF_FLAGGED(d->character, AFF_FLYING)) {
-        GET_ALT(d->character) = 1;
+        d->character->setBaseStat<int>("altitude", 1);
     } else {
-        GET_ALT(d->character) = 0;
+        d->character->setBaseStat<int>("altitude", 0);
     }
 
     for(auto f : {AFF_POSITION, AFF_SANCTUARY, AFF_ZANZOKEN}) d->character->affect_flags.set(f, false);
@@ -1374,16 +1374,14 @@ void enter_player_game(struct descriptor_data *d) {
     d->character->sits.reset();
     BLOCKED(d->character) = nullptr;
     BLOCKS(d->character) = nullptr;
-    GET_OVERFLOW(d->character) = false;
-    GET_SPAM(d->character) = 0;
-    GET_RMETER(d->character) = 0;
+    for(const auto &s : {"spam", "rage_meter"}) d->character->setBaseStat(s, 0);
     if (!d->character->affected) {
         d->character->affect_flags.set(AFF_HEALGLOW, false);
     }
     if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
-        GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
+        d->character->setBaseStat<int>("speedboost", GET_SPEEDCALC(d->character) * 0.5);
     } else {
-        GET_SPEEDBOOST(d->character) = 0;
+        d->character->setBaseStat<int>("speedboost", 0);
     }
 
     d->character->player_flags.set(PLR_HEALT, false);
@@ -1431,7 +1429,7 @@ void enter_player_game(struct descriptor_data *d) {
         SET_SKILL(d->character, SKILL_FOCUS, 30);
     }
 
-    COMBO(d->character) = -1;
+    d->character->setBaseStat<int>("combo", -1);
 }
 
 int readUserIndex(char *name) {
@@ -1475,7 +1473,7 @@ void payout(int num) {
                 k->account->modRPP(3);
                 send_to_char(k->character, "@D[@G+ 3 RPP@D] @cA new logon count record has been achieved!@n\r\n");
             }
-            GET_RTIME(k->character) = LASTPAYOUT;
+            k->character->setBaseStat("rewtime", LASTPAYOUT);
         }
     }
 }

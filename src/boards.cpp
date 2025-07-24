@@ -72,17 +72,22 @@ void init_boards() {
 
     // Iterate over all files within path that have integer filenames.
     for(auto &p: std::filesystem::directory_iterator(path)) {
-        if(p.is_regular_file()) {
-            try {
-                board_vnum = std::stoi(p.path().filename().string());
-            } catch(std::invalid_argument &e) {
-                continue;
-            }
+        if (!p.is_regular_file()) {
+            continue; // Skip directories or non-regular files.
+        }
+        auto pa = p.path().filename();
+        if(!is_number(pa.string().c_str())) {
+            continue; // Skip files that are not named with an integer.
+        }
+        try {
+            board_vnum = std::stoi(p.path().filename().string());
+        } catch(std::invalid_argument &e) {
+            continue;
+        }
 
-            if ((tmp_board = load_board(board_vnum))) {
-                tmp_board->next = bboards;
-                bboards = tmp_board;
-            }
+        if ((tmp_board = load_board(board_vnum))) {
+            tmp_board->next = bboards;
+            bboards = tmp_board;
         }
     }
 

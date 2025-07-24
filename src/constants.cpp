@@ -1758,10 +1758,6 @@ std::vector<std::string> getVitalNames() {
         return getEnumNames<CharVital>();
 }
 
-std::vector<std::string> getNumNames() {
-        return getEnumNames<CharNum>();
-}
-
 std::vector<std::string> getStatNames() {
         return getEnumNames<CharStat>();
 }

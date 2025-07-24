@@ -1172,7 +1172,7 @@ namespace trans {
                         }
 
                         if(axion_dice(0) <= chance && GET_BARRIER(ch) <= 0) {
-                            ch->barrier = ch->getCurLF() / 5;
+                            ch->setBaseStat("barrier", ch->getCurLF() / 5);
                             send_to_char(ch, "@MThe mantle of your tainted life flares out, creating a barrier.@n");
                         }
                         else
@@ -2625,7 +2625,7 @@ namespace trans {
         if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
             int64_t barrier = GET_BARRIER(ch);
             float ratio = (float) afterKi / (float) beforeKi;
-            GET_BARRIER(ch) = barrier * ratio;
+            ch->setBaseStat<int64_t>("barrier", barrier * ratio);
 
             send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
         }
@@ -2664,7 +2664,7 @@ namespace trans {
         if (beforeKi > afterKi && GET_BARRIER(ch) > 0) {
             int64_t barrier = GET_BARRIER(ch);
             float ratio = (float) afterKi / (float) beforeKi;
-            GET_BARRIER(ch) = barrier * ratio;
+            ch->setBaseStat<int64_t>("barrier", barrier * ratio);
 
             send_to_char(ch, "Your barrier shimmers as it loses some energy with your transformation.\r\n");
         }

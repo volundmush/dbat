@@ -773,7 +773,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             if ((i = atoi(arg)) <= 0)
                 break;
             else if (i <= MAX_PERSONALITIES)
-                GET_PERSONALITY(OLC_MOB(d)) = i;
+                OLC_MOB(d)->setBaseStat("personality", i);
             medit_disp_personality(d);
             return;
 /*-------------------------------------------------------------------*/
@@ -845,7 +845,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_POS:
-            GET_POS(OLC_MOB(d)) = LIMIT(i, 0, NUM_POSITIONS - 1);
+            OLC_MOB(d)->setBaseStat("position", i);
             break;
 
         case MEDIT_DEFAULT_POS:
@@ -857,7 +857,7 @@ void medit_parse(struct descriptor_data *d, char *arg) {
             break;
 
         case MEDIT_LEVEL:
-            OLC_MOB(d)->set(CharNum::level, i);
+            OLC_MOB(d)->setBaseStat<int>("level", i);
             /* Try to add some baseline defaults based on level choice. */
             break;
 

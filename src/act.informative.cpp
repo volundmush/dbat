@@ -160,7 +160,7 @@ ACMD(do_evolve) {
 
     bonusVal = std::min(bonusVal, ch->getBaseST() / 10);
     ch->gainBaseStat(it->name, bonusVal);
-    GET_MOLT_EXP(ch) -= it->cost;
+    ch->modBaseStat<int64_t>("molt_experience", -it->cost);
     send_to_char(ch,
                     "Your body evolves to make better use of the way it is now, and you feel that your %s has strengthened. @D[@C%s@D: @Y+%s@D]@n\r\n",
                     it->name, it->name, add_commas(bonusVal).c_str());
@@ -2376,9 +2376,9 @@ static void list_one_char(struct char_data *i, struct char_data *ch) {
         send_to_char(ch, " @D(@RIDLE@D)");
     send_to_char(ch, "@n\r\n");
 
-    if (GET_EAVESDROP(i) > 0) {
+    if (auto eave = GET_EAVESDROP(i); eave > 0) {
         char eaves[300];
-        sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[GET_EAVESDIR(i)]);
+        sprintf(eaves, "@w...$e is spying on everything to the @c%s@w.", dirs[eave]);
         act(eaves, true, i, nullptr, ch, TO_VICT);
     }
     if (!IS_NPC(i)) {
@@ -4523,19 +4523,19 @@ ACMD(do_status) {
         if (AFF_FLAGGED(ch, AFF_ETHEREAL))
             send_to_char(ch, "You are ethereal and cannot interact with normal space!\r\n");
 
-        if (GET_REGEN(ch) > 0) {
-            send_to_char(ch, "Something is augmenting your regen rate by %s%d%s!\r\n", GET_REGEN(ch) > 0 ? "+" : "-",
-                         GET_REGEN(ch), "%");
+        if (auto reg = GET_REGEN(ch); reg > 0) {
+            send_to_char(ch, "Something is augmenting your regen rate by %s%d%s!\r\n", reg > 0 ? "+" : "-",
+                         reg, "%");
         }
 
-        if (GET_ASB(ch) > 0) {
+        if (auto asb = GET_ASB(ch); asb > 0) {
             send_to_char(ch, "Something is augmenting your auto-skill training rate by %s%d%s!\r\n",
-                         GET_ASB(ch) > 0 ? "+" : "-", GET_ASB(ch), "%");
+                         asb > 0 ? "+" : "-", asb, "%");
         }
 
-        if (ch->lifebonus > 0) {
+        if (auto lb = ch->getBaseStat<int>("lifebonus"); lb > 0) {
             send_to_char(ch, "Something is augmenting your Life Force Max by %s%d%s!\r\n",
-                         ch->lifebonus > 0 ? "+" : "-", ch->lifebonus, "%");
+                         lb > 0 ? "+" : "-", lb, "%");
         }
 
         if (PLR_FLAGGED(ch, PLR_FISHING))
@@ -5235,7 +5235,7 @@ ACMD(do_gen_ps) {
         case SCMD_NEWS: {
             write_to_output(ch->desc, news);
         }
-            GET_LPLAY(ch) = time(nullptr);
+            ch->setBaseStat("last_played", time(nullptr));
             break;
         case SCMD_INFO: {
             write_to_output(ch->desc, info);

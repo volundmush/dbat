@@ -132,13 +132,13 @@ void copyover_recover_final() {
         auto c = d->character = playFind->second.character;
         c->desc = d;
 
-		GET_LOADROOM(c) = room;
+        c->setBaseStat("load_room", room);
         for(auto f : {PLR_WRITING, PLR_MAILING, PLR_CRYO}) c->player_flags.set(f, false);
 
         write_to_output(d, "@rThe world comes back into focus... has something changed?@n\r\n");
 
         if (AFF_FLAGGED(d->character, AFF_HAYASA)) {
-            GET_SPEEDBOOST(d->character) = GET_SPEEDCALC(d->character) * 0.5;
+            d->character->setBaseStat<int>("speedboost", GET_SPEEDCALC(d->character) * 0.5);
         }
     }
 }
@@ -217,7 +217,7 @@ static void performReboot(int mode) {
         jd["character"] = och->id;
 
         auto r = IN_ROOM(och);
-        auto w = GET_WAS_IN(och);
+        auto w = och->getBaseStat("was_in_room");
         if(r > 1) {
             jd["in_room"] = r;
         } else if(r <= 1 && w > 1) {
@@ -589,8 +589,9 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if (GET_KAIOKEN(d->character) > 0 && GET_ADMLEVEL(d->character) > 0) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", GET_KAIOKEN(d->character));
+            auto kaioken = GET_KAIOKEN(d->character);
+            if (kaioken > 0 && GET_ADMLEVEL(d->character) > 0) {
+                count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", kaioken);
                 flagged = true;
                 if (count >= 0)
                     len += count;
@@ -601,8 +602,8 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if (GET_KAIOKEN(d->character) > 0 && GET_ADMLEVEL(d->character) <= 0) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", GET_KAIOKEN(d->character));
+            if (kaioken > 0 && GET_ADMLEVEL(d->character) <= 0) {
+                count = snprintf(prompt + len, sizeof(prompt) - len, "KAIOKEN X%d - ", kaioken);
                 flagged = true;
                 if (count >= 0)
                     len += count;
@@ -654,7 +655,7 @@ char *make_prompt(struct descriptor_data *d) {
                     len += count;
             }
             if (PRF_FLAGGED(d->character, PRF_FORM) && len < sizeof(prompt)) {
-                Form form = d->character->form;
+                auto form = d->character->form;
                 
                 if(d->character->transforms[form].grade > 1)
                     count = snprintf(prompt + len, sizeof(prompt) - len, "@D[@mForm@y: @W%s - %s@D]@n",
@@ -812,7 +813,7 @@ char *make_prompt(struct descriptor_data *d) {
                     len += count;
             }
             if (GET_CHARGE(d->character) < GET_MAX_MANA(d->character) * .01 && GET_CHARGE(d->character) > 0) {
-                GET_CHARGE(d->character) = 0;
+                d->character->setBaseStat<int64_t>("charge", 0);
             }
             if (GET_CHARGE(d->character) > 0) {
                 int64_t charge = GET_CHARGE(d->character);
@@ -1627,7 +1628,7 @@ int arena_watch(struct char_data *ch) {
 
     if (found == false) {
         ch->pref_flags.set(PRF_ARENAWATCH, false);
-        ARENA_IDNUM(ch) = -1;
+        ch->setBaseStat<room_vnum>("arena_watch", -1);
         return (NOWHERE);
     } else {
         return (room);
@@ -1877,16 +1878,16 @@ char *act(const char *str, int hide_invisible, struct char_data *ch,
                     }
                 }
             }
-            if (GET_EAVESDROP(d->character) > 0) {
+            if (auto eaves = GET_EAVESDROP(d->character); eaves > 0) {
                 int roll = rand_number(1, 101);
                 if (!resskill || (roll_skill(d->character, resskill) >= dcval)) {
-                    if (ch != nullptr && GET_EAVESDROP(d->character) == ch->getRoomVnum() &&
+                    if (ch != nullptr && eaves == ch->getRoomVnum() &&
                         GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                         char buf3[1000];
                         *buf3 = '\0';
                         sprintf(buf3, "-----Eavesdrop-----\r\n%s\r\n-----Eavesdrop-----\r\n", str);
                         perform_act(buf3, ch, obj, vict_obj, d->character);
-                    } else if (obj != nullptr && GET_EAVESDROP(d->character) == obj->getRoomVnum() &&
+                    } else if (obj != nullptr && eaves == obj->getRoomVnum() &&
                                GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                         char buf3[1000];
                         *buf3 = '\0';

@@ -298,7 +298,7 @@ static void phase_powerup(struct char_data *ch, int type, int phase) {
     }
     // Deprecated: This code will remove any lingering AFF_STARPHASE from pre-3.0.
     null_affect(ch, AFF_STARPHASE);
-    GET_PHASE(ch) = phase;
+    ch->setBaseStat<int>("starphase", phase);
 }
 
 static void advanceGrowth() {

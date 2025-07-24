@@ -119,7 +119,7 @@ ACMD(do_languages) {
         else {
             for (i = MIN_LANGUAGES; i <= MAX_LANGUAGES; i++) {
                 if ((search_block(arg, languages, false) == i - MIN_LANGUAGES) && GET_SKILL(ch, i)) {
-                    SPEAKING(ch) = i;
+                    ch->setBaseStat("speaking", i);
                     send_to_char(ch, "You now speak %s.\r\n", languages[i - MIN_LANGUAGES]);
                     found = true;
                     break;
@@ -324,7 +324,7 @@ ACMD(do_say) {
                                 send_to_room(real_room(DRAGONR),
                                              "@wShenron says, '@CYour wish has been granted, %s is now tougher!%s@w'@n\r\n",
                                              GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
-                                wch->mod(CharNum::armor_wishes, 1);
+                                wch->modBaseStat<int>("armor_wishes", 1);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a tough wish on %s.", GET_NAME(ch),
@@ -411,7 +411,7 @@ ACMD(do_say) {
                                 int roll = rand_number(1, 3);
                                 send_to_char(wch, "@GYou suddenly feel like you could learn %d more skills!@n\r\n",
                                              roll);
-                                GET_SLOTS(wch) += roll;
+                                wch->modBaseStat<int>("skill_slots", roll);
                                 granted = true;
                                 SELFISHMETER += 1;
                                 mudlog(NRM, ADMLVL_GOD, true, "Shenron: %s has made a skill wish on %s.", GET_NAME(ch),
@@ -491,7 +491,7 @@ ACMD(do_say) {
                                                  "@wShenron says, '@CYour wish has been granted, %s has returned to life!%s@w'@n\r\n",
                                                  GET_NAME(wch), WISH[0] ? "" : " Now make your second wish.");
                                     if (real_room(GET_DROOM(wch)) == NOWHERE) {
-                                        GET_DROOM(wch) = 300;
+                                        wch->setBaseStat("death_room", 300);
                                     }
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
                                         char_from_room(wch);
@@ -528,7 +528,7 @@ ACMD(do_say) {
                                                  GET_NAME(wch), GET_NAME(wch2),
                                                  WISH[0] ? "" : " Now make your second wish.");
                                     if (real_room(GET_DROOM(wch)) == NOWHERE) {
-                                        GET_DROOM(wch) = 300;
+                                        wch->setBaseStat("death_room", 300);
                                     }
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
                                         char_from_room(wch);
@@ -539,7 +539,7 @@ ACMD(do_say) {
                                         for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->affect_flags.set(f, false);
                                     }
                                     if (real_room(GET_DROOM(wch2)) == NOWHERE) {
-                                        GET_DROOM(wch2) = 300;
+                                        wch2->setBaseStat("death_room", 300);
                                     }
                                     if (real_room(GET_DROOM(wch2)) != NOWHERE) {
                                         char_from_room(wch2);
@@ -578,7 +578,7 @@ ACMD(do_say) {
                                                  GET_NAME(wch), GET_NAME(wch2), GET_NAME(wch3),
                                                  WISH[0] ? "" : " Now make your second wish.");
                                     if (real_room(GET_DROOM(wch)) == NOWHERE) {
-                                        GET_DROOM(wch) = 300;
+                                        wch->setBaseStat("death_room", 300);
                                     }
                                     if (real_room(GET_DROOM(wch)) != NOWHERE) {
                                         char_from_room(wch);
@@ -589,7 +589,7 @@ ACMD(do_say) {
                                         for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch->affect_flags.set(f, false);
                                     }
                                     if (real_room(GET_DROOM(wch2)) == NOWHERE) {
-                                        GET_DROOM(wch2) = 300;
+                                        wch2->setBaseStat("death_room", 300);
                                     }
                                     if (real_room(GET_DROOM(wch2)) != NOWHERE) {
                                         char_from_room(wch2);
@@ -600,7 +600,7 @@ ACMD(do_say) {
                                         for(auto f : {AFF_SPIRIT, AFF_ETHEREAL}) wch2->affect_flags.set(f, false);
                                     }
                                     if (real_room(GET_DROOM(wch3)) == NOWHERE) {
-                                        GET_DROOM(wch3) = 300;
+                                        wch3->setBaseStat("death_room", 300);
                                     }
                                     if (real_room(GET_DROOM(wch3)) != NOWHERE) {
                                         char_from_room(wch3);
@@ -831,7 +831,7 @@ static void perform_tell(struct char_data *ch, struct char_data *vict, char *arg
     }
 
     if (!IS_NPC(vict) && !IS_NPC(ch))
-        GET_LAST_TELL(vict) = GET_IDNUM(ch);
+        vict->setBaseStat("last_tell", GET_IDNUM(ch));
 }
 
 static int is_tell_ok(struct char_data *ch, struct char_data *vict) {
@@ -1527,9 +1527,9 @@ ACMD(do_gen_comm) {
         send_to_all("@rSPAMMING@D: @C%s@w has been frozen for spamming, let that be a lesson to 'em.@n\r\n",
                     GET_NAME(ch));
         ch->player_flags.set(PLR_FROZEN, true);
-        GET_FREEZE_LEV(ch) = 1;
+        ch->setBaseStat("freeze_level", 1);
     } else if (GET_SPAM(ch) < 3) {
-        GET_SPAM(ch) += 1;
+        ch->modBaseStat("spam", 1);
     }
 }
 

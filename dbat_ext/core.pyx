@@ -458,8 +458,6 @@ def get_names(category: str) -> list[str]:
         names = db.getMoneyNames()
     elif category == "vitals":
         names = db.getVitalNames()
-    elif category == "nums":
-        names = db.getNumNames()
     elif category == "stats":
         names = db.getStatNames()
     elif category == "dims":

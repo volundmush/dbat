@@ -243,10 +243,6 @@ void affect_total(struct char_data *ch) {
         affect_modify(ch, af->location, af->modifier, af->specific, af->bitvector, false);
 
 
-    GET_SAVE_MOD(ch, SAVING_FORTITUDE) = HAS_FEAT(ch, FEAT_GREAT_FORTITUDE) * 3;
-    GET_SAVE_MOD(ch, SAVING_REFLEX) = HAS_FEAT(ch, FEAT_LIGHTNING_REFLEXES) * 3;
-    GET_SAVE_MOD(ch, SAVING_WILL) = HAS_FEAT(ch, FEAT_IRON_WILL) * 3;
-
     for (i = 0; i < NUM_WEARS; i++) {
         if (GET_EQ(ch, i)) {
             if (GET_OBJ_TYPE(GET_EQ(ch, i)) == ITEM_ARMOR) {
@@ -448,7 +444,7 @@ void char_to_room(struct char_data *ch, struct room_data* room) {
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
             ch->pref_flags.set(PRF_ARENAWATCH, false);
-            ARENA_IDNUM(ch) = -1;
+            ch->setBaseStat<room_vnum>("arena_watch", -1);
         }
     }
 
@@ -936,7 +932,7 @@ void extract_char_final(struct char_data *ch) {
     if(!IS_NPC(ch)) {
         // PCs have a very complicated set of places they're not allowed to log off from.
         // If they do, somehow, then this function will ensure they show up somewhere sane.
-        ch->load_room = ch->normalizeLoadRoom(IN_ROOM(ch));
+        ch->setBaseStat("load_room", ch->normalizeLoadRoom(IN_ROOM(ch)));
     }
 
     /*
@@ -982,18 +978,18 @@ void extract_char_final(struct char_data *ch) {
     if (GRAPPLING(ch)) {
         act("@WYou stop grappling with @C$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
         act("@C$n@W stops grappling with @c$N@W!@n", true, ch, nullptr, GRAPPLING(ch), TO_ROOM);
-        GRAPTYPE(GRAPPLING(ch)) = -1;
+        GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
         GRAPPLED(GRAPPLING(ch)) = nullptr;
         GRAPPLING(ch) = nullptr;
-        GRAPTYPE(ch) = -1;
+        ch->setBaseStat<int>("grapple_type", -1);
     }
     if (GRAPPLED(ch)) {
         act("@WYou stop being grappled with by @C$N@W!@n", true, ch, nullptr, GRAPPLED(ch), TO_CHAR);
         act("@C$n@W stops being grappled with by @c$N@W!@n", true, ch, nullptr, GRAPPLED(ch), TO_ROOM);
-        GRAPTYPE(GRAPPLED(ch)) = -1;
+        GRAPPLED(ch)->setBaseStat<int>("grapple_type", -1);
         GRAPPLING(GRAPPLED(ch)) = nullptr;
         GRAPPLED(ch) = nullptr;
-        GRAPTYPE(ch) = -1;
+        ch->setBaseStat<int>("grapple_type", -1);
     }
 
     if (CARRYING(ch)) {

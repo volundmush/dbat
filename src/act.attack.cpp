@@ -112,7 +112,7 @@ ACMD(do_combine) {
                                          "@Y%s@C is no longer prepared to combine an attack with the group!@n\r\n",
                                          get_i_name(f->follower, ch));
                     }
-                    GET_COMBINE(ch) = -1;
+                    ch->setBaseStat("combine", -1);
                     return;
                 }
             } else if (!strcasecmp(arg, "stop") && !ch->master) {
@@ -161,7 +161,7 @@ ACMD(do_combine) {
                     send_to_char(ch, "No targeting yourself...\r\n");
                     return;
                 }
-                GET_COMBINE(ch) = temp;
+                ch->setBaseStat("combine", temp);
                 for (f = ch->followers; f; f = f->next) {
                     if (!AFF_FLAGGED(f->follower, AFF_GROUP)) {
                         continue;
@@ -191,7 +191,7 @@ ACMD(do_combine) {
                                          "@BCOMBINE@c: @Y%s@C has prepared to combine a @c'@G%s@c'@C with the next group attack!@n\r\n",
                                          get_i_name(f->follower, ch), attack_names[temp]);
                     }
-                    GET_COMBINE(ch) = temp;
+                    ch->setBaseStat("combine", temp);
                 } else {
                     send_to_char(ch, "You do not have the minimum 5%s ki charged.\r\n", "%");
                     return;
@@ -293,8 +293,8 @@ ACMD(do_throw) {
 
     /* We are throwing an object. */
     if (obj) {
-        if (ch->throws == -1) {
-            ch->throws = 0;
+        if (ch->getBaseStat<int>("throws") == -1) {
+            ch->setBaseStat<int>("throws", 0);
             return;
         }
 
@@ -423,8 +423,8 @@ ACMD(do_throw) {
             }
 
             if (!tech_handle_zanzoken(ch, vict, "$p")) {
-                COMBO(ch) = -1;
-                COMBHITS(ch) = 0;
+                ch->setBaseStat<int>("combo", -1);
+                ch->setBaseStat<int>("combo_hits", 0);
                 int stcost = ((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj));
                 vict->affect_flags.set(AFF_ZANZOKEN, false);
                 pcost(ch, 0, stcost / 2);
@@ -456,7 +456,7 @@ ACMD(do_throw) {
                 if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
                     MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, -odam / 2);
                 }
-                LASTATK(ch) = -50;
+                ch->setBaseStat<int>("last_attack", -50);
                 hurt(0, 0, ch, vict, nullptr, 0, 0);
                 obj_from_char(obj);
                 obj_to_room(obj, IN_ROOM(vict));
@@ -464,15 +464,15 @@ ACMD(do_throw) {
                 if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
                     perc += 20;
                 if (perc + GET_CHA(ch) >= chance + penalty && multithrow == true && GET_HIT(vict) > 1 &&
-                    ch->throws > 1) {
+                    ch->getBaseStat<int>("throws") > 1) {
                     do_throw(ch, argument, 0, 0);
-                    ch->throws -= 1;
+                    ch->modBaseStat<int>("throws", -1);
                 } else if (perc + GET_CHA(ch) >= chance + penalty && multithrow == true && GET_HIT(vict) > 1 &&
-                           ch->throws == 1) {
+                           ch->getBaseStat<int>("throws") == 1) {
                     do_throw(ch, argument, 0, 0);
-                    ch->throws = -1;
+                    ch->setBaseStat<int>("throws", -1);
                 } else {
-                    ch->throws = 0;
+                    ch->setBaseStat<int>("throws", 0);
                 }
                 WAIT_STATE(ch, PULSE_3SEC);
                 return;
@@ -530,7 +530,7 @@ ACMD(do_throw) {
             if (!OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
                 MOD_OBJ_VAL(obj, VAL_ALL_HEALTH, -odam);
             }
-            LASTATK(ch) = -50;
+            ch->setBaseStat<int>("last_attack", -50);
             if ((GET_OBJ_VAL(obj, VAL_ALL_HEALTH) - odam) <= 0 && !OBJ_FLAGGED(obj, ITEM_UNBREAKABLE)) {
                 act("You smile as $p breaks on $N's@n face!", true, ch, obj, vict, TO_CHAR);
                 act("$n@n smiles as $p breaks on $N's@n face!", true, ch, obj, vict, TO_NOTVICT);
@@ -582,15 +582,15 @@ ACMD(do_throw) {
             ch->decCurST(((GET_MAX_HIT(ch) / 200) + GET_OBJ_WEIGHT(obj)));
             if (!GET_EQ(ch, WEAR_WIELD1) && !GET_EQ(ch, WEAR_WIELD2))
                 perc += 12;
-            if (perc + GET_CHA(ch) >= chance + penalty && multithrow == true && GET_HIT(vict) > 1 && ch->throws > 1) {
+            if (perc + GET_CHA(ch) >= chance + penalty && multithrow == true && GET_HIT(vict) > 1 && ch->getBaseStat<int>("throws") > 1) {
                 do_throw(ch, argument, 0, 0);
-                ch->throws -= 1;
+                ch->modBaseStat<int>("throws", -1);
             } else if (perc + GET_CHA(ch) >= chance + penalty && multithrow == true && GET_HIT(vict) > 1 &&
-                       ch->throws == 1) {
+                       ch->getBaseStat<int>("throws") == 1) {
                 do_throw(ch, argument, 0, 0);
-                ch->throws = -1;
+                ch->setBaseStat<int>("throws", -1);
             } else {
-                ch->throws = 0;
+                ch->setBaseStat<int>("throws", 0);
             }
             WAIT_STATE(ch, PULSE_3SEC);
             return;
@@ -775,7 +775,7 @@ ACMD(do_selfd) {
     } else if (GRAPPLING(ch)) {
         tch = GRAPPLING(ch);
         dmg += GET_CHARGE(ch);
-        GET_CHARGE(ch) = 0;
+        ch->setBaseStat<int64_t>("charge", 0);
         dmg += ch->getBasePL() * 0.6;
         dmg += ch->getBaseST();
         ch->decCurHealthPercent(1, 1);
@@ -790,12 +790,12 @@ ACMD(do_selfd) {
         ch->player_flags.set(PLR_SELFD, false);
         ch->player_flags.set(PLR_SELFD2, false);
         if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
-            GET_SDCOOLDOWN(ch) = 600;
+            ch->setBaseStat("selfdestruct_cooldown", 600);
         }
         if ((IS_MAJIN(ch) || IS_BIO(ch)) && ch->getCurVitalDam(CharVital::lifeforce) < 0.5) {
             ch->modCurVitalDam(CharVital::lifeforce, -2.0);
             ch->player_flags.set(PLR_GOOP, true);
-            ch->gooptime = 70;
+            ch->setBaseStat<int>("gooptime", 70);
         } else {
             die(ch, nullptr);
         }
@@ -808,7 +808,7 @@ ACMD(do_selfd) {
         return;
     } else {
         dmg += GET_CHARGE(ch);
-        GET_CHARGE(ch) = 0;
+        ch->setBaseStat<int64_t>("charge", 0);
         dmg += (ch->getBasePL()) * 0.6;
         dmg += (ch->getBaseST());
         dmg *= 1.5;
@@ -836,7 +836,7 @@ ACMD(do_selfd) {
             }
         }
         if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
-            GET_SDCOOLDOWN(ch) = 600;
+            ch->setBaseStat("selfdestruct_cooldown", 600);
         }
         die(ch, nullptr);
         ch->player_flags.set(PLR_SELFD, false);

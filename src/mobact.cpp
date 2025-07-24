@@ -222,10 +222,10 @@ void mobile_activity(uint64_t heartPulse, double deltaTime) {
                         continue;
                     else if (AFF_FLAGGED(vict, AFF_SNEAK) && GET_SKILL(vict, SKILL_MOVE_SILENTLY) > spot_roll)
                         continue;
-                    else if (ch->aggtimer < 8)
-                        ch->aggtimer += 1;
+                    else if (ch->getBaseStat<int>("aggtimer") < 8)
+                        ch->modBaseStat("aggtimer", 1);
                     else {
-                        ch->aggtimer = 0;
+                        ch->setBaseStat("aggtimer", 0);
                         char tar[MAX_INPUT_LENGTH];
 
                         sprintf(tar, "%s", GET_NAME(vict));

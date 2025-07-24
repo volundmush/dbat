@@ -1287,7 +1287,7 @@ namespace atk {
                     victim->setStatusKnockedOut();
                 } else if ((GET_POS(victim) == POS_STANDING || GET_POS(victim) == POS_FIGHTING) &&
                                !AFF_FLAGGED(victim, AFF_KNOCKED)) {
-                    GET_POS(victim) = POS_SITTING;
+                    victim->setBaseStat<int>("position", POS_SITTING);
                 }
                 victim->getRoom()->modDamage(5);
                 break;
@@ -2023,7 +2023,7 @@ namespace atk {
                 TO_VICT);
             act("@C$n@C's skillful shogekiha dissipated some of @c$N's@C charged ki!", true, user, nullptr, victim,
                 TO_NOTVICT);
-            GET_CHARGE(victim) -= GET_CHARGE(victim) * 0.25;
+            victim->modBaseStat<int64_t>("charge", -(GET_CHARGE(victim) * 0.25));
         }
     }
 
@@ -2069,7 +2069,7 @@ namespace atk {
             extracted = true;
         } else if (KICHARGE(obj) > 0 && GET_CHARGE(user) < KICHARGE(obj)) {
             KICHARGE(obj) -= GET_CHARGE(user);
-            GET_CHARGE(user) = 0;
+            user->setBaseStat<int64_t>("charge", 0);
             calcDamage = KICHARGE(obj);
             hurt(0, 0, USER(obj), user, nullptr, calcDamage, 0);
             extract_obj(obj);
@@ -2466,9 +2466,9 @@ namespace atk {
     // PsychicBlast
     void PsychicBlast::attackPostprocess() {
         if (GET_CHARGE(victim) > 0 && rand_number(1, 3) == 2) {
-            GET_CHARGE(victim) -= calcDamage / 5;
+            victim->modBaseStat<int64_t>("charge", -(calcDamage / 5));
             if (GET_CHARGE(victim) < 0) {
-                GET_CHARGE(victim) = 0;
+                victim->setBaseStat<int64_t>("charge", 0);
             }
             send_to_char(victim, "@RYou lose some of your charged ki!@n\r\n");
         }
@@ -3140,9 +3140,9 @@ namespace atk {
     // Hellflash
     void Hellflash::attackPreprocess() {
         if (GET_BARRIER(victim) > 0) {
-            GET_BARRIER(victim) -= calcDamage;
+            victim->modBaseStat<int64_t>("barrier", -calcDamage);
             if (GET_BARRIER(victim) <= 0) {
-                GET_BARRIER(victim) = 1;
+                victim->setBaseStat<int64_t>("barrier", 1);
             }
         }
     }
@@ -3578,14 +3578,14 @@ namespace atk {
         reduction = GET_HIT(victim);
         if (AFF_FLAGGED(user, AFF_SANCTUARY)) {
             if (initSkill >= 100) {
-                GET_BARRIER(user) += calcDamage * 0.1;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.1);
             } else if (initSkill >= 60) {
-                GET_BARRIER(user) += calcDamage * 0.05;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.05);
             } else if (initSkill >= 40) {
-                GET_BARRIER(user) += calcDamage * 0.02;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.02);
             }
             if (GET_BARRIER(user) > GET_MAX_MANA(user)) {
-                GET_BARRIER(user) = GET_MAX_MANA(user);
+                user->setBaseStat<int64_t>("barrier", GET_MAX_MANA(user));
             }
         }
     }
@@ -3645,14 +3645,14 @@ namespace atk {
     void WaterSpike::attackPreprocess() {
         if (AFF_FLAGGED(user, AFF_SANCTUARY)) {
             if (initSkill >= 100) {
-                GET_BARRIER(user) += calcDamage * 0.1;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.1);
             } else if (initSkill >= 60) {
-                GET_BARRIER(user) += calcDamage * 0.05;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.05);
             } else if (initSkill >= 40) {
-                GET_BARRIER(user) += calcDamage * 0.02;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.02);
             }
             if (GET_BARRIER(user) > GET_MAX_MANA(user)) {
-                GET_BARRIER(user) = GET_MAX_MANA(user);
+                user->setBaseStat<int64_t>("barrier", GET_MAX_MANA(user));
             }
         }
     }
@@ -3727,14 +3727,14 @@ namespace atk {
     void KoteiruBakuha::attackPreprocess() {
         if (AFF_FLAGGED(user, AFF_SANCTUARY)) {
             if (initSkill >= 100) {
-                GET_BARRIER(user) += calcDamage * 0.1;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.1);
             } else if (initSkill >= 60) {
-                GET_BARRIER(user) += calcDamage * 0.05;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.05);
             } else if (initSkill >= 40) {
-                GET_BARRIER(user) += calcDamage * 0.02;
+                user->modBaseStat<int64_t>("barrier", calcDamage * 0.02);
             }
             if (GET_BARRIER(user) > GET_MAX_MANA(user)) {
-                GET_BARRIER(user) = GET_MAX_MANA(user);
+                user->setBaseStat<int64_t>("barrier", GET_MAX_MANA(user));
             }
         }
     }

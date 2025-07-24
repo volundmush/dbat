@@ -22,7 +22,7 @@ static void init_char_stats_attributes() {
 
     for (const auto& [name, specific] : attributes) {
         auto &stat = charStats.addStat(name);
-        stat.setBaseValue(15.0)
+        stat.setInitFunc(15.0)
             .setMinBaseValue(1.0)
             .setMaxBaseValue(80.0)
             .setMinEffectiveValue(1.0)
@@ -38,7 +38,7 @@ static void init_char_stats_attributes() {
 
         auto &train_stat = charStats.addStat(train_name);
         train_stat
-            .setBaseValue(0.0)
+            .setInitFunc(0.0)
             .setMinBaseValue(0.0)
             .setSpecific(specific)
             .addTag("attribute_training")
@@ -57,8 +57,7 @@ static void init_char_stats_physics() {
 
     for (const auto& [name, specific] : physics) {
         auto &stat = charStats.addStat(name);
-        stat.setBaseValue(0.0)
-            .setSpecific(specific)
+        stat.setSpecific(specific)
             .setApplyBase(APPLY_CDIM_BASE)
             .setApplyMultiplier(APPLY_CDIM_MULT)
             .setApplyPostMultiplier(APPLY_CDIM_POST)
@@ -80,8 +79,7 @@ static void init_char_stats_money() {
 
     for (const auto& [name, specific] : money_types) {
         auto &stat = charStats.addStat(name);
-        stat.setBaseValue(0.0)
-            .setMinBaseValue(0.0)
+        stat.setMinBaseValue(0.0)
             .setSpecific(specific)
             .addTag("money")
             ;
@@ -100,8 +98,7 @@ static void init_char_stats_advancement() {
 
     for (const auto& [name, specific] : advancement_stats) {
         auto &stat = charStats.addStat(name);
-        stat.setBaseValue(0.0)
-            .setMinBaseValue(0.0)
+        stat.setMinBaseValue(0.0)
             .setSpecific(specific)
             .setApplyBase(APPLY_CSTAT_BASE)
             .setApplyMultiplier(APPLY_CSTAT_MULT)
@@ -115,19 +112,11 @@ static void init_char_stats_advancement() {
 static void init_char_stats_alignment() {
     // alignment...
 
-    static const std::vector<std::tuple<std::string, int>> alignment_stats = {
-        {"good_evil", 1 << 0},
-        {"law_chaos", 1 << 1}
-    };
-
-    for (const auto& [name, specific] : alignment_stats) {
-        auto &stat = charStats.addStat(name);
-        stat.setBaseValue(0.0)
+    for (const auto& s : {"good_evil", "law_chaos"}) {
+        charStats.addStat(s)
+            .setInitFunc(0.0)
             .setMinBaseValue(-1000.0)
             .setMaxBaseValue(1000.0)
-            .setMaxEffectiveValue(1000.0)
-            .setMinEffectiveValue(-1000.0)
-            .setSpecific(specific)
             .addTag("alignment")
             ;
     }
@@ -145,7 +134,7 @@ static void init_char_stats_vitals() {
 
     for (const auto& [name, specific] : vitals) {
         auto &stat = charStats.addStat(name);
-        stat.setBaseValue(800.0)
+        stat.setInitFunc(800.0)
             .setMinBaseValue(0.0)
             //.setMaxBaseValue(100.0)
             .setSpecific(specific)
@@ -161,28 +150,25 @@ static void init_char_stats_derived() {
     // derived stats...
 
     charStats.addStat("carry_capacity")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .setMinBaseValue(100.0)
         .setSpecific(1 << 0)
         .setApplyBase(APPLY_CDER_BASE)
         .setApplyMultiplier(APPLY_CDER_MULT)
         .setApplyPostMultiplier(APPLY_CDER_POST)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
             double out = target->getEffectiveStat("weight") + 100.0;
             out += target->getEffectiveStat("strength") * 50.0;
             out += target->getEffectiveStat("powerlevel") / 200.0;
             return out;
         })
+        .setSetterFunc(nullptr)
         ;
     
     charStats.addStat("weight_inventory")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
             double weight = 0;
             auto objects = target->getObjects();
@@ -191,13 +177,12 @@ static void init_char_stats_derived() {
             }
             return weight;
         })
+        .setSetterFunc(nullptr)
         ;
 
     charStats.addStat("weight_equipped")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
             double total_weight = 0;
 
@@ -208,109 +193,89 @@ static void init_char_stats_derived() {
             }
             return total_weight;
         })
+        .setSetterFunc(nullptr)
         ;
     
     charStats.addStat("weight_carried")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
-            return target->getEffectiveStat("weight_inventory") + target->getEffectiveStat("weight_equipped") + (target->carrying ? target->carrying->getEffectiveStat("weight_total") : 0);
+            return target->getBaseStat("weight_inventory") + target->getBaseStat("weight_equipped") + (target->carrying ? target->carrying->getEffectiveStat("weight_total") : 0);
         })
+        .setSetterFunc(nullptr)
         ;
     
     charStats.addStat("weight_total")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
             return target->getEffectiveStat("weight") + target->getBaseStat("weight_carried");
         })
+        .setSetterFunc(nullptr)
         ;
 
     charStats.addStat("carry_available")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .setSpecific(1 << 3)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
-            return target->getEffectiveStat("carry_capacity") - target->getEffectiveStat("weight_carried");
+            return target->getEffectiveStat("carry_capacity") - target->getBaseStat("weight_carried");
         })
+        .setSetterFunc(nullptr)
         ;
     
     charStats.addStat("speednar")
-        .setSerialize(false)
-        .setBaseValue(1.0)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
-            double ratio = target->getEffectiveStat("weight_carried") / target->getEffectiveStat("carry_capacity");
+            double ratio = target->getBaseStat("weight_carried") / target->getEffectiveStat("carry_capacity");
             if (ratio >= 0.05) {
-                return std::max(0.01, std::min(1.0, 1.0 - ratio));
+                return std::clamp<double>(1.0 - ratio, 0.01, 1.0);
             }
             return 1.0;
         })
+        .setSetterFunc(nullptr)
         ;
+    
     charStats.addStat("burden_current")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
             auto total = target->getBaseStat("weight_total");
             total *= target->getLocationEnvironment(ENV_GRAVITY);
             return total;
         })
+        .setSetterFunc(nullptr)
         ;
     
     charStats.addStat("burden_ratio")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .addTag("derived")
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setGetterFunc([](struct char_data* target, const std::string& stat_name) {
             // Example derived stat calculation
             auto total = target->getBaseStat("burden_current");
             auto max = target->getEffectiveStat("carry_capacity");
             if(max == 0) return 0.0;
             return total / max;
         })
+        .setSetterFunc(nullptr)
         ;
 }
 
 static void init_char_stats_combat() {
     // armor works a little weird because of armor_wishes.
     charStats.addStat("armor_wishes")
-        .setBaseValue(0.0)
-        .setMinBaseValue(0.0)
-        .setMaxBaseValue(100.0)
         .addTag("combat")
-        ;
-    
-    charStats.addStat("armor_innate")
-        .setBaseValue(0.0)
-        .addTag("combat")
-        .setEffectiveFunc([](struct char_data* target, const std::string& stat_name, double base_value) {
-            // Example effective stat calculation
-            double out = target->getBaseStat("armor_wishes") * 5000.0;
-            out += base_value;
-            return out;
-        })
         ;
     
     // The actual thing used in combat calculations.
     charStats.addStat("armor")
-        .setSerialize(false)
-        .setBaseValue(0.0)
         .addTag("combat")
         .setApplyBase(APPLY_COMBAT_BASE)
         .setApplyMultiplier(APPLY_COMBAT_MULT)
         .setSpecific(1 << 2)
-        .setBaseFunc([](struct char_data* target, const std::string& stat_name) {
+        .setPreEffectiveFunc([](struct char_data* target, const std::string& stat_name, double* total) {
             // Example effective stat calculation
-            return target->getEffectiveStat("armor_innate");
+            *total += target->getBaseStat("armor_wishes") * 5000.0;
         })
         ;
         
@@ -319,13 +284,26 @@ static void init_char_stats_combat() {
 static void init_char_stats_misc() {
     for(const auto &s : {"waitTime", "internalGrowth", "lifetimeGrowth", "overGrowth",
     "spellfail", "armorcheck", "armorcheckall", "charge", "chargeto", "barrier", 
-    "radar1", "radar2", "radar3"}) {
+    "radar1", "radar2", "radar3", "level", "wait", "admin_level", "mystic_melody",
+"group_kills", "freeze_level", "invis_level", "wimp_level", "death_type", "altitude",
+"listen_room", "last_interest", "last_played", "boosts", "upgrade_points",
+"majinize", "majinizer", "death_time", "lasthit", "death_count", "rewtime", "starphase",
+"molt_experience", "molt_level", "damage_mod", "pole_bonus", "forgetting_skill", "stupidkiss",
+"personality", "life_percent", "mind_linker", "bless_level", "preference", "lifebonus",
+"auto_skill_bonus", "regen_rate", "relax_count", "ingest_learned", "gauntlet",
+"last_olc_mode", "throws", "gooptime", "mobcharge", "combine"}) {
         charStats.addStat(s)
-        .setBaseValue(0.0)
-        .setMinBaseValue(0.0)
         .addTag("misc")
         ;
     }
+
+    charStats.addStat("absorbs")
+        .setInitFunc([](struct char_data* target, const std::string& stat_name) {
+            if(target->race == Race::bio_android) return 3.0;
+            return 0.0;
+        })
+        .setMinBaseValue(0.0)
+        ;
 
     charStats.addStat("transBonus")
         .setInitFunc([](struct char_data* target, const std::string& stat_name) {
@@ -337,20 +315,91 @@ static void init_char_stats_misc() {
         .addTag("misc")
         ;
     
+    charStats.addStat("speaking")
+        .setInitFunc(SKILL_LANG_COMMON);
+
+    for(const auto& s : {"backstab_cooldown", "concentrate_cooldown", "selfdestruct_cooldown"}) {
+        charStats.addStat(s)
+        .setMinBaseValue(0.0)
+        .setMaxBaseValue(10.0)
+        .addTag("misc")
+        ;
+    }
+    
+
+    charStats.addStat("position")
+        .setInitFunc(8.0)
+        .setMinBaseValue(0.0)
+        .setMaxBaseValue(8.0)
+        ;
+    
+    charStats.addStat("kaioken")
+        .setInitFunc(0.0)
+        .setMinBaseValue(0.0)
+        .setMaxBaseValue(20.0)
+        .addTag("misc")
+        ;
+    
     charStats.addStat("suppression")
-        .setBaseValue(0.0)
         .setMinBaseValue(0.0)
         .setMaxBaseValue(99.0)
         .addTag("misc")
         ;
-
-
-    for(const auto &s : {"fish_state", "fish_distance"}) {
-        charStats.addStat(s)
-        .setSerialize(false)
-        .setBaseValue(0.0)
+    
+    charStats.addStat("sleeptime")
+        .setInitFunc(8.0)
         .setMinBaseValue(0.0)
-        .addTag("fishing")
+        .setMaxBaseValue(8.0)
+    ;
+
+    charStats.addStat("food_rejuvenation")
+        .setInitFunc(0.0)
+        .setMinBaseValue(0.0)
+        .setMaxBaseValue(2.0)
+        ;
+    
+    charStats.addStat("fury")
+        .setInitFunc(0.0)
+        .setMinBaseValue(0.0)
+        .setMaxBaseValue(100.0)
+        ;
+    
+    charStats.addStat("tail_growth")
+        .setInitFunc(0.0)
+        .setMinBaseValue(0.0)
+        .setMaxBaseValue(10.0)
+        .addTag("misc")
+        ;
+    
+    charStats.addStat("skill_slots")
+        .setInitFunc(30.0)
+        ;
+    
+    for(const auto &s : {"was_in_room", "master_id", "hometown", "load_room", "death_room", "listen_direction"}) {
+        charStats.addStat(s)
+        //.setInitFunc(NOWHERE)
+        ;
+    }
+
+    for(const auto &s : {"last_tell", "olc_zone"}) {
+        charStats.addStat(s)
+        .setInitFunc(-1)
+        .setMinBaseValue(-1)
+        .setMaxBaseValue(9999999999)
+        ;
+    }
+    
+    charStats.addStat("aggtimer")
+        .setMinBaseValue(0.0)
+        .setMaxBaseValue(8.0)
+        .setSetterFunc(nullptr) // These are not persistent stats.
+        ;
+
+    for(const auto &s : {"fish_state", "fish_distance", "spam", "combo", "combo_hits",
+    "last_attack", "ping", "speedboost", "arena_watch", "rage_meter"}) {
+        charStats.addStat(s)
+        .addTag("misc")
+        .setSetterFunc(nullptr) // These are not persistent stats.
         ;
     }
     

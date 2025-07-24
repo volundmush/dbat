@@ -85,7 +85,7 @@ enum class Sensei : uint8_t {
     commoner = 0,
     roshi = 1,
     piccolo = 2,
-    krane = 3,
+    crane = 3,
     nail = 4,
     bardock = 5,
     ginyu = 6,
@@ -2480,16 +2480,6 @@ enum class CharVital : uint8_t {
  ki = 1 << 1,
  stamina = 1 << 2,
  lifeforce = 1 << 3
-};
-
-using num_t = int;
-enum class CharNum : uint8_t {
- level = 0,
- wait = 1,
- admin_level = 2,
- mystic_melody = 5,
- group_kills = 6,
- armor_wishes = 7
 };
 
 using stat_t = int64_t;

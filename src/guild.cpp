@@ -117,8 +117,8 @@ void handle_ingest_learn(struct char_data *ch, struct char_data *vict) {
             ((GET_SKILL_BASE(ch, i) <= 0) && GET_SKILL_BASE(vict, i) > 0)) {
             SET_SKILL(ch, i, GET_SKILL_BASE(ch, i) + rand_number(10, 25));
             send_to_char(ch, "@YYou learned @y%s@Y from ingesting your target!@n\r\n", spell_info[i].name);
-            GET_SLOTS(ch) += 1;
-            GET_INGESTLEARNED(ch) = 1;
+            ch->modBaseStat<int>("skill_slots", 1);
+            ch->setBaseStat<int>("ingest_learned", 1);
 
         }
     }
@@ -759,17 +759,17 @@ void handle_forget(struct char_data *keeper, int guild_nr, struct char_data *ch,
         send_to_char(ch, "@MYou can not forget a skill you don't know!@n\r\n");
     } else if (GET_FORGETING(ch) == skill_num) {
         send_to_char(ch, "@MYou stop forgetting %s@n\r\n", spell_info[skill_num].name);
-        GET_FORGET_COUNT(ch) = 0;
-        GET_FORGETING(ch) = 0;
+        ch->setBaseStat("forget_count", 0);
+        ch->setBaseStat<int>("forgetting_skill", 0);
     } else if (GET_FORGETING(ch) != 0) {
         send_to_char(ch, "@MYou stop forgetting %s, and start trying to forget %s.@n\r\n",
                      spell_info[GET_FORGETING(ch)].name, spell_info[skill_num].name);
-        GET_FORGET_COUNT(ch) = 0;
-        GET_FORGETING(ch) = skill_num;
+        ch->setBaseStat("forget_count", 0);
+        ch->setBaseStat<int>("forgetting_skill", skill_num);
     } else {
         send_to_char(ch, "@MYou start trying to forget %s.@n\r\n", spell_info[skill_num].name);
-        GET_FORGET_COUNT(ch) = 0;
-        GET_FORGETING(ch) = skill_num;
+        ch->setBaseStat("forget_count", 0);
+        ch->setBaseStat<int>("forgetting_skill", skill_num);
     }
 
 }
@@ -952,13 +952,13 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         SET_SKILL(ch, skill_num, GET_SKILL_BASE(ch, skill_num) + rand_number(10, 25));
                         ch->modPractices(-pointcost);
                         if (GET_FORGETING(ch) != 0 && GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
-                            GET_FORGET_COUNT(ch) += 1;
+                            ch->modBaseStat("forget_count", 1);
                             if (GET_FORGET_COUNT(ch) >= 5) {
                                 SET_SKILL(ch, GET_FORGETING(ch), 0);
                                 send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n",
                                              spell_info[GET_FORGETING(ch)].name);
-                                GET_FORGETING(ch) = 0;
-                                GET_FORGET_COUNT(ch) = 0;
+                                ch->setBaseStat<int>("forgetting_skill", 0);
+                                ch->setBaseStat("forget_count", 0);
                                 if(skill_num == (int)Skill::kaioken) {
                                     ch->transforms.erase(Form::kaioken);
                                 }
@@ -976,7 +976,7 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                                 }
                             }
                         } else if (GET_SKILL_BASE(ch, GET_FORGETING(ch)) < 30) {
-                            GET_FORGETING(ch) = 0;
+                            ch->setBaseStat("forgetting_skill", 0);
                         }
                     } else {
                         send_to_char(ch,
@@ -1001,13 +1001,13 @@ void handle_practice(struct char_data *keeper, int guild_nr, struct char_data *c
                         ch->modExperience(gain);
                     }
                     if (GET_FORGETING(ch) != 0) {
-                        GET_FORGET_COUNT(ch) += 1;
+                        ch->modBaseStat("forget_count", 1);
                         if (GET_FORGET_COUNT(ch) >= 5) {
                             SET_SKILL(ch, GET_FORGETING(ch), 0);
                             send_to_char(ch, "@MYou have finally forgotten what little you knew of %s@n\r\n",
                                          spell_info[GET_FORGETING(ch)].name);
-                            GET_FORGETING(ch) = 0;
-                            GET_FORGET_COUNT(ch) = 0;
+                            ch->setBaseStat("forgetting_skill", 0);
+                            ch->setBaseStat("forget_count", 0);
                         }
                     }
                 }

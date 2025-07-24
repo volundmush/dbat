@@ -98,7 +98,7 @@ void tech_handle_fireshield(char_data *ch, char_data *vict, const std::string &p
         msg = fmt::format("@c$n's@W {} is burned by @C$N's@W fireshield!@n", part);
         act(msg.c_str(), true, ch, nullptr, vict, TO_NOTVICT);
         int64_t dmg = GET_MAX_MANA(vict) * 0.02;
-        LASTATK(vict) += 1000;
+        vict->modBaseStat<int>("last_attack", 1000);
         hurt(0, 0, vict, ch, nullptr, dmg, 0);
         if (GET_BONUS(ch, BONUS_FIREPRONE)) {
             send_to_char(ch, "@RYou are extremely flammable and are burned by the attack!@n\r\n");
@@ -128,9 +128,9 @@ bool tech_handle_android_absorb(char_data *ch, char_data *vict) {
         }
         if (GET_CHARGE(vict) + amot > GET_MAX_MANA(vict)) {
             vict->incCurKI(vict->getMaxKI() - GET_CHARGE(vict));
-            GET_CHARGE(vict) = GET_MAX_MANA(vict);
+            vict->setBaseStat<int64_t>("charge", GET_MAX_MANA(vict));
         } else {
-            GET_CHARGE(vict) += amot;
+            vict->modBaseStat<int64_t>("charge", amot);
         }
         return true;
     }
@@ -143,8 +143,8 @@ void tech_handle_crashdown(char_data *ch, char_data *vict) {
         act("@wYou are knocked out of the air!@n", true, ch, nullptr, vict, TO_VICT);
         act("@w$N@w is knocked out of the air!@n", true, ch, nullptr, vict, TO_NOTVICT);
         vict->affect_flags.set(AFF_FLYING, false);
-        GET_ALT(vict) = 0;
-        GET_POS(vict) = POS_SITTING;
+        vict->setBaseStat<int>("altitude", 0);
+        vict->setBaseStat("combo", POS_SITTING);
     } else {
         handle_knockdown(vict);
     }

@@ -376,7 +376,7 @@ static void handle_pilot_ready(struct char_data *ch) {
 
     ch->player_flags.set(PLR_PILOTING, true);
     act("@w$n sits down and begins piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
-    GET_POS(ch) = POS_SITTING;
+    ch->setBaseStat<int>("position", POS_SITTING);
     send_to_char(ch, "@wYou take a seat in the pilot's chair.\r\n");
 }
 
@@ -384,7 +384,7 @@ static void handle_pilot_unready(struct char_data *ch) {
     if (PLR_FLAGGED(ch, PLR_PILOTING)) {
         act("@w$n stands up and stops piloting the ship.", true, ch, nullptr, nullptr, TO_ROOM);
         send_to_char(ch, "@wYou stand up from the pilot's seat.\r\n");
-        GET_POS(ch) = POS_STANDING;
+        ch->setBaseStat<int>("position", POS_STANDING);
         ch->player_flags.set(PLR_PILOTING, false);
     } else {
         send_to_char(ch, "You are already not flying the ship!\r\n");

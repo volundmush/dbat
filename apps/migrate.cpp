@@ -352,10 +352,10 @@ static void handle_org_who(org_data &g, bitvector_t with_who[]) {
                     g.only_sensei.insert(Sensei::piccolo);
                     break;
                 case TRADE_NOROGUE:
-                    g.not_sensei.insert(Sensei::krane);
+                    g.not_sensei.insert(Sensei::crane);
                     break;
                 case TRADE_ONLYROGUE:
-                    g.only_sensei.insert(Sensei::krane);
+                    g.only_sensei.insert(Sensei::crane);
                     break;
                 case TRADE_NOFIGHTER:
                     g.not_sensei.insert(Sensei::nail);
@@ -1124,7 +1124,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    ch->set(CharNum::level, t[0]);
+    ch->setBaseStat("level", t[0]);
 
     /* max hit = 0 is a flag that H, M, V is xdy+z */
     ch->setBaseStat("powerlevel", t[3]);
@@ -1133,7 +1133,7 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
 
     ch->mob_specials.damnodice = t[6];
     ch->mob_specials.damsizedice = t[7];
-    GET_DAMAGE_MOD(ch) = t[8];
+    ch->setBaseStat("damage_mod", t[8]);
 
     if (!get_line(mob_f, line)) {
         basic_mud_log("SYSERR: Format error in mob #%d, second line after S flag\n"
@@ -1154,16 +1154,11 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
     auto sen = t[3]+1;
     if(sen > 14) sen = 0;
     ch->sensei = static_cast<Sensei>(sen);
-    GET_SAVE_BASE(ch, SAVING_FORTITUDE) = 0;
-    GET_SAVE_BASE(ch, SAVING_REFLEX) = 0;
-    GET_SAVE_BASE(ch, SAVING_WILL) = 0;
 
     /* GET_CLASS_RANKS(ch, t[3]) = GET_LEVEL(ch); */
 
     if (!IS_HUMAN(ch))
         ch->affect_flags.set(AFF_INFRAVISION);
-
-    SPEAKING(ch) = SKILL_LANG_COMMON;
 
     if (!get_line(mob_f, line)) {
         basic_mud_log("SYSERR: Format error in last line of mob #%d\n"
@@ -1177,15 +1172,11 @@ static int parse_simple_mob(FILE *mob_f, struct char_data *ch, mob_vnum nr) {
         return 0;
     }
 
-    GET_POS(ch) = t[0];
+    ch->setBaseStat<int>("position", t[0]);
     GET_DEFAULT_POS(ch) = t[1];
     ch->sex = static_cast<Sex>(t[2]);
 
-    SPEAKING(ch) = MIN_LANGUAGES;
     set_height_and_weight_by_race(ch);
-
-    for (j = 0; j < 3; j++)
-        GET_SAVE_MOD(ch, j) = 0;
 
     if (MOB_FLAGGED(ch, MOB_AUTOBALANCE)) {
         mob_autobalance(ch);
@@ -1268,7 +1259,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Cha") {
         RANGE(0, 200);
-        ch->setBaseStat("charisma", num_arg);
+        ch->setBaseStat("speed", num_arg);
     }
 
     CASE("Hit") {
@@ -1316,7 +1307,7 @@ static void interpret_espec(const char *keyword, const char *value, struct char_
 
     CASE("Feat") {
         sscanf(value, "%d %d", &num, &num2);
-        HAS_FEAT(ch, num) = num2;
+        //HAS_FEAT(ch, num) = num2;
     }
 
     CASE("Skill") {
@@ -2448,7 +2439,7 @@ static void load_bonuses(FILE *fl, struct char_data *ch, bool mods) {
            &num[45], &num[46], &num[47], &num[48], &num[49], &num[50], &num[51]);
     for (i = 0; i < 52; i++) {
         if (num[i] > 0) {
-            GET_BONUS(ch, i) = num[i];
+            //GET_BONUS(ch, i) = num[i];
         }
     }
 }
@@ -2511,7 +2502,7 @@ static void load_majin(struct char_data *ch, const char *line) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
-    GET_MAJINIZED(ch) = num;
+    ch->setBaseStat("majinizer", num);
 
 }
 
@@ -2519,7 +2510,7 @@ static void load_molt(struct char_data *ch, const char *line) {
     int64_t num = 0;
 
     sscanf(line, "%" I64T "", &num);
-    GET_MOLT_EXP(ch) = num;
+    ch->setBaseStat<int64_t>("molt_experience", num);
 
 }
 
@@ -2542,38 +2533,15 @@ static int load_char(const char *name, struct char_data *ch) {
 
         /* character initializations */
         /* initializations necessary to keep some things straight */
-        ch->affected = nullptr;
-        ch->affectedv = nullptr;
-        for (i = 1; i <= SKILL_TABLE_SIZE; i++) {
-            SET_SKILL(ch, i, 0);
-            SET_SKILL_BONUS(ch, i, 0);
-            SET_SKILL_PERF(ch, i, 0);
-        }
 
-        GET_LOG_USER(ch) = strdup("NOUSER");
-        GET_FURY(ch) = PFDEF_HAIRL;
         GET_CLAN(ch) = strdup("None.");
-        GET_HOME(ch) = PFDEF_HOMETOWN;
         ch->setBaseStat("weight", PFDEF_WEIGHT);
 
-        GET_RELAXCOUNT(ch) = PFDEF_EYE;
-        GET_BLESSLVL(ch) = PFDEF_HEIGHT;
-        // GET_LIFEFORCE(ch) = PFDEF_BASEPL;
-        GET_LIFEPERC(ch) = PFDEF_WEIGHT;
-        GET_STUPIDKISS(ch) = 0;
-        GET_POS(ch) = POS_STANDING;
-        GET_MAJINIZED(ch) = PFDEF_BASEPL;
-        GET_GAUNTLET(ch) = PFDEF_GAUNTLET;
+        ch->setBaseStat("bless_level", PFDEF_HEIGHT);
+        ch->setBaseStat("life_percent", PFDEF_WEIGHT);
+        ch->setBaseStat<int>("position", POS_STANDING);
 
-        GET_LOADROOM(ch) = PFDEF_LOADROOM;
-        GET_INVIS_LEV(ch) = PFDEF_INVISLEV;
-        GET_FREEZE_LEV(ch) = PFDEF_FREEZELEV;
-        GET_WIMP_LEV(ch) = PFDEF_WIMPLEV;
-
-        GET_OLC_ZONE(ch) = PFDEF_OLC;
-
-        ch->time.birth = ch->time.created = ch->time.maxage = 0;
-        ch->followers = nullptr;
+        ch->setBaseStat<int>("olc_zone", PFDEF_OLC);
 
         while (get_line(fl, line)) {
             bitvector_t flags[4];
@@ -2602,8 +2570,8 @@ static int load_char(const char *name, struct char_data *ch) {
                         }
                     } else if (!strcmp(tag, "Affs")) load_affects(fl, ch, 0);
                     else if (!strcmp(tag, "Affv")) load_affects(fl, ch, 1);
-                    else if (!strcmp(tag, "AdmL")) ch->set(CharNum::admin_level, atoi(line));
-                    else if (!strcmp(tag, "Abso")) GET_ABSORBS(ch) = atoi(line);
+                    else if (!strcmp(tag, "AdmL")) ch->setBaseStat("admin_level", atoi(line));
+                    else if (!strcmp(tag, "Abso")) ch->setBaseStat<int>("absorbs", atoi(line));
                     else if (!strcmp(tag, "AdmF")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
                         flags[0] = asciiflag_conv(f1);
@@ -2620,14 +2588,14 @@ static int load_char(const char *name, struct char_data *ch) {
                 case 'B':
                     if (!strcmp(tag, "Bank")) ch->setBaseStat("money_bank", atoi(line));
                     else if (!strcmp(tag, "Bki ")) load_BASE(ch, line, LOAD_MANA);
-                    else if (!strcmp(tag, "Blss")) GET_BLESSLVL(ch) = atoi(line);
+                    else if (!strcmp(tag, "Blss")) ch->setBaseStat("bless_level", atoi(line));
                     else if (!strcmp(tag, "Boam")) GET_BOARD(ch, 0) = atoi(line);
                     else if (!strcmp(tag, "Boai")) GET_BOARD(ch, 1) = atoi(line);
                     else if (!strcmp(tag, "Boac")) GET_BOARD(ch, 2) = atoi(line);
                     else if (!strcmp(tag, "Boad")) GET_BOARD(ch, 3) = atoi(line);
                     else if (!strcmp(tag, "Boab")) GET_BOARD(ch, 4) = atoi(line);
                     else if (!strcmp(tag, "Bonu")) load_bonuses(fl, ch, false);
-                    else if (!strcmp(tag, "Boos")) GET_BOOSTS(ch) = atoi(line);
+                    else if (!strcmp(tag, "Boos")) ch->setBaseStat<int>("boosts", atoi(line));
                     else if (!strcmp(tag, "Bpl ")) load_BASE(ch, line, LOAD_HIT);
                     else if (!strcmp(tag, "Brth")) ch->time.birth = atol(line);
                     else if (!strcmp(tag, "Bst ")) load_BASE(ch, line, LOAD_MOVE);
@@ -2645,18 +2613,18 @@ static int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "Colr")) {
                         sscanf(line, "%d %s", &num, buf2);
                     } else if (!strcmp(tag, "Con ")) ch->setBaseStat("constitution", atoi(line));
-                    else if (!strcmp(tag, "Cool")) GET_COOLDOWN(ch) = atoi(line);
+                    else if (!strcmp(tag, "Cool")) ch->setBaseStat("concentrate_cooldown", atoi(line));
                     else if (!strcmp(tag, "Crtd")) ch->time.created = atol(line);
                     break;
 
                 case 'D':
-                    if (!strcmp(tag, "Deat")) GET_DTIME(ch) = atoi(line);
-                    else if (!strcmp(tag, "Deac")) GET_DCOUNT(ch) = atoi(line);
+                    if (!strcmp(tag, "Deat")) ch->setBaseStat("death_time", atoi(line));
+                    else if (!strcmp(tag, "Deac")) ch->setBaseStat("death_count", atoi(line));
                     else if (!strcmp(tag, "Desc")) ch->look_description = fread_string(fl, buf2);
                     else if (!strcmp(tag, "Dex ")) ch->setBaseStat("agility", atoi(line));
                     else if (!strcmp(tag, "Drnk")) GET_COND(ch, DRUNK) = atoi(line);
-                    else if (!strcmp(tag, "Damg")) GET_DAMAGE_MOD(ch) = atoi(line);
-                    else if (!strcmp(tag, "Droo")) GET_DROOM(ch) = atoi(line);
+                    else if (!strcmp(tag, "Damg")) ch->setBaseStat("damage_mod", atoi(line));
+                    else if (!strcmp(tag, "Droo")) ch->setBaseStat("death_room", atoi(line));
                     break;
 
                 case 'E':
@@ -2668,16 +2636,16 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'F':
-                    if (!strcmp(tag, "Fisd")) GET_FISHD(ch) = atoi(line);
-                    else if (!strcmp(tag, "Frez")) GET_FREEZE_LEV(ch) = atoi(line);
-                    else if (!strcmp(tag, "Forc")) GET_FORGET_COUNT(ch) = atoi(line);
-                    else if (!strcmp(tag, "Forg")) GET_FORGETING(ch) = atoi(line);
-                    else if (!strcmp(tag, "Fury")) GET_FURY(ch) = atoi(line);
+                    if (!strcmp(tag, "Fisd")) ch->setBaseStat("fish_distance", atoi(line));
+                    else if (!strcmp(tag, "Frez")) ch->setBaseStat("freeze_level", atoi(line));
+                    else if (!strcmp(tag, "Forc")) ch->setBaseStat("forget_count", atoi(line));
+                    else if (!strcmp(tag, "Forg")) ch->setBaseStat<int>("forgetting_skill", atoi(line));
+                    else if (!strcmp(tag, "Fury")) ch->setBaseStat("fury", atoi(line));
                     break;
 
                 case 'G':
                     if (!strcmp(tag, "Gold")) ch->setBaseStat("money_carried", atoi(line));
-                    else if (!strcmp(tag, "Gaun")) GET_GAUNTLET(ch) = atoi(line);
+                    else if (!strcmp(tag, "Gaun")) ch->setBaseStat("gauntlet", atoi(line));
                     //else if (!strcmp(tag, "Geno")) ch->genome.insert(atoi(line));
                     //else if (!strcmp(tag, "Gen1")) ch->genome.insert(atoi(line));
                     break;
@@ -2685,8 +2653,9 @@ static int load_char(const char *name, struct char_data *ch) {
                 case 'H':
                     if (!strcmp(tag, "Hit ")) load_HMVS(ch, line, LOAD_HIT);
                     else if (!strcmp(tag, "Hite")) ch->setBaseStat("height", atoi(line));
-                    else if (!strcmp(tag, "Home")) GET_HOME(ch) = atoi(line);
-                    else if (!strcmp(tag, "Host")) {}
+                    else if (!strcmp(tag, "Home")) ch->setBaseStat("hometown", atoi(line));
+                    else if (!strcmp(tag, "Host")) {
+                    }
                     //else if (!strcmp(tag, "Hrc ")) ch->set(CharAppearance::hair_color, atoi(line));
                     //else if (!strcmp(tag, "Hrl ")) ch->set(CharAppearance::hair_length, atoi(line));
                     //else if (!strcmp(tag, "Hrs ")) ch->set(CharAppearance::hair_style, atoi(line));
@@ -2695,39 +2664,39 @@ static int load_char(const char *name, struct char_data *ch) {
 
                 case 'I':
                     if (!strcmp(tag, "Id  ")) GET_IDNUM(ch) = atol(line);
-                    else if (!strcmp(tag, "INGl")) GET_INGESTLEARNED(ch) = atoi(line);
+                    else if (!strcmp(tag, "INGl")) ch->setBaseStat("ingest_learned", atoi(line));
                     else if (!strcmp(tag, "Int ")) ch->setBaseStat("intelligence", atoi(line));
-                    else if (!strcmp(tag, "Invs")) GET_INVIS_LEV(ch) = atoi(line);
+                    else if (!strcmp(tag, "Invs")) ch->setBaseStat("invis_level", atoi(line));
                     break;
 
                 case 'K':
                     if (!strcmp(tag, "Ki  ")) load_HMVS(ch, line, LOAD_KI);
-                    else if (!strcmp(tag, "Kaio")) GET_KAIOKEN(ch) = atoi(line);
+                    else if (!strcmp(tag, "Kaio")) ch->setBaseStat("kaioken", atoi(line));
                     break;
 
                 case 'L':
                     if (!strcmp(tag, "Last")) ch->time.logon = atol(line);
                     else if (!strcmp(tag, "Lern")) ch->modPractices(atoi(line));
-                    else if (!strcmp(tag, "Levl")) ch->set(CharNum::level, atoi(line));
+                    else if (!strcmp(tag, "Levl")) ch->setBaseStat("level", atoi(line));
                     else if (!strcmp(tag, "LF  ")) load_BASE(ch, line, LOAD_LIFE);
-                    else if (!strcmp(tag, "LFPC")) GET_LIFEPERC(ch) = atoi(line);
+                    else if (!strcmp(tag, "LFPC")) ch->setBaseStat("life_percent", atoi(line));
                     else if (!strcmp(tag, "Lila")) GET_LIMBCOND(ch, 1) = atoi(line);
                     else if (!strcmp(tag, "Lill")) GET_LIMBCOND(ch, 3) = atoi(line);
                     else if (!strcmp(tag, "Lira")) GET_LIMBCOND(ch, 0) = atoi(line);
                     else if (!strcmp(tag, "Lirl")) GET_LIMBCOND(ch, 2) = atoi(line);
-                    else if (!strcmp(tag, "Lint")) GET_LINTEREST(ch) = atoi(line);
-                    else if (!strcmp(tag, "Lpla")) GET_LPLAY(ch) = atoi(line);
+                    else if (!strcmp(tag, "Lint")) ch->setBaseStat("last_interest", atoi(line));
+                    else if (!strcmp(tag, "Lpla")) ch->setBaseStat("last_played", atoi(line));
 
                     break;
 
                 case 'M':
                     if (!strcmp(tag, "Mana")) load_HMVS(ch, line, LOAD_MANA);
                     else if (!strcmp(tag, "Mexp")) load_molt(ch, line);
-                    else if (!strcmp(tag, "Mlvl")) GET_MOLT_LEVEL(ch) = atoi(line);
+                    else if (!strcmp(tag, "Mlvl")) ch->setBaseStat<int>("molt_level", atoi(line));
                     else if (!strcmp(tag, "Move")) load_HMVS(ch, line, LOAD_MOVE);
                     else if (!strcmp(tag, "Mcls")) {
 
-                    } else if (!strcmp(tag, "Maji")) MAJINIZED(ch) = atoi(line);
+                    } else if (!strcmp(tag, "Maji")) ch->setBaseStat("majinizer", atoi(line));
                     else if (!strcmp(tag, "Majm")) load_majin(ch, line);
                     else if (!strcmp(tag, "Mimi"))
                         ch->mimic = (Race)atoi(line);
@@ -2739,19 +2708,19 @@ static int load_char(const char *name, struct char_data *ch) {
                     break;
 
                 case 'O':
-                    if (!strcmp(tag, "Olc ")) GET_OLC_ZONE(ch) = atoi(line);
+                    if (!strcmp(tag, "Olc ")) ch->setBaseStat<int>("olc_zone", atoi(line));
                     break;
 
                 case 'P':
                     if (!strcmp(tag, "Phas")) ;//ch->set(CharAppearance::distinguishing_feature, atoi(line));
-                    else if (!strcmp(tag, "Phse")) GET_PHASE(ch) = atoi(line);
+                    else if (!strcmp(tag, "Phse")) ch->setBaseStat<int>("starphase", atoi(line));
                     else if (!strcmp(tag, "Plyd")) ch->time.played = atol(line);
 #ifdef ASCII_SAVE_POOFS
                     else if (!strcmp(tag, "PfIn")) POOFIN(ch) = strdup(line);
                     else if (!strcmp(tag, "PfOt")) POOFOUT(ch) = strdup(line);
 #endif
-                    else if (!strcmp(tag, "Pole")) GET_POLE_BONUS(ch) = atoi(line);
-                    else if (!strcmp(tag, "Posi")) GET_POS(ch) = atoi(line);
+                    else if (!strcmp(tag, "Pole")) ch->setBaseStat("pole_bonus", atoi(line));
+                    else if (!strcmp(tag, "Posi")) ch->setBaseStat<int>("position", atoi(line));
                     else if (!strcmp(tag, "Pref")) {
                         sscanf(line, "%s %s %s %s", f1, f2, f3, f4);
                         flags[0] = asciiflag_conv(f1);
@@ -2761,7 +2730,7 @@ static int load_char(const char *name, struct char_data *ch) {
                         for(auto f = 0; f < 128; f++) {
                             if(IS_SET_AR(flags, f)) ch->pref_flags.set(f, true);
                         }
-                    } else if (!strcmp(tag, "Prff")) GET_PREFERENCE(ch) = atoi(line);
+                    } else if (!strcmp(tag, "Prff")) ch->setBaseStat("preference", atoi(line));
                     break;
 
                 case 'R':
@@ -2775,20 +2744,20 @@ static int load_char(const char *name, struct char_data *ch) {
                         if(!boost::iequals(line, "Empty"))
                             GET_RDISPLAY(ch) = strdup(line);
                     }
-                    else if (!strcmp(tag, "Rela")) GET_RELAXCOUNT(ch) = atoi(line);
-                    else if (!strcmp(tag, "Rtim")) GET_RTIME(ch) = atoi(line);
+                    else if (!strcmp(tag, "Rela")) ch->setBaseStat("relax_count", atoi(line));
+                    else if (!strcmp(tag, "Rtim")) ch->setBaseStat("rewtime", atoi(line));
                     else if (!strcmp(tag, "Rad1")) ch->setBaseStat("radar1", atoi(line));
                     else if (!strcmp(tag, "Rad2")) ch->setBaseStat("radar2", atoi(line));
                     else if (!strcmp(tag, "Rad3")) ch->setBaseStat("radar3", atoi(line));
-                    else if (!strcmp(tag, "Room")) GET_LOADROOM(ch) = atoi(line);
+                    else if (!strcmp(tag, "Room")) ch->setBaseStat("load_room", atoi(line));
                     else if (!strcmp(tag, "RPfe")) GET_FEATURE(ch) = strdup(line);
                     break;
 
                 case 'S':
                     if (!strcmp(tag, "Sex ")) ch->sex = static_cast<Sex>(atoi(line));
-                    else if (!strcmp(tag, "Ship")) GET_SHIP(ch) = atoi(line);
-                    else if (!strcmp(tag, "Scoo")) GET_SDCOOLDOWN(ch) = atoi(line);
-                    else if (!strcmp(tag, "Shpr")) GET_SHIPROOM(ch) = atoi(line);
+                    else if (!strcmp(tag, "Ship")) ;
+                    else if (!strcmp(tag, "Scoo")) ch->setBaseStat("selfdestruct_cooldown", atoi(line));
+                    else if (!strcmp(tag, "Shpr")) ;
                     else if (!strcmp(tag, "Skil")) load_skills(fl, ch, false);
                     //else if (!strcmp(tag, "Skn ")) ch->set(CharAppearance::skin_color, atoi(line));
                     else if (!strcmp(tag, "Size")) ch->setSize(atoi(line));
@@ -2797,15 +2766,15 @@ static int load_char(const char *name, struct char_data *ch) {
                     else if (!strcmp(tag, "SkCl")) {
                         sscanf(line, "%d %d", &num2, &num3);
                         ch->modPractices(num3);
-                    } else if (!strcmp(tag, "Slot")) ch->skill_slots = atoi(line);
-                    else if (!strcmp(tag, "Spek")) SPEAKING(ch) = atoi(line);
+                    } else if (!strcmp(tag, "Slot")) ch->setBaseStat<int>("skill_slots", atoi(line));
+                    else if (!strcmp(tag, "Spek")) ;
                     else if (!strcmp(tag, "Str ")) ch->setBaseStat("strength", atoi(line));
-                    else if (!strcmp(tag, "Stuk")) ch->stupidkiss = atoi(line);
+                    else if (!strcmp(tag, "Stuk")) ;
                     else if (!strcmp(tag, "Supp")) ch->setBaseStat("suppression", atoi(line));
                     break;
 
                 case 'T':
-                    if (!strcmp(tag, "Tgro")) GET_TGROWTH(ch) = atoi(line);
+                    if (!strcmp(tag, "Tgro")) ch->setBaseStat<int>("tail_growth", atoi(line));
                     else if (!strcmp(tag, "Tcla")) {
                         switch(atoi(line)) {
                             case 1: // great requirements... range is 0.2 to 0.3.
@@ -2826,28 +2795,23 @@ static int load_char(const char *name, struct char_data *ch) {
                         sscanf(line, "%d %d", &num2, &num3);
                         //GET_TRANSCOST(ch, num2) = num3;
                     } else if (!strcmp(tag, "Thir")) GET_COND(ch, THIRST) = atoi(line);
-                    else if (!strcmp(tag, "Thr1")) GET_SAVE_MOD(ch, 0) = atoi(line);
-                    else if (!strcmp(tag, "Thr2")) GET_SAVE_MOD(ch, 1) = atoi(line);
-                    else if (!strcmp(tag, "Thr3")) GET_SAVE_MOD(ch, 2) = atoi(line);
+                    else if (!strcmp(tag, "Thr1")) ;
+                    else if (!strcmp(tag, "Thr2")) ;
+                    else if (!strcmp(tag, "Thr3")) ;
                     else if (!strcmp(tag, "Thr4") || !strcmp(tag, "Thr5")); /* Discard extra saves */
-                    else if (!strcmp(tag, "ThB1")) GET_SAVE_BASE(ch, 0) = atoi(line);
-                    else if (!strcmp(tag, "ThB2")) GET_SAVE_BASE(ch, 1) = atoi(line);
-                    else if (!strcmp(tag, "ThB3")) GET_SAVE_BASE(ch, 2) = atoi(line);
-                    else if (!strcmp(tag, "Trag")) ch->set(CharTrain::agility, atoi(line));
-                    else if (!strcmp(tag, "Trco")) ch->set(CharTrain::constitution, atoi(line));
-                    else if (!strcmp(tag, "Trin")) ch->set(CharTrain::intelligence, atoi(line));
-                    else if (!strcmp(tag, "Trsp")) ch->set(CharTrain::speed, atoi(line));
-                    else if (!strcmp(tag, "Trst")) ch->set(CharTrain::strength, atoi(line));
-                    else if (!strcmp(tag, "Trwi")) ch->set(CharTrain::wisdom, atoi(line));
+                    else if (!strcmp(tag, "ThB1")) ;
+                    else if (!strcmp(tag, "ThB2")) ;
+                    else if (!strcmp(tag, "ThB3")) ;
+                    else if (!strcmp(tag, "Trag")) ch->setBaseStat("train_agility",  atoi(line));
+                    else if (!strcmp(tag, "Trco")) ch->setBaseStat("train_constitution",  atoi(line));
+                    else if (!strcmp(tag, "Trin")) ch->setBaseStat("train_intelligence",  atoi(line));
+                    else if (!strcmp(tag, "Trsp")) ch->setBaseStat("train_speed",  atoi(line));
+                    else if (!strcmp(tag, "Trst")) ch->setBaseStat("train_strength",  atoi(line));
+                    else if (!strcmp(tag, "Trwi")) ch->setBaseStat("train_wisdom",  atoi(line));
                     break;
                 case 'U':
-                    if (!strcmp(tag, "Upgr")) GET_UP(ch) = atoi(line);
-                    else if (!strcmp(tag, "User")) {
-                        if (GET_LOG_USER(ch)) {
-                            free(GET_LOG_USER(ch));
-                        }
-                        GET_LOG_USER(ch) = strdup(line);
-                    }
+                    if (!strcmp(tag, "Upgr")) ch->setBaseStat<int>("upgrade_points", atoi(line));
+                    else if (!strcmp(tag, "User")) ;
                     break;
                 case 'V':
                     if (!strcmp(tag, "Voic")) GET_VOICE(ch) = strdup(line);
@@ -2855,7 +2819,7 @@ static int load_char(const char *name, struct char_data *ch) {
 
                 case 'W':
                     if (!strcmp(tag, "Wate")) ch->setBaseStat("weight", atoi(line));
-                    else if (!strcmp(tag, "Wimp")) GET_WIMP_LEV(ch) = atoi(line);
+                    else if (!strcmp(tag, "Wimp")) ch->setBaseStat("wimp_level", atoi(line));
                     else if (!strcmp(tag, "Wis ")) ch->setBaseStat("wisdom", atoi(line));
                     break;
 
@@ -3170,6 +3134,9 @@ void House_boot() {
 
 void boot_db_world_legacy() {
 
+    basic_mud_log("Loading stat handlers...");
+    init_stat_handlers();
+
     basic_mud_log("Loading legacy world data...");
     basic_mud_log("Loading zone table.");
     index_boot(DB_BOOT_ZON);
@@ -3352,8 +3319,9 @@ void migrate_characters() {
         p.account = &a;
         a.admin_level = std::max(a.admin_level, GET_ADMLEVEL(ch));
         a.characters.emplace_back(ch->id);
-        ch->in_room = ch->load_room;
-        ch->was_in_room = ch->load_room;
+        auto lroom = ch->getBaseStat<room_vnum>("load_room");
+        ch->in_room = lroom;
+        ch->setBaseStat<room_vnum>("was_in_room", lroom);
         uniqueCharacters.emplace(id, sh);
         units.emplace(id, sh);
     }
@@ -3709,7 +3677,7 @@ static void migrate_obj_data(obj_data *o) {
                 o->not_sensei.insert(Sensei::piccolo);
                 break;
             case 14:
-                o->not_sensei.insert(Sensei::krane);
+                o->not_sensei.insert(Sensei::crane);
                 break;
             case 15:
                 o->not_sensei.insert(Sensei::nail);

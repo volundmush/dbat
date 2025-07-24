@@ -157,11 +157,11 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
     /* Some otherwise inclined "luck" for the attacker */
     perc += rand_number(-5, 5);
 
-    if (ch->throws >= 3) {
-        ch->throws = 0;
+    if (ch->getBaseStat<int>("throws") >= 3) {
+        ch->setBaseStat<int>("throws", 0);
         return;
-    } else if (ch->throws == -1) {
-        ch->throws = 0;
+    } else if (ch->getBaseStat<int>("throws") == -1) {
+        ch->setBaseStat<int>("throws", 0);
     }
 
     /* Racial bonuses */
@@ -206,7 +206,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
         act("@Y...in a lightning flash of speed you attack @y$N@Y again!@n", true, ch, nullptr, vict, TO_CHAR);
         act("@Y...in a lightning flash of speed @y$n@Y attacks YOU again!@n", true, ch, nullptr, vict, TO_VICT);
         act("@Y...in a lightning flash of speed @y$n@Y attacks @y$N@Y again!@n", true, ch, nullptr, vict, TO_NOTVICT);
-        ch->throws += 1;
+        ch->modBaseStat<int>("throws", 1);
         ch->player_flags.set(PLR_MULTIHIT, true);
         if (COMBO(ch) > -1) {
             switch (COMBO(ch)) {
@@ -237,17 +237,17 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
                 case 6:
                     sprintf(buf, "%s", GET_NAME(vict));
                     do_slam(ch, buf, 0, 0);
-                    ch->throws += 1;
+                    ch->modBaseStat<int>("throws", 1);
                     break;
                 case 8:
                     sprintf(buf, "%s", GET_NAME(vict));
                     do_heeldrop(ch, buf, 0, 0);
-                    ch->throws += 1;
+                    ch->modBaseStat<int>("throws", 1);
                     break;
                 case 51:
                     sprintf(buf, "%s", GET_NAME(vict));
                     do_bash(ch, buf, 0, 0);
-                    ch->throws += 1;
+                    ch->modBaseStat<int>("throws", 1);
                     break;
                 case 52:
                     sprintf(buf, "%s", GET_NAME(vict));
@@ -256,7 +256,7 @@ void handle_multihit(struct char_data *ch, struct char_data *vict) {
                 case 56:
                     sprintf(buf, "%s", GET_NAME(vict));
                     do_tailwhip(ch, buf, 0, 0);
-                    ch->throws += 1;
+                    ch->modBaseStat<int>("throws", 1);
                     break;
             }
         } else {
@@ -546,10 +546,10 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
 
     if (GET_CHARGE(ch) >= GET_MAX_MANA(ch) * maxki) {
         totki += GET_MAX_MANA(ch) * maxki;
-        GET_CHARGE(ch) -= GET_MAX_MANA(ch) * maxki;
+        ch->modBaseStat<int64_t>("charge", -(GET_MAX_MANA(ch) * maxki));
     } else {
         totki += GET_CHARGE(ch);
-        GET_CHARGE(ch) = 0;
+        ch->setBaseStat<int64_t>("charge", 0);
     }
 
     for (f = ch->followers; f; f = f->next) {
@@ -561,10 +561,10 @@ void combine_attacks(struct char_data *ch, struct char_data *vict) {
             }
             if (GET_CHARGE(f->follower) >= GET_MAX_MANA(f->follower) * maxki) {
                 totki += GET_MAX_MANA(f->follower) * maxki;
-                GET_CHARGE(f->follower) -= GET_MAX_MANA(f->follower) * maxki;
+                f->follower->modBaseStat<int64_t>("charge", -(GET_MAX_MANA(f->follower) * maxki));
             } else {
                 totki += GET_CHARGE(f->follower);
-                GET_CHARGE(f->follower) = 0;
+                f->follower->setBaseStat<int64_t>("charge", 0);
             }
             totalmem += 1;
             attavg += GET_SKILL(f->follower, attack_skills[GET_COMBINE(f->follower)]);
@@ -728,7 +728,7 @@ void handle_knockdown(struct char_data *ch) {
     } else {
         act("@mYou are knocked off your feet!@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@W$n@m is knocked off $s feet!@n", true, ch, nullptr, nullptr, TO_ROOM);
-        GET_POS(ch) = POS_SITTING;
+        ch->setBaseStat<int>("position", POS_SITTING);
     }
 
 }
@@ -862,7 +862,7 @@ int backstab(struct char_data *ch, struct char_data *vict, int wlvl, int64_t dmg
     else if (GET_SKILL(ch, SKILL_DAGGER) >= 50)
         chance += 10;
 
-    GET_BACKSTAB_COOL(ch) = 10;
+    ch->setBaseStat<int>("backstab_cooldown", 10);
 
     if (chance >= roll_to_beat) {
         int attacker_roll =
@@ -1079,7 +1079,7 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg) {
             add = dmg * rate;
             if (GET_CHARGE(ch) + add > GET_MAX_MANA(ch)) {
                 if (GET_CHARGE(ch) < GET_MAX_MANA(ch)) {
-                    GET_CHARGE(ch) = GET_MAX_MANA(ch);
+                    ch->setBaseStat<int64_t>("charge", GET_MAX_MANA(ch));
                     act("@MYou leech some of the energy away!@n", true, ch, nullptr, nullptr, TO_CHAR);
                     act("@m$n@M leeches some of the energy away!@n", true, ch, nullptr, nullptr, TO_ROOM);
                 } else {
@@ -1087,7 +1087,7 @@ int64_t advanced_energy(struct char_data *ch, int64_t dmg) {
                                  "@MYou can't leech because there is too much charged energy for you to handle!@n\r\n");
                 }
             } else {
-                GET_CHARGE(ch) += add;
+                ch->modBaseStat<int64_t>("charge", add);
                 act("@MYou leech some of the energy away!@n", true, ch, nullptr, nullptr, TO_CHAR);
                 act("@m$n@M leeches some of the energy away!@n", true, ch, nullptr, nullptr, TO_ROOM);
             }
@@ -3055,7 +3055,7 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
             focus = GET_SKILL(ch, SKILL_FOCUS);
         }
         if (type != -2) {
-            LASTATK(ch) = type;
+            ch->setBaseStat<int>("last_attack", type);
         } else {
             type = 0;
         }
@@ -3241,10 +3241,10 @@ int64_t damtype(struct char_data *ch, int type, int skill, double percent) {
                 }
                 if (GET_PREFERENCE(ch) == PREFERENCE_WEAPON && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.05) {
                     dam += GET_MAX_MANA(ch) * 0.05;
-                    GET_CHARGE(ch) -= GET_MAX_MANA(ch) * 0.05;
+                    ch->modBaseStat<int64_t>("charge", -(GET_MAX_MANA(ch) * 0.05));
                 } else if (GET_PREFERENCE(ch) == PREFERENCE_WEAPON && GET_CHARGE(ch) > 0) {
                     dam += GET_CHARGE(ch);
-                    GET_CHARGE(ch) -= 0;
+                    ch->setBaseStat<int64_t>("charge", 0);
                 }
                 if (group_bonus(ch, 2) == 8) {
                     dam += dam * 0.02;
@@ -3925,7 +3925,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         } else if (vict == ch) {
             send_to_char(ch, "That's insane, don't hurt yourself. Hurt others! That's the key to life ^_^\r\n");
             return 0;
-        } else if (vict->gooptime > 0) {
+        } else if (vict->getBaseStat<int>("gooptime") > 0) {
             send_to_char(ch, "It seems like it'll be hard to kill them right now...\r\n");
             return 0;
         } else if (CARRYING(ch)) {
@@ -3940,14 +3940,14 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         } else if (MOB_FLAGGED(vict, MOB_NOKILL)) {
             send_to_char(ch, "But they are not to be killed!\r\n");
             return 0;
-        } else if (MAJINIZED(ch) == ((vict)->id)) {
+        } else if (ch->getBaseStat<int>("majinizer") == vict->id) {
             send_to_char(ch, "You can not harm your master!\r\n");
             return 0;
         } else if (GET_BONUS(ch, BONUS_COWARD) > 0 && vict->getPL() > ch->getPL() + (ch->getPL() * .5) &&
                    !FIGHTING(ch)) {
             send_to_char(ch, "You are too cowardly to start anything with someone so much stronger than yourself!\r\n");
             return 0;
-        } else if (MAJINIZED(vict) == ((ch)->id)) {
+        } else if (vict->getBaseStat<int>("majinized") == ch->id) {
             send_to_char(ch, "You can not harm your servant.\r\n");
             return 0;
         } else if ((GRAPPLING(ch) && GRAPTYPE(ch) != 3) || (GRAPPLED(ch) && (GRAPTYPE(ch) == 1 || GRAPTYPE(ch) == 4))) {
@@ -3994,7 +3994,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
             return 0;
         } else if (!IS_NPC(ch) && GET_ALT(ch) > GET_ALT(vict) && !IS_NPC(vict) && num == 0) {
             if (GET_ALT(vict) < 0) {
-                GET_ALT(vict) = GET_ALT(ch);
+                vict->setBaseStat<int>("altitude", GET_ALT(ch));
                 return 1;
             } else {
                 send_to_char(ch, "You are too far above them.\r\n");
@@ -4002,7 +4002,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
             }
         } else if (!IS_NPC(ch) && GET_ALT(ch) < GET_ALT(vict) && !IS_NPC(vict) && num == 0) {
             if (GET_ALT(vict) > 2) {
-                GET_ALT(vict) = GET_ALT(ch);
+                vict->setBaseStat<int>("altitude", GET_ALT(ch));
                 return 1;
             } else {
                 send_to_char(ch, "They are too far above you.\r\n");
@@ -4154,13 +4154,13 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
             before = (ch->getCurST());
         }
         if (GET_CHARGE(ch) <= (GET_MAX_MANA(ch) * ki)) {
-            GET_CHARGE(ch) = 0;
+            ch->setBaseStat<int64_t>("charge", 0);
         }
         if (GET_CHARGE(ch) > (GET_MAX_MANA(ch) * ki)) {
-            GET_CHARGE(ch) -= (GET_MAX_MANA(ch) * ki);
+            ch->modBaseStat<int64_t>("charge", -(GET_MAX_MANA(ch) * ki));
         }
         if (GET_CHARGE(ch) < 0) {
-            GET_CHARGE(ch) = 0;
+            ch->setBaseStat<int64_t>("charge", 0);
         }
         if (AFF_FLAGGED(ch, AFF_HASS)) {
             st += st * .3;
@@ -4173,9 +4173,9 @@ void pcost(struct char_data *ch, double ki, int64_t st) {
 
         if (GET_PREFERENCE(ch) == PREFERENCE_H2H && GET_CHARGE(ch) >= GET_MAX_MANA(ch) * 0.1) {
             st -= st * 0.5;
-            GET_CHARGE(ch) -= st;
+            ch->modBaseStat<int64_t>("charge", -st);
             if (GET_CHARGE(ch) < 0)
-                GET_CHARGE(ch) = 0;
+                ch->setBaseStat<int64_t>("charge", 0);
         }
 
         if (IS_ICER(ch)) {
@@ -4317,8 +4317,8 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             if (LASTATK(ch) != 11 && LASTATK(ch) != 39 && LASTATK(ch) != 500 && LASTATK(ch) < 1000) {
                 if (handle_combo(ch, vict) > 0) {
                     if (beforered <= 1) {
-                        COMBO(ch) = -1;
-                        COMBHITS(ch) = 0;
+                        ch->setBaseStat<int>("combo", -1);
+                        ch->setBaseStat<int>("combo_hits", 0);
                         send_to_char(ch, "@RYou have cut your combo short because you missed your last hit!@n\r\n");
                     } else if (COMBHITS(ch) < physical_mastery(ch)) {
                         dmg += combo_damage(ch, dmg, 0);
@@ -4354,19 +4354,19 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                             }
                             giveRandomVital(ch, gain, gain, gain, 5);
                         }
-                        COMBO(ch) = -1;
-                        COMBHITS(ch) = 0;
+                        ch->setBaseStat<int>("combo", -1);
+                        ch->setBaseStat<int>("combo_hits", 0);
                     }
                 }
             } else if (COMBHITS(ch) > 0 && LASTATK(ch) < 1000) {
                 send_to_char(ch, "@RYou have cut your combo short because you used the wrong attack!@n\r\n");
-                COMBO(ch) = -1;
-                COMBHITS(ch) = 0;
+                ch->setBaseStat<int>("combo", -1);
+                ch->setBaseStat<int>("combo_hits", 0);
             }
         }
 
         if (LASTATK(ch) >= 1000) {
-            LASTATK(ch) -= 1000;
+            ch->modBaseStat<int>("last_attack", -1000);
         }
 
         if (GET_PREFERENCE(ch) == PREFERENCE_KI && GET_CHARGE(ch) > 0) {
@@ -4387,11 +4387,11 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 sprintf(barr, "@CYour barrier absorbs the damage! @D[@B%s@D]@n", add_commas(dmg).c_str());
                 act(barr, true, ch, nullptr, vict, TO_VICT);
                 act("@c$N's@C barrier absorbs the damage!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                GET_BARRIER(vict) -= dmg;
+                vict->modBaseStat<int64_t>("barrier", -dmg);
                 dmg = 0;
             } else if (GET_BARRIER(vict) - dmg <= 0) {
                 dmg -= GET_BARRIER(vict);
-                GET_BARRIER(vict) = 0;
+                vict->setBaseStat<int64_t>("barrier", 0);
                 act("@c$N's@C barrier bursts!@n", true, ch, nullptr, vict, TO_CHAR);
                 act("@CYour barrier bursts!@n", true, ch, nullptr, vict, TO_VICT);
                 act("@c$N's@C barrier bursts!@n", true, ch, nullptr, vict, TO_NOTVICT);
@@ -4603,7 +4603,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             vict->mob_specials.memory.push_back(ch->shared());
         }
         if (IS_NPC(vict) && GET_HIT(vict) > ((vict->getMaxPL())) / 4) {
-            LASTHIT(vict) = GET_IDNUM(ch);
+            vict->setBaseStat("lasthit", GET_IDNUM(ch));
         }
         if (AFF_FLAGGED(vict, AFF_SLEEP) && rand_number(1, 2) == 2) {
             affect_from_char(vict, SPELL_SLEEP);
@@ -4615,7 +4615,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             vict->cureStatusKnockedOut(true);
             if (IS_NPC(vict) && rand_number(1, 20) >= 12) {
                 act("@W$n@W stands up.@n", false, vict, nullptr, nullptr, TO_ROOM);
-                GET_POS(vict) = POS_STANDING;
+                vict->setBaseStat<int>("position", POS_STANDING);
             }
         }
         if (IS_NPC(vict)) {
@@ -4694,7 +4694,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (FIGHTING(ch)) {
                     stop_fighting(ch);
                 }
-                GET_POS(vict) = POS_SLEEPING;
+                vict->setBaseStat<int>("position", POS_SLEEPING);
                 if (!IS_NPC(ch)) {
                     vict->affect_flags.set(AFF_KNOCKED, true);
                 }
@@ -4729,7 +4729,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
             if (FIGHTING(ch)) {
                 stop_fighting(ch);
             }
-            GET_POS(vict) = POS_SLEEPING;
+            vict->setBaseStat<int>("position", POS_SLEEPING);
             if (!IS_NPC(ch)) {
                 vict->affect_flags.set(AFF_KNOCKED, true);
             }
@@ -4775,7 +4775,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                 if (FIGHTING(ch)) {
                     stop_fighting(ch);
                 }
-                GET_POS(vict) = POS_SITTING;
+                vict->setBaseStat<int>("position", POS_SITTING);
                 char_from_room(vict);
                 char_to_room(vict, real_room(sensei::getStartRoom(vict->sensei)));
             }
@@ -4824,7 +4824,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                     return;
                 }
                 if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                    GET_DEATH_TYPE(vict) = 0;
+                    vict->setBaseStat("death_type", 0);
                 }
                 if (type <= 0 && (!IS_NPC(vict) || !MOB_FLAGGED(vict, MOB_DUMMY))) {
                     handle_death_msg(ch, vict, 0);
@@ -4848,7 +4848,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
                         if (GET_HIT(ch) <= GET_MAX_HIT(ch)) {
                             ch->incCurHealth(healhp);
                         }
-                        GET_CHARGE(ch) = GET_CHARGE(ch) + (GET_MAX_MANA(vict) * 0.12);
+                        ch->modBaseStat<int64_t>("charge", GET_MAX_MANA(vict) * 0.12);
                         
                     }
                     if (ch->mutations.get(Mutation::natural_energy)) {
@@ -4992,7 +4992,7 @@ void hurt(int limb, int chance, struct char_data *ch, struct char_data *vict, st
 
         if (!is_sparring(ch) && IS_HALFBREED(vict) && GET_FURY(vict) < 100 && !PLR_FLAGGED(vict, PLR_FURY)) {
             send_to_char(vict, "@RYour fury increases a little bit!@n\r\n");
-            GET_FURY(vict) += 1;
+            vict->modBaseStat("fury", 1);
         }
 
         /* Ends GET_FURY increase for halfbreeds who got damaged */
@@ -5279,8 +5279,8 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
             if (COMBO(ch) != -1) {
                 send_to_char(ch, "@RYou have cut your combo short with the wrong attack!@n\r\n");
             }
-            COMBO(ch) = -1;
-            COMBHITS(ch) = 0;
+            ch->setBaseStat<int>("combo", -1);
+            ch->setBaseStat<int>("combo_hits", 0);
             pass = false;
             break;
     }
@@ -5322,7 +5322,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 5:
                     if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
                         send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R punch @Gnext!@n\r\n");
-                        COMBO(ch) = 0;
+                        ch->setBaseStat<int>("combo", 0);
                         success = true;
                     }
                     break;
@@ -5333,7 +5333,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 10:
                     if (GET_SKILL(ch, SKILL_KICK) > 0) {
                         send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R kick @Gnext!@n\r\n");
-                        COMBO(ch) = 1;
+                        ch->setBaseStat<int>("combo", 1);
                         success = true;
                     }
                     break;
@@ -5342,8 +5342,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 13:
                 case 14:
                     if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
-                        send_to_char(ch, "@GYou have a chance for a COMBO! Try an@R elbow @Gnext!@n\r\n");
-                        COMBO(ch) = 2;
+                        send_to_char(ch, "@GYou have a chance for a COMBO! Try an@R elbow @Gnext!@n\r\n");                            ch->setBaseStat("combo", 2);
                         success = true;
                     }
                     break;
@@ -5352,7 +5351,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 17:
                     if (GET_SKILL(ch, SKILL_KNEE) > 0) {
                         send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R knee @Gnext!@n\r\n");
-                        COMBO(ch) = 3;
+                        ch->setBaseStat<int>("combo", 3);
                         success = true;
                     }
                     break;
@@ -5360,7 +5359,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 19:
                     if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
                         send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R roundhouse @Gnext!@n\r\n");
-                        COMBO(ch) = 4;
+                        ch->setBaseStat<int>("combo", 4);
                         success = true;
                     }
                     break;
@@ -5368,21 +5367,21 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                 case 21:
                     if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
                         send_to_char(ch, "@GYou have a chance for a COMBO! Try an@R uppercut @Gnext!@n\r\n");
-                        COMBO(ch) = 5;
+                        ch->setBaseStat<int>("combo", 5);
                         success = true;
                     }
                     break;
                 case 22:
                     if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
                         send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R heeldrop @Gnext!@n\r\n");
-                        COMBO(ch) = 8;
+                        ch->setBaseStat<int>("combo", 8);
                         success = true;
                     }
                     break;
                 case 24:
                     if (GET_SKILL(ch, SKILL_SLAM) > 0) {
                         send_to_char(ch, "@GYou have a chance for a COMBO! Try a@R slam @Gnext!@n\r\n");
-                        COMBO(ch) = 6;
+                        ch->setBaseStat<int>("combo", 6);
                         success = true;
                     }
                     break;
@@ -5390,7 +5389,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
         }
         return 0;
     } else if (LASTATK(ch) == COMBO(ch) && COMBHITS(ch) < physical_mastery(ch)) {
-        COMBHITS(ch) += 1;
+        ch->modBaseStat<int>("combo_hits", 1);
         while (success == false) {
             if (COMBHITS(ch) >= 20) { /* We're kicking ass! */
                 switch (rand_number(1, 34)) {
@@ -5405,7 +5404,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 2;
+                            ch->setBaseStat("combo", 2);
                             success = true;
                         }
                         break;
@@ -5420,7 +5419,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 3;
+                            ch->setBaseStat("combo", 3);
                             success = true;
                         }
                         break;
@@ -5432,7 +5431,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 5;
+                            ch->setBaseStat("combo", 5);
                             success = true;
                         }
                         break;
@@ -5444,7 +5443,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 4;
+                            ch->setBaseStat("combo", 4);
                             success = true;
                         }
                         break;
@@ -5453,22 +5452,22 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 29:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
-                            COMBO(ch) = 51;
+                            ch->setBaseStat("combo", 51);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 56;
+                            ch->setBaseStat("combo", 56);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 52;
+                            ch->setBaseStat("combo", 52);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 6;
+                            ch->setBaseStat("combo", 6);
                             success = true;
                         }
                         break;
@@ -5479,22 +5478,22 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 34:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
-                            COMBO(ch) = 51;
+                            ch->setBaseStat("combo", 51);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 56;
+                            ch->setBaseStat("combo", 56);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 52;
+                            ch->setBaseStat("combo", 52);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 8;
+                            ch->setBaseStat("combo", 8);
                             success = true;
                         }
                         break;
@@ -5514,7 +5513,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 2;
+                            ch->setBaseStat("combo", 2);
                             success = true;
                         }
                         break;
@@ -5531,7 +5530,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 3;
+                            ch->setBaseStat("combo", 3);
                             success = true;
                         }
                         break;
@@ -5541,7 +5540,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 0;
+                            ch->setBaseStat("combo", 0);
                             success = true;
                         }
                         break;
@@ -5551,7 +5550,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KICK) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 1;
+                            ch->setBaseStat("combo", 1);
                             success = true;
                         }
                         break;
@@ -5560,7 +5559,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 5;
+                            ch->setBaseStat("combo", 5);
                             success = true;
                         }
                         break;
@@ -5571,51 +5570,51 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 4;
+                            ch->setBaseStat("combo", 4);
                             success = true;
                         }
                         break;
                     case 35:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
-                            COMBO(ch) = 51;
+                            ch->setBaseStat("combo", 51);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 56;
+                            ch->setBaseStat("combo", 56);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 52;
+                            ch->setBaseStat("combo", 52);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 6;
+                            ch->setBaseStat("combo", 6);
                             success = true;
                         }
                         break;
                     case 36:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
-                            COMBO(ch) = 51;
+                            ch->setBaseStat("combo", 51);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 56;
+                            ch->setBaseStat("combo", 56);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 52;
+                            ch->setBaseStat("combo", 52);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 8;
+                            ch->setBaseStat("combo", 8);
                             success = true;
                         }
                         break;
@@ -5630,7 +5629,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 2;
+                            ch->setBaseStat("combo", 2);
                             success = true;
                         }
                         break;
@@ -5642,7 +5641,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 3;
+                            ch->setBaseStat("combo", 3);
                             success = true;
                         }
                         break;
@@ -5657,7 +5656,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 0;
+                            ch->setBaseStat("combo", 0);
                             success = true;
                         }
                         break;
@@ -5672,7 +5671,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KICK) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 1;
+                            ch->setBaseStat("combo", 1);
                             success = true;
                         }
                         break;
@@ -5682,7 +5681,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 5;
+                            ch->setBaseStat("combo", 5);
                             success = true;
                         }
                         break;
@@ -5691,7 +5690,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 4;
+                            ch->setBaseStat("combo", 4);
                             success = true;
                         }
                         break;
@@ -5699,44 +5698,44 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                     case 33:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
-                            COMBO(ch) = 51;
+                            ch->setBaseStat("combo", 51);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 56;
+                            ch->setBaseStat("combo", 56);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 52;
+                            ch->setBaseStat("combo", 52);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_SLAM) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rslam@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 6;
+                            ch->setBaseStat("combo", 6);
                             success = true;
                         }
                         break;
                     case 34:
                         if (GET_SKILL(ch, SKILL_BASH) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try bash@G!@n\r\n", COMBHITS(ch));
-                            COMBO(ch) = 51;
+                            ch->setBaseStat("combo", 51);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_TAILWHIP) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rtailwhip@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 56;
+                            ch->setBaseStat("combo", 56);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEADBUTT) > 0 && rand_number(1, 2) == 2) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheadbutt@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 52;
+                            ch->setBaseStat("combo", 52);
                             success = true;
                         } else if (GET_SKILL(ch, SKILL_HEELDROP) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rheeldrop@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 8;
+                            ch->setBaseStat("combo", 8);
                             success = true;
                         }
                         break;
@@ -5750,7 +5749,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 2;
+                            ch->setBaseStat("combo", 2);
                             success = true;
                         }
                         break;
@@ -5761,7 +5760,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 3;
+                            ch->setBaseStat("combo", 3);
                             success = true;
                         }
                         break;
@@ -5778,7 +5777,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 0;
+                            ch->setBaseStat("combo", 0);
                             success = true;
                         }
                         break;
@@ -5795,7 +5794,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KICK) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 1;
+                            ch->setBaseStat("combo", 1);
                             success = true;
                         }
                         break;
@@ -5803,7 +5802,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_UPPERCUT) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R uppercut@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 5;
+                            ch->setBaseStat("combo", 5);
                             success = true;
                         }
                         break;
@@ -5811,7 +5810,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ROUNDHOUSE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rroundhouse@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 4;
+                            ch->setBaseStat("combo", 4);
                             success = true;
                         }
                         break;
@@ -5824,7 +5823,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_ELBOW) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try an@R elbow@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 2;
+                            ch->setBaseStat("combo", 2);
                             success = true;
                         }
                         break;
@@ -5834,7 +5833,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KNEE) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rknee@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 3;
+                            ch->setBaseStat("combo", 3);
                             success = true;
                         }
                         break;
@@ -5853,7 +5852,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_PUNCH) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rpunch@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 0;
+                            ch->setBaseStat("combo", 0);
                             success = true;
                         }
                         break;
@@ -5872,7 +5871,7 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
                         if (GET_SKILL(ch, SKILL_KICK) > 0) {
                             send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Next try a @Rkick@G!@n\r\n",
                                          COMBHITS(ch));
-                            COMBO(ch) = 1;
+                            ch->setBaseStat("combo", 1);
                             success = true;
                         }
                         break;
@@ -5881,16 +5880,16 @@ int handle_combo(struct char_data *ch, struct char_data *vict) {
         }
         return COMBHITS(ch);
     } else if (LASTATK(ch) == COMBO(ch) && COMBHITS(ch) >= physical_mastery(ch)) {
-        COMBHITS(ch) += 1;
+        ch->modBaseStat<int>("combo_hits", 1);
         send_to_char(ch, "@D(@GC-c-combo Bonus @gx%d@G!@D)@C Combo FINISHED for massive damage@G!@n\r\n", COMBHITS(ch));
     } else if (COMBO(ch) != LASTATK(ch) && COMBO(ch) > -1) {
         send_to_char(ch, "@GCombo failed!@n\r\n");
-        COMBO(ch) = -1;
-        COMBHITS(ch) = 0;
+        ch->setBaseStat<int>("combo", -1);
+        ch->setBaseStat<int>("combo_hits", 0);
         return 0;
     } else {
-        COMBO(ch) = -1;
-        COMBHITS(ch) = 0;
+        ch->setBaseStat<int>("combo", -1);
+        ch->setBaseStat<int>("combo_hits", 0);
         return 0;
     }
     return 0;
@@ -6102,7 +6101,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r writhes on the ground screaming in pain before finally dying!@n", true, ch, nullptr,
                         vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
                 case 5:
@@ -6113,7 +6112,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true,
                         ch, nullptr, vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
             }
@@ -6149,7 +6148,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r writhes in the water screaming in pain before finally dying!@n", true, ch, nullptr,
                         vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
                 case 5:
@@ -6160,7 +6159,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r hits the water dead with such force that blood mixed with water flies into the air briefly!@n",
                         true, ch, nullptr, vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
             }
@@ -6195,7 +6194,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r writhes in space trying to scream in pain before $e finally dies!@n", true, ch, nullptr,
                         vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
                 case 5:
@@ -6206,7 +6205,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r dies suddenly leaving behind a badly damaged corpse floating in space!@n", true, ch,
                         nullptr, vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
             }
@@ -6241,7 +6240,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r writhes in midair screaming in pain before finally dying!@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
                 case 5:
@@ -6252,7 +6251,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r hits the ground dead with such force that blood flies into the air briefly!@n", true,
                         ch, nullptr, vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
             }
@@ -6287,7 +6286,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r writhes and thrashes in the water trying to scream before finally dying!@n", true, ch,
                         nullptr, vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
                 case 5:
@@ -6298,7 +6297,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@R$N@r hits the ground dead with such force that blood floods out of $S body into the water!@n",
                         true, ch, nullptr, vict, TO_NOTVICT);
                     if (GET_DEATH_TYPE(vict) != DTYPE_HEAD) {
-                        GET_DEATH_TYPE(vict) = DTYPE_PULP;
+                        vict->setBaseStat("death_type", DTYPE_PULP);
                     }
                     break;
             }
@@ -6313,7 +6312,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 2:
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
@@ -6322,13 +6321,13 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_VICT);
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_HALF;
+                    vict->setBaseStat("death_type", DTYPE_HALF);
                     break;
                 case 3:
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 4:
                     act("@R$N@r falls down as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -6351,7 +6350,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r explodes and chunks of $M shower to the ground.@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 2:
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
@@ -6360,13 +6359,13 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_VICT);
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_HALF;
+                    vict->setBaseStat("death_type", DTYPE_HALF);
                     break;
                 case 3:
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 4:
                     act("@R$N@r falls down as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -6390,7 +6389,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r explodes and chunks of $M shower out into every direction of space.@n", true, ch,
                         nullptr, vict, TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 2:
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
@@ -6399,13 +6398,13 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_VICT);
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_HALF;
+                    vict->setBaseStat("death_type", DTYPE_HALF);
                     break;
                 case 3:
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 4:
                     act("@R$N@r floats away as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);
@@ -6428,7 +6427,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r explodes and chunks of $M shower toward the ground far below.@n", true, ch, nullptr,
                         vict, TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 2:
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
@@ -6437,13 +6436,13 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_VICT);
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_HALF;
+                    vict->setBaseStat("death_type", DTYPE_HALF);
                     break;
                 case 3:
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 4:
                     act("@R$N@r falls down toward the ground as a smoldering corpse!@n", true, ch, nullptr, vict,
@@ -6470,7 +6469,7 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                     act("@rYou explode leaving only chunks behind.@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r explodes and chunks of $M float freely through the water.@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 2:
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
@@ -6479,13 +6478,13 @@ void handle_death_msg(struct char_data *ch, struct char_data *vict, int type) {
                         TO_VICT);
                     act("@rThe bottom half of @R$N@r is all that remains as $E dies.@n", true, ch, nullptr, vict,
                         TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_HALF;
+                    vict->setBaseStat("death_type", DTYPE_HALF);
                     break;
                 case 3:
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_CHAR);
                     act("@rYour body completely disintegrates in the attack!@n", true, ch, nullptr, vict, TO_VICT);
                     act("@R$N@r is completely disintegrated in the attack!@n", true, ch, nullptr, vict, TO_NOTVICT);
-                    GET_DEATH_TYPE(vict) = DTYPE_VAPOR;
+                    vict->setBaseStat("death_type", DTYPE_VAPOR);
                     break;
                 case 4:
                     act("@R$N@r falls back as a smoldering corpse!@n", true, ch, nullptr, vict, TO_CHAR);

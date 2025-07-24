@@ -3059,7 +3059,7 @@ ACMD(do_drink) {
     gain_condition(ch, THIRST, drink_aff[GET_OBJ_VAL(temp, VAL_DRINKCON_LIQUID)][THIRST] * amount);
     if (GET_FOODR(ch) == 0 && subcmd != SCMD_SIP) {
         ch->incCurST((ch->getMaxST() / 100) * amount);
-        GET_FOODR(ch) = 2;
+        ch->setBaseStat("food_rejuvenation", 2);
         send_to_char(ch, "You feel rejuvinated by it.\r\n");
     }
     if (GET_SKILL(ch, SKILL_WELLSPRING) && (ch->getCurKI()) < GET_MAX_MANA(ch) && wasthirsty <= 30 &&
@@ -3185,7 +3185,7 @@ ACMD(do_eat) {
     gain_condition(ch, HUNGER, amount);
     if (GET_FOODR(ch) == 0 && subcmd != SCMD_TASTE) {
         ch->incCurST((ch->getMaxST() / 100) * amount);
-        GET_FOODR(ch) = 2;
+        ch->setBaseStat("food_rejuvenation", 2);
         send_to_char(ch, "You feel rejuvinated by it.\r\n");
     }
 

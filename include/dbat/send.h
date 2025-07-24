@@ -104,9 +104,9 @@ void send_to_room(struct room_data *room, fmt::string_view format, Args&&... arg
                     d->output += formatted_string;
                 }
             }
-            if (GET_EAVESDROP(d->character) > 0) {
+            if (auto eaves = GET_EAVESDROP(d->character); eaves > 0) {
                 int roll = rand_number(1, 101);
-                if (GET_EAVESDROP(d->character) == room->vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
+                if (eaves == room->vn && GET_SKILL(d->character, SKILL_EAVESDROP) > roll) {
                     d->output += "@c-----Eavesdrop-----@n\r\n%s\r\n@c-----Eavesdrop-----@n\r\n";
                     d->output += formatted_string;
                 }

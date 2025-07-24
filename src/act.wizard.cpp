@@ -234,7 +234,7 @@ ACMD(do_news) {
         fclose(fl);
 
         if (entries > 0) {
-            GET_LPLAY(ch) = time(nullptr);
+            ch->setBaseStat("last_played", time(nullptr));
             WAIT_STATE(ch, PULSE_1SEC);
             write_to_output(ch->desc, buf);
         } else {
@@ -252,7 +252,7 @@ ACMD(do_news) {
 
     if (found == true) {
         send_to_char(ch, "%s\r\n", buf);
-        GET_LPLAY(ch) = time(nullptr);
+        ch->setBaseStat("last_played", time(nullptr));
         *buf = '\0';
         *title = '\0';
         *lastline = '\0';
@@ -675,7 +675,7 @@ ACMD(do_recall) {
             char_from_room(ch);
             char_to_room(ch, real_room(2));
             look_at_room(IN_ROOM(ch), ch, 0);
-            GET_LOADROOM(ch) = ch->getRoomVnum();
+            ch->setBaseStat("load_room", ch->getRoomVnum());
         }
     }
 
@@ -1524,7 +1524,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
     if (IS_NPC(k)) {
         char *tmstr;
-        tmstr = (char *) asctime(localtime(&GET_LPLAY(k)));
+        auto tm = GET_LPLAY(k);
+        tmstr = (char *) asctime(localtime(&tm));
         *(tmstr + strlen(tmstr) - 1) = '\0';
         send_to_char(ch, "LOADED AT: [%s]\r\n", tmstr);
     }
@@ -1538,8 +1539,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
 
     send_to_char(ch, "DROOM: [%5d]\r\n", GET_DROOM(k));
     if (IS_MOB(k)) {
-        if (k->master_id != NOTHING)
-            sprintf(buf, ", Master: %s", get_name_by_id(k->master_id));
+        if (auto mas = k->getBaseStat<int>("master_id");  mas != NOTHING)
+            sprintf(buf, ", Master: %s", get_name_by_id(mas));
         else
             buf[0] = 0;
         send_to_char(ch, "Keyword: %s, VNum: [%5d], RNum: [%5d]%s\r\n", k->name,
@@ -1565,10 +1566,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
                      buf1, cmbuf2, (int) k->time.played / 3600,
                      (int) (((int64_t)k->time.played % 3600) / 60), 0);
 
-        if (k->desc) {
-            send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_USER(k));
-        } else {
-            send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", GET_LOG_USER(k));
+        if (auto find = players.find(k->id); find != players.end()) {
+            send_to_char(ch, "@YOwned by User@D: [@C%s@D]@n\r\n", find->second.account->name.c_str());
         }
         if (!IS_NPC(k)) {
             send_to_char(ch, "@RCharacter Deaths@D: @r%d@n\r\n", GET_DCOUNT(k));
@@ -1609,9 +1608,8 @@ static void do_stat_character(struct char_data *ch, struct char_data *k) {
     send_to_char(ch, "Coins: [%9d], Bank: [%9d] (Total: %d)\r\n",
                  GET_GOLD(k), GET_BANK_GOLD(k), GET_GOLD(k) + GET_BANK_GOLD(k));
 
-    send_to_char(ch, "Armor: [%d ], Damage: [%2d], Saving throws: [%d/%d/%d]\r\n",
-                 GET_ARMOR(k), GET_DAMAGE_MOD(k), GET_SAVE_MOD(k, 0),
-                 GET_SAVE_MOD(k, 1), GET_SAVE_MOD(k, 2));
+    send_to_char(ch, "Armor: [%d ], Damage: [%2d]\r\n",
+                 GET_ARMOR(k), GET_DAMAGE_MOD(k));
 
     sprinttype(GET_POS(k), position_types, buf, sizeof(buf));
     send_to_char(ch, "Pos: %s, Fighting: %s", buf, FIGHTING(k) ? GET_NAME(FIGHTING(k)) : "Nobody");
@@ -2564,7 +2562,7 @@ ACMD(do_advance) {
         return;
     } else if ((newlevel = atoi(level)) <= 0) {
         if (!strcasecmp("demote", level)) {
-            victim->set(CharNum::level, 1);
+            victim->setBaseStat<int>("level", 1);
             victim->setBaseStat("powerlevel",150);
             victim->setBaseStat("ki",150);
             victim->setBaseStat("stamina",150);
@@ -2665,7 +2663,7 @@ ACMD(do_restore) {
 }
 
 void perform_immort_vis(struct char_data *ch) {
-    GET_INVIS_LEV(ch) = 0;
+    ch->setBaseStat("invis_level", 0);
 }
 
 static void perform_immort_invis(struct char_data *ch, int level) {
@@ -2681,7 +2679,7 @@ static void perform_immort_invis(struct char_data *ch, int level) {
                 tch, TO_VICT);
     }
 
-    GET_INVIS_LEV(ch) = level;
+    ch->setBaseStat("invis_level", level);
     send_to_char(ch, "Your invisibility level is %d.\r\n", level);
 }
 
@@ -3141,7 +3139,7 @@ ACMD(do_wizutil) {
                     return;
                 }
                 vict->player_flags.set(PLR_FROZEN, true);
-                GET_FREEZE_LEV(vict) = GET_ADMLEVEL(ch);
+                vict->setBaseStat("freeze_level", GET_ADMLEVEL(ch));
                 send_to_char(vict,
                              "A bitter wind suddenly rises and drains every erg of heat from your body!\r\nYou feel frozen!\r\n");
                 send_to_char(ch, "Frozen.\r\n");
@@ -3860,7 +3858,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 send_to_char(ch, "You aren't godly enough for that!\r\n");
                 return (0);
             }
-            GET_INVIS_LEV(vict) = RANGE(0, GET_ADMLEVEL(vict));
+            vict->setBaseStat("invis_level", RANGE(0, GET_ADMLEVEL(vict)));
             break;
         case 25:
             if (GET_ADMLEVEL(ch) < ADMLVL_IMPL && ch != vict) {
@@ -3909,7 +3907,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
                 return (0);
             }
             value = MAX(0, value);
-            vict->set(CharNum::level, value);
+            vict->setBaseStat<int>("level", value);
             break;
         case 35:
             if ((rnum = real_room(value)) == NOWHERE) {
@@ -3941,12 +3939,13 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
         case 42:
             if (!strcasecmp(val_arg, "off")) {
                 vict->player_flags.set(PLR_LOADROOM, false);
-                GET_LOADROOM(vict) = NOWHERE;
+                vict->setBaseStat("load_room", NOWHERE);
             } else if (is_number(val_arg)) {
                 rvnum = atoi(val_arg);
                 if (real_room(rvnum) != NOWHERE) {
                     vict->player_flags.set(PLR_LOADROOM, true);
-                    GET_LOADROOM(vict) = rvnum;
+                    vict->setBaseStat("load_room", rvnum);
+
                     send_to_char(ch, "%s will enter at room #%d.\r\n", GET_NAME(vict), GET_LOADROOM(vict));
                 } else {
                     send_to_char(ch, "That room does not exist!\r\n");
@@ -4008,16 +4007,16 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
 
         case 51:
             if (is_abbrev(val_arg, "socials") || is_abbrev(val_arg, "actions"))
-                GET_OLC_ZONE(vict) = AEDIT_PERMISSION;
+                vict->setBaseStat<int>("olc_zone", AEDIT_PERMISSION);
             else if (is_abbrev(val_arg, "hedit"))
-                GET_OLC_ZONE(vict) = HEDIT_PERMISSION;
+                vict->setBaseStat<int>("olc_zone", HEDIT_PERMISSION);
             else if (is_abbrev(val_arg, "off"))
-                GET_OLC_ZONE(vict) = NOWHERE;
+                vict->setBaseStat<int>("olc_zone", NOWHERE);
             else if (!is_number(val_arg)) {
                 send_to_char(ch, "Value must be either 'socials', 'actions', 'hedit', 'off' or a zone number.\r\n");
                 return (0);
             } else
-                GET_OLC_ZONE(vict) = atoi(val_arg);
+                vict->setBaseStat<int>("olc_zone", atoi(val_arg));
             break;
 
         case 52: {
@@ -4096,18 +4095,22 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             break;
 
         case 67:
-            GET_DROOM(vict) = RANGE(0, 20000);
+            if(!world.contains(value)) {
+                send_to_char(ch, "There is no such room.\r\n");
+                return (0);
+            }
+            vict->setBaseStat("death_room", value);
             break;
 
         case 68:
-            GET_ABSORBS(vict) = RANGE(0, 3);
+            vict->setBaseStat<int>("absorbs", RANGE(0, 3));
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set absorbs for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set absorbs for %s.", GET_NAME(ch), GET_NAME(vict));
             break;
 
         case 69:
-            GET_UP(vict) += RANGE(1, 1000);
+            vict->modBaseStat<int>("upgrade_points", RANGE(1, 1000));
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set upgrade points for %s.",
                    GET_NAME(ch), GET_NAME(vict));
             log_imm_action("SET: %s has set upgrade points for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4116,10 +4119,10 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             send_to_char(ch, "Use the reward command.\r\n");
             break;
         case 72:
-            GET_BOOSTS(vict) = RANGE(-1000, 1000);
+            vict->setBaseStat<int>("boosts", RANGE(-1000, 1000));
             break;
         case 74:
-            GET_DCOUNT(vict) = RANGE(-1000, 1000);
+            vict->setBaseStat<int>("death_count", RANGE(-1000, 1000));
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set death count for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set death count for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4135,7 +4138,7 @@ static int perform_set(struct char_data *ch, struct char_data *vict, int mode,
             }
             break;
         case 78:
-            GET_SLOTS(vict) = RANGE(1, 1000);
+            vict->setBaseStat<int>("skill_slots", RANGE(1, 1000));
             mudlog(NRM, MAX(ADMLVL_GOD, GET_INVIS_LEV(ch)), true, "SET: %s has set skill slots for %s.", GET_NAME(ch),
                    GET_NAME(vict));
             log_imm_action("SET: %s has set skill slots for %s.", GET_NAME(ch), GET_NAME(vict));
@@ -4240,10 +4243,10 @@ ACMD(do_peace) {
         if (GET_ADMLEVEL(vict) > GET_ADMLEVEL(ch))
             continue;
         stop_fighting(vict);
-        GET_POS(vict) = POS_SITTING;
+        vict->setBaseStat("combo", POS_SITTING);
     }
     stop_fighting(ch);
-    GET_POS(ch) = POS_STANDING;
+    ch->setBaseStat("combo", POS_STANDING);
 }
 
 ACMD(do_wizupdate) {

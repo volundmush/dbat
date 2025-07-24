@@ -1014,8 +1014,6 @@ ACMD(do_mtransform) {
     ch->proto_script = m->proto_script;
     ch->appearances = m->appearances;
     ch->mob_specials = m->mob_specials;
-    ch->base_stats = m->base_stats;
-    ch->nums = m->nums;
     ch->stats = m->stats;
     ch->mob_flags = m->mob_flags;
     ch->bodyparts = m->bodyparts;

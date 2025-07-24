@@ -18,8 +18,6 @@
 
 void feato(int featnum, char *name, int in_game, int can_learn, int can_stack);
 
-void list_feats_known(struct char_data *ch);
-
 void list_feats_available(struct char_data *ch);
 
 void list_feats_complete(struct char_data *ch);
@@ -34,8 +32,6 @@ char buf3[MAX_STRING_LENGTH];
 char buf4[MAX_STRING_LENGTH];
 
 /* External functions*/
-int count_metamagic_feats(struct char_data *ch);
-
 void feato(int featnum, char *name, int in_game, int can_learn, int can_stack) {
     feat_list[featnum].name = name;
     feat_list[featnum].in_game = in_game;
@@ -198,46 +194,11 @@ int feat_is_available(struct char_data *ch, int featnum, int iarg, char *sarg) {
 }
 
 int is_proficient_with_armor(const struct char_data *ch, int cmarmor_type) {
-    return false;
+    return true;
 }
 
 int is_proficient_with_weapon(const struct char_data *ch, int cmweapon_type) {
-    switch (cmweapon_type) {
-        case WEAPON_TYPE_UNARMED:
-            return 1;
-        case WEAPON_TYPE_DAGGER:
-        case WEAPON_TYPE_MACE:
-        case WEAPON_TYPE_SICKLE:
-        case WEAPON_TYPE_SPEAR:
-        case WEAPON_TYPE_STAFF:
-        case WEAPON_TYPE_CROSSBOW:
-        case WEAPON_TYPE_SLING:
-        case WEAPON_TYPE_THROWN:
-        case WEAPON_TYPE_CLUB:
-            if (HAS_FEAT(ch, FEAT_SIMPLE_WEAPON_PROFICIENCY))
-                return true;
-            break;
-        case WEAPON_TYPE_SHORTBOW:
-        case WEAPON_TYPE_LONGBOW:
-        case WEAPON_TYPE_HAMMER:
-        case WEAPON_TYPE_LANCE:
-        case WEAPON_TYPE_FLAIL:
-        case WEAPON_TYPE_LONGSWORD:
-        case WEAPON_TYPE_SHORTSWORD:
-        case WEAPON_TYPE_GREATSWORD:
-        case WEAPON_TYPE_RAPIER:
-        case WEAPON_TYPE_SCIMITAR:
-        case WEAPON_TYPE_POLEARM:
-        case WEAPON_TYPE_BASTARD_SWORD:
-        case WEAPON_TYPE_AXE:
-            if (HAS_FEAT(ch, FEAT_MARTIAL_WEAPON_PROFICIENCY))
-                return true;
-            break;
-        default:
-            return false;
-            break;
-    }
-    return false;
+    return true;
 }
 
 int compare_feats(const void *x, const void *y) {
@@ -257,71 +218,6 @@ void sort_feats() {
     qsort(&feat_sort_info[1], NUM_FEATS_DEFINED, sizeof(int), compare_feats);
 }
 
-void list_feats_known(struct char_data *ch) {
-    int i, j, sortpos;
-    int none_shown = true;
-    int temp_value;
-    int added_hp = 0;
-    char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
-
-    // Display Headings
-    sprintf(buf + strlen(buf), "\r\n");
-    sprintf(buf + strlen(buf), "@WFeats Known@n\r\n");
-    sprintf(buf + strlen(buf), "@B~@R~@B~@R~@B~@R~@B~@R~@B~@R~@B~@n\r\n");
-    sprintf(buf + strlen(buf), "\r\n");
-
-    strcpy(buf2, buf);
-
-    for (sortpos = 1; sortpos <= NUM_FEATS_DEFINED; sortpos++) {
-
-        if (strlen(buf2) > MAX_STRING_LENGTH - 32)
-            break;
-
-        i = feat_sort_info[sortpos];
-        if (HAS_FEAT(ch, i) && feat_list[i].in_game) {
-            switch (i) {
-                case FEAT_SKILL_FOCUS:
-                    sprintf(buf, "%-20s (+%d points overall)\r\n", feat_list[i].name, HAS_FEAT(ch, i) * 2);
-                    strcat(buf2, buf);
-                    none_shown = false;
-                    break;
-                case FEAT_TOUGHNESS:
-                    temp_value = HAS_FEAT(ch, FEAT_TOUGHNESS);
-                    added_hp = temp_value * 3;
-                    sprintf(buf, "%-20s (+%d hp)\r\n", feat_list[i].name, added_hp);
-                    strcat(buf2, buf);
-                    none_shown = false;
-                    break;
-                case FEAT_IMPROVED_CRITICAL:
-                case FEAT_WEAPON_FINESSE:
-                case FEAT_WEAPON_FOCUS:
-                case FEAT_WEAPON_SPECIALIZATION:
-                case FEAT_GREATER_WEAPON_FOCUS:
-                case FEAT_GREATER_WEAPON_SPECIALIZATION:
-                    for (j = 0; j <= MAX_WEAPON_TYPES; j++) {
-                        if (HAS_COMBAT_FEAT(ch, feat_to_subfeat(i), j)) {
-                            sprintf(buf, "%-20s (%s)\r\n", feat_list[i].name, weapon_type[j]);
-                            strcat(buf2, buf);
-                            none_shown = false;
-                        }
-                    }
-                    break;
-                default:
-                    sprintf(buf, "%-20s\r\n", feat_list[i].name);
-                    strcat(buf2, buf);        /* The above, @ should always be safe to do. */
-                    none_shown = false;
-                    break;
-            }
-        }
-    }
-
-    if (none_shown) {
-        sprintf(buf, "You do not know any feats at this time.\r\n");
-        strcat(buf2, buf);
-    }
-
-    write_to_output(ch->desc, buf2);
-}
 
 void list_feats_available(struct char_data *ch) {
     char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
@@ -428,7 +324,7 @@ ACMD(do_feats) {
 
     if (is_abbrev(arg, "known") || !*arg) {
         send_to_char(ch, "Syntax is \"feats <available | complete | known>\".\r\n");
-        list_feats_known(ch);
+        //list_feats_known(ch);
     } else if (is_abbrev(arg, "available")) {
         list_feats_available(ch);
     } else if (is_abbrev(arg, "complete")) {

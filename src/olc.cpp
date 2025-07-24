@@ -94,7 +94,7 @@ ACMD(do_olc) {
             olc_set_show(ch, olc_mode, argument);
             return;
         case OLC_REPEAT:
-            if (!(olc_mode = GET_LAST_OLC_MODE(ch)) ||
+            if (!(olc_mode = ch->getBaseStat<int>("last_olc_mode")) ||
                 ((olc_targ = GET_LAST_OLC_TARG(ch)) == nullptr)) {
                 send_to_char(ch, "No last OLC operation!\r\n");
                 return;
@@ -161,7 +161,7 @@ ACMD(do_olc) {
         send_to_char(ch, "You can't modify that.\r\n");
         return;
     }
-    GET_LAST_OLC_MODE(ch) = olc_mode;
+    ch->setBaseStat<int>("last_olc_mode", olc_mode);
     GET_LAST_OLC_TARG(ch) = olc_targ;
 
     olc_ch = ch;

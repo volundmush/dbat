@@ -247,18 +247,12 @@ static void generate_multiform(struct char_data *ch, int count) {
             clone->look_description = strdup(ch->look_description);
         clone->race = ch->race;
         clone->sensei = ch->sensei;
-        clone->nums = ch->nums;
 
         clone->appearances = ch->appearances;
-        clone->base_stats = ch->base_stats;
+        clone->stats = ch->stats;
         clone->size = ch->size;
-        clone->trains = ch->trains;
-
-        clone->nums = ch->nums;
 
         clone->time = ch->time;
-
-        clone->tail_growth = ch->tail_growth;
 
         // Copying these values, but it shouldn't matter because clones no longer work this way.
 
@@ -336,7 +330,7 @@ static void resolve_song(struct char_data *ch) {
     if (instrument == 0) {
         send_to_char(ch, "You do not have an instrument.\r\n");
         act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->set(CharNum::mystic_melody, 0);
+        ch->setBaseStat<int>("mystic_melody", 0);
         return;
     }
 
@@ -416,7 +410,7 @@ static void resolve_song(struct char_data *ch) {
                 if ((ch->getCurKI()) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    ch->set(CharNum::mystic_melody, 0);
+                    ch->setBaseStat<int>("mystic_melody", 0);
                     return;
                 }
                 break;
@@ -465,7 +459,7 @@ static void resolve_song(struct char_data *ch) {
                 if ((ch->getCurKI()) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    ch->set(CharNum::mystic_melody, 0);
+                    ch->setBaseStat<int>("mystic_melody", 0);
                     return;
                 }
             }
@@ -630,9 +624,9 @@ static void resolve_song(struct char_data *ch) {
                             }
                             act("@c$n's@C triumphant and soaring music has powered a barrier around @c$N@C!@n", true,
                                 ch, nullptr, vict, TO_NOTVICT);
-                            GET_BARRIER(vict) += ((GET_MAX_MANA(ch) * 0.005) * (skill * 0.25)) + skill;
+                            vict->modBaseStat<int64_t>("barrier", ((GET_MAX_MANA(ch) * 0.005) * (skill * 0.25)) + skill);
                             if (GET_BARRIER(vict) >= GET_MAX_MANA(vict) * 0.75) {
-                                GET_BARRIER(vict) = GET_MAX_MANA(vict) * 0.75;
+                                vict->setBaseStat<int64_t>("barrier", GET_MAX_MANA(vict) * 0.75);
                             }
                             vict->affect_flags.set(AFF_SANCTUARY, true);
                             ch->incCurKI(ch->getPercentOfMaxKI(.02) + skill);
@@ -642,7 +636,7 @@ static void resolve_song(struct char_data *ch) {
                 if ((ch->getCurKI()) <= 0) {
                     send_to_char(ch, "You no longer have the ki necessary to play your song.\r\n");
                     act("@c$n@C stops playing $s song.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                    ch->set(CharNum::mystic_melody, 0);
+                    ch->setBaseStat<int>("mystic_melody", 0);
                     return;
                 }
                 break;
@@ -655,56 +649,56 @@ static void resolve_song(struct char_data *ch) {
             case SONG_TELEPORT_EARTH:
                 char_from_room(ch);
                 char_to_room(ch, real_room(300));
-                ch->set(CharNum::mystic_melody, 0);
+                ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Earth and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_VEGETA:
                 char_from_room(ch);
                 char_to_room(ch, real_room(2234));
-                ch->set(CharNum::mystic_melody, 0);
+                ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Vegeta and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_FRIGID:
                 char_from_room(ch);
                 char_to_room(ch, real_room(4047));
-                ch->set(CharNum::mystic_melody, 0);
+                ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Frigid and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_NAMEK:
                 char_from_room(ch);
                 char_to_room(ch, real_room(10182));
-                ch->set(CharNum::mystic_melody, 0);
+                ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Namek and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_KANASSA:
                 char_from_room(ch);
                 char_to_room(ch, real_room(14910));
-                ch->set(CharNum::mystic_melody, 0);
+                ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Kanassa and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_AETHER:
                 char_from_room(ch);
                 char_to_room(ch, real_room(12025));
-                ch->set(CharNum::mystic_melody, 0);
+                ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Aether and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_ARLIA:
                 char_from_room(ch);
                 char_to_room(ch, real_room(16087));
-                ch->set(CharNum::mystic_melody, 0);
+                ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Arlia and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
             case SONG_TELEPORT_KONACK:
                 char_from_room(ch);
                 char_to_room(ch, real_room(8003));
-                ch->set(CharNum::mystic_melody, 0);
+                ch->setBaseStat<int>("mystic_melody", 0);
                 act("@CFinally as the last of your comrades has been teleported you teleport yourself to Konack and stop your song.@n",
                     true, ch, nullptr, nullptr, TO_CHAR);
                 break;
@@ -738,7 +732,7 @@ ACMD(do_song) {
     if (GET_SONG(ch)) {
         act("@cYou stop playing your ocarina.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n stops playing their ocarina.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        ch->set(CharNum::mystic_melody, 0);
+        ch->setBaseStat<int>("mystic_melody", 0);
         return;
     }
     char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -787,7 +781,7 @@ ACMD(do_song) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C begins to play a song on $s ocarina. The music seems to be some sort of lullaby.@n", true,
             ch, nullptr, nullptr, TO_ROOM);
-        ch->set(CharNum::mystic_melody, SONG_SAFETY);
+        ch->setBaseStat<int>("mystic_melody", SONG_SAFETY);
         ch->decCurKI(cost);
         return;
     }
@@ -805,7 +799,7 @@ ACMD(do_song) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C begins to play a song on $s ocarina. Depressing low toned music issues forth from the ocarina.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->set(CharNum::mystic_melody, SONG_SHADOW_STITCH);
+        ch->setBaseStat<int>("mystic_melody", SONG_SHADOW_STITCH);
         ch->decCurKI(cost);
         return;
     }
@@ -832,21 +826,21 @@ ACMD(do_song) {
         }
         
         if (!strcasecmp(arg2, "earth")) {
-            ch->set(CharNum::mystic_melody, SONG_TELEPORT_EARTH);
+            ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_EARTH);
         } else if (!strcasecmp(arg2, "frigid")) {
-            ch->set(CharNum::mystic_melody, SONG_TELEPORT_FRIGID);
+            ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_FRIGID);
         } else if (!strcasecmp(arg2, "vegeta")) {
-            ch->set(CharNum::mystic_melody, SONG_TELEPORT_VEGETA);
+            ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_VEGETA);
         } else if (!strcasecmp(arg2, "namek")) {
-            ch->set(CharNum::mystic_melody, SONG_TELEPORT_NAMEK);
+            ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_NAMEK);
         } else if (!strcasecmp(arg2, "arlia")) {
-            ch->set(CharNum::mystic_melody, SONG_TELEPORT_ARLIA);
+            ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_ARLIA);
         } else if (!strcasecmp(arg2, "kanassa")) {
-            ch->set(CharNum::mystic_melody, SONG_TELEPORT_KANASSA);
+            ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_KANASSA);
         } else if (!strcasecmp(arg2, "konack")) {
-            ch->set(CharNum::mystic_melody, SONG_TELEPORT_KONACK);
+            ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_KONACK);
         } else if (!strcasecmp(arg2, "aether")) {
-            ch->set(CharNum::mystic_melody, SONG_TELEPORT_AETHER);
+            ch->setBaseStat<int>("mystic_melody", SONG_TELEPORT_AETHER);
         } else {
             send_to_char(ch,
                             "Syntax: song teleport (earth | vegeta | namek | aether | konack | kanassa | arlia | frigid)\r\n");
@@ -872,7 +866,7 @@ ACMD(do_song) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@c$n@C begins to play a song on $s ocarina. A triumphant song full of soaring sounds from the ocarina as it is played.@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        ch->set(CharNum::mystic_melody, SONG_SHIELDING);
+        ch->setBaseStat<int>("mystic_melody", SONG_SHIELDING);
         ch->decCurKI(cost);
         return;
     }
@@ -902,23 +896,23 @@ ACMD(do_preference) {
 
     if (!strcasecmp(arg, "throw")) {
         send_to_char(ch, "You will now favor throwing weapons as fighting specialization. You're sure to nail it.\r\n");
-        GET_PREFERENCE(ch) = PREFERENCE_THROWING;
+        ch->setBaseStat("preference", PREFERENCE_THROWING);
         auto &s = ch->skill[SKILL_THROW];
         if(s.level <= 90) s.level += 10;
         else if(s.level < 100) s.level = 100;
         return;
     } else if (!strcasecmp(arg, "hand")) {
         send_to_char(ch, "You will now favor your body as your fighting specialization. Your body is ready.\r\n");
-        GET_PREFERENCE(ch) = PREFERENCE_H2H;
+        ch->setBaseStat("preference", PREFERENCE_H2H);
         return;
     } else if (!strcasecmp(arg, "ki")) {
         send_to_char(ch,
                      "You will now favor your ki energy as your fighting specialization. I expect more than a few smoldering craters.\r\n");
-        GET_PREFERENCE(ch) = PREFERENCE_KI;
+        ch->setBaseStat("preference", PREFERENCE_KI);
         return;
     } else if (!strcasecmp(arg, "weapon")) {
         send_to_char(ch, "You will now favor your weapons as your fighting specialization. Let the blood fly!\r\n");
-        GET_PREFERENCE(ch) = PREFERENCE_WEAPON;
+        ch->setBaseStat("preference", PREFERENCE_WEAPON);
         return;
     } else {
         send_to_char(ch, "Syntax: preference (throw | weapon | hand | ki)\r\n");
@@ -1210,11 +1204,11 @@ ACMD(do_lifeforce) {
     if (setting <= 0) {
         send_to_char(ch,
                      "Your will just isn't in the fight, huh?\nYou will not use up life force to maintain your PL period.\r\n");
-        GET_LIFEPERC(ch) = 0;
+        ch->setBaseStat("life_percent", 0);
         return;
     }
     send_to_char(ch, "Your life force will automatically kick in at %d%s of your optimal PL.\r\n", setting, "%");
-    GET_LIFEPERC(ch) = setting;
+    ch->setBaseStat("life_percent", setting);
 }
 
 ACMD(do_defend) {
@@ -2585,7 +2579,7 @@ ACMD(do_amnisiac) {
         act("@WYou see @C$n@W quickly grab @C$N@W, pulling them into a deep, almost passionate kiss. @C$N@W seems shocked, and wobbles a bit, grabbing at @c$s@W head once @C$n@W lets go.",
             true, ch, nullptr, vict, TO_NOTVICT);
         ch->decCurKI(cost);
-        GET_STUPIDKISS(vict) = skill;
+        vict->setBaseStat("stupidkiss", skill);
         return;
     }
 
@@ -2604,7 +2598,7 @@ ACMD(do_shimmer) {
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
             ch->pref_flags.set(PRF_ARENAWATCH, true);
-            ARENA_IDNUM(ch) = -1;
+            ch->setBaseStat<room_vnum>("arena_watch", -1);
             send_to_char(ch, "You stop watching the arena action.\r\n");
         }
     }
@@ -2871,7 +2865,7 @@ ACMD(do_hydromancy) {
             obj_to_room(obj, IN_ROOM(ch));
         }
         improve_skill(ch, SKILL_STYLE, 1);
-        GET_COOLDOWN(ch) = 10;
+        ch->setBaseStat("concentrate_cooldown", 10);
     } else if (!strcasecmp(arg, "flood")) {
         if (!*arg2) {
             send_to_char(ch, "Syntax 1: hydromancy flood (direction)\r\n");
@@ -2899,7 +2893,7 @@ ACMD(do_hydromancy) {
         struct char_data *vict, *next_v;
 
         int last = LASTATK(ch);
-        LASTATK(ch) = 500;
+        ch->setBaseStat<int>("last_attack", 500);
         char bun[MAX_STRING_LENGTH], bunn[MAX_STRING_LENGTH];
 
         if (skill < chance) {
@@ -2948,9 +2942,9 @@ ACMD(do_hydromancy) {
                 }
             }
             dest->ground_effect = -3;
-            LASTATK(ch) = last;
+            ch->setBaseStat<int>("last_attack", last);
             WAIT_STATE(ch, PULSE_2SEC);
-            GET_COOLDOWN(ch) = 15;
+            ch->setBaseStat("concentrate_cooldown", 15);
         }
     } else {
         send_to_char(ch, "Syntax 1: hydromancy (flood) (direction)\r\n");
@@ -3274,7 +3268,7 @@ ACMD(do_hayasa) {
         af.location = APPLY_NONE;
         af.bitvector = AFF_HAYASA;
         affect_join(ch, &af, false, false, false, false);
-        GET_SPEEDBOOST(ch) = GET_SPEEDCALC(ch) * 0.5;
+        ch->setBaseStat<int>("speedboost", GET_SPEEDCALC(ch) * 0.5);
         reveal_hiding(ch, 0);
         act("@CYou close your eyes for a brief moment and focus your ki around your body as a soft blue glow. All your movements are faster now!@n",
             true, ch, nullptr, nullptr, TO_CHAR);
@@ -3391,7 +3385,7 @@ ACMD(do_arena) {
     } else if (!strcasecmp(arg, "stop")) {
         send_to_char(ch, "You stop viewing what's going on in the arena.\r\n");
         ch->pref_flags.set(PRF_ARENAWATCH, false);
-        ARENA_IDNUM(ch) = -1;
+        ch->setBaseStat<room_vnum>("arena_watch", -1);
         return;
     } else if (ch->getRoomVnum() != 17875) {
         send_to_char(ch, "You are not close enough to the arena floor to see it.\r\n");
@@ -3455,7 +3449,7 @@ ACMD(do_arena) {
                     nullptr, nullptr, TO_CHAR);
                 act("@C$n@w starts watching the action in the arena.@n", true, ch, nullptr, nullptr, TO_ROOM);
                 ch->pref_flags.set(PRF_ARENAWATCH, true);
-                ARENA_IDNUM(ch) = num;
+                ch->setBaseStat<room_vnum>("arena_watch", num);
             } else {
                 send_to_char(ch, "A fighter with such a number was not found in the arena.\r\n");
                 return;
@@ -5449,7 +5443,7 @@ ACMD(do_beacon) {
         return;
     } else {
         send_to_char(ch, "You stake out the room you are in and will return to it if you die and are revived.\r\n");
-        GET_DROOM(ch) = ch->getRoomVnum();
+        ch->setBaseStat("death_room", ch->getRoomVnum());
         return;
     }
 

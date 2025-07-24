@@ -106,16 +106,16 @@ void handle_teleport(struct char_data *ch, struct char_data *tar, int location) 
             DRAGGING(ch) = nullptr;
         }
         if (GRAPPLING(ch) && IS_NPC(GRAPPLING(ch))) {
-            GRAPTYPE(GRAPPLING(ch)) = -1;
+            GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
             GRAPPLED(GRAPPLING(ch)) = nullptr;
             GRAPPLING(ch) = nullptr;
-            GRAPTYPE(ch) = -1;
+            ch->setBaseStat<int>("grapple_type", -1);
         }
         if (GRAPPLED(ch) && IS_NPC(GRAPPLED(ch))) {
-            GRAPTYPE(GRAPPLED(ch)) = -1;
+            GRAPPLED(ch)->setBaseStat<int>("grapple_type", -1);
             GRAPPLING(GRAPPLED(ch)) = nullptr;
             GRAPPLED(ch) = nullptr;
-            GRAPTYPE(ch) = -1;
+            ch->setBaseStat<int>("grapple_type", -1);
         }
     } else { /* Wut... */
         basic_mud_log("ERROR: handle_teleport called without a destination.");
@@ -868,7 +868,7 @@ ACMD(do_move) {
     if (GET_COND(ch, DRUNK) > 4 && (rand_number(1, 9) + GET_COND(ch, DRUNK)) >= rand_number(14, 20)) {
         send_to_char(ch, "You wobble around and then fall on your ass.\r\n");
         act("@C$n@W wobbles around before falling on $s ass@n.", true, ch, nullptr, nullptr, TO_ROOM);
-        GET_POS(ch) = POS_SITTING;
+        ch->setBaseStat<int>("position", POS_SITTING);
         return;
     }
 
@@ -962,16 +962,16 @@ ACMD(do_move) {
     }
     if (GET_EAVESDROP(ch) > 0) {
         send_to_char(ch, "You stop eavesdropping.\r\n");
-        GET_EAVESDROP(ch) = real_room(0);
+        ch->setBaseStat("listen_room", 0);
     }
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
             ch->pref_flags.set(PRF_ARENAWATCH, false);
-            ARENA_IDNUM(ch) = -1;
+            ch->setBaseStat<room_vnum>("arena_watch", -1);
         }
         if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
             ch->getRoomVnum() != 1) {
-            GET_LOADROOM(ch) = ch->getRoomVnum();
+            ch->setBaseStat("load_room", ch->getRoomVnum());
         }
 
         auto ratio = ch->getBaseStat("burden_ratio");
@@ -2056,12 +2056,12 @@ static void handle_fly_space(char_data *ch) {
     }
 
     reveal_hiding(ch, 0);
-    GET_ALT(ch) = 2;
+    ch->setBaseStat<int>("altitude", 2);
     ch->affect_flags.set(AFF_FLYING, true);
     if (!block_calc(ch)) {
         return;
     }
-    GET_ALT(ch) = 0;
+    ch->setBaseStat<int>("altitude", 0);
     ch->affect_flags.set(AFF_FLYING, false);
 
     if(planet) {
@@ -2134,13 +2134,13 @@ ACMD(do_fly) {
 
     auto set_flying = [&](int alt) {
         reveal_hiding(ch, 0);
-        GET_ALT(ch) = alt;
+        ch->setBaseStat<int>("altitude", alt);
         ch->affect_flags.set(AFF_FLYING, true);
         if (auto chair = SITS(ch); chair) {
             chair->sitting.reset();
             ch->sits.reset();
         }
-        GET_POS(ch) = POS_STANDING;
+        ch->setBaseStat<int>("position", POS_STANDING);
         if(!IS_ANDROID(ch))
             ch->modCurVitalDam(CharVital::ki, 0.01);
     };
@@ -2182,7 +2182,7 @@ ACMD(do_fly) {
             act("@W$n starts to drift slowly!@n", true, ch, nullptr, nullptr, TO_ROOM);
         }
         ch->affect_flags.set(AFF_FLYING, false);
-        GET_ALT(ch) = 0;
+        ch->setBaseStat<int>("altitude", 0);
         return;
     }
 
@@ -2232,13 +2232,13 @@ ACMD(do_stand) {
             act("$n clambers to $s feet.", true, ch, nullptr, nullptr, TO_ROOM);
             if (chair) autochair(ch, chair);
             /* May be sitting for some reason and may still be fighting. */
-            GET_POS(ch) = FIGHTING(ch) ? POS_FIGHTING : POS_STANDING;
+            ch->setBaseStat<int>("position", FIGHTING(ch) ? POS_FIGHTING : POS_STANDING);
             break;
         case POS_RESTING:
             send_to_char(ch, "You stop resting, and stand up.\r\n");
             act("$n stops resting, and clambers to $s feet.", true, ch, nullptr, nullptr, TO_ROOM);
             if (chair) autochair(ch, chair);
-            GET_POS(ch) = POS_STANDING;
+            ch->setBaseStat("combo", POS_STANDING);
             break;
         case POS_SLEEPING:
             send_to_char(ch, "You have to wake up first!\r\n");
@@ -2247,7 +2247,7 @@ ACMD(do_stand) {
             send_to_char(ch, "You stop floating around, and put your feet on the ground.\r\n");
             act("$n stops floating around, and puts $s feet on the ground.",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            GET_POS(ch) = POS_STANDING;
+            ch->setBaseStat("combo", POS_STANDING);
             break;
     }
 }
@@ -2287,7 +2287,7 @@ ACMD(do_sit) {
                 reveal_hiding(ch, 0);
                 send_to_char(ch, "You sit down.\r\n");
                 act("$n sits down.", false, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_SITTING;
+                ch->setBaseStat("combo", POS_SITTING);
                 break;
             case POS_SITTING:
                 send_to_char(ch, "You're sitting already.\r\n");
@@ -2295,7 +2295,7 @@ ACMD(do_sit) {
             case POS_RESTING:
                 send_to_char(ch, "You stop resting, and sit up.\r\n");
                 act("$n stops resting.", true, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_SITTING;
+                ch->setBaseStat("combo", POS_SITTING);
                 break;
             case POS_SLEEPING:
                 send_to_char(ch, "You have to wake up first.\r\n");
@@ -2306,7 +2306,7 @@ ACMD(do_sit) {
             default:
                 send_to_char(ch, "You stop floating around, and sit down.\r\n");
                 act("$n stops floating around, and sits down.", true, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_SITTING;
+                ch->setBaseStat("combo", POS_SITTING);
                 break;
         }
         return;
@@ -2341,7 +2341,7 @@ ACMD(do_sit) {
             reveal_hiding(ch, 0);
             act("You sit down on $p.", false, ch, chair, nullptr, TO_CHAR);
             act("$n sits down on $p.", false, ch, chair, nullptr, TO_ROOM);
-            GET_POS(ch) = POS_SITTING;
+            ch->setBaseStat("combo", POS_SITTING);
             ch->sits = chair->shared();
             chair->sitting = ch->shared();
             break;
@@ -2360,7 +2360,7 @@ ACMD(do_sit) {
         default:
             send_to_char(ch, "You stop floating around, and sit down.\r\n");
             act("$n stops floating around, and sits down.", true, ch, nullptr, nullptr, TO_ROOM);
-            GET_POS(ch) = POS_SITTING;
+            ch->setBaseStat("combo", POS_SITTING);
             break;
     }
 }
@@ -2388,7 +2388,7 @@ ACMD(do_rest) {
             send_to_char(ch, "You have a barrier around you and can't rest.\r\n");
             return;
         } else {
-            GET_BARRIER(ch) = 0;
+            ch->setBaseStat<int64_t>("barrier", 0);
             ch->affect_flags.set(AFF_SANCTUARY, false);
         }
     }
@@ -2430,12 +2430,12 @@ ACMD(do_rest) {
                 reveal_hiding(ch, 0);
                 send_to_char(ch, "You lay down and rest your tired bones.\r\n");
                 act("$n lays down and rests.", true, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_RESTING;
+                ch->setBaseStat("combo", POS_RESTING);
                 break;
             case POS_SITTING:
                 send_to_char(ch, "You rest your tired bones.\r\n");
                 act("$n rests.", true, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_RESTING;
+                ch->setBaseStat("combo", POS_RESTING);
                 break;
             case POS_RESTING:
                 send_to_char(ch, "You are already resting.\r\n");
@@ -2449,7 +2449,7 @@ ACMD(do_rest) {
             default:
                 send_to_char(ch, "You stop floating around, and stop to rest your tired bones.\r\n");
                 act("$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_RESTING;
+                ch->setBaseStat("combo", POS_RESTING);
                 break;
         }
         return;
@@ -2485,7 +2485,7 @@ ACMD(do_rest) {
             act("$n lays down and rests on $p.", true, ch, chair, nullptr, TO_ROOM);
             ch->sits = chair->shared();
             chair->sitting = ch->shared();
-            GET_POS(ch) = POS_RESTING;
+            ch->setBaseStat("combo", POS_RESTING);
             ch->removeLimitBreak();
             break;
         case POS_SITTING:
@@ -2503,7 +2503,7 @@ ACMD(do_rest) {
         default:
             send_to_char(ch, "You stop floating around, and stop to rest your tired bones.\r\n");
             act("$n stops floating around, and rests.", false, ch, nullptr, nullptr, TO_ROOM);
-            GET_POS(ch) = POS_RESTING;
+            ch->setBaseStat("combo", POS_RESTING);
             ch->removeLimitBreak();
             break;
     }
@@ -2517,7 +2517,7 @@ ACMD(do_sleep) {
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
             ch->pref_flags.set(PRF_ARENAWATCH, false);
-            ARENA_IDNUM(ch) = -1;
+            ch->setBaseStat<room_vnum>("arena_watch", -1);
             send_to_char(ch, "You stop watching the arena action.\r\n");
         }
     }
@@ -2553,7 +2553,7 @@ ACMD(do_sleep) {
             send_to_char(ch, "You have a barrier around you and can't sleep.\r\n");
             return;
         } else {
-            GET_BARRIER(ch) = 0;
+            ch->setBaseStat<int64_t>("barrier", 0);
             ch->affect_flags.set(AFF_SANCTUARY, false);
         }
     }
@@ -2595,7 +2595,7 @@ ACMD(do_sleep) {
                 reveal_hiding(ch, 0);
                 send_to_char(ch, "You go to sleep.\r\n");
                 act("$n lies down and falls asleep.", true, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_SLEEPING;
+                ch->setBaseStat("combo", POS_SLEEPING);
                 ch->removeLimitBreak();
                 /* Fury Mode Loss for halfbreeds */
 
@@ -2608,7 +2608,7 @@ ACMD(do_sleep) {
                 /* Fury Mode Loss for halfbreeds */
 
                 if (GET_STUPIDKISS(ch) > 0) {
-                    GET_STUPIDKISS(ch) = 0;
+                    ch->setBaseStat("stupidkiss", 0);
                     send_to_char(ch, "You forget about that stupid kiss.\r\n");
                 }
                 break;
@@ -2622,7 +2622,7 @@ ACMD(do_sleep) {
                 send_to_char(ch, "You stop floating around, and lie down to sleep.\r\n");
                 act("$n stops floating around, and lie down to sleep.",
                     true, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_SLEEPING;
+                ch->setBaseStat("combo", POS_SLEEPING);
                 ch->removeLimitBreak();
                 break;
         }
@@ -2673,12 +2673,12 @@ ACMD(do_sleep) {
             /* Fury Mode Loss for halfbreeds */
 
             if (GET_STUPIDKISS(ch) > 0) {
-                GET_STUPIDKISS(ch) = 0;
+                ch->setBaseStat("stupidkiss", 0);
                 send_to_char(ch, "You forget about that stupid kiss.\r\n");
             }
             ch->sits = chair->shared();
             chair->sitting = ch->shared();
-            GET_POS(ch) = POS_SLEEPING;
+            ch->setBaseStat("combo", POS_SLEEPING);
             break;
         case POS_SLEEPING:
             send_to_char(ch, "You are already sound asleep.\r\n");
@@ -2690,7 +2690,7 @@ ACMD(do_sleep) {
             send_to_char(ch, "You stop floating around, and lie down to sleep.\r\n");
             act("$n stops floating around, and lie down to sleep.",
                 true, ch, nullptr, nullptr, TO_ROOM);
-            GET_POS(ch) = POS_SLEEPING;
+            ch->setBaseStat("combo", POS_SLEEPING);
             ch->removeLimitBreak();
             break;
     }
@@ -2733,7 +2733,7 @@ ACMD(do_wake) {
         else {
             act("You wake $M up.", false, ch, nullptr, vict, TO_CHAR);
             act("You are awakened by $n.", false, ch, nullptr, vict, TO_VICT | TO_SLEEP);
-            GET_POS(vict) = POS_SITTING;
+            vict->setBaseStat("combo", POS_SITTING);
             if (DRAGGED(vict)) {
                 act("@WYou stop dragging @C$N@W!@n", true, DRAGGED(vict), nullptr, vict, TO_CHAR);
                 act("@C$n@W stops dragging @c$N@W!@n", true, DRAGGED(vict), nullptr, vict, TO_ROOM);
@@ -2772,7 +2772,7 @@ ACMD(do_wake) {
                 carry_drop(CARRIED_BY(ch), 1);
             }
         }
-        GET_POS(ch) = POS_SITTING;
+        ch->setBaseStat("combo", POS_SITTING);
     }
 }
 

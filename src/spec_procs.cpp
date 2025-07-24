@@ -169,7 +169,7 @@ SPECIAL(gauntlet_room)  /* Jamdog - 13th Feb 2006 */
             /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */
             if (GET_GAUNTLET(ch) < (gauntlet_info[i][0])) {
                 //set player's gauntlet rank
-                GET_GAUNTLET(ch) = (gauntlet_info[i][0]);
+                ch->setBaseStat("gauntlet", gauntlet_info[i][0]);
             }
         }
     }
@@ -275,7 +275,7 @@ SPECIAL(gauntlet_end)  /* Jamdog - 20th Feb 2007 */
         /* Check not overwriting gauntlet rank with lower value (Jamdog - 20th July 2006) */
         if (GET_GAUNTLET(ch) < GAUNTLET_END) {
             //set player's gauntlet rank
-            GET_GAUNTLET(ch) = GAUNTLET_END;
+            ch->setBaseStat("gauntlet", GAUNTLET_END);
         }
     }
 
@@ -467,7 +467,7 @@ SPECIAL(pet_shops) {
         }
         char_to_room(pet, ch->getRoom());
         add_follower(pet, ch);
-        pet->master_id = GET_IDNUM(ch);
+        pet->setBaseStat("master_id", GET_IDNUM(ch));
 
         send_to_char(ch, "May you enjoy your pet.\r\n");
         act("$n buys $N as a pet.", false, ch, nullptr, pet, TO_ROOM);
@@ -728,10 +728,10 @@ SPECIAL(healtank) {
                 send_to_char(ch, "Someone else is already inside that healing tank!\r\n");
                 return (true);
             }
-            GET_CHARGE(ch) = 0;
+            ch->setBaseStat<int64_t>("charge", 0);
             ch->player_flags.set(PLR_CHARGE, false);
-            GET_CHARGETO(ch) = 0;
-            GET_BARRIER(ch) = 0;
+            ch->setBaseStat<int64_t>("chargeto", 0);
+            ch->setBaseStat<int64_t>("barrier", 0);
             act("@wYou step inside the healing tank and put on its breathing mask. A water like solution pours over your body until the tank is full.@n",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("@C$n@w steps inside the healing tank and puts on its breathing mask. A water like solution pours over $s body until the tank is full.@n",

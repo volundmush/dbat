@@ -474,7 +474,7 @@ ACMD(do_rpp) {
                 send_to_char(ch, "You are already at your skillslot cap.\r\n");
                 return;
             } else {
-                GET_SLOTS(ch) += 1;
+                ch->modBaseStat<int>("skill_slots", 1);
             } /* Can pay for it */
         } /*End Skillslot Reward */
 
@@ -666,43 +666,43 @@ ACMD(do_willpower) {
     if (IS_NPC(ch))
         return;
 
-    if (MAJINIZED(ch) <= 0) {
+    if (ch->getBaseStat<int>("majinizer") <= 3) {
         send_to_char(ch, "You are not majinized and have no need to reclaim full control of your own will.\r\n");
         return;
-    } else {
-        auto itg = ch->getBaseStat("internalGrowth");
-        if (itg < 30 && GET_WIS(ch) < 100) {
-            send_to_char(ch, "You do not have enough Growth to focus your attempt to break free.\r\n");
-            fail = true;
-        }
-        if (itg < 60 && GET_WIS(ch) >= 100) {
-            send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
-            fail = true;
-        }
+    }
 
-        if (fail == true) {
-            return;
-        } else {
-            ch->setExperience(0);
-            if (rand_number(10, 100) - GET_INT(ch) > 60) {
-                reveal_hiding(ch, 0);
-                act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments $n seems to give up and the commotion dies down.@n",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                return;
-            } else {
-                ch->setExperience(0);
-                ch->modBaseStat("internalGrowth", -30);
-                reveal_hiding(ch, 0);
-                act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n",
-                    true, ch, nullptr, nullptr, TO_CHAR);
-                act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments the ground beneath $n splits and $e lets out a piercing scream. The M on $s forehead disappears!@n",
-                    true, ch, nullptr, nullptr, TO_ROOM);
-                MAJINIZED(ch) = 3;
-                return;
-            }
-        }
+    auto itg = ch->getBaseStat("internalGrowth");
+    if (itg < 30 && GET_WIS(ch) < 100) {
+        send_to_char(ch, "You do not have enough Growth to focus your attempt to break free.\r\n");
+        fail = true;
+    }
+    if (itg < 60 && GET_WIS(ch) >= 100) {
+        send_to_char(ch, "You do not have enough PS to focus your attempt to break free.\r\n");
+        fail = true;
+    }
+
+    if (fail == true) {
+        return;
+    }
+
+    ch->setExperience(0);
+    if (rand_number(10, 100) - GET_INT(ch) > 60) {
+        reveal_hiding(ch, 0);
+        act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments you give up, having failed to overcome the majinization!@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments $n seems to give up and the commotion dies down.@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        return;
+    } else {
+        ch->setExperience(0);
+        ch->modBaseStat("internalGrowth", -30);
+        reveal_hiding(ch, 0);
+        act("@WYou focus all your knowledge and will on breaking free. Dark purple energy swirls around your body and the M on your forehead burns brightly. After a few moments the ground splits beneath you and while letting out a piercing scream the M disappears from your forehead! You are free while still keeping the boost you had recieved from the majinization!@n",
+            true, ch, nullptr, nullptr, TO_CHAR);
+        act("@W$n focuses hard with $s eyes closed. Dark purple energy swirls around $s body and the M on $s head burns brightly. After a few moments the ground beneath $n splits and $e lets out a piercing scream. The M on $s forehead disappears!@n",
+            true, ch, nullptr, nullptr, TO_ROOM);
+        ch->setBaseStat("majinizer", 3);
+        return;
     }
 }
 
@@ -733,10 +733,10 @@ ACMD(do_grapple) {
         act("@RYou stop grappling with @r$N@R!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
         act("@r$n@R stops grappling with @rYOU!!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
         act("@r$n@R stops grappling with @r$N@R!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
-        GRAPTYPE(GRAPPLING(ch)) = -1;
+        GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
         GRAPPLED(GRAPPLING(ch)) = nullptr;
         GRAPPLING(ch) = nullptr;
-        GRAPTYPE(ch) = -1;
+        ch->setBaseStat<int>("grapple_type", -1);
         return;
     }
 
@@ -892,9 +892,9 @@ ACMD(do_grapple) {
 
             /* Let's grapple! */
             GRAPPLING(ch) = vict;
-            GRAPTYPE(ch) = 1;
+            ch->setBaseStat<int>("grapple_type", 1);
             GRAPPLED(vict) = ch;
-            GRAPTYPE(vict) = 1;
+            vict->setBaseStat<int>("grapple_type", 1);
             /* Let's grapple! */
 
             ch->decCurST(cost);
@@ -912,9 +912,9 @@ ACMD(do_grapple) {
 
             /* Let's grapple! */
             GRAPPLING(ch) = vict;
-            GRAPTYPE(ch) = 2;
+            ch->setBaseStat<int>("grapple_type", 2);
             GRAPPLED(vict) = ch;
-            GRAPTYPE(vict) = 2;
+            vict->setBaseStat<int>("grapple_type", 2);
             /* Let's grapple! */
 
             ch->decCurST(cost);
@@ -936,9 +936,9 @@ ACMD(do_grapple) {
 
             /* Let's grapple! */
             GRAPPLING(ch) = vict;
-            GRAPTYPE(ch) = 4;
+            ch->setBaseStat<int>("grapple_type", 4);
             GRAPPLED(vict) = ch;
-            GRAPTYPE(vict) = 4;
+            vict->setBaseStat<int>("grapple_type", 4);
             /* Let's grapple! */
 
             ch->decCurST(cost);
@@ -954,9 +954,9 @@ ACMD(do_grapple) {
 
             /* Let's grapple! */
             GRAPPLING(ch) = vict;
-            GRAPTYPE(ch) = 3;
+            ch->setBaseStat<int>("grapple_type", 3);
             GRAPPLED(vict) = ch;
-            GRAPTYPE(vict) = 3;
+            vict->setBaseStat<int>("grapple_type", 3);
             /* Let's grapple! */
 
             vict->player_flags.set(PLR_THANDW, false);
@@ -1066,7 +1066,7 @@ ACMD(do_trip) {
             improve_skill(ch, SKILL_TRIP, 0);
             ch->decCurST(cost);
             WAIT_STATE(ch, PULSE_4SEC);
-            WAIT_STATE(vict, vict->get(CharNum::wait) + PULSE_4SEC * 2);
+            WAIT_STATE(vict, vict->getBaseStat<int>("wait") + PULSE_4SEC * 2);
             if (FIGHTING(ch) == nullptr) {
                 set_fighting(ch, vict);
             }
@@ -1701,10 +1701,12 @@ void trainProgress(char_data* ch) {
         ch->modPractices(-1);
     }
 
-    auto results = ch->mod(train, stat_train);
+    auto train_name = "train_" + stat_name;
+
+    auto results = ch->modBaseStat<int>(train_name, stat_train);
 
     if (results >= needed) {
-        ch->mod(train, -needed);
+        ch->modBaseStat(train_name, -needed);
         send_to_char(ch, "You feel your %s improve!@n\r\n", stat_name);
         ch->modBaseStat(stat_name, 1);
         if (IS_PICCOLO(ch) && IS_NAMEK(ch)) {
@@ -2146,7 +2148,7 @@ ACMD(do_future) {
     }
 
     assign_affect(vict, AFF_FUTURE, 0, -1, 0, 0, 2, 0, 0, 5);
-    GET_POS(vict) = POS_SLEEPING;
+    vict->setBaseStat("combo", POS_SLEEPING);
 
 }
 
@@ -2636,9 +2638,9 @@ ACMD(do_fury) {
                 ch->decCurLFPercent(2, -1);
             }
         }
-        GET_FURY(ch) = 0;
+        ch->setBaseStat("fury", 0);
     } else if (!strcasecmp(arg, "attack")) {
-        GET_FURY(ch) = 50;
+        ch->setBaseStat("fury", 50);
     } else {
         send_to_char(ch,
                      "Syntax: fury (attack) <--- this will not use up your LF to restore PL.\n        fury <--- fury by itself will do both LF to PL restore and attack boost.\r\n");
@@ -2805,7 +2807,7 @@ ACMD(do_telepathy) {
             act("@w$n@C removes the link $s mind had with yours.@n", true, ch, nullptr, MINDLINK(ch), TO_VICT);
             MINDLINK(MINDLINK(ch)) = nullptr;
             MINDLINK(ch) = nullptr;
-            LINKER(ch) = 0;
+            ch->setBaseStat("mind_linker", 0);
             return;
         } else if (!(vict = get_char_vis(ch, arg2, nullptr, FIND_CHAR_WORLD))) {
             send_to_char(ch, "Link with the mind of who?\r\n");
@@ -2838,7 +2840,7 @@ ACMD(do_telepathy) {
             send_to_char(vict, "@wIf this is undesirable, Try: meditate break@n\r\n");
             MINDLINK(vict) = ch;
             MINDLINK(ch) = vict;
-            LINKER(ch) = 1;
+            ch->setBaseStat("mind_linker", 1);
             return;
         }
     } else if (!(strcmp(arg, "read"))) {
@@ -2994,7 +2996,7 @@ ACMD(do_potential) {
         send_to_char(ch, "They are a machine and have no potential to release.\r\n");
         return;
     }
-    if (MAJINIZED(vict) > 0) {
+    if (vict->getBaseStat<int>("majinized") > 0) {
         send_to_char(ch, "They are already majinized and have no potential to release.\r\n");
         return;
     }
@@ -3018,7 +3020,7 @@ ACMD(do_potential) {
         improve_skill(ch, SKILL_POTENTIAL, 0);
         improve_skill(ch, SKILL_POTENTIAL, 0);
         improve_skill(ch, SKILL_POTENTIAL, 0);
-        GET_BOOSTS(ch) -= 1;
+        ch->modBaseStat<int>("boosts", -1);
         return;
     }
 }
@@ -3058,10 +3060,10 @@ ACMD(do_majinize) {
         return;
     }
     int alignmentTotal = GET_ALIGNMENT(ch) - GET_ALIGNMENT(vict);
-    if (MAJINIZED(vict) > 0 && MAJINIZED(vict) != ((ch)->id)) {
+    if (auto maj = vict->getBaseStat<int>("majinizer"); maj > 0 && maj != ch->id) {
         send_to_char(ch, "They are already majinized before by someone else.\r\n");
         return;
-    } else if ((vict->master != ch)) {
+    } else if (vict->master != ch) {
         send_to_char(ch, "They must be following you in order for you to majinize them.\r\n");
         return;
     } else if (!((alignmentTotal >= -1500) && (alignmentTotal <= 1500))) {
@@ -3073,7 +3075,7 @@ ACMD(do_majinize) {
         return;
     }
         /* Rillao: transloc, add new transes here */
-    else if (vict->permForms.contains(Form::majinized) && MAJINIZED(vict) == ((ch)->id)) {
+    else if (vict->permForms.contains(Form::majinized) && vict->getBaseStat<int>("majinizer") == ch->id) {
         reveal_hiding(ch, 0);
         act("You remove $N's majinization, freeing them from your influence, but also weakening them.", true, ch,
             nullptr, vict, TO_CHAR);
@@ -3081,11 +3083,11 @@ ACMD(do_majinize) {
             vict, TO_VICT);
         act("$n waves a hand at $N, and instantly the glowing M on $S forehead disappears!", true, ch, nullptr, vict,
             TO_NOTVICT);
-        MAJINIZED(vict) = 0;
-        GET_BOOSTS(ch) += 1;
+        vict->setBaseStat("majinizer", 0);
+        ch->modBaseStat<int>("boosts", 1);
 
-        if (GET_MAJINIZED(vict) == 0) {
-            GET_MAJINIZED(vict) = ((vict->getBasePL()) * .4);
+        if (vict->getBaseStat<int>("majinized") == 0) {
+            vict->setBaseStat("majinized", vict->getBasePL() * .4);
         }
         vict->permForms.erase(Form::majinized);
         return;
@@ -3110,10 +3112,10 @@ ACMD(do_majinize) {
             true, ch, nullptr, vict, TO_VICT);
         act("$n focuses power into $N, influencing their mind and increasing their strength! After the struggle ends in $S mind a glowing purple M forms on $S forehead.",
             true, ch, nullptr, vict, TO_NOTVICT);
-        MAJINIZED(vict) = ((ch)->id);
-        GET_BOOSTS(ch) -= 1;
+        vict->setBaseStat("majinizer", ch->id);
+        ch->modBaseStat<int>("boosts", -1);
 
-        GET_MAJINIZED(vict) = (vict->getBasePL()) * .4;
+        vict->setBaseStat("majinized", (vict->getBasePL()) * .4);
         vict->addTransform(Form::majinized);
         return;
     }
@@ -3419,7 +3421,7 @@ ACMD(do_form) {
             }
             obj_to_char(obj, ch);
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3460,7 +3462,7 @@ ACMD(do_form) {
             }
             obj_to_char(obj, ch);
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3481,7 +3483,7 @@ ACMD(do_form) {
             obj = read_object(319, VIRTUAL);
             obj_to_char(obj, ch);
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3501,7 +3503,7 @@ ACMD(do_form) {
         } else {
             obj = read_object(16, VIRTUAL);
             obj_to_char(obj, ch);  // cooldown removed on 10/24/2021
-            reveal_hiding(ch, 0);  //GET_COOLDOWN(ch) = 10;
+            reveal_hiding(ch, 0);  //ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3610,7 +3612,7 @@ ACMD(do_form) {
             obj_to_char(obj, ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3666,7 +3668,7 @@ ACMD(do_form) {
             obj->size = static_cast<Size>(get_size(vict));
             do_wear(vict, "all", 0, 0);
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3688,7 +3690,7 @@ ACMD(do_form) {
             obj_to_char(obj, ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3711,7 +3713,7 @@ ACMD(do_form) {
             for(auto f : {ITEM_NORENT, ITEM_NOSELL}) obj->item_flags.set(f, true);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3734,7 +3736,7 @@ ACMD(do_form) {
             obj_to_char(obj, ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3757,7 +3759,7 @@ ACMD(do_form) {
             obj_to_char(obj, ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3780,7 +3782,7 @@ ACMD(do_form) {
             obj_to_char(obj, ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3802,7 +3804,7 @@ ACMD(do_form) {
             obj_to_char(obj, ch);
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3824,7 +3826,7 @@ ACMD(do_form) {
             obj_to_room(obj, IN_ROOM(ch));
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3853,7 +3855,7 @@ ACMD(do_form) {
             obj_to_room(obj, IN_ROOM(ch));
             obj->size = static_cast<Size>(get_size(ch));
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3885,7 +3887,7 @@ ACMD(do_form) {
             obj = read_object(1, VIRTUAL);
             obj_to_char(obj, ch);
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You hold out your hand and create $p out of your ki!", true, ch, obj, nullptr, TO_CHAR);
             act("$n holds out $s hand and creates $p out of thin air!", true, ch, obj, nullptr, TO_ROOM);
             ch->decCurKI(cost);
@@ -3929,7 +3931,7 @@ ACMD(do_recharge) {
             return;
         } else {
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You focus your ki into your energy reserves, recharging them some.", true, ch, nullptr, nullptr,
                 TO_CHAR);
             act("$n stops and glows green briefly.", true, ch, nullptr, nullptr, TO_ROOM);
@@ -3974,7 +3976,7 @@ ACMD(do_srepair) {
             return;
         } else {
             reveal_hiding(ch, 0);
-            GET_COOLDOWN(ch) = 10;
+            ch->setBaseStat("concentrate_cooldown", 10);
             act("You repair some of your outer casings and internal systems, with the small nano-robots contained in your body.",
                 true, ch, nullptr, nullptr, TO_CHAR);
             act("$n stops a moment as small glowing particles move across $s body.", true, ch, nullptr, nullptr,
@@ -4179,7 +4181,7 @@ ACMD(do_upgrade) {
             send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
             return;
         } else {
-            GET_UP(ch) -= cost;
+            ch->modBaseStat<int>("upgrade_points", -cost);
             send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
             ch->gainBaseStat("powerlevel", bonus);
         }
@@ -4215,7 +4217,7 @@ ACMD(do_upgrade) {
             send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
             return;
         } else {
-            GET_UP(ch) -= cost;
+            ch->modBaseStat<int>("upgrade_points", -cost);
             send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
             ch->gainBaseStat("ki", bonus);
         }
@@ -4251,7 +4253,7 @@ ACMD(do_upgrade) {
             send_to_char(ch, "@mYou can't spend that much UGP on it as it will go over your softcap.@n\r\n");
             return;
         } else {
-            GET_UP(ch) -= cost;
+            ch->modBaseStat<int>("upgrade_points", -cost);
             send_to_char(ch, "You upgrade your system and gain %s %s!", add_commas(bonus).c_str(), arg);
             ch->gainBaseStat("stamina", bonus);
         }
@@ -4343,7 +4345,7 @@ ACMD(do_ingest) {
                 ch, nullptr, vict, TO_VICT);
             act("@C$n@w flings a piece of goo at @c$N@W! The goo engulfs $M and then return to @C$n@W!@n", true, ch,
                 nullptr, vict, TO_NOTVICT);
-            GET_ABSORBS(ch) += 1;
+            ch->modBaseStat<int>("absorbs", 1);
             int64_t pl = (vict->getBasePL()) / 6;
             int64_t stam = (vict->getBaseST()) / 6;
             int64_t ki = (vict->getBaseKI()) / 6;
@@ -4576,7 +4578,7 @@ ACMD(do_absorb) {
                 true, ch, nullptr, vict, TO_VICT);
             act("@C$n@w rushes at @c$N@W and $s tail engulfs $M! You quickly suck $S squirming body into your tail, absorbing @c$N@W!@n",
                 true, ch, nullptr, vict, TO_NOTVICT);
-            GET_ABSORBS(ch) -= 1;
+            ch->modBaseStat<int>("absorbs", -1);
 
             int64_t stam = (vict->getBaseST()) / 5;
             int64_t ki = (vict->getBaseKI()) / 5;
@@ -4782,10 +4784,10 @@ ACMD(do_escape) {
             if (!FIGHTING(GRAPPLED(ch))) {
                 set_fighting(GRAPPLED(ch), ch);
             }
-            GRAPTYPE(GRAPPLED(ch)) = -1;
+            GRAPPLED(ch)->setBaseStat<int>("grapple_type", -1);
             GRAPPLING(GRAPPLED(ch)) = nullptr;
             GRAPPLED(ch) = nullptr;
-            GRAPTYPE(ch) = -1;
+            ch->setBaseStat<int>("grapple_type", -1);
         } else {
             act("@c$N@W struggles to break loose of @C$n's@W hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_NOTVICT);
             act("@WYou struggle to break loose of @C$n's@W hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_VICT);
@@ -4798,10 +4800,10 @@ ACMD(do_escape) {
                         TO_NOTVICT);
                     act("@WYou manage to break loose of @C$n's@W hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_VICT);
                     act("@c$N@W manages to break loose of your hold!@n", true, GRAPPLED(ch), nullptr, ch, TO_CHAR);
-                    GRAPTYPE(GRAPPLED(ch)) = -1;
+                    GRAPPLED(ch)->setBaseStat<int>("grapple_type", -1);
                     GRAPPLING(GRAPPLED(ch)) = nullptr;
                     GRAPPLED(ch) = nullptr;
-                    GRAPTYPE(ch) = -1;
+                    ch->setBaseStat<int>("grapple_type", -1);
                 }
             }
             WAIT_STATE(ch, PULSE_2SEC);
@@ -5086,7 +5088,7 @@ ACMD(do_focus) {
                 ch->decCurKI(ch->getMaxKI() / 20);
                 int duration = roll_aff_duration(GET_INT(ch), 2);
                 /* Str , Con, Int, Agl, Wis, Spd */
-                assign_affect(ch, AFF_MIGHT, SKILL_MIGHT, duration, ch->get(CharTrain::strength) / 5, 2, 0, 0, 0, 0);
+                assign_affect(ch, AFF_MIGHT, SKILL_MIGHT, duration, ch->getBaseStat("train_strength") / 5, 2, 0, 0, 0, 0);
                 reveal_hiding(ch, 0);
                 act("You focus ki into your muscles, making them mighty!", true, ch, nullptr, nullptr, TO_CHAR);
                 act("$n focuses ki into $s muscles, making them mighty!", true, ch, nullptr, nullptr, TO_ROOM);
@@ -5135,7 +5137,7 @@ ACMD(do_focus) {
                     ch->decCurKI(ch->getMaxKI() / 20);
                     int duration = roll_aff_duration(GET_INT(ch), 2);
                     /* Str , Con, Int, Agl, Wis, Spd */
-                    assign_affect(vict, AFF_MIGHT, SKILL_MIGHT, duration, vict->get(CharTrain::strength) / 5, 2, 0, 0, 0, 0);
+                    assign_affect(vict, AFF_MIGHT, SKILL_MIGHT, duration, vict->getBaseStat("train_strength") / 5, 2, 0, 0, 0, 0);
                     reveal_hiding(ch, 0);
                     act("You focus ki into $N's muscles, making them mighty!", true, ch, nullptr, vict, TO_CHAR);
                     act("$n focuses ki into your muscles, making them mighty!", true, ch, nullptr, vict, TO_VICT);
@@ -5215,7 +5217,7 @@ ACMD(do_focus) {
             } else {
                 int duration = roll_aff_duration(GET_INT(ch), 2);
                 /* Str , Con, Int, Agl, Wis, Spd */
-                assign_affect(ch, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, ch->get(CharTrain::intelligence) / 5, 0);
+                assign_affect(ch, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, ch->getBaseStat("train_intelligence") / 5, 0);
                 ch->decCurKI(ch->getMaxKI() / 20);
                 reveal_hiding(ch, 0);
                 act("You focus ki into your mind, awakening it to cosmic wisdom!", true, ch, nullptr, nullptr, TO_CHAR);
@@ -5282,7 +5284,7 @@ ACMD(do_focus) {
                 } else {
                     int duration = roll_aff_duration(GET_INT(ch), 2);
                     /* Str , Con, Int, Agl, Wis, Spd */
-                    assign_affect(vict, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, vict->get(CharTrain::intelligence) / 5, 0);
+                    assign_affect(vict, AFF_ENLIGHTEN, SKILL_ENLIGHTEN, duration, 0, 0, 0, 0, vict->getBaseStat("train_intelligence") / 5, 0);
                     ch->decCurKI(ch->getMaxKI() / 20);
                     reveal_hiding(ch, 0);
                     act("You focus ki into $N's mind, awakening it to cosmic wisdom!", true, ch, nullptr, vict,
@@ -5347,7 +5349,7 @@ ACMD(do_focus) {
             } else {
                 int duration = roll_aff_duration(GET_INT(ch), 2);
                 /* Str , Con, Int, Agl, Wis, Spd */
-                assign_affect(ch, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, ch->get(CharTrain::intelligence) / 5, 0, 0, 0);
+                assign_affect(ch, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, ch->getBaseStat("train_intelligence") / 5, 0, 0, 0);
                 ch->decCurKI(ch->getMaxKI() / 20);
                 reveal_hiding(ch, 0);
                 act("You focus ki into your mind, making it work faster!", true, ch, nullptr, nullptr, TO_CHAR);
@@ -5393,7 +5395,7 @@ ACMD(do_focus) {
                 } else {
                     int duration = roll_aff_duration(GET_INT(ch), 2);;
                     /* Str , Con, Int, Agl, Wis, Spd */
-                    assign_affect(vict, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, vict->get(CharTrain::intelligence) / 5, 0, 0, 0);
+                    assign_affect(vict, AFF_GENIUS, SKILL_GENIUS, duration, 0, 0, vict->getBaseStat("train_intelligence") / 5, 0, 0, 0);
                     ch->decCurKI(ch->getMaxKI() / 20);
                     reveal_hiding(ch, 0);
                     act("You focus ki into $N's mind, making it work faster!", true, ch, nullptr, vict, TO_CHAR);
@@ -5439,7 +5441,7 @@ ACMD(do_focus) {
                 ch->decCurKI(ch->getMaxKI() / 20);
                 int duration = roll_aff_duration(GET_INT(ch), 2);;
                 /* Str , Con, Int, Agl, Wis, Spd */
-                assign_affect(ch, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, ch->get(CharTrain::agility) / 5, 0, 0);
+                assign_affect(ch, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, ch->getBaseStat("train_agility") / 5, 0, 0);
                 reveal_hiding(ch, 0);
                 act("You focus ki into your limbs, making them more flexible!", true, ch, nullptr, nullptr, TO_CHAR);
                 act("$n focuses ki into $s limbs, making them more flexible!", true, ch, nullptr, nullptr, TO_ROOM);
@@ -5485,7 +5487,7 @@ ACMD(do_focus) {
                     ch->decCurKI(ch->getMaxKI() / 20);
                     int duration = roll_aff_duration(GET_INT(ch), 2);;
                     /* Str , Con, Int, Agl, Wis, Spd */
-                    assign_affect(vict, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, vict->get(CharTrain::agility) / 5, 0, 0);
+                    assign_affect(vict, AFF_FLEX, SKILL_FLEX, duration, 0, 0, 0, vict->getBaseStat("train_agility") / 5, 0, 0);
                     reveal_hiding(ch, 0);
                     act("You focus ki into $N's limbs, making them more flexible!", true, ch, nullptr, vict, TO_CHAR);
                     act("$n focuses ki into your limbs, making them more flexible!", true, ch, nullptr, vict, TO_VICT);
@@ -5531,9 +5533,9 @@ ACMD(do_focus) {
                 ch->decCurKI(ch->getMaxKI() / 20);
                 reveal_hiding(ch, 0);
                 if (IS_KABITO(ch)) {
-                    GET_BLESSLVL(ch) = GET_SKILL(ch, SKILL_BLESS);
+                    ch->setBaseStat("bless_level", GET_SKILL(ch, SKILL_BLESS));
                 } else {
-                    GET_BLESSLVL(ch) = 0;
+                    ch->setBaseStat("bless_level", 0);
                 }
                 act("You focus ki while chanting spiritual words. You feel your body recovering at above normal speed!",
                     true, ch, nullptr, nullptr, TO_CHAR);
@@ -5585,9 +5587,9 @@ ACMD(do_focus) {
                     ch->decCurKI(ch->getMaxKI() / 20);
                     reveal_hiding(ch, 0);
                     if (IS_KAI(ch)) {
-                        GET_BLESSLVL(vict) = GET_SKILL(ch, SKILL_BLESS);
+                        vict->setBaseStat("bless_level", GET_SKILL(ch, SKILL_BLESS));
                     } else {
-                        GET_BLESSLVL(vict) = 0;
+                        vict->setBaseStat("bless_level", 0);
                     }
                     act("You focus ki while chanting spiritual words. Blessing $N with faster regeneration!", true, ch,
                         nullptr, vict, TO_CHAR);
@@ -5764,9 +5766,9 @@ ACMD(do_focus) {
                     true, ch, nullptr, vict, TO_VICT);
                 act("$n focuses ki while moving $s hands in a lulling pattern, putting $N to sleep!", true, ch, nullptr,
                     vict, TO_NOTVICT);
-                GET_POS(vict) = POS_SLEEPING;
+                vict->setBaseStat("combo", POS_SLEEPING);
                 vict->affect_flags.set(AFF_FLYING, false);
-                GET_ALT(vict) = 0;
+                vict->setBaseStat<int>("altitude", 0);
                 return;
             }
         }
@@ -6039,9 +6041,6 @@ ACMD(do_plant) {
 
     roll = roll_skill(ch, SKILL_SLEIGHT_OF_HAND) + rand_number(1, 3);
     fail = rand_number(1, 105);
-
-    if (HAS_FEAT(ch, FEAT_DEFT_HANDS))
-        roll += 2;
 
     if (GET_POS(vict) < POS_SLEEPING)
         detect = 0;
@@ -6381,8 +6380,8 @@ ACMD(do_eavesdrop) {
 
     if (GET_EAVESDROP(ch) > 0) {
         send_to_char(ch, "You stop eavesdropping.\r\n");
-        GET_EAVESDROP(ch) = real_room(0);
-        GET_EAVESDIR(ch) = -1;
+        ch->setBaseStat("listen_room", 0);
+        ch->setBaseStat("listen_direction", -1);
         return;
     }
 
@@ -6402,8 +6401,8 @@ ACMD(do_eavesdrop) {
             sprintf(buf, "The %s is closed.\r\n", fname(EXIT(ch, dir)->keyword));
             send_to_char(ch, buf);
         } else {
-            GET_EAVESDROP(ch) = GET_ROOM_VNUM(EXIT(ch, dir)->to_room);
-            GET_EAVESDIR(ch) = dir;
+            ch->setBaseStat("listen_room", GET_ROOM_VNUM(EXIT(ch, dir)->to_room));
+            ch->setBaseStat("listen_direction", dir);
             send_to_char(ch, "Okay.\r\n");
         }
     } else
@@ -6798,7 +6797,7 @@ ACMD(do_barrier) {
     if (AFF_FLAGGED(ch, AFF_SANCTUARY) && !strcasecmp("release", arg)) {
         act("@BYou dispel your barrier, releasing its energy.@n", true, ch, nullptr, nullptr, TO_CHAR);
         act("@B$n@B dispels $s barrier, releasing its energy.@n", true, ch, nullptr, nullptr, TO_ROOM);
-        GET_BARRIER(ch) = 0;
+        ch->setBaseStat<int64_t>("barrier", 0);
         ch->affect_flags.set(AFF_SANCTUARY, false);
         return;
     } else if (!strcasecmp("release", arg)) {
@@ -6846,13 +6845,13 @@ ACMD(do_barrier) {
             true, ch, nullptr, nullptr, TO_CHAR);
         act("@B$n@B shouts as $e forms a barrier of ki around $s body, but it becomes imbalanced and explodes outward!@n",
             true, ch, nullptr, nullptr, TO_ROOM);
-        GET_CHARGE(ch) -= cost;
+        ch->modBaseStat<int64_t>("charge", -cost);
         if (GET_SKILL(ch, SKILL_BARRIER)) {
             improve_skill(ch, SKILL_BARRIER, 2);
         } else {
             improve_skill(ch, SKILL_AQUA_BARRIER, 2);
         }
-        GET_COOLDOWN(ch) = 30;
+        ch->setBaseStat("concentrate_cooldown", 30);
         return;
     } else {
         if (GET_SKILL(ch, SKILL_BARRIER)) {
@@ -6864,15 +6863,15 @@ ACMD(do_barrier) {
             act("@B$n@B shouts as $e forms a barrier of ki and raging waters around $s body!@n", true, ch, nullptr,
                 nullptr, TO_ROOM);
         }
-        GET_BARRIER(ch) = (GET_MAX_MANA(ch) / 100) * size;
-        GET_CHARGE(ch) -= cost;
+        ch->setBaseStat<int64_t>("barrier", (GET_MAX_MANA(ch) / 100) * size);
+        ch->modBaseStat<int64_t>("charge", -cost);
         if (GET_SKILL(ch, SKILL_BARRIER)) {
             improve_skill(ch, SKILL_BARRIER, 2);
         } else {
             improve_skill(ch, SKILL_AQUA_BARRIER, 2);
         }
         ch->affect_flags.set(AFF_SANCTUARY, true);
-        GET_COOLDOWN(ch) = 20;
+        ch->setBaseStat("concentrate_cooldown", 20);
         return;
     }
 }
@@ -6890,7 +6889,7 @@ ACMD(do_instant) {
     if (!IS_NPC(ch)) {
         if (PRF_FLAGGED(ch, PRF_ARENAWATCH)) {
             ch->pref_flags.set(PRF_ARENAWATCH, false);
-            ARENA_IDNUM(ch) = -1;
+            ch->setBaseStat<room_vnum>("arena_watch", -1);
             send_to_char(ch, "You stop watching the arena action.\r\n");
         }
     }
@@ -7638,7 +7637,7 @@ ACMD(do_meditate) {
         } else {
             send_to_char(ch,
                          "During your meditation you manage to expand your mind and get the feeling you could learn some new skills.\r\n");
-            GET_SLOTS(ch) += 1;
+            ch->modBaseStat<int>("skill_slots", 1);
             ch->modPractices(-cost);
             return;
         }
@@ -7665,7 +7664,7 @@ ACMD(do_meditate) {
                 MINDLINK(ch)->affect_flags.set(AFF_SHOCKED, false);
             }
 
-            LINKER(MINDLINK(ch)) = 0;
+            MINDLINK(ch)->setBaseStat("mind_linker", 0);
             MINDLINK(MINDLINK(ch)) = nullptr;
             MINDLINK(ch) = nullptr;
             return;
@@ -8130,21 +8129,19 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (GET_BACKSTAB_COOL(d->character) > 0) {
-            GET_BACKSTAB_COOL(d->character) -= 1;
+            d->character->modBaseStat("backstab_cooldown", -1);
         }
 
         if (GET_COOLDOWN(d->character) > 0) {
-            GET_COOLDOWN(d->character) -= 2;
-            if (GET_COOLDOWN(d->character) <= 0) {
-                GET_COOLDOWN(d->character) = 0;
+            if(d->character->modBaseStat<int>("concentrate_cooldown", -2) == 0) {
                 send_to_char(d->character, "You can concentrate again.\r\n");
             }
         }
         /* Andros Start */
         if (GET_SDCOOLDOWN(d->character) > 0) {
-            GET_SDCOOLDOWN(d->character) -= 10;
+            d->character->modBaseStat("selfdestruct_cooldown", -10);
             if (GET_SDCOOLDOWN(d->character) <= 0) {
-                GET_SDCOOLDOWN(d->character) = 0;
+                d->character->setBaseStat("selfdestruct_cooldown", 0);
                 send_to_char(d->character, "Your body has recovered from your last selfdestruct.\r\n");
             }
         } /* Andros End */
@@ -8178,7 +8175,7 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (GET_PING(d->character) >= 1) {
-            GET_PING(d->character) -= 1;
+            d->character->modBaseStat<int>("ping", -1);
             if (PLR_FLAGGED(d->character, PLR_PILOTING) && GET_PING(d->character) == 0) {
                 send_to_char(d->character,
                              "Your radar is ready to calculate the direction of another destination.\r\n");
@@ -8194,13 +8191,13 @@ void base_update(uint64_t heartPulse, double deltaTime) {
             }
         }
         if (!FIGHTING(d->character) && COMBO(d->character) > -1) {
-            COMBO(d->character) = -1;
-            COMBHITS(d->character) = 0;
+            d->character->setBaseStat<int>("combo", -1);
+            d->character->setBaseStat<int>("combo_hits", 0);
         }
 
         if (cash == true && GET_BANK_GOLD(d->character) > 0) {
             inc = (GET_BANK_GOLD(d->character) / 50) * 2;
-            GET_LINTEREST(d->character) = LASTINTEREST;
+            d->character->setBaseStat("last_interest", LASTINTEREST);
             if (inc >= 25000) {
                 inc = 25000;
             }
@@ -8253,13 +8250,8 @@ void base_update(uint64_t heartPulse, double deltaTime) {
                 BLOCKS(d->character) = nullptr;
             }
         }
-        if (GET_OVERFLOW(d->character) == true) {
-            mudlog(NRM, ADMLVL_GOD, true, "OVERFLOW: %s has caused an overflow, check for illegal activity.",
-                   GET_NAME(d->character));
-            GET_OVERFLOW(d->character) = false;
-        }
         if (GET_SPAM(d->character) > 0) {
-            GET_SPAM(d->character) = 0;
+            d->character->setBaseStat("spam", 0);
         } else
             continue;
     }
@@ -8630,7 +8622,7 @@ ACMD(do_scouter) {
                      add_commas(GET_CHARGE(vict)).c_str());
     } else if (IS_NPC(vict)) {
         send_to_char(ch, "@D|@1@CC@c@1ha@1@Cr@c@1ge@1@Cd Ki @1@D: @Y%21s@n@D|@n\r\n",
-                     add_commas(vict->mobcharge * rand_number(GET_INT(ch) * 50, GET_INT(ch) * 200)).c_str());
+                     add_commas(vict->getBaseStat<int>("mobcharge") * rand_number(GET_INT(ch) * 50, GET_INT(ch) * 200)).c_str());
     }
     if (percent < 10)
         send_to_char(ch, "@D|@1@YS@y@1ta@1@Ym@y@1in@1@Ya    @1@D: @Y%21s@n@D|@n\r\n", "Exhausted");
@@ -8762,13 +8754,13 @@ ACMD(do_quit) {
             (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899)) {
             if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
                 ch->getRoomVnum() != 1) {
-                GET_LOADROOM(ch) = ch->getRoomVnum();
+                ch->setBaseStat("load_room", ch->getRoomVnum());
             }
         }
         if (ch->getWhereFlag(WhereFlag::pendulum_past)) {
             if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
                 ch->getRoomVnum() != 1) {
-                GET_LOADROOM(ch) = GET_ROOM_VNUM(real_room(1561));
+                ch->setBaseStat("load_room", GET_ROOM_VNUM(real_room(1561)));
             }
         }
         extract_char(ch);        /* Char is saved before extracting. */
@@ -8799,7 +8791,7 @@ ACMD(do_save) {
             if (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899) {
                 if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
                     ch->getRoomVnum() != 1) {
-                    GET_LOADROOM(ch) = ch->getRoomVnum();
+                    ch->setBaseStat("load_room", ch->getRoomVnum());
 
                 }
             }
@@ -8812,7 +8804,7 @@ ACMD(do_save) {
     if (ch->getRoomVnum() < 19800 || ch->getRoomVnum() > 19899) {
         if (ch->getRoomVnum() != NOWHERE && ch->getRoomVnum() != 0 &&
             ch->getRoomVnum() != 1) {
-            GET_LOADROOM(ch) = ch->getRoomVnum();
+            ch->setBaseStat("load_room", ch->getRoomVnum());
         }
     }
 }
@@ -9017,7 +9009,7 @@ ACMD(do_steal) {
                     return;
                 } else { /* Failure! */
                     reveal_hiding(ch, 0);
-                    GET_POS(vict) = POS_SITTING;
+                    vict->setBaseStat("combo", POS_SITTING);
                     act("@rYou are caught trying to steal $p@r from @R$N@r!@n", true, ch, obj, vict, TO_CHAR);
                     act("@rYou feel your body being shifted while you sleep and wake up to find @R$n@r trying to steal $p@r from you!@n",
                         true, ch, obj, vict, TO_VICT);
@@ -9025,7 +9017,7 @@ ACMD(do_steal) {
                         TO_NOTVICT);
                     WAIT_STATE(ch, PULSE_3SEC);
                     if (IS_NPC(vict)) {
-                        GET_POS(vict) = POS_STANDING;
+                        vict->setBaseStat("combo", POS_STANDING);
                         set_fighting(vict, ch);
                     }
                     improve_skill(ch, SKILL_SLEIGHT_OF_HAND, 2);
@@ -9079,7 +9071,7 @@ ACMD(do_steal) {
                     act("@R$N@r catches @R$n's@r trying to $p@r!@n", true, ch, obj, vict, TO_NOTVICT);
                     WAIT_STATE(ch, PULSE_3SEC);
                     if (IS_NPC(vict)) {
-                        GET_POS(vict) = POS_STANDING;
+                        vict->setBaseStat("combo", POS_STANDING);
                         set_fighting(vict, ch);
                     }
                     improve_skill(ch, SKILL_SLEIGHT_OF_HAND, 2);
@@ -9359,14 +9351,14 @@ ACMD(do_ungroup) {
             if (AFF_FLAGGED(f->follower, AFF_GROUP)) {
                 f->follower->affect_flags.set(AFF_GROUP, false);
                 act("$N has disbanded the group.", true, f->follower, nullptr, ch, TO_CHAR);
-                f->follower->set(CharNum::group_kills, 0);
+                f->follower->setBaseStat<int>("group_kills", 0);
                 if (!AFF_FLAGGED(f->follower, AFF_CHARM))
                     stop_follower(f->follower);
             }
         }
 
         ch->affect_flags.set(AFF_GROUP, false);
-        ch->set(CharNum::group_kills, 0);
+        ch->setBaseStat<int>("group_kills", 0);
         send_to_char(ch, "You disband the group.\r\n");
         return;
     }
@@ -9385,7 +9377,7 @@ ACMD(do_ungroup) {
     }
 
     tch->affect_flags.set(AFF_GROUP, false);
-    tch->set(CharNum::group_kills, 0);
+    tch->setBaseStat<int>("group_kills", 0);
 
     act("$N is no longer a member of your group.", false, ch, nullptr, tch, TO_CHAR);
     act("You have been kicked out of $n's group!", false, ch, nullptr, tch, TO_VICT);
@@ -9685,11 +9677,11 @@ ACMD(do_value) {
                         send_to_char(ch, "You can't set your wimp level above half your powerlevel.\r\n");
                     else {
                         send_to_char(ch, "Okay, you'll wimp out if you drop below %d powerlevel.\r\n", value_lev);
-                        GET_WIMP_LEV(ch) = value_lev;
+                        ch->setBaseStat("wimp_level", value_lev);
                     }
                 } else {
                     send_to_char(ch, "Okay, you'll now tough out fights to the bitter end.\r\n");
-                    GET_WIMP_LEV(ch) = 0;
+                    ch->setBaseStat("wimp_level", 0);
                 }
                 break;
             default:

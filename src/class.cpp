@@ -235,7 +235,7 @@ void do_start(struct char_data *ch) {
     int punch;
     struct obj_data *obj;
 
-    ch->set(CharNum::level, 1);
+    ch->setBaseStat<int>("level", 1);
     ch->setExperience(1);
 
     if (IS_ANDROID(ch)) {
@@ -256,64 +256,34 @@ void do_start(struct char_data *ch) {
     GET_LIMBCOND(ch, 2) = 100;
     GET_LIMBCOND(ch, 3) = 100;
 
-    GET_SLOTS(ch) = 30;
-
+    int modslots = 0;
     if (GET_RACE(ch) == RACE_HUMAN) {
-        GET_SLOTS(ch) += 1;
+        modslots += 1;
     } else if (GET_RACE(ch) == RACE_SAIYAN) {
-        GET_SLOTS(ch) -= 1;
+        modslots -= 1;
     } else if (GET_RACE(ch) == RACE_TRUFFLE) {
-        GET_SLOTS(ch) += 2;
+        modslots += 2;
     } else if (GET_RACE(ch) == RACE_HALFBREED) {
-        GET_SLOTS(ch) += 1;
+        modslots += 1;
     } else if (GET_RACE(ch) == RACE_MAJIN) {
-        GET_SLOTS(ch) -= 1;
+        modslots -= 1;
     } else if (GET_RACE(ch) == RACE_KAI) {
-        GET_SLOTS(ch) += 4;
+        modslots += 4;
     }
 
-
     if (IS_TSUNA(ch) || IS_KABITO(ch) || IS_NAIL(ch))
-        GET_SLOTS(ch) += 5;
+        modslots += 5;
 
     if (GET_BONUS(ch, BONUS_GMEMORY))
-        GET_SLOTS(ch) += 2;
+        modslots += 2;
     if (GET_BONUS(ch, BONUS_BMEMORY))
-        GET_SLOTS(ch) -= 5;
+        modslots -= 5;
+
+    if(modslots) ch->modBaseStat<int>("skill_slots", modslots);
 
     ch->gainTail(false);
 
-    if (GET_RACE(ch) == RACE_MAJIN) {
-        GET_ABSORBS(ch) = 0;
-        GET_INGESTLEARNED(ch) = 0;
-
-    }
-    if (GET_RACE(ch) == RACE_BIO) {
-        GET_ABSORBS(ch) = 3;
-    }
-
-
     if (!PLR_FLAGGED(ch, PLR_FORGET)) {
-        if (ch->choice == 1) {
-            punch = rand_number(30, 40);
-            SET_SKILL(ch, SKILL_BLOCK, punch);
-        }
-        if (ch->choice == 2) {
-            punch = rand_number(10, 20);
-            SET_SKILL(ch, SKILL_PUNCH, punch);
-        }
-        if (ch->choice == 3) {
-            punch = rand_number(30, 40);
-            SET_SKILL(ch, SKILL_KICK, punch);
-        }
-        if (ch->choice == 4) {
-            punch = rand_number(20, 30);
-            SET_SKILL(ch, SKILL_SLAM, punch);
-        }
-        if (ch->choice == 5) {
-            punch = rand_number(20, 30);
-            SET_SKILL(ch, SKILL_FOCUS, punch);
-        }
         if (IS_HUMAN(ch)) {
             punch = rand_number(5, 15);
             SET_SKILL(ch, SKILL_BUILD, punch);
@@ -404,73 +374,42 @@ void do_start(struct char_data *ch) {
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
     switch (GET_RACE(ch)) {
-        case RACE_HUMAN:
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
-            break;
-        case RACE_SAIYAN:
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
-            break;
-        case RACE_HALFBREED:
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
-            break;
-        case RACE_ICER:
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
-            break;
-        case RACE_KONATSU:
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
-            break;
-        case RACE_NAMEK:
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
-            break;
-        case RACE_MUTANT:
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
-            break;
         case RACE_ANDROID:
             ch->affect_flags.set(AFF_INFRAVISION, true);
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
             break;
         default:
-            SET_SKILL(ch, SKILL_LANG_COMMON, 1);
             break;
     }
+    SET_SKILL(ch, SKILL_LANG_COMMON, 1);
 
-    SPEAKING(ch) = SKILL_LANG_COMMON;
-
-    GET_LIFEPERC(ch) = 75;
+    ch->setBaseStat("life_percent", 75);
 
     /* assign starting items etc...*/
-    obj = read_object(17, VIRTUAL);
-    obj_to_char(obj, ch);
+    std::vector<vnum> obj_vnums;
+    obj_vnums.push_back(17);
+
     if (IS_HOSHIJIN(ch)) {
-        obj = read_object(3428, VIRTUAL);
-        obj_to_char(obj, ch);
+        obj_vnums.push_back(3428);
     }
-    struct obj_data *obj2;
-    obj2 = read_object(17998, VIRTUAL);
-    obj_to_char(obj2, ch);
+    obj_vnums.push_back(17998);
 
     if (IS_TAPION(ch) || IS_GINYU(ch)) {
-        struct obj_data *throw_obj;
-        throw_obj = read_object(19050, VIRTUAL);
-        obj_to_char(throw_obj, ch);
+        obj_vnums.push_back(19050);
         if (rand_number(1, 2) == 2) {
-            throw_obj = nullptr;
-            throw_obj = read_object(19050, VIRTUAL);
-            obj_to_char(throw_obj, ch);
+            obj_vnums.push_back(19050);
         }
         if (rand_number(1, 2) == 2) {
-            throw_obj = nullptr;
-            throw_obj = read_object(19050, VIRTUAL);
-            obj_to_char(throw_obj, ch);
+            obj_vnums.push_back(19050);
         }
 
     } else if (IS_DABURA(ch)) {
-        struct obj_data *throw_obj;
-        throw_obj = read_object(19055, VIRTUAL);
-        obj_to_char(throw_obj, ch);
-        throw_obj = nullptr;
-        throw_obj = read_object(19055, VIRTUAL);
-        obj_to_char(throw_obj, ch);
+        obj_vnums.push_back(19055);
+        obj_vnums.push_back(19055);
+    }
+
+    for(auto v : obj_vnums) {
+        auto o = read_object(v, VIRTUAL);
+        if(o) obj_to_char(o, ch);
     }
 
     send_to_imm("New character created, %s, by user, %s.", GET_NAME(ch), GET_USER(ch));
@@ -486,7 +425,7 @@ void do_start(struct char_data *ch) {
 
     ch->restoreVitals();
 
-    GET_OLC_ZONE(ch) = NOWHERE;
+    ch->setBaseStat<int>("olc_zone", NOWHERE);
 }
 
 
@@ -628,44 +567,44 @@ void advance_level(struct char_data *ch) {
     int add_gen_feats = 0, add_class_feats = 0;
     char buf[MAX_STRING_LENGTH];
 
-
+    auto lvl = GET_LEVEL(ch);
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-    if (GET_LEVEL(ch) >= 1) {
+    if (lvl >= 1) {
         double pl_percent = 10, ki_percent = 10, st_percent = 10, prac_reward = std::max<int>(10, GET_WIS(ch));
 
-        if (GET_LEVEL(ch) >= 91) {
+        if (lvl >= 91) {
             pl_percent -= 7.2;
             ki_percent -= 7.2;
             st_percent -= 7.2;
-        } else if (GET_LEVEL(ch) >= 81) {
+        } else if (lvl >= 81) {
             pl_percent -= 5.8;
             ki_percent -= 5.8;
             st_percent -= 5.8;
-        } else if (GET_LEVEL(ch) >= 71) {
+        } else if (lvl >= 71) {
             pl_percent -= 5;
             ki_percent -= 5;
             st_percent -= 5;
-        } else if (GET_LEVEL(ch) >= 61) {
+        } else if (lvl >= 61) {
             pl_percent -= 4;
             ki_percent -= 4;
             st_percent -= 4;
-        } else if (GET_LEVEL(ch) >= 51) {
+        } else if (lvl >= 51) {
             pl_percent -= 3;
             ki_percent -= 3;
             st_percent -= 3;
-        } else if (GET_LEVEL(ch) >= 41) {
+        } else if (lvl >= 41) {
             pl_percent -= 1.7;
             ki_percent -= 1.7;
             st_percent -= 1.7;
-        } else if (GET_LEVEL(ch) >= 31) {
+        } else if (lvl >= 31) {
             pl_percent -= 0.8;
             ki_percent -= 0.8;
             st_percent -= 0.8;
-        } else if (GET_LEVEL(ch) >= 21) {
+        } else if (lvl >= 21) {
             pl_percent -= 0.35;
             ki_percent -= 0.35;
             st_percent -= 0.35;
-        } else if (GET_LEVEL(ch) >= 11) {
+        } else if (lvl >= 11) {
             pl_percent -= 0.15;
             ki_percent -= 0.15;
             st_percent -= 0.15;
@@ -773,7 +712,7 @@ void advance_level(struct char_data *ch) {
     if (add_mana >= 15000000) {
         add_mana = 15000000;
     }
-    switch (GET_LEVEL(ch)) {
+    switch (lvl) {
         case 5:
             add_hp += rand_number(600, 1000);
             add_move += rand_number(600, 1000);
@@ -836,7 +775,7 @@ void advance_level(struct char_data *ch) {
             break;
     }
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
-    if (GET_LEVEL(ch) == 1 || !(GET_LEVEL(ch) % 3)) {
+    if (lvl == 1 || !(lvl % 3)) {
         add_gen_feats += 1;
     }
 
@@ -846,7 +785,7 @@ void advance_level(struct char_data *ch) {
 
     /* Derived from the SRD under OGL, see ../doc/srd.txt for information */
     i = ability_mod_value(GET_CON(ch));
-    if (GET_LEVEL(ch) > 1) {
+    if (lvl > 1) {
         /* blah */
     } else {
         ch->gainBaseStat("powerlevel", rand_number(1, 20));
@@ -870,21 +809,21 @@ void advance_level(struct char_data *ch) {
         add_prac += rand_number(4, 12);
     }
 
-    if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && GET_LEVEL(ch) > 80) {
+    if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && lvl > 80) {
         add_hp *= 2;
         add_mana *= 2;
         add_move *= 2;
-    } else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && GET_LEVEL(ch) > 60) {
+    } else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && lvl > 60) {
         add_hp *= 1.75;
         add_mana *= 1.75;
         add_move *= 1.75;
-    } else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && GET_LEVEL(ch) > 50) {
+    } else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && lvl > 50) {
         add_hp *= 1.5;
         add_mana *= 1.5;
         add_move *= 1.5;
     }
         /* Rillao: transloc, add new transes here */
-    else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && GET_LEVEL(ch) > 40) {
+    else if ((IS_DEMON(ch) || IS_KANASSAN(ch)) && lvl > 40) {
         add_hp *= 1.25;
         add_mana *= 1.25;
         add_move *= 1.25;
@@ -909,13 +848,13 @@ void advance_level(struct char_data *ch) {
     sprintf(buf, "@D[@YGain@D: @RPl@D(@G%s@D) @gSt@D(@G%s@D) @CKi@D(@G%s@D) @bPS@D(@G%s@D)]", add_commas(add_hp).c_str(),
             add_commas(add_move).c_str(), add_commas(add_mana).c_str(), add_commas(add_prac).c_str());
     if (GET_BONUS(ch, BONUS_GMEMORY) &&
-        (GET_LEVEL(ch) == 20 || GET_LEVEL(ch) == 40 || GET_LEVEL(ch) == 60 || GET_LEVEL(ch) == 80 ||
-         GET_LEVEL(ch) == 100)) {
-        GET_SLOTS(ch) += 1;
+        (lvl == 20 || lvl == 40 || lvl == 60 || lvl == 80 ||
+         lvl == 100)) {
+        ch->modBaseStat<int>("skill_slots", 1);
         send_to_char(ch, "@CYou feel like you could remember a new skill!@n\r\n");
     }
     if (IS_NAMEK(ch) && rand_number(1, 100) <= 5) {
-        GET_SLOTS(ch) += 1;
+        ch->modBaseStat<int>("skill_slots", 1);
         send_to_char(ch, "@CYou feel as though you could learn another skill.@n\r\n");
     }
     if (IS_ICER(ch) && rand_number(1, 100) <= 25) {
@@ -925,7 +864,7 @@ void advance_level(struct char_data *ch) {
 
     int gain_stat = false;
 
-    switch (GET_LEVEL(ch)) {
+    switch (lvl) {
         case 10:
         case 20:
         case 30:
@@ -1024,14 +963,14 @@ void advance_level(struct char_data *ch) {
 
     if (GET_SKILL(ch, SKILL_POTENTIAL) && rand_number(1, 4) == 4) {
         send_to_char(ch, "You can now perform another Potential Release.\r\n");
-        GET_BOOSTS(ch) += 1;
+        ch->modBaseStat<int>("boosts", 1);
     }
-    if (IS_MAJIN(ch) && ((GET_LEVEL(ch) % 25) == 0)) {
+    if (IS_MAJIN(ch) && ((lvl % 25) == 0)) {
         send_to_char(ch, "You can now perform another Majinization.\r\n");
-        GET_BOOSTS(ch) += 1;
+        ch->modBaseStat<int>("boosts", 1);
     }
 
-    if ((GET_LEVEL(ch) % 10) == 0) {
+    if ((lvl % 10) == 0) {
         // every 10 levels...
         const std::map<int, std::pair<std::string, std::string>> checks = {
             {BONUS_BRAWNY, {"strength", "@GYour muscles have grown stronger!@n"}},
@@ -1498,7 +1437,7 @@ namespace sensei {
     }
 
     static const std::vector<Sensei> all_senseis = {
-            Sensei::roshi, Sensei::piccolo, Sensei::krane,
+            Sensei::roshi, Sensei::piccolo, Sensei::crane,
             Sensei::nail, Sensei::bardock, Sensei::ginyu,
             Sensei::frieza, Sensei::tapion, Sensei::sixteen,
             Sensei::dabura, Sensei::kibito, Sensei::jinto,
@@ -1530,7 +1469,7 @@ namespace sensei {
             {Sensei::kibito, 12098},
             {Sensei::nail, 11683},
             {Sensei::bardock, 2268},
-            {Sensei::krane, 13009},
+            {Sensei::crane, 13009},
             {Sensei::tapion, 8231},
             {Sensei::piccolo, 1659},
             {Sensei::sixteen, 1713},
@@ -1555,7 +1494,7 @@ namespace sensei {
             {Sensei::kibito, 12098},
             {Sensei::nail, 11683},
             {Sensei::bardock, 2267},
-            {Sensei::krane, 13012},
+            {Sensei::crane, 13012},
             {Sensei::tapion, 8233},
             {Sensei::piccolo, 1662},
             {Sensei::sixteen, 1714},
@@ -1578,7 +1517,7 @@ namespace sensei {
     static const std::unordered_map<Sensei, std::string> sensei_name = {
             {Sensei::roshi, "Roshi"},
             {Sensei::piccolo, "Piccolo"},
-            {Sensei::krane, "Krane"},
+            {Sensei::crane, "Crane"},
             {Sensei::nail, "Nail"},
             {Sensei::bardock, "Bardock"},
             {Sensei::ginyu, "Ginyu"},
@@ -1596,7 +1535,7 @@ namespace sensei {
     static const std::unordered_map<Sensei, std::string> sensei_abbr = {
             {Sensei::roshi, "Ro"},
             {Sensei::piccolo, "Pi"},
-            {Sensei::krane, "Kr"},
+            {Sensei::crane, "Cr"},
             {Sensei::nail, "Na"},
             {Sensei::bardock, "Ba"},
             {Sensei::ginyu, "Gi"},
@@ -1614,7 +1553,7 @@ namespace sensei {
     static const std::unordered_map<Sensei, std::string> sensei_arts = {
             {Sensei::roshi, "Kame Arts"},
             {Sensei::piccolo, "Demon Taijutsu"},
-            {Sensei::krane, "Crane Arts"},
+            {Sensei::crane, "Crane Arts"},
             {Sensei::nail, "Tranquil Palm"},
             {Sensei::bardock, "Brutal Beast"},
             {Sensei::ginyu, "Flaunted Style"},

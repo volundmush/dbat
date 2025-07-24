@@ -250,21 +250,21 @@ static void mob_attack(struct char_data *ch, char *buf) {
     }
 
     if ((ch->getCurKI()) >= GET_MAX_MANA(ch) * 0.05 && IS_HUMANOID(ch) && (!IS_DRAGON(ch) || dragonpass == true)) {
-        if (ch->mobcharge <= 0 && rand_number(1, 10) >= 8) {
+        if (ch->getBaseStat<int>("mobcharge") <= 0 && rand_number(1, 10) >= 8) {
             act("@wAn aura flares up around @R$n@w!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->mobcharge += 1;
+            ch->modBaseStat<int>("mobcharge", 1);
             if (GET_LEVEL(ch) > 80) {
-                ch->mobcharge += 1;
+                ch->modBaseStat<int>("mobcharge", 1);
             }
-        } else if (ch->mobcharge <= 5) {
+        } else if (ch->getBaseStat<int>("mobcharge") <= 5) {
             act("@wThe aura burns brighter around @R$n@w!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->mobcharge += 1;
+            ch->modBaseStat<int>("mobcharge", 1);
             if (GET_LEVEL(ch) > 80) {
-                ch->mobcharge += 1;
+                ch->modBaseStat<int>("mobcharge", 1);
             }
-        } else if (ch->mobcharge == 6) {
+        } else if (ch->getBaseStat<int>("mobcharge") == 6) {
             act("@wThe aura around @R$n@w flashes!@n", true, ch, nullptr, nullptr, TO_ROOM);
-            ch->mobcharge += 1;
+            ch->modBaseStat<int>("mobcharge", 1);
             special = 100;
         }
     }
@@ -390,8 +390,8 @@ static void mob_attack(struct char_data *ch, char *buf) {
                 case 4:
                     if (special > 80)
                         do_zanzoken(ch, buf, 0, 0);
-                    if (ch->mobcharge == 7) {
-                        ch->mobcharge = 0;
+                    if (ch->getBaseStat<int>("mobcharge") == 7) {
+                        ch->setBaseStat<int>("mobcharge", 0);
                         do_kiball(ch, buf, 0, 0);
                     }
                     break;
@@ -401,8 +401,8 @@ static void mob_attack(struct char_data *ch, char *buf) {
                 case 8:
                     if (special > 80)
                         do_zanzoken(ch, buf, 0, 0);
-                    if (ch->mobcharge == 7) {
-                        ch->mobcharge = 0;
+                    if (ch->getBaseStat<int>("mobcharge") == 7) {
+                        ch->setBaseStat<int>("mobcharge", 0);
                         do_kiblast(ch, buf, 0, 0);
                     }
                     break;
@@ -414,8 +414,8 @@ static void mob_attack(struct char_data *ch, char *buf) {
                     if (IS_DRAGON(ch) && rand_number(1, 4) == 4) {
                         do_breath(ch, buf, 0, 0);
                     } else {
-                        if (ch->mobcharge == 7) {
-                            ch->mobcharge = 0;
+                        if (ch->getBaseStat<int>("mobcharge") == 7) {
+                            ch->setBaseStat<int>("mobcharge", 0);
                             do_beam(ch, buf, 0, 0);
                         }
                     }
@@ -428,8 +428,8 @@ static void mob_attack(struct char_data *ch, char *buf) {
                     if (IS_DRAGON(ch) && rand_number(1, 4) == 4) {
                         do_breath(ch, buf, 0, 0);
                     } else {
-                        if (ch->mobcharge == 7) {
-                            ch->mobcharge = 0;
+                        if (ch->getBaseStat<int>("mobcharge") == 7) {
+                            ch->setBaseStat<int>("mobcharge", 0);
                             do_renzo(ch, buf, 0, 0);
                         }
                     }
@@ -439,8 +439,8 @@ static void mob_attack(struct char_data *ch, char *buf) {
                     if (IS_DRAGON(ch) && rand_number(1, 4) == 4) {
                         do_breath(ch, buf, 0, 0);
                     } else {
-                        if (ch->mobcharge == 7) {
-                            ch->mobcharge = 0;
+                        if (ch->getBaseStat<int>("mobcharge") == 7) {
+                            ch->setBaseStat<int>("mobcharge", 0);
                             do_tsuihidan(ch, buf, 0, 0);
                         }
                     }
@@ -450,8 +450,8 @@ static void mob_attack(struct char_data *ch, char *buf) {
                     if (IS_DRAGON(ch) && rand_number(1, 4) == 4) {
                         do_breath(ch, buf, 0, 0);
                     } else {
-                        if (ch->mobcharge == 7) {
-                            ch->mobcharge = 0;
+                        if (ch->getBaseStat<int>("mobcharge") == 7) {
+                            ch->setBaseStat<int>("mobcharge", 0);
                             do_shogekiha(ch, buf, 0, 0);
                         }
                     }
@@ -461,8 +461,8 @@ static void mob_attack(struct char_data *ch, char *buf) {
                     if (IS_DRAGON(ch)) {
                         do_breath(ch, buf, 0, 0);
                     }
-                    if (ch->mobcharge == 7) {
-                        ch->mobcharge = 0;
+                    if (ch->getBaseStat<int>("mobcharge") == 7) {
+                        ch->setBaseStat<int>("mobcharge", 0);
                         switch (GET_CLASS(ch)) {
                             case Sensei::roshi:
                                 if (special >= 100)
@@ -488,7 +488,7 @@ static void mob_attack(struct char_data *ch, char *buf) {
                                 else
                                     do_barrier(ch, "25", 0, 0);
                                 break;
-                            case Sensei::krane:
+                            case Sensei::crane:
                                 if (special >= 100)
                                     do_tribeam(ch, buf, 0, 0);
                                 else if (special >= 80)
@@ -654,7 +654,7 @@ static void cleanup_arena_watch(struct char_data *ch) {
         if (PRF_FLAGGED(d->character, PRF_ARENAWATCH)) {
             if (ARENA_IDNUM(d->character) == GET_IDNUM(ch)) {
                 d->character->pref_flags.set(PRF_ARENAWATCH, false);
-                ARENA_IDNUM(d->character) = -1;
+                d->character->setBaseStat<room_vnum>("arena_watch", -1);
             }
         }
     }
@@ -922,7 +922,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
     for (auto ch : filter_raw(subs)) {
 
         if (GET_POS(ch) == POS_FIGHTING) {
-            GET_POS(ch) = POS_STANDING;
+            ch->setBaseStat<int>("position", POS_STANDING);
         }
         if (PLR_FLAGGED(ch, PLR_SPIRAL)) {
             handle_spiral(ch, nullptr, GET_SKILL(ch, SKILL_SPIRAL), false);
@@ -989,11 +989,11 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
                 act("@C$n@W chokes YOU@W, and you pass out!@n", true, ch, nullptr, GRAPPLING(ch), TO_VICT);
                 act("@C$n@W chokes @c$N@W, and $E passes out!@n", true, ch, nullptr, GRAPPLING(ch), TO_NOTVICT);
                 ch->affect_flags.set(AFF_KNOCKED, true);
-                GET_POS(GRAPPLING(ch)) = POS_SLEEPING;
-                GRAPTYPE(GRAPPLING(ch)) = -1;
+                GRAPPLING(ch)->setBaseStat<int>("position", POS_SLEEPING);
+                GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
                 GRAPPLED(GRAPPLING(ch)) = nullptr;
                 GRAPPLING(ch) = nullptr;
-                GRAPTYPE(ch) = -1;
+                ch->setBaseStat<int>("grapple_type", -1);
             }
         } else if (GRAPPLING(ch) && GRAPTYPE(ch) == 4 && rand_number(1, 12) >= 8) {
             act("@WYou crush @C$N@W some more!@n", true, ch, nullptr, GRAPPLING(ch), TO_CHAR);
@@ -1006,8 +1006,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             send_to_char(ch, "@CTry 'escape' to break free from the hold!@n\r\n");
         }
         if (IS_HALFBREED(ch) && PLR_FLAGGED(ch, PLR_FURY)) {
-            GET_RMETER(ch) += 1;
-            if (GET_RMETER(ch) >= 1000) {
+            if (ch->modBaseStat<int>("rage_meter", 1) >= 1000) {
 
                 ch->incCurHealthPercent(.15);
                 ch->incCurKIPercent(.15);
@@ -1043,7 +1042,7 @@ void fight_stack(uint64_t heartPulse, double deltaTime) {
             ch->cureStatusKnockedOut(true);
             if (IS_NPC(ch) && rand_number(1, 20) >= 12) {
                 act("@W$n@W stands up.@n", false, ch, nullptr, nullptr, TO_ROOM);
-                GET_POS(ch) = POS_STANDING;
+                ch->setBaseStat<int>("position", POS_STANDING);
             }
         }
 
@@ -1202,7 +1201,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             send_to_char(ch, "You have charged the last that you can.\r\n");
             act("$n@w's aura @Yflashes@w spectacularly, rushing upwards in torrents!@n", true, ch, nullptr, nullptr,
                 TO_ROOM);
-            GET_CHARGE(ch) += ch->getCurKI();
+            ch->modBaseStat<int64_t>("charge", ch->getCurKI());
             ch->decCurKIPercent(1);
             stopCharge = true;
         } else {
@@ -1212,14 +1211,14 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                 stopCharge = true;
             } else if (GET_CHARGE(ch) + (((GET_MAX_MANA(ch) * 0.01) * perc) + 1) >= GET_CHARGETO(ch)) {
                 ch->decCurKI(GET_CHARGETO(ch) - GET_CHARGE(ch));
-                GET_CHARGE(ch) = GET_CHARGETO(ch);
+                ch->setBaseStat<int64_t>("charge", GET_CHARGETO(ch));
                 send_to_char(ch, "You stop charging as you reach the maximum that you wished to charge.\r\n");
                 act("$n@w's aura flares up brightly and then burns steadily.@n", true, ch, nullptr, nullptr,
                     TO_ROOM);
                 stopCharge = true;
             } else {
                 ch->decCurKI(((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
-                GET_CHARGE(ch) += ((GET_MAX_MANA(ch) * 0.01) * perc) + 1;
+                ch->modBaseStat<int64_t>("charge", ((GET_MAX_MANA(ch) * 0.01) * perc) + 1);
                 switch (rand_number(1, 3)) {
                     case 1:
                         act("$n@w's aura ripples magnificantly while growing brighter!@n", true, ch, nullptr,
@@ -1239,8 +1238,8 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                         break;
                 }
                 if (GET_CHARGE(ch) >= GET_CHARGETO(ch)) {
-                    GET_CHARGE(ch) = GET_CHARGETO(ch);
-                    GET_CHARGE(ch) += GET_INT(ch);
+                    ch->setBaseStat<int64_t>("charge", GET_CHARGETO(ch));
+                    ch->modBaseStat<int64_t>("charge", GET_INT(ch));
                     send_to_char(ch, "You have finished charging!\r\n");
                     act("$n@w's aura burns brightly and then evens out.@n", true, ch, nullptr, nullptr, TO_ROOM);
                     stopCharge = true;
@@ -1251,7 +1250,7 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             }
         }
         if(stopCharge) {
-            GET_CHARGETO(ch) = 0;
+            ch->setBaseStat<int64_t>("chargeto", 0);
             ch->player_flags.set(PLR_CHARGE, false);
         }
         if(GET_CHARGE(ch) > 0) {
@@ -1285,8 +1284,8 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             }
             ch->player_flags.set(PLR_CHARGE, false);
             ch->incCurKI(GET_CHARGE(ch));
-            GET_CHARGE(ch) = 0;
-            GET_CHARGETO(ch) = 0;
+            ch->setBaseStat<int64_t>("charge", 0);
+            ch->setBaseStat<int64_t>("chargeto", 0);
         }
         auto docharge = PLR_FLAGGED(ch, PLR_CHARGE);
         auto prefki = GET_PREFERENCE(ch) == PREFERENCE_KI;
@@ -1308,8 +1307,8 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
             }
             ch->player_flags.set(PLR_CHARGE, false);
             ch->incCurKI(GET_CHARGE(ch));
-            GET_CHARGE(ch) = 0;
-            GET_CHARGETO(ch) = 0;
+            ch->setBaseStat<int64_t>("charge", 0);
+            ch->setBaseStat<int64_t>("chargeto", 0);
         }
         if (GET_CHARGE(ch) >= ch->getMaxKI() / 2) {
             improve_skill(ch, SKILL_CONCENTRATION, 1);
@@ -1335,11 +1334,11 @@ void kiChargeSystem(uint64_t heartPulse, double deltaTime) {
                         break;
                 }
                 loss = GET_CHARGE(ch) / 20;
-                GET_CHARGE(ch) -= loss;
+                ch->modBaseStat<int64_t>("charge", -loss);
             } else if (GET_CHARGE(ch) < GET_MAX_MANA(ch) / 100 && GET_CHARGE(ch) != 0) {
                 send_to_char(ch, "Your charged energy is completely gone as your aura fades.\r\n");
                 act("$n@w's aura fades away dimmly.@n", true, ch, nullptr, nullptr, TO_ROOM);
-                GET_CHARGE(ch) = 0;
+                ch->setBaseStat<int64_t>("charge", 0);
             }
         }
 
@@ -1368,15 +1367,15 @@ void update_pos(struct char_data *victim) {
     else if (GET_POS(victim) == POS_SITTING && FIGHTING(victim))
         return;
     else if (GET_HIT(victim) > 0)
-        GET_POS(victim) = POS_STANDING;
+        victim->setBaseStat<int>("position", POS_STANDING);
     else if (GET_HIT(victim) <= -11)
-        GET_POS(victim) = POS_DEAD;
+        victim->setBaseStat<int>("position", POS_DEAD);
     else if (GET_HIT(victim) <= -6)
-        GET_POS(victim) = POS_MORTALLYW;
+        victim->setBaseStat<int>("position", POS_MORTALLYW);
     else if (GET_HIT(victim) <= -3)
-        GET_POS(victim) = POS_INCAP;
+        victim->setBaseStat<int>("position", POS_INCAP);
     else
-        GET_POS(victim) = POS_STUNNED;
+        victim->setBaseStat<int>("position", POS_STUNNED);
 }
 
 
@@ -1402,9 +1401,9 @@ void set_fighting(struct char_data *ch, struct char_data *vict) {
     FIGHTING(ch) = vict;
 
     if (GET_POS(ch) == POS_SITTING) {
-        GET_POS(ch) = POS_SITTING;
+        ch->setBaseStat<int>("position", POS_SITTING);
     } else if (GET_POS(ch) == POS_SLEEPING) {
-        GET_POS(ch) = POS_SLEEPING;
+        ch->setBaseStat<int>("position", POS_SLEEPING);
     }
 
     for(auto c : {ch, vict}) {
@@ -1421,8 +1420,8 @@ void stop_fighting(struct char_data *ch) {
     struct char_data *temp;
 
     if (IS_NPC(ch)) {
-        COMBO(ch) = -1;
-        COMBHITS(ch) = 0;
+        ch->setBaseStat<int>("combo", -1);
+        ch->setBaseStat<int>("combo_hits", 0);
     }
 
     FIGHTING(ch) = nullptr;
@@ -1810,16 +1809,16 @@ static void final_combat_resolve(struct char_data *ch) {
         DRAGGED(ch) = nullptr;
     }
     if (GRAPPLING(ch)) {
-        GRAPTYPE(GRAPPLING(ch)) = -1;
+        GRAPPLING(ch)->setBaseStat<int>("grapple_type", -1);
         GRAPPLED(GRAPPLING(ch)) = nullptr;
         GRAPPLING(ch) = nullptr;
-        GRAPTYPE(ch) = -1;
+        ch->setBaseStat<int>("grapple_type", -1);
     }
     if (GRAPPLED(ch)) {
-        GRAPTYPE(GRAPPLED(ch)) = -1;
+        GRAPPLED(ch)->setBaseStat<int>("grapple_type", -1);
         GRAPPLING(GRAPPLED(ch)) = nullptr;
         GRAPPLED(ch) = nullptr;
-        GRAPTYPE(ch) = -1;
+        ch->setBaseStat<int>("grapple_type", -1);
     }
     if (BLOCKED(ch)) {
         BLOCKS(BLOCKED(ch)) = nullptr;
@@ -1861,7 +1860,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
 
     /* To make ordinary commands work in scripts.  welcor*/
     if (GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_SLEEPING && GET_POS(ch) != POS_RESTING)
-        GET_POS(ch) = POS_STANDING;
+        ch->setBaseStat<int>("position", POS_STANDING);
 
     if (killer && !IS_NPC(killer)) {
         if (!IS_NPC(killer) && !IS_NPC(ch)) {
@@ -1894,44 +1893,42 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
             }
         }
         if (IS_ANDROID(killer) && !IS_NPC(killer) && !(killer->subrace == SubRace::android_model_absorb)) {
+            int up = 0;
+            auto klevel = GET_LEVEL(killer);
+            auto chlevel = GET_LEVEL(ch);
             if (killer->subrace == SubRace::android_model_repair) {
-                if (GET_LEVEL(killer) > GET_LEVEL(ch) + 15) {
+                
+                if (klevel > chlevel + 15) {
                     send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 10) {
-                    GET_UP(killer) += 3;
-                    send_to_char(killer, "@D[@G+3 @mUpgrade Point@D]@n\r\n");
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 8) {
-                    GET_UP(killer) += 6;
-                    send_to_char(killer, "@D[@G+6 @mUpgrade Points@D]@n\r\n");
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 4) {
-                    GET_UP(killer) += 12;
-                    send_to_char(killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 2) {
-                    GET_UP(killer) += 16;
-                    send_to_char(killer, "@D[@G+16 @mUpgrade Points@D]@n\r\n");
+                } else if (klevel > chlevel + 10) {
+                    up = 3;
+                } else if (klevel > chlevel + 8) {
+                    up = 6;
+                } else if (klevel > chlevel + 4) {
+                    up = 12;
+                } else if (klevel > chlevel + 2) {
+                    up = 16;
                 } else {
-                    GET_UP(killer) += 28;
-                    send_to_char(killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
+                    up = 28;
                 }
             } else {
-                if (GET_LEVEL(killer) > GET_LEVEL(ch) + 15) {
+                if (klevel > chlevel + 15) {
                     send_to_char(killer, "@D[@G+0 @mUpgrade Point @r-WEAK-@D]@n\r\n");
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 10) {
-                    GET_UP(killer) += 5;
-                    send_to_char(killer, "@D[@G+5 @mUpgrade Point@D]@n\r\n");
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 6) {
-                    GET_UP(killer) += 12;
-                    send_to_char(killer, "@D[@G+12 @mUpgrade Points@D]@n\r\n");
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 4) {
-                    GET_UP(killer) += 18;
-                    send_to_char(killer, "@D[@G+18 @mUpgrade Points@D]@n\r\n");
-                } else if (GET_LEVEL(killer) > GET_LEVEL(ch) + 2) {
-                    GET_UP(killer) += 28;
-                    send_to_char(killer, "@D[@G+28 @mUpgrade Points@D]@n\r\n");
+                } else if (klevel > chlevel + 10) {
+                    up = 5;
+                } else if (klevel > chlevel + 6) {
+                    up = 12;
+                } else if (klevel > chlevel + 4) {
+                    up = 18;
+                } else if (klevel > chlevel + 2) {
+                    up = 28;
                 } else {
-                    GET_UP(killer) += 36;
-                    send_to_char(killer, "@D[@G+36 @mUpgrade Points@D]@n\r\n");
+                    up = 36;
                 }
+            }
+            if(up > 0) {
+                killer->modBaseStat<int>("upgrade_points", up);
+                send_to_char(killer, "@D[@G+%d @mUpgrade Points@D]@n\r\n", up);
             }
         }
         if (death_mtrigger(ch, killer))
@@ -2078,7 +2075,7 @@ void raw_kill(struct char_data *ch, struct char_data *killer) {
         if (!IS_NPC(ch)) {
             if (IS_ANDROID(ch) && ch->subrace != SubRace::android_model_absorb && android_lose && GET_UP(ch) > 5) {
                 int loss = GET_UP(ch) / 5;
-                GET_UP(ch) -= loss;
+                ch->modBaseStat<int>("upgrade_points", -loss);
                 send_to_char(ch, "@rYou lose @R%s@r upgrade points!@n\r\n", add_commas(loss).c_str());
             }
         }
@@ -2096,7 +2093,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             ch->decCurHealthPercent(1, 1);
             ch->player_flags.set(PLR_GOOP, true);
             characterSubscriptions.subscribe("goopTimeService", ch);
-            ch->gooptime = 32;
+            ch->setBaseStat<int>("gooptime", 32);
             return;
         }
         if (PLR_FLAGGED(ch, PLR_IMMORTAL)) {
@@ -2117,7 +2114,7 @@ void die(struct char_data *ch, struct char_data *killer) {
             if (FIGHTING(ch)) {
                 stop_fighting(ch);
             }
-            GET_POS(ch) = POS_SITTING;
+            ch->setBaseStat<int>("position", POS_SITTING);
             ch->teleport_to(sensei::getStartRoom(ch->sensei));
             return;
         }
@@ -2125,7 +2122,7 @@ void die(struct char_data *ch, struct char_data *killer) {
         for(auto f : {AFF_KNOCKED, AFF_SLEEP, AFF_PARALYZE}) ch->affect_flags.set(f, false);
         if (!AFF_FLAGGED(ch, AFF_SPIRIT) && !ch->getWhereFlag(WhereFlag::pendulum_past) && !ch->is_newbie()) {
             if (ch->getRoomVnum() >= 2002 && ch->getRoomVnum() <= 2011) {
-                GET_DTIME(ch) = time(nullptr);
+                ch->setBaseStat("death_time", time(nullptr));
             } else if (ch->getWhereFlag(WhereFlag::afterlife) || ch->getRoomFlag(ROOM_HELL)) {
                 send_to_char(ch, "Your soul is saved from destruction by King Yemma. Why? Who knows.\r\n");
             } else if (IN_ARENA(ch)) {
@@ -2146,18 +2143,11 @@ void die(struct char_data *ch, struct char_data *killer) {
                 final_combat_resolve(ch);
                 return;
             } else {
-                if (killer && IS_NPC(killer)) {
-                    GET_DTIME(ch) = time(nullptr) + 28800;
-                    GET_DCOUNT(ch) += 1;
-                } else if (killer && !IS_NPC(killer)) {
-                    GET_DTIME(ch) = time(nullptr) + 28800;
+                if (killer && !IS_NPC(killer)) {
                     ch->player_flags.set(PLR_PDEATH, true);
-                    GET_DCOUNT(ch) += 1;
-                } else {
-                    GET_DTIME(ch) = time(nullptr) + 28800;
-
-                    GET_DCOUNT(ch) += 1;
                 }
+                ch->setBaseStat("death_time", time(nullptr) + 28800);
+                ch->modBaseStat("death_count", 1);
             }
             if (GET_COND(ch, HUNGER) >= 0) {
                 GET_COND(ch, HUNGER) = 48;
@@ -2253,7 +2243,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
     if (MOB_FLAGGED(victim, MOB_KNOWKAIO)) {
         share += share * .25;
     }
-    ch->mod(CharNum::group_kills, 1);
+    ch->modBaseStat<int>("group_kills", 1);
     if ((GET_GROUPKILLS(ch) + 1) / 20 > share * 0.16) {
         share += share * 0.16;
     } else {
@@ -2284,7 +2274,7 @@ static void perform_group_gain(struct char_data *ch, int base, struct char_data 
                 ch->incCurHealthPercent(.02);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G5%s PL Repaired@D]@n\r\n", "%");
             } else if (leader->subrace == SubRace::android_model_sense && !(ch->subrace == SubRace::android_model_absorb)) {
-                GET_UP(ch) += 5;
+                ch->modBaseStat<int>("upgrade_points", 5);
                 send_to_char(ch, "You receive a bonus from your group's leader! @D[@G+5 @mUpgrade Points@D]@n\r\n");
             }
         } else {

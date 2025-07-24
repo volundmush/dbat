@@ -643,7 +643,8 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     Sensei sensei{Sensei::commoner};
     Sex sex{Sex::male};
 
-    std::unordered_map<std::string, double> base_stats; // Base stats for this unit.
+    // Base stats for this unit.
+    std::unordered_map<std::string, double> stats;
 
     std::unordered_map<Appearance, std::string> appearances;
     std::string getAppearance(Appearance type, bool withTransform = true);
@@ -676,26 +677,19 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     }
 
     template<typename R = double>
-    R gainBaseStat(const std::string& stat, double val) {
-        return charStats.gainBase<R>(this, stat, val);
+    R gainBaseStat(const std::string& stat, double val, bool applyBonuses = true) {
+        return charStats.gainBase<R>(this, stat, val, applyBonuses);
     }
 
     template<typename R = double>
-    R gainBaseStatPercent(const std::string& stat, double percent) {
-        return charStats.gainBasePercent<R>(this, stat, percent);
+    R gainBaseStatPercent(const std::string& stat, double percent, bool applyBonuses = true) {
+        return charStats.gainBasePercent<R>(this, stat, percent, applyBonuses);
     }
 
     template<typename R = double>
     R getEffectiveStat(const std::string& stat) {
         return charStats.getEffective<R>(this, stat);
     }
-
-    int getArmor();
-
-    std::unordered_map<CharNum, num_t> nums{};
-    num_t get(CharNum stat);
-    num_t set(CharNum stat, num_t val);
-    num_t mod(CharNum stat, num_t val);
 
     struct mob_special_data mob_specials{};
 
@@ -709,9 +703,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     void gainGrowth(double);
 
     // Instance-relevant fields below...
-    room_vnum was_in_room{NOWHERE};    /* location for linkdead people		*/
-
-    room_vnum hometown{NOWHERE};        /* PC Hometown / NPC spawn room         */
     struct time_data time{};    /* PC's AGE in days			*/
     struct affected_type *affected{};
     /* affected by what spells		*/
@@ -735,16 +726,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     /* For round based affect wearoff	*/
 
     struct follow_type *followers{};/* List of chars followers		*/
-    
-    int master_id{NOTHING};
-
-    struct memorize_node *memorized{};
-    struct innate_node *innate{};
-
-    int8_t position{POS_STANDING};        /* Standing, fighting, sleeping, etc.	*/
-
-    int timer{};            /* Timer for update			*/
-
     std::weak_ptr<obj_data> sits{};      /* What am I sitting on? */
 
     struct char_data *fighting;    /* Opponent				*/
@@ -768,12 +749,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     std::list<std::weak_ptr<char_data>> poisoned;
     struct char_data *original{};
     std::list<std::weak_ptr<char_data>> clones{};
-
-    int8_t feats[MAX_FEATS + 1]{};    /* Feats (booleans and counters)	*/
-    int combat_feats[CFEAT_MAX + 1][FT_ARRAY_MAX]{};
-    /* One bitvector array per CFEAT_ type	*/
-    int school_feats[SFEAT_MAX + 1]{};/* One bitvector array per CFEAT_ type	*/
-
     std::map<Skill, skill_data> skill;
 
     FlagHandler<CharacterFlag> character_flags{};
@@ -785,17 +760,10 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     FlagHandler<Mutation> mutations{};
 
     std::bitset<NUM_WEARS> bodyparts{};  /* Bitvector for current bodyparts      */
-    int16_t saving_throw[3]{};    /* Saving throw				*/
-    int16_t apply_saving_throw[3]{};    /* Saving throw bonuses			*/
 
     int64_t getExperience();
     int64_t setExperience(int64_t value);
     int64_t modExperience(int64_t value, bool applyBonuses = true);
-
-    std::unordered_map<CharStat, stat_t> stats;
-    stat_t get(CharStat type);
-    stat_t set(CharStat type, stat_t val);
-    stat_t mod(CharStat type, stat_t val);
 
     Form form{Form::base};        /* Current form of the character		*/
     Form technique{Form::base};        /* Current technique form of the character		*/
@@ -806,130 +774,29 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     // Data stored about different forms.
     std::unordered_map<Form, trans_data> transforms;
 
-    /* All below added by Iovan for sure o.o */
-    int64_t charge{};
-    int64_t chargeto{};
-    int64_t barrier{};
-
-    char *clan{};
-    room_vnum droom{};
-    int choice{};
-    int sleeptime{};
-    int foodr{};
-    int altitude{};
-    int overf{};
-    int spam{};
-
-    int ship{};
-    room_vnum shipr{};
-    time_t lastpl{};
-    time_t lboard[5]{};
-
-    room_vnum listenroom{};
-    int crank{};
-    int kaioken{};
-    int absorbs{};
-    int boosts{};
-    int upgrade{};
-    time_t lastint{};
-    int majinize{};
-    short fury{};
-    short btime{};
-    int eavesdir{};
-    time_t deathtime{};
-
-    int64_t suppression{};
-    
-    int lasthit{};
-    int dcount{};
-    char *voice{};                  /* PC's snet voice */
-    int limbs[4]{};                 /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
-    time_t rewtime{};
-    
     std::array<int, 6> gravAcclim;
-    int grap{};
-    
-    int combo{};
-    int lastattack{};
-    int combhits{};
-    int ping{};
-    int starphase{};
     std::optional<Race> mimic{};
-    std::bitset<MAX_BONUSES> bonuses{};
 
-    int death_type{};
-
-    int64_t moltexp{};
-    int moltlevel{};
-
-    char *loguser{};                /* What user was I last saved as?      */
-    int arenawatch{};
-    int64_t majinizer{};
-    int speedboost{};
-    int skill_slots{};
-    int tail_growth{};
-    int rage_meter{};
+    /* All below added by Iovan for sure o.o */
+    char *clan{};
+    int crank{}; // clan rank
+    char *voice{}; /* PC's snet voice */
     char *feature{};
-
-    int armor_last{};
-    int forgeting{};
-    int forgetcount{};
-    int backstabcool{};
-    int con_cooldown{};
-    short stupidkiss{};
     char *temp_prompt{};
-
-    int personality{};
-    int combine{};
-    int linker{};
-    int fishstate{};
-    int throws{};
-
-    int lifeperc{};
-    int gooptime{};
-    int blesslvl{};
-    
-    int mobcharge{};
-    int preference{};
-    int aggtimer{};
-
-    int lifebonus{};
-    int asb{};
-    int regen{};
-    int con_sdcooldown{};
-
-    int8_t limb_condition[4]{};
-
     char *rdisplay{};
-
-    int relax_count{};
-    int ingestLearned{};
-
-    int64_t last_tell{-1};        /* idnum of last tell from              */
-    void *last_olc_targ{};        /* olc control                          */
-    int last_olc_mode{};        /* olc control                          */
-    int olc_zone{};            /* Zone where OLC is permitted		*/
-    int gauntlet{};                 /* Highest Gauntlet Position */
     char *poofin{};            /* Description on arrival of a god.     */
     char *poofout{};        /* Description upon a god's exit.       */
-    int speaking{};            /* Language currently speaking		*/
+    void *last_olc_targ{};        /* olc control                          */
+    int timer{};            /* Timer for update			*/
 
+    time_t lboard[5]{};
+    int limbs[4]{}; /* 0 Right Arm, 1 Left Arm, 2 Right Leg, 3 Left Leg */
+    int8_t limb_condition[4]{};
     int8_t conditions[NUM_CONDITIONS]{};        /* Drunk, full, thirsty			*/
-    int practice_points{};        /* Skill points earned from race HD	*/
 
-    int wimp_level{0};        /* Below this # of hit points, flee!	*/
-    int8_t freeze_level{};        /* Level of god who froze char, if any	*/
-    int16_t invis_level{};        /* level of invisibility		*/
-    room_vnum load_room{NOWHERE};        /* Which room to place char in		*/
-    
     room_vnum normalizeLoadRoom(room_vnum in);
 
     double getAffectModifier(uint64_t location, uint64_t specific) override;
-
-    std::unordered_map<CharTrain, attribute_train_t> trains;
-    attribute_train_t get(CharTrain attr);
-    attribute_train_t set(CharTrain attr, attribute_train_t val);
-    attribute_train_t mod(CharTrain attr, attribute_train_t val);
 
     // C++ reworking
     std::string juggleRaceName(bool capitalized);
@@ -965,10 +832,6 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
 
     bool in_northran();
 
-    bool can_tolerate_gravity(int grav);
-
-    int calcTier();
-
     int64_t calc_soft_cap();
 
     bool is_soft_cap(int64_t type, long double mult);
@@ -987,170 +850,87 @@ struct char_data : public thing_data, std::enable_shared_from_this<char_data> {
     double getCurVitalDam(CharVital type);
 
     int64_t getCurHealth();
-
     int64_t getMaxHealth();
-
     double getCurHealthPercent();
-
     int64_t getPercentOfCurHealth(double amt);
-
     int64_t getPercentOfMaxHealth(double amt);
-
     bool isFullHealth();
-
     int64_t setCurHealth(int64_t amt);
-
     int64_t setCurHealthPercent(double amt);
-
     int64_t incCurHealth(int64_t amt, bool limit_max = true);
-
     int64_t decCurHealth(int64_t amt, int64_t floor = 0);
-
     int64_t incCurHealthPercent(double amt, bool limit_max = true);
-
     int64_t decCurHealthPercent(double amt, int64_t floor = 0);
-
     void restoreHealth(bool announce = true);
 
-    int64_t healCurHealth(int64_t amt);
-
-    int64_t harmCurHealth(int64_t amt);
-
     int64_t getPL();
-
     int64_t getMaxPLTrans();
-
     int64_t getCurPL();
-
     int64_t getUnsuppressedPL();
-
     int64_t getBasePL();
-
     int64_t getEffBasePL();
-
     double getCurPLPercent();
-
     int64_t getPercentOfCurPL(double amt);
-
     int64_t getPercentOfMaxPL(double amt);
-
     bool isFullPL();
-
     int64_t getCurKI();
-
     int64_t getMaxKI();
-
     int64_t getBaseKI();
-
     int64_t getEffBaseKI();
-
     double getCurKIPercent();
-
     int64_t getPercentOfCurKI(double amt);
-
     int64_t getPercentOfMaxKI(double amt);
-
     bool isFullKI();
-
     int64_t setCurKI(int64_t amt);
-
     int64_t setCurKIPercent(double amt);
-
     int64_t incCurKI(int64_t amt, bool limit_max = true);
-
     int64_t decCurKI(int64_t amt, int64_t floor = 0);
-
     int64_t incCurKIPercent(double amt, bool limit_max = true);
-
     int64_t decCurKIPercent(double amt, int64_t floor = 0);
-
     void restoreKI(bool announce = true);
-
     int64_t getCurST();
-
     int64_t getMaxST();
-
     int64_t getBaseST();
-
     int64_t getEffBaseST();
-
     double getCurSTPercent();
-
     int64_t getPercentOfCurST(double amt);
-
     int64_t getPercentOfMaxST(double amt);
-
     bool isFullST();
-
     int64_t setCurST(int64_t amt);
-
     int64_t setCurSTPercent(double amt);
-
     int64_t incCurST(int64_t amt, bool limit_max = true);
-
     int64_t decCurST(int64_t amt, int64_t floor = 0);
-
     int64_t incCurSTPercent(double amt, bool limit_max = true);
-
     int64_t decCurSTPercent(double amt, int64_t floor = 0);
-
     void restoreST(bool announce = true);
-
     int64_t getCurLF();
-
     int64_t getMaxLF();
-
-    double getCurLFPercent();
-
-    int64_t getPercentOfCurLF(double amt);
-
-    int64_t getPercentOfMaxLF(double amt);
-
     bool isFullLF();
-
-    int64_t setCurLF(int64_t amt);
-
-    int64_t setCurLFPercent(double amt);
-
     int64_t incCurLF(int64_t amt, bool limit_max = true);
-
     int64_t decCurLF(int64_t amt, int64_t floor = 0);
-
     int64_t incCurLFPercent(double amt, bool limit_max = true);
-
     int64_t decCurLFPercent(double amt, int64_t floor = 0);
-
     void restoreLF(bool announce = true);
-
     bool isFullVitals();
-
     void restoreVitals(bool announce = true);
-
     void restoreStatus(bool announce = true);
-
     void restoreLimbs(bool announce = true);
 
     // status stuff
     void cureStatusKnockedOut(bool announce = true);
-
     void cureStatusBurn(bool announce = true);
 
     void cureStatusPoison(bool announce = true);
-
     void setStatusKnockedOut();
 
     // stats refactor stuff
     int64_t getMaxPL();
-
     void apply_kaioken(int times, bool announce);
-
     void remove_kaioken(int8_t announce);
-
     int getRPP();
     void modRPP(int amt);
     int getPractices();
     void modPractices(int amt);
-
     bool isProvidingLight();
     double currentGravity();
 

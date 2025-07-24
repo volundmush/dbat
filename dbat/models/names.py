@@ -27,7 +27,6 @@ __categories = {
     "Align": "aligns",
     "Money": "moneys",
     "Vital": "vitals",
-    "Num": "nums",
     "Stat": "stats",
     "Dim": "dims",
     "ComStat": "com_stats",

@@ -231,7 +231,7 @@ ASPELL(spell_charm) {
             stop_follower(victim);
 
         add_follower(victim, ch);
-        victim->master_id = GET_IDNUM(ch);
+        victim->setBaseStat<int>("master_id", GET_IDNUM(ch));
 
         af.type = SPELL_CHARM;
         af.duration = 24 * 2;

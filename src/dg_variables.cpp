@@ -785,7 +785,7 @@ in the vault (vnum: 453) now and then. you can just use
                             for (i = POS_SLEEPING; i <= POS_STANDING; i++) {
                                 /* allows : Sleeping, Resting, Sitting, Fighting, Standing */
                                 if (!strncasecmp(subfield, position_types[i], strlen(subfield))) {
-                                    GET_POS(c) = i;
+                                    c->setBaseStat("combo", i);
                                     break;
                                 }
                             }

@@ -184,7 +184,7 @@ ACMD(do_geno) {
     obj_to_room(obj, IN_ROOM(vict));
     objectSubscriptions.subscribe("hugeKiAttacks", obj);
 
-    GET_CHARGE(ch) += GET_MAX_HIT(ch) / 10;
+    ch->modBaseStat<int64_t>("charge", GET_MAX_HIT(ch) / 10);
     TARGET(obj) = vict;
     KICHARGE(obj) = damtype(ch, 41, prob, attperc);
     KITYPE(obj) = SKILL_GENOCIDE;
@@ -279,7 +279,7 @@ ACMD(do_genki) {
         }
         if (AFF_FLAGGED(friend_char, AFF_GROUP) &&
             (friend_char->master == ch || ch->master == friend_char || friend_char->master == ch->master)) {
-            GET_CHARGE(ch) += (ch->getCurKI()) / 10;
+            ch->modBaseStat<int64_t>("charge", (ch->getCurKI()) / 10);
             ch->decCurKI(ch->getCurKI() / 20);
         }
     }
@@ -828,8 +828,8 @@ ACMD(do_charge) {
                 break;
         }
         ch->incCurKI(GET_CHARGE(ch));
-        GET_CHARGE(ch) = 0;
-        GET_CHARGETO(ch) = 0;
+        ch->setBaseStat<int64_t>("charge", 0);
+        ch->setBaseStat<int64_t>("chargeto", 0);
         ch->player_flags.set(PLR_CHARGE, false);
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
@@ -851,8 +851,8 @@ ACMD(do_charge) {
                 break;
         }
         ch->incCurKI(GET_CHARGE(ch));
-        GET_CHARGE(ch) = 0;
-        GET_CHARGETO(ch) = 0;
+        ch->setBaseStat<int64_t>("charge", 0);
+        ch->setBaseStat<int64_t>("chargeto", 0);
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
         return;
@@ -873,7 +873,7 @@ ACMD(do_charge) {
                 break;
         }
         ch->player_flags.set(PLR_CHARGE, false);
-        GET_CHARGETO(ch) = 0;
+        ch->setBaseStat<int64_t>("chargeto", 0);
         characterSubscriptions.unsubscribe("chargeMoreKi", ch);
         return;
     } else if (!strcasecmp("cancel", arg) && !PLR_FLAGGED(ch, PLR_CHARGE)) {
@@ -917,7 +917,7 @@ ACMD(do_charge) {
                 sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", GET_AURA(ch));
                 act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
                 characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
-                GET_CHARGE(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff;
+                ch->setBaseStat<int64_t>("charge", (((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff);
                 ch->decCurKI((((GET_MAX_MANA(ch) * 0.01) * amt) + 1) - diff + spiritcost);
             }
         } else {
@@ -927,8 +927,8 @@ ACMD(do_charge) {
             char bloom[MAX_INPUT_LENGTH];
             sprintf(bloom, "@wA %s aura flashes up brightly around $n@w!@n", GET_AURA(ch));
             act(bloom, true, ch, nullptr, nullptr, TO_ROOM);
-            GET_CHARGETO(ch) = (((GET_MAX_MANA(ch) * 0.01) * amt) + 1);
-            GET_CHARGE(ch) += 1;
+            ch->setBaseStat<int64_t>("chargeto", (((GET_MAX_MANA(ch) * 0.01) * amt) + 1));
+            ch->modBaseStat<int64_t>("charge", 1);
             characterSubscriptions.unsubscribe("kiLeakingSystem", ch);
             ch->player_flags.set(PLR_CHARGE, true);
         }

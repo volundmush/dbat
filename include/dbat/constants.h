@@ -111,7 +111,6 @@ std::vector<std::string> getAppearanceNames();
 std::vector<std::string> getAlignNames();
 std::vector<std::string> getMoneyNames();
 std::vector<std::string> getVitalNames();
-std::vector<std::string> getNumNames();
 std::vector<std::string> getStatNames();
 std::vector<std::string> getDimNames();
 std::vector<std::string> getComStatNames();

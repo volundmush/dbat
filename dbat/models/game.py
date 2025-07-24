@@ -322,23 +322,14 @@ class CharData(ThingData):
     title: str = ""
     race: names.Race = names.Race.spirit
     sensei: names.Sensei = names.Sensei.commoner
-    
-    trains: typing.Dict[names.AttributeTrain, int] = Field(default_factory=dict)
-    attributes: typing.Dict[names.Attribute, int] = Field(default_factory=dict)
-    moneys: typing.Dict[names.Money, int] = Field(default_factory=dict)
-    aligns: typing.Dict[names.Align, int] = Field(default_factory=dict)
+    subrace: names.SubRace | None = None
     appearances: typing.Dict[names.Appearance, int] = Field(default_factory=dict)
-    vitals: typing.Dict[names.Vital, int] = Field(default_factory=dict)
-    nums: typing.Dict[names.Num, int] = Field(default_factory=dict)
-    stats: typing.Dict[names.Stat, int] = Field(default_factory=dict)
-    dims: typing.Dict[names.Dim, float] = Field(default_factory=dict)
+    stats: typing.Dict[str, float] = Field(default_factory=dict)
     character_flags: typing.Set[names.CharacterFlag] = Field(default_factory=set)
     mob_flags: typing.Set[names.MobFlag] = Field(default_factory=set)
     player_flags: typing.Set[names.PlayerFlag] = Field(default_factory=set)
     pref_flags: typing.Set[names.PrefFlag] = Field(default_factory=set)
     bodyparts: typing.Set[int] = Field(default_factory=set)
-    armor: int = 0
-    damage_mod: int = 0
     admin_flags: typing.Set[names.AdminFlag] = Field(default_factory=set)
     mob_specials: MobSpecialData = Field(default_factory=MobSpecialData)
     transforms: typing.Dict[names.Form, TransData] = Field(default_factory=dict)
@@ -350,42 +341,14 @@ class CharData(ThingData):
     @field_serializer("sensei")
     def serialize_sensei(self, value):
         return value.name
-    
-    @field_serializer("trains")
-    def serialize_trains(self, value):
-        return {train.name: level for train, level in value.items()} if value else {}
-    
-    @field_serializer("attributes")
-    def serialize_attributes(self, value):
-        return {attr.name: level for attr, level in value.items()} if value else {}
-    
-    @field_serializer("moneys")
-    def serialize_moneys(self, value):
-        return {money.name: amount for money, amount in value.items()} if value else {}
-    
-    @field_serializer("aligns")
-    def serialize_aligns(self, value):
-        return {align.name: amount for align, amount in value.items()} if value else {}
+
+    @field_serializer("subrace")
+    def serialize_subrace(self, value):
+        return value.name if value else None
     
     @field_serializer("appearances")
     def serialize_appearances(self, value):
         return {appearance.name: level for appearance, level in value.items()} if value else {}
-    
-    @field_serializer("vitals")
-    def serialize_vitals(self, value):
-        return {vital.name: level for vital, level in value.items()} if value else {}
-    
-    @field_serializer("nums")
-    def serialize_nums(self, value):
-        return {num.name: level for num, level in value.items()} if value else {}
-    
-    @field_serializer("stats")
-    def serialize_stats(self, value):
-        return {stat.name: level for stat, level in value.items()} if value else {}
-    
-    @field_serializer("dims")
-    def serialize_dims(self, value):
-        return {dim.name: level for dim, level in value.items()} if value else {}
     
     @field_serializer("character_flags")
     def serialize_character_flags(self, value): 
@@ -401,10 +364,6 @@ class CharData(ThingData):
     
     @field_serializer("pref_flags")
     def serialize_pref_flags(self, value):
-        return [flag.name for flag in value] if value else []
-    
-    @field_serializer("admin_flags")
-    def serialize_admin_flags(self, value):
         return [flag.name for flag in value] if value else []
     
     @field_serializer("bodyparts")

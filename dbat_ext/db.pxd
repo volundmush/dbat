@@ -88,7 +88,6 @@ cdef extern from "dbat/constants.h":
     vector[string] getAlignNames()
     vector[string] getMoneyNames()
     vector[string] getVitalNames()
-    vector[string] getNumNames()
     vector[string] getStatNames()
     vector[string] getDimNames()
     vector[string] getComStatNames()

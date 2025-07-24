@@ -1405,11 +1405,11 @@ int block_calc(struct char_data *ch) {
                     send_to_char(blocker, "You're now floating in the air.\r\n");
 
                     blocker->affect_flags.set(AFF_FLYING, true);
-                    GET_ALT(blocker) = GET_ALT(ch);
+                    blocker->setBaseStat<int>("altitude", GET_ALT(ch));
                 } else if (AFF_FLAGGED(ch, AFF_FLYING) && !AFF_FLAGGED(blocker, AFF_FLYING) && GET_ALT(ch) == 2) {
                     send_to_char(blocker, "You're now floating high in the sky.\r\n");
                     blocker->affect_flags.set(AFF_FLYING, true);
-                    GET_ALT(blocker) = GET_ALT(ch);
+                    blocker->setBaseStat<int>("altitude", GET_ALT(ch));
                 }
                 return (0);
             } else {
@@ -1527,7 +1527,7 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
     else if (chCon >= 10)
         moltgain += chCon * 50;
 
-    GET_MOLT_EXP(ch) += moltgain;
+    ch->modBaseStat<int64_t>("molt_experience", moltgain);
 
     if (AFF_FLAGGED(ch, AFF_SPIRIT)) {
         send_to_char(ch,
@@ -1537,8 +1537,8 @@ void handle_evolution(struct char_data *ch, int64_t dmg) {
 
     if (GET_MOLT_EXP(ch) > molt_threshold(ch)) {
         if (GET_MOLT_LEVEL(ch) <= chCon * 2 || chCon >= 100) {
-            GET_MOLT_EXP(ch) = 0;
-            GET_MOLT_LEVEL(ch) += 1;
+            ch->setBaseStat<int64_t>("molt_experience", 0);
+            ch->modBaseStat<int>("molt_level", 1);
             int armorgain = armor_evolve(ch);
 
             if(ch->getBaseStat("armor_innate") + armorgain < 500000)
@@ -2059,8 +2059,8 @@ void improve_skill(struct char_data *ch, int skill, int num) {
         roll += roll * .25;
     }
 
-    if (GET_ASB(ch) > 0) {
-        roll -= (roll * 0.01) * GET_ASB(ch);
+    if (auto asb = GET_ASB(ch); asb > 0) {
+        roll -= (roll * 0.01) * asb;
     }
 
     roll = std::max(roll, 300);
@@ -2398,7 +2398,7 @@ void stop_follower(struct char_data *ch) {
         act("$n stops following you.", true, ch, nullptr, ch->master, TO_VICT);
 
     if (has_group(ch))
-        ch->set(CharNum::group_kills, 0);
+        ch->setBaseStat<int>("group_kills", 0);
 
     if (ch->master->followers->follower == ch) {  /* Head of follower-list? */
         k = ch->master->followers;
@@ -2824,32 +2824,6 @@ int room_is_dark(room_rnum room) {
     return (false);
 }
 
-int count_metamagic_feats(struct char_data *ch) {
-    int count = 0;                /* Number of Metamagic Feats Known */
-
-    if (HAS_FEAT(ch, FEAT_STILL_SPELL))
-        count++;
-
-    if (HAS_FEAT(ch, FEAT_SILENT_SPELL))
-        count++;
-
-    if (HAS_FEAT(ch, FEAT_QUICKEN_SPELL))
-        count++;
-
-    if (HAS_FEAT(ch, FEAT_MAXIMIZE_SPELL))
-        count++;
-
-    if (HAS_FEAT(ch, FEAT_HEIGHTEN_SPELL))
-        count++;
-
-    if (HAS_FEAT(ch, FEAT_EXTEND_SPELL))
-        count++;
-
-    if (HAS_FEAT(ch, FEAT_EMPOWER_SPELL))
-        count++;
-
-    return count;
-}
 
 
 int default_admin_flags_mortal[] =
@@ -2895,7 +2869,7 @@ void admin_set(struct char_data *ch, int value) {
                "%s promoted from %s to %s", GET_NAME(ch), admin_level_names[GET_ADMLEVEL(ch)],
                admin_level_names[value]);
         while (GET_ADMLEVEL(ch) < value) {
-            ch->mod(CharNum::admin_level, 1);
+            ch->modBaseStat<int>("admin_level", 1);
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
                 ch->admin_flags.set(default_admin_flags[GET_ADMLEVEL(ch)][i], true);
         }
@@ -2918,7 +2892,7 @@ void admin_set(struct char_data *ch, int value) {
         while (GET_ADMLEVEL(ch) > value) {
             for (i = 0; default_admin_flags[GET_ADMLEVEL(ch)][i] != -1; i++)
                 ch->admin_flags.set(default_admin_flags[GET_ADMLEVEL(ch)][i], false);
-            ch->mod(CharNum::admin_level, -1);
+            ch->modBaseStat<int>("admin_level", -1);
         }
         run_autowiz();
         if (orig >= ADMLVL_IMMORT && value < ADMLVL_IMMORT) {

@@ -42,7 +42,7 @@ void affect_update(uint64_t heartPulse, double deltaTime) {
                         if (spell_info[af->type].wear_off_msg)
                             send_to_char(i, "%s\r\n", spell_info[af->type].wear_off_msg);
                         if (GET_SPEEDBOOST(i) > 0 && af->type == SPELL_HAYASA) {
-                            GET_SPEEDBOOST(i) = 0;
+                            i->setBaseStat<int>("speedboost", 0);
                         }
                     }
                 affect_remove(i, af);
@@ -119,13 +119,9 @@ int mag_newsaves(struct char_data *ch, struct char_data *victim, int spellnum, i
         stype = SAVING_WILL;
     else
         return false;
-    total = GET_SAVE(victim, stype) + rand_number(1, 20);
+    total = rand_number(1, 20);
     dc = spell_info[spellnum].spell_level + level + ability_mod_value(cast_stat);
     if (ch) {
-        if (HAS_SCHOOL_FEAT(ch, CFEAT_SPELL_FOCUS, spell_info[spellnum].school))
-            dc++;
-        if (HAS_SCHOOL_FEAT(ch, CFEAT_GREATER_SPELL_FOCUS, spell_info[spellnum].school))
-            dc++;
     }
     if (total >= dc)
         return true;
@@ -255,7 +251,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
             dam = 0;
         } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF)) {
             if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
-                HAS_FEAT(victim, FEAT_EVASION) &&
+                false &&
                 (!GET_EQ(victim, WEAR_BODY) ||
                  GET_OBJ_TYPE(GET_EQ(victim, WEAR_BODY)) != ITEM_ARMOR ||
                  GET_OBJ_VAL(GET_EQ(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
@@ -268,7 +264,7 @@ int mag_damage(int level, struct char_data *ch, struct char_data *victim,
         }
     } else if (IS_SET(spell_info[spellnum].save_flags, MAGSAVE_HALF) &&
                IS_SET(spell_info[spellnum].save_flags, MAGSAVE_REFLEX) &&
-               HAS_FEAT(victim, FEAT_IMPROVED_EVASION) &&
+               false &&
                (!GET_EQ(victim, WEAR_BODY) ||
                 GET_OBJ_TYPE(GET_EQ(victim, WEAR_BODY)) != ITEM_ARMOR ||
                 GET_OBJ_VAL(GET_EQ(victim, WEAR_BODY), VAL_ARMOR_SKILL) < ARMOR_TYPE_MEDIUM)) {
@@ -492,7 +488,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
             if (GET_POS(victim) > POS_SLEEPING) {
                 send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
                 act("$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
-                GET_POS(victim) = POS_SLEEPING;
+                victim->setBaseStat("combo", POS_SLEEPING);
             }
             break;
 
@@ -508,7 +504,7 @@ void mag_affects(int level, struct char_data *ch, struct char_data *victim,
             if (GET_POS(victim) > POS_SLEEPING) {
                 send_to_char(victim, "You feel very sleepy...  Zzzz......\r\n");
                 act("$n goes to sleep.", true, victim, nullptr, nullptr, TO_ROOM);
-                GET_POS(victim) = POS_SLEEPING;
+                victim->setBaseStat("combo", POS_SLEEPING);
             }
             break;
 
@@ -965,7 +961,7 @@ void mag_summons(int level, struct char_data *ch, struct obj_data *obj, int spel
         if (assist && FIGHTING(ch)) {
             set_fighting(mob, FIGHTING(ch));
         }
-        mob->master_id = GET_IDNUM(ch);
+        mob->setBaseStat("master_id", GET_IDNUM(ch));
     }
     if (handle_corpse) {
         auto con = obj->getObjects();

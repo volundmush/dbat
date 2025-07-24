@@ -67,8 +67,9 @@ void char_data::resurrect(ResurrectionMode mode) {
     player_flags.set(PLR_PDEATH, false);
     // Send them to their starting room and have them 'look'.
     char_from_room(this);
-    if (GET_DROOM(this) != NOWHERE && GET_DROOM(this) != 0 && GET_DROOM(this) != 1) {
-        char_to_room(this, real_room(GET_DROOM(this)));
+    auto droom = GET_DROOM(this);
+    if (droom != NOWHERE && droom != 0 && droom != 1) {
+        char_to_room(this, real_room(droom));
     } else {
         char_to_room(this, real_room(sensei::getStartRoom(sensei)));
     }
@@ -79,7 +80,8 @@ void char_data::resurrect(ResurrectionMode mode) {
     switch (mode) {
         case Costless:
             return;
-        case Basic:
+        case Basic: {
+            auto dcount = GET_DCOUNT(this);
             if (dcount >= 8 && dcount < 10) {
                 dur = 90;
             } else if (dcount >= 5 && dcount < 8) {
@@ -89,6 +91,7 @@ void char_data::resurrect(ResurrectionMode mode) {
             } else if (dcount >= 1 && dcount < 3) {
                 dur = 40;
             }
+        }
             break;
         case RPP:
             dur = 100;
@@ -129,7 +132,7 @@ void char_data::resurrect(ResurrectionMode mode) {
             send_to_char(this, "@R...and a loss of @r%d@R PS!@n", psloss);
         }
     }
-    GET_DTIME(this) = 0;
+    setBaseStat("death_time", 0);
     ::act("$n's body forms in a pool of @Bblue light@n.", true, this, nullptr, nullptr, TO_ROOM);
 }
 
@@ -186,7 +189,7 @@ static std::map<int, uint16_t> grav_threshold = {
 
 int64_t char_data::calc_soft_cap() {
     return 750000000;
-    //auto level = get(CharNum::Level);
+    //auto level = getBaseStat<int>("Level");
     //if(level >= 100) return 5e9;
     //return race::getSoftCap(race, level);
 }
@@ -202,7 +205,7 @@ bool char_data::is_soft_cap(int64_t type, long double mult) {
     return false;
 
     // Level 100 characters are never softcapped.
-    if (get(CharNum::level) >= 100) {
+    if (getBaseStat<int>("level") >= 100) {
         return false;
     }
     auto cur_cap = calc_soft_cap() * mult;
@@ -370,7 +373,7 @@ int64_t char_data::incCurHealth(int64_t amt, bool limit_max) {
         dmg += (double) std::abs(amt) / (double) getMaxPL();
     setCurVitalDam(CharVital::powerlevel, 1.0 - dmg);
     return getCurHealth();
-};
+}
 
 int64_t char_data::decCurHealth(int64_t amt, int64_t floor) {
     auto fl = 0.0;
@@ -750,8 +753,8 @@ void char_data::restoreStatus(bool announce) {
 void char_data::setStatusKnockedOut() {
     affect_flags.set(AFF_KNOCKED, true);
     affect_flags.set(AFF_FLYING, false);
-    altitude = 0;
-    GET_POS(this) = POS_SLEEPING;
+    setBaseStat("altitude", 0);
+    this->setBaseStat<int>("position", POS_SLEEPING);
 }
 
 void char_data::cureStatusKnockedOut(bool announce) {
@@ -770,7 +773,7 @@ void char_data::cureStatusKnockedOut(bool announce) {
         }
 
         affect_flags.set(AFF_KNOCKED, false);
-        GET_POS(this) = POS_SITTING;
+        this->setBaseStat<int>("position", POS_SITTING);
     }
 }
 
@@ -830,7 +833,7 @@ void char_data::loseTail() {
     if (!character_flags.get(CharacterFlag::tail)) return;
     character_flags.set(CharacterFlag::tail, false);
     remove_limb(this, 6);
-    GET_TGROWTH(this) = 0;
+    this->setBaseStat<int>("tail_growth", 0);
     oozaru_revert(this);
 }
 
@@ -909,7 +912,7 @@ int64_t char_data::getPL() {
 }
 
 void char_data::apply_kaioken(int times, bool announce) {
-    GET_KAIOKEN(this) = times;
+    setBaseStat("kaioken", times);
     character_flags.set(CharacterFlag::powering_up, false);
 
     if (announce) {
@@ -921,11 +924,11 @@ void char_data::apply_kaioken(int times, bool announce) {
 }
 
 void char_data::remove_kaioken(int8_t announce) {
-    auto kaio = GET_KAIOKEN(this);
+    auto kaio = getBaseStat<int>("kaioken");
     if (!kaio) {
         return;
     }
-    GET_KAIOKEN(this) = 0;
+    setBaseStat("kaioken", 0);
 
     switch (announce) {
         case 1:
@@ -968,14 +971,11 @@ void char_data::modRPP(int amt) {
 }
 
 int char_data::getPractices() {
-    return practice_points;
+    return getBaseStat<int>("practices");
 }
 
 void char_data::modPractices(int amt) {
-    practice_points += amt;
-    if(practice_points < 0) {
-        practice_points = 0;
-    }
+    modBaseStat("practices", amt);
 }
 
 
@@ -1071,7 +1071,7 @@ void char_data::login() {
         if (mult > 3) {
             mult = 3;
         }
-        GET_LINTEREST(this) = LASTINTEREST;
+        setBaseStat("last_interest", LASTINTEREST);
         if (GET_BANK_GOLD(this) > 0) {
             int inc = ((GET_BANK_GOLD(this) / 100) * 2);
             if (inc >= 7500) {
@@ -1120,7 +1120,7 @@ double char_data::getAffectModifier(uint64_t location, uint64_t specific) {
     total += trans::getModifier(this, location, specific);
 
     // Position modifier.
-    if(auto find = pos_affects.find(position); find != pos_affects.end()) {
+    if(auto find = pos_affects.find(getBaseStat<int>("position")); find != pos_affects.end()) {
         for(auto &eff : find->second) {
             if(!eff.match(location, specific)) continue;
             total += eff.modifier;
@@ -1196,37 +1196,6 @@ void char_data::gainGrowth(double gain) {
         cangain = gain - cangain;
         modBaseStat("overGrowth", cangain);
     }
-}
-
-attribute_train_t char_data::get(CharTrain attr) {
-    if(auto t = trains.find(attr); t != trains.end()) {
-        return t->second;
-    }
-    return 0;
-}
-
-attribute_train_t char_data::set(CharTrain attr, attribute_train_t val) {
-    return trains[attr] = std::max<attribute_train_t>(0, val);
-}
-
-attribute_train_t char_data::mod(CharTrain attr, attribute_train_t val) {
-    return set(attr, get(attr) + val);
-}
-
-
-num_t char_data::get(CharNum stat) {
-    if(auto st = nums.find(stat); st != nums.end()) {
-        return st->second;
-    }
-    return 0;
-}
-
-num_t char_data::set(CharNum stat, num_t val) {
-    return nums[stat] = val;
-}
-
-num_t char_data::mod(CharNum stat, num_t val) {
-    return set(stat, get(stat) + val);
 }
 
 
@@ -1328,11 +1297,6 @@ obj_data* char_data::getEquipSlot(int slot) {
     return GET_EQ(this, slot);
 }
 
-
-int char_data::getArmor() {
-    return getEffectiveStat<int>("armor");
-}
-
 void char_data::onAttack(atk::Attack& outgoing) {
     if(form != Form::base)
         trans::onAttack(this, outgoing, form);
@@ -1345,21 +1309,6 @@ void char_data::onAttacked(atk::Attack& incoming) {
         trans::onAttacked(this, incoming, form);
     if(technique != Form::base)
         trans::onAttacked(this, incoming, technique);
-}
-
-stat_t char_data::set(CharStat type, stat_t val) {
-    return stats[type] = val;
-}
-
-stat_t char_data::mod(CharStat type, stat_t val) {
-    return set(type, get(type) + val);
-}
-
-stat_t char_data::get(CharStat type) {
-    if(auto st = stats.find(type); st != stats.end()) {
-        return st->second;
-    }
-    return 0;
 }
 
 int64_t char_data::getExperience() {
@@ -1579,11 +1528,7 @@ std::optional<std::string> char_data::dgCallMember(const std::string& member, co
     }
 
     if(auto save = _save_names.find(lmember); save != _save_names.end()) {
-        if (!arg.empty()) {
-            int addition = atof(arg.c_str());
-            GET_SAVE_MOD(this, save->second) += addition;
-        }
-        return fmt::format("{}", GET_SAVE_MOD(this, save->second));
+        return fmt::format("{}", 0);
     }
 
     if(auto pf = _pflags.find(lmember); pf != _pflags.end()) {

@@ -235,7 +235,7 @@ static void dragon_level(struct char_data *ch) {
         level = rand_number(40, 60);
     }
 
-    ch->set(CharNum::level, level + rand_number(5, 20));
+    ch->setBaseStat<int>("level", level + rand_number(5, 20));
 }
 
 
@@ -306,8 +306,6 @@ static std::vector<std::filesystem::path> getDumpFiles() {
     std::sort(directories.begin(), directories.end(), std::greater<>());
     return directories;
 }
-
-extern void init_stat_handlers();
 
 void boot_db_world() {
 
@@ -1085,7 +1083,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
             break;
     }
 
-    GET_LPLAY(mob) = time(nullptr);
+    mob->setBaseStat("last_played", time(nullptr));
     bool autoset = mob->getBaseStat("powerlevel") <= 1;
     if(autoset) {
         for(auto c : {"powerlevel", "ki", "stamina"}) {
@@ -1363,8 +1361,7 @@ struct char_data *read_mobile(mob_vnum nr, int type) /* and mob_rnum */
     mob->time.created = mob->time.logon = time(nullptr); /* why not */
     mob->time.played = 0.0;
     mob->time.logon = time(nullptr);
-    MOB_LOADROOM(mob) = NOWHERE;
-    mob->position = mob->mob_specials.default_pos;
+    mob->setBaseStat("position", mob->mob_specials.default_pos);
     for(const auto& i : {0, 1, 2, 3}) mob->limb_condition[i] = 100;
 
     copy_proto_script(&proto->second, mob, MOB_TRIGGER);
@@ -1588,7 +1585,7 @@ static void do_reset_cmds(zone_data &z) {
 
                     mob = read_mobile(c.arg1, REAL);
                     /*  Set the mobs loadroom for room_max checks. */
-                    MOB_LOADROOM(mob) = c.arg3;
+                    mob->setBaseStat("hometown", c.arg3);
                     char_to_room(mob, c.arg3);
 
                     load_mtrigger(mob);
@@ -2154,11 +2151,10 @@ void reset_char(struct char_data *ch) {
     ch->master = nullptr;
     IN_ROOM(ch) = NOWHERE;
     FIGHTING(ch) = nullptr;
-    ch->position = POS_STANDING;
+    ch->setBaseStat("position", POS_STANDING);
     ch->mob_specials.default_pos = POS_STANDING;
     ch->time.logon = time(nullptr);
 
-    GET_LAST_TELL(ch) = NOBODY;
 }
 
 
@@ -2171,7 +2167,7 @@ void init_char(struct char_data *ch) {
 
     ch->setBaseStat("money_carried", 1500);
     GET_CLAN(ch) = strdup("None.");
-    ch->practice_points = 600;
+    ch->setBaseStat("practices", 600);
 
 
     /* If this is our first player make him LVL_IMPL. */
@@ -2183,7 +2179,7 @@ void init_char(struct char_data *ch) {
     ch->time.logon = ch->time.created = time(nullptr);
     ch->time.played = 0.0;
 
-    GET_HOME(ch) = 1;
+    ch->setBaseStat("hometown", 1);
 
     set_height_and_weight_by_race(ch);
 
@@ -2198,8 +2194,7 @@ void init_char(struct char_data *ch) {
     for (i = 0; i < 3; i++)
         GET_COND(ch, i) = (GET_ADMLEVEL(ch) == ADMLVL_IMPL ? -1 : 24);
 
-    GET_LOADROOM(ch) = NOWHERE;
-    SPEAKING(ch) = SKILL_LANG_COMMON;
+    ch->setBaseStat("load_room", NOWHERE);
 
     do_start(ch);
 }
