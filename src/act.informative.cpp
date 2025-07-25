@@ -3956,9 +3956,9 @@ ACMD(do_score) {
         send_to_char(ch, "                   @D<@wGravity Acclim@D: @w" + grav + "@D> <@wRPP@D: @w%-3d@D>@n\n", GET_RP(ch));
         send_to_char(ch, "               @D<@wSpeed Index@D: @w%-8s@D> <@wArmor Index@D: @w%-8s@D>@n\n", add_commas(GET_SPEEDI(ch)).c_str(), add_commas(GET_ARMOR(ch)).c_str());
         send_to_char(ch, "  @D[@RStrength     @D|@G%2d (%3d)@D] [@YAgility      @D|@G%2d (%3d)@D] [@BSpeed        @D|@G%2d (%3d)@D]@n\n",
-                     ch->getBaseStat("strength"), GET_STR(ch), ch->getBaseStat("agility"), GET_DEX(ch), ch->getBaseStat("speed"), GET_CHA(ch));
+                     ch->getBaseStat<int>("strength"), GET_STR(ch), ch->getBaseStat<int>("agility"), GET_DEX(ch), ch->getBaseStat<int>("speed"), GET_CHA(ch));
         send_to_char(ch, "  @D[@gConstitution @D|@G%2d (%3d)@D] [@CIntelligence @D|@G%2d (%3d)@D] [@MWisdom       @D|@G%2d (%3d)@D]@n\n",
-                     ch->getBaseStat("constitution"), GET_CON(ch), ch->getBaseStat("intelligence"), GET_INT(ch), ch->getBaseStat("wisdom"),
+                     ch->getBaseStat<int>("constitution"), GET_CON(ch), ch->getBaseStat<int>("intelligence"), GET_INT(ch), ch->getBaseStat<int>("wisdom"),
                      GET_WIS(ch));
     }
     if (view == full || view == other) {

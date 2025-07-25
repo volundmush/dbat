@@ -191,13 +191,16 @@ class StatHandler {
 
         double getBaseHelper(T* target, const StatDef<T>& stat_def) const {
             double out = 0.0;
+            bool needInit = true;
             if(auto func = stat_def.getGetterFunc(); func) {
                 auto res = func(target, stat_def.getName());
                 if (res.has_value()) {
                     out = *res;
+                    needInit = false; // We have a value, no need to initialize.
                 }
             }
-            else if (auto init_func = stat_def.getInitFunc(); init_func) {
+            
+            if (auto init_func = stat_def.getInitFunc(); needInit && init_func) {
                 out = init_func(target, stat_def.getName());
                 // since this might be random we need to save the result instantly.
                 // We can return here to avoid repeat min/max checks.

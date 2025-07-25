@@ -688,72 +688,56 @@ char *make_prompt(struct descriptor_data *d) {
                 if (count >= 0)
                     len += count;
             }
-            if (COMBO(d->character) == 51 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Bash) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
+
+            {
+                auto combo = COMBO(d->character);
+                char *promptCombo = nullptr;
+                switch(combo) {
+                    case 51:
+                        promptCombo = "Combo (Bash) - ";
+                        break;
+                    case 52:    
+                        promptCombo = "Combo (Headbutt) - ";
+                        break;
+                    case 56:
+                        promptCombo = "Combo (Tailwhip) - ";
+                        break;
+                    case 0:
+                        promptCombo = "Combo (Punch) - ";
+                        break;
+                    case 1:
+                        promptCombo = "Combo (Kick) - ";
+                        break;
+                    case 2:
+                        promptCombo = "Combo (Elbow) - ";
+                        break;
+                    case 3:
+                        promptCombo = "Combo (Knee) - ";
+                        break;
+                    case 4:
+                        promptCombo = "Combo (Roundhouse) - ";
+                        break;
+                    case 5:
+                        promptCombo = "Combo (Uppercut) - ";
+                        break;
+                    case 6:
+                        promptCombo = "Combo (Slam) - ";
+                        break;
+                    case 8:
+                        promptCombo = "Combo (Heeldrop) - ";
+                        break;
+                    default:
+                        promptCombo = nullptr;
+                        break;
+                }
+                if (promptCombo && len < sizeof(prompt)) {
+                    count = snprintf(prompt + len, sizeof(prompt) - len, "%s", promptCombo);
+                    flagged = true;
+                    if (count >= 0)
+                        len += count;
+                }
             }
-            if (COMBO(d->character) == 52 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Headbutt) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 56 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Tailwhip) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 0 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Punch) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 1 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Kick) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 2 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Elbow) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 3 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Knee) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 4 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Roundhouse) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 5 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Uppercut) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 6 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Slam) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
-            if (COMBO(d->character) == 8 && len < sizeof(prompt)) {
-                count = snprintf(prompt + len, sizeof(prompt) - len, "Combo (Heeldrop) - ");
-                flagged = true;
-                if (count >= 0)
-                    len += count;
-            }
+
             if (PRF_FLAGGED(d->character, PRF_AFK) && len < sizeof(prompt) && !PRF_FLAGGED(d->character, PRF_NODEC)) {
                 count = snprintf(prompt + len, sizeof(prompt) - len, "AFK - ");
                 flagged = true;

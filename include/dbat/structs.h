@@ -208,8 +208,6 @@ struct unit_data {
     void activateScripts();
     void deactivateScripts();
 
-    
-    
     weight_t getInventoryWeight();
     int64_t getInventoryCount();
 

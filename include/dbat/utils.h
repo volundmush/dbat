@@ -704,7 +704,7 @@ void SET_SKILL_PERF(struct char_data *ch, uint16_t skill, int16_t val);
           (GET_ADD(ch) <= 99) ? 29 :  30 ) ) )                   \
         ) */
 
-#define CAN_CARRY_W(ch) ((ch)->getEffectiveStat("carry_capacity"))
+#define CAN_CARRY_W(ch) ((ch)->getEffectiveStat<int>("carry_capacity"))
 #define CAN_CARRY_N(ch) (50)
 #define AWAKE(ch) (GET_POS(ch) > POS_SLEEPING)
 #define CAN_SEE_IN_DARK(ch) \

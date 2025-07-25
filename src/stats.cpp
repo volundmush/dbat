@@ -282,7 +282,7 @@ static void init_char_stats_combat() {
 }
 
 static void init_char_stats_misc() {
-    for(const auto &s : {"waitTime", "internalGrowth", "lifetimeGrowth", "overGrowth",
+    for(const auto &s : {"internalGrowth", "lifetimeGrowth", "overGrowth",
     "spellfail", "armorcheck", "armorcheckall", "charge", "chargeto", "barrier", 
     "radar1", "radar2", "radar3", "level", "wait", "admin_level", "mystic_melody",
 "group_kills", "freeze_level", "invis_level", "wimp_level", "death_type", "altitude",
@@ -296,6 +296,12 @@ static void init_char_stats_misc() {
         .addTag("misc")
         ;
     }
+
+    charStats.addStat("waitTime")
+        .setInitFunc(0.0)
+        .setMinBaseValue(0.0)
+        .addTag("misc")
+        ;
 
     charStats.addStat("absorbs")
         .setInitFunc([](struct char_data* target, const std::string& stat_name) {
@@ -395,10 +401,17 @@ static void init_char_stats_misc() {
         .setSetterFunc(nullptr) // These are not persistent stats.
         ;
 
-    for(const auto &s : {"fish_state", "fish_distance", "spam", "combo", "combo_hits",
+    for(const auto &s : {"fish_state", "fish_distance", "spam", "combo_hits",
     "last_attack", "ping", "speedboost", "arena_watch", "rage_meter"}) {
         charStats.addStat(s)
         .addTag("misc")
+        .setSetterFunc(nullptr) // These are not persistent stats.
+        ;
+    }
+
+    for(const auto &s : {"combo"}) {
+        charStats.addStat(s)
+        .setInitFunc(-1.0)
         .setSetterFunc(nullptr) // These are not persistent stats.
         ;
     }

@@ -168,7 +168,7 @@ void commandWaitQueue(uint64_t heartPulse, double deltaTime) {
     auto sub = characterSubscriptions.all("commandWaitQueue");
 
     for(auto ch : filter_raw(sub)) {
-        if(auto res = ch->modBaseStat("waitTime", -deltaTime); res == 0.0) {
+        if(auto res = ch->modBaseStat("waitTime", -deltaTime); res <= 0.0) {
             if(ch->task != Task::nothing) doContinuedTask(ch);
             else if(!ch->wait_input_queue.empty()) {
                 auto command = ch->wait_input_queue.front();
