@@ -3911,18 +3911,22 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         send_to_char(ch, "You are inside a healing tank!\r\n");
         return 0;
     }
+
     if (IS_CARRYING_W(ch) > CAN_CARRY_W(ch)) {
         send_to_char(ch, "You are weighted down too much!\r\n");
         return 0;
     }
+
+    if (ch->getRoomFlag(ROOM_PEACEFUL)) {
+            send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
+            return 0;
+    }
+
     if (vict) {
         if (GET_HIT(vict) <= 0 && FIGHTING(vict)) {
             return 0;
         }
-        if (ch->getRoomFlag(ROOM_PEACEFUL)) {
-            send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
-            return 0;
-        } else if (vict == ch) {
+         if (vict == ch) {
             send_to_char(ch, "That's insane, don't hurt yourself. Hurt others! That's the key to life ^_^\r\n");
             return 0;
         } else if (vict->getBaseStat<int>("gooptime") > 0) {
@@ -4013,10 +4017,7 @@ int can_kill(struct char_data *ch, struct char_data *vict, struct obj_data *obj,
         }
     }
     if (obj) {
-        if (ch->getRoomFlag(ROOM_PEACEFUL)) {
-            send_to_char(ch, "This room just has such a peaceful, easy feeling...\r\n");
-            return 0;
-        } else if (OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && GET_OBJ_VNUM(obj) != 87 && GET_OBJ_VNUM(obj) != 80 &&
+        if (OBJ_FLAGGED(obj, ITEM_UNBREAKABLE) && GET_OBJ_VNUM(obj) != 87 && GET_OBJ_VNUM(obj) != 80 &&
                    GET_OBJ_VNUM(obj) != 81 && GET_OBJ_VNUM(obj) != 82 && GET_OBJ_VNUM(obj) != 83) {
             send_to_char(ch, "You can't hit that, it is protected by the immortals!\r\n");
             return 0;
